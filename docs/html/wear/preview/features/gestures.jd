@@ -1,0 +1,323 @@
+page.title=Wrist Gestures
+meta.keywords="wear-preview"
+page.tags="wear-preview"
+page.image=images/cards/card-n-sdk_2x.png
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+
+  <ul>
+    <li><a href="#using_wlv">Using a WearableListView</a></li>
+    <li><a href="#using_key_events">Using Key Events Directly</a></li>
+    <li><a href="#best_practices">Best Practices</a></li>
+  </ul>
+
+</div>
+</div>
+
+    <p>
+      Wrist gestures can enable quick, one-handed interactions with your app
+      when use of a touch screen is inconvenient. For example, a user can scroll
+      through notifications with one hand while holding a cup of water with the
+      other. Other examples of using wrist gestures when a touch screen would
+      be inconvenient include:
+    </p>
+
+    <ul>
+      <li>In an app for jogging, navigating through vertical screens that show
+      the steps taken, time elapsed, and current pace
+      </li>
+
+      <li>At the airport with luggage, scrolling through flight and gate
+      information
+      </li>
+
+      <li>Scrolling through news articles
+      </li>
+    </ul>
+
+    <p>
+      To review the wrist gestures on your watch, first confirm gestures are
+      turned on by selecting <strong>Settings &gt; Gestures &gt; Wrist Gestures
+      On</strong>. (Wrist gestures are on by default.) Then complete the
+      Gestures tutorial on the watch (<strong>Settings &gt; Gestures &gt;
+      Launch Tutorial</strong>).
+    </p>
+
+    <p>
+      The following gestures from the <a href=
+      "https://support.google.com/androidwear/answer/6312406">Android Wear
+      Help</a> are unavailable to apps:
+    </p>
+
+    <ul>
+      <li>Push wrist down
+      </li>
+
+      <li>Raise wrist up
+      </li>
+
+      <li>Shaking the wrist
+      </li>
+    </ul>
+
+    <p>
+      Wrist gestures can be used in these ways:
+    </p>
+
+    <ul>
+      <li>
+        <a href="#using_wlv">Using a WearableListView</a>, which
+        has predefined gesture actions
+      </li>
+
+      <li>
+        <a href="#using_key_events">Using key events directly</a> to
+        define new user actions
+      </li>
+    </ul>
+
+    <p>
+      Each wrist gesture is mapped to an <code>int</code> constant from the
+      <code><a href=
+      "{@docRoot}reference/android/view/KeyEvent.html">KeyEvent</a></code>
+      class, as shown in the following table:
+    </p>
+
+    <table>
+      <tr>
+        <th>
+          Gesture
+        </th>
+        <th>
+          KeyEvent
+        </th>
+        <th>
+          Description
+        </th>
+      </tr>
+
+      <tr>
+        <td>
+          Flick wrist out
+        </td>
+        <td>
+          <a href=
+          "{@docRoot}reference/android/view/KeyEvent.html#KEYCODE_NAVIGATE_NEXT">
+          KEYCODE_NAVIGATE_NEXT</a>
+        </td>
+        <td>
+          This key code goes to the next item.
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          Flick wrist in
+        </td>
+        <td>
+          <a href=
+          "{@docRoot}reference/android/view/KeyEvent.html#KEYCODE_NAVIGATE_PREVIOUS">
+          KEYCODE_NAVIGATE_PREVIOUS</a>
+        </td>
+        <td>
+          This key code goes to the previous item.
+        </td>
+      </tr>
+    </table>
+
+    <h2 id="using_wlv">
+      Using a WearableListView
+    </h2>
+
+    <p>
+      A <code><a href=
+      "{@docRoot}reference/android/support/wearable/view/WearableListView.html">
+      WearableListView</a></code> has predefined actions for occurrences of
+      wrist gestures when the View has the focus. For more information, see
+      <a href="#best_practices">Best Practices</a>. For information about using
+      <code>WearableListView</code>, see <a href=
+      "{@docRoot}training/wearables/ui/lists.html">Creating
+      Lists</a>.
+    </p>
+
+    <p>
+      Even if you use a <code>WearableListView</code>, you may want to use
+      constants from the <code><a href=
+      "{@docRoot}reference/android/view/KeyEvent.html">KeyEvent</a></code>
+      class. The predefined actions can be overridden by subclassing the
+      <code>WearableListView</code> and re-implementing the
+      <code>onKeyDown()</code> callback. The behavior can be disabled entirely
+      by using <code>setEnableGestureNavigation(false)</code>. Also see
+      <a href="{@docRoot}training/keyboard-input/commands.html">
+      Handling Keyboard Actions</a>.
+    </p>
+
+    <h2 id="using_key_events">
+      Using Key Events Directly
+    </h2>
+
+    <p>
+      You can use key events outside of a <code><a href=
+      "{@docRoot}reference/android/support/wearable/view/WearableListView.html">
+      WearableListView</a></code> to trigger new actions in response to gesture
+      events. Importantly, these gesture events:
+    </p>
+
+    <ul>
+      <li>Are recognized when a device is in Active mode
+      </li>
+
+      <li>Are delivered in the same way as all key events
+      </li>
+    </ul>
+
+    <p>
+      Specifically, these events are delivered to the top Activity, to the View
+      with keyboard focus. Just as any other key event, a class that relates to
+      user interaction (such as a View or an Activity) that implements
+      <code><a href=
+      "{@docRoot}reference/android/view/KeyEvent.Callback.html">
+      KeyEvent.Callback</a></code> can listen to key events that relate to
+      wrist gestures. The Android framework calls the View or Activity that has
+      the focus with the key events; for gestures, the <code>onKeyDown()</code>
+      method callback is called when gestures occur.
+    </p>
+
+    <p>
+      As an example, an app may override predefined actions in a View or
+      Activity (both implementing <code>KeyEvent.Callback</code>) as follows:
+    </p>
+
+    <pre>
+public final class GesturesActivity extends Activity {
+
+ &#64;Override /* KeyEvent.Callback */
+ public boolean onKeyDown(int keyCode, KeyEvent event) {
+  switch (keyCode) {
+   case KeyEvent.KEYCODE_NAVIGATE_NEXT:
+    // Do something that advances a user View to the next item in an ordered list.
+    return moveToNextItem();
+   case KeyEvent.KEYCODE_NAVIGATE_PREVIOUS:
+    // Do something that advances a user View to the previous item in an ordered list.
+    return moveToPreviousItem();
+  }
+  // If you did not handle it, let it be handled by the next possible element as deemed by the Activity.
+  return super.onKeyDown(keyCode, event);
+ }
+
+ /** Shows the next item in the custom list. */
+ private boolean moveToNextItem() {
+  boolean handled = false;
+  …
+  // Return true if handled successfully, otherwise return false.
+  return handled;
+ }
+
+ /** Shows the previous item in the custom list. */
+ private boolean moveToPreviousItem() {
+  boolean handled = false;
+  …
+  // Return true if handled successfully, otherwise return false.
+  return handled;
+ }
+}
+</pre>
+
+    <h2 id="best_practices">
+      Best Practices
+    </h2>
+
+    <ul>
+      <li>Review the <code><a href=
+      "{@docRoot}reference/android/view/KeyEvent.html">KeyEvent</a></code>
+      and <code><a href=
+      "{@docRoot}reference/android/view/KeyEvent.Callback.html">
+        KeyEvent.Callback</a></code> pages for the delivery of key events to
+        your View and Activity.
+      </li>
+
+      <li>Keep a consistent directional affordance:
+        <ul>
+          <li>Use "Flick wrist out" for next, "Flick wrist in" for previous
+          </li>
+        </ul>
+      </li>
+
+      <li>Have a touch parallel for a gesture.
+      </li>
+
+      <li>Provide visual feedback.
+      </li>
+
+      <li>Don't use a keycode to implement functionality that would be
+      counter-intuitive to the rest of the system. For example, do not use
+      <code>KEYCODE_NAVIGATE_NEXT</code> to cancel an action or to navigate the
+      left-right axis with flicks.
+      </li>
+
+      <li>Don't intercept the key events on elements that are not part of the
+      user interface, for example the Views that are offscreen or partially
+      covered. This is the same as any other key event.
+      </li>
+
+      <li>Don't reinterpret repeated flick gestures into your own, new gesture.
+      It may conflict with the system's "Shaking the wrist" gesture.
+      </li>
+
+      <li>For a View to receive gesture key events, it must have <a href=
+      "{@docRoot}reference/android/view/View.html#attr_android:focusable">
+        focus</a>; see <a href=
+        "{@docRoot}reference/android/view/View.html#setFocusable(boolean)">
+        View::setFocusable()</a>. Because gestures are treated as key events,
+        they trigger a transition out of "Touch mode" that may do unexpected
+        things. Therefore, since users may alternate between using touch and
+        gestures, the <a href=
+        "{@docRoot}reference/android/view/View.html#setFocusableInTouchMode(boolean)">
+        View::setFocusableInTouchmode()</a> method may be necessary. In some
+        cases, it also may be necessary to use
+        <code>setDescendantFocusability(FOCUS_BEFORE_DESCENDANTS)</code> so
+        that when focus changes after a change to or from "Touch mode," your
+        intended View gets the focus.
+      </li>
+
+      <li>Use <code>requestFocus()</code> and <code>clearFocus()</code>
+      carefully:
+        <ul>
+          <li>When calling <code><a href=
+          "{@docRoot}reference/android/view/View.html#requestFocus()">
+            requestFocus()</a></code>, be sure that the View really should have
+            focus. If the View is offscreen, or is covered by another View,
+            surprises can occur when gestures trigger callbacks.
+          </li>
+
+          <li>The <code><a href=
+          "{@docRoot}reference/android/view/View.html#clearFocus()">
+            clearFocus()</a></code> initiates a focus search to find another
+            suitable View. Depending on the View hierarchy, this search might
+            require non-trivial computation. It can also end up assigning focus
+            to a View you don’t expect to receive focus.
+          </li>
+        </ul>
+      </li>
+
+      <li>Key events are delivered first to the View with focus in the View
+      hierarchy. If the focused View does not handle the event (i.e., returns
+      <code>false</code>), the event is not delivered to the parent View, even
+      if it can receive focus and has a <a href=
+      "{@docRoot}reference/android/text/method/KeyListener.html">
+        KeyListener</a>. Rather, the event is delivered to the current Activity
+        holding the View hierarchy with focus. Thus, it may be necessary to
+        catch all events at the higher level and then pass relevant codes down.
+        Alternatively, you might subclass the Activity and override the
+        <code><a href=
+        "{@docRoot}reference/android/app/Activity.html#dispatchKeyEvent(android.view.KeyEvent)">
+        dispatchKeyEvent(KeyEvent event)</a></code> method to ensure that keys
+        are intercepted when necessary, or are handled when not handled at
+        lower layers.
+      </li>
+    </ul>

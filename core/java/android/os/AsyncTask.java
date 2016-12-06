@@ -35,8 +35,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * <p>AsyncTask enables proper and easy use of the UI thread. This class allows to
- * perform background operations and publish results on the UI thread without
+ * <p>AsyncTask enables proper and easy use of the UI thread. This class allows you
+ * to perform background operations and publish results on the UI thread without
  * having to manipulate threads and/or handlers.</p>
  *
  * <p>AsyncTask is designed to be a helper class around {@link Thread} and {@link Handler}
@@ -55,7 +55,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <div class="special reference">
  * <h3>Developer Guides</h3>
  * <p>For more information about using tasks and threads, read the
- * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html">Processes and
+ * <a href="{@docRoot}guide/components/processes-and-threads.html">Processes and
  * Threads</a> developer guide.</p>
  * </div>
  *
@@ -298,12 +298,19 @@ public abstract class AsyncTask<Params, Progress, Result> {
         mWorker = new WorkerRunnable<Params, Result>() {
             public Result call() throws Exception {
                 mTaskInvoked.set(true);
-
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                //noinspection unchecked
-                Result result = doInBackground(mParams);
-                Binder.flushPendingCommands();
-                return postResult(result);
+                Result result = null;
+                try {
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                    //noinspection unchecked
+                    result = doInBackground(mParams);
+                    Binder.flushPendingCommands();
+                } catch (Throwable tr) {
+                    mCancelled.set(true);
+                    throw tr;
+                } finally {
+                    postResult(result);
+                }
+                return result;
             }
         };
 

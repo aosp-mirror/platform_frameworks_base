@@ -10,7 +10,7 @@ next.link=connectivity-monitoring.html
 
 @jd:body
 
-<div id="tb-wrapper"> 
+<div id="tb-wrapper">
 <div id="tb">
 
 <h2>このレッスンの内容</h2>
@@ -26,7 +26,7 @@ next.link=connectivity-monitoring.html
   <li><a href="{@docRoot}guide/components/intents-filters.html">インテントとインテント フィルタ</a>
 </ul>
 
-</div> 
+</div>
 </div>
 
 <p>Android 搭載端末を装着できるホルダーの種類には、さまざまなものがあります。たとえば、車載用や家庭用のホルダーがあり、デジタルかアナログかという区別もあります。ホルダー装着状態は一般的に、充電状態と密接にリンクしています。多くのホルダーは、装着されている端末に電力を供給しているからです。</p>
@@ -36,8 +36,8 @@ next.link=connectivity-monitoring.html
 <p>ホルダー装着状態も sticky {@link android.content.Intent} としてブロードキャストされるので、端末がホルダーに装着されているかどうかと、装着されている場合のホルダーのタイプを問い合わせることができます。</p>
 
 
-<h2 id="CurrentDockState">現在のホルダー装着状態を特定する</h2> 
- 
+<h2 id="CurrentDockState">現在のホルダー装着状態を特定する</h2>
+
 <p>ホルダー装着状態の詳細は、{@link android.content.Intent#ACTION_DOCK_EVENT} アクションの sticky ブロードキャストにエクストラとして含まれています。これは sticky であるため、{@link android.content.BroadcastReceiver} を登録する必要はありません。次のコード例に示すように、{@link android.content.Context#registerReceiver registerReceiver()} を呼び出し、{@code null} をブロードキャスト レシーバとして渡します。</p>
 
 <pre>IntentFilter ifilter = new IntentFilter(Intent.ACTION_DOCK_EVENT);
@@ -49,9 +49,9 @@ Intent dockStatus = context.registerReceiver(null, ifilter);</pre>
 boolean isDocked = dockState != Intent.EXTRA_DOCK_STATE_UNDOCKED;</pre>
 
 
-<h2 id="DockType">現在のホルダーのタイプを特定する</h2> 
+<h2 id="DockType">現在のホルダーのタイプを特定する</h2>
 
-<p>端末がホルダーに装着されている場合のホルダーのタイプは、次の 4 つのいずれかです。 
+<p>端末がホルダーに装着されている場合のホルダーのタイプは、次の 4 つのいずれかです。
 <ul><li>カー</li>
 <li>卓上</li>
 <li>ローエンド（アナログ）卓上</li>
@@ -60,12 +60,12 @@ boolean isDocked = dockState != Intent.EXTRA_DOCK_STATE_UNDOCKED;</pre>
 <p>最後の 2 つは、Android API レベル 11 で追加されたものです。したがって、ホルダーのタイプだけがわかればよく、デジタルとアナログの区別は問わないという場合は、次のように 3 つすべてについて調べるとよいでしょう。</p>
 
 <pre>boolean isCar = dockState == EXTRA_DOCK_STATE_CAR;
-boolean isDesk = dockState == EXTRA_DOCK_STATE_DESK || 
+boolean isDesk = dockState == EXTRA_DOCK_STATE_DESK ||
                  dockState == EXTRA_DOCK_STATE_LE_DESK ||
                  dockState == EXTRA_DOCK_STATE_HE_DESK;</pre>
 
 
-<h2 id="MonitorDockState">ホルダーの装着状態またはタイプの変化を監視する</h2> 
+<h2 id="MonitorDockState">ホルダーの装着状態またはタイプの変化を監視する</h2>
 
 <p>端末がホルダーに装着されたり、装着が解除されたりするたびに、{@link android.content.Intent#ACTION_DOCK_EVENT} アクションがブロードキャストされます。端末のホルダー装着状態の変化を監視するには、次のコード例に示すように、アプリのマニフェスト内でブロードキャスト レシーバを登録します。</p>
 

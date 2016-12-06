@@ -8,7 +8,7 @@ parent.link=index.html
 
 
 <div id="deprecatedSticker">
-  <a href="#" 
+  <a href="#"
      onclick="$('#naMessage').show();$('#deprecatedSticker').hide();return false">
     <strong>This doc is deprecated</strong></a>
 </div>
@@ -105,7 +105,7 @@ need to</a></li>
 <p>
   It illustrates activities and tasks with examples, and describes some
   of their underlying principles and mechanisms, such as navigation,
-  multitasking, activity re-use, intents, and the activity stack. 
+  multitasking, activity re-use, intents, and the activity stack.
   The document also highlights design decisions that are available to you
   and what control they give you over the UI of your application.
 </p>
@@ -146,7 +146,7 @@ document),
 
 <p>
   An Android <em>application</em> typically consists of one or more
-  related, loosely bound activities <!--(and possibly 
+  related, loosely bound activities <!--(and possibly
   <a href=#services_broadcast_receivers title="other components">other
   components</a>)--> for the user to interact with, typically bundled up
   in a single file (with an .apk suffix). Android ships with a rich set
@@ -186,10 +186,10 @@ document),
   seamless, activity after activity, <a href="#tasks">task</a> after
   task.
 </p>
-  
+
 <p>
   An activity handles a particular type of content (data) and accepts a
-  set of related user actions. Each activity has a 
+  set of related user actions. Each activity has a
   <a href="{@docRoot}guide/components/activities.html#Lifecycle">lifecycle</a> that is
 independent of the other
   activities in its application or task &mdash; each activity is
@@ -283,7 +283,7 @@ independent of the other
   to the activity stack, so that pressing <em>Back</em> displays the previous
   activity on the stack. However, the user cannot use the <em>Back</em> button to go
   back further than the last visit to Home. The adding of an activity to
-  the current stack happens whether or not that activity begins a new 
+  the current stack happens whether or not that activity begins a new
   <a href=#tasks title=task>task</a> (as long as that task was started
   without going Home), so going back can let the user go back to
   activities in previous tasks. The user can get to tasks earlier than
@@ -297,7 +297,7 @@ independent of the other
   designing the navigation, if you have screen A and you want the user
   to be able go to a subsequent screen B and then use the <em>Back</em> button to go
   back to screen A, then the screen A needs to be implemented as an
-  activity. The one exception to this rule is if your application 
+  activity. The one exception to this rule is if your application
   <a href="#taking_over_back_key">takes control of the <em>Back</em> button</a> and manages the
 navigation
 itself.
@@ -340,7 +340,7 @@ itself.
         Send a text message with an attachment
       </li>
       <li>
-        View a YouTube video and share it by email with someone else 
+        View a YouTube video and share it by email with someone else
       </li>
     </ul>
 
@@ -666,7 +666,7 @@ itself.
   mailto:info@example.com link, they are actually initiating an Intent
   object, or just an <em>intent</em>,  which then gets resolved to a
   particular component (we consider only activity components here).
-  So, the result of a user touching a mailto: link is an Intent object 
+  So, the result of a user touching a mailto: link is an Intent object
   that the system tries to match to an activity. If that Intent object was
   written explicitly naming an activity (an <em>explicit intent</em>),
   then the system immediately launches that activity in response to the user
@@ -925,7 +925,7 @@ href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filter
   For instance, you could disable the user control that initiates
   the Intent object, or display a message to the user that lets them go
   to a location, such as Google Play, to download its application.
-  In this way, your code can start the activity (using either startActivity() 
+  In this way, your code can start the activity (using either startActivity()
   or startActivityForResult()) only if the intent has tested to resolve
   to an activity that is actually present.
 </p>
@@ -947,7 +947,7 @@ href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filter
         launcher</em> (typically implemented as a sliding drawer on the
         Home screen), or from a shortcut icon on the Home screen, or
         from the task switcher.  (The mechanism for this is for the
-        activity to have an 
+        activity to have an
         <a href={@docRoot}guide/components/intents-filters.html>intent filter</a> with action
 MAIN and
         category LAUNCHER.)
@@ -1103,7 +1103,7 @@ MAIN and
   activity to be run.
 </p>
 
-    
+
 <h3 id="notifications_get_back_tip">Notifications and App Widgets should provide consistent back behavior</h3>
 <p>
   Notifications and app widgets are two common ways that a user can launch

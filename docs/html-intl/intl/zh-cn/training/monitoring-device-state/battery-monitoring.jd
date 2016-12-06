@@ -7,8 +7,8 @@ next.title=确定和监控基座对接状态和类型
 next.link=docking-monitoring.html
 
 @jd:body
- 
-<div id="tb-wrapper"> 
+
+<div id="tb-wrapper">
 <div id="tb">
 
 <h2>本教程将指导您</h2>
@@ -24,9 +24,9 @@ next.link=docking-monitoring.html
   <li><a href="{@docRoot}guide/components/intents-filters.html">intent 和 intent 过滤器</a>
 </ul>
 
-</div> 
 </div>
- 
+</div>
+
 <p>如果您要更改后台更新频率，从而减少更新对电池使用时间的影响，最好先查看当前的电池电量和充电状态。</p>
 
 <p>对应用进行更新会影响电池使用时间，具体取决于设备的电池电量和充电状态。如果用户正在通过交流电源为设备充电，更新应用的影响就可以忽略不计。因此，在大多数情况下，只要设备连接了充电器，您就可以最大程度地提高刷新频率。相反，如果设备在消耗电池电量，那么降低更新频率就可以延长电池使用时间。</p>
@@ -34,8 +34,8 @@ next.link=docking-monitoring.html
 <p>同样，您也可以查看电池电量，如果电量即将耗尽，您就可以降低更新频率，甚至停止更新。</p>
 
 
-<h2 id="DetermineChargeState">确定当前的充电状态</h2> 
- 
+<h2 id="DetermineChargeState">确定当前的充电状态</h2>
+
 <p>请先确定当前的充电状态。{@link android.os.BatteryManager} 会通过一个包含充电状态的持续 {@link android.content.Intent} 广播所有的电池详情和充电详情。</p>
 
 <p>由于这是个持续 intent，因此您无需通过将传入 {@code null} 的 {@code registerReceiver} 作为接收器直接调用（如下一代码段所示）来注册 {@link android.content.BroadcastReceiver}，系统会返回当前电池状态 intent。您可以在此处传入实际的 {@link android.content.BroadcastReceiver} 对象，不过我们会在下文中介绍如何处理更新，因此您不一定要执行此操作。</p>
@@ -58,7 +58,7 @@ boolean acCharge = chargePlug == BATTERY_PLUGGED_AC;</pre>
 <p>通常，如果设备连接了交流充电器，您就应最大程度地提高后台更新频率；如果设备通过 USB 充电，请降低更新频率；如果电池在耗电，请进一步降低更新频率。</p>
 
 
-<h2 id="MonitorChargeState">监控充电状态的变化</h2> 
+<h2 id="MonitorChargeState">监控充电状态的变化</h2>
 
 <p>充电状态的改变就像设备连接电源那样容易，因此监控充电状态的变化并相应地调整刷新频率就很重要了。</p>
 
@@ -75,11 +75,11 @@ boolean acCharge = chargePlug == BATTERY_PLUGGED_AC;</pre>
 
 <pre>public class PowerConnectionReceiver extends BroadcastReceiver {
     &#64;Override
-    public void onReceive(Context context, Intent intent) { 
+    public void onReceive(Context context, Intent intent) {
         int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
         boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
                             status == BatteryManager.BATTERY_STATUS_FULL;
-    
+
         int chargePlug = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
         boolean usbCharge = chargePlug == BATTERY_PLUGGED_USB;
         boolean acCharge = chargePlug == BATTERY_PLUGGED_AC;
@@ -87,7 +87,7 @@ boolean acCharge = chargePlug == BATTERY_PLUGGED_AC;</pre>
 }</pre>
 
 
-<h2 id="CurrentLevel">确定当前的电池电量</h2> 
+<h2 id="CurrentLevel">确定当前的电池电量</h2>
 
 <p>在某些情况下，确定当前的电池电量会对您有所帮助。如果电池电量低于一定水平，您可以降低后台更新频率。</p>
 
@@ -99,7 +99,7 @@ int scale = battery.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
 float batteryPct = level / (float)scale;</pre>
 
 
-<h2 id="MonitorLevel">监控电池电量的显著变化</h2> 
+<h2 id="MonitorLevel">监控电池电量的显著变化</h2>
 
 <p>您无法轻松地对电池状态进行持续监控，不过也无需这么做。</p>
 

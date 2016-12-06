@@ -379,7 +379,7 @@ mas serviços externos, como o Google Play, as leem para oferecer uma filtragem
 aos usuários quando buscam esses aplicativos para seu dispositivo.</p>
 
 <p>Por exemplo: se o aplicativo exige uma câmera e usa APIs introduzidas no Android 2.1 (<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API de nível</a> 7),
-deve-se declarar esses requisitos no arquivo de manifesto da seguinte forma:</p> 
+deve-se declarar esses requisitos no arquivo de manifesto da seguinte forma:</p>
 
 <pre>
 &lt;manifest ... >
@@ -393,7 +393,7 @@ deve-se declarar esses requisitos no arquivo de manifesto da seguinte forma:</p>
 <p>Assim, dispositivos que <em>não</em> tenham câmera e tenham
 versão Android <em>anterior</em> a 2.1 não poderão instalar o aplicativo a partir do Google Play.</p>
 
-<p>No entanto, também é possível declarar que o aplicativo usa a câmera como recurso 
+<p>No entanto, também é possível declarar que o aplicativo usa a câmera como recurso
 <em>não obrigatório</em>. Nesse caso, o aplicativo precisa definir o atributo <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#required">{@code required}</a>
  como {@code "false"} e verificar em tempo de execução
 se o dispositivo tem câmera e desativar os recursos da câmera conforme o necessário.</p>

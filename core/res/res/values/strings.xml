@@ -482,6 +482,10 @@
     <!-- label for item that turns off power in phone options dialog -->
     <string name="global_action_power_off">Power off</string>
 
+    <!-- label for item that restarts phone in phone options dialog -->
+    <!-- TODO: promote to separate string-->
+    <string name="global_action_restart" translatable="false">@string/sim_restart_button</string>
+
     <!-- label for item that starts emergency call -->
     <string name="global_action_emergency">Emergency</string>
 
@@ -1759,6 +1763,10 @@
     <string name="lockscreen_pattern_wrong">Try again</string>
     <!-- On the unlock password screen, shown when the user enters the wrong lock password and must try again. -->
     <string name="lockscreen_password_wrong">Try again</string>
+
+    <!-- On the keyguard screen, this string explains that some features or data may not be available until the device is unlocked. [CHAR LIMIT=48] -->
+    <string name="lockscreen_storage_locked">Unlock for all features and data</string>
+
     <!-- Shown when face unlock failed multiple times so we're just using the backup -->
     <string name="faceunlock_multiple_failures">Maximum Face Unlock attempts exceeded</string>
 
@@ -1952,7 +1960,7 @@
     <string name="lockscreen_access_pattern_cleared">Pattern cleared</string>
     <!-- Accessibility description sent when user adds a dot to the pattern. [CHAR LIMIT=NONE]  -->
     <string name="lockscreen_access_pattern_cell_added">Cell added</string>
-    <!-- Accessibility description sent when user adds a dot to the pattern. Announces the 
+    <!-- Accessibility description sent when user adds a dot to the pattern. Announces the
     actual cell when headphones are connected [CHAR LIMIT=NONE]  -->
     <string name="lockscreen_access_pattern_cell_added_verbose">
             Cell <xliff:g id="cell_index" example="3">%1$s</xliff:g> added</string>
@@ -2031,6 +2039,12 @@
         FACTORY_TEST action.</string>
     <!-- Button to restart the device after the factory test. -->
     <string name="factorytest_reboot">Reboot</string>
+
+    <!-- Do not translate.  timepicker mode, overridden for watch -->
+    <string name="time_picker_mode" translatable="false">"clock"</string>
+
+    <!-- Do not translate.  datepicker mode, overridden for watch -->
+    <string name="date_picker_mode" translatable="false">"calendar"</string>
 
     <!-- Do not translate.  WebView User Agent string -->
     <string name="web_user_agent" translatable="false">Mozilla/5.0 (Linux; U; <xliff:g id="x">Android %s</xliff:g>)
@@ -2792,10 +2806,13 @@
     <!-- [CHAR LIMIT=NONE] Message shown in upgrading dialog when doing an fstrim. -->
     <string name="android_upgrading_fstrim">Optimizing storage.</string>
 
-    <!-- [CHAR LIMIT=40] Title of notification that is shown when performing a system upgrade. -->
-    <string name="android_upgrading_notification_title">Android is upgrading</string>
+    <!-- [CHAR LIMIT=40] Title of notification that is shown when finishing a system upgrade. -->
+    <string name="android_upgrading_notification_title">Finishing Android update\u2026</string>
     <!-- [CHAR LIMIT=200] Body of notification that is shown when performing a system upgrade. -->
     <string name="android_upgrading_notification_body">Some apps may not work properly until the upgrade finishes</string>
+
+    <!-- [CHAR LIMIT=40] Toast that is shown when an app is still upgrading. -->
+    <string name="app_upgrading_toast"><xliff:g id="application">%1$s</xliff:g> is upgrading\u2026</string>
 
     <!-- [CHAR LIMIT=NONE] Message shown in upgrading dialog for each .apk that is optimized. -->
     <string name="android_upgrading_apk">Optimizing app
@@ -2920,6 +2937,27 @@
 
     <!-- A notification is shown when the user connects to a Wi-Fi network and the system detects that that network has no Internet access. This is the notification's message. -->
     <string name="wifi_no_internet_detailed">Tap for options</string>
+
+    <!-- A notification might be shown if the device switches to another network type (e.g., cellular data) because it detects that the network it was using (e.g., Wi-Fi) has lost Internet connectivity. This is the notification's title. %1$s is the network type that the device switched to, e.g., cellular data. It is one of the strings in the network_switch_type_name array. -->
+    <string name="network_switch_metered">Switched to <xliff:g id="network_type">%1$s</xliff:g></string>
+
+    <!-- A notification might be shown if the device switches to another network type (e.g., cellular data) because it detects that the network it was using (e.g., Wi-Fi) has lost Internet connectivity. This is the notification's message. %1$s is the network that the device switched to, e.g., cellular data. %2$s is the network type the device switched from, e.g., Wi-Fi. Both are strings in the network_switch_type_name array. -->
+    <string name="network_switch_metered_detail">Device uses <xliff:g id="new_network">%1$s</xliff:g> when <xliff:g id="previous_network">%2$s</xliff:g> has no Internet access. Charges may apply.</string>
+
+    <!-- A toast might be shown if the device switches to another network type (e.g., cellular data) because it detects that the network it was using (e.g., Wi-Fi) has lost Internet connectivity. This is the text of the toast. %1$s is the network that the device switched from, e.g., Wi-Fi. %2$s is the network type the device switched from, e.g., cellular data. Both are strings in the network_switch_type_name array. -->
+    <string name="network_switch_metered_toast">Switched from <xliff:g id="previous_network">%1$s</xliff:g> to <xliff:g id="new_network">%2$s</xliff:g></string>
+
+    <!-- Network type names used in the network_switch_metered and network_switch_metered_detail strings. These must be kept in the sync with the values NetworkCapabilities.TRANSPORT_xxx values, and in the same order. -->
+    <string-array name="network_switch_type_name">
+        <item>cellular data</item>
+        <item>Wi-Fi</item>
+        <item>Bluetooth</item>
+        <item>Ethernet</item>
+        <item>VPN</item>
+    </string-array>
+
+    <!-- Network type name displayed if one of the types is not found in network_switch_type_name. -->
+    <string name="network_switch_type_name_unknown">an unknown network type</string>
 
      <!-- A notification is shown when a user's selected SSID is later disabled due to connectivity problems.  This is the notification's title / ticker. -->
      <string name="wifi_watchdog_network_disabled">Couldn\'t connect to Wi-Fi</string>
@@ -3092,8 +3130,6 @@
 
     <string name="fast_scroll_alphabet">\u0020ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
     <string name="fast_scroll_numeric_alphabet">\u00200123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
-
-    <string name="candidates_style"><u>candidates</u></string>
 
     <!-- External media notification strings -->
     <skip />
@@ -3297,10 +3333,12 @@
     <string name="vpn_lockdown_connecting">Always-on VPN connecting\u2026</string>
     <!-- Notification title when connected to lockdown VPN. -->
     <string name="vpn_lockdown_connected">Always-on VPN connected</string>
+    <!-- Notification title when not connected to lockdown VPN. -->
+    <string name="vpn_lockdown_disconnected">Always-on VPN disconnected</string>
     <!-- Notification title when error connecting to lockdown VPN. -->
     <string name="vpn_lockdown_error">Always-on VPN error</string>
     <!-- Notification body that indicates user can touch to configure lockdown VPN connection. -->
-    <string name="vpn_lockdown_config">Tap to configure</string>
+    <string name="vpn_lockdown_config">Tap to set up</string>
 
     <!-- Localized strings for WebView -->
     <!-- Label for button in a WebView that will open a chooser to choose a file to upload -->
@@ -3521,8 +3559,8 @@
     <!-- Button text for the edit menu in input method extract mode. [CHAR LIMIT=16] -->
     <string name="extract_edit_menu_button">Edit</string>
 
-    <!-- Notification title when data usage has exceeded warning threshold. [CHAR LIMIT=32] -->
-    <string name="data_usage_warning_title">Data usage warning</string>
+    <!-- Notification title when data usage has exceeded warning threshold. [CHAR LIMIT=50] -->
+    <string name="data_usage_warning_title">Data usage alert</string>
     <!-- Notification body when data usage has exceeded warning threshold. [CHAR LIMIT=32] -->
     <string name="data_usage_warning_body">Tap to view usage and settings.</string>
 
@@ -4161,7 +4199,7 @@
 
     <!-- [CHAR_LIMIT=NONE] Data saver: Feature description -->
     <string name="data_saver_description">To help reduce data usage, Data Saver prevents some apps from sending or receiving data in the background. An app you’re currently using can access data, but may do so less frequently. This may mean, for example, that images don’t display until you tap them.</string>
-    <!-- [CHAR_LIMIT=30] Data saver: Title on first-time dialogFeature description -->
+    <!-- [CHAR_LIMIT=35] Data saver: Title on first-time dialog -->
     <string name="data_saver_enable_title">Turn on Data Saver?</string>
     <!-- [CHAR_LIMIT=16] Data saver: Button to turn it on on first-time dialog -->
     <string name="data_saver_enable_button">Turn on</string>
@@ -4328,6 +4366,9 @@
     <string name="language_picker_section_suggested">Suggested</string>
     <!-- List section subheader for the language picker, containing a list of all languages available [CHAR LIMIT=30] -->
     <string name="language_picker_section_all">All languages</string>
+    <!-- List section subheader for the region picker, containing a list of all regions supported for the selected language.
+    Warning: this is a more 'neutral' term for 'country', not for the sub-divisions of a country. [CHAR LIMIT=30] -->
+    <string name="region_picker_section_all">All regions</string>
 
     <!-- Menu item in the locale menu  [CHAR LIMIT=30] -->
     <string name="locale_search_menu">Search</string>
@@ -4374,6 +4415,23 @@
     <!-- The representation of a time duration when negative. An example is -1:14. This can be used with a countdown timer for example.-->
     <string name="negative_duration">\u2212<xliff:g id="time" example="1:14">%1$s</xliff:g></string>
 
+    <!-- Title of notification to start a new demo session when device is in retail mode [CHAR LIMIT=NONE] -->
+    <string name="reset_retail_demo_mode_title">Reset device?</string>
+    <!-- Text of notification to start a new demo session when device is in retail mode [CHAR LIMIT=NONE] -->
+    <string name="reset_retail_demo_mode_text">Tap to reset device</string>
+    <!-- Text of dialog shown when starting a demo user for the first time [CHAR LIMIT=40] -->
+    <string name="demo_starting_message">Starting demo\u2026</string>
+    <!-- Text of dialog shown when starting a new demo user in retail demo mode [CHAR LIMIT=40] -->
+    <string name="demo_restarting_message">Resetting device\u2026</string>
+    <!-- Title of the dialog shown when user inactivity times out in retail demo mode [CHAR LIMIT=40] -->
+    <string name="demo_user_inactivity_timeout_title">Reset device?</string>
+    <!-- Warning message shown when user inactivity times out in retail demo mode [CHAR LIMIT=none] -->
+    <string name="demo_user_inactivity_timeout_countdown">You\u2019ll lose any changes and the demo will start again in <xliff:g id="timeout" example="9">%1$s</xliff:g> seconds\u2026</string>
+    <!-- Text of button to allow user to abort countdown and continue current session in retail demo mode [CHAR LIMIT=40] -->
+    <string name="demo_user_inactivity_timeout_left_button">Cancel</string>
+    <!-- Text of button to allow user to abort countdown and immediately start another session in retail demo mode [CHAR LIMIT=40] -->
+    <string name="demo_user_inactivity_timeout_right_button">Reset now</string>
+
     <!-- Title of notification shown when device has been forced to safe mode after a security compromise. -->
     <string name="audit_safemode_notification">Factory reset to use this device without restrictions</string>
     <!-- Description of notification shown when device has been forced to safe mode after a security compromise. -->
@@ -4382,4 +4440,6 @@
     <!-- Accessibilty string added to a widget that has been suspended [CHAR LIMIT=20] -->
     <string name="suspended_widget_accessibility">Disabled <xliff:g id="label" example="Calendar">%1$s</xliff:g></string>
 
+    <!-- Label used by Telephony code, assigned as the display name for conference calls [CHAR LIMIT=60] -->
+    <string name="conference_call">Conference Call</string>
 </resources>

@@ -1,0 +1,329 @@
+page.title=App Distribution
+meta.keywords="wear-preview"
+page.tags="wear-preview"
+page.image=images/cards/card-n-sdk_2x.png
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+
+  <ul>
+    <li><a href="#publish">Publish Your APKs</a></li>
+    <li><a href="#targeting">Setting Up Targeting for a Watch</a></li>
+    <li><a href="#console">Using the Play Developer Console</a></li>
+  </ul>
+
+</div>
+</div>
+
+    <p>
+      With Android Wear 2.0, a user can visit the Play Store on a watch and
+      download a Wear app directly to the watch.
+    </p>
+
+    <p>
+      Generally, a Wear 2.0 app in the Play Store needs
+      a minimum and target API level of 24 or higher in
+      the Android manifest file. The minimum SDK level can be 23
+      only if you are using the same APK
+      for Wear 1.0 and 2.0 (and thus have an embedded Wear 1.0 APK).
+    </p>
+
+    <h2 id="publish">
+      Publish Your APKs
+    </h2>
+
+    <p>
+      To make your app appear in the on-watch Play Store, upload
+      the watch APK in the Play Developer Console just as you would any other
+      APK. If you only have a watch APK and no phone APK, no other steps
+      are required.
+    </p>
+
+    <p>
+      If you have a phone APK in addition to a watch APK, you must use the
+      <a href="https://developer.android.com/google/play/publishing/multiple-apks.html">Multi-APK delivery method</a>.
+    </p>
+
+    <p>
+      <a href=
+      "https://developer.android.com/training/permissions/requesting.html">Run-time
+      permissions</a> are required.
+    </p>
+
+    <p>
+      Also see
+      <a href="{@docRoot}wear/preview/features/standalone-apps.html">
+      Standalone Apps</a>.
+    </p>
+
+    <h3>
+      Distribution to Wear 2.0 watches
+    </h3>
+
+    <p>
+      If you only want your app to be distributed to Wear 2.0 watches,
+      it is unnecessary to embed the watch APK inside the the phone APK.
+    </p>
+
+    <p>
+      If you want your app to
+      be distributed to Wear 1.0 watches, you need to embed the
+      watch APK inside the phone APK, as described directly below.
+    </p>
+
+    <h3>
+      Distribution to Wear 1.0 and 2.0 watches
+    </h3>
+
+    <p>
+      If you are already distributing your app to Wear 1.0 watches,
+      follow these steps:
+    </p>
+
+    <ol>
+      <li>Provide a Wear 2.0 (standalone) version of your watch APK that can be made
+      available in the Play Store on Wear.
+      </li>
+
+      <li>Continue embedding a Wear 1.0 APK in your phone APK,
+      for use by watches that do not have Wear 2.0.
+      </li>
+    </ol>
+
+    <h3>
+      Specifying a version code
+    </h3>
+
+    <p>
+      To ensure that a standalone APK acts as an upgrade to an embedded Wear APK, the
+      standalone Wear APK's <a href=
+      "https://developer.android.com/google/play/publishing/multiple-apks.html#VersionCodes">
+      version code</a> generally should be higher than the embedded Wear APK's version code.
+      (A phone APK's version code scheme can be independent from that of a watch
+      APK, although they must be unique.) However, the version codes
+      of the standalone APK and the embedded Wear APK can be the same if
+      the APKs are equivalent. If the APKs are not equivalent,
+      but the version code is the same, then when a watch updates from Wear 1.0
+      to 2.0, the watch may get the new APK only after waiting for a
+      longer-than-expected period of time.
+    </p>
+
+    <p>
+      Note that it currently is not possible to create a single APK that works
+      on a phone and watch.
+    </p>
+
+    <h3>
+      Support in the Gradle file
+    </h3>
+
+    <p>
+      If you have a Wear app that is intended for both Wear 1.0 and Wear 2.0,
+      consider using <a href=
+      "https://developer.android.com/studio/build/build-variants.html#product-flavors">
+      product flavors</a>. For example,
+      if you want to target both SDK version 23 and version 24,
+      update your Wear module's <code>build.gradle</code> file to include
+      the following if an existing embedded app has a minimum SDK version of 23:
+    </p>
+
+<pre>
+android {
+    // Allows you to reference product flavors in your
+    // phone module's build.gradle file
+    publishNonDefault true
+    ...
+    defaultConfig
+    {
+       // This is the minSdkVersion of the Wear 1.0 embedded app
+       minSdkVersion 23
+       ...
+    }
+    buildTypes {...}
+    productFlavors {
+        wear1 {
+          // Use the defaultConfig value
+        }
+        wear2 {
+            minSdkVersion 24
+        }
+    }
+}
+</pre>
+
+    <p>
+      Then update your phone module’s <code>build.gradle</code> file, replacing
+      <code>wearApp</code> as follows:
+    </p>
+
+<pre>
+dependencies {
+    ...
+    wearApp project(path: ':wear', configuration: 'wear1Release')
+}
+</pre>
+
+    <p>
+      A <a href=
+      "https://developer.android.com/studio/build/build-variants.html#product-flavors">
+      build variant</a> is a combination of the product flavor and build type.
+      In Android Studio, select the appropriate build variant when
+      debugging or publishing your app. For example, if <code>wear2</code> is a
+      product flavor, select <strong>wear2Release</strong> as the
+      release build variant.
+    </p>
+
+    <p>
+      For purposes of code that is Wear 2.0-specific or Wear 1.0-specific,
+      consider <a href=
+      "https://developer.android.com/studio/build/build-variants.html#sourcesets">
+      source sets for build variants</a>.
+    </p>
+
+
+    <h2 id="targeting">
+      Setting Up Targeting for a Watch
+    </h2>
+
+    <p>
+      In your Android Manifest file, you must specify the following feature
+      restriction: the <code>uses-feature</code> element is set to
+      <code>android.hardware.type.watch</code>. Do not set
+      the <code>required</code> attribute to <code>false</code>.
+      A single APK for Wear and non-Wear devices presently is not supported.
+    </p>
+
+    <p>
+      Thus, if an APK has the following setting, Google Play provides the APK
+      to watches only:
+    </p>
+
+<pre>
+&lt;manifest package=&quot;com.example.standalone&quot;
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
+    &lt;uses-feature
+        android:name=&quot;android.hardware.type.watch&quot;
+    ...
+&lt;/manifest&gt;
+</pre>
+
+    <p>
+      The <code>android.hardware.type.watch</code> setting above can be
+      combined with other criteria such as SDK version, screen resolution, and
+      CPU architecture. Thus, different Wear APKs can target different hardware
+      configurations.
+    </p>
+
+    <h2 id="console">
+      Using the Play Developer Console
+    </h2>
+
+    <p>
+      Below is an introduction to <a href=
+      "https://support.google.com/googleplay/android-developer/answer/113469">uploading</a>
+      a standalone Wear APK to an application listing using the Play Developer
+      Console.
+    </p>
+
+    <p>
+      If your app supports both Wear 1.0 and Wear 2.0, continue embedding the
+      Wear 1.0 APK (minimum SDK version of 20, 21, or 22, or 23) in the phone
+      APK and upload the phone APK. In addition, upload your standalone Wear
+      2.0 APK (which has a minimum SDK version of 24).
+    </p>
+
+    <p>
+      Also see <a href=
+      "https://developer.android.com/google/play/publishing/multiple-apks.html">
+      Multiple APK Support</a> and <a href=
+      "https://developer.android.com/distribute/googleplay/developer-console.html#manage">
+      Manage Your App</a>.
+      Before uploading an APK as described below, the APK
+      must be <a href=
+      "https://developer.android.com/studio/publish/app-signing.html#release-mode">
+      signed</a>.
+    </p>
+
+     <h3  id="uploading-apk">
+      Uploading your APK
+    </h3>
+
+    <p>
+      Go to the <a href="https://play.google.com/apps/publish">Play Developer
+      Console</a>, navigate to your application listing, and select
+      <strong>APK</strong> in the left-navigation panel. An APK screen similar to
+      the following is displayed:
+    </p>
+    <img src="../images/apk-tabs.png" width="" alt="alt_text">
+
+    <p>
+      You may need to use advanced mode for uploads, as follows:
+    </p>
+
+    <ul>
+      <li>Advanced mode is unnecessary if you only have a Wear 2.0 app and no
+      phone app. Instead of advanced mode, use simple mode.</li>
+
+      <li>Use advanced mode if you support Wear 1.0 or have a phone app.</li>
+    </ul>
+
+    <p>
+      Therefore, on the above APK screen, to determine whether to click
+      the <strong>Switch to advanced mode</strong>
+      button, consider the following:
+    </p>
+
+    <ul>
+      <li>If your app does not support Wear 1.0, and only has a watch APK,
+      upload it using simple mode.
+      </li>
+
+      <li>If your app does not support Wear 1.0 and has both a watch APK and a
+      phone APK, click <strong>Switch to advanced mode</strong>
+      to upload the watch and phone APKs.
+      </li>
+    </ul>
+
+    <p>
+      See <a href=
+      "https://developer.android.com/google/play/publishing/multiple-apks.html#SimpleAndAdvanced">
+      Simple mode and advanced mode</a> for more information about toggling
+      between modes.
+    </p>
+
+    <p>
+      Select the appropriate tab (<strong>Production</strong>, <strong>Beta
+      Testing</strong>, or <strong>Alpha Testing</strong>) for your upload.
+      Then click
+      the <strong>Upload New APK</strong> button and select your standalone
+      Wear APK for upload.
+    </p>
+
+    <h3>
+      Reviewing and publishing
+    </h3>
+
+    <p>
+      After you upload your standalone Wear APK and scroll down the resulting
+      page, the APK is shown in the <strong>Current APK</strong> table, with a
+      version number, in a similar way to the following:
+    </p>
+    <img src="../images/current-apk.png" width="" alt="alt_text">
+
+    <p>
+      Finally, in the <strong>Current APK</strong> table above, click the line
+      with the <strong>Version</strong> to review the APK. The <strong>APK
+      Details</strong> panel is displayed. You can verify, for example, that
+      the number in the <strong>Supported Android Devices</strong> line is far
+      fewer than the number would be for a typical phone APK:
+    </p>
+    <img src="../images/apk-details.png" width="" alt="alt_text">
+
+    <p>
+      When you are ready, <a href=
+      "https://support.google.com/googleplay/android-developer/answer/6334282">publish</a>
+      your app.
+    </p>

@@ -36,7 +36,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 
-import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_TRANSFORM;
+import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE;
 
 /**
  * Provides information about the size and density of a logical display.
@@ -284,6 +284,27 @@ public final class Display {
      */
     public static final int STATE_DOZE_SUSPEND = 4;
 
+    /* The color mode constants defined below must be kept in sync with the ones in
+     * system/graphics.h */
+
+    /**
+     * Display color mode: The current color mode is unknown or invalid.
+     * @hide
+     */
+    public static final int COLOR_MODE_INVALID = -1;
+
+    /**
+     * Display color mode: The default or native gamut of the display.
+     * @hide
+     */
+    public static final int COLOR_MODE_DEFAULT = 0;
+
+    /**
+     * Display color mode: SRGB
+     * @hide
+     */
+    public static final int COLOR_MODE_SRGB = 7;
+
     /**
      * Internal method to create a display.
      * Applications should use {@link android.view.WindowManager#getDefaultDisplay()}
@@ -463,20 +484,29 @@ public final class Display {
 
     /**
      * Gets the size of the display, in pixels.
+     * Value returned by this method does not necessarily represent the actual raw size
+     * (native resolution) of the display.
      * <p>
-     * Note that this value should <em>not</em> be used for computing layouts,
-     * since a device will typically have screen decoration (such as a status bar)
-     * along the edges of the display that reduce the amount of application
-     * space available from the size returned here.  Layouts should instead use
-     * the window size.
+     * 1. The returned size may be adjusted to exclude certain system decor elements
+     * that are always visible.
      * </p><p>
-     * The size is adjusted based on the current rotation of the display.
-     * </p><p>
-     * The size returned by this method does not necessarily represent the
-     * actual raw size (native resolution) of the display.  The returned size may
-     * be adjusted to exclude certain system decoration elements that are always visible.
-     * It may also be scaled to provide compatibility with older applications that
+     * 2. It may be scaled to provide compatibility with older applications that
      * were originally designed for smaller displays.
+     * </p><p>
+     * 3. It can be different depending on the WindowManager to which the display belongs.
+     * </p><p>
+     * - If requested from non-Activity context (e.g. Application context via
+     * {@code (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE)})
+     * it will report the size of the entire display based on current rotation and with subtracted
+     * system decoration areas.
+     * </p><p>
+     * - If requested from activity (either using {@code getWindowManager()} or
+     * {@code (WindowManager) getSystemService(Context.WINDOW_SERVICE)}) resulting size will
+     * correspond to current app window size. In this case it can be smaller than physical size in
+     * multi-window mode.
+     * </p><p>
+     * Typically for the purposes of layout apps should make a request from activity context
+     * to obtain size available for the app content.
      * </p>
      *
      * @param outSize A {@link Point} object to receive the size information.
@@ -687,33 +717,22 @@ public final class Display {
     }
 
     /**
-     * Request the display applies a color transform.
+     * Request the display applies a color mode.
      * @hide
      */
-    @RequiresPermission(CONFIGURE_DISPLAY_COLOR_TRANSFORM)
-    public void requestColorTransform(ColorTransform colorTransform) {
-        mGlobal.requestColorTransform(mDisplayId, colorTransform.getId());
+    @RequiresPermission(CONFIGURE_DISPLAY_COLOR_MODE)
+    public void requestColorMode(int colorMode) {
+        mGlobal.requestColorMode(mDisplayId, colorMode);
     }
 
     /**
-     * Returns the active color transform of this display
+     * Returns the active color mode of this display
      * @hide
      */
-    public ColorTransform getColorTransform() {
+    public int getColorMode() {
         synchronized (this) {
             updateDisplayInfoLocked();
-            return mDisplayInfo.getColorTransform();
-        }
-    }
-
-    /**
-     * Returns the default color transform of this display
-     * @hide
-     */
-    public ColorTransform getDefaultColorTransform() {
-        synchronized (this) {
-            updateDisplayInfoLocked();
-            return mDisplayInfo.getDefaultColorTransform();
+            return mDisplayInfo.colorMode;
         }
     }
 
@@ -728,14 +747,14 @@ public final class Display {
     }
 
     /**
-     * Gets the supported color transforms of this device.
+     * Gets the supported color modes of this device.
      * @hide
      */
-    public ColorTransform[] getSupportedColorTransforms() {
+    public int[] getSupportedColorModes() {
         synchronized (this) {
             updateDisplayInfoLocked();
-            ColorTransform[] transforms = mDisplayInfo.supportedColorTransforms;
-            return Arrays.copyOf(transforms, transforms.length);
+            int[] colorModes = mDisplayInfo.supportedColorModes;
+            return Arrays.copyOf(colorModes, colorModes.length);
         }
     }
 
@@ -785,13 +804,16 @@ public final class Display {
      * were originally designed for smaller displays.
      * </p><p>
      * 3. It can be different depending on the WindowManager to which the display belongs.
-     * <pre>
+     * </p><p>
      * - If requested from non-Activity context (e.g. Application context via
      * {@code (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE)})
-     * metrics will report real size of the display based on current rotation.
-     * - If requested from activity resulting metrics will correspond to current window metrics.
-     * In this case the size can be smaller than physical size in multi-window mode.
-     * </pre>
+     * metrics will report the size of the entire display based on current rotation and with
+     * subtracted system decoration areas.
+     * </p><p>
+     * - If requested from activity (either using {@code getWindowManager()} or
+     * {@code (WindowManager) getSystemService(Context.WINDOW_SERVICE)}) resulting metrics will
+     * correspond to current app window metrics. In this case the size can be smaller than physical
+     * size in multi-window mode.
      * </p>
      *
      * @param outMetrics A {@link DisplayMetrics} object to receive the metrics.
@@ -1205,6 +1227,33 @@ public final class Display {
             return mMinLuminance;
         }
 
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) {
+                return true;
+            }
+
+            if (!(other instanceof HdrCapabilities)) {
+                return false;
+            }
+            HdrCapabilities that = (HdrCapabilities) other;
+
+            return Arrays.equals(mSupportedHdrTypes, that.mSupportedHdrTypes)
+                && mMaxLuminance == that.mMaxLuminance
+                && mMaxAverageLuminance == that.mMaxAverageLuminance
+                && mMinLuminance == that.mMinLuminance;
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 23;
+            hash = hash * 17 + Arrays.hashCode(mSupportedHdrTypes);
+            hash = hash * 17 + Float.floatToIntBits(mMaxLuminance);
+            hash = hash * 17 + Float.floatToIntBits(mMaxAverageLuminance);
+            hash = hash * 17 + Float.floatToIntBits(mMinLuminance);
+            return hash;
+        }
+
         public static final Creator<HdrCapabilities> CREATOR = new Creator<HdrCapabilities>() {
             @Override
             public HdrCapabilities createFromParcel(Parcel source) {
@@ -1250,90 +1299,5 @@ public final class Display {
         public int describeContents() {
             return 0;
         }
-    }
-
-    /**
-     * A color transform supported by a given display.
-     *
-     * @see Display#getSupportedColorTransforms()
-     * @hide
-     */
-    public static final class ColorTransform implements Parcelable {
-        public static final ColorTransform[] EMPTY_ARRAY = new ColorTransform[0];
-
-        private final int mId;
-        private final int mColorTransform;
-
-        public ColorTransform(int id, int colorTransform) {
-            mId = id;
-            mColorTransform = colorTransform;
-        }
-
-        public int getId() {
-            return mId;
-        }
-
-        public int getColorTransform() {
-            return mColorTransform;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            if (this == other) {
-                return true;
-            }
-            if (!(other instanceof ColorTransform)) {
-                return false;
-            }
-            ColorTransform that = (ColorTransform) other;
-            return mId == that.mId
-                && mColorTransform == that.mColorTransform;
-        }
-
-        @Override
-        public int hashCode() {
-            int hash = 1;
-            hash = hash * 17 + mId;
-            hash = hash * 17 + mColorTransform;
-            return hash;
-        }
-
-        @Override
-        public String toString() {
-            return new StringBuilder("{")
-                    .append("id=").append(mId)
-                    .append(", colorTransform=").append(mColorTransform)
-                    .append("}")
-                    .toString();
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        private ColorTransform(Parcel in) {
-            this(in.readInt(), in.readInt());
-        }
-
-        @Override
-        public void writeToParcel(Parcel out, int parcelableFlags) {
-            out.writeInt(mId);
-            out.writeInt(mColorTransform);
-        }
-
-        @SuppressWarnings("hiding")
-        public static final Parcelable.Creator<ColorTransform> CREATOR
-                = new Parcelable.Creator<ColorTransform>() {
-            @Override
-            public ColorTransform createFromParcel(Parcel in) {
-                return new ColorTransform(in);
-            }
-
-            @Override
-            public ColorTransform[] newArray(int size) {
-                return new ColorTransform[size];
-            }
-        };
     }
 }

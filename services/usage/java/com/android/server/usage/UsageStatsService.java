@@ -94,7 +94,7 @@ public class UsageStatsService extends SystemService implements
 
     static final String TAG = "UsageStatsService";
 
-    static final boolean DEBUG = false;
+    static final boolean DEBUG = false; // Never submit with true
     static final boolean COMPRESS_TIME = false;
 
     private static final long TEN_SECONDS = 10 * 1000;
@@ -139,8 +139,8 @@ public class UsageStatsService extends SystemService implements
     long mSystemTimeSnapshot;
 
     boolean mAppIdleEnabled;
-    boolean mAppIdleParoled;
-    private boolean mScreenOn;
+    boolean mAppIdleTempParoled;
+    boolean mCharging;
     private long mLastAppIdleParoledTime;
 
     private volatile boolean mPendingOneTimeCheckIdleStates;
@@ -191,7 +191,7 @@ public class UsageStatsService extends SystemService implements
         mAppIdleEnabled = getContext().getResources().getBoolean(
                 com.android.internal.R.bool.config_enableAutoPowerModes);
         if (mAppIdleEnabled) {
-            IntentFilter deviceStates = new IntentFilter(BatteryManager.ACTION_CHARGING);
+            IntentFilter deviceStates = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
             deviceStates.addAction(BatteryManager.ACTION_DISCHARGING);
             deviceStates.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
             getContext().registerReceiver(new DeviceStateReceiver(), deviceStates);
@@ -237,7 +237,7 @@ public class UsageStatsService extends SystemService implements
 
             mSystemServicesReady = true;
         } else if (phase == PHASE_BOOT_COMPLETED) {
-            setAppIdleParoled(getContext().getSystemService(BatteryManager.class).isCharging());
+            setChargingState(getContext().getSystemService(BatteryManager.class).isCharging());
         }
     }
 
@@ -284,9 +284,8 @@ public class UsageStatsService extends SystemService implements
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            if (BatteryManager.ACTION_CHARGING.equals(action)
-                    || BatteryManager.ACTION_DISCHARGING.equals(action)) {
-                setAppIdleParoled(BatteryManager.ACTION_CHARGING.equals(action));
+            if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
+                setChargingState(intent.getIntExtra("plugged", 0) != 0);
             } else if (PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED.equals(action)) {
                 onDeviceIdleModeChanged();
             }
@@ -304,9 +303,9 @@ public class UsageStatsService extends SystemService implements
 
         @Override public void onDisplayChanged(int displayId) {
             if (displayId == Display.DEFAULT_DISPLAY) {
+                final boolean displayOn = isDisplayOn();
                 synchronized (UsageStatsService.this.mLock) {
-                    mAppIdleHistory.updateDisplayLocked(isDisplayOn(),
-                            SystemClock.elapsedRealtime());
+                    mAppIdleHistory.updateDisplayLocked(displayOn, SystemClock.elapsedRealtime());
                 }
             }
         }
@@ -376,12 +375,21 @@ public class UsageStatsService extends SystemService implements
         }
     }
 
+    void setChargingState(boolean charging) {
+        synchronized (mLock) {
+            if (mCharging != charging) {
+                mCharging = charging;
+                postParoleStateChanged();
+            }
+        }
+    }
+
     /** Paroled here means temporary pardon from being inactive */
     void setAppIdleParoled(boolean paroled) {
         synchronized (mLock) {
-            if (mAppIdleParoled != paroled) {
-                mAppIdleParoled = paroled;
-                if (DEBUG) Slog.d(TAG, "Changing paroled to " + mAppIdleParoled);
+            if (mAppIdleTempParoled != paroled) {
+                mAppIdleTempParoled = paroled;
+                if (DEBUG) Slog.d(TAG, "Changing paroled to " + mAppIdleTempParoled);
                 if (paroled) {
                     postParoleEndTimeout();
                 } else {
@@ -390,6 +398,12 @@ public class UsageStatsService extends SystemService implements
                 }
                 postParoleStateChanged();
             }
+        }
+    }
+
+    boolean isParoledOrCharging() {
+        synchronized (mLock) {
+            return mAppIdleTempParoled || mCharging;
         }
     }
 
@@ -495,7 +509,7 @@ public class UsageStatsService extends SystemService implements
     /** Check if it's been a while since last parole and let idle apps do some work */
     void checkParoleTimeout() {
         synchronized (mLock) {
-            if (!mAppIdleParoled) {
+            if (!mAppIdleTempParoled) {
                 final long timeSinceLastParole = checkAndGetTimeLocked() - mLastAppIdleParoledTime;
                 if (timeSinceLastParole > mAppIdleParoleIntervalMillis) {
                     if (DEBUG) Slog.d(TAG, "Crossed default parole interval");
@@ -786,7 +800,7 @@ public class UsageStatsService extends SystemService implements
     }
 
     boolean isAppIdleFilteredOrParoled(String packageName, int userId, long elapsedRealtime) {
-        if (mAppIdleParoled) {
+        if (isParoledOrCharging()) {
             return false;
         }
         return isAppIdleFiltered(packageName, getAppId(packageName), userId, elapsedRealtime);
@@ -836,6 +850,10 @@ public class UsageStatsService extends SystemService implements
 
             if (mAppWidgetManager != null
                     && mAppWidgetManager.isBoundWidgetPackage(packageName, userId)) {
+                return false;
+            }
+
+            if (isDeviceProvisioningPackage(packageName)) {
                 return false;
             }
         }
@@ -930,6 +948,16 @@ public class UsageStatsService extends SystemService implements
         return dpm.packageHasActiveAdmins(packageName, userId);
     }
 
+    /**
+     * Returns {@code true} if the supplied package is the device provisioning app. Otherwise,
+     * returns {@code false}.
+     */
+    private boolean isDeviceProvisioningPackage(String packageName) {
+        String deviceProvisioningPackage = getContext().getResources().getString(
+                com.android.internal.R.string.config_deviceProvisioningPackage);
+        return deviceProvisioningPackage != null && deviceProvisioningPackage.equals(packageName);
+    }
+
     private boolean isCarrierApp(String packageName) {
         synchronized (mLock) {
             if (!mHaveCarrierPrivilegedApps) {
@@ -975,8 +1003,9 @@ public class UsageStatsService extends SystemService implements
     }
 
     void informParoleStateChanged() {
+        final boolean paroled = isParoledOrCharging();
         for (AppIdleStateChangeListener listener : mPackageAccessListeners) {
-            listener.onParoleStateChanged(mAppIdleParoled);
+            listener.onParoleStateChanged(paroled);
         }
     }
 
@@ -991,9 +1020,9 @@ public class UsageStatsService extends SystemService implements
             service.persistActiveStats();
             mAppIdleHistory.writeAppIdleTimesLocked(mUserState.keyAt(i));
         }
-        // Persist elapsed time periodically, in case screen doesn't get toggled
-        // until the next boot
-        mAppIdleHistory.writeElapsedTimeLocked();
+        // Persist elapsed and screen on time. If this fails for whatever reason, the apps will be
+        // considered not-idle, which is the safest outcome in such an event.
+        mAppIdleHistory.writeAppIdleDurationsLocked();
         mHandler.removeMessages(MSG_FLUSH_TO_DISK);
     }
 
@@ -1058,9 +1087,9 @@ public class UsageStatsService extends SystemService implements
 
             pw.println();
             pw.print("mAppIdleEnabled="); pw.print(mAppIdleEnabled);
-            pw.print(" mAppIdleParoled="); pw.print(mAppIdleParoled);
-            pw.print(" mScreenOn="); pw.println(mScreenOn);
-            pw.print("mLastAppIdleParoledTime=");
+            pw.print(" mAppIdleTempParoled="); pw.print(mAppIdleTempParoled);
+            pw.print(" mCharging="); pw.print(mCharging);
+            pw.print(" mLastAppIdleParoledTime=");
             TimeUtils.formatDuration(mLastAppIdleParoledTime, pw);
             pw.println();
         }
@@ -1125,7 +1154,8 @@ public class UsageStatsService extends SystemService implements
                     break;
 
                 case MSG_PAROLE_STATE_CHANGED:
-                    if (DEBUG) Slog.d(TAG, "Parole state changed: " + mAppIdleParoled);
+                    if (DEBUG) Slog.d(TAG, "Parole state: " + mAppIdleTempParoled
+                            + ", Charging state:" + mCharging);
                     informParoleStateChanged();
                     break;
 
@@ -1412,6 +1442,24 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
+        public void reportShortcutUsage(String packageName, String shortcutId, int userId) {
+            if (packageName == null || shortcutId == null) {
+                Slog.w(TAG, "Event reported without a package name or a shortcut ID");
+                return;
+            }
+
+            UsageEvents.Event event = new UsageEvents.Event();
+            event.mPackage = packageName.intern();
+            event.mShortcutId = shortcutId.intern();
+
+            // This will later be converted to system time.
+            event.mTimeStamp = SystemClock.elapsedRealtime();
+
+            event.mEventType = Event.SHORTCUT_INVOCATION;
+            mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
+        }
+
+        @Override
         public void reportContentProviderUsage(String name, String packageName, int userId) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = name;
@@ -1434,7 +1482,7 @@ public class UsageStatsService extends SystemService implements
 
         @Override
         public boolean isAppIdleParoleOn() {
-            return mAppIdleParoled;
+            return isParoledOrCharging();
         }
 
         @Override

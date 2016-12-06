@@ -1,0 +1,98 @@
+page.title=drupe Launches Android First and Finds Global Success with Beta Testing
+page.metaDescription=Drupe uses beta testing to increase its global reach.
+page.tags="developerstory", "apps", "googleplay"
+page.image=images/cards/distribute/stories/drupe.jpg
+page.timestamp=1468901832
+
+@jd:body
+
+<div class="figure">
+  <img src="{@docRoot}images/distribute/stories/drupe-icon.png" />
+</div>
+
+<h3>
+  Background
+</h3>
+
+<p>
+  In 2015, <a class="external-link" href=
+  "https://play.google.com/store/apps/dev?id=8486231504544197967">
+  drupe mobile</a>, founded by Assaf Ziv and Barak Witkowski, launched the
+  <a class="external-link" href=
+  "https://play.google.com/store/apps/details?id=mobi.drupe.app">drupe app</a>
+  on Android first. With a unique, people-first approach, their communications
+  app is focused on reinventing the way people use their phone to do basic
+  actions. By constantly improving and expanding their cross-app
+  functionality, the app is used globally and was recently awarded Google
+  Play’s Editor’s Choice recognition.
+</p>
+
+<h3>
+  What they did
+</h3>
+
+<dl>
+  <dt><strong>Android openness</strong></dt>
+  <dd>From the start, drupe knew Android was their ideal mobile platform.
+  <em>"Thanks to the openness of the system, we can build a truly native
+  experience on Android. The real way to supply a people-centric experience
+  requires such an openness, not always existing on other platforms,"</em>
+  said Barak Witkowski, co-founder and CEO of drupe. Key to their innovative
+  approach, drupe uses the current context of the user to show them the
+  right contacts and actions to optimize the drupe experience.</dd>
+
+<div class="figure">
+  <img src="{@docRoot}images/distribute/stories/drupe-screenshot.png">
+</div>
+
+  <dt><strong>Beta testing</strong></dt>
+  <dd>They have a large community of 20,000 <em>druper</em> beta users on
+  Android, which has been critical to their success. To minimize risk and seek
+  feedback from valued users, the team built beta testing into their regular
+  development process. By having a dialogue with users worldwide, they are able
+  to gauge interest in new app versions, collect feature requests, and more.
+  This has helped the team achieve a 99.7% crash-free user ratio, as well
+  as verify new versions in real-life scenarios, on various devices, before
+  full launch.</dd>
+
+  <dt><strong>Going global</strong></dt>
+  <dd>With initial focus on building a high quality app, drupe then set out
+  to take advantage of Android’s global scale. Key to their international
+  growth, the app is now translated in 17 languages, and the store listing
+  page is available in 28 languages. This led to an increase in conversion
+  and retention rates. Additionally, when entering India, the team noticed
+  several user reviews requesting integration with a specific messaging app
+  widely used in the Indian market. Through a combination of this integration,
+  adding Hindi language translation, and other new features, drupe saw improved
+  performance. In six months, <strong>daily active users increased 300%, and
+  actions per average daily user increased 25% in the Indian
+  market</strong>.</dd>
+</dl>
+
+<h3>
+  Results
+</h3>
+
+<p>
+  Drupe’s focus on innovation and building a truly contextual and intuitive
+  app proved to be a model of success for attaining growth in both engagement
+  and new global reach. The team has continued to increase its relevance
+  through feedback loops and feature adoptions. <strong>This has led to 700%
+  growth in daily active users, and 550% growth in number of interactions
+  triggered via drupe</strong> in the past six months. The team is focused on
+  enhancing their recommendation engine to add even more contextual abilities
+  for their users while continuing to grow a successful business on Google
+  Play.
+</p>
+
+<h3>
+  Get started
+</h3>
+
+<p>
+  Learn more about
+  <a href="{@docRoot}distribute/engage/beta.html">beta testing</a>
+  and find out how to
+  <a href="{@docRoot}distribute/tools/localization-checklist.html">
+  localize your app</a> to create a high-quality experience for global users.
+</p>

@@ -9,7 +9,7 @@ trainingnavtop=true
 
 <div id="tb-wrapper">
   <div id="tb">
-    
+
     <h2>Содержание этого урока</h2>
 <ol>
   <li><a href="#lifecycle-states">Изучение обратных вызовов жизненного цикла</a></li>
@@ -17,7 +17,7 @@ trainingnavtop=true
   <li><a href="#Create">Создание нового экземпляра</a></li>
   <li><a href="#Destroy">Уничтожение операции</a></li>
 </ol>
-    
+
     <h2>См. также:</h2>
     <ul>
       <li><a href="{@docRoot}guide/components/activities.html">Операции</a></li>
@@ -34,7 +34,7 @@ trainingnavtop=true
 </div>
 
 <p>В отличие от других парадигм программирования, где приложения запускаются с использованием метода {@code main()}, система
-Android запускает код в {@link android.app.Activity}экземпляре посредством активации определенных 
+Android запускает код в {@link android.app.Activity}экземпляре посредством активации определенных
 методов обратного вызова, соответствующих определенным этапам его
 жизненного цикла. Существует последовательность методов обратного вызова, которые запускают операцию и последовательность
 методов обратного вызова, уничтожающих операцию.</p>
@@ -83,7 +83,7 @@ Android запускает код в {@link android.app.Activity}экземпл�
 </ul>
 
 <!--
-<p class="table-caption"><strong>Table 1.</strong> Activity lifecycle state pairs and callback 
+<p class="table-caption"><strong>Table 1.</strong> Activity lifecycle state pairs and callback
 methods.</p>
 <table>
   <tr>
@@ -138,7 +138,7 @@ android.app.Activity#onResume()}.</p>
 
 
 
-<h2 id="launching-activity">Указание операции, запускающей приложение</h2> 
+<h2 id="launching-activity">Указание операции, запускающей приложение</h2>
 
 <p>Когда пользователь выбирает значок приложения на главном экране, система вызывает метод {@link
 android.app.Activity#onCreate onCreate()} для {@link android.app.Activity} в вашем приложении
@@ -151,7 +151,7 @@ android.app.Activity#onCreate onCreate()} для {@link android.app.Activity} в
 <p>Основная операция приложения должна декларироваться в манифесте с помощью фильтра <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
 <intent-filter>}</a>, включающего действие {@link
 android.content.Intent#ACTION_MAIN MAIN} и категорию
-{@link android.content.Intent#CATEGORY_LAUNCHER LAUNCHER}. Например:</p> 
+{@link android.content.Intent#CATEGORY_LAUNCHER LAUNCHER}. Например:</p>
 
 <pre>
 &lt;activity android:name=".MainActivity" android:label="&#64;string/app_name">
@@ -200,10 +200,10 @@ public void onCreate(Bundle savedInstanceState) {
     // Set the user interface layout for this Activity
     // The layout file is defined in the project res/layout/main_activity.xml file
     setContentView(R.layout.main_activity);
-    
+
     // Initialize member TextView so we can manipulate it later
     mTextView = (TextView) findViewById(R.id.text_message);
-    
+
     // Make sure we're running on Honeycomb or higher to use ActionBar APIs
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
         // For the main activity, make sure the app icon in the action bar
@@ -221,7 +221,7 @@ public void onCreate(Bundle savedInstanceState) {
 <p>После завершения выполнения {@link android.app.Activity#onCreate onCreate()} система
 быстро вызывает методы {@link android.app.Activity#onStart()} и {@link android.app.Activity#onResume()} по
 очереди. Операция никогда не остается в состоянии создания или запуска. Технически
-операция становится видимой для пользователя при вызове {@link android.app.Activity#onStart()}, однако затем сразу же происходит 
+операция становится видимой для пользователя при вызове {@link android.app.Activity#onStart()}, однако затем сразу же происходит
 {@link android.app.Activity#onResume()} и операция остается в состоянии возобновления,
 пока что-то не произойдет, например пока не поступит телефонный звонок, пользователь не переключится
 на другую операцию или экран устройства не выключится.</p>
@@ -268,7 +268,7 @@ android.app.Activity#onDestroy}.</p>
 &#64;Override
 public void onDestroy() {
     super.onDestroy();  // Always call the superclass
-    
+
     // Stop method tracing that the activity started during onCreate()
     android.os.Debug.stopMethodTracing();
 }

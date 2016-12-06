@@ -4,7 +4,7 @@ page.tags=AppWidgetHost,home screen,launcher
 
 <div id="qv-wrapper">
   <div id="qv">
-    
+
     <h2>In this document</h2>
         <ol>
           <li><a href="#host-binding">Binding App Widgets</a>
@@ -32,58 +32,58 @@ to embed <a href="{@docRoot}guide/topics/appwidgets/index.html">app widgets</a> 
 access to content. If you're building a Home replacement or a similar app,
 you can also allow the user to embed app widgets by implementing an
 {@link android.appwidget.AppWidgetHost}.
-This is not something that most apps will ever need to do, but if you are 
-creating your own host, it's important to understand the contractual obligations 
+This is not something that most apps will ever need to do, but if you are
+creating your own host, it's important to understand the contractual obligations
 a host implicitly agrees to.</p>
 
-<p>This document focuses on the responsibilities involved in implementing a custom 
-{@link android.appwidget.AppWidgetHost}. For an example of how to implement an 
+<p>This document focuses on the responsibilities involved in implementing a custom
+{@link android.appwidget.AppWidgetHost}. For an example of how to implement an
 {@link android.appwidget.AppWidgetHost}, see the source code for the
-Android Home screen 
+Android Home screen
 <a href="https://android.googlesource.com/platform/packages/apps/Launcher2/+/master/src/com/android/launcher2/Launcher.java">
-Launcher</a>. 
+Launcher</a>.
 
 
-<p>Here is an overview of key classes and concepts involved in implementing a custom 
+<p>Here is an overview of key classes and concepts involved in implementing a custom
 {@link android.appwidget.AppWidgetHost}:</p>
 <ul>
-    <li><strong>App Widget Host</strong>&mdash;  
-    The {@link android.appwidget.AppWidgetHost} provides the interaction 
-with the AppWidget service for apps, like the home screen, that want to embed 
-app widgets in their UI. An {@link android.appwidget.AppWidgetHost} must have 
-an ID that is unique within the host's own package. This ID remains persistent 
+    <li><strong>App Widget Host</strong>&mdash;
+    The {@link android.appwidget.AppWidgetHost} provides the interaction
+with the AppWidget service for apps, like the home screen, that want to embed
+app widgets in their UI. An {@link android.appwidget.AppWidgetHost} must have
+an ID that is unique within the host's own package. This ID remains persistent
 across all uses of the host. The ID is typically a hard-coded value that you assign
 in your application.</li>
-  
+
     <li><strong>App Widget ID</strong>&mdash;
-    Each app widget instance is assigned a unique ID at the time of binding 
-(see {@link android.appwidget.AppWidgetManager#bindAppWidgetIdIfAllowed bindAppWidgetIdIfAllowed()}, 
-discussed in more detail in <a href="#binding">Binding app widgets</a>). 
-The unique ID is obtained by the host using {@link android.appwidget.AppWidgetHost#allocateAppWidgetId() allocateAppWidgetId()}. This ID is persistent across the lifetime of the widget, 
-that is, until it is deleted from the host. Any host-specific state (such as the 
-size and location of the widget) should be persisted by the hosting package and 
+    Each app widget instance is assigned a unique ID at the time of binding
+(see {@link android.appwidget.AppWidgetManager#bindAppWidgetIdIfAllowed bindAppWidgetIdIfAllowed()},
+discussed in more detail in <a href="#binding">Binding app widgets</a>).
+The unique ID is obtained by the host using {@link android.appwidget.AppWidgetHost#allocateAppWidgetId() allocateAppWidgetId()}. This ID is persistent across the lifetime of the widget,
+that is, until it is deleted from the host. Any host-specific state (such as the
+size and location of the widget) should be persisted by the hosting package and
 associated with the app widget ID.
 </li>
-  
-    <li><strong>App Widget Host View</strong>&mdash;  
-    {@link android.appwidget.AppWidgetHostView} can be thought of as a frame 
-that the widget is wrapped in whenever it needs to be displayed. An app widget 
-is assigned to an {@link android.appwidget.AppWidgetHostView} every time the 
+
+    <li><strong>App Widget Host View</strong>&mdash;
+    {@link android.appwidget.AppWidgetHostView} can be thought of as a frame
+that the widget is wrapped in whenever it needs to be displayed. An app widget
+is assigned to an {@link android.appwidget.AppWidgetHostView} every time the
 widget is inflated by the host. </li>
     <li><strong>Options Bundle</strong>&mdash;
-The {@link android.appwidget.AppWidgetHost} uses the options bundle to communicate 
-information to the {@link android.appwidget.AppWidgetProvider} about how the 
-widget is being displayed (for example, size range, and whether the widget is on 
-a lockscreen or the home screen). This information allows the 
-{@link android.appwidget.AppWidgetProvider} to tailor the widget's contents 
+The {@link android.appwidget.AppWidgetHost} uses the options bundle to communicate
+information to the {@link android.appwidget.AppWidgetProvider} about how the
+widget is being displayed (for example, size range, and whether the widget is on
+a lockscreen or the home screen). This information allows the
+{@link android.appwidget.AppWidgetProvider} to tailor the widget's contents
 and appearance based on how and where it is  displayed.
-You use 
+You use
 {@link android.appwidget.AppWidgetHostView#updateAppWidgetOptions(android.os.Bundle) updateAppWidgetOptions()}
-and 
+and
 {@link android.appwidget.AppWidgetHostView#updateAppWidgetSize updateAppWidgetSize()}
 
-to modify an app widget's 
-bundle. Both of these methods trigger a callback to the 
+to modify an app widget's
+bundle. Both of these methods trigger a callback to the
 {@link android.appwidget.AppWidgetProvider}.</p></li>
 </ul>
 
@@ -98,15 +98,15 @@ app is running on.</p>
 
 <h3 id="binding-pre">Binding app widgets on Android 4.0 and lower</h3>
 
-<p>On devices running Android version 4.0 and lower, users add app widgets 
-via a system activity that allows users to select a widget. This implicitly 
-does a permission check&mdash;that is, by adding the app widget, the user is 
-implicitly granting permission to your app to add app widgets to the host. 
-Here is an example that illustrates 
-this approach, taken from the original 
-<a href="https://android.googlesource.com/platform/packages/apps/Launcher/+/master/src/com/android/launcher/Launcher.java">Launcher</a>. In this snippet, an event handler invokes 
-{@link android.app.Activity#startActivityForResult(android.content.Intent,int) startActivityForResult()} 
-with the request code {@code REQUEST_PICK_APPWIDGET} in response to a 
+<p>On devices running Android version 4.0 and lower, users add app widgets
+via a system activity that allows users to select a widget. This implicitly
+does a permission check&mdash;that is, by adding the app widget, the user is
+implicitly granting permission to your app to add app widgets to the host.
+Here is an example that illustrates
+this approach, taken from the original
+<a href="https://android.googlesource.com/platform/packages/apps/Launcher/+/master/src/com/android/launcher/Launcher.java">Launcher</a>. In this snippet, an event handler invokes
+{@link android.app.Activity#startActivityForResult(android.content.Intent,int) startActivityForResult()}
+with the request code {@code REQUEST_PICK_APPWIDGET} in response to a
 user action:</p>
 
 <pre>
@@ -118,9 +118,9 @@ public void onClick(DialogInterface dialog, int which) {
     ...
         case AddAdapter.ITEM_APPWIDGET: {
             ...
-            int appWidgetId = 
+            int appWidgetId =
                     Launcher.this.mAppWidgetHost.allocateAppWidgetId();
-            Intent pickIntent = 
+            Intent pickIntent =
                     new Intent(AppWidgetManager.ACTION_APPWIDGET_PICK);
             pickIntent.putExtra
                     (AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
@@ -135,7 +135,7 @@ public void onClick(DialogInterface dialog, int which) {
 app widget to your activity. In the following example, the activity responds
 by calling {@code addAppWidget()} to add the app widget:</p>
 
-<pre>public final class Launcher extends Activity 
+<pre>public final class Launcher extends Activity
         implements View.OnClickListener, OnLongClickListener {
     ...
     &#64;Override
@@ -152,7 +152,7 @@ by calling {@code addAppWidget()} to add the app widget:</p>
                     completeAddAppWidget(data, mAddItemCellInfo, !mDesktopLocked);
                     break;
                 }
-        } 
+        }
         ...
     }
 }</pre>
@@ -164,7 +164,7 @@ needs to be configured before it's added:</p>
     int appWidgetId = data.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
 
     String customWidget = data.getStringExtra(EXTRA_CUSTOM_WIDGET);
-    AppWidgetProviderInfo appWidget = 
+    AppWidgetProviderInfo appWidget =
             mAppWidgetManager.getAppWidgetInfo(appWidgetId);
 
     if (appWidget.configure != null) {
@@ -183,7 +183,7 @@ see <a href="{@docRoot}guide/topics/appwidgets/index.html#Configuring">Creating 
 App Widget Configuration Activity</a>.</p>
 
 <p>Once the app widget is ready, the next step is to do the
-actual work of adding it to the workspace. The 
+actual work of adding it to the workspace. The
 <a href="https://android.googlesource.com/platform/packages/apps/Launcher/+/master/src/com/android/launcher/Launcher.java">original Launcher</a> uses a method called {@code completeAddAppWidget()}
 to do this.</p>
 
@@ -201,12 +201,12 @@ binding. To use this improved process, your app must declare the
 <p>But this is just the first step. At runtime the user must
 explicitly grant permission to your app to allow it to add app widgets
 to the host. To test whether your app has permission to add the widget,
-you use the 
-{@link android.appwidget.AppWidgetManager#bindAppWidgetIdIfAllowed bindAppWidgetIdIfAllowed()} 
-method. 
+you use the
+{@link android.appwidget.AppWidgetManager#bindAppWidgetIdIfAllowed bindAppWidgetIdIfAllowed()}
+method.
 If {@link android.appwidget.AppWidgetManager#bindAppWidgetIdIfAllowed bindAppWidgetIdIfAllowed()}
 returns {@code false}, your app must display a dialog prompting the
-user to grant permission 
+user to grant permission
 ("allow" or "always allow," to cover all future app widget additions).
 This snippet gives an example of how to display the dialog:</p>
 
@@ -218,9 +218,9 @@ intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_OPTIONS, options);
 startActivityForResult(intent, REQUEST_BIND_APPWIDGET);
 </pre>
 
-<p>The host also has to check whether the user added 
+<p>The host also has to check whether the user added
 an app widget that needs configuration. For more discussion of this topic,
-see 
+see
 <a href="{@docRoot}guide/topics/appwidgets/index.html#Configuring">Creating
 an App Widget Configuration Activity</a>.</p>
 
@@ -229,23 +229,23 @@ an App Widget Configuration Activity</a>.</p>
 <div class="sidebox-wrapper">
 <div class="sidebox">
   <h2>What Version are You Targeting?</h2>
-  <p>The approach you use in implementing your host should depend on what Android version  
-you're targeting. Many of the features described in this section were introduced 
+  <p>The approach you use in implementing your host should depend on what Android version
+you're targeting. Many of the features described in this section were introduced
 in 3.0 or later. For example:</p>
 <ul>
 <li>Android 3.0 (API Level 11) introduces auto-advance behavior for widgets.</li>
 <li>Android 3.1 (API Level 12) introduces the ability to resize widgets.</li>
 <li>Android 4.0 (API Level 15) introduces a change in padding policy that
-puts the responsibility on the 
+puts the responsibility on the
 host to manage padding.</li>
 <li>Android 4.1 (API Level 16) adds an API that allows the widget provider
 to get more detailed information about the environment in which its
 widget instances are being hosted.</li>
-<li>Android 4.2 (API Level 17) introduces the options bundle and the 
-{@link android.appwidget.AppWidgetManager#bindAppWidgetIdIfAllowed(int,android.content.ComponentName,android.os.Bundle) bindAppWidgetIdIfAllowed()} 
+<li>Android 4.2 (API Level 17) introduces the options bundle and the
+{@link android.appwidget.AppWidgetManager#bindAppWidgetIdIfAllowed(int,android.content.ComponentName,android.os.Bundle) bindAppWidgetIdIfAllowed()}
 method. It also introduces lockscreen widgets.</li>
 </ul>
-<p>If you are targeting earlier devices, refer to the original 
+<p>If you are targeting earlier devices, refer to the original
 <a href="https://android.googlesource.com/platform/packages/apps/Launcher/+/master/src/com/android/launcher/Launcher.java">Launcher</a> as an example.
 </div>
 </div>
@@ -273,7 +273,7 @@ from the Configuration Activity</a>. This is a necessary step for many app widge
 they can be properly displayed.</li>
 
 <li>Every app widget specifies a minimum width and height in dps, as defined in the {@link android.appwidget.AppWidgetProviderInfo} metadata
-(using {@link android.appwidget.AppWidgetProviderInfo#minWidth android:minWidth} and 
+(using {@link android.appwidget.AppWidgetProviderInfo#minWidth android:minWidth} and
 {@link android.appwidget.AppWidgetProviderInfo#minHeight android:minHeight}).
 Make sure that the widget is laid out with at least this many dps.
 For example, many hosts align icons and widgets in a grid. In this scenario,
@@ -379,7 +379,7 @@ so it is not explicitly required to set this for a home screen host.</p>
 for your app&mdash;for example, if your host is a home screen, ensure
 that the
 {@link android.appwidget.AppWidgetProviderInfo#widgetCategory android:widgetCategory}
-attribute in the 
+attribute in the
 {@link android.appwidget.AppWidgetProviderInfo} metadata includes
 the flag {@link android.appwidget.AppWidgetProviderInfo#WIDGET_CATEGORY_HOME_SCREEN}.
 Similarly, for the lockscreen, ensure that field includes the flag  {@link android.appwidget.AppWidgetProviderInfo#WIDGET_CATEGORY_KEYGUARD}. For more

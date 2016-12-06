@@ -29,31 +29,39 @@ import com.android.internal.telephony.RILConstants;
 public class RadioAccessFamily implements Parcelable {
 
     // Radio Access Family
+    // 2G
     public static final int RAF_UNKNOWN = (1 <<  ServiceState.RIL_RADIO_TECHNOLOGY_UNKNOWN);
+    public static final int RAF_GSM = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_GSM);
     public static final int RAF_GPRS = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_GPRS);
     public static final int RAF_EDGE = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_EDGE);
-    public static final int RAF_UMTS = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_UMTS);
     public static final int RAF_IS95A = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_IS95A);
     public static final int RAF_IS95B = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_IS95B);
     public static final int RAF_1xRTT = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_1xRTT);
+    // 3G
     public static final int RAF_EVDO_0 = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_0);
     public static final int RAF_EVDO_A = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_A);
-    public static final int RAF_HSDPA = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_HSDPA);
-    public static final int RAF_HSUPA = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_HSUPA);
-    public static final int RAF_HSPA = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_HSPA);
     public static final int RAF_EVDO_B = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_B);
     public static final int RAF_EHRPD = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_EHRPD);
-    public static final int RAF_LTE = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_LTE);
+    public static final int RAF_HSUPA = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_HSUPA);
+    public static final int RAF_HSDPA = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_HSDPA);
+    public static final int RAF_HSPA = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_HSPA);
     public static final int RAF_HSPAP = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_HSPAP);
-    public static final int RAF_GSM = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_GSM);
+    public static final int RAF_UMTS = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_UMTS);
     public static final int RAF_TD_SCDMA = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_TD_SCDMA);
+    // 4G
+    public static final int RAF_LTE = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_LTE);
+    public static final int RAF_LTE_CA = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_LTE_CA);
 
     // Grouping of RAFs
+    // 2G
     private static final int GSM = RAF_GSM | RAF_GPRS | RAF_EDGE;
-    private static final int HS = RAF_HSUPA | RAF_HSDPA | RAF_HSPA | RAF_HSPAP;
     private static final int CDMA = RAF_IS95A | RAF_IS95B | RAF_1xRTT;
+    // 3G
     private static final int EVDO = RAF_EVDO_0 | RAF_EVDO_A | RAF_EVDO_B | RAF_EHRPD;
+    private static final int HS = RAF_HSUPA | RAF_HSDPA | RAF_HSPA | RAF_HSPAP;
     private static final int WCDMA = HS | RAF_UMTS;
+    // 4G
+    private static final int LTE = RAF_LTE | RAF_LTE_CA;
 
     /* Phone ID of phone */
     private int mPhoneId;
@@ -162,19 +170,19 @@ public class RadioAccessFamily implements Parcelable {
                 raf = CDMA | EVDO;
                 break;
             case RILConstants.NETWORK_MODE_LTE_CDMA_EVDO:
-                raf = RAF_LTE | CDMA | EVDO;
+                raf = LTE | CDMA | EVDO;
                 break;
             case RILConstants.NETWORK_MODE_LTE_GSM_WCDMA:
-                raf = RAF_LTE | GSM | WCDMA;
+                raf = LTE | GSM | WCDMA;
                 break;
             case RILConstants.NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA:
-                raf = RAF_LTE | CDMA | EVDO | GSM | WCDMA;
+                raf = LTE | CDMA | EVDO | GSM | WCDMA;
                 break;
             case RILConstants.NETWORK_MODE_LTE_ONLY:
-                raf = RAF_LTE;
+                raf = LTE;
                 break;
             case RILConstants.NETWORK_MODE_LTE_WCDMA:
-                raf = RAF_LTE | WCDMA;
+                raf = LTE | WCDMA;
                 break;
             case RILConstants.NETWORK_MODE_CDMA_NO_EVDO:
                 raf = CDMA;
@@ -192,28 +200,28 @@ public class RadioAccessFamily implements Parcelable {
                 raf = RAF_TD_SCDMA | WCDMA;
                 break;
             case RILConstants.NETWORK_MODE_LTE_TDSCDMA:
-                raf = RAF_LTE | RAF_TD_SCDMA;
+                raf = LTE | RAF_TD_SCDMA;
                 break;
             case RILConstants.NETWORK_MODE_TDSCDMA_GSM:
                 raf = RAF_TD_SCDMA | GSM;
                 break;
             case RILConstants.NETWORK_MODE_LTE_TDSCDMA_GSM:
-                raf = RAF_LTE | RAF_TD_SCDMA | GSM;
+                raf = LTE | RAF_TD_SCDMA | GSM;
                 break;
             case RILConstants.NETWORK_MODE_TDSCDMA_GSM_WCDMA:
                 raf = RAF_TD_SCDMA | GSM | WCDMA;
                 break;
             case RILConstants.NETWORK_MODE_LTE_TDSCDMA_WCDMA:
-                raf = RAF_LTE | RAF_TD_SCDMA | WCDMA;
+                raf = LTE | RAF_TD_SCDMA | WCDMA;
                 break;
             case RILConstants.NETWORK_MODE_LTE_TDSCDMA_GSM_WCDMA:
-                raf = RAF_LTE | RAF_TD_SCDMA | GSM | WCDMA;
+                raf = LTE | RAF_TD_SCDMA | GSM | WCDMA;
                 break;
             case RILConstants.NETWORK_MODE_TDSCDMA_CDMA_EVDO_GSM_WCDMA:
                 raf = RAF_TD_SCDMA | CDMA | EVDO | GSM | WCDMA;
                 break;
             case RILConstants.NETWORK_MODE_LTE_TDSCDMA_CDMA_EVDO_GSM_WCDMA:
-                raf = RAF_LTE | RAF_TD_SCDMA | CDMA | EVDO | GSM | WCDMA;
+                raf = LTE | RAF_TD_SCDMA | CDMA | EVDO | GSM | WCDMA;
                 break;
             default:
                 raf = RAF_UNKNOWN;
@@ -232,8 +240,27 @@ public class RadioAccessFamily implements Parcelable {
         raf = ((WCDMA & raf) > 0) ? (WCDMA | raf) : raf;
         raf = ((CDMA & raf) > 0) ? (CDMA | raf) : raf;
         raf = ((EVDO & raf) > 0) ? (EVDO | raf) : raf;
+        raf = ((LTE & raf) > 0) ? (LTE | raf) : raf;
 
         return raf;
+    }
+
+    /**
+     * Returns the highest capability of the RadioAccessFamily (4G > 3G > 2G).
+     * @param raf The RadioAccessFamily that we wish to filter
+     * @return The highest radio capability
+     */
+    public static int getHighestRafCapability(int raf) {
+        if ((LTE & raf) > 0) {
+            return TelephonyManager.NETWORK_CLASS_4_G;
+        }
+        if ((EVDO|HS|WCDMA & raf) > 0) {
+            return TelephonyManager.NETWORK_CLASS_3_G;
+        }
+        if((GSM|CDMA & raf) > 0) {
+            return TelephonyManager.NETWORK_CLASS_2_G;
+        }
+        return TelephonyManager.NETWORK_CLASS_UNKNOWN;
     }
 
     public static int getNetworkTypeFromRaf(int raf) {
@@ -254,19 +281,19 @@ public class RadioAccessFamily implements Parcelable {
             case (CDMA | EVDO):
                 type = RILConstants.NETWORK_MODE_CDMA;
                 break;
-            case (RAF_LTE | CDMA | EVDO):
+            case (LTE | CDMA | EVDO):
                 type = RILConstants.NETWORK_MODE_LTE_CDMA_EVDO;
                 break;
-            case (RAF_LTE | GSM | WCDMA):
+            case (LTE | GSM | WCDMA):
                 type = RILConstants.NETWORK_MODE_LTE_GSM_WCDMA;
                 break;
-            case (RAF_LTE | CDMA | EVDO | GSM | WCDMA):
+            case (LTE | CDMA | EVDO | GSM | WCDMA):
                 type = RILConstants.NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA;
                 break;
-            case RAF_LTE:
+            case LTE:
                 type = RILConstants.NETWORK_MODE_LTE_ONLY;
                 break;
-            case (RAF_LTE | WCDMA):
+            case (LTE | WCDMA):
                 type = RILConstants.NETWORK_MODE_LTE_WCDMA;
                 break;
             case CDMA:
@@ -284,28 +311,28 @@ public class RadioAccessFamily implements Parcelable {
             case (RAF_TD_SCDMA | WCDMA):
                 type = RILConstants.NETWORK_MODE_TDSCDMA_WCDMA;
                 break;
-            case (RAF_LTE | RAF_TD_SCDMA):
+            case (LTE | RAF_TD_SCDMA):
                 type = RILConstants.NETWORK_MODE_LTE_TDSCDMA;
                 break;
             case (RAF_TD_SCDMA | GSM):
                 type = RILConstants.NETWORK_MODE_TDSCDMA_GSM;
                 break;
-            case (RAF_LTE | RAF_TD_SCDMA | GSM):
+            case (LTE | RAF_TD_SCDMA | GSM):
                 type = RILConstants.NETWORK_MODE_LTE_TDSCDMA_GSM;
                 break;
             case (RAF_TD_SCDMA | GSM | WCDMA):
                 type = RILConstants.NETWORK_MODE_TDSCDMA_GSM_WCDMA;
                 break;
-            case (RAF_LTE | RAF_TD_SCDMA | WCDMA):
+            case (LTE | RAF_TD_SCDMA | WCDMA):
                 type = RILConstants.NETWORK_MODE_LTE_TDSCDMA_WCDMA;
                 break;
-            case (RAF_LTE | RAF_TD_SCDMA | GSM | WCDMA):
+            case (LTE | RAF_TD_SCDMA | GSM | WCDMA):
                 type = RILConstants.NETWORK_MODE_LTE_TDSCDMA_GSM_WCDMA;
                 break;
             case (RAF_TD_SCDMA | CDMA | EVDO | GSM | WCDMA):
                 type = RILConstants.NETWORK_MODE_TDSCDMA_CDMA_EVDO_GSM_WCDMA;
                 break;
-            case (RAF_LTE | RAF_TD_SCDMA | RAF_LTE | CDMA | EVDO | GSM | WCDMA):
+            case (LTE | RAF_TD_SCDMA | CDMA | EVDO | GSM | WCDMA):
                 type = RILConstants.NETWORK_MODE_LTE_TDSCDMA_CDMA_EVDO_GSM_WCDMA;
                 break;
             default:
@@ -339,6 +366,7 @@ public class RadioAccessFamily implements Parcelable {
             case "CDMA":    return CDMA;
             case "EVDO":    return EVDO;
             case "WCDMA":   return WCDMA;
+            case "LTE_CA":  return RAF_LTE_CA;
             default:        return RAF_UNKNOWN;
         }
     }

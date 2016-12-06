@@ -127,6 +127,11 @@ public class KeyguardStatusView extends GridLayout {
         super.onConfigurationChanged(newConfig);
         mClockView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                 getResources().getDimensionPixelSize(R.dimen.widget_big_font_size));
+        // Some layouts like burmese have a different margin for the clock
+        MarginLayoutParams layoutParams = (MarginLayoutParams) mClockView.getLayoutParams();
+        layoutParams.bottomMargin = getResources().getDimensionPixelSize(
+                R.dimen.bottom_text_spacing_digital);
+        mClockView.setLayoutParams(layoutParams);
         mDateView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                 getResources().getDimensionPixelSize(R.dimen.widget_label_font_size));
         mOwnerInfo.setTextSize(TypedValue.COMPLEX_UNIT_PX,

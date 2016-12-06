@@ -35,6 +35,7 @@ import android.util.ArraySet;
 import android.view.Surface;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -52,6 +53,37 @@ import java.util.concurrent.ConcurrentHashMap;
  * Implementations are then responsible for updating the state of the {@code Connection}, and
  * must call {@link #destroy()} to signal to the framework that the {@code Connection} is no
  * longer used and associated resources may be recovered.
+ * <p>
+ * Subclasses of {@code Connection} override the {@code on*} methods to provide the the
+ * {@link ConnectionService}'s implementation of calling functionality.  The {@code on*} methods are
+ * called by Telecom to inform an instance of a {@code Connection} of actions specific to that
+ * {@code Connection} instance.
+ * <p>
+ * Basic call support requires overriding the following methods: {@link #onAnswer()},
+ * {@link #onDisconnect()}, {@link #onReject()}, {@link #onAbort()}
+ * <p>
+ * Where a {@code Connection} has {@link #CAPABILITY_SUPPORT_HOLD}, the {@link #onHold()} and
+ * {@link #onUnhold()} methods should be overridden to provide hold support for the
+ * {@code Connection}.
+ * <p>
+ * Where a {@code Connection} supports a variation of video calling (e.g. the
+ * {@code CAPABILITY_SUPPORTS_VT_*} capability bits), {@link #onAnswer(int)} should be overridden
+ * to support answering a call as a video call.
+ * <p>
+ * Where a {@code Connection} has {@link #PROPERTY_IS_EXTERNAL_CALL} and
+ * {@link #CAPABILITY_CAN_PULL_CALL}, {@link #onPullExternalCall()} should be overridden to provide
+ * support for pulling the external call.
+ * <p>
+ * Where a {@code Connection} supports conference calling {@link #onSeparate()} should be
+ * overridden.
+ * <p>
+ * There are a number of other {@code on*} methods which a {@code Connection} can choose to
+ * implement, depending on whether it is concerned with the associated calls from Telecom.  If,
+ * for example, call events from a {@link InCallService} are handled,
+ * {@link #onCallEvent(String, Bundle)} should be overridden.  Another example is
+ * {@link #onExtrasChanged(Bundle)}, which should be overridden if the {@code Connection} wishes to
+ * make use of extra information provided via the {@link Call#putExtras(Bundle)} and
+ * {@link Call#removeExtras(String...)} methods.
  */
 public abstract class Connection extends Conferenceable {
 
@@ -100,7 +132,6 @@ public abstract class Connection extends Conferenceable {
      * <p>
      * A connection can only be in this state if the {@link #PROPERTY_IS_EXTERNAL_CALL} property and
      * {@link #CAPABILITY_CAN_PULL_CALL} capability bits are set on the connection.
-     * @hide
      */
     public static final int STATE_PULLING_CALL = 7;
 
@@ -284,7 +315,6 @@ public abstract class Connection extends Conferenceable {
      * <p>
      * Should only be set on a {@code Connection} where {@link #PROPERTY_IS_EXTERNAL_CALL}
      * is set.
-     * @hide
      */
     public static final int CAPABILITY_CAN_PULL_CALL = 0x01000000;
 
@@ -297,7 +327,7 @@ public abstract class Connection extends Conferenceable {
      *
      * @hide
      */
-    public static final int PROPERTY_SHOW_CALLBACK_NUMBER = 1<<0;
+    public static final int PROPERTY_EMERGENCY_CALLBACK_MODE = 1<<0;
 
     /**
      * Whether the call is a generic conference, where we do not know the precise state of
@@ -332,13 +362,22 @@ public abstract class Connection extends Conferenceable {
      * external connections.  Only those {@link InCallService}s which have the
      * {@link TelecomManager#METADATA_INCLUDE_EXTERNAL_CALLS} metadata set to {@code true} in its
      * manifest will see external connections.
-     * @hide
      */
     public static final int PROPERTY_IS_EXTERNAL_CALL = 1<<4;
 
+    /**
+     * Indicates that the connection has CDMA Enhanced Voice Privacy enabled.
+     */
+    public static final int PROPERTY_HAS_CDMA_VOICE_PRIVACY = 1<<5;
+
+    /**
+     * Indicates that the connection represents a downgraded IMS conference.
+     * @hide
+     */
+    public static final int PROPERTY_IS_DOWNGRADED_CONFERENCE = 1<<6;
 
     //**********************************************************************************************
-    // Next PROPERTY value: 1<<5
+    // Next PROPERTY value: 1<<7
     //**********************************************************************************************
 
     /**
@@ -365,9 +404,25 @@ public abstract class Connection extends Conferenceable {
     public static final String EXTRA_CALL_SUBJECT = "android.telecom.extra.CALL_SUBJECT";
 
     /**
+     * Boolean connection extra key set on a {@link Connection} in
+     * {@link Connection#STATE_RINGING} state to indicate that answering the call will cause the
+     * current active foreground call to be dropped.
+     */
+    public static final String EXTRA_ANSWERING_DROPS_FG_CALL =
+            "android.telecom.extra.ANSWERING_DROPS_FG_CALL";
+
+    /**
+     * Boolean connection extra key on a {@link Connection} which indicates that adding an
+     * additional call is disallowed.
+     * @hide
+     */
+    public static final String EXTRA_DISABLE_ADD_CALL =
+            "android.telecom.extra.DISABLE_ADD_CALL";
+
+    /**
      * Connection event used to inform Telecom that it should play the on hold tone.  This is used
      * to play a tone when the peer puts the current call on hold.  Sent to Telecom via
-     * {@link #sendConnectionEvent(String)}.
+     * {@link #sendConnectionEvent(String, Bundle)}.
      * @hide
      */
     public static final String EVENT_ON_HOLD_TONE_START =
@@ -376,7 +431,7 @@ public abstract class Connection extends Conferenceable {
     /**
      * Connection event used to inform Telecom that it should stop the on hold tone.  This is used
      * to stop a tone when the peer puts the current call on hold.  Sent to Telecom via
-     * {@link #sendConnectionEvent(String)}.
+     * {@link #sendConnectionEvent(String, Bundle)}.
      * @hide
      */
     public static final String EVENT_ON_HOLD_TONE_END =
@@ -391,9 +446,46 @@ public abstract class Connection extends Conferenceable {
      * {@link Call.Details#PROPERTY_IS_EXTERNAL_CALL} and
      * {@link Call.Details#CAPABILITY_CAN_PULL_CALL}, but the {@link ConnectionService} could not
      * pull the external call due to an error condition.
-     * @hide
+     * <p>
+     * Sent via {@link #sendConnectionEvent(String, Bundle)}.  The {@link Bundle} parameter is
+     * expected to be null when this connection event is used.
      */
     public static final String EVENT_CALL_PULL_FAILED = "android.telecom.event.CALL_PULL_FAILED";
+
+    /**
+     * Connection event used to inform {@link InCallService}s when the merging of two calls has
+     * failed. The User Interface should use this message to inform the user of the error.
+     * <p>
+     * Sent via {@link #sendConnectionEvent(String, Bundle)}.  The {@link Bundle} parameter is
+     * expected to be null when this connection event is used.
+     */
+    public static final String EVENT_CALL_MERGE_FAILED = "android.telecom.event.CALL_MERGE_FAILED";
+
+    /**
+     * Connection event used to inform {@link InCallService}s when a call has been put on hold by
+     * the remote party.
+     * <p>
+     * This is different than the {@link Connection#STATE_HOLDING} state which indicates that the
+     * call is being held locally on the device.  When a capable {@link ConnectionService} receives
+     * signalling to indicate that the remote party has put the call on hold, it can send this
+     * connection event.
+     * @hide
+     */
+    public static final String EVENT_CALL_REMOTELY_HELD =
+            "android.telecom.event.CALL_REMOTELY_HELD";
+
+    /**
+     * Connection event used to inform {@link InCallService}s when a call which was remotely held
+     * (see {@link #EVENT_CALL_REMOTELY_HELD}) has been un-held by the remote party.
+     * <p>
+     * This is different than the {@link Connection#STATE_HOLDING} state which indicates that the
+     * call is being held locally on the device.  When a capable {@link ConnectionService} receives
+     * signalling to indicate that the remote party has taken the call off hold, it can send this
+     * connection event.
+     * @hide
+     */
+    public static final String EVENT_CALL_REMOTELY_UNHELD =
+            "android.telecom.event.CALL_REMOTELY_UNHELD";
 
     // Flag controlling whether PII is emitted into the logs
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
@@ -441,69 +533,94 @@ public abstract class Connection extends Conferenceable {
         mConnectionCapabilities |= capability;
     }
 
-
+    /**
+     * Renders a set of capability bits ({@code CAPABILITY_*}) as a human readable string.
+     *
+     * @param capabilities A capability bit field.
+     * @return A human readable string representation.
+     */
     public static String capabilitiesToString(int capabilities) {
+        return capabilitiesToStringInternal(capabilities, true /* isLong */);
+    }
+
+    /**
+     * Renders a set of capability bits ({@code CAPABILITY_*}) as a *short* human readable
+     * string.
+     *
+     * @param capabilities A capability bit field.
+     * @return A human readable string representation.
+     * @hide
+     */
+    public static String capabilitiesToStringShort(int capabilities) {
+        return capabilitiesToStringInternal(capabilities, false /* isLong */);
+    }
+
+    private static String capabilitiesToStringInternal(int capabilities, boolean isLong) {
         StringBuilder builder = new StringBuilder();
-        builder.append("[Capabilities:");
+        builder.append("[");
+        if (isLong) {
+            builder.append("Capabilities:");
+        }
+
         if (can(capabilities, CAPABILITY_HOLD)) {
-            builder.append(" CAPABILITY_HOLD");
+            builder.append(isLong ? " CAPABILITY_HOLD" : " hld");
         }
         if (can(capabilities, CAPABILITY_SUPPORT_HOLD)) {
-            builder.append(" CAPABILITY_SUPPORT_HOLD");
+            builder.append(isLong ? " CAPABILITY_SUPPORT_HOLD" : " sup_hld");
         }
         if (can(capabilities, CAPABILITY_MERGE_CONFERENCE)) {
-            builder.append(" CAPABILITY_MERGE_CONFERENCE");
+            builder.append(isLong ? " CAPABILITY_MERGE_CONFERENCE" : " mrg_cnf");
         }
         if (can(capabilities, CAPABILITY_SWAP_CONFERENCE)) {
-            builder.append(" CAPABILITY_SWAP_CONFERENCE");
+            builder.append(isLong ? " CAPABILITY_SWAP_CONFERENCE" : " swp_cnf");
         }
         if (can(capabilities, CAPABILITY_RESPOND_VIA_TEXT)) {
-            builder.append(" CAPABILITY_RESPOND_VIA_TEXT");
+            builder.append(isLong ? " CAPABILITY_RESPOND_VIA_TEXT" : " txt");
         }
         if (can(capabilities, CAPABILITY_MUTE)) {
-            builder.append(" CAPABILITY_MUTE");
+            builder.append(isLong ? " CAPABILITY_MUTE" : " mut");
         }
         if (can(capabilities, CAPABILITY_MANAGE_CONFERENCE)) {
-            builder.append(" CAPABILITY_MANAGE_CONFERENCE");
+            builder.append(isLong ? " CAPABILITY_MANAGE_CONFERENCE" : " mng_cnf");
         }
         if (can(capabilities, CAPABILITY_SUPPORTS_VT_LOCAL_RX)) {
-            builder.append(" CAPABILITY_SUPPORTS_VT_LOCAL_RX");
+            builder.append(isLong ? " CAPABILITY_SUPPORTS_VT_LOCAL_RX" : " VTlrx");
         }
         if (can(capabilities, CAPABILITY_SUPPORTS_VT_LOCAL_TX)) {
-            builder.append(" CAPABILITY_SUPPORTS_VT_LOCAL_TX");
+            builder.append(isLong ? " CAPABILITY_SUPPORTS_VT_LOCAL_TX" : " VTltx");
         }
         if (can(capabilities, CAPABILITY_SUPPORTS_VT_LOCAL_BIDIRECTIONAL)) {
-            builder.append(" CAPABILITY_SUPPORTS_VT_LOCAL_BIDIRECTIONAL");
+            builder.append(isLong ? " CAPABILITY_SUPPORTS_VT_LOCAL_BIDIRECTIONAL" : " VTlbi");
         }
         if (can(capabilities, CAPABILITY_SUPPORTS_VT_REMOTE_RX)) {
-            builder.append(" CAPABILITY_SUPPORTS_VT_REMOTE_RX");
+            builder.append(isLong ? " CAPABILITY_SUPPORTS_VT_REMOTE_RX" : " VTrrx");
         }
         if (can(capabilities, CAPABILITY_SUPPORTS_VT_REMOTE_TX)) {
-            builder.append(" CAPABILITY_SUPPORTS_VT_REMOTE_TX");
+            builder.append(isLong ? " CAPABILITY_SUPPORTS_VT_REMOTE_TX" : " VTrtx");
         }
         if (can(capabilities, CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL)) {
-            builder.append(" CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL");
+            builder.append(isLong ? " CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL" : " VTrbi");
         }
         if (can(capabilities, CAPABILITY_CANNOT_DOWNGRADE_VIDEO_TO_AUDIO)) {
-            builder.append(" CAPABILITY_CANNOT_DOWNGRADE_VIDEO_TO_AUDIO");
+            builder.append(isLong ? " CAPABILITY_CANNOT_DOWNGRADE_VIDEO_TO_AUDIO" : " !v2a");
         }
         if (can(capabilities, CAPABILITY_SPEED_UP_MT_AUDIO)) {
-            builder.append(" CAPABILITY_SPEED_UP_MT_AUDIO");
+            builder.append(isLong ? " CAPABILITY_SPEED_UP_MT_AUDIO" : " spd_aud");
         }
         if (can(capabilities, CAPABILITY_CAN_UPGRADE_TO_VIDEO)) {
-            builder.append(" CAPABILITY_CAN_UPGRADE_TO_VIDEO");
+            builder.append(isLong ? " CAPABILITY_CAN_UPGRADE_TO_VIDEO" : " a2v");
         }
         if (can(capabilities, CAPABILITY_CAN_PAUSE_VIDEO)) {
-            builder.append(" CAPABILITY_CAN_PAUSE_VIDEO");
+            builder.append(isLong ? " CAPABILITY_CAN_PAUSE_VIDEO" : " paus_VT");
         }
         if (can(capabilities, CAPABILITY_CONFERENCE_HAS_NO_CHILDREN)) {
-            builder.append(" CAPABILITY_SINGLE_PARTY_CONFERENCE");
+            builder.append(isLong ? " CAPABILITY_SINGLE_PARTY_CONFERENCE" : " 1p_cnf");
         }
         if (can(capabilities, CAPABILITY_CAN_SEND_RESPONSE_VIA_CONNECTION)) {
-            builder.append(" CAPABILITY_CAN_SEND_RESPONSE_VIA_CONNECTION");
+            builder.append(isLong ? " CAPABILITY_CAN_SEND_RESPONSE_VIA_CONNECTION" : " rsp_by_con");
         }
         if (can(capabilities, CAPABILITY_CAN_PULL_CALL)) {
-            builder.append(" CAPABILITY_CAN_PULL_CALL");
+            builder.append(isLong ? " CAPABILITY_CAN_PULL_CALL" : " pull");
         }
 
         builder.append("]");
@@ -511,34 +628,55 @@ public abstract class Connection extends Conferenceable {
     }
 
     /**
-     * Builds a string representation of a properties bit-mask.
+     * Renders a set of property bits ({@code PROPERTY_*}) as a human readable string.
      *
-     * @param properties The properties bit-mask.
-     * @return String representation.
-     * @hide
+     * @param properties A property bit field.
+     * @return A human readable string representation.
      */
     public static String propertiesToString(int properties) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("[Properties:");
+        return propertiesToStringInternal(properties, true /* isLong */);
+    }
 
-        if (can(properties, PROPERTY_SHOW_CALLBACK_NUMBER)) {
-            builder.append(" PROPERTY_SHOW_CALLBACK_NUMBER");
+    /**
+     * Renders a set of property bits ({@code PROPERTY_*}) as a *short* human readable string.
+     *
+     * @param properties A property bit field.
+     * @return A human readable string representation.
+     * @hide
+     */
+    public static String propertiesToStringShort(int properties) {
+        return propertiesToStringInternal(properties, false /* isLong */);
+    }
+
+    private static String propertiesToStringInternal(int properties, boolean isLong) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("[");
+        if (isLong) {
+            builder.append("Properties:");
+        }
+
+        if (can(properties, PROPERTY_EMERGENCY_CALLBACK_MODE)) {
+            builder.append(isLong ? " PROPERTY_EMERGENCY_CALLBACK_MODE" : " ecbm");
         }
 
         if (can(properties, PROPERTY_HIGH_DEF_AUDIO)) {
-            builder.append(" PROPERTY_HIGH_DEF_AUDIO");
+            builder.append(isLong ? " PROPERTY_HIGH_DEF_AUDIO" : " HD");
         }
 
         if (can(properties, PROPERTY_WIFI)) {
-            builder.append(" PROPERTY_WIFI");
+            builder.append(isLong ? " PROPERTY_WIFI" : " wifi");
         }
 
         if (can(properties, PROPERTY_GENERIC_CONFERENCE)) {
-            builder.append(" PROPERTY_GENERIC_CONFERENCE");
+            builder.append(isLong ? " PROPERTY_GENERIC_CONFERENCE" : " gen_conf");
         }
 
         if (can(properties, PROPERTY_IS_EXTERNAL_CALL)) {
-            builder.append(" PROPERTY_IS_EXTERNAL_CALL");
+            builder.append(isLong ? " PROPERTY_IS_EXTERNAL_CALL" : " xtrnl");
+        }
+
+        if (can(properties, PROPERTY_HAS_CDMA_VOICE_PRIVACY)) {
+            builder.append(isLong ? " PROPERTY_HAS_CDMA_VOICE_PRIVACY" : " priv");
         }
 
         builder.append("]");
@@ -574,6 +712,8 @@ public abstract class Connection extends Conferenceable {
         public void onExtrasChanged(Connection c, Bundle extras) {}
         public void onExtrasRemoved(Connection c, List<String> keys) {}
         public void onConnectionEvent(Connection c, String event, Bundle extras) {}
+        /** @hide */
+        public void onConferenceSupportedChanged(Connection c, boolean isConferenceSupported) {}
     }
 
     /**
@@ -593,7 +733,6 @@ public abstract class Connection extends Conferenceable {
      * {@link android.telecom.InCallService.VideoCall}.
      */
     public static abstract class VideoProvider {
-
         /**
          * Video is not being received (no protocol pause was issued).
          * @see #handleCallSessionEvent(int)
@@ -677,6 +816,14 @@ public abstract class Connection extends Conferenceable {
         private static final int MSG_REQUEST_CONNECTION_DATA_USAGE = 10;
         private static final int MSG_SET_PAUSE_IMAGE = 11;
         private static final int MSG_REMOVE_VIDEO_CALLBACK = 12;
+
+        private static final String SESSION_EVENT_RX_PAUSE_STR = "RX_PAUSE";
+        private static final String SESSION_EVENT_RX_RESUME_STR = "RX_RESUME";
+        private static final String SESSION_EVENT_TX_START_STR = "TX_START";
+        private static final String SESSION_EVENT_TX_STOP_STR = "TX_STOP";
+        private static final String SESSION_EVENT_CAMERA_FAILURE_STR = "CAMERA_FAIL";
+        private static final String SESSION_EVENT_CAMERA_READY_STR = "CAMERA_READY";
+        private static final String SESSION_EVENT_UNKNOWN_STR = "UNKNOWN";
 
         private VideoProvider.VideoProviderHandler mMessageHandler;
         private final VideoProvider.VideoProviderBinder mBinder;
@@ -1188,6 +1335,32 @@ public abstract class Connection extends Conferenceable {
                 }
             }
         }
+
+        /**
+         * Returns a string representation of a call session event.
+         *
+         * @param event A call session event passed to {@link #handleCallSessionEvent(int)}.
+         * @return String representation of the call session event.
+         * @hide
+         */
+        public static String sessionEventToString(int event) {
+            switch (event) {
+                case SESSION_EVENT_CAMERA_FAILURE:
+                    return SESSION_EVENT_CAMERA_FAILURE_STR;
+                case SESSION_EVENT_CAMERA_READY:
+                    return SESSION_EVENT_CAMERA_READY_STR;
+                case SESSION_EVENT_RX_PAUSE:
+                    return SESSION_EVENT_RX_PAUSE_STR;
+                case SESSION_EVENT_RX_RESUME:
+                    return SESSION_EVENT_RX_RESUME_STR;
+                case SESSION_EVENT_TX_START:
+                    return SESSION_EVENT_TX_START_STR;
+                case SESSION_EVENT_TX_STOP:
+                    return SESSION_EVENT_TX_STOP_STR;
+                default:
+                    return SESSION_EVENT_UNKNOWN_STR + " " + event;
+            }
+        }
     }
 
     private final Listener mConnectionDeathListener = new Listener() {
@@ -1385,6 +1558,15 @@ public abstract class Connection extends Conferenceable {
 
     /**
      * Returns the extras associated with this connection.
+     * <p>
+     * Extras should be updated using {@link #putExtras(Bundle)}.
+     * <p>
+     * Telecom or an {@link InCallService} can also update the extras via
+     * {@link android.telecom.Call#putExtras(Bundle)}, and
+     * {@link Call#removeExtras(List)}.
+     * <p>
+     * The connection is notified of changes to the extras made by Telecom or an
+     * {@link InCallService} by {@link #onExtrasChanged(Bundle)}.
      *
      * @return The extras associated with this connection.
      */
@@ -1472,6 +1654,8 @@ public abstract class Connection extends Conferenceable {
                 return "RINGING";
             case STATE_DIALING:
                 return "DIALING";
+            case STATE_PULLING_CALL:
+                return "PULLING_CALL";
             case STATE_ACTIVE:
                 return "ACTIVE";
             case STATE_HOLDING:
@@ -1493,7 +1677,6 @@ public abstract class Connection extends Conferenceable {
 
     /**
      * Returns the connection's properties, as a bit mask of the {@code PROPERTY_*} constants.
-     * @hide
      */
     public final int getConnectionProperties() {
         return mConnectionProperties;
@@ -1591,6 +1774,16 @@ public abstract class Connection extends Conferenceable {
     public final void setDialing() {
         checkImmutable();
         setState(STATE_DIALING);
+    }
+
+    /**
+     * Sets state to pulling (e.g. the connection is being pulled to the local device from another
+     * device).  Only applicable for {@link Connection}s with
+     * {@link Connection#PROPERTY_IS_EXTERNAL_CALL} and {@link Connection#CAPABILITY_CAN_PULL_CALL}.
+     */
+    public final void setPulling() {
+        checkImmutable();
+        setState(STATE_PULLING_CALL);
     }
 
     /**
@@ -1699,7 +1892,6 @@ public abstract class Connection extends Conferenceable {
      * Sets the connection's properties as a bit mask of the {@code PROPERTY_*} constants.
      *
      * @param connectionProperties The new connection properties.
-     * @hide
      */
     public final void setConnectionProperties(int connectionProperties) {
         checkImmutable();
@@ -1880,6 +2072,9 @@ public abstract class Connection extends Conferenceable {
      * New or existing keys are replaced in the {@code Connection} extras.  Keys which are no longer
      * in the new extras, but were present the last time {@code setExtras} was called are removed.
      * <p>
+     * Alternatively you may use the {@link #putExtras(Bundle)}, and
+     * {@link #removeExtras(String...)} methods to modify the extras.
+     * <p>
      * No assumptions should be made as to how an In-Call UI or service will handle these extras.
      * Keys should be fully qualified (e.g., com.example.MY_EXTRA) to avoid conflicts.
      *
@@ -1924,7 +2119,6 @@ public abstract class Connection extends Conferenceable {
      * Keys should be fully qualified (e.g., com.example.MY_EXTRA) to avoid conflicts.
      *
      * @param extras The extras to add.
-     * @hide
      */
     public final void putExtras(@NonNull Bundle extras) {
         checkImmutable();
@@ -1988,10 +2182,9 @@ public abstract class Connection extends Conferenceable {
     }
 
     /**
-     * Removes an extra from this {@code Connection}.
+     * Removes extras from this {@code Connection}.
      *
-     * @param keys The key of the extra key to remove.
-     * @hide
+     * @param keys The keys of the extras to remove.
      */
     public final void removeExtras(List<String> keys) {
         synchronized (mExtrasLock) {
@@ -2005,6 +2198,15 @@ public abstract class Connection extends Conferenceable {
         for (Listener l : mListeners) {
             l.onExtrasRemoved(this, unmodifiableKeys);
         }
+    }
+
+    /**
+     * Removes extras from this {@code Connection}.
+     *
+     * @param keys The keys of the extras to remove.
+     */
+    public final void removeExtras(String ... keys) {
+        removeExtras(Arrays.asList(keys));
     }
 
     /**
@@ -2129,7 +2331,6 @@ public abstract class Connection extends Conferenceable {
      * capability and {@link Connection#PROPERTY_IS_EXTERNAL_CALL} property bits must be set.
      * <p>
      * For more information on external calls, see {@link Connection#PROPERTY_IS_EXTERNAL_CALL}.
-     * @hide
      */
     public void onPullExternalCall() {}
 
@@ -2138,11 +2339,16 @@ public abstract class Connection extends Conferenceable {
      * <p>
      * The {@link InCallService} issues a Call event via {@link Call#sendCallEvent(String, Bundle)}.
      * <p>
+     * Where possible, the Connection should make an attempt to handle {@link Call} events which
+     * are part of the {@code android.telecom.*} namespace.  The Connection should ignore any events
+     * it does not wish to handle.  Unexpected events should be handled gracefully, as it is
+     * possible that a {@link InCallService} has defined its own Call events which a Connection is
+     * not aware of.
+     * <p>
      * See also {@link Call#sendCallEvent(String, Bundle)}.
      *
      * @param event The call event.
      * @param extras Extras associated with the call event.
-     * @hide
      */
     public void onCallEvent(String event, Bundle extras) {}
 
@@ -2155,7 +2361,6 @@ public abstract class Connection extends Conferenceable {
      * {@link Call#removeExtras(List)}.
      *
      * @param extras The new extras bundle.
-     * @hide
      */
     public void onExtrasChanged(Bundle extras) {}
 
@@ -2330,17 +2535,54 @@ public abstract class Connection extends Conferenceable {
     }
 
     /**
-     * Sends an event associated with this {@code Connection}, with associated event extras.
-     *
-     * Events are exposed to {@link InCallService} implementations via the
-     * {@link Call.Callback#onConnectionEvent(Call, String, Bundle)} API.
-     *
+     * Notifies listeners when a change has occurred to the Connection which impacts its ability to
+     * be a part of a conference call.
+     * @param isConferenceSupported {@code true} if the connection supports being part of a
+     *      conference call, {@code false} otherwise.
+     * @hide
+     */
+    protected void notifyConferenceSupportedChanged(boolean isConferenceSupported) {
+        for (Listener l : mListeners) {
+            l.onConferenceSupportedChanged(this, isConferenceSupported);
+        }
+    }
+
+    /**
+     * Sends an event associated with this {@code Connection} with associated event extras to the
+     * {@link InCallService}.
+     * <p>
+     * Connection events are used to communicate point in time information from a
+     * {@link ConnectionService} to a {@link InCallService} implementations.  An example of a
+     * custom connection event includes notifying the UI when a WIFI call has been handed over to
+     * LTE, which the InCall UI might use to inform the user that billing charges may apply.  The
+     * Android Telephony framework will send the {@link #EVENT_CALL_MERGE_FAILED} connection event
+     * when a call to {@link Call#mergeConference()} has failed to complete successfully.  A
+     * connection event could also be used to trigger UI in the {@link InCallService} which prompts
+     * the user to make a choice (e.g. whether they want to incur roaming costs for making a call),
+     * which is communicated back via {@link Call#sendCallEvent(String, Bundle)}.
+     * <p>
+     * Events are exposed to {@link InCallService} implementations via
+     * {@link Call.Callback#onConnectionEvent(Call, String, Bundle)}.
+     * <p>
      * No assumptions should be made as to how an In-Call UI or service will handle these events.
-     * Events should be fully qualified (e.g., com.example.event.MY_EVENT) to avoid conflicts.
+     * The {@link ConnectionService} must assume that the In-Call UI could even chose to ignore
+     * some events altogether.
+     * <p>
+     * Events should be fully qualified (e.g. {@code com.example.event.MY_EVENT}) to avoid
+     * conflicts between {@link ConnectionService} implementations.  Further, custom
+     * {@link ConnectionService} implementations shall not re-purpose events in the
+     * {@code android.*} namespace, nor shall they define new event types in this namespace.  When
+     * defining a custom event type, ensure the contents of the extras {@link Bundle} is clearly
+     * defined.  Extra keys for this bundle should be named similar to the event type (e.g.
+     * {@code com.example.extra.MY_EXTRA}).
+     * <p>
+     *  When defining events and the associated extras, it is important to keep their behavior
+     * consistent when the associated {@link ConnectionService} is updated.  Support for deprecated
+     * events/extras should me maintained to ensure backwards compatibility with older
+     * {@link InCallService} implementations which were built to support the older behavior.
      *
      * @param event The connection event.
-     * @param extras Bundle containing extra information associated with the event.
-     * @hide
+     * @param extras Optional bundle containing extra information associated with the event.
      */
     public void sendConnectionEvent(String event, Bundle extras) {
         for (Listener l : mListeners) {

@@ -19,6 +19,8 @@ package android.preference;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -31,6 +33,7 @@ import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 /**
  * Represents a top-level {@link Preference} that
@@ -91,13 +94,33 @@ public final class PreferenceScreen extends PreferenceGroup implements AdapterVi
     private Dialog mDialog;
 
     private ListView mListView;
-    
+
+    private int mLayoutResId = com.android.internal.R.layout.preference_list_fragment;
+    private Drawable mDividerDrawable;
+    private boolean mDividerSpecified;
+
     /**
      * Do NOT use this constructor, use {@link PreferenceManager#createPreferenceScreen(Context)}.
      * @hide-
      */
     public PreferenceScreen(Context context, AttributeSet attrs) {
         super(context, attrs, com.android.internal.R.attr.preferenceScreenStyle);
+
+        TypedArray a = context.obtainStyledAttributes(null,
+                com.android.internal.R.styleable.PreferenceScreen,
+                com.android.internal.R.attr.preferenceScreenStyle,
+                0);
+
+        mLayoutResId = a.getResourceId(
+                com.android.internal.R.styleable.PreferenceScreen_screenLayout,
+                mLayoutResId);
+        if (a.hasValueOrEmpty(com.android.internal.R.styleable.PreferenceScreen_divider)) {
+            mDividerDrawable =
+                    a.getDrawable(com.android.internal.R.styleable.PreferenceScreen_divider);
+            mDividerSpecified = true;
+        }
+
+        a.recycle();
     }
 
     /**
@@ -163,18 +186,30 @@ public final class PreferenceScreen extends PreferenceGroup implements AdapterVi
 
         LayoutInflater inflater = (LayoutInflater)
                 context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View childPrefScreen = inflater.inflate(
-                com.android.internal.R.layout.preference_list_fragment, null);
+        View childPrefScreen = inflater.inflate(mLayoutResId, null);
+        View titleView = childPrefScreen.findViewById(android.R.id.title);
         mListView = (ListView) childPrefScreen.findViewById(android.R.id.list);
+        if (mDividerSpecified) {
+            mListView.setDivider(mDividerDrawable);
+        }
+
         bind(mListView);
 
         // Set the title bar if title is available, else no title bar
         final CharSequence title = getTitle();
         Dialog dialog = mDialog = new Dialog(context, context.getThemeResId());
         if (TextUtils.isEmpty(title)) {
+            if (titleView != null) {
+                titleView.setVisibility(View.GONE);
+            }
             dialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         } else {
-            dialog.setTitle(title);
+            if (titleView instanceof TextView) {
+                ((TextView) titleView).setText(title);
+                titleView.setVisibility(View.VISIBLE);
+            } else {
+                dialog.setTitle(title);
+            }
         }
         dialog.setContentView(childPrefScreen);
         dialog.setOnDismissListener(this);

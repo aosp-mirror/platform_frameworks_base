@@ -84,11 +84,13 @@
     <item msgid="1744840221860799971">"Kapalı"</item>
     <item msgid="3054662377365844197">"Tümü"</item>
     <item msgid="688870735111627832">"Radyo hariç tümü"</item>
+    <item msgid="2850427388488887328">"yaln. çekirdek"</item>
   </string-array>
   <string-array name="select_logpersist_summaries">
     <item msgid="2216470072500521830">"Kapalı"</item>
     <item msgid="172978079776521897">"Günlük arabelleklerin tümü"</item>
     <item msgid="3873873912383879240">"Radyo günlük arabellekleri hariç tümü"</item>
+    <item msgid="8489661142527693381">"yalnızca çekirdek günlük arabelleği"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Animasyon kapalı"</item>

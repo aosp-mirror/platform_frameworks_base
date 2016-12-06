@@ -32,7 +32,7 @@ page.tags=alertdialog,dialogfragment
       <li>{@link android.app.DialogFragment}</li>
       <li>{@link android.app.AlertDialog}</li>
     </ol>
-    
+
     <h2>関連ドキュメント</h2>
     <ol>
       <li><a href="{@docRoot}design/building-blocks/dialogs.html">ダイアログ デザインのガイド</a></li>
@@ -142,7 +142,7 @@ public class FireMissilesDialogFragment extends DialogFragment {
 
 <div class="figure" style="width:290px;margin:0 0 0 20px">
 <img src="{@docRoot}images/ui/dialog_buttons.png" alt="" />
-<p class="img-caption"><strong>図 1</strong> 
+<p class="img-caption"><strong>図 1</strong>
 メッセージと 2 つのアクション ボタンを含むダイアログ</p>
 </div>
 
@@ -248,7 +248,7 @@ AlertDialog dialog = builder.create();
   <dt>Neutral</dt>
   <dd>ユーザーがアクションを続けたくない可能性があり、キャンセルしたいとは限らない場合に使います。
 ポジティブ ボタンとネガティブ ボタンの間に表示されます。
-たとえば、「後で通知する」のようなアクションの場合です。</dd> 
+たとえば、「後で通知する」のようなアクションの場合です。</dd>
 </dl>
 
 <p>各ボタンタイプのいずれか 1 つのみを {@link
@@ -258,7 +258,7 @@ android.app.AlertDialog} に追加できます。つまり、2 つ以上の「�
 
 <div class="figure" style="width:290px;margin:0 0 0 40px">
 <img src="{@docRoot}images/ui/dialog_list.png" alt="" />
-<p class="img-caption"><strong>図 3</strong> 
+<p class="img-caption"><strong>図 3</strong>
 タイトルとリストを含むダイアログ</p>
 </div>
 
@@ -318,7 +318,7 @@ android.app.AlertDialog.Builder#setAdapter setAdapter()} を使ってリスト�
 <h4 id="Checkboxes">固定の複数選択または排他的選択リストを追加する</h4>
 
 <p>複数選択アイテム（チェックボックス）または排他的選択アイテム（ラジオボタン）のリストを追加するには、{@link android.app.AlertDialog.Builder#setMultiChoiceItems(Cursor,String,String,
-DialogInterface.OnMultiChoiceClickListener) setMultiChoiceItems()} または {@link android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener) 
+DialogInterface.OnMultiChoiceClickListener) setMultiChoiceItems()} または {@link android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener)
 setSingleChoiceItems()} メソッドをそれぞれ使用します。
 
 
@@ -346,7 +346,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
                        // If the user checked the item, add it to the selected items
                        mSelectedItems.add(which);
                    } else if (mSelectedItems.contains(which)) {
-                       // Else, if the item is already in the array, remove it 
+                       // Else, if the item is already in the array, remove it
                        mSelectedItems.remove(Integer.valueOf(which));
                    }
                }
@@ -372,7 +372,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
 </pre>
 
 <p>従来のリストとラジオボタンを含むリストでは、「排他的選択」アクションが提供されますが、ユーザーの選択を固定させたい場合は、{@link
-android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener) 
+android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener)
 setSingleChoiceItems()} を使用してください。つまり、ダイアログを後でもう一度開く場合は、ユーザーの現在の選択を表示し、ラジオボタンを含むリストを作成します。
 
 
@@ -470,7 +470,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
                public void onClick(DialogInterface dialog, int id) {
                    LoginDialogFragment.this.getDialog().cancel();
                }
-           });      
+           });
     return builder.create();
 }
 </pre>
@@ -505,7 +505,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
 
 <pre>
 public class NoticeDialogFragment extends DialogFragment {
-    
+
     /* The activity that creates an instance of this dialog fragment must
      * implement this interface in order to receive event callbacks.
      * Each method passes the DialogFragment in case the host needs to query it. */
@@ -513,10 +513,10 @@ public class NoticeDialogFragment extends DialogFragment {
         public void onDialogPositiveClick(DialogFragment dialog);
         public void onDialogNegativeClick(DialogFragment dialog);
     }
-    
+
     // Use this instance of the interface to deliver action events
     NoticeDialogListener mListener;
-    
+
     // Override the Fragment.onAttach() method to instantiate the NoticeDialogListener
     &#64;Override
     public void onAttach(Activity activity) {
@@ -543,7 +543,7 @@ public class NoticeDialogFragment extends DialogFragment {
 public class MainActivity extends FragmentActivity
                           implements NoticeDialogFragment.NoticeDialogListener{
     ...
-    
+
     public void showNoticeDialog() {
         // Create an instance of the dialog fragment and show it
         DialogFragment dialog = new NoticeDialogFragment();
@@ -656,7 +656,7 @@ public class CustomDialogFragment extends DialogFragment {
         // Inflate the layout to use as dialog or embedded fragment
         return inflater.inflate(R.layout.purchase_items, container, false);
     }
-  
+
     /** The system calls this only when creating the layout in a dialog. */
     &#64;Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -678,7 +678,7 @@ public class CustomDialogFragment extends DialogFragment {
 public void showDialog() {
     FragmentManager fragmentManager = getSupportFragmentManager();
     CustomDialogFragment newFragment = new CustomDialogFragment();
-    
+
     if (mIsLargeLayout) {
         // The device is using a large layout, so show the fragment as a dialog
         newFragment.show(fragmentManager, "dialog");

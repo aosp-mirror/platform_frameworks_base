@@ -26,6 +26,7 @@ import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
 import com.android.internal.policy.IKeyguardStateCallback;
+import com.android.server.policy.keyguard.KeyguardStateMonitor.OnShowingStateChangedCallback;
 
 import java.io.PrintWriter;
 
@@ -39,9 +40,11 @@ public class KeyguardServiceWrapper implements IKeyguardService {
     private IKeyguardService mService;
     private String TAG = "KeyguardServiceWrapper";
 
-    public KeyguardServiceWrapper(Context context, IKeyguardService service) {
+    public KeyguardServiceWrapper(Context context, IKeyguardService service,
+            OnShowingStateChangedCallback showingStateChangedCallback) {
         mService = service;
-        mKeyguardStateMonitor = new KeyguardStateMonitor(context, service);
+        mKeyguardStateMonitor = new KeyguardStateMonitor(context, service,
+                showingStateChangedCallback);
     }
 
     @Override // Binder interface
@@ -63,9 +66,9 @@ public class KeyguardServiceWrapper implements IKeyguardService {
     }
 
     @Override // Binder interface
-    public void setOccluded(boolean isOccluded) {
+    public void setOccluded(boolean isOccluded, boolean animate) {
         try {
-            mService.setOccluded(isOccluded);
+            mService.setOccluded(isOccluded, animate);
         } catch (RemoteException e) {
             Slog.w(TAG , "Remote Exception", e);
         }
@@ -81,9 +84,9 @@ public class KeyguardServiceWrapper implements IKeyguardService {
     }
 
     @Override // Binder interface
-    public void dismiss() {
+    public void dismiss(boolean allowWhileOccluded) {
         try {
-            mService.dismiss();
+            mService.dismiss(allowWhileOccluded);
         } catch (RemoteException e) {
             Slog.w(TAG , "Remote Exception", e);
         }
@@ -232,6 +235,14 @@ public class KeyguardServiceWrapper implements IKeyguardService {
 
     public boolean isShowing() {
         return mKeyguardStateMonitor.isShowing();
+    }
+
+    public boolean isTrusted() {
+        return mKeyguardStateMonitor.isTrusted();
+    }
+
+    public boolean hasLockscreenWallpaper() {
+        return mKeyguardStateMonitor.hasLockscreenWallpaper();
     }
 
     public boolean isSecure(int userId) {

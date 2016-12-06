@@ -369,7 +369,7 @@ reduce the alerts is to use a transition type of <code>
 GEOFENCE_TRANSITION_DWELL</a></code> instead of <code>
 <a href="{@docRoot}reference/com/google/android/gms/location/Geofence.html#GEOFENCE_TRANSITION_ENTER">
 GEOFENCE_TRANSITION_ENTER</a></code>. This way, the dwelling alert is sent only when the user stops
-inside a geofence for a given period of time. You can choose the duration by setting a 
+inside a geofence for a given period of time. You can choose the duration by setting a
 <a href="{@docRoot}reference/com/google/android/gms/location/Geofence.Builder.html#setLoiteringDelay(int)">
 loitering delay</a>.</p>
 

@@ -1,5 +1,4 @@
 page.title=Developer Stories: Games
-meta.tags="google play, games, global, developer story"
 page.timestamp=1381449601
 page.image=/images/distribute/glu-ew-gpgames.jpg
 page.metaDescription=How game studios are using Google Play game services to deliver new gaming experiences for their users.
@@ -26,8 +25,7 @@ page.metaDescription=How game studios are using Google Play game services to del
   <h2 class="norule">Articles</h2>
 
   <div class="resource-widget resource-flow-layout col-16"
-      data-query="type:distribute+tag:developerstory+tag:games"
-      data-sortOrder="-timestamp"
+      data-query="collection:distribute/stories/games/docs"
       data-cardSizes="6x6"
       data-items-per-page="15"
       data-initial-results="6"></div>

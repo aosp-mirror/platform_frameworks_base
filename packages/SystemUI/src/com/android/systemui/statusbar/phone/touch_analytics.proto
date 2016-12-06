@@ -120,6 +120,7 @@ message Session {
         RESERVED_2 = 1;
         RANDOM_WAKEUP = 2;
         REAL = 3;
+        REJECTED_TOUCH_REPORT = 4;
     }
 
     optional uint64 startTimestampMillis = 1;

@@ -768,6 +768,21 @@ namespace PaintGlue {
         return false;
     }
 
+    // Don't count glyphs that are the recommended "space" glyph and are zero width.
+    // This logic makes assumptions about HarfBuzz layout, but does correctly handle
+    // cases where ligatures form and zero width space glyphs are left in as
+    // placeholders.
+    static size_t countNonSpaceGlyphs(const Layout& layout) {
+        size_t count = 0;
+        static unsigned int kSpaceGlyphId = 3;
+        for (size_t i = 0; i < layout.nGlyphs(); i++) {
+            if (layout.getGlyphId(i) != kSpaceGlyphId || layout.getCharAdvance(i) != 0.0) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     // Returns true if the given string is exact one pair of regional indicators.
     static bool isFlag(const jchar* str, size_t length) {
         const jchar RI_LEAD_SURROGATE = 0xD83C;
@@ -831,7 +846,7 @@ namespace PaintGlue {
         Layout layout;
         MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, str.get(), 0, str.size(),
                 str.size());
-        size_t nGlyphs = layout.nGlyphs();
+        size_t nGlyphs = countNonSpaceGlyphs(layout);
         if (nGlyphs != 1 && nChars > 1) {
             // multiple-character input, and was not a ligature
             // TODO: handle ZWJ/ZWNJ characters specially so we can detect certain ligatures

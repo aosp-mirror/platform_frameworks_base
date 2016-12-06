@@ -39,9 +39,9 @@ public abstract class AuthenticationClient extends ClientMonitor {
     public abstract void resetFailedAttempts();
 
     public AuthenticationClient(Context context, long halDeviceId, IBinder token,
-            IFingerprintServiceReceiver receiver, int callingUserId, int groupId, long opId,
+            IFingerprintServiceReceiver receiver, int targetUserId, int groupId, long opId,
             boolean restricted, String owner) {
-        super(context, halDeviceId, token, receiver, callingUserId, groupId, restricted, owner);
+        super(context, halDeviceId, token, receiver, targetUserId, groupId, restricted, owner);
         mOpId = opId;
     }
 
@@ -65,7 +65,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
                     Fingerprint fp = !getIsRestricted()
                             ? new Fingerprint("" /* TODO */, groupId, fingerId, getHalDeviceId())
                             : null;
-                    receiver.onAuthenticationSucceeded(getHalDeviceId(), fp);
+                    receiver.onAuthenticationSucceeded(getHalDeviceId(), fp, getTargetUserId());
                 }
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to notify Authenticated:", e);
@@ -115,6 +115,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
             final int result = daemon.authenticate(mOpId, getGroupId());
             if (result != 0) {
                 Slog.w(TAG, "startAuthentication failed, result=" + result);
+                MetricsLogger.histogram(getContext(), "fingeprintd_auth_start_error", result);
                 onError(FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE);
                 return result;
             }

@@ -81,6 +81,27 @@ TEST(RecordingCanvas, emptyClipRect) {
     ASSERT_EQ(0u, dl->getOps().size()) << "Must be zero ops. Rect should be rejected.";
 }
 
+TEST(RecordingCanvas, emptyPaintRejection) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+        SkPaint emptyPaint;
+        emptyPaint.setColor(Color::Transparent);
+
+        float points[] = {0, 0, 200, 200};
+        canvas.drawPoints(points, 4, emptyPaint);
+        canvas.drawLines(points, 4, emptyPaint);
+        canvas.drawRect(0, 0, 200, 200, emptyPaint);
+        canvas.drawRegion(SkRegion(SkIRect::MakeWH(200, 200)), emptyPaint);
+        canvas.drawRoundRect(0, 0, 200, 200, 10, 10, emptyPaint);
+        canvas.drawCircle(100, 100, 100, emptyPaint);
+        canvas.drawOval(0, 0, 200, 200, emptyPaint);
+        canvas.drawArc(0, 0, 200, 200, 0, 360, true, emptyPaint);
+        SkPath path;
+        path.addRect(0, 0, 200, 200);
+        canvas.drawPath(path, emptyPaint);
+    });
+    EXPECT_EQ(0u, dl->getOps().size()) << "Op should be rejected";
+}
+
 TEST(RecordingCanvas, drawArc) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         canvas.drawArc(0, 0, 200, 200, 0, 180, true, SkPaint());
@@ -340,6 +361,36 @@ TEST(RecordingCanvas, saveLayer_simple) {
     EXPECT_EQ(3, count);
 }
 
+TEST(RecordingCanvas, saveLayer_rounding) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 100, [](RecordingCanvas& canvas) {
+            canvas.saveLayerAlpha(10.25f, 10.75f, 89.25f, 89.75f, 128, SaveFlags::ClipToLayer);
+            canvas.drawRect(20, 20, 80, 80, SkPaint());
+            canvas.restore();
+        });
+        int count = 0;
+        playbackOps(*dl, [&count](const RecordedOp& op) {
+            Matrix4 expectedMatrix;
+            switch(count++) {
+            case 0:
+                EXPECT_EQ(RecordedOpId::BeginLayerOp, op.opId);
+                EXPECT_EQ(Rect(10, 10, 90, 90), op.unmappedBounds) << "Expect bounds rounded out";
+                break;
+            case 1:
+                EXPECT_EQ(RecordedOpId::RectOp, op.opId);
+                expectedMatrix.loadTranslate(-10, -10, 0);
+                EXPECT_MATRIX_APPROX_EQ(expectedMatrix, op.localMatrix) << "Expect rounded offset";
+                break;
+            case 2:
+                EXPECT_EQ(RecordedOpId::EndLayerOp, op.opId);
+                // Don't bother asserting recording state data - it's not used
+                break;
+            default:
+                ADD_FAILURE();
+            }
+        });
+        EXPECT_EQ(3, count);
+}
+
 TEST(RecordingCanvas, saveLayer_missingRestore) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         canvas.saveLayerAlpha(0, 0, 200, 200, 128, SaveFlags::ClipToLayer);
@@ -492,6 +543,21 @@ TEST(RecordingCanvas, saveLayer_rotateClipped) {
         }
     });
     EXPECT_EQ(3, count);
+}
+
+TEST(RecordingCanvas, saveLayer_rejectBegin) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+        canvas.save(SaveFlags::MatrixClip);
+        canvas.translate(0, -20); // avoid identity case
+        // empty clip rect should force layer + contents to be rejected
+        canvas.clipRect(0, -20, 200, -20, SkRegion::kIntersect_Op);
+        canvas.saveLayerAlpha(0, 0, 200, 200, 128, SaveFlags::ClipToLayer);
+        canvas.drawRect(0, 0, 200, 200, SkPaint());
+        canvas.restore();
+        canvas.restore();
+    });
+
+    ASSERT_EQ(0u, dl->getOps().size()) << "Begin/Rect/End should all be rejected.";
 }
 
 TEST(RecordingCanvas, drawRenderNode_rejection) {

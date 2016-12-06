@@ -1,0 +1,606 @@
+page.title=Multi-Window Support
+page.metaDescription=New support in Android N for showing more than one app at a time.
+page.keywords="multi-window", "android N", "split screen", "free-form"
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>In this document</h2>
+      <ol>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#lifecycle">Multi-Window Lifecycle</a></li>
+        <li><a href="#configuring">Configuring Your App for Multi-Window
+              Mode</a></li>
+        <li><a href="#running">Running Your App in Multi-Window Mode</a></li>
+        <li><a href="#testing">Testing Your App's Multi-Window Support</a></li>
+      </ol>
+    <h2>See Also</h2>
+      <ol>
+        <li><a href="{@docRoot}training/tv/playback/picture-in-picture.html">Adding
+          Picture-in-Picture</a></li>
+        <li><a class="external-link"
+          href="https://github.com/googlesamples/android-MultiWindowPlayground">Multi-Window
+          Playground sample app</a></li>
+        <li><a class="external-link"
+          href="https://medium.com/google-developers/5-tips-for-preparing-for-multi-window-in-android-n-7bed803dda64"
+          >Five Tips for Preparing for Multi-Window in Android N</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>
+  Android 7.0 adds support for displaying more than one app at the
+  same time. On handheld devices, two apps can run side-by-side or
+  one-above-the-other in <em>split-screen</em> mode. On TV devices, apps can
+  use <em>picture-in-picture</em> mode to continue video playback while users
+  are interacting with another app.
+</p>
+
+<p>
+  If your app targets Android 7.0 (API level 24) or higher, you can configure how your app
+  handles multi-window display. For example, you can specify your activity's
+  minimum allowable dimensions. You can also disable multi-window display for
+  your app, ensuring that the system only shows your app in full-screen
+  mode.
+</p>
+
+<h2 id="overview">Overview</h2>
+
+<p>
+  Android 7.0 allows several apps to share the screen at once. For
+  example, a user could split the screen, viewing a web page on the left side
+  while composing an email on the right side. The user experience depends on
+  the device:
+</p>
+
+<ul>
+  <li>Handheld devices running Android 7.0 offer split-screen
+  mode. In this mode, the system fills the screen with two apps, showing them
+  either side-by-side or one-above-the-other. The user can drag the dividing
+  line separating the two to make one app larger and the other smaller.
+  </li>
+
+  <li>On TV devices, apps can put themselves
+  in <a href="picture-in-picture.html">picture-in-picture mode</a>, allowing
+  them to continue showing content while the user browses or interacts with
+  other apps.
+  </li>
+
+  <li>Manufacturers of larger devices can choose to enable freeform
+  mode, in which the user can freely resize each activity. If the
+  manufacturer enables this feature, the device offers freeform mode in addition
+  to split-screen mode.
+  </li>
+</ul>
+
+<img src="{@docRoot}images/android-7.0/mw-splitscreen.png" alt="" width="650"
+    srcset="{@docRoot}images/android-7.0/mw-splitscreen.png 1x,
+    {@docRoot}images/android-7.0/mw-splitscreen_2x.png 2x,"
+    id="img-split-screen" />
+<p class="img-caption">
+  <strong>Figure 1.</strong> Two apps running side-by-side in split-screen mode.
+</p>
+
+<p>
+  The user can switch into multi-window mode in the following ways:
+</p>
+
+<ul>
+  <li>If the user opens the <a href="{@docRoot}guide/components/recents.html">Overview
+  screen</a> and performs a long press on an
+  activity title, they can drag that activity to a highlighted portion of the
+  screen to put the activity in multi-window mode.
+  </li>
+
+  <li>If the user performs a long press on the Overview button, the device puts
+  the current activity in multi-window mode, and opens the Overview screen to
+  let the user choose another activity to share the screen.
+  </li>
+</ul>
+
+<p>
+  Users can <a href="{@docRoot}guide/topics/ui/drag-drop.html">drag and
+  drop</a> data from one activity to another while the activities are sharing
+  the screen.
+
+<h2 id="lifecycle">Multi-Window Lifecycle</h2>
+
+<p>
+  Multi-window mode does not change the <a href=
+  "{@docRoot}training/basics/activity-lifecycle/index.html">activity
+  lifecycle</a>.
+</p>
+
+<p>
+  In multi-window mode, only the activity the user has most recently interacted
+  with is active at a given time. This activity is considered <em>topmost</em>.
+  All other activities are in the paused state, even if they are visible.
+  However, the system gives these paused-but-visible activities higher priority
+  than activities that are not visible. If the user interacts with one of the
+  paused activities, that activity is resumed, and the previously topmost
+  activity is paused.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> In multi-window mode, an app can be in the paused
+  state and still be visible to the user. An app might need to continue its
+  activities even while paused. For example, a video-playing app that is in
+  paused mode but is visible should continue showing its video. For this
+  reason, we recommend that activities that play video <em>not</em> pause the
+  video in their {@link android.app.Activity#onPause onPause()} handlers.
+  Instead, they should pause video in {@link android.app.Activity#onStop
+  onStop()}, and resume playback in {@link android.app.Activity#onStart
+  onStart()}.
+</p>
+
+<p>
+  When the user puts an app into multi-window mode, the system notifies the
+  activity of a configuration change, as specified in <a href=
+  "{@docRoot}guide/topics/resources/runtime-changes.html">Handling Runtime
+  Changes</a>. This also happens when the user resizes the app, or puts the app
+  back into full-screen mode.
+  Essentially, this change has the same activity-lifecycle
+  implications as when the system notifies the app that the device has switched
+  from portrait to landscape mode, except that the device dimensions are
+  changed instead of just being swapped. As discussed in <a href=
+  "{@docRoot}guide/topics/resources/runtime-changes.html">Handling Runtime
+  Changes</a>, your activity can handle the configuration change itself, or it
+  can allow the system to destroy the activity and recreate it with the new
+  dimensions.
+</p>
+
+<p>
+  If the user is resizing a window and makes it larger in either dimension, the
+  system resizes the activity to match the user action and issues <a href=
+  "{@docRoot}guide/topics/resources/runtime-changes.html">runtime changes</a>
+  as needed. If the app lags behind in drawing in newly-exposed areas, the
+  system temporarily fills those areas with the color specified by the {@link
+  android.R.attr#windowBackground windowBackground} attribute or by the default
+  <code>windowBackgroundFallback</code> style attribute.
+</p>
+
+<h2 id="configuring">Configuring Your App for Multi-Window Mode</h2>
+
+<p>
+  If your app targets API level 24 or higher, you can configure how and
+  whether your app's activities support multi-window display. You can set
+  attributes in your manifest to control both size and layout.
+  A root activity's attribute settings apply to all activities
+  within its task stack. For example, if the root activity has
+  <code>android:resizeableActivity</code> set to true, then all activities
+  in the task stack are resizable.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> If you build a multi-orientation app that targets API
+  level 23 or lower, and the user uses the app in
+  multi-window mode, the system forcibly resizes the app. The system presents a
+  dialog box warning the user that the app may behave unexpectedly. The system
+  does <em>not</em> resize fixed-orientation apps; if
+  the user attempts to open a fixed-orientation app under multi-window mode,
+  the app takes over the whole screen.
+</p>
+
+<h4 id="resizeableActivity">android:resizeableActivity</h4>
+
+<p>
+  Set this attribute in your manifest's <a href=
+  "{@docRoot}guide/topics/manifest/activity-element"><code>&lt;activity&gt;</code></a>
+  or <a href=
+  "{@docRoot}guide/topics/manifest/application-element"><code>&lt;application&gt;</code></a>
+  element to enable or disable multi-window display:
+</p>
+
+<pre>
+android:resizeableActivity=["true" | "false"]
+</pre>
+
+<p>
+  If this attribute is set to true, the activity can be launched in
+  split-screen and freeform modes. If the attribute is set to false, the
+  activity does not support multi-window mode. If this value is false, and the
+  user attempts to launch the activity in multi-window mode, the activity takes
+  over the full screen.
+</p>
+
+<p>
+  If your app targets API level 24, but you do not specify a value
+  for this attribute, the attribute's value defaults to true.
+</p>
+
+<h4 id="supportsPictureInPicture">android:supportsPictureInPicture</h4>
+
+<p>
+  Set this attribute in your manifest's <a href=
+  "{@docRoot}guide/topics/manifest/activity-element"><code>&lt;activity&gt;</code></a>
+  node to indicate whether the activity supports <a href=
+  "{@docRoot}training/tv/playback/picture-in-picture.html">Picture-in-Picture</a>
+  display. This attribute is ignored if <code>android:resizeableActivity</code>
+  is false.
+</p>
+
+<pre>
+android:supportsPictureInPicture=["true" | "false"]
+</pre>
+
+<h3 id="layout">Layout attributes</h3>
+
+<p>
+  With Android 7.0, the <code>&lt;layout&gt;</code> manifest element
+  supports several attributes that affect how an activity behaves in
+  multi-window mode:
+</p>
+
+<dl>
+  <dt>
+    <code>android:defaultWidth</code>
+  </dt>
+
+  <dd>
+    Default width of the activity when launched in freeform mode.
+  </dd>
+
+  <dt>
+    <code>android:defaultHeight</code>
+  </dt>
+
+  <dd>
+    Default height of the activity when launched in freeform mode.
+  </dd>
+
+  <dt>
+    <code>android:gravity</code>
+  </dt>
+
+  <dd>
+    Initial placement of the activity when launched in freeform mode. See the
+    {@link android.view.Gravity} reference for suitable values.
+  </dd>
+
+  <dt>
+    <code>android:minHeight</code>, <code>android:minWidth</code>
+  </dt>
+
+  <dd>
+    Minimum height and minimum width for the activity in both split-screen
+    and freeform modes. If the user moves the divider in split-screen mode
+    to make an activity smaller than the specified minimum, the system crops
+    the activity to the size the user requests.
+  </dd>
+</dl>
+
+<p>
+  For example, the following code shows how to specify an activity's default
+  size and location, and its minimum size, when the activity is displayed in
+  freeform mode:
+</p>
+
+<pre>
+&lt;activity android:name=".MyActivity"&gt;
+    &lt;layout android:defaultHeight="500dp"
+          android:defaultWidth="600dp"
+          android:gravity="top|end"
+          android:minHeight="450dp"
+          android:minWidth="300dp" /&gt;
+&lt;/activity&gt;
+</pre>
+
+<h2 id="running">Running Your App in Multi-Window Mode</h2>
+
+<p>
+  Beginning with Android 7.0, the system offers functionality to support apps
+  that can run in multi-window mode.
+</p>
+
+<h3 id="disabled-features">Disabled features in multi-window mode</h3>
+
+<p>
+  Certain features are disabled or ignored when a device is in multi-window
+  mode, because they don’t make sense for an activity which may be sharing the
+  device screen with other activities or apps. Such features include:
+
+<ul>
+  <li>Some <a href="{@docRoot}training/system-ui/index.html">System UI</a>
+  customization options are disabled; for example, apps cannot hide the status
+  bar if they are not running in full-screen mode.
+  </li>
+
+  <li>The system ignores changes to the <code><a href=
+  "{@docRoot}guide/topics/manifest/activity-element.html#screen"
+  >android:screenOrientation</a></code> attribute.
+  </li>
+</ul>
+
+<h3 id="change-notification">Multi-window change notification and querying</h3>
+
+<p>
+  {@link android.app.Activity} offers the following methods to support
+  multi-window display.
+</p>
+
+<dl>
+  <dt>
+    {@link android.app.Activity#isInMultiWindowMode isInMultiWindowMode()}
+  </dt>
+
+  <dd>
+    Call to find out if the activity is in multi-window mode.
+  </dd>
+
+  <dt>
+    {@link android.app.Activity#isInPictureInPictureMode
+    isInPictureInPictureMode()}
+  </dt>
+
+  <dd>
+    Call to find out if the activity is in <a href=
+    "{@docRoot}training/tv/playback/picture-in-picture.jd">picture-in-picture</a>
+    mode.
+    <p class="note">
+      <strong>Note:</strong> Picture-in-picture mode is a special case of
+      multi-window mode. If <code>myActivity.isInPictureInPictureMode()</code>
+      returns true, then <code>myActivity.isInMultiWindowMode()</code> also
+      returns true.
+    </p>
+  </dd>
+
+  <dt>
+    {@link android.app.Activity#onMultiWindowModeChanged
+    onMultiWindowModeChanged()}
+  </dt>
+
+  <dd>
+    The system calls this method whenever the activity goes into or out of
+    multi-window mode. The system passes the method a value of true if the
+    activity is entering multi-window mode, and false if the activity is
+    leaving multi-window mode.
+  </dd>
+
+  <dt>
+    {@link android.app.Activity#onPictureInPictureModeChanged
+    onPictureInPictureModeChanged()}
+  </dt>
+
+  <dd>
+    The system calls this method whenever the activity goes into or out of
+    picture-in-picture mode. The system passes the method a value of true if
+    the activity is entering picture-in-picture mode, and false if the activity
+    is leaving picture-in-picture mode.
+  </dd>
+</dl>
+
+<p>
+  The {@link android.app.Fragment} class exposes versions of many of these
+  methods, for example {@link android.app.Fragment#onMultiWindowModeChanged
+  Fragment.onMultiWindowModeChanged()}.
+</p>
+
+<h3 id="entering-pip">Entering picture-in-picture mode</h3>
+
+<p>
+  To put an activity in picture-in-picture mode, call {@link
+  android.app.Activity#enterPictureInPictureMode
+  Activity.enterPictureInPictureMode()}. This method has no effect if the
+  device does not support picture-in-picture mode. For more information, see
+  the <a href=
+  "{@docRoot}training/tv/playback/picture-in-picture.jd">Picture-in-Picture</a>
+  documentation.
+</p>
+
+<h3 id="launch">Launch New Activities in Multi-Window Mode</h3>
+
+<p>
+  When you launch a new activity, you can hint to the system that the new
+  activity should be displayed adjacent to the current one, if possible. To do
+  this, use the intent flag
+  {@link android.content.Intent#FLAG_ACTIVITY_LAUNCH_ADJACENT}. Passing
+  this flag requests the following behavior:
+</p>
+
+<ul>
+  <li>If the device is in split-screen mode, the system attempts to create the
+  new activity next to the activity that launched it, so the two activities
+  share the screen. The system is not guaranteed to be able to do this, but it
+  makes the activities adjacent if possible.
+  </li>
+
+  <li>If the device is not in split-screen mode, this flag has no effect.
+  </li>
+</ul>
+
+<p>
+  If a device is in freeform mode and you are launching a new activity, you can
+  specify the new activity's dimensions and screen location by calling
+  {@link android.app.ActivityOptions#setLaunchBounds
+  ActivityOptions.setLaunchBounds()}. This method has no effect if
+  the device is not in multi-window mode.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> If you launch an activity within a task stack, the
+  activity replaces the activity on the screen, inheriting all of its
+  multi-window properties. If you want to launch the new activity as a separate
+  window in multi-window mode, you must launch it in a new task stack.
+</p>
+
+<h3 id="dnd">Supporting drag and drop</h3>
+
+<p>
+  Users can <a href="{@docRoot}guide/topics/ui/drag-drop.html">drag and
+  drop</a> data from one activity to another while the two activities are
+  sharing the screen. (Prior to Android 7.0, users could only drag and drop data
+  within a single activity.) For this reason, you may want to add drag and drop
+  functionality to your app if your app does not currently support it.
+</p>
+
+
+<dl>
+  <dt>
+    {@link android.view.DragAndDropPermissions}
+  </dt>
+
+  <dd>
+    Token object responsible for specifying the permissions granted to the app
+    that receives a drop.
+  </dd>
+
+  <dt>
+    {@link android.view.View#startDragAndDrop View.startDragAndDrop()}
+  </dt>
+
+  <dd>
+    Alias for {@link android.view.View#startDrag View.startDrag()}. To enable
+    cross-activity drag and drop, pass the flag {@link
+    android.view.View#DRAG_FLAG_GLOBAL}. If you need to give URI permissions to
+    the recipient activity, pass the flags {@link
+    android.view.View#DRAG_FLAG_GLOBAL_URI_READ} or {@link
+    android.view.View#DRAG_FLAG_GLOBAL_URI_WRITE}, as appropriate.
+  </dd>
+
+  <dt>
+    {@link android.view.View#cancelDragAndDrop View.cancelDragAndDrop()}
+  </dt>
+
+  <dd>
+    Cancels a drag operation currently in progress. Can only be called by the
+    app that originated the drag operation.
+  </dd>
+
+  <dt>
+    {@link android.view.View#updateDragShadow View.updateDragShadow()}
+  </dt>
+
+  <dd>
+    Replaces the drag shadow for a drag operation currently in progress. Can
+    only be called by the app that originated the drag operation.
+  </dd>
+
+  <dt>
+    {@link android.app.Activity#requestDragAndDropPermissions
+    Activity.requestDragAndDropPermissions()}
+  </dt>
+
+  <dd>
+    Requests the permissions for the content URIs passed with the {@link
+    android.content.ClipData} contained in a {@link android.view.DragEvent}.
+  </dd>
+</dl>
+
+<h2 id="testing">Testing Your App's Multi-Window Support</h2>
+
+<p>
+  Whether or not your app targets API level 24 or higher, you should
+  verify how it behaves in multi-window mode in case a user tries to launch it
+  in multi-window mode on a device running Android 7.0 or higher.
+</p>
+
+<h3 id="configuring">Configuring a Test Device</h3>
+
+<p>
+  If a device runs Android 7.0 or higher, it automatically supports split-screen
+  mode.
+</p>
+
+<h3 id="test-non-n">If your app targets API level 23 or lower</h3>
+
+<p>
+  If your app targets API level 23 or lower and the user attempts to use
+  the app in multi-window mode, the system forcibly resizes the app unless the
+  app declares a fixed orientation.
+</p>
+
+<p>
+  If your app does not declare a fixed orientation, you should launch your app
+  on a device running Android 7.0 or higher and attempt to put the app in
+  split-screen mode. Verify that the user experience is
+  acceptable when the app is forcibly resized.
+</p>
+
+<p>
+  If the app declares a fixed orientation, you should attempt to put the app in
+  multi-window mode. Verify that when you do so, the app remains
+  in full-screen mode.
+</p>
+
+<h3 id="test-mw">If you support multi-window mode</h3>
+
+<p>
+  If your app targets API level 24 or higher and does not disable
+  multi-window support, verify the following behavior under both split-screen
+  and freeform modes.
+</p>
+
+<ul>
+  <li>Launch the app in full-screen mode, then switch to multi-window mode by
+  long-pressing the Overview button. Verify that the app switches properly.
+  </li>
+
+  <li>Launch the app directly in multi-window mode, and verify that the app
+  launches properly. You can launch an app in multi-window mode by pressing the
+  Overview button, then long-pressing the title bar of your app and dragging it
+  to one of the highlighted areas on the screen.
+  </li>
+
+  <li>Resize your app in split-screen mode by dragging the divider line.
+  Verify that the app resizes without crashing, and that necessary UI elements
+  are visible.
+  </li>
+
+  <li>If you have specified minimum dimensions for your app, attempt to resize
+  the app below those dimensions. Verify that you cannot resize the app to be
+  smaller than the specified minimum.
+  </li>
+
+  <li>Through all tests, verify that your app's performance is acceptable. For
+  example, verify that there is not too long a lag to update the UI after the
+  app is resized.
+  </li>
+</ul>
+
+<h4 id="test-checklist">Testing checklist</h4>
+
+<p>
+  To verify your app's performance in multi-window mode, try the following
+  operations. You should try these operations in both split-screen and
+  multi-window mode, except where otherwise noted.
+</p>
+
+<ul>
+  <li>Enter and leave multi-window mode.
+  </li>
+
+  <li>Switch from your app to another app, and verify that the app behaves
+  properly while it is visible but not active. For example, if your app is
+  playing video, verify that the video continues to play while the user is
+  interacting with another app.
+  </li>
+
+  <li>In split-screen mode, try moving the dividing bar to make your app both
+  larger and smaller. Try these operations in both side-by-side and
+  one-above-the-other configurations. Verify that the app does not crash,
+  essential functionality is visible, and the resize operation doesn't take too
+  long.
+  </li>
+
+  <li>Perform several resize operations in rapid succession. Verify that your
+  app doesn't crash or leak memory. For information about checking your app's
+  memory usage, see <a href="{@docRoot}tools/debugging/debugging-memory.html">
+  Investigating Your RAM Usage</a>.
+  </li>
+
+  <li>Use your app normally in a number of different window configurations, and
+  verify that the app behaves properly. Verify that text is readable, and that
+  UI elements aren't too small to interact with.
+  </li>
+</ul>
+
+<h3 id="test-disabled-mw">If you have disabled multi-window support</h3>
+
+<p>
+  If you disabled multi-window support by setting
+  <code>android:resizeableActivity="false"</code>, you should launch your app on
+  a device running Android 7.0 or higher and attempt to put the app in
+  freeform and split-screen modes. Verify that when you do so, the app remains
+  in full-screen mode.
+</p>

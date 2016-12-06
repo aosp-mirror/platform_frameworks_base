@@ -84,7 +84,7 @@ href="{@docRoot}design/patterns/settings.html">Settings</a> design guide.</p>
 
 <img src="{@docRoot}images/ui/settings/settings.png" alt="" width="435" />
 <p class="img-caption"><strong>Figure 1.</strong> Screenshots from the Android Messaging app's
-settings. Selecting an item defined by a {@link android.preference.Preference} 
+settings. Selecting an item defined by a {@link android.preference.Preference}
 opens an interface to change the setting.</p>
 
 
@@ -230,7 +230,7 @@ android.preference.ListPreference}. Both items include the following three attri
   <dt>{@code android:key}</dt>
   <dd>This attribute is required for preferences that persist a data value. It specifies the unique
 key (a string) the system uses when saving this setting's value in the {@link
-android.content.SharedPreferences}. 
+android.content.SharedPreferences}.
   <p>The only instances in which this attribute is <em>not required</em> is when the preference is a
 {@link android.preference.PreferenceCategory} or {@link android.preference.PreferenceScreen}, or the
 preference specifies an {@link android.content.Intent} to invoke (with an <a
@@ -291,7 +291,7 @@ android.preference.PreferenceCategory}.</p>
 
 <pre>
 &lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    &lt;PreferenceCategory 
+    &lt;PreferenceCategory
         android:title="&#64;string/pref_sms_storage_title"
         android:key="pref_key_storage_settings">
         &lt;CheckBoxPreference
@@ -299,12 +299,12 @@ android.preference.PreferenceCategory}.</p>
             android:summary="&#64;string/pref_summary_auto_delete"
             android:title="&#64;string/pref_title_auto_delete"
             android:defaultValue="false"... />
-        &lt;Preference 
+        &lt;Preference
             android:key="pref_key_sms_delete_limit"
             android:dependency="pref_key_auto_delete"
             android:summary="&#64;string/pref_summary_delete_limit"
             android:title="&#64;string/pref_title_sms_delete"... />
-        &lt;Preference 
+        &lt;Preference
             android:key="pref_key_mms_delete_limit"
             android:dependency="pref_key_auto_delete"
             android:summary="&#64;string/pref_summary_delete_limit"
@@ -594,11 +594,11 @@ element inside a root {@code <preference-headers>} element. For example:</p>
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
-    &lt;header 
+    &lt;header
         android:fragment="com.example.prefs.SettingsActivity$SettingsFragmentOne"
         android:title="@string/prefs_category_one"
         android:summary="@string/prefs_summ_category_one" />
-    &lt;header 
+    &lt;header
         android:fragment="com.example.prefs.SettingsActivity$SettingsFragmentTwo"
         android:title="@string/prefs_category_two"
         android:summary="@string/prefs_summ_category_two" >
@@ -678,15 +678,15 @@ the {@link android.preference.PreferenceActivity} that specifies which preferenc
 load.</p>
 
 <p>For example, here's an XML file for preference headers that is used on Android 3.0
-and higher ({@code res/xml/preference_headers.xml}):</p> 
+and higher ({@code res/xml/preference_headers.xml}):</p>
 
 <pre>
 &lt;preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
-    &lt;header 
+    &lt;header
         android:fragment="com.example.prefs.SettingsFragmentOne"
         android:title="@string/prefs_category_one"
         android:summary="@string/prefs_summ_category_one" />
-    &lt;header 
+    &lt;header
         android:fragment="com.example.prefs.SettingsFragmentTwo"
         android:title="@string/prefs_category_two"
         android:summary="@string/prefs_summ_category_two" />
@@ -698,18 +698,18 @@ Android 3.0 ({@code res/xml/preference_headers_legacy.xml}):</p>
 
 <pre>
 &lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    &lt;Preference 
+    &lt;Preference
         android:title="@string/prefs_category_one"
         android:summary="@string/prefs_summ_category_one"  >
-        &lt;intent 
+        &lt;intent
             android:targetPackage="com.example.prefs"
             android:targetClass="com.example.prefs.SettingsActivity"
             android:action="com.example.prefs.PREFS_ONE" />
     &lt;/Preference>
-    &lt;Preference 
+    &lt;Preference
         android:title="@string/prefs_category_two"
         android:summary="@string/prefs_summ_category_two" >
-        &lt;intent 
+        &lt;intent
             android:targetPackage="com.example.prefs"
             android:targetClass="com.example.prefs.SettingsActivity"
             android:action="com.example.prefs.PREFS_TWO" />
@@ -943,8 +943,8 @@ uses.</p>
 
 <p>The Android framework includes a variety of {@link android.preference.Preference} subclasses that
 allow you to build a UI for several different types of settings.
-However, you might discover a setting you need for which there’s no built-in solution, such as a
-number picker or date picker. In such a case, you’ll need to create a custom preference by extending
+However, you might discover a setting you need for which there's no built-in solution, such as a
+number picker or date picker. In such a case, you'll need to create a custom preference by extending
 the {@link android.preference.Preference} class or one of the other subclasses.</p>
 
 <p>When you extend the {@link android.preference.Preference} class, there are a few important
@@ -982,11 +982,11 @@ default positive and negative dialog buttons:</p>
 public class NumberPickerPreference extends DialogPreference {
     public NumberPickerPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
-        
+
         setDialogLayoutResource(R.layout.numberpicker_dialog);
         setPositiveButtonText(android.R.string.ok);
         setNegativeButtonText(android.R.string.cancel);
-        
+
         setDialogIcon(null);
     }
     ...
@@ -1201,7 +1201,7 @@ protected void onRestoreInstanceState(Parcelable state) {
     // Cast state to custom BaseSavedState and pass to superclass
     SavedState myState = (SavedState) state;
     super.onRestoreInstanceState(myState.getSuperState());
-    
+
     // Set this Preference's widget to reflect the restored state
     mNumberPicker.setValue(myState.value);
 }

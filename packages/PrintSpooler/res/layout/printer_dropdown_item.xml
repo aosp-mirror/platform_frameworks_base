@@ -16,7 +16,8 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
       android:layout_width="fill_parent"
-      android:layout_height="?android:attr/listPreferredItemHeightSmall"
+      android:layout_height="wrap_content"
+      android:minHeight="?android:attr/listPreferredItemHeightSmall"
       style="?android:attr/spinnerItemStyle"
       android:orientation="horizontal"
       android:gravity="start|center_vertical">

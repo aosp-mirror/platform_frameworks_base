@@ -28,7 +28,8 @@
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Wifi-verbinding mislukt"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Authenticatieprobleem"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Niet binnen bereik"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"Geen internettoegang gevonden. Er wordt niet automatisch opnieuw verbinding gemaakt."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"Geen internettoegang gevonden. Er wordt niet automatisch opnieuw verbinding gemaakt."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"Geen internettoegang."</string>
     <string name="saved_network" msgid="4352716707126620811">"Opgeslagen door <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Verbonden via wifi-assistent"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Verbonden via %1$s"</string>
@@ -131,10 +132,10 @@
     <item msgid="8903157781070679765">"Normaal"</item>
     <item msgid="164347302621392996">"Snel"</item>
     <item msgid="5794028588101562009">"Sneller"</item>
-    <item msgid="7163942783888652942">"Zeer snel"</item>
-    <item msgid="7831712693748700507">"Vlug"</item>
-    <item msgid="5194774745031751806">"Zeer vlug"</item>
-    <item msgid="9085102246155045744">"Snelst"</item>
+    <item msgid="7163942783888652942">"Nog sneller"</item>
+    <item msgid="7831712693748700507">"Heel erg snel"</item>
+    <item msgid="5194774745031751806">"Snelst"</item>
+    <item msgid="9085102246155045744">"Allerallersnelst"</item>
   </string-array>
     <string name="choose_profile" msgid="8229363046053568878">"Profiel kiezen"</string>
     <string name="category_personal" msgid="1299663247844969448">"Persoonlijk"</string>
@@ -167,7 +168,7 @@
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Uitgebreide wifi-logregistratie insch."</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Agressieve handover van wifi naar mobiel"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Altijd roamingscans voor wifi toestaan"</string>
-    <string name="mobile_data_always_on" msgid="7745605759775320362">"Mobiele gegevens altijd actief"</string>
+    <string name="mobile_data_always_on" msgid="7745605759775320362">"Mobiele data altijd actief"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Absoluut volume uitschakelen"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Opties weergeven voor certificering van draadloze weergave"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Logniveau voor wifi verhogen, weergeven per SSID RSSI in wifi-kiezer"</string>
@@ -184,7 +185,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Neplocaties toestaan"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Neplocaties toestaan"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Inspectie van weergavekenmerk inschakelen"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"De DHCP-client van Lollipop gebruiken in plaats van de nieuwe Android DHCP-client."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mobiele gegevens altijd actief houden, ook als wifi actief is (voor sneller schakelen tussen netwerken)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB-foutopsporing toestaan?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB-foutopsporing is alleen bedoeld voor ontwikkeldoeleinden. Het kan worden gebruikt om gegevens te kopiëren tussen je computer en je apparaat, apps zonder melding op je apparaat te installeren en loggegevens te lezen."</string>
@@ -234,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Clipgrenzen, marges en meer weergeven"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"V.r.n.l.-indelingsrichting afdwingen"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Schermindelingsrichting geforceerd instellen op v.r.n.l. voor alle talen"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"CPU-gebruik weergeven"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Schermoverlay met huidig CPU-gebruik"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"GPU-rendering afdwingen"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Gebruik van GPU voor 2D-tekening forceren"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA forceren"</string>
@@ -342,4 +340,5 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Grootst"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Aangepast (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Help en feedback"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"Menu"</string>
 </resources>

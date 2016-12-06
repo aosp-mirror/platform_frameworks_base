@@ -47,6 +47,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.settingslib.R;
 
 import java.io.File;
 import java.text.Collator;
@@ -582,10 +583,10 @@ public class ApplicationsState {
         public ArrayList<AppEntry> rebuild(AppFilter filter, Comparator<AppEntry> comparator,
                 boolean foreground) {
             synchronized (mRebuildSync) {
-                synchronized (mEntriesMap) {
+                synchronized (mRebuildingSessions) {
                     mRebuildingSessions.add(this);
                     mRebuildRequested = true;
-                    mRebuildAsync = false;
+                    mRebuildAsync = true;
                     mRebuildFilter = filter;
                     mRebuildComparator = comparator;
                     mRebuildForeground = foreground;
@@ -597,23 +598,7 @@ public class ApplicationsState {
                     }
                 }
 
-                // We will wait for .25s for the list to be built.
-                long waitend = SystemClock.uptimeMillis()+250;
-
-                while (mRebuildResult == null) {
-                    long now = SystemClock.uptimeMillis();
-                    if (now >= waitend) {
-                        break;
-                    }
-                    try {
-                        mRebuildSync.wait(waitend - now);
-                    } catch (InterruptedException e) {
-                    }
-                }
-
-                mRebuildAsync = true;
-
-                return mRebuildResult;
+                return null;
             }
         }
 
@@ -637,7 +622,7 @@ public class ApplicationsState {
             }
 
             if (filter != null) {
-                filter.init();
+                filter.init(mContext);
             }
 
             List<AppEntry> apps;
@@ -765,6 +750,7 @@ public class ApplicationsState {
         static final int MSG_LOAD_ICONS = 3;
         static final int MSG_LOAD_SIZES = 4;
         static final int MSG_LOAD_LAUNCHER = 5;
+        static final int MSG_LOAD_HOME_APP = 6;
 
         boolean mRunning;
 
@@ -776,7 +762,7 @@ public class ApplicationsState {
         public void handleMessage(Message msg) {
             // Always try rebuilding list first thing, if needed.
             ArrayList<Session> rebuildingSessions = null;
-            synchronized (mEntriesMap) {
+            synchronized (mRebuildingSessions) {
                 if (mRebuildingSessions.size() > 0) {
                     rebuildingSessions = new ArrayList<Session>(mRebuildingSessions);
                     mRebuildingSessions.clear();
@@ -833,13 +819,33 @@ public class ApplicationsState {
                         if (!mMainHandler.hasMessages(MainHandler.MSG_LOAD_ENTRIES_COMPLETE)) {
                             mMainHandler.sendEmptyMessage(MainHandler.MSG_LOAD_ENTRIES_COMPLETE);
                         }
-                        sendEmptyMessage(MSG_LOAD_LAUNCHER);
+                        sendEmptyMessage(MSG_LOAD_HOME_APP);
                     }
                 } break;
+                case MSG_LOAD_HOME_APP: {
+                    final List<ResolveInfo> homeActivities = new ArrayList<>();
+                    mPm.getHomeActivities(homeActivities);
+                    synchronized (mEntriesMap) {
+                        final int entryCount = mEntriesMap.size();
+                        for (int i = 0; i < entryCount; i++) {
+                            if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_HOME_APP acquired lock");
+                            final HashMap<String, AppEntry> userEntries = mEntriesMap.valueAt(i);
+                            for (ResolveInfo activity : homeActivities) {
+                                String packageName = activity.activityInfo.packageName;
+                                AppEntry entry = userEntries.get(packageName);
+                                if (entry != null) {
+                                    entry.isHomeApp = true;
+                                }
+                            }
+                            if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_HOME_APP releasing lock");
+                        }
+                    }
+                    sendEmptyMessage(MSG_LOAD_LAUNCHER);
+                }
+                break;
                 case MSG_LOAD_LAUNCHER: {
                     Intent launchIntent = new Intent(Intent.ACTION_MAIN, null)
                             .addCategory(Intent.CATEGORY_LAUNCHER);
-
                     for (int i = 0; i < mEntriesMap.size(); i++) {
                         int userId = mEntriesMap.keyAt(i);
                         // If we do not specify MATCH_DIRECT_BOOT_AWARE or
@@ -1135,6 +1141,11 @@ public class ApplicationsState {
          */
         public boolean hasLauncherEntry;
 
+        /**
+         * Whether or not it's a Home app.
+         */
+        public boolean isHomeApp;
+
         public String getNormalizedLabel() {
             if (normalizedLabel != null) {
                 return normalizedLabel;
@@ -1270,6 +1281,9 @@ public class ApplicationsState {
 
     public interface AppFilter {
         void init();
+        default void init(Context context) {
+            init();
+        }
         boolean filterApp(AppEntry info);
     }
 
@@ -1325,6 +1339,8 @@ public class ApplicationsState {
             } else if ((entry.info.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
                 return true;
             } else if (entry.hasLauncherEntry) {
+                return true;
+            } else if ((entry.info.flags & ApplicationInfo.FLAG_SYSTEM) != 0 && entry.isHomeApp) {
                 return true;
             }
             return false;
@@ -1386,6 +1402,33 @@ public class ApplicationsState {
         }
     };
 
+    public static final AppFilter FILTER_NOT_HIDE = new AppFilter() {
+        private String[] mHidePackageNames;
+
+        public void init(Context context) {
+            mHidePackageNames = context.getResources()
+                .getStringArray(R.array.config_hideWhenDisabled_packageNames);
+        }
+
+        @Override
+        public void init() {
+        }
+
+        @Override
+        public boolean filterApp(AppEntry entry) {
+            if (ArrayUtils.contains(mHidePackageNames, entry.info.packageName)) {
+                if (!entry.info.enabled) {
+                    return false;
+                } else if (entry.info.enabledSetting ==
+                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    };
+
     public static class VolumeFilter implements AppFilter {
         private final String mVolumeUuid;
 
@@ -1410,6 +1453,12 @@ public class ApplicationsState {
         public CompoundFilter(AppFilter first, AppFilter second) {
             mFirstFilter = first;
             mSecondFilter = second;
+        }
+
+        @Override
+        public void init(Context context) {
+            mFirstFilter.init(context);
+            mSecondFilter.init(context);
         }
 
         @Override

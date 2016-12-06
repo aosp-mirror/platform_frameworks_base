@@ -123,6 +123,11 @@ public class TileService extends Service {
     /**
      * @hide
      */
+    public static final String EXTRA_TOKEN = "token";
+
+    /**
+     * @hide
+     */
     public static final String EXTRA_COMPONENT = "android.service.quicksettings.extra.COMPONENT";
 
     private final H mHandler = new H(Looper.getMainLooper());
@@ -132,6 +137,7 @@ public class TileService extends Service {
     private IBinder mToken;
     private IQSService mService;
     private Runnable mUnlockRunnable;
+    private IBinder mTileToken;
 
     @Override
     public void onDestroy() {
@@ -197,7 +203,7 @@ public class TileService extends Service {
     public final void setStatusIcon(Icon icon, String contentDescription) {
         if (mService != null) {
             try {
-                mService.updateStatusIcon(mTile, icon, contentDescription);
+                mService.updateStatusIcon(mTileToken, icon, contentDescription);
             } catch (RemoteException e) {
             }
         }
@@ -224,14 +230,14 @@ public class TileService extends Service {
             @Override
             public void onViewDetachedFromWindow(View v) {
                 try {
-                    mService.onDialogHidden(getQsTile());
+                    mService.onDialogHidden(mTileToken);
                 } catch (RemoteException e) {
                 }
             }
         });
         dialog.show();
         try {
-            mService.onShowDialog(mTile);
+            mService.onShowDialog(mTileToken);
         } catch (RemoteException e) {
         }
     }
@@ -246,7 +252,7 @@ public class TileService extends Service {
     public final void unlockAndRun(Runnable runnable) {
         mUnlockRunnable = runnable;
         try {
-            mService.startUnlockAndRun(mTile);
+            mService.startUnlockAndRun(mTileToken);
         } catch (RemoteException e) {
         }
     }
@@ -292,7 +298,7 @@ public class TileService extends Service {
     public final void startActivityAndCollapse(Intent intent) {
         startActivity(intent);
         try {
-            mService.onStartActivity(mTile);
+            mService.onStartActivity(mTileToken);
         } catch (RemoteException e) {
         }
     }
@@ -311,14 +317,14 @@ public class TileService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         mService = IQSService.Stub.asInterface(intent.getIBinderExtra(EXTRA_SERVICE));
+        mTileToken = intent.getIBinderExtra(EXTRA_TOKEN);
         try {
-            ComponentName component = intent.getParcelableExtra(EXTRA_COMPONENT);
-            mTile = mService.getTile(component);
+            mTile = mService.getTile(mTileToken);
         } catch (RemoteException e) {
             throw new RuntimeException("Unable to reach IQSService", e);
         }
         if (mTile != null) {
-            mTile.setService(mService);
+            mTile.setService(mService, mTileToken);
             mHandler.sendEmptyMessage(H.MSG_START_SUCCESS);
         }
         return new IQSTileService.Stub() {
@@ -403,7 +409,7 @@ public class TileService extends Service {
                     break;
                 case MSG_START_SUCCESS:
                     try {
-                        mService.onStartSuccessful(mTile);
+                        mService.onStartSuccessful(mTileToken);
                     } catch (RemoteException e) {
                     }
                     break;

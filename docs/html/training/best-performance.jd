@@ -6,3 +6,8 @@ page.trainingcourse=true
 
 <p>These classes and articles help you build an app that's smooth, responsive,
 and uses as little battery as possible.</p>
+
+<p>Along with this section, you can find additional information about optimizing
+your app in the <a href="/topic/performance/index.html">Performance and
+Power</a> section.</p>
+

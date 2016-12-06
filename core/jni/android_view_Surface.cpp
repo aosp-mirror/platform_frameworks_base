@@ -487,6 +487,11 @@ static jint nativeSetScalingMode(JNIEnv *env, jclass clazz, jlong nativeObject, 
     return surface->setScalingMode(scalingMode);
 }
 
+static jint nativeForceScopedDisconnect(JNIEnv *env, jclass clazz, jlong nativeObject) {
+    Surface* surface = reinterpret_cast<Surface*>(nativeObject);
+    return surface->disconnect(-1, IGraphicBufferProducer::DisconnectMode::AllLocal);
+}
+
 namespace uirenderer {
 
 using namespace android::uirenderer::renderthread;
@@ -564,6 +569,7 @@ static const JNINativeMethod gSurfaceMethods[] = {
     {"nativeGetHeight", "(J)I", (void*)nativeGetHeight },
     {"nativeGetNextFrameNumber", "(J)J", (void*)nativeGetNextFrameNumber },
     {"nativeSetScalingMode", "(JI)I", (void*)nativeSetScalingMode },
+    {"nativeForceScopedDisconnect", "(J)I", (void*)nativeForceScopedDisconnect},
 
     // HWUI context
     {"nHwuiCreate", "(JJ)J", (void*) hwui::create },

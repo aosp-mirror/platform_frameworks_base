@@ -22,7 +22,6 @@ import com.android.internal.logging.MetricsProto;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.server.Watchdog;
 
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
@@ -33,10 +32,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageDataObserver;
-import android.content.pm.PackageManager;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
@@ -58,7 +54,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.concurrent.Semaphore;
+import java.util.Set;
 
 import static com.android.server.Watchdog.NATIVE_STACKS_OF_INTEREST;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ANR;
@@ -362,7 +358,7 @@ class AppErrors {
                 return;
             }
 
-            Message msg = Message.obtain();
+            final Message msg = Message.obtain();
             msg.what = ActivityManagerService.SHOW_ERROR_UI_MSG;
 
             task = data.task;
@@ -390,8 +386,8 @@ class AppErrors {
                     } catch (IllegalArgumentException e) {
                         // Hmm, that didn't work, app might have crashed before creating a
                         // recents entry. Let's see if we have a safe-to-restart intent.
-                        if (task.intent.getCategories().contains(
-                                Intent.CATEGORY_LAUNCHER)) {
+                        final Set<String> cats = task.intent.getCategories();
+                        if (cats != null && cats.contains(Intent.CATEGORY_LAUNCHER)) {
                             mService.startActivityInPackage(task.mCallingUid,
                                     task.mCallingPackage, task.intent,
                                     null, null, null, 0, 0,
@@ -579,6 +575,8 @@ class AppErrors {
     boolean handleAppCrashLocked(ProcessRecord app, String reason,
             String shortMsg, String longMsg, String stackTrace, AppErrorDialog.Data data) {
         long now = SystemClock.uptimeMillis();
+        boolean showBackground = Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
 
         Long crashTime;
         Long crashTimePersistent;
@@ -616,7 +614,9 @@ class AppErrors {
                 // processes run critical code.
                 mService.removeProcessLocked(app, false, false, "crash");
                 mService.mStackSupervisor.resumeFocusedStackTopActivityLocked();
-                return false;
+                if (!showBackground) {
+                    return false;
+                }
             }
             mService.mStackSupervisor.resumeFocusedStackTopActivityLocked();
         } else {
@@ -631,12 +631,21 @@ class AppErrors {
             }
         }
 
+        boolean procIsBoundForeground =
+                (app.curProcState == ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
         // Bump up the crash count of any services currently running in the proc.
         for (int i=app.services.size()-1; i>=0; i--) {
             // Any services running in the application need to be placed
             // back in the pending list.
             ServiceRecord sr = app.services.valueAt(i);
             sr.crashCount++;
+
+            // Allow restarting for started or bound foreground services that are crashing the
+            // first time. This includes wallpapers.
+            if ((data != null) && (sr.crashCount <= 1)
+                    && (sr.isForeground || procIsBoundForeground)) {
+                data.isRestartableForService = true;
+            }
         }
 
         // If the crashing process is what we consider to be the "home process" and it has been
@@ -700,7 +709,7 @@ class AppErrors {
             }
             final boolean crashSilenced = mAppsNotReportingCrashes != null &&
                     mAppsNotReportingCrashes.contains(proc.info.packageName);
-            if (mService.canShowErrorDialogs() && !crashSilenced) {
+            if ((mService.canShowErrorDialogs() || showBackground) && !crashSilenced) {
                 proc.crashDialog = new AppErrorDialog(mContext, mService, data);
             } else {
                 // The device is asleep, so just pretend that the user
@@ -747,6 +756,12 @@ class AppErrors {
             mService.updateCpuStatsNow();
         }
 
+        // Unless configured otherwise, swallow ANRs in background processes & kill the process.
+        boolean showBackground = Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
+
+        boolean isSilentANR;
+
         synchronized (mService) {
             // PowerManager.reboot() can block for a long time, so ignore ANRs while shutting down.
             if (mService.mShuttingDown) {
@@ -777,25 +792,29 @@ class AppErrors {
             // Dump thread traces as quickly as we can, starting with "interesting" processes.
             firstPids.add(app.pid);
 
-            int parentPid = app.pid;
-            if (parent != null && parent.app != null && parent.app.pid > 0) {
-                parentPid = parent.app.pid;
-            }
-            if (parentPid != app.pid) firstPids.add(parentPid);
+            // Don't dump other PIDs if it's a background ANR
+            isSilentANR = !showBackground && !app.isInterestingToUserLocked() && app.pid != MY_PID;
+            if (!isSilentANR) {
+                int parentPid = app.pid;
+                if (parent != null && parent.app != null && parent.app.pid > 0) {
+                    parentPid = parent.app.pid;
+                }
+                if (parentPid != app.pid) firstPids.add(parentPid);
 
-            if (MY_PID != app.pid && MY_PID != parentPid) firstPids.add(MY_PID);
+                if (MY_PID != app.pid && MY_PID != parentPid) firstPids.add(MY_PID);
 
-            for (int i = mService.mLruProcesses.size() - 1; i >= 0; i--) {
-                ProcessRecord r = mService.mLruProcesses.get(i);
-                if (r != null && r.thread != null) {
-                    int pid = r.pid;
-                    if (pid > 0 && pid != app.pid && pid != parentPid && pid != MY_PID) {
-                        if (r.persistent) {
-                            firstPids.add(pid);
-                            if (DEBUG_ANR) Slog.i(TAG, "Adding persistent proc: " + r);
-                        } else {
-                            lastPids.put(pid, Boolean.TRUE);
-                            if (DEBUG_ANR) Slog.i(TAG, "Adding ANR proc: " + r);
+                for (int i = mService.mLruProcesses.size() - 1; i >= 0; i--) {
+                    ProcessRecord r = mService.mLruProcesses.get(i);
+                    if (r != null && r.thread != null) {
+                        int pid = r.pid;
+                        if (pid > 0 && pid != app.pid && pid != parentPid && pid != MY_PID) {
+                            if (r.persistent) {
+                                firstPids.add(pid);
+                                if (DEBUG_ANR) Slog.i(TAG, "Adding persistent proc: " + r);
+                            } else {
+                                lastPids.put(pid, Boolean.TRUE);
+                                if (DEBUG_ANR) Slog.i(TAG, "Adding ANR proc: " + r);
+                            }
                         }
                     }
                 }
@@ -818,10 +837,18 @@ class AppErrors {
             info.append("Parent: ").append(parent.shortComponentName).append("\n");
         }
 
-        final ProcessCpuTracker processCpuTracker = new ProcessCpuTracker(true);
+        ProcessCpuTracker processCpuTracker = new ProcessCpuTracker(true);
 
-        File tracesFile = mService.dumpStackTraces(true, firstPids, processCpuTracker, lastPids,
-                NATIVE_STACKS_OF_INTEREST);
+        String[] nativeProcs = NATIVE_STACKS_OF_INTEREST;
+        // don't dump native PIDs for background ANRs
+        File tracesFile = null;
+        if (isSilentANR) {
+            tracesFile = mService.dumpStackTraces(true, firstPids, null, lastPids,
+                null);
+        } else {
+            tracesFile = mService.dumpStackTraces(true, firstPids, processCpuTracker, lastPids,
+                nativeProcs);
+        }
 
         String cpuInfo = null;
         if (ActivityManagerService.MONITOR_CPU_USAGE) {
@@ -865,14 +892,10 @@ class AppErrors {
             }
         }
 
-        // Unless configured otherwise, swallow ANRs in background processes & kill the process.
-        boolean showBackground = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
-
         synchronized (mService) {
             mService.mBatteryStatsService.noteProcessAnr(app.processName, app.uid);
 
-            if (!showBackground && !app.isInterestingToUserLocked() && app.pid != MY_PID) {
+            if (isSilentANR) {
                 app.kill("bg anr", true);
                 return;
             }
@@ -929,7 +952,9 @@ class AppErrors {
                     null, null, 0, null, null, null, AppOpsManager.OP_NONE,
                     null, false, false, MY_PID, Process.SYSTEM_UID, 0 /* TODO: Verify */);
 
-            if (mService.canShowErrorDialogs()) {
+            boolean showBackground = Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
+            if (mService.canShowErrorDialogs() || showBackground) {
                 d = new AppNotRespondingDialog(mService,
                         mContext, proc, (ActivityRecord)data.get("activity"),
                         msg.arg1 != 0);

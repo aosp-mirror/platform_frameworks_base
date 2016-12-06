@@ -7,11 +7,11 @@ parent.link=index.html
   <img src="{@docRoot}images/ui/ui-controls.png" alt="" style="margin:0" />
 </div>
 
-<p>입력 제어는 앱의 사용자 인터페이스에 있는 대화형 구성 요소입니다. 
+<p>입력 제어는 앱의 사용자 인터페이스에 있는 대화형 구성 요소입니다.
 Android는 버튼, 텍스트 필드, 찾기 막대, 확인란, 확대 버튼, 전환 버튼 등과 같이
 UI에서 사용할 수 있도록 매우 다양한 제어를 제공합니다.</p>
 
-<p>UI에 입력 제어를 추가하려면 단순히 <a href="{@docRoot}guide/topics/ui/declaring-layout.html">XML 레이아웃</a>에 XML 요소를 하나 추가하기만 하면 됩니다. 
+<p>UI에 입력 제어를 추가하려면 단순히 <a href="{@docRoot}guide/topics/ui/declaring-layout.html">XML 레이아웃</a>에 XML 요소를 하나 추가하기만 하면 됩니다.
 다음은 텍스트 필드와 버튼이 있는 레이아웃을 예시로 나타낸 것입니다.</p>
 
 <pre style="clear:right">
@@ -33,16 +33,16 @@ UI에서 사용할 수 있도록 매우 다양한 제어를 제공합니다.</p>
 &lt;/LinearLayout>
 </pre>
 
-<p>각 입력 제어는 특정한 입력 이벤트를 지원하므로, 사용자가 텍스트를 입력할 때 또는 버튼을 터치할 때 
+<p>각 입력 제어는 특정한 입력 이벤트를 지원하므로, 사용자가 텍스트를 입력할 때 또는 버튼을 터치할 때
 이벤트를 처리할 수 있게 해줍니다.</p>
 
 
 <h2 id="CommonControls">보편적인 제어</h2>
-<p>다음은 앱에서 사용할 수 있는 몇 가지 보편적인 제어를 목록으로 나열한 것입니다. 링크를 따라가면 각 제어에 대해 
+<p>다음은 앱에서 사용할 수 있는 몇 가지 보편적인 제어를 목록으로 나열한 것입니다. 링크를 따라가면 각 제어에 대해
 좀 더 자세히 알아볼 수 있습니다.</p>
 
 <p class="note"><strong>참고:</strong> Android는 여기에 나열된 것보다 몇 가지 더 많은 제어를 제공합니다.
- 더 많은 내용을 알아보려면 {@link android.widget} 패키지를 탐색해보십시오. 
+ 더 많은 내용을 알아보려면 {@link android.widget} 패키지를 탐색해보십시오.
 앱에 특정한 종류의 입력 제어가 필요한 경우, 나름의 <a href="{@docRoot}guide/topics/ui/custom-components.html">사용자 지정 구성 요소</a>를 직접 구축해도 됩니다.</p>
 
 <table>
@@ -69,7 +69,7 @@ UI에서 사용할 수 있도록 매우 다양한 제어를 제공합니다.</p>
     <tr>
         <td><a href="controls/radiobutton.html">무선 버튼</a></td>
         <td>확인란과 비슷하지만, 예외가 있다면 그룹 내에서 하나만 선택할 수 있다는 점입니다.</td>
-	<td>{@link android.widget.RadioGroup RadioGroup} 
+	<td>{@link android.widget.RadioGroup RadioGroup}
 	<br>{@link android.widget.RadioButton RadioButton} </td>
     </tr>
     <tr>

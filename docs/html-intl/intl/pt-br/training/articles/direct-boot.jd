@@ -1,0 +1,181 @@
+page.title=Inicialização direta
+page.keywords=preview,sdk,direct boot
+page.tags=androidn
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>Neste documento</h2>
+  <ol>
+    <li><a href="#run">Solicitar acesso para executar durante a inicialização direta</a></li>
+    <li><a href="#access">Acesso ao armazenamento criptografado do dispositivo</a></li>
+    <li><a href="#notification">Receber notificação quando o usuário desbloquear</a></li>
+    <li><a href="#migrating">Migrar dados existentes</a></li>
+    <li><a href="#testing">Testar seu aplicativo com reconhecimento de criptografia</a></li>
+  </ol>
+</div>
+</div>
+
+<p>O Android N é executado em um modo seguro de <i>inicialização direta</i>
+quando o dispositivo é ligado, mas o usuário não o
+desbloqueia. Para isso, o sistema oferece dois locais de armazenamento para dados:</p>
+
+<ul>
+<li><i>O armazenamento criptografado de credenciais</i>, que é o local de armazenamento padrão
+e é disponibilizado apenas depois que o usuário desbloqueia o dispositivo.</li>
+<li><i>O armazenamento criptografado do dispositivo</i>, que é um local de armazenamento disponibilizado
+durante o modo de inicialização direta e depois que o usuário desbloqueia o dispositivo.</li>
+</ul>
+
+<p>Por padrão, aplicativos não são executados no modo de inicialização direta.
+Se seu aplicativo precisa executar ações durante esse modo, você pode registrar os
+componentes que devem ser executados. Alguns casos comuns
+para aplicativos que precisam ser executados no modo de inicialização direta:</p>
+
+<ul>
+<li>Aplicativos com notificações programadas, como aplicativos de
+despertador.</li>
+<li>Aplicativos que fornecem notificações importantes ao usuário, como aplicativos de SMS.</li>
+<li>Aplicativos que fornecem serviços de acessibilidade, como o Talkback.</li>
+</ul>
+
+<p>Se seu aplicativo precisar acessar dados enquanto estiver no modo de inicialização direta, use
+o armazenamento criptografado do dispositivo. O armazenamento criptografado do dispositivo contém dados
+criptografados com uma chave que só é disponibilizada depois que o dispositivo realizou
+uma inicialização verificada com sucesso.</p>
+
+<p>Para dados que devem ser criptografados com uma chave associada às credenciais
+do usuário, como um PIN ou uma senha, use o armazenamento criptografado de credenciais.
+Esse armazenamento só é disponibilizado depois que o usuário
+desbloquear o dispositivo com sucesso e até que ele reinicie o dispositivo novamente. Se o
+usuário ativar a tela de bloqueio após desbloquear o dispositivo, isso não bloqueará
+o armazenamento criptografado de credenciais.</p>
+
+<h2 id="run">Solicitar acesso para executar durante a inicialização direta</h2>
+
+<p>Aplicativos devem registrar seus componentes com o sistema antes de
+poderem ser executados no modo de inicialização direta ou acessar o armazenamento criptografado
+do dispositivo. Os aplicativos são registrados com o sistema ao marcar os componentes como
+<i>tendo reconhecimento de criptografia</i>. Para marcar seu componente como tendo reconhecimento de criptografia, defina o atributo
+<code>android:directBootAware</code> como true no manifesto.<p>
+
+<p>Componentes com reconhecimento de criptografia podem se registrar para receber uma mensagem de transmissão
+<code>LOCKED_BOOT_COMPLETED</code> do
+sistema quando o dispositivo é reiniciado. Nesse momento, o armazenamento criptografado do
+dispositivo é disponibilizado e pode executar tarefas
+necessárias durante o modo de inicialização, como o acionamento de um alarme programado.</p>
+
+<p>O snippet de código a seguir é um exemplo de como registrar um
+{@link android.content.BroadcastReceiver} como tendo reconhecimento de criptografia e adicionar um
+filtro de intenção para <code>LOCKED_BOOT_COMPLETED</code> no manifesto do aplicativo:</p>
+
+<pre>
+&lt;receiver
+  android:directBootAware="true" &gt;
+  ...
+  &lt;intent-filter&gt;
+    &lt;action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" /&gt;
+  &lt;/intent-filter&gt;
+&lt;/receiver&gt;
+</pre>
+
+<p>Quando o usuário desbloquear o dispositivo, todos os componentes poderão acessar o armazenamento
+criptografado do dispositivo e o armazenamento criptografado de credenciais.</p>
+
+<h2 id="access">Acesso ao armazenamento criptografado do dispositivo</h2>
+
+<p>Para acessar o armazenamento criptografado do dispositivo, crie uma segunda instância de
+{@link android.content.Context} chamando
+<code>Context.createDeviceProtectedStorageContext()</code>. Todas as chamadas da API
+de armazenamento que usam esse contexto acessam o armazenamento criptografado do dispositivo. O
+exemplo a seguir acessa o armazenamento criptografado do dispositivo e abre um
+arquivo de dados existente do aplicativo:</p>
+
+<pre>
+Context directBootContext = appContext.createDeviceProtectedStorageContext();
+// Access appDataFilename that lives in device encrypted storage
+FileInputStream inStream = directBootContext.openFileInput(appDataFilename);
+// Use inStream to read content...
+</pre>
+
+<p>Use o armazenamento criptografado do dispositivo somente para
+informações que precisem ser acessadas durante o modo de inicialização direta.
+Não use o armazenamento criptografado do dispositivo como um repositório criptografado para fins gerais.
+Para informações particulares do usuário ou dados criptografados que não são necessários durante
+o modo de inicialização direta, use o armazenamento criptografado de credenciais.</p>
+
+<h2 id="notification">Receber notificação quando o usuário desbloquear</h2>
+
+<p>Quando o usuário desbloquear o dispositivo após a reinicialização, seu aplicativo poderá voltar
+a acessar o armazenamento criptografado de credenciais e usar serviços regulares do sistema que
+dependem das credenciais do usuário.</p>
+
+<p>Para receber uma notificação quando o usuário desbloquear o dispositivo após uma reinicialização,
+registre um {@link android.content.BroadcastReceiver} do componente em execução
+para ouvir a mensagem <code>ACTION_USER_UNLOCKED</code>. Você também pode
+receber a mensagem {@link android.content.Intent#ACTION_BOOT_COMPLETED
+ACTION_BOOT_COMPLETED} existente, que agora indica que o dispositivo foi inicializado e que
+o usuário o desbloqueou.</p>
+
+<p>Você pode enviar uma consulta diretamente se o usuário desbloquear o dispositivo chamando
+<code>UserManager.isUserUnlocked()</code>.</p>
+
+<h2 id="migrating">Migrar dados existentes</h2>
+
+<p>Se um usuário atualizar o dispositivo para usar o modo de inicialização direta, você poderá ter dados
+existentes que precisem ser migrados para o armazenamento criptografado do dispositivo. Use
+<code>Context.moveSharedPreferencesFrom()</code> e
+<code>Context.moveDatabaseFrom()</code> para migrar dados de preferências e do banco de
+dados entre o armazenamento criptografado de credenciais e o armazenamento criptografado do dispositivo.</p>
+
+<p>Tenha bom senso ao decidir quais dados migrar do armazenamento
+criptografado de credenciais para o armazenamento criptografado do dispositivo. Não migre
+informações particulares do usuário, como senhas ou tokens de autorização, para o
+armazenamento criptografado do dispositivo. Em alguns casos, pode ser necessário gerenciar
+conjuntos separados de dados nos dois repositórios criptografados.</p>
+
+<h2 id="testing">Testar seu aplicativo com reconhecimento de criptografia</h2>
+
+<p>Teste seu aplicativo com reconhecimento de criptografia usando o novo modo de inicialização direta. Existem duas
+maneiras de ativar a inicialização direta.</p>
+
+<p class="caution"><strong>Cuidado:</strong> ao ativar a inicialização direta,
+você apaga todos os dados do usuário no dispositivo.</p>
+
+<p>Em dispositivos compatíveis com o Android N instalado, ative a
+inicialização direta seguindo um destes procedimentos:</p>
+
+<ul>
+<li>No dispositivo, ative <b>Developer options</b>, se ainda não tiver feito isso,
+acessando <b>Settings &gt; About phone</b> e tocando em <b>Build number</b>
+sete vezes. Quando a tela de opções do desenvolvedor for disponibilizada, acesse
+<b>Settings &gt; Developer options</b> e selecione
+<b>Convert to file encryption</b>.</li>
+<li>Use os seguintes comandos de shell adb para ativar o modo de inicialização direta:
+<pre class="no-pretty-print">
+$ adb reboot-bootloader
+$ fastboot --wipe-and-use-fbe
+</pre>
+</li>
+</ul>
+
+<p>Um modo de inicialização direta emulado também está disponível, caso você precise trocar
+de modo nos dispositivos de teste. O modo emulado só deve ser usado durante
+o desenvolvimento e pode causar perda de dados. Para ativar o modo de inicialização direta,
+defina um padrão de bloqueio no dispositivo, escolha "No thanks", caso seja solicitada
+uma tela de inicialização segura ao definir esse padrão, e, em seguida, use o
+seguinte comando de shell adb:</p>
+
+<pre class="no-pretty-print">
+$ adb shell sm set-emulate-fbe true
+</pre>
+
+<p>Para desativar o modo de inicialização direta emulado, use o seguinte comando:</p>
+
+<pre class="no-pretty-print">
+$ adb shell sm set-emulate-fbe false
+</pre>
+
+<p>O uso desses comandos faz com que o dispositivo seja reinicializado.</p>

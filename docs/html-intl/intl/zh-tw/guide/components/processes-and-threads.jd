@@ -49,7 +49,7 @@ page.tags=生命週期、背景
 &lt;receiver&gt;}</a> 和 <a href="{@docRoot}guide/topics/manifest/provider-element.html">{@code
 &lt;provider&gt;}</a> &mdash; 的宣示說明項目都支援 {@code android:process} 屬性，這項屬性能指定元件應在哪個處理程序執行。
 您可以設定此屬性讓每個元件都以自己的處理程序執行，或只讓當中的部分元件共用同一處理程序。
-您也可以設定 
+您也可以設定
 {@code android:process}，讓不同應用程式的元件以相同的處理程序執行，只要這些應用程式分享相同的 Linux 使用者 ID 並以相同的憑證簽署。
 
 </p>
@@ -142,7 +142,7 @@ android.content.Context#startService startService()} 方法啟動的服務的處
   </li>
 
   <li><b>背景處理程序</b>
-    <p>這種處理程序會保留使用者目前看不見的 Activity (已呼叫 Activity 的 
+    <p>這種處理程序會保留使用者目前看不見的 Activity (已呼叫 Activity 的
 {@link android.app.Activity#onStop onStop()} 方法)。這些處理程序會間接影響使用者體驗，且系統能隨時將其終止，藉此回收記憶體以供前景、可見或服務處理程序使用。
 
 
@@ -319,7 +319,7 @@ private class DownloadImageTask extends AsyncTask&lt;String, Void, Bitmap&gt; {
     protected Bitmap doInBackground(String... urls) {
         return loadImageFromNetwork(urls[0]);
     }
-    
+
     /** The system calls this to perform work in the UI thread and delivers
       * the result from doInBackground() */
     protected void onPostExecute(Bitmap result) {

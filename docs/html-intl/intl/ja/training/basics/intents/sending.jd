@@ -93,7 +93,7 @@ Intent webIntent = new Intent(Intent.ACTION_VIEW, webpage);
 さまざまな {@link
 android.content.Intent#putExtra(String,String) putExtra()} メソッドを使用して、特別データを 1 つ以上追加することができます。</p>
 
-<p>デフォルトでは、インテントに含まれる 
+<p>デフォルトでは、インテントに含まれる
 {@link android.net.Uri} データに基づいて、インテントに必要な適切な MIME タイプをシステムが決定します。インテントに {@link android.net.Uri} が含まれていない場合は、通常は {@link android.content.Intent#setType setType()} を使用して、インテントに関連するデータのタイプを指定する必要があります。
 
 MIME タイプの詳細な指定により、どの種類のアクティビティがインテントを受け取るかが指定されます。

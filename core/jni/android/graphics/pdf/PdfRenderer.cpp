@@ -44,11 +44,9 @@ static struct {
 } gPointClassInfo;
 
 // See PdfEditor.cpp
-extern Mutex sPdfiumLock;
 extern int sUnmatchedPdfiumInitRequestCount;
 
 static void initializeLibraryIfNeeded() {
-    Mutex::Autolock _l(sPdfiumLock);
     if (sUnmatchedPdfiumInitRequestCount == 0) {
         FPDF_InitLibrary();
     }
@@ -56,7 +54,6 @@ static void initializeLibraryIfNeeded() {
 }
 
 static void destroyLibraryIfNeeded() {
-    Mutex::Autolock _l(sPdfiumLock);
     sUnmatchedPdfiumInitRequestCount--;
     if (sUnmatchedPdfiumInitRequestCount == 0) {
        FPDF_DestroyLibrary();

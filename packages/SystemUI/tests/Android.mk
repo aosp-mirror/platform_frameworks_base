@@ -58,6 +58,42 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 # UI it doesn't own. This is necessary to allow screenshots to be taken
 LOCAL_CERTIFICATE := platform
 
+# Provide jack a list of classes to exclude from code coverage.
+# This is needed because the SystemUITests compile SystemUI source directly, rather than using
+# LOCAL_INSTRUMENTATION_FOR := SystemUI.
+#
+# We want to exclude the test classes from code coverage measurements, but they share the same
+# package as the rest of SystemUI so they can't be easily filtered by package name.
+#
+# Generate a comma separated list of patterns based on the test source files under src/
+# SystemUI classes are in ../src/ so they won't be excluded.
+# Example:
+#   Input files: src/com/android/systemui/Test.java src/com/android/systemui/AnotherTest.java
+#   Generated exclude list: com.android.systemui.Test*,com.android.systemui.AnotherTest*
+
+# Filter all src files under src/ to just java files
+local_java_files := $(filter %.java,$(call all-java-files-under, src))
+# Transform java file names into full class names.
+# This only works if the class name matches the file name and the directory structure
+# matches the package.
+local_classes := $(subst /,.,$(patsubst src/%.java,%,$(local_java_files)))
+local_comma := ,
+local_empty :=
+local_space := $(local_empty) $(local_empty)
+# Convert class name list to jacoco exclude list
+# This appends a * to all classes and replace the space separators with commas.
+jacoco_exclude := $(subst $(space),$(comma),$(patsubst %,%*,$(local_classes)))
+
+LOCAL_JACK_COVERAGE_INCLUDE_FILTER := com.android.systemui.*
+LOCAL_JACK_COVERAGE_EXCLUDE_FILTER := com.android.systemui.tests.*,$(jacoco_exclude)
+
 include frameworks/base/packages/SettingsLib/common.mk
 
 include $(BUILD_PACKAGE)
+
+# Reset variables
+local_java_files :=
+local_classes :=
+local_comma :=
+local_space :=
+jacoco_exclude :=

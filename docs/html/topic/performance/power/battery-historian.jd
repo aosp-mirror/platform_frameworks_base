@@ -1,0 +1,247 @@
+page.title=Analyzing Power Use with Battery Historian
+page.metaDescription=Improve network performance by optimizing image size.
+
+meta.tags="power"
+page.tags="power"
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+    <ol>
+      <li>
+        <a href="#sv">System-wide View</a>
+      </li>
+      <li>
+        <a href="#asd">App-Specific Data</a>
+      </li>
+      <li>
+        <a href="#usecases">Other Cases Where Battery Historian Can Help</a>
+      </li>
+    </ol>
+<h2>See also</h2>
+   <ol>
+      <li>
+      <a href="https://github.com/google/battery-historian">Battery Historian
+      on GitHub</a>
+      </li>
+
+      <li>
+      <a href="https://developer.android.com/studio/profile/battery-historian.html">
+      Batterystats and Battery Historian Walkthrough
+      </li>
+
+      <li>
+      <a href="https://youtu.be/VC2Hlb22mZM?list=PLOU2XLYxmsILe6_eGvDN3GyiodoV3qNSC&t=2063"
+      target="_blank">
+      Battery Historian talk at Google I/O 2016</a>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<p>
+The Battery Historian tool provides insight into a device’s battery consumption
+over time. At a system-wide level, the tool visualizes power-related events from
+the system logs in an HTML representation. At an app-specific level, the tool
+provides a variety of data that can help you identify battery-draining app
+behavior.
+</p>
+
+<p>
+This document describes some of the ways you can use Battery Historian
+to learn about battery-consumption patterns. The document begins by explaining
+how to read the system-wide data that Battery Historian reports. Then,
+it presents ways in which you can use Battery Historian to diagnose
+and troubleshoot your own app's behavior related to battery consumption.
+Last, it offers several tips on scenarios in which Battery Historian may be
+particularly useful.
+</p>
+
+<h2 id="sv">System-wide View</h2>
+
+<p>
+The Battery Historian tool provides a system-wide visualization of various
+app and system behaviors, along with their correlation against battery
+consumption over time. This view, shown in Figure 1, can help you
+diagnose and identify power use issues with your app.
+</p>
+
+  <img src="{@docRoot}topic/performance/images/generic-timeline.png">
+  <p class="img-caption">
+<strong>Figure 1.</strong>
+Battery Historian’s display of system-wide events affecting power
+consumption.
+  </p>
+
+<p>
+Of particular interest in this figure is the black, horizontal, downward trend
+line representing Battery Level, measured on the y-axis. For example, at the
+very beginning of the Battery Level line, at approximately 6:50 AM, the
+visualization shows a relatively steep drop in battery level.
+</p>
+
+<p>
+Figure 2 provides a close-up of that part of the display.
+</p>
+
+  <img src="{@docRoot}topic/performance/images/s-generic-closeup.png">
+  <p class="img-caption">
+<strong>Figure 2.</strong>
+A close-up of the Battery Historian timeline from roughly 6:50 AM to 7:20 AM.
+  </p>
+
+<p>
+At the very beginning of the Battery Level line, as battery decline steeply,
+the display shows three things happening: The CPU is running, an app has
+acquired a wakelock, and the screen is on. In this way, Battery Historian helps
+you understand what events are happening when battery consumption is high. You
+can then target these behaviors in your app and investigate whether there are
+related optimizations you can make.
+</p>
+
+<p>
+The system-wide visualization can provide other clues, as well. For instance, if
+it shows that the mobile radio is frequently being turned off and on, there may
+be an opportunity to optimize this behavior through <a href=”intelligent
+scheduling page”>intelligent scheduling APIs</a> such as JobScheduler or
+Firebase Job Dispatcher.
+</p>
+
+<p>
+The next section explains how to investigate behavior and events specific to
+your own app.
+</p>
+
+<p>
+<h2 id="asd">App-Specific Data</h2>
+</p>
+
+<p>
+In addition to the macro-level data provided by the system-wide view, Battery
+Historian also provides tables and some visualization of data specific to each
+app running on your device. The tabular data includes:
+</p>
+
+<ul>
+   <li>The app’s estimated power use on the device.</li>
+   <li>Network information.</li>
+   <li>Wakelocks.</li>
+   <li>Services.</li>
+   <li>Process info.</li>
+</ul>
+
+<p>
+The tables provide two dimensions of data about your app. First, you can look
+up where your app’s power usage ranks compared to other apps. To do so, click
+<em>Device Power Estimates</em> table under <em>Tables</em>. This example
+examines a fictional app called Pug Power.
+</p>
+
+  <img src="{@docRoot}topic/performance/images/app-rankings.png">
+  <p class="img-caption">
+<strong>Figure 3.</strong> Investigating which apps consume the most power.
+  </p>
+
+<p>
+The table in Figure 3 reveals that Pug Power is the ninth biggest consumer of
+battery power on this device, and the third biggest app that is not part of the
+OS. This data suggests that this app bears deeper investigation.
+</p>
+
+<p>
+To look up the data for a specific app, enter its package name into the lower
+of the two dropdown menus under <em>App Selection</em>, located under the left
+side of the visualization.
+</p>
+
+  <img src="{@docRoot}topic/performance/images/dropdown.png">
+  <p class="img-caption">
+<strong>Figure 4.</strong> Entering a specific app whose data to view.
+  </p>
+
+<p>
+When you select a specific app, the following data visualization categories
+change to display app-specific data instead of system-wide data:
+</p>
+
+<ul>
+   <li>SyncManager.</li>
+   <li>Foreground process.</li>
+   <li>Userspace Wakelock.</li>
+   <li>Top app.</li>
+   <li>JobScheduler.</li>
+   <li>Activity Manager Proc.</li>
+</ul>
+
+The SyncManager and JobScheduler visualizations immediately make it obvious if
+your app performs syncs and executes jobs more frequently than necessary. In
+doing so, they can quickly reveal an opportunity to optimize your app’s
+behavior for improved battery performance.
+
+<p>
+You can also obtain one more piece of app-specific visualization data,
+<em>Userspace Wakelock</em>. To include this information in the bug report,
+enter the following command in your terminal window:
+</p>
+
+<pre>
+$ adb shell dumpsys batterystats --enable full-wake-history
+</pre>
+
+<p class="note">
+<strong>Note:</strong> From Android 6.0 (API level 23), the platform includes
+Doze functionality, which imposes certain optimizations on apps. For example,
+Doze batches jobs to take place during brief maintenance windows, regardless of
+how JobScheduler has scheduled them.
+</p>
+
+<p>
+Figures 5 and 6 show data for Pug Power: Figure 5
+shows the visualization of
+the app-specific data, and Figure 6 shows the corresponding tabular data.
+</p>
+
+  <img src="{@docRoot}topic/performance/images/pug-visualization.png">
+  <p class="img-caption">
+<strong>Figure 5.</strong> Visualization of data for fictional app Pug Power.
+  </p>
+
+  <img src="{@docRoot}topic/performance/images/pugspecificdata.png">
+  <p class="img-caption">
+<strong>Figure 6.</strong> Tabular data for the fictional Pug Power app.
+  </p>
+
+<p>
+A look at the visualization does not show anything immediately obvious.
+The JobScheduler line shows that the app has no jobs scheduled. The SyncManager
+line shows that the app has not performed any syncs.
+</p>
+
+<p>
+However, examination of the <em>Wakelocks</em> segment of the tabular data
+reveals that Pug Power acquires wakelocks totaling over an hour. This unusual
+and costly behavior can account for the app’s high level of power consumption.
+This piece of information helps the developer target an area where optimization
+is likely to greatly help. In this case, why does the app acquire so much
+wakelock time, and how can the developer ameliorate this behavior?
+</p>
+
+<h2 id="usecases">Other Cases Where Battery Historian Can Help</h2>
+
+<p>
+There are many other cases in which Battery Historian can help you diagnose
+opportunities for improving battery behavior. For example, Battery Historian
+can tell you if your app is:
+</p>
+
+<ul>
+   <li>Firing wakeup alarms overly frequently (every 10 seconds or less).</li>
+   <li>Continuously holding a GPS lock.</li>
+   <li>Scheduling jobs every 30 seconds or less.</li>
+   <li>Scheduling syncs every 30 seconds or less.</li>
+   <li>Using the cellular radio more frequently than you expect.</li>
+</ul>
+

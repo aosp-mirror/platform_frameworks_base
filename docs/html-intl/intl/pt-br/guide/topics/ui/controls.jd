@@ -69,7 +69,7 @@ de um tipo específico de controle de entrada, você pode criar os próprios <a 
     <tr>
         <td><a href="controls/radiobutton.html">Botão de opção</a></td>
         <td>Similar às caixas de seleção, exceto que somente uma opção pode ser selecionada no grupo.</td>
-	<td>{@link android.widget.RadioGroup RadioGroup} 
+	<td>{@link android.widget.RadioGroup RadioGroup}
 	<br>{@link android.widget.RadioButton RadioButton} </td>
     </tr>
     <tr>

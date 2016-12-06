@@ -9,7 +9,7 @@ sys.date=February 2009
 <em>API Level:</em>&nbsp;<strong>2</strong></p>
 
 
-<p>This document provides version notes for the Android 1.1 system image included in the SDK. 
+<p>This document provides version notes for the Android 1.1 system image included in the SDK.
 
 <ul>
 <li><a href="#overview">Overview</a>
@@ -29,7 +29,7 @@ counterpart to the Android 1.1 production system image, deployable to
 Android-powered handsets starting in February 2009. </p>
 
 <p>The Android 1.1 system image delivers an updated version of the framework
-API. As with the Android 1.0 API, the Android 1.1 API 
+API. As with the Android 1.0 API, the Android 1.1 API
 is assigned an integer identifier &mdash; <strong>2</strong> &mdash; that is
 stored in the system itself. This identifier, called the "API Level", allows the
 system to correctly determine whether an application is compatible with
@@ -37,8 +37,8 @@ the system, prior to installing the application. </p>
 
 <p>Applications indicate the lowest system API Level that they are compatible with by adding
 a value to the <code>android:minSdkVersion</code> attribute.
-The value of the attribute is an integer corresponding to an API Level 
-identifier. Prior to installing an application, the system checks the value of 
+The value of the attribute is an integer corresponding to an API Level
+identifier. Prior to installing an application, the system checks the value of
 <code>android:minSdkVersion</code> and allows the install only
 if the referenced integer is less than or equal to the API Level integer stored
 in the system itself. </p>
@@ -139,7 +139,7 @@ listed below.</p>
 	<li>German (de) </li>
 	</ul>
 
-<p>Localized UI strings match the locales that are displayable in 
+<p>Localized UI strings match the locales that are displayable in
 the emulator, accessible through the device Settings application.</p>
 
 <h2 id="resolved-issues">Resolved Issues</h2>

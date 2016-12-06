@@ -851,4 +851,11 @@ public class BaseInputConnection implements InputConnection {
         
         endBatchEdit();
     }
+
+    /**
+     * The default implementation does nothing.
+     */
+    public boolean commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts) {
+        return false;
+    }
 }

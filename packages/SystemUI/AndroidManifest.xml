@@ -150,9 +150,6 @@
     <!-- DevicePolicyManager get user restrictions -->
     <uses-permission android:name="android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS" />
 
-    <!-- Needed for passing extras with intent ACTION_SHOW_ADMIN_SUPPORT_DETAILS -->
-    <uses-permission android:name="android.permission.MANAGE_DEVICE_ADMINS" />
-
     <!-- TV picture-in-picture -->
     <uses-permission android:name="android.permission.RECEIVE_MEDIA_RESOURCE_USAGE" />
 
@@ -164,6 +161,9 @@
 
     <!-- the ability to rename notifications posted by other apps -->
     <uses-permission android:name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME" />
+
+    <!-- shortcut manager -->
+    <uses-permission android:name="android.permission.RESET_SHORTCUT_MANAGER_THROTTLING" />
 
     <application
         android:name=".SystemUIApplication"
@@ -213,18 +213,9 @@
             </intent-filter>
         </receiver>
 
-        <service android:name=".LoadAverageService"
-                android:exported="true" />
-
         <service android:name=".ImageWallpaper"
                 android:permission="android.permission.BIND_WALLPAPER"
                 android:exported="true" />
-
-        <receiver android:name=".BootReceiver" androidprv:systemUserOnly="true">
-            <intent-filter android:priority="1000">
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
 
         <activity android:name=".tuner.TunerActivity"
                   android:enabled="false"
@@ -385,7 +376,7 @@
             android:theme="@style/PipTheme"
             android:launchMode="singleTop"
             android:taskAffinity=""
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|locale|layoutDirection"
             android:resizeableActivity="true"
             android:supportsPictureInPicture="true"
             androidprv:alwaysFocusable="true"
@@ -395,7 +386,7 @@
             android:exported="true"
             android:theme="@style/PipTheme"
             android:taskAffinity=""
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|locale|layoutDirection"
             android:resizeableActivity="true"
             android:supportsPictureInPicture="true"
             android:excludeFromRecents="true" />

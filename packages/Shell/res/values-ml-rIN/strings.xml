@@ -21,7 +21,7 @@
     <string name="bugreport_finished_title" msgid="4429132808670114081">"ബഗ് റിപ്പോർട്ട് <xliff:g id="ID">#%d</xliff:g> ക്യാപ്ചർ ചെയ്തു"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"ബഗ് റിപ്പോർട്ടിലേക്ക് വിശദാംശങ്ങൾ ചേർക്കുന്നു"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"കാത്തിരിക്കുക..."</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"നിങ്ങളുടെ ബഗ് റിപ്പോർട്ട് പങ്കിടുന്നതിന് ഇടത്തേയ്‌ക്ക് സ്വൈപ്പുചെയ്യുക"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"ബഗ് റിപ്പോർട്ട് താമസിയാതെ ഫോണിൽ ദൃശ്യമാകും"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"നിങ്ങളുടെ ബഗ് റിപ്പോർട്ട് പങ്കിടാൻ ടാപ്പുചെയ്യുക"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"സ്ക്രീൻഷോട്ട് കൂടാതെയോ സ്ക്രീൻഷോട്ട് പൂർത്തിയാകുന്നതിന് കാക്കാതെയോ നിങ്ങളുടെ ബഗ് റിപ്പോർട്ട് പങ്കിടാൻ ടാപ്പുചെയ്യുക"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"സ്ക്രീൻഷോട്ട് കൂടാതെയോ സ്ക്രീൻഷോട്ട് പൂർത്തിയാകുന്നതിന് കാക്കാതെയോ നിങ്ങളുടെ ബഗ് റിപ്പോർട്ട് പങ്കിടാൻ ടാപ്പുചെയ്യുക"</string>

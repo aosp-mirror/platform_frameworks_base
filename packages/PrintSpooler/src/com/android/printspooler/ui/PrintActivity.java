@@ -244,6 +244,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setTitle(R.string.print_dialog);
+
         Bundle extras = getIntent().getExtras();
 
         mPrintJob = extras.getParcelable(PrintManager.EXTRA_PRINT_JOB);
@@ -298,7 +300,6 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         // Now that we are bound to the local print spooler service
         // and the printer registry loaded the historical printers
         // we can show the UI without flickering.
-        setTitle(R.string.print_dialog);
         setContentView(R.layout.print_activity);
 
         try {
@@ -526,6 +527,14 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                     .setContentType(info.getContentType())
                     .setPageCount(pageCount)
                     .build();
+
+            File file = mFileProvider.acquireFile(null);
+            try {
+                adjustedInfo.setDataSize(file.length());
+            } finally {
+                mFileProvider.releaseFile();
+            }
+
             mPrintJob.setDocumentInfo(adjustedInfo);
             mPrintJob.setPages(document.printedPages);
         }
@@ -2060,6 +2069,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
         if (mPrinterRegistry != null) {
             mPrinterRegistry.setTrackedPrinter(null);
+            mPrinterRegistry.setOnPrintersChangeListener(null);
         }
 
         if (mPrintersObserver != null) {
@@ -3076,6 +3086,14 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                     .setContentType(oldDocInfo.getContentType())
                     .setPageCount(newPageCount)
                     .build();
+
+            File file = mFileProvider.acquireFile(null);
+            try {
+                newDocInfo.setDataSize(file.length());
+            } finally {
+                mFileProvider.releaseFile();
+            }
+
             mPrintJob.setDocumentInfo(newDocInfo);
         }
 

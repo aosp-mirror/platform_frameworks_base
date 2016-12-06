@@ -392,7 +392,7 @@ Demos</a> application.</p>
 <h3>Extended UI framework</h3>
 
 <ul>
-  
+
   <li><b>Multiple-choice selection for ListView and GridView</b>
 
 <p>New {@link android.widget.AbsListView#CHOICE_MODE_MULTIPLE_MODAL} mode for {@link
@@ -419,9 +419,9 @@ java</a>
 class in the API Demos sample application.</p>
   </li>
 
-  
+
   <li><b>New APIs to transform views</b>
-  
+
     <p>New APIs allow you to easily apply 2D and 3D transformations to views in your activity
 layout. New transformations are made possible with a set of object properties that define the view's
 layout position, orientation, transparency and more.</p>
@@ -452,7 +452,7 @@ animator.start();
 </pre>
   </li>
 
-  
+
   <li><b>New holographic themes</b>
 
     <p>The standard system widgets and overall look have been redesigned and incorporate a new
@@ -475,55 +475,55 @@ href="{@docRoot}guide/topics/ui/themes.html#SelectATheme">select a theme based o
 version</a>.</p>
 
   </li>
-  
-  
+
+
   <li><b>New widgets</b>
 
     <ul>
     <li>{@link android.widget.AdapterViewAnimator}
     <p>Base class for an {@link android.widget.AdapterView} that performs animations when switching
     between its views.</p></li>
-    
+
     <li>{@link android.widget.AdapterViewFlipper}
     <p>Simple {@link android.widget.ViewAnimator} that animates between two or more views that have
     been added to it. Only one child is shown at a time. If requested, it can automatically flip
   between
     each child at a regular interval.</p></li>
-    
+
     <li>{@link android.widget.CalendarView}
     <p>Allows users to select dates from a calendar by touching the date and can scroll or fling the
 calendar to a desired date. You can configure the range of dates available in the widget.</p></li>
-    
+
     <li>{@link android.widget.ListPopupWindow}
     <p>Anchors itself to a host view and displays a list of choices, such as for a list of
     suggestions when typing into an {@link android.widget.EditText} view.</p></li>
-    
+
     <li>{@link android.widget.NumberPicker}
     <p>Enables the user to select a number from a predefined range. The widget presents an input
 field and up and down buttons for selecting a number. Touching the input field allows the user to
 scroll through values or touch again to directly edit the current value. It also allows you to map
 positions to strings, so that the corresponding string is displayed instead of the index
 position.</p></li>
-    
+
     <li>{@link android.widget.PopupMenu}
     <p>Displays a {@link android.view.Menu} in a modal popup window that's anchored to a view. The
 popup appears below the anchor view if there is room, or above it if there is not. If the IME (soft
 keyboard) is visible, the popup does not overlap the IME it until the user touches the
 menu.</p></li>
-    
+
     <li>{@link android.widget.SearchView}
     <p>Provides a search box that you can configure to deliver search queries to a specified
 activity and display search suggestions (in the same manner as the traditional search dialog). This
 widget is particularly useful for offering a search widget in the Action Bar. For more information,
 see <a href="{@docRoot}guide/topics/search/search-dialog.html">Creating a Search Interface.</p></li>
-    
+
     <li>{@link android.widget.StackView}
     <p>A view that displays its children in a 3D stack and allows users to swipe through
   views like a rolodex.</p></li>
-    
+
     </ul>
   </li>
-  
+
 </ul>
 
 
@@ -545,7 +545,7 @@ smoother scrolling, and overall better performance and response to user interact
 
 
   <li><b>View support for hardware and software layers</b>
-  
+
     <p>By default, a {@link android.view.View} has no layer specified. You can specify that the
 view be backed by either a hardware or software layer, specified by values {@link
 android.view.View#LAYER_TYPE_HARDWARE} and {@link android.view.View#LAYER_TYPE_SOFTWARE}, using
@@ -563,7 +563,7 @@ software layer, which can potentially be slow.</p>
     <p>For more information, see the {@link android.view.View#LAYER_TYPE_HARDWARE} and {@link
 android.view.View#LAYER_TYPE_SOFTWARE} documentation.</p>
   </li>
-  
+
 
   <li><b>Renderscript 3D graphics engine</b>
 
@@ -591,7 +591,7 @@ android.media.MediaRecorder#setCaptureRate setCaptureRate()} sets the rate at wh
 should be captured.</p></li>
 
   <li><b>Texture support for image streams</b>
-    
+
 <p>New {@link android.graphics.SurfaceTexture} allows you to capture an image stream as an OpenGL ES
 texture. By calling {@link android.hardware.Camera#setPreviewTexture setPreviewTexture()} for your
 {@link android.hardware.Camera} instance, you can specify the {@link
@@ -599,7 +599,7 @@ android.graphics.SurfaceTexture} upon which to draw video playback or preview fr
 camera.</p></li>
 
   <li><b>HTTP Live streaming</b>
-    
+
 <p>Applications can now pass an M3U playlist URL to the media framework to begin an HTTP Live
 streaming session. The media framework supports most of the HTTP Live streaming specification,
 including adaptive bit rate. See the <a
@@ -607,7 +607,7 @@ href="{@docRoot}guide/appendix/media-formats.html">Supported Media Formats</a> d
 more information.</p></li>
 
   <li><b>EXIF data</b>
-    
+
 <p>The {@link android.media.ExifInterface} includes new fields for photo aperture, ISO, and exposure
 time.</p></li>
 
@@ -810,7 +810,7 @@ expressed with acceleration and rotation rate data. A web page can register for 
 events by calling {@code window.addEventListener} with event type {@code "deviceorientation"}
 and register for motion events by registering the {@code "devicemotion"} event type.</p>
   </li>
-  
+
   <li><b>CSS 3D Transforms</b>
     <p>As defined by the <a href="http://www.w3.org/TR/css3-3d-transforms/">CSS 3D Transform
 Module</a> specification, the Browser allows elements rendered by CSS to be transformed in three
@@ -967,7 +967,7 @@ the system, prior to installing the application. </p>
 
 <p>To use APIs introduced in Android {@sdkPlatformVersion} in your application,
 you need compile the application against the Android library that is provided in
-the Android {@sdkPlatformVersion} SDK platform. Depending on your needs, you might 
+the Android {@sdkPlatformVersion} SDK platform. Depending on your needs, you might
 also need to add an <code>android:minSdkVersion="{@sdkPlatformApiLevel}"</code>
 attribute to the <code>&lt;uses-sdk&gt;</code> element in the application's
 manifest. If your application is designed to run only on Android 2.3 and higher,

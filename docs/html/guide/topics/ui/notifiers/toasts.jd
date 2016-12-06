@@ -2,14 +2,14 @@ page.title=Toasts
 @jd:body
 
 <div id="qv-wrapper">
-  <div id="qv">    
+  <div id="qv">
     <h2>In this document</h2>
     <ol>
       <li><a href="#Basics">The Basics</a></li>
       <li><a href="#Positioning">Positioning your Toast</a></li>
       <li><a href="#CustomToastView">Creating a Custom Toast View</a></li>
     </ol>
-    
+
     <h2>Key classes</h2>
     <ol>
       <li>{@link android.widget.Toast}</li>
@@ -19,14 +19,14 @@ page.title=Toasts
 
 <p>A toast provides simple feedback about an operation in a small popup.
 It only fills the amount of space required for the message and the current
-activity remains visible and interactive. 
-For example, navigating away from an email before you send it triggers a 
-"Draft saved" toast to let you know that you can continue editing later. 
+activity remains visible and interactive.
+For example, navigating away from an email before you send it triggers a
+"Draft saved" toast to let you know that you can continue editing later.
 Toasts automatically disappear after a timeout.</p>
 
 <img src="{@docRoot}images/toast.png" alt="" />
 
-<p>If user response to a status message is required, consider instead using a 
+<p>If user response to a status message is required, consider instead using a
 <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Notification</a>.</p>
 
 
@@ -49,8 +49,8 @@ toast.show();
 </pre>
 
 <p>This example demonstrates everything you need for most toast notifications.
-You should rarely need anything else. You may, however, want to position the 
-toast differently or even use your own layout instead of a simple text message. 
+You should rarely need anything else. You may, however, want to position the
+toast differently or even use your own layout instead of a simple text message.
 The following sections describe how you can do these things.</p>
 
 <p>You can also chain your methods and avoid holding on to the Toast object, like this:</p>
@@ -61,7 +61,7 @@ The following sections describe how you can do these things.</p>
 
 <p>A standard toast notification appears near the bottom of the screen, centered horizontally.
 You can change this position with the {@link android.widget.Toast#setGravity(int,int,int)}
-method. This accepts three parameters: a {@link android.view.Gravity} constant, 
+method. This accepts three parameters: a {@link android.view.Gravity} constant,
 an x-position offset, and a y-position offset.</p>
 
 <p>For example, if you decide that the toast should appear in the top-left corner, you can set the
@@ -70,22 +70,28 @@ gravity like this:</p>
 toast.setGravity(Gravity.TOP|Gravity.LEFT, 0, 0);
 </pre>
 
-<p>If you want to nudge the position to the right, increase the value of the second parameter. 
+<p>If you want to nudge the position to the right, increase the value of the second parameter.
 To nudge it down, increase the value of the last parameter.
 
 
 <h2 id="CustomToastView">Creating a Custom Toast View</h2>
 
-<p>If a simple text message isn't enough, you can create a customized layout for your
-toast notification. To create a custom layout, define a View layout,
-in XML or in your application code, and pass the root {@link android.view.View} object
-to the {@link android.widget.Toast#setView(View)} method.</p>
+<p>
+  If a simple text message isn't enough, you can create a customized layout
+  for your toast notification. To create a custom layout, define a View
+  layout, in XML or in your application code, and pass the root {@link
+  android.view.View} object to the {@link android.widget.Toast#setView(View)}
+  method.
+</p>
 
-<p>For example, you can create the layout for the toast visible in the screenshot to the right
-with the following XML (saved as <em>toast_layout.xml</em>):</p>
+<p>
+  For example, you can create the layout for the toast visible in the
+  screenshot to the right with the following XML (saved as
+  <em>layout/custom_toast.xml</em>):
+</p>
 <pre>
 &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/toast_layout_root"
+              android:id="@+id/custom_toast_container"
               android:orientation="horizontal"
               android:layout_width="fill_parent"
               android:layout_height="fill_parent"
@@ -103,15 +109,18 @@ with the following XML (saved as <em>toast_layout.xml</em>):</p>
               android:textColor="#FFF"
               />
 &lt;/LinearLayout>
-</pre> 
+</pre>
 
-<p>Notice that the ID of the LinearLayout element is "toast_layout_root". You must use this
-ID to inflate the layout from the XML, as shown here:</p>
+<p>
+  Notice that the ID of the LinearLayout element is "custom_toast_container".
+  You must use this ID and the ID of the XML layout file "custom_toast" to
+  inflate the layout, as shown here:
+</p>
 
 <pre>
 LayoutInflater inflater = getLayoutInflater();
 View layout = inflater.inflate(R.layout.custom_toast,
-                               (ViewGroup) findViewById(R.id.toast_layout_root));
+                (ViewGroup) findViewById(R.id.custom_toast_container));
 
 TextView text = (TextView) layout.findViewById(R.id.text);
 text.setText("This is a custom toast");
@@ -123,21 +132,21 @@ toast.setView(layout);
 toast.show();
 </pre>
 
-<p>First, retrieve the {@link android.view.LayoutInflater} with 
-{@link android.app.Activity#getLayoutInflater()} 
+<p>First, retrieve the {@link android.view.LayoutInflater} with
+{@link android.app.Activity#getLayoutInflater()}
 (or {@link android.content.Context#getSystemService(String) getSystemService()}),
-and then inflate the layout from XML using 
+and then inflate the layout from XML using
 {@link android.view.LayoutInflater#inflate(int, ViewGroup)}. The first parameter
 is the layout resource ID and the second is the root View. You can use
-this inflated layout to find more View objects in the layout, so now capture and 
+this inflated layout to find more View objects in the layout, so now capture and
 define the content for the ImageView and TextView elements. Finally, create
 a new Toast with {@link android.widget.Toast#Toast(Context)} and set some properties
 of the toast, such as the gravity and duration. Then call
 {@link android.widget.Toast#setView(View)} and pass it the inflated layout.
-You can now display the toast with your custom layout by calling 
+You can now display the toast with your custom layout by calling
 {@link android.widget.Toast#show()}.</p>
 
-<p class="note"><strong>Note:</strong> Do not use the public constructor for a Toast 
+<p class="note"><strong>Note:</strong> Do not use the public constructor for a Toast
 unless you are going to define the layout with {@link android.widget.Toast#setView(View)}.
 If you do not have a custom layout to use, you must use
 {@link android.widget.Toast#makeText(Context,int,int)} to create the Toast.</p>

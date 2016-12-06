@@ -16,10 +16,13 @@
 
 package com.android.internal.app;
 
+import com.android.internal.R;
+
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
@@ -132,6 +135,16 @@ public class AssistUtils {
         }
     }
 
+    public void registerVoiceInteractionSessionListener(IVoiceInteractionSessionListener listener) {
+        try {
+            if (mVoiceInteractionManagerService != null) {
+                mVoiceInteractionManagerService.registerVoiceInteractionSessionListener(listener);
+            }
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to register voice interaction listener", e);
+        }
+    }
+
     public ComponentName getAssistComponentForUser(int userId) {
         final String setting = Settings.Secure.getStringForUser(mContext.getContentResolver(),
                 Settings.Secure.ASSISTANT, userId);
@@ -156,4 +169,41 @@ public class AssistUtils {
         return null;
     }
 
+    public static boolean isPreinstalledAssistant(Context context, ComponentName assistant) {
+        if (assistant == null) {
+            return false;
+        }
+        ApplicationInfo applicationInfo;
+        try {
+            applicationInfo = context.getPackageManager().getApplicationInfo(
+                    assistant.getPackageName(), 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+        return applicationInfo.isSystemApp() || applicationInfo.isUpdatedSystemApp();
+    }
+
+    private static boolean isDisclosureEnabled(Context context) {
+        return Settings.Secure.getInt(context.getContentResolver(),
+                Settings.Secure.ASSIST_DISCLOSURE_ENABLED, 0) != 0;
+    }
+
+    /**
+     * @return if the disclosure animation should trigger for the given assistant.
+     *
+     * Third-party assistants will always need to disclose, while the user can configure this for
+     * pre-installed assistants.
+     */
+    public static boolean shouldDisclose(Context context, ComponentName assistant) {
+        if (!allowDisablingAssistDisclosure(context)) {
+            return true;
+        }
+
+        return isDisclosureEnabled(context) || !isPreinstalledAssistant(context, assistant);
+    }
+
+    public static boolean allowDisablingAssistDisclosure(Context context) {
+        return context.getResources().getBoolean(
+                com.android.internal.R.bool.config_allowDisablingAssistDisclosure);
+    }
 }

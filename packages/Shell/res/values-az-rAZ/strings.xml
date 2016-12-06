@@ -21,7 +21,7 @@
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Baq hesabatı <xliff:g id="ID">#%d</xliff:g> alındı"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Detallar baq hesabatına əlavə olunur"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Lütfən, gözləyin..."</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Baq raportunu paylaşmaq üçün sola sürüşdürün"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Baq həlli tezliklə telefonda görünəcək"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Baq hesabatınızı paylaşmaq üçün tıklayın"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"baq hesabatınızı skrinşot olmadan paylaşmaq üçün tıklayın, skrinşotun tamamlanması üçün isə gözləyin"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"baq hesabatınızı skrinşot olmadan paylaşmaq üçün tıklayın, skrinşotun tamamlanması üçün isə gözləyin"</string>

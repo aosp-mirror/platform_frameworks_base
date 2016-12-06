@@ -1,0 +1,9 @@
+toc:
+- title: Optimizing Apps for Chromebooks
+  path: /topic/arc/index.html
+- title: App Manifest Compatibility for Chromebooks
+  path: /topic/arc/manifest.html
+- title: Loading Apps on Chromebooks
+  path: /topic/arc/sideload.html
+- title: Chrome OS Device Support for Apps
+  path: /topic/arc/device-support.html

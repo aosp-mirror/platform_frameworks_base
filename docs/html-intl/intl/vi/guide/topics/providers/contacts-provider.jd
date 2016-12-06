@@ -253,7 +253,7 @@ page.title=Trình cung cấp Danh bạ
             Ví dụ, nếu bạn muốn ứng dụng của mình duy trì dữ liệu danh bạ cho dịch vụ dựa trên nền web của mình
             với miền {@code com.example.dataservice}, và tài khoản của người dùng cho dịch vụ của bạn
             là {@code becky.sharp@dataservice.example.com}, trước tiên, người dùng phải thêm
-            "loại" tài khoản ({@code com.example.dataservice}) và "tên" tài khoản 
+            "loại" tài khoản ({@code com.example.dataservice}) và "tên" tài khoản
             ({@code becky.smart@dataservice.example.com}) trước khi ứng dụng của bạn có thể thêm hàng liên lạc thô.
             Bạn có thể giải thích yêu cầu này với người dùng bằng tài liệu, hoặc bạn có thể nhắc
             người dùng thêm loại và tên này, hoặc cả hai. Loại tài khoản và tên tài khoản
@@ -1697,7 +1697,7 @@ startActivity(insertIntent);
 <p>
     Nếu dịch vụ chấp nhận thông tin xác thực, trình xác thực có thể
     lưu giữ thông tin xác thực đó để sử dụng sau. Vì khuôn khổ trình xác thực bổ trợ,
-    {@link android.accounts.AccountManager} có thể cung cấp quyền truy cập bất kỳ token xác thực nào mà một trình xác thực 
+    {@link android.accounts.AccountManager} có thể cung cấp quyền truy cập bất kỳ token xác thực nào mà một trình xác thực
     hỗ trợ và chọn hiện ra, chẳng hạn như token xác thực OAuth2.
 </p>
 <p>
@@ -1821,7 +1821,7 @@ mà cung cấp dữ liệu cụ thể cho
     </dl>
 <h2 id="SocialStream">Dữ liệu từ Luồng Xã hội</h2>
 <p>
-    Các bảng {@code android.provider.ContactsContract.StreamItems} và 
+    Các bảng {@code android.provider.ContactsContract.StreamItems} và
     {@code android.provider.ContactsContract.StreamItemPhotos} quản lý
     dữ liệu đến từ các mạng xã hội. Bạn có thể ghi một trình điều hợp đồng bộ mà thêm dữ liệu luồng từ
     mạng của chính mình vào những bảng này, hoặc bạn có thể đọc dữ liệu luồng từ những bảng này và
@@ -1830,7 +1830,7 @@ mà cung cấp dữ liệu cụ thể cho
 </p>
 <h3 id="StreamText">Văn bản từ luồng xã hội</h3>
 <p>
-    Các mục dòng dữ liệu luôn được liên kết với một liên lạc thô. 
+    Các mục dòng dữ liệu luôn được liên kết với một liên lạc thô.
     {@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID} liên kết với giá trị
     <code>_ID</code> của liên lạc thô mới. Loại tài khoản và tên tài khoản của liên lạc thô
     cũng được lưu giữ trong hàng mục dòng.
@@ -1934,7 +1934,7 @@ mà cung cấp dữ liệu cụ thể cho
         Cột này có sẵn để tương thích ngược với các phiên bản trước của Trình cung cấp
         Danh bạ mà đã sử dụng nó để lưu giữ ảnh. Tuy nhiên, trong phiên bản hiện tại
         bạn không nên sử dụng cột này để lưu giữ ảnh. Thay vào đó, hãy sử dụng
-        hoặc {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID} hoặc 
+        hoặc {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID} hoặc
         {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI} (cả hai
         đều được mô tả trong các điểm sau) để lưu giữ ảnh trong một tệp. Lúc này, cột này
         chứa một hình thu nhỏ của ảnh sẵn sàng để đọc.
@@ -2344,7 +2344,7 @@ mà cung cấp dữ liệu cụ thể cho
     việc truy xuất thông tin ảnh. Không có lớp thuận tiện cho việc truy xuất hình thu nhỏ
     chính đối với một liên lạc thô, nhưng bạn có thể gửi một truy vấn tới bảng
     {@link android.provider.ContactsContract.Data}, chọn
-    {@code android.provider.BaseColumns#_ID} của liên lạc thô, 
+    {@code android.provider.BaseColumns#_ID} của liên lạc thô,
     {@link android.provider.ContactsContract.CommonDataKinds.Photo#CONTENT_ITEM_TYPE
     Photo.CONTENT_ITEM_TYPE}, và cột {@link android.provider.ContactsContract.Data#IS_PRIMARY}
     để tìm hàng ảnh chính của liên lạc thô.

@@ -28,8 +28,18 @@ import java.util.Objects;
 
 /**
  * The AudioRecordingConfiguration class collects the information describing an audio recording
- * session. This information is returned through the
- * {@link AudioManager#getActiveRecordingConfigurations()} method.
+ * session.
+ * <p>Direct polling (see {@link AudioManager#getActiveRecordingConfigurations()}) or callback
+ * (see {@link AudioManager#registerAudioRecordingCallback(android.media.AudioManager.AudioRecordingCallback, android.os.Handler)}
+ * methods are ways to receive information about the current recording configuration of the device.
+ * <p>An audio recording configuration contains information about the recording format as used by
+ * the application ({@link #getClientFormat()}, as well as the recording format actually used by
+ * the device ({@link #getFormat()}). The two recording formats may, for instance, be at different
+ * sampling rates due to hardware limitations (e.g. application recording at 44.1kHz whereas the
+ * device always records at 48kHz, and the Android framework resamples for the application).
+ * <p>The configuration also contains the use case for which audio is recorded
+ * ({@link #getClientAudioSource()}), enabling the ability to distinguish between different
+ * activities such as ongoing voice recognition or camcorder recording.
  *
  */
 public final class AudioRecordingConfiguration implements Parcelable {
@@ -47,12 +57,12 @@ public final class AudioRecordingConfiguration implements Parcelable {
     /**
      * @hide
      */
-    public AudioRecordingConfiguration(int session, int source, AudioFormat devFormat,
-            AudioFormat clientFormat, int patchHandle) {
+    public AudioRecordingConfiguration(int session, int source, AudioFormat clientFormat,
+            AudioFormat devFormat, int patchHandle) {
         mSessionId = session;
         mClientSource = source;
-        mDeviceFormat = devFormat;
         mClientFormat = clientFormat;
+        mDeviceFormat = devFormat;
         mPatchHandle = patchHandle;
     }
 

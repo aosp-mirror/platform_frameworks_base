@@ -69,7 +69,7 @@ parent.link=index.html
     <tr>
         <td><a href="controls/radiobutton.html">圓形按鈕</a></td>
         <td>功用與核取方塊類似，但會限制使用者只能從一組選項中選取一個選項。</td>
-	<td>{@link android.widget.RadioGroup RadioGroup} 
+	<td>{@link android.widget.RadioGroup RadioGroup}
 	<br>{@link android.widget.RadioButton RadioButton} </td>
     </tr>
     <tr>

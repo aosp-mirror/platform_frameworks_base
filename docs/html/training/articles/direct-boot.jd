@@ -1,0 +1,225 @@
+page.title=Supporting Direct Boot
+page.keywords=direct boot
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#run">Requesting Access to Run During Direct Boot</a></li>
+    <li><a href="#access">Accessing Device Encrypted Storage</a></li>
+    <li><a href="#notification">Getting Notified of User Unlock</a></li>
+    <li><a href="#migrating">Migrating Existing Data</a></li>
+    <li><a href="#testing">Testing Your Encryption Aware App</a></li>
+    <li><a href="#dpm">Checking Device Policy Encryption Status</a></li>
+  </ol>
+</div>
+</div>
+
+<p>Android 7.0 runs in a secure, <i>Direct Boot</i> mode
+when the device has been powered on but the user has not unlocked the
+device. To support this, the system provides two storage locations for data:</p>
+
+<ul>
+<li><i>Credential encrypted storage</i>, which is the default storage location
+and only available after the user has unlocked the device.</li>
+<li><i>Device encrypted storage</i>, which is a storage location available both
+during Direct Boot mode and after the user has unlocked the device.</li>
+</ul>
+
+<p>By default, apps do not run during Direct Boot mode.
+If your app needs to take action during Direct Boot mode, you can register
+app components that should be run during this mode. Some common use cases
+for apps needing to run during Direct Boot mode include:</p>
+
+<ul>
+<li>Apps that have scheduled notifications, such as alarm clock
+apps.</li>
+<li>Apps that provide important user notifications, like SMS apps.</li>
+<li>Apps that provide accessibility services, like Talkback.</li>
+</ul>
+
+<p>If your app needs to access data while running in Direct Boot mode, use
+device encrypted storage. Device encrypted storage contains data
+encrypted with a key that is only available after a device has performed a
+successful verified boot.</p>
+
+<p>For data that should be encrypted with a key associated with user
+credentials, such as a PIN or password, use credential encrypted storage.
+Credential encrypted storage is only available after the user has successfully
+unlocked the device, up until when the user restarts the device again. If the
+user enables the lock screen after unlocking the device, this doesn't lock
+credential encrypted storage.</p>
+
+<h2 id="run">Requesting Access to Run During Direct Boot</h2>
+
+<p>Apps must register their components with the system before they
+can run during Direct Boot mode or access device encrypted
+storage. Apps register with the system by marking components as
+<i>encryption aware</i>. To mark your component as encryption aware, set the
+<code>android:directBootAware</code> attribute to true in your manifest.<p>
+
+<p>Encryption aware components can register to receive a
+{@link android.content.Intent#ACTION_LOCKED_BOOT_COMPLETED
+ACTION_LOCKED_BOOT_COMPLETED} broadcast message from the
+system when the device has been restarted. At this point device encrypted
+storage is available, and your component can execute tasks that need to be
+run during Direct Boot mode, such as triggering a scheduled alarm.</p>
+
+<p>The following code snippet is an example of how to register a
+{@link android.content.BroadcastReceiver} as encryption aware, and add an
+intent filter for {@link android.content.Intent#ACTION_LOCKED_BOOT_COMPLETED
+ACTION_LOCKED_BOOT_COMPLETED}, in the app manifest:</p>
+
+<pre>
+&lt;receiver
+  android:directBootAware="true" &gt;
+  ...
+  &lt;intent-filter&gt;
+    &lt;action android:name="android.intent.action.ACTION_LOCKED_BOOT_COMPLETED" /&gt;
+  &lt;/intent-filter&gt;
+&lt;/receiver&gt;
+</pre>
+
+<p>Once the user has unlocked the device, all components can access both the
+device encrypted storage as well as credential encrypted storage.</p>
+
+<h2 id="access">Accessing Device Encrypted Storage</h2>
+
+<p>To access device encrypted storage, create a second
+{@link android.content.Context} instance by calling
+{@link android.content.Context#createDeviceProtectedStorageContext
+Context.createDeviceProtectedStorageContext()}. All storage API
+calls made using this context access the device encrypted storage. The
+following example accesses the device encrypted storage and opens an existing
+app data file:</p>
+
+<pre>
+Context directBootContext = appContext.createDeviceProtectedStorageContext();
+// Access appDataFilename that lives in device encrypted storage
+FileInputStream inStream = directBootContext.openFileInput(appDataFilename);
+// Use inStream to read content...
+</pre>
+
+<p>Use device encrypted storage only for
+information that must be accessible during Direct Boot mode.
+Don't use device encrypted storage as a general-purpose encrypted store.
+For private user information, or encrypted data that isn't needed during
+Direct Boot mode, use credential encrypted storage.</p>
+
+<h2 id="notification">Getting Notified of User Unlock</h2>
+
+<p>When the user unlocks the device after restart, your app can switch to
+accessing credential encrypted storage and use regular system services that
+depend on user credentials.</p>
+
+<p>To get notified when the user unlocks the device after a reboot,
+register a {@link android.content.BroadcastReceiver} from a running component
+to listen for unlock notification messages. When the user unlocks the device
+after boot:
+</p>
+<ul>
+<li>If your app has foreground processes that need immediate notification,
+listen for the {@link android.content.Intent#ACTION_USER_UNLOCKED
+ACTION_USER_UNLOCKED} message.</li>
+<li>If your app only uses background processes that can act on a delayed
+notification, listen for the
+{@link android.content.Intent#ACTION_BOOT_COMPLETED ACTION_BOOT_COMPLETED}
+message.</li>
+</ul>
+
+<p>If the user has unlocked the device, you can find out by calling
+{@link android.os.UserManager#isUserUnlocked UserManager.isUserUnlocked()}.
+</p>
+
+<h2 id="migrating">Migrating Existing Data</h2>
+
+<p>If a user updates their device to use Direct Boot mode, you might have
+existing data that needs to get migrated to device encrypted storage. Use
+{@link android.content.Context#moveSharedPreferencesFrom
+Context.moveSharedPreferencesFrom()} and
+{@link android.content.Context#moveDatabaseFrom
+Context.moveDatabaseFrom()} to migrate preference and database
+data between credential encrypted storage and device encrypted storage.</p>
+
+<p>Use your best judgment when deciding what data to migrate from credential
+encrypted storage to device encrypted storage. You should not migrate
+private user information, such as passwords or authorization tokens, to
+device encrypted storage. In some scenarios, you might need to manage
+separate sets of data in the two encrypted stores.</p>
+
+<h2 id="testing">Testing Your Encryption Aware App</h2>
+
+<p>Test your encryption aware app with Direct Boot mode enabled. There are
+two ways to enable Direct Boot.</p>
+
+<p class="caution"><strong>Caution:</strong> Enabling Direct Boot
+wipes all user data on the device.</p>
+
+<p>On supported devices with Android 7.0 installed, enable
+Direct Boot by doing one of the following:</p>
+
+<ul>
+<li>On the device, enable <b>Developer options</b> if you haven't already by
+going to <b>Settings &gt; About phone</b>, and tapping <b>Build number</b>
+seven times. Once the developer options screen is available, go to
+<b>Settings &gt; Developer options</b> and select
+<b>Convert to file encryption</b>.</li>
+<li>Use the following adb shell commands to enable Direct Boot mode:
+<pre class="no-pretty-print">
+$ adb reboot-bootloader
+$ fastboot --wipe-and-use-fbe
+</pre>
+</li>
+</ul>
+
+<p>An emulated Direct Boot mode is also available, in case you need to switch
+modes on your test devices. Emulated mode should only be used during
+development and may cause data loss. To enable emulated Direct Boot mode,
+set a lock pattern on the device, choose "No thanks" if prompted for a
+secure start-up screen when setting a lock pattern, and then use the
+following adb shell command:</p>
+
+<pre class="no-pretty-print">
+$ adb shell sm set-emulate-fbe true
+</pre>
+
+<p>To turn off emulated Direct Boot mode, use the following command:</p>
+
+<pre class="no-pretty-print">
+$ adb shell sm set-emulate-fbe false
+</pre>
+
+<p>Using these commands causes the device to reboot.</p>
+
+<h2 id="dpm">Checking Device Policy Encryption Status</h2>
+
+<p>Device administration apps can use
+{@link android.app.admin.DevicePolicyManager#getStorageEncryptionStatus
+DevicePolicyManager.getStorageEncryptionStatus()} to check the current
+encryption status of the device. If your app is targeting an API level
+lower than 24.0 (Android 7.0),
+{@link android.app.admin.DevicePolicyManager#getStorageEncryptionStatus
+getStorageEncryptionStatus()} will return
+{@link android.app.admin.DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE
+ENCRYPTION_STATUS_ACTIVE} if the device is either using full-disk encryption,
+or file-based encryption with Direct Boot. In both of these cases, data is
+always stored encrypted at rest. If your app is targeting an API level of
+24.0 or higher,
+{@link android.app.admin.DevicePolicyManager#getStorageEncryptionStatus
+getStorageEncryptionStatus()} will return
+{@link android.app.admin.DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE
+ENCRYPTION_STATUS_ACTIVE} if the device is using full-disk encryption. It will
+return
+{@link android.app.admin.DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE_PER_USER
+ENCRYPTION_STATUS_ACTIVE_PER_USER} if the device is using file-based encryption
+with Direct Boot.</p>
+
+<p>If you build a device administration app
+that targets Android 7.0, make sure to check for both
+{@link android.app.admin.DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE
+ENCRYPTION_STATUS_ACTIVE} and
+{@link android.app.admin.DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE_PER_USER
+ENCRYPTION_STATUS_ACTIVE_PER_USER} to determine if the device is
+encrypted.</p>

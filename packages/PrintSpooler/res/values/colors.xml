@@ -16,8 +16,6 @@
 
 <resources>
 
-    <color name="print_button_tint_color">#EEFF41</color>
-
     <color name="print_preview_scrim_color">#99000000</color>
 
     <color name="print_preview_background_color">#F2F1F2</color>

@@ -94,6 +94,11 @@ abstract class DisplayDevice {
     }
 
     /**
+     * Returns whether the unique id of the device is stable across reboots.
+     */
+    public abstract boolean hasStableUniqueId();
+
+    /**
      * Gets information about the display device.
      *
      * The information returned should not change between calls unless the display
@@ -135,7 +140,7 @@ abstract class DisplayDevice {
     /**
      * Sets the mode, if supported.
      */
-    public void requestColorTransformAndModeInTransactionLocked(int colorTransformId, int modeId) {
+    public void requestDisplayModesInTransactionLocked(int colorMode, int modeId) {
     }
 
     /**

@@ -28,7 +28,8 @@
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Error de connexió Wi-Fi"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Problema d\'autenticació"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Fora de l\'abast"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"No s\'ha detectat accés a Internet, no s\'hi tornarà a connectar automàticament."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"No s\'ha detectat accés a Internet; no s\'hi tornarà a connectar automàticament."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"No hi ha accés a Internet."</string>
     <string name="saved_network" msgid="4352716707126620811">"Desat per <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Connectat mitjançant l\'assistent de Wi‑Fi"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Connectada mitjançant %1$s"</string>
@@ -111,7 +112,7 @@
     <string name="tts_play_example_summary" msgid="8029071615047894486">"Reprodueix una breu demostració de síntesi de veu"</string>
     <string name="tts_install_data_title" msgid="4264378440508149986">"Instal·la dades de veu"</string>
     <string name="tts_install_data_summary" msgid="5742135732511822589">"Instal·la les dades de veu necessàries per a la síntesi de veu"</string>
-    <string name="tts_engine_security_warning" msgid="8786238102020223650">"Pot ser que aquest motor de síntesi de la parla pugui recopilar tot el text que es dirà en veu alta, incloses les dades personals, com ara les contrasenyes i els números de les targetes de crèdit. Ve del motor <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Voleu activar l\'ús d\'aquest motor de síntesi de la parla?"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"Pot ser que aquest motor de síntesi de la parla pugui recopilar tot el text que es dirà en veu alta, incloses les dades personals, com ara les contrasenyes i els números de les targetes de crèdit. Ve del motor <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Vols activar l\'ús d\'aquest motor de síntesi de la parla?"</string>
     <string name="tts_engine_network_required" msgid="1190837151485314743">"Aquest idioma requereix una connexió de xarxa activa per a la sortida de síntesi de veu."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"Això és un exemple de síntesi de veu"</string>
     <string name="tts_status_title" msgid="7268566550242584413">"Estat de l\'idioma predeterminat"</string>
@@ -184,7 +185,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Ubicacions simulades"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Permet les ubicacions simulades"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Inspecció d\'atributs de visualització"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Utilitza el client DHCP de Lollipop en lloc del nou client DHCP d\'Android"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mantén les dades mòbils sempre actives, fins i tot quan la Wi‑Fi està activada (per canviar de xarxa ràpidament)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Voleu permetre la depuració USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"La depuració USB només està indicada per a activitats de desenvolupament. Fes-la servir intercanviar dades entre l\'ordinador i el dispositiu, per instal·lar aplicacions al dispositiu sense rebre notificacions i per llegir dades de registre."</string>
@@ -234,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Mostra els límits de clips, els marges, etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Força direcció dreta-esquerra"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Força direcció de pantalla dreta-esquerra en totes les llengües"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Mostra l\'ús de la CPU"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Superposa l\'ús de la CPU a la pantalla"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Força acceleració GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Força l\'ús de GPU per a dibuixos en 2D"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Força MSAA  4x"</string>
@@ -342,4 +340,5 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Màxim"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Personalitzat (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Ajuda i suggeriments"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"Menú"</string>
 </resources>

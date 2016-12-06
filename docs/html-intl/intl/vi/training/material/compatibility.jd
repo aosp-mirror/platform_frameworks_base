@@ -94,7 +94,7 @@ r21 và cao hơn gồm những tính năng material design sau:</p>
 
 <h3>Bảng màu</h3>
 
-<p>Để có được các kiểu phong cách material design và tùy chỉnh bảng màu bằng Thư viện Hỗ trợ v7 
+<p>Để có được các kiểu phong cách material design và tùy chỉnh bảng màu bằng Thư viện Hỗ trợ v7
 của Android, hãy áp dụng một trong các chủ đề <code>Theme.AppCompat</code>:</p>
 
 <pre>

@@ -131,7 +131,7 @@ public abstract class DpmTestBase extends AndroidTestCase {
 
         doReturn(ai).when(mMockContext.ipackageManager).getApplicationInfo(
                 eq(admin.getPackageName()),
-                eq(PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS),
+                anyInt(),
                 eq(UserHandle.getUserId(packageUid)));
 
         // Set up queryBroadcastReceivers().

@@ -14,37 +14,37 @@ page.tags=view,widget
 </div>
 </div>
 
-<p>Android offers a sophisticated and powerful componentized model for building your UI, 
-based on the fundamental layout classes: {@link android.view.View} and 
-{@link android.view.ViewGroup}. To start with, the platform includes a variety of prebuilt 
-View and ViewGroup subclasses &mdash; called widgets and layouts, respectively &mdash; 
+<p>Android offers a sophisticated and powerful componentized model for building your UI,
+based on the fundamental layout classes: {@link android.view.View} and
+{@link android.view.ViewGroup}. To start with, the platform includes a variety of prebuilt
+View and ViewGroup subclasses &mdash; called widgets and layouts, respectively &mdash;
 that you can use to construct your UI.</p>
 
-<p>A partial list of available widgets includes {@link android.widget.Button Button}, 
-{@link android.widget.TextView TextView}, 
-{@link android.widget.EditText EditText}, 
+<p>A partial list of available widgets includes {@link android.widget.Button Button},
+{@link android.widget.TextView TextView},
+{@link android.widget.EditText EditText},
 {@link android.widget.ListView ListView},
-{@link android.widget.CheckBox CheckBox}, 
-{@link android.widget.RadioButton RadioButton}, 
-{@link android.widget.Gallery Gallery}, 
-{@link android.widget.Spinner Spinner}, and the more special-purpose 
-{@link android.widget.AutoCompleteTextView AutoCompleteTextView}, 
+{@link android.widget.CheckBox CheckBox},
+{@link android.widget.RadioButton RadioButton},
+{@link android.widget.Gallery Gallery},
+{@link android.widget.Spinner Spinner}, and the more special-purpose
+{@link android.widget.AutoCompleteTextView AutoCompleteTextView},
 {@link android.widget.ImageSwitcher ImageSwitcher}, and
 {@link android.widget.TextSwitcher TextSwitcher}. </p>
 
-<p>Among the layouts available are {@link android.widget.LinearLayout LinearLayout}, 
-{@link android.widget.FrameLayout FrameLayout}, {@link android.widget.RelativeLayout RelativeLayout}, 
+<p>Among the layouts available are {@link android.widget.LinearLayout LinearLayout},
+{@link android.widget.FrameLayout FrameLayout}, {@link android.widget.RelativeLayout RelativeLayout},
 and others. For more examples, see <a href="layout-objects.html">Common Layout Objects</a>.</p>
 
-<p>If none of the prebuilt widgets or layouts meets your needs, you can create your own View subclass. 
-If you only need to make small adjustments to an existing widget or layout, you can simply subclass 
+<p>If none of the prebuilt widgets or layouts meets your needs, you can create your own View subclass.
+If you only need to make small adjustments to an existing widget or layout, you can simply subclass
 the widget or layout and override its methods.
 </p>
 
-<p>Creating your own View subclasses gives you precise control over the appearance and function 
-of a screen element. To give an idea of the control you get with custom views, here are some 
+<p>Creating your own View subclasses gives you precise control over the appearance and function
+of a screen element. To give an idea of the control you get with custom views, here are some
 examples of what you could do with them:</p>
- 
+
 <ul>
   <li>
     You could create a completely custom-rendered View type, for example a "volume
@@ -60,7 +60,7 @@ examples of what you could do with them:</p>
   </li>
   <li>
     You could override the way that an EditText component is rendered on the screen
-    (the <a href="{@docRoot}resources/samples/NotePad/index.html">Notepad Tutorial</a> uses this to good effect, 
+    (the <a href="{@docRoot}resources/samples/NotePad/index.html">Notepad Tutorial</a> uses this to good effect,
     to create a lined-notepad page).
   </li>
   <li>
@@ -69,7 +69,7 @@ examples of what you could do with them:</p>
   </li>
 </ul>
 <p>
-The sections below explain how to create custom Views and use them in your application. 
+The sections below explain how to create custom Views and use them in your application.
 For detailed reference information, see the {@link android.view.View} class. </p>
 
 
@@ -77,26 +77,26 @@ For detailed reference information, see the {@link android.view.View} class. </p
 
 <p>Here is a high level overview of what you need to know to get started in creating your own
 View components:</p>
- 
+
 <ol>
   <li>
-    Extend an existing {@link android.view.View View} class or subclass 
+    Extend an existing {@link android.view.View View} class or subclass
 	with your own class.
   </li>
   <li>
-    Override some of the methods from the superclass. The superclass methods 
+    Override some of the methods from the superclass. The superclass methods
     to override start with '<code>on</code>', for
-    example, {@link android.view.View#onDraw onDraw()}, 
-    {@link android.view.View#onMeasure onMeasure()}, and 
+    example, {@link android.view.View#onDraw onDraw()},
+    {@link android.view.View#onMeasure onMeasure()}, and
     {@link android.view.View#onKeyDown onKeyDown()}.
-    This is similar to the <code>on...</code> events in {@link android.app.Activity Activity} 
+    This is similar to the <code>on...</code> events in {@link android.app.Activity Activity}
     or {@link android.app.ListActivity ListActivity}
     that you override for lifecycle and other functionality hooks.
   <li>
-    Use your new extension class. Once completed, your new extension class 
+    Use your new extension class. Once completed, your new extension class
     can be used in place of the view upon which it was based.
   </li>
-</ol>  
+</ol>
 <p class="note"><strong>Tip:</strong>
     Extension classes can be defined as inner classes inside the activities
     that use them. This is useful because it controls access to them but
@@ -119,7 +119,7 @@ way you like, limited perhaps only by your imagination, the size of the
 screen, and the available processing power (remember that ultimately your
 application might have to run on something with significantly less power
 than your desktop workstation).</p>
-<p>To create a fully customized component:</p> 
+<p>To create a fully customized component:</p>
 <ol>
   <li>
     The most generic view you can extend is, unsurprisingly, {@link
@@ -170,11 +170,11 @@ slightly more complex by the requirements of limits from the parent
 (which are passed in to the <code>onMeasure()</code> method) and by the
 requirement to call the <code>setMeasuredDimension()</code> method with the
 measured width and height once they have been calculated. If you fail to
-call this method from an overridden <code>onMeasure()</code> method, the 
+call this method from an overridden <code>onMeasure()</code> method, the
 result will be an exception at measurement time.</p>
-<p>At a high level, implementing <code>onMeasure()</code> looks something 
+<p>At a high level, implementing <code>onMeasure()</code> looks something
  like this:</p>
- 
+
 <ol>
   <li>
     The overridden <code>onMeasure()</code> method is called with width and
@@ -193,7 +193,7 @@ result will be an exception at measurement time.</p>
     measurement width and height which will be required to render the
     component. It should try to stay within the specifications passed in,
     although it can choose to exceed them (in this case, the parent can
-    choose what to do, including clipping, scrolling, throwing an exception, 
+    choose what to do, including clipping, scrolling, throwing an exception,
     or asking the <code>onMeasure()</code> to try again, perhaps with
     different measurement specifications).
   </li>
@@ -212,7 +212,7 @@ Here's a summary of some of the other standard methods that the framework calls 
        <thead>
            <tr><th>Category</th> <th>Methods</th> <th>Description</th></tr>
        </thead>
-       
+
        <tbody>
        <tr>
            <td rowspan="2">Creation</td>
@@ -228,7 +228,7 @@ Here's a summary of some of the other standard methods that the framework calls 
            <td>Called after a view and all of its children has been inflated
            from XML.</td>
        </tr>
-       
+
        <tr>
            <td rowspan="3">Layout</td>
            <td><code>{@link  android.view.View#onMeasure}</code></td>
@@ -247,14 +247,14 @@ Here's a summary of some of the other standard methods that the framework calls 
            <td>Called when the size of this view has changed.
            </td>
        </tr>
-       
+
        <tr>
            <td>Drawing</td>
            <td><code>{@link  android.view.View#onDraw}</code></td>
            <td>Called when the view should render its content.
            </td>
        </tr>
-  
+
        <tr>
            <td rowspan="4">Event processing</td>
            <td><code>{@link  android.view.View#onKeyDown}</code></td>
@@ -265,58 +265,58 @@ Here's a summary of some of the other standard methods that the framework calls 
            <td><code>{@link  android.view.View#onKeyUp}</code></td>
            <td>Called when a key up event occurs.
            </td>
-       </tr>   
+       </tr>
        <tr>
            <td><code>{@link  android.view.View#onTrackballEvent}</code></td>
            <td>Called when a trackball motion event occurs.
            </td>
-       </tr>  
+       </tr>
        <tr>
            <td><code>{@link  android.view.View#onTouchEvent}</code></td>
            <td>Called when a touch screen motion event occurs.
            </td>
-       </tr>  
-       
+       </tr>
+
        <tr>
            <td rowspan="2">Focus</td>
            <td><code>{@link  android.view.View#onFocusChanged}</code></td>
            <td>Called when the view gains or loses focus.
            </td>
        </tr>
-       
+
        <tr>
            <td><code>{@link  android.view.View#onWindowFocusChanged}</code></td>
            <td>Called when the window containing the view gains or loses focus.
            </td>
        </tr>
-       
+
        <tr>
            <td rowspan="3">Attaching</td>
            <td><code>{@link  android.view.View#onAttachedToWindow()}</code></td>
            <td>Called when the view is attached to a window.
            </td>
        </tr>
-  
+
        <tr>
            <td><code>{@link  android.view.View#onDetachedFromWindow}</code></td>
            <td>Called when the view is detached from its window.
            </td>
-       </tr>     
-  
+       </tr>
+
        <tr>
            <td><code>{@link  android.view.View#onWindowVisibilityChanged}</code></td>
            <td>Called when the visibility of the window containing the view
            has changed.
            </td>
-       </tr>     
+       </tr>
        </tbody>
-       
+
    </table>
 
 
 
 <h3 id="customexample">A Custom View Example</h3>
-<p>The CustomView sample in the 
+<p>The CustomView sample in the
 <a href="{@docRoot}resources/samples/ApiDemos/index.html">API Demos</a> provides an example
 of a customized View. The custom View is defined in the
 <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/LabelView.html">LabelView</a>
@@ -359,9 +359,9 @@ combination of a single line EditText field and an adjacent button with an attac
 something from the list, it populates the EditText field, but the user can
 also type something directly into the EditText if they prefer.</p>
 <p>In Android, there are actually two other Views readily available to do
-this: {@link android.widget.Spinner Spinner} and 
-{@link android.widget.AutoCompleteTextView AutoCompleteTextView}, but 
-regardless, the concept of a Combo Box makes an easy-to-understand 
+this: {@link android.widget.Spinner Spinner} and
+{@link android.widget.AutoCompleteTextView AutoCompleteTextView}, but
+regardless, the concept of a Combo Box makes an easy-to-understand
 example.</p>
 <p>To create a compound component:</p>
 <ol>
@@ -397,7 +397,7 @@ example.</p>
   <li>
     In the case of extending a Layout, you don't need to override the
     <code>onDraw()</code> and <code>onMeasure()</code> methods since the
-    layout will have default behavior that will likely work just fine. However, 
+    layout will have default behavior that will likely work just fine. However,
     you can still override them if you need to.
   </li>
   <li>
@@ -409,7 +409,7 @@ example.</p>
 <p>
  To summarize, the use of a Layout as the basis for a Custom Control has a
 number of advantages, including:</p>
- 
+
 <ul>
   <li>
     You can specify the layout using the declarative XML files just like
@@ -433,7 +433,7 @@ number of advantages, including:</p>
  SpeechView which extends LinearLayout to make a component for displaying
  Speech quotes. The corresponding classes in the sample code are
  <code>List4.java</code> and <code>List6.java</code>.</p>
- 
+
 
 
 <h2 id="modifying">Modifying an Existing View Type</h2>
@@ -450,7 +450,7 @@ samples. This demonstrates many aspects of using the Android platform, among
 them is extending an EditText View to make a lined notepad. This is not a
 perfect example, and the APIs for doing this might change from this early
 preview, but it does demonstrate the principles.</p>
-<p>If you haven't done so already, import the 
+<p>If you haven't done so already, import the
 NotePad sample into Android Studio (or
 just look at the source using the link provided). In particular look at the definition of
 <code>MyEditText</code> in the <a
@@ -462,7 +462,7 @@ file.</p>
     <strong>The Definition</strong>
     <p>The class is defined with the following line:<br/>
      <code>public static class MyEditText extends EditText</code></p>
-     
+
     <ul>
       <li>
         It is defined as an inner class within the <code>NoteEditor</code>
@@ -488,7 +488,7 @@ file.</p>
   </li>
   <li>
     <strong>Class Initialization</strong>
-    <p>As always, the super is called first. Furthermore, 
+    <p>As always, the super is called first. Furthermore,
     this is not a default constructor, but a parameterized one. The
     EditText is created with these parameters when it is inflated from an
     XML layout file, thus, our constructor needs to both take them and pass them
@@ -496,7 +496,7 @@ file.</p>
   </li>
   <li>
     <strong>Overridden Methods</strong>
-    <p>In this example, there is only one method to be overridden: 
+    <p>In this example, there is only one method to be overridden:
     <code>onDraw()</code> &mdash; but there could easily be others needed when you
     create your own custom components.</p>
     <p>For the NotePad sample, overriding the <code>onDraw()</code> method allows
@@ -513,7 +513,7 @@ file.</p>
     <code>res/layout</code> folder.</p>
 <pre>
 &lt;view
-  class=&quot;com.android.notepad.NoteEditor$MyEditText&quot; 
+  class=&quot;com.android.notepad.NoteEditor$MyEditText&quot;
   id=&quot;&#64;+id/note&quot;
   android:layout_width=&quot;fill_parent&quot;
   android:layout_height=&quot;fill_parent&quot;
@@ -522,7 +522,7 @@ file.</p>
   android:scrollbars=&quot;vertical&quot;
   android:fadingEdge=&quot;vertical&quot; /&gt;
 </pre>
-     
+
     <ul>
       <li>
         The custom component is created as a generic view in the XML, and
@@ -531,7 +531,7 @@ file.</p>
         <code>NoteEditor$MyEditText</code> notation which is a standard way to
         refer to inner classes in the Java programming language.
         <p>If your custom View component is not defined as an inner class, then you can,
-        alternatively, declare the View component 
+        alternatively, declare the View component
         with the XML element name, and exclude the <code>class</code> attribute. For example:</p>
 <pre>
 &lt;com.android.notepad.MyEditText

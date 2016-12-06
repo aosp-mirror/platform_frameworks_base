@@ -16,8 +16,6 @@
 
 package android.transition;
 
-import com.android.internal.R;
-
 import android.animation.TimeInterpolator;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -25,6 +23,8 @@ import android.util.AndroidRuntimeException;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.android.internal.R;
 
 import java.util.ArrayList;
 
@@ -495,6 +495,16 @@ public class TransitionSet extends Transition {
         int numTransitions = mTransitions.size();
         for (int i = 0; i < numTransitions; ++i) {
             mTransitions.get(i).cancel();
+        }
+    }
+
+    /** @hide */
+    @Override
+    void forceToEnd(ViewGroup sceneRoot) {
+        super.forceToEnd(sceneRoot);
+        int numTransitions = mTransitions.size();
+        for (int i = 0; i < numTransitions; ++i) {
+            mTransitions.get(i).forceToEnd(sceneRoot);
         }
     }
 

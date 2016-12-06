@@ -143,7 +143,9 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_4g_plus" msgid="3032226872470658661">"4G+"</string>
     <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
+    <string name="accessibility_data_connection_lte_plus" msgid="361876866906946007">"LTE+"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"漫遊"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
@@ -238,7 +240,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"已暫停 4G 數據"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"已暫停流動數據"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"已暫停使用數據"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"由於您已達到設定的數據用量上限，裝置已暫停使用數據，直到週期結束。\n\n如恢復使用數據，流動網絡供應商可能會向您收取費用。"</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"已達到您設定的數據上限。系統將停止使用流動數據網絡。\n\n如果您恢復使用流動數據網絡，可能需要支付數據費用。"</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"恢復"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"沒有互聯網連線"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi 已連線"</string>
@@ -319,6 +321,9 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"上限為 <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> 警告"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"工作模式"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"夜燈模式"</string>
+    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"夜燈模式已開啟，輕按即可關閉"</string>
+    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"夜燈模式已關閉，輕按即可開啟"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"沒有最近項目"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"您已清除所有項目"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"應用程式資料"</string>
@@ -332,6 +337,8 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"水平分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"垂直分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"自訂分割"</string>
+  <string-array name="recents_blacklist_array">
+  </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"已完成充電"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"充電中"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g>後完成充電"</string>
@@ -399,6 +406,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"裝置可能會受到監控"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"個人檔案可能受到監控"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"網絡可能會受到監控"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"網絡可能會受到監控"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"裝置監控"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"個人檔案監控"</string>
     <string name="monitoring_title" msgid="169206259253048106">"網絡監控"</string>
@@ -411,6 +419,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"您已連結至<xliff:g id="APPLICATION">%1$s</xliff:g> ，它能夠監控您的網絡活動，包括電郵、應用程式和網站。"</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"您已連結至<xliff:g id="APPLICATION">%1$s</xliff:g>，它能夠監控您的個人網絡活動，包括電郵、應用程式和網站。"</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"您已連接至「<xliff:g id="APPLICATION">%1$s</xliff:g>」，此應用程式可以監控您的個人網絡活動，包括電郵、應用程式及網站。"</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"您的工作設定檔由<xliff:g id="ORGANIZATION">%1$s</xliff:g>管理。它已連結至<xliff:g id="APPLICATION">%2$s</xliff:g>，能夠監控您的工作網絡活動，包括電郵、應用程式和網站。\n\n如需進一步資訊，請聯絡您的管理員。"</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"您的工作設定檔由<xliff:g id="ORGANIZATION">%1$s</xliff:g>管理。它已連結至<xliff:g id="APPLICATION_WORK">%2$s</xliff:g>，能夠監控您的工作網絡活動，包括電郵、應用程式和網站。\n\n此外，您亦連結至<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>，因此它亦能夠監控您的個人網絡活動。"</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"您的裝置由 <xliff:g id="ORGANIZATION">%1$s</xliff:g> 管理。\n\n您的管理員可以監控及管理您裝置的設定、企業存取、應用程式、資料及位置資訊。\n\n此外，您的裝置連至 <xliff:g id="APPLICATION">%2$s</xliff:g>，它能監控您的網絡活動，包括電郵、應用程式及網站。\n\n如需更多資訊，請聯絡您的管理員。"</string>
@@ -436,6 +445,18 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」為音量對話框"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"輕按即可復原。"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"您正在使用工作設定檔"</string>
+  <string-array name="volume_stream_titles">
+    <item msgid="5841843895402729630">"通話"</item>
+    <item msgid="5997713001067658559">"系統"</item>
+    <item msgid="7858983209929864160">"鈴聲"</item>
+    <item msgid="1850038478268896762">"媒體"</item>
+    <item msgid="8265110906352372092">"鬧鐘"</item>
+    <item msgid="5339394737636839168"></item>
+    <item msgid="2951313578278086204">"藍牙"</item>
+    <item msgid="2919807739709798970"></item>
+    <item msgid="150349973435223405"></item>
+    <item msgid="6761963760295549099"></item>
+  </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s。輕按即可取消靜音。"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s。輕按即可設為震動。無障礙功能服務可能已經設為靜音。"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s。輕按即可設為靜音。無障礙功能服務可能已經設為靜音。"</string>
@@ -475,8 +496,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"在狀態列中顯示時鐘秒數，但可能會影響電池壽命。"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"重新排列快速設定"</string>
     <string name="show_brightness" msgid="6613930842805942519">"在快速設定顯示亮度"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"啟用分割畫面向上快速滑動手勢"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"從 [概覽] 按鈕向上快速滑動，即可使用手勢功能進入分割畫面模式"</string>
     <string name="experimental" msgid="6198182315536726162">"實驗版"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"要開啟藍牙嗎？"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"如要將鍵盤連接至平板電腦，請先開啟藍牙。"</string>
@@ -506,21 +525,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"更多設定"</string>
     <string name="notification_done" msgid="5279426047273930175">"完成"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」通知控制項"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"顏色和外觀"</string>
-    <string name="night_mode" msgid="3540405868248625488">"夜間模式"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"校準螢幕"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"已開啟"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"已關閉"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"自動開啟"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"在適當的位置和時間切換至「夜間模式」"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"「夜間模式」開啟時"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"在 Android OS 中使用深色主題背景"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"調整色調"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"調整亮度"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"系統會將深色主題背景套用至 Android OS 核心區域 (一般以淺色主題背景顯示)，例如「設定」。"</string>
-    <string name="color_apply" msgid="9212602012641034283">"套用"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"確認設定"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"部分顏色設定會令此裝置無法使用。請按一下 [確定] 加以確認，否則這些顏色設定將於 10 秒後重設。"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"電池用量"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"充電時無法使用「省電模式」"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"省電模式"</string>
@@ -649,4 +653,5 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"開啟<xliff:g id="ID_1">%s</xliff:g>設定頁面。"</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"編輯設定次序。"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"第 <xliff:g id="ID_1">%1$d</xliff:g> 頁 (共 <xliff:g id="ID_2">%2$d</xliff:g> 頁)"</string>
+    <string name="cant_silence_or_block" msgid="999689262131488625">"通知無法設為靜音或封鎖"</string>
 </resources>

@@ -81,7 +81,7 @@ page.title=通知
     <strong>圖 2.</strong>通知匣中的通知。
 </p>
 
-<p class="note"><strong>注意：</strong>除非另外註明，否則本指南參照<a href="{@docRoot}tools/support-library/index.html">支援程式庫</a> 4 版中的 
+<p class="note"><strong>注意：</strong>除非另外註明，否則本指南參照<a href="{@docRoot}tools/support-library/index.html">支援程式庫</a> 4 版中的
 {@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder} 類別。類別 {@link android.app.Notification.Builder Notification.Builder} 是在 Android 3.0 (API 級別 11) 新增。
 
 
@@ -97,10 +97,10 @@ page.title=通知
 
 <h2 id="CreateNotification">建立通知</h2>
 
-<p>您會為 
+<p>您會為
 {@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder} 物件中的通知指定 UI 資訊與動作。
-如要建立通知本身，您可以呼叫 
-{@link android.support.v4.app.NotificationCompat.Builder#build NotificationCompat.Builder.build()}，其傳回的 
+如要建立通知本身，您可以呼叫
+{@link android.support.v4.app.NotificationCompat.Builder#build NotificationCompat.Builder.build()}，其傳回的
 {@link android.app.Notification} 物件會包含您的規格。如要發出通知，您可以呼叫 {@link android.app.NotificationManager#notify NotificationManager.notify()} 將 {@link android.app.Notification} 物件傳送至系統。
 
 </p>
@@ -149,7 +149,7 @@ page.title=通知
     在 {@link android.app.Notification} 內，動作本身是由
 {@link android.app.PendingIntent} 完成定義，其中包含的
 {@link android.content.Intent} 會啟動您應用程式中的
-{@link android.app.Activity}。如要將 
+{@link android.app.Activity}。如要將
 {@link android.app.PendingIntent} 與手勢關聯，可呼叫
 {@link android.support.v4.app.NotificationCompat.Builder} 的適當方法。例如，如果當使用者按一下通知匣中的通知文字時，您希望啟動
 {@link android.app.Activity}，可呼叫
@@ -394,7 +394,7 @@ numMessages = 0;
 <h2 id="NotificationResponse">啟動 Activity 時保留導覽</h2>
 <p>
     當您從通知啟動 {@link android.app.Activity} 時，您必須保留使用者預期的導覽體驗。
-按一下  <i>[返回]</i> 應可將使用者從應用程式的一般工作流程帶回主螢幕，而按一下 
+按一下  <i>[返回]</i> 應可將使用者從應用程式的一般工作流程帶回主螢幕，而按一下
  <i>[近期記錄]</i> 應會將
 {@link android.app.Activity} 顯示為個別的工作。如要保留導覽體驗，請以全新的工作啟動
 {@link android.app.Activity}。您該如何設定
@@ -466,7 +466,7 @@ numMessages = 0;
                 </p>
             </li>
             <li>
-                此外您還需要新增 Android 4.1 以上版本的支援。為此，請將 
+                此外您還需要新增 Android 4.1 以上版本的支援。為此，請將
 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html#parent">android:parentActivityName</a></code> 屬性新增到您要啟動 {@link android.app.Activity} 的
 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 元素。
 
@@ -722,7 +722,7 @@ setProgress(max, progress, false)} 將該列新增至您的通知，然後發出
 <p>
     當操作完成時，您可以繼續顯示進度列或將其移除。不論是任何一種情況，都務必更新通知文字來指出操作已完成。
 
-    如要移除進度列，請呼叫 
+    如要移除進度列，請呼叫
 {@link android.support.v4.app.NotificationCompat.Builder#setProgress
 setProgress(0, 0, false)}。例如：
 </p>
@@ -933,7 +933,7 @@ Notification notification = new Notification.Builder(context)
 
 </p>
 <p>
-    如要定義自訂通知版面配置，請從具現化可擴大 XML 配置檔案的 
+    如要定義自訂通知版面配置，請從具現化可擴大 XML 配置檔案的
 {@link android.widget.RemoteViews} 物件著手。接著，改為呼叫 {@link android.support.v4.app.NotificationCompat.Builder#setContent setContent()}，而不是呼叫像是 {@link android.support.v4.app.NotificationCompat.Builder#setContentTitle setContentTitle()} 的方法。
 
 

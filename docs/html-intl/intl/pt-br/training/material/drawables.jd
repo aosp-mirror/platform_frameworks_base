@@ -38,7 +38,7 @@ somente uma vez e colore-os automaticamente para combinar com seu tema.</p>
 
 <p>Você pode aplicar um tingimento aos objetos {@link android.graphics.drawable.BitmapDrawable} ou {@link
 android.graphics.drawable.NinePatchDrawable} com o método {@code setTint()}. Você também
-pode configurar a cor e o modo do tingimento nos layouts com os atributos <code>android:tint</code> e 
+pode configurar a cor e o modo do tingimento nos layouts com os atributos <code>android:tint</code> e
 <code>android:tintMode</code>.</p>
 
 

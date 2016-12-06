@@ -42,7 +42,7 @@ page.title=Поставщик календаря
       <li><a href="#intent-view">Использование намерения для просмотра данных календаря</a></li>
     </ol>
   </li>
-  
+
   <li><a href="#sync-adapter">Адаптеры синхронизации</a></li>
 </ol>
 
@@ -113,26 +113,26 @@ URI имеют формат <code><em>&lt;class&gt;</em>.CONTENT_URI</code>. Н�
   </tr>
   <tr>
     <td><p>{@link android.provider.CalendarContract.Calendars}</p></td>
-    
+
     <td>В этой таблице находится
 информация о календарях. В каждой строке этой таблицы представлены сведения
 об отдельном календаре, например, его название, цвет, информация о синхронизации и т. д.</td>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Events}</td>
-    
+
     <td>В этой таблице находится
 информация о событиях. В каждой строке этой таблицы содержится информация об отдельном
 событии &mdash;например, заголовок события, место проведения, время начала, время
 завершения и т. д. Событие может быть однократным или повторяющимся. Сведения об участниках,
-напоминаниях и расширенные свойства хранятся в отдельных таблицах. 
+напоминаниях и расширенные свойства хранятся в отдельных таблицах.
 В каждой из них имеется целочисленная переменная {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID},
 которая ссылается на объект {@link android.provider.BaseColumns#_ID} в таблице событий.</td>
 
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Instances}</td>
-    
+
     <td>В этой таблице содержатся данные о времени
 начала и окончания каждого повторения события. В каждой строке этой таблицы
 представлено одно повторение события. Однократные события сопоставляются с повторениями
@@ -141,7 +141,7 @@ URI имеют формат <code><em>&lt;class&gt;</em>.CONTENT_URI</code>. Н�
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Attendees}</td>
-    
+
     <td>В этой таблице находится
 информация об участниках (гостях). В каждой строке этой таблицы указан один
 гость. В ней указываются тип гостя и информация о том,
@@ -149,7 +149,7 @@ URI имеют формат <code><em>&lt;class&gt;</em>.CONTENT_URI</code>. Н�
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Reminders}</td>
-    
+
     <td>В этой таблице находятся
 данные уведомлений или оповещений. В каждой строке этой таблицы указано одно уведомление или оповещение. Для одного
 события можно создать несколько напоминаний. Максимальное количество таких напоминаний для события
@@ -159,7 +159,7 @@ URI имеют формат <code><em>&lt;class&gt;</em>.CONTENT_URI</code>. Н�
 указанным календарем. Напоминания задаются в минутах до начала события и
 имеют метод, который определяет порядок уведомления пользователя.</td>
   </tr>
-  
+
 </table>
 
 <p>API поставщика календаря обеспечивает достаточную гибкость и эффективность. В то же время
@@ -211,7 +211,7 @@ android.Manifest.permission#READ_CALENDAR}. Также в него
 
 <p>В таблице {@link android.provider.CalendarContract.Calendars} содержатся подробные сведения
 о каждом отдельном календаре. Выполнять запись в указанные ниже столбцы
-этой таблицы могут и приложение, и <a href="#sync-adapter">адаптер синхронизации</a>. 
+этой таблицы могут и приложение, и <a href="#sync-adapter">адаптер синхронизации</a>.
 Полный список поддерживаемых полей представлен в справке по классу
 {@link android.provider.CalendarContract.Calendars}.</p>
 <table>
@@ -229,7 +229,7 @@ android.Manifest.permission#READ_CALENDAR}. Также в него
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Calendars#VISIBLE}</td>
-    
+
     <td>Логическое значение, обозначающее, выбран ли календарь для отображения. Значение
 «0» указывает на то, что события, связанные с
 этим календарем, не отображаются.  Значение «1» указывает на то, что события, связанные с
@@ -240,7 +240,7 @@ android.provider.CalendarContract.Instances}.</td>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.CalendarColumns#SYNC_EVENTS}</td>
-    
+
     <td>Логическое значение, обозначающее, следует ли синхронизировать календарь и хранить имеющиеся в нем события
 на устройстве. Значение «0» указывает, что не следует синхронизировать этот календарь или
 хранить имеющиеся в нем события на устройстве.  Значение «1» указывает, что этот календарь следует синхронизировать и
@@ -268,13 +268,13 @@ public static final String[] EVENT_PROJECTION = new String[] {
     Calendars.CALENDAR_DISPLAY_NAME,         // 2
     Calendars.OWNER_ACCOUNT                  // 3
 };
-  
+
 // The indices for the projection array above.
 private static final int PROJECTION_ID_INDEX = 0;
 private static final int PROJECTION_ACCOUNT_NAME_INDEX = 1;
 private static final int PROJECTION_DISPLAY_NAME_INDEX = 2;
 private static final int PROJECTION_OWNER_ACCOUNT_INDEX = 3;</pre>
-  
+
 
 <div class="sidebox-wrapper"> <div class="sidebox"> <h3>Зачем необходимо указывать параметр
 ACCOUNT_TYPE?</h3> <p>При создании запроса {@link
@@ -289,7 +289,7 @@ Calendars.ACCOUNT_NAME} необходимо также
 android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL}. Он используется для календарей,
 которые не связаны с аккаунтом устройства. Аккаунты {@link
 android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL} не
-синхронизируются.</p> </div> </div> 
+синхронизируются.</p> </div> </div>
 
 
 <p> В следующей части примера создается запрос. С помощью выбора определяются
@@ -308,38 +308,38 @@ android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL} не
 <pre>// Run query
 Cursor cur = null;
 ContentResolver cr = getContentResolver();
-Uri uri = Calendars.CONTENT_URI;   
-String selection = "((" + Calendars.ACCOUNT_NAME + " = ?) AND (" 
+Uri uri = Calendars.CONTENT_URI;
+String selection = "((" + Calendars.ACCOUNT_NAME + " = ?) AND ("
                         + Calendars.ACCOUNT_TYPE + " = ?) AND ("
                         + Calendars.OWNER_ACCOUNT + " = ?))";
 String[] selectionArgs = new String[] {"sampleuser@gmail.com", "com.google",
-        "sampleuser@gmail.com"}; 
-// Submit the query and get a Cursor object back. 
+        "sampleuser@gmail.com"};
+// Submit the query and get a Cursor object back.
 cur = cr.query(uri, EVENT_PROJECTION, selection, selectionArgs, null);</pre>
 
 <p>В следующем разделе кода выполняется пошаговый обзор набора результатов с помощью курсора. В нем
 используются константы, которые были заданы в начале примера, для получения значений
 для каждого из полей.</p>
-    
+
 <pre>// Use the cursor to step through the returned records
 while (cur.moveToNext()) {
     long calID = 0;
     String displayName = null;
     String accountName = null;
     String ownerName = null;
-      
+
     // Get the field values
     calID = cur.getLong(PROJECTION_ID_INDEX);
     displayName = cur.getString(PROJECTION_DISPLAY_NAME_INDEX);
     accountName = cur.getString(PROJECTION_ACCOUNT_NAME_INDEX);
     ownerName = cur.getString(PROJECTION_OWNER_ACCOUNT_INDEX);
-              
+
     // Do something with the values...
 
    ...
 }
 </pre>
-  
+
 <h3 id="modify-calendar">Изменение календаря</h3>
 
 <p>Чтобы обновить календарь, можно указать {@link
@@ -350,7 +350,7 @@ android.provider.BaseColumns#_ID} календаря: либо в виде ид�
 либо в качестве первого элемента выделения. Выделение
 должно начинаться с <code>&quot;_id=?&quot;</code>, а первым аргументом
 <code>selectionArg</code> должен быть {@link
-android.provider.BaseColumns#_ID} календаря. 
+android.provider.BaseColumns#_ID} календаря.
 Также для выполнения обновлений можно закодировать идентификатор в URI. В этом примере для
 изменения отображаемого имени календаря используется
 подход
@@ -387,7 +387,7 @@ android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL}.
 в <a href="#manifest">файл манифеста</a>
 приложения необходимо включить разрешение {@link android.Manifest.permission#WRITE_CALENDAR}.</p>
 
-<p>Выполнять запись в указанные ниже столбцы этой таблицы могут и приложение, и 
+<p>Выполнять запись в указанные ниже столбцы этой таблицы могут и приложение, и
 адаптер синхронизации. Полный список поддерживаемых полей представлен в справке по классу {@link
 android.provider.CalendarContract.Events}.</p>
 
@@ -434,7 +434,7 @@ android.provider.CalendarContract.Events}.</p>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#DURATION}</td>
-    
+
     <td>Продолжительность события в формате <a href="http://tools.ietf.org/html/rfc5545#section-3.8.2.5">RFC5545</a>.
 Например, значение <code>&quot;PT1H&quot;</code> обозначает, что событие
 должно длиться один час, а значение <code>&quot;P2W&quot;</code> указывает на продолжительность
@@ -444,39 +444,39 @@ android.provider.CalendarContract.Events}.</p>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#ALL_DAY}</td>
-    
+
     <td>Значение «1» обозначает, что это событие занимает весь день по
 местному часовому поясу. Значение «0» указывает на то, что это регулярное событие, которое может начаться
 и завершиться в любое время в течение дня.</td>
 
-    
+
   </tr>
-  
-  
+
+
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#RRULE}</td>
-    
+
     <td>Правило повторения для формата события. Например,
 <code>&quot;FREQ=WEEKLY;COUNT=10;WKST=SU&quot;</code>. С другими
 примерами можно ознакомиться <a href="http://tools.ietf.org/html/rfc5545#section-3.8.5.3">здесь</a>.</td>
-    
+
   </tr>
-  
+
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#RDATE}</td>
-    <td>Даты повторения события. 
+    <td>Даты повторения события.
 Обычно {@link android.provider.CalendarContract.EventsColumns#RDATE}
 используется вместе с {@link android.provider.CalendarContract.EventsColumns#RRULE}
 для определения агрегированного набора
 повторяющихся событий. Дополнительные сведения представлены в <a href="http://tools.ietf.org/html/rfc5545#section-3.8.5.2">спецификации RFC5545</a>.</td>
 </tr>
- 
+
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#AVAILABILITY}</td>
-    
+
     <td>Если событие считается как занятое или как свободное время,
  доступное для планирования. </td>
-    
+
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#GUESTS_CAN_MODIFY}</td>
@@ -514,11 +514,11 @@ java.util.TimeZone#getAvailableIDs()}. Обратите внимание, что
 вставке события с помощью намерения {@link
 android.content.Intent#ACTION_INSERT INSERT}, как описано в разделе <a href="#intent-insert">Использование намерения для вставки события</a>, &mdash; в этом
 случае используется часовой пояс по умолчанию.</li>
-  
+
   <li>Для однократных событий необходимо указать {@link
 android.provider.CalendarContract.EventsColumns#DTEND}. </li>
-  
-  
+
+
   <li>Для повторяющихся событий необходимо указать {@link
 android.provider.CalendarContract.EventsColumns#DURATION} в дополнение к {@link
 android.provider.CalendarContract.EventsColumns#RRULE} или {@link
@@ -528,7 +528,7 @@ android.content.Intent#ACTION_INSERT INSERT}, как описано в разд�
 случае можно использовать {@link
 android.provider.CalendarContract.EventsColumns#RRULE} в сочетании с {@link android.provider.CalendarContract.EventsColumns#DTSTART} и {@link android.provider.CalendarContract.EventsColumns#DTEND}; кроме того, приложение «Календарь»
  автоматически преобразует указанный период в продолжительность.</li>
-  
+
 </ul>
 
 <p>Ниже представлен пример вставки события. Для простоты все это выполняется в потоке
@@ -539,8 +539,8 @@ android.provider.CalendarContract.EventsColumns#RRULE} в сочетании с 
 
 <pre>
 long calID = 3;
-long startMillis = 0; 
-long endMillis = 0;     
+long startMillis = 0;
+long endMillis = 0;
 Calendar beginTime = Calendar.getInstance();
 beginTime.set(2012, 9, 14, 7, 30);
 startMillis = beginTime.getTimeInMillis();
@@ -561,7 +561,7 @@ Uri uri = cr.insert(Events.CONTENT_URI, values);
 
 // get the event ID that is the last element in the Uri
 long eventID = Long.parseLong(uri.getLastPathSegment());
-// 
+//
 // ... do something with event ID
 //
 //</pre>
@@ -598,7 +598,7 @@ ContentResolver cr = getContentResolver();
 ContentValues values = new ContentValues();
 Uri updateUri = null;
 // The new title for the event
-values.put(Events.TITLE, &quot;Kickboxing&quot;); 
+values.put(Events.TITLE, &quot;Kickboxing&quot;);
 updateUri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
 int rows = getContentResolver().update(updateUri, values, null, null);
 Log.i(DEBUG_TAG, &quot;Rows updated: &quot; + rows);  </pre>
@@ -625,7 +625,7 @@ ContentValues values = new ContentValues();
 Uri deleteUri = null;
 deleteUri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
 int rows = getContentResolver().delete(deleteUri, null, null);
-Log.i(DEBUG_TAG, &quot;Rows deleted: &quot; + rows);  
+Log.i(DEBUG_TAG, &quot;Rows deleted: &quot; + rows);
 </pre>
 
 <h2 id="attendees">Таблица участников</h2>
@@ -634,10 +634,10 @@ Log.i(DEBUG_TAG, &quot;Rows deleted: &quot; + rows);
 указан один участник или гость события. При вызове метода
 {@link android.provider.CalendarContract.Reminders#query(android.content.ContentResolver, long, java.lang.String[]) query()}
 возвращается список участников для события
-с заданным {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID}. 
+с заданным {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID}.
 Этот {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID}
 должен соответствовать {@link
-android.provider.BaseColumns#_ID} определенного события.</p> 
+android.provider.BaseColumns#_ID} определенного события.</p>
 
 <p>В таблице ниже указаны
 поля, доступные для записи. При вставке нового участника необходимо указать все эти поля, кроме
@@ -720,7 +720,7 @@ Uri uri = cr.insert(Attendees.CONTENT_URI, values);
 <p>В каждой строке таблицы {@link android.provider.CalendarContract.Reminders}
 указано одно напоминание о событии. При вызове метода
 {@link android.provider.CalendarContract.Reminders#query(android.content.ContentResolver, long, java.lang.String[]) query()}возвращается список напоминаний для события
-с заданным 
+с заданным
 {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID}.</p>
 
 
@@ -780,9 +780,9 @@ Uri uri = cr.insert(Reminders.CONTENT_URI, values);</pre>
 возможность запрашивать повторения событий. </p>
 
 <p>В таблице ниже перечислены некоторые из полей, которые можно запросить для экземпляра. Обратите внимание,
-что часовой пояс задается параметрами 
-{@link android.provider.CalendarContract.CalendarCache#KEY_TIMEZONE_TYPE} 
-и 
+что часовой пояс задается параметрами
+{@link android.provider.CalendarContract.CalendarCache#KEY_TIMEZONE_TYPE}
+и
 {@link android.provider.CalendarContract.CalendarCache#KEY_TIMEZONE_INSTANCES}.</p>
 
 
@@ -801,18 +801,18 @@ Uri uri = cr.insert(Reminders.CONTENT_URI, values);</pre>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Instances#END_DAY}</td>
-    
+
     <td>День окончания экземпляра по юлианскому календарю относительно часового пояса
-приложения «Календарь». 
-    
+приложения «Календарь».
+
 </td>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Instances#END_MINUTE}</td>
-    
+
     <td>Минута окончания экземпляра, вычисленная от полуночи по часовому поясу
 приложения «Календарь».</td>
-    
+
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Instances#EVENT_ID}</td>
@@ -820,27 +820,27 @@ Uri uri = cr.insert(Reminders.CONTENT_URI, values);</pre>
   </tr>
     <tr>
     <td>{@link android.provider.CalendarContract.Instances#START_DAY}</td>
-    <td>День начала экземпляра по юлианскому календарю относительно часового пояса приложения «Календарь». 
+    <td>День начала экземпляра по юлианскому календарю относительно часового пояса приложения «Календарь».
  </td>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Instances#START_MINUTE}</td>
-    
+
     <td>Минута начала экземпляра, вычисленная от полуночи по часовому поясу
-приложения «Календарь». 
+приложения «Календарь».
 </td>
-    
+
   </tr>
 
 </table>
 
 <h3 id="query-instances">Запрос таблицы экземпляров</h3>
 
-<p>Чтобы запросить таблицу экземпляров, необходимо указать промежуток времени для запроса в 
+<p>Чтобы запросить таблицу экземпляров, необходимо указать промежуток времени для запроса в
 URI. В этом примере {@link android.provider.CalendarContract.Instances}
 получает доступ к полю {@link
 android.provider.CalendarContract.EventsColumns#TITLE} посредством своей реализации
-интерфейса {@link android.provider.CalendarContract.EventsColumns}. 
+интерфейса {@link android.provider.CalendarContract.EventsColumns}.
 Другими словами, {@link
 android.provider.CalendarContract.EventsColumns#TITLE}
 возвращается посредством обращения к базе данных, а не путем запроса таблицы {@link
@@ -853,7 +853,7 @@ public static final String[] INSTANCE_PROJECTION = new String[] {
     Instances.BEGIN,         // 1
     Instances.TITLE          // 2
   };
-  
+
 // The indices for the projection array above.
 private static final int PROJECTION_ID_INDEX = 0;
 private static final int PROJECTION_BEGIN_INDEX = 1;
@@ -868,7 +868,7 @@ long startMillis = beginTime.getTimeInMillis();
 Calendar endTime = Calendar.getInstance();
 endTime.set(2011, 10, 24, 8, 0);
 long endMillis = endTime.getTimeInMillis();
-  
+
 Cursor cur = null;
 ContentResolver cr = getContentResolver();
 
@@ -883,28 +883,28 @@ ContentUris.appendId(builder, startMillis);
 ContentUris.appendId(builder, endMillis);
 
 // Submit the query
-cur =  cr.query(builder.build(), 
-    INSTANCE_PROJECTION, 
-    selection, 
-    selectionArgs, 
+cur =  cr.query(builder.build(),
+    INSTANCE_PROJECTION,
+    selection,
+    selectionArgs,
     null);
-   
+
 while (cur.moveToNext()) {
     String title = null;
     long eventID = 0;
-    long beginVal = 0;    
-    
+    long beginVal = 0;
+
     // Get the field values
     eventID = cur.getLong(PROJECTION_ID_INDEX);
     beginVal = cur.getLong(PROJECTION_BEGIN_INDEX);
     title = cur.getString(PROJECTION_TITLE_INDEX);
-              
-    // Do something with the values. 
-    Log.i(DEBUG_TAG, "Event:  " + title); 
+
+    // Do something with the values.
+    Log.i(DEBUG_TAG, "Event:  " + title);
     Calendar calendar = Calendar.getInstance();
-    calendar.setTimeInMillis(beginVal);  
+    calendar.setTimeInMillis(beginVal);
     DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
-    Log.i(DEBUG_TAG, "Date: " + formatter.format(calendar.getTime()));    
+    Log.i(DEBUG_TAG, "Date: " + formatter.format(calendar.getTime()));
     }
  }</pre>
 
@@ -923,8 +923,8 @@ while (cur.moveToNext()) {
     {@link android.content.Intent#ACTION_VIEW VIEW} <br></td>
     <td><p><code>content://com.android.calendar/time/&lt;ms_since_epoch&gt;</code></p>
     Сослаться на URI также можно с помощью
-{@link android.provider.CalendarContract#CONTENT_URI CalendarContract.CONTENT_URI}. 
-Пример использования этого намерения представлен в разделе <a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-view">Использование намерений для просмотра данных календаря</a>. 
+{@link android.provider.CalendarContract#CONTENT_URI CalendarContract.CONTENT_URI}.
+Пример использования этого намерения представлен в разделе <a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-view">Использование намерений для просмотра данных календаря</a>.
 
     </td>
     <td>Открытие календаря во время, заданное параметром <code>&lt;ms_since_epoch&gt;</code>.</td>
@@ -935,11 +935,11 @@ while (cur.moveToNext()) {
 
      </td>
     <td><p><code>content://com.android.calendar/events/&lt;event_id&gt;</code></p>
-    
+
     Сослаться на URI также можно с помощью
-{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}. 
+{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}.
 Пример использования этого намерения представлен в разделе <a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-view">Использование намерений для просмотра данных календаря</a>.
-    
+
     </td>
     <td>Просмотр события, указанного с помощью <code>&lt;event_id&gt;</code>.</td>
 
@@ -952,12 +952,12 @@ while (cur.moveToNext()) {
   <tr>
     <td>{@link android.content.Intent#ACTION_EDIT EDIT} </td>
     <td><p><code>content://com.android.calendar/events/&lt;event_id&gt;</code></p>
-    
+
   Сослаться на URI также можно с помощью
-{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}. 
+{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}.
 Пример использования этого намерения представлен в разделе <a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-edit">Использование намерения для редактирования события</a>.
-    
-    
+
+
     </td>
     <td>Редактирование события, указанного с помощью <code>&lt;event_id&gt;</code>.</td>
 
@@ -972,11 +972,11 @@ while (cur.moveToNext()) {
     <br>
     {@link android.content.Intent#ACTION_INSERT INSERT} </td>
     <td><p><code>content://com.android.calendar/events</code></p>
-    
+
    Сослаться на URI также можно с помощью
-{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}. 
+{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}.
 Пример использования этого намерения представлен в разделе <a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-insert">Использование намерения для редактирования события</a>.
-    
+
     </td>
 
     <td>Создание события.</td>
@@ -996,7 +996,7 @@ while (cur.moveToNext()) {
     <td>Название события.</td>
   </tr>
   <tr>
-  
+
     <td>{@link android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME
 CalendarContract.EXTRA_EVENT_BEGIN_TIME}</td>
     <td>Время начала события (в миллисекундах) от эпохи.</td>
@@ -1004,25 +1004,25 @@ CalendarContract.EXTRA_EVENT_BEGIN_TIME}</td>
   <tr>
     <td>{@link android.provider.CalendarContract#EXTRA_EVENT_END_TIME
 CalendarContract.EXTRA_EVENT_END_TIME}</td>
-    
+
     <td>Время окончания события (в миллисекундах) от эпохи.</td>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract#EXTRA_EVENT_ALL_DAY
 CalendarContract.EXTRA_EVENT_ALL_DAY}</td>
-    
+
     <td>Логическое значение, обозначающее, что это событие на весь день. Значение может быть
 <code>true</code> или <code>false</code>.</td> </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#EVENT_LOCATION
 Events.EVENT_LOCATION}</td>
-    
+
     <td>Место проведения события.</td>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#DESCRIPTION
 Events.DESCRIPTION}</td>
-    
+
     <td>Описание события.</td>
   </tr>
   <tr>
@@ -1039,16 +1039,16 @@ Events.DESCRIPTION}</td>
     <td>
     {@link android.provider.CalendarContract.EventsColumns#ACCESS_LEVEL
 Events.ACCESS_LEVEL}</td>
-    
+
     <td>Указывает на то, является ли событие общедоступным или закрытым.</td>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#AVAILABILITY
 Events.AVAILABILITY}</td>
-    
+
     <td>Если событие считается как занятое или как свободное время, доступное для планирования.</td>
-    
-</table> 
+
+</table>
 <p>В разделах ниже указан порядок использования этих намерений.</p>
 
 
@@ -1059,14 +1059,14 @@ Events.AVAILABILITY}</td>
 Благодаря этому в <a href="#manifest">файл манифеста</a> вашего приложения не нужно включать разрешение {@link
 android.Manifest.permission#WRITE_CALENDAR}.</p>
 
-  
+
 <p>Когда пользователи работают с приложением, в котором используется такой подход, приложение отправляет
 их в «Календарь» для завершения добавления события. Намерение {@link
 android.content.Intent#ACTION_INSERT INSERT} использует дополнительные поля
 для предварительного указания в форме сведений о событии в приложении «Календарь». После этого пользователи
 могут отменить событие, отредактировать форму или сохранить событие в своем
 календаре.</p>
-  
+
 
 
 <p>Ниже представлен фрагмент кода, в котором на 19 января 2012 г. планируется событие, которое будет проходить с
@@ -1075,7 +1075,7 @@ android.content.Intent#ACTION_INSERT INSERT} использует дополни
 <ul>
   <li>В качестве URI в нем задается
 {@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}.</li>
-  
+
   <li>В нем используются дополнительные поля {@link
 android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME
 CalendarContract.EXTRA_EVENT_BEGIN_TIME} и {@link
@@ -1083,10 +1083,10 @@ android.provider.CalendarContract#EXTRA_EVENT_END_TIME
 CalendarContract.EXTRA_EVENT_END_TIME} для предварительного указания в форме
 сведений о времени события. Значения времени должны быть указаны в формате UTC и в миллисекундах от
 эпохи.</li>
-  
+
   <li>В нем используется дополнительное поле {@link android.content.Intent#EXTRA_EMAIL Intent.EXTRA_EMAIL}
 для предоставления списка участников, разделенных запятыми (их адреса эл. почты).</li>
-  
+
 </ul>
 <pre>
 Calendar beginTime = Calendar.getInstance();
@@ -1158,12 +1158,12 @@ startActivity(intent);
 
 <ul>
   <li>Адаптеру синхронизации необходимо указать, что он является таковым, задав для параметра {@link android.provider.CalendarContract#CALLER_IS_SYNCADAPTER} значение <code>true</code>.</li>
-  
-  
+
+
   <li>Адаптеру синхронизации необходимо предоставить {@link
 android.provider.CalendarContract.SyncColumns#ACCOUNT_NAME} и {@link
 android.provider.CalendarContract.SyncColumns#ACCOUNT_TYPE} в качестве параметров запроса в URI. </li>
-  
+
   <li>Адаптер синхронизации имеет доступ на запись к большему числу столбцов, чем приложение или виджет.
   Например, приложение может изменять только некоторые характеристики календаря,
 такие как название, отображаемое имя, настройки видимости и

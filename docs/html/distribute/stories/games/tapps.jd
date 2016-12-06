@@ -1,0 +1,366 @@
+page.title=Tapps Games Increases Installs by More Than 20% with Store Listing Experiments
+page.metaDescription=Tapps Games increased their use of store listing experiments in the Developer Console, with impressive results.
+page.tags="developerstory", "games", "googleplay"
+page.image=images/cards/distribute/stories/tapps.png
+page.timestamp=1468901831
+
+@jd:body
+
+<style type="text/css">
+  span.positive{
+    color:green;
+    font-size: 125%;
+    font-weight:bold;">
+  }
+  span.negative{
+    color:red;
+    font-size: 125%;
+    font-weight:bold;">
+  }
+</style>
+
+<div class="figure" style="width:215px">
+  <img src="{@docRoot}images/distribute/stories/tapps-logo.png" height="65">
+</div>
+
+<h3>
+  Background
+</h3>
+
+<p>
+  <a class="external-link" href=
+  "https://play.google.com/store/apps/dev?id=6615809648420562690">Tapps</a> is
+  a mobile game publisher in São Paulo, Brazil. With a mission of <em>creating
+  fun for everyone</em>, Tapps has a portfolio of over 200 titles on the Google
+  Play Store, with roughly 70% of their installs coming from Android. Store
+  listing experiments have provided invaluable metrics to help their growing
+  team understand what makes the most effective product listings.
+</p>
+
+<h3>
+  What they did
+</h3>
+
+<p>
+  Tapps has increased their use of store listing experiments in the Developer
+  Console. They recently expanded their marketing team to allocate greater time
+  and designated resources to the Developer Console tools. <strong>"We can’t
+  stress enough how much value the store listing experiments have brought us
+  over the past months. Right now, our marketing team has a substantial time
+  allocated to these tests every week,"</strong> said Felipe Watanabe, head of
+  marketing at Tapps. With icons and screenshots, Tapps tested variations in
+  color, character positioning, and the overall amount of graphic detail. In
+  the description tests, they found that shorter messages with clear calls to
+  action and appropriate language localizations were most successful.
+</p>
+
+<h3>
+  Results
+</h3>
+
+<p>
+  By frequently conducting store listing experiments, Tapps gained valuable
+  insights that they have applied across their greater portfolio of games.
+  Results showed that shortening messaging, using contrasting colors,
+  reordering screenshots, and simplifying graphics often led to variant results
+  representing an average increase in performance between 5% and 50%. After
+  making changes based on the test results, Tapps saw <strong>install rates
+  increase beyond 20-30%</strong>.
+</p>
+
+<h4>
+  Screen tests
+</h4>
+
+<p>
+  The following table compares the install rates for three apps based on
+  changes to each app's screenshot.
+</p>
+
+<p class="table-caption">
+  <strong>Table 1</strong>. Screen test results
+</p>
+
+<table>
+  <tr>
+    <th>
+      Original
+    </th>
+    <th>
+      Variant
+    </th>
+    <th>
+      Variant results
+    </th>
+  </tr>
+
+  <tr>
+    <td>
+      <img src="{@docRoot}images/distribute/stories/tapps-screen-orig-3.png"
+      width="240">
+    </td>
+    <td>
+      <img src="{@docRoot}images/distribute/stories/tapps-screen-var-3.png"
+      width="240">
+    </td>
+    <td>
+      <span class="positive">+25%</span>
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      <img src="{@docRoot}images/distribute/stories/tapps-screen-orig-1.png"
+      width="240">
+    </td>
+    <td>
+      <img src="{@docRoot}images/distribute/stories/tapps-screen-var-1.png"
+      width="240">
+    </td>
+    <td>
+      <span class="positive">+17.1%</span>
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      <img src="{@docRoot}images/distribute/stories/tapps-screen-orig-2.png"
+      width="240">
+    </td>
+    <td>
+      <img src="{@docRoot}images/distribute/stories/tapps-screen-var-2.png"
+      width="240">
+    </td>
+    <td>
+      <span class="positive">+7.4%</span>
+    </td>
+  </tr>
+
+</table>
+
+<h4>
+  Icon tests
+</h4>
+
+<p>
+  The following tables compare install rates for three apps based on changes
+  to each app's icon.
+</p>
+
+<p class="table-caption">
+  <strong>Table 2</strong>. Icon 1 test results
+</p>
+
+<table>
+  <tr>
+    <th>
+      Original
+    </th>
+    <th>
+      Variant 1
+    </th>
+    <th>
+      Variant 2
+    </th>
+  </tr>
+
+  <tr>
+    <td>
+      <img src="{@docRoot}images/distribute/stories/tapps-icon-orig-1.png">
+    </td>
+    <td>
+      <img src="{@docRoot}images/distribute/stories/tapps-icon-var-1.png">
+    </td>
+    <td>
+      <img src="{@docRoot}images/distribute/stories/tapps-icon-var-1-2.png">
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      ---
+    </td>
+    <td>
+      <span class="negative">-29.6%</span>
+    </td>
+    <td>
+      <span class="positive">+20.8%</span>
+    </td>
+  </tr>
+</table>
+
+<p class="table-caption">
+  <strong>Table 3</strong>. Icon 2 test results
+</p>
+
+<table>
+  <tr>
+    <th>
+      Original
+    </th>
+    <th>
+      Variant 1
+    </th>
+    <th>
+      Variant 2
+    </th>
+  </tr>
+
+  <tr>
+    <td>
+      <img src="{@docRoot}images/distribute/stories/tapps-icon-orig-2.png">
+    </td>
+    <td>
+      <img src="{@docRoot}images/distribute/stories/tapps-icon-var-2.png">
+    </td>
+    <td>
+      <img src="{@docRoot}images/distribute/stories/tapps-icon-var-2-2.png">
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      ---
+    </td>
+    <td>
+      <span class="positive">+5.1%</span>
+    </td>
+    <td>
+      <span class="positive">+19.7%</span>
+    </td>
+  </tr>
+</table>
+
+<p class="table-caption">
+  <strong>Table 4</strong>. Icon 3 test results
+</p>
+
+<table>
+  <tr>
+    <th>
+      Original
+    </th>
+    <th>
+      Variant 1
+    </th>
+    <th>
+      Variant 2
+    </th>
+  </tr>
+
+  <tr>
+    <td>
+      <img src="{@docRoot}images/distribute/stories/tapps-icon-orig-3.png">
+    </td>
+    <td>
+      <img src="{@docRoot}images/distribute/stories/tapps-icon-var-3.png">
+    </td>
+    <td>
+      <img src="{@docRoot}images/distribute/stories/tapps-icon-var-3-2.png">
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      ---
+    </td>
+    <td>
+      <span class="negative">-17.7%</span>
+    </td>
+    <td>
+      <span class="positive">+50.7%</span>
+    </td>
+  </tr>
+</table>
+
+<h4>
+  Description tests
+</h4>
+
+<p>
+  The following table compares install rates for three apps based on changes to
+  each app's description text.
+</p>
+
+<p class="table-caption">
+  <strong>Table 5</strong>. Description test results
+</p>
+
+<table>
+  <tr>
+    <th>
+      Game
+    </th>
+    <th>
+      Original
+    </th>
+    <th>
+      Variant
+    </th>
+    <th>
+      Variant results
+    </th>
+  </tr>
+
+  <tr>
+    <td>
+      <img src="{@docRoot}images/distribute/stories/tapps-logic-pic.png">
+      <strong>Logic Pic</strong>
+    </td>
+    <td>
+      <em>"Use logic to solve fun puzzles and discover hidden pictures! Logic
+      Pic is free!"</em>
+    </td>
+    <td>
+      <strong><em>"Discover all the hidden pictures in this challenging classic
+      japanese puzzle!"</em></strong>
+    </td>
+    <td>
+      <span class="positive">+10.7%</span>
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      <img src="{@docRoot}images/distribute/stories/tapps-candy-hills.png"
+      width="96"> <strong>Candy Hills</strong>
+    </td>
+    <td>
+      <em>"What will your candy park look like? Build it now in Candy
+      Hills!"</em>
+    </td>
+    <td>
+      <strong><em>"Build your own sweet candy park in Candy
+      Hills!"</em></strong>
+    </td>
+    <td>
+      <span class="positive">+8.2%</span>
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      <img src="{@docRoot}images/distribute/stories/tapps-villains-corp.png"
+      width="96"> <strong>Villains Corp.</strong>
+    </td>
+    <td>
+      <em>"Be a real villain and CONQUER THE WORLD!"</em>
+    </td>
+    <td>
+      <strong><em>"Mwahahaha! Be a real villain and CONQUER THE
+      WORLD!"</em></strong>
+    </td>
+    <td>
+      <span class="positive">+6.8%</span>
+    </td>
+  </tr>
+</table>
+
+<h3>
+  Get started
+</h3>
+
+<p>
+  Find out more about <a href=
+  "{@docRoot}distribute/users/experiments.html">store listing experiments</a>.
+</p>

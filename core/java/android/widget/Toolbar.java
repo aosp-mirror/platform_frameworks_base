@@ -161,7 +161,7 @@ public class Toolbar extends ViewGroup {
     private int mTitleMarginTop;
     private int mTitleMarginBottom;
 
-    private final RtlSpacingHelper mContentInsets = new RtlSpacingHelper();
+    private RtlSpacingHelper mContentInsets;
     private int mContentInsetStartWithNavigation;
     private int mContentInsetEndWithActions;
 
@@ -270,6 +270,7 @@ public class Toolbar extends ViewGroup {
         final int contentInsetRight =
                 a.getDimensionPixelSize(R.styleable.Toolbar_contentInsetRight, 0);
 
+        ensureContentInsets();
         mContentInsets.setAbsolute(contentInsetLeft, contentInsetRight);
 
         if (contentInsetStart != RtlSpacingHelper.UNDEFINED ||
@@ -463,13 +464,13 @@ public class Toolbar extends ViewGroup {
      */
     public void setTitleMarginBottom(int margin) {
         mTitleMarginBottom = margin;
-
         requestLayout();
     }
 
     @Override
     public void onRtlPropertiesChanged(@ResolvedLayoutDir int layoutDirection) {
         super.onRtlPropertiesChanged(layoutDirection);
+        ensureContentInsets();
         mContentInsets.setDirection(layoutDirection == LAYOUT_DIRECTION_RTL);
     }
 
@@ -1092,6 +1093,7 @@ public class Toolbar extends ViewGroup {
      * @attr ref android.R.styleable#Toolbar_contentInsetStart
      */
     public void setContentInsetsRelative(int contentInsetStart, int contentInsetEnd) {
+        ensureContentInsets();
         mContentInsets.setRelative(contentInsetStart, contentInsetEnd);
     }
 
@@ -1112,7 +1114,7 @@ public class Toolbar extends ViewGroup {
      * @attr ref android.R.styleable#Toolbar_contentInsetStart
      */
     public int getContentInsetStart() {
-        return mContentInsets.getStart();
+        return mContentInsets != null ? mContentInsets.getStart() : 0;
     }
 
     /**
@@ -1132,7 +1134,7 @@ public class Toolbar extends ViewGroup {
      * @attr ref android.R.styleable#Toolbar_contentInsetEnd
      */
     public int getContentInsetEnd() {
-        return mContentInsets.getEnd();
+        return mContentInsets != null ? mContentInsets.getEnd() : 0;
     }
 
     /**
@@ -1154,6 +1156,7 @@ public class Toolbar extends ViewGroup {
      * @attr ref android.R.styleable#Toolbar_contentInsetRight
      */
     public void setContentInsetsAbsolute(int contentInsetLeft, int contentInsetRight) {
+        ensureContentInsets();
         mContentInsets.setAbsolute(contentInsetLeft, contentInsetRight);
     }
 
@@ -1174,7 +1177,7 @@ public class Toolbar extends ViewGroup {
      * @attr ref android.R.styleable#Toolbar_contentInsetLeft
      */
     public int getContentInsetLeft() {
-        return mContentInsets.getLeft();
+        return mContentInsets != null ? mContentInsets.getLeft() : 0;
     }
 
     /**
@@ -1194,7 +1197,7 @@ public class Toolbar extends ViewGroup {
      * @attr ref android.R.styleable#Toolbar_contentInsetRight
      */
     public int getContentInsetRight() {
-        return mContentInsets.getRight();
+        return mContentInsets != null ? mContentInsets.getRight() : 0;
     }
 
     /**
@@ -2125,6 +2128,12 @@ public class Toolbar extends ViewGroup {
         mMenuBuilderCallback = mcb;
         if (mMenuView != null) {
             mMenuView.setMenuCallbacks(pcb, mcb);
+        }
+    }
+
+    private void ensureContentInsets() {
+        if (mContentInsets == null) {
+            mContentInsets = new RtlSpacingHelper();
         }
     }
 

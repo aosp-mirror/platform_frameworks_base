@@ -32,7 +32,7 @@ page.tags=alertdialog,dialogfragment
       <li>{@link android.app.DialogFragment}</li>
       <li>{@link android.app.AlertDialog}</li>
     </ol>
-    
+
     <h2>См. также:</h2>
     <ol>
       <li><a href="{@docRoot}design/building-blocks/dialogs.html">Руководство по дизайну диалоговых окон</a></li>
@@ -235,8 +235,8 @@ AlertDialog dialog = builder.create();
 </pre>
 
 <p>Методы <code>set...Button()</code> предполагают заголовок для кнопки (реализуемый
-через <a href="{@docRoot}guide/topics/resources/string-resource.html">строковый ресурс</a>) и 
-{@link android.content.DialogInterface.OnClickListener}, который определяет действие, 
+через <a href="{@docRoot}guide/topics/resources/string-resource.html">строковый ресурс</a>) и
+{@link android.content.DialogInterface.OnClickListener}, который определяет действие,
 следующее за нажатием кнопки пользователем.</p>
 
 <p>Реализована возможность добавлять три различных вида кнопок действий:</p>
@@ -248,7 +248,7 @@ AlertDialog dialog = builder.create();
   <dt>Нейтральные</dt>
   <dd>Используются в случаях, когда пользователь может не желать продолжить действие,
   но при этом необязательно хочет его отменить. Появляется между положительными и отрицательнымиI
-  кнопками. Примером такого действия может быть «Напомнить позже».</dd> 
+  кнопками. Примером такого действия может быть «Напомнить позже».</dd>
 </dl>
 
 <p>Можно добавлять только одну кнопку каждого вида в {@link
@@ -271,7 +271,7 @@ android.app.AlertDialog}. Это означает, что нельзя испо�
 <li>Интерактивный список с выбором нескольких вариантов (флажки)</li>
 </ul>
 
-<p>Для создания списка с выбором одного варианта, как на рисунке 3, 
+<p>Для создания списка с выбором одного варианта, как на рисунке 3,
 используйте метод{@link android.app.AlertDialog.Builder#setItems setItems()}:</p>
 
 <pre style="clear:right">
@@ -289,9 +289,9 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
 }
 </pre>
 
-<p>Поскольку список отображается в области содержимого диалогового окна, 
+<p>Поскольку список отображается в области содержимого диалогового окна,
 диалоговое окно не может показать одновременно сообщение и список, поэтому необходимо задать заголовок
-диалогового окна с помощью {@link android.app.AlertDialog.Builder#setTitle setTitle()}. 
+диалогового окна с помощью {@link android.app.AlertDialog.Builder#setTitle setTitle()}.
 Для указания элементов списка необходимо вызвать {@link
 android.app.AlertDialog.Builder#setItems setItems()}, передающий указатель.
 В качестве другого варианта можно указать список с помощью {@link
@@ -320,8 +320,8 @@ android.app.AlertDialog.Builder#setAdapter setAdapter()}. Наполнение �
 <p>Для добавления списка с несколькими вариантами ответов (флажки) или
 списка с одним вариантом ответа (переключатели) используйте методы
 {@link android.app.AlertDialog.Builder#setMultiChoiceItems(Cursor,String,String,
-DialogInterface.OnMultiChoiceClickListener) setMultiChoiceItems()} или 
-{@link android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener) 
+DialogInterface.OnMultiChoiceClickListener) setMultiChoiceItems()} или
+{@link android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener)
 setSingleChoiceItems()} соответственно.</p>
 
 <p>Например, таким образом можно создать список с несколькими вариантами ответов, как на
@@ -346,7 +346,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
                        // If the user checked the item, add it to the selected items
                        mSelectedItems.add(which);
                    } else if (mSelectedItems.contains(which)) {
-                       // Else, if the item is already in the array, remove it 
+                       // Else, if the item is already in the array, remove it
                        mSelectedItems.remove(Integer.valueOf(which));
                    }
                }
@@ -371,9 +371,9 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
 }
 </pre>
 
-<p>Несмотря на то, что и традиционный список, и список с переключателями 
+<p>Несмотря на то, что и традиционный список, и список с переключателями
 предполагают действие по выбору одного элемента, вам необходимо использовать {@link
-android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener) 
+android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener)
 setSingleChoiceItems()}, чтобы сохранить выбор пользователя.
 Это значит, что при повторном открытии диалогового окна будет отображаться текущий выбор пользователя,
 а затем создается список с переключателями.</p>
@@ -442,7 +442,7 @@ android.app.AlertDialog.Builder}.</p>
 одинаковые стили шрифта.</p>
 
 <p>Для применения макета в вашем {@link android.support.v4.app.DialogFragment}
-вам понадобится {@link android.view.LayoutInflater} с 
+вам понадобится {@link android.view.LayoutInflater} с
 {@link android.app.Activity#getLayoutInflater()} и вызов
 {@link android.view.LayoutInflater#inflate inflate()}, где первым параметром будет являться
 ID ресурса макета, а вторым параметром — исходный вид макета.
@@ -470,7 +470,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
                public void onClick(DialogInterface dialog, int id) {
                    LoginDialogFragment.this.getDialog().cancel();
                }
-           });      
+           });
     return builder.create();
 }
 </pre>
@@ -505,7 +505,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
 
 <pre>
 public class NoticeDialogFragment extends DialogFragment {
-    
+
     /* The activity that creates an instance of this dialog fragment must
      * implement this interface in order to receive event callbacks.
      * Each method passes the DialogFragment in case the host needs to query it. */
@@ -513,10 +513,10 @@ public class NoticeDialogFragment extends DialogFragment {
         public void onDialogPositiveClick(DialogFragment dialog);
         public void onDialogNegativeClick(DialogFragment dialog);
     }
-    
+
     // Use this instance of the interface to deliver action events
     NoticeDialogListener mListener;
-    
+
     // Override the Fragment.onAttach() method to instantiate the NoticeDialogListener
     &#64;Override
     public void onAttach(Activity activity) {
@@ -543,7 +543,7 @@ public class NoticeDialogFragment extends DialogFragment {
 public class MainActivity extends FragmentActivity
                           implements NoticeDialogFragment.NoticeDialogListener{
     ...
-    
+
     public void showNoticeDialog() {
         // Create an instance of the dialog fragment and show it
         DialogFragment dialog = new NoticeDialogFragment();
@@ -638,7 +638,7 @@ android.support.v4.app.Fragment}.</p>
 
 <p>Тем не менее, в этом случае нельзя использовать{@link android.app.AlertDialog.Builder AlertDialog.Builder}
 или другие объекты {@link android.app.Dialog} для построения диалогового окна. Если
-необходимо сделать {@link android.support.v4.app.DialogFragment} 
+необходимо сделать {@link android.support.v4.app.DialogFragment}
 встраиваемым, нужно определить пользовательский интерфейс диалогового окна в макете методом обратного вызова
 {@link android.support.v4.app.DialogFragment#onCreateView
 onCreateView()}.</p>
@@ -656,7 +656,7 @@ public class CustomDialogFragment extends DialogFragment {
         // Inflate the layout to use as dialog or embedded fragment
         return inflater.inflate(R.layout.purchase_items, container, false);
     }
-  
+
     /** The system calls this only when creating the layout in a dialog. */
     &#64;Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -678,7 +678,7 @@ public class CustomDialogFragment extends DialogFragment {
 public void showDialog() {
     FragmentManager fragmentManager = getSupportFragmentManager();
     CustomDialogFragment newFragment = new CustomDialogFragment();
-    
+
     if (mIsLargeLayout) {
         // The device is using a large layout, so show the fragment as a dialog
         newFragment.show(fragmentManager, "dialog");
@@ -695,12 +695,12 @@ public void showDialog() {
 }
 </pre>
 
-<p>Подробные сведения о выполнении операций с фрагментами приведены в руководстве 
+<p>Подробные сведения о выполнении операций с фрагментами приведены в руководстве
 <a href="{@docRoot}guide/components/fragments.html">Фрагменты</a>.</p>
 
 <p>В приведенном примере <code>mIsLargeLayout</code> булеан указывает, должно ли текущее устройство использовать
  большой макет приложения  (и отображать фрагмент как диалоговое окно, а не
-в полноэкранном режиме). Лучшим способом установить такой вид булеана является объявление 
+в полноэкранном режиме). Лучшим способом установить такой вид булеана является объявление
 <a href="{@docRoot}guide/topics/resources/more-resources.html#Bool">значения булевой переменной</a>
 с <a href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">альтернативным</a> значением для других размеров экранов. В качестве примера приведены два
 варианта булевых ресурсов для различных размеров экранов:</p>
@@ -776,7 +776,7 @@ android.support.v4.app.DialogFragment#onDismiss onDismiss()} в {@link
 android.support.v4.app.DialogFragment}.</p>
 
 <p>Также можно <em>отменить</em> диалоговое окно. Это особое событие, возникающее, когда пользователь
-покинул диалоговое окно, не завершив задачу. Так происходит, когда пользователь нажимает кнопку 
+покинул диалоговое окно, не завершив задачу. Так происходит, когда пользователь нажимает кнопку
 <em>Назад</em>, касается экрана за областью диалогового окна,
 либо когда задано {@link android.app.Dialog#cancel()} в {@link
 android.app.Dialog} (например, в качестве отклика на нажатие кнопки «Отмена» в диалоговом окне).</p>

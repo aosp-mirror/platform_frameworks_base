@@ -20,7 +20,7 @@
     android:id="@+id/date_time_alarm_group"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginTop="8dp"
+    android:layout_marginTop="16dp"
     android:layout_marginStart="16dp"
     android:gravity="start"
     android:orientation="vertical">
@@ -62,7 +62,8 @@
     <com.android.systemui.statusbar.AlphaOptimizedButton
         android:id="@+id/alarm_status"
         android:layout_width="wrap_content"
-        android:layout_height="20dp"
+        android:layout_height="wrap_content"
+        android:minHeight="20dp"
         android:paddingTop="3dp"
         android:drawablePadding="8dp"
         android:drawableStart="@drawable/ic_access_alarms_small"

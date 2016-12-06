@@ -32,7 +32,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Ծանուցումներ չկան"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Ընթացիկ"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Ծանուցումներ"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"Մարտկոցը լիցքաթափվում է"</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"Մարտկոցի լիցքը սպառվում է"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Մնաց <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"Մնաց <xliff:g id="PERCENTAGE">%s</xliff:g>: Մարտկոցի տնտեսումը միացված է:"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB լիցքավորումը չի աջակցվում:\nՕգտվեք միայն գործող լիցքավորիչից:"</string>
@@ -143,7 +143,9 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_4g_plus" msgid="3032226872470658661">"4G+"</string>
     <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
+    <string name="accessibility_data_connection_lte_plus" msgid="361876866906946007">"LTE+"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Ռոումինգ"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
@@ -236,7 +238,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4Գ տվյալների օգտագործումը դադարեցված է"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Բջջային տվյալների օգտագործումը դադարեցված է"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Տվյալների օգտագործումը դադարեցված է"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Քանի որ ձեր սահմանված տվյալների սահմանաչափը սպառվել է, սարքն այլևս չի օգտագործի տվյալները այս ցիկլի մնացած ընթացքում:\n\nԵթե վերսկսեք, հնարավոր է կիրառվեն գանձումներ ձեր օպերատորի կողմից:"</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Տվյալների օգտագործման համար նշված սահմանաչափը լրացել է: Դուք բջջային տվյալներ այլևս չեք օգտագործում:\n\nԵթե վերսկսեք բջջային տվյալների օգտագործումը, դրա համար կարող են վճարներ գանձվել:"</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Վերսկսել"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Ինտերնետ կապ չկա"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi-ը միացված է"</string>
@@ -317,6 +319,9 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Սահմանաչափ՝ <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> զգուշացում"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Աշխատանքային ռեժիմ"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Գիշերային լույս"</string>
+    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"Գիշերային լույսը միացված է, հպեք՝ անջատելու համար"</string>
+    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"Գիշերային լույսն անջատված է, հպեք՝ միացնելու համար"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"Վերջին տարրեր չկան"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Դուք ջնջել եք ամենը"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Հավելվածի մասին"</string>
@@ -330,6 +335,8 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Հորիզոնական տրոհում"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Ուղղահայաց տրոհում"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Հատուկ տրոհում"</string>
+  <string-array name="recents_blacklist_array">
+  </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Լիցքավորված է"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Լիցքավորվում է"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"Լրիվ լիցքավորմանը մնաց <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
@@ -397,6 +404,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"Սարքը կարող է վերահսկվել"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Պրոֆիլը կարող է վերահսկվել"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Ցանցը կարող է վերահսկվել"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"Ցանցը կարող է վերահսկվել"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Սարքի մշտադիտարկում"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Պրոֆիլի վերահսկում"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Ցանցի մշտադիտարկում"</string>
@@ -409,13 +417,14 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"Դուք կապակցված եք <xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածին, որը կարող է վերահսկել ձեր ցանցի գործունեությունը, այդ թվում նաև էլփոստի հաշիվները, հավելվածները և կայքերը:"</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Դուք կապակցված եք <xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածին, որը կարող է վերահսկել անձնական ցանցում կատարած ձեր գործողությունները, այդ թվում նաև էլփոստի հաշիվները, հավելվածները և կայքերը:"</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Դուք կապակցված եք <xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածին, որը կարող է վերահսկել անձնական ցանցում կատարած ձեր գործողությունները, այդ թվում նաև էլփոստի հաշիվները, հավելվածները և կայքերը:"</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"Աշխատանքային պրոֆիլի կառավարիչն է՝ <xliff:g id="ORGANIZATION">%1$s</xliff:g>: Այն կապակցված է <xliff:g id="APPLICATION">%2$s</xliff:g> հավելվածին, որը կարող է վերահսկել աշխատանքային ցանցում կատարած գործունեությունը, այդ թվում նաև էլփոստի հաշիվները, հավելվածները և կայքերը:\n\nԼրացուցիչ տեղեկությունների համար դիմեք ադմինիստրատորին:"</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Աշխատանքային պրոֆիլի կառավարիչն է՝ <xliff:g id="ORGANIZATION">%1$s</xliff:g>: Այն կապակցված է <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> հավելվածին, որը կարող է վերահսկել աշխատանքային ցանցում կատարած գործունեությունը, այդ թվում նաև էլփոստի հաշիվները, հավելվածները և կայքերը:\n\nԴուք նույնպես կապակցված եք <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> հավելվածին, որը կարող է վերահսկել անձնական ցանցում կատարած ձեր գործողությունները:"</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Սարքի կառավարիչն է՝ <xliff:g id="ORGANIZATION">%1$s</xliff:g>:\n\nԱդմինիստրատորը կարող է վերահսկել և կառավարել կարգավորումները, կորպորատիվ հաշիվը, հավելվածները, սարքի հետ առնչվող և սարքի տեղադրության տվյալները:\n\nՆաև կապակցված եք <xliff:g id="APPLICATION">%2$s</xliff:g> հավելվածին, ինչը կարող է վերահսկել ձեր ցանցի գործունեությունը, այդ թվում նաև՝ էլփոստի հաշիվները, հավելվածները և կայքերը:\n\nԼրացուցիչ տեղեկությունների համար դիմեք ադմինիստրատորին:"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Սարքը կմնա արգելափակված՝ մինչև ձեռքով չբացեք"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Ավելի արագ ստացեք ծանուցումները"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Տեսեք դրանք մինչև ապակողպելը"</string>
-    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Ոչ, շնորհակալություն"</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Ոչ"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Կարգավորել"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"Ավարտել"</string>
@@ -424,7 +433,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Էկրանն ամրացված է"</string>
     <string name="screen_pinning_description" msgid="7238941806855968768">"Էկրանը կմնա տեսադաշտում, մինչև այն ապամրացնեք: Ապամրացնելու համար հպեք և պահեք Հետ կոճակը:"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Եղավ"</string>
-    <string name="screen_pinning_negative" msgid="3741602308343880268">"Ոչ, շնորհակալություն"</string>
+    <string name="screen_pinning_negative" msgid="3741602308343880268">"Ոչ"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Թաքցնե՞լ <xliff:g id="TILE_LABEL">%1$s</xliff:g>-ը:"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Այն դարձյալ կհայտնվի, երբ նորից միացնեք կարգավորումներում:"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Թաքցնել"</string>
@@ -434,6 +443,18 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g>-ը ձայնի ուժգնության երկխոսության հավելված է"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"Հպեք՝ բնօրինակը վերականգնելու համար:"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Դուք օգտագործում եք ձեր աշխատանքային պրոֆիլը"</string>
+  <string-array name="volume_stream_titles">
+    <item msgid="5841843895402729630">"Զանգել"</item>
+    <item msgid="5997713001067658559">"Համակարգ"</item>
+    <item msgid="7858983209929864160">"Զանգ"</item>
+    <item msgid="1850038478268896762">"Մեդիա"</item>
+    <item msgid="8265110906352372092">"Զարթուցիչ"</item>
+    <item msgid="5339394737636839168"></item>
+    <item msgid="2951313578278086204">"Bluetooth"</item>
+    <item msgid="2919807739709798970"></item>
+    <item msgid="150349973435223405"></item>
+    <item msgid="6761963760295549099"></item>
+  </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s: Հպեք՝ ձայնը միացնելու համար:"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s: Հպեք՝ թրթռումը միացնելու համար: Մատչելիության ծառայությունների ձայնը կարող է անջատվել:"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s: Հպեք՝ ձայնն անջատելու համար: Մատչելիության ծառայությունների ձայնը կարող է անջատվել:"</string>
@@ -473,8 +494,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Ցույց տալ ժամացույցի վայրկյանները կարգավիճակի տողում: Կարող է ազդել մարտկոցի աշխատանքի ժամանակի վրա:"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Վերադասավորել Արագ կարգավորումները"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Ցույց տալ պայծառությունն Արագ կարգավորումներում"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"Ակտիվացնել մատը վերև սահեցնելով էկրանը տրոհելու ժեստը"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Միացնել Համատեսք կոճակից մատը դեպի վերև սահեցնելու միջոցով տրոհված էկրանի ռեժիմ անցնելու ժեստը"</string>
     <string name="experimental" msgid="6198182315536726162">"Փորձնական"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Միացնե՞լ Bluetooth-ը:"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Ստեղնաշարը ձեր պլանշետին միացնելու համար նախ անհրաժեշտ է միացնել Bluetooth-ը:"</string>
@@ -504,21 +523,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"Այլ կարգավորումներ"</string>
     <string name="notification_done" msgid="5279426047273930175">"Պատրաստ է"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի ծանուցումների կառավարներ"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"Գույնը և արտաքին տեսքը"</string>
-    <string name="night_mode" msgid="3540405868248625488">"Գիշերային ռեժիմ"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"Չափաբերել էկրանը"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"Միացված է"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"Անջատված է"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"Միացնել ավտոմատ կերպով"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Անցեք Գիշերային ռեժիմի, եթե դա պահանջում է տեղը և օրվա ժամանակը"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"Երբ Գիշերային ռեժիմը միացված է"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Օգտագործել մուգ թեման Android OS-ի համար"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"Կարգավորել երանգը"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"Կարգավորել պայծառությունը"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"Մուգ թեման կիրառվում է Android OS-ի հիմնական հատվածների նկատմամբ, որոնք սովորաբար ցուցադրվում են բաց թեմայում (օրինակ՝ Կարգավորումներ):"</string>
-    <string name="color_apply" msgid="9212602012641034283">"Կիրառել"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"Հաստատել կարգավորումները"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"Գունային որոշ կարգավորումները կարող են այս սարքը օգտագործման համար ոչ պիտանի դարձնել: Սեղմեք Լավ կոճակը՝ գունային այս կարգավորումները հաստատելու համար: Հակառակ դեպքում այս կարգավորումները կվերակայվեն 10 վայրկյան հետո:"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Մարտկոցի օգտագործում"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Մարտկոցի տնտեսումը լիցքավորման ժամանակ հասանելի չէ"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Մարտկոցի տնտեսում"</string>
@@ -640,11 +644,12 @@
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Բացել կարգավորումները:"</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Բացել արագ կարգավորումները:"</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Փակել արագ կարգավորումները:"</string>
-    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Զարթուցիչը կարգավորված է:"</string>
+    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Զարթուցիչը դրված է:"</string>
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Մուտք է գործել որպես <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"Ինտերնետ կապ չկա:"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Բացել մանրամասները:"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Բացել <xliff:g id="ID_1">%s</xliff:g> կարգավորումները:"</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Խմբագրել կարգավորումների հերթականությունը:"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Էջ <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <string name="cant_silence_or_block" msgid="999689262131488625">"Հնարավոր չէ արգելափակել ծանուցումները կամ անջատել դրանց ձայնը"</string>
 </resources>

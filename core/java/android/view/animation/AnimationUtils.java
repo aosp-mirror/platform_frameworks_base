@@ -44,6 +44,31 @@ public class AnimationUtils {
     private static final int TOGETHER = 0;
     private static final int SEQUENTIALLY = 1;
 
+    private static class AnimationState {
+        boolean animationClockLocked;
+        long currentVsyncTimeMillis;
+        long lastReportedTimeMillis;
+    };
+
+    private static ThreadLocal<AnimationState> sAnimationState
+            = new ThreadLocal<AnimationState>() {
+        @Override
+        protected AnimationState initialValue() {
+            return new AnimationState();
+        }
+    };
+
+    /** @hide */
+    public static void lockAnimationClock(long vsyncMillis) {
+        AnimationState state = sAnimationState.get();
+        state.animationClockLocked = true;
+        state.currentVsyncTimeMillis = vsyncMillis;
+    }
+
+    /** @hide */
+    public static void unlockAnimationClock() {
+        sAnimationState.get().animationClockLocked = false;
+    }
 
     /**
      * Returns the current animation time in milliseconds. This time should be used when invoking
@@ -56,7 +81,14 @@ public class AnimationUtils {
      * @see android.os.SystemClock
      */
     public static long currentAnimationTimeMillis() {
-        return SystemClock.uptimeMillis();
+        AnimationState state = sAnimationState.get();
+        if (state.animationClockLocked) {
+            // It's important that time never rewinds
+            return Math.max(state.currentVsyncTimeMillis,
+                    state.lastReportedTimeMillis);
+        }
+        state.lastReportedTimeMillis = SystemClock.uptimeMillis();
+        return state.lastReportedTimeMillis;
     }
 
     /**

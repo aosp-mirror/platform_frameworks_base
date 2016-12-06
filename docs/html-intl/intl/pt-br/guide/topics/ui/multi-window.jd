@@ -1,0 +1,589 @@
+page.title=Suporte a várias janelas
+page.metaDescription=Novo suporte à exibição de mais de um aplicativo ao mesmo tempo no Android N.
+page.keywords="multi-window", "android N", "split screen", "free-form"
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    <h2>Neste documento</h2>
+      <ol>
+        <li><a href="#overview">Visão geral</a></li>
+        <li><a href="#lifecycle">Ciclo de vida do modo de várias janelas</a></li>
+        <li><a href="#configuring">Configuração do aplicativo para o modo
+ de várias janelas</a></li>
+        <li><a href="#running">Execução do aplicativo no modo de várias janelas</a></li>
+        <li><a href="#testing">Teste do suporte a várias janelas em seu aplicativo</a></li>
+      </ol>
+    <h2>Veja também</h2>
+      <ol>
+        <li><a class="external-link" href="https://github.com/googlesamples/android-MultiWindowPlayground">Playground — aplicativo de exemplo
+ do modo de várias janelas</a></li>
+        <li><a class="external-link" href="https://medium.com/google-developers/5-tips-for-preparing-for-multi-window-in-android-n-7bed803dda64">Cinco dicas para preparar o modo de várias janelas no Android N</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>
+  O Android N adiciona suporte à exibição de mais de um aplicativo ao
+ mesmo tempo. Em dispositivos portáteis, dois aplicativos podem ser executados lado a lado ou
+ um acima do outro no modo de <em>tela dividida</em>. Em dispositivos de TV, os aplicativos podem
+ usar o modo de <em>imagem em imagem</em> para continuar a reprodução do vídeo enquanto os usuários
+ interagem com outro aplicativo.
+</p>
+
+<p>
+  Se você compilar o aplicativo com o N Preview SDK, poderá configurar como o aplicativo
+ processa a exibição de várias janelas. Por exemplo, você pode especificar as dimensões
+mínimas permitidas para a atividade. Você também pode desativar a exibição de várias janelas para
+ o aplicativo, garantindo que o sistema mostre o aplicativo apenas
+em modo de tela inteira.
+</p>
+
+<h2 id="overview">Visão geral</h2>
+
+<p>
+  O Android N permite que diversos aplicativos compartilhem a tela ao mesmo tempo. Por
+ exemplo, um usuário pode dividir a tela para visualizar uma página da web no lado esquerdo
+ e compor um e-mail no lado direito. A experiência do usuário depende do
+ dispositivo:
+</p>
+
+<ul>
+  <li>Os dispositivos portáteis que executam o Android N oferecem o
+ modo de tela dividida. Nesse modo, o sistema preenche a tela com dois aplicativos, exibindo-os
+ lado a lado ou um acima do outro. O usuário pode arrastar a linha divisória
+ que separa os dois para que um aplicativo fique maior e o outro menor.
+  </li>
+
+  <li>No Nexus Player executando Android N, os aplicativos podem entrar
+ no <a href="picture-in-picture.html">modo de imagem em imagem</a>, o que permite
+ que continuem a exibir conteúdo enquanto o usuário navega ou interage com
+ outros aplicativos.
+  </li>
+
+  <li>Fabricantes de dispositivos maiores podem optar pelo modo de
+ forma livre, em que o usuário pode redimensionar livremente cada atividade. Se o
+ fabricante ativar esse recurso, o dispositivo oferecerá o modo de forma livre
+ e o modo de tela dividida.
+  </li>
+</ul>
+
+<img src="{@docRoot}images/android-7.0/mw-splitscreen.png" alt="" width="650" srcset="{@docRoot}images/android-7.0/mw-splitscreen.png 1x,
+    {@docRoot}images/android-7.0/mw-splitscreen_2x.png 2x," id="img-split-screen" />
+<p class="img-caption">
+  <strong>Figura 1.</strong> Dois aplicativos executando lado a lado em modo de tela dividida.
+</p>
+
+<p>
+  O usuário pode mudar para o modo de várias janelas das seguintes maneiras:
+</p>
+
+<ul>
+  <li>Se o usuário abrir a <a href="{@docRoot}guide/components/recents.html">tela
+ Overview</a> e pressionar longamente um
+ título de atividade, poderá arrastá-la para uma parte destacada da
+ tela para colocá-la no modo de várias janelas.
+  </li>
+
+  <li>Se o usuário pressionar longamente o botão Overview, o dispositivo colocará
+ a atividade atual no modo de várias janelas e abrirá a tela Overview para
+ permitir que o usuário escolha outra atividade para compartilhar a tela.
+  </li>
+</ul>
+
+<p>
+  Os usuários podem <a href="{@docRoot}guide/topics/ui/drag-drop.html">arrastar e
+ soltar</a> dados de uma atividade para outra enquanto as atividades compartilham
+ a tela. (Anteriormente, os usuários podiam apenas arrastar e soltar dados em uma única
+ atividade.)
+</p>
+
+<h2 id="lifecycle">Ciclo de vida do modo de várias janelas</h2>
+
+<p>
+  O modo de várias janelas não altera o <a href="{@docRoot}training/basics/activity-lifecycle/index.html">ciclo de vida
+ da atividade</a>.
+</p>
+
+<p>
+  No modo de várias janelas, somente a atividade com a qual o usuário interagiu mais recentemente
+ fica ativa em um determinado momento. Essa atividade é considerada a atividade <em>superior</em>.
+  Todas as outras atividades ficam no estado pausado, mesmo se visíveis.
+  No entanto, o sistema atribui a essas atividades pausadas, mas visíveis, uma prioridade maior
+ que a das atividades não visíveis. Se o usuário interagir com uma das
+ atividades pausadas, ela será retomada e a atividade previamente superior
+ será pausada.
+</p>
+
+<p class="note">
+  <strong>Observação:</strong> em modo de suporte a várias janelas, um aplicativo pode estar no estado
+ pausado e continuar visível ao usuário. Pode ser necessário que um aplicativo continue com suas
+ atividades, mesmo se pausado. Por exemplo, um aplicativo que reproduz vídeo e que está no
+ modo pausado, mas visível, deve continuar a exibir o vídeo. Por esse
+ motivo, recomendamos que atividades que reproduzem vídeo <em>não</em> pausem o
+ vídeo nos manipuladores {@link android.app.Activity#onPause onPause()}.
+  Em vez disso, o vídeo deve ser pausado em {@link android.app.Activity#onStop
+  onStop()} e a reprodução retomada em {@link android.app.Activity#onStart
+  onStart()}.
+</p>
+
+<p>
+  Quando o usuário coloca um aplicativo no modo de várias janelas, o sistema notifica a
+ atividade sobre a mudança de configuração, como especificado em <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Processamento de alterações
+ no tempo de execução</a>. Isso também acontece quando o usuário redimensiona o aplicativo ou
+ coloca-o novamente no modo de tela cheia.
+  Essencialmente, essa alteração afeta
+ o ciclo de vida da atividade da mesma forma que quando o sistema notifica o aplicativo de que o dispositivo mudou
+ do modo de retrato para paisagem, exceto que as dimensões do dispositivo são
+ alteradas, em vez de simplesmente permutadas. Como discutido em <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Processamento de alterações
+ no tempo de execução</a>, a sua atividade pode processar ela mesma a mudança de configuração ou
+ permitir que o sistema destrua a atividade e recrie-a com as novas
+ dimensões.
+</p>
+
+<p>
+  Se o usuário redimensionar uma janela e aumentar uma de suas dimensões, o
+ sistema redimensionará a atividade para corresponder à ação do usuário e emitirá <a href="{@docRoot}guide/topics/resources/runtime-changes.html">mudanças de tempo de execução</a>
+ conforme necessário. Se o aplicativo demorar a desenhar nas áreas recém-expostas, o
+ sistema preencherá temporariamente essas áreas com a cor especificada pelo atributo {@link
+  android.R.attr#windowBackground windowBackground} ou pelo atributo de estilo padrão
+ <code>windowBackgroundFallback</code>.
+</p>
+
+<h2 id="configuring">Configuração do aplicativo para o modo de várias janelas</h2>
+
+<p>
+  Se o seu aplicativo for direcionado ao Android N, você poderá configurar como
+ e se as atividades do aplicativo suportam a exibição em várias janelas. Você pode definir
+ atributos no manifesto para controlar o tamanho e o layout.
+  As configurações de atributos de uma atividade raiz se aplicam a todas as atividades
+ em sua pilha de tarefas. Por exemplo, se a atividade raiz tiver
+ <code>android:resizeableActivity</code> definido como true, todas as atividades
+ na pilha de tarefas serão redimensionáveis.
+</p>
+
+<p class="note">
+  <strong>Observação:</strong> se você compilar um aplicativo com várias orientações usando uma versão
+ do SDK anterior ao Android N e o usuário usar o aplicativo em
+ modo de suporte a várias janelas, o sistema redimensionará forçosamente o aplicativo. O sistema apresenta uma
+ caixa de diálogo avisando o usuário de que o aplicativo pode se comportar de forma inesperada. O sistema
+ <em>não</em> redimensiona aplicativos de orientação fixa; se
+ o usuário tentar abrir um aplicativo de orientação fixa no modo de várias janelas,
+ o aplicativo ocupará toda a tela.
+</p>
+
+<h4 id="resizeableActivity">android:resizeableActivity</h4>
+<p>
+  Defina esse atributo no nó <code>&lt;activity&gt;</code> ou
+ <code>&lt;application&gt;</code> em seu manifesto para ativar ou desativar a exibição em
+ várias telas:
+</p>
+
+<pre>
+android:resizeableActivity=["true" | "false"]
+</pre>
+
+<p>
+  Se esse atributo for definido como verdadeiro, a atividade poderá ser inicializada nos
+ modos de tela dividida e forma livre. Se o atributo for definido como falso, a
+ atividade não oferecerá suporte ao modo de várias janelas. Se esse valor for falso e o
+ usuário tentar iniciar a atividade no modo de várias janelas, a atividade ocupará
+ a tela inteira.
+</p>
+
+<p>
+  Se o aplicativo for direcionado ao Android N, mas o valor desse atributo não for
+ especificado, o atributo assumirá o valor padrão de verdadeiro.
+</p>
+
+<h4 id="supportsPictureInPicture">android:supportsPictureInPicture</h4>
+
+<p>
+  Defina esse atributo no nó <code>&lt;activity&gt;</code> ou no seu manifesto para
+ indicar se a atividade oferece suporte à exibição no modo de imagem em imagem. Esse
+ atributo será ignorado se <code>android:resizeableActivity</code> for falso.
+</p>
+
+<pre>
+android:supportsPictureInPicture=["true" | "false"]
+</pre>
+
+<h3 id="layout">Atributos de layout</h3>
+
+<p>
+  No Android N, o elemento de manifesto <code>&lt;layout&gt;</code>
+ oferece suporte a diversos atributos que afetam o comportamento da atividade no
+ modo de várias janelas:
+</p>
+
+<dl>
+  <dt>
+    <code>android:defaultWidth</code>
+  </dt>
+
+  <dd>
+    Largura padrão da atividade quando iniciada no modo de forma livre.
+  </dd>
+
+  <dt>
+    <code>android:defaultHeight</code>
+  </dt>
+
+  <dd>
+    Altura padrão da atividade quando iniciada no modo de forma livre.
+  </dd>
+
+  <dt>
+    <code>android:gravity</code>
+  </dt>
+
+  <dd>
+    Posicionamento inicial da atividade quando iniciada no modo de forma livre. Consulte a
+ referência de {@link android.view.Gravity} para obter os valores adequados.
+  </dd>
+
+  <dt>
+    <code>android:minimalHeight</code>, <code>android:minimalWidth</code>
+  </dt>
+
+  <dd>
+    Altura mínima e largura mínima para a atividade nos modos de tela dividida
+ e forma livre. Se o usuário mover o divisor no modo de tela dividida
+ para tornar uma atividade menor que o mínimo especificado, o sistema recortará
+ a atividade para o tamanho solicitado pelo usuário.
+  </dd>
+</dl>
+
+<p>
+  Por exemplo, o código a seguir mostra como especificar um tamanho e uma localização
+ padrão para a atividade, bem como o tamanho mínimo, quando a atividade é exibida no
+ modo de forma livre:
+</p>
+
+<pre>
+&lt;activity android:name=".MyActivity"&gt;
+    &lt;layout android:defaultHeight="500dp"
+          android:defaultWidth="600dp"
+          android:gravity="top|end"
+          android:minimalHeight="450dp"
+          android:minimalWidth="300dp" /&gt;
+&lt;/activity&gt;
+</pre>
+
+<h2 id="running">Execução do aplicativo no modo de várias janelas</h2>
+
+<p>
+  O Android N oferece nova funcionalidade para dar suporte a aplicativos que podem ser executados
+ no modo de várias janelas.
+</p>
+
+<h3 id="disabled-features">Recursos desativados no modo de várias janelas</h3>
+
+<p>
+  Alguns recursos são desativados ou ignorados quando um dispositivo está no modo de
+ várias janelas, pois não fazem sentido para uma atividade que pode estar compartilhando a
+ tela do dispositivo com outras atividades ou aplicativos. Esses recursos incluem:
+
+<ul>
+  <li>Algumas opções de personalização de <a href="{@docRoot}training/system-ui/index.html">IU do sistema</a>
+ são desativadas. Por exemplo, os aplicativos não podem ocultar a barra de status
+ se não estiverem executando no modo de tela cheia.
+  </li>
+
+  <li>O sistema ignora as alterações no atributo <code><a href=
+  "{@docRoot}guide/topics/manifest/activity-element.html#screen"
+  >android:screenOrientation</a></code>.
+  </li>
+</ul>
+
+<h3 id="change-notification">Notificações e consultas de mudança no modo de várias janelas</h3>
+
+<p>
+  Os novos métodos a seguir foram adicionados à classe {@link android.app.Activity}
+ para oferecer suporte à exibição em várias janelas. Para obter detalhes sobre cada método, consulte a
+ <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referência
+ do N Preview SDK</a>.
+</p>
+
+<dl>
+  <dt>
+    <code>Activity.isInMultiWindowMode()</code>
+  </dt>
+
+  <dd>
+    Chame para descobrir se a atividade está no modo de várias janelas.
+  </dd>
+
+  <dt>
+    <code>Activity.isInPictureInPictureMode()</code>
+  </dt>
+
+  <dd>
+    Chame para descobrir se a atividade está no modo de imagem em imagem.
+
+    <p class="note">
+      <strong>Observação:</strong> o modo de imagem em imagem é um caso especial do
+ modo de várias janelas. Se <code>myActivity.isInPictureInPictureMode()</code>
+ retornar true, <code>myActivity.isInMultiWindowMode()</code> também
+ retornará true.
+    </p>
+  </dd>
+
+  <dt>
+    <code>Activity.onMultiWindowModeChanged()</code>
+  </dt>
+
+  <dd>
+    O sistema chama esse método sempre que a atividade entra ou sai do
+ modo de várias janelas. O sistema passará ao método o valor true se a
+ atividade entrar no modo de várias janelas e false se a atividade
+ sair do modo de várias janelas.
+  </dd>
+
+  <dt>
+    <code>Activity.onPictureInPictureModeChanged()</code>
+  </dt>
+
+  <dd>
+    O sistema chama esse método sempre que a atividade entra ou sai do
+ modo de imagem em imagem. O sistema passará ao método o valor true se
+ a atividade entrar no modo de várias janelas e false se a atividade
+ sair do modo de várias janelas.
+  </dd>
+</dl>
+
+<p>
+  Existem também versões de {@link android.app.Fragment} para cada um desses
+ métodos como, por exemplo, <code>Fragment.isInMultiWindowMode()</code>.
+</p>
+
+<h3 id="entering-pip">Entrar no modo de imagem em imagem</h3>
+
+<p>
+  Para colocar uma atividade no modo de imagem em imagem, chame o novo método
+ <code>Activity.enterPictureInPictureMode()</code>. Esse método não terá efeito se
+ o dispositivo não oferecer suporte ao modo de imagem em imagem. Para obter mais informações,
+ consulte a documentação do modo <a href="picture-in-picture.html">imagem em imagem</a>.
+</p>
+
+<h3 id="launch">Iniciar novas atividades no modo de várias janelas</h3>
+
+<p>
+  Quando você iniciar uma nova atividade, poderá indicar ao sistema que a
+ a nova atividade deverá ser exibida adjacente à atual, se possível. Para fazer
+ isso, use o sinalizador
+ <code>Intent.FLAG_ACTIVITY_LAUNCH_TO_ADJACENT</code>. A passagem
+ desse sinalizador solicita o seguinte comportamento:
+</p>
+
+<ul>
+  <li>Se o dispositivo estiver no modo de tela dividida, o sistema tentará criar a
+ nova atividade ao lado da atividade que a iniciou para que as duas atividades
+ compartilhem a tela. Nem sempre o sistema conseguirá fazer isso, mas as
+ atividades ficarão adjacentes, se possível.
+  </li>
+
+  <li>Se o dispositivo não estiver no modo de tela dividida, esse sinalizador não terá efeito.
+  </li>
+</ul>
+
+<p>
+  Se um dispositivo estiver no modo de forma livre e você iniciar uma nova atividade, poderá
+ especificar as dimensões e a posição na tela da nova atividade chamando
+ <code>ActivityOptions.setLaunchBounds()</code>. Esse método não terá efeito se
+ o dispositivo não estiver no modo de várias janelas.
+</p>
+
+<p class="note">
+  <strong>Observação:</strong> se você iniciar uma atividade em uma pilha de tarefas, essa
+ atividade substituirá a atividade na tela, herdando todas as
+ propriedades de suporte a várias janelas. Se você quiser iniciar a nova atividade como janela
+ separada no modo de várias janelas, inicie essa atividade em uma nova pilha de tarefas.
+</p>
+
+<h3 id="dnd">Suporte a arrastar e soltar</h3>
+
+<p>
+  Os usuários podem <a href="{@docRoot}guide/topics/ui/drag-drop.html">arrastar e
+ soltar</a> dados de uma atividade para outra enquanto as duas atividades
+ compartilham a tela. (Anteriormente, os usuários podiam apenas arrastar e soltar dados em uma
+ única atividade.) Por esse motivo, se o aplicativo não tem a funcionalidade de arrastar e soltar,
+ pode ser uma boa ideia adicioná-la.
+</p>
+
+<p>
+  O N Preview SDK estende o pacote <a href="{@docRoot}reference/android/view/package-summary.html"><code>android.view</code></a>
+ para oferecer suporte ao recurso arrastar e soltar entre aplicativos. Para obter detalhes sobre os seguintes
+ métodos e classes, consulte a <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referência
+ do Preview SDK</a>.
+</p>
+
+<dl>
+  <dt>
+    <code>android.view.DropPermissions</code>
+  </dt>
+
+  <dd>
+    Objeto token responsável por especificar as permissões concedidas ao aplicativo
+ que recebe uma ação de soltar.
+  </dd>
+
+  <dt>
+    <code>View.startDragAndDrop()</code>
+  </dt>
+
+  <dd>
+    Novo alias de {@link android.view.View#startDrag View.startDrag()}. Para
+ ativar o recurso de arrastar e soltar entre atividades, passe o novo sinalizador
+ <code>View.DRAG_FLAG_GLOBAL</code>. Se você precisar conceder permissões de URI à
+ atividade de destino, passe os novos sinalizadores,
+ <code>View.DRAG_FLAG_GLOBAL_URI_READ</code> ou
+ <code>View.DRAG_FLAG_GLOBAL_URI_WRITE</code>, conforme o caso.
+  </dd>
+
+  <dt>
+    <code>View.cancelDragAndDrop()</code>
+  </dt>
+
+  <dd>
+    Cancela uma operação de arrastar em andamento. Somente pode ser chamado
+ pelo aplicativo que originou a operação de arrastar.
+  </dd>
+
+  <dt>
+    <code>View.updateDragShadow()</code>
+  </dt>
+
+  <dd>
+    Substitui a sombra de arrastar para uma operação de arrastar em andamento. Somente
+ pode ser chamado pelo aplicativo que originou a operação de arrastar.
+  </dd>
+
+  <dt>
+    <code>Activity.requestDropPermissions()</code>
+  </dt>
+
+  <dd>
+    Solicita as permissões dos URIs de conteúdo passados com {@link
+    android.content.ClipData} contidos em {@link android.view.DragEvent}.
+  </dd>
+</dl>
+
+<h2 id="testing">Teste do suporte a várias janelas em seu aplicativo</h2>
+
+<p>
+  Atualizando ou não o seu aplicativo para o Android N, você deve
+ verificar como ele se comporta no modo de várias janelas, pois um usuário pode tentar iniciá-lo
+ no modo de várias janelas em um dispositivo executando o Android N.
+</p>
+
+<h3 id="configuring">Configuração de um dispositivo de teste</h3>
+
+<p>
+  Se você instalar o Android N em um dispositivo, o modo de tela dividida
+ será instalado automaticamente.
+</p>
+
+<h3 id="test-non-n">Se o aplicativo não foi compilado com o N Preview SDK</h3>
+
+<p>
+  Se você não compilou o aplicativo com o N Preview SDK e o usuário tentar usar
+ o aplicativo no modo de várias janelas, o sistema redimensionará obrigatoriamente o aplicativo, a menos que este
+ declare uma orientação fixa.
+</p>
+
+<p>
+  Se o aplicativo não declarar uma orientação fixa, inicie o aplicativo
+ em um dispositivo executando Android N e tente colocar o aplicativo no modo
+ de tela dividida. Verifique se a experiência do usuário é
+ aceitável quando o aplicativo é redimensionado obrigatoriamente.
+</p>
+
+<p>
+  Se o aplicativo declarar uma orientação fixa, você deverá tentar colocá-lo no
+ modo de várias janelas. Verifique se, ao fazê-lo, o aplicativo continua
+ no modo de tela cheia.
+</p>
+
+<h3 id="test-mw">Se você oferecer suporte ao modo de várias janelas</h3>
+
+<p>
+  Se você compilar o aplicativo com o N Preview SDK e não tiver desativado o
+ suporte a várias janelas, verifique o comportamento a seguir nos modos de tela dividida
+ e forma livre.
+</p>
+
+<ul>
+  <li>Inicie o aplicativo em modo de tela inteira e mude para o modo de várias janelas
+ pressionando longamente o botão Overview. Verifique se o aplicativo alterna corretamente.
+  </li>
+
+  <li>Inicie o aplicativo diretamente no modo de várias janelas e verifique se o aplicativo
+ é iniciado corretamente. Você pode iniciar um aplicativo no modo de várias telas pressionando o
+ botão Overview, pressionando longamente a barra de título do aplicativo e arrastando-o
+ para uma das áreas destacadas na tela.
+  </li>
+
+  <li>Redimensione o aplicativo no modo de tela dividida, arrastando a linha divisora.
+  Verifique se o aplicativo é redimensionado sem falhar e se os elementos de IU necessários
+ estão visíveis.
+  </li>
+
+  <li>Se você especificou dimensões mínimas para o aplicativo, tente redimensionar
+ o aplicativo abaixo dessas dimensões. Verifique se não é possível redimensionar o aplicativo
+ para um tamanho menor que o mínimo especificado.
+  </li>
+
+  <li>Em todos os testes, verifique se o desempenho do aplicativo é aceitável. Por
+ exemplo, verifique se há uma demora muito grande para atualizar a IU após o
+ redimensionamento do aplicativo.
+  </li>
+</ul>
+
+<h4 id="test-checklist">Lista de verificação de teste</h4>
+
+<p>
+  Para verificar o desempenho do aplicativo no modo de várias janelas, experimente as operações
+ a seguir. Você deve tentar essas operações nos modos de tela dividida e
+ várias telas, exceto onde houver instruções diferentes.
+</p>
+
+<ul>
+  <li>Entre e saia do modo de várias janelas.
+  </li>
+
+  <li>Alterne do seu aplicativo para outro e verifique se o seu aplicativo se comporta
+ corretamente enquanto visível, mas não ativo. Por exemplo, se o seu aplicativo estiver
+ reproduzindo vídeo, verifique se a reprodução não é interrompida quando o usuário
+ interage com outro aplicativo.
+  </li>
+
+  <li>No modo de tela dividida, tente mover a barra divisora para aumentar e reduzir
+ o tamanho do aplicativo. Tente essas operações nas configurações lado a lado
+ e um acima do outro. Verifique se o aplicativo não falha,
+ se a funcionalidade essencial fica visível e se a operação de redimensionamento não demora
+ demais.
+  </li>
+
+  <li>Execute várias operações de redimensionamento em rápida sucessão. Verifique se o
+ aplicativo não falha nem apresenta vazamento de memória. Para obter informações sobre como verificar o uso de memória
+ do aplicativo, consulte <a href="{@docRoot}tools/debugging/debugging-memory.html">
+  Investigação do uso de RAM</a>.
+  </li>
+
+  <li>Use o aplicativo normalmente em diversas configurações diferentes de janela e
+ verifique se o aplicativo se comporta corretamente. Verifique se o texto é legível e se os
+ elementos de IU não ficam pequenos demais para a interação.
+  </li>
+</ul>
+
+<h3 id="test-disabled-mw">Se você desativou o suporte a várias janelas</h3>
+
+<p>
+  Se você desativou o suporte a várias janelas definindo
+ <code>android:resizableActivity="false"</code>, inicie o aplicativo em
+ um dispositivo executando Android N e tente colocá-lo nos modos
+ de forma livre e tela dividida. Verifique se, ao fazê-lo, o aplicativo continua
+ no modo de tela cheia.
+</p>

@@ -69,7 +69,7 @@ kiểu điều khiển nhập liệu cụ thể, bạn có thể xây dựng <a 
     <tr>
         <td><a href="controls/radiobutton.html">Nút chọn một</a></td>
         <td>Tương tự như hộp kiểm, chỉ khác ở chỗ chỉ có thể chọn một tùy chọn trong nhóm.</td>
-	<td>{@link android.widget.RadioGroup RadioGroup} 
+	<td>{@link android.widget.RadioGroup RadioGroup}
 	<br>{@link android.widget.RadioButton RadioButton} </td>
     </tr>
     <tr>

@@ -20,17 +20,17 @@ permission join the group through the {@code permissionGroup} attribute of the
 presented together in the user interface.
 
 <p>
-Note that this element does not declare a permission itself, only a category in 
-which permissions can be placed.  See the 
-<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code> element for element for information 
+Note that this element does not declare a permission itself, only a category in
+which permissions can be placed.  See the
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code> element for element for information
 on declaring permissions and assigning them to groups.
 </p></dd>
 
 <dt>attributes:</dt>
 <dd><dl class="attr">
 <dt><a name="desc"></a>{@code android:description}</dt>
-<dd>User-readable text that describes the group.  The text should be 
-longer and more explanatory than the label.  This attribute must be 
+<dd>User-readable text that describes the group.  The text should be
+longer and more explanatory than the label.  This attribute must be
 set as a reference to a string resource.  Unlike the {@code label}
 attribute, it cannot be a raw string.</dd>
 
@@ -39,10 +39,10 @@ attribute, it cannot be a raw string.</dd>
 as a reference to a drawable resource containing the image definition.</dd>
 
 <dt><a name="label"></a>{@code android:label}</dt>
-<dd>A user-readable name for the group.  As a convenience, the label can 
-be directly set as a raw string while you're developing the application.  
-However, when the application is ready to be published, it should be set 
-as a reference to a string resource, so that it can be localized like other 
+<dd>A user-readable name for the group.  As a convenience, the label can
+be directly set as a raw string while you're developing the application.
+However, when the application is ready to be published, it should be set
+as a reference to a string resource, so that it can be localized like other
 strings in the user interface.</dd>
 
 <dt><a name="nm"></a>{@code android:name}</dt>

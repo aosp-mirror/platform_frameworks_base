@@ -120,7 +120,7 @@ o dispositivo atingiu o estado de paginação de memória. Portanto, eliminar al
 
       <ul>
         <li>Se ele hospedar um {@link android.app.Activity} que não esteja em primeiro plano,
-mas ainda seja visível para o usuário (o seu método {@link android.app.Activity#onPause onPause()} tiver sido chamado). 
+mas ainda seja visível para o usuário (o seu método {@link android.app.Activity#onPause onPause()} tiver sido chamado).
 Isto poderá ocorrer, por exemplo, se a atividade em primeiro plano iniciar um diálogo, o que permitirá
 que a atividade anterior seja vista por trás dela.</li>
 
@@ -319,7 +319,7 @@ private class DownloadImageTask extends AsyncTask&lt;String, Void, Bitmap&gt; {
     protected Bitmap doInBackground(String... urls) {
         return loadImageFromNetwork(urls[0]);
     }
-    
+
     /** The system calls this to perform work in the UI thread and delivers
       * the result from doInBackground() */
     protected void onPostExecute(Bitmap result) {

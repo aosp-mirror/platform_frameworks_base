@@ -69,7 +69,7 @@ Android. Все они имеются в пакете {@link android.widget}. Е
     <tr>
         <td><a href="controls/radiobutton.html">Переключатель</a></td>
         <td>Этот элемент управления аналогичен флажку, за исключением того, что в группе элементов можно выбрать только один вариант.</td>
-	<td>{@link android.widget.RadioGroup RadioGroup} 
+	<td>{@link android.widget.RadioGroup RadioGroup}
 	<br>{@link android.widget.RadioButton RadioButton} </td>
     </tr>
     <tr>

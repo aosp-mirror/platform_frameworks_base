@@ -1,0 +1,18 @@
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android" >
+    <shortcut
+        android:shortcutId="ms1"
+        android:enabled="true"
+        android:icon="@drawable/icon1"
+        android:shortcutShortLabel="@string/shortcut_title1"
+        android:shortcutLongLabel="@string/shortcut_text1"
+        android:shortcutDisabledMessage="@string/shortcut_disabled_message1"
+        >
+        <intent
+            android:action="action1"
+            android:data="data1"
+            >
+        </intent>
+        <categories android:name="android.shortcut.conversation" />
+        <categories android:name="android.shortcut.media" />
+    </shortcut>
+</shortcuts>

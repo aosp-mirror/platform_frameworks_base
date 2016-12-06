@@ -68,7 +68,9 @@ public final class BluetoothHealthAppConfiguration implements Parcelable {
     public boolean equals(Object o) {
         if (o instanceof BluetoothHealthAppConfiguration) {
             BluetoothHealthAppConfiguration config = (BluetoothHealthAppConfiguration) o;
-            // config.getName() can never be NULL
+
+            if (mName == null) return false;
+
             return mName.equals(config.getName()) &&
                     mDataType == config.getDataType() &&
                     mRole == config.getRole() &&

@@ -32,7 +32,7 @@ page.tags=提醒对话框,对话框片段
       <li>{@link android.app.DialogFragment}</li>
       <li>{@link android.app.AlertDialog}</li>
     </ol>
-    
+
     <h2>另请参阅</h2>
     <ol>
       <li><a href="{@docRoot}design/building-blocks/dialogs.html">对话框设计指南</a></li>
@@ -248,7 +248,7 @@ AlertDialog dialog = builder.create();
   <dt>中性</dt>
   <dd>您应该在用户可能不想继续执行操作，但也不一定想要取消操作时使用此按钮。
 它出现在肯定按钮和否定按钮之间。
-例如，实际操作可能是“稍后提醒我”。</dd> 
+例如，实际操作可能是“稍后提醒我”。</dd>
 </dl>
 
 <p>对于每种按钮类型，您只能为 {@link
@@ -317,10 +317,10 @@ android.app.AlertDialog.Builder#setAdapter setAdapter()} 指定一个列表。�
 
 <h4 id="Checkboxes">添加永久性多选列表或单选列表</h4>
 
-<p>要想添加多选项（复选框）或单选项（单选按钮）列表，请分别使用 
+<p>要想添加多选项（复选框）或单选项（单选按钮）列表，请分别使用
 {@link android.app.AlertDialog.Builder#setMultiChoiceItems(Cursor,String,String,
-DialogInterface.OnMultiChoiceClickListener) setMultiChoiceItems()} 或 
-{@link android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener) 
+DialogInterface.OnMultiChoiceClickListener) setMultiChoiceItems()} 或
+{@link android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener)
 setSingleChoiceItems()}
 方法。</p>
 
@@ -346,7 +346,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
                        // If the user checked the item, add it to the selected items
                        mSelectedItems.add(which);
                    } else if (mSelectedItems.contains(which)) {
-                       // Else, if the item is already in the array, remove it 
+                       // Else, if the item is already in the array, remove it
                        mSelectedItems.remove(Integer.valueOf(which));
                    }
                }
@@ -373,7 +373,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
 
 <p>尽管传统列表和具有单选按钮的列表都能提供“单选”操作，但如果您想持久保存用户的选择，则应使用
 {@link
-android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener) 
+android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener)
 setSingleChoiceItems()}。也就是说，如果稍后再次打开对话框时系统应指示用户的当前选择，那么您就需要创建一个具有单选按钮的列表。
 
 </p>
@@ -442,7 +442,7 @@ android.app.AlertDialog.Builder#setView setView()} 将其添加到 {@link androi
 {@code "sans-serif"}，以便两个文本字段都使用匹配的字体样式。</p>
 
 <p>要扩展 {@link android.support.v4.app.DialogFragment}
-中的布局，请通过 {@link android.app.Activity#getLayoutInflater()} 
+中的布局，请通过 {@link android.app.Activity#getLayoutInflater()}
 获取一个 {@link android.view.LayoutInflater} 并调用
 {@link android.view.LayoutInflater#inflate inflate()}，其中第一个参数是布局资源
 ID，第二个参数是布局的父视图。然后，您可以调用
@@ -470,7 +470,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
                public void onClick(DialogInterface dialog, int id) {
                    LoginDialogFragment.this.getDialog().cancel();
                }
-           });      
+           });
     return builder.create();
 }
 </pre>
@@ -505,7 +505,7 @@ API。
 
 <pre>
 public class NoticeDialogFragment extends DialogFragment {
-    
+
     /* The activity that creates an instance of this dialog fragment must
      * implement this interface in order to receive event callbacks.
      * Each method passes the DialogFragment in case the host needs to query it. */
@@ -513,10 +513,10 @@ public class NoticeDialogFragment extends DialogFragment {
         public void onDialogPositiveClick(DialogFragment dialog);
         public void onDialogNegativeClick(DialogFragment dialog);
     }
-    
+
     // Use this instance of the interface to deliver action events
     NoticeDialogListener mListener;
-    
+
     // Override the Fragment.onAttach() method to instantiate the NoticeDialogListener
     &#64;Override
     public void onAttach(Activity activity) {
@@ -543,7 +543,7 @@ public class NoticeDialogFragment extends DialogFragment {
 public class MainActivity extends FragmentActivity
                           implements NoticeDialogFragment.NoticeDialogListener{
     ...
-    
+
     public void showNoticeDialog() {
         // Create an instance of the dialog fragment and show it
         DialogFragment dialog = new NoticeDialogFragment();
@@ -656,7 +656,7 @@ public class CustomDialogFragment extends DialogFragment {
         // Inflate the layout to use as dialog or embedded fragment
         return inflater.inflate(R.layout.purchase_items, container, false);
     }
-  
+
     /** The system calls this only when creating the layout in a dialog. */
     &#64;Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -678,7 +678,7 @@ UI：</p>
 public void showDialog() {
     FragmentManager fragmentManager = getSupportFragmentManager();
     CustomDialogFragment newFragment = new CustomDialogFragment();
-    
+
     if (mIsLargeLayout) {
         // The device is using a large layout, so show the fragment as a dialog
         newFragment.show(fragmentManager, "dialog");

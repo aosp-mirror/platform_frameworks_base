@@ -76,7 +76,7 @@ page.tags=settings,preferences
   </div>
   <div class="col-5">
     <img src="{@docRoot}design/media/help_evenbetter.png">
-  </div>  
+  </div>
 </div>
 
 <div class="cols">

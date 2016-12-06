@@ -30,7 +30,7 @@ parent.link=index.html
 которые называются <a href="#EventListeners">приемниками событий</a>, и служат перехватчиками действий пользователя с вашим пользовательским интерфейсом.</p>
 
 <p>Несмотря на то, что вы будете чаще использовать приемники событий для перехвата действий пользователя, может
-наступить момент, когда вам не захочется наследовать класс View, чтобы создать нестандартный компонент. 
+наступить момент, когда вам не захочется наследовать класс View, чтобы создать нестандартный компонент.
 Возможно, вы захотите наследовать класс {@link android.widget.Button},
 чтобы сделать нечто более необычное. В этом случае вы сможете определить поведение события по умолчанию для своего
 класса с помощью <a href="#EventHandlers">обработчиков событий</a> класса.</p>
@@ -46,27 +46,27 @@ parent.link=index.html
 
 <dl>
   <dt><code>onClick()</code></dt>
-    <dd>Из объекта {@link android.view.View.OnClickListener}. 
+    <dd>Из объекта {@link android.view.View.OnClickListener}.
  Этот метод вызывается, когда пользователь касается элемента
  (в режиме касания), или переводит фокус на элемент с помощью клавиш перемещения или трекбола и
 нажимает соответствующую клавишу «ввода» или нажимает на трекбол.</dd>
   <dt><code>onLongClick()</code></dt>
-    <dd>Из объекта {@link android.view.View.OnLongClickListener}. 
+    <dd>Из объекта {@link android.view.View.OnLongClickListener}.
  Этот метод вызывается, когда пользователь касается элемента и удерживает его (в режиме касания),
 или переводит фокус на элемент с помощью клавиш перемещения или трекбола и
 нажимает и удерживает соответствующую клавишу «ввода» или трекбол (в течение одной секунды).</dd>
   <dt><code>onFocusChange()</code></dt>
-    <dd>Из объекта {@link android.view.View.OnFocusChangeListener}. 
+    <dd>Из объекта {@link android.view.View.OnFocusChangeListener}.
  Этот метод вызывается, когда пользователь перемещается в элемент или из него с помощью клавиш перемещения или трекбола.</dd>
   <dt><code>onKey()</code></dt>
-    <dd>Из объекта {@link android.view.View.OnKeyListener}. 
+    <dd>Из объекта {@link android.view.View.OnKeyListener}.
  Этот метод вызывается, когда пользователь переносит фокус на элемент и нажимает или отпускает аппаратную клавишу на устройстве.</dd>
   <dt><code>onTouch()</code></dt>
-    <dd>Из объекта {@link android.view.View.OnTouchListener}. 
+    <dd>Из объекта {@link android.view.View.OnTouchListener}.
  Этот метод вызывается, когда пользователь выполняет действие, считающееся событием касания, например, нажимает, отпускает
 или выполняет любой жест на экране (в пределах границ элемента).</dd>
   <dt><code>onCreateContextMenu()</code></dt>
-    <dd>Из объекта {@link android.view.View.OnCreateContextMenuListener}. 
+    <dd>Из объекта {@link android.view.View.OnCreateContextMenuListener}.
 Этот метод вызывается, когда создается контекстное меню (в результате длительного «длительного нажатия»). См. обсуждение
 контекстных меню в руководстве
 для разработчиков <a href="{@docRoot}guide/topics/ui/menus.html#context-menu">Меню</a>.</dd>
@@ -75,8 +75,8 @@ parent.link=index.html
 <p>Эти методы являются единственными составными частями соответствующих интерфейсов. Чтобы определить один из этих методов
 и обрабатывать события, реализуйте вложенный интерфейс в вашем процесс или определите его, как анонимный класс.
 Затем передайте экземпляр реализации
-в соответствующий метод <code>View.set...Listener()</code>. (Например, вызовите 
-<code>{@link android.view.View#setOnClickListener(View.OnClickListener) setOnClickListener()}</code> 
+в соответствующий метод <code>View.set...Listener()</code>. (Например, вызовите
+<code>{@link android.view.View#setOnClickListener(View.OnClickListener) setOnClickListener()}</code>
 и передайте ему свою реализацию {@link android.view.View.OnClickListener OnClickListener}.)</p>
 
 <p>В следующем примере показано, как зарегистрировать приемник события «по клику» (on-click) для кнопки. </p>
@@ -122,7 +122,7 @@ public class ExampleActivity extends Activity implements OnClickListener {
 зависит от события. Для некоторых методов, которые возвращают значения, причина описана ниже:</p>
 <ul>
   <li><code>{@link android.view.View.OnLongClickListener#onLongClick(View) onLongClick()}</code> —
-этот метод возвращает логическое значение, указывающее, что вы обработали это событие и его более не следует хранить. 
+этот метод возвращает логическое значение, указывающее, что вы обработали это событие и его более не следует хранить.
 А именно, верните значение <em>true</em>, чтобы указать, что вы обработали событие и его следует остановить;
 верните значение <em>false</em>, если вы не обработали его и/или событие должно продолжаться для любых других
 приемников события on-click.</li>
@@ -181,14 +181,14 @@ dispatchKeyEvent()}</code>. В качестве альтернативы к пе
 макета, учитывайте и другие методы:</p>
 <ul>
   <li><code>{@link  android.app.Activity#dispatchTouchEvent(MotionEvent)
-    Activity.dispatchTouchEvent(MotionEvent)}</code> — этот метод позволяет вашей операции {@link 
+    Activity.dispatchTouchEvent(MotionEvent)}</code> — этот метод позволяет вашей операции {@link
     android.app.Activity} перехватывать все события касаний перед их отправкой в окно.</li>
   <li><code>{@link  android.view.ViewGroup#onInterceptTouchEvent(MotionEvent)
     ViewGroup.onInterceptTouchEvent(MotionEvent)}</code> — этот метод позволяет объекту {@link
     android.view.ViewGroup} просматривать события перед их отправкой в дочерние отображаемые объекты.</li>
   <li><code>{@link  android.view.ViewParent#requestDisallowInterceptTouchEvent(boolean)
     ViewParent.requestDisallowInterceptTouchEvent(boolean)}</code> — вызовите этот метод
-в родительском отображаемом объекте, чтобы указать ему, что он не должен перехватывать события касания с помощью <code>{@link 
+в родительском отображаемом объекте, чтобы указать ему, что он не должен перехватывать события касания с помощью <code>{@link
     android.view.ViewGroup#onInterceptTouchEvent(MotionEvent)}</code>.</li>
 </ul>
 
@@ -199,7 +199,7 @@ dispatchKeyEvent()}</code>. В качестве альтернативы к пе
 какой элемент будет принимать ввод.  Однако, если устройство поддерживает сенсорный ввод, и пользователь
 начинает взаимодействовать с интерфейсом, прикасаясь к его элементам, исчезает необходимость
 выделять элементы или передавать фокус определенному отображаемому объекту.  Следовательно, существует режим
-взаимодействия, который называется «режимом касания». 
+взаимодействия, который называется «режимом касания».
 </p>
 <p>
 Как только пользователь касается экрана, устройство, поддерживающее сенсорный ввод,
@@ -214,7 +214,7 @@ dispatchKeyEvent()}</code>. В качестве альтернативы к пе
 с пользовательским интерфейсом без касания экрана.
 </p>
 <p>
-Состояние режима касания поддерживается во всей системе (для всех окон и операций). 
+Состояние режима касания поддерживается во всей системе (для всех окон и операций).
 Чтобы узнать текущее состояние, можно вызвать
 {@link android.view.View#isInTouchMode} и посмотреть, находится ли устройство в режиме касания.
 </p>
@@ -282,7 +282,7 @@ dispatchKeyEvent()}</code>. В качестве альтернативы к пе
     the framework will take care of measuring, laying out, and drawing the tree
     as appropriate.</li>
    </ol>
-   
+
    <p class="note"><strong>Note:</strong> The entire View tree is single threaded. You must always be on
    the UI thread when calling any method on any View.
    If you are doing work on other threads and want to update the state of a View

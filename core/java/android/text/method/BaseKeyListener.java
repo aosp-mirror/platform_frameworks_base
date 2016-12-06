@@ -129,8 +129,8 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
         // The offset is immediately before a variation selector.
         final int STATE_BEFORE_VS = 6;
 
-        // The offset is immediately before a ZWJ emoji.
-        final int STATE_BEFORE_ZWJ_EMOJI = 7;
+        // The offset is immediately before an emoji.
+        final int STATE_BEFORE_EMOJI = 7;
         // The offset is immediately before a ZWJ that were seen before a ZWJ emoji.
         final int STATE_BEFORE_ZWJ = 8;
         // The offset is immediately before a variation selector and a ZWJ that were seen before a
@@ -169,7 +169,7 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
                     } else if (codePoint == Emoji.COMBINING_ENCLOSING_KEYCAP) {
                         state = STATE_BEFORE_KEYCAP;
                     } else if (Emoji.isEmoji(codePoint)) {
-                        state = STATE_BEFORE_ZWJ_EMOJI;
+                        state = STATE_BEFORE_EMOJI;
                     } else {
                         state = STATE_FINISHED;
                     }
@@ -232,7 +232,7 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
                 case STATE_BEFORE_VS:
                     if (Emoji.isEmoji(codePoint)) {
                         deleteCharCount += Character.charCount(codePoint);
-                        state = STATE_BEFORE_ZWJ_EMOJI;
+                        state = STATE_BEFORE_EMOJI;
                         break;
                     }
 
@@ -242,7 +242,7 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
                     }
                     state = STATE_FINISHED;
                     break;
-                case STATE_BEFORE_ZWJ_EMOJI:
+                case STATE_BEFORE_EMOJI:
                     if (codePoint == Emoji.ZERO_WIDTH_JOINER) {
                         state = STATE_BEFORE_ZWJ;
                     } else {
@@ -252,7 +252,8 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
                 case STATE_BEFORE_ZWJ:
                     if (Emoji.isEmoji(codePoint)) {
                         deleteCharCount += Character.charCount(codePoint) + 1;  // +1 for ZWJ.
-                        state = STATE_BEFORE_ZWJ_EMOJI;
+                        state = Emoji.isEmojiModifier(codePoint) ?
+                                STATE_BEFORE_EMOJI_MODIFIER : STATE_BEFORE_EMOJI;
                     } else if (isVariationSelector(codePoint)) {
                         lastSeenVSCharCount = Character.charCount(codePoint);
                         state = STATE_BEFORE_VS_AND_ZWJ;
@@ -265,7 +266,7 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
                         // +1 for ZWJ.
                         deleteCharCount += lastSeenVSCharCount + 1 + Character.charCount(codePoint);
                         lastSeenVSCharCount = 0;
-                        state = STATE_BEFORE_ZWJ_EMOJI;
+                        state = STATE_BEFORE_EMOJI;
                     } else {
                         state = STATE_FINISHED;
                     }

@@ -21,6 +21,9 @@
 #include "Properties.h"
 #include "renderstate/RenderState.h"
 #include "ShadowTessellator.h"
+#ifdef BUGREPORT_FONT_CACHE_USAGE
+#include "font/FontCacheHistoryTracker.h"
+#endif
 #include "utils/GLUtils.h"
 
 #include <cutils/properties.h>
@@ -195,12 +198,7 @@ void Caches::dumpMemoryUsage(String8 &log) {
     log.appendFormat("  PatchCache           %8d / %8d\n",
             patchCache.getSize(), patchCache.getMaxSize());
 
-    const uint32_t sizeA8 = fontRenderer.getFontRendererSize(GL_ALPHA);
-    const uint32_t sizeRGBA = fontRenderer.getFontRendererSize(GL_RGBA);
-    log.appendFormat("  FontRenderer A8    %8d / %8d\n", sizeA8, sizeA8);
-    log.appendFormat("  FontRenderer RGBA  %8d / %8d\n", sizeRGBA, sizeRGBA);
-    log.appendFormat("  FontRenderer total %8d / %8d\n", sizeA8 + sizeRGBA,
-            sizeA8 + sizeRGBA);
+    fontRenderer.dumpMemoryUsage(log);
 
     log.appendFormat("Other:\n");
     log.appendFormat("  FboCache             %8d / %8d\n",
@@ -213,11 +211,14 @@ void Caches::dumpMemoryUsage(String8 &log) {
     total += tessellationCache.getSize();
     total += dropShadowCache.getSize();
     total += patchCache.getSize();
-    total += fontRenderer.getFontRendererSize(GL_ALPHA);
-    total += fontRenderer.getFontRendererSize(GL_RGBA);
+    total += fontRenderer.getSize();
 
     log.appendFormat("Total memory usage:\n");
     log.appendFormat("  %d bytes, %.2f MB\n", total, total / 1024.0f / 1024.0f);
+
+#ifdef BUGREPORT_FONT_CACHE_USAGE
+    fontRenderer.getFontRenderer().historyTracker().dump(log);
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -29,7 +29,7 @@ trainingnavtop=true
         </a>
     </li>
     <li>
-        <a href="{@docRoot}design/patterns/notifications.html">Notifications</a> Design Guide
+        <a href="https://material.google.com/patterns/notifications.html">Notifications</a> Design Guide
     </li>
 </ul>
 
@@ -59,9 +59,9 @@ trainingnavtop=true
 <h2 id="FixedProgress">Display a Fixed-duration Progress Indicator</h2>
 <p>
     To display a determinate progress bar, add the bar to your notification by calling
-    {@link android.support.v4.app.NotificationCompat.Builder#setProgress 
-    setProgress(max, progress, false)} and then issue the notification. 
-    The third argument is a boolean that indicates whether the 
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress
+    setProgress(max, progress, false)} and then issue the notification.
+    The third argument is a boolean that indicates whether the
     progress bar is indeterminate (<strong>true</strong>) or determinate (<strong>false</strong>).
     As your operation proceeds,
     increment <code>progress</code>, and update the notification. At the end of the operation,
@@ -74,7 +74,7 @@ trainingnavtop=true
     You can either leave the progress bar showing when the operation is done, or remove it. In
     either case, remember to update the notification text to show that the operation is complete.
     To remove the progress bar, call
-    {@link android.support.v4.app.NotificationCompat.Builder#setProgress 
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress
     setProgress(0, 0, false)}. For example:
 </p>
 <pre>
@@ -136,14 +136,14 @@ new Thread(
 <p>
     To display a continuing (indeterminate) activity indicator, add it to your notification with
     {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress(0, 0, true)}
-    and issue the notification. The first two arguments are ignored, and the third argument  
+    and issue the notification. The first two arguments are ignored, and the third argument
     declares that the indicator is indeterminate. The result is an indicator
     that has the same style as a progress bar, except that its animation is ongoing.
 </p>
 <p>
     Issue the notification at the beginning of the operation. The animation will run until you
     modify your notification. When the operation is done, call
-    {@link android.support.v4.app.NotificationCompat.Builder#setProgress 
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress
     setProgress(0, 0, false)} and then update the notification to remove the activity indicator.
     Always do this; otherwise, the animation will run even when the operation is complete. Also
     remember to change the notification text to indicate that the operation is complete.
@@ -160,7 +160,7 @@ mNotifyManager.notify(id, mBuilder.build());
 </pre>
 <p>
     Replace the lines you've found with the following lines. Notice that the third parameter
-    in the {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()} 
+    in the {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()}
     call is set to {@code true} to indicate that the progress bar is
     indeterminate:
 </p>

@@ -67,7 +67,8 @@ public interface IApplicationThread extends IInterface {
             List<ReferrerIntent> pendingNewIntents, int configChanges, boolean notResumed,
             Configuration config, Configuration overrideConfig, boolean preserveWindow)
             throws RemoteException;
-    void scheduleNewIntent(List<ReferrerIntent> intent, IBinder token) throws RemoteException;
+    void scheduleNewIntent(
+            List<ReferrerIntent> intent, IBinder token, boolean andPause) throws RemoteException;
     void scheduleDestroyActivity(IBinder token, boolean finished,
             int configChanges) throws RemoteException;
     void scheduleReceiver(Intent intent, ActivityInfo info, CompatibilityInfo compatInfo,
@@ -122,7 +123,6 @@ public interface IApplicationThread extends IInterface {
             throws RemoteException;
     void dumpHeap(boolean managed, String path, ParcelFileDescriptor fd)
             throws RemoteException;
-    void attachAgent(String path) throws RemoteException;
     void setSchedulingGroup(int group) throws RemoteException;
     // the package has been removed, clean up internal references
     static final int PACKAGE_REMOVED = 0;
@@ -225,5 +225,4 @@ public interface IApplicationThread extends IInterface {
     int SCHEDULE_MULTI_WINDOW_CHANGED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+58;
     int SCHEDULE_PICTURE_IN_PICTURE_CHANGED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+59;
     int SCHEDULE_LOCAL_VOICE_INTERACTION_STARTED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+60;
-    int ATTACH_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+61;
 }

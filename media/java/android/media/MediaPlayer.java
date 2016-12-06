@@ -1641,7 +1641,8 @@ public class MediaPlayer extends PlayerBase
      * (i.e. reaches the end of the stream).
      * The media framework will attempt to transition from this player to
      * the next as seamlessly as possible. The next player can be set at
-     * any time before completion. The next player must be prepared by the
+     * any time before completion, but shall be after setDataSource has been
+     * called successfully. The next player must be prepared by the
      * app, and the application should not call start() on it.
      * The next MediaPlayer must be different from 'this'. An exception
      * will be thrown if next == this.
@@ -3494,7 +3495,7 @@ public class MediaPlayer extends PlayerBase
          * @param extra an extra code, specific to the info. Typically
          * implementation dependent.
          * @return True if the method handled the info, false if it didn't.
-         * Returning false, or not having an OnErrorListener at all, will
+         * Returning false, or not having an OnInfoListener at all, will
          * cause the info to be discarded.
          */
         boolean onInfo(MediaPlayer mp, int what, int extra);

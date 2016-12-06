@@ -77,6 +77,9 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
      */
     static final int FLAG_FEATURE_INJECT_MOTION_EVENTS = 0x00000010;
 
+    static final int FEATURES_AFFECTING_MOTION_EVENTS = FLAG_FEATURE_INJECT_MOTION_EVENTS
+            | FLAG_FEATURE_AUTOCLICK | FLAG_FEATURE_TOUCH_EXPLORATION
+            | FLAG_FEATURE_SCREEN_MAGNIFIER;
     /**
      * Flag for enabling the feature to control the screen magnifier. If
      * {@link #FLAG_FEATURE_SCREEN_MAGNIFIER} is set this flag is ignored
@@ -203,8 +206,13 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         }
 
         if (event instanceof MotionEvent) {
-            MotionEvent motionEvent = (MotionEvent) event;
-            processMotionEvent(state, motionEvent, policyFlags);
+            if ((mEnabledFeatures & FEATURES_AFFECTING_MOTION_EVENTS) != 0) {
+                MotionEvent motionEvent = (MotionEvent) event;
+                processMotionEvent(state, motionEvent, policyFlags);
+                return;
+            } else {
+                super.onInputEvent(event, policyFlags);
+            }
         } else if (event instanceof KeyEvent) {
             KeyEvent keyEvent = (KeyEvent) event;
             processKeyEvent(state, keyEvent, policyFlags);

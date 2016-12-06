@@ -9,12 +9,7 @@ page.tags=photo,video,picture,mediarecorder
     <li><a href="#considerations">Considerations</a></li>
     <li><a href="#basics">The Basics</a>
     <li><a href="#manifest">Manifest Declarations</a></li>
-    <li><a href="#intents">Using Existing Camera Apps</a>
-      <ol>
-        <li><a href="#intent-image">Image capture intent</a></li>
-        <li><a href="#intent-video">Video capture intent</a></li>
-        <li><a href="#intent-receive">Receiving camera intent result</a></li>
-      </ol>
+    <li><a href="#camera-apps">Using Existing Camera Apps</a>
     <li><a href="#custom-camera">Building a Camera App</a>
       <ol>
         <li><a href="#detect-camera">Detecting camera hardware</a></li>
@@ -72,7 +67,7 @@ manifest</a>.</li>
   <li><strong>Quick Picture or Customized Camera</strong> - How will your application use the
 camera? Are you just interested in snapping a quick picture or video clip, or will your application
 provide a new way to use cameras? For a getting a quick snap or clip, consider
-<a href="#intents">Using Existing Camera Apps</a>. For developing a customized camera feature, check
+<a href="#camera-apps">Using Existing Camera Apps</a>. For developing a customized camera feature, check
 out the <a href="#custom-camera">Building a Camera App</a> section.</li>
 
   <li><strong>Storage</strong> - Are the images or videos your application generates intended to be
@@ -122,8 +117,9 @@ camera.
 <pre>
 &lt;uses-permission android:name=&quot;android.permission.CAMERA&quot; /&gt;
 </pre>
-  <p class="note"><strong>Note:</strong> If you are using the camera <a href="#intents">via an
-intent</a>, your application does not need to request this permission.</p>
+  <p class="note"><strong>Note:</strong> If you are using the camera <a href="#camera-apps">by
+invoking an existing camera app</a>,
+your application does not need to request this permission.</p>
   </li>
   <li><strong>Camera Features</strong> - Your application must also declare use of camera features,
 for example:
@@ -158,10 +154,16 @@ application must request the audio capture permission.
 &lt;uses-permission android:name="android.permission.RECORD_AUDIO" /&gt;
 </pre>
   </li>
-  <li><strong>Location Permission</strong> - If your application tags images with GPS location
-information, you must request location permission:
+  <li>
+    <p><strong>Location Permission</strong> - If your application tags images
+    with GPS location information, you must request the {@code ACCESS_FINE_LOCATION}
+    permission. Note that, if your app targets Android 5.0 (API level 21) or
+    higher, you also need to declare that your app uses the device's GPS:</p>
 <pre>
 &lt;uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /&gt;
+...
+&lt;!-- Needed only if your app targets Android 5.0 (API level 21) or higher. --&gt;
+&lt;uses-feature android:name="android.hardware.location.gps" /&gt;
 </pre>
 <p>For more information about getting user location, see
 <a href="{@docRoot}guide/topics/location/strategies.html">Location Strategies</a>.</p>
@@ -169,193 +171,17 @@ information, you must request location permission:
 </ul>
 
 
-<h2 id="intents">Using Existing Camera Apps</h2>
+<h2 id="camera-apps">Using Existing Camera Apps</h2>
 <p>A quick way to enable taking pictures or videos in your application without a lot of extra code
-is to use an {@link android.content.Intent} to invoke an existing Android camera application. A
-camera intent makes a request to capture a picture or video clip through an existing camera app and
-then returns control back to your application. This section shows you how to capture an image or
-video using this technique.</p>
-
-<p>The procedure for invoking a camera intent follows these general steps:</p>
-
-<ol>
-  <li><strong>Compose a Camera Intent</strong> - Create an {@link android.content.Intent} that
-requests an image or video, using one of these intent types:
-    <ul>
-      <li>{@link android.provider.MediaStore#ACTION_IMAGE_CAPTURE MediaStore.ACTION_IMAGE_CAPTURE} -
-Intent action type for requesting an image from an existing camera application.</li>
-      <li>{@link android.provider.MediaStore#ACTION_VIDEO_CAPTURE MediaStore.ACTION_VIDEO_CAPTURE} -
-Intent action type for requesting a video from an existing camera application. </li>
-    </ul>
-  </li>
-  <li><strong>Start the Camera Intent</strong> - Use the {@link
-android.app.Activity#startActivityForResult(android.content.Intent, int) startActivityForResult()}
-method to execute the camera intent. After you start the intent, the Camera application user
-interface appears on the device screen and the user can take a picture or video.</li>
-  <li><strong>Receive the Intent Result</strong> - Set up an {@link
-android.app.Activity#onActivityResult(int, int, android.content.Intent) onActivityResult()} method
-in your application to receive the callback and data from the camera intent. When the user
-finishes taking a picture or video (or cancels the operation), the system calls this method.</li>
-</ol>
-
-
-<h3 id="intent-image">Image capture intent</h3>
-<p>Capturing images using a camera intent is quick way to enable your application to take pictures
-with minimal coding. An image capture intent can include the following extra information:</p>
-
-<ul>
-  <li>{@link android.provider.MediaStore#EXTRA_OUTPUT MediaStore.EXTRA_OUTPUT} - This setting
-requires a {@link android.net.Uri} object specifying a path and file name where you'd like to
-save the picture. This setting is optional but strongly recommended. If you do not specify this
-value, the camera application saves the requested picture in the default location with a default
-name, specified in the returned intent's {@link android.content.Intent#getData() Intent.getData()}
-field.</li>
-</ul>
-
-<p>The following example demonstrates how to construct a image capture intent and execute it.
-The {@code getOutputMediaFileUri()} method in this example refers to the sample code shown in <a
-href= "#saving-media">Saving Media Files</a>.</p>
-
-<pre>
-private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
-private Uri fileUri;
-
-&#64;Override
-public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.main);
-
-    // create Intent to take a picture and return control to the calling application
-    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-    fileUri = getOutputMediaFileUri(MEDIA_TYPE_IMAGE); // create a file to save the image
-    intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri); // set the image file name
-
-    // start the image capture Intent
-    startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
-}
-</pre>
-
-<p>When the {@link android.app.Activity#startActivityForResult(android.content.Intent, int)
-startActivityForResult()} method is executed, users see a camera application interface.
-After the user finishes taking a picture (or cancels the operation), the user interface returns to
-your application, and you must intercept the {@link
-android.app.Activity#onActivityResult(int, int, android.content.Intent) onActivityResult()}
-method to receive the result of the intent and continue your application execution. For information
-on how to receive the completed intent, see <a href="#intent-receive">Receiving camera intent
-result</a>.</p>
-
-
-<h3 id="intent-video">Video capture intent</h3>
-<p>Capturing video using a camera intent is a quick way to enable your application to take videos
-with minimal coding. A video capture intent can include the following extra information:</p>
-
-<ul>
-  <li>{@link android.provider.MediaStore#EXTRA_OUTPUT MediaStore.EXTRA_OUTPUT} - This setting
-requires a {@link android.net.Uri} specifying a path and file name where you'd like to save the
-video. This setting is optional but strongly recommended. If you do not specify this value, the
-Camera application saves the requested video in the default location with a default name, specified
-in the returned intent's {@link android.content.Intent#getData() Intent.getData()} field.</li>
-  <li>{@link android.provider.MediaStore#EXTRA_VIDEO_QUALITY MediaStore.EXTRA_VIDEO_QUALITY} -
-This value can be 0 for lowest quality and smallest file size or 1 for highest quality and
-larger file size.</li>
-  <li>{@link android.provider.MediaStore#EXTRA_DURATION_LIMIT MediaStore.EXTRA_DURATION_LIMIT} -
-Set this value to limit the length, in seconds, of the video being captured.</li>
-  <li>{@link android.provider.MediaStore#EXTRA_SIZE_LIMIT MediaStore.EXTRA_SIZE_LIMIT} -
-Set this value to limit the file size, in bytes, of the video being captured.
-</li>
-</ul>
-
-<p>The following example demonstrates how to construct a video capture intent and execute it.
-The {@code getOutputMediaFileUri()} method in this example refers to the sample code shown in <a
-href= "#saving-media">Saving Media Files</a>.</p>
-
-<pre>
-private static final int CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE = 200;
-private Uri fileUri;
-
-&#64;Override
-public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.main);
-
-    //create new Intent
-    Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-
-    fileUri = getOutputMediaFileUri(MEDIA_TYPE_VIDEO);  // create a file to save the video
-    intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);  // set the image file name
-
-    intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1); // set the video image quality to high
-
-    // start the Video Capture Intent
-    startActivityForResult(intent, CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE);
-}
-</pre>
-
-<p>When the {@link
-android.app.Activity#startActivityForResult(android.content.Intent, int)
-startActivityForResult()} method is executed, users see a modified camera application interface.
-After the user finishes taking a video (or cancels the operation), the user interface
-returns to your application, and you must intercept the {@link
-android.app.Activity#onActivityResult(int, int, android.content.Intent) onActivityResult()}
-method to receive the result of the intent and continue your application execution. For information
-on how to receive the completed intent, see the next section.</p>
-
-<h3 id="intent-receive">Receiving camera intent result</h3>
-<p>Once you have constructed and executed an image or video camera intent, your application must be
-configured to receive the result of the intent. This section shows you how to intercept the callback
-from a camera intent so your application can do further processing of the captured image or
-video.</p>
-
-<p>In order to receive the result of an intent, you must override the {@link
-android.app.Activity#onActivityResult(int, int, android.content.Intent) onActivityResult()} in the
-activity that started the intent. The following example demonstrates how to override {@link
-android.app.Activity#onActivityResult(int, int, android.content.Intent) onActivityResult()} to
-capture the result of the <a href="#intent-image">image camera intent</a> or <a
-href="#intent-video">video camera intent</a> examples shown in the previous sections.</p>
-
-<pre>
-private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
-private static final int CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE = 200;
-
-&#64;Override
-protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
-        if (resultCode == RESULT_OK) {
-            // Image captured and saved to fileUri specified in the Intent
-            Toast.makeText(this, "Image saved to:\n" +
-                     data.getData(), Toast.LENGTH_LONG).show();
-        } else if (resultCode == RESULT_CANCELED) {
-            // User cancelled the image capture
-        } else {
-            // Image capture failed, advise user
-        }
-    }
-
-    if (requestCode == CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE) {
-        if (resultCode == RESULT_OK) {
-            // Video captured and saved to fileUri specified in the Intent
-            Toast.makeText(this, "Video saved to:\n" +
-                     data.getData(), Toast.LENGTH_LONG).show();
-        } else if (resultCode == RESULT_CANCELED) {
-            // User cancelled the video capture
-        } else {
-            // Video capture failed, advise user
-        }
-    }
-}
-</pre>
-
-<p>Once your activity receives a successful result, the captured image or video is available in the
-specified location for your application to access.</p>
-
-
+is to use an {@link android.content.Intent} to invoke an existing Android camera application.
+The details are described in the training lessons
+<a href="{@docRoot}training/camera/photobasics.html">Taking Photos Simply</a> and
+<a href="{@docRoot}training/camera/videobasics.html">Recording Videos Simply</a>.</p>
 
 <h2 id="custom-camera">Building a Camera App</h2>
 <p>Some developers may require a camera user interface that is customized to the look of their
-application or provides special features. Creating a customized camera activity requires more
-code than <a href="#intents">using an intent</a>, but it can provide a more compelling experience
-for your users.</p>
+application or provides special features. Writing your own picture-taking code
+can provide a more compelling experience for your users.</p>
 
 <p><strong> Note: The following guide is for the older, deprecated {@link android.hardware.Camera}
 API. For new or advanced camera applications, the newer {@link android.hardware.camera2} API is
@@ -419,7 +245,7 @@ android.hardware.Camera#getNumberOfCameras() Camera.getNumberOfCameras()} method
 <h3 id="access-camera">Accessing cameras</h3>
 <p>If you have determined that the device on which your application is running has a camera, you
 must request to access it by getting an instance of {@link android.hardware.Camera} (unless you
-are using an <a href="#intents">intent to access the camera</a>). </p>
+are using an <a href="camera-apps">intent to access the camera</a>). </p>
 
 <p>To access the primary camera, use the {@link android.hardware.Camera#open() Camera.open()} method
 and be sure to catch any exceptions, as shown in the code below:</p>
@@ -1243,7 +1069,7 @@ support and to what level. After making that decision, you should plan on includ
 camera application that checks to see if device hardware supports those features and fails
 gracefully if a feature is not available.</p>
 
-<p>You can check the availabilty of camera features by getting an instance of a camera’s parameters
+<p>You can check the availabilty of camera features by getting an instance of a camera's parameters
 object, and checking the relevant methods. The following code sample shows you how to obtain a
 {@link android.hardware.Camera.Parameters} object and check if the camera supports the autofocus
 feature:</p>
@@ -1290,7 +1116,7 @@ mCamera.setParameters(params);
 
 <p>This technique works for nearly all camera features, and most parameters can be changed at any
 time after you have obtained an instance of the {@link android.hardware.Camera} object. Changes to
-parameters are typically visible to the user immediately in the application’s camera preview.
+parameters are typically visible to the user immediately in the application's camera preview.
 On the software side, parameter changes may take several frames to actually take effect as the
 camera hardware processes the new instructions and then sends updated image data.</p>
 
@@ -1341,7 +1167,7 @@ mCamera.setParameters(params);
 </pre>
 
 <p>The {@link android.hardware.Camera.Area} object contains two data parameters: A {@link
-android.graphics.Rect} object for specifying an area within the camera’s field of view and a weight
+android.graphics.Rect} object for specifying an area within the camera's field of view and a weight
 value, which tells the camera what level of importance this area should be given in light metering
 or focus calculations.</p>
 
@@ -1405,7 +1231,7 @@ class MyFaceDetectionListener implements Camera.FaceDetectionListener {
 }
 </pre>
 
-<p>After creating this class, you then set it into your application’s
+<p>After creating this class, you then set it into your application's
 {@link android.hardware.Camera} object, as shown in the example code below:</p>
 
 <pre>
@@ -1480,7 +1306,7 @@ public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
 
 <p class="note"><strong>Note:</strong> Remember to call this method <em>after</em> calling
 {@link android.hardware.Camera#startPreview startPreview()}. Do not attempt to start face detection
-in the {@link android.app.Activity#onCreate onCreate()} method of your camera app’s main activity,
+in the {@link android.app.Activity#onCreate onCreate()} method of your camera app's main activity,
 as the preview is not available by this point in your application's the execution.</p>
 
 

@@ -417,7 +417,7 @@
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Ermöglicht der App, Pakete zu empfangen, die mithilfe von Multicast-Adressen an sämtliche Geräte in einem WLAN versendet wurden, nicht nur an dein Telefon. Dies nimmt mehr Leistung in Anspruch als der Nicht-Multicast-Modus."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Auf Bluetooth-Einstellungen zugreifen"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Ermöglicht der App, das lokale Bluetooth-Tablet zu konfigurieren, Remote-Geräte zu erkennen und eine Verbindung zu diesen herzustellen"</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Ermöglicht der App, den lokalen Bluetooth-Fernseher zu konfigurieren, Remote-Geräte zu erkennen und ein Pairing mit diesen durchzuführen"</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Ermöglicht der App, den lokalen Bluetooth-Fernseher zu konfigurieren, Remote-Geräte zu erkennen und eine Kopplung mit ihnen durchzuführen"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Ermöglicht der App, das lokale Bluetooth-Telefon zu konfigurieren, Remote-Geräte zu erkennen und eine Verbindung zu diesen herzustellen"</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX-Verbindungen herstellen und trennen"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Ermöglicht der App festzustellen, ob WiMAX aktiviert ist. Zudem kann sie Informationen zu verbundenen WiMAX-Netzwerken abrufen."</string>
@@ -425,9 +425,9 @@
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Ermöglicht der App, eine Verbindung zwischen dem Tablet und WiMAX-Netzwerken herzustellen und solche zu trennen."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Ermöglicht der App, eine Verbindung zwischen dem Fernseher und WiMAX-Netzwerken herzustellen und diese zu trennen"</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Ermöglicht der App, eine Verbindung zwischen dem Telefon und WiMAX-Netzwerken herzustellen und solche zu trennen."</string>
-    <string name="permlab_bluetooth" msgid="6127769336339276828">"Pairing mit Bluetooth-Geräten durchführen"</string>
+    <string name="permlab_bluetooth" msgid="6127769336339276828">"Kopplung mit Bluetooth-Geräten durchführen"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Ermöglicht der App, die Bluetooth-Konfiguration eines Tablets einzusehen und Verbindungen zu gekoppelten Geräten herzustellen und zu akzeptieren."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Ermöglicht der App, die Bluetooth-Konfiguration des Fernsehers einzusehen und Verbindungen zu Pairing-Geräten herzustellen und zu akzeptieren"</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Ermöglicht der App, die Bluetooth-Konfiguration des Fernsehers abzurufen und Verbindungen zu gekoppelten Geräten herzustellen und zu akzeptieren"</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Ermöglicht der App, die Bluetooth-Konfiguration des Telefons einzusehen und Verbindungen mit gekoppelten Geräten herzustellen und zu akzeptieren."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"Nahfeldkommunikation steuern"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Ermöglicht der App die Kommunikation mit Tags für die Nahfeldkommunikation, Karten und Readern"</string>
@@ -679,6 +679,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Korrekt!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Erneut versuchen"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Erneut versuchen"</string>
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"Entsperren, um alle Funktionen und Daten zu nutzen"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Die maximal zulässige Anzahl an Face Unlock-Versuchen wurde überschritten."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Keine SIM-Karte"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Keine SIM-Karte im Tablet"</string>
@@ -1023,8 +1024,9 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android wird aktualisiert..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android wird gestartet…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Speicher wird optimiert"</string>
-    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android wird aktualisiert"</string>
+    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"Android-Update wird beendet…"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Einige Apps funktionieren unter Umständen nicht richtig, bis das Upgrade abgeschlossen ist"</string>
+    <string name="app_upgrading_toast" msgid="3008139776215597053">"Für <xliff:g id="APPLICATION">%1$s</xliff:g> wird gerade ein Upgrade ausgeführt…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"App <xliff:g id="NUMBER_0">%1$d</xliff:g> von <xliff:g id="NUMBER_1">%2$d</xliff:g> wird optimiert..."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> wird vorbereitet"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Apps werden gestartet..."</string>
@@ -1075,6 +1077,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"WLAN hat keinen Internetzugriff"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Für Optionen tippen"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"Zu <xliff:g id="NETWORK_TYPE">%1$s</xliff:g> gewechselt"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Auf dem Gerät wird \"<xliff:g id="NEW_NETWORK">%1$s</xliff:g>\" verwendet, wenn über \"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>\" kein Internet verfügbar ist. Eventuell fallen Gebühren an."</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"Von \"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>\" zu \"<xliff:g id="NEW_NETWORK">%2$s</xliff:g>\" gewechselt"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"mobile Datennutzung"</item>
+    <item msgid="75483255295529161">"WLAN"</item>
+    <item msgid="6862614801537202646">"Bluetooth"</item>
+    <item msgid="5447331121797802871">"Ethernet"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"ein unbekannter Netzwerktyp"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Es konnte keine WLAN-Verbindung hergestellt werden."</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" hat eine schlechte Internetverbindung."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Verbindung zulassen?"</string>
@@ -1152,7 +1165,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Zum Auswählen von Sprache und Layout tippen"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"Kandidaten"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> wird vorbereitet"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Nach Fehlern wird gesucht"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Neue <xliff:g id="NAME">%s</xliff:g> entdeckt"</string>
@@ -1214,7 +1226,7 @@
     <string name="deny" msgid="2081879885755434506">"Ablehnen"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Berechtigung angefordert"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Berechtigung angefordert\nfür Konto <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
-    <string name="forward_intent_to_owner" msgid="1207197447013960896">"Du verwendest diese App außerhalb deines Arbeitsprofils."</string>
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"Du verwendest diese App außerhalb deines Arbeitsprofils"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"Du verwendest diese App in deinem Arbeitsprofil."</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Eingabemethode"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Synchronisieren"</string>
@@ -1231,8 +1243,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Verbunden mit <xliff:g id="SESSION">%s</xliff:g>. Zum Verwalten des Netzwerks tippen"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Verbindung zu durchgehend aktivem VPN wird hergestellt…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Mit durchgehend aktivem VPN verbunden"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Verbindung zu durchgehend aktivem VPN getrennt"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Durchgehend aktives VPN – Verbindungsfehler"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"Zum Konfigurieren tippen"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Zum Einrichten tippen"</string>
     <string name="upload_file" msgid="2897957172366730416">"Datei auswählen"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Keine ausgewählt"</string>
     <string name="reset" msgid="2448168080964209908">"Zurücksetzen"</string>
@@ -1316,7 +1329,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"USB-Speichergerät von <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB-Speicher"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Bearbeiten"</string>
-    <string name="data_usage_warning_title" msgid="1955638862122232342">"Warnung zum Datenverbrauch"</string>
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"Warnung zur Datennutzung"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Für Nutzung und Einstellungen tippen."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-/3G-Datenlimit erreicht"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G-Datenlimit erreicht"</string>
@@ -1635,6 +1648,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"Sprache eingeben"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Vorschläge"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Alle Sprachen"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"Alle Regionen"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Suche"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"Arbeitsmodus ist AUS"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Arbeitsprofil aktivieren, einschließlich Apps, Synchronisierung im Hintergrund und verknüpfter Funktionen."</string>
@@ -1652,7 +1666,16 @@
     <string name="unpin_target" msgid="3556545602439143442">"Markierung entfernen"</string>
     <string name="app_info" msgid="6856026610594615344">"App-Informationen"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"Gerät zurücksetzen?"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Zum Zurücksetzen des Geräts tippen"</string>
+    <string name="demo_starting_message" msgid="5268556852031489931">"Demo wird gestartet…"</string>
+    <string name="demo_restarting_message" msgid="952118052531642451">"Gerät wird zurückgesetzt…"</string>
+    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Gerät zurücksetzen?"</string>
+    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Alle Änderungen gehen verloren und Demo wird in <xliff:g id="TIMEOUT">%1$s</xliff:g> Sekunden neu gestartet…"</string>
+    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Abbrechen"</string>
+    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Jetzt zurücksetzen"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Gerät auf Werkseinstellungen zurücksetzen, um es ohne Einschränkungen zu nutzen"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Für weitere Informationen tippen."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> deaktiviert"</string>
+    <string name="conference_call" msgid="3751093130790472426">"Telefonkonferenz"</string>
 </resources>

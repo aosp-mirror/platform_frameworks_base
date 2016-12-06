@@ -113,10 +113,10 @@ class="toggle-content-img" alt="" />
 
 <dt>Tools:</dt>
 <dd>
-<ul> 
+<ul>
 <li>Adds support for library projects in the Ant build system.</li>
 <li>Adds improved layout rendering in ADT’s visual layout editor.</li>
-</ul> 
+</ul>
 </dd>
 
 </dl>

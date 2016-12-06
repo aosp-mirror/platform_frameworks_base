@@ -105,7 +105,7 @@ This is the terms of service for the Android Backup Service.
 8.4 You agree that you shall not remove, obscure, or alter any proprietary rights notices (including copyright, trade mark notices) which may be affixed to or contained within the Service.
 
 <h3>9. License from Google</h3>
-9.1 Subject to terms and conditions of these Terms, Google gives you a personal, worldwide, royalty-free, non-assignable and non-exclusive license to use the Service as provided to you by Google. This license is for the sole purpose of enabling you to use and enjoy the benefit of the Service as provided by Google, in the manner permitted by the Terms. 
+9.1 Subject to terms and conditions of these Terms, Google gives you a personal, worldwide, royalty-free, non-assignable and non-exclusive license to use the Service as provided to you by Google. This license is for the sole purpose of enabling you to use and enjoy the benefit of the Service as provided by Google, in the manner permitted by the Terms.
 
 9.2 You may not (and you may not permit anyone else to) copy, modify, create a derivative work of, reverse engineer, decompile or otherwise attempt to extract the source code from the Service or any part thereof, unless this is expressly permitted or required by law, or unless you have been specifically told that you may do so by Google, in writing.
 
@@ -208,7 +208,7 @@ with the Android Backup Service Terms of Service</label>
 <input id="pname" type="text" name="pname" size="47" value="" onkeyup="onFormInput()"
 onfocus="boxFocusChanged(this,true)" onblur="boxFocusChanged(this,false)"/>
 </p>
-<p><a href="" class="dac-button dac-raised dac-primary disabled ndk" id="registerButton" 
+<p><a href="" class="dac-button dac-raised dac-primary disabled ndk" id="registerButton"
 onclick="onRegister(); return false;" >Register with Android Backup Service</a></p>
 </div>
 
@@ -234,7 +234,7 @@ onclick="onRegister(); return false;" >Register with Android Backup Service</a><
       );
     }
   }
-  
+
   function boxFocusChanged(obj, focused) {
     if (focused) {
       if(obj.value == DEFAULT_TEXT){
@@ -248,14 +248,14 @@ onclick="onRegister(); return false;" >Register with Android Backup Service</a><
       }
     }
   }
-  
-  
+
+
   function onFormInput() {
     /* verify that the TOS is agreed and a bit version is chosen */
     var packagename = $("#pname").val();
     if ($("input#agree").is(":checked")
         && packagename.length
-        && packagename != DEFAULT_TEXT) {      
+        && packagename != DEFAULT_TEXT) {
       /* reveal the button */
       $("a#registerButton").removeClass('disabled');
     } else {

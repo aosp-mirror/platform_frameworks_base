@@ -32,6 +32,7 @@
 #include <jni.h>
 #include <memory>
 #include <stdio.h>
+#include <system/graphics.h>
 #include <ui/DisplayInfo.h>
 #include <ui/HdrCapabilities.h>
 #include <ui/FrameStats.h>
@@ -58,7 +59,6 @@ static struct {
     jfieldID secure;
     jfieldID appVsyncOffsetNanos;
     jfieldID presentationDeadlineNanos;
-    jfieldID colorTransform;
 } gPhysicalDisplayInfoClassInfo;
 
 static struct {
@@ -248,10 +248,10 @@ static void nativeSetPosition(JNIEnv* env, jclass clazz, jlong nativeObject, jfl
     }
 }
 
-static void nativeSetPositionAppliesWithResize(JNIEnv* env, jclass clazz,
+static void nativeSetGeometryAppliesWithResize(JNIEnv* env, jclass clazz,
         jlong nativeObject) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    status_t err = ctrl->setPositionAppliesWithResize();
+    status_t err = ctrl->setGeometryAppliesWithResize();
     if (err < 0 && err != NO_INIT) {
         doThrowIAE(env);
     }
@@ -371,7 +371,12 @@ static void nativeSetDisplaySurface(JNIEnv* env, jclass clazz,
     if (sur != NULL) {
         bufferProducer = sur->getIGraphicBufferProducer();
     }
-    SurfaceComposerClient::setDisplaySurface(token, bufferProducer);
+    status_t err = SurfaceComposerClient::setDisplaySurface(token,
+            bufferProducer);
+    if (err != NO_ERROR) {
+        doThrowIAE(env, "Illegal Surface, could not enable async mode. Was this"
+                " Surface created with singleBufferMode?");
+    }
 }
 
 static void nativeSetDisplayLayerStack(JNIEnv* env, jclass clazz,
@@ -429,8 +434,6 @@ static jobjectArray nativeGetDisplayConfigs(JNIEnv* env, jclass clazz,
                 info.appVsyncOffset);
         env->SetLongField(infoObj, gPhysicalDisplayInfoClassInfo.presentationDeadlineNanos,
                 info.presentationDeadline);
-        env->SetIntField(infoObj, gPhysicalDisplayInfoClassInfo.colorTransform,
-                info.colorTransform);
         env->SetObjectArrayElement(configArray, static_cast<jsize>(c), infoObj);
         env->DeleteLocalRef(infoObj);
     }
@@ -448,6 +451,43 @@ static jboolean nativeSetActiveConfig(JNIEnv* env, jclass clazz, jobject tokenOb
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
     if (token == NULL) return JNI_FALSE;
     status_t err = SurfaceComposerClient::setActiveConfig(token, static_cast<int>(id));
+    return err == NO_ERROR ? JNI_TRUE : JNI_FALSE;
+}
+
+static jintArray nativeGetDisplayColorModes(JNIEnv* env, jclass, jobject tokenObj) {
+    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
+    if (token == NULL) return NULL;
+    Vector<android_color_mode_t> colorModes;
+    if (SurfaceComposerClient::getDisplayColorModes(token, &colorModes) != NO_ERROR ||
+            colorModes.isEmpty()) {
+        return NULL;
+    }
+
+    jintArray colorModesArray = env->NewIntArray(colorModes.size());
+    if (colorModesArray == NULL) {
+        jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+        return NULL;
+    }
+    jint* colorModesArrayValues = env->GetIntArrayElements(colorModesArray, 0);
+    for (size_t i = 0; i < colorModes.size(); i++) {
+        colorModesArrayValues[i] = static_cast<jint>(colorModes[i]);
+    }
+    env->ReleaseIntArrayElements(colorModesArray, colorModesArrayValues, 0);
+    return colorModesArray;
+}
+
+static jint nativeGetActiveColorMode(JNIEnv* env, jclass, jobject tokenObj) {
+    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
+    if (token == NULL) return -1;
+    return static_cast<jint>(SurfaceComposerClient::getActiveColorMode(token));
+}
+
+static jboolean nativeSetActiveColorMode(JNIEnv* env, jclass,
+        jobject tokenObj, jint colorMode) {
+    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
+    if (token == NULL) return JNI_FALSE;
+    status_t err = SurfaceComposerClient::setActiveColorMode(token,
+            static_cast<android_color_mode_t>(colorMode));
     return err == NO_ERROR ? JNI_TRUE : JNI_FALSE;
 }
 
@@ -626,6 +666,16 @@ static jobject nativeGetHandle(JNIEnv* env, jclass clazz, jlong nativeObject) {
     return javaObjectForIBinder(env, ctrl->getHandle());
 }
 
+static jboolean nativeGetTransformToDisplayInverse(JNIEnv* env, jclass clazz, jlong nativeObject) {
+    bool out = false;
+    auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
+    status_t status = ctrl->getTransformToDisplayInverse(&out);
+    if (status != NO_ERROR) {
+        return false;
+    }
+    return out;
+}
+
 static jobject nativeGetHdrCapabilities(JNIEnv* env, jclass clazz, jobject tokenObject) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObject));
     if (token == NULL) return NULL;
@@ -667,8 +717,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetLayer },
     {"nativeSetPosition", "(JFF)V",
             (void*)nativeSetPosition },
-    {"nativeSetPositionAppliesWithResize", "(J)V",
-            (void*)nativeSetPositionAppliesWithResize },
+    {"nativeSetGeometryAppliesWithResize", "(J)V",
+            (void*)nativeSetGeometryAppliesWithResize },
     {"nativeSetSize", "(JII)V",
             (void*)nativeSetSize },
     {"nativeSetTransparentRegionHint", "(JLandroid/graphics/Region;)V",
@@ -705,6 +755,12 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetActiveConfig },
     {"nativeSetActiveConfig", "(Landroid/os/IBinder;I)Z",
             (void*)nativeSetActiveConfig },
+    {"nativeGetDisplayColorModes", "(Landroid/os/IBinder;)[I",
+            (void*)nativeGetDisplayColorModes},
+    {"nativeGetActiveColorMode", "(Landroid/os/IBinder;)I",
+            (void*)nativeGetActiveColorMode},
+    {"nativeSetActiveColorMode", "(Landroid/os/IBinder;I)Z",
+            (void*)nativeSetActiveColorMode},
     {"nativeGetHdrCapabilities", "(Landroid/os/IBinder;)Landroid/view/Display$HdrCapabilities;",
             (void*)nativeGetHdrCapabilities },
     {"nativeClearContentFrameStats", "(J)Z",
@@ -722,7 +778,9 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
     {"nativeSetOverrideScalingMode", "(JI)V",
             (void*)nativeSetOverrideScalingMode },
     {"nativeGetHandle", "(J)Landroid/os/IBinder;",
-            (void*)nativeGetHandle }
+            (void*)nativeGetHandle },
+    {"nativeGetTransformToDisplayInverse", "(J)Z",
+            (void*)nativeGetTransformToDisplayInverse },
 };
 
 int register_android_view_SurfaceControl(JNIEnv* env)
@@ -745,8 +803,6 @@ int register_android_view_SurfaceControl(JNIEnv* env)
             clazz, "appVsyncOffsetNanos", "J");
     gPhysicalDisplayInfoClassInfo.presentationDeadlineNanos = GetFieldIDOrDie(env,
             clazz, "presentationDeadlineNanos", "J");
-    gPhysicalDisplayInfoClassInfo.colorTransform = GetFieldIDOrDie(env, clazz,
-            "colorTransform", "I");
 
     jclass rectClazz = FindClassOrDie(env, "android/graphics/Rect");
     gRectClassInfo.bottom = GetFieldIDOrDie(env, rectClazz, "bottom", "I");

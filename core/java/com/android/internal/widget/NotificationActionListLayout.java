@@ -17,11 +17,13 @@
 package com.android.internal.widget;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Pair;
 import android.view.Gravity;
+import android.view.RemotableViewMethod;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
@@ -33,11 +35,14 @@ import java.util.Comparator;
  * the remaining available width, and the last action consumes the remaining space.
  */
 @RemoteViews.RemoteView
-public class NotificationActionListLayout extends ViewGroup {
+public class NotificationActionListLayout extends LinearLayout {
 
     private int mTotalWidth = 0;
     private ArrayList<Pair<Integer, TextView>> mMeasureOrderTextViews = new ArrayList<>();
     private ArrayList<View> mMeasureOrderOther = new ArrayList<>();
+    private boolean mMeasureLinearly;
+    private int mDefaultPaddingEnd;
+    private Drawable mDefaultBackground;
 
     public NotificationActionListLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -45,6 +50,10 @@ public class NotificationActionListLayout extends ViewGroup {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        if (mMeasureLinearly) {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            return;
+        }
         final int N = getChildCount();
         int textViews = 0;
         int otherViews = 0;
@@ -186,6 +195,10 @@ public class NotificationActionListLayout extends ViewGroup {
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        if (mMeasureLinearly) {
+            super.onLayout(changed, left, top, right, bottom);
+            return;
+        }
         final boolean isLayoutRtl = isLayoutRtl();
         final int paddingTop = mPaddingTop;
 
@@ -241,26 +254,24 @@ public class NotificationActionListLayout extends ViewGroup {
     }
 
     @Override
-    public LayoutParams generateLayoutParams(AttributeSet attrs) {
-        return new MarginLayoutParams(getContext(), attrs);
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        mDefaultPaddingEnd = getPaddingEnd();
+        mDefaultBackground = getBackground();
     }
 
-    @Override
-    protected LayoutParams generateDefaultLayoutParams() {
-        return new MarginLayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
-    }
-
-    @Override
-    protected LayoutParams generateLayoutParams(LayoutParams p) {
-        if (p instanceof MarginLayoutParams) {
-            return new MarginLayoutParams((MarginLayoutParams)p);
-        }
-        return new MarginLayoutParams(p);
-    }
-
-    @Override
-    protected boolean checkLayoutParams(LayoutParams p) {
-        return p instanceof MarginLayoutParams;
+    /**
+     * Set whether the list is in a mode where some actions are emphasized. This will trigger an
+     * equal measuring where all actions are full height and change a few parameters like
+     * the padding.
+     */
+    @RemotableViewMethod
+    public void setEmphasizedMode(boolean emphasizedMode) {
+        mMeasureLinearly = emphasizedMode;
+        setPaddingRelative(getPaddingStart(), getPaddingTop(),
+                emphasizedMode ? 0 : mDefaultPaddingEnd, getPaddingBottom());
+        setBackground(emphasizedMode ? null : mDefaultBackground);
+        requestLayout();
     }
 
     public static final Comparator<Pair<Integer, TextView>> MEASURE_ORDER_COMPARATOR

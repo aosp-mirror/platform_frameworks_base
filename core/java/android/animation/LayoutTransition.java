@@ -62,7 +62,11 @@ import java.util.Map;
  * layout will run (closing the gap created in the layout when the item was removed). If this
  * default choreography behavior is not desired, the {@link #setDuration(int, long)} and
  * {@link #setStartDelay(int, long)} of any or all of the animations can be changed as
- * appropriate.</p>
+ * appropriate. Keep in mind, however, that if you start an APPEARING animation before a
+ * DISAPPEARING animation is completed, the DISAPPEARING animation stops, and any effects from
+ * the DISAPPEARING animation are reverted. If you instead start a DISAPPEARING animation
+ * before an APPEARING animation is completed, a similar set of effects occurs for the
+ * APPEARING animation.</p>
  *
  * <p>The animations specified for the transition, both the defaults and any custom animations
  * set on the transition object, are templates only. That is, these animations exist to hold the

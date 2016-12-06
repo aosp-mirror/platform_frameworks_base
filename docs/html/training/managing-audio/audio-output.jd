@@ -8,8 +8,8 @@ previous.link=audio-focus.html
 
 @jd:body
 
- 
-<div id="tb-wrapper"> 
+
+<div id="tb-wrapper">
 <div id="tb">
 
 <h2>This lesson teaches you to</h2>
@@ -25,16 +25,16 @@ previous.link=audio-focus.html
 </ul>
 
 
-</div> 
+</div>
 </div>
 
 <p>Users have a number of alternatives when it comes to enjoying the audio from their Android
 devices. Most devices have a built-in speaker, headphone jacks for wired headsets, and many also
 feature Bluetooth connectivity and support for A2DP audio. </p>
 
- 
-<h2 id="CheckHardware">Check What Hardware is Being Used</h2> 
- 
+
+<h2 id="CheckHardware">Check What Hardware is Being Used</h2>
+
 <p>How your app behaves might be affected by which hardware its output is being routed to.</p>
 
 <p>You can query the {@link android.media.AudioManager} to determine if the audio is currently
@@ -48,13 +48,13 @@ if (isBluetoothA2dpOn()) {
     // Adjust output for Speakerphone.
 } else if (isWiredHeadsetOn()) {
     // Adjust output for headsets
-} else { 
+} else {
     // If audio plays and noone can hear it, is it still playing?
 }
 </pre>
 
 
-<h2 id="HandleChanges">Handle Changes in the Audio Output Hardware</h2> 
+<h2 id="HandleChanges">Handle Changes in the Audio Output Hardware</h2>
 
 <p>When a headset is unplugged, or a Bluetooth device disconnected, the audio stream
 automatically reroutes to the built in speaker. If you listen to your music at as high a volume as I
@@ -65,7 +65,7 @@ intent when this happens. It’s good practice to register a {@link android.cont
 that listens for this intent whenever you’re playing audio. In the case of music players, users
 typically expect the playback to be paused&mdash;while for games you may choose to significantly
 lower the volume.</p>
- 
+
 <pre>
 private class NoisyAudioStreamReceiver extends BroadcastReceiver {
     &#64;Override

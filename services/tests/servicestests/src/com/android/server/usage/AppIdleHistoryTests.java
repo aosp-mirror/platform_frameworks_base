@@ -67,7 +67,7 @@ public class AppIdleHistoryTests extends AndroidTestCase {
         // Screen on time should not keep progressing with screen is off
         assertEquals(aih.getScreenOnTimeLocked(7000), 3000);
         assertEquals(aih.getScreenOnTimeLocked(8000), 3000);
-        aih.writeElapsedTimeLocked();
+        aih.writeAppIdleDurationsLocked();
 
         // Check if the screen on time is persisted across instantiations
         AppIdleHistory aih2 = new AppIdleHistory(mStorageDir, 0);

@@ -32,7 +32,7 @@ page.tags=diálogodealerta,fragmentodediálogo
       <li>{@link android.app.DialogFragment}</li>
       <li>{@link android.app.AlertDialog}</li>
     </ol>
-    
+
     <h2>Veja também</h2>
     <ol>
       <li><a href="{@docRoot}design/building-blocks/dialogs.html">Guia de projeto de caixas de diálogo</a></li>
@@ -235,8 +235,8 @@ AlertDialog dialog = builder.create();
 </pre>
 
 <p>Os métodos <code>set...Button()</code> exigem um título para o botão (fornecido
-por um <a href="{@docRoot}guide/topics/resources/string-resource.html">recurso de string</a>) e um 
-{@link android.content.DialogInterface.OnClickListener} que defina a ação a realizar 
+por um <a href="{@docRoot}guide/topics/resources/string-resource.html">recurso de string</a>) e um
+{@link android.content.DialogInterface.OnClickListener} que defina a ação a realizar
 quando o usuário pressionar o botão.</p>
 
 <p>Há três botões de ação diferente que podem ser adicionados:</p>
@@ -248,7 +248,7 @@ quando o usuário pressionar o botão.</p>
   <dt>Neutro</dt>
   <dd>É o que se deve usar quando houver a opção de o usuário não querer continuar a ação,
   mas não necessariamente cancelá-la. Ele aparece entre os botões positivo
-  e negativo. Por exemplo: a ação pode ser "Notifique-me mais tarde".</dd> 
+  e negativo. Por exemplo: a ação pode ser "Notifique-me mais tarde".</dd>
 </dl>
 
 <p>É possível adicionar somente um de cada tipo de botão a uma {@link
@@ -271,7 +271,7 @@ Caixa de diálogo com um título e uma lista.</p>
 <li>Lista de escolhas múltiplas persistentes (caixas de seleção)</li>
 </ul>
 
-<p>Para criar uma lista de escolha única como a da figura 3, 
+<p>Para criar uma lista de escolha única como a da figura 3,
 use o método {@link android.app.AlertDialog.Builder#setItems setItems()}:</p>
 
 <pre style="clear:right">
@@ -291,7 +291,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
 
 <p>Como a lista aparece na área do conteúdo da caixa de diálogo,
 a caixa não pode exibir uma mensagem e uma lista, e será preciso definir um título
-para ela com {@link android.app.AlertDialog.Builder#setTitle setTitle()}. 
+para ela com {@link android.app.AlertDialog.Builder#setTitle setTitle()}.
 Para especificar os itens da lista, chame {@link
 android.app.AlertDialog.Builder#setItems setItems()} passando uma matriz.
 Alternativamente, é possível especificar uma lista com {@link
@@ -320,8 +320,8 @@ Lista de itens de múltipla escolha.</p>
 <p>Para adicionar uma lista de itens de múltipla escolha (caixas de seleção)
 ou itens de escolha única (botões de rádio), use os métodos
 {@link android.app.AlertDialog.Builder#setMultiChoiceItems(Cursor,String,String,
-DialogInterface.OnMultiChoiceClickListener) setMultiChoiceItems()} ou 
-{@link android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener) 
+DialogInterface.OnMultiChoiceClickListener) setMultiChoiceItems()} ou
+{@link android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener)
 setSingleChoiceItems()} respectivamente.</p>
 
 <p>Por exemplo, a seguir apresenta-se como criar uma lista de múltipla escolha como
@@ -346,7 +346,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
                        // If the user checked the item, add it to the selected items
                        mSelectedItems.add(which);
                    } else if (mSelectedItems.contains(which)) {
-                       // Else, if the item is already in the array, remove it 
+                       // Else, if the item is already in the array, remove it
                        mSelectedItems.remove(Integer.valueOf(which));
                    }
                }
@@ -373,7 +373,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
 
 <p>Embora a lista tradicional e uma lista com botões de opção
 forneçam uma ação de "escolha única", deve-se usar {@link
-android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener) 
+android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener)
 setSingleChoiceItems()} se você desejar manter a escolha do usuário.
 Ou seja, se a caixa de diálogo abrir novamente mais tarde, deve indicar qual é a escolha atual do usuário,
 portanto deve-se criar uma lista com botões de opção.</p>
@@ -442,7 +442,7 @@ deve-se alterar a família da fonte para {@code "sans-serif"} para que os campos
 um estilo de fonte compatível.</p>
 
 <p>Para inflar o layout no {@link android.support.v4.app.DialogFragment},
-obtenha um {@link android.view.LayoutInflater} com 
+obtenha um {@link android.view.LayoutInflater} com
 {@link android.app.Activity#getLayoutInflater()} e chame
 {@link android.view.LayoutInflater#inflate inflate()}, em que o primeiro parâmetro
 é o ID de recurso do layout e o segundo é uma vista pai do layout.
@@ -470,7 +470,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
                public void onClick(DialogInterface dialog, int id) {
                    LoginDialogFragment.this.getDialog().cancel();
                }
-           });      
+           });
     return builder.create();
 }
 </pre>
@@ -505,7 +505,7 @@ uma interface por meio da qual entrega os eventos de volta à atividade do host:
 
 <pre>
 public class NoticeDialogFragment extends DialogFragment {
-    
+
     /* The activity that creates an instance of this dialog fragment must
      * implement this interface in order to receive event callbacks.
      * Each method passes the DialogFragment in case the host needs to query it. */
@@ -513,10 +513,10 @@ public class NoticeDialogFragment extends DialogFragment {
         public void onDialogPositiveClick(DialogFragment dialog);
         public void onDialogNegativeClick(DialogFragment dialog);
     }
-    
+
     // Use this instance of the interface to deliver action events
     NoticeDialogListener mListener;
-    
+
     // Override the Fragment.onAttach() method to instantiate the NoticeDialogListener
     &#64;Override
     public void onAttach(Activity activity) {
@@ -543,7 +543,7 @@ dela por meio de uma implementação da interface {@code NoticeDialogListener}:<
 public class MainActivity extends FragmentActivity
                           implements NoticeDialogFragment.NoticeDialogListener{
     ...
-    
+
     public void showNoticeDialog() {
         // Create an instance of the dialog fragment and show it
         DialogFragment dialog = new NoticeDialogFragment();
@@ -656,7 +656,7 @@ public class CustomDialogFragment extends DialogFragment {
         // Inflate the layout to use as dialog or embedded fragment
         return inflater.inflate(R.layout.purchase_items, container, false);
     }
-  
+
     /** The system calls this only when creating the layout in a dialog. */
     &#64;Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -678,7 +678,7 @@ ou como uma IU de tela cheia com base no tamanho da tela:</p>
 public void showDialog() {
     FragmentManager fragmentManager = getSupportFragmentManager();
     CustomDialogFragment newFragment = new CustomDialogFragment();
-    
+
     if (mIsLargeLayout) {
         // The device is using a large layout, so show the fragment as a dialog
         newFragment.show(fragmentManager, "dialog");
@@ -695,7 +695,7 @@ public void showDialog() {
 }
 </pre>
 
-<p>Para obter mais informações sobre a realização de operações de fragmentos, consulte o guia 
+<p>Para obter mais informações sobre a realização de operações de fragmentos, consulte o guia
 <a href="{@docRoot}guide/components/fragments.html">Fragmentos</a>.</p>
 
 <p>Nesse exemplo, o booleano <code>mIsLargeLayout</code> especifica se o dispositivo atual
@@ -721,7 +721,7 @@ versões de recurso bool para diferentes tamanhos de tela:</p>
 &lt;/resources>
 </pre>
 
-<p>Assim, é possível inicializar o valor {@code mIsLargeLayout} durante o método 
+<p>Assim, é possível inicializar o valor {@code mIsLargeLayout} durante o método
 {@link android.app.Activity#onCreate onCreate()} da atividade:</p>
 
 <pre>
@@ -776,7 +776,7 @@ android.support.v4.app.DialogFragment#onDismiss onDismiss()} no {@link
 android.support.v4.app.DialogFragment}.</p>
 
 <p>Também é possível <em>cancelar</em> uma caixa de diálogo. Trata-se de um evento especial que indica que o usuário
-se retirou explicitamente da caixa de diálogo sem concluir a tarefa. Isso ocorre se o usuário pressionar o botão 
+se retirou explicitamente da caixa de diálogo sem concluir a tarefa. Isso ocorre se o usuário pressionar o botão
 <em>Voltar</em>, tocar na tela fora da área da caixa de diálogo
 ou se você chamar {@link android.app.Dialog#cancel()} explicitamente no {@link
 android.app.Dialog} (como em resposta a um botão "Cancelar" na caixa de diálogo).</p>

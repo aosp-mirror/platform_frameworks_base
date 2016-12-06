@@ -1,0 +1,186 @@
+page.title=Ảnh trong ảnh
+page.keywords=preview,sdk,PIP,Picture-in-picture
+page.tags=androidn
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>Trong tài liệu này</h2>
+<ol>
+  <li><a href="#declaring">Khai báo Hoạt động hỗ trợ
+Ảnh trong ảnh</a></li>
+  <li><a href="#pip_button">Chuyển Hoạt động sang Ảnh trong ảnh</a>
+</li>
+  <li><a href="#handling_ui">Xử lý UI trong chế độ Ảnh trong ảnh</a>
+</li>
+  <li><a href="#continuing_playback">Tiếp tục phát lại video ở chế độ
+Ảnh trong ảnh</a></li>
+  <li><a href="#best">Thực hành Tốt nhất</a></li>
+</ol>
+
+<h2>Xem thêm</h2>
+<ol>
+  <li><a href="{@docRoot}preview/features/multi-window.html">Hỗ trợ
+đa cửa sổ</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>Trong Android N, người dùng Android TV đã có thể xem video
+trong một cửa sổ được ghim vào một góc màn hình khi điều hướng bên trong
+các ứng dụng. Chế độ Ảnh trong ảnh (PIP) cho phép ứng dụng chạy một hoạt động
+video trong cửa sổ được ghim trong khi một hoạt động khác tiếp tục chạy
+ngầm. Cửa sổ PIP cho phép người dùng thực hiện nhiều việc khi đang sử dụng ứng dụng của bạn,
+giúp cho người dùng năng suất hơn.</p>
+
+<p>Ứng dụng của bạn có thể quyết định khi nào thì kích hoạt chế độ PIP. Sau đây là một vài ví dụ về
+thời điểm chuyển vào chế độ PIP:</p>
+
+<ul>
+<li>Ứng dụng của bạn có thể chuyển một video vào chế độ PIP khi người dùng điều hướng
+rời khỏi video đó để duyệt nội dung khác.</li>
+<li>Ứng dụng của bạn có thể chuyển một video sang chế độ PIP khi người dùng xem đoạn cuối
+ của một tập nội dung. Màn hình chính sẽ hiển thị thông tin quảng cáo
+hoặc tóm tắt về tập tiếp theo trong loạt video đó.</li>
+<li>Ứng dụng của bạn có thể mang lại cho người dùng một cách để xếp hàng các nội dung bổ sung khi
+họ đang xem một video. Video đó sẽ tiếp tục được phát trong chế độ PIP trong khi màn hình
+chính hiển thị hoạt động chọn nội dung.</li>
+</ul>
+
+<p>Cửa sổ PIP có kích thước 240x135 dp và được hiển thị trên lớp trên cùng ở một trong
+bốn góc của màn hình được hệ thống chọn. Người dùng có thể gọi ra một menu PIP
+, cho phép họ bật tắt cửa sổ PIP lên toàn màn hình hoặc đóng cửa sổ
+PIP bằng cách bấm giữ nút <b>Home</b> trên điều khiển từ xa. Nếu một video
+khác bắt đầu phát trên màn hình chính, cửa sổ PIP sẽ tự động
+được đóng. Người dùng cũng có thể đóng cửa sổ PIP thông qua nút Recents.</p>
+
+<img src="{@docRoot}images/android-7.0/pip-active.png" />
+<p class="img-caption"><strong>Hình 1.</strong> Một video Ảnh trong ảnh
+được hiển thị ở góc màn hình khi người dùng duyệt nội dung
+trên màn hình chính.</p>
+
+<p>PIP sử dụng các API đa cửa sổ có trong Android N để
+tạo cửa sổ video nằm chồng được ghim. Để thêm chế độ PIP vào ứng dụng bạn cần
+đăng ký các hoạt động hỗ trợ PIP, chuyển hoạt động của bạn sang chế độ PIP khi
+cần và đảm bảo cho các phần tử UI sẽ bị ẩn đi và phát lại video vẫn tiếp tục khi
+hoạt động đó ở trong chế độ PIP.</p>
+
+<h2 id="declaring">Khai báo Hoạt động hỗ trợ Ảnh trong ảnh</h2>
+
+<p>Theo mặc định, hệ thống không tự động hỗ trợ PIP cho các ứng dụng.
+Nếu bạn muốn hỗ trợ chế độ PIP trong ứng dụng của mình, hãy đăng ký hoạt động
+video trong bản kê khai bằng cách đặt
+<code>android:supportsPictureInPicture</code> và
+<code>android:resizeableActivity</code> thành <code>true</code>. Ngoài ra, hãy chỉ định
+hoạt động của bạn xử lý các thay đổi cấu hình bố trí để hoạt động đó
+không khởi chạy lại khi có các thay đổi về bố trí trong quá trình chuyển tiếp chế độ PIP.</p>
+
+<pre>
+&lt;activity android:name="VideoActivity"
+    android:resizeableActivity="true"
+    android:supportsPictureInPicture="true"
+    android:configChanges=
+        "screenSize|smallestScreenSize|screenLayout|orientation"
+    ...
+</pre>
+
+<p>Khi đăng ký hoạt động của bạn, hãy nhớ rằng trong chế độ PIP, hoạt động
+của bạn sẽ được hiển thị trong một cửa sổ nhỏ nằm chồng trên màn hình TV. Các hoạt động
+phát lại video với UI tối giản sẽ đem đến trải nghiệm người dùng tốt nhất. Các hoạt động
+có chứa những phần tử UI nhỏ có thể không đem lại trải nghiệm người dùng đạt yêu cầu
+khi được chuyển sang chế độ PIP bởi người dùng không thể thấy các chi tiết của phần tử UI
+trong cửa sổ PIP.</p>
+
+<h2 id="pip_button">Chuyển Hoạt động sang Ảnh trong ảnh</h2>
+
+Khi bạn cần chuyển hoạt động của mình sang chế độ PIP, hãy gọi
+<code>Activity.enterPictureInPicture()</code>. Ví dụ sau sẽ chuyển
+sang chế độ PIP khi người dùng chọn một nút PIP riêng trên thanh điều khiển
+media:</p>
+
+<pre>
+&#64;Override
+public void onActionClicked(Action action) {
+    if (action.getId() == R.id.lb_control_picture_in_picture) {
+        getActivity().enterPictureInPicture();
+        return;
+    }
+    ...
+</pre>
+
+<p>Thêm một nút PIP vào thanh điều khiển media của bạn sẽ cho phép người dùng dễ dàng chuyển
+sang chế độ PIP khi điều khiển phát lại video.</p>
+
+<img src="{@docRoot}images/android-7.0/pip-button.png" />
+<p class="img-caption"><strong>Hình 1.</strong> Một nút Ảnh trong ảnh
+trên thanh điều khiển media.</p>
+
+<p>Android N có một lớp
+<code>PlaybackControlsRow.PictureInPictureAction</code> mới định nghĩa
+các hành động ở chế độ PIP trên thanh điều khiển và sử dụng biểu tượng PIP.</p>
+
+<h2 id="handling_ui">Xử lý UI trong chế độ Ảnh trong ảnh</h2>
+
+<p>Khi hoạt động của bạn vào trong chế độ PIP thì hoạt động đó chỉ nên hiển thị phát lại
+video. Hãy xóa các phần tử UI trước khi hoạt động của bạn vào chế độ PIP,
+và khôi phục các phần tử này khi hoạt động quay lại chế độ toàn màn hình.
+Ghi đè phương thức <code>Activity.onPictureInPictureChanged()</code> hoặc
+<code>Fragment.onPictureInPictureChanged()</code> và bật hoặc
+tắt các phần tử UI khi cần thiết, ví dụ:</p>
+
+<pre>
+&#64;Override
+public void onPictureInPictureChanged(boolean inPictureInPicture) {
+    if (inPictureInPicture) {
+        // Hide the controls in picture-in-picture mode.
+        ...
+    } else {
+        // Restore the playback UI based on the playback status.
+        ...
+    }
+}
+</pre>
+
+<h2 id="continuing_playback">Tiếp tục phát lại video ở chế độ
+Ảnh trong ảnh</h2>
+
+<p>Khi hoạt động của bạn chuyển sang chế độ PIP thì hệ thống sẽ coi hoạt động đó đang ở trong
+trạng thái tạm dừng và sẽ gọi phương thức <code>onPause()</code> của hoạt động. Việc phát lại
+video không nên được tạm dừng và cần được tiếp tục phát nếu hoạt động
+bị tạm dừng do chế độ PIP. Hãy kiểm tra chế độ PIP trong phương thức
+<code>onPause()</code> của hoạt động và xử lý việc phát lại cho phù hợp, ví
+dụ:</p>
+
+<pre>
+&#64;Override
+public void onPause() {
+    // If called due to PIP, do not pause playback
+    if (inPictureInPicture()) {
+        // Continue playback
+        ...
+    }
+    // If paused but not in PIP, pause playback if necessary
+    ...
+}
+</pre>
+
+<p>Khi hoạt động của bạn chuyển ra khỏi chế độ PIP để quay trở về chế độ toàn màn hình thì
+hệ thống sẽ tiếp tục hoạt động của bạn và gọi phương thức <code>onResume()</code>.</p>
+
+<h2 id="best">Thực hành Tốt nhất</h2>
+
+<p>PIP được dành cho các hoạt động phát lại video toàn màn hình. Khi chuyển
+hoạt động của bạn vào chế độ PIP, hãy tránh hiển thị bất kỳ nội dung nào ngoài video.
+Theo dõi khi hoạt động của bạn vào chế độ PIP và ẩn đi các phần tử UI, như mô tả
+trong <a href="#handling_ui">Xử lý UI trong chế độ Ảnh trong ảnh</a>.</p>
+
+<p>Vì cửa sổ PIP được hiển thị dưới dạng cửa sổ nổi ở góc
+màn hình do đó bạn cần tránh hiển thị các thông tin quan trọng trong màn hình chính
+ở bất kỳ vùng nào có thể bị che khuất bởi cửa sổ PIP.</p>
+
+<p>Theo mặc định, khi một hoạt động đang ở trong chế độ PIP thì nó sẽ không nhận tiêu điểm nhập vào. Để
+tiếp nhận các sự kiện nhập vào khi ở chế độ PIP, hãy sử dụng
+<code>MediaSession.setMediaButtonReceiver()</code>.</p>

@@ -25,7 +25,7 @@ parent.link=manifest-intro.html
           android:<a href="#hwaccel">hardwareAccelerated</a>=["true" | "false"]
           android:<a href="#icon">icon</a>="<i>drawable resource</i>"
           android:<a href="#label">label</a>="<i>string resource</i>"
-          android:<a href="#lmode">launchMode</a>=["multiple" | "singleTop" |
+          android:<a href="#lmode">launchMode</a>=["standard" | "singleTop" |
                               "singleTask" | "singleInstance"]
           android:<a href="#maxRecents">maxRecents</a>="<i>integer</i>"
           android:<a href="#multi">multiprocess</a>=["true" | "false"]
@@ -35,6 +35,7 @@ parent.link=manifest-intro.html
           android:<a href="#prmsn">permission</a>="<i>string</i>"
           android:<a href="#proc">process</a>="<i>string</i>"
           android:<a href="#relinquish">relinquishTaskIdentity</a>=["true" | "false"]
+          android:<a href="#resizeableActivity">resizeableActivity</a>=["true" | "false"]
           android:<a href="#screen">screenOrientation</a>=["unspecified" | "behind" |
                                      "landscape" | "portrait" |
                                      "reverseLandscape" | "reversePortrait" |
@@ -43,6 +44,7 @@ parent.link=manifest-intro.html
                                      "sensor" | "fullSensor" | "nosensor" |
                                      "user" | "fullUser" | "locked"]
           android:<a href="#state">stateNotNeeded</a>=["true" | "false"]
+          android:<a href="#supportsPIP">supportsPictureInPicture</a>=["true" | "false"]
           android:<a href="#aff">taskAffinity</a>="<i>string</i>"
           android:<a href="#theme">theme</a>="<i>resource or theme</i>"
           android:<a href="#uioptions">uiOptions</a>=["none" | "splitActionBarWhenNarrow"]
@@ -794,9 +796,39 @@ to "{@code false}". The default value is "{@code false}".
 and icons in the <a href="{@docRoot}guide/components/recents.html">overview screen</a>.</p>
 </dd>
 
+<dt id="resizeableActivity"><code>resizeableActivity</code></dt>
+
+<dd>
+<p>
+  Specifies whether the app supports <a href=
+  "{@docRoot}guide/topics/ui/multi-window.html">multi-window display</a>. You
+  can set this attribute in either the <code>&lt;activity&gt;</code> or
+  <a href="application-element.html"><code>&lt;application&gt;</code></a>
+  element.
+</p>
+
+<p>
+  If you set this attribute to true, the user can launch the activity in
+  split-screen and freeform modes. If you set the attribute to false, the
+  activity does not support multi-window mode. If this value is false, and the
+  user attempts to launch the activity in multi-window mode, the activity takes
+  over the full screen.
+</p>
+
+<p>
+  If your app targets API level 24 or higher, but you do not specify a value
+  for this attribute, the attribute's value defaults to true.
+</p>
+
+<p>
+  This attribute was added in API level 24.
+</p>
+</dd>
 
 <dt><a name="screen"></a>{@code android:screenOrientation}</dt>
-<dd>The orientation of the activity's display on the device.
+<dd>The orientation of the activity's display on the device. The system ignores
+  this attribute if the activity is running in <a
+  href="{@docRoot}guide/topics/ui/multi-window.html">multi-window mode</a>.
 
 <p>The value can be any one of the following strings:</p>
 
@@ -920,6 +952,19 @@ absence of retained state.  For example, the activity that displays the
 home screen uses this setting to make sure that it does not get removed if it
 crashes for some reason.
 </p></dd>
+
+<dt id="supportsPIP"><code>supportsPictureInPicture</code></dt>
+
+<dd>
+<p>
+  Specifies whether the activity supports <a href=
+  "{@docRoot}training/tv/playback/picture-in-picture.jd">Picture-in-Picture</a>
+  display. The system ignores this attribute if <a href=
+  "#resizeableActivity"><code>android:resizeableActivity</code></a> is false.
+</p>
+
+<p>This attribute was added in API level 24.</p>
+</dd>
 
 <dt><a name="aff"></a>{@code android:taskAffinity}</dt>
 <dd>The task that the activity has an affinity for.  Activities with

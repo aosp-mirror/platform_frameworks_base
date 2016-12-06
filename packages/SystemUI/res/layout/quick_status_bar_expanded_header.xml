@@ -37,13 +37,14 @@
         android:clipToPadding="false"
         android:orientation="horizontal"
         android:layout_alignParentEnd="true"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="4dp"
         android:layout_marginEnd="12dp">
 
         <com.android.systemui.statusbar.phone.MultiUserSwitch android:id="@+id/multi_user_switch"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_alignParentEnd="true"
+            android:focusable="true"
             android:background="@drawable/ripple_drawable" >
             <ImageView android:id="@+id/multi_user_avatar"
                 android:layout_width="@dimen/multi_user_avatar_expanded_size"
@@ -51,6 +52,18 @@
                 android:layout_gravity="center"
                 android:scaleType="centerInside"/>
         </com.android.systemui.statusbar.phone.MultiUserSwitch>
+
+        <com.android.systemui.statusbar.AlphaOptimizedImageView
+            android:id="@android:id/edit"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:clipToPadding="false"
+            android:clickable="true"
+            android:focusable="true"
+            android:src="@drawable/ic_mode_edit"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/accessibility_quick_settings_edit"
+            android:padding="14dp" />
 
         <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
             android:id="@+id/settings_button_container"
@@ -64,7 +77,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/ripple_drawable"
-                android:src="@drawable/ic_settings"
+                android:src="@drawable/ic_settings_20dp"
                 android:contentDescription="@string/accessibility_quick_settings_settings" />
             <com.android.systemui.statusbar.AlphaOptimizedImageView android:id="@+id/tuner_icon"
                 android:layout_width="match_parent"
@@ -98,7 +111,7 @@
         android:layout_alignParentTop="true"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
-        android:paddingTop="8dp"
+        android:paddingTop="6dp"
         android:visibility="gone"
         android:textAppearance="@style/TextAppearance.StatusBar.Expanded.EmergencyCallsOnly"
         android:text="@*android:string/emergency_calls_only"
@@ -116,7 +129,7 @@
         android:id="@+id/quick_qs_panel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="52dp"
         android:layout_marginStart="12dp"
         android:layout_marginEnd="12dp"
         android:layout_alignParentEnd="true"

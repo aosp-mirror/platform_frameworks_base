@@ -244,23 +244,23 @@
     <string name="user_owner_label" msgid="1119010402169916617">"தனிப்பட்ட சுயவிவரத்திற்கு மாறு"</string>
     <string name="managed_profile_label" msgid="5289992269827577857">"பணிச் சுயவிவரத்திற்கு மாறு"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"தொடர்புகள்"</string>
-    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"தொடர்புகளை அணுகும்"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"தொடர்புகளை அணுக வேண்டும்"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"இருப்பிடம்"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"சாதனத்தின் இருப்பிடத்தை அணுகும்"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"இந்தச் சாதனத்தின் இருப்பிடத்தை அறிந்து கொள்ளலாம்"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"கேலெண்டர்"</string>
-    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"கேலெண்டரை அணுகும்"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"கேலெண்டரை அணுகலாம்"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS செய்திகளை அனுப்பும் மற்றும் பார்க்கும்"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS அனுப்பலாம், வந்த SMSகளைப் பார்க்கலாம்"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"சேமிப்பிடம்"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"உங்கள் சாதனத்தில் உள்ள படங்கள், மீடியா மற்றும் கோப்புகளை அணுகும்"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"உங்கள் சாதனத்தில் உள்ள படங்கள், மீடியா மற்றும் கோப்புகளை அணுக வேண்டும்"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"மைக்ரோஃபோன்"</string>
-    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ஆடியோவைப் பதிவுசெய்யும்"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ஒலிப் பதிவு செய்யலாம்"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"கேமரா"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"படங்களை எடுக்கும், வீடியோவைப் பதிவுசெய்யும்"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"படங்கள் மற்றும் வீடியோக்கள் எடுக்கலாம்"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ஃபோன்"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"மொபைல் அழைப்புகளைச் செய்யும், பெறும்"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"யாரையும் தொலைபேசியில் அழைக்கலாம்"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"உடல் உணர்விகள்"</string>
-    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"உங்கள் உடலியக்கக் குறிகள் பற்றிய உணர்வித் தரவை அணுகும்"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"உங்கள் உடல் இயக்கம் பற்றி உணர்விகள் கூறும் தகவலைப் பார்க்கலாம்"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"சாளர உள்ளடக்கத்தைப் பெறும்"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"நீங்கள் பணியாற்றி கொண்டிருக்கும் சாளரத்தின் உள்ளடக்கத்தைப் பார்க்கலாம்."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"தொடுவதன் மூலம் அறிவதை இயக்கும்"</string>
@@ -679,6 +679,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"சரி!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"மீண்டும் முயற்சிக்கவும்"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"மீண்டும் முயற்சிக்கவும்"</string>
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"எல்லா அம்சங்கள் &amp; தரவை பெற, சாதனத்தை திறக்கவும்"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"முகம் திறப்பதற்கான அதிகபட்ச முயற்சிகள் கடந்தன"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"சிம் கார்டு இல்லை"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"டேப்லெட்டில் சிம் கார்டு இல்லை."</string>
@@ -1023,8 +1024,9 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android மேம்படுத்தப்படுகிறது…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android துவங்குகிறது..."</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"சேமிப்பகத்தை உகந்ததாக்குகிறது."</string>
-    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android மேம்படுத்தப்படுகிறது"</string>
+    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"Android புதுப்பிப்பை நிறைவுசெய்கிறது…"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"மேம்படுத்துவது முடியும் வரை, சில பயன்பாடுகள் சரியாக வேலைசெய்யாமல் போகக்கூடும்"</string>
+    <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g>ஐ மேம்படுத்துகிறது…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_0">%1$d</xliff:g> / <xliff:g id="NUMBER_1">%2$d</xliff:g> பயன்பாட்டை ஒருங்கிணைக்கிறது."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g>ஐத் தயார்செய்கிறது."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"பயன்பாடுகள் தொடங்கப்படுகின்றன."</string>
@@ -1075,6 +1077,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"வைஃபை இணைய அணுகல் கொண்டிருக்கவில்லை"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"விருப்பங்களுக்கு, தட்டவும்"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>க்கு மாற்றப்பட்டது"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> இல் இணைய அணுகல் இல்லாததால், சாதனமானது <xliff:g id="NEW_NETWORK">%1$s</xliff:g>ஐப் பயன்படுத்துகிறது. கட்டணங்கள் விதிக்கப்படலாம்."</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> இலிருந்து <xliff:g id="NEW_NETWORK">%2$s</xliff:g>க்கு மாற்றப்பட்டது"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"செல்லுலார் தரவு"</item>
+    <item msgid="75483255295529161">"வைஃபை"</item>
+    <item msgid="6862614801537202646">"புளூடூத்"</item>
+    <item msgid="5447331121797802871">"ஈத்தர்நெட்"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"தெரியாத நெட்வொர்க் வகை"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"வைஃபை உடன் இணைக்க முடியவில்லை"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" இணைய இணைப்பு மோசமாக உள்ளது."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"இணைப்பை அனுமதிக்கவா?"</string>
@@ -1152,7 +1165,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"மொழியையும் தளவமைப்பையும் தேர்ந்தெடுக்க, தட்டவும்"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"கேன்டிடேட்ஸ்"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> தயாராகிறது"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"பிழைகள் உள்ளதா எனப் பார்க்கிறது"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"புதிய <xliff:g id="NAME">%s</xliff:g> கண்டறியப்பட்டது"</string>
@@ -1231,8 +1243,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> உடன் இணைக்கப்பட்டது. நெட்வொர்க்கை நிர்வகிக்க, தட்டவும்."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"எப்போதும் இயங்கும் VPN உடன் இணைக்கிறது…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"எப்போதும் இயங்கும் VPN இணைக்கப்பட்டது"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"எப்போதும் இயங்கும் VPN துண்டிக்கப்பட்டது"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"எப்போதும் இயங்கும் VPN பிழை"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"உள்ளமைக்க, தட்டவும்"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"அமைக்க, தட்டவும்"</string>
     <string name="upload_file" msgid="2897957172366730416">"கோப்பைத் தேர்வுசெய்"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"எந்தக் கோப்பும் தேர்வுசெய்யப்படவில்லை"</string>
     <string name="reset" msgid="2448168080964209908">"மீட்டமை"</string>
@@ -1316,7 +1329,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB டிரைவ்"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB சேமிப்பிடம்"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"திருத்து"</string>
-    <string name="data_usage_warning_title" msgid="1955638862122232342">"தரவு பயன்பாட்டு எச்சரிக்கை"</string>
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"தரவுப் பயன்பாடு குறித்த எச்சரிக்கை"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"தரவு உபயோகம், அமைப்புகளைப் பார்க்க, தட்டவும்."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G தரவு வரம்பைக் கடந்தது"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G தரவு வரம்பைக் கடந்தது"</string>
@@ -1635,6 +1648,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"மொழி பெயரை உள்ளிடுக"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"பரிந்துரைகள்"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"எல்லா மொழிகளும்"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"எல்லா மண்டலங்களும்"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"தேடு"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"பணிப் பயன்முறை முடக்கப்பட்டது"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"செயல்பட, பணி சுயவிவரத்தை அனுமதி. இதில் பயன்பாடுகள், பின்னணி ஒத்திசைவு மற்றும் தொடர்புடைய அம்சங்கள் அடங்கும்."</string>
@@ -1652,7 +1666,16 @@
     <string name="unpin_target" msgid="3556545602439143442">"பின்னை அகற்று"</string>
     <string name="app_info" msgid="6856026610594615344">"பயன்பாட்டுத் தகவல்"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"சாதனத்தை மீட்டமைக்கவா?"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"சாதனத்தை மீட்டமைக்க, தட்டவும்"</string>
+    <string name="demo_starting_message" msgid="5268556852031489931">"டெமோவைத் தொடங்குகிறது…"</string>
+    <string name="demo_restarting_message" msgid="952118052531642451">"சாதனத்தை மீட்டமைக்கிறது…"</string>
+    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"சாதனத்தை மீட்டமைக்கவா?"</string>
+    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"மாற்றங்கள் சேமிக்கப்படாது, <xliff:g id="TIMEOUT">%1$s</xliff:g> வினாடிகளில் டெமோ மீண்டும் தொடங்கும்…"</string>
+    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"ரத்துசெய்"</string>
+    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"இப்போதே மீட்டமை"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"இந்தச் சாதனத்தைக் கட்டுப்பாடுகளின்றிப் பயன்படுத்த, ஆரம்ப நிலைக்கு மீட்டமைக்கவும்"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"மேலும் அறிய தொடவும்."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"முடக்கப்பட்டது: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="conference_call" msgid="3751093130790472426">"குழு அழைப்பு"</string>
 </resources>

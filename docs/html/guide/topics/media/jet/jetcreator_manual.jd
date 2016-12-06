@@ -21,7 +21,7 @@ format, that respond in real-time to game play events and user interaction.</p>
 <p>JET works in conjunction with SONiVOX's
 Embedded Audio Synthesizer (EAS) which is the MIDI
 playback device for Android. Both the
-JET and EAS engines are integrated into the Android embedded platform through the 
+JET and EAS engines are integrated into the Android embedded platform through the
 {@link android.media.JetPlayer} class, as well
 as inherent in the JET Creator application. As such, the JET content author can
 be sure that the playback will sound exactly the same in both the JET Creator
@@ -387,34 +387,34 @@ JET Creator projects to other people.</p>
 you first launch JET Creator you are presented with an open dialog like the
 following.</p>
 
- 
+
 
 <p><img border=0 width=450 height=285
 src="{@docRoot}images/jet/jc_open_dlg.png"
 </p>
 
- 
 
- 
+
+
 
 <p>  <b>Open</b> will open an existing .jtc (JET Creator file) file. Use the browser
 button to browse to the directory where you have saved your .jtc file.</p>
 
- 
+
 
 <p>  <b>New</b> will create a new .jtc file.</p>
 
- 
+
 
 <p>  <b>Import</b> will import a JET Archive (.zip) file.</p>
 
- 
+
 
 <p>  <b>Cancel</b> will cancel the dialog and exit the application.</p>
 
- 
 
- 
+
+
 
 <h1>5 Main Window </h1>
 
@@ -457,16 +457,16 @@ Creator Main Window<o:p></o:p></i></p>
 <p>The buttons along the left side of main
 window do the following:</p>
 
-<p>Add: 
+<p>Add:
 Displays the segment or event window for adding a new segment or event</p>
 
-<p>Revise: 
+<p>Revise:
 Displays the segment or event window for updating an existing segment or event</p>
 
-<p>Delete: 
+<p>Delete:
 Deletes the selected segment or event (will ask for confirmation)</p>
 
-<p>Move: 
+<p>Move:
 Displays the move window which allows you to move selected segments or events
 in time</p>
 
@@ -476,11 +476,11 @@ in time</p>
 <p>Dequeue All:   Dequeues
 (deselects) all segments</p>
 
-<p>Play: 
+<p>Play:
 Starts playback of all queued segments. This button changes to Stop if any
 segments are playing</p>
 
-<p>Audition: 
+<p>Audition:
 Displays the Audition window (see below)</p>
 
 

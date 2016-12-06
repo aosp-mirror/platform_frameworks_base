@@ -20,11 +20,18 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager.ApplicationInfoFlags;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -34,8 +41,10 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.util.DisplayMetrics;
 import android.util.Log;
 
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -156,18 +165,19 @@ public class LauncherApps {
         }
 
         /**
-         * Indicates that one or more shortcuts (which may be dynamic and/or pinned)
+         * Indicates that one or more shortcuts of any kind (dynamic, pinned, or manifest)
          * have been added, updated or removed.
          *
          * <p>Only the applications that are allowed to access the shortcut information,
          * as defined in {@link #hasShortcutHostPermission()}, will receive it.
          *
          * @param packageName The name of the package that has the shortcuts.
-         * @param shortcuts all shortcuts from the package (dynamic and/or pinned).  Only "key"
-         *    information will be provided, as defined in {@link ShortcutInfo#hasKeyFieldsOnly()}.
+         * @param shortcuts All shortcuts from the package (dynamic, manifest and/or pinned).
+         *    Only "key" information will be provided, as defined in
+         *    {@link ShortcutInfo#hasKeyFieldsOnly()}.
          * @param user The UserHandle of the profile that generated the change.
          *
-         * @hide
+         * @see ShortcutManager
          */
         public void onShortcutsChanged(@NonNull String packageName,
                 @NonNull List<ShortcutInfo> shortcuts, @NonNull UserHandle user) {
@@ -176,31 +186,68 @@ public class LauncherApps {
 
     /**
      * Represents a query passed to {@link #getShortcuts(ShortcutQuery, UserHandle)}.
-     *
-     * @hide
      */
     public static class ShortcutQuery {
         /**
          * Include dynamic shortcuts in the result.
          */
-        public static final int FLAG_GET_DYNAMIC = 1 << 0;
+        public static final int FLAG_MATCH_DYNAMIC = 1 << 0;
+
+        /** @hide kept for unit tests */
+        @Deprecated
+        public static final int FLAG_GET_DYNAMIC = FLAG_MATCH_DYNAMIC;
 
         /**
          * Include pinned shortcuts in the result.
          */
-        public static final int FLAG_GET_PINNED = 1 << 1;
+        public static final int FLAG_MATCH_PINNED = 1 << 1;
+
+        /** @hide kept for unit tests */
+        @Deprecated
+        public static final int FLAG_GET_PINNED = FLAG_MATCH_PINNED;
 
         /**
-         * Requests "key" fields only.  See {@link ShortcutInfo#hasKeyFieldsOnly()} for which
-         * fields are available.
+         * Include manifest shortcuts in the result.
+         */
+        public static final int FLAG_MATCH_MANIFEST = 1 << 3;
+
+        /** @hide kept for unit tests */
+        @Deprecated
+        public static final int FLAG_GET_MANIFEST = FLAG_MATCH_MANIFEST;
+
+        /** @hide */
+        public static final int FLAG_MATCH_ALL_KINDS =
+                FLAG_GET_DYNAMIC | FLAG_GET_PINNED | FLAG_GET_MANIFEST;
+
+        /** @hide kept for unit tests */
+        @Deprecated
+        public static final int FLAG_GET_ALL_KINDS = FLAG_MATCH_ALL_KINDS;
+
+        /**
+         * Requests "key" fields only.  See {@link ShortcutInfo#hasKeyFieldsOnly()}'s javadoc to
+         * see which fields fields "key".
+         * This allows quicker access to shortcut information in order to
+         * determine whether the caller's in-memory cache needs to be updated.
+         *
+         * <p>Typically, launcher applications cache all or most shortcut information
+         * in memory in order to show shortcuts without a delay.
+         *
+         * When a given launcher application wants to update its cache, such as when its process
+         * restarts, it can fetch shortcut information with this flag.
+         * The application can then check {@link ShortcutInfo#getLastChangedTimestamp()} for each
+         * shortcut, fetching a shortcut's non-key information only if that shortcut has been
+         * updated.
+         *
+         * @see ShortcutManager
          */
         public static final int FLAG_GET_KEY_FIELDS_ONLY = 1 << 2;
 
         /** @hide */
         @IntDef(flag = true,
                 value = {
-                        FLAG_GET_DYNAMIC,
-                        FLAG_GET_PINNED,
+                        FLAG_MATCH_DYNAMIC,
+                        FLAG_MATCH_PINNED,
+                        FLAG_MATCH_MANIFEST,
                         FLAG_GET_KEY_FIELDS_ONLY,
                 })
         @Retention(RetentionPolicy.SOURCE)
@@ -224,40 +271,56 @@ public class LauncherApps {
         }
 
         /**
-         * If non-zero, returns only shortcuts that have been added or updated since the timestamp,
-         * which is a milliseconds since the Epoch.
+         * If non-zero, returns only shortcuts that have been added or updated
+         * since the given timestamp, expressed in milliseconds since the Epoch&mdash;see
+         * {@link System#currentTimeMillis()}.
          */
-        public void setChangedSince(long changedSince) {
+        public ShortcutQuery setChangedSince(long changedSince) {
             mChangedSince = changedSince;
+            return this;
         }
 
         /**
          * If non-null, returns only shortcuts from the package.
          */
-        public void setPackage(@Nullable String packageName) {
+        public ShortcutQuery setPackage(@Nullable String packageName) {
             mPackage = packageName;
+            return this;
         }
 
         /**
          * If non-null, return only the specified shortcuts by ID.  When setting this field,
-         * a packange name must also be set with {@link #setPackage}.
+         * a package name must also be set with {@link #setPackage}.
          */
-        public void setShortcutIds(@Nullable List<String> shortcutIds) {
+        public ShortcutQuery setShortcutIds(@Nullable List<String> shortcutIds) {
             mShortcutIds = shortcutIds;
+            return this;
         }
 
         /**
-         * If non-null, returns only shortcuts associated with the activity.
+         * If non-null, returns only shortcuts associated with the activity; i.e.
+         * {@link ShortcutInfo}s whose {@link ShortcutInfo#getActivity()} are equal
+         * to {@code activity}.
          */
-        public void setActivity(@Nullable ComponentName activity) {
+        public ShortcutQuery setActivity(@Nullable ComponentName activity) {
             mActivity = activity;
+            return this;
         }
 
         /**
-         * Set query options.
+         * Set query options.  At least one of the {@code MATCH} flags should be set.  Otherwise,
+         * no shortcuts will be returned.
+         *
+         * <ul>
+         *     <li>{@link #FLAG_MATCH_DYNAMIC}
+         *     <li>{@link #FLAG_MATCH_PINNED}
+         *     <li>{@link #FLAG_MATCH_MANIFEST}
+         *     <li>{@link #FLAG_GET_KEY_FIELDS_ONLY}
+         * </ul>
          */
-        public void setQueryFlags(@QueryFlags int queryFlags) {
+        public ShortcutQuery setQueryFlags(@QueryFlags int queryFlags) {
             mQueryFlags = queryFlags;
+            return this;
         }
     }
 
@@ -422,12 +485,16 @@ public class LauncherApps {
      *
      * <p>Only the default launcher can access the shortcut information.
      *
-     * <p>Note when this method returns {@code false}, that may be a temporary situation because
+     * <p>Note when this method returns {@code false}, it may be a temporary situation because
      * the user is trying a new launcher application.  The user may decide to change the default
-     * launcher to the calling application again, so even if a launcher application loses
+     * launcher back to the calling application again, so even if a launcher application loses
      * this permission, it does <b>not</b> have to purge pinned shortcut information.
+     * If the calling launcher application contains pinned shortcuts, they will still work,
+     * even though the caller no longer has the shortcut host permission.
      *
-     * @hide
+     * @throws IllegalStateException when the user is locked.
+     *
+     * @see ShortcutManager
      */
     public boolean hasShortcutHostPermission() {
         try {
@@ -438,7 +505,7 @@ public class LauncherApps {
     }
 
     /**
-     * Returns the IDs of {@link ShortcutInfo}s that match {@code query}.
+     * Returns {@link ShortcutInfo}s that match {@code query}.
      *
      * <p>Callers must be allowed to access the shortcut information, as defined in {@link
      * #hasShortcutHostPermission()}.
@@ -447,8 +514,10 @@ public class LauncherApps {
      * @param user The UserHandle of the profile.
      *
      * @return the IDs of {@link ShortcutInfo}s that match the query.
+     * @throws IllegalStateException when the user is locked, or when the {@code user} user
+     * is locked or not running.
      *
-     * @hide
+     * @see ShortcutManager
      */
     @Nullable
     public List<ShortcutInfo> getShortcuts(@NonNull ShortcutQuery query,
@@ -467,12 +536,13 @@ public class LauncherApps {
      * @hide // No longer used.  Use getShortcuts() instead.  Kept for unit tests.
      */
     @Nullable
+    @Deprecated
     public List<ShortcutInfo> getShortcutInfo(@NonNull String packageName,
             @NonNull List<String> ids, @NonNull UserHandle user) {
         final ShortcutQuery q = new ShortcutQuery();
         q.setPackage(packageName);
         q.setShortcutIds(ids);
-        q.setQueryFlags(ShortcutQuery.FLAG_GET_DYNAMIC | ShortcutQuery.FLAG_GET_PINNED);
+        q.setQueryFlags(ShortcutQuery.FLAG_GET_ALL_KINDS);
         return getShortcuts(q, user);
     }
 
@@ -482,14 +552,16 @@ public class LauncherApps {
      * <p>This API is <b>NOT</b> cumulative; this will replace all pinned shortcuts for the package.
      * However, different launchers may have different set of pinned shortcuts.
      *
-     * <p>Callers must be allowed to access the shortcut information, as defined in {@link
-     * #hasShortcutHostPermission()}.
+     * <p>The calling launcher application must be allowed to access the shortcut information,
+     * as defined in {@link #hasShortcutHostPermission()}.
      *
      * @param packageName The target package name.
      * @param shortcutIds The IDs of the shortcut to be pinned.
      * @param user The UserHandle of the profile.
+     * @throws IllegalStateException when the user is locked, or when the {@code user} user
+     * is locked or not running.
      *
-     * @hide
+     * @see ShortcutManager
      */
     public void pinShortcuts(@NonNull String packageName, @NonNull List<String> shortcutIds,
             @NonNull UserHandle user) {
@@ -503,6 +575,7 @@ public class LauncherApps {
     /**
      * @hide kept for testing.
      */
+    @Deprecated
     public int getShortcutIconResId(@NonNull ShortcutInfo shortcut) {
         return shortcut.getIconResourceId();
     }
@@ -510,46 +583,29 @@ public class LauncherApps {
     /**
      * @hide kept for testing.
      */
+    @Deprecated
     public int getShortcutIconResId(@NonNull String packageName, @NonNull String shortcutId,
             @NonNull UserHandle user) {
         final ShortcutQuery q = new ShortcutQuery();
         q.setPackage(packageName);
         q.setShortcutIds(Arrays.asList(shortcutId));
-        q.setQueryFlags(ShortcutQuery.FLAG_GET_DYNAMIC | ShortcutQuery.FLAG_GET_PINNED);
+        q.setQueryFlags(ShortcutQuery.FLAG_GET_ALL_KINDS);
         final List<ShortcutInfo> shortcuts = getShortcuts(q, user);
 
         return shortcuts.size() > 0 ? shortcuts.get(0).getIconResourceId() : 0;
     }
 
     /**
-     * Return the icon as {@link ParcelFileDescriptor}, when it's stored as a file
-     * (i.e. when {@link ShortcutInfo#hasIconFile()} returns {@code true}).
-     *
-     * <p>Callers must be allowed to access the shortcut information, as defined in {@link
-     * #hasShortcutHostPermission()}.
-     *
-     * @param shortcut The target shortcut.
-     *
-     * @hide
+     * @hide internal/unit tests only
      */
     public ParcelFileDescriptor getShortcutIconFd(
             @NonNull ShortcutInfo shortcut) {
-        return getShortcutIconFd(shortcut.getPackageName(), shortcut.getId(),
+        return getShortcutIconFd(shortcut.getPackage(), shortcut.getId(),
                 shortcut.getUserId());
     }
 
     /**
-     * Return the icon as {@link ParcelFileDescriptor}, when it's stored as a file
-     * (i.e. when {@link ShortcutInfo#hasIconFile()} returns {@code true}).
-     *
-     * <p>Callers must be allowed to access the shortcut information, as defined in {@link
-     * #hasShortcutHostPermission()}.
-     *
-     * @param packageName The target package name.
-     * @param shortcutId The ID of the shortcut to lad rom.
-     * @param user The UserHandle of the profile.
-     *
-     * @hide
+     * @hide internal/unit tests only
      */
     public ParcelFileDescriptor getShortcutIconFd(
             @NonNull String packageName, @NonNull String shortcutId, @NonNull UserHandle user) {
@@ -567,55 +623,133 @@ public class LauncherApps {
     }
 
     /**
-     * Launches a shortcut.
+     * Returns the icon for this shortcut, without any badging for the profile.
      *
-     * <p>Callers must be allowed to access the shortcut information, as defined in {@link
-     * #hasShortcutHostPermission()}.
+     * <p>The calling launcher application must be allowed to access the shortcut information,
+     * as defined in {@link #hasShortcutHostPermission()}.
+     *
+     * @param density The preferred density of the icon, zero for default density. Use
+     * density DPI values from {@link DisplayMetrics}.
+     *
+     * @return The drawable associated with the shortcut.
+     * @throws IllegalStateException when the user is locked, or when the {@code user} user
+     * is locked or not running.
+     *
+     * @see ShortcutManager
+     * @see #getShortcutBadgedIconDrawable(ShortcutInfo, int)
+     * @see DisplayMetrics
+     */
+    public Drawable getShortcutIconDrawable(@NonNull ShortcutInfo shortcut, int density) {
+        if (shortcut.hasIconFile()) {
+            final ParcelFileDescriptor pfd = getShortcutIconFd(shortcut);
+            if (pfd == null) {
+                return null;
+            }
+            try {
+                final Bitmap bmp = BitmapFactory.decodeFileDescriptor(pfd.getFileDescriptor());
+                return (bmp == null) ? null : new BitmapDrawable(mContext.getResources(), bmp);
+            } finally {
+                try {
+                    pfd.close();
+                } catch (IOException ignore) {
+                }
+            }
+        } else if (shortcut.hasIconResource()) {
+            try {
+                final int resId = shortcut.getIconResourceId();
+                if (resId == 0) {
+                    return null; // Shouldn't happen but just in case.
+                }
+                final ApplicationInfo ai = getApplicationInfo(shortcut.getPackage(),
+                        /* flags =*/ 0, shortcut.getUserHandle());
+                final Resources res = mContext.getPackageManager().getResourcesForApplication(ai);
+                return res.getDrawableForDensity(resId, density);
+            } catch (NameNotFoundException | Resources.NotFoundException e) {
+                return null;
+            }
+        } else {
+            return null; // Has no icon.
+        }
+    }
+
+    /**
+     * Returns the shortcut icon with badging appropriate for the profile.
+     *
+     * <p>The calling launcher application must be allowed to access the shortcut information,
+     * as defined in {@link #hasShortcutHostPermission()}.
+     *
+     * @param density Optional density for the icon, or 0 to use the default density. Use
+     * @return A badged icon for the shortcut.
+     * @throws IllegalStateException when the user is locked, or when the {@code user} user
+     * is locked or not running.
+     *
+     * @see ShortcutManager
+     * @see #getShortcutIconDrawable(ShortcutInfo, int)
+     * @see DisplayMetrics
+     */
+    public Drawable getShortcutBadgedIconDrawable(ShortcutInfo shortcut, int density) {
+        final Drawable originalIcon = getShortcutIconDrawable(shortcut, density);
+
+        return (originalIcon == null) ? null : mContext.getPackageManager().getUserBadgedIcon(
+                originalIcon, shortcut.getUserHandle());
+    }
+
+    /**
+     * Starts a shortcut.
+     *
+     * <p>The calling launcher application must be allowed to access the shortcut information,
+     * as defined in {@link #hasShortcutHostPermission()}.
      *
      * @param packageName The target shortcut package name.
      * @param shortcutId The target shortcut ID.
      * @param sourceBounds The Rect containing the source bounds of the clicked icon.
      * @param startActivityOptions Options to pass to startActivity.
      * @param user The UserHandle of the profile.
-     * @return {@code false} when the shortcut is no longer valid (e.g. the creator application
-     *   has been uninstalled). {@code true} when the shortcut is still valid.
+     * @throws IllegalStateException when the user is locked, or when the {@code user} user
+     * is locked or not running.
      *
-     * @hide
+     * @throws android.content.ActivityNotFoundException failed to start shortcut. (e.g.
+     * the shortcut no longer exists, is disabled, the intent receiver activity doesn't exist, etc)
      */
-    public boolean startShortcut(@NonNull String packageName, @NonNull String shortcutId,
+    public void startShortcut(@NonNull String packageName, @NonNull String shortcutId,
             @Nullable Rect sourceBounds, @Nullable Bundle startActivityOptions,
             @NonNull UserHandle user) {
-        return startShortcut(packageName, shortcutId, sourceBounds, startActivityOptions,
+        startShortcut(packageName, shortcutId, sourceBounds, startActivityOptions,
                 user.getIdentifier());
     }
 
     /**
      * Launches a shortcut.
      *
-     * <p>Callers must be allowed to access the shortcut information, as defined in {@link
-     * #hasShortcutHostPermission()}.
+     * <p>The calling launcher application must be allowed to access the shortcut information,
+     * as defined in {@link #hasShortcutHostPermission()}.
      *
      * @param shortcut The target shortcut.
      * @param sourceBounds The Rect containing the source bounds of the clicked icon.
      * @param startActivityOptions Options to pass to startActivity.
-     * @return {@code false} when the shortcut is no longer valid (e.g. the creator application
-     *   has been uninstalled). {@code true} when the shortcut is still valid.
+     * @throws IllegalStateException when the user is locked, or when the {@code user} user
+     * is locked or not running.
      *
-     * @hide
+     * @throws android.content.ActivityNotFoundException failed to start shortcut. (e.g.
+     * the shortcut no longer exists, is disabled, the intent receiver activity doesn't exist, etc)
      */
-    public boolean startShortcut(@NonNull ShortcutInfo shortcut,
+    public void startShortcut(@NonNull ShortcutInfo shortcut,
             @Nullable Rect sourceBounds, @Nullable Bundle startActivityOptions) {
-        return startShortcut(shortcut.getPackageName(), shortcut.getId(),
+        startShortcut(shortcut.getPackage(), shortcut.getId(),
                 sourceBounds, startActivityOptions,
                 shortcut.getUserId());
     }
 
-    private boolean startShortcut(@NonNull String packageName, @NonNull String shortcutId,
+    private void startShortcut(@NonNull String packageName, @NonNull String shortcutId,
             @Nullable Rect sourceBounds, @Nullable Bundle startActivityOptions,
             int userId) {
         try {
-            return mService.startShortcut(mContext.getPackageName(), packageName, shortcutId,
+            final boolean success =
+                    mService.startShortcut(mContext.getPackageName(), packageName, shortcutId,
                     sourceBounds, startActivityOptions, userId);
+            if (!success) {
+                throw new ActivityNotFoundException("Shortcut could not be started");
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

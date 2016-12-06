@@ -16,7 +16,11 @@
 
 package android.widget;
 
+import com.android.internal.R;
+import com.android.internal.widget.ExploreByTouchHelper;
+
 import android.animation.ObjectAnimator;
+import android.annotation.IntDef;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -43,9 +47,8 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
-import com.android.internal.R;
-import com.android.internal.widget.ExploreByTouchHelper;
-
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -55,11 +58,16 @@ import java.util.Locale;
  * @hide
  */
 public class RadialTimePickerView extends View {
-
     private static final String TAG = "RadialTimePickerView";
 
     public static final int HOURS = 0;
     public static final int MINUTES = 1;
+
+    /** @hide */
+    @IntDef({HOURS, MINUTES})
+    @Retention(RetentionPolicy.SOURCE)
+    @interface PickerType {}
+
     private static final int HOURS_INNER = 2;
 
     private static final int SELECTOR_CIRCLE = 0;
@@ -185,8 +193,24 @@ public class RadialTimePickerView extends View {
 
     private boolean mInputEnabled = true;
 
-    public interface OnValueSelectedListener {
-        void onValueSelected(int pickerIndex, int newValue, boolean autoAdvance);
+    interface OnValueSelectedListener {
+        /**
+         * Called when the selected value at a given picker index has changed.
+         *
+         * @param pickerType the type of value that has changed, one of:
+         *                   <ul>
+         *                       <li>{@link #MINUTES}
+         *                       <li>{@link #HOURS}
+         *                   </ul>
+         * @param newValue the new value as minute in hour (0-59) or hour in
+         *                 day (0-23)
+         * @param autoAdvance when the picker type is {@link #HOURS},
+         *                    {@code true} to switch to the {@link #MINUTES}
+         *                    picker or {@code false} to stay on the current
+         *                    picker. No effect when picker type is
+         *                    {@link #MINUTES}.
+         */
+        void onValueSelected(@PickerType int pickerType, int newValue, boolean autoAdvance);
     }
 
     /**
@@ -977,7 +1001,7 @@ public class RadialTimePickerView extends View {
         // Ensure we're showing the correct picker.
         animatePicker(mShowHours, ANIM_DURATION_TOUCH);
 
-        final int type;
+        final @PickerType int type;
         final int newValue;
         final boolean valueChanged;
 

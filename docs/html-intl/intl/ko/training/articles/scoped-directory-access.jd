@@ -1,0 +1,148 @@
+page.title=범위가 지정된 디렉터리 액세스
+page.keywords=preview, sdk, 범위가 지정된 디렉터리 액세스
+page.tags=androidn
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>이 문서의 내용</h2>
+  <ol>
+    <li><a href="#accessing">외부 저장소 디렉터리 액세스</a></li>
+    <li><a href="#removable">이동식 미디어의 디렉터리 액세스</a></li>
+    <li><a href="#best">모범 사례</a></li>
+  </ol>
+</div>
+</div>
+
+<p>일반적으로 사진 앱과 같은 앱은
+<code>Pictures</code> 디렉터리 등 외부 저장소의 특정 디렉터리에만 액세스하면 됩니다. 기존 외부 저장소 액세스 방식은
+이런 유형의 앱에 대상화된 디렉터리 액세스를 쉽게
+제공하지 못합니다. 예를 들면 다음과 같습니다.</p>
+
+<ul>
+<li>매니페스트에서 {@link android.Manifest.permission#READ_EXTERNAL_STORAGE}
+또는 {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE}를 요청하면
+외부 저장소의 모든 공개 디렉터리에 액세스할 수 있습니다.
+이는 앱에 필요한 것보다 과도한 액세스를 제공할 수 있습니다.</li>
+<li>일반적으로,
+<a href="{@docRoot}guide/topics/providers/document-provider.html">저장소
+액세스 프레임워크</a>를 사용하면 시스템 UI를 통해 사용자가 디렉터리를
+선택할 수 있습니다. 앱이 항상 동일한 외부 디렉터리에 액세스한다면
+필요 없는 동작입니다.</li>
+</ul>
+
+<p>Android N은 일반 외부 저장소 디렉터리에 액세스하기 위한
+단순화된 새로운 API를 제공합니다. </p>
+
+<h2 id="accessing">외부 저장소 디렉터리 액세스</h2>
+
+<p><code>StorageManager</code> 클래스를 사용하여 적절한
+<code>StorageVolume</code> 인스턴스를 가져옵니다. 그 후, 해당 인스턴스의
+<code>StorageVolume.createAccessIntent()</code> 메서드를 호출하여 인텐트를 생성합니다.
+이 인텐트로 외부 저장소 디렉터리에 액세스합니다. 이동식 미디어 볼륨을 비롯한
+모든 사용 가능한 볼륨의 목록을 가져오려면
+<code>StorageManager.getVolumesList()</code>를 사용합니다.</p>
+
+<p>특정 파일에 대한 정보가 있으면
+<code>StorageManager.getStorageVolume(File)</code>을 사용하여 해당 파일이 들어 있는
+<code>StorageVolume</code>을 가져옵니다. 이 <code>StorageVolume</code>에서
+<code>createAccessIntent()</code>를 호출하여 파일의 외부 저장소 디렉터리에
+액세스합니다.</p>
+
+<p>
+외부 SD 카드와 같은 보조 볼륨에서는 특정 디렉터리 대신 전체 볼륨에 대한 액세스를 요청하려면
+<code>StorageVolume.createAccessIntent()</code>를 호출할 때
+null을 전달합니다. 기본 볼륨에 null을 전달하거나 잘못된 디렉터리 이름을 전달하는 경우
+<code>StorageVolume.createAccessIntent()</code>는 null을
+반환합니다.
+</p>
+
+<p>다음 코드 조각은 기본 공유 저장소에서
+<code>Pictures</code> 디렉터리를 여는 방법에 대한 예시입니다.</p>
+
+<pre>
+StorageManager sm = (StorageManager)getSystemService(Context.STORAGE_SERVICE);
+StorageVolume volume = sm.getPrimaryVolume();
+Intent intent = volume.createAccessIntent(Environment.DIRECTORY_PICTURES);
+startActivityForResult(intent, request_code);
+</pre>
+
+<p>시스템이 외부 디렉터리에 액세스 권한을 부여하고자 시도하고,
+필요에 따라 단순화된 UI를 사용하는 사용자의 액세스를 확인합니다.</p>
+
+<img src="{@docRoot}images/android-7.0/scoped-directory-access-framed.png" srcset="{@docRoot}images/android-7.0/scoped-directory-access-framed.png 1x,
+{@docRoot}images/android-7.0/scoped-directory-access-framed_2x.png 2x" />
+<p class="img-caption"><strong>그림 1.</strong> Pictures 디렉터리에
+액세스를 요청하는 애플리케이션.</p>
+
+<p>사용자가 액세스 권한을 부여하면, 시스템이
+<code>Activity.RESULT_OK</code>의 결과 코드가 포함된
+<code>onActivityResult()</code> 재정의와 URI가 포함된 인텐트 데이터를 호출합니다. 제공된
+URI를 사용하여 디렉터리 정보에 액세스합니다.
+<a href="{@docRoot}guide/topics/providers/document-provider.html">저장소
+액세스 프레임워크</a>가
+반환한 URI를 사용하는 것과 유사합니다.</p>
+
+<p>사용자가 액세스 권한을 부여하지 않으면 시스템이
+<code>Activity.RESULT_CANCELED</code>의 결과 코드가 포함된
+<code>onActivityResult()</code> 재정의와 null 인텐트 데이터를 호출합니다.</p>
+
+<p class="note"><b>참고</b>: 특정 외부 디렉터리에 대한 액세스 권한을 얻으면
+해당 디렉터리의 하위 디렉터리에 대한 액세스 권한도 얻게 됩니다.</p>
+
+<h2 id="removable">이동식 미디어의 디렉터리 액세스</h2>
+
+<p>범위가 지정된 디렉터리 액세스를 사용하여 이동식 미디어의 디렉터리에 액세스하려면
+먼저 다음과 같은
+{@link android.os.Environment#MEDIA_MOUNTED} 알림을 수신하는 {@link android.content.BroadcastReceiver}를 추가합니다.</p>
+
+<pre>
+&lt;receiver
+    android:name=".MediaMountedReceiver"
+    android:enabled="true"
+    android:exported="true" &gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.MEDIA_MOUNTED" /&gt;
+        &lt;data android:scheme="file" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/receiver&gt;
+</pre>
+
+<p>사용자가 SD 카드 등의 이동식 미디어를 장착하면 시스템이
+{@link android.os.Environment#MEDIA_MOUNTED} 알림을 보냅니다. 이 알림은
+이동식 미디어 디렉터리에 액세스하는 데 사용할 수 있는 인텐트 데이터의 <code>StorageVolume</code> 객체를
+제공합니다. 다음은
+이동식 미디어의 <code>Pictures</code> 디렉터리에 액세스하는 예시입니다.</p>
+
+<pre>
+// BroadcastReceiver has already cached the MEDIA_MOUNTED
+// notification Intent in mediaMountedIntent
+StorageVolume volume = (StorageVolume)
+    mediaMountedIntent.getParcelableExtra(StorageVolume.EXTRA_STORAGE_VOLUME);
+volume.createAccessIntent(Environment.DIRECTORY_PICTURES);
+startActivityForResult(intent, request_code);
+</pre>
+
+<h2 id="best">모범 사례</h2>
+
+<p>가능하면, 사용자에게 액세스 권한을 반복적으로 요청하지 않도록 외부 디렉터리 액세스 URI를
+변경하지 마세요. 사용자가 액세스 권한을 부여하면 디렉터리 액세스 URI로
+<code>getContentResolver().takePersistableUriPermssion()</code>를
+호출합니다. 시스템이 URI를 유지하고 이후 액세스 요청에서는
+<code>RESULT_OK</code>를 반환하고 사용자에게 확인 UI를
+표시하지 않습니다.</p>
+
+<p>사용자가 외부 디렉터리 액세스를 거부하면
+다시 즉시 액세스를 요청하지 마세요. 액세스를 반복적으로 요청하면
+사용자 환경을 저해하는 결과를 낳습니다. 사용자가 요청을 거부하는데 앱이 다시 액세스를
+요청하면, UI에 <b>Don't ask again</b> 체크박스가 표시됩니다.</p>
+
+<img src="{@docRoot}images/android-7.0/scoped-directory-access-dont-ask.png" srcset="{@docRoot}images/android-7.0/scoped-directory-access-dont-ask.png 1x,
+{@docRoot}images/android-7.0/scoped-directory-access-dont-ask_2x.png 2x" />
+<p class="img-caption"><strong>그림 1.</strong> 이동식 미디어에 대해
+다시 액세스 요청을 하는 애플리케이션.</p>
+
+<p>사용자가 <b>Don't ask again</b>을 선택하여 요청을 거부하면 앱에서 해당 디렉터리에 대한 이후의 모든
+요청이 자동으로 거부되고,
+사용자에게는 어떤 요청 UI도 표시되지 않습니다.</p>

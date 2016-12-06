@@ -250,23 +250,23 @@
     <string name="user_owner_label" msgid="1119010402169916617">"Prepnúť na osobný"</string>
     <string name="managed_profile_label" msgid="5289992269827577857">"Prepnúť na pracovný"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakty"</string>
-    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"prístup k vašim kontaktom"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"prístup ku kontaktom"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Poloha"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"prístup k polohe tohto zariadenia"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendár"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"prístup ku kalendáru"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"posielať a zobrazovať SMS"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"posielanie a zobrazovanie SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Úložisko"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"prístup k fotkám, médiám a súborom na zariadení"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"prístup k fotkám, médiám a súborom v zariadení"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofón"</string>
-    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"zaznamenávanie zvuku"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"nahrávanie zvuku"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotoaparát"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotenie a natáčanie videí"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefón"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"telefonovať a spravovať hovory"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"telefonovanie a správu hovorov"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Telesné senzory"</string>
-    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"prístup k údajom senzorov o životných funkciách"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"prístup k dátam senzorov vašich životných funkcií"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Načítať obsah okna"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Môžete preskúmať obsah okna, s ktorým pracujete."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Zapnúť funkciu Preskúmanie dotykom"</string>
@@ -685,6 +685,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Správne!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Skúsiť znova"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Skúsiť znova"</string>
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"Všetky funkcie a dáta získate po odomknutí"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Prekročili ste maximálny povolený počet pokusov o odomknutie tvárou"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Nie je vložená SIM karta"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"V tablete nie je žiadna SIM karta."</string>
@@ -1069,8 +1070,9 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Prebieha inovácia systému Android..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Systém Android sa spúšťa…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optimalizuje sa úložisko"</string>
-    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Prebieha inovácia systému Android"</string>
+    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"Dokončuje sa aktualizácia Androidu…"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Niektoré aplikácie môžu správne fungovať až po dokončení inovácie"</string>
+    <string name="app_upgrading_toast" msgid="3008139776215597053">"Aplikácia <xliff:g id="APPLICATION">%1$s</xliff:g> sa inovuje…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Prebieha optimalizácia aplikácie <xliff:g id="NUMBER_0">%1$d</xliff:g> z <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Pripravuje sa aplikácia <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Prebieha spúšťanie aplikácií."</string>
@@ -1125,6 +1127,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"Sieť Wi-Fi nemá prístup k internetu"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Klepnutím získate možnosti"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"Prepnuté na sieť: <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Keď sieť <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nemá prístup k internetu, zariadenie používa sieť <xliff:g id="NEW_NETWORK">%1$s</xliff:g>. Môžu sa účtovať poplatky."</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"Prepnuté zo siete <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> na sieť <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"mobilné dáta"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"Bluetooth"</item>
+    <item msgid="5447331121797802871">"Ethernet"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"neznámy typ siete"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Nepodarilo sa pripojiť k sieti Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" má nekvalitné internetové pripojenie."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Povoliť pripojenie?"</string>
@@ -1202,7 +1215,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Klepnutím vyberte jazyk a rozloženie"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" AÁÄBCČDĎDZDŽEÉFGHCHIÍJKLĽMNŇOÓÔPRŔSŠTŤUÚVWXYÝZŽ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"kandidáti"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Pripravuje sa úložisko <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Prebieha kontrola chýb"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Bolo zistené nové úložisko <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1281,8 +1293,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Pripojené k relácii <xliff:g id="SESSION">%s</xliff:g>. Po klepnutí môžete sieť spravovať."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Pripájanie k vždy zapnutej sieti VPN…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Pripojenie k vždy zapnutej sieti VPN"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Vždy zapnutá sieť VPN bola odpojená"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Chyba vždy zapnutej siete VPN"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"Klepnutím spustíte konfiguráciu"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Klepnutím prejdete do Nastavení"</string>
     <string name="upload_file" msgid="2897957172366730416">"Zvoliť súbor"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nie je vybratý žiadny súbor"</string>
     <string name="reset" msgid="2448168080964209908">"Obnoviť"</string>
@@ -1368,7 +1381,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"Disk USB <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"Ukladací priestor USB"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Upraviť"</string>
-    <string name="data_usage_warning_title" msgid="1955638862122232342">"Upozornenie o využití dát"</string>
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"Upozornenie na spotrebu dát"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Klepnutím zobrazíte využitie a nastavenia."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Bol dosiahnutý limit 2G–3G"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Bol dosiahnutý limit 4G"</string>
@@ -1663,7 +1676,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (ďalší budík)"</string>
-    <string name="zen_mode_forever" msgid="7420011936770086993">"Dokým túto funkciu nevypnete"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"Kým túto funkciu nevypnete"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Dokým nevypnete stav Nerušiť"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Zbaliť"</string>
@@ -1707,6 +1720,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"Zadajte názov jazyka"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Navrhované"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Všetky jazyky"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"Všetky regióny"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Vyhľadávanie"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"Pracovný režim je VYPNUTÝ"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Povoľte fungovanie pracovného profilu vrátane aplikácií, synchronizácie na pozadí a súvisiacich funkcií."</string>
@@ -1724,7 +1738,16 @@
     <string name="unpin_target" msgid="3556545602439143442">"Uvoľniť"</string>
     <string name="app_info" msgid="6856026610594615344">"Info o aplikácii"</string>
     <string name="negative_duration" msgid="5688706061127375131">"-<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"Resetovať zariadenie?"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Klepnutím resetujete zariadenie"</string>
+    <string name="demo_starting_message" msgid="5268556852031489931">"Spúšťa sa ukážka…"</string>
+    <string name="demo_restarting_message" msgid="952118052531642451">"Resetuje sa zariadenie…"</string>
+    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Resetovať zariadenie?"</string>
+    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Prídete o všetky zmeny a ukážka sa znova spustí o <xliff:g id="TIMEOUT">%1$s</xliff:g> s…"</string>
+    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Zrušiť"</string>
+    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Resetovať"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Ak chcete toto zariadenie používať bez obmedzení, obnovte na ňom továrenské nastavenia"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Klepnutím získate ďalšie informácie."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Deaktivovaná miniaplikácia <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="conference_call" msgid="3751093130790472426">"Konferenčný hovor"</string>
 </resources>

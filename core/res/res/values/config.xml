@@ -268,6 +268,18 @@
     <!-- The maximum duration (in milliseconds) we expect a network transition to take -->
     <integer name="config_networkTransitionTimeout">60000</integer>
 
+    <!-- Whether/how to notify the user on network switches. See LingerMonitor.java. -->
+    <integer translatable="false" name="config_networkNotifySwitchType">0</integer>
+
+    <!-- What types of network switches to notify. See LingerMonitor.java. -->
+    <string-array translatable="false" name="config_networkNotifySwitches">
+    </string-array>
+
+    <!-- Whether the device should automatically switch away from Wi-Fi networks that lose
+         Internet access. Actual device behaviour is controlled by
+         Settings.Global.NETWORK_AVOID_BAD_WIFI. This is the default value of that setting. -->
+    <integer translatable="false" name="config_networkAvoidBadWifi">1</integer>
+
     <!-- List of regexpressions describing the interface (if any) that represent tetherable
          USB interfaces.  If the device doesn't want to support tethering over USB this should
          be empty.  An example would be "usb.*" -->
@@ -542,8 +554,11 @@
          Software implementation will be used if config_hardware_auto_brightness_available is not set -->
     <bool name="config_automatic_brightness_available">false</bool>
 
-    <!-- Fast brightness animation ramp rate -->
+    <!-- Fast brightness animation ramp rate in brightness units per second-->
     <integer translatable="false" name="config_brightness_ramp_rate_fast">200</integer>
+
+    <!-- Slow brightness animation ramp rate in brightness units per second-->
+    <integer translatable="false" name="config_brightness_ramp_rate_slow">40</integer>
 
     <!-- Don't name config resources like this.  It should look like config_annoyDianne -->
     <bool name="config_annoy_dianne">true</bool>
@@ -757,6 +772,26 @@
     -->
     <integer name="config_defaultNightMode">1</integer>
 
+    <!-- Control whether Night display is available. This should only be enabled on devices
+         with HWC 2.0 or higher. -->
+    <bool name="config_nightDisplayAvailable">false</bool>
+
+    <!-- Default mode to control how Night display is automatically activated.
+         One of the following values (see NightDisplayController.java):
+             0 - AUTO_MODE_DISABLED
+             1 - AUTO_MODE_CUSTOM
+             2 - AUTO_MODE_TWILIGHT
+    -->
+    <integer name="config_defaultNightDisplayAutoMode">0</integer>
+
+    <!-- Default time when Night display is automatically activated.
+         Represented as milliseconds from midnight (e.g. 79200000 == 10pm). -->
+    <integer name="config_defaultNightDisplayCustomStartTime">79200000</integer>
+
+    <!-- Default time when Night display is automatically deactivated.
+         Represented as milliseconds from midnight (e.g. 21600000 == 6am). -->
+    <integer name="config_defaultNightDisplayCustomEndTime">21600000</integer>
+
     <!-- Indicate whether to allow the device to suspend when the screen is off
          due to the proximity sensor.  This resource should only be set to true
          if the sensor HAL correctly handles the proximity sensor as a wake-up source.
@@ -778,6 +813,12 @@
             1 - Go to voice assist
     -->
     <integer name="config_longPressOnBackBehavior">0</integer>
+
+    <!-- Control the behavior when the user panic presses the back button.
+            0 - Nothing
+            1 - Go to home
+    -->
+    <integer name="config_backPanicBehavior">0</integer>
 
     <!-- Control the behavior when the user short presses the power button.
             0 - Nothing
@@ -1104,6 +1145,72 @@
          The brightness values must be between 0 and 255 and be non-decreasing.
          This must be overridden in platform specific overlays -->
     <integer-array name="config_autoBrightnessKeyboardBacklightValues">
+    </integer-array>
+
+    <!-- Array of hysteresis constraint values for brightening, represented as tenths of a
+         percent. The length of this array is assumed to be one greater than
+         config_dynamicHysteresisLuxLevels. The brightening threshold is calculated as
+         lux * (1.0f + CONSTRAINT_VALUE). When the current lux is higher than this threshold,
+         the screen brightness is recalculated. See the config_dynamicHysteresisLuxLevels
+         description for how the constraint value is chosen. -->
+    <integer-array name="config_dynamicHysteresisBrightLevels">
+        <item>100</item>
+    </integer-array>
+
+    <!-- Array of hysteresis constraint values for darkening, represented as tenths of a
+         percent. The length of this array is assumed to be one greater than
+         config_dynamicHysteresisLuxLevels. The darkening threshold is calculated as
+         lux * (1.0f - CONSTRAINT_VALUE). When the current lux is lower than this threshold,
+         the screen brightness is recalculated. See the config_dynamicHysteresisLuxLevels
+         description for how the constraint value is chosen. -->
+    <integer-array name="config_dynamicHysteresisDarkLevels">
+        <item>200</item>
+    </integer-array>
+
+    <!-- Array of ambient lux threshold values. This is used for determining hysteresis constraint
+         values by calculating the index to use for lookup and then setting the constraint value
+         to the corresponding value of the array. The new brightening hysteresis constraint value
+         is the n-th element of config_dynamicHysteresisBrightLevels, and the new darkening
+         hysteresis constraint value is the n-th element of config_dynamicHysteresisDarkLevels.
+
+         The (zero-based) index is calculated as follows: (MAX is the largest index of the array)
+         condition                      calculated index
+         value < lux[0]                 0
+         lux[n] <= value < lux[n+1]     n+1
+         lux[MAX] <= value              MAX+1 -->
+    <integer-array name="config_dynamicHysteresisLuxLevels">
+    </integer-array>
+
+    <!-- This flag requires config_dozeSensorLuxLevels to have one or more entries and only affects
+         the screen brightness while dozing. The screen brightness of a device is based off of a
+         ring buffer of the last n seconds of ambient light sensor sample readings.
+
+         If this flag is true, then this buffer is cleared and the screen brightness is based off of
+         ambient light sensor readings that are obtained while the device is dozing.  This mode may
+         be better suited for watches.
+
+         If this flag is false, then this buffer is untouched. -->
+    <bool name="config_useNewSensorSamplesForDoze">false</bool>
+
+    <!-- Array of ambient light sensor lux threshold values for determining screen brightness for
+         devices that have both an ambient light sensor and the screen on while dozing. This is
+         used to determine the screen brightness while dozing by calculating the index to use for
+         lookup and then setting the screen brightness value to the corresponding value of
+         config_dozeBrightnessBacklightValues.
+
+         The (zero-based) index is calculated as follows: (MAX is the largest index of the array)
+         condition                      calculated index
+         value < lux[0]                 0
+         lux[n] <= value < lux[n+1]     n+1
+         lux[MAX] <= value              MAX+1 -->
+    <integer-array name="config_dozeSensorLuxLevels">
+    </integer-array>
+
+    <!-- Array of values for determining screen brightness for devices that have both an ambient
+         light sensor and the screen on while dozing. The length of this array is assumed to be one
+         greater than config_dozeModeSensorLuxLevels if they are not both empty. See the
+         config_dozeModeSensorLuxLevels description for how the backlight value is chosen. -->
+    <integer-array name="config_dozeBrightnessBacklightValues">
     </integer-array>
 
     <!-- Amount of time it takes for the light sensor to warm up in milliseconds.
@@ -1733,6 +1840,10 @@
     <!-- Amount of time in ms the user needs to press the relevant key to bring up the global actions dialog -->
     <integer name="config_globalActionsKeyTimeout">500</integer>
 
+    <!-- Distance that should be scrolled in response to a {@link MotionEvent#ACTION_SCROLL event}
+         with an axis value of 1. -->
+    <dimen name="config_scrollFactor">64dp</dimen>
+
     <!-- Maximum number of grid columns permitted in the ResolverActivity
          used for picking activities to handle an intent. -->
     <integer name="config_maxResolverActivityColumns">3</integer>
@@ -1813,28 +1924,6 @@
          * The device must be provisioned with HDCP keys (for protected content).
     -->
     <bool name="config_enableWifiDisplay">false</bool>
-
-    <!-- The color transform values that correspond to each respective configuration mode for the
-         built-in display, or -1 if the mode is unsupported by the device. The possible
-         configuration modes are:
-            1. Wide-gamut ("Vibrant")
-            2. Adobe RGB ("Natural")
-            3. sRGB ("Standard")
-
-        For example, if a device had Wide-gamut as color transform mode 1, sRGB mode as color
-        transform mode 7, and did not support Adobe RGB at all this would look like:
-
-            <integer-array name="config_colorTransforms">
-                <item>1</item>
-                <item>-1</item>
-                <item>7</item>
-            </integer-array>
-    -->
-    <integer-array name="config_colorTransforms">
-        <item>-1</item>
-        <item>-1</item>
-        <item>-1</item>
-    </integer-array>
 
     <!-- When true, local displays that do not contain any of their own content will automatically
          mirror the content of the default display. -->
@@ -2069,9 +2158,11 @@
          "bugreport" = Take bug report, if available
          "silent" = silent mode
          "users" = list of users
+         "restart" = restart device
          -->
     <string-array translatable="false" name="config_globalActionsList">
         <item>power</item>
+        <item>restart</item>
         <item>bugreport</item>
         <item>users</item>
     </string-array>
@@ -2141,6 +2232,11 @@
 
     <!-- Flag specifying whether VT is available on device -->
     <bool name="config_device_vt_available">false</bool>
+
+    <!-- Flag specifying whether the device will use the "allow_hold_in_ims_call" carrier config
+         option.  When false, the device will support holding of IMS calls, regardless of the
+         carrier config setting. -->
+    <bool name="config_device_respects_hold_carrier_config">true</bool>
 
     <!-- Flag specifying whether VT should be available for carrier: independent of
          carrier provisioning. If false: hard disabled. If true: then depends on carrier
@@ -2290,8 +2386,8 @@
     <!-- An array of CDMA roaming indicators which means international roaming -->
     <integer-array translatable="false" name="config_cdma_international_roaming_indicators" />
 
-    <!-- set the system language as value of EF LI/EF PL -->
-    <bool name="config_use_sim_language_file">true</bool>
+    <!-- flag to indicate if EF LI/EF PL should be used for system language -->
+    <bool name="config_use_sim_language_file">false</bool>
 
     <!-- Use ERI text for network name on CDMA LTE -->
     <bool name="config_LTE_eri_for_network_name">true</bool>
@@ -2466,6 +2562,10 @@
     <!-- True if the device supports Sustained Performance Mode-->
     <bool name="config_sustainedPerformanceModeSupported">false</bool>
 
+    <!-- File used to enable the double touch gesture.
+         TODO: move to input HAL once ready. -->
+    <string name="config_doubleTouchGestureEnableFile"></string>
+
     <!-- Controls how we deal with externally connected physical keyboards.
          0 - When using this device, it is not clear for users to recognize when the physical
              keyboard is (should be) connected and when it is (should be) disconnected.  Most of
@@ -2491,6 +2591,22 @@
     <string-array translatable="false" name="config_defaultPinnerServiceFiles">
     </string-array>
 
+    <!-- True if camera app should be pinned via Pinner Service -->
+    <bool name="config_pinnerCameraApp">false</bool>
+
+    <!-- Component that is the default launcher when demo mode is enabled. -->
+    <string name="config_demoModeLauncherComponent">com.android.retaildemo/.DemoPlayer</string>
+
+    <!-- Flag indicating whether round icons should be parsed from the application manifest. -->
+    <bool name="config_useRoundIcon">false</bool>
+
+    <!-- Flag indicating whether the assist disclosure can be disabled using
+         ASSIST_DISCLOSURE_ENABLED. -->
+    <bool name="config_allowDisablingAssistDisclosure">false</bool>
+
+    <!-- True if the device supports system navigation keys. -->
+    <bool name="config_supportSystemNavigationKeys">false</bool>
+
     <!-- emergency call number for the emergency affordance -->
     <string name="config_emergency_call_number" translatable="false">112</string>
 
@@ -2501,6 +2617,17 @@
         <item>405</item>
     </integer-array>
 
+    <!-- Package name for the device provisioning package. -->
+    <string name="config_deviceProvisioningPackage"></string>
+
+    <!-- Colon separated list of package names that should be granted DND access -->
+    <string name="config_defaultDndAccessPackages" translatable="false">com.android.camera2</string>
+
+    <!-- User restrictions set when the first user is created.
+         Note: Also update appropriate overlay files. -->
+    <string-array translatable="false" name="config_defaultFirstUserRestrictions">
+    </string-array>
+
     <!-- Specifies whether the permissions needed by a legacy app should be
          reviewed before any of its components can run. A legacy app is one
          with targetSdkVersion < 23, i.e apps using the old permission model.
@@ -2508,4 +2635,31 @@
          is installed. -->
     <bool name="config_permissionReviewRequired">false</bool>
 
+    <!-- Default value for android:focusableInTouchMode for some framework scrolling containers.
+         ListView/GridView are notably absent since this is their default anyway.
+         Set to true for watch devices. -->
+    <bool name="config_focusScrollContainersInTouchMode">false</bool>
+
+    <string name="config_networkOverLimitComponent" translatable="false">com.android.systemui/com.android.systemui.net.NetworkOverLimitActivity</string>
+    <string name="config_dataUsageSummaryComponent" translatable="false">com.android.settings/com.android.settings.Settings$DataUsageSummaryActivity</string>
+
+    <!-- A array of regex to treat a SMS as VVM SMS if the message body matches.
+         Each item represents an entry, which consists of two parts:
+         a comma (,) separated list of MCCMNC the regex applies to, followed by a semicolon (;), and
+         then the regex itself. -->
+    <string-array translatable="false" name="config_vvmSmsFilterRegexes">
+        <!-- Verizon requires any SMS that starts with //VZWVVM to be treated as a VVM SMS-->
+        <item>310004,310010,310012,310013,310590,310890,310910,311110,311270,311271,311272,311273,311274,311275,311276,311277,311278,311279,311280,311281,311282,311283,311284,311285,311286,311287,311288,311289,311390,311480,311481,311482,311483,311484,311485,311486,311487,311488,311489;^//VZWVVM.*</item>
+    </string-array>
+    <!-- This config is holding calling number conversion map - expected to convert to emergency
+         number. Formats for this config as below:
+         <item>[dialstring1],[dialstring2],[dialstring3]:[replacement]</item>
+
+         E.g. for Taiwan Type Approval, 110 and 119 should be converted to 112.
+         <item>110,119:112</item>
+    -->
+    <string-array translatable="false" name="config_convert_to_emergency_number_map" />
+
+    <!-- An array of packages for which notifications cannot be blocked. -->
+    <string-array translatable="false" name="config_nonBlockableNotificationPackages" />
 </resources>

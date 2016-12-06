@@ -27,6 +27,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Process;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.service.quicksettings.Tile;
@@ -51,6 +52,7 @@ import com.android.systemui.qs.tiles.FlashlightTile;
 import com.android.systemui.qs.tiles.HotspotTile;
 import com.android.systemui.qs.tiles.IntentTile;
 import com.android.systemui.qs.tiles.LocationTile;
+import com.android.systemui.qs.tiles.NightDisplayTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
 import com.android.systemui.qs.tiles.UserTile;
 import com.android.systemui.qs.tiles.WifiTile;
@@ -59,7 +61,6 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
-import com.android.systemui.statusbar.policy.NightModeController;
 import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
@@ -70,7 +71,6 @@ import com.android.systemui.statusbar.policy.SecurityController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
-import com.android.systemui.tuner.NightModeTile;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 
@@ -86,7 +86,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
     private static final String TAG = "QSTileHost";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    public static final String TILES_SETTING = "sysui_qs_tiles";
+    public static final String TILES_SETTING = Secure.QS_TILES;
 
     private final Context mContext;
     private final PhoneStatusBar mStatusBar;
@@ -110,7 +110,6 @@ public class QSTileHost implements QSTile.Host, Tunable {
     private final TileServices mServices;
 
     private final List<Callback> mCallbacks = new ArrayList<>();
-    private final NightModeController mNightModeController;
     private final AutoTileManager mAutoTiles;
     private final ManagedProfileController mProfileController;
     private final NextAlarmController mNextAlarmController;
@@ -143,7 +142,6 @@ public class QSTileHost implements QSTile.Host, Tunable {
         mBattery = battery;
         mIconController = iconController;
         mNextAlarmController = nextAlarmController;
-        mNightModeController = new NightModeController(mContext, true);
         mProfileController = new ManagedProfileController(this);
 
         final HandlerThread ht = new HandlerThread(QSTileHost.class.getSimpleName(),
@@ -307,10 +305,6 @@ public class QSTileHost implements QSTile.Host, Tunable {
         return mIconController;
     }
 
-    public NightModeController getNightModeController() {
-        return mNightModeController;
-    }
-
     public ManagedProfileController getManagedProfileController() {
         return mProfileController;
     }
@@ -321,6 +315,9 @@ public class QSTileHost implements QSTile.Host, Tunable {
             return;
         }
         if (DEBUG) Log.d(TAG, "Recreating tiles");
+        if (newValue == null && UserManager.isDeviceInDemoMode(mContext)) {
+            newValue = mContext.getResources().getString(R.string.quick_settings_tiles_retail_mode);
+        }
         final List<String> tileSpecs = loadTileSpecs(mContext, newValue);
         int currentUser = ActivityManager.getCurrentUser();
         if (tileSpecs.equals(mTileSpecs) && currentUser == mCurrentUser) return;
@@ -338,6 +335,9 @@ public class QSTileHost implements QSTile.Host, Tunable {
                 if (tile.isAvailable()) {
                     if (DEBUG) Log.d(TAG, "Adding " + tile);
                     tile.removeCallbacks();
+                    if (!(tile instanceof CustomTile) && mCurrentUser != currentUser) {
+                        tile.userSwitch(currentUser);
+                    }
                     newTiles.put(tileSpec, tile);
                 } else {
                     tile.destroy();
@@ -411,23 +411,11 @@ public class QSTileHost implements QSTile.Host, Tunable {
                 ComponentName component = CustomTile.getComponentFromSpec(tileSpec);
                 Intent intent = new Intent().setComponent(component);
                 TileLifecycleManager lifecycleManager = new TileLifecycleManager(new Handler(),
-                        mContext, mServices, new Tile(component), intent,
+                        mContext, mServices, new Tile(), intent,
                         new UserHandle(ActivityManager.getCurrentUser()));
                 lifecycleManager.onStopListening();
                 lifecycleManager.onTileRemoved();
-                lifecycleManager.flushMessagesAndUnbind();
-            }
-        }
-        for (int i = 0; i < NA; i++) {
-            String tileSpec = newTiles.get(i);
-            if (!tileSpec.startsWith(CustomTile.PREFIX)) continue;
-            if (!previousTiles.contains(tileSpec)) {
-                ComponentName component = CustomTile.getComponentFromSpec(tileSpec);
-                Intent intent = new Intent().setComponent(component);
-                TileLifecycleManager lifecycleManager = new TileLifecycleManager(new Handler(),
-                        mContext, mServices, new Tile(component), intent,
-                        new UserHandle(ActivityManager.getCurrentUser()));
-                lifecycleManager.onTileAdded();
+                TileLifecycleManager.setTileAdded(mContext, component, false);
                 lifecycleManager.flushMessagesAndUnbind();
             }
         }
@@ -452,8 +440,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
         else if (tileSpec.equals("user")) return new UserTile(this);
         else if (tileSpec.equals("battery")) return new BatteryTile(this);
         else if (tileSpec.equals("saver")) return new DataSaverTile(this);
-        else if (tileSpec.equals(NightModeTile.NIGHT_MODE_SPEC))
-            return new NightModeTile(this);
+        else if (tileSpec.equals("night")) return new NightDisplayTile(this);
         // Intent tiles.
         else if (tileSpec.startsWith(IntentTile.PREFIX)) return IntentTile.create(this,tileSpec);
         else if (tileSpec.startsWith(CustomTile.PREFIX)) return CustomTile.create(this,tileSpec);

@@ -43,7 +43,7 @@ Leanback sample app</a> image card view when selected.</p>
 on demand. In the browse fragment where your app presents its content to the user, you create a
 {@link android.support.v17.leanback.widget.Presenter} for the content cards and pass it to the adapter
 that adds the content to the screen. In the following code, the <code>CardPresenter</code> is created
-in the {@link android.support.v4.app.LoaderManager.LoaderCallbacks#onLoadFinished(android.support.v4.content.Loader, java.lang.Object) onLoadFinished()}
+in the {@link android.support.v4.app.LoaderManager.LoaderCallbacks#onLoadFinished onLoadFinished()}
 callback of the {@link android.support.v4.app.LoaderManager}.</p>
 
 <pre>

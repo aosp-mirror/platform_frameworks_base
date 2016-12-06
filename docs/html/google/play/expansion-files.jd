@@ -131,7 +131,7 @@ considers them opaque binary blobs and renames the files using the following sch
   <dt>{@code main} or {@code patch}</dt>
     <dd>Specifies whether the file is the main or patch expansion file. There can be
 only one main file and one patch file for each APK.</dd>
-  <dt>{@code &lt;expansion-version&gt;}</dt>
+  <dt>{@code <expansion-version>}</dt>
     <dd>This is an integer that matches the version code of the APK with which the expansion is
 <em>first</em> associated (it matches the application's <a
 href="{@docRoot}guide/topics/manifest/manifest-element.html#vcode">{@code android:versionCode}</a>
@@ -139,7 +139,7 @@ value).
     <p>"First" is emphasized because although the Developer Console allows you to
 re-use an uploaded expansion file with a new APK, the expansion file's name does not change&mdash;it
 retains the version applied to it when you first uploaded the file.</p></dd>
-  <dt>{@code &lt;package-name&gt;}</dt>
+  <dt>{@code <package-name>}</dt>
     <dd>Your application's Java-style package name.</dd>
 </dl>
 
@@ -162,9 +162,9 @@ itself, you must save the files to the exact same location.</p>
 </pre>
 
 <ul>
-  <li>{@code &lt;shared-storage&gt;} is the path to the shared storage space, available from
+  <li>{@code <shared-storage>} is the path to the shared storage space, available from
 {@link android.os.Environment#getExternalStorageDirectory()}.</li>
-  <li>{@code &lt;package-name&gt;} is your application's Java-style package name, available
+  <li>{@code <package-name>} is your application's Java-style package name, available
 from {@link android.content.Context#getPackageName()}.</li>
 </ul>
 
@@ -470,7 +470,7 @@ and "Google Play Downloader Library", choose <em>Minimum SDK level</em>, then se
 <strong>Finish</strong>.</li>
   <li>Select <strong>File > Project Structure</strong>.</li>
   <li>Select the <em>Properties</em> tab and in <em>Library
-Repository</em>, enter the library from the {@code &lt;sdk&gt;/extras/google/} directory
+Repository</em>, enter the library from the {@code <sdk>/extras/google/} directory
 ({@code play_licensing/} for the License Verification Library or {@code
 play_apk_expansion/downloader_library/} for the Downloader Library).</li>
   <li>Select <strong>OK</strong> to create the new module.</li>
@@ -716,7 +716,7 @@ application's {@code SampleDownloaderActivity} class for details.)</p>
   </li>
   <li>Start the download by calling the static method {@code
 DownloaderClientMarshaller.startDownloadServiceIfRequired(Context c, PendingIntent
-notificationClient, Class&lt;?> serviceClass)}.
+notificationClient, Class<?> serviceClass)}.
     <p>The method takes the following parameters:</p>
     <ul>
       <li><code>context</code>: Your application's {@link android.content.Context}.</li>
@@ -780,7 +780,7 @@ public void onCreate(Bundle savedInstanceState) {
   </li>
   <li>When the {@code startDownloadServiceIfRequired()} method returns anything <em>other
 than</em> {@code NO_DOWNLOAD_REQUIRED}, create an instance of {@code IStub} by
-calling {@code DownloaderClientMarshaller.CreateStub(IDownloaderClient client, Class&lt;?>
+calling {@code DownloaderClientMarshaller.CreateStub(IDownloaderClient client, Class<?>
 downloaderService)}. The {@code IStub} provides a binding between your activity to the downloader
 service such that your activity receives callbacks about the download progress.
     <p>In order to instantiate your {@code IStub} by calling {@code CreateStub()}, you must pass it
@@ -956,7 +956,7 @@ which explains how to implement a license policy such as this one.</p>
 depends on the type of file you've used. As discussed in the <a href="#Overview">overview</a>, your
 expansion files can be any kind of file you
 want, but are renamed using a particular <a href="#Filename">file name format</a> and are saved to
-{@code &lt;shared-storage&gt;/Android/obb/&lt;package-name&gt;/}.</p>
+{@code <shared-storage>/Android/obb/<package-name>/}.</p>
 
 <p>Regardless of how you read your files, you should always first check that the external
 storage is available for reading. There's a chance that the user has the storage mounted to a
@@ -1059,7 +1059,7 @@ option to specify the file suffixes that should not be compressed:</p>
 
 <p>The Google Market Apk Expansion package includes a library called the APK
 Expansion Zip Library (located in {@code
-&lt;sdk>/extras/google/google_market_apk_expansion/zip_file/}). This is an optional library that
+<sdk>/extras/google/google_market_apk_expansion/zip_file/}). This is an optional library that
 helps you read your expansion
 files when they're saved as ZIP files. Using this library allows you to easily read resources from
 your ZIP expansion files as a virtual file system.</p>

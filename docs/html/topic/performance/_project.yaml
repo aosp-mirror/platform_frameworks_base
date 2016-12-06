@@ -1,0 +1,6 @@
+name: "Performance"
+home_url: /topic/performance/
+description: "Improve your app's performance by learning how to optimize power consumption, launch times, and other important areas of performance."
+content_license: cc3-apache2
+buganizer_id: 30209417
+parent_project_metadata_path: /develop/_project.yaml

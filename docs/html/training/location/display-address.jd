@@ -324,7 +324,7 @@ public class FetchAddressIntentService extends IntentService {
   process if needed. If the service is already running then it remains running.
   Because the service extends {@link android.app.IntentService IntentService},
   it shuts down automatically when all intents have been processed.</p>
-  
+
 <p>Start the service from your app's main activity,
   and create an {@link android.content.Intent} to pass data to the service. You
   need an <em>explicit</em> intent, because you want only your service

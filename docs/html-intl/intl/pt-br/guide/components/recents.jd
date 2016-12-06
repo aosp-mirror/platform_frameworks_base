@@ -41,7 +41,7 @@ page.tags="recents","overview"
 atividades</a> e <a href="{@docRoot}guide/components/tasks-and-back-stack.html">tarefas</a> acessadas recentemente. O
 usuário pode navegar pela lista e selecionar uma tarefa a retomar ou remover uma tarefa da
 lista deslizando-a para fora. Com a versão 5.0 do Android (API de nível 21), várias instâncias da
-mesma atividade contendo diferentes documentos podem aparecer como tarefas na tela de visão geral. Por exemplo, o 
+mesma atividade contendo diferentes documentos podem aparecer como tarefas na tela de visão geral. Por exemplo, o
 Google Drive pode ter uma tarefa para cada um dos vários documentos do Google. Cada documento aparece como uma
 tarefa na tela de visão geral.</p>
 
@@ -158,8 +158,8 @@ efeitos quando o usuário abre um documento com o aplicativo:</p>
 <dl>
   <dt>"{@code intoExisting}"</dt>
   <dd>A atividade reutiliza uma tarefa existente para o documento. Isso é o mesmo que configurar o
-  sinalizador {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT} <em>sem</em> configurar 
-  o sinalizador {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK}, como descrito em 
+  sinalizador {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT} <em>sem</em> configurar
+  o sinalizador {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK}, como descrito em
   <a href="#flag-new-doc">Uso do sinalizador Intent para adicionar uma tarefa</a> acima.</dd>
 
   <dt>"{@code always}"</dt>
@@ -169,7 +169,7 @@ efeitos quando o usuário abre um documento com o aplicativo:</p>
 
   <dt>"{@code none”}"</dt>
   <dd>A atividade não cria uma nova tarefa para o documento. A tela de visão geral trata a
-  atividade como aconteceria por padrão: ela exibe uma tarefa para o aplicativo, que 
+  atividade como aconteceria por padrão: ela exibe uma tarefa para o aplicativo, que
   retoma a atividade invocada por último pelo usuário.</dd>
 
   <dt>"{@code never}"</dt>
@@ -205,7 +205,7 @@ recentemente é removida da tela de visão geral. O valor máximo de {@code andr
 
 <h3 id="#apptask-remove">Uso da classe AppTask para remover tarefas</h3>
 
-<p>Na atividade que cria uma nova tarefa na tela de visão geral, é possível 
+<p>Na atividade que cria uma nova tarefa na tela de visão geral, é possível
 especificar quando remover a tarefa e terminar todas as atividades associadas a ela chamando
 o método {@link android.app.ActivityManager.AppTask#finishAndRemoveTask() finishAndRemoveTask()}.</p>
 

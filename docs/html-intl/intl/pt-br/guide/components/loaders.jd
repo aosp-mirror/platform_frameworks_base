@@ -21,14 +21,14 @@ parent.link=activities.html
         </ol>
     </li>
   </ol>
-    
+
   <h2>Classes principais</h2>
     <ol>
       <li>{@link android.app.LoaderManager}</li>
       <li>{@link android.content.Loader}</li>
 
-    </ol>   
-    
+    </ol>
+
     <h2>Exemplos relacionados</h2>
    <ol>
      <li> <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderCursor.html">
@@ -51,7 +51,7 @@ quando o conteúdo é alterado.</li>
 quando são recriados após uma alteração de configuração. Portanto, eles não precisam reconsultar
 os dados.</li>
   </ul>
- 
+
 <h2 id="summary">Resumo da API de carregador</h2>
 
 <p>Há várias classes e interfaces que podem ser envolvidas no uso
@@ -68,7 +68,7 @@ de carregadores em um aplicativo. Elas são resumidas nesta tabela:</p>
 {@link android.app.Fragment} para gerenciar uma ou mais instâncias de {@link
 android.content.Loader}. Isto ajuda um aplicativo a gerenciar
 operações executadas por longos períodos juntamente com o ciclo de vida de {@link android.app.Activity}
-ou {@link android.app.Fragment}; o uso mais comum disto é com 
+ou {@link android.app.Fragment}; o uso mais comum disto é com
 {@link android.content.CursorLoader}. No entanto, os aplicativos têm a liberdade de criar
 os próprios carregadores para outros tipos de dados.
     <br />
@@ -129,7 +129,7 @@ de {@link android.content.Loader} ou {@link android.content.AsyncTaskLoader}
 para carregar dados de outra origem.</li>
   <li>Uma implementação de {@link android.app.LoaderManager.LoaderCallbacks}.
 É aqui que é possível criar novos carregadores e gerenciar as referências
-a carregadores existentes.</li> 
+a carregadores existentes.</li>
 <li>Uma maneira de exibir os dados do carregador, como um {@link
 android.widget.SimpleCursorAdapter}.</li>
   <li>Uma origem de dados, como um {@link android.content.ContentProvider}, ao usar
@@ -140,7 +140,7 @@ android.widget.SimpleCursorAdapter}.</li>
 <p>O {@link android.app.LoaderManager} gerencia uma ou mais instâncias de {@link
 android.content.Loader} dentro de uma {@link android.app.Activity}
 ou um {@link android.app.Fragment}. Há apenas um {@link
-android.app.LoaderManager} por atividade ou fragmento.</p> 
+android.app.LoaderManager} por atividade ou fragmento.</p>
 
 <p>Geralmente,
 inicializa-se um {@link android.content.Loader} dentro do método {@link
@@ -157,13 +157,13 @@ recebe os seguintes parâmetros:</p>
 <ul>
   <li>Um ID único que identifica o carregador. Neste exemplo, o ID é 0.</li>
 <li>Argumentos opcionais para fornecer ao carregador
-em construção (<code>null</code> neste exemplo).</li> 
+em construção (<code>null</code> neste exemplo).</li>
 
 <li>Uma implementação de {@link android.app.LoaderManager.LoaderCallbacks},
 que {@link android.app.LoaderManager} chama para relatar eventos do carregador. Nesse exemplo,
  a classe local implementa a interface de {@link
 android.app.LoaderManager.LoaderCallbacks}, para que ela passe uma referência
-para si, {@code this}.</li> 
+para si, {@code this}.</li>
 </ul>
 <p>A chamada de {@link android.app.LoaderManager#initLoader initLoader()} garante que o carregador
 foi inicializado e que está ativo. Ela possui dois possíveis resultados:</p>
@@ -193,7 +193,7 @@ a vida do carregador automaticamente. O {@link android.app.LoaderManager}
 inicia e interrompe o carregamento quando necessário, além de manter o estado do carregador
 e do conteúdo associado. À medida que isso ocorre, você raramente interage com os carregadores
 diretamente (para ver um exemplo de métodos para aprimorar o comportamento
-de um carregador, consulte o exemplo de <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html"> LoaderThrottle</a>). 
+de um carregador, consulte o exemplo de <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html"> LoaderThrottle</a>).
 Geralmente, usam-se os métodos {@link
 android.app.LoaderManager.LoaderCallbacks} para intervir no processo de carregamento
 quando determinados eventos ocorrem. Para obter mais informações sobre este assunto, consulte <a href="#callback">Uso dos retornos de chamada de LoaderManager</a>.</p>
@@ -245,7 +245,7 @@ instancia e retorna um novo {@link android.content.Loader} para o ID fornecido.
 — chamado quando um carregador anteriormente criado termina o seu carregamento.
 </li></ul>
 <ul>
-  <li>{@link android.app.LoaderManager.LoaderCallbacks#onLoaderReset onLoaderReset()}  
+  <li>{@link android.app.LoaderManager.LoaderCallbacks#onLoaderReset onLoaderReset()}
     — chamado quando um carregador anteriormente criado é reiniciado,
 tornando os dados indisponíveis.
 </li>
@@ -343,7 +343,7 @@ public void onLoadFinished(Loader&lt;Cursor&gt; loader, Cursor data) {
 <p>Este método é chamado quando um carregador anteriormente criado é reiniciado,
 tornando os dados indisponíveis. Este retorno de chamada permite que você descubra quando os dados
 estão prestes a serem liberados para que seja possível remover a referência a eles.  </p>
-<p>Esta implementação chama 
+<p>Esta implementação chama
 {@link android.widget.SimpleCursorAdapter#swapCursor swapCursor()}
 com um valor de <code>null</code>:</p>
 
@@ -366,7 +366,7 @@ public void onLoaderReset(Loader&lt;Cursor&gt; loader) {
 android.app.Fragment} que exibe uma {@link android.widget.ListView} contendo
 os resultados de uma consulta aos provedores de conteúdo de contatos. Ela usa um {@link
 android.content.CursorLoader} para gerenciar a consulta no provedor.</p>
- 
+
 <p>Para um aplicativo acessar os contatos de um usuário, como neste exemplo,
 o manifesto deverá incluir a permissão
 {@link android.Manifest.permission#READ_CONTACTS READ_CONTACTS}.</p>

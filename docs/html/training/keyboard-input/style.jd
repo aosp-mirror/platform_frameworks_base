@@ -71,7 +71,7 @@ so the text field conceals the user's input:</p>
     android:id="@+id/password"
     android:hint="@string/password_hint"
     android:inputType="textPassword"
-    ... />    
+    ... />
 </pre>
 
 <p>There are several possible values documented with the

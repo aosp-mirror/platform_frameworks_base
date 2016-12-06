@@ -1,0 +1,6 @@
+name: "Stories"
+home_url: /distribute/stories/
+description: "Android developers, their apps, and their successes with Android and Google Play."
+content_license: cc3-apache2
+buganizer_id: 30209417
+parent_project_metadata_path: /distribute/_project.yaml

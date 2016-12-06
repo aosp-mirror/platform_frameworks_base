@@ -208,7 +208,7 @@ private:
     void drawSimpleRects(const float* rects, int vertexCount, const SkPaint* paint);
 
 
-    size_t addOp(RecordedOp* op);
+    int addOp(RecordedOp* op);
 // ----------------------------------------------------------------------------
 // lazy object copy
 // ----------------------------------------------------------------------------

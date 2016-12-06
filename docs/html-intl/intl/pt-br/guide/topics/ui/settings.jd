@@ -82,7 +82,7 @@ como programar as configurações do aplicativo por meio de APIs {@link android.
 
 <img src="{@docRoot}images/ui/settings/settings.png" alt="" width="435" />
 <p class="img-caption"><strong>Figura 1.</strong> Capturas de tela das configurações do aplicativo Mensagens
-do Android. A seleção de um item definido por uma {@link android.preference.Preference} 
+do Android. A seleção de um item definido por uma {@link android.preference.Preference}
 abre uma interface para alterar a configuração.</p>
 
 
@@ -120,8 +120,8 @@ um dos seguintes tipos de dados:</p>
 </ul>
 
 <p>Como a IU de configurações do aplicativo é criada com objetos {@link android.preference.Preference}
- em vez de objetos 
-{@link android.view.View}, é preciso usar uma subclasse {@link android.app.Activity} ou 
+ em vez de objetos
+{@link android.view.View}, é preciso usar uma subclasse {@link android.app.Activity} ou
 {@link android.app.Fragment} especializada para exibir as configurações de lista:</p>
 
 <ul>
@@ -226,8 +226,8 @@ android.preference.ListPreference}. Os dois itens contêm estes três atributos:
   <dt>{@code android:key}</dt>
   <dd>Esse atributo é necessário para preferências que persistem a um valor de dados. Ele especifica a chave
 exclusiva (uma string) que o sistema usa ao salvar o valor dessa configuração em {@link
-android.content.SharedPreferences}. 
-  <p>As únicas instâncias em que esse atributo é <em>dispensável</em> ocorrem quando a preferência é um 
+android.content.SharedPreferences}.
+  <p>As únicas instâncias em que esse atributo é <em>dispensável</em> ocorrem quando a preferência é um
 {@link android.preference.PreferenceCategory} ou {@link android.preference.PreferenceScreen},
 ou quando a preferência especifica um {@link android.content.Intent} para invocar (com um elemento <a href="#Intents">{@code &lt;intent&gt;}</a>) ou um {@link android.app.Fragment} para exibir (com um atributo <a href="{@docRoot}reference/android/preference/Preference.html#attr_android:fragment">{@code
 android:fragment}</a>).</p>
@@ -285,7 +285,7 @@ android.preference.PreferenceCategory}.</p>
 
 <pre>
 &lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    &lt;PreferenceCategory 
+    &lt;PreferenceCategory
         android:title="&#64;string/pref_sms_storage_title"
         android:key="pref_key_storage_settings">
         &lt;CheckBoxPreference
@@ -293,12 +293,12 @@ android.preference.PreferenceCategory}.</p>
             android:summary="&#64;string/pref_summary_auto_delete"
             android:title="&#64;string/pref_title_auto_delete"
             android:defaultValue="false"... />
-        &lt;Preference 
+        &lt;Preference
             android:key="pref_key_sms_delete_limit"
             android:dependency="pref_key_auto_delete"
             android:summary="&#64;string/pref_summary_delete_limit"
             android:title="&#64;string/pref_title_sms_delete"... />
-        &lt;Preference 
+        &lt;Preference
             android:key="pref_key_mms_delete_limit"
             android:dependency="pref_key_auto_delete"
             android:summary="&#64;string/pref_summary_delete_limit"
@@ -311,7 +311,7 @@ android.preference.PreferenceCategory}.</p>
 
 <h4 id="Subscreens">Uso de subtelas</h4>
 
-<p>Para usar grupos de configurações em uma subtela (como ilustrado na figura 3), coloque o grupo 
+<p>Para usar grupos de configurações em uma subtela (como ilustrado na figura 3), coloque o grupo
 de objetos {@link android.preference.Preference} dentro de {@link
 android.preference.PreferenceScreen}.</p>
 
@@ -588,11 +588,11 @@ dentro de um elemento raiz {@code &lt;preference-headers&gt;}. Por exemplo:</p>
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
-    &lt;header 
+    &lt;header
         android:fragment="com.example.prefs.SettingsActivity$SettingsFragmentOne"
         android:title="@string/prefs_category_one"
         android:summary="@string/prefs_summ_category_one" />
-    &lt;header 
+    &lt;header
         android:fragment="com.example.prefs.SettingsActivity$SettingsFragmentTwo"
         android:title="@string/prefs_category_two"
         android:summary="@string/prefs_summ_category_two" >
@@ -636,7 +636,7 @@ public static class SettingsFragment extends PreferenceFragment {
 <h3 id="DisplayHeaders">Exibição de cabeçalhos</h3>
 
 <p>Para exibir os cabeçalhos de preferência, é preciso implementar o método de retorno de chamada {@link
-android.preference.PreferenceActivity#onBuildHeaders onBuildHeaders()} e chamar 
+android.preference.PreferenceActivity#onBuildHeaders onBuildHeaders()} e chamar
 {@link android.preference.PreferenceActivity#loadHeadersFromResource
 loadHeadersFromResource()}. Por exemplo:</p>
 
@@ -672,15 +672,15 @@ ao {@link android.preference.PreferenceActivity} que especifica que arquivo XML 
 carregar.</p>
 
 <p>Por exemplo, abaixo há um arquivo XML de cabeçalhos de preferência usado no Android 3.0
-e posterior ({@code res/xml/preference_headers.xml}):</p> 
+e posterior ({@code res/xml/preference_headers.xml}):</p>
 
 <pre>
 &lt;preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
-    &lt;header 
+    &lt;header
         android:fragment="com.example.prefs.SettingsFragmentOne"
         android:title="@string/prefs_category_one"
         android:summary="@string/prefs_summ_category_one" />
-    &lt;header 
+    &lt;header
         android:fragment="com.example.prefs.SettingsFragmentTwo"
         android:title="@string/prefs_category_two"
         android:summary="@string/prefs_summ_category_two" />
@@ -692,18 +692,18 @@ mais antigas que a 3.0 ({@code res/xml/preference_headers_legacy.xml}):</p>
 
 <pre>
 &lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    &lt;Preference 
+    &lt;Preference
         android:title="@string/prefs_category_one"
         android:summary="@string/prefs_summ_category_one"  >
-        &lt;intent 
+        &lt;intent
             android:targetPackage="com.example.prefs"
             android:targetClass="com.example.prefs.SettingsActivity"
             android:action="com.example.prefs.PREFS_ONE" />
     &lt;/Preference>
-    &lt;Preference 
+    &lt;Preference
         android:title="@string/prefs_category_two"
         android:summary="@string/prefs_summ_category_two" >
-        &lt;intent 
+        &lt;intent
             android:targetPackage="com.example.prefs"
             android:targetClass="com.example.prefs.SettingsActivity"
             android:action="com.example.prefs.PREFS_TWO" />
@@ -975,11 +975,11 @@ da caixa de diálogo positiva e negativa:</p>
 public class NumberPickerPreference extends DialogPreference {
     public NumberPickerPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
-        
+
         setDialogLayoutResource(R.layout.numberpicker_dialog);
         setPositiveButtonText(android.R.string.ok);
         setNegativeButtonText(android.R.string.cancel);
-        
+
         setDialogIcon(null);
     }
     ...
@@ -1194,7 +1194,7 @@ protected void onRestoreInstanceState(Parcelable state) {
     // Cast state to custom BaseSavedState and pass to superclass
     SavedState myState = (SavedState) state;
     super.onRestoreInstanceState(myState.getSuperState());
-    
+
     // Set this Preference's widget to reflect the restored state
     mNumberPicker.setValue(myState.value);
 }

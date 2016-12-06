@@ -67,7 +67,7 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent,
         , mEglManager(thread.eglManager())
         , mOpaque(!translucent)
         , mAnimationContext(contextFactory->createAnimationContext(mRenderThread.timeLord()))
-        , mJankTracker(thread.timeLord().frameIntervalNanos())
+        , mJankTracker(thread.mainDisplayInfo())
         , mProfiler(mFrames)
         , mContentDrawBounds(0, 0, 0, 0) {
     mRenderNodes.emplace_back(rootRenderNode);
@@ -198,6 +198,48 @@ static bool wasSkipped(FrameInfo* info) {
     return info && ((*info)[FrameInfoIndex::Flags] & FrameInfoFlags::SkippedFrame);
 }
 
+bool CanvasContext::isSwapChainStuffed() {
+    static const auto SLOW_THRESHOLD = 6_ms;
+
+    if (mSwapHistory.size() != mSwapHistory.capacity()) {
+        // We want at least 3 frames of history before attempting to
+        // guess if the queue is stuffed
+        return false;
+    }
+    nsecs_t frameInterval = mRenderThread.timeLord().frameIntervalNanos();
+    auto& swapA = mSwapHistory[0];
+
+    // Was there a happy queue & dequeue time? If so, don't
+    // consider it stuffed
+    if (swapA.dequeueDuration < SLOW_THRESHOLD
+            && swapA.queueDuration < SLOW_THRESHOLD) {
+        return false;
+    }
+
+    for (size_t i = 1; i < mSwapHistory.size(); i++) {
+        auto& swapB = mSwapHistory[i];
+
+        // If there's a multi-frameInterval gap we effectively already dropped a frame,
+        // so consider the queue healthy.
+        if (swapA.swapCompletedTime - swapB.swapCompletedTime > frameInterval * 3) {
+            return false;
+        }
+
+        // Was there a happy queue & dequeue time? If so, don't
+        // consider it stuffed
+        if (swapB.dequeueDuration < SLOW_THRESHOLD
+                && swapB.queueDuration < SLOW_THRESHOLD) {
+            return false;
+        }
+
+        swapA = swapB;
+    }
+
+    // All signs point to a stuffed swap chain
+    ATRACE_NAME("swap chain stuffed");
+    return true;
+}
+
 void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
         int64_t syncQueued, RenderNode* target) {
     mRenderThread.removeFrameCallback(this);
@@ -243,7 +285,7 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
 
     if (CC_LIKELY(mSwapHistory.size())) {
         nsecs_t latestVsync = mRenderThread.timeLord().latestVsync();
-        const SwapHistory& lastSwap = mSwapHistory.back();
+        SwapHistory& lastSwap = mSwapHistory.back();
         nsecs_t vsyncDelta = std::abs(lastSwap.vsyncTime - latestVsync);
         // The slight fudge-factor is to deal with cases where
         // the vsync was estimated due to being slow handling the signal.
@@ -253,15 +295,17 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
             // Already drew for this vsync pulse, UI draw request missed
             // the deadline for RT animations
             info.out.canDrawThisFrame = false;
-        } else if (lastSwap.swapTime < latestVsync) {
+        } else if (vsyncDelta >= mRenderThread.timeLord().frameIntervalNanos() * 3
+                || (latestVsync - mLastDropVsync) < 500_ms) {
+            // It's been several frame intervals, assume the buffer queue is fine
+            // or the last drop was too recent
             info.out.canDrawThisFrame = true;
         } else {
-            // We're maybe behind? Find out for sure
-            int runningBehind = 0;
-            // TODO: Have this method be on Surface, too, not just ANativeWindow...
-            ANativeWindow* window = mNativeSurface.get();
-            window->query(window, NATIVE_WINDOW_CONSUMER_RUNNING_BEHIND, &runningBehind);
-            info.out.canDrawThisFrame = !runningBehind;
+            info.out.canDrawThisFrame = !isSwapChainStuffed();
+            if (!info.out.canDrawThisFrame) {
+                // dropping frame
+                mLastDropVsync = mRenderThread.timeLord().latestVsync();
+            }
         }
     } else {
         info.out.canDrawThisFrame = true;
@@ -282,6 +326,7 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
 
 void CanvasContext::stopDrawing() {
     mRenderThread.removeFrameCallback(this);
+    mAnimationContext->pauseAnimators();
 }
 
 void CanvasContext::notifyFramePending() {
@@ -515,10 +560,27 @@ void CanvasContext::draw() {
         }
         SwapHistory& swap = mSwapHistory.next();
         swap.damage = screenDirty;
-        swap.swapTime = systemTime(CLOCK_MONOTONIC);
+        swap.swapCompletedTime = systemTime(CLOCK_MONOTONIC);
         swap.vsyncTime = mRenderThread.timeLord().latestVsync();
+        if (mNativeSurface.get()) {
+            int durationUs;
+            mNativeSurface->query(NATIVE_WINDOW_LAST_DEQUEUE_DURATION, &durationUs);
+            swap.dequeueDuration = us2ns(durationUs);
+            mNativeSurface->query(NATIVE_WINDOW_LAST_QUEUE_DURATION, &durationUs);
+            swap.queueDuration = us2ns(durationUs);
+        } else {
+            swap.dequeueDuration = 0;
+            swap.queueDuration = 0;
+        }
+        mCurrentFrameInfo->set(FrameInfoIndex::DequeueBufferDuration)
+                = swap.dequeueDuration;
+        mCurrentFrameInfo->set(FrameInfoIndex::QueueBufferDuration)
+                = swap.queueDuration;
         mHaveNewSurface = false;
         mFrameNumber = -1;
+    } else {
+        mCurrentFrameInfo->set(FrameInfoIndex::DequeueBufferDuration) = 0;
+        mCurrentFrameInfo->set(FrameInfoIndex::QueueBufferDuration) = 0;
     }
 
     // TODO: Use a fence for real completion?
@@ -546,6 +608,10 @@ void CanvasContext::draw() {
     }
 
     GpuMemoryTracker::onFrameCompleted();
+#ifdef BUGREPORT_FONT_CACHE_USAGE
+    caches.fontRenderer.getFontRenderer().historyTracker().frameCompleted();
+#endif
+
 }
 
 // Called by choreographer to do an RT-driven animation
@@ -571,6 +637,9 @@ void CanvasContext::prepareAndDraw(RenderNode* node) {
     prepareTree(info, frameInfo, systemTime(CLOCK_MONOTONIC), node);
     if (info.out.canDrawThisFrame) {
         draw();
+    } else {
+        // wait on fences so tasks don't overlap next frame
+        waitOnFences();
     }
 }
 

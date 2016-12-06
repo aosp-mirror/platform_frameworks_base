@@ -36,7 +36,7 @@ parent.link=activities.html
     <li>{@link android.app.FragmentManager}</li>
     <li>{@link android.app.FragmentTransaction}</li>
   </ol>
-  
+
   <h2>Xem thêm</h2>
   <ol>
     <li><a href="{@docRoot}training/basics/fragments/index.html">Xây dựng một UI Động bằng các Phân đoạn</a></li>
@@ -148,7 +148,7 @@ của bạn.</p>
 khởi tạo các thành phần thiết yếu của phân đoạn mà bạn muốn giữ lại khi phân đoạn
 bị tạm dừng hoặc dừng hẳn, sau đó tiếp tục.</dd>
   <dt>{@link android.app.Fragment#onCreateView onCreateView()}</dt>
-  <dd>Hệ thống sẽ gọi phương pháp này khi đến lúc phân đoạn vẽ giao diện người dùng của nó 
+  <dd>Hệ thống sẽ gọi phương pháp này khi đến lúc phân đoạn vẽ giao diện người dùng của nó
 lần đầu tiên. Để vẽ một UI cho phân đoạn của mình, bạn phải trả về một {@link android.view.View} từ phương pháp
 này, đây là gốc của bố trí phân đoạn của bạn. Bạn có thể trả về giá trị rỗng nếu phân đoạn không
 cung cấp UI.</dd>
@@ -303,7 +303,7 @@ phân đoạn:</p>
   <ul>
     <li>Cung cấp thuộc tính {@code android:id} với một ID duy nhất.</li>
     <li>Cung cấp thuộc tính {@code android:tag} với một xâu duy nhất.</li>
-    <li>Nếu bạn không cung cấp được thuộc tính nào, hệ thống sẽ sử dụng ID của dạng xem 
+    <li>Nếu bạn không cung cấp được thuộc tính nào, hệ thống sẽ sử dụng ID của dạng xem
 của bộ chứa.</li>
   </ul>
 </div>
@@ -362,7 +362,7 @@ findFragmentByTag()}.</p>
 
 <p>Để biết ví dụ về hoạt động sử dụng phân đoạn như một trình thực hiện nền, không có UI, hãy xem mẫu {@code
 FragmentRetainInstance.java}, mẫu này có trong các mẫu SDK (có sẵn thông qua
-Trình quản lý SDK Android) và nằm trên hệ thống của bạn như là 
+Trình quản lý SDK Android) và nằm trên hệ thống của bạn như là
 <code>&lt;sdk_root&gt;/APIDemos/app/src/main/java/com/example/android/apis/app/FragmentRetainInstance.java</code>.</p>
 
 
@@ -378,7 +378,7 @@ có nó, hãy gọi {@link android.app.Activity#getFragmentManager()} từ hoạ
   <li>Nhận các phân đoạn tồn tại trong hoạt động, bằng {@link
 android.app.FragmentManager#findFragmentById findFragmentById()} (đối với các phân đoạn cung cấp UI trong
 bố trí hoạt động) hoặc {@link android.app.FragmentManager#findFragmentByTag
-findFragmentByTag()} (đối với các phân đoạn có hoặc không cung cấp UI).</li> 
+findFragmentByTag()} (đối với các phân đoạn có hoặc không cung cấp UI).</li>
   <li>Lấy phân đoạn ra khỏi ngăn xếp, bằng {@link
 android.app.FragmentManager#popBackStack()} (mô phỏng một câu lệnh <em>Quay lại</em> của người dùng).</li>
   <li>Đăng ký một đối tượng theo dõi cho những thay đổi đối với ngăn xếp, bằng {@link
@@ -562,9 +562,9 @@ public static class FragmentA extends ListFragment {
 }
 </pre>
 
-<p>Nếu hoạt động chưa triển khai giao diện, khi đó phân đoạn sẽ đưa ra lỗi 
+<p>Nếu hoạt động chưa triển khai giao diện, khi đó phân đoạn sẽ đưa ra lỗi
 {@link java.lang.ClassCastException}.
-Nếu thành công, thành viên {@code mListener} giữ một tham chiếu tới triển khai 
+Nếu thành công, thành viên {@code mListener} giữ một tham chiếu tới triển khai
 {@code OnArticleSelectedListener}của hoạt động, sao cho phân đoạn A có thể chia sẻ sự kiện với hoạt động bằng cách gọi các phương pháp
 được định nghĩa bởi giao diện {@code OnArticleSelectedListener}. Ví dụ, nếu phân đoạn A là một
 phần mở rộng của {@link android.app.ListFragment}, mỗi lần
@@ -785,7 +785,7 @@ android.widget.FrameLayout}), hoặc bắt đầu một hoạt động mới (t�
 
 <p>Phân đoạn thứ hai, {@code DetailsFragment} sẽ hiển thị tóm tắt vở kịch cho mục được chọn từ
 danh sách trong {@code TitlesFragment}:</p>
- 
+
 {@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java details}
 
 <p>Nhớ lại ở lớp {@code TitlesFragment} rằng, nếu người dùng nhấp vào một mục danh sách và bố trí
@@ -798,7 +798,7 @@ tóm tắt vở kịch được chọn khi màn hình ở hướng đứng:</p>
 
 {@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java
 details_activity}
- 
+
 <p>Lưu ý rằng hoạt động này tự kết thúc nếu cấu hình là khổ ngang, sao cho hoạt động
 chính có thể chiếm lấy và hiển thị {@code DetailsFragment} bên cạnh {@code TitlesFragment}.
 Điều này có thể xảy ra nếu người dùng bắt đầu {@code DetailsActivity} ở dạng hướng đứng, nhưng

@@ -29,7 +29,7 @@ trainingnavtop=true
         </a>
     </li>
     <li>
-        <a href="{@docRoot}design/patterns/notifications.html">Notifications</a> Design Guide
+        <a href="https://material.google.com/patterns/notifications.html">Notifications</a> Design Guide
     </li>
 </ul>
 
@@ -37,7 +37,7 @@ trainingnavtop=true
 </div>
 </div>
 <p>
-    Part of designing a notification is preserving the user's expected navigation experience. 
+    Part of designing a notification is preserving the user's expected navigation experience.
     For a detailed discussion of this topic, see the
     <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html#NotificationResponse">Notifications</a>
     API guide.
@@ -49,7 +49,7 @@ trainingnavtop=true
     </dt>
     <dd>
         You're starting an {@link android.app.Activity} that's part of the application's normal
-        workflow. 
+        workflow.
     </dd>
     <dt>
         Special activity
@@ -202,10 +202,10 @@ NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
 Intent notifyIntent =
         new Intent(new ComponentName(this, ResultActivity.class));
 // Sets the Activity to start in a new, empty task
-notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | 
+notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
         Intent.FLAG_ACTIVITY_CLEAR_TASK);
 // Creates the PendingIntent
-PendingIntent notifyIntent =
+PendingIntent pendingIntent =
         PendingIntent.getActivity(
         this,
         0,
@@ -214,7 +214,7 @@ PendingIntent notifyIntent =
 );
 
 // Puts the PendingIntent into the notification builder
-builder.setContentIntent(notifyIntent);
+builder.setContentIntent(pendingIntent);
 // Notifications are issued by sending them to the
 // NotificationManager system service.
 NotificationManager mNotificationManager =

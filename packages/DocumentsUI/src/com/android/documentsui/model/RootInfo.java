@@ -213,13 +213,13 @@ public class RootInfo implements Durable, Parcelable, Comparable<RootInfo> {
             derivedIcon = R.drawable.ic_root_download;
         } else if (isImages()) {
             derivedType = TYPE_IMAGES;
-            derivedIcon = R.drawable.ic_doc_image;
+            derivedIcon = com.android.internal.R.drawable.ic_doc_image;
         } else if (isVideos()) {
             derivedType = TYPE_VIDEO;
-            derivedIcon = R.drawable.ic_doc_video;
+            derivedIcon = com.android.internal.R.drawable.ic_doc_video;
         } else if (isAudio()) {
             derivedType = TYPE_AUDIO;
-            derivedIcon = R.drawable.ic_doc_audio;
+            derivedIcon = com.android.internal.R.drawable.ic_doc_audio;
         } else if (isRecents()) {
             derivedType = TYPE_RECENTS;
         } else {

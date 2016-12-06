@@ -1,0 +1,589 @@
+page.title=Compatibilidad con ventanas múltiples
+page.metaDescription=Nueva compatibilidad en Android N para mostrar más de una aplicación a la vez.
+page.keywords="multi-window", "android N", "split screen", "free-form"
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    <h2>En este documento</h2>
+      <ol>
+        <li><a href="#overview">Información general</a></li>
+        <li><a href="#lifecycle">Ciclo de vida en modo de ventanas múltiples</a></li>
+        <li><a href="#configuring">Configuración de tu aplicación para el modo de
+              ventanas múltiples</a></li>
+        <li><a href="#running">Ejecución de tu aplicación en modo de ventanas múltiples</a></li>
+        <li><a href="#testing">Prueba de la compatibilidad de tu aplicación con el uso de ventanas múltiples</a></li>
+      </ol>
+    <h2>Consulta también</h2>
+      <ol>
+        <li><a class="external-link" href="https://github.com/googlesamples/android-MultiWindowPlayground">Aplicación de ejemplo para la
+          prueba de ventanas múltiples</a></li>
+        <li><a class="external-link" href="https://medium.com/google-developers/5-tips-for-preparing-for-multi-window-in-android-n-7bed803dda64">Cinco tips para prepararse para ventanas múltiples en Android N</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>
+  Android N agrega compatibilidad con la visualización de más de una aplicación
+ a la vez. En dispositivos portátiles, se pueden ejecutar dos aplicaciones una al lado de la otra o
+  una por encima de la otra en modo de <em>pantalla dividida</em>. En dispositivos de TV, las aplicaciones pueden
+  usar el modo <em>picture-in-picture</em> para continuar la reproducción de video mientras los usuarios
+  interactúan con otra aplicación.
+</p>
+
+<p>
+  Si compilas tu aplicación con el N Preview SDK, puedes configurar la manera en que tu aplicación
+  administra la visualización de ventanas múltiples. Por ejemplo, puedes especificar las dimensiones
+  mínimas permitidas de tu actividad. También puedes inhabilitar la visualización de ventanas múltiples para
+  tu aplicación asegurándote de que el sistema solo muestre tu aplicación en modo de
+  pantalla completa.
+</p>
+
+<h2 id="overview">Información general</h2>
+
+<p>
+  Android N permite que varias aplicaciones compartan la pantalla al mismo tiempo. Por
+  ejemplo, un usuario podría dividir la pantalla y ver una página web a la izquierda
+  mientras escribe un correo electrónico a la derecha. La experiencia de usuario depende
+  del dispositivo:
+</p>
+
+<ul>
+  <li>Los dispositivos portátiles con Android N ofrecen modo de
+  pantalla dividida. En este modo, el sistema ocupa la pantalla con dos aplicaciones y las muestra
+  una al lado de la otra o una encima de la otra. El usuario puede arrastrar la línea que divide
+  las dos aplicaciones para visualizar una más grande que la otra.
+  </li>
+
+  <li>En dispositivos Nexus Player con Android N, las aplicaciones pueden ubicarse automáticamente
+  en <a href="picture-in-picture.html">modo Picture-in-picture</a>, lo que les permite
+  continuar mostrando contenido mientras el usuario explora o interactúa con
+  otras aplicaciones.
+  </li>
+
+  <li>Los fabricantes de dispositivos más grandes pueden optar por habilitar el modo
+  de forma libre, en el que el usuario puede modificar libremente el tamaño de cada actividad. Si el
+  fabricante habilita está función, el dispositivo ofrecerá modo de forma libre además
+  del modo de pantalla dividida.
+  </li>
+</ul>
+
+<img src="{@docRoot}images/android-7.0/mw-splitscreen.png" alt="" width="650" srcset="{@docRoot}images/android-7.0/mw-splitscreen.png 1x,
+    {@docRoot}images/android-7.0/mw-splitscreen_2x.png 2x," id="img-split-screen" />
+<p class="img-caption">
+  <strong>Figura 1:</strong> Dos aplicaciones ejecutándose una al lado de la otra en modo de pantalla dividida.
+</p>
+
+<p>
+  El usuario puede cambiar a modo de ventanas múltiples de la siguiente manera:
+</p>
+
+<ul>
+  <li>Si el usuario abre la <a href="{@docRoot}guide/components/recents.html">pantalla
+  Overview</a> y presiona durante un momento el
+  título de una actividad, puede arrastrar esa actividad a una parte resaltada de la
+  pantalla para llevarla a modo de ventanas múltiples.
+  </li>
+
+  <li>Si el usuario presiona durante un momento el botón Overview, el dispositivo coloca
+  la actividad actual en modo de ventanas múltiples y abre la pantalla Overview para
+  permitirle al usuario seleccionar otra actividad para compartir la pantalla.
+  </li>
+</ul>
+
+<p>
+  Los usuarios pueden <a href="{@docRoot}guide/topics/ui/drag-drop.html">arrastrar y
+  soltar</a> datos de una actividad a otra mientras las actividades comparten
+  la pantalla. (Antes, los usuarios solo podían arrastrar y soltar datos dentro de una sola
+  actividad).
+</p>
+
+<h2 id="lifecycle">Ciclo de vida en modo de ventanas múltiples</h2>
+
+<p>
+  El modo de ventanas múltiples no cambia el <a href="{@docRoot}training/basics/activity-lifecycle/index.html">ciclo de vida
+  de la actividad</a>.
+</p>
+
+<p>
+  En modo de ventanas múltiples, solo la actividad con la que el usuario interactuó más recientemente
+  está activa en un momento determinado. Esa actividad se considera la <em>principal</em>.
+  Todas las demás actividades están pausadas, aunque estén visibles.
+  No obstante, el sistema les da a esas actividades pausadas pero visibles una prioridad más alta
+  que las actividades que no están visibles. Si el usuario interactúa con una de las
+  actividades pausadas, se reanuda esa actividad y se pausa la actividad que antes
+  era la principal.
+</p>
+
+<p class="note">
+  <strong>Nota:</strong> En modo de ventanas múltiples, una aplicación puede estar pausada
+  y aún visible para el usuario. Es posible que una aplicación necesite continuar sus
+  actividades mientras está pausada. Por ejemplo, una aplicación de reproducción de video que está
+  pausada pero visible debería continuar mostrando el video. Por ese
+  motivo, recomendamos que las actividades que reproducen video <em>no</em> pausen el
+  video en sus controladores{@link android.app.Activity#onPause onPause()}.
+  En su lugar, deben pausar el video en {@link android.app.Activity#onStop
+  onStop()} y reanudar la reproducción en {@link android.app.Activity#onStart
+  onStart()}.
+</p>
+
+<p>
+  Cuando el usuario coloca una aplicación en modo de ventanas múltiples, el sistema le notifica a la
+ actividad de un cambio de configuración, tal como se especifica en <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Control de cambios en
+ tiempo de ejecución</a>. Esto también sucede cuando el usuario modifica el tamaño de la aplicación o coloca la aplicación
+ nuevamente en el modo de pantalla completa.
+  Básicamente, este cambio tiene las mismas consecuencias en el ciclo de vida
+ de la actividad que cuando el sistema notifica a la aplicación que el dispositivo cambió de
+ modo vertical a modo de paisaje, excepto porque se modifican las dimensiones del dispositivo
+ en lugar de intercambiarse solamente. Como se aborda en <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Control de cambios en
+  tiempo de ejecución</a>, tu actividad puede administrar el cambio de configuración por sí misma, o
+  puede permitir que el sistema destruya la actividad y la vuelva a crear con las nuevas
+  dimensiones.
+</p>
+
+<p>
+  Si el usuario cambia el tamaño de una ventana y la agranda en cualquier dirección, el
+  sistema modifica el tamaño de la actividad para que coincida con la acción del usuario y emite <a href="{@docRoot}guide/topics/resources/runtime-changes.html">cambios en tiempo de ejecución</a>
+  según sean necesarios. Si la aplicación se retrasa en el trazado de áreas recientemente expuestas, el
+  sistema rellena esas áreas con el color especificado por el atributo {@link
+  android.R.attr#windowBackground windowBackground} o por el atributo de estilo predeterminado
+  <code>windowBackgroundFallback</code>.
+</p>
+
+<h2 id="configuring">Configuración de tu aplicación para el modo de ventanas múltiples</h2>
+
+<p>
+  Si tu aplicación está orientada a Android N, puedes configurar cómo y
+  si quieres que las actividades de tu aplicación admitan la visualización de ventanas múltiples. Puedes establecer
+  atributos en tu manifiesto para controlar el tamaño y el diseño.
+  La configuración de atributos de una actividad raíz se aplica a todas las actividades
+ de su pila de tareas. Por ejemplo, si
+  <code>android:resizeableActivity</code> está configurado en true para la actividad raíz, se puede modificar el tamaño de todas las actividades
+ de la pila de tareas.
+</p>
+
+<p class="note">
+  <strong>Nota:</strong> Si compilas una aplicación con múltiples orientaciones con una versión del
+  SDK anterior a Android N, y el usuario usa la aplicación en
+  modo de ventanas múltiples, el sistema cambia el tamaño de la aplicación de forma forzada. El sistema presenta un
+  cuadro de diálogo en el que se advierte al usuario que la aplicación puede comportarse de forma inesperada. El sistema
+  <em>no</em> modifica el tamaño de aplicaciones con orientación fija; si
+  el usuario intenta abrir una aplicación con orientación fija en modo de ventanas múltiples,
+  la aplicación ocupará toda la pantalla.
+</p>
+
+<h4 id="resizeableActivity">android:resizeableActivity</h4>
+<p>
+  Establece este atributo en el nodo <code>&lt;activity&gt;</code> o
+  <code>&lt;application&gt;</code> de tu manifiesto para habilitar o inhabilitar la visualización
+  en modo de ventanas múltiples:
+</p>
+
+<pre>
+android:resizeableActivity=["true" | "false"]
+</pre>
+
+<p>
+  Si este atributo se establece en true, la actividad puede iniciarse en
+  los modos de pantalla dividida y forma libre. Si el atributo se establece en false, la
+  actividad no admite el modo de ventanas múltiples. Si el valor es false, y el
+  usuario intenta iniciar la actividad en modo de ventanas múltiples, la actividad ocupará
+  toda la pantalla.
+</p>
+
+<p>
+  Si tu aplicación está orientada a Android N, pero no especificas un valor
+  para este atributo, el valor predeterminado del atributo será true.
+</p>
+
+<h4 id="supportsPictureInPicture">android:supportsPictureInPicture</h4>
+
+<p>
+  Establece este atributo en el nodo <code>&lt;activity&gt;</code> de tu manifiesto
+ para indicar si la actividad admite la visualización de Picture-in-picture. Este
+  atributo se ignora si <code>android:resizeableActivity</code> es false.
+</p>
+
+<pre>
+android:supportsPictureInPicture=["true" | "false"]
+</pre>
+
+<h3 id="layout">Atributos de diseño</h3>
+
+<p>
+  Con Android N, el elemento de manifiesto <code>&lt;layout&gt;</code>
+  admite varios atributos que afectan cómo se comporta una actividad en
+  modo de ventanas múltiples:
+</p>
+
+<dl>
+  <dt>
+    <code>android:defaultWidth</code>
+  </dt>
+
+  <dd>
+    Ancho predeterminado de la actividad cuando se inicia en modo de forma libre.
+  </dd>
+
+  <dt>
+    <code>android:defaultHeight</code>
+  </dt>
+
+  <dd>
+    Altura predeterminada de la actividad cuando se inicia en modo de forma libre.
+  </dd>
+
+  <dt>
+    <code>android:gravity</code>
+  </dt>
+
+  <dd>
+    Ubicación inicial de la actividad cuando se inicia en modo de forma libre. Consulta la referencia
+ {@link android.view.Gravity} para obtener valores adecuados.
+  </dd>
+
+  <dt>
+    <code>android:minimalHeight</code>, <code>android:minimalWidth</code>
+  </dt>
+
+  <dd>
+    Altura y ancho mínimos para la actividad tanto en el modo de pantalla dividida como en el
+ modo de forma libre. Si el usuario mueve la línea divisoria en el modo de pantalla dividida
+    para reducir el tamaño respecto del tamaño mínimo especificado, el sistema recorta
+    la actividad para ajustarla a los requisitos del usuario.
+  </dd>
+</dl>
+
+<p>
+  Por ejemplo, el siguiente código muestra cómo especificar el tamaño
+  y la ubicación predeterminados de una actividad, y su tamaño mínimo, cuando la actividad se visualiza en
+  modo de forma libre:
+</p>
+
+<pre>
+&lt;activity android:name=".MyActivity"&gt;
+    &lt;layout android:defaultHeight="500dp"
+          android:defaultWidth="600dp"
+          android:gravity="top|end"
+          android:minimalHeight="450dp"
+          android:minimalWidth="300dp" /&gt;
+&lt;/activity&gt;
+</pre>
+
+<h2 id="running">Ejecución de tu aplicación en modo de ventanas múltiples</h2>
+
+<p>
+  Android N ofrece nuevas funcionalidades para admitir aplicaciones que puedan ejecutarse
+  en modo de ventanas múltiples.
+</p>
+
+<h3 id="disabled-features">Funciones deshabilitadas en modo de ventanas múltiples</h3>
+
+<p>
+  Ciertas funciones están deshabilitadas o se ignoran cuando un dispositivo se encuentra en modo de
+  ventanas múltiples, ya que no resultan útiles para una actividad que podría estar compartiendo la
+  pantalla del dispositivo con otras actividades o aplicaciones. Esas funciones incluyen las siguientes:
+
+<ul>
+  <li>Algunas opciones de personalización de la <a href="{@docRoot}training/system-ui/index.html">IU del sistema</a>
+  están deshabilitadas; por ejemplo, las aplicaciones no pueden ocultar la barra de
+  estado si no se están ejecutando en modo de pantalla completa.
+  </li>
+
+  <li>El sistema ignora los cambios en el atributo <code><a href=
+  "{@docRoot}guide/topics/manifest/activity-element.html#screen"
+  >android:screenOrientation</a></code>.
+  </li>
+</ul>
+
+<h3 id="change-notification">Notificación y consulta de cambios en modo de ventanas múltiples</h3>
+
+<p>
+  Se agregaron los siguientes métodos nuevos a la clase {@link android.app.Activity}
+ para admitir la visualización de ventanas múltiples. Para obtener información detallada sobre cada método, consulta la
+  <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referencia sobre N Preview SDK
+</a>.
+</p>
+
+<dl>
+  <dt>
+    <code>Activity.isInMultiWindowMode()</code>
+  </dt>
+
+  <dd>
+    Realiza una llamada para averiguar si la actividad está en modo de ventanas múltiples.
+  </dd>
+
+  <dt>
+    <code>Activity.isInPictureInPictureMode()</code>
+  </dt>
+
+  <dd>
+    Realiza una llamada para averiguar si la actividad está en modo Picture-in-picture.
+
+    <p class="note">
+      <strong>Nota:</strong> El modo Picture-in-picture es un caso especial del
+ modo de ventanas múltiples. Si <code>myActivity.isInPictureInPictureMode()</code>
+ devuelve un valor true, <code>myActivity.isInMultiWindowMode()</code> también
+ devuelve un valor true.
+    </p>
+  </dd>
+
+  <dt>
+    <code>Activity.onMultiWindowModeChanged()</code>
+  </dt>
+
+  <dd>
+    El sistema llama a este método siempre que la actividad entra en modo de ventanas
+ múltiples o sale de él. El sistema le pasa al método un valor de true si la
+ actividad entra en modo de ventanas múltiples y false si la actividad
+ sale del modo de ventanas múltiples.
+  </dd>
+
+  <dt>
+    <code>Activity.onPictureInPictureModeChanged()</code>
+  </dt>
+
+  <dd>
+    El sistema llama a este método siempre que la actividad entra en modo Picture-in-picture
+ o sale de él. El sistema le pasa al método un valor de true si
+ la actividad entra en modo Picture-in-picture y false si la actividad
+ sale de dicho modo.
+  </dd>
+</dl>
+
+<p>
+  También hay versiones {@link android.app.Fragment} de cada uno de esos
+  métodos; por ejemplo, <code>Fragment.isInMultiWindowMode()</code>.
+</p>
+
+<h3 id="entering-pip">Cómo entrar en modo Picture-in-picture</h3>
+
+<p>
+  Para que una actividad entre en modo de Picture-in-picture, debes llamar al nuevo método
+  <code>Activity.enterPictureInPictureMode()</code>. Este método no tiene efecto si
+ el dispositivo no admite el modo de imagen en imagen. Para obtener más información,
+  consulta la documentación de <a href="picture-in-picture.html">Picture-in-Picture</a>.
+</p>
+
+<h3 id="launch">Inicia nuevas actividades en modo de ventanas múltiples</h3>
+
+<p>
+  Cuando inicias una nueva actividad, puedes indicarle al sistema que la nueva
+  actividad se debe mostrar adyacente a la actual, si fuera posible. Para hacer
+  esto, usa el marcador
+  <code>Intent.FLAG_ACTIVITY_LAUNCH_TO_ADJACENT</code>. Pasar
+  este marcador requiere el siguiente comportamiento:
+</p>
+
+<ul>
+  <li>Si el dispositivo está en modo de pantalla dividida, el sistema intenta crear la
+  nueva actividad junto a la actividad que lo inició, de modo que las dos actividades
+  compartan la pantalla. No se garantiza que el sistema pueda hacerlo, pero
+  ubicará las actividades de forma adyacente si fuera posible.
+  </li>
+
+  <li>Si el dispositivo no está en modo de pantalla dividida, este marcador no tendrá efecto.
+  </li>
+</ul>
+
+<p>
+  Si un dispositivo está en modo de forma libre e inicias una nueva actividad, puedes
+  especificar las dimensiones y la ubicación de la pantalla de la nueva actividad al llamar a
+  <code>ActivityOptions.setLaunchBounds()</code>. Este método no tiene efecto si
+  el dispositivo no está en modo de ventanas múltiples.
+</p>
+
+<p class="note">
+  <strong>Nota:</strong> Si inicias una actividad en una pila de tareas, esa
+  actividad reemplaza la actividad en pantalla y hereda todas sus
+  propiedades de ventanas múltiples. Si quieres iniciar la nueva actividad en una ventana
+  independiente en modo de ventanas múltiples, debes iniciarla en una nueva pila de tareas.
+</p>
+
+<h3 id="dnd">Admisión de la funcionalidad de arrastrar y soltar</h3>
+
+<p>
+  Los usuarios pueden <a href="{@docRoot}guide/topics/ui/drag-drop.html">arrastrar y
+  soltar</a> datos de una actividad a otra mientras las dos actividades
+  comparten la pantalla. (Antes, los usuarios solo podían arrastrar y soltar datos dentro de una
+  sola actividad). Por este motivo, te recomendamos que agregues la funcionalidad de arrastrar y
+  soltar a tu aplicación si es que aún no la admite.
+</p>
+
+<p>
+  El N Preview SDK amplía el paquete <a href="{@docRoot}reference/android/view/package-summary.html"><code>android.view</code></a>
+  para admitir la funcionalidad de arrastrar y soltar entre aplicaciones diferentes. Para obtener información detallada sobre las siguientes
+  clase y métodos, consulta la <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referencia
+  del N Preview SDK</a>.
+</p>
+
+<dl>
+  <dt>
+    <code>android.view.DropPermissions</code>
+  </dt>
+
+  <dd>
+    Objeto token responsable de especificar los permisos otorgados a la aplicación
+    que recibe datos mediante la funcionalidad de arrastrar y soltar.
+  </dd>
+
+  <dt>
+    <code>View.startDragAndDrop()</code>
+  </dt>
+
+  <dd>
+    Nuevo alias para {@link android.view.View#startDrag View.startDrag()}. Para
+    habilitar la funcionalidad arrastrar y soltar entre diferentes actividades, pasa el nuevo marcador
+    <code>View.DRAG_FLAG_GLOBAL</code>. Si necesitas otorgar permisos de URI a
+    la actividad receptora, pasa los nuevos marcadores
+    <code>View.DRAG_FLAG_GLOBAL_URI_READ</code> o
+    <code>View.DRAG_FLAG_GLOBAL_URI_WRITE</code>, según corresponda.
+  </dd>
+
+  <dt>
+    <code>View.cancelDragAndDrop()</code>
+  </dt>
+
+  <dd>
+    Cancela una operación de arrastrar actualmente en curso. Solo puede ser llamado por la
+    aplicación que originó la operación de arrastrar.
+  </dd>
+
+  <dt>
+    <code>View.updateDragShadow()</code>
+  </dt>
+
+  <dd>
+    Reemplaza la sombra del arrastre por una operación de arrastrar actualmente en curso. Solo
+    puede ser llamado por la aplicación que originó la operación de arrastrar.
+  </dd>
+
+  <dt>
+    <code>Activity.requestDropPermissions()</code>
+  </dt>
+
+  <dd>
+    Solicita los permisos para los URI de contenido que se pasan con el {@link
+    android.content.ClipData} incluido en un {@link android.view.DragEvent}.
+  </dd>
+</dl>
+
+<h2 id="testing">Prueba de la compatibilidad de tu aplicación con el uso de ventanas múltiples</h2>
+
+<p>
+  Ya sea que actualices o no tu aplicación para Android N, debes
+  verificar la forma en que se comporta en modo de ventanas múltiples en caso de que un usuario intente iniciarla
+  en modo de ventanas múltiples en un dispositivo con Android N.
+</p>
+
+<h3 id="configuring">Configuración de un dispositivo de prueba</h3>
+
+<p>
+  Si instalas Android N en un dispositivo, se admite automáticamente el modo
+  de pantalla dividida.
+</p>
+
+<h3 id="test-non-n">Si tu aplicación no se compiló con el N Preview SDK</h3>
+
+<p>
+  Si no creaste tu aplicación con el N Preview SDK y el usuario intenta usar
+  la aplicación en modo de ventanas múltiples, el sistema cambia el tamaño de la aplicación de forma forzada, a menos que la aplicación
+  declare una orientación fija.
+</p>
+
+<p>
+  Si tu aplicación no declara una orientación fija, debes iniciar tu aplicación
+  en un dispositivo con Android N e intentar colocar la aplicación en
+  modo de pantalla dividida. Cuando se modifique el tamaño de la aplicación de forma forzada,
+ verifica que la experiencia de usuario sea aceptable.
+</p>
+
+<p>
+  Si la aplicación declara una orientación fija, debes intentar colocar la aplicación en
+  modo de ventanas múltiples. Cuando lo hagas, verifica que la aplicación
+  continúe en modo de pantalla completa.
+</p>
+
+<h3 id="test-mw">Si admites el modo de ventanas múltiples</h3>
+
+<p>
+  Si compilaste tu aplicación con el N Preview SDK y no deshabilitaste
+  la compatibilidad con ventanas múltiples, verifica el siguiente comportamiento tanto en modo de pantalla dividida
+  como en modo de forma libre.
+</p>
+
+<ul>
+  <li>Inicia la aplicación en modo de pantalla completa y luego cambia al modo de ventanas múltiples al presionar
+  durante un momento el botón Overview. Verifica que la aplicación pase de un modo a otro correctamente.
+  </li>
+
+  <li>Inicia la aplicación directamente en modo de ventanas múltiples y verifica que se
+  inicie correctamente. Puedes iniciar una aplicación en modo de ventanas múltiples al presionar el
+  botón Overview, luego presionar durante un momento la barra de título de la aplicación y arrastrarla
+  a una de las áreas resaltadas de la pantalla.
+  </li>
+
+  <li>Cambia el tamaño de tu aplicación en modo de pantalla dividida al arrastrar la línea divisoria.
+  Verifica que la aplicación cambie de tamaño sin fallar y que estén visibles los elementos
+ necesarios de la IU.
+  </li>
+
+  <li>Si especificaste dimensiones mínimas para tu aplicación, intenta cambiar el tamaño
+  de la aplicación a dimensiones más bajas que las especificadas. Verifica que no puedas modificar el tamaño de la aplicación
+  para que sea más pequeña que la dimensión mínima especificada.
+  </li>
+
+  <li>En todas las pruebas, verifica que el rendimiento de la aplicación sea aceptable. Por
+  ejemplo, verifica que la actualización de la IU después de cambiar el tamaño de la aplicación
+  no demore mucho.
+  </li>
+</ul>
+
+<h4 id="test-checklist">Lista de comprobación de pruebas</h4>
+
+<p>
+  Para verificar el rendimiento de tu aplicación en modo de ventanas múltiples, intenta las siguientes
+  operaciones. Debes probar estas operaciones tanto en modo de pantalla dividida como en
+  modo de ventanas múltiples, excepto cuando se indique algo diferente.
+</p>
+
+<ul>
+  <li>Ingresa en modo de ventanas múltiples y luego sal.
+  </li>
+
+  <li>Pasa de tu aplicación a otra y verifica que la aplicación se comporte
+  correctamente mientras esté visible pero no activa. Por ejemplo, si tu aplicación está
+  reproduciendo video, comprueba que el video se siga reproduciendo mientras el usuario interactúe
+  con otra aplicación.
+  </li>
+
+  <li>En modo de pantalla dividida, prueba mover la barra divisora para agrandar y
+  achicar la aplicación. Realiza estas operaciones en las configuraciones una al lado de la otra y
+  una encima de la otra. Verifica que la aplicación no falle,
+  que las funcionalidades necesarias estén visibles y que la operación de cambio de tamaño no demore
+  mucho.
+  </li>
+
+  <li>Realiza varias operaciones de cambio de tamaño en una sucesión rápida. Verifica que tu
+  aplicación no falle ni pierda memoria. Para obtener información acerca de cómo comprobar el uso de memoria
+  de tu aplicación, consulta <a href="{@docRoot}tools/debugging/debugging-memory.html">
+  Averiguación del uso de RAM</a>.
+  </li>
+
+  <li>Usa tu aplicación normalmente en diferentes configuraciones de ventanas y
+  verifica que la aplicación se comporte correctamente. Verifica que el texto sea legible y que
+  los elementos de la IU sean lo suficientemente grandes para interactuar con ellos.
+  </li>
+</ul>
+
+<h3 id="test-disabled-mw">Si deshabilitaste la compatibilidad con el modo de ventanas múltiples</h3>
+
+<p>
+  Si deshabilitaste la compatibilidad con el modo de ventanas múltiples al configurar
+  <code>android:resizableActivity="false"</code>, debes iniciar tu aplicación en
+  un dispositivo con Android N e intentar colocar la aplicación en los
+  modos de forma libre y pantalla dividida. Cuando lo hagas, verifica que la aplicación
+  continúe en modo de pantalla completa.
+</p>

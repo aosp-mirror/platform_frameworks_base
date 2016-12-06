@@ -65,6 +65,8 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
 
     private SimpleDateFormat mYearFormat;
     private SimpleDateFormat mMonthDayFormat;
+    private SimpleDateFormat mAccessibilityEventFormat;
+
 
     // Top-level container.
     private ViewGroup mContainer;
@@ -306,6 +308,9 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
         mMonthDayFormat = new SimpleDateFormat(datePattern, locale);
         mMonthDayFormat.setContext(DisplayContext.CAPITALIZATION_FOR_STANDALONE);
         mYearFormat = new SimpleDateFormat("y", locale);
+
+        // Clear out the lazily-initialized accessibility event formatter.
+        mAccessibilityEventFormat = null;
 
         // Update the header text.
         onCurrentDateChanged(false);
@@ -586,7 +591,12 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
 
     @Override
     public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
-        event.getText().add(mCurrentDate.getTime().toString());
+        if (mAccessibilityEventFormat == null) {
+            final String pattern = DateFormat.getBestDateTimePattern(mCurrentLocale, "EMMMMdy");
+            mAccessibilityEventFormat = new SimpleDateFormat(pattern);
+        }
+        final CharSequence text = mAccessibilityEventFormat.format(mCurrentDate.getTime());
+        event.getText().add(text);
     }
 
     public CharSequence getAccessibilityClassName() {

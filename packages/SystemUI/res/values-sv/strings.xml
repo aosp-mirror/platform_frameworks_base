@@ -143,7 +143,9 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_4g_plus" msgid="3032226872470658661">"4G+"</string>
     <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
+    <string name="accessibility_data_connection_lte_plus" msgid="361876866906946007">"LTE+"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Roaming"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
@@ -236,7 +238,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G-data har pausats"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Mobildata har pausats"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Dataanvändningen har pausats"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Eftersom du har nått den angivna datagränsen har dataanvändningen pausats under resten av perioden.\n\nOm du återupptar dataanvändningen kan avgifter från operatören tillkomma."</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Den angivna datagränsen har uppnåtts. Du använder inte längre mobildata.\n\nOm du fortsätter kan avgifter för dataanvändning tillkomma."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Återuppta"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Ingen anslutning"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi-ansluten"</string>
@@ -317,6 +319,9 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Gräns: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Varning <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Arbetsläge"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Nattljus"</string>
+    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"Nattljus har aktiverats. Tryck för att inaktivera"</string>
+    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"Nattljus har inaktiverats. Tryck för att aktivera"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"Listan med de senaste åtgärderna är tom"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Du har tömt listan"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Appinformation"</string>
@@ -326,10 +331,12 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> är inaktiverad i säkert läge."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Rensa alla"</string>
     <string name="recents_incompatible_app_message" msgid="5075812958564082451">"Appen har inte stöd för delad skärm."</string>
-    <string name="recents_drag_hint_message" msgid="2649739267073203985">"Dra här om du vill dela upp skärmen"</string>
+    <string name="recents_drag_hint_message" msgid="2649739267073203985">"Dra hit för att dela upp skärmen"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Dela horisontellt"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Dela vertikalt"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Dela anpassad"</string>
+  <string-array name="recents_blacklist_array">
+  </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Laddat"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Laddar"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> tills batteriet är fulladdat"</string>
@@ -345,7 +352,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Mindre brådskande aviseringar nedan"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Tryck igen för att öppna"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"Svep uppåt om du vill låsa upp"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"Svep uppåt för att låsa upp"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Svep från ikonen och öppna telefonen"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Svep från ikonen och öppna röstassistenten"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Svep från ikonen och öppna kameran"</string>
@@ -397,6 +404,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"Enheten kan övervakas"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Det kan hända att profilen övervakas"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Nätverket kan vara övervakat"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"Nätverket kan vara övervakat"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Enhetsövervakning"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Profilövervakning"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Nätverksövervakning"</string>
@@ -409,6 +417,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"Du är ansluten till <xliff:g id="APPLICATION">%1$s</xliff:g>, som kan bevaka aktivitet på nätverket, inklusive e-post, appar och webbplatser."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Du är ansluten till <xliff:g id="APPLICATION">%1$s</xliff:g>, som kan bevaka din privata aktivitet på nätverket, inklusive e-post, appar och webbplatser."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Du är ansluten till <xliff:g id="APPLICATION">%1$s</xliff:g> som kan övervaka din privata aktivitet på nätverket, inklusive e-postmeddelanden, appar och webbplatser."</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"Jobbprofilen hanteras av <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Den är ansluten till <xliff:g id="APPLICATION">%2$s</xliff:g>, som kan hantera aktivitet på arbetsplatsens nätverk, inklusive e-post, appar och webbplatser.\n\nKontakta administratören för mer information."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Jobbprofilen hanteras av <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Den är ansluten till <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, som kan hantera aktivitet på arbetsplatsens nätverk, inklusive e-post, appar och webbplatser.\n\nDu är även ansluten till <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, som kan hantera privat aktivitet på nätverket."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Enheten hanteras av <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministratören kan bevaka och hantera inställningar, företagsåtkomst, appar, data som är kopplad till enheten och enhetens platsuppgifter.\n\nDu är ansluten till <xliff:g id="APPLICATION">%2$s</xliff:g>, som kan övervaka aktivitet på nätverket, inklusive e-post. appar och webbplatser .\n\nKontakta administratören för mer information."</string>
@@ -434,6 +443,18 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> används som volymkontroll"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"Återställ originalet genom att trycka här."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Du använder din jobbprofil"</string>
+  <string-array name="volume_stream_titles">
+    <item msgid="5841843895402729630">"Ring"</item>
+    <item msgid="5997713001067658559">"System"</item>
+    <item msgid="7858983209929864160">"Ring"</item>
+    <item msgid="1850038478268896762">"Media"</item>
+    <item msgid="8265110906352372092">"Alarm"</item>
+    <item msgid="5339394737636839168"></item>
+    <item msgid="2951313578278086204">"Bluetooth"</item>
+    <item msgid="2919807739709798970"></item>
+    <item msgid="150349973435223405"></item>
+    <item msgid="6761963760295549099"></item>
+  </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Tryck här om du vill slå på ljudet."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Tryck här om du vill sätta på vibrationen. Tillgänglighetstjänster kanske inaktiveras."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Tryck här om du vill stänga av ljudet. Tillgänglighetstjänsterna kanske inaktiveras."</string>
@@ -473,8 +494,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Visa klocksekunder i statusfältet. Detta kan påverka batteritiden."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Ordna snabbinställningarna"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Visa ljusstyrka i snabbinställningarna"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"Aktivera delad skärm när du sveper uppåt"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Aktivera en rörelse som delar skärmen när du sveper uppåt från knappen Översikt"</string>
     <string name="experimental" msgid="6198182315536726162">"Experimentella"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Vill du aktivera Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Om du vill ansluta tangentbordet till surfplattan måste du först aktivera Bluetooth."</string>
@@ -504,21 +523,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"Fler inställningar"</string>
     <string name="notification_done" msgid="5279426047273930175">"Klar"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Inställningar för <xliff:g id="APP_NAME">%1$s</xliff:g>-aviseringar"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"Färg och utseende"</string>
-    <string name="night_mode" msgid="3540405868248625488">"Nattläge"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"Kalibrera skärmen"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"Aktiverat"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"Inaktiverat"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"Aktivera automatiskt"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Byt till Nattläge vid passande platser och tider på dygnet"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"När Nattläget är aktiverat"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Använd mörkt tema för Android OS"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"Justera ton"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"Justera ljusstyrka"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"Det mörka temat används för kärnfunktioner i Android OS som brukar visas med ett ljust tema, t.ex. inställningarna."</string>
-    <string name="color_apply" msgid="9212602012641034283">"Verkställ"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"Bekräfta inställningarna"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"Vissa färginställningar kan göra den här enheten oanvändbar. Klicka på OK om du vill bekräfta färginställningarna, annars återställs inställningarna efter 10 sekunder."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Batteriförbrukning"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Batterisparläget är inte tillgängligt vid laddning"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Batterisparläge"</string>
@@ -647,4 +651,5 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Öppna <xliff:g id="ID_1">%s</xliff:g>-inställningarna."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Ändra ordning på inställningarna."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Sida <xliff:g id="ID_1">%1$d</xliff:g> av <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <string name="cant_silence_or_block" msgid="999689262131488625">"Det går inte att tysta eller blockera aviseringar"</string>
 </resources>

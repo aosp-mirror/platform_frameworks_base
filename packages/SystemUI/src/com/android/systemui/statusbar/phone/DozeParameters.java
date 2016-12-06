@@ -21,6 +21,7 @@ import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.MathUtils;
+import android.util.SparseBooleanArray;
 
 import com.android.systemui.R;
 
@@ -37,7 +38,7 @@ public class DozeParameters {
 
     private final Context mContext;
 
-    private static PulseSchedule sPulseSchedule;
+    private static IntInOutMatcher sPickupSubtypePerformsProxMatcher;
 
     public DozeParameters(Context context) {
         mContext = context;
@@ -58,10 +59,21 @@ public class DozeParameters {
         pw.print("    getVibrateOnPickup(): "); pw.println(getVibrateOnPickup());
         pw.print("    getProxCheckBeforePulse(): "); pw.println(getProxCheckBeforePulse());
         pw.print("    getPulseOnNotifications(): "); pw.println(getPulseOnNotifications());
-        pw.print("    getPulseSchedule(): "); pw.println(getPulseSchedule());
-        pw.print("    getPulseScheduleResets(): "); pw.println(getPulseScheduleResets());
         pw.print("    getPickupVibrationThreshold(): "); pw.println(getPickupVibrationThreshold());
-        pw.print("    getPickupPerformsProxCheck(): "); pw.println(getPickupPerformsProxCheck());
+        pw.print("    getPickupSubtypePerformsProxCheck(): ");pw.println(
+                dumpPickupSubtypePerformsProxCheck());
+    }
+
+    private String dumpPickupSubtypePerformsProxCheck() {
+        // Refresh sPickupSubtypePerformsProxMatcher
+        getPickupSubtypePerformsProxCheck(0);
+
+        if (sPickupSubtypePerformsProxMatcher == null) {
+            return "fallback: " + mContext.getResources().getBoolean(
+                    R.bool.doze_pickup_performs_proximity_check);
+        } else {
+            return "spec: " + sPickupSubtypePerformsProxMatcher.mSpec;
+        }
     }
 
     public boolean getDisplayStateSupported() {
@@ -72,8 +84,8 @@ public class DozeParameters {
         return getPulseInDuration(pickup) + getPulseVisibleDuration() + getPulseOutDuration();
     }
 
-    public int getPulseInDuration(boolean pickup) {
-        return pickup
+    public int getPulseInDuration(boolean pickupOrDoubleTap) {
+        return pickupOrDoubleTap
                 ? getInt("doze.pulse.duration.in.pickup", R.integer.doze_pulse_duration_in_pickup)
                 : getInt("doze.pulse.duration.in", R.integer.doze_pulse_duration_in);
     }
@@ -102,28 +114,16 @@ public class DozeParameters {
         return SystemProperties.getBoolean("doze.vibrate.pickup", false);
     }
 
+    public String getDoubleTapSensorType() {
+        return mContext.getString(R.string.doze_double_tap_sensor_type);
+    }
+
     public boolean getProxCheckBeforePulse() {
         return getBoolean("doze.pulse.proxcheck", R.bool.doze_proximity_check_before_pulse);
     }
 
-    public boolean getPickupPerformsProxCheck() {
-        return getBoolean("doze.pickup.proxcheck", R.bool.doze_pickup_performs_proximity_check);
-    }
-
     public boolean getPulseOnNotifications() {
         return getBoolean("doze.pulse.notifications", R.bool.doze_pulse_on_notifications);
-    }
-
-    public PulseSchedule getPulseSchedule() {
-        final String spec = getString("doze.pulse.schedule", R.string.doze_pulse_schedule);
-        if (sPulseSchedule == null || !sPulseSchedule.mSpec.equals(spec)) {
-            sPulseSchedule = PulseSchedule.parse(spec);
-        }
-        return sPulseSchedule;
-    }
-
-    public int getPulseScheduleResets() {
-        return getInt("doze.pulse.schedule.resets", R.integer.doze_pulse_schedule_resets);
     }
 
     public int getPickupVibrationThreshold() {
@@ -143,43 +143,98 @@ public class DozeParameters {
         return SystemProperties.get(propName, mContext.getString(resId));
     }
 
-    public static class PulseSchedule {
-        private static final Pattern PATTERN = Pattern.compile("(\\d+?)s", 0);
+    public boolean getPickupSubtypePerformsProxCheck(int subType) {
+        String spec = getString("doze.pickup.proxcheck",
+                R.string.doze_pickup_subtype_performs_proximity_check);
 
-        private String mSpec;
-        private int[] mSchedule;
+        if (TextUtils.isEmpty(spec)) {
+            // Fall back to non-subtype based property.
+            return mContext.getResources().getBoolean(R.bool.doze_pickup_performs_proximity_check);
+        }
 
-        public static PulseSchedule parse(String spec) {
-            if (TextUtils.isEmpty(spec)) return null;
-            try {
-                final PulseSchedule rt = new PulseSchedule();
-                rt.mSpec = spec;
-                final String[] tokens = spec.split(",");
-                rt.mSchedule = new int[tokens.length];
-                for (int i = 0; i < tokens.length; i++) {
-                    final Matcher m = PATTERN.matcher(tokens[i]);
-                    if (!m.matches()) throw new IllegalArgumentException("Bad token: " + tokens[i]);
-                    rt.mSchedule[i] = Integer.parseInt(m.group(1));
+        if (sPickupSubtypePerformsProxMatcher == null
+                || !TextUtils.equals(spec, sPickupSubtypePerformsProxMatcher.mSpec)) {
+            sPickupSubtypePerformsProxMatcher = new IntInOutMatcher(spec);
+        }
+
+        return sPickupSubtypePerformsProxMatcher.isIn(subType);
+    }
+
+
+    /**
+     * Parses a spec of the form `1,2,3,!5,*`. The resulting object will match numbers that are
+     * listed, will not match numbers that are listed with a ! prefix, and will match / not match
+     * unlisted numbers depending on whether * or !* is present.
+     *
+     * *  -> match any numbers that are not explicitly listed
+     * !* -> don't match any numbers that are not explicitly listed
+     * 2  -> match 2
+     * !3 -> don't match 3
+     *
+     * It is illegal to specify:
+     * - an empty spec
+     * - a spec containing that are empty, or a lone !
+     * - a spec for anything other than numbers or *
+     * - multiple terms for the same number / multiple *s
+     */
+    public static class IntInOutMatcher {
+        private static final String WILDCARD = "*";
+        private static final char OUT_PREFIX = '!';
+
+        private final SparseBooleanArray mIsIn;
+        private final boolean mDefaultIsIn;
+        final String mSpec;
+
+        public IntInOutMatcher(String spec) {
+            if (TextUtils.isEmpty(spec)) {
+                throw new IllegalArgumentException("Spec must not be empty");
+            }
+
+            boolean defaultIsIn = false;
+            boolean foundWildcard = false;
+
+            mSpec = spec;
+            mIsIn = new SparseBooleanArray();
+
+            for (String itemPrefixed : spec.split(",", -1)) {
+                if (itemPrefixed.length() == 0) {
+                    throw new IllegalArgumentException(
+                            "Illegal spec, must not have zero-length items: `" + spec + "`");
                 }
-                if (DEBUG) Log.d(TAG, "Parsed spec [" + spec + "] as: " + rt);
-                return rt;
-            } catch (RuntimeException e) {
-                Log.w(TAG, "Error parsing spec: " + spec, e);
-                return null;
+                boolean isIn = itemPrefixed.charAt(0) != OUT_PREFIX;
+                String item = isIn ? itemPrefixed : itemPrefixed.substring(1);
+
+                if (itemPrefixed.length() == 0) {
+                    throw new IllegalArgumentException(
+                            "Illegal spec, must not have zero-length items: `" + spec + "`");
+                }
+
+                if (WILDCARD.equals(item)) {
+                    if (foundWildcard) {
+                        throw new IllegalArgumentException("Illegal spec, `" + WILDCARD +
+                                "` must not appear multiple times in `" + spec + "`");
+                    }
+                    defaultIsIn = isIn;
+                    foundWildcard = true;
+                } else {
+                    int key = Integer.parseInt(item);
+                    if (mIsIn.indexOfKey(key) >= 0) {
+                        throw new IllegalArgumentException("Illegal spec, `" + key +
+                                "` must not appear multiple times in `" + spec + "`");
+                    }
+                    mIsIn.put(key, isIn);
+                }
             }
+
+            if (!foundWildcard) {
+                throw new IllegalArgumentException("Illegal spec, must specify either * or !*");
+            }
+
+            mDefaultIsIn = defaultIsIn;
         }
 
-        @Override
-        public String toString() {
-            return Arrays.toString(mSchedule);
-        }
-
-        public long getNextTime(long now, long notificationTime) {
-            for (int i = 0; i < mSchedule.length; i++) {
-                final long time = notificationTime + mSchedule[i] * 1000;
-                if (time > now) return time;
-            }
-            return 0;
+        public boolean isIn(int value) {
+            return (mIsIn.get(value, mDefaultIsIn));
         }
     }
 }

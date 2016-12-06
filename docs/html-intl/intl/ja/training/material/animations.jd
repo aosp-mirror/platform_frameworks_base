@@ -173,7 +173,7 @@ Enter と Exit の遷移や、アクティビティ間での Shared elements 遷
 </ul>
 
 <p>{@link android.transition.Visibility} クラスを拡張する Transition はすべて、EnterTransition または ExitTransition としてサポートされます。
-詳細については、API リファレンスの 
+詳細については、API リファレンスの
 {@link android.transition.Transition} クラスをご覧ください。</p>
 
 <p>Android 5.0（API レベル 21）では、次の共有要素遷移もサポートしています。</p>
@@ -226,7 +226,7 @@ Enter と Exit の遷移や、アクティビティ間での Shared elements 遷
 &lt;/transitionSet>
 </pre>
 
-<p><code>changeImageTransform</code> 要素は 
+<p><code>changeImageTransform</code> 要素は
 {@link android.transition.ChangeImageTransform} クラスに対応します。詳細については、API リファレンスの {@link android.transition.Transition} をご覧ください。
 </p>
 
@@ -263,7 +263,7 @@ setSharedElementEnterTransition()} メソッドは、呼び出し先のアクテ
 有効にしていないと、呼び出し元のアクティビティが Exit 遷移を開始したあと、window 遷移（スケールやフェードなど）が起きます。
 </p>
 
-<p>Enter 遷移をできるだけ早く開始するには、呼び出し先のアクティビティで 
+<p>Enter 遷移をできるだけ早く開始するには、呼び出し先のアクティビティで
 {@link android.view.Window#setAllowEnterTransitionOverlap Window.setAllowEnterTransitionOverlap()}
  メソッドを使用します。これにより、さらに印象的な Enter 遷移になります。</p>
 
@@ -321,7 +321,7 @@ imgContainerView.setOnClickListener(new View.OnClickListener() {
 {@link android.view.View#setTransitionName View.setTransitionName()} メソッドを使用して両方のアクティビティに共通の要素名を指定します。
 </p>
 
-<p>2 つ目のアクティビティが終了したときにシーンの切り替えアニメーションを逆回転させるには、{@link android.app.Activity#finish Activity.finish()} の代わりに 
+<p>2 つ目のアクティビティが終了したときにシーンの切り替えアニメーションを逆回転させるには、{@link android.app.Activity#finish Activity.finish()} の代わりに
 {@link android.app.Activity#finishAfterTransition Activity.finishAfterTransition()}
  メソッドを呼び出します。</p>
 

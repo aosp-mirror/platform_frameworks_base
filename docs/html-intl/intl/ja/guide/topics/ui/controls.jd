@@ -69,7 +69,7 @@ parent.link=index.html
     <tr>
         <td><a href="controls/radiobutton.html">ラジオボタン</a></td>
         <td>グループで選択できるオプションは 1 つのみであることを除き、チェックボックスと同様です。</td>
-	<td>{@link android.widget.RadioGroup RadioGroup} 
+	<td>{@link android.widget.RadioGroup RadioGroup}
 	<br>{@link android.widget.RadioButton RadioButton} </td>
     </tr>
     <tr>

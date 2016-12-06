@@ -23,6 +23,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.util.AndroidException;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -201,9 +202,11 @@ public class Wm extends BaseCommand {
         try {
             if (density > 0) {
                 // TODO(multidisplay): For now Configuration only applies to main screen.
-                mWm.setForcedDisplayDensity(Display.DEFAULT_DISPLAY, density);
+                mWm.setForcedDisplayDensityForUser(Display.DEFAULT_DISPLAY, density,
+                        UserHandle.USER_CURRENT);
             } else {
-                mWm.clearForcedDisplayDensity(Display.DEFAULT_DISPLAY);
+                mWm.clearForcedDisplayDensityForUser(Display.DEFAULT_DISPLAY,
+                        UserHandle.USER_CURRENT);
             }
         } catch (RemoteException e) {
         }

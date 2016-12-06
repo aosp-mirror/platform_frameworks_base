@@ -143,7 +143,9 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_4g_plus" msgid="3032226872470658661">"4G+"</string>
     <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
+    <string name="accessibility_data_connection_lte_plus" msgid="361876866906946007">"LTE+"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"റോമിംഗ്"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
@@ -236,7 +238,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G ഡാറ്റ താൽക്കാലികമായി നിർത്തി"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"സെല്ലുലാർ ഡാറ്റ താൽക്കാലികമായി നിർത്തി"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"ഡാറ്റ താൽക്കാലികമായി നിർത്തി"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"നിങ്ങൾ നേരത്തെ ക്രമീകരിച്ച ഡാറ്റ പരിധിയിലെത്തിയതിനാൽ, ഈ സൈക്കിളിന്റെ അവശേഷിക്കുന്ന ഡാറ്റ ഉപയോഗം, ഉപകരണം താൽക്കാലികമായി നിർത്തി.\n\nപുനരാരംഭിക്കുന്നത്, നിങ്ങളുടെ കാരിയറിൽ നിന്ന് നിരക്കുകൾക്ക് ഇടയാക്കാം."</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"നിങ്ങൾ സജ്ജമാക്കിയ ഡാറ്റ പരിധി എത്തിക്കഴിഞ്ഞു. ഇനിയങ്ങോട്ട് നിങ്ങൾ സെല്ലുലാർ ഡാറ്റ ഉപയോഗിക്കില്ല.\n\nതുടരുകയാണെങ്കിൽ, ഡാറ്റാ ഉപയോഗത്തിന് നിരക്കുകൾ ബാധകമായേക്കാം."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"പുനരാരംഭിക്കുക"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"ഇന്റർനെറ്റ് കണക്ഷൻ ഇല്ല"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"വൈഫൈ കണക്‌റ്റുചെയ്‌തു"</string>
@@ -317,6 +319,9 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> പരിധി"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> മുന്നറിയിപ്പ്"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"പ്രവർത്തന മോഡ്"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"നൈറ്റ് ലൈറ്റ്"</string>
+    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"നൈറ്റ് ലൈറ്റ് ഓണാണ്, ഓഫാക്കുന്നതിന് ടാപ്പുചെയ്യുക"</string>
+    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"നൈറ്റ് ലൈറ്റ് ഓഫാണ്, ഓണാക്കുന്നതിന് ടാപ്പുചെയ്യുക"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"സമീപകാല ഇനങ്ങൾ ഒന്നുമില്ല"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"നിങ്ങൾ എല്ലാം മായ്ച്ചിരിക്കുന്നു"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"ആപ്പ് വിവരം"</string>
@@ -330,6 +335,8 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"തിരശ്ചീനമായി വേർതിരിക്കുക"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ലംബമായി വേർതിരിക്കുക"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"ഇഷ്‌ടാനുസൃതമായി വേർതിരിക്കുക"</string>
+  <string-array name="recents_blacklist_array">
+  </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"ചാർജായി"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"ചാർജ്ജുചെയ്യുന്നു"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"പൂർണ്ണമായും ചാർജ്ജാകുന്നതിന്, <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
@@ -397,6 +404,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"ഉപകരണം നിരീക്ഷിക്കപ്പെടാം"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"പ്രൊഫൈൽ നിരീക്ഷിക്കപ്പെടാം"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"നെറ്റ്‌വർക്ക് നിരീക്ഷിക്കപ്പെടാം"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"നെറ്റ്‌വർക്ക് നിരീക്ഷിക്കപ്പെടാം"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"ഉപകരണം നിരീക്ഷിക്കൽ"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"പ്രൊഫൈൽ നിരീക്ഷിക്കൽ"</string>
     <string name="monitoring_title" msgid="169206259253048106">"നെറ്റ്‌വർക്ക് നിരീക്ഷിക്കൽ"</string>
@@ -409,6 +417,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"നിങ്ങൾ <xliff:g id="APPLICATION">%1$s</xliff:g> എന്നതിലേക്ക് കണക്റ്റുചെയ്‌തിരിക്കുന്നു, അതിന് ഇമെയിലുകൾ, ആപ്സ്, വെബ്‌സൈറ്റുകൾ എന്നിവ ഉൾപ്പെടെ നിങ്ങളുടെ നെറ്റ്‌വർക്ക് പ്രവർത്തനം നിരീക്ഷിക്കാനാകും."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"നിങ്ങൾ <xliff:g id="APPLICATION">%1$s</xliff:g> എന്നതിലേക്ക് കണക്റ്റുചെയ്‌തിരിക്കുന്നു, അതിന് ഇമെയിലുകൾ, ആപ്സ്, വെബ്‌സൈറ്റുകൾ എന്നിവ ഉൾപ്പെടെ നിങ്ങളുടെ സ്വകാര്യ നെറ്റ്‌വർക്ക് പ്രവർത്തനം നിരീക്ഷിക്കാനാകും."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"നിങ്ങൾ <xliff:g id="APPLICATION">%1$s</xliff:g> ആപ്പിലേക്ക് കണക്റ്റുചെയ്‌തിരിക്കുന്നു, ഇമെയിലുകൾ, ആപ്‌സ്, വെബ്‌സൈറ്റുകൾ എന്നിവ ഉൾപ്പെടെ നെറ്റ്‌വർക്ക് ആക്റ്റിവിറ്റി നിരീക്ഷിക്കാൻ ഈ ആപ്പിന് കഴിയും."</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ നിയന്ത്രിക്കുന്നത് <xliff:g id="ORGANIZATION">%1$s</xliff:g> ആണ്. നിങ്ങൾ <xliff:g id="APPLICATION">%2$s</xliff:g> എന്നതിലേക്ക് കണക്റ്റുചെയ്‌തിരിക്കുന്നു, അതിന് ഇമെയിലുകൾ, ആപ്സ്, വെബ്‌സൈറ്റുകൾ എന്നിവ ഉൾപ്പെടെ നിങ്ങളുടെ ഔദ്യോഗിക നെറ്റ്‌വർക്ക് പ്രവർത്തനം നിരീക്ഷിക്കാനാകും.\n\nകൂടുതൽ വിവരങ്ങൾക്ക്, നിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്ററെ ബന്ധപ്പെടുക."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ നിയന്ത്രിക്കുന്നത് <xliff:g id="ORGANIZATION">%1$s</xliff:g> ആണ്. നിങ്ങൾ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> എന്നതിലേക്ക് കണക്റ്റുചെയ്‌തിരിക്കുന്നു, അതിന് ഇമെയിലുകൾ, ആപ്സ്, വെബ്‌സൈറ്റുകൾ എന്നിവ ഉൾപ്പെടെ നിങ്ങളുടെ ഔദ്യോഗിക നെറ്റ്‌വർക്ക് പ്രവർത്തനം നിരീക്ഷിക്കാനാകും.\n\nനിങ്ങൾ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> എന്നതിലേക്കും കണക്റ്റുചെയ്‌തിരിക്കുന്നു, അതിന് നിങ്ങളുടെ സ്വകാര്യ നെറ്റ്‌വർക്ക് പ്രവർത്തനം നിരീക്ഷിക്കാനാകും."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"നിങ്ങളുടെ ഉപകരണം നിയന്ത്രിക്കുന്നത് <xliff:g id="ORGANIZATION">%1$s</xliff:g> ആണ്.\n\nനിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്റർക്ക്, ഉപകരണവുമായി ബന്ധപ്പെട്ട ക്രമീകരണവും കോർപ്പറേറ്റ് ആക്‌സസ്സും അപ്ലിക്കേഷനുകളും വിവരവും ഒപ്പം ഉപകരണത്തിന്റെ ലൊക്കേഷൻ വിവരവും നിരീക്ഷിച്ച് നിയന്ത്രിക്കാനാകും.\n\nഇമെയിലുകളും അപ്ലിക്കേഷനുകളും വെബ്‌സൈറ്റുകളും ഉൾപ്പെടെയുള്ള നെറ്റ്‌വർക്ക് പ്രവർത്തനം നിരീക്ഷിക്കാനാകുന്ന ഒരു <xliff:g id="APPLICATION">%2$s</xliff:g> എന്നതിലേക്കും നിങ്ങൾ കണക്റ്റുചെയ്തിരിക്കുന്നു.\n\nകൂടുതൽ വിവരങ്ങൾക്ക്, അഡ്‌മിനിസ്ട്രേറ്ററെ ബന്ധപ്പെടുക."</string>
@@ -434,6 +443,18 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g>, വോളിയം ഡയലോഗാണ്"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"ഒറിജിനൽ പുനഃസ്ഥാപിക്കാൻ ടാപ്പുചെയ്യുക."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"നിങ്ങൾ ഉപയോഗിക്കുന്നത് ഔദ്യോഗിക പ്രൊഫൈലാണ്"</string>
+  <string-array name="volume_stream_titles">
+    <item msgid="5841843895402729630">"വിളിക്കുക"</item>
+    <item msgid="5997713001067658559">"സിസ്‌റ്റം"</item>
+    <item msgid="7858983209929864160">"റിംഗുചെയ്യുക"</item>
+    <item msgid="1850038478268896762">"മീഡിയ"</item>
+    <item msgid="8265110906352372092">"അലാറം"</item>
+    <item msgid="5339394737636839168"></item>
+    <item msgid="2951313578278086204">"ബ്ലൂടൂത്ത്"</item>
+    <item msgid="2919807739709798970"></item>
+    <item msgid="150349973435223405"></item>
+    <item msgid="6761963760295549099"></item>
+  </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. അൺമ്യൂട്ടുചെയ്യുന്നതിന് ടാപ്പുചെയ്യുക."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. വൈബ്രേറ്റിലേക്ക് സജ്ജമാക്കുന്നതിന് ടാപ്പുചെയ്യുക. പ്രവേശനക്ഷമതാ സേവനങ്ങൾ മ്യൂട്ടുചെയ്യപ്പെട്ടേക്കാം."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. മ്യൂട്ടുചെയ്യുന്നതിന് ടാപ്പുചെയ്യുക. പ്രവേശനക്ഷമതാ സേവനങ്ങൾ മ്യൂട്ടുചെയ്യപ്പെട്ടേക്കാം."</string>
@@ -473,8 +494,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"സ്റ്റാറ്റസ് ബാറിൽ ക്ലോക്ക് സെക്കൻഡ് കാണിക്കുന്നത് ബാറ്ററിയുടെ ലൈഫിനെ ബാധിക്കാം."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"ദ്രുത ക്രമീകരണം പുനഃസജ്ജീകരിക്കുക"</string>
     <string name="show_brightness" msgid="6613930842805942519">"ദ്രുത ക്രമീകരണത്തിൽ തെളിച്ചം കാണിക്കുക"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"സ്പ്ലിറ്റ്-സ്ക്രീൻ സ്വൈപ്പ്-അപ്പ് ജെസ്റ്റർ പ്രവർത്തനക്ഷമമാക്കുക"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"ചുരുക്കവിവരണ ബട്ടണിൽ നിന്ന് മുകളിലേക്ക് സ്വൈപ്പുചെയ്തുകൊണ്ട് സ്പ്ലിറ്റ്-സ്ക്രീനിലേക്ക് പ്രവേശിക്കാൻ ജെസ്‌റ്റർ പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="experimental" msgid="6198182315536726162">"പരീക്ഷണാത്മകം!"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth ഓണാക്കണോ?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"നിങ്ങളുടെ ടാബ്‌ലെറ്റുമായി കീബോർഡ് കണക്റ്റുചെയ്യുന്നതിന്, ആദ്യം Bluetooth ഓണാക്കേണ്ടതുണ്ട്."</string>
@@ -504,21 +523,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"കൂടുതൽ ക്രമീകരണം"</string>
     <string name="notification_done" msgid="5279426047273930175">"പൂർത്തിയായി"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> അറിയിപ്പ് നിയന്ത്രണങ്ങൾ"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"വർണ്ണവും രൂപഭാവവും"</string>
-    <string name="night_mode" msgid="3540405868248625488">"നൈറ്റ് മോഡ്"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"ഡിസ്പ്ലേ കാലിബ്രേറ്റുചെയ്യുക"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"ഓൺ"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"ഓഫ്"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"സ്വയമേവ ഓണാക്കുക"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"ലൊക്കേഷനും ദിവസത്തിലെ സമയത്തിനും അനുയോജ്യമായ തരത്തിൽ നൈറ്റ് മോഡിലേക്ക് സ്വിച്ചുചെയ്യുക"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"നൈറ്റ് മോഡ് ഓണായിരിക്കുമ്പോൾ"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Android OS-നുള്ള ഇരുണ്ട തീം ഉപയോഗിക്കുക"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"ടിന്റ് ക്രമപ്പെടുത്തുക"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"തെളിച്ചം ക്രമപ്പെടുത്തുക"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"ക്രമീകരണം പോലെയുള്ള, ഒരു ലൈറ്റ് തീമിൽ സാധാരണ ഗതിയിൽ പ്രദർശിപ്പിക്കപ്പെടുന്ന Android OS-ന്റെ അടിസ്ഥാന ഇടങ്ങളിലേക്ക്, ഇരുണ്ട തീം പ്രയോഗിക്കുന്നു."</string>
-    <string name="color_apply" msgid="9212602012641034283">"ബാധകമാക്കുക"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"ക്രമീകരണം സ്ഥിരീകരിക്കുക"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"ചില വർണ്ണ ക്രമീകരണത്തിന് ഈ ഉപകരണത്തെ ഉപയോഗരഹിതമാക്കാനാകും. ഈ വർണ്ണ ക്രമീകരണം സ്ഥിരീകരിക്കുന്നതിന് ശരി എന്നതിൽ ക്ലിക്കുചെയ്യുക, അല്ലെങ്കിൽ 10 സെക്കൻഡിന് ശേഷം ഈ ക്രമീകരണം പുനഃക്രമീകരിക്കപ്പെടും."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"ബാറ്ററി ഉപയോഗം"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ചാർജുചെയ്യുന്ന സമയത്ത് ബാറ്ററി സേവർ ലഭ്യമല്ല"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"ബാറ്ററി സേവർ"</string>
@@ -647,4 +651,5 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> ക്രമീകരണം തുറക്കുക."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ക്രമീകരണ ക്രമം എഡിറ്റുചെയ്യുക."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"പേജ് <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <string name="cant_silence_or_block" msgid="999689262131488625">"അറിയിപ്പുകൾ നിശബ്ദമാക്കാനോ ബ്ലോക്കുചെയ്യാനോ കഴിയില്ല"</string>
 </resources>

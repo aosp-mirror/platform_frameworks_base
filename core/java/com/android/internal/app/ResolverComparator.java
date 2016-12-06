@@ -157,7 +157,10 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
 
         // We want to put the one targeted to another user at the end of the dialog.
         if (lhs.targetUserId != UserHandle.USER_CURRENT) {
-            return 1;
+            return rhs.targetUserId != UserHandle.USER_CURRENT ? 0 : 1;
+        }
+        if (rhs.targetUserId != UserHandle.USER_CURRENT) {
+            return -1;
         }
 
         if (mHttp) {

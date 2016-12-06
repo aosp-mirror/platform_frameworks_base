@@ -78,6 +78,13 @@ public:
     bool prefetchAndMarkInUse(void* ownerToken, const SkBitmap* bitmap);
 
     /**
+     * Attempts to precache the SkBitmap. Returns true if a Texture was successfully
+     * acquired for the bitmap, false otherwise. Does not mark the Texture
+     * as in use and won't update currently in-use Textures.
+     */
+    bool prefetch(const SkBitmap* bitmap);
+
+    /**
      * Returns the texture associated with the specified bitmap from either within the cache, or
      * the AssetAtlas. If the texture cannot be found in the cache, a new texture is generated.
      */

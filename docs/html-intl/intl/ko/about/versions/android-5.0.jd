@@ -381,7 +381,7 @@ sdk.platform.apiLevel=21
 <h3 id="AudioPlayback">오디오 재생</h3>
 <p>이 출시 버전에는 다음과 같은 {@link android.media.AudioTrack}에 대한 변경사항이 포함되어 있습니다.</p>
 <ul>
-  <li>이제 앱에서 부동 소수점 형식({@link android.media.AudioFormat#ENCODING_PCM_FLOAT ENCODING_PCM_FLOAT})으로 오디오 데이터를 제공할 수 있습니다. 이를 통해 더 큰 음량비, 더 일관된 정밀도 및 더 큰 헤드룸이 가능해졌습니다. 부동 소수점 연산은 중간 과정 계산에 특히 유용합니다. 재생 엔드포인트는 오디오 데이터에 낮은 비트 심도로 정수 형식을 사용합니다 (Android 5.0에서 일부 내부 파이프라인은 아직 부동 소수점이 아님). 
+  <li>이제 앱에서 부동 소수점 형식({@link android.media.AudioFormat#ENCODING_PCM_FLOAT ENCODING_PCM_FLOAT})으로 오디오 데이터를 제공할 수 있습니다. 이를 통해 더 큰 음량비, 더 일관된 정밀도 및 더 큰 헤드룸이 가능해졌습니다. 부동 소수점 연산은 중간 과정 계산에 특히 유용합니다. 재생 엔드포인트는 오디오 데이터에 낮은 비트 심도로 정수 형식을 사용합니다 (Android 5.0에서 일부 내부 파이프라인은 아직 부동 소수점이 아님).
   <li>이제 앱에서 오디오 데이터를 {@link android.media.MediaCodec}에서 제공하는 것과 같은 형식인 {@link java.nio.ByteBuffer}로 제공할 수 있습니다.
   <li>{@link android.media.AudioTrack#WRITE_NON_BLOCKING WRITE_NON_BLOCKING} 옵션은 일부 앱에서 버퍼링 및 멀티스레딩을 단순화할 수 있습니다.
 </ul>
@@ -429,7 +429,7 @@ sdk.platform.apiLevel=21
 <p>시스템에서 적절한 네트워크를 감지하면 감지한 네트워크에 연결하고 {@link android.net.ConnectivityManager.NetworkCallback#onAvailable(android.net.Network) onAvailable()} 콜백을 호출합니다. 콜백의 {@link android.net.Network} 개체를 사용하여 네트워크에 대한 추가 정보를 가져오거나, 트래픽이 선택한 네트워크를 사용하도록 유도합니다.</p>
 
 <h3 id="BluetoothBroadcasting">저전력 블루투스</h3>
-<p>Android 4.3에서는 <a href="{@docRoot}guide/topics/connectivity/bluetooth-le.html">저전력 블루투스</a>(<em>블루투스 LE</em>)에 대한 플랫폼 지원이 도입되었습니다. Android 5.0에서는 Android 기기가 블루투스 LE <em>주변기기</em>로 작동할 수 있습니다. 앱에서 이 기능을 사용하여 주변 기기에 블루투스로 연결할 수 있음을 알릴 수 있습니다. 예를 들어 기기가 만보계나 건강 모니터링 기기로 작동하면서 다른 블루투스 LE 기기와 데이터를 통신할 수 있도록 하는 앱을 제작할 수 있습니다.</p> 
+<p>Android 4.3에서는 <a href="{@docRoot}guide/topics/connectivity/bluetooth-le.html">저전력 블루투스</a>(<em>블루투스 LE</em>)에 대한 플랫폼 지원이 도입되었습니다. Android 5.0에서는 Android 기기가 블루투스 LE <em>주변기기</em>로 작동할 수 있습니다. 앱에서 이 기능을 사용하여 주변 기기에 블루투스로 연결할 수 있음을 알릴 수 있습니다. 예를 들어 기기가 만보계나 건강 모니터링 기기로 작동하면서 다른 블루투스 LE 기기와 데이터를 통신할 수 있도록 하는 앱을 제작할 수 있습니다.</p>
 <p>새 {@link android.bluetooth.le} API를 사용하면 앱에서 광고를 브로드캐스팅하고, 응답을 스캔하며, 주변의 블루투스 LE 기기와 연결을 설정하도록 할 수 있습니다. 새 광고 및 스캔 기능을 사용하려면 매니페스트에 {@link android.Manifest.permission#BLUETOOTH_ADMIN BLUETOOTH_ADMIN} 권한을 추가합니다. 사용자가 Play 스토어에서 앱을 업데이트하거나 다운로드할 때 사용자에게 앱에 권한을 부여할 것인지 묻는 메시지('블루투스 연결 정보: 주변의 블루투스 기기에 브로드캐스팅하거나 이러한 기기에 대한 정보 수집하는 등 앱에서 블루투스를 제어하도록 허용합니다.')가 표시됩니다.</p>
 
 <p>다른 앱에서 내 앱을 찾을 수 있도록 블루투스 LE 광고를 시작하려면 {@link android.bluetooth.le.BluetoothLeAdvertiser#startAdvertising(android.bluetooth.le.AdvertiseSettings, android.bluetooth.le.AdvertiseData, android.bluetooth.le.AdvertiseCallback) startAdvertising()}을 호출하고 이를 {@link android.bluetooth.le.AdvertiseCallback} 클래스 구현에 전달합니다. 콜백 개체는 광고 작업의 성공 또는 실패에 대한 보고서를 수신합니다.</p>

@@ -13,7 +13,7 @@ nonavpage=true
 
 <style>
 .fullpage>#footer,
-#jd-content>.content-footer.wrap {
+#body-content>.content-footer.wrap {
   display:none;
 }
 </style>

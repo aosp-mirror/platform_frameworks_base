@@ -1,0 +1,121 @@
+page.title=Ghi lại TV
+page.keywords=preview,sdk,tv,recording
+page.tags=androidn
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>Trong tài liệu này</h2>
+  <ol>
+    <li><a href="#supporting">Chỉ báo Hỗ trợ ghi lại</a></li>
+    <li><a href="#recording">Ghi lại một chương trình</a></li>
+    <li><a href="#errors">Xử lý lỗi ghi lại</a></li>
+    <li><a href="#sessions">Quản lý các chương trình được ghi lại</a></li>
+    <li><a href="#best">Thực hành Tốt nhất</a></li>
+  </ol>
+</div>
+</div>
+
+<p>Các dịch vụ nguồn vào TV cho phép người dùng tạm dừng và tiếp tục phát lại kênh thông qua
+các API chuyển dịch thời gian. Android N mở rộng thêm chuyển dịch thời gian
+bằng cách cho phép người dùng lưu nhiều chương trình được ghi lại.</p>
+
+<p>Người dùng có thể tạo lịch ghi lại trước hoặc tiến hành ghi lại khi họ xem
+một chương trình. Khi hệ thống đã lưu bản ghi lại, người dùng có thể duyệt, quản lý
+và phát lại bản ghi đó bằng ứng dụng TV của hệ thống.</p>
+
+<p>Nếu bạn muốn cung cấp tính năng ghi lại cho dịch vụ nguồn vào TV,
+bạn phải báo cho hệ thống biết ứng dụng của bạn hỗ trợ ghi lại, triển khai
+khả năng ghi chương trình, xử lý và thông báo bất kỳ lỗi nào xuất hiện
+trong quá trình ghi lại và quản lý các chương trình được ghi lại.</p>
+
+<h2 id="supporting">Chỉ báo Hỗ trợ ghi lại</h2>
+
+<p>Để thông báo cho hệ thống biết dịch vụ nguồn vào TV của bạn hỗ trợ ghi lại, hãy thực hiện
+các bước sau:</p>
+
+<ol>
+<li>Trong phương thức <code>TvInputService.onCreate()</code> của bạn, hãy tạo một đối tượng
+<code>TvInputInfo</code> mới sử dụng lớp <code>TvInputInfo.Builder</code>
+.</li>
+<li>Khi tạo đối tượng <code>TvInputInfo</code> mới, hãy gọi
+<code>setCanRecord(true)</code> trước khi gọi <code>build()</code> để
+chỉ báo dịch vụ của bạn hỗ trợ ghi lại.</li>
+<li>Đăng ký đối tượng <code>TvInputInfo</code> với hệ thống bằng cách gọi
+<code>TvInputService.updateTvInputInfo()</code>.</li>
+</ol>
+
+<h2 id="recording">Ghi lại một chương trình</h2>
+
+<p>Sau khi dịch vụ nguồn vào TV của bạn đăng ký để hỗ trợ tính năng
+ghi lại, hệ thống sẽ gọi phương thức
+<code>TvInputService.onCreateRecordingSession()</code> của bạn khi cần truy cập
+phần triển khai ghi lại của ứng dụng. Triển khai lớp con
+<code>TvInputService.RecordingSession</code> của bạn và trả nó về
+khi hàm gọi lại <code>onCreateRecordingSession()</code>
+được gọi. Lớp con này chịu trách nhiệm chuyển sang dữ liệu kênh phù hợp,
+ghi lại dữ liệu được yêu cầu và thông báo trạng thái ghi lại và các lỗi cho
+hệ thống.</p>
+
+<p>Khi hệ thống gọi <code>RecordingSession.onTune()</code>, chuyển vào một
+URI của kênh, chỉnh vào kênh mà URI đó chỉ định. Thông báo cho hệ thống biết
+ứng dụng của bạn đã chỉnh vào kênh mong muốn bằng cách gọi <code>notifyTuned()</code>,
+hoặc nếu ứng dụng không thể chỉnh vào kênh phù hợp, hãy gọi
+<code>notifyError()</code>.</p>
+
+<p>Tiếp theo hệ thống sẽ gọi hàm gọi lại <code>RecordingSession.onStartRecording()</code>
+. Ứng dụng của bạn phải bắt đầu ghi lại ngay lập tức. Khi hệ thống gọi
+hàm gọi lại này, hệ thống có thể cung cấp một URI có chứa thông tin về chương trình
+sắp được ghi lại. Khi kết thúc việc ghi lại, bạn cần sao chép dữ liệu
+này vào bảng dữ liệu <code>RecordedPrograms</code>.</p>
+
+<p>Cuối cùng, hệ thống sẽ gọi <code>RecordingSession.onStopRecording()</code>.
+Lúc này, ứng dụng của bạn phải dừng ghi lại ngay lập tức. Bạn cũng cần
+tạo một mục nhập trong bảng <code>RecordedPrograms</code>. Mục này cần
+có URI dữ liệu của chương trình được ghi lại trong
+cột <code>RecordedPrograms.COLUMN_RECORDING_DATA_URI</code>, và bất kỳ thông tin
+về chương trình mà hệ thống đã cung cấp trong lần gọi đầu tiên tới
+<code>onStartRecording()</code>.</p>
+
+<p>Để biết thêm thông tin về cách truy cập bảng <code>RecordedPrograms</code>
+hãy xem <a href="#sessions">Quản lý các chương trình được ghi lại</a>.</p>
+
+<h2 id="errors">Xử lý lỗi ghi lại</h2>
+
+<p>Nếu xảy ra lỗi trong quá trình ghi lại, làm cho dữ liệu ghi lại không sử dụng được thì
+hãy thông báo cho hệ thống bằng cách gọi <code>RecordingSession.notifyError()</code>.
+Tương tự, bạn có thể gọi <code>notifyError()</code> sau khi một chương trình ghi lại
+được tạo để cho phép hệ thống biết được ứng dụng của bạn không còn tiếp tục ghi các chương trình.</p>
+
+<p>Nếu xảy ra lỗi trong quá trình ghi lại, nhưng có khả năng là một phần dữ liệu
+ghi lại có thể được sử dụng để người dùng phát lại thì hãy gọi
+<code>RecordingSession.notifyRecordingStopped()</code> để cho phép hệ thống
+sử dụng một phần chương trình đó.</p>
+
+<h2 id="sessions">Quản lý các chương trình được ghi lại</h2>
+
+<p>Hệ thống lưu giữ thông tin cho mọi chương trình được ghi lại từ tất cả
+các ứng dụng kênh truyền hình hỗ trợ ghi lại trong bảng trình cung cấp nội dung<code>TvContract.RecordedPrograms</code>
+. Có thể truy cập thông tin này qua URI nội dung
+<code>RecordedPrograms.Uri</code>. Hãy sử dụng các API trình cung cấp nội dung để
+đọc, thêm và xóa các mục trong bảng này.</p>
+
+<p>Để biết thêm thông tin về thao tác với dữ liệu trình cung cấp nội dung, hãy xem
+<a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+Nội dung Cơ bản về Trình cung cấp Nội dung</a>.</p>
+
+<h2 id="best">Thực hành Tốt nhất</h2>
+
+<p>Các thiết bị TV có thể có bộ nhớ lưu trữ hạn chế do đó phán đoán hợp lý nhất khi
+phân bổ bộ nhớ lưu trữ để lưu các chương trình được ghi lại. Sử dụng
+<code>RecordingCallback.onError(RECORDING_ERROR_INSUFFICIENT_SPACE)</code> khi
+không có đủ dung lượng trống để lưu một chương trình được ghi lại.</p>
+
+<p>Khi người dùng khởi tạo quá trình ghi lại, bạn cần tiến hành ghi lại dữ liệu nhanh nhất
+có thể. Để hỗ trợ công việc này, hãy hoàn thành tất cả các tác vụ tốn thời gian trước đó,
+như truy cập và phân bổ không gian lưu trữ khi hệ thống gọi hàm gọi lại
+<code>onCreateRecordingSession()</code>. Làm như vậy sẽ cho phép bạn tiến hành
+việc ghi lại ngay lập tức khi hàm gọi lại <code>onStartRecording()</code>
+được gọi.</p>

@@ -123,22 +123,27 @@ void BaseRenderNodeAnimator::resolveStagingRequest(Request request) {
         mPlayTime = (mPlayState == PlayState::Running || mPlayState == PlayState::Reversing) ?
                         mPlayTime : 0;
         mPlayState = PlayState::Running;
+        mPendingActionUponFinish = Action::None;
         break;
     case Request::Reverse:
         mPlayTime = (mPlayState == PlayState::Running || mPlayState == PlayState::Reversing) ?
                         mPlayTime : mDuration;
         mPlayState = PlayState::Reversing;
+        mPendingActionUponFinish = Action::None;
         break;
     case Request::Reset:
         mPlayTime = 0;
         mPlayState = PlayState::Finished;
+        mPendingActionUponFinish = Action::Reset;
         break;
     case Request::Cancel:
         mPlayState = PlayState::Finished;
+        mPendingActionUponFinish = Action::None;
         break;
     case Request::End:
         mPlayTime = mPlayState == PlayState::Reversing ? 0 : mDuration;
         mPlayState = PlayState::Finished;
+        mPendingActionUponFinish = Action::End;
         break;
     default:
         LOG_ALWAYS_FATAL("Invalid staging request: %d", static_cast<int>(request));
@@ -176,8 +181,6 @@ void BaseRenderNodeAnimator::pushStaging(AnimationContext& context) {
         mStagingRequests.clear();
 
         if (mStagingPlayState == PlayState::Finished) {
-            // Set the staging play time and end the animation
-            updatePlayTime(mPlayTime);
             callOnFinishedListener(context);
         } else if (mStagingPlayState == PlayState::Running
                 || mStagingPlayState == PlayState::Reversing) {
@@ -236,6 +239,15 @@ bool BaseRenderNodeAnimator::animate(AnimationContext& context) {
         return false;
     }
     if (mPlayState == PlayState::Finished) {
+        if (mPendingActionUponFinish == Action::Reset) {
+            // Skip to start.
+            updatePlayTime(0);
+        } else if (mPendingActionUponFinish == Action::End) {
+            // Skip to end.
+            updatePlayTime(mDuration);
+        }
+        // Reset pending action.
+        mPendingActionUponFinish = Action ::None;
         return true;
     }
 
@@ -272,6 +284,10 @@ bool BaseRenderNodeAnimator::updatePlayTime(nsecs_t playTime) {
     setValue(mTarget, mFromValue + (mDeltaValue * fraction));
 
     return playTime >= mDuration;
+}
+
+nsecs_t BaseRenderNodeAnimator::getRemainingPlayTime() {
+    return mPlayState == PlayState::Reversing ? mPlayTime : mDuration - mPlayTime;
 }
 
 void BaseRenderNodeAnimator::forceEndNow(AnimationContext& context) {

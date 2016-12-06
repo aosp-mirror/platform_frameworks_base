@@ -29,7 +29,7 @@ tela para a interface de usuário e um <em>serviço</em> realiza trabalho
 em segundo plano de forma independente.</p>
 
 <p>De um componente, é possível executar outro componente usando uma <em>intenção</em>. É possível até mesmo
-iniciar um componente em um aplicativo diferente, como uma atividade em um aplicativo de mapas para mostrar um endereço. Esse modelo 
+iniciar um componente em um aplicativo diferente, como uma atividade em um aplicativo de mapas para mostrar um endereço. Esse modelo
 fornece vários pontos de entrada para um único aplicativo e permite que qualquer aplicativo se comporte como o "padrão" de um usuário
 para uma ação que outros aplicativos podem invocar.</p>
 
@@ -53,7 +53,7 @@ diferentes configurações de dispositivos. Por exemplo, é possível criar dife
 de layout para diversos tamanhos de tela e o sistema
 determina qual layout deverá aplicar com base no tamanho da tela do dispositivo atual.</p>
 
-<p>Você pode consultar a disponibilidade dos recursos do dispositivo em tempo de execução se qualquer recurso do 
+<p>Você pode consultar a disponibilidade dos recursos do dispositivo em tempo de execução se qualquer recurso do
 aplicativo exigir hardware específico, como uma câmera. Se necessário, também é possível declarar recursos que o aplicativo exige,
 para que mercados como a Google Play Store não permitam a instalação em dispositivos que não sejam compatíveis
 com aquele recurso.</p>

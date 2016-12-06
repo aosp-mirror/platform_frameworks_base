@@ -21,7 +21,7 @@
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Laporan bug <xliff:g id="ID">#%d</xliff:g> dijepret"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Menambahkan detail ke laporan bug"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Harap tunggu..."</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Gesek ke kiri untuk membagikan laporan bug Anda"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Laporan bug akan segera muncul di ponsel"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Ketuk untuk membagikan laporan bug"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Ketuk untuk membagikan laporan bug tanpa tangkapan layar atau menunggu tangkapan layar selesai"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Ketuk untuk membagikan laporan bug tanpa tangkapan layar atau menunggu tangkapan layar selesai"</string>

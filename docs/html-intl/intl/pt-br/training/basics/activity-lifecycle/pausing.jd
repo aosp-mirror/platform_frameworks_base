@@ -8,13 +8,13 @@ trainingnavtop=true
 
 <div id="tb-wrapper">
   <div id="tb">
-    
+
     <h2>Esta lição ensina a</h2>
     <ol>
       <li><a href="#Pause">Pausar sua atividade</a></li>
       <li><a href="#Resume">Reiniciar sua atividade</a></li>
     </ol>
-    
+
     <h2>Leia também</h2>
     <ul>
       <li><a href="{@docRoot}guide/components/activities.html">Atividades</a>
@@ -31,12 +31,12 @@ trainingnavtop=true
   </div>
 </div>
 
-<p>Durante o uso normal do aplicativo, a atividade em primeiro plano as vezes é obstruída por outros 
+<p>Durante o uso normal do aplicativo, a atividade em primeiro plano as vezes é obstruída por outros
 componentes visuais que causam a <em>pausa</em>.  Por exemplo, quando uma atividade
- semitransparente é aberta (como uma no estilo de um diálogo), a atividade anterior pausa. Enquanto a 
+ semitransparente é aberta (como uma no estilo de um diálogo), a atividade anterior pausa. Enquanto a
 atividade estiver parcialmente visível, mas não for o foco da atividade, ela permanecerá pausada.</p>
 
-<p>No entanto, se a atividade estiver completamente obstruída e não visível, ela <em>para</em> (o que será 
+<p>No entanto, se a atividade estiver completamente obstruída e não visível, ela <em>para</em> (o que será
 discutido na próxima lição).</p>
 
 <p>Conforme a atividade entra no estado pausado, o sistema chama o método {@link
@@ -59,7 +59,7 @@ aguarda no estado Pausa (1). Se o usuário retornar à atividade enquanto ainda 
 
 
 <h2 id="Pause">Pausar sua atividade</h2>
-      
+
 <p>Quando o sistema chama {@link android.app.Activity#onPause()} para sua atividade, teoricamente
 significa que a atividade ainda está parcialmente visível, mas geralmente é um indício
 de que o usuário está saindo da atividade e logo entrará em estado Interrompido.  Use

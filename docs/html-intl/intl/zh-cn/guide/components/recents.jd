@@ -118,7 +118,7 @@ public void createNewDocument(View view) {
 如果未找到任务或者 Intent 包含
 {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK}
 标志，则会以该 Activity 作为其根创建新任务。如果找到的话，则会将该任务转到前台并将新
- Intent 
+ Intent
 传递给
 {@link android.app.Activity#onNewIntent onNewIntent()}。新 Activity 将获得 Intent 并在概览屏幕中创建新文档，如下例所示：</p>
 
@@ -176,7 +176,7 @@ protected void onNewIntent(Intent intent) {
   <dd>该 Activity 不会为文档创建新任务。设置此值会替代
 {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}
 和 {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK} 标志的行为（如果在
- Intent 
+ Intent
 中设置了其中一个标志），并且概览屏幕将为应用显示单个任务，该任务将从用户上次调用的任意 Activity 开始继续执行。</dd>
 </dl>
 

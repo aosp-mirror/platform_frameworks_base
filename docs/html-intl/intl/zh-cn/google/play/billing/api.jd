@@ -32,7 +32,7 @@ parent.link=index.html
    <h2>另请参见</h2>
     <ol>
       <li><a href="{@docRoot}training/in-app-billing/index.html">销售应用内商品</a></li>
-    </ol>  
+    </ol>
   </div>
   </div>
 
@@ -68,7 +68,7 @@ parent.link=index.html
     <ol type="a">
     <li>Google Play 返回的 <code>Bundle</code> 中包含 <code>PendingIntent</code>，您的应用可用它来启动购买结帐界面。</li>
     <li>您的应用通过调用 <code>startIntentSenderForResult</code> 方法来启动 PendingIntent。</li>
-    <li>当结帐流程结束后（即用户成功购买商品或取消购买），Google Play 会向您的 <code>onActivityResult</code> 方法发送响应 <code>Intent</code>。<code>onActivityResult</code> 的结果代码中有一个代码将用于表明用户是完成了购买还是取消了购买。响应 <code>Intent</code> 中会包含所购商品的相关信息，其中包括 Google Play 为了唯一标识此次购买交易而生成的 <code>purchaseToken</code> 字符串。<code>Intent</code> 中还包含使用您的私人开发者密钥签署的购买签名。</li> 
+    <li>当结帐流程结束后（即用户成功购买商品或取消购买），Google Play 会向您的 <code>onActivityResult</code> 方法发送响应 <code>Intent</code>。<code>onActivityResult</code> 的结果代码中有一个代码将用于表明用户是完成了购买还是取消了购买。响应 <code>Intent</code> 中会包含所购商品的相关信息，其中包括 Google Play 为了唯一标识此次购买交易而生成的 <code>purchaseToken</code> 字符串。<code>Intent</code> 中还包含使用您的私人开发者密钥签署的购买签名。</li>
     </ol>
   </li>
   </ol>

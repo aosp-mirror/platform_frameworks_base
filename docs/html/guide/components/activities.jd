@@ -622,7 +622,7 @@ android.app.Activity#onSaveInstanceState onSaveInstanceState()}.</p>
 
 <p>The system calls {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()}
 before making the activity vulnerable to destruction. The system passes this method
-a {@link android.os.Bundle} in which you can save 
+a {@link android.os.Bundle} in which you can save
 state information about the activity as name-value pairs, using methods such as {@link
 android.os.Bundle#putString putString()} and {@link
 android.os.Bundle#putInt putInt()}. Then, if the system kills your application

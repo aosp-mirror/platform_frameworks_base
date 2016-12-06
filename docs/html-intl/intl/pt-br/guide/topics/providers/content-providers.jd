@@ -52,12 +52,12 @@ dados e fornecem mecanismos para definir a segurança dos dados. Provedores de c
  padrão que conecta dados em um processo com código em execução em outro processo.
 </p>
 <p>
-    Quando desejar acessar dados em um provedor de conteúdo, você usa o 
-    objeto {@link android.content.ContentResolver} no 
+    Quando desejar acessar dados em um provedor de conteúdo, você usa o
+    objeto {@link android.content.ContentResolver} no
     {@link android.content.Context} do aplicativo para se comunicar com o provedor como cliente.
     O objeto {@link android.content.ContentResolver} se comunica com o objeto provedor, uma
     instância de uma classe que implementa {@link android.content.ContentProvider}. O objeto
-    provedor recebe solicitações de dados de clientes, realiza a ação solicitada e 
+    provedor recebe solicitações de dados de clientes, realiza a ação solicitada e
     devolve os resultados.
 </p>
 <p>
@@ -68,10 +68,10 @@ dados e fornecem mecanismos para definir a segurança dos dados. Provedores de c
 </p>
 <p>
     O Android propriamente dito inclui provedores de conteúdo que gerenciam dados como áudio, vídeo, imagens e
-    informações de contato pessoais. Alguns deles estão listados na documentação de 
-    referência do 
+    informações de contato pessoais. Alguns deles estão listados na documentação de
+    referência do
     pacote <code><a href="{@docRoot}reference/android/provider/package-summary.html">android.provider</a>
-    </code>. Com algumas restrições, esses provedores podem ser acessados por qualquer aplicativo 
+    </code>. Com algumas restrições, esses provedores podem ser acessados por qualquer aplicativo
     Android.
 </p><p>
     Os tópicos a seguir descrevem provedores de conteúdo em mais detalhes:

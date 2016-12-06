@@ -183,7 +183,7 @@ public File getTempFile(Context context, String url) {
     try {
         String fileName = Uri.parse(url).getLastPathSegment();
         file = File.createTempFile(fileName, null, context.getCacheDir());
-    catch (IOException e) {
+    } catch (IOException e) {
         // Error while creating file
     }
     return file;
@@ -250,7 +250,7 @@ public boolean isExternalStorageReadable() {
 вашего приложения пользователем. Хотя технически эти файлы доступны для пользователя и других приложений, поскольку находятся
 во внешнем хранилище, они не имеют никакой ценности для пользователей
 вне вашего приложения. Когда пользователь удаляет ваше приложение, система удаляет
-все файлы из каталога закрытых файлов вашего приложения во внешнем хранилище. 
+все файлы из каталога закрытых файлов вашего приложения во внешнем хранилище.
   <p>Например, к этой категории относятся дополнительные ресурсы, загруженные приложением, и временные мультимедийные файлы.</p>
   </dd>
 </dl>
@@ -265,7 +265,7 @@ android.os.Environment#DIRECTORY_PICTURES}. Например:</p>
 
 <pre>
 public File getAlbumStorageDir(String albumName) {
-    // Get the directory for the user's public pictures directory. 
+    // Get the directory for the user's public pictures directory.
     File file = new File(Environment.getExternalStoragePublicDirectory(
             Environment.DIRECTORY_PICTURES), albumName);
     if (!file.mkdirs()) {
@@ -287,7 +287,7 @@ android.content.Context#getExternalFilesDir getExternalFilesDir()} и предо
 
 <pre>
 public File getAlbumStorageDir(Context context, String albumName) {
-    // Get the directory for the app's private pictures directory. 
+    // Get the directory for the app's private pictures directory.
     File file = new File(context.getExternalFilesDir(
             Environment.DIRECTORY_PICTURES), albumName);
     if (!file.mkdirs()) {
@@ -332,7 +332,7 @@ java.io.File#getTotalSpace}. Эти методы позволяют узнать
 общее пространство в хранилище. Эта информация также позволять
 избежать переполнения объема хранилища сверх определенного уровня.</p>
 
-<p>Однако система не гарантирует возможность записи такого же количества байт, как указано 
+<p>Однако система не гарантирует возможность записи такого же количества байт, как указано
 в {@link java.io.File#getFreeSpace}.  Если выводимое число на
 несколько мегабайт превышает размер данных, которые вы хотите сохранить, или если файловая система заполнена
 менее, чем на 90%, дальше можно действовать спокойно.
@@ -366,13 +366,13 @@ myContext.deleteFile(fileName);
 
 <div class="note">
 <p><strong>Примечание.</strong> При удалении пользователем вашего приложения система Android удаляет
-следующие элементы:</p> 
+следующие элементы:</p>
 <ul>
 <li>Все файлы, сохраненные во внутреннем хранилище</li>
 <li>Все файлы, сохраненные во внешнем хранилище с использованием {@link
 android.content.Context#getExternalFilesDir getExternalFilesDir()}.</li>
 </ul>
-<p>Однако вам следует регулярно вручную очищать кэш-память, чтобы удалить файлы, созданные с помощью 
+<p>Однако вам следует регулярно вручную очищать кэш-память, чтобы удалить файлы, созданные с помощью
 {@link android.content.Context#getCacheDir()}, а также удалять любые
 другие ненужные файлы.</p>
 </div>

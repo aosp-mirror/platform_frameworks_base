@@ -21,7 +21,7 @@
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Umbiko wesiphazamisi ongu-<xliff:g id="ID">#%d</xliff:g> uthwetshuliwe"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Ingeza imininingwane kumbiko wesiphazamisi"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Sicela ulinde..."</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Swayiphela kwesokunxele ukuze wabelane umbiko wesiphazamiso sakho"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Umbiko wesiphazamisi uzobonakala efonini maduze"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Thepha ukuze wabelane ngombiko wakho wesiphazamisi"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Thepha ukuze wabelane ngombiko wesiphazamisi ngaphandle kwesithombe-skrini noma ulinde isithombe-skrini ukuthi siqede"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Thepha ukuze wabelane ngombiko wesiphazamisi ngaphandle kwesithombe-skrini noma ulinde isithombe-skrini ukuthi siqede"</string>

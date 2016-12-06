@@ -1,0 +1,85 @@
+page.title=Contoh
+page.tags="preview", "samples", "android"
+page.image=images/cards/card-n-samples_2x.png
+@jd:body
+
+<p>
+  Contoh kode berikut disediakan untuk Android N. Untuk
+  mengunduh contoh di Android Studio, pilih opsi menu <b>File &gt; Import
+  Samples</b>.
+</p>
+
+<p class="note">
+  <strong>Catatan:</strong> Proyek yang bisa diunduh ini didesain
+   untuk digunakan bersama Gradle dan Android Studio.
+</p>
+
+
+<h3 id="mw">Playground Multi-Jendela</h3>
+<img src="{@docRoot}images/android-7.0/sample-multiwindow.png" style="float: left; padding-right: 0.5em" height="250" width="156" />
+<p>
+  Contoh ini memperagakan cara memanfaatkan antarmuka pengguna
+  multi-jendela bersama aplikasi Anda.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-MultiWindowPlayground">
+  Dapatkan di GitHub</a>
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="an">Pemberitahuan Aktif</h3>
+<img src="{@docRoot}images/android-7.0/sample-activenotifications.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
+<p>
+  Ini adalah contoh yang sudah ada sebelumnya, menampilkan layanan sederhana yang mengirimkan
+   pemberitahuan menggunakan NotificationCompat. Setiap percakapan yang belum dibaca dari pengguna
+  dikirimkan sebagai pemberitahuan berbeda.
+</p>
+<p>
+  Contoh ini telah diperbarui untuk memanfaatkan fitur pemberitahuan baru
+  yang tersedia di Android N.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-ActiveNotifications">
+  Dapatkan di GitHub</a>
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="ms">Layanan Perpesanan</h3>
+<img src="{@docRoot}images/android-7.0/sample-messagingservice.png" style="float: left; padding-right: 0.5em" height="250" width="150" />
+<p>
+  Ini adalah contoh yang telah ada sebelumnya yang memperagakan cara menggunakan
+  NotificationManager untuk memberi tahu jumlah pemberitahuan yang saat ini ditampilkan
+  oleh aplikasi.
+</p>
+<p>
+  Contoh ini telah diperbarui untuk memanfaatkan fitur pemberitahuan baru
+  yang tersedia di Android N.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-MessagingService">
+  Dapatkan di GitHub</a>
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="fbe">Direct Boot</h3>
+<img src="{@docRoot}images/android-7.0/sample-directboot.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
+<p>
+  Contoh ini memperagakan cara menyimpan dan mengakses data dalam penyimpanan yang dienkripsi
+  dengan perangkat yang selalu tersedia saat perangkat booting.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-DirectBoot">
+  Dapatkan di GitHub</a>
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="sda">Scoped Directory Access</h3>
+<img src="{@docRoot}images/android-7.0/sample-scopeddirectoryaccess.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
+<p>
+  Contoh ini memperagakan cara membaca dan menulis data dari direktori
+  spesifik, sekaligus meminta izin lebih sedikit.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-ScopedDirectoryAccess">
+  Dapatkan di GitHub</a>
+</p>

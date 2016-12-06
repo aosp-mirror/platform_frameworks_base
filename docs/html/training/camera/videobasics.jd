@@ -108,7 +108,7 @@ retrieves this video and displays it in a {@link android.widget.VideoView}.</p>
 
 <pre>
 &#64;Override
-protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
     if (requestCode == REQUEST_VIDEO_CAPTURE && resultCode == RESULT_OK) {
         Uri videoUri = intent.getData();
         mVideoView.setVideoURI(videoUri);

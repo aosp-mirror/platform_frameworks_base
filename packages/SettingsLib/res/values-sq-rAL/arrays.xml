@@ -84,11 +84,13 @@
     <item msgid="1744840221860799971">"Joaktive"</item>
     <item msgid="3054662377365844197">"Të gjitha"</item>
     <item msgid="688870735111627832">"Të gjitha përveç atyre radio"</item>
+    <item msgid="2850427388488887328">"vetëm bërthama"</item>
   </string-array>
   <string-array name="select_logpersist_summaries">
     <item msgid="2216470072500521830">"Joaktive"</item>
     <item msgid="172978079776521897">"Të gjitha memoriet e regjistrit"</item>
     <item msgid="3873873912383879240">"Të gjitha memoriet e regjistrit, përveç atyre radio"</item>
+    <item msgid="8489661142527693381">"vetëm memoria e regjistrimit të bërthamës"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Animacioni është i çaktivizuar"</item>

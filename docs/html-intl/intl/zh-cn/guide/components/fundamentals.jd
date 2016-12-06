@@ -379,7 +379,7 @@ Google Play
 等外部服务会读取它们，以便当用户在其设备中搜索应用时为用户提供过滤功能。</p>
 
 <p>例如，如果您的应用需要相机，并使用 Android 2.1（<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API</a> 7 级）中引入的
-API，您应该像下面这样在清单文件中以要求形式声明这些信息：</p> 
+API，您应该像下面这样在清单文件中以要求形式声明这些信息：</p>
 
 <pre>
 &lt;manifest ... >
@@ -390,7 +390,7 @@ API，您应该像下面这样在清单文件中以要求形式声明这些信�
 &lt;/manifest>
 </pre>
 
-<p>现在，<em>没有</em>相机且 
+<p>现在，<em>没有</em>相机且
 Android 版本<em>低于</em> 2.1 的设备将无法从 Google Play 安装您的应用。</p>
 
 <p>不过，您也可以声明您的应用使用相机，但并不<em>要求</em>必须使用。

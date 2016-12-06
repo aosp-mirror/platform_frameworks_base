@@ -793,12 +793,12 @@ public class RenderNode {
         return mOwningView != null && mOwningView.mAttachInfo != null;
     }
 
-    public void addAnimator(AnimatedVectorDrawable.VectorDrawableAnimatorRT animatorSet) {
+    public void registerVectorDrawableAnimator(
+            AnimatedVectorDrawable.VectorDrawableAnimatorRT animatorSet) {
         if (mOwningView == null || mOwningView.mAttachInfo == null) {
             throw new IllegalStateException("Cannot start this animator on a detached view!");
         }
-        nAddAnimator(mNativeRenderNode, animatorSet.getAnimatorNativePtr());
-        mOwningView.mAttachInfo.mViewRootImpl.registerAnimatingRenderNode(this);
+        mOwningView.mAttachInfo.mViewRootImpl.registerVectorDrawableAnimator(animatorSet);
     }
 
     public void endAllAnimators() {

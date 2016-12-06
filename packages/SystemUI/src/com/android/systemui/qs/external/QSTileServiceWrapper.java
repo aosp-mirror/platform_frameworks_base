@@ -94,4 +94,8 @@ public class QSTileServiceWrapper {
             return false;
         }
     }
+
+    public IQSTileService getService() {
+        return mService;
+    }
 }

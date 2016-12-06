@@ -303,7 +303,7 @@ public class BindingActivity extends Activity {
 }
 </pre>
 
-<p>上述範例顯示：用戶端如何使用 
+<p>上述範例顯示：用戶端如何使用
 {@link android.content.ServiceConnection} 的實作和 {@link
 android.content.ServiceConnection#onServiceConnected onServiceConnected()} 回呼，繫結至服務。下一節提供關於繫結至服務處理程序的詳細資訊。
 </p>
@@ -334,7 +334,7 @@ android.os.Messenger} 讓服務一次處理一個呼叫。如果您的服務必�
 </div>
 </div>
 
-<p>如果服務要和遠端處理程序溝通，則可以使用 
+<p>如果服務要和遠端處理程序溝通，則可以使用
 {@link android.os.Messenger} 為您的服務提供介面。此技術讓您不需要使用 AIDL，就可以執行處理程序間通訊 (IPC)。
 </p>
 
@@ -636,7 +636,7 @@ android.content.Context#stopService stopService()} 加以停止，否則服務�
 
 </p>
 
-<p>此外，如果您的服務已啟動並且接受繫結，當系統呼叫您的 {@link android.app.Service#onUnbind onUnbind()} 方法時，可以選擇傳回 
+<p>此外，如果您的服務已啟動並且接受繫結，當系統呼叫您的 {@link android.app.Service#onUnbind onUnbind()} 方法時，可以選擇傳回
 {@code true} (如果您希望用戶端下次繫結至服務時，可以接收 {@link android.app.Service#onRebind
 onRebind()} 呼叫，而不是接收 {@link
 android.app.Service#onBind onBind()} 的呼叫)。{@link android.app.Service#onRebind

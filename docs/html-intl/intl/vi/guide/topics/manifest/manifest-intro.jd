@@ -31,27 +31,27 @@ page.title=Bản kê khai Ứng dụng
 <li>Nó đặt tên gói Java cho ứng dụng.
 Tên gói đóng vai trò như một mã nhận diện duy nhất cho ứng dụng.</li>
 
-<li>Nó mô tả các thành phần của ứng dụng &mdash; hoạt động, 
-dịch vụ, hàm nhận quảng bá, và trình cung cấp nội dung mà ứng dụng 
-được soạn bởi.  Nó đặt tên các lớp triển khai từng thành phần và 
-công bố các khả năng của chúng (ví dụ, những tin nhắn {@link android.content.Intent 
-Intent} mà chúng có thể xử lý).  Những khai báo này cho phép hệ thống Android 
+<li>Nó mô tả các thành phần của ứng dụng &mdash; hoạt động,
+dịch vụ, hàm nhận quảng bá, và trình cung cấp nội dung mà ứng dụng
+được soạn bởi.  Nó đặt tên các lớp triển khai từng thành phần và
+công bố các khả năng của chúng (ví dụ, những tin nhắn {@link android.content.Intent
+Intent} mà chúng có thể xử lý).  Những khai báo này cho phép hệ thống Android
 biết các thành phần là gì và chúng có thể được khởi chạy trong những điều kiện nào.</li>
 
-<li>Nó xác định những tiến trình nào sẽ lưu trữ các thành phần ứng dụng.</li>  
+<li>Nó xác định những tiến trình nào sẽ lưu trữ các thành phần ứng dụng.</li>
 
-<li>Nó khai báo các quyền mà ứng dụng phải có để 
-truy cập các phần được bảo vệ của API và tương tác với các ứng dụng khác.</li>  
+<li>Nó khai báo các quyền mà ứng dụng phải có để
+truy cập các phần được bảo vệ của API và tương tác với các ứng dụng khác.</li>
 
-<li>Nó cũng khai báo các quyền mà ứng dụng khác phải có để 
+<li>Nó cũng khai báo các quyền mà ứng dụng khác phải có để
 tương tác với các thành phần của ứng dụng.</li>
 
-<li>Nó liệt kê các lớp {@link android.app.Instrumentation} cung cấp 
-tính năng tạo hồ sơ và các thông tin khác khi ứng dụng đang chạy.  Những khai báo này 
-chỉ xuất hiện trong bản kê khai khi ứng dụng đang được phát triển và 
+<li>Nó liệt kê các lớp {@link android.app.Instrumentation} cung cấp
+tính năng tạo hồ sơ và các thông tin khác khi ứng dụng đang chạy.  Những khai báo này
+chỉ xuất hiện trong bản kê khai khi ứng dụng đang được phát triển và
 thử nghiệm; chúng bị loại bỏ trước khi ứng dụng được công bố.</li>
 
-<li>Nó khai báo mức tối thiểu của API Android mà ứng dụng 
+<li>Nó khai báo mức tối thiểu của API Android mà ứng dụng
 yêu cầu.</li>
 
 <li>Nó liệt kê các thư viện mà ứng dụng phải được liên kết với.</li>
@@ -61,12 +61,12 @@ yêu cầu.</li>
 <h2 id="filestruct">Cấu trúc của Tệp Bản kê khai</h2>
 
 <p>
-Sơ đồ bên dưới minh họa cấu trúc chung của tệp bản kê khai và mọi 
-phần tử mà nó có thể chứa.  Từng phần tử, cùng với tất cả thuộc tính 
-của mình, sẽ được lập tài liệu theo dõi đầy đủ vào một tệp riêng.  Để xem thông tin 
-chi tiết về mọi phần tử, hãy nhấp vào tên phần tử trong sơ đồ, 
+Sơ đồ bên dưới minh họa cấu trúc chung của tệp bản kê khai và mọi
+phần tử mà nó có thể chứa.  Từng phần tử, cùng với tất cả thuộc tính
+của mình, sẽ được lập tài liệu theo dõi đầy đủ vào một tệp riêng.  Để xem thông tin
+chi tiết về mọi phần tử, hãy nhấp vào tên phần tử trong sơ đồ,
 trong danh sách các phần tử theo thứ tự chữ cái mà tuân theo sơ đồ, hoặc trên bất kỳ
-nội dung nào khác đề cập tới tên phần tử. 
+nội dung nào khác đề cập tới tên phần tử.
 </p>
 
 <pre>
@@ -126,9 +126,9 @@ nội dung nào khác đề cập tới tên phần tử.
 </pre>
 
 <p>
-Tất cả phần tử có thể xuất hiện trong tệp bản kê khai được liệt kê ở bên dưới 
-theo thứ tự chữ cái.  Đây là những phần tử hợp pháp duy nhất; bạn không thể 
-thêm các phần tử hay thuộc tính của chính mình.  
+Tất cả phần tử có thể xuất hiện trong tệp bản kê khai được liệt kê ở bên dưới
+theo thứ tự chữ cái.  Đây là những phần tử hợp pháp duy nhất; bạn không thể
+thêm các phần tử hay thuộc tính của chính mình.
 </p>
 
 <p style="margin-left: 2em">
@@ -158,74 +158,74 @@ thêm các phần tử hay thuộc tính của chính mình.
 </p>
 
 
-    
+
 
 <h2 id="filec">Các Quy ước Tệp</h2>
 
 <p>
-Một số quy ước và quy tắc áp dụng chung cho tất cả các phần tử và thuộc tính 
+Một số quy ước và quy tắc áp dụng chung cho tất cả các phần tử và thuộc tính
 trong bản kê khai:
 </p>
 
 <dl>
 <dt><b>Phần tử</b></dt>
-<dd>Chỉ các phần tử 
+<dd>Chỉ các phần tử
 <code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> và
-<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 
-là bắt buộc phải có, chúng đều phải có mặt và chỉ có thể xảy ra một lần.  
-Hầu hết các phần tử khác có thể xảy ra nhiều lần hoặc không xảy ra &mdash; mặc dù ít 
-nhất một vài trong số chúng phải có mặt để bản kê khai thực sự có 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
+là bắt buộc phải có, chúng đều phải có mặt và chỉ có thể xảy ra một lần.
+Hầu hết các phần tử khác có thể xảy ra nhiều lần hoặc không xảy ra &mdash; mặc dù ít
+nhất một vài trong số chúng phải có mặt để bản kê khai thực sự có
 ý nghĩa nào đó.
 
 <p>
-Nếu một phần tử chứa bất kỳ nội dung nào, nó có thể chứa các phần tử khác.  
+Nếu một phần tử chứa bất kỳ nội dung nào, nó có thể chứa các phần tử khác.
 Tất cả giá trị sẽ được đặt thông qua thuộc tính, chứ không phải là dữ liệu ký tự trong một phần tử.
 </p>
 
 <p>
 Các phần tử cùng cấp thường không theo thứ tự.  Ví dụ, các phần tử
-<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>, 
-<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>, và 
-<code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code> 
-có thể được trộn lẫn với nhau theo bất kỳ trình tự nào.  (Phần tử 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>,
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>, và
+<code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>
+có thể được trộn lẫn với nhau theo bất kỳ trình tự nào.  (Phần tử
 <code><a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;activity-alias&gt;</a></code>
-là trường hợp ngoại lệ đối với quy tắc này:  Nó phải tuân theo 
-<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 
+là trường hợp ngoại lệ đối với quy tắc này:  Nó phải tuân theo
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
 , đối tượng mà nó là bí danh cho.)
 </p></dd>
 
 <dt><b>Thuộc tính</b></dt>
-<dd>Theo cách hiểu thông thường, tất cả thuộc tính đều mang tính tùy chọn.  Tuy nhiên, có một số thuộc tính 
-phải được quy định cho một phần tử để hoàn thành mục đích của nó.  Sử dụng 
+<dd>Theo cách hiểu thông thường, tất cả thuộc tính đều mang tính tùy chọn.  Tuy nhiên, có một số thuộc tính
+phải được quy định cho một phần tử để hoàn thành mục đích của nó.  Sử dụng
 tài liệu làm hướng dẫn.  Đối với những thuộc tính thực sự tùy chọn, nó đề cập tới một giá trị
 mặc định hoặc thông báo điều gì sẽ xảy ra nếu không có một đặc tả.
 
-<p>Ngoài một số thuộc tính của phần tử 
-<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> 
-gốc, tất cả tên thuộc tính đều bắt đầu bằng một tiền tố {@code android:}&mdash; 
-ví dụ, {@code android:alwaysRetainTaskState}.  Do tiền tố này 
-phổ dụng, tài liệu thường bỏ sót nó khi tham chiếu tới các thuộc tính 
+<p>Ngoài một số thuộc tính của phần tử
+<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code>
+gốc, tất cả tên thuộc tính đều bắt đầu bằng một tiền tố {@code android:}&mdash;
+ví dụ, {@code android:alwaysRetainTaskState}.  Do tiền tố này
+phổ dụng, tài liệu thường bỏ sót nó khi tham chiếu tới các thuộc tính
 theo tên.</p></dd>
 
 <dt><b>Khai báo tên lớp</b></dt>
-<dd>Nhiều thuộc tính tương ứng với các đối tượng Java, bao gồm các phần tử cho 
-chính ứng dụng (phần tử 
-<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 
-) và các thành phần chính của nó &mdash; hoạt động 
-(<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>), 
-dịch vụ 
-(<code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>), 
-hàm nhận quảng bá 
-(<code><a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code>), 
-và trình cung cấp nội dung 
-(<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>).  
+<dd>Nhiều thuộc tính tương ứng với các đối tượng Java, bao gồm các phần tử cho
+chính ứng dụng (phần tử
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
+) và các thành phần chính của nó &mdash; hoạt động
+(<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>),
+dịch vụ
+(<code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>),
+hàm nhận quảng bá
+(<code><a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code>),
+và trình cung cấp nội dung
+(<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>).
 
 <p>
-Nếu bạn định nghĩa một lớp con như vẫn luôn làm đối với lớp thành phần 
-({@link android.app.Activity}, {@link android.app.Service}, 
-{@link android.content.BroadcastReceiver}, và {@link android.content.ContentProvider}), 
-lớp con sẽ được khai báo thông qua một thuộc tính {@code name}.  Tên phải bao gồm 
-chỉ định gói đầy đủ.  
+Nếu bạn định nghĩa một lớp con như vẫn luôn làm đối với lớp thành phần
+({@link android.app.Activity}, {@link android.app.Service},
+{@link android.content.BroadcastReceiver}, và {@link android.content.ContentProvider}),
+lớp con sẽ được khai báo thông qua một thuộc tính {@code name}.  Tên phải bao gồm
+chỉ định gói đầy đủ.
 Ví dụ, một lớp con {@link android.app.Service} có thể được khai báo như sau:
 </p>
 
@@ -239,12 +239,12 @@ Ví dụ, một lớp con {@link android.app.Service} có thể được khai b�
 &lt;/manifest&gt;</pre>
 
 <p>
-Tuy nhiên, do cách viết tốc ký, nếu ký tự đầu tiên của xâu là một dấu chấm, 
-xâu sẽ được nối với tên gói của ứng dụng (như được quy định bởi 
-thuộc tính của phần tử <code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> 
+Tuy nhiên, do cách viết tốc ký, nếu ký tự đầu tiên của xâu là một dấu chấm,
+xâu sẽ được nối với tên gói của ứng dụng (như được quy định bởi
+thuộc tính của phần tử <code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code>
 
-<code>, <a href="{@docRoot}guide/topics/manifest/manifest-element.html#package">package</a></code> 
-).  Cách gán sau cũng giống như trên: 
+<code>, <a href="{@docRoot}guide/topics/manifest/manifest-element.html#package">package</a></code>
+).  Cách gán sau cũng giống như trên:
 </p>
 
 <pre>&lt;manifest package="com.example.project" . . . &gt;
@@ -257,13 +257,13 @@ thuộc tính của phần tử <code><a href="{@docRoot}guide/topics/manifest/m
 &lt;/manifest&gt;</pre>
 
 <p>
-Khi khởi động một thành phần, Android sẽ tạo một thực thể của lớp con được nêu tên.  
+Khi khởi động một thành phần, Android sẽ tạo một thực thể của lớp con được nêu tên.
 Nếu lớp con không được quy định, nó sẽ tạo một thực thể của lớp cơ sở.
 </p></dd>
 
 <dt><b>Nhiều giá trị</b></dt>
-<dd>Nếu có thể quy định nhiều hơn một giá trị, phần tử gần như luôn 
-được lặp lại, thay vì liệt kê nhiều giá trị trong một phần tử duy nhất.  
+<dd>Nếu có thể quy định nhiều hơn một giá trị, phần tử gần như luôn
+được lặp lại, thay vì liệt kê nhiều giá trị trong một phần tử duy nhất.
 Ví dụ, một bộ lọc ý định có thể liệt kê vài hành động:
 
 <pre>&lt;intent-filter . . . &gt;
@@ -274,24 +274,24 @@ Ví dụ, một bộ lọc ý định có thể liệt kê vài hành động:
 &lt;/intent-filter&gt;</pre></dd>
 
 <dt><b>Giá trị tài nguyên</b></dt>
-<dd>Một số thuộc tính có các giá trị có thể được hiển thị với người dùng &mdash; ví 
-dụ, một nhãn và một biểu tượng cho một hoạt động.  Giá trị của những thuộc tính này 
-cần được cục bộ hóa và vì thế phải được thiết đặt từ một tài nguyên hoặc chủ đề.  Giá trị 
+<dd>Một số thuộc tính có các giá trị có thể được hiển thị với người dùng &mdash; ví
+dụ, một nhãn và một biểu tượng cho một hoạt động.  Giá trị của những thuộc tính này
+cần được cục bộ hóa và vì thế phải được thiết đặt từ một tài nguyên hoặc chủ đề.  Giá trị
 tài nguyên được biểu diễn theo định dạng sau,</p>
 
 <p style="margin-left: 2em">{@code @[<i>gói</i>:]<i>kiểu</i>:<i>tên</i>}</p>
 
 <p>
-trong đó <i>gói</i> có thể được bỏ qua nếu tài nguyên nằm trong cùng gói 
-với ứng dụng, <i>kiểu</i> là kiểu của tài nguyên &mdash; chẳng hạn như "xâu" hoặc 
-&mdash; "vẽ được" và <i>tên</i> là tên nhận biết tài nguyên cụ thể.  
+trong đó <i>gói</i> có thể được bỏ qua nếu tài nguyên nằm trong cùng gói
+với ứng dụng, <i>kiểu</i> là kiểu của tài nguyên &mdash; chẳng hạn như "xâu" hoặc
+&mdash; "vẽ được" và <i>tên</i> là tên nhận biết tài nguyên cụ thể.
 Ví dụ:
 </p>
 
 <pre>&lt;activity android:icon="@drawable/smallPic" . . . &gt</pre>
 
 <p>
-Các giá trị từ một chủ đề được biểu diễn theo cách tương tự, nhưng với một '{@code ?}' 
+Các giá trị từ một chủ đề được biểu diễn theo cách tương tự, nhưng với một '{@code ?}'
 thay vì '{@code @}' ở đầu:
 </p>
 
@@ -299,8 +299,8 @@ thay vì '{@code @}' ở đầu:
 </p></dd>
 
 <dt><b>Giá trị xâu</b></dt>
-<dd>Trường hợp giá trị của một thuộc tính là một xâu, phải sử dụng hai dấu xuyệc ngược ('{@code \\}') 
-để thoát các ký tự &mdash; ví dụ, '{@code \\n}' đối với 
+<dd>Trường hợp giá trị của một thuộc tính là một xâu, phải sử dụng hai dấu xuyệc ngược ('{@code \\}')
+để thoát các ký tự &mdash; ví dụ, '{@code \\n}' đối với
 một dòng tin tức hoặc '{@code \\uxxxx}' đối với một ký tự Unicode.</dd>
 </dl>
 
@@ -308,7 +308,7 @@ một dòng tin tức hoặc '{@code \\uxxxx}' đối với một ký tự Unico
 <h2 id="filef">Các Tính năng Tệp</h2>
 
 <p>
-Phần sau đây mô tả cách phản ánh một số tính năng của Android 
+Phần sau đây mô tả cách phản ánh một số tính năng của Android
 trong tệp bản kê khai.
 </p>
 
@@ -316,23 +316,23 @@ trong tệp bản kê khai.
 <h3 id="ifs">Bộ lọc Ý định</h3>
 
 <p>
-Các thành phần cốt lõi của một ứng dụng (hoạt động, dịch vụ và hàm nhận 
-quảng bá) được kích hoạt bởi <i>ý định</i>.  Ý định là một 
-gói thông tin (một đối tượng {@link android.content.Intent}) mô tả một 
-hành động mong muốn &mdash; bao gồm dữ liệu sẽ được dựa trên, thể loại của 
-thành phần mà sẽ thực hiện hành động, và các chỉ dẫn thích hợp khác.  
-Android định vị một thành phần phù hợp để hồi đáp ý định, khởi chạy 
-một thực thể mới của thành phần nếu cần, và chuyển cho nó đối tượng đó 
+Các thành phần cốt lõi của một ứng dụng (hoạt động, dịch vụ và hàm nhận
+quảng bá) được kích hoạt bởi <i>ý định</i>.  Ý định là một
+gói thông tin (một đối tượng {@link android.content.Intent}) mô tả một
+hành động mong muốn &mdash; bao gồm dữ liệu sẽ được dựa trên, thể loại của
+thành phần mà sẽ thực hiện hành động, và các chỉ dẫn thích hợp khác.
+Android định vị một thành phần phù hợp để hồi đáp ý định, khởi chạy
+một thực thể mới của thành phần nếu cần, và chuyển cho nó đối tượng đó
 Ý định.
 </p>
 
 <p>
-Các thành phần sẽ quảng cáo khả năng của mình &mdash; các kiểu ý định mà chúng có thể 
-hồi đáp &mdash; thông qua <i>các bộ lọc ý định</i>.  Do hệ thống Android phải 
-tìm hiểu một thành phần có thể xử lý những ý định nào trước khi khởi chạy thành phần đó, 
-bộ lọc ý định được quy định trong bản kê khai như là các phần tử 
+Các thành phần sẽ quảng cáo khả năng của mình &mdash; các kiểu ý định mà chúng có thể
+hồi đáp &mdash; thông qua <i>các bộ lọc ý định</i>.  Do hệ thống Android phải
+tìm hiểu một thành phần có thể xử lý những ý định nào trước khi khởi chạy thành phần đó,
+bộ lọc ý định được quy định trong bản kê khai như là các phần tử
 <code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code>
-.  Một thành phần có thể có nhiều bộ lọc, mỗi bộ lọc lại mô tả 
+.  Một thành phần có thể có nhiều bộ lọc, mỗi bộ lọc lại mô tả
 một khả năng khác nhau.
 </p>
 
@@ -344,9 +344,9 @@ thành phần.
 </p>
 
 <p>
-Để biết thông tin về cách các đối tượng Ý định được kiểm tra thông qua bộ lọc ý định, 
-hãy xem tài liệu riêng có tiêu đề 
-<a href="{@docRoot}guide/components/intents-filters.html">Ý định 
+Để biết thông tin về cách các đối tượng Ý định được kiểm tra thông qua bộ lọc ý định,
+hãy xem tài liệu riêng có tiêu đề
+<a href="{@docRoot}guide/components/intents-filters.html">Ý định
 và Bộ lọc Ý định</a>.
 </p>
 
@@ -354,42 +354,42 @@ và Bộ lọc Ý định</a>.
 <h3 id="iconlabel">Biểu tượng và Nhãn</h3>
 
 <p>
-Nhiều phần tử có thuộc tính {@code icon} và {@code label} cho một 
-biểu tượng nhỏ và nhãn văn bản mà có thể được hiển thị với người dùng.  Một số cũng có thuộc tính 
-{@code description} cho văn bản giải trình dài hơn mà cũng có thể 
-được hiển thị trên màn hình.  Ví dụ, phần tử 
+Nhiều phần tử có thuộc tính {@code icon} và {@code label} cho một
+biểu tượng nhỏ và nhãn văn bản mà có thể được hiển thị với người dùng.  Một số cũng có thuộc tính
+{@code description} cho văn bản giải trình dài hơn mà cũng có thể
+được hiển thị trên màn hình.  Ví dụ, phần tử
 <code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code>
-có cả ba thuộc tính này, vì thế khi người dùng được hỏi xem có 
-cấp quyền cho một ứng dụng yêu cầu hay không, biểu tượng thể hiện 
+có cả ba thuộc tính này, vì thế khi người dùng được hỏi xem có
+cấp quyền cho một ứng dụng yêu cầu hay không, biểu tượng thể hiện
 quyền, tên của quyền, và mô tả nội dung
 của quyền đó đều có thể được trình bày cho người dùng xem.
 </p>
 
 <p>
-Trong mọi trường hợp, biểu tượng và nhãn được đặt trong một phần tử chứa sẽ trở thành các thiết đặt 
-{@code icon} và {@code label} mặc định cho tất cả phần tử con của bộ chứa đó.  
-Vì thế, biểu tượng và nhãn được đặt trong phần tử 
-<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 
-là biểu tượng và nhãn mặc định cho từng thành phần của ứng dụng.  
-Tương tự, biểu tượng và nhãn được đặt cho một thành phần &mdash; ví dụ, một phần tử 
-<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 
-&mdash; sẽ là các cài đặt mặc định cho từng phần tử 
-<code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code> 
+Trong mọi trường hợp, biểu tượng và nhãn được đặt trong một phần tử chứa sẽ trở thành các thiết đặt
+{@code icon} và {@code label} mặc định cho tất cả phần tử con của bộ chứa đó.
+Vì thế, biểu tượng và nhãn được đặt trong phần tử
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
+là biểu tượng và nhãn mặc định cho từng thành phần của ứng dụng.
+Tương tự, biểu tượng và nhãn được đặt cho một thành phần &mdash; ví dụ, một phần tử
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+&mdash; sẽ là các cài đặt mặc định cho từng phần tử
+<code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code>
 của thành phần đó.  Nếu một phần tử
-<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 
-thiết đặt một nhãn, nhưng hoạt động và bộ lọc ý định của nó thì không, 
-nhãn ứng dụng sẽ được coi là nhãn của cả hoạt động và 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
+thiết đặt một nhãn, nhưng hoạt động và bộ lọc ý định của nó thì không,
+nhãn ứng dụng sẽ được coi là nhãn của cả hoạt động và
 bộ lọc ý định.
 </p>
 
 <p>
-Biểu tượng và nhãn được đặt cho một bộ lọc ý định sẽ được sử dụng để biểu diễn một thành phần 
+Biểu tượng và nhãn được đặt cho một bộ lọc ý định sẽ được sử dụng để biểu diễn một thành phần
 bất cứ khi nào thành phần đó được trình bày với người dùng để thực hiện chức năng
-mà bộ lọc đã quảng cáo.  Ví dụ, một bộ lọc với các thiết đặt 
-"{@code android.intent.action.MAIN}" và 
-"{@code android.intent.category.LAUNCHER}" quảng cáo một hoạt động 
+mà bộ lọc đã quảng cáo.  Ví dụ, một bộ lọc với các thiết đặt
+"{@code android.intent.action.MAIN}" và
+"{@code android.intent.category.LAUNCHER}" quảng cáo một hoạt động
 là hoạt động khởi đầu một ứng dụng &mdash; cụ thể, là
-hoạt động sẽ được hiển thị trong trình khởi chạy ứng dụng.  Vì thế, biểu tượng và nhãn 
+hoạt động sẽ được hiển thị trong trình khởi chạy ứng dụng.  Vì thế, biểu tượng và nhãn
 được đặt trong bộ lọc là những nội dung được hiển thị trong trình khởi chạy.
 </p>
 
@@ -397,14 +397,14 @@ hoạt động sẽ được hiển thị trong trình khởi chạy ứng dụn
 <h3 id="perms">Quyền</h3>
 
 <p>
-Một <i>quyền</i> là sự hạn chế giới hạn truy cập vào một phần của mã 
-hoặc vào dữ liệu trên thiết bị.   Giới hạn này được áp đặt nhằm bảo vệ dữ liệu 
-và mã trọng yếu, có thể bị lạm dụng để bóp méo hoặc làm hỏng trải nghiệm người dùng.  
+Một <i>quyền</i> là sự hạn chế giới hạn truy cập vào một phần của mã
+hoặc vào dữ liệu trên thiết bị.   Giới hạn này được áp đặt nhằm bảo vệ dữ liệu
+và mã trọng yếu, có thể bị lạm dụng để bóp méo hoặc làm hỏng trải nghiệm người dùng.
 </p>
 
 <p>
-Mỗi quyền được nhận biết bằng một nhãn duy nhất.  Thông thường, nhãn cho biết 
-hành động bị hạn chế.  Ví dụ, sau đây là một số quyền được định nghĩa 
+Mỗi quyền được nhận biết bằng một nhãn duy nhất.  Thông thường, nhãn cho biết
+hành động bị hạn chế.  Ví dụ, sau đây là một số quyền được định nghĩa
 bởi Android:
 </p>
 
@@ -418,25 +418,25 @@ Một tính năng có thể được bảo vệ bởi nhiều nhất một quy�
 </p>
 
 <p>
-Nếu một ứng dụng cần truy cập vào một tính năng được bảo vệ bởi một quyền, 
-nó phải khai báo rằng nó yêu cầu quyền đó cùng với một phần tử 
-<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code> 
-trong bản kê khai.  Lúc đó, khi ứng dụng được cài đặt trên 
-thiết bị, trình cài đặt sẽ xác định xem có cấp quyền 
-được yêu cầu hay không bằng cách kiểm tra các thẩm quyền đã ký chứng chỉ 
-của ứng dụng và trong một số trường hợp, bằng cách hỏi người dùng.  
-Nếu quyền được cấp, ứng dụng có thể sử dụng các tính năng 
+Nếu một ứng dụng cần truy cập vào một tính năng được bảo vệ bởi một quyền,
+nó phải khai báo rằng nó yêu cầu quyền đó cùng với một phần tử
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
+trong bản kê khai.  Lúc đó, khi ứng dụng được cài đặt trên
+thiết bị, trình cài đặt sẽ xác định xem có cấp quyền
+được yêu cầu hay không bằng cách kiểm tra các thẩm quyền đã ký chứng chỉ
+của ứng dụng và trong một số trường hợp, bằng cách hỏi người dùng.
+Nếu quyền được cấp, ứng dụng có thể sử dụng các tính năng
 được bảo vệ.  Nếu không, việc thử truy cập những tính năng đó sẽ thất bại
-mà không có bất kỳ thông báo nào cho người dùng. 
+mà không có bất kỳ thông báo nào cho người dùng.
 </p>
 
 <p>
-Một ứng dụng cũng có thể bảo vệ các thành phần của chính nó (hoạt động, dịch vụ, 
-hàm nhận quảng bá và trình cung cấp nội dung) bằng các quyền.  Nó có thể sử dụng 
-bất kỳ quyền nào được định nghĩa bởi Android (được liệt kê trong 
-{@link android.Manifest.permission android.Manifest.permission}) hoặc được khai báo 
-bởi các ứng dụng khác.  Hoặc nó có thể tự định nghĩa quyền của mình.  Một quyền mới được khai báo 
-bằng phần tử 
+Một ứng dụng cũng có thể bảo vệ các thành phần của chính nó (hoạt động, dịch vụ,
+hàm nhận quảng bá và trình cung cấp nội dung) bằng các quyền.  Nó có thể sử dụng
+bất kỳ quyền nào được định nghĩa bởi Android (được liệt kê trong
+{@link android.Manifest.permission android.Manifest.permission}) hoặc được khai báo
+bởi các ứng dụng khác.  Hoặc nó có thể tự định nghĩa quyền của mình.  Một quyền mới được khai báo
+bằng phần tử
 <code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code>
 .  Ví dụ, một hoạt động có thể được bảo vệ như sau:
 </p>
@@ -457,43 +457,43 @@ bằng phần tử
 </pre>
 
 <p>
-Lưu ý rằng trong ví dụ này, quyền {@code DEBIT_ACCT} không chỉ 
-được khai báo bằng phần tử 
+Lưu ý rằng trong ví dụ này, quyền {@code DEBIT_ACCT} không chỉ
+được khai báo bằng phần tử
 <code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code>
-, việc sử dụng quyền cũng được yêu cầu bằng phần tử 
-<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code> 
-.  Phải yêu cầu sử dụng quyền để các thành phần khác của 
-ứng dụng nhằm khởi chạy hoạt động được bảo vệ, mặc dù việc bảo vệ 
-do chính ứng dụng áp đặt.  
+, việc sử dụng quyền cũng được yêu cầu bằng phần tử
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
+.  Phải yêu cầu sử dụng quyền để các thành phần khác của
+ứng dụng nhằm khởi chạy hoạt động được bảo vệ, mặc dù việc bảo vệ
+do chính ứng dụng áp đặt.
 </p>
 
 <p>
-Trong cùng ví dụ này, nếu thuộc tính {@code permission} được đặt thành một quyền 
-được khai báo ở nơi khác 
-(chẳng hạn như {@code android.permission.CALL_EMERGENCY_NUMBERS}, sẽ không 
-cần phải khai báo lại nó bằng một phần tử 
+Trong cùng ví dụ này, nếu thuộc tính {@code permission} được đặt thành một quyền
+được khai báo ở nơi khác
+(chẳng hạn như {@code android.permission.CALL_EMERGENCY_NUMBERS}, sẽ không
+cần phải khai báo lại nó bằng một phần tử
 <code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code>
-.  Tuy nhiên, sẽ vẫn cần phải yêu cầu sử dụng nó bằng 
-<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>. 
+.  Tuy nhiên, sẽ vẫn cần phải yêu cầu sử dụng nó bằng
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>.
 </p>
 
 <p>
-Phần tử 
-<code><a href="{@docRoot}guide/topics/manifest/permission-tree-element.html">&lt;permission-tree&gt;</a></code> 
-sẽ khai báo một vùng tên cho nhóm quyền mà sẽ được định nghĩa trong 
-mã.  Và 
+Phần tử
+<code><a href="{@docRoot}guide/topics/manifest/permission-tree-element.html">&lt;permission-tree&gt;</a></code>
+sẽ khai báo một vùng tên cho nhóm quyền mà sẽ được định nghĩa trong
+mã.  Và
 <code><a href="{@docRoot}guide/topics/manifest/permission-group-element.html">&lt;permission-group&gt;</a></code>
-sẽ định nghĩa một nhãn cho một tập hợp quyền (cả được khai báo trong bản kê khai bằng phần tử 
-<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code> 
-và được khai báo ở chỗ khác).  Nó chỉ ảnh hưởng tới cách các quyền được 
-nhóm lại khi được trình bày với người dùng.  Phần tử 
+sẽ định nghĩa một nhãn cho một tập hợp quyền (cả được khai báo trong bản kê khai bằng phần tử
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code>
+và được khai báo ở chỗ khác).  Nó chỉ ảnh hưởng tới cách các quyền được
+nhóm lại khi được trình bày với người dùng.  Phần tử
 <code><a href="{@docRoot}guide/topics/manifest/permission-group-element.html">&lt;permission-group&gt;</a></code>
-không quy định những quyền nào thuộc về nhóm; 
+không quy định những quyền nào thuộc về nhóm;
 nó chỉ đặt cho nhóm một cái tên.  Một quyền được đặt vào nhóm
 bằng cách gán tên nhóm với thuộc tính của phần tử
-<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code> 
-, 
-<code><a href="{@docRoot}guide/topics/manifest/permission-element.html#pgroup">permissionGroup</a></code> 
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code>
+,
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html#pgroup">permissionGroup</a></code>
 .
 </p>
 
@@ -501,17 +501,17 @@ bằng cách gán tên nhóm với thuộc tính của phần tử
 <h3 id="libs">Thư viện</h3>
 
 <p>
-Mọi ứng dụng đều được liên kết với thư viện Android mặc định, nó 
-bao gồm các gói cơ bản để xây dựng ứng dụng (bằng các lớp thông dụng 
-chẳng hạn như Hoạt động, Dịch vụ, Ý định, Dạng xem, Nút, Ứng dụng, Trình cung cấp Nội dung, 
+Mọi ứng dụng đều được liên kết với thư viện Android mặc định, nó
+bao gồm các gói cơ bản để xây dựng ứng dụng (bằng các lớp thông dụng
+chẳng hạn như Hoạt động, Dịch vụ, Ý định, Dạng xem, Nút, Ứng dụng, Trình cung cấp Nội dung,
 v.v.).
 </p>
 
 <p>
-Tuy nhiên, một số gói nằm trong thư viện của chính mình.  Nếu ứng dụng của bạn 
-sử dụng mã từ bất kỳ gói nào trong những gói này, nó phải công khai yêu cầu được liên kết 
-với chúng.  Bản kê khai phải chứa một phần tử 
-<code><a href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></code> 
-riêng để đặt tên cho từng thư viện.  (Tên thư viện có thể được tìm thấy trong tài liệu 
+Tuy nhiên, một số gói nằm trong thư viện của chính mình.  Nếu ứng dụng của bạn
+sử dụng mã từ bất kỳ gói nào trong những gói này, nó phải công khai yêu cầu được liên kết
+với chúng.  Bản kê khai phải chứa một phần tử
+<code><a href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></code>
+riêng để đặt tên cho từng thư viện.  (Tên thư viện có thể được tìm thấy trong tài liệu
 của gói.)
 </p>

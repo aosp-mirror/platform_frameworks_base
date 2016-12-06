@@ -79,6 +79,9 @@ public class BootReceiver extends BroadcastReceiver {
     private static final String LOG_FILES_FILE = "log-files.xml";
     private static final AtomicFile sFile = new AtomicFile(new File(
             Environment.getDataSystemDirectory(), LOG_FILES_FILE));
+    private static final String LAST_HEADER_FILE = "last-header.txt";
+    private static final File lastHeaderFile = new File(
+            Environment.getDataSystemDirectory(), LAST_HEADER_FILE);
 
     @Override
     public void onReceive(final Context context, Intent intent) {
@@ -113,9 +116,17 @@ public class BootReceiver extends BroadcastReceiver {
         Downloads.removeAllDownloadsByPackage(context, OLD_UPDATER_PACKAGE, OLD_UPDATER_CLASS);
     }
 
-    private void logBootEvents(Context ctx) throws IOException {
-        final DropBoxManager db = (DropBoxManager) ctx.getSystemService(Context.DROPBOX_SERVICE);
-        final String headers = new StringBuilder(512)
+    private String getPreviousBootHeaders() {
+        try {
+            return FileUtils.readTextFile(lastHeaderFile, 0, null);
+        } catch (IOException e) {
+            Slog.e(TAG, "Error reading " + lastHeaderFile, e);
+            return null;
+        }
+    }
+
+    private String getCurrentBootHeaders() throws IOException {
+        return new StringBuilder(512)
             .append("Build: ").append(Build.FINGERPRINT).append("\n")
             .append("Hardware: ").append(Build.BOARD).append("\n")
             .append("Revision: ")
@@ -125,6 +136,31 @@ public class BootReceiver extends BroadcastReceiver {
             .append("Kernel: ")
             .append(FileUtils.readTextFile(new File("/proc/version"), 1024, "...\n"))
             .append("\n").toString();
+    }
+
+
+    private String getBootHeadersToLogAndUpdate() throws IOException {
+        final String oldHeaders = getPreviousBootHeaders();
+        final String newHeaders = getCurrentBootHeaders();
+
+        try {
+            FileUtils.stringToFile(lastHeaderFile, newHeaders);
+        } catch (IOException e) {
+            Slog.e(TAG, "Error writing " + lastHeaderFile, e);
+        }
+
+        if (oldHeaders == null) {
+            // If we failed to read the old headers, use the current headers
+            // but note this in the headers so we know
+            return "isPrevious: false\n" + newHeaders;
+        }
+
+        return "isPrevious: true\n" + oldHeaders;
+    }
+
+    private void logBootEvents(Context ctx) throws IOException {
+        final DropBoxManager db = (DropBoxManager) ctx.getSystemService(Context.DROPBOX_SERVICE);
+        final String headers = getBootHeadersToLogAndUpdate();
         final String bootReason = SystemProperties.get("ro.boot.bootreason", null);
 
         String recovery = RecoverySystem.handleAftermath(ctx);

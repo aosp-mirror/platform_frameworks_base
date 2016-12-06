@@ -60,6 +60,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.hardware.display.DisplayManagerGlobal;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -78,6 +80,8 @@ import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Patterns;
 import android.util.SparseArray;
+import android.view.Display;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.View.OnFocusChangeListener;
@@ -212,6 +216,8 @@ public class BugreportProgressService extends Service {
 
     private static final Bundle sNotificationBundle = new Bundle();
 
+    private boolean mIsWatch;
+
     @Override
     public void onCreate() {
         mContext = getApplicationContext();
@@ -225,6 +231,9 @@ public class BugreportProgressService extends Service {
                 Log.w(TAG, "Could not create directory " + mScreenshotsDir);
             }
         }
+        final Configuration conf = mContext.getResources().getConfiguration();
+        mIsWatch = (conf.uiMode & Configuration.UI_MODE_TYPE_MASK) ==
+                Configuration.UI_MODE_TYPE_WATCH;
     }
 
     @Override
@@ -439,56 +448,68 @@ public class BugreportProgressService extends Service {
             return;
         }
 
-        final NumberFormat nf = NumberFormat.getPercentInstance();
-        nf.setMinimumFractionDigits(2);
-        nf.setMaximumFractionDigits(2);
-        final String percentageText = nf.format((double) info.progress / info.max);
-        final Action cancelAction = new Action.Builder(null, mContext.getString(
-                com.android.internal.R.string.cancel), newCancelIntent(mContext, info)).build();
-        final Intent infoIntent = new Intent(mContext, BugreportProgressService.class);
-        infoIntent.setAction(INTENT_BUGREPORT_INFO_LAUNCH);
-        infoIntent.putExtra(EXTRA_ID, info.id);
-        final PendingIntent infoPendingIntent =
-                PendingIntent.getService(mContext, info.id, infoIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-        final Action infoAction = new Action.Builder(null,
-                mContext.getString(R.string.bugreport_info_action),
-                infoPendingIntent).build();
-        final Intent screenshotIntent = new Intent(mContext, BugreportProgressService.class);
-        screenshotIntent.setAction(INTENT_BUGREPORT_SCREENSHOT);
-        screenshotIntent.putExtra(EXTRA_ID, info.id);
-        PendingIntent screenshotPendingIntent = mTakingScreenshot ? null : PendingIntent
-                .getService(mContext, info.id, screenshotIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT);
-        final Action screenshotAction = new Action.Builder(null,
-                mContext.getString(R.string.bugreport_screenshot_action),
-                screenshotPendingIntent).build();
-
-        final String title = mContext.getString(R.string.bugreport_in_progress_title, info.id);
-
-        final String name =
-                info.name != null ? info.name : mContext.getString(R.string.bugreport_unnamed);
-
-        final Notification notification = newBaseNotification(mContext)
-                .setContentTitle(title)
-                .setTicker(title)
-                .setContentText(name)
-                .setProgress(info.max, info.progress, false)
-                .setOngoing(true)
-                .setContentIntent(infoPendingIntent)
-                .setActions(infoAction, screenshotAction, cancelAction)
-                .build();
-
         if (info.finished) {
             Log.w(TAG, "Not sending progress notification because bugreport has finished already ("
                     + info + ")");
             return;
         }
+
+        final NumberFormat nf = NumberFormat.getPercentInstance();
+        nf.setMinimumFractionDigits(2);
+        nf.setMaximumFractionDigits(2);
+        final String percentageText = nf.format((double) info.progress / info.max);
+
+        String title = mContext.getString(R.string.bugreport_in_progress_title, info.id);
+
+        // TODO: Remove this workaround when notification progress is implemented on Wear.
+        if (mIsWatch) {
+            nf.setMinimumFractionDigits(0);
+            nf.setMaximumFractionDigits(0);
+            final String watchPercentageText = nf.format((double) info.progress / info.max);
+            title = title + "\n" + watchPercentageText;
+        }
+
+        final String name =
+                info.name != null ? info.name : mContext.getString(R.string.bugreport_unnamed);
+
+        final Notification.Builder builder = newBaseNotification(mContext)
+                .setContentTitle(title)
+                .setTicker(title)
+                .setContentText(name)
+                .setProgress(info.max, info.progress, false)
+                .setOngoing(true);
+
+        // Wear bugreport doesn't need the bug info dialog, screenshot and cancel action.
+        if (!mIsWatch) {
+            final Action cancelAction = new Action.Builder(null, mContext.getString(
+                    com.android.internal.R.string.cancel), newCancelIntent(mContext, info)).build();
+            final Intent infoIntent = new Intent(mContext, BugreportProgressService.class);
+            infoIntent.setAction(INTENT_BUGREPORT_INFO_LAUNCH);
+            infoIntent.putExtra(EXTRA_ID, info.id);
+            final PendingIntent infoPendingIntent =
+                    PendingIntent.getService(mContext, info.id, infoIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+            final Action infoAction = new Action.Builder(null,
+                    mContext.getString(R.string.bugreport_info_action),
+                    infoPendingIntent).build();
+            final Intent screenshotIntent = new Intent(mContext, BugreportProgressService.class);
+            screenshotIntent.setAction(INTENT_BUGREPORT_SCREENSHOT);
+            screenshotIntent.putExtra(EXTRA_ID, info.id);
+            PendingIntent screenshotPendingIntent = mTakingScreenshot ? null : PendingIntent
+                    .getService(mContext, info.id, screenshotIntent,
+                            PendingIntent.FLAG_UPDATE_CURRENT);
+            final Action screenshotAction = new Action.Builder(null,
+                    mContext.getString(R.string.bugreport_screenshot_action),
+                    screenshotPendingIntent).build();
+            builder.setContentIntent(infoPendingIntent)
+                .setActions(infoAction, screenshotAction, cancelAction);
+        }
+
         if (DEBUG) {
             Log.d(TAG, "Sending 'Progress' notification for id " + info.id + " (pid " + info.pid
                     + "): " + percentageText);
         }
-        sendForegroundabledNotification(info.id, notification);
+        sendForegroundabledNotification(info.id, builder.build());
     }
 
     private void sendForegroundabledNotification(int id, Notification notification) {
@@ -754,7 +775,6 @@ public class BugreportProgressService extends Service {
             }
             msg = mContext.getString(R.string.bugreport_screenshot_taken);
         } else {
-            // TODO: try again using Framework APIs instead of relying on screencap.
             msg = mContext.getString(R.string.bugreport_screenshot_failed);
             Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
         }
@@ -854,10 +874,7 @@ public class BugreportProgressService extends Service {
         // Stop running on foreground, otherwise share notification cannot be dismissed.
         stopForegroundWhenDone(id);
 
-        final Configuration conf = mContext.getResources().getConfiguration();
-        if ((conf.uiMode & Configuration.UI_MODE_TYPE_MASK) != Configuration.UI_MODE_TYPE_WATCH) {
-            triggerLocalNotification(mContext, info);
-        }
+        triggerLocalNotification(mContext, info);
     }
 
     /**
@@ -1336,22 +1353,24 @@ public class BugreportProgressService extends Service {
     /**
      * Takes a screenshot and save it to the given location.
      */
-    private static boolean takeScreenshot(Context context, String screenshotFile) {
-        final ProcessBuilder screencap = new ProcessBuilder()
-                .command("/system/bin/screencap", "-p", screenshotFile);
-        Log.d(TAG, "Taking screenshot using " + screencap.command());
-        try {
-            final int exitValue = screencap.start().waitFor();
-            if (exitValue == 0) {
+    private static boolean takeScreenshot(Context context, String path) {
+        final Bitmap bitmap = Screenshooter.takeScreenshot();
+        if (bitmap == null) {
+            return false;
+        }
+        boolean status;
+        try (final FileOutputStream fos = new FileOutputStream(path)) {
+            if (bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)) {
                 ((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(150);
                 return true;
+            } else {
+                Log.e(TAG, "Failed to save screenshot on " + path);
             }
-            Log.e(TAG, "screencap (" + screencap.command() + ") failed: " + exitValue);
-        } catch (IOException e) {
-            Log.e(TAG, "screencap (" + screencap.command() + ") failed", e);
-        } catch (InterruptedException e) {
-            Log.w(TAG, "Thread interrupted while screencap still running");
-            Thread.currentThread().interrupt();
+        } catch (IOException e ) {
+            Log.e(TAG, "Failed to save screenshot on " + path, e);
+            return false;
+        } finally {
+            bitmap.recycle();
         }
         return false;
     }

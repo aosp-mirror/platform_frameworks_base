@@ -1,0 +1,565 @@
+page.title=Launch-Time Performance
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+<ol>
+<li><a href="#internals">Launch Internals</a>
+  <ol>
+    <li><a href="#cold">Cold start</a></li>
+    <li><a href="#warm">Warm start</a></li>
+    <li><a href="#lukewarm">Lukewarm start</a></li>
+  </ol>
+</li>
+<li><a href="#profiling">Profiling Launch Performance</a>
+  <ol>
+    <li><a href="#time-initial">Time to initial display</a></li>
+    <li><a href="#time-full">Time to full display</a></li>
+  </ol>
+</li>
+<li><a href="#common">Common Issues</a>
+   <ol>
+      <li><a href="#heavy-app">Heavy app initialization</a></li>
+      <li><a href="#heavy-act">Heavy activity initialization</a></li>
+      <li><a href="#themed">Themed launch screens</a></li>
+   </ol>
+      </li>
+</ol>
+</div>
+</div>
+
+<p>
+Users expect apps to be responsive and fast to load. An app with a slow startup
+time doesn’t meet this expectation, and can be disappointing to users. This
+sort of poor experience may cause a user to rate your app poorly on the Play
+store, or even abandon your app altogether.
+</p>
+
+<p>
+This document provides information to help you optimize your app’s launch time.
+It begins by explaining the internals of the launch process. Next, it discusses
+how to profile startup performance. Last, it describes some common startup-time
+issues, and gives some hints on how to address them.
+</p>
+
+<h2 id="internals">Launch Internals</h2>
+
+<p>
+App launch can take place in one of three states, each affecting how
+long it takes for your app to become visible to the user: cold start,
+warm start, and lukewarm start. In a cold start, your app starts from scratch.
+In the other states, the system needs to bring the app from the background to
+the foreground. We recommend that you always optimize based on an assumption of
+a cold start. Doing so can improve the performance of warm and lukewarm starts,
+as well.
+</p>
+
+<p>
+To optimize your app for fast startup, it’s useful to understand what’s
+happening at the system and app levels, and how they interact, in each of
+these states.
+</p>
+
+<h3 id="cold">Cold start</h3>
+
+<p>
+A cold start refers to an app’s starting from scratch: the system’s process
+has not, until this start, created the app’s process. Cold starts happen in
+cases such as your app’s being launched for the first time since the device
+booted, or since the system killed the app. This type of start presents the
+greatest challenge in terms of minimizing startup time, because the system
+and app have more work to do than in the other launch states.
+</p>
+
+<p>
+At the beginning of a cold start, the system has three tasks. These tasks are:
+</p>
+
+<ol style="1">
+   <li>Loading and launching the app.</li>
+   <li>Displaying a blank starting window for the app immediately after launch.
+   </li>
+   <li>Creating the app
+   <a href="{docRoot}guide/components/processes-and-threads.html#Processes">
+   process.</a></li>
+</ol>
+<br/>
+<p>
+As soon as the system creates the app process, the app process is responsible
+for the next stages. These stages are:
+</p>
+
+<ol style="1">
+   <li>Creating the app object.</li>
+   <li>Launching the main thread.</li>
+   <li>Creating the main activity.</li>
+   <li>Inflating views.</li>
+   <li>Laying out the screen.</li>
+   <li>Performing the initial draw.</li>
+</ol>
+
+<p>
+Once the app process has completed the first draw, the system process swaps
+out the currently displayed background window, replacing it with the main
+activity. At this point, the user can start using the app.
+</p>
+
+<p>
+Figure 1 shows how the system and app processes hand off work between each
+other.
+</p>
+<br/>
+
+  <img src="{@docRoot}topic/performance/images/cold-launch.png">
+  <p class="img-caption">
+    <strong>Figure 1.</strong> A visual representation of the important parts of
+    a cold application launch.
+  </p>
+
+<p>
+Performance issues can arise during creation of the app and
+creation of the activity.
+</p>
+
+<h4 id="app-creation">Application creation</h4>
+
+<p>
+When your application launches, the blank starting window remains on the screen
+until the system finishes drawing the app for the first time. At that point,
+the system process swaps out the starting window for your app, allowing the
+user to start interacting with the app.
+</p>
+
+<p>
+If you’ve overloaded {@link android.app.Application#onCreate() Application.oncreate()}
+in your own app, the app starts by calling this
+method on your app object. Afterwards, the app spawns the main thread, also
+known as the UI thread, and tasks it with creating your main activity.
+</p>
+
+<p>
+From this point, system- and app-level processes proceed in accordance with
+the <a href="{docRoot}guide/topics/processes/process-lifecycle.html">
+app lifecycle stages</a>.
+</p>
+
+<h4 id="act-creation">Activity creation</h4>
+
+<p>
+After the app process creates your activity, the activity performs the
+following operations:
+</p>
+
+<ol style="1">
+   <li>Initializes values.</li>
+   <li>Calls constructors.</li>
+   <li>Calls the callback method, such as
+   {@link android.app.Activity#onCreate(android.os.Bundle) Activity.onCreate()},
+   appropriate to the current lifecycle state of the activity.</li>
+</ol>
+
+<p>
+Typically, the
+{@link android.app.Activity#onCreate(android.os.Bundle) onCreate()}
+method has the greatest impact on load time, because it performs the work with
+the highest overhead: loading and inflating views, and initializing the objects
+needed for the activity to run.
+</p>
+
+<h3 id="warm">Warm start</h3>
+
+<p>
+A warm start of your application is much simpler and lower-overhead than a
+cold start. In a warm start, all the system does is bring your activity to
+the foreground. If all of your application’s activities are still resident in
+memory, then the app can avoid having to repeat object initialization, layout
+inflation, and rendering.
+</p>
+
+<p>
+However, if some memory has been purged in response to memory trimming
+events, such as
+{@link android.content.ComponentCallbacks2#onTrimMemory(int) onTrimMemory()},
+then those objects will need to be recreated in
+response to the warm start event.
+</p>
+
+<p>
+A warm start displays the same on-screen behavior as a cold start scenario:
+The system process displays a blank screen until the app has finished rendering
+the activity.
+</p>
+
+<h3 id="lukewarm">Lukewarm start</h3>
+
+<p>
+A lukewarm start encompasses some subset of the operations that
+take place during a cold start; at the same time, it represents less overhead
+than a warm start. There are many potential states that could be considered
+lukewarm starts. For instance:
+</p>
+
+<ul>
+   <li>The user backs out of your app, but then re-launches it. The process may
+       have continued to run, but the app must recreate the activity from scratch
+       via a call to
+       {@link android.app.Activity#onCreate(android.os.Bundle) onCreate()}.</li>
+
+   <li>The system evicts your app from memory, and then the user re-launches it.
+       The process and the Activity need to be restarted, but the task can
+       benefit somewhat from the saved instance state bundle passed into
+       {@link android.app.Activity#onCreate(android.os.Bundle) onCreate()}.</li>
+</ul>
+
+<h2 id="profiling">Profiling Launch Performance</h2>
+
+<p>
+In order to properly diagnose start time performance, you can track metrics
+that show how long it takes your application to start.
+</p>
+
+<h3 id="time-initial">Time to initial display</h3>
+
+<p>
+From Android 4.4 (API level 19), logcat includes an output line containing
+a value called {@code Displayed}. This value represents
+the amount of time elapsed between launching the process and finishing drawing
+the corresponding activity on the screen. The elapsed time encompasses the
+following sequence of events:
+</p>
+
+<ol style="1">
+   <li>Launch the process.</li>
+   <li>Initialize the objects.</li>
+   <li>Create and initialize the activity.</li>
+   <li>Inflate the layout.</li>
+   <li>Draw your application for the first time.</li>
+</ol>
+
+<p>
+The reported log line looks similar to the following example:
+</p>
+
+<pre class="no-pretty-print">
+ActivityManager: Displayed com.android.myexample/.StartupTiming: +3s534ms
+</pre>
+
+<p>
+If you’re tracking logcat output from the command line, or in a terminal,
+finding the elapsed time is straightforward. To find elapsed time in
+Android Studio, you must disable filters in your logcat view. Disabling the
+filters is necessary because the system server, not the app itself, serves
+this log.
+</p>
+
+<p>
+Once you’ve made the appropriate settings, you can easily search for the
+correct term to see the time. Figure 2 shows how to disable filters, and,
+in the second line of output from the bottom, an example of logcat output of
+the {@code Displayed} time.
+</p>
+<br/>
+
+  <img src="{@docRoot}topic/performance/images/displayed-logcat.png">
+  <p class="img-caption">
+    <strong>Figure 2.</strong> Disabling filters, and
+    finding the {@code Displayed} value in logcat.
+  </p>
+
+<p>
+The {@code Displayed} metric in the logcat output does not necessarily capture
+the amount of time until all resources are loaded and displayed: it leaves out
+resources that are not referenced in the layout file or that the app creates
+as part of object initialization. It excludes these resources because loading
+them is an inline process, and does not block the app’s initial display.
+</p>
+
+<h3 id="time-full">Time to full display</h3>
+
+<p>
+You can use the {@link android.app.Activity#reportFullyDrawn()} method to
+measure the elapsed time
+between application launch and complete display of all resources and view
+hierarchies. This can be valuable in cases where an app performs lazy loading.
+In lazy loading, an app does not block the initial drawing of the window, but
+instead asynchronously loads resources and updates the view hierarchy.
+</p>
+
+<p>
+If, due to lazy loading, an app’s initial display does not include all
+resources, you might consider the completed loading and display of all
+resources and views as a separate metric: For example, your UI might be
+fully loaded, with some text drawn, but not yet display images that the
+app must fetch from the network.
+</p>
+
+<p>
+To address this concern, you can manually call
+{@link android.app.Activity#reportFullyDrawn()}
+to let the system know that your activity is
+finished with its lazy loading. When you use this method, the value
+that logcat displays is the time elapsed
+since the creation of the application object, and the moment
+{@link android.app.Activity#reportFullyDrawn()} is called.
+</p>
+
+<p>
+If you learn that your display times are slower than you’d like, you can
+go on to try to identify the bottlenecks in the startup process.
+</p>
+
+<h4 id="bottlenecks">Identifying bottlenecks</h4>
+
+<p>
+Two good ways to look for bottlenecks are Android Studio’s Method Tracer tool
+and inline tracing. To learn about Method Tracer, see that tool’s
+<a href="{docRoot}studio/profile/am-methodtrace.html">documentation</a>.
+</p>
+
+<p>
+If you do not have access to the Method Tracer tool, or cannot start the tool
+at the correct time to gain log information, you can gain similar insight
+through inline tracing inside of your apps’ and activities’ {@code onCreate()}
+methods. To learn about inline tracing, see the reference documentation for
+the {@link android.os.Trace} functions, and for the
+<a href="{docRoot}studio/profile/systrace-commandline.html">Systrace</a> tool.
+</p>
+
+<h2 id="common">Common Issues</h2>
+
+<p>
+This section discusses several issues that often affect apps’ startup
+performance. These issues chiefly concern initializing app and activity
+objects, as well as the loading of screens.
+</p>
+
+<h3 id="heavy-app">Heavy app initialization</h3>
+
+<p>
+Launch performance can suffer when your code overrides the {@code Application}
+object, and executes heavy work or complex logic when initializing that object.
+Your app may waste time during startup if your Application subclasses perform
+initializations that don’t need to be done yet. Some initializations may be
+completely unnecessary: for example, initializing state information for the
+main activity, when the app has actually started up in response to an intent.
+With an intent, the app uses only a subset of the previously initialized state
+data.
+</p>
+
+<p>
+Other challenges during app initialization include garbage-collection events
+that are impactful or numerous, or disk I/O happening concurrently with
+initialization, further blocking the initialization process. Garbage collection
+is especially a consideration with the Dalvik runtime; the Art runtime performs
+garbage collection concurrently, minimizing that operation's impact.
+</p>
+
+<h4 id="diagnosing-1">Diagnosing the problem</h4>
+
+<p>
+You can use method tracing or inline tracing to try to diagnose the problem.
+</p>
+
+<h5>Method tracing</h5>
+
+<p>
+Running the Method Tracer tool reveals that the
+{@link android.app.Instrumentation#callApplicationOnCreate(android.app.Application) callApplicationOnCreate()}
+method eventually calls your {@code com.example.customApplication.onCreate}
+method. If the tool shows that these
+methods are taking a long time to finish executing, you should explore further
+to see what work is occurring there.
+</p>
+
+<h5>Inline tracing</h5>
+
+<p>
+Use inline tracing to investigate likely culprits including:
+</p>
+
+<ul>
+   <li>Your app’s initial {@link android.app.Application#onCreate()}
+   function.</li>
+   <li>Any global singleton objects your app initializes.</li>
+   <li>Any disk I/O, deserialization, or tight loops that might be occurring
+   during the bottleneck.
+</ul>
+
+
+<h4 id="solutions-1">Solutions to the problem</h4>
+
+<p>
+Whether the problem lies with unnecessary initializations or disk I/O,
+the solution calls for lazy-initializing objects: initializing only those
+objects that are immediately needed. For example, rather than creating global
+static objects, instead, move to a singleton pattern, where the app initalizes
+objects only the first time it accesses them.
+</p>
+
+<h3 id="heavy-act">Heavy activity initialization</h4>
+
+<p>
+Activity creation often entails a lot of high-overhead work. Often, there are
+opportunities to optimize this work to achieve performance improvements. Such
+common issues include:
+</p>
+
+<ul>
+   <li>Inflating large or complex layouts.</li>
+   <li>Blocking screen drawing on disk, or network I/O.</li>
+   <li>Loading and decoding bitmaps.</li>
+   <li>Rasterizing {@link android.graphics.drawable.VectorDrawable VectorDrawable} objects.</li>
+   <li>Initialization of other subsystems of the activity.</li>
+</ul>
+
+<h4 id="diagnosing-2">Diagnosing the problem</h4>
+
+<p>
+In this case, as well, both method tracing and inline tracing can prove useful.
+</p>
+
+<h5>Method tracing</h5>
+
+<p>
+When running the Method Tracer tool, the particular areas to
+focus on your your app’s {@link android.app.Application} subclass constructors and
+{@code com.example.customApplication.onCreate()} methods.
+</p>
+
+<p>
+If the tool shows that these methods are taking a long time to finish
+executing, you should explore further to see what work is occurring there.
+</p>
+
+<h5>Inline tracing</h5>
+
+<p>
+Use inline tracing to investigate likely culprits including:
+</p>
+
+<ul>
+   <li>Your app’s initial {@link android.app.Application#onCreate()}
+   function.</li>
+   <li>Any global singleton objects it initializes.</li>
+   <li>Any disk I/O, deserialization, or tight loops that might be occurring
+   during the bottleneck.</li>
+</ul>
+
+<h4 id="solutions-2">Solutions to the problem</h4>
+
+<p>
+There are many potential bottlenecks, but two common problems and remedies
+are as follows:
+</p>
+
+<ul>
+   <li>The larger your view hierarchy, the more time the app takes to inflate
+   it. Two steps you can take to address this issue are:
+
+   <ul>
+      <li>Flattening your view hierarchy by reducing redundant or nested
+      layouts.</li>
+
+      <li>Not inflating parts of the UI that do not need to be visible during
+      launch. Instead, use use a {@link android.view.ViewStub} object as a
+      placeholder for sub-hierarchies that the app can inflate at a more
+      appropriate time.</li>
+   </ul>
+   </li>
+
+   <li>Having all of your resource initialization on the main
+       thread can also slow down startup. You can address this issue as follows:
+
+   <ul>
+      <li>Move all resource initialization so that the app can perform it
+      lazily on a different thread.</li>
+      <li>Allow the app to load and display your views, and then later
+      update visual properties that are dependent on bitmaps and other
+      resources.</li>
+   </ul>
+   </li>
+
+<h3 id="themed">Themed launch screens</h3>
+
+
+<p>
+You may wish to theme your app’s loading experience, so that the app’s
+launch screen is thematically consistent with the rest of the app, instead of
+with the system theming. Doing so can hide a slow activity launch.
+</p>
+
+<p>
+A common way to implement a themed launch screen is to use the the
+{@link android.R.attr#windowDisablePreview} theme attribute to turn off
+the initial blank screen
+that the system process draws when launching the app. However, this approach
+can result in a longer startup time than apps that don’t suppress the preview
+window. Also, it forces the user to wait with no feedback while the activity
+launches, making them wonder if the app is functioning properly.
+</p>
+
+<h4 id="diagnosing-3">Diagnosing the problem</h4>
+
+<p>
+You can often diagnose this problem by observing a slow response when a user
+launches your app. In such a case, the screen may seem to be frozen, or to
+have stopped responding to input.
+</p>
+
+<h4 id="solutions-3">Solutions to the problem</h4>
+
+<p>
+We recommend that, rather than disabling the preview window, you
+follow the common
+<a href="http://www.google.com/design/spec/patterns/launch-screens.html#">
+Material Design</a> patterns. You can use the activity's
+{@code windowBackground} theme attribute to provide a simple custom drawable
+for the starting activity.
+</p>
+
+<p>
+For example, you might create a new drawable file and reference it from the
+layout XML and app manifest file as follows:
+</p>
+
+<p>Layout XML file:</p>
+
+<pre>
+&lt;layer-list xmlns:android="http://schemas.android.com/apk/res/android" android:opacity="opaque"&gt;
+  &lt;!-- The background color, preferably the same as your normal theme --&gt;
+  &lt;item android:drawable="@android:color/white"/&gt;
+  &lt;!-- Your product logo - 144dp color version of your app icon --&gt;
+  &lt;item&gt;
+    &lt;bitmap
+      android:src="@drawable/product_logo_144dp"
+      android:gravity="center"/&gt;
+  &lt;/item&gt;
+&lt;/layer-list&gt;
+</pre>
+
+<p>Manifest file:</p>
+
+<pre>
+&lt;activity ...
+android:theme="@style/AppTheme.Launcher" /&gt;
+</pre>
+
+<p>
+The easiest way to transition back to your normal theme is to call
+{@link android.view.ContextThemeWrapper#setTheme(int) setTheme(R.style.AppTheme)}
+before calling {@code super.onCreate()} and {@code setContentView()}:
+</p>
+
+<pre class="no-pretty-print">
+public class MyMainActivity extends AppCompatActivity {
+  &#64;Override
+  protected void onCreate(Bundle savedInstanceState) {
+    // Make sure this is before calling super.onCreate
+    setTheme(R.style.Theme_MyApp);
+    super.onCreate(savedInstanceState);
+    // ...
+  }
+}
+</pre>

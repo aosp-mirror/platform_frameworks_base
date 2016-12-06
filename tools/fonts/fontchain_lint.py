@@ -256,13 +256,20 @@ def parse_fonts_xml(fonts_xml_path):
 
 
 def check_emoji_coverage(all_emoji, equivalent_emoji):
+    emoji_font = get_emoji_font()
+    check_emoji_font_coverage(emoji_font, all_emoji, equivalent_emoji)
+
+
+def get_emoji_font():
     emoji_fonts = [
         record.font for record in _fallback_chain
         if 'Zsye' in record.scripts]
     assert len(emoji_fonts) == 1, 'There are %d emoji fonts.' % len(emoji_fonts)
-    emoji_font = emoji_fonts[0]
-    coverage = get_emoji_map(emoji_font)
+    return emoji_fonts[0]
 
+
+def check_emoji_font_coverage(emoji_font, all_emoji, equivalent_emoji):
+    coverage = get_emoji_map(emoji_font)
     for sequence in all_emoji:
         assert sequence in coverage, (
             '%s is not supported in the emoji font.' % printable(sequence))
@@ -322,15 +329,9 @@ def check_emoji_defaults(default_emoji):
     # Noto does not have monochrome glyphs for Unicode 7.0 wingdings and
     # webdings yet.
     missing_text_chars -= _chars_by_age['7.0']
-    # TODO: Remove these after b/26113320 is fixed
-    missing_text_chars -= {
-        0x263A, # WHITE SMILING FACE
-        0x270C, # VICTORY HAND
-        0x2744, # SNOWFLAKE
-        0x2764, # HEAVY BLACK HEART
-    }
     assert missing_text_chars == set(), (
-        'Text style version of some emoji characters are missing: ' + repr(missing_text_chars))
+        'Text style version of some emoji characters are missing: ' +
+            repr(missing_text_chars))
 
 
 # Setting reverse to true returns a dictionary that maps the values to sets of
@@ -350,7 +351,7 @@ def parse_unicode_datafile(file_path, reverse=False):
             if not line:
                 continue
 
-            chars, prop = line.split(';')
+            chars, prop = line.split(';')[:2]
             chars = chars.strip()
             prop = prop.strip()
 
@@ -411,21 +412,6 @@ def parse_ucd(ucd_path):
     _emoji_zwj_sequences = parse_unicode_datafile(
         path.join(ucd_path, 'emoji-zwj-sequences.txt'))
 
-    # filter modern pentathlon, as it seems likely to be removed from final spec
-    # also filter rifle
-    def is_excluded(n):
-        return n in [0x1f93b, 0x1f946]
-
-    def contains_excluded(t):
-        if type(t) == int:
-            return is_excluded(t)
-        return any(is_excluded(cp) for cp in t)
-
-    # filter modern pentathlon, as it seems likely to be removed from final spec
-    _emoji_properties['Emoji'] = set(
-        t for t in _emoji_properties['Emoji'] if not contains_excluded(t))
-    _emoji_sequences = dict(
-        (t, v) for (t, v) in _emoji_sequences.items() if not contains_excluded(t))
 
 def flag_sequence(territory_code):
     return tuple(0x1F1E6 + ord(ch) - ord('A') for ch in territory_code)
@@ -437,7 +423,8 @@ UNSUPPORTED_FLAGS = frozenset({
     flag_sequence('GF'), flag_sequence('GP'), flag_sequence('GS'),
     flag_sequence('MF'), flag_sequence('MQ'), flag_sequence('NC'),
     flag_sequence('PM'), flag_sequence('RE'), flag_sequence('TF'),
-    flag_sequence('WF'), flag_sequence('XK'), flag_sequence('YT'),
+    flag_sequence('UN'), flag_sequence('WF'), flag_sequence('XK'),
+    flag_sequence('YT'),
 })
 
 EQUIVALENT_FLAGS = {
@@ -449,6 +436,22 @@ EQUIVALENT_FLAGS = {
 }
 
 COMBINING_KEYCAP = 0x20E3
+
+# Characters that Android defaults to emoji style, different from the recommendations in UTR #51
+ANDROID_DEFAULT_EMOJI = frozenset({
+    0x2600, # BLACK SUN WITH RAYS
+    0x2601, # CLOUD
+    0x260E, # BLACK TELEPHONE
+    0x261D, # WHITE UP POINTING INDEX
+    0x263A, # WHITE SMILING FACE
+    0x2660, # BLACK SPADE SUIT
+    0x2663, # BLACK CLUB SUIT
+    0x2665, # BLACK HEART SUIT
+    0x2666, # BLACK DIAMOND SUIT
+    0x270C, # VICTORY HAND
+    0x2744, # SNOWFLAKE
+    0x2764, # HEAVY BLACK HEART
+})
 
 LEGACY_ANDROID_EMOJI = {
     0xFE4E5: flag_sequence('JP'),
@@ -483,24 +486,73 @@ ZWJ_IDENTICALS = {
     (0x1F468, 0x200D, 0x1F469, 0x200D, 0x1F466): 0x1F46A,
 }
 
+
+def is_fitzpatrick_modifier(cp):
+    return 0x1F3FB <= cp <= 0x1F3FF
+
+
+def reverse_emoji(seq):
+    rev = list(reversed(seq))
+    # if there are fitzpatrick modifiers in the sequence, keep them after
+    # the emoji they modify
+    for i in xrange(1, len(rev)):
+        if is_fitzpatrick_modifier(rev[i-1]):
+            rev[i], rev[i-1] = rev[i-1], rev[i]
+    return tuple(rev)
+
+
 def compute_expected_emoji():
     equivalent_emoji = {}
     sequence_pieces = set()
     all_sequences = set()
     all_sequences.update(_emoji_variation_sequences)
 
+    # add zwj sequences not in the current emoji-zwj-sequences.txt
+    adjusted_emoji_zwj_sequences = dict(_emoji_zwj_sequences)
+    adjusted_emoji_zwj_sequences.update(_emoji_zwj_sequences)
+    # single parent families
+    additional_emoji_zwj = (
+        (0x1F468, 0x200D, 0x1F466),
+        (0x1F468, 0x200D, 0x1F467),
+        (0x1F468, 0x200D, 0x1F466, 0x200D, 0x1F466),
+        (0x1F468, 0x200D, 0x1F467, 0x200D, 0x1F466),
+        (0x1F468, 0x200D, 0x1F467, 0x200D, 0x1F467),
+        (0x1F469, 0x200D, 0x1F466),
+        (0x1F469, 0x200D, 0x1F467),
+        (0x1F469, 0x200D, 0x1F466, 0x200D, 0x1F466),
+        (0x1F469, 0x200D, 0x1F467, 0x200D, 0x1F466),
+        (0x1F469, 0x200D, 0x1F467, 0x200D, 0x1F467),
+    )
+    # sequences formed from man and woman and optional fitzpatrick modifier
+    modified_extensions = (
+        0x2696,
+        0x2708,
+        0x1F3A8,
+        0x1F680,
+        0x1F692,
+    )
+    for seq in additional_emoji_zwj:
+        adjusted_emoji_zwj_sequences[seq] = 'Emoji_ZWJ_Sequence'
+    for ext in modified_extensions:
+        for base in (0x1F468, 0x1F469):
+            seq = (base, 0x200D, ext)
+            adjusted_emoji_zwj_sequences[seq] = 'Emoji_ZWJ_Sequence'
+            for modifier in range(0x1F3FB, 0x1F400):
+                seq = (base, modifier, 0x200D, ext)
+                adjusted_emoji_zwj_sequences[seq] = 'Emoji_ZWJ_Sequence'
+
     for sequence in _emoji_sequences.keys():
         sequence = tuple(ch for ch in sequence if ch != EMOJI_VS)
         all_sequences.add(sequence)
         sequence_pieces.update(sequence)
 
-    for sequence in _emoji_zwj_sequences.keys():
+    for sequence in adjusted_emoji_zwj_sequences.keys():
         sequence = tuple(ch for ch in sequence if ch != EMOJI_VS)
         all_sequences.add(sequence)
         sequence_pieces.update(sequence)
         # Add reverse of all emoji ZWJ sequences, which are added to the fonts
         # as a workaround to get the sequences work in RTL text.
-        reversed_seq = tuple(reversed(sequence))
+        reversed_seq = reverse_emoji(sequence)
         all_sequences.add(reversed_seq)
         equivalent_emoji[reversed_seq] = sequence
 
@@ -519,6 +571,7 @@ def compute_expected_emoji():
         set(LEGACY_ANDROID_EMOJI.keys()))
     default_emoji = (
         _emoji_properties['Emoji_Presentation'] |
+        ANDROID_DEFAULT_EMOJI |
         all_sequences |
         set(LEGACY_ANDROID_EMOJI.keys()))
 
@@ -536,8 +589,8 @@ def compute_expected_emoji():
 
 
 def main():
-    target_out = sys.argv[1]
     global _fonts_dir
+    target_out = sys.argv[1]
     _fonts_dir = path.join(target_out, 'fonts')
 
     fonts_xml_path = path.join(target_out, 'etc', 'fonts.xml')

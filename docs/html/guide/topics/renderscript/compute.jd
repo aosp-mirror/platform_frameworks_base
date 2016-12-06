@@ -185,7 +185,7 @@ Allocations} but no output {@link android.renderscript.Allocation Allocations}.<
 
 <p>Reduction kernels are explained in more detail <a href="#reduction-in-depth">here</a>.</p>
 
-<p>Reduction kernels are supported in Android Nougat (API level 24) and later.</p>
+<p>Reduction kernels are supported in Android 7.0 (API level 24) and later.</p>
 </li>
 </ul>
 
@@ -578,7 +578,7 @@ following:</p>
   <li>searching for a specific value or for the coordinate of a specific value within the data</li>
 </ul>
 
-<p>In Android Nougat (API level 24) and later, RenderScript supports <i>reduction kernels</i> to allow
+<p>In Android 7.0 (API level 24) and later, RenderScript supports <i>reduction kernels</i> to allow
 efficient user-written reduction algorithms. You may launch reduction kernels on inputs with
 1, 2, or 3 dimensions.<p>
 

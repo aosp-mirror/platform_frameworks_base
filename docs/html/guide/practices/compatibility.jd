@@ -114,7 +114,7 @@ is {@link android.content.pm.PackageManager#FEATURE_APP_WIDGETS}.</p>
 
 <p>If necessary, you can prevent users from installing your app when their devices don't provide a
 given feature by declaring it with a <a href=
-"{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a>
+"{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a>
 element in your app's <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest
 file</a>.</p>
 
@@ -164,7 +164,7 @@ android.content.pm.PackageManager#FEATURE_BLUETOOTH} device feature. You can dis
 on this feature and make your app available to devices without Bluetooth by setting the <a href=
 "{@docRoot}guide/topics/manifest/uses-feature-element.html#required">{@code required}</a> attribute
 to {@code "false"} in the <a href=
-"{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a> tag.
+"{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a> tag.
 For more information about implicitly required device features, read <a href=
 "{@docRoot}guide/topics/manifest/uses-feature-element.html#permissions">Permissions that Imply
 Feature Requirements</a>.</p>
@@ -180,7 +180,7 @@ Android 1.0 is API level 1 and Android 4.4 is API level 19.</p>
 
 <p>The API level allows you to declare the minimum version with which your app is
 compatible, using the <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code
-&lt;uses-sdk>}</a> manifest tag and its
+<uses-sdk>}</a> manifest tag and its
 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a>
 attribute.</p>
 

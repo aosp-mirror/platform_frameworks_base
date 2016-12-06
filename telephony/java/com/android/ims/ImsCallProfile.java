@@ -205,6 +205,14 @@ public class ImsCallProfile implements Parcelable {
      */
     public static final String EXTRA_CALL_RAT_TYPE = "CallRadioTech";
 
+    /**
+     * Similar to {@link #EXTRA_CALL_RAT_TYPE}, except with a lowercase 'c'.  Used to ensure
+     * compatibility with modems that are non-compliant with the {@link #EXTRA_CALL_RAT_TYPE}
+     * extra key.  Should be removed when the non-compliant modems are fixed.
+     * @hide
+     */
+    public static final String EXTRA_CALL_RAT_TYPE_ALT = "callRadioTech";
+
     public int mServiceType;
     public int mCallType;
     public int mRestrictCause = CALL_RESTRICT_CAUSE_NONE;
@@ -445,6 +453,15 @@ public class ImsCallProfile implements Parcelable {
      */
     public boolean isVideoPaused() {
         return mMediaProfile.mVideoDirection == ImsStreamMediaProfile.DIRECTION_INACTIVE;
+    }
+
+    /**
+     * Determines if the {@link ImsCallProfile} represents a video call.
+     *
+     * @return {@code true} if the profile is for a video call, {@code false} otherwise.
+     */
+    public boolean isVideoCall() {
+        return VideoProfile.isVideo(getVideoStateFromCallType(mCallType));
     }
 
     /**

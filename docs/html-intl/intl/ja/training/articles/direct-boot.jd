@@ -1,0 +1,181 @@
+page.title=ダイレクト ブート
+page.keywords=preview,sdk,direct boot
+page.tags=androidn
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>このドキュメントの内容</h2>
+  <ol>
+    <li><a href="#run">ダイレクト ブート中に実行するためのアクセスを要求する</a></li>
+    <li><a href="#access">端末暗号化ストレージにアクセスする</a></li>
+    <li><a href="#notification">ユーザーによる端末のロック解除の通知を受信する</a></li>
+    <li><a href="#migrating">既存のデータを移行する</a></li>
+    <li><a href="#testing">暗号化対応アプリをテストする</a></li>
+  </ol>
+</div>
+</div>
+
+<p>Android N は、電源を入れたときにユーザーが端末のロックを解除していない場合、セキュリティで保護された <i>ダイレクト ブート</i> モードで実行します。
+
+この機能をサポートするため、システムで次の 2 つの保存先を使用できるようになります。</p>
+
+<ul>
+<li><i>認証情報暗号化ストレージ。</i>これはデフォルトの保存先で、ユーザーが端末のロックを解除した後にだけ使用できます。
+</li>
+<li><i>端末暗号化ストレージ。</i>この保存先は、ダイレクト ブート モード中とユーザーが端末のロックを解除した後の両方で使用できます。
+</li>
+</ul>
+
+<p>デフォルトで、ダイレクト ブート モード中はアプリは実行されません。ダイレクト ブート モード中にアプリで操作を実行する必要がある場合、このモードで実行するアプリ コンポーネントを登録できます。
+
+ダイレクト ブート モードでアプリの実行が必要になる一般的な使用例は次のとおりです。
+</p>
+
+<ul>
+<li>アラーム クロック アプリなど、通知がスケジュールされているアプリ。
+</li>
+<li>SMS アプリなど、重要なユーザー通知を表示するアプリ。</li>
+<li>Talkback など、ユーザー補助機能サービスを提供するアプリ。</li>
+</ul>
+
+<p>ダイレクト ブート モードで実行中にアプリがデータにアクセスする必要がある場合は、端末暗号化ストレージを使用します。
+端末暗号化ストレージにはキーで暗号化されたデータが保存され、端末がセキュアブートに成功した場合にのみこのデータを使用できます。
+
+</p>
+
+<p>ユーザーの認証情報に関連付けたキーで暗号化しなければならない PIN やパスワードなどのデータには、認証情報暗号化ストレージを使用します。認証情報暗号化ストレージは、ユーザーが端末のロック解除に成功した後に使用可能になり、ユーザーが端末を再起動するまでアクセスできます。
+
+
+ユーザーが端末をロック解除した後にロック画面を有効にしても、認証情報暗号化ストレージはロックされません。
+
+</p>
+
+<h2 id="run">ダイレクト ブート中に実行するためのアクセスを要求する</h2>
+
+<p>ダイレクト ブート モード中にアプリを実行したり、端末暗号化ストレージにアクセスしたりするには、アプリ コンポーネントの登録が必要です。
+
+アプリをシステムに登録するには、コンポーネントが
+<i>暗号化対応するように指定します。</i>コンポーネントが暗号化対応するよう指定するには、マニフェスト内で
+<code>android:directBootAware</code> 属性を true に設定します。<p>
+
+<p>暗号化対応コンポーネントを登録しておくと、端末を再起動したときにシステムから
+<code>LOCKED_BOOT_COMPLETED</code> ブロードキャスト メッセージを受信できます。
+この時点で端末暗号化ストレージが使用できるようになり、ダイレクト ブート モード中にコンポーネントが実行しなければならないタスクを実行できます。たとえば、スケジュールしたアラームのトリガーなどが該当します。
+
+</p>
+
+<p>次のコード スニペットは、アプリのマニフェスト内で
+{@link android.content.BroadcastReceiver} を暗号化対応として登録し、<code>LOCKED_BOOT_COMPLETED</code> のインテント フィルタを追加する方法の例を示しています。
+</p>
+
+<pre>
+&lt;receiver
+  android:directBootAware="true" &gt;
+  ...
+  &lt;intent-filter&gt;
+    &lt;action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" /&gt;
+  &lt;/intent-filter&gt;
+&lt;/receiver&gt;
+</pre>
+
+<p>ユーザーが端末のロックを解除すると、すべてのコンポーネントは端末暗号化ストレージと認証情報暗号化ストレージの両方にアクセスできます。
+</p>
+
+<h2 id="access">端末暗号化ストレージにアクセスする</h2>
+
+<p>端末暗号化ストレージにアクセスするには、
+<code>Context.createDeviceProtectedStorageContext()</code> を呼び出して追加の
+{@link android.content.Context} インスタンスを作成します。このコンテキストで実行されたストレージ API 呼び出しはすべて、端末暗号化ストレージにアクセスします。
+次の例では、端末暗号化ストレージにアクセスして既存のアプリのデータ ファイルを開きます。
+
+</p>
+
+<pre>
+Context directBootContext = appContext.createDeviceProtectedStorageContext();
+// Access appDataFilename that lives in device encrypted storage
+FileInputStream inStream = directBootContext.openFileInput(appDataFilename);
+// Use inStream to read content...
+</pre>
+
+<p>端末暗号化ストレージは、ダイレクト ブート モード中にアクセスが必要な情報のみに使用してください。汎用的な暗号化された保存先として、端末暗号化ストレージを使用することはできません。ユーザーの個人情報や、ダイレクト ブート モード中に特に必要ではない暗号化されたデータには、認証情報暗号化ストレージを使用してください。
+
+
+
+</p>
+
+<h2 id="notification">ユーザーによる端末のロック解除の通知を受信する</h2>
+
+<p>再起動後にユーザーが端末のロックを解除すると、アプリは認証情報暗号化ストレージへのアクセスに切り替えて、ユーザーの認証情報に応じて通常のシステム サービスを使用します。
+
+</p>
+
+<p>再起動後、ユーザーが端末のロックを解除したときに通知を受信するには、実行中のコンポーネントから {@link android.content.BroadcastReceiver} を登録して、<code>ACTION_USER_UNLOCKED</code> メッセージをリッスンするようにします。
+
+または、既存の {@link android.content.Intent#ACTION_BOOT_COMPLETED
+ACTION_BOOT_COMPLETED} メッセージを受信することもできます。このメッセージは、端末が起動してユーザーが端末のロックを解除したことを示すようになりました。
+
+</p>
+
+<p>
+<code>UserManager.isUserUnlocked()</code> を呼び出して、ユーザーが端末のロックを解除したかを直接問い合わせることもできます。</p>
+
+<h2 id="migrating">既存のデータを移行する</h2>
+
+<p>ユーザーが端末をアップデートしてダイレクト ブート モードを使用できるようになると、既存のデータを端末暗号化ストレージに移行しなければならない場合があります。
+
+<code>Context.moveSharedPreferencesFrom()</code> および
+<code>Context.moveDatabaseFrom()</code> を使用すると、設定およびデータベースのデータを認証情報暗号化ストレージと端末暗号化ストレージ間で移行できます。
+</p>
+
+<p>どのデータを認証情報暗号化ストレージから端末暗号化ストレージに移行するかは、慎重に判断してください。
+パスワードや承認トークンなどのユーザーの個人情報は、端末暗号化ストレージに移行しないでください。
+
+場合によっては、この 2 つの暗号化された保存先に、データセットを振り分けて管理する必要があります。
+</p>
+
+<h2 id="testing">暗号化対応アプリをテストする</h2>
+
+<p>新しいダイレクト ブート モードを使用して、暗号化対応アプリをテストしてみましょう。ダイレクト ブートを有効にする方法は 2 つあります。
+</p>
+
+<p class="caution"><strong>警告:</strong>ダイレクト ブートを有効にすると、端末上のすべてのユーザーデータが消去されます。
+</p>
+
+<p>Android N がインストールされたサポート対象端末では、次のいずれかの方法を使用してダイレクト ブートを有効にします。
+</p>
+
+<ul>
+<li>端末で、<b>[Developer options]</b> がまだ有効になっていない場合は、次の手順で有効にします。<b>[Settings] &gt; [About phone]</b> で <b>[Build number]</b> を 7 回タップします。
+
+[Developer options] 画面が表示されたら、<b>[Settings] &gt; [Developer options]</b> で <b>[Convert to file encryption]</b> を選択します。
+
+</li>
+<li>次の adb shell コマンドを使用して、ダイレクト ブート モードを有効にします。
+<pre class="no-pretty-print">
+$ adb reboot-bootloader
+$ fastboot --wipe-and-use-fbe
+</pre>
+</li>
+</ul>
+
+<p>テスト端末でモードの切り替えが必要な場合、エミュレーションされたダイレクト ブート モードも使用できます。
+データが失われるおそれがありますので、EMULATED モードは開発中にのみ使用してください。
+エミュレーションされたダイレクト ブート モードを有効にするには、端末でロック パターンを設定します。ロック パターンの設定時にセキュリティで保護されたスタートアップ画面について確認メッセージが表示された場合は、[No thanks] を選択します。次に、次の adb shell コマンドを使用します。
+
+
+</p>
+
+<pre class="no-pretty-print">
+$ adb shell sm set-emulate-fbe true
+</pre>
+
+<p>エミュレーションされたダイレクト ブート モードを無効にするには、次のコマンドを使用します。</p>
+
+<pre class="no-pretty-print">
+$ adb shell sm set-emulate-fbe false
+</pre>
+
+<p>これらのコマンドを使用すると、端末が再起動されます。</p>

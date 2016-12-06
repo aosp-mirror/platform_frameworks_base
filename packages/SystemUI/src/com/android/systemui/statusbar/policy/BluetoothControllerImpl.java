@@ -49,6 +49,7 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     private CachedBluetoothDevice mLastDevice;
 
     private final H mHandler = new H();
+    private int mState;
 
     public BluetoothControllerImpl(Context context, Looper bgLooper) {
         mLocalBluetoothManager = LocalBluetoothManager.getInstance(context, null);
@@ -117,6 +118,11 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     @Override
     public boolean isBluetoothEnabled() {
         return mEnabled;
+    }
+
+    @Override
+    public int getBluetoothState() {
+        return mState;
     }
 
     @Override
@@ -192,7 +198,9 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
 
     @Override
     public void onBluetoothStateChanged(int bluetoothState) {
-        mEnabled = bluetoothState == BluetoothAdapter.STATE_ON;
+        mEnabled = bluetoothState == BluetoothAdapter.STATE_ON
+                || bluetoothState == BluetoothAdapter.STATE_TURNING_ON;
+        mState = bluetoothState;
         mHandler.sendEmptyMessage(H.MSG_STATE_CHANGED);
     }
 

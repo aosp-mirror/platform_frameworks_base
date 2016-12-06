@@ -34,7 +34,7 @@ Screens</a></li>
 
 
 <div class="note design">
-<p><strong>New Guides for App Designers!</strong></p> 
+<p><strong>New Guides for App Designers!</strong></p>
 <p>Check out the new documents for designers at <strong><a
 href="{@docRoot}design/index.html">Android Design</a></strong>, including more guidelines
 for <a href="{@docRoot}design/style/iconography.html">Iconography</a>.</p>
@@ -291,10 +291,10 @@ your application. </p>
 the Android platform.</p>
 
 <p class="warning"><strong>Warning:</strong>
-Because these resources can change between platform versions, you 
+Because these resources can change between platform versions, you
 should not reference the system's copy of the resources. If you want to
 use any icons or other internal drawable resources, you should store a
-local copy of those icons or drawables in your application resources, 
+local copy of those icons or drawables in your application resources,
 then reference the local copy from your application code. In that way, you can
 maintain control over the appearance of your icons, even if the system's
 copy changes. Note that the grid below is not intended to be complete.</p>

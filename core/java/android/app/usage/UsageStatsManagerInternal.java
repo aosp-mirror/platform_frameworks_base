@@ -56,6 +56,17 @@ public abstract class UsageStatsManagerInternal {
     public abstract void reportConfigurationChange(Configuration config, int userId);
 
     /**
+     * Reports that an action equivalent to a ShortcutInfo is taken by the user.
+     *
+     * @param packageName The package name of the shortcut publisher
+     * @param shortcutId The ID of the shortcut in question
+     * @param userId The user in which the content provider was accessed.
+     *
+     * @see android.content.pm.ShortcutManager#reportShortcutUsed(String)
+     */
+    public abstract void reportShortcutUsage(String packageName, String shortcutId, int userId);
+
+    /**
      * Reports that a content provider has been accessed by a foreground app.
      * @param name The authority of the content provider
      * @param pkgName The package name of the content provider

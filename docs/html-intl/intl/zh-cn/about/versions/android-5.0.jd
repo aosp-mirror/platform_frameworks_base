@@ -430,7 +430,7 @@ sdk.platform.apiLevel=21
 <p>当系统检测到合适的网络时，它将连接到该网络并调用 {@link android.net.ConnectivityManager.NetworkCallback#onAvailable(android.net.Network) onAvailable()} 回调。您可以在回调中使用 {@link android.net.Network} 对象来获取关于该网络的更多信息，或者指示通信使用选定的网络。</p>
 
 <h3 id="BluetoothBroadcasting">低功耗蓝牙</h3>
-<p>Android 4.3 中作为重头戏引入了对<a href="{@docRoot}guide/topics/connectivity/bluetooth-le.html">低功耗蓝牙</a>（“低功耗蓝牙”<em></em>）的平台支持。在 Android 5.0 中，Android 设备现在可以用作低功耗蓝牙<em>外围设备</em>。应用可以使用此功能使附近的设备知道它的存在。例如，您可以构建相应的应用来允许设备用作计步器或健康检测器并与另一低功耗蓝牙设备交换其数据。</p> 
+<p>Android 4.3 中作为重头戏引入了对<a href="{@docRoot}guide/topics/connectivity/bluetooth-le.html">低功耗蓝牙</a>（“低功耗蓝牙”<em></em>）的平台支持。在 Android 5.0 中，Android 设备现在可以用作低功耗蓝牙<em>外围设备</em>。应用可以使用此功能使附近的设备知道它的存在。例如，您可以构建相应的应用来允许设备用作计步器或健康检测器并与另一低功耗蓝牙设备交换其数据。</p>
 <p>新的 {@link android.bluetooth.le} API 允许您的应用对公告进行广播，扫描响应，以及与附近的低功能蓝牙设备建立连接。要使用新的公告和扫描功能，请在您的清单中添加 {@link android.Manifest.permission#BLUETOOTH_ADMIN BLUETOOTH_ADMIN} 权限。当用户从 Play 商店更新或下载您的应用时，会要求他们向您的应用授予以下权限：“蓝牙连接信息：允许应用控制蓝牙，包括向附近的蓝牙设备进行广播以及获取关于这些设备的信息。”</p>
 
 <p>要开始低功耗蓝牙公告以便其他设备可以发现您的应用，请调用 {@link android.bluetooth.le.BluetoothLeAdvertiser#startAdvertising(android.bluetooth.le.AdvertiseSettings, android.bluetooth.le.AdvertiseData, android.bluetooth.le.AdvertiseCallback) startAdvertising()} 并传入 {@link android.bluetooth.le.AdvertiseCallback} 类的一个实施。回调对象将收到关于公告操作成功或失败的报告。</p>

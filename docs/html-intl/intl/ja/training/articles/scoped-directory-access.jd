@@ -1,0 +1,148 @@
+page.title=特定のディレクトリへのアクセス
+page.keywords=preview,sdk,scoped directory access
+page.tags=androidn
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>このドキュメントの内容</h2>
+  <ol>
+    <li><a href="#accessing">外部ストレージのディレクトリへのアクセス</a></li>
+    <li><a href="#removable">リムーバブル メディアのディレクトリへのアクセス</a></li>
+    <li><a href="#best">ベスト プラクティス</a></li>
+  </ol>
+</div>
+</div>
+
+<p>写真アプリなどは通常、外部ストレージの特定のディレクトリ（<code>Pictures</code> ディレクトリなど）のみにアクセスする必要があります。
+外部ストレージへのアクセスに関する従来のアプローチでは、このようなアプリに目的のディレクトリへのアクセスを容易に提供できる設計にはなっていませんでした。
+
+次に例を示します。</p>
+
+<ul>
+<li>マニフェストで {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} または {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} を要求すると、外部ストレージ上のすべての公開ディレクトリにアクセスできますが、この場合、アプリが必要な場所以外にもアクセスできることになります。
+
+
+</li>
+<li><a href="{@docRoot}guide/topics/providers/document-provider.html">ストレージ アクセス フレームワーク</a>を使用すると、通常、ユーザーはシステム UI を使用してディレクトリを選択できますが、アプリが常に同じ外部ディレクトリにアクセスする場合、この選択は不要です。
+
+
+
+</li>
+</ul>
+
+<p>Android N では、一般的な外部ストレージ ディレクトリにアクセスできる、新しいシンプルな API を提供します。
+ </p>
+
+<h2 id="accessing">外部ストレージのディレクトリへのアクセス</h2>
+
+<p><code>StorageManager</code> クラスを使用して、適切な
+<code>StorageVolume</code> インスタンスを取得します。次に、そのインスタンスの
+<code>StorageVolume.createAccessIntent()</code> メソッドを呼び出して、インテントを作成します。このインテントを使用して、外部ストレージのディレクトリにアクセスします。
+リムーバブル メディア ボリュームなど、使用できるすべてのボリュームのリストを取得するには、<code>StorageManager.getVolumesList()</code> を使用します。
+
+</p>
+
+<p>特定のファイルに関する情報がある場合は、
+<code>StorageManager.getStorageVolume(File)</code> を使用して、そのファイルを含む
+<code>StorageVolume</code> を取得します。この <code>StorageVolume</code> で
+<code>createAccessIntent()</code> を呼び出し、このファイルの外部ストレージ ディレクトリにアクセスします。
+</p>
+
+<p>
+外部 SD カードなどのセカンダリ ボリュームで、
+<code>StorageVolume.createAccessIntent()</code> を呼び出すときに null を渡し、特定のディレクトリではなくボリューム全体へのアクセスをリクエストします。プライマリ ボリュームに null を渡すか、無効なディレクトリ名を渡すと、
+<code>StorageVolume.createAccessIntent()</code> は null を返します。
+
+
+</p>
+
+<p>次のコード スニペットは、プライマリ共有ストレージの
+<code>Pictures</code> ディレクトリを開く方法の例を示しています。</p>
+
+<pre>
+StorageManager sm = (StorageManager)getSystemService(Context.STORAGE_SERVICE);
+StorageVolume volume = sm.getPrimaryVolume();
+Intent intent = volume.createAccessIntent(Environment.DIRECTORY_PICTURES);
+startActivityForResult(intent, request_code);
+</pre>
+
+<p>システムは外部ディレクトリへのアクセスの付与を試行し、必要に応じてシンプルな UI で、ユーザーにアクセスを確認します。
+</p>
+
+<img src="{@docRoot}images/android-7.0/scoped-directory-access-framed.png" srcset="{@docRoot}images/android-7.0/scoped-directory-access-framed.png 1x,
+{@docRoot}images/android-7.0/scoped-directory-access-framed_2x.png 2x" />
+<p class="img-caption"><strong>図 1.</strong> Pictures ディレクトリへのアクセスを要求するアプリ
+</p>
+
+<p>ユーザーがアクセスを付与すると、
+<code>Activity.RESULT_OK</code> の結果コードと、URI を含むインテント データを指定して、
+<code>onActivityResult()</code> のオーバーライドを呼び出します。提供された URI を使用して、ディレクトリの情報にアクセスします。これは、<a href="{@docRoot}guide/topics/providers/document-provider.html">ストレージ アクセス フレームワーク</a>で返された URI を使用する場合と同様です。
+
+
+
+</p>
+
+<p>ユーザーがアクセスを付与しなかった場合は、
+<code>Activity.RESULT_CANCELED</code> の結果コードと、null のインテント データを指定して、
+<code>onActivityResult()</code> のオーバーライドを呼び出します。</p>
+
+<p class="note"><b>注</b>:特定の外部ディレクトリへのアクセスを取得すると、そのディレクトリ内のサブディレクトリへのアクセスも取得します。
+</p>
+
+<h2 id="removable">リムーバブル メディアのディレクトリへのアクセス</h2>
+
+<p>特定のディレクトリへのアクセスを使用してリムーバブル メディア上のディレクトリにアクセスするには、まず {@link android.os.Environment#MEDIA_MOUNTED} 通知をリッスンする {@link android.content.BroadcastReceiver} を追加します。次に例を示します。
+
+</p>
+
+<pre>
+&lt;receiver
+    android:name=".MediaMountedReceiver"
+    android:enabled="true"
+    android:exported="true" &gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.MEDIA_MOUNTED" /&gt;
+        &lt;data android:scheme="file" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/receiver&gt;
+</pre>
+
+<p>ユーザーが SD カードなどのリムーバブル メディアをマウントすると、システムは
+{@link android.os.Environment#MEDIA_MOUNTED} 通知を送信します。この通知は、インテント データ内の <code>StorageVolume</code> オブジェクトを提供します。このオブジェクトを使用して、リムーバブル メディア上のディレクトリにアクセスできます。
+
+次の例では、リムーバブル メディア上の <code>Pictures</code> ディレクトリにアクセスします。
+</p>
+
+<pre>
+// BroadcastReceiver has already cached the MEDIA_MOUNTED
+// notification Intent in mediaMountedIntent
+StorageVolume volume = (StorageVolume)
+    mediaMountedIntent.getParcelableExtra(StorageVolume.EXTRA_STORAGE_VOLUME);
+volume.createAccessIntent(Environment.DIRECTORY_PICTURES);
+startActivityForResult(intent, request_code);
+</pre>
+
+<h2 id="best">ベスト プラクティス</h2>
+
+<p>外部ディレクトリのアクセス URI はできる限り保持してください。そうすれば、ユーザーに何度もアクセス要求をする必要がなくなります。
+ユーザーがアクセスを付与したら、ディレクトリのアクセス URI を指定して
+<code>getContentResolver().takePersistableUriPermssion()</code> を呼び出します。
+システムが URI を保持し、以降のアクセス要求では <code>RESULT_OK</code> を返して、ユーザーに確認の UI を表示しません。
+
+</p>
+
+<p>ユーザーが外部ディレクトリへのアクセスを拒否した直後に、またアクセスをリクエストしないようにしてください。
+何度もアクセスを要求すると、ユーザー エクスペリエンスが低下します。
+リクエストがユーザーにより拒否され、アプリが再度アクセスをリクエストすると、UI に [<b>Don't ask again</b>] チェックボックスが表示されます。
+</p>
+
+<img src="{@docRoot}images/android-7.0/scoped-directory-access-dont-ask.png" srcset="{@docRoot}images/android-7.0/scoped-directory-access-dont-ask.png 1x,
+{@docRoot}images/android-7.0/scoped-directory-access-dont-ask_2x.png 2x" />
+<p class="img-caption"><strong>図 1.</strong> リムーバブル メディアへのアクセスに対して 2 回目のリクエストを行うアプリ。
+</p>
+
+<p>ユーザーが [<b>Don't ask again</b>] を選択してリクエストを拒否すると、特定のディレクトリに対するアプリからの今後のすべてのリクエストは自動的に拒否され、リクエストに関する UI は表示されなくなります。
+
+</p>

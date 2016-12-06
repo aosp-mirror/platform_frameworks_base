@@ -53,7 +53,8 @@ public abstract class ShortcutServiceInternal {
             @NonNull String callingPackage, @NonNull String packageName,
             @NonNull List<String> shortcutIds, int userId);
 
-    public abstract Intent createShortcutIntent(int launcherUserId, @NonNull String callingPackage,
+    public abstract Intent[] createShortcutIntents(
+            int launcherUserId, @NonNull String callingPackage,
             @NonNull String packageName, @NonNull String shortcutId, int userId);
 
     public abstract void addListener(@NonNull ShortcutChangeListener listener);
@@ -67,10 +68,4 @@ public abstract class ShortcutServiceInternal {
 
     public abstract boolean hasShortcutHostPermission(int launcherUserId,
             @NonNull String callingPackage);
-
-    /**
-     * Called by AM when the system locale changes *within the AM lock*.  ABSOLUTELY do not take
-     * any locks in this method.
-     */
-    public abstract void onSystemLocaleChangedNoLock();
 }

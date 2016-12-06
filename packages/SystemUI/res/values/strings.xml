@@ -348,8 +348,14 @@
     <!-- Content description of the data connection type 4G for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_data_connection_4g">4G</string>
 
+    <!-- Content description of the data connection type 4G for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_data_connection_4g_plus">4G+</string>
+
     <!-- Content description of the data connection type LTE for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_data_connection_lte">LTE</string>
+
+    <!-- Content description of the data connection type LTE+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_data_connection_lte_plus">LTE+</string>
 
     <!-- Content description of the data connection type CDMA for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_data_connection_cdma">CDMA</string>
@@ -563,7 +569,7 @@
     <!-- Title of dialog shown when data usage has exceeded limit and has been disabled. [CHAR LIMIT=48] -->
     <string name="data_usage_disabled_dialog_title">Data is paused</string>
     <!-- Body of dialog shown when data usage has exceeded limit and has been disabled. [CHAR LIMIT=NONE] -->
-    <string name="data_usage_disabled_dialog">Because your set data limit was reached, the device has paused data usage for the remainder of this cycle.\n\nResuming may lead to charges from your carrier.</string>
+    <string name="data_usage_disabled_dialog">The data limit you set has been reached. You are no longer using cellular data.\n\nIf you resume, charges may apply for data usage.</string>
     <!-- Dialog button indicating that data connection should be re-enabled. [CHAR LIMIT=28] -->
     <string name="data_usage_disabled_dialog_enable">Resume</string>
 
@@ -749,6 +755,12 @@
     <string name="quick_settings_cellular_detail_data_warning"><xliff:g id="data_limit" example="2.0 GB">%s</xliff:g> warning</string>
     <!-- QuickSettings: Work mode [CHAR LIMIT=NONE] -->
     <string name="quick_settings_work_mode_label">Work mode</string>
+    <!-- QuickSettings: Label for the toggle to activate Night display (renamed "Night Light" with title caps). [CHAR LIMIT=20] -->
+    <string name="quick_settings_night_display_label">Night Light</string>
+    <!-- QuickSettings: Summary for the toggle to deactivate Night display when it's on (renamed "Night Light" with title caps). [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_night_display_summary_on">Night Light on, tap to turn off</string>
+    <!-- QuickSettings: Label for the toggle to activate Night display when it's off (renamed "Night Light" with title caps). [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_night_display_summary_off">Night Light off, tap to turn on</string>
 
     <!-- Recents: The empty recents string. [CHAR LIMIT=NONE] -->
     <string name="recents_empty_message">No recent items</string>
@@ -777,6 +789,10 @@
     <string name="recents_multistack_add_stack_dialog_split_vertical">Split Vertical</string>
     <!-- Recents: MultiStack add stack split custom radio button. [CHAR LIMIT=NONE] -->
     <string name="recents_multistack_add_stack_dialog_split_custom">Split Custom</string>
+
+    <!-- Fully qualified activity class names to be blacklisted in Recents, add package names into overlay as needed -->
+    <string-array name="recents_blacklist_array">
+    </string-array>
 
     <!-- Expanded Status Bar Header: Battery Charged [CHAR LIMIT=40] -->
     <string name="expanded_header_battery_charged">Charged</string>
@@ -985,6 +1001,9 @@
     <!-- Footer vpn present text [CHAR LIMIT=50] -->
     <string name="vpn_footer">Network may be monitored</string>
 
+    <!-- Footer vpn present text [CHAR LIMIT=50] -->
+    <string name="branded_vpn_footer">Network may be monitored</string>
+
     <!-- Monitoring dialog title for device owned devices [CHAR LIMIT=35] -->
     <string name="monitoring_title_device_owned">Device monitoring</string>
 
@@ -1020,6 +1039,9 @@
 
     <!-- Monitoring dialog text for single app (inside personal profile) [CHAR LIMIT=400] -->
     <string name="monitoring_description_app_personal">You\'re connected to <xliff:g id="application">%1$s</xliff:g>, which can monitor your personal network activity, including emails, apps, and websites.</string>
+
+    <!-- Monitoring dialog text for single app (inside personal profile) [CHAR LIMIT=400] -->
+    <string name="branded_monitoring_description_app_personal">You\'re connected to <xliff:g id="application">%1$s</xliff:g>, which can monitor your personal network activity, including emails, apps, and websites.</string>
 
     <!-- Monitoring dialog text for single app (inside work profile) [CHAR LIMIT=400] -->
     <string name="monitoring_description_app_work">Your work profile is managed by <xliff:g id="organization">%1$s</xliff:g>. It is connected to <xliff:g id="application">%2$s</xliff:g>, which can monitor your work network activity, including emails, apps, and websites.\n\nFor more information, contact your administrator.</string>
@@ -1093,14 +1115,14 @@
     <!-- Toast shown when user unlocks screen and managed profile activity is in the foreground -->
     <string name="managed_profile_foreground_toast">You\'re using your work profile</string>
 
-    <string-array name="volume_stream_titles" translatable="false">
-        <item>Voice calls</item> <!-- STREAM_VOICE_CALL -->
+    <string-array name="volume_stream_titles">
+        <item>Call</item> <!-- STREAM_VOICE_CALL -->
         <item>System</item> <!-- STREAM_SYSTEM -->
-        <item>Notifications</item> <!-- STREAM_RING -->
+        <item>Ring</item> <!-- STREAM_RING -->
         <item>Media</item> <!-- STREAM_MUSIC -->
-        <item>Alarms</item> <!-- STREAM_ALARM -->
+        <item>Alarm</item> <!-- STREAM_ALARM -->
         <item></item> <!-- STREAM_NOTIFICATION -->
-        <item>Bluetooth calls</item> <!-- STREAM_BLUETOOTH_SCO -->
+        <item>Bluetooth</item> <!-- STREAM_BLUETOOTH_SCO -->
         <item></item> <!-- STREAM_SYSTEM_ENFORCED -->
         <item></item> <!-- STREAM_DTMF -->
         <item></item> <!-- STREAM_TTS -->
@@ -1227,11 +1249,6 @@
     <!-- Option to use new paging layout in quick settings [CHAR LIMIT=60] -->
     <string name="qs_paging" translatable="false">Use the new Quick Settings</string>
 
-    <!-- Toggle to enable the gesture to enter split-screen by swiping up from the Overview button. [CHAR LIMIT=60]-->
-    <string name="overview_nav_bar_gesture">Enable split-screen swipe-up gesture</string>
-    <!-- Description for the toggle to enable the gesture to enter split-screen by swiping up from the Overview button. [CHAR LIMIT=NONE]-->
-    <string name="overview_nav_bar_gesture_desc">Enable gesture to enter split-screen by swiping up from the Overview button</string>
-
     <!-- Category in the System UI Tuner settings, where new/experimental
          settings are -->
     <string name="experimental">Experimental</string>
@@ -1332,59 +1349,6 @@
 
     <!-- Notification: Gear: Content description for the gear. [CHAR LIMIT=NONE] -->
     <string name="notification_gear_accessibility"><xliff:g id="app_name" example="YouTube">%1$s</xliff:g> notification controls</string>
-
-    <!-- SysUI Tuner: Color and appearance screen title [CHAR LIMIT=50] -->
-    <string name="color_and_appearance">Color and appearance</string>
-
-    <!-- SysUI Tuner: Name of the night mode feature [CHAR LIMIT=30] -->
-    <string name="night_mode">Night mode</string>
-
-    <!-- SysUI Tuner: Name of calibrate display dialog [CHAR LIMIT=30] -->
-    <string name="calibrate_display">Calibrate display</string>
-
-    <!-- SysUI Tuner: Summary of night mode when its on [CHAR LIMIT=NONE] -->
-    <string name="night_mode_on">On</string>
-
-    <!-- SysUI Tuner: Summary of night mode when its off [CHAR LIMIT=NONE] -->
-    <string name="night_mode_off">Off</string>
-
-    <!-- SysUI Tuner: Label for switch to turn on night mode automatically [CHAR LIMIT=50] -->
-    <string name="turn_on_automatically">Turn on automatically</string>
-
-    <!-- SysUI Tuner: Summary for switch to turn on night mode automatically [CHAR LIMIT=NONE] -->
-    <string name="turn_on_auto_summary">Switch into Night Mode as appropriate for location and time of day</string>
-
-    <!-- SysUI Tuner: Label for section controlling what night mode does [CHAR LIMIT=60] -->
-    <string name="when_night_mode_on">When Night Mode is on</string>
-
-    <!-- SysUI Tuner: Switch controlling whether dark theme is turned on with night mode [CHAR LIMIT=45] -->
-    <string name="use_dark_theme">Use dark theme for Android OS</string>
-
-    <!-- SysUI Tuner: Switch controlling whether tint is changed with night mode [CHAR LIMIT=45] -->
-    <string name="adjust_tint">Adjust tint</string>
-
-    <!-- SysUI Tuner: Switch controlling whether brightness is changed with night mode [CHAR LIMIT=45] -->
-    <string name="adjust_brightness">Adjust brightness</string>
-
-    <!-- SysUI Tuner: Disclaimer about using dark theme with night mode [CHAR LIMIT=NONE] -->
-    <string name="night_mode_disclaimer">The dark theme is applied to
-        core areas of Android OS that are normally displayed in a light theme,
-        such as Settings.</string>
-
-    <!-- Button to apply settings [CHAR LIMIT=30] -->
-    <string name="color_apply">Apply</string>
-
-    <!-- Title of warning dialog about bad color settings. [CHAR LIMIT=30] -->
-    <string name="color_revert_title">Confirm settings</string>
-
-    <!-- Message warning user about custom color settings [CHAR LIMIT=NONE] -->
-    <string name="color_revert_message">Some color settings can make this
-        device unusable. Click OK to confirm these color settings,
-        otherwise these settings will reset after 10 seconds.</string>
-
-    <string name="color_modification_r" translatable="false">R</string>
-    <string name="color_modification_g" translatable="false">G</string>
-    <string name="color_modification_b" translatable="false">B</string>
 
     <!-- Title of the battery settings detail panel [CHAR LIMIT=20] -->
     <string name="battery_panel_title">Battery usage</string>
@@ -1666,6 +1630,9 @@
     <!-- Accessibility label for the notification icons in the collapsed status bar. Not shown on screen [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_notification_icon"><xliff:g name="app_name" example="Gmail">%1$s</xliff:g> notification: <xliff:g name="notification_text" example="5 new messages">%2$s</xliff:g></string>
 
+    <!-- Label for button that reports a touch that was wrongly rejected by the lockscreen. For debugging only. [CHAR LIMIT=NONE] -->
+    <string name="report_rejected_touch" translatable="false">Report rejected touch</string>
+
     <!-- Multi-Window strings -->
     <!-- Text that gets shown on top of current activity to inform the user that the system force-resized the current activity and that things might crash/not work properly [CHAR LIMIT=NONE] -->
     <string name="dock_forced_resizable">App may not work with split-screen.</string>
@@ -1699,7 +1666,10 @@
     <!-- accessibility label for button to edit quick settings [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_edit">Edit order of settings.</string>
 
-    <!-- accessibility label for paging indicator in quick settings [CHAR LIMITi=NONE] -->
+    <!-- accessibility label for paging indicator in quick settings [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_page">Page <xliff:g name="current_page" example="1">%1$d</xliff:g> of <xliff:g name="num_pages" example="2">%2$d</xliff:g></string>
 
+    <!-- Label that replaces other notification controls when the notification is from the system
+         and cannot be silenced (see @string/show_silently) or blocked (see @string/block) -->
+    <string name="cant_silence_or_block">Notifications can\'t be silenced or blocked</string>
 </resources>

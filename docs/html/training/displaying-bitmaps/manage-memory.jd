@@ -42,11 +42,11 @@ different versions of Android.</p>
 
 <p>To set the stage for this lesson, here is how Android's management of
 bitmap memory has evolved:</p>
-<ul> 
+<ul>
   <li>
-On Android Android 2.2 (API level 8) and lower, when garbage 
+On Android Android 2.2 (API level 8) and lower, when garbage
 collection occurs, your app's threads get stopped. This causes a lag that
-can degrade performance. 
+can degrade performance.
 <strong>Android 2.3 adds concurrent garbage collection, which means that
 the memory is reclaimed soon after a bitmap is no longer referenced.</strong>
 </li>
@@ -66,7 +66,7 @@ management for different Android versions.</p>
 
 <h2 id="recycle">Manage Memory on Android 2.3.3 and Lower</h2>
 
-<p>On Android 2.3.3 (API level 10) and lower, using 
+<p>On Android 2.3.3 (API level 10) and lower, using
 {@link android.graphics.Bitmap#recycle recycle()}
 is recommended. If you're displaying large amounts of bitmap data in your app,
 you're likely to run into
@@ -82,12 +82,12 @@ and later attempt to draw the bitmap, you will get the error:
 
 <p>The following code snippet gives an example of calling
 {@link android.graphics.Bitmap#recycle recycle()}. It uses reference counting
-(in the variables {@code mDisplayRefCount} and {@code mCacheRefCount}) to track 
+(in the variables {@code mDisplayRefCount} and {@code mCacheRefCount}) to track
 whether a bitmap is currently being displayed or in the cache. The
 code recycles the bitmap when these conditions are met:</p>
 
 <ul>
-<li>The reference count for both {@code mDisplayRefCount} and 
+<li>The reference count for both {@code mDisplayRefCount} and
 {@code mCacheRefCount} is 0.</li>
 <li>The bitmap is not {@code null}, and it hasn't been recycled yet.</li>
 </ul>
@@ -142,7 +142,7 @@ private synchronized boolean hasValidBitmap() {
 
 <p>Android 3.0 (API level 11) introduces the
 {@link android.graphics.BitmapFactory.Options#inBitmap BitmapFactory.Options.inBitmap}
-field. If this option is set, decode methods that take the 
+field. If this option is set, decode methods that take the
 {@link android.graphics.BitmapFactory.Options Options} object
 will attempt to reuse an existing bitmap when loading content. This means
 that the bitmap's memory is reused, resulting in improved performance, and
@@ -154,7 +154,7 @@ removing both memory allocation and de-allocation. However, there are certain re
 <h3>Save a bitmap for later use</h3>
 
 <p>The following snippet demonstrates how an existing bitmap is stored for possible
-later use in the sample app. When an app is running on Android 3.0 or higher and 
+later use in the sample app. When an app is running on Android 3.0 or higher and
 a bitmap is evicted from the {@link android.util.LruCache},
 a soft reference to the bitmap is placed
 in a {@link java.util.HashSet}, for possible reuse later with
@@ -238,7 +238,7 @@ if it finds a suitable match (your code should never assume that a match will be
     }
 }
 
-// This method iterates through the reusable bitmaps, looking for one 
+// This method iterates through the reusable bitmaps, looking for one
 // to use for inBitmap:
 protected Bitmap getBitmapFromReusableSet(BitmapFactory.Options options) {
         Bitmap bitmap = null;

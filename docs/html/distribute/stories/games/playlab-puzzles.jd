@@ -1,0 +1,87 @@
+page.title=Playlab Increases Juice Cubes Conversions by 25% with Store Listing Experiments
+page.metaDescription=Playlab uses store listing experiments to refresh their Juice Cubes icon.
+page.tags="developerstory", "apps", "googleplay"
+page.image=images/cards/distribute/stories/playlab.jpg
+page.timestamp=1468901832
+
+@jd:body
+
+<div class="figure">
+  <img src="{@docRoot}images/distribute/stories/playlab-icon.png" />
+</div>
+
+<h3>
+  Background
+</h3>
+
+<p>
+  <a class="external-link" href=
+  "https://play.google.com/store/apps/dev?id=9190927840679184784&e=-EnableAppDetailsPageRedesign">
+  Playlab</a> is a game developer and publisher based in Hong Kong, with
+  production studios in Bangkok and Manila. Playlab apps include
+  <a class="external-link" href=
+  "https://play.google.com/store/apps/details?id=ppl.unity.JuiceCubesBeta">
+  Juice Cubes</a>, <a class="external-link" href=
+  "https://play.google.com/store/apps/details?id=ppl.unity.junglecubes">
+  Jungle Cubes</a>, and <a class="external-link" href=
+  "https://play.google.com/store/apps/details?id=ppl.cocos2dx.ranchrun&hl=en">
+  Ranch Run</a>.
+
+  Released in 2013, <a class="external-link" href=
+  "https://play.google.com/store/apps/details?id=ppl.unity.JuiceCubesBeta">
+  Juice Cubes</a> is a strategy puzzle game with over 25 million downloads
+  worldwide and over 100,000 five-star reviews on Google Play. The game has
+  gained success in Southeast Asian markets such as Indonesia and Thailand,
+  and in Western markets such as the US, Australia, the UK, and Canada.
+</p>
+
+<h3>
+  What they did
+</h3>
+
+<p>
+  As part of Juice Cubes’ content update in April 2016, Playlab decided to
+  refresh its Play Store icon and test whether different icons could increase
+  their conversion rate.
+</p>
+
+<p>
+  Playlab used the <em>Store Listing Experiments</em> feature on the Google
+  Play Developer Console to test three variations of their new game icon.
+</p>
+
+<h3>
+  Results
+</h3>
+
+<p>
+  Within three days of running the store listing experiment, Playlab saw
+  positive results which led them to make an informed decision to change the
+  current icon to the best-performing version. Variant C outperformed the
+  initial control icon and the two other variants, with a <strong>25% increase
+  in installs</strong>. One month after applying the best-performing icon,
+  Juice Cubes continued to see a 25% increase in the number of conversions
+  from store visitors who made organic installs.
+</p>
+
+<img src="{@docRoot}images/distribute/stories/playlab-screenshot.png">
+
+<p>
+  <em>"Google Play Store Listing Experiments offer a fast, easy, and free way
+  to do A/B testing on an icon. The data provided after each test helped us
+  to make a decision really quickly. The best part is the team no longer needs
+  so many resources to decide which icon to use because we can let the
+  users decide."</em> said Jakob Lykkegaard, CEO and co-founder of Playlab.
+</p>
+
+<h3>
+  Get started
+</h3>
+
+<p>
+  Learn how to use <a class="external-link" href=
+  "https://support.google.com/googleplay/android-developer/answer/6227309">
+  A/B testing</a> and find out more about how to run
+  <a href="{@docRoot}distribute/users/experiments.html">
+  store listing experiments</a> on Google Play.
+</p>

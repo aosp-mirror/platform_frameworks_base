@@ -39,7 +39,7 @@ android.view.View} と {@link android.view.ViewGroup} オブジェクトの階�
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="fill_parent" 
+              android:layout_width="fill_parent"
               android:layout_height="fill_parent"
               android:orientation="vertical" >
     &lt;TextView android:id="@+id/text"
@@ -60,7 +60,7 @@ android.view.View} と {@link android.view.ViewGroup} オブジェクトの階�
 <p>UI レイアウト作成のガイドについては、<a href="declaring-layout.html">XML レイアウト</a>をご覧ください。
 
 
-  
+
 <h2 id="UIComponents">ユーザー インターフェース コンポーネント</h2>
 
 <p>{@link android.view.View} と {@link android.view.ViewGroup} オブジェクトを使用してすべての UI をビルドする必要はありません。

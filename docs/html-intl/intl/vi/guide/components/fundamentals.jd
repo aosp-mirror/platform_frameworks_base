@@ -295,16 +295,16 @@ android.app.Activity} và các thuộc tính {@code android:label} quy định m
 <p>Bạn phải khai báo tất cả thành phần của ứng dụng như sau:</p>
 <ul>
   <li>Các phần tử <code><a
-href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 
+href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
 cho hoạt động</li>
   <li>Các phần tử <code><a
 href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code> cho
 dịch vụ</li>
   <li>Các phần tử <code><a
-href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code> 
+href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code>
 cho hàm nhận quảng bá</li>
   <li>Các phần tử <code><a
-href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code> 
+href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>
 cho trình cung cấp nội dung</li>
 </ul>
 
@@ -379,7 +379,7 @@ chúng, nhưng các dịch vụ bên ngoài như Google Play thì có đọc đ�
 cho người dùng khi họ tìm kiếm ứng dụng từ thiết bị của mình.</p>
 
 <p>Ví dụ, nếu ứng dụng của bạn yêu cầu máy ảnh và sử dụng các API được giới thiệu trong Android 2.1 (<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API Mức</a> 7),
-bạn cần khai báo những điều này như yêu cầu trong tệp bản kê khai của mình như sau:</p> 
+bạn cần khai báo những điều này như yêu cầu trong tệp bản kê khai của mình như sau:</p>
 
 <pre>
 &lt;manifest ... >

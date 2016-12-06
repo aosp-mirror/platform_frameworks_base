@@ -8,13 +8,13 @@ trainingnavtop=true
 
 <div id="tb-wrapper">
   <div id="tb">
-    
+
     <h2>本课程将向您展示如何</h2>
     <ol>
       <li><a href="#Pause">暂停Activity</a></li>
       <li><a href="#Resume">继续Activity</a></li>
     </ol>
-    
+
     <h2>您还应阅读</h2>
     <ul>
       <li><a href="{@docRoot}guide/components/activities.html">Activity</a>
@@ -59,7 +59,7 @@ android.app.Activity#onPause()} 的调用时，可能意味着Activity将暂停
 
 
 <h2 id="Pause">暂停Activity</h2>
-      
+
 <p>当系统为您的Activity调用 {@link android.app.Activity#onPause()} 时，它从技术角度看意味着您的Activity仍然处于部分可见状态，但往往说明用户即将离开Activity并且它很快就要进入“停止”状态。
 
 您通常应使用

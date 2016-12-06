@@ -32,6 +32,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.content.pm.ApplicationInfo;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -288,9 +289,14 @@ public class Dialog implements DialogInterface, Window.Callback,
         }
 
         mCanceled = false;
-        
+
         if (!mCreated) {
             dispatchOnCreate(null);
+        } else {
+            // Fill the DecorView in on any configuration changes that
+            // may have occured while it was removed from the WindowManager.
+            final Configuration config = mContext.getResources().getConfiguration();
+            mWindow.getDecorView().dispatchConfigurationChanged(config);
         }
 
         onStart();

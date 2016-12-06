@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 import java.util.StringTokenizer;
 
 public class ProcessCpuTracker {
@@ -176,6 +177,11 @@ public class ProcessCpuTracker {
     private boolean mFirst = true;
 
     private byte[] mBuffer = new byte[4096];
+
+    public interface FilterStats {
+        /** Which stats to pick when filtering */
+        boolean needed(Stats stats);
+    }
 
     public static class Stats {
         public final int pid;
@@ -693,6 +699,18 @@ public class ProcessCpuTracker {
 
     final public Stats getStats(int index) {
         return mProcStats.get(index);
+    }
+
+    final public List<Stats> getStats(FilterStats filter) {
+        final ArrayList<Stats> statses = new ArrayList<>(mProcStats.size());
+        final int N = mProcStats.size();
+        for (int p = 0; p < N; p++) {
+            Stats stats = mProcStats.get(p);
+            if (filter.needed(stats)) {
+                statses.add(stats);
+            }
+        }
+        return statses;
     }
 
     final public int countWorkingStats() {

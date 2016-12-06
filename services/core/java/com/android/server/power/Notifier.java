@@ -18,6 +18,7 @@ package com.android.server.power;
 
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
+import android.app.RetailDemoModeServiceInternal;
 
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
@@ -91,6 +92,7 @@ final class Notifier {
     private final ActivityManagerInternal mActivityManagerInternal;
     private final InputManagerInternal mInputManagerInternal;
     private final InputMethodManagerInternal mInputMethodManagerInternal;
+    private final RetailDemoModeServiceInternal mRetailDemoModeServiceInternal;
 
     private final NotifierHandler mHandler;
     private final Intent mScreenOnIntent;
@@ -136,6 +138,7 @@ final class Notifier {
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         mInputMethodManagerInternal = LocalServices.getService(InputMethodManagerInternal.class);
+        mRetailDemoModeServiceInternal = LocalServices.getService(RetailDemoModeServiceInternal.class);
 
         mHandler = new NotifierHandler(looper);
         mScreenOnIntent = new Intent(Intent.ACTION_SCREEN_ON);
@@ -188,6 +191,48 @@ final class Notifier {
             } catch (RemoteException ex) {
                 // Ignore
             }
+        }
+    }
+
+    public void onLongPartialWakeLockStart(String tag, int ownerUid, WorkSource workSource,
+            String historyTag) {
+        if (DEBUG) {
+            Slog.d(TAG, "onLongPartialWakeLockStart: ownerUid=" + ownerUid
+                    + ", workSource=" + workSource);
+        }
+
+        try {
+            if (workSource != null) {
+                final int N = workSource.size();
+                for (int i=0; i<N; i++) {
+                    mBatteryStats.noteLongPartialWakelockStart(tag, historyTag, workSource.get(i));
+                }
+            } else {
+                mBatteryStats.noteLongPartialWakelockStart(tag, historyTag, ownerUid);
+            }
+        } catch (RemoteException ex) {
+            // Ignore
+        }
+    }
+
+    public void onLongPartialWakeLockFinish(String tag, int ownerUid, WorkSource workSource,
+            String historyTag) {
+        if (DEBUG) {
+            Slog.d(TAG, "onLongPartialWakeLockFinish: ownerUid=" + ownerUid
+                    + ", workSource=" + workSource);
+        }
+
+        try {
+            if (workSource != null) {
+                final int N = workSource.size();
+                for (int i=0; i<N; i++) {
+                    mBatteryStats.noteLongPartialWakelockFinish(tag, historyTag, workSource.get(i));
+                }
+            } else {
+                mBatteryStats.noteLongPartialWakelockFinish(tag, historyTag, ownerUid);
+            }
+        } catch (RemoteException ex) {
+            // Ignore
         }
     }
 
@@ -534,7 +579,9 @@ final class Notifier {
             }
             mUserActivityPending = false;
         }
-
+        if (mRetailDemoModeServiceInternal != null) {
+            mRetailDemoModeServiceInternal.onUserActivity();
+        }
         mPolicy.userActivity();
     }
 

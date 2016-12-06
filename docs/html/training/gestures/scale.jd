@@ -44,13 +44,13 @@ class="button">Download the sample</a>
 
 <p>This lesson describes how to use touch gestures to drag and scale on-screen
 objects, using {@link android.view.View#onTouchEvent onTouchEvent()} to intercept
-touch events. 
+touch events.
 </p>
 
 <h2 id="drag">Drag an Object</h2>
 
-<p class="note">If you are targeting Android 3.0 or higher, you can use the built-in drag-and-drop event 
-listeners with {@link android.view.View.OnDragListener}, as described in 
+<p class="note">If you are targeting Android 3.0 or higher, you can use the built-in drag-and-drop event
+listeners with {@link android.view.View.OnDragListener}, as described in
 <a href="{@docRoot}guide/topics/ui/drag-drop.html">Drag and Drop</a>.
 
 <p>A common operation for a touch gesture is to use it to drag an object across
@@ -66,14 +66,14 @@ the touch screen and lifts the first finger. If your app is just tracking
 individual pointers, it will regard the second pointer as the default and move
 the image to that location.</li>
 
-<li>To prevent this from happening, your app needs to distinguish between the 
-original pointer and any follow-on pointers. To do this, it tracks the 
-{@link android.view.MotionEvent#ACTION_POINTER_DOWN} and 
-{@link android.view.MotionEvent#ACTION_POINTER_UP} events described in 
-<a href="multi.html">Handling Multi-Touch Gestures</a>. 
-{@link android.view.MotionEvent#ACTION_POINTER_DOWN} and 
-{@link android.view.MotionEvent#ACTION_POINTER_UP} are 
-passed to the {@link android.view.View#onTouchEvent onTouchEvent()} callback 
+<li>To prevent this from happening, your app needs to distinguish between the
+original pointer and any follow-on pointers. To do this, it tracks the
+{@link android.view.MotionEvent#ACTION_POINTER_DOWN} and
+{@link android.view.MotionEvent#ACTION_POINTER_UP} events described in
+<a href="multi.html">Handling Multi-Touch Gestures</a>.
+{@link android.view.MotionEvent#ACTION_POINTER_DOWN} and
+{@link android.view.MotionEvent#ACTION_POINTER_UP} are
+passed to the {@link android.view.View#onTouchEvent onTouchEvent()} callback
 whenever a secondary pointer goes down or up. </li>
 
 
@@ -90,16 +90,16 @@ calculate the distance to move using data from the correct pointer.</li>
 <p>The following snippet enables a user to drag an object around on the screen. It records the initial
 position of the active pointer, calculates the distance the pointer traveled, and moves the object to the
 new position. It correctly manages the possibility of additional pointers, as described
-above.</p> 
+above.</p>
 
-<p>Notice that the snippet uses the {@link android.view.MotionEvent#getActionMasked getActionMasked()} method. 
-You should always use this method (or better yet, the compatability version 
-{@link android.support.v4.view.MotionEventCompat#getActionMasked MotionEventCompat.getActionMasked()}) 
+<p>Notice that the snippet uses the {@link android.view.MotionEvent#getActionMasked getActionMasked()} method.
+You should always use this method (or better yet, the compatability version
+{@link android.support.v4.view.MotionEventCompat#getActionMasked MotionEventCompat.getActionMasked()})
 to retrieve the action of a
-{@link android.view.MotionEvent}. Unlike the older 
-{@link android.view.MotionEvent#getAction getAction()} 
-method, {@link android.support.v4.view.MotionEventCompat#getActionMasked getActionMasked()} 
-is designed to work with multiple pointers. It returns the masked action 
+{@link android.view.MotionEvent}. Unlike the older
+{@link android.view.MotionEvent#getAction getAction()}
+method, {@link android.support.v4.view.MotionEventCompat#getActionMasked getActionMasked()}
+is designed to work with multiple pointers. It returns the masked action
 being performed, without including the pointer index bits.</p>
 
 <pre>// The ‘active pointer’ is the one currently moving our object.
@@ -109,15 +109,15 @@ private int mActivePointerId = INVALID_POINTER_ID;
 public boolean onTouchEvent(MotionEvent ev) {
     // Let the ScaleGestureDetector inspect all events.
     mScaleDetector.onTouchEvent(ev);
-             
-    final int action = MotionEventCompat.getActionMasked(ev); 
-        
-    switch (action) { 
+
+    final int action = MotionEventCompat.getActionMasked(ev);
+
+    switch (action) {
     case MotionEvent.ACTION_DOWN: {
-        final int pointerIndex = MotionEventCompat.getActionIndex(ev); 
-        final float x = MotionEventCompat.getX(ev, pointerIndex); 
-        final float y = MotionEventCompat.getY(ev, pointerIndex); 
-            
+        final int pointerIndex = MotionEventCompat.getActionIndex(ev);
+        final float x = MotionEventCompat.getX(ev, pointerIndex);
+        final float y = MotionEventCompat.getY(ev, pointerIndex);
+
         // Remember where we started (for dragging)
         mLastTouchX = x;
         mLastTouchY = y;
@@ -125,15 +125,15 @@ public boolean onTouchEvent(MotionEvent ev) {
         mActivePointerId = MotionEventCompat.getPointerId(ev, 0);
         break;
     }
-            
+
     case MotionEvent.ACTION_MOVE: {
         // Find the index of the active pointer and fetch its position
-        final int pointerIndex = 
-                MotionEventCompat.findPointerIndex(ev, mActivePointerId);  
-            
+        final int pointerIndex =
+                MotionEventCompat.findPointerIndex(ev, mActivePointerId);
+
         final float x = MotionEventCompat.getX(ev, pointerIndex);
         final float y = MotionEventCompat.getY(ev, pointerIndex);
-            
+
         // Calculate the distance moved
         final float dx = x - mLastTouchX;
         final float dy = y - mLastTouchY;
@@ -149,62 +149,62 @@ public boolean onTouchEvent(MotionEvent ev) {
 
         break;
     }
-            
+
     case MotionEvent.ACTION_UP: {
         mActivePointerId = INVALID_POINTER_ID;
         break;
     }
-            
+
     case MotionEvent.ACTION_CANCEL: {
         mActivePointerId = INVALID_POINTER_ID;
         break;
     }
-        
+
     case MotionEvent.ACTION_POINTER_UP: {
-            
-        final int pointerIndex = MotionEventCompat.getActionIndex(ev); 
-        final int pointerId = MotionEventCompat.getPointerId(ev, pointerIndex); 
+
+        final int pointerIndex = MotionEventCompat.getActionIndex(ev);
+        final int pointerId = MotionEventCompat.getPointerId(ev, pointerIndex);
 
         if (pointerId == mActivePointerId) {
             // This was our active pointer going up. Choose a new
             // active pointer and adjust accordingly.
             final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
-            mLastTouchX = MotionEventCompat.getX(ev, newPointerIndex); 
-            mLastTouchY = MotionEventCompat.getY(ev, newPointerIndex); 
+            mLastTouchX = MotionEventCompat.getX(ev, newPointerIndex);
+            mLastTouchY = MotionEventCompat.getY(ev, newPointerIndex);
             mActivePointerId = MotionEventCompat.getPointerId(ev, newPointerIndex);
         }
         break;
     }
-    }       
+    }
     return true;
 }</pre>
 
 <h2 id="pan">Drag to Pan</h2>
 
-<p>The previous section showed an example of dragging an object around the screen. Another 
-common scenario is <em>panning</em>, which is when a user's dragging motion causes scrolling 
-in both the x and y axes. The above snippet directly intercepted the {@link android.view.MotionEvent} 
-actions to implement dragging. The snippet in this section takes advantage of the platform's 
-built-in support for common gestures. It overrides 
-{@link android.view.GestureDetector.OnGestureListener#onScroll onScroll()} in 
+<p>The previous section showed an example of dragging an object around the screen. Another
+common scenario is <em>panning</em>, which is when a user's dragging motion causes scrolling
+in both the x and y axes. The above snippet directly intercepted the {@link android.view.MotionEvent}
+actions to implement dragging. The snippet in this section takes advantage of the platform's
+built-in support for common gestures. It overrides
+{@link android.view.GestureDetector.OnGestureListener#onScroll onScroll()} in
 {@link android.view.GestureDetector.SimpleOnGestureListener}.</p>
 
-<p>To provide a little more context, {@link android.view.GestureDetector.OnGestureListener#onScroll onScroll()} 
-is called when a user is dragging his finger to pan the content. 
-{@link android.view.GestureDetector.OnGestureListener#onScroll onScroll()} is only called when 
-a finger is down; as soon as the finger is lifted from the screen, the gesture either ends, 
-or a fling gesture is started (if the finger was moving with some speed just before it was lifted). 
+<p>To provide a little more context, {@link android.view.GestureDetector.OnGestureListener#onScroll onScroll()}
+is called when a user is dragging his finger to pan the content.
+{@link android.view.GestureDetector.OnGestureListener#onScroll onScroll()} is only called when
+a finger is down; as soon as the finger is lifted from the screen, the gesture either ends,
+or a fling gesture is started (if the finger was moving with some speed just before it was lifted).
 For more discussion of scrolling vs. flinging, see <a href="scroll.html">Animating a Scroll Gesture</a>.</p>
 
 <p>Here is the snippet for {@link android.view.GestureDetector.OnGestureListener#onScroll onScroll()}:
 
 
-<pre>// The current viewport. This rectangle represents the currently visible 
-// chart domain and range. 
-private RectF mCurrentViewport = 
+<pre>// The current viewport. This rectangle represents the currently visible
+// chart domain and range.
+private RectF mCurrentViewport =
         new RectF(AXIS_X_MIN, AXIS_Y_MIN, AXIS_X_MAX, AXIS_Y_MAX);
 
-// The current destination rectangle (in pixel coordinates) into which the 
+// The current destination rectangle (in pixel coordinates) into which the
 // chart data should be drawn.
 private Rect mContentRect;
 
@@ -213,18 +213,18 @@ private final GestureDetector.SimpleOnGestureListener mGestureListener
 ...
 
 &#64;Override
-public boolean onScroll(MotionEvent e1, MotionEvent e2, 
+public boolean onScroll(MotionEvent e1, MotionEvent e2,
             float distanceX, float distanceY) {
     // Scrolling uses math based on the viewport (as opposed to math using pixels).
-    
+
     // Pixel offset is the offset in screen pixels, while viewport offset is the
-    // offset within the current viewport. 
-    float viewportOffsetX = distanceX * mCurrentViewport.width() 
+    // offset within the current viewport.
+    float viewportOffsetX = distanceX * mCurrentViewport.width()
             / mContentRect.width();
-    float viewportOffsetY = -distanceY * mCurrentViewport.height() 
+    float viewportOffsetY = -distanceY * mCurrentViewport.height()
             / mContentRect.height();
     ...
-    // Updates the viewport, refreshes the display. 
+    // Updates the viewport, refreshes the display.
     setViewportBottomLeft(
             mCurrentViewport.left + viewportOffsetX,
             mCurrentViewport.bottom + viewportOffsetY);
@@ -232,20 +232,20 @@ public boolean onScroll(MotionEvent e1, MotionEvent e2,
     return true;
 }</pre>
 
-<p>The implementation of {@link android.view.GestureDetector.OnGestureListener#onScroll onScroll()} 
+<p>The implementation of {@link android.view.GestureDetector.OnGestureListener#onScroll onScroll()}
 scrolls the viewport in response to the touch gesture:</p>
 
 <pre>
 /**
  * Sets the current viewport (defined by mCurrentViewport) to the given
- * X and Y positions. Note that the Y value represents the topmost pixel position, 
+ * X and Y positions. Note that the Y value represents the topmost pixel position,
  * and thus the bottom of the mCurrentViewport rectangle.
  */
 private void setViewportBottomLeft(float x, float y) {
     /*
-     * Constrains within the scroll range. The scroll range is simply the viewport 
-     * extremes (AXIS_X_MAX, etc.) minus the viewport size. For example, if the 
-     * extremes were 0 and 10, and the viewport size was 2, the scroll range would 
+     * Constrains within the scroll range. The scroll range is simply the viewport
+     * extremes (AXIS_X_MAX, etc.) minus the viewport size. For example, if the
+     * extremes were 0 and 10, and the viewport size was 2, the scroll range would
      * be 0 to 8.
      */
 
@@ -270,11 +270,11 @@ provides {@link android.view.ScaleGestureDetector}. {@link
 android.view.GestureDetector} and {@link android.view.ScaleGestureDetector} can
 be used together when you  want a view to recognize additional gestures.</p>
 
-<p>To report detected  gesture events, gesture detectors use listener objects 
-passed to their constructors. {@link android.view.ScaleGestureDetector} uses 
-{@link android.view.ScaleGestureDetector.OnScaleGestureListener}. 
-Android provides 
-{@link android.view.ScaleGestureDetector.SimpleOnScaleGestureListener} 
+<p>To report detected  gesture events, gesture detectors use listener objects
+passed to their constructors. {@link android.view.ScaleGestureDetector} uses
+{@link android.view.ScaleGestureDetector.OnScaleGestureListener}.
+Android provides
+{@link android.view.ScaleGestureDetector.SimpleOnScaleGestureListener}
 as a helper class that you can extend if you don’t care about all of the reported events.</p>
 
 
@@ -311,7 +311,7 @@ public void onDraw(Canvas canvas) {
     canvas.restore();
 }
 
-private class ScaleListener 
+private class ScaleListener
         extends ScaleGestureDetector.SimpleOnScaleGestureListener {
     &#64;Override
     public boolean onScale(ScaleGestureDetector detector) {
@@ -329,14 +329,14 @@ private class ScaleListener
 
 
 <h3>More complex scaling example</h3>
-<p>Here is a more complex example from the {@code InteractiveChart} sample provided with this class. 
+<p>Here is a more complex example from the {@code InteractiveChart} sample provided with this class.
 The {@code InteractiveChart} sample supports both scrolling (panning) and scaling with multiple fingers,
-using the {@link android.view.ScaleGestureDetector} "span" 
-({@link android.view.ScaleGestureDetector#getCurrentSpanX getCurrentSpanX/Y}) and 
+using the {@link android.view.ScaleGestureDetector} "span"
+({@link android.view.ScaleGestureDetector#getCurrentSpanX getCurrentSpanX/Y}) and
 "focus" ({@link android.view.ScaleGestureDetector#getFocusX getFocusX/Y}) features:</p>
 
 <pre>&#64;Override
-private RectF mCurrentViewport = 
+private RectF mCurrentViewport =
         new RectF(AXIS_X_MIN, AXIS_Y_MIN, AXIS_X_MAX, AXIS_Y_MAX);
 private Rect mContentRect;
 private ScaleGestureDetector mScaleGestureDetector;
@@ -399,7 +399,7 @@ private final ScaleGestureDetector.OnScaleGestureListener mScaleGestureListener
                 0,
                 0);
         mCurrentViewport.right = mCurrentViewport.left + newWidth;
-        mCurrentViewport.bottom = mCurrentViewport.top + newHeight;     
+        mCurrentViewport.bottom = mCurrentViewport.top + newHeight;
         ...
         // Invalidates the View to update the display.
         ViewCompat.postInvalidateOnAnimation(InteractiveLineGraphView.this);

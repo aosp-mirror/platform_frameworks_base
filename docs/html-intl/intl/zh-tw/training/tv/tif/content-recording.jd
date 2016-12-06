@@ -1,0 +1,121 @@
+page.title=電視錄製
+page.keywords=preview,sdk,tv,recording
+page.tags=androidn
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>此文件內容</h2>
+  <ol>
+    <li><a href="#supporting">指出錄製支援</a></li>
+    <li><a href="#recording">錄製工作階段</a></li>
+    <li><a href="#errors">處理錄製錯誤</a></li>
+    <li><a href="#sessions">管理已錄製的工作階段</a></li>
+    <li><a href="#best">最佳做法</a></li>
+  </ol>
+</div>
+</div>
+
+<p>電視輸入服務可讓使用者透過時間位移 API 來暫停及繼續頻道播放。
+Android N 透過讓使用者儲存多個已錄製的工作階段，以延伸時間位移功能。
+</p>
+
+<p>使用者可以事先排定錄製作業，或在觀看節目時開始錄製。
+一旦系統儲存錄製的內容，使用者可以使用系統電視應用程式來瀏覽、管理及播放錄製的內容。
+</p>
+
+<p>如果要為您的電視輸入服務提供錄製功能，您必須向系統指出您的應用程式支援錄製、實作錄製節目的功能、處理及溝通錄製期間可能發生的任何錯誤，以及管理您已錄製的工作階段。
+
+
+</p>
+
+<h2 id="supporting">指出錄製支援</h2>
+
+<p>若要告訴系統您的電視輸入服務支援錄製，請依照這些步驟執行：
+</p>
+
+<ol>
+<li>在您的 <code>TvInputService.onCreate()</code> 方法中，使用 <code>TvInputInfo.Builder</code> 類別建立新的 <code>TvInputInfo</code> 物件。
+
+</li>
+<li>建立新的 <code>TvInputInfo</code> 物件時，在呼叫 <code>build()</code> 之前先呼叫 <code>setCanRecord(true)</code>，以指出您的服務支援錄製。
+
+</li>
+<li>透過呼叫 <code>TvInputService.updateTvInputInfo()</code>，以向系統註冊您的 <code>TvInputInfo</code> 物件。
+</li>
+</ol>
+
+<h2 id="recording">錄製工作階段</h2>
+
+<p>在您的電視輸入服務註冊並告訴系統它支援錄製功能之後，系統會在需要存取您應用程式的錄製實作時呼叫您的 <code>TvInputService.onCreateRecordingSession()</code>。
+
+
+實作您自己的 <code>TvInputService.RecordingSession</code> 子類別，並在 <code>onCreateRecordingSession()</code> 回呼引發時傳回它。
+
+
+此子類別負責切換到正確的頻道資料、錄製要求的資料，並和系統溝通錄製狀態與錯誤。
+
+</p>
+
+<p>當系統透過傳入頻道 URI 以呼叫 <code>RecordingSession.onTune()</code> 時，會轉台到 URI 指定的頻道。
+透過呼叫 <code>notifyTuned()</code> 以通知系統您的應用程式已轉台到想要的頻道，或者，若您的應用程式無法轉台到適當的頻道，則呼叫 <code>notifyError()</code>。
+
+
+</p>
+
+<p>接著，系統會呼叫 <code>RecordingSession.onStartRecording()</code> 回呼。
+您的應用程式必須立即開始錄製。當系統呼叫此回呼時，它可能會提供包含將錄製之節目相關資訊的 URI。
+
+當錄製完成時，您必須將此資料複製到 <code>RecordedPrograms</code> 資料表格。
+</p>
+
+<p>最後，系統會呼叫 <code>RecordingSession.onStopRecording()</code>。此時，您的應用程式必須立即停止錄製。
+您也必須在 <code>RecordedPrograms</code> 表格中建立一個項目。
+此項目應該在 <code>RecordedPrograms.COLUMN_RECORDING_DATA_URI</code> 欄中包括已錄製的工作階段資料 URI，以及系統在對 <code>onStartRecording()</code> 的初始呼叫中提供的任何節目資訊。
+
+
+
+</p>
+
+<p>如需有關如何存取 <code>RecordedPrograms</code> 表格的詳細資料，請參閱<a href="#sessions">管理已錄製的工作階段</a>。
+</p>
+
+<h2 id="errors">處理錄製錯誤</h2>
+
+<p>如果錄製期間發生錯誤，造成已錄製的資料無法使用，請透過呼叫 <code>RecordingSession.notifyError()</code> 以通知系統。同樣地，您可以在建立錄製工作階段之後呼叫 <code>notifyError()</code>，以讓系統知道您的應用程式已無法再錄製工作階段。
+
+
+</p>
+
+<p>如果錄製期間發生錯誤，但您想要提供可用的部分錄製內容給使用者播放，請呼叫 <code>RecordingSession.notifyRecordingStopped()</code> 以讓系統使用該部分工作階段。
+
+
+</p>
+
+<h2 id="sessions">管理已錄製的工作階段</h2>
+
+<p>系統會從 <code>TvContract.RecordedPrograms</code> 內容提供者表格中所有支援錄製頻道的應用程式維護所有已錄製之工作階段的資訊。
+
+此資訊可透過 <code>RecordedPrograms.Uri</code> 內容 URI 來存取。
+使用內容提供者 API 來讀取、新增及刪除此表格中的項目。
+</p>
+
+<p>如需有關處理內容提供者資料的詳細資訊，請參閱<a href="{@docRoot}guide/topics/providers/content-provider-basics.html">內容提供者基礎知識</a>。
+
+</p>
+
+<h2 id="best">最佳做法</h2>
+
+<p>電視裝置的儲存空間可能有限，因此在配置儲存空間以儲存已錄製的工作階段時，請使用最佳判斷。
+當可用空間不足而無法儲存已錄製的工作階段時，請使用 <code>RecordingCallback.onError(RECORDING_ERROR_INSUFFICIENT_SPACE)</code>。
+
+</p>
+
+<p>當使用者起始錄製時，您應該儘快開始錄製資料。
+如果要加快此程序，請在系統呼叫 <code>onCreateRecordingSession()</code> 回呼時完成所有初期耗時工作 (例如，存取及配置儲存空間)。
+
+這樣做可讓您在 <code>onStartRecording()</code> 回呼引發時立即開始錄製。
+
+</p>

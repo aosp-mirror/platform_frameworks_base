@@ -210,7 +210,7 @@ android.support.v7.widget.CardView} có thể có đổ bóng và góc bo tròn.
 Để biết thêm thông tin, hãy xem phần <a href="{@docRoot}training/material/compatibility.html">Duy trì
 Tính tương thích</a>.</p>
 
-<p>Sử dụng những thuộc tính sau để tùy chỉnh diện mạo của widget 
+<p>Sử dụng những thuộc tính sau để tùy chỉnh diện mạo của widget
 {@link android.support.v7.widget.CardView}:</p>
 
 <ul>

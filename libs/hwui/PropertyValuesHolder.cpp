@@ -25,7 +25,27 @@ namespace uirenderer {
 
 using namespace VectorDrawable;
 
-float PropertyValuesHolder::getValueFromData(float fraction) {
+inline U8CPU lerp(U8CPU fromValue, U8CPU toValue, float fraction) {
+    return (U8CPU) (fromValue * (1 - fraction) + toValue * fraction);
+}
+
+// TODO: Add a test for this
+void ColorEvaluator::evaluate(SkColor* outColor,
+        const SkColor& fromColor, const SkColor& toColor, float fraction) const {
+    U8CPU alpha = lerp(SkColorGetA(fromColor), SkColorGetA(toColor), fraction);
+    U8CPU red = lerp(SkColorGetR(fromColor), SkColorGetR(toColor), fraction);
+    U8CPU green = lerp(SkColorGetG(fromColor), SkColorGetG(toColor), fraction);
+    U8CPU blue = lerp(SkColorGetB(fromColor), SkColorGetB(toColor), fraction);
+    *outColor = SkColorSetARGB(alpha, red, green, blue);
+}
+
+void PathEvaluator::evaluate(PathData* out,
+        const PathData& from, const PathData& to, float fraction) const {
+    VectorDrawableUtils::interpolatePaths(out, from, to, fraction);
+}
+
+template<typename T>
+const T PropertyValuesHolderImpl<T>::getValueFromData(float fraction) const {
     if (mDataSource.size() == 0) {
         LOG_ALWAYS_FATAL("No data source is defined");
         return 0;
@@ -41,57 +61,44 @@ float PropertyValuesHolder::getValueFromData(float fraction) {
     int lowIndex = floor(fraction);
     fraction -= lowIndex;
 
-    float value = mDataSource[lowIndex] * (1.0f - fraction)
-            + mDataSource[lowIndex + 1] * fraction;
+    T value;
+    mEvaluator->evaluate(&value, mDataSource[lowIndex], mDataSource[lowIndex + 1], fraction);
     return value;
 }
 
-void GroupPropertyValuesHolder::setFraction(float fraction) {
-    float animatedValue;
+template<typename T>
+const T PropertyValuesHolderImpl<T>::calculateAnimatedValue(float fraction) const {
     if (mDataSource.size() > 0) {
-        animatedValue = getValueFromData(fraction);
+        return getValueFromData(fraction);
     } else {
-        animatedValue = mStartValue * (1 - fraction) + mEndValue * fraction;
+        T value;
+        mEvaluator->evaluate(&value, mStartValue, mEndValue, fraction);
+        return value;
     }
+}
+
+void GroupPropertyValuesHolder::setFraction(float fraction) {
+    float animatedValue = calculateAnimatedValue(fraction);
     mGroup->mutateProperties()->setPropertyValue(mPropertyId, animatedValue);
 }
 
-inline U8CPU lerp(U8CPU fromValue, U8CPU toValue, float fraction) {
-    return (U8CPU) (fromValue * (1 - fraction) + toValue * fraction);
-}
-
-// TODO: Add a test for this
-SkColor FullPathColorPropertyValuesHolder::interpolateColors(SkColor fromColor, SkColor toColor,
-        float fraction) {
-    U8CPU alpha = lerp(SkColorGetA(fromColor), SkColorGetA(toColor), fraction);
-    U8CPU red = lerp(SkColorGetR(fromColor), SkColorGetR(toColor), fraction);
-    U8CPU green = lerp(SkColorGetG(fromColor), SkColorGetG(toColor), fraction);
-    U8CPU blue = lerp(SkColorGetB(fromColor), SkColorGetB(toColor), fraction);
-    return SkColorSetARGB(alpha, red, green, blue);
-}
-
 void FullPathColorPropertyValuesHolder::setFraction(float fraction) {
-    SkColor animatedValue = interpolateColors(mStartValue, mEndValue, fraction);
+    SkColor animatedValue = calculateAnimatedValue(fraction);
     mFullPath->mutateProperties()->setColorPropertyValue(mPropertyId, animatedValue);
 }
 
 void FullPathPropertyValuesHolder::setFraction(float fraction) {
-    float animatedValue;
-    if (mDataSource.size() > 0) {
-        animatedValue = getValueFromData(fraction);
-    } else {
-        animatedValue = mStartValue * (1 - fraction) + mEndValue * fraction;
-    }
+    float animatedValue = calculateAnimatedValue(fraction);
     mFullPath->mutateProperties()->setPropertyValue(mPropertyId, animatedValue);
 }
 
 void PathDataPropertyValuesHolder::setFraction(float fraction) {
-    VectorDrawableUtils::interpolatePaths(&mPathData, mStartValue, mEndValue, fraction);
+    mEvaluator->evaluate(&mPathData, mStartValue, mEndValue, fraction);
     mPath->mutateProperties()->setData(mPathData);
 }
 
 void RootAlphaPropertyValuesHolder::setFraction(float fraction) {
-    float animatedValue = mStartValue * (1 - fraction) + mEndValue * fraction;
+    float animatedValue = calculateAnimatedValue(fraction);
     mTree->mutateProperties()->setRootAlpha(animatedValue);
 }
 

@@ -24,6 +24,7 @@ namespace aapt {
 extern int compile(const std::vector<StringPiece>& args);
 extern int link(const std::vector<StringPiece>& args);
 extern int dump(const std::vector<StringPiece>& args);
+extern int diff(const std::vector<StringPiece>& args);
 
 } // namespace aapt
 
@@ -44,12 +45,14 @@ int main(int argc, char** argv) {
             return aapt::link(args);
         } else if (command == "dump" || command == "d") {
             return aapt::dump(args);
+        } else if (command == "diff") {
+            return aapt::diff(args);
         }
         std::cerr << "unknown command '" << command << "'\n";
     } else {
         std::cerr << "no command specified\n";
     }
 
-    std::cerr << "\nusage: aapt2 [compile|link|dump] ..." << std::endl;
+    std::cerr << "\nusage: aapt2 [compile|link|dump|diff] ..." << std::endl;
     return 1;
 }

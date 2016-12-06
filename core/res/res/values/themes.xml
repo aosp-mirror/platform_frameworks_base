@@ -57,6 +57,7 @@ please see themes_device_defaults.xml.
 
         <item name="colorPrimaryDark">@color/legacy_primary_dark</item>
         <item name="colorPrimary">@color/legacy_primary</item>
+        <item name="colorSecondary">?attr/colorPrimary</item>
         <item name="colorControlActivated">@color/legacy_control_activated</item>
         <item name="colorControlNormal">@color/legacy_control_normal</item>
         <item name="colorControlHighlight">@color/legacy_button_pressed</item>
@@ -317,6 +318,7 @@ please see themes_device_defaults.xml.
         <item name="activityChooserViewStyle">@style/Widget.ActivityChooserView</item>
         <item name="mediaRouteButtonStyle">@style/Widget.DeviceDefault.MediaRouteButton</item>
         <item name="fragmentBreadCrumbsStyle">@style/Widget.FragmentBreadCrumbs</item>
+        <item name="contextPopupMenuStyle">?attr/popupMenuStyle</item>
 
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@style/Preference.PreferenceScreen</item>

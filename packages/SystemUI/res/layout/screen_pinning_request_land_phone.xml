@@ -20,7 +20,8 @@
     android:layout_height="@dimen/screen_pinning_request_width"
     android:layout_width="wrap_content"
     android:gravity="right|center_vertical"
-    android:orientation="horizontal" >
+    android:orientation="horizontal"
+    android:theme="@android:style/Theme.DeviceDefault.Light">
 
     <include
         android:layout_width="360dp"

@@ -8,7 +8,7 @@ page.metaDescription=我们翻译了以下一些网站资源，希望能帮助�
 @jd:body
 
     <div class="jd-descr" itemprop="articleBody">
-    <div class="resource-widget resource-carousel-layout col-16" 
+    <div class="resource-widget resource-carousel-layout col-16"
     style="height:420px;margin-top:0px;padding-top:0"
     data-query="collection:overview/carousel/zhcn"
     data-sortOdrder="-timestamp"

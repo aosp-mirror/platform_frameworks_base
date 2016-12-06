@@ -602,6 +602,11 @@ final class WifiDisplayAdapter extends DisplayAdapter {
             mMode = createMode(width, height, refreshRate);
         }
 
+        @Override
+        public boolean hasStableUniqueId() {
+            return true;
+        }
+
         public void destroyLocked() {
             if (mSurface != null) {
                 mSurface.release();

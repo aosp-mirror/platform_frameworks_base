@@ -21,6 +21,7 @@ parent.link=index.html
     </li>
     <li><a href="#shape-drawable">Shape Drawable</a></li>
     <li><a href="#nine-patch">Nine-patch</a></li>
+    <li><a href="#vector-drawable">Vector Drawables</a></li>
   </ol>
 
   <h2>See also</h2>
@@ -428,58 +429,66 @@ state
          of the object it's attached to.
          -->
 
-         <h2 id="nine-patch">Nine-patch</h2>
+<h2 id="nine-patch">Nine-patch</h2>
 
-         <p>A {@link android.graphics.drawable.NinePatchDrawable} graphic is a stretchable bitmap
-image,           which Android
-           will automatically resize to accommodate the contents of the View in which you have
-placed it as the           background.
-           An example use of a NinePatch is the backgrounds used by standard Android buttons &mdash;
-           buttons must stretch to accommodate strings of various lengths. A NinePatch drawable is a
-standard           PNG
-           image that includes an extra 1-pixel-wide border. It must be saved with the extension
-           <code>.9.png</code>,
-           and saved into the <code>res/drawable/</code> directory of your project.
-         </p>
-         <p>
-           The border is used to define the stretchable and static areas of
-           the image. You indicate a stretchable section by drawing one (or more) 1-pixel-wide
-           black line(s) in the left and top part of the border (the other border pixels should
-           be fully transparent or white). You can have as many stretchable sections as you want:
-           their relative size stays the same, so the largest sections always remain the largest.
-         </p>
-         <p>
-           You can also define an optional drawable section of the image (effectively,
-           the padding lines) by drawing a line on the right and bottom lines.
-           If a View object sets the NinePatch as its background and then specifies the
-           View's text, it will stretch itself so that all the text fits inside only
-           the area designated by the right and bottom lines (if included). If the
-           padding lines are not included, Android uses the left and top lines to
-           define this drawable area.
-         </p>
-         <p>To clarify the difference between the different lines, the left and top lines define
-           which pixels of the image are allowed to be replicated in order to stretch the image.
-           The bottom and right lines define the relative area within the image that the contents
-           of the View are allowed to lie within.</p>
-         <p>
-           Here is a sample NinePatch file used to define a button:
-         </p>
-         <img src="{@docRoot}images/ninepatch_raw.png" alt="" />
-
-         <p>This NinePatch defines one stretchable area with the left and top lines
-           and the drawable area with the bottom and right lines. In the top image, the dotted grey
-           lines identify the regions of the image that will be replicated in order to stretch the
-image. The           pink
-           rectangle in the bottom image identifies the region in which the contents of the View are
-allowed.
-           If the contents don't fit in this region, then the image will be stretched so that they
-do.
+<p>
+  A {@link android.graphics.drawable.NinePatchDrawable} graphic is a
+  stretchable bitmap image, which Android will automatically resize to
+  accommodate the contents of the View in which you have placed it as the
+  background. An example use of a NinePatch is the backgrounds used by
+  standard Android buttons — buttons must stretch to accommodate strings of
+  various lengths. A NinePatch drawable is a standard PNG image that includes
+  an extra 1-pixel-wide border. It must be saved with the extension
+  <code>.9.png</code>, and saved into the <code>res/drawable/</code> directory
+  of your project.
 </p>
 
-<p>The <a href="{@docRoot}tools/help/draw9patch.html">Draw 9-patch</a> tool offers
-   an extremely handy way to create your NinePatch images, using a WYSIWYG graphics editor. It
-even raises warnings if the region you've defined for the stretchable area is at risk of
-producing drawing artifacts as a result of the pixel replication.
+<p>
+  The border is used to define the stretchable and static areas of the image.
+  You indicate a stretchable section by drawing one (or more) 1-pixel-wide
+  black line(s) in the left and top part of the border (the other border
+  pixels should be fully transparent or white). You can have as many
+  stretchable sections as you want: their relative size stays the same, so the
+  largest sections always remain the largest.
+</p>
+
+<p>
+  You can also define an optional drawable section of the image (effectively,
+  the padding lines) by drawing a line on the right and bottom lines. If a
+  View object sets the NinePatch as its background and then specifies the
+  View's text, it will stretch itself so that all the text fits inside only
+  the area designated by the right and bottom lines (if included). If the
+  padding lines are not included, Android uses the left and top lines to
+  define this drawable area.
+</p>
+
+<p>
+  To clarify the difference between the different lines, the left and top
+  lines define which pixels of the image are allowed to be replicated in order
+  to stretch the image. The bottom and right lines define the relative area
+  within the image that the contents of the View are allowed to lie within.
+</p>
+
+<p>
+  Here is a sample NinePatch file used to define a button:
+</p>
+<img src="{@docRoot}images/ninepatch_raw.png" alt="">
+<p>
+  This NinePatch defines one stretchable area with the left and top lines and
+  the drawable area with the bottom and right lines. In the top image, the
+  dotted grey lines identify the regions of the image that will be replicated
+  in order to stretch the image. The pink rectangle in the bottom image
+  identifies the region in which the contents of the View are allowed. If the
+  contents don't fit in this region, then the image will be stretched so that
+  they do.
+</p>
+
+<p>
+  The <a href="{@docRoot}tools/help/draw9patch.html">Draw 9-patch</a> tool
+  offers an extremely handy way to create your NinePatch images, using a
+  WYSIWYG graphics editor. It even raises warnings if the region you've
+  defined for the stretchable area is at risk of producing drawing artifacts
+  as a result of the pixel replication.
 </p>
 
 <h3>Example XML</h3>
@@ -516,3 +525,265 @@ stretches to accommodate it.
 </p>
 
 <img src="{@docRoot}images/ninepatch_examples.png" alt=""/>
+
+<h2 id="vector-drawable">
+  Vector Drawables
+</h2>
+
+<p>
+  A {@link android.graphics.drawable.VectorDrawable} graphic replaces multiple
+  PNG assets with a single vector graphic. The vector graphic is defined in an
+  XML file as a set of points, lines, and curves along with its associated
+  color information.
+</p>
+
+<p>
+  The major advantage of using a vector graphic is image scalability. Using
+  vector graphics resizes the same file for different screen densities without
+  loss of image quality. This results in smaller APK files and less developer
+  maintenance. You can also use vector images for animation by using multiple
+  XML files instead of multiple images for each display resolution.
+</p>
+
+<p>
+  Let's go through an example to understand the benefits. An image of size 100
+  x 100 dp may render good quality on a smaller display resolution. On larger
+  devices, the app might want to use a 400 x 400 dp version of the image.
+  Normally, developers create multiple versions of an asset to cater to
+  different screen densities. This approach consumes more development efforts,
+  and results in a larger APK, which takes more space on the device.
+</p>
+
+<p>
+  As of Android 5.0 (API level 21), there are two classes that support vector
+  graphics as a drawable resource: {@link
+  android.graphics.drawable.VectorDrawable} and {@link
+  android.graphics.drawable.AnimatedVectorDrawable}. For more information
+  about using the VectorDrawable and the AnimatedVectorDrawable classes, read
+  the <a href="#vector-drawable-class">About VectorDrawable class</a> and
+  <a href="#animated-vector-drawable-class">About AnimatedVectorDrawable
+  class</a> sections.
+</p>
+
+<h3 id="vector-drawable-class">About VectorDrawable class</h3>
+<p>
+  {@link android.graphics.drawable.VectorDrawable} defines a static drawable
+  object. Similar to the SVG format, each vector graphic is defined as a tree
+  hierachy, which is made up of <code>path</code> and <code>group</code> objects.
+  Each <code>path</code> contains the geometry of the object's outline and
+  <code>group</code> contains details for transformation. All paths are drawn
+  in the same order as they appear in the XML file.
+</p>
+
+<img src="{@docRoot}images/guide/topics/graphics/vectorpath.png" alt=""/>
+<p class="img-caption">
+  <strong>Figure 1.</strong> Sample hierarchy of a vector drawable asset
+</p>
+
+
+<p>
+  The <a href="{@docRoot}studio/write/vector-asset-studio.html">Vector Asset
+  Studio</a> tool offers a simple way to add a vector graphic to the project
+  as an XML file.
+</p>
+
+<h4>
+  Example XML
+</h4>
+
+<p>
+  Here is a sample <code>VectorDrawable</code> XML file that renders an image
+  of a battery in the charging mode.
+</p>
+
+<pre>
+&lt;!-- res/drawable/battery_charging.xml --&gt;
+&lt;vector xmlns:android="http://schemas.android.com/apk/res/android"
+    &lt;!-- intrinsic size of the drawable --&gt;
+    android:height="24dp"
+    android:width="24dp"
+    &lt;!-- size of the virtual canvas --&gt;
+    android:viewportWidth="24.0"
+    android:viewportHeight="24.0"&gt;
+   &lt;group
+         android:name="rotationGroup"
+         android:pivotX="10.0"
+         android:pivotY="10.0"
+         android:rotation="15.0" &gt;
+      &lt;path
+        android:name="vect"
+        android:fillColor="#FF000000"
+        android:pathData="M15.67,4H14V2h-4v2H8.33C7.6,4 7,4.6 7,5.33V9h4.93L13,7v2h4V5.33C17,4.6 16.4,4 15.67,4z"
+        android:fillAlpha=".3"/&gt;
+      &lt;path
+        android:name="draw"
+        android:fillColor="#FF000000"
+        android:pathData="M13,12.5h2L11,20v-5.5H9L11.93,9H7v11.67C7,21.4 7.6,22 8.33,22h7.33c0.74,0 1.34,-0.6 1.34,-1.33V9h-4v3.5z"/&gt;
+   &lt;/group&gt;
+&lt;/vector&gt;
+</pre>
+
+<p>This XML renders the following image:
+</p>
+
+<img src=
+"{@docRoot}images/guide/topics/graphics/ic_battery_charging_80_black_24dp.png"
+alt=""/>
+
+<h3 id="animated-vector-drawable-class">
+  About AnimatedVectorDrawable class
+</h3>
+
+<p>
+  {@link android.graphics.drawable.AnimatedVectorDrawable
+  AnimatedVectorDrawable} adds animation to the properties of a vector
+  graphic. You can define an animated vector graphic as three separate
+  resource files or as a single XML file defining the entire drawable. Let's
+  look at both the approaches for better understanding: <a href=
+  "#multiple-files">Multiple XML files</a> and <a href="#single-file">Single
+  XML file</a>.
+</p>
+
+<h4 id="multiple-files">
+  Multiple XML files
+</h4>
+<p>
+  By using this approach, you can define three separate XML files:
+
+<ul>
+  <li>A {@link android.graphics.drawable.VectorDrawable} XML file.
+  </li>
+
+  <li>
+  An {@link android.graphics.drawable.AnimatedVectorDrawable} XML file that
+defines the target {@link android.graphics.drawable.VectorDrawable}, the
+target paths and groups to animate, the properties, and the animations defined
+as {@link android.animation.ObjectAnimator ObjectAnimator} objects or {@link
+android.animation.AnimatorSet AnimatorSet} objects.
+  </li>
+
+  <li>An animator XML file.
+  </li>
+</ul>
+</p>
+
+<h5>
+  Example of multiple XML files
+</h5>
+<p>
+  The following XML files demonstrate the animation of a vector graphic.
+
+<ul>
+  <li>VectorDrawable's XML file: <code>vd.xml</code>
+  </li>
+
+  <li style="list-style: none; display: inline">
+<pre>
+&lt;vector xmlns:android="http://schemas.android.com/apk/res/android"
+   android:height="64dp"
+   android:width="64dp"
+   android:viewportHeight="600"
+   android:viewportWidth="600" &gt;
+   &lt;group
+      android:name="rotationGroup"
+      android:pivotX="300.0"
+      android:pivotY="300.0"
+      android:rotation="45.0" &gt;
+      &lt;path
+         android:name="vectorPath"
+         android:fillColor="#000000"
+         android:pathData="M300,70 l 0,-70 70,70 0,0 -70,70z" /&gt;
+   &lt;/group&gt;
+&lt;/vector&gt;
+</pre>
+  </li>
+
+  <li>AnimatedVectorDrawable's XML file: <code>avd.xml</code>
+  </li>
+
+  <li style="list-style: none; display: inline">
+<pre>
+&lt;animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+   android:drawable="@drawable/vd" &gt;
+     &lt;target
+         android:name="rotationGroup"
+         android:animation="@anim/rotation" /&gt;
+     &lt;target
+         android:name="vectorPath"
+         android:animation="@anim/path_morph" /&gt;
+&lt;/animated-vector&gt;
+</pre>
+  </li>
+
+  <li>Animator XML files that are used in the AnimatedVectorDrawable's XML
+  file: <code>rotation.xml</code> and <code>path_morph.xml</code>
+  </li>
+
+  <li style="list-style: none; display: inline">
+<pre>
+&lt;objectAnimator
+   android:duration="6000"
+   android:propertyName="rotation"
+   android:valueFrom="0"
+   android:valueTo="360" /&gt;
+</pre>
+
+<pre>
+&lt;set xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+   &lt;objectAnimator
+      android:duration="3000"
+      android:propertyName="pathData"
+      android:valueFrom="M300,70 l 0,-70 70,70 0,0   -70,70z"
+      android:valueTo="M300,70 l 0,-70 70,0  0,140 -70,0 z"
+      android:valueType="pathType"/&gt;
+&lt;/set&gt;
+</pre>
+  </li>
+</ul>
+</p>
+<h4 id="single-file">
+  Single XML file
+</h4>
+
+<p>
+  By using this approach, you can merge the related XML files into a single
+  XML file through the XML Bundle Format. At the time of building the app, the
+  <code>aapt</code> tag creates separate resources and references them in the
+  animated vector. This approach requires Build Tools 24 or higher, and the
+  output is backward compatible.
+</p>
+
+<h5>
+  Example of a single XML file
+</h5>
+<pre>
+&lt;animated-vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"&gt;
+    &lt;aapt:attr name="android:drawable"&gt;
+        &lt;vector
+            android:width="24dp"
+            android:height="24dp"
+            android:viewportWidth="24"
+            android:viewportHeight="24"&gt;
+            &lt;path
+                android:name="root"
+                android:strokeWidth="2"
+                android:strokeLineCap="square"
+                android:strokeColor="?android:colorControlNormal"
+                android:pathData="M4.8,13.4 L9,17.6 M10.4,16.2 L19.6,7" /&gt;
+        &lt;/vector&gt;
+    &lt;/aapt:attr&gt;
+    &lt;target android:name="root"&gt;
+        &lt;aapt:attr name="android:animation"&gt;
+            &lt;objectAnimator
+                android:propertyName="pathData"
+                android:valueFrom="M4.8,13.4 L9,17.6 M10.4,16.2 L19.6,7"
+                android:valueTo="M6.4,6.4 L17.6,17.6 M6.4,17.6 L17.6,6.4"
+                android:duration="300"
+                android:interpolator="@android:interpolator/fast_out_slow_in"
+                android:valueType="pathType" /&gt;
+        &lt;/aapt:attr&gt;
+    &lt;/target&gt;
+&lt;/animated-vector&gt;
+</pre>

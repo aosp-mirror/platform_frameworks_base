@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
+import android.os.UserManager;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -36,11 +37,11 @@ import com.android.internal.logging.MetricsProto;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
-import com.android.systemui.qs.QSAnimator;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSPanel.Callback;
 import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.qs.TouchAnimator;
+import com.android.systemui.qs.TouchAnimator.Builder;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.NextAlarmController.NextAlarmChangeCallback;
@@ -82,19 +83,14 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     protected MultiUserSwitch mMultiUserSwitch;
     private ImageView mMultiUserAvatar;
 
-    private float mDateTimeTranslation;
-    private float mDateTimeAlarmTranslation;
-    private float mDateScaleFactor;
-    protected float mGearTranslation;
 
-    private TouchAnimator mSecondHalfAnimator;
-    private TouchAnimator mFirstHalfAnimator;
-    private TouchAnimator mDateSizeAnimator;
-    private TouchAnimator mAlarmTranslation;
+    private TouchAnimator mAnimator;
     protected TouchAnimator mSettingsAlpha;
     private float mExpansionAmount;
     private QSTileHost mHost;
+    private View mEdit;
     private boolean mShowFullAlarm;
+    private float mDateTimeTranslation;
 
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -106,11 +102,16 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
         mEmergencyOnly = (TextView) findViewById(R.id.header_emergency_calls_only);
 
+        mEdit = findViewById(android.R.id.edit);
+        findViewById(android.R.id.edit).setOnClickListener(view ->
+                mHost.startRunnableDismissingKeyguard(() -> mQsPanel.showEdit(view)));
+
         mDateTimeAlarmGroup = (ViewGroup) findViewById(R.id.date_time_alarm_group);
         mDateTimeAlarmGroup.findViewById(R.id.empty_time_view).setVisibility(View.GONE);
         mDateTimeGroup = (ViewGroup) findViewById(R.id.date_time_group);
         mDateTimeGroup.setPivotX(0);
         mDateTimeGroup.setPivotY(0);
+        mDateTimeTranslation = getResources().getDimension(R.dimen.qs_date_time_translation);
         mShowFullAlarm = getResources().getBoolean(R.bool.quick_settings_show_full_alarm);
 
         mExpandIndicator = (ExpandableIndicator) findViewById(R.id.expand_indicator);
@@ -152,47 +153,21 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         FontSizeUtils.updateFontSize(mAlarmStatus, R.dimen.qs_date_collapsed_size);
         FontSizeUtils.updateFontSize(mEmergencyOnly, R.dimen.qs_emergency_calls_only_text_size);
 
-        mGearTranslation = mContext.getResources().getDimension(R.dimen.qs_header_gear_translation);
-
-        mDateTimeTranslation = mContext.getResources().getDimension(
-                R.dimen.qs_date_anim_translation);
-        mDateTimeAlarmTranslation = mContext.getResources().getDimension(
-                R.dimen.qs_date_alarm_anim_translation);
-        float dateCollapsedSize = mContext.getResources().getDimension(
-                R.dimen.qs_date_collapsed_text_size);
-        float dateExpandedSize = mContext.getResources().getDimension(
-                R.dimen.qs_date_text_size);
-        mDateScaleFactor = dateExpandedSize / dateCollapsedSize;
-        updateDateTimePosition();
-
-        mSecondHalfAnimator = new TouchAnimator.Builder()
+        Builder builder = new Builder()
                 .addFloat(mShowFullAlarm ? mAlarmStatus : findViewById(R.id.date), "alpha", 0, 1)
-                .addFloat(mEmergencyOnly, "alpha", 0, 1)
-                .setStartDelay(.5f)
-                .build();
+                .addFloat(mEmergencyOnly, "alpha", 0, 1);
         if (mShowFullAlarm) {
-            mFirstHalfAnimator = new TouchAnimator.Builder()
-                    .addFloat(mAlarmStatusCollapsed, "alpha", 1, 0)
-                    .setEndDelay(.5f)
-                    .build();
+            builder.addFloat(mAlarmStatusCollapsed, "alpha", 1, 0);
         }
-        mDateSizeAnimator = new TouchAnimator.Builder()
-                .addFloat(mDateTimeGroup, "scaleX", 1, mDateScaleFactor)
-                .addFloat(mDateTimeGroup, "scaleY", 1, mDateScaleFactor)
-                .setStartDelay(.36f)
-                .build();
+        mAnimator = builder.build();
 
         updateSettingsAnimator();
     }
 
     protected void updateSettingsAnimator() {
         mSettingsAlpha = new TouchAnimator.Builder()
-                .addFloat(mSettingsContainer, "translationY", -mGearTranslation, 0)
-                .addFloat(mMultiUserSwitch, "translationY", -mGearTranslation, 0)
-                .addFloat(mSettingsButton, "rotation", -90, 0)
-                .addFloat(mSettingsContainer, "alpha", 0, 1)
+                .addFloat(mEdit, "alpha", 0, 1)
                 .addFloat(mMultiUserSwitch, "alpha", 0, 1)
-                .setStartDelay(QSAnimator.EXPANDED_TILE_DELAY)
                 .build();
 
         final boolean isRtl = isLayoutRtl();
@@ -222,6 +197,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
     @Override
     public void setExpanded(boolean expanded) {
+        if (mExpanded == expanded) return;
         mExpanded = expanded;
         mHeaderQsPanel.setExpanded(expanded);
         updateEverything();
@@ -247,12 +223,8 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     @Override
     public void setExpansion(float headerExpansionFraction) {
         mExpansionAmount = headerExpansionFraction;
-        mSecondHalfAnimator.setPosition(headerExpansionFraction);
-        if (mShowFullAlarm) {
-            mFirstHalfAnimator.setPosition(headerExpansionFraction);
-        }
-        mDateSizeAnimator.setPosition(headerExpansionFraction);
-        mAlarmTranslation.setPosition(headerExpansionFraction);
+        updateDateTimePosition();
+        mAnimator.setPosition(headerExpansionFraction);
         mSettingsAlpha.setPosition(headerExpansionFraction);
 
         updateAlarmVisibilities();
@@ -273,15 +245,6 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mAlarmStatusCollapsed.setVisibility(mAlarmShowing ? View.VISIBLE : View.INVISIBLE);
     }
 
-    private void updateDateTimePosition() {
-        // This one has its own because we have to rebuild it every time the alarm state changes.
-        mAlarmTranslation = new TouchAnimator.Builder()
-                .addFloat(mDateTimeAlarmGroup, "translationY", 0, mAlarmShowing
-                        ? mDateTimeAlarmTranslation : mDateTimeTranslation)
-                .build();
-        mAlarmTranslation.setPosition(mExpansionAmount);
-    }
-
     public void setListening(boolean listening) {
         if (listening == mListening) {
             return;
@@ -293,20 +256,28 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
     @Override
     public void updateEverything() {
-        updateDateTimePosition();
-        updateVisibilities();
-        setClickable(false);
+        post(() -> {
+            updateVisibilities();
+            setClickable(false);
+        });
     }
 
     protected void updateVisibilities() {
         updateAlarmVisibilities();
+        updateDateTimePosition();
         mEmergencyOnly.setVisibility(mExpanded && mShowEmergencyCallsOnly
                 ? View.VISIBLE : View.INVISIBLE);
-        mSettingsContainer.setVisibility(mExpanded ? View.VISIBLE : View.INVISIBLE);
         mSettingsContainer.findViewById(R.id.tuner_icon).setVisibility(
                 TunerService.isTunerEnabled(mContext) ? View.VISIBLE : View.INVISIBLE);
-        mMultiUserSwitch.setVisibility(mExpanded && mMultiUserSwitch.hasMultipleUsers()
+        final boolean isDemo = UserManager.isDeviceInDemoMode(mContext);
+        mMultiUserSwitch.setVisibility(mExpanded && mMultiUserSwitch.hasMultipleUsers() && !isDemo
                 ? View.VISIBLE : View.INVISIBLE);
+        mEdit.setVisibility(isDemo || !mExpanded ? View.INVISIBLE : View.VISIBLE);
+    }
+
+    private void updateDateTimePosition() {
+        mDateTimeAlarmGroup.setTranslationY(mShowEmergencyCallsOnly
+                ? mExpansionAmount * mDateTimeTranslation : 0);
     }
 
     private void updateListeners() {
@@ -350,27 +321,29 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     public void onClick(View v) {
         if (v == mSettingsButton) {
             MetricsLogger.action(mContext,
-                    MetricsProto.MetricsEvent.ACTION_QS_EXPANDED_SETTINGS_LAUNCH);
+                    mExpanded ? MetricsProto.MetricsEvent.ACTION_QS_EXPANDED_SETTINGS_LAUNCH
+                            : MetricsProto.MetricsEvent.ACTION_QS_COLLAPSED_SETTINGS_LAUNCH);
             if (mSettingsButton.isTunerClick()) {
-                if (TunerService.isTunerEnabled(mContext)) {
-                    TunerService.showResetRequest(mContext, new Runnable() {
-                        @Override
-                        public void run() {
+                mHost.startRunnableDismissingKeyguard(() -> post(() -> {
+                    if (TunerService.isTunerEnabled(mContext)) {
+                        TunerService.showResetRequest(mContext, () -> {
                             // Relaunch settings so that the tuner disappears.
                             startSettingsActivity();
-                        }
-                    });
-                } else {
-                    Toast.makeText(getContext(), R.string.tuner_toast, Toast.LENGTH_LONG).show();
-                    TunerService.setTunerEnabled(mContext, true);
-                }
+                        });
+                    } else {
+                        Toast.makeText(getContext(), R.string.tuner_toast,
+                                Toast.LENGTH_LONG).show();
+                        TunerService.setTunerEnabled(mContext, true);
+                    }
+                    startSettingsActivity();
+
+                }));
+            } else {
+                startSettingsActivity();
             }
-            startSettingsActivity();
         } else if (v == mAlarmStatus && mNextAlarm != null) {
             PendingIntent showIntent = mNextAlarm.getShowIntent();
-            if (showIntent != null && showIntent.isActivity()) {
-                mActivityStarter.startActivity(showIntent.getIntent(), true /* dismissShade */);
-            }
+            mActivityStarter.startPendingIntentDismissingKeyguard(showIntent);
         }
     }
 

@@ -21,7 +21,7 @@
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Feilrapporten <xliff:g id="ID">#%d</xliff:g> er fullført"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Legger til detaljer i feilrapporten"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Vent litt"</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Sveip til venstre for å dele feilrapporten din"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Feilrapporten vises snart på telefonen"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Trykk for å dele feilrapporten"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Trykk for å dele feilrapporten uten noen skjermdump, eller vent til skjermdumpen er klar"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Trykk for å dele feilrapporten uten noen skjermdump, eller vent til skjermdumpen er klar"</string>

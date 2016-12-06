@@ -240,7 +240,7 @@ and game controllers include
 android.view.MotionEvent#AXIS_HAT_Y}, {@link
 android.view.MotionEvent#AXIS_RTRIGGER}, {@link
 android.view.MotionEvent#AXIS_ORIENTATION}, {@link
-android.view.MotionEvent#AXIS_THROTTLE}, and many others. 
+android.view.MotionEvent#AXIS_THROTTLE}, and many others.
 Existing {@link android.view.MotionEvent} axes are represented by {@link
 android.view.MotionEvent#AXIS_X}, {@link android.view.MotionEvent#AXIS_Y},
 {@link android.view.MotionEvent#AXIS_PRESSURE}, {@link
@@ -299,7 +299,7 @@ each axis value.</p>
 <p>Finally, since the motion events from joysticks, gamepads, mice, and
 trackballs are not touch events, the platform adds a new callback method for
 passing them to a {@link android.view.View} as "generic" motion events.
-Specifically, it reports the non-touch motion events to 
+Specifically, it reports the non-touch motion events to
 {@link android.view.View}s through a call to {@link
 android.view.View#onGenericMotionEvent(android.view.MotionEvent)
 onGenericMotionEvent()}, rather than to {@link
@@ -318,7 +318,7 @@ onGenericMotionEvent()} there instead.</p>
 
 <p class="note">To look at a sample application that uses joystick motion
 events, see <a
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/GameControllerInput.html">GameControllerInput</a> 
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/GameControllerInput.html">GameControllerInput</a>
 and <a
 href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/GameView.html">GameView</a>.</p>
 

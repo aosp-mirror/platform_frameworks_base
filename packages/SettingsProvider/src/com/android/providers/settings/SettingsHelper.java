@@ -247,7 +247,6 @@ public class SettingsHelper {
                 return Settings.Secure.getInt(mContext.getContentResolver(), name, 0) != 0;
             case Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES:
             case Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES:
-            case Settings.Secure.ACCESSIBILITY_DISPLAY_COLOR_MATRIX:
             case Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER:
             case Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE:
                 return !TextUtils.isEmpty(Settings.Secure.getString(

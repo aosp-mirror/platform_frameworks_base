@@ -162,6 +162,9 @@ public class AppTransition implements Dump {
     private final WindowManagerService mService;
 
     private int mNextAppTransition = TRANSIT_UNSET;
+    private int mLastUsedAppTransition = TRANSIT_UNSET;
+    private String mLastOpeningApp;
+    private String mLastClosingApp;
 
     private static final int NEXT_TRANSIT_TYPE_NONE = 0;
     private static final int NEXT_TRANSIT_TYPE_CUSTOM = 1;
@@ -285,6 +288,13 @@ public class AppTransition implements Dump {
 
     private void setAppTransition(int transit) {
         mNextAppTransition = transit;
+        setLastAppTransition(TRANSIT_UNSET, null, null);
+    }
+
+    void setLastAppTransition(int transit, AppWindowToken openingApp, AppWindowToken closingApp) {
+        mLastUsedAppTransition = transit;
+        mLastOpeningApp = "" + openingApp;
+        mLastClosingApp = "" + closingApp;
     }
 
     boolean isReady() {
@@ -364,6 +374,7 @@ public class AppTransition implements Dump {
 
     void goodToGo(AppWindowAnimator topOpeningAppAnimator, AppWindowAnimator topClosingAppAnimator,
             ArraySet<AppWindowToken> openingApps, ArraySet<AppWindowToken> closingApps) {
+        int appTransition = mNextAppTransition;
         mNextAppTransition = TRANSIT_UNSET;
         mAppTransitionState = APP_STATE_RUNNING;
         notifyAppTransitionStartingLocked(
@@ -372,7 +383,7 @@ public class AppTransition implements Dump {
                 topOpeningAppAnimator != null ? topOpeningAppAnimator.animation : null,
                 topClosingAppAnimator != null ? topClosingAppAnimator.animation : null);
         mService.getDefaultDisplayContentLocked().getDockedDividerController()
-                .notifyAppTransitionStarting();
+                .notifyAppTransitionStarting(openingApps, appTransition);
 
         // Prolong the start for the transition when docking a task from recents, unless recents
         // ended it already then we don't need to wait.
@@ -604,7 +615,7 @@ public class AppTransition implements Dump {
             float scaleH = mTmpRect.height() / (float) appHeight;
             Animation scale = new ScaleAnimation(scaleW, 1, scaleH, 1,
                     computePivot(mTmpRect.left, scaleW),
-                    computePivot(mTmpRect.right, scaleH));
+                    computePivot(mTmpRect.top, scaleH));
             scale.setInterpolator(mDecelerateInterpolator);
 
             Animation alpha = new AlphaAnimation(0, 1);
@@ -1057,7 +1068,7 @@ public class AppTransition implements Dump {
         final float thumbWidth = thumbWidthI > 0 ? thumbWidthI : 1;
         final int thumbHeightI = mTmpRect.height();
         final float thumbHeight = thumbHeightI > 0 ? thumbHeightI : 1;
-        final int thumbStartX = mTmpRect.left - containingFrame.left;
+        final int thumbStartX = mTmpRect.left - containingFrame.left - contentInsets.left;
         final int thumbStartY = mTmpRect.top - containingFrame.top;
 
         switch (thumbTransitState) {
@@ -1615,8 +1626,7 @@ public class AppTransition implements Dump {
         if (isTransitionSet()) {
             clear();
             mNextAppTransitionType = NEXT_TRANSIT_TYPE_SCALE_UP;
-            putDefaultNextAppTransitionCoordinates(startX, startY, startX + startWidth,
-                    startY + startHeight, null);
+            putDefaultNextAppTransitionCoordinates(startX, startY, startWidth, startHeight, null);
             postAnimationCallback();
         }
     }
@@ -1904,6 +1914,14 @@ public class AppTransition implements Dump {
         if (mNextAppTransitionCallback != null) {
             pw.print(prefix); pw.print("mNextAppTransitionCallback=");
                     pw.println(mNextAppTransitionCallback);
+        }
+        if (mLastUsedAppTransition != TRANSIT_NONE) {
+            pw.print(prefix); pw.print("mLastUsedAppTransition=");
+                    pw.println(appTransitionToString(mLastUsedAppTransition));
+            pw.print(prefix); pw.print("mLastOpeningApp=");
+                    pw.println(mLastOpeningApp);
+            pw.print(prefix); pw.print("mLastClosingApp=");
+                    pw.println(mLastClosingApp);
         }
     }
 

@@ -44,6 +44,7 @@ import android.util.SparseArray;
 import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.SurfaceControl;
+import android.view.animation.Animation;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
@@ -398,23 +399,21 @@ public class TaskStack implements DimLayer.DimLayerUser,
             return false;
         }
 
-        final int oldDockSide = mStackId == DOCKED_STACK_ID ? getDockSide() : DOCKED_INVALID;
         mTmpRect2.set(mBounds);
         mDisplayContent.rotateBounds(mRotation, newRotation, mTmpRect2);
         if (mStackId == DOCKED_STACK_ID) {
             repositionDockedStackAfterRotation(mTmpRect2);
             snapDockedStackAfterRotation(mTmpRect2);
             final int newDockSide = getDockSide(mTmpRect2);
-            if (oldDockSide != newDockSide) {
-                // Update the dock create mode and clear the dock create bounds, these
-                // might change after a rotation and the original values will be invalid.
-                mService.setDockedStackCreateStateLocked(
-                        (newDockSide == DOCKED_LEFT || newDockSide == DOCKED_TOP)
-                        ? DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT
-                        : DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT,
-                        null);
-                mDisplayContent.getDockedDividerController().notifyDockSideChanged(newDockSide);
-            }
+
+            // Update the dock create mode and clear the dock create bounds, these
+            // might change after a rotation and the original values will be invalid.
+            mService.setDockedStackCreateStateLocked(
+                    (newDockSide == DOCKED_LEFT || newDockSide == DOCKED_TOP)
+                    ? DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT
+                    : DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT,
+                    null);
+            mDisplayContent.getDockedDividerController().notifyDockSideChanged(newDockSide);
         }
 
         mBoundsAfterRotation.set(mTmpRect2);
@@ -890,7 +889,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
             mAdjustImeAmount = adjustAmount;
             mAdjustDividerAmount = adjustDividerAmount;
             updateAdjustedBounds();
-            return isVisibleForUserLocked();
+            return isVisibleLocked(true /* ignoreKeyguard */);
         } else {
             return false;
         }
@@ -926,7 +925,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
         if (minimizeAmount != mMinimizeAmount) {
             mMinimizeAmount = minimizeAmount;
             updateAdjustedBounds();
-            return isVisibleForUserLocked();
+            return isVisibleLocked(true /* ignoreKeyguard*/);
         } else {
             return false;
         }
@@ -943,7 +942,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
     void beginImeAdjustAnimation() {
         for (int j = mTasks.size() - 1; j >= 0; j--) {
             final Task task = mTasks.get(j);
-            if (task.isVisibleForUser()) {
+            if (task.isVisible()) {
                 task.setDragResizing(true, DRAG_RESIZE_MODE_DOCKED_DIVIDER);
                 task.addWindowsWaitingForDrawnIfResizingChanged();
             }
@@ -1233,9 +1232,13 @@ public class TaskStack implements DimLayer.DimLayerUser,
     }
 
     boolean isVisibleLocked() {
+        return isVisibleLocked(false /* ignoreKeyguard */);
+    }
+
+    boolean isVisibleLocked(boolean ignoreKeyguard) {
         final boolean keyguardOn = mService.mPolicy.isKeyguardShowingOrOccluded()
                 && !mService.mAnimator.mKeyguardGoingAway;
-        if (keyguardOn && !StackId.isAllowedOverLockscreen(mStackId)) {
+        if (!ignoreKeyguard && keyguardOn && !StackId.isAllowedOverLockscreen(mStackId)) {
             // The keyguard is showing and the stack shouldn't show on top of the keyguard.
             return false;
         }
@@ -1249,20 +1252,6 @@ public class TaskStack implements DimLayer.DimLayerUser,
             }
         }
 
-        return false;
-    }
-
-    /**
-     * @return true if a the stack is visible for the current in user, ignoring any other visibility
-     *         aspects, and false otherwise
-     */
-    boolean isVisibleForUserLocked() {
-        for (int i = mTasks.size() - 1; i >= 0; i--) {
-            final Task task = mTasks.get(i);
-            if (task.isVisibleForUser()) {
-                return true;
-            }
-        }
         return false;
     }
 
@@ -1378,5 +1367,14 @@ public class TaskStack implements DimLayer.DimLayerUser,
 
     public boolean getBoundsAnimating() {
         return mBoundsAnimating;
+    }
+
+    /**
+     * See {@link WindowManagerService#overridePlayingAppAnimationsLw}
+     */
+    void overridePlayingAppAnimations(Animation a) {
+        for (int i = mTasks.size() - 1; i >= 0; --i) {
+            mTasks.get(i).overridePlayingAppAnimations(a);
+        }
     }
 }

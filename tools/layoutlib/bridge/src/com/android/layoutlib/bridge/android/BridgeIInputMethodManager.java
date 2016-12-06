@@ -16,11 +16,13 @@
 
 package com.android.layoutlib.bridge.android;
 
+import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.InputBindResult;
 
+import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -236,6 +238,13 @@ public class BridgeIInputMethodManager implements IInputMethodManager {
 
     @Override
     public IBinder asBinder() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public IInputContentUriToken createInputContentUriToken(IBinder token, Uri contentUri,
+            String packageName) {
         // TODO Auto-generated method stub
         return null;
     }

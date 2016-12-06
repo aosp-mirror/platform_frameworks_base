@@ -26,6 +26,7 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.service.persistentdata.IPersistentDataBlockService;
 import android.service.persistentdata.PersistentDataBlockManager;
 import android.util.Slog;
@@ -155,6 +156,14 @@ public class PersistentDataBlockService extends SystemService {
                     "Only the Admin user is allowed to change OEM unlock state");
         }
     }
+
+    private void enforceUserRestriction(String userRestriction) {
+        if (UserManager.get(mContext).hasUserRestriction(userRestriction)) {
+            throw new SecurityException(
+                    "OEM unlock is disallowed by user restriction: " + userRestriction);
+        }
+    }
+
     private int getTotalDataSizeLocked(DataInputStream inputStream) throws IOException {
         // skip over checksum
         inputStream.skipBytes(DIGEST_SIZE_BYTES);
@@ -447,14 +456,20 @@ public class PersistentDataBlockService extends SystemService {
         }
 
         @Override
-        public void setOemUnlockEnabled(boolean enabled) {
+        public void setOemUnlockEnabled(boolean enabled) throws SecurityException {
             // do not allow monkey to flip the flag
             if (ActivityManager.isUserAMonkey()) {
                 return;
             }
+
             enforceOemUnlockWritePermission();
             enforceIsAdmin();
 
+            if (enabled) {
+                // Do not allow oem unlock to be enabled if it's disallowed by a user restriction.
+                enforceUserRestriction(UserManager.DISALLOW_OEM_UNLOCK);
+                enforceUserRestriction(UserManager.DISALLOW_FACTORY_RESET);
+            }
             synchronized (mLock) {
                 doSetOemUnlockEnabledLocked(enabled);
                 computeAndWriteDigestLocked();

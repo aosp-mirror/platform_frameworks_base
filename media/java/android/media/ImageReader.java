@@ -241,6 +241,10 @@ public class ImageReader implements AutoCloseable {
      * same {@link Surface} can be reused with a different API once the first source is
      * disconnected from the {@link Surface}.</p>
      *
+     * <p>Please note that holding on to the Surface object returned by this method is not enough
+     * to keep its parent ImageReader from being reclaimed. In that sense, a Surface acts like a
+     * {@link java.lang.ref.WeakReference weak reference} to the ImageReader that provides it.</p>
+     *
      * @return A {@link Surface} to use for a drawing target for various APIs.
      */
     public Surface getSurface() {
@@ -512,11 +516,36 @@ public class ImageReader implements AutoCloseable {
             mAcquiredImages.clear();
 
             nativeClose();
-        }
 
-        if (mEstimatedNativeAllocBytes > 0) {
-            VMRuntime.getRuntime().registerNativeFree(mEstimatedNativeAllocBytes);
-            mEstimatedNativeAllocBytes = 0;
+            if (mEstimatedNativeAllocBytes > 0) {
+                VMRuntime.getRuntime().registerNativeFree(mEstimatedNativeAllocBytes);
+                mEstimatedNativeAllocBytes = 0;
+            }
+        }
+    }
+
+    /**
+     * Discard any free buffers owned by this ImageReader.
+     *
+     * <p>
+     * Generally, the ImageReader caches buffers for reuse once they have been
+     * allocated, for best performance. However, sometimes it may be important to
+     * release all the cached, unused buffers to save on memory.
+     * </p>
+     * <p>
+     * Calling this method will discard all free cached buffers. This does not include any buffers
+     * associated with Images acquired from the ImageReader, any filled buffers waiting to be
+     * acquired, and any buffers currently in use by the source rendering buffers into the
+     * ImageReader's Surface.
+     * <p>
+     * The ImageReader continues to be usable after this call, but may need to reallocate buffers
+     * when more buffers are needed for rendering.
+     * </p>
+     * @hide
+     */
+    public void discardFreeBuffers() {
+        synchronized (mCloseLock) {
+            nativeDiscardFreeBuffers();
         }
     }
 
@@ -872,6 +901,7 @@ public class ImageReader implements AutoCloseable {
     private synchronized native void nativeReleaseImage(Image i);
     private synchronized native Surface nativeGetSurface();
     private synchronized native int nativeDetachImage(Image i);
+    private synchronized native void nativeDiscardFreeBuffers();
 
     /**
      * @return A return code {@code ACQUIRE_*}

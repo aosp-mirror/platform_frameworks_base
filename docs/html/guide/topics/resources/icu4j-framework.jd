@@ -1,0 +1,165 @@
+page.title=ICU4J Android Framework APIs
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>In this document:</h2>
+<ol>
+    <li><a href="#relation">Relationship to ICU4J</a></li>
+    <li><a href="#migration">Migrating to android.icu APIs from ICU4J </a></li>
+    <li><a href="#licence">Licensing</a></li>
+</ol>
+
+<h2>See Also</h2>
+<ol>
+  <li>
+    <a class="external-link" href=
+    "http://userguide.icu-project.org">Documentation for ICU4J</a>
+  </li>
+
+  <li>
+    <a class="external-link" href=
+    "http://site.icu-project.org/#TOC-What-is-ICU-">Latest standards supported
+    by ICU4J</a>
+  </li>
+</ol>
+</div>
+</div>
+
+<p>
+  ICU4J is an open-source, widely used set of Java libraries providing Unicode
+  and globalization support for software applications. Starting in Android 7.0
+  (API level 24), Android
+  exposes a subset of the ICU4J APIs for app developers
+  to use under the {@code android.icu} package. These APIs use
+  localization data present on the device. As a result, you can reduce your APK
+  footprint by not compiling the ICU4J libraries into your APK; instead, you can
+  simply call out to them in the framework. (In this case, you may want to provide
+  <a href="{@docRoot}google/play/publishing/multiple-apks.html">multiple versions
+  of your APK</a>, so users running versions of Android lower than
+  Android 7.0 (API level 24)
+  can download a version of the app that contains the ICU4J libraries.)
+</p>
+
+<p>
+  This document begins by providing some basic information on the minimum
+  Android API levels required to support these libraries. It then explains what
+  you need to know about the Android-specific implementation of ICU4J. Finally,
+  it tells you how to use the ICU4J APIs in the Android framework.
+</p>
+
+<h2 id="relation">Relationship to ICU4J</h2>
+
+<p>
+  Android exposes a subset of the ICU4J APIs via the
+  <code>android.icu</code> package, rather than <code>com.ibm.icu</code>. The
+  Android framework may choose not to
+  expose ICU4J APIs for various reasons; for example, Android does not expose
+  some deprecated APIs or those that the ICU team have not yet declared as
+  stable. As the ICU team deprecates APIs in the future, Android will also mark
+  them as deprecated but will continue to include them.
+</p>
+
+<p class="table-caption"><strong>Table 1.</strong> ICU and CLDR versions used
+  in Android].</p>
+<table>
+<tr>
+<th>Android API level</th>
+<th>ICU version</th>
+<th>CLDR version</th>
+</tr>
+<tr>
+<td>Android 7.0 (API level 24)</td>
+<td>56</td>
+<td>28</td>
+</tr>
+</table>
+
+<p>Here are a few important things to note:</p>
+
+<ul>
+<li>The ICU4J Android framework APIs do not include all the ICU4J APIs.</li>
+<li>NDK developers should know that Android ICU4C is not supported.</li>
+<li>The APIs in the Android framework do not replace Android’s support for
+<a href="{@docRoot}guide/topics/resources/localization.html">localizing with
+resources</a>.</li>
+</ul>
+
+<h2 id="migration">Migrating to the android.icu package from com.ibm.icu</h2>
+
+<p>
+  If you are already using the ICU4J APIs in your app, and the
+  <code>android.icu</code> APIs meet your requirements, then migrating to
+  the framework APIs requires you to change your Java imports
+  from <code>com.ibm.icu</code> to <code>android.icu</code>. You may then
+  remove your own copy of ICU4J files from the APK.
+</p>
+
+<p class="note">
+  <b>Note</b>: The ICU4J framework APIs use the {@code android.icu}
+  namespace instead of {@code com.ibm.icu}. This is to avoid namespace
+  conflicts in APKs that contain their own {@code com.ibm.icu} libraries.
+</p>
+
+<h3 id="migrate-from-android">
+  Migrating to android.icu APIs from other Android SDK APIs
+</h3>
+
+<p>
+  Some classes in the <code>java</code> and<code>android</code> packages have
+  equivalents to those found in ICU4J. However, ICU4J often provides broader
+  support for standards and languages.
+</p>
+<p>Here are some examples to get you started:</p>
+<table>
+<tr>
+<th>Class</th>
+<th>Alternatives</th>
+</tr>
+<tr>
+<td><code>java.lang.Character</code> </td>
+<td><code>android.icu.lang.UCharacter</code> </td>
+</tr>
+<tr>
+<td><code>java.text.BreakIterator</code> </td>
+<td><code>android.icu.text.BreakIterator</code> </td>
+</tr>
+<tr>
+<td><code>java.text.DecimalFormat</code> </td>
+<td><code>android.icu.text.DecimalFormat</code> </td>
+</tr>
+<tr>
+<td><code>java.util.Calendar</code></td>
+<td>
+<code>android.icu.util.Calendar</code></td>
+</tr>
+<tr>
+<td><code>android.text.BidiFormatter</code>
+ </td>
+<td><code>android.icu.text.Bidi</code>
+ </td>
+</tr>
+<tr>
+<td><code>android.text.format.DateFormat</code>
+ </td>
+<td><code>android.icu.text.DateFormat</code>
+ </td>
+</tr>
+<tr>
+<td><code>android.text.format.DateUtils</code> </td>
+<td><code>android.icu.text.DateFormat</code>
+<code>android.icu.text.RelativeDateTimeFormatter</code>
+</td>
+</tr>
+</table>
+
+<h2 id="licence">Licensing</h2>
+
+<p>
+  ICU4J is released under the ICU license. For details, see the <a class=
+  "external-link" href=
+  "http://userguide.icu-project.org/icufaq#TOC-How-is-the-ICU-licensed-">ICU
+  User Guide.</a>
+</p>

@@ -190,7 +190,7 @@ phải được lưu ở đây, chẳng hạn như một <a href="{@docRoot}guid
   </tr>
 </table>
 
-<p class="caution"><strong>Chú ý:</strong> Không được lưu tệp tài nguyên trực tiếp vào trong thư mục 
+<p class="caution"><strong>Chú ý:</strong> Không được lưu tệp tài nguyên trực tiếp vào trong thư mục
 {@code res/}&mdash;nó sẽ gây ra lỗi với trình biên dịch.</p>
 
 <p>Để biết thêm thông tin về các loại tài nguyên, hãy xem tài liệu <a href="available-resources.html">Các Loại Tài nguyên</a>.</p>
@@ -312,7 +312,7 @@ mã mạng di động hiện tại.</p>
         v.v.
       </td>
       <td><p>Ngôn ngữ được định nghĩa bằng một mã ngôn ngữ <a href="http://www.loc.gov/standards/iso639-2/php/code_list.php">ISO
-              639-1</a> gồm hai chữ cái, có thể theo sau là một mã khu vực 
+              639-1</a> gồm hai chữ cái, có thể theo sau là một mã khu vực
               <a href="http://www.iso.org/iso/en/prods-services/iso3166ma/02iso-3166-code-lists/list-en1.html">ISO
               3166-1-alpha-2</a> dài hai chữ cái (đằng trước là "{@code r}" chữ thường).
         </p><p>
@@ -498,7 +498,7 @@ Nhiều Màn hình</a>.</p>
         <li>{@code xlarge}: Các màn hình lớn hơn đáng kể so với màn hình
         HVGA mật độ trung bình truyền thống. Kích cỡ bố trí tối thiểu đối với một màn hình siêu lớn
         bằng xấp xỉ 720x960 đơn vị dp.  Trong hầu hết trường hợp, những thiết bị có màn hình
-        siêu lớn sẽ quá lớn để mang trong túi và gần như là 
+        siêu lớn sẽ quá lớn để mang trong túi và gần như là
         thiết bị kiểu máy tính bảng. <em>Được thêm trong API mức 9.</em></li>
         </ul>
         <p class="note"><strong>Lưu ý:</strong> Việc sử dụng một hạn định kích cỡ không hàm ý rằng các
@@ -510,7 +510,7 @@ bất kỳ tài nguyên nào <a href="#BestMatch">phù hợp nhất</a>.</p>
 ứng dụng của bạn sẽ bị lỗi vào thời gian chạy (ví dụ, nếu tất cả tài nguyên bố trí được gắn thẻ hạn định {@code
 xlarge} nhưng thiết bị lại có màn hình kích cỡ bình thường).</p>
         <p><em>Được thêm trong API mức 4.</em></p>
-        
+
         <p>Xem <a href="{@docRoot}guide/practices/screens_support.html">Hỗ trợ Nhiều
 Màn hình</a> để biết thêm thông tin.</p>
         <p>Xem thêm trường cấu hình {@link android.content.res.Configuration#screenLayout},
@@ -530,7 +530,7 @@ hay lớn.</p>
           <li>{@code notlong}: Màn hình không dài, chẳng hạn như QVGA, HVGA và VGA</li>
         </ul>
         <p><em>Được thêm trong API mức 4.</em></p>
-        <p>Giá trị này thuần túy được dựa trên tỷ lệ khung ảnh của màn hình (màn hình "dài" sẽ rộng hơn). Nó 
+        <p>Giá trị này thuần túy được dựa trên tỷ lệ khung ảnh của màn hình (màn hình "dài" sẽ rộng hơn). Nó
 không liên quan tới hướng của màn hình.</p>
         <p>Xem thêm trường cấu hình {@link android.content.res.Configuration#screenLayout},
 ở đó cho biết màn hình có dài không.</p>
@@ -628,7 +628,7 @@ Mức 8</em></li>
           <li>{@code xxhdpi}: Màn hình mật độ siêu siêu cao; xấp xỉ 480dpi. <em>Được thêm trong API
 Mức 16</em></li>
           <li>{@code xxxhdpi}: Mật độ siêu siêu siêu cao sử dụng (chỉ biểu tượng trình khởi chạy, xem
-            <a href="{@docRoot}guide/practices/screens_support.html#xxxhdpi-note">ghi chú</a> 
+            <a href="{@docRoot}guide/practices/screens_support.html#xxxhdpi-note">ghi chú</a>
             trong <em>Hỗ trợ Nhiều Màn hình</em>); xấp xỉ 640dpi. <em>Được thêm trong API
 Mức 18</em></li>
           <li>{@code nodpi}: Loại này có thể được sử dụng cho tài nguyên bitmap mà bạn không muốn được định cỡ
@@ -950,7 +950,7 @@ layout-land/} cho khổ ngang và {@code layout-port/} cho khổ dọc, hãy đ�
 cấu hình mà bạn chưa nghĩ đến, mà còn bởi các phiên bản Android mới đôi khi thêm
 hạn định cấu hình mà những phiên bản cũ hơn không hỗ trợ. Nếu bạn sử dụng một hạn định tài nguyên mới,
 nhưng vẫn duy trì tính tương thích về mã với các phiên bản cũ hơn của Android thì khi một phiên bản cũ hơn của
-Android chạy trên ứng dụng của bạn, nó sẽ bị lỗi nếu bạn không cung cấp tài nguyên mặc định, do nó 
+Android chạy trên ứng dụng của bạn, nó sẽ bị lỗi nếu bạn không cung cấp tài nguyên mặc định, do nó
 không thể sử dụng tài nguyên được đặt tên bằng hạn định mới. Ví dụ, nếu <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
 minSdkVersion}</a> của bạn được đặt bằng 4, và bạn xác định tất cả tài nguyên vẽ được của mình bằng cách sử dụng <a href="#NightQualifier">chế độ ban đêm</a> ({@code night} hoặc {@code notnight}, đã được thêm trong API
 Mức 8), khi đó một thiết bị API mức 4 sẽ không thể truy cập tài nguyên vẽ được của bạn và sẽ bị lỗi. Trong trường hợp

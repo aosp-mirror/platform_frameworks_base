@@ -214,7 +214,7 @@ pressed (activated).</li>
   <li>The second <code>&lt;item></code> defines the bitmap to use when the button is
 focused (when the button is highlighted using the trackball or directional
 pad).</li>
-  <li>The third <code>&lt;item></code> defines the bitmap to use when the button is in the 
+  <li>The third <code>&lt;item></code> defines the bitmap to use when the button is in the
 default state (it's neither pressed nor focused).</li>
 </ul>
   <p class="note"><strong>Note:</strong> The order of the <code>&lt;item></code> elements is

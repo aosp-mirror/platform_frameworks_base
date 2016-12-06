@@ -8,13 +8,13 @@ trainingnavtop=true
 
 <div id="tb-wrapper">
   <div id="tb">
-    
+
     <h2>Содержание этого урока</h2>
     <ol>
       <li><a href="#Stop">Остановка операции</a></li>
       <li><a href="#Start">Запуск/перезапуск операции</a></li>
     </ol>
-    
+
     <h2>См. также:</h2>
     <ul>
       <li><a href="{@docRoot}guide/components/activities.html">Операции</a>
@@ -118,7 +118,7 @@ protected void onStop() {
 <p class="note"><strong>Примечание.</strong> Даже если система уничтожит операцию в период остановки,
 она сохранит состояние объектов {@link android.view.View} (например, текста в {@link
 android.widget.EditText}) в {@link android.os.Bundle} (наборе пар "ключ-значение") и восстановит
-их, если пользователь вернется в тот же экземпляр операции (на <a href="recreating.html">следующем уроке</a> мы более подробно поговорим об использовании {@link android.os.Bundle} для сохранения 
+их, если пользователь вернется в тот же экземпляр операции (на <a href="recreating.html">следующем уроке</a> мы более подробно поговорим об использовании {@link android.os.Bundle} для сохранения
 других данных состояния в случае уничтожения и воссоздания вашей операции).</p>
 
 
@@ -152,13 +152,13 @@ android.app.Activity#onStart()} как при создании операции,
 &#64;Override
 protected void onStart() {
     super.onStart();  // Always call the superclass method first
-    
+
     // The activity is either being restarted or started for the first time
     // so this is where we should make sure that GPS is enabled
-    LocationManager locationManager = 
+    LocationManager locationManager =
             (LocationManager) getSystemService(Context.LOCATION_SERVICE);
     boolean gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-    
+
     if (!gpsEnabled) {
         // Create a dialog here that requests the user to enable GPS, and use an intent
         // with the android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS action
@@ -169,8 +169,8 @@ protected void onStart() {
 &#64;Override
 protected void onRestart() {
     super.onRestart();  // Always call the superclass method first
-    
-    // Activity being restarted from stopped state    
+
+    // Activity being restarted from stopped state
 }
 </pre>
 

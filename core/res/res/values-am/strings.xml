@@ -679,6 +679,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"ትክክል!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"እንደገና ሞክር"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"እንደገና ሞክር"</string>
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"ለሁሉም ባህሪያት እና ውሂብ ያስከፍቱ"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"የመጨረሻውን  የገጽ ክፈት ሙከራዎችን አልፏል"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"ምንም ሲም ካርድ የለም"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"በጡባዊ ውስጥ ምንም SIM ካርድ የለም።"</string>
@@ -1023,8 +1024,9 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android እያሻሻለ ነው..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android በመጀመር ላይ ነው…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"ማከማቻን በማመቻቸት ላይ።"</string>
-    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android በማላቅ ላይ ነው"</string>
+    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"የAndroid ዝማኔን በመጨረስ ላይ…"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"አንዳንድ መተግበሪያዎች ማላቁ እስኪጠናቀቅ ድረስ በአግባቡ ላይሰሩ ይችላሉ"</string>
+    <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g> በማላቅ ላይ…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"መተግበሪያዎች በአግባቡ በመጠቀም ላይ <xliff:g id="NUMBER_0">%1$d</xliff:g> ከ <xliff:g id="NUMBER_1">%2$d</xliff:g> ፡፡"</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g>ን ማዘጋጀት።"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"መተግበሪያዎችን በማስጀመር ላይ፡፡"</string>
@@ -1075,6 +1077,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi በይነመረብ መዳረሻ የለውም"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ለአማራጮች መታ ያድርጉ"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"ወደ <xliff:g id="NETWORK_TYPE">%1$s</xliff:g> ተቀይሯል"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ምንም ዓይነት የበይነመረብ ግንኙነት በማይኖረው ጊዜ መሣሪያዎች <xliff:g id="NEW_NETWORK">%1$s</xliff:g>ን ይጠቀማሉ። ክፍያዎች ተፈጻሚ ሊሆኑ ይችላሉ።"</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"ከ<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> ወደ <xliff:g id="NEW_NETWORK">%2$s</xliff:g> ተቀይሯል"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"የተንቀሳቃሽ ስልክ ውሂብ"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"ብሉቱዝ"</item>
+    <item msgid="5447331121797802871">"ኤተርኔት"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"አንድ ያልታወቀ አውታረ መረብ ዓይነት"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"ወደ Wi-Fi ለማያያዝ አልተቻለም"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" ደካማ የበይነመረብ ግንኙነት ኣለው።"</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"ግንኙነት ይፈቀድ?"</string>
@@ -1152,7 +1165,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"ቋንቋ እና አቀማመጥን ለመምረጥ መታ ያድርጉ"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"ዕጩዎች"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g>ን በማዘጋጀት ላይ"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"ስህተቶች ካሉ በመፈተሽ ላይ"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"አዲስ <xliff:g id="NAME">%s</xliff:g> ተገኝቷል"</string>
@@ -1231,8 +1243,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"ለ<xliff:g id="SESSION">%s</xliff:g> የተገናኘ። አውታረመረቡን ለማደራጀት ሁለቴ ንካ።"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"ሁልጊዜ የበራ VPN በመገናኘት ላይ…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"ሁልጊዜ የበራ VPN ተገናኝቷል"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"ሁልጊዜ የበራ የVPN ግንኙነት ተቋርጧል"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"ሁልጊዜ የበራ VPN ስህተት"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"ለማዋቀር መታ ያድርጉ"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"ለማዋቀር መታ ያድርጉ"</string>
     <string name="upload_file" msgid="2897957172366730416">"ፋይል ምረጥ"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"ምንም ፋይል አልተመረጠም"</string>
     <string name="reset" msgid="2448168080964209908">"ዳግም አስጀምር"</string>
@@ -1316,7 +1329,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"የ<xliff:g id="MANUFACTURER">%s</xliff:g> ዩኤስቢ አንጻፊ"</string>
     <string name="storage_usb" msgid="3017954059538517278">"የUSB  ማከማቻ"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"አርትዕ"</string>
-    <string name="data_usage_warning_title" msgid="1955638862122232342">"የውሂብ አጠቃቀም ማስጠንቀቂየ"</string>
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"የውሂብ አጠቃቀም ማንቂያ"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"አጠቃቀምን እና ቅንብሮችን ለማየት መታ ያድርጉ።"</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"የ2ጂ-3ጂ ውሂብ ገደብ ላይ ተደርሷል"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"የ4ጂ ውሂብ ገደብ ላይ ተደርሷል"</string>
@@ -1635,6 +1648,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"የቋንቋ ስም ይተይቡ"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"የተጠቆሙ"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"ሁሉም ቋንቋዎች"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"ሁሉም ክልሎች"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ፈልግ"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"የሥራ ሁነታ ጠፍቷል"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"መተግበሪያዎችን፣ የበስተጀርባ ሥምረት እና ተዛማጅ ባሕሪዎችን ጨምሮ የሥራ መገለጫ እንዲሰራ ይፍቀዱ።"</string>
@@ -1652,7 +1666,16 @@
     <string name="unpin_target" msgid="3556545602439143442">"ንቀል"</string>
     <string name="app_info" msgid="6856026610594615344">"የመተግበሪያ መረጃ"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"መሣሪያ ዳግም ይጀመር?"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"መሣሪያን ዳግም ለማስጀመር መታ ያድርጉ"</string>
+    <string name="demo_starting_message" msgid="5268556852031489931">"ማሳያን በማስጀመር ላይ…"</string>
+    <string name="demo_restarting_message" msgid="952118052531642451">"መሣሪያን ዳግም በማስጀመር ላይ…"</string>
+    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"መሣሪያ ዳግም ይጀመር?"</string>
+    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"ማንኛቸውም ለውጦች ይጠፋሉ፣ እና ማሳያው በ<xliff:g id="TIMEOUT">%1$s</xliff:g> ሰከንዶች ውስጥ እንደገና ይጀምራል…"</string>
+    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"ይቅር"</string>
+    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"አሁን ዳግም አስጀምር"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"ይህን መሣሪያ ያለምንም ገደብ ለመጠቀም የፋብሪካ ዳግም ያስጀምሩ"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"የበለጠ ለመረዳት ይንኩ።"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> ተሰናክሏል"</string>
+    <string name="conference_call" msgid="3751093130790472426">"የስብሰባ ጥሪ"</string>
 </resources>

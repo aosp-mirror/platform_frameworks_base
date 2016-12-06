@@ -221,7 +221,7 @@ feature image or screenshots for your Google Play app listing.</p>
       landOffset: [489,327],
       portRes: ['shadow', 'back', 'fore'],
       portOffset: [327,489],
-      portSize: [1440, 2560], 
+      portSize: [1440, 2560],
       archived: true
     },
     {

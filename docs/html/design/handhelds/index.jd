@@ -92,7 +92,8 @@ to allow the user to enjoy full screen content without distraction.</p>
 <p>Notifications are brief messages that users can access at any time from the status bar. They
 provide updates, reminders, or information that's important, but not critical enough to warrant
 interrupting the user. Open the notifications drawer by swiping down on the status bar. Touching a
-notification opens the associated app. <a href="{@docRoot}design/patterns/notifications.html">More on Notifications</a></p>
+notification opens the associated app. <a
+href="https://material.google.com/patterns/notifications.html">More on Notifications</a></p>
 
 <div class="cols">
   <div class="col-4">

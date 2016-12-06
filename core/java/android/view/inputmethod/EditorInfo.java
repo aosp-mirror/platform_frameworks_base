@@ -25,6 +25,8 @@ import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Printer;
 
+import java.util.Arrays;
+
 /**
  * An EditorInfo describes several attributes of a text editing object
  * that an input method is communicating with (typically an EditText), most
@@ -363,6 +365,18 @@ public class EditorInfo implements InputType, Parcelable {
     @Nullable
     public LocaleList hintLocales = null;
 
+
+    /**
+     * List of acceptable MIME types for
+     * {@link InputConnection#commitContent(InputContentInfo, int, Bundle)}.
+     *
+     * <p>{@code null} or an empty array means that
+     * {@link InputConnection#commitContent(InputContentInfo, int, Bundle)} is not supported in this
+     * editor.</p>
+     */
+    @Nullable
+    public String[] contentMimeTypes = null;
+
     /**
      * Ensure that the data in this EditorInfo is compatible with an application
      * that was developed against the given target API version.  This can
@@ -418,6 +432,7 @@ public class EditorInfo implements InputType, Parcelable {
                 + " fieldName=" + fieldName);
         pw.println(prefix + "extras=" + extras);
         pw.println(prefix + "hintLocales=" + hintLocales);
+        pw.println(prefix + "contentMimeTypes=" + Arrays.toString(contentMimeTypes));
     }
 
     /**
@@ -446,6 +461,7 @@ public class EditorInfo implements InputType, Parcelable {
         } else {
             LocaleList.getEmptyLocaleList().writeToParcel(dest, flags);
         }
+        dest.writeStringArray(contentMimeTypes);
     }
 
     /**
@@ -471,6 +487,7 @@ public class EditorInfo implements InputType, Parcelable {
                     res.extras = source.readBundle();
                     LocaleList hintLocales = LocaleList.CREATOR.createFromParcel(source);
                     res.hintLocales = hintLocales.isEmpty() ? null : hintLocales;
+                    res.contentMimeTypes = source.readStringArray();
                     return res;
                 }
 

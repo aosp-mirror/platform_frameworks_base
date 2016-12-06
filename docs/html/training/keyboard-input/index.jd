@@ -32,9 +32,9 @@ through an attached keyboard.</p>
 <p>These topics and more are discussed in the following lessons.</p>
 
 
-<h2>Lessons</h2> 
- 
-<dl> 
+<h2>Lessons</h2>
+
+<dl>
   <dt><b><a href="style.html">Specifying the Input Method Type</a></b></dt>
     <dd>Learn how to show certain soft input methods, such as those designed for phone numbers, web
     addresses, or other formats. Also learn how to specify characteristics such
@@ -51,5 +51,5 @@ through an attached keyboard.</p>
   <dt><b><a href="commands.html">Handling Keyboard Actions</a></b></dt>
     <dd>Learn how to respond directly to keyboard input for user actions.
     </dd>
- 
-</dl> 
+
+</dl>

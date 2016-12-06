@@ -40,7 +40,7 @@ API 讀取並寫入檔案。
 該物件的用途很廣，例如非常適用於影像檔案或透過網路交換的項目。
 </p>
 
-<p>本課程將顯示如何在您的應用程式中執行與檔案相關的基本任務。本課程假設您已熟悉 Linux 檔案系統的基本概念，以及 
+<p>本課程將顯示如何在您的應用程式中執行與檔案相關的基本任務。本課程假設您已熟悉 Linux 檔案系統的基本概念，以及
 {@link java.io} 中的標準檔案輸入/輸出 API。
 </p>
 
@@ -183,7 +183,7 @@ public File getTempFile(Context context, String url) {
     try {
         String fileName = Uri.parse(url).getLastPathSegment();
         file = File.createTempFile(fileName, null, context.getCacheDir());
-    catch (IOException e) {
+    } catch (IOException e) {
         // Error while creating file
     }
     return file;
@@ -250,12 +250,12 @@ public boolean isExternalStorageReadable() {
 
 
 
- 
+
   <p>例如，您的應用程式下載的附加資源，或暫存媒體檔案都是私用檔案。</p>
   </dd>
 </dl>
 
-<p>若您希望將公用檔案儲存在外部儲存空間，請使用 
+<p>若您希望將公用檔案儲存在外部儲存空間，請使用
 {@link android.os.Environment#getExternalStoragePublicDirectory
 getExternalStoragePublicDirectory()} 方法取得代表外部儲存空間內相應目錄的 {@link java.io.File}。
 該方法採用對要儲存的檔案類型進行指定 (以便能合理區分這些檔案與其他公用檔案) 的引數，諸如 {@link android.os.Environment#DIRECTORY_MUSIC} 或 {@link
@@ -265,7 +265,7 @@ android.os.Environment#DIRECTORY_PICTURES}。
 
 <pre>
 public File getAlbumStorageDir(String albumName) {
-    // Get the directory for the user's public pictures directory. 
+    // Get the directory for the user's public pictures directory.
     File file = new File(Environment.getExternalStoragePublicDirectory(
             Environment.DIRECTORY_PICTURES), albumName);
     if (!file.mkdirs()) {
@@ -287,7 +287,7 @@ android.content.Context#getExternalFilesDir getExternalFilesDir()}，然後向�
 
 <pre>
 public File getAlbumStorageDir(Context context, String albumName) {
-    // Get the directory for the app's private pictures directory. 
+    // Get the directory for the app's private pictures directory.
     File file = new File(context.getExternalFilesDir(
             Environment.DIRECTORY_PICTURES), albumName);
     if (!file.mkdirs()) {
@@ -366,7 +366,7 @@ myContext.deleteFile(fileName);
 
 <div class="note">
 <p><strong>注意：</strong>使用者解除安裝您的應用程式時，Android 系統會刪除以下檔案：
-</p> 
+</p>
 <ul>
 <li>您在內部儲存空間儲存的所有檔案</li>
 <li>您使用 {@link

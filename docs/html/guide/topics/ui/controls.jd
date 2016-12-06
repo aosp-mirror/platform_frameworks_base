@@ -71,7 +71,7 @@ href="{@docRoot}guide/topics/ui/custom-components.html">custom components</a>.</
     <tr>
         <td><a href="controls/radiobutton.html">Radio button</a></td>
         <td>Similar to checkboxes, except that only one option can be selected in the group.</td>
-	<td>{@link android.widget.RadioGroup RadioGroup} 
+	<td>{@link android.widget.RadioGroup RadioGroup}
 	<br>{@link android.widget.RadioButton RadioButton} </td>
     </tr>
     <tr>

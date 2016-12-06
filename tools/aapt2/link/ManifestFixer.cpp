@@ -180,7 +180,6 @@ bool ManifestFixer::buildRules(xml::XmlActionExecutor* executor, IDiagnostics* d
 
     manifestAction[u"uses-configuration"];
     manifestAction[u"uses-feature"];
-    manifestAction[u"uses-library"];
     manifestAction[u"supports-screens"];
     manifestAction[u"compatible-screens"];
     manifestAction[u"supports-gl-texture"];
@@ -188,6 +187,9 @@ bool ManifestFixer::buildRules(xml::XmlActionExecutor* executor, IDiagnostics* d
     // Application actions.
     xml::XmlNodeAction& applicationAction = (*executor)[u"manifest"][u"application"];
     applicationAction.action(optionalNameIsJavaClassName);
+
+    // Uses library actions.
+    applicationAction[u"uses-library"];
 
     // Activity actions.
     applicationAction[u"activity"].action(requiredNameIsJavaClassName);

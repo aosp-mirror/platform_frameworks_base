@@ -190,7 +190,8 @@ public abstract class ApplicationThreadNative extends Binder
             data.enforceInterface(IApplicationThread.descriptor);
             List<ReferrerIntent> pi = data.createTypedArrayList(ReferrerIntent.CREATOR);
             IBinder b = data.readStrongBinder();
-            scheduleNewIntent(pi, b);
+            final boolean andPause = data.readInt() == 1;
+            scheduleNewIntent(pi, b, andPause);
             return true;
         }
 
@@ -498,14 +499,6 @@ public abstract class ApplicationThreadNative extends Binder
             ParcelFileDescriptor fd = data.readInt() != 0
                     ? ParcelFileDescriptor.CREATOR.createFromParcel(data) : null;
             dumpHeap(managed, path, fd);
-            return true;
-        }
-
-        case ATTACH_AGENT_TRANSACTION:
-        {
-            data.enforceInterface(IApplicationThread.descriptor);
-            String agent = data.readString();
-            attachAgent(agent);
             return true;
         }
 
@@ -917,12 +910,13 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.recycle();
     }
 
-    public void scheduleNewIntent(List<ReferrerIntent> intents, IBinder token)
+    public void scheduleNewIntent(List<ReferrerIntent> intents, IBinder token, boolean andPause)
             throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeTypedList(intents);
         data.writeStrongBinder(token);
+        data.writeInt(andPause ? 1 : 0);
         mRemote.transact(SCHEDULE_NEW_INTENT_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
@@ -1308,14 +1302,6 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeString(prefix);
         data.writeStringArray(args);
         mRemote.transact(DUMP_ACTIVITY_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
-        data.recycle();
-    }
-
-    public void attachAgent(String agent) throws RemoteException {
-        Parcel data = Parcel.obtain();
-        data.writeInterfaceToken(IApplicationThread.descriptor);
-        data.writeString(agent);
-        mRemote.transact(ATTACH_AGENT_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
         data.recycle();
     }
 

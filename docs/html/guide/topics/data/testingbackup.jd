@@ -1,0 +1,181 @@
+page.title=Testing Backup and Restore
+page.tags=backup, marshmallow, androidm
+page.keywords=backup, restore, testing
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#HowBackupWorks">How backup works</a></li>
+    <li><a href="#Prerequisites">Prerequisites</a></li>
+    <li><a href="#Preparing">Preparing your device or emulator</a></li>
+    <li><a href="#TestingBackup">Testing backup</a></li>
+    <li><a href="#TestingRestore">Testing restore</a></li>
+    <li><a href="#Troubleshooting">Troubleshooting</a></li>
+  </ol>
+
+</div>
+</div>
+
+<p>This page shows you how to manually trigger Auto Backup, Key/Value Backup, and restore operations to
+ensure your app saves and restores data properly.
+
+<h2 id="HowBackupWorkso">How backup works</h2>
+<p>The section describes various pieces in the Android backup framework and how they
+interact with apps that support Auto Backup and Key/Value Backup. During the app
+development phase, most of the inner working of the framework were abstracted away, so you didn't need to know this information. However, during the
+testing phase, an understanding of these concepts is important.
+
+<p>The following diagram illustrates how data flows during backup and restore:
+
+<img src="images/backup-framework.png" alt="backup-framework">
+
+<p>The <em>Backup Manager Service</em> is an Android system
+service which orchestrates and initiates backup and restore operations. The service
+is accessible through the {@link android.app.backup.BackupManager}
+API. During a backup operation, the service queries your app for backup data,
+then hands it to the <em>backup transport</em>, which then archives the data.
+During a restore operation, the backup manager service retrieves the backup data
+from the backup transport and restores the data to the device.
+
+<p><em>Backup Transports</em> are Android components that are responsible
+for storing and retrieving backups. An Android device can have zero or more
+backup transports, but only one of those transports can be marked active. The
+available backup transports may differ from device to device (due to
+customizations by device manufacturers and service providers), but most Google
+Play enabled devices ship with the following transports:
+</p><ul>
+<li><strong>Google GMS Transport</strong>(default) - the active backup
+transport on most devices, part of <a href="https://www.android.com/gms/">Google Mobile Services</a>. This documentation assumes that users are using the
+Google GMS transport. This transport stores Auto Backup data in a private folder in the
+user's Google Drive account. Key/Value Backup data is stored in the <a href="{@docRoot}google/backup/index.html">Android Backup Service</a>.
+<li><strong>Local Transport</strong> - stores backup data locally on the device.
+This transport is typically used for development/debugging purposes and is not
+useful in the real world.</li></ul>
+
+<p>If a device does not have any backup transports, then the data cannot be
+backed up. Your app is not adversely affected.
+
+<p class="caution"><strong>Caution:</strong> Because the backup transport
+can differ from device to device, Android cannot guarantee the security
+of your data while using backup. Be cautious about using backup to store
+sensitive data, such as usernames and passwords.
+
+<h2 id="Prerequisites">Prerequisites</h2>
+<p>You need to know a bit about the following tools:
+
+<ul>
+  <li><a href="{@docRoot}studio/command-line/adb.html">adb</a>
+- to run commands on the device or emulator
+  <li><a href="{@docRoot}studio/command-line/bmgr.html">bmgr</a> - to
+perform various backup and restore operations
+  <li><a href="{@docRoot}studio/command-line/logcat.html">logcat</a>
+- to see the output of backup and restore operations.</li></ul>
+
+<h2 id="Preparing">Preparing your device or
+emulator</h2>
+<p>Prepare your device or emulator for backup testing by working through the
+following checklist:
+<ul>
+  <li>For Auto Backup, check that you are using a device or emulator running
+Android 6.0 (API level 23) or higher.</li>
+  <li>For Key/Value Backup, check that you are using a device or emulator running
+Android 2.2 (API level 8) or higher.</li>
+  <li>Check that backup and restore is enabled on the device or emulator. There
+are two ways to check: <ul>
+    <li>On the device, go to <strong>Settings -> Backup &amp; Restore</strong>.
+    <li>From adb shell, run <code>bmgr enable</code></li></ul>
+    <p>On physical devices, backup and restore is typically enabled during the
+initial setup wizard. Emulators do not run the setup wizard, so don't forget to
+enable backup and specify a backup account in device settings.
+  <li>Make sure the GMS Backup Transport is available and active by running the
+command from adb shell:
+  <pre class="prettyprint">$ bmgr list transports</pre>
+  <p>Then, check the console for the following output:
+  <pre class="prettyprint">android/com.android.internal.backup.LocalTransport
+* com.google.android.gms/.backup.BackupTransportService</pre>
+  <p>Physical devices without Google Play and emulators without Google APIs
+might not include the GMS Backup Transport. This article assumes you are using
+the GMS Backup Transport. You can test backup and restore with other backup
+transports, but the procedure and output can differ.
+</ul>
+
+<h2 id="TestingBackup">Testing backup</h2>
+<p>To initiate a backup of your app, run the following command:
+
+<pre class="prettyprint">$ bmgr backupnow &lt;PACKAGE></pre>
+
+<p>The <code>backupnow</code> command runs either a Key/Value Backup or Auto Backup depending on
+the package's manifest declarations. Check logcat to see the output of the
+backup procedure. For example:
+
+<pre class="prettyprint">D/BackupManagerService: fullTransportBackup()
+I/GmsBackupTransport: Attempt to do full backup on &lt;PACKAGE>
+
+---- or ----
+
+V/BackupManagerService: Scheduling immediate backup pass
+D/PerformBackupTask: starting key/value Backup of BackupRequest{pkg=&lt;PACKAGE>}
+</pre>
+
+<p>If the <code>backupnow</code> command is not available on your device, you need to run one
+of the following commands:
+<ul>
+  <li>For Auto Backups, run: <code>bmgr fullbackup &lt;PACKAGE></code>
+  <li>For Key/Value Backups, schedule and run your backup with the following
+commands:
+  <pre class="prettyprint">$ bmgr backup &lt;PACKAGE>
+$ bmgr run</pre>
+  <p><code>bmgr backup</code> adds your app to the Backup Manager's queue. <code>bmgr run</code> initiates the
+backup operation, which forces the Backup Manager to perform all backup requests
+that are in its queue.
+  </li></ul>
+
+<h2 id="TestingRestore">Testing restore</h2>
+<p>To manually initiate a restore, run the following command:
+
+<pre class="prettyprint">$ bmgr restore &lt;PACKAGE></pre>
+
+<p>Warning: This action stops your app and wipes its data before performing the
+restore operation.
+
+<p>Then, check logcat to see the output of the restore procedure. For example:
+
+<pre class="prettyprint">V/BackupManagerService: beginRestoreSession: pkg=&lt;PACKAGE> transport=null
+V/RestoreSession: restorePackage pkg=&lt;PACKAGE> token=368abb4465c5c683
+...
+I/BackupManagerService: Restore complete.
+</pre>
+
+<p>You also can test automatic restore for your app by uninstalling and
+reinstalling your app either with <code>adb</code> or through the Google
+Play Store app.
+
+<h2 id="Troubleshooting">Troubleshooting</h2>
+<p><strong>Exceeded Quota</strong>
+
+<p>If you see the the following messages in logcat:
+
+<pre class="prettyprint">I/PFTBT: Transport rejected backup of &lt;PACKAGE>, skipping
+
+--- or ---
+
+I/PFTBT: Transport quota exceeded for package: &lt;PACKAGE>
+</pre>
+
+<p>Your app has exceeded the quota and has been banned from backing up
+data on this device. To lift the ban, either factory reset your device or change
+the backup account.
+
+<p><strong>Full Backup Not Possible</strong>
+
+<p>If you see the the following message in logcat:
+
+<pre class="prettyprint">I/BackupManagerService: Full backup not currently possible -- key/value backup not yet run?
+</pre>
+
+<p>The fullbackup operation failed because no Key/Value Backup operation has yet
+occurred on the device. Trigger a Key/Value Backup with the command <code>bmgr
+run </code>and then try again.

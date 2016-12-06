@@ -146,12 +146,11 @@ public class QuickQSPanel extends QSPanel {
     };
 
     public int getNumQuickTiles(Context context) {
-        return TunerService.get(context).getValue(NUM_QUICK_TILES, 5);
+        return TunerService.get(context).getValue(NUM_QUICK_TILES, 6);
     }
 
     private static class HeaderTileLayout extends LinearLayout implements QSTileLayout {
 
-        private final Space mEndSpacer;
         protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
         private boolean mListening;
 
@@ -161,25 +160,6 @@ public class QuickQSPanel extends QSPanel {
             setClipToPadding(false);
             setGravity(Gravity.CENTER_VERTICAL);
             setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-
-            mEndSpacer = new Space(context);
-            mEndSpacer.setLayoutParams(generateLayoutParams());
-            updateDownArrowMargin();
-            addView(mEndSpacer);
-            setOrientation(LinearLayout.HORIZONTAL);
-        }
-
-        @Override
-        protected void onConfigurationChanged(Configuration newConfig) {
-            super.onConfigurationChanged(newConfig);
-            updateDownArrowMargin();
-        }
-
-        private void updateDownArrowMargin() {
-            LayoutParams params = (LayoutParams) mEndSpacer.getLayoutParams();
-            params.setMarginStart(mContext.getResources().getDimensionPixelSize(
-                    R.dimen.qs_expand_margin));
-            mEndSpacer.setLayoutParams(params);
         }
 
         @Override
@@ -193,11 +173,11 @@ public class QuickQSPanel extends QSPanel {
 
         @Override
         public void addTile(TileRecord tile) {
-            addView(tile.tileView, getChildCount() - 1 /* Leave icon at end */,
-                    generateLayoutParams());
-            // Add a spacer.
-            addView(new Space(mContext), getChildCount() - 1 /* Leave icon at end */,
-                    generateSpaceParams());
+            if (getChildCount() != 0) {
+                // Add a spacer.
+                addView(new Space(mContext), getChildCount(), generateSpaceParams());
+            }
+            addView(tile.tileView, getChildCount(), generateLayoutParams());
             mRecords.add(tile);
             tile.tile.setListening(this, mListening);
         }
@@ -222,8 +202,10 @@ public class QuickQSPanel extends QSPanel {
             int childIndex = getChildIndex(tile.tileView);
             // Remove the tile.
             removeViewAt(childIndex);
-            // Remove its spacer as well.
-            removeViewAt(childIndex);
+            if (getChildCount() != 0) {
+                // Remove its spacer as well.
+                removeViewAt(childIndex);
+            }
             mRecords.remove(tile);
             tile.tile.setListening(this, false);
         }

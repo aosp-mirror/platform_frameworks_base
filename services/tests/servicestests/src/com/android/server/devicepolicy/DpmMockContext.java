@@ -527,6 +527,7 @@ public class DpmMockContext extends MockContext {
             int initialCode, String initialData, Bundle initialExtras) {
         spiedContext.sendOrderedBroadcastAsUser(intent, user, receiverPermission, resultReceiver,
                 scheduler, initialCode, initialData, initialExtras);
+        resultReceiver.onReceive(spiedContext, intent);
     }
 
     @Override

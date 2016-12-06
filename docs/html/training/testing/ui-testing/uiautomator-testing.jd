@@ -26,7 +26,7 @@ trainingnavtop=true
   <h2>You should also read</h2>
 
   <ul>
-    <li><a href="{@docRoot}reference/android/support/test/package-summary.html">
+    <li><a href="{@docRoot}reference/android/support/test/uiautomator/package-summary.html">
 UI Automator API Reference</a></li>
   </ul>
 
@@ -172,7 +172,7 @@ about creating JUnit 4 test classes and using JUnit 4 assertions and annotations
 <a href="{@docRoot}training/testing/unit-testing/instrumented-unit-tests.html#build">
 Create an Instrumented Unit Test Class</a>.
 </p>
-<p>Add the {@code &#64;RunWith(AndroidJUnit4.class)} annotation at the beginning of your test class
+<p>Add the {@code @RunWith(AndroidJUnit4.class)} annotation at the beginning of your test class
 definition. You also need to specify the
 <a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">
 {@code AndroidJUnitRunner}</a> class
@@ -279,7 +279,7 @@ public class ChangeTextBehaviorTest {
 }
 </pre>
 
-<p>In the example, the {@code &#64;SdkSuppress(minSdkVersion = 18)} statement helps to ensure that
+<p>In the example, the {@code @SdkSuppress(minSdkVersion = 18)} statement helps to ensure that
   tests will only run on devices with Android 4.3 (API level 18) or higher, as required by the
   UI Automator framework.</p>
 

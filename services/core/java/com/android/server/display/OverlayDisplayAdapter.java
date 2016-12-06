@@ -266,6 +266,11 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
+        public boolean hasStableUniqueId() {
+            return false;
+        }
+
+        @Override
         public void performTraversalInTransactionLocked() {
             if (mSurfaceTexture != null) {
                 if (mSurface == null) {
@@ -310,7 +315,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        public void requestColorTransformAndModeInTransactionLocked(int color, int id) {
+        public void requestDisplayModesInTransactionLocked(int color, int id) {
             int index = -1;
             if (id == 0) {
                 // Use the default.

@@ -2,60 +2,82 @@ page.title=Verifying App Behavior on the Android Runtime (ART)
 @jd:body
 
 <div id="qv-wrapper">
-<div id="qv">
-<h2>Quickview</h2>
-  <ul>
-    <li>The new Android runtime (ART) is available on some of the newest Android
-      devices, though all of them currently have Dalvik as the default
-      runtime.</li>
-    <li>App developers should make sure their apps are compatible with ART,
-      especially if you use JNI to run native code or if you use certain tools
-      that produce non-standard code (such as some obfuscators).</li>
-  </ul>
+  <div id="qv">
+    <h2 id="Contents">
+      In this document
+    </h2>
 
-  <h2 id="Contents">In this document</h2>
- <ol>
-    <li><a href="#GC_Migration">Addressing Garbage Collection (GC) Issues</a></li>
-    <li><a href="#JNI_Issues">Preventing JNI Issues</a>
-      <ol>
-        <li><a href="#JNI_and_GC">Checking JNI code for garbage-collection
-          issues</a></li>
-        <li><a href="#Error_Handling">Error handling</a></li>
-        <li><a href="#Object_Model_Changes">Object model changes</a></li>
-      </ol>
-    </li>
-    <li><a href="#Stack_Size">Preventing Stack Size Issues</a></li>
-    <li><a href="#AOT_Fails">Fixing AOT Compilation Issues</a></li>
-    <li><a href="#Reporting_Problems">Reporting Problems</a></li>
-  </ol>
-  <h2>See also</h2>
-  <ol>
-    <li><a href="http://source.android.com/devices/tech/dalvik/art.html">Introducing ART</a></li>
-    <li><a
-href="http://android-developers.blogspot.com/2011/07/debugging-android-jni-with-checkjni.html">Debugging
-Android JNI with CheckJNI</a></li>
-  </ol>
+    <ol>
+      <li>
+        <a href="#GC_Migration">Addressing Garbage Collection (GC) Issues</a>
+      </li>
+
+      <li>
+        <a href="#JNI_Issues">Preventing JNI Issues</a>
+        <ol>
+          <li>
+            <a href="#JNI_and_GC">Checking JNI code for garbage-collection
+            issues</a>
+          </li>
+
+          <li>
+            <a href="#Error_Handling">Error handling</a>
+          </li>
+
+          <li>
+            <a href="#Object_Model_Changes">Object model changes</a>
+          </li>
+        </ol>
+      </li>
+
+      <li>
+        <a href="#Stack_Size">Preventing Stack Size Issues</a>
+      </li>
+
+      <li>
+        <a href="#AOT_Fails">Fixing AOT Compilation Issues</a>
+      </li>
+
+      <li>
+        <a href="#Reporting_Problems">Reporting Problems</a>
+      </li>
+    </ol>
+
+    <h2>
+      See also
+    </h2>
+
+    <ol>
+      <li>
+        <a href=
+        "http://source.android.com/devices/tech/dalvik/art.html">Introducing
+        ART</a>
+      </li>
+
+      <li>
+        <a href=
+        "http://android-developers.blogspot.com/2011/07/debugging-android-jni-with-checkjni.html">
+        Debugging Android JNI with CheckJNI</a>
+      </li>
+    </ol>
+  </div>
 </div>
-</div>
 
-<p>With Android 4.4, we are beginning to roll out a new Android runtime,
-<strong>ART</strong>. This runtime offers a number of new features that improve
-performance and smoothness of the Android platform and apps. (You can find more
-information about ART's new features in <a
-href="http://source.android.com/devices/tech/dalvik/art.html">Introducing
-ART</a>.)</p>
+<p>
+  The Android runtime (ART) is the default runtime for devices running Android
+  5.0 (API level 21) and higher. This runtime offers a number of features
+  that improve performance and smoothness of the Android platform and apps.
+  You can find more information about ART's new features in <a href=
+  "http://source.android.com/devices/tech/dalvik/art.html">Introducing
+  ART</a>.
+</p>
 
-<p>Currently, ART is available on a number of Android 4.4 devices, such as the
-Nexus 4, Nexus 5, Nexus 7, and Google Play edition devices.
-At this time, all devices still use Dalvik as the default runtime. We encourage
-you to test your apps for ART compatibility and to take advantage of ART's new
-features. However, for the time being, you should also take care to maintain
-compatibility with Dalvik.</p>
-
-<p>This document lets you know about things to watch for when migrating an
-existing app to be compatible with ART. Most apps should just work when
-running with ART. However, some techniques that work on Dalvik do not work on
-ART. This document discusses some of these issues.</p>
+<p>
+  However, some techniques that work on Dalvik do not work on ART. This
+  document lets you know about things to watch for when migrating an existing
+  app to be compatible with ART. Most apps should just work when running with
+  ART.
+</p>
 
 <h2 id="GC_Migration">Addressing Garbage Collection (GC) Issues</h2>
 
@@ -147,7 +169,7 @@ in use, this can lead to memory corruption or other problems. For example:</p>
 
 <h3 id="Error_Handling">Error handling</h3>
 
-<p>ART's JNI throws errors in a number of cases where Dalvik didn’t. (Once
+<p>ART's JNI throws errors in a number of cases where Dalvik doesn’t. (Once
 again, you can catch many such cases by testing with CheckJNI.)</p>
 
 <p>For example, if <code>RegisterNatives</code> is called with a method that

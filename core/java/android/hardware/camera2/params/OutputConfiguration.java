@@ -20,6 +20,8 @@ package android.hardware.camera2.params;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.graphics.ImageFormat;
+import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.utils.HashCodeHelpers;
 import android.hardware.camera2.utils.SurfaceUtils;
@@ -93,6 +95,21 @@ public final class OutputConfiguration implements Parcelable {
     public OutputConfiguration(@NonNull Surface surface) {
         this(SURFACE_GROUP_ID_NONE, surface, ROTATION_0);
     }
+
+    /**
+     * Unknown surface source type.
+     */
+    private final int SURFACE_TYPE_UNKNOWN = -1;
+
+    /**
+     * The surface is obtained from {@link android.view.SurfaceView}.
+     */
+    private final int SURFACE_TYPE_SURFACE_VIEW = 0;
+
+    /**
+     * The surface is obtained from {@link android.graphics.SurfaceTexture}.
+     */
+    private final int SURFACE_TYPE_SURFACE_TEXTURE = 1;
 
     /**
      * Create a new {@link OutputConfiguration} instance with a {@link Surface},
@@ -179,12 +196,110 @@ public final class OutputConfiguration implements Parcelable {
         checkNotNull(surface, "Surface must not be null");
         checkArgumentInRange(rotation, ROTATION_0, ROTATION_270, "Rotation constant");
         mSurfaceGroupId = surfaceGroupId;
+        mSurfaceType = SURFACE_TYPE_UNKNOWN;
         mSurface = surface;
         mRotation = rotation;
         mConfiguredSize = SurfaceUtils.getSurfaceSize(surface);
         mConfiguredFormat = SurfaceUtils.getSurfaceFormat(surface);
         mConfiguredDataspace = SurfaceUtils.getSurfaceDataspace(surface);
         mConfiguredGenerationId = surface.getGenerationId();
+        mIsDeferredConfig = false;
+    }
+
+    /**
+     * Create a new {@link OutputConfiguration} instance, with desired Surface size and Surface
+     * source class.
+     * <p>
+     * This constructor takes an argument for desired Surface size and the Surface source class
+     * without providing the actual output Surface. This is used to setup a output configuration
+     * with a deferred Surface. The application can use this output configuration to create a
+     * session.
+     * </p>
+     * <p>
+     * However, the actual output Surface must be set via {@link #setDeferredSurface} and finish the
+     * deferred Surface configuration via {@link CameraCaptureSession#finishDeferredConfiguration}
+     * before submitting a request with this Surface target. The deferred Surface can only be
+     * obtained from either from {@link android.view.SurfaceView} by calling
+     * {@link android.view.SurfaceHolder#getSurface}, or from
+     * {@link android.graphics.SurfaceTexture} via
+     * {@link android.view.Surface#Surface(android.graphics.SurfaceTexture)}).
+     * </p>
+     *
+     * @param surfaceSize Size for the deferred surface.
+     * @param klass a non-{@code null} {@link Class} object reference that indicates the source of
+     *            this surface. Only {@link android.view.SurfaceHolder SurfaceHolder.class} and
+     *            {@link android.graphics.SurfaceTexture SurfaceTexture.class} are supported.
+     * @hide
+     */
+    public <T> OutputConfiguration(@NonNull Size surfaceSize, @NonNull Class<T> klass) {
+        checkNotNull(klass, "surfaceSize must not be null");
+        checkNotNull(klass, "klass must not be null");
+        if (klass == android.view.SurfaceHolder.class) {
+            mSurfaceType = SURFACE_TYPE_SURFACE_VIEW;
+        } else if (klass == android.graphics.SurfaceTexture.class) {
+            mSurfaceType = SURFACE_TYPE_SURFACE_TEXTURE;
+        } else {
+            mSurfaceType = SURFACE_TYPE_UNKNOWN;
+            throw new IllegalArgumentException("Unknow surface source class type");
+        }
+
+        mSurfaceGroupId = SURFACE_GROUP_ID_NONE;
+        mSurface = null;
+        mRotation = ROTATION_0;
+        mConfiguredSize = surfaceSize;
+        mConfiguredFormat = StreamConfigurationMap.imageFormatToInternal(ImageFormat.PRIVATE);
+        mConfiguredDataspace = StreamConfigurationMap.imageFormatToDataspace(ImageFormat.PRIVATE);
+        mConfiguredGenerationId = 0;
+        mIsDeferredConfig = true;
+    }
+
+    /**
+     * Check if this configuration has deferred configuration.
+     *
+     * <p>This will return true if the output configuration was constructed with surface deferred.
+     * It will return true even after the deferred surface is set later.</p>
+     *
+     * @return true if this configuration has deferred surface.
+     * @hide
+     */
+    public boolean isDeferredConfiguration() {
+        return mIsDeferredConfig;
+    }
+
+    /**
+     * Set the deferred surface to this OutputConfiguration.
+     *
+     * <p>
+     * The deferred surface must be obtained from either from {@link android.view.SurfaceView} by
+     * calling {@link android.view.SurfaceHolder#getSurface}, or from
+     * {@link android.graphics.SurfaceTexture} via
+     * {@link android.view.Surface#Surface(android.graphics.SurfaceTexture)}). After the deferred
+     * surface is set, the application must finish the deferred surface configuration via
+     * {@link CameraCaptureSession#finishDeferredConfiguration} before submitting a request with
+     * this surface target.
+     * </p>
+     *
+     * @param surface The deferred surface to be set.
+     * @throws IllegalArgumentException if the Surface is invalid.
+     * @throws IllegalStateException if a Surface was already set to this deferred
+     *         OutputConfiguration.
+     * @hide
+     */
+    public void setDeferredSurface(@NonNull Surface surface) {
+        checkNotNull(surface, "Surface must not be null");
+        if (mSurface != null) {
+            throw new IllegalStateException("Deferred surface is already set!");
+        }
+
+        // This will throw IAE is the surface was abandoned.
+        Size surfaceSize = SurfaceUtils.getSurfaceSize(surface);
+        if (!surfaceSize.equals(mConfiguredSize)) {
+            Log.w(TAG, "Deferred surface size " + surfaceSize +
+                    " is different with pre-configured size " + mConfiguredSize +
+                    ", the pre-configured size will be used.");
+        }
+
+        mSurface = surface;
     }
 
     /**
@@ -203,10 +318,12 @@ public final class OutputConfiguration implements Parcelable {
         this.mSurface = other.mSurface;
         this.mRotation = other.mRotation;
         this.mSurfaceGroupId = other.mSurfaceGroupId;
+        this.mSurfaceType = other.mSurfaceType;
         this.mConfiguredDataspace = other.mConfiguredDataspace;
         this.mConfiguredFormat = other.mConfiguredFormat;
         this.mConfiguredSize = other.mConfiguredSize;
         this.mConfiguredGenerationId = other.mConfiguredGenerationId;
+        this.mIsDeferredConfig = other.mIsDeferredConfig;
     }
 
     /**
@@ -215,16 +332,30 @@ public final class OutputConfiguration implements Parcelable {
     private OutputConfiguration(@NonNull Parcel source) {
         int rotation = source.readInt();
         int surfaceSetId = source.readInt();
+        int surfaceType = source.readInt();
+        int width = source.readInt();
+        int height = source.readInt();
         Surface surface = Surface.CREATOR.createFromParcel(source);
-        checkNotNull(surface, "Surface must not be null");
         checkArgumentInRange(rotation, ROTATION_0, ROTATION_270, "Rotation constant");
         mSurfaceGroupId = surfaceSetId;
         mSurface = surface;
         mRotation = rotation;
-        mConfiguredSize = SurfaceUtils.getSurfaceSize(mSurface);
-        mConfiguredFormat = SurfaceUtils.getSurfaceFormat(mSurface);
-        mConfiguredDataspace = SurfaceUtils.getSurfaceDataspace(mSurface);
-        mConfiguredGenerationId = mSurface.getGenerationId();
+        if (surface != null) {
+            mSurfaceType = SURFACE_TYPE_UNKNOWN;
+            mConfiguredSize = SurfaceUtils.getSurfaceSize(mSurface);
+            mConfiguredFormat = SurfaceUtils.getSurfaceFormat(mSurface);
+            mConfiguredDataspace = SurfaceUtils.getSurfaceDataspace(mSurface);
+            mConfiguredGenerationId = mSurface.getGenerationId();
+            mIsDeferredConfig = true;
+        } else {
+            mSurfaceType = surfaceType;
+            mConfiguredSize = new Size(width, height);
+            mConfiguredFormat = StreamConfigurationMap.imageFormatToInternal(ImageFormat.PRIVATE);
+            mConfiguredGenerationId = 0;
+            mConfiguredDataspace =
+                    StreamConfigurationMap.imageFormatToDataspace(ImageFormat.PRIVATE);
+            mIsDeferredConfig = false;
+        }
     }
 
     /**
@@ -291,7 +422,12 @@ public final class OutputConfiguration implements Parcelable {
         }
         dest.writeInt(mRotation);
         dest.writeInt(mSurfaceGroupId);
-        mSurface.writeToParcel(dest, flags);
+        dest.writeInt(mSurfaceType);
+        dest.writeInt(mConfiguredSize.getWidth());
+        dest.writeInt(mConfiguredSize.getHeight());
+        if (mSurface != null) {
+            mSurface.writeToParcel(dest, flags);
+        }
     }
 
     /**
@@ -311,13 +447,20 @@ public final class OutputConfiguration implements Parcelable {
             return true;
         } else if (obj instanceof OutputConfiguration) {
             final OutputConfiguration other = (OutputConfiguration) obj;
+            boolean iSSurfaceEqual = mSurface == other.mSurface &&
+                    mConfiguredGenerationId == other.mConfiguredGenerationId ;
+            if (mIsDeferredConfig) {
+                Log.i(TAG, "deferred config has the same surface");
+                iSSurfaceEqual = true;
+            }
             return mRotation == other.mRotation &&
-                   mSurface == other.mSurface &&
-                   mConfiguredGenerationId == other.mConfiguredGenerationId &&
+                   iSSurfaceEqual&&
                    mConfiguredSize.equals(other.mConfiguredSize) &&
                    mConfiguredFormat == other.mConfiguredFormat &&
                    mConfiguredDataspace == other.mConfiguredDataspace &&
-                   mSurfaceGroupId == other.mSurfaceGroupId;
+                   mSurfaceGroupId == other.mSurfaceGroupId &&
+                   mSurfaceType == other.mSurfaceType &&
+                   mIsDeferredConfig == other.mIsDeferredConfig;
         }
         return false;
     }
@@ -327,15 +470,26 @@ public final class OutputConfiguration implements Parcelable {
      */
     @Override
     public int hashCode() {
+        // Need ensure that the hashcode remains unchanged after set a deferred surface. Otherwise
+        // The deferred output configuration will be lost in the camera streammap after the deferred
+        // surface is set.
+        if (mIsDeferredConfig) {
+            return HashCodeHelpers.hashCode(
+                    mRotation, mConfiguredSize.hashCode(), mConfiguredFormat, mConfiguredDataspace,
+                    mSurfaceGroupId, mSurfaceType);
+        }
+
         return HashCodeHelpers.hashCode(
             mRotation, mSurface.hashCode(), mConfiguredGenerationId,
             mConfiguredSize.hashCode(), mConfiguredFormat, mConfiguredDataspace, mSurfaceGroupId);
     }
 
     private static final String TAG = "OutputConfiguration";
-    private final Surface mSurface;
+    private Surface mSurface;
     private final int mRotation;
-    private int mSurfaceGroupId;
+    private final int mSurfaceGroupId;
+    // Surface source type, this is only used by the deferred surface configuration objects.
+    private final int mSurfaceType;
 
     // The size, format, and dataspace of the surface when OutputConfiguration is created.
     private final Size mConfiguredSize;
@@ -343,4 +497,6 @@ public final class OutputConfiguration implements Parcelable {
     private final int mConfiguredDataspace;
     // Surface generation ID to distinguish changes to Surface native internals
     private final int mConfiguredGenerationId;
+    // Flag indicating if this config has deferred surface.
+    private final boolean mIsDeferredConfig;
 }

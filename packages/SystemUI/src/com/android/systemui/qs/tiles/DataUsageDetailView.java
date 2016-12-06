@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.annotation.ColorInt;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -24,6 +25,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.settingslib.Utils;
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
@@ -64,7 +66,7 @@ public class DataUsageDetailView extends LinearLayout {
         final Resources res = mContext.getResources();
         final int titleId;
         final long bytes;
-        int usageColor = R.color.system_accent_color;
+        @ColorInt int usageColor = 0;
         final String top;
         String bottom = null;
         if (info.usageLevel < info.warningLevel || info.limitLevel <= 0) {
@@ -89,14 +91,18 @@ public class DataUsageDetailView extends LinearLayout {
                     formatBytes(info.usageLevel));
             bottom = res.getString(R.string.quick_settings_cellular_detail_data_limit,
                     formatBytes(info.limitLevel));
-            usageColor = R.color.system_warning_color;
+            usageColor = mContext.getColor(R.color.system_warning_color);
+        }
+
+        if (usageColor == 0) {
+            usageColor = Utils.getColorAccent(mContext);
         }
 
         final TextView title = (TextView) findViewById(android.R.id.title);
         title.setText(titleId);
         final TextView usage = (TextView) findViewById(R.id.usage_text);
         usage.setText(formatBytes(bytes));
-        usage.setTextColor(mContext.getColor(usageColor));
+        usage.setTextColor(usageColor);
         final DataUsageGraph graph = (DataUsageGraph) findViewById(R.id.usage_graph);
         graph.setLevels(info.limitLevel, info.warningLevel, info.usageLevel);
         final TextView carrier = (TextView) findViewById(R.id.usage_carrier_text);
@@ -109,6 +115,12 @@ public class DataUsageDetailView extends LinearLayout {
         final TextView infoBottom = (TextView) findViewById(R.id.usage_info_bottom_text);
         infoBottom.setVisibility(bottom != null ? View.VISIBLE : View.GONE);
         infoBottom.setText(bottom);
+        boolean showLevel = info.warningLevel > 0 || info.limitLevel > 0;
+        graph.setVisibility(showLevel ? View.VISIBLE : View.GONE);
+        if (!showLevel) {
+            infoTop.setVisibility(View.GONE);
+        }
+
     }
 
     private String formatBytes(long bytes) {

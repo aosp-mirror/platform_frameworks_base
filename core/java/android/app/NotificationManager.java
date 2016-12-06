@@ -312,8 +312,8 @@ public class NotificationManager
         try {
             service.enqueueNotificationWithTag(pkg, mContext.getOpPackageName(), tag, id,
                     copy, idOut, user.getIdentifier());
-            if (id != idOut[0]) {
-                Log.w(TAG, "notify: id corrupted: sent " + id + ", got back " + idOut[0]);
+            if (localLOGV && id != idOut[0]) {
+                Log.v(TAG, "notify: id corrupted: sent " + id + ", got back " + idOut[0]);
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

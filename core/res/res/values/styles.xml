@@ -649,11 +649,13 @@ please see styles_device_defaults.xml.
     <style name="Widget.ScrollView">
         <item name="scrollbars">vertical</item>
         <item name="fadingEdge">vertical</item>
+        <item name="focusableInTouchMode">@bool/config_focusScrollContainersInTouchMode</item>
     </style>
 
     <style name="Widget.HorizontalScrollView">
         <item name="scrollbars">horizontal</item>
         <item name="fadingEdge">horizontal</item>
+        <item name="focusableInTouchMode">@bool/config_focusScrollContainersInTouchMode</item>
     </style>
 
     <style name="Widget.ListView" parent="Widget.AbsListView">
@@ -1122,6 +1124,8 @@ please see styles_device_defaults.xml.
     <style name="PreferenceFragmentList">
         <item name="paddingStart">@dimen/preference_fragment_padding_side</item>
         <item name="paddingEnd">@dimen/preference_fragment_padding_side</item>
+        <item name="paddingTop">0dp</item>
+        <item name="paddingBottom">@dimen/preference_fragment_padding_bottom</item>
     </style>
 
     <!-- Other Misc Styles -->
@@ -1408,7 +1412,7 @@ please see styles_device_defaults.xml.
         <item name="paddingEnd">?attr/dialogPreferredPadding</item>
         <item name="background">?attr/selectableItemBackground</item>
         <item name="drawablePadding">32dp</item>
-        <item name="drawableTint">@color/accent_material_light</item>
+        <item name="drawableTint">?android:attr/colorAccent</item>
         <item name="drawableTintMode">src_atop</item>
     </style>
 

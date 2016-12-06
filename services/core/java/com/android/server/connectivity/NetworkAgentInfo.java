@@ -28,14 +28,21 @@ import android.net.NetworkRequest;
 import android.net.NetworkState;
 import android.os.Handler;
 import android.os.Messenger;
+import android.os.SystemClock;
+import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.util.AsyncChannel;
+import com.android.internal.util.WakeupMessage;
 import com.android.server.ConnectivityService;
 import com.android.server.connectivity.NetworkMonitor;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Objects;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * A bag class used by ConnectivityService for holding a collection of most recent
@@ -97,15 +104,18 @@ import java.util.Comparator;
 // -----------------------------------------------
 // If a network has no chance of satisfying any requests (even if it were to become validated
 // and enter state #5), ConnectivityService will disconnect the NetworkAgent's AsyncChannel.
-// If the network ever for any period of time had satisfied a NetworkRequest (i.e. had been
-// the highest scoring that satisfied the NetworkRequest's constraints), but is no longer the
-// highest scoring network for any NetworkRequest, then there will be a 30s pause before
-// ConnectivityService disconnects the NetworkAgent's AsyncChannel.  During this pause the
-// network is considered "lingering".  This pause exists to allow network communication to be
-// wrapped up rather than abruptly terminated.  During this pause if the network begins satisfying
-// a NetworkRequest, ConnectivityService will cancel the future disconnection of the NetworkAgent's
-// AsyncChannel, and the network is no longer considered "lingering".
+//
+// If the network was satisfying a foreground NetworkRequest (i.e. had been the highest scoring that
+// satisfied the NetworkRequest's constraints), but is no longer the highest scoring network for any
+// foreground NetworkRequest, then there will be a 30s pause to allow network communication to be
+// wrapped up rather than abruptly terminated. During this pause the network is said to be
+// "lingering". During this pause if the network begins satisfying a foreground NetworkRequest,
+// ConnectivityService will cancel the future disconnection of the NetworkAgent's AsyncChannel, and
+// the network is no longer considered "lingering". After the linger timer expires, if the network
+// is satisfying one or more background NetworkRequests it is kept up in the background. If it is
+// not, ConnectivityService disconnects the NetworkAgent's AsyncChannel.
 public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
+
     public NetworkInfo networkInfo;
     // This Network object should always be used if possible, so as to encourage reuse of the
     // enclosed socket factory and connection pool.  Avoid creating other Network objects.
@@ -130,11 +140,13 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     public boolean everValidated;
 
     // The result of the last validation attempt on this network (true if validated, false if not).
-    // This bit exists only because we never unvalidate a network once it's been validated, and that
-    // is because the network scoring and revalidation code does not (may not?) deal properly with
-    // networks becoming unvalidated.
-    // TODO: Fix the network scoring code, remove this, and rename everValidated to validated.
     public boolean lastValidated;
+
+    // If true, becoming unvalidated will lower the network's score. This is only meaningful if the
+    // system is configured not to do this for certain networks, e.g., if the
+    // config_networkAvoidBadWifi option is set to 0 and the user has not overridden that via
+    // Settings.Global.NETWORK_AVOID_BAD_WIFI.
+    public boolean avoidUnvalidated;
 
     // Whether a captive portal was ever detected on this network.
     // This is a sticky bit; once set it is never cleared.
@@ -143,12 +155,69 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // Whether a captive portal was found during the last network validation attempt.
     public boolean lastCaptivePortalDetected;
 
-    // Indicates whether the network is lingering.  Networks are lingered when they become unneeded
-    // as a result of their NetworkRequests being satisfied by a different network, so as to allow
-    // communication to wrap up before the network is taken down.  This usually only happens to the
-    // default network.  Lingering ends with either the linger timeout expiring and the network
-    // being taken down, or the network satisfying a request again.
-    public boolean lingering;
+    // Networks are lingered when they become unneeded as a result of their NetworkRequests being
+    // satisfied by a higher-scoring network. so as to allow communication to wrap up before the
+    // network is taken down.  This usually only happens to the default network. Lingering ends with
+    // either the linger timeout expiring and the network being taken down, or the network
+    // satisfying a request again.
+    public static class LingerTimer implements Comparable<LingerTimer> {
+        public final NetworkRequest request;
+        public final long expiryMs;
+
+        public LingerTimer(NetworkRequest request, long expiryMs) {
+            this.request = request;
+            this.expiryMs = expiryMs;
+        }
+        public boolean equals(Object o) {
+            if (!(o instanceof LingerTimer)) return false;
+            LingerTimer other = (LingerTimer) o;
+            return (request.requestId == other.request.requestId) && (expiryMs == other.expiryMs);
+        }
+        public int hashCode() {
+            return Objects.hash(request.requestId, expiryMs);
+        }
+        public int compareTo(LingerTimer other) {
+            return (expiryMs != other.expiryMs) ?
+                    Long.compare(expiryMs, other.expiryMs) :
+                    Integer.compare(request.requestId, other.request.requestId);
+        }
+        public String toString() {
+            return String.format("%s, expires %dms", request.toString(),
+                    expiryMs - SystemClock.elapsedRealtime());
+        }
+    }
+
+    /**
+     * Inform ConnectivityService that the network LINGER period has
+     * expired.
+     * obj = this NetworkAgentInfo
+     */
+    public static final int EVENT_NETWORK_LINGER_COMPLETE = 1001;
+
+    // All linger timers for this network, sorted by expiry time. A linger timer is added whenever
+    // a request is moved to a network with a better score, regardless of whether the network is or
+    // was lingering or not.
+    // TODO: determine if we can replace this with a smaller or unsorted data structure. (e.g.,
+    // SparseLongArray) combined with the timestamp of when the last timer is scheduled to fire.
+    private final SortedSet<LingerTimer> mLingerTimers = new TreeSet<>();
+
+    // For fast lookups. Indexes into mLingerTimers by request ID.
+    private final SparseArray<LingerTimer> mLingerTimerForRequest = new SparseArray<>();
+
+    // Linger expiry timer. Armed whenever mLingerTimers is non-empty, regardless of whether the
+    // network is lingering or not. Always set to the expiry of the LingerTimer that expires last.
+    // When the timer fires, all linger state is cleared, and if the network has no requests, it is
+    // torn down.
+    private WakeupMessage mLingerMessage;
+
+    // Linger expiry. Holds the expiry time of the linger timer, or 0 if the timer is not armed.
+    private long mLingerExpiryMs;
+
+    // Whether the network is lingering or not. Must be maintained separately from the above because
+    // it depends on the state of other networks and requests, which only ConnectivityService knows.
+    // (Example: we don't linger a network if it would become the best for a NetworkRequest if it
+    // validated).
+    private boolean mLingering;
 
     // This represents the last score received from the NetworkAgent.
     private int currentScore;
@@ -162,17 +231,25 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     private static final int MAXIMUM_NETWORK_SCORE = 100;
 
     // The list of NetworkRequests being satisfied by this Network.
-    public final SparseArray<NetworkRequest> networkRequests = new SparseArray<NetworkRequest>();
-    // The list of NetworkRequests that this Network previously satisfied with the highest
-    // score.  A non-empty list indicates that if this Network was validated it is lingered.
-    // NOTE: This list is only used for debugging.
-    public final ArrayList<NetworkRequest> networkLingered = new ArrayList<NetworkRequest>();
+    private final SparseArray<NetworkRequest> mNetworkRequests = new SparseArray<>();
+
+    // How many of the satisfied requests are actual requests and not listens.
+    private int mNumRequestNetworkRequests = 0;
+
+    // How many of the satisfied requests are of type BACKGROUND_REQUEST.
+    private int mNumBackgroundNetworkRequests = 0;
 
     public final Messenger messenger;
     public final AsyncChannel asyncChannel;
 
     // Used by ConnectivityService to keep track of 464xlat.
     public Nat464Xlat clatd;
+
+    private static final String TAG = ConnectivityService.class.getSimpleName();
+    private static final boolean VDBG = false;
+    private final ConnectivityService mConnService;
+    private final Context mContext;
+    private final Handler mHandler;
 
     public NetworkAgentInfo(Messenger messenger, AsyncChannel ac, Network net, NetworkInfo info,
             LinkProperties lp, NetworkCapabilities nc, int score, Context context, Handler handler,
@@ -184,20 +261,129 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         linkProperties = lp;
         networkCapabilities = nc;
         currentScore = score;
-        networkMonitor = connService.createNetworkMonitor(context, handler, this, defaultRequest);
+        mConnService = connService;
+        mContext = context;
+        mHandler = handler;
+        networkMonitor = mConnService.createNetworkMonitor(context, handler, this, defaultRequest);
         networkMisc = misc;
+    }
+
+    // Functions for manipulating the requests satisfied by this network.
+    //
+    // These functions must only called on ConnectivityService's main thread.
+
+    private static final boolean ADD = true;
+    private static final boolean REMOVE = false;
+
+    private void updateRequestCounts(boolean add, NetworkRequest request) {
+        int delta = add ? +1 : -1;
+        switch (request.type) {
+            case REQUEST:
+            case TRACK_DEFAULT:
+                mNumRequestNetworkRequests += delta;
+                break;
+
+            case BACKGROUND_REQUEST:
+                mNumRequestNetworkRequests += delta;
+                mNumBackgroundNetworkRequests += delta;
+                break;
+
+            case LISTEN:
+                break;
+
+            case NONE:
+            default:
+                Log.wtf(TAG, "Unhandled request type " + request.type);
+                break;
+        }
     }
 
     /**
      * Add {@code networkRequest} to this network as it's satisfied by this network.
-     * NOTE: This function must only be called on ConnectivityService's main thread.
      * @return true if {@code networkRequest} was added or false if {@code networkRequest} was
      *         already present.
      */
     public boolean addRequest(NetworkRequest networkRequest) {
-        if (networkRequests.get(networkRequest.requestId) == networkRequest) return false;
-        networkRequests.put(networkRequest.requestId, networkRequest);
+        NetworkRequest existing = mNetworkRequests.get(networkRequest.requestId);
+        if (existing == networkRequest) return false;
+        if (existing != null) {
+            // Should only happen if the requestId wraps. If that happens lots of other things will
+            // be broken as well.
+            Log.wtf(TAG, String.format("Duplicate requestId for %s and %s on %s",
+                    networkRequest, existing, name()));
+            updateRequestCounts(REMOVE, existing);
+        }
+        mNetworkRequests.put(networkRequest.requestId, networkRequest);
+        updateRequestCounts(ADD, networkRequest);
         return true;
+    }
+
+    /**
+     * Remove the specified request from this network.
+     */
+    public void removeRequest(int requestId) {
+        NetworkRequest existing = mNetworkRequests.get(requestId);
+        if (existing == null) return;
+        updateRequestCounts(REMOVE, existing);
+        mNetworkRequests.remove(requestId);
+        if (existing.isRequest()) {
+            unlingerRequest(existing);
+        }
+    }
+
+    /**
+     * Returns whether this network is currently satisfying the request with the specified ID.
+     */
+    public boolean isSatisfyingRequest(int id) {
+        return mNetworkRequests.get(id) != null;
+    }
+
+    /**
+     * Returns the request at the specified position in the list of requests satisfied by this
+     * network.
+     */
+    public NetworkRequest requestAt(int index) {
+        return mNetworkRequests.valueAt(index);
+    }
+
+    /**
+     * Returns the number of requests currently satisfied by this network for which
+     * {@link android.net.NetworkRequest#isRequest} returns {@code true}.
+     */
+    public int numRequestNetworkRequests() {
+        return mNumRequestNetworkRequests;
+    }
+
+    /**
+     * Returns the number of requests currently satisfied by this network of type
+     * {@link android.net.NetworkRequest.Type.BACKGROUND_REQUEST}.
+     */
+    public int numBackgroundNetworkRequests() {
+        return mNumBackgroundNetworkRequests;
+    }
+
+    /**
+     * Returns the number of foreground requests currently satisfied by this network.
+     */
+    public int numForegroundNetworkRequests() {
+        return mNumRequestNetworkRequests - mNumBackgroundNetworkRequests;
+    }
+
+    /**
+     * Returns the number of requests of any type currently satisfied by this network.
+     */
+    public int numNetworkRequests() {
+        return mNetworkRequests.size();
+    }
+
+    /**
+     * Returns whether the network is a background network. A network is a background network if it
+     * is satisfying no foreground requests and at least one background request. (If it did not have
+     * a background request, it would be a speculative network that is only being kept up because
+     * it might satisfy a request if it validated).
+     */
+    public boolean isBackgroundNetwork() {
+        return !isVPN() && numForegroundNetworkRequests() == 0 && mNumBackgroundNetworkRequests > 0;
     }
 
     // Does this network satisfy request?
@@ -232,14 +418,20 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         }
 
         int score = currentScore;
-        // Use NET_CAPABILITY_VALIDATED here instead of lastValidated, this allows
-        // ConnectivityService.updateCapabilities() to compute the old score prior to updating
-        // networkCapabilities (with a potentially different validated state).
-        if (!networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED) && !pretendValidated) {
+        if (!lastValidated && !pretendValidated && !ignoreWifiUnvalidationPenalty()) {
             score -= UNVALIDATED_SCORE_PENALTY;
         }
         if (score < 0) score = 0;
         return score;
+    }
+
+    // Return true on devices configured to ignore score penalty for wifi networks
+    // that become unvalidated (b/31075769).
+    private boolean ignoreWifiUnvalidationPenalty() {
+        boolean isWifi = networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) &&
+                networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+        boolean avoidBadWifi = mConnService.avoidBadWifi() || avoidUnvalidated;
+        return isWifi && !avoidBadWifi && everValidated;
     }
 
     // Get the current score for this Network.  This may be modified from what the
@@ -269,13 +461,103 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         }
     }
 
+    /**
+     * Sets the specified request to linger on this network for the specified time. Called by
+     * ConnectivityService when the request is moved to another network with a higher score.
+     */
+    public void lingerRequest(NetworkRequest request, long now, long duration) {
+        if (mLingerTimerForRequest.get(request.requestId) != null) {
+            // Cannot happen. Once a request is lingering on a particular network, we cannot
+            // re-linger it unless that network becomes the best for that request again, in which
+            // case we should have unlingered it.
+            Log.wtf(TAG, this.name() + ": request " + request.requestId + " already lingered");
+        }
+        final long expiryMs = now + duration;
+        LingerTimer timer = new LingerTimer(request, expiryMs);
+        if (VDBG) Log.d(TAG, "Adding LingerTimer " + timer + " to " + this.name());
+        mLingerTimers.add(timer);
+        mLingerTimerForRequest.put(request.requestId, timer);
+    }
+
+    /**
+     * Cancel lingering. Called by ConnectivityService when a request is added to this network.
+     * Returns true if the given request was lingering on this network, false otherwise.
+     */
+    public boolean unlingerRequest(NetworkRequest request) {
+        LingerTimer timer = mLingerTimerForRequest.get(request.requestId);
+        if (timer != null) {
+            if (VDBG) Log.d(TAG, "Removing LingerTimer " + timer + " from " + this.name());
+            mLingerTimers.remove(timer);
+            mLingerTimerForRequest.remove(request.requestId);
+            return true;
+        }
+        return false;
+    }
+
+    public long getLingerExpiry() {
+        return mLingerExpiryMs;
+    }
+
+    public void updateLingerTimer() {
+        long newExpiry = mLingerTimers.isEmpty() ? 0 : mLingerTimers.last().expiryMs;
+        if (newExpiry == mLingerExpiryMs) return;
+
+        // Even if we're going to reschedule the timer, cancel it first. This is because the
+        // semantics of WakeupMessage guarantee that if cancel is called then the alarm will
+        // never call its callback (handleLingerComplete), even if it has already fired.
+        // WakeupMessage makes no such guarantees about rescheduling a message, so if mLingerMessage
+        // has already been dispatched, rescheduling to some time in the future it won't stop it
+        // from calling its callback immediately.
+        if (mLingerMessage != null) {
+            mLingerMessage.cancel();
+            mLingerMessage = null;
+        }
+
+        if (newExpiry > 0) {
+            mLingerMessage = mConnService.makeWakeupMessage(
+                    mContext, mHandler,
+                    "NETWORK_LINGER_COMPLETE." + network.netId,
+                    EVENT_NETWORK_LINGER_COMPLETE, this);
+            mLingerMessage.schedule(newExpiry);
+        }
+
+        mLingerExpiryMs = newExpiry;
+    }
+
+    public void linger() {
+        mLingering = true;
+    }
+
+    public void unlinger() {
+        mLingering = false;
+    }
+
+    public boolean isLingering() {
+        return mLingering;
+    }
+
+    public void clearLingerState() {
+        if (mLingerMessage != null) {
+            mLingerMessage.cancel();
+            mLingerMessage = null;
+        }
+        mLingerTimers.clear();
+        mLingerTimerForRequest.clear();
+        updateLingerTimer();  // Sets mLingerExpiryMs, cancels and nulls out mLingerMessage.
+        mLingering = false;
+    }
+
+    public void dumpLingerTimers(PrintWriter pw) {
+        for (LingerTimer timer : mLingerTimers) { pw.println(timer); }
+    }
+
     public String toString() {
         return "NetworkAgentInfo{ ni{" + networkInfo + "}  " +
                 "network{" + network + "}  nethandle{" + network.getNetworkHandle() + "}  " +
                 "lp{" + linkProperties + "}  " +
                 "nc{" + networkCapabilities + "}  Score{" + getCurrentScore() + "}  " +
                 "everValidated{" + everValidated + "}  lastValidated{" + lastValidated + "}  " +
-                "created{" + created + "} lingering{" + lingering + "} " +
+                "created{" + created + "} lingering{" + isLingering() + "} " +
                 "explicitlySelected{" + networkMisc.explicitlySelected + "} " +
                 "acceptUnvalidated{" + networkMisc.acceptUnvalidated + "} " +
                 "everCaptivePortalDetected{" + everCaptivePortalDetected + "} " +

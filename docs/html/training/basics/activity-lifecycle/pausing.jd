@@ -8,13 +8,13 @@ trainingnavtop=true
 
 <div id="tb-wrapper">
   <div id="tb">
-    
+
     <h2>This lesson teaches you to</h2>
     <ol>
       <li><a href="#Pause">Pause Your Activity</a></li>
       <li><a href="#Resume">Resume Your Activity</a></li>
     </ol>
-    
+
     <h2>You should also read</h2>
     <ul>
       <li><a href="{@docRoot}guide/components/activities.html">Activities</a>
@@ -32,25 +32,34 @@ class="button">Download the demo</a>
   </div>
 </div>
 
-<p>During normal app use, the foreground activity is sometimes obstructed by other 
-visual components that cause the activity to <em>pause</em>.  For example, when a semi-transparent
-activity opens (such as one in the style of a dialog), the previous activity pauses. As long as the
-activity is still partially visible but currently not the activity in focus, it remains paused.</p>
+<p>
+  During normal app use, the app sometimes loses focus, causing the activity to
+  <em>pause</em>. For example, when apps run in <a href=
+  "{@docRoot}guide/topics/ui/multi-window.html">multi-window mode</a>, only one
+  of the apps has the focus at any time; the system pauses all other apps. Similarly,
+  when a semi-transparent activity opens (such as one in the style of a
+  dialog), the previous activity pauses. As long as the activity is still
+  partially visible but currently not the activity in focus, it remains paused.
+</p>
 
 <p>However, once the activity is fully-obstructed and not visible, it <em>stops</em> (which is
 discussed in the next lesson).</p>
 
 <p>As your activity enters the paused state, the system calls the {@link
 android.app.Activity#onPause onPause()} method on your {@link android.app.Activity}, which allows
-you to stop ongoing actions that should not continue while paused (such as a video) or persist
+you to stop ongoing actions that should not continue while paused or persist
 any information that should be permanently saved in case the user continues to leave your app. If
 the user returns to your activity from the paused state, the system resumes it and calls the
 {@link android.app.Activity#onResume onResume()} method.</p>
 
-<p class="note"><strong>Note:</strong> When your activity receives a call to {@link
-android.app.Activity#onPause()}, it may be an indication that the activity will be paused for a
-moment and the user may return focus to your activity. However, it's usually the first indication
-that the user is leaving your activity.</p>
+<p class="note">
+  <strong>Note:</strong> When the system calls your activity's {@link
+  android.app.Activity#onPause()} method, the system may be signaling that the
+  activity will be paused for a moment and the user may return focus to your
+  activity, or that the app is running in multi-window mode. However, this
+  method call may also be the first indication that the user is leaving your
+  activity.
+</p>
 
 <img src="{@docRoot}images/training/basics/basic-lifecycle-paused.png" />
 <p class="img-caption"><strong>Figure 1.</strong> When a semi-transparent activity obscures
@@ -60,14 +69,18 @@ system calls {@link android.app.Activity#onResume onResume()} (2).</p>
 
 
 <h2 id="Pause">Pause Your Activity</h2>
-      
+
 <p>When the system calls {@link android.app.Activity#onPause()} for your activity, it
 technically means your activity is still partially visible, but most often is an indication that
 the user is leaving the activity and it will soon enter the Stopped state.  You should usually use
 the {@link android.app.Activity#onPause()} callback to:</p>
 
 <ul>
-  <li>Stop animations or other ongoing actions that could consume CPU.</li>
+  <li>Check if the activity is visible; if it is not, stop animations or other
+    ongoing actions that could consume CPU. Remember, beginning with Android
+    7.0, a paused app might be running in <a
+    href="{@docRoot}guide/topics/ui/multi-window.html">multi-window mode</a>.
+    In this case, you would not want to stop animations or video playback.</li>
   <li>Commit unsaved changes, but only if users expect such changes to be permanently saved when
 they leave (such as a draft email).</li>
   <li>Release system resources, such as broadcast receivers, handles to sensors (like

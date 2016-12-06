@@ -252,6 +252,17 @@ external storage on a computer or removes the media, and there's no security enf
 save to the external storage. All applications can read and write files placed on the external
 storage and the user can remove them.</p>
 
+<h3 id="ScopedDirAccess">Using Scoped Directory Access</h3>
+
+On Android 7.0 or later, if you need access to a specific directory on
+external storage, use scoped directory access. Scoped directory access
+simplifies how your application accesses standard external storage directories,
+such as the <code>Pictures</code> directory, and provides a simple
+permissions UI that clearly details what directory the application is
+requesting access to. For more details on scoped directory access, see
+<a href="{@docRoot}training/articles/scoped-directory-access.html">Using
+Scoped Directory Access</a>.
+
 <h3 id="ExternalPermissions">Getting access to external storage</h3>
 
 <p>In order to read or write files on the external storage, your app must acquire the

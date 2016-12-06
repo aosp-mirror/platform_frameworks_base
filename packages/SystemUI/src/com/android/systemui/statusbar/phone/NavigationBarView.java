@@ -54,10 +54,12 @@ import java.io.PrintWriter;
 
 public class NavigationBarView extends LinearLayout {
     final static boolean DEBUG = false;
-    final static String TAG = "PhoneStatusBar/NavigationBarView";
+    final static String TAG = "StatusBar/NavBarView";
 
     // slippery nav bar when everything is disabled, e.g. during setup
     final static boolean SLIPPERY_WHEN_DISABLED = true;
+
+    final static boolean ALTERNATE_CAR_MODE_UI = false;
 
     final Display mDisplay;
     View mCurrentView = null;
@@ -65,6 +67,7 @@ public class NavigationBarView extends LinearLayout {
 
     boolean mVertical;
     boolean mScreenOn;
+    private int mCurrentRotation = -1;
 
     boolean mShowMenu;
     int mDisabledFlags = 0;
@@ -93,11 +96,14 @@ public class NavigationBarView extends LinearLayout {
     private OnVerticalChangedListener mOnVerticalChangedListener;
     private boolean mLayoutTransitionsEnabled = true;
     private boolean mWakeAndUnlocking;
-    private boolean mCarMode = false;
+    private boolean mUseCarModeUi = false;
+    private boolean mInCarMode = false;
     private boolean mDockedStackExists;
 
     private final SparseArray<ButtonDispatcher> mButtonDisatchers = new SparseArray<>();
     private Configuration mConfiguration;
+
+    private NavigationBarInflaterView mNavigationInflaterView;
 
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
@@ -287,7 +293,9 @@ public class NavigationBarView extends LinearLayout {
             mMenuIcon = ctx.getDrawable(R.drawable.ic_sysbar_menu);
             mImeIcon = ctx.getDrawable(R.drawable.ic_ime_switcher_default);
 
-            updateCarModeIcons(ctx);
+            if (ALTERNATE_CAR_MODE_UI) {
+                updateCarModeIcons(ctx);
+            }
         }
     }
 
@@ -338,14 +346,14 @@ public class NavigationBarView extends LinearLayout {
         // carmode, respectively. Recents are not available in CarMode in nav bar so change
         // to recent icon is not required.
         Drawable backIcon = (backAlt)
-                ? getBackIconWithAlt(mCarMode, mVertical)
-                : getBackIcon(mCarMode, mVertical);
+                ? getBackIconWithAlt(mUseCarModeUi, mVertical)
+                : getBackIcon(mUseCarModeUi, mVertical);
 
         getBackButton().setImageDrawable(backIcon);
 
         updateRecentsIcon();
 
-        if (mCarMode) {
+        if (mUseCarModeUi) {
             getHomeButton().setImageDrawable(mHomeCarModeIcon);
         } else {
             getHomeButton().setImageDrawable(mHomeDefaultIcon);
@@ -373,16 +381,12 @@ public class NavigationBarView extends LinearLayout {
 
         final boolean disableHome = ((disabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0);
 
-        // Disable recents always in car mode.
-        boolean disableRecent = (
-                mCarMode || (disabledFlags & View.STATUS_BAR_DISABLE_RECENT) != 0);
+        // Always disable recents when alternate car mode UI is active.
+        boolean disableRecent = mUseCarModeUi
+                        || ((disabledFlags & View.STATUS_BAR_DISABLE_RECENT) != 0);
         final boolean disableBack = ((disabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0)
                 && ((mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) == 0);
         final boolean disableSearch = ((disabledFlags & View.STATUS_BAR_DISABLE_SEARCH) != 0);
-
-        if (SLIPPERY_WHEN_DISABLED) {
-            setSlippery(disableHome && disableRecent && disableBack && disableSearch);
-        }
 
         ViewGroup navButtons = (ViewGroup) getCurrentView().findViewById(R.id.nav_buttons);
         if (navButtons != null) {
@@ -458,22 +462,6 @@ public class NavigationBarView extends LinearLayout {
         }
     }
 
-    public void setSlippery(boolean newSlippery) {
-        WindowManager.LayoutParams lp = (WindowManager.LayoutParams) getLayoutParams();
-        if (lp != null) {
-            boolean oldSlippery = (lp.flags & WindowManager.LayoutParams.FLAG_SLIPPERY) != 0;
-            if (!oldSlippery && newSlippery) {
-                lp.flags |= WindowManager.LayoutParams.FLAG_SLIPPERY;
-            } else if (oldSlippery && !newSlippery) {
-                lp.flags &= ~WindowManager.LayoutParams.FLAG_SLIPPERY;
-            } else {
-                return;
-            }
-            WindowManager wm = (WindowManager)getContext().getSystemService(Context.WINDOW_SERVICE);
-            wm.updateViewLayout(this, lp);
-        }
-    }
-
     public void setMenuVisibility(final boolean show) {
         setMenuVisibility(show, false);
     }
@@ -492,9 +480,10 @@ public class NavigationBarView extends LinearLayout {
 
     @Override
     public void onFinishInflate() {
+        mNavigationInflaterView = (NavigationBarInflaterView) findViewById(
+                R.id.navigation_inflater);
         updateRotatedViews();
-        ((NavigationBarInflaterView) findViewById(R.id.navigation_inflater)).setButtonDispatchers(
-                mButtonDisatchers);
+        mNavigationInflaterView.setButtonDispatchers(mButtonDisatchers);
 
         getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
 
@@ -543,6 +532,10 @@ public class NavigationBarView extends LinearLayout {
         updateCurrentView();
     }
 
+    public boolean needsReorient(int rotation) {
+        return mCurrentRotation != rotation;
+    }
+
     private void updateCurrentView() {
         final int rot = mDisplay.getRotation();
         for (int i=0; i<4; i++) {
@@ -550,10 +543,12 @@ public class NavigationBarView extends LinearLayout {
         }
         mCurrentView = mRotatedViews[rot];
         mCurrentView.setVisibility(View.VISIBLE);
+        mNavigationInflaterView.setAlternativeOrder(rot == Surface.ROTATION_90);
         for (int i = 0; i < mButtonDisatchers.size(); i++) {
             mButtonDisatchers.valueAt(i).setCurrentView(mCurrentView);
         }
         updateLayoutTransitionsEnabled();
+        mCurrentRotation = rot;
     }
 
     private void updateRecentsIcon() {
@@ -577,7 +572,7 @@ public class NavigationBarView extends LinearLayout {
         setMenuVisibility(mShowMenu, true /* force */);
 
         if (DEBUG) {
-            Log.d(TAG, "reorient(): rot=" + mDisplay.getRotation());
+            Log.d(TAG, "reorient(): rot=" + mCurrentRotation);
         }
 
         updateTaskSwitchHelper();
@@ -633,12 +628,19 @@ public class NavigationBarView extends LinearLayout {
         boolean uiCarModeChanged = false;
         if (newConfig != null) {
             int uiMode = newConfig.uiMode & Configuration.UI_MODE_TYPE_MASK;
-            if (mCarMode && uiMode != Configuration.UI_MODE_TYPE_CAR) {
-                mCarMode = false;
-                uiCarModeChanged = true;
-            } else if (uiMode == Configuration.UI_MODE_TYPE_CAR) {
-                mCarMode = true;
-                uiCarModeChanged = true;
+            final boolean isCarMode = (uiMode == Configuration.UI_MODE_TYPE_CAR);
+
+            if (isCarMode != mInCarMode) {
+                mInCarMode = isCarMode;
+                getHomeButton().setCarMode(isCarMode);
+
+                if (ALTERNATE_CAR_MODE_UI) {
+                    mUseCarModeUi = isCarMode;
+                    uiCarModeChanged = true;
+                } else {
+                    // Don't use car mode behavior if ALTERNATE_CAR_MODE_UI not set.
+                    mUseCarModeUi = false;
+                }
             }
         }
         return uiCarModeChanged;

@@ -318,7 +318,7 @@ href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targe
 
 <h3 id="Ratings">Ratings from remote controllers</h3>
 
-<p>Android 4.4 builds upon the existing capabilities for remote control clients (apps that receive media control events with the {@link android.media.RemoteControlClient}) by adding the ability for users to rate the current track from the remote controller.</p> 
+<p>Android 4.4 builds upon the existing capabilities for remote control clients (apps that receive media control events with the {@link android.media.RemoteControlClient}) by adding the ability for users to rate the current track from the remote controller.</p>
 
 <p>The new {@link android.media.Rating} class encapsulates information about a user rating. A rating is defined by its rating style (either {@link android.media.Rating#RATING_HEART}, {@link android.media.Rating#RATING_THUMB_UP_DOWN}, {@link android.media.Rating#RATING_3_STARS}, {@link android.media.Rating#RATING_4_STARS}, {@link android.media.Rating#RATING_5_STARS} or {@link android.media.Rating#RATING_PERCENTAGE}) and the rating value that's appropriate for that style.</p>
 

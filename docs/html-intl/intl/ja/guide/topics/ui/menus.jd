@@ -83,9 +83,9 @@ Android 3.0 からは、<em>Menu</em> ボタンが廃止されたため（一部
 </p>
   <p><a href="#options-menu">オプション メニューの作成</a>のセクションをご覧ください。</p>
     </dd>
-    
+
   <dt><strong>コンテキスト メニューとコンテキスト アクション モード</strong></dt>
-  
+
    <dd>コンテキスト メニューは、ユーザーが要素を長押しクリックするときに表示される<a href="#FloatingContextMenu">フローティング メニュー</a>です。
 ここでは、選択したコンテンツやコンテキスト フレームに影響するアクションが提供されます。
 
@@ -94,7 +94,7 @@ Android 3.0 からは、<em>Menu</em> ボタンが廃止されたため（一部
 </p>
   <p><a href="#context-menu">コンテキスト メニューの作成</a>のセクションをご覧ください。</p>
 </dd>
-    
+
   <dt><strong>ポップアップ メニュー</strong></dt>
     <dd>ポップアップ メニューでは、メニューを呼び出すビューに固定された縦方向のリストでアイテムが表示されます。
 特定のコンテンツに関連するアクションの概要を表示したり、コマンドの 2 番目の部分のオプションを表示したりする場合に適しています。
@@ -135,7 +135,7 @@ Android 3.0 からは、<em>Menu</em> ボタンが廃止されたため（一部
   <dt><code>&lt;item></code></dt>
     <dd>メニューで 1 つのアイテムを表示する {@link android.view.MenuItem} を作成します。この要素には、サブメニューを作成するために、ネストされた <code>&lt;menu></code> 要素を含めることができます。
 </dd>
-    
+
   <dt><code>&lt;group></code></dt>
     <dd>省略可能な {@code &lt;item&gt;} 要素の非表示コンテナ。メニュー アイテムでアクティブ状態や可視性のようなプロパティを共有できるよう、メニュー アイテムを分類できます。
 詳細については、<a href="#groups">メニュー グループの作成</a>のセクションをご覧ください。
@@ -742,8 +742,8 @@ android.view.Menu} オブジェクトにメニュー リソースをインフレ
 
 <pre>
 &lt;ImageButton
-    android:layout_width="wrap_content" 
-    android:layout_height="wrap_content" 
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:src="@drawable/ic_overflow_holo_dark"
     android:contentDescription="@string/descr_overflow_button"
     android:onClick="showPopup" />

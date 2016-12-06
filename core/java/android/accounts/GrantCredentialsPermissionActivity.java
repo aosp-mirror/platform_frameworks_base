@@ -35,12 +35,10 @@ import java.io.IOException;
  */
 public class GrantCredentialsPermissionActivity extends Activity implements View.OnClickListener {
     public static final String EXTRAS_ACCOUNT = "account";
-    public static final String EXTRAS_AUTH_TOKEN_LABEL = "authTokenLabel";
     public static final String EXTRAS_AUTH_TOKEN_TYPE = "authTokenType";
     public static final String EXTRAS_RESPONSE = "response";
-    public static final String EXTRAS_ACCOUNT_TYPE_LABEL = "accountTypeLabel";
-    public static final String EXTRAS_PACKAGES = "application";
     public static final String EXTRAS_REQUESTING_UID = "uid";
+
     private Account mAccount;
     private String mAuthTokenType;
     private int mUid;
@@ -109,7 +107,11 @@ public class GrantCredentialsPermissionActivity extends Activity implements View
                 }
             }
         };
-        AccountManager.get(this).getAuthTokenLabel(mAccount.type, mAuthTokenType, callback, null);
+
+        if (!AccountManager.ACCOUNT_ACCESS_TOKEN_TYPE.equals(mAuthTokenType)) {
+            AccountManager.get(this).getAuthTokenLabel(mAccount.type,
+                    mAuthTokenType, callback, null);
+        }
 
         findViewById(R.id.allow_button).setOnClickListener(this);
         findViewById(R.id.deny_button).setOnClickListener(this);

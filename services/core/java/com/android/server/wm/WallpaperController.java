@@ -246,7 +246,10 @@ class WallpaperController {
 
     boolean updateWallpaperOffset(WindowState wallpaperWin, int dw, int dh, boolean sync) {
         boolean rawChanged = false;
-        float wpx = mLastWallpaperX >= 0 ? mLastWallpaperX : 0.5f;
+        // Set the default wallpaper x-offset to either edge of the screen (depending on RTL), to
+        // match the behavior of most Launchers
+        float defaultWallpaperX = wallpaperWin.isRtl() ? 1f : 0f;
+        float wpx = mLastWallpaperX >= 0 ? mLastWallpaperX : defaultWallpaperX;
         float wpxs = mLastWallpaperXStep >= 0 ? mLastWallpaperXStep : -1.0f;
         int availw = wallpaperWin.mFrame.right - wallpaperWin.mFrame.left - dw;
         int offset = availw > 0 ? -(int)(availw * wpx + .5f) : 0;
@@ -479,6 +482,8 @@ class WallpaperController {
         boolean resetTopWallpaper = false;
         boolean inFreeformSpace = false;
         boolean replacing = false;
+        boolean keyguardGoingAwayWithWallpaper = false;
+
         for (int i = windows.size() - 1; i >= 0; i--) {
             w = windows.get(i);
             if ((w.mAttrs.type == TYPE_WALLPAPER)) {
@@ -506,13 +511,11 @@ class WallpaperController {
                 inFreeformSpace = stack != null && stack.mStackId == FREEFORM_WORKSPACE_STACK_ID;
             }
 
-            replacing = replacing || w.mWillReplaceWindow;
+            replacing |= w.mWillReplaceWindow;
+            keyguardGoingAwayWithWallpaper |= (w.mAppToken != null
+                    && w.mWinAnimator.mKeyguardGoingAwayWithWallpaper);
 
-            // If the app is executing an animation because the keyguard is going away (and the
-            // keyguard was showing the wallpaper) keep the wallpaper during the animation so it
-            // doesn't flicker out.
-            final boolean hasWallpaper = (w.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0
-                    || (w.mAppToken != null && w.mWinAnimator.mKeyguardGoingAwayWithWallpaper);
+            final boolean hasWallpaper = (w.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0;
             if (hasWallpaper && w.isOnScreen() && (mWallpaperTarget == w || w.isDrawFinishedLw())) {
                 if (DEBUG_WALLPAPER) Slog.v(TAG, "Found wallpaper target: #" + i + "=" + w);
                 result.setWallpaperTarget(w, i);
@@ -529,17 +532,25 @@ class WallpaperController {
             }
         }
 
-        if (result.wallpaperTarget == null && windowDetachedI >= 0) {
+        if (result.wallpaperTarget != null) {
+            return;
+        }
+
+        if (windowDetachedI >= 0) {
             if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
                     "Found animating detached wallpaper activity: #" + windowDetachedI + "=" + w);
             result.setWallpaperTarget(w, windowDetachedI);
-        }
-        if (result.wallpaperTarget == null
-                && (inFreeformSpace || (replacing && mWallpaperTarget != null))) {
+        } else if (inFreeformSpace || (replacing && mWallpaperTarget != null)) {
             // In freeform mode we set the wallpaper as its own target, so we don't need an
             // additional window to make it visible. When we are replacing a window and there was
             // wallpaper before replacement, we want to keep the window until the new windows fully
             // appear and can determine the visibility, to avoid flickering.
+            result.setWallpaperTarget(result.topWallpaper, result.topWallpaperIndex);
+
+        } else if (keyguardGoingAwayWithWallpaper) {
+            // If the app is executing an animation because the keyguard is going away (and the
+            // keyguard was showing the wallpaper) keep the wallpaper during the animation so it
+            // doesn't flicker out by having it be its own target.
             result.setWallpaperTarget(result.topWallpaper, result.topWallpaperIndex);
         }
     }
@@ -575,27 +586,24 @@ class WallpaperController {
                     if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
                             "New i: " + wallpaperTargetIndex + " old i: " + oldI);
                     if (oldI >= 0) {
-                        if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
-                                "Animating wallpapers: old#" + oldI + "=" + oldW + "; new#"
-                                + wallpaperTargetIndex + "=" + wallpaperTarget);
+                        final boolean newTargetHidden =
+                                wallpaperTarget.mAppToken != null && wallpaperTarget.mAppToken.hiddenRequested;
+                        final boolean oldTargetHidden =
+                                oldW.mAppToken != null && oldW.mAppToken.hiddenRequested;
+                        if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG, "Animating wallpapers:"
+                                + " old#" + oldI + "=" + oldW + " hidden=" + oldTargetHidden
+                                + " new#" + wallpaperTargetIndex + "=" + wallpaperTarget
+                                + " hidden=" + newTargetHidden);
 
-                        // Set the new target correctly.
-                        if (wallpaperTarget.mAppToken != null
-                                && wallpaperTarget.mAppToken.hiddenRequested) {
-                            if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
-                                    "Old wallpaper still the target.");
-                            mWallpaperTarget = oldW;
-                            wallpaperTarget = oldW;
-                            wallpaperTargetIndex = oldI;
-                        }
-                        // Now set the upper and lower wallpaper targets correctly,
+                        // Set the upper and lower wallpaper targets correctly,
                         // and make sure that we are positioning the wallpaper below the lower.
-                        else if (wallpaperTargetIndex > oldI) {
+                        if (wallpaperTargetIndex > oldI) {
                             // The new target is on top of the old one.
                             if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
                                     "Found target above old target.");
                             mUpperWallpaperTarget = wallpaperTarget;
                             mLowerWallpaperTarget = oldW;
+
                             wallpaperTarget = oldW;
                             wallpaperTargetIndex = oldI;
                         } else {
@@ -604,6 +612,22 @@ class WallpaperController {
                                     "Found target below old target.");
                             mUpperWallpaperTarget = oldW;
                             mLowerWallpaperTarget = wallpaperTarget;
+                        }
+                        if (newTargetHidden && !oldTargetHidden) {
+                            if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
+                                    "Old wallpaper still the target.");
+                            // Use the old target if new target is hidden but old target
+                            // is not. If they're both hidden, still use the new target.
+                            mWallpaperTarget = oldW;
+                        } else if (newTargetHidden == oldTargetHidden
+                                && !mService.mOpeningApps.contains(wallpaperTarget.mAppToken)
+                                    && (mService.mOpeningApps.contains(oldW.mAppToken)
+                                    || mService.mClosingApps.contains(oldW.mAppToken))) {
+                            // If they're both hidden (or both not hidden), prefer the one that's
+                            // currently in opening or closing app list, this allows transition
+                            // selection logic to better determine the wallpaper status of
+                            // opening/closing apps.
+                            mWallpaperTarget = oldW;
                         }
                     }
                 }
@@ -733,14 +757,16 @@ class WallpaperController {
                 }
 
                 // Now stick it in. For apps over wallpaper keep the wallpaper at the bottommost
-                // layer. For keyguard over wallpaper put the wallpaper under the keyguard.
+                // layer. For keyguard over wallpaper put the wallpaper under the lowest window that
+                // is currently on screen, i.e. not hidden by policy.
                 int insertionIndex = 0;
                 if (visible && wallpaperTarget != null) {
                     final int type = wallpaperTarget.mAttrs.type;
                     final int privateFlags = wallpaperTarget.mAttrs.privateFlags;
                     if ((privateFlags & PRIVATE_FLAG_KEYGUARD) != 0
                             || type == TYPE_KEYGUARD_SCRIM) {
-                        insertionIndex = windows.indexOf(wallpaperTarget);
+                        insertionIndex = Math.min(windows.indexOf(wallpaperTarget),
+                                findLowestWindowOnScreen(windows));
                     }
                 }
                 if (DEBUG_WALLPAPER_LIGHT || DEBUG_WINDOW_MOVEMENT
@@ -755,6 +781,21 @@ class WallpaperController {
         }
 
         return changed;
+    }
+
+    /**
+     * @return The index in {@param windows} of the lowest window that is currently on screen and
+     *         not hidden by the policy.
+     */
+    private int findLowestWindowOnScreen(WindowList windows) {
+        final int size = windows.size();
+        for (int index = 0; index < size; index++) {
+            final WindowState win = windows.get(index);
+            if (win.isOnScreen()) {
+                return index;
+            }
+        }
+        return Integer.MAX_VALUE;
     }
 
     boolean adjustWallpaperWindows() {

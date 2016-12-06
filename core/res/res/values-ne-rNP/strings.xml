@@ -256,7 +256,7 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"माइक्रोफोन"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"अडियो रेकर्ड गर्नुहोस्"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"क्यामेरा"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"तस्बिर खिच्नुहोस् तथा भिडियो रेकर्ड गर्नुहोस्"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"तस्बिर खिच्नुका साथै भिडियो रेकर्ड गर्नुहोस्"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"फोन"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"फोन कलहरू गर्नुहोस् र व्यवस्थापन गर्नुहोस्"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"शारीरिक सेन्सर"</string>
@@ -679,6 +679,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"सही!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"फेरि प्रयास गर्नुहोस्"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"फेरि प्रयास गर्नुहोस्"</string>
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"सबै सुविधाहरू र डेटाका लागि अनलक गर्नुहोस्"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"अत्याधिक मोहडा खोल्ने प्रयासहरू बढी भए।"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"SIM कार्ड छैन"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"ट्याब्लेटमा SIM कार्ड छैन।"</string>
@@ -1029,8 +1030,9 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"एन्ड्रोइड अपग्रेड हुँदैछ…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android शुरू हुँदैछ..."</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"भण्डारण अनुकूलन गर्दै।"</string>
-    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android को स्तरवृद्धि हुँदैछ"</string>
+    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"Android को अद्यावधिकलाई सम्पन्न गर्दै…"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"स्तरवृद्धि सम्पन्न नभएसम्म केही अनुप्रयोगहरू राम्ररी काम नगर्न सक्छन्"</string>
+    <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g> को स्तरवृद्धि हुँदैछ…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"अनुप्रयोग अनुकुल हुँदै <xliff:g id="NUMBER_0">%1$d</xliff:g> को <xliff:g id="NUMBER_1">%2$d</xliff:g>।"</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> तयारी गर्दै।"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"सुरुवात अनुप्रयोगहरू।"</string>
@@ -1081,6 +1083,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi मा इन्टरनेट पहुँच छैन"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"विकल्पहरूका लागि ट्याप गर्नुहोस्"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> मा बदल्नुहोस्"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> मा इन्टरनेट माथिको पहुँच नहुँदा यन्त्रले <xliff:g id="NEW_NETWORK">%1$s</xliff:g> को प्रयोग गर्दछ। शुल्कहरू लागू हुन सक्छन्।"</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> बाट <xliff:g id="NEW_NETWORK">%2$s</xliff:g> मा परिवर्तन गरियो"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"सेलुलर डेटा"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"ब्लुटुथ"</item>
+    <item msgid="5447331121797802871">"इथरनेट"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"नेटवर्कको कुनै अज्ञात प्रकार"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"वाइ-फाइसँग जडान गर्न सकेन"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" कमजोर इन्टरनेट जडान छ।"</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"जडान अनुमति दिने हो?"</string>
@@ -1158,7 +1171,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"भाषा र लेआउट चयन गर्न ट्याप गर्नुहोस्"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"उम्मेदवार"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"तयारी गर्दै <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"त्रुटिहरूको लागि जाँच गर्दै"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"नयाँ <xliff:g id="NAME">%s</xliff:g> भेटियो"</string>
@@ -1237,8 +1249,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g>सँग जोडिएको। नेटवर्क प्रबन्ध गर्न हान्नुहोस्।"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"VPN जडान सधै जोड्दै…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"सधैँ खुल्ला हुने VPN जोडिएको"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"सधैँ-सक्रिय VPN लाई विच्छेद गरियो"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"सधैँ भरि VPN त्रुटिमा"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"कन्फिगर गर्न ट्याप गर्नुहोस्"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"सेट अप गर्न ट्याप गर्नुहोस्"</string>
     <string name="upload_file" msgid="2897957172366730416">"फाइल छान्नुहोस्"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"कुनै फाइल छानिएको छैन"</string>
     <string name="reset" msgid="2448168080964209908">"पुनःसेट गर्नु"</string>
@@ -1322,7 +1335,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB ड्राइभ"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB भण्डारण"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"सम्पादन गर्नुहोस्"</string>
-    <string name="data_usage_warning_title" msgid="1955638862122232342">"डेटाको प्रयोग चेतावनी"</string>
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"डेटा प्रयोग बारे सतर्कता"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"प्रयोग र सेटिङहरू हेर्न ट्याप गर्नुहोस्।"</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G डेटा सीमा पुग्यो"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G डेटा सीमा पुग्यो"</string>
@@ -1606,7 +1619,7 @@
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"अवरोध नपुर्याउँनुहोस्"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"डाउनटाइम"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"हरेक हप्तादिनको राति"</string>
-    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"शनिवार"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"शनिबार"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"घटना"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> द्वारा मौन गरिएको"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"तपाईंको यन्त्रसँग आन्तरिक समस्या छ, र तपाईंले फ्याक्ट्री डाटा रिसेट नगर्दासम्म यो अस्थिर रहन्छ।"</string>
@@ -1641,6 +1654,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"भाषाको नाम टाइप गर्नुहोस्"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"सुझाव दिइयो"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"सम्पूर्ण भाषाहरू"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"सबै क्षेत्रहरू"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"खोज"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"कार्य मोड बन्द छ"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"अनुप्रयोग, पृष्ठभूमि सिंक र सम्बन्धित विशेषताहरू सहित, कार्य प्रोफाइललाई कार्य गर्न अनुमति दिनुहोस्।"</string>
@@ -1658,7 +1672,16 @@
     <string name="unpin_target" msgid="3556545602439143442">"अनपिन गर्नुहोस्"</string>
     <string name="app_info" msgid="6856026610594615344">"अनुप्रयोगका बारे जानकारी"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"यन्त्रलाई रिसेट गर्ने हो?"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"यन्त्रलाई रिसेट गर्न ट्याप गर्नुहोस्"</string>
+    <string name="demo_starting_message" msgid="5268556852031489931">"डेमो सुरु गर्दै…"</string>
+    <string name="demo_restarting_message" msgid="952118052531642451">"यन्त्रलाई रिसेट गर्दै…"</string>
+    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"यन्त्रलाई रिसेट गर्ने हो?"</string>
+    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"तपाईँ सबै परिवर्तनहरू गुमाउनु हुनेछ र <xliff:g id="TIMEOUT">%1$s</xliff:g> सेकेन्डमा डेमो फेरि सुरु हुनेछ…"</string>
+    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"रद्द गर्नुहोस्"</string>
+    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"अहिले रिसेट गर्नुहोस्"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"यस यन्त्रलाई सीमितताहरू बिना प्रयोग गर्नका लागि फ्याक्ट्री रिसेट गर्नुहोस्"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"थप जान्नका लागि छुनुहोस्।"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> लाई असक्षम गरियो"</string>
+    <string name="conference_call" msgid="3751093130790472426">"सम्मेलन कल"</string>
 </resources>

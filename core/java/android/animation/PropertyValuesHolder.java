@@ -1095,8 +1095,12 @@ public class PropertyValuesHolder implements Cloneable {
         }
         // TODO: We need a better way to get data out of keyframes.
         if (mKeyframes instanceof PathKeyframes.FloatKeyframesBase
-                || mKeyframes instanceof PathKeyframes.IntKeyframesBase) {
-            // property values will animate based on external data source (e.g. Path)
+                || mKeyframes instanceof PathKeyframes.IntKeyframesBase
+                || (mKeyframes.getKeyframes() != null && mKeyframes.getKeyframes().size() > 2)) {
+            // When a pvh has more than 2 keyframes, that means there are intermediate values in
+            // addition to start/end values defined for animators. Another case where such
+            // intermediate values are defined is when animator has a path to animate along. In
+            // these cases, a data source is needed to capture these intermediate values.
             values.dataSource = new PropertyValues.DataSource() {
                 @Override
                 public Object getValueAtFraction(float fraction) {
@@ -1106,6 +1110,13 @@ public class PropertyValuesHolder implements Cloneable {
         } else {
             values.dataSource = null;
         }
+    }
+
+    /**
+     * @hide
+     */
+    public Class getValueType() {
+        return mValueType;
     }
 
     @Override
@@ -1174,6 +1185,15 @@ public class PropertyValuesHolder implements Cloneable {
             setIntValues(values);
             if (property instanceof  IntProperty) {
                 mIntProperty = (IntProperty) mProperty;
+            }
+        }
+
+        @Override
+        public void setProperty(Property property) {
+            if (property instanceof IntProperty) {
+                mIntProperty = (IntProperty) property;
+            } else {
+                super.setProperty(property);
             }
         }
 
@@ -1312,6 +1332,15 @@ public class PropertyValuesHolder implements Cloneable {
             setFloatValues(values);
             if (property instanceof  FloatProperty) {
                 mFloatProperty = (FloatProperty) mProperty;
+            }
+        }
+
+        @Override
+        public void setProperty(Property property) {
+            if (property instanceof FloatProperty) {
+                mFloatProperty = (FloatProperty) property;
+            } else {
+                super.setProperty(property);
             }
         }
 
@@ -1516,7 +1545,7 @@ public class PropertyValuesHolder implements Cloneable {
                     }
                     propertyMap.put(mPropertyName, mJniSetter);
                 }
-           }
+            }
         }
     }
 

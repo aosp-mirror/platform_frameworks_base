@@ -23,6 +23,7 @@ import android.annotation.CallSuper;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.MainThread;
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.Context;
@@ -65,6 +66,7 @@ import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
@@ -2595,6 +2597,29 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     public int getInputMethodWindowRecommendedHeight() {
         return mImm.getInputMethodWindowVisibleHeight();
+    }
+
+    /**
+     * Allow the receiver of {@link InputContentInfo} to obtain a temporary read-only access
+     * permission to the content.
+     *
+     * @param inputContentInfo Content to be temporarily exposed from the input method to the
+     * application.
+     * This cannot be {@code null}.
+     * @param inputConnection {@link InputConnection} with which
+     * {@link InputConnection#commitContent(InputContentInfo, Bundle)} will be called.
+     * @hide
+     */
+    @Override
+    public final void exposeContent(@NonNull InputContentInfo inputContentInfo,
+            @NonNull InputConnection inputConnection) {
+        if (inputConnection == null) {
+            return;
+        }
+        if (getCurrentInputConnection() != inputConnection) {
+            return;
+        }
+        mImm.exposeContent(mToken, inputContentInfo, getCurrentInputEditorInfo());
     }
 
     /**

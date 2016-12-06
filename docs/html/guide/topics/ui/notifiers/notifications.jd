@@ -1,4 +1,6 @@
 page.title=Notifications
+page.image=images/android-7.0/notifications-card.png
+page.tags="notifications", "alerts"
 @jd:body
 
 <div id="qv-wrapper">
@@ -21,6 +23,8 @@ page.title=Notifications
     <ol>
       <li><a href="#Updating">Updating notifications</a></li>
       <li><a href="#Removing">Removing notifications</a></li>
+      <li><a href="#direct">Replying to notifications</a></li>
+      <li><a href="#bundle">Bundling notifications</a></li>
     </ol>
   </li>
   <li><a href="#NotificationResponse">Preserving Navigation when Starting an Activity</a>
@@ -37,12 +41,18 @@ page.title=Notifications
   </li>
   <li><a href="#metadata">Notification Metadata</a></li>
   <li><a href="#Heads-up">Heads-up Notifications</a></li>
-  <li><a href="#lockscreenNotification">Lock Screen Notifications</a></li>
+  <li><a href="#lockscreenNotification">Lock Screen Notifications</a>
     <ol>
       <li><a href="#visibility">Setting Visibility</a></li>
       <li><a href="#controllingMedia">Controlling Media Playback on the Lock Screen</a></li>
     </ol>
-  <li><a href="#CustomNotification">Custom Notification Layouts</a></li>
+  </li>
+  <li><a href="#CustomNotification">Customizing Notifications</a>
+    <ol>
+      <li><a href="#custom">Custom Views</a></li>
+      <li><a href="#style">Messaging Style</a></li>
+    </ol>
+  </li>
 </ol>
 
     <h2>Key classes</h2>
@@ -60,7 +70,7 @@ page.title=Notifications
 <h2>See also</h2>
 <ol>
     <li>
-        <a href="{@docRoot}design/patterns/notifications.html">Android Design: Notifications</a>
+        <a href="https://material.google.com/patterns/notifications.html">Material Design: Notifications</a>
     </li>
 </ol>
 </div>
@@ -97,7 +107,7 @@ The class {@link android.app.Notification.Builder Notification.Builder} was adde
 The material design changes introduced in Android 5.0 (API level 21) are of particular
 importance, and you should review the <a href="{@docRoot}training/material/index.html">Material
 Design</a> training for more information. To learn how to design notifications and their interactions,
-read the <a href="{@docRoot}design/patterns/notifications.html">Notifications</a> design guide.</p>
+read the <a href="https://material.google.com/patterns/notifications.html">Notifications</a> design guide.</p>
 
 <h2 id="CreateNotification">Creating a Notification</h2>
 
@@ -184,7 +194,7 @@ notification, you pass the {@link android.app.Notification} object to the system
 </p>
 <p> For information about setting an appropriate priority level, see "Correctly
     set and manage notification priority" in the <a
-    href="{@docRoot}design/patterns/notifications.html">Notifications</a> Design
+    href="https://material.google.com/patterns/notifications.html">Notifications</a> Design
     guide.
 </p>
 <!-- ------------------------------------------------------------------------------------------ -->
@@ -323,7 +333,7 @@ mBuilder.setStyle(inBoxStyle);
     For example, Gmail notifies the user that new emails have arrived by increasing its count of
     unread messages and by adding a summary of each email to the notification. This is called
     "stacking" the notification; it's described in more detail in the
-    <a href="{@docRoot}design/patterns/notifications.html">Notifications</a> Design guide.
+    <a href="https://material.google.com/patterns/notifications.html">Notifications</a> Design guide.
 </p>
 <p class="note">
     <strong>Note:</strong> This Gmail feature requires the "inbox" expanded layout, which is part
@@ -394,6 +404,305 @@ numMessages = 0;
         all of the notifications you previously issued.
     </li>
 </ul>
+
+<!--------------------------------------------------------------- -->
+<h2 id="direct">Replying to notifications</h2>
+
+<p>
+  Starting in Android 7.0 (API level 24),
+  users can respond directly to text messages or update task lists
+  from within the notification
+  dialog. On a handheld, the inline reply action appears as an additional
+  button
+  displayed in the notification. When a user replies via keyboard, the system
+  attaches the text response to the intent
+  you had specified for the notification action and sends the intent to your
+  handheld app.
+</p>
+
+<img id="fig-reply-button" src="{@docRoot}images/android-7.0/inline-reply.png"
+  srcset="{@docRoot}images/android-7.0/inline-reply.png 1x,
+  {@docRoot}images/android-7.0/inline-reply_2x.png 2x"
+  width="400">
+<p class="img-caption">
+  <strong>Figure 1.</strong> The <strong>Reply</strong> action button.
+</p>
+
+<h3>Adding inline reply actions</h3>
+
+<p>To create a notification action that supports direct reply:
+</p>
+
+<ol>
+<li>Create an instance of {@link android.support.v4.app.RemoteInput.Builder}
+  that you can add to your notification
+action. This class's constructor accepts a string that the system uses as the key
+ for the text input. Later, your handheld app uses that key to retrieve the text
+  of the input.
+
+<pre>
+// Key for the string that's delivered in the action's intent.
+private static final String KEY_TEXT_REPLY = "key_text_reply";
+String replyLabel = getResources().getString(R.string.reply_label);
+RemoteInput remoteInput = new RemoteInput.Builder(KEY_TEXT_REPLY)
+        .setLabel(replyLabel)
+        .build();
+</pre>
+</li>
+<li>Attach the {@link android.support.v4.app.RemoteInput}
+ object to an action using <code>addRemoteInput()</code>.
+
+<pre>
+// Create the reply action and add the remote input.
+Notification.Action action =
+        new Notification.Action.Builder(R.drawable.ic_reply_icon,
+                getString(R.string.label), replyPendingIntent)
+                .addRemoteInput(remoteInput)
+                .build();
+</pre>
+</li>
+
+<li>Apply the action to a notification and issue the notification.
+
+<pre>
+// Build the notification and add the action.
+Notification newMessageNotification =
+        new Notification.Builder(mContext)
+                .setSmallIcon(R.drawable.ic_message)
+                .setContentTitle(getString(R.string.title))
+                .setContentText(getString(R.string.content))
+                .addAction(action))
+                .build();
+
+// Issue the notification.
+NotificationManager notificationManager =
+        NotificationManager.from(mContext);
+notificationManager.notify(notificationId, newMessageNotification);
+
+</pre>
+</li>
+
+</ol>
+
+
+<p> The system prompts the user to input a response when they trigger the
+notification action. </p>
+
+<img id="fig-user-input" src="{@docRoot}images/android-7.0/inline-type-reply.png"
+    srcset="{@docRoot}images/android-7.0/inline-type-reply.png 1x,
+    {@docRoot}images/android-7.0/inline-type-reply_2x.png 2x"
+    width="300">
+<p class="img-caption">
+  <strong>Figure 2.</strong> The user inputs text from the notification shade.
+</p>
+
+<h3>
+  Retrieving user input from the inline reply
+</h3>
+
+<p>
+  To receive user input from the notification interface to the activity you
+  declared in the reply action's intent:
+</p>
+
+<ol>
+  <li>Call {@link android.support.v4.app.RemoteInput#getResultsFromIntent
+  getResultsFromIntent()} by passing the notification action’s intent as the
+  input parameter. This method returns a {@link android.os.Bundle} that
+  contains the text response.
+
+    <pre>
+Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
+</pre>
+  </li>
+
+  <li>Query the bundle using the result key (provided to the {@link
+  android.support.v4.app.RemoteInput.Builder} constructor). You can complete
+  this process and retrieve the input text by creating a method, as in the
+  following code snippet:
+
+    <pre>
+// Obtain the intent that started this activity by calling
+// Activity.getIntent() and pass it into this method to
+// get the associated string.
+
+private CharSequence getMessageText(Intent intent) {
+    Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
+    if (remoteInput != null) {
+        return remoteInput.getCharSequence(KEY_TEXT_REPLY);
+    }
+    return null;
+ }
+</pre>
+  </li>
+
+  <li>Build and issue another notification, using the same notification ID that
+    you provided for the previous notification. The progress indicator
+    disappears from the notification interface to inform users of a successful
+    reply. When working with this new notification, use the context that gets
+    passed to the receiver's {@code onReceive()} method.
+
+    <pre>
+// Build a new notification, which informs the user that the system
+// handled their interaction with the previous notification.
+Notification repliedNotification =
+        new Notification.Builder(context)
+                .setSmallIcon(R.drawable.ic_message)
+                .setContentText(getString(R.string.replied))
+                .build();
+
+// Issue the new notification.
+NotificationManager notificationManager =
+        NotificationManager.from(context);
+notificationManager.notify(notificationId, repliedNotification);
+</pre>
+  </li>
+</ol>
+
+<p>
+  For interactive apps, such as chats, you can include additional
+  context when handling retrieved text. For example, these apps could show
+  multiple lines of chat history. When the user responds via {@link
+  android.support.v4.app.RemoteInput}, you can update the reply history
+  using the {@code setRemoteInputHistory()} method.
+</p>
+
+<p>
+  The notification must be either updated or cancelled after the app has
+  received remote input. When the user replies to a remote update
+  using Direct Reply,
+  do not cancel the notification. Instead, update the notification
+  to display the user's reply.
+  For notifications using {@code MessagingStyle}, you should add
+  the reply as the latest message. When using other templates, you can
+  append the user's reply to the remote-input history.
+</p>
+
+<!-------------------------------------------------------------------------- -->
+
+<h2 id="bundle">Bundling notifications</h2>
+
+<p>
+  Starting in Android 7.0 (API level 24),
+  Android provides developers with a new way to represent
+  a queue of notifications: <i>bundled notifications</i>. This is similar to the
+  <a href="{@docRoot}training/wearables/notifications/stacks.html">Notification
+  Stacks</a> feature in Android Wear. For example, if your app
+  creates notifications
+  for received messages, when more than one message is received, bundle the
+  notifications together as a single group. You can
+  use the {@link android.support.v4.app.NotificationCompat.Builder#setGroup
+  Builder.setGroup()} method to bundle similar notifications.</p>
+
+<p>
+  A notification group imposes a hierarchy on the notifications comprising it.
+  At the top of that hierarchy is a parent notification that displays summary
+  information for the group. The user can progressively
+  expand the notification group, and the system shows more information as the
+  user drills deeper. When the user expands the bundle, the system reveals more
+  information for all its child notifications; when the user
+  expands one of those notifications, the system reveals its entire content.
+</p>
+
+<img id="fig-bundles" src="{@docRoot}images/android-7.0/bundles.png"
+  srcset="{@docRoot}images/android-7.0/bundles.png 1x,
+          {@docRoot}images/android-7.0/bundles_2x.png 2x"
+  width="300">
+<p class="img-caption">
+  <strong>Figure 3.</strong> The user can progressively expand the notification
+  group.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> If the same app sends four or more notifications
+  and does not specify a grouping, the
+  system automatically groups them together.
+</p>
+
+<p>To learn how to add notifications to a group, see
+<a href="{@docRoot}training/wearables/notifications/stacks.html#AddGroup">Add
+Each Notification to a Group</a>.</p>
+
+
+<h3 id="best-practices">Best practices for bundled notifications</h3>
+<p>This section provides guidelines about when to use notification groups instead
+of the {@link android.app.Notification.InboxStyle InboxStyle}
+notifications available in Android 6.0 and previous versions.</p>
+
+<h3>When to use bundled notifications</h3>
+
+<p>You should use notification groups only if all of the following conditions are
+true for your use case:</p>
+
+<ul>
+  <li>The child notifications are complete notifications and can be displayed
+   individually without the need for a group summary.</li>
+  <li>There is a benefit to surfacing the child notifications individually. For
+  example:
+  </li>
+  <ul>
+    <li>They are actionable, with actions specific to each child.</li>
+    <li>There is more information to the child that the user wants to read.</li>
+  </ul>
+</ul>
+
+<p>Examples of good use cases for notification groups include: a messaging app
+displaying a list of incoming messages, or an email app displaying a list of
+received emails.</p>
+
+<p>
+Examples of cases where a single notification is preferable
+ include individual messages from a single person, or a list representation of
+ single-line text items. You can use
+({@link android.app.Notification.InboxStyle InboxStyle} or
+{@link android.app.Notification.BigTextStyle BigTextStyle}) to accomplish
+this.
+</p>
+
+<h3 id ="post">Displaying bundled notifications</h3>
+
+<p>
+  The app should always post a group summary, even if the group contains just a
+  single child. The system will suppress the summary and directly display the
+  child notification if it only contains a single notification. This ensures
+  that the system can provide a consistent experience when the user swipes away
+  children of a group.
+</p>
+
+<h3>Peeking notifications</h3>
+
+<p>While the system usually displays child notifications as a group, you can set
+ them to temporarily appear as
+ <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html#Heads-up">
+ heads-up notifications</a>. This feature is especially useful because it allows
+  immediate access to the most recent child and the actions associated with it.
+</p>
+
+
+<h3>Backwards compatibility</h3>
+
+<p>
+  Both notification groups and remote input have been a part of the {@link
+  android.app.Notification} API since Android 5.0 (API level 21) to support
+  Android Wear devices. If you've already built notifications with these APIs,
+  the only action you must take is to verify that the app behavior corresponds
+  to the guidelines described above, and to consider implementing {@code
+  setRemoteInputHistory()}.
+</p>
+
+<p>
+  In order to support backward compatibility, the same APIs are available with
+  the support library's {@link android.support.v4.app.NotificationCompat}
+  class, allowing you to build notifications that works on versions of Android
+  less than 5.0 (API level 21).
+  On handhelds and tablets, users only see the summary notification,
+  so an app should still have an inbox style or an equivalent notification
+  representative for the whole information content of the group. As Android
+  Wear devices allow users to see all child notifications even on older
+  platform levels, you should build child notifications regardless of API
+  level.
+</p>
+
 <!-- ------------------------------------------------------------------------------------------ -->
 <!-- ------------------------------------------------------------------------------------------ -->
 <h2 id="NotificationResponse">Preserving Navigation when Starting an Activity</h2>
@@ -886,35 +1195,38 @@ method.</p>
 
 <h3 id="controllingMedia">Controlling Media Playback on the Lock Screen</h3>
 
-<p>In Android 5.0 (API level 21) the lock screen no longer displays media controls
-based on the {@link android.media.RemoteControlClient}, which is now deprecated. Instead, use the
-{@link android.app.Notification.MediaStyle} template with the
-{@link android.app.Notification.Builder#addAction(android.app.Notification.Action) addAction()}
-method, which converts actions into clickable icons.</p>
+<p>
+  In Android 5.0 (API level 21) the lock screen no longer displays media
+  controls based on the {@link android.media.RemoteControlClient}, which is
+  now deprecated. Instead, use the {@link
+  android.support.v7.app.NotificationCompat.MediaStyle} template with the
+  {@link
+  android.support.v4.app.NotificationCompat.Builder#addAction(android.support.v4.app.NotificationCompat.Action)
+  addAction()} method, which converts actions into clickable icons.
+</p>
 
-<p class="note"><strong>Note:</strong> The template and the
-{@link android.app.Notification.Builder#addAction(android.app.Notification.Action) addAction()}
-method are not included in the support library, so these features run in Android 5.0 and higher
-only.</p>
-
-<p>To display media playback controls on the lock screen in Android 5.0, set the visibility
-to {@link android.support.v4.app.NotificationCompat#VISIBILITY_PUBLIC}, as described above. Then add
-the actions and set the {@link android.app.Notification.MediaStyle} template, as described in the
-following sample code:</p>
+<p>
+  To display media playback controls on the lock screen in Android 5.0, set
+  the visibility to {@link
+  android.support.v4.app.NotificationCompat#VISIBILITY_PUBLIC}, as described
+  above. Then add the actions and set the {@link
+  android.support.v7.app.NotificationCompat.MediaStyle} template, as described
+  in the following sample code:
+</p>
 
 <pre>
-Notification notification = new Notification.Builder(context)
+Notification notification = new NotificationCompat.Builder(context)
     // Show controls on lock screen even when user hides sensitive content.
-    .setVisibility(Notification.VISIBILITY_PUBLIC)
+    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
     .setSmallIcon(R.drawable.ic_stat_player)
     // Add media control buttons that invoke intents in your media service
     .addAction(R.drawable.ic_prev, "Previous", prevPendingIntent) // #0
     .addAction(R.drawable.ic_pause, "Pause", pausePendingIntent)  // #1
     .addAction(R.drawable.ic_next, "Next", nextPendingIntent)     // #2
     // Apply the media style template
-    .setStyle(new Notification.MediaStyle()
-    .setShowActionsInCompactView(1 /* #1: pause button */)
-    .setMediaSession(mMediaSession.getSessionToken())
+    .setStyle(new NotificationCompat.MediaStyle()
+        .setShowActionsInCompactView(1 /* #1: pause button */)
+        .setMediaSession(mMediaSession.getSessionToken()))
     .setContentTitle("Wonderful music")
     .setContentText("My Awesome Band")
     .setLargeIcon(albumArtBitmap)
@@ -984,3 +1296,69 @@ for more information about the new APIs for managing the media session and contr
     standard notification layout text. If you use the same style in applications that target Android
     2.3 or higher, you'll ensure that your text is visible against the display background.
 </p>
+
+<!-- ------------------------------------------------------------------------ -->
+<h3 id="custom"> Custom Views</h3>
+<p>
+  Starting from Android 7.0 (API level 24),
+  you can customize notification views and
+  still obtain system decorations like notification headers, actions, and
+  expandable layouts.
+</p>
+
+<p>To enable this capability, Android provides the following APIs to style your
+  custom view:</p>
+
+<dl>
+<dt>
+{@code DecoratedCustomViewStyle()}</dt>
+<dd> Styles notifications other than media
+notifications.</dd>
+<dt>
+{@code DecoratedMediaCustomViewStyle()}</dt>
+<dd> Styles media notifications.</dd>
+</dl>
+
+<p>To use this API, call the {@code setStyle()} method, passing to it
+the desired custom view style.</p>
+
+<p>This snippet shows how to construct a custom notification object with the
+{@code DecoratedCustomViewStyle()} method.</p>
+
+<pre>
+Notification notification = new Notification.Builder()
+           .setSmallIcon(R.drawable.ic_stat_player)
+           .setLargeIcon(albumArtBitmap))
+           .setCustomContentView(contentView);
+           .setStyle(new Notification.DecoratedCustomViewStyle())
+           .build();
+
+</pre>
+
+<!-- ----------------------------------------------------------------------- -->
+
+<h3 id="style">Messaging Style</h3>
+<p>
+  Starting in Android 7.0 (API level 24),
+  Android provides an API for customizing the style of a notification.
+  Using the <code>MessagingStyle</code> class, you can change several of the
+  labels displayed on the notification, including the conversation title,
+  additional messages, and the content view for the notification.
+</p>
+
+<p>
+  The following code snippet demonstrates how to customize a notification's
+  style using the <code>MessagingStyle</code> class.
+</p>
+
+<pre>
+  Notification notification = new Notification.Builder()
+             .setStyle(new Notification.MessagingStyle("Me")
+                 .setConversationTitle("Team lunch")
+                 .addMessage("Hi", timestamp1, null) // Pass in null for user.
+                 .addMessage("What's up?", timestamp2, "Coworker")
+                 .addMessage("Not much", timestamp3, null)
+                 .addMessage("How about lunch?", timestamp4, "Coworker"))
+             .build();
+</pre>
+

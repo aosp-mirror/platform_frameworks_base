@@ -1,0 +1,181 @@
+page.title=직접 부팅
+page.keywords=preview, sdk, 직접 부팅
+page.tags=androidn
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>이 문서의 내용</h2>
+  <ol>
+    <li><a href="#run">직접 부팅 시 실행하기 위한 액세스 요청</a></li>
+    <li><a href="#access">기기 암호화 저장소 액세스</a></li>
+    <li><a href="#notification">사용자 잠금 해제 알림 수신</a></li>
+    <li><a href="#migrating">기존 데이터 마이그레이션</a></li>
+    <li><a href="#testing">암호화 인식 앱 테스트</a></li>
+  </ol>
+</div>
+</div>
+
+<p>기기에 전원이 들어와 있지만 <i>사용자가 기기의 잠금을 해제하지</i> 않았을 경우 Android N은 안전한
+직접 부팅
+ 모드에서 실행됩니다. 이를 지원하기 위해 시스템에서 다음과 같은 두 가지 데이터 저장소 위치를 제공합니다.</p>
+
+<ul>
+<li><i>자격 증명 암호화 저장소:</i>기본 저장소 위치이며, 사용자가 기기의 잠금을 해제한 후에만
+사용할 수 있습니다.</li>
+<li><i>기기 암호화 저장소:</i>직접 부팅 모드와 사용자가 기기의 잠금을 해제한 후에
+모두 사용할 수 있는 저장소 위치입니다.</li>
+</ul>
+
+<p>기본적으로 직접 부팅 모드 시 앱이 실행되지 않습니다.
+직접 부팅 모드에서 조치가 필요한 경우,
+이 모드에서 실행되어야 하는 앱 구성 요소를 등록할 수 있습니다. 직접 부팅 모드 시 실행되어야 하는 앱의
+몇 가지 공통 사용 사례는 다음과 같습니다.</p>
+
+<ul>
+<li>알람 시계 앱과 같이 예약된 알림이 있는
+앱.</li>
+<li>SMS 앱처럼 중요한 사용자 알림을 제공하는 앱.</li>
+<li>Talkback처럼 접근성 서비스를 제공하는 앱.</li>
+</ul>
+
+<p>앱이 직접 부팅 모드에서 실행되는 동안 데이터에 액세스해야 하는 경우
+기기 암호화 저장소를 사용합니다. 기기 암호화 저장소에는
+기기가 성공적으로 확인된 부팅을 수행한 후에만
+사용할 수 있는 키로 암호화된 데이터가 포함됩니다.</p>
+
+<p>PIN이나 비밀번호와 같이 사용자 자격 증명과 연관된 키로 암호화해야 하는 데이터는
+자격 증명 암호화 저장소를 사용합니다.
+자격 증명 암호화 저장소는 사용자가 기기의 잠금을 해제한 뒤부터
+기기를 다시 시작할 때까지 사용할 수 있습니다. 사용자가
+기기의 잠금을 해제한 뒤 잠금 화면을 활성화해도
+자격 증명 암호화 저장소가 잠기지 않습니다.</p>
+
+<h2 id="run">직접 부팅 시 실행하기 위한 액세스 요청</h2>
+
+<p>앱은 직접 부팅 모드에서 실행되거나
+기기 암호화 저장소에 액세스하기 전까지
+시스템에 구성 요소를 등록해야 합니다. 앱은 구성 요소를 암호화 인식으로 표시하여
+<i>시스템에</i> 등록합니다. 구성 요소를 암호화 인식으로 표시하려면 매니페스트에서
+<code>android:directBootAware</code> 속성을 true로 설정합니다.<p>
+
+<p>암호화 인식 구성 요소로 등록하면 기기가 다시 시작되었을 때 시스템에서
+<code>LOCKED_BOOT_COMPLETED</code> 브로드캐스트 메시지를
+수신할 수 있습니다. 이 시점에서 기기 암호화 저장소를
+사용할 수 있고, 여러분의 구성 요소는
+예약된 알람 트리거 등과 같이 직접 부팅 모드에서 실행해야 하는 작업을 실행할 수 있습니다.</p>
+
+<p>다음 코드 조각은
+{@link android.content.BroadcastReceiver}를 암호화 인식으로 등록하고 앱 매니페스트에
+<code>LOCKED_BOOT_COMPLETED</code>의 인텐트 필터를 추가하는 예시입니다.</p>
+
+<pre>
+&lt;receiver
+  android:directBootAware="true" &gt;
+  ...
+  &lt;intent-filter&gt;
+    &lt;action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" /&gt;
+  &lt;/intent-filter&gt;
+&lt;/receiver&gt;
+</pre>
+
+<p>사용자가 기기의 잠금을 해제하면 모든 구성 요소가
+기기 암호화 저장소와 자격 증명 암호화 저장소에 액세스할 수 있습니다.</p>
+
+<h2 id="access">기기 암호화 저장소 액세스</h2>
+
+<p>기기 암호화 저장소에 액세스하려면
+<code>Context.createDeviceProtectedStorageContext()</code>를 호출하여 두 번째
+{@link android.content.Context} 인스턴스를 생성합니다. 이 컨텍스트를 사용하여 수행된 모든 저장소 API 호출은
+기기 암호화 저장소에 액세스합니다. 다음은
+기기 암호화 저장소에 액세스하고 기존
+앱 데이터 파일을 여는 예시입니다.</p>
+
+<pre>
+Context directBootContext = appContext.createDeviceProtectedStorageContext();
+// Access appDataFilename that lives in device encrypted storage
+FileInputStream inStream = directBootContext.openFileInput(appDataFilename);
+// Use inStream to read content...
+</pre>
+
+<p>직접 부팅 모드에서 액세스해야 하는 정보에만
+기기 암호화 저장소를 사용합니다.
+기기 암호화 저장소를 범용 암호화 저장소로 사용하지 마십시오.
+개인적인 사용자 정보 또는 직접 부팅 모드에서 필요하지 않은 암호화 데이터는
+자격 증명 암호화 저장소를 사용합니다.</p>
+
+<h2 id="notification">사용자 잠금 해제 알림 수신</h2>
+
+<p>사용자가 재시작 후 기기의 잠금을 해제하면
+앱이 자격 증명 암호화 저장소 액세스로 전환하고,
+사용자 자격 증명을 따르는 일반 시스템 서비스를 사용할 수 있습니다.</p>
+
+<p>사용자가 재부팅 후 기기의 잠금을 해제할 때 알림을 받으려면
+실행 중인 구성 요소에서 {@link android.content.BroadcastReceiver}를 등록하고
+<code>ACTION_USER_UNLOCKED</code> 메시지를 수신합니다. 또는,
+기존 {@link android.content.Intent#ACTION_BOOT_COMPLETED
+ACTION_BOOT_COMPLETED} 메시지를 수신할 수 있습니다. 이 메시지는 기기가 부팅되었으며 사용자가 기기의 잠금을
+해제했음을 나타냅니다.</p>
+
+<p>사용자가
+<code>UserManager.isUserUnlocked()</code>를 호출하여 기기 잠금을 해제했는지 직접 쿼리할 수 있습니다.</p>
+
+<h2 id="migrating">기존 데이터 마이그레이션</h2>
+
+<p>직접 부팅 모드를 사용하도록 사용자가 자신의 기기를 업데이트하는 경우,
+여러분이 기존 데이터를 기기 암호화 저장소로 마이그레이션해야 할 수도 있습니다.
+<code>Context.moveSharedPreferencesFrom()</code>과
+<code>Context.moveDatabaseFrom()</code>을 사용하여 자격 증명 암호화 저장소와 기기 암호화 저장소 간에
+기본 설정과 데이터베이스 데이터를 마이그레이션합니다.</p>
+
+<p>어떤 데이터를 자격 증명
+암호화 저장소에서 기기 암호화 저장소로 마이그레이션할지를 신중히 결정하세요. 암호나 인증 토큰 등의
+개인 사용자 정보는 기기 암호화 저장소로
+마이그레이션해서는 안 됩니다. 일부 시나리오에서
+두 가지 암호화 저장소에 있는 별도의 데이터 세트를 관리해야 할 수 있습니다.</p>
+
+<h2 id="testing">암호화 인식 앱 테스트</h2>
+
+<p>새로운 직접 부팅 모드로 암호화 인식 앱을 테스트하세요. 직접 부팅을
+활성화하는 방법은 두 가지가 있습니다.</p>
+
+<p class="caution"><strong>주의:</strong> 직접 부팅을 활성화하면
+기기에서 모든 사용자 데이터가 삭제됩니다.</p>
+
+<p>Android N이 설치된 지원 기기에서
+직접 부팅을 활성화하는 방법:</p>
+
+<ul>
+<li><b>Developer options</b>가 활성화되어 있지 않으면 기기에서
+<b>Settings &gt; About phone</b>으로 이동하여 <b>Build number</b>를
+7번 탭하여 활성화합니다. 개발자 옵션 화면이 나오면
+<b>Settings &gt; Developer options</b>로 이동해서
+<b>Convert to file encryption</b>을 선택합니다.</li>
+<li>다음 adb shell 명령을 사용하여 직접 부팅 모드를 활성화합니다.
+<pre class="no-pretty-print">
+$ adb reboot-bootloader
+$ fastboot --wipe-and-use-fbe
+</pre>
+</li>
+</ul>
+
+<p>테스트 기기에서 모드를 전환해야 할 경우
+에뮬레이션된 직접 부팅 모드도 사용할 수 있습니다. 에뮬레이션된 모드는 개발 시에만 사용해야 하며
+데이터가 손실될 수 있습니다. 에뮬레이션된 직접 부팅 모드를 활성화하려면
+기기에서 잠금 패턴을 설정합니다. 잠금 패턴을 설정할 때 안전 모드 화면으로 시작할지 묻는 메시지가 나오면 "No thanks"를
+선택한 뒤 다음
+adb shell 명령을 사용합니다.</p>
+
+<pre class="no-pretty-print">
+$ adb shell sm set-emulate-fbe true
+</pre>
+
+<p>에뮬레이션된 직접 부팅 모드를 끄려면 다음 명령을 사용합니다.</p>
+
+<pre class="no-pretty-print">
+$ adb shell sm set-emulate-fbe false
+</pre>
+
+<p>이 명령을 사용하면 기기가 재부팅됩니다.</p>

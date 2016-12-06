@@ -168,6 +168,8 @@ public:
 
     ANDROID_API int64_t getFrameNumber();
 
+    void waitOnFences();
+
 private:
     friend class RegisterFrameCallbackTask;
     // TODO: Replace with something better for layer & other GL object
@@ -178,7 +180,7 @@ private:
 
     void freePrefetchedLayers(TreeObserver* observer);
 
-    void waitOnFences();
+    bool isSwapChainStuffed();
 
     EGLint mLastFrameWidth = 0;
     EGLint mLastFrameHeight = 0;
@@ -198,11 +200,16 @@ private:
     struct SwapHistory {
         SkRect damage;
         nsecs_t vsyncTime;
-        nsecs_t swapTime;
+        nsecs_t swapCompletedTime;
+        nsecs_t dequeueDuration;
+        nsecs_t queueDuration;
     };
 
     RingBuffer<SwapHistory, 3> mSwapHistory;
     int64_t mFrameNumber = -1;
+
+    // last vsync for a dropped frame due to stuffed queue
+    nsecs_t mLastDropVsync = 0;
 
     bool mOpaque;
 #if HWUI_NEW_OPS

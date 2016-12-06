@@ -1,0 +1,93 @@
+page.title=Interact with Nearby Users
+page.metaDescription=Use the Nearby feature to interact with nearby people, devices, and beacons.
+page.image=images/distribute/nearby_connections.png
+page.tags="users, nearby, engage"
+@jd:body
+
+<p>Create experiences that seem magical for users who are in close proximity by using the unique
+close-range and cross-platform capabilities of Nearby. Set up multiplayer games, ad-hoc groups,
+sharing, or collaborative sessions so that your users can work or play together more easily when
+they're close.</p>
+
+<p>Learn more about <a href="https://developers.google.com/nearby/">how to add nearby interactions
+to your app or game</a>.</p>
+
+<div class="wrap">
+  <div class="cols" style="margin-top:1em;">
+    <div class="col-4of12">
+      <h3>
+        Messaging
+      </h3>
+      <img src="{@docRoot}images/distribute/nearby_messaging.png">
+      <p class="figure-caption">
+        Find nearby devices and share messages to enable rich interactions and collaboration
+        among users.
+      </p>
+    </div>
+
+    <div class="col-4of12">
+      <h3>
+        Connections
+      </h3>
+      <img src="{@docRoot}images/distribute/nearby_connections.png">
+      <p class="figure-caption">
+        Discover other local devices and create connections that enable real-time, cross-device
+        experiences.
+      </p>
+    </div>
+
+    <div class="col-4of12">
+      <h3>
+        Beacons
+      </h3>
+      <img src="{@docRoot}images/distribute/nearby_beacons.png">
+      <p class="figure-caption">
+        Receive messages from beacons using
+        <a href="https://developers.google.com/beacons/eddystone">Eddystone</a> and add context to
+        location-based apps and games.
+      </p>
+    </div>
+  </div>
+</div>
+
+<p class="note"><strong>Note:</strong> Nearby uses Bluetooth 2.0, Bluetooth 4.0, Wi-Fi, and an
+ultrasonic modem to function over distances of up to 100 feet.</p>
+
+<h2 id="best-practices">Best practices</h2>
+
+<p>The following list contains some helpful tips and best practices that will help you set up
+and use Nearby effectively:
+
+<ul>
+  <li>Use Nearby features sparingly and only when they're needed because they can consume battery
+  life quickly (up to 3.5 times faster than normal).
+  </li>
+
+  <li>Invoke Nearby explicitly with a button, switch, or special screen, and provide a visual
+  indication when the features are actively sending or receiving content.
+  </li>
+
+  <li>Ensure that users are aware of the data that is made visible by Nearby before
+  they start using the features.
+  </li>
+
+  <li>Stop any publish or subscribe operations when the user exits the app or stops the
+  activity that requires Nearby.
+  </li>
+
+  <li>Use the <em>earshot</em> option, which uses only the ultrasonic modem to send and receive
+  messages, to limit the range of Nearby messages to about five feet when privacy is important.
+  </li>
+
+  <li>Accelerate the exchange of messages (when appropriate) by making one device the publisher
+  only, and all other devices subscribers.
+  </li>
+</ul>
+
+<h2 id="related-resources">Related resources</h2>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/users/nearby"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>

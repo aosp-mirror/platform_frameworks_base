@@ -46,7 +46,7 @@ parent.link=index.html
 
 
 <div class="note design">
-<p><strong>New Guides for App Designers!</strong></p> 
+<p><strong>New Guides for App Designers!</strong></p>
 <p>Check out the new documents for designers at <strong><a
 href="{@docRoot}design/index.html">Android Design</a></strong>.</p>
 </div>

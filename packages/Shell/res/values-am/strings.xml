@@ -21,7 +21,7 @@
     <string name="bugreport_finished_title" msgid="4429132808670114081">"የሳንካ ሪፖርት <xliff:g id="ID">#%d</xliff:g> ተወስዷል"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"ዝርዝሮችን ወደ የሳንካ ሪፖርቱ በማከል ላይ"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"እባክዎ ይጠብቁ…"</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"የሳንካ ሪፖርትዎን ለማጋራት ወደ ግራ ያንሸራትቱ"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"የሳንካ ሪፖርቱ ከትንሽ ጊዜ በኋላ በስልኩ ላይ ይመጣል"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"የሳንካ ሪፖርትዎን ለማጋራት መታ ያድርጉ"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"የእርስዎን የሳንካ ሪፖርት ያለ ቅጽበታዊ ማያ ገጽ ለማጋራት መታ ያድርጉ ወይም ቅጽበታዊ ማያ ገጹ እስኪጨርስ ይጠብቁ"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"የእርስዎን የሳንካ ሪፖርት ያለ ቅጽበታዊ ማያ ገጽ ለማጋራት መታ ያድርጉ ወይም ቅጽበታዊ ማያ ገጹ እስኪጨርስ ይጠብቁ"</string>

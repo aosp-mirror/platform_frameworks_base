@@ -12,7 +12,7 @@ page.image=/distribute/images/core-quality-guidelines.jpg
         <li><a href="#listing">Соответствие требованиям Google Play</a></li>
 
   </ol>
-  
+
   <h2>Тестирование</h2>
   <ol>
     <li><a href="#test-environment">Настройка среды тестирования</a></li>
@@ -24,7 +24,7 @@ page.image=/distribute/images/core-quality-guidelines.jpg
     <li><a href="{@docRoot}distribute/essentials/quality/tablets.html">Качество приложений для планшетных ПК</a></li>
         <li><a href="{@docRoot}distribute/essentials/optimizing-your-app.html">Оптимизация приложений</a></li>
   </ol>
-  
+
 
 </div>
 </div>
@@ -84,7 +84,7 @@ page.image=/distribute/images/core-quality-guidelines.jpg
     <th style="width:54px;">
       ИД
     </th>
-    
+
 
     <th>
       Описание
@@ -182,7 +182,7 @@ page.image=/distribute/images/core-quality-guidelines.jpg
   </td>
   <td>
     <p style="margin-bottom:.5em;">
-    Уведомления должны соответствовать <a href="{@docRoot}design/patterns/notifications.html">рекомендациям</a> по дизайну Android. В 
+    Уведомления должны соответствовать <a href="{@docRoot}design/patterns/notifications.html">рекомендациям</a> по дизайну Android. В
 частности, должны быть соблюдены следующие правила.
     </p>
 
@@ -290,7 +290,7 @@ data-maxresults="6">
   <td>
     <p style="margin-bottom:.5em;">
     Приложение не запрашивает прав доступа к наиболее важным данным (например,
- к контактам или системному журналу), а также к платным сервисам 
+ к контактам или системному журналу), а также к платным сервисам
  (например, службам дозвона или отправки СМС), если это не связано с основной функциональностью данного
  приложения.
     </p>
@@ -311,7 +311,7 @@ data-maxresults="6">
 
     <p style="margin-bottom:.25em;">
     Поддержка установки на SD-карту рекомендована для всех больших приложений
- (превышающих 10 МБ). См. в руководстве разработчика в разделе <a href="{@docRoot}guide/topics/data/install-location.html">Место 
+ (превышающих 10 МБ). См. в руководстве разработчика в разделе <a href="{@docRoot}guide/topics/data/install-location.html">Место
 установки приложения</a> информацию о том,
  какие типы приложений должны поддерживать установку на SD-карты.
     </p>
@@ -490,7 +490,7 @@ data-maxresults="6">
  его состояние должно быть восстановлено максимально близко к предыдущему состоянию.
     </li>
 
-    <li>При нажатии кнопки "Назад" приложение позволяет сохранить свое текущее состояние или 
+    <li>При нажатии кнопки "Назад" приложение позволяет сохранить свое текущее состояние или
 состояние пользователя, которое в противном случае будет потеряно при переходе назад.
     </li>
     </ol>
@@ -1048,8 +1048,8 @@ data-cardsizes="6x3,6x3,6x3,6x3,6x3,6x3" data-maxresults="6">
     </p>
 
     <p style="margin-bottom:.25em;">
-    Чтобы принудительно задействовать аппаратное ускорение (если оно поддерживается 
- устройством), добавьте параметр <code>hardware-accelerated="true"</code> к разделу 
+    Чтобы принудительно задействовать аппаратное ускорение (если оно поддерживается
+ устройством), добавьте параметр <code>hardware-accelerated="true"</code> к разделу
  <code>&lt;application&gt;</code> в манифесте приложения и выполните его повторную компиляцию.
     </p>
   </td>

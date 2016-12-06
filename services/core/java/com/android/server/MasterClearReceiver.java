@@ -47,6 +47,7 @@ public class MasterClearReceiver extends BroadcastReceiver {
         final String reason = intent.getStringExtra(Intent.EXTRA_REASON);
         final boolean wipeExternalStorage = intent.getBooleanExtra(
                 Intent.EXTRA_WIPE_EXTERNAL_STORAGE, false);
+        final boolean forceWipe = intent.getBooleanExtra(Intent.EXTRA_FORCE_MASTER_CLEAR, false);
 
         Slog.w(TAG, "!!! FACTORY RESET !!!");
         // The reboot call is blocking, so we need to do it on another thread.
@@ -54,7 +55,7 @@ public class MasterClearReceiver extends BroadcastReceiver {
             @Override
             public void run() {
                 try {
-                    RecoverySystem.rebootWipeUserData(context, shutdown, reason);
+                    RecoverySystem.rebootWipeUserData(context, shutdown, reason, forceWipe);
                     Log.wtf(TAG, "Still running after master clear?!");
                 } catch (IOException e) {
                     Slog.e(TAG, "Can't perform master clear/factory reset", e);

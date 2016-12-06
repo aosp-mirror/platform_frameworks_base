@@ -16,7 +16,9 @@
 
 package android.os;
 
+import android.annotation.TestApi;
 import android.system.Os;
+import android.system.OsConstants;
 import android.util.Log;
 import android.webkit.WebViewZygote;
 import dalvik.system.VMRuntime;
@@ -303,6 +305,12 @@ public class Process {
      * @hide
      */
     public static final int SCHED_IDLE = 5;
+
+    /**
+     * Reset scheduler choice on fork.
+     * @hide
+     */
+    public static final int SCHED_RESET_ON_FORK = 0x40000000;
 
     // Keep in sync with SP_* constants of enum type SchedPolicy
     // declared in system/core/include/cutils/sched_policy.h,
@@ -636,6 +644,9 @@ public class Process {
      * priority.
      * If the thread is a thread group leader, that is it's gettid() == getpid(),
      * then the other threads in the same thread group are _not_ affected.
+     *
+     * Does not set cpuset for some historical reason, just calls
+     * libcutils::set_sched_policy().
      */
     public static final native void setThreadGroup(int tid, int group)
             throws IllegalArgumentException, SecurityException;
@@ -657,6 +668,8 @@ public class Process {
      * priority threads alone.  group == THREAD_GROUP_BG_NONINTERACTIVE moves all
      * threads, regardless of priority, to the background scheduling group.
      * group == THREAD_GROUP_FOREGROUND is not allowed.
+     *
+     * Always sets cpusets.
      */
     public static final native void setProcessGroup(int pid, int group)
             throws IllegalArgumentException, SecurityException;
@@ -728,6 +741,24 @@ public class Process {
             throws IllegalArgumentException;
     
     /**
+     * Return the current scheduling policy of a thread, based on Linux.
+     *
+     * @param tid The identifier of the thread/process to get the scheduling policy.
+     *
+     * @throws IllegalArgumentException Throws IllegalArgumentException if
+     * <var>tid</var> does not exist, or if <var>priority</var> is out of range for the policy.
+     * @throws SecurityException Throws SecurityException if your process does
+     * not have permission to modify the given thread, or to use the given
+     * scheduling policy or priority.
+     *
+     * {@hide}
+     */
+    
+    @TestApi
+    public static final native int getThreadScheduler(int tid)
+            throws IllegalArgumentException;
+
+    /**
      * Set the scheduling policy and priority of a thread, based on Linux.
      *
      * @param tid The identifier of the thread/process to change.
@@ -742,6 +773,7 @@ public class Process {
      *
      * {@hide}
      */
+
     public static final native void setThreadScheduler(int tid, int policy, int priority)
             throws IllegalArgumentException;
 
@@ -915,4 +947,26 @@ public class Process {
      * @hide
      */
     public static final native void removeAllProcessGroups();
+
+    /**
+     * Check to see if a thread belongs to a given process. This may require
+     * more permissions than apps generally have.
+     * @return true if this thread belongs to a process
+     * @hide
+     */
+    public static final boolean isThreadInProcess(int tid, int pid) {
+        StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
+        try {
+            if (Os.access("/proc/" + tid + "/task/" + pid, OsConstants.F_OK)) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            return false;
+        } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
+        }
+
+    }
 }

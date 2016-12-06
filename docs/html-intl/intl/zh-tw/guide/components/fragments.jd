@@ -36,7 +36,7 @@ parent.link=activities.html
     <li>{@link android.app.FragmentManager}</li>
     <li>{@link android.app.FragmentTransaction}</li>
   </ol>
-  
+
   <h2>另請參閱</h2>
   <ol>
     <li><a href="{@docRoot}training/basics/fragments/index.html">使用片段建置動態 UI</a></li>
@@ -46,7 +46,7 @@ parent.link=activities.html
 </div>
 </div>
 
-<p>{@link android.app.Fragment} 代表一種行為或 
+<p>{@link android.app.Fragment} 代表一種行為或
 {@link android.app.Activity} 中的一部分使用者介面。您可以合併單一 Activity 中的多個片段，藉此建置
 多窗格 UI 以及在多個 Activity 中重複使用片段。您可以將片段想成是 Activity 的模組化區段，片段擁有自己的生命週期、接收自己的輸入事件，而且您可以在 Activity 執行時新增或移除片段 (有點像是您可以在不同 Activity 中重複使用的「子 Activity」)。
 
@@ -204,11 +204,11 @@ android.app.ListFragment} 的子類別，則實作完畢後系統預設會傳回
 {@link android.widget.ListView}，因此您不必加以實作。</p>
 
 <p>如要從 {@link
-android.app.Fragment#onCreateView onCreateView()} 傳回版面配置，您可以從 XML 中定義的<a href="{@docRoot}guide/topics/resources/layout-resource.html">l版面配置資源</a>擴大它。為協助您完成這項作業，{@link android.app.Fragment#onCreateView onCreateView()} 提供了 
+android.app.Fragment#onCreateView onCreateView()} 傳回版面配置，您可以從 XML 中定義的<a href="{@docRoot}guide/topics/resources/layout-resource.html">l版面配置資源</a>擴大它。為協助您完成這項作業，{@link android.app.Fragment#onCreateView onCreateView()} 提供了
 {@link android.view.LayoutInflater} 物件。
 </p>
 
-<p>例如，以下是 {@link android.app.Fragment} 的子類別，可從 
+<p>例如，以下是 {@link android.app.Fragment} 的子類別，可從
 {@code example_fragment.xml} 檔案載入版面配置：</p>
 
 <pre>
@@ -378,7 +378,7 @@ FragmentRetainInstance.java} 範例 (可透過 Android SDK Manager 存取)<code>
   <li>使用 {@link
 android.app.FragmentManager#findFragmentById findFragmentById()} (針對在 Activity 版面配置中提供 UI 的片段) 或 {@link android.app.FragmentManager#findFragmentByTag
 findFragmentByTag()} (針對未提供 UI 的片段) 取得 Activity 中的現有片段。
-</li> 
+</li>
   <li>使用 {@link
 android.app.FragmentManager#popBackStack()} (模擬使用者的「返回」<em></em>命令) 將片段從返回堆疊中推出。</li>
   <li>使用 {@link
@@ -563,7 +563,7 @@ public static class FragmentA extends ListFragment {
 </pre>
 
 <p>如果 Activity 並未實作介面，那麼片段會擲回
-{@link java.lang.ClassCastException}。成功擲回時，{@code mListener} 成員會保留 Activity 所實作 
+{@link java.lang.ClassCastException}。成功擲回時，{@code mListener} 成員會保留 Activity 所實作
 {@code OnArticleSelectedListener} 的參照資料，以便片段 A 呼叫 {@code OnArticleSelectedListener} 介面定義的方法與 Activity 分享事件。
 
 例如，假設片段 A 是
@@ -739,7 +739,7 @@ android.app.Activity#onCreate onCreate()} 回呼後，Activity 中的片段就�
 這個 Activity 範例同時示範了如何根據螢幕設定提供不同的片段設定。
 </p>
 
-<p class="note"><strong>注意：</strong>如需這個 Activity 的完整原始碼，請查閱 
+<p class="note"><strong>注意：</strong>如需這個 Activity 的完整原始碼，請查閱
 <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.html">{@code
 FragmentLayout.java}</a>。</p>
 
@@ -785,7 +785,7 @@ android.widget.FrameLayout})，或是啟動新的 Activity (藉此顯示片段)�
 
 <p>第二個片段 {@code DetailsFragment} 則會針對
 {@code TitlesFragment} 中，使用者所選清單項目的劇本摘要：</p>
- 
+
 {@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java details}
 
 <p>針對 {@code TitlesFragment} 類別發出的回呼，如果使用者點擊清單項目，而且目前的版面配置「並未」<em></em>包含 {@code R.id.details} 檢視 ({@code DetailsFragment} 所屬的檢視)，則應用程式會執行 {@code DetailsActivity} Activity 來顯示項目內容。
@@ -798,7 +798,7 @@ android.widget.FrameLayout})，或是啟動新的 Activity (藉此顯示片段)�
 
 {@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java
 details_activity}
- 
+
 <p>請注意，這個 Activity 會在螢幕採用橫向版面配置的情況下自行結束，因此主要 Activity 會接續顯示 {@code TitlesFragment} 旁的 {@code DetailsFragment}。如果使用者在採用直向版面配置的裝置上執行 {@code DetailsActivity}，然後將該裝置旋轉成橫向 (這會重新執行目前的 Activity)，就可能會發生這種情況。
 
 

@@ -1,0 +1,213 @@
+page.title=Modo Picture-in-picture
+page.keywords=preview,sdk,PIP,Picture-in-picture
+page.tags=androidn
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>En este documento</h2>
+<ol>
+  <li><a href="#declaring">Declarar que la actividad permite
+el modo Picture-in-Picture</a></li>
+  <li><a href="#pip_button">Cambiar la actividad al modo Picture-in-picture</a>
+</li>
+  <li><a href="#handling_ui">Gestionar las IU durante el modo Picture-in-picture</a>
+</li>
+  <li><a href="#continuing_playback">Continuar la reproducción de video durante
+el modo Picture-in-picture</a></li>
+  <li><a href="#single_playback">Usar una única actividad de reproducción para
+el modo Picture-in-picture</a></li>
+  <li><a href="#best">Prácticas recomendadas</a></li>
+</ol>
+
+<h2>Consulta también</h2>
+<ol>
+  <li><a href="{@docRoot}preview/features/multi-window.html">Compatibilidad con
+ventanas múltiples</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>Con Android N, los usuarios de Android TV ahora pueden ver un video
+en una ventana fija que se ubica en una esquina de la pantalla mientras navegan dentro de
+aplicaciones. El modo picture-in-picture (PIP) permite que las aplicaciones reproduzcan un video
+en una ventana fija mientras se lleva a cabo otra actividad
+en el fondo. La ventana de PIP les permite a los usuarios realizar múltiples tareas mientras usan tu aplicación, lo cual les permite
+ser más productivos.</p>
+
+<p>Tu aplicación puede decidir cuándo activar el modo PIP. Aquí te mostramos algunos ejemplos de
+situaciones en las que se podría usar el modo PIP:</p>
+
+<ul>
+<li>Tu aplicación puede pasar un video al modo PIP cuando el usuario retrocede
+en la navegación desde el video para explorar otro contenido.</li>
+<li>También puede hacerlo mientras el usuario está viendo el final
+de un episodio de contenido. La pantalla principal muestra información promocional
+o de resumen sobre el próximo capítulo de la serie.</li>
+<li>Tu aplicación puede brindarles a los usuarios una forma de poner en cola otro contenido mientras
+miran un video. El video continúa reproduciéndose en modo PIP mientras la pantalla
+principal muestra una actividad de selección de contenido.</li>
+</ul>
+
+<p>La ventana de PIP es de 240x135 dp y se muestra en la capa delantera en una de las
+cuatro esquinas de la pantalla que el sistema elige. El usuario puede acceder a un menú de
+PIP que le permite activar o desactivar la ventana de PIP a pantalla completa o cerrarla
+presionando el botón <b>Home</b> en el control remoto. Si se comienza a reproducir
+otro video en la pantalla principal, la ventana de PIP se cierra
+automáticamente. Los usuarios también pueden cerrar la ventana de PIP desde Recents.</p>
+
+<img src="{@docRoot}images/android-7.0/pip-active.png" />
+<p class="img-caption"><strong>Imagen 1.</strong> Un video picture-in-picture
+visible en una esquina de la pantalla mientras el usuario explora contenido
+en la pantalla principal.</p>
+
+<p>El modo PIP aprovecha las API de ventanas múltiples disponibles en Android N para
+brindar la ventana superpuesta fija de video. Para agregarle el modo PIP a tu aplicación, debes
+registrar las actividades que permitan este modo, cambiar la actividad al modo PIP según
+sea necesario y asegurarte de que los elementos de IU se oculten y que la reproducción de video continúe mientras
+la actividad se encuentra en modo PIP.</p>
+
+<h2 id="declaring">Declarar que la actividad permite el modo picture-in-picture</h2>
+
+<p>De forma predeterminada, el sistema no permite el modo PIP para aplicaciones automáticamente.
+Si deseas permitir este modo en tu aplicaciones, registra la actividad
+de video en tu manifiesto configurando
+<code>android:supportsPictureInPicture</code> y
+<code>android:resizeableActivity</code> en <code>true</code>. Además, debes especificar
+que tu actividad gestiona los cambios de configuración de la presentación para que la actividad
+no se reinicie cuando ocurran cambios de presentación durante las transiciones en el modo PIP.</p>
+
+<pre>
+&lt;activity android:name="VideoActivity"
+    android:resizeableActivity="true"
+    android:supportsPictureInPicture="true"
+    android:configChanges=
+        "screenSize|smallestScreenSize|screenLayout|orientation"
+    ...
+</pre>
+
+<p>Cuando registres la actividad, ten en cuenta que, en el modo PIP, la
+actividad se muestra en una ventana superpuesta pequeña en una pantalla de TV. Las actividades de reproducción
+de videos con IU mínimas brindan la mejor experiencia de usuario. Las actividades que
+incluyen elementos de IU pequeños podrían no brindar una buena experiencia de usuario
+cuando se cambian al modo PIP, porque los usuarios no podrán ver los detalles de los elementos de IU
+en la ventana PIP.</p>
+
+<h2 id="pip_button">Cambiar la actividad al modo Picture-in-picture</h2>
+
+Cuando necesites cambiar la actividad al modo PIP, llama a
+<code>Activity.enterPictureInPictureMode()</code>. En el siguiente ejemplo, se
+cambia al modo PIP cuando el usuario selecciona un botón PIP especial en una barra
+de control de medios:</p>
+
+<pre>
+&#64;Override
+public void onActionClicked(Action action) {
+    if (action.getId() == R.id.lb_control_picture_in_picture) {
+        getActivity().enterPictureInPictureMode();
+        return;
+    }
+    ...
+</pre>
+
+<p>Agregar un botón PIP a la barra de control de medios le permite al usuario cambiar
+fácilmente al modo PIP y seguir controlando la reproducción de video.</p>
+
+<img src="{@docRoot}images/android-7.0/pip-button.png" />
+<p class="img-caption"><strong>Imagen 1.</strong> Un botón
+PIP en una barra de control de medios.</p>
+
+<p>Android N incluye una nueva clase
+<code>PlaybackControlsRow.PictureInPictureAction</code> que define
+las acciones de PIP de la barra de control y usa el ícono PIP.</p>
+
+<h2 id="handling_ui">Gestionar las IU durante el modo picture-in-picture</h2>
+
+<p>Cuando la actividad ingresa al modo PIP, esta solo debería mostrar la reproducción
+de video. Debes quitar los elementos de IU antes de que la actividad ingrese al modo PIP
+y volver a mostrarlos cuando la actividad vuelva al modo de pantalla completa.
+Anula <code>Activity.onPictureInPictureModeChanged()</code> o
+<code>Fragment.onPictureInPictureModeChanged()</code> y habilita
+o inhabilita los elementos de IU según sea necesario, por ejemplo:</p>
+
+<pre>
+&#64;Override
+public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
+    if (isInPictureInPictureMode) {
+        // Hide the controls in picture-in-picture mode.
+        ...
+    } else {
+        // Restore the playback UI based on the playback status.
+        ...
+    }
+}
+</pre>
+
+<h2 id="continuing_playback">Continuar la reproducción de video durante
+el modo Picture-in-picture</h2>
+
+<p>Cuando la actividad cambia al modo PIP, el sistema considera que se encuentra en
+pausa y llama al método <code>onPause()</code> de la actividad. La reproducción
+de video no debería pausarse y debería continuar si la actividad se
+pausa debido al modo PIP. Busca el modo PIP en el método
+<code>onPause()</code> de la actividad y controla la reproducción según corresponda, por
+ejemplo:</p>
+
+<pre>
+&#64;Override
+public void onPause() {
+    // If called while in PIP mode, do not pause playback
+    if (isInPictureInPictureMode()) {
+        // Continue playback
+        ...
+    }
+    // If paused but not in PIP, pause playback if necessary
+    ...
+}
+</pre>
+
+<p>Cuando la actividad sale del modo PIP y vuelve al modo de pantalla completa, el
+sistema reinicia la actividad y llama al método <code>onResume()</code>.</p>
+
+<h2 id="single_playback">Usar una única actividad de reproducción para
+el modo Picture-in-picture</h2>
+
+<p>En tu aplicación, un usuario puede seleccionar un nuevo video cuando busca contenido en la
+pantalla principal, mientras una actividad de reproducción de video está en modo PIP. Reproduce el nuevo
+video en la actividad de reproducción actual en modo de pantalla completa, en lugar de
+iniciar una nueva actividad que podría confundir al usuario.</p>
+
+<p>A fin de garantizar que se utilice una única actividad para las solicitudes de reproducción de video y que esta
+ ingrese en el modo PIP o salga de este cuando sea necesario, configura el
+<code>android:launchMode</code> de la actividad en <code>singleTask</code>, en el manifiesto:
+</p>
+
+<pre>
+&lt;activity android:name="VideoActivity"
+    ...
+    android:supportsPictureInPicture="true"
+    android:launchMode="singleTask"
+    ...
+</pre>
+
+<p>En tu actividad, anula {@link android.app.Activity#onNewIntent
+Activity.onNewIntent()} y administra el nuevo video, deteniendo cualquier reproducción
+de video actual si es necesario.</p>
+
+<h2 id="best">Prácticas recomendadas</h2>
+
+<p>El modo PIP está diseñado para actividades que reproducen un video en pantalla completa. Cuando cambies la
+actividad al modo PIP, evita que se muestre cualquier elemento que no sea el contenido del video.
+Rastrea el cambio a modo PIP de la actividad y oculta los elementos de IU, como se explica
+en la sección <a href="#handling_ui">Gestionar las IU durante el modo picture-in-picture</a>.</p>
+
+<p>Debido a que la ventana de PIP se muestra como una ventana flotante en una
+esquina de la pantalla, debes evitar mostrar información importante en la pantalla principal
+en cualquier área que pueda quedar oculta detrás de la ventana de PIP.</p>
+
+<p>Cuando una actividad se encuentra en modo PIP, de forma predeterminada, no tiene focalización en las entradas. Para
+recibir eventos de entradas durante este modo, usa
+<code>MediaSession.setMediaButtonReceiver()</code>.</p>

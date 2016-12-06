@@ -9,7 +9,7 @@ trainingnavtop=true
 
 <div id="tb-wrapper">
   <div id="tb">
-    
+
     <h2>本课程将向您展示如何</h2>
 <ol>
   <li><a href="#lifecycle-states">了解生命周期回调</a></li>
@@ -17,7 +17,7 @@ trainingnavtop=true
   <li><a href="#Create">创建一个新实例</a></li>
   <li><a href="#Destroy">销毁Activity</a></li>
 </ol>
-    
+
     <h2>您还应阅读</h2>
     <ul>
       <li><a href="{@docRoot}guide/components/activities.html">Activity</a></li>
@@ -83,7 +83,7 @@ Activity还可以从“暂停”和“停止”状态回到继续状态。
 </ul>
 
 <!--
-<p class="table-caption"><strong>Table 1.</strong> Activity lifecycle state pairs and callback 
+<p class="table-caption"><strong>Table 1.</strong> Activity lifecycle state pairs and callback
 methods.</p>
 <table>
   <tr>
@@ -128,7 +128,7 @@ methods.</p>
 </dl>
 
 <p>其他状态（“创建”和“开始”）是瞬态，系统会通过调用下一个生命周期回调方法从这些状态快速移到下一个状态。
-也就是说，在系统调用 
+也就是说，在系统调用
 {@link android.app.Activity#onCreate onCreate()} 之后，它会快速调用 {@link
 android.app.Activity#onStart()}，紧接着快速调用 {@link
 android.app.Activity#onResume()}。</p>
@@ -138,7 +138,7 @@ android.app.Activity#onResume()}。</p>
 
 
 
-<h2 id="launching-activity">指定您的应用的启动器Activity</h2> 
+<h2 id="launching-activity">指定您的应用的启动器Activity</h2>
 
 <p>当用户从主屏幕选择您的应用图标时，系统会为您已声明为“启动器”（ 或“主要”）Activity的应用中的 {@link android.app.Activity} 调用 {@link
 android.app.Activity#onCreate onCreate()} 方法。
@@ -151,7 +151,7 @@ android.app.Activity#onCreate onCreate()} 方法。
 <p>您的应用的主Activity必须使用 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
 <intent-filter>}</a>（包括 {@link
 android.content.Intent#ACTION_MAIN MAIN} 操作和
-{@link android.content.Intent#CATEGORY_LAUNCHER LAUNCHER} 类别）在宣示说明中声明。例如：</p> 
+{@link android.content.Intent#CATEGORY_LAUNCHER LAUNCHER} 类别）在宣示说明中声明。例如：</p>
 
 <pre>
 &lt;activity android:name=".MainActivity" android:label="&#64;string/app_name">
@@ -200,10 +200,10 @@ public void onCreate(Bundle savedInstanceState) {
     // Set the user interface layout for this Activity
     // The layout file is defined in the project res/layout/main_activity.xml file
     setContentView(R.layout.main_activity);
-    
+
     // Initialize member TextView so we can manipulate it later
     mTextView = (TextView) findViewById(R.id.text_message);
-    
+
     // Make sure we're running on Honeycomb or higher to use ActionBar APIs
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
         // For the main activity, make sure the app icon in the action bar
@@ -214,7 +214,7 @@ public void onCreate(Bundle savedInstanceState) {
 }
 </pre>
 
-<p class="caution"><strong>注意：</strong>使用 {@link android.os.Build.VERSION#SDK_INT} 
+<p class="caution"><strong>注意：</strong>使用 {@link android.os.Build.VERSION#SDK_INT}
 可防止旧版系统以这种方式仅在 Android 2.0 （API 级别5）和更高级别执行新 API 工作。
 较旧版本会遇到运行时异常。</p>
 
@@ -268,7 +268,7 @@ android.app.Activity#onDestroy} 期间终止它们。
 &#64;Override
 public void onDestroy() {
     super.onDestroy();  // Always call the superclass
-    
+
     // Stop method tracing that the activity started during onCreate()
     android.os.Debug.stopMethodTracing();
 }

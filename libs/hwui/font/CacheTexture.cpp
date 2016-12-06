@@ -330,5 +330,17 @@ bool CacheTexture::fitBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint32_
     return false;
 }
 
+uint32_t CacheTexture::calculateFreeMemory() const {
+    CacheBlock* cacheBlock = mCacheBlocks;
+    uint32_t free = 0;
+    // currently only two formats are supported: GL_ALPHA or GL_RGBA;
+    uint32_t bpp = mFormat == GL_RGBA ? 4 : 1;
+    while (cacheBlock) {
+        free += bpp * cacheBlock->mWidth * cacheBlock->mHeight;
+        cacheBlock = cacheBlock->mNext;
+    }
+    return free;
+}
+
 }; // namespace uirenderer
 }; // namespace android

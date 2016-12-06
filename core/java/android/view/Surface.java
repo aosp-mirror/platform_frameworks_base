@@ -33,6 +33,18 @@ import dalvik.system.CloseGuard;
 
 /**
  * Handle onto a raw buffer that is being managed by the screen compositor.
+ *
+ * <p>A Surface is generally created by or from a consumer of image buffers (such as a
+ * {@link android.graphics.SurfaceTexture}, {@link android.media.MediaRecorder}, or
+ * {@link android.renderscript.Allocation}), and is handed to some kind of producer (such as
+ * {@link android.opengl.EGL14#eglCreateWindowSurface(android.opengl.EGLDisplay,android.opengl.EGLConfig,java.lang.Object,int[],int) OpenGL},
+ * {@link android.media.MediaPlayer#setSurface MediaPlayer}, or
+ * {@link android.hardware.camera2.CameraDevice#createCaptureSession CameraDevice}) to draw
+ * into.</p>
+ *
+ * <p><strong>Note:</strong> A Surface acts like a
+ * {@link java.lang.ref.WeakReference weak reference} to the consumer it is associated with. By
+ * itself it will not keep its parent consumer from being reclaimed.</p>
  */
 public class Surface implements Parcelable {
     private static final String TAG = "Surface";
@@ -58,6 +70,8 @@ public class Surface implements Parcelable {
 
     private static native long nativeGetNextFrameNumber(long nativeObject);
     private static native int nativeSetScalingMode(long nativeObject, int scalingMode);
+    private static native void nativeSetBuffersTransform(long nativeObject, long transform);
+    private static native int nativeForceScopedDisconnect(long nativeObject);
 
     public static final Parcelable.Creator<Surface> CREATOR =
             new Parcelable.Creator<Surface>() {
@@ -94,6 +108,8 @@ public class Surface implements Parcelable {
     private Matrix mCompatibleMatrix;
 
     private HwuiContext mHwuiContext;
+
+    private boolean mIsSingleBuffered;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -157,7 +173,7 @@ public class Surface implements Parcelable {
         if (surfaceTexture == null) {
             throw new IllegalArgumentException("surfaceTexture must not be null");
         }
-
+        mIsSingleBuffered = surfaceTexture.isSingleBuffered();
         synchronized (mLock) {
             mName = surfaceTexture.toString();
             setNativeObjectLocked(nativeCreateFromSurfaceTexture(surfaceTexture));
@@ -456,7 +472,10 @@ public class Surface implements Parcelable {
             // create a new native Surface and return it after reducing
             // the reference count on mNativeObject.  Either way, it is
             // not necessary to call nativeRelease() here.
+            // NOTE: This must be kept synchronized with the native parceling code
+            // in frameworks/native/libs/Surface.cpp
             mName = source.readString();
+            mIsSingleBuffered = source.readInt() != 0;
             setNativeObjectLocked(nativeReadFromParcel(mNativeObject, source));
         }
     }
@@ -467,7 +486,10 @@ public class Surface implements Parcelable {
             throw new IllegalArgumentException("dest must not be null");
         }
         synchronized (mLock) {
+            // NOTE: This must be kept synchronized with the native parceling code
+            // in frameworks/native/libs/Surface.cpp
             dest.writeString(mName);
+            dest.writeInt(mIsSingleBuffered ? 1 : 0);
             nativeWriteToParcel(mNativeObject, dest);
         }
         if ((flags & Parcelable.PARCELABLE_WRITE_RETURN_VALUE) != 0) {
@@ -527,6 +549,24 @@ public class Surface implements Parcelable {
                 throw new IllegalArgumentException("Invalid scaling mode: " + scalingMode);
             }
         }
+    }
+
+    void forceScopedDisconnect() {
+        synchronized (mLock) {
+            checkNotReleasedLocked();
+            int err = nativeForceScopedDisconnect(mNativeObject);
+            if (err != 0) {
+                throw new RuntimeException("Failed to disconnect Surface instance (bad object?)");
+            }
+        }
+    }
+
+    /**
+     * Returns whether or not this Surface is backed by a single-buffered SurfaceTexture
+     * @hide
+     */
+    public boolean isSingleBuffered() {
+        return mIsSingleBuffered;
     }
 
     /**

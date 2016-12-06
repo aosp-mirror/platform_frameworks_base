@@ -24,10 +24,12 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.android.egg.R;
+import com.android.internal.logging.MetricsLogger;
 
 public class Cat extends Drawable {
     public static final long[] PURR = {0, 40, 20, 40, 20, 40, 20, 40, 20, 40, 20, 40};
@@ -37,6 +39,8 @@ public class Cat extends Drawable {
     private long mSeed;
     private String mName;
     private int mBodyColor;
+    private int mFootType;
+    private boolean mBowTie;
 
     private synchronized Random notSoRandom(long seed) {
         if (mNotSoRandom == null) {
@@ -64,6 +68,15 @@ public class Cat extends Drawable {
             i+=2;
         }
         return a[i+1];
+    }
+
+    public static final int getColorIndex(int q, int[] a) {
+        for(int i = 1; i < a.length; i+=2) {
+            if (a[i] == q) {
+                return i/2;
+            }
+        }
+        return -1;
     }
 
     public static final int[] P_BODY_COLORS = {
@@ -130,7 +143,7 @@ public class Cat extends Drawable {
         mSeed = seed;
 
         setName(context.getString(R.string.default_cat_name,
-                String.valueOf(mSeed).substring(0, 3)));
+                String.valueOf(mSeed % 1000)));
 
         final Random nsr = notSoRandom(seed);
 
@@ -155,14 +168,19 @@ public class Cat extends Drawable {
             tint(0xFF000000, D.mouth, D.nose);
         }
 
+        mFootType = 0;
         if (nsr.nextFloat() < 0.25f) {
+            mFootType = 4;
             tint(0xFFFFFFFF, D.foot1, D.foot2, D.foot3, D.foot4);
         } else {
             if (nsr.nextFloat() < 0.25f) {
-                tint(0xFFFFFFFF, D.foot1, D.foot2);
+                mFootType = 2;
+                tint(0xFFFFFFFF, D.foot1, D.foot3);
             } else if (nsr.nextFloat() < 0.25f) {
-                tint(0xFFFFFFFF, D.foot3, D.foot4);
+                mFootType = 3; // maybe -2 would be better? meh.
+                tint(0xFFFFFFFF, D.foot2, D.foot4);
             } else if (nsr.nextFloat() < 0.1f) {
+                mFootType = 1;
                 tint(0xFFFFFFFF, (Drawable) choose(nsr, D.foot1, D.foot2, D.foot3, D.foot4));
             }
         }
@@ -175,7 +193,8 @@ public class Cat extends Drawable {
 
         final int collarColor = chooseP(nsr, P_COLLAR_COLORS);
         tint(collarColor, D.collar);
-        tint((nsr.nextFloat() < 0.1f) ? collarColor : 0, D.bowtie);
+        mBowTie = nsr.nextFloat() < 0.1f;
+        tint(mBowTie ? collarColor : 0, D.bowtie);
     }
 
     public static Cat create(Context context) {
@@ -190,7 +209,7 @@ public class Cat extends Drawable {
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         return new Notification.Builder(context)
                 .setSmallIcon(Icon.createWithResource(context, R.drawable.stat_icon))
-                .setLargeIcon(createLargeIcon(context))
+                .setLargeIcon(createNotificationLargeIcon(context))
                 .setColor(getBodyColor())
                 .setPriority(Notification.PRIORITY_LOW)
                 .setContentTitle(context.getString(R.string.notification_title))
@@ -240,11 +259,24 @@ public class Cat extends Drawable {
         return result;
     }
 
-    public Icon createLargeIcon(Context context) {
-        final Resources res = context.getResources();
-        final int w = res.getDimensionPixelSize(android.R.dimen.notification_large_icon_width);
-        final int h = res.getDimensionPixelSize(android.R.dimen.notification_large_icon_height);
+    public static Icon recompressIcon(Icon bitmapIcon) {
+        if (bitmapIcon.getType() != Icon.TYPE_BITMAP) return bitmapIcon;
+        final Bitmap bits = bitmapIcon.getBitmap();
+        final ByteArrayOutputStream ostream = new ByteArrayOutputStream(
+                bits.getWidth() * bits.getHeight() * 2); // guess 50% compression
+        final boolean ok = bits.compress(Bitmap.CompressFormat.PNG, 100, ostream);
+        if (!ok) return null;
+        return Icon.createWithData(ostream.toByteArray(), 0, ostream.size());
+    }
 
+    public Icon createNotificationLargeIcon(Context context) {
+        final Resources res = context.getResources();
+        final int w = 2*res.getDimensionPixelSize(android.R.dimen.notification_large_icon_width);
+        final int h = 2*res.getDimensionPixelSize(android.R.dimen.notification_large_icon_height);
+        return recompressIcon(createIcon(context, w, h));
+    }
+
+    public Icon createIcon(Context context, int w, int h) {
         Bitmap result = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         final Canvas canvas = new Canvas(result);
         final Paint pt = new Paint();
@@ -288,6 +320,30 @@ public class Cat extends Drawable {
 
     public int getBodyColor() {
         return mBodyColor;
+    }
+
+    public void logAdd(Context context) {
+        logCatAction(context, "egg_neko_add");
+    }
+
+    public void logRename(Context context) {
+        logCatAction(context, "egg_neko_rename");
+    }
+
+    public void logRemove(Context context) {
+        logCatAction(context, "egg_neko_remove");
+    }
+
+    public void logShare(Context context) {
+        logCatAction(context, "egg_neko_share");
+    }
+
+    private void logCatAction(Context context, String prefix) {
+        MetricsLogger.count(context, prefix, 1);
+        MetricsLogger.histogram(context, prefix +"_color",
+                getColorIndex(mBodyColor, P_BODY_COLORS));
+        MetricsLogger.histogram(context, prefix + "_bowtie", mBowTie ? 1 : 0);
+        MetricsLogger.histogram(context, prefix + "_feet", mFootType);
     }
 
     public static class CatParts {

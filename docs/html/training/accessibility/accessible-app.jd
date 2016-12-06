@@ -55,7 +55,7 @@ href="https://play.google.com/store/apps/details?id=com.google.android.marvin.ta
 If you have a label that's likely not to change during the lifecycle of the
 application (such as "Pause" or "Purchase"), you can add it via the XML layout,
 by setting a UI element's <a
- 
+
 href="{@docRoot}reference/android/view/View.html#attr_android:contentDescription"
 >{@code android:contentDescription}</a> attribute, like in this
 example:</p>
@@ -163,7 +163,7 @@ supported can be found in the {@link
 android.view.accessibility.AccessibilityEvent} reference documentation.
 
 <p>As an example, if you want to extend an image view such that you can write
-captions by typing on the keyboard when it has focus, it makes sense to fire an 
+captions by typing on the keyboard when it has focus, it makes sense to fire an
 {@link android.view.accessibility.AccessibilityEvent#TYPE_VIEW_TEXT_CHANGED}
 event, even though that's not normally built into image views.  The code to
 generate that event would look like this:</p>

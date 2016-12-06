@@ -83,9 +83,9 @@ parent.link=index.html
 </p>
   <p>請參閱<a href="#options-menu">建立選項選單</a>。</p>
     </dd>
-    
+
   <dt><strong>內容選單和內容關聯動作模式</strong></dt>
-  
+
    <dd>內容選單是會在使用者長按某元素時顯示的<a href="#FloatingContextMenu">浮動選單</a>。
 它提供的動作會影響所選取內容或內容畫面。
 
@@ -94,7 +94,7 @@ parent.link=index.html
 </p>
   <p>請參閱<a href="#context-menu">建立內容關聯選單</a>。</p>
 </dd>
-    
+
   <dt><strong>彈出式選單</strong></dt>
     <dd>彈出式選單顯示的項目清單會以垂直清單的方式，錨定在呼叫該選單的檢視。
 它很適合用來提供與特定內容有關的動作溢出，或針對第二部分的命令提供選項。
@@ -135,7 +135,7 @@ parent.link=index.html
   <dt><code>&lt;item></code></dt>
     <dd>建立代表選單中單一項目的 {@link android.view.MenuItem}。此元素可以包含巢狀
 <code>&lt;menu></code> 元素以建立子選單。</dd>
-    
+
   <dt><code>&lt;group></code></dt>
     <dd>可供 {@code &lt;item&gt;} 元素選用的不可見容器。它可讓您將選單項目分類，以便分享屬性，例如有效狀態與可見度。
 如需詳細資訊，請參閱<a href="#groups">建立選單群組</a>。
@@ -742,8 +742,8 @@ android.widget.PopupMenu#getMenu() PopupMenu.getMenu()} 所傳回的 {@link andr
 
 <pre>
 &lt;ImageButton
-    android:layout_width="wrap_content" 
-    android:layout_height="wrap_content" 
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:src="@drawable/ic_overflow_holo_dark"
     android:contentDescription="@string/descr_overflow_button"
     android:onClick="showPopup" />
@@ -900,7 +900,7 @@ android.view.MenuItem#setChecked(boolean) setChecked()} 方法在程式碼中變
 <p>已選取可勾選項目時，系統會呼叫所選取個別項目的回呼方法 (例如 {@link android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()})。
 您必須在這裡設定核取方塊的狀態，原因是核取方塊或選項按鈕並不會自動變更其狀態。
 
-您可以利用 
+您可以利用
 {@link android.view.MenuItem#isChecked()} 來查詢項目的目前狀態 (使用者選取它之前的狀態)，然後利用
 {@link android.view.MenuItem#setChecked(boolean) setChecked()} 來設定勾選狀態。例如：</p>
 
@@ -1010,7 +1010,7 @@ addIntentOptions()} 時，它會覆寫第一個引數中所指定選單群組中
 <p>您也能向其他應用程式提供 Activity 的服務，這樣即可在其他應用程式的選單中包含您的應用程式 (與上述的角色顛倒)。
 </p>
 
-<p>如要包含在其他應用程式選單中，您必須照常定義意圖篩選器，但務必為意圖篩選器類別納入 
+<p>如要包含在其他應用程式選單中，您必須照常定義意圖篩選器，但務必為意圖篩選器類別納入
 {@link android.content.Intent#CATEGORY_ALTERNATIVE} 和/或 {@link android.content.Intent#CATEGORY_SELECTED_ALTERNATIVE} 值。
 
 例如：</p>

@@ -81,6 +81,8 @@ public final class Trace {
     public static final long TRACE_TAG_SYSTEM_SERVER = 1L << 19;
     /** @hide */
     public static final long TRACE_TAG_DATABASE = 1L << 20;
+    /** @hide */
+    public static final long TRACE_TAG_NETWORK = 1L << 21;
 
     private static final long TRACE_TAG_NOT_READY = 1L << 63;
     private static final int MAX_SECTION_NAME_LEN = 127;

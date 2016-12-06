@@ -9,7 +9,7 @@ trainingnavtop=true
 
 <div id="tb-wrapper">
   <div id="tb">
-    
+
     <h2>このレッスンでの学習内容</h2>
 <ol>
   <li><a href="#lifecycle-states">ライフサイクル コールバックを理解する</a></li>
@@ -17,7 +17,7 @@ trainingnavtop=true
   <li><a href="#Create">新しいインスタンスを作成する</a></li>
   <li><a href="#Destroy">アクティビティを破棄する</a></li>
 </ol>
-    
+
     <h2>関連ドキュメント</h2>
     <ul>
       <li><a href="{@docRoot}guide/components/activities.html">アクティビティ</a></li>
@@ -83,7 +83,7 @@ trainingnavtop=true
 </ul>
 
 <!--
-<p class="table-caption"><strong>Table 1.</strong> Activity lifecycle state pairs and callback 
+<p class="table-caption"><strong>Table 1.</strong> Activity lifecycle state pairs and callback
 methods.</p>
 <table>
   <tr>
@@ -138,7 +138,7 @@ android.app.Activity#onResume()} が続きます。</p>
 
 
 
-<h2 id="launching-activity">アプリのランチャー アクティビティを指定する</h2> 
+<h2 id="launching-activity">アプリのランチャー アクティビティを指定する</h2>
 
 <p>ユーザーがホーム画面からアプリのアイコンを選択すると、システムはアプリ内で「ランチャー」（または「メイン」）のアクティビティであると宣言された {@link android.app.Activity} に対して {@link
 android.app.Activity#onCreate onCreate()} メソッドを呼び出します。
@@ -151,7 +151,7 @@ android.app.Activity#onCreate onCreate()} メソッドを呼び出します。
 <p>アプリのメインのアクティビティは、{@link
 android.content.Intent#ACTION_MAIN MAIN} アクションと {@link android.content.Intent#CATEGORY_LAUNCHER LAUNCHER} カテゴリを含む <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
 <intent-filter>}</a> を使用してマニフェストで宣言する必要があります。
-次に例を示します。</p> 
+次に例を示します。</p>
 
 <pre>
 &lt;activity android:name=".MainActivity" android:label="&#64;string/app_name">
@@ -180,7 +180,7 @@ android.app.Activity#onCreate onCreate()} を呼び出すことにより、{@lin
 
 </p>
 
-<p>アクティビティの存続期間すべてにわたり、一度のみ発生すべき基本的なアプリの起動ロジックを実行するための 
+<p>アクティビティの存続期間すべてにわたり、一度のみ発生すべき基本的なアプリの起動ロジックを実行するための
 {@link android.app.Activity#onCreate onCreate()} メソッドを実装する必要があります。たとえば、
 {@link android.app.Activity#onCreate onCreate()} の実装では、ユーザー インターフェースを定義し、場合によってはいくつかのクラススコープの変数をインスタンス化する必要があります。
 </p>
@@ -200,10 +200,10 @@ public void onCreate(Bundle savedInstanceState) {
     // Set the user interface layout for this Activity
     // The layout file is defined in the project res/layout/main_activity.xml file
     setContentView(R.layout.main_activity);
-    
+
     // Initialize member TextView so we can manipulate it later
     mTextView = (TextView) findViewById(R.id.text_message);
-    
+
     // Make sure we're running on Honeycomb or higher to use ActionBar APIs
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
         // For the main activity, make sure the app icon in the action bar
@@ -268,7 +268,7 @@ android.app.Activity#onDestroy} の間にそれらを破棄する必要があり
 &#64;Override
 public void onDestroy() {
     super.onDestroy();  // Always call the superclass
-    
+
     // Stop method tracing that the activity started during onCreate()
     android.os.Debug.stopMethodTracing();
 }

@@ -653,12 +653,17 @@ class RecentTasks extends ArrayList<TaskRecord> {
                             && task.realActivity.equals(tr.realActivity);
                     // If the document is open in another app or is not the same
                     // document, we don't need to trim it.
-                    if (!sameActivity || !sameIntentFilter || multiTasksAllowed) {
+                    if (!sameActivity) {
                         continue;
                     // Otherwise only trim if we are over our max recents for this task
-                    } else if (maxRecents > 0 && !doTrim) {
+                    } else if (maxRecents > 0) {
                         --maxRecents;
-                        continue;
+                        if (!doTrim || !sameIntentFilter || multiTasksAllowed) {
+                            // We don't want to trim if we are not over the max allowed entries and
+                            // the caller doesn't want us to trim, the tasks are not of the same
+                            // intent filter, or multiple entries fot the task is allowed.
+                            continue;
+                        }
                     }
                     // Hit the maximum number of documents for this task. Fall through
                     // and remove this document from recents.

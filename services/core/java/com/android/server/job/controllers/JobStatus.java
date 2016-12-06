@@ -486,6 +486,7 @@ public final class JobStatus {
                 + ":[" + job.getService()
                 + ",jId=" + job.getId()
                 + ",u" + getUserId()
+                + ",suid=" + getSourceUid()
                 + ",R=(" + formatRunTime(earliestRunTimeElapsedMillis, NO_EARLIEST_RUNTIME)
                 + "," + formatRunTime(latestRunTimeElapsedMillis, NO_LATEST_RUNTIME) + ")"
                 + ",N=" + job.getNetworkType() + ",C=" + job.isRequireCharging()

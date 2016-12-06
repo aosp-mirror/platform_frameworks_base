@@ -20,7 +20,9 @@ import android.annotation.AttrRes;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -264,5 +266,93 @@ public class AlertDialogLayout extends LinearLayout {
         }
 
         return 0;
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        final int paddingLeft = mPaddingLeft;
+
+        // Where right end of child should go
+        final int width = right - left;
+        final int childRight = width - mPaddingRight;
+
+        // Space available for child
+        final int childSpace = width - paddingLeft - mPaddingRight;
+
+        final int totalLength = getMeasuredHeight();
+        final int count = getChildCount();
+        final int gravity = getGravity();
+        final int majorGravity = gravity & Gravity.VERTICAL_GRAVITY_MASK;
+        final int minorGravity = gravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK;
+
+        int childTop;
+        switch (majorGravity) {
+            case Gravity.BOTTOM:
+                // totalLength contains the padding already
+                childTop = mPaddingTop + bottom - top - totalLength;
+                break;
+
+            // totalLength contains the padding already
+            case Gravity.CENTER_VERTICAL:
+                childTop = mPaddingTop + (bottom - top - totalLength) / 2;
+                break;
+
+            case Gravity.TOP:
+            default:
+                childTop = mPaddingTop;
+                break;
+        }
+
+        final Drawable dividerDrawable = getDividerDrawable();
+        final int dividerHeight = dividerDrawable == null ?
+                0 : dividerDrawable.getIntrinsicHeight();
+
+        for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
+            if (child != null && child.getVisibility() != GONE) {
+                final int childWidth = child.getMeasuredWidth();
+                final int childHeight = child.getMeasuredHeight();
+
+                final LinearLayout.LayoutParams lp =
+                        (LinearLayout.LayoutParams) child.getLayoutParams();
+
+                int layoutGravity = lp.gravity;
+                if (layoutGravity < 0) {
+                    layoutGravity = minorGravity;
+                }
+                final int layoutDirection = getLayoutDirection();
+                final int absoluteGravity = Gravity.getAbsoluteGravity(
+                        layoutGravity, layoutDirection);
+
+                final int childLeft;
+                switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
+                    case Gravity.CENTER_HORIZONTAL:
+                        childLeft = paddingLeft + ((childSpace - childWidth) / 2)
+                                + lp.leftMargin - lp.rightMargin;
+                        break;
+
+                    case Gravity.RIGHT:
+                        childLeft = childRight - childWidth - lp.rightMargin;
+                        break;
+
+                    case Gravity.LEFT:
+                    default:
+                        childLeft = paddingLeft + lp.leftMargin;
+                        break;
+                }
+
+                if (hasDividerBeforeChildAt(i)) {
+                    childTop += dividerHeight;
+                }
+
+                childTop += lp.topMargin;
+                setChildFrame(child, childLeft, childTop, childWidth, childHeight);
+                childTop += childHeight + lp.bottomMargin;
+            }
+        }
+    }
+
+    private void setChildFrame(View child, int left, int top, int width, int height) {
+        child.layout(left, top, left + width, top + height);
     }
 }

@@ -53,6 +53,7 @@ import com.android.systemui.recents.events.activity.DockedTopTaskEvent;
 import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
+import com.android.systemui.recents.events.component.ShowUserToastEvent;
 import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsTaskLoader;
@@ -455,8 +456,8 @@ public class Recents extends SystemUI
                 mDraggingInRecentsCurrentUser = currentUser;
                 return true;
             } else {
-                Toast.makeText(mContext, R.string.recents_incompatible_app_message,
-                        Toast.LENGTH_SHORT).show();
+                EventBus.getDefault().send(new ShowUserToastEvent(
+                        R.string.recents_incompatible_app_message, Toast.LENGTH_SHORT));
                 return false;
             }
         } else {
@@ -672,6 +673,27 @@ public class Recents extends SystemUI
         // Update the configuration for the Recents component when the activity configuration
         // changes as well
         mImpl.onConfigurationChanged();
+    }
+
+    public final void onBusEvent(ShowUserToastEvent event) {
+        int currentUser = sSystemServicesProxy.getCurrentUser();
+        if (sSystemServicesProxy.isSystemUser(currentUser)) {
+            mImpl.onShowCurrentUserToast(event.msgResId, event.msgLength);
+        } else {
+            if (mSystemToUserCallbacks != null) {
+                IRecentsNonSystemUserCallbacks callbacks =
+                        mSystemToUserCallbacks.getNonSystemUserRecentsForUser(currentUser);
+                if (callbacks != null) {
+                    try {
+                        callbacks.showCurrentUserToast(event.msgResId, event.msgLength);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Callback failed", e);
+                    }
+                } else {
+                    Log.e(TAG, "No SystemUI callbacks found for user: " + currentUser);
+                }
+            }
+        }
     }
 
     /**

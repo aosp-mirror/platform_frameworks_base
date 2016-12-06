@@ -1,0 +1,153 @@
+page.title=Chrome OS Device Support for Apps
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>On this page</h2>
+
+      <ol>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#support">Supported Platforms</a></li>
+      </ol>
+    </div>
+  </div>
+
+<p>
+You can use the Google Play Store to install Android apps on several Google
+Chromebooks. This document describes the Chromebooks, Chromeboxes, and
+Chromebases that can install Android apps, both currently and in upcoming
+releases of Chrome OS.
+</p>
+
+<h2 id="overview">Overview</h2>
+
+<p>
+The same Android apps that run on phones and tablets can run on Chromebooks
+without compromising their speed, simplicity, or security. To develop the best
+experience for Android apps across Chromebooks, you should test your app on a
+suite of devices that consists of the following categories:
+</p>
+
+<ul>
+  <li>
+    ARM architecture.
+  </li>
+  <li>
+    Intel x86 architecture.
+  </li>
+  <li>
+    Touch.
+  </li>
+  <li>
+    Non-touch (uses fake-touch).
+  </li>
+  <li>
+    Convertible.
+  </li>
+</ul>
+
+<p>To learn more about Google Play Store support on Chromebooks, see the
+following <a class="external-link"
+href="https://chrome.googleblog.com/2016/05/the-google-play-store-coming-to.html">
+Google Chrome blog post</a>.
+</p>
+
+<p class="note"><strong>Note: </strong>You may elect to exclude your app from
+being available to certain Android devices, such as Chromebooks. For more
+information, visit <a class="external-link"
+href="https://support.google.com/googleplay/android-developer/answer/1286017">
+View &amp; restrict your app's compatible devices</a>.
+</p>
+
+<p>
+The following section lists the Chromebooks that work with Android apps and the
+categories that each device satisfies.
+</p>
+
+<h2 id="support">Supported Platforms</h2>
+
+<p>
+Android apps are not available on every Chromebook, but Google continues to
+evaluate more devices based on a range of factors, such as processor type, GPU,
+and drivers. The following table shows the platforms that currently support
+Android apps:
+</p>
+
+<p class="table-caption" id="Objects-and-interfaces">
+  <strong>Table 1.</strong> Chromebooks that currently support Android apps.</p>
+<table>
+  <tr>
+    <th scope="col">Manufacturer</th>
+    <th scope="col">Model</th>
+    <th scope="col">Architecture</th>
+    <th scope="col">Touchscreen support</th>
+    <th scope="col">Convertible</th>
+  </tr>
+  <tr>
+    <td>Acer</td>
+    <td>Chromebook R11 / C738T</td>
+    <td>Intel x86</td>
+    <td>Yes</td>
+    <td>Yes</td>
+  </tr>
+  <tr>
+    <td>Asus</td>
+    <td>Chromebook Flip</td>
+    <td>ARM</td>
+    <td>Yes</td>
+    <td>Yes</td>
+  </tr>
+  <tr>
+    <td>Google</td>
+    <td>Chromebook Pixel (2015)</td>
+    <td>Intel x86</td>
+    <td>Yes</td>
+    <td>No</td>
+  </tr>
+</table>
+
+<p>
+The following list shows the platforms that will support Android apps in an
+upcoming release of Chrome OS:
+</p>
+
+<ul>
+  <li><strong>Acer: </strong>Chromebook 11 C740, Chromebook 11 CB3-111 / C730 /
+  C730E / CB3-131, Chromebook 14 CB3-431, Chromebook 14 for Work, Chromebook
+  15 CB5-571 / C910, Chromebook 15 CB3-531, Chromebox CXI2, Chromebase 24
+  </li>
+  <li><strong>Asus: </strong>Chromebook C200, Chromebook C201,
+  Chromebook C202SA, Chromebook C300SA, Chromebook C300, Chromebox CN62,
+  Chromebit CS10</li>
+  <li><strong>AOpen: </strong>Chromebox Commercial,
+  Chromebase Commercial 22"</li>
+  <li><strong>Bobicus: </strong>Chromebook 11</li>
+  <li><strong>CDI: </strong>eduGear Chromebook K Series,
+  eduGear Chromebook M Series, eduGear Chromebook R Series</li>
+  <li><strong>CTL: </strong>Chromebook J2 / J4, N6 Education Chromebook,
+  J5 Convertible Chromebook</li>
+  <li><strong>Dell: </strong>Chromebook 11 3120, Chromebook 13 7310</li>
+  <li><strong>Edxis: </strong>Chromebook, Education Chromebook</li>
+  <li><strong>Haier: </strong>Chromebook 11, Chromebook 11e, Chromebook 11 G2
+  </li>
+  <li><strong>Hexa: </strong>Chromebook Pi</li>
+  <li><strong>HiSense: </strong>Chromebook 11</li>
+  <li><strong>Lava: </strong>Xolo Chromebook</li>
+  <li><strong>HP: </strong>Chromebook 11 G3 / G4 / G4 EE, Chromebook 14 G4,
+  Chromebook 13</li>
+  <li><strong>Lenovo: </strong>100S Chromebook, N20 / N20P Chromebook,
+  N21 Chromebook, ThinkCentre Chromebox, ThinkPad 11e Chromebook,
+  N22 Chromebook, Thinkpad 13 Chromebook, Thinkpad 11e Chromebook Gen 3</li>
+  <li><strong>Medion: </strong>Akoya S2013, Chromebook S2015</li>
+  <li><strong>M&amp;A: </strong>Chromebook</li>
+  <li><strong>NComputing: </strong>Chromebook CX100</li>
+  <li><strong>Nexian: </strong>Chromebook 11.6"</li>
+  <li><strong>PCMerge: </strong>Chromebook PCM-116E</li>
+  <li><strong>Poin2: </strong>Chromebook 11</li>
+  <li><strong>Samsung: </strong>Chromebook 2 11" - XE500C12, Chromebook 3</li>
+  <li><strong>Sector 5: </strong>E1 Rugged Chromebook</li>
+  <li><strong>Senkatel: </strong>C1101 Chromebook</li>
+  <li><strong>Toshiba: </strong>Chromebook 2, Chromebook 2 (2015)</li>
+  <li><strong>True IDC: </strong>Chromebook 11</li>
+  <li><strong>Viglen: </strong>Chromebook 11</li>
+</ul>

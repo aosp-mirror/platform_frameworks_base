@@ -1,5 +1,5 @@
 page.title=Activity
-page.tags=Activity, Intent 
+page.tags=Activity, Intent
 @jd:body
 
 <div id="qv-wrapper">
@@ -215,7 +215,7 @@ That Cannot Change</a>
 <h2 id="StartingAnActivity">启动 Activity</h2>
 
 <p>您可以通过调用 {@link android.app.Activity#startActivity
-  startActivity()}，并将其传递给描述您想启动的 Activity 的 {@link android.content.Intent} 
+  startActivity()}，并将其传递给描述您想启动的 Activity 的 {@link android.content.Intent}
 来启动另一个 Activity。Intent 对象会指定您想启动的具体 Activity 或描述您想执行的操作类型（系统会为您选择合适的 Activity，甚至是来自其他应用的 Activity）。
 
 
@@ -608,7 +608,7 @@ android.app.Activity#onSaveInstanceState onSaveInstanceState()}。
 
 <p>系统会先调用
 {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()}，然后再使 Activity 变得易于销毁。系统会向该方法传递一个
-{@link android.os.Bundle}，您可以在其中使用 
+{@link android.os.Bundle}，您可以在其中使用
 {@link
 android.os.Bundle#putString putString()} 和 {@link
 android.os.Bundle#putInt putInt()} 等方法以名称-值对形式保存有关 Activity 状态的信息。然后，如果系统终止您的应用进程，并且用户返回您的 Activity，则系统会重建该 Activity，并将

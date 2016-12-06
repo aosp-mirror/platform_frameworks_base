@@ -8,13 +8,13 @@ trainingnavtop=true
 
 <div id="tb-wrapper">
   <div id="tb">
-    
+
     <h2>Содержание этого урока</h2>
     <ol>
       <li><a href="#SaveState">Сохранение состояния операции</a></li>
       <li><a href="#RestoreState">Восстановление состояния операции</a></li>
     </ol>
-    
+
     <h2>См. также:</h2>
     <ul>
       <li><a href="{@docRoot}training/basics/supporting-devices/screens.html">Поддержка
@@ -105,7 +105,7 @@ public void onSaveInstanceState(Bundle savedInstanceState) {
     // Save the user's current game state
     savedInstanceState.putInt(STATE_SCORE, mCurrentScore);
     savedInstanceState.putInt(STATE_LEVEL, mCurrentLevel);
-    
+
     // Always call the superclass so it can save the view hierarchy state
     super.onSaveInstanceState(savedInstanceState);
 }
@@ -138,7 +138,7 @@ onCreate()}:</p>
 &#64;Override
 protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState); // Always call the superclass first
-   
+
     // Check whether we're recreating a previously destroyed instance
     if (savedInstanceState != null) {
         // Restore value of members from saved state
@@ -157,12 +157,12 @@ android.app.Activity#onRestoreInstanceState onRestoreInstanceState()}, кото�
 после метода {@link android.app.Activity#onStart()}. Система вызывает {@link
 android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} только при наличии сохраненного состояния
 для восстановления, и поэтому вам не нужно проверять, имеет ли {@link android.os.Bundle} значение null:</p>
-        
+
 <pre>
 public void onRestoreInstanceState(Bundle savedInstanceState) {
     // Always call the superclass so it can restore the view hierarchy
     super.onRestoreInstanceState(savedInstanceState);
-   
+
     // Restore state members from saved instance
     mCurrentScore = savedInstanceState.getInt(STATE_SCORE);
     mCurrentLevel = savedInstanceState.getInt(STATE_LEVEL);

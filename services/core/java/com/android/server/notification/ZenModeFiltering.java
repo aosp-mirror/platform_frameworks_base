@@ -81,7 +81,9 @@ public class ZenModeFiltering {
         if (zen == Global.ZEN_MODE_NO_INTERRUPTIONS) return false; // nothing gets through
         if (zen == Global.ZEN_MODE_ALARMS) return false; // not an alarm
         if (zen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
-            if (config.allowRepeatCallers && REPEAT_CALLERS.isRepeat(context, extras)) return true;
+            if (config.allowRepeatCallers && REPEAT_CALLERS.isRepeat(context, extras)) {
+                return true;
+            }
             if (!config.allowCalls) return false; // no other calls get through
             if (validator != null) {
                 final float contactAffinity = validator.getContactAffinity(userHandle, extras,
@@ -95,6 +97,10 @@ public class ZenModeFiltering {
     private static Bundle extras(NotificationRecord record) {
         return record != null && record.sbn != null && record.sbn.getNotification() != null
                 ? record.sbn.getNotification().extras : null;
+    }
+
+    protected void recordCall(NotificationRecord record) {
+        REPEAT_CALLERS.recordCall(mContext, extras(record));
     }
 
     public boolean shouldIntercept(int zen, ZenModeConfig config, NotificationRecord record) {
@@ -233,28 +239,45 @@ public class ZenModeFiltering {
     }
 
     private static class RepeatCallers {
+        // Person : time
         private final ArrayMap<String, Long> mCalls = new ArrayMap<>();
         private int mThresholdMinutes;
 
+        private synchronized void recordCall(Context context, Bundle extras) {
+            setThresholdMinutes(context);
+            if (mThresholdMinutes <= 0 || extras == null) return;
+            final String peopleString = peopleString(extras);
+            if (peopleString == null) return;
+            final long now = System.currentTimeMillis();
+            cleanUp(mCalls, now);
+            mCalls.put(peopleString, now);
+        }
+
         private synchronized boolean isRepeat(Context context, Bundle extras) {
-            if (mThresholdMinutes <= 0) {
-                mThresholdMinutes = context.getResources().getInteger(com.android.internal.R.integer
-                        .config_zen_repeat_callers_threshold);
-            }
+            setThresholdMinutes(context);
             if (mThresholdMinutes <= 0 || extras == null) return false;
             final String peopleString = peopleString(extras);
             if (peopleString == null) return false;
             final long now = System.currentTimeMillis();
-            final int N = mCalls.size();
+            cleanUp(mCalls, now);
+            return mCalls.containsKey(peopleString);
+        }
+
+        private synchronized void cleanUp(ArrayMap<String, Long> calls, long now) {
+            final int N = calls.size();
             for (int i = N - 1; i >= 0; i--) {
                 final long time = mCalls.valueAt(i);
                 if (time > now || (now - time) > mThresholdMinutes * 1000 * 60) {
-                    mCalls.removeAt(i);
+                    calls.removeAt(i);
                 }
             }
-            final boolean isRepeat = mCalls.containsKey(peopleString);
-            mCalls.put(peopleString, now);
-            return isRepeat;
+        }
+
+        private void setThresholdMinutes(Context context) {
+            if (mThresholdMinutes <= 0) {
+                mThresholdMinutes = context.getResources().getInteger(com.android.internal.R.integer
+                        .config_zen_repeat_callers_threshold);
+            }
         }
 
         private static String peopleString(Bundle extras) {

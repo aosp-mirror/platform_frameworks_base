@@ -113,11 +113,11 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
             mHost.startActivityDismissingKeyguard(new Intent(Settings.ACTION_WIFI_SETTINGS));
             return;
         }
+        showDetail(true);
         if (!mState.value) {
             mController.setWifiEnabled(true);
             mState.value = true;
         }
-        showDetail(true);
     }
 
     @Override
@@ -368,5 +368,5 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
             }
             mItems.setItems(items);
         }
-    };
+    }
 }

@@ -334,7 +334,7 @@ que o serviço realize vários encadeamentos, deve-se usar a <a href="{@docRoot}
 </div>
 </div>
 
-<p>Caso precise que o serviço comunique-se com processos remotos, é possível usar 
+<p>Caso precise que o serviço comunique-se com processos remotos, é possível usar
 o {@link android.os.Messenger} para fornecer a interface ao serviço. Esta técnica permite
 estabelecer comunicação entre processos (IPC) sem precisar usar a AIDL.</p>
 
@@ -348,7 +348,7 @@ para cada chamada de um cliente.</li>
   <li>O {@link android.os.Messenger} cria um {@link android.os.IBinder} que o serviço
 retorna aos clientes a partir de {@link android.app.Service#onBind onBind()}.</li>
   <li>Os clientes usam {@link android.os.IBinder} para instanciar o {@link android.os.Messenger}
-(que menciona o {@link android.os.Handler} do serviço), que usam para enviar objetos 
+(que menciona o {@link android.os.Handler} do serviço), que usam para enviar objetos
 {@link android.os.Message} para o serviço.</li>
   <li>O serviço recebe cada {@link android.os.Message} em seu {@link
 android.os.Handler} &mdash; especificamente, no método {@link android.os.Handler#handleMessage
@@ -538,7 +538,7 @@ são abordados mais abaixo).</p>
   </li>
 </ol>
 
-<p>Por exemplo, o fragmento a seguir conecta o cliente ao serviço criado acima 
+<p>Por exemplo, o fragmento a seguir conecta o cliente ao serviço criado acima
 <a href="#Binder">estendendo a classe Binder</a> para que tudo que ele tenha que fazer seja lançar
 o {@link android.os.IBinder} retornado para a classe {@code LocalService} e solicitar a instância de {@code
 LocalService}:</p>
@@ -637,7 +637,7 @@ android.content.Context#stopService stopService()}, independente de vínculo
 com qualquer cliente.</p>
 
 <p>Além disso, se o serviço for iniciado e aceitar vínculos, quando o sistema chamar
-o método {@link android.app.Service#onUnbind onUnbind()}, será possível retornar 
+o método {@link android.app.Service#onUnbind onUnbind()}, será possível retornar
 {@code true} opcionalmente se você quiser receber uma chamada de {@link android.app.Service#onRebind
 onRebind()} na próxima vez em que um cliente vincular-se ao serviço (em vez de receber uma chamada de {@link
 android.app.Service#onBind onBind()}). {@link android.app.Service#onRebind

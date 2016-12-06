@@ -34,7 +34,7 @@ interface IAppWidgetService {
     // for AppWidgetHost
     //
     ParceledListSlice startListening(IAppWidgetHost host, String callingPackage, int hostId,
-            in int[] appWidgetIds, out int[] updatedIds);
+            in int[] appWidgetIds);
     void stopListening(String callingPackage, int hostId);
     int allocateAppWidgetId(String callingPackage, int hostId);
     void deleteAppWidgetId(String callingPackage, int appWidgetId);

@@ -41,5 +41,6 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="-50dp"
         android:src="@drawable/ic_pause_white_24dp"
-        android:text="@string/pip_pause" />
+        android:text="@string/pip_pause"
+        android:visibility="gone" />
 </merge>

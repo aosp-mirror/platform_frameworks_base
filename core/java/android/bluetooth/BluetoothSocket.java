@@ -532,22 +532,19 @@ public final class BluetoothSocket implements Closeable {
                 if(length <= mMaxTxPacketSize) {
                     mSocketOS.write(b, offset, length);
                 } else {
-                    int tmpOffset = offset;
-                    int tmpLength = mMaxTxPacketSize;
-                    int endIndex = offset + length;
-                    boolean done = false;
                     if(DBG) Log.w(TAG, "WARNING: Write buffer larger than L2CAP packet size!\n"
                             + "Packet will be divided into SDU packets of size "
                             + mMaxTxPacketSize);
-                    do{
+                    int tmpOffset = offset;
+                    int bytesToWrite = length;
+                    while (bytesToWrite > 0) {
+                        int tmpLength = (bytesToWrite > mMaxTxPacketSize)
+                                ? mMaxTxPacketSize
+                                : bytesToWrite;
                         mSocketOS.write(b, tmpOffset, tmpLength);
-                        tmpOffset += mMaxTxPacketSize;
-                        if((tmpOffset + mMaxTxPacketSize) > endIndex) {
-                            tmpLength = endIndex - tmpOffset;
-                            done = true;
-                        }
-                    } while(!done);
-
+                        tmpOffset += tmpLength;
+                        bytesToWrite -= tmpLength;
+                    }
                 }
             } else {
                 mSocketOS.write(b, offset, length);

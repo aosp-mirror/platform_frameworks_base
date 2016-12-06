@@ -21,7 +21,7 @@ page.title=Định nghĩa Hoạt hình Tùy chỉnh
 </div>
 
 
-<p>Hoạt hình theo phong cách material design phản hồi hành động của người dùng và cung cấp 
+<p>Hoạt hình theo phong cách material design phản hồi hành động của người dùng và cung cấp
 tính liên tục trực quan khi người dùng tương tác với ứng dụng của bạn. Giao diện material cung cấp một số hoạt hình
 mặc định cho các nút và chuyển tiếp hoạt động, và Android 5.0 (API mức 21) và cao hơn cho phép bạn tùy chỉnh
 những hoạt hình này và tạo các hoạt hình mới:</p>
@@ -160,7 +160,7 @@ trung tâm.</li>
 
 <li>Chuyển tiếp <strong>phần tử chung</strong> xác định các dạng xem chung giữa hai hoạt động
 sẽ chuyển tiếp như thế nào giữa những hoạt động này. Ví dụ, nếu hai hoạt động có cùng
-hình ảnh ở các vị trí và kích cỡ khác nhau, chuyển tiếp phần tử chung <em>changeImageTransform</em> 
+hình ảnh ở các vị trí và kích cỡ khác nhau, chuyển tiếp phần tử chung <em>changeImageTransform</em>
 sẽ thể hiện và co giãn hình ảnh một cách mượt mà giữa những hoạt động này.</li>
 </ul>
 
@@ -329,7 +329,7 @@ thay vì {@link android.app.Activity#finish Activity.finish()}.</p>
 
 <p>Để tạo một hoạt hình chuyển tiếp cảnh giữa hai hoạt động có nhiều hơn một phần tử
 chung, hãy định nghĩa các phần tử chung trong cả hai bố trí bằng thuộc tính <code>android:transitionName</code>
- (hoặc sử dụng phương thức {@link android.view.View#setTransitionName View.setTransitionName()} 
+ (hoặc sử dụng phương thức {@link android.view.View#setTransitionName View.setTransitionName()}
 trong cả hai hoạt động), và tạo một đối tượng {@link android.app.ActivityOptions} như sau:</p>
 
 <pre>

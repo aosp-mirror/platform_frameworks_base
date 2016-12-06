@@ -407,7 +407,10 @@ public class CameraDeviceImpl extends CameraDevice
                 int streamId = mConfiguredOutputs.keyAt(i);
                 OutputConfiguration outConfig = mConfiguredOutputs.valueAt(i);
 
-                if (!outputs.contains(outConfig)) {
+                if (!outputs.contains(outConfig) || outConfig.isDeferredConfiguration()) {
+                    // Always delete the deferred output configuration when the session
+                    // is created, as the deferred output configuration doesn't have unique surface
+                    // related identifies.
                     deleteList.add(streamId);
                 } else {
                     addSet.remove(outConfig);  // Don't create a stream previously created
@@ -741,6 +744,37 @@ public class CameraDeviceImpl extends CameraDevice
             }
 
             mRemoteDevice.tearDown(streamId);
+        }
+    }
+
+    public void finishDeferredConfig(List<OutputConfiguration> deferredConfigs)
+            throws CameraAccessException {
+        if (deferredConfigs == null || deferredConfigs.size() == 0) {
+            throw new IllegalArgumentException("deferred config is null or empty");
+        }
+
+        synchronized(mInterfaceLock) {
+            for (OutputConfiguration config : deferredConfigs) {
+                int streamId = -1;
+                for (int i = 0; i < mConfiguredOutputs.size(); i++) {
+                    // Have to use equal here, as createCaptureSessionByOutputConfigurations() and
+                    // createReprocessableCaptureSessionByConfigurations() do a copy of the configs.
+                    if (config.equals(mConfiguredOutputs.valueAt(i))) {
+                        streamId = mConfiguredOutputs.keyAt(i);
+                        break;
+                    }
+                }
+                if (streamId == -1) {
+                    throw new IllegalArgumentException("Deferred config is not part of this "
+                            + "session");
+                }
+
+                if (config.getSurface() == null) {
+                    throw new IllegalArgumentException("The deferred config for stream " + streamId
+                            + " must have a non-null surface");
+                }
+                mRemoteDevice.setDeferredConfiguration(streamId, config);
+            }
         }
     }
 
@@ -2005,6 +2039,7 @@ public class CameraDeviceImpl extends CameraDevice
      *
      * <p> Handle binder death for ICameraDeviceUser. Trigger onError.</p>
      */
+    @Override
     public void binderDied() {
         Log.w(TAG, "CameraDevice " + mCameraId + " died unexpectedly");
 

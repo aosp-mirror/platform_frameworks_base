@@ -89,7 +89,7 @@ href="{@docRoot}guide/components/fragments.html">Fragments</a> developer guide.<
 </li>
 
 
-  <li><strong>Use the action bar</strong>, but follow best practices and ensure your design 
+  <li><strong>Use the action bar</strong>, but follow best practices and ensure your design
 is flexible enough for the system to adjust the action bar layout based on the screen size.
 
 <p>The {@link android.app.ActionBar} is a UI component for activities that replaces the traditional

@@ -6,14 +6,14 @@ parent.link=index.html
 
 <div id="qv-wrapper">
 <div id="qv">
-  
+
   <h2>Quickview</h2>
   <ul>
     <li>Licensing allows you to verify your app was purchased from Google Play</li>
     <li>Your app maintains control of how it enforces its licensing status</li>
     <li>The service is free for all developers who publish on Google Play</li>
   </ul>
-  
+
   <h2>In this document</h2>
   <ol>
   <li><a href="#Secure">License Responses are Secure</a></li>
@@ -21,7 +21,7 @@ parent.link=index.html
   <li><a href="#Reqs">Requirements and Limitations</a></li>
   <li><a href="#CopyProtection">Replacement for Copy Protection</a></li>
 </ol>
-  
+
 </div>
 </div>
 
@@ -107,10 +107,10 @@ response data using an RSA key pair that is shared exclusively between the Googl
 server and you.</p>
 
 <p>The licensing service generates a single licensing key pair for each
-application and exposes the public key in your application's 
-<strong>Services & APIs</strong> page in the Developer Console. You must copy 
-the public key from the Developer Console and embed it in your application 
-source code. The server retains the private key internally and uses it to sign 
+application and exposes the public key in your application's
+<strong>Services & APIs</strong> page in the Developer Console. You must copy
+the public key from the Developer Console and embed it in your application
+source code. The server retains the private key internally and uses it to sign
 license responses for the applications you publish with that account.</p>
 
 <p>When your application receives a signed response, it uses the embedded public
@@ -209,7 +209,7 @@ practices in the following documents, you can help ensure that your implementati
 secure.</li>
 <li>Adding licensing to an application does not affect the way the application
 functions when run on a device that does not offer Google Play.</li>
-<li>You can implement licensing controls for a free app, but only if you're using the service to 
+<li>You can implement licensing controls for a free app, but only if you're using the service to
 provide <a
 href="{@docRoot}google/play/expansion-files.html">APK expansion files</a>.</li>
 </ul>

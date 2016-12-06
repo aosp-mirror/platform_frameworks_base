@@ -169,7 +169,7 @@ UsbAccessory accessory = (UsbAccessory) intent.getParcelableExtra(UsbManager.EXT
     include a <code>&lt;uses-feature&gt;</code> element that declares that your application uses
     the <code>android.hardware.usb.accessory</code> feature.</li>
 
-    <li>If you are using the 
+    <li>If you are using the
     <a href="http://code.google.com/android/add-ons/google-apis/index.html">add-on library</a>,
     add the <code>&lt;uses-library&gt;</code> element specifying
     <code>com.android.future.usb.accessory</code> for the library.</li>
@@ -347,7 +347,7 @@ UsbAccessory[] accessoryList = manager.getAcccessoryList();
 private static final String ACTION_USB_PERMISSION =
     "com.android.example.USB_PERMISSION";
 private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
- 
+
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
         if (ACTION_USB_PERMISSION.equals(action)) {
@@ -444,7 +444,7 @@ private void openAccessory() {
   <pre>
 BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
     public void onReceive(Context context, Intent intent) {
-        String action = intent.getAction(); 
+        String action = intent.getAction();
 
         if (UsbManager.ACTION_USB_ACCESSORY_DETACHED.equals(action)) {
             UsbAccessory accessory = (UsbAccessory)intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);

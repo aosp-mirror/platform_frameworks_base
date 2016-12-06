@@ -8,13 +8,13 @@ trainingnavtop=true
 
 <div id="tb-wrapper">
   <div id="tb">
-    
+
     <h2>このレッスンでの学習内容</h2>
     <ol>
       <li><a href="#SaveState">自分のアクティビティ状態を保存する</a></li>
       <li><a href="#RestoreState">自分のアクティビティ状態をリストアする</a></li>
     </ol>
-    
+
     <h2>関連ドキュメント</h2>
     <ul>
       <li><a href="{@docRoot}training/basics/supporting-devices/screens.html">異なる画面のサポート
@@ -73,7 +73,7 @@ onRestoreInstanceState()} と {@link android.app.Activity#onCreate onCreate()}
 
 <img src="{@docRoot}images/training/basics/basic-lifecycle-savestate.png" />
 <p class="img-caption"><strong>図 2.</strong> システムがアクティビティを停止し始めると、
-{@link android.app.Activity#onSaveInstanceState onSaveInstanceState()}（1）が呼び出されるため、{@link android.app.Activity} インスタンスの再作成の必要がある場合に備えて、保存する追加の状態データを指定できます。アクティビティが破棄され、同じインスタンスを再作成する必要がある場合、システムは（1）で定義された状態データを {@link android.app.Activity#onCreate onCreate()} メソッド（2）と 
+{@link android.app.Activity#onSaveInstanceState onSaveInstanceState()}（1）が呼び出されるため、{@link android.app.Activity} インスタンスの再作成の必要がある場合に備えて、保存する追加の状態データを指定できます。アクティビティが破棄され、同じインスタンスを再作成する必要がある場合、システムは（1）で定義された状態データを {@link android.app.Activity#onCreate onCreate()} メソッド（2）と
 {@link android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} メソッド（3）の両方に渡します。
 
 
@@ -105,7 +105,7 @@ public void onSaveInstanceState(Bundle savedInstanceState) {
     // Save the user's current game state
     savedInstanceState.putInt(STATE_SCORE, mCurrentScore);
     savedInstanceState.putInt(STATE_LEVEL, mCurrentLevel);
-    
+
     // Always call the superclass so it can save the view hierarchy state
     super.onSaveInstanceState(savedInstanceState);
 }
@@ -138,7 +138,7 @@ onCreate()} で、いくつかの状態データを復元する方法につい�
 &#64;Override
 protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState); // Always call the superclass first
-   
+
     // Check whether we're recreating a previously destroyed instance
     if (savedInstanceState != null) {
         // Restore value of members from saved state
@@ -157,12 +157,12 @@ android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} の実装�
 復元対象の保存済みの状態がある場合のみ {@link
 android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} が呼び出されるため、
 {@link android.os.Bundle} が null であるかどうかをチェックする必要はありません。</p>
-        
+
 <pre>
 public void onRestoreInstanceState(Bundle savedInstanceState) {
     // Always call the superclass so it can restore the view hierarchy
     super.onRestoreInstanceState(savedInstanceState);
-   
+
     // Restore state members from saved instance
     mCurrentScore = savedInstanceState.getInt(STATE_SCORE);
     mCurrentLevel = savedInstanceState.getInt(STATE_LEVEL);

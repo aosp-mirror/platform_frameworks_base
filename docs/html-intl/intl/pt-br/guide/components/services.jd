@@ -185,7 +185,7 @@ usá-los a partir de outros componentes do aplicativo.</p>
 <p>Como atividades (e outros componentes), você deve declarar todos os serviços no arquivo de manifesto
 do aplicativo.</p>
 
-<p>Para declarar o serviço, adicione um elemento <a href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a> 
+<p>Para declarar o serviço, adicione um elemento <a href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a>
 como filho do elemento <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
 . Por exemplo:</p>
 
@@ -494,7 +494,7 @@ a cada constante.</p>
 
 <h3 id="StartingAService">Início de um serviço</h3>
 
-<p>É possível iniciar um dispositivo de uma atividade ou outro componente do aplicativo passando uma 
+<p>É possível iniciar um dispositivo de uma atividade ou outro componente do aplicativo passando uma
 {@link android.content.Intent} a {@link
 android.content.Context#startService startService()}. O sistema Android chama o método {@link
 android.app.Service#onStartCommand onStartCommand()} do serviço e passa a ele a {@link

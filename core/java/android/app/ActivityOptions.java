@@ -31,10 +31,13 @@ import android.os.IRemoteCallback;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.transition.Transition;
+import android.transition.TransitionManager;
 import android.util.Pair;
 import android.util.Slog;
 import android.view.AppTransitionAnimationSpec;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 
 import java.util.ArrayList;
@@ -190,6 +193,7 @@ public class ActivityOptions {
             = "android:activity.exitCoordinatorIndex";
 
     private static final String KEY_USAGE_TIME_REPORT = "android:activity.usageTimeReport";
+    private static final String KEY_ROTATION_ANIMATION_HINT = "android:activity.rotationAnimationHint";
 
     /** @hide */
     public static final int ANIM_NONE = 0;
@@ -241,6 +245,7 @@ public class ActivityOptions {
     private int mDockCreateMode = DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
     private boolean mTaskOverlay;
     private AppTransitionAnimationSpec mAnimSpecs[];
+    private int mRotationAnimationHint = -1;
 
     /**
      * Create an ActivityOptions specifying a custom animation to run when
@@ -640,9 +645,70 @@ public class ActivityOptions {
     public static ActivityOptions makeSceneTransitionAnimation(Activity activity,
             Pair<View, String>... sharedElements) {
         ActivityOptions opts = new ActivityOptions();
-        if (!activity.getWindow().hasFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)) {
-            opts.mAnimationType = ANIM_DEFAULT;
+        makeSceneTransitionAnimation(activity, activity.getWindow(), opts,
+                activity.mExitTransitionListener, sharedElements);
+        return opts;
+    }
+
+    /**
+     * Call this immediately prior to startActivity to begin a shared element transition
+     * from a non-Activity. The window must support Window.FEATURE_ACTIVITY_TRANSITIONS.
+     * The exit transition will start immediately and the shared element transition will
+     * start once the launched Activity's shared element is ready.
+     * <p>
+     * When all transitions have completed and the shared element has been transfered,
+     * the window's decor View will have its visibility set to View.GONE.
+     *
+     * @hide
+     */
+    @SafeVarargs
+    public static ActivityOptions startSharedElementAnimation(Window window,
+            Pair<View, String>... sharedElements) {
+        ActivityOptions opts = new ActivityOptions();
+        final View decorView = window.getDecorView();
+        if (decorView == null) {
             return opts;
+        }
+        final ExitTransitionCoordinator exit =
+                makeSceneTransitionAnimation(null, window, opts, null, sharedElements);
+        if (exit != null) {
+            HideWindowListener listener = new HideWindowListener(window, exit);
+            exit.setHideSharedElementsCallback(listener);
+            exit.startExit();
+        }
+        return opts;
+    }
+
+    /**
+     * This method should be called when the {@link #startSharedElementAnimation(Window, Pair[])}
+     * animation must be stopped and the Views reset. This can happen if there was an error
+     * from startActivity or a springboard activity and the animation should stop and reset.
+     *
+     * @hide
+     */
+    public static void stopSharedElementAnimation(Window window) {
+        final View decorView = window.getDecorView();
+        if (decorView == null) {
+            return;
+        }
+        final ExitTransitionCoordinator exit = (ExitTransitionCoordinator)
+                decorView.getTag(com.android.internal.R.id.cross_task_transition);
+        if (exit != null) {
+            exit.cancelPendingTransitions();
+            decorView.setTagInternal(com.android.internal.R.id.cross_task_transition, null);
+            TransitionManager.endTransitions((ViewGroup) decorView);
+            exit.resetViews();
+            exit.clearState();
+            decorView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    static ExitTransitionCoordinator makeSceneTransitionAnimation(Activity activity, Window window,
+            ActivityOptions opts, SharedElementCallback callback,
+            Pair<View, String>[] sharedElements) {
+        if (!window.hasFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)) {
+            opts.mAnimationType = ANIM_DEFAULT;
+            return null;
         }
         opts.mAnimationType = ANIM_SCENE_TRANSITION;
 
@@ -665,18 +731,22 @@ public class ActivityOptions {
             }
         }
 
-        ExitTransitionCoordinator exit = new ExitTransitionCoordinator(activity, names, names,
-                views, false);
+        ExitTransitionCoordinator exit = new ExitTransitionCoordinator(activity, window,
+                callback, names, names, views, false);
         opts.mTransitionReceiver = exit;
         opts.mSharedElementNames = names;
-        opts.mIsReturning = false;
-        opts.mExitCoordinatorIndex =
-                activity.mActivityTransitionState.addExitTransitionCoordinator(exit);
-        return opts;
+        opts.mIsReturning = (activity == null);
+        if (activity == null) {
+            opts.mExitCoordinatorIndex = -1;
+        } else {
+            opts.mExitCoordinatorIndex =
+                    activity.mActivityTransitionState.addExitTransitionCoordinator(exit);
+        }
+        return exit;
     }
 
     /** @hide */
-    public static ActivityOptions makeSceneTransitionAnimation(Activity activity,
+    static ActivityOptions makeSceneTransitionAnimation(Activity activity,
             ExitTransitionCoordinator exitCoordinator, ArrayList<String> sharedElementNames,
             int resultCode, Intent resultData) {
         ActivityOptions opts = new ActivityOptions();
@@ -795,6 +865,7 @@ public class ActivityOptions {
             mAnimationFinishedListener = IRemoteCallback.Stub.asInterface(
                     opts.getBinder(KEY_ANIMATION_FINISHED_LISTENER));
         }
+        mRotationAnimationHint = opts.getInt(KEY_ROTATION_ANIMATION_HINT);
     }
 
     /**
@@ -898,6 +969,16 @@ public class ActivityOptions {
     /** @hide */
     public boolean isReturning() {
         return mIsReturning;
+    }
+
+    /**
+     * Returns whether or not the ActivityOptions was created with
+     * {@link #startSharedElementAnimation(Window, Pair[])}.
+     *
+     * @hide
+     */
+    boolean isCrossTask() {
+        return mExitCoordinatorIndex < 0;
     }
 
     /** @hide */
@@ -1138,6 +1219,7 @@ public class ActivityOptions {
         if (mAnimationFinishedListener != null) {
             b.putBinder(KEY_ANIMATION_FINISHED_LISTENER, mAnimationFinishedListener.asBinder());
         }
+        b.putInt(KEY_ROTATION_ANIMATION_HINT, mRotationAnimationHint);
 
         return b;
     }
@@ -1184,11 +1266,93 @@ public class ActivityOptions {
         return null;
     }
 
+    /**
+     * Returns the rotation animation set by {@link setRotationAnimationHint} or -1
+     * if unspecified.
+     * @hide
+     */
+    public int getRotationAnimationHint() {
+        return mRotationAnimationHint;
+    }
+
+
+    /**
+     * Set a rotation animation to be used if launching the activity
+     * triggers an orientation change, or -1 to clear. See
+     * {@link android.view.WindowManager.LayoutParams} for rotation
+     * animation values.
+     * @hide
+     */
+    public void setRotationAnimationHint(int hint) {
+        mRotationAnimationHint = hint;
+    }
+
     /** @hide */
     @Override
     public String toString() {
         return "ActivityOptions(" + hashCode() + "), mPackageName=" + mPackageName
                 + ", mAnimationType=" + mAnimationType + ", mStartX=" + mStartX + ", mStartY="
                 + mStartY + ", mWidth=" + mWidth + ", mHeight=" + mHeight;
+    }
+
+    private static class HideWindowListener extends Transition.TransitionListenerAdapter
+        implements ExitTransitionCoordinator.HideSharedElementsCallback {
+        private final Window mWindow;
+        private final ExitTransitionCoordinator mExit;
+        private final boolean mWaitingForTransition;
+        private boolean mTransitionEnded;
+        private boolean mSharedElementHidden;
+        private ArrayList<View> mSharedElements;
+
+        public HideWindowListener(Window window, ExitTransitionCoordinator exit) {
+            mWindow = window;
+            mExit = exit;
+            mSharedElements = new ArrayList<>(exit.mSharedElements);
+            Transition transition = mWindow.getExitTransition();
+            if (transition != null) {
+                transition.addListener(this);
+                mWaitingForTransition = true;
+            } else {
+                mWaitingForTransition = false;
+            }
+            View decorView = mWindow.getDecorView();
+            if (decorView != null) {
+                if (decorView.getTag(com.android.internal.R.id.cross_task_transition) != null) {
+                    throw new IllegalStateException(
+                            "Cannot start a transition while one is running");
+                }
+                decorView.setTagInternal(com.android.internal.R.id.cross_task_transition, exit);
+            }
+        }
+
+        @Override
+        public void onTransitionEnd(Transition transition) {
+            mTransitionEnded = true;
+            hideWhenDone();
+            transition.removeListener(this);
+        }
+
+        @Override
+        public void hideSharedElements() {
+            mSharedElementHidden = true;
+            hideWhenDone();
+        }
+
+        private void hideWhenDone() {
+            if (mSharedElementHidden && (!mWaitingForTransition || mTransitionEnded)) {
+                mExit.resetViews();
+                int numSharedElements = mSharedElements.size();
+                for (int i = 0; i < numSharedElements; i++) {
+                    View view = mSharedElements.get(i);
+                    view.requestLayout();
+                }
+                View decorView = mWindow.getDecorView();
+                if (decorView != null) {
+                    decorView.setTagInternal(
+                            com.android.internal.R.id.cross_task_transition, null);
+                    decorView.setVisibility(View.GONE);
+                }
+            }
+        }
     }
 }

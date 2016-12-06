@@ -28,6 +28,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.content.res.Resources;
 import android.database.SQLException;
 import android.os.Build;
@@ -178,6 +179,14 @@ public class AccountManager {
     public static final String KEY_ACCOUNT_TYPE = "accountType";
 
     /**
+     * Bundle key used for the account access id used for noting the
+     * account was accessed when unmarshalled from a parcel.
+     *
+     * @hide
+     */
+    public static final String KEY_ACCOUNT_ACCESS_ID = "accountAccessId";
+
+    /**
      * Bundle key used for the auth token value in results
      * from {@link #getAuthToken} and friends.
      */
@@ -264,6 +273,15 @@ public class AccountManager {
     public static final String AUTHENTICATOR_META_DATA_NAME =
             "android.accounts.AccountAuthenticator";
     public static final String AUTHENTICATOR_ATTRIBUTES_NAME = "account-authenticator";
+
+    /**
+     * Token type for the special case where a UID has access only to an account
+     * but no authenticator specific auth token types.
+     *
+     * @hide
+     */
+    public static final String ACCOUNT_ACCESS_TOKEN_TYPE =
+            "com.android.AccountManager.ACCOUNT_ACCESS_TOKEN_TYPE";
 
     private final Context mContext;
     private final IAccountManager mService;
@@ -803,7 +821,8 @@ public class AccountManager {
             public Account bundleToResult(Bundle bundle) throws AuthenticatorException {
                 String name = bundle.getString(KEY_ACCOUNT_NAME);
                 String type = bundle.getString(KEY_ACCOUNT_TYPE);
-                return new Account(name, type);
+                String accessId = bundle.getString(KEY_ACCOUNT_ACCESS_ID);
+                return new Account(name, type, accessId);
             }
         }.start();
     }
@@ -2263,6 +2282,7 @@ public class AccountManager {
                                     result.putString(KEY_ACCOUNT_NAME, null);
                                     result.putString(KEY_ACCOUNT_TYPE, null);
                                     result.putString(KEY_AUTHTOKEN, null);
+                                    result.putBinder(KEY_ACCOUNT_ACCESS_ID, null);
                                     try {
                                         mResponse.onResult(result);
                                     } catch (RemoteException e) {
@@ -2288,9 +2308,11 @@ public class AccountManager {
                                         public void onResult(Bundle value) throws RemoteException {
                                             Account account = new Account(
                                                     value.getString(KEY_ACCOUNT_NAME),
-                                                    value.getString(KEY_ACCOUNT_TYPE));
-                                            mFuture = getAuthToken(account, mAuthTokenType, mLoginOptions,
-                                                    mActivity, mMyCallback, mHandler);
+                                                    value.getString(KEY_ACCOUNT_TYPE),
+                                                    value.getString(KEY_ACCOUNT_ACCESS_ID));
+                                            mFuture = getAuthToken(account, mAuthTokenType,
+                                                    mLoginOptions,  mActivity, mMyCallback,
+                                                    mHandler);
                                         }
 
                                         @Override
@@ -2337,7 +2359,8 @@ public class AccountManager {
                         setException(new AuthenticatorException("account not in result"));
                         return;
                     }
-                    final Account account = new Account(accountName, accountType);
+                    final String accessId = result.getString(KEY_ACCOUNT_ACCESS_ID);
+                    final Account account = new Account(accountName, accountType, accessId);
                     mNumAccounts = 1;
                     getAuthToken(account, mAuthTokenType, null /* options */, mActivity,
                             mMyCallback, mHandler);
@@ -2680,8 +2703,6 @@ public class AccountManager {
      *         <ul>
      *         <li>{@link #KEY_ACCOUNT_SESSION_BUNDLE} - encrypted Bundle for
      *         adding the the to the device later.
-     *         <li>{@link #KEY_PASSWORD} - optional, the password or password
-     *         hash of the account.
      *         <li>{@link #KEY_ACCOUNT_STATUS_TOKEN} - optional, token to check
      *         status of the account
      *         </ul>
@@ -2769,8 +2790,6 @@ public class AccountManager {
      *         <ul>
      *         <li>{@link #KEY_ACCOUNT_SESSION_BUNDLE} - encrypted Bundle for
      *         updating the local credentials on device later.
-     *         <li>{@link #KEY_PASSWORD} - optional, the password or password
-     *         hash of the account
      *         <li>{@link #KEY_ACCOUNT_STATUS_TOKEN} - optional, token to check
      *         status of the account
      *         </ul>
@@ -2963,5 +2982,50 @@ public class AccountManager {
                 return bundle.getBoolean(KEY_BOOLEAN_RESULT);
             }
         }.start();
+    }
+
+    /**
+     * Gets whether a given package under a user has access to an account.
+     * Can be called only from the system UID.
+     *
+     * @param account The account for which to check.
+     * @param packageName The package for which to check.
+     * @param userHandle The user for which to check.
+     * @return True if the package can access the account.
+     *
+     * @hide
+     */
+    public boolean hasAccountAccess(@NonNull Account account, @NonNull String packageName,
+            @NonNull UserHandle userHandle) {
+        try {
+            return mService.hasAccountAccess(account, packageName, userHandle);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Creates an intent to request access to a given account for a UID.
+     * The returned intent should be stated for a result where {@link
+     * Activity#RESULT_OK} result means access was granted whereas {@link
+     * Activity#RESULT_CANCELED} result means access wasn't granted. Can
+     * be called only from the system UID.
+     *
+     * @param account The account for which to request.
+     * @param packageName The package name which to request.
+     * @param userHandle The user for which to request.
+     * @return The intent to request account access or null if the package
+     *     doesn't exist.
+     *
+     * @hide
+     */
+    public IntentSender createRequestAccountAccessIntentSenderAsUser(@NonNull Account account,
+            @NonNull String packageName, @NonNull UserHandle userHandle) {
+        try {
+            return mService.createRequestAccountAccessIntentSenderAsUser(account, packageName,
+                    userHandle);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 }

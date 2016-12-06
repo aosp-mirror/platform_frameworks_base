@@ -15,10 +15,12 @@
  */
 package com.android.server.pm;
 
+import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.content.pm.PackageInfo;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.backup.BackupUtils;
 
 import libcore.util.HexEncoding;
@@ -34,12 +36,15 @@ import java.util.Base64;
 
 /**
  * Package information used by {@link android.content.pm.ShortcutManager} for backup / restore.
+ *
+ * All methods should be guarded by {@code ShortcutService.mLock}.
  */
 class ShortcutPackageInfo {
     private static final String TAG = ShortcutService.TAG;
 
     static final String TAG_ROOT = "package-info";
     private static final String ATTR_VERSION = "version";
+    private static final String ATTR_LAST_UPDATE_TIME = "last_udpate_time";
     private static final String ATTR_SHADOW = "shadow";
 
     private static final String TAG_SIGNATURE = "signature";
@@ -53,16 +58,20 @@ class ShortcutPackageInfo {
      */
     private boolean mIsShadow;
     private int mVersionCode = VERSION_UNKNOWN;
+    private long mLastUpdateTime;
     private ArrayList<byte[]> mSigHashes;
 
-    private ShortcutPackageInfo(int versionCode, ArrayList<byte[]> sigHashes, boolean isShadow) {
+    private ShortcutPackageInfo(int versionCode, long lastUpdateTime,
+            ArrayList<byte[]> sigHashes, boolean isShadow) {
         mVersionCode = versionCode;
+        mLastUpdateTime = lastUpdateTime;
         mIsShadow = isShadow;
         mSigHashes = sigHashes;
     }
 
     public static ShortcutPackageInfo newEmpty() {
-        return new ShortcutPackageInfo(VERSION_UNKNOWN, new ArrayList<>(0), /* isShadow */ false);
+        return new ShortcutPackageInfo(VERSION_UNKNOWN, /* last update time =*/ 0,
+                new ArrayList<>(0), /* isShadow */ false);
     }
 
     public boolean isShadow() {
@@ -77,8 +86,16 @@ class ShortcutPackageInfo {
         return mVersionCode;
     }
 
-    public void setVersionCode(int versionCode) {
-        mVersionCode = versionCode;
+    public long getLastUpdateTime() {
+        return mLastUpdateTime;
+    }
+
+    /** Set {@link #mVersionCode} and {@link #mLastUpdateTime} from a {@link PackageInfo}. */
+    public void updateVersionInfo(@NonNull PackageInfo pi) {
+        if (pi != null) {
+            mVersionCode = pi.versionCode;
+            mLastUpdateTime = pi.lastUpdateTime;
+        }
     }
 
     public boolean hasSignatures() {
@@ -104,20 +121,21 @@ class ShortcutPackageInfo {
         return true;
     }
 
-    public static ShortcutPackageInfo generateForInstalledPackage(
+    @VisibleForTesting
+    public static ShortcutPackageInfo generateForInstalledPackageForTest(
             ShortcutService s, String packageName, @UserIdInt int packageUserId) {
         final PackageInfo pi = s.getPackageInfoWithSignatures(packageName, packageUserId);
         if (pi.signatures == null || pi.signatures.length == 0) {
             Slog.e(TAG, "Can't get signatures: package=" + packageName);
             return null;
         }
-        final ShortcutPackageInfo ret = new ShortcutPackageInfo(pi.versionCode,
+        final ShortcutPackageInfo ret = new ShortcutPackageInfo(pi.versionCode, pi.lastUpdateTime,
                 BackupUtils.hashSignatureArray(pi.signatures), /* shadow=*/ false);
 
         return ret;
     }
 
-    public void refresh(ShortcutService s, ShortcutPackageItem pkg) {
+    public void refreshSignature(ShortcutService s, ShortcutPackageItem pkg) {
         if (mIsShadow) {
             s.wtf("Attempted to refresh package info for shadow package " + pkg.getPackageName()
                     + ", user=" + pkg.getOwnerUserId());
@@ -130,7 +148,6 @@ class ShortcutPackageInfo {
             Slog.w(TAG, "Package not found: " + pkg.getPackageName());
             return;
         }
-        mVersionCode = pi.versionCode;
         mSigHashes = BackupUtils.hashSignatureArray(pi.signatures);
     }
 
@@ -139,6 +156,7 @@ class ShortcutPackageInfo {
         out.startTag(null, TAG_ROOT);
 
         ShortcutService.writeAttr(out, ATTR_VERSION, mVersionCode);
+        ShortcutService.writeAttr(out, ATTR_LAST_UPDATE_TIME, mLastUpdateTime);
         ShortcutService.writeAttr(out, ATTR_SHADOW, mIsShadow);
 
         for (int i = 0; i < mSigHashes.size(); i++) {
@@ -154,6 +172,9 @@ class ShortcutPackageInfo {
             throws IOException, XmlPullParserException {
 
         final int versionCode = ShortcutService.parseIntAttribute(parser, ATTR_VERSION);
+
+        final long lastUpdateTime = ShortcutService.parseLongAttribute(
+                parser, ATTR_LAST_UPDATE_TIME);
 
         // When restoring from backup, it's always shadow.
         final boolean shadow =
@@ -188,11 +209,12 @@ class ShortcutPackageInfo {
 
         // Successfully loaded; replace the feilds.
         mVersionCode = versionCode;
+        mLastUpdateTime = lastUpdateTime;
         mIsShadow = shadow;
         mSigHashes = hashes;
     }
 
-    public void dump(ShortcutService s, PrintWriter pw, String prefix) {
+    public void dump(PrintWriter pw, String prefix) {
         pw.println();
 
         pw.print(prefix);
@@ -206,6 +228,11 @@ class ShortcutPackageInfo {
         pw.print(prefix);
         pw.print("  Version: ");
         pw.print(mVersionCode);
+        pw.println();
+
+        pw.print(prefix);
+        pw.print("  Last package update time: ");
+        pw.print(mLastUpdateTime);
         pw.println();
 
         for (int i = 0; i < mSigHashes.size(); i++) {

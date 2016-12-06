@@ -132,6 +132,9 @@ public abstract class PackageManager {
             MATCH_SYSTEM_ONLY,
             MATCH_FACTORY_ONLY,
             MATCH_DEBUG_TRIAGED_MISSING,
+            GET_DISABLED_COMPONENTS,
+            GET_DISABLED_UNTIL_USED_COMPONENTS,
+            GET_UNINSTALLED_PACKAGES,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PackageInfoFlags {}
@@ -143,6 +146,9 @@ public abstract class PackageManager {
             MATCH_UNINSTALLED_PACKAGES,
             MATCH_SYSTEM_ONLY,
             MATCH_DEBUG_TRIAGED_MISSING,
+            MATCH_DISABLED_UNTIL_USED_COMPONENTS,
+            GET_DISABLED_UNTIL_USED_COMPONENTS,
+            GET_UNINSTALLED_PACKAGES,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApplicationInfoFlags {}
@@ -160,6 +166,9 @@ public abstract class PackageManager {
             MATCH_DIRECT_BOOT_UNAWARE,
             MATCH_SYSTEM_ONLY,
             MATCH_UNINSTALLED_PACKAGES,
+            GET_DISABLED_COMPONENTS,
+            GET_DISABLED_UNTIL_USED_COMPONENTS,
+            GET_UNINSTALLED_PACKAGES,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ComponentInfoFlags {}
@@ -178,6 +187,9 @@ public abstract class PackageManager {
             MATCH_DIRECT_BOOT_UNAWARE,
             MATCH_SYSTEM_ONLY,
             MATCH_UNINSTALLED_PACKAGES,
+            GET_DISABLED_COMPONENTS,
+            GET_DISABLED_UNTIL_USED_COMPONENTS,
+            GET_UNINSTALLED_PACKAGES,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ResolveInfoFlags {}
@@ -2868,6 +2880,7 @@ public abstract class PackageManager {
      *
      * @see #GET_META_DATA
      * @see #GET_SHARED_LIBRARY_FILES
+     * @see #MATCH_DISABLED_UNTIL_USED_COMPONENTS
      * @see #MATCH_SYSTEM_ONLY
      * @see #MATCH_UNINSTALLED_PACKAGES
      */
@@ -3496,6 +3509,7 @@ public abstract class PackageManager {
      *
      * @see #GET_META_DATA
      * @see #GET_SHARED_LIBRARY_FILES
+     * @see #MATCH_DISABLED_UNTIL_USED_COMPONENTS
      * @see #MATCH_SYSTEM_ONLY
      * @see #MATCH_UNINSTALLED_PACKAGES
      */
@@ -5416,7 +5430,7 @@ public abstract class PackageManager {
      * {@link #COMPONENT_ENABLED_STATE_DISABLED}, or
      * {@link #COMPONENT_ENABLED_STATE_DEFAULT}.  The last one means the
      * application's enabled state is based on the original information in
-     * the manifest as found in {@link ComponentInfo}.
+     * the manifest as found in {@link ApplicationInfo}.
      * @throws IllegalArgumentException if the named package does not exist.
      */
     public abstract int getApplicationEnabledSetting(String packageName);

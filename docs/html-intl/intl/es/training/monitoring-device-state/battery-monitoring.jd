@@ -7,8 +7,8 @@ next.title=Cómo determinar y controlar el tipo de conector y el estado de la co
 next.link=docking-monitoring.html
 
 @jd:body
- 
-<div id="tb-wrapper"> 
+
+<div id="tb-wrapper">
 <div id="tb">
 
 <h2>En esta sección puedes aprender:</h2>
@@ -24,9 +24,9 @@ next.link=docking-monitoring.html
   <li><a href="{@docRoot}guide/components/intents-filters.html">Intentos y filtros de intentos</a>
 </ul>
 
-</div> 
 </div>
- 
+</div>
+
 <p>Al modificar la frecuencia de las actualizaciones en segundo plano para reducir el efecto de las mismas en la duración de la batería, te recomendamos que comiences por comprobar el estado de carga y el nivel actual de la batería.</p>
 
 <p>El impacto derivado de actualizar aplicaciones en la duración de la batería varía en función del nivel de batería y del estado de carga del dispositivo, mientras que es insignificante cuando este está conectado a la corriente. Por ello, en la mayoría de los casos, puedes maximizar la frecuencia de actualización cuando el dispositivo esté conectado a un cargador. Por el contrario, si el dispositivo está en proceso de descarga, disminuir la frecuencia de actualización te permitirá aumentar la duración de la batería.</p>
@@ -34,8 +34,8 @@ next.link=docking-monitoring.html
 <p>Del mismo modo, puedes comprobar el nivel de carga de la batería y reducir la frecuencia de las actualizaciones o incluso detenerlas cuando la batería esté a punto de agotarse.</p>
 
 
-<h2 id="DetermineChargeState">Cómo determinar el estado de carga actual</h2> 
- 
+<h2 id="DetermineChargeState">Cómo determinar el estado de carga actual</h2>
+
 <p>En primer lugar, te recomendamos que determines el estado de carga actual. {@link android.os.BatteryManager} envía los detalles de carga y de la batería en un {@link android.content.Intent} persistente que incluye el estado de carga.</p>
 
 <p>Se trata de un intento persistente, por lo que no es necesario registrar un {@link android.content.BroadcastReceiver}. Para ello, solo tienes que ejecutar {@code registerReceiver} transmitiendo {@code null} como el receptor (como se muestra en el siguiente fragmento). A continuación, se devuelve el intento de estado actual de la batería. Puedes transmitir un objeto {@link android.content.BroadcastReceiver} real, pero hablaremos sobre las actualizaciones en otra sección, por lo que no es necesario ahora.</p>
@@ -58,7 +58,7 @@ boolean acCharge = chargePlug == BATTERY_PLUGGED_AC;</pre>
 <p>Normalmente, debes maximizar la frecuencia de las actualizaciones en segundo plano si el dispositivo está conectado a un cargador de corriente alterna, disminuir esa frecuencia si se utiliza un cargador USB y reducirla aún más si la batería se está descargando.</p>
 
 
-<h2 id="MonitorChargeState">Cómo supervisar los cambios en el estado de carga</h2> 
+<h2 id="MonitorChargeState">Cómo supervisar los cambios en el estado de carga</h2>
 
 <p>Modificar el estado de carga es tan fácil como conectar el dispositivo a un enchufe o USB. Por ello, es importante que supervises el estado de carga por si se producen cambios y modifiques la frecuencia de actualización según corresponda.</p>
 
@@ -75,11 +75,11 @@ boolean acCharge = chargePlug == BATTERY_PLUGGED_AC;</pre>
 
 <pre>public class PowerConnectionReceiver extends BroadcastReceiver {
     &#64;Override
-    public void onReceive(Context context, Intent intent) { 
+    public void onReceive(Context context, Intent intent) {
         int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
         boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
                             status == BatteryManager.BATTERY_STATUS_FULL;
-    
+
         int chargePlug = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
         boolean usbCharge = chargePlug == BATTERY_PLUGGED_USB;
         boolean acCharge = chargePlug == BATTERY_PLUGGED_AC;
@@ -87,7 +87,7 @@ boolean acCharge = chargePlug == BATTERY_PLUGGED_AC;</pre>
 }</pre>
 
 
-<h2 id="CurrentLevel">Cómo determinar el nivel de batería actual</h2> 
+<h2 id="CurrentLevel">Cómo determinar el nivel de batería actual</h2>
 
 <p>En algunos casos, también es útil determinar el nivel de batería actual. Puedes disminuir la frecuencia de las actualizaciones en segundo plano si el nivel de carga de la batería es inferior a un valor determinado.</p>
 
@@ -99,7 +99,7 @@ int scale = battery.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
 float batteryPct = level / (float)scale;</pre>
 
 
-<h2 id="MonitorLevel">Cómo supervisar cambios importantes en el nivel de batería</h2> 
+<h2 id="MonitorLevel">Cómo supervisar cambios importantes en el nivel de batería</h2>
 
 <p>No puedes controlar el estado de la batería de forma continua fácilmente, pero tampoco es necesario.</p>
 

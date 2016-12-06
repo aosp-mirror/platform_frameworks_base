@@ -83,9 +83,9 @@ Android 3.0 及更高版本的系统中，<a href="{@docRoot}guide/topics/ui/act
 </p>
   <p>请参阅<a href="#options-menu">创建选项菜单</a>部分。</p>
     </dd>
-    
+
   <dt><strong>上下文菜单和上下文操作模式</strong></dt>
-  
+
    <dd>上下文菜单是用户长按某一元素时出现的<a href="#FloatingContextMenu">浮动菜单</a>。
 它提供的操作将影响所选内容或上下文框架。
 
@@ -94,7 +94,7 @@ Android 3.0 及更高版本的系统中，<a href="{@docRoot}guide/topics/ui/act
 </p>
   <p>请参阅<a href="#context-menu">创建上下文菜单</a>部分。</p>
 </dd>
-    
+
   <dt><strong>弹出菜单</strong></dt>
     <dd>弹出菜单将以垂直列表形式显示一系列项目，这些项目将锚定到调用该菜单的视图中。
 它特别适用于提供与特定内容相关的大量操作，或者为命令的另一部分提供选项。
@@ -135,7 +135,7 @@ XML <a href="{@docRoot}guide/topics/resources/menu-resource.html">菜单资源</
   <dt><code>&lt;item></code></dt>
     <dd>创建 {@link android.view.MenuItem}，此元素表示菜单中的一项，可能包含嵌套的 <code>&lt;menu></code>
 元素，以便创建子菜单。</dd>
-    
+
   <dt><code>&lt;group></code></dt>
     <dd>{@code &lt;item&gt;} 元素的不可见容器（可选）。它支持您对菜单项进行分类，使其共享活动状态和可见性等属性。
 如需了解详细信息，请参阅<a href="#groups">创建菜单组</a>部分。
@@ -742,8 +742,8 @@ android.view.Menu} 对象中。在 API 级别 14 及更高版本中，您可以�
 
 <pre>
 &lt;ImageButton
-    android:layout_width="wrap_content" 
-    android:layout_height="wrap_content" 
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:src="@drawable/ic_overflow_holo_dark"
     android:contentDescription="@string/descr_overflow_button"
     android:onClick="showPopup" />

@@ -143,7 +143,9 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_4g_plus" msgid="3032226872470658661">"4G+"</string>
     <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
+    <string name="accessibility_data_connection_lte_plus" msgid="361876866906946007">"LTE+"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"रोमिङ"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
@@ -236,7 +238,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G डेटा रोकिएको छ"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"सेल्यूलर डेटा रोकिएको छ"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"डेटा रोकिएको छ"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"तपाईंले सेट गर्नुभएको डेटाको सीमा पुगेकाले, यन्त्रले यस चक्रको बाँकी भागका लागि डेटाको प्रयोग रोकेको छ।\n\nपुन: सुरू गर्दा तपाईंको क्यारियरले शुल्कहरू लिन सक्छ।"</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"तपाईँले सेट गर्नुभएको डेटाको सीमामा पुगिएको छ। अबदेखि तपाईँ सेलुलर डेटाको प्रयोग गर्नुहुने छैन। \n\nतपाईँले प्रयोग जारी राख्नुभयो भने डेटा प्रयोगका शुल्कहरू लाग्न सक्छन्।"</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"पुनः सुरु गर्नुहोस्"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"इन्टरनेट जडान छैन"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi जडित"</string>
@@ -317,6 +319,9 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> सीमा"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> चेतावनी दिँदै"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"कार्य मोड"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"रात्रिको प्रकाश"</string>
+    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"रात्रिको प्रकाश सक्रिय छ, निष्क्रिय पार्न ट्याप गर्नुहोस्"</string>
+    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"रात्रिको प्रकाश निष्क्रिय छ, सक्रिय गर्न ट्याप गर्नुहोस्"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"हालका कुनै पनि वस्तुहरू छैनन्"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"तपाईँले सबै कुरा खाली गर्नुभएको छ"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"अनुप्रयोग जानकारी"</string>
@@ -330,6 +335,8 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"तेर्सो रूपमा विभाजन गर्नुहोस्"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ठाडो रूपमा विभाजन गर्नुहोस्"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"अनुकूलन विभाजन गर्नुहोस्"</string>
+  <string-array name="recents_blacklist_array">
+  </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"चार्ज भयो"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"चार्ज हुँदै"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> पूर्ण नभएसम्म"</string>
@@ -397,6 +404,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"उपकरण अनुगमन हुन सक्छ"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"प्रोफाइल अनुगमन हुन सक्छ"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"सञ्जाल अनुगमित हुन सक्छ"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"नेटवर्कको अनुगमन गरिने सम्भावना छ"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"उपकरण अनुगमन"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"प्रोफाइल अनुगमन गर्दै"</string>
     <string name="monitoring_title" msgid="169206259253048106">"सञ्जाल अनुगमन"</string>
@@ -409,6 +417,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"तपाईँ <xliff:g id="APPLICATION">%1$s</xliff:g> सँग जडित हुनुहुन्छ जसले इ-मेल, अनुप्रयोगहरू र वेबसाइट लगायतका तपाईँका नेटवर्क गतिविधिको अनुगमन गर्न सक्छ।"</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"तपाईँ <xliff:g id="APPLICATION">%1$s</xliff:g> सँग जडित हुनुहुन्छ जसले इ-मेल, अनुप्रयोगहरू र वेबसाइट लगायतका तपाईँको निजी नेटवर्क गतिविधिका अनुगमन गर्न सक्छ।"</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"तपाईं <xliff:g id="APPLICATION">%1$s</xliff:g> मा जोडिनुभएको छ जसले इमेल, अनुप्रयोग र वेबसाइटहरू लगायतको तपाईंको  व्यक्तिगत नेटवर्क सम्बन्धी गतिविधिको अनुगमन गर्न सक्छ।"</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"तपाईँको कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ। यो <xliff:g id="APPLICATION">%2$s</xliff:g> सँग जोडिएको छ जसले इमेल, अनुप्रयोगहरू, र वेबसाइटहरू लगायतका तपाईँका नेटवर्क गतिविधि अनुगमन गर्न सक्छ।\n\nथप जानकारीको लागि, आफ्नो प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"तपाईँको कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ। यो <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> सँग जोडिएको छ जसले इमेल, अनुप्रयोगहरू, र वेबसाइटहरू लगायतका तपाईँका नेटवर्क गतिविधि अनुगमन गर्न सक्छ।\n\nतपाईँ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> सँग पनि जडित हुनुहुन्छ, जसले तपाईँको व्यक्तिगत नेटवर्क गतिविधि अनुगमन गर्न सक्छ।"</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"तपाईँको उपकरण <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्थित गरिन्छ।\n\nतपाईँको प्रशासकले तपाईँको यन्त्र र त्यसको स्थान जानकारीमार्फत सेटिङहरू,  कर्पोरेट पहुँच, अनुप्रयोगहरू, तपाईँको यन्त्रसँग सम्बद्ध डेटा  र तपाईँको यन्त्रको स्थान जानकारीको अनुगमन र व्यवस्थापन गर्न सक्छ।\n\nतपाईँ <xliff:g id="APPLICATION">%2$s</xliff:g> सँग जडित हुनुहुन्छ जसले इमेल, अनुप्रयोगहरू, र वेबसाइटहरू लगायतका तपाईँका नेटवर्क गतिविधिका अनुगमन गर्न सक्छ।\n\nथप जानकारीको लागि तपाईको प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
@@ -434,6 +443,18 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> भोल्यूम संवाद हो"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"मूललाई पुनर्स्थापना गर्न ट्याप गर्नुहोस्।"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"तपाईँले कार्य प्रोफाइल प्रयोग गर्दै हुनुहुन्छ"</string>
+  <string-array name="volume_stream_titles">
+    <item msgid="5841843895402729630">"कल"</item>
+    <item msgid="5997713001067658559">"प्रणाली"</item>
+    <item msgid="7858983209929864160">"रिङटोन"</item>
+    <item msgid="1850038478268896762">"मिडिया"</item>
+    <item msgid="8265110906352372092">"अलार्म"</item>
+    <item msgid="5339394737636839168"></item>
+    <item msgid="2951313578278086204">"ब्लुटुथ"</item>
+    <item msgid="2919807739709798970"></item>
+    <item msgid="150349973435223405"></item>
+    <item msgid="6761963760295549099"></item>
+  </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s। अनम्यूट गर्नका लागि ट्याप गर्नुहोस्।"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s। कम्पनमा सेट गर्नका लागि ट्याप गर्नुहोस्। पहुँच सम्बन्धी सेवाहरू म्यूट हुन सक्छन्।"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s। म्यूट गर्नका लागि ट्याप गर्नुहोस्। पहुँच सम्बन्धी सेवाहरू म्यूट हुन सक्छन्।"</string>
@@ -473,8 +494,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"वस्तुस्थिति पट्टीको घडीमा सेकेन्ड देखाउनुहोस्। ब्याट्री आयु प्रभावित हुन सक्छ।"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"द्रुत सेटिङहरू पुनः व्यवस्थित गर्नुहोस्"</string>
     <string name="show_brightness" msgid="6613930842805942519">"द्रुत सेटिङहरूमा उज्यालो देखाउनुहोस्"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"विभाजित-स्क्रिन स्वाइप-अप इशारा सक्षम गर्नुहोस्"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"परिदृश्य बटनदेखि माथि स्वाइप गरी विभाजित-स्क्रिन प्रविष्ट गर्न इसारालाई सक्रिय गर्नुहोस्"</string>
     <string name="experimental" msgid="6198182315536726162">"प्रयोगात्मक"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"ब्लुटुथ सक्रिय पार्ने हो?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"आफ्नो ट्याब्लेटसँग किबोर्ड जोड्न, पहिले तपाईँले ब्लुटुथ सक्रिय गर्नुपर्छ।"</string>
@@ -504,21 +523,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"थप सेटिङहरू"</string>
     <string name="notification_done" msgid="5279426047273930175">"सम्पन्‍न भयो"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> का सूचनाका लागि नियन्त्रणहरू"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"रंग र रूप"</string>
-    <string name="night_mode" msgid="3540405868248625488">"रात्री मोड"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"प्रदर्शनको स्तर  मिलाउनुहोस्"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"सक्रिय"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"निष्क्रिय"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"स्वतः सक्रिय पार्नुहोस्"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"स्थान र दिनको समयको लागि उपयुक्त रात्री मोडमा स्विच गर्नुहोस्"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"रात्री मोड सक्रिय हुँदा"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Android OS का लागि गाढा रंगको विषयवस्तु प्रयोग गर्नुहोस्"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"रङ्गलाई समायोजन गर्नुहोस्"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"चमकलाई समायोजन गर्नुहोस्"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"गहिरो रंगको विषयवस्तुलाई Android OS का त्यस्ता मुख्य क्षेत्रहरूमा लागू गरिन्छ जसलाई सामान्यतया हल्का रंगमा देखाइन्छ, जस्तै सेटिङहरू।"</string>
-    <string name="color_apply" msgid="9212602012641034283">"लागू गर्नुहोस्"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"सेटिङहरूको पुष्टि गर्नुहोस्"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"केही रङ सेटिङहरूले यस यन्त्रलाई अनुपयोगी बनाउन सक्छन्। यी रङ सेटिङहरू पुष्टि गर्न ठीक छ मा क्लिक गर्नुहोस्, अन्यथा यी सेटिङहरू १० सेकेण्डपछि रिसेट हुनेछन्।"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"ब्याट्री उपयोग"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"चार्ज गर्ने समयमा ब्याट्री सेभर उपलब्ध छैन"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"ब्याट्री सेभर"</string>
@@ -647,4 +651,5 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> सम्बन्धी सेटिङहरूलाई खोल्नुहोस्।"</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"सेटिङहरूको क्रमलाई सम्पादन गर्नुहोस्।"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g> मध्ये पृष्ठ <xliff:g id="ID_1">%1$d</xliff:g>"</string>
+    <string name="cant_silence_or_block" msgid="999689262131488625">"सूचनाहरूलाई मौन गर्न वा यसमाथि रोक लगाउन मिल्दैन"</string>
 </resources>

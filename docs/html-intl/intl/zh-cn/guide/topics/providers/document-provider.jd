@@ -177,7 +177,7 @@ URI 授权；</li>
 中，提供程序和客户端并不直接交互。客户端请求与文件交互（即读取、编辑、创建或删除文件）的权限；
 </li>
 
-<li>交互在应用（在本示例中为照片应用）触发 Intent 
+<li>交互在应用（在本示例中为照片应用）触发 Intent
 {@link android.content.Intent#ACTION_OPEN_DOCUMENT} 或 {@link android.content.Intent#ACTION_CREATE_DOCUMENT} 后开始。Intent 可能包括进一步细化条件的过滤器&mdash;例如，“为我提供所有 MIME
 类型为‘图像’的可打开文件”；
 </li>
@@ -460,7 +460,7 @@ DocumentsContract.deleteDocument(getContentResolver(), uri);
 
 <p>您可以使用 SAF
 就地编辑文本文档。以下代码段会触发
-{@link android.content.Intent#ACTION_OPEN_DOCUMENT}  Intent 
+{@link android.content.Intent#ACTION_OPEN_DOCUMENT}  Intent
 并使用类别 {@link android.content.Intent#CATEGORY_OPENABLE}
 以仅显示可以打开的文档。它会进一步过滤以仅显示文本文件：</p>
 
@@ -589,7 +589,7 @@ SAF
 </ul></li>
 
 <li>一个包括
-{@code android.content.action.DOCUMENTS_PROVIDER} 操作的 Intent 
+{@code android.content.action.DOCUMENTS_PROVIDER} 操作的 Intent
 过滤器，以便在系统搜索提供程序时让您的提供程序出现在选取器中。</li>
 
 </ul>
@@ -623,7 +623,7 @@ SAF
 Android 4.4 及更高版本的设备。如果您想让应用支持 {@link android.content.Intent#ACTION_GET_CONTENT}
 以适应运行 Android 4.3
 及更低版本的设备，则应在您的清单文件中为运行 Android 4.4
-或更高版本的设备禁用 {@link android.content.Intent#ACTION_GET_CONTENT}  Intent 
+或更高版本的设备禁用 {@link android.content.Intent#ACTION_GET_CONTENT}  Intent
 过滤器。应将文档提供程序和
 {@link android.content.Intent#ACTION_GET_CONTENT}
 视为具有互斥性。如果您同时支持这两者，您的应用将在系统选取器
@@ -631,7 +631,7 @@ UI
 中出现两次，提供两种不同的方式来访问您存储的数据。这会给用户造成困惑。</p>
 
 <p>建议按照以下步骤为运行 Android 4.4 版或更高版本的设备禁用
-{@link android.content.Intent#ACTION_GET_CONTENT}  Intent 
+{@link android.content.Intent#ACTION_GET_CONTENT}  Intent
 过滤器：</p>
 
 <ol>
@@ -643,7 +643,7 @@ UI
 
 <li>添加一个<a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">Activity别名</a>，为
 4.4 版（API 19
-级）或更高版本禁用 {@link android.content.Intent#ACTION_GET_CONTENT}  Intent 
+级）或更高版本禁用 {@link android.content.Intent#ACTION_GET_CONTENT}  Intent
 过滤器。例如：
 
 <pre>

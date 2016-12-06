@@ -529,8 +529,18 @@ struct FeatureGroup {
     int openGLESVersion;
 };
 
+static bool hasFeature(const char* name, const FeatureGroup& grp,
+                       const KeyedVector<String8, ImpliedFeature>& implied) {
+    String8 name8(name);
+    ssize_t idx = grp.features.indexOfKey(name8);
+    if (idx < 0) {
+        idx = implied.indexOfKey(name8);
+    }
+    return idx >= 0;
+}
+
 static void addImpliedFeature(KeyedVector<String8, ImpliedFeature>* impliedFeatures,
-                              const char* name, const char* reason, bool sdk23) {
+                              const char* name, const String8& reason, bool sdk23) {
     String8 name8(name);
     ssize_t idx = impliedFeatures->indexOfKey(name8);
     if (idx < 0) {
@@ -543,7 +553,7 @@ static void addImpliedFeature(KeyedVector<String8, ImpliedFeature>* impliedFeatu
     if (feature->impliedBySdk23 && !sdk23) {
         feature->impliedBySdk23 = false;
     }
-    feature->reasons.add(String8(reason));
+    feature->reasons.add(reason);
 }
 
 static void printFeatureGroupImpl(const FeatureGroup& grp,
@@ -616,9 +626,16 @@ static void addParentFeatures(FeatureGroup* grp, const String8& name) {
     } else if (name == "android.hardware.location.gps" ||
             name == "android.hardware.location.network") {
         grp->features.add(String8("android.hardware.location"), Feature(true));
+    } else if (name == "android.hardware.faketouch.multitouch") {
+        grp->features.add(String8("android.hardware.faketouch"), Feature(true));
+    } else if (name == "android.hardware.faketouch.multitouch.distinct" ||
+            name == "android.hardware.faketouch.multitouch.jazzhands") {
+        grp->features.add(String8("android.hardware.faketouch.multitouch"), Feature(true));
+        grp->features.add(String8("android.hardware.faketouch"), Feature(true));
     } else if (name == "android.hardware.touchscreen.multitouch") {
         grp->features.add(String8("android.hardware.touchscreen"), Feature(true));
-    } else if (name == "android.hardware.touchscreen.multitouch.distinct") {
+    } else if (name == "android.hardware.touchscreen.multitouch.distinct" ||
+            name == "android.hardware.touchscreen.multitouch.jazzhands") {
         grp->features.add(String8("android.hardware.touchscreen.multitouch"), Feature(true));
         grp->features.add(String8("android.hardware.touchscreen"), Feature(true));
     } else if (name == "android.hardware.opengles.aep") {
@@ -634,50 +651,58 @@ static void addImpliedFeaturesForPermission(const int targetSdk, const String8& 
                                             bool impliedBySdk23Permission) {
     if (name == "android.permission.CAMERA") {
         addImpliedFeature(impliedFeatures, "android.hardware.camera",
-                String8::format("requested %s permission", name.string())
-                .string(), impliedBySdk23Permission);
+                          String8::format("requested %s permission", name.string()),
+                          impliedBySdk23Permission);
     } else if (name == "android.permission.ACCESS_FINE_LOCATION") {
-        addImpliedFeature(impliedFeatures, "android.hardware.location.gps",
-                String8::format("requested %s permission", name.string())
-                .string(), impliedBySdk23Permission);
+        if (targetSdk < SDK_LOLLIPOP) {
+            addImpliedFeature(impliedFeatures, "android.hardware.location.gps",
+                              String8::format("requested %s permission", name.string()),
+                              impliedBySdk23Permission);
+            addImpliedFeature(impliedFeatures, "android.hardware.location.gps",
+                              String8::format("targetSdkVersion < %d", SDK_LOLLIPOP),
+                              impliedBySdk23Permission);
+        }
         addImpliedFeature(impliedFeatures, "android.hardware.location",
-                String8::format("requested %s permission", name.string())
-                .string(), impliedBySdk23Permission);
-    } else if (name == "android.permission.ACCESS_MOCK_LOCATION") {
-        addImpliedFeature(impliedFeatures, "android.hardware.location",
-                String8::format("requested %s permission", name.string())
-                .string(), impliedBySdk23Permission);
+                String8::format("requested %s permission", name.string()),
+                impliedBySdk23Permission);
     } else if (name == "android.permission.ACCESS_COARSE_LOCATION") {
-        addImpliedFeature(impliedFeatures, "android.hardware.location.network",
-                String8::format("requested %s permission", name.string())
-                .string(), impliedBySdk23Permission);
+        if (targetSdk < SDK_LOLLIPOP) {
+            addImpliedFeature(impliedFeatures, "android.hardware.location.network",
+                              String8::format("requested %s permission", name.string()),
+                              impliedBySdk23Permission);
+            addImpliedFeature(impliedFeatures, "android.hardware.location.network",
+                              String8::format("targetSdkVersion < %d", SDK_LOLLIPOP),
+                              impliedBySdk23Permission);
+        }
         addImpliedFeature(impliedFeatures, "android.hardware.location",
-                String8::format("requested %s permission", name.string())
-                .string(), impliedBySdk23Permission);
-    } else if (name == "android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" ||
+                          String8::format("requested %s permission", name.string()),
+                          impliedBySdk23Permission);
+    } else if (name == "android.permission.ACCESS_MOCK_LOCATION" ||
+               name == "android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" ||
                name == "android.permission.INSTALL_LOCATION_PROVIDER") {
         addImpliedFeature(impliedFeatures, "android.hardware.location",
-                String8::format("requested %s permission", name.string())
-                .string(), impliedBySdk23Permission);
+                          String8::format("requested %s permission", name.string()),
+                          impliedBySdk23Permission);
     } else if (name == "android.permission.BLUETOOTH" ||
                name == "android.permission.BLUETOOTH_ADMIN") {
-        if (targetSdk > 4) {
+        if (targetSdk > SDK_DONUT) {
             addImpliedFeature(impliedFeatures, "android.hardware.bluetooth",
-                    String8::format("requested %s permission", name.string())
-                    .string(), impliedBySdk23Permission);
+                              String8::format("requested %s permission", name.string()),
+                              impliedBySdk23Permission);
             addImpliedFeature(impliedFeatures, "android.hardware.bluetooth",
-                    "targetSdkVersion > 4", impliedBySdk23Permission);
+                              String8::format("targetSdkVersion > %d", SDK_DONUT),
+                              impliedBySdk23Permission);
         }
     } else if (name == "android.permission.RECORD_AUDIO") {
         addImpliedFeature(impliedFeatures, "android.hardware.microphone",
-                String8::format("requested %s permission", name.string())
-                .string(), impliedBySdk23Permission);
+                          String8::format("requested %s permission", name.string()),
+                          impliedBySdk23Permission);
     } else if (name == "android.permission.ACCESS_WIFI_STATE" ||
                name == "android.permission.CHANGE_WIFI_STATE" ||
                name == "android.permission.CHANGE_WIFI_MULTICAST_STATE") {
         addImpliedFeature(impliedFeatures, "android.hardware.wifi",
-                String8::format("requested %s permission", name.string())
-                .string(), impliedBySdk23Permission);
+                          String8::format("requested %s permission", name.string()),
+                          impliedBySdk23Permission);
     } else if (name == "android.permission.CALL_PHONE" ||
                name == "android.permission.CALL_PRIVILEGED" ||
                name == "android.permission.MODIFY_PHONE_STATE" ||
@@ -690,8 +715,8 @@ static void addImpliedFeaturesForPermission(const int targetSdk, const String8& 
                name == "android.permission.WRITE_APN_SETTINGS" ||
                name == "android.permission.WRITE_SMS") {
         addImpliedFeature(impliedFeatures, "android.hardware.telephony",
-                String8("requested a telephony permission").string(),
-                impliedBySdk23Permission);
+                          String8("requested a telephony permission"),
+                          impliedBySdk23Permission);
     }
 }
 
@@ -1642,18 +1667,18 @@ int doDump(Bundle* bundle)
                             if (error == "") {
                                 if (orien == 0 || orien == 6 || orien == 8) {
                                     // Requests landscape, sensorLandscape, or reverseLandscape.
-                                    addImpliedFeature(&impliedFeatures,
-                                                      "android.hardware.screen.landscape",
-                                                      "one or more activities have specified a "
-                                                      "landscape orientation",
-                                                      false);
+                                    addImpliedFeature(
+                                            &impliedFeatures, "android.hardware.screen.landscape",
+                                            String8("one or more activities have specified a "
+                                                    "landscape orientation"),
+                                            false);
                                 } else if (orien == 1 || orien == 7 || orien == 9) {
                                     // Requests portrait, sensorPortrait, or reversePortrait.
-                                    addImpliedFeature(&impliedFeatures,
-                                                      "android.hardware.screen.portrait",
-                                                      "one or more activities have specified a "
-                                                      "portrait orientation",
-                                                      false);
+                                    addImpliedFeature(
+                                            &impliedFeatures, "android.hardware.screen.portrait",
+                                            String8("one or more activities have specified a "
+                                                    "portrait orientation"),
+                                            false);
                                 }
                             }
                         } else if (tag == "uses-library") {
@@ -2005,8 +2030,12 @@ int doDump(Bundle* bundle)
                 }
             }
 
-            addImpliedFeature(&impliedFeatures, "android.hardware.touchscreen",
-                    "default feature for all apps", false);
+            // If the app hasn't declared the touchscreen as a feature requirement (either
+            // directly or implied, required or not), then the faketouch feature is implied.
+            if (!hasFeature("android.hardware.touchscreen", commonFeatures, impliedFeatures)) {
+                addImpliedFeature(&impliedFeatures, "android.hardware.faketouch",
+                                  String8("default feature for all apps"), false);
+            }
 
             const size_t numFeatureGroups = featureGroups.size();
             if (numFeatureGroups == 0) {

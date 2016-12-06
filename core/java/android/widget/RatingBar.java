@@ -110,8 +110,8 @@ public class RatingBar extends AbsSeekBar {
         }
 
         // A touch inside a star fill up to that fractional area (slightly more
-        // than 1 so boundaries round up).
-        mTouchProgressOffset = 1.1f;
+        // than 0.5 so boundaries round up).
+        mTouchProgressOffset = 0.6f;
     }
 
     public RatingBar(Context context, AttributeSet attrs) {
@@ -281,10 +281,8 @@ public class RatingBar extends AbsSeekBar {
     protected synchronized void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        if (mSampleTile != null) {
-            // TODO: Once ProgressBar's TODOs are gone, this can be done more
-            // cleanly than mSampleTile
-            final int width = mSampleTile.getWidth() * mNumStars;
+        if (mSampleWidth > 0) {
+            final int width = mSampleWidth * mNumStars;
             setMeasuredDimension(resolveSizeAndState(width, widthMeasureSpec, 0),
                     getMeasuredHeight());
         }

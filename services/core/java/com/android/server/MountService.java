@@ -1056,6 +1056,10 @@ class MountService extends IMountService.Stub
                         || mForceAdoptable) {
                     flags |= DiskInfo.FLAG_ADOPTABLE;
                 }
+                // Adoptable storage isn't currently supported on FBE devices
+                if (StorageManager.isFileEncryptedNativeOnly()) {
+                    flags &= ~DiskInfo.FLAG_ADOPTABLE;
+                }
                 mDisks.put(id, new DiskInfo(id, flags));
                 break;
             }
@@ -1433,13 +1437,22 @@ class MountService extends IMountService.Stub
      * Decide if volume is mountable per device policies.
      */
     private boolean isMountDisallowed(VolumeInfo vol) {
-        if (vol.type == VolumeInfo.TYPE_PUBLIC || vol.type == VolumeInfo.TYPE_PRIVATE) {
-            final UserManager userManager = mContext.getSystemService(UserManager.class);
-            return userManager.hasUserRestriction(UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA,
+        UserManager userManager = mContext.getSystemService(UserManager.class);
+
+        boolean isUsbRestricted = false;
+        if (vol.disk != null && vol.disk.isUsb()) {
+            isUsbRestricted = userManager.hasUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER,
                     Binder.getCallingUserHandle());
-        } else {
-            return false;
         }
+
+        boolean isTypeRestricted = false;
+        if (vol.type == VolumeInfo.TYPE_PUBLIC || vol.type == VolumeInfo.TYPE_PRIVATE) {
+            isTypeRestricted = userManager
+                    .hasUserRestriction(UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA,
+                    Binder.getCallingUserHandle());
+        }
+
+        return isUsbRestricted || isTypeRestricted;
     }
 
     private void enforceAdminUser() {
@@ -1985,6 +1998,11 @@ class MountService extends IMountService.Stub
         }
 
         if ((mask & StorageManager.DEBUG_FORCE_ADOPTABLE) != 0) {
+            if (StorageManager.isFileEncryptedNativeOnly()) {
+                throw new IllegalStateException(
+                        "Adoptable storage not available on device with native FBE");
+            }
+
             synchronized (mLock) {
                 mForceAdoptable = (flags & StorageManager.DEBUG_FORCE_ADOPTABLE) != 0;
 

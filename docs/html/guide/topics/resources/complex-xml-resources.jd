@@ -93,8 +93,7 @@ Since we’re making an animated vector drawable, we put the file under <code>re
         &lt;/vector&gt;
     <strong>&lt;aapt:attr /&gt;</strong>
 
-    &lt;target
-        android:name="rotationGroup" /&gt;
+    &lt;target android:name="rotationGroup"&gt;
         <strong>&lt;aapt:attr name="android:animation" &gt;</strong>
             &lt;objectAnimator
                 android:duration="6000"
@@ -102,6 +101,7 @@ Since we’re making an animated vector drawable, we put the file under <code>re
                 android:valueFrom="0"
                 android:valueTo="360" /&gt;
         <strong>&lt;aapt:attr&gt;</strong>
+    &lt;/target&gt;
 &lt;/animated-vector&gt;
 </pre>
 </dd>

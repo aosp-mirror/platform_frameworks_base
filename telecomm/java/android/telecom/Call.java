@@ -23,6 +23,7 @@ import android.os.Handler;
 
 import java.lang.String;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -104,7 +105,6 @@ public final class Call {
      * An {@link InCallService} will only see this state if it has the
      * {@link TelecomManager#METADATA_INCLUDE_EXTERNAL_CALLS} metadata set to {@code true} in its
      * manifest.
-     * @hide
      */
     public static final int STATE_PULLING_CALL = 11;
 
@@ -252,7 +252,6 @@ public final class Call {
          * <p>
          * See {@link Connection#CAPABILITY_CAN_PULL_CALL} and
          * {@link Connection#PROPERTY_IS_EXTERNAL_CALL}.
-         * @hide
          */
         public static final int CAPABILITY_CAN_PULL_CALL = 0x00800000;
 
@@ -305,9 +304,13 @@ public final class Call {
          * in its manifest.
          * <p>
          * See {@link Connection#PROPERTY_IS_EXTERNAL_CALL}.
-         * @hide
          */
         public static final int PROPERTY_IS_EXTERNAL_CALL = 0x00000040;
+
+        /**
+         * Indicates that the call has CDMA Enhanced Voice Privacy enabled.
+         */
+        public static final int PROPERTY_HAS_CDMA_VOICE_PRIVACY = 0x00000080;
 
         //******************************************************************************************
         // Next PROPERTY value: 0x00000100
@@ -464,6 +467,9 @@ public final class Call {
             }
             if (hasProperty(properties, PROPERTY_IS_EXTERNAL_CALL)) {
                 builder.append(" PROPERTY_IS_EXTERNAL_CALL");
+            }
+            if(hasProperty(properties, PROPERTY_HAS_CDMA_VOICE_PRIVACY)) {
+                builder.append(" PROPERTY_HAS_CDMA_VOICE_PRIVACY");
             }
             builder.append("]");
             return builder.toString();
@@ -695,6 +701,24 @@ public final class Call {
         }
     }
 
+    /**
+     * Defines callbacks which inform the {@link InCallService} of changes to a {@link Call}.
+     * These callbacks can originate from the Telecom framework, or a {@link ConnectionService}
+     * implementation.
+     * <p>
+     * You can handle these callbacks by extending the {@link Callback} class and overriding the
+     * callbacks that your {@link InCallService} is interested in.  The callback methods include the
+     * {@link Call} for which the callback applies, allowing reuse of a single instance of your
+     * {@link Callback} implementation, if desired.
+     * <p>
+     * Use {@link Call#registerCallback(Callback)} to register your callback(s).  Ensure
+     * {@link Call#unregisterCallback(Callback)} is called when you no longer require callbacks
+     * (typically in {@link InCallService#onCallRemoved(Call)}).
+     * Note: Callbacks which occur before you call {@link Call#registerCallback(Callback)} will not
+     * reach your implementation of {@link Callback}, so it is important to register your callback
+     * as soon as your {@link InCallService} is notified of a new call via
+     * {@link InCallService#onCallAdded(Call)}.
+     */
     public static abstract class Callback {
         /**
          * Invoked when the state of this {@code Call} has changed. See {@link #getState()}.
@@ -779,14 +803,19 @@ public final class Call {
         public void onConferenceableCallsChanged(Call call, List<Call> conferenceableCalls) {}
 
         /**
-         * Invoked when a call receives an event from its associated {@link Connection}.
+         * Invoked when a {@link Call} receives an event from its associated {@link Connection}.
+         * <p>
+         * Where possible, the Call should make an attempt to handle {@link Connection} events which
+         * are part of the {@code android.telecom.*} namespace.  The Call should ignore any events
+         * it does not wish to handle.  Unexpected events should be handled gracefully, as it is
+         * possible that a {@link ConnectionService} has defined its own Connection events which a
+         * Call is not aware of.
          * <p>
          * See {@link Connection#sendConnectionEvent(String, Bundle)}.
          *
          * @param call The {@code Call} receiving the event.
          * @param event The event.
          * @param extras Extras associated with the connection event.
-         * @hide
          */
         public void onConnectionEvent(Call call, String event, Bundle extras) {}
     }
@@ -965,7 +994,6 @@ public final class Call {
      * An {@link InCallService} will only see calls which support this method if it has the
      * {@link TelecomManager#METADATA_INCLUDE_EXTERNAL_CALLS} metadata set to {@code true}
      * in its manifest.
-     * @hide
      */
     public void pullExternalCall() {
         // If this isn't an external call, ignore the request.
@@ -980,15 +1008,35 @@ public final class Call {
      * Sends a {@code Call} event from this {@code Call} to the associated {@link Connection} in
      * the {@link ConnectionService}.
      * <p>
+     * Call events are used to communicate point in time information from an {@link InCallService}
+     * to a {@link ConnectionService}.  A {@link ConnectionService} implementation could define
+     * events which enable the {@link InCallService}, for example, toggle a unique feature of the
+     * {@link ConnectionService}.
+     * <p>
+     * A {@link ConnectionService} can communicate to the {@link InCallService} using
+     * {@link Connection#sendConnectionEvent(String, Bundle)}.
+     * <p>
      * Events are exposed to {@link ConnectionService} implementations via
      * {@link android.telecom.Connection#onCallEvent(String, Bundle)}.
      * <p>
      * No assumptions should be made as to how a {@link ConnectionService} will handle these events.
-     * Events should be fully qualified (e.g., com.example.event.MY_EVENT) to avoid conflicts.
+     * The {@link InCallService} must assume that the {@link ConnectionService} could chose to
+     * ignore some events altogether.
+     * <p>
+     * Events should be fully qualified (e.g., {@code com.example.event.MY_EVENT}) to avoid
+     * conflicts between {@link InCallService} implementations.  Further, {@link InCallService}
+     * implementations shall not re-purpose events in the {@code android.*} namespace, nor shall
+     * they define their own event types in this namespace.  When defining a custom event type,
+     * ensure the contents of the extras {@link Bundle} is clearly defined.  Extra keys for this
+     * bundle should be named similar to the event type (e.g. {@code com.example.extra.MY_EXTRA}).
+     * <p>
+     * When defining events and the associated extras, it is important to keep their behavior
+     * consistent when the associated {@link InCallService} is updated.  Support for deprecated
+     * events/extras should me maintained to ensure backwards compatibility with older
+     * {@link ConnectionService} implementations which were built to support the older behavior.
      *
      * @param event The connection event.
      * @param extras Bundle containing extra information associated with the event.
-     * @hide
      */
     public void sendCallEvent(String event, Bundle extras) {
         mInCallAdapter.sendCallEvent(mTelecomCallId, event, extras);
@@ -1002,7 +1050,6 @@ public final class Call {
      * extras.  Keys should be fully qualified (e.g., com.example.MY_EXTRA) to avoid conflicts.
      *
      * @param extras The extras to add.
-     * @hide
      */
     public final void putExtras(Bundle extras) {
         if (extras == null) {
@@ -1032,7 +1079,7 @@ public final class Call {
     }
 
     /**
-     * Adds an integer extra to this {@code Connection}.
+     * Adds an integer extra to this {@link Call}.
      *
      * @param key The extra key.
      * @param value The value.
@@ -1047,7 +1094,7 @@ public final class Call {
     }
 
     /**
-     * Adds a string extra to this {@code Connection}.
+     * Adds a string extra to this {@link Call}.
      *
      * @param key The extra key.
      * @param value The value.
@@ -1062,10 +1109,9 @@ public final class Call {
     }
 
     /**
-     * Removes extras from this {@code Connection}.
+     * Removes extras from this {@link Call}.
      *
      * @param keys The keys of the extras to remove.
-     * @hide
      */
     public final void removeExtras(List<String> keys) {
         if (mExtras != null) {
@@ -1077,6 +1123,15 @@ public final class Call {
             }
         }
         mInCallAdapter.removeExtras(mTelecomCallId, keys);
+    }
+
+    /**
+     * Removes extras from this {@link Call}.
+     *
+     * @param keys The keys of the extras to remove.
+     */
+    public final void removeExtras(String ... keys) {
+        removeExtras(Arrays.asList(keys));
     }
 
     /**

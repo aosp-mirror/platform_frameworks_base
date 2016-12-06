@@ -17,7 +17,7 @@ support hardware acceleration on tablets. With this new pipeline, all drawing op
 by the UI toolkit are carried out using the GPU. You’ll be happy to hear that Android 4.0, Ice Cream
 Sandwich, brings an improved version of the hardware-accelerated 2D rendering pipeline.</p>
       </a>
-  
+
       <a
 href="http://android-developers.blogspot.com/2011/05/introducing-viewpropertyanimator.html">
         <h4>Introducing ViewPropertyAnimator</h4>
@@ -25,7 +25,7 @@ href="http://android-developers.blogspot.com/2011/05/introducing-viewpropertyani
 including the new properties added to the View class in 3.0. In the 3.1 release, we added a small
 utility class that makes animating these properties even easier.</p>
       </a>
-      
+
       <a
 href="http://android-developers.blogspot.com/2011/03/android-30-hardware-acceleration.html">
         <h4>Android 3.0 Hardware Acceleration</h4>
@@ -43,7 +43,7 @@ applications can benefit from an extra boost in performance.</p>
 that keeps your user interface (UI) components responsive and avoids exceeding your application
 memory limit.</p>
     </a>
-    
+
 
   </div>
 </div>

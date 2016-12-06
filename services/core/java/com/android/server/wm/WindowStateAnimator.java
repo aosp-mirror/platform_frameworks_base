@@ -51,12 +51,15 @@ import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Debug;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.MagnificationSpec;
+import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -225,8 +228,6 @@ class WindowStateAnimator {
     int mAttrType;
 
     static final long PENDING_TRANSACTION_FINISH_WAIT_TIME = 100;
-    long mDeferTransactionUntilFrame = -1;
-    long mDeferTransactionTime = -1;
 
     boolean mForceScaleUntilResize;
 
@@ -923,6 +924,22 @@ class WindowStateAnimator {
         mPendingDestroySurface = null;
     }
 
+    void applyMagnificationSpec(MagnificationSpec spec, Matrix transform) {
+        final int surfaceInsetLeft = mWin.mAttrs.surfaceInsets.left;
+        final int surfaceInsetTop = mWin.mAttrs.surfaceInsets.top;
+
+        if (spec != null && !spec.isNop()) {
+            float scale = spec.scale;
+            transform.postScale(scale, scale);
+            transform.postTranslate(spec.offsetX, spec.offsetY);
+
+            // As we are scaling the whole surface, to keep the content
+            // in the same position we will also have to scale the surfaceInsets.
+            transform.postTranslate(-(surfaceInsetLeft*scale - surfaceInsetLeft),
+                    -(surfaceInsetTop*scale - surfaceInsetTop));
+        }
+    }
+
     void computeShownFrameLocked() {
         final boolean selfTransformation = mHasLocalTransformation;
         Transformation attachedTransformation =
@@ -1013,10 +1030,7 @@ class WindowStateAnimator {
             if (mService.mAccessibilityController != null && displayId == DEFAULT_DISPLAY) {
                 MagnificationSpec spec = mService.mAccessibilityController
                         .getMagnificationSpecForWindowLocked(mWin);
-                if (spec != null && !spec.isNop()) {
-                    tmpMatrix.postScale(spec.scale, spec.scale);
-                    tmpMatrix.postTranslate(spec.offsetX, spec.offsetY);
-                }
+                applyMagnificationSpec(spec, tmpMatrix);
             }
 
             // "convert" it into SurfaceFlinger's format
@@ -1115,10 +1129,7 @@ class WindowStateAnimator {
             tmpMatrix.setScale(mWin.mGlobalScale, mWin.mGlobalScale);
             tmpMatrix.postTranslate(frame.left + mWin.mXOffset, frame.top + mWin.mYOffset);
 
-            if (spec != null && !spec.isNop()) {
-                tmpMatrix.postScale(spec.scale, spec.scale);
-                tmpMatrix.postTranslate(spec.offsetX, spec.offsetY);
-            }
+            applyMagnificationSpec(spec, tmpMatrix);
 
             tmpMatrix.getValues(tmpFloats);
 
@@ -1400,6 +1411,9 @@ class WindowStateAnimator {
         mExtraHScale = (float) 1.0;
         mExtraVScale = (float) 1.0;
 
+        boolean wasForceScaled = mForceScaleUntilResize;
+        boolean wasSeamlesslyRotated = w.mSeamlesslyRotated;
+
         // Once relayout has been called at least once, we need to make sure
         // we only resize the client surface during calls to relayout. For
         // clients which use indeterminate measure specs (MATCH_PARENT),
@@ -1407,21 +1421,17 @@ class WindowStateAnimator {
         // However, this would be unsafe, as the client may be in the middle
         // of producing a frame at the old size, having just completed layout
         // to find the surface size changed underneath it.
-        //
-        // TODO: For N we only apply this fix to the pinned workspace. As we
-        // aren't observing known issues here outside of PiP resizing. (Typically
-        // the other windows that use -1 are PopupWindows which aren't likely
-        // to be rendering while we resize).
-
-        boolean wasForceScaled = mForceScaleUntilResize;
-
-        if (!w.inPinnedWorkspace() || (!w.mRelayoutCalled || w.mInRelayout)) {
+        if (!w.mRelayoutCalled || w.mInRelayout) {
             mSurfaceResized = mSurfaceController.setSizeInTransaction(
                     mTmpSize.width(), mTmpSize.height(), recoveringMemory);
         } else {
             mSurfaceResized = false;
         }
         mForceScaleUntilResize = mForceScaleUntilResize && !mSurfaceResized;
+        // If we are undergoing seamless rotation, the surface has already
+        // been set up to persist at it's old location. We need to freeze
+        // updates until a resize occurs.
+        mService.markForSeamlessRotation(w, w.mSeamlesslyRotated && !mSurfaceResized);
 
         calculateSurfaceWindowCrop(mTmpClipRect, mTmpFinalClipRect);
 
@@ -1471,17 +1481,20 @@ class WindowStateAnimator {
             // will be seamless.
             mForceScaleUntilResize = true;
         } else {
-            mSurfaceController.setPositionInTransaction(mTmpSize.left, mTmpSize.top,
-                    recoveringMemory);
+            if (!w.mSeamlesslyRotated) {
+                mSurfaceController.setPositionInTransaction(mTmpSize.left, mTmpSize.top,
+                        recoveringMemory);
+            }
         }
 
         // If we are ending the scaling mode. We switch to SCALING_MODE_FREEZE
-        // to prevent further updates until buffer latch. Normally position
-        // would continue to apply immediately. But we need a different position
-        // before and after resize (since we have scaled the shadows, as discussed
-        // above).
-        if (wasForceScaled && !mForceScaleUntilResize) {
-            mSurfaceController.setPositionAppliesWithResizeInTransaction(true);
+        // to prevent further updates until buffer latch.
+        // When ending both force scaling, and seamless rotation, we need to freeze
+        // the Surface geometry until a buffer comes in at the new size (normally position and crop
+        // are unfrozen). setGeometryAppliesWithResizeInTransaction accomplishes this for us.
+        if ((wasForceScaled && !mForceScaleUntilResize) ||
+                (wasSeamlesslyRotated && !w.mSeamlesslyRotated)) {
+            mSurfaceController.setGeometryAppliesWithResizeInTransaction(true);
             mSurfaceController.forceScaleableInTransaction(false);
         }
 
@@ -1493,12 +1506,13 @@ class WindowStateAnimator {
                     -w.mAttrs.surfaceInsets.right, -w.mAttrs.surfaceInsets.bottom);
         }
 
-        updateSurfaceWindowCrop(clipRect, mTmpFinalClipRect, recoveringMemory);
-
-        mSurfaceController.setMatrixInTransaction(mDsDx * w.mHScale * mExtraHScale,
-                mDtDx * w.mVScale * mExtraVScale,
-                mDsDy * w.mHScale * mExtraHScale,
-                mDtDy * w.mVScale * mExtraVScale, recoveringMemory);
+        if (!w.mSeamlesslyRotated) {
+            updateSurfaceWindowCrop(clipRect, mTmpFinalClipRect, recoveringMemory);
+            mSurfaceController.setMatrixInTransaction(mDsDx * w.mHScale * mExtraHScale,
+                    mDtDx * w.mVScale * mExtraVScale,
+                    mDsDy * w.mHScale * mExtraHScale,
+                    mDtDy * w.mVScale * mExtraVScale, recoveringMemory);
+        }
 
         if (mSurfaceResized) {
             mReportSurfaceResized = true;
@@ -1858,6 +1872,7 @@ class WindowStateAnimator {
         // frozen, there is no reason to animate and it can cause strange
         // artifacts when we unfreeze the display if some different animation
         // is running.
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "WSA#applyAnimationLocked");
         if (mService.okToDisplay()) {
             int anim = mPolicy.selectAnimationLw(mWin, transit);
             int attr = -1;
@@ -1897,6 +1912,8 @@ class WindowStateAnimator {
         } else {
             clearAnimation();
         }
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+
         if (mWin.mAttrs.type == TYPE_INPUT_METHOD) {
             mService.adjustForImeIfNeeded(mWin.mDisplayContent);
             if (isEntrance) {
@@ -2036,32 +2053,9 @@ class WindowStateAnimator {
         if (!mWin.isChildWindow()) {
             return;
         }
-        mDeferTransactionUntilFrame = frameNumber;
-        mDeferTransactionTime = System.currentTimeMillis();
         mSurfaceController.deferTransactionUntil(
                 mWin.mAttachedWindow.mWinAnimator.mSurfaceController.getHandle(),
                 frameNumber);
-    }
-
-    // Defer the current transaction to the frame number of the last saved transaction.
-    // We do this to avoid shooting through an unsynchronized transaction while something is
-    // pending. This is generally fine, as either we will get in on the synchronization,
-    // or SurfaceFlinger will see that the frame has already occured. The only
-    // potential problem is in frame number resets so we reset things with a timeout
-    // every so often to be careful.
-    void deferToPendingTransaction() {
-        if (mDeferTransactionUntilFrame < 0) {
-            return;
-        }
-        long time = System.currentTimeMillis();
-        if (time > mDeferTransactionTime + PENDING_TRANSACTION_FINISH_WAIT_TIME) {
-            mDeferTransactionTime = -1;
-            mDeferTransactionUntilFrame = -1;
-        } else {
-            mSurfaceController.deferTransactionUntil(
-                    mWin.mAttachedWindow.mWinAnimator.mSurfaceController.getHandle(),
-                    mDeferTransactionUntilFrame);
-        }
     }
 
     /**
@@ -2083,5 +2077,83 @@ class WindowStateAnimator {
 
     void endDelayingAnimationStart() {
         mAnimationStartDelayed = false;
+    }
+
+    void seamlesslyRotateWindow(int oldRotation, int newRotation) {
+        final WindowState w = mWin;
+        if (!w.isVisibleNow() || w.mIsWallpaper) {
+            return;
+        }
+
+        final Rect cropRect = mService.mTmpRect;
+        final Rect displayRect = mService.mTmpRect2;
+        final RectF frameRect = mService.mTmpRectF;
+        final Matrix transform = mService.mTmpTransform;
+
+        final float x = w.mFrame.left;
+        final float y = w.mFrame.top;
+        final float width = w.mFrame.width();
+        final float height = w.mFrame.height();
+
+        mService.getDefaultDisplayContentLocked().getLogicalDisplayRect(displayRect);
+        final float displayWidth = displayRect.width();
+        final float displayHeight = displayRect.height();
+
+        // Compute a transform matrix to undo the coordinate space transformation,
+        // and present the window at the same physical position it previously occupied.
+        final int deltaRotation = DisplayContent.deltaRotation(newRotation, oldRotation);
+        DisplayContent.createRotationMatrix(deltaRotation, x, y, displayWidth, displayHeight,
+                transform);
+
+        // We have two cases:
+        //  1. Windows with NATIVE_WINDOW_TRANSFORM_INVERSE_DISPLAY:
+        //     These windows never change buffer size when rotating. Rather the window manager
+        //     just updates the scaling factors to fit in the new coordinate system,
+        //     and SurfaceFlinger takes care of updating the buffer contents. So in this case
+        //     we just need we just need to update the scaling factors and things are seamless
+        //     already.
+        //  2. Other windows:
+        //     In this case, we need to apply a rotation matrix to the window. For example
+        //     if we have a portrait window and rotate to landscape, the window is still portrait
+        //     and now extends off the bottom of the screen (and only halfway across). Essentially we
+        //     apply a transform to display the current buffer at it's old position
+        //     (in the new coordinate space). We then freeze layer updates until the resize
+        //     occurs, at which point we undo, them.
+        if (w.isChildWindow() && mSurfaceController.getTransformToDisplayInverse()) {
+            frameRect.set(x, y, x+width, y+height);
+            transform.mapRect(frameRect);
+
+            w.mAttrs.x = (int) frameRect.left - w.mAttachedWindow.mFrame.left;
+            w.mAttrs.y = (int) frameRect.top - w.mAttachedWindow.mFrame.top;
+            w.mAttrs.width = (int) Math.ceil(frameRect.width());
+            w.mAttrs.height = (int) Math.ceil(frameRect.height());
+
+            w.setWindowScale(w.mRequestedWidth, w.mRequestedHeight);
+
+            w.applyGravityAndUpdateFrame(w.mContainingFrame, w.mDisplayFrame);
+            computeShownFrameLocked();
+            setSurfaceBoundariesLocked(false);
+
+            // The stack bounds will not yet be rotated at this point so setSurfaceBoundaries locked
+            // will crop us incorrectly. Overwrite the crop, exposing the full surface. By the next
+            // transaction this will be corrected.
+            cropRect.set(0, 0, w.mRequestedWidth, w.mRequestedWidth + w.mRequestedHeight);
+            mSurfaceController.setCropInTransaction(cropRect, false);
+        } else {
+            mService.markForSeamlessRotation(w, true);
+            transform.getValues(mService.mTmpFloats);
+
+            float DsDx = mService.mTmpFloats[Matrix.MSCALE_X];
+            float DtDx = mService.mTmpFloats[Matrix.MSKEW_Y];
+            float DsDy = mService.mTmpFloats[Matrix.MSKEW_X];
+            float DtDy = mService.mTmpFloats[Matrix.MSCALE_Y];
+            float nx = mService.mTmpFloats[Matrix.MTRANS_X];
+            float ny = mService.mTmpFloats[Matrix.MTRANS_Y];
+            mSurfaceController.setPositionInTransaction(nx, ny, false);
+            mSurfaceController.setMatrixInTransaction(DsDx * w.mHScale,
+                    DtDx * w.mVScale,
+                    DsDy * w.mHScale,
+                    DtDy * w.mVScale, false);
+        }
     }
 }

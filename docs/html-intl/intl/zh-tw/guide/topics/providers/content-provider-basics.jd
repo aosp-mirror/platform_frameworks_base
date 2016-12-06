@@ -237,7 +237,7 @@ page.title=內容供應程式基本概念
 
     {@link android.content.ContentResolver#query query()} 方法會呼叫使用者字典供應程式所定義的
 {@link android.content.ContentProvider#query ContentProvider.query()} 方法。
-以下是 
+以下是
 {@link android.content.ContentResolver#query ContentResolver.query()} 呼叫的程式碼：
 <p>
 <pre>
@@ -250,7 +250,7 @@ mCursor = getContentResolver().query(
     mSortOrder);                        // The sort order for the returned rows
 </pre>
 <p>
-    表 2 列出 
+    表 2 列出
 {@link android.content.ContentResolver#query
 query(Uri,projection,selection,selectionArgs,sortOrder)} 的引數及相對應的 SQL SELECT 陳述式：
 </p>
@@ -284,7 +284,7 @@ query(Uri,projection,selection,selectionArgs,sortOrder)} 的引數及相對應�
     <tr>
         <td align="center"><code>selectionArgs</code></td>
         <td align="center">
-            (沒有任何相對應的關鍵字/參數。選取引數會取代選取子句中的 
+            (沒有任何相對應的關鍵字/參數。選取引數會取代選取子句中的
 <code>?</code> 預留位置。)
         </td>
     </tr>
@@ -581,7 +581,7 @@ selectionArgs[0] = mUserInput;
 
 </p>
 <p>
-    如果沒有任何資料欄符合選取條件，則供應程式會傳回 {@link android.database.Cursor#getCount Cursor.getCount()} 為 0 的 
+    如果沒有任何資料欄符合選取條件，則供應程式會傳回 {@link android.database.Cursor#getCount Cursor.getCount()} 為 0 的
 {@link android.database.Cursor} 物件 (即沒有任何內容的游標)。
 
 </p>
@@ -595,7 +595,7 @@ selectionArgs[0] = mUserInput;
 
 </p>
 <p>
-    以下程式碼片段是上一個程式碼片段的延伸。它會建立內含查詢所擷取 {@link android.database.Cursor} 的 
+    以下程式碼片段是上一個程式碼片段的延伸。它會建立內含查詢所擷取 {@link android.database.Cursor} 的
 {@link android.widget.SimpleCursorAdapter} 物件，並將該物件設定為 {@link android.widget.ListView} 的配接器：
 
 
@@ -674,7 +674,7 @@ if (mCursor != null) {
 <p>
     {@link android.database.Cursor} 實作方法包含數個用於從物件擷取不同資料類型的「get」方法。
 例如，上方程式碼片段使用了 {@link android.database.Cursor#getString getString()}。
-此外，這種實作方法還包括 
+此外，這種實作方法還包括
 {@link android.database.Cursor#getType getType()} 方法，可傳回指定資料欄資料類型的值。
 
 </p>
@@ -709,7 +709,7 @@ if (mCursor != null) {
 
 </p>
 <p>
-    以下的 
+    以下的
 <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
  元素會要求使用者字典供應程式的讀取存取權：
 </p>
@@ -733,7 +733,7 @@ if (mCursor != null) {
 </p>
 <h3 id="Inserting">插入資料</h3>
 <p>
-    如要在供應程式中插入資料，請呼叫 
+    如要在供應程式中插入資料，請呼叫
 {@link android.content.ContentResolver#insert ContentResolver.insert()} 方法。
 這個方法會在供應程式中插入新的資料列，並傳回該列的內容 URI。
     以下程式碼片段示範如何在使用者字典供應程式中插入新的字詞：
@@ -785,14 +785,14 @@ content://user_dictionary/words/&lt;id_value&gt;
 
 </p>
 <p>
-    如要從傳回的 {@link android.net.Uri} 取得 <code>_ID</code> 的值，請呼叫 
+    如要從傳回的 {@link android.net.Uri} 取得 <code>_ID</code> 的值，請呼叫
 {@link android.content.ContentUris#parseId ContentUris.parseId()}。
 </p>
 <h3 id="Updating">更新資料</h3>
 <p>
     如要更新資料列，請使用內含經過更新的值 (與您在插入資料時所使用的值相同) 以及選取條件 (與您在建立查詢時所使用的選取條件相同) 的 {@link android.content.ContentValues} 物件。
 
-    您所使用的用戶端方法為 
+    您所使用的用戶端方法為
 {@link android.content.ContentResolver#update ContentResolver.update()}。您只需針對要更新的資料欄，將相關值加到 {@link android.content.ContentValues} 物件即可。
 如果您想清除資料欄的內容，請將值設定為 <code>null</code>。
 
@@ -901,7 +901,7 @@ Cursor.getType()} 來確認可用的資料類型。
 
 例如，聯絡人供應程式中的 {@link android.provider.ContactsContract.Data} 表格會使用 MIME 類型為每個資料列中儲存的聯絡人資料加上標籤。
 
-如要取得與內容 URI 相對應的 MIME 類型，請呼叫 
+如要取得與內容 URI 相對應的 MIME 類型，請呼叫
 {@link android.content.ContentResolver#getType ContentResolver.getType()}。
 </p>
 <p>
@@ -1009,13 +1009,13 @@ ContentResolver.applyBatch()}，則系統會傳回一系列結果。
 
 </p>
 <p>
-    供應程式會使用 
+    供應程式會使用
 <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>
- 元素的 
+ 元素的
 <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">android:grantUriPermission</a></code>
- 屬性以及 
+ 屬性以及
 <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>
- 元素的 
+ 元素的
 <code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission&gt;</a></code>
  子元素在本身的宣示說明中為內容 URI 定義 URI 權限。如要進一步瞭解 URI 權限的運作機制，請參閱<a href="{@docRoot}guide/topics/security/security.html">安全性和權限</a>指南的「URI 權限」。
 
@@ -1032,8 +1032,8 @@ ContentResolver.applyBatch()}，則系統會傳回一系列結果。
 <ol>
     <li>
         您的應用程式使用 {@link android.app.Activity#startActivityForResult
-startActivityForResult()} 方法，傳送了內含 
-{@link android.content.Intent#ACTION_PICK} 動作的意圖以及「聯絡人」MIME 類型 
+startActivityForResult()} 方法，傳送了內含
+{@link android.content.Intent#ACTION_PICK} 動作的意圖以及「聯絡人」MIME 類型
 {@link android.provider.ContactsContract.RawContacts#CONTENT_ITEM_TYPE}。
 
     </li>
@@ -1043,9 +1043,9 @@ startActivityForResult()} 方法，傳送了內含
     </li>
     <li>
         在選取 Activity 中，使用者選取了要更新的聯絡人。
-一旦使用者進行這項動作，選取 Activity 便會呼叫 
+一旦使用者進行這項動作，選取 Activity 便會呼叫
 {@link android.app.Activity#setResult setResult(resultcode, intent)} 來設定要傳回您應用程式的意圖。
-該意圖包含使用者所選聯絡人的內容 URI，以及「額外」的旗標 
+該意圖包含使用者所選聯絡人的內容 URI，以及「額外」的旗標
 {@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION}。
 這些旗標可將 URI 權限授予您的應用程式，以便其讀取內容 URI 指向的聯絡人資料。選取 Activity 隨後會呼叫 {@link android.app.Activity#finish()} 來傳回您應用程式的控制權。
 
@@ -1053,7 +1053,7 @@ startActivityForResult()} 方法，傳送了內含
 
     </li>
     <li>
-        您的 Activity 返回前景，而系統呼叫您 Activity 的 
+        您的 Activity 返回前景，而系統呼叫您 Activity 的
 {@link android.app.Activity#onActivityResult onActivityResult()} 方法。
 這個方法可接收聯絡人應用程式中的選取 Activity 所建立的結果意圖。
 
@@ -1071,7 +1071,7 @@ startActivityForResult()} 方法，傳送了內含
 
 </p>
 <p>
-    例如，日曆應用程式接受可讓您啟用應用程式插入 UI 的 
+    例如，日曆應用程式接受可讓您啟用應用程式插入 UI 的
 {@link android.content.Intent#ACTION_INSERT} 意圖。您可以在該意圖中傳入「額外」的資料，供應用程式用於預先填入使用者介面。由於週期性活動的語法較為複雜，因此建議您利用 {@link android.content.Intent#ACTION_INSERT} 啟用日曆應用程式，然後讓使用者透過該應用程式將活動插入日曆供應程式。
 
 
@@ -1089,7 +1089,7 @@ Android 平台內建的大多數供應程式都可在 {@link android.provider} �
 </p>
 <p>
     例如，使用者字典供應程式有一個內含內容 URI 和欄名稱常數的 {@link android.provider.UserDictionary} 合約類別。
-「字詞」表格的內容 URI 是在 
+「字詞」表格的內容 URI 是在
 {@link android.provider.UserDictionary.Words#CONTENT_URI UserDictionary.Words.CONTENT_URI} 常數中定義。
 
     此外，{@link android.provider.UserDictionary.Words} 類別也包含欄名稱常數，可用於本指南中的程式碼片段範例。
@@ -1106,7 +1106,7 @@ String[] mProjection =
 </pre>
 <p>
     聯絡人供應程式的另一個合約類別為 {@link android.provider.ContactsContract}。
-    此類別的參考文件附有程式碼片段範例。其中一個 
+    此類別的參考文件附有程式碼片段範例。其中一個
 {@link android.provider.ContactsContract.Intents.Insert} 子類別為內含意圖常數和意圖資料的合約類別。
 
 </p>

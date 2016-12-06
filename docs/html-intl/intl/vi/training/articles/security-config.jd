@@ -1,0 +1,745 @@
+page.title=Cấu hình Bảo mật mạng
+page.keywords=androidn,security,network
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>Trong tài liệu này</h2>
+<ol>
+  <li><a href="#manifest">Thêm một tệp Cấu hình Bảo mật mạng</a></li>
+  <li><a href="#CustomTrust">Tùy chỉnh các CA đáng tin cậy</a>
+      <ol>
+      <li><a href="#ConfigCustom">Cấu hình một CA tùy chỉnh đáng tin cậy</a></li>
+      <li><a href="#LimitingCas">Giới hạn bộ CA đáng tin cậy</a></li>
+      <li><a href="#TrustingAdditionalCas">Tin cậy các CA bổ sung</a></li>
+      </ol>
+  </li>
+  <li><a href="#TrustingDebugCa">Các CA chỉ trong chế độ gỡ lỗi</a></li>
+  <li><a href="#UsesCleartextTraffic">Không sử dụng truyền gửi văn bản chưa mã hóa</a></li>
+  <li><a href="#CertificatePinning">Ghim chứng chỉ</a></li>
+  <li><a href="#ConfigInheritance">Hành vi Kế thừa cấu hình</a></li>
+  <li><a href="#FileFormat">Định dạng Tệp cấu hình</a></li>
+</ol>
+</div>
+</div>
+
+
+<p>
+  Android N có tính năng Cấu hình Bảo mật mạng
+  cho phép ứng dụng tùy chỉnh các cài đặt bảo mật mạng trong một tệp
+  cấu hình khai báo an toàn mà không cần sửa đổi mã nguồn ứng dụng. Các cài đặt này có thể
+  được cấu hình cho các miền cụ thể và cho một ứng dụng cụ thể. Các khả năng
+   chính của tính năng này như sau:
+</p>
+
+<ul>
+  <li>
+    <b>Nguồn tin cậy tùy chỉnh:</b> Tùy chính các Nhà cung cấp chứng chỉ (CA)
+   nào được tin cậy cho các kết nối bảo mật của một ứng dụng. Ví
+  dụ, tin cậy các chứng chỉ tự ký đặc biệt hoặc hạn chế
+   bộ CA công khai mà ứng dụng tin cậy.
+  </li>
+
+  <li>
+    <b>Chỉ khống chế khi gỡ lỗi:</b> Gỡ lỗi các kết nối bảo mật một cách an toàn trong một ứng dụng
+   mà không thêm rủi ro cho cơ sở cài đặt.
+  </li>
+
+  <li>
+    <b>Không sử dụng truyền gửi văn bản chưa mã hóa:</b> Bảo vệ các ứng dụng khỏi việc
+   vô tình sử dụng truyền gửi văn bản chưa mã hóa.
+  </li>
+
+  <li>
+    <b>Ghim chứng chỉ:</b> Giới hạn kết nối bảo mật của ứng dụng
+  trong các chứng chỉ đặc biệt.
+  </li>
+</ul>
+
+
+<h2 id="manifest">Thêm một Tệp Cấu hình Bảo mật mạng</h2>
+
+<p>
+  Tính năng Cấu hình Bảo mật mạng sử dụng một tệp XML làm nơi bạn sẽ chỉ định
+   các cài đặt cho ứng dụng của mình. Bạn phải bổ sung một mục nhập trong bản kê khai của
+   ứng dụng để trỏ đến tệp này. Đoạn mã sau của một bản kê khai
+  minh họa cách tạo mục nhập này:
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+...
+&lt;app ...&gt;
+    &lt;meta-data android:name="android.security.net.config"
+               android:resource="@xml/network_security_config" /&gt;
+    ...
+&lt;/app&gt;
+</pre>
+
+<h2 id="CustomTrust">Tùy chỉnh các CA đáng tin cậy</h2>
+
+<p>
+  Một ứng dụng có thể muốn tin cậy một bộ các CA tùy chỉnh thay vì mặc định
+  của nền tảng. Những lý do phổ biến nhất cho điều này là:
+</p>
+
+<ul>
+  <li>Kết nối tới một máy chủ có nhà cung cấp chứng chỉ riêng (tự ký,
+  được cấp bởi một CA nội bộ của công ty, v.v.).
+  </li>
+
+  <li>Giới hạn bộ CA chỉ trong các CA mà bạn tin cậy thay vì mọi
+  CA được cài đặt trước.
+  </li>
+
+  <li>Tin cậy các CA bổ sung không được kèm theo trong hệ thống.
+  </li>
+</ul>
+
+<p>
+  Theo mặc định, các kết nối bảo mật (vd: TLS, HTTPS) từ mọi ứng dụng sẽ tin cậy
+  các CA của hệ thống được cài đặt trước và các ứng dụng nhắm mục tiêu mức API 23
+   (Android M) và thấp hơn theo mặc định cũng tin cậy kho lưu trữ CA được người dùng bổ sung. Một
+   ứng dụng có thể tùy chỉnh các kết nối của riêng nó bằng cách sử dụng {@code base-config} (dành cho
+  tùy chỉnh trên phạm vi ứng dụng) hoặc {@code domain-config} (tùy chỉnh
+  cho mỗi miền).
+</p>
+
+
+<h3 id="ConfigCustom">Cấu hình một CA tùy chỉnh</h3>
+
+<p>
+  Giả sử bạn muốn kết nối tới máy chủ của mình có sử dụng các chứng chỉ
+  SSL tự ký hoặc tới một máy chủ có chứng chỉ SSL được cấp bởi một CA không công khai
+  mà bạn tin cậy, chẳng hạn như CA nội bộ của công ty.
+</p>
+
+<p>
+  <code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;example.com&lt;/domain&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/my_ca"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+<p>
+  Thêm chứng chỉ CA tự ký hoặc không công khai theo định dạng PEM hoặc DER vào
+  {@code res/raw/my_ca}.
+</p>
+
+
+<h3 id="LimitingCas">Giới hạn bộ CA đáng tin cậy</h3>
+
+<p>
+  Một ứng dụng không muốn tin cậy mọi CA được hệ thống tin cậy có thể
+   chỉ định bộ CA hạn chế của riêng nó để tin cậy. Điều này sẽ bảo vệ
+  ứng dụng khỏi các chứng chỉ lừa đảo được cấp bởi bất kỳ CA nào khác.
+</p>
+
+<p>
+  Cấu hình để giới hạn bộ CA đáng tin cậy cũng giống như <a href="#TrustingACustomCa">Tin cậy một CA tùy chỉnh</a> cho một miền cụ thể ngoại trừ
+  việc nhiều CA được cung cấp trong tài nguyên.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;secure.example.com&lt;/domain&gt;
+        &lt;domain includeSubdomains="true"&gt;cdn.example.com&lt;/domain&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/trusted_roots"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+<p>
+  Thêm các CA đáng tin cậy theo định dạng PEM hoặc DER vào {@code res/raw/trusted_roots}.
+  Lưu ý rằng nếu sử dụng định dạng PEM thì tệp <em>chỉ</em> được chứa dữ liệu PEM
+  và không có thêm dữ liệu văn bản. Bạn cũng có thể cung cấp nhiều
+   phần tử <a href="#certificates"><code>&lt;certificates&gt;</code></a>
+ thay vì một phần tử.
+</p>
+
+
+<h3 id="TrustingAdditionalCas">
+  Tin cậy các CA bổ sung
+</h3>
+
+<p>
+  Một ứng dụng có thể muốn tin cậy các CA bổ sung không được hệ thống tin cậy,
+   điều này có thể do hệ thống chưa thêm CA đó hoặc một CA không
+  đáp ứng các yêu cầu để đưa vào hệ thống Android. Một
+  ứng dụng có thể thực hiện điều này bằng cách chỉ định nhiều nguồn chứng chỉ cho một
+   cấu hình.
+</p>
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;base-config&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/extracas"/&gt;
+            &lt;certificates src="system"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/base-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="TrustingDebugCa">Cấu hình các CA để gỡ lỗi</h2>
+
+<p>
+  Khi gỡ lỗi một ứng dụng kết nối qua HTTPS thì bạn có thể muốn
+   kết nối tới một máy chủ phát triển cục bộ không có chứng chỉ
+  SSL dành cho máy chủ thương mại của bạn. Để hỗ trợ cho trường hợp này mà không cần
+   chỉnh sửa mã nguồn ứng dụng của bạn thì bạn có thể chỉ định các CA chỉ dùng cho gỡ lỗi
+ mà <i>chỉ</i> được tin cậy khi <a href="{@docRoot}guide/topics/manifest/application-element.html#debug">
+android:debuggable</a>
+ là {@code true} bằng cách sử dụng {@code debug-overrides}. Thông thường các IDE và công cụ
+ dựng sẽ đặt cờ này tự động đối với các bản dựng không dùng để phát hành.
+</p>
+
+<p>
+  Làm như vậy an toàn hơn so với mã điều kiện thông thường bởi, là điều kiện
+  bảo mật tiên quyết, các cửa hàng ứng dụng không chấp nhận các ứng dụng được đánh dấu
+  là hỗ trợ gỡ lỗi.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;debug-overrides&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/debug_cas"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/debug-overrides&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="UsesCleartextTraffic">Không sử dụng truyền gửi văn bản chưa mã hóa</h2>
+
+<p>
+  Các ứng dụng có ý định kết nối tới các điểm đích chỉ sử dụng các kết nối
+  bảo mật có thể bỏ hỗ trợ truyền gửi văn bản không mã hóa (bằng giao thức
+ HTTP không mã hóa thay vì HTTPS) tới các đích đó. Tùy chọn này giúp ngăn
+  các hồi quy tiềm tàng trong ứng dụng do thay đổi trong các URL được cung cấp bởi các nguồn
+  bên ngoài như các máy chủ phụ trợ.
+  Hãy xem {@link android.security.NetworkSecurityPolicy#isCleartextTrafficPermitted
+  NetworkSecurityPolicy.isCleartextTrafficPermitted()} để biết thêm chi tiết.
+</p>
+
+<p>
+  Ví dụ, một ứng dụng có thể đảm bảo rằng mọi kết nối tới {@code
+  secure.example.com} luôn được thực hiện qua HTTPS để bảo vệ việc truyền gửi dữ liệu nhạy cảm
+   khỏi các mạng có hại.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config usesCleartextTraffic="false"&gt;
+        &lt;domain includeSubdomains="true"&gt;secure.example.com&lt;/domain&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="CertificatePinning">Ghim chứng chỉ</h2>
+
+<p>
+  Thông thường thì một ứng dụng sẽ tin cậy mọi CA được cài đặt sẵn. Nếu bất kỳ CA nào trong số này sẽ
+   phát hành một chứng chỉ lừa đảo thì ứng dụng sẽ gặp phải rủi ro từ một cuộc tấn công
+   MiTM. Một số ứng dụng chọn cách giới hạn bộ chứng chỉ được chúng chấp nhận
+   bằng cách giới hạn bộ CA được ứng dụng tin cậy hoặc bằng cách ghim chứng chỉ.
+</p>
+
+<p>
+  Ghim chứng chỉ được thực hiện bằng cách cung cấp một bộ chứng chỉ theo mã hash của
+  khóa công khai (SubjectPublicKeyInfo của chứng chỉ X.509). Một chuỗi
+   chứng chỉ khi đó chỉ hợp lệ nếu như chuỗi chứng chỉ có chứa ít nhất một trong
+  các khóa công khai được ghim.
+</p>
+
+<p>
+  Lưu ý rằng khi sử dụng ghim chứng chỉ bạn phải luôn kèm thêm một khóa
+  dự phòng để nếu bạn bị buộc phải chuyển sang các khóa mới hoặc thay đổi các CA (khi
+   ghim vào một chứng chỉ CA hoặc một chứng chỉ trung gian của CA đó) thì
+  kết nối của ứng dụng sẽ không bị ảnh hưởng. Nếu không bạn phải đưa ra một
+  bản cập nhật cho ứng dụng để khôi phục khả năng kết nối.
+</p>
+
+<p>
+  Ngoài ra, có thể đặt thời gian hết hạn cho các ghim, sau thời gian đó
+  sẽ không tiến hành ghim được. Điều này giúp phòng ngừa các vấn đề về kết nối trong
+  ứng dụng chưa được cập nhật. Tuy nhiên, việc đặt thời gian hết hạn
+   trên các ghim này có thể khiến ghim bị bỏ qua.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;example.com&lt;/domain&gt;
+        &lt;pin-set expiration="2018-01-01"&gt;
+            &lt;pin digest="SHA-256"&gt;7HIpactkIAq2Y49orFOOQKurWxmmSFZhBCoQYcRhJ3Y=&lt;/pin&gt;
+            &lt;!-- backup pin --&gt
+            &lt;pin digest="SHA-256"&gt;fwza0LRMXouZHRC8Ei+4PyuldPDcf3UKgO/04cDM1oE=&lt;/pin&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="ConfigInheritance">Hành vi Kế thừa cấu hình</h2>
+
+<p>
+  Các giá trị chưa được đặt trong một cấu hình cụ thể sẽ được kế thừa. Hành vi này cho phép tạo ra các cấu hình phức tạp
+   hơn trong khi vẫn giữ cho tệp cấu hình có thể đọc được.
+</p>
+
+<p>
+  Nếu một giá trị không được đặt trong một mục nhập cụ thể thì giá trị thuộc mục nhập
+  bao quát hơn tiếp theo sẽ được sử dụng. Các giá trị chưa được đặt trong {@code domain-config} sẽ được
+  lấy từ phần tử cha {@code domain-config} nếu như được lồng, hoặc từ {@code
+  base-config} nếu không được lồng. Các giá trị chưa được đặt trong {@code base-config} sẽ sử dụng
+  các giá trị mặc định của nền tảng.
+</p>
+
+<p>
+  Ví dụ: hãy xem xét trường hợp tất cả các kết nối tới miền con của {@code
+  example.com} phải sử dụng một bộ CA tùy chỉnh. Ngoài ra, truyền gửi văn bản không mã hóa tới
+  các miền này được cho phép <em>trừ khi</em> kết nối tới {@code
+  secure.example.com}. Bằng cách lồng cấu hình cho {@code
+  secure.example.com} bên trong cấu hình cho {@code example.com} thì
+  {@code trust-anchors} không cần phải được sao lặp.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;example.com&lt;/domain&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/my_ca"/&gt;
+        &lt;/trust-anchors&gt;
+        &lt;domain-config cleartextTrafficPermitted="false"&gt;
+            &lt;domain includeSubdomains="true"&gt;secure.example.com&lt;/domain&gt;
+        &lt;/domain-config&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="FileFormat">Định dạng Tệp cấu hình</h2>
+
+<p>
+  Tính năng Cấu hình Bảo mật mạng sử dụng một định dạng tệp XML.
+  Cấu trúc chung của tệp này được thể hiện trong đoạn mẫu mã nguồn sau:
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;base-config&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="..."/&gt;
+            ...
+        &lt;/trust-anchors&gt;
+    &lt;/base-config&gt;
+
+    &lt;domain-config&gt;
+        &lt;domain&gt;android.com&lt;/domain&gt;
+        ...
+        &lt;trust-anchors&gt;
+            &lt;certificates src="..."/&gt;
+            ...
+        &lt;/trust-anchors&gt;
+        &lt;pin-set&gt;
+            &lt;pin digest="..."&gt;...&lt;/pin&gt;
+            ...
+        &lt;/pin-set&gt;
+    &lt;/domain-config&gt;
+    ...
+    &lt;debug-overrides&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="..."/&gt;
+            ...
+        &lt;/trust-anchors&gt;
+    &lt;/debug-overrides&gt;
+&lt;/network-security-config&gt;
+</pre>
+
+<p>
+  Các phần sau sẽ mô tả cú pháp và các chi tiết khác của định dạng
+   tệp này.
+</p>
+
+<h3 id="network-security-config">
+  &lt;network-security-config&gt;
+</h3>
+
+<dl class="xml">
+  <dt>
+    có thể chứa:
+  </dt>
+
+  <dd>
+    0 hoặc 1 của <code><a href="#base-config">&lt;base-config&gt;</a></code><br>
+    Bất kỳ số nào của <code><a href=
+    "#domain-config">&lt;domain-config&gt;</a></code><br>
+    0 hoặc 1 của <code><a href="#debug-overrides">&lt;debug-overrides&gt;</a></code>
+  </dd>
+</dl>
+
+<h3 id="base-config">
+  &lt;base-config&gt;
+</h3>
+
+<dl class="xml">
+  <dt>
+    cú pháp:
+  </dt>
+</dl>
+
+<pre class="stx">
+&lt;base-config <a href=
+"#usesCleartextTraffic">usesCleartextTraffic</a>=["true" | "false"]&gt;
+    ...
+&lt;/base-config&gt;
+</pre>
+<dl class="xml">
+  <dt>
+    có thể chứa:
+  </dt>
+
+  <dd>
+    <code><a href="#trust-anchors">&lt;trust-anchors&gt;</a></code>
+  </dd>
+
+  <dt>
+    mô tả:
+  </dt>
+
+  <dd>
+    Cấu hình mặc định được sử dụng bởi mọi kết nối có đích đến không được
+   bao gồm bởi một <a href="#domain-config"><code>domain-config</code></a>.
+
+<p>
+  Bất kỳ giá trị nào chưa được đặt sẽ sử dụng các giá trị mặc định của nền tảng. Cấu hình
+   mặc định cho các ứng dụng nhắm mục tiêu API mức 24 trở lên:
+</p>
+
+<pre>
+&lt;base-config usesCleartextTraffic="true"&gt;
+    &lt;trust-anchors&gt;
+        &lt;certificates src="system" /&gt;
+    &lt;/trust-anchors&gt;
+&lt;/base-config&gt;
+</pre>
+Cấu hình mặc định cho các ứng dụng nhắm mục tiêu API mức 23 trở xuống:
+<pre>
+&lt;base-config usesCleartextTraffic="true"&gt;
+    &lt;trust-anchors&gt;
+        &lt;certificates src="system" /&gt;
+        &lt;certificates src="user" /&gt;
+    &lt;/trust-anchors&gt;
+&lt;/base-config&gt;
+</pre>
+
+  </dd>
+</dl>
+
+<h3 id="domain-config">&lt;domain-config&gt;</h3>
+<dl class="xml">
+<dt>cú pháp:</dt>
+<dd>
+<pre class="stx">&lt;domain-config <a href="#usesCleartextTraffic">usesCleartextTraffic</a>=["true" | "false"]&gt;
+    ...
+&lt;/domain-config&gt;</pre>
+</dd>
+
+<dt>Có thể chứa:</dt>
+
+<dd>
+1 hoặc nhiều <code><a href="#domain">&lt;domain&gt;</a></code>
+<br/>0 hoặc 1 <code><a href="#trust-anchors">&lt;trust-anchors&gt;</a></code>
+<br/>0 hoặc 1 <code><a href="#pin-set">&lt;pin-set&gt;</code></a>
+<br/>Bất kỳ số nào của <code>&lt;domain-config&gt;</code> được lồng</dd>
+
+<dt>Mô tả</dt>
+<dd>Cấu hình được sử dụng cho các kết nối tới các điểm đích cụ thể theo như định nghĩa bởi các phần tử {@code domain}.
+
+<p>Lưu ý rằng nếu nhiều phần tử {@code domain-config} chứa một điểm đích thì cấu hình có quy tắc miền trùng khớp
+cụ thể nhất (dài nhất) sẽ được sử dụng.</p></dd>
+</dl>
+
+
+<h3 id="domain">&lt;domain&gt;</h3>
+
+<dl class="xml">
+  <dt>
+    cú pháp:
+  </dt>
+
+  <dd>
+    <pre class="stx">
+&lt;domain includeSubdomains=["true" | "false"]&gt;example.com&lt;/domain&gt;
+</pre>
+  </dd>
+
+  <dt>
+    Thuộc tính:
+  </dt>
+
+  <dd>
+    <dl class="attr">
+      <dt>
+        {@code includeSubdomains}
+      </dt>
+
+      <dd>
+        Nếu {@code "true"} thì quy tắc miền này sẽ trùng với miền đó và tất cả
+   các miền con, bao gồm các miền con của miền con, nếu không quy tắc đó chỉ
+   áp dụng cho các trùng khớp tuyệt đối.
+      </dd>
+    </dl>
+  </dd>
+
+  <dt>
+    Mô tả:
+  </dt>
+</dl>
+
+<h3 id="debug-overrides">&lt;debug-overrides&gt;</h3>
+
+<dl class="xml">
+  <dt>
+    cú pháp:
+  </dt>
+
+  <dd>
+    <pre class="stx">
+&lt;debug-overrides&gt;
+    ...
+&lt;/debug-overrides&gt;
+</pre>
+  </dd>
+
+  <dt>
+    Có thể chứa:
+  </dt>
+
+  <dd>
+    0 hoặc 1 <code><a href="#trust-anchors">&lt;trust-anchors&gt;</a></code>
+  </dd>
+
+  <dt>
+    Mô tả:
+  </dt>
+
+  <dd>
+    Ghi đè được thực hiện khi <a href="{@docRoot}guide/topics/manifest/application-element.html#debug">android:debuggable</a>
+   là {@code "true"} thì thường là trường hợp dành cho các bản dựng không phát hành
+   được tạo ra bởi các IDE hoặc công cụ dựng. Các nguồn tin cậy được chỉ định trong {@code
+    debug-overrides} được thêm vào tất cả các cấu hình khác và ghim
+   chứng chỉ không được thực hiện khi chuỗi chứng chỉ của máy chủ sử dụng một trong
+   các nguồn tin cậy chỉ dành cho gỡ lỗi này. Nếu <a href="{@docRoot}guide/topics/manifest/application-element.html#debug">android:debuggable</a>
+    là {@code "false"} thì phần này bị bỏ qua hoàn toàn.
+  </dd>
+</dl>
+
+<h3 id="trust-anchors">&lt;trust-anchors&gt;</h3>
+<dl class="xml">
+  <dt>
+    cú pháp:
+  </dt>
+
+  <dd>
+    <pre class="stx">
+&lt;trust-anchors&gt;
+...
+&lt;/trust-anchors&gt;
+</pre>
+  </dd>
+
+  <dt>
+    Có thể chứa:
+  </dt>
+
+  <dd>
+    Bất kỳ số nào của <code><a href="#certificates">&lt;certificates&gt;</a></code>
+  </dd>
+
+  <dt>
+    Mô tả:
+  </dt>
+
+  <dd>
+    Đặt nguồn tin cậy cho các kết nối bảo mật:
+  </dd>
+</dl>
+
+
+<h3 id="certificates">&lt;certificates&gt;</h3>
+<dl class="xml">
+<dt>cú pháp:</dt>
+<dd><pre class="stx">&lt;certificates src=["system" | "user" | "<i>raw resource</i>"]
+              overridePins=["true" | "false"] /&gt;
+</pre></dd>
+<dt>mô tả:</dt>
+<dd>Bộ các chứng chỉ X.509 cho các phần tử {@code trust-anchors}.</dd>
+
+<dt>thuộc tính:</dt>
+<dd><dl class="attr">
+<dt>{@code src}</dt>
+<dd>
+Nguồn của các chứng chỉ CA, có thể là một
+<ul>
+  <li>id nguồn thô trỏ tới một tệp có chứa các chứng chỉ X.509.
+  Các chứng chỉ phải được mã hóa theo định dạng DER hoặc PEM. Trong trường hợp của các chứng chỉ
+PEM thì tệp đó <em>không được</em> chứa dữ liệu không phải PEM khác như
+   các chú thích.
+  </li>
+
+  <li>{@code "system"} cho các chứng chỉ CA hệ thống được cài đặt sẵn
+  </li>
+
+  <li>{@code "user"} cho các chứng chỉ CA do người dùng thêm vào
+  </li>
+</ul>
+</dd>
+
+<dt>{@code overridePins}</dt>
+<dd>
+  <p>
+    Xác định xem liệu các CA từ nguồn này có bỏ qua việc ghim chứng chỉ hay không. Nếu {@code
+    "true"} thì các chuỗi chứng chỉ mà xâu qua một trong các CA từ nguồn
+   này thì khi đó ghim sẽ không được thực hiện. Đây có thể là điều có ích cho các CA gỡ lỗi
+   hoặc để hỗ trợ cho người dùng tấn công MiTM hoạt động truyền gửi bảo mật của ứng dụng.
+  </p>
+
+  <p>
+    Mặc định là {@code "false"} trừ khi được chỉ định trong một phần tử {@code debug-overrides}
+, khi đó mặc định là {@code "true"}.
+  </p>
+</dd>
+</dl>
+</dd>
+
+
+<h3 id="pin-set">&lt;pin-set&gt;</h3>
+
+<dl class="xml">
+  <dt>
+    cú pháp:
+  </dt>
+
+  <dd>
+<pre class="stx">
+&lt;pin-set expiration="date"&gt;
+...
+&lt;/pin-set&gt;
+</pre>
+  </dd>
+
+  <dt>
+    Có thể chứa:
+  </dt>
+
+  <dd>
+    Bất kỳ số nào của <code><a href="#pin">&lt;pin&gt;</a></code>
+  </dd>
+
+  <dt>
+    Mô tả:
+  </dt>
+
+  <dd>
+    Một bộ các ghim khóa công khai. Để một kết nối bảo mật được tin cậy, một trong các
+   khóa công khai trong chuỗi tin cậy phải nằm trong bộ các ghim này. Xem
+    <code><a href="#pin">&lt;pin&gt;</a></code> để biết định dạng của các ghim.
+  </dd>
+
+  <dt>
+    Thuộc tính:
+  </dt>
+
+  <dd>
+    <dl class="attr">
+      <dt>
+        {@code expiration}
+      </dt>
+
+      <dd>
+        Ngày tháng, theo định dạng {@code yyyy-MM-dd}, vào và sau thời điểm các ghim
+    hết hạn và do đó vô hiệu hóa ghim. Nếu thuộc tính này chưa được đặt thì khi đó các
+   ghim không hết hạn.
+        <p>
+          Việc hết hạn giúp phòng ngừa các vấn đề về khả năng kết nối trong ứng dụng làm cho không
+   nhận được các bản cập nhật cho bộ ghim, chẳng hạn như do người dùng
+   vô hiệu hóa các bản cập nhật ứng dụng.
+        </p>
+      </dd>
+    </dl>
+  </dd>
+</dl>
+
+<h3 id="pin">&lt;pin&gt;</h3>
+<dl class="xml">
+  <dt>
+    cú pháp:
+  </dt>
+
+  <dd>
+<pre class="stx">
+&lt;pin digest=["SHA-256"]&gt;base64 encoded digest of X.509
+    SubjectPublicKeyInfo (SPKI)&lt;/pin&gt;
+</pre>
+  </dd>
+
+  <dt>
+    Thuộc tính:
+  </dt>
+
+  <dd>
+    <dl class="attr">
+      <dt>
+        {@code digest}
+      </dt>
+
+      <dd>
+        Thuật toán băm được sử dụng để tạo ghim. Hiện tại, chỉ có
+        {@code "SHA-256"} được hỗ trợ.
+      </dd>
+    </dl>
+  </dd>
+</dl>

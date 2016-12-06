@@ -143,7 +143,9 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_4g_plus" msgid="3032226872470658661">"4G+"</string>
     <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
+    <string name="accessibility_data_connection_lte_plus" msgid="361876866906946007">"LTE+"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Barangolás"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
@@ -236,7 +238,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"A 4G adatforgalom szünetel"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"A mobilhálózati adatforgalom szünetel"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Az adatforgalom szünetel"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Mivel elérte a beállított adatkorlátot, az eszköz a ciklus fennmaradó részére felfüggesztette az adathasználatot.\n\nHa mégis használja az adatkapcsolatot, akkor szolgáltatója többletköltséget számíthat fel."</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Elérte a beállított adatkorlátot. A továbbiakban nem használ mobiladat-forgalmat.\n\nHa a folytatást választja, szolgáltatója adathasználati díjat számíthat fel."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Folytatás"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Nincs internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi csatlakoztatva"</string>
@@ -317,6 +319,9 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> korlát"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Figyelem! <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Munka mód"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Éjszakai fény"</string>
+    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"Éjszakai fény bekapcsolva, koppintson a kikapcsoláshoz"</string>
+    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"Éjszakai fény kikapcsolva, koppintson a bekapcsoláshoz"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"Nincsenek mostanában használt elemek"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Mindent törölt"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Az alkalmazás adatai"</string>
@@ -330,6 +335,8 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Osztott vízszintes"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Osztott függőleges"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Osztott egyéni"</string>
+  <string-array name="recents_blacklist_array">
+  </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Feltöltve"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Töltés"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> a teljes töltöttségig"</string>
@@ -397,6 +404,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"Lehet, hogy az eszközt figyelik"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Profilját felügyelhetik"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Lehet, hogy a hálózatot figyelik"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"Lehet, hogy a hálózat felügyelt"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Eszközfigyelés"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Profilfelügyelet"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Hálózatfigyelés"</string>
@@ -409,6 +417,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"Csatlakoztatta a(z) <xliff:g id="APPLICATION">%1$s</xliff:g> alkalmazást, amely figyelheti hálózati tevékenységét, beleértve az e-maileket, az alkalmazásokat és a webhelyeket."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Csatlakoztatta a(z) <xliff:g id="APPLICATION">%1$s</xliff:g> alkalmazást, amely figyelheti személyes hálózati tevékenységét, beleértve az e-maileket, az alkalmazásokat és a webhelyeket."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Ön a(z) <xliff:g id="APPLICATION">%1$s</xliff:g> alkalmazáshoz csatlakozik, amely figyelheti személyes hálózati tevékenységét, beleértve az e-maileket, alkalmazásokat és webhelyeket."</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"Munkaprofilját a(z) <xliff:g id="ORGANIZATION">%1$s</xliff:g> felügyeli. Csatlakoztatva van hozzá a(z) <xliff:g id="APPLICATION">%2$s</xliff:g> alkalmazás, amely figyelheti az Ön hálózati tevékenységét, beleértve az e-maileket, az alkalmazásokat és a webhelyeket.\n\nTovábbi információért forduljon a rendszergazdájához."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Munkaprofilját a(z) <xliff:g id="ORGANIZATION">%1$s</xliff:g> felügyeli. Csatlakoztatva van hozzá a(z) <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> alkalmazás, amely figyelheti az Ön hálózati tevékenységét, beleértve az e-maileket, az alkalmazásokat és a webhelyeket.\n\nCsatlakoztatta továbbá a(z) <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> alkalmazást, amely szintén figyelemmel kísérheti személyes hálózati tevékenységét."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Eszközét a következő felügyeli: <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nA rendszergazda figyelemmel kísérheti és módosíthatja beállításait, vállalati hozzáféréseit, alkalmazásait, az eszközéhez társított adatokat és eszköze helyadatait.\n\nÖn a következőhöz csatlakozik: <xliff:g id="APPLICATION">%2$s</xliff:g>, amely (az e-mailekre, alkalmazásokra és webhelyekre is kiterjedően) figyelemmel kísérheti hálózati tevékenységét.\n\nTovábbi információért forduljon a rendszergazdához."</string>
@@ -434,6 +443,18 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazás kezeli a hangerőt"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"Koppintson az eredeti visszaállításához."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"A munkaprofilt használja"</string>
+  <string-array name="volume_stream_titles">
+    <item msgid="5841843895402729630">"Hívás"</item>
+    <item msgid="5997713001067658559">"Rendszer"</item>
+    <item msgid="7858983209929864160">"Csörgetés"</item>
+    <item msgid="1850038478268896762">"Média"</item>
+    <item msgid="8265110906352372092">"Ébresztő"</item>
+    <item msgid="5339394737636839168"></item>
+    <item msgid="2951313578278086204">"Bluetooth"</item>
+    <item msgid="2919807739709798970"></item>
+    <item msgid="150349973435223405"></item>
+    <item msgid="6761963760295549099"></item>
+  </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Koppintson a némítás megszüntetéséhez."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Koppintson a rezgés beállításához. Előfordulhat, hogy a kisegítő lehetőségek szolgáltatásai le vannak némítva."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Koppintson a némításhoz. Előfordulhat, hogy a kisegítő lehetőségek szolgáltatásai le vannak némítva."</string>
@@ -462,7 +483,7 @@
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Hotspot"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Munkaprofil"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Egyeseknek tetszik, másoknak nem"</string>
-    <string name="tuner_warning" msgid="8730648121973575701">"A Kezelőfelület-hangoló az Android felhasználói felületének szerkesztéséhez és testreszabásához nyújt további megoldásokat. Ezek a kísérleti funkciók változhatnak vagy megsérülhetnek a későbbi kiadásokban,illetve eltűnhetnek azokból. Körültekintően járjon el."</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"A Kezelőfelület-hangoló az Android felhasználói felületének szerkesztéséhez és testreszabásához nyújt további megoldásokat. Ezek a kísérleti funkciók változhatnak vagy megsérülhetnek a későbbi kiadásokban, illetve eltűnhetnek azokból. Körültekintően járjon el."</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"Ezek a kísérleti funkciók változhatnak vagy megsérülhetnek a későbbi kiadásokban, illetve eltűnhetnek azokból. Körültekintően járjon el."</string>
     <string name="got_it" msgid="2239653834387972602">"Értem"</string>
     <string name="tuner_toast" msgid="603429811084428439">"Gratulálunk! A Kezelőfelület-hangolót hozzáadtuk a Beállításokhoz"</string>
@@ -473,8 +494,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Másodpercek megjelenítése az állapotsor óráján. Ez hatással lehet az akkumulátor üzemidejére."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Gyorsbeállítások átrendezése"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Fényerő megjelenítése a gyorsbeállításokban"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"Képernyőfelosztó gyors felfelé csúsztatás engedélyezése"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Kézmozdulat engedélyezése osztott képernyős nézet aktiválásához, ha az Áttekintés gombról felfelé húzza az ujját"</string>
     <string name="experimental" msgid="6198182315536726162">"Kísérleti"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Engedélyezi a Bluetooth-kapcsolatot?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Ha a billentyűzetet csatlakoztatni szeretné táblagépéhez, először engedélyeznie kell a Bluetooth-kapcsolatot."</string>
@@ -504,21 +523,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"További beállítások"</string>
     <string name="notification_done" msgid="5279426047273930175">"Kész"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g>-értesítések vezérlői"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"Szín és megjelenés"</string>
-    <string name="night_mode" msgid="3540405868248625488">"Éjszakai mód"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"Kijelző kalibrálása"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"Bekapcsolva"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"Kikapcsolva"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"Automatikus bekapcsolás"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Váltás az Éjszakai módra a helynek és napszaknak megfelelően"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"Amikor be van kapcsolva az Éjszakai mód"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Sötét téma használata az Android operációs rendszernél"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"Színárnyalat módosítása"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"Fényerő módosítása"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"Sötét téma látható az Android operációs rendszer olyan alapterületeinél, amelyek normál állapotban világosan jelennek meg (például a Beállítások)."</string>
-    <string name="color_apply" msgid="9212602012641034283">"Alkalmaz"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"Beállítások megerősítése"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"Bizonyos színbeállítások használhatatlanná tehetik ezt az eszközt. A színbeállítás megerősítéséhez kattintson az OK lehetőségre, máskülönben a rendszer 10 másodpercen belül visszaáll a korábbira."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Akkumulátorhasználat"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Az Akkumulátorkímélő módot töltés közben nem lehet használni"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Akkumulátorkímélő mód"</string>
@@ -647,4 +651,5 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"A(z) <xliff:g id="ID_1">%s</xliff:g> beállításainak megnyitása."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Beállítások sorrendjének szerkesztése."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_1">%1$d</xliff:g>. oldal, összesen: <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <string name="cant_silence_or_block" msgid="999689262131488625">"Az értesítéseket nem lehet elnémítani vagy letiltani"</string>
 </resources>

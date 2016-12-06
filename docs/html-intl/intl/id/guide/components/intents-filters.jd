@@ -1,0 +1,899 @@
+page.title=Intent dan Filter Intent
+page.tags="IntentFilter"
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Dalam dokumen ini</h2>
+<ol>
+  <li><a href="#Types">Tipe Intent</a></li>
+  <li><a href="#Building">Membangun Intent</a>
+    <ol>
+      <li><a href="#ExampleExplicit">Contoh intent eksplisit</a></li>
+      <li><a href="#ExampleSend">Contoh intent implisit</a></li>
+      <li><a href="#ForceChooser">Memaksakan pemilih aplikasi</a></li>
+    </ol>
+  </li>
+  <li><a href="#Receiving">Menerima Intent Implisit</a>
+    <ol>
+      <li><a href="#ExampleFilters">Contoh filter</a></li>
+    </ol>
+  </li>
+  <li><a href="#PendingIntent">Menggunakan Intent Tertunda</a></li>
+  <li><a href="#Resolution">Resolusi Intent</a>
+    <ol>
+      <li><a href="#ActionTest">Pengujian tindakan</a></li>
+      <li><a href="#CategoryTest">Pengujian kategori</a></li>
+      <li><a href="#DataTest">Pengujian data</a></li>
+      <li><a href="#imatch">Pencocokan intent</a></li>
+    </ol>
+  </li>
+</ol>
+
+<h2>Lihat juga</h2>
+<ol>
+<li><a href="{@docRoot}training/basics/intents/index.html">Berinteraksi dengan Aplikasi Lain</a></li>
+<li><a href="{@docRoot}training/sharing/index.html">Berbagi Konten</a></li>
+</ol>
+
+</div>
+</div>
+
+
+
+
+<p>{@link android.content.Intent} merupakan objek pertukaran pesan yang bisa Anda gunakan untuk meminta tindakan
+dari <a href="{@docRoot}guide/components/fundamentals.html#Components">komponen aplikasi</a> lain.
+Walaupun intent memudahkan komunikasi antarkomponen dalam beberapa cara, ada tiga
+kasus-penggunaan dasar:</p>
+
+<ul>
+<li><b>Untuk memulai aktivitas:</b>
+<p>{@link android.app.Activity} menyatakan satu layar dalam aplikasi. Anda bisa memulai instance
+baru {@link android.app.Activity} dengan meneruskan {@link android.content.Intent}
+ke {@link android.content.Context#startActivity startActivity()}. {@link android.content.Intent}
+menjelaskan aktivitas yang akan dimulai dan membawa data yang diperlukan.</p>
+
+<p>Jika Anda ingin menerima hasil dari aktivitas bila selesai,
+panggil {@link android.app.Activity#startActivityForResult
+startActivityForResult()}. Aktivitas Anda menerima hasil
+sebagai objek {@link android.content.Intent} terpisah dalam callback {@link
+android.app.Activity#onActivityResult onActivityResult()} aktivitas Anda.
+Untuk informasi selengkapnya, lihat panduan <a href="{@docRoot}guide/components/activities.html">Aktivitas</a>.</p></li>
+
+<li><b>Untuk memulai layanan:</b>
+<p>{@link android.app.Service} adalah komponen yang melakukan operasi di latar belakang
+tanpa antarmuka pengguna. Anda bisa memulai layanan untuk melakukan operasi satu-kali
+(misalnya mengunduh file) dengan meneruskan {@link android.content.Intent}
+ke {@link android.content.Context#startService startService()}. {@link android.content.Intent}
+menjelaskan layanan yang akan dimulai dan membawa data yang diperlukan.</p>
+
+<p>Jika layanan didesain dengan antarmuka pengguna klien-server, Anda bisa mengikat ke layanan
+dari komponen lain dengan meneruskan {@link android.content.Intent} ke {@link
+android.content.Context#bindService bindService()}</code>. Untuk informasi selengkapnya, lihat panduan <a href="{@docRoot}guide/components/services.html">Layanan</a>.</p></li>
+
+<li><b>Untuk mengirim siaran:</b>
+<p>Siaran adalah pesan yang bisa diterima aplikasi apa saja. Sistem menyampaikan beragam siaran
+untuk kejadian sistem, misalnya saat sistem booting atau saat perangkat mulai mengisi daya.
+Anda bisa mengirim siaran ke aplikasi lain dengan meneruskan {@link android.content.Intent}
+ke {@link android.content.Context#sendBroadcast(Intent) sendBroadcast()},
+{@link android.content.Context#sendOrderedBroadcast(Intent, String)
+sendOrderedBroadcast()}, atau {@link
+android.content.Context#sendStickyBroadcast sendStickyBroadcast()}.</p>
+</li>
+</ul>
+
+
+
+
+<h2 id="Types">Tipe Intent</h2>
+
+<p>Ada dua tipe intent:</p>
+
+<ul>
+<li><b>Intent eksplisit</b> menetapkan komponen untuk memulai dengan nama (
+nama kelas yang sepenuhnya memenuhi syarat). Anda biasanya akan menggunakan intent eksplisit untuk memulai sebuah komponen
+dalam aplikasi sendiri, karena Anda mengetahui nama kelas dari aktivitas atau layanan yang ingin dimulai.
+Misalnya, mulai aktivitas baru sebagai respons terhadap tindakan pengguna atau mulai layanan untuk mengunduh
+file di latar belakang.</li>
+
+<li><b>Intent implisit</b> tidak menetapkan komponen tertentu, melainkan mendeklarasikan tindakan umum
+yang dilakukan, yang memungkinkan komponen aplikasi lain untuk menanganinya. Misalnya, jika Anda ingin
+menampilkan sebuah lokasi di peta pada pengguna, Anda bisa menggunakan intent implisit untuk meminta aplikasi lain
+yang mampu untuk menunjukkan lokasi yang telah ditetapkan di peta tersebut.</li>
+</ul>
+
+<p>Saat Anda membuat intent eksplisit untuk memulai aktivitas atau layanan, sistem akan segera
+memulai komponen aplikasi yang telah ditetapkan dalam objek {@link android.content.Intent}.</p>
+
+<div class="figure" style="width:446px">
+<img src="{@docRoot}images/components/intent-filters@2x.png" width="446" alt="" />
+<p class="img-caption"><strong>Gambar 1.</strong> Ilustrasi yang menggambarkan cara intent implisit
+disampaikan melalui sistem untuk memulai aktivitas lain: <b>[1]</b> <em>Aktivitas A</em> membuat sebuah
+{@link android.content.Intent} dengan keterangan tindakan dan meneruskannya ke {@link
+android.content.Context#startActivity startActivity()}. <b>[2]</b> Sistem Android akan mencari semua
+aplikasi untuk filter intent yang cocok dengan intent tersebut. Bila cocok, <b>[3]</b> sistem akan
+memulai aktivitas mencocokkan (<em>Aktivitas B</em>) dengan memanggil metode {@link
+android.app.Activity#onCreate onCreate()} dan meneruskannya ke {@link android.content.Intent}.
+</p>
+</div>
+
+<p>Bila Anda membuat intent implisit, sistem Android akan menemukan komponen yang sesuai untuk memulai
+dengan membandingkan konten intent dengan <em>filter intent</em> yang dideklarasikan dalam <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">file manifes</a> aplikasi lain di
+perangkat. Jika intent cocok dengan filter intent, sistem akan memulai komponen tersebut dan mengiriminya
+objek {@link android.content.Intent}. Jika banyak filter intent yang kompatibel, sistem
+menampilkan dialog sehingga pengguna bisa memilih aplikasi yang akan digunakan.</p>
+
+<p>Filter intent adalah ekspresi dalam file manifes aplikasi yang
+menetapkan tipe intent yang akan diterima
+komponen. Misalnya, dengan mendeklarasikan intent filter untuk aktivitas,
+Anda akan memungkinkan aplikasi lain untuk langsung memulai aktivitas Anda dengan intent tertentu.
+Demikian pula, jika Anda <em>tidak</em> mendeklarasikan filter intent untuk suatu aktivitas, maka aktivitas tersebut hanya bisa dimulai
+dengan intent eksplisit.</p>
+
+<p class="caution"><strong>Perhatian:</strong> Untuk memastikan aplikasi Anda aman, selalu gunakan intent
+eksplisit saat memulai {@link android.app.Service} dan jangan
+mendeklarasikan filter intent untuk layanan. Menggunakan intent implisit untuk memulai layanan akan menimbulkan
+bahaya keamanan karena Anda tidak bisa memastikan layanan apa yang akan merespons intent,
+dan pengguna tidak bisa melihat layanan mana yang dimulai. Mulai dari Android 5.0 (API level 21), sistem
+melontarkan eksepsi jika Anda memanggil {@link android.content.Context#bindService bindService()}
+dengan intent implisit.</p>
+
+
+
+
+
+<h2 id="Building">Membangun Intent</h2>
+
+<p>Objek {@link android.content.Intent} membawa informasi yang digunakan sistem Android
+untuk menentukan komponen mana yang akan dimulai (misalnya nama persis dari suatu komponen atau kategori
+komponen yang seharusnya menerima intent), ditambah informasi yang digunakan komponen penerima untuk
+melakukan tindakan dengan benar (misalnya tindakan yang harus dilakukan dan data yang harus diolah).</p>
+
+
+<p>Informasi utama yang dimuat dalam {@link android.content.Intent} adalah sebagai berikut:</p>
+
+<dl>
+
+<dt><b>Nama komponen</b></dt>
+<dd>Nama komponen yang akan dimulai.
+
+<p>Ini opsional, namun merupakan bagian informasi penting yang membuat intent
+menjadi <b>eksplisit</b>, yaitu intent harus dikirim hanya ke komponen aplikasi
+yang didefinisikan oleh nama komponen. Tanpa nama komponen, intent menjadi <b>implisit</b> dan
+sistem akan memutuskan komponen mana yang harus menerima intent berdasarkan informasi intent lain
+(misalnya tindakan, data, dan kategori&mdash;yang dijelaskan di bawah ini). Jadi jika Anda ingin memulai komponen
+tertentu dalam aplikasi, Anda harus menetapkan nama komponen tersebut.</p>
+
+<p class="note"><strong>Catatan:</strong> Saat memulai {@link android.app.Service}, Anda harus
+<strong>selalu menetapkan nama komponen</strong>. Jika tidak, maka Anda tidak bisa memastikan layanan apa
+yang akan merespons intent tersebut, dan pengguna tidak bisa melihat layanan mana yang dimulai.</p>
+
+<p>Bidang {@link android.content.Intent} ini adalah objek
+{@link android.content.ComponentName}, yang bisa Anda tetapkan menggunakan
+nama kelas yang sepenuhnya memenuhi syarat dari komponen target, termasuk nama paket aplikasi. Misalnya,
+{@code com.example.ExampleActivity}. Anda bisa mengatur nama komponen dengan {@link
+android.content.Intent#setComponent setComponent()}, {@link android.content.Intent#setClass
+setClass()}, {@link android.content.Intent#setClassName(String, String) setClassName()}, atau dengan konstruktor
+{@link android.content.Intent}.</p>
+
+</dd>
+
+<p><dt><b>Tindakan</b></dt>
+<dd>String yang menetapkan tindakan generik untuk dilakukan (misalnya <em>lihat</em> atau <em>pilih</em>).
+
+<p>Dalam hal intent siaran, ini adalah tindakan yang terjadi dan dilaporkan.
+Tindakan ini sangat menentukan bagaimana keseluruhan intent disusun&mdash;terutama
+apa yang dimuat dalam data dan ekstra.
+
+<p>Anda bisa menetapkan tindakan sendiri yang akan digunakan oleh intent dalam aplikasi Anda (atau digunakan oleh aplikasi
+lain untuk memanggil komponen dalam aplikasi Anda), namun Anda harus menggunakan konstanta tindakan
+yang didefinisikan oleh kelas {@link android.content.Intent} atau kelas kerangka kerja lain. Berikut ini adalah beberapa
+tindakan umum untuk memulai sebuah aktivitas:</p>
+
+<dl>
+<dt>{@link android.content.Intent#ACTION_VIEW}</dt>
+   <dd>Gunakan tindakan ini dalam intent dengan {@link
+   android.content.Context#startActivity startActivity()} saat Anda memiliki beberapa informasi yang
+ bisa ditampilkan aktivitas kepada pengguna, misalnya foto yang bisa dilihat dalam aplikasi galeri, atau alamat
+ yang bisa dilihat dalam aplikasi peta.</dd>
+
+<dt>{@link android.content.Intent#ACTION_SEND}</dt>
+   <dd>Juga dikenal dengan intent "berbagi", Anda harus menggunakannya dalam intent dengan {@link
+   android.content.Context#startActivity startActivity()} bila Anda memiliki data yang bisa digunakan pengguna untuk
+ berbagi melalui aplikasi lain, misalnya aplikasi email atau aplikasi jaringan sosial.</dd>
+</dl>
+
+<p>Lihat referensi kelas {@link android.content.Intent} untuk konstanta
+selengkapnya yang mendefinisikan tindakan generik.  Tindakan lain yang didefinisikan
+di tempat lain dalam kerangka kerja Android, misalnya dalam {@link android.provider.Settings} untuk tindakan
+yang membuka layar tertentu dalam aplikasi Settings di sistem.</p>
+
+<p>Anda bisa menetapkan tindakan untuk sebuah intent dengan {@link android.content.Intent#setAction
+setAction()} atau dengan konstruktor {@link android.content.Intent}.</p>
+
+<p>Jika mendefinisikan tindakan Anda sendiri, pastikan untuk memasukkan nama paket aplikasi Anda
+sebagai awalan. Misalnya:</p>
+<pre>static final String ACTION_TIMETRAVEL = "com.example.action.TIMETRAVEL";</pre>
+</dd>
+
+<dt><b>Data</b></dt>
+<dd>URI (objek {@link android.net.Uri}) yang mengacu data untuk diolah dan/atau
+tipe MIME dari data tersebut. Tipe data yang disediakan umumnya didikte oleh tindakan intent.
+Misalnya, jika tindakan merupakan {@link android.content.Intent#ACTION_EDIT}, data harus berisi
+URI dari dokumen untuk diedit.
+
+<p>Saat membuat intent,
+seringkali tipe data (tipe MIME-nya) selain URI perlu ditetapkan.
+Misalnya, aktivitas yang mampu menampilkan gambar mungkin tidak mampu
+memutar file audio, walaupun format URI mungkin serupa.
+Jadi menetapkan tipe MIME data Anda akan membantu sistem
+Android menemukan komponen terbaik untuk diterima intent.
+Akan tetapi, tipe MIME seringkali bisa diambil dari URI&mdash;terutama saat datanya merupakan URI
+{@code content:}, yang menunjukkan data tersebut berada di perangkat dan dikontrol oleh
+{@link android.content.ContentProvider}, yang membuat data tipe MIME terlihat di sistem.</p>
+
+<p>Untuk mengatur data URI saja, panggil {@link android.content.Intent#setData setData()}.
+Untuk mengatur tipe MIME saja, panggil {@link android.content.Intent#setType setType()}. Jika perlu, Anda
+bisa mengatur keduanya secara eksplisit dengan {@link
+android.content.Intent#setDataAndType setDataAndType()}.</p>
+
+<p class="caution"><strong>Perhatian:</strong> Jika ingin mengatur tipe URI dan MIME,
+<strong>jangan</strong> panggil {@link android.content.Intent#setData setData()} dan
+{@link android.content.Intent#setType setType()} karena mereka saling menghapuskan nilai satu sama lain.
+Selalu gunakan {@link android.content.Intent#setDataAndType setDataAndType()} untuk mengatur
+tipe URI maupun MIME.</p>
+</dd>
+
+<p><dt><b>Kategori</b></dt>
+<dd>String yang berisi informasi tambahan tentang jenis komponen
+yang harus menangani intent.  Keterangan kategori dalam jumlah berapa pun bisa
+dimasukkan dalam intent, namun sebagian besar intent tidak memerlukan kategori.
+Berikut ini adalah beberapa kategori umum:
+
+<dl>
+<dt>{@link android.content.Intent#CATEGORY_BROWSABLE}</dt>
+  <dd>Aktivitas target memungkinkannya dimulai oleh browser web untuk menampilkan data
+yang diacu oleh tautan&mdash;misalnya gambar atau pesan e-mail.
+  </dd>
+<dt>{@link android.content.Intent#CATEGORY_LAUNCHER}</dt>
+  <dd>Aktivitas tersebut adalah aktivitas awal dari sebuah tugas dan dicantumkan dalam
+       launcher aplikasi sistem.
+  </dd>
+</dl>
+
+<p>Lihat keterangan kelas {@link android.content.Intent} untuk mengetahui daftar lengkap
+kategori.</p>
+
+<p>Anda bisa menetapkan kategori dengan {@link android.content.Intent#addCategory addCategory()}.</p>
+</dd>
+</dl>
+
+
+<p>Properti yang tercantum di atas (nama komponen, tindakan, data, dan kategori) menyatakan
+karakteristik yang mendefinisikan intent. Dengan membaca properti ini, sistem Android
+mampu memutuskan komponen aplikasi yang harus dimulainya.</p>
+
+<p>Akan tetapi, intent bisa membawa informasi tambahan yang tidak memengaruhi
+cara intent ditetapkan pada komponen aplikasi. Intent juga bisa menyediakan:</p>
+
+<dl>
+<dt><b>Ekstra</b></dt>
+<dd>Pasangan nilai-kunci yang membawa informasi yang diperlukan untuk menghasilkan tindakan yang diminta.
+Seperti halnya beberapa tindakan menggunakan jenis tertentu URI data, beberapa tindakan juga menggunakan ekstra tertentu.
+
+<p>Anda bisa menambahkan data ekstra dengan beragam metode {@link android.content.Intent#putExtra putExtra()},
+masing-masing menerima dua parameter: nama kunci dan nilainya.
+Anda juga bisa membuat objek {@link android.os.Bundle} dengan semua data ekstra, kemudian memasukkan
+{@link android.os.Bundle} dalam {@link android.content.Intent} dengan {@link
+android.content.Intent#putExtras putExtras()}.</p>
+
+<p>Misalnya, saat membuat intent yang akan dikirimkan bersama email
+{@link android.content.Intent#ACTION_SEND}, Anda bisa menetapkan penerima "kepada" dengan kunci
+{@link android.content.Intent#EXTRA_EMAIL}, dan menetapkan "subjek" dengan kunci
+{@link android.content.Intent#EXTRA_SUBJECT}.</p>
+
+<p>Kelas {@link android.content.Intent} menetapkan beberapa konstanta {@code EXTRA_*}
+untuk tipe data standar. Jika Anda ingin mendeklarasikan kunci ekstra sendiri (untuk intent yang
+diterima aplikasi Anda), pastikan untuk memasukkan nama paket aplikasi
+sebagai awalan. Misalnya:</p>
+<pre>static final String EXTRA_GIGAWATTS = "com.example.EXTRA_GIGAWATTS";</pre>
+</dd>
+
+<dt><b>Flag</b></dt>
+<dd>Flag didefinisikan dalam kelas {@link android.content.Intent} yang berfungsi sebagai metadata untuk
+intent. Flag menginstruksikan cara meluncurkan aktivitas (misalnya,
+<a href="{@docRoot}guide/components/tasks-and-back-stack.html">tugas</a> mana yang harus dimiliki suatu aktivitas
+) dan cara memperlakukannya setelah diluncurkan (misalnya, apakah aktivitas tersebut masuk ke dalam daftar aktivitas
+terbaru) pada sistem Android.
+
+<p>Untuk informasi selengkapnya, lihat metode {@link android.content.Intent#setFlags setFlags()} .</p>
+</dd>
+
+</dl>
+
+
+
+
+<h3 id="ExampleExplicit">Contoh intent eksplisit</h3>
+
+<p>Intent eksplisit adalah intent yang Anda gunakan untuk meluncurkan komponen aplikasi tertentu, seperti
+aktivitas tertentu atau layanan dalam aplikasi Anda. Untuk membuat intent eksplisit, definisikan
+nama komponen untuk objek {@link android.content.Intent} &mdash;semua
+properti intent lain bersifat opsional.</p>
+
+<p>Misalnya, jika Anda ingin membangun layanan dalam aplikasi Anda, bernama {@code DownloadService},
+yang didesain untuk mengunduh file dari web, Anda bisa memulainya dengan kode berikut ini:</p>
+
+<pre>
+// Executed in an Activity, so 'this' is the {@link android.content.Context}
+// The fileUrl is a string URL, such as "http://www.example.com/image.png"
+Intent downloadIntent = new Intent(this, DownloadService.class);
+downloadIntent.setData({@link android.net.Uri#parse Uri.parse}(fileUrl));
+startService(downloadIntent);
+</pre>
+
+<p>Konstruktor {@link android.content.Intent#Intent(Context,Class)}
+ menyediakan {@link android.content.Context} aplikasi dan
+objek {@link java.lang.Class} pada komponen. Dengan demikian,
+intent ini memulai secara eksplisit kelas {@code DownloadService} dalam aplikasi.</p>
+
+<p>Untuk informasi selengkapnya tentang membangun dan memulai layanan, lihat panduan
+<a href="{@docRoot}guide/components/services.html">Layanan</a>.</p>
+
+
+
+
+<h3 id="ExampleSend">Contoh intent implisit</h3>
+
+<p>Intent implisit menetapkan tindakan yang bisa memanggil aplikasi pada perangkat yang mampu
+melakukan tindakan. Menggunakan intent implisit berguna bila aplikasi Anda tidak bisa melakukan
+tindakan, namun aplikasi lain mungkin bisa melakukannya dan Anda ingin pengguna untuk memilih aplikasi mana yang ingin digunakan.</p>
+
+<p>Misalnya, jika memiliki konten yang Anda ingin agar pengguna berbagi konten itu dengan orang lain, buatlah intent
+dengan tindakan {@link android.content.Intent#ACTION_SEND}
+dan tambahkan ekstra yang menetapkan konten yang akan dibagikan. Bila Anda memanggil
+{@link android.content.Context#startActivity startActivity()} dengan intent tersebut, pengguna bisa
+memilih aplikasi yang akan digunakan untuk berbagi konten.</p>
+
+<p class="caution"><strong>Perhatian:</strong> Ada kemungkinan pengguna tidak memiliki <em>suatu</em>
+aplikasi yang menangani intent implisit yang Anda kirimkan ke {@link android.content.Context#startActivity
+startActivity()}. Jika itu terjadi, panggilan akan gagal dan aplikasi Anda akan crash. Untuk memeriksa
+apakah aktivitas bisa menerima intent, panggil {@link android.content.Intent#resolveActivity
+resolveActivity()} pada objek {@link android.content.Intent} Anda. Jika hasilnya bukan nol,
+berarti setidaknya ada satu aplikasi yang bisa menangani intent tersebut dan aman untuk memanggil
+{@link android.content.Context#startActivity startActivity()}. Jika hasilnya nol,
+Anda tidak boleh menggunakan intent tersebut dan, jika memungkinkan, Anda harus menonaktifkan fitur yang mengeluarkan
+intent tersebut.</p>
+
+
+<pre>
+// Create the text message with a string
+Intent sendIntent = new Intent();
+sendIntent.setAction(Intent.ACTION_SEND);
+sendIntent.putExtra(Intent.EXTRA_TEXT, textMessage);
+sendIntent.setType("text/plain");
+
+// Verify that the intent will resolve to an activity
+if (sendIntent.resolveActivity(getPackageManager()) != null) {
+    startActivity(sendIntent);
+}
+</pre>
+
+<p class="note"><strong>Catatan:</strong> Dalam hal ini, URI tidak digunakan, namun tipe data intent
+dideklarasikan untuk menetapkan konten yang dibawa oleh ekstra.</p>
+
+
+<p>Saat {@link android.content.Context#startActivity startActivity()} dipanggil, sistem akan
+memeriksa semua aplikasi yang terinstal untuk menentukan aplikasi mana yang bisa menangani intent jenis ini (
+intent dengan tindakan {@link android.content.Intent#ACTION_SEND} dan yang membawa data
+"teks/polos"). Jika hanya ada satu aplikasi yang bisa menanganinya, aplikasi tersebut akan langsung terbuka dan diberi
+intent tersebut. Jika banyak aktivitas menerima intent, sistem akan
+menampilkan dialog sehingga pengguna bisa memilih aplikasi mana yang digunakan.</p>
+
+
+<div class="figure" style="width:200px">
+  <img src="{@docRoot}images/training/basics/intent-chooser.png" alt="">
+  <p class="img-caption"><strong>Gambar 2.</strong> Dialog pemilih.</p>
+</div>
+
+<h3 id="ForceChooser">Memaksakan pemilih aplikasi</h3>
+
+<p>Bila ada lebih dari satu aplikasi yang merespons intent implisit Anda,
+pengguna bisa memilih aplikasi mana yang digunakan dan membuat aplikasi tersebut pilihan default untuk
+tindakan tersebut. Ini sangat membantu saat melakukan tindakan di mana pengguna
+mungkin ingin menggunakan aplikasi yang sama untuk seterusnya, seperti saat membuka halaman web (pengguna
+biasanya memilih hanya satu browser web).</p>
+
+<p>Akan tetapi, jika ada banyak aplikasi yang bisa merespons intent tersebut dan pengguna mungkin ingin menggunakan aplikasi
+yang berbeda untuk setiap kalinya, Anda harus menampilkan dialog pemilih secara eksplisit. Dialog pemilih akan meminta
+pengguna memilih aplikasi yang akan digunakan untuk tindakan tertentu setiap kali (pengguna tidak bisa memilih aplikasi default untuk
+tindakan tersebut). Misalnya, saat aplikasi Anda melakukan "berbagi" dengan tindakan {@link
+android.content.Intent#ACTION_SEND}, pengguna mungkin ingin berbagi menggunakan aplikasi berbeda sesuai
+dengan situasi mereka saat itu, jadi Anda harus selalu menggunakan dialog pemilih, seperti yang ditampilkan dalam gambar 2.</p>
+
+
+
+
+<p>Untuk menampilkan pemilih, buatlah {@link android.content.Intent} menggunakan {@link
+android.content.Intent#createChooser createChooser()} dan teruskan ke {@link
+android.app.Activity#startActivity startActivity()}. Misalnya:</p>
+
+<pre>
+Intent sendIntent = new Intent(Intent.ACTION_SEND);
+...
+
+// Always use string resources for UI text.
+// This says something like "Share this photo with"
+String title = getResources().getString(R.string.chooser_title);
+// Create intent to show the chooser dialog
+Intent chooser = Intent.createChooser(sendIntent, title);
+
+// Verify the original intent will resolve to at least one activity
+if (sendIntent.resolveActivity(getPackageManager()) != null) {
+    startActivity(chooser);
+}
+</pre>
+
+<p>Ini menampilkan dialog dengan daftar aplikasi yang merespons intent yang diteruskan ke metode {@link
+android.content.Intent#createChooser createChooser()} dan menggunakan teks yang disediakan sebagai
+judul dialog.</p>
+
+
+
+
+
+
+
+
+
+<h2 id="Receiving">Menerima Intent Implisit</h2>
+
+<p>Untuk mengiklankan intent implisit yang bisa diterima aplikasi Anda, deklarasikan satu atau beberapa filter intent untuk
+tiap komponen aplikasi dengan elemen <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a>
+dalam <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">file manifes</a> Anda.
+Tiap filter intent menetapkan tipe intent yang diterimanya berdasarkan tindakan intent,
+data, dan kategori. Sistem akan mengirim intent implisit ke komponen aplikasi Anda hanya jika
+intent tersebut bisa diteruskan melalui salah satu filter intent.</p>
+
+<p class="note"><strong>Catatan:</strong> Intent eksplisit selalu dikirimkan ke targetnya,
+apa pun filter intent yang dideklarasikan komponen.</p>
+
+<p>Komponen aplikasi harus mendeklarasikan filter terpisah untuk setiap pekerjaan unik yang bisa dilakukannya.
+Misalnya, satu aktivitas dalam aplikasi galeri gambar bisa memiliki dua filter: satu filter
+untuk melihat gambar, dan filter lainnya untuk mengedit gambar. Bila aktivitas dimulai,
+aktivitas akan memeriksa {@link android.content.Intent} dan menentukan cara berperilaku berdasarkan informasi
+dalam {@link android.content.Intent} (misalnya menampilkan kontrol editor atau tidak).</p>
+
+<p>Tiap filter intent didefinisikan oleh elemen <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a>
+dalam file manifes aplikasi, yang tersarang dalam komponen aplikasi terkait (seperti
+elemen <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+). Di dalam <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a>,
+Anda bisa menetapkan tipe intent yang akan diterima dengan menggunakan salah satu atau beberapa
+dari tiga elemen ini:</p>
+
+<dl>
+<dt><a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action&gt;}</a></dt>
+  <dd>Mendeklarasikan tindakan intent yang diterima, dalam atribut {@code name}. Nilai
+  haruslah nilai string literal dari tindakan, bukan konstanta kelas.</dd>
+<dt><a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a></dt>
+  <dd>Mendeklarasikan tipe data yang diterima, menggunakan salah satu atau beberapa atribut yang menetapkan beragam
+  aspek URI data (<code>scheme</code>, <code>host</code>, <code>port</code>,
+  <code>path</code>, dll.) dan tipe MIME.</dd>
+<dt><a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category&gt;}</a></dt>
+  <dd>Mendeklarasikan kategori intent yang diterima, dalam atribut {@code name}. Nilai
+  haruslah nilai string literal dari tindakan, bukan konstanta kelas.
+
+  <p class="note"><strong>Catatan:</strong> Untuk menerima intent implisit, Anda
+  <strong>harus menyertakan</strong> kategori
+{@link android.content.Intent#CATEGORY_DEFAULT} dalam filter intent. Metode
+  {@link android.app.Activity#startActivity startActivity()}dan
+  {@link android.app.Activity#startActivityForResult startActivityForResult()} memperlakukan semua intent
+  seolah-olah mendeklarasikan kategori {@link android.content.Intent#CATEGORY_DEFAULT}.
+  Jika tidak mendeklarasikan kategori ini dalam filter intent Anda, tidak ada intent implisit yang ditetapkan untuk
+ aktivitas Anda.</p>
+  </dd>
+</dl>
+
+<p>Misalnya, ini adalah deklarasi aktivitas dengan filter intent yang diterima intent
+{@link android.content.Intent#ACTION_SEND} bila tipe data berupa teks:</p>
+
+<pre>
+&lt;activity android:name="ShareActivity">
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="text/plain"/>
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p>Anda bisa membuat filter yang menyertakan lebih dari satu instance
+<a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action&gt;}</a>,
+<a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a>, atau
+<a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category&gt;}</a>.
+Jika Anda melakukannya, Anda hanya perlu memastikan bahwa komponen bisa menangani semua kombinasi
+elemen filter tersebut.</p>
+
+<p>Bila ingin menangani beragam jenis intent, namun hanya dalam kombinasi
+tindakan, data, dan tipe kategori tertentu, maka Anda harus membuat banyak filter intent.</p>
+
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>Membatasi akses ke komponen</h2>
+<p>Menggunakan filter intent bukanlah cara yang aman untuk mencegah aplikasi lain memulai
+komponen Anda. Walaupun filter intent membatasi komponen agar hanya merespons
+jenis intent implisit tertentu, aplikasi lain bisa saja memulai komponen aplikasi Anda
+dengan menggunakan intent eksplisit jika pengembangnya menentukan nama komponen Anda.
+Jika perlu <em>hanya aplikasi Anda sendiri</em> yang mampu memulai salah satu komponen,
+atur atribut <a href="{@docRoot}guide/topics/manifest/activity-element.html#exported">{@code
+exported}</a> ke {@code "false"} untuk komponen itu.
+</p>
+</div>
+</div>
+
+<p>Intent implisit diuji terhadap filter dengan membandingkan intent dengan masing-masing
+dari ketiga elemen. Agar dikirim ke komponen, intent harus lolos ketiga pengujian tersebut.
+Jika intent gagal dalam salah satu pengujian, sistem Android tidak akan mengirim intent ke
+komponen.  Akan tetapi, karena sebuah komponen dapat memiliki beberapa filter intent, intent yang tidak
+lolos melalui salah satu filter komponen mungkin akan lolos di filter lain.
+Informasi selengkapnya tentang cara sistem menetapkan intent disediakan dalam bagian di bawah ini
+tentang <a href="#Resolution">Resolusi Intent</a>.</p>
+
+<p class="caution"><strong>Perhatian:</strong> Untuk menghindari menjalankan
+{@link android.app.Service} aplikasi yang berbeda secara tidak sengaja, selalu gunakan intent eksplisit untuk memulai layanan Anda sendiri dan jangan
+deklarasikan filter intent untuk layanan Anda.</p>
+
+<p class="note"><strong>Catatan:</strong>
+Untuk semua aktivitas, Anda harus mendeklarasikan filter intent dalam file manifes.
+Akan tetapi, filter untuk penerima siaran bisa didaftarkan secara dinamis dengan memanggil
+{@link android.content.Context#registerReceiver(BroadcastReceiver, IntentFilter, String,
+Handler) registerReceiver()}. Anda nanti bisa mencabut pendaftaran penerima dengan {@link
+android.content.Context#unregisterReceiver unregisterReceiver()}. Dengan begitu aplikasi Anda
+bisa mendengarkan siaran tertentu hanya selama periode waktu yang telah ditetapkan saat aplikasi Anda
+berjalan.</p>
+
+
+
+
+
+
+
+<h3 id="ExampleFilters">Contoh filter</h3>
+
+<p>Untuk lebih memahami beberapa perilaku filter intent, lihatlah cuplikan berikut
+dari file manifes aplikasi berbagi di jaringan sosial.</p>
+
+<pre>
+&lt;activity android:name="MainActivity">
+    &lt;!-- This activity is the main entry, should appear in app launcher -->
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.MAIN" />
+        &lt;category android:name="android.intent.category.LAUNCHER" />
+    &lt;/intent-filter>
+&lt;/activity>
+
+&lt;activity android:name="ShareActivity">
+    &lt;!-- This activity handles "SEND" actions with text data -->
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="text/plain"/>
+    &lt;/intent-filter&gt;
+    &lt;!-- This activity also handles "SEND" and "SEND_MULTIPLE" with media data -->
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.SEND"/>
+        &lt;action android:name="android.intent.action.SEND_MULTIPLE"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+        &lt;data android:mimeType="application/vnd.google.panorama360+jpg"/>
+        &lt;data android:mimeType="image/*"/>
+        &lt;data android:mimeType="video/*"/>
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+</pre>
+
+<p>Aktivitas pertama, {@code MainActivity}, merupakan titik masuk utama aplikasi&mdash;aplikasi yang
+terbuka saat pengguna meluncurkan aplikasi dengan ikon launcher:</p>
+<ul>
+  <li>Tindakan {@link android.content.Intent#ACTION_MAIN}
+  menunjukkan ini adalah titik masuk utama dan tidak mengharapkan data intent apa pun.</li>
+  <li>Kategori {@link android.content.Intent#CATEGORY_LAUNCHER} menunjukjkan bahwa ikon
+  aktivitas ini harus ditempatkan dalam launcher aplikasi sistem. Jika elemen <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+  tidak menetapkan ikon dengan{@code icon}, maka sistem akan menggunakan ikon dari elemen
+<a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>.</li>
+</ul>
+<p>Keduanya harus dipasangkan bersama agar aktivitas muncul dalam launcher aplikasi.</p>
+
+<p>Aktivitas kedua, {@code ShareActivity}, dimaksudkan untuk memudahkan berbagi teks dan konten
+media. Walaupun pengguna mungkin memasuki aktivitas ini dengan mengarah ke aktivitas dari {@code MainActivity},
+pengguna juga bisa memasukkan {@code ShareActivity} secara langsung dari aplikasi lain yang mengeluarkan intent
+implisit yang cocok dengan salah satu dari kedua filter intent.</p>
+
+<p class="note"><strong>Catatan:</strong> Tipe MIME,
+<a href="https://developers.google.com/panorama/android/">{@code
+application/vnd.google.panorama360+jpg}</a>, merupakan tipe data khusus yang menetapkan
+foto panorama, yang bisa Anda tangani dengan API <a href="{@docRoot}reference/com/google/android/gms/panorama/package-summary.html">panorama
+Google</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="PendingIntent">Menggunakan Intent Tertunda</h2>
+
+<p>Objek {@link android.app.PendingIntent} merupakan pembungkus objek {@link
+android.content.Intent}. Tujuan utama {@link android.app.PendingIntent}
+adalah memberikan izin pada aplikasi asing
+untuk menggunakan {@link android.content.Intent} yang termuat seolah-olah dieksekusi dari
+proses aplikasi Anda sendiri.</p>
+
+<p>Kasus penggunaan utama untuk intent tertunda antara lain:</p>
+<ul>
+  <li>Mendeklarasikan intent untuk dieksekusi saat pengguna melakukan tindakan dengan <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Pemberitahuan</a>
+  ({@link android.app.NotificationManager}
+  sistem Android akan mengeksekusi {@link android.content.Intent}) Anda.
+  <li>Mendeklarasikan intent untuk dieksekusi saat pengguna melakukan tindakan dengan
+<a href="{@docRoot}guide/topics/appwidgets/index.html">App Widget</a>
+  (aplikasi layar Home mengeksekusi {@link android.content.Intent}).
+  <li>Mendeklarasikan intent untuk dieksekusi di waktu yang telah ditetapkan di masa mendatang
+({@link android.app.AlarmManager}  sistem Android akan mengeksekusi {@link android.content.Intent}).
+</ul>
+
+<p>Karena setiap objek {@link android.content.Intent} didesain untuk ditangani oleh tipe
+tertentu dari komponen aplikasi (baik {@link android.app.Activity}, {@link android.app.Service}, maupun
+ {@link android.content.BroadcastReceiver}), jadi {@link android.app.PendingIntent} harus
+dibuat dengan pertimbangan yang sama. Saat menggunakan intent tertunda, aplikasi Anda tidak akan
+mengeksekusi intent dengan panggilan seperti {@link android.content.Context#startActivity
+startActivity()}. Anda harus mendeklarasikan tipe komponen yang dimaksud saat membuat
+{@link android.app.PendingIntent} dengan memanggil metode kreator masing-masing:</p>
+
+<ul>
+  <li>{@link android.app.PendingIntent#getActivity PendingIntent.getActivity()} untuk
+  {@link android.content.Intent} yang memulai {@link android.app.Activity}.</li>
+  <li>{@link android.app.PendingIntent#getService PendingIntent.getService()} untuk
+  {@link android.content.Intent} yang memulai {@link android.app.Service}.</li>
+  <li>{@link android.app.PendingIntent#getBroadcast PendingIntent.getBroadcast()} untuk
+  {@link android.content.Intent} yang memulai {@link android.content.BroadcastReceiver}.</li>
+</ul>
+
+<p>Kecuali jika aplikasi Anda <em>menerima</em> intent tertunda dari aplikasi lain,
+metode di atas untuk membuat {@link android.app.PendingIntent} menjadi satu-satunya metode
+{@link android.app.PendingIntent} yang mungkin Anda butuhkan.</p>
+
+<p>Tiap metode mengambil {@link android.content.Context} aplikasi saat itu,
+{@link android.content.Intent} yang ingin Anda bungkus, dan satu atau beberapa flag yang menetapkan
+cara penggunaan intent (misalnya apakah intent bisa digunakan lebih dari sekali).</p>
+
+<p>Informasi selengkapnya tentang intent tertunda disediakan pada dokumentasi untuk setiap
+kasus penggunaan yang bersangkutan, seperti dalam panduan API <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Notifications</a>
+dan <a href="{@docRoot}guide/topics/appwidgets/index.html">App Widgets</a>.</p>
+
+
+
+
+
+
+
+<h2 id="Resolution">Resolusi Intent</h2>
+
+
+<p>Saat sistem menerima intent implisit yang memulai suatu aktivitas, sistem tersebut akan mencari
+aktivitas terbaik untuk intent dengan membandingkan intent dengan filter intent berdasarkan tiga aspek:</p>
+
+<ul>
+  <li>Tindakan intent
+  <li>Data intent (baik URI maupun tipe data)
+  <li>Kategori intent
+</ul>
+
+<p>Bagian berikut menjelaskan cara pencocokan intent dengan komponen yang sesuai
+sehubungan dengan cara pendeklarasian filter intent dalam file manifes aplikasi.</p>
+
+
+<h3 id="ActionTest">Pengujian tindakan</h3>
+
+<p>Untuk menetapkan tindakan intent yang diterima, filter intent bisa mendeklarasikan nol atau beberapa elemen
+<a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
+&lt;action&gt;}</a>.  Misalnya:</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;action android:name="android.intent.action.EDIT" /&gt;
+    &lt;action android:name="android.intent.action.VIEW" /&gt;
+    ...
+&lt;/intent-filter&gt;
+</pre>
+
+<p>Untuk melewati filter ini, tindakan yang ditetapkan dalam {@link android.content.Intent}
+harus sesuai dengan salah satu tindakan yang tercantum dalam filter.</p>
+
+<p>Jika filter tidak mencantumkan tindakan apa pun, maka tidak ada intent
+yang dicocokkan, jadi semua intent gagal dalam pengujian. Akan tetapi, jika sebuah {@link android.content.Intent}
+tidak menetapkan suatu tindakan, maka akan lolos pengujian (asalkan filter
+berisi setidaknya satu tindakan).</p>
+
+
+
+<h3 id="CategoryTest">Pengujian kategori</h3>
+
+<p>Untuk menetapkan kategori intent yang diterima, filter intent bisa mendeklarasikan nol atau beberapa elemen
+<a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
+&lt;category&gt;}</a>.  Misalnya:</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+    &lt;category android:name="android.intent.category.BROWSABLE" /&gt;
+    ...
+&lt;/intent-filter&gt;
+</pre>
+
+<p>Agar intent bisa lolos pengujian kategori, setiap kategori dalam {@link android.content.Intent}
+harus sesuai dengan kategori dalam filter. Kebalikannya tidak diperlukan&mdash;filter intent bisa
+mendeklarasikan kategori lebih banyak daripada yang ditetapkan dalam {@link android.content.Intent} dan
+{@link android.content.Intent} tetap akan lolos. Oleh karena itu, intent tanpa kategori harus
+selalu lolos pengujian ini, kategori apa pun yang dideklarasikan dalam filter.</p>
+
+<p class="note"><strong>Catatan:</strong>
+Android secara otomatis menerapkan kategori {@link android.content.Intent#CATEGORY_DEFAULT}
+untuk semua intent implisit yang diteruskan ke {@link
+android.content.Context#startActivity startActivity()} dan {@link
+android.app.Activity#startActivityForResult startActivityForResult()}.
+Jadi jika ingin aktivitas Anda menerima intent implisit, aktivitas tersebut harus
+menyertakan kategori untuk{@code "android.intent.category.DEFAULT"} dalam filter intent (seperti
+yang ditampilkan dalam contoh{@code &lt;intent-filter&gt;} sebelumnya.</p>
+
+
+
+<h3 id="DataTest">Pengujian data</h3>
+
+<p>Untuk menetapkan data intent yang diterima, filter intent bisa mendeklarasikan nol atau beberapa elemen
+<a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
+&lt;data&gt;}</a>.  Misalnya:</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;data android:mimeType="video/mpeg" android:scheme="http" ... /&gt;
+    &lt;data android:mimeType="audio/mpeg" android:scheme="http" ... /&gt;
+    ...
+&lt;/intent-filter&gt;
+</pre>
+
+<p>Tiap elemen <code><a href="{@docRoot}guide/topics/manifest/data-element.html">&lt;data&gt;</a></code>
+bisa menetapkan struktur URI dan tipe data (tipe media MIME).  Ada atribut
+terpisah &mdash; {@code scheme}, {@code host}, {@code port},
+dan {@code path} &mdash; untuk setiap bagian URI:
+</p>
+
+<p style="margin-left: 2em">{@code &lt;scheme&gt;://&lt;host&gt;:&lt;port&gt;/&lt;path&gt;}</p>
+
+<p>
+Misalnya:
+</p>
+
+<p style="margin-left: 2em">{@code content://com.example.project:200/folder/subfolder/etc}</p>
+
+<p>Dalam URI ini, skemanya adalah {@code content}, host-nya adalah {@code com.example.project},
+port-nya adalah {@code 200}, dan path-nya adalah {@code folder/subfolder/etc}.
+</p>
+
+<p>Tiap atribut bersifat opsional dalam elemen <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a>,
+namun ada dependensi linear:</p>
+<ul>
+  <li>Jika skema tidak ditetapkan, host akan diabaikan.</li>
+  <li>Jika host tidak ditetapkan, port akan diabaikan.</li>
+  <li>Jika skema dan host tidak ditetapkan, path akan diabaikan.</li>
+</ul>
+
+<p>Bila URI dalam intent dibandingkan dengan spesifikasi URI dalam filter,
+pembandingannya hanya dengan bagian URI yang disertakan dalam filter. Misalnya:</p>
+<ul>
+  <li>Jika sebuah filter menetapkan hanya satu skema, semua URI dengan skema tersebut akan cocok
+dengan filter.</li>
+  <li>Jika sebuah filter menetapkan satu skema dan satu otoritas namun tanpa path, semua URI
+dengan skema dan otoritas yang sama akan lolos dari filter, apa pun path-nya.</li>
+  <li>Jika sebuah filter menetapkan satu skema, otoritas dan path, hanya URI dengan skema,
+otoritas, dan path sama yang bisa lolos dari filter.</li>
+</ul>
+
+<p class="note"><strong>Catatan:</strong> Spesifikasi path bisa berisi
+wildcard bintang (*) untuk hanya mencocokkan nama path secara parsial.</p>
+
+<p>Pengujian data membandingkan URI maupun tipe MIME dalam intent dengan URI
+dan tipe MIME yang ditetapkan dalam filter.  Aturannya adalah sebagai berikut:
+</p>
+
+<ol type="a">
+<li>Intent yang tidak berisi URI maupun tipe MIME hanya akan lolos
+pengujian jika filter tersebut tidak menetapkan URI atau tipe MIME apa pun.</li>
+
+<li>Intent yang berisi URI namun tidak berisi tipe MIME (baik secara eksplisit maupun tidak langsung dari
+URI) hanya akan lolos pengujian jika URI-nya cocok dengan format URI filter
+dan filternya juga tidak menetapkan tipe MIME.</li>
+
+<li>Intent yang berisi tipe MIME namun tidak berisi URI hanya akan lolos pengujian
+jika filter mencantumkan tipe MIME yang sama dan tidak menetapkan format URI.</li>
+
+<li>Intent yang berisi URI maupun tipe MIME (baik secara eksplisit maupun tidak langsung dari
+URI) hanya akan lolos pengujian bagian tipe MIME jika
+tipe tersebut cocok dengan tipe yang dicantumkan dalam filter.  Ini akan lolos pengujian bagian URI
+jika URI-nya cocok dengan URI dalam filter atau memiliki {@code content:}
+atau URI {@code file:} dan filter tidak menetapkan URI. Dengan kata lain,
+komponen dianggap mendukung data {@code content:} dan {@code file:} jika
+filternya <em>hanya</em> mencantumkan tipe MIME.</p></li>
+</ol>
+
+<p>
+Aturan terakhir ini, aturan (d), mencerminkan harapan
+bahwa komponen mampu mendapatkan data lokal dari file atau penyedia konten.
+Oleh karena itu, filter mereka mencatumkan tipe data saja dan tidak secara eksplisit
+harus menamai skema {@code content:} dan {@code file:}.
+Ini adalah kasus umum.  Elemen <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a>
+seperti berikut ini, misalnya, memberi tahu Android bahwa komponen bisa mengambil data gambar dari penyedia
+konten dan menampilkannya:
+</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;data android:mimeType="image/*" /&gt;
+    ...
+&lt;/intent-filter&gt;</pre>
+
+<p>
+Karena sebagian besar data yang tersedia dikeluarkan oleh penyedia konten, filter yang
+menetapkan tipe data namun bukan URI mungkin adalah yang paling umum.
+</p>
+
+<p>
+Konfigurasi umum yang lain adalah filter dengan skema dan tipe data.  Misalnya
+, elemen <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a>
+ seperti berikut ini akan memberi tahu Android bahwa
+komponen bisa mengambil data video dari jaringan untuk melakukan tindakan:
+</p>
+
+<pre>
+&lt;intent-filter&gt;
+    &lt;data android:scheme="http" android:type="video/*" /&gt;
+    ...
+&lt;/intent-filter&gt;</pre>
+
+
+
+<h3 id="imatch">Pencocokan intent</h3>
+
+<p>Intent dicocokkan dengan filter intent selain untuk menemukan komponen
+target yang akan diaktifkan, juga untuk menemukan sesuatu tentang rangkaian
+komponen pada perangkat.  Misalnya, aplikasi Home akan menempatkan launcher aplikasi
+dengan mencari semua aktivitas dengan filter intent yang menetapkan tindakan
+{@link android.content.Intent#ACTION_MAIN} dan
+kategori {@link android.content.Intent#CATEGORY_LAUNCHER}.</p>
+
+<p>Aplikasi Anda bisa menggunakan pencocokan intent dengan cara serupa.
+{@link android.content.pm.PackageManager} memiliki seperangkat metode {@code query...()}
+yang mengembalikan semua komponen yang bisa menerima intent tertentu, dan
+serangkaian metode{@code resolve...()} serupa yang menentukan komponen
+terbaik untuk merespons intent.  Misalnya,
+{@link android.content.pm.PackageManager#queryIntentActivities
+queryIntentActivities()} akan mengembalikan daftar semua aktivitas yang bisa melakukan
+intent yang diteruskan sebagai argumen, dan {@link
+android.content.pm.PackageManager#queryIntentServices
+queryIntentServices()} akan mengembalikan daftar layanan serupa.
+Tidak ada metode yang akan mengaktifkan komponen; mereka hanya mencantumkan komponen yang
+bisa merespons.  Ada metode serupa,
+{@link android.content.pm.PackageManager#queryBroadcastReceivers
+queryBroadcastReceivers()}, untuk penerima siaran.
+</p>
+
+
+
+

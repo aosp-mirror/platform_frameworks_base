@@ -541,6 +541,72 @@ public final class MediaCodecInfo {
          * frame rate}. Use
          * <code class=prettyprint>format.setString(MediaFormat.KEY_FRAME_RATE, null)</code>
          * to clear any existing frame rate setting in the format.
+         * <p>
+         *
+         * The following table summarizes the format keys considered by this method.
+         *
+         * <table style="width: 0%">
+         *  <thead>
+         *   <tr>
+         *    <th rowspan=3>OS Version(s)</th>
+         *    <td colspan=3>{@code MediaFormat} keys considered for</th>
+         *   </tr><tr>
+         *    <th>Audio Codecs</th>
+         *    <th>Video Codecs</th>
+         *    <th>Encoders</th>
+         *   </tr>
+         *  </thead>
+         *  <tbody>
+         *   <tr>
+         *    <td>{@link android.os.Build.VERSION_CODES#LOLLIPOP}</th>
+         *    <td rowspan=3>{@link MediaFormat#KEY_MIME}<sup>*</sup>,<br>
+         *        {@link MediaFormat#KEY_SAMPLE_RATE},<br>
+         *        {@link MediaFormat#KEY_CHANNEL_COUNT},</td>
+         *    <td>{@link MediaFormat#KEY_MIME}<sup>*</sup>,<br>
+         *        {@link CodecCapabilities#FEATURE_AdaptivePlayback}<sup>D</sup>,<br>
+         *        {@link CodecCapabilities#FEATURE_SecurePlayback}<sup>D</sup>,<br>
+         *        {@link CodecCapabilities#FEATURE_TunneledPlayback}<sup>D</sup>,<br>
+         *        {@link MediaFormat#KEY_WIDTH},<br>
+         *        {@link MediaFormat#KEY_HEIGHT},<br>
+         *        <strong>no</strong> {@code KEY_FRAME_RATE}</td>
+         *    <td rowspan=4>{@link MediaFormat#KEY_BITRATE_MODE},<br>
+         *        {@link MediaFormat#KEY_PROFILE}
+         *        (and/or {@link MediaFormat#KEY_AAC_PROFILE}<sup>~</sup>),<br>
+         *        <!-- {link MediaFormat#KEY_QUALITY},<br> -->
+         *        {@link MediaFormat#KEY_COMPLEXITY}
+         *        (and/or {@link MediaFormat#KEY_FLAC_COMPRESSION_LEVEL}<sup>~</sup>)</td>
+         *   </tr><tr>
+         *    <td>{@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1}</th>
+         *    <td rowspan=2>as above, plus<br>
+         *        {@link MediaFormat#KEY_FRAME_RATE}</td>
+         *   </tr><tr>
+         *    <td>{@link android.os.Build.VERSION_CODES#M}</th>
+         *   </tr><tr>
+         *    <td>{@link android.os.Build.VERSION_CODES#N}</th>
+         *    <td>as above, plus<br>
+         *        {@link MediaFormat#KEY_PROFILE},<br>
+         *        <!-- {link MediaFormat#KEY_MAX_BIT_RATE},<br> -->
+         *        {@link MediaFormat#KEY_BIT_RATE}</td>
+         *    <td>as above, plus<br>
+         *        {@link MediaFormat#KEY_PROFILE},<br>
+         *        {@link MediaFormat#KEY_LEVEL}<sup>+</sup>,<br>
+         *        <!-- {link MediaFormat#KEY_MAX_BIT_RATE},<br> -->
+         *        {@link MediaFormat#KEY_BIT_RATE},<br>
+         *        {@link CodecCapabilities#FEATURE_IntraRefresh}<sup>E</sup></td>
+         *   </tr>
+         *   <tr>
+         *    <td colspan=4>
+         *     <p class=note><strong>Notes:</strong><br>
+         *      *: must be specified; otherwise, method returns {@code false}.<br>
+         *      +: method does not verify that the format parameters are supported
+         *      by the specified level.<br>
+         *      D: decoders only<br>
+         *      E: encoders only<br>
+         *      ~: if both keys are provided values must match
+         *    </td>
+         *   </tr>
+         *  </tbody>
+         * </table>
          *
          * @param format media format with optional feature directives.
          * @throws IllegalArgumentException if format is not a valid media format.

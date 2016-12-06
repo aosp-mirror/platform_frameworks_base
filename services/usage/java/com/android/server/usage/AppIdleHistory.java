@@ -118,7 +118,6 @@ public class AppIdleHistory {
         } else {
             mScreenOnDuration += elapsedRealtime - mScreenOnSnapshot;
             mElapsedDuration += elapsedRealtime - mElapsedSnapshot;
-            writeScreenOnTimeLocked();
             mElapsedSnapshot = elapsedRealtime;
         }
     }
@@ -167,7 +166,7 @@ public class AppIdleHistory {
     /**
      * To be called periodically to keep track of elapsed time when app idle times are written
      */
-    public void writeElapsedTimeLocked() {
+    public void writeAppIdleDurationsLocked() {
         final long elapsedRealtime = SystemClock.elapsedRealtime();
         // Only bump up and snapshot the elapsed time. Don't change screen on duration.
         mElapsedDuration += elapsedRealtime - mElapsedSnapshot;

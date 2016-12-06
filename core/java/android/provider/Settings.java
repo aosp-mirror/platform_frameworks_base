@@ -44,7 +44,6 @@ import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.DropBoxManager;
 import android.os.IBinder;
@@ -454,6 +453,22 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_DISPLAY_SETTINGS =
             "android.settings.DISPLAY_SETTINGS";
+
+    /**
+     * Activity Action: Show settings to allow configuration of Night display.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_NIGHT_DISPLAY_SETTINGS =
+            "android.settings.NIGHT_DISPLAY_SETTINGS";
 
     /**
      * Activity Action: Show settings to allow configuration of locale.
@@ -1284,6 +1299,19 @@ public final class Settings {
             = "android.settings.VR_LISTENER_SETTINGS";
 
     /**
+     * Activity Action: Show Storage Manager settings.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_STORAGE_MANAGER_SETTINGS
+            = "android.settings.STORAGE_MANAGER_SETTINGS";
+
+    /**
      * Activity Action: Allows user to select current webview implementation.
      * <p>
      * Input: Nothing.
@@ -1564,7 +1592,7 @@ public final class Settings {
 
         private IContentProvider lazyGetProvider(ContentResolver cr) {
             IContentProvider cp = null;
-            synchronized (this) {
+            synchronized (NameValueCache.this) {
                 cp = mContentProvider;
                 if (cp == null) {
                     cp = mContentProvider = cr.acquireProvider(mUri.getAuthority());
@@ -1591,7 +1619,7 @@ public final class Settings {
         public String getStringForUser(ContentResolver cr, String name, final int userHandle) {
             final boolean isSelf = (userHandle == UserHandle.myUserId());
             if (isSelf) {
-                synchronized (this) {
+                synchronized (NameValueCache.this) {
                     if (mGenerationTracker != null) {
                         if (mGenerationTracker.isGenerationChanged()) {
                             if (DEBUG) {
@@ -1624,7 +1652,7 @@ public final class Settings {
                         args.putInt(CALL_METHOD_USER_KEY, userHandle);
                     }
                     boolean needsGenerationTracker = false;
-                    synchronized (this) {
+                    synchronized (NameValueCache.this) {
                         if (isSelf && mGenerationTracker == null) {
                             needsGenerationTracker = true;
                             if (args == null) {
@@ -1643,7 +1671,7 @@ public final class Settings {
                         String value = b.getString(Settings.NameValueTable.VALUE);
                         // Don't update our cache for reads of other users' data
                         if (isSelf) {
-                            synchronized (this) {
+                            synchronized (NameValueCache.this) {
                                 if (needsGenerationTracker) {
                                     MemoryIntArray array = b.getParcelable(
                                             CALL_METHOD_TRACK_GENERATION_KEY);
@@ -1660,7 +1688,7 @@ public final class Settings {
                                         }
                                         mGenerationTracker = new GenerationTracker(array, index,
                                                 generation, () -> {
-                                            synchronized (this) {
+                                            synchronized (NameValueCache.this) {
                                                 Log.e(TAG, "Error accessing generation"
                                                         + " tracker - removing");
                                                 if (mGenerationTracker != null) {
@@ -1701,7 +1729,7 @@ public final class Settings {
                 }
 
                 String value = c.moveToNext() ? c.getString(0) : null;
-                synchronized (this) {
+                synchronized (NameValueCache.this) {
                     mValues.put(name, value);
                 }
                 if (LOCAL_LOGV) {
@@ -1838,7 +1866,6 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.CALL_AUTO_RETRY);
             MOVED_TO_GLOBAL.add(Settings.Global.DEBUG_APP);
             MOVED_TO_GLOBAL.add(Settings.Global.WAIT_FOR_DEBUGGER);
-            MOVED_TO_GLOBAL.add(Settings.Global.SHOW_PROCESSES);
             MOVED_TO_GLOBAL.add(Settings.Global.ALWAYS_FINISH_ACTIVITIES);
             MOVED_TO_GLOBAL.add(Settings.Global.TZINFO_UPDATE_CONTENT_URL);
             MOVED_TO_GLOBAL.add(Settings.Global.TZINFO_UPDATE_METADATA_URL);
@@ -2775,7 +2802,8 @@ public final class Settings {
         /**
          * Control whether the process CPU usage meter should be shown.
          *
-         * @deprecated Use {@link Global#SHOW_PROCESSES} instead
+         * @deprecated This functionality is no longer available as of
+         * {@link android.os.Build.VERSION_CODES#N_MR1}.
          */
         @Deprecated
         public static final String SHOW_PROCESSES = Global.SHOW_PROCESSES;
@@ -5311,15 +5339,6 @@ public final class Settings {
                 "accessibility_display_daltonizer";
 
         /**
-         * Float list that specifies the color matrix to apply to
-         * the display. Valid values are defined in AccessibilityManager.
-         *
-         * @hide
-         */
-        public static final String ACCESSIBILITY_DISPLAY_COLOR_MATRIX =
-                "accessibility_display_color_matrix";
-
-        /**
          * Setting that specifies whether automatic click when the mouse pointer stops moving is
          * enabled.
          *
@@ -5352,6 +5371,13 @@ public final class Settings {
          * @hide
          */
         public static final String LONG_PRESS_TIMEOUT = "long_press_timeout";
+
+        /**
+         * The duration in milliseconds between the first tap's up event and the second tap's
+         * down event for an interaction to be considered part of the same multi-press.
+         * @hide
+         */
+        public static final String MULTI_PRESS_TIMEOUT = "multi_press_timeout";
 
         /**
          * List of the enabled print services.
@@ -5848,6 +5874,8 @@ public final class Settings {
         /**
          * If nonzero, ANRs in invisible background processes bring up a dialog.
          * Otherwise, the process will be silently killed.
+         *
+         * Also prevents ANRs and crash dialogs from being suppressed.
          * @hide
          */
         public static final String ANR_SHOW_BACKGROUND = "anr_show_background";
@@ -5924,6 +5952,36 @@ public final class Settings {
                 INCALL_POWER_BUTTON_BEHAVIOR_SCREEN_OFF;
 
         /**
+         * What happens when the user presses the Back button while in-call
+         * and the screen is on.<br/>
+         * <b>Values:</b><br/>
+         * 0 - The Back buttons does nothing different.<br/>
+         * 1 - The Back button hangs up the current call.<br/>
+         *
+         * @hide
+         */
+        public static final String INCALL_BACK_BUTTON_BEHAVIOR = "incall_back_button_behavior";
+
+        /**
+         * INCALL_BACK_BUTTON_BEHAVIOR value for no action.
+         * @hide
+         */
+        public static final int INCALL_BACK_BUTTON_BEHAVIOR_NONE = 0x0;
+
+        /**
+         * INCALL_BACK_BUTTON_BEHAVIOR value for "hang up".
+         * @hide
+         */
+        public static final int INCALL_BACK_BUTTON_BEHAVIOR_HANGUP = 0x1;
+
+        /**
+         * INCALL_POWER_BUTTON_BEHAVIOR default value.
+         * @hide
+         */
+        public static final int INCALL_BACK_BUTTON_BEHAVIOR_DEFAULT =
+                INCALL_BACK_BUTTON_BEHAVIOR_NONE;
+
+        /**
          * Whether the device should wake when the wake gesture sensor detects motion.
          * @hide
          */
@@ -5934,6 +5992,18 @@ public final class Settings {
          * @hide
          */
         public static final String DOZE_ENABLED = "doze_enabled";
+
+        /**
+         * Whether the device should pulse on pick up gesture.
+         * @hide
+         */
+        public static final String DOZE_PULSE_ON_PICK_UP = "doze_pulse_on_pick_up";
+
+        /**
+         * Whether the device should pulse on double tap gesture.
+         * @hide
+         */
+        public static final String DOZE_PULSE_ON_DOUBLE_TAP = "doze_pulse_on_double_tap";
 
         /**
          * The current night mode that has been selected by the user.  Owned
@@ -6026,6 +6096,17 @@ public final class Settings {
          * @hide
          */
         public static final String ASSIST_SCREENSHOT_ENABLED = "assist_screenshot_enabled";
+
+        /**
+         * Specifies whether the screen will show an animation if screen contents are sent to the
+         * assist application (active voice interaction service).
+         *
+         * Note that the disclosure will be forced for third-party assistants or if the device
+         * does not support disabling it.
+         *
+         * @hide
+         */
+        public static final String ASSIST_DISCLOSURE_ENABLED = "assist_disclosure_enabled";
 
         /**
          * Names of the service components that the current user has explicitly allowed to
@@ -6163,44 +6244,39 @@ public final class Settings {
                 "camera_double_tap_power_gesture_disabled";
 
         /**
-
-        /**
-         * Behavior of twilight on the device.
-         * One of {@link #TWILIGHT_MODE_LOCKED_OFF}, {@link #TWILIGHT_MODE_LOCKED_ON}
-         * or {@link #TWILIGHT_MODE_AUTO}.
+         * Whether the camera double twist gesture to flip between front and back mode should be
+         * enabled.
+         *
          * @hide
          */
-        public static final String TWILIGHT_MODE = "twilight_mode";
+        public static final String CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED =
+                "camera_double_twist_to_flip_enabled";
 
         /**
-         * Twilight mode always off.
+         * Control whether Night display is currently activated.
          * @hide
          */
-        public static final int TWILIGHT_MODE_LOCKED_OFF = 0;
+        public static final String NIGHT_DISPLAY_ACTIVATED = "night_display_activated";
 
         /**
-         * Twilight mode always on.
+         * Control whether Night display will automatically activate/deactivate.
          * @hide
          */
-        public static final int TWILIGHT_MODE_LOCKED_ON = 1;
+        public static final String NIGHT_DISPLAY_AUTO_MODE = "night_display_auto_mode";
 
         /**
-         * Twilight mode auto.
+         * Custom time when Night display is scheduled to activate.
+         * Represented as milliseconds from midnight (e.g. 79200000 == 10pm).
          * @hide
          */
-        public static final int TWILIGHT_MODE_AUTO = 2;
+        public static final String NIGHT_DISPLAY_CUSTOM_START_TIME = "night_display_custom_start_time";
 
         /**
-         * Twilight mode auto, temporarily overriden to on.
+         * Custom time when Night display is scheduled to deactivate.
+         * Represented as milliseconds from midnight (e.g. 21600000 == 6am).
          * @hide
          */
-        public static final int TWILIGHT_MODE_AUTO_OVERRIDE_OFF = 3;
-
-        /**
-         * Twilight mode auto, temporarily overriden to off.
-         * @hide
-         */
-        public static final int TWILIGHT_MODE_AUTO_OVERRIDE_ON = 4;
+        public static final String NIGHT_DISPLAY_CUSTOM_END_TIME = "night_display_custom_end_time";
 
         /**
          * Whether brightness should automatically adjust based on twilight state.
@@ -6244,12 +6320,100 @@ public final class Settings {
         public static final int VR_DISPLAY_MODE_OFF = 1;
 
         /**
+         * Whether CarrierAppUtils#disableCarrierAppsUntilPrivileged has been executed at least
+         * once.
+         *
+         * <p>This is used to ensure that we only take one pass which will disable apps that are not
+         * privileged (if any). From then on, we only want to enable apps (when a matching SIM is
+         * inserted), to avoid disabling an app that the user might actively be using.
+         *
+         * <p>Will be set to 1 once executed.
+         *
+         * @hide
+         */
+        public static final String CARRIER_APPS_HANDLED = "carrier_apps_handled";
+
+        /**
          * Whether parent user can access remote contact in managed profile.
          *
          * @hide
          */
         public static final String MANAGED_PROFILE_CONTACT_REMOTE_SEARCH =
                 "managed_profile_contact_remote_search";
+
+        /**
+         * Whether or not the automatic storage manager is enabled and should run on the device.
+         *
+         * @hide
+         */
+        public static final String AUTOMATIC_STORAGE_MANAGER_ENABLED =
+                "automatic_storage_manager_enabled";
+
+        /**
+         * How many days of information for the automatic storage manager to retain on the device.
+         *
+         * @hide
+         */
+        public static final String AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN =
+                "automatic_storage_manager_days_to_retain";
+
+        /**
+         * Default number of days of information for the automatic storage manager to retain.
+         *
+         * @hide
+         */
+        public static final int AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN_DEFAULT = 90;
+
+        /**
+         * How many bytes the automatic storage manager has cleared out.
+         *
+         * @hide
+         */
+        public static final String AUTOMATIC_STORAGE_MANAGER_BYTES_CLEARED =
+                "automatic_storage_manager_bytes_cleared";
+
+
+        /**
+         * Last run time for the automatic storage manager.
+         *
+         * @hide
+         */
+        public static final String AUTOMATIC_STORAGE_MANAGER_LAST_RUN =
+                "automatic_storage_manager_last_run";
+
+
+        /**
+         * Whether SystemUI navigation keys is enabled.
+         * @hide
+         */
+        public static final String SYSTEM_NAVIGATION_KEYS_ENABLED =
+                "system_navigation_keys_enabled";
+
+        /**
+         * Holds comma separated list of ordering of QS tiles.
+         * @hide
+         */
+        public static final String QS_TILES = "sysui_qs_tiles";
+
+        /**
+         * Whether preloaded APKs have been installed for the user.
+         * @hide
+         */
+        public static final String DEMO_USER_SETUP_COMPLETE
+                = "demo_user_setup_complete";
+
+        /**
+         * Specifies whether the web action API is enabled.
+         *
+         * @hide
+         */
+        public static final String WEB_ACTION_ENABLED = "web_action_enabled";
+
+        /**
+         * Has this pairable device been paired or upgraded from a previously paired system.
+         * @hide
+         */
+        public static final String DEVICE_PAIRED = "device_paired";
 
         /**
          * This are the settings to be backed up.
@@ -6268,7 +6432,6 @@ public final class Settings {
             USB_MASS_STORAGE_ENABLED,                           // moved to global
             ACCESSIBILITY_DISPLAY_INVERSION_ENABLED,
             ACCESSIBILITY_DISPLAY_DALTONIZER,
-            ACCESSIBILITY_DISPLAY_COLOR_MATRIX,
             ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
             ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED,
             ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
@@ -6324,7 +6487,18 @@ public final class Settings {
             PREFERRED_TTY_MODE,
             ENHANCED_VOICE_PRIVACY_ENABLED,
             TTY_MODE_ENABLED,
-            INCALL_POWER_BUTTON_BEHAVIOR
+            INCALL_POWER_BUTTON_BEHAVIOR,
+            NIGHT_DISPLAY_CUSTOM_START_TIME,
+            NIGHT_DISPLAY_CUSTOM_END_TIME,
+            NIGHT_DISPLAY_AUTO_MODE,
+            NIGHT_DISPLAY_ACTIVATED,
+            CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED,
+            CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED,
+            SYSTEM_NAVIGATION_KEYS_ENABLED,
+            QS_TILES,
+            DOZE_ENABLED,
+            DOZE_PULSE_ON_PICK_UP,
+            DOZE_PULSE_ON_DOUBLE_TAP
         };
 
         /**
@@ -7326,27 +7500,54 @@ public final class Settings {
         public static final String WEBVIEW_DATA_REDUCTION_PROXY_KEY =
                 "webview_data_reduction_proxy_key";
 
-        /**
-         * Whether or not the WebView fallback mechanism should be enabled.
-         * 0=disabled, 1=enabled.
-         * @hide
-         */
-        public static final String WEBVIEW_FALLBACK_LOGIC_ENABLED =
-                "webview_fallback_logic_enabled";
+       /**
+        * Whether or not the WebView fallback mechanism should be enabled.
+        * 0=disabled, 1=enabled.
+        * @hide
+        */
+       public static final String WEBVIEW_FALLBACK_LOGIC_ENABLED =
+               "webview_fallback_logic_enabled";
 
-        /**
-         * Name of the package used as WebView provider (if unset the provider is instead determined
-         * by the system).
-         * @hide
-         */
-        public static final String WEBVIEW_PROVIDER = "webview_provider";
+       /**
+        * Name of the package used as WebView provider (if unset the provider is instead determined
+        * by the system).
+        * @hide
+        */
+       public static final String WEBVIEW_PROVIDER = "webview_provider";
 
-        /**
-         * Developer setting to enable WebView multiprocess rendering.
-         * @hide
-         */
-        @SystemApi
-        public static final String WEBVIEW_MULTIPROCESS = "webview_multiprocess";
+       /**
+        * Developer setting to enable WebView multiprocess rendering.
+        * @hide
+        */
+       @SystemApi
+       public static final String WEBVIEW_MULTIPROCESS = "webview_multiprocess";
+
+       /**
+        * The maximum number of notifications shown in 24 hours when switching networks.
+        * @hide
+        */
+       public static final String NETWORK_SWITCH_NOTIFICATION_DAILY_LIMIT =
+              "network_switch_notification_daily_limit";
+
+       /**
+        * The minimum time in milliseconds between notifications when switching networks.
+        * @hide
+        */
+       public static final String NETWORK_SWITCH_NOTIFICATION_RATE_LIMIT_MILLIS =
+              "network_switch_notification_rate_limit_millis";
+
+       /**
+        * Whether to automatically switch away from wifi networks that lose Internet access.
+        * Only meaningful if config_networkAvoidBadWifi is set to 0, otherwise the system always
+        * avoids such networks. Valid values are:
+        *
+        * 0: Don't avoid bad wifi, don't prompt the user. Get stuck on bad wifi like it's 2013.
+        * null: Ask the user whether to switch away from bad wifi.
+        * 1: Avoid bad wifi.
+        *
+        * @hide
+        */
+       public static final String NETWORK_AVOID_BAD_WIFI = "network_avoid_bad_wifi";
 
        /**
         * Whether Wifi display is enabled/disabled
@@ -7834,10 +8035,35 @@ public final class Settings {
         /**
          * The server used for captive portal detection upon a new conection. A
          * 204 response code from the server is used for validation.
+         * TODO: remove this deprecated symbol.
          *
          * @hide
          */
         public static final String CAPTIVE_PORTAL_SERVER = "captive_portal_server";
+
+        /**
+         * The URL used for HTTPS captive portal detection upon a new connection.
+         * A 204 response code from the server is used for validation.
+         *
+         * @hide
+         */
+        public static final String CAPTIVE_PORTAL_HTTPS_URL = "captive_portal_https_url";
+
+        /**
+         * The URL used for HTTP captive portal detection upon a new connection.
+         * A 204 response code from the server is used for validation.
+         *
+         * @hide
+         */
+        public static final String CAPTIVE_PORTAL_HTTP_URL = "captive_portal_http_url";
+
+        /**
+         * The URL used for fallback HTTP captive portal detection when previous HTTP
+         * and HTTPS captive portal detection attemps did not return a conclusive answer.
+         *
+         * @hide
+         */
+        public static final String CAPTIVE_PORTAL_FALLBACK_URL = "captive_portal_fallback_url";
 
         /**
          * Whether to use HTTPS for network validation. This is enabled by default and the setting
@@ -7847,6 +8073,14 @@ public final class Settings {
          * @hide
          */
         public static final String CAPTIVE_PORTAL_USE_HTTPS = "captive_portal_use_https";
+
+        /**
+         * Which User-Agent string to use in the header of the captive portal detection probes.
+         * The User-Agent field is unset when this setting has no value (HttpUrlConnection default).
+         *
+         * @hide
+         */
+        public static final String CAPTIVE_PORTAL_USER_AGENT = "captive_portal_user_agent";
 
         /**
          * Whether network service discovery is enabled.
@@ -8269,7 +8503,11 @@ public final class Settings {
 
         /**
          * Control whether the process CPU usage meter should be shown.
+         *
+         * @deprecated This functionality is no longer available as of
+         * {@link android.os.Build.VERSION_CODES#N_MR1}.
          */
+        @Deprecated
         public static final String SHOW_PROCESSES = "show_processes";
 
         /**
@@ -8534,8 +8772,6 @@ public final class Settings {
 
         /**
          * The name of the device
-         *
-         * @hide
          */
         public static final String DEVICE_NAME = "device_name";
 
@@ -8583,13 +8819,22 @@ public final class Settings {
         public static final String WFC_IMS_ENABLED = "wfc_ims_enabled";
 
         /**
-         * WFC Mode.
+         * WFC mode on home/non-roaming network.
          * <p>
          * Type: int - 2=Wi-Fi preferred, 1=Cellular preferred, 0=Wi-Fi only
          *
          * @hide
          */
         public static final String WFC_IMS_MODE = "wfc_ims_mode";
+
+        /**
+         * WFC mode on roaming network.
+         * <p>
+         * Type: int - see {@link WFC_IMS_MODE} for values
+         *
+         * @hide
+         */
+        public static final String WFC_IMS_ROAMING_MODE = "wfc_ims_roaming_mode";
 
         /**
          * Whether WFC roaming is enabled
@@ -8617,6 +8862,34 @@ public final class Settings {
          */
         public static final String EPHEMERAL_COOKIE_MAX_SIZE_BYTES =
                 "ephemeral_cookie_max_size_bytes";
+
+        /**
+         * Toggle to enable/disable the entire ephemeral feature. By default, ephemeral is
+         * enabled. Set to zero to disable.
+         * <p>
+         * Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        public static final String ENABLE_EPHEMERAL_FEATURE = "enable_ephemeral_feature";
+
+        /**
+         * A mask applied to the ephemeral hash to generate the hash prefix.
+         * <p>
+         * Type: int
+         *
+         * @hide
+         */
+        public static final String EPHEMERAL_HASH_PREFIX_MASK = "ephemeral_hash_prefix_mask";
+
+        /**
+         * Number of hash prefixes to send during ephemeral resolution.
+         * <p>
+         * Type: int
+         *
+         * @hide
+         */
+        public static final String EPHEMERAL_HASH_PREFIX_COUNT = "ephemeral_hash_prefix_count";
 
         /**
          * The duration for caching uninstalled ephemeral apps.
@@ -8652,6 +8925,41 @@ public final class Settings {
          * @hide
          */
         public static final String SAFE_BOOT_DISALLOWED = "safe_boot_disallowed";
+
+        /**
+         * Whether this device is currently in retail demo mode. If true, device
+         * usage is severely limited.
+         * <p>
+         * Type: int (0 for false, 1 for true)
+         * @hide
+         */
+        public static final String DEVICE_DEMO_MODE = "device_demo_mode";
+
+        /**
+         * Retail mode specific settings. This is encoded as a key=value list, separated by commas.
+         * Ex: "user_inactivity_timeout_ms=30000,warning_dialog_timeout_ms=10000". The following
+         * keys are supported:
+         *
+         * <pre>
+         * user_inactivity_timeout_ms  (long)
+         * warning_dialog_timeout_ms   (long)
+         * </pre>
+         * <p>
+         * Type: string
+         *
+         * @hide
+         */
+        public static final String RETAIL_DEMO_MODE_CONSTANTS = "retail_demo_mode_constants";
+
+        /**
+         * The reason for the settings database being downgraded. This is only for
+         * troubleshooting purposes and its value should not be interpreted in any way.
+         *
+         * Type: string
+         *
+         * @hide
+         */
+        public static final String DATABASE_DOWNGRADE_REASON = "database_downgrade_reason";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
@@ -9058,6 +9366,12 @@ public final class Settings {
          * @hide
          */
         public static final String MAX_NOTIFICATION_ENQUEUE_RATE = "max_notification_enqueue_rate";
+
+        /**
+         * Whether cell is enabled/disabled
+         * @hide
+         */
+        public static final String CELL_ON = "cell_on";
     }
 
     /**

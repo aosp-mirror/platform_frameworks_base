@@ -22,7 +22,7 @@ page.tags=Activity、生命週期
 </div>
 
 <p>有些裝置設定可以在執行階段期間進行變更 (例如，螢幕方向、鍵盤可用性和語言)。
-進行這類變更時，Android 會重新啟動執行中的 
+進行這類變更時，Android 會重新啟動執行中的
 {@link android.app.Activity} (呼叫 {@link android.app.Activity#onDestroy()}，後面加上 {@link
 android.app.Activity#onCreate(Bundle) onCreate()})。
 重新啟動行為的設計是以符合新裝置設定的替代資源自動重新載入您的應用程式，以協助您的應用程式適應新的設定。

@@ -679,6 +679,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"ត្រឹមត្រូវ!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"ព្យាយាម​ម្ដង​ទៀត"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"ព្យាយាម​ម្ដង​ទៀត"</string>
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"ដោះសោលក្ខណៈពិសេស និងទិន្នន័យទាំងអស់"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"បាន​លើស​ការ​ព្យាយាម​ដោះ​សោ​តាម​ទម្រង់​មុខ"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"គ្មាន​ស៊ី​ម​កាត"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"គ្មាន​ស៊ីម​កាត​ក្នុង​កុំព្យូទ័រ​បន្ទះ។"</string>
@@ -976,7 +977,7 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"កែសម្រួល​ជាមួយ​ %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"កែសម្រួល"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"ចែករំលែក​ជាមួយ"</string>
-    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"ចែករំលែក​ជាមួយ"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"ចែករំលែក​ជាមួយ %1$s"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"ចែករំលែក"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"ផ្ញើដោយប្រើ"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"ផ្ញើដោយប្រើ %1$s"</string>
@@ -1025,8 +1026,9 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android កំពុង​ធ្វើ​បច្ចុប្បន្នភាព..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android កំពុង​ចាប់ផ្ដើម…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"កំពុងធ្វើឲ្យឧបករណ៍ផ្ទុកមានប្រសិទ្ធភាព។"</string>
-    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android កំពុងអាប់គ្រេត..."</string>
+    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"កំពុងបញ្ចប់ការអាប់ដេត Android…"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"កម្មវិធីមួយចំនួនអាចនឹងមិនដំណើរការប្រក្រតីនោះទេ រហូតដល់ការអាប់គ្រេតបញ្ចប់"</string>
+    <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g> អាប់គ្រេត…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"ធ្វើ​ឲ្យ​កម្មវិធី​ប្រសើរ​ឡើង <xliff:g id="NUMBER_0">%1$d</xliff:g> នៃ <xliff:g id="NUMBER_1">%2$d</xliff:g> ។"</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"កំពុងរៀបចំ <xliff:g id="APPNAME">%1$s</xliff:g>។"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"ចាប់ផ្ដើម​កម្មវិធី។"</string>
@@ -1077,6 +1079,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi មិនមានអ៊ិនធឺណិតនោះទេ"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ប៉ះសម្រាប់ជម្រើស"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"បានប្តូរទៅ <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"ឧបករណ៍ប្រើ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> នៅពេលដែល <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> គ្មានការតភ្ជាប់អ៊ីនធឺណិត។ អាចគិតប្រាក់លើការប្រើប្រាស់ទិន្នន័យ។"</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"បានប្តូរពី <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> ទៅ <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"ទិន្នន័យចល័ត"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"ប៊្លូធូស"</item>
+    <item msgid="5447331121797802871">"អ៊ីសឺរណិត"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"ប្រភេទបណ្តាញមិនស្គាល់"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"មិន​​អាច​តភ្ជាប់​វ៉ាយហ្វាយ"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" មាន​ការ​តភ្ជាប់​អ៊ីនធឺណិត​មិន​ល្អ។"</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"អនុញ្ញាត​ភ្ជាប់?"</string>
@@ -1154,7 +1167,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"ប៉ះដើម្បីជ្រើសភាសា និងប្លង់"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"បេក្ខជន"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"កំពុងរៀបចំ <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"កំពុងពិនិត្យរកកំហុស"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"បានរកឃើញ <xliff:g id="NAME">%s</xliff:g> ថ្មី"</string>
@@ -1233,8 +1245,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"បាន​ភ្ជាប់​ទៅ <xliff:g id="SESSION">%s</xliff:g> ។ ប៉ះ ដើម្បី​គ្រប់គ្រង​បណ្ដាញ។"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"បើក​ការ​តភ្ជាប់ VPN ជា​និច្ច..។"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"ភ្ជាប់ VPN ជា​និច្ច"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"បានផ្តាច់ VPN ដែលបើកជានិច្ច"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"បើក​កំហុស VPN ជា​និច្ច"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"ប៉ះដើម្បីកំណត់រចនាសម្ព័ន្ធ"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"ប៉ះដើម្បីដំឡើង"</string>
     <string name="upload_file" msgid="2897957172366730416">"ជ្រើស​​ឯកសារ"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"គ្មាន​ឯកសារ​បាន​ជ្រើស"</string>
     <string name="reset" msgid="2448168080964209908">"កំណត់​ឡើងវិញ"</string>
@@ -1318,7 +1331,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"ឧបករណ៍ផ្ទុក USB <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"ឧបករណ៍​ផ្ទុក​យូអេសប៊ី"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"កែសម្រួល​"</string>
-    <string name="data_usage_warning_title" msgid="1955638862122232342">"ការព្រមាន​ប្រើ​ទិន្នន័យ"</string>
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"ការព្រមានអំពីការប្រើទិន្នន័យ"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"ប៉ះដើម្បីមើលការប្រើប្រាស់ និងការកំណត់"</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"បាន​ដល់​ដែន​កំណត់​ទិន្នន័យ 2G-3G"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"បាន​ដល់​ដែន​កំណត់​ទិន្នន័យ 4G"</string>
@@ -1637,6 +1650,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"វាយបញ្ចូលឈ្មោះភាសា"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"បាន​ស្នើ"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"ភាសាទាំងអស់"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"តំបន់ទាំងអស់"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ស្វែងរក"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"របៀបការងារបានបិទ"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"អនុញ្ញាតឲ្យប្រវត្តិរូបការងារដំណើរការ ដោយរាប់បញ្ចូលទាំងកម្មវិធី ការធ្វើសមកាលកម្មផ្ទៃខាងក្រោយ និងលក្ខណៈពិសេសដែលពាក់ព័ន្ធ។"</string>
@@ -1654,7 +1668,16 @@
     <string name="unpin_target" msgid="3556545602439143442">"មិនខ្ទាស់"</string>
     <string name="app_info" msgid="6856026610594615344">"ព័ត៌មាន​កម្មវិធី"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"កំណត់ឧបករណ៍ឡើងវិញឬ?"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"ប៉ះដើម្បីកំណត់ឧបករណ៍ឡើងវិញ"</string>
+    <string name="demo_starting_message" msgid="5268556852031489931">"កំពុងចាប់ផ្តើមការបង្ហាញសាកល្បង…"</string>
+    <string name="demo_restarting_message" msgid="952118052531642451">"កំពុងកំណត់ឧបករណ៍ឡើងវិញ…"</string>
+    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"កំណត់ឧបករណ៍ឡើងវិញឬ?"</string>
+    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"អ្នកនឹងបាត់បង់ការផ្លាស់ប្តូរណាមួយ ហើយការបង្ហាញសាកល្បងនឹងចាប់ផ្តើមម្តងទៀតក្នុងរយៈពេល <xliff:g id="TIMEOUT">%1$s</xliff:g> វិនាទីទៀត…"</string>
+    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"បោះបង់"</string>
+    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"កំណត់ឡើងវិញឥឡូវនេះ"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"កំណត់ដូចចេញពីរោងចក្រឡើងវិញដើម្បីប្រើឧបករណ៍នេះដោយគ្មានការរឹតបន្តឹង"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"ប៉ះ​ ដើម្បី​​ស្វែងយល់​បន្ថែម។"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> ដែលបានបិទដំណើរការ"</string>
+    <string name="conference_call" msgid="3751093130790472426">"ការហៅជាក្រុម"</string>
 </resources>

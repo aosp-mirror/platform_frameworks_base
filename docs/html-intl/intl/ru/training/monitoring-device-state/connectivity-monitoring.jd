@@ -11,7 +11,7 @@ next.link=manifest-receivers.html
 
 @jd:body
 
-<div id="tb-wrapper"> 
+<div id="tb-wrapper">
 <div id="tb">
 
 <h2>Содержание урока</h2>
@@ -27,7 +27,7 @@ next.link=manifest-receivers.html
   <li><a href="{@docRoot}guide/components/intents-filters.html">Намерения и фильтры намерений</a>
 </ul>
 
-</div> 
+</div>
 </div>
 
 <p>Чаще всего повторяющиеся оповещения и фоновые службы используются для планового обновления приложения из Интернета, кэширования или загрузки больших объемов данных. Однако если подключение к Интернету не установлено или скорость соединения слишком низкая, выполнять загрузку не имеет смысла.</p>
@@ -35,18 +35,18 @@ next.link=manifest-receivers.html
 <p>Проверить наличие подключения к Интернету и его тип можно с помощью {@link android.net.ConnectivityManager}.</p>
 
 
-<h2 id="DetermineConnection">Определение наличия подключения к Интернету</h2> 
- 
+<h2 id="DetermineConnection">Определение наличия подключения к Интернету</h2>
+
 <p>Если подключение отсутствует, нет смысла планировать обновление из Интернета. В приведенном ниже коде показано, как использовать {@link android.net.ConnectivityManager} для отправки запросов об активной сети и определять возможности подключения.</p>
 
 <pre>ConnectivityManager cm =
         (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
- 
+
 NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
 boolean isConnected = activeNetwork.isConnectedOrConnecting();</pre>
 
 
-<h2 id="DetermineType">Определение типа подключения к Интернету</h2> 
+<h2 id="DetermineType">Определение типа подключения к Интернету</h2>
 
 <p>Также можно определить тип доступного в настоящий момент подключения к Интернету.</p>
 
@@ -59,7 +59,7 @@ boolean isConnected = activeNetwork.isConnectedOrConnecting();</pre>
 <p>Когда обновления отключены, необходимо отслеживать изменения доступных соединений, чтобы возобновить их сразу после подключения устройства к Интернету.</p>
 
 
-<h2 id="MonitorChanges">Отслеживание изменения возможностей подключения</h2> 
+<h2 id="MonitorChanges">Отслеживание изменения возможностей подключения</h2>
 
 <p>{@link android.net.ConnectivityManager} передает действие {@link android.net.ConnectivityManager#CONNECTIVITY_ACTION} ({@code "android.net.conn.CONNECTIVITY_CHANGE"}) при каждом изменении сведений о подключении. Зарегистрируйте в манифесте приемник широковещательных намерений, чтобы отслеживать эти изменения и запускать (или приостанавливать) фоновые обновления соответствующим образом.</p>
 

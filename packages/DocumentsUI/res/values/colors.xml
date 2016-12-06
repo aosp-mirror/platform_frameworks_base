@@ -15,9 +15,6 @@
 -->
 
 <resources>
-    <color name="material_grey_400">#ffbdbdbd</color>
-    <color name="material_teal_700">#ff00796b</color>
-
     <!-- This is the window background, but also the background for anything
          else that needs to manually declare a background matching the "default"
          app background (e.g. the drawer overlay). -->
@@ -26,22 +23,19 @@
     <color name="directory_background">#fff7f7f7</color>
     <color name="menu_search_background">@android:color/transparent</color>
 
-    <color name="primary_dark">@*android:color/primary_dark_material_dark</color>
-    <color name="primary">@*android:color/material_blue_grey_900</color>
-    <color name="accent">@*android:color/accent_material_light</color>
-    <color name="accent_dark">@*android:color/accent_material_dark</color>
-    <color name="action_mode">@color/material_grey_400</color>
-    <color name="status_bar_color">@*android:color/material_blue_grey_950</color>
+    <color name="primary_dark">@*android:color/primary_dark_device_default_settings</color>
+    <color name="primary">@*android:color/primary_device_default_settings</color>
+    <color name="accent">@*android:color/accent_device_default_light</color>
+    <color name="accent_dark">@*android:color/accent_device_default_dark</color>
 
     <color name="band_select_background">#88ffffff</color>
     <color name="band_select_border">#44000000</color>
 
-    <color name="item_doc_background_disabled">#fff4f4f4</color>
-
-    <color name="root_activated_color">@color/material_teal_700</color>
+    <color name="root_activated_color">@*android:color/accent_device_default_700</color>
 
     <!-- TODO: Would be nice to move this to a color-set, but not sure how to support animation -->
     <color name="item_doc_background">#fffafafa</color>
-    <color name="item_doc_background_selected">#ffe0f2f1</color>
+    <color name="item_doc_background_disabled">#fff4f4f4</color>
+    <color name="item_doc_background_selected">@*android:color/accent_device_default_50</color>
 
 </resources>

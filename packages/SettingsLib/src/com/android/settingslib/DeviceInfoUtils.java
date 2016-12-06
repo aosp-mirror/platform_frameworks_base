@@ -22,6 +22,9 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Build;
+import android.telephony.PhoneNumberUtils;
+import android.telephony.SubscriptionInfo;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -36,6 +39,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static android.content.Context.TELEPHONY_SERVICE;
 
 public class DeviceInfoUtils {
     private static final String TAG = "DeviceInfoUtils";
@@ -167,6 +172,42 @@ public class DeviceInfoUtils {
         } else {
             return null;
         }
+    }
+
+    public static String getFormattedPhoneNumber(Context context, SubscriptionInfo subscriptionInfo) {
+        String formattedNumber = null;
+        if (subscriptionInfo != null) {
+            final TelephonyManager telephonyManager =
+                    (TelephonyManager) context.getSystemService(TELEPHONY_SERVICE);
+            final String rawNumber =
+                    telephonyManager.getLine1Number(subscriptionInfo.getSubscriptionId());
+            if (!TextUtils.isEmpty(rawNumber)) {
+                formattedNumber = PhoneNumberUtils.formatNumber(rawNumber);
+            }
+
+        }
+        return formattedNumber;
+    }
+
+    public static String getFormattedPhoneNumbers(Context context,
+            List<SubscriptionInfo> subscriptionInfo) {
+        StringBuilder sb = new StringBuilder();
+        if (subscriptionInfo != null) {
+            final TelephonyManager telephonyManager =
+                    (TelephonyManager) context.getSystemService(TELEPHONY_SERVICE);
+            final int count = subscriptionInfo.size();
+            for (int i = 0; i < count; i++) {
+                final String rawNumber = telephonyManager.getLine1Number(
+                        subscriptionInfo.get(i).getSubscriptionId());
+                if (!TextUtils.isEmpty(rawNumber)) {
+                    sb.append(PhoneNumberUtils.formatNumber(rawNumber));
+                    if (i < count - 1) {
+                        sb.append("\n");
+                    }
+                }
+            }
+        }
+        return sb.toString();
     }
 
 }

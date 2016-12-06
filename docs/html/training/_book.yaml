@@ -420,6 +420,8 @@ toc:
       path: /training/basics/network-ops/connecting.html
     - title: Managing Network Usage
       path: /training/basics/network-ops/managing.html
+    - title: Optimizing Network Data Usage
+      path: /training/basics/network-ops/data-saver.html
     - title: Parsing XML Data
       path: /training/basics/network-ops/xml.html
   - title: Transferring Data Without Draining the Battery
@@ -436,16 +438,6 @@ toc:
       path: /training/efficient-downloads/redundant_redundant.html
     - title: Modifying Patterns Based on the Connectivity Type
       path: /training/efficient-downloads/connectivity_patterns.html
-  - title: Syncing to the Cloud
-    path: /training/backup/index.html
-    path_attributes:
-    - name: description
-      value: How to sync and back up app and user data to remote web services in the cloud and how to restore the data back to multiple devices.
-    section:
-    - title: Configuring Auto Backup
-      path: /training/backup/autosyncapi.html
-    - title: Using the Backup API
-      path: /training/backup/backupapi.html
   - title: Resolving Cloud Save Conflicts
     path: /training/cloudsave/conflict-res.html
     path_attributes:
@@ -693,8 +685,12 @@ toc:
         value: 再生中カードを表示する
     - title: Adding a Guided Step
       path: /training/tv/playback/guided-step.html
+    - title: Introducing First-time Users to Your App
+      path: /training/tv/playback/onboarding.html
     - title: Enabling Background Playback
       path: /training/tv/playback/options.html
+    - title: Adding Picture-in-picture
+      path: /training/tv/playback/picture-in-picture.html
   - title: Helping Users Find Content on TV
     path: /training/tv/discovery/index.html
     path_attributes:
@@ -724,6 +720,8 @@ toc:
       path: /training/tv/tif/channel.html
     - title: Managing User Interaction
       path: /training/tv/tif/ui.html
+    - title: Supporting Content Recording
+      path: /training/tv/tif/content-recording.html
   - title: TV Apps Checklist
     path: /training/tv/publishing/checklist.html
     path_attributes:
@@ -892,6 +890,11 @@ toc:
         value: 順応性のある UI フローの実装
       - name: zh-cn-lang
         value: 实施自适应用户界面流程
+  - title: Build a Responsive UI with ConstraintLayout
+    path: /training/constraint-layout/index.html
+    path_attributes:
+    - name: description
+      value: How to build a layout using ConstraintLayout and the Android Studio Layout Editor.
   - title: Adding the App Bar
     path: /training/appbar/index.html
     path_attributes:
@@ -1143,6 +1146,8 @@ toc:
         value: 维护兼容性
       - name: zh-tw-lang
         value: 維持相容性
+    - title: Selecting Colors with the Palette API
+      path: /training/material/palette-colors.html
 
 - title: Best Practices for User Input
   path: /training/best-user-input.html
@@ -1227,15 +1232,9 @@ toc:
       path: /training/scheduling/wakelock.html
     - title: Scheduling Repeating Alarms
       path: /training/scheduling/alarms.html
-
 - title: Best Practices for Performance
   path: /training/best-performance.html
   section:
-  - title: Managing Your App's Memory
-    path: /training/articles/memory.html
-    path_attributes:
-    - name: description
-      value: How to keep your app's memory footprint small in order to improve performance on a variety of mobile devices.
   - title: Performance Tips
     path: /training/articles/perf-tips.html
     path_attributes:
@@ -1267,23 +1266,6 @@ toc:
     - name: description
       value: How to minimize the amount of power your app requires by adapting to current power conditions and performing power-hungry tasks at proper intervals.
     section:
-    - title: Reducing Network Battery Drain
-      path: /training/performance/battery/network/index.html
-      section:
-      - title: Collecting Network Traffic Data
-        path: /training/performance/battery/network/gather-data.html
-      - title: Analyzing Network Traffic Data
-        path: /training/performance/battery/network/analyze-data.html
-      - title: Optimizing User-Initiated Network Use
-        path: /training/performance/battery/network/action-user-traffic.html
-      - title: Optimizing App-Initiated Network Use
-        path: /training/performance/battery/network/action-app-traffic.html
-      - title: Optimizing Server-Initiated Network Use
-        path: /training/performance/battery/network/action-server-traffic.html
-      - title: Optimizing General Network Use
-        path: /training/performance/battery/network/action-any-traffic.html
-    - title: Optimizing for Doze and App Standby
-      path: /training/monitoring-device-state/doze-standby.html
     - title: Monitoring the Battery Level and Charging State
       path: /training/monitoring-device-state/battery-monitoring.html
       path_attributes:
@@ -1363,6 +1345,11 @@ toc:
     path_attributes:
     - name: description
       value: How to ensure that your app is secure when performing network transactions.
+  - title: Network Security Configuration
+    path: /training/articles/security-config.html
+    path_attributes:
+    - name: description
+      value: Customize the behavior of your app's secure network connections safely.
   - title: Updating Your Security Provider to Protect Against SSL Exploits
     path: /training/articles/security-gms-provider.html
     path_attributes:
@@ -1373,11 +1360,31 @@ toc:
     path_attributes:
     - name: description
       value: How to use the SafetyNet service to analyze a device where your app is running and get information about its compatibility with your app.
+  - title: Checking URLs with the Safe Browsing API
+    path: /training/safebrowsing/index.html
+    path_attributes:
+    - name: description
+      value: How to use the SafetyNet service to determine if a URL is designated as a known threat.
+  - title: Verifying Hardware-backed Key Pairs with Key Attestation
+    path: /training/articles/security-key-attestation.html
+    path_attributes:
+    - name: description
+      value: How to retrieve and verify the properties of a device's hardware-backed key pair.
   - title: Enhancing Security with Device Management Policies
     path: /work/device-management-policy.html
     path_attributes:
     - name: description
       value: How to create an application that enforces security policies on devices.
+  - title: Supporting Direct Boot
+    path: /training/articles/direct-boot.html
+    path_attributes:
+    - name: description
+      value: How use device encrypted storage during Direct Boot mode.
+  - title: Using Scoped Directory Access
+    path: /training/articles/scoped-directory-access.html
+    path_attributes:
+    - name: description
+      value: How to use scoped directory access to request access to external storage directories.
 
 - title: Best Practices for Permissions & Identifiers
   path: /training/best-permissions-ids.html

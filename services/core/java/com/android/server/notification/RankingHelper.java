@@ -504,8 +504,8 @@ public class RankingHelper implements RankingConfig {
         return packageBans;
     }
 
-    public void onPackagesChanged(boolean queryReplace, String[] pkgList) {
-        if (queryReplace || pkgList == null || pkgList.length == 0
+    public void onPackagesChanged(boolean removingPackage, String[] pkgList) {
+        if (!removingPackage || pkgList == null || pkgList.length == 0
                 || mRestoredWithoutUids.isEmpty()) {
             return; // nothing to do
         }

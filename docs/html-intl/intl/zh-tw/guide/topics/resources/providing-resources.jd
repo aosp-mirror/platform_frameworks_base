@@ -510,7 +510,7 @@ xlarge} 限定詞，但裝置為一般大小螢幕)。
 
 </p>
         <p>已新增至 API 級別 4。<em></em></p>
-        
+
         <p>請參閱<a href="{@docRoot}guide/practices/screens_support.html">支援多個螢幕</a>以取得詳細資訊。
 </p>
         <p>另請查看 {@link android.content.res.Configuration#screenLayout} 設定欄位，該欄位會指出螢幕為小螢幕、一般螢幕或大螢幕。
@@ -824,7 +824,7 @@ orientation" described above.</p>
 名稱中的任何大寫只是為了方便閱讀。</li>
     <li>每個限定詞類型只支援一個值。例如，如果您想在西班牙文和法文使用相同的可繪項目檔案，則不能將目錄命名為 <em></em>
 <code>drawable-rES-rFR/</code>。
-您必須有兩個資源目錄，例如 
+您必須有兩個資源目錄，例如
 <code>drawable-rES/</code> 和 <code>drawable-rFR/</code>，這兩個目錄要包含適當的檔案。
 但是，您不需要實際將相同的檔案複製到這兩位置。您可以為資源建立別名。
 請參閱下方的
@@ -877,7 +877,7 @@ res/drawable-en-rCA/} 建立一個 {@code icon.xml} 檔案，以及建立 {@code
     android:src="@drawable/icon_ca" />
 </pre>
 
-<p>如果您將此檔案儲存成 {@code icon.xml} (在替代資源目錄中，像是 
+<p>如果您將此檔案儲存成 {@code icon.xml} (在替代資源目錄中，像是
 {@code res/drawable-en-rCA/})，系統會將它編譯成可當作 {@code R.drawable.icon} 參照的資源，但它實際上是 {@code
 R.drawable.icon_ca} 資源 (儲存在 {@code res/drawable/}) 的別名。
 </p>
@@ -1025,7 +1025,7 @@ drawable-port-ldpi/
 drawable-port-notouch-12key/
 </pre>
 <p class="note"><strong>例外狀況：</strong>螢幕像素密度是唯一沒有因為衝突而被排除的限定詞。
-即使裝置的螢幕密度是 hdpi 但仍然沒有排除 
+即使裝置的螢幕密度是 hdpi 但仍然沒有排除
 <code>drawable-port-ldpi/</code>，因為此刻每個螢幕密度都視為相符。
 如需詳細資訊，請參閱<a href="{@docRoot}guide/practices/screens_support.html">支援多個螢幕</a>文件。
 </p></li>

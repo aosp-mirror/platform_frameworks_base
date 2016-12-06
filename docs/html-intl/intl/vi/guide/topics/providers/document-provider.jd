@@ -146,7 +146,7 @@ không thay đổi giữa các lần khởi động lại thiết bị.</li>
 
 
 <li>Tài liệu có thể là một tệp mở được (có một kiểu MIME cụ thể), hoặc một
-thư mục chứa các tài liệu bổ sung (có kiểu MIME 
+thư mục chứa các tài liệu bổ sung (có kiểu MIME
 {@link android.provider.DocumentsContract.Document#MIME_TYPE_DIR}).</li>
 
 <li>Mỗi tài liệu có thể có các khả năng khác nhau như được mô tả bởi
@@ -177,7 +177,7 @@ có thể sử dụng kho lưu trữ đám mây dựa trên tag cho dữ liệu 
 trực tiếp với nhau. Một máy khách yêu cầu quyền để tương tác
 với tệp (cụ thể là quyền đọc, chỉnh sửa, tạo hoặc xóa tệp).</li>
 
-<li>Tương tác bắt đầu khi một ứng dụng (trong ví dụ này này một ứng dụng ảnh) thể hiện ý định 
+<li>Tương tác bắt đầu khi một ứng dụng (trong ví dụ này này một ứng dụng ảnh) thể hiện ý định
 {@link android.content.Intent#ACTION_OPEN_DOCUMENT} hoặc {@link android.content.Intent#ACTION_CREATE_DOCUMENT}. Ý định có thể bao gồm các bộ lọc
 để cụ thể hơn các tiêu chí&mdash;ví dụ, "cấp cho tôi tất cả tệp mở được
 có kiểu MIME là 'image'."</li>

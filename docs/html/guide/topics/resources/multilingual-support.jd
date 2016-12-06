@@ -1,0 +1,232 @@
+page.title=Language and Locale
+page.tags=androidn
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>In this document:</h2>
+<ol>
+	  <li><a href="#preN">Challenges in Resolving Language Resources</a></li>
+    <li><a href="#postN">Improvements to Resource-Resolution Strategy</a></li>
+    <li><a href="#design">Designing your App to Support Additional
+      Locales</a></li>
+
+</ol>
+
+</div>
+</div>
+
+<p>Starting in Android 7.0 (API level 24),
+Android provides enhanced support for multilingual users,
+allowing them to select multiple locales in settings. Android
+provides this capability by greatly expanding the number of locales supported
+and changing the way the system resolves resources.</p>
+
+<p>This document starts by explaining the resource resolution strategy in
+versions of Android lower than 7.0 (API level 24). Next, it describes
+the improved resource-resolution strategy in Android 7.0.
+Last, it explains how to take advantage of
+the expanded number of locales to support more multilingual users.</p>
+
+<h2 id="preN">Challenges in Resolving Language Resources</h2>
+
+<p>Prior to Android 7.0, Android could not always successfully
+ match app and system locales.</p>
+
+ <p>For example, assume that you have the following situation:</p>
+ <ul>
+ <li>Your app's default language is {@code en_US} (US English), and it also has
+  Spanish strings localized in {@code es_ES}
+  resource files.</li>
+ <li> A device is set to {@code es_MX} </li>
+
+<p>When your Java code refers to strings, the system would load
+strings from the default ({@code en_US}) resource file, even if the app has
+Spanish resources localized under {@code es_ES}. This is because when the system
+ cannot find an exact match, it continues to look for resources by stripping the
+ country code off the locale. Finally, if no match is found, the system falls
+ back to the default, which is {@code en_US}. </p>
+
+
+<p>The system would also default to {@code en_US} if the user chose a language that
+the app didn't support at all, like French. For example:</p>
+
+<p class="table-caption" id="t-resource-res">
+<strong>Table 1.</strong> Resource resolution without an exact locale match.
+</p>
+<table>
+<tbody>
+<tr>
+<th>User Settings</th>
+<th>App Resources</th>
+<th>Resource Resolution</th>
+</tr>
+<tr>
+<td>fr_CH</td>
+<td>
+default (en)<br>
+de_DE<br>
+es_ES<br>
+fr_FR<br>
+it_IT<br>
+</td>
+ <td>
+Try fr_CH =&gt; Fail<br>
+Try fr =&gt; Fail<br>
+Use default (en)
+</td>
+ </tr>
+ </tbody>
+</table>
+
+
+<p>In this example, the system displays English strings without
+knowing whether the user can understand English. This behavior is pretty common
+today.</p>
+
+<h2 id="postN">Improvements to Resource-Resolution Strategy</h2>
+<p>Android 7.0 (API level 24) brings more robust resource resolution, and
+ finds better fallbacks automatically.
+ However, to speed up resolution and improve
+ maintainability, you should store resources in the most common parent dialect.
+ For example, if you were storing Spanish resources
+ in the {@code values-es-rUS} directory
+ before, move them into the {@code values-b+es+419} directory,
+ which contains Latin American Spanish.
+ Similarly, if you have resource strings in a
+ directory named {@code values-en-rGB}, rename
+ the directory to {@code values-b+en+001} (International
+ English), because the most common
+ parent for <code>en-GB</code> strings is {@code en-001}.
+ The following examples explain why these practices improve performance and
+reliability of resource resolution.</p>
+
+<h3>Resource resolution examples</h3>
+
+<p>With versions of Android greater than 7.0, the case described in
+	<strong>Table 1</strong> is resolved differently:</p>
+
+<p class="table-caption" id="t-improved-res">
+<strong>Table 2.</strong> An improved resolution strategy for when there is no
+exact locale match.</p>
+<table>
+<tr>
+<th>User Settings</th>
+<th>App Resources</th>
+<th>Resource Resolution</th>
+</tr>
+<tr>
+<td><ol>
+<li> fr_CH</li>
+</ol>
+</td>
+<td>
+default (en)<br>
+de_DE<br>
+es_ES<br>
+fr_FR<br>
+it_IT<br>
+</td>
+<td>
+Try fr_CH =&gt; Fail<br>
+Try fr =&gt; Fail<br>
+Try children of fr =&gt; fr_FR<br>
+Use fr_FR
+</td>
+</tr>
+
+</table>
+
+
+<p>Now the user gets French resources instead of English. This example also shows
+ why you should store French strings in {@code fr} rather than {@code fr_FR}
+ for Android 7.0 or higher. Here the course of action is
+ to match the closest parent dialect,
+ making resolution faster and more predictable.</p>
+
+<p>In addition to this improved resolution logic, Android now offers more
+ user languages to choose from. Let’s try the above example again with Italian
+ specified as an additional user language, but without app support for French.  </p>
+
+<p class="table-caption" id="t-2d-choice">
+<strong>Table 3.</strong> Resource resolution when the app only matches the
+user's second-preferred locale setting.</p>
+<table>
+<tr>
+<th>User Settings</th>
+<th>App Resources</th>
+<th>Resource Resolution</th>
+
+</tr>
+<tr>
+<td><ol>
+<li> fr_CH</li>
+<li> it_CH</li>
+</ol>
+</td>
+<td>
+default (en)<br>
+de_DE<br>
+es_ES<br>
+it_IT<br>
+</td>
+<td>
+Try fr_CH =&gt; Fail<br>
+Try fr =&gt; Fail<br>
+Try children of fr =&gt; Fail<br>
+Try it_CH =&gt; Fail<br>
+Try it =&gt; Fail<br>
+Try children of it =&gt; it_IT<br>
+Use it_IT
+</td>
+
+</tr>
+
+</table>
+<p>
+  The user still gets a language they understand, even though the app doesn’t
+  support French.
+</p>
+
+
+<h2 id="design">Designing your App to Support Additional Locales</h2>
+<h3>LocaleList API</h3>
+
+<p>
+  Starting with Android 7.0 (API level 24), Android exposes the
+  {@code LocaleList.getDefault()} API
+  that lets apps directly query the list of languages a user has specified. This API
+  allows you to create more sophisticated
+  app behavior and better-optimized display of content. For example, Search
+  can show results in multiple languages based on user’s settings.  Browser apps
+  can avoid offering to translate pages in a language the user already knows,
+  and keyboard apps can auto-enable all appropriate layouts.
+</p>
+
+<h3>Formatters</h3>
+
+<p>
+  Up through Android 6.0 (API level 23), Android supported only one or
+  two locales
+  for many common languages
+  (en, es, ar, fr, ru). Because there were only a few variants of each language,
+  apps could get away with storing some numbers and dates as hard coded strings
+  in resource files.  However, with Android's broadened set of supported
+  locales, there can be
+  significant differences in formats for dates, times, currencies, and similar
+  information even within a single locale. Hard-coding your formats can produce
+  a confusing experience for end users.
+  Therefore, when developing for Android 7.0 or higher versions,
+  make sure to use formatters instead of hard coding numbers and date strings.</p>
+
+<p>
+  For example, Android 7.0 and higher includes support for
+  27 Arabic locales. These locales can share most resources,
+  but some prefer ASCII digits, while others prefer native digits. For example,
+  when you want to create a sentence with a digit variable, such as
+  "Choose a 4 digit pin", use formatters as shown below:
+</p>
+
+<pre> format(locale, "Choose a %d-digit PIN", 4)</pre>

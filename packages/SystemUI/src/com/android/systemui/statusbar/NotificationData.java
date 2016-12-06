@@ -34,7 +34,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -343,7 +342,6 @@ public class NotificationData {
                         entry.notification.setOverrideGroupKey(overrideGroupKey);
                         mGroupManager.onEntryUpdated(entry, oldSbn);
                     }
-                    //mGroupManager.onEntryBundlingUpdated(entry, getOverrideGroupKey(entry.key));
                 }
             }
         }

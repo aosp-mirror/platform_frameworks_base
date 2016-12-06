@@ -440,7 +440,7 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Hatz-marka digitala ez da osorik hauteman. Saiatu berriro."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Ezin izan da hatza-marka prozesatu. Saiatu berriro."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Hatz-marka digitalen sentsorea zikina dago. Garbi ezazu, eta saiatu berriro."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Hatza bizkorregi mugitu duzu. Saiatu berriro."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Hatza azkarregi mugitu duzu. Saiatu berriro."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Mantsoegi mugitu duzu hatza. Saiatu berriro."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
@@ -679,6 +679,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Eredua zuzena da!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Saiatu berriro"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Saiatu berriro"</string>
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"Desblokeatu eginbide eta datu guztiak erabiltzeko"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Aurpegiaren bidez desblokeatzeko saiakera muga gainditu da"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Ez dago SIM txartelik"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Ez dago SIM txartelik tabletan."</string>
@@ -742,7 +743,7 @@
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Erabiltzaile-hautatzailea"</string>
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Egoera"</string>
     <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Kamera"</string>
-    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Multimedia-kontrolak"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Multimedia kontrolatzeko aukerak"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Widgetak berrantolatzen hasi da."</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Widgetak berrantolatu dira."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> widgeta ezabatu da."</string>
@@ -1023,8 +1024,9 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android bertsio-berritzen ari da…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android abiarazten ari da…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Memoria optimizatzen."</string>
-    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android bertsioa berritzen ari gara"</string>
+    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"Android eguneratzen amaitzen…"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Aplikazio batzuek agian ez dute behar bezala funtzionatuko bertsioa berritzen amaitu arte"</string>
+    <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g> bertsio-berritzen ari da…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_0">%1$d</xliff:g>/<xliff:g id="NUMBER_1">%2$d</xliff:g> aplikazio optimizatzen."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> prestatzen."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Aplikazioak abiarazten."</string>
@@ -1073,8 +1075,19 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Hasi saioa sarean"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi konexioa ezin da Internetera konektatu"</string>
+    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi eginbidea ezin da Internetera konektatu"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Sakatu aukerak ikusteko"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> erabiltzen ari zara orain"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> Internetera konektatzeko gauza ez denean, <xliff:g id="NEW_NETWORK">%1$s</xliff:g> erabiltzen du gailuak. Agian kostuak ordaindu beharko dituzu."</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> erabiltzen ari zinen, baina <xliff:g id="NEW_NETWORK">%2$s</xliff:g> erabiltzen ari zara orain"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"datu-konexioa"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"Bluetooth"</item>
+    <item msgid="5447331121797802871">"Ethernet"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"sare mota ezezaguna"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Ezin izan da Wi-Fi sarera konektatu"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" Interneteko konexio txarra du."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Konektatzea baimendu nahi diozu?"</string>
@@ -1152,7 +1165,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Hizkuntza eta diseinua hautatzeko, sakatu hau"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"hautagaiak"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> prestatzen"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Errorerik dagoen egiaztatzen"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"<xliff:g id="NAME">%s</xliff:g> berria hauteman da"</string>
@@ -1231,8 +1243,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> saiora konektatuta. Sakatu sarea kudeatzeko."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Beti aktibatuta dagoen VPNa konektatzen…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Beti aktibatuta dagoen VPNa konektatu da"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Deskonektatu egin da beti aktibatuta dagoen VPN konexioa"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Beti aktibatuta dagoen VPN errorea"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"Sakatu konfiguratzeko"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Konfiguratzeko, sakatu hau"</string>
     <string name="upload_file" msgid="2897957172366730416">"Aukeratu fitxategia"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Ez da fitxategirik aukeratu"</string>
     <string name="reset" msgid="2448168080964209908">"Berrezarri"</string>
@@ -1316,7 +1329,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB unitatea"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB memoria"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Editatu"</string>
-    <string name="data_usage_warning_title" msgid="1955638862122232342">"Datuen erabilerari buruzko abisua"</string>
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"Datu-erabilerari buruzko abisua"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Sakatu erabilera eta ezarpenak ikusteko."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2-3 GB-ko mugara iritsi zara"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4 GB-ko mugara iritsi zara"</string>
@@ -1635,6 +1648,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"Adierazi hizkuntza"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Iradokitakoak"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Hizkuntza guztiak"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"Lurralde guztiak"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Bilaketa"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"Desaktibatuta dago laneko modua"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Baimendu laneko profilak funtzionatzea, besteak beste, aplikazioak, atzeko planoko sinkronizazioa eta erlazionatutako eginbideak."</string>
@@ -1652,7 +1666,16 @@
     <string name="unpin_target" msgid="3556545602439143442">"Kendu aingura"</string>
     <string name="app_info" msgid="6856026610594615344">"Aplikazioari buruzko informazioa"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"Gailua berrezarri nahi duzu?"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Gailua berrezartzeko, sakatu hau"</string>
+    <string name="demo_starting_message" msgid="5268556852031489931">"Demoa abiarazten…"</string>
+    <string name="demo_restarting_message" msgid="952118052531642451">"Gailua berrezartzen…"</string>
+    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Gailua berrezarri nahi duzu?"</string>
+    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Aldaketak galduko dituzu eta <xliff:g id="TIMEOUT">%1$s</xliff:g> segundo barru hasiko da berriro demoa…"</string>
+    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Utzi"</string>
+    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Berrezarri"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Berrezarri jatorrizko ezarpenak gailua murriztapenik gabe erabili ahal izateko"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Sakatu informazio gehiago lortzeko."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> desgaituta dago"</string>
+    <string name="conference_call" msgid="3751093130790472426">"Konferentzia-deia"</string>
 </resources>

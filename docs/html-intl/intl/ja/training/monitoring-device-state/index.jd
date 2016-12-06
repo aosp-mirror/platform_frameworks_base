@@ -7,10 +7,10 @@ next.link=battery-monitoring.html
 
 @jd:body
 
-<div id="tb-wrapper"> 
+<div id="tb-wrapper">
 <div id="tb">
 
-<h2>依存関係と前提条件</h2> 
+<h2>依存関係と前提条件</h2>
 <ul>
   <li>Android 2.0（API レベル 5）以上</li>
   <li>「<a href="{@docRoot}guide/components/intents-filters.html">インテントとインテント フィルタ</a>」を読み終えていること</li>
@@ -21,19 +21,19 @@ next.link=battery-monitoring.html
   <li><a href="{@docRoot}guide/components/services.html">サービス</a>
 </ul>
 
-</div> 
+</div>
 </div>
 
 <p>アプリを開発するときは、ホスト端末の電池消費量への影響を抑えるよう心がける必要があります。このクラスを修了すると、開発するアプリの中でホスト端末の状態を監視し、それに基づいて機能や動作を変更することができるようになります。</p>
 
 <p>接続が失われたときはバックグラウンド サービスの更新を停止する、電池残量が低下したときは更新の頻度を下げるといった対策を講じることにより、ユーザー エクスペリエンスを損なうことなく、アプリが電池消費量に及ぼす影響を最小限に抑えることができます。</p>
 
-<h2>レッスン</h2> 
- 
+<h2>レッスン</h2>
+
 <!-- Create a list of the lessons in this class along with a short description of each lesson.
 These should be short and to the point. It should be clear from reading the summary whether someone
-will want to jump to a lesson or not.--> 
- 
+will want to jump to a lesson or not.-->
+
 <dl>
   <dt><b><a href="battery-monitoring.html">電池残量と充電状態の監視</a></b></dt>
   <dd>アプリの更新頻度を変更するために現在の電池残量や充電状態の変化を特定および監視する方法を学習します。</dd>
@@ -46,4 +46,4 @@ will want to jump to a lesson or not.-->
 
   <dt><b><a href="manifest-receivers.html">オンデマンドでのブロードキャスト レシーバ操作</a></b></dt>
   <dd>マニフェスト内で宣言したブロードキャスト レシーバのオンとオフを実行時に切り替えます。端末の状態に応じて、不要なレシーバを無効にすることができます。効率を上げるために、状態変化レシーバのオンとオフを切り替える方法や、端末が特定の状態になるまでアクションを延期する方法を学習します。</dd>
-</dl> 
+</dl>

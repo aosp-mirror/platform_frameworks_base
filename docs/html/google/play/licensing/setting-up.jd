@@ -181,12 +181,12 @@ these steps: </p>
 <ol>
   <li>Launch the Android SDK Manager, available under the Android Studio Tools menu
 (<strong>Tools > Android > SDK Manager</strong>) or by executing
-{@code &lt;sdk>/tools/android sdk}.</li>
+{@code <sdk>/tools/android sdk}.</li>
   <li>Select and download <strong>Google APIs</strong> for the Android version you'd like to target
 (must be Android 2.2 or higher).</li>
   <li>When the download is complete, open the AVD Manager, available under the Android Studio
 Tools menu (<strong>Tools > Android > AVD Manager</strong>) or by executing
-{@code &lt;sdk>/tools/android avd}.</li>
+{@code <sdk>/tools/android avd}.</li>
   <li>In the <em>Android Virtual Device Manager</em> window, select
 <strong>+ Create Virtual Device</strong> to set the configuration details for the new AVD. </li>
   <li>In the <em>Virtual Device Configuration</em> window, select device hardware, then
@@ -317,7 +317,7 @@ project as a new module.</p>
 <strong>File > New > Import Module</strong>.</li>
 <li>In the <em>New Module</em> window, in <em>Source directory</em>, enter the LVL's
 <code>library</code> directory (the directory containing the library's AndroidManifest.xml file)
-as the project root ({@code &lt;sdk>/extras/google/play_licensing/library/AndroidManifest.xml}),
+as the project root ({@code <sdk>/extras/google/play_licensing/library/AndroidManifest.xml}),
 then select <strong>Next</strong>.</li>
 <li>Select <strong>Finish</strong> to import the library module.</li>
 </ol>

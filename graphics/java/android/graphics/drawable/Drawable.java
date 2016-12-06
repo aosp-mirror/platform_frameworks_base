@@ -109,6 +109,9 @@ import java.util.Collection;
  *     <li> <b>Nine Patch</b>: an extension to the PNG format allows it to
  *     specify information about how to stretch it and place things inside of
  *     it.
+ *     <li><b>Vector</b>: a drawable defined in an XML file as a set of points,
+ *     lines, and curves along with its associated color information. This type
+ *     of drawable can be scaled without loss of display quality.
  *     <li> <b>Shape</b>: contains simple drawing commands instead of a raw
  *     bitmap, allowing it to resize better in some cases.
  *     <li> <b>Layers</b>: a compound drawable, which draws multiple underlying
@@ -1422,9 +1425,10 @@ public abstract class Drawable {
     /**
      * Obtains styled attributes from the theme, if available, or unstyled
      * resources if the theme is null.
+     * @hide
      */
-    static @NonNull TypedArray obtainAttributes(@NonNull Resources res, @Nullable Theme theme,
-            @NonNull AttributeSet set, @NonNull int[] attrs) {
+    protected static @NonNull TypedArray obtainAttributes(@NonNull Resources res,
+            @Nullable Theme theme, @NonNull AttributeSet set, @NonNull int[] attrs) {
         if (theme == null) {
             return res.obtainAttributes(set, attrs);
         }

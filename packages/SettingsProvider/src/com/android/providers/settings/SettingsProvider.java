@@ -114,7 +114,7 @@ import java.util.regex.Pattern;
 public class SettingsProvider extends ContentProvider {
     private static final boolean DEBUG = false;
 
-    private static final boolean DROP_DATABASE_ON_MIGRATION = !Build.IS_DEBUGGABLE;
+    private static final boolean DROP_DATABASE_ON_MIGRATION = true;
 
     private static final String LOG_TAG = "SettingsProvider";
 
@@ -544,7 +544,7 @@ public class SettingsProvider extends ContentProvider {
                 final int userCount = users.size();
                 for (int i = 0; i < userCount; i++) {
                     UserInfo user = users.get(i);
-                    dumpForUser(user.id, pw);
+                    dumpForUserLocked(user.id, pw);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -552,12 +552,16 @@ public class SettingsProvider extends ContentProvider {
         }
     }
 
-    private void dumpForUser(int userId, PrintWriter pw) {
+    private void dumpForUserLocked(int userId, PrintWriter pw) {
         if (userId == UserHandle.USER_SYSTEM) {
             pw.println("GLOBAL SETTINGS (user " + userId + ")");
             Cursor globalCursor = getAllGlobalSettings(ALL_COLUMNS);
             dumpSettings(globalCursor, pw);
             pw.println();
+
+            SettingsState globalSettings = mSettingsRegistry.getSettingsLocked(
+                    SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM);
+            globalSettings.dumpHistoricalOperations(pw);
         }
 
         pw.println("SECURE SETTINGS (user " + userId + ")");
@@ -565,10 +569,18 @@ public class SettingsProvider extends ContentProvider {
         dumpSettings(secureCursor, pw);
         pw.println();
 
+        SettingsState secureSettings = mSettingsRegistry.getSettingsLocked(
+                SETTINGS_TYPE_SECURE, userId);
+        secureSettings.dumpHistoricalOperations(pw);
+
         pw.println("SYSTEM SETTINGS (user " + userId + ")");
         Cursor systemCursor = getAllSystemSettings(userId, ALL_COLUMNS);
         dumpSettings(systemCursor, pw);
         pw.println();
+
+        SettingsState systemSettings = mSettingsRegistry.getSettingsLocked(
+                SETTINGS_TYPE_SYSTEM, userId);
+        systemSettings.dumpHistoricalOperations(pw);
     }
 
     private void dumpSettings(Cursor cursor, PrintWriter pw) {
@@ -799,7 +811,8 @@ public class SettingsProvider extends ContentProvider {
 
         // If this is a setting that is currently restricted for this user, do not allow
         // unrestricting changes.
-        if (isGlobalOrSecureSettingRestrictedForUser(name, callingUserId, value)) {
+        if (isGlobalOrSecureSettingRestrictedForUser(name, callingUserId, value,
+                Binder.getCallingUid())) {
             return false;
         }
 
@@ -930,7 +943,8 @@ public class SettingsProvider extends ContentProvider {
 
         // If this is a setting that is currently restricted for this user, do not allow
         // unrestricting changes.
-        if (isGlobalOrSecureSettingRestrictedForUser(name, callingUserId, value)) {
+        if (isGlobalOrSecureSettingRestrictedForUser(name, callingUserId, value,
+                Binder.getCallingUid())) {
             return false;
         }
 
@@ -1153,7 +1167,7 @@ public class SettingsProvider extends ContentProvider {
      * @return true if the change is prohibited, false if the change is allowed.
      */
     private boolean isGlobalOrSecureSettingRestrictedForUser(String setting, int userId,
-            String value) {
+            String value, int callingUid) {
         String restriction;
         switch (setting) {
             case Settings.Secure.LOCATION_MODE:
@@ -1189,6 +1203,20 @@ public class SettingsProvider extends ContentProvider {
 
             case Settings.Global.PREFERRED_NETWORK_MODE:
                 restriction = UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS;
+                break;
+
+            case Settings.Secure.ALWAYS_ON_VPN_APP:
+            case Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN:
+                // Whitelist system uid (ConnectivityService) and root uid to change always-on vpn
+                if (callingUid == Process.SYSTEM_UID || callingUid == Process.ROOT_UID) {
+                    return false;
+                }
+                restriction = UserManager.DISALLOW_CONFIG_VPN;
+                break;
+
+            case Settings.Global.SAFE_BOOT_DISALLOWED:
+                if ("1".equals(value)) return false;
+                restriction = UserManager.DISALLOW_SAFE_BOOT;
                 break;
 
             default:
@@ -2074,7 +2102,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 127;
+            private static final int SETTINGS_VERSION = 131;
 
             private final int mUserId;
 
@@ -2114,6 +2142,12 @@ public class SettingsProvider extends ContentProvider {
 
                     // Now upgrade should work fine.
                     onUpgradeLocked(mUserId, oldVersion, newVersion);
+
+                    // Make a note what happened, so we don't wonder why data was lost
+                    String reason = "Settings rebuilt! Current version: "
+                            + curVersion + " while expected: " + newVersion;
+                    getGlobalSettingsLocked().insertSettingLocked(
+                            Settings.Global.DATABASE_DOWNGRADE_REASON, reason, "android");
                 }
 
                 // Set the global settings version if owner.
@@ -2327,6 +2361,84 @@ public class SettingsProvider extends ContentProvider {
                         }
                     }
                     currentVersion = 127;
+                }
+
+                if (currentVersion == 127) {
+                    // version 127 is no longer used.
+                    currentVersion = 128;
+                }
+
+                if (currentVersion == 128) {
+                    // Version 128: Allow OEMs to grant DND access to default apps. Note that
+                    // the new apps are appended to the list of already approved apps.
+                    final SettingsState systemSecureSettings =
+                            getSecureSettingsLocked(userId);
+
+                    final Setting policyAccess = systemSecureSettings.getSettingLocked(
+                            Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES);
+                    String defaultPolicyAccess = getContext().getResources().getString(
+                            com.android.internal.R.string.config_defaultDndAccessPackages);
+                    if (!TextUtils.isEmpty(defaultPolicyAccess)) {
+                        if (policyAccess.isNull()) {
+                            systemSecureSettings.insertSettingLocked(
+                                    Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES,
+                                    defaultPolicyAccess,
+                                    SettingsState.SYSTEM_PACKAGE_NAME);
+                        } else {
+                            StringBuilder currentSetting =
+                                    new StringBuilder(policyAccess.getValue());
+                            currentSetting.append(":");
+                            currentSetting.append(defaultPolicyAccess);
+                            systemSecureSettings.updateSettingLocked(
+                                    Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES,
+                                    currentSetting.toString(),
+                                    SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+                    }
+
+                    currentVersion = 129;
+                }
+
+                if (currentVersion == 129) {
+                    // default longpress timeout changed from 500 to 400. If unchanged from the old
+                    // default, update to the new default.
+                    final SettingsState systemSecureSettings =
+                            getSecureSettingsLocked(userId);
+                    final String oldValue = systemSecureSettings.getSettingLocked(
+                            Settings.Secure.LONG_PRESS_TIMEOUT).getValue();
+                    if (TextUtils.equals("500", oldValue)) {
+                        systemSecureSettings.insertSettingLocked(
+                                Settings.Secure.LONG_PRESS_TIMEOUT,
+                                String.valueOf(getContext().getResources().getInteger(
+                                        R.integer.def_long_press_timeout_millis)),
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 130;
+                }
+
+                if (currentVersion == 130) {
+                    // Initialize new multi-press timeout to default value
+                    final SettingsState systemSecureSettings = getSecureSettingsLocked(userId);
+                    final String oldValue = systemSecureSettings.getSettingLocked(
+                            Settings.Secure.MULTI_PRESS_TIMEOUT).getValue();
+                    if (TextUtils.equals(null, oldValue)) {
+                        systemSecureSettings.insertSettingLocked(
+                                Settings.Secure.MULTI_PRESS_TIMEOUT,
+                                String.valueOf(getContext().getResources().getInteger(
+                                        R.integer.def_multi_press_timeout_millis)),
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+
+                    currentVersion = 131;
+                }
+
+                if (currentVersion != newVersion) {
+                    Slog.wtf("SettingsProvider", "warning: upgrading settings database to version "
+                            + newVersion + " left it at "
+                            + currentVersion + " instead; this is probably a bug", new Throwable());
+                    if (DEBUG) {
+                        throw new RuntimeException("db upgrade error");
+                    }
                 }
 
                 // vXXX: Add new settings above this point.

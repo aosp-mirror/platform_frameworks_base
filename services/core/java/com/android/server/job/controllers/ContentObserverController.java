@@ -16,6 +16,7 @@
 
 package com.android.server.job.controllers;
 
+import android.annotation.UserIdInt;
 import android.app.job.JobInfo;
 import android.content.Context;
 import android.database.ContentObserver;
@@ -23,6 +24,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -35,6 +37,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Controller for monitoring changes to content URIs through a ContentObserver.
@@ -59,7 +62,11 @@ public class ContentObserverController extends StateController {
     private static volatile ContentObserverController sController;
 
     final private List<JobStatus> mTrackedTasks = new ArrayList<JobStatus>();
-    ArrayMap<JobInfo.TriggerContentUri, ObserverInstance> mObservers = new ArrayMap<>();
+    /**
+     * Per-userid {@link JobInfo.TriggerContentUri} keyed ContentObserver cache.
+     */
+    SparseArray<ArrayMap<JobInfo.TriggerContentUri, ObserverInstance>> mObservers =
+            new SparseArray<>();
     final Handler mHandler;
 
     public static ContentObserverController get(JobSchedulerService taskManagerService) {
@@ -203,18 +210,21 @@ public class ContentObserverController extends StateController {
 
     final class ObserverInstance extends ContentObserver {
         final JobInfo.TriggerContentUri mUri;
+        final @UserIdInt int mUserId;
         final ArraySet<JobInstance> mJobs = new ArraySet<>();
 
-        public ObserverInstance(Handler handler, JobInfo.TriggerContentUri uri) {
+        public ObserverInstance(Handler handler, JobInfo.TriggerContentUri uri,
+                @UserIdInt int userId) {
             super(handler);
             mUri = uri;
+            mUserId = userId;
         }
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             if (DEBUG) {
                 Slog.i(TAG, "onChange(self=" + selfChange + ") for " + uri
-                        + " when mUri=" + mUri);
+                        + " when mUri=" + mUri + " mUserId=" + mUserId);
             }
             synchronized (mLock) {
                 final int N = mJobs.size();
@@ -258,27 +268,38 @@ public class ContentObserverController extends StateController {
 
         boolean mTriggerPending;
 
+        // This constructor must be called with the master job scheduler lock held.
         JobInstance(JobStatus jobStatus) {
             mJobStatus = jobStatus;
             mExecuteRunner = new TriggerRunnable(this);
             mTimeoutRunner = new TriggerRunnable(this);
             final JobInfo.TriggerContentUri[] uris = jobStatus.getJob().getTriggerContentUris();
+            final int sourceUserId = jobStatus.getSourceUserId();
+            ArrayMap<JobInfo.TriggerContentUri, ObserverInstance> observersOfUser =
+                    mObservers.get(sourceUserId);
+            if (observersOfUser == null) {
+                observersOfUser = new ArrayMap<>();
+                mObservers.put(sourceUserId, observersOfUser);
+            }
             if (uris != null) {
                 for (JobInfo.TriggerContentUri uri : uris) {
-                    ObserverInstance obs = mObservers.get(uri);
+                    ObserverInstance obs = observersOfUser.get(uri);
                     if (obs == null) {
-                        obs = new ObserverInstance(mHandler, uri);
-                        mObservers.put(uri, obs);
+                        obs = new ObserverInstance(mHandler, uri, jobStatus.getSourceUserId());
+                        observersOfUser.put(uri, obs);
                         final boolean andDescendants = (uri.getFlags() &
                                 JobInfo.TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS) != 0;
                         if (DEBUG) {
                             Slog.v(TAG, "New observer " + obs + " for " + uri.getUri()
-                                    + " andDescendants=" + andDescendants);
+                                    + " andDescendants=" + andDescendants
+                                    + " sourceUserId=" + sourceUserId);
                         }
                         mContext.getContentResolver().registerContentObserver(
                                 uri.getUri(),
                                 andDescendants,
-                                obs);
+                                obs,
+                                sourceUserId
+                        );
                     } else {
                         if (DEBUG) {
                             final boolean andDescendants = (uri.getFlags() &
@@ -342,7 +363,11 @@ public class ContentObserverController extends StateController {
                         Slog.i(TAG, "Unregistering observer " + obs + " for " + obs.mUri.getUri());
                     }
                     mContext.getContentResolver().unregisterContentObserver(obs);
-                    mObservers.remove(obs.mUri);
+                    ArrayMap<JobInfo.TriggerContentUri, ObserverInstance> observerOfUser =
+                            mObservers.get(obs.mUserId);
+                    if (observerOfUser !=  null) {
+                        observerOfUser.remove(obs.mUri);
+                    }
                 }
             }
         }
@@ -366,60 +391,66 @@ public class ContentObserverController extends StateController {
         int N = mObservers.size();
         if (N > 0) {
             pw.println("  Observers:");
-            for (int i = 0; i < N; i++) {
-                ObserverInstance obs = mObservers.valueAt(i);
-                int M = obs.mJobs.size();
-                boolean shouldDump = false;
-                for (int j=0; j<M; j++) {
-                    JobInstance inst = obs.mJobs.valueAt(j);
-                    if (inst.mJobStatus.shouldDump(filterUid)) {
-                        shouldDump = true;
-                        break;
+            for (int userIdx = 0; userIdx < N; userIdx++) {
+                final int userId = mObservers.keyAt(userIdx);
+                ArrayMap<JobInfo.TriggerContentUri, ObserverInstance> observersOfUser =
+                        mObservers.get(userId);
+                int numbOfObserversPerUser = observersOfUser.size();
+                for (int observerIdx = 0 ; observerIdx < numbOfObserversPerUser; observerIdx++) {
+                    ObserverInstance obs = observersOfUser.valueAt(observerIdx);
+                    int M = obs.mJobs.size();
+                    boolean shouldDump = false;
+                    for (int j = 0; j < M; j++) {
+                        JobInstance inst = obs.mJobs.valueAt(j);
+                        if (inst.mJobStatus.shouldDump(filterUid)) {
+                            shouldDump = true;
+                            break;
+                        }
                     }
-                }
-                if (!shouldDump) {
-                    continue;
-                }
-                pw.print("    ");
-                JobInfo.TriggerContentUri trigger = mObservers.keyAt(i);
-                pw.print(trigger.getUri());
-                pw.print(" 0x");
-                pw.print(Integer.toHexString(trigger.getFlags()));
-                pw.print(" (");
-                pw.print(System.identityHashCode(obs));
-                pw.println("):");
-                pw.println("      Jobs:");
-                for (int j=0; j<M; j++) {
-                    JobInstance inst = obs.mJobs.valueAt(j);
-                    pw.print("        #");
-                    inst.mJobStatus.printUniqueId(pw);
-                    pw.print(" from ");
-                    UserHandle.formatUid(pw, inst.mJobStatus.getSourceUid());
-                    if (inst.mChangedAuthorities != null) {
-                        pw.println(":");
-                        if (inst.mTriggerPending) {
-                            pw.print("          Trigger pending: update=");
-                            TimeUtils.formatDuration(
-                                    inst.mJobStatus.getTriggerContentUpdateDelay(), pw);
-                            pw.print(", max=");
-                            TimeUtils.formatDuration(
-                                    inst.mJobStatus.getTriggerContentMaxDelay(), pw);
+                    if (!shouldDump) {
+                        continue;
+                    }
+                    pw.print("    ");
+                    JobInfo.TriggerContentUri trigger = observersOfUser.keyAt(observerIdx);
+                    pw.print(trigger.getUri());
+                    pw.print(" 0x");
+                    pw.print(Integer.toHexString(trigger.getFlags()));
+                    pw.print(" (");
+                    pw.print(System.identityHashCode(obs));
+                    pw.println("):");
+                    pw.println("      Jobs:");
+                    for (int j = 0; j < M; j++) {
+                        JobInstance inst = obs.mJobs.valueAt(j);
+                        pw.print("        #");
+                        inst.mJobStatus.printUniqueId(pw);
+                        pw.print(" from ");
+                        UserHandle.formatUid(pw, inst.mJobStatus.getSourceUid());
+                        if (inst.mChangedAuthorities != null) {
+                            pw.println(":");
+                            if (inst.mTriggerPending) {
+                                pw.print("          Trigger pending: update=");
+                                TimeUtils.formatDuration(
+                                        inst.mJobStatus.getTriggerContentUpdateDelay(), pw);
+                                pw.print(", max=");
+                                TimeUtils.formatDuration(
+                                        inst.mJobStatus.getTriggerContentMaxDelay(), pw);
+                                pw.println();
+                            }
+                            pw.println("          Changed Authorities:");
+                            for (int k = 0; k < inst.mChangedAuthorities.size(); k++) {
+                                pw.print("          ");
+                                pw.println(inst.mChangedAuthorities.valueAt(k));
+                            }
+                            if (inst.mChangedUris != null) {
+                                pw.println("          Changed URIs:");
+                                for (int k = 0; k < inst.mChangedUris.size(); k++) {
+                                    pw.print("          ");
+                                    pw.println(inst.mChangedUris.valueAt(k));
+                                }
+                            }
+                        } else {
                             pw.println();
                         }
-                        pw.println("          Changed Authorities:");
-                        for (int k=0; k<inst.mChangedAuthorities.size(); k++) {
-                            pw.print("          ");
-                            pw.println(inst.mChangedAuthorities.valueAt(k));
-                        }
-                        if (inst.mChangedUris != null) {
-                            pw.println("          Changed URIs:");
-                            for (int k = 0; k<inst.mChangedUris.size(); k++) {
-                                pw.print("          ");
-                                pw.println(inst.mChangedUris.valueAt(k));
-                            }
-                        }
-                    } else {
-                        pw.println();
                     }
                 }
             }

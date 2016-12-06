@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="2783841764617238354">"দস্তাবেজগুলি"</string>
+    <string name="app_label" msgid="1551050262492398204">"ফাইল"</string>
     <string name="downloads_label" msgid="959113951084633612">"ডাউনলোডগুলি"</string>
     <string name="title_open" msgid="4353228937663917801">"এখান থেকে খুলুন"</string>
     <string name="title_save" msgid="2433679664882857999">"এতে সংরক্ষণ করুন"</string>

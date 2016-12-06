@@ -16,6 +16,13 @@
 
 package android.hardware.location;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -53,10 +60,14 @@ public class ContextHubService extends IContextHubService.Stub {
     private static final int PRE_LOADED_APP_MEM_REQ = 0;
 
     private static final int MSG_HEADER_SIZE = 4;
-    private static final int MSG_FIELD_TYPE = 0;
-    private static final int MSG_FIELD_VERSION = 1;
-    private static final int MSG_FIELD_HUB_HANDLE = 2;
-    private static final int MSG_FIELD_APP_INSTANCE = 3;
+    private static final int HEADER_FIELD_MSG_TYPE = 0;
+    private static final int HEADER_FIELD_MSG_VERSION = 1;
+    private static final int HEADER_FIELD_HUB_HANDLE = 2;
+    private static final int HEADER_FIELD_APP_INSTANCE = 3;
+
+    private static final int HEADER_FIELD_LOAD_APP_ID_LO = MSG_HEADER_SIZE;
+    private static final int HEADER_FIELD_LOAD_APP_ID_HI = MSG_HEADER_SIZE + 1;
+    private static final int MSG_LOAD_APP_HEADER_SIZE = MSG_HEADER_SIZE + 2;
 
     private static final int OS_APP_INSTANCE = -1;
 
@@ -137,6 +148,36 @@ public class ContextHubService extends IContextHubService.Stub {
         return mContextHubInfo[contextHubHandle];
     }
 
+    // TODO(b/30808791): Remove this when NanoApp's API is correctly treating
+    // app IDs as 64-bits.
+    private static long parseAppId(NanoApp app) {
+        // NOTE: If this shifting seems odd (since it's actually "ONAN"), note
+        //     that it matches how this is defined in context_hub.h.
+        final int HEADER_MAGIC =
+            (((int)'N' <<  0) |
+             ((int)'A' <<  8) |
+             ((int)'N' << 16) |
+             ((int)'O' << 24));
+        final int HEADER_MAGIC_OFFSET = 4;
+        final int HEADER_APP_ID_OFFSET = 8;
+
+        ByteBuffer header = ByteBuffer.wrap(app.getAppBinary())
+            .order(ByteOrder.LITTLE_ENDIAN);
+
+        try {
+            if (header.getInt(HEADER_MAGIC_OFFSET) == HEADER_MAGIC) {
+                // This is a legitimate nanoapp header.  Let's grab the app ID.
+                return header.getLong(HEADER_APP_ID_OFFSET);
+            }
+        } catch (IndexOutOfBoundsException e) {
+            // The header is undersized.  We'll fall through to our code
+            // path below, which handles being unable to parse the header.
+        }
+        // We failed to parse the header.  Even through it's probably wrong,
+        // let's give NanoApp's idea of our ID.  This is at least consistent.
+        return app.getAppId();
+    }
+
     @Override
     public int loadNanoApp(int contextHubHandle, NanoApp app) throws RemoteException {
         checkPermissions();
@@ -146,15 +187,32 @@ public class ContextHubService extends IContextHubService.Stub {
             return -1;
         }
 
-        int[] msgHeader = new int[MSG_HEADER_SIZE];
-        msgHeader[MSG_FIELD_HUB_HANDLE] = contextHubHandle;
-        msgHeader[MSG_FIELD_APP_INSTANCE] = OS_APP_INSTANCE;
-        msgHeader[MSG_FIELD_VERSION] = 0;
-        msgHeader[MSG_FIELD_TYPE] = MSG_LOAD_NANO_APP;
+        int[] msgHeader = new int[MSG_LOAD_APP_HEADER_SIZE];
+        msgHeader[HEADER_FIELD_HUB_HANDLE] = contextHubHandle;
+        msgHeader[HEADER_FIELD_APP_INSTANCE] = OS_APP_INSTANCE;
+        msgHeader[HEADER_FIELD_MSG_VERSION] = 0;
+        msgHeader[HEADER_FIELD_MSG_TYPE] = MSG_LOAD_NANO_APP;
 
-        if (nativeSendMessage(msgHeader, app.getAppBinary()) != 0) {
+        long appId = app.getAppId();
+        // TODO(b/30808791): Remove this hack when the NanoApp API is fixed,
+        //     and getAppId() returns a 'long' instead of an 'int'.
+        if ((appId >> 32) != 0) {
+            // We're unlikely to notice this warning, but at least
+            // we can avoid running our hack logic.
+            Log.w(TAG, "Code has not been updated since API fix.");
+        } else {
+            appId = parseAppId(app);
+        }
+
+        msgHeader[HEADER_FIELD_LOAD_APP_ID_LO] = (int)(appId & 0xFFFFFFFF);
+        msgHeader[HEADER_FIELD_LOAD_APP_ID_HI] = (int)((appId >> 32) & 0xFFFFFFFF);
+
+        int errVal = nativeSendMessage(msgHeader, app.getAppBinary());
+        if (errVal != 0) {
+            Log.e(TAG, "Send Message returns error" + contextHubHandle);
             return -1;
         }
+
         // Do not add an entry to mNanoAppInstance Hash yet. The HAL may reject the app
         return 0;
     }
@@ -169,12 +227,14 @@ public class ContextHubService extends IContextHubService.Stub {
 
         // Call Native interface here
         int[] msgHeader = new int[MSG_HEADER_SIZE];
-        msgHeader[MSG_FIELD_HUB_HANDLE] = ANY_HUB;
-        msgHeader[MSG_FIELD_APP_INSTANCE] = OS_APP_INSTANCE;
-        msgHeader[MSG_FIELD_VERSION] = 0;
-        msgHeader[MSG_FIELD_TYPE] = MSG_UNLOAD_NANO_APP;
+        msgHeader[HEADER_FIELD_HUB_HANDLE] = ANY_HUB;
+        msgHeader[HEADER_FIELD_APP_INSTANCE] = nanoAppInstanceHandle;
+        msgHeader[HEADER_FIELD_MSG_VERSION] = 0;
+        msgHeader[HEADER_FIELD_MSG_TYPE] = MSG_UNLOAD_NANO_APP;
 
-        if (nativeSendMessage(msgHeader, null) != 0) {
+        byte msg[] = new byte[0];
+
+        if (nativeSendMessage(msgHeader, msg) != 0) {
             return -1;
         }
 
@@ -222,10 +282,10 @@ public class ContextHubService extends IContextHubService.Stub {
         checkPermissions();
 
         int[] msgHeader = new int[MSG_HEADER_SIZE];
-        msgHeader[MSG_FIELD_HUB_HANDLE] = hubHandle;
-        msgHeader[MSG_FIELD_APP_INSTANCE] = nanoAppHandle;
-        msgHeader[MSG_FIELD_VERSION] = msg.getVersion();
-        msgHeader[MSG_FIELD_TYPE] = msg.getMsgType();
+        msgHeader[HEADER_FIELD_HUB_HANDLE] = hubHandle;
+        msgHeader[HEADER_FIELD_APP_INSTANCE] = nanoAppHandle;
+        msgHeader[HEADER_FIELD_MSG_VERSION] = msg.getVersion();
+        msgHeader[HEADER_FIELD_MSG_TYPE] = msg.getMsgType();
 
         return nativeSendMessage(msgHeader, msg.getData());
     }
@@ -269,15 +329,17 @@ public class ContextHubService extends IContextHubService.Stub {
             Log.v(TAG, "No message callbacks registered.");
             return 0;
         }
-        ContextHubMessage message =
-                new ContextHubMessage(header[MSG_FIELD_TYPE], header[MSG_FIELD_VERSION], data);
+
+        ContextHubMessage msg = new ContextHubMessage(header[HEADER_FIELD_MSG_TYPE],
+                                                      header[HEADER_FIELD_MSG_VERSION],
+                                                      data);
         for (int i = 0; i < callbacksCount; ++i) {
             IContextHubCallback callback = mCallbacksList.getBroadcastItem(i);
             try {
                 callback.onMessageReceipt(
-                        header[MSG_FIELD_HUB_HANDLE],
-                        header[MSG_FIELD_APP_INSTANCE],
-                        message);
+                        header[HEADER_FIELD_HUB_HANDLE],
+                        header[HEADER_FIELD_APP_INSTANCE],
+                        msg);
             } catch (RemoteException e) {
                 Log.i(TAG, "Exception (" + e + ") calling remote callback (" + callback + ").");
                 continue;
@@ -301,19 +363,34 @@ public class ContextHubService extends IContextHubService.Stub {
         appInfo.setNeededReadMemBytes(PRE_LOADED_APP_MEM_REQ);
         appInfo.setNeededWriteMemBytes(PRE_LOADED_APP_MEM_REQ);
 
+        String action;
+        if (mNanoAppHash.containsKey(appInstanceHandle)) {
+            action = "Updated";
+        } else {
+            action = "Added";
+        }
+
         mNanoAppHash.put(appInstanceHandle, appInfo);
-        Log.d(TAG, "Added app instance " + appInstanceHandle + " with id " + appId
-              + " version " + appVersion);
+        Log.d(TAG, action + " app instance " + appInstanceHandle + " with id "
+              + appId + " version " + appVersion);
+
+        return 0;
+    }
+
+    private int deleteAppInstance(int appInstanceHandle) {
+        if (mNanoAppHash.remove(appInstanceHandle) == null) {
+            return -1;
+        }
 
         return 0;
     }
 
     private void sendVrStateChangeMessageToApp(NanoAppInstanceInfo app, boolean vrModeEnabled) {
         int[] msgHeader = new int[MSG_HEADER_SIZE];
-        msgHeader[MSG_FIELD_TYPE] = 0;
-        msgHeader[MSG_FIELD_VERSION] = 0;
-        msgHeader[MSG_FIELD_HUB_HANDLE] = ANY_HUB;
-        msgHeader[MSG_FIELD_APP_INSTANCE] = app.getHandle();
+        msgHeader[HEADER_FIELD_MSG_TYPE] = 0;
+        msgHeader[HEADER_FIELD_MSG_VERSION] = 0;
+        msgHeader[HEADER_FIELD_HUB_HANDLE] = ANY_HUB;
+        msgHeader[HEADER_FIELD_APP_INSTANCE] = app.getHandle();
 
         byte[] data = new byte[1];
         data[0] = (byte) ((vrModeEnabled) ? 1 : 0);

@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -30,6 +31,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.util.Log;
@@ -57,6 +59,7 @@ public class KeyguardIndicationController {
 
     private final Context mContext;
     private final KeyguardIndicationTextView mTextView;
+    private final UserManager mUserManager;
     private final IBatteryStats mBatteryInfo;
 
     private final int mSlowThreshold;
@@ -85,11 +88,12 @@ public class KeyguardIndicationController {
         mSlowThreshold = res.getInteger(R.integer.config_chargingSlowlyThreshold);
         mFastThreshold = res.getInteger(R.integer.config_chargingFastThreshold);
 
-
+        mUserManager = context.getSystemService(UserManager.class);
         mBatteryInfo = IBatteryStats.Stub.asInterface(
                 ServiceManager.getService(BatteryStats.SERVICE_NAME));
+
         KeyguardUpdateMonitor.getInstance(context).registerCallback(mUpdateMonitor);
-        context.registerReceiverAsUser(mReceiver, UserHandle.SYSTEM,
+        context.registerReceiverAsUser(mTickReceiver, UserHandle.SYSTEM,
                 new IntentFilter(Intent.ACTION_TIME_TICK), null, null);
     }
 
@@ -155,30 +159,29 @@ public class KeyguardIndicationController {
 
     private void updateIndication() {
         if (mVisible) {
-            mTextView.switchIndication(computeIndication());
-            mTextView.setTextColor(computeColor());
-        }
-    }
+            // Walk down a precedence-ordered list of what should indication
+            // should be shown based on user or device state
+            if (!mUserManager.isUserUnlocked(ActivityManager.getCurrentUser())) {
+                mTextView.switchIndication(com.android.internal.R.string.lockscreen_storage_locked);
+                mTextView.setTextColor(Color.WHITE);
 
-    private int computeColor() {
-        if (!TextUtils.isEmpty(mTransientIndication)) {
-            return mTransientTextColor;
-        }
-        return Color.WHITE;
-    }
+            } else if (!TextUtils.isEmpty(mTransientIndication)) {
+                mTextView.switchIndication(mTransientIndication);
+                mTextView.setTextColor(mTransientTextColor);
 
-    private String computeIndication() {
-        if (!TextUtils.isEmpty(mTransientIndication)) {
-            return mTransientIndication;
-        }
-        if (mPowerPluggedIn) {
-            String indication = computePowerIndication();
-            if (DEBUG_CHARGING_SPEED) {
-                indication += ",  " + (mChargingWattage / 1000) + " mW";
+            } else if (mPowerPluggedIn) {
+                String indication = computePowerIndication();
+                if (DEBUG_CHARGING_SPEED) {
+                    indication += ",  " + (mChargingWattage / 1000) + " mW";
+                }
+                mTextView.switchIndication(indication);
+                mTextView.setTextColor(Color.WHITE);
+
+            } else {
+                mTextView.switchIndication(mRestingIndication);
+                mTextView.setTextColor(Color.WHITE);
             }
-            return indication;
         }
-        return mRestingIndication;
     }
 
     private String computePowerIndication() {
@@ -225,6 +228,8 @@ public class KeyguardIndicationController {
     }
 
     KeyguardUpdateMonitorCallback mUpdateMonitor = new KeyguardUpdateMonitorCallback() {
+        public int mLastSuccessiveErrorMessage = -1;
+
         @Override
         public void onRefreshBatteryInfo(KeyguardUpdateMonitor.BatteryStatus status) {
             boolean isChargingOrFull = status.status == BatteryManager.BATTERY_STATUS_CHARGING
@@ -252,6 +257,9 @@ public class KeyguardIndicationController {
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_CLEAR_FP_MSG),
                         TRANSIENT_FP_ERROR_TIMEOUT);
             }
+            // Help messages indicate that there was actually a try since the last error, so those
+            // are not two successive error messages anymore.
+            mLastSuccessiveErrorMessage = -1;
         }
 
         @Override
@@ -263,15 +271,22 @@ public class KeyguardIndicationController {
             }
             int errorColor = mContext.getResources().getColor(R.color.system_warning_color, null);
             if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
-                mStatusBarKeyguardViewManager.showBouncerMessage(errString, errorColor);
+                // When swiping up right after receiving a fingerprint error, the bouncer calls
+                // authenticate leading to the same message being shown again on the bouncer.
+                // We want to avoid this, as it may confuse the user when the message is too
+                // generic.
+                if (mLastSuccessiveErrorMessage != msgId) {
+                    mStatusBarKeyguardViewManager.showBouncerMessage(errString, errorColor);
+                }
             } else if (updateMonitor.isDeviceInteractive()) {
-                    showTransientIndication(errString, errorColor);
-                    // We want to keep this message around in case the screen was off
-                    mHandler.removeMessages(MSG_HIDE_TRANSIENT);
-                    hideTransientIndicationDelayed(5000);
-             } else {
-                    mMessageToShowOnScreenOn = errString;
+                showTransientIndication(errString, errorColor);
+                // We want to keep this message around in case the screen was off
+                mHandler.removeMessages(MSG_HIDE_TRANSIENT);
+                hideTransientIndicationDelayed(5000);
+            } else {
+                mMessageToShowOnScreenOn = errString;
             }
+            mLastSuccessiveErrorMessage = msgId;
         }
 
         @Override
@@ -293,9 +308,28 @@ public class KeyguardIndicationController {
                 mMessageToShowOnScreenOn = null;
             }
         }
+
+        @Override
+        public void onFingerprintAuthenticated(int userId) {
+            super.onFingerprintAuthenticated(userId);
+            mLastSuccessiveErrorMessage = -1;
+        }
+
+        @Override
+        public void onFingerprintAuthFailed() {
+            super.onFingerprintAuthFailed();
+            mLastSuccessiveErrorMessage = -1;
+        }
+
+        @Override
+        public void onUserUnlocked() {
+            if (mVisible) {
+                updateIndication();
+            }
+        }
     };
 
-    BroadcastReceiver mReceiver = new BroadcastReceiver() {
+    BroadcastReceiver mTickReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (mVisible) {
@@ -303,6 +337,7 @@ public class KeyguardIndicationController {
             }
         }
     };
+
 
     private final Handler mHandler = new Handler() {
         @Override

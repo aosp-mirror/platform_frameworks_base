@@ -102,9 +102,8 @@ public class TrustManagerService extends SystemService {
     private static final int MSG_START_USER = 7;
     private static final int MSG_CLEANUP_USER = 8;
     private static final int MSG_SWITCH_USER = 9;
-    private static final int MSG_SET_DEVICE_LOCKED = 10;
-    private static final int MSG_FLUSH_TRUST_USUALLY_MANAGED = 11;
-    private static final int MSG_UNLOCK_USER = 12;
+    private static final int MSG_FLUSH_TRUST_USUALLY_MANAGED = 10;
+    private static final int MSG_UNLOCK_USER = 11;
 
     private static final int TRUST_USUALLY_MANAGED_FLUSH_DELAY = 2 * 60 * 1000;
 
@@ -317,20 +316,6 @@ public class TrustManagerService extends SystemService {
         }
     }
 
-    public void setDeviceLockedForUser(int userId, boolean locked) {
-        if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)) {
-            synchronized (mDeviceLockedForUser) {
-                mDeviceLockedForUser.put(userId, locked);
-            }
-            if (locked) {
-                try {
-                    ActivityManagerNative.getDefault().notifyLockedProfile(userId);
-                } catch (RemoteException e) {
-                }
-            }
-        }
-    }
-
     boolean isDeviceLockedInner(int userId) {
         synchronized (mDeviceLockedForUser) {
             return mDeviceLockedForUser.get(userId, true);
@@ -399,11 +384,16 @@ public class TrustManagerService extends SystemService {
     }
 
     void updateDevicePolicyFeatures() {
+        boolean changed = false;
         for (int i = 0; i < mActiveAgents.size(); i++) {
             AgentInfo info = mActiveAgents.valueAt(i);
             if (info.agent.isConnected()) {
                 info.agent.updateDevicePolicyFeatures();
+                changed = true;
             }
+        }
+        if (changed) {
+            mArchive.logDevicePolicyChanged();
         }
     }
 
@@ -833,10 +823,24 @@ public class TrustManagerService extends SystemService {
         }
 
         @Override
-        public void setDeviceLockedForUser(int userId, boolean value) {
+        public void setDeviceLockedForUser(int userId, boolean locked) {
             enforceReportPermission();
-            mHandler.obtainMessage(MSG_SET_DEVICE_LOCKED, value ? 1 : 0, userId)
-                    .sendToTarget();
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)) {
+                    synchronized (mDeviceLockedForUser) {
+                        mDeviceLockedForUser.put(userId, locked);
+                    }
+                    if (locked) {
+                        try {
+                            ActivityManagerNative.getDefault().notifyLockedProfile(userId);
+                        } catch (RemoteException e) {
+                        }
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
         @Override
@@ -911,9 +915,6 @@ public class TrustManagerService extends SystemService {
                 case MSG_SWITCH_USER:
                     mCurrentUser = msg.arg1;
                     refreshDeviceLockedForUser(UserHandle.USER_ALL);
-                    break;
-                case MSG_SET_DEVICE_LOCKED:
-                    setDeviceLockedForUser(msg.arg2, msg.arg1 != 0);
                     break;
                 case MSG_FLUSH_TRUST_USUALLY_MANAGED:
                     SparseBooleanArray usuallyManaged;

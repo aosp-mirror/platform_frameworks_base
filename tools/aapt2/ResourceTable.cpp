@@ -189,6 +189,17 @@ std::vector<ResourceConfigValue*> ResourceEntry::findAllValues(const ConfigDescr
     return results;
 }
 
+std::vector<ResourceConfigValue*> ResourceEntry::findValuesIf(
+        const std::function<bool(ResourceConfigValue*)>& f) {
+    std::vector<ResourceConfigValue*> results;
+    for (auto& configValue : values) {
+        if (f(configValue.get())) {
+            results.push_back(configValue.get());
+        }
+    }
+    return results;
+}
+
 /**
  * The default handler for collisions. A return value of -1 means keep the
  * existing value, 0 means fail, and +1 means take the incoming value.

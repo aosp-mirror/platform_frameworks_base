@@ -38,8 +38,11 @@ import java.util.List;
  *
  * <div class="special reference">
  * <h3>Developer Guides</h3>
- * <p>For more information about using BLUETOOTH, read the
- * <a href="{@docRoot}guide/topics/connectivity/bluetooth.html">Bluetooth</a> developer guide.</p>
+ * <p>
+ * For more information about using BLUETOOTH, read the <a href=
+ * "{@docRoot}guide/topics/connectivity/bluetooth.html">Bluetooth</a> developer
+ * guide.
+ * </p>
  * </div>
  *
  * @see Context#getSystemService
@@ -233,7 +236,7 @@ public final class BluetoothManager {
                 Log.e(TAG, "Fail to get GATT Server connection");
                 return null;
             }
-            BluetoothGattServer mGattServer = new BluetoothGattServer(context, iGatt,transport);
+            BluetoothGattServer mGattServer = new BluetoothGattServer(iGatt,transport);
             Boolean regStatus = mGattServer.registerCallback(callback);
             return regStatus? mGattServer : null;
         } catch (RemoteException e) {

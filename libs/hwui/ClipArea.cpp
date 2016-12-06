@@ -464,10 +464,7 @@ const ClipBase* ClipArea::serializeIntersectedClip(LinearAllocator& allocator,
             }
             case ClipMode::Region:
                 other = getRegion(recordedClip);
-
-                // TODO: handle non-translate transforms properly!
-                other.translate(recordedClipTransform.getTranslateX(),
-                        recordedClipTransform.getTranslateY());
+                applyTransformToRegion(recordedClipTransform, &other);
             }
 
             ClipRegion* regionClip = allocator.create<ClipRegion>();
@@ -527,9 +524,27 @@ void ClipArea::applyClip(const ClipBase* clip, const Matrix4& transform) {
         }
     } else {
         SkRegion region(getRegion(clip));
-        // TODO: handle non-translate transforms properly!
-        region.translate(transform.getTranslateX(), transform.getTranslateY());
+        applyTransformToRegion(transform, &region);
         clipRegion(region, SkRegion::kIntersect_Op);
+    }
+}
+
+void ClipArea::applyTransformToRegion(const Matrix4& transform, SkRegion* region) {
+    if (transform.rectToRect() && !transform.isPureTranslate()) {
+        // handle matrices with scale manually by mapping each rect
+        SkRegion other;
+        SkRegion::Iterator it(*region);
+        while (!it.done()) {
+            Rect rect(it.rect());
+            transform.mapRect(rect);
+            rect.snapGeometryToPixelBoundaries(true);
+            other.op(rect.left, rect.top, rect.right, rect.bottom, SkRegion::kUnion_Op);
+            it.next();
+        }
+        region->swap(other);
+    } else {
+        // TODO: handle non-translate transforms properly!
+        region->translate(transform.getTranslateX(), transform.getTranslateY());
     }
 }
 

@@ -217,8 +217,8 @@ abstract public class ManagedServices {
         return mEnabledServicesPackageNames.contains(pkg);
     }
 
-    public void onPackagesChanged(boolean queryReplace, String[] pkgList) {
-        if (DEBUG) Slog.d(TAG, "onPackagesChanged queryReplace=" + queryReplace
+    public void onPackagesChanged(boolean removingPackage, String[] pkgList) {
+        if (DEBUG) Slog.d(TAG, "onPackagesChanged removingPackage=" + removingPackage
                 + " pkgList=" + (pkgList == null ? null : Arrays.asList(pkgList))
                 + " mEnabledServicesPackageNames=" + mEnabledServicesPackageNames);
         boolean anyServicesInvolved = false;
@@ -234,7 +234,7 @@ abstract public class ManagedServices {
 
         if (anyServicesInvolved) {
             // if we're not replacing a package, clean up orphaned bits
-            if (!queryReplace) {
+            if (removingPackage) {
                 updateSettingsAccordingToInstalledServices();
                 rebuildRestoredPackages();
             }

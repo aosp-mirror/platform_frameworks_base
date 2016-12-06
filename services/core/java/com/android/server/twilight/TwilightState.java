@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2016 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,58 +16,89 @@
 
 package com.android.server.twilight;
 
-import java.text.DateFormat;
-import java.util.Date;
+import android.text.format.DateFormat;
+
+import java.util.Calendar;
 
 /**
- * Describes whether it is day or night.
- * This object is immutable.
+ * The twilight state, consisting of the sunrise and sunset times (in millis) for the current
+ * period.
+ * <p/>
+ * Note: This object is immutable.
  */
-public class TwilightState {
-    private final boolean mIsNight;
-    private final float mAmount;
+public final class TwilightState {
 
-    TwilightState(boolean isNight, float amount) {
-        mIsNight = isNight;
-        mAmount = amount;
+    private final long mSunriseTimeMillis;
+    private final long mSunsetTimeMillis;
+
+    TwilightState(long sunriseTimeMillis, long sunsetTimeMillis) {
+        mSunriseTimeMillis = sunriseTimeMillis;
+        mSunsetTimeMillis = sunsetTimeMillis;
     }
 
     /**
-     * Returns true if it is currently night time.
+     * Returns the time (in UTC milliseconds from epoch) of the upcoming or previous sunrise if
+     * it's night or day respectively.
+     */
+    public long sunriseTimeMillis() {
+        return mSunriseTimeMillis;
+    }
+
+    /**
+     * Returns a new {@link Calendar} instance initialized to {@link #sunriseTimeMillis()}.
+     */
+    public Calendar sunrise() {
+        final Calendar sunrise = Calendar.getInstance();
+        sunrise.setTimeInMillis(mSunriseTimeMillis);
+        return sunrise;
+    }
+
+    /**
+     * Returns the time (in UTC milliseconds from epoch) of the upcoming or previous sunset if
+     * it's day or night respectively.
+     */
+    public long sunsetTimeMillis() {
+        return mSunsetTimeMillis;
+    }
+
+    /**
+     * Returns a new {@link Calendar} instance initialized to {@link #sunsetTimeMillis()}.
+     */
+    public Calendar sunset() {
+        final Calendar sunset = Calendar.getInstance();
+        sunset.setTimeInMillis(mSunsetTimeMillis);
+        return sunset;
+    }
+
+    /**
+     * Returns {@code true} if it is currently night time.
      */
     public boolean isNight() {
-        return mIsNight;
-    }
-
-    /**
-     * For twilight affects that change gradually over time, this is the amount they
-     * should currently be in effect.
-     */
-    public float getAmount() {
-        return mAmount;
+        final long now = System.currentTimeMillis();
+        return now >= mSunsetTimeMillis && now < mSunriseTimeMillis;
     }
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof TwilightState && equals((TwilightState)o);
+        return o instanceof TwilightState && equals((TwilightState) o);
     }
 
     public boolean equals(TwilightState other) {
         return other != null
-                && mIsNight == other.mIsNight
-                && mAmount == other.mAmount;
+                && mSunriseTimeMillis == other.mSunriseTimeMillis
+                && mSunsetTimeMillis == other.mSunsetTimeMillis;
     }
 
     @Override
     public int hashCode() {
-        return 0; // don't care
+        return Long.hashCode(mSunriseTimeMillis) ^ Long.hashCode(mSunsetTimeMillis);
     }
 
     @Override
     public String toString() {
-        DateFormat f = DateFormat.getDateTimeInstance();
-        return "{TwilightState: isNight=" + mIsNight
-                + ", mAmount=" + mAmount
-                + "}";
+        return "TwilightState {"
+                + " sunrise=" + DateFormat.format("MM-dd HH:mm", mSunriseTimeMillis)
+                + " sunset="+ DateFormat.format("MM-dd HH:mm", mSunsetTimeMillis)
+                + " }";
     }
 }

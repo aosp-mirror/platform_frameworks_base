@@ -1147,6 +1147,8 @@
         </activity>
         <activity android:name="com.android.internal.policy.PhoneWindowActionModeTestActivity">
         </activity>
+        <activity android:name="android.app.EmptyActivity">
+        </activity>
 
         <receiver android:name="android.app.activity.AbortReceiver">
             <intent-filter android:priority="1">

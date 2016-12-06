@@ -275,5 +275,73 @@ TEST(ClipArea, serializeIntersectedClip_snap) {
     }
 }
 
+TEST(ClipArea, serializeIntersectedClip_scale) {
+    ClipArea area(createClipArea());
+    area.setClip(0, 0, 400, 400);
+    LinearAllocator allocator;
+
+    SkPath circlePath;
+    circlePath.addCircle(50, 50, 50);
+
+    ClipRegion recordedClip;
+    recordedClip.region.setPath(circlePath, SkRegion(SkIRect::MakeWH(100, 100)));
+    recordedClip.rect = Rect(100, 100);
+
+    Matrix4 translateScale;
+    translateScale.loadTranslate(100, 100, 0);
+    translateScale.scale(2, 2, 1);
+    auto resolvedClip = area.serializeIntersectedClip(allocator, &recordedClip, translateScale);
+
+    ASSERT_NE(nullptr, resolvedClip);
+    EXPECT_EQ(ClipMode::Region, resolvedClip->mode);
+    EXPECT_EQ(Rect(100, 100, 300, 300), resolvedClip->rect);
+    auto clipRegion = reinterpret_cast<const ClipRegion*>(resolvedClip);
+    EXPECT_EQ(SkIRect::MakeLTRB(100, 100, 300, 300), clipRegion->region.getBounds());
+}
+
+TEST(ClipArea, applyTransformToRegion_identity) {
+    SkRegion region(SkIRect::MakeLTRB(1, 2, 3, 4));
+    ClipArea::applyTransformToRegion(Matrix4::identity(), &region);
+    EXPECT_TRUE(region.isRect());
+    EXPECT_EQ(SkIRect::MakeLTRB(1, 2, 3, 4), region.getBounds());
+}
+
+TEST(ClipArea, applyTransformToRegion_translate) {
+    SkRegion region(SkIRect::MakeLTRB(1, 2, 3, 4));
+    Matrix4 transform;
+    transform.loadTranslate(10, 20, 0);
+    ClipArea::applyTransformToRegion(transform, &region);
+    EXPECT_TRUE(region.isRect());
+    EXPECT_EQ(SkIRect::MakeLTRB(11, 22, 13, 24), region.getBounds());
+}
+
+TEST(ClipArea, applyTransformToRegion_scale) {
+    SkRegion region(SkIRect::MakeLTRB(1, 2, 3, 4));
+    Matrix4 transform;
+    transform.loadScale(2, 3, 1);
+    ClipArea::applyTransformToRegion(transform, &region);
+    EXPECT_TRUE(region.isRect());
+    EXPECT_EQ(SkIRect::MakeLTRB(2, 6, 6, 12), region.getBounds());
+}
+
+TEST(ClipArea, applyTransformToRegion_translateScale) {
+    SkRegion region(SkIRect::MakeLTRB(1, 2, 3, 4));
+    Matrix4 transform;
+    transform.translate(10, 20);
+    transform.scale(2, 3, 1);
+    ClipArea::applyTransformToRegion(transform, &region);
+    EXPECT_TRUE(region.isRect());
+    EXPECT_EQ(SkIRect::MakeLTRB(12, 26, 16, 32), region.getBounds());
+}
+
+TEST(ClipArea, applyTransformToRegion_rotate90) {
+    SkRegion region(SkIRect::MakeLTRB(1, 2, 3, 4));
+    Matrix4 transform;
+    transform.loadRotate(90);
+    ClipArea::applyTransformToRegion(transform, &region);
+    EXPECT_TRUE(region.isRect());
+    EXPECT_EQ(SkIRect::MakeLTRB(-4, 1, -2, 3), region.getBounds());
+}
+
 } // namespace uirenderer
 } // namespace android

@@ -228,7 +228,7 @@ public class AndroidKeyStoreProvider extends Provider {
         if (exportResult.resultCode != KeyStore.NO_ERROR) {
             throw (UnrecoverableKeyException)
                     new UnrecoverableKeyException("Failed to obtain X.509 form of public key")
-                    .initCause(KeyStore.getKeyStoreException(errorCode));
+                    .initCause(KeyStore.getKeyStoreException(exportResult.resultCode));
         }
         final byte[] x509EncodedPublicKey = exportResult.exportData;
 

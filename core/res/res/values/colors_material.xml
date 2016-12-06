@@ -26,9 +26,15 @@
 
     <color name="primary_material_dark">@color/material_grey_900</color>
     <color name="primary_material_light">@color/material_grey_100</color>
+    <color name="primary_material_settings">@color/material_blue_grey_900</color>
     <color name="primary_dark_material_dark">@color/black</color>
     <color name="primary_dark_material_light">@color/material_grey_600</color>
     <color name="primary_dark_material_light_light_status_bar">@color/material_grey_300</color>
+    <color name="primary_dark_material_settings">@color/material_blue_grey_950</color>
+
+    <color name="secondary_material_settings">@color/material_blue_grey_800</color>
+    <color name="tertiary_material_settings">@color/material_blue_grey_700</color>
+    <color name="quaternary_material_settings">@color/material_blue_grey_200</color>
 
     <color name="accent_material_light">@color/material_deep_teal_500</color>
     <color name="accent_material_dark">@color/material_deep_teal_200</color>
@@ -55,7 +61,10 @@
     <color name="secondary_text_default_material_dark">#b3ffffff</color>
 
     <item name="hint_alpha_material_dark" format="float" type="dimen">0.50</item>
-    <item name="hint_alpha_material_light" format="float" type="dimen">0.54</item>
+    <item name="hint_alpha_material_light" format="float" type="dimen">0.38</item>
+
+    <item name="hint_pressed_alpha_material_dark" format="float" type="dimen">0.70</item>
+    <item name="hint_pressed_alpha_material_light" format="float" type="dimen">0.54</item>
 
     <item name="disabled_alpha_material_light" format="float" type="dimen">0.26</item>
     <item name="disabled_alpha_material_dark" format="float" type="dimen">0.30</item>
@@ -75,11 +84,15 @@
     <color name="material_grey_100">#fff5f5f5</color>
     <color name="material_grey_50">#fffafafa</color>
 
+    <color name="material_deep_teal_50">#ffe0f2f1</color>
     <color name="material_deep_teal_100">#ffb2dfdb</color>
     <color name="material_deep_teal_200">#ff80cbc4</color>
     <color name="material_deep_teal_300">#ff4db6ac</color>
     <color name="material_deep_teal_500">#ff009688</color>
+    <color name="material_deep_teal_700">#ff00796b</color>
 
+    <color name="material_blue_grey_200">#ffb0bec5</color>
+    <color name="material_blue_grey_700">#ff455a64</color>
     <color name="material_blue_grey_800">#ff37474f</color>
     <color name="material_blue_grey_900">#ff263238</color>
     <color name="material_blue_grey_950">#ff21272b</color>

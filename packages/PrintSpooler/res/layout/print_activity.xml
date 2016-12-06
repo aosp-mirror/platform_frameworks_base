@@ -16,7 +16,6 @@
 
 <com.android.printspooler.widget.PrintContentView
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:printspooler="http://schemas.android.com/apk/res/com.android.printspooler"
     android:id="@+id/options_content"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
@@ -28,12 +27,14 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:paddingStart="8dip"
+        android:layout_marginEnd="16dp"
         android:elevation="@dimen/preview_controls_elevation"
         android:background="?android:attr/colorPrimary">
 
         <Spinner
             android:id="@+id/destination_spinner"
-            android:layout_width="@dimen/preview_destination_spinner_width"
+            android:layout_width="wrap_content"
+            android:minWidth="@dimen/preview_destination_spinner_width"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dip"
             android:dropDownWidth="wrap_content"

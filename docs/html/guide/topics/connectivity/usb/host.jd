@@ -263,7 +263,7 @@ UsbDevice device = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE
   obtain a device from the map.</p>
   <pre>
 UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);
-...  
+...
 HashMap&lt;String, UsbDevice&gt; deviceList = manager.getDeviceList();
 UsbDevice device = deviceList.get("deviceName");
 </pre>
@@ -317,7 +317,7 @@ private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
                     if(device != null){
                       //call method to set up device communication
                    }
-                } 
+                }
                 else {
                     Log.d(TAG, "permission denied for device " + device);
                 }
@@ -396,7 +396,7 @@ private boolean forceClaim = true;
 
 UsbInterface intf = device.getInterface(0);
 UsbEndpoint endpoint = intf.getEndpoint(0);
-UsbDeviceConnection connection = mUsbManager.openDevice(device); 
+UsbDeviceConnection connection = mUsbManager.openDevice(device);
 connection.claimInterface(intf, forceClaim);
 connection.bulkTransfer(endpoint, bytes, bytes.length, TIMEOUT); //do in another thread
 </pre>
@@ -422,7 +422,7 @@ connection.bulkTransfer(endpoint, bytes, bytes.length, TIMEOUT); //do in another
   <pre>
 BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
     public void onReceive(Context context, Intent intent) {
-        String action = intent.getAction(); 
+        String action = intent.getAction();
 
       if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
             UsbDevice device = (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);

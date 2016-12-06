@@ -79,22 +79,15 @@ must also request the {@link android.Manifest.permission#BIND_ACCESSIBILITY_SERV
 as shown in the following sample:</p>
 
 <pre>
-&lt;manifest&gt;
-  ...
-  &lt;uses-permission ... /&gt;
-  ...
   &lt;application&gt;
-    ...
     &lt;service android:name=&quot;.MyAccessibilityService&quot;
-        android:label=&quot;@string/accessibility_service_label&quot;
-        android:permission=&quot;android.permission.BIND_ACCESSIBILITY_SERVICE&quot&gt;
+        android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+        android:label=&quot;@string/accessibility_service_label&quot;&gt;
       &lt;intent-filter&gt;
         &lt;action android:name=&quot;android.accessibilityservice.AccessibilityService&quot; /&gt;
       &lt;/intent-filter&gt;
     &lt;/service&gt;
-    &lt;uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE" /&gt;
   &lt;/application&gt;
-&lt;/manifest&gt;
 </pre>
 
 <p>These declarations are required for all accessibility services deployed on Android 1.6 (API Level
@@ -124,7 +117,7 @@ your accessibility service, as shown in the following example:</p>
 &lt;/service&gt;
 </pre>
 
-<p>This meta-data element refers to an XML file that you create in your application’s resource
+<p>This meta-data element refers to an XML file that you create in your application's resource
 directory ({@code <project_dir>/res/xml/accessibility_service_config.xml}). The following code
 shows example contents for the service configuration file:</p>
 
@@ -267,7 +260,7 @@ this way, the Android system can provide much richer detail about accessibility 
 accessibility services to provide more useful feedback to users.</p>
 
 <p>An accessibility service gets information about an user interface event through an {@link
-android.view.accessibility.AccessibilityEvent} passed by the system to the service’s
+android.view.accessibility.AccessibilityEvent} passed by the system to the service's
 {@link android.accessibilityservice.AccessibilityService#onAccessibilityEvent
 onAccessibilityEvent()} callback method. This object provides details about the event, including the
 type of object being acted upon, its descriptive text and other details. Starting in Android 4.0
@@ -335,7 +328,7 @@ user actions). If your service requires all views, it can request them by settin
   of a user. This feature, added in Android 4.1 (API Level 16), and requires that your
   accessibility service request activation of the Explore by Touch feature. Your service can
   request this activation by setting the
-  {@link android.accessibilityservice.AccessibilityServiceInfo#flags flags} member of the service’s
+  {@link android.accessibilityservice.AccessibilityServiceInfo#flags flags} member of the service's
   {@link android.accessibilityservice.AccessibilityServiceInfo} instance to
   {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REQUEST_TOUCH_EXPLORATION_MODE},
   as shown in the following example.

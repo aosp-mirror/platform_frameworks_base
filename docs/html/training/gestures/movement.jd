@@ -55,13 +55,13 @@ detecting touch events is often based more on movement than on simple contact.
 To help apps distinguish between movement-based gestures (such as a swipe) and
 non-movement gestures (such as a single tap), Android includes the notion of
 "touch slop." Touch slop refers to the distance in pixels a user's touch can wander
-before the gesture is interpreted as a movement-based gesture. For more discussion of this 
+before the gesture is interpreted as a movement-based gesture. For more discussion of this
 topic, see <a href="viewgroup.html#vc">Managing Touch Events in a ViewGroup</a>.</p>
 
 
 
 <p>There are several different ways to track movement in a gesture, depending on
-the needs of your application. For example:</p> 
+the needs of your application. For example:</p>
 
 <ul>
 
@@ -89,8 +89,8 @@ details.</li>
 <p> You could have a movement-based gesture that is simply based on the distance and/or direction the pointer traveled. But velocity often is a
 determining factor in tracking a gesture's characteristics or even deciding
 whether the gesture occurred. To make velocity calculation easier, Android
-provides the {@link android.view.VelocityTracker} class and the  	
-{@link android.support.v4.view.VelocityTrackerCompat} class in the 
+provides the {@link android.view.VelocityTracker} class and the
+{@link android.support.v4.view.VelocityTrackerCompat} class in the
 <a href="{@docRoot}tools/support-library/index.html">Support Library</a>.
 {@link
 android.view.VelocityTracker} helps you track the velocity of touch events. This
@@ -98,7 +98,7 @@ is useful for gestures in which velocity is part of the criteria for the
 gesture, such as a fling.</p>
 
 
-<p>Here is a simple example that illustrates the purpose of the methods in the 
+<p>Here is a simple example that illustrates the purpose of the methods in the
 {@link android.view.VelocityTracker} API:</p>
 
 <pre>public class MainActivity extends Activity {
@@ -126,16 +126,16 @@ gesture, such as a fling.</p>
                 break;
             case MotionEvent.ACTION_MOVE:
                 mVelocityTracker.addMovement(event);
-                // When you want to determine the velocity, call 
-                // computeCurrentVelocity(). Then call getXVelocity() 
-                // and getYVelocity() to retrieve the velocity for each pointer ID. 
+                // When you want to determine the velocity, call
+                // computeCurrentVelocity(). Then call getXVelocity()
+                // and getYVelocity() to retrieve the velocity for each pointer ID.
                 mVelocityTracker.computeCurrentVelocity(1000);
                 // Log velocity of pixels per second
                 // Best practice to use VelocityTrackerCompat where possible.
-                Log.d("", "X velocity: " + 
-                        VelocityTrackerCompat.getXVelocity(mVelocityTracker, 
+                Log.d("", "X velocity: " +
+                        VelocityTrackerCompat.getXVelocity(mVelocityTracker,
                         pointerId));
-                Log.d("", "Y velocity: " + 
+                Log.d("", "Y velocity: " +
                         VelocityTrackerCompat.getYVelocity(mVelocityTracker,
                         pointerId));
                 break;
@@ -150,8 +150,8 @@ gesture, such as a fling.</p>
 }
 </pre>
 
-<p class="note"><strong>Note:</strong> Note that you should calculate velocity after an 
-{@link android.view.MotionEvent#ACTION_MOVE} event, 
-not after {@link android.view.MotionEvent#ACTION_UP}. After an {@link android.view.MotionEvent#ACTION_UP}, 
+<p class="note"><strong>Note:</strong> Note that you should calculate velocity after an
+{@link android.view.MotionEvent#ACTION_MOVE} event,
+not after {@link android.view.MotionEvent#ACTION_UP}. After an {@link android.view.MotionEvent#ACTION_UP},
 the X and Y velocities will be 0.
 </p>

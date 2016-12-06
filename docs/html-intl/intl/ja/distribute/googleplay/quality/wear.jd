@@ -395,4 +395,4 @@ data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
 </p>
 <p>
   はい。上記の要件は、アプリが Google Play で Android Wear アプリとして識別され、Android Wear ユーザーが発見しやすくなるかどうかのみを判断するものです。アプリが Wear アプリとして承認されなくても、電話やタブレットなどの他のデバイス タイプで利用可能です。ウェアラブル端末へのインストールも可能です。
-</p> 
+</p>

@@ -21,7 +21,7 @@
     <string name="bugreport_finished_title" msgid="4429132808670114081">"బగ్ నివేదిక <xliff:g id="ID">#%d</xliff:g> సంగ్రహించబడింది"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"బగ్ నివేదికకు వివరాలను జోడిస్తోంది"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"దయచేసి వేచి ఉండండి..."</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"మీ బగ్ నివేదికను భాగస్వామ్యం చేయడానికి ఎడమవైపుకు స్వైప్ చేయండి"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"బగ్ నివేదిక త్వరలో ఫోన్‌లో కనిపిస్తుంది"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"మీ బగ్ నివేదికను భాగస్వామ్యం చేయడానికి నొక్కండి"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"స్క్రీన్‌షాట్ లేకుండా మీ బగ్ నివే. భాగ. చేయడానికి నొక్కండి లేదా స్క్రీన్‌షాట్ ముగిసేదాకా వేచి ఉండండి"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"స్క్రీన్‌షాట్ లేకుండా మీ బగ్ నివే. భాగ. చేయడానికి నొక్కండి లేదా స్క్రీన్‌షాట్ ముగిసేదాకా వేచి ఉండండి"</string>

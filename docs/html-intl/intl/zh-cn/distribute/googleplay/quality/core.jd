@@ -12,7 +12,7 @@ page.image=/distribute/images/core-quality-guidelines.jpg
         <li><a href="#listing">Google Play</a></li>
 
   </ol>
-  
+
   <h2>测试</h2>
   <ol>
     <li><a href="#test-environment">设置测试环境</a></li>
@@ -24,7 +24,7 @@ page.image=/distribute/images/core-quality-guidelines.jpg
     <li><a href="{@docRoot}distribute/essentials/quality/tablets.html">平板电脑应用的质量</a></li>
         <li><a href="{@docRoot}distribute/essentials/optimizing-your-app.html">优化您的应用</a></li>
   </ol>
-  
+
 
 </div>
 </div>
@@ -84,7 +84,7 @@ page.image=/distribute/images/core-quality-guidelines.jpg
     <th style="width:54px;">
       ID
     </th>
-    
+
 
     <th>
       说明
@@ -746,7 +746,7 @@ data-cardsizes="6x3" data-maxresults="6">
     <li>应用商品详情包括高品质的置顶大图。
     </li>
 
-    <li>置顶大图不能包含设备图片、屏幕截图，也不能包含缩小后以及在应用适配的最小尺寸屏幕上显示时难以辨认的小文字。  
+    <li>置顶大图不能包含设备图片、屏幕截图，也不能包含缩小后以及在应用适配的最小尺寸屏幕上显示时难以辨认的小文字。
 
 
     </li>
@@ -1049,7 +1049,7 @@ data-cardsizes="6x3,6x3,6x3,6x3,6x3,6x3" data-maxresults="6">
 
     <p style="margin-bottom:.25em;">
     要强制启动硬件加速（在设备支持的情况下），请将
-    <code>hardware-accelerated="true"</code>添加到应用清单文件中的<code>&lt;application&gt;</code>并重新编译。 
+    <code>hardware-accelerated="true"</code>添加到应用清单文件中的<code>&lt;application&gt;</code>并重新编译。
 
     </p>
   </td>

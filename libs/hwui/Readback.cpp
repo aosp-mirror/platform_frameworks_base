@@ -136,7 +136,7 @@ CopyResult Readback::copySurfaceInto(renderthread::RenderThread& renderThread,
             EGL_NATIVE_BUFFER_ANDROID, clientBuffer, attrs);
 
     if (sourceImage == EGL_NO_IMAGE_KHR) {
-        ALOGW("Error creating image (%#x)", eglGetError());
+        ALOGW("eglCreateImageKHR failed (%#x)", eglGetError());
         return CopyResult::UnknownError;
     }
     GLuint sourceTexId;
@@ -147,7 +147,8 @@ CopyResult Readback::copySurfaceInto(renderthread::RenderThread& renderThread,
 
     GLenum status = GL_NO_ERROR;
     while ((status = glGetError()) != GL_NO_ERROR) {
-        ALOGW("Error creating image (%#x)", status);
+        ALOGW("glEGLImageTargetTexture2DOES failed (%#x)", status);
+        eglDestroyImageKHR(display, sourceImage);
         return CopyResult::UnknownError;
     }
 
@@ -182,6 +183,13 @@ CopyResult Readback::copySurfaceInto(renderthread::RenderThread& renderThread,
     // Cleanup
     caches.textureState().deleteTexture(texture);
     renderState.deleteFramebuffer(fbo);
+
+    sourceTexture.deleteTexture();
+    // All we're flushing & finishing is the deletion of the texture since
+    // copyTextureInto already did a major flush & finish as an implicit
+    // part of glReadPixels, so this shouldn't pose any major stalls.
+    glFinish();
+    eglDestroyImageKHR(display, sourceImage);
 
     GL_CHECKPOINT(MODERATE);
 

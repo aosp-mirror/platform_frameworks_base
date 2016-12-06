@@ -28,6 +28,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.support.annotation.Nullable;
@@ -73,7 +74,7 @@ final class QuickViewIntentBuilder {
     @Nullable Intent build() {
         if (DEBUG) Log.d(TAG, "Preparing intent for doc:" + mDocument.documentId);
 
-        String trustedPkg = mResources.getString(R.string.trusted_quick_viewer_package);
+        String trustedPkg = getQuickViewPackage();
 
         if (!TextUtils.isEmpty(trustedPkg)) {
             Intent intent = new Intent(Intent.ACTION_QUICK_VIEW);
@@ -114,6 +115,16 @@ final class QuickViewIntentBuilder {
         }
 
         return null;
+    }
+
+    private String getQuickViewPackage() {
+        String resValue = mResources.getString(R.string.trusted_quick_viewer_package);
+        if (Build.IS_DEBUGGABLE ) {
+            // Allow users of debug devices to override default quick viewer
+            // for the purposes of testing.
+            return android.os.SystemProperties.get("debug.quick_viewer", resValue);
+        }
+        return resValue;
     }
 
     private int collectViewableUris(ArrayList<Uri> uris) {

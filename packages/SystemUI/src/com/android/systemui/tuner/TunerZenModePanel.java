@@ -54,7 +54,6 @@ public class TunerZenModePanel extends LinearLayout implements OnClickListener {
         mHeaderSwitch = findViewById(R.id.tuner_zen_switch);
         mHeaderSwitch.setVisibility(View.VISIBLE);
         mHeaderSwitch.setOnClickListener(this);
-        mHeaderSwitch.findViewById(com.android.internal.R.id.up).setVisibility(View.GONE);
         ((TextView) mHeaderSwitch.findViewById(android.R.id.title)).setText(
                 R.string.quick_settings_dnd_label);
         mZenModePanel = (ZenModePanel) findViewById(R.id.zen_mode_panel);

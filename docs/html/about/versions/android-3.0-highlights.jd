@@ -4,31 +4,31 @@ page.title=Honeycomb
 
 
 <style type="text/css">
-#jd-content {
+#body-content {
   max-width:1200px;
 }
-#jd-content div.screenshot {
+#body-content div.screenshot {
   float:left;
   clear:left;
   padding:15px 30px 15px 0;
 }
-#jd-content div.video {
+#body-content div.video {
   float:right;
   padding:0 60px 40px;
 }
-#jd-content table.columns {
+#body-content table.columns {
   margin:0 0 1em 0;
 }
-#jd-content table.columns td {
+#body-content table.columns td {
   padding:0;
 }
-#jd-content table.columns td+td {
+#body-content table.columns td+td {
   padding:0 2em;
 }
-#jd-content table.columns td img {
+#body-content table.columns td img {
   margin:0;
 }
-#jd-content table.columns td+td>*:first-child {
+#body-content table.columns td+td>*:first-child {
   margin-top:-2em;
 }
 .green {
@@ -40,7 +40,7 @@ page.title=Honeycomb
 
 <p>Welcome to Android 3.0!</p>
 
-<p>The Android 3.0 platform introduces many new and exciting features for users and developers. 
+<p>The Android 3.0 platform introduces many new and exciting features for users and developers.
 This document provides a glimpse of some of the new features and technologies, as delivered in
 Android 3.0. For a more detailed look at new developer APIs, see the <a
 href="{@docRoot}about/versions/android-3.0.html">Android 3.0 Platform</a> document.</p>
@@ -61,7 +61,7 @@ src="{@docRoot}sdk/images/3.0/home_hero1.png" alt="" height="280" /></a></div>
 
 <p>Android 3.0 is a new version of the Android platform that is specifically optimized for devices with larger screen sizes, particularly tablets. It introduces a brand new, truly virtual and “holographic” UI design, as well as an elegant, content-focused interaction model.</p>
 
-<p>Android 3.0 builds on the things people love most about Android &mdash; refined multitasking, rich notifications, Home screen customization, widgets, and more &mdash; and transforms them with a vibrant, 3D experience and deeper interactivity, making them familiar but even better than before.</p> 
+<p>Android 3.0 builds on the things people love most about Android &mdash; refined multitasking, rich notifications, Home screen customization, widgets, and more &mdash; and transforms them with a vibrant, 3D experience and deeper interactivity, making them familiar but even better than before.</p>
 
 <p>The new UI brings fresh paradigms for interaction, navigation, and customization and makes them available to all applications &mdash; even those built for earlier versions of the platform. Applications written for Android 3.0 are able to use an extended set of UI objects, powerful graphics, and media capabilities to engage users in new ways.</p>
 

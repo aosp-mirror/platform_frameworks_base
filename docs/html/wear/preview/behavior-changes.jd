@@ -1,0 +1,106 @@
+page.title=Behavior Changes
+meta.keywords="preview", "wear"
+page.tags="preview", "developer preview"
+
+@jd:body
+
+<p>
+  Along with new features, Android Wear 2.0 includes a variety of behavior
+  changes. This document highlights some of the key changes to
+  account for in your apps.
+</p>
+
+<p>
+  If you have previously published an app for Android Wear, be aware that
+  your app might be affected by these changes in the platform.
+</p>
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+
+<ul>
+  <li><a href="#activity-dismissal">Activity Dismissal</a></li>
+  <li><a href="#invalid-fields">Invalid Fields for a Complication Type</a></li>
+  <li><a href="#empty">Complication Types for Empty Data</a></li>
+</ul>
+
+</div>
+</div>
+
+<h2 id="activity-dismissal">Activity Dismissal</h2>
+
+<p>
+  Starting in <a href="{@docRoot}wear/preview/index.html">Android Wear 2.0</a>,
+  users dismiss apps and activities by using
+  the power (stem) button on the watch.
+  Long-pressing to dismiss an app is no longer suggested.
+  Additionally, developers should not implement the
+  long-press for dismissing
+  <a href="{@docRoot}training/wearables/ui/exit.html">full screen</a>
+  activities (panning or immersive activities such as Google Maps).
+</p>
+
+<p>
+  In Android Wear 2.0, the power button of the watch is used
+  to navigate back in the
+  <a href="{@docRoot}guide/components/tasks-and-back-stack.html">back stack</a>,
+  including for full-screen panning activities.
+  Before Android Wear 2.0, the <code>DismissOverlayView</code> class was
+  used to implement the long-press for a user to dismiss an app.
+  (The <code>DismissOverlayView</code> class was added to a layout
+  for full-screen drawing and to draw over the other views.)
+  Developers should test the power button for going back
+  between an app's activities and for exiting an app.
+</p>
+
+<p>
+  Additionally, swipe for exiting an app or activity is not available.
+  Developers can consider how their user interfaces
+  can be enhanced with swipe-left and swipe-right,
+  in a way similar to the functionality described for
+  <a href="{@docRoot}wear/preview/features/ui-nav-actions.html">navigation
+  drawers</a>.
+</p>
+
+<h2 id="invalid-fields">Invalid Fields for a Complication Type</h2>
+
+<p>
+  When a watch face uses the <a href="{@docRoot}wear/preview/features/complications.html">
+  Complications API</a>, the watch face requests data from a chosen provider.
+  A <code>ComplicationData</code> object, which contains
+  complication types, is returned.
+</p>
+
+<p>
+  A complication type determines the
+  kinds of data that a watch face can render. This section describes
+  a behavior change related to the <code>ComplicationData</code> object.
+</p>
+
+<p>
+  Starting with
+  <a href="https://developer.android.com/wear/preview/support.html#dp3">
+  Developer Preview 3</a>, when a watch face requests a field that is invalid
+  for a complication type, a default value for the field is returned.
+  For example, if a watch face tries to access a <code>Long text</code>
+  field in a <code>SHORT_TEXT</code> type, the default value for the
+  <code>Long text</code> field is returned.
+  In previous releases, such a request for an invalid field
+  (for a type) resulted in an exception.
+</p>
+
+<h2 id="empty">Complication Types for Empty Data</h2>
+
+<p>
+  Starting with
+  <a href="https://developer.android.com/wear/preview/support.html#dp3">
+  Developer Preview 3</a>, the complication types used for "empty" data are
+  changed. Apps that use the Complications API
+  may need to be updated to use
+  <code>TYPE_NO_DATA</code>. See the information
+  about <code>TYPE_NO_DATA</code> in the
+  <a href="{@docRoot}wear/preview/features/complications.html#types_and_fields">
+  Types and fields</a> section.
+</p>

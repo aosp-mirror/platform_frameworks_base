@@ -1,0 +1,610 @@
+page.title=Mudanças de comportamento
+page.keywords=preview,sdk,compatibility
+meta.tags="preview", "compatibility"
+page.tags="preview", "developer preview"
+page.image=images/cards/card-n-changes_2x.png
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>Neste documento</h2>
+
+<ol>
+  <li><a href="#perf">Melhorias no desempenho</a>
+    <ol>
+      <li><a href="#doze">Soneca</a></li>
+      <li><a href="#bg-opt">Otimizações em segundo plano</a></li>
+    </ol>
+  </li>
+  <li><a href="#perm">Alterações nas permissões</a>
+  </li>
+  <li><a href="#sharing-files">Compartilhamento de arquivos entre aplicativos</a></li>
+  <li><a href="#accessibility">Melhorias na acessibilidade</a>
+    <ol>
+      <li><a href="#screen-zoom">Zoom de tela</a></li>
+      <li><a href="#vision-settings">Configurações de visão no assistente de configuração</a></li>
+    </ol>
+  </li>
+  <li><a href="#ndk">Aplicativos NDK vinculados a bibliotecas de plataforma</a></li>
+  <li><a href="#afw">Android for Work</a></li>
+  <li><a href="#annotations">Retenção de anotações</a></li>
+  <li><a href="#other">Outros pontos importantes</a></li>
+</ol>
+
+<h2>Veja também</h2>
+<ol>
+  <li><a href="{@docRoot}preview/api-overview.html">
+Visão geral da API do Android N</a></li>
+</ol>
+
+</div>
+</div>
+
+
+<p>
+  Junto com novos recursos e funcionalidades, o Android N
+inclui uma variedade de mudanças de comportamento do sistema e da API. Este documento
+destaca algumas das principais mudanças que você deve entender e considerar
+nos aplicativos.
+</p>
+
+<p>
+  Caso tenha publicado anteriormente um aplicativo para Android, saiba que ele pode ser afetado
+ pelas alterações na plataforma.
+</p>
+
+
+<h2 id="perf">Bateria e memória</h2>
+
+<p>
+O Android N inclui alterações de comportamento do sistema com o objetivo de melhorar a vida útil da bateria
+nos dispositivos e reduzir o uso de RAM. Essas alterações podem afetar o acesso do aplicativo aos
+recursos do sistema, bem como a forma como ele interage com outros aplicativos por meio de
+ certas intenções explícitas .
+</p>
+
+<h3 id="doze">Soneca</h3>
+
+<p>
+  Introduzido no Android 6.0 (nível da API 23), o modo soneca aumenta a vida útil da bateria
+ adiando atividades de CPU e rede quando um usuário deixa um dispositivo desconectado,
+ estacionário e com a tela desativada. O Android N aprimora
+ ainda mais o modo soneca aplicando um subconjunto de restrições de CPU e rede
+ quando o dispositivo está desconectado e com a tela desativada, mas não necessariamente
+ estacionário, como, por exemplo, quando o celular está no bolso do usuário.
+</p>
+
+
+<img src="{@docRoot}images/android-7.0/doze-diagram-1.png" alt="" height="251px" id="figure1" />
+<p class="img-caption">
+  <strong>Figura 1.</strong> Ilustração de como o modo soneca aplica um primeiro nível de
+ restrições de atividades de sistema para aumentar a vida útil da bateria.
+</p>
+
+<p>
+  Quando o dispositivo estiver sendo alimentado pela bateria e a tela estiver desativada por um determinado
+ período, o dispositivo entrará no modo de soneca e aplicará o primeiro subconjunto de restrições: o
+acesso do aplicativo à rede será desativado e os trabalhos e sincronizações serão adiados. Se o dispositivo permanecer
+estacionário por um determinado período após entrar no modo soneca, o sistema aplicará
+as demais restrições de soneca a {@link android.os.PowerManager.WakeLock}, aos alarmes
+{@link android.app.AlarmManager} e às verificações de GPS e Wi-Fi. Independentemente
+ de as restrições de soneca serem aplicadas parcial ou totalmente, o sistema despertará o
+ dispositivo para breves janelas de manutenção, quando os aplicativos
+ poderão acessar a rede e executar todos os trabalhos/sincronizações adiados.
+</p>
+
+
+<img src="{@docRoot}images/android-7.0/doze-diagram-2.png" alt="" id="figure2" />
+<p class="img-caption">
+  <strong>Figura 2.</strong> Ilustração de como o modo soneca aplica um segundo nível de
+ restrições de atividades de sistema após o dispositivo permanecer estacionário por um determinado período.
+</p>
+
+<p>
+  Note que a ativação da tela ou do dispositivo encerra o modo soneca e
+ remove essas restrições de processamento. O comportamento adicional não
+ afeta as recomendações e práticas recomendadas para a adaptação do aplicativo à versão
+ anterior do modo soneca, introduzida no Android 6.0 (nível da API 23), como discutido em
+ <a href="{@docRoot}training/monitoring-device-state/doze-standby.html">
+ Otimização para soneca e aplicativo em espera</a>. Você deve continuar
+ a seguir essas recomendações, como o uso do Google Cloud Messaging (GCM) para
+ enviar e receber mensagens, e começar a planejar atualizações para acomodar o
+ comportamento adicional do modo soneca.
+</p>
+
+
+<h3 id="bg-opt">Project Svelte: Otimizações em segundo plano</h3>
+
+<p>
+  O Android N remove três transmissões implícitas para ajudar a otimizar o
+ uso de memória e o consumo de energia. Essa alteração é necessária porque transmissões
+ implícitas iniciam frequentemente em segundo plano aplicativos
+ registrados para escutá-las. A remoção dessas transmissões pode beneficiar consideravelmente o desempenho
+do dispositivo e a experiência do usuário.
+</p>
+
+<p>
+  Dispositivos móveis passam por alterações frequentes na conectividade, como a alternância
+ entre Wi-Fi e dados móveis. No momento, os aplicativos podem monitorar alterações de
+ conectividade registrando um receptor para a transmissão implícita {@link
+ android.net.ConnectivityManager#CONNECTIVITY_ACTION} em seu
+ manifesto. Como vários aplicativos se registram para receber essa transmissão, uma única
+ mudança de rede pode fazer com que todos despertem e processem a transmissão
+ ao mesmo tempo.
+</p>
+
+<p>
+  De forma semelhante, em versões anteriores do Android, os aplicativos podiam se registrar para receber transmissões implícitas {@link
+ android.hardware.Camera#ACTION_NEW_PICTURE} e {@link
+ android.hardware.Camera#ACTION_NEW_VIDEO} de outros aplicativos, como
+ Câmera. Quando um usuário tira uma fotografia com o aplicativo Câmera, esses aplicativos são despertados
+ para processar a transmissão.
+</p>
+
+<p>
+  Para aliviar esses problemas, o Android N aplica a seguintes
+ otimizações:
+</p>
+
+<ul>
+  <li>Os aplicativos direcionados ao Android N não receberão transmissões {@link
+ android.net.ConnectivityManager#CONNECTIVITY_ACTION}, mesmo
+ se tiverem entradas no manifesto solicitando notificação desses eventos. Os aplicativos em execução
+ainda poderão escutar {@code CONNECTIVITY_CHANGE} no encadeamento principal
+ se solicitarem a notificação com {@link android.content.BroadcastReceiver}.
+  </li>
+
+  <li>Os aplicativos não podem enviar nem receber transmissões {@link
+ android.hardware.Camera#ACTION_NEW_PICTURE} ou {@link
+ android.hardware.Camera#ACTION_NEW_VIDEO}. Essa otimização
+ afeta todos os aplicativos e não apenas os direcionados ao Android N.
+  </li>
+</ul>
+
+<p>Se o seu aplicativo usar qualquer uma dessas intenções, remova as dependências
+ delas assim que possível para direcionar corretamente os dispositivos Android N.
+  A estrutura do Android oferece diversas soluções para reduzir a necessidade dessas
+ transmissões implícitas. Por exemplo, a API {@link
+ android.app.job.JobScheduler} oferece um mecanismo robusto para agendar
+ operações de rede quando ocorrem condições especificadas, como conexão a uma
+ rede ilimitada. Você pode até usar {@link
+android.app.job.JobScheduler} para reagir a mudanças em provedores de conteúdo.
+</p>
+
+<p>
+  Para obter mais informações sobre otimizações em segundo plano no N e como adaptar seu aplicativo,
+ consulte <a href="{@docRoot}preview/features/background-optimization.html">Otimizações
+em segundo plano</a>.
+</p>
+
+<h2 id="perm">Alterações nas permissões</h2>
+
+<p>
+  O Android N inclui alterações em permissões que podem afetar seu aplicativo.
+</p>
+
+<h3 id="permfilesys">Alterações nas permissões do sistema de arquivos</h3>
+
+<p>
+  Para aprimorar a segurança de arquivos privados, o diretório privado de
+ aplicativos direcionados ao Android N ou superior tem acesso restrito (<code>0700</code>).
+  Esta configuração impede o vazamento de metadados de arquivos privados, como tamanho
+ e existência. Esta alteração de permissão tem vários efeitos colaterais:
+</p>
+
+<ul>
+  <li>
+    O proprietário não deve mais relaxar as permissões para arquivos privados,
+ e qualquer tentativa de fazer isso usando
+ {@link android.content.Context#MODE_WORLD_READABLE} e/ou
+ {@link android.content.Context#MODE_WORLD_WRITEABLE} acionará uma
+ {@link java.lang.SecurityException}.
+    <p class="note">
+      <strong>Observação:</strong> Até agora, essa restrição não foi adotada em pleno vigor.
+      Aplicativos ainda podem modificar permissões para o diretório privado usando
+ APIs nativas ou a API {@link java.io.File File}. No entanto, o relaxamento
+ de permissões para o diretório privado é enfaticamente desencorajado.
+    </p>
+  </li>
+  <li>
+    A passagem de URIs <code>file://</code> para fora do domínio do pacote pode deixar o
+ receptor com um caminho inacessível. Sendo assim, tentativas de passar um URI
+ <code>file://</code> acionam uma
+ <code>FileUriExposedException</code>. A forma recomendada para compartilhamento do
+ conteúdo de um arquivo privado é o uso do {@link
+ android.support.v4.content.FileProvider}.
+  </li>
+  <li>
+    O {@link android.app.DownloadManager} não consegue mais compartilhar
+ arquivos armazenados de forma privada por nome de arquivo. Os aplicativos de legado podem acabar em um
+ caminho inacessível quando acessam {@link
+ android.app.DownloadManager#COLUMN_LOCAL_FILENAME}. Aplicativos direcionados para o
+ Android N ou superior acionam uma {@link java.lang.SecurityException} quando
+ tentam acessar
+ {@link android.app.DownloadManager#COLUMN_LOCAL_FILENAME}.
+    Aplicativos de legado que definem o local de download para um local público
+ usando
+ {@link
+android.app.DownloadManager.Request#setDestinationInExternalFilesDir
+DownloadManager.Request.setDestinationInExternalFilesDir()} ou
+ {@link
+android.app.DownloadManager.Request#setDestinationInExternalPublicDir
+DownloadManager.Request.setDestinationInExternalPublicDir()}
+ ainda conseguem acessar o caminho em
+{@link android.app.DownloadManager#COLUMN_LOCAL_FILENAME}, no entanto, este
+ método é enfaticamente desencorajado. A forma preferencial para se acessar um arquivo
+ exposto pelo {@link android.app.DownloadManager} é o uso do
+{@link android.content.ContentResolver#openFileDescriptor
+ContentResolver.openFileDescriptor()}.
+  </li>
+</ul>
+
+<h2 id="sharing-files">Compartilhamento de arquivos entre aplicativos</h2>
+
+<p>
+Para aplicativos direcionados ao Android N, a estrutura do Android cumpre com
+a política de API {@link android.os.StrictMode} que proíbe a exposição de URIs {@code file://}
+fora do aplicativo. Se uma intenção que contenha o URI de um arquivo deixar o aplicativo, ele falhará
+ com uma exceção {@code FileUriExposedException}.
+</p>
+
+<p>
+Para compartilhar arquivos entre aplicativos, você deve enviar um URI {@code content://}
+e conceder uma permissão de acesso temporária ao URI. A forma mais fácil de conceder essa permissão é
+usar a classe {@link android.support.v4.content.FileProvider}. Para obter mais informações
+ sobre permissões e compartilhamento de arquivos,
+consulte <a href="{@docRoot}training/secure-file-sharing/index.html">Compartilhamento de Arquivos</a>.
+</p>
+
+<h2 id="accessibility">Melhorias na acessibilidade</h2>
+
+<p>
+  O Android N inclui mudanças criadas para aprimorar a facilidade de uso da
+ plataforma para usuários com visão reduzida ou deficiente. Normalmente, essas mudanças
+ não exigirão alterações de código no aplicativo. No entanto, analise
+ esse recurso e teste-o em seu aplicativo para avaliar possíveis impactos na experiência
+ do usuário.
+</p>
+
+
+<h3 id="screen-zoom">Zoom de tela</h3>
+
+<p>
+  O Android N permite que os usuários definam <strong>Display size</strong>, que amplia
+ ou reduz todos os elementos na tela, melhorando a acessibilidade do dispositivo
+ para usuários com visão deficiente. Os usuários não podem alterar o zoom da tela além da largura mínima de
+ tela de <a href="http://developer.android.com/guide/topics/resources/providing-resources.html">
+sw320dp</a>, que é a largura do Nexus 4, um telefone comum de tamanho médio.
+</p>
+
+<div class="cols">
+
+<div class="col-6">
+  <img src="{@docRoot}images/android-7.0/screen-zoom-1.png" alt="" height="XXX" id="figure1" />
+</div>
+<div class="col-6">
+  <img src="{@docRoot}images/android-7.0/screen-zoom-2.png" alt="" height="XXX" id="figure1" />
+</div>
+
+</div> <!-- end cols -->
+<p class="img-caption">
+  <strong>Figura 3.</strong> A tela à direita mostra o efeito de
+ reduzir o Display size de um dispositivo executando uma imagem do sistema Android N.
+</p>
+
+
+<p>
+  Quando a densidade do dispositivo mudar, o sistema notificará os aplicativos em execução das
+ seguintes formas:
+</p>
+
+<ul>
+  <li>Se um aplicativo está direcionado ao nível da API 23 ou mais baixo, o sistema automaticamente elimina
+ todos os processos em segundo plano. Isso significa que, se um usuário sair
+ desse aplicativo para abrir a tela <em>Settings</em> e alterar a
+ configuração <strong>Display size</strong>, o sistema eliminará o aplicativo da mesma
+ forma que faria em uma situação de pouca memória. Se o aplicativo tiver processos
+ em primeiro plano, o sistema notificará esses processos sobre a mudança de configuração, como
+ descrito em <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Processamento
+ de alterações no tempo de execução</a>, como se a orientação do dispositivo tivesse mudado.
+  </li>
+
+  <li>Se um aplicativo for direcionado ao Android N, todos os seus processos
+ (em primeiro e segundo plano) serão notificados da mudança de configuração, como
+ descrito em <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Processamento
+ de alterações no tempo de execução</a>.
+  </li>
+</ul>
+
+<p>
+  A maioria dos aplicativos não precisa ser alterada para ser compatível com esse recurso, desde que
+ os aplicativos sigam as práticas recomendadas do Android. Os itens específicos a serem verificados são:
+</p>
+
+<ul>
+  <li>Teste o aplicativo em um dispositivo com largura de tela <code><a href=
+  "{@docRoot}guide/topics/resources/providing-resources.html">sw320dp</a></code>
+ e verifique se ele funciona adequadamente.
+  </li>
+
+  <li>Quando a configuração do dispositivo mudar, atualize todas as informações
+ dependentes de densidade armazenadas no cache, como bitmaps no cache ou recursos carregados da
+ rede. Verifique a ocorrência de alterações de configuração quando o aplicativo sair do estado pausado e retomar
+ a execução.
+    <p class="note">
+      <strong>Observação:</strong> se você armazenar em cache dados dependentes de configuração,
+recomendamos incluir metadados relevantes, como o tamanho de tela
+ adequado ou a densidade de pixels desses dados. Salvar esses dados permitirá que você
+ decida se será necessário atualizar os dados armazenados em cache após uma mudança
+ de configuração.
+    </p>
+  </li>
+
+  <li>Evite especificar dimensões com unidades px, pois elas não são redimensionadas de
+ acordo com a densidade de tela. Em vez disso, especifique dimensões com unidades de <a href="{@docRoot}guide/practices/screens_support.html">pixel independente de
+ densidade</a> (<code>dp</code>).
+  </li>
+</ul>
+
+<h3 id="vision-settings">Configurações de visão no assistente de configuração</h3>
+
+<p>
+  Agora, o Android N inclui Configurações de visão na tela de boas-vindas, onde os usuários podem
+ definir as configurações de acessibilidade a seguir em um novo dispositivo:
+  <strong>gesto de ampliação</strong>, <strong>tamanho da fonte</strong>
+, <strong>tamanho da tela</strong> e <strong>TalkBack</strong>. Essa alteração
+ aumenta a visibilidade de erros relacionados a configurações de tela diferentes. Para
+ avaliar o impacto do recurso, teste seus aplicativos com essas
+configurações ativadas. As configurações podem ser encontradas em <strong>Settings &gt;
+ Accessibility</strong>.
+</p>
+
+<h2 id="ndk">Aplicativos NDK vinculados a bibliotecas de plataforma</h2>
+
+<p>
+  O Android N inclui mudanças no namespace para evitar o carregamento de APIs não públicas.
+  Se você usar o NDK, use apenas APIs públicas da plataforma
+ Android. O uso de APIs não públicas na próxima versão oficial do Android
+ poderá causar problemas no seu aplicativo.
+</p>
+
+<p>
+  Para alertar sobre o uso de APIs não públicas, os aplicativos executados em um dispositivo
+ Android N geram um erro na saída logcat quando um aplicativo chama uma API não pública.
+  Esse erro também é exibido na tela do dispositivo como mensagem para que o usuário
+fique ciente da situação. Revise o código do seu aplicativo para
+ remover o uso de APIs de plataformas não públicas e faça testes completos do aplicativo usando
+ um dispositivo de visualização ou um emulador.
+</p>
+
+<p>
+  Se o seu aplicativo depender de bibliotecas de plataforma, consulte a documentação do NDK
+ para obter soluções usuais de substituição de APIs privadas comuns por APIs públicas equivalentes.
+  Também é possível que você esteja vinculando bibliotecas de plataforma sem perceber,
+ particularmente se o aplicativo usar uma biblioteca que faz parte da plataforma (como
+ <code>libpng</code>), mas não faz parte do NDK. Nesse caso, verifique se
+o APK contém todos os arquivos .so que você pretende vincular.
+</p>
+
+<p class="caution">
+  <strong>Cuidado:</strong> Algumas bibliotecas de terceiros também podem conter links para APIs
+ não públicas. Se o aplicativo usar essas bibliotecas, poderá falhar quando executado
+ na próxima versão oficial do Android.
+</p>
+
+<p>
+  Os aplicativos não devem depender de nem usar bibliotecas nativas não incluídas
+ no NDK, pois elas podem ser alteradas ou removidas entre uma versão do Android
+ e outra. A mudança de OpenSSL para BoringSSL é um exemplo dessas alterações.
+  Além disso, dispositivos diferentes podem oferecer níveis distintos de compatibilidade, pois
+ não há requisitos de compatibilidade para bibliotecas de plataforma não incluídas
+no NDK. Se você precisar acessar bibliotecas que não são do NDK em dispositivos mais antigos, torne o carregamento
+dependente do nível da Android API.
+</p>
+
+<p>
+  Para ajudar a diagnosticar esses tipos de problemas, veja a seguir alguns exemplos de erros
+ de Java e NDK que podem ocorrer durante a compilação do aplicativo com o Android N:
+</p>
+
+<p>Exemplo de erro de Java:</p>
+<pre class="no-pretty-print">
+java.lang.UnsatisfiedLinkError: dlopen failed: library "/system/lib/libcutils.so"
+    is not accessible for the namespace "classloader-namespace"
+</pre>
+
+<p>Exemplo de erro de NDK:</p>
+<pre class="no-pretty-print">
+dlopen failed: cannot locate symbol "__system_property_get" referenced by ...
+</pre>
+
+
+<p>
+  Veja a seguir algumas correções comuns para aplicativos que encontram esses tipos de erro:
+</p>
+
+<ul>
+  <li>O uso de getJavaVM e getJNIEnv do libandroid_runtime.so pode ser substituído
+ por funções JNI padrão:
+<pre class="no-pretty-print">
+AndroidRuntime::getJavaVM -&gt; GetJavaVM from &lt;jni.h&gt;
+AndroidRuntime::getJNIEnv -&gt; JavaVM::GetEnv or
+JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
+</pre>
+  </li>
+
+  <li>O uso do símbolo {@code property_get} de {@code libcutils.so} pode ser
+ substituído pelo {@code alternative __system_property_get} público.
+   Para fazer isso, use {@code __system_property_get} com o include abaixo:
+<pre>
+#include &lt;sys/system_properties.h&gt;
+</pre>
+  </li>
+
+  <li>O uso do símbolo {@code SSL_ctrl} de {@code libcrypto.so} deve ser
+ substituído por uma versão local do aplicativo. Por exemplo, vincule estaticamente
+ {@code libcyrpto.a} no arquivo {@code .so} ou inclua dinamicamente o seu próprio
+ {@code libcrypto.so} do BoringSSL ou OpenSSL no aplicativo.
+  </li>
+</ul>
+
+<h2 id="afw">Android for Work</h2>
+<p>
+  O Android N contém mudanças para aplicativos direcionados ao Android for Work, incluindo
+ mudanças em instalação de certificados, redefinição de senha, gerenciamento de
+ usuários secundários e acesso a identificadores de dispositivos. Se você estiver criando aplicativos para
+ ambientes do Android for Work, examine essas mudanças e modifique
+ o aplicativo conforme necessário.
+</p>
+
+<ul>
+  <li>Você precisa instalar um instalador de certificado delegado antes que o DPC possa
+ configurá-lo. Para aplicativos de donos de perfil e dispositivo direcionados ao N SDK, você deve
+ instalar o instalador de certificado delegado antes de chamar o
+ controlador de políticas de dispositivo (DPC)
+ <code>DevicePolicyManager.setCertInstallerPackage()</code>. Se o instalador
+ não estiver instalado, o sistema gerará uma
+ <code>IllegalArgumentException</code>.
+  </li>
+
+  <li>As restrições de redefinição de senha de administradores do dispositivo agora se aplicam também a
+donos de perfil. Os administradores de dispositivo não podem mais usar
+ {@code DevicePolicyManager.resetPassword()} para limpar senhas nem para alterar
+ as já definidas. Os administradores de dispositivo ainda poderão definir uma senha, mas apenas
+ em dispositivos sem senha, PIN nem padrão.
+  </li>
+
+  <li>Donos de dispositivo e perfil poderão gerenciar contas, mesmo se restrições forem
+ definidas. Eles podem chamar as APIs de gerenciamento de contas,
+ mesmo se restrições de usuário <code>DISALLOW_MODIFY_ACCOUNTS</code> forem implementadas.
+  </li>
+
+  <li>Os donos de dispositivo podem gerenciar usuários secundários com maior facilidade. Quando um dispositivo
+ executar no modo de dono do dispositivo, a restrição <code>DISALLOW_ADD_USER</code>
+ será definida automaticamente. Isso evita que os usuários criem usuários secundários
+ não gerenciados. Além disso, os métodos <code>CreateUser()</code> e
+ <code>createAndInitializeUser()</code> ficaram obsoletos e foram substituídos
+ pelo novo método <code>DevicePolicyManager.createAndManageUser()</code>.
+  </li>
+
+  <li>Os donos de dispositivo podem acessar identificadores de dispositivo. O dono do dispositivo pode acessar o
+ endereço MAC Wi-Fi de um dispositivo usando
+ <code>DevicePolicyManagewr.getWifiMacAddress()</code>. Se a rede Wi-Fi nunca
+ foi ativada no dispositivo, esse método retorna o valor {@code null}.
+  </li>
+
+  <li>A configuração modo de trabalho controla o acesso a aplicativos de trabalho. Quando o modo de trabalho está desativado, a
+ tela de início do sistema mostra os aplicativos de trabalho em cinza para indicar que estão indisponíveis. Quando é
+ reativado, o modo de trabalho retorna ao comportamento normal.
+</ul>
+
+<p>
+  Para obter mais informações sobre as mudanças no Android for Work no Android N, consulte
+ <a href="{@docRoot}preview/features/afw.html">Atualizações no Android for Work</a>.
+</p>
+
+<h2 id="annotations">Retenção de anotações</h2>
+
+<p>
+O Android N corrige um erro em que a visibilidade de anotações era ignorada.
+Este problema permitia que o tempo de execução acessasse anotações a que não deveria
+ter acesso. Entre essas anotações, estão:
+</p>
+
+<ul>
+   <li>{@code VISIBILITY_BUILD}: que só deveria estar visível em tempo de compilação.</li>
+   <li>{@code VISIBILITY_SYSTEM}: que deveria estar visível em tempo de execução, mas apenas para o
+sistema subjacente.</li>
+</ul>
+
+<p>
+Se o seu aplicativo se baseou neste comportamento, adicione uma política de retenção para anotações que deve
+ estar disponível em tempo de execução. É possível fazer isso usando {@code @Retention(RetentionPolicy.RUNTIME)}.
+</p>
+
+<h2 id="other">Outros pontos importantes</h2>
+
+<ul>
+<li>Quando um aplicativo for executado no Android N, mas for direcionado a um nível da API menor
+ e o usuário alterar o tamanho da tela, o processo do aplicativo será eliminado. O aplicativo
+deverá ser capaz de processar corretamente esse cenário. Caso contrário, ele falhará
+quando o usuário restaurá-lo usando Recents.
+
+<p>
+Você deve testar o aplicativo para verificar
+se esse comportamento não ocorre.
+Isso pode ser feito causando uma falha idêntica
+eliminando o aplicativo manualmente usando o DDMS.
+</p>
+
+<p>
+Aplicativos direcionados ao Android N e versões posteriores não serão eliminados automaticamente em mudanças de densidade.
+No entanto, podem continuar a responder a alterações de configurações de forma não ideal.
+</p>
+</li>
+
+<li>
+Os aplicativos no Android N devem ser capazes de processar corretamente mudanças de configuração
+e não devem falhar em inicializações subsequentes. Você pode verificar o comportamento do aplicativo
+alterando o tamanho da fonte (<strong>Setting</strong> &gt;
+<strong>Display</strong> &gt; <strong>Font size</strong>) e depois restaurando
+o aplicativo em Recents.
+</li>
+
+<li>
+Devido a um erro em versões anteriores do Android, o sistema não sinaliza gravações
+ em um soquete TCP no encadeamento principal como violações do modo estrito. O Android N corrigiu esse erro.
+Agora, os aplicativos que exibirem este comportamento gerarão uma{@code android.os.NetworkOnMainThreadException}.
+Geralmente, a realização de operações de rede no encadeamento principal é uma má ideia porque essas operações
+geralmente têm alta latência no final, causando ANRs e problemas.
+</li>
+
+<li>
+Agora, por padrão, a família de métodos {@code Debug.startMethodTracing()} armazena
+os resultados no diretório específico do pacote no armazenamento compartilhado,
+ e não no nível mais alto
+ do cartão SD.  Isso significa que os aplicativos não precisam mais solicitar a permissão {@code WRITE_EXTERNAL_STORAGE} para usar estas APIs.
+</li>
+
+<li>
+Muitas APIs de plataformas começaram a verificar grandes cargas úteis enviadas
+por meio de transações {@link android.os.Binder}, e o
+sistema agora gera novamente{@code TransactionTooLargeExceptions}
+como {@code RuntimeExceptions}, em vez de registrá-las ou suprimi-las silenciosamente.  Um
+exemplo comum é armazenar dados demais em
+{@link android.app.Activity#onSaveInstanceState Activity.onSaveInstanceState()},
+que faz com que {@code ActivityThread.StopInfo} gere uma
+{@code RuntimeException} quando seu aplicativo é direcionado ao Android N.
+</li>
+
+<li>
+Se um aplicativo publica tarefas {@link java.lang.Runnable} para uma {@link android.view.View} e
+ esta {@link android.view.View}
+não está anexada a uma janela, o sistema
+coloca a tarefa {@link java.lang.Runnable} em fila com a {@link android.view.View}.
+A tarefa {@link java.lang.Runnable} não é executada até que a
+{@link android.view.View} esteja anexada
+a uma janela. Este comportamento corrige os seguintes erros:
+<ul>
+   <li>Se um aplicativo publicasse em uma {@link android.view.View} de um encadeamento que não fosse o encadeamento de IU da janela pretendida
+, o {@link java.lang.Runnable} poderia acabar sendo executado no encadeamento errado.
+   </li>
+   <li>Se a tarefa {@link java.lang.Runnable} fosse publicada de um encadeamento que não fosse
+ um encadeamento de looper, o aplicativo poderia expor a tarefa {@link java.lang.Runnable}.</li>
+</ul>
+</li>
+
+<li>
+Se um aplicativo no Android N com permissão
+{@link android.Manifest.permission#DELETE_PACKAGES DELETE_PACKAGES}
+tentar excluir um pacote instalado por outro aplicativo,
+o sistema solicitará a confirmação do usuário. Nesse cenário, os aplicativos devem esperar
+{@link android.content.pm.PackageInstaller#STATUS_PENDING_USER_ACTION STATUS_PENDING_USER_ACTION}
+como status de retorno ao invocar
+{@link android.content.pm.PackageInstaller#uninstall PackageInstaller.uninstall()}.
+</li>
+
+</ul>
+

@@ -32,6 +32,8 @@ import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.Log;
 
+import com.android.settingslib.R;
+
 import java.util.Date;
 import java.util.Locale;
 
@@ -41,12 +43,12 @@ import static android.net.NetworkStatsHistory.FIELD_TX_BYTES;
 import static android.telephony.TelephonyManager.SIM_STATE_READY;
 import static android.text.format.DateUtils.FORMAT_ABBREV_MONTH;
 import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
+import static android.net.TrafficStats.MB_IN_BYTES;
 
 public class DataUsageController {
+
     private static final String TAG = "DataUsageController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-
-    public static final long DEFAULT_WARNING_LEVEL = 2L * 1024 * 1024 * 1024;
     private static final int FIELDS = FIELD_RX_BYTES | FIELD_TX_BYTES;
     private static final StringBuilder PERIOD_BUILDER = new StringBuilder(50);
     private static final java.util.Formatter PERIOD_FORMATTER = new java.util.Formatter(
@@ -73,6 +75,14 @@ public class DataUsageController {
 
     public void setNetworkController(NetworkNameProvider networkController) {
         mNetworkController = networkController;
+    }
+
+    /**
+     * Returns the default warning level in bytes.
+     */
+    public long getDefaultWarningLevel() {
+        return MB_IN_BYTES
+                * mContext.getResources().getInteger(R.integer.default_data_warning_level_mb);
     }
 
     private INetworkStatsSession getSession() {
@@ -169,7 +179,7 @@ public class DataUsageController {
                 usage.limitLevel = policy.limitBytes > 0 ? policy.limitBytes : 0;
                 usage.warningLevel = policy.warningBytes > 0 ? policy.warningBytes : 0;
             } else {
-                usage.warningLevel = DEFAULT_WARNING_LEVEL;
+                usage.warningLevel = getDefaultWarningLevel();
             }
             if (usage != null && mNetworkController != null) {
                 usage.carrier = mNetworkController.getMobileDataNetworkName();

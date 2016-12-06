@@ -81,7 +81,7 @@ a database that is only accessible to root. But on a rooted device, the
 credentials would be readable by anyone with {@code adb} access to the device.</p>
 
 <p>With this in mind, you shouldn't pass the user's actual
-password to {@link android.accounts.AccountManager#addAccountExplicitly 
+password to {@link android.accounts.AccountManager#addAccountExplicitly
 AccountManager.addAccountExplicitly()}. Instead, you should store a
 cryptographically secure token that would be of limited use to an attacker. If your
 user credentials are protecting something valuable, you should carefully

@@ -9,7 +9,7 @@ trainingnavtop=true
 
 <div id="tb-wrapper">
   <div id="tb">
-    
+
     <h2>이 과정에서 다루는 내용</h2>
 <ol>
   <li><a href="#lifecycle-states">수명 주기 콜백 이해하기</a></li>
@@ -17,7 +17,7 @@ trainingnavtop=true
   <li><a href="#Create">새로운 인스턴스 생성하기</a></li>
   <li><a href="#Destroy">액티비티 소멸하기</a></li>
 </ol>
-    
+
     <h2>필독 항목</h2>
     <ul>
       <li><a href="{@docRoot}guide/components/activities.html">액티비티</a></li>
@@ -83,7 +83,7 @@ Android 시스템은 {@link android.app.Activity} 인스턴스 수명 주기의 
 </ul>
 
 <!--
-<p class="table-caption"><strong>Table 1.</strong> Activity lifecycle state pairs and callback 
+<p class="table-caption"><strong>Table 1.</strong> Activity lifecycle state pairs and callback
 methods.</p>
 <table>
   <tr>
@@ -138,7 +138,7 @@ android.app.Activity#onResume()}을 호출합니다.</p>
 
 
 
-<h2 id="launching-activity">앱 시작 관리자 액티비티 지정하기</h2> 
+<h2 id="launching-activity">앱 시작 관리자 액티비티 지정하기</h2>
 
 <p>사용자가 홈 화면에서 앱 아이콘을 선택하면, 시스템이 앱에서 "시작 관리자"(또는 "메인") 액티비티로 선언한 {@link android.app.Activity}에 대한 {@link
 android.app.Activity#onCreate onCreate()} 메서드를
@@ -151,7 +151,7 @@ android.app.Activity#onCreate onCreate()} 메서드를
 <p>앱의 메인 액티비티는 {@link
 android.content.Intent#ACTION_MAIN MAIN} 작업 및{@link android.content.Intent#CATEGORY_LAUNCHER LAUNCHER} 카테고리를 포함하는 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
 <intent-filter>}</a>와 함께
-매니페스트 파일에 선언되어야 합니다. 예를 들면 다음과 같습니다.</p> 
+매니페스트 파일에 선언되어야 합니다. 예를 들면 다음과 같습니다.</p>
 
 <pre>
 &lt;activity android:name=".MainActivity" android:label="&#64;string/app_name">
@@ -200,10 +200,10 @@ public void onCreate(Bundle savedInstanceState) {
     // Set the user interface layout for this Activity
     // The layout file is defined in the project res/layout/main_activity.xml file
     setContentView(R.layout.main_activity);
-    
+
     // Initialize member TextView so we can manipulate it later
     mTextView = (TextView) findViewById(R.id.text_message);
-    
+
     // Make sure we're running on Honeycomb or higher to use ActionBar APIs
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
         // For the main activity, make sure the app icon in the action bar
@@ -268,7 +268,7 @@ android.app.Activity#onDestroy} 중에 액티비티를 중단시켜야 합니다
 &#64;Override
 public void onDestroy() {
     super.onDestroy();  // Always call the superclass
-    
+
     // Stop method tracing that the activity started during onCreate()
     android.os.Debug.stopMethodTracing();
 }

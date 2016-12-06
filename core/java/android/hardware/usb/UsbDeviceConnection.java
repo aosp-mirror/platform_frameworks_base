@@ -16,8 +16,10 @@
 
 package android.hardware.usb;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.content.Context;
 import android.os.ParcelFileDescriptor;
-
 import java.io.FileDescriptor;
 
 
@@ -31,6 +33,8 @@ public class UsbDeviceConnection {
 
     private final UsbDevice mDevice;
 
+    private Context mContext;
+
     // used by the JNI code
     private long mNativeContext;
 
@@ -42,8 +46,19 @@ public class UsbDeviceConnection {
         mDevice = device;
     }
 
-    /* package */ boolean open(String name, ParcelFileDescriptor pfd) {
+    /* package */ boolean open(String name, ParcelFileDescriptor pfd,  @NonNull Context context) {
+        mContext = context.getApplicationContext();
+
         return native_open(name, pfd.getFileDescriptor());
+    }
+
+    /**
+     * @return The application context the connection was created for.
+     *
+     * @hide
+     */
+    public @Nullable Context getContext() {
+        return mContext;
     }
 
     /**

@@ -15,7 +15,7 @@ parent.link=index.html
       <li><a href="#billing-support">获取相关支持</a></li>
     </ol>
 
-    
+
     <h2>另请参见</h2>
     <ol>
       <li><a href="{@docRoot}google/play/billing/billing_overview.html">应用内结算概述</a></li>

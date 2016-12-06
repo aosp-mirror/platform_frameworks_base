@@ -379,7 +379,7 @@ startActivity()} に渡す場合、ユーザーがメールを下書きして送
 </p>
 
 <p>たとえば、アプリでカメラを使用する必要があり、Android 2.1 で採用された API（<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API レベル</a> 7）を使用する場合、次のようにマニフェスト ファイルでそれを要件として宣言する必要があります。
-</p> 
+</p>
 
 <pre>
 &lt;manifest ... >

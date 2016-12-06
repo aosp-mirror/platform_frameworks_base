@@ -1,0 +1,593 @@
+page.title=Manage Your App's Memory
+page.tags=ram,low memory,OutOfMemoryError,onTrimMemory
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+<ol>
+  <li><a href="#monitor">Monitor Available Memory and Memory Usage</a>
+    <ul>
+      <li><a href="#AnalyzeRam">Tools for analyzing RAM usage</a></li>
+      <li><a href="#release">Release memory in response to events</a></li>
+      <li><a href="#CheckHowMuchMemory">Check how much memory you should use</a></li>
+    </ul>
+  </li>
+  <li><a href="#code">Use More Efficient Code Constructs</a>
+    <ul>
+      <li><a href="#Services">Use services sparingly</a></li>
+      <li><a href="#DataContainers">Use optimized data containers</a></li>
+      <li><a href="#Abstractions">Be careful with code abstractions</a></li>
+      <li><a href="#NanoProto">Use nano protobufs for serialized data</a></li>
+      <li><a href="#churn">Avoid memory churn</a></li>
+    </ul>
+  </li>
+  <li><a href="#remove">Remove Memory-Intensive Resources and Libraries</a>
+    <ul>
+      <li><a href="#reduce">Reduce overall APK size</a></li>
+      <li><a href="#DependencyInjection">Avoid dependency injection frameworks</a></li>
+      <li><a href="#ExternalLibs">Be careful about using external libraries</a></li>
+    </ul>
+  </li>
+</ol>
+<h2>See Also</h2>
+<ul>
+  <li><a href="{@docRoot}training/articles/memory-overview.html">Overview of Android Memory Management</a>
+  </li>
+  <li><a href="{@docRoot}studio/profile/investigate-ram.html">Investigating Your RAM Usage</a>
+  </li>
+  <li><a href="{@docRoot}topic/performance/reduce-apk-size.html">Reduce APK Size</a></li>
+</ul>
+
+</div>
+</div>
+
+<!-- INTRO #################################################### -->
+
+<p>
+  Random-access memory (RAM) is a valuable
+  resource in any software development environment, but
+  it's even more valuable on a mobile operating system
+  where physical memory is often constrained.
+  Although both the Android Runtime (ART) and Dalvik virtual machine perform
+  routine garbage collection, this does not mean you can ignore
+  when and where your app allocates and releases memory.
+  You still need to avoid
+  introducing memory leaks, usually caused by holding onto
+  object references in static member variables, and
+  release any {@link java.lang.ref.Reference} objects at the appropriate
+  time as defined by
+  lifecycle callbacks.
+</p>
+
+<p>
+  This page explains how you can
+  proactively reduce memory usage within your app.
+  For more information about general
+  practices to clean up your resources when programming in Java,
+  refer to other books or online
+  documentation about managing resource references.
+  If you’re looking for information about how to
+  analyze memory in a running app, read
+  <a href="#AnalyzeRam">Tools for analyzing RAM usage</a>.
+  For more detailed information about how the Android Runtime and Dalvik
+  virtual machine manage memory, see the
+  <a href="{@docRoot}training/articles/memory-overview.html">Overview of Android Memory Management</a>.
+</p>
+
+<!-- Section 1 #################################################### -->
+
+<h2 id="monitor">Monitor Available Memory and Memory Usage</h2>
+
+<p>
+  The Android framework, Android Studio, and Android SDK
+  can help you analyze and adjust your app's memory usage.
+  The Android framework
+  exposes several APIs that allow your app to reduce its memory usage
+  dynamically during runtime. Android Studio and the Android SDK
+  contain several tools  that allow you to investigate how your
+  app uses memory.
+</p>
+
+<!-- Section 1.1 #################################################### -->
+
+<h3 id="AnalyzeRam">Tools for analyzing RAM usage</h3>
+
+<p>
+  Before you can fix the memory usage problems in your app, you first need
+  to find them. Android Studio and the Android SDK include several tools
+  for analyzing memory usage in your app:
+</p>
+
+<ol>
+  <li>
+    The Device Monitor has a Dalvik Debug Monitor Server (DDMS) tool that allows
+    you to inspect memory allocation within your app process.
+    You can use this information to understand how your
+    app uses memory overall. For example, you can force a garbage collection
+    event and then view the types of objects that remain in memory. You can
+    use this information to identify operations or actions within your app
+    that allocate or leave excessive amounts of objects in memory.
+
+    <p>For more information about how to use the DDMS tool, see
+      <a href="/studio/profile/ddms.html">Using DDMS</a>.
+    </p>
+  </li>
+
+  <li>
+    The Memory Monitor in Android Studio shows you how your app allocates
+    memory over the course of a single session.
+    The tool shows a graph of available
+    and allocated Java memory over time, including garbage collection events.
+    You can also initiate garbage collection events and take a snapshot of
+    the Java heap while your app runs. The output from the Memory Monitor tool
+    can help you identify points when your app experiences excessive garbage
+    collection events, leading to app slowness.
+    <p>
+      For more information about how to use Memory Monitor tool, see
+      <a href="{@docRoot}tools/debugging/debugging-memory.html#ViewHeap">Viewing Heap Updates</a>.
+    </p>
+  </li>
+
+  <li>
+    Garbage collection events also show up in the Traceview viewer. Traceview
+    allows you to view trace log files as both a timeline and as a profile
+    of what happened within a method. You can use this tool to determine
+    what code was executing when a garbage collection event occurred.
+    <p>
+      For more information about how to use the Traceview viewer, see
+      <a href="https://developer.android.com/studio/profile/traceview.html">Profiling with Traceview and dmtracedump</a>.
+    </p>
+  </li>
+
+  <li>
+    The Allocation Tracker tool in Android Studio gives you a detailed look
+    at how your app allocates memory.
+    The Allocation Tracker records an app's memory allocations and lists
+    all allocated objects within the profiling snapshot. You can use this
+    tool to track down parts of your code that allocate too many objects.
+
+    <p>
+      For more information about how to use the Allocation Tracker tool, see
+      <a href="{docRoot}studio/profile/allocation-tracker-walkthru.html">Allocation Tracker Walkthrough</a>.
+    </p>
+  </li>
+
+</ol>
+
+<!-- Section 1.2 #################################################### -->
+
+<h3 id="release">Release memory in response to events</h3>
+
+<p>
+  An Android device can run with varying amounts of free memory
+  depending on the physical amount of RAM on the device and how the user
+  operates it. The system broadcasts signals to indicate when it is under
+  memory pressure, and apps should listen for these signals and adjust
+  their memory usage as appropriate.
+</p>
+
+</p>
+  You can use the {@link android.content.ComponentCallbacks2} API
+  to listen for these signals and then adjust your memory
+  usage in response to app lifecycle
+  or device events. The
+  {@link android.content.ComponentCallbacks2#onTrimMemory onTrimMemory()}
+  method allows your app to listen for memory related events when the app runs
+  in the foreground (is visible) and when it runs in the background.
+</p>
+
+<p>
+  To listen for these events, implement the {@link
+  android.content.ComponentCallbacks2#onTrimMemory onTrimMemory()}
+  callback in your {@link android.app.Activity}
+  classes, as shown in the following code snippet.
+</p>
+
+<pre class="prettyprint">
+import android.content.ComponentCallbacks2;
+// Other import statements ...
+
+public class MainActivity extends AppCompatActivity
+    implements ComponentCallbacks2 {
+
+    // Other activity code ...
+
+    /**
+     * Release memory when the UI becomes hidden or when system resources become low.
+     * @param level the memory-related event that was raised.
+     */
+    public void onTrimMemory(int level) {
+
+        // Determine which lifecycle or system event was raised.
+        switch (level) {
+
+            case ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN:
+
+                /*
+                   Release any UI objects that currently hold memory.
+
+                   The user interface has moved to the background.
+                */
+
+                break;
+
+            case ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE:
+            case ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW:
+            case ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL:
+
+                /*
+                   Release any memory that your app doesn't need to run.
+
+                   The device is running low on memory while the app is running.
+                   The event raised indicates the severity of the memory-related event.
+                   If the event is TRIM_MEMORY_RUNNING_CRITICAL, then the system will
+                   begin killing background processes.
+                */
+
+                break;
+
+            case ComponentCallbacks2.TRIM_MEMORY_BACKGROUND:
+            case ComponentCallbacks2.TRIM_MEMORY_MODERATE:
+            case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
+
+                /*
+                   Release as much memory as the process can.
+
+                   The app is on the LRU list and the system is running low on memory.
+                   The event raised indicates where the app sits within the LRU list.
+                   If the event is TRIM_MEMORY_COMPLETE, the process will be one of
+                   the first to be terminated.
+                */
+
+                break;
+
+            default:
+                /*
+                  Release any non-critical data structures.
+
+                  The app received an unrecognized memory level value
+                  from the system. Treat this as a generic low-memory message.
+                */
+                break;
+        }
+    }
+}
+</pre>
+
+<p>
+  The
+  {@link android.content.ComponentCallbacks2#onTrimMemory onTrimMemory()}
+  callback was added in Android 4.0 (API level 14). For earlier versions,
+  you can use the
+  {@link android.content.ComponentCallbacks#onLowMemory()}
+  callback as a fallback for older versions, which is roughly equivalent to the
+  {@link android.content.ComponentCallbacks2#TRIM_MEMORY_COMPLETE} event.
+</p>
+
+<!-- Section 1.3 #################################################### -->
+
+<h3 id="CheckHowMuchMemory">Check how much memory you should use</h3>
+
+<p>
+  To allow multiple running processes, Android sets a hard limit
+  on the heap size alloted for each app. The exact heap size limit varies
+  between devices based on how much RAM the device
+  has available overall. If your app has reached the heap capacity and
+  tries to allocate more
+  memory, the system throws an {@link java.lang.OutOfMemoryError}.
+</p>
+
+<p>
+  To avoid running out of memory, you can to query the system to determine
+  how much heap space you have available on the current device.
+  You can query the system for this figure by calling
+  {@link android.app.ActivityManager#getMemoryInfo(android.app.ActivityManager.MemoryInfo) getMemoryInfo()}.
+  This returns an
+  {@link android.app.ActivityManager.MemoryInfo } object that provides
+  information about the device's
+  current memory status, including available memory, total memory, and
+  the memory threshold&mdash;the memory level below which the system begins
+  to kill processes. The
+  {@link android.app.ActivityManager.MemoryInfo } class also exposes a simple
+  boolean field,
+  {@link android.app.ActivityManager.MemoryInfo#lowMemory }
+  that tells you whether the device is running low on memory.
+</p>
+
+<p>
+  The following code snippet shows an example of how you can use the
+  {@link android.app.ActivityManager#getMemoryInfo(android.app.ActivityManager.MemoryInfo) getMemoryInfo()}.
+  method in your application.
+</p>
+
+<pre class="prettyprint">
+public void doSomethingMemoryIntensive() {
+
+    // Before doing something that requires a lot of memory,
+    // check to see whether the device is in a low memory state.
+    ActivityManager.MemoryInfo memoryInfo = getAvailableMemory();
+
+    if (!memoryInfo.lowMemory) {
+        // Do memory intensive work ...
+    }
+}
+
+// Get a MemoryInfo object for the device's current memory status.
+private ActivityManager.MemoryInfo getAvailableMemory() {
+    ActivityManager activityManager = (ActivityManager) this.getSystemService(ACTIVITY_SERVICE);
+    ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
+    activityManager.getMemoryInfo(memoryInfo);
+    return memoryInfo;
+}
+</pre>
+
+<!-- Section 2 #################################################### -->
+
+<h2 id="code">Use More Memory-Efficient Code Constructs</h2>
+
+<p>
+  Some Android features, Java classes, and code constructs tend to
+  use more memory than others. You can minimize how
+  much memory your app uses by choosing more efficient alternatives in
+  your code.
+</p>
+
+<!-- Section 2.1 #################################################### -->
+
+<h3 id="Services">Use services sparingly</h3>
+
+<p>
+  Leaving a service running when it’s not needed is
+  <strong>one of the worst memory-management
+  mistakes</strong> an Android app can make. If your app needs a
+  <a href="{@docRoot}guide/components/services.html">service</a>
+  to perform work in the background, do not keep it running unless
+  it needs to run a job. Remember to stop your service when it has completed
+  its task. Otherwise, you can inadvertently cause a memory leak.
+</p>
+
+<p>
+  When you start a service, the system prefers to always keep the process
+  for that service running. This behavior
+  makes services processes very expensive
+  because the RAM used by a service remains unavailable to other processes.
+  This reduces the number of cached processes that the system can keep in
+  the LRU cache, making app switching less efficient. It can even lead to
+  thrashing in the system when memory is tight and the system can’t
+  maintain enough processes to host all the services currently running.
+</p>
+
+<p>
+  You should generally avoid use of persistent services because of
+  the on-going demands they place on available memory. Instead, we
+  recommend that you use an alternative implementation
+  such as {@link android.app.job.JobScheduler}. For more information about
+  how to use {@link android.app.job.JobScheduler} to schedule background
+  processes, see
+  <a href="/topic/performance/background-optimization.html">Background Optimizations</a>.
+<p>
+  If you must use a service, the
+  best way to limit the lifespan of your service is to use an {@link
+  android.app.IntentService}, which finishes
+  itself as soon as it's done handling the intent that started it.
+  For more information, read
+  <a href="{@docRoot}training/run-background-service/index.html">Running in a Background Service</a>.
+</p>
+
+<!-- Section 2.2 #################################################### -->
+
+<h3 id="DataContainers">Use optimized data containers</h3>
+
+<p>
+  Some of the classes provided by the programming language are not optimized for
+  use on mobile devices. For example, the generic
+  {@link java.util.HashMap} implementation can be quite memory
+  inefficient because it needs a separate entry object for every mapping.
+</p>
+
+<p>
+  The Android framework includes several optimized data containers, including
+  {@link android.util.SparseArray}, {@link android.util.SparseBooleanArray},
+  and {@link android.support.v4.util.LongSparseArray}.
+  For example, the {@link android.util.SparseArray} classes are more
+  efficient because they avoid the system's need to
+  <acronym title="Automatic conversion from primitive types to object classes (such as int to Integer)">autobox</acronym>
+  the key and sometimes value (which creates yet another object or
+  two per entry).
+</p>
+
+<p>
+  If necessary, you can always switch to raw arrays for a really lean data
+  structure.
+</p>
+
+<!-- Section 2.3 #################################################### -->
+
+<h3 id="Abstractions">Be careful with code abstractions</h3>
+
+<p>
+  Developers often use abstractions simply as a good programming practice,
+  because abstractions can improve code flexibility and maintenance.
+  However, abstractions come at a significant cost:
+  generally they require a fair amount more code that
+  needs to be executed, requiring more time and
+  more RAM for that code to be mapped into memory.
+  So if your abstractions aren't supplying a
+  significant benefit, you should avoid them.
+</p>
+
+<p>
+  For example, enums often require more than twice as much memory as static
+  constants. You should strictly avoid using enums on Android.
+</p>
+
+<!-- Section 2.4 #################################################### -->
+
+<h3 id="NanoProto">Use nano protobufs for serialized data</h3>
+
+<p>
+  <a href="https://developers.google.com/protocol-buffers/docs/overview">Protocol buffers</a>
+  are a language-neutral, platform-neutral, extensible mechanism
+  designed by Google for serializing structured data&mdash;similar to XML, but
+  smaller, faster, and simpler. If you decide to use
+  protobufs for your data, you should always use nano protobufs in your
+  client-side code. Regular protobufs generate extremely verbose code, which
+  can cause many kinds of problems in your app such as
+  increased RAM use, significant APK size increase, and slower execution.
+</p>
+
+<p>
+  For more information, see the "Nano version" section in the
+  <a href="https://android.googlesource.com/platform/external/protobuf/+/master/java/README.txt"
+class="external-link">protobuf readme</a>.
+</p>
+
+<!-- Section 2.5 #################################################### -->
+
+<h3 id="churn">Avoid memory churn</h3>
+
+<p>
+  As mentioned previously, garbage collections events don't normally affect
+  your app's performance. However, many garbage collection events that occur
+  over a short period of time can quickly eat up your frame time. The more time
+  that the system spends on garbage collection, the less time it has to do
+  other stuff like rendering or streaming audio.
+</p>
+
+<p>
+  Often, <em>memory churn</em> can cause a large number of
+  garbage collection events to occur. In practice, memory churn describes the
+  number of allocated temporary objects that occur in a given amount of time.
+</p>
+
+<p>
+  For example, you might allocate multiple temporary objects within a
+  <code>for</code> loop. Or you might create new
+  {@link android.graphics.Paint} or {@link android.graphics.Bitmap}
+  objects inside the
+  {@link android.view.View#onDraw(android.graphics.Canvas) onDraw()}
+  function of a view.
+  In both cases, the app creates a lot of objects quickly at high volume.
+  These can quickly consume all the available memory in the young generation,
+  forcing a garbage collection event to occur.
+</p>
+
+<p>
+  Of course, you need to find the places in your code where
+  the memory churn is high before you can fix them. Use the tools discussed in
+  <a href="#AnalyzeRam">Analyze your RAM usage</a>
+</p>
+
+<p>
+  Once you identify the problem areas in your code, try to reduce the number of
+  allocations within performance critical areas. Consider moving things out of
+  inner loops or perhaps moving them into a
+  <a href="https://en.wikipedia.org/wiki/Factory_method_pattern" class="external-link">Factory</a>
+  based allocation structure.
+</p>
+
+<!-- Section 3 #################################################### -->
+
+<h2 id="remove">Remove Memory-Intensive Resources and Libraries</h2>
+
+<p>
+  Some resources and libraries within your code can gobble up memory without
+  you knowing it. Overall size of your APK, including third-party libraries
+  or embedded resources, can affect how much memory your app consumes. You can
+  improve your app's memory consumption by removing any redundant, unnecessary,
+  or bloated components, resources, or libraries from your code.
+</p>
+
+<!-- Section 3.1 #################################################### -->
+
+<h3 id="reduce">Reduce overall APK size</h3>
+
+<p>
+  You can significantly reduce your app's memory usage by reducing the overall
+  size of your app. Bitmap size, resources, animation frames, and third-party
+  libraries can all contribute to the size of your APK.
+  Android Studio and the Android SDK provide multiple tools
+  to help you reduce the size of your resources and external dependencies.
+</p>
+
+<p>
+  For more information about how to reduce your overall APK size, see
+  <a href="{@docRoot}topic/performance/reduce-apk-size.html">Reduce APK Size</a>.
+</p>
+
+<!-- Section 3.2 #################################################### -->
+
+<h3 id="DependencyInjection">Use caution with dependency injection frameworks</h3>
+
+<p>
+  Dependency injection framework such as
+  <a href="https://code.google.com/p/google-guice/" class="external-link">Guice</a>
+  or
+  <a href="https://github.com/roboguice/roboguice" class="external-link">RoboGuice</a>
+  can simplify the code you write and provide an adaptive environment
+  that's useful for testing and other configuration changes. However, dependency
+  frameworks aren't always optimized for mobile devices.
+</p>
+
+<p>
+  For example, these frameworks tend to initialize processes by
+  scanning your code for annotations. This which can require significant
+  amounts of your code to be mapped into RAM unnecessarily. The system
+  allocates these mapped pages into clean memory so Android can drop them; yet
+  that can't happen until the pages have remained in memory for a long period
+  of time.
+ </p>
+
+<p>
+  If you need to use a dependency injection framework in your app, consider
+  using
+  <a class="external-link" href="http://google.github.io/dagger/">Dagger</a>
+  instead. For example, Dagger does not use reflection to scan your app's code.
+  Dagger's strict implementation means that it can be used in Android apps
+  without needlessly increasing memory usage.
+</p>
+
+<!-- Section 3.3 #################################################### -->
+
+<h3 id="ExternalLibs">Be careful about using external libraries</h3>
+
+<p>
+  External library code is often not written for mobile environments and
+  can be inefficient when used
+  for work on a mobile client. When you decide to use an
+  external library, you may need to optimize that library for mobile devices.
+  Plan for that work up-front and analyze the library in terms of code size and
+  RAM footprint before deciding to use it at all.
+</p>
+
+<p>
+  Even some mobile-optimized libraries can cause problems due to differing
+  implementations. For example, one library may use nano protobufs
+  while another uses micro protobufs, resulting in two different protobuf
+  implementations in your app. This can happen with different
+  implementations of logging, analytics, image loading frameworks,
+  caching, and many other things you don't expect.
+</p>
+
+<p>
+  Although <a href="{@docRoot}tools/help/proguard.html">ProGuard</a> can
+  help to remove APIs and resources with the right flags, it can't remove a
+  library's large internal dependencies. The features that you want in these
+  libraries may require lower-level dependencies. This becomes especially
+  problematic when you use an {@link android.app.Activity } subclass from a
+  library (which will tend to have wide swaths of dependencies),
+  when libraries use reflection (which is common and means you need to spend a
+  lot of time manually tweaking ProGuard to get it to work), and so on.
+</p>
+
+<p>
+  Also avoid using a shared library for just one or two features out of dozens.
+  You don't want to pull in a large amount of code and overhead that
+  you don't even use. When you consider whether to use a library, look for
+  an implementation that strongly matches what you need. Otherwise, you might
+  decide to create your own implementation.
+</p>
+

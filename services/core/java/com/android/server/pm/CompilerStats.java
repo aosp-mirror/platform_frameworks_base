@@ -265,6 +265,7 @@ class CompilerStats extends AbstractStatsBase<Void> {
         try {
             f = file.startWrite();
             OutputStreamWriter osw = new OutputStreamWriter(f);
+            write(osw);
             osw.flush();
             file.finishWrite(f);
         } catch (IOException e) {

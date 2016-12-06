@@ -143,7 +143,9 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_4g_plus" msgid="3032226872470658661">"4G+"</string>
     <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
+    <string name="accessibility_data_connection_lte_plus" msgid="361876866906946007">"LTE+"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"ரோமிங்"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
@@ -236,7 +238,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G டேட்டா இடைநிறுத்தப்பட்டது"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"செல்லுலார் தரவு இடைநிறுத்தப்பட்டது"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"தரவு இடைநிறுத்தப்பட்டது"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"அமைக்கப்பட்ட தரவின் வரம்பை அடைந்துவிட்டதால், இந்தச் சுழற்சியின் மீதமுள்ள நாட்களுக்கான தரவுப் பயன்பாட்டைச் சாதனம் இடைநிறுத்தியுள்ளது.\n\nமீண்டும் தொடங்குவது, மொபைல் நிறுவனக் கட்டணங்களுக்கு உட்படுத்தலாம்."</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"நீங்கள் அமைத்த தரவு வரம்பை அடைந்துவிட்டீர்கள். இப்போது செல்லுலார் தரவைப் பயன்படுத்த முடியாது.\n\nமீண்டும் தொடங்கினால், தரவுப் பயன்பாட்டிற்குக் கட்டணங்கள் விதிக்கப்படலாம்."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"மீண்டும் தொடங்கு"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"இணைய இணைப்பு இல்லை"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"வைஃபை இணைக்கப்பட்டது"</string>
@@ -317,6 +319,9 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> வரம்பு"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> எச்சரிக்கை"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"பணிப் பயன்முறை"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"இரவு ஒளி"</string>
+    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"இரவு ஒளி இயக்கப்பட்டுள்ளது. முடக்க, தட்டவும்"</string>
+    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"இரவு ஒளி முடக்கப்பட்டுள்ளது. இயக்க, தட்டவும்"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"சமீபத்திய பணிகள் இல்லை"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"எல்லாவற்றையும் அழித்துவிட்டீர்கள்"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"பயன்பாட்டு தகவல்"</string>
@@ -330,6 +335,8 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"கிடைமட்டமாகப் பிரி"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"செங்குத்தாகப் பிரி"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"தனிவிருப்பத்தில் பிரி"</string>
+  <string-array name="recents_blacklist_array">
+  </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"சார்ஜ் செய்யப்பட்டது"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"சார்ஜாகிறது"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"முழுவதும் சார்ஜாக <xliff:g id="CHARGING_TIME">%s</xliff:g> ஆகும்"</string>
@@ -397,6 +404,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"சாதனம் கண்காணிக்கப்படலாம்"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"சுயவிவரம் கண்காணிக்கப்படலாம்"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"நெட்வொர்க் கண்காணிக்கப்படலாம்"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"நெட்வொர்க் கண்காணிக்கப்படலாம்"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"சாதனத்தைக் கண்காணித்தல்"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"சுயவிவரத்தைக் கண்காணித்தல்"</string>
     <string name="monitoring_title" msgid="169206259253048106">"நெட்வொர்க்கைக் கண்காணித்தல்"</string>
@@ -409,6 +417,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"<xliff:g id="APPLICATION">%1$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளீர்கள். இந்தப் பயன்பாட்டால், மின்னஞ்சல்கள், பயன்பாடுகள் மற்றும் இணையதளங்கள் உட்பட உங்கள் நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்க முடியும்."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"<xliff:g id="APPLICATION">%1$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளீர்கள். இந்தப் பயன்பாட்டால், மின்னஞ்சல்கள், பயன்பாடுகள் மற்றும் இணையதளங்கள் உட்பட உங்கள் தனிப்பட்ட நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்க முடியும்."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"<xliff:g id="APPLICATION">%1$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளீர்கள். இந்தப் பயன்பாட்டால் மின்னஞ்சல்கள், பயன்பாடுகள், இணையதளங்கள் உட்பட உங்கள் தனிப்பட்ட நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்க முடியும்."</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"உங்கள் பணி சுயவிவரத்தை <xliff:g id="ORGANIZATION">%1$s</xliff:g> நிர்வகிக்கிறது. <xliff:g id="APPLICATION">%2$s</xliff:g> உடன் இணைக்கப்பட்டதால், மின்னஞ்சல்கள், பயன்பாடுகள் மற்றும் இணையதளங்கள் உட்பட உங்கள் பணியிட நெட்வொர்க் செயல்பாட்டை அதனால் கண்காணிக்க முடியும்.\n\nகூடுதல் தகவலுக்கு, நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"உங்கள் பணி சுயவிவரத்தை <xliff:g id="ORGANIZATION">%1$s</xliff:g> நிர்வகிக்கிறது. <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளதால், மின்னஞ்சல்கள், பயன்பாடுகள் மற்றும் இணையதளங்கள் உட்பட உங்கள் பணியிட நெட்வொர்க் செயல்பாட்டை அதனால் கண்காணிக்க முடியும்.\n\nமேலும் <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளதால், உங்கள் தனிப்பட்ட நெட்வொர்க் செயல்பாட்டையும் அதனால் கண்காணிக்க முடியும்."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"சாதனத்தை நிர்வகிப்பது: <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nஉங்கள் நிர்வாகியால் அமைப்புகள், நிறுவன அணுகல், பயன்பாடுகள், சாதனத்துடன் தொடர்புடைய தரவு மற்றும் சாதனத்தின் இருப்பிடத் தகவல் ஆகியவற்றைக் கண்காணிக்கவும் நிர்வகிக்கவும் முடியும்.\n\n<xliff:g id="APPLICATION">%2$s</xliff:g> உடன் இணைக்கப்பட்டதால், மின்னஞ்சல்கள், பயன்பாடுகள் மற்றும் இணையதளங்கள் உட்பட உங்கள் நெட்வொர்க் செயல்பாட்டை அதனால் கண்காணிக்க முடியும்.\n\nகூடுதல் தகவலுக்கு, நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
@@ -434,6 +443,18 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"ஒலியளவு செய்தி: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"அசலை மீட்டமைக்க, தட்டவும்."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"பணி சுயவிவரத்தைப் பயன்படுத்துகிறீர்கள்"</string>
+  <string-array name="volume_stream_titles">
+    <item msgid="5841843895402729630">"அழைப்பு"</item>
+    <item msgid="5997713001067658559">"சாதனம்"</item>
+    <item msgid="7858983209929864160">"ரிங்"</item>
+    <item msgid="1850038478268896762">"மீடியா"</item>
+    <item msgid="8265110906352372092">"அலாரம்"</item>
+    <item msgid="5339394737636839168"></item>
+    <item msgid="2951313578278086204">"புளூடூத்"</item>
+    <item msgid="2919807739709798970"></item>
+    <item msgid="150349973435223405"></item>
+    <item msgid="6761963760295549099"></item>
+  </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. ஒலி இயக்க, தட்டவும்."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. அதிர்விற்கு அமைக்க, தட்டவும். அணுகல்தன்மை சேவைகள் ஒலியடக்கப்படக்கூடும்."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. ஒலியடக்க, தட்டவும். அணுகல்தன்மை சேவைகள் ஒலியடக்கப்படக்கூடும்."</string>
@@ -473,8 +494,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"நிலைப் பட்டியில் கடிகார வினாடிகளைக் காட்டும். பேட்டரியின் ஆயுளைக் குறைக்கலாம்."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"விரைவு அமைப்புகளை மறுவரிசைப்படுத்து"</string>
     <string name="show_brightness" msgid="6613930842805942519">"விரைவு அமைப்புகளில் ஒளிர்வுப் பட்டியைக் காட்டு"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"மேலே ஸ்வைப் செய்வதன் மூலம் திரையைப் பிரிக்கும் சைகையை இயக்கு"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"மேலோட்டப் பார்வை பொத்தானிலிருந்து மேலே ஸ்வைப் செய்வதன் மூலம், திரைப் பிரிப்பைச் செயலாக்குவதற்கான சைகையை இயக்கும்"</string>
     <string name="experimental" msgid="6198182315536726162">"சோதனை முயற்சி"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"புளூடூத்தை இயக்கவா?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"உங்கள் டேப்லெட்டுடன் விசைப்பலகையை இணைக்க, முதலில் புளூடூத்தை இயக்க வேண்டும்."</string>
@@ -504,21 +523,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"மேலும் அமைப்புகள்"</string>
     <string name="notification_done" msgid="5279426047273930175">"முடிந்தது"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> அறிவிப்புக் கட்டுப்பாடுகள்"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"வண்ணமும் தோற்றமும்"</string>
-    <string name="night_mode" msgid="3540405868248625488">"இரவுப் பயன்முறை"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"திரையை அளவுத்திருத்தம் செய்"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"இயக்கத்தில்"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"முடக்கத்தில்"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"தானாகவே இயக்கு"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"இருப்பிடம் மற்றும் நேரத்தின்படி இரவுப் பயன்முறைக்கு மாற்று"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"இரவுப் பயன்முறை இயக்கப்பட்டிருக்கும் போது"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Android OSக்காக அடர் தீமினைப் பயன்படுத்து"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"டிண்ட்டைச் சரிசெய்"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"ஒளிர்வைச் சரிசெய்"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"வழக்கமாக வெளிர் தீமில் காட்டப்படுகிற Android OS இன் முக்கிய பகுதிகளில் (எ.கா. அமைப்புகள்) அடர் தீம் பயன்படுத்தப்படுகிறது."</string>
-    <string name="color_apply" msgid="9212602012641034283">"பயன்படுத்து"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"அமைப்புகளை உறுதிப்படுத்து"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"சில வண்ண அமைப்புகள் இந்தச் சாதனத்தைப் பயன்படுத்த முடியாதபடி செய்யலாம். இந்த வண்ண அமைப்புகளை உறுதிப்படுத்த, சரி என்பதைக் கிளிக் செய்யவும், இல்லையெனில் இந்த அமைப்புகள் 10 வினாடிகளுக்குப் பின் மீட்டமைக்கப்படும்."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"பேட்டரி உபயோகம்"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"சார்ஜ் செய்யும் போது பேட்டரி சேமிப்பானைப் பயன்படுத்த முடியாது"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"பேட்டரி சேமிப்பான்"</string>
@@ -647,4 +651,5 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> அமைப்புகளைத் திற."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"அமைப்புகளின் வரிசை முறையைத் திருத்து."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"பக்கம் <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <string name="cant_silence_or_block" msgid="999689262131488625">"அறிவிப்புகளை ஒலியடக்க அல்லது தடுக்க முடியவில்லை"</string>
 </resources>

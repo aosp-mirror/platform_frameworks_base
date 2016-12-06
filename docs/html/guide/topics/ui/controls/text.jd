@@ -4,7 +4,7 @@ page.tags=edittext,autocompletetextview
 
 <div id="qv-wrapper">
 <div id="qv">
-  
+
 <h2>In this document</h2>
 <ol>
   <li><a href="#Keyboard">Specifying the Keyboard Type</a>
@@ -279,7 +279,7 @@ that provides suggestions from an array, using {@link android.widget.ArrayAdapte
 layout with only the text field:
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
-&lt;AutoCompleteTextView xmlns:android="http://schemas.android.com/apk/res/android" 
+&lt;AutoCompleteTextView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="&#64;+id/autocomplete_country"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content" />
@@ -313,8 +313,8 @@ code to specify the adapter that supplies the suggestions:
 AutoCompleteTextView textView = (AutoCompleteTextView) findViewById(R.id.autocomplete_country);
 // Get the string array
 String[] countries = getResources().getStringArray(R.array.countries_array);
-// Create the adapter and set it to the AutoCompleteTextView 
-ArrayAdapter&lt;String> adapter = 
+// Create the adapter and set it to the AutoCompleteTextView
+ArrayAdapter&lt;String> adapter =
         new ArrayAdapter&lt;String>(this, android.R.layout.simple_list_item_1, countries);
 textView.setAdapter(adapter);
 </pre>

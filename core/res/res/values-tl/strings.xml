@@ -679,6 +679,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Tama!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Subukang muli"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Subukang muli"</string>
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"I-unlock para sa lahat ng feature at data"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Nalagpasan na ang maximum na mga pagtatangka sa Face Unlock"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Walang SIM card"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Walang SIM card sa tablet."</string>
@@ -1023,8 +1024,9 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Nag-a-upgrade ang Android…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Nagsisimula ang Android…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Ino-optimize ang storage."</string>
-    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Nag-a-upgrade ang Android"</string>
+    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"Tinatapos ang pag-update sa Android…"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Maaaring hindi gumana nang maayos ang ilang app hangga\'t hindi pa natatapos ang pag-upgrade"</string>
+    <string name="app_upgrading_toast" msgid="3008139776215597053">"Nag-a-upgrade ang <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Ino-optimize ang app <xliff:g id="NUMBER_0">%1$d</xliff:g> ng <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Ihinahanda ang <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Sinisimulan ang apps."</string>
@@ -1075,6 +1077,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"Walang access sa Internet ang Wi-Fi"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"I-tap para sa mga opsyon"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"Lumipat sa <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Ginagamit ng device ang <xliff:g id="NEW_NETWORK">%1$s</xliff:g> kapag walang access sa Internet ang <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>. Maaaring may mga malapat na singilin."</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"Lumipat sa <xliff:g id="NEW_NETWORK">%2$s</xliff:g> mula sa <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"cellular data"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"Bluetooth"</item>
+    <item msgid="5447331121797802871">"Ethernet"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"isang hindi kilalang uri ng network"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Hindi makakonekta sa Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" ay mayroong mahinang koneksyon sa Internet."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Payagan ang kuneksyon?"</string>
@@ -1138,7 +1151,7 @@
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Nakakonekta sa isang accessory ng USB"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"I-tap para sa higit pang mga opsyon."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Konektado ang debugging ng USB"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"I-tap upang i-disable ang pagde-debug ng USB."</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"I-tap upang i-disable ang pag-debug ng USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Kinukuha ang ulat ng bug…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Gusto mo bang ibahagi ang ulat ng bug?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Ibinabahagi ang ulat ng bug…"</string>
@@ -1152,7 +1165,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"I-tap upang pumili ng wika at layout"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"mga kandidato"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Inihahanda ang <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Sinusuri para sa mga error"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Na-detect ang bagong <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1231,8 +1243,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Nakakonekta sa <xliff:g id="SESSION">%s</xliff:g>. Tapikin upang pamahalaan ang network."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Kumukonekta ang Always-on VPN…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Nakakonekta ang Always-on VPN"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Hindi nakakonekta ang palaging naka-on na VPN"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Error sa Always-on VPN"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"I-tap upang i-configure"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"I-tap upang i-set up"</string>
     <string name="upload_file" msgid="2897957172366730416">"Pumili ng file"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Walang napiling file"</string>
     <string name="reset" msgid="2448168080964209908">"I-reset"</string>
@@ -1316,7 +1329,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB drive"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB storage"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"I-edit"</string>
-    <string name="data_usage_warning_title" msgid="1955638862122232342">"Babala sa paggamit ng data"</string>
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"Alerto sa paggamit ng data"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"I-tap tingnan paggamit/setting."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Naabot na ang limitasyon sa 2G-3G data"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Naabot na ang limitasyon sa 4G data"</string>
@@ -1635,6 +1648,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"I-type ang wika"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Iminumungkahi"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Lahat ng wika"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"Lahat ng rehiyon"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Maghanap"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"NAKA-OFF ang work mode"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Payagang gumana ang profile sa trabaho, kasama na ang mga app, pag-sync sa background at mga may kaugnayang feature."</string>
@@ -1652,7 +1666,16 @@
     <string name="unpin_target" msgid="3556545602439143442">"I-unpin"</string>
     <string name="app_info" msgid="6856026610594615344">"Impormasyon ng app"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"Gusto mo bang i-reset ang device?"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Mag-tap upang i-reset ang device"</string>
+    <string name="demo_starting_message" msgid="5268556852031489931">"Sinisimulan ang demo…"</string>
+    <string name="demo_restarting_message" msgid="952118052531642451">"Nire-reset ang device…"</string>
+    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Gusto mo bang i-reset ang device?"</string>
+    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Mawawala mo ang anumang mga pagbabago at magsisimulang muli ang demo pagkalipas ng <xliff:g id="TIMEOUT">%1$s</xliff:g> (na) segundo…"</string>
+    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Kanselahin"</string>
+    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"I-reset ngayon"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"I-factory reset upang magamit ang device na ito nang walang mga paghihigpit"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Pindutin upang matuto nang higit pa."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Na-disable ang <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="conference_call" msgid="3751093130790472426">"Conference Call"</string>
 </resources>

@@ -102,8 +102,8 @@ import com.android.internal.view.IDragAndDropPermissions;
  *  </tr>
  *  <tr>
  *      <td>ACTION_DRAG_ENDED</td>
- *      <td style="text-align: center;">X</td>
- *      <td style="text-align: center;">X</td>
+ *      <td style="text-align: center;">&nbsp;</td>
+ *      <td style="text-align: center;">&nbsp;</td>
  *      <td style="text-align: center;">&nbsp;</td>
  *      <td style="text-align: center;">&nbsp;</td>
  *      <td style="text-align: center;">&nbsp;</td>
@@ -134,6 +134,7 @@ public class DragEvent implements Parcelable {
 
     Object mLocalState;
     boolean mDragResult;
+    boolean mEventHandlerWasCalled;
 
     private DragEvent mNext;
     private RuntimeException mRecycledLocation;
@@ -152,12 +153,16 @@ public class DragEvent implements Parcelable {
      * if it can accept a drop. The onDragEvent() or onDrag() methods usually inspect the metadata
      * from {@link #getClipDescription()} to determine if they can accept the data contained in
      * this drag. For an operation that doesn't represent data transfer, these methods may
-     * perform other actions to determine whether or not the View should accept the drag.
+     * perform other actions to determine whether or not the View should accept the data.
      * If the View wants to indicate that it is a valid drop target, it can also react by
      * changing its appearance.
      * <p>
-     * A View only receives further drag events if it returns {@code true} in response to
-     * ACTION_DRAG_STARTED.
+     *  Views added or becoming visible for the first time during a drag operation receive this
+     *  event when they are added or becoming visible.
+     * </p>
+     * <p>
+     *  A View only receives further drag events if it returns {@code true} in response to
+     *  ACTION_DRAG_STARTED.
      * </p>
      * @see #ACTION_DRAG_ENDED
      * @see #getX()
@@ -176,9 +181,10 @@ public class DragEvent implements Parcelable {
      * </p>
      * <p>
      * The system stops sending ACTION_DRAG_LOCATION events to a View once the user moves the
-     * drag shadow out of the View object's bounding box. If the user moves the drag shadow back
-     * into the View object's bounding box, the View receives an ACTION_DRAG_ENTERED again before
-     * receiving any more ACTION_DRAG_LOCATION events.
+     * drag shadow out of the View object's bounding box or into a descendant view that can accept
+     * the data. If the user moves the drag shadow back into the View object's bounding box or out
+     * of a descendant view that can accept the data, the View receives an ACTION_DRAG_ENTERED again
+     * before receiving any more ACTION_DRAG_LOCATION events.
      * </p>
      * @see #ACTION_DRAG_ENTERED
      * @see #getX()
@@ -188,7 +194,8 @@ public class DragEvent implements Parcelable {
 
     /**
      * Action constant returned by {@link #getAction()}: Signals to a View that the user
-     * has released the drag shadow, and the drag point is within the bounding box of the View.
+     * has released the drag shadow, and the drag point is within the bounding box of the View and
+     * not within a descendant view that can accept the data.
      * The View should retrieve the data from the DragEvent by calling {@link #getClipData()}.
      * The methods {@link #getX()} and {@link #getY()} return the X and Y position of the drop point
      * within the View object's bounding box.
@@ -211,8 +218,10 @@ public class DragEvent implements Parcelable {
      * operation has concluded.  A View that changed its appearance during the operation should
      * return to its usual drawing state in response to this event.
      * <p>
-     * All views that received an ACTION_DRAG_STARTED event will receive the
-     * ACTION_DRAG_ENDED event even if they are not currently visible when the drag ends.
+     *  All views with listeners that returned boolean <code>true</code> for the ACTION_DRAG_STARTED
+     *  event will receive the ACTION_DRAG_ENDED event even if they are not currently visible when
+     *  the drag ends. Views removed during the drag operation won't receive the ACTION_DRAG_ENDED
+     *  event.
      * </p>
      * <p>
      *  The View object can call {@link #getResult()} to see the result of the operation.
@@ -233,9 +242,10 @@ public class DragEvent implements Parcelable {
      *  drop target.
      * </p>
      * The system stops sending ACTION_DRAG_LOCATION events to a View once the user moves the
-     * drag shadow out of the View object's bounding box. If the user moves the drag shadow back
-     * into the View object's bounding box, the View receives an ACTION_DRAG_ENTERED again before
-     * receiving any more ACTION_DRAG_LOCATION events.
+     * drag shadow out of the View object's bounding box or into a descendant view that can accept
+     * the data. If the user moves the drag shadow back into the View object's bounding box or out
+     * of a descendant view that can accept the data, the View receives an ACTION_DRAG_ENTERED again
+     * before receiving any more ACTION_DRAG_LOCATION events.
      * </p>
      * @see #ACTION_DRAG_ENTERED
      * @see #ACTION_DRAG_LOCATION
@@ -244,7 +254,8 @@ public class DragEvent implements Parcelable {
 
     /**
      * Action constant returned by {@link #getAction()}: Signals that the user has moved the
-     * drag shadow outside the bounding box of the View.
+     * drag shadow out of the bounding box of the View or into a descendant view that can accept
+     * the data.
      * The View can react by changing its appearance in a way that tells the user that
      * View is no longer the immediate drop target.
      * <p>
@@ -359,7 +370,7 @@ public class DragEvent implements Parcelable {
      * The drag handler or listener for a View can use the metadata in this object to decide if the
      * View can accept the dragged View object's data.
      * <p>
-     * This method returns valid data for all event actions.
+     * This method returns valid data for all event actions except for {@link #ACTION_DRAG_ENDED}.
      * @return The ClipDescription that was part of the ClipData sent to the system by startDrag().
      */
     public ClipDescription getClipDescription() {
@@ -377,7 +388,11 @@ public class DragEvent implements Parcelable {
      * The object is intended to provide local information about the drag and drop operation. For
      * example, it can indicate whether the drag and drop operation is a copy or a move.
      * <p>
-     *  This method returns valid data for all event actions.
+     * The local state is available only to views in the activity which has started the drag
+     * operation. In all other activities this method will return null
+     * </p>
+     * <p>
+     *  This method returns valid data for all event actions except for {@link #ACTION_DRAG_ENDED}.
      * </p>
      * @return The local state object sent to the system by startDrag().
      */
@@ -435,6 +450,7 @@ public class DragEvent implements Parcelable {
         mClipData = null;
         mClipDescription = null;
         mLocalState = null;
+        mEventHandlerWasCalled = false;
 
         synchronized (gRecyclerLock) {
             if (gRecyclerUsed < MAX_RECYCLED) {

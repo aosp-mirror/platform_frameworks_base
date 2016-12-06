@@ -35,6 +35,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 public class BluetoothTestUtils extends Assert {
 
@@ -423,57 +425,40 @@ public class BluetoothTestUtils extends Assert {
      * @param adapter The BT adapter.
      */
     public void enable(BluetoothAdapter adapter) {
-        int mask = (BluetoothReceiver.STATE_TURNING_ON_FLAG | BluetoothReceiver.STATE_ON_FLAG
-                | BluetoothReceiver.SCAN_MODE_CONNECTABLE_FLAG);
-        long start = -1;
-        BluetoothReceiver receiver = getBluetoothReceiver(mask);
-
-        int state = adapter.getState();
-        switch (state) {
-            case BluetoothAdapter.STATE_ON:
-                assertTrue(adapter.isEnabled());
-                removeReceiver(receiver);
-                return;
-            case BluetoothAdapter.STATE_TURNING_ON:
-                assertFalse(adapter.isEnabled());
-                mask = 0; // Don't check for received intents since we might have missed them.
-                break;
-            case BluetoothAdapter.STATE_OFF:
-                assertFalse(adapter.isEnabled());
-                start = System.currentTimeMillis();
-                assertTrue(adapter.enable());
-                break;
-            case BluetoothAdapter.STATE_TURNING_OFF:
-                start = System.currentTimeMillis();
-                assertTrue(adapter.enable());
-                break;
-            default:
-                removeReceiver(receiver);
-                fail(String.format("enable() invalid state: state=%d", state));
-        }
-
-        long s = System.currentTimeMillis();
-        while (System.currentTimeMillis() - s < ENABLE_DISABLE_TIMEOUT) {
-            state = adapter.getState();
-            if (state == BluetoothAdapter.STATE_ON
-                    && (receiver.getFiredFlags() & mask) == mask) {
-                assertTrue(adapter.isEnabled());
-                long finish = receiver.getCompletedTime();
-                if (start != -1 && finish != -1) {
-                    writeOutput(String.format("enable() completed in %d ms", (finish - start)));
-                } else {
-                    writeOutput("enable() completed");
+        writeOutput("Enabling Bluetooth adapter.");
+        assertFalse(adapter.isEnabled());
+        int btState = adapter.getState();
+        final Semaphore completionSemaphore = new Semaphore(0);
+        final BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                final String action = intent.getAction();
+                if (!BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
+                    return;
                 }
-                removeReceiver(receiver);
-                return;
+                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
+                        BluetoothAdapter.ERROR);
+                if (state == BluetoothAdapter.STATE_ON) {
+                    completionSemaphore.release();
+                }
             }
-            sleep(POLL_TIME);
-        }
+        };
 
-        int firedFlags = receiver.getFiredFlags();
-        removeReceiver(receiver);
-        fail(String.format("enable() timeout: state=%d (expected %d), flags=0x%x (expected 0x%x)",
-                state, BluetoothAdapter.STATE_ON, firedFlags, mask));
+        final IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        mContext.registerReceiver(receiver, filter);
+        assertTrue(adapter.enable());
+        boolean success = false;
+        try {
+            success = completionSemaphore.tryAcquire(ENABLE_DISABLE_TIMEOUT, TimeUnit.MILLISECONDS);
+            writeOutput(String.format("enable() completed in 0 ms"));
+        } catch (final InterruptedException e) {
+            // This should never happen but just in case it does, the test will fail anyway.
+        }
+        mContext.unregisterReceiver(receiver);
+        if (!success) {
+            fail(String.format("enable() timeout: state=%d (expected %d)", btState,
+                    BluetoothAdapter.STATE_ON));
+        }
     }
 
     /**
@@ -483,57 +468,40 @@ public class BluetoothTestUtils extends Assert {
      * @param adapter The BT adapter.
      */
     public void disable(BluetoothAdapter adapter) {
-        int mask = (BluetoothReceiver.STATE_TURNING_OFF_FLAG | BluetoothReceiver.STATE_OFF_FLAG
-                | BluetoothReceiver.SCAN_MODE_NONE_FLAG);
-        long start = -1;
-        BluetoothReceiver receiver = getBluetoothReceiver(mask);
-
-        int state = adapter.getState();
-        switch (state) {
-            case BluetoothAdapter.STATE_OFF:
-                assertFalse(adapter.isEnabled());
-                removeReceiver(receiver);
-                return;
-            case BluetoothAdapter.STATE_TURNING_ON:
-                assertFalse(adapter.isEnabled());
-                start = System.currentTimeMillis();
-                break;
-            case BluetoothAdapter.STATE_ON:
-                assertTrue(adapter.isEnabled());
-                start = System.currentTimeMillis();
-                assertTrue(adapter.disable());
-                break;
-            case BluetoothAdapter.STATE_TURNING_OFF:
-                assertFalse(adapter.isEnabled());
-                mask = 0; // Don't check for received intents since we might have missed them.
-                break;
-            default:
-                removeReceiver(receiver);
-                fail(String.format("disable() invalid state: state=%d", state));
-        }
-
-        long s = System.currentTimeMillis();
-        while (System.currentTimeMillis() - s < ENABLE_DISABLE_TIMEOUT) {
-            state = adapter.getState();
-            if (state == BluetoothAdapter.STATE_OFF
-                    && (receiver.getFiredFlags() & mask) == mask) {
-                assertFalse(adapter.isEnabled());
-                long finish = receiver.getCompletedTime();
-                if (start != -1 && finish != -1) {
-                    writeOutput(String.format("disable() completed in %d ms", (finish - start)));
-                } else {
-                    writeOutput("disable() completed");
+        writeOutput("Disabling Bluetooth adapter.");
+        assertTrue(adapter.isEnabled());
+        int btState = adapter.getState();
+        final Semaphore completionSemaphore = new Semaphore(0);
+        final BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                final String action = intent.getAction();
+                if (!BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
+                    return;
                 }
-                removeReceiver(receiver);
-                return;
+                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
+                        BluetoothAdapter.ERROR);
+                if (state == BluetoothAdapter.STATE_OFF) {
+                    completionSemaphore.release();
+                }
             }
-            sleep(POLL_TIME);
-        }
+        };
 
-        int firedFlags = receiver.getFiredFlags();
-        removeReceiver(receiver);
-        fail(String.format("disable() timeout: state=%d (expected %d), flags=0x%x (expected 0x%x)",
-                state, BluetoothAdapter.STATE_OFF, firedFlags, mask));
+        final IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        mContext.registerReceiver(receiver, filter);
+        assertTrue(adapter.disable());
+        boolean success = false;
+        try {
+            success = completionSemaphore.tryAcquire(ENABLE_DISABLE_TIMEOUT, TimeUnit.MILLISECONDS);
+            writeOutput(String.format("disable() completed in 0 ms"));
+        } catch (final InterruptedException e) {
+            // This should never happen but just in case it does, the test will fail anyway.
+        }
+        mContext.unregisterReceiver(receiver);
+        if (!success) {
+            fail(String.format("disable() timeout: state=%d (expected %d)", btState,
+                    BluetoothAdapter.STATE_OFF));
+        }
     }
 
     /**
@@ -543,40 +511,47 @@ public class BluetoothTestUtils extends Assert {
      * @param adapter The BT adapter.
      */
     public void discoverable(BluetoothAdapter adapter) {
-        int mask = BluetoothReceiver.SCAN_MODE_CONNECTABLE_DISCOVERABLE_FLAG;
-
         if (!adapter.isEnabled()) {
             fail("discoverable() bluetooth not enabled");
         }
 
         int scanMode = adapter.getScanMode();
-        if (scanMode == BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
+        if (scanMode != BluetoothAdapter.SCAN_MODE_CONNECTABLE) {
             return;
         }
 
-        BluetoothReceiver receiver = getBluetoothReceiver(mask);
-
-        assertEquals(BluetoothAdapter.SCAN_MODE_CONNECTABLE, scanMode);
-        long start = System.currentTimeMillis();
-        assertTrue(adapter.setScanMode(BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE));
-
-        while (System.currentTimeMillis() - start < DISCOVERABLE_UNDISCOVERABLE_TIMEOUT) {
-            scanMode = adapter.getScanMode();
-            if (scanMode == BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE
-                    && (receiver.getFiredFlags() & mask) == mask) {
-                writeOutput(String.format("discoverable() completed in %d ms",
-                        (receiver.getCompletedTime() - start)));
-                removeReceiver(receiver);
-                return;
+        final Semaphore completionSemaphore = new Semaphore(0);
+        final BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                final String action = intent.getAction();
+                if (!BluetoothAdapter.ACTION_SCAN_MODE_CHANGED.equals(action)) {
+                    return;
+                }
+                final int mode = intent.getIntExtra(BluetoothAdapter.EXTRA_SCAN_MODE,
+                        BluetoothAdapter.SCAN_MODE_NONE);
+                if (mode == BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
+                    completionSemaphore.release();
+                }
             }
-            sleep(POLL_TIME);
-        }
+        };
 
-        int firedFlags = receiver.getFiredFlags();
-        removeReceiver(receiver);
-        fail(String.format("discoverable() timeout: scanMode=%d (expected %d), flags=0x%x "
-                + "(expected 0x%x)", scanMode, BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE,
-                firedFlags, mask));
+        final IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
+        mContext.registerReceiver(receiver, filter);
+        assertTrue(adapter.setScanMode(BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE));
+        boolean success = false;
+        try {
+            success = completionSemaphore.tryAcquire(DISCOVERABLE_UNDISCOVERABLE_TIMEOUT,
+                    TimeUnit.MILLISECONDS);
+            writeOutput(String.format("discoverable() completed in 0 ms"));
+        } catch (final InterruptedException e) {
+            // This should never happen but just in case it does, the test will fail anyway.
+        }
+        mContext.unregisterReceiver(receiver);
+        if (!success) {
+            fail(String.format("discoverable() timeout: scanMode=%d (expected %d)", scanMode,
+                    BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE));
+        }
     }
 
     /**
@@ -586,40 +561,47 @@ public class BluetoothTestUtils extends Assert {
      * @param adapter The BT adapter.
      */
     public void undiscoverable(BluetoothAdapter adapter) {
-        int mask = BluetoothReceiver.SCAN_MODE_CONNECTABLE_FLAG;
-
         if (!adapter.isEnabled()) {
             fail("undiscoverable() bluetooth not enabled");
         }
 
         int scanMode = adapter.getScanMode();
-        if (scanMode == BluetoothAdapter.SCAN_MODE_CONNECTABLE) {
+        if (scanMode != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
             return;
         }
 
-        BluetoothReceiver receiver = getBluetoothReceiver(mask);
-
-        assertEquals(BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE, scanMode);
-        long start = System.currentTimeMillis();
-        assertTrue(adapter.setScanMode(BluetoothAdapter.SCAN_MODE_CONNECTABLE));
-
-        while (System.currentTimeMillis() - start < DISCOVERABLE_UNDISCOVERABLE_TIMEOUT) {
-            scanMode = adapter.getScanMode();
-            if (scanMode == BluetoothAdapter.SCAN_MODE_CONNECTABLE
-                    && (receiver.getFiredFlags() & mask) == mask) {
-                writeOutput(String.format("undiscoverable() completed in %d ms",
-                        (receiver.getCompletedTime() - start)));
-                removeReceiver(receiver);
-                return;
+        final Semaphore completionSemaphore = new Semaphore(0);
+        final BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                final String action = intent.getAction();
+                if (!BluetoothAdapter.ACTION_SCAN_MODE_CHANGED.equals(action)) {
+                    return;
+                }
+                final int mode = intent.getIntExtra(BluetoothAdapter.EXTRA_SCAN_MODE,
+                        BluetoothAdapter.SCAN_MODE_NONE);
+                if (mode == BluetoothAdapter.SCAN_MODE_CONNECTABLE) {
+                    completionSemaphore.release();
+                }
             }
-            sleep(POLL_TIME);
-        }
+        };
 
-        int firedFlags = receiver.getFiredFlags();
-        removeReceiver(receiver);
-        fail(String.format("undiscoverable() timeout: scanMode=%d (expected %d), flags=0x%x "
-                + "(expected 0x%x)", scanMode, BluetoothAdapter.SCAN_MODE_CONNECTABLE, firedFlags,
-                mask));
+        final IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
+        mContext.registerReceiver(receiver, filter);
+        assertTrue(adapter.setScanMode(BluetoothAdapter.SCAN_MODE_CONNECTABLE));
+        boolean success = false;
+        try {
+            success = completionSemaphore.tryAcquire(DISCOVERABLE_UNDISCOVERABLE_TIMEOUT,
+                    TimeUnit.MILLISECONDS);
+            writeOutput(String.format("undiscoverable() completed in 0 ms"));
+        } catch (InterruptedException e) {
+            // This should never happen but just in case it does, the test will fail anyway.
+        }
+        mContext.unregisterReceiver(receiver);
+        if (!success) {
+            fail(String.format("undiscoverable() timeout: scanMode=%d (expected %d)", scanMode,
+                    BluetoothAdapter.SCAN_MODE_CONNECTABLE));
+        }
     }
 
     /**

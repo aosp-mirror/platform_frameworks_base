@@ -1,0 +1,6 @@
+name: "Android Instant Apps"
+home_url: /topic/instant-apps/
+description: "An evolution in app sharing and discovery, Android Instant Apps enables Android apps to run instantly, without requiring installation."
+content_license: cc3-apache2
+buganizer_id: 30209417
+parent_project_metadata_path: /develop/_project.yaml

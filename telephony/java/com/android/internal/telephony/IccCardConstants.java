@@ -32,6 +32,8 @@ public class IccCardConstants {
     public static final String INTENT_VALUE_ICC_ABSENT = "ABSENT";
     /* CARD_IO_ERROR means for three consecutive times there was SIM IO error */
     static public final String INTENT_VALUE_ICC_CARD_IO_ERROR = "CARD_IO_ERROR";
+    /* CARD_RESTRICTED means card is present but not usable due to carrier restrictions */
+    static public final String INTENT_VALUE_ICC_CARD_RESTRICTED = "CARD_RESTRICTED";
     /* LOCKED means ICC is locked by pin or by network */
     public static final String INTENT_VALUE_ICC_LOCKED = "LOCKED";
     //TODO: we can remove this state in the future if Bug 18489776 analysis
@@ -74,7 +76,8 @@ public class IccCardConstants {
         READY,          /** ordinal(5) == {@See TelephonyManager#SIM_STATE_READY} */
         NOT_READY,      /** ordinal(6) == {@See TelephonyManager#SIM_STATE_NOT_READY} */
         PERM_DISABLED,  /** ordinal(7) == {@See TelephonyManager#SIM_STATE_PERM_DISABLED} */
-        CARD_IO_ERROR;  /** ordinal(8) == {@See TelephonyManager#SIM_STATE_CARD_IO_ERROR} */
+        CARD_IO_ERROR,  /** ordinal(8) == {@See TelephonyManager#SIM_STATE_CARD_IO_ERROR} */
+        CARD_RESTRICTED;/** ordinal(9) == {@See TelephonyManager#SIM_STATE_CARD_RESTRICTED} */
 
         public boolean isPinLocked() {
             return ((this == PIN_REQUIRED) || (this == PUK_REQUIRED));
@@ -83,7 +86,8 @@ public class IccCardConstants {
         public boolean iccCardExist() {
             return ((this == PIN_REQUIRED) || (this == PUK_REQUIRED)
                     || (this == NETWORK_LOCKED) || (this == READY)
-                    || (this == PERM_DISABLED) || (this == CARD_IO_ERROR));
+                    || (this == PERM_DISABLED) || (this == CARD_IO_ERROR)
+                    || (this == CARD_RESTRICTED));
         }
 
         public static State intToState(int state) throws IllegalArgumentException {
@@ -97,6 +101,7 @@ public class IccCardConstants {
                 case 6: return NOT_READY;
                 case 7: return PERM_DISABLED;
                 case 8: return CARD_IO_ERROR;
+                case 9: return CARD_RESTRICTED;
                 default:
                     throw new IllegalArgumentException();
             }

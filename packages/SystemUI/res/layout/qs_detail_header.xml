@@ -22,19 +22,9 @@
     android:background="@drawable/btn_borderless_rect"
     android:gravity="center">
 
-    <ImageView
-        android:id="@*android:id/up"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_marginEnd="16dp"
-        android:padding="16dp"
-        android:clickable="true"
-        android:background="?android:attr/selectableItemBackground"
-        android:contentDescription="@*android:string/action_bar_up_description"
-        android:src="?android:attr/homeAsUpIndicator" />
-
     <TextView
         android:id="@android:id/title"
+        android:paddingStart="16dp"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"

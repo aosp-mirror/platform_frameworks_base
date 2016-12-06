@@ -170,7 +170,24 @@ public class BackspaceTest extends KeyListenerTestCase {
         backspace(state, 0);
         state.assertEquals("|");
 
+        state.setByString("U+1F469 U+200D U+1F373 |");
+        backspace(state, 0);
+        state.assertEquals("|");
+
+        state.setByString("U+1F487 U+200D U+2640 |");
+        backspace(state, 0);
+        state.assertEquals("|");
+
+        state.setByString("U+1F487 U+200D U+2640 U+FE0F |");
+        backspace(state, 0);
+        state.assertEquals("|");
+
         state.setByString("U+1F468 U+200D U+2764 U+FE0F U+200D U+1F48B U+200D U+1F468 |");
+        backspace(state, 0);
+        state.assertEquals("|");
+
+        // Emoji modifier can be appended to the first emoji.
+        state.setByString("U+1F469 U+1F3FB U+200D U+1F4BC |");
         backspace(state, 0);
         state.assertEquals("|");
 
@@ -442,13 +459,6 @@ public class BackspaceTest extends KeyListenerTestCase {
         state.setByString("U+1F466 U+1F3FB U+200D |");
         backspace(state, 0);
         state.assertEquals("U+1F466 U+1F3FB |");
-        backspace(state, 0);
-        state.assertEquals("|");
-
-        // Emoji modifier + ZERO WIDTH JOINER
-        state.setByString("U+1F466 U+1F3FB U+200D U+1F469 |");
-        backspace(state, 0);
-        state.assertEquals("U+1F466 |");
         backspace(state, 0);
         state.assertEquals("|");
 

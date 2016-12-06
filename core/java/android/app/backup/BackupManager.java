@@ -128,6 +128,14 @@ public class BackupManager {
     @SystemApi
     public static final int ERROR_AGENT_FAILURE = BackupTransport.AGENT_ERROR;
 
+    /**
+     * Intent extra when any subsidiary backup-related UI is launched from Settings:  does
+     * device policy or configuration permit backup operations to run at all?
+     *
+     * @hide
+     */
+    public static final String EXTRA_BACKUP_SERVICES_AVAILABLE = "backup_services_available";
+
     private Context mContext;
     private static IBackupManager sService;
 

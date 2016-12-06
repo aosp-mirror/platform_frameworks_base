@@ -275,10 +275,16 @@ public class TaskStack {
                 new RectF(0, 0.5f, 1, 1));
 
         @Override
-        public boolean acceptsDrop(int x, int y, int width, int height, boolean isCurrentTarget) {
-            return isCurrentTarget
-                    ? areaContainsPoint(expandedTouchDockArea, width, height, x, y)
-                    : areaContainsPoint(touchArea, width, height, x, y);
+        public boolean acceptsDrop(int x, int y, int width, int height, Rect insets,
+                boolean isCurrentTarget) {
+            if (isCurrentTarget) {
+                getMappedRect(expandedTouchDockArea, width, height, mTmpRect);
+                return mTmpRect.contains(x, y);
+            } else {
+                getMappedRect(touchArea, width, height, mTmpRect);
+                updateBoundsWithSystemInsets(mTmpRect, insets);
+                return mTmpRect.contains(x, y);
+            }
         }
 
         // Represents the view state of this dock state
@@ -423,6 +429,7 @@ public class TaskStack {
         private final RectF touchArea;
         private final RectF dockArea;
         private final RectF expandedTouchDockArea;
+        private static final Rect mTmpRect = new Rect();
 
         /**
          * @param createMode used to pass to ActivityManager to dock the task
@@ -452,23 +459,11 @@ public class TaskStack {
         }
 
         /**
-         * Returns whether {@param x} and {@param y} are contained in the area scaled to the
-         * given {@param width} and {@param height}.
-         */
-        public boolean areaContainsPoint(RectF area, int width, int height, float x, float y) {
-            int left = (int) (area.left * width);
-            int top = (int) (area.top * height);
-            int right = (int) (area.right * width);
-            int bottom = (int) (area.bottom * height);
-            return x >= left && y >= top && x <= right && y <= bottom;
-        }
-
-        /**
          * Returns the docked task bounds with the given {@param width} and {@param height}.
          */
-        public Rect getPreDockedBounds(int width, int height) {
-            return new Rect((int) (dockArea.left * width), (int) (dockArea.top * height),
-                    (int) (dockArea.right * width), (int) (dockArea.bottom * height));
+        public Rect getPreDockedBounds(int width, int height, Rect insets) {
+            getMappedRect(dockArea, width, height, mTmpRect);
+            return updateBoundsWithSystemInsets(mTmpRect, insets);
         }
 
         /**
@@ -511,9 +506,33 @@ public class TaskStack {
             int top = dockArea.bottom < 1f
                     ? 0
                     : insets.top;
-            layoutAlgorithm.getTaskStackBounds(displayRect, windowRectOut, top, insets.right,
+            // For now, ignore the left insets since we always dock on the left and show Recents
+            // on the right
+            layoutAlgorithm.getTaskStackBounds(displayRect, windowRectOut, top, 0, insets.right,
                     taskStackBounds);
             return taskStackBounds;
+        }
+
+        /**
+         * Returns the expanded bounds in certain dock sides such that the bounds account for the
+         * system insets (namely the vertical nav bar).  This call modifies and returns the given
+         * {@param bounds}.
+         */
+        private Rect updateBoundsWithSystemInsets(Rect bounds, Rect insets) {
+            if (dockSide == DOCKED_LEFT) {
+                bounds.right += insets.left;
+            } else if (dockSide == DOCKED_RIGHT) {
+                bounds.left -= insets.right;
+            }
+            return bounds;
+        }
+
+        /**
+         * Returns the mapped rect to the given dimensions.
+         */
+        private void getMappedRect(RectF bounds, int width, int height, Rect out) {
+            out.set((int) (bounds.left * width), (int) (bounds.top * height),
+                    (int) (bounds.right * width), (int) (bounds.bottom * height));
         }
     }
 

@@ -26,6 +26,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.egg.R;
+import com.android.internal.logging.MetricsLogger;
 
 import java.util.ArrayList;
 
@@ -51,6 +52,7 @@ public class NekoDialog extends Dialog {
         if (currentState == 0 && food.getType() != 0) {
             NekoService.registerJob(getContext(), food.getInterval(getContext()));
         }
+        MetricsLogger.histogram(getContext(), "egg_neko_offered_food", food.getType());
         prefs.setFoodState(food.getType());
         dismiss();
     }

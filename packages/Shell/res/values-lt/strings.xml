@@ -21,7 +21,7 @@
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Pranešimas apie riktą (<xliff:g id="ID">#%d</xliff:g>) užfiksuotas"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Pridedama informacijos prie pranešimo apie riktą"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Palaukite…"</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Perbraukite kairėn, kad bendrintumėte rikto ataskaitą"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Pranešimai apie riktus netrukus bus rodomi telefone"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Palieskite, kad bendrintumėte pranešimą apie riktą"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Palieskite ir bendrinkite pranešimą apie riktą be ekrano kopijos arba palaukite, kol ji bus sukurta"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Palieskite ir bendrinkite pranešimą apie riktą be ekrano kopijos arba palaukite, kol ji bus sukurta"</string>

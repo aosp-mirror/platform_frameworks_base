@@ -147,7 +147,7 @@ public final class Looper {
             }
 
             final long traceTag = me.mTraceTag;
-            if (traceTag != 0) {
+            if (traceTag != 0 && Trace.isTagEnabled(traceTag)) {
                 Trace.traceBegin(traceTag, msg.target.getTraceName(msg));
             }
             try {

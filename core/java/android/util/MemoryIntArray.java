@@ -54,7 +54,7 @@ public final class MemoryIntArray implements Parcelable, Closeable {
     private final int mOwnerPid;
     private final boolean mClientWritable;
     private final long mMemoryAddr;
-    private ParcelFileDescriptor mFd;
+    private int mFd;
 
     /**
      * Creates a new instance.
@@ -71,22 +71,23 @@ public final class MemoryIntArray implements Parcelable, Closeable {
         mOwnerPid = Process.myPid();
         mClientWritable = clientWritable;
         final String name = UUID.randomUUID().toString();
-        mFd = ParcelFileDescriptor.fromFd(nativeCreate(name, size));
-        mMemoryAddr = nativeOpen(mFd.getFd(), true, clientWritable);
+        mFd = nativeCreate(name, size);
+        mMemoryAddr = nativeOpen(mFd, true, clientWritable);
     }
 
     private MemoryIntArray(Parcel parcel) throws IOException {
         mOwnerPid = parcel.readInt();
         mClientWritable = (parcel.readInt() == 1);
-        mFd = parcel.readParcelable(null);
-        if (mFd == null) {
+        ParcelFileDescriptor pfd = parcel.readParcelable(null);
+        if (pfd == null) {
             throw new IOException("No backing file descriptor");
         }
+        mFd = pfd.detachFd();
         final long memoryAddress = parcel.readLong();
         if (isOwner()) {
             mMemoryAddr = memoryAddress;
         } else {
-            mMemoryAddr = nativeOpen(mFd.getFd(), false, mClientWritable);
+            mMemoryAddr = nativeOpen(mFd, false, mClientWritable);
         }
     }
 
@@ -108,7 +109,7 @@ public final class MemoryIntArray implements Parcelable, Closeable {
     public int get(int index) throws IOException {
         enforceNotClosed();
         enforceValidIndex(index);
-        return nativeGet(mFd.getFd(), mMemoryAddr, index, isOwner());
+        return nativeGet(mFd, mMemoryAddr, index, isOwner());
     }
 
     /**
@@ -124,7 +125,7 @@ public final class MemoryIntArray implements Parcelable, Closeable {
         enforceNotClosed();
         enforceWritable();
         enforceValidIndex(index);
-        nativeSet(mFd.getFd(), mMemoryAddr, index, value, isOwner());
+        nativeSet(mFd, mMemoryAddr, index, value, isOwner());
     }
 
     /**
@@ -134,7 +135,7 @@ public final class MemoryIntArray implements Parcelable, Closeable {
      */
     public int size() throws IOException {
         enforceNotClosed();
-        return nativeSize(mFd.getFd());
+        return nativeSize(mFd);
     }
 
     /**
@@ -145,9 +146,8 @@ public final class MemoryIntArray implements Parcelable, Closeable {
     @Override
     public void close() throws IOException {
         if (!isClosed()) {
-            ParcelFileDescriptor pfd = mFd;
-            mFd = null;
-            nativeClose(pfd.getFd(), mMemoryAddr, isOwner());
+            nativeClose(mFd, mMemoryAddr, isOwner());
+            mFd = -1;
         }
     }
 
@@ -155,7 +155,7 @@ public final class MemoryIntArray implements Parcelable, Closeable {
      * @return Whether this array is closed and shouldn't be used.
      */
     public boolean isClosed() {
-        return mFd == null;
+        return mFd == -1;
     }
 
     @Override
@@ -171,10 +171,15 @@ public final class MemoryIntArray implements Parcelable, Closeable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeInt(mOwnerPid);
-        parcel.writeInt(mClientWritable ? 1 : 0);
-        parcel.writeParcelable(mFd, 0);
-        parcel.writeLong(mMemoryAddr);
+        ParcelFileDescriptor pfd = ParcelFileDescriptor.adoptFd(mFd);
+        try {
+            parcel.writeInt(mOwnerPid);
+            parcel.writeInt(mClientWritable ? 1 : 0);
+            parcel.writeParcelable(pfd, flags & ~Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+            parcel.writeLong(mMemoryAddr);
+        } finally {
+            pfd.detachFd();
+        }
     }
 
     @Override
@@ -189,19 +194,12 @@ public final class MemoryIntArray implements Parcelable, Closeable {
             return false;
         }
         MemoryIntArray other = (MemoryIntArray) obj;
-        if (mFd == null) {
-            if (other.mFd != null) {
-                return false;
-            }
-        } else if (mFd.getFd() != other.mFd.getFd()) {
-            return false;
-        }
-        return true;
+        return mFd == other.mFd;
     }
 
     @Override
     public int hashCode() {
-        return mFd != null ? mFd.hashCode() : 1;
+        return mFd;
     }
 
     private boolean isOwner() {

@@ -42,7 +42,7 @@ class="button">Download the sample</a>
 <p>This class explains the basic tasks involved in connecting to the network,
 monitoring the network connection (including connection changes), and giving
 users control over an app's network usage. It also describes how to parse and
-consume XML data.</p> 
+consume XML data.</p>
 
 <p>This class includes a sample application that illustrates how to perform
 common network operations. You can download the sample (to the right) and use it
@@ -66,18 +66,18 @@ of your app's network operations.</p>
 
 <dl>
  <dt><b><a href="connecting.html">Connecting to the Network</a></b></dt>
- 
+
    <dd>Learn how to connect to the network, choose an HTTP client, and perform
 network operations outside of the UI thread.</dd>
 
  <dt><b><a href="managing.html">Managing Network Usage</a></b></dt>
- 
+
    <dd>Learn how to check a
 device's network connection, create a preferences UI for controlling network
 usage, and respond to connection changes.</dd>
-   
+
    <dt><b><a href="xml.html">Parsing XML Data</a></b></dt>
    <dd>Learn how to parse and consume XML data.</dd>
 
-</dl> 
+</dl>
 

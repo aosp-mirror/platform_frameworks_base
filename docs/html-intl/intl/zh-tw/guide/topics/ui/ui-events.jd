@@ -187,7 +187,7 @@ android.app.Activity} 能在發送至視窗之前攔截所有輕觸事件。</li
     ViewGroup.onInterceptTouchEvent(MotionEvent)}</code> - 這讓 {@link
 android.view.ViewGroup} 在發送至子檢視時能監控事件。</li>
   <li><code>{@link  android.view.ViewParent#requestDisallowInterceptTouchEvent(boolean)
-    ViewParent.requestDisallowInterceptTouchEvent(boolean)}</code> - 呼叫這個父檢視以指出不應該使用 <code>{@link 
+    ViewParent.requestDisallowInterceptTouchEvent(boolean)}</code> - 呼叫這個父檢視以指出不應該使用 <code>{@link
     android.view.ViewGroup#onInterceptTouchEvent(MotionEvent)}</code> 攔截輕觸事件。
 </li>
 </ul>
@@ -199,11 +199,11 @@ android.view.ViewGroup} 在發送至子檢視時能監控事件。</li>
 不過，如果裝置具有輕觸功能，而且使用者透過輕觸方式開始與介面互動，就不需要再將項目反白顯示，或是對特定檢視提供焦點。
 
 因此，這就是名稱為「輕觸模式」的互動模式。
- 
+
 </p>
 <p>
 如果是具備輕觸功能的裝置，使用者輕觸螢幕之後，裝置就會進入輕觸模式。
-從這點以此類推，只有 
+從這點以此類推，只有
 {@link android.view.View#isFocusableInTouchMode} 為 true 的檢視才可設定焦點，例如文字編輯小工具。
 其他可輕觸的檢視，例如按鈕，在輕觸時不會成為焦點；按下時，只會觸發 on-click 接聽器。
 
@@ -214,7 +214,7 @@ android.view.ViewGroup} 在發送至子檢視時能監控事件。</li>
 
 </p>
 <p>
-整個系統 (所有視窗和 Activity) 都會保留輕觸模式的狀態。如要查詢目前的狀態，您可以呼叫 
+整個系統 (所有視窗和 Activity) 都會保留輕觸模式的狀態。如要查詢目前的狀態，您可以呼叫
 {@link android.view.View#isInTouchMode} 以查看裝置目前是否處於輕觸模式。
 
 </p>
@@ -282,7 +282,7 @@ android.view.ViewGroup} 在發送至子檢視時能監控事件。</li>
     the framework will take care of measuring, laying out, and drawing the tree
     as appropriate.</li>
    </ol>
-   
+
    <p class="note"><strong>Note:</strong> The entire View tree is single threaded. You must always be on
    the UI thread when calling any method on any View.
    If you are doing work on other threads and want to update the state of a View

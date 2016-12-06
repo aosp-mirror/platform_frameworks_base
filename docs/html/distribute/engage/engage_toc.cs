@@ -66,6 +66,12 @@
         <span class="en">Get Feedback with Beta Tests</span></a>
     </div>
   </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs
+        var:toroot?>distribute/engage/nearby.html">
+        <span class="en">Interact with Nearby Users</span></a>
+    </div>
+  </li>
 </ul>
 
 <script type="text/javascript">

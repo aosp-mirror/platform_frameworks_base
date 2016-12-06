@@ -21,12 +21,17 @@ import android.util.Pools;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.CrossFadeHelper;
+import com.android.systemui.statusbar.TransformableView;
+import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 /**
  * A transform state of a image view.
 */
 public class ImageTransformState extends TransformState {
+    public static final long ANIMATION_DURATION_LENGTH = 210;
 
     public static final int ICON_TAG = R.id.image_icon_tag;
     private static Pools.SimplePool<ImageTransformState> sInstancePool
@@ -47,6 +52,52 @@ public class ImageTransformState extends TransformState {
             return mIcon != null && mIcon.sameAs(((ImageTransformState) otherState).getIcon());
         }
         return super.sameAs(otherState);
+    }
+
+    @Override
+    public void appear(float transformationAmount, TransformableView otherView) {
+        if (otherView instanceof HybridNotificationView) {
+            if (transformationAmount == 0.0f) {
+                mTransformedView.setPivotY(0);
+                mTransformedView.setPivotX(mTransformedView.getWidth() / 2);
+                prepareFadeIn();
+            }
+            transformationAmount = mapToDuration(transformationAmount);
+            CrossFadeHelper.fadeIn(mTransformedView, transformationAmount, false /* remap */);
+            transformationAmount = Interpolators.LINEAR_OUT_SLOW_IN.getInterpolation(
+                    transformationAmount);
+            mTransformedView.setScaleX(transformationAmount);
+            mTransformedView.setScaleY(transformationAmount);
+        } else {
+            super.appear(transformationAmount, otherView);
+        }
+    }
+
+    @Override
+    public void disappear(float transformationAmount, TransformableView otherView) {
+        if (otherView instanceof HybridNotificationView) {
+            if (transformationAmount == 0.0f) {
+                mTransformedView.setPivotY(0);
+                mTransformedView.setPivotX(mTransformedView.getWidth() / 2);
+            }
+            transformationAmount = mapToDuration(1.0f - transformationAmount);
+            CrossFadeHelper.fadeOut(mTransformedView, 1.0f - transformationAmount,
+                    false /* remap */);
+            transformationAmount = Interpolators.LINEAR_OUT_SLOW_IN.getInterpolation(
+                    transformationAmount);
+            mTransformedView.setScaleX(transformationAmount);
+            mTransformedView.setScaleY(transformationAmount);
+        } else {
+            super.disappear(transformationAmount, otherView);
+        }
+    }
+
+    private static float mapToDuration(float scaleAmount) {
+        // Assuming a linear interpolator, we can easily map it to our new duration
+        scaleAmount = (scaleAmount * StackStateAnimator.ANIMATION_DURATION_STANDARD
+                - (StackStateAnimator.ANIMATION_DURATION_STANDARD - ANIMATION_DURATION_LENGTH))
+                        / ANIMATION_DURATION_LENGTH;
+        return Math.max(Math.min(scaleAmount, 1.0f), 0.0f);
     }
 
     public Icon getIcon() {

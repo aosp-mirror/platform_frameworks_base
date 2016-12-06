@@ -107,7 +107,7 @@ trong thư mục dự án <code>res/layout/</code> Android của bạn để bi�
 
 <h2 id="load">Nạp Tài nguyên XML</h2>
 
-<p>Khi bạn biên dịch ứng dụng của mình, từng tệp bố trí XML được biên dịch thành một tài nguyên 
+<p>Khi bạn biên dịch ứng dụng của mình, từng tệp bố trí XML được biên dịch thành một tài nguyên
 {@link android.view.View}. Bạn nên nạp tài nguyên bố trí từ mã ứng dụng của mình, trong triển khai gọi lại
 {@link android.app.Activity#onCreate(android.os.Bundle) Activity.onCreate()} của bạn.
 Làm vậy bằng cách gọi <code>{@link android.app.Activity#setContentView(int) setContentView()}</code>,
@@ -260,7 +260,7 @@ Tài nguyên Có sẵn</a>.</p>
    </p>
 
    <p>
-   Cặp thứ nhất được gọi là <em>chiều rộng đo được</em> và 
+   Cặp thứ nhất được gọi là <em>chiều rộng đo được</em> và
    <em>chiều cao đo được</em>. Những kích thước này xác định một dạng xem muốn phóng lớn bao nhiêu
    trong dạng xem mẹ của nó. Các
    kích thước đo được có thể thu được bằng cách gọi {@link android.view.View#getMeasuredWidth()}

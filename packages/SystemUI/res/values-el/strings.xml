@@ -143,7 +143,9 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_4g_plus" msgid="3032226872470658661">"4G+"</string>
     <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
+    <string name="accessibility_data_connection_lte_plus" msgid="361876866906946007">"LTE+"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Περιαγωγή"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
@@ -161,7 +163,7 @@
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Φόρτιση μπαταρίας, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> τοις εκατό."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Ρυθμίσεις συστήματος."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Ειδοποιήσεις."</string>
-    <string name="accessibility_remove_notification" msgid="3603099514902182350">"Εκκαθάριση ειδοποίησης."</string>
+    <string name="accessibility_remove_notification" msgid="3603099514902182350">"Διαγραφή ειδοποίησης."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"Το GPS ενεργοποιήθηκε."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"Προσδιορισμός GPS."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Το TeleTypewriter ενεργοποιήθηκε."</string>
@@ -236,14 +238,14 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Τα δεδομένα 4G τέθηκαν σε παύση"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Τα δεδομένα κινητής τηλεφωνίας τέθηκαν σε παύση"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Τα δεδομένα τέθηκαν σε παύση"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Επειδή συμπληρώθηκε το όριο των δεδομένων που ορίστηκε για τη συσκευή σας, η χρήση δεδομένων τέθηκε σε παύση για το υπόλοιπο αυτού του κύκλου.\n\nΗ εκ νέου ενεργοποίησή τους ενδέχεται να επιφέρει χρεώσεις από την εταιρεία κινητής τηλεφωνίας σας."</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Το όριο δεδομένων που ορίσατε έχει εξαντληθεί. Δεν χρησιμοποιείτε πλέον δεδομένα κινητής τηλεφωνίας.\n\nΑν συνεχίσετε, ενδέχεται να ισχύσουν χρεώσεις για τη χρήση δεδομένων."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Συνέχιση"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Χωρ. σύνδ. στο Διαδ."</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi συνδεδεμένο"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Αναζήτηση για GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Ρύθμιση τοποθεσίας με GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Τα αιτήματα τοποθεσίας έχουν ενεργοποιηθεί"</string>
-    <string name="accessibility_clear_all" msgid="5235938559247164925">"Εκκαθάριση όλων των ειδοποιήσεων."</string>
+    <string name="accessibility_clear_all" msgid="5235938559247164925">"Διαγραφή όλων των ειδοποιήσεων."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> επιπλέον ειδοποιήσεις εντός της ομάδας.</item>
@@ -317,8 +319,11 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Όριο <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Προειδοποίηση για <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Λειτουργία εργασίας"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Νυχτερινός φωτισμός"</string>
+    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"Ο Νυχτερινός φωτισμός είναι ενεργοποιημένος. Πατήστε για απενεργοποίηση."</string>
+    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"Ο Νυχτερινός φωτισμός είναι απενεργοποιημένος. Πατήστε για ενεργοποίηση."</string>
     <string name="recents_empty_message" msgid="808480104164008572">"Δεν υπάρχουν πρόσφατα στοιχεία"</string>
-    <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Έχει γίνει εκκαθάριση όλων των στοιχείων"</string>
+    <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Έχει γίνει διαγραφή όλων των στοιχείων"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Πληροφορίες εφαρμογής"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"καρφίτσωμα οθόνης"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"αναζήτηση"</string>
@@ -330,6 +335,8 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Οριζόντιος διαχωρισμός"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Κάθετος διαχωρισμός"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Προσαρμοσμένος διαχωρισμός"</string>
+  <string-array name="recents_blacklist_array">
+  </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Φορτίστηκε"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Φόρτιση"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> για πλήρη φόρτιση"</string>
@@ -397,6 +404,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"Η συσκευή μπορεί να παρακολουθείται"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Το προφίλ ενδέχεται να παρακολουθείται"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Το δίκτυο ενδέχεται να παρακολουθείται"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"Το δίκτυο ενδέχεται να παρακολουθείται"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Παρακολούθηση συσκευής"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Παρακολούθηση προφίλ"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Παρακολούθηση δικτύου"</string>
@@ -409,6 +417,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"Έχετε συνδεθεί στην εφαρμογή <xliff:g id="APPLICATION">%1$s</xliff:g>, η οποία μπορεί να παρακολουθεί τη δραστηριότητα του δικτύου σας, συμπεριλαμβανομένων μηνυμάτων ηλεκτρονικού ταχυδρομείου, εφαρμογών και ιστότοπων."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Έχετε συνδεθεί στην εφαρμογή <xliff:g id="APPLICATION">%1$s</xliff:g>, η οποία μπορεί να παρακολουθεί τη δραστηριότητα του προσωπικού σας δικτύου, συμπεριλαμβανομένων μηνυμάτων ηλεκτρονικού ταχυδρομείου, εφαρμογών και ιστότοπων."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Έχετε συνδεθεί στην εφαρμογή <xliff:g id="APPLICATION">%1$s</xliff:g>, η οποία μπορεί να παρακολουθεί τη δραστηριότητα του προσωπικού σας δικτύου, συμπεριλαμβανομένων μηνυμάτων ηλεκτρονικού ταχυδρομείου, εφαρμογών και ιστοτόπων."</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"Η διαχείριση του προφίλ εργασίας γίνεται από τον οργανισμό <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Είναι συνδεδεμένο στην εφαρμογή <xliff:g id="APPLICATION">%2$s</xliff:g>, η οποία μπορεί να παρακολουθεί τη δραστηριότητα του δικτύου εργασίας, συμπεριλαμβανομένων μηνυμάτων ηλεκτρονικού ταχυδρομείου, εφαρμογών και ιστότοπων.\n\nΓια περισσότερες πληροφορίες, επικοινωνήστε με το διαχειριστή."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Η διαχείριση του προφίλ εργασίας γίνεται από τον οργανισμό <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Είναι συνδεδεμένο στην εφαρμογή <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, η οποία μπορεί να παρακολουθεί τη δραστηριότητα του δικτύου εργασίας, συμπεριλαμβανομένων μηνυμάτων ηλεκτρονικού ταχυδρομείου, εφαρμογών και ιστότοπων.\n\nΕπίσης, είστε συνδεδεμένοι στην εφαρμογή <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, η οποία μπορεί να παρακολουθεί τη δραστηριότητα του προσωπικού σας δικτύου."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Η διαχείριση της συσκευής γίνεται από <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nΟ διαχειριστής μπορεί να παρακολουθεί και να διαχειρίζεται ρυθμίσεις, εταιρική πρόσβαση, εφαρμογές, δεδομένα σχετικά με τη συσκευή και πληρ. τοποθεσίας της συσκευής.\n\nΕίστε συνδεδ. σε <xliff:g id="APPLICATION">%2$s</xliff:g> που μπορεί να παρακολουθεί τη δραστηρ. του δικτύου εργασίας, όπως μηνύματα ηλεκτρ. ταχυδρομείου, εφαρμογές και ιστότοπους.\n\nΓια περισ. πληροφορίες, επικοινωνήστε με το διαχειριστή."</string>
@@ -429,11 +438,23 @@
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Θα εμφανιστεί ξανά την επόμενη φορά που θα το ενεργοποιήσετε στις ρυθμίσεις."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Απόκρυψη"</string>
     <string name="volumeui_prompt_message" msgid="918680947433389110">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> θέλει να γίνει το παράθυρο διαλόγου ελέγχου έντασης"</string>
-    <string name="volumeui_prompt_allow" msgid="7954396902482228786">"Να επιτραπεί"</string>
+    <string name="volumeui_prompt_allow" msgid="7954396902482228786">"Να επιτρέπεται"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Απόρριψη"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> αποτελεί το παράθυρο διαλόγου ελέγχου έντασης"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"Πατήστε για να επαναφέρετε την αρχική μορφή της εικόνας."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Χρησιμοποιείτε το προφίλ εργασίας σας"</string>
+  <string-array name="volume_stream_titles">
+    <item msgid="5841843895402729630">"Κλήση"</item>
+    <item msgid="5997713001067658559">"Σύστημα"</item>
+    <item msgid="7858983209929864160">"Ήχος κλήσης"</item>
+    <item msgid="1850038478268896762">"Μέσα"</item>
+    <item msgid="8265110906352372092">"Ξυπνητήρι"</item>
+    <item msgid="5339394737636839168"></item>
+    <item msgid="2951313578278086204">"Bluetooth"</item>
+    <item msgid="2919807739709798970"></item>
+    <item msgid="150349973435223405"></item>
+    <item msgid="6761963760295549099"></item>
+  </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Πατήστε για κατάργηση σίγασης."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Πατήστε για ενεργοποιήσετε τη δόνηση. Οι υπηρεσίες προσβασιμότητας ενδέχεται να τεθούν σε σίγαση."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Πατήστε για σίγαση. Οι υπηρεσίες προσβασιμότητας ενδέχεται να τεθούν σε σίγαση."</string>
@@ -473,8 +494,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Εμφάνιση δευτερολέπτων ρολογιού στη γραμμή κατάστασης. Ενδέχεται να επηρεάσει τη διάρκεια ζωής της μπαταρίας."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Αναδιάταξη Γρήγορων ρυθμίσεων"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Εμφάνιση φωτεινότητας στις Γρήγορες ρυθμίσεις"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"Ενεργοποίηση κίνησης ολίσθησης επάνω για διαχωρισμό οθόνης"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Ενεργοποίηση κίνησης για μετάβαση σε διαχωρισμό οθόνης μέσω ολίσθησης επάνω από το κουμπί \"Επισκόπηση\""</string>
     <string name="experimental" msgid="6198182315536726162">"Σε πειραματικό στάδιο"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Ενεργοποίηση Bluetooth;"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Για να συνδέσετε το πληκτρολόγιο με το tablet σας, θα πρέπει πρώτα να ενεργοποιήσετε το Bluetooth."</string>
@@ -504,21 +523,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"Περισσότερες ρυθμίσεις"</string>
     <string name="notification_done" msgid="5279426047273930175">"Τέλος"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Στοιχεία ελέγχου κοινοποίησης <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"Χρώμα και εμφάνιση"</string>
-    <string name="night_mode" msgid="3540405868248625488">"Νυχτερινή λειτουργία"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"Βαθμονόμηση οθόνης"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"Ενεργή"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"Ανενεργή"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"Αυτόματη ενεργοποίηση"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Αλλαγή σε νυχτερινή λειτουργία όπως απαιτείται βάσει τοποθεσίας και ώρας της ημέρας"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"Όταν είναι ενεργή η νυχτερινή λειτουργία"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Χρήση σκοτεινού θέματος για Android OS"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"Ρύθμιση απόχρωσης"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"Ρύθμιση φωτεινότητας"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"Το σκούρο θέμα εφαρμόζεται σε βασικές περιοχές του λειτουργικού συστήματος Android οι οποίες συνήθως εμφανίζονται με φωτεινό θέμα, όπως οι Ρυθμίσεις."</string>
-    <string name="color_apply" msgid="9212602012641034283">"Εφαρμογή"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"Επιβεβαίωση ρυθμίσεων"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"Ορισμένες ρυθμίσεις χρωμάτων μπορεί να μην επιτρέπουν τη χρήση αυτής της συσκευής. Κάντε κλικ στην επιλογή OK για να επιβεβαιώσετε αυτές τις ρυθμίσεις χρωμάτων, διαφορετικά θα γίνει επαναφορά αυτών των ρυθμίσεων μετά από 10 δευτερόλεπτα."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Χρήση της μπαταρίας"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Η εξοικονόμηση μπαταρίας δεν είναι διαθέσιμη κατά τη διάρκεια της φόρτισης"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Εξοικονόμηση μπαταρίας"</string>
@@ -647,4 +651,5 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Άνοιγμα ρυθμίσεων <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Επεξεργασία σειράς ρυθμίσεων."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Σελίδα <xliff:g id="ID_1">%1$d</xliff:g> από <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <string name="cant_silence_or_block" msgid="999689262131488625">"Δεν είναι δυνατή η σίγαση ή ο αποκλεισμός των ειδοποιήσεων"</string>
 </resources>

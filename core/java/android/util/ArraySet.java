@@ -156,28 +156,46 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
             synchronized (ArraySet.class) {
                 if (mTwiceBaseCache != null) {
                     final Object[] array = mTwiceBaseCache;
-                    mArray = array;
-                    mTwiceBaseCache = (Object[])array[0];
-                    mHashes = (int[])array[1];
-                    array[0] = array[1] = null;
-                    mTwiceBaseCacheSize--;
-                    if (DEBUG) Log.d(TAG, "Retrieving 2x cache " + mHashes
-                            + " now have " + mTwiceBaseCacheSize + " entries");
-                    return;
+                    try {
+                        mArray = array;
+                        mTwiceBaseCache = (Object[]) array[0];
+                        mHashes = (int[]) array[1];
+                        array[0] = array[1] = null;
+                        mTwiceBaseCacheSize--;
+                        if (DEBUG) Log.d(TAG, "Retrieving 2x cache " + mHashes
+                                + " now have " + mTwiceBaseCacheSize + " entries");
+                        return;
+                    } catch (ClassCastException e) {
+                    }
+                    // Whoops!  Someone trampled the array (probably due to not protecting
+                    // their access with a lock).  Our cache is corrupt; report and give up.
+                    Slog.wtf(TAG, "Found corrupt ArraySet cache: [0]=" + array[0]
+                            + " [1]=" + array[1]);
+                    mTwiceBaseCache = null;
+                    mTwiceBaseCacheSize = 0;
                 }
             }
         } else if (size == BASE_SIZE) {
             synchronized (ArraySet.class) {
                 if (mBaseCache != null) {
                     final Object[] array = mBaseCache;
-                    mArray = array;
-                    mBaseCache = (Object[])array[0];
-                    mHashes = (int[])array[1];
-                    array[0] = array[1] = null;
-                    mBaseCacheSize--;
-                    if (DEBUG) Log.d(TAG, "Retrieving 1x cache " + mHashes
-                            + " now have " + mBaseCacheSize + " entries");
-                    return;
+                    try {
+                        mArray = array;
+                        mBaseCache = (Object[]) array[0];
+                        mHashes = (int[]) array[1];
+                        array[0] = array[1] = null;
+                        mBaseCacheSize--;
+                        if (DEBUG) Log.d(TAG, "Retrieving 1x cache " + mHashes
+                                + " now have " + mBaseCacheSize + " entries");
+                        return;
+                    } catch (ClassCastException e) {
+                    }
+                    // Whoops!  Someone trampled the array (probably due to not protecting
+                    // their access with a lock).  Our cache is corrupt; report and give up.
+                    Slog.wtf(TAG, "Found corrupt ArraySet cache: [0]=" + array[0]
+                            + " [1]=" + array[1]);
+                    mBaseCache = null;
+                    mBaseCacheSize = 0;
                 }
             }
         }
@@ -402,11 +420,14 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
             throw new IllegalStateException("Array is full");
         }
         if (index > 0 && mHashes[index - 1] > hash) {
-            RuntimeException e = new RuntimeException("here");
-            e.fillInStackTrace();
-            Log.w(TAG, "New hash " + hash
-                    + " is before end of array hash " + mHashes[index - 1]
-                    + " at index " + index, e);
+            // Cannot optimize since it would break the sorted order - fallback to add()
+            if (DEBUG) {
+                RuntimeException e = new RuntimeException("here");
+                e.fillInStackTrace();
+                Log.w(TAG, "New hash " + hash
+                        + " is before end of array hash " + mHashes[index - 1]
+                        + " at index " + index, e);
+            }
             add(value);
             return;
         }

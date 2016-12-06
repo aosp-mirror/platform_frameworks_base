@@ -2,7 +2,7 @@ page.title=ローカライズのチェックリスト
 page.metaDescription=Android と Google Play から提供される世界中のユーザーを活用します。このチェックリストを読んで、お客様の製品を世界中のマーケットに提供する方法の概要を把握してください。
 meta.tags="localizing, publishing, disttools"
 page.tags="local, l10n, translation, language"
-page.image=/distribute/images/localization-checklist.jpg 
+page.image=/distribute/images/localization-checklist.jpg
 
 @jd:body
 
@@ -713,4 +713,4 @@ data-maxresults="6">
   data-query="collection:distribute/toolsreference/localizationchecklist/supportlaunch"
   data-sortOrder="-timestamp"
   data-cardSizes="9x3,9x3,6x3,9x3,9x3,9x3"
-  data-maxResults="6"></div> 
+  data-maxResults="6"></div>

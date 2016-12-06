@@ -12,8 +12,8 @@ next.link=adaptui.html
 
 
 <!-- This is the training bar -->
-<div id="tb-wrapper"> 
-<div id="tb"> 
+<div id="tb-wrapper">
+<div id="tb">
 
 <h2>강의 목표</h2>
 <ol>
@@ -29,15 +29,15 @@ next.link=adaptui.html
 </ul>
 
 <h2>다운로드 </h2>
- 
-<div class="download-box"> 
+
+<div class="download-box">
 <a href="http://developer.android.com/shareables/training/NewsReader.zip" class="button">샘플 앱 다운로드</a>
-<p class="filename">NewsReader.zip</p> 
-</div> 
- 
- 
-</div> 
-</div> 
+<p class="filename">NewsReader.zip</p>
+</div>
+
+
+</div>
+</div>
 
 <p>이 강의에서는 다양한 리소스를 제공하고 해상도 독립형(resolution-independent) 측정 단위를 사용함으로써 다양한 화면 밀도를 지원하는 방법을 설명합니다.</p>
 
@@ -48,8 +48,8 @@ next.link=adaptui.html
 <p>예를 들어 두 개의 보기 사이에 여백을 지정할 때 <code>px</code>가 아닌 <code>dp</code>를 사용합니다.</p>
 
 <pre>
-&lt;Button android:layout_width="wrap_content" 
-    android:layout_height="wrap_content" 
+&lt;Button android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:text="&#64;string/clickme"
     android:layout_marginTop="20dp" /&gt;
 </pre>
@@ -57,8 +57,8 @@ next.link=adaptui.html
 <p>텍스트 크기를 지정할 때에는 항상 <code>sp</code>를 사용합니다.</p>
 
 <pre>
-&lt;TextView android:layout_width="match_parent" 
-    android:layout_height="wrap_content" 
+&lt;TextView android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:textSize="20sp" /&gt;
 </pre>
 

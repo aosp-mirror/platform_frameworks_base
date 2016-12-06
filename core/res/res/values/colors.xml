@@ -74,6 +74,8 @@
     <drawable name="input_method_fullscreen_background">#fff9f9f9</drawable>
     <color name="input_method_navigation_guard">#ff000000</color>
 
+    <color name="system_error">#fff4511e</color> <!-- deep orange 600 -->
+
     <!-- For date picker widget -->
     <drawable name="selected_day_background">#ff0092f4</drawable>
 
@@ -118,7 +120,7 @@
     <!-- LockPatternView -->
     <color name="lock_pattern_view_regular_color">#ffffffff</color>
     <color name="lock_pattern_view_success_color">#ffffffff</color>
-    <color name="lock_pattern_view_error_color">#fff4511e</color>
+    <color name="lock_pattern_view_error_color">@color/system_error</color>
 
     <!-- FaceLock -->
     <color name="facelock_spotlight_mask">#CC000000</color>
@@ -138,6 +140,7 @@
     <color name="notification_progress_background_color">@color/secondary_text_material_light</color>
 
     <color name="notification_action_list">#ffeeeeee</color>
+    <color name="notification_action_list_dark">#ffe0e0e0</color>
 
     <!-- Keyguard colors -->
     <color name="keyguard_avatar_frame_color">#ffffffff</color>
@@ -151,7 +154,7 @@
     <color name="battery_saver_mode_color">#fff4511e</color><!-- deep orange 600 -->
 
     <!-- Default user icon colors -->
-    <color name="user_icon_1">#ff00bcd4</color><!-- teal 500 -->
+    <color name="user_icon_1">#ff00bcd4</color><!-- cyan 500 -->
     <color name="user_icon_2">#ff3f51b5</color><!-- indigo 500 -->
     <color name="user_icon_3">#ff4285f4</color><!-- blue 500 -->
     <color name="user_icon_4">#ffe91e63</color><!-- pink 500 -->

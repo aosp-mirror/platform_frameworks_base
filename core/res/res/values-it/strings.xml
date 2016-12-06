@@ -311,7 +311,7 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Consente all\'applicazione di abilitare la modalità automobile."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"chiusura altre applicazioni"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Consente all\'applicazione di terminare i processi in background di altre applicazioni. Ciò potrebbe causare l\'interruzione di altre applicazioni."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"posizionamento davanti ad altre app"</string>
+    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"visualizzazione sopra altre app"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Consente all\'applicazione di spostarsi sopra ad altre applicazioni o parti dell\'interfaccia utente. Potrebbe interferire con il tuo utilizzo dell\'interfaccia in qualsiasi applicazione o cambiare ciò che credi di vedere in altre applicazioni."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"esecuzione permanente delle applicazioni"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Consente all\'applicazione di rendere persistenti in memoria alcune sue parti. Ciò può limitare la memoria disponibile per altre applicazioni, rallentando il tablet."</string>
@@ -679,6 +679,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Corretta."</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Riprova"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Riprova"</string>
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"Sblocca per accedere a funzioni e dati"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Numero massimo di tentativi di Sblocco col sorriso superato"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Nessuna scheda SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Nessuna scheda SIM presente nel tablet."</string>
@@ -1023,8 +1024,9 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Aggiornamento di Android..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Avvio di Android…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Ottimizzazione archiviazione."</string>
-    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Aggiornamento di Android in corso"</string>
+    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"Completamento aggiornamento Android…"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Alcune app potrebbero non funzionare correttamente fino al completamento dell\'upgrade"</string>
+    <string name="app_upgrading_toast" msgid="3008139776215597053">"Upgrade dell\'app <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Ottimizzazione applicazione <xliff:g id="NUMBER_0">%1$d</xliff:g> di <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> in preparazione."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Avvio applicazioni."</string>
@@ -1075,6 +1077,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"Connessione Wi-Fi priva di accesso Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Tocca per le opzioni"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"Passato a <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Il dispositivo utilizza <xliff:g id="NEW_NETWORK">%1$s</xliff:g> quando <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> non ha accesso a Internet. Potrebbero essere applicati costi."</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"Passato da <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> a <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"rete dati"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"Bluetooth"</item>
+    <item msgid="5447331121797802871">"Ethernet"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"tipo di rete sconosciuto"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Impossibile connettersi alla rete Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" ha una connessione Internet debole."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Consentire la connessione?"</string>
@@ -1152,7 +1165,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Tocca per selezionare la lingua e il layout"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"candidati"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Preparazione della <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Ricerca errori"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Nuova <xliff:g id="NAME">%s</xliff:g> rilevata"</string>
@@ -1231,8 +1243,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Collegata a <xliff:g id="SESSION">%s</xliff:g>. Tocca per gestire la rete."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Connessione a VPN sempre attiva…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"VPN sempre attiva connessa"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"VPN sempre attiva disconnessa"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Errore VPN sempre attiva"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"Tocca per configurare"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Tocca per configurare"</string>
     <string name="upload_file" msgid="2897957172366730416">"Scegli file"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nessun file è stato scelto"</string>
     <string name="reset" msgid="2448168080964209908">"Reimposta"</string>
@@ -1316,7 +1329,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"Unità USB <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"Archivio USB"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Modifica"</string>
-    <string name="data_usage_warning_title" msgid="1955638862122232342">"Avviso sull\'utilizzo dei dati"</string>
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"Avviso sull\'utilizzo dei dati"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Tocca per uso e impostazioni."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Limite di dati 2G-3G raggiunto"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Limite di dati 4G raggiunto"</string>
@@ -1635,6 +1648,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"Digita nome lingua"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Suggerite"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Tutte le lingue"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"Tutte le aree geografiche"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Cerca"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"Modalità Lavoro DISATTIVATA"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Attiva il profilo di lavoro, incluse app, sincronizzazione in background e funzioni correlate."</string>
@@ -1652,7 +1666,16 @@
     <string name="unpin_target" msgid="3556545602439143442">"Sblocca"</string>
     <string name="app_info" msgid="6856026610594615344">"Informazioni app"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"Ripristinare il dispositivo?"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Tocca per ripristinare il dispositivo"</string>
+    <string name="demo_starting_message" msgid="5268556852031489931">"Avvio della demo…"</string>
+    <string name="demo_restarting_message" msgid="952118052531642451">"Ripristino del dispositivo…"</string>
+    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Ripristinare il dispositivo?"</string>
+    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Perderai tutte le modifiche e la demo verrà riavviata tra <xliff:g id="TIMEOUT">%1$s</xliff:g> secondi…"</string>
+    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Annulla"</string>
+    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Ripristina ora"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Esegui il ripristino dei dati di fabbrica per utilizzare il dispositivo senza limitazioni"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Tocca per ulteriori informazioni."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Widget <xliff:g id="LABEL">%1$s</xliff:g> disattivato"</string>
+    <string name="conference_call" msgid="3751093130790472426">"Audioconferenza"</string>
 </resources>

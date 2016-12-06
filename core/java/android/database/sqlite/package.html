@@ -6,15 +6,44 @@ classes that an application would use to manage its own private database.
 Applications use these classes to manage private databases. If creating a
 content provider, you will probably have to use these classes to create and
 manage your own database to store content. See <a
-href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a> to learn
-the conventions for implementing a content provider. See the
-NotePadProvider class in the NotePad sample application in the SDK for an
-example of a content provider. Android ships with SQLite version 3.4.0
-<p>If you are working with data sent to you by a provider, you will not use
-these SQLite classes, but instead use the generic {@link android.database}
-classes.
-<p>Android ships with the sqlite3 database tool in the <code>tools/</code>
-folder. You can use this tool to browse or run SQL commands on the device. Run by
-typing <code>sqlite3</code> in a shell window.
+href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>
+to learn the conventions for implementing a content provider. If you are working
+with data sent to you by a provider, you do not use these SQLite classes, but
+instead use the generic {@link android.database} classes.
+
+<p>The Android SDK and Android emulators both include the
+<a href="{@docRoot}studio/command-line/sqlite3.html">sqlite3</a> command-line
+database tool. On your development machine, run the tool from the
+<code>platform-tools/</code> folder of your SDK. On the emulator, run the tool
+with adb shell, for example, <code>adb -e shell sqlite3</code>.
+
+<p>The version of SQLite depends on the version of Android. See the following table:
+<table style="width:auto;">
+  <tr><th>Android API</th><th>SQLite Version</th></tr>
+  <tr><td>API 24</td><td>3.9</td></tr>
+  <tr><td>API 21</td><td>3.8</td></tr>
+  <tr><td>API 11</td><td>3.7</td></tr>
+  <tr><td>API 8</td><td>3.6</td></tr>
+  <tr><td>API 3</td><td>3.5</td></tr>
+  <tr><td>API 1</td><td>3.4</td></tr>
+</table>
+
+<p>Some device manufacturers include different versions of SQLite on their devices.
+  There are two ways to programmatically determine the version number.
+
+<ul>
+  <li>If available, use the sqlite3 tool, for example:
+    <code>adb -e shell sqlite3 --version</code>.</li>
+  <li>Create and query an in-memory database as shown in the following code sample:
+    <pre>
+    String query = "select sqlite_version() AS sqlite_version";
+    SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(":memory:", null);
+    Cursor cursor = db.rawQuery(query, null);
+    String sqliteVersion = "";
+    if (cursor.moveToNext()) {
+        sqliteVersion = cursor.getString(0);
+    }</pre>
+  </li>
+</ul>
 </BODY>
 </HTML>

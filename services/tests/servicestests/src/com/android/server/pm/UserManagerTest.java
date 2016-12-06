@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.MediumTest;
 
 import com.android.internal.util.ArrayUtils;
 
@@ -33,6 +34,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /** Test {@link UserManager} functionality. */
+@MediumTest
 public class UserManagerTest extends AndroidTestCase {
     private static final int REMOVE_CHECK_INTERVAL = 500;
     private static final int REMOVE_TIMEOUT = 60 * 1000;
@@ -96,7 +98,7 @@ public class UserManagerTest extends AndroidTestCase {
                     && !user.isPrimary()) {
                 found = true;
                 Bundle restrictions = mUserManager.getUserRestrictions(user.getUserHandle());
-                assertFalse("New user should have DISALLOW_CONFIG_WIFI =false by default",
+                assertTrue("Guest user should have DISALLOW_CONFIG_WIFI=true by default",
                         restrictions.getBoolean(UserManager.DISALLOW_CONFIG_WIFI));
             }
         }

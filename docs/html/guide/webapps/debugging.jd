@@ -92,7 +92,7 @@ expect from other web browsers.</p>
 <h2 id="WebView">Using Console APIs in WebView</h2>
 
 <p>All the console APIs shown above are also
-supported when debugging in {@link android.webkit.WebView}. 
+supported when debugging in {@link android.webkit.WebView}.
 If you're targeting Android 2.1 (API level 7) and higher, you must
 provide a {@link android.webkit.WebChromeClient}
 that implements the {@link android.webkit.WebChromeClient#onConsoleMessage(String,int,String)

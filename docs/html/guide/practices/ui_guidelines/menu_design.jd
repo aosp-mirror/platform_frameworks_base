@@ -8,7 +8,7 @@ parent.link=index.html
 
 
 <div id="deprecatedSticker">
-  <a href="#" 
+  <a href="#"
      onclick="$('#naMessage').show();$('#deprecatedSticker').hide();return false">
     <strong>This doc is deprecated</strong></a>
 </div>
@@ -16,7 +16,7 @@ parent.link=index.html
 
 <div id="naMessage" style="display:block">
 <div><p><strong>This document has been deprecated.</strong></p>
- <p>For design guidelines about adding user actions and other options, read the design guidelines 
+ <p>For design guidelines about adding user actions and other options, read the design guidelines
 for <a href="{@docRoot}design/patterns/actionbar.html">Action Bar</a> or the developer guide about
 <a href="{@docRoot}guide/topics/ui/menus.html">Menus</a>.</p>
 
@@ -25,7 +25,7 @@ for <a href="{@docRoot}design/patterns/actionbar.html">Action Bar</a> or the dev
 onclick="$('#naMessage').hide();$('#deprecatedSticker').show()" />
 </div>
 </div>
-	
+
 
 
 
@@ -37,7 +37,7 @@ onclick="$('#naMessage').hide();$('#deprecatedSticker').show()" />
 
 <div id="qv-wrapper">
 <div id="qv">
-			
+
 <h2>Quickview</h2>
 
 <ul>
@@ -85,15 +85,15 @@ onclick="$('#naMessage').hide();$('#deprecatedSticker').show()" />
 </ol>
 
 </div>
-</div>       
+</div>
 
 <p>
   A menu holds a set of commands (user actions) that are normally hidden, and
   are accessible by a button, key, or gesture.  Menu commands provide a means
-  for performing operations and for navigating to other parts of your 
+  for performing operations and for navigating to other parts of your
   application or other applications.  Menus are useful for freeing screen space,
   as an alternative to placing functionality and navigation, in buttons or other
-  user controls in the content area of your application. 
+  user controls in the content area of your application.
 </p>
 
 <p>
@@ -102,7 +102,7 @@ onclick="$('#naMessage').hide();$('#deprecatedSticker').show()" />
   the functionality and navigation for your application.  Briefly:
   <ul>
     <li>The <em>Options menu</em> contains primary functionality that applies
-        globally to the current activity or starts a related activity. 
+        globally to the current activity or starts a related activity.
         It is typically invoked by a user pressing a hard button, often labeled <em>Menu</em>.</li>
     <li>The <em>Context menu</em> contains secondary functionality for the currently
         selected item.  It is typically invoked by a user's touch &amp; hold
@@ -113,11 +113,11 @@ onclick="$('#naMessage').hide();$('#deprecatedSticker').show()" />
 
 <p>
   All but the simplest applications have menus.  The system automatically
-  lays the menus out and provides standard ways for users to access them.  
+  lays the menus out and provides standard ways for users to access them.
   In this sense, they are familiar and dependable ways for users to access
   functionality across all applications.  All menus are panels that "float"
   on top of the activity screen and are smaller than full screen, so that the
-  application is still visible around its edges.  This is a visual reminder 
+  application is still visible around its edges.  This is a visual reminder
   that a menu is an intermediary operation that disappears once it's used.
 </p>
 
@@ -127,8 +127,8 @@ onclick="$('#naMessage').hide();$('#deprecatedSticker').show()" />
 
 <h2 id="tour_of_the_menus">Tour of the Menus</h2>
 
-<p class="note"><strong>Note:</strong> Your menus and screens might not look 
-like those shown in this document; they may vary from one version of Android 
+<p class="note"><strong>Note:</strong> Your menus and screens might not look
+like those shown in this document; they may vary from one version of Android
 or device to another.
 </p>
 
@@ -137,13 +137,13 @@ or device to another.
 <p>
   The Options menu contains commands that apply globally across the current
   activity, or can start another activity. They do not apply to a selected
-  item in the content (a <a href="#context_menu">Context menu</a> does that).  
+  item in the content (a <a href="#context_menu">Context menu</a> does that).
 </p>
 
 <p>
-  On most devices, a user presses the <em>Menu</em> button to access the Options menu, 
-  as shown in the screenshot below.  To close the menu, the user presses 
-  <em>Menu</em> again, or presses the <em>Back</em> button. 
+  On most devices, a user presses the <em>Menu</em> button to access the Options menu,
+  as shown in the screenshot below.  To close the menu, the user presses
+  <em>Menu</em> again, or presses the <em>Back</em> button.
   In fact, to cancel out of any menu, press the <em>Back</em> button.  (Pressing the <em>Menu</em>
   button or touching outside the menu also works.)  Note that how to invoke this
   menu may be different on different devices.
@@ -153,15 +153,15 @@ or device to another.
   Each
   <a href="{@docRoot}guide/practices/ui_guidelines/activity_task_design.html#activities">activity</a>
   activity has its own set of operations and therefore its own Options menu.
-  An application with multiple activities would have a different Options menu 
-  for each activity. 
+  An application with multiple activities would have a different Options menu
+  for each activity.
 </p>
 
 <p>
   For example, in the message list view of an email program, the Options menu
-  might let you search the messages, compose a new message, refresh the list, 
-  or change the email settings.  The compose view of an email program would 
-  have a different Options menu, such as adding a CC field, attaching a file, 
+  might let you search the messages, compose a new message, refresh the list,
+  or change the email settings.  The compose view of an email program would
+  have a different Options menu, such as adding a CC field, attaching a file,
   or discarding the message.
 </p>
 
@@ -179,7 +179,7 @@ or device to another.
   <li>
     <b>Options expanded menu</b> - If the activity has more menu items than will
     fit on the icon menu, then the last icon is labeled "More" &mdash; selecting it
-    displays a list that can contain any number of menu items and will scroll 
+    displays a list that can contain any number of menu items and will scroll
     as necessary.
   </li>
 </ul>
@@ -202,18 +202,18 @@ or device to another.
 
 <p>
   A user can touch &amp; hold on content on the screen to
-  access a Context menu (if one exists), as shown in the screenshot below. 
+  access a Context menu (if one exists), as shown in the screenshot below.
   A Context menu is a list of menu items (commands) that can operate
   on the selected content.  The command can either be part of the current
-  activity, or the system can pass the selected content along to 
-  an operation in another activity (by way of an 
+  activity, or the system can pass the selected content along to
+  an operation in another activity (by way of an
   <a href="{@docRoot}guide/practices/ui_guidelines/activity_task_design.html#intents">intent</a>).
 </p>
 
 <p>
   For example, in an email message list, a user can touch &amp; hold on
   an email message to open a Context menu containing commands to read,
-  archive, or delete the message. 
+  archive, or delete the message.
 </p>
 
 <p id="location">
@@ -231,7 +231,7 @@ or device to another.
   In the above example, if the user performs touch &amp; hold on the contact
   "Obi Wan Kenobi", a Context menu opens.  The commands provided in
   this Context menu are the complete set of actions that can be performed
-  on this contact. 
+  on this contact.
 </p>
 
 <p>
@@ -246,7 +246,7 @@ or device to another.
 <p>
   Also note, as shown in the following screenshot, the Context menu and the
   next screen both hold the same complete set of commands that can be performed
-  on this contact.  The Context menu displays the commands in a list, 
+  on this contact.  The Context menu displays the commands in a list,
   while the "View contact" activity splits them into various items in the
   Options menu, icon buttons and list items.
 </p>
@@ -268,10 +268,10 @@ or device to another.
 <h4>Text Commands in Context Menu</h4>
 
 <p>
-  Text links and text fields in the content both have system-provided operations 
+  Text links and text fields in the content both have system-provided operations
   that are common across all applications: operations such as "Select all", "Select text",
-  "Copy all", and "Add to dictionary".  If the text field is editable, it also 
-  has  other operations, such as "Cut all" and "Input Method", and if text 
+  "Copy all", and "Add to dictionary".  If the text field is editable, it also
+  has  other operations, such as "Cut all" and "Input Method", and if text
   is also on the clipboard, it has "Paste".  The system automatically inserts
   the appropriate menu items into the Context menu of text links and text
   fields, as shown in the following screenshot.
@@ -342,7 +342,7 @@ or device to another.
   An example of a selection-specific Context menu is when a user performs a
   touch &amp; hold on a person's name in a list view of a contacts application.
   The Context menu would typically contain commands "View contact", "Call contact",
-  and "Edit contact".  
+  and "Edit contact".
 </p>
 
 <h3 id="most_frequently_used">Place the most frequently used operations first</h3>
@@ -365,7 +365,7 @@ or device to another.
 
 <h3 id="dont_put_commands">Don't put commands <em>only</em> in a Context menu</h3>
 <p>
-  If a user can fully access your application without using Context menus, 
+  If a user can fully access your application without using Context menus,
   then it's designed properly!  In general, if part of your application is inaccessible
   without using Context menus, then you need to duplicate those commands elsewhere.
 </p>
@@ -373,8 +373,8 @@ or device to another.
 <p>
   Before opening a Context menu, it has no visual representation that identifies
   its presence (whereas the Options menu has the <em>Menu</em> button), and so is not
-  particularly discoverable. 
-  Therefore, in general, a Context menu should <em>duplicate</em> commands 
+  particularly discoverable.
+  Therefore, in general, a Context menu should <em>duplicate</em> commands
   found in the corresponding activity screen.  For example, while it's useful to
   let the user call a phone number from a Context menu invoked by touch
   &amp; hold on a name in a list of contacts, that operation should <em>also</em>
@@ -388,7 +388,7 @@ or device to another.
   As described under <a href="#context_menu_shortcut">shortcut</a>,
   touching on an item in the content should activate the same command as touching
   the first item in the Context menu.  Both cases should be the most intuitive
-  operation for that item.  
+  operation for that item.
 </p>
 
 <h3 id="selecting_content_item">Selecting an item in the content should perform the most intuitive operation</h3>
@@ -427,13 +427,13 @@ or device to another.
 <h3 id="context_menu_should_identify">A Context menu should identify the selected item</h3>
 
 <p>
-  When a user does touch &amp; hold on an item, the Context menu should 
-  contain the name of the selected item.  Therefore, 
+  When a user does touch &amp; hold on an item, the Context menu should
+  contain the name of the selected item.  Therefore,
   when creating a Context menu, be sure to include a title and the name of the
-  selected item so that it's clear to the user what the context is.  
+  selected item so that it's clear to the user what the context is.
   For example, if a user selects a contact "Joan of Arc", put that name in the
   title of the Context menu (using
-  {@link android.view.ContextMenu#setHeaderTitle(java.lang.CharSequence) setHeaderTitle}). 
+  {@link android.view.ContextMenu#setHeaderTitle(java.lang.CharSequence) setHeaderTitle}).
   Likewise, a command to edit the contact should be called "Edit contact",
   not just "Edit".
 </p>
@@ -442,7 +442,7 @@ or device to another.
 <h3 id="most_important_commands">Put only the most important commands fixed on the screen</h3>
 
 <p>
-  By putting commands in menus, you free up the screen to hold more content. 
+  By putting commands in menus, you free up the screen to hold more content.
   On the other hand, fixing commands in the content area of an activity
   makes them more prominent and easy to use.
 </p>
@@ -456,7 +456,7 @@ or device to another.
       To give a command the highest prominence, ensuring the command is obvious and won't be overlooked.<br>
       Example: A "Buy" button in a store application.
     </li>
-    <li> 
+    <li>
       When quick access to the command is important and going to the menu would be
       tedious or slow.<br>
       Example: Next/Previous buttons or Zoom In/Out buttons in an image viewing application.
@@ -494,7 +494,7 @@ or device to another.
   When a dialog is displayed, pressing the <em>Menu</em> button should do nothing.  This also holds
 true
   for activities that look like dialogs.  A dialog box is recognizable by being
-  smaller than full-screen, having zero to three buttons, is non-scrollable, and 
+  smaller than full-screen, having zero to three buttons, is non-scrollable, and
   possibly a list of selectable items that can include checkboxes or radio buttons.
   <!--For examples of dialogs, see Text Guidelines.-->
 </p>
@@ -520,12 +520,12 @@ true
 
 <p>
   Sometimes a menu item's action cannot be performed &mdash; for example,
-  the "Forward" button in a browser cannot work until after the "Back" 
+  the "Forward" button in a browser cannot work until after the "Back"
   button has been pressed. We recommend:
 </p>
 
 <ul>
-  <li> 	
+  <li>
     <b>In Options menu</b> - disable the menu item, which dims the text and icon,
     turning it gray.  This applies to menu items in both the icon menu and the
     "More" menu.  It would be disorienting for the icon menu to change from 6

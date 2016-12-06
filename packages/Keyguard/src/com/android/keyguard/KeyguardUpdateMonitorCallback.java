@@ -128,6 +128,11 @@ public class KeyguardUpdateMonitorCallback {
     public void onUserInfoChanged(int userId) { }
 
     /**
+     * Called when a user got unlocked.
+     */
+    public void onUserUnlocked() { }
+
+    /**
      * Called when boot completed.
      *
      * Note, this callback will only be received if boot complete occurs after registering with
@@ -240,4 +245,15 @@ public class KeyguardUpdateMonitorCallback {
      * has changed.
      */
     public void onStrongAuthStateChanged(int userId) { }
+
+    /**
+     * Called when the state whether we have a lockscreen wallpaper has changed.
+     */
+    public void onHasLockscreenWallpaperChanged(boolean hasLockscreenWallpaper) { }
+
+    /**
+     * Called when the dream's window state is changed.
+     * @param dreaming true if the dream's window has been created and is visible
+     */
+    public void onDreamingStateChanged(boolean dreaming) { }
 }

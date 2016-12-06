@@ -1400,18 +1400,6 @@ public final class LoadedApk {
         }
 
         public void death(ComponentName name, IBinder service) {
-            ServiceDispatcher.ConnectionInfo old;
-
-            synchronized (this) {
-                old = mActiveConnections.remove(name);
-                if (old == null || old.binder != service) {
-                    // Death for someone different than who we last
-                    // reported...  just ignore it.
-                    return;
-                }
-                old.binder.unlinkToDeath(old.deathMonitor, 0);
-            }
-
             if (mActivityThread != null) {
                 mActivityThread.post(new RunConnection(name, service, 1));
             } else {
@@ -1460,7 +1448,7 @@ public final class LoadedApk {
                 }
             }
 
-            // If there was an old service, it is not disconnected.
+            // If there was an old service, it is now disconnected.
             if (old != null) {
                 mConnection.onServiceDisconnected(name);
             }
@@ -1471,6 +1459,17 @@ public final class LoadedApk {
         }
 
         public void doDeath(ComponentName name, IBinder service) {
+            synchronized (this) {
+                ConnectionInfo old = mActiveConnections.get(name);
+                if (old == null || old.binder != service) {
+                    // Death for someone different than who we last
+                    // reported...  just ignore it.
+                    return;
+                }
+                mActiveConnections.remove(name);
+                old.binder.unlinkToDeath(old.deathMonitor, 0);
+            }
+
             mConnection.onServiceDisconnected(name);
         }
 

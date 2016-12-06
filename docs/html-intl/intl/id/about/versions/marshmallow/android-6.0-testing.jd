@@ -1,0 +1,190 @@
+page.title=Panduan Pengujian
+page.image=images/cards/card-n-guide_2x.png
+meta.tags="preview", "testing"
+page.tags="preview", "developer preview"
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    <h2>Dalam dokumen ini</h2>
+      <ol>
+        <li><a href="#runtime-permissions">Izin Pengujian</a></li>
+        <li><a href="#doze-standby">Menguji Istirahatkan dan Aplikasi Siaga</a></li>
+        <li><a href="#ids">Pencadangan Otomatis dan Identifier Perangkat</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>
+  Android N memberi Anda kesempatan untuk memastikan aplikasi bekerja pada
+  platform versi berikutnya. Pratinjau ini berisi beberapa API dan perubahan perilaku yang bisa
+  memengaruhi aplikasi Anda, sebagaimana dijelaskan dalam <a href="{@docRoot}preview/api-overview.html">Ringkasan
+  API</a> dan <a href="{@docRoot}preview/behavior-changes.html">Perubahan Perilaku</a>. Dalam menguji
+  aplikasi dengan pratinjau, ada beberapa perubahan sistem spesifik yang harus Anda fokuskan untuk
+  memastikan pengguna mendapatkan pengalaman yang bagus.
+</p>
+
+<p>
+  Panduan ini menjelaskan apa dan bagaimana menguji fitur pratinjau dengan aplikasi Anda. Anda harus
+  mengutamakan pengujian fitur pratinjau spesifik ini, dikarenakan pengaruhnya yang besar pada
+  perilaku aplikasi Anda:
+</p>
+
+<ul>
+  <li><a href="#runtime-permissions">Izin</a>
+  </li>
+  <li><a href="#doze-standby">Istirahatkan dan Aplikasi Siaga</a>
+  </li>
+  <li><a href="#ids">Pencadangan Otomatis dan Identifier Perangkat</a></li>
+</ul>
+
+<p>
+  Untuk informasi selengkapnya tentang cara menyiapkan perangkat atau perangkat maya dengan citra sistem pratinjau
+  untuk pengujian, lihat <a href="{@docRoot}preview/setup-sdk.html">Menyiapkan
+Android N SDK</a>.
+</p>
+
+
+<h2 id="runtime-permissions">Izin Pengujian</h2>
+
+<p>
+  Model <a href="{@docRoot}preview/features/runtime-permissions.html">Izin</a> yang baru
+  mengubah cara alokasi izin untuk aplikasi Anda oleh pengguna. Sebagai ganti memberi semua
+  izin selama prosedur pemasangan, aplikasi Anda harus meminta izin kepada pengguna secara individual
+ pada waktu proses. Bagi pengguna, perilaku ini memberi kontrol yang lebih detail atas setiap aktivitas aplikasi, dan
+  juga konteks yang lebih untuk memahami sebab aplikasi meminta izin tertentu. Pengguna
+  bisa memberi atau mencabut izin yang diberikan pada suatu aplikasi secara individual kapan saja. Fitur
+  pratinjau ini kemungkinan besar memengaruhi perilaku aplikasi Anda dan mungkin menghambat fungsi beberapa
+  fitur aplikasi Anda, atau mengurangi kualitas kerjanya.
+</p>
+
+<p class="caution">
+  Perubahan ini memengaruhi semua aplikasi yang berjalan di platform baru, bahkan aplikasi yang tidak menargetkan versi
+  platform baru. Platform ini memberikan perilaku kompatibilitas terbatas untuk aplikasi lawas, namun Anda
+  harus mulai merencanakan migrasi aplikasi ke model izin baru sekarang juga, dengan tujuan
+  mempublikasikan versi terbaru aplikasi Anda saat peluncuran platform secara resmi.
+</p>
+
+
+<h3 id="permission-test-tips">Tip pengujian</h3>
+
+<p>
+  Gunakan tip berikut untuk membantu Anda merencanakan dan menjalankan pengujian aplikasi dengan
+  perilaku izin yang baru.
+</p>
+
+<ul>
+  <li>Identifikasi izin aplikasi Anda saat ini dan jalur kode terkait.</li>
+  <li>Uji alur pengguna pada semua layanan dan data yang dilindungi izin.</li>
+  <li>Uji dengan berbagai kombinasi izin yang diberikan/dicabut.</li>
+  <li>Gunakan alat bantu {@code adb} untuk mengelola izin dari baris perintah:
+    <ul>
+      <li>Cantumkan daftar izin dan status berdasarkan kelompok:
+        <pre>adb shell pm list permissions -d -g</pre>
+      </li>
+      <li>Beri atau cabut satu atau beberapa izin menggunakan sintaks berikut:<br>
+        <pre>adb shell pm [grant|revoke] &lt;permission.name&gt; ...</pre>
+      </li>
+    </ul>
+  </li>
+  <li>Analisis aplikasi Anda untuk layanan yang menggunakan izin.</li>
+</ul>
+
+<h3 id="permission-test-strategy">Strategi pengujian</h3>
+
+<p>
+  Perubahan izin memengaruhi struktur dan desain aplikasi Anda, begitu juga
+  pengalaman pengguna dan alur yang Anda sediakan untuk pengguna. Anda harus menilai penggunaan izin
+  aplikasi saat ini dan mulai merencanakan alur baru yang ingin ditawarkan. Rilis platform
+  resmi menyediakan perilaku kompatibilitas, namun Anda harus merencanakan pembaruan aplikasi dan tidak
+  bergantung pada perilaku ini.
+</p>
+
+<p>
+  Identifikasi izin yang sebenarnya diperlukan dan digunakan aplikasi Anda, kemudian temukan berbagai
+  jalur kode yang menggunakan layanan yang dilindungi izin. Anda bisa melakukan ini melalui kombinasi
+  pengujian pada platform baru dan analisis kode. Dalam pengujian, Anda harus fokus pada pemilihan
+ izin waktu proses dengan mengubah {@code targetSdkVersion} aplikasi ke versi pratinjau. Untuk
+  informasi selengkapnya, lihat <a href="{@docRoot}preview/setup-sdk.html#">Menyiapkan
+Android N SDK</a>.
+</p>
+
+<p>
+  Uji dengan berbagai kombinasi izin yang dicabut dan ditambahkan, untuk menyoroti alur pengguna yang
+  bergantung pada izin. Jika dependensi tidak jelas atau logis, Anda harus mempertimbangkan
+optimalisasi atau kompartementalisasi alur tersebut untuk mengeliminasi dependensi atau menjelaskan alasan
+  diperlukannya izin.
+</p>
+
+<p>
+  Untuk informasi selengkapnya tentang perilaku izin waktu proses, pengujian, dan praktik terbaik, lihat
+  halaman pratinjau <a href="{@docRoot}preview/features/runtime-permissions.html">Izin</a>
+  pengembang.
+</p>
+
+
+<h2 id="doze-standby">Menguji Istirahatkan dan Aplikasi Siaga</h2>
+
+<p>
+  Fitur penghematan daya Istirahatkan dan Aplikasi Siaga membatasi jumlah pemrosesan latar belakang yang
+  bisa dikerjakan aplikasi Anda saat perangkat dalam keadaan diam atau saat aplikasi Anda sedang tidak fokus. Pembatasan
+  yang dapat diberlakukan oleh sistem pada aplikasi termasuk akses jaringan terbatas atau tidak ada,
+  tugas latar belakang yang ditangguhkan, Pemberitahuan yang ditangguhkan, permintaan membangunkan yang diabaikan, serta alarm. Untuk memastikan
+  aplikasi Anda berperilaku dengan benar pada optimalisasi penghematan daya ini, Anda harus menguji aplikasi dengan
+ menyimulasikan keadaan baterai yang sedang tinggal sedikit ini.
+</p>
+
+<h4 id="doze">Menguji aplikasi Anda dengan Istirahatkan</h4>
+
+<p>Untuk menguji Istirahatkan dengan aplikasi Anda:</p>
+
+<ol>
+<li>Konfigurasikan perangkat keras atau perangkat maya dengan citra sistem Android N.</li>
+<li>Hubungkan perangkat dengan mesin pengembangan dan pasang aplikasi Anda.</li>
+<li>Jalankan aplikasi Anda dan biarkan aktif.</li>
+<li>Simulasikan perangkat yang sedang masuk ke dalam mode Istirahatkan dengan menjalankan perintah berikut:
+
+<pre>
+$ adb shell dumpsys battery unplug
+$ adb shell dumpsys deviceidle step
+$ adb shell dumpsys deviceidle -h
+</pre>
+
+  </li>
+  <li>Amati perilaku aplikasi Anda saat perangkat diaktifkan kembali. Pastikan aplikasi
+    pulih dengan baik saat perangkat keluar dari Istirahatkan.</li>
+</ol>
+
+
+<h4 id="standby">Menguji aplikasi dengan Aplikasi Siaga</h4>
+
+<p>Untuk menguji mode Aplikasi Siaga dengan aplikasi Anda:</p>
+
+<ol>
+  <li>Konfigurasikan perangkat keras atau perangkat maya dengan citra sistem Android N.</li>
+  <li>Hubungkan perangkat dengan mesin pengembangan dan pasang aplikasi Anda.</li>
+  <li>Jalankan aplikasi Anda dan biarkan aktif.</li>
+  <li>Simulasikan aplikasi yang sedang masuk ke dalam mode siaga dengan menjalankan perintah berikut:
+
+<pre>
+$ adb shell am broadcast -a android.os.action.DISCHARGING
+$ adb shell am set-idle &lt;packageName&gt; true
+</pre>
+
+  </li>
+  <li>Simulasikan membangunkan aplikasi Anda menggunakan perintah berikut:
+    <pre>$ adb shell am set-idle &lt;packageName&gt; false</pre>
+  </li>
+  <li>Amati perilaku aplikasi Anda saat dibangunkan. Pastikan aplikasi pulih dengan baik
+   dari mode siaga. Secara khusus, Anda harus memeriksa apakah Pemberitahuan aplikasi dan pekerjaan latar belakang
+   tetap berjalan sebagaimana yang diharapkan.</li>
+</ol>
+
+<h2 id="ids">Auto Backup for Apps dan Identifier Perangkat Spesifik</h2>
+
+<p>Jika aplikasi Anda mempertahankan identifier perangkat spesifik, seperti ID pendaftaran Google
+Cloud Messaging, dalam penyimpanan internal,
+pastikan Anda mengikuti praktik terbaik untuk mengecualikan lokasi
+penyimpanan dari pencadangan otomatis, seperti dijelaskan dalam <a href="{@docRoot}preview/backup/index.html">Auto
+Backup for Apps</a>. </p>

@@ -47,7 +47,7 @@
     <string name="savetopdf_button" msgid="2976186791686924743">"PDF ಗೆ ಉಳಿಸು"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"ಪ್ರಿಂಟ್ ಆಯ್ಕೆಗಳನ್ನು ವಿಸ್ತರಿಸಲಾಗಿದೆ"</string>
     <string name="print_options_collapsed" msgid="7455930445670414332">"ಪ್ರಿಂಟ್ ಆಯ್ಕೆಗಳನ್ನು ಮುಚ್ಚಲಾಗಿದೆ"</string>
-    <string name="search" msgid="5421724265322228497">"ಹುಡುಕು"</string>
+    <string name="search" msgid="5421724265322228497">"ಹುಡುಕಿ"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"ಎಲ್ಲಾ ಪ್ರಿಂಟರ್‌ಗಳು"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"ಸೇವೆಯನ್ನು ಸೇರಿಸು"</string>
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"ಹುಡುಕಾಟ ಪೆಟ್ಟಿಗೆಯನ್ನು ತೋರಿಸಲಾಗಿದೆ"</string>
@@ -81,10 +81,10 @@
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> ರದ್ದು ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"ಮುದ್ರಕ ದೋಷ <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"ಮುದ್ರಕವು <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> ನಿರ್ಬಂಧಿಸಿದೆ"</string>
-    <string name="cancel" msgid="4373674107267141885">"ರದ್ದುಮಾಡು"</string>
+    <string name="cancel" msgid="4373674107267141885">"ರದ್ದುಮಾಡಿ"</string>
     <string name="restart" msgid="2472034227037808749">"ಮರುಪ್ರಾರಂಭಿಸು"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"ಮುದ್ರಕಕ್ಕೆ ಸಂಪರ್ಕವಿಲ್ಲ"</string>
-    <string name="reason_unknown" msgid="5507940196503246139">"ಅಜ್ಞಾತ"</string>
+    <string name="reason_unknown" msgid="5507940196503246139">"ಅಪರಿಚಿತ"</string>
     <string name="print_service_security_warning_title" msgid="2160752291246775320">"<xliff:g id="SERVICE">%1$s</xliff:g> ಬಳಸುವುದೇ?"</string>
     <string name="print_service_security_warning_summary" msgid="1427434625361692006">"ನಿಮ್ಮ ಡಾಕ್ಯುಮೆಂಟ್‌ ಪ್ರಿಂಟರ್‌ಗೆ ಹೋಗುವ ಸಂದರ್ಭದಲ್ಲಿ ಒಂದು ಅಥವಾ ಅದಕ್ಕಿಂತ ಹೆಚ್ಚು ಸರ್ವರ್‌ಗಳ ಮೂಲಕ ಹಾದು ಹೋಗಬಹುದು."</string>
   <string-array name="color_mode_labels">

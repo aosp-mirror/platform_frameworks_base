@@ -100,11 +100,21 @@
 
     <!-- The default tiles to display in QuickSettings -->
     <string name="quick_settings_tiles_default" translatable="false">
-        wifi,cell,battery,dnd,flashlight,rotation,bt,airplane,location
+        wifi,cell,battery,dnd,flashlight,rotation,bt,airplane
+    </string>
+
+    <!-- Tiles native to System UI. Order should match "quick_settings_tiles_default" -->
+    <string name="quick_settings_tiles_stock" translatable="false">
+        wifi,cell,battery,dnd,flashlight,rotation,bt,airplane,location,hotspot,inversion,saver,work,cast,night
     </string>
 
     <!-- The tiles to display in QuickSettings -->
     <string name="quick_settings_tiles" translatable="false">default</string>
+
+    <!-- The tiles to display in QuickSettings in retail mode -->
+    <string name="quick_settings_tiles_retail_mode" translatable="false">
+        cell,battery,dnd,flashlight,rotation,location
+    </string>
 
     <!-- Whether or not the RSSI tile is capitalized or not. -->
     <bool name="quick_settings_rssi_tile_capitalization">true</bool>
@@ -115,6 +125,9 @@
 
     <!-- Should "4G" be shown instead of "LTE" when the network is NETWORK_TYPE_LTE? -->
     <bool name="config_show4GForLTE">true</bool>
+
+    <!-- Should "LTE"/"4G" be shown instead of "LTE+"/"4G+" when on NETWORK_TYPE_LTE_CA? -->
+    <bool name="config_hideLtePlus">false</bool>
 
     <!-- milliseconds before the heads up notification auto-dismisses. -->
     <integer name="heads_up_notification_decay">5000</integer>
@@ -205,26 +218,39 @@
     <!-- Doze: should notifications be used as a pulse signal? -->
     <bool name="doze_pulse_on_notifications">true</bool>
 
-    <!-- Doze: when to pulse after a buzzworthy notification arrives -->
-    <string name="doze_pulse_schedule" translatable="false">10s,30s,60s</string>
-
-    <!-- Doze: maximum number of times the notification pulse schedule can be reset -->
-    <integer name="doze_pulse_schedule_resets">2</integer>
-
     <!-- Doze: duration to avoid false pickup gestures triggered by notification vibrations -->
     <integer name="doze_pickup_vibration_threshold">2000</integer>
 
-    <!-- Doze: can we assume the pickup sensor includes a proximity check? -->
+    <!-- Doze: can we assume the pickup sensor includes a proximity check?
+         This is ignored if doze_pickup_subtype_performs_proximity_check is not empty.
+         @deprecated: use doze_pickup_subtype_performs_proximity_check instead.-->
     <bool name="doze_pickup_performs_proximity_check">false</bool>
+
+    <!-- Doze: a list of pickup sensor subtypes that perform a proximity check before they trigger.
+               If not empty, either * or !* must appear to specify the default.
+               If empty, falls back to doze_pickup_performs_proximity_check.
+
+               Examples: 1,2,3,!* -> subtypes 1,2 and 3 perform the check, all others don't.
+                         !1,!2,*  -> subtypes 1 and 2 don't perform the check, all others do.
+                         !8,*     -> subtype 8 does not perform the check, all others do
+                         1,1,*    -> illegal, every item may only appear once
+                         1,!1,*   -> illegal, no contradictions allowed
+                         1,2      -> illegal, need either * or !*
+                         1,,4a3   -> illegal, no empty or non-numeric terms allowed
+    -->
+    <string name="doze_pickup_subtype_performs_proximity_check"></string>
+
+    <!-- Type of the double tap sensor. Empty if double tap is not supported. -->
+    <string name="doze_double_tap_sensor_type" translatable="false"></string>
 
     <!-- Doze: pulse parameter - how long does it take to fade in? -->
     <integer name="doze_pulse_duration_in">900</integer>
 
     <!-- Doze: pulse parameter - how long does it take to fade in after a pickup? -->
-    <integer name="doze_pulse_duration_in_pickup">300</integer>
+    <integer name="doze_pulse_duration_in_pickup">130</integer>
 
     <!-- Doze: pulse parameter - once faded in, how long does it stay visible? -->
-    <integer name="doze_pulse_duration_visible">3000</integer>
+    <integer name="doze_pulse_duration_visible">6000</integer>
 
     <!-- Doze: pulse parameter - how long does it take to fade out? -->
     <integer name="doze_pulse_duration_out">600</integer>
@@ -265,4 +291,3 @@
     <bool name="quick_settings_show_full_alarm">false</bool>
 
 </resources>
-

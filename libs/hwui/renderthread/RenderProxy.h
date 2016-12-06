@@ -115,6 +115,7 @@ public:
 
     ANDROID_API void setTextureAtlas(const sp<GraphicBuffer>& buffer, int64_t* map, size_t size);
     ANDROID_API void setProcessStatsBuffer(int fd);
+    ANDROID_API int getRenderThreadTid();
 
     ANDROID_API void serializeDisplayListTree();
 
@@ -128,6 +129,7 @@ public:
     ANDROID_API long getDroppedFrameReportCount();
 
     ANDROID_API static int copySurfaceInto(sp<Surface>& surface, SkBitmap* bitmap);
+    ANDROID_API static void prepareToDraw(const SkBitmap& bitmap);
 
 private:
     RenderThread& mRenderThread;

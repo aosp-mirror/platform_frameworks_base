@@ -449,15 +449,14 @@ public abstract class InCallService extends Service {
     }
 
     /**
-     * Called when a {@link Call} has received a connection event issued by the
-     * {@link ConnectionService}.
+     * Unused; to handle connection events issued by a {@link ConnectionService}, implement the
+     * {@link android.telecom.Call.Callback#onConnectionEvent(Call, String, Bundle)} callback.
      * <p>
      * See {@link Connection#sendConnectionEvent(String, Bundle)}.
      *
      * @param call The call the event is associated with.
      * @param event The event.
      * @param extras Any associated extras.
-     * @hide
      */
     public void onConnectionEvent(Call call, String event, Bundle extras) {
     }

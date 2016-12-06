@@ -696,8 +696,13 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         Slog.w(TAG, "Recognition aborted");
         MetricsLogger.count(mContext, "sth_recognition_aborted", 1);
         ModelData modelData = getModelDataForLocked(event.soundModelHandle);
-        if (modelData != null) {
+        if (modelData != null && modelData.isModelStarted()) {
             modelData.setStopped();
+            try {
+                modelData.getCallback().onRecognitionPaused();
+            } catch (RemoteException e) {
+                Slog.w(TAG, "RemoteException in onRecognitionPaused", e);
+            }
         }
     }
 

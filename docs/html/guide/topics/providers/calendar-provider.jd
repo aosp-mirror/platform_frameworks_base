@@ -42,7 +42,7 @@ page.title=Calendar Provider
       <li><a href="#intent-view">Using intents to view calendar data</a></li>
     </ol>
   </li>
-  
+
   <li><a href="#sync-adapter">Sync Adapters</a></li>
 </ol>
 
@@ -63,8 +63,8 @@ operations on calendars, events, attendees, reminders, and so on.</p>
 
 <p>The Calender Provider API can be used by applications and sync adapters. The
 rules vary depending on what type of program is making the calls. This document
-focuses primarily on using the Calendar Provider API as an application. For 
-a discussion of how sync adapters are different, see 
+focuses primarily on using the Calendar Provider API as an application. For
+a discussion of how sync adapters are different, see
 <a href="#sync-adapter">Sync Adapters</a>.</p>
 
 
@@ -79,17 +79,17 @@ nor does it need to provide a user interface to view or create events.</p>
 
 <h2 id="overview">Basics</h2>
 
-<p><a href="{@docRoot}guide/topics/providers/content-providers.html">Content providers</a> store data and make it accessible to 
+<p><a href="{@docRoot}guide/topics/providers/content-providers.html">Content providers</a> store data and make it accessible to
 applications. The content providers offered by the Android platform (including the Calendar Provider) typically expose data as a set of tables based on a
 relational database model, where each row is a record and each column is data of
 a particular type and meaning. Through the Calendar Provider API, applications
 and sync adapters can get read/write access to the database tables that hold a
 user's calendar data.</p>
 
-<p>Every content provider exposes a public URI (wrapped as a 
-{@link android.net.Uri} 
+<p>Every content provider exposes a public URI (wrapped as a
+{@link android.net.Uri}
 object) that uniquely identifies its data set.  A content provider that controls
- multiple data sets (multiple tables) exposes a separate URI for each one.  All 
+ multiple data sets (multiple tables) exposes a separate URI for each one.  All
 URIs for providers begin with the string &quot;content://&quot;.  This
 identifies the data as being controlled by a content provider. The Calendar
 Provider defines constants for the URIs for each of its classes (tables). These
@@ -113,26 +113,26 @@ main tables and the fields that link them to each other.</p>
   </tr>
   <tr>
     <td><p>{@link android.provider.CalendarContract.Calendars}</p></td>
-    
-    <td>This table holds 
+
+    <td>This table holds
 the calendar-specific information. Each  row in this table contains the details for
 a single calendar, such as the  name, color, sync information, and so on.</td>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Events}</td>
-    
+
     <td>This table holds the
 event-specific information. Each row  in this table has the information for a single
 event&mdash;for example, event title, location, start time, end
 time, and so on. The event can occur one-time or can recur multiple times. Attendees,
-reminders, and extended  properties are stored in separate tables. 
-They each have an {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID} 
+reminders, and extended  properties are stored in separate tables.
+They each have an {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID}
 that references the {@link android.provider.BaseColumns#_ID} in the Events table.</td>
 
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Instances}</td>
-    
+
     <td>This table holds the
 start and end time for each occurrence of an event. Each row in this table
 represents a single event occurrence. For one-time events there is a 1:1 mapping
@@ -141,7 +141,7 @@ of instances to events. For recurring events, multiple rows are automatically
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Attendees}</td>
-    
+
     <td>This table holds the
 event attendee (guest) information. Each row represents a single guest of an
 event. It specifies the type of guest and the guest's attendance response
@@ -149,17 +149,17 @@ for the event.</td>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Reminders}</td>
-    
+
     <td>This table holds the
 alert/notification data. Each row represents a single alert for an event. An
 event can have multiple reminders. The maximum number of reminders per event is
-specified in 
-{@link android.provider.CalendarContract.CalendarColumns#MAX_REMINDERS}, 
+specified in
+{@link android.provider.CalendarContract.CalendarColumns#MAX_REMINDERS},
 which is set by the sync adapter that
 owns  the given calendar. Reminders are specified in minutes before the event
 and have a method that determines how the user will be alerted.</td>
   </tr>
-  
+
 </table>
 
 <p>The Calendar Provider API is designed to be flexible and powerful. At the
@@ -178,9 +178,9 @@ Intents</a>.</p>
 
 
 <li><strong>Sync adapters.</strong> A sync adapter synchronizes the calendar data
-on a user's device with another server or data source. In the 
+on a user's device with another server or data source. In the
 {@link android.provider.CalendarContract.Calendars} and
-{@link android.provider.CalendarContract.Events} tables, 
+{@link android.provider.CalendarContract.Events} tables,
 there are columns that are reserved for the sync adapters to use.
 The provider and applications should not modify them. In fact, they are not
 visible unless they are accessed as a sync adapter. For more information about
@@ -209,9 +209,9 @@ to delete, insert or update calendar data:</p>
 
 <h2 id="calendar">Calendars Table</h2>
 
-<p>The {@link android.provider.CalendarContract.Calendars} table contains details 
+<p>The {@link android.provider.CalendarContract.Calendars} table contains details
 for individual calendars. The following
-Calendars columns are writable by both an application and a <a href="#sync-adapter">sync adapter</a>. 
+Calendars columns are writable by both an application and a <a href="#sync-adapter">sync adapter</a>.
 For a full list of supported fields, see the
 {@link android.provider.CalendarContract.Calendars} reference.</p>
 <table>
@@ -229,7 +229,7 @@ For a full list of supported fields, see the
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Calendars#VISIBLE}</td>
-    
+
     <td>A boolean indicating whether the calendar is selected to be displayed. A
 value of 0 indicates that events associated with this calendar should not be
 shown.  A value of 1 indicates that events associated with this calendar should
@@ -240,7 +240,7 @@ android.provider.CalendarContract.Instances} table.</td>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.CalendarColumns#SYNC_EVENTS}</td>
-    
+
     <td>A boolean indicating whether the calendar should be synced and have its
 events stored on the device. A value of 0 says do not sync this calendar or
 store its events on the device.  A value of 1 says sync events for this calendar
@@ -253,8 +253,8 @@ and store its events on the device.</td>
 <p>Here is an example that shows how to get the calendars that are owned by a particular
 user. For simplicity's sake, in this example the query operation is shown in the
 user interface thread ("main thread"). In practice, this should be done in an asynchronous
-thread instead of on the main thread. For more discussion, see 
-<a href="{@docRoot}guide/components/loaders.html">Loaders</a>. If you are not just 
+thread instead of on the main thread. For more discussion, see
+<a href="{@docRoot}guide/components/loaders.html">Loaders</a>. If you are not just
 reading data but modifying it, see {@link android.content.AsyncQueryHandler}.
 </p>
 
@@ -268,18 +268,18 @@ public static final String[] EVENT_PROJECTION = new String[] {
     Calendars.CALENDAR_DISPLAY_NAME,         // 2
     Calendars.OWNER_ACCOUNT                  // 3
 };
-  
+
 // The indices for the projection array above.
 private static final int PROJECTION_ID_INDEX = 0;
 private static final int PROJECTION_ACCOUNT_NAME_INDEX = 1;
 private static final int PROJECTION_DISPLAY_NAME_INDEX = 2;
 private static final int PROJECTION_OWNER_ACCOUNT_INDEX = 3;</pre>
-  
+
 
 <div class="sidebox-wrapper"> <div class="sidebox"> <h3>Why must you include
 ACCOUNT_TYPE?</h3> <p>If you query on a {@link
 android.provider.CalendarContract.Calendars#ACCOUNT_NAME
-Calendars.ACCOUNT_NAME}, you must also include 
+Calendars.ACCOUNT_NAME}, you must also include
 {@link android.provider.CalendarContract.Calendars#ACCOUNT_TYPE Calendars.ACCOUNT_TYPE}
 in the selection. That is because a given account is
 only considered unique given both its <code>ACCOUNT_NAME</code> and its
@@ -289,7 +289,7 @@ account authenticator that was used when the account was registered with the
 android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL} for calendars not
 associated with a device account. {@link
 android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL} accounts do not get
-synced.</p> </div> </div> 
+synced.</p> </div> </div>
 
 
 <p> In the next part of the example, you construct your query. The selection
@@ -301,59 +301,59 @@ calendars that have the <code>ACCOUNT_NAME</code>
 has viewed, not just calendars the user owns, omit the <code>OWNER_ACCOUNT</code>.
 The query returns a {@link android.database.Cursor}
 object that you can use to traverse the result set returned by the database
-query. For more discussion of using queries in content providers, 
+query. For more discussion of using queries in content providers,
 see <a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>.</p>
 
 
 <pre>// Run query
 Cursor cur = null;
 ContentResolver cr = getContentResolver();
-Uri uri = Calendars.CONTENT_URI;   
-String selection = "((" + Calendars.ACCOUNT_NAME + " = ?) AND (" 
+Uri uri = Calendars.CONTENT_URI;
+String selection = "((" + Calendars.ACCOUNT_NAME + " = ?) AND ("
                         + Calendars.ACCOUNT_TYPE + " = ?) AND ("
                         + Calendars.OWNER_ACCOUNT + " = ?))";
 String[] selectionArgs = new String[] {"sampleuser@gmail.com", "com.google",
-        "sampleuser@gmail.com"}; 
-// Submit the query and get a Cursor object back. 
+        "sampleuser@gmail.com"};
+// Submit the query and get a Cursor object back.
 cur = cr.query(uri, EVENT_PROJECTION, selection, selectionArgs, null);</pre>
 
 <p>This next section uses the cursor to step through the result set. It uses the
 constants that were set up at the beginning of the example to return the values
 for each field.</p>
-    
+
 <pre>// Use the cursor to step through the returned records
 while (cur.moveToNext()) {
     long calID = 0;
     String displayName = null;
     String accountName = null;
     String ownerName = null;
-      
+
     // Get the field values
     calID = cur.getLong(PROJECTION_ID_INDEX);
     displayName = cur.getString(PROJECTION_DISPLAY_NAME_INDEX);
     accountName = cur.getString(PROJECTION_ACCOUNT_NAME_INDEX);
     ownerName = cur.getString(PROJECTION_OWNER_ACCOUNT_INDEX);
-              
+
     // Do something with the values...
 
    ...
 }
 </pre>
-  
+
 <h3 id="modify-calendar">Modifying a calendar</h3>
 
 <p>To perform an update of an calendar, you can provide the {@link
 android.provider.BaseColumns#_ID} of the calendar either as an appended ID to
-the Uri 
+the Uri
 
-({@link android.content.ContentUris#withAppendedId(android.net.Uri,long) withAppendedId()}) 
+({@link android.content.ContentUris#withAppendedId(android.net.Uri,long) withAppendedId()})
 or as the first selection item. The  selection
 should start with <code>&quot;_id=?&quot;</code>, and the first
 <code>selectionArg</code> should be  the {@link
-android.provider.BaseColumns#_ID} of the calendar. 
+android.provider.BaseColumns#_ID} of the calendar.
 You can also do updates by encoding the ID in the URI. This example changes a
-calendar's display name using the 
-({@link android.content.ContentUris#withAppendedId(android.net.Uri,long) withAppendedId()}) 
+calendar's display name using the
+({@link android.content.ContentUris#withAppendedId(android.net.Uri,long) withAppendedId()})
 approach:</p>
 
 <pre>private static final String DEBUG_TAG = "MyActivity";
@@ -375,7 +375,7 @@ an application needs to create a local calendar, it can do this by performing
 the calendar insertion as a sync adapter, using an {@link
 android.provider.CalendarContract.SyncColumns#ACCOUNT_TYPE} of {@link
 android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL}.
-{@link android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL} 
+{@link android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL}
 is a special account type for calendars that are not
 associated with a device account. Calendars of this type are not synced to a server. For a
 discussion of sync adapters, see <a href="#sync-adapter">Sync Adapters</a>.</p>
@@ -434,7 +434,7 @@ android.provider.CalendarContract.Events} reference.</p>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#DURATION}</td>
-    
+
     <td>The duration of the event in <a
 href="http://tools.ietf.org/html/rfc5545#section-3.8.2.5">RFC5545</a> format.
 For example, a value of <code>&quot;PT1H&quot;</code> states that the event
@@ -445,41 +445,41 @@ duration of 2 weeks. </td>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#ALL_DAY}</td>
-    
+
     <td>A value of 1 indicates this event occupies the entire day, as defined by
 the local time zone. A value of 0 indicates it is a regular event that may start
 and end at any time during a day.</td>
 
-    
+
   </tr>
-  
-  
+
+
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#RRULE}</td>
-    
+
     <td>The recurrence rule for the event format. For
 example, <code>&quot;FREQ=WEEKLY;COUNT=10;WKST=SU&quot;</code>. You can find
 more examples <a
 href="http://tools.ietf.org/html/rfc5545#section-3.8.5.3">here</a>.</td>
-    
+
   </tr>
-  
+
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#RDATE}</td>
-    <td>The recurrence dates for the event. 
-    You typically use {@link android.provider.CalendarContract.EventsColumns#RDATE} 
-    in conjunction with {@link android.provider.CalendarContract.EventsColumns#RRULE} 
+    <td>The recurrence dates for the event.
+    You typically use {@link android.provider.CalendarContract.EventsColumns#RDATE}
+    in conjunction with {@link android.provider.CalendarContract.EventsColumns#RRULE}
     to define an aggregate set of
 repeating occurrences. For more discussion, see the <a
 href="http://tools.ietf.org/html/rfc5545#section-3.8.5.2">RFC5545 spec</a>.</td>
 </tr>
- 
+
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#AVAILABILITY}</td>
-    
-    <td>If this event counts as busy time or is free time that can be 
+
+    <td>If this event counts as busy time or is free time that can be
 scheduled over. </td>
-    
+
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#GUESTS_CAN_MODIFY}</td>
@@ -519,11 +519,11 @@ you're inserting an event through the {@link
 android.content.Intent#ACTION_INSERT INSERT} Intent, described in <a
 href="#intent-insert">Using an intent to insert an event</a>&mdash;in that
 scenario, a default time zone is supplied.</li>
-  
+
   <li>For non-recurring events, you must include {@link
 android.provider.CalendarContract.EventsColumns#DTEND}. </li>
-  
-  
+
+
   <li>For recurring events, you must include a {@link
 android.provider.CalendarContract.EventsColumns#DURATION} in addition to  {@link
 android.provider.CalendarContract.EventsColumns#RRULE} or {@link
@@ -532,9 +532,9 @@ you're inserting an event through the {@link
 android.content.Intent#ACTION_INSERT INSERT} Intent, described in <a
 href="#intent-insert">Using an intent to insert an event</a>&mdash;in that
 scenario, you can use an {@link
-android.provider.CalendarContract.EventsColumns#RRULE} in conjunction with {@link android.provider.CalendarContract.EventsColumns#DTSTART} and {@link android.provider.CalendarContract.EventsColumns#DTEND}, and the Calendar application 
+android.provider.CalendarContract.EventsColumns#RRULE} in conjunction with {@link android.provider.CalendarContract.EventsColumns#DTSTART} and {@link android.provider.CalendarContract.EventsColumns#DTEND}, and the Calendar application
 converts it to a duration automatically.</li>
-  
+
 </ul>
 
 <p>Here is an example of inserting an event. This is being performed in the UI
@@ -545,8 +545,8 @@ information, see {@link android.content.AsyncQueryHandler}.</p>
 
 <pre>
 long calID = 3;
-long startMillis = 0; 
-long endMillis = 0;     
+long startMillis = 0;
+long endMillis = 0;
 Calendar beginTime = Calendar.getInstance();
 beginTime.set(2012, 9, 14, 7, 30);
 startMillis = beginTime.getTimeInMillis();
@@ -567,7 +567,7 @@ Uri uri = cr.insert(Events.CONTENT_URI, values);
 
 // get the event ID that is the last element in the Uri
 long eventID = Long.parseLong(uri.getLastPathSegment());
-// 
+//
 // ... do something with event ID
 //
 //</pre>
@@ -584,14 +584,14 @@ attendees or reminders to an event.</p>
 that you use an {@link android.content.Intent#ACTION_EDIT EDIT} Intent, as
 described in <a href="#intent-edit">Using an intent to edit an  event</a>.
 However, if you need to, you can edit events directly. To perform an update of
-an Event, you can provide the <code>_ID</code> of the 
+an Event, you can provide the <code>_ID</code> of the
 event either as an appended ID to the Uri ({@link
-android.content.ContentUris#withAppendedId(android.net.Uri,long) withAppendedId()}) 
-or as the first selection item. 
+android.content.ContentUris#withAppendedId(android.net.Uri,long) withAppendedId()})
+or as the first selection item.
 The selection should start with <code>&quot;_id=?&quot;</code>, and the first
 <code>selectionArg</code> should be  the <code>_ID</code> of the event. You can
 also do updates using a selection with no ID. Here is an example of updating an
-event. It changes the title of the event using the 
+event. It changes the title of the event using the
 {@link android.content.ContentUris#withAppendedId(android.net.Uri,long) withAppendedId()}
 approach:</p>
 
@@ -604,7 +604,7 @@ ContentResolver cr = getContentResolver();
 ContentValues values = new ContentValues();
 Uri updateUri = null;
 // The new title for the event
-values.put(Events.TITLE, &quot;Kickboxing&quot;); 
+values.put(Events.TITLE, &quot;Kickboxing&quot;);
 updateUri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
 int rows = getContentResolver().update(updateUri, values, null, null);
 Log.i(DEBUG_TAG, &quot;Rows updated: &quot; + rows);  </pre>
@@ -631,22 +631,22 @@ ContentValues values = new ContentValues();
 Uri deleteUri = null;
 deleteUri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
 int rows = getContentResolver().delete(deleteUri, null, null);
-Log.i(DEBUG_TAG, &quot;Rows deleted: &quot; + rows);  
+Log.i(DEBUG_TAG, &quot;Rows deleted: &quot; + rows);
 </pre>
 
 <h2 id="attendees">Attendees Table</h2>
 
 <p>Each row of the {@link android.provider.CalendarContract.Attendees} table
-represents a single attendee or guest of an event. Calling 
-{@link android.provider.CalendarContract.Reminders#query(android.content.ContentResolver, long, java.lang.String[]) query()} 
+represents a single attendee or guest of an event. Calling
+{@link android.provider.CalendarContract.Reminders#query(android.content.ContentResolver, long, java.lang.String[]) query()}
 returns a list of attendees for  the
-event with the given {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID}. 
-This  {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID} 
+event with the given {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID}.
+This  {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID}
 must match the {@link
-android.provider.BaseColumns#_ID} of a particular event.</p> 
+android.provider.BaseColumns#_ID} of a particular event.</p>
 
 <p>The following table lists the
-writable fields. When inserting a new attendee, you must include all of them 
+writable fields. When inserting a new attendee, you must include all of them
 except <code>ATTENDEE_NAME</code>.
 </p>
 
@@ -704,7 +704,7 @@ except <code>ATTENDEE_NAME</code>.
 <h3 id="add-attendees">Adding Attendees</h3>
 
 <p>Here is an example that adds a single attendee to an event. Note that the
-{@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID} 
+{@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID}
 is required:</p>
 
 <pre>
@@ -724,17 +724,17 @@ Uri uri = cr.insert(Attendees.CONTENT_URI, values);
 <h2 id="reminders">Reminders Table</h2>
 
 <p>Each row of the {@link android.provider.CalendarContract.Reminders} table
-represents a single reminder for an event. Calling 
+represents a single reminder for an event. Calling
 {@link android.provider.CalendarContract.Reminders#query(android.content.ContentResolver, long, java.lang.String[]) query()}  returns a list of reminders for the
-event with the given 
+event with the given
 {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID}.</p>
 
 
 <p>The following table lists the writable fields for reminders. All of them must
 be included when inserting a new reminder. Note that sync adapters specify the
 types of reminders they support in the {@link
-android.provider.CalendarContract.Calendars} table. See 
-{@link android.provider.CalendarContract.CalendarColumns#ALLOWED_REMINDERS} 
+android.provider.CalendarContract.Calendars} table. See
+{@link android.provider.CalendarContract.CalendarColumns#ALLOWED_REMINDERS}
 for details.</p>
 
 
@@ -779,16 +779,16 @@ Uri uri = cr.insert(Reminders.CONTENT_URI, values);</pre>
 
 <h2 id="instances">Instances Table</h2>
 
-<p>The 
+<p>The
 {@link android.provider.CalendarContract.Instances} table holds the
 start and end time for occurrences of an event. Each row in this table
 represents a single event occurrence. The instances table is not writable and only
 provides a  way to query event occurrences. </p>
 
-<p>The following table lists some of the fields you can query on for an instance. Note 
-that time zone is defined by 
-{@link android.provider.CalendarContract.CalendarCache#KEY_TIMEZONE_TYPE} 
-and 
+<p>The following table lists some of the fields you can query on for an instance. Note
+that time zone is defined by
+{@link android.provider.CalendarContract.CalendarCache#KEY_TIMEZONE_TYPE}
+and
 {@link android.provider.CalendarContract.CalendarCache#KEY_TIMEZONE_INSTANCES}.</p>
 
 
@@ -807,18 +807,18 @@ and
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Instances#END_DAY}</td>
-    
+
     <td>The Julian end day of the instance, relative to the Calendar's time
-zone. 
-    
+zone.
+
 </td>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Instances#END_MINUTE}</td>
-    
+
     <td>The end minute of the instance measured from midnight in the
 Calendar's time zone.</td>
-    
+
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Instances#EVENT_ID}</td>
@@ -826,16 +826,16 @@ Calendar's time zone.</td>
   </tr>
     <tr>
     <td>{@link android.provider.CalendarContract.Instances#START_DAY}</td>
-    <td>The Julian start day of the instance, relative to the Calendar's time zone. 
+    <td>The Julian start day of the instance, relative to the Calendar's time zone.
  </td>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Instances#START_MINUTE}</td>
-    
+
     <td>The start minute of the instance measured from midnight, relative to the
-Calendar's time zone. 
+Calendar's time zone.
 </td>
-    
+
   </tr>
 
 </table>
@@ -846,7 +846,7 @@ Calendar's time zone.
 in the URI. In this example, {@link android.provider.CalendarContract.Instances}
 gets access to the {@link
 android.provider.CalendarContract.EventsColumns#TITLE} field through its
-implementation of the {@link android.provider.CalendarContract.EventsColumns} interface. 
+implementation of the {@link android.provider.CalendarContract.EventsColumns} interface.
 In other words, {@link
 android.provider.CalendarContract.EventsColumns#TITLE} is returned through a
 database view, not through querying the raw {@link
@@ -859,7 +859,7 @@ public static final String[] INSTANCE_PROJECTION = new String[] {
     Instances.BEGIN,         // 1
     Instances.TITLE          // 2
   };
-  
+
 // The indices for the projection array above.
 private static final int PROJECTION_ID_INDEX = 0;
 private static final int PROJECTION_BEGIN_INDEX = 1;
@@ -874,7 +874,7 @@ long startMillis = beginTime.getTimeInMillis();
 Calendar endTime = Calendar.getInstance();
 endTime.set(2011, 10, 24, 8, 0);
 long endMillis = endTime.getTimeInMillis();
-  
+
 Cursor cur = null;
 ContentResolver cr = getContentResolver();
 
@@ -889,28 +889,28 @@ ContentUris.appendId(builder, startMillis);
 ContentUris.appendId(builder, endMillis);
 
 // Submit the query
-cur =  cr.query(builder.build(), 
-    INSTANCE_PROJECTION, 
-    selection, 
-    selectionArgs, 
+cur =  cr.query(builder.build(),
+    INSTANCE_PROJECTION,
+    selection,
+    selectionArgs,
     null);
-   
+
 while (cur.moveToNext()) {
     String title = null;
     long eventID = 0;
-    long beginVal = 0;    
-    
+    long beginVal = 0;
+
     // Get the field values
     eventID = cur.getLong(PROJECTION_ID_INDEX);
     beginVal = cur.getLong(PROJECTION_BEGIN_INDEX);
     title = cur.getString(PROJECTION_TITLE_INDEX);
-              
-    // Do something with the values. 
-    Log.i(DEBUG_TAG, "Event:  " + title); 
+
+    // Do something with the values.
+    Log.i(DEBUG_TAG, "Event:  " + title);
     Calendar calendar = Calendar.getInstance();
-    calendar.setTimeInMillis(beginVal);  
+    calendar.setTimeInMillis(beginVal);
     DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
-    Log.i(DEBUG_TAG, "Date: " + formatter.format(calendar.getTime()));    
+    Log.i(DEBUG_TAG, "Date: " + formatter.format(calendar.getTime()));
     }
  }</pre>
 
@@ -928,9 +928,9 @@ while (cur.moveToNext()) {
     <td><br>
     {@link android.content.Intent#ACTION_VIEW VIEW} <br></td>
     <td><p><code>content://com.android.calendar/time/&lt;ms_since_epoch&gt;</code></p>
-    You can also refer to the URI with 
-{@link android.provider.CalendarContract#CONTENT_URI CalendarContract.CONTENT_URI}. 
-For an example of using this intent, see <a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-view">Using intents to view calendar data</a>. 
+    You can also refer to the URI with
+{@link android.provider.CalendarContract#CONTENT_URI CalendarContract.CONTENT_URI}.
+For an example of using this intent, see <a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-view">Using intents to view calendar data</a>.
 
     </td>
     <td>Open calendar to the time specified by <code>&lt;ms_since_epoch&gt;</code>.</td>
@@ -941,11 +941,11 @@ For an example of using this intent, see <a href="{@docRoot}guide/topics/provide
 
      </td>
     <td><p><code>content://com.android.calendar/events/&lt;event_id&gt;</code></p>
-    
-    You can also refer to the URI with 
-{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}. 
+
+    You can also refer to the URI with
+{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}.
 For an example of using this intent, see <a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-view">Using intents to view calendar data</a>.
-    
+
     </td>
     <td>View the event specified by <code>&lt;event_id&gt;</code>.</td>
 
@@ -958,12 +958,12 @@ For an example of using this intent, see <a href="{@docRoot}guide/topics/provide
   <tr>
     <td>{@link android.content.Intent#ACTION_EDIT EDIT} </td>
     <td><p><code>content://com.android.calendar/events/&lt;event_id&gt;</code></p>
-    
-  You can also refer to the URI with 
-{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}. 
+
+  You can also refer to the URI with
+{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}.
 For an example of using this intent, see <a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-edit">Using an intent to edit an event</a>.
-    
-    
+
+
     </td>
     <td>Edit the event specified by <code>&lt;event_id&gt;</code>.</td>
 
@@ -978,11 +978,11 @@ For an example of using this intent, see <a href="{@docRoot}guide/topics/provide
     <br>
     {@link android.content.Intent#ACTION_INSERT INSERT} </td>
     <td><p><code>content://com.android.calendar/events</code></p>
-    
-   You can also refer to the URI with 
-{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}. 
+
+   You can also refer to the URI with
+{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}.
 For an example of using this intent, see <a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-insert">Using an intent to insert an event</a>.
-    
+
     </td>
 
     <td>Create an event.</td>
@@ -1002,7 +1002,7 @@ For an example of using this intent, see <a href="{@docRoot}guide/topics/provide
     <td>Name for the event.</td>
   </tr>
   <tr>
-  
+
     <td>{@link android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME
 CalendarContract.EXTRA_EVENT_BEGIN_TIME}</td>
     <td>Event begin time in milliseconds from the epoch.</td>
@@ -1010,25 +1010,25 @@ CalendarContract.EXTRA_EVENT_BEGIN_TIME}</td>
   <tr>
     <td>{@link android.provider.CalendarContract#EXTRA_EVENT_END_TIME
 CalendarContract.EXTRA_EVENT_END_TIME}</td>
-    
+
     <td>Event end time in milliseconds from the epoch.</td>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract#EXTRA_EVENT_ALL_DAY
 CalendarContract.EXTRA_EVENT_ALL_DAY}</td>
-    
+
     <td>A boolean that indicates that an event is all day. Value can be
 <code>true</code> or <code>false</code>.</td> </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#EVENT_LOCATION
 Events.EVENT_LOCATION}</td>
-    
+
     <td>Location of the event.</td>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#DESCRIPTION
 Events.DESCRIPTION}</td>
-    
+
     <td>Event description.</td>
   </tr>
   <tr>
@@ -1045,16 +1045,16 @@ Events.DESCRIPTION}</td>
     <td>
     {@link android.provider.CalendarContract.EventsColumns#ACCESS_LEVEL
 Events.ACCESS_LEVEL}</td>
-    
+
     <td>Whether the event is private or public.</td>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#AVAILABILITY
 Events.AVAILABILITY}</td>
-    
+
     <td>If this event counts as busy time or is free time that can be scheduled over.</td>
-    
-</table> 
+
+</table>
 <p>The following sections describe how to use these intents.</p>
 
 
@@ -1066,23 +1066,23 @@ With this approach, your application doesn't even need to have the {@link
 android.Manifest.permission#WRITE_CALENDAR} permission included in its <a
 href="#manifest">manifest file</a>.</p>
 
-  
+
 <p>When users run an application that uses this approach, the application sends
 them to the Calendar to finish adding the event. The {@link
 android.content.Intent#ACTION_INSERT INSERT} Intent uses extra fields to
 pre-populate a form with the details of the event in the Calendar. Users can
 then cancel the event, edit the form as needed, or save the event to their
 calendars.</p>
-  
+
 
 
 <p>Here is a code snippet that schedules an event on January 19, 2012, that runs
 from 7:30 a.m. to 8:30 a.m. Note the following about this code snippet:</p>
 
 <ul>
-  <li>It specifies {@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI} 
+  <li>It specifies {@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}
   as the Uri.</li>
-  
+
   <li>It uses the {@link
 android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME
 CalendarContract.EXTRA_EVENT_BEGIN_TIME} and {@link
@@ -1090,10 +1090,10 @@ android.provider.CalendarContract#EXTRA_EVENT_END_TIME
 CalendarContract.EXTRA_EVENT_END_TIME} extra fields to pre-populate the form
 with the time of the event. The values  for these times must be in UTC milliseconds
 from the epoch.</li>
-  
+
   <li>It uses the {@link android.content.Intent#EXTRA_EMAIL Intent.EXTRA_EMAIL}
 extra field to provide a comma-separated list of invitees, specified by email address.</li>
-  
+
 </ul>
 <pre>
 Calendar beginTime = Calendar.getInstance();
@@ -1166,18 +1166,18 @@ access the Calendar Provider:</p>
 
 <ul>
   <li>A sync adapter needs to specify that it's a sync adapter by setting {@link android.provider.CalendarContract#CALLER_IS_SYNCADAPTER} to <code>true</code>.</li>
-  
-  
+
+
   <li>A sync adapter needs to provide an {@link
 android.provider.CalendarContract.SyncColumns#ACCOUNT_NAME} and an {@link
 android.provider.CalendarContract.SyncColumns#ACCOUNT_TYPE} as query parameters in the URI. </li>
-  
+
   <li>A sync adapter has write access to more columns than an application or widget.
-  For example, an application can only modify a few characteristics of a calendar, 
+  For example, an application can only modify a few characteristics of a calendar,
   such as its name, display name, visibility setting, and whether the calendar is
   synced. By comparison, a sync adapter can access not only those columns, but many others,
   such as calendar color, time zone, access level, location, and so on.
-However, a sync adapter is restricted to the <code>ACCOUNT_NAME</code> and 
+However, a sync adapter is restricted to the <code>ACCOUNT_NAME</code> and
 <code>ACCOUNT_TYPE</code> it specified.</li> </ul>
 
 <p>Here is a helper method you can use to return a URI for use with a sync adapter:</p>
@@ -1188,5 +1188,5 @@ However, a sync adapter is restricted to the <code>ACCOUNT_NAME</code> and
         .appendQueryParameter(Calendars.ACCOUNT_TYPE, accountType).build();
  }
 </pre>
-<p>For a sample implementation of a sync adapter (not specifically related to Calendar), see 
+<p>For a sample implementation of a sync adapter (not specifically related to Calendar), see
 <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">SampleSyncAdapter</a>.

@@ -23,17 +23,32 @@ displays child {@link android.view.View} elements in rows and columns.</p>
 
 <img src="{@docRoot}images/ui/gridlayout.png" alt="" />
 
-<p>{@link android.widget.TableLayout} positions its children into rows
-    and columns. TableLayout containers do not display border lines for their rows, columns,
-    or cells. The table will have as many columns as the row with the most cells. A table can leave
-cells empty, but cells cannot span columns, as they can in HTML.</p>
-<p>{@link android.widget.TableRow} objects are the child views of a TableLayout
-(each TableRow defines a single row in the table).
-Each row has zero or more cells, each of which is defined by any kind of other View. So, the cells of a row may be
-composed of a variety of View objects, like ImageView or TextView objects.
-A cell may also be a ViewGroup object (for example, you can nest another TableLayout as a cell).</p>
-<p>The following sample layout has two rows and two cells in each. The accompanying screenshot shows the 
-result, with cell borders displayed as dotted lines (added for visual effect). </p>
+<p>
+  {@link android.widget.TableLayout} positions its children into rows and
+  columns. TableLayout containers do not display border lines for their rows,
+  columns, or cells. The table will have as many columns as the row with the
+  most cells. A table can leave cells empty. Cells can span multiple columns,
+  as they can in HTML. You can span columns by using the <code>span</code>
+  field in the {@link android.widget.TableRow.LayoutParams} class.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> Cells cannot span multiple rows.
+</p>
+
+<p>
+  {@link android.widget.TableRow} objects are the child views of a TableLayout
+  (each TableRow defines a single row in the table). Each row has zero or more
+  cells, each of which is defined by any kind of other View. So, the cells of
+  a row may be composed of a variety of View objects, like ImageView or
+  TextView objects. A cell may also be a ViewGroup object (for example, you
+  can nest another TableLayout as a cell).
+</p>
+<p>
+  The following sample layout has two rows and two cells in each. The
+  accompanying screenshot shows the result, with cell borders displayed as
+  dotted lines (added for visual effect).
+</p>
 
 <table class="columns">
     <tr>
@@ -71,7 +86,7 @@ result, with cell borders displayed as dotted lines (added for visual effect). <
 
 <p>Columns can be hidden, marked to stretch and fill the available screen space,
     or can be marked as shrinkable to force the column to shrink until the table
-    fits the screen. See the {@link android.widget.TableLayout TableLayout reference} 
+    fits the screen. See the {@link android.widget.TableLayout TableLayout reference}
 documentation for more details. </p>
 
 

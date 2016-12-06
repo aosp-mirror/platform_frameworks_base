@@ -9,16 +9,6 @@ page.metaDescription=The most visited store in the world for Android apps. Cloud
 
 @jd:body
 
-<script>
-  $(document).ready(function() {
-    if (useUpdatedTemplates) {
-      $("#useUpdatedTemplates").css("display","block");
-    } else {
-      $("#useOldTemplates").css("display","block");
-    }
-  })
-</script>
-
 <div class="dac-hero-carousel" data-carousel-query="collection:distribute/landing/carousel">
 </div>
 
@@ -28,18 +18,7 @@ page.metaDescription=The most visited store in the world for Android apps. Cloud
   </a>
 </div>
 
-<section id="useOldTemplates" style="display:none" class="dac-section dac-gray dac-small" id="latest"><div class="wrap">
-  <h2 class="norule">Latest</h2>
-  <div class="resource-widget resource-flow-layout col-16"
-      data-query="type:youtube+tag:googleplay+tag:developerstory+tag:featured, type:blog+tag:googleplay+tag:distribute+tag:featured"
-      data-sortOrder="-timestamp"
-      data-cardSizes="6x6"
-      data-maxResults="3"
-      data-items-per-page="6"
-      data-initial-results="3"></div>
-</div></section>
-
-<section id="useUpdatedTemplates" style="display:none" class="dac-section dac-gray dac-small" id="latest"><div class="wrap">
+<section class="dac-section dac-gray dac-small" id="latest"><div class="wrap">
   <h2 class="norule">Latest</h2>
 
   <div class="dac-filter dac-filter-section" data-filter="#latest-resources">

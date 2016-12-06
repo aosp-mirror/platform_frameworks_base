@@ -8,7 +8,7 @@ page.tags=sensorevent,orientation,proximity
   <ol>
     <li><a href="#sensors-pos-gamerot">Using the Game Rotation Vector Sensor</a></li>
     <li><a href="#sensors-pos-geomrot">Using the Geomagnetic Rotation Vector Sensor</a></li>
-    <li><a href="#sensors-pos-orient">Using the Orientation Sensor</a></li>
+    <li><a href="#sensors-pos-orient">Computing the Device's Orientation</a></li>
     <li><a href="#sensors-pos-mag">Using the Geomagnetic Field Sensor</a></li>
     <li><a href="#sensors-pos-prox">Using the Proximity Sensor</a></li>
   </ol>
@@ -42,38 +42,49 @@ href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/os/Senso
   </div>
 </div>
 
-<p>The Android platform provides two sensors that let you determine the position of a device: the
-geomagnetic field sensor and the orientation sensor. The Android platform also
-provides a sensor that lets you determine how close the face of a device is to an object (known as
-the proximity sensor). The geomagnetic field sensor and the proximity sensor are hardware-based.
-Most
-handset and tablet manufacturers include a geomagnetic field sensor. Likewise, handset manufacturers
-usually include a proximity sensor to determine when a handset is being held close to a user's face
-(for example, during a phone call). The orientation sensor is software-based and derives its data
-from the accelerometer and the geomagnetic field sensor.</p>
+<p>
+  The Android platform provides two sensors that let you determine the position
+  of a device: the geomagnetic field sensor and the accelerometer. The Android
+  platform also provides a sensor that lets you determine how close the face of
+  a device is to an object (known as the <em>proximity sensor</em>). The
+  geomagnetic field sensor and the proximity sensor are hardware-based. Most
+  handset and tablet manufacturers include a geomagnetic field sensor. Likewise,
+  handset manufacturers usually include a proximity sensor to determine when a
+  handset is being held close to a user's face (for example, during a phone
+  call). For determining a device's orientation, you can use the readings from
+  the device's accelerometer and the geomagnetic field sensor.
+</p>
 
-<p class="note"><strong>Note:</strong> The orientation sensor was deprecated in Android 2.2 (API
-Level 8).</p>
+<p class="note">
+  <strong>Note:</strong> The orientation sensor was deprecated in Android 2.2
+  (API level 8), and the orientation sensor type was deprecated in Android 4.4W
+  (API level 20).
+</p>
 
-<p>Position sensors are useful for determining a device's physical position in the
-world's frame of reference. For example, you can use the geomagnetic field sensor in
-combination with the accelerometer to determine a device's position relative to
-the magnetic North Pole. You can also use the orientation sensor (or similar sensor-based
-orientation methods) to determine a device's position in your application's frame of reference.
-Position sensors are not typically used to monitor device movement or motion, such as shake, tilt,
-or thrust (for more information, see <a
-href="{@docRoot}guide/topics/sensors/sensors_motion.html">Motion Sensors</a>).</p>
+<p>
+  Position sensors are useful for determining a device's physical position in
+  the world's frame of reference. For example, you can use the geomagnetic field
+  sensor in combination with the accelerometer to determine a device's position
+  relative to the magnetic north pole. You can also use these sensors to
+  determine a device's orientation in your application's frame of reference.
+  Position sensors are not typically used to monitor device movement or motion,
+  such as shake, tilt, or thrust (for more information, see <a
+  href="{@docRoot}guide/topics/sensors/sensors_motion.html">Motion Sensors</a>).
+</p>
 
-<p>The geomagnetic field sensor and orientation sensor return multi-dimensional arrays of sensor
-values
-for each {@link android.hardware.SensorEvent}. For example, the orientation sensor provides
-geomagnetic
-field strength values for each of the three coordinate axes during a single sensor event. Likewise,
-the orientation sensor provides azimuth (yaw), pitch, and roll values during a single sensor event.
-For more information about the coordinate systems that are used by sensors, see <a
-href="{@docRoot}guide/topics/sensors/sensors_overview.html#sensors-coords">Sensor Coordinate
-Systems</a>. The proximity sensor provides a single value for each sensor event. Table 1 summarizes
-the position sensors that are supported on the Android platform.</p>
+<p>
+  The geomagnetic field sensor and accelerometer return multi-dimensional arrays
+  of sensor values for each {@link android.hardware.SensorEvent}. For example,
+  the geomagnetic field sensor provides geomagnetic field strength values for
+  each of the three coordinate axes during a single sensor event. Likewise, the
+  accelerometer sensor measures the acceleration applied to the device during a
+  sensor event. For more information about the coordinate systems that are used
+  by sensors, see <a
+  href="{@docRoot}guide/topics/sensors/sensors_overview.html#sensors-coords">
+  Sensor Coordinate Systems</a>. The proximity sensor provides a single value
+  for each sensor event. Table 1 summarizes the position sensors that are
+  supported on the Android platform.
+</p>
 
 <p class="table-caption" id="table1">
   <strong>Table 1.</strong> Position sensors that are supported on the Android platform.</p>
@@ -174,13 +185,16 @@ the position sensors that are supported on the Android platform.</p>
   </tr>
 </table>
 
-<p class="note"><sup><strong>1</strong></sup> This sensor was deprecated in Android 2.2 (API Level
-  8). The sensor framework provides alternate methods for acquiring device orientation, which are
-discussed in <a href="#sensors-pos-orient">Using the Orientation Sensor</a>.</p>
+<p class="note">
+  <sup><strong>1</strong></sup>This sensor was deprecated in Android 2.2 (API
+  level 8), and this sensor type was deprecated in Android 4.4W (API level 20).
+  The sensor framework provides alternate methods for acquiring device
+  orientation, which are discussed in <a href="#sensors-pos-orient">Computing
+  the Device's Orientation</a>.
+</p>
 
 <p class="note"><sup><strong>2</strong></sup> Some proximity sensors provide only binary values
 representing near and far.</p>
-
 
 <h2 id="sensors-pos-gamerot">Using the Game Rotation Vector Sensor</h2>
 
@@ -228,71 +242,106 @@ mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTO
 </pre>
 
 
-<h2 id="sensors-pos-orient">Using the Orientation Sensor</h2>
+<h2 id="sensors-pos-orient">Computing the Device's Orientation</h2>
 
-<p>The orientation sensor lets you monitor the position of a device relative to the earth's frame of
-reference (specifically, magnetic north). The following code shows you how to get an instance of the
-default orientation sensor:</p>
-
+<p>By computing a device's orientation, you can monitor the position of the
+  device relative to the earth's frame of reference (specifically, the magnetic
+  north pole). The following code shows you how to compute a device's
+  orientation:
+</p>
 <pre>
 private SensorManager mSensorManager;
-private Sensor mSensor;
 ...
-mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+// Rotation matrix based on current readings from accelerometer and magnetometer.
+final float[] rotationMatrix = new float[9];
+mSensorManager.getRotationMatrix(rotationMatrix, null,
+  accelerometerReading, magnetometerReading);
+
+// Express the updated rotation matrix as three orientation angles.
+final float[] orientationAngles = new float[3];
+mSensorManager.getOrientation(rotationMatrix, orientationAngles);
 </pre>
-
-<p>The orientation sensor derives its data by using a device's geomagnetic field sensor in
-combination with a device's accelerometer. Using these two hardware sensors, an orientation sensor
-provides data for the following three dimensions:</p>
-
+<p>The system computes the orientation angles by using a device's geomagnetic
+  field sensor in combination with the device's accelerometer. Using these two
+  hardware sensors, the system provides data for the following three
+  orientation angles:
+</p>
 <ul>
-  <li>Azimuth (degrees of rotation around the z axis). This is the angle between magnetic north
-and the device's y axis. For example, if the device's y axis is aligned with magnetic north
-this value is 0, and if the device's y axis is pointing south this value is 180. Likewise, when
-the y axis is pointing east this value is 90 and when it is pointing west this value is 270.</li>
-  <li>Pitch (degrees of rotation around the x axis). This value is positive when the positive z axis
-rotates toward the positive y axis, and it is negative when the positive z axis
-rotates toward the negative y axis. The range of values is 180 degrees to -180
-degrees.</li>
-  <li>Roll (degrees of rotation around the y axis). This value is positive when the positive z axis
-rotates toward the positive x axis, and it is negative when the positive z axis
-rotates toward the negative x axis. The range of values is 90 degrees to -90
-degrees.</li>
+  <li>
+    <strong>Azimuth (degrees of rotation about the -z axis).</strong> This is
+    the angle between the device's current compass direction and magnetic north.
+    If the top edge of the device faces magnetic north, the azimuth is 0
+    degrees; if the top edge faces south, the azimuth is 180 degrees. Similarly,
+    if the top edge faces east, the azimuth is 90 degrees, and if the top edge
+    faces west, the azimuth is 270 degrees.
+  </li>
+  <li>
+    <strong>Pitch (degrees of rotation about the x axis).</strong> This is the
+    angle between a plane parallel to the device's screen and a plane parallel
+    to the ground. If you hold the device parallel to the ground with the bottom
+    edge closest to you and tilt the top edge of the device toward the ground,
+    the pitch angle becomes positive. Tilting in the opposite direction&mdash;
+    moving the top edge of the device away from the ground&mdash;causes
+    the pitch angle to become negative. The range of values is -180 degrees to
+    180 degrees.
+  </li>
+  <li>
+    <strong>Roll (degrees of rotation about the y axis).</strong> This is the
+    angle between a plane perpendicular to the device's screen and a plane
+    perpendicular to the ground. If you hold the device parallel to the ground
+    with the bottom edge closest to you and tilt the left edge of the device
+    toward the ground, the roll angle becomes positive. Tilting in the opposite
+    direction&mdash;moving the right edge of the device toward the ground&mdash;
+    causes the roll angle to become negative. The range of values is -90 degrees
+    to 90 degrees.
+  </li>
 </ul>
 
-<p>This definition is different from yaw, pitch, and roll used in aviation, where the X axis is
-along the long side of the plane (tail to nose). Also, for historical reasons the roll angle is
-positive in the clockwise direction (mathematically speaking, it should be positive in the
-counter-clockwise direction).</p>
+<p class="note">
+  <strong>Note:</strong>The sensor's roll definition has changed to reflect the
+  vast majority of implementations in the geosensor ecosystem.
+</p>
 
-<p>The orientation sensor derives its data by processing the raw sensor data from the accelerometer
-and the geomagnetic field sensor. Because of the heavy processing that is involved, the accuracy and
-precision of the orientation sensor is diminished (specifically, this sensor is only reliable when
-the roll component is 0). As a result, the orientation sensor was deprecated in Android 2.2 (API
-level 8). Instead of using raw data from the orientation sensor, we recommend that you use the
-{@link android.hardware.SensorManager#getRotationMatrix getRotationMatrix()} method in conjunction
-with the {@link android.hardware#getOrientation getOrientation()} method to compute orientation
-values. You can also use the {@link android.hardware.SensorManager#remapCoordinateSystem
-remapCoordinateSystem()} method to translate the orientation values to your application's frame of
-reference.</p>
+<p>
+  Note that these angles work off of a different coordinate system than the
+  one used in aviation (for yaw, pitch, and roll). In the aviation system, the
+  x axis is along the long side of the plane, from tail to nose.
+</p>
 
-<p>The following code sample shows how to acquire orientation data directly from the orientation
-sensor. We recommend that you do this only if a device has negligible roll.</p>
+<p>
+  The orientation sensor derives its data by processing the raw sensor data
+  from the accelerometer and the geomagnetic field sensor. Because of the heavy
+  processing that is involved, the accuracy and precision of the orientation
+  sensor is diminished. Specifically, this sensor is reliable only when the roll
+  angle is 0. As a result, the orientation sensor was deprecated in Android
+  2.2 (API level 8), and the orientation sensor type was deprecated in Android
+  4.4W (API level 20).
 
+  Instead of using raw data from the orientation sensor, we recommend that you
+  use the {@link android.hardware.SensorManager#getRotationMatrix getRotationMatrix()}
+  method in conjunction with the
+  {@link android.hardware.SensorManager#getOrientation getOrientation()} method
+  to compute orientation values, as shown in the following code sample. As part
+  of this process, you can use the
+  {@link android.hardware.SensorManager#remapCoordinateSystem remapCoordinateSystem()}
+  method to translate the orientation values to your application's frame of
+  reference.
+</p>
 <pre>
 public class SensorActivity extends Activity implements SensorEventListener {
 
   private SensorManager mSensorManager;
-  private Sensor mOrientation;
+  private final float[] mAccelerometerReading = new float[3];
+  private final float[] mMagnetometerReading = new float[3];
+
+  private final float[] mRotationMatrix = new float[9];
+  private final float[] mOrientationAngles = new float[3];
 
   &#64;Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
-
     mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-    mOrientation = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
   }
 
   &#64;Override
@@ -304,31 +353,63 @@ public class SensorActivity extends Activity implements SensorEventListener {
   &#64;Override
   protected void onResume() {
     super.onResume();
-    mSensorManager.registerListener(this, mOrientation, SensorManager.SENSOR_DELAY_NORMAL);
+
+    // Get updates from the accelerometer and magnetometer at a constant rate.
+    // To make batch operations more efficient and reduce power consumption,
+    // provide support for delaying updates to the application.
+    //
+    // In this example, the sensor reporting delay is small enough such that
+    // the application receives an update before the system checks the sensor
+    // readings again.
+    mSensorManager.registerListener(this, Sensor.TYPE_ACCELEROMETER,
+      SensorManager.SENSOR_DELAY_NORMAL, SensorManager.SENSOR_DELAY_UI);
+    mSensorManager.registerListener(this, Sensor.TYPE_MAGNETIC_FIELD,
+      SensorManager.SENSOR_DELAY_NORMAL, SensorManager.SENSOR_DELAY_UI);
   }
 
   &#64;Override
   protected void onPause() {
     super.onPause();
+
+    // Don't receive any more updates from either sensor.
     mSensorManager.unregisterListener(this);
   }
 
+  // Get readings from accelerometer and magnetometer. To simplify calculations,
+  // consider storing these readings as unit vectors.
   &#64;Override
   public void onSensorChanged(SensorEvent event) {
-    float azimuth_angle = event.values[0];
-    float pitch_angle = event.values[1];
-    float roll_angle = event.values[2];
-    // Do something with these orientation angles.
+    if (event.sensor == Sensor.TYPE_ACCELEROMETER) {
+      System.arraycopy(event.values, 0, mAccelerometerReading,
+        0, mAccelerometerReading.length);
+    }
+    else if (event.sensor == Sensor.TYPE_MAGNETIC_FIELD) {
+      System.arraycopy(event.values, 0, mMagnetometerReading,
+        0, mMagnetometerReading.length);
+    }
+  }
+
+  // Compute the three orientation angles based on the most recent readings from
+  // the device's accelerometer and magnetometer.
+  public void updateOrientationAngles() {
+    // Update rotation matrix, which is needed to update orientation angles.
+    mSensorManager.getRotationMatrix(mRotationMatrix, null,
+      mAccelerometerReading, mMagnetometerReading);
+
+    // "mRotationMatrix" now has up-to-date information.
+
+    mSensorManager.getOrientation(mRotationMatrix, mOrientationAngles);
+
+    // "mOrientationAngles" now has up-to-date information.
   }
 }
 </pre>
 
-<p>You do not usually need to perform any data processing or filtering of the raw data that you
-obtain from an orientation sensor, other than translating the sensor's coordinate system to your
-application's frame of reference. The <a
-href="{@docRoot}resources/samples/AccelerometerPlay/index.html">Accelerometer Play</a> sample shows
-you how to translate acceleration sensor data into another frame of reference; the technique is
-similar to the one you might use with the orientation sensor.</p>
+<p>
+  You don't usually need to perform any data processing or filtering of the
+  device's raw orientation angles other than translating the sensor's
+  coordinate system to your application's frame of reference.
+</p>
 
 <h2 id="sensors-pos-mag">Using the Geomagnetic Field Sensor</h2>
 

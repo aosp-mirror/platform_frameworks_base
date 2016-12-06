@@ -58,7 +58,7 @@ Screens</a></li>
 
 
 <div class="note design">
-<p><strong>New Guides for App Designers!</strong></p> 
+<p><strong>New Guides for App Designers!</strong></p>
 <p>Check out the new documents for designers at <strong><a
 href="{@docRoot}design/index.html">Android Design</a></strong>, including more guidelines
 for <a href="{@docRoot}design/style/iconography.html">Iconography</a>.</p>
@@ -72,13 +72,13 @@ professional to users.</p>
 
 <p>This document provides information to help you create icons for various parts
 of your application’s user interface that match the general styles used by the
-Android 2.x framework. Following these guidelines will help you to create a 
+Android 2.x framework. Following these guidelines will help you to create a
 polished and unified experience for the user.</p>
 
 <p>The following documents discuss detailed guidelines for the common types of
 icons used throughout Android applications:</p>
 
-<dl> 
+<dl>
   <dt><strong><a href="icon_design_launcher.html">Launcher Icons</a></strong></dt>
   <dd>A Launcher icon is a graphic that represents your application on the
   device's Home screen and in the Launcher window.</dd>
@@ -103,7 +103,7 @@ icons used throughout Android applications:</p>
   graphically represent list items. An example is the Settings application.</dd>
 </dl>
 
-<p>To get started creating your icons more quickly, you can download 
+<p>To get started creating your icons more quickly, you can download
 the Android Icon Templates Pack.</p>
 
 
@@ -142,7 +142,7 @@ section in the box at the top-right corner of this page.</p>
 <p>Android is designed to run on a variety of devices that offer a range of
 screen sizes and resolutions. When you design the icons for your application,
 it's important keep in mind that your application may be installed on any of
-those devices. As described in the <a 
+those devices. As described in the <a
 href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
 Screens</a> document, the Android platform makes it straightforward for you to
 provide icons in such a way that they will be displayed properly on any device,
@@ -158,7 +158,7 @@ your application, see <a
 href="{@docRoot}guide/practices/screens_support.html#qualifiers">Resource
 directory qualifiers for screen size and density</a>. </p>
 
-<p>For tips on how to create and manage icon sets for multiple densities, see 
+<p>For tips on how to create and manage icon sets for multiple densities, see
 <a href="#design-tips">Tips for Designers</a>.</p>
 
 
@@ -290,7 +290,7 @@ initially draw launcher icons on an 864x864 artboard, it will be easier and
 cleaner to tweak the icons when you scale the artboard down to the target
 sizes for final asset creation.</p>
 
-  
+
 
 <h3>When scaling, redraw bitmap layers as needed</h3>
 

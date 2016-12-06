@@ -48,7 +48,7 @@ following conditions hold:
   at the top of the screen that the user is interacting with (its
   {@link android.app.Activity#onResume} method has been called).</li>
   <li> It has a {@link android.content.BroadcastReceiver} that is currently running
-  (its {@link android.content.BroadcastReceiver#onReceive 
+  (its {@link android.content.BroadcastReceiver#onReceive
   BroadcastReceiver.onReceive()} method is executing).</li>
   <li>It has a {@link android.app.Service} that is currently executing code
   in one of its callbacks ({@link android.app.Service#onCreate Service.onCreate()},

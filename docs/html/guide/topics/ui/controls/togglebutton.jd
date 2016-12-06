@@ -14,6 +14,7 @@ page.tags=switch,togglebutton
   <ol>
     <li>{@link android.widget.ToggleButton}</li>
     <li>{@link android.widget.Switch}</li>
+    <li>{@link android.support.v7.widget.SwitchCompat}</li>
     <li>{@link android.widget.CompoundButton}</li>
   </ol>
 </div>
@@ -21,9 +22,12 @@ page.tags=switch,togglebutton
 
 <p>A toggle button allows the user to change a setting between two states.</p>
 
-<p>You can add a basic toggle button to your layout with the {@link android.widget.ToggleButton}
-object. Android 4.0 (API level 14) introduces another kind of toggle button called a switch that
-provides a slider control, which you can add with a {@link android.widget.Switch} object.</p>
+<p>You can add a basic toggle button to your layout with the
+{@link android.widget.ToggleButton} object. Android 4.0 (API level 14)
+introduces another kind of toggle button called a switch that provides a slider
+control, which you can add with a {@link android.widget.Switch} object.
+{@link android.support.v7.widget.SwitchCompat} is a version of the Switch
+widget which runs on devices back to API 7.</p>
 
 <p>
   If you need to change a button's state yourself, you can use the {@link

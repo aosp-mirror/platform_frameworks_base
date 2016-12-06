@@ -22,7 +22,7 @@ page.title=Định nghĩa Đổ bóng và Dạng xem Cắt hình
 tầm quan trọng tương đối của từng phần tử và tập chung sự chú ý của họ vào tác vụ hiện có.</p>
 
 <p>Độ cao của một dạng xem, được biểu diễn bằng thuộc tính Z, sẽ xác định diện mạo trực quan của
-bóng đổ: dạng xem có giá trị Z cao hơn sẽ đổ bóng lớn hơn, mềm hơn. Dạng xem có giá trị Z cao hơn sẽ che khuất dạng xem 
+bóng đổ: dạng xem có giá trị Z cao hơn sẽ đổ bóng lớn hơn, mềm hơn. Dạng xem có giá trị Z cao hơn sẽ che khuất dạng xem
 có giá trị Z thấp hơn; tuy nhiên, giá trị Z của một dạng xem không ảnh hưởng tới kích cỡ của dạng xem.</p>
 
 <p>Đổ bóng được vẽ bởi dạng xem mẹ của dạng xem cao hơn, do vậy nó phụ thuộc vào tiêu chuẩn cắt dạng xem,
@@ -51,7 +51,7 @@ trong không gian 3D</a>.</p>
 <p class="img-caption"><strong>Hình 1</strong> - Đổ bóng cho các độ cao dạng xem khác nhau.</p>
 
 <p>Để đặt độ cao của dạng xem trong một định nghĩa bố trí, hãy sử dụng thuộc tính <code>android:elevation</code>
-. Để đặt độ cao của dạng xem trong mã của một hoạt động, hãy sử dụng phương thức 
+. Để đặt độ cao của dạng xem trong mã của một hoạt động, hãy sử dụng phương thức
 {@link android.view.View#setElevation View.setElevation()}.</p>
 
 <p>Để đặt độ dịch của dạng xem, hãy sử dụng phương thức {@link android.view.View#setTranslationZ
@@ -59,7 +59,7 @@ View.setTranslationZ()}.</p>
 
 <p>Các phương thức {@link android.view.ViewPropertyAnimator#z ViewPropertyAnimator.z()} và {@link
 android.view.ViewPropertyAnimator#translationZ ViewPropertyAnimator.translationZ()} mới cho phép
-bạn dễ dàng tạo hiệu ứng hoạt hình cho độ cao của dạng xem. Để biết thêm thông tin, hãy xem tài liệu tham khảo API cho 
+bạn dễ dàng tạo hiệu ứng hoạt hình cho độ cao của dạng xem. Để biết thêm thông tin, hãy xem tài liệu tham khảo API cho
 {@link android.view.ViewPropertyAnimator} và hướng dẫn cho nhà phát triển về <a href="{@docRoot}guide/topics/graphics/prop-animation.html">Hoạt hình Thuộc tính</a>
 .</p>
 

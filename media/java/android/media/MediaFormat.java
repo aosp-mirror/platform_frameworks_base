@@ -49,12 +49,18 @@ import java.util.Map;
  * <tr><td>{@link #KEY_FRAME_RATE}</td><td>Integer or Float</td><td>required for <b>encoders</b>,
  *         optional for <b>decoders</b></td></tr>
  * <tr><td>{@link #KEY_CAPTURE_RATE}</td><td>Integer</td><td></td></tr>
- * <tr><td>{@link #KEY_I_FRAME_INTERVAL}</td><td>Integer</td><td><b>encoder-only</b></td></tr>
+ * <tr><td>{@link #KEY_I_FRAME_INTERVAL}</td><td>Integer (or Float)</td><td><b>encoder-only</b>,
+ *         time-interval between key frames.
+ *         Float support added in {@link android.os.Build.VERSION_CODES#N_MR1}</td></tr>
  * <tr><td>{@link #KEY_INTRA_REFRESH_PERIOD}</td><td>Integer</td><td><b>encoder-only</b>, optional</td></tr>
  * <tr><td>{@link #KEY_MAX_WIDTH}</td><td>Integer</td><td><b>decoder-only</b>, optional, max-resolution width</td></tr>
  * <tr><td>{@link #KEY_MAX_HEIGHT}</td><td>Integer</td><td><b>decoder-only</b>, optional, max-resolution height</td></tr>
- * <tr><td>{@link #KEY_REPEAT_PREVIOUS_FRAME_AFTER}</td><td>Long</td><td><b>video encoder in surface-mode only</b></td></tr>
- * <tr><td>{@link #KEY_PUSH_BLANK_BUFFERS_ON_STOP}</td><td>Integer(1)</td><td><b>video decoder rendering to a surface only</b></td></tr>
+ * <tr><td>{@link #KEY_REPEAT_PREVIOUS_FRAME_AFTER}</td><td>Long</td><td><b>encoder in surface-mode
+ *         only</b>, optional</td></tr>
+ * <tr><td>{@link #KEY_PUSH_BLANK_BUFFERS_ON_STOP}</td><td>Integer(1)</td><td><b>decoder rendering
+ *         to a surface only</b>, optional</td></tr>
+ * <tr><td>{@link #KEY_TEMPORAL_LAYERING}</td><td>String</td><td><b>encoder only</b>, optional,
+ *         temporal-layering schema</td></tr>
  * </table>
  * Specify both {@link #KEY_MAX_WIDTH} and {@link #KEY_MAX_HEIGHT} to enable
  * adaptive playback (seamless resolution change) for a video decoder that
@@ -258,9 +264,20 @@ public final class MediaFormat {
     public static final String KEY_CAPTURE_RATE = "capture-rate";
 
     /**
-     * A key describing the frequency of I frames expressed in secs
-     * between I frames.
-     * The associated value is an integer.
+     * A key describing the frequency of key frames expressed in seconds between key frames.
+     * <p>
+     * This key is used by video encoders.
+     * A negative value means no key frames are requested after the first frame.
+     * A zero value means a stream containing all key frames is requested.
+     * <p class=note>
+     * Most video encoders will convert this value of the number of non-key-frames between
+     * key-frames, using the {@linkplain #KEY_FRAME_RATE frame rate} information; therefore,
+     * if the actual frame rate differs (e.g. input frames are dropped or the frame rate
+     * changes), the <strong>time interval</strong> between key frames will not be the
+     * configured value.
+     * <p>
+     * The associated value is an integer (or float since
+     * {@link android.os.Build.VERSION_CODES#N_MR1}).
      */
     public static final String KEY_I_FRAME_INTERVAL = "i-frame-interval";
 
@@ -280,12 +297,18 @@ public final class MediaFormat {
 
    /**
      * A key describing the temporal layering schema.  This is an optional parameter
-     * that applies only to video encoders.  Use {@link MediaCodec#getInputFormat}
+     * that applies only to video encoders.  Use {@link MediaCodec#getOutputFormat}
      * after {@link MediaCodec#configure configure} to query if the encoder supports
-     * the desired schema. Supported values are {@code webrtc.vp8.1-layer},
-     * {@code webrtc.vp8.2-layer}, {@code webrtc.vp8.3-layer}, and {@code none}.
-     * If the encoder does not support temporal layering, the input format will
-     * not have an entry with this key.
+     * the desired schema. Supported values are {@code webrtc.vp8.N-layer},
+     * {@code android.generic.N}, {@code android.generic.N+M} and {@code none}, where
+     * {@code N} denotes the total number of non-bidirectional layers (which must be at least 1)
+     * and {@code M} denotes the total number of bidirectional layers (which must be non-negative).
+     * <p class=note>{@code android.generic.*} schemas have been added in {@link
+     * android.os.Build.VERSION_CODES#N_MR1}.
+     * <p>
+     * The encoder may support fewer temporal layers, in which case the output format
+     * will contain the configured schema. If the encoder does not support temporal
+     * layering, the output format will not have an entry with this key.
      * The associated value is a string.
      */
     public static final String KEY_TEMPORAL_LAYERING = "ts-schema";
@@ -554,7 +577,9 @@ public final class MediaFormat {
     /**
      * A key describing the desired clockwise rotation on an output surface.
      * This key is only used when the codec is configured using an output surface.
-     * The associated value is an integer, representing degrees.
+     * The associated value is an integer, representing degrees. Supported values
+     * are 0, 90, 180 or 270. This is an optional field; if not specified, rotation
+     * defaults to 0.
      *
      * @see MediaCodecInfo.CodecCapabilities#profileLevels
      */

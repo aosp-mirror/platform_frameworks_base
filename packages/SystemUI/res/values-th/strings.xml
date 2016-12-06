@@ -143,7 +143,9 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_4g_plus" msgid="3032226872470658661">"4G+"</string>
     <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
+    <string name="accessibility_data_connection_lte_plus" msgid="361876866906946007">"LTE+"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"โรมมิ่ง"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"EDGE"</string>
@@ -236,7 +238,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"หยุดการใช้ข้อมูล 4G ชั่วคราวแล้ว"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"หยุดการใช้ข้อมูลมือถือชั่วคราวแล้ว"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"หยุดการใช้ข้อมูลชั่วคราวแล้ว"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"เนื่องจากใช้งานข้อมูลถึงขีดจำกัดที่กำหนดไว้แล้ว อุปกรณ์จึงหยุดการใช้งานข้อมูลไว้ชั่วคราวตลอดระยะเวลาที่เหลือของรอบนี้\n\nการทำให้กลับมาทำงานอีกครั้งอาจทำให้เกิดค่าใช้จ่ายจากผู้ให้บริการ"</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"คุณใช้อินเทอร์เน็ตเกินปริมาณที่กำหนดไว้ ระบบจะไม่ใช้เครือข่ายมือถือต่อไป\n\nหากใช้ต่อ อาจมีค่าบริการตามปริมาณการใช้อินเทอร์เน็ต"</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"ทำต่อ"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"ไม่มีอินเทอร์เน็ต"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"เชื่อมต่อ WiFi แล้ว"</string>
@@ -317,6 +319,9 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"ขีดจำกัด <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"คำเตือน <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"โหมดการทำงาน"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"แสงตอนกลางคืน"</string>
+    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"แสงตอนกลางคืนเปิดอยู่ แตะเพื่อปิด"</string>
+    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"แสงตอนกลางคืนปิดอยู่ แตะเพื่อเปิด"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"ไม่มีรายการล่าสุด"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"คุณได้ล้างทุกอย่างแล้ว"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"ข้อมูลแอปพลิเคชัน"</string>
@@ -330,6 +335,8 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"แยกในแนวนอน"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"แยกในแนวตั้ง"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"แยกแบบกำหนดเอง"</string>
+  <string-array name="recents_blacklist_array">
+  </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"ชาร์จแล้ว"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"กำลังชาร์จ"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"อีก <xliff:g id="CHARGING_TIME">%s</xliff:g> จึงจะเต็ม"</string>
@@ -338,7 +345,7 @@
     <string name="description_target_search" msgid="3091587249776033139">"ค้นหา"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"เลื่อนขึ้นเพื่อ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"เลื่อนไปทางซ้ายเพื่อ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"คุณจะไม่ถูกรบกวนจากเสียงและการสั่น ยกเว้นการปลุก การเตือนความจำ กิจกรรม และผู้โทรที่คุณระบุ"</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"คุณจะไม่ถูกรบกวนจากเสียงและการสั่น ยกเว้นการปลุก การช่วยเตือน กิจกรรม และผู้โทรที่คุณระบุ"</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"กำหนดค่า"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"การใช้โหมดนี้จะบล็อกเสียงและการสั่นทั้งหมด ซึ่งรวมถึงเสียงปลุก เพลง วิดีโอ และเกม คุณจะยังโทรออกได้อยู่"</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"การใช้โหมดนี้จะบล็อกเสียงและการสั่นทั้งหมด ซึ่งรวมถึงเสียงปลุก เพลง วิดีโอ และเกม"</string>
@@ -397,6 +404,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"อาจมีการตรวจสอบอุปกรณ์"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"อาจมีการตรวจสอบโปรไฟล์"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"เครือข่ายอาจได้รับการตรวจสอบ"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"เครือข่ายอาจถูกตรวจสอบ"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"การตรวจสอบอุปกรณ์"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"การตรวจสอบโปรไฟล์"</string>
     <string name="monitoring_title" msgid="169206259253048106">"การตรวจสอบเครือข่าย"</string>
@@ -409,6 +417,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"คุณเชื่อมต่อกับ <xliff:g id="APPLICATION">%1$s</xliff:g> ซึ่งสามารถตรวจสอบกิจกรรมในเครือข่ายของคุณ รวมถึงอีเมล แอป และเว็บไซต์ได้"</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"คุณเชื่อมต่อกับ <xliff:g id="APPLICATION">%1$s</xliff:g> ซึ่งสามารถตรวจสอบกิจกรรมในเครือข่ายส่วนตัวของคุณ รวมถึงอีเมล แอป และเว็บไซต์ได้"</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"คุณเชื่อมต่อกับ <xliff:g id="APPLICATION">%1$s</xliff:g> ซึ่งสามารถตรวจสอบกิจกรรมในเครือข่ายส่วนตัวของคุณ รวมถึงอีเมล แอป และเว็บไซต์ได้"</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"โปรไฟล์งานได้รับการจัดการโดย <xliff:g id="ORGANIZATION">%1$s</xliff:g> โดยมีการเชื่อมต่อกับ <xliff:g id="APPLICATION">%2$s</xliff:g> ซึ่งสามารถตรวจสอบกิจกรรมในเครือข่าย รวมถึงอีเมล แอป และเว็บไซต์ได้\n\nสำหรับข้อมูลเพิ่มเติม โปรดติดต่อผู้ดูแลระบบ"</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"โปรไฟล์งานได้รับการจัดการโดย <xliff:g id="ORGANIZATION">%1$s</xliff:g> โดยมีการเชื่อมต่อกับ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> ซึ่งสามารถตรวจสอบกิจกรรมในเครือข่าย รวมถึงอีเมล แอป และเว็บไซต์ได้\n\nนอกจากนี้ คุณยังเชื่อมต่อกับ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ซึ่งสามารถตรวจสอบกิจกรรมในเครือข่ายส่วนตัวได้"</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"อุปกรณ์ได้รับการจัดการโดย <xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nผู้ดูและรบบของคุณสามารถตรวจสอบและจัดการการตั้งค่า การเข้าถึงของบริษัท แอป ข้อมูลที่เชื่อมโยงกับอุปกรณ์ และข้อมูลตำแหน่งของอุปกรณ์ได้\n\nคุณมีการเชื่อมต่อกับ <xliff:g id="APPLICATION">%2$s</xliff:g> ซึ่งสามารถตรวจสอบกิจกรรมในเครือข่ายรวมถึงอีเมล แอป และเว็บไซต์ได้\n\nสำหรับข้อมูลเพิ่มเติม โปรดติดต่อผู้ดูแลระบบ"</string>
@@ -434,6 +443,18 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> เป็นช่องโต้ตอบระดับเสียง"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"แตะเพื่อคืนค่าเป็นค่าเดิม"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"คุณกำลังใช้โปรไฟล์งานของคุณ"</string>
+  <string-array name="volume_stream_titles">
+    <item msgid="5841843895402729630">"โทร"</item>
+    <item msgid="5997713001067658559">"ระบบ"</item>
+    <item msgid="7858983209929864160">"ทำให้ส่งเสียง"</item>
+    <item msgid="1850038478268896762">"สื่อ"</item>
+    <item msgid="8265110906352372092">"การปลุก"</item>
+    <item msgid="5339394737636839168"></item>
+    <item msgid="2951313578278086204">"บลูทูธ"</item>
+    <item msgid="2919807739709798970"></item>
+    <item msgid="150349973435223405"></item>
+    <item msgid="6761963760295549099"></item>
+  </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s แตะเพื่อเปิดเสียง"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s แตะเพื่อตั้งค่าให้สั่น อาจมีการปิดเสียงบริการการเข้าถึง"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s แตะเพื่อปิดเสียง อาจมีการปิดเสียงบริการการเข้าถึง"</string>
@@ -473,8 +494,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"แสดงวินาทีของนาฬิกาในแถบสถานะ อาจส่งผลต่ออายุแบตเตอรี"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"จัดเรียงการตั้งค่าด่วนใหม่"</string>
     <string name="show_brightness" msgid="6613930842805942519">"แสดงความสว่างในการตั้งค่าด่วน"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"เปิดใช้ท่าทางสัมผัสการเลื่อนขึ้นเพื่อแยกหน้าจอ"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"เปิดใช้ท่าทางสัมผัสเพื่อเข้าสู่โหมดแยกหน้าจอโดยเลื่อนขึ้นจากปุ่มภาพรวม"</string>
     <string name="experimental" msgid="6198182315536726162">"ทดสอบ"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"เปิดบลูทูธไหม"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"หากต้องการเชื่อมต่อแป้นพิมพ์กับแท็บเล็ต คุณต้องเปิดบลูทูธก่อน"</string>
@@ -504,21 +523,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"การตั้งค่าเพิ่มเติม"</string>
     <string name="notification_done" msgid="5279426047273930175">"เสร็จสิ้น"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"ส่วนควบคุมการแจ้งเตือนของ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"สีและลักษณะที่ปรากฏ"</string>
-    <string name="night_mode" msgid="3540405868248625488">"โหมดกลางคืน"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"ปรับเทียบการแสดงผล"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"เปิด"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"ปิด"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"เปิดอัตโนมัติ"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"เปลี่ยนเป็นโหมดกลางคืนตามความเหมาะสมกับสถานที่และเวลาของวัน"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"เมื่อเปิดโหมดกลางคืน"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"ใช้ธีมสีเข้มสำหรับ Android OS"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"ปรับการแต้มสี"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"ปรับความสว่าง"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"ใช้ธีมสีเข้มในบริเวณสำคัญของระบบปฏิบัติการ Android ซึ่งปกติแล้วจะแสดงด้วยธีมสีอ่อน เช่น การตั้งค่า"</string>
-    <string name="color_apply" msgid="9212602012641034283">"ใช้"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"ยืนยันการตั้งค่า"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"การตั้งค่าสีบางอย่างอาจทำให้อุปกรณ์นี้ใช้งานไม่ได้ คลิกตกลงเพื่อยืนยันการตั้งค่าสีเหล่านี้ มิฉะนั้นระบบจะรีเซ็ตการตั้งค่าหลังจาก 10 วินาที"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"การใช้งานแบตเตอรี่"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ไม่สามารถใช้โหมดประหยัดแบตเตอรี่ระหว่างการชาร์จ"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"โหมดประหยัดแบตเตอรี่"</string>
@@ -647,4 +651,5 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"เปิดการตั้งค่า <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"แก้ไขลำดับการตั้งค่า"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"หน้า <xliff:g id="ID_1">%1$d</xliff:g> จาก <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <string name="cant_silence_or_block" msgid="999689262131488625">"ไม่สามารถปิดเสียงหรือบล็อกการแจ้งเตือน"</string>
 </resources>

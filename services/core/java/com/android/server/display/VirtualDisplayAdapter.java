@@ -225,6 +225,11 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
+        public boolean hasStableUniqueId() {
+            return false;
+        }
+
+        @Override
         public Runnable requestDisplayStateLocked(int state, int brightness) {
             if (state != mDisplayState) {
                 mDisplayState = state;

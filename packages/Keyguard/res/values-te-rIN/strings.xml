@@ -46,11 +46,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"సిమ్ కార్డు లాక్ చేయబడింది."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"సిమ్ కార్డు PUK లాక్ చేయబడింది."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"సిమ్ కార్డును అన్‌లాక్ చేస్తోంది…"</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"నమూనా అన్‌లాక్."</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"పిన్ అన్‌లాక్."</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"పాస్‌వర్డ్ అన్‌లాక్."</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"నమూనా ప్రాంతం."</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"స్లయిడ్ ప్రాంతం."</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN ప్రాంతం"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM PIN ప్రాంతం"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM PUK ప్రాంతం"</string>

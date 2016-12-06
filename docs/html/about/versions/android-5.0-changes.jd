@@ -105,7 +105,9 @@ Behavior on the Android Runtime (ART)</a>. Pay particular attention if:</p>
 
 <p>Make sure your notifications take these Android 5.0 changes into account.
  To learn more about designing your notifications for Android 5.0 and higher,
- see the <a href="{@docRoot}design/patterns/notifications.html">notifications design guide</a>.
+ see the <a
+ href="https://material.google.com/patterns/notifications.html">notifications
+ design guide</a>.
 </p>
 
 <h3 id="NotificationsMaterialDesignStyle">Material design style</h3>

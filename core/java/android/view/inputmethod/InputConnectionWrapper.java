@@ -269,4 +269,12 @@ public class InputConnectionWrapper implements InputConnection {
     public void closeConnection() {
         mTarget.closeConnection();
     }
+
+    /**
+     * {@inheritDoc}
+     * @throws NullPointerException if the target is {@code null}.
+     */
+    public boolean commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts) {
+        return mTarget.commitContent(inputContentInfo, flags, opts);
+    }
 }

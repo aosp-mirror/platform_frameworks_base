@@ -1,0 +1,148 @@
+page.title=Scoped Directory Access
+page.keywords=pratinjau,sdk,scoped directory access
+page.tags=androidn
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>Dalam dokumen ini</h2>
+  <ol>
+    <li><a href="#accessing">Mengakses Direktori Penyimpanan Eksternal</a></li>
+    <li><a href="#removable">Mengakses Direktori pada Media Lepas-Pasang</a></li>
+    <li><a href="#best">Praktik Terbaik</a></li>
+  </ol>
+</div>
+</div>
+
+<p>Aplikasi seperti aplikasi foto biasanya hanya memerlukan akses ke direktori tertentu dalam
+penyimpanan eksternal, seperti direktori <code>Pictures</code>. Pendekatan
+yang ada dalam mengakses penyimpanan eksternal tidak didesain untuk memberi kemudahan
+akses direktori tertarget untuk tipe aplikasi ini. Misalnya:</p>
+
+<ul>
+<li>Meminta {@link android.Manifest.permission#READ_EXTERNAL_STORAGE}
+atau {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} dalam manifes Anda
+akan memungkinkan akses ke semua direktori publik pada penyimpanan eksternal, yang mungkin
+lebih banyak akses dari yang dibutuhkan aplikasi Anda.</li>
+<li>Menggunakan
+<a href="{@docRoot}guide/topics/providers/document-provider.html">Storage
+Access Framework</a> biasanya membuat pengguna Anda memilih direktori
+melalui UI sistem, yang tidak diperlukan jika aplikasi Anda selalu mengakses
+direktori eksternal yang sama.</li>
+</ul>
+
+<p>Android N menyediakan API baru yang disederhanakan untuk mengakses
+direktori penyimpanan eksternal umum. </p>
+
+<h2 id="accessing">Mengakses Direktori Penyimpanan Eksternal</h2>
+
+<p>Gunakan kelas <code>StorageManager</code> untuk mendapatkan instance
+<code>StorageVolume</code> yang tepat. Kemudian, buat intent dengan memanggil metode
+<code>StorageVolume.createAccessIntent()</code> dari instance itu.
+Gunakan intent ini untuk mengakses direktori penyimpanan eksternal. Untuk mendapatkan daftar
+semua volume yang tersedia, termasuk volume media lepas-pasang, gunakan
+<code>StorageManager.getVolumesList()</code>.</p>
+
+<p>Jika Anda memiliki informasi tentang file spesifik, gunakan
+<code>StorageManager.getStorageVolume(File)</code> untuk mendapatkan
+<code>StorageVolume</code> yang berisi file tersebut. Panggil
+<code>createAccessIntent()</code> pada <code>StorageVolume</code> ini untuk mengakses
+direktori penyimpanan eksternal untuk file tersebut.</p>
+
+<p>
+Di volume kedua, seperti kartu SD eksternal, teruskan null saat memanggil
+<code>StorageVolume.createAccessIntent()</code> untuk meminta akses ke seluruh
+volume, sebagai ganti direktori spesifik.
+<code>StorageVolume.createAccessIntent()</code> akan mengembalikan null jika Anda meneruskan
+null ke volume utama, atau jika Anda meneruskan nama direktori yang tidak valid.
+</p>
+
+<p>Cuplikan kode berikut adalah contoh cara membuka direktori
+<code>Pictures</code> dalam penyimpanan bersama utama:</p>
+
+<pre>
+StorageManager sm = (StorageManager)getSystemService(Context.STORAGE_SERVICE);
+StorageVolume volume = sm.getPrimaryVolume();
+Intent intent = volume.createAccessIntent(Environment.DIRECTORY_PICTURES);
+startActivityForResult(intent, request_code);
+</pre>
+
+<p>Sistem ini mencoba untuk memberikan akses ke direktori eksternal, dan jika
+diperlukan mengonfirmasi akses dengan pengguna menggunakan UI yang disederhanakan:</p>
+
+<img src="{@docRoot}images/android-7.0/scoped-directory-access-framed.png" srcset="{@docRoot}images/android-7.0/scoped-directory-access-framed.png 1x,
+{@docRoot}images/android-7.0/scoped-directory-access-framed_2x.png 2x" />
+<p class="img-caption"><strong>Gambar 1.</strong> Sebuah aplikasi yang meminta
+akses ke direktori Pictures.</p>
+
+<p>Jika pengguna memberi akses, sistem akan memanggil penggantian
+<code>onActivityResult()</code> Anda dengan kode hasil
+<code>Activity.RESULT_OK</code>, dan data intent yang berisi URI. Gunakan
+URI yang disediakan untuk mengakses informasi direktori, serupa dengan menggunakan URI
+yang dikembalikan oleh
+<a href="{@docRoot}guide/topics/providers/document-provider.html">Storage
+Access Framework</a>.</p>
+
+<p>Jika pengguna tidak memberi akses, sistem akan memanggil penggantian
+<code>onActivityResult()</code> Anda dengan kode hasil
+<code>Activity.RESULT_CANCELED</code>, dan data intent nol.</p>
+
+<p class="note"><b>Catatan</b>: Mendapatkan akses ke direktori eksternal tertentu
+juga akan memperoleh akses ke subdirektori dalam direktori tersebut.</p>
+
+<h2 id="removable">Mengakses Direktori pada Media Lepas-Pasang</h2>
+
+<p>Untuk menggunakan Scoped Directory Access guna mengakses direktori pada media lepas-pasang,
+pertama tambahkan {@link android.content.BroadcastReceiver} yang akan mendengarkan pemberitahuan
+{@link android.os.Environment#MEDIA_MOUNTED}, misalnya:</p>
+
+<pre>
+&lt;receiver
+    android:name=".MediaMountedReceiver"
+    android:enabled="true"
+    android:exported="true" &gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.MEDIA_MOUNTED" /&gt;
+        &lt;data android:scheme="file" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/receiver&gt;
+</pre>
+
+<p>Bila pengguna memasang media lepas-pasang, seperti kartu SD, sistem akan mengirimkan pemberitahuan
+{@link android.os.Environment#MEDIA_MOUNTED}. Pemberitahuan ini
+memberikan sebuah objek <code>StorageVolume</code> dalam data intent yang bisa
+Anda gunakan untuk mengakses direktori pada media lepas-pasang. Contoh berikut
+mengakses direktori <code>Pictures</code> pada media lepas-pasang:</p>
+
+<pre>
+// BroadcastReceiver has already cached the MEDIA_MOUNTED
+// notification Intent in mediaMountedIntent
+StorageVolume volume = (StorageVolume)
+    mediaMountedIntent.getParcelableExtra(StorageVolume.EXTRA_STORAGE_VOLUME);
+volume.createAccessIntent(Environment.DIRECTORY_PICTURES);
+startActivityForResult(intent, request_code);
+</pre>
+
+<h2 id="best">Praktik Terbaik</h2>
+
+<p>Bila memungkinkan, pertahankan URI akses direktori eksternal sehingga Anda tidak perlu
+berulang kali meminta akses ke pengguna. Setelah pengguna memberikan akses, panggil
+<code>getContentResolver().takePersistableUriPermssion()</code> bersama
+URI akses direktori. Sistem akan mempertahankan URI dan permintaan
+akses berikutnya akan mengembalikan <code>RESULT_OK</code> dan tidak menampilkan UI konfirmasi kepada
+pengguna.</p>
+
+<p>Jika pengguna menolak akses ke direktori eksternal, jangan langsung
+meminta akses lagi. Berulang kali meminta akses akan menghasilkan pengalaman
+pengguna yang buruk. Jika permintaan ditolak oleh pengguna, dan aplikasi meminta akses
+lagi, UI akan menampilkan kotak centang <b>Don't ask again</b>:</p>
+
+<img src="{@docRoot}images/android-7.0/scoped-directory-access-dont-ask.png" srcset="{@docRoot}images/android-7.0/scoped-directory-access-dont-ask.png 1x,
+{@docRoot}images/android-7.0/scoped-directory-access-dont-ask_2x.png 2x" />
+<p class="img-caption"><strong>Gambar 1.</strong> Sebuah aplikasi membuat
+permintaan kedua untuk mengakses media lepas-pasang.</p>
+
+<p>Jika pengguna memilih <b>Don't ask again</b> dan menolak permintaan,
+semua permintaan berikutnya untuk direktori yang diberikan dari aplikasi
+Anda secara otomatis akan ditolak, dan tidak ada UI permintaan yang akan ditampilkan ke pengguna.</p>

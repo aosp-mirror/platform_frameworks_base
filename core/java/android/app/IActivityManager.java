@@ -136,7 +136,7 @@ public interface IActivityManager extends IInterface {
             ActivityManager.TaskDescription description, Bitmap thumbnail) throws RemoteException;
     public Point getAppTaskThumbnailSize() throws RemoteException;
     public List<RunningTaskInfo> getTasks(int maxNum, int flags) throws RemoteException;
-    public List<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum,
+    public ParceledListSlice<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum,
             int flags, int userId) throws RemoteException;
     public ActivityManager.TaskThumbnail getTaskThumbnail(int taskId) throws RemoteException;
     public List<RunningServiceInfo> getServices(int maxNum, int flags) throws RemoteException;
@@ -512,7 +512,8 @@ public interface IActivityManager extends IInterface {
     public int getLaunchedFromUid(IBinder activityToken) throws RemoteException;
     public String getLaunchedFromPackage(IBinder activityToken) throws RemoteException;
 
-    public void registerUserSwitchObserver(IUserSwitchObserver observer) throws RemoteException;
+    public void registerUserSwitchObserver(IUserSwitchObserver observer,
+            String name) throws RemoteException;
     public void unregisterUserSwitchObserver(IUserSwitchObserver observer) throws RemoteException;
 
     public void requestBugReport(int bugreportType) throws RemoteException;
@@ -656,6 +657,31 @@ public interface IActivityManager extends IInterface {
     public int sendIntentSender(IIntentSender target, int code, Intent intent, String resolvedType,
             IIntentReceiver finishedReceiver, String requiredPermission, Bundle options)
             throws RemoteException;
+
+    public void setVrThread(int tid) throws RemoteException;
+    public void setRenderThread(int tid) throws RemoteException;
+
+    /**
+     * Lets activity manager know whether the calling process is currently showing "top-level" UI
+     * that is not an activity, i.e. windows on the screen the user is currently interacting with.
+     *
+     * <p>This flag can only be set for persistent processes.
+     *
+     * @param hasTopUi Whether the calling process has "top-level" UI.
+     */
+    public void setHasTopUi(boolean hasTopUi) throws RemoteException;
+
+    /**
+     * Returns if the target of the PendingIntent can be fired directly, without triggering
+     * a work profile challenge. This can happen if the PendingIntent is to start direct-boot
+     * aware activities, and the target user is in RUNNING_LOCKED state, i.e. we should allow
+     * direct-boot aware activity to bypass work challenge when the user hasn't unlocked yet.
+     * @param intent the {@link  PendingIntent} to be tested.
+     * @return {@code true} if the intent should not trigger a work challenge, {@code false}
+     *     otherwise.
+     * @throws RemoteException
+     */
+    public boolean canBypassWorkChallenge(PendingIntent intent) throws RemoteException;
 
     /*
      * Private non-Binder interfaces
@@ -1043,4 +1069,10 @@ public interface IActivityManager extends IInterface {
     int START_CONFIRM_DEVICE_CREDENTIAL_INTENT = IBinder.FIRST_CALL_TRANSACTION + 374;
     int SEND_IDLE_JOB_TRIGGER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 375;
     int SEND_INTENT_SENDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 376;
+
+    // Start of N MR1 transactions
+    int SET_VR_THREAD_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 377;
+    int SET_RENDER_THREAD_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 378;
+    int SET_HAS_TOP_UI = IBinder.FIRST_CALL_TRANSACTION + 379;
+    int CAN_BYPASS_WORK_CHALLENGE = IBinder.FIRST_CALL_TRANSACTION + 380;
 }

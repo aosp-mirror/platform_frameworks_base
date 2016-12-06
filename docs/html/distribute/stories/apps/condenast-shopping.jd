@@ -1,0 +1,76 @@
+page.title=Glamour.de Connects Offline and Online Shopping Experiences with Google Play Billing
+page.metaDescription=Cond&eacute; Nast improves features on its Glamour app.
+page.tags="developerstory", "apps", "googleplay"
+page.image=images/cards/distribute/stories/glamour.png
+page.timestamp=null
+
+@jd:body
+
+
+<h3>Background</h3>
+
+<div class="figure">
+  <img src="{@docRoot}images/distribute/stories/glamour-icon.png" />
+</div>
+
+<p>
+  Glamour is one of the main
+  <a class="external-link"
+  href="https://play.google.com/store/apps/developer?id=Cond%C3%A9%20Nast%20Verlag%20GmbH&hl=en">
+  Cond&eacute; Nast</a> traditional brands. Every year, Glamour hosts a
+  successful shopping event called
+  <a class="external-link"
+  href="https://play.google.com/store/apps/details?id=de.glamour.android&e=-EnableAppDetailsPageRedesign">
+  <em>GLAMOUR Shopping-Week</em></a> in Germany, Austria, and Switzerland.
+  This event has always been print-focused, as readers received a shopping
+  card with the magazine to redeem discounts in selected shops, both offline
+  and online, for one week.
+</p>
+
+<p>
+  In March 2016, Glamour digitized this experience.
+</p>
+
+<h3>What they did</h3>
+
+<p>
+  To make the most of <em>GLAMOUR Shopping-Week</em>, Cond&eacute; Nast relaunched the
+  <a class="external-link"
+  href="https://play.google.com/store/apps/details?id=de.condenast.glamourde&e=-EnableAppDetailsPageRedesign">
+  GLAMOUR app</a> with a more appealing design and an improved user experience:
+<ul>
+  <li>The main features updated for the shopping week included a shop finder, online offers, and
+      a digital shopping card.</li>
+  <li>The current e-paper magazine was made available through the app and sold via Google Play
+      Billing.</li>
+  <li>They offered readers the in-app purchase of digital shopping cards and activation codes
+      through Google Play Billing. Readers can activate digital shopping cards via in-app
+      purchases or with the print shopping card activation code.</li>
+  <li>The online and offline shopping experience was also supported by online shopping discount
+      codes in the app or offline through the shop finder.</li>
+</ul>
+</p>
+
+<h3>Results</h3>
+
+<p>
+  The offline and online combination resulted in positive engagement both in terms of app
+  installs and sales:
+<ul>
+  <li>There were 130,000 new app downloads, and 100,000 users enabled location access to use
+      the shop finder.</li>
+  <li><strong>Sessions increased by 140%</strong> compared to previous weeks. Session length
+      doubled and <strong>the number of active users grew by five times</strong>.</li>
+  <li>12,000 in-app purchases were generated, increasing general e-paper sales by six times,
+      which resulted in <strong>an increase in total magazine circulation</strong>.</li>
+  <li>The digital shopping card was shown more than 200,000 times to redeem offers in shops.</li>
+</ul>
+</p>
+
+<h3>Get started</h3>
+
+<p>
+  Find out more about
+  <a href="https://developer.android.com/google/play/billing/billing_overview.html">
+  in-app purchases</a>.
+</p>

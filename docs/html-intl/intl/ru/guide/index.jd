@@ -4,7 +4,7 @@ page.title=Общие сведения о платформе Android
 
 
 <div class="sidebox" style="width:220px"><!-- width to match col-4 below -->
-<p>Чтобы узнать, как работают приложения, начните с раздела 
+<p>Чтобы узнать, как работают приложения, начните с раздела
 <a href="{@docRoot}guide/components/fundamentals.html">Основы создания приложений</a>.</p>
 <p>Чтобы сразу приступить к программированию, читайте раздел <a href="{@docRoot}training/basics/firstapp/index.html">Создание первого приложения</a>.</p>
 </div>

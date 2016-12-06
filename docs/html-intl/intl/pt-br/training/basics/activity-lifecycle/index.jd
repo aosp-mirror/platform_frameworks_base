@@ -45,7 +45,7 @@ métodos do ciclo de vida em sua atividade conforme ela fica em segundo plano (o
 está visível, mas a instância e seu estado permanecem intactos).</p>
 
 <p>Dentro dos métodos de retorno de chamada do ciclo de vida, você pode declarar como a atividade deve se comportar quando o
-usuário sai e retorna da atividade.  Por exemplo, se estiver construindo um reprodutor de vídeos de transmissão em sequência, 
+usuário sai e retorna da atividade.  Por exemplo, se estiver construindo um reprodutor de vídeos de transmissão em sequência,
 você pode pausar o vídeo e encerrar a conexão da rede quando o usuário alternar para outro
 aplicativo. Quando o usuário retornar, será possível reconectar a rede e permitir que ele reinicie o vídeo
 de onde parou.</p>
@@ -55,7 +55,7 @@ android.app.Activity} recebe e como utilizá-los para que a atividade faça o qu
 usuário espera e não consuma recursos do sistema quando não estiver em uso.</p>
 
 <h2>Lições</h2>
- 
+
 <dl>
   <dt><b><a href="starting.html">Iniciando uma atividade</a></b></dt>
   <dd>Aprenda os fundamentos sobre ciclo de vida da atividade, como o usuário pode iniciar seu aplicativo e como
@@ -68,5 +68,5 @@ fazer durante essas mudanças de estados.</dd>
   <dt><b><a href="recreating.html">Recriando uma atividade</a></b></dt>
   <dd>Aprenda sobre o que acontece quando sua atividade é destruída e como reconstruir o estado
 da atividade quando necessário.</dd>
-</dl> 
+</dl>
 

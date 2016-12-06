@@ -36,7 +36,7 @@ next.link=purchase-iab-products.html
 
 <p>To add new in-app products to your product list:</p>
 <ol>
-<li>Build a signed APK file for your In-app Billing application. To learn how to build and sign your APK, see <a href="{@docRoot}tools/publishing/preparing.html#publishing-build">Building Your Application for Release</a>. Make sure that you are using your final (not debug) certificate and private key to sign your application.  
+<li>Build a signed APK file for your In-app Billing application. To learn how to build and sign your APK, see <a href="{@docRoot}tools/publishing/preparing.html#publishing-build">Building Your Application for Release</a>. Make sure that you are using your final (not debug) certificate and private key to sign your application.
 </li>
 <li>In the Developer Console, open the application entry that you created earlier.</li>
 <li>Click on the APK tab then click on Upload new APK. Upload the signed APK file to the Developer Console. Don’t publish the app yet!</li>
@@ -48,9 +48,9 @@ next.link=purchase-iab-products.html
 <h2 id="QueryDetails">Query Items Available for Purchase</h2>
 <p>You can query Google Play to programmatically retrieve details of the in-app products that are associated with your application (such as the product’s price, title, description, and type).  This is useful, for example, when you want to display a listing of unowned items that are still available for purchase to users.</p>
 <p class="note"><strong>Note:</strong> When making the query, you will need to specify the product IDs for the products explicitly. You can manually find the product IDs from the Developer Console by opening the <strong>In-app Products</strong> tab for your application. The product IDs are listed under the column labeled <strong>Name/ID</strong>.</p>
-<p>To retrieve the product details, call {@code queryInventoryAsync(boolean, List, QueryInventoryFinishedListener)} on your IabHelper instance. 
+<p>To retrieve the product details, call {@code queryInventoryAsync(boolean, List, QueryInventoryFinishedListener)} on your IabHelper instance.
 <ul>
-<li>The first input argument indicates whether product details should be retrieved (should be set to {@code true}).</li> 
+<li>The first input argument indicates whether product details should be retrieved (should be set to {@code true}).</li>
 <li>The {@code List} argument consists of one or more product IDs (also called SKUs) for the products that you want to query.</li>
 <li>Finally, the {@code QueryInventoryFinishedListener} argument specifies a listener is notified when the query operation has completed and handles the query response.</li>
 </ul>
@@ -70,9 +70,9 @@ mHelper.queryInventoryAsync(true, additionalSkuList,
 <p>The following code shows how you can retrieve the item prices from the result set.</p>
 
 <pre>
-IabHelper.QueryInventoryFinishedListener 
+IabHelper.QueryInventoryFinishedListener
    mQueryFinishedListener = new IabHelper.QueryInventoryFinishedListener() {
-   public void onQueryInventoryFinished(IabResult result, Inventory inventory)   
+   public void onQueryInventoryFinished(IabResult result, Inventory inventory)
    {
       if (result.isFailure()) {
          // handle error
@@ -84,7 +84,7 @@ IabHelper.QueryInventoryFinishedListener
        String bananaPrice =
           inventory.getSkuDetails(SKU_BANANA).getPrice();
 
-       // update the UI 
+       // update the UI
    }
 }
 </pre>

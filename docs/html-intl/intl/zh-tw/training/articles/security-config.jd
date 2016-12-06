@@ -1,0 +1,745 @@
+page.title=網路安全性設定
+page.keywords=androidn,security,network
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>此文件內容</h2>
+<ol>
+  <li><a href="#manifest">新增安全性設定檔</a></li>
+  <li><a href="#CustomTrust">自訂信任的 CA</a>
+      <ol>
+      <li><a href="#ConfigCustom">設定信任的自訂 CA</a></li>
+      <li><a href="#LimitingCas">限制信任的 CA 組</a></li>
+      <li><a href="#TrustingAdditionalCas">信任其他 CA</a></li>
+      </ol>
+  </li>
+  <li><a href="#TrustingDebugCa">僅偵錯 CA</a></li>
+  <li><a href="#UsesCleartextTraffic">退出明碼流量</a></li>
+  <li><a href="#CertificatePinning">關聯憑證</a></li>
+  <li><a href="#ConfigInheritance">設定繼承行為</a></li>
+  <li><a href="#FileFormat">設定檔案格式</a></li>
+</ol>
+</div>
+</div>
+
+
+<p>
+  Android N 包括網路安全性設定功能，讓應用程式在安全的宣告式設定檔中即可自訂網路安全性設定，而不必修改應用程式的程式碼。
+
+這些設定可以針對特定網域以及針對特定應用程式來設定。
+此功能的主要能力如下：
+
+</p>
+
+<ul>
+  <li>
+    <b>自訂信任錨點：</b>為應用程式的安全連線自訂信任的憑證授權單位 (CA)。
+例如，信任特定的自我簽署憑證，或限制應用程式信任的一組公用 CA。
+
+
+  </li>
+
+  <li>
+    <b>僅偵錯覆寫：</b>在應用程式中安全地為安全連線進行偵錯，而不會增加已安裝應用程式者的風險。
+
+  </li>
+
+  <li>
+    <b>退出明碼流量：</b>保護應用程式不受意外使用明碼流量危害。
+
+  </li>
+
+  <li>
+    <b>憑證關聯：</b>限制應用程式的安全連線只用特定憑證。
+
+  </li>
+</ul>
+
+
+<h2 id="manifest">新增安全性設定檔</h2>
+
+<p>
+  網路安全性設定功能會使用 XML 檔案，而您為應用程式指定的設定就在此。
+您必須在應用程式的宣示說明包括一個指向這個檔案的項目。
+以下節錄自宣示說明的程式碼，示範如何建立此項目：
+
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+...
+&lt;app ...&gt;
+    &lt;meta-data android:name="android.security.net.config"
+               android:resource="@xml/network_security_config" /&gt;
+    ...
+&lt;/app&gt;
+</pre>
+
+<h2 id="CustomTrust">自訂信任的 CA</h2>
+
+<p>
+  應用程式會想要信任自訂的一組 CA，而不是平台預設的 CA。
+最常見的原因如下：
+</p>
+
+<ul>
+  <li>使用 (由內部公司 CA 等所自我簽署、發行的) 自訂憑證授權單位連線至主機。
+
+  </li>
+
+  <li>限制 CA 只用您信任的那組 CA，而不是所有人預先安裝的 CA。
+
+  </li>
+
+  <li>信任系統中所未包括的其他 CA。
+  </li>
+</ul>
+
+<p>
+  根據預設，來自所有應用程式的安全連線全都信任預先安裝的系統 CA，而目標為 API 層級 23 (Android M) 和以下版本的應用程式預設也會信任使用者新增的 CA 存放區。
+
+應用程式可以使用 {@code base-config} (針對整個應用程式自訂) 或 {@code domain-config} (針對每個網域自訂)，自訂自己的連線。
+
+
+
+</p>
+
+
+<h3 id="ConfigCustom">設定自訂 CA</h3>
+
+<p>
+  假設您想要連線的主機使用自我簽署的 SSL 憑證，或要連線的主機使用 SSL 憑證是由您信任的非公用 CA 所發行，例如您公司的內部 CA。
+
+
+</p>
+
+<p>
+  <code>res/xml/network_security_config.xml</code>：
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;example.com&lt;/domain&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/my_ca"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+<p>
+  將 PEM 或 DER 格式的自我簽署或非公用 CA 憑證新增至
+  {@code res/raw/my_ca}。
+</p>
+
+
+<h3 id="LimitingCas">限制信任的 CA 組</h3>
+
+<p>
+  應用程式若不想要信任系統所信任的所有 CA，可以自行指定一組範圍較小的信任 CA。
+如此可以保護應用程式，不受任何其他 CA 所發行的詐騙憑證危害。
+
+</p>
+
+<p>
+  限制信任的 CA 組，其設定類似於<a href="#TrustingACustomCa">信任自訂 CA</a> (針對特定網域)，只不過多個 CA 都是資源所提供。
+
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>：
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;secure.example.com&lt;/domain&gt;
+        &lt;domain includeSubdomains="true"&gt;cdn.example.com&lt;/domain&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/trusted_roots"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+<p>
+  將 PEM 或 DER 格式的信任 CA 新增至 {@code res/raw/trusted_roots}。
+  請注意，如果使用 PEM 格式，該檔案「只」能包含 PEM 資料，不能有額外的文字。<em></em>
+您還可以提供多個
+  <a href="#certificates"><code>&lt;certificates&gt;</code></a>
+元素，而不只一個。
+</p>
+
+
+<h3 id="TrustingAdditionalCas">
+  信任其他 CA
+</h3>
+
+<p>
+  應用程式會想要信任不受系統信任的其他 CA，這是因為系統尚未包括該 CA，或 CA 不符合納入 Android 系統的需求。
+
+應用程式可以為設定指定多個憑證來源，來完成此動作。
+
+
+</p>
+<p>
+<code>res/xml/network_security_config.xml</code>：
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;base-config&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/extracas"/&gt;
+            &lt;certificates src="system"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/base-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="TrustingDebugCa">設定 CA 進行偵錯</h2>
+
+<p>
+  對透過 HTTPS 連線的應用程式進行偵錯時，您想要連線的本機開發伺服器並沒有生產伺服器的 SSL 憑證。
+
+若以不修改應用程式的程式碼為前提，為了支援此動作，您可以使用 {@code debug-overrides} 來指定僅偵錯 CA，「只」有在 <a href="{@docRoot}guide/topics/manifest/application-element.html#debug">
+android:debuggable</a>
+ 為 {@code true} 時才予以信任。<i></i>
+
+一般來說，IDE 和建置工具會為非發行版本自動設定此旗標。
+
+</p>
+
+<p>
+  因為應用程式商店採取的安全措施是，不接受標示為可偵錯的應用程式，所以這種方式會比條件式程式碼安全。
+
+
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>：
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;debug-overrides&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/debug_cas"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/debug-overrides&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="UsesCleartextTraffic">退出明碼流量</h2>
+
+<p>
+  打算只使用安全連線連線至目的地的應用程式，可以針對那些目的地退出支援明碼 (使用未加密的 HTTP 通訊協定，而非 HTTPS)。
+
+此選項有助於避免應用程式由於外部來源 (例如，後端伺服器) 提供的 URL 中發生變更，而造成意外回復。
+
+
+  如需更多詳細資料，請參閱 {@link android.security.NetworkSecurityPolicy#isCleartextTrafficPermitted
+  NetworkSecurityPolicy.isCleartextTrafficPermitted()}。
+</p>
+
+<p>
+  例如，應用程式想要確保 的所有連線一律要透過 HTTPS 完成，以保護敏感流量不受惡意網路危害。
+
+
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>：
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config usesCleartextTraffic="false"&gt;
+        &lt;domain includeSubdomains="true"&gt;secure.example.com&lt;/domain&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="CertificatePinning">關聯憑證</h2>
+
+<p>
+  應用程式一般會信任所有預先安裝的 CA。若這類的任何 CA 意在發行詐騙憑證，應用程式會有遭受 MiTM 攻擊的風險。
+
+有些應用程式選擇透過限制所信任的 CA 組或關聯憑證，來限制可接受的憑證組。
+
+</p>
+
+<p>
+  憑證關聯的方法是，透過公用金鑰的雜湊 (X.509 憑證的 SubjectPublicKeyInfo) 來提供一組憑證。
+只有當憑證鏈至少包含一個關聯的公用金鑰時，才是有效的憑證鏈。
+
+
+</p>
+
+<p>
+  請注意，使用憑證關聯時，您務必要包括備份金鑰，這樣萬一強制您切換到新的金鑰或變更 CA (關聯到 CA 憑證或該 CA 的中繼者) 時，您的應用程式連線才不會受到影響。
+
+
+否則，您必須推出應用程式更新，才能還原連線。
+
+</p>
+
+<p>
+  此外，可為關聯設定到期時間，只要該關聯經過多久都未執行，即為到期。
+這有助於避免未經更新的應用程式發生連線問題。
+然而，針對關聯設定到期時間，會造成略過關聯。
+
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>：
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;example.com&lt;/domain&gt;
+        &lt;pin-set expiration="2018-01-01"&gt;
+            &lt;pin digest="SHA-256"&gt;7HIpactkIAq2Y49orFOOQKurWxmmSFZhBCoQYcRhJ3Y=&lt;/pin&gt;
+            &lt;!-- backup pin --&gt
+            &lt;pin digest="SHA-256"&gt;fwza0LRMXouZHRC8Ei+4PyuldPDcf3UKgO/04cDM1oE=&lt;/pin&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="ConfigInheritance">設定繼承行為</h2>
+
+<p>
+  繼承的值都未設定在特定設定中。此行為允許有更複雜的設定，同時保持設定檔讓人看得懂。
+
+</p>
+
+<p>
+  如果值未設定在特定項目中時，就會使用下一個更一般項目的值。
+如為巢狀結構，就會從上層 {@code domain-config} 取得未在 {@code domain-config} 中設定的值，或非巢狀時，則會從 {@code
+  base-config} 取得值。
+未在 {@code base-config} 中設定的值會使用平台的預設值。
+
+</p>
+
+<p>
+  例如，假設所有連至 {@code
+  example.com} 子網域的連線都必須使用一組自訂 CA。此外，允許明碼流量送往這些網域，但連線到 {@code
+  secure.example.com} 時「除外」。
+<em></em>在 {@code example.com} 的設定內以巢狀方式排列 {@code
+  secure.example.com} 的設定，就不需要重複
+  {@code trust-anchors}。
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>：
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;example.com&lt;/domain&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/my_ca"/&gt;
+        &lt;/trust-anchors&gt;
+        &lt;domain-config cleartextTrafficPermitted="false"&gt;
+            &lt;domain includeSubdomains="true"&gt;secure.example.com&lt;/domain&gt;
+        &lt;/domain-config&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="FileFormat">設定檔案格式</h2>
+
+<p>
+  網路安全性設定功能會使用 XML 檔案格式。
+  下列程式碼範例顯示檔案的整體結構：
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;base-config&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="..."/&gt;
+            ...
+        &lt;/trust-anchors&gt;
+    &lt;/base-config&gt;
+
+    &lt;domain-config&gt;
+        &lt;domain&gt;android.com&lt;/domain&gt;
+        ...
+        &lt;trust-anchors&gt;
+            &lt;certificates src="..."/&gt;
+            ...
+        &lt;/trust-anchors&gt;
+        &lt;pin-set&gt;
+            &lt;pin digest="..."&gt;...&lt;/pin&gt;
+            ...
+        &lt;/pin-set&gt;
+    &lt;/domain-config&gt;
+    ...
+    &lt;debug-overrides&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="..."/&gt;
+            ...
+        &lt;/trust-anchors&gt;
+    &lt;/debug-overrides&gt;
+&lt;/network-security-config&gt;
+</pre>
+
+<p>
+  下列各區段描述檔案格式的語法與其他詳細資料。
+
+</p>
+
+<h3 id="network-security-config">
+  &lt;network-security-config&gt;
+</h3>
+
+<dl class="xml">
+  <dt>
+    可以包含：
+  </dt>
+
+  <dd>
+    0 或 1 個 <code><a href="#base-config">&lt;base-config&gt;</a></code><br>
+    任何數目的 <code><a href=
+    "#domain-config">&lt;domain-config&gt;</a></code><br>
+    0 或 1 個 <code><a href="#debug-overrides">&lt;debug-overrides&gt;</a></code>
+  </dd>
+</dl>
+
+<h3 id="base-config">
+  &lt;base-config&gt;
+</h3>
+
+<dl class="xml">
+  <dt>
+    語法：
+  </dt>
+</dl>
+
+<pre class="stx">
+&lt;base-config <a href=
+"#usesCleartextTraffic">usesCleartextTraffic</a>=["true" | "false"]&gt;
+    ...
+&lt;/base-config&gt;
+</pre>
+<dl class="xml">
+  <dt>
+    可以包含：
+  </dt>
+
+  <dd>
+    <code><a href="#trust-anchors">&lt;trust-anchors&gt;</a></code>
+  </dd>
+
+  <dt>
+    描述：
+  </dt>
+
+  <dd>
+    連線到 <a href="#domain-config"><code>domain-config</code></a> 所未涵蓋的目的地時使用的預設設定。
+
+
+<p>
+  任何未設定的值都會使用平台預設值。目標為 API 層級 24 和更新版本的應用程式預設設定：
+
+</p>
+
+<pre>
+&lt;base-config usesCleartextTraffic="true"&gt;
+    &lt;trust-anchors&gt;
+        &lt;certificates src="system" /&gt;
+    &lt;/trust-anchors&gt;
+&lt;/base-config&gt;
+</pre>
+目標為 API 層級 23 和以下版本的應用程式預設設定：
+<pre>
+&lt;base-config usesCleartextTraffic="true"&gt;
+    &lt;trust-anchors&gt;
+        &lt;certificates src="system" /&gt;
+        &lt;certificates src="user" /&gt;
+    &lt;/trust-anchors&gt;
+&lt;/base-config&gt;
+</pre>
+
+  </dd>
+</dl>
+
+<h3 id="domain-config">&lt;domain-config&gt;</h3>
+<dl class="xml">
+<dt>語法：</dt>
+<dd>
+<pre class="stx">&lt;domain-config <a href="#usesCleartextTraffic">usesCleartextTraffic</a>=["true" | "false"]&gt;
+    ...
+&lt;/domain-config&gt;</pre>
+</dd>
+
+<dt>可以包含：</dt>
+
+<dd>
+1 或更多個 <code><a href="#domain">&lt;domain&gt;</a></code>
+<br/>0 或 1 個 <code><a href="#trust-anchors">&lt;trust-anchors&gt;</a></code>
+<br/>0 或 1 個 <code><a href="#pin-set">&lt;pin-set&gt;</code></a>
+<br/>任何數目的巢狀 <code>&lt;domain-config&gt;</code></dd>
+
+<dt>描述</dt>
+<dd>依照 {@code domain} 元素所定義，連線至特定目的地時使用的設定。
+
+<p>請注意，如有多個 {@code domain-config} 元素涵蓋同一個目的地，則會使用含有最明確 (最長) 比對網域規則的設定。
+</p></dd>
+</dl>
+
+
+<h3 id="domain">&lt;domain&gt;</h3>
+
+<dl class="xml">
+  <dt>
+    語法：
+  </dt>
+
+  <dd>
+    <pre class="stx">
+&lt;domain includeSubdomains=["true" | "false"]&gt;example.com&lt;/domain&gt;
+</pre>
+  </dd>
+
+  <dt>
+    屬性：
+  </dt>
+
+  <dd>
+    <dl class="attr">
+      <dt>
+        {@code includeSubdomains}
+      </dt>
+
+      <dd>
+        如為 {@code "true"}，表示此網域規則會比對網域和所有子網域，包括子網域的子網域在內，反之此規則只會套用到完全相符者。
+
+
+      </dd>
+    </dl>
+  </dd>
+
+  <dt>
+    描述：
+  </dt>
+</dl>
+
+<h3 id="debug-overrides">&lt;debug-overrides&gt;</h3>
+
+<dl class="xml">
+  <dt>
+    語法：
+  </dt>
+
+  <dd>
+    <pre class="stx">
+&lt;debug-overrides&gt;
+    ...
+&lt;/debug-overrides&gt;
+</pre>
+  </dd>
+
+  <dt>
+    可以包含：
+  </dt>
+
+  <dd>
+    0 或 1 個 <code><a href="#trust-anchors">&lt;trust-anchors&gt;</a></code>
+  </dd>
+
+  <dt>
+    描述：
+  </dt>
+
+  <dd>
+    當 <a href="{@docRoot}guide/topics/manifest/application-element.html#debug">android:debuggable</a>
+ 為 {@code "true"} (一般是在非發行版本由 IDE 與建置工具產生的情況下) 時所要套用的覆寫。
+{@code
+    debug-overrides} 中指定的信任錨點會新增至所有其他連線，而當伺服器的憑證鏈使用其中一個僅偵錯信任錨點時，即不會執行憑證關聯。
+
+如果 <a href="{@docRoot}guide/topics/manifest/application-element.html#debug">android:debuggable</a>
+ 為 {@code "false"}，就會完全略過這個區段。
+  </dd>
+</dl>
+
+<h3 id="trust-anchors">&lt;trust-anchors&gt;</h3>
+<dl class="xml">
+  <dt>
+    語法：
+  </dt>
+
+  <dd>
+    <pre class="stx">
+&lt;trust-anchors&gt;
+...
+&lt;/trust-anchors&gt;
+</pre>
+  </dd>
+
+  <dt>
+    可以包含：
+  </dt>
+
+  <dd>
+    任何數目的 <code><a href="#certificates">&lt;certificates&gt;</a></code>
+  </dd>
+
+  <dt>
+    描述：
+  </dt>
+
+  <dd>
+    可供安全連線使用的信任錨點組。
+  </dd>
+</dl>
+
+
+<h3 id="certificates">&lt;certificates&gt;</h3>
+<dl class="xml">
+<dt>語法：</dt>
+<dd><pre class="stx">&lt;certificates src=["system" | "user" | "<i>raw resource</i>"]
+              overridePins=["true" | "false"] /&gt;
+</pre></dd>
+<dt>描述：</dt>
+<dd>可供 {@code trust-anchors} 元素使用的 X.509 憑證組。</dd>
+
+<dt>屬性：</dt>
+<dd><dl class="attr">
+<dt>{@code src}</dt>
+<dd>
+CA 憑證的來源，可以是其中一個原始資源識別碼，其指向含有 X.509 憑證的檔案。
+<ul>
+  <li>
+  憑證必須以 DER 或 PEM 格式編碼。如為 PEM 憑證，檔案中「不可」包含非 PEM 的額外資料，例如註解。
+<em></em>
+
+  </li>
+
+  <li>{@code "system"} 代表預先安裝的系統 CA 憑證
+  </li>
+
+  <li>{@code "user"} 代表使用者新增的 CA 憑證
+  </li>
+</ul>
+</dd>
+
+<dt>{@code overridePins}</dt>
+<dd>
+  <p>
+    指定來自此來源的 CA 是否要略過憑證關聯。如為 {@code
+    "true"}，憑證鏈的鏈結若經過此來源的其中一個 CA，就不會執行關聯。
+這對偵錯 CA 會很實用，或支援讓使用者 MiTM 應用程式的安全流量。
+
+  </p>
+
+  <p>
+    預設為 {@code "false"}，除非您在 {@code debug-overrides}
+ 元素中指定，而那種情況的預設為 {@code "true"}。
+  </p>
+</dd>
+</dl>
+</dd>
+
+
+<h3 id="pin-set">&lt;pin-set&gt;</h3>
+
+<dl class="xml">
+  <dt>
+    語法：
+  </dt>
+
+  <dd>
+<pre class="stx">
+&lt;pin-set expiration="date"&gt;
+...
+&lt;/pin-set&gt;
+</pre>
+  </dd>
+
+  <dt>
+    可以包含：
+  </dt>
+
+  <dd>
+    任何數目的 <code><a href="#pin">&lt;pin&gt;</a></code>
+  </dd>
+
+  <dt>
+    描述：
+  </dt>
+
+  <dd>
+    一組公用金鑰關聯。信任鏈中的其中一個公用金鑰必須要在這組關聯中，才是可信任的安全連線。
+如需關聯的格式，請參閱
+    <code><a href="#pin">&lt;pin&gt;</a></code>。
+  </dd>
+
+  <dt>
+    屬性：
+  </dt>
+
+  <dd>
+    <dl class="attr">
+      <dt>
+        {@code expiration}
+      </dt>
+
+      <dd>
+        到期之後就會停用關聯的日期，格式為 {@code yyyy-MM-dd}。
+如果未設定屬性，關聯就不會到期。
+
+        <p>
+          到期有助於避免因使用者停用應用程式更新，而無法取得關聯組更新的應用程式發生連線問題。
+
+
+        </p>
+      </dd>
+    </dl>
+  </dd>
+</dl>
+
+<h3 id="pin">&lt;pin&gt;</h3>
+<dl class="xml">
+  <dt>
+    語法：
+  </dt>
+
+  <dd>
+<pre class="stx">
+&lt;pin digest=["SHA-256"]&gt;base64 encoded digest of X.509
+    SubjectPublicKeyInfo (SPKI)&lt;/pin&gt;
+</pre>
+  </dd>
+
+  <dt>
+    屬性：
+  </dt>
+
+  <dd>
+    <dl class="attr">
+      <dt>
+        {@code digest}
+      </dt>
+
+      <dd>
+        用來產生關聯的摘要演算法。目前僅支援
+        {@code "SHA-256"}。
+      </dd>
+    </dl>
+  </dd>
+</dl>

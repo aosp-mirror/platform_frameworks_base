@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.annotation.NonNull;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Parcel;
@@ -134,6 +135,8 @@ public class ScrollView extends FrameLayout {
     private int mOverscrollDistance;
     private int mOverflingDistance;
 
+    private int mScrollFactor;
+
     /**
      * ID of the active pointer. This is used to retain consistency during
      * drags/flings if multiple pointers are used.
@@ -186,6 +189,10 @@ public class ScrollView extends FrameLayout {
         setFillViewport(a.getBoolean(R.styleable.ScrollView_fillViewport, false));
 
         a.recycle();
+
+        if (context.getResources().getConfiguration().uiMode == Configuration.UI_MODE_TYPE_WATCH) {
+            setRevealOnFocusHint(false);
+        }
     }
 
     @Override
@@ -243,6 +250,7 @@ public class ScrollView extends FrameLayout {
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
         mOverscrollDistance = configuration.getScaledOverscrollDistance();
         mOverflingDistance = configuration.getScaledOverflingDistance();
+        mScrollFactor = configuration.getScaledScrollFactor();
     }
 
     @Override
@@ -777,30 +785,35 @@ public class ScrollView extends FrameLayout {
 
     @Override
     public boolean onGenericMotionEvent(MotionEvent event) {
-        if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_SCROLL: {
-                    if (!mIsBeingDragged) {
-                        final float vscroll = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
-                        if (vscroll != 0) {
-                            final int delta = (int) (vscroll * getVerticalScrollFactor());
-                            final int range = getScrollRange();
-                            int oldScrollY = mScrollY;
-                            int newScrollY = oldScrollY - delta;
-                            if (newScrollY < 0) {
-                                newScrollY = 0;
-                            } else if (newScrollY > range) {
-                                newScrollY = range;
-                            }
-                            if (newScrollY != oldScrollY) {
-                                super.scrollTo(mScrollX, newScrollY);
-                                return true;
-                            }
-                        }
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_SCROLL:
+                final float axisValue;
+                if (event.isFromSource(InputDevice.SOURCE_CLASS_POINTER)) {
+                    axisValue = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
+                } else if (event.isFromSource(InputDevice.SOURCE_ROTARY_ENCODER)) {
+                    axisValue = event.getAxisValue(MotionEvent.AXIS_SCROLL);
+                } else {
+                    axisValue = 0;
+                }
+
+                final int delta = Math.round(axisValue * mScrollFactor);
+                if (delta != 0) {
+                    final int range = getScrollRange();
+                    int oldScrollY = mScrollY;
+                    int newScrollY = oldScrollY - delta;
+                    if (newScrollY < 0) {
+                        newScrollY = 0;
+                    } else if (newScrollY > range) {
+                        newScrollY = range;
+                    }
+                    if (newScrollY != oldScrollY) {
+                        super.scrollTo(mScrollX, newScrollY);
+                        return true;
                     }
                 }
-            }
+                break;
         }
+
         return super.onGenericMotionEvent(event);
     }
 
@@ -1455,11 +1468,13 @@ public class ScrollView extends FrameLayout {
 
     @Override
     public void requestChildFocus(View child, View focused) {
-        if (!mIsLayoutDirty) {
-            scrollToChild(focused);
-        } else {
-            // The child may not be laid out yet, we can't compute the scroll yet
-            mChildToScrollTo = focused;
+        if (focused.getRevealOnFocusHint()) {
+            if (!mIsLayoutDirty) {
+                scrollToChild(focused);
+            } else {
+                // The child may not be laid out yet, we can't compute the scroll yet
+                mChildToScrollTo = focused;
+            }
         }
         super.requestChildFocus(child, focused);
     }

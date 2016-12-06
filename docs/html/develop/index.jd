@@ -14,29 +14,36 @@ excludeFromSuggestions=true
   <div class="wrap">
     <div class="cols dac-hero-content">
       <div class="col-1of2 col-push-1of2 dac-hero-figure">
-        <img class="dac-hero-image" src="/images/develop/hero_image_studio5_2x.png" srcset="/images/develop/hero_image_studio5.png 1x, /images/develop/hero_image_studio5_2x.png 2x">
+        <img class="dac-hero-image" style="padding-top:32px"
+          src="/images/develop/hero-layout-editor_2x.png"
+          srcset="/images/develop/hero-layout-editor_2x.png 2x,
+                  /images/develop/hero-layout-editor.png 1x">
       </div>
       <div class="col-1of2 col-pull-1of2" style="margin-bottom:40px">
         <h1 class="dac-hero-title">
             <a style="color:inherit" href="{@docRoot}studio/index.html">
-            Android Studio 2.1,<br>now available!</a></h1>
+            Android Studio 2.2</a></h1>
 
-<p class="dac-hero-description">Android Studio provides the fastest tools for
-building apps on every type of Android device.</p>
+<p class="dac-hero-description">There are 20+ new features in this release
+focused on helping you code faster and smarter. With Android Studio 2.2 you
+can:</p>
 
-<p class="dac-hero-description">The latest version, Android Studio 2.1, adds
-support for N Preview development on top of the faster Android Emulator and
-Instant Run feature from 2.0.</p>
+<ul class="dac-hero-description">
+  <li>Develop your app user interface faster with the new Layout Editor &amp;
+    Constraint Layout</li>
+  <li>Develop smarter with the APK analyzer &amp; expanded code analysis</li>
+  <li>Develop with the the latest Android 7.0 Nougat APIs &amp; features</li>
+</ul>
 
 <p style="margin-top:24px">
     <a class="dac-hero-cta" href="{@docRoot}studio/index.html">
       <span class="dac-sprite dac-auto-chevron"></span>
-      Get Android Studio
+      Get Android Studio 2.2
     </a>
   &nbsp;&nbsp;&nbsp;&nbsp;<wbr>
-    <a class="dac-hero-cta" href="{@docRoot}studio/releases/index.html">
+    <a class="dac-hero-cta" href="{@docRoot}studio/features.html">
     <span class="dac-sprite dac-auto-chevron"></span>
-    See the release notes</a>
+    See more features</a>
 </p>
 
       </div>

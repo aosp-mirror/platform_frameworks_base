@@ -682,6 +682,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Ispravno!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Pokušajte ponovo"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Pokušajte ponovo"</string>
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"Otključajte za sve značajke i podatke"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Premašen je maksimalni broj Otključavanja licem"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Nema SIM kartice"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"U tabletnom uređaju nema SIM kartice."</string>
@@ -1046,8 +1047,9 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android se nadograđuje…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Pokretanje Androida..."</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optimiziranje pohrane."</string>
-    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android se nadograđuje"</string>
+    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"Dovršavanje ažuriranja Androida…"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Neke aplikacije možda neće funkcionirati pravilno dok nadogradnja ne završi"</string>
+    <string name="app_upgrading_toast" msgid="3008139776215597053">"Nadogradnja aplikacije <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Optimiziranje aplikacije <xliff:g id="NUMBER_0">%1$d</xliff:g> od <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Pripremanje aplikacije <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Pokretanje aplikacija."</string>
@@ -1100,6 +1102,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi nema pristup internetu"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Dodirnite za opcije"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"Prelazak na drugu mrežu: <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Kada <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nema pristup internetu, na uređaju se upotrebljava <xliff:g id="NEW_NETWORK">%1$s</xliff:g>. Moguća je naplata naknade."</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"Mreža je promijenjena: <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> &gt; <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"mobilni podaci"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"Bluetooth"</item>
+    <item msgid="5447331121797802871">"Ethernet"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"nepoznata vrsta mreže"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Ne može se spojiti na Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" ima lošu internetsku vezu."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Dopustiti povezivanje?"</string>
@@ -1177,7 +1190,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Dodirnite da biste odabrali jezik i raspored"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"kandidati"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Priprema uređaja <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Traženje pogrešaka"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Otkriven je novi uređaj <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1256,8 +1268,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Povezan sa sesijom <xliff:g id="SESSION">%s</xliff:g>. Dotaknite za upravljanje mrežom."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Povezivanje s uvijek uključenom VPN mrežom…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Povezan s uvijek uključenom VPN mrežom"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Prekinuta je veza s uvijek uključenom VPN mrežom"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Pogreška uvijek uključene VPN mreže"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"Dodirnite da biste konfigurirali"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Dodirnite za postavljanje"</string>
     <string name="upload_file" msgid="2897957172366730416">"Odaberite datoteku"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nema odabranih datoteka"</string>
     <string name="reset" msgid="2448168080964209908">"Ponovo postavi"</string>
@@ -1342,7 +1355,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB pogon"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB pohrana"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Uredi"</string>
-    <string name="data_usage_warning_title" msgid="1955638862122232342">"Upozorenje o upotrebi podataka"</string>
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"Upozorenje o upotrebi podataka"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Dodirnite za upotrebu i postavke"</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Dost. ogr. 2G–3G prijenosa pod."</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Dost. ogr. 4G prijenosa podataka"</string>
@@ -1671,6 +1684,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"Unesite naziv jezika"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Predloženo"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Svi jezici"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"Sve regije"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Pretraži"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"Radni je način ISKLJUČEN"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Omogućuje radnom profilu da funkcionira, uključujući aplikacije, sinkronizaciju u pozadini i povezane značajke."</string>
@@ -1688,7 +1702,16 @@
     <string name="unpin_target" msgid="3556545602439143442">"Otkvači"</string>
     <string name="app_info" msgid="6856026610594615344">"Informacije o aplikaciji"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"Želite li vratiti uređaj na zadano?"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Dodirnite za vraćanje uređaja na zadano"</string>
+    <string name="demo_starting_message" msgid="5268556852031489931">"Pokretanje demo-načina..."</string>
+    <string name="demo_restarting_message" msgid="952118052531642451">"Vraćanje uređaja na zadano…"</string>
+    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Želite li vratiti uređaj na zadano?"</string>
+    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Sve će se promjene izbrisati, a demonstracija će se ponovo pokrenuti za <xliff:g id="TIMEOUT">%1$s</xliff:g> s…"</string>
+    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Odustani"</string>
+    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Vrati na zadano sada"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Uređaj je vraćen na tvorničke postavke da biste ga mogli upotrebljavati bez ograničenja"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Dodirnite da biste saznali više."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> – onemogućeno"</string>
+    <string name="conference_call" msgid="3751093130790472426">"Konferencijski poziv"</string>
 </resources>

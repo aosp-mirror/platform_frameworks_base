@@ -137,7 +137,7 @@ evento. En la pantalla de detalles del evento, es posible navegar con los botone
 
 <h4>Notificaciones emergentes</h4>
 
-<p><em>Las notificaciones emergentes</em> omiten el panel lateral de notificaciones y aparecen directamente 
+<p><em>Las notificaciones emergentes</em> omiten el panel lateral de notificaciones y aparecen directamente
 frente al usuario. Estas casi nunca se utilizan, y se <strong>deben reservar para ocasiones en las que es necesario proporcionar una
 respuesta oportuna y es necesario realizar una interrupción en el contexto del usuario</strong>. Por ejemplo,
 en Talk se utiliza este estilo para alertar al usuario sobre una invitación de un amigo para participar en una videocharla, ya que esta

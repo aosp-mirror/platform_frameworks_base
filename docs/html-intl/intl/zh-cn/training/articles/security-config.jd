@@ -1,0 +1,747 @@
+page.title=网络安全配置
+page.keywords=Android N、安全、网络
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>本文内容</h2>
+<ol>
+  <li><a href="#manifest">添加安全配置文件</a></li>
+  <li><a href="#CustomTrust">自定义信任的 CA</a>
+      <ol>
+      <li><a href="#ConfigCustom">配置信任的自定义 CA</a></li>
+      <li><a href="#LimitingCas">限制信任的 CA 集</a></li>
+      <li><a href="#TrustingAdditionalCas">信任附加 CA</a></li>
+      </ol>
+  </li>
+  <li><a href="#TrustingDebugCa">仅调试 CA</a></li>
+  <li><a href="#UsesCleartextTraffic">选择退出 Cleartext Traffic</a></li>
+  <li><a href="#CertificatePinning">固定证书</a></li>
+  <li><a href="#ConfigInheritance">配置继承行为</a></li>
+  <li><a href="#FileFormat">配置文件格式</a></li>
+</ol>
+</div>
+</div>
+
+
+<p>
+  Android N 包含一个网络安全配置特性，让应用可以在一个安全的声明性配置文件中自定义其网络安全设置，而无需修改应用代码。
+
+可以针对特定域和特定应用配置这些设置。
+该特性的主要功能如下所示：
+
+</p>
+
+<ul>
+  <li>
+    <b>自定义信任锚：</b>针对应用的安全连接自定义哪些证书颁发机构 (CA) 值得信赖。
+例如，信任特定的自签署证书或限制应用信任的公共 CA 集。
+
+
+  </li>
+
+  <li>
+    <b>仅调试重写：</b>在应用中以安全方式调试安全连接，而不会增加安装基数的风险。
+
+  </li>
+
+  <li>
+    <b>Cleartext traffic 选择退出：</b>防止应用意外使用 cleartext traffic。
+
+  </li>
+
+  <li>
+    <b>证书固定：</b>将应用的安全连接限制为特定的证书。
+
+  </li>
+</ul>
+
+
+<h2 id="manifest">添加安全配置文件</h2>
+
+<p>
+  网络安全配置特性使用一个 XML 文件，您可以在该文件中指定应用的设置。
+您必须在应用的清单中包含一个条目来指向该文件。
+以下代码摘自一份清单，演示了如何创建此条目：
+
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest ... &gt;
+  &lt;application ... &gt;
+    &lt;meta-data android:name="android.security.net.config"
+               android:resource="@xml/network_security_config" /&gt;
+    ...
+  &lt;/application&gt;
+&lt;/manifest&gt;
+</pre>
+
+<h2 id="CustomTrust">自定义信任的 CA</h2>
+
+<p>
+  应用可能需要信任自定义的 CA 集，而不是平台默认值。
+出现此情况的最常见原因包括：
+</p>
+
+<ul>
+  <li>连接到具有自定义证书颁发机构（自签署、由公司内部 CA 签发等）的主机。
+
+  </li>
+
+  <li>将 CA 集仅限于您信任的 CA，而不是每个预装 CA。
+
+  </li>
+
+  <li>信任系统中未包含的附加 CA。
+  </li>
+</ul>
+
+<p>
+  默认情况下，来自所有应用的安全（例如 TLS、HTTPS）连接均信任预装的系统 CA，而面向 API 级别 23 (Android M) 及更低级别的应用默认情况下还会信任用户添加的 CA 存储。
+
+应用可以使用 {@code base-config}（针对应用范围的定制）或 {@code domain-config}（针对每个域的定制）自定义自己的连接。
+
+
+
+</p>
+
+
+<h3 id="ConfigCustom">配置自定义 CA</h3>
+
+<p>
+  假设您要连接到使用自签署 SSL 证书的主机，或者连接到其 SSL 证书是由您信任的非公共 CA（如公司内部 CA）签发的主机。
+
+
+</p>
+
+<p>
+  <code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;example.com&lt;/domain&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/my_ca"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+<p>
+  以 PEM 或 DER 格式将自签署或非公共 CA 证书添加到
+{@code res/raw/my_ca}。
+</p>
+
+
+<h3 id="LimitingCas">限制信任的 CA 集</h3>
+
+<p>
+  如果应用不想信任系统信任的所有 CA，则可以自行指定，缩减要信任的 CA 集。
+这样可防止应用信任任何其他 CA 签发的欺诈性证书。
+
+</p>
+
+<p>
+  限制信任的 CA 集的配置与针对特定域<a href="#TrustingACustomCa">信任自定义 CA</a> 相似，不同的是，前者要在资源中提供多个 CA。
+
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;secure.example.com&lt;/domain&gt;
+        &lt;domain includeSubdomains="true"&gt;cdn.example.com&lt;/domain&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/trusted_roots"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+<p>
+  以 PEM 或 DER 格式将信任的 CA 添加到 {@code res/raw/trusted_roots}。
+  请注意，如果使用 PEM 格式，文件必须仅包含 PEM 数据，且没有额外的文本。
+<em></em>您还可以提供多个
+<a href="#certificates"><code>&lt;certificates&gt;</code></a>
+元素，而不是只能提供一个元素。
+</p>
+
+
+<h3 id="TrustingAdditionalCas">
+  信任附加 CA
+</h3>
+
+<p>
+  应用可能需要信任系统不信任的附加 CA，出现此情况的原因可能是系统还未包含此 CA，或 CA 不符合添加到 Android 系统中的要求。
+
+应用可以通过为一个配置指定多个证书源来实现此目的。
+
+
+</p>
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;base-config&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/extracas"/&gt;
+            &lt;certificates src="system"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/base-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="TrustingDebugCa">配置用于调试的 CA</h2>
+
+<p>
+  调试通过 HTTPS 连接的应用时，您可能需要连接到没有用于生产服务器的 SSL 证书的本地开发服务器。
+
+为了支持此操作，而又不对应用的代码进行任何修改，您可以通过使用 {@code debug-overrides} 指定仅在<a href="{@docRoot}guide/topics/manifest/application-element.html#debug">
+android:debuggable</a>
+为 {@code true} 时才信任的仅调试 CA。<i></i>
+
+通常，IDE 和构建工具会自动为非发布版本设置此标志。
+
+</p>
+
+<p>
+  这比一般的条件代码更安全，因为出于安全考虑，应用存储不接受被标记为可调试的应用。
+
+
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;debug-overrides&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/debug_cas"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/debug-overrides&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="UsesCleartextTraffic">选择退出 Cleartext Traffic</h2>
+
+<p>
+  旨在连接到仅使用安全连接的目标的应用可以选择不再对这些目标提供 cleartext（使用解密的 HTTP 协议而非 HTTPS）支持。
+
+此选项有助于防止应用因外部源（如后端服务器）提供的 URL 发生变化而意外回归。
+
+
+  请参阅 {@link android.security.NetworkSecurityPolicy#isCleartextTrafficPermitted
+NetworkSecurityPolicy.isCleartextTrafficPermitted()} 了解更多详情。
+</p>
+
+<p>
+  例如，应用可能需要确保所有与 {@code
+secure.example.com} 的连接始终是通过 HTTPS 完成，以防止来自恶意网络的敏感流量。
+
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config usesCleartextTraffic="false"&gt;
+        &lt;domain includeSubdomains="true"&gt;secure.example.com&lt;/domain&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="CertificatePinning">固定证书</h2>
+
+<p>
+  一般情况下，应用信任所有预装 CA。如果有预装 CA 要签发欺诈性证书，则应用将面临被中间人攻击 (MiTM) 的风险。
+
+有些应用通过限制信任的 CA 集或通过证书固定来选择限制其接受的证书集。
+
+</p>
+
+<p>
+  通过按公钥的哈希值（X.509 证书的 SubjectPublicKeyInfo）提供证书集完成证书固定。
+然后，证书链仅在至少包含一个已固定的公钥时才有效。
+
+
+</p>
+
+<p>
+  请注意，使用证书固定时，您应始终包含一个备份密钥，这样，当您需要强制切换到新密钥时，或更改 CA 时（固定到某个 CA 证书或该 CA 的中间证书时），您应用的连接性不会受到影响。
+
+
+否则，您必须推送应用的更新以恢复连接性。
+
+</p>
+
+<p>
+  此外，可以设置固定到期时间，在该时间之后不执行证书固定。
+这有助于防止尚未更新的应用出现连接问题。
+不过，设置固定到期时间可能会绕过证书固定。
+
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;example.com&lt;/domain&gt;
+        &lt;pin-set expiration="2018-01-01"&gt;
+            &lt;pin digest="SHA-256"&gt;7HIpactkIAq2Y49orFOOQKurWxmmSFZhBCoQYcRhJ3Y=&lt;/pin&gt;
+            &lt;!-- backup pin --&gt
+            &lt;pin digest="SHA-256"&gt;fwza0LRMXouZHRC8Ei+4PyuldPDcf3UKgO/04cDM1oE=&lt;/pin&gt;
+        &lt;/pin-set&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="ConfigInheritance">配置继承行为</h2>
+
+<p>
+  继承未在特定配置中设置的值。此行为允许进行更复杂的配置，同时保证配置文件可读。
+
+</p>
+
+<p>
+  如果未在特定条目中设置值，则使用来自下一个更通用的条目中的值。
+未在 {@code domain-config} 中设置的值从父级 {@code domain-config}（如果已嵌套）或从 {@code
+base-config}（如果未嵌套）中获取。
+未在 {@code base-config} 中设置的值使用平台默认值。
+
+</p>
+
+<p>
+  例如，考虑所有与 {@code
+example.com} 的子域的连接必须使用自定义 CA 集。此外，允许使用这些域的 cleartext traffic，连接到 {@code
+  secure.example.com} 时除外。<em></em>
+通过在 {@code example.com} 的配置中嵌套 {@code
+secure.example.com} 的配置，不需要重复 {@code trust-anchors}。
+
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;example.com&lt;/domain&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/my_ca"/&gt;
+        &lt;/trust-anchors&gt;
+        &lt;domain-config cleartextTrafficPermitted="false"&gt;
+            &lt;domain includeSubdomains="true"&gt;secure.example.com&lt;/domain&gt;
+        &lt;/domain-config&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="FileFormat">配置文件格式</h2>
+
+<p>
+  网络安全配置特性使用 XML 文件格式。
+  文件的整体结构如以下代码示例所示：
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;base-config&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="..."/&gt;
+            ...
+        &lt;/trust-anchors&gt;
+    &lt;/base-config&gt;
+
+    &lt;domain-config&gt;
+        &lt;domain&gt;android.com&lt;/domain&gt;
+        ...
+        &lt;trust-anchors&gt;
+            &lt;certificates src="..."/&gt;
+            ...
+        &lt;/trust-anchors&gt;
+        &lt;pin-set&gt;
+            &lt;pin digest="..."&gt;...&lt;/pin&gt;
+            ...
+        &lt;/pin-set&gt;
+    &lt;/domain-config&gt;
+    ...
+    &lt;debug-overrides&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="..."/&gt;
+            ...
+        &lt;/trust-anchors&gt;
+    &lt;/debug-overrides&gt;
+&lt;/network-security-config&gt;
+</pre>
+
+<p>
+  以下部分介绍语法和文件格式的其他详细信息。
+
+</p>
+
+<h3 id="network-security-config">
+  &lt;network-security-config&gt;
+</h3>
+
+<dl class="xml">
+  <dt>
+    可包含：
+  </dt>
+
+  <dd>
+    0 或 1 个 <code><a href="#base-config">&lt;base-config&gt;</a></code><br>
+    任意数量的 <code><a href=
+    "#domain-config">&lt;domain-config&gt;</a></code><br>
+    0 或 1 个 <code><a href="#debug-overrides">&lt;debug-overrides&gt;</a></code>
+  </dd>
+</dl>
+
+<h3 id="base-config">
+  &lt;base-config&gt;
+</h3>
+
+<dl class="xml">
+  <dt>
+    语法：
+  </dt>
+</dl>
+
+<pre class="stx">
+&lt;base-config <a href=
+"#usesCleartextTraffic">usesCleartextTraffic</a>=["true" | "false"]&gt;
+    ...
+&lt;/base-config&gt;
+</pre>
+<dl class="xml">
+  <dt>
+    可包含：
+  </dt>
+
+  <dd>
+    <code><a href="#trust-anchors">&lt;trust-anchors&gt;</a></code>
+  </dd>
+
+  <dt>
+    说明：
+  </dt>
+
+  <dd>
+    目标不在 <a href="#domain-config"><code>domain-config</code></a> 涵盖范围内的所有连接所使用的默认配置。
+
+
+<p>
+  未设置的任何值均使用平台默认值。面向上述 API 级别 24 及更高级别的应用的默认配置：
+
+</p>
+
+<pre>
+&lt;base-config usesCleartextTraffic="true"&gt;
+    &lt;trust-anchors&gt;
+        &lt;certificates src="system" /&gt;
+    &lt;/trust-anchors&gt;
+&lt;/base-config&gt;
+</pre>
+面向 API 级别 23 及更低级别的应用的默认配置：
+<pre>
+&lt;base-config usesCleartextTraffic="true"&gt;
+    &lt;trust-anchors&gt;
+        &lt;certificates src="system" /&gt;
+        &lt;certificates src="user" /&gt;
+    &lt;/trust-anchors&gt;
+&lt;/base-config&gt;
+</pre>
+
+  </dd>
+</dl>
+
+<h3 id="domain-config">&lt;domain-config&gt;</h3>
+<dl class="xml">
+<dt>语法：</dt>
+<dd>
+<pre class="stx">&lt;domain-config <a href="#usesCleartextTraffic">usesCleartextTraffic</a>=["true" | "false"]&gt;
+    ...
+&lt;/domain-config&gt;</pre>
+</dd>
+
+<dt>可包含：</dt>
+
+<dd>
+1 个或多个 <code><a href="#domain">&lt;domain&gt;</a></code>
+<br/>0 或 1 个 <code><a href="#trust-anchors">&lt;trust-anchors&gt;</a></code>
+<br/>0 或 1 个 <code><a href="#pin-set">&lt;pin-set&gt;</code></a>
+<br/>任意数量的已嵌套 <code>&lt;domain-config&gt;</code></dd>
+
+<dt>说明</dt>
+<dd>用于按照 {@code domain} 元素的定义连接到特定目标的配置。
+
+<p>请注意，如果有多个 {@code domain-config} 元素涵盖某个目标，则使用匹配域规则最具体（最长）的配置。
+</p></dd>
+</dl>
+
+
+<h3 id="domain">&lt;domain&gt;</h3>
+
+<dl class="xml">
+  <dt>
+    语法：
+  </dt>
+
+  <dd>
+    <pre class="stx">
+&lt;domain includeSubdomains=["true" | "false"]&gt;example.com&lt;/domain&gt;
+</pre>
+  </dd>
+
+  <dt>
+    属性：
+  </dt>
+
+  <dd>
+    <dl class="attr">
+      <dt>
+        {@code includeSubdomains}
+      </dt>
+
+      <dd>
+        如果为 {@code "true"}，则此域规则与域及所有子域（包括子域的子域）匹配，否则，该规则仅适用于精确匹配项。
+
+
+      </dd>
+    </dl>
+  </dd>
+
+  <dt>
+    说明：
+  </dt>
+</dl>
+
+<h3 id="debug-overrides">&lt;debug-overrides&gt;</h3>
+
+<dl class="xml">
+  <dt>
+    语法：
+  </dt>
+
+  <dd>
+    <pre class="stx">
+&lt;debug-overrides&gt;
+    ...
+&lt;/debug-overrides&gt;
+</pre>
+  </dd>
+
+  <dt>
+    可包含：
+  </dt>
+
+  <dd>
+    0 或 1 个 <code><a href="#trust-anchors">&lt;trust-anchors&gt;</a></code>
+  </dd>
+
+  <dt>
+    说明：
+  </dt>
+
+  <dd>
+    当 <a href="{@docRoot}guide/topics/manifest/application-element.html#debug">android:debuggable</a>
+为 {@code "true"} 时将应用的重写，IDE 和构建工具生成的非发布版本通常属于此情况。
+将在 {@code
+debug-overrides} 中指定的信任锚添加到所有其他配置，并且当服务器的证书链使用其中一个仅调试信任锚时不执行证书固定。
+
+如果 <a href="{@docRoot}guide/topics/manifest/application-element.html#debug">android:debuggable</a>
+为 {@code "false"}，则完全忽略此部分。
+  </dd>
+</dl>
+
+<h3 id="trust-anchors">&lt;trust-anchors&gt;</h3>
+<dl class="xml">
+  <dt>
+    语法：
+  </dt>
+
+  <dd>
+    <pre class="stx">
+&lt;trust-anchors&gt;
+...
+&lt;/trust-anchors&gt;
+</pre>
+  </dd>
+
+  <dt>
+    可包含：
+  </dt>
+
+  <dd>
+    任意数量的 <code><a href="#certificates">&lt;certificates&gt;</a></code>
+  </dd>
+
+  <dt>
+    说明：
+  </dt>
+
+  <dd>
+    用于安全连接的信任锚集
+  </dd>
+</dl>
+
+
+<h3 id="certificates">&lt;certificates&gt;</h3>
+<dl class="xml">
+<dt>语法：</dt>
+<dd><pre class="stx">&lt;certificates src=["system" | "user" | "<i>raw resource</i>"]
+              overridePins=["true" | "false"] /&gt;
+</pre></dd>
+<dt>说明：</dt>
+<dd>用于 {@code trust-anchors} 元素的 X.509 证书集。</dd>
+
+<dt>属性：</dt>
+<dd><dl class="attr">
+<dt>{@code src}</dt>
+<dd>
+CA 证书的来源，可以是
+<ul>
+  <li>指向包含 X.509 证书的文件的原始资源 id。
+  证书必须以 DER 或 PEM 格式编码。如果为 PEM 证书，则文件不得包含额外的非 PEM 数据，如注释。
+
+<em></em>
+  </li>
+
+  <li>用于预装系统 CA 证书的 {@code "system"}
+  </li>
+
+  <li>用于用户添加的 CA 证书的 {@code "user"}
+  </li>
+</ul>
+</dd>
+
+<dt>{@code overridePins}</dt>
+<dd>
+  <p>
+    指定来自此源的 CA 是否绕过证书固定。如果为 {@code
+"true"}，则为穿过此源的其中一个 CA 的链颁发证书，并且不执行证书固定。
+这对于调试 CA 或支持用户对应用的安全流量进行中间人攻击 (MiTM) 非常有用。
+
+  </p>
+
+  <p>
+    默认值为 {@code "false"}，除非在 {@code debug-overrides}
+元素中另外指定（在这种情况下，默认值为 {@code "true"}）。
+  </p>
+</dd>
+</dl>
+</dd>
+
+
+<h3 id="pin-set">&lt;pin-set&gt;</h3>
+
+<dl class="xml">
+  <dt>
+    语法：
+  </dt>
+
+  <dd>
+<pre class="stx">
+&lt;pin-set expiration="date"&gt;
+...
+&lt;/pin-set&gt;
+</pre>
+  </dd>
+
+  <dt>
+    可包含：
+  </dt>
+
+  <dd>
+    任意数量的 <code><a href="#pin">&lt;pin&gt;</a></code>
+  </dd>
+
+  <dt>
+    说明：
+  </dt>
+
+  <dd>
+    公钥固定 (PKP) 集。对于要信任的安全连接，信任链中必须有一个公钥位于 PKP 集中。
+有关固定形式，请参阅
+<code><a href="#pin">&lt;pin&gt;</a></code>。
+  </dd>
+
+  <dt>
+    属性：
+  </dt>
+
+  <dd>
+    <dl class="attr">
+      <dt>
+        {@code expiration}
+      </dt>
+
+      <dd>
+        采用 {@code yyyy-MM-dd} 格式的日期，在该日期及之后固定过期，因而禁用固定。
+如果未设置该属性，则固定不会过期。
+
+        <p>
+          设置到期时间有助于防止未更新到其 PKP 集（例如，由于用户禁用应用更新）的应用出现连接问题。
+
+
+        </p>
+      </dd>
+    </dl>
+  </dd>
+</dl>
+
+<h3 id="pin">&lt;pin&gt;</h3>
+<dl class="xml">
+  <dt>
+    语法：
+  </dt>
+
+  <dd>
+<pre class="stx">
+&lt;pin digest=["SHA-256"]&gt;base64 encoded digest of X.509
+    SubjectPublicKeyInfo (SPKI)&lt;/pin&gt;
+</pre>
+  </dd>
+
+  <dt>
+    属性：
+  </dt>
+
+  <dd>
+    <dl class="attr">
+      <dt>
+        {@code digest}
+      </dt>
+
+      <dd>
+        用于生成 PKP 的摘要算法。目前仅支持
+{@code "SHA-256"}。
+      </dd>
+    </dl>
+  </dd>
+</dl>

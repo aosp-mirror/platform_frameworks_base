@@ -10,7 +10,7 @@ page.metaDescription=Questions and answers about Designed for Families
     font-weight:bold;
   }
   </style>
-  
+
 <div id="qv-wrapper">
 <ol id="qv">
 <h2>In this document</h2>
@@ -84,7 +84,7 @@ page.metaDescription=Questions and answers about Designed for Families
   <dd>
     No, you do not need to translate your privacy policy. However, if you
     distribute your apps in a few select countries, it is advised that you do
-    translate your privacy policy. 
+    translate your privacy policy.
   </dd>
 
   <dt>
@@ -173,7 +173,7 @@ page.metaDescription=Questions and answers about Designed for Families
     confirm that it is appropriate for families. Assuming your app complies with all program
     requirements, we expect that publishing time should not take any longer
     than normal; however, there may be a delay in publishing the app if it is
-    rejected during the Designed for Families review. 
+    rejected during the Designed for Families review.
   </dd>
 
   <dt>
@@ -301,7 +301,7 @@ page.metaDescription=Questions and answers about Designed for Families
 
   <dd>
     House ads are allowed, but they must comply with <a
-    href="https://support.google.com/googleplay/android-developer/answer/6184502#ads">ads policies</a>. 
+    href="https://support.google.com/googleplay/android-developer/answer/6184502#ads">ads policies</a>.
   </dd>
 
   <dt>

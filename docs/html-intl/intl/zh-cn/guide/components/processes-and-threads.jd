@@ -47,7 +47,7 @@ Linux 进程。默认情况下，同一应用的所有组件在相同的进程�
 &lt;activity&gt;}</a>、<a href="{@docRoot}guide/topics/manifest/service-element.html">{@code
 &lt;service&gt;}</a>、<a href="{@docRoot}guide/topics/manifest/receiver-element.html">{@code
 &lt;receiver&gt;}</a> 和 <a href="{@docRoot}guide/topics/manifest/provider-element.html">{@code
-&lt;provider&gt;}</a>&mdash;均支持 
+&lt;provider&gt;}</a>&mdash;均支持
 {@code android:process} 属性，此属性可以指定该组件应在哪个进程运行。您可以设置此属性，使每个组件均在各自的进程中运行，或者使一些组件共享一个进程，而其他组件则不共享。
 此外，您还可以设置 {@code android:process}，使不同应用的组件在相同的进程中运行，但前提是这些应用共享相同的 Linux 用户 ID 并使用相同的证书进行签署。
 
@@ -319,7 +319,7 @@ private class DownloadImageTask extends AsyncTask&lt;String, Void, Bitmap&gt; {
     protected Bitmap doInBackground(String... urls) {
         return loadImageFromNetwork(urls[0]);
     }
-    
+
     /** The system calls this to perform work in the UI thread and delivers
       * the result from doInBackground() */
     protected void onPostExecute(Bitmap result) {

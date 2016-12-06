@@ -41,6 +41,10 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageParser;
+import android.content.pm.PackageParser.ApkLite;
+import android.content.pm.PackageParser.PackageLite;
+import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.UserInfo;
 import android.net.Uri;
 import android.os.Binder;
@@ -362,11 +366,27 @@ public final class Pm {
      */
     private int runInstall() throws RemoteException {
         final InstallParams params = makeInstallParams();
+        final String inPath = nextArg();
+        if (params.sessionParams.sizeBytes < 0 && inPath != null) {
+            File file = new File(inPath);
+            if (file.isFile()) {
+                try {
+                    ApkLite baseApk = PackageParser.parseApkLite(file, 0);
+                    PackageLite pkgLite = new PackageLite(null, baseApk, null, null, null);
+                    params.sessionParams.setSize(
+                            PackageHelper.calculateInstalledSize(pkgLite, false,
+                            params.sessionParams.abiOverride));
+                } catch (PackageParserException | IOException e) {
+                    System.err.println("Error: Failed to parse APK file : " + e);
+                    return 1;
+                }
+            }
+        }
+
         final int sessionId = doCreateSession(params.sessionParams,
                 params.installerPackageName, params.userId);
 
         try {
-            final String inPath = nextArg();
             if (inPath == null && params.sessionParams.sizeBytes == 0) {
                 System.err.println("Error: must either specify a package size or an APK file");
                 return 1;
@@ -922,6 +942,8 @@ public final class Pm {
                 flags |= UserInfo.FLAG_EPHEMERAL;
             } else if ("--guest".equals(opt)) {
                 flags |= UserInfo.FLAG_GUEST;
+            } else if ("--demo".equals(opt)) {
+                flags |= UserInfo.FLAG_DEMO;
             } else {
                 System.err.println("Error: unknown option " + opt);
                 return showUsage();

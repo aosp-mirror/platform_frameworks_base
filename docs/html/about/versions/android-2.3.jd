@@ -240,7 +240,7 @@ reboots. </p>
 <li>Applications can obtain an instance of the {@link android.app.DownloadManager}
 class by calling {@link
 android.content.Context#getSystemService(String)} and passing
-{@link android.content.Context#DOWNLOAD_SERVICE}. Applications that request 
+{@link android.content.Context#DOWNLOAD_SERVICE}. Applications that request
 downloads through this API should register a broadcast receiver for {@link
 android.app.DownloadManager#ACTION_NOTIFICATION_CLICKED}, to appropriately
 handle when the user clicks on a running download in a notification or from the
@@ -690,7 +690,7 @@ the system, prior to installing the application. </p>
 
 <p>To use APIs introduced in Android {@sdkPlatformVersion} in your application,
 you need compile the application against the Android library that is provided in
-the Android {@sdkPlatformVersion} SDK platform. Depending on your needs, you might 
+the Android {@sdkPlatformVersion} SDK platform. Depending on your needs, you might
 also need to add an <code>android:minSdkVersion="{@sdkPlatformApiLevel}"</code>
 attribute to the <code>&lt;uses-sdk&gt;</code> element in the application's
 manifest. If your application is designed to run only on Android 2.3 and higher,

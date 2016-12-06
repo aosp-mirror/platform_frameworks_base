@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import com.android.internal.R;
+
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.Widget;
@@ -29,10 +31,12 @@ import android.graphics.Paint.Align;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.text.method.NumberKeyListener;
 import android.util.AttributeSet;
 import android.util.SparseArray;
@@ -52,15 +56,14 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 
-import com.android.internal.R;
-import libcore.icu.LocaleData;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+
+import libcore.icu.LocaleData;
 
 /**
  * A widget that enables the user to select a number from a predefined range.
@@ -1991,7 +1994,7 @@ public class NumberPicker extends LinearLayout {
             removeCallbacks(mChangeCurrentByOneFromLongPressCommand);
         }
         if (mSetSelectionCommand != null) {
-            removeCallbacks(mSetSelectionCommand);
+            mSetSelectionCommand.cancel();
         }
         if (mBeginSoftInputOnLongPressCommand != null) {
             removeCallbacks(mBeginSoftInputOnLongPressCommand);
@@ -2033,18 +2036,14 @@ public class NumberPicker extends LinearLayout {
     }
 
     /**
-     * Posts an {@link SetSelectionCommand} from the given <code>selectionStart
-     * </code> to <code>selectionEnd</code>.
+     * Posts a {@link SetSelectionCommand} from the given
+     * {@code selectionStart} to {@code selectionEnd}.
      */
     private void postSetSelectionCommand(int selectionStart, int selectionEnd) {
         if (mSetSelectionCommand == null) {
-            mSetSelectionCommand = new SetSelectionCommand();
-        } else {
-            removeCallbacks(mSetSelectionCommand);
+            mSetSelectionCommand = new SetSelectionCommand(mInputText);
         }
-        mSetSelectionCommand.mSelectionStart = selectionStart;
-        mSetSelectionCommand.mSelectionEnd = selectionEnd;
-        post(mSetSelectionCommand);
+        mSetSelectionCommand.post(selectionStart, selectionEnd);
     }
 
     /**
@@ -2090,6 +2089,12 @@ public class NumberPicker extends LinearLayout {
         @Override
         public CharSequence filter(
                 CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+            // We don't know what the output will be, so always cancel any
+            // pending set selection command.
+            if (mSetSelectionCommand != null) {
+                mSetSelectionCommand.cancel();
+            }
+
             if (mDisplayedValues == null) {
                 CharSequence filtered = super.filter(source, start, end, dest, dstart, dend);
                 if (filtered == null) {
@@ -2237,12 +2242,39 @@ public class NumberPicker extends LinearLayout {
     /**
      * Command for setting the input text selection.
      */
-    class SetSelectionCommand implements Runnable {
-        private int mSelectionStart;
+    private static class SetSelectionCommand implements Runnable {
+        private final EditText mInputText;
 
+        private int mSelectionStart;
         private int mSelectionEnd;
 
+        /** Whether this runnable is currently posted. */
+        private boolean mPosted;
+
+        public SetSelectionCommand(EditText inputText) {
+            mInputText = inputText;
+        }
+
+        public void post(int selectionStart, int selectionEnd) {
+            mSelectionStart = selectionStart;
+            mSelectionEnd = selectionEnd;
+
+            if (!mPosted) {
+                mInputText.post(this);
+                mPosted = true;
+            }
+        }
+
+        public void cancel() {
+            if (mPosted) {
+                mInputText.removeCallbacks(this);
+                mPosted = false;
+            }
+        }
+
+        @Override
         public void run() {
+            mPosted = false;
             mInputText.setSelection(mSelectionStart, mSelectionEnd);
         }
     }

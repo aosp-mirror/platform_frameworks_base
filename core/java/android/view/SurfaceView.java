@@ -115,6 +115,7 @@ public class SurfaceView extends View {
     final Rect mStableInsets = new Rect();
     final Rect mOutsets = new Rect();
     final Rect mBackdropFrame = new Rect();
+    final Rect mTmpRect = new Rect();
     final Configuration mConfiguration = new Configuration();
 
     static final int KEEP_SCREEN_ON_MSG = 1;
@@ -193,26 +194,20 @@ public class SurfaceView extends View {
     private boolean mGlobalListenersAdded;
 
     public SurfaceView(Context context) {
-        super(context);
-        init();
+        this(context, null);
     }
 
     public SurfaceView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        init();
+        this(context, attrs, 0);
     }
 
     public SurfaceView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        init();
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public SurfaceView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        init();
-    }
 
-    private void init() {
         setWillNotDraw(true);
     }
 
@@ -233,6 +228,7 @@ public class SurfaceView extends View {
         mSession = getWindowSession();
         mLayout.token = getWindowToken();
         mLayout.setTitle("SurfaceView - " + getViewRootImpl().getTitle());
+        mLayout.packageName = mContext.getOpPackageName();
         mViewVisibility = getVisibility() == VISIBLE;
 
         if (!mGlobalListenersAdded) {
@@ -499,7 +495,7 @@ public class SurfaceView extends View {
                               | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                               | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
                               ;
-                if (!creating && !force && !mUpdateWindowNeeded && !sizeChanged) {
+                if (!creating && !force && !sizeChanged) {
                     mLayout.privateFlags |=
                             WindowManager.LayoutParams.PRIVATE_FLAG_PRESERVE_GEOMETRY;
                 } else {
@@ -591,6 +587,20 @@ public class SurfaceView extends View {
                             for (SurfaceHolder.Callback c : callbacks) {
                                 c.surfaceDestroyed(mSurfaceHolder);
                             }
+                            // Since Android N the same surface may be reused and given to us
+                            // again by the system server at a later point. However
+                            // as we didn't do this in previous releases, clients weren't
+                            // necessarily required to clean up properly in
+                            // surfaceDestroyed. This leads to problems for example when
+                            // clients don't destroy their EGL context, and try
+                            // and create a new one on the same surface following reuse.
+                            // Since there is no valid use of the surface in-between
+                            // surfaceDestroyed and surfaceCreated, we force a disconnect,
+                            // so the next connect will always work if we end up reusing
+                            // the surface.
+                            if (mSurface.isValid()) {
+                                mSurface.forceScopedDisconnect();
+                            }
                         }
                     }
 
@@ -666,21 +676,21 @@ public class SurfaceView extends View {
 
                 transformFromViewToWindowSpace(mLocation);
 
-                mWinFrame.set(mWindowSpaceLeft, mWindowSpaceTop,
+                mTmpRect.set(mWindowSpaceLeft, mWindowSpaceTop,
                         mLocation[0], mLocation[1]);
 
                 if (mTranslator != null) {
-                    mTranslator.translateRectInAppWindowToScreen(mWinFrame);
+                    mTranslator.translateRectInAppWindowToScreen(mTmpRect);
                 }
 
                 if (!isHardwareAccelerated() || !mRtHandlingPositionUpdates) {
                     try {
                         if (DEBUG) Log.d(TAG, String.format("%d updateWindowPosition UI, " +
                                 "postion = [%d, %d, %d, %d]", System.identityHashCode(this),
-                                mWinFrame.left, mWinFrame.top,
-                                mWinFrame.right, mWinFrame.bottom));
-                        mSession.repositionChild(mWindow, mWinFrame.left, mWinFrame.top,
-                                mWinFrame.right, mWinFrame.bottom, -1, mWinFrame);
+                                mTmpRect.left, mTmpRect.top,
+                                mTmpRect.right, mTmpRect.bottom));
+                        mSession.repositionChild(mWindow, mTmpRect.left, mTmpRect.top,
+                                mTmpRect.right, mTmpRect.bottom, -1, mTmpRect);
                     } catch (RemoteException ex) {
                         Log.e(TAG, "Exception from relayout", ex);
                     }
@@ -692,10 +702,10 @@ public class SurfaceView extends View {
     private Rect mRTLastReportedPosition = new Rect();
 
     /**
-     * Called by native on RenderThread to update the window position
+     * Called by native by a Rendering Worker thread to update the window position
      * @hide
      */
-    public final void updateWindowPositionRT(long frameNumber,
+    public final void updateWindowPosition_renderWorker(long frameNumber,
             int left, int top, int right, int bottom) {
         IWindowSession session = mSession;
         MyWindow window = mWindow;
@@ -720,7 +730,7 @@ public class SurfaceView extends View {
         }
         try {
             if (DEBUG) {
-                Log.d(TAG, String.format("%d updateWindowPosition RT, frameNr = %d, " +
+                Log.d(TAG, String.format("%d updateWindowPosition RenderWorker, frameNr = %d, " +
                         "postion = [%d, %d, %d, %d]", System.identityHashCode(this),
                         frameNumber, left, top, right, bottom));
             }
@@ -737,12 +747,12 @@ public class SurfaceView extends View {
 
     /**
      * Called by native on RenderThread to notify that the window is no longer in the
-     * draw tree
+     * draw tree. UI thread is blocked at this point.
      * @hide
      */
-    public final void windowPositionLostRT(long frameNumber) {
+    public final void windowPositionLost_uiRtSync(long frameNumber) {
         if (DEBUG) {
-            Log.d(TAG, String.format("%d windowPositionLostRT RT, frameNr = %d",
+            Log.d(TAG, String.format("%d windowPositionLost, frameNr = %d",
                     System.identityHashCode(this), frameNumber));
         }
         IWindowSession session = mSession;
@@ -757,14 +767,18 @@ public class SurfaceView extends View {
             // safely access other member variables at this time.
             // So do what the UI thread would have done if RT wasn't handling position
             // updates.
-            if (!mWinFrame.isEmpty() && !mWinFrame.equals(mRTLastReportedPosition)) {
+            mTmpRect.set(mLayout.x, mLayout.y,
+                    mLayout.x + mLayout.width,
+                    mLayout.y + mLayout.height);
+
+            if (!mTmpRect.isEmpty() && !mTmpRect.equals(mRTLastReportedPosition)) {
                 try {
                     if (DEBUG) Log.d(TAG, String.format("%d updateWindowPosition, " +
                             "postion = [%d, %d, %d, %d]", System.identityHashCode(this),
-                            mWinFrame.left, mWinFrame.top,
-                            mWinFrame.right, mWinFrame.bottom));
-                    session.repositionChild(window, mWinFrame.left, mWinFrame.top,
-                            mWinFrame.right, mWinFrame.bottom, frameNumber, mWinFrame);
+                            mTmpRect.left, mTmpRect.top,
+                            mTmpRect.right, mTmpRect.bottom));
+                    session.repositionChild(window, mTmpRect.left, mTmpRect.top,
+                            mTmpRect.right, mTmpRect.bottom, frameNumber, mWinFrame);
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Exception from relayout", ex);
                 }

@@ -251,7 +251,7 @@ mCursor = getContentResolver().query(
 </pre>
 <p>
     В таблице 2 указано соответствие аргументов для метода
-{@link android.content.ContentResolver#query 
+{@link android.content.ContentResolver#query
 query(Uri,projection,selection,selectionArgs,sortOrder)} SQL-инструкции SELECT.
 </p>
 <p class="table-caption">
@@ -701,7 +701,7 @@ if (mCursor != null) {
 для вставки, обновления или удаления данных.
 </p>
 <p>
-    Чтобы получить разрешения, необходимые для доступа к поставщику, приложение запрашивает их с помощью элемента 
+    Чтобы получить разрешения, необходимые для доступа к поставщику, приложение запрашивает их с помощью элемента
 <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
 в файле манифеста. При установке менеджером пакетов Android приложения пользователю необходимо
 утвердить все разрешения, запрашиваемые приложением. В случае утверждения всех разрешений

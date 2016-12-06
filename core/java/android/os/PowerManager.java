@@ -1340,6 +1340,11 @@ public final class PowerManager {
         }
 
         /** @hide */
+        public String getTag() {
+            return mTag;
+        }
+
+        /** @hide */
         public void setHistoryTag(String tag) {
             mHistoryTag = tag;
         }
@@ -1357,6 +1362,35 @@ public final class PowerManager {
                     + Integer.toHexString(System.identityHashCode(this))
                     + " held=" + mHeld + ", refCount=" + mCount + "}";
             }
+        }
+
+        /**
+         * Wraps a Runnable such that this method immediately acquires the wake lock and then
+         * once the Runnable is done the wake lock is released.
+         *
+         * <p>Example:
+         *
+         * <pre>
+         * mHandler.post(mWakeLock.wrap(() -> {
+         *     // do things on handler, lock is held while we're waiting for this
+         *     // to get scheduled and until the runnable is done executing.
+         * });
+         * </pre>
+         *
+         * <p>Note: you must make sure that the Runnable eventually gets executed, otherwise you'll
+         *    leak the wakelock!
+         *
+         * @hide
+         */
+        public Runnable wrap(Runnable r) {
+            acquire();
+            return () -> {
+                try {
+                    r.run();
+                } finally {
+                    release();
+                }
+            };
         }
     }
 }

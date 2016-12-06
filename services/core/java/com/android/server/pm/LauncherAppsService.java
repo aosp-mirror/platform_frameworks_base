@@ -17,8 +17,9 @@
 package com.android.server.pm;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Context;
@@ -98,6 +99,7 @@ public class LauncherAppsService extends SystemService {
         private final Context mContext;
         private final PackageManager mPm;
         private final UserManager mUm;
+        private final ActivityManagerInternal mActivityManagerInternal;
         private final ShortcutServiceInternal mShortcutServiceInternal;
         private final PackageCallbackList<IOnAppsChangedListener> mListeners
                 = new PackageCallbackList<IOnAppsChangedListener>();
@@ -110,6 +112,8 @@ public class LauncherAppsService extends SystemService {
             mContext = context;
             mPm = mContext.getPackageManager();
             mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+            mActivityManagerInternal = Preconditions.checkNotNull(
+                    LocalServices.getService(ActivityManagerInternal.class));
             mShortcutServiceInternal = Preconditions.checkNotNull(
                     LocalServices.getService(ShortcutServiceInternal.class));
             mShortcutServiceInternal.addListener(mPackageMonitor);
@@ -380,7 +384,8 @@ public class LauncherAppsService extends SystemService {
                         "To query by shortcut ID, package name must also be set");
             }
 
-            return new ParceledListSlice<>(
+            // TODO(b/29399275): Eclipse compiler requires explicit List<ShortcutInfo> cast below.
+            return new ParceledListSlice<>((List<ShortcutInfo>)
                     mShortcutServiceInternal.getShortcuts(getCallingUserId(),
                             callingPackage, changedSince, packageName, shortcutIds,
                             componentName, flags, user.getIdentifier()));
@@ -447,23 +452,41 @@ public class LauncherAppsService extends SystemService {
                 ensureShortcutPermission(callingPackage, userId);
             }
 
-            final Intent intent = mShortcutServiceInternal.createShortcutIntent(getCallingUserId(),
-                    callingPackage, packageName, shortcutId, userId);
-            if (intent == null) {
+            final Intent[] intents = mShortcutServiceInternal.createShortcutIntents(
+                    getCallingUserId(), callingPackage, packageName, shortcutId, userId);
+            if (intents == null || intents.length == 0) {
                 return false;
             }
             // Note the target activity doesn't have to be exported.
 
-            intent.setSourceBounds(sourceBounds);
-            prepareIntentForLaunch(intent, sourceBounds);
+            intents[0].addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intents[0].setSourceBounds(sourceBounds);
 
-            final long ident = Binder.clearCallingIdentity();
+            return startShortcutIntentsAsPublisher(
+                    intents, packageName, startActivityOptions, userId);
+        }
+
+        private boolean startShortcutIntentsAsPublisher(@NonNull Intent[] intents,
+                @NonNull String publisherPackage, Bundle startActivityOptions, int userId) {
+            final int code;
+            final long ident = injectClearCallingIdentity();
             try {
-                mContext.startActivityAsUser(intent, startActivityOptions, UserHandle.of(userId));
+                code = mActivityManagerInternal.startActivitiesAsPackage(publisherPackage,
+                        userId, intents, startActivityOptions);
+                if (code >= ActivityManager.START_SUCCESS) {
+                    return true; // Success
+                } else {
+                    Log.e(TAG, "Couldn't start activity, code=" + code);
+                }
+                return code >= ActivityManager.START_SUCCESS;
+            } catch (SecurityException e) {
+                if (DEBUG) {
+                    Slog.d(TAG, "SecurityException while launching intent", e);
+                }
+                return false;
             } finally {
-                Binder.restoreCallingIdentity(ident);
+                injectRestoreCallingIdentity(ident);
             }
-            return true;
         }
 
         @Override
@@ -497,7 +520,9 @@ public class LauncherAppsService extends SystemService {
 
             Intent launchIntent = new Intent(Intent.ACTION_MAIN);
             launchIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-            prepareIntentForLaunch(launchIntent, sourceBounds);
+            launchIntent.setSourceBounds(sourceBounds);
+            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
             launchIntent.setPackage(component.getPackageName());
 
             long ident = Binder.clearCallingIdentity();
@@ -536,13 +561,6 @@ public class LauncherAppsService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
-        }
-
-        private void prepareIntentForLaunch(@NonNull Intent launchIntent,
-                @Nullable Rect sourceBounds) {
-            launchIntent.setSourceBounds(sourceBounds);
-            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                    | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
         }
 
         @Override
@@ -613,17 +631,20 @@ public class LauncherAppsService extends SystemService {
             public void onPackageAdded(String packageName, int uid) {
                 UserHandle user = new UserHandle(getChangingUserId());
                 final int n = mListeners.beginBroadcast();
-                for (int i = 0; i < n; i++) {
-                    IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
-                    BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
-                    if (!isEnabledProfileOf(user, cookie.user, "onPackageAdded")) continue;
-                    try {
-                        listener.onPackageAdded(user, packageName);
-                    } catch (RemoteException re) {
-                        Slog.d(TAG, "Callback failed ", re);
+                try {
+                    for (int i = 0; i < n; i++) {
+                        IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
+                        BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
+                        if (!isEnabledProfileOf(user, cookie.user, "onPackageAdded")) continue;
+                        try {
+                            listener.onPackageAdded(user, packageName);
+                        } catch (RemoteException re) {
+                            Slog.d(TAG, "Callback failed ", re);
+                        }
                     }
+                } finally {
+                    mListeners.finishBroadcast();
                 }
-                mListeners.finishBroadcast();
 
                 super.onPackageAdded(packageName, uid);
             }
@@ -632,17 +653,20 @@ public class LauncherAppsService extends SystemService {
             public void onPackageRemoved(String packageName, int uid) {
                 UserHandle user = new UserHandle(getChangingUserId());
                 final int n = mListeners.beginBroadcast();
-                for (int i = 0; i < n; i++) {
-                    IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
-                    BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
-                    if (!isEnabledProfileOf(user, cookie.user, "onPackageRemoved")) continue;
-                    try {
-                        listener.onPackageRemoved(user, packageName);
-                    } catch (RemoteException re) {
-                        Slog.d(TAG, "Callback failed ", re);
+                try {
+                    for (int i = 0; i < n; i++) {
+                        IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
+                        BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
+                        if (!isEnabledProfileOf(user, cookie.user, "onPackageRemoved")) continue;
+                        try {
+                            listener.onPackageRemoved(user, packageName);
+                        } catch (RemoteException re) {
+                            Slog.d(TAG, "Callback failed ", re);
+                        }
                     }
+                } finally {
+                    mListeners.finishBroadcast();
                 }
-                mListeners.finishBroadcast();
 
                 super.onPackageRemoved(packageName, uid);
             }
@@ -651,17 +675,20 @@ public class LauncherAppsService extends SystemService {
             public void onPackageModified(String packageName) {
                 UserHandle user = new UserHandle(getChangingUserId());
                 final int n = mListeners.beginBroadcast();
-                for (int i = 0; i < n; i++) {
-                    IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
-                    BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
-                    if (!isEnabledProfileOf(user, cookie.user, "onPackageModified")) continue;
-                    try {
-                        listener.onPackageChanged(user, packageName);
-                    } catch (RemoteException re) {
-                        Slog.d(TAG, "Callback failed ", re);
+                try {
+                    for (int i = 0; i < n; i++) {
+                        IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
+                        BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
+                        if (!isEnabledProfileOf(user, cookie.user, "onPackageModified")) continue;
+                        try {
+                            listener.onPackageChanged(user, packageName);
+                        } catch (RemoteException re) {
+                            Slog.d(TAG, "Callback failed ", re);
+                        }
                     }
+                } finally {
+                    mListeners.finishBroadcast();
                 }
-                mListeners.finishBroadcast();
 
                 super.onPackageModified(packageName);
             }
@@ -670,17 +697,20 @@ public class LauncherAppsService extends SystemService {
             public void onPackagesAvailable(String[] packages) {
                 UserHandle user = new UserHandle(getChangingUserId());
                 final int n = mListeners.beginBroadcast();
-                for (int i = 0; i < n; i++) {
-                    IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
-                    BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
-                    if (!isEnabledProfileOf(user, cookie.user, "onPackagesAvailable")) continue;
-                    try {
-                        listener.onPackagesAvailable(user, packages, isReplacing());
-                    } catch (RemoteException re) {
-                        Slog.d(TAG, "Callback failed ", re);
+                try {
+                    for (int i = 0; i < n; i++) {
+                        IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
+                        BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
+                        if (!isEnabledProfileOf(user, cookie.user, "onPackagesAvailable")) continue;
+                        try {
+                            listener.onPackagesAvailable(user, packages, isReplacing());
+                        } catch (RemoteException re) {
+                            Slog.d(TAG, "Callback failed ", re);
+                        }
                     }
+                } finally {
+                    mListeners.finishBroadcast();
                 }
-                mListeners.finishBroadcast();
 
                 super.onPackagesAvailable(packages);
             }
@@ -689,17 +719,20 @@ public class LauncherAppsService extends SystemService {
             public void onPackagesUnavailable(String[] packages) {
                 UserHandle user = new UserHandle(getChangingUserId());
                 final int n = mListeners.beginBroadcast();
-                for (int i = 0; i < n; i++) {
-                    IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
-                    BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
-                    if (!isEnabledProfileOf(user, cookie.user, "onPackagesUnavailable")) continue;
-                    try {
-                        listener.onPackagesUnavailable(user, packages, isReplacing());
-                    } catch (RemoteException re) {
-                        Slog.d(TAG, "Callback failed ", re);
+                try {
+                    for (int i = 0; i < n; i++) {
+                        IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
+                        BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
+                        if (!isEnabledProfileOf(user, cookie.user, "onPackagesUnavailable")) continue;
+                        try {
+                            listener.onPackagesUnavailable(user, packages, isReplacing());
+                        } catch (RemoteException re) {
+                            Slog.d(TAG, "Callback failed ", re);
+                        }
                     }
+                } finally {
+                    mListeners.finishBroadcast();
                 }
-                mListeners.finishBroadcast();
 
                 super.onPackagesUnavailable(packages);
             }
@@ -708,17 +741,20 @@ public class LauncherAppsService extends SystemService {
             public void onPackagesSuspended(String[] packages) {
                 UserHandle user = new UserHandle(getChangingUserId());
                 final int n = mListeners.beginBroadcast();
-                for (int i = 0; i < n; i++) {
-                    IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
-                    BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
-                    if (!isEnabledProfileOf(user, cookie.user, "onPackagesSuspended")) continue;
-                    try {
-                        listener.onPackagesSuspended(user, packages);
-                    } catch (RemoteException re) {
-                        Slog.d(TAG, "Callback failed ", re);
+                try {
+                    for (int i = 0; i < n; i++) {
+                        IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
+                        BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
+                        if (!isEnabledProfileOf(user, cookie.user, "onPackagesSuspended")) continue;
+                        try {
+                            listener.onPackagesSuspended(user, packages);
+                        } catch (RemoteException re) {
+                            Slog.d(TAG, "Callback failed ", re);
+                        }
                     }
+                } finally {
+                    mListeners.finishBroadcast();
                 }
-                mListeners.finishBroadcast();
 
                 super.onPackagesSuspended(packages);
             }
@@ -727,17 +763,20 @@ public class LauncherAppsService extends SystemService {
             public void onPackagesUnsuspended(String[] packages) {
                 UserHandle user = new UserHandle(getChangingUserId());
                 final int n = mListeners.beginBroadcast();
-                for (int i = 0; i < n; i++) {
-                    IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
-                    BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
-                    if (!isEnabledProfileOf(user, cookie.user, "onPackagesUnsuspended")) continue;
-                    try {
-                        listener.onPackagesUnsuspended(user, packages);
-                    } catch (RemoteException re) {
-                        Slog.d(TAG, "Callback failed ", re);
+                try {
+                    for (int i = 0; i < n; i++) {
+                        IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
+                        BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
+                        if (!isEnabledProfileOf(user, cookie.user, "onPackagesUnsuspended")) continue;
+                        try {
+                            listener.onPackagesUnsuspended(user, packages);
+                        } catch (RemoteException re) {
+                            Slog.d(TAG, "Callback failed ", re);
+                        }
                     }
+                } finally {
+                    mListeners.finishBroadcast();
                 }
-                mListeners.finishBroadcast();
 
                 super.onPackagesUnsuspended(packages);
             }
@@ -745,50 +784,52 @@ public class LauncherAppsService extends SystemService {
             @Override
             public void onShortcutChanged(@NonNull String packageName,
                     @UserIdInt int userId) {
-                if (!ShortcutService.FEATURE_ENABLED) {
-                    return;
-                }
                 postToPackageMonitorHandler(() -> onShortcutChangedInner(packageName, userId));
             }
 
             private void onShortcutChangedInner(@NonNull String packageName,
                     @UserIdInt int userId) {
-                final UserHandle user = UserHandle.of(userId);
-
                 final int n = mListeners.beginBroadcast();
-                for (int i = 0; i < n; i++) {
-                    IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
-                    BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
-                    if (!isEnabledProfileOf(user, cookie.user, "onShortcutChanged")) continue;
+                try {
+                    final UserHandle user = UserHandle.of(userId);
 
-                    final int launcherUserId = cookie.user.getIdentifier();
+                    for (int i = 0; i < n; i++) {
+                        IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
+                        BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
+                        if (!isEnabledProfileOf(user, cookie.user, "onShortcutChanged")) continue;
 
-                    // Make sure the caller has the permission.
-                    if (!mShortcutServiceInternal.hasShortcutHostPermission(
-                            launcherUserId, cookie.packageName)) {
-                        continue;
+                        final int launcherUserId = cookie.user.getIdentifier();
+
+                        // Make sure the caller has the permission.
+                        if (!mShortcutServiceInternal.hasShortcutHostPermission(
+                                launcherUserId, cookie.packageName)) {
+                            continue;
+                        }
+                        // Each launcher has a different set of pinned shortcuts, so we need to do a
+                        // query in here.
+                        // (As of now, only one launcher has the permission at a time, so it's bit
+                        // moot, but we may change the permission model eventually.)
+                        final List<ShortcutInfo> list =
+                                mShortcutServiceInternal.getShortcuts(launcherUserId,
+                                        cookie.packageName,
+                                        /* changedSince= */ 0, packageName, /* shortcutIds=*/ null,
+                                        /* component= */ null,
+                                        ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY
+                                        | ShortcutQuery.FLAG_GET_ALL_KINDS
+                                        , userId);
+                        try {
+                            listener.onShortcutChanged(user, packageName,
+                                    new ParceledListSlice<>(list));
+                        } catch (RemoteException re) {
+                            Slog.d(TAG, "Callback failed ", re);
+                        }
                     }
-                    // Each launcher has a different set of pinned shortcuts, so we need to do a
-                    // query in here.
-                    // (As of now, only one launcher has the permission at a time, so it's bit
-                    // moot, but we may change the permission model eventually.)
-                    final List<ShortcutInfo> list =
-                            mShortcutServiceInternal.getShortcuts(launcherUserId,
-                                    cookie.packageName,
-                                    /* changedSince= */ 0, packageName, /* shortcutIds=*/ null,
-                                    /* component= */ null,
-                                    ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY
-                                    | ShortcutQuery.FLAG_GET_PINNED
-                                    | ShortcutQuery.FLAG_GET_DYNAMIC
-                                    , userId);
-                    try {
-                        listener.onShortcutChanged(user, packageName,
-                                new ParceledListSlice<>(list));
-                    } catch (RemoteException re) {
-                        Slog.d(TAG, "Callback failed ", re);
-                    }
+                } catch (RuntimeException e) {
+                    // When the user is locked we get IllegalState, so just catch all.
+                    Log.w(TAG, e.getMessage(), e);
+                } finally {
+                    mListeners.finishBroadcast();
                 }
-                mListeners.finishBroadcast();
             }
         }
 

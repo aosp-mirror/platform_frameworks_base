@@ -23,4 +23,7 @@
 <wallpaper xmlns:android="http://schemas.android.com/apk/res/android"
     android:author="@string/test_wallpaper_author"
     android:description="@string/test_wallpaper_desc"
-    android:thumbnail="@drawable/test_wallpaper_thumb" />
+    android:thumbnail="@drawable/test_wallpaper_thumb"
+    android:showMetadataInPreview="true"
+    android:contextUri="@string/test_wallpaper_context_uri"
+    android:contextDescription="@string/test_wallpaper_context_description"/>

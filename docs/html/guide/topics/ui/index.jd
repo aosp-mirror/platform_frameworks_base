@@ -1,6 +1,6 @@
 page.title=User Interface
 page.landing=true
-page.landing.intro=Your app's user interface is everything that the user can see and interact with. Android provides a variety of pre-built UI components such as structured layout objects and UI controls that allow you to build the graphical user interface for your app. Android also provides other UI modules for special interfaces such as dialogs, notifications, and menus.  
+page.landing.intro=Your app's user interface is everything that the user can see and interact with. Android provides a variety of pre-built UI components such as structured layout objects and UI controls that allow you to build the graphical user interface for your app. Android also provides other UI modules for special interfaces such as dialogs, notifications, and menus.
 page.landing.image=images/ui/ui_index.png
 page.landing.next=overview.html
 
@@ -13,7 +13,7 @@ page.landing.next=overview.html
 
     <a href="http://android-developers.blogspot.com/2012/01/say-goodbye-to-menu-button.html">
       <h4>Say Goodbye to the Menu Button</h4>
-      <p>As Ice Cream Sandwich rolls out to more devices, it’s important that you begin to migrate
+      <p>As Ice Cream Sandwich rolls out to more devices, it's important that you begin to migrate
 your designs to the action bar in order to promote a consistent Android user experience.</p> </a>
 
     <a href="http://android-developers.blogspot.com/2011/11/new-layout-widgets-space-and-gridlayout.html">
@@ -29,7 +29,7 @@ way to interact with your application.</p> </a>
     <a href="http://android-developers.blogspot.com/2011/08/horizontal-view-swiping-with-viewpager.html">
       <h4>Horizontal View Swiping with ViewPager</h4>
       <p>Whether you have just started out in Android app development or are a veteran of the craft,
-it probably won’t be too long before you’ll need to implement horizontally scrolling sets of views.
+it probably won't be too long before you'll need to implement horizontally scrolling sets of views.
 </p> </a>
   </div>
 

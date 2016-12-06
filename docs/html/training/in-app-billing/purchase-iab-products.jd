@@ -45,7 +45,7 @@ next.link=test-iab-app.html
 <p>The following example shows how you can make a purchase request for a product with ID {@code SKU_GAS}, using an arbitrary value of 10001 for the request code, and an encoded developer payload string.</p>
 
 <pre>
-mHelper.launchPurchaseFlow(this, SKU_GAS, 10001,   
+mHelper.launchPurchaseFlow(this, SKU_GAS, 10001,
    mPurchaseFinishedListener, "bGoa+V7g/yqDXvKRqq+JTFn4uQZbPiQJo4pf9RzJ");
 </pre>
 
@@ -54,14 +54,14 @@ mHelper.launchPurchaseFlow(this, SKU_GAS, 10001,
 <p>The following example shows how you can handle the purchase response in the listener, depending on whether the purchase order was completed successfully, and whether the user purchased gas or a premium upgrade. In this example, gas is an in-app product that can be purchased multiple times, so you should consume the purchase to allow the user to buy it again.  To learn how to consume purchases, see the <a href="{@docRoot}training/in-app-billing/purchase-iab-products.html#Consume">Consuming Products</a> section. The premium upgrade is a one-time purchase so you don’t need to consume it.  It is good practice to update the UI immediately so that your users can see their newly purchased items.</p>
 
 <pre>
-IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener 
+IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener
    = new IabHelper.OnIabPurchaseFinishedListener() {
-   public void onIabPurchaseFinished(IabResult result, Purchase purchase) 
+   public void onIabPurchaseFinished(IabResult result, Purchase purchase)
    {
       if (result.isFailure()) {
          Log.d(TAG, "Error purchasing: " + result);
          return;
-      }      
+      }
       else if (purchase.getSku().equals(SKU_GAS)) {
          // consume the gas and update the UI
       }
@@ -86,7 +86,7 @@ mHelper.queryInventoryAsync(mGotInventoryListener);
 <p>If the query is successful, the query results are stored in an {@code Inventory} object that is passed back to the listener. The In-app Billing service returns only the purchases made by the user account that is currently logged in to the device.</p>
 
 <pre>
-IabHelper.QueryInventoryFinishedListener mGotInventoryListener 
+IabHelper.QueryInventoryFinishedListener mGotInventoryListener
    = new IabHelper.QueryInventoryFinishedListener() {
    public void onQueryInventoryFinished(IabResult result,
       Inventory inventory) {
@@ -96,7 +96,7 @@ IabHelper.QueryInventoryFinishedListener mGotInventoryListener
       }
       else {
         // does the user have the premium upgrade?
-        mIsPremium = inventory.hasPurchase(SKU_PREMIUM);        
+        mIsPremium = inventory.hasPurchase(SKU_PREMIUM);
         // update UI accordingly
       }
    }
@@ -111,7 +111,7 @@ IabHelper.QueryInventoryFinishedListener mGotInventoryListener
 <p>In this example, you want to consume the gas item that the user has previously purchased in your app.</p>
 
 <pre>
-mHelper.consumeAsync(inventory.getPurchase(SKU_GAS), 
+mHelper.consumeAsync(inventory.getPurchase(SKU_GAS),
    mConsumeFinishedListener);
 </pre>
 

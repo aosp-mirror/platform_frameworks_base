@@ -125,7 +125,7 @@ ele vazará todas as vistas e recursos da instância da atividade original (vaza
 significa que o aplicativo mantém a retenção deles, que não podem ser recolhidos, o que
 causa perda de memória).</p>
 
-<p>Em seguida, use {@link android.app.FragmentManager} para adicionar o fragmento à atividade. 
+<p>Em seguida, use {@link android.app.FragmentManager} para adicionar o fragmento à atividade.
 É possível obter o objeto de dados do fragmento quando a atividade reiniciar durante as alterações
 de configuração em tempo de execução. Por exemplo: defina a atividade da seguinte forma:</p>
 

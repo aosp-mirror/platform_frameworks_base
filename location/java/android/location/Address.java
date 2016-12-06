@@ -28,7 +28,7 @@ import android.os.Parcelable;
 /**
  * A class representing an Address, i.e, a set of Strings describing a location.
  *
- * The addres format is a simplified version of xAL (eXtensible Address Language)
+ * The address format is a simplified version of xAL (eXtensible Address Language)
  * http://www.oasis-open.org/committees/ciq/ciq.html#6
  */
 public class Address implements Parcelable {

@@ -201,7 +201,7 @@ newRowId = db.insert(
 </pre>
 
 <p>{@link android.database.sqlite.SQLiteDatabase#insert insert()}
-的第一个参数即为表格名称。第二个参数指定在 
+的第一个参数即为表格名称。第二个参数指定在
 {@link android.content.ContentValues} 为空的情况下框架可在其中插入 NULL 的列的名称（如果您将其设置为 {@code "null"}，
 那么框架将不会在没有值时插入行。）
 </p>

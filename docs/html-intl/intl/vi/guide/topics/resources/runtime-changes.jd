@@ -82,12 +82,12 @@ hoạt động của mình để giữ lại các đối tượng có trạng th
 <p>Để giữ lại các đối tượng có trạng thái trong một phân đoạn trong khi thay đổi cấu hình thời gian chạy:</p>
 
 <ol>
-  <li>Mở rộng lớp {@link android.app.Fragment} và khai báo các tham chiếu tới đối tượng 
+  <li>Mở rộng lớp {@link android.app.Fragment} và khai báo các tham chiếu tới đối tượng
       có trạng thái của bạn.</li>
   <li>Gọi {@link android.app.Fragment#setRetainInstance(boolean)} khi phân đoạn được tạo.
       </li>
   <li>Thêm phân đoạn vào hoạt động của bạn.</li>
-  <li>Sử dụng {@link android.app.FragmentManager} để truy xuất phân đoạn khi hoạt động 
+  <li>Sử dụng {@link android.app.FragmentManager} để truy xuất phân đoạn khi hoạt động
       được khởi động lại.</li>
 </ol>
 
@@ -125,8 +125,8 @@ rò rỉ tất cả dạng xem và tài nguyên của thực thể hoạt độn
 có nghĩa là ứng dụng của bạn duy trì việc lưu giữ tài nguyên và chúng không thể được thu dọn bộ nhớ rác, vì thế
 rất nhiều bộ nhớ có thể bị mất.)</p>
 
-<p>Khi đó, hãy sử dụng {@link android.app.FragmentManager} để thêm phân đoạn vào hoạt động. 
-Bạn có thể thu được đối tượng dữ liệu từ phân đoạn khi hoạt động bắt đầu lại trong khi 
+<p>Khi đó, hãy sử dụng {@link android.app.FragmentManager} để thêm phân đoạn vào hoạt động.
+Bạn có thể thu được đối tượng dữ liệu từ phân đoạn khi hoạt động bắt đầu lại trong khi
 thay đổi cấu hình thời gian chạy. Ví dụ, định nghĩa hoạt động của bạn như sau:</p>
 
 <pre>
@@ -168,7 +168,7 @@ public class MyActivity extends Activity {
 <p>Trong ví dụ này, {@link android.app.Activity#onCreate(Bundle) onCreate()} thêm một phân đoạn
 hoặc khôi phục một tham chiếu đến nó. {@link android.app.Activity#onCreate(Bundle) onCreate()} cũng
 lưu trữ đối tượng có trạng thái bên trong thực thể phân đoạn đó.
-{@link android.app.Activity#onDestroy() onDestroy()} cập nhật đối tượng có trạng thái bên trong 
+{@link android.app.Activity#onDestroy() onDestroy()} cập nhật đối tượng có trạng thái bên trong
 thực thể phân đoạn được giữ lại.</p>
 
 

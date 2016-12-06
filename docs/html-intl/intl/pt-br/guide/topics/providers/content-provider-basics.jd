@@ -216,7 +216,7 @@ page.title=Preceitos do provedor de conteúdo
     Os aplicativos acessam dados a partir de um provedor de conteúdo
     com um objeto cliente {@link android.content.ContentResolver}. Esse objeto tem métodos que chamam
     métodos de nome idêntico no objeto do provedor, uma instância de uma das subclasses
-    concretas de {@link android.content.ContentProvider}. 
+    concretas de {@link android.content.ContentProvider}.
     Os métodos {@link android.content.ContentResolver} fornecem as funções básicas
     do "CRUD" (criar, recuperar, atualizar e excluir) de armazenamento persistente.
 </p>
@@ -251,7 +251,7 @@ mCursor = getContentResolver().query(
 </pre>
 <p>
     A tabela 2 mostra como os argumentos para
-    {@link android.content.ContentResolver#query 
+    {@link android.content.ContentResolver#query
     query(Uri,projection,selection,selectionArgs,sortOrder)} correspondem a uma declaração SQL SELECT:
 </p>
 <p class="table-caption">
@@ -310,7 +310,7 @@ mCursor = getContentResolver().query(
     {@link android.provider.UserDictionary.Words#CONTENT_URI} contém a URI de conteúdo
     da tabela de "palavras" do dicionário do usuário. O objeto {@link android.content.ContentResolver}
     analisa a autoridade da URI e usa-na para "determinar" o provedor
-    comparando a autoridade a uma tabela de provedores conhecidos do sistema. 
+    comparando a autoridade a uma tabela de provedores conhecidos do sistema.
     O {@link android.content.ContentResolver} pode, então, enviar os argumentos da consulta ao provedor
     correto.
 </p>
@@ -344,7 +344,7 @@ Uri singleUri = ContentUris.withAppendedId(UserDictionary.Words.CONTENT_URI,4);
 </p>
 <p class="note">
     <strong>Observação:</strong> as classes {@link android.net.Uri} e {@link android.net.Uri.Builder}
-    contêm métodos convenientes para a construção de objetos de URI bem formados a partir de strings. 
+    contêm métodos convenientes para a construção de objetos de URI bem formados a partir de strings.
     As {@link android.content.ContentUris} contêm métodos conveniente para anexar valores de ID
     a uma URI. O fragmento anterior usa {@link android.content.ContentUris#withAppendedId
     withAppendedId()} para anexar um ID à URI de conteúdo UserDictionary.
@@ -359,7 +359,7 @@ Uri singleUri = ContentUris.withAppendedId(UserDictionary.Words.CONTENT_URI,4);
 </p>
 <p class="note">
     Por uma questão de clareza, os fragmentos de código nesta seção chamam
-    {@link android.content.ContentResolver#query ContentResolver.query()} no "encadeamento da IU". 
+    {@link android.content.ContentResolver#query ContentResolver.query()} no "encadeamento da IU".
     No código atual, contudo, deve-se realizar consultas assincronamente em um encadeamento separado. Um modo de fazê-lo
     é usar a classe {@link android.content.CursorLoader}, descrita
     com mais detalhes no guia <a href="{@docRoot}guide/components/loaders.html">
@@ -567,7 +567,7 @@ selectionArgs[0] = mUserInput;
 <p>
     O método cliente {@link android.content.ContentResolver#query ContentResolver.query()} sempre
     retorna um {@link android.database.Cursor} contendo as colunas especificadas pela projeção
-    da consulta para as linhas que atendem aos critérios de seleção da consulta. 
+    da consulta para as linhas que atendem aos critérios de seleção da consulta.
     Um objeto {@link android.database.Cursor} fornece acesso para leitura aleatório para as linhas e colunas que
     contém. Usando métodos {@link android.database.Cursor}, é possível repetir as linhas
     nos resultados, determinar o tipo dos dados de cada coluna, extrair os dados de uma coluna e examinar
@@ -946,7 +946,7 @@ mRowsDeleted = getContentResolver().delete(
     Para acessar um provedor em "modo de lote",
     cria-se uma matriz de objetos {@link android.content.ContentProviderOperation} e, em seguida,
     envia-os a um provedor de conteúdo com
-    {@link android.content.ContentResolver#applyBatch ContentResolver.applyBatch()}. Confere-se a 
+    {@link android.content.ContentResolver#applyBatch ContentResolver.applyBatch()}. Confere-se a
     <em>autoridade</em> do provedor de conteúdo para esse método em vez de para uma URI de conteúdo específica.
     Isso permite que cada objeto {@link android.content.ContentProviderOperation} na matriz trabalhe
     com uma tabela diferente. Chamar {@link android.content.ContentResolver#applyBatch
@@ -954,7 +954,7 @@ mRowsDeleted = getContentResolver().delete(
 </p>
 <p>
     A descrição da classe de contrato {@link android.provider.ContactsContract.RawContacts}
-    contém um fragmento de código que demonstra a inserção em lote. 
+    contém um fragmento de código que demonstra a inserção em lote.
 O aplicativo de exemplo do <a href="{@docRoot}resources/samples/ContactManager/index.html">Gerente de contato</a>
     contém um exemplo de acesso em lote em seu
     arquivo de origem <code>ContactAdder.java</code>.
@@ -1089,7 +1089,7 @@ O aplicativo de exemplo do <a href="{@docRoot}resources/samples/ContactManager/i
 </p>
 <p>
     Por exemplo: o Provedor de Dicionário do Usuário tem uma classe de contrato
-    {@link android.provider.UserDictionary} que contém constantes de URI de conteúdo e de nome de coluna. 
+    {@link android.provider.UserDictionary} que contém constantes de URI de conteúdo e de nome de coluna.
     A URI de conteúdo da tabela de "palavras" é definida na constante
     {@link android.provider.UserDictionary.Words#CONTENT_URI UserDictionary.Words.CONTENT_URI}.
     A classe {@link android.provider.UserDictionary.Words} também contém constantes de nome de coluna
@@ -1184,7 +1184,7 @@ content://com.example.trains/Line2/5
 vnd.android.cursor.<strong>item</strong>/vnd.example.line2
 </pre>
 <p>
-    A maioria dos provedores define constantes de classe de contrato para os tipos MIME que usam. 
+    A maioria dos provedores define constantes de classe de contrato para os tipos MIME que usam.
     A classe de contrato {@link android.provider.ContactsContract.RawContacts} do Provedor de Contatos,
     por exemplo, define a constante
     {@link android.provider.ContactsContract.RawContacts#CONTENT_ITEM_TYPE} para o tipo MIME

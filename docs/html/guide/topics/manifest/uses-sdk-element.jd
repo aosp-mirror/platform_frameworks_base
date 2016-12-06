@@ -223,8 +223,13 @@ Android platform. For information about the relative numbers of devices that
 are running each version, see the <a href="{@docRoot}about/dashboards/index.html">Platform
 Versions dashboards page</a>.</p>
 
-<table>
+<table id="api-level-table">
   <tr><th>Platform Version</th><th>API Level</th><th>VERSION_CODE</th><th>Notes</th></tr>
+
+    <tr><td><a href="{@docRoot}about/versions/nougat/android-7.0.html">Android 7.0</a></td>
+    <td><a href="{@docRoot}sdk/api_diff/24/changes.html" title="Diff Report">24</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#N}</td>
+    <td><a href="{@docRoot}about/versions/nougat/index.html">Platform Highlights</a></td></tr>
 
     <tr><td><a href="{@docRoot}about/versions/marshmallow/android-6.0.html">Android 6.0</a></td>
     <td><a href="{@docRoot}sdk/api_diff/23/changes.html" title="Diff Report">23</a></td>

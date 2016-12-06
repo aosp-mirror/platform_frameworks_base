@@ -22,4 +22,4 @@
     android:layout_height="wrap_content"
     android:spinnersShown="true"
     android:calendarViewShown="false"
-    android:datePickerMode="@integer/date_picker_mode" />
+    android:dialogMode="true" />

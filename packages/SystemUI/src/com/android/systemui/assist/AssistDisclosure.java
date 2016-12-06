@@ -95,39 +95,34 @@ public class AssistDisclosure {
     private class AssistDisclosureView extends View
             implements ValueAnimator.AnimatorUpdateListener {
 
-        public static final int TRACING_ANIMATION_DURATION = 600;
-        public static final int ALPHA_IN_ANIMATION_DURATION = 450;
-        public static final int ALPHA_OUT_ANIMATION_DURATION = 400;
+        static final int FULL_ALPHA = 222; // 87%
+        static final int ALPHA_IN_ANIMATION_DURATION = 400;
+        static final int ALPHA_OUT_ANIMATION_DURATION = 300;
+
 
         private float mThickness;
         private float mShadowThickness;
         private final Paint mPaint = new Paint();
         private final Paint mShadowPaint = new Paint();
 
-        private final ValueAnimator mTracingAnimator;
         private final ValueAnimator mAlphaOutAnimator;
         private final ValueAnimator mAlphaInAnimator;
         private final AnimatorSet mAnimator;
 
-        private float mTracingProgress = 0;
         private int mAlpha = 0;
 
         public AssistDisclosureView(Context context) {
             super(context);
 
-            mTracingAnimator = ValueAnimator.ofFloat(0, 1).setDuration(TRACING_ANIMATION_DURATION);
-            mTracingAnimator.addUpdateListener(this);
-            mTracingAnimator.setInterpolator(AnimationUtils.loadInterpolator(mContext,
-                    R.interpolator.assist_disclosure_trace));
-            mAlphaInAnimator = ValueAnimator.ofInt(0, 255).setDuration(ALPHA_IN_ANIMATION_DURATION);
+            mAlphaInAnimator = ValueAnimator.ofInt(0, FULL_ALPHA)
+                    .setDuration(ALPHA_IN_ANIMATION_DURATION);
             mAlphaInAnimator.addUpdateListener(this);
-            mAlphaInAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
-            mAlphaOutAnimator = ValueAnimator.ofInt(255, 0).setDuration(
+            mAlphaInAnimator.setInterpolator(Interpolators.CUSTOM_40_40);
+            mAlphaOutAnimator = ValueAnimator.ofInt(FULL_ALPHA, 0).setDuration(
                     ALPHA_OUT_ANIMATION_DURATION);
             mAlphaOutAnimator.addUpdateListener(this);
-            mAlphaOutAnimator.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
+            mAlphaOutAnimator.setInterpolator(Interpolators.CUSTOM_40_40);
             mAnimator = new AnimatorSet();
-            mAnimator.play(mAlphaInAnimator).with(mTracingAnimator);
             mAnimator.play(mAlphaInAnimator).before(mAlphaOutAnimator);
             mAnimator.addListener(new AnimatorListenerAdapter() {
                 boolean mCancelled;
@@ -174,8 +169,6 @@ public class AssistDisclosure {
             super.onDetachedFromWindow();
 
             mAnimator.cancel();
-
-            mTracingProgress = 0;
             mAlpha = 0;
         }
 
@@ -197,45 +190,32 @@ public class AssistDisclosure {
             final int width = getWidth();
             final int height = getHeight();
             float thickness = mThickness;
-            final float pixelProgress = mTracingProgress * (width + height - 2 * thickness);
 
-            float bottomProgress = Math.min(pixelProgress, width / 2f);
-            if (bottomProgress > 0) {
-                drawBeam(canvas,
-                        width / 2f - bottomProgress,
-                        height - thickness,
-                        width / 2f + bottomProgress,
-                        height, paint, padding);
-            }
+            // bottom
+            drawBeam(canvas,
+                    0,
+                    height - thickness,
+                    width,
+                    height, paint, padding);
 
-            float sideProgress = Math.min(pixelProgress - bottomProgress, height - thickness);
-            if (sideProgress > 0) {
-                drawBeam(canvas,
-                        0,
-                        (height - thickness) - sideProgress,
-                        thickness,
-                        height - thickness, paint, padding);
-                drawBeam(canvas,
-                        width - thickness,
-                        (height - thickness) - sideProgress,
-                        width,
-                        height - thickness, paint, padding);
-            }
+            // sides
+            drawBeam(canvas,
+                    0,
+                    0,
+                    thickness,
+                    height - thickness, paint, padding);
+            drawBeam(canvas,
+                    width - thickness,
+                    0,
+                    width,
+                    height - thickness, paint, padding);
 
-            float topProgress = Math.min(pixelProgress - bottomProgress - sideProgress,
-                    width / 2 - thickness);
-            if (sideProgress > 0 && topProgress > 0) {
-                drawBeam(canvas,
-                        thickness,
-                        0,
-                        thickness + topProgress,
-                        thickness, paint, padding);
-                drawBeam(canvas,
-                        (width - thickness) - topProgress,
-                        0,
-                        width - thickness,
-                        thickness, paint, padding);
-            }
+            // top
+            drawBeam(canvas,
+                    thickness,
+                    0,
+                    width - thickness,
+                    thickness, paint, padding);
         }
 
         private void drawBeam(Canvas canvas, float left, float top, float right, float bottom,
@@ -253,8 +233,6 @@ public class AssistDisclosure {
                 mAlpha = (int) mAlphaOutAnimator.getAnimatedValue();
             } else if (animation == mAlphaInAnimator) {
                 mAlpha = (int) mAlphaInAnimator.getAnimatedValue();
-            } else if (animation == mTracingAnimator) {
-                mTracingProgress = (float) mTracingAnimator.getAnimatedValue();
             }
             invalidate();
         }

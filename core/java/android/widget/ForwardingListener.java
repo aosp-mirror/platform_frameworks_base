@@ -58,13 +58,14 @@ public abstract class ForwardingListener
 
     public ForwardingListener(View src) {
         mSrc = src;
+        src.setLongClickable(true);
+        src.addOnAttachStateChangeListener(this);
+
         mScaledTouchSlop = ViewConfiguration.get(src.getContext()).getScaledTouchSlop();
         mTapTimeout = ViewConfiguration.getTapTimeout();
 
         // Use a medium-press timeout. Halfway between tap and long-press.
         mLongPressTimeout = (mTapTimeout + ViewConfiguration.getLongPressTimeout()) / 2;
-
-        src.addOnAttachStateChangeListener(this);
     }
 
     /**

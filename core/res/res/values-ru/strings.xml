@@ -269,7 +269,7 @@
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"доступ к данным датчиков о состоянии организма"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Получать содержимое окна"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Анализировать содержимое активного окна."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Включать аудиоподсказки"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Включать Изучение касанием"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Озвучивать нажимаемые элементы и разрешать управление устройством с помощью жестов."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Включать спец. возможности для Интернета"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Могут быть установлены дополнительные скрипты."</string>
@@ -685,6 +685,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Правильно!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Повторите попытку"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Повторите попытку"</string>
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"Разблок. для доступа ко всем функциям и данным"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Все попытки войти с помощью Фейсконтроля использованы"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Нет SIM-карты"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"SIM-карта не установлена."</string>
@@ -827,9 +828,9 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"Удалить запрос"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Отправить запрос"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Голосовой поиск"</string>
-    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Включить аудиоподсказки?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> хочет включить функцию \"Аудиоподсказки\". Она позволяет прослушивать или просматривать описание элементов, которых вы касаетесь, и управлять планшетным ПК с помощью жестов."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> хочет включить функцию \"Аудиоподсказки\". Она позволяет прослушивать или просматривать описание элементов, которых вы касаетесь, и управлять телефоном с помощью жестов."</string>
+    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Включить Изучение касанием?"</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> хочет включить Изучение касанием. Вы сможете прослушивать или просматривать описание элементов, которых касаетесь, и управлять планшетом с помощью жестов."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> хочет включить Изучение касанием. Вы сможете прослушивать или просматривать описание элементов, которых касаетесь, и управлять телефоном с помощью жестов."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 месяц назад"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Более месяца назад"</string>
     <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
@@ -1021,7 +1022,7 @@
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Изменить"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Поделиться с помощью:"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Поделиться через %1$s"</string>
-    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Открыть доступ"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Поделиться"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"Выберите приложение"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"Отправка с помощью %1$s"</string>
     <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"Отправить"</string>
@@ -1069,8 +1070,9 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Обновление Android..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Запуск Android…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Оптимизация хранилища…"</string>
-    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Обновление Android"</string>
+    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"Завершается обновление Android"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Во время обновления возможны неполадки в работе приложений."</string>
+    <string name="app_upgrading_toast" msgid="3008139776215597053">"Обновление приложения \"<xliff:g id="APPLICATION">%1$s</xliff:g>\"…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Оптимизация приложения <xliff:g id="NUMBER_0">%1$d</xliff:g> из <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Подготовка приложения \"<xliff:g id="APPNAME">%1$s</xliff:g>\"..."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Запуск приложений."</string>
@@ -1125,6 +1127,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"Сеть Wi-Fi не подключена к Интернету"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Нажмите, чтобы показать варианты."</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"Новое подключение: <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Устройство использует <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, если подключение к сети <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> недоступно. Может взиматься плата за передачу данных."</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"Устройство отключено от сети <xliff:g id="NEW_NETWORK">%2$s</xliff:g> и теперь использует <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"мобильные данные"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"Bluetooth"</item>
+    <item msgid="5447331121797802871">"Ethernet"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"неизвестный тип сети"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Не удалось подключиться к сети Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" – плохое интернет-соединение."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Разрешить подключение?"</string>
@@ -1202,7 +1215,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Нажмите, чтобы выбрать язык и раскладку"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"варианты"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Подготовка карты \"<xliff:g id="NAME">%s</xliff:g>\"…"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Поиск ошибок"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Обнаружена новая карта \"<xliff:g id="NAME">%s</xliff:g>\""</string>
@@ -1281,8 +1293,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Подключено: \"<xliff:g id="SESSION">%s</xliff:g>\". Нажмите здесь, чтобы изменить настройки сети."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Подключение…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Подключено"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Отключено"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Ошибка"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"Нажмите, чтобы настроить."</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Нажмите, чтобы настроить"</string>
     <string name="upload_file" msgid="2897957172366730416">"Выбрать файл"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Не выбран файл"</string>
     <string name="reset" msgid="2448168080964209908">"Сбросить"</string>
@@ -1368,7 +1381,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"USB-накопитель <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB-накопитель"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Изменить"</string>
-    <string name="data_usage_warning_title" msgid="1955638862122232342">"Осталось мало трафика"</string>
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"Лимит на передачу данных"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Нажмите, чтобы проверить трафик и настройки."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Достигнут лимит трафика 2G/3G"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Достигнут лимит трафика 4G"</string>
@@ -1707,6 +1720,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"Введите язык"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Рекомендуемые"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Все языки"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"Все регионы"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Поиск"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"Рабочий режим отключен"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Включить рабочий профиль: приложения, фоновую синхронизацию и связанные функции."</string>
@@ -1724,7 +1738,16 @@
     <string name="unpin_target" msgid="3556545602439143442">"Открепить"</string>
     <string name="app_info" msgid="6856026610594615344">"О приложении"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"Сбросить настройки устройства?"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Нажмите здесь, чтобы сбросить настройки"</string>
+    <string name="demo_starting_message" msgid="5268556852031489931">"Запуск деморежима…"</string>
+    <string name="demo_restarting_message" msgid="952118052531642451">"Сброс настроек…"</string>
+    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Сбросить настройки устройства?"</string>
+    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Все изменения будут утеряны. Деморежим будет перезапущен через <xliff:g id="TIMEOUT">%1$s</xliff:g> сек."</string>
+    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Отмена"</string>
+    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Сбросить"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Сброс до заводских настроек для работы без ограничений"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Нажмите, чтобы узнать больше."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Виджет <xliff:g id="LABEL">%1$s</xliff:g> отключен"</string>
+    <string name="conference_call" msgid="3751093130790472426">"Конференц-связь"</string>
 </resources>

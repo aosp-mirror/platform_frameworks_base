@@ -40,6 +40,7 @@ import android.view.LayoutInflater;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
 
+import android.widget.Toast;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.policy.DockedDividerUtils;
 import com.android.systemui.R;
@@ -184,7 +185,9 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         mHeaderBar = (TaskViewHeader) inflater.inflate(R.layout.recents_task_view_header,
                 null, false);
         reloadResources();
+    }
 
+    public void onBootCompleted() {
         // When we start, preload the data associated with the previous recent tasks.
         // We can use a new plan since the caches will be the same.
         RecentsTaskLoader loader = Recents.getTaskLoader();
@@ -197,14 +200,18 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         loader.loadTasks(mContext, plan, launchOpts);
     }
 
-    public void onBootCompleted() {
-        // Do nothing
-    }
-
     public void onConfigurationChanged() {
+        Resources res = mContext.getResources();
         reloadResources();
         mDummyStackView.reloadOnConfigurationChange();
+        // Update the header bar direction directly as it is not attached to anything and does not
+        // layout except in updateHeaderBarLayout()
+        mHeaderBar.setLayoutDirection(res.getConfiguration().getLayoutDirection());
         mHeaderBar.onConfigurationChanged();
+        mHeaderBar.forceLayout();
+        mHeaderBar.measure(
+                MeasureSpec.makeMeasureSpec(mHeaderBar.getMeasuredWidth(), MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(mHeaderBar.getMeasuredHeight(), MeasureSpec.EXACTLY));
     }
 
     /**
@@ -213,11 +220,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
      * {@link Recents#onBusEvent(RecentsVisibilityChangedEvent)}.
      */
     public void onVisibilityChanged(Context context, boolean visible) {
-        SystemUIApplication app = (SystemUIApplication) context;
-        PhoneStatusBar statusBar = app.getComponent(PhoneStatusBar.class);
-        if (statusBar != null) {
-            statusBar.updateRecentsVisibility(visible);
-        }
+        Recents.getSystemServices().setRecentsVisibility(visible);
     }
 
     /**
@@ -392,6 +395,10 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
     public void onDraggingInRecentsEnded(float velocity) {
         EventBus.getDefault().sendOntoMainThread(new DraggingInRecentsEndedEvent(velocity));
+    }
+
+    public void onShowCurrentUserToast(int msgResId, int msgLength) {
+        Toast.makeText(mContext, msgResId, msgLength).show();
     }
 
     /**
@@ -611,7 +618,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         stackLayout.setSystemInsets(systemInsets);
         if (stack != null) {
             stackLayout.getTaskStackBounds(displayRect, windowRect, systemInsets.top,
-                    systemInsets.right, mTaskStackBounds);
+                    systemInsets.left, systemInsets.right, mTaskStackBounds);
             stackLayout.reset();
             stackLayout.initialize(displayRect, windowRect, mTaskStackBounds,
                     TaskStackLayoutAlgorithm.StackState.getStackStateForStack(stack));
@@ -623,6 +630,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 synchronized (mHeaderBarLock) {
                     if (mHeaderBar.getMeasuredWidth() != taskViewWidth ||
                             mHeaderBar.getMeasuredHeight() != mTaskBarHeight) {
+                        mHeaderBar.forceLayout();
                         mHeaderBar.measure(
                                 MeasureSpec.makeMeasureSpec(taskViewWidth, MeasureSpec.EXACTLY),
                                 MeasureSpec.makeMeasureSpec(mTaskBarHeight, MeasureSpec.EXACTLY));
@@ -809,15 +817,19 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             boolean isHomeStackVisible, boolean animate, int growTarget) {
         RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        boolean isBlacklisted = (runningTask != null)
+                ? ssp.isBlackListedActivity(runningTask.baseActivity.getClassName())
+                : false;
 
-        int runningTaskId = !mLaunchedWhileDocking && (runningTask != null)
+        int runningTaskId = !mLaunchedWhileDocking && !isBlacklisted && (runningTask != null)
                 ? runningTask.id
                 : -1;
 
         // In the case where alt-tab is triggered, we never get a preloadRecents() call, so we
         // should always preload the tasks now. If we are dragging in recents, reload them as
         // the stacks might have changed.
-        if (mLaunchedWhileDocking || mTriggeredFromAltTab ||sInstanceLoadPlan == null) {
+        if (mLaunchedWhileDocking || mTriggeredFromAltTab || sInstanceLoadPlan == null) {
             // Create a new load plan if preloadRecents() was never triggered
             sInstanceLoadPlan = loader.createLoadPlan(mContext);
         }
@@ -827,11 +839,13 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
         TaskStack stack = sInstanceLoadPlan.getTaskStack();
         boolean hasRecentTasks = stack.getTaskCount() > 0;
-        boolean useThumbnailTransition = (runningTask != null) && !isHomeStackVisible && hasRecentTasks;
+        boolean useThumbnailTransition = (runningTask != null) && !isHomeStackVisible &&
+                hasRecentTasks;
 
         // Update the launch state that we need in updateHeaderBarLayout()
         launchState.launchedFromHome = !useThumbnailTransition && !mLaunchedWhileDocking;
         launchState.launchedFromApp = useThumbnailTransition || mLaunchedWhileDocking;
+        launchState.launchedFromBlacklistedApp = launchState.launchedFromApp && isBlacklisted;
         launchState.launchedViaDockGesture = mLaunchedWhileDocking;
         launchState.launchedViaDragGesture = mDraggingInRecents;
         launchState.launchedToTaskId = runningTaskId;
@@ -859,7 +873,9 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         }
 
         ActivityOptions opts;
-        if (useThumbnailTransition) {
+        if (isBlacklisted) {
+            opts = getUnknownTransitionActivityOptions();
+        } else if (useThumbnailTransition) {
             // Try starting with a thumbnail transition
             opts = getThumbnailTransitionActivityOptions(runningTask, mDummyStackView,
                     windowOverrideRect);

@@ -345,7 +345,7 @@ public class ApplicationErrorReport implements Parcelable {
             PrintWriter pw = new FastPrintWriter(sw, false, 256);
             tr.printStackTrace(pw);
             pw.flush();
-            stackTrace = sw.toString();
+            stackTrace = sanitizeString(sw.toString());
             exceptionMessage = tr.getMessage();
 
             // Populate fields with the "root cause" exception
@@ -374,6 +374,29 @@ public class ApplicationErrorReport implements Parcelable {
                 throwMethodName = "unknown";
                 throwLineNumber = 0;
             }
+
+            exceptionMessage = sanitizeString(exceptionMessage);
+        }
+
+        /**
+         * Ensure that the string is of reasonable size, truncating from the middle if needed.
+         */
+        private String sanitizeString(String s) {
+            int prefixLength = 10 * 1024;
+            int suffixLength = 10 * 1024;
+            int acceptableLength = prefixLength + suffixLength;
+
+            if (s != null && s.length() > acceptableLength) {
+                String replacement =
+                        "\n[TRUNCATED " + (s.length() - acceptableLength) + " CHARS]\n";
+
+                StringBuilder sb = new StringBuilder(acceptableLength + replacement.length());
+                sb.append(s.substring(0, prefixLength));
+                sb.append(replacement);
+                sb.append(s.substring(s.length() - suffixLength));
+                return sb.toString();
+            }
+            return s;
         }
 
         /**

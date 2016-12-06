@@ -82,6 +82,7 @@ public class NekoService extends JobService {
                 if (cats.size() == 0 || rng.nextFloat() <= new_cat_prob) {
                     cat = Cat.create(this);
                     prefs.addCat(cat);
+                    cat.logAdd(this);
                     Log.v(TAG, "A new cat is here: " + cat.getName());
                 } else {
                     cat = cats.get(rng.nextInt(cats.size()));
@@ -99,6 +100,14 @@ public class NekoService extends JobService {
     @Override
     public boolean onStopJob(JobParameters jobParameters) {
         return false;
+    }
+
+    public static void registerJobIfNeeded(Context context, long intervalMinutes) {
+        JobScheduler jss = context.getSystemService(JobScheduler.class);
+        JobInfo info = jss.getPendingJob(JOB_ID);
+        if (info == null) {
+            registerJob(context, intervalMinutes);
+        }
     }
 
     public static void registerJob(Context context, long intervalMinutes) {

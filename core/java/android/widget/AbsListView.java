@@ -21,6 +21,7 @@ import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -75,6 +76,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.RemoteViews.OnClickHandler;
 
@@ -615,6 +617,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private int mTouchSlop;
     private float mDensityScale;
 
+    private float mScrollFactor;
+
     private InputConnection mDefInputConnection;
     private InputConnectionWrapper mPublicInputConnection;
 
@@ -856,6 +860,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 R.styleable.AbsListView_fastScrollAlwaysVisible, false));
 
         a.recycle();
+
+        if (context.getResources().getConfiguration().uiMode == Configuration.UI_MODE_TYPE_WATCH) {
+            setRevealOnFocusHint(false);
+        }
     }
 
     private void initAbsListView() {
@@ -868,6 +876,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         final ViewConfiguration configuration = ViewConfiguration.get(mContext);
         mTouchSlop = configuration.getScaledTouchSlop();
+        mScrollFactor = configuration.getScaledScrollFactor();
         mMinimumVelocity = configuration.getScaledMinimumFlingVelocity();
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
         mOverscrollDistance = configuration.getScaledOverscrollDistance();
@@ -1545,7 +1554,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         switch (action) {
             case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD:
             case R.id.accessibilityActionScrollDown: {
-                if (isEnabled() && getLastVisiblePosition() < getCount() - 1) {
+                if (isEnabled() && canScrollDown()) {
                     final int viewportHeight = getHeight() - mListPadding.top - mListPadding.bottom;
                     smoothScrollBy(viewportHeight, PositionScroller.SCROLL_DURATION);
                     return true;
@@ -1553,7 +1562,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             } return false;
             case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD:
             case R.id.accessibilityActionScrollUp: {
-                if (isEnabled() && mFirstPosition > 0) {
+                if (isEnabled() && canScrollUp()) {
                     final int viewportHeight = getHeight() - mListPadding.top - mListPadding.bottom;
                     smoothScrollBy(-viewportHeight, PositionScroller.SCROLL_DURATION);
                     return true;
@@ -2315,22 +2324,24 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     /**
-     * Get a view and have it show the data associated with the specified
-     * position. This is called when we have already discovered that the view is
-     * not available for reuse in the recycle bin. The only choices left are
+     * Gets a view and have it show the data associated with the specified
+     * position. This is called when we have already discovered that the view
+     * is not available for reuse in the recycle bin. The only choices left are
      * converting an old view or making a new one.
      *
-     * @param position The position to display
-     * @param isScrap Array of at least 1 boolean, the first entry will become true if
-     *                the returned view was taken from the "temporary detached" scrap heap, false if
-     *                otherwise.
+     * @param position the position to display
+     * @param outMetadata an array of at least 1 boolean where the first entry
+     *                    will be set {@code true} if the view is currently
+     *                    attached to the window, {@code false} otherwise (e.g.
+     *                    newly-inflated or remained scrap for multiple layout
+     *                    passes)
      *
      * @return A view displaying the data associated with the specified position
      */
-    View obtainView(int position, boolean[] isScrap) {
+    View obtainView(int position, boolean[] outMetadata) {
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "obtainView");
 
-        isScrap[0] = false;
+        outMetadata[0] = false;
 
         // Check whether we have a transient state view. Attempt to re-bind the
         // data and discard the view if we fail.
@@ -2349,7 +2360,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 }
             }
 
-            isScrap[0] = true;
+            outMetadata[0] = true;
 
             // Finish the temporary detach started in addScrapView().
             transientView.dispatchFinishTemporaryDetach();
@@ -2362,19 +2373,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             if (child != scrapView) {
                 // Failed to re-bind the data, return scrap to the heap.
                 mRecycler.addScrapView(scrapView, position);
-            } else {
-                if (child.isTemporarilyDetached()) {
-                    isScrap[0] = true;
+            } else if (child.isTemporarilyDetached()) {
+                outMetadata[0] = true;
 
-                    // Finish the temporary detach started in addScrapView().
-                    child.dispatchFinishTemporaryDetach();
-                } else {
-                    // we set isScrap to "true" only if the view is temporarily detached.
-                    // if the view is fully detached, it is as good as a view created by the
-                    // adapter
-                    isScrap[0] = false;
-                }
-
+                // Finish the temporary detach started in addScrapView().
+                child.dispatchFinishTemporaryDetach();
             }
         }
 
@@ -4206,21 +4209,26 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     @Override
     public boolean onGenericMotionEvent(MotionEvent event) {
-        if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_SCROLL:
-                    if (mTouchMode == TOUCH_MODE_REST) {
-                        final float vscroll = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
-                        if (vscroll != 0) {
-                            final int delta = (int) (vscroll * getVerticalScrollFactor());
-                            if (!trackMotionScroll(delta, delta)) {
-                                return true;
-                            }
-                        }
-                    }
-                    break;
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_SCROLL:
+                final float axisValue;
+                if (event.isFromSource(InputDevice.SOURCE_CLASS_POINTER)) {
+                    axisValue = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
+                } else if (event.isFromSource(InputDevice.SOURCE_ROTARY_ENCODER)) {
+                    axisValue = event.getAxisValue(MotionEvent.AXIS_SCROLL);
+                } else {
+                    axisValue = 0;
+                }
 
-                case MotionEvent.ACTION_BUTTON_PRESS:
+                final int delta = Math.round(axisValue * mScrollFactor);
+                if (delta != 0) {
+                    if (!trackMotionScroll(delta, delta)) {
+                        return true;
+                    }
+                }
+                break;
+            case MotionEvent.ACTION_BUTTON_PRESS:
+                if (event.isFromSource(InputDevice.SOURCE_CLASS_POINTER)) {
                     int actionButton = event.getActionButton();
                     if ((actionButton == MotionEvent.BUTTON_STYLUS_PRIMARY
                             || actionButton == MotionEvent.BUTTON_SECONDARY)
@@ -4230,8 +4238,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             removeCallbacks(mPendingCheckForTap);
                         }
                     }
-                    break;
-            }
+                }
+                break;
         }
 
         return super.onGenericMotionEvent(event);
@@ -5981,6 +5989,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         @Override
         public void closeConnection() {
             getTarget().closeConnection();
+        }
+
+        @Override
+        public boolean commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts) {
+            return getTarget().commitContent(inputContentInfo, flags, opts);
         }
     }
 

@@ -79,7 +79,7 @@ SharedPreferences sharedPref = context.getSharedPreferences(
 SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
 </pre>
 
-<p class="caution"><strong>Внимание!</strong> Если вы создадите общий файл настроек 
+<p class="caution"><strong>Внимание!</strong> Если вы создадите общий файл настроек
 с {@link android.content.Context#MODE_WORLD_READABLE} или {@link
 android.content.Context#MODE_WORLD_WRITEABLE}, ваши данные будут доступны всем другим приложениям, которым известен идентификатор
 файла.</p>

@@ -179,6 +179,8 @@ public:
             const ClipBase* recordedClip, const Matrix4& recordedClipTransform);
     void applyClip(const ClipBase* recordedClip, const Matrix4& recordedClipTransform);
 
+    static void applyTransformToRegion(const Matrix4& transform, SkRegion* region);
+
 private:
     void enterRectangleMode();
     void rectangleModeClipRectWithTransform(const Rect& r, const mat4* transform, SkRegion::Op op);

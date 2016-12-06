@@ -29,6 +29,7 @@ import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
 import static com.android.server.wm.AppTransition.DEFAULT_APP_TRANSITION_DURATION;
 import static com.android.server.wm.AppTransition.TOUCH_RESPONSE_INTERPOLATOR;
+import static com.android.server.wm.AppTransition.TRANSIT_NONE;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED;
@@ -38,6 +39,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.IDockedStackListener;
@@ -388,8 +390,8 @@ public class DockedStackDividerController implements DimLayerUser {
                 inputMethodManagerInternal.hideCurrentInputMethod();
                 mImeHideRequested = true;
             }
-        } else {
-            setMinimizedDockedStack(false);
+        } else if (setMinimizedDockedStack(false)) {
+            mService.mWindowPlacerLocked.performSurfacePlacement();
         }
     }
 
@@ -492,8 +494,32 @@ public class DockedStackDividerController implements DimLayerUser {
         checkMinimizeChanged(false /* animate */);
     }
 
-    void notifyAppTransitionStarting() {
+    void notifyAppTransitionStarting(ArraySet<AppWindowToken> openingApps, int appTransition) {
+        final boolean wasMinimized = mMinimizedDock;
         checkMinimizeChanged(true /* animate */);
+
+        // We were minimized, and now we are still minimized, but somebody is trying to launch an
+        // app in docked stack, better show recent apps so we actually get unminimized! This catches
+        // any case that was missed in ActivityStarter.postStartActivityUncheckedProcessing because
+        // we couldn't retrace the launch of the app in the docked stack to the launch from
+        // homescreen.
+        if (wasMinimized && mMinimizedDock && containsAppInDockedStack(openingApps)
+                && appTransition != TRANSIT_NONE) {
+            mService.showRecentApps(true /* fromHome */);
+        }
+    }
+
+    /**
+     * @return true if {@param apps} contains an activity in the docked stack, false otherwise.
+     */
+    private boolean containsAppInDockedStack(ArraySet<AppWindowToken> apps) {
+        for (int i = apps.size() - 1; i >= 0; i--) {
+            final AppWindowToken token = apps.valueAt(i);
+            if (token.mTask != null && token.mTask.mStack.mStackId == DOCKED_STACK_ID) {
+                return true;
+            }
+        }
+        return false;
     }
 
     boolean isMinimizedDock() {
@@ -542,31 +568,43 @@ public class DockedStackDividerController implements DimLayerUser {
             return;
         }
 
-        clearImeAdjustAnimation();
+        final boolean imeChanged = clearImeAdjustAnimation();
+        boolean minimizedChange = false;
         if (minimizedDock) {
             if (animate) {
                 startAdjustAnimation(0f, 1f);
             } else {
-                setMinimizedDockedStack(true);
+                minimizedChange |= setMinimizedDockedStack(true);
             }
         } else {
             if (animate) {
                 startAdjustAnimation(1f, 0f);
             } else {
-                setMinimizedDockedStack(false);
+                minimizedChange |= setMinimizedDockedStack(false);
             }
+        }
+        if (imeChanged || minimizedChange) {
+            if (imeChanged && !minimizedChange) {
+                Slog.d(TAG, "setMinimizedDockedStack: IME adjust changed due to minimizing,"
+                        + " minimizedDock=" + minimizedDock
+                        + " minimizedChange=" + minimizedChange);
+            }
+            mService.mWindowPlacerLocked.performSurfacePlacement();
         }
     }
 
-    private void clearImeAdjustAnimation() {
+    private boolean clearImeAdjustAnimation() {
+        boolean changed = false;
         final ArrayList<TaskStack> stacks = mDisplayContent.getStacks();
         for (int i = stacks.size() - 1; i >= 0; --i) {
             final TaskStack stack = stacks.get(i);
             if (stack != null && stack.isAdjustedForIme()) {
                 stack.resetAdjustedForIme(true /* adjustBoundsNow */);
+                changed  = true;
             }
         }
         mAnimatingForIme = false;
+        return changed;
     }
 
     private void startAdjustAnimation(float from, float to) {
@@ -625,8 +663,21 @@ public class DockedStackDividerController implements DimLayerUser {
                 if (mDelayedImeWin != null) {
                     mDelayedImeWin.mWinAnimator.endDelayingAnimationStart();
                 }
+                // If the adjust status changed since this was posted, only notify
+                // the new states and don't animate.
+                long duration = 0;
+                if (mAdjustedForIme == adjustedForIme
+                        && mAdjustedForDivider == adjustedForDivider) {
+                    duration = IME_ADJUST_ANIM_DURATION;
+                } else {
+                    Slog.w(TAG, "IME adjust changed while waiting for drawn:"
+                            + " adjustedForIme=" + adjustedForIme
+                            + " adjustedForDivider=" + adjustedForDivider
+                            + " mAdjustedForIme=" + mAdjustedForIme
+                            + " mAdjustedForDivider=" + mAdjustedForDivider);
+                }
                 notifyAdjustedForImeChanged(
-                        adjustedForIme || adjustedForDivider, IME_ADJUST_ANIM_DURATION);
+                        mAdjustedForIme || mAdjustedForDivider, duration);
             };
         } else {
             notifyAdjustedForImeChanged(
@@ -634,15 +685,10 @@ public class DockedStackDividerController implements DimLayerUser {
         }
     }
 
-    private void setMinimizedDockedStack(boolean minimized) {
+    private boolean setMinimizedDockedStack(boolean minimized) {
         final TaskStack stack = mDisplayContent.getDockedStackVisibleForUserLocked();
         notifyDockedStackMinimizedChanged(minimized, 0);
-        if (stack == null) {
-            return;
-        }
-        if (stack.setAdjustedForMinimizedDock(minimized ? 1f : 0f)) {
-            mService.mWindowPlacerLocked.performSurfacePlacement();
-        }
+        return stack != null && stack.setAdjustedForMinimizedDock(minimized ? 1f : 0f);
     }
 
     private boolean isAnimationMaximizing() {

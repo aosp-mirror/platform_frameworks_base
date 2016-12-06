@@ -626,6 +626,16 @@ public class KeyStore {
         }
     }
 
+    /**
+     * Notify keystore that the device went off-body.
+     */
+    public void onDeviceOffBody() {
+        try {
+            mBinder.onDeviceOffBody();
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot connect to keystore", e);
+        }
+    }
 
     /**
      * Returns a {@link KeyStoreException} corresponding to the provided keystore/keymaster error

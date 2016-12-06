@@ -41,7 +41,7 @@ public class NativeDaemonConnectorException extends Exception {
     }
 
     public int getCode() {
-        return mEvent.getCode();
+        return mEvent != null ? mEvent.getCode() : -1;
     }
 
     public String getCmd() {

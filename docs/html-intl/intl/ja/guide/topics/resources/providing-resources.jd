@@ -110,7 +110,7 @@ MyProject/
   <tr>
     <td><code>drawable/</code></td>
 
-    <td><p>ビットマップ ファイル（{@code .png}、{@code .9.png}、{@code .jpg}、{@code .gif}）または次のドローアブル リソース サブタイプにコンパイルされる XML ファイル: 
+    <td><p>ビットマップ ファイル（{@code .png}、{@code .9.png}、{@code .jpg}、{@code .gif}）または次のドローアブル リソース サブタイプにコンパイルされる XML ファイル:
 </p>
       <ul>
         <li>ビットマップ ファイル</li>
@@ -510,7 +510,7 @@ xlarge} 識別子のタグが付いているが、端末は通常サイズの画
 
 </p>
         <p>API レベル 4 で追加。<em></em></p>
-        
+
         <p>詳細については、「<a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a>」をご覧ください。
 </p>
         <p>さらに、{@link android.content.res.Configuration#screenLayout} 設定フィールドもご覧ください。これは、画面のサイズが小、中、大のいずれかであるかを表します。

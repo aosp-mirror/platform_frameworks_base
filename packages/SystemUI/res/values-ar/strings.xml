@@ -147,7 +147,9 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"شبكة الجيل الثالث"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"‏شبكة 3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"شبكة الجيل الرابع"</string>
+    <string name="accessibility_data_connection_4g_plus" msgid="3032226872470658661">"شبكة الجيل الرابع أو أحدث"</string>
     <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
+    <string name="accessibility_data_connection_lte_plus" msgid="361876866906946007">"LTE+"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"تجوال"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
@@ -197,13 +199,13 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"تشغيل وضع الطائرة."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"تم إيقاف وضع الطائرة."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"تم تشغيل وضع الطائرة."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"تم تشغيل الرجاء عدم الإزعاج، الأولوية فقط."</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"تم تشغيل الرجاء عدم الإزعاج، كتم الصوت تمامًا."</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"تم تشغيل الرجاء عدم الإزعاج، التنبيهات فقط."</string>
+    <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"تم تشغيل \"عدم الإزعاج، الأولوية فقط\"."</string>
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"تم تشغيل \"عدم الإزعاج، كتم الصوت تمامًا\"."</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"تم تشغيل \"عدم الإزعاج، التنبيهات فقط\"."</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"الرجاء عدم الإزعاج."</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"تم تعطيل \"الرجاء عدم الإزعاج\"."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"تم تعطيل \"الرجاء عدم الإزعاج\"."</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"تم تشغيل \"الرجاء عدم الإزعاج\"."</string>
+    <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"تم تشغيل \"عدم الإزعاج\"."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"البلوتوث."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"إيقاف البلوتوث."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"تشغيل البلوتوث."</string>
@@ -240,7 +242,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"تم إيقاف بيانات شبكة الجيل الرابع مؤقتًا"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"تم إيقاف بيانات شبكة الجوّال مؤقتًا"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"تم إيقاف البيانات مؤقتًا"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"نظرًا لأنك بلغت الحد الأقصى المحدد للبيانات، فقد أوقف الجهاز استخدام البيانات مؤقتًا في بقية هذه الدورة.\n\nومن الممكن أن يؤدي الاستئناف إلى تحصيل رسوم من قِبل مشغِّل شبكة الجوّال."</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"تم الوصول إلى حد البيانات الذي عيَّنته، ولم يعد بإمكانك استخدام بيانات شبكة الجوّال.\n\nعند الاستئناف، قد يتم تحصيل رسوم مقابل استخدام البيانات."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"استئناف"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"لا يوجد اتصال إنترنت"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"‏Wi-Fi متصل"</string>
@@ -325,6 +327,9 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"قيد <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"تحذير <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"وضع العمل"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"إضاءة ليلية"</string>
+    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"الإضاءة الليلية قيد العمل، انقر لإيقافها."</string>
+    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"الإضاءة الليلية قيد الإيقاف، انقر لتشغيلها."</string>
     <string name="recents_empty_message" msgid="808480104164008572">"ليست هناك عناصر تم استخدامها مؤخرًا"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"لقد محوتَ كل شيء"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"معلومات التطبيق"</string>
@@ -338,6 +343,8 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"تقسيم أفقي"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"تقسيم رأسي"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"تقسيم مخصص"</string>
+  <string-array name="recents_blacklist_array">
+  </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"تم الشحن"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"جارٍ الشحن"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> حتى الاكتمال"</string>
@@ -405,6 +412,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"ربما تتم مراقبة الجهاز"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"ربما تتم مراقبة الملف الشخصي"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"قد تكون الشبكة خاضعة للمراقبة"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"قد تكون الشبكة خاضعة للمراقبة"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"مراقبة الأجهزة"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"مراقبة الملف الشخصي"</string>
     <string name="monitoring_title" msgid="169206259253048106">"مراقبة الشبكات"</string>
@@ -417,6 +425,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"شبكة ظاهرية خاصة"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"أنت متصل بـ <xliff:g id="APPLICATION">%1$s</xliff:g>، الذي يمكنه مراقبة أنشطتك على الشبكة، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"أنت متصل بـ <xliff:g id="APPLICATION">%1$s</xliff:g>، الذي يمكنه مراقبة أنشطتك الشخصية على الشبكة، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"أنت متصل بـ <xliff:g id="APPLICATION">%1$s</xliff:g>، الذي يمكنه مراقبة أنشطتك الشخصية على الشبكة، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب."</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"تتم إدارة ملفك الشخصي للعمل عن طريق <xliff:g id="ORGANIZATION">%1$s</xliff:g>. وهذا الملف الشخصي للعمل متصل بـ <xliff:g id="APPLICATION">%2$s</xliff:g>، الذي يمكنه مراقبة أنشطتك على شبكة العمل، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب.\n\nللمزيد من المعلومات، اتصل بالمشرف."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"تتم إدارة ملفك الشخصي للعمل عن طريق <xliff:g id="ORGANIZATION">%1$s</xliff:g>. وهذا الملف الشخصي للعمل متصل بـ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>، الذي يمكنه مراقبة أنشطتك على شبكة العمل، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب.\n\nأنت متصل أيضًا بـ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>، الذي يمكنه مراقبة أنشطتك الشخصية على الشبكة."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"تتم إدارة جهازك عن طريق <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nيمكن للمشرف مراقبة وإدارة كل من الإعدادات والوصول إلى الشركة والتطبيقات والبيانات المرتبطة بجهازك ومعلومات الموقع لجهازك.\n\nأنت متصل بـ <xliff:g id="APPLICATION">%2$s</xliff:g>، الذي يمكنه مراقبة أنشطتك على الشبكة، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب.\n\nللمزيد من المعلومات، اتصل بالمشرف."</string>
@@ -442,6 +451,18 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> هو مربع حوار مستوى الصوت"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"انقر لاستعادة النسخة الأصلية."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"أنت تستخدم ملفك الشخصي للعمل"</string>
+  <string-array name="volume_stream_titles">
+    <item msgid="5841843895402729630">"الاتصال"</item>
+    <item msgid="5997713001067658559">"النظام"</item>
+    <item msgid="7858983209929864160">"الرنين"</item>
+    <item msgid="1850038478268896762">"الوسائط"</item>
+    <item msgid="8265110906352372092">"المنبه"</item>
+    <item msgid="5339394737636839168"></item>
+    <item msgid="2951313578278086204">"البلوتوث"</item>
+    <item msgid="2919807739709798970"></item>
+    <item msgid="150349973435223405"></item>
+    <item msgid="6761963760295549099"></item>
+  </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"‏%1$s. انقر لإلغاء التجاهل."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"‏%1$s. انقر للتعيين على الاهتزاز. قد يتم تجاهل خدمات إمكانية الوصول."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"‏%1$s. انقر للتجاهل. قد يتم تجاهل خدمات إمكانية الوصول."</string>
@@ -481,8 +502,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"عرض ثواني الساعة في شريط الحالة. قد يؤثر ذلك في عمر البطارية."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"إعادة ترتيب الإعدادات السريعة"</string>
     <string name="show_brightness" msgid="6613930842805942519">"عرض السطوع في الإعدادات السريعة"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"تمكين إيماءة تقسيم الشاشة بالتمرير السريع لأعلى"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"تمكين الإيماء لإدخال تقسيم الشاشة من خلال التمرير السريع لأعلى من زر النظرة العامة"</string>
     <string name="experimental" msgid="6198182315536726162">"إعدادات تجريبية"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"تشغيل البلوتوث؟"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"لتوصيل لوحة المفاتيح بالجهاز اللوحي، يلزمك تشغيل بلوتوث أولاً."</string>
@@ -512,21 +531,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"المزيد من الإعدادات"</string>
     <string name="notification_done" msgid="5279426047273930175">"تم"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"عناصر التحكم في إشعارات <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"اللون والمظهر"</string>
-    <string name="night_mode" msgid="3540405868248625488">"الوضع الليلي"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"معايرة الشاشة"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"تشغيل"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"إيقاف"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"التشغيل تلقائيًا"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"التبديل إلى الوضع الليلي بما يتناسب مع الموقع والوقت من اليوم"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"عند تشغيل الوضع الليلي"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"‏استخدام مظهر معتم لنظام التشغيل Android"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"ضبط التلوين الخفيف"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"ضبط السطوع"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"‏يتم تطبيق المظهر المعتم على المناطق الأساسية في نظام التشغيل Android والتي يتم عرضها عادة في مظهر مضيء، مثل الإعدادات."</string>
-    <string name="color_apply" msgid="9212602012641034283">"تطبيق"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"تأكيد الإعدادات"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"يمكن أن تتسبب بعض إعدادات الألوان في تعطيل إمكانية استخدام الجهاز. يمكنك النقر على \"موافق\" لتأكيد إعدادات الألوان هذه، وإلا فستتم إعادة تعيين هذه الإعدادات بعد ۱۰ ثوانٍ."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"استخدام البطارية"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"وضع توفير شحن البطارية غير متاح أثناء الشحن."</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"توفير شحن البطارية"</string>
@@ -655,4 +659,5 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"فتح إعدادات <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"تعديل ترتيب الإعدادات."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"الصفحة <xliff:g id="ID_1">%1$d</xliff:g> من <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <string name="cant_silence_or_block" msgid="999689262131488625">"لا يمكن كتم صوت الإشعارات أو حظرها"</string>
 </resources>

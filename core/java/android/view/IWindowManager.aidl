@@ -73,8 +73,8 @@ interface IWindowManager
     void clearForcedDisplaySize(int displayId);
     int getInitialDisplayDensity(int displayId);
     int getBaseDisplayDensity(int displayId);
-    void setForcedDisplayDensity(int displayId, int density);
-    void clearForcedDisplayDensity(int displayId);
+    void setForcedDisplayDensityForUser(int displayId, int density, int userId);
+    void clearForcedDisplayDensityForUser(int displayId, int userId);
     void setForcedDisplayScalingMode(int displayId, int mode); // 0 = auto, 1 = disable
 
     void setOverscan(int displayId, int left, int top, int right, int bottom);
@@ -112,7 +112,7 @@ interface IWindowManager
             int requestedOrientation, boolean fullscreen, boolean showWhenLocked, int userId,
             int configChanges, boolean voiceInteraction, boolean launchTaskBehind,
             in Rect taskBounds, in Configuration configuration, int taskResizeMode,
-            boolean alwaysFocusable, boolean homeTask, int targetSdkVersion);
+            boolean alwaysFocusable, boolean homeTask, int targetSdkVersion, int rotationAnimationHint);
     /**
      *
      * @param token The token we are adding to the input task Id.
@@ -173,7 +173,8 @@ interface IWindowManager
             in CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes,
             int icon, int logo, int windowFlags, IBinder transferFrom, boolean createIfNeeded);
     void setAppVisibility(IBinder token, boolean visible);
-    void notifyAppStopped(IBinder token, boolean stopped);
+    void notifyAppResumed(IBinder token, boolean wasStopped, boolean allowSavedSurface);
+    void notifyAppStopped(IBinder token);
     void startAppFreezingScreen(IBinder token, int configChanges);
     void stopAppFreezingScreen(IBinder token, boolean force);
     void removeAppToken(IBinder token);
@@ -306,6 +307,11 @@ interface IWindowManager
     boolean isRotationFrozen();
 
     /**
+     * Screenshot the current wallpaper layer, including the whole screen.
+     */
+    Bitmap screenshotWallpaper();
+
+    /**
      * Used only for assist -- request a screenshot of the current application.
      */
     boolean requestAssistScreenshot(IAssistScreenshotReceiver receiver);
@@ -323,6 +329,16 @@ interface IWindowManager
      * Called by the status bar to notify Views of changes to System UI visiblity.
      */
     oneway void statusBarVisibilityChanged(int visibility);
+
+    /**
+     * Called by System UI to notify of changes to the visibility of Recents.
+     */
+    oneway void setRecentsVisibility(boolean visible);
+
+    /**
+     * Called by System UI to notify of changes to the visibility of PIP.
+     */
+    oneway void setTvPipVisibility(boolean visible);
 
     /**
      * Device has a software navigation bar (separate from the status bar).

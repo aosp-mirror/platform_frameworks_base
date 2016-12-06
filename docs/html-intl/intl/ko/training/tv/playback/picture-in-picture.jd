@@ -1,0 +1,213 @@
+page.title=PIP
+page.keywords=preview, sdk, PIP, Picture-in-picture
+page.tags=androidn
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>이 문서의 내용</h2>
+<ol>
+  <li><a href="#declaring">액티비티의
+PIP 지원 선언</a></li>
+  <li><a href="#pip_button">액티비티를 PIP로 전환</a>
+</li>
+  <li><a href="#handling_ui">PIP에서 UI 처리</a>
+</li>
+  <li><a href="#continuing_playback">
+PIP에서 동영상 재생 계속</a></li>
+  <li><a href="#single_playback">PIP를 위한 단일 재생 액티비티
+사용</a></li>
+  <li><a href="#best">모범 사례</a></li>
+</ol>
+
+<h2>참고 항목</h2>
+<ol>
+  <li><a href="{@docRoot}preview/features/multi-window.html">다중 창
+지원</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>Android N에서 Android TV 사용자는
+앱 안에서 탐색할 때 화면 모서리의 고정 창에서
+동영상을 볼 수 있습니다. PIP(Picture-In-Picture) 모드를 사용하면
+앱의 백그라운드에서 다른 액티비티를 계속하면서
+고정 창에서 동영상 액티비티를 실행할 수 있습니다. PIP 창에서 사용자는 앱을 사용하는 동안 멀티태스킹이 가능하므로
+생산성이 향상됩니다.</p>
+
+<p>앱이 PIP 모드를 실행할 시기를 결정할 수 있습니다. PIP 모드로 전환하는 시기와 관련된 몇 가지
+예시는 다음과 같습니다.</p>
+
+<ul>
+<li>사용자가 동영상에서 다른 콘텐츠를 탐색하러 이동할 때 앱이
+동영상을 PIP 모드로 전환할 수 있습니다.</li>
+<li>사용자가 콘텐츠 에피소드의 끝부분을 볼 때 앱이
+동영상을 PIP 모드로 전환할 수 있습니다. 메인 화면은 시리즈 다음 에피소드의
+홍보 또는 요약 정보를 표시합니다.</li>
+<li>사용자가 동영상을 보는 동안 앱이
+추가 콘텐츠를 대기열에 올릴 수 있는 방법을 제공할 수 있습니다. 메인 화면에 콘텐츠 선택 액티비티가 표시되는 동안
+동영상이 PIP 모드에서 계속 재생됩니다.</li>
+</ul>
+
+<p>PIP 창은 240x135dp이고
+화면 모서리 4개 중 하나에서 가장 위쪽 레이어에 표시되며, 시스템이 선택합니다. 사용자는
+리모컨의 <b>Home</b> 버튼을 눌러
+PIP 창을 전체 화면으로 전환하거나 PIP를 닫는 PIP 메뉴를 불러올 수 있습니다. 다른 동영상이
+메인 화면에서 재생되기 시작하면 PIP 창이
+자동으로 닫힙니다. 사용자가 Recents를 통해서 PIP 창을 닫을 수도 있습니다.</p>
+
+<img src="{@docRoot}images/android-7.0/pip-active.png" />
+<p class="img-caption"><strong>그림 1.</strong> 사용자가 메인 화면에서 콘텐츠를 탐색하는 동안
+화면 모서리에 표시되는 PIP 동영상.
+</p>
+
+<p>PIP는 Android N에서 사용할 수 있는 다중 창 API를 사용하여
+고정된 동영상 오버레이 창을 제공합니다. 앱에 PIP를 추가하려면
+PIP를 지원하는 액티비티를 등록하고 필요한 경우 액티비티를 PIP 모드로 전환해야 합니다. 또한
+액티비티가 PIP 모드에 있을 때 UI 요소가 숨겨지고 동영상 재생이
+계속되는지 확인해야 합니다.</p>
+
+<h2 id="declaring">액티비티의 PIP 지원 선언</h2>
+
+<p>기본적으로 시스템은 앱에 대해 PIP를 자동으로 지원하지 않습니다.
+앱에서 PIP를 지원하려면
+<code>android:supportsPictureInPicture</code>와
+<code>android:resizeableActivity</code>를 <code>true</code>로 설정하여 매니페스트에서 동영상 액티비티를
+등록합니다. 또한,
+PIP 모드 전환 시 레이아웃 변경이 일어날 때 액티비티가 다시 시작되지 않도록
+액티비티가 레이아웃 구성 변화를 처리하게 지정합니다.</p>
+
+<pre>
+&lt;activity android:name="VideoActivity"
+    android:resizeableActivity="true"
+    android:supportsPictureInPicture="true"
+    android:configChanges=
+        "screenSize|smallestScreenSize|screenLayout|orientation"
+    ...
+</pre>
+
+<p>액티비티를 등록할 때는 PIP 모드에서
+액티비티가 TV 화면의 작은 오버레이 창에 표시된다는 것을 기억하세요. 최소 UI를 포함한
+동영상 재생 액티비티가 가장 좋은 사용자 환경을 제공합니다. 작은 UI 요소를 포함한
+액티비티는 PIP 모드로 전환할 때
+사용자가 PIP 창의 UI 요소를 상세히 볼 수 없으므로
+좋은 사용자 환경을 제공하지 못할 수 있습니다.</p>
+
+<h2 id="pip_button">액티비티를 PIP로 전환</h2>
+
+액티비티를 PIP 모드로 전환해야 하는 경우
+<code>Activity.enterPictureInPictureMode()</code>를 호출합니다. 다음 예에서는 사용자가
+미디어 컨트롤 막대에서 전용 PIP 버튼을 선택했을 때
+PIP 모드로 전환합니다.</p>
+
+<pre>
+&#64;Override
+public void onActionClicked(Action action) {
+    if (action.getId() == R.id.lb_control_picture_in_picture) {
+        getActivity().enterPictureInPictureMode();
+        return;
+    }
+    ...
+</pre>
+
+<p>미디어 컨트롤 막대에 PIP 버튼을 추가하면
+사용자가 동영상 재생을 제어하면서 PIP 모드로 쉽게 전환할 수 있습니다.</p>
+
+<img src="{@docRoot}images/android-7.0/pip-button.png" />
+<p class="img-caption"><strong>그림 1.</strong> 미디어 컨트롤 막대의 PIP
+버튼.</p>
+
+<p>Android N에는 컨트롤 막대 PIP 동작을 정의하고 PIP 아이콘을 사용하는 새로운
+<code>PlaybackControlsRow.PictureInPictureAction</code> 클래스가 포함되어 있습니다.
+</p>
+
+<h2 id="handling_ui">PIP에서 UI 처리</h2>
+
+<p>액티비티가 PIP 모드로 전환되면
+동영상 재생만 표시됩니다. 액티비티가 PIP 모드로 전환되기 전에 UI 요소를 제거하고
+액티비티가 다시 전체 화면이 되었을 때 이 요소를 복원합니다.
+필요에 따라 <code>Activity.onPictureInPictureModeChanged()</code> 또는
+<code>Fragment.onPictureInPictureModeChanged()</code>를 재정의하고
+UI 요소를 활성화/비활성화합니다. 예를 들면 다음과 같습니다.</p>
+
+<pre>
+&#64;Override
+public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
+    if (isInPictureInPictureMode) {
+        // Hide the controls in picture-in-picture mode.
+        ...
+    } else {
+        // Restore the playback UI based on the playback status.
+        ...
+    }
+}
+</pre>
+
+<h2 id="continuing_playback">PIP에서 동영상 재생 계속
+</h2>
+
+<p>액티비티가 PIP 모드로 전환되면 시스템은
+액티비티가 일시 정지된 상태에 있다고 간주하고 액티비티의 <code>onPause()</code> 메서드를 호출합니다. 동영상
+재생은 일시 정지되어서는 안되며 PIP 모드로 인해 액티비티가 일시 정지되었다면
+계속 재생되어야 합니다. 액티비티의
+<code>onPause()</code> 메서드에서 PIP를 확인하고 적절히 재생을 처리합니다. 예를 들면 다음과 같습니다.
+</p>
+
+<pre>
+&#64;Override
+public void onPause() {
+    // If called while in PIP mode, do not pause playback
+    if (isInPictureInPictureMode()) {
+        // Continue playback
+        ...
+    }
+    // If paused but not in PIP, pause playback if necessary
+    ...
+}
+</pre>
+
+<p>액티비티가 PIP 모드에서 전체 화면 모드로 전환되면
+시스템이 액티비티를 재시작하고 <code>onResume()</code> 메서드를 호출합니다.</p>
+
+<h2 id="single_playback">PIP를 위한 단일 재생 액티비티
+사용</h2>
+
+<p>동영상 재생 액티비티가 PIP 모드에 있는 동안, 앱에서
+사용자가 메인 화면에서 콘텐츠를 찾아볼 때 새 동영상을 선택할 수도 있습니다. 이 때 새 액티비티를 시작하면
+사용자에게 혼동을 줄 수 있으므로, 새 액티비티를 시작하는 대신
+기존 재생 액티비티에서 새 동영상을 전체 화면 모드로 재생합니다.</p>
+
+<p>동영상 재생 요청에 단일 액티비티가 사용되도록 하고
+필요에 따라 PIP 모드로 들어가거나 PIP 모드에서 나오도록 하려면, 매니페스트에서 액티비티의
+<code>android:launchMode</code>를 <code>singleTask</code>로 설정합니다.
+</p>
+
+<pre>
+&lt;activity android:name="VideoActivity"
+    ...
+    android:supportsPictureInPicture="true"
+    android:launchMode="singleTask"
+    ...
+</pre>
+
+<p>액티비티에서 {@link android.app.Activity#onNewIntent
+Activity.onNewIntent()}를 재정의하고 새 동영상을 처리하며, 필요한 경우 기존 동영상
+재생을 중단시키세요.</p>
+
+<h2 id="best">모범 사례</h2>
+
+<p>PIP는 전체 화면 동영상을 재생하는 액티비티용입니다. 액티비티를
+PIP 모드로 전환할 때는 동영상 콘텐츠만 표시하세요.
+<a href="#handling_ui">PIP에서 UI 처리</a>에서 설명한 바와 같이 액티비티가 PIP 모드로 전환되는 때를
+추적하고 UI 요소를 숨깁니다.</p>
+
+<p>PIP 창이 화면 모서리에 떠 있는 창으로 표시되므로
+PIP 창으로 가려질 수 있는 영역에는 메인 화면에서
+중요한 정보를 표시하지 말아야 합니다.</p>
+
+<p>액티비티가 PIP 모드일 때는 기본적으로 입력 포커스를 받지 않습니다. PIP 모드에서
+입력 이벤트를 수신하려면
+<code>MediaSession.setMediaButtonReceiver()</code>를 사용합니다.</p>

@@ -30,6 +30,8 @@ import android.content.pm.ApplicationInfo;
 import android.telephony.SignalStrength;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
+import android.util.Log;
+import android.util.LongSparseArray;
 import android.util.MutableBoolean;
 import android.util.Pair;
 import android.util.Printer;
@@ -47,6 +49,7 @@ import com.android.internal.os.BatteryStatsHelper;
  * @hide
  */
 public abstract class BatteryStats implements Parcelable {
+    private static final String TAG = "BatteryStats";
 
     private static final boolean LOCAL_LOGV = false;
 
@@ -175,8 +178,11 @@ public abstract class BatteryStats implements Parcelable {
 
     /**
      * Current version of checkin data format.
+     *
+     * New in version 19:
+     *   - Wakelock data (wl) gets current and max times.
      */
-    static final String CHECKIN_VERSION = "18";
+    static final String CHECKIN_VERSION = "19";
 
     /**
      * Old version, we hit 9 and ran out of room, need to remove.
@@ -350,6 +356,32 @@ public abstract class BatteryStats implements Parcelable {
          * @return a time in microseconds
          */
         public abstract long getTimeSinceMarkLocked(long elapsedRealtimeUs);
+
+        /**
+         * Returns the max duration if it is being tracked.
+         * Not all Timer subclasses track the max duration and the current duration.
+
+         */
+        public long getMaxDurationMsLocked(long elapsedRealtimeMs) {
+            return -1;
+        }
+
+        /**
+         * Returns the current time the timer has been active, if it is being tracked.
+         * Not all Timer subclasses track the max duration and the current duration.
+         */
+        public long getCurrentDurationMsLocked(long elapsedRealtimeMs) {
+            return -1;
+        }
+
+        /**
+         * Returns whether the timer is currently running.  Some types of timers
+         * (e.g. BatchTimers) don't know whether the event is currently active,
+         * and report false.
+         */
+        public boolean isRunningLocked() {
+            return false;
+        }
 
         /**
          * Temporary for debugging.
@@ -545,6 +577,20 @@ public abstract class BatteryStats implements Parcelable {
          * @see com.android.internal.os.PowerProfile#getNumSpeedStepsInCpuCluster(int)
          */
         public abstract long getTimeAtCpuSpeed(int cluster, int step, int which);
+
+        /**
+         * Returns the number of times this UID woke up the Application Processor to
+         * process a mobile radio packet.
+         * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
+         */
+        public abstract long getMobileRadioApWakeupCount(int which);
+
+        /**
+         * Returns the number of times this UID woke up the Application Processor to
+         * process a WiFi packet.
+         * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
+         */
+        public abstract long getWifiRadioApWakeupCount(int which);
 
         public static abstract class Sensor {
             /*
@@ -1285,9 +1331,14 @@ public abstract class BatteryStats implements Parcelable {
         public static final int EVENT_TEMP_WHITELIST = 0x0011;
         // Event for the screen waking up.
         public static final int EVENT_SCREEN_WAKE_UP = 0x0012;
+        // Event for the UID that woke up the application processor.
+        // Used for wakeups coming from WiFi, modem, etc.
+        public static final int EVENT_WAKEUP_AP = 0x0013;
+        // Event for reporting that a specific partial wake lock has been held for a long duration.
+        public static final int EVENT_LONG_WAKE_LOCK = 0x0014;
 
         // Number of event types.
-        public static final int EVENT_COUNT = 0x0013;
+        public static final int EVENT_COUNT = 0x0015;
         // Mask to extract out only the type part of the event.
         public static final int EVENT_TYPE_MASK = ~(EVENT_FLAG_START|EVENT_FLAG_FINISH);
 
@@ -1315,6 +1366,10 @@ public abstract class BatteryStats implements Parcelable {
                 EVENT_TEMP_WHITELIST | EVENT_FLAG_START;
         public static final int EVENT_TEMP_WHITELIST_FINISH =
                 EVENT_TEMP_WHITELIST | EVENT_FLAG_FINISH;
+        public static final int EVENT_LONG_WAKE_LOCK_START =
+                EVENT_LONG_WAKE_LOCK | EVENT_FLAG_START;
+        public static final int EVENT_LONG_WAKE_LOCK_FINISH =
+                EVENT_LONG_WAKE_LOCK | EVENT_FLAG_FINISH;
 
         // For CMD_EVENT.
         public int eventCode;
@@ -1979,13 +2034,13 @@ public abstract class BatteryStats implements Parcelable {
     public static final String[] HISTORY_EVENT_NAMES = new String[] {
             "null", "proc", "fg", "top", "sync", "wake_lock_in", "job", "user", "userfg", "conn",
             "active", "pkginst", "pkgunin", "alarm", "stats", "inactive", "active", "tmpwhitelist",
-            "screenwake",
+            "screenwake", "wakeupap", "longwake"
     };
 
     public static final String[] HISTORY_EVENT_CHECKIN_NAMES = new String[] {
             "Enl", "Epr", "Efg", "Etp", "Esy", "Ewl", "Ejb", "Eur", "Euf", "Ecn",
             "Eac", "Epi", "Epu", "Eal", "Est", "Eai", "Eaa", "Etw",
-            "Esw",
+            "Esw", "Ewa", "Elw"
     };
 
     /**
@@ -2535,6 +2590,22 @@ public abstract class BatteryStats implements Parcelable {
                 sb.append('(');
                 sb.append(count);
                 sb.append(" times)");
+                final long maxDurationMs = timer.getMaxDurationMsLocked(elapsedRealtimeUs/1000);
+                if (maxDurationMs >= 0) {
+                    sb.append(" max=");
+                    sb.append(maxDurationMs);
+                }
+                if (timer.isRunningLocked()) {
+                    final long currentMs = timer.getCurrentDurationMsLocked(elapsedRealtimeUs/1000);
+                    if (currentMs >= 0) {
+                        sb.append(" (running for ");
+                        sb.append(currentMs);
+                        sb.append("ms)");
+                    } else {
+                        sb.append(" (running)");
+                    }
+                }
+
                 return ", ";
             }
         }
@@ -2542,6 +2613,7 @@ public abstract class BatteryStats implements Parcelable {
     }
 
     /**
+     * Prints details about a timer, if its total time was greater than 0.
      *
      * @param pw a PrintWriter object to print to.
      * @param sb a StringBuilder object.
@@ -2550,24 +2622,40 @@ public abstract class BatteryStats implements Parcelable {
      * @param which which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
      * @param prefix a String to be prepended to each line of output.
      * @param type the name of the timer.
+     * @return true if anything was printed.
      */
     private static final boolean printTimer(PrintWriter pw, StringBuilder sb, Timer timer,
-            long rawRealtime, int which, String prefix, String type) {
+            long rawRealtimeUs, int which, String prefix, String type) {
         if (timer != null) {
             // Convert from microseconds to milliseconds with rounding
-            final long totalTime = (timer.getTotalTimeLocked(
-                    rawRealtime, which) + 500) / 1000;
+            final long totalTimeMs = (timer.getTotalTimeLocked(
+                    rawRealtimeUs, which) + 500) / 1000;
             final int count = timer.getCountLocked(which);
-            if (totalTime != 0) {
+            if (totalTimeMs != 0) {
                 sb.setLength(0);
                 sb.append(prefix);
                 sb.append("    ");
                 sb.append(type);
                 sb.append(": ");
-                formatTimeMs(sb, totalTime);
+                formatTimeMs(sb, totalTimeMs);
                 sb.append("realtime (");
                 sb.append(count);
                 sb.append(" times)");
+                final long maxDurationMs = timer.getMaxDurationMsLocked(rawRealtimeUs/1000);
+                if (maxDurationMs >= 0) {
+                    sb.append(" max=");
+                    sb.append(maxDurationMs);
+                }
+                if (timer.isRunningLocked()) {
+                    final long currentMs = timer.getCurrentDurationMsLocked(rawRealtimeUs/1000);
+                    if (currentMs >= 0) {
+                        sb.append(" (running for ");
+                        sb.append(currentMs);
+                        sb.append("ms)");
+                    } else {
+                        sb.append(" (running)");
+                    }
+                }
                 pw.println(sb.toString());
                 return true;
             }
@@ -2590,15 +2678,23 @@ public abstract class BatteryStats implements Parcelable {
             long elapsedRealtimeUs, String name, int which, String linePrefix) {
         long totalTimeMicros = 0;
         int count = 0;
+        long max = -1;
+        long current = -1;
         if (timer != null) {
             totalTimeMicros = timer.getTotalTimeLocked(elapsedRealtimeUs, which);
             count = timer.getCountLocked(which); 
+            current = timer.getCurrentDurationMsLocked(elapsedRealtimeUs/1000);
+            max = timer.getMaxDurationMsLocked(elapsedRealtimeUs/1000);
         }
         sb.append(linePrefix);
         sb.append((totalTimeMicros + 500) / 1000); // microseconds to milliseconds with rounding
         sb.append(',');
         sb.append(name != null ? name + "," : "");
         sb.append(count);
+        sb.append(',');
+        sb.append(current);
+        sb.append(',');
+        sb.append(max);
         return ",";
     }
     
@@ -3105,20 +3201,22 @@ public abstract class BatteryStats implements Parcelable {
             final long mobilePacketsTx = u.getNetworkActivityPackets(NETWORK_MOBILE_TX_DATA, which);
             final long mobileActiveTime = u.getMobileRadioActiveTime(which);
             final int mobileActiveCount = u.getMobileRadioActiveCount(which);
+            final long mobileWakeup = u.getMobileRadioApWakeupCount(which);
             final long wifiPacketsRx = u.getNetworkActivityPackets(NETWORK_WIFI_RX_DATA, which);
             final long wifiPacketsTx = u.getNetworkActivityPackets(NETWORK_WIFI_TX_DATA, which);
+            final long wifiWakeup = u.getWifiRadioApWakeupCount(which);
             final long btBytesRx = u.getNetworkActivityBytes(NETWORK_BT_RX_DATA, which);
             final long btBytesTx = u.getNetworkActivityBytes(NETWORK_BT_TX_DATA, which);
             if (mobileBytesRx > 0 || mobileBytesTx > 0 || wifiBytesRx > 0 || wifiBytesTx > 0
                     || mobilePacketsRx > 0 || mobilePacketsTx > 0 || wifiPacketsRx > 0
                     || wifiPacketsTx > 0 || mobileActiveTime > 0 || mobileActiveCount > 0
-                    || btBytesRx > 0 || btBytesTx > 0) {
+                    || btBytesRx > 0 || btBytesTx > 0 || mobileWakeup > 0 || wifiWakeup > 0) {
                 dumpLine(pw, uid, category, NETWORK_DATA, mobileBytesRx, mobileBytesTx,
                         wifiBytesRx, wifiBytesTx,
                         mobilePacketsRx, mobilePacketsTx,
                         wifiPacketsRx, wifiPacketsTx,
                         mobileActiveTime, mobileActiveCount,
-                        btBytesRx, btBytesTx);
+                        btBytesRx, btBytesTx, mobileWakeup, wifiWakeup);
             }
 
             // Dump modem controller data, per UID.
@@ -4125,6 +4223,9 @@ public abstract class BatteryStats implements Parcelable {
             final int wifiScanCount = u.getWifiScanCount(which);
             final long uidWifiRunningTime = u.getWifiRunningTime(rawRealtime, which);
 
+            final long mobileWakeup = u.getMobileRadioApWakeupCount(which);
+            final long wifiWakeup = u.getWifiRadioApWakeupCount(which);
+
             if (mobileRxBytes > 0 || mobileTxBytes > 0
                     || mobileRxPackets > 0 || mobileTxPackets > 0) {
                 pw.print(prefix); pw.print("    Mobile network: ");
@@ -4147,6 +4248,14 @@ public abstract class BatteryStats implements Parcelable {
                 sb.append(" @ ");
                 sb.append(BatteryStatsHelper.makemAh(uidMobileActiveTime / 1000 / (double)packets));
                 sb.append(" mspp");
+                pw.println(sb.toString());
+            }
+
+            if (mobileWakeup > 0) {
+                sb.setLength(0);
+                sb.append(prefix);
+                sb.append("    Mobile radio AP wakeups: ");
+                sb.append(mobileWakeup);
                 pw.println(sb.toString());
             }
 
@@ -4178,6 +4287,14 @@ public abstract class BatteryStats implements Parcelable {
                                 whichBatteryRealtime)); sb.append(") ");
                                 sb.append(wifiScanCount);
                                 sb.append("x");
+                pw.println(sb.toString());
+            }
+
+            if (wifiWakeup > 0) {
+                sb.setLength(0);
+                sb.append(prefix);
+                sb.append("    WiFi AP wakeups: ");
+                sb.append(wifiWakeup);
                 pw.println(sb.toString());
             }
 
@@ -4922,7 +5039,9 @@ public abstract class BatteryStats implements Parcelable {
                         pw.print(',');
                         pw.print(rec.stepDetails.statIdlTime);
                         pw.print(',');
-                        pw.print(rec.stepDetails.statPlatformIdleState);
+                        if (rec.stepDetails.statPlatformIdleState != null) {
+                            pw.print(rec.stepDetails.statPlatformIdleState);
+                        }
                         pw.println();
                     }
                 }

@@ -33,16 +33,17 @@ In XML: <code>@[<em>package</em>:]layout/<em>filename</em></code>
 <dt>syntax:</dt>
 <dd>
 <pre class="stx">
-&lt;?xml version="1.0" encoding="utf-8"?>
-&lt;<a href="#viewgroup-element"><em>ViewGroup</em></a> xmlns:android="http://schemas.android.com/apk/res/android"
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;<a href="#viewgroup-element"><em>ViewGroup</em></a>
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@[+][<em>package</em>:]id/<em>resource_name</em>"
-    android:layout_height=["<em>dimension</em>" | "fill_parent" | "wrap_content"]
-    android:layout_width=["<em>dimension</em>" | "fill_parent" | "wrap_content"]
+    android:layout_height=["<em>dimension</em>" | "match_parent" | "wrap_content"]
+    android:layout_width=["<em>dimension</em>" | "match_parent" | "wrap_content"]
     [<em>ViewGroup-specific attributes</em>] &gt;
     &lt;<a href="#view-element"><em>View</em></a>
         android:id="@[+][<em>package</em>:]id/<em>resource_name</em>"
-        android:layout_height=["<em>dimension</em>" | "fill_parent" | "wrap_content"]
-        android:layout_width=["<em>dimension</em>" | "fill_parent" | "wrap_content"]
+        android:layout_height=["<em>dimension</em>" | "match_parent" | "wrap_content"]
+        android:layout_width=["<em>dimension</em>" | "match_parent" | "wrap_content"]
         [<em>View-specific attributes</em>] &gt;
         &lt;<a href="#requestfocus-element">requestFocus</a>/&gt;
     &lt;/<em>View</em>&gt;
@@ -82,15 +83,17 @@ about the <a href="#idvalue">value for {@code android:id}</a> below.
         </dd>
         <dt><code>android:layout_height</code></dt>
         <dd><em>Dimension or keyword</em>. <strong>Required</strong>. The height for the group, as a
-dimension value (or <a
-href="more-resources.html#Dimension">dimension resource</a>) or a keyword ({@code "fill_parent"}
-or {@code "wrap_content"}). See the <a href="#layoutvalues">valid values</a> below.
+dimension value (or
+<a href="more-resources.html#Dimension">dimension resource</a>) or a keyword
+({@code "match_parent"} or {@code "wrap_content"}). See the <a href=
+"#layoutvalues">valid values</a> below.
         </dd>
         <dt><code>android:layout_width</code></dt>
         <dd><em>Dimension or keyword</em>. <strong>Required</strong>. The width for the group, as a
-dimension value (or <a
-href="more-resources.html#Dimension">dimension resource</a>) or a keyword ({@code "fill_parent"}
-or {@code "wrap_content"}). See the <a href="#layoutvalues">valid values</a> below.
+dimension value (or
+<a href="more-resources.html#Dimension">dimension resource</a>) or a keyword
+({@code "match_parent"} or {@code "wrap_content"}). See the <a href=
+"#layoutvalues">valid values</a> below.
         </dd>
       </dl>
       <p>More attributes are supported by the {@link android.view.ViewGroup}
@@ -114,15 +117,17 @@ the <a href="#idvalue">value for {@code android:id}</a> below.
         </dd>
         <dt><code>android:layout_height</code></dt>
         <dd><em>Dimension or keyword</em>. <strong>Required</strong>. The height for the element, as
-a dimension value (or <a
-href="more-resources.html#Dimension">dimension resource</a>) or a keyword ({@code "fill_parent"}
-or {@code "wrap_content"}). See the <a href="#layoutvalues">valid values</a> below.
+a dimension value (or
+<a href="more-resources.html#Dimension">dimension resource</a>) or a keyword
+({@code "match_parent"} or {@code "wrap_content"}). See the <a href=
+"#layoutvalues">valid values</a> below.
         </dd>
         <dt><code>android:layout_width</code></dt>
         <dd><em>Dimension or keyword</em>. <strong>Required</strong>. The width for the element, as
-a dimension value (or <a
-href="more-resources.html#Dimension">dimension resource</a>) or a keyword ({@code "fill_parent"}
-or {@code "wrap_content"}). See the <a href="#layoutvalues">valid values</a> below.
+a dimension value (or
+<a href="more-resources.html#Dimension">dimension resource</a>) or a keyword
+({@code "match_parent"} or {@code "wrap_content"}). See the <a href=
+"#layoutvalues">valid values</a> below.
         </dd>
       </dl>
       <p>More attributes are supported by the {@link android.view.View}
@@ -221,9 +226,6 @@ plus symbol in the <code>android:id</code> value.</p>
 deprecate <code>fill_parent</code>.</td>
     </tr>
     <tr>
-      <td><code>fill_parent</code></td>
-      <td>Sets the dimension to match that of the parent element.</td>
-    </tr><tr>
       <td><code>wrap_content</code></td>
       <td>Sets the dimension only to the size required to fit the content of this element.</td>
     </tr>
@@ -245,8 +247,8 @@ guide.
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="fill_parent" 
-              android:layout_height="fill_parent" 
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
               android:orientation="vertical" >
     &lt;TextView android:id="@+id/text"
               android:layout_width="wrap_content"

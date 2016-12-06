@@ -21,7 +21,7 @@
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Hibajelentés (<xliff:g id="ID">#%d</xliff:g>) rögzítve"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Információk hozzáadása a hibajelentéshez"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Kérjük, várjon..."</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Húzza ujját balra a hibajelentés megosztásához"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"A hibajelentés hamarosan megjelenik a telefonon."</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Koppintson a hibajelentés megosztásához"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Koppintson ide, ha képernyőkép nélkül osztaná meg a hibajelentést, vagy várjon a képernyőképre."</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Koppintson ide, ha képernyőkép nélkül osztaná meg a hibajelentést, vagy várjon a képernyőképre."</string>

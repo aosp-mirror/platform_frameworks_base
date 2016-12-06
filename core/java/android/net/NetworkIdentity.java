@@ -175,7 +175,11 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
 
         if (isNetworkTypeMobile(type)) {
             if (state.subscriberId == null) {
-                Slog.w(TAG, "Active mobile network without subscriber!");
+                if (state.networkInfo.getState() != NetworkInfo.State.DISCONNECTED &&
+                        state.networkInfo.getState() != NetworkInfo.State.UNKNOWN) {
+                    Slog.w(TAG, "Active mobile network without subscriber! ni = "
+                            + state.networkInfo);
+                }
             }
 
             subscriberId = state.subscriberId;

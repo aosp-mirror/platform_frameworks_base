@@ -25,23 +25,24 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.util.LruCache;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
-
-import java.lang.ref.WeakReference;
 
 /**
  * TODO: This should be better integrated into the system so it doesn't need
  * special calls from the activity manager to clear it.
  */
 public final class AttributeCache {
+    private static final int CACHE_SIZE = 4;
     private static AttributeCache sInstance = null;
 
     private final Context mContext;
 
     @GuardedBy("this")
-    private final ArrayMap<String, WeakReference<Package>> mPackages = new ArrayMap<>();
+    private final LruCache<String, Package> mPackages = new LruCache<>(CACHE_SIZE);
+
     @GuardedBy("this")
     private final Configuration mConfiguration = new Configuration();
 
@@ -86,15 +87,12 @@ public final class AttributeCache {
 
     public void removePackage(String packageName) {
         synchronized (this) {
-            final WeakReference<Package> ref = mPackages.remove(packageName);
-            final Package pkg = (ref != null) ? ref.get() : null;
+            final Package pkg = mPackages.remove(packageName);
             if (pkg != null) {
-                if (pkg.mMap != null) {
-                    for (int i = 0; i < pkg.mMap.size(); i++) {
-                        final ArrayMap<int[], Entry> map = pkg.mMap.valueAt(i);
-                        for (int j = 0; j < map.size(); j++) {
-                            map.valueAt(j).recycle();
-                        }
+                for (int i = 0; i < pkg.mMap.size(); i++) {
+                    final ArrayMap<int[], Entry> map = pkg.mMap.valueAt(i);
+                    for (int j = 0; j < map.size(); j++) {
+                        map.valueAt(j).recycle();
                     }
                 }
 
@@ -113,15 +111,14 @@ public final class AttributeCache {
                 // The configurations being masked out are ones that commonly
                 // change so we don't want flushing the cache... all others
                 // will flush the cache.
-                mPackages.clear();
+                mPackages.evictAll();
             }
         }
     }
     
     public Entry get(String packageName, int resId, int[] styleable, int userId) {
         synchronized (this) {
-            WeakReference<Package> ref = mPackages.get(packageName);
-            Package pkg = (ref != null) ? ref.get() : null;
+            Package pkg = mPackages.get(packageName);
             ArrayMap<int[], Entry> map = null;
             Entry ent = null;
             if (pkg != null) {
@@ -144,7 +141,7 @@ public final class AttributeCache {
                     return null;
                 }
                 pkg = new Package(context);
-                mPackages.put(packageName, new WeakReference<>(pkg));
+                mPackages.put(packageName, pkg);
             }
             
             if (map == null) {

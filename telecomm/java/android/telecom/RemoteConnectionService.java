@@ -120,6 +120,12 @@ final class RemoteConnectionService {
         }
 
         @Override
+        public void setPulling(String callId, Session.Info sessionInfo) {
+            findConnectionForAction(callId, "setPulling")
+                    .setState(Connection.STATE_PULLING_CALL);
+        }
+
+        @Override
         public void setDisconnected(String callId, DisconnectCause disconnectCause,
                 Session.Info sessionInfo) {
             if (mConnectionById.containsKey(callId)) {
@@ -223,6 +229,7 @@ final class RemoteConnectionService {
 
             conference.setState(parcel.getState());
             conference.setConnectionCapabilities(parcel.getConnectionCapabilities());
+            conference.setConnectionProperties(parcel.getConnectionProperties());
             mConferenceById.put(callId, conference);
             conference.registerCallback(new RemoteConference.Callback() {
                 @Override

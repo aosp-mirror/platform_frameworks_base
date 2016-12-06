@@ -428,7 +428,7 @@ sdk.platform.apiLevel=21
 <p>當系統偵測到適用網路時，就會自動連線並叫用 {@link android.net.ConnectivityManager.NetworkCallback#onAvailable(android.net.Network) onAvailable()} 回呼。您可以使用回呼的 {@link android.net.Network} 物件，以取得網路的額外資訊，或是將流量導向所選的網路。</p>
 
 <h3 id="BluetoothBroadcasting">藍牙低功耗技術</h3>
-<p>Android 4.3 平台首度導入了<a href="{@docRoot}guide/topics/connectivity/bluetooth-le.html">藍牙低功耗技術</a> (<em>Bluetooth LE</em>) 支援功能，讓裝置以主機角色建立連線。在 Android 5.0 中，Android 裝置則可以扮演 Bluetooth LE「周邊裝置」<em></em>的角色。應用程式可以透過這項功能，輕鬆讓附近的裝置偵測到。舉例來說，您可以打造應用程式，讓裝置化身為計步器或健康監測器，並將資料傳送給另一台 Bluetooth LE 裝置。</p> 
+<p>Android 4.3 平台首度導入了<a href="{@docRoot}guide/topics/connectivity/bluetooth-le.html">藍牙低功耗技術</a> (<em>Bluetooth LE</em>) 支援功能，讓裝置以主機角色建立連線。在 Android 5.0 中，Android 裝置則可以扮演 Bluetooth LE「周邊裝置」<em></em>的角色。應用程式可以透過這項功能，輕鬆讓附近的裝置偵測到。舉例來說，您可以打造應用程式，讓裝置化身為計步器或健康監測器，並將資料傳送給另一台 Bluetooth LE 裝置。</p>
 <p>全新的 {@link android.bluetooth.le} API 可讓您的應用程式播送廣告、掃描回應，以及與附近的 Bluetooth LE 裝置建立連線。如要使用全新的廣告和掃描功能，請在您的資訊清單中新增 {@link android.Manifest.permission#BLUETOOTH_ADMIN BLUETOOTH_ADMIN} 權限。當使用者從 Play 商店更新或下載您的應用程式時，會看到以下的權限要求提示：「藍牙連線資訊：允許應用程式控制藍牙功能，包括對附近的藍牙裝置播送資訊，或是從附近的藍牙裝置取得資訊。」</p>
 
 <p>如要開始 Bluetooth LE 廣告功能，以便其他裝置發掘您的應用程式，請呼叫 {@link android.bluetooth.le.BluetoothLeAdvertiser#startAdvertising(android.bluetooth.le.AdvertiseSettings, android.bluetooth.le.AdvertiseData, android.bluetooth.le.AdvertiseCallback) startAdvertising()} 並傳遞 {@link android.bluetooth.le.AdvertiseCallback} 類別實作。回呼物件會收到廣告作業成功或失敗的報告。</p>

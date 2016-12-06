@@ -8,13 +8,13 @@ trainingnavtop=true
 
 <div id="tb-wrapper">
   <div id="tb">
-    
+
     <h2>このレッスンでの学習内容</h2>
     <ol>
       <li><a href="#Pause">アクティビティを一時停止する</a></li>
       <li><a href="#Resume">アクティビティを再開する</a></li>
     </ol>
-    
+
     <h2>関連ドキュメント</h2>
     <ul>
       <li><a href="{@docRoot}guide/components/activities.html">アクティビティ</a>
@@ -59,7 +59,7 @@ android.app.Activity#onPause()} の呼び出しを受信した場合は、アク
 
 
 <h2 id="Pause">アクティビティを一時停止する</h2>
-      
+
 <p>システムがアクティビティに対して {@link android.app.Activity#onPause()} を呼び出した場合、技術的にはアクティビティはまだ部分的に表示されていることを意味しますが、ほとんどの場合は、ユーザーがアクティビティを離れていて、ほどなく停止状態になる徴候を示しています。
 
 通常、以下を行う場合には、{@link android.app.Activity#onPause()} コールバックを使用する必要があります。

@@ -33,6 +33,7 @@ import java.lang.reflect.Array;
             mText = source.toString().substring(start, end);
 
         mSpans = EmptyArray.OBJECT;
+        // Invariant: mSpanData.length = mSpans.length * COLUMNS
         mSpanData = EmptyArray.INT;
 
         if (source instanceof Spanned) {
@@ -99,7 +100,7 @@ import java.lang.reflect.Array;
             Object[] srcSpans = src.mSpans;
             mSpanCount = count;
             mSpans = ArrayUtils.newUnpaddedObjectArray(mSpanCount);
-            mSpanData = new int[mSpanCount * COLUMNS];
+            mSpanData = new int[mSpans.length * COLUMNS];
             for (int i = 0, j = 0; i < limit; i++) {
                 int spanStart = srcData[i * COLUMNS + START];
                 int spanEnd = srcData[i * COLUMNS + END];

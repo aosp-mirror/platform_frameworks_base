@@ -27,6 +27,7 @@ import android.hardware.display.WifiDisplay;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
+import android.view.Display;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -35,8 +36,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import libcore.io.IoUtils;
 import libcore.util.Objects;
@@ -50,8 +54,13 @@ import libcore.util.Objects;
  * &lt;display-manager-state>
  *   &lt;remembered-wifi-displays>
  *     &lt;wifi-display deviceAddress="00:00:00:00:00:00" deviceName="XXXX" deviceAlias="YYYY" />
- *   &gt;remembered-wifi-displays>
- * &gt;/display-manager-state>
+ *   &lt;remembered-wifi-displays>
+ *   &lt;display-states>
+ *      &lt;display>
+ *          &lt;color-mode>0&lt;/color-mode>
+ *      &lt;/display>
+ *  &lt;/display-states>
+ * &lt;/display-manager-state>
  * </code>
  *
  * TODO: refactor this to extract common code shared with the input manager's data store
@@ -61,6 +70,10 @@ final class PersistentDataStore {
 
     // Remembered Wifi display devices.
     private ArrayList<WifiDisplay> mRememberedWifiDisplays = new ArrayList<WifiDisplay>();
+
+    // Display state by unique id.
+    private final HashMap<String, DisplayState> mDisplayStates =
+            new HashMap<String, DisplayState>();
 
     // The atomic file used to safely read or write the file.
     private final AtomicFile mAtomicFile;
@@ -168,7 +181,41 @@ final class PersistentDataStore {
         return -1;
     }
 
-    private void loadIfNeeded() {
+    public int getColorMode(DisplayDevice device) {
+        if (!device.hasStableUniqueId()) {
+            return Display.COLOR_MODE_DEFAULT;
+        }
+        DisplayState state = getDisplayState(device.getUniqueId(), false);
+        if (state == null) {
+            return Display.COLOR_MODE_DEFAULT;
+        }
+        return state.getColorMode();
+    }
+
+    public boolean setColorMode(DisplayDevice device, int colorMode) {
+        if (!device.hasStableUniqueId()) {
+            return false;
+        }
+        DisplayState state = getDisplayState(device.getUniqueId(), true);
+        if (state.setColorMode(colorMode)) {
+            setDirty();
+            return true;
+        }
+        return false;
+    }
+
+    private DisplayState getDisplayState(String uniqueId, boolean createIfAbsent) {
+        loadIfNeeded();
+        DisplayState state = mDisplayStates.get(uniqueId);
+        if (state == null && createIfAbsent) {
+            state = new DisplayState();
+            mDisplayStates.put(uniqueId, state);
+            setDirty();
+        }
+        return state;
+    }
+
+    public void loadIfNeeded() {
         if (!mLoaded) {
             load();
             mLoaded = true;
@@ -240,6 +287,9 @@ final class PersistentDataStore {
             if (parser.getName().equals("remembered-wifi-displays")) {
                 loadRememberedWifiDisplaysFromXml(parser);
             }
+            if (parser.getName().equals("display-states")) {
+                loadDisplaysFromXml(parser);
+            }
         }
     }
 
@@ -267,6 +317,27 @@ final class PersistentDataStore {
         }
     }
 
+    private void loadDisplaysFromXml(XmlPullParser parser)
+            throws IOException, XmlPullParserException {
+        final int outerDepth = parser.getDepth();
+        while (XmlUtils.nextElementWithin(parser, outerDepth)) {
+            if (parser.getName().equals("display")) {
+                String uniqueId = parser.getAttributeValue(null, "unique-id");
+                if (uniqueId == null) {
+                    throw new XmlPullParserException(
+                            "Missing unique-id attribute on display.");
+                }
+                if (mDisplayStates.containsKey(uniqueId)) {
+                    throw new XmlPullParserException("Found duplicate display.");
+                }
+
+                DisplayState state = new DisplayState();
+                state.loadFromXml(parser);
+                mDisplayStates.put(uniqueId, state);
+            }
+        }
+    }
+
     private void saveToXml(XmlSerializer serializer) throws IOException {
         serializer.startDocument(null, true);
         serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
@@ -282,7 +353,72 @@ final class PersistentDataStore {
             serializer.endTag(null, "wifi-display");
         }
         serializer.endTag(null, "remembered-wifi-displays");
+        serializer.startTag(null, "display-states");
+        for (Map.Entry<String, DisplayState> entry : mDisplayStates.entrySet()) {
+            final String uniqueId = entry.getKey();
+            final DisplayState state = entry.getValue();
+            serializer.startTag(null, "display");
+            serializer.attribute(null, "unique-id", uniqueId);
+            state.saveToXml(serializer);
+            serializer.endTag(null, "display");
+        }
+        serializer.endTag(null, "display-states");
         serializer.endTag(null, "display-manager-state");
         serializer.endDocument();
+    }
+
+    public void dump(PrintWriter pw) {
+        pw.println("PersistentDataStore");
+        pw.println("  mLoaded=" + mLoaded);
+        pw.println("  mDirty=" + mDirty);
+        pw.println("  RememberedWifiDisplays:");
+        int i = 0;
+        for (WifiDisplay display : mRememberedWifiDisplays) {
+            pw.println("    " + i++ + ": " + display);
+        }
+        pw.println("  DisplayStates:");
+        i = 0;
+        for (Map.Entry<String, DisplayState> entry : mDisplayStates.entrySet()) {
+            pw.println("    " + i++ + ": " + entry.getKey());
+            entry.getValue().dump(pw, "      ");
+        }
+    }
+
+    private static final class DisplayState {
+        private int mColorMode;
+
+        public boolean setColorMode(int colorMode) {
+            if (colorMode == mColorMode) {
+                return false;
+            }
+            mColorMode = colorMode;
+            return true;
+        }
+
+        public int getColorMode() {
+            return mColorMode;
+        }
+
+        public void loadFromXml(XmlPullParser parser)
+                throws IOException, XmlPullParserException {
+            final int outerDepth = parser.getDepth();
+
+            while (XmlUtils.nextElementWithin(parser, outerDepth)) {
+                if (parser.getName().equals("color-mode")) {
+                    String value = parser.nextText();
+                    mColorMode = Integer.parseInt(value);
+                }
+            }
+        }
+
+        public void saveToXml(XmlSerializer serializer) throws IOException {
+            serializer.startTag(null, "color-mode");
+            serializer.text(Integer.toString(mColorMode));
+            serializer.endTag(null, "color-mode");
+        }
+
+        private void dump(final PrintWriter pw, final String prefix) {
+            pw.println(prefix + "ColorMode=" + mColorMode);
+        }
     }
 }

@@ -1,0 +1,181 @@
+page.title=Khởi động Trực tiếp
+page.keywords=preview,sdk,direct boot
+page.tags=androidn
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>Trong tài liệu này</h2>
+  <ol>
+    <li><a href="#run">Yêu cầu Truy cập để Chạy trong quá trình Khởi động Trực tiếp</a></li>
+    <li><a href="#access">Truy cập Bộ nhớ Lưu trữ Mã hóa của Thiết bị</a></li>
+    <li><a href="#notification">Nhận thông báo Mở khóa của Người dùng</a></li>
+    <li><a href="#migrating">Chuyển nhập Dữ liệu Có sẵn</a></li>
+    <li><a href="#testing">Kiểm thử Ứng dụng Nhận biết Mã hóa của bạn</a></li>
+  </ol>
+</div>
+</div>
+
+<p>Android N chạy trong chế độ <i>Khởi động Trực tiếp</i> an toàn
+khi thiết bị đã được bật nguồn nhưng người dùng chưa mở khóa
+thiết bị. Để hỗ trợ chế độ này, hệ thống cung cấp hai vị trí lưu trữ dữ liệu:</p>
+
+<ul>
+<li><i>Lưu trữ mã hóa thông tin xác thực</i>, là vị trí lưu trữ mặc định
+và chỉ khả dụng sau khi người dùng đã mở khóa thiết bị.</li>
+<li><i>Lưu trữ mã hóa thiết bị</i>, là vị trí lưu trữ khả dụng cho cả
+chế độ Khởi động Trực tiếp và sau khi người dùng đã mở khóa thiết bị.</li>
+</ul>
+
+<p>Theo mặc định, các ứng dụng không chạy trong quá trình chế độ Khởi động Trực tiếp.
+Nếu ứng dụng của bạn cần thực hiện hành động trong chế độ Khởi động Trực tiếp thì bạn có thể đăng ký
+các thành phần ứng dụng cần chạy trong chế độ này. Một số trường hợp sử dụng phổ biến
+cho các ứng dụng cần chạy trong chế độ Khởi động Trực tiếp gồm:</p>
+
+<ul>
+<li>Ứng dụng có thông báo theo lịch, như ứng dụng
+đồng hồ báo thức.</li>
+<li>Ứng dụng cung cấp các thông báo quan trọng cho người dùng như ứng dụng SMS.</li>
+<li>Ứng dụng cung cấp các dịch vụ trợ năng như Talkback.</li>
+</ul>
+
+<p>Nếu ứng dụng của bạn cần truy cập dữ liệu khi đang chạy trong chế độ Khởi động Trực tiếp thì hãy sử dụng
+lưu trữ mã hóa thiết bị. Bộ nhớ lưu trữ được mã hóa của thiết bị có chứa dữ liệu
+được mã hóa bằng một khóa chỉ khả dụng sau khi thiết bị đã thực hiện một
+lần khởi động được xác thực thành công.</p>
+
+<p>Đối với dữ liệu cần được mã hóa bằng một khóa liên kết tới thông tin xác thực
+của người dùng như mã PIN hoặc mật khẩu thì hãy sử dụng bộ nhớ lưu trữ mã hóa thông tin xác thực.
+Bộ nhớ lưu trữ mã hóa thông tin xác thực chỉ khả dụng sau khi người dùng đã mở khóa
+thành công thiết bị, tính đến khi người dùng khởi động lại thiết bị một lần nữa. Nếu
+người dùng mở màn hình khóa sau khi mở khóa thiết bị thì thao tác này không khóa
+bộ nhớ mã hóa thông tin xác thực.</p>
+
+<h2 id="run">Yêu cầu Truy cập để Chạy trong quá trình Khởi động Trực tiếp</h2>
+
+<p>Các ứng dụng phải đăng ký các thành phần của chúng với hệ thống trước khi chúng
+có thể chạy trong chế độ Khởi động Trực tiếp hoặc truy cập bộ nhớ lưu trữ
+mã hóa thiết bị. Ứng dụng đăng ký với hệ thống bằng cách đánh dấu các thành phần là
+<i>nhận biết mã hóa</i>. Để đánh dấu các thành phần của bạn là nhận biết mã hóa, hãy đặt thuộc tính
+<code>android:encryptionAware</code> thành true trong bản kê khai.<p>
+
+<p>Các thành phần nhận biết mã hóa có thể đăng ký để nhận một thông điệp truyền phát
+<code>LOCKED_BOOT_COMPLETED</code> từ
+hệ thống khi thiết bị được khởi động lại. Lúc này, bộ nhớ lưu trữ
+mã hóa thiết bị sẽ khả dụng và thành phần của bạn có thể thực thi các tác vụ cần được
+chạy trong chế độ Khởi động Trực tiếp, như kích hoạt báo thức đã đặt.</p>
+
+<p>Đoạn mã sau là một ví dụ về cách đăng ký một
+{@link android.content.BroadcastReceiver} là nhận biết mã hóa và thêm một
+bộ lọc ý định cho <code>LOCKED_BOOT_COMPLETED</code> trong bản kê khai của ứng dụng:</p>
+
+<pre>
+&lt;receiever
+  android:encryptionAware="true" &gt;
+  ...
+  &lt;intent-filter&gt;
+    &lt;action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" /&gt;
+  &lt;/intent-filter&gt;
+&lt;/receiver&gt;
+</pre>
+
+<p>Khi người dùng đã mở khóa thiết bị thì mọi thành phần có thể truy cập
+cả bộ nhớ lưu trữ mã hóa thiết bị lẫn bộ nhớ lưu trữ mã hóa thông tin xác thực.</p>
+
+<h2 id="access">Truy cập Bộ nhớ Lưu trữ Mã hóa của Thiết bị</h2>
+
+<p>Để truy cập bộ nhớ lưu trữ mã hóa thiết bị, hãy tạo một thực thể
+{@link android.content.Context} thứ hai bằng cách gọi
+<code>Context.createDeviceEncryptedStorageContext()</code>. Tất cả các lệnh gọi
+API bộ nhớ lưu trữ đều sử dụng bối cảnh này để truy cập bộ nhớ lưu trữ mã hóa thiết bị.
+Ví dụ sau sẽ truy cập bộ nhớ lưu trữ mã hóa của thiết bị và mở một tệp
+dữ liệu ứng dụng có sẵn:</p>
+
+<pre>
+Context directBootContext = Context.createDeviceEncryptedStorageContext();
+// Access appDataFilename that lives in device encrypted storage
+FileInputStream inStream = directBootContext.openFileInput(appDataFilename);
+// Use inStream to read content...
+</pre>
+
+<p>Chỉ sử dụng bộ nhớ lưu trữ mã hóa của thiết bị
+cho thông tin phải truy cập được trong chế độ Khởi động Trực tiếp.
+Không sử dụng bộ nhớ lưu trữ mã hóa của thiết bị làm bộ lưu trữ mã hóa cho mục đích chung.
+Đối với thông tin cá nhân của người dùng, hoặc dữ liệu được mã hóa không cần thiết
+trong chế độ Khởi động Trực tiếp thì hãy sử dụng bộ nhớ lưu trữ mã hóa thông tin xác thực.</p>
+
+<h2 id="notification">Nhận thông báo Mở khóa của Người dùng</h2>
+
+<p>Một khi người dùng mở khóa thiết bị sau khi khởi động lại, ứng dụng của bạn có thể chuyển sang
+truy cập bộ nhớ lưu trữ mã hóa thông tin xác thực và sử dụng các dịch vụ thông thường của hệ thống
+phụ thuộc vào thông tin xác thực người dùng.</p>
+
+<p>Để nhận thông báo khi người dùng mở khóa thiết bị sau khi khởi động lại,
+hãy đăng ký một {@link android.content.BroadcastReceiver} từ một thành phần đang chạy
+để lắng nghe thông báo <code>ACTION_USER_UNLOCKED</code>. Hoặc bạn có thể
+nhận thông báo có sẵn {@link android.content.Intent#ACTION_BOOT_COMPLETED
+ACTION_BOOT_COMPLETED} lúc này sẽ chỉ báo thiết bị đã khởi động xong và
+người dùng đã mở khóa thiết bị.</p>
+
+<p>Bạn có thể truy vấn trực tiếp để biết người dùng đã mở khóa thiết bị hay chưa bằng cách gọi
+<code>UserManager.isUserUnlocked()</code>.</p>
+
+<h2 id="migrating">Chuyển nhập Dữ liệu Có sẵn</h2>
+
+<p>Nếu người dùng cập nhật thiết bị của họ để sử dụng chế độ Khởi động Trực tiếp thì bạn có thể có dữ liệu
+hiện hữu cần được chuyển nhập sang bộ nhớ lưu trữ mã hóa của thiết bị. Sử dụng
+<code>Context.migrateSharedPreferencesFrom()</code> và
+<code>Context.migrateDatabaseFrom()</code> để chuyển nhập dữ liệu về tùy chọn và cơ sở dữ liệu
+giữa bộ nhớ lưu trữ mã hóa thông tin xác thực và bộ nhớ lưu trữ mã hóa thiết bị.</p>
+
+<p>Hãy phán đoán hợp lý nhất khi quyết định dữ liệu nào nên chuyển nhập từ bộ nhớ lưu trữ mã hóa
+thông tin xác thực sang bộ nhớ lưu trữ mã hóa thiết bị. Bạn không nên di chuyển
+thông tin cá nhân của người dùng như mật khẩu hoặc các mã thông báo cấp quyền sang
+bộ nhớ lưu trữ mã hóa thiết bị. Trong một số trường hợp, bạn có thể cần quản lý
+các bộ dữ liệu riêng biệt trong hai bộ lưu trữ mã hóa.</p>
+
+<h2 id="testing">Kiểm thử Ứng dụng Nhận biết Mã hóa của bạn</h2>
+
+<p>Kiểm thử ứng dụng nhận biết mã hóa bằng cách sử dụng chế độ Khởi động Trực tiếp mới. Có
+hai cách để kích hoạt Khởi động Trực tiếp.</p>
+
+<p class="caution"><strong>Cẩn trọng:</strong> Kích hoạt Khởi động Trực tiếp
+sẽ xóa sạch mọi dữ liệu người dùng trên thiết bị.</p>
+
+<p>Trên các thiết bị được hỗ trợ có Android N được cài đặt, kích hoạt
+Khởi động Trực tiếp bằng cách thực hiện một trong các thao tác sau:</p>
+
+<ul>
+<li>Trên thiết bị, bật <b>Developer options</b> nếu chưa hãy bật bằng cách
+vào <b>Settings &gt; About phone</b> và nhấn vào <b>Build number</b>
+bảy lần. Khi màn hình tùy chọn cho nhà phát triển khả dụng, hãy vào
+<b>Settings &gt; Developer options</b> và chọn
+<b>Convert to file encryption</b>.</li>
+<li>Sử dụng các lệnh shell adb sau để kích hoạt chế độ Khởi động Trực tiếp:
+<pre class="no-pretty-print">
+$ adb reboot-bootloader
+$ fastboot --wipe-and-use-fbe
+</pre>
+</li>
+</ul>
+
+<p>Cũng có một chế độ Khởi động Trực tiếp giả lập trong trường hợp bạn cần chuyển đổi
+các chế độ trên thiết bị thử nghiệm. Chỉ nên sử dụng chế độ Giả lập trong quá trình
+phát triển và có thể làm mất dữ liệu. Để kích hoạt chế độ Khởi động Trực tiếp giả lập,
+hãy đặt mẫu hình khóa cho thiết bị, chọn "No thanks" nếu được yêu cầu
+ bật màn hình khởi động bảo mật khi đặt một mẫu hình khóa và sau đó sử dụng
+lệnh shell adb sau:</p>
+
+<pre class="no-pretty-print">
+$ adb shell sm set-emulate-fbe true
+</pre>
+
+<p>Hãy sử dụng lệnh sau để tắt chế độ Khởi động Trực tiếp giả lập:</p>
+
+<pre class="no-pretty-print">
+$ adb shell sm set-emulate-fbe false
+</pre>
+
+<p>Sử dụng các lệnh này có thể khiến cho thiết bị khởi động lại.</p>

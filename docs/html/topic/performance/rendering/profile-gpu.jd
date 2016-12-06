@@ -1,0 +1,406 @@
+page.title=Analyzing with Profile GPU Rendering
+page.metaDescription=Use the Profile GPU tool to help you optimize your app's rendering performance.
+
+meta.tags="power"
+page.tags="power"
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+    <ol>
+      <li>
+        <a href="#visrep">Visual Representation</a></li>
+      </li>
+
+      <li>
+       <a href="#sam">Stages and Their Meanings</a>
+      
+      <ul>
+         <li>
+           <a href="#sv">Input Handling</a>
+         </li>
+         <li>
+           <a href="#asd">Animation</a>
+         </li>
+         <li>
+           <a href="#asd">Measurement/Layout</a>
+         </li>
+         <li>
+           <a href="#asd">Drawing</a>
+         </li>
+         </li>
+         <li>
+           <a href="#asd">Sync/Upload</a>
+         </li>
+         <li>
+           <a href="#asd">Issuing Commands</a>
+         </li>
+         <li>
+           <a href="#asd">Processing/Swapping Buffer</a>
+         </li>
+         <li>
+           <a href="#asd">Miscellaneous</a>
+         </li>
+      </ul>
+      </li>     
+     </ol>
+  </div>
+</div>
+
+<p>
+The <a href="/studio/profile/dev-options-rendering.html">
+Profile GPU Rendering</a> tool indicates the relative time that each stage of
+the rendering pipeline takes to render the previous frame. This knowledge
+can help you identify bottlenecks in the pipeline, so that you
+can know what to optimize to improve your app's rendering performance.
+</p>
+
+<p>
+This page briefly explains what happens during each pipeline stage, and
+discusses issues that can cause bottlenecks there. Before reading
+this page, you should be familiar with the information presented in the
+<a href="/studio/profile/dev-options-rendering.html">Profile GPU
+Rendering Walkthrough</a>. In addition, to understand how all of the
+stages fit together, it may be helpful to review
+<a href="https://www.youtube.com/watch?v=we6poP0kw6E&index=64&list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">
+how the rendering pipeline works.</a>
+</p>
+
+<h2 id="#visrep">Visual Representation</h2>
+
+<p>
+The Profile GPU Rendering tool displays stages and their relative times in the
+form of a graph: a color-coded histogram. Figure 1 shows an example of
+such a display.
+</p>
+
+  <img src="{@docRoot}topic/performance/images/bars.png">
+  <p class="img-caption">
+<strong>Figure 1.</strong> Profile GPU Rendering Graph
+  </p>
+
+</p>
+
+<p>
+Each segment of each vertical bar displayed in the Profile GPU Rendering
+graph represents a stage of the pipeline and is highlighted using a specific
+color in
+the bar graph. Figure 2 shows a key to the meaning of each displayed color.
+</p>
+
+  <img src="{@docRoot}topic/performance/images/s-profiler-legend.png">
+  <p class="img-caption">
+<strong>Figure 2.</strong> Profile GPU Rendering Graph Legend
+  </p>
+
+<p>
+Once you understand what each color signfiies,
+you can target specific aspects of your
+app to try to optimize its rendering performance.
+</p>
+
+<h2 id="sam">Stages and Their Meanings</a></h2>
+
+<p>
+This section explains what happens during each stage corresponding
+to a color in Figure 2, as well as bottleneck causes to look out for.
+</p>
+
+
+<h3 id="ih">Input Handling</h3>
+
+<p>
+The input handling stage of the pipeline measures how long the app
+spent handling input events. This metric indicates how long the app
+spent executing code called as a result of input event callbacks.
+</p>
+
+<h4>When this segment is large</h4>
+
+<p>
+High values in this area are typically a result of too much work, or
+too-complex work, occurring inside the input-handler event callbacks.
+Since these callbacks always occur on the main thread, solutions to this
+problem focus on optimizing the work directly, or offloading the work to a
+different thread.
+</p>
+
+<p>
+It’s also worth noting that {@link android.support.v7.widget.RecyclerView}
+scrolling can appear in this phase.
+{@link android.support.v7.widget.RecyclerView} scrolls immediately when it
+consumes the touch event. As a result,
+it can inflate or populate new item views. For this reason, it’s important to
+make this operation as fast as possible. Profiling tools like Traceview or
+Systrace can help you investigate further.
+</p>
+
+<h3 id="at">Animation</h3>
+
+<p>
+The Animations phase shows you just how long it took to evaluate all the
+animators that were running in that frame. The most common animators are
+{@link android.animation.ObjectAnimator},
+{@link android.view.ViewPropertyAnimator}, and
+<a href="/training/transitions/overview.html">Transitions</a>.
+</p>
+
+<h4>When this segment is large</h4>
+
+<p>
+High values in this area are typically a result of work that’s executing due
+to some property change of the animation. For example, a fling animation,
+which scrolls your {@link android.widget.ListView} or
+{@link android.support.v7.widget.RecyclerView}, causes large amounts of view
+inflation and population.
+</p>
+
+<h3 id="ml">Measurement/Layout</h3>
+
+<p>
+In order for Android to draw your view items on the screen, it executes
+two specific operations across layouts and views in your view hierarchy.
+</p>
+
+<p>
+First, the system measures the view items. Every view and layout has
+specific data that describes the size of the object on the screen. Some views
+can have a specific size; others have a size that adapts to the size
+of the parent layout container
+</p>
+
+<p>
+Second, the system lays out the view items. Once the system calculates
+the sizes of children views, the system can proceed with layout, sizing
+and positioning the views on the screen.
+</p>
+
+<p>
+The system performs measurement and layout not only for the views to be drawn,
+but also for the parent hierarchies of those views, all the way up to the root
+view.
+</p>
+
+<h4>When this segment is large</h4>
+
+<p>
+If your app spends a lot of time per frame in this area, it is
+usually either because of the sheer volume of views that need to be
+laid out, or problems such as
+<a href="/topic/performance/optimizing-view-hierarchies.html#double">
+double taxation</a> at the wrong spot in your
+hierarchy. In either of these cases, addressing performance involves
+<a href="/topic/performance/optimizing-view-hierarchies.html">improving
+the performance of your view hierarchies</a>.
+</p>
+
+<p>
+Code that you’ve added to
+{@link android.view.View#onLayout(boolean, int, int, int, int)} or
+{@link android.view.View#onMeasure(int, int)}
+can also cause performance
+issues. <a href="/studio/profile/traceview.html">Traceview</a> and
+<a href="/studio/profile/systrace.html">Systrace</a> can help you examine
+the callstacks to identify problems your code may have.
+</p>
+
+<h3 id="draw">Drawing</h3>
+
+<p>
+The draw stage translates a view’s rendering operations, such as drawing
+a background or drawing text, into a sequence of native drawing commands.
+The system captures these commands into a display list.
+</p>
+
+<p>
+The Draw bar records how much time it takes to complete capturing the commands
+into the display list, for all the views that needed to be updated on the screen
+this frame. The measured time applies to any code that you have added to the UI
+objects in your app. Examples of such code may be the
+{@link android.view.View#onDraw(android.graphics.Canvas) onDraw()},
+{@link android.view.View#dispatchDraw(android.graphics.Canvas) dispatchDraw()},
+and the various <code>draw ()methods</code> belonging to the subclasses of the
+{@link android.graphics.drawable.Drawable} class.
+</p>
+
+<h4>When this segment is large</h4>
+
+<p>
+In simplified terms, you can understand this metric as showing how long it took
+to run all of the calls to
+{@link android.view.View#onDraw(android.graphics.Canvas) onDraw()}
+for each invalidated view. This
+measurement includes any time spent dispatching draw commands to children and
+drawables that may be present. For this reason, when you see this bar spike, the
+cause could be that a bunch of views suddenly became invalidated. Invalidation
+makes it necessary to regenerate views' display lists. Alternatively, a
+lengthy time may be the result of a few custom views that have some extremely
+complex logic in their
+{@link android.view.View#onDraw(android.graphics.Canvas) onDraw()} methods.
+</p>
+
+<h3 id="su">Sync/Upload</h3>
+
+<p>
+The Sync & Upload metric represents the time it takes to transfer
+bitmap objects from CPU memory to GPU memory during the current frame.
+</p>
+
+<p>
+As different processors, the CPU and the GPU have different RAM areas
+dedicated to processing. When you draw a bitmap on Android, the system
+transfers the bitmap to GPU memory before the GPU can render it to the
+screen. Then, the GPU caches the bitmap so that the system doesn’t need to
+transfer the data again unless the texture gets evicted from the GPU texture
+cache.
+</p>
+
+<p class="note"><strong>Note:</strong> On Lollipop devices, this stage is
+purple.
+</p>
+
+<h4>When this segment is large</h4>
+
+<p>
+All resources for a frame need to reside in GPU memory before they can be
+used to draw a frame. This means that a high value for this metric could mean
+either a large number of small resource loads or a small number of very large
+resources. A common case is when an app displays a single bitmap that’s
+close to the size of the screen. Another case is when an app displays a
+large number of thumbnails.
+</p>
+
+<p>
+To shrink this bar, you can employ techniques such as:
+</p>
+
+<ul>
+   <li>
+Ensuring your bitmap resolutions are not much larger than the size at which they
+will be displayed. For example, your app should avoid displaying a 1024x1024
+image as a 48x48 image.
+   </li>
+
+   <li>
+Taking advantage of {@link android.graphics.Bitmap#prepareToDraw()}
+to asynchronously pre-upload a bitmap before the next sync phase.
+   </li>
+</ul>
+
+<h3 id="ic">Issuing Commands</h3>
+
+<p>
+The <em>Issue Commands</em> segment represents the time it takes to issue all
+of the commands necessary for drawing display lists to the screen.
+</p>
+
+<p>
+For the system to draw display lists to the screen, it sends the
+necessary commands to the GPU. Typically, it performs this action through the
+<a href="/guide/topics/graphics/opengl.html">OpenGL ES</a> API.
+</p>
+
+<p>
+This process takes some time, as the system performs final transformation
+and clipping for each command before sending the command to the GPU. Additional
+overhead then arises on the GPU side, which computes the final commands. These
+commands include final transformations, and additional clipping.
+</p>
+
+<h4>When this segment is large</h4>
+
+<p>
+The time spent in this stage is a direct measure of the complexity and
+quantity of display lists that the system renders in a given
+frame. For example, having many draw operations, especially in cases where
+there's a small inherent cost to each draw primitive, could inflate this time.
+For example:
+</p>
+
+<pre>
+for (int i = 0; i < 1000; i++)
+canvas.drawPoint()
+</pre>
+
+<p>
+is a lot more expensive to issue than:
+</p>
+
+<pre>
+canvas.drawPoints(mThousandPointArray);
+</pre>
+
+<p>
+There isn’t always a 1:1 correlation between issuing commands and
+actually drawing display lists. Unlike <em>Issue Commands</em>,
+which captures the time it takes to send drawing commands to the GPU,
+the <em>Draw</em> metric represents the time that it took to capture the issued
+commands into the display list.
+</p>
+
+<p>
+This difference arises because the display lists are cached by
+the system wherever possible. As a result, there are situations where a
+scroll, transform, or animation requires the system to re-send a display
+list, but not have to actually rebuild it&mdash;recapture the drawing
+commands&mdash;from scratch. As a result, you can see a high “Issue
+commands” bar without seeing a high <em>Draw commands</em> bar.
+</p>
+
+<h3 id="psb">Processing/Swapping Buffers</h3>
+
+<p>
+Once Android finishes submitting all its display list to the GPU,
+the system issues one final command to tell the graphics driver that it's
+done with the current frame. At this point, the driver can finally present
+the updated image to the screen.
+</p>
+
+<h4>When this segment is large</h4>
+
+<p>
+It’s important to understand that the GPU executes work in parallel with the
+CPU. The Android system issues draw commands to the GPU, and then moves on to
+the next task. The GPU reads those draw commands from a queue and processes
+them.
+</p>
+
+<p>
+In situations where the CPU issues commands faster than the GPU
+consumes them, the communications queue between the processors can become
+full. When this occurs, the CPU blocks, and waits until there is space in the
+queue to place the next command. This full-queue state arises often during the
+<em>Swap Buffers</em> stage, because at that point, a whole frame’s worth of
+commands have been submitted.
+</p>
+
+</p>
+The key to mitigating this problem is to reduce the complexity of work occurring
+on the GPU, in similar fashion to what you would do for the “Issue Commands”
+phase.
+</p>
+
+
+<h3 id="mt">Miscellaneous</h3>
+
+<p>
+In addition to the time it takes the rendering system to perform its work,
+there’s an additional set of work that occurs on the main thread and has
+nothing to do with rendering. Time that this work consumes is reported as
+<em>misc time</em>. Misc time generally represents work that might be occurring
+on the UI thread between two consecutive frames of rendering.
+</p>
+
+<h4>When this segment is large</h4>
+
+<p>
+If this value is high, it is likely that your app has callbacks, intents, or
+other work that should be happening on another thread. Tools such as
+<a href="/studio/profile/traceview.html">Method
+Tracing</a> or <a href="/studio/profile/systrace.html">Systrace</a> can provide
+visibility into the tasks that are running on
+the main thread. This information can help you target performance improvements.
+</p>

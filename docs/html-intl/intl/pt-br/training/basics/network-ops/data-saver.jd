@@ -1,0 +1,234 @@
+page.title=Economia de dados
+metaDescription=User-enabled otimização de uso de dados.
+page.keywords="android N", "data usage", "metered network"
+page.image=images/cards/card-nyc_2x.jpg
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    <h2>
+      Neste documento
+    </h2>
+
+    <ol>
+      <li>
+        <a href="#status">Verificação de preferências da Economia de dados</a>
+        <ol>
+          <li>
+            <a href="#request-whitelist">Solicitação de permissão para colocar na lista de permissões</a>
+          </li>
+        </ol>
+      </li>
+
+      <li>
+        <a href="#monitor-changes">Monitoramento de preferências do
+ Economia de dados</a>
+      </li>
+
+      <li>
+        <a href="#testing">Teste com comandos do Android Debug Bridge</a>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  Durante a vida útil de um smartphone, o custo do plano de dados pode
+facilmente exceder o custo do próprio dispositivo. No N Developer Preview, os usuários podem
+ ativar a Economia de dados no dispositivo como um todo para usar menos dados, seja
+ em roaming, perto do final do período de cobrança ou em pacotes de dados pré-pagos pequenos.
+</p>
+
+<p>
+  Quando um usuário ativa a Economia de dados em <strong>Settings</strong> e o dispositivo está
+em uma rede tarifada, o sistema bloqueia o uso de dados em segundo plano e avisa
+ aos aplicativos para reduzir o uso de dados no primeiro plano sempre que possível. Os usuários podem
+autorizar aplicativos específicos a usar dados tarifados em segundo plano, mesmo com a Economia
+ de dados ativada.
+</p>
+
+<p>
+  O N Developer Preview estende a API {@link android.net.ConnectivityManager}
+ para oferecer aos aplicativos uma forma de <a href="#status">recuperar as
+preferências do usuário para a Economia de dados</a> e <a href="#monitor-changes">monitorar
+as mudanças de preferências</a>. Como prática recomendada, os aplicativos devem verificar se o
+ usuário ativou a Economia de dados e tentar limitar o uso de dados em primeiro e
+ segundo plano.
+</p>
+
+<h2 id="status">
+  Verificação de preferências da Economia de dados
+</h2>
+
+<p>
+  No N Developer Preview, aplicativos podem usar a API {@link
+ android.net.ConnectivityManager} para determinar quais restrições
+ de uso de dados estão sendo aplicadas. O método {@code getRestrictBackgroundStatus()}
+ retorna um dos seguintes valores:
+</p>
+
+<dl>
+  <dt>
+    {@code RESTRICT_BACKGROUND_STATUS_DISABLED}
+  </dt>
+
+  <dd>
+    A Economia de dados está desativada.
+  </dd>
+
+  <dt>
+    {@code RESTRICT_BACKGROUND_STATUS_ENABLED}
+  </dt>
+
+  <dd>
+    O usuário ativou a Economia de dados para este aplicativo. Os aplicativos tentarão limitar o
+ uso de dados em primeiro plano e gerenciar as restrições ao
+ uso de dados em segundo plano.
+  </dd>
+
+  <dt>
+    {@code RESTRICT_BACKGROUND_STATUS_WHITELISTED}
+  </dt>
+
+  <dd>
+    O usuário ativou a Economia de dados, mas o aplicativo está na lista de permissões. Os aplicativos
+ ainda tentarão limitar o uso de dados em primeiro e segundo plano.
+  </dd>
+</dl>
+
+<p>
+  É prática recomendada limitar o uso de dados sempre que o dispositivo
+ estiver conectado a uma rede tarifada, mesmo que a Economia de dados esteja desativada e o aplicativo
+ esteja na lista de permissões. O modelo de código a seguir usa {@link
+ android.net.ConnectivityManager#isActiveNetworkMetered
+ ConnectivityManager.isActiveNetworkMetered()} e {@code
+ ConnectivityManager.getRestrictBackgroundStatus()} para determinar o volume máximo de dados
+ que o aplicativo pode usar:
+</p>
+
+<pre>
+ConnectivityManager connMgr = (ConnectivityManager)
+        getSystemService(Context.CONNECTIVITY_SERVICE);
+// Checks if the device is on a metered network
+if (connMgr.isActiveNetworkMetered()) {
+  // Checks user’s Data Saver settings.
+  switch (connMgr.getRestrictBackgroundStatus()) {
+    case RESTRICT_BACKGROUND_STATUS_ENABLED:
+    // Background data usage is blocked for this app. Wherever possible,
+    // the app should also use less data in the foreground.
+
+    case RESTRICT_BACKGROUND_STATUS_WHITELISTED:
+    // The app is whitelisted. Wherever possible,
+    // the app should use less data in the foreground and background.
+
+    case RESTRICT_BACKGROUND_STATUS_DISABLED:
+    // Data Saver is disabled. Since the device is connected to a
+    // metered network, the app should use less data wherever possible.
+  }
+} else {
+  // The device is not on a metered network.
+  // Use data as required to perform syncs, downloads, and updates.
+}
+</pre>
+
+<h3 id="request-whitelist">
+  Solicitação de permissão para colocar na lista de permissões
+</h3>
+
+<p>
+  Se o seu aplicativo precisa usar dados em segundo plano, ele pode solicitar permissão para
+ entrar na lista de permissões enviando uma intenção
+ <code>Settings.ACTION_IGNORE_BACKGROUND_DATA_RESTRICTIONS_SETTINGS</code>
+ que contenha o URI no nome de pacote do aplicativo, por exemplo,
+ <code>package:MY_APP_ID</code>.
+</p>
+
+<p>
+  O envio da intenção e do URI abre o aplicativo <strong>Settings</strong> e
+ exibe as configurações de uso de dados de seu aplicativo. O usuário pode decidir então se
+ ativará os dados em segundo plano para o aplicativo. Antes de enviar a intenção, é
+ prática recomendada perguntar primeiro ao usuário se ele deseja iniciar o
+aplicativo <strong>Settings</strong> com o objetivo de ativar o uso
+ de dados em segundo plano.
+</p>
+
+<h2 id="monitor-changes">
+  Monitoramento de alterações nas preferências da Economia de dados
+</h2>
+
+<p>
+  Os aplicativos podem monitorar alterações nas preferências da Economia de dados criando um {@link
+ android.content.BroadcastReceiver} para escutar {@code
+ConnectivityManager.ACTION_RESTRICT_BACKGROUND_CHANGED} e registrar
+ dinamicamente o receptor em {@link android.content.Context#registerReceiver
+ Context.registerReceiver()}. Quando recebe esta transmissão, o aplicativo deve
+ <a href="#status">verificar se as novas preferências da Economia de dados afetam
+ as permissões</a> chamando {@code
+ ConnectivityManager.getRestrictBackgroundStatus()}.
+</p>
+
+<p class="note">
+  <strong>Observação:</strong> O sistema só envia esta transmissão para aplicativos que
+ se registram dinamicamente para recebê-la em {@link
+ android.content.Context#registerReceiver Context.registerReceiver()}. Os aplicativos
+ que se registrarem para receber a transmissão no manifesto não a
+ receberão.
+</p>
+
+<h2 id="testing">
+  Teste com comandos do Android Debug Bridge
+</h2>
+
+O <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge (ADB)</a>
+oferece alguns comandos que podem ser usados para verificar e configurar permissões
+de rede:
+
+<dl>
+  <dt>
+    <code>$ adb shell dumpsys netpolicy</code>
+  </dt>
+
+  <dd>
+    Gera um relatório que inclui a configuração de restrição atual da rede de segundo plano global
+, os UIDs do pacote em lista de permissões e as permissões de rede
+ de outros pacotes conhecidos.
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy</code>
+  </dt>
+
+  <dd>
+    Exibe uma lista completa de comandos do Gerenciador de políticas de rede (netpolicy).
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy set restrict-background
+    &lt;boolean&gt;</code>
+  </dt>
+
+  <dd>
+    Ativa ou desativa o modo da Economia de dados ao passar <code>true</code> ou
+ <code>false</code>, respectivamente.
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy add restrict-background-whitelist
+    &lt;UID&gt;</code>
+  </dt>
+
+  <dd>
+    Adiciona o UID do pacote especificado à lista de permissões para permitir o uso de dados de segundo plano
+ tarifados.
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy remove restrict-background-whitelist
+    &lt;UID&gt;</code>
+  </dt>
+
+  <dd>
+    Adiciona o UID do pacote especificado à lista de permissões para bloquear o uso de dados
+ de segundo plano tarifados enquanto a Economia de dados estiver ativada.
+  </dd>
+</dl>

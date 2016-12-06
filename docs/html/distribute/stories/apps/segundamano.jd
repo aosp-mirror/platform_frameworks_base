@@ -1,0 +1,63 @@
+page.title=Segundamano Develops Android-First as Its Fastest Channel for Growth
+page.metaDescription=Segundamano developed Android app to increase potential for growth.
+page.tags="developerstory", "apps", "googleplay"
+page.image=images/cards/distribute/stories/segundamano.png
+page.timestamp=1468901832
+
+@jd:body
+
+<div class="figure" style="width:113px">
+  <img src="{@docRoot}images/distribute/stories/segundamano-icon.png" height=
+  "113">
+</div>
+
+<h3>
+  Background
+</h3>
+
+<p>
+  <a class="external-link" href=
+  "https://play.google.com/store/apps/details?id=mx.segundamano.android">Segundamano</a>
+  is a leading shopping application in Mexico for second-hand products. They
+  started by placing classified ads in newspapers, progressed to desktop, and
+  over the past year have seen significant growth in mobile, which now accounts
+  for 70% of their business. They have also seen <strong>270% year-over-year
+  growth on the Android platform alone</strong>.
+</p>
+
+<h3>
+  What they did
+</h3>
+
+<p>
+  Segundamano shifted focus to mobile with their Android app because of the
+  high potential for growth. From July 2015 to January 2016, they saw an
+  increase of 55% in the number of classified ads on Android, higher than any
+  other platform. To leverage this momentum, Segundamano implemented two new
+  features on Android: premium offers and push notifications. Segundamano also
+  decided to implement material design in order to improve the in-app
+  experience and streamline the sales process for users.
+</p>
+
+<h3>
+  Results
+</h3>
+
+<p>
+  Following Segundamano’s enhancements to the user experience, they've seen an
+  increase in their star rating, a 4.7% lift in monthly active users, and a 7%
+  increase in sales of premium listings. Additionally, year-to-date, their
+  <strong>installs are over seven times higher on Android than on other
+  platforms</strong>.
+</p>
+
+<h3>
+  Get started
+</h3>
+
+<p>
+  Learn more about simplifying your in-app experience with <a href=
+  "{@docRoot}guide/topics/ui/notifiers/notifications.html">Notifications</a>
+  and the <a href="{@docRoot}design/material/index.html">material design
+  guidelines</a>.
+</p>

@@ -556,7 +556,9 @@ public class TaskStackLayoutAlgorithm {
                     Math.max(0, mUnfocusedRange.getAbsoluteX(maxBottomNormX)));
             boolean scrollToFront = launchState.launchedFromHome ||
                     launchState.launchedViaDockGesture;
-            if (launchState.launchedWithAltTab) {
+            if (launchState.launchedFromBlacklistedApp) {
+                mInitialScrollP = mMaxScrollP;
+            } else if (launchState.launchedWithAltTab) {
                 mInitialScrollP = Utilities.clamp(launchTaskIndex, mMinScrollP, mMaxScrollP);
             } else if (scrollToFront) {
                 mInitialScrollP = Utilities.clamp(launchTaskIndex, mMinScrollP, mMaxScrollP);
@@ -579,6 +581,7 @@ public class TaskStackLayoutAlgorithm {
         mTaskIndexOverrideMap.clear();
 
         boolean scrollToFront = launchState.launchedFromHome ||
+                launchState.launchedFromBlacklistedApp ||
                 launchState.launchedViaDockGesture;
         if (getInitialFocusState() == STATE_UNFOCUSED && mNumStackTasks > 1) {
             if (ignoreScrollToFront || (!launchState.launchedWithAltTab && !scrollToFront)) {
@@ -1058,9 +1061,9 @@ public class TaskStackLayoutAlgorithm {
      * top and right system insets (but not the bottom inset) and left/right paddings, but _not_
      * the top/bottom padding or insets.
      */
-    public void getTaskStackBounds(Rect displayRect, Rect windowRect, int topInset, int rightInset,
-            Rect taskStackBounds) {
-        taskStackBounds.set(windowRect.left, windowRect.top + topInset,
+    public void getTaskStackBounds(Rect displayRect, Rect windowRect, int topInset, int leftInset,
+            int rightInset, Rect taskStackBounds) {
+        taskStackBounds.set(windowRect.left + leftInset, windowRect.top + topInset,
                 windowRect.right - rightInset, windowRect.bottom);
 
         // Ensure that the new width is at most the smaller display edge size
@@ -1255,7 +1258,7 @@ public class TaskStackLayoutAlgorithm {
         String innerPrefix = prefix + "  ";
 
         writer.print(prefix); writer.print(TAG);
-        writer.write(" numStackTasks="); writer.write(mNumStackTasks);
+        writer.write(" numStackTasks="); writer.print(mNumStackTasks);
         writer.println();
 
         writer.print(innerPrefix);

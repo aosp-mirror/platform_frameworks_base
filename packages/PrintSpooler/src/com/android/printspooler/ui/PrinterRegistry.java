@@ -120,13 +120,11 @@ public class PrinterRegistry {
         @Override
         public void onLoaderReset(Loader<List<PrinterInfo>> loader) {
             mPrinters.clear();
-            if (mOnPrintersChangeListener != null) {
-                // Post a message as we are in onLoadFinished and certain operations
-                // are not allowed in this callback, such as fragment transactions.
-                // Clients should not handle this explicitly.
-                mHandler.obtainMessage(MyHandler.MSG_PRINTERS_INVALID,
-                        mOnPrintersChangeListener).sendToTarget();
-            }
+
+            // Post a message as we are in onLoadFinished and certain operations
+            // are not allowed in this callback, such as fragment transactions.
+            // Clients should not handle this explicitly.
+            mHandler.obtainMessage(MyHandler.MSG_PRINTERS_INVALID).sendToTarget();
         }
 
         // LoaderCallbacks#onLoadFinished
@@ -134,15 +132,12 @@ public class PrinterRegistry {
         public void onLoadFinished(Loader<List<PrinterInfo>> loader, List<PrinterInfo> printers) {
             mPrinters.clear();
             mPrinters.addAll(printers);
-            if (mOnPrintersChangeListener != null) {
-                // Post a message as we are in onLoadFinished and certain operations
-                // are not allowed in this callback, such as fragment transactions.
-                // Clients should not handle this explicitly.
-                SomeArgs args = SomeArgs.obtain();
-                args.arg1 = mOnPrintersChangeListener;
-                args.arg2 = printers;
-                mHandler.obtainMessage(MyHandler.MSG_PRINTERS_CHANGED, args).sendToTarget();
-            }
+
+            // Post a message as we are in onLoadFinished and certain operations
+            // are not allowed in this callback, such as fragment transactions.
+            // Clients should not handle this explicitly.
+            mHandler.obtainMessage(MyHandler.MSG_PRINTERS_CHANGED, printers).sendToTarget();
+
             if (!mReady) {
                 mReady = true;
                 if (mReadyCallback != null) {
@@ -158,7 +153,7 @@ public class PrinterRegistry {
         }
     };
 
-    private static final class MyHandler extends Handler {
+    private final class MyHandler extends Handler {
         public static final int MSG_PRINTERS_CHANGED = 0;
         public static final int MSG_PRINTERS_INVALID = 1;
 
@@ -171,16 +166,17 @@ public class PrinterRegistry {
         public void handleMessage(Message message) {
             switch (message.what) {
                 case MSG_PRINTERS_CHANGED: {
-                    SomeArgs args = (SomeArgs) message.obj;
-                    OnPrintersChangeListener callback = (OnPrintersChangeListener) args.arg1;
-                    List<PrinterInfo> printers = (List<PrinterInfo>) args.arg2;
-                    args.recycle();
-                    callback.onPrintersChanged(printers);
+                    List<PrinterInfo> printers = (List<PrinterInfo>) message.obj;
+
+                    if (mOnPrintersChangeListener != null) {
+                        mOnPrintersChangeListener.onPrintersChanged(printers);
+                    }
                 } break;
 
                 case MSG_PRINTERS_INVALID: {
-                    OnPrintersChangeListener callback = (OnPrintersChangeListener) message.obj;
-                    callback.onPrintersInvalid();
+                    if (mOnPrintersChangeListener != null) {
+                        mOnPrintersChangeListener.onPrintersInvalid();
+                    }
                 } break;
             }
         }

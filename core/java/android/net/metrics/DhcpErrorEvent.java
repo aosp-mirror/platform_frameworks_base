@@ -24,10 +24,11 @@ import android.util.SparseArray;
 import com.android.internal.util.MessageUtils;
 
 /**
- * {@hide} Event class used to record error events when parsing DHCP response packets.
+ * Event class used to record error events when parsing DHCP response packets.
+ * {@hide}
  */
 @SystemApi
-public final class DhcpErrorEvent extends IpConnectivityEvent implements Parcelable {
+public final class DhcpErrorEvent implements Parcelable {
     public static final int L2_ERROR   = 1;
     public static final int L3_ERROR   = 2;
     public static final int L4_ERROR   = 3;
@@ -49,9 +50,13 @@ public final class DhcpErrorEvent extends IpConnectivityEvent implements Parcela
     public static final int DHCP_INVALID_OPTION_LENGTH = makeErrorCode(DHCP_ERROR, 3);
     public static final int DHCP_NO_MSG_TYPE           = makeErrorCode(DHCP_ERROR, 4);
     public static final int DHCP_UNKNOWN_MSG_TYPE      = makeErrorCode(DHCP_ERROR, 5);
+    /** {@hide} */
+    public static final int DHCP_NO_COOKIE             = makeErrorCode(DHCP_ERROR, 6);
 
     public static final int BUFFER_UNDERFLOW           = makeErrorCode(MISC_ERROR, 1);
     public static final int RECEIVE_ERROR              = makeErrorCode(MISC_ERROR, 2);
+    /** {@hide} */
+    public static final int PARSING_ERROR              = makeErrorCode(MISC_ERROR, 3);
 
     public final String ifName;
     // error code byte format (MSB to LSB):
@@ -61,7 +66,8 @@ public final class DhcpErrorEvent extends IpConnectivityEvent implements Parcela
     // byte 3: optional code
     public final int errorCode;
 
-    private DhcpErrorEvent(String ifName, int errorCode) {
+    /** {@hide} */
+    public DhcpErrorEvent(String ifName, int errorCode) {
         this.ifName = ifName;
         this.errorCode = errorCode;
     }
@@ -71,11 +77,13 @@ public final class DhcpErrorEvent extends IpConnectivityEvent implements Parcela
         this.errorCode = in.readInt();
     }
 
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(ifName);
         out.writeInt(errorCode);
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
@@ -92,11 +100,9 @@ public final class DhcpErrorEvent extends IpConnectivityEvent implements Parcela
     };
 
     public static void logParseError(String ifName, int errorCode) {
-        logEvent(new DhcpErrorEvent(ifName, errorCode));
     }
 
     public static void logReceiveError(String ifName) {
-        logEvent(new DhcpErrorEvent(ifName, RECEIVE_ERROR));
     }
 
     public static int errorCodeWithOption(int errorCode, int option) {
@@ -113,8 +119,9 @@ public final class DhcpErrorEvent extends IpConnectivityEvent implements Parcela
     }
 
     final static class Decoder {
-        static final SparseArray<String> constants =
-                MessageUtils.findMessageNames(new Class[]{DhcpErrorEvent.class},
-                new String[]{"L2_", "L3_", "L4_", "BOOTP_", "DHCP_", "BUFFER_", "RECEIVE_"});
+        static final SparseArray<String> constants = MessageUtils.findMessageNames(
+                new Class[]{DhcpErrorEvent.class},
+                new String[]{"L2_", "L3_", "L4_", "BOOTP_", "DHCP_", "BUFFER_", "RECEIVE_",
+                "PARSING_"});
     }
 }

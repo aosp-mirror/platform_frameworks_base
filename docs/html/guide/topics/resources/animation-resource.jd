@@ -12,7 +12,7 @@ parent.link=available-resources.html
         <ol>
           <li><a href="#Tween">Tween animation</a></li>
           <li><a href="#Frame">Frame animation</a></li>
-        </ol>      
+        </ol>
       </li>
     </ol>
     <h2>See also</h2>
@@ -94,7 +94,7 @@ In XML: <code>@[<em>package</em>:]animator/<em>filename</em></code>
 &lt;/set&gt;
 </pre>
 
-<p>The file must have a single root element: either 
+<p>The file must have a single root element: either
 <code>&lt;set&gt;</code>, <code>&lt;objectAnimator&gt;</code>, or <code>&lt;valueAnimator&gt;</code>. You can
 group animation elements together inside the <code>&lt;set&gt;</code> element, including other
 <code>&lt;set&gt;</code> elements.
@@ -109,7 +109,7 @@ group animation elements together inside the <code>&lt;set&gt;</code> element, i
     <code>&lt;valueAnimator&gt;</code>, or other <code>&lt;set&gt;</code> elements).  Represents
     an {@link android.animation.AnimatorSet}.
     <p>You can specify nested <code>&lt;set&gt;</code> tags to further
-    group animations together. Each <code>&lt;set&gt;</code> can define its own 
+    group animations together. Each <code>&lt;set&gt;</code> can define its own
     <code>ordering</code> attribute.</p>
 
       <p class="caps">attributes:</p>
@@ -119,11 +119,11 @@ group animation elements together inside the <code>&lt;set&gt;</code> element, i
         </dt>
         <dd>
           <em>Keyword</em>. Specifies the play ordering of animations in this set.
-          <table> 
-            <tr><th>Value</th><th>Description</th></tr> 
-            <tr><td><code>sequentially</code></td><td>Play animations in this set sequentially</td></tr> 
-            <tr><td><code>together</code> (default)</td><td>Play animations in this set at the same time.</td></tr> 
-          </table> 
+          <table>
+            <tr><th>Value</th><th>Description</th></tr>
+            <tr><td><code>sequentially</code></td><td>Play animations in this set sequentially</td></tr>
+            <tr><td><code>together</code> (default)</td><td>Play animations in this set at the same time.</td></tr>
+          </table>
         </dd>
       </dl>
     </dd>
@@ -131,11 +131,11 @@ group animation elements together inside the <code>&lt;set&gt;</code> element, i
   <dt id="obj-animator-element"><code>&lt;objectAnimator&gt;</code></dt>
     <dd>Animates a specific property of an object over a specific amount of time. Represents
     an {@link android.animation.ObjectAnimator}.</p>
-    
+
       <p class="caps">attributes:</p>
       <dl class="atn-list">
         <dt>
-          <code>android:propertyName</code> 
+          <code>android:propertyName</code>
         </dt>
         <dd>
           <em>String</em>. <strong>Required</strong>. The object's property to animate, referenced by its name. For example you can specify
@@ -206,11 +206,11 @@ group animation elements together inside the <code>&lt;set&gt;</code> element, i
         <dd>
           <em>Keyword</em>. Do not specify this attribute if the value is a color. The animation framework automatically handles color
           values
-          <table> 
-            <tr><th>Value</th><th>Description</th></tr> 
-            <tr><td><code>intType</code></td><td>Specifies that the animated values are integers</td></tr> 
-            <tr><td><code>floatType</code> (default)</td><td>Specifies that the animated values are floats</td></tr> 
-          </table> 
+          <table>
+            <tr><th>Value</th><th>Description</th></tr>
+            <tr><td><code>intType</code></td><td>Specifies that the animated values are integers</td></tr>
+            <tr><td><code>floatType</code> (default)</td><td>Specifies that the animated values are floats</td></tr>
+          </table>
         </dd>
 
       </dl>
@@ -279,11 +279,11 @@ group animation elements together inside the <code>&lt;set&gt;</code> element, i
         <dd>
           <em>Keyword</em>. Do not specify this attribute if the value is a color. The animation framework automatically handles color
           values.
-          <table> 
-            <tr><th>Value</th><th>Description</th></tr> 
-            <tr><td><code>intType</code></td><td>Specifies that the animated values are integers</td></tr> 
-            <tr><td><code>floatType</code> (default)</td><td>Specifies that the animated values are floats</td></tr> 
-          </table> 
+          <table>
+            <tr><th>Value</th><th>Description</th></tr>
+            <tr><td><code>intType</code></td><td>Specifies that the animated values are integers</td></tr>
+            <tr><td><code>floatType</code> (default)</td><td>Specifies that the animated values are floats</td></tr>
+          </table>
         </dd>
 
       </dl>
@@ -320,7 +320,7 @@ group animation elements together inside the <code>&lt;set&gt;</code> element, i
   before starting the animation set. Calling {@link android.animation.AnimatorSet#setTarget
   setTarget()} sets a single target object for all children of the {@link
   android.animation.AnimatorSet} as a convenience. The following code shows how to do this:</p>
-  
+
 <pre>
 AnimatorSet set = (AnimatorSet) AnimatorInflater.loadAnimator(myContext,
     R.anim.property_animator);

@@ -102,16 +102,16 @@ android:name="android.permission.WRITE_SOCIAL_STREAM"&gt;</code> in their manife
 <li>Adds the class {@link android.provider.CalendarContract.Colors} to represent
 a color table in the <a href="{@docRoot}guide/topics/providers/calendar-provider.html">Calendar
 Provider</a>. The class provides fields for accessing
-colors available for a given account. Colors are referenced by 
+colors available for a given account. Colors are referenced by
 {@link android.provider.CalendarContract.ColorsColumns#COLOR_KEY COLOR_KEY}
 which must be unique for a given account name/type. These values can only be
 updated by the sync adapter.</li>
 <li>Adds {@link android.provider.CalendarContract.CalendarColumns#ALLOWED_AVAILABILITY ALLOWED_AVAILABILITY}
-and 
+and
 {@link android.provider.CalendarContract.CalendarColumns#ALLOWED_ATTENDEE_TYPES ALLOWED_ATTENDEE_TYPES}
 for exchange/sync support.</li>
 <li>Adds {@link android.provider.CalendarContract.AttendeesColumns#TYPE_RESOURCE}
-(such as conference rooms) for attendees and 
+(such as conference rooms) for attendees and
 {@link android.provider.CalendarContract.EventsColumns#AVAILABILITY_TENTATIVE},
 as well as {@link android.provider.CalendarContract.EventsColumns#EVENT_COLOR_KEY}
 for events.</li>
@@ -123,7 +123,7 @@ for events.</li>
 own padding. Instead, the system now automatically adds padding for each widget,
 based the characteristics of the current screen. This leads to a more uniform,
 consistent presentation of widgets in a grid. To assist applications that host
-home screen widgets, the platform provides a new method 
+home screen widgets, the platform provides a new method
 {@link android.appwidget.AppWidgetHostView#getDefaultPaddingForWidget(android.content.Context, android.content.ComponentName, android.graphics.Rect)
 getDefaultPaddingForWidget()}. Applications can call this method to get the
 system-defined padding and account for it when computing the number of cells to
@@ -136,7 +136,7 @@ allocate to the widget.</p>
 android.view.textservice.SpellCheckerSession#cancel() cancel()} method cancels
 any pending and running spell-checker tasks in a session.</li>
 
-<li>For spell-checker services, a new suggestions flag, 
+<li>For spell-checker services, a new suggestions flag,
 {@link android.view.textservice.SuggestionsInfo#RESULT_ATTR_HAS_RECOMMENDED_SUGGESTIONS},
 lets the services distinguish higher-confidence suggestions from
 lower-confidence ones. For example, a spell-checker could set the flag if an
@@ -206,8 +206,8 @@ the inflated layout.</li>
 allow apps to get and set the maximum scroll offset for an
 {@link android.view.accessibility.AccessibilityRecord} object.</li>
 
-<li>When touch-exploration mode is enabled, a new secure setting 
-{@link android.provider.Settings.Secure#ACCESSIBILITY_SPEAK_PASSWORD} 
+<li>When touch-exploration mode is enabled, a new secure setting
+{@link android.provider.Settings.Secure#ACCESSIBILITY_SPEAK_PASSWORD}
 indicates whether the user requests the IME to speak text entered in password fields, even when
 a headset is not in use. By default, no password text is spoken unless a headset
 is in use.</li>
@@ -217,7 +217,7 @@ is in use.</li>
 
 <ul>
 <li>Adds the new method {@link
-android.speech.tts.TextToSpeech.Engine#getFeatures(java.util.Locale)
+android.speech.tts.TextToSpeech#getFeatures(java.util.Locale)
 getFeatures()}for querying and enabling network TTS support.
 <li>Adds a new listener class, {@link
 android.speech.tts.UtteranceProgressListener}, that engines can register to

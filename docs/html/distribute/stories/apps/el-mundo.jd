@@ -1,0 +1,73 @@
+page.title=El Mundo Improves User Ratings and Engagement with Material Design
+page.metaDescription=El Mundo uses Material Design principles to enhance their app's user experience.
+page.tags="developerstory", "apps", "googleplay"
+page.image=images/cards/distribute/stories/el-mundo.png
+page.timestamp=1468901833
+
+@jd:body
+
+<div class="figure" style="width:113px">
+  <img src="{@docRoot}images/distribute/stories/el-mundo-icon.png" height=
+  "113">
+</div>
+
+<h3>
+  Background
+</h3>
+
+<p>
+  <a class="external-link" href=
+  "https://play.google.com/store/apps/details?id=com.gi.elmundo.main">El
+  Mundo</a>, one of Spain’s largest newspapers, integrated material design
+  principles into their app, which helped increase their Google Play Store
+  rating and improve user engagement.
+</p>
+
+<h3>
+  What they did
+</h3>
+
+<p>
+  El Mundo decided to completely redesign their app to provide a higher quality
+  user experience, making it easier for their readers to engage with news
+  content. By implementing material design guidelines, they created a
+  consistent look and feel throughout their app.
+</p>
+
+<p>
+  After analyzing user comments, El Mundo discovered that readers considered
+  their app to be complicated and out-of-date. Therefore, they decided to
+  simplify the app’s functionality by removing features that were redundant.
+  They also removed sections of their app that were less relevant to their
+  readers, such as weather updates and movie trailers. Finally, they applied a
+  brand new internal development framework that they now use consistently
+  across all of their apps.
+</p>
+
+<h3>
+  Results
+</h3>
+
+<p>
+  Following the re-launch of their material design app, El Mundo saw a
+  <strong>45% increase in the weekly install rate</strong>. Readers now spend
+  more time in the app, with the average time spent in-app increasing from one
+  to three minutes.
+</p>
+
+<p>
+  Additionally, this redesign resulted in more readers providing positive
+  feedback around the new experience, increasing the app rating in the Google
+  Play store by 25.8%, from 3.1 to 3.9.
+</p>
+
+<h3>
+  Get started
+</h3>
+
+<p>
+  Learn how to integrate <a class="external-link" href=
+  "https://material.google.com">Material Design</a> guidelines and follow
+  <a class="external-link" href="https://design.google.com">design
+  principles</a> for your app.
+</p>

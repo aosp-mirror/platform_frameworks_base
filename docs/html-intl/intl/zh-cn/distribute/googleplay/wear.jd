@@ -60,7 +60,7 @@ page.metaDescription=将您的应用、游戏和内容分发到 Android Wear。
 
 <p>
   为了做好准备，以便在 Android Wear 上成功推出应用，首先要查阅在穿戴设备上提供出色应用体验的准则。
-请参考 <a href="{@docRoot}design/wear/index.html">Android 
+请参考 <a href="{@docRoot}design/wear/index.html">Android
 Wear 设计准则</a>，了解有关针对穿戴设备扩展应用的建议，以及有关设计和可用性的详情。
 
 </p>
@@ -120,7 +120,7 @@ Wear 设计准则</a>，了解有关针对穿戴设备扩展应用的建议，�
 <p>
   您的穿戴设备应用应表现出色，在 Android Wear 上看起来引人入胜，并且提供尽可能最佳的用户体验。
 Google Play 将展示精选的优质穿戴设备应用，以便用户轻松发现。
-以下说明了您如何加入平台，提交用户喜爱的 
+以下说明了您如何加入平台，提交用户喜爱的
 Android Wear 应用：
 </p>
 

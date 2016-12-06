@@ -182,6 +182,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
      */
     private final Random mRandom = new SecureRandom();
 
+    /** All sessions allocated */
+    @GuardedBy("mSessions")
+    private final SparseBooleanArray mAllocatedSessions = new SparseBooleanArray();
+
     @GuardedBy("mSessions")
     private final SparseArray<PackageInstallerSession> mSessions = new SparseArray<>();
 
@@ -365,6 +369,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                             // keep details around for dumpsys.
                             mHistoricalSessions.put(session.sessionId, session);
                         }
+                        mAllocatedSessions.put(session.sessionId, true);
                     }
                 }
             }
@@ -666,23 +671,26 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                         "Too many historical sessions for UID " + callingUid);
             }
 
-            final long createdMillis = System.currentTimeMillis();
             sessionId = allocateSessionIdLocked();
+        }
 
-            // We're staging to exactly one location
-            File stageDir = null;
-            String stageCid = null;
-            if ((params.installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
-                final boolean isEphemeral =
-                        (params.installFlags & PackageManager.INSTALL_EPHEMERAL) != 0;
-                stageDir = buildStageDir(params.volumeUuid, sessionId, isEphemeral);
-            } else {
-                stageCid = buildExternalStageCid(sessionId);
-            }
+        final long createdMillis = System.currentTimeMillis();
+        // We're staging to exactly one location
+        File stageDir = null;
+        String stageCid = null;
+        if ((params.installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
+            final boolean isEphemeral =
+                    (params.installFlags & PackageManager.INSTALL_EPHEMERAL) != 0;
+            stageDir = buildStageDir(params.volumeUuid, sessionId, isEphemeral);
+        } else {
+            stageCid = buildExternalStageCid(sessionId);
+        }
 
-            session = new PackageInstallerSession(mInternalCallback, mContext, mPm,
-                    mInstallThread.getLooper(), sessionId, userId, installerPackageName, callingUid,
-                    params, createdMillis, stageDir, stageCid, false, false);
+        session = new PackageInstallerSession(mInternalCallback, mContext, mPm,
+                mInstallThread.getLooper(), sessionId, userId, installerPackageName, callingUid,
+                params, createdMillis, stageDir, stageCid, false, false);
+
+        synchronized (mSessions) {
             mSessions.put(sessionId, session);
         }
 
@@ -765,8 +773,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         int sessionId;
         do {
             sessionId = mRandom.nextInt(Integer.MAX_VALUE - 1) + 1;
-            if (mSessions.get(sessionId) == null && mHistoricalSessions.get(sessionId) == null
-                    && !mLegacySessions.get(sessionId, false)) {
+            if (!mAllocatedSessions.get(sessionId, false)) {
+                mAllocatedSessions.put(sessionId, true);
                 return sessionId;
             }
         } while (n++ < 32);
@@ -862,13 +870,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                 IntentSender statusReceiver, int userId) {
         final int callingUid = Binder.getCallingUid();
         mPm.enforceCrossUserPermission(callingUid, userId, true, true, "uninstall");
-        boolean allowSilentUninstall = true;
         if ((callingUid != Process.SHELL_UID) && (callingUid != Process.ROOT_UID)) {
             mAppOps.checkPackage(callingUid, callerPackageName);
-            final String installerPackageName = mPm.getInstallerPackageName(packageName);
-            allowSilentUninstall = mPm.isOrphaned(packageName) ||
-                    (installerPackageName != null
-                            && installerPackageName.equals(callerPackageName));
         }
 
         // Check whether the caller is device owner, in which case we do it silently.
@@ -879,8 +882,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
         final PackageDeleteObserverAdapter adapter = new PackageDeleteObserverAdapter(mContext,
                 statusReceiver, packageName, isDeviceOwner, userId);
-        if (allowSilentUninstall && mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.DELETE_PACKAGES) == PackageManager.PERMISSION_GRANTED) {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DELETE_PACKAGES)
+                    == PackageManager.PERMISSION_GRANTED) {
             // Sweet, call straight through!
             mPm.deletePackage(packageName, adapter.getBinder(), userId, flags);
         } else if (isDeviceOwner) {

@@ -33,7 +33,6 @@ static android::DisplayInfo DUMMY_DISPLAY {
     false, // secure?
     0, // appVsyncOffset
     0, // presentationDeadline
-    0, // colorTransform
 };
 
 DisplayInfo getBuiltInDisplay() {

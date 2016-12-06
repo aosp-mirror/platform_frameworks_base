@@ -1,0 +1,582 @@
+page.title=Hỗ trợ đa cửa sổ
+page.metaDescription=Hỗ trợ mới trong Android N để hiển thị nhiều hơn một ứng dụng cùng lúc.
+page.keywords="multi-window", "android N", "split screen", "free-form"
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    <h2>Trong tài liệu này</h2>
+      <ol>
+        <li><a href="#overview">Tổng quan</a></li>
+        <li><a href="#lifecycle">Vòng đời đa cửa sổ</a></li>
+        <li><a href="#configuring">Cấu hình Ứng dụng của bạn cho Chế độ
+              Đa cửa sổ</a></li>
+        <li><a href="#running">Chạy Ứng dụng của bạn trong Chế độ Đa cửa sổ</a></li>
+        <li><a href="#testing">Kiểm thử Hỗ trợ Đa cửa sổ của Ứng dụng của bạn</a></li>
+      </ol>
+    <h2>Xem thêm</h2>
+      <ol>
+        <li><a class="external-link" href="https://github.com/googlesamples/android-MultiWindowPlayground">Ứng dụng mẫu Multi-Windows
+          Playground</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>
+  Android N thêm hỗ trợ cho hiển thị đồng thời nhiều hơn một ứng dụng
+  vào cùng một thời điểm. Trên thiết bị cầm tay, hai ứng dụng có thể chạy song song hoặc
+  trên dưới nhau trong chế độ <em>chia màn hình</em>. Trên thiết bị TV, ứng dụng có thể
+  sử dụng chế độ <em>ảnh trong ảnh</em> để tiếp tục phát lại video trong khi người dùng
+  đang tương tác với ứng dụng khác.
+</p>
+
+<p>
+  Nếu bạn dựng ứng dụng của bạn bằng N Preview SDK, bạn có thể cấu hình cách ứng dụng của bạn
+  xử lý hiển thị đa cửa sổ. Ví dụ, bạn có thể quy định
+  các kích thước tối thiểu cho phép của hoạt động của bạn. Bạn cũng có thể vô hiệu hóa hiển thị đa cửa sổ cho
+  ứng dụng của bạn, đảm bảo rằng hệ thống chỉ hiển thị ứng dụng của bạn trong chế độ
+   toàn màn hình.
+</p>
+
+<h2 id="overview">Tổng quan</h2>
+
+<p>
+  Android N cho phép một vài ứng dụng chia sẻ màn hình ngay lập tức. Ví
+  dụ, người dùng có thể chia đôi màn hình ra, xem một trang web ở bên trái màn hình
+  trong khi đang tạo email ở bên phải màn hình. Trải nghiệm này của người dùng phụ thuộc vào
+  thiết bị:
+</p>
+
+<ul>
+  <li>Thiết bị cầm tay đang chạy Android N có chế độ
+  chia màn hình. Trong chế độ này, hệ thống sẽ lấp đầy màn hình bằng hai ứng dụng
+  song song nhau hoặc trên dưới. Người dùng có thể kéo đường chia
+  phân tách hai ứng dụng để hiển thị một ứng dụng rộng hơn và ứng dụng còn lại nhỏ đi.
+  </li>
+
+  <li>Trên Trình phát Nexus đang chạy Android N, các ứng dụng có thể tự đặt chúng
+  vào trong <a href="picture-in-picture.html">chế độ ảnh trong ảnh</a>, cho phép
+  các ứng dụng này tiếp tục hiển thị nội dung khi người dùng duyệt web hoặc tương tác với
+  ứng dụng khác.
+  </li>
+
+  <li>Các nhà sản xuất thiết bị có kích cỡ lớn hơn có thể chọn kích hoạt chế độ
+  hình dạng tự do, trong đó người dùng có thể tự do thay đổi kích thước mỗi hoạt động. Nếu
+  nhà sản xuất đã kích hoạt tính năng này, ngoài
+  chế độ chia màn hình, thiết bị sẽ còn có chế độ hình dạng tự do.
+  </li>
+</ul>
+
+<img src="{@docRoot}images/android-7.0/mw-splitscreen.png" alt="" width="650" srcset="{@docRoot}images/android-7.0/mw-splitscreen.png 1x,
+    {@docRoot}images/android-7.0/mw-splitscreen_2x.png 2x," id="img-split-screen" />
+<p class="img-caption">
+  <strong>Hình 1.</strong> Hai ứng dụng chạy trong chế độ chia màn hình.
+</p>
+
+<p>
+  Người dùng có thể chuyển vào trong chế độ đa cửa sổ bằng các cách sau:
+</p>
+
+<ul>
+  <li>Nếu người dùng mở màn hình <a href="{@docRoot}guide/components/recents.html">Overview
+  </a> và thực hiện nhấn giữ
+  tiêu đề của hoạt động, họ có thể kéo hoạt động đó đến phần được tô sáng của
+  màn hình để đặt hoạt động đó vào trong chế độ đa cửa sổ.
+  </li>
+
+  <li>Nếu người dùng thực hiện nhấn giữ nút Overview, thiết bị sẽ đặt
+  hoạt động hiện tại vào trong chế độ đa cửa sổ, và mở màn hình Overview để
+  cho phép người dùng chọn một hoạt động khác để chia sẻ màn hình.
+  </li>
+</ul>
+
+<p>
+  Người dùng có thể <a href="{@docRoot}guide/topics/ui/drag-drop.html">kéo và
+  thả</a> từ một hoạt động sang một hoạt động khác trong khi các hoạt động này vẫn đang chia sẻ
+  cùng một màn hình. (Trước đó, người dùng chỉ có thể kéo và thả dữ liệu trong một hoạt động
+  đơn lẻ.)
+</p>
+
+<h2 id="lifecycle">Vòng đời đa cửa sổ</h2>
+
+<p>
+  Chế độ đa cửa sổ không thay đổi <a href="{@docRoot}training/basics/activity-lifecycle/index.html">vòng đời
+  của hoạt động</a>.
+</p>
+
+<p>
+  Trong chế độ đa cửa sổ, chỉ hoạt động mà người dùng đã tương tác gần đây nhất
+  mới hoạt động trong khoảng thời gian xác định. Hoạt động này được cân nhắc <em>ở trên cùng</em>.
+  Tất cả các hoạt động khác sẽ ở trong tình trạng tạm dừng, ngay cả khi chúng vẫn hiển thị.
+  Tuy nhiên, hệ thống sẽ cấp mức ưu tiên cao hơn cho hoạt động bị tạm dừng nhưng vẫn hiển thị này
+  so với các hoạt động không hiển thị. Nếu người dùng tương tác với một trong những
+  hoạt động bị tạm dừng, hoạt động đó sẽ được tiếp tục, và hoạt động trên cùng trước đó
+  sẽ bị tạm dừng.
+</p>
+
+<p class="note">
+  <strong>Lưu ý:</strong> Trong chế độ đa cửa sổ, một ứng dụng có thể trong trạng thái
+  tạm dừng và vẫn hiển thị với người dùng. Ứng dụng có thể cần tiếp tục
+  các hoạt động của nó thậm chí trong khi đamg bị tạm dừng. Ví dụ, một ứng dụng phát video đang ở trong
+  chế độ tạm dừng nhưng vẫn hiển thị thì sẽ tiếp tục hiển thị video của nó. Vì lý do
+  này, chúng tôi đề nghị các hoạt động phát video <em>không</em> tạm dừng
+  video trong trình xử lý{@link android.app.Activity#onPause onPause()}.
+  Thay vào đó, các ứng dụng nên tạm dừng video trong {@link android.app.Activity#onStop
+  onStop()}, và tiếp tục phát lại trong {@link android.app.Activity#onStart
+  onStart()}.
+</p>
+
+<p>
+  Khi người dùng đặt một ứng dụng vào trong chế độ đa cửa sổ, hệ thống sẽ thông báo về
+  hoạt động thay đổi cấu hình đó, như được quy định trong <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Xử lý Thay đổi
+  Thời gian chạy</a>. Về cơ bản, thay đổi này có ngụ ý về vòng đời hoạt động tương tự
+  vì khi hệ thống thông báo cho ứng dụng rằng thiết bị đã chuyển
+  từ chế độ hướng dọc sang chế độ ngang, ngoại trừ trường hợp các kích thước của thiết bị
+  đã được thay đổi thay vì chỉ bị hoán đổi. Như đã thảo luận trong phần <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Xử lý Thay đổi
+  Thời gian chạy</a>, hoạt động của bạn có thể tự xử lý thay đổi cấu hình này, hoặc nó
+  có thể cho phép hệ thống hủy hoạt động này và tạo lại nó với
+  các kích thước mới.
+</p>
+
+<p>
+  Nếu người dùng thay đổi kích thước của một cửa sổ và làm nó rộng hơn ở bất kỳ kích thước nào,
+  hệ thống sẽ thay đổi kích thước của hoạt động để khớp với hành động của người dùng và phát hành <a href="{@docRoot}guide/topics/resources/runtime-changes.html">các thay đổi thời gian chạy</a>
+  nếu cần. Nếu ứng dụng bị trễ lại trong khi vẽ các vùng mới được hiển thị,
+  hệ thống sẽ tạm thời lấp đầy các vùng đó bằng một màu được quy định bởi thuộc tính {@link
+  android.R.attr#windowBackground windowBackground} hoặc bằng thuộc tính kiểu
+  <code>windowBackgroundFallback</code> mặc định.
+</p>
+
+<h2 id="configuring">Cấu hình Ứng dụng của bạn cho Chế độ Đa cửa sổ</h2>
+
+<p>
+  Nếu ứng dụng của bạn nhắm đến Android N, bạn có thể cấu hình cách thức và
+  liệu các hoạt động của ứng dụng có hỗ trợ hiển thị đa cửa sổ không. Bạn có thể đặt
+  các thuộc tính trong bản kê khai của bạn để kiểm soát cả kích cỡ và bố trí.
+  Cài đặt thuộc tính của hoạt động gốc sẽ áp dụng cho tất cả các hoạt động
+  nằm trong ngăn xếp hoạt động của nó.
+</p>
+
+<p class="note">
+  <strong>Lưu ý:</strong> Nếu bạn dựng một ứng dụng đa hướng bằng phiên bản
+   SDK thấp hơn Android N, và người dùng sử dụng ứng dụng đó trong
+  chế độ đa cửa sổ, hệ thống sẽ bắt buộc thay đổi kích thước của ứng dụng đó. Hệ thống sẽ hiển thị một
+  hộp hội thoại cảnh báo người dùng rằng ứng dụng này có thể có hành vi không như kỳ vọng. Hệ thống
+  <em>không</em> thay đổi kích cỡ của ứng dụng có hướng cố định; nếu
+  người dùng cố mở một ứng dụng có hướng cố định dưới chế độ đa cửa sổ,
+  ứng dụng này sẽ chiếm toàn bộ màn hình.
+</p>
+
+<h4 id="resizeableActivity">android:resizeableActivity</h4>
+<p>
+  Đặt thuộc tính này trong <code>&lt;activity&gt;</code> của bản kê khai của bạn hoặc node
+  <code>&lt;application&gt;</code> để kích hoạt hoặc vô hiệu hóa hiển thị
+  đa cửa sổ:
+</p>
+
+<pre>
+android:resizeableActivity=["true" | "false"]
+</pre>
+
+<p>
+  Nếu thuộc tính này được đặt thành true, hoạt động có thể được khởi chạy trong
+ chế độ chia màn hình và hình dạng tự do. Nếu thuộc tính này được đặt thành false,
+  hoạt động sẽ không hỗ trợ chế độ đa cửa sổ. Nếu giá trị này là false, và
+  người dùng cố khởi chạy hoạt động trong chế độ đa cửa sổ, hoạt động đó sẽ
+  chiếm toàn màn hình.
+</p>
+
+<p>
+  Nếu ứng dụng của bạn nhắm đến Android N, nhưng bạn chưa quy định giá trị
+  cho thuộc tính này, giá trị của thuộc tính sẽ mặc định đặt là true.
+</p>
+
+<h4 id="supportsPictureInPicture">android:supportsPictureInPicture</h4>
+
+<p>
+  Đặt thuộc tính này trong node <code>&lt;activity&gt;</code> của bản kê khai của bạn để
+  cho biết liệu hoạt động này có hỗ trợ hiển thị ảnh trong ảnh hay không. Thuộc tính
+  này được bỏ qua nếu <code>android:resizeableActivity</code> là false.
+</p>
+
+<pre>
+android:supportsPictureInPicture=["true" | "false"]
+</pre>
+
+<h3 id="layout">Thuộc tính bố trí</h3>
+
+<p>
+  Với Android N, phần tử bản kê khai <code>&lt;layout&gt;</code>
+  có hỗ trợ một số thuộc tính sẽ ảnh hưởng đến cách hoạt động có hành vi như thế nào trong
+  chế độ đa cửa sổ:
+</p>
+
+<dl>
+  <dt>
+    <code>android:defaultWidth</code>
+  </dt>
+
+  <dd>
+    Chiều rộng mặc định của hoạt động khi được khởi chạy trong chế độ hình dạng tự do.
+  </dd>
+
+  <dt>
+    <code>android:defaultHeight</code>
+  </dt>
+
+  <dd>
+    Chiều cao mặc định của hoạt động khi được khởi chạy trong chế độ hình dạng tự do.
+  </dd>
+
+  <dt>
+    <code>android:gravity</code>
+  </dt>
+
+  <dd>
+    Vị trí ban đầu của hoạt động khi được khởi chạy trong chế độ hình dạng tự do. Xem tham chiếu
+    {@link android.view.Gravity} về các giá trị phù hợp.
+  </dd>
+
+  <dt>
+    <code>android:minimalSize</code>
+  </dt>
+
+  <dd>
+    Chiều cao và chiều rộng tối thiểu cho hoạt động trong cả chế độ chia màn hình
+    và chế độ hình dạng tự do. Nếu người dùng di chuyển thanh phân chia trong chế độ chia màn hình
+    để làm cho hoạt động nhỏ hơn mức tối thiểu quy định, hệ thống sẽ cắt xén
+    hoạt động đó thành kích cỡ mà người dùng yêu cầu.
+  </dd>
+</dl>
+
+<p>
+  Ví dụ, đoạn mã sau đây sẽ cho biết cách quy định kích thước và vị trí mặc định
+   của một hoạt động và kích thước tối thiểu của nó, khi hoạt động được hiển thị trong
+  chế độ hình dạng tự do:
+</p>
+
+<pre>
+&lt;activity android:name=".MyActivity"&gt;
+    &lt;layout android:defaultHeight="500dp"
+          android:defaultWidth="600dp"
+          android:gravity="top|end"
+          android:minimalSize="450dp" /&gt;
+&lt;/activity&gt;
+</pre>
+
+<h2 id="running">Chạy Ứng dụng của bạn trong Chế độ Đa cửa sổ</h2>
+
+<p>
+  Android N có tính năng mới để hỗ trợ các ứng dụng có thể chạy
+  trong chế độ đa cửa sổ.
+</p>
+
+<h3 id="disabled-features">Các tính năng bị vô hiệu hóa trong Chế độ Đa cửa sổ</h3>
+
+<p>
+  Một số tính năng bị vô hiệu hóa hoặc bỏ qua khi một thiết bị đang ở chế độ
+  đa cửa sổ bởi các tính năng này không có ý nghĩa đối với một hoạt động có thể đang chia sẻ
+  màn hình thiết bị với các hoạt động hoặc ứng dụng khác. Các tính năng đó bao gồm:
+
+<ul>
+  <li>Ví dụ, một vài tùy chọn tùy chỉnh <a href="{@docRoot}training/system-ui/index.html">System UI</a>
+  sẽ bị vô hiệu hóa, ứng dụng không thể ẩn thanh trạng thái
+  nếu chúng đang chạy trong chế độ toàn màn hình.
+  </li>
+
+  <li>Hệ thống sẽ bỏ qua các thay đổi đối với thuộc tính <code><a href=
+  "{@docRoot}guide/topics/manifest/activity-element.html#screen"
+  >android:screenOrientation</a></code>.
+  </li>
+</ul>
+
+<h3 id="change-notification">Thông báo và truy vấn thay đổi đa cửa sổ</h3>
+
+<p>
+  Các phương thức mới sau đây đã được thêm vào lớp {@link android.app.Activity}
+  để hỗ trợ hiển thị đa cửa sổ. Để biết chi tiết về mỗi phương thức, xem
+  <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Tham chiếu N Preview SDK</a>.
+</p>
+
+<dl>
+  <dt>
+    <code>Activity.inMultiWindow()</code>
+  </dt>
+
+  <dd>
+    Lệnh gọi để tìm hiểu xem hoạt động có đang ở chế độ đa cửa sổ hay không.
+  </dd>
+
+  <dt>
+    <code>Activity.inPictureInPicture()</code>
+  </dt>
+
+  <dd>
+    Lệnh gọi để tìm hiểu xem hoạt động có đang ở chế độ ảnh trong ảnh hay không.
+
+    <p class="note">
+      <strong>Lưu ý:</strong> Chế độ Ảnh trong ảnh là trường hợp đặc biệt
+      của chế độ đa cửa sổ. Nếu <code>myActivity.inPictureInPicture()</code>
+      trả về là true, thì <code>myActivity.inMultiWindow()</code> cũng trả về là
+      true.
+    </p>
+  </dd>
+
+  <dt>
+    <code>Activity.onMultiWindowChanged()</code>
+  </dt>
+
+  <dd>
+    Hệ thống sẽ gọi phương thức này bất cứ khi nào hoạt động đi vào trong hay ra ngoài
+    chế độ đa cửa sổ. Hệ thống sẽ chuyển cho phương thức giá trị true nếu
+    hoạt động đang đi vào chế độ đa cửa sổ, và false nếu hoạt động
+    đang rời chế độ đa cửa sổ.
+  </dd>
+
+  <dt>
+    <code>Activity.onPictureInPictureChanged()</code>
+  </dt>
+
+  <dd>
+    Hệ thống sẽ gọi phương thức này bất cứ khi nào hoạt động đi vào trong hay ra ngoài
+    chế độ ảnh trong ảnh. Hệ thống sẽ chuyển cho phương thức một giá trị true nếu
+    hoạt động đang đi vào chế độ ảnh trong ảnh, và false nếu hoạt động
+    đang rời chế độ ảnh trong ảnh.
+  </dd>
+</dl>
+
+<p>
+  Cũng có các phiên bản {@link android.app.Fragment} của từng phương thức
+  này, ví dụ như <code>Fragment.inMultiWindow()</code>.
+</p>
+
+<h3 id="entering-pip">Vào chế độ ảnh trong ảnh</h3>
+
+<p>
+  Để đặt một hoạt động vào trong chế độ ảnh trong ảnh, hãy gọi phương thức mới
+  <code>Activity.enterPictureInPicture()</code>. Phương thức này sẽ không có ảnh hưởng nếu
+  thiết bị không hỗ trợ chế độ ảnh trong ảnh. Để biết thêm thông tin,
+  hãy xem tài liệu <a href="picture-in-picture.html">Ảnh trong ảnh</a>.
+</p>
+
+<h3 id="launch">Khởi chạy Hoạt động Mới trong Chế độ Đa cửa sổ</h3>
+
+<p>
+  Khi bạn khởi chạy một hoạt động mới, bạn có thể gợi ý cho hệ thống rằng hoạt động
+  mới sẽ được hiển thị liền kề hoạt động hiện tại, nếu có thể. Để thực hiện điều
+  này, hãy dùng cờ
+  <code>Intent.FLAG_ACTIVITY_LAUNCH_TO_ADJACENT</code>. Việc chuyển
+  cờ này yêu cầu hành vi sau:
+</p>
+
+<ul>
+  <li>Nếu thiết bị đang ở chế độ chia màn hình, hệ thống sẽ cố tạo ra
+  hoạt động mới bên cạnh hoạt động đã khởi chạy nó, vì vậy hai hoạt động này
+  sẽ chia sẻ cùng một màn hình. Hệ thống không được đảm bảo có thể làm được điều này, nhưng nó
+ làm cho các hoạt động ở liền kề nhau nếu có thể.
+  </li>
+
+  <li>Nếu thiết bị không ở chế độ chia màn hình, cờ này sẽ không có tác dụng.
+  </li>
+</ul>
+
+<p>
+  Nếu thiết bị đang ở chế độ hình dạng tự do và bạn đang khởi chạy một hoạt động mới, bạn có thể
+  quy định kích thước của hoạt động mới và vị trí màn hình bằng cách gọi
+  <code>ActivityOptions.setLaunchBounds()</code>. Phương thức này sẽ không có ảnh hưởng nếu
+  thiết bị không ở chế độ đa cửa sổ.
+</p>
+
+<p class="note">
+  <strong>Lưu ý:</strong> Nếu bạn khởi chạy một hoạt động trong một ngăn xếp tác vụ, hoạt động
+  này sẽ thay thế hoạt động trên màn hình, kế thừa tất cả các thuộc tính đa cửa sổ
+  của nó. Nếu bạn muốn khởi chạy hoạt động mới dưới dạng một cửa sổ
+  riêng trong chế độ đa cửa sổ, bạn phải khởi chạy nó trong một ngăn xếp tác vụ mới.
+</p>
+
+<h3 id="dnd">Hỗ trợ kéo và thả</h3>
+
+<p>
+  Người dùng có thể <a href="{@docRoot}guide/topics/ui/drag-drop.html">kéo và
+  thả</a> dữ liệu từ một hoạt động này sang một hoạt động khác trong khi các hoạt động này vẫn đang
+  chia sẻ cùng một màn hình. (Trước đó, người dùng chỉ có thể kéo và thả dữ liệu trong một
+  hoạt động đơn lẻ.) Vì lý do này, bạn có thể muốn thêm tính năng kéo và thả
+  vào ứng dụng của bạn nếu ứng dụng của bạn hiện không hỗ trợ tính năng này.
+</p>
+
+<p>
+  N Preview SDK mở rộng gói <a href="{@docRoot}reference/android/view/package-summary.html"><code>android.view</code></a>
+  để hỗ trợ kéo và thả giữa các ứng dụng. Để biết chi tiết về các lớp và phương thức
+  sau, hãy xem <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Tham chiếu N
+  Preview SDK</a>.
+</p>
+
+<dl>
+  <dt>
+    <code>android.view.DropPermissions</code>
+  </dt>
+
+  <dd>
+    Đối tượng mã thông báo chịu trách nhiệm về việc quy định các quyền cấp cho ứng dụng
+    nhận được thao tác thả.
+  </dd>
+
+  <dt>
+    <code>View.startDragAndDrop()</code>
+  </dt>
+
+  <dd>
+    Bí danh mới cho {@link android.view.View#startDrag View.startDrag()}. Để
+    kích hoạt kéo và thả giữa các hoạt động, hãy chuyển cờ mới
+    <code>View.DRAG_FLAG_GLOBAL</code>. Nếu bạn cần cấp quyền URI cho
+    hoạt động của đối tượng nhận, hãy chuyển các cờ mới
+    <code>View.DRAG_FLAG_GLOBAL_URI_READ</code> hoặc
+    <code>View.DRAG_FLAG_GLOBAL_URI_WRITE</code>, nếu phù hợp.
+  </dd>
+
+  <dt>
+    <code>View.cancelDragAndDrop()</code>
+  </dt>
+
+  <dd>
+    Hủy thao tác kéo hiện đang diễn ra. Chỉ có thể được gọi bằng
+    ứng dụng đã khởi nguồn thao tác kéo đó.
+  </dd>
+
+  <dt>
+    <code>View.updateDragShadow()</code>
+  </dt>
+
+  <dd>
+    Thay thế bóng kéo cho thao tác kéo hiện đang diễn ra. Chỉ có thể
+    được gọi bằng ứng dụng đã khởi nguồn thao tác kéo đó.
+  </dd>
+
+  <dt>
+    <code>Activity.requestDropPermissions()</code>
+  </dt>
+
+  <dd>
+    Yêu cầu các quyền cho URI nội dung đã chuyển với {@link
+    android.content.ClipData} có chứa trong {@link android.view.DragEvent}.
+  </dd>
+</dl>
+
+<h2 id="testing">Kiểm thử Hỗ trợ Đa cửa sổ của Ứng dụng của bạn</h2>
+
+<p>
+  Dù cho bạn có cập nhật ứng dụng của mình lên Android N hay không, bạn cũng nên
+  xác minh cách thiết bị có hành vi như thế nào trong chế độ đa cửa sổ trong trường hợp người dùng cố khởi chạy nó
+  ở chế độ đa cửa sổ trên thiết bị chạy Android N.
+</p>
+
+<h3 id="configuring">Cấu hình Thiết bị Kiểm thử</h3>
+
+<p>
+  Nếu bạn cài đặt Android N trên thiết bị, chế độ chia màn hình
+  sẽ được tự động hỗ trợ.
+</p>
+
+<h3 id="test-non-n">Nếu ứng dụng của bạn không được dựng bằng N Preview SDK</h3>
+
+<p>
+  Nếu bạn dựng ứng dụng của mình bằng N Preview SDK, và người dùng cố sử dụng ứng dụng này
+  trong chế độ đa cửa sổ, hệ thống sẽ bắt buộc thay đổi kích thước của ứng dụng đó trừ khi ứng dụng này
+  khai báo hướng cố định.
+</p>
+
+<p>
+  Nếu ứng dụng không khai báo hướng cố định, bạn nên khởi chạy ứng dụng của bạn
+  trên thiết bị đang chạy Android N và cố đặt ứng dụng vào trong
+  chế độ chia màn hình. Xác minh rằng trải nghiệm người dùng là
+  chấp nhận được khi ứng dụng bị bắt buộc thay đổi kích cỡ.
+</p>
+
+<p>
+  Nếu ứng dụng khai báo hướng cố định, bạn nên cố đặt ứng dụng vào trong
+  chế độ đa cửa sổ. Xác minh xem khi bạn làm như vậy, ứng dụng vẫn giữ
+  ở chế độ toàn màn hình.
+</p>
+
+<h3 id="test-mw">Nếu bạn hỗ trợ chế độ đa cửa sổ</h3>
+
+<p>
+  Nếu bạn dựng ứng dụng của bạn bằng N Preview SDK và chưa vô hiệu hóa
+  hỗ trợ đa cửa sổ, hãy xác minh hành vi sau dưới chế độ chia màn hình
+  và chế độ hình dạng tự do.
+</p>
+
+<ul>
+  <li>Khởi chạy ứng dụng trong chế độ toàn màn hình, rồi chuyển sang chế độ đa cửa sổ bằng cách
+  nhấn giữ nút Overview. Xác minh rằng ứng dụng đã chuyển đổi đúng cách.
+  </li>
+
+  <li>Khởi chạy ứng dụng trực tiếp trong chế độ đa cửa sổ, và xác thực rằng ứng dụng này
+  khởi chạy đúng cách. Bạn có thể khởi chạy ứng dụng trong chế độ đa cửa sổ bằng cách nhấn vào nút
+  Overview, rồi nhấn giữ vào thanh tiều đề của ứng dụng của bạn và kéo nó
+  đến một trong những vùng được tô sáng trên màn hình.
+  </li>
+
+  <li>Thay đổi kích thước ứng dụng của bạn trong chế độ chia màn hình bằng cách kéo đường phân chia.
+  Xác minh rằng ứng dụng thay đổi kích thước mà không bị lỗi, và các phần tử UI cần thiết
+  vẫn hiển thị.
+  </li>
+
+  <li>Nếu bạn đã quy định các kích cỡ tối thiểu cho ứng dụng của bạn, hãy cố thay đổi kích thước của ứng dụng
+  sao cho nhỏ hơn các kích thước đã quy định đó. Xác minh rằng bạn không thể thay đổi kích cỡ của ứng dụng để
+  nhỏ hơn kích cỡ tối thiểu đã quy định.
+  </li>
+
+  <li>Thông qua tất cả các bài kiểm thử, hãy xác minh rằng hiệu năng của ứng dụng của bạn là có thể chấp nhận được. Ví
+  dụ, xác minh rằng sẽ không bị trễ quá lâu để cập nhật UI sau khi
+  ứng dụng bị thay đổi kích thước.
+  </li>
+</ul>
+
+<h4 id="test-checklist">Danh sách kiểm thử</h4>
+
+<p>
+  Để xác minh hiệu năng ứng dụng của bạn trong chế độ đa cửa sổ, hãy thử các thao tác
+  sau. Bạn nên thử các thao tác này trong cả chế độ chia màn hình và
+  chế độ đa cửa sổ, trừ khi có lưu ý khác.
+</p>
+
+<ul>
+  <li>Vào và rời chế độ đa cửa sổ.
+  </li>
+
+  <li>Hãy chuyển từ ứng dụng của bạn sang ứng dụng khác, và xác minh rằng ứng dụng có hành vi
+  đúng cách trong khi nó hiển thị nhưng không hoạt động. Ví dụ nếu ứng dụng của bạn đang
+  phát video, hãy xác minh rằng video tiếp tục phát trong khi người dùng đang
+  tương tác với một ứng dụng khác.
+  </li>
+
+  <li>Trong chế độ chia màn hình, hãy thử di chuyển thanh phân chia để làm cho ứng dụng của bạn
+  rộng hơn và nhỏ hơn. Thử các thao tác này trong cả cấu hình song song và
+  trên dưới. Xác minh rằng ứng dụng không bị treo,
+  các chức năng thiết yếu vẫn hiển thị, và thao tác thay đổi kích cỡ không quá
+   lâu.
+  </li>
+
+  <li>Thực hiện một vài thao tác thay đổi kích cỡ nối tiếp nhau thật nhanh. Xác minh rằng ứng dụng
+  của bạn không bị lỗi hoặc bị rò rỉ bộ nhớ. Để biết thông tin về kiểm tra việc sử dụng bộ nhớ của
+  ứng dụng, xem <a href="{@docRoot}tools/debugging/debugging-memory.html">
+  Kiểm tra Sử dụng RAM của bạn</a>.
+  </li>
+
+  <li>Sử dụng ứng dụng của bạn như thông thường trong một số cấu hình cửa sổ khác nhau, và
+  xác minh rằng ứng dụng có hành vi bình thường. Xác minh rằng có thể đọc được các chữ và
+  các phần tử UI không quá nhỏ để tương tác với chúng.
+  </li>
+</ul>
+
+<h3 id="test-disabled-mw">Nếu bạn đã vô hiệu hóa hỗ trợ đa cửa sổ</h3>
+
+<p>
+  Nếu bạn đã vô hiệu hóa hỗ trợ đa cửa sổ bằng cách đặt
+  <code>android:resizableActivity="false"</code>, bạn nên khởi chạy ứng dụng của mình trên
+  thiết bị chạy Android N và cố đặt ứng dụng này vào trong
+  cả chế độ hình dạng tự do và chế độ chia màn hình. Xác minh xem khi bạn làm như vậy, ứng dụng vẫn giữ
+  ở chế độ toàn màn hình.
+</p>

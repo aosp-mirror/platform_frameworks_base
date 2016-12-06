@@ -36,6 +36,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -2565,6 +2566,20 @@ public final class Parcel {
             return null;
         }
         Parcelable[] p = new Parcelable[N];
+        for (int i = 0; i < N; i++) {
+            p[i] = readParcelable(loader);
+        }
+        return p;
+    }
+
+    /** @hide */
+    public final <T extends Parcelable> T[] readParcelableArray(ClassLoader loader,
+            Class<T> clazz) {
+        int N = readInt();
+        if (N < 0) {
+            return null;
+        }
+        T[] p = (T[]) Array.newInstance(clazz, N);
         for (int i = 0; i < N; i++) {
             p[i] = readParcelable(loader);
         }

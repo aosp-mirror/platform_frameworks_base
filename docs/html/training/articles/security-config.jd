@@ -1,0 +1,752 @@
+page.title=Network Security Configuration
+page.keywords=security,network,config
+page.metaDescription=Feature that allows app developers to customize network security settings in a safe configuration file.
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>In this document</h2>
+<ol>
+  <li><a href="#manifest">Adding a Security Configuration File</a></li>
+  <li><a href="#CustomTrust">Customizing Trusted CAs</a>
+      <ol>
+      <li><a href="#ConfigCustom">Configuring a Trusted Custom CA</a></li>
+      <li><a href="#LimitingCas">Limiting the Set of Trusted CAs</a></li>
+      <li><a href="#TrustingAdditionalCas">Trusting Additional CAs</a></li>
+      </ol>
+  </li>
+  <li><a href="#TrustingDebugCa">Debugging-only CAs</a></li>
+  <li><a href="#CleartextTrafficPermitted">Opting Out of Cleartext Traffic</a></li>
+  <li><a href="#CertificatePinning">Pinning Certificates</a></li>
+  <li><a href="#ConfigInheritance">Configuration Inheritance Behavior</a></li>
+  <li><a href="#FileFormat">Configuration File Format</a></li>
+</ol>
+</div>
+</div>
+
+
+<p>
+  The Network Security Configuration feature lets apps customize their network
+  security settings in a safe, declarative configuration file without modifying
+  app code. These settings can be configured for specific domains and for a
+  specific app. The key capabilities of this feature are as follows:
+</p>
+
+<ul>
+  <li>
+    <b>Custom trust anchors:</b> Customize which Certificate Authorities (CA)
+    are trusted for an app's secure connections. For
+    example, trusting particular self-signed certificates or restricting the
+    set of public CAs that the app trusts.
+  </li>
+
+  <li>
+    <b>Debug-only overrides:</b> Safely debug secure connections in an app
+    without added risk to the installed base.
+  </li>
+
+  <li>
+    <b>Cleartext traffic opt-out:</b> Protect apps from
+    accidental usage of cleartext traffic.
+  </li>
+
+  <li>
+    <b>Certificate pinning:</b> Restrict an app's secure connection to
+    particular certificates.
+  </li>
+</ul>
+
+
+<h2 id="manifest">Adding a Security Configuration File</h2>
+
+<p>
+  The Network Security Configuration feature uses an XML file where you specify
+  the settings for your app. You must include an entry in the manifest of your
+  app to point to this file. The following code excerpt from a manifest
+  demonstrates how to create this entry:
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest ... &gt;
+    &lt;application android:networkSecurityConfig="@xml/network_security_config"
+                    ... &gt;
+        ...
+    &lt;/application&gt;
+&lt;/manifest&gt;
+</pre>
+
+<h2 id="CustomTrust">Customizing Trusted CAs</h2>
+
+<p>
+  An app may want to trust a custom set of CAs instead of the platform
+  default. The most common reasons of this are:
+</p>
+
+<ul>
+  <li>Connecting to a host with a custom certificate authority, such as a
+  CA that is self-signed or is issued internally within a company.
+  </li>
+
+  <li>Limiting the set of CAs to only the CAs you trust instead of every
+  pre-installed CA.
+  </li>
+
+  <li>Trusting additional CAs not included in the system.
+  </li>
+</ul>
+
+<p>
+  By default, secure connections (using protocols like TLS and HTTPS) from all
+  apps trust the pre-installed system CAs, and apps targeting Android 6.0 (API
+  level 23) and lower also trust the user-added CA store by default. An app can
+  customize its own connections using {@code base-config} (for app-wide
+  customization) or {@code domain-config} (for per-domain customization).
+</p>
+
+
+<h3 id="ConfigCustom">Configuring a Custom CA</h3>
+
+<p>
+  Assume you want to connect to your host which uses a self-signed SSL
+  certificate or to a host whose SSL certificate is issued by a non-public CA
+  which you trust, such as your company's internal CA.
+</p>
+
+<p>
+  <code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;example.com&lt;/domain&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/my_ca"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+<p>
+  Add the self-signed or non-public CA certificate, in PEM or DER format, to
+  {@code res/raw/my_ca}.
+</p>
+
+
+<h3 id="LimitingCas">Limiting the Set of Trusted CAs</h3>
+
+<p>
+  An app that does not want to trust all CAs trusted by system can
+  instead specify its own reduced set of CAs to trust. This protects the
+  app from fradulent certificates issued by any of the other CAs.
+</p>
+
+<p>
+  The configuration to limit the set of trusted CAs is similar to <a href=
+  "#ConfigCustom">trusting a custom CA</a> for a specific domain except
+  that multiple CAs are provided in the resource.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;secure.example.com&lt;/domain&gt;
+        &lt;domain includeSubdomains="true"&gt;cdn.example.com&lt;/domain&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/trusted_roots"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+<p>
+  Add the trusted CAs, in PEM or DER format, to {@code res/raw/trusted_roots}.
+  Note that if using PEM format the file must contain <em>only</em> PEM data
+  and no extra text. You can also provide multiple
+  <a href="#certificates"><code>&lt;certificates&gt;</code></a>
+elements instead of one.
+</p>
+
+
+<h3 id="TrustingAdditionalCas">
+  Trusting Additional CAs
+</h3>
+
+<p>
+  An app may want to trust additional CAs not trusted by the system,
+  this could be due to the system not yet including the CA or a CA that does
+  not meet the requirements for inclusion into the Android system. An
+  app can do this by specifying multiple certificate sources for a
+  configuration.
+</p>
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;base-config&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/extracas"/&gt;
+            &lt;certificates src="system"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/base-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="TrustingDebugCa">Configuring CAs for Debugging</h2>
+
+<p>
+  When debugging an app that connects over HTTPS, you may want to
+  connect to a local development server, which does not have the SSL
+  certificate for your production server. In order to support this without any
+  modification to your app's code, you can specify debug-only CAs, which
+  are trusted <i>only</i> when <a href=
+  "{@docRoot}guide/topics/manifest/application-element.html#debug">
+android:debuggable</a>
+  is {@code true}, by using {@code debug-overrides}. Normally, IDEs and build
+  tools set this flag automatically for non-release builds.
+</p>
+
+<p>
+  This is safer than the usual conditional code because, as a security
+  precaution, app stores do not accept apps which are marked
+  debuggable.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;debug-overrides&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/debug_cas"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/debug-overrides&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="CleartextTrafficPermitted">Opting Out of Cleartext Traffic</h2>
+
+<p>
+  Applications intending to connect to destinations using only secure
+  connections can opt-out of supporting cleartext (using the unencrypted HTTP
+  protocol instead of HTTPS) to those destinations. This option helps prevent
+  accidental regressions in apps due to changes in URLs provided by external
+  sources such as backend servers.
+  See {@link android.security.NetworkSecurityPolicy#isCleartextTrafficPermitted
+  NetworkSecurityPolicy.isCleartextTrafficPermitted()} for more details.
+</p>
+
+<p>
+  For example, an app may want to ensure that all connections to {@code
+  secure.example.com} are always done over HTTPS to protect sensitive traffic
+  from hostile networks.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config cleartextTrafficPermitted="false"&gt;
+        &lt;domain includeSubdomains="true"&gt;secure.example.com&lt;/domain&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="CertificatePinning">Pinning Certificates</h2>
+
+<p>
+  Normally, an app trusts all pre-installed CAs. If any of these CAs were to
+  issue a fradulent certificate, the app would be at risk from a
+  man-in-the-middle attack. Some apps choose to limit the set of certificates
+  they accept by either limiting the set of CAs they trust or by certificate
+  pinning.
+</p>
+
+<p>
+  Certificate pinning is done by providing a set of certificates by hash of the
+  public key (<code>SubjectPublicKeyInfo</code> of the X.509 certificate). A
+  certificate chain is then valid only if the certificate chain contains at
+  least one of the pinned public keys.
+</p>
+
+<p>
+  Note that, when using certificate pinning, you should always include a backup
+  key so that if you are forced to switch to new keys or change CAs (when
+  pinning to a CA certificate or an intermediate of that CA), your
+  app's connectivity is unaffected. Otherwise, you must push out
+  an update to the app to restore connectivity.
+</p>
+
+<p>
+  Additionally, it is possible to set an expiration time for pins after which
+  pinning is not performed. This helps prevent connectivity issues in
+  apps which have not been updated. However, setting an expiration time
+  on pins may enable pinning bypass.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;example.com&lt;/domain&gt;
+        &lt;pin-set expiration="2018-01-01"&gt;
+            &lt;pin digest="SHA-256"&gt;7HIpactkIAq2Y49orFOOQKurWxmmSFZhBCoQYcRhJ3Y=&lt;/pin&gt;
+            &lt;!-- backup pin --&gt
+            &lt;pin digest="SHA-256"&gt;fwza0LRMXouZHRC8Ei+4PyuldPDcf3UKgO/04cDM1oE=&lt;/pin&gt;
+        &lt;/pin-set&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="ConfigInheritance">Configuration Inheritance Behavior</h2>
+
+<p>
+  Values not set in a specific configuration are inherited. This behavior allows
+  more complex configurations while keeping the configuration file readable.
+</p>
+
+<p>
+  If a value is not set in a specific entry, then the value from the more
+  general entry is used. For example, values not set in a {@code domain-config}
+  are taken from the parent {@code domain-config}, if nested, or from the {@code
+  base-config} if not. Values not set in the {@code base-config} use the
+  platform default values.
+</p>
+
+<p>
+  For example, consider where all connections to subdomains of {@code
+  example.com} must use a custom set of CAs. Additonally, cleartext traffic to
+  these domains is permitted <em>except</em> when connecting to {@code
+  secure.example.com}. By nesting the configuration for {@code
+  secure.example.com} inside the configuration for {@code example.com}, the
+  {@code trust-anchors} does not need to be duplicated.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;example.com&lt;/domain&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/my_ca"/&gt;
+        &lt;/trust-anchors&gt;
+        &lt;domain-config cleartextTrafficPermitted="false"&gt;
+            &lt;domain includeSubdomains="true"&gt;secure.example.com&lt;/domain&gt;
+        &lt;/domain-config&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="FileFormat">Configuration File Format</h2>
+
+<p>
+  The Network Security Configuration feature uses an XML file format.
+  The overall structure of the file is shown in the following code sample:
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;base-config&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="..."/&gt;
+            ...
+        &lt;/trust-anchors&gt;
+    &lt;/base-config&gt;
+
+    &lt;domain-config&gt;
+        &lt;domain&gt;android.com&lt;/domain&gt;
+        ...
+        &lt;trust-anchors&gt;
+            &lt;certificates src="..."/&gt;
+            ...
+        &lt;/trust-anchors&gt;
+        &lt;pin-set&gt;
+            &lt;pin digest="..."&gt;...&lt;/pin&gt;
+            ...
+        &lt;/pin-set&gt;
+    &lt;/domain-config&gt;
+    ...
+    &lt;debug-overrides&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="..."/&gt;
+            ...
+        &lt;/trust-anchors&gt;
+    &lt;/debug-overrides&gt;
+&lt;/network-security-config&gt;
+</pre>
+
+<p>
+  The following sections describe the syntax and other details of the file
+  format.
+</p>
+
+<h3 id="network-security-config">
+  &lt;network-security-config&gt;
+</h3>
+
+<dl class="xml">
+  <dt>
+    can contain:
+  </dt>
+
+  <dd>
+    0 or 1 of <code><a href="#base-config">&lt;base-config&gt;</a></code><br>
+    Any number of <code><a href=
+    "#domain-config">&lt;domain-config&gt;</a></code><br>
+    0 or 1 of <code><a href="#debug-overrides">&lt;debug-overrides&gt;</a></code>
+  </dd>
+</dl>
+
+<h3 id="base-config">
+  &lt;base-config&gt;
+</h3>
+
+<dl class="xml">
+  <dt>
+    syntax:
+  </dt>
+</dl>
+
+<pre class="stx">
+&lt;base-config <a href=
+"#CleartextTrafficPermitted">cleartextTrafficPermitted</a>=["true" | "false"]&gt;
+    ...
+&lt;/base-config&gt;
+</pre>
+<dl class="xml">
+  <dt>
+    can contain:
+  </dt>
+
+  <dd>
+    <code><a href="#trust-anchors">&lt;trust-anchors&gt;</a></code>
+  </dd>
+
+  <dt>
+    description:
+  </dt>
+
+  <dd>
+    The default configuration used by all connections whose destination is not
+    covered by a <a href="#domain-config"><code>domain-config</code></a>.
+
+<p>
+  Any values that are not set use the platform default values. The default
+  configuration for apps targeting Android 7.0 (API level 24) and higher is as
+  follows:
+</p>
+
+<pre>
+&lt;base-config cleartextTrafficPermitted="true"&gt;
+    &lt;trust-anchors&gt;
+        &lt;certificates src="system" /&gt;
+    &lt;/trust-anchors&gt;
+&lt;/base-config&gt;
+</pre>
+The default configuration for apps targeting Android 6.0 (API level 23) and
+lower is as follows:
+<pre>
+&lt;base-config cleartextTrafficPermitted="true"&gt;
+    &lt;trust-anchors&gt;
+        &lt;certificates src="system" /&gt;
+        &lt;certificates src="user" /&gt;
+    &lt;/trust-anchors&gt;
+&lt;/base-config&gt;
+</pre>
+
+  </dd>
+</dl>
+
+<h3 id="domain-config">&lt;domain-config&gt;</h3>
+<dl class="xml">
+<dt>syntax:</dt>
+<dd>
+<pre class="stx">&lt;domain-config <a href="#CleartextTrafficPermitted">cleartextTrafficPermitted</a>=["true" | "false"]&gt;
+    ...
+&lt;/domain-config&gt;</pre>
+</dd>
+
+<dt>Can Contain:</dt>
+
+<dd>
+1 or more <code><a href="#domain">&lt;domain&gt;</a></code>
+<br/>0 or 1 <code><a href="#trust-anchors">&lt;trust-anchors&gt;</a></code>
+<br/>0 or 1 <code><a href="#pin-set">&lt;pin-set&gt;</code></a>
+<br/>Any number of nested <code>&lt;domain-config&gt;</code></dd>
+
+<dt>Description</dt>
+<dd>Configuration used for connections to specific destinations, as defined by
+the {@code domain} elements.
+
+<p>Note that if multiple {@code domain-config} elements cover a destination, the
+configuration with the most specific (longest) matching domain rule is
+used.</p></dd>
+</dl>
+
+<h3 id="domain">&lt;domain&gt;</h3>
+
+<dl class="xml">
+  <dt>
+    syntax:
+  </dt>
+
+  <dd>
+    <pre class="stx">
+&lt;domain includeSubdomains=["true" | "false"]&gt;example.com&lt;/domain&gt;
+</pre>
+  </dd>
+
+  <dt>
+    Attributes:
+  </dt>
+
+  <dd>
+    <dl class="attr">
+      <dt>
+        {@code includeSubdomains}
+      </dt>
+
+      <dd>
+        If {@code "true"}, then this domain rule matches the domain and all
+        subdomains, including subdomains of subdomains. Otherwise, the rule only
+        applies to exact matches.
+      </dd>
+    </dl>
+  </dd>
+
+  <dt>
+    Description:
+  </dt>
+</dl>
+
+<h3 id="debug-overrides">&lt;debug-overrides&gt;</h3>
+
+<dl class="xml">
+  <dt>
+    syntax:
+  </dt>
+
+  <dd>
+    <pre class="stx">
+&lt;debug-overrides&gt;
+    ...
+&lt;/debug-overrides&gt;
+</pre>
+  </dd>
+
+  <dt>
+    Can Contain:
+  </dt>
+
+  <dd>
+    0 or 1 <code><a href="#trust-anchors">&lt;trust-anchors&gt;</a></code>
+  </dd>
+
+  <dt>
+    Description:
+  </dt>
+
+  <dd>
+    Overrides to be applied when <a href=
+    "{@docRoot}guide/topics/manifest/application-element.html#debug">android:debuggable</a>
+    is {@code "true"}, which is normally the case for non-release builds
+    generated by IDEs and build tools. Trust anchors specified in {@code
+    debug-overrides} are added to all other configurations, and certificate
+    pinning is not performed when the server's certificate chain uses one of
+    these debug-only trust anchors. If <a href=
+    "{@docRoot}guide/topics/manifest/application-element.html#debug">android:debuggable</a>
+    is {@code "false"}, then this section is completely ignored.
+  </dd>
+</dl>
+
+<h3 id="trust-anchors">&lt;trust-anchors&gt;</h3>
+<dl class="xml">
+  <dt>
+    syntax:
+  </dt>
+
+  <dd>
+    <pre class="stx">
+&lt;trust-anchors&gt;
+...
+&lt;/trust-anchors&gt;
+</pre>
+  </dd>
+
+  <dt>
+    Can Contain:
+  </dt>
+
+  <dd>
+    Any number of <code><a href="#certificates">&lt;certificates&gt;</a></code>
+  </dd>
+
+  <dt>
+    Description:
+  </dt>
+
+  <dd>
+    Set of trust anchors for secure connections.
+  </dd>
+</dl>
+
+
+<h3 id="certificates">&lt;certificates&gt;</h3>
+<dl class="xml">
+<dt>syntax:</dt>
+<dd><pre class="stx">&lt;certificates src=["system" | "user" | "<i>raw resource</i>"]
+              overridePins=["true" | "false"] /&gt;
+</pre></dd>
+<dt>description:</dt>
+<dd>Set of X.509 certificates for {@code trust-anchors} elements.</dd>
+
+<dt>attributes:</dt>
+<dd><dl class="attr">
+<dt>{@code src}</dt>
+<dd>
+The source of CA certificates. Each certificate can be one of the following:
+<ul>
+  <li>a raw resource ID pointing to a file containing X.509 certificates.
+  Certificates must be encoded in DER or PEM format. In the case of PEM
+  certificates, the file <em>must not</em> contain extra non-PEM data such as
+  comments.
+  </li>
+
+  <li>{@code "system"} for the pre-installed system CA certificates
+  </li>
+
+  <li>{@code "user"} for user-added CA certificates
+  </li>
+</ul>
+</dd>
+
+<dt>{@code overridePins}</dt>
+<dd>
+  <p>
+    Specifies if the CAs from this source bypass certificate pinning. If {@code
+    "true"}, then pinning is not performed on certificate chains which are
+    signed by one of the CAs from this source. This can be useful for debugging
+    CAs or for testing man-in-the-middle attacks on your app's secure traffic.
+  </p>
+
+  <p>
+    Default is {@code "false"} unless specified in a {@code debug-overrides}
+    element, in which case the default is {@code "true"}.
+  </p>
+</dd>
+</dl>
+</dd>
+
+
+<h3 id="pin-set">&lt;pin-set&gt;</h3>
+
+<dl class="xml">
+  <dt>
+    syntax:
+  </dt>
+
+  <dd>
+<pre class="stx">
+&lt;pin-set expiration="date"&gt;
+...
+&lt;/pin-set&gt;
+</pre>
+  </dd>
+
+  <dt>
+    Can Contain:
+  </dt>
+
+  <dd>
+    Any number of <code><a href="#pin">&lt;pin&gt;</a></code>
+  </dd>
+
+  <dt>
+    Description:
+  </dt>
+
+  <dd>
+    A set of public key pins. For a secure connection to be trusted, one of the
+    public keys in the chain of trust must be in the set of pins. See
+    <code><a href="#pin">&lt;pin&gt;</a></code> for the format of pins.
+  </dd>
+
+  <dt>
+    Attributes:
+  </dt>
+
+  <dd>
+    <dl class="attr">
+      <dt>
+        {@code expiration}
+      </dt>
+
+      <dd>
+        The date, in {@code yyyy-MM-dd} format, on which the pins expire, thus
+        disabling pinning. If the attribute is not set, then the pins do not
+        expire.
+        <p>
+          Expiration helps prevent connectivity issues in apps which do not get
+          updates to their pin set, such as when the user disables app updates.
+        </p>
+      </dd>
+    </dl>
+  </dd>
+</dl>
+
+<h3 id="pin">&lt;pin&gt;</h3>
+<dl class="xml">
+  <dt>
+    syntax:
+  </dt>
+
+  <dd>
+<pre class="stx">
+&lt;pin digest=["SHA-256"]&gt;base64 encoded digest of X.509
+    SubjectPublicKeyInfo (SPKI)&lt;/pin&gt;
+</pre>
+  </dd>
+
+  <dt>
+    Attributes:
+  </dt>
+
+  <dd>
+    <dl class="attr">
+      <dt>
+        {@code digest}
+      </dt>
+
+      <dd>
+        The digest algorithm used to generate the pin. Currently, only
+        {@code "SHA-256"} is supported.
+      </dd>
+    </dl>
+  </dd>
+</dl>

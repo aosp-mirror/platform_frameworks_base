@@ -4,31 +4,31 @@ page.title=Honeycomb MR1
 
 
 <style type="text/css">
-#jd-content {
+#body-content {
   max-width:1200px;
 }
-#jd-content div.screenshot {
+#body-content div.screenshot {
   float:left;
   clear:left;
   padding:15px 30px 15px 0;
 }
-#jd-content div.video {
+#body-content div.video {
   float:right;
   padding:0 60px 40px;
 }
-#jd-content table.columns {
+#body-content table.columns {
   margin:0 0 1em 0;
 }
-#jd-content table.columns td {
+#body-content table.columns td {
   padding:0;
 }
-#jd-content table.columns td+td {
+#body-content table.columns td+td {
   padding:0 2em;
 }
-#jd-content table.columns td img {
+#body-content table.columns td img {
   margin:0;
 }
-#jd-content table.columns td+td>*:first-child {
+#body-content table.columns td+td>*:first-child {
   margin-top:-2em;
 }
 .green {
@@ -93,7 +93,7 @@ device.</p>
 <p>The platform also adds new support for USB accessories &mdash; external
 hardware devices designed to attach to Android-powered devices as USB hosts. When an
 accessory is attached, the framework will look for a corresponding application
-and offer to launch it for the user.  The accessory can also present a URL 
+and offer to launch it for the user.  The accessory can also present a URL
 to the user, for downloading an appropriate application if one is not already
 installed.  Users can interact with the application to control powered accessories such
 as robotics controllers; docking stations; diagnostic and musical equipment;
@@ -215,7 +215,7 @@ indicator to let users see how much space is available.</p>
 
 <div  style="padding-top:0em;">
 <div style="margin-right:1em;float:left;margin-left:0em;"><img src="{@docRoot}sdk/images/3.1/resizeable.png" alt="" width="170"  target="_android" style="margin-bottom:0;" />
-<div style="padding-left:1.4em;padding-bottom:1em;width:180px;font-size:.9em"><strong>Figure 
+<div style="padding-left:1.4em;padding-bottom:1em;width:180px;font-size:.9em"><strong>Figure
 4.</strong> Home screen widgets can now be resized.</div></div>
 
 <p><strong>Calendar</strong></p>

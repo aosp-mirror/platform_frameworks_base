@@ -40,11 +40,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     static final boolean DBG = false;
 
     private static final String NAME = "sound_model.db";
-    private static final int VERSION = 4;
+    private static final int VERSION = 5;
 
     public static interface SoundModelContract {
         public static final String TABLE = "sound_model";
         public static final String KEY_MODEL_UUID = "model_uuid";
+        public static final String KEY_VENDOR_UUID = "vendor_uuid";
         public static final String KEY_KEYPHRASE_ID = "keyphrase_id";
         public static final String KEY_TYPE = "type";
         public static final String KEY_DATA = "data";
@@ -58,6 +59,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String CREATE_TABLE_SOUND_MODEL = "CREATE TABLE "
             + SoundModelContract.TABLE + "("
             + SoundModelContract.KEY_MODEL_UUID + " TEXT PRIMARY KEY,"
+            + SoundModelContract.KEY_VENDOR_UUID + " TEXT, "
             + SoundModelContract.KEY_KEYPHRASE_ID + " INTEGER,"
             + SoundModelContract.KEY_TYPE + " INTEGER,"
             + SoundModelContract.KEY_DATA + " BLOB,"
@@ -78,9 +80,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // TODO: For now, drop older tables and recreate new ones.
-        db.execSQL("DROP TABLE IF EXISTS " + SoundModelContract.TABLE);
-        onCreate(db);
+        if (oldVersion < 4) {
+            // For old versions just drop the tables and recreate new ones.
+            db.execSQL("DROP TABLE IF EXISTS " + SoundModelContract.TABLE);
+            onCreate(db);
+        } else {
+            // In the jump to version 5, we added support for the vendor UUID.
+            if (oldVersion == 4) {
+                Slog.d(TAG, "Adding vendor UUID column");
+                db.execSQL("ALTER TABLE " + SoundModelContract.TABLE + " ADD COLUMN "
+                        + SoundModelContract.KEY_VENDOR_UUID + " TEXT");
+                oldVersion++;
+            }
+        }
     }
 
     /**
@@ -93,6 +105,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             SQLiteDatabase db = getWritableDatabase();
             ContentValues values = new ContentValues();
             values.put(SoundModelContract.KEY_MODEL_UUID, soundModel.uuid.toString());
+            if (soundModel.vendorUuid != null) {
+                values.put(SoundModelContract.KEY_VENDOR_UUID, soundModel.vendorUuid.toString());
+            }
             values.put(SoundModelContract.KEY_TYPE, SoundTrigger.SoundModel.TYPE_KEYPHRASE);
             values.put(SoundModelContract.KEY_DATA, soundModel.data);
 
@@ -176,6 +191,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                             continue;
                         }
 
+                        String vendorUuidString = null;
+                        int vendorUuidColumn = c.getColumnIndex(SoundModelContract.KEY_VENDOR_UUID);
+                        if (vendorUuidColumn != -1) {
+                            vendorUuidString = c.getString(vendorUuidColumn);
+                        }
                         byte[] data = c.getBlob(c.getColumnIndex(SoundModelContract.KEY_DATA));
                         int recognitionModes = c.getInt(
                                 c.getColumnIndex(SoundModelContract.KEY_RECOGNITION_MODES));
@@ -212,9 +232,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         Keyphrase[] keyphrases = new Keyphrase[1];
                         keyphrases[0] = new Keyphrase(
                                 keyphraseId, recognitionModes, modelLocale, text, users);
+                        UUID vendorUuid = null;
+                        if (vendorUuidString != null) {
+                            vendorUuid = UUID.fromString(vendorUuidString);
+                        }
                         KeyphraseSoundModel model = new KeyphraseSoundModel(
-                                UUID.fromString(modelUuid),
-                                null /* FIXME use vendor UUID */, data, keyphrases);
+                                UUID.fromString(modelUuid), vendorUuid, data, keyphrases);
                         if (DBG) {
                             Slog.d(TAG, "Found SoundModel for the given keyphrase/locale/user: "
                                     + model);

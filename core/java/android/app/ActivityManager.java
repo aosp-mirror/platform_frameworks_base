@@ -93,7 +93,8 @@ public class ActivityManager {
     @IntDef({
             BUGREPORT_OPTION_FULL,
             BUGREPORT_OPTION_INTERACTIVE,
-            BUGREPORT_OPTION_REMOTE
+            BUGREPORT_OPTION_REMOTE,
+            BUGREPORT_OPTION_WEAR
     })
     public @interface BugreportMode {}
     /**
@@ -114,6 +115,11 @@ public class ActivityManager {
      * @hide
      */
     public static final int BUGREPORT_OPTION_REMOTE = 2;
+    /**
+     * Takes a bugreport on a wearable device.
+     * @hide
+     */
+    public static final int BUGREPORT_OPTION_WEAR = 3;
 
     /**
      * <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code
@@ -1507,7 +1513,7 @@ public class ActivityManager {
             throws SecurityException {
         try {
             return ActivityManagerNative.getDefault().getRecentTasks(maxNum,
-                    flags, UserHandle.myUserId());
+                    flags, UserHandle.myUserId()).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1532,7 +1538,7 @@ public class ActivityManager {
             throws SecurityException {
         try {
             return ActivityManagerNative.getDefault().getRecentTasks(maxNum,
-                    flags, userId);
+                    flags, userId).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3621,6 +3627,24 @@ public class ActivityManager {
             return ActivityManagerNative.getDefault().getLockTaskModeState();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Enable more aggressive scheduling for latency-sensitive low-runtime VR threads. Only one
+     * thread can be a VR thread in a process at a time, and that thread may be subject to
+     * restrictions on the amount of time it can run.
+     *
+     * To reset the VR thread for an application, a tid of 0 can be passed.
+     *
+     * @see android.os.Process#myTid()
+     * @param tid tid of the VR thread
+     */
+    public static void setVrThread(int tid) {
+        try {
+            ActivityManagerNative.getDefault().setVrThread(tid);
+        } catch (RemoteException e) {
+            // pass
         }
     }
 

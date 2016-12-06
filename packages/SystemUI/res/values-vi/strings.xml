@@ -143,7 +143,9 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3,5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_4g_plus" msgid="3032226872470658661">"4G+"</string>
     <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
+    <string name="accessibility_data_connection_lte_plus" msgid="361876866906946007">"LTE+"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Chuyển vùng"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Cạnh"</string>
@@ -236,7 +238,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Đã tạm dừng dữ liệu 4G"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Đã tạm dừng dữ liệu di động"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Đã tạm dừng dữ liệu"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Vì bạn đã đạt tới giới hạn dữ liệu thiết lập nên thiết bị đã tạm dừng sử dụng dữ liệu cho phần còn lại của chu kỳ này.\n\nTiếp tục có thể dẫn tới nhà cung cấp dịch vụ của bạn sẽ tính phí."</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Đã đạt đến giới hạn dữ liệu mà bạn đặt. Bạn hiện không còn sử dụng dữ liệu di động.\n\nNếu tiếp tục, bạn có thể bị tính phí khi sử dụng dữ liệu."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Tiếp tục"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Ko có k.nối Internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Đã kết nối Wi-Fi"</string>
@@ -308,7 +310,7 @@
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Đang dùng làm điểm truy cập Internet"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Điểm phát sóng"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Thông báo"</string>
-    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Đèn nháy"</string>
+    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Đèn pin"</string>
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Dữ liệu di động"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Sử dụng dữ liệu"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Dữ liệu còn lại"</string>
@@ -317,6 +319,9 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Giới hạn <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Cảnh báo <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Chế độ làm việc"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Đèn đọc sách"</string>
+    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"Đèn đọc sách được bật, nhấn để tắt"</string>
+    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"Đèn đọc sách bị tắt, nhấn để bật"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"Không có mục gần đây nào"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Bạn đã xóa mọi nội dung"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Thông tin ứng dụng"</string>
@@ -330,6 +335,8 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Phân tách ngang"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Phân tách dọc"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Tùy chỉnh phân tách"</string>
+  <string-array name="recents_blacklist_array">
+  </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Đã sạc đầy"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Đang sạc"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> cho đến khi đầy"</string>
@@ -397,6 +404,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"Thiết bị có thể được giám sát"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Hồ sơ có thể được giám sát"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Mạng có thể được giám sát"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"Mạng có thể được giám sát"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Giám sát thiết bị"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Giám sát hồ sơ"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Giám sát mạng"</string>
@@ -409,6 +417,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"Bạn đang kết nối với <xliff:g id="APPLICATION">%1$s</xliff:g>. Ứng dụng này có thể giám sát hoạt động mạng của bạn bao gồm email, ứng dụng và trang web."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Bạn đang kết nối với <xliff:g id="APPLICATION">%1$s</xliff:g>. Ứng dụng này có thể giám sát hoạt động mạng cá nhân của bạn bao gồm email, ứng dụng và trang web."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Bạn đang kết nối với <xliff:g id="APPLICATION">%1$s</xliff:g>. Ứng dụng này có thể giám sát hoạt động mạng cá nhân của bạn bao gồm email, ứng dụng và trang web."</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"Hồ sơ công việc của bạn được quản lý bởi <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Hồ sơ được kết nối với <xliff:g id="APPLICATION">%2$s</xliff:g>, ứng dụng này có thể giám sát hoạt động mạng cơ quan của bạn, bao gồm email, ứng dụng và trang web.\n\nĐể biết thêm thông tin, hãy liên hệ với quản trị viên của bạn."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Hồ sơ công việc của bạn được quản lý bởi <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Hồ sơ được kết nối với <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, ứng dụng này có thể giám sát hoạt động mạng cơ quan của bạn, bao gồm email, ứng dụng và trang web.\n\nBạn cũng được kết nối với <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, có thể giám sát hoạt động mạng cá nhân của bạn."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Thiết bị của bạn được quản lý bởi <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nQuản trị viên có thể giám sát và quản lý cài đặt, quyền truy cập của công ty, ứng dụng, dữ liệu được liên kết với thiết bị của bạn và thông tin về vị trí của thiết bị.\n\nBạn được kết nối với <xliff:g id="APPLICATION">%2$s</xliff:g>. Ứng dụng này có thể giám sát hoạt động mạng của bạn, bao gồm email, ứng dụng và trang web.\n\nĐể biết thêm thông tin, hãy liên hệ với quản trị viên của bạn."</string>
@@ -434,6 +443,18 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> là hộp thoại khối lượng"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"Nhấn để khôi phục ảnh chụp màn hình gốc."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Bạn đang sử dụng hồ sơ công việc của mình"</string>
+  <string-array name="volume_stream_titles">
+    <item msgid="5841843895402729630">"Gọi"</item>
+    <item msgid="5997713001067658559">"Hệ thống"</item>
+    <item msgid="7858983209929864160">"Chuông"</item>
+    <item msgid="1850038478268896762">"Phương tiện"</item>
+    <item msgid="8265110906352372092">"Báo thức"</item>
+    <item msgid="5339394737636839168"></item>
+    <item msgid="2951313578278086204">"Bluetooth"</item>
+    <item msgid="2919807739709798970"></item>
+    <item msgid="150349973435223405"></item>
+    <item msgid="6761963760295549099"></item>
+  </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Nhấn để bật tiếng."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Nhấn để đặt chế độ rung. Bạn có thể tắt tiếng dịch vụ trợ năng."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Nhấn để tắt tiếng. Bạn có thể tắt tiếng dịch vụ trợ năng."</string>
@@ -475,8 +496,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Hiển thị giây đồng hồ trong thanh trạng thái. Có thể ảnh hưởng đến thời lượng pin."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Sắp xếp lại Cài đặt nhanh"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Hiển thị độ sáng trong Cài đặt nhanh"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"Bật cử chỉ vuốt lên ở chế độ chia đôi màn hình"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Cho phép cử chỉ truy cập chế độ chia đôi màn hình bằng cách vuốt lên từ nút Tổng quan"</string>
     <string name="experimental" msgid="6198182315536726162">"Thử nghiệm"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bật Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Để kết nối bàn phím với máy tính bảng, trước tiên, bạn phải bật Bluetooth."</string>
@@ -506,21 +525,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"Cài đặt khác"</string>
     <string name="notification_done" msgid="5279426047273930175">"Xong"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Điều khiển thông báo <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"Màu sắc và giao diện"</string>
-    <string name="night_mode" msgid="3540405868248625488">"Chế độ ban đêm"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"Hiệu chỉnh hiển thị"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"Bật"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"Tắt"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"Tự động bật"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Chuyển sang Chế bộ ban đêm khi thích hợp cho vị trí và thời gian trong ngày"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"Khi Chế độ ban đêm đang bật"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Sử dụng chủ đề sẫm màu cho Android OS"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"Điều chỉnh phủ màu"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"Điều chỉnh độ sáng"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"Chủ đề sẫm màu được áp dụng cho các vùng chính của Android OS được hiển thị bình thường trong chủ đề sáng màu, chẳng hạn như Cài đặt."</string>
-    <string name="color_apply" msgid="9212602012641034283">"Áp dụng"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"Xác nhận cài đặt"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"Một số cài đặt màu có thể khiến thiết bị này không sử dụng được. Hãy nhấp vào OK để xác nhận các cài đặt màu này, nếu không những cài đặt này sẽ được đặt lại sau 10 giây."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Mức sử dụng pin"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Trình tiết kiệm pin không khả dụng trong khi sạc"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Trình tiết kiệm pin"</string>
@@ -649,4 +653,5 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Mở cài đặt <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Chỉnh sửa thứ tự cài đặt."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Trang <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <string name="cant_silence_or_block" msgid="999689262131488625">"Không thể chặn hoặc tắt tiếng thông báo"</string>
 </resources>

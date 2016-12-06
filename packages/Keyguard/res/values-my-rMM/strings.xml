@@ -46,16 +46,11 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"ဆင်းမ်ကဒ် သော့ကျနေပါသည်"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"ဆင်းမ်ကဒ် ရဲ့ ပင်နံပါတ် ပြန်ဖွင့်သည့် ကုဒ် သော့ကျနေပါသည်"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"ဆင်းမ်ကဒ် ကို သော့ဖွင့်နေပါသည်"</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"ပုံစံဖြင့် သော့ဖွင့်ခြင်း"</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"ပင်နံပါတ်ဖြင့် သော့ဖွင့်ခြင်း"</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"စကားဝှက်ဖြင့် သော့ဖွင့်ခြင်း"</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"ပုံစံနေရာ"</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"ဘေးတိုက်ပွတ်ဆွဲရန် နေရာ"</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN နေရာ"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM PIN နေရာ"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM PUK နေရာ"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"<xliff:g id="ALARM">%1$s</xliff:g> အတွက် နောက် သတိပေးရန် သတ်မှတ်ချက်"</string>
-    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"ဖျက်ရန်ခလုတ်"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"ဖျက်ရန်"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enterခလုတ်"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"ပုံဖော်မှုအား မေ့လျော့ခြင်း"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"ပုံဆွဲအမှား"</string>

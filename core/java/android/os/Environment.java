@@ -345,6 +345,41 @@ public class Environment {
     }
 
     /**
+     * Return preloads directory.
+     * <p>This directory may contain pre-loaded content such as
+     * {@link #getDataPreloadsDemoDirectory() demo videos} and
+     * {@link #getDataPreloadsAppsDirectory() APK files} .
+     * {@hide}
+     */
+    public static File getDataPreloadsDirectory() {
+        return new File(getDataDirectory(), "preloads");
+    }
+
+    /**
+     * @see #getDataPreloadsDirectory()
+     * {@hide}
+     */
+    public static File getDataPreloadsDemoDirectory() {
+        return new File(getDataPreloadsDirectory(), "demo");
+    }
+
+    /**
+     * @see #getDataPreloadsDirectory()
+     * {@hide}
+     */
+    public static File getDataPreloadsAppsDirectory() {
+        return new File(getDataPreloadsDirectory(), "apps");
+    }
+
+    /**
+     * @see #getDataPreloadsDirectory()
+     * {@hide}
+     */
+    public static File getDataPreloadsMediaDirectory() {
+        return new File(getDataPreloadsDirectory(), "media");
+    }
+
+    /**
      * Return the primary shared/external storage directory. This directory may
      * not currently be accessible if it has been mounted by the user on their
      * computer, has been removed from the device, or some other problem has

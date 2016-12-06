@@ -62,7 +62,7 @@ public class TaskPersisterTest extends AndroidTestCase {
         for (int i = 0; i < 100; i++) {
             taskIdsOnFile.put(getRandomTaskIdForUser(testUserId), true);
         }
-        mTaskPersister.maybeWritePersistedTaskIdsForUser(taskIdsOnFile, testUserId);
+        mTaskPersister.writePersistedTaskIdsForUser(taskIdsOnFile, testUserId);
         SparseBooleanArray newTaskIdsOnFile = mTaskPersister
                 .loadPersistedTaskIdsForUser(testUserId);
         assertTrue("TaskIds written differ from TaskIds read back from file",

@@ -11,7 +11,7 @@ next.link=manifest-receivers.html
 
 @jd:body
 
-<div id="tb-wrapper"> 
+<div id="tb-wrapper">
 <div id="tb">
 
 <h2>このレッスンの内容</h2>
@@ -27,7 +27,7 @@ next.link=manifest-receivers.html
   <li><a href="{@docRoot}guide/components/intents-filters.html">インテントとインテント フィルタ</a>
 </ul>
 
-</div> 
+</div>
 </div>
 
 <p>反復アラームとバックグラウンド サービスの用途のうち代表的なものとしては、インターネット リソースからアプリのデータを定期的に更新するためのスケジュール設定や、データのキャッシュへの格納、長時間に及ぶダウンロードの実行などがあります。しかし、インターネットに接続されていないときや、速度が低すぎるためにダウンロードを完了できない場合にまで、更新をスケジューリングするために端末をスリープ状態から復帰させる必要があるでしょうか。</p>
@@ -35,18 +35,18 @@ next.link=manifest-receivers.html
 <p>{@link android.net.ConnectivityManager} を使用すると、端末が実際にインターネットに接続されているかどうかと、接続されている場合の接続タイプを調べることができます。</p>
 
 
-<h2 id="DetermineConnection">インターネット接続の有無を特定する</h2> 
- 
+<h2 id="DetermineConnection">インターネット接続の有無を特定する</h2>
+
 <p>端末がインターネットに接続されていない場合は、インターネット リソースに基づく更新をスケジューリングする必要性はありません。次のスニペットは、{@link android.net.ConnectivityManager} を使用してアクティブなネットワークを問い合わせて、インターネットに接続しているかどうかを特定する方法を示すものです。</p>
 
 <pre>ConnectivityManager cm =
         (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
- 
+
 NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
 boolean isConnected = activeNetwork.isConnectedOrConnecting();</pre>
 
 
-<h2 id="DetermineType">インターネット接続のタイプを特定する</h2> 
+<h2 id="DetermineType">インターネット接続のタイプを特定する</h2>
 
 <p>現在使用可能なインターネット接続のタイプも調べることができます。</p>
 
@@ -59,7 +59,7 @@ boolean isConnected = activeNetwork.isConnectedOrConnecting();</pre>
 <p>更新を停止した場合は、接続状態の変化を受信することが重要です。インターネット接続が確立されたら更新を再開できるようにするためです。</p>
 
 
-<h2 id="MonitorChanges">接続状態の変化を監視する</h2> 
+<h2 id="MonitorChanges">接続状態の変化を監視する</h2>
 
 <p>接続状態の詳細が変化すると、{@link android.net.ConnectivityManager} によって {@link android.net.ConnectivityManager#CONNECTIVITY_ACTION}（{@code "android.net.conn.CONNECTIVITY_CHANGE"}）アクションがブロードキャストされます。アプリのマニフェスト内でブロードキャスト レシーバを登録し、このような変化を検出することで、それに応じてアプリのバックグラウンド更新を再開（または停止）することができます。</p>
 

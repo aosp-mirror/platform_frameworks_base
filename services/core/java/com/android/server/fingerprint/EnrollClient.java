@@ -88,6 +88,7 @@ public abstract class EnrollClient extends ClientMonitor {
             final int result = daemon.enroll(mCryptoToken, getGroupId(), timeout);
             if (result != 0) {
                 Slog.w(TAG, "startEnroll failed, result=" + result);
+                MetricsLogger.histogram(getContext(), "fingerprintd_enroll_start_error", result);
                 onError(FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE);
                 return result;
             }

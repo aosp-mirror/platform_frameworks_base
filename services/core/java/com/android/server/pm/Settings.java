@@ -4010,7 +4010,7 @@ final class Settings {
         file.delete();
         removeCrossProfileIntentFiltersLPw(userId);
 
-        mRuntimePermissionsPersistence.onUserRemoved(userId);
+        mRuntimePermissionsPersistence.onUserRemovedLPw(userId);
 
         writePackageListLPr();
     }
@@ -4151,6 +4151,14 @@ final class Settings {
         }
         final String classNameStr = componentName.getClassName();
         return pkg.getCurrentEnabledStateLPr(classNameStr, userId);
+    }
+
+    boolean wasPackageEverLaunchedLPr(String packageName, int userId) {
+        final PackageSetting pkgSetting = mPackages.get(packageName);
+        if (pkgSetting == null) {
+            throw new IllegalArgumentException("Unknown package: " + packageName);
+        }
+        return !pkgSetting.getNotLaunched(userId);
     }
 
     boolean setPackageStoppedStateLPw(PackageManagerService pm, String packageName,
@@ -5107,7 +5115,7 @@ final class Settings {
             }
         }
 
-        private void onUserRemoved(int userId) {
+        private void onUserRemovedLPw(int userId) {
             // Make sure we do not
             mHandler.removeMessages(userId);
 
@@ -5118,6 +5126,9 @@ final class Settings {
             for (SettingBase sb : mSharedUsers.values()) {
                 revokeRuntimePermissionsAndClearFlags(sb, userId);
             }
+
+            mDefaultPermissionsGranted.delete(userId);
+            mFingerprints.remove(userId);
         }
 
         private void revokeRuntimePermissionsAndClearFlags(SettingBase sb, int userId) {

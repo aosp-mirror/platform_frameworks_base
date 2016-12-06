@@ -123,15 +123,15 @@ android.support.v4.app.DialogFragment#show show()}.</p>
 <p>For example, here's a button that, when clicked, calls a method to show the dialog:</p>
 
 <pre>
-&lt;Button 
-    android:layout_width="wrap_content" 
+&lt;Button
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:text="@string/pick_time" 
+    android:text="@string/pick_time"
     android:onClick="showTimePickerDialog" />
 </pre>
 
 <p>When the user clicks this button, the system calls the following method:</p>
-  
+
 <pre>
 public void showTimePickerDialog(View v) {
     DialogFragment newFragment = new TimePickerFragment();
@@ -224,15 +224,15 @@ android.support.v4.app.DialogFragment#show show()}.</p>
 <p>For example, here's a button that, when clicked, calls a method to show the dialog:</p>
 
 <pre>
-&lt;Button 
-    android:layout_width="wrap_content" 
+&lt;Button
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:text="@string/pick_date" 
+    android:text="@string/pick_date"
     android:onClick="showDatePickerDialog" />
 </pre>
 
 <p>When the user clicks this button, the system calls the following method:</p>
-  
+
 <pre>
 public void showDatePickerDialog(View v) {
     DialogFragment newFragment = new DatePickerFragment();

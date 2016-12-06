@@ -2623,6 +2623,14 @@ status_t ResourceTable::assignResourceIds()
         const SourcePos unknown(String8("????"), 0);
         sp<Type> attr = p->getType(String16("attr"), unknown);
 
+        // Force creation of ID if we are building feature splits.
+        // Auto-generated ID resources won't apply the type ID offset correctly unless
+        // the offset is applied here first.
+        // b/30607637
+        if (mPackageType == AppFeature && p->getName() == mAssetsPackage) {
+            sp<Type> id = p->getType(String16("id"), unknown);
+        }
+
         // Assign indices...
         const size_t typeCount = p->getOrderedTypes().size();
         for (size_t ti = 0; ti < typeCount; ti++) {
@@ -4521,6 +4529,7 @@ bool ResourceTable::shouldGenerateVersionedResource(
         const ConfigDescription& sourceConfig,
         const int sdkVersionToGenerate) {
     assert(sdkVersionToGenerate > sourceConfig.sdkVersion);
+    assert(configList != NULL);
     const DefaultKeyedVector<ConfigDescription, sp<ResourceTable::Entry>>& entries
             = configList->getEntries();
     ssize_t idx = entries.indexOfKey(sourceConfig);
@@ -4851,24 +4860,39 @@ void ResourceTable::getDensityVaryingResources(
         const Vector<sp<Type> >& types = mOrderedPackages[p]->getOrderedTypes();
         const size_t typeCount = types.size();
         for (size_t t = 0; t < typeCount; t++) {
-            const Vector<sp<ConfigList> >& configs = types[t]->getOrderedConfigs();
+            const sp<Type>& type = types[t];
+            if (type == NULL) {
+                continue;
+            }
+
+            const Vector<sp<ConfigList> >& configs = type->getOrderedConfigs();
             const size_t configCount = configs.size();
             for (size_t c = 0; c < configCount; c++) {
+                const sp<ConfigList>& configList = configs[c];
+                if (configList == NULL) {
+                    continue;
+                }
+
                 const DefaultKeyedVector<ConfigDescription, sp<Entry> >& configEntries
-                        = configs[c]->getEntries();
+                        = configList->getEntries();
                 const size_t configEntryCount = configEntries.size();
                 for (size_t ce = 0; ce < configEntryCount; ce++) {
+                    const sp<Entry>& entry = configEntries.valueAt(ce);
+                    if (entry == NULL) {
+                        continue;
+                    }
+
                     const ConfigDescription& config = configEntries.keyAt(ce);
                     if (AaptConfig::isDensityOnly(config)) {
                         // This configuration only varies with regards to density.
                         const Symbol symbol(
                                 mOrderedPackages[p]->getName(),
-                                types[t]->getName(),
-                                configs[c]->getName(),
+                                type->getName(),
+                                configList->getName(),
                                 getResId(mOrderedPackages[p], types[t],
-                                         configs[c]->getEntryIndex()));
+                                         configList->getEntryIndex()));
 
-                        const sp<Entry>& entry = configEntries.valueAt(ce);
+
                         AaptUtil::appendValue(resources, symbol,
                                               SymbolDefinition(symbol, config, entry->getPos()));
                     }

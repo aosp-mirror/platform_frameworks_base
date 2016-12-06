@@ -38,6 +38,7 @@ import android.util.EventLog;
 import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.Surface;
+import android.view.animation.Animation;
 
 import com.android.server.EventLogTags;
 
@@ -624,8 +625,8 @@ class Task implements DimLayer.DimLayerUser {
                     //
                     // As we use this flag as a hint to freeze surface boundary updates,
                     // we'd like to only apply this to TYPE_BASE_APPLICATION,
-                    // windows of TYPE_APPLICATION like dialogs, could appear
-                    // to not be drag resizing while they resize, but we'd
+                    // windows of TYPE_APPLICATION (or TYPE_DRAWN_APPLICATION) like dialogs,
+                    // could appear to not be drag resizing while they resize, but we'd
                     // still like to manipulate their frame to update crop, etc...
                     //
                     // Anyway we don't need to synchronize position and content updates for these
@@ -675,19 +676,6 @@ class Task implements DimLayer.DimLayerUser {
     boolean showForAllUsers() {
         final int tokensCount = mAppTokens.size();
         return (tokensCount != 0) && mAppTokens.get(tokensCount - 1).showForAllUsers;
-    }
-
-    boolean isVisibleForUser() {
-        for (int i = mAppTokens.size() - 1; i >= 0; i--) {
-            final AppWindowToken appToken = mAppTokens.get(i);
-            for (int j = appToken.allAppWindows.size() - 1; j >= 0; j--) {
-                WindowState window = appToken.allAppWindows.get(j);
-                if (!window.isHiddenFromUserLocked()) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     boolean isVisible() {
@@ -776,6 +764,15 @@ class Task implements DimLayer.DimLayerUser {
     @Override
     public DisplayInfo getDisplayInfo() {
         return mStack.getDisplayContent().getDisplayInfo();
+    }
+
+    /**
+     * See {@link WindowManagerService#overridePlayingAppAnimationsLw}
+     */
+    void overridePlayingAppAnimations(Animation a) {
+        for (int i = mAppTokens.size() - 1; i >= 0; i--) {
+            mAppTokens.get(i).overridePlayingAppAnimations(a);
+        }
     }
 
     @Override

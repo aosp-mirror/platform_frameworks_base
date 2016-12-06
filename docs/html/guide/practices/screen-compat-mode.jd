@@ -75,7 +75,7 @@ android:targetSdkVersion}</a> to {@code "4"} or higher, or set <a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html#resizeable">{@code
 android:resizeable}</a> to {@code "true"}.</p>
   </dd>
-  
+
   <dt>Version 2 (Android 3.2 and greater)</dt>
   <dd>The system draws the application's layout the same as
 it would on a normal size handset (approximately emulating a 320dp x 480dp screen), then scales it
@@ -151,9 +151,9 @@ android:xlargeScreens}</a> attribute to {@code "true"}:</p>
 system will always resize your layout to fit the screen. This works regardless of what values
 you've set in the <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code <uses-sdk>}</a>
-attributes.</p> 
+attributes.</p>
   </li>
-  
+
   <li><strong>Easy but has other effects:</strong>
     <p>In your manifest's <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code <uses-sdk>}</a>

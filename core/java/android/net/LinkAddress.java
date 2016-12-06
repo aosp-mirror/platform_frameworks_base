@@ -103,7 +103,7 @@ public class LinkAddress implements Parcelable {
     private boolean isIPv6ULA() {
         if (address != null && address instanceof Inet6Address) {
             byte[] bytes = address.getAddress();
-            return ((bytes[0] & (byte)0xfc) == (byte)0xfc);
+            return ((bytes[0] & (byte)0xfe) == (byte)0xfc);
         }
         return false;
     }

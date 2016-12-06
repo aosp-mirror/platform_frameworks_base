@@ -34,30 +34,31 @@ marketing for review.</p>
     <ul>
     <li>Android&trade; should have a trademark symbol the first time it appears in a creative.</li>
     <li>Android should always be capitalized and is never plural or possessive.</li>
-    <li>"Android" cannot be used in names of applications or accessory products,
-    including phones, tablets, TVs, speakers, headphones, watches, and other devices. Instead use "for Android".
+    <li>"Android", or anything confusingly similar to "Android", cannot be used
+    in names of applications or accessory products, including phones, tablets, TVs,
+    speakers, headphones, watches, and other devices. Instead, use "for Android".
       <ul>
-        <li><span style="color:red">Incorrect</span>: "Android MediaPlayer"</li>
+        <li><span style="color:red">Incorrect</span>: "Android MediaPlayer" or "Ndroid MediaPlayer"</li>
         <li><span style="color:green">Correct</span>: "MediaPlayer for Android"</li>
       </ul>
-      <p>If used with your logo, "for Android" should be no larger than 90% of your logo’s size.
-      First instance of this use should be followed by a TM symbol, "for Android&trade;".</p>
+      <p>If used with your logo, "for Android" should be no larger than 90% of your logo's size.
+      The first instance of this use should be followed by a TM symbol: "for Android&trade;".</p>
     </li>
-    <li>"Android TV", "Android Wear" and "Android Auto" may only be used to identify or market
+    <li>"Android TV", "Android Wear", and "Android Auto" may only be used to identify or market
       products or services with prior approval.  Use "for Android" or "with Android" for all
-      other Android-based products
+      other Android-based products.
       <ul>
         <li><span style="color:red">Incorrect</span>: "Android TV Streaming Stick",
           "Streaming Stick with Android TV"</li>
         <li><span style="color:green">Correct</span>: "Streaming Stick with Android"</li>
       </ul>
       <p>If used with your logo, "for Android" or "with Android" should be no larger than 90% of
-        your logo’s size. First instance of this use should be followed by a TM symbol,
+        your logo's size. The first instance of this use should be followed by a TM symbol:
         "for Android&trade;".</p>
     </li>
-    <li>Android may be used as a descriptor, as long as it is followed by a
-        proper generic term. (Think of "Android" as a term used in place of
-        "the Android platform.")
+    <li>Android may be used as a descriptor in text, as long as it is followed by a
+        proper generic term and is not the name of your product, app, or service.
+        Think of "Android" as a term used in place of "the Android platform."
       <ul>
         <li><span style="color:red">Incorrect</span>: "Android MediaPlayer" or "Android XYZ app"</li>
         <li><span style="color:green">Correct</span>: "Android features" or "Android applications"</li>
@@ -100,7 +101,9 @@ used according to terms described in the Creative Commons 3.0 Attribution Licens
 <h4 style="clear:right">Android logo</h4>
 
 <div style="float:right;width:210px;margin-left:30px;margin-top:-10px">
-  <img alt="" src="{@docRoot}images/brand/android_logo_no.png">
+  <img alt="" src="{@docRoot}images/brand/android_logo_no.png"
+    srcset="{@docRoot}images/brand/android_logo_no.png 1x,
+    {@docRoot}images/brand/android_logo_no_2x.png 2x">
 </div>
 
 <p>The Android logo may not be used.</p>

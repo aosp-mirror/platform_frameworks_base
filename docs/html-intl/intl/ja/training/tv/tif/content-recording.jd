@@ -1,0 +1,142 @@
+page.title=TV の録画機能
+page.keywords=preview,sdk,tv,recording
+page.tags=androidn
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>このドキュメントの内容</h2>
+  <ol>
+    <li><a href="#supporting">録画のサポートを示す</a></li>
+    <li><a href="#recording">セッションを録画する</a></li>
+    <li><a href="#errors">録画のエラーを処理する</a></li>
+    <li><a href="#sessions">録画したセッションを管理する</a></li>
+    <li><a href="#best">ベスト プラクティス</a></li>
+  </ol>
+</div>
+</div>
+
+<p>TV の入力サービスを使用すると、ユーザーは time-shifting API を介してチャンネルの再生を一時停止および再開できます。
+Android N では、録画したセッションを複数保存できるようにして、タイムシフティング機能を拡張しています。
+</p>
+
+<p>ユーザーはあらかじめ録画をスケジュールできます。また、プログラムを視聴しながら録画を開始することもできます。
+システムが録画を保存すると、システムの TV アプリで録画をブラウジング、管理、再生できます。
+</p>
+
+<p>TV 入力サービスで録画機能を提供する場合は、アプリが録画をサポートしていることをシステムに示し、プログラムの録画機能を実装し、録画中に発生したエラーを処理および通知し、録画したセッションを管理する必要があります。
+
+
+</p>
+
+<p class="note"><strong>注:</strong>ライブチャンネル アプリでは、録画を作成したり録画にアクセスするための機能はまだ提供されていません。
+ライブチャンネル アプリに変更が行われるまで、TV 入力サービスの録画機能を完全にテストすることは難しい場合があります。
+
+</p>
+
+<h2 id="supporting">録画のサポートを示す</h2>
+
+<p>TV 入力サービスで録画をサポートしていることをシステムに示すには、サービス メタデータ XML ファイル内の <code>android:canRecord</code> 属性を <code>true</code> に設定します。
+
+
+</p>
+
+<pre>
+&lt;tv-input xmlns:android="http://schemas.android.com/apk/res/android"
+  <b>android:canRecord="true"</b>
+  android:setupActivity="com.example.sampletvinput.SampleTvInputSetupActivity" /&gt;
+</pre>
+
+<p>サービス メタデータ ファイルの詳細については、<a href="{@docRoot}training/tv/tif/tvinput.html#manifest">マニフェストで TV 入力サービスを宣言する</a>をご覧ください。
+
+
+</p>
+
+<p>また、以下のステップを使用して、コードで録画機能のサポートを示すことができます。
+</p>
+
+<ol>
+<li><code>TvInputService.onCreate()</code> メソッドで、<code>TvInputInfo.Builder</code> クラスを使用して新しい
+<code>TvInputInfo</code> オブジェクトを作成します。
+</li>
+<li>新しい <code>TvInputInfo</code> オブジェクトを作成するときは、
+<code>setCanRecord(true)</code> を呼び出してから、<code>build()</code> を呼び出して、サービスが録画をサポートしていることを示します。
+</li>
+<li>
+<code>TvInputManager.updateTvInputInfo()</code> を呼び出してシステムに <code>TvInputInfo</code> オブジェクトを登録します。</li>
+</ol>
+
+<h2 id="recording">セッションを録画する</h2>
+
+<p>TV 入力サービスで録画機能のサポートを登録した後、システムがアプリの録画機能の実装にアクセスする必要があるときに、
+<code>TvInputService.onCreateRecordingSession()</code> を呼び出します。
+
+独自の
+<code>TvInputService.RecordingSession</code> サブクラスを実装し、<code>onCreateRecordingSession()</code> コールバックが発生したときに返します。
+
+このサブクラスは、正しいチャンネル データへの切り替え、要求されたデータの録画、録画のステータスおよびエラーのシステムへの通知を処理します。
+
+</p>
+
+<p>システムが <code>RecordingSession.onTune()</code> を呼び出すと、チャンネル URI を渡して、URI で指定されたチャンネルに合わせます。
+<code>notifyTuned()</code> を呼び出して、アプリが目的のチャンネルに合わせたことをシステムに通知します。または、アプリが適切なチャンネルに合わせることができなかった場合は、
+<code>notifyError()</code> を呼び出します。
+
+</p>
+
+<p>次に、システムは <code>RecordingSession.onStartRecording()</code> コールバックを呼び出します。
+アプリは直ちに録画を開始する必要があります。システムはこのコールバックを呼び出すときに、これから録画するプログラムに関する情報を含む URI を提供します。
+
+録画が完了したら、このデータを <code>RecordedPrograms</code> データ テーブルにコピーする必要があります。
+</p>
+
+<p>最後に、システムが <code>RecordingSession.onStopRecording()</code> を呼び出します。この時点で、アプリは録画を直ちに停止する必要があります。
+また、<code>RecordedPrograms</code> テーブルのエントリも作成する必要があります。
+このエントリは、
+<code>RecordedPrograms.COLUMN_RECORDING_DATA_URI</code> 列に録画したセッション データの URI を設定し、システムが最初に
+<code>onStartRecording()</code> を呼び出したときに提供したプログラム情報がすべて含まれている必要があります。
+
+</p>
+
+<p><code>RecordedPrograms</code> テーブルへのアクセス方法の詳細については、<a href="#sessions">録画したセッションを管理する</a>をご覧ください。
+</p>
+
+<h2 id="errors">録画のエラーを処理する</h2>
+
+<p>録画中にエラーが発生し、録画したデータのレンダリングができない場合は、<code>RecordingSession.notifyError()</code> を呼び出してシステムに通知します。同様に、録画セッションの作成後に <code>notifyError()</code> を呼び出して、アプリがセッションを録画できないことをシステムに通知することもできます。
+
+
+</p>
+
+<p>録画中にエラーが発生したにもかかわらず、一部の録画を再生できるようにしてユーザーに提供したい場合は、
+<code>RecordingSession.notifyRecordingStopped()</code> を呼び出すと、システムで部分的なセッションを使用できるようになります。
+
+</p>
+
+<h2 id="sessions">録画したセッションを管理する</h2>
+
+<p>システムは、すべての録画可能チャンネル アプリで録画したすべてのセッションの情報を、<code>TvContract.RecordedPrograms</code>
+コンテンツ プロバイダ テーブルに保持します。
+この情報は、
+<code>RecordedPrograms.Uri</code> コンテンツ URI を使用してアクセスできます。コンテンツ プロバイダ API を使用して、このテーブルのエントリの読み取り、追加、削除が可能です。
+</p>
+
+<p>コンテンツ プロバイダのデータの操作方法については、<a href="{@docRoot}guide/topics/providers/content-provider-basics.html">コンテンツ プロバイダの基本</a>をご覧ください。
+
+</p>
+
+<h2 id="best">ベスト プラクティス</h2>
+
+<p>TV 端末のストレージには上限があるため、録画したセッションを保存するためにストレージを割り当てるときは、十分に検討してください。
+録画したセッションを保存する容量が不足している場合は、
+<code>RecordingCallback.onError(RECORDING_ERROR_INSUFFICIENT_SPACE)</code> を使用します。
+</p>
+
+<p>ユーザーが録画を開始すると、できるだけ速やかにデータの録画を開始する必要があります。
+録画を円滑に開始するには、システムが
+<code>onCreateRecordingSession()</code> コールバックを呼び出したときにストレージ容量のアクセスや割り当てなど、時間のかかるタスクをあからじめ完了しておきます。
+そうすれば、<code>onStartRecording()</code> コールバックが発生したときに直ちに録画を開始できます。
+
+</p>

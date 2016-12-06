@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSPanel.TileRecord;
@@ -87,9 +88,9 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         if (mListening == listening) return;
         mListening = listening;
         if (mListening) {
-            mPages.get(mPosition).setListening(listening);
+            setPageListening(mPosition, true);
             if (mOffPage) {
-                mPages.get(mPosition + 1).setListening(listening);
+                setPageListening(mPosition + 1, true);
             }
         } else {
             // Make sure no pages are listening.
@@ -130,6 +131,9 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     private void setPageListening(int position, boolean listening) {
         if (position >= mPages.size()) return;
+        if (isLayoutRtl()) {
+            position = mPages.size() - 1 - position;
+        }
         mPages.get(position).setListening(listening);
     }
 
@@ -207,6 +211,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             }
             if (DEBUG) Log.d(TAG, "Size: " + mNumPages);
             mPageIndicator.setNumPages(mNumPages);
+            mDecorGroup.setVisibility(mNumPages > 1 ? View.VISIBLE : View.GONE);
             setAdapter(mAdapter);
             mAdapter.notifyDataSetChanged();
             setCurrentItem(0, false);
@@ -238,7 +243,8 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
                 maxHeight = height;
             }
         }
-        setMeasuredDimension(getMeasuredWidth(), maxHeight + mDecorGroup.getMeasuredHeight());
+        setMeasuredDimension(getMeasuredWidth(), maxHeight
+                + (mDecorGroup.getVisibility() != View.GONE ? mDecorGroup.getMeasuredHeight() : 0));
     }
 
     private final Runnable mDistribute = new Runnable() {

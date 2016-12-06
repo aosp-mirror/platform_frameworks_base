@@ -7,7 +7,7 @@ parent.link=index.html
 
 <div id="qv-wrapper">
 <div id="qv">
-  
+
   <h2>In this document</h2>
   <ol>
     <li><a href="#lvl-summary">LVL Classes and Interfaces</a></li>
@@ -418,7 +418,7 @@ responses in the <code>allow()</code> method. The count of {@code RETRY} respons
 maintained in the <code>processServerResponse()</code> method, not shown. </p>
 
 
-<pre>    
+<pre>
 public boolean allowAccess() {
     long ts = System.currentTimeMillis();
     if (mLastResponse == LicenseResponse.LICENSED) {

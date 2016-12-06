@@ -412,6 +412,17 @@ page.image=images/work/cards/android-studio_600px.png
   </li>
 </ol>
 
+<p class="caution"><b>Caution</b>: When running your app with Instant Run in
+Android Studio, attempting to open your app with a Work profile or secondary
+profile will crash your app. To use your app with the Work profile, we
+recommend you create a new <a href="/studio/run/rundebugconfig.html">run
+configuration</a> that includes the <code>--user <var>user_id</var></code> flag,
+specifying the Work profile user ID. You can find the user ID by executing
+<code>adb shell pm list users</code> from command line. For more information,
+see the <a href="/studio/run/index.html#ir-work-profile">Instant Run
+documentation</a>.</p>
+
+
 <h3>Provision a device owner</h3>
 
 <p>

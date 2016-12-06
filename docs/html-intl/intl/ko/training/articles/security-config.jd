@@ -1,0 +1,747 @@
+page.title=네트워크 보안 구성
+page.keywords=androidn, 보안, 네트워크
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>이 문서의 내용</h2>
+<ol>
+  <li><a href="#manifest">보안 구성 파일 추가</a></li>
+  <li><a href="#CustomTrust">신뢰할 수 있는 CA 사용자 지정</a>
+      <ol>
+      <li><a href="#ConfigCustom">신뢰할 수 있는 사용자 지정 CA 구성</a></li>
+      <li><a href="#LimitingCas">신뢰할 수 있는 CA 세트 제한</a></li>
+      <li><a href="#TrustingAdditionalCas">추가 CA 신뢰</a></li>
+      </ol>
+  </li>
+  <li><a href="#TrustingDebugCa">디버그 전용 CA</a></li>
+  <li><a href="#UsesCleartextTraffic">일반 텍스트 트래픽 옵트아웃</a></li>
+  <li><a href="#CertificatePinning">인증서 고정</a></li>
+  <li><a href="#ConfigInheritance">구성 상속 동작</a></li>
+  <li><a href="#FileFormat">구성 파일 형식</a></li>
+</ol>
+</div>
+</div>
+
+
+<p>
+  Android N에는 앱 코드를 수정하지 않고 앱이 안전한 선언
+구성 파일에서 네트워크 보안 설정을 사용자 지정할 수 있는
+네트워크 보안 구성 기능이 포함되어 있습니다. 이 설정은
+특정 도메인과 특정 앱에 대해 구성할 수 있습니다. 이 기능의
+핵심 기능:
+</p>
+
+<ul>
+  <li>
+    <b>사용자 지정 신뢰 앵커:</b> 앱의 보안 연결에 대해 신뢰할 수 있는 인증 기관(CA)을
+사용자 지정합니다. 예를 들어,
+특정한 자체 서명 인증서를 신뢰하거나
+앱이 신뢰하는 공개 CA 세트를 제한합니다.
+  </li>
+
+  <li>
+    <b>디버그 전용 재정의:</b> 설치된 기반에 위험을 더하지 않고도, 앱의 보안 연결을 안전하게
+디버그할 수 있습니다.
+  </li>
+
+  <li>
+    <b>일반 텍스트 트래픽 옵트아웃:</b> 일반 텍스트 트래픽을 실수로 사용하지
+않도록 앱을 보호합니다.
+  </li>
+
+  <li>
+    <b>인증서 고정:</b> 앱의 안전한 연결을 특정 인증서로
+제한합니다.
+  </li>
+</ul>
+
+
+<h2 id="manifest">보안 구성 파일 추가</h2>
+
+<p>
+  네트워크 보안 구성 기능은 XML 파일을 사용해서
+앱의 설정을 지정합니다. 앱 매니페스트에 이 파일을 가리키는 항목을
+포함해야 합니다. 매니페스트에서 발췌한 다음 코드는
+이 항목을 생성하는 방법을 보여줍니다.
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest ... &gt;
+  &lt;application ... &gt;
+    &lt;meta-data android:name="android.security.net.config"
+               android:resource="@xml/network_security_config" /&gt;
+    ...
+  &lt;/application&gt;
+&lt;/manifest&gt;
+</pre>
+
+<h2 id="CustomTrust">신뢰할 수 있는 CA 사용자 지정</h2>
+
+<p>
+  앱에서 플랫폼 기본값 대신 사용자 지정 CA 세트를
+신뢰하고자 할 수 있습니다. 가장 일반적인 이유는 다음과 같습니다.
+</p>
+
+<ul>
+  <li>사용자 지정 인증 기관(자체 서명한 인증서,
+국제 기업 CA에서 발급한 인증서 등)을 포함한 호스트에 연결.
+  </li>
+
+  <li>모든 사전 설치된 CA 대신 신뢰할 수 있는 CA로만
+CA 세트를 제한.
+  </li>
+
+  <li>시스템에 포함되지 않은 추가 CA 신뢰.
+  </li>
+</ul>
+
+<p>
+  기본적으로 모든 앱으로부터 안전한(예: TLS, HTTPS) 연결은 사전 설치된 시스템 CA를 신뢰하고,
+API 레벨 23(Android M)
+이하를 대상으로 하는 앱도 사용자가 추가한 CA 저장소를 기본적으로 신뢰합니다. 앱은
+{@code base-config}(앱
+전체 사용자 지정) 또는 {@code domain-config}(도메인별
+사용자 지정)를 사용하여 연결을 사용자 지정할 수 있습니다.
+</p>
+
+
+<h3 id="ConfigCustom">사용자 지정 CA 구성</h3>
+
+<p>
+  자체 서명된
+인증서를 사용하는 호스트나 신뢰할 수 있는 비공개 CA(예: 사내 CA)에서 발급한 SSL 인증서를 사용하는 호스트에
+연결할 경우를 가정합시다.
+</p>
+
+<p>
+  <code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;example.com&lt;/domain&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/my_ca"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+<p>
+  자체 서명된 인증서 또는 비공개 CA 인증서를 PEM 또는 DER 형식으로
+{@code res/raw/my_ca}에 추가합니다.
+</p>
+
+
+<h3 id="LimitingCas">신뢰할 수 있는 CA 세트 제한</h3>
+
+<p>
+  앱에서 시스템이 신뢰하는 CA 중 일부를 신뢰하지 않으려면, 대신
+신뢰할 CA 세트를 줄여서 지정할 수 있습니다. 이 방법은
+다른 CA에서 발급된 허위 인증서로부터 앱을 보호해줍니다.
+</p>
+
+<p>
+  신뢰할 수 있는 CA 세트를 제한하는 구성은 특정 도메인에서 <a href="#TrustingACustomCa">사용자 지정 CA를 신뢰</a>하는 것과 비슷하지만
+여러 CA가 리소스에서 제공된다는 점이 다릅니다.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;secure.example.com&lt;/domain&gt;
+        &lt;domain includeSubdomains="true"&gt;cdn.example.com&lt;/domain&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/trusted_roots"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+<p>
+  신뢰할 수 있는 CA를 PEM 또는 DER 형식으로 {@code res/raw/trusted_roots}에 추가합니다.
+  PEM 형식을 사용할 경우 파일에 PEM 데이터<em>만</em> 포함되고
+다른 추가 텍스트가 포함되어서는 안 됩니다. 또한 한 개가 아니라 여러 개의
+<a href="#certificates"><code>&lt;certificates&gt;</code></a>
+요소를 제공할 수 있습니다.
+</p>
+
+
+<h3 id="TrustingAdditionalCas">
+  추가 CA 신뢰
+</h3>
+
+<p>
+  앱에서 시스템이 신뢰하지 않는 CA를 신뢰하고자 한다면,
+이는 시스템에 해당 CA가 아직 포함되지 않았거나 CA가 Android 시스템에 포함되기 위한
+요구사항을 충족하지 못했기 때문일 수 있습니다. 앱은
+구성에 대해 여러 개의 인증서 소스를 지정하여
+신뢰할 수 있는 CA를 추가할 수 있습니다.
+</p>
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;base-config&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/extracas"/&gt;
+            &lt;certificates src="system"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/base-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="TrustingDebugCa">디버그용 CA 구성</h2>
+
+<p>
+  HTTPS로 연결되는 앱을 디버그할 때
+프로덕션 서버에 SSL 인증서가 없는 로컬 개발 서버로
+연결하고자 할 수도 있습니다. 앱 코드를 수정하지 않고 이 기능을 지원하려면,
+{@code debug-overrides}를
+사용하여 <i>오직</i> <a href="{@docRoot}guide/topics/manifest/application-element.html#debug">
+android:debuggable</a>
+이 {@code true}일 때만 신뢰할 수 있는 디버그 전용 CA를 지정할 수 있습니다. 일반적으로 IDE 및 빌드 도구는 비 릴리스 빌드에 대해
+ 이 플래그를 자동으로 설정합니다.
+</p>
+
+<p>
+  보안 예방 조치로 앱 스토어에서
+디버그 가능으로 표시된 앱은 허용하지 않기 때문에
+일반적인 조건 코드보다 안전합니다.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;debug-overrides&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/debug_cas"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/debug-overrides&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="UsesCleartextTraffic">일반 텍스트 트래픽 옵트아웃</h2>
+
+<p>
+  보안 연결만 사용하여 대상에 연결하는 애플리케이션은 해당
+대상에 대해 일반 텍스트를 지원하는 기능(HTTPS 대신 암호화되지 않은 HTTP
+프로토콜 사용)을 옵트아웃할 수 있습니다. 이 옵션은
+백엔드 서버 등의 외부 소스가 제공하는 URL의 변경 사항으로 인해
+앱에서 우연히 회귀가 일어나지 않도록 예방합니다.
+  자세한 내용은 {@link android.security.NetworkSecurityPolicy#isCleartextTrafficPermitted
+  NetworkSecurityPolicy.isCleartextTrafficPermitted()}를 참조하세요.
+</p>
+
+<p>
+  예를 들어, 앱에서 적대적 네트워크로부터 민감한 트래픽을 보호하기 위해 {@code
+  secure.example.com}에 대한 연결은 항상 HTTPS를 통해서만 수행되도록
+할 수 있습니다.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config usesCleartextTraffic="false"&gt;
+        &lt;domain includeSubdomains="true"&gt;secure.example.com&lt;/domain&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="CertificatePinning">인증서 고정</h2>
+
+<p>
+  일반적으로 앱은 모든 사전 설치된 CA를 신뢰합니다. 이러한 CA에서
+허위 인증서를 발급한다면 앱이 MiTM
+공격에 노출될 위험이 있습니다. 일부 앱은 신뢰하는 CA 세트를 제한하거나
+인증서를 고정하는 방식으로 허용하는 인증서 세트를 제한합니다.
+</p>
+
+<p>
+  인증서 고정은
+공개 키 해시(X.509인증서의 SubjectPublicKeyInfo)로 인증서 세트를 제공하는 방식으로 수행됩니다. 그러면 인증서 체인에
+하나 이상의 고정된 공개 키가 있어야만
+인증서 체인이 유효합니다.
+</p>
+
+<p>
+  인증서 고정을 사용할 때는 언제나 백업 키를 포함해야
+새로운 키로 강제 전환하거나 CA를 변경할 경우(
+CA 인증서 또는 해당 CA의 중간 CA에 고정할 경우)
+앱 연결이 영향을 받지 않습니다. 그렇지 않으면
+연결을 복구하기 위해 앱에 업데이트를 내보내야 합니다.
+</p>
+
+<p>
+  또한, 고정을 수행하지 않게 되면 핀 만료 시간을
+설정할 수 있습니다. 이는 업데이트되지 않은 앱에서
+연결 문제를 예방해 줍니다. 그러나 핀에 만료 시간을 설정하면
+고정 우회가 가능할 수도 있습니다.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;example.com&lt;/domain&gt;
+        &lt;pin-set expiration="2018-01-01"&gt;
+            &lt;pin digest="SHA-256"&gt;7HIpactkIAq2Y49orFOOQKurWxmmSFZhBCoQYcRhJ3Y=&lt;/pin&gt;
+            &lt;!-- backup pin --&gt
+            &lt;pin digest="SHA-256"&gt;fwza0LRMXouZHRC8Ei+4PyuldPDcf3UKgO/04cDM1oE=&lt;/pin&gt;
+        &lt;/pin-set&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="ConfigInheritance">구성 상속 동작</h2>
+
+<p>
+  특정 구성에서 설정되지 않은 값을 상속합니다. 이 동작은 구성 파일을 읽을 수 있게 유지하면서도
+더욱 복잡한 구성이 가능합니다.
+</p>
+
+<p>
+  특정 항목에 값이 설정되지 않았다면
+그 다음으로 일반적인 항목의 값이 사용됩니다. {@code domain-config}에서 설정되지 않은 값은
+중첩될 경우 상위 {@code domain-config}에서 가져오고 그렇지 않을 경우 {@code
+  base-config}에서 가져옵니다. {@code base-config}에서 설정되지 않은 값은
+플랫폼 기본값을 사용합니다.
+</p>
+
+<p>
+  예를 들어, {@code
+  example.com}의 하위 도메인에 대한 모든 연결은 사용자 지정 CA 세트를 사용해야 합니다. 또한, 이러한 도메인에 대한 일반 텍스트 트래픽은
+{@code
+  secure.example.com}에 연결할 때를 <em>제외</em>하고 허용됩니다. {@code example.com} 구성 내부에 {@code
+  secure.example.com} 구성을 중첩하면
+{@code trust-anchors}를 복제하지 않아도 됩니다.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;example.com&lt;/domain&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/my_ca"/&gt;
+        &lt;/trust-anchors&gt;
+        &lt;domain-config cleartextTrafficPermitted="false"&gt;
+            &lt;domain includeSubdomains="true"&gt;secure.example.com&lt;/domain&gt;
+        &lt;/domain-config&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="FileFormat">구성 파일 형식</h2>
+
+<p>
+  네트워크 보안 구성 기능은 XML 파일 형식을 사용합니다.
+  파일의 전반적 구조는 다음 코드 샘플에 나타나 있습니다.
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;base-config&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="..."/&gt;
+            ...
+        &lt;/trust-anchors&gt;
+    &lt;/base-config&gt;
+
+    &lt;domain-config&gt;
+        &lt;domain&gt;android.com&lt;/domain&gt;
+        ...
+        &lt;trust-anchors&gt;
+            &lt;certificates src="..."/&gt;
+            ...
+        &lt;/trust-anchors&gt;
+        &lt;pin-set&gt;
+            &lt;pin digest="..."&gt;...&lt;/pin&gt;
+            ...
+        &lt;/pin-set&gt;
+    &lt;/domain-config&gt;
+    ...
+    &lt;debug-overrides&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="..."/&gt;
+            ...
+        &lt;/trust-anchors&gt;
+    &lt;/debug-overrides&gt;
+&lt;/network-security-config&gt;
+</pre>
+
+<p>
+  다음 섹션에서는 이 파일 형식의 구문과
+기타 세부 정보를 설명합니다.
+</p>
+
+<h3 id="network-security-config">
+  &lt;network-security-config&gt;
+</h3>
+
+<dl class="xml">
+  <dt>
+    다음을 포함할 수 있습니다.
+  </dt>
+
+  <dd>
+    <code><a href="#base-config">&lt;base-config&gt;</a></code> 0 또는 1개<br>
+    <code><a href=
+    "#domain-config">&lt;domain-config&gt;</a></code> 임의의 개수<br>
+    <code><a href="#debug-overrides">&lt;debug-overrides&gt;</a></code> 0 또는 1개
+  </dd>
+</dl>
+
+<h3 id="base-config">
+  &lt;base-config&gt;
+</h3>
+
+<dl class="xml">
+  <dt>
+    구문:
+  </dt>
+</dl>
+
+<pre class="stx">
+&lt;base-config <a href=
+"#usesCleartextTraffic">usesCleartextTraffic</a>=["true" | "false"]&gt;
+    ...
+&lt;/base-config&gt;
+</pre>
+<dl class="xml">
+  <dt>
+    다음을 포함할 수 있습니다.
+  </dt>
+
+  <dd>
+    <code><a href="#trust-anchors">&lt;trust-anchors&gt;</a></code>
+  </dd>
+
+  <dt>
+    설명:
+  </dt>
+
+  <dd>
+    대상이
+<a href="#domain-config"><code>domain-config</code></a>에 포함되지 않는 모든 연결에서 사용하는 기본 구성.
+
+<p>
+  설정되지 않은 값은 플랫폼 기본값을 사용합니다. API 레벨 24 이상을 대상으로 하는
+앱의 기본 구성:
+</p>
+
+<pre>
+&lt;base-config usesCleartextTraffic="true"&gt;
+    &lt;trust-anchors&gt;
+        &lt;certificates src="system" /&gt;
+    &lt;/trust-anchors&gt;
+&lt;/base-config&gt;
+</pre>
+API 레벨 23 이하를 대상으로 하는 앱의 기본 구성:
+<pre>
+&lt;base-config usesCleartextTraffic="true"&gt;
+    &lt;trust-anchors&gt;
+        &lt;certificates src="system" /&gt;
+        &lt;certificates src="user" /&gt;
+    &lt;/trust-anchors&gt;
+&lt;/base-config&gt;
+</pre>
+
+  </dd>
+</dl>
+
+<h3 id="domain-config">&lt;domain-config&gt;</h3>
+<dl class="xml">
+<dt>구문:</dt>
+<dd>
+<pre class="stx">&lt;domain-config <a href="#usesCleartextTraffic">usesCleartextTraffic</a>=["true" | "false"]&gt;
+    ...
+&lt;/domain-config&gt;</pre>
+</dd>
+
+<dt>다음을 포함할 수 있습니다.</dt>
+
+<dd>
+<code><a href="#domain">&lt;domain&gt;</a></code> 1개 이상
+<br/><code><a href="#trust-anchors">&lt;trust-anchors&gt;</a></code> 0 또는 1개
+<br/><code><a href="#pin-set">&lt;pin-set&gt;</code></a> 0 또는 1개
+<br/>중첩된 <code>&lt;domain-config&gt;</code> 임의의 개수</dd>
+
+<dt>설명</dt>
+<dd>{@code domain} 요소에서 정의한 특정 대상에 대한 연결에 사용되는 구성.
+
+<p>여러 {@code domain-config} 요소에서 대상을 포함하는 경우 가장 구체적인(긴)
+일치 도메인이 포함된 구성이 사용됩니다.</p></dd>
+</dl>
+
+
+<h3 id="domain">&lt;domain&gt;</h3>
+
+<dl class="xml">
+  <dt>
+    구문:
+  </dt>
+
+  <dd>
+    <pre class="stx">
+&lt;domain includeSubdomains=["true" | "false"]&gt;example.com&lt;/domain&gt;
+</pre>
+  </dd>
+
+  <dt>
+    속성:
+  </dt>
+
+  <dd>
+    <dl class="attr">
+      <dt>
+        {@code includeSubdomains}
+      </dt>
+
+      <dd>
+        {@code "true"}인 경우 이 도메인 규칙이 도메인 및 모든 하위 도메인(하위 도메인의 하위 도메인 포함)과
+일치합니다. 그렇지 않을 경우 이 규칙은
+정확한 일치에만 적용됩니다.
+      </dd>
+    </dl>
+  </dd>
+
+  <dt>
+    설명:
+  </dt>
+</dl>
+
+<h3 id="debug-overrides">&lt;debug-overrides&gt;</h3>
+
+<dl class="xml">
+  <dt>
+    구문:
+  </dt>
+
+  <dd>
+    <pre class="stx">
+&lt;debug-overrides&gt;
+    ...
+&lt;/debug-overrides&gt;
+</pre>
+  </dd>
+
+  <dt>
+    다음을 포함할 수 있습니다.
+  </dt>
+
+  <dd>
+    <code><a href="#trust-anchors">&lt;trust-anchors&gt;</a></code> 0 또는 1개
+  </dd>
+
+  <dt>
+    설명:
+  </dt>
+
+  <dd>
+    <a href="{@docRoot}guide/topics/manifest/application-element.html#debug">android:debuggable</a>
+가 {@code "true"}일 때 재정의를 적용합니다. 일반적으로
+IDE와 빌드 도구에서 생성한 비 릴리스 빌드에 해당합니다. {@code
+    debug-overrides}에서 지정된 신뢰 앵커를 모든 다른 구성에 추가하고,
+서버의 인증서 체인이 이러한
+디버그 전용 신뢰 앵커 중 하나를 사용하면 고정을 수행하지 않습니다. <a href="{@docRoot}guide/topics/manifest/application-element.html#debug">android:debuggable</a>
+이 {@code "false"}이면 이 섹션은 완전히 무시합니다.
+  </dd>
+</dl>
+
+<h3 id="trust-anchors">&lt;trust-anchors&gt;</h3>
+<dl class="xml">
+  <dt>
+    구문:
+  </dt>
+
+  <dd>
+    <pre class="stx">
+&lt;trust-anchors&gt;
+...
+&lt;/trust-anchors&gt;
+</pre>
+  </dd>
+
+  <dt>
+    다음을 포함할 수 있습니다.
+  </dt>
+
+  <dd>
+    <code><a href="#certificates">&lt;certificates&gt;</a></code> 임의의 개수
+  </dd>
+
+  <dt>
+    설명:
+  </dt>
+
+  <dd>
+    보안 연결에 대한 신뢰 앵커 세트.
+  </dd>
+</dl>
+
+
+<h3 id="certificates">&lt;certificates&gt;</h3>
+<dl class="xml">
+<dt>구문:</dt>
+<dd><pre class="stx">&lt;certificates src=["system" | "user" | "<i>raw resource</i>"]
+              overridePins=["true" | "false"] /&gt;
+</pre></dd>
+<dt>설명:</dt>
+<dd>{@code trust-anchors} 요소에 대한 X.509 인증서 세트.</dd>
+
+<dt>속성:</dt>
+<dd><dl class="attr">
+<dt>{@code src}</dt>
+<dd>
+CA 인증서 소스는 다음 중 하나가 될 수 있습니다.
+<ul>
+  <li>X.509 인증서를 포함한 파일을 가리키는 원시 리소스 ID.
+  인증서는 DER 또는 PEM 형식으로 암호화해야 합니다. PEM 인증서의 경우,
+파일에는 코멘트와 같은 PEM이 아닌 추가 데이터가
+포함되어서는 <em>안 됩니다</em>.
+  </li>
+
+  <li>사전 설치된 시스템 CA 인증서의 {@code "system"}
+  </li>
+
+  <li>사용자가 추가한 CA 인증서의 {@code "user"}
+  </li>
+</ul>
+</dd>
+
+<dt>{@code overridePins}</dt>
+<dd>
+  <p>
+    이 소스의 CA가 인증서 고정을 우회할지 지정합니다. {@code
+    "true"}이고 인증서 체인이 이 소스의 CA 중 하나를 통해 묶일 경우
+고정을 수행하지 않습니다. 디버그 CA 또는
+사용자가 앱의 보안 트래픽을 MiTM하도록 지원할 때 유용합니다.
+  </p>
+
+  <p>
+    {@code debug-overrides}
+요소에서 지정되지 않은 경우 기본값은 {@code "false"}입니다. 지정된 경우 기본값은 {@code "true"}입니다.
+  </p>
+</dd>
+</dl>
+</dd>
+
+
+<h3 id="pin-set">&lt;pin-set&gt;</h3>
+
+<dl class="xml">
+  <dt>
+    구문:
+  </dt>
+
+  <dd>
+<pre class="stx">
+&lt;pin-set expiration="date"&gt;
+...
+&lt;/pin-set&gt;
+</pre>
+  </dd>
+
+  <dt>
+    다음을 포함할 수 있습니다.
+  </dt>
+
+  <dd>
+    <code><a href="#pin">&lt;pin&gt;</a></code> 임의의 개수
+  </dd>
+
+  <dt>
+    설명:
+  </dt>
+
+  <dd>
+    공개 키 핀 세트. 신뢰할 수 있는 보안 연결은
+신뢰 체인의 공개 키 중 하나가 핀 세트에 포함되어야 합니다. 핀 형식은
+<code><a href="#pin">&lt;pin&gt;</a></code>를 참조하세요.
+  </dd>
+
+  <dt>
+    속성:
+  </dt>
+
+  <dd>
+    <dl class="attr">
+      <dt>
+        {@code expiration}
+      </dt>
+
+      <dd>
+        핀 만료 당일과 그 이후의 {@code yyyy-MM-dd} 형식 날짜로,
+핀이 비활성화됩니다. 이 속성이 설정되지 않으면
+핀이 만료되지 않습니다.
+        <p>
+          만료는 어떤 이유(사용자가 앱 업데이트를 비활성화)로
+ PIN 세트가 업데이트되지 않는 앱에서
+ 연결 문제를 예방하는 데 유용합니다.
+        </p>
+      </dd>
+    </dl>
+  </dd>
+</dl>
+
+<h3 id="pin">&lt;pin&gt;</h3>
+<dl class="xml">
+  <dt>
+    구문:
+  </dt>
+
+  <dd>
+<pre class="stx">
+&lt;pin digest=["SHA-256"]&gt;base64 encoded digest of X.509
+    SubjectPublicKeyInfo (SPKI)&lt;/pin&gt;
+</pre>
+  </dd>
+
+  <dt>
+    속성:
+  </dt>
+
+  <dd>
+    <dl class="attr">
+      <dt>
+        {@code digest}
+      </dt>
+
+      <dd>
+        PIN을 생성하는 데 사용된 다이제스트 알고리즘. 현재
+{@code "SHA-256"}만 지원됩니다.
+      </dd>
+    </dl>
+  </dd>
+</dl>

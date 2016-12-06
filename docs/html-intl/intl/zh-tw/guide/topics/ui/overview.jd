@@ -39,7 +39,7 @@ XML 提供類似於 HTML 且人類看得懂的版面配置結構。</p>
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="fill_parent" 
+              android:layout_width="fill_parent"
               android:layout_height="fill_parent"
               android:orientation="vertical" >
     &lt;TextView android:id="@+id/text"
@@ -60,7 +60,7 @@ XML 提供類似於 HTML 且人類看得懂的版面配置結構。</p>
 <p>如需建立 UI 版面配置的完整指南，請參閱 <a href="declaring-layout.html">XML 版面配置</a>。
 
 
-  
+
 <h2 id="UIComponents">使用者介面元件</h2>
 
 <p>您不必使用 {@link android.view.View} 與 {@link

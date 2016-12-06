@@ -21,14 +21,14 @@ parent.link=activities.html
         </ol>
     </li>
   </ol>
-    
+
   <h2>Key classes</h2>
     <ol>
       <li>{@link android.app.LoaderManager}</li>
       <li>{@link android.content.Loader}</li>
 
-    </ol>   
-    
+    </ol>
+
     <h2>Related samples</h2>
    <ol>
      <li> <a
@@ -53,7 +53,7 @@ content changes.</li>
 recreated after a configuration change. Thus, they don't need to re-query their
 data.</li>
   </ul>
- 
+
 <h2 id="summary">Loader API Summary</h2>
 
 <p>There are multiple classes and interfaces that may be involved in using
@@ -131,10 +131,10 @@ of {@link android.content.Loader} or {@link android.content.AsyncTaskLoader} to
 load data from some other source.</li>
   <li>An implementation for {@link android.app.LoaderManager.LoaderCallbacks}.
 This is where you create new loaders and manage your references to existing
-loaders.</li> 
+loaders.</li>
 <li>A way of displaying the loader's data, such as a {@link
 android.widget.SimpleCursorAdapter}.</li>
-  <li>A data source, such as a {@link android.content.ContentProvider}, when using a 
+  <li>A data source, such as a {@link android.content.ContentProvider}, when using a
 {@link android.content.CursorLoader}.</li>
 </ul>
 <h3 id="starting">Starting a Loader</h3>
@@ -142,7 +142,7 @@ android.widget.SimpleCursorAdapter}.</li>
 <p>The {@link android.app.LoaderManager} manages one or more {@link
 android.content.Loader} instances within an {@link android.app.Activity} or
 {@link android.app.Fragment}. There is only one {@link
-android.app.LoaderManager} per activity or fragment.</p> 
+android.app.LoaderManager} per activity or fragment.</p>
 
 <p>You typically
 initialize a {@link android.content.Loader} within the activity's {@link
@@ -159,13 +159,13 @@ the following parameters:</p>
 <ul>
   <li>A unique ID that identifies the loader. In this example, the ID is 0.</li>
 <li>Optional arguments to supply to the loader at
-construction (<code>null</code> in this example).</li> 
+construction (<code>null</code> in this example).</li>
 
 <li>A {@link android.app.LoaderManager.LoaderCallbacks} implementation, which
 the {@link android.app.LoaderManager} calls to report loader events. In this
 example, the local class implements the {@link
 android.app.LoaderManager.LoaderCallbacks} interface, so it passes a reference
-to itself, {@code this}.</li> 
+to itself, {@code this}.</li>
 </ul>
 <p>The {@link android.app.LoaderManager#initLoader initLoader()} call ensures that a loader
 is initialized and active. It has two possible outcomes:</p>
@@ -196,7 +196,7 @@ the life of the loader automatically. The {@link android.app.LoaderManager}
 starts and stops loading when necessary, and maintains the state of the loader
 and its associated content. As this implies, you rarely interact with loaders
 directly (though for an example of using loader methods to fine-tune a loader's
-behavior, see the <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html"> LoaderThrottle</a> sample). 
+behavior, see the <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html"> LoaderThrottle</a> sample).
 You most commonly use the {@link
 android.app.LoaderManager.LoaderCallbacks} methods to intervene in the loading
 process when particular events occur. For more discussion of this topic, see <a
@@ -249,7 +249,7 @@ Instantiate and return a new {@link android.content.Loader} for the given ID.
 &#8212; Called when a previously created loader has finished its load.
 </li></ul>
 <ul>
-  <li>{@link android.app.LoaderManager.LoaderCallbacks#onLoaderReset onLoaderReset()}  
+  <li>{@link android.app.LoaderManager.LoaderCallbacks#onLoaderReset onLoaderReset()}
     &#8212; Called when a previously created loader is being reset,  thus  making its
 data unavailable.
 </li>
@@ -344,11 +344,11 @@ public void onLoadFinished(Loader&lt;Cursor&gt; loader, Cursor data) {
 
 <h4 id="onLoaderReset">onLoaderReset</h4>
 
-<p>This method is called when a previously created loader is being reset,  thus 
+<p>This method is called when a previously created loader is being reset,  thus
 making its data unavailable. This callback lets you find  out when the data is
 about to be released so you can remove your  reference to it.  </p>
-<p>This implementation calls 
-{@link android.widget.SimpleCursorAdapter#swapCursor swapCursor()}  
+<p>This implementation calls
+{@link android.widget.SimpleCursorAdapter#swapCursor swapCursor()}
 with a value of <code>null</code>:</p>
 
 <pre>
@@ -370,7 +370,7 @@ public void onLoaderReset(Loader&lt;Cursor&gt; loader) {
 android.app.Fragment} that displays a {@link android.widget.ListView} containing
 the results of a query against the contacts content provider. It uses a {@link
 android.content.CursorLoader} to manage the query on the provider.</p>
- 
+
 <p>For an application to access a user's contacts, as shown in this example, its
 manifest must include the permission
 {@link android.Manifest.permission#READ_CONTACTS READ_CONTACTS}.</p>

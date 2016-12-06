@@ -38,7 +38,7 @@ make one below another, centered in the screen, centered left, and so on. By def
 views are drawn at the top-left of the layout, so you must define the position of each view
 using the various layout properties available from {@link
 android.widget.RelativeLayout.LayoutParams}.</p>
- 
+
 <p>Some of the many layout properties available to views in a {@link android.widget.RelativeLayout}
 include:</p>
 <dl>

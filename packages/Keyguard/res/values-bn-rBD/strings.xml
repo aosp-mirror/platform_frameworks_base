@@ -46,11 +46,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"সিম কার্ড লক করা আছে৷"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"সিম কার্ডটি PUK কোড দিয়ে লক করা আছে৷"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"সিম কার্ড আনলক করা হচ্ছে…"</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"প্যাটার্ন দিয়ে আনলক৷"</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"পিন দিয়ে আনলক৷"</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"পাসওয়ার্ড দিয়ে আনলক৷"</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"প্যাটার্ন এলাকা৷"</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"স্লাইড করার এলাকা৷"</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"পিন অঞ্চল"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM পিন অঞ্চল"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM PUK অঞ্চল"</string>

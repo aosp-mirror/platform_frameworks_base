@@ -1,0 +1,374 @@
+page.title=Reducing Image Download Sizes
+page.metaDescription=Improve network performance by optimizing image size.
+
+meta.tags="performance"
+page.tags="performance"
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+    <ol>
+
+      <li>
+        <a href="#uif">Understanding Image Formats</a>
+        <ul>
+           <li><a href="#png">PNG</a></li>
+           <li><a href="#jpg">JPG</a></li>
+           <li><a href="#webp">WebP</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="#sf">Selecting a Format</a></li>
+      <li><a href="#doqv">Determining Optimal Quality Values</a>
+        <ul>
+           <li><a href="#sv">Scalar Values (JPG, WebP only)</a></li>
+           <li><a href="#butter">Butteraugli</a></li>
+        </ul>
+      </li>
+      <li><a href="#sizes">Serving Sizes</a></li>
+    </ol>
+  </div>
+</div>
+
+<p>
+Most download traffic consists of images. As a result, the smaller you can make
+your downloadable images, the better a network experience your app can provide
+for users. This page provides guidance on making image files smaller and more
+network-friendly.
+</p>
+
+<h2 id="uif">Understanding Image Formats</h2>
+
+<p>Android apps typically use images that are in one or more of the following file
+formats: PNG, JPG, and WebP. For each of these formats, there are steps you can
+take to reduce image sizes.
+</p>
+
+<h3 id="png">PNG</h3>
+
+<p>
+A key to making your PNG files smaller is reducing the number of unique
+colors used in each row of pixels that comprises the image. By using fewer
+colors, you improve the compression potential at all of the other stages of
+the pipeline.
+</p>
+
+<p>
+Reducing the number of unique colors makes a significant difference because PNG
+compression effectiveness is partly a function of the degree to which
+horizontally adjacent pixel colors vary. Thus, reducing the number of unique
+colors in each row of your PNG images can help in reducing their file sizes.
+</p>
+
+<p>
+When deciding whether to pursue this strategy, you should keep in mind that
+reducing the number of unique colors effectively amounts to applying a lossy
+encoding stage to the image. However, an encoding tool may not be a good
+judge of how bad a seemingly small error looks to the human eye. Therefore,
+you should perform this work manually in order to help ensure
+the right balance between efficient compression and acceptable image quality.
+</p>
+
+<p>
+There are two particularly useful approaches you can take: striving for indexed
+formats, and applying vector quantization.
+</p>
+
+
+<h4 id="strive">Strive for indexed formats</h4>
+
+<p>
+Any attempt at color reduction should start with trying to optimize your colors
+so that you can use the INDEXED format when exporting the image as a PNG. The
+INDEXED color mode works by choosing the best 256 colors to use, and replacing
+all pixel values with indices into that color palette. The result is a
+reduction from 16 million (potential) colors to only 256 colors: from 3 (without
+transparency) or 4 (with transparency) bytes per pixel to 1 byte per pixel.
+This change is a significant first-step file size reduction.
+</p>
+
+<p>
+Figure 1 shows shows an image and its indexed variant.
+</p>
+
+  <img src="{@docRoot}topic/performance/images/beforeafterindexed.png">
+  <p class="img-caption">
+Figure 1. An image before and after conversion to the INDEXED format.
+  </p>
+
+
+<p>
+Figure 2 shows the color palette for the image in Figure 1:
+</p>
+
+  <img src="{@docRoot}topic/performance/images/palette.png">
+  <p class="img-caption">
+Figure 2. The color palette for the image in Figure 1.
+  </p>
+
+<p>
+Representing your image as a paletted image goes a long way toward
+significantly improving the file size, so it's worth investigating if the
+majority of your images can be converted.
+</p>
+
+<p>
+Of course, not every image can be accurately represented with only 256 colors.
+Some images, for example, might need 257, 310, 512, or 912 colors to
+look correct. In such cases, vector quantization can also be helpful.
+</p>
+
+<h4 id="vq">Vector quantization</h4>
+
+<p>
+The process of creating an indexed image may be better described as vector
+quantization (VQ). VQ serves as a rounding process for multidimensional
+numbers.  In this process, all the colors in your image get grouped based upon
+their similarity. For a given group, all colors in that group are replaced by a
+single <em>center point</em> value, which minimizes error for colors in that
+cell (or "site" if you're using the Voronoi terminology). In Figure 3,
+the green dots represent input colors, and the red dots are the center points
+that replace the input colors. Each cell is bounded by blue lines.
+</p>
+
+  <img src="{@docRoot}topic/performance/images/vq.gif">
+  <p class="img-caption">
+Figure 3. Applying vector quantization to the colors in an image.
+</p>
+
+<p>
+The result of applying VQ to an image reduces the number of unique colors,
+replacing each group of colors with a single color that's "pretty close"
+in visual quality.
+</p>
+
+<p>
+This technique also allows you to define the maximum number of unique colors in
+your image. For example, Figure 4 shows the a parrot head in 16.7 million colors
+(24 bits per pixel, or bpp) alongside a version that only allows only
+16 (3 bpp) unique colors to be used.
+</p>
+
+  <img src="{@docRoot}topic/performance/images/parrot.png">
+  <p class="img-caption">
+Figure 4. Image before and after application of vector quantification.
+  </p>
+
+<p>
+Immediately, you can see that there's a loss of quality; most of the gradient
+colors have been replaced, imparting a banding effect to the image. This image
+needs more than 16 unique colors.
+</p>
+
+<p>
+Setting up a VQ step in your pipeline can help you get a better sense of the
+true number of unique colors that your image uses, and can help you reduce them
+significantly. There are a number of readily available tools that you can use
+to help you implement this technique.
+</p>
+
+<h3 id="jpg">JPG</h3>
+
+<p>
+If you are using JPG images, there are several small changes you can make that
+potentially provide significant file-size savings. These include:
+</p>
+
+<ul>
+   <li>
+Producing a smaller file size through different encoding methods (without
+impacting quality).
+   </li>
+
+   <li>
+Adjusting quality slightly in order to yield better compression.
+   </li>
+</ul>
+
+<p>Pursuing these strategies can often net you file-size reductions of up to
+25%.
+</p>
+
+<p>
+When choosing tools, remember that photo exporting tools can
+insert unnecessary metadata, such as GPS information, into your images. At
+a minimum, try to leverage existing tools to help strip out this information
+from your files.
+</p>
+
+<h3 id="webp">WebP</h3>
+
+<p>
+WebP is a newer image format supported from Android 4.2.1 (API level 17). This
+format provides superior lossless and lossy compression for images on the web.
+Using WebP, developers can create smaller, richer images. WebP lossless image
+files are, on average,
+<a href="https://developers.google.com/speed/webp/docs/webp_lossless_alpha_study#conclusions">
+26% smaller</a> than PNGs. These image files also support
+transparency (also known as alpha channel) at a cost of just
+<a href="https://developers.google.com/speed/webp/docs/webp_lossless_alpha_study#results">
+22% more</a> bytes.
+</p>
+
+<p>
+WebP lossy images are
+<a href="https://developers.google.com/speed/webp/docs/webp_study#experiment_1_webp_vs_jpeg_at_equal_ssim_index">
+25-34% smaller</a> than comparable JPG images at equivalent
+<a href="https://en.wikipedia.org/wiki/Structural_similarity">SSIM</a>
+quality indices. For cases when lossy RGB compression is acceptable, lossy
+WebP also supports transparency, typically producing file sizes 3 times smaller
+than PNG.
+</p>
+
+<p>
+For more information about WebP, visit the
+<a href="https://developers.google.com/speed/webp/">WebP site</a>.
+</p>
+
+<h2 id="sf">Selecting a Format</h2>
+
+<p>
+Different image formats are suitable for different types of images. JPG and PNG
+have very different compression processes, and they produce quite different
+results.
+</p>
+
+<p>
+The decision between PNG and JPG often comes down to the complexity of the
+image itself. Figure 5 shows two images that come out quite differently
+depending on which compression scheme the developer applies. The image on the
+left has many small details, and thus compresses more efficiently with JPG. The
+image on the right, with runs of the same color, compresses more efficiently
+with PNG.
+</p>
+
+  <img src="{@docRoot}topic/performance/images/comparison.png">
+  <p class="img-caption">
+Figure 5. Suitable cases for JPG vs. PNG
+  </p>
+
+
+<p>
+WebP as a format can support both lossy and lossless modes, making it an ideal
+replacement for both PNG and JPG. The only thing to keep in mind is that it
+only has native support on devices running Android 4.2.1 (API level 17) and
+higher. Fortunately, the large
+<a
+href="https://developer.android.com/about/dashboards/index.html#Platform">
+majority of devices</a> satisfy that requirement.
+</p>
+
+<p>
+Figure 6 provides a simple visualization to help you decide which compression
+scheme to use.
+</p>
+
+  <img src="{@docRoot}topic/performance/images/decisions.png">
+  <p class="img-caption">
+Figure 6. Deciding on a compression scheme
+  </p>
+
+<h2 id="doqv">Determining Optimal Quality Values</h2>
+
+<p>
+There are several techniques you can use to achieve the right balance between
+compression and image quality. One technique uses scalar values and therefore
+only works for JPG and WebP. The other technique takes advantage of the
+Butteraugli library, and is usable for all image formats.
+</p>
+
+<h3 id="sv">Scalar values (JPG and WebP only)</h3>
+
+<p>
+The power of JPG and WebP comes from the fact that you can use a scalar value
+to balance quality against file size. The trick is finding out what the correct
+quality value is for your image. Too low a quality level produces a small file
+at the cost of image quality. Too high a quality level increases file size
+without providing a noticeable benefit to the user.
+</p>
+
+<p>
+The most straightforward solution is to pick some non-maximum value, and use
+that value. However, be aware that the quality value affects every image
+differently. While a quality of 75%, for example, may look fine on most images,
+there may be some cases do not fare as well. You should make sure to test your
+chosen maximum value against a representative sample of images. Also, make
+sure to perform all of your tests against the original images, and not on
+compressed versions.
+</p>
+
+<p>
+For large media applications that upload and re-send millions of JPGs a day,
+hand-tuning for each asset is impractical. You might address this challenge by
+specifying several different quality levels, according to image category. For
+example, you might set 35% as the quality setting for thumbnails, since a
+smaller image hides more compression artifacts.
+</p>
+
+<h3 id="butter">Butteraugli</h4>
+
+<p>
+The Butteraugli project is a library to test an image's Psychovisual Error
+Threshold: the point at which a viewer starts to notice image degradation. In
+other words, this project attempts to quantify how distorted your compressed
+image is.
+</p>
+
+<p>
+Butteraugli allows you to define a goal for visual quality, and then run PNG,
+JPG, WebP lossy, and WebP lossless compressions. You can then choose the image
+that is the best balance of file size and Butteraugli level. Figure 7 shows an
+example of how Butteraugli was used to find the minimal JPG quality level
+before the visual distortion was high enough for a user could perceive a
+problem; the result is a roughly 65% reduction in file size.
+</p>
+
+  <img src="{@docRoot}topic/performance/images/moarparrots.png">
+  <p class="img-caption">
+Figure 7. An image before and after application of Butteraugli technology.
+  </p>
+
+<p>
+Butteraugli allows you to proceed based on either output or input. That is, you
+can look for the lowest quality setting before a user perceives noticeable
+distortion in the resulting image, or you can iteratively set image-distortion
+levels to learn their associated quality levels.
+</p>
+
+<h2 id="sizes">Serving Sizes</h2>
+
+<p>
+It is tempting to keep only a single resolution of an image on a server. When a
+device accesses the image, the server serves it at that one resolution and
+leaves downscaling to the device.
+</p>
+
+<p>
+This solution is convenient for the developer, but potentially painful for the
+user, because the solution forces the user to download much more data than they
+need.
+
+You should instead store multiple sizes of images, and serve the size that is
+most appropriate for a particular use case. For example, for a thumbnail,
+serving an actual thumbnail image instead of serving and downscaling a
+full-size version consumes much less network bandwidth
+</p>
+
+</p>
+This approach is good for download speed, and is less costly for users who may
+be using limited or metered data plans. Proceeding like this also results in
+the image's taking less space on the device and in main memory. In the
+case of large images, such as 4K ones, this approach also saves the device
+from having to resize images before loading them.
+</p>
+
+<p>
+Implementing this approach requires that you have a backend image service to
+provide images at various resolutions with proper caching. There are existing
+services that can provide help with this task. For example,
+<a href="https://cloud.google.com/appengine/">App Engine</a> comes
+with image resizing functionality already installed.
+</p>

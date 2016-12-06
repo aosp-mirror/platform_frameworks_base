@@ -1,0 +1,582 @@
+page.title=多視窗支援
+page.metaDescription=Android N 新推出支援一次顯示多個應用程式。
+page.keywords="multi-window", "android N", "split screen", "free-form"
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    <h2>此文件內容</h2>
+      <ol>
+        <li><a href="#overview">總覽</a></li>
+        <li><a href="#lifecycle">多視窗生命週期</a></li>
+        <li><a href="#configuring">針對多視窗模式設定應用程式
+</a></li>
+        <li><a href="#running">在多視窗模式中執行應用程式</a></li>
+        <li><a href="#testing">測試應用程式的多視窗支援</a></li>
+      </ol>
+    <h2>另請參閱</h2>
+      <ol>
+        <li><a class="external-link" href="https://github.com/googlesamples/android-MultiWindowPlayground">多視窗 Playground 範例應用程式
+</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>
+  Android N 新增一次顯示多個應用程式的支援。
+在手持式裝置上，兩個應用程式可以在「分割畫面」模式中並排或上下排列。
+<em></em>在電視裝置上，應用程式能使用「子母畫面」模式，在使用者與另一個應用程式互動時持續播放影片。
+<em></em>
+
+</p>
+
+<p>
+  如使用 N Preview SDK 建置應用程式，您可以設定應用程式處理多視窗顯示的方式。
+例如，您可以指定活動的最小可允許尺寸。
+您也可以停用應用程式的多視窗顯示，確保系統只會以全螢幕模式顯示您的應用程式。
+
+
+</p>
+
+<h2 id="overview">總覽</h2>
+
+<p>
+  Android N 允許多個應用程式同時分享螢幕。例如，使用者可以分割畫面，在左邊檢視網頁，同時在右邊撰寫電子郵件。
+
+使用者體驗依裝置而異：
+
+</p>
+
+<ul>
+  <li>執行 Android N 的手持式裝置可提供分割畫面模式。
+處於此模式時，系統會以並排或上下排列的方式顯示兩個應用程式，將螢幕填滿。
+使用者可以拖曳將畫面一分為二的分隔線，加大一邊的應用程式，就會縮小另一邊。
+
+  </li>
+
+  <li>在執行 Android N 的 Nexus Player 上，當使用者瀏覽其他應用程式或與其互動時，應用程式會將本身放入<a href="picture-in-picture.html">子母畫面模式</a>以持續顯示內容。
+
+
+
+  </li>
+
+  <li>較大型裝置的製造商可選擇啟用自由形式模式，讓使用者自由調整每個活動的大小。
+若製造商啟用此功能，裝置除了分割畫面模式外，還會提供自由形式模式。
+
+
+  </li>
+</ul>
+
+<img src="{@docRoot}images/android-7.0/mw-splitscreen.png" alt="" width="650" srcset="{@docRoot}images/android-7.0/mw-splitscreen.png 1x,
+    {@docRoot}images/android-7.0/mw-splitscreen_2x.png 2x," id="img-split-screen" />
+<p class="img-caption">
+  <strong>圖 1.</strong> 在分割畫面模式中並排執行的兩個應用程式。
+</p>
+
+<p>
+  使用者可以透過下列方式來切換多視窗模式：
+</p>
+
+<ul>
+  <li>如果使用者開啟<a href="{@docRoot}guide/components/recents.html">總覽畫面</a>並長按活動標題，就可以將該標題拖曳到畫面醒目提示的部分，將活動放入多視窗模式。
+
+
+
+  </li>
+
+  <li>如果使用者長按「總覽」按鈕，裝置會將目前的活動放入多視窗模式，並開啟總覽畫面，讓使用者選擇要分享螢幕的另一個活動。
+
+
+  </li>
+</ul>
+
+<p>
+  使用者可以在活動分享螢幕時，將一個活動中的資料<a href="{@docRoot}guide/topics/ui/drag-drop.html">拖放</a>到另一個活動。
+
+(之前，使用者只能在單一活動內拖放資料)。
+
+</p>
+
+<h2 id="lifecycle">多視窗生命週期</h2>
+
+<p>
+  多視窗模式不會變更<a href="{@docRoot}training/basics/activity-lifecycle/index.html">活動生命週期</a>。
+
+</p>
+
+<p>
+  在多視窗模式中，特定時間只有最近與使用者互動的活動才會處於使用中。
+這會視為「最上層」活動。<em></em>
+  即使能看到所有其他活動，但也處於暫停狀態。
+  然而，相較於看不到的活動，系統會給予這類暫停但可看見的活動較高的優先順序。
+若使用者改與其中一個暫停的活動互動，該活動就會恢復，使先前的最上層活動變成暫停。
+
+
+</p>
+
+<p class="note">
+  <strong>注意：</strong>在多視窗模式中，使用者仍能見到處於暫停狀態的應用程式。
+即使處於暫停，應用程式仍需要進行其活動。
+例如，處於暫停模式但仍可以看見的影片播放應用程式，應會持續顯示其影片。
+因此，建議您在播放影片的活動 {@link android.app.Activity#onPause onPause()} 處理常式中，「不要」暫停影片。
+<em></em>
+
+  應該改為在 {@link android.app.Activity#onStop
+  onStop()}, and resume playback in {@link android.app.Activity#onStart
+  onStart()} 中暫停影片。
+</p>
+
+<p>
+  當使用者將應用程式放入多視窗模式時，系統會通知活動發生設定變更，如<a href="{@docRoot}guide/topics/resources/runtime-changes.html">處理執行階段變更</a>所指定。
+
+基本上，此變更的活動生命週期和系統通知應用程式，裝置從垂直模式切換為水平模式時的生命週期相當，差別在於裝置尺寸會改變，而不只是切換。
+
+
+如<a href="{@docRoot}guide/topics/resources/runtime-changes.html">處理執行階段變更</a>中所述，您的活動能自行處理設定變更，或會允許系統終結活動並以新的尺寸重新建立。
+
+
+
+</p>
+
+<p>
+  如果使用者調整視窗大小並加大長或寬的尺寸，系統會根據使用者動作來調整活動大小，並視需要發出<a href="{@docRoot}guide/topics/resources/runtime-changes.html">執行階段變更</a>。
+
+若應用程式在新公開的區域中繪製發生延遲，系統會暫時使用 {@link
+  android.R.attr#windowBackground windowBackground} 所指定的色彩或預設的
+  <code>windowBackgroundFallback</code> 樣式屬性，填滿那些區域。
+
+</p>
+
+<h2 id="configuring">針對多視窗模式設定應用程式</h2>
+
+<p>
+  您的應用程式若以 Android N 為目標，您可以設定應用程式的活動是否支援多視窗顯示以及支援的方式。
+您可以在宣示說明中設定屬性，同時控制大小與版面配置。
+
+  根活動的屬性設定會套用到它工作堆疊內的所有活動。
+
+</p>
+
+<p class="note">
+  <strong>注意：</strong>如果您使用 Android N 以下的 SDK 版本建置多螢幕方向應用程式，而且使用者會在多視窗模式中使用該應用程式，系統會強制調整應用程式大小。
+
+系統會顯示對話方塊向使用者警告應用程式行為異常。
+系統「不會」調整螢幕方向固定的應用程式大小，如使用者嘗試在多視窗模式下開啟螢幕方向固定的應用程式，應用程式會佔滿整個螢幕。
+<em></em>
+
+
+</p>
+
+<h4 id="resizeableActivity">android:resizeableActivity</h4>
+<p>
+  在宣示說明的 <code>&lt;activity&gt;</code> 或
+  <code>&lt;application&gt;</code> 節點中，設定此屬性以啟用或停用多視窗顯示：
+
+</p>
+
+<pre>
+android:resizeableActivity=["true" | "false"]
+</pre>
+
+<p>
+  如將此屬性設定為 true，就能以分割畫面和自由形式模式來啟動活動。
+如將屬性設定為 false，活動會不支援多視窗模式。
+如果此值為 false，而使用者嘗試以多視窗模式啟動活動，該活動會佔滿整個螢幕。
+
+
+</p>
+
+<p>
+  您的應用程式如以 Android N 為目標，但您並未指定此屬性的值，屬性的預設值為 true。
+
+</p>
+
+<h4 id="supportsPictureInPicture">android:supportsPictureInPicture</h4>
+
+<p>
+  在宣示說明的 <code>&lt;activity&gt;</code> 節點中，設定此屬性以指出活動是否支援子母畫面顯示：
+如果 <code>android:resizeableActivity</code> 為 false，則會忽略此屬性。
+
+</p>
+
+<pre>
+android:supportsPictureInPicture=["true" | "false"]
+</pre>
+
+<h3 id="layout">版面配置屬性</h3>
+
+<p>
+  使用 Android N，<code>&lt;layout&gt;</code> 宣示說明元素支援的數個屬性會影響多視窗模式中的活動行為。
+
+
+</p>
+
+<dl>
+  <dt>
+    <code>android:defaultWidth</code>
+  </dt>
+
+  <dd>
+    以自由形式模式啟動活動時的預設寬度。
+  </dd>
+
+  <dt>
+    <code>android:defaultHeight</code>
+  </dt>
+
+  <dd>
+    以自由形式模式啟動活動時的預設高度。
+  </dd>
+
+  <dt>
+    <code>android:gravity</code>
+  </dt>
+
+  <dd>
+    以自由形式模式啟動活動時的初始放置位置。請參閱
+    {@link android.view.Gravity} 參考資料以查看適當的值。
+  </dd>
+
+  <dt>
+    <code>android:minimalSize</code>
+  </dt>
+
+  <dd>
+    在分割畫面與自由形式模式中，活動的最小高度與最小寬度。
+如果使用者在分割畫面模式中移動分隔，而使活動小於指定的最小值，系統會將活動裁剪為使用者要求的大小。
+
+
+  </dd>
+</dl>
+
+<p>
+  例如，在自由形式模式中顯示活動時，下列程式碼顯示如何指定活動的預設大小與位置以及它的最小大小：
+
+
+</p>
+
+<pre>
+&lt;activity android:name=".MyActivity"&gt;
+    &lt;layout android:defaultHeight="500dp"
+          android:defaultWidth="600dp"
+          android:gravity="top|end"
+          android:minimalSize="450dp" /&gt;
+&lt;/activity&gt;
+</pre>
+
+<h2 id="running">在多視窗模式中執行應用程式</h2>
+
+<p>
+  Android N 提供的新功能支援在多視窗模式中執行應用程式。
+
+</p>
+
+<h3 id="disabled-features">可在多視窗模式中停用的功能</h3>
+
+<p>
+  當裝置處於多視窗模式時，有些功能無法用於會與其他活動或應用程式分享裝置螢幕的活動，因此會加以停用或忽略。
+
+這類功能包括：
+
+<ul>
+  <li>有些<a href="{@docRoot}training/system-ui/index.html">系統 UI</a>
+  自訂選項會停用。例如，不以全螢幕模式執行就無法隱藏狀態列的應用程式。
+
+  </li>
+
+  <li>系統會忽略對 <code><a href=
+  "{@docRoot}guide/topics/manifest/activity-element.html#screen"
+  >android:screenOrientation</a></code> 屬性的變更。
+  </li>
+</ul>
+
+<h3 id="change-notification">多視窗變更通知與查詢</h3>
+
+<p>
+  已將下列可支援多視窗顯示的新方法新增至 {@link android.app.Activity}
+  類別。如需每個方法的詳細資訊，請參閱
+  <a href="{@docRoot}preview/setup-sdk.html#docs-dl">N Preview SDK 參考資料</a>。
+</p>
+
+<dl>
+  <dt>
+    <code>Activity.inMultiWindow()</code>
+  </dt>
+
+  <dd>
+    呼叫即可知道活動是否處於多視窗模式。
+  </dd>
+
+  <dt>
+    <code>Activity.inPictureInPicture()</code>
+  </dt>
+
+  <dd>
+    呼叫即可知道活動是否處於子母畫面模式。
+
+    <p class="note">
+      <strong>注意：</strong>子母畫面模式為多視窗模式的特殊情況。
+如果 <code>myActivity.inPictureInPicture()</code>
+      傳回 true，那麼 <code>myActivity.inMultiWindow()</code> 也會傳回 true。
+
+    </p>
+  </dd>
+
+  <dt>
+    <code>Activity.onMultiWindowChanged()</code>
+  </dt>
+
+  <dd>
+    每當活動進入或離開多視窗模式，系統就會呼叫這個方法。
+如果活動正在進入多視窗模式，系統會將 true 的值傳遞給方法，若活動正要離開多視窗模式，則會傳遞 false。
+
+
+  </dd>
+
+  <dt>
+    <code>Activity.onPictureInPictureChanged()</code>
+  </dt>
+
+  <dd>
+    每當活動進入或離開子母畫面模式，系統就會呼叫這個方法。
+如果活動正在進入子母畫面模式，系統會將 true 的值傳遞給方法，若活動正要離開子母畫面模式，則會傳遞 false。
+
+
+  </dd>
+</dl>
+
+<p>
+  上述的每一個方法也都有 {@link android.app.Fragment} 版本，例如
+ <code>Fragment.inMultiWindow()</code>。
+</p>
+
+<h3 id="entering-pip">進入子母畫面模式</h3>
+
+<p>
+  呼叫新方法
+  <code>Activity.enterPictureInPicture()</code>，即可將活動放入子母畫面模式。如果裝置不支援子母畫面模式，這個方法就沒有作用。
+如需詳細資訊，請參閱<a href="picture-in-picture.html">子母畫面</a>文件。
+
+</p>
+
+<h3 id="launch">在多視窗模式中啟動新活動</h3>
+
+<p>
+  當您啟動新活動，可以提示系統應儘可能在目前活動的旁邊顯示新的活動。
+如要這樣做，請使用旗標
+  <code>Intent.FLAG_ACTIVITY_LAUNCH_TO_ADJACENT</code>。
+傳遞此旗標會要求下列行為：
+
+</p>
+
+<ul>
+  <li>如果裝置處於分割畫面模式中，系統會嘗試在啟動新活動的活動旁邊建立該活動，讓兩個活動分享螢幕。
+
+系統不保證一定能這樣做，但會儘可能讓活動相鄰。
+
+  </li>
+
+  <li>如果裝置未處於分割畫面模式，這個旗標就沒有作用。
+  </li>
+</ul>
+
+<p>
+  如果裝置處於自由形式模式，而您正在啟動新的活動，您可以呼叫
+  <code>ActivityOptions.setLaunchBounds()</code>，指定新活動的尺寸與畫面位置。
+如果裝置未處於多視窗模式，這個方法就沒有作用。
+
+</p>
+
+<p class="note">
+  <strong>注意：</strong>如果您在工作堆疊內啟動活動，該活動就會取代畫面上的活動，繼承它的所有多視窗屬性。
+
+如果您想要在多視窗模式中，以個別的視窗啟動活動，您必須在新的工作堆疊中啟動該活動。
+
+</p>
+
+<h3 id="dnd">支援拖放功能</h3>
+
+<p>
+  使用者可以在兩個活動分享螢幕時，將一個活動中的資料<a href="{@docRoot}guide/topics/ui/drag-drop.html">拖放</a>到另一個活動。
+
+(之前，使用者只能在單一活動內拖放資料)。
+因此，若您的應用程式目前不支援拖曳功能，建議您將該功能新增至應用程式。
+
+</p>
+
+<p>
+  N Preview SDK 擴充 <a href="{@docRoot}reference/android/view/package-summary.html"><code>android.view</code></a>
+  套件，支援跨應用程式的拖放功能。如需下列類別與方法的詳細資訊，請參閱 <a href="{@docRoot}preview/setup-sdk.html#docs-dl">N Preview SDK 參考資料</a>。
+
+
+</p>
+
+<dl>
+  <dt>
+    <code>android.view.DropPermissions</code>
+  </dt>
+
+  <dd>
+    語彙基元物件負責指定權限，授予給放下接收者應用程式。
+
+  </dd>
+
+  <dt>
+    <code>View.startDragAndDrop()</code>
+  </dt>
+
+  <dd>
+    {@link android.view.View#startDrag View.startDrag()} 的新別名。傳遞新旗標
+    <code>View.DRAG_FLAG_GLOBAL</code>，就可以啟用跨活動的拖放功能。
+如果您需要將 URI 權限授予接收者活動，請視需要傳遞新旗標
+    <code>View.DRAG_FLAG_GLOBAL_URI_READ</code> 或
+    <code>View.DRAG_FLAG_GLOBAL_URI_WRITE</code>。
+
+  </dd>
+
+  <dt>
+    <code>View.cancelDragAndDrop()</code>
+  </dt>
+
+  <dd>
+    取消目前進行中的拖曳操作。只能由產生拖曳操作的應用程式呼叫。
+
+  </dd>
+
+  <dt>
+    <code>View.updateDragShadow()</code>
+  </dt>
+
+  <dd>
+    取代目前所進行拖曳操作的拖曳陰影。只能由產生拖曳操作的應用程式呼叫。
+
+  </dd>
+
+  <dt>
+    <code>Activity.requestDropPermissions()</code>
+  </dt>
+
+  <dd>
+    針對利用 {@link android.view.DragEvent} 中包含的 {@link
+    android.content.ClipData} 傳遞的內容 URI，要求權限。
+  </dd>
+</dl>
+
+<h2 id="testing">測試應用程式的多視窗支援</h2>
+
+<p>
+  不論您是否針對 Android N 更新您的應用程式，都應該確認應用程式在多視窗模式中的行為為何，以免使用者試圖在執行 Android N 的裝置上以多視窗模式啟動應用程式。
+
+
+</p>
+
+<h3 id="configuring">設定測試裝置</h3>
+
+<p>
+  如果您在裝置上安裝 Android N，即自動支援分割畫面模式。
+
+</p>
+
+<h3 id="test-non-n">應用程式若非以 N Preview SDK 建置</h3>
+
+<p>
+  若您並非以 N Preview SDK 建置應用程式，而且使用者會試圖在多視窗模式中使用該應用程式，除非應用程式宣告螢幕方向固定，否則系統會強制調整應用程式大小。
+
+
+</p>
+
+<p>
+  若您的應用程式並未宣告螢幕方向固定，您應該在執行 Android N 的裝置上啟動應用程式，並嘗試將應用程式放入分割畫面模式。
+
+確認強制調整應用程式大小時的使用者體驗可以接受。
+
+</p>
+
+<p>
+  若您的應用程式宣告螢幕方向固定，您應該嘗試將應用程式放入多視窗模式。
+確認您這樣做時，應用程式依然會處於全螢幕模式。
+
+</p>
+
+<h3 id="test-mw">若您支援多視窗模式</h3>
+
+<p>
+  如果您以 N Preview SDK 建置應用程式且未停用多視窗支援，請在分割畫面與自由形式模式下，確認下列行為：
+
+
+</p>
+
+<ul>
+  <li>以全螢幕模式啟動應用程式，然後長按 [總覽] 按鈕以切換到多視窗模式。
+確認應用程式可以正確切換。
+  </li>
+
+  <li>以多視窗模式直接啟動應用程式，並確認應用程式可以正確啟動。
+您可以按下 [總覽] 按鈕，然後長按應用程式的標題欄，再拖曳到螢幕上其中一個醒目提示的區域，即可以多視窗模式啟動應用程式。
+
+
+  </li>
+
+  <li>在分割畫面模式中拖曳分隔線調整應用程式的大小。
+  確認可以調整應用程式大小而不會當機，同時可以看見必要的 UI 元素。
+
+  </li>
+
+  <li>如果您已指定應用程式的最小尺寸，請嘗試將應用程式的大小調整到低於指定的尺寸。
+確認您無法將應用程式的大小調整到小於指定的最小值。
+
+  </li>
+
+  <li>經由所有測試確認應用程式的效能可以接受。例如，確認在調整應用程式大小之後，不會遲遲不更新 UI。
+
+
+  </li>
+</ul>
+
+<h4 id="test-checklist">測試檢查清單</h4>
+
+<p>
+  若要確認應用程式在多視窗模式中的效能，請嘗試下列操作。
+除非另外註明，否則您應該在分割畫面與多視窗模式中嘗試這些操作。
+
+</p>
+
+<ul>
+  <li>進入和離開多視窗模式。
+  </li>
+
+  <li>從您的應用程式切換到另一個應用程式，並確認當應用程式不在使用中但可看見時，能正常運作。
+例如，如果是播放影片的應用程式，請確認當使用者與另一個應用程式互動時，影片會持續播放。
+
+
+  </li>
+
+  <li>在分割畫面模式中，嘗試移動分隔列以加大和縮小應用程式。
+在並排與上下排列設定都要嘗試這些操作。
+確認應用程式不會當機，可以看見基本功能，而且不會花太長的時間完成調整大小操作。
+
+
+  </li>
+
+  <li>快速連續執行數次調整大小操作。確認應用程式不會因此當機或流失記憶體。
+如需檢查應用程式記憶體使用量的詳細資訊，請參閱<a href="{@docRoot}tools/debugging/debugging-memory.html">調查 RAM 使用狀況</a>。
+
+
+  </li>
+
+  <li>以數個不同的視窗設定正常使用您的應用程式，並確認應用程式都能正常運作。
+確認文字可以閱讀，而且 UI 元素不會太小而無法與之互動。
+
+  </li>
+</ul>
+
+<h3 id="test-disabled-mw">若已停用多視窗支援</h3>
+
+<p>
+  若您已設定
+  <code>android:resizableActivity="false"</code> 來停用多視窗支援，您應該在執行 Android N 的裝置上啟動應用程式，並嘗試將應用程式放入自由形式與分割畫面模式。
+
+確認您這樣做時，應用程式依然會處於全螢幕模式。
+
+</p>

@@ -167,6 +167,10 @@ bool TextureCache::prefetchAndMarkInUse(void* ownerToken, const SkBitmap* bitmap
     return texture;
 }
 
+bool TextureCache::prefetch(const SkBitmap* bitmap) {
+    return getCachedTexture(bitmap, AtlasUsageType::Use);
+}
+
 Texture* TextureCache::get(const SkBitmap* bitmap, AtlasUsageType atlasUsageType) {
     Texture* texture = getCachedTexture(bitmap, atlasUsageType);
 

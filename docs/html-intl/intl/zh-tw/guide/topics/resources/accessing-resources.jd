@@ -101,12 +101,12 @@ android.content.res.Resources} (以 {@link android.content.Context#getResources(
 <div class="sidebox">
 <h2>存取原始檔案</h2>
 
-<p>雖然不常見，但您有時需要存取原始檔案和目錄。如果有此需求，則不能將檔案儲存在 {@code res/}，因為要從 
-{@code res/} 讀取資源的唯一方式是透過資源 ID。不過，您可以將資源儲存在 
+<p>雖然不常見，但您有時需要存取原始檔案和目錄。如果有此需求，則不能將檔案儲存在 {@code res/}，因為要從
+{@code res/} 讀取資源的唯一方式是透過資源 ID。不過，您可以將資源儲存在
 {@code assets/} 目錄。
 </p>
 <p>儲存在 {@code assets/} 目錄中的檔案「不會」<em></em>指定資源 ID，因此您無法透過 {@code R} 類別或從 XML 資源參照這些檔案。
-您可以改為查詢 {@code assets/} 目錄中的檔案，就像一般檔案系統一樣，並使用 
+您可以改為查詢 {@code assets/} 目錄中的檔案，就像一般檔案系統一樣，並使用
 {@link android.content.res.AssetManager} 讀取原始資料。
 </p>
 <p>不過，如果您只是要讀取原始資料 (例如影片或音訊檔案)，可以將檔案儲存在 {@code res/raw/} 目錄，然後使用 {@link

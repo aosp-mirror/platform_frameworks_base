@@ -27,16 +27,19 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Insets;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
-import android.graphics.PorterDuff.Mode;
 import android.graphics.Shader;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.FloatProperty;
+import android.util.IntProperty;
 import android.util.LayoutDirection;
 import android.util.Log;
 import android.util.PathParser;
+import android.util.Property;
 import android.util.Xml;
 
 import com.android.internal.R;
@@ -73,27 +76,36 @@ import dalvik.system.VMRuntime;
  * <dl>
  * <dt><code>android:name</code></dt>
  * <dd>Defines the name of this vector drawable.</dd>
+ * <dd>Animatable : No.</dd>
  * <dt><code>android:width</code></dt>
  * <dd>Used to define the intrinsic width of the drawable.
  * This support all the dimension units, normally specified with dp.</dd>
+ * <dd>Animatable : No.</dd>
  * <dt><code>android:height</code></dt>
  * <dd>Used to define the intrinsic height the drawable.
  * This support all the dimension units, normally specified with dp.</dd>
+ * <dd>Animatable : No.</dd>
  * <dt><code>android:viewportWidth</code></dt>
  * <dd>Used to define the width of the viewport space. Viewport is basically
  * the virtual canvas where the paths are drawn on.</dd>
+ * <dd>Animatable : No.</dd>
  * <dt><code>android:viewportHeight</code></dt>
  * <dd>Used to define the height of the viewport space. Viewport is basically
  * the virtual canvas where the paths are drawn on.</dd>
+ * <dd>Animatable : No.</dd>
  * <dt><code>android:tint</code></dt>
  * <dd>The color to apply to the drawable as a tint. By default, no tint is applied.</dd>
+ * <dd>Animatable : No.</dd>
  * <dt><code>android:tintMode</code></dt>
  * <dd>The Porter-Duff blending mode for the tint color. The default value is src_in.</dd>
+ * <dd>Animatable : No.</dd>
  * <dt><code>android:autoMirrored</code></dt>
  * <dd>Indicates if the drawable needs to be mirrored when its layout direction is
  * RTL (right-to-left).</dd>
+ * <dd>Animatable : No.</dd>
  * <dt><code>android:alpha</code></dt>
  * <dd>The opacity of this drawable.</dd>
+ * <dd>Animatable : Yes.</dd>
  * </dl></dd>
  * </dl>
  *
@@ -105,24 +117,32 @@ import dalvik.system.VMRuntime;
  * <dl>
  * <dt><code>android:name</code></dt>
  * <dd>Defines the name of the group.</dd>
+ * <dd>Animatable : No.</dd>
  * <dt><code>android:rotation</code></dt>
  * <dd>The degrees of rotation of the group.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:pivotX</code></dt>
  * <dd>The X coordinate of the pivot for the scale and rotation of the group.
  * This is defined in the viewport space.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:pivotY</code></dt>
  * <dd>The Y coordinate of the pivot for the scale and rotation of the group.
  * This is defined in the viewport space.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:scaleX</code></dt>
  * <dd>The amount of scale on the X Coordinate.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:scaleY</code></dt>
  * <dd>The amount of scale on the Y coordinate.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:translateX</code></dt>
  * <dd>The amount of translation on the X coordinate.
  * This is defined in the viewport space.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:translateY</code></dt>
  * <dd>The amount of translation on the Y coordinate.
  * This is defined in the viewport space.</dd>
+ * <dd>Animatable : Yes.</dd>
  * </dl></dd>
  * </dl>
  *
@@ -132,40 +152,60 @@ import dalvik.system.VMRuntime;
  * <dl>
  * <dt><code>android:name</code></dt>
  * <dd>Defines the name of the path.</dd>
+ * <dd>Animatable : No.</dd>
  * <dt><code>android:pathData</code></dt>
  * <dd>Defines path data using exactly same format as "d" attribute
  * in the SVG's path data. This is defined in the viewport space.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:fillColor</code></dt>
  * <dd>Specifies the color used to fill the path. May be a color or, for SDK 24+, a color state list
- * or a gradient color. If this property is animated, any value set by the animation will
- * override the original value. No path fill is drawn if this property is not specified.</dd>
+ * or a gradient color (See {@link android.R.styleable#GradientColor}
+ * and {@link android.R.styleable#GradientColorItem}).
+ * If this property is animated, any value set by the animation will override the original value.
+ * No path fill is drawn if this property is not specified.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:strokeColor</code></dt>
  * <dd>Specifies the color used to draw the path outline. May be a color or, for SDK 24+, a color
- * state list or a gradient color. If this property is animated, any value set by the animation will
- * override the original value. No path outline is drawn if this property is not specified.</dd>
+ * state list or a gradient color (See {@link android.R.styleable#GradientColor}
+ * and {@link android.R.styleable#GradientColorItem}).
+ * If this property is animated, any value set by the animation will override the original value.
+ * No path outline is drawn if this property is not specified.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:strokeWidth</code></dt>
  * <dd>The width a path stroke.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:strokeAlpha</code></dt>
  * <dd>The opacity of a path stroke.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:fillAlpha</code></dt>
  * <dd>The opacity to fill the path with.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:trimPathStart</code></dt>
  * <dd>The fraction of the path to trim from the start, in the range from 0 to 1.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:trimPathEnd</code></dt>
  * <dd>The fraction of the path to trim from the end, in the range from 0 to 1.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:trimPathOffset</code></dt>
  * <dd>Shift trim region (allows showed region to include the start and end), in the range
  * from 0 to 1.</dd>
+ * <dd>Animatable : Yes.</dd>
  * <dt><code>android:strokeLineCap</code></dt>
  * <dd>Sets the linecap for a stroked path: butt, round, square.</dd>
+ * <dd>Animatable : No.</dd>
  * <dt><code>android:strokeLineJoin</code></dt>
  * <dd>Sets the lineJoin for a stroked path: miter,round,bevel.</dd>
+ * <dd>Animatable : No.</dd>
  * <dt><code>android:strokeMiterLimit</code></dt>
  * <dd>Sets the Miter limit for a stroked path.</dd>
+ * <dd>Animatable : No.</dd>
  * <dt><code>android:fillType</code></dt>
- * <dd>Sets the fillType for a path. It is the same as SVG's "fill-rule" properties.
- * For more details, see https://www.w3.org/TR/SVG/painting.html#FillRuleProperty</dd>
+ * <dd>Sets the fillType for a path. The types can be either "evenOdd" or "nonZero". They behave the
+ * same as SVG's "fill-rule" properties. For more details, see
+ * <a href="https://www.w3.org/TR/SVG/painting.html#FillRuleProperty">FillRuleProperty</a></dd>
+ * <dd>Animatable : No.</dd>
  * </dl></dd>
+ *
  * </dl>
  *
  * <dl>
@@ -175,9 +215,11 @@ import dalvik.system.VMRuntime;
  * <dl>
  * <dt><code>android:name</code></dt>
  * <dd>Defines the name of the clip path.</dd>
+ * <dd>Animatable : No.</dd>
  * <dt><code>android:pathData</code></dt>
  * <dd>Defines clip path using the same format as "d" attribute
  * in the SVG's path data.</dd>
+ * <dd>Animatable : Yes.</dd>
  * </dl></dd>
  * </dl>
  * <li>Here is a simple VectorDrawable in this vectordrawable.xml file.
@@ -198,7 +240,26 @@ import dalvik.system.VMRuntime;
  *             android:pathData=&quot;M300,70 l 0,-70 70,70 0,0 -70,70z&quot; /&gt;
  *     &lt;/group&gt;
  * &lt;/vector&gt;
- * </pre></li>
+ * </pre>
+ * </li>
+ * <li>And here is an example of linear gradient color, which is supported in SDK 24+.
+ * See more details in {@link android.R.styleable#GradientColor} and
+ * {@link android.R.styleable#GradientColorItem}.
+ * <pre>
+ * &lt;gradient xmlns:android="http://schemas.android.com/apk/res/android"
+ *     android:angle="90"
+ *     android:startColor="?android:attr/colorPrimary"
+ *     android:endColor="?android:attr/colorControlActivated"
+ *     android:centerColor="#f00"
+ *     android:startX="0"
+ *     android:startY="0"
+ *     android:endX="100"
+ *     android:endY="100"
+ *     android:type="linear"&gt;
+ * &lt;/gradient&gt;
+ * </pre>
+ * </li>
+ *
  */
 
 public class VectorDrawable extends Drawable {
@@ -232,7 +293,7 @@ public class VectorDrawable extends Drawable {
     private final Rect mTmpBounds = new Rect();
 
     public VectorDrawable() {
-        this(new VectorDrawableState(), null);
+        this(new VectorDrawableState(null), null);
     }
 
     /**
@@ -386,6 +447,11 @@ public class VectorDrawable extends Drawable {
     protected boolean onStateChange(int[] stateSet) {
         boolean changed = false;
 
+        // When the VD is stateful, we need to mutate the drawable such that we don't share the
+        // cache bitmap with others. Such that the state change only affect this new cached bitmap.
+        if (isStateful()) {
+            mutate();
+        }
         final VectorDrawableState state = mVectorState;
         if (state.onStateChange(stateSet)) {
             changed = true;
@@ -678,7 +744,11 @@ public class VectorDrawable extends Drawable {
         groupStack.push(state.mRootGroup);
 
         int eventType = parser.getEventType();
-        while (eventType != XmlPullParser.END_DOCUMENT) {
+        final int innerDepth = parser.getDepth() + 1;
+
+        // Parse everything until the end of the vector element.
+        while (eventType != XmlPullParser.END_DOCUMENT
+                && (parser.getDepth() >= innerDepth || eventType != XmlPullParser.END_TAG)) {
             if (eventType == XmlPullParser.START_TAG) {
                 final String tagName = parser.getName();
                 final VGroup currentGroup = groupStack.peek();
@@ -758,6 +828,13 @@ public class VectorDrawable extends Drawable {
         return mVectorState.mAutoMirrored;
     }
 
+    /**
+     * @hide
+     */
+    public long getNativeTree() {
+        return mVectorState.getNativeRenderer();
+    }
+
     static class VectorDrawableState extends ConstantState {
         // Variables below need to be copied (deep copy if applicable) for mutation.
         int[] mThemeAttrs;
@@ -790,12 +867,33 @@ public class VectorDrawable extends Drawable {
         int mLastSWCachePixelCount = 0;
         int mLastHWCachePixelCount = 0;
 
+        final static Property<VectorDrawableState, Float> ALPHA =
+                new FloatProperty<VectorDrawableState>("alpha") {
+                    @Override
+                    public void setValue(VectorDrawableState state, float value) {
+                        state.setAlpha(value);
+                    }
+
+                    @Override
+                    public Float get(VectorDrawableState state) {
+                        return state.getAlpha();
+                    }
+                };
+
+        Property getProperty(String propertyName) {
+            if (ALPHA.getName().equals(propertyName)) {
+                return ALPHA;
+            }
+            return null;
+        }
+
         // This tracks the total native allocation for all the nodes.
         private int mAllocationOfAllNodes = 0;
 
         private static final int NATIVE_ALLOCATION_SIZE = 316;
 
-        // Deep copy for mutate() or implicitly mutate.
+        // If copy is not null, deep copy the given VectorDrawableState. Otherwise, create a
+        // native vector drawable tree with an empty root group.
         public VectorDrawableState(VectorDrawableState copy) {
             if (copy != null) {
                 mThemeAttrs = copy.mThemeAttrs;
@@ -816,8 +914,11 @@ public class VectorDrawable extends Drawable {
                 if (copy.mRootName != null) {
                     mVGTargetsMap.put(copy.mRootName, this);
                 }
-                onTreeConstructionFinished();
+            } else {
+                mRootGroup = new VGroup();
+                createNativeTree(mRootGroup);
             }
+            onTreeConstructionFinished();
         }
 
         private void createNativeTree(VGroup rootGroup) {
@@ -835,7 +936,8 @@ public class VectorDrawable extends Drawable {
             VMRuntime.getRuntime().registerNativeAllocation(NATIVE_ALLOCATION_SIZE);
         }
 
-
+        // This should be called every time after a new RootGroup and all its subtrees are created
+        // (i.e. in constructors of VectorDrawableState and in inflate).
         void onTreeConstructionFinished() {
             mRootGroup.setTree(mNativeTree);
             mAllocationOfAllNodes = mRootGroup.getNativeSize();
@@ -881,11 +983,6 @@ public class VectorDrawable extends Drawable {
                     || (mRootGroup != null && mRootGroup.canApplyTheme())
                     || (mTint != null && mTint.canApplyTheme())
                     || super.canApplyTheme();
-        }
-
-        public VectorDrawableState() {
-            mRootGroup = new VGroup();
-            createNativeTree(mRootGroup);
         }
 
         @Override
@@ -967,7 +1064,7 @@ public class VectorDrawable extends Drawable {
     }
 
     static class VGroup extends VObject {
-        private static final int ROTATE_INDEX = 0;
+        private static final int ROTATION_INDEX = 0;
         private static final int PIVOT_X_INDEX = 1;
         private static final int PIVOT_Y_INDEX = 2;
         private static final int SCALE_X_INDEX = 3;
@@ -978,7 +1075,7 @@ public class VectorDrawable extends Drawable {
 
         private static final int NATIVE_ALLOCATION_SIZE = 100;
 
-        private static final HashMap<String, Integer> sPropertyMap =
+        private static final HashMap<String, Integer> sPropertyIndexMap =
                 new HashMap<String, Integer>() {
                     {
                         put("translateX", TRANSLATE_X_INDEX);
@@ -987,19 +1084,123 @@ public class VectorDrawable extends Drawable {
                         put("scaleY", SCALE_Y_INDEX);
                         put("pivotX", PIVOT_X_INDEX);
                         put("pivotY", PIVOT_Y_INDEX);
-                        put("rotation", ROTATE_INDEX);
+                        put("rotation", ROTATION_INDEX);
                     }
                 };
 
         static int getPropertyIndex(String propertyName) {
-            if (sPropertyMap.containsKey(propertyName)) {
-                return sPropertyMap.get(propertyName);
+            if (sPropertyIndexMap.containsKey(propertyName)) {
+                return sPropertyIndexMap.get(propertyName);
             } else {
                 // property not found
                 return -1;
             }
         }
 
+        // Below are the Properties that wrap the setters to avoid reflection overhead in animations
+        private static final Property<VGroup, Float> TRANSLATE_X =
+                new FloatProperty<VGroup> ("translateX") {
+                    @Override
+                    public void setValue(VGroup object, float value) {
+                        object.setTranslateX(value);
+                    }
+
+                    @Override
+                    public Float get(VGroup object) {
+                        return object.getTranslateX();
+                    }
+                };
+
+        private static final Property<VGroup, Float> TRANSLATE_Y =
+                new FloatProperty<VGroup> ("translateY") {
+                    @Override
+                    public void setValue(VGroup object, float value) {
+                        object.setTranslateY(value);
+                    }
+
+                    @Override
+                    public Float get(VGroup object) {
+                        return object.getTranslateY();
+                    }
+        };
+
+        private static final Property<VGroup, Float> SCALE_X =
+                new FloatProperty<VGroup> ("scaleX") {
+                    @Override
+                    public void setValue(VGroup object, float value) {
+                        object.setScaleX(value);
+                    }
+
+                    @Override
+                    public Float get(VGroup object) {
+                        return object.getScaleX();
+                    }
+                };
+
+        private static final Property<VGroup, Float> SCALE_Y =
+                new FloatProperty<VGroup> ("scaleY") {
+                    @Override
+                    public void setValue(VGroup object, float value) {
+                        object.setScaleY(value);
+                    }
+
+                    @Override
+                    public Float get(VGroup object) {
+                        return object.getScaleY();
+                    }
+                };
+
+        private static final Property<VGroup, Float> PIVOT_X =
+                new FloatProperty<VGroup> ("pivotX") {
+                    @Override
+                    public void setValue(VGroup object, float value) {
+                        object.setPivotX(value);
+                    }
+
+                    @Override
+                    public Float get(VGroup object) {
+                        return object.getPivotX();
+                    }
+                };
+
+        private static final Property<VGroup, Float> PIVOT_Y =
+                new FloatProperty<VGroup> ("pivotY") {
+                    @Override
+                    public void setValue(VGroup object, float value) {
+                        object.setPivotY(value);
+                    }
+
+                    @Override
+                    public Float get(VGroup object) {
+                        return object.getPivotY();
+                    }
+                };
+
+        private static final Property<VGroup, Float> ROTATION =
+                new FloatProperty<VGroup> ("rotation") {
+                    @Override
+                    public void setValue(VGroup object, float value) {
+                        object.setRotation(value);
+                    }
+
+                    @Override
+                    public Float get(VGroup object) {
+                        return object.getRotation();
+                    }
+                };
+
+        private static final HashMap<String, Property> sPropertyMap =
+                new HashMap<String, Property>() {
+                    {
+                        put("translateX", TRANSLATE_X);
+                        put("translateY", TRANSLATE_Y);
+                        put("scaleX", SCALE_X);
+                        put("scaleY", SCALE_Y);
+                        put("pivotX", PIVOT_X);
+                        put("pivotY", PIVOT_Y);
+                        put("rotation", ROTATION);
+                    }
+                };
         // Temp array to store transform values obtained from native.
         private float[] mTransform;
         /////////////////////////////////////////////////////
@@ -1055,6 +1256,15 @@ public class VectorDrawable extends Drawable {
             mNativePtr = nCreateGroup();
         }
 
+        Property getProperty(String propertyName) {
+            if (sPropertyMap.containsKey(propertyName)) {
+                return sPropertyMap.get(propertyName);
+            } else {
+                // property not found
+                return null;
+            }
+        }
+
         public String getGroupName() {
             return mGroupName;
         }
@@ -1102,7 +1312,7 @@ public class VectorDrawable extends Drawable {
                 throw new RuntimeException("Error: inconsistent property count");
             }
             float rotate = a.getFloat(R.styleable.VectorDrawableGroup_rotation,
-                    mTransform[ROTATE_INDEX]);
+                    mTransform[ROTATION_INDEX]);
             float pivotX = a.getFloat(R.styleable.VectorDrawableGroup_pivotX,
                     mTransform[PIVOT_X_INDEX]);
             float pivotY = a.getFloat(R.styleable.VectorDrawableGroup_pivotY,
@@ -1288,6 +1498,27 @@ public class VectorDrawable extends Drawable {
         String mPathName;
         @Config int mChangingConfigurations;
 
+        private static final Property<VPath, PathParser.PathData> PATH_DATA =
+                new Property<VPath, PathParser.PathData>(PathParser.PathData.class, "pathData") {
+                    @Override
+                    public void set(VPath object, PathParser.PathData data) {
+                        object.setPathData(data);
+                    }
+
+                    @Override
+                    public PathParser.PathData get(VPath object) {
+                        return object.getPathData();
+                    }
+                };
+
+        Property getProperty(String propertyName) {
+            if (PATH_DATA.getName().equals(propertyName)) {
+                return PATH_DATA;
+            }
+            // property not found
+            return null;
+        }
+
         public VPath() {
             // Empty constructor.
         }
@@ -1410,7 +1641,7 @@ public class VectorDrawable extends Drawable {
 
         private static final int NATIVE_ALLOCATION_SIZE = 264;
         // Property map for animatable attributes.
-        private final static HashMap<String, Integer> sPropertyMap
+        private final static HashMap<String, Integer> sPropertyIndexMap
                 = new HashMap<String, Integer> () {
             {
                 put("strokeWidth", STROKE_WIDTH_INDEX);
@@ -1421,6 +1652,125 @@ public class VectorDrawable extends Drawable {
                 put("trimPathStart", TRIM_PATH_START_INDEX);
                 put("trimPathEnd", TRIM_PATH_END_INDEX);
                 put("trimPathOffset", TRIM_PATH_OFFSET_INDEX);
+            }
+        };
+
+        // Below are the Properties that wrap the setters to avoid reflection overhead in animations
+        private static final Property<VFullPath, Float> STROKE_WIDTH =
+                new FloatProperty<VFullPath> ("strokeWidth") {
+                    @Override
+                    public void setValue(VFullPath object, float value) {
+                        object.setStrokeWidth(value);
+                    }
+
+                    @Override
+                    public Float get(VFullPath object) {
+                        return object.getStrokeWidth();
+                    }
+                };
+
+        private static final Property<VFullPath, Integer> STROKE_COLOR =
+                new IntProperty<VFullPath> ("strokeColor") {
+                    @Override
+                    public void setValue(VFullPath object, int value) {
+                        object.setStrokeColor(value);
+                    }
+
+                    @Override
+                    public Integer get(VFullPath object) {
+                        return object.getStrokeColor();
+                    }
+                };
+
+        private static final Property<VFullPath, Float> STROKE_ALPHA =
+                new FloatProperty<VFullPath> ("strokeAlpha") {
+                    @Override
+                    public void setValue(VFullPath object, float value) {
+                        object.setStrokeAlpha(value);
+                    }
+
+                    @Override
+                    public Float get(VFullPath object) {
+                        return object.getStrokeAlpha();
+                    }
+                };
+
+        private static final Property<VFullPath, Integer> FILL_COLOR =
+                new IntProperty<VFullPath>("fillColor") {
+                    @Override
+                    public void setValue(VFullPath object, int value) {
+                        object.setFillColor(value);
+                    }
+
+                    @Override
+                    public Integer get(VFullPath object) {
+                        return object.getFillColor();
+                    }
+                };
+
+        private static final Property<VFullPath, Float> FILL_ALPHA =
+                new FloatProperty<VFullPath> ("fillAlpha") {
+                    @Override
+                    public void setValue(VFullPath object, float value) {
+                        object.setFillAlpha(value);
+                    }
+
+                    @Override
+                    public Float get(VFullPath object) {
+                        return object.getFillAlpha();
+                    }
+                };
+
+        private static final Property<VFullPath, Float> TRIM_PATH_START =
+                new FloatProperty<VFullPath> ("trimPathStart") {
+                    @Override
+                    public void setValue(VFullPath object, float value) {
+                        object.setTrimPathStart(value);
+                    }
+
+                    @Override
+                    public Float get(VFullPath object) {
+                        return object.getTrimPathStart();
+                    }
+                };
+
+        private static final Property<VFullPath, Float> TRIM_PATH_END =
+                new FloatProperty<VFullPath> ("trimPathEnd") {
+                    @Override
+                    public void setValue(VFullPath object, float value) {
+                        object.setTrimPathEnd(value);
+                    }
+
+                    @Override
+                    public Float get(VFullPath object) {
+                        return object.getTrimPathEnd();
+                    }
+                };
+
+        private static final Property<VFullPath, Float> TRIM_PATH_OFFSET =
+                new FloatProperty<VFullPath> ("trimPathOffset") {
+                    @Override
+                    public void setValue(VFullPath object, float value) {
+                        object.setTrimPathOffset(value);
+                    }
+
+                    @Override
+                    public Float get(VFullPath object) {
+                        return object.getTrimPathOffset();
+                    }
+                };
+
+        private final static HashMap<String, Property> sPropertyMap
+                = new HashMap<String, Property> () {
+            {
+                put("strokeWidth", STROKE_WIDTH);
+                put("strokeColor", STROKE_COLOR);
+                put("strokeAlpha", STROKE_ALPHA);
+                put("fillColor", FILL_COLOR);
+                put("fillAlpha", FILL_ALPHA);
+                put("trimPathStart", TRIM_PATH_START);
+                put("trimPathEnd", TRIM_PATH_END);
+                put("trimPathOffset", TRIM_PATH_OFFSET);
             }
         };
 
@@ -1446,11 +1796,24 @@ public class VectorDrawable extends Drawable {
             mFillColors = copy.mFillColors;
         }
 
+        Property getProperty(String propertyName) {
+            Property p = super.getProperty(propertyName);
+            if (p != null) {
+                return p;
+            }
+            if (sPropertyMap.containsKey(propertyName)) {
+                return sPropertyMap.get(propertyName);
+            } else {
+                // property not found
+                return null;
+            }
+        }
+
         int getPropertyIndex(String propertyName) {
-            if (!sPropertyMap.containsKey(propertyName)) {
+            if (!sPropertyIndexMap.containsKey(propertyName)) {
                 return -1;
             } else {
-                return sPropertyMap.get(propertyName);
+                return sPropertyIndexMap.get(propertyName);
             }
         }
 
@@ -1784,6 +2147,7 @@ public class VectorDrawable extends Drawable {
         abstract boolean onStateChange(int[] state);
         abstract boolean isStateful();
         abstract int getNativeSize();
+        abstract Property getProperty(String propertyName);
     }
 
     private static native long nCreateTree(long rootGroupPtr);

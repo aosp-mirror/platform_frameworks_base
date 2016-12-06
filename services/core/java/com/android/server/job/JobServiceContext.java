@@ -230,6 +230,15 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
         return job == null ? null : new JobStatus(job);
     }
 
+    /**
+     * Internal non-cloning inspection of the currently running job, if any.  The lock
+     * must be held when calling this *and* for the entire lifetime of using its returned
+     * JobStatus object!
+     */
+    JobStatus getRunningJobUnsafeLocked() {
+        return mRunningJob;
+    }
+
     /** Called externally when a job that was scheduled for execution should be cancelled. */
     void cancelExecutingJob(int reason) {
         mCallbackHandler.obtainMessage(MSG_CANCEL, reason, 0 /* unused */).sendToTarget();
@@ -306,10 +315,24 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
         this.service = IJobService.Stub.asInterface(service);
         final PowerManager pm =
                 (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, runningJob.getTag());
-        mWakeLock.setWorkSource(new WorkSource(runningJob.getSourceUid()));
-        mWakeLock.setReferenceCounted(false);
-        mWakeLock.acquire();
+        PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                runningJob.getTag());
+        wl.setWorkSource(new WorkSource(runningJob.getSourceUid()));
+        wl.setReferenceCounted(false);
+        wl.acquire();
+        synchronized (mLock) {
+            // We use a new wakelock instance per job.  In rare cases there is a race between
+            // teardown following job completion/cancellation and new job service spin-up
+            // such that if we simply assign mWakeLock to be the new instance, we orphan
+            // the currently-live lock instead of cleanly replacing it.  Watch for this and
+            // explicitly fast-forward the release if we're in that situation.
+            if (mWakeLock != null) {
+                Slog.w(TAG, "Bound new job " + runningJob + " but live wakelock " + mWakeLock
+                        + " tag=" + mWakeLock.getTag());
+                mWakeLock.release();
+            }
+            mWakeLock = wl;
+        }
         mCallbackHandler.obtainMessage(MSG_SERVICE_BOUND).sendToTarget();
     }
 

@@ -17,6 +17,7 @@
 package android.app;
 
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -852,7 +853,9 @@ final class BackStackRecord extends FragmentTransaction implements
              * Ensure that fragments that are entering are at least at the CREATED state
              * so that they may load Transitions using TransitionInflater.
              */
-            if (fragment.mState < Fragment.CREATED && mManager.mCurState >= Fragment.CREATED) {
+            if (fragment.mState < Fragment.CREATED && mManager.mCurState >= Fragment.CREATED &&
+                    mManager.mHost.getContext().getApplicationInfo().targetSdkVersion >=
+                    Build.VERSION_CODES.N) {
                 mManager.makeActive(fragment);
                 mManager.moveToState(fragment, Fragment.CREATED, 0, 0, false);
             }

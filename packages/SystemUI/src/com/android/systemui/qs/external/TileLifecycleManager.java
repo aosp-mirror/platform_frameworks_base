@@ -26,6 +26,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ServiceInfo;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -37,6 +38,7 @@ import android.service.quicksettings.TileService;
 import android.support.annotation.VisibleForTesting;
 import android.util.ArraySet;
 import android.util.Log;
+
 import libcore.util.Objects;
 
 import java.util.Set;
@@ -63,10 +65,14 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     private static final int MAX_BIND_RETRIES = 5;
     private static final int BIND_RETRY_DELAY = 1000;
 
+    // Shared prefs that hold tile lifecycle info.
+    private static final String TILES = "tiles_prefs";
+
     private final Context mContext;
     private final Handler mHandler;
     private final Intent mIntent;
     private final UserHandle mUser;
+    private final IBinder mToken = new Binder();
 
     private Set<Integer> mQueuedMessages = new ArraySet<>();
     private QSTileServiceWrapper mWrapper;
@@ -88,7 +94,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         mHandler = handler;
         mIntent = intent;
         mIntent.putExtra(TileService.EXTRA_SERVICE, service.asBinder());
-        mIntent.putExtra(TileService.EXTRA_COMPONENT, intent.getComponent());
+        mIntent.putExtra(TileService.EXTRA_TOKEN, mToken);
         mUser = user;
         if (DEBUG) Log.d(TAG, "Creating " + mIntent + " " + mUser);
     }
@@ -123,6 +129,12 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     }
 
     public void setBindService(boolean bind) {
+        if (mBound && mUnbindImmediate) {
+            // If we are already bound and expecting to unbind, this means we should stay bound
+            // because something else wants to hold the connection open.
+            mUnbindImmediate = false;
+            return;
+        }
         mBound = bind;
         if (bind) {
             if (mBindTryCount == MAX_BIND_RETRIES) {
@@ -396,7 +408,20 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         handleDeath();
     }
 
+    public IBinder getToken() {
+        return mToken;
+    }
+
     public interface TileChangeListener {
         void onTileChanged(ComponentName tile);
+    }
+
+    public static boolean isTileAdded(Context context, ComponentName component) {
+        return context.getSharedPreferences(TILES, 0).getBoolean(component.flattenToString(), false);
+    }
+
+    public static void setTileAdded(Context context, ComponentName component, boolean added) {
+        context.getSharedPreferences(TILES, 0).edit().putBoolean(component.flattenToString(),
+                added).commit();
     }
 }

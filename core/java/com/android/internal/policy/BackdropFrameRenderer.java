@@ -110,12 +110,15 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
             int statusBarColor, int navigationBarColor) {
         mDecorView = decorView;
         mResizingBackgroundDrawable = resizingBackgroundDrawable != null
+                        && resizingBackgroundDrawable.getConstantState() != null
                 ? resizingBackgroundDrawable.getConstantState().newDrawable()
                 : null;
         mCaptionBackgroundDrawable = captionBackgroundDrawableDrawable != null
+                        && captionBackgroundDrawableDrawable.getConstantState() != null
                 ? captionBackgroundDrawableDrawable.getConstantState().newDrawable()
                 : null;
         mUserCaptionBackgroundDrawable = userCaptionBackgroundDrawable != null
+                        && userCaptionBackgroundDrawable.getConstantState() != null
                 ? userCaptionBackgroundDrawable.getConstantState().newDrawable()
                 : null;
         if (mCaptionBackgroundDrawable == null) {
@@ -371,6 +374,8 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
                 systemInsets.bottom);
         final int rightInset = DecorView.getColorViewRightInset(stableInsets.right,
                 systemInsets.right);
+        final int leftInset = DecorView.getColorViewLeftInset(stableInsets.left,
+                systemInsets.left);
         if (mStatusBarColor != null) {
             mStatusBarColor.setBounds(0, 0, left + width, topInset);
             mStatusBarColor.draw(canvas);
@@ -380,9 +385,11 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         // don't want the navigation bar background be moving around when resizing in docked mode.
         // However, we need it for the transitions into/out of docked mode.
         if (mNavigationBarColor != null && fullscreen) {
-            final int size = DecorView.getNavBarSize(bottomInset, rightInset);
+            final int size = DecorView.getNavBarSize(bottomInset, rightInset, leftInset);
             if (DecorView.isNavBarToRightEdge(bottomInset, rightInset)) {
                 mNavigationBarColor.setBounds(width - size, 0, width, height);
+            } else if (DecorView.isNavBarToLeftEdge(bottomInset, leftInset)) {
+                mNavigationBarColor.setBounds(0, 0, size, height);
             } else {
                 mNavigationBarColor.setBounds(0, height - size, width, height);
             }

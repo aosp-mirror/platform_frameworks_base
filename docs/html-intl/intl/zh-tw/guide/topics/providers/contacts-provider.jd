@@ -614,7 +614,7 @@ Email.CONTENT_ITEM_TYPE} (內含使用者名稱，而不是電子郵件地址) �
 <p>
     如要擷取內含使用者的設定檔的聯絡人列，請呼叫 {@link android.content.ContentResolver#query(Uri,String[], String, String[], String)
 ContentResolver.query()}。
-將內容 URI 設為 
+將內容 URI 設為
 {@link android.provider.ContactsContract.Profile#CONTENT_URI}，並且不要提供任何選取條件。
 您也可以使用此內容 URI 做為擷取原始聯絡人或設定檔資料的基礎 URI。
 例如，以下程式碼片段會擷取設定檔資料：
@@ -932,7 +932,7 @@ public Loader&lt;Cursor&gt; onCreateLoader(int id, Bundle args) {
     您應該儘可能透過建立
  {@link android.content.ContentProviderOperation} 物件的{@link java.util.ArrayList}，然後呼叫
  {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()}，以「批次模式」在聯絡人供應程式中進行資料的插入、更新以及刪除。
-因為聯絡人供應程式會在單一交易中執行 
+因為聯絡人供應程式會在單一交易中執行
 {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()} 的所有操作，所以您所做的修改不會讓聯絡人存放庫處於不一致的狀態。
 
 
@@ -1004,7 +1004,7 @@ public Loader&lt;Cursor&gt; onCreateLoader(int id, Bundle args) {
             <code>previousResult</code>
         </dt>
         <dd>
-            
+
 {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()} 中的
 {@link android.content.ContentProviderResult} 物件以 0 開始的陣列索引值。套用批次操作時，每次操作結果都會儲存在結果的中繼陣列。
 
@@ -1758,7 +1758,7 @@ onPerformSync()} 方法完成。
         <dd>
             {@link android.accounts.AccountManager} 會啟動此服以開始驗證程序。
 服務的 {@link android.app.Service#onCreate()} 方法會具現化為驗證器物件。
-系統需驗證應用程式同步配接器的使用者帳戶時，會呼叫服務的 
+系統需驗證應用程式同步配接器的使用者帳戶時，會呼叫服務的
 {@link android.app.Service#onBind(Intent) onBind()} 方法以取得驗證器的
  {@link android.os.IBinder}。
 這樣可以讓系統以跨處理程序的方式呼叫驗證器的方法。
@@ -2115,7 +2115,7 @@ openAssetFileDescriptor()} 可取得相片檔案的控制代碼。
         </ul>
         <code><em>activityclass</em></code> 值是 Activity 的完整類別名稱，以此 Activity 接收意圖。
 <code><em>invite_action_label</em></code> 值是顯示在裝置聯絡人應用程式內 [新增連線]<strong></strong> 選單中的文字字串。
- 
+
 
     </li>
 </ol>

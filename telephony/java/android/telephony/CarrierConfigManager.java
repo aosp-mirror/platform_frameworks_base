@@ -24,6 +24,7 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 
+import com.android.ims.ImsReasonInfo;
 import com.android.internal.telephony.ICarrierConfigLoader;
 
 /**
@@ -270,13 +271,35 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_VT_AVAILABLE_BOOL = "carrier_vt_available_bool";
 
     /**
+     * Flag specifying whether the carrier wants to notify the user when a VT call has been handed
+     * over from WIFI to LTE.
+     * <p>
+     * The handover notification is sent as a
+     * {@link TelephonyManager#EVENT_HANDOVER_VIDEO_FROM_WIFI_TO_LTE}
+     * {@link android.telecom.Connection} event, which an {@link android.telecom.InCallService}
+     * should use to trigger the display of a user-facing message.
+     * <p>
+     * The Connection event is sent to the InCallService only once, the first time it occurs.
+     * @hide
+     */
+    public static final String KEY_NOTIFY_HANDOVER_VIDEO_FROM_WIFI_TO_LTE_BOOL =
+            "notify_handover_video_from_wifi_to_lte_bool";
+
+    /**
+     * Flag specifying whether the carrier supports downgrading a video call (tx, rx or tx/rx)
+     * directly to an audio call.
+     * @hide
+     */
+    public static final String KEY_SUPPORT_DOWNGRADE_VT_TO_AUDIO_BOOL =
+            "support_downgrade_vt_to_audio_bool";
+
+    /**
      * Where there is no preloaded voicemail number on a SIM card, specifies the carrier's default
      * voicemail number.
      * When empty string, no default voicemail number is specified.
      * @hide
      */
     public static final String KEY_DEFAULT_VM_NUMBER_STRING = "default_vm_number_string";
-
 
     /**
      * Flag specifying whether WFC over IMS should be available for carrier: independent of
@@ -307,13 +330,23 @@ public class CarrierConfigManager {
             "carrier_wfc_supports_wifi_only_bool";
 
     /**
-     * Default WFC_IMS_mode 0: WIFI_ONLY
-     *                      1: CELLULAR_PREFERRED
-     *                      2: WIFI_PREFERRED
+     * Default WFC_IMS_MODE for home network   0: WIFI_ONLY
+     *                                         1: CELLULAR_PREFERRED
+     *                                         2: WIFI_PREFERRED
      * @hide
      */
     public static final String KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT =
             "carrier_default_wfc_ims_mode_int";
+
+    /**
+     * Default WFC_IMS_MODE for roaming
+     * See {@link KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT} for valid values.
+     *
+     * @hide
+     */
+    public static final String KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_MODE_INT =
+            "carrier_default_wfc_ims_roaming_mode_int";
+
     /**
      * Default WFC_IMS_enabled: true VoWiFi by default is on
      *                          false VoWiFi by default is off
@@ -329,6 +362,16 @@ public class CarrierConfigManager {
      */
     public static final String KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_ENABLED_BOOL =
             "carrier_default_wfc_ims_roaming_enabled_bool";
+
+    /**
+     * Flag indicating whether failed calls due to no service should prompt the user to enable
+     * WIFI calling.  When {@code true}, if the user attempts to establish a call when there is no
+     * service available, they are connected to WIFI, and WIFI calling is disabled, a different
+     * call failure message will be used to encourage the user to enable WIFI calling.
+     * @hide
+     */
+    public static final String KEY_CARRIER_PROMOTE_WFC_ON_CALL_FAIL_BOOL =
+            "carrier_promote_wfc_on_call_fail_bool";
 
     /** Flag specifying whether provisioning is required for VOLTE. */
     public static final String KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL
@@ -437,18 +480,18 @@ public class CarrierConfigManager {
             "always_show_emergency_alert_onoff_bool";
 
     /**
-     * The data call APN retry configuration for default type APN.
+     * The flag to disable cell broadcast severe alert when extreme alert is disabled.
      * @hide
      */
-    public static final String KEY_CARRIER_DATA_CALL_RETRY_CONFIG_DEFAULT_STRING =
-            "carrier_data_call_retry_config_default_string";
+    public static final String KEY_DISABLE_SEVERE_WHEN_EXTREME_DISABLED_BOOL =
+            "disable_severe_when_extreme_disabled_bool";
 
     /**
-     * The data call APN retry configuration for other type APNs.
+     * The data call retry configuration for different types of APN.
      * @hide
      */
-    public static final String KEY_CARRIER_DATA_CALL_RETRY_CONFIG_OTHERS_STRING =
-            "carrier_data_call_retry_config_others_string";
+    public static final String KEY_CARRIER_DATA_CALL_RETRY_CONFIG_STRINGS =
+            "carrier_data_call_retry_config_strings";
 
     /**
      * Delay between trying APN from the pool
@@ -575,6 +618,17 @@ public class CarrierConfigManager {
     public static final String KEY_SUPPORT_CONFERENCE_CALL_BOOL = "support_conference_call_bool";
 
     /**
+     * Determines whether video conference calls are supported by a carrier.  When {@code true},
+     * video calls can be merged into conference calls, {@code false} otherwiwse.
+     * <p>
+     * Note: even if video conference calls are not supported, audio calls may be merged into a
+     * conference if {@link #KEY_SUPPORT_CONFERENCE_CALL_BOOL} is {@code true}.
+     * @hide
+     */
+    public static final String KEY_SUPPORT_VIDEO_CONFERENCE_CALL_BOOL =
+            "support_video_conference_call_bool";
+
+    /**
      * Determine whether user can toggle Enhanced 4G LTE Mode in Settings.
      */
     public static final String KEY_EDITABLE_ENHANCED_4G_LTE_BOOL = "editable_enhanced_4g_lte_bool";
@@ -627,6 +681,14 @@ public class CarrierConfigManager {
     public static final String KEY_WFC_DATA_SPN_FORMAT_IDX_INT = "wfc_data_spn_format_idx_int";
 
     /**
+     * The Component Name of the activity that can setup the emergency addrees for WiFi Calling
+     * as per carrier requirement.
+     * @hide
+     */
+     public static final String KEY_WFC_EMERGENCY_ADDRESS_CARRIER_APP_STRING =
+            "wfc_emergency_address_carrier_app_string";
+
+    /**
      * Boolean to decide whether to use #KEY_CARRIER_NAME_STRING from CarrierConfig app.
      * @hide
      */
@@ -638,7 +700,6 @@ public class CarrierConfigManager {
      * @hide
      */
     public static final String KEY_CARRIER_NAME_STRING = "carrier_name_string";
-
 
     /**
      * If this is true, the SIM card (through Customer Service Profile EF file) will be able to
@@ -654,11 +715,32 @@ public class CarrierConfigManager {
     public static final String KEY_ALLOW_ADDING_APNS_BOOL = "allow_adding_apns_bool";
 
     /**
+     * APN types that user is not allowed to modify
+     * @hide
+     */
+    public static final String KEY_READ_ONLY_APN_TYPES_STRING_ARRAY =
+            "read_only_apn_types_string_array";
+
+    /**
+     * APN fields that user is not allowed to modify
+     * @hide
+     */
+    public static final String KEY_READ_ONLY_APN_FIELDS_STRING_ARRAY =
+            "read_only_apn_fields_string_array";
+
+    /**
      * Boolean indicating if intent for emergency call state changes should be broadcast
      * @hide
      */
     public static final String KEY_BROADCAST_EMERGENCY_CALL_STATE_CHANGES_BOOL =
             "broadcast_emergency_call_state_changes_bool";
+
+    /**
+     * Cell broadcast additional channels enbled by the carrier
+     * @hide
+     */
+    public static final String KEY_CARRIER_ADDITIONAL_CBS_CHANNELS_STRINGS =
+            "carrier_additional_cbs_channels_strings";
 
     // These variables are used by the MMS service and exposed through another API, {@link
     // SmsManager}. The variable names and string values are copied from there.
@@ -693,6 +775,8 @@ public class CarrierConfigManager {
     public static final String KEY_MMS_UA_PROF_TAG_NAME_STRING = "uaProfTagName";
     public static final String KEY_MMS_UA_PROF_URL_STRING = "uaProfUrl";
     public static final String KEY_MMS_USER_AGENT_STRING = "userAgent";
+    /** @hide */
+    public static final String KEY_MMS_CLOSE_CONNECTION_BOOL = "mmsCloseConnection";
 
     /**
      * If carriers require differentiate un-provisioned status: cold sim or out of credit sim
@@ -703,10 +787,44 @@ public class CarrierConfigManager {
      * example:
      * <item>com.google.android.carrierPackageName</item>
      * <item>com.google.android.carrierPackageName.CarrierActivityName</item>
+     * The ComponentName of the carrier activity that can setup the device and activate with the
+     * network as part of the Setup Wizard flow.
      * @hide
      */
-     public static final String KEY_SIM_PROVISIONING_STATUS_DETECTION_CARRIER_APP_STRING_ARRAY =
-            "sim_state_detection_carrier_app_string_array";
+     public static final String KEY_CARRIER_SETUP_APP_STRING = "carrier_setup_app_string";
+
+    /**
+     * A list of component name of carrier signalling receivers which are interested in intent
+     * android.intent.action.CARRIER_SIGNAL_REDIRECTED.
+     * Example:
+     * <item>com.google.android.carrierPackageName/.CarrierSignalReceiverNameA</item>
+     * <item>com.google.android.carrierPackageName/.CarrierSignalReceiverNameB</item>
+     * @hide
+     */
+    public static final String KEY_SIGNAL_REDIRECTION_RECEIVER_STRING_ARRAY =
+            "signal_redirection_receiver_string_array";
+
+    /**
+     * A list of component name of carrier signalling receivers which are interested in intent
+     * android.intent.action.CARRIER_SIGNAL_REQUEST_NETWORK_FAILED.
+     * Example:
+     * <item>com.google.android.carrierPackageName/.CarrierSignalReceiverNameA</item>
+     * <item>com.google.android.carrierPackageName/.CarrierSignalReceiverNameB</item>
+     * @hide
+     */
+    public static final String KEY_SIGNAL_DCFAILURE_RECEIVER_STRING_ARRAY =
+            "signal_dcfailure_receiver_string_array";
+
+    /**
+     * A list of component name of carrier signalling receivers which are interested in intent
+     * android.intent.action.CARRIER_SIGNAL_PCO_VALUE.
+     * Example:
+     * <item>com.google.android.carrierPackageName/.CarrierSignalReceiverNameA</item>
+     * <item>com.google.android.carrierPackageName/.CarrierSignalReceiverNameB</item>
+     * @hide
+     */
+    public static final String KEY_SIGNAL_PCO_RECEIVER_STRING_ARRAY =
+            "signal_pco_receiver_string_array";
 
     /**
      * Determines whether the carrier supports making non-emergency phone calls while the phone is
@@ -772,11 +890,154 @@ public class CarrierConfigManager {
     /** @hide */
     public static final int CDMA_ROAMING_MODE_ANY = 2;
 
+    /**
+     * Report IMEI as device id even if it's a CDMA/LTE phone.
+     *
+     * @hide
+     */
+    public static final String KEY_FORCE_IMEI_BOOL = "force_imei_bool";
+
+    /**
+     * The families of Radio Access Technologies that will get clustered and ratcheted,
+     * ie, we will report transitions up within the family, but not down until we change
+     * cells.  This prevents flapping between base technologies and higher techs that are
+     * granted on demand within the cell.
+     * @hide
+     */
+    public static final String KEY_RATCHET_RAT_FAMILIES =
+            "ratchet_rat_families";
+
+    /**
+     * Flag indicating whether some telephony logic will treat a call which was formerly a video
+     * call as if it is still a video call.  When {@code true}:
+     * <p>
+     * Logic which will automatically drop a video call which takes place over WIFI when a
+     * voice call is answered (see {@link #KEY_DROP_VIDEO_CALL_WHEN_ANSWERING_AUDIO_CALL_BOOL}.
+     * <p>
+     * Logic which determines whether the user can use TTY calling.
+     */
+    public static final String KEY_TREAT_DOWNGRADED_VIDEO_CALLS_AS_VIDEO_CALLS_BOOL =
+            "treat_downgraded_video_calls_as_video_calls_bool";
+
+    /**
+     * When {@code true}, if the user is in an ongoing video call over WIFI and answers an incoming
+     * audio call, the video call will be disconnected before the audio call is answered.  This is
+     * in contrast to the usual expected behavior where a foreground video call would be put into
+     * the background and held when an incoming audio call is answered.
+     */
+    public static final String KEY_DROP_VIDEO_CALL_WHEN_ANSWERING_AUDIO_CALL_BOOL =
+            "drop_video_call_when_answering_audio_call_bool";
+
+    /**
+     * Flag indicating whether the carrier supports merging wifi calls when VoWIFI is disabled.
+     * This can happen in the case of a carrier which allows offloading video calls to WIFI
+     * separately of whether voice over wifi is enabled.  In such a scenario when two video calls
+     * are downgraded to voice, they remain over wifi.  However, if VoWIFI is disabled, these calls
+     * cannot be merged.
+     */
+    public static final String KEY_ALLOW_MERGE_WIFI_CALLS_WHEN_VOWIFI_OFF_BOOL =
+            "allow_merge_wifi_calls_when_vowifi_off_bool";
+
+    /**
+     * Flag indicating whether the carrier supports the Hold command while in an IMS call.
+     * <p>
+     * The device configuration value {@code config_device_respects_hold_carrier_config} ultimately
+     * controls whether this carrier configuration option is used.  Where
+     * {@code config_device_respects_hold_carrier_config} is false, the value of the
+     * {@link #KEY_ALLOW_HOLD_IN_IMS_CALL_BOOL} carrier configuration option is ignored.
+     * @hide
+     */
+    public static final String KEY_ALLOW_HOLD_IN_IMS_CALL_BOOL = "allow_hold_in_ims_call";
+
+    /**
+     * When true, indicates that adding a call is disabled when there is an ongoing video call
+     * or when there is an ongoing call on wifi which was downgraded from video and VoWifi is
+     * turned off.
+     */
+    public static final String KEY_ALLOW_ADD_CALL_DURING_VIDEO_CALL_BOOL =
+            "allow_add_call_during_video_call";
+
+    /**
+     * When true, indicates that the HD audio icon in the in-call screen should not be shown for
+     * VoWifi calls.
+     * @hide
+     */
+    public static final String KEY_WIFI_CALLS_CAN_BE_HD_AUDIO = "wifi_calls_can_be_hd_audio";
+
+    /**
+     * When true, indicates that the HD audio icon in the in-call screen should not be shown for
+     * video calls.
+     * @hide
+     */
+    public static final String KEY_VIDEO_CALLS_CAN_BE_HD_AUDIO = "video_calls_can_be_hd_audio";
+
+    /**
+     * Defines operator-specific {@link com.android.ims.ImsReasonInfo} mappings.
+     *
+     * Format: "ORIGINAL_CODE|MESSAGE|NEW_CODE"
+     * Where {@code ORIGINAL_CODE} corresponds to a {@link ImsReasonInfo#getCode()} code,
+     * {@code MESSAGE} corresponds to an expected {@link ImsReasonInfo#getExtraMessage()} string,
+     * and {@code NEW_CODE} is the new {@code ImsReasonInfo#CODE_*} which this combination of
+     * original code and message shall be remapped to.
+     *
+     * Example: "501|call completion elsewhere|1014"
+     * When the {@link ImsReasonInfo#getCode()} is {@link ImsReasonInfo#CODE_USER_TERMINATED} and
+     * the {@link ImsReasonInfo#getExtraMessage()} is {@code "call completion elsewhere"},
+     * {@link ImsReasonInfo#CODE_ANSWERED_ELSEWHERE} shall be used as the {@link ImsReasonInfo}
+     * code instead.
+     * @hide
+     */
+    public static final String KEY_IMS_REASONINFO_MAPPING_STRING_ARRAY =
+            "ims_reasoninfo_mapping_string_array";
+
+    /**
+     * When {@code false}, use default title for Enhanced 4G LTE Mode settings.
+     * When {@code true}, use the variant.
+     * @hide
+     */
+    public static final String KEY_ENHANCED_4G_LTE_TITLE_VARIANT_BOOL =
+            "enhanced_4g_lte_title_variant_bool";
+
+    /**
+     * Indicates whether the carrier wants to notify the user when handover of an LTE video call to
+     * WIFI fails.
+     * <p>
+     * When {@code true}, if a video call starts on LTE and the modem reports a failure to handover
+     * the call to WIFI or if no handover success is reported within 60 seconds of call initiation,
+     * the {@link android.telephony.TelephonyManager#EVENT_HANDOVER_TO_WIFI_FAILED} event is raised
+     * on the connection.
+     * @hide
+     */
+    public static final String KEY_NOTIFY_VT_HANDOVER_TO_WIFI_FAILURE_BOOL =
+            "notify_vt_handover_to_wifi_failure_bool";
+
+    /**
+     * A upper case list of CNAP names that are unhelpful to the user for distinguising calls and
+     * should be filtered out of the CNAP information. This includes CNAP names such as "WIRELESS
+     * CALLER" or "UNKNOWN NAME". By default, if there are no filtered names for this carrier, null
+     * is returned.
+     * @hide
+     */
+    public static final String FILTERED_CNAP_NAMES_STRING_ARRAY = "filtered_cnap_names_string_array";
+
+    /**
+     * Determine whether user can change Wi-Fi Calling preference in roaming.
+     * {@code false} - roaming preference {@link KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_MODE_INT} is
+     *                 the same as home preference {@link KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT}
+     *                 and cannot be changed.
+     * {@code true}  - roaming preference can be changed by user independently.
+     *
+     * @hide
+     */
+    public static final String KEY_EDITABLE_WFC_ROAMING_MODE_BOOL =
+            "editable_wfc_roaming_mode_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
     static {
         sDefaults = new PersistableBundle();
+        sDefaults.putBoolean(KEY_ALLOW_HOLD_IN_IMS_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_ADDITIONAL_CALL_SETTING_BOOL, true);
         sDefaults.putBoolean(KEY_ALLOW_EMERGENCY_NUMBERS_IN_CALL_LOG_BOOL, false);
         sDefaults.putBoolean(KEY_ALLOW_LOCAL_DTMF_TONES_BOOL, true);
@@ -785,12 +1046,16 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_SETTINGS_ENABLE_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_AVAILABLE_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VT_AVAILABLE_BOOL, false);
+        sDefaults.putBoolean(KEY_NOTIFY_HANDOVER_VIDEO_FROM_WIFI_TO_LTE_BOOL, false);
+        sDefaults.putBoolean(KEY_SUPPORT_DOWNGRADE_VT_TO_AUDIO_BOOL, true);
         sDefaults.putString(KEY_DEFAULT_VM_NUMBER_STRING, "");
         sDefaults.putBoolean(KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_WFC_SUPPORTS_WIFI_ONLY_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_DEFAULT_WFC_IMS_ENABLED_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_ENABLED_BOOL, false);
+        sDefaults.putBoolean(KEY_CARRIER_PROMOTE_WFC_ON_CALL_FAIL_BOOL, false);
         sDefaults.putInt(KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT, 2);
+        sDefaults.putInt(KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_MODE_INT, 2);
         sDefaults.putBoolean(KEY_CARRIER_FORCE_DISABLE_ETWS_CMAS_TEST_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL, true);
@@ -840,13 +1105,17 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_EXTRA_VAL_STRING, "");
         sDefaults.putBoolean(KEY_CSP_ENABLED_BOOL, false);
         sDefaults.putBoolean(KEY_ALLOW_ADDING_APNS_BOOL, true);
+        sDefaults.putStringArray(KEY_READ_ONLY_APN_TYPES_STRING_ARRAY, null);
+        sDefaults.putStringArray(KEY_READ_ONLY_APN_FIELDS_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_BROADCAST_EMERGENCY_CALL_STATE_CHANGES_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_EMERGENCY_ALERT_ONOFF_BOOL, false);
-        sDefaults.putString(KEY_CARRIER_DATA_CALL_RETRY_CONFIG_DEFAULT_STRING,
-                "default_randomization=2000,5000,10000,20000,40000,80000:5000,160000:5000,"
-                        + "320000:5000,640000:5000,1280000:5000,1800000:5000");
-        sDefaults.putString(KEY_CARRIER_DATA_CALL_RETRY_CONFIG_OTHERS_STRING,
-                "max_retries=3, 5000, 5000, 5000");
+        sDefaults.putBoolean(KEY_DISABLE_SEVERE_WHEN_EXTREME_DISABLED_BOOL, true);
+        sDefaults.putStringArray(KEY_CARRIER_DATA_CALL_RETRY_CONFIG_STRINGS, new String[]{
+                "default:default_randomization=2000,5000,10000,20000,40000,80000:5000,160000:5000,"
+                        + "320000:5000,640000:5000,1280000:5000,1800000:5000",
+                "mms:default_randomization=2000,5000,10000,20000,40000,80000:5000,160000:5000,"
+                        + "320000:5000,640000:5000,1280000:5000,1800000:5000",
+                "others:max_retries=3, 5000, 5000, 5000"});
         sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_DEFAULT_LONG, 20000);
         sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_FASTER_LONG, 3000);
         sDefaults.putString(KEY_CARRIER_ERI_FILE_NAME_STRING, "eri.xml");
@@ -876,6 +1145,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_CDMA_DTMF_TONE_DELAY_INT, 100);
         sDefaults.putInt(KEY_CDMA_3WAYCALL_FLASH_DELAY_INT , 0);
         sDefaults.putBoolean(KEY_SUPPORT_CONFERENCE_CALL_BOOL, true);
+        sDefaults.putBoolean(KEY_SUPPORT_VIDEO_CONFERENCE_CALL_BOOL, false);
         sDefaults.putBoolean(KEY_EDITABLE_ENHANCED_4G_LTE_BOOL, true);
         sDefaults.putBoolean(KEY_HIDE_IMS_APN_BOOL, false);
         sDefaults.putBoolean(KEY_HIDE_PREFERRED_NETWORK_TYPE_BOOL, false);
@@ -884,6 +1154,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_WFC_OPERATOR_ERROR_CODES_STRING_ARRAY, null);
         sDefaults.putInt(KEY_WFC_SPN_FORMAT_IDX_INT, 0);
         sDefaults.putInt(KEY_WFC_DATA_SPN_FORMAT_IDX_INT, 0);
+        sDefaults.putString(KEY_WFC_EMERGENCY_ADDRESS_CARRIER_APP_STRING, "");
         sDefaults.putBoolean(KEY_CONFIG_WIFI_DISABLE_IN_ECBM, false);
         sDefaults.putBoolean(KEY_CARRIER_NAME_OVERRIDE_BOOL, false);
         sDefaults.putString(KEY_CARRIER_NAME_STRING, "");
@@ -903,6 +1174,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_MMS_SMS_DELIVERY_REPORT_ENABLED_BOOL, true);
         sDefaults.putBoolean(KEY_MMS_SUPPORT_HTTP_CHARSET_HEADER_BOOL, false);
         sDefaults.putBoolean(KEY_MMS_SUPPORT_MMS_CONTENT_DISPOSITION_BOOL, true);
+        sDefaults.putBoolean(KEY_MMS_CLOSE_CONNECTION_BOOL, false);
         sDefaults.putInt(KEY_MMS_ALIAS_MAX_CHARS_INT, 48);
         sDefaults.putInt(KEY_MMS_ALIAS_MIN_CHARS_INT, 2);
         sDefaults.putInt(KEY_MMS_HTTP_SOCKET_TIMEOUT_INT, 60 * 1000);
@@ -922,11 +1194,32 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_MMS_USER_AGENT_STRING, "");
         sDefaults.putBoolean(KEY_ALLOW_NON_EMERGENCY_CALLS_IN_ECM_BOOL, true);
         sDefaults.putBoolean(KEY_USE_RCS_PRESENCE_BOOL, false);
+        sDefaults.putBoolean(KEY_FORCE_IMEI_BOOL, false);
         sDefaults.putInt(KEY_CDMA_ROAMING_MODE_INT, CDMA_ROAMING_MODE_RADIO_DEFAULT);
 
-        // Used for Sim card State detection app
-        sDefaults.putStringArray(KEY_SIM_PROVISIONING_STATUS_DETECTION_CARRIER_APP_STRING_ARRAY,
-                null);
+        // Carrier Signalling Receivers
+        sDefaults.putStringArray(KEY_SIGNAL_REDIRECTION_RECEIVER_STRING_ARRAY, null);
+        sDefaults.putStringArray(KEY_SIGNAL_DCFAILURE_RECEIVER_STRING_ARRAY, null);
+        sDefaults.putStringArray(KEY_SIGNAL_PCO_RECEIVER_STRING_ARRAY, null);
+        sDefaults.putString(KEY_CARRIER_SETUP_APP_STRING, "");
+
+        // Rat families: {GPRS, EDGE}, {EVDO, EVDO_A, EVDO_B}, {UMTS, HSPA, HSDPA, HSUPA, HSPAP},
+        // {LTE, LTE_CA}
+        // Order is important - lowest precidence first
+        sDefaults.putStringArray(KEY_RATCHET_RAT_FAMILIES,
+                new String[]{"1,2","7,8,12","3,11,9,10,15","14,19"});
+        sDefaults.putBoolean(KEY_TREAT_DOWNGRADED_VIDEO_CALLS_AS_VIDEO_CALLS_BOOL, false);
+        sDefaults.putBoolean(KEY_DROP_VIDEO_CALL_WHEN_ANSWERING_AUDIO_CALL_BOOL, false);
+        sDefaults.putBoolean(KEY_ALLOW_MERGE_WIFI_CALLS_WHEN_VOWIFI_OFF_BOOL, true);
+        sDefaults.putBoolean(KEY_ALLOW_ADD_CALL_DURING_VIDEO_CALL_BOOL, true);
+        sDefaults.putBoolean(KEY_WIFI_CALLS_CAN_BE_HD_AUDIO, true);
+        sDefaults.putBoolean(KEY_VIDEO_CALLS_CAN_BE_HD_AUDIO, true);
+
+        sDefaults.putStringArray(KEY_IMS_REASONINFO_MAPPING_STRING_ARRAY, null);
+        sDefaults.putBoolean(KEY_ENHANCED_4G_LTE_TITLE_VARIANT_BOOL, false);
+        sDefaults.putBoolean(KEY_NOTIFY_VT_HANDOVER_TO_WIFI_FAILURE_BOOL, false);
+        sDefaults.putStringArray(FILTERED_CNAP_NAMES_STRING_ARRAY, null);
+        sDefaults.putBoolean(KEY_EDITABLE_WFC_ROAMING_MODE_BOOL, false);
     }
 
     /**

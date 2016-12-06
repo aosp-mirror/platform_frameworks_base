@@ -596,6 +596,16 @@ public class UserManager {
     public static final String DISALLOW_CAMERA = "no_camera";
 
     /**
+     * Specifies if a user is not allowed to unmute the device's master volume.
+     *
+     * @see DevicePolicyManager#setMasterVolumeMuted(ComponentName, boolean)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     * @hide
+     */
+    public static final String DISALLLOW_UNMUTE_DEVICE = "disallow_unmute_device";
+
+    /**
      * Specifies if a user is not allowed to use cellular data when roaming. This can only be set by
      * device owners. The default value is <code>false</code>.
      *
@@ -617,6 +627,18 @@ public class UserManager {
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_SET_USER_ICON = "no_set_user_icon";
+
+    /**
+     * Specifies if a user is not allowed to enable the oem unlock setting. The default value is
+     * <code>false</code>. Setting this restriction has no effect if the bootloader is already
+     * unlocked.
+     *
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     * @hide
+     */
+    public static final String DISALLOW_OEM_UNLOCK = "no_oem_unlock";
 
     /**
      * Allows apps in the parent profile to handle web links from the managed profile.
@@ -805,7 +827,7 @@ public class UserManager {
      */
     public boolean isPrimaryUser() {
         UserInfo user = getUserInfo(UserHandle.myUserId());
-        return user != null ? user.isPrimary() : false;
+        return user != null && user.isPrimary();
     }
 
     /**
@@ -871,7 +893,21 @@ public class UserManager {
      */
     public boolean isGuestUser() {
         UserInfo user = getUserInfo(UserHandle.myUserId());
-        return user != null ? user.isGuest() : false;
+        return user != null && user.isGuest();
+    }
+
+    /**
+     * Checks if the calling app is running in a demo user. When running in a demo user,
+     * apps can be more helpful to the user, or explain their features in more detail.
+     *
+     * @return whether the caller is a demo user.
+     */
+    public boolean isDemoUser() {
+        try {
+            return mService.isDemoUser(UserHandle.myUserId());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -1991,6 +2027,10 @@ public class UserManager {
         if (!supportsMultipleUsers()) {
             return false;
         }
+        // If Demo Mode is on, don't show user switcher
+        if (isDeviceInDemoMode(mContext)) {
+            return false;
+        }
         List<UserInfo> users = getUsers(true);
         if (users == null) {
            return false;
@@ -2004,6 +2044,14 @@ public class UserManager {
         final boolean guestEnabled = !mContext.getSystemService(DevicePolicyManager.class)
                 .getGuestUserDisabled(null);
         return switchableUserCount > 1 || guestEnabled;
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean isDeviceInDemoMode(Context context) {
+        return Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.DEVICE_DEMO_MODE, 0) > 0;
     }
 
     /**

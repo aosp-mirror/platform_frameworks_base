@@ -1,0 +1,1039 @@
+page.title=Android N for Developers
+meta.tags="preview", "androidn"
+page.tags="preview", "developer preview"
+page.image=images/cards/card-n-apis_2x.png
+@jd:body
+
+
+
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>Fitur-fitur Utama bagi Pengembang</h2>
+  <ol>
+      <ul style="list-style-type:none;">
+        <li><a href="#multi-window_support">Dukungan Multi-Jendela</a></li>
+        <li><a href="#notification_enhancements">Pemberitahuan</a></li>
+        <li><a href="#jit_aot">Kompilasi JIT/AOT</a></li>
+        <li><a href="#quick_path_to_app_install">Jalur Cepat untuk Pasang Aplikasi</a></li>
+        <li><a href="#doze_on_the_go">Istirahatkan Kapan Saja</a></li>
+        <li><a href="#background_optimizations">Optimalisasi Latar Belakang</a></li>
+        <li><a href="#data_saver">Data Saver</a></li>
+        <li><a href="#vulkan">Vulkan API</a></li>
+        <li><a href="#tile_api">Quick Settings Tile API</a></li>
+        <li><a href="#number-blocking">Pemblokiran Nomor</a></li>
+        <li><a href="#call_screening">Penyaringan Panggilan</a></li>
+        <li><a href="#multi-locale_languages">Lokal dan Bahasa</a></li>
+        <li><a href="#emoji">Emoji Baru</a></li>
+        <li><a href="#icu4">ICU4J API di Android</a></li>
+        <li><a href="#gles_32">OpenGL ES 3.2 API</a></li>
+        <li><a href="#android_tv_recording">Perekaman Android TV</a></li>
+        <li><a href="#android_for_work">Android for Work</a></li>
+        <li><a href="#accessibility_enhancements">Aksesibilitas</a></li>
+        <li><a href="#direct_boot">Direct Boot</a></li>
+        <li><a href="#key_attestation">Key Attestation</a></li>
+        <li><a href="#network_security_config">Network Security Config</a></li>
+        <li><a href="#default_trusted_ca">CA Tepercaya Default</a></li>
+        <li><a href="#apk_signature_v2">APK Signature Scheme V2</a></li>
+        <li><a href="#scoped_directory_access">Scoped Directory Access</a></li>
+        <li><a href="#keyboard_shortcuts_helper">Keyboard Shortcuts Helper</a></li>
+        <li><a href="#sustained_performance_api">Sustained Performance API</a></li>
+        <li><a href="#vr">Dukungan VR</a></li>
+        <li><a href="#print_svc">Penyempurnaan Layanan Cetak</a></li>
+        <li><a href="#virtual_files">File Maya</a></li>
+        <li><a href="#framemetrics_api">FrameMetricsListener API</a></li>
+      </ol>
+</div>
+</div>
+
+
+
+<p>Android N masih dalam pengembangan aktif, namun Anda bisa mencobanya
+sekarang sebagai bagian dari N Developer Preview. Bagian-bagian di bawah ini akan menyoroti sebagian dari
+fitur baru untuk pengembang. </p>
+
+<p>
+  Pastikan memeriksa <a href="{@docRoot}preview/behavior-changes.html">Perubahan Perilaku</a> untuk mengetahui selengkapnya tentang
+  bagian-bagian perubahan platform yang bisa memengaruhi aplikasi Anda, lihatlah
+  panduan pengembang untuk mengetahui selengkapnya tentang fitur-fitur utama, dan unduh <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referensi API</a> untuk mengetahui detail tentang
+  API baru.
+</p>
+
+<h2 id="multi-window_support">Dukungan Multi-Jendela</h2>
+
+
+<p>Di Android N, kami memperkenalkan fitur multitasking baru dan yang banyak diminta
+ke dalam platform &mdash; dukungan multi-jendela. </p>
+
+  <p>Pengguna sekarang bisa membuka dua aplikasi sekaligus di layar. </p>
+  <ul>
+  <li>Pada ponsel dan tablet
+yang menjalankan Android N, pengguna bisa menjalankan dua aplikasi secara berdampingan atau
+satu aplikasi di atas yang lain dalam mode layar terbagi. Pengguna bisa mengubah ukuran aplikasi dengan menyeret
+pembagi di antara keduanya. </li>
+
+<li>Pada perangkat Android TV, aplikasi bisa menempatkan dirinya sendiri dalam <a href="{@docRoot}preview/features/picture-in-picture.html">mode
+gambar-dalam-gambar</a>, sehingga aplikasi bisa terus menampilkan materi sementara pengguna menjelajahi atau
+berinteraksi dengan aplikasi lain.</li>
+  </ul>
+
+<div class="col-4of10">
+<img src="{@docRoot}images/android-7.0/mw-portrait.png" alt="" style="height:460px;padding-left:1em;" id="img-split-screen" />
+<p class="img-caption">
+  <strong>Gambar 1.</strong> Aplikasi yang berjalan dalam mode layar terbagi.
+</p>
+
+  </div>
+
+<p>Khususnya pada tablet dan perangkat yang berlayar lebih besar lainnya, dukungan multi-jendela
+memberi Anda cara baru untuk memikat pengguna. Anda bahkan bisa mengaktifkan fitur seret-dan-lepas di
+aplikasi untuk memudahkan pengguna menyeret materi ke dan dari aplikasi &mdash; cara bagus
+untuk menyempurnakan pengalaman pengguna Anda. </p>
+
+<p>Tidak sulit menambahkan dukungan multi-jendela ke aplikasi Anda dan mengonfigurasi cara
+menangani tampilan multi-jendela. Misalnya, Anda bisa menetapkan dimensi
+minimum yang diizinkan aktivitas, sehingga mencegah pengguna mengubah ukuran aktivitas di bawah
+ukuran itu. Anda juga bisa menonaktifkan tampilan multi-jendela untuk aplikasi Anda, yang
+  akan memastikan sistem hanya menampilkan aplikasi dalam mode layar penuh.</p>
+
+<p>
+  Untuk informasi selengkapnya, lihat dokumentasi pengembang <a href="{@docRoot}preview/features/multi-window.html">Dukungan Multi-Jendela</a>.
+
+</p>
+
+<h2 id="notification_enhancements">Penyempurnaan Pemberitahuan</h2>
+
+<p>Di Android N kami telah mengubah desain pemberitahuan agar lebih mudah dan lebih cepat
+digunakan. Beberapa perubahan tersebut antara lain:</p>
+
+<ul>
+  <li>
+    <strong>Pembaruan template</strong>: Kami telah memperbarui template pemberitahuan untuk
+    lebih menekankan citra pahlawan dan avatar. Pengembang akan dapat
+   memanfaatkan template baru dengan penyesuaian kode yang minimal.
+  </li>
+
+  <li>
+    <strong>Penyesuaian gaya pesan</strong>: Anda bisa menyesuaikan lebih banyak
+    label antarmuka pengguna yang berkaitan dengan pemberitahuan Anda menggunakan kelas
+    <code>MessageStyle</code>. Anda bisa mengonfigurasi pesan, judul percakapan,
+    dan tampilan materi.
+  </li>
+
+  <li>
+    <strong>Bundel pemberitahuan</strong>: Sistem bisa mengelompokkan pesan,
+    misalnya menurut topik pesan, dan menampilkan kelompok pesan tersebut. Seorang pengguna bisa
+   bertindak, misalnya Tutup atau Arsipkan, atas pesan yang ditampilkan. Jika Anda sudah
+    mengimplementasikan pemberitahuan untuk Android Wear, Anda akan terbiasa dengan
+    model ini.
+  </li>
+
+  <li>
+    <strong>Balasan Langsung</strong>: Untuk aplikasi komunikasi real-time, sistem
+    Android mendukung balasan inline sehingga pengguna bisa dengan cepat membalas
+    SMS atau pesan teks secara langsung dari dalam antarmuka pemberitahuan.
+  </li>
+
+  <li>
+    <strong>Tampilan khusus</strong>: Dua API baru memungkinkan Anda memanfaatkan dekorasi sistem,
+    misalnya header pemberitahuan dan tindakan, saat menggunakan tampilan
+    khusus dalam pemberitahuan.
+  </li>
+</ul>
+
+<div class="col-4of12">
+  <img src="{@docRoot}images/android-7.0/notifications-1.png" alt="" style="padding:.5em;max-width:226px">
+</div>
+
+<div class="col-4of12">
+  <img src="{@docRoot}images/android-7.0/notifications-3.png" alt="" style="padding:.5em;max-width:226px">
+</div>
+
+<div class="col-4of12">
+  <img src="{@docRoot}images/android-7.0/notifications-2.png" alt="" style="padding:.5em;max-width:226px">
+</div>
+
+
+<p class="img-caption">
+  <strong>Gambar 2.</strong> Bundel pemberitahuan dan balasan langsung.
+</p>
+
+<p>Untuk mengetahui cara mengimplementasikan fitur-fitur
+  baru ini, lihat panduan <a href="{@docRoot}preview/features/notification-updates.html">Pemberitahuan</a>.
+</p>
+
+
+
+<h2 id="jit_aot">Kompilasi JIT/AOT yang dipandu profil</h2>
+
+<p>Di Android N, kami telah menambahkan compiler Just in Time (JIT) dengan pembuatan profil kode ke
+ART, yang memungkinkannya terus meningkatkan kinerja aplikasi Android saat
+dijalankan. Compiler JIT melengkapi compiler Ahead of Time (AOT) pada ART
+dan membantu memperbaiki kinerja waktu proses, menghemat ruang penyimpanan, dan mempercepat
+pembaruan aplikasi serta pembaruan sistem.</p>
+
+<p>Kompilasi yang dipandu profil memungkinkan ART mengelola kompilasi AOT/JIT untuk setiap aplikasi
+sesuai dengan penggunaan sebenarnya, serta kondisi pada perangkat. Misalnya
+,ART menyimpan profil setiap metode terbaik aplikasi dan bisa melakukan kompilasi lebih awal
+serta menyimpan sementara metode-metode tersebut di cache untuk mendapatkan kinerja terbaik. Hal ini membuat bagian lain dari aplikasi
+dibiarkan tidak dikompilasi hingga benar-benar digunakan.</p>
+
+<p>Di samping meningkatkan kinerja bagian-bagian penting aplikasi, kompilasi yang dipandu profil
+membantu mengurangi footprint RAM keseluruhan aplikasi, termasuk biner
+terkait. Fitur ini terutama penting pada perangkat dengan memori minim.</p>
+
+<p>ART mengelola kompilasi yang dipandu profil dengan cara yang meminimalkan dampak terhadap
+baterai perangkat. ART melakukan prakompilasi hanya bila perangkat sedang diam dan
+mengisi daya, sehingga menghemat waktu dan baterai dengan melakukan pekerjaan tersebut di awal.</p>
+
+<h2 id="quick_path_to_app_install">Jalur Cepat untuk Pasang Aplikasi</h2>
+
+<p>Salah satu manfaat paling nyata dari compiler JIT pada ART adalah kecepatan
+pemasnagan aplikasi dan pembaruan sistem. Bahkan aplikasi besar yang membutuhkan beberapa menit untuk
+dioptimalkan dan dipasang di Android 6.0 sekarang bisa dipasang hanya dalam hitungan
+detik. Pembaruan sistem juga lebih cepat, karena tidak ada lagi langkah optimalisasi. </p>
+
+<h2 id="doze_on_the_go">Istirahatkan Kapan Saja...</h2>
+
+<p>Android 6.0 memperkenalkan Istirahatkan, yaitu mode sistem yang menghemat baterai dengan menangguhkan
+aktivitas CPU dan jaringan di aplikasi bila perangkat sedang diam, misalnya saat
+diletakkan di atas meja atau dalam laci. </p>
+
+<p>Sekarang di Android N, Istirahatkan selangkah lebih maju dalam menghemat baterai kapan saja.
+Setiap kali layar mati dalam jangka waktu tertentu dan perangkat tidak terhubung ke sumber daya,
+Istirahatkan akan menerapkan subset pembatasan umum CPU dan jaringan pada aplikasi.
+Artinya pengguna bisa menghemat daya baterai meskipun perangkat dibawa di dalam
+tasnya.</p>
+
+
+<img src="/preview/images/doze-diagram-1.png" alt="" id="figure1" />
+<p class="img-caption">
+  <strong>Gambar 3.</strong> Istirahatkan sekarang menerapkan
+  pembatasan untuk meningkatkan daya tahan baterai bahkan saat perangkat sedang tidak diam.
+</p>
+
+
+<p>Tidak lama setelah layar dimatikan saat perangkat menggunakan daya baterai, Istirahatkan
+akan membatasi akses jaringan serta menangguhkan pekerjaan dan sinkronisasi. Selama jeda
+pemeliharaan, aplikasi diizinkan mengakses jaringan dan menjalankan semua
+pekerjaan/sinkronisasi yang ditangguhkan. Menyalakan layar atau mencolokkan perangkat akan mengeluarkan
+perangkat dari Istirahatkan.</p>
+
+<p>Bila perangkat dalam kondisi diam lagi, dengan layar mati dan menggunakan daya baterai selama
+jangka waktu tertentu, Istirahatkan akan menerapkan pembatasan CPU dan jaringan pada {@link
+android.os.PowerManager.WakeLock}, alarm {@link android.app.AlarmManager}, dan
+pemindaian GPS/Wi-Fi.</p>
+
+<p>Praktik terbaik untuk menyesuaikan aplikasi Anda dengan Istirahatkan adalah sama, baik
+perangkat sedang bergerak maupun diam, jadi jika Anda sudah memperbarui aplikasi untuk
+menjalankan Istirahatkan dengan lancar, berarti Anda sudah siap. Jika belum, mulailah <a href="{@docRoot}training/monitoring-device-state/doze-standby.html#assessing_your_app">menyesuaikan
+aplikasi Anda dengan Istirahatkan</a> sekarang juga.</p>
+
+<h2 id="background_optimizations">Project Svelte: Optimalisasi Latar Belakang</h2>
+
+<p>Project Svelte merupakan upaya berkelanjutan untuk meminimalkan penggunaan RAM oleh sistem dan aplikasi
+di semua jenis perangkat Android dalam ekosistem. Di Android N, Project
+Svelte berfokus pada optimalisasi cara aplikasi berjalan di latar belakang. </p>
+
+<p>Proses latar belakang merupakan bagian terpenting dari sebagian besar aplikasi. Bila ditangani dengan benar, proses
+ini bisa memberikan pengalaman pengguna yang mengagumkan &mdash; segera, cepat, dan sesuai konteks.
+Bila tidak ditangani dengan benar, proses latar belakang bisa menguras RAM (dan
+baterai) yang sebenarnya tidak perlu serta memengaruhi kinerja sistem untuk aplikasi lain. </p>
+
+<p>Sejak Android 5.0, {@link android.app.job.JobScheduler} telah menjadi
+cara yang disukai untuk melakukan pekerjaan latar belakang dengan cara yang baik
+bagi pengguna. Aplikasi bisa menjadwalkan pekerjaan sekaligus memungkinkan sistem mengoptimalkan berdasarkan
+kondisi memori, daya, dan konektivitas. JobScheduler menawarkan kontrol serta
+kemudahan, dan kami ingin semua aplikasi menggunakannya. </p>
+
+<p>
+  Opsi baik lainnya adalah <a href="https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
+  <code>GCMNetworkManager</code></a>, bagian dari Google Play Services, yang
+  menawarkan penjadwalan pekerjaan serupa dengan kompatibilitas pada semua versi lawas
+  Android.
+</p>
+
+<p>Kami terus memperluas <code>JobScheduler</code> dan
+<code>GCMNetworkManager</code> untuk memenuhi lebih banyak
+kasus penggunaan Anda &mdash; misalnya, di Android N Anda sekarang bisa menjadwalkan pekerjaan
+latar belakang berdasarkan perubahan di Content Providers. Pada saat yang sama kami mulai
+menghilangkan beberapa pola lama yang bisa mengurangi kinerja sistem,
+terutama pada perangkat yang minim memori.</p>
+
+<p>Di Android N kami membuang tiga siaran implisit yang umum digunakan &mdash;
+ {@link android.net.ConnectivityManager#CONNECTIVITY_ACTION}, {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE}, dan {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO} &mdash; karena ketiganya bisa mengaktifkan
+proses latar belakang pada beberapa aplikasi sekaligus serta menguras memori dan baterai. Jika
+aplikasi Anda menerimanya, manfaatkan N Developer Preview untuk
+  beralih ke <code>JobScheduler</code> dan API terkait sebagai gantinya. </p>
+
+<p>
+  Lihat dokumentasi <a href="{@docRoot}preview/features/background-optimization.html">Optimalisasi
+  Latar Belakang</a> untuk mengetahui detailnya.
+</p>
+
+
+<h2 id="data_saver">Data Saver</h2>
+
+<div class="col-5of12" style="margin-right:1.5em;">
+<img src="{@docRoot}images/android-7.0/datasaver.png" style="border:2px solid #ddd">
+
+<p class="img-caption" style="padding-right:2em;">
+  <strong>Gambar 4.</strong> Data Saver di Settings.
+</p>
+  </div>
+
+<p>Selama penggunaan perangkat seluler, biaya paket data seluler biasanya
+  melebihi harga perangkat itu sendiri. Bagi banyak pengguna, data seluler adalah sumber daya
+mahal yang ingin mereka hemat. </p>
+
+<p>Android N memperkenalkan mode Data Saver, layanan sistem baru yang mengurangi
+penggunaan data seluler oleh aplikasi, baik saat roaming, mendekati akhir siklus tagihan,
+atau saat menggunakan paket data prabayar yang kecil. Data Saver memberi pengguna kemampuan mengontrol cara aplikasi
+menggunakan data seluler dan memungkinkan pengembang memberikan layanan yang lebih efisien bila Data
+Saver aktif. </p>
+
+<p>Bila pengguna mengaktifkan Data Saver di <strong>Settings</strong> dan perangkat
+dalam jaringan berkuota, sistem akan memblokir penggunaan data latar belakang dan memberi tahu aplikasi
+untuk menghemat penggunaan data latar depan &mdash; misalnya dengan membatasi
+kecepatan bit untuk streaming, mengurangi kualitas gambar, menangguhkan precaching optimistik,
+dan seterusnya. Pengguna bisa memasukkan aplikasi tertentu ke daftar putih untuk memungkinkan penggunaan data berkuota
+bila Data Saver diaktifkan.</p>
+
+<p>Android N memperluas {@link android.net.ConnectivityManager} untuk menyediakan cara pada aplikasi
+untuk <a href="{@docRoot}preview/features/data-saver.html#status">mengambil
+preferensi Data Saver pengguna</a> dan <a href="{@docRoot}preview/features/data-saver.html#monitor-changes">memantau
+perubahan preferensi</a>. Semua aplikasi harus memeriksa apakah pengguna telah mengaktifkan Data
+Saver dan berusaha membatasi penggunaan data latar belakang dan latar depan.</p>
+
+
+<h2 id="vulkan">Vulkan API</h2>
+
+<p>
+  Android N mengintegrasikan <a href="http://www.khronos.org/vulkan" class="external-link">Vulkan™</a>, sebuah API rendering 3D baru, ke dalam platform. Seperti
+  <a href="https://www.khronos.org/opengles/" class="external-link">OpenGL™
+  ES</a>, Vulkan merupakan standar terbuka untuk grafik 3D dan rendering yang dikelola
+  oleh Khronos Group.
+</p>
+
+<p>
+  Vulkan didesain dari nol untuk meminimalkan overhead CPU dalam driver,
+  dan memungkinkan aplikasi Anda mengontrol operasi GPU lebih langsung. Vulkan
+  juga memungkinkan paralelisasi yang lebih baik dengan mengizinkan beberapa thread menjalankan
+  pekerjaan seperti pembuatan buffer perintah sekaligus.
+</p>
+
+<p>
+  Pustaka dan alat pengembangan Vulkan telah dimasukkan ke dalam Android NDK. Ini
+  berisi:
+</p>
+
+<ul>
+  <li>Header
+  </li>
+
+  <li>Layer validasi (pustaka debug)
+  </li>
+
+  <li>SPIR-V shader compiler
+  </li>
+
+  <li>Pustaka kompilasi shader waktu proses SPIR-V
+  </li>
+</ul>
+
+<p>
+  Vulkan hanya tersedia untuk aplikasi pada perangkat dengan perangkat keras yang mendukung Vulkan,
+  seperti Nexus 5X, Nexus 6P, dan Nexus Player. Kami bekerja sama erat dengan mitra
+  agar secepatnya makin banyak perangkat yang dilengkapi Vulkan.
+</p>
+
+<p>
+  Untuk informasi selengkapnya, lihat <a href="{@docRoot}ndk/guides/graphics/index.html">dokumentasi API</a>.
+</p>
+
+<h2 id="tile_api">Quick Settings Tile API</h2>
+
+
+<div style="float:right;max-width:320px">
+<img src="{@docRoot}images/android-7.0/quicksettings.png" style="padding-left:1.5em;">
+
+<p class="img-caption" style="padding-left:2em;">
+  <strong>Gambar 5.</strong> Quick Settings Tile dalam bayangan pemberitahuan.
+</p>
+
+
+  </div><p>Quick Settings adalah cara populer dan mudah untuk mengekspos setelan dan tindakan utama,
+langsung dari bayangan pemberitahuan. Di Android N, kami telah memperluas lingkup
+Quick Settings untuk membuatnya lebih berguna dan praktis lagi. </p>
+
+<p>Kami telah menambahkan ruang lebih banyak untuk petak Quick Settings tambahan, yang bisa
+diakses pengguna di semua bagian area tampilan halaman bernomor dengan mengusap ke kiri atau kanan. Kami juga memberi pengguna
+kontrol untuk mengatur letak dan petak Quick Settings apa yang akan
+ditampilkan &mdash; pengguna bisa menambahkan atau memindahkan petak dengan menyeret dan melepasnya. </p>
+
+<p>Bagi pengembang, Android N juga menambahkan API baru yang memungkinkan Anda mendefinisikan
+  petak Quick Settings untuk memberi akses mudah kepada pengguna ke berbagai kontrol dan tindakan utama dalam aplikasi Anda.</p>
+
+<p>
+  Petak Quick Settings dicadangkan untuk kontrol atau tindakan yang
+  mendesak atau sering digunakan, dan tidak boleh digunakan sebagai pintasan untuk
+ membuka aplikasi.
+</p>
+
+<p>
+  Setelah mendefinisikan petak, Anda bisa menyediakannya kepada pengguna, yang bisa mereka tambahkan
+  ke Quick Settings cukup dengan seret dan lepas.
+</p>
+
+<p>
+  Untuk informasi tentang pembuatan petak aplikasi, lihat dokumentasi untuk
+  <code>android.service.quicksettings.Tile</code> dalam <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referensi API</a> yang bisa diunduh.
+</p>
+
+
+
+<h2 id="number-blocking">Pemblokiran Nomor</h2>
+
+<p>Android N sekarang mendukung pemblokiran nomor di platform dan menyediakan
+API kerangka kerja agar penyedia layanan bisa mengelola daftar nomor blokir. Aplikasi SMS
+default, aplikasi telepon default, dan aplikasi operator bisa membaca dari dan
+menulis ke daftar nomor blokir. Daftar ini tidak dapat diakses oleh aplikasi lain.</p>
+
+<p>Dengan membuat pemblokiran nomor sebagai fitur standar pada platformnya, Android menyediakan
+cara konsisten bagi aplikasi untuk mendukung pemblokiran nomor di berbagai
+perangkat. Manfaat lain yang bisa diperoleh aplikasi antara lain:</p>
+
+<ul>
+  <li> Nomor yang diblokir untuk panggilan juga akan diblokir untuk SMS
+  <li> Nomor yang diblokir tetap disimpan saat pengaturan ulang dan pada berbagai perangkat melalui fitur Backup &amp;
+Restore.
+  <li> Beberapa aplikasi sekaligus bisa menggunakan daftar nomor blokir yang sama.
+</ul>
+
+<p>Selain itu, dengan integrasi aplikasi operator melalui Android berarti operator bisa
+membaca daftar nomor blokir pada perangkat dan melakukan pemblokiran di sisi layanan
+bagi pengguna tersebut untuk menghentikan panggilan dan SMS yang tidak diinginkan
+agar tidak sampai ke pengguna lewat media apa pun, misalnya VOIP-endpoint atau meneruskan panggilan telepon.</p>
+
+<p>
+  Untuk informasi selengkapnya, lihat <code>android.provider.BlockedNumberContract</code>
+  dalam <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referensi
+  API</a> yang bisa diunduh.
+</p>
+
+<h2 id="call_screening">Penyaringan Panggilan</h2>
+
+<p>
+  Android N memungkinkan aplikasi telepon default untuk menyaring panggilan masuk. Aplikasi
+  telepon melakukannya dengan mengimplementasikan <code>CallScreeningService</code> baru,
+  yang memungkinkan aplikasi telepon untuk melakukan sejumlah tindakan berdasarkan
+  {@link android.telecom.Call.Details Call.Details} panggilan masuk, misalnya:
+</p>
+
+<ul>
+  <li> Menolak panggilan masuk
+  <li> Tidak mengizinkan panggilan tersebut disimpan ke log panggilan
+  <li> Tidak menampilkan pemberitahuan untuk panggilan tersebut kepada pengguna
+</ul>
+
+<p>
+  Untuk informasi selengkapnya, lihat <code>android.telecom.CallScreeningService</code>
+  dalam <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referensi
+  API</a> yang bisa diunduh.
+</p>
+
+
+<h2 id="multi-locale_languages">Dukungan Multilokal, Lebih Banyak Bahasa yang Didukung</h2>
+
+
+<p>Android N kini memungkinkan pengguna memilih <strong>banyak lokal</strong> di Settings,
+untuk mendukung kasus penggunaan dwibahasa dengan lebih baik. Aplikasi bisa menggunakan
+API baru untuk mendapatkan lokal pilihan pengguna kemudian menawarkan pengalaman pengguna
+yang lebih canggih untuk pengguna multilokal &mdash; seperti menampilkan hasil telusur dalam
+banyak bahasa dan tidak menawarkan untuk menerjemahkan halaman web dalam bahasa
+yang sudah diketahui pengguna.</p>
+
+<p>Bersama dukungan multilokal, Android N juga memperluas ragam bahasa
+yang tersedia untuk pengguna. Masing-masing ditawarkan lebih dari 25 varian untuk bahasa yang umum
+digunakan seperti Inggris, Spanyol, Prancis, dan Arab. Juga ditambahkan dukungan
+parsial untuk lebih dari 100 bahasa baru.</p>
+
+<p>Aplikasi bisa mendapatkan daftar lokal yang disetel oleh pengguna dengan memanggil
+<code>LocaleList.GetDefault()</code>.  Untuk mendukung jumlah lokal yang diperluas, Android N sedang
+ mengubah cara mengatasi masalah sumber daya. Pastikan Anda menguji dan memverifikasi bahwa aplikasi Anda
+berfungsi seperti yang diharapkan dengan logika resolusi sumber daya baru.</p>
+
+<p>Untuk mengetahui tentang perilaku resolusi sumber daya baru dan praktik terbaik yang
+harus Anda ikuti, lihat <a href="{@docRoot}preview/features/multilingual-support.html">Dukungan Multibahasa</a>.</p>
+
+
+<h2 id="emoji">Emoji Baru</h2>
+
+<p>
+  Android N memperkenalkan emoji tambahan dan fitur terkait emoji termasuk
+  emoji warna kulit dan dukungan untuk pemilih
+  variasi. Jika aplikasi Anda mendukung emoji,
+  ikuti panduan berikut untuk memanfaatkan fitur terkait emoji ini.
+</p>
+
+<ul>
+  <li>
+    <strong>Periksa apakah perangkat berisi emoji sebelum memasukannya.</strong>
+    Untuk memeriksa emoji mana yang terdapat di
+    font sistem, gunakan metode {@link android.graphics.Paint#hasGlyph(String)}.
+  </li>
+  <li>
+    <strong>Periksa apakah emoji mendukung pemilih variasi.</strong>
+    Pemilih variasi memungkinkan Anda
+    menampilkan emoji tertentu berwarna atau hitam-putih.
+    Pada perangkat seluler, aplikasi akan menghadirkan emoji berwarna daripada hitam-putih. Akan tetapi,
+    jika aplikasi Anda menampilkan emoji sebaris dengan teks, maka harus menggunakan variasi hitam-putih.
+    Untuk menentukan apakah sebuah emoji memiliki variasi, gunakan pemilih variasi.
+    Untuk daftar lengkap dari karakter dengan variasinya, tinjaulah bagian
+    <em>rangkaian variasi emoji</em> pada
+    <a class="external-link" href="http://www.unicode.org/Public/9.0.0/ucd/StandardizedVariants-9.0.0d1.txt">
+      dokumentasi Unicode mengenai variasi</a>.
+  </li>
+  <li>
+    <strong>Periksa apakah emoji mendukung warna kulit.</strong> Android N memungkinkan pengguna memodifikasi
+    warna kulit emoji yang dirender sesuai dengan preferensi mereka. Aplikasi keyboard harus menyediakan indikasi
+    visual untuk emoji yang memiliki beberapa warna kulit dan harus memungkinkan pengguna
+    memilih warna kulit yang mereka sukai. Untuk menentukan apakah emoji sistem memiliki
+    modifier warna kulit, gunakan metode {@link android.graphics.Paint#hasGlyph(String)}.
+ Anda bisa menentukan emoji mana yang menggunakan warna kulit dengan membaca
+    <a class="external-link" href="http://unicode.org/emoji/charts/full-emoji-list.html">
+     dokumentasi Unicode</a>.
+  </li>
+</ul>
+
+
+<h2 id="icu4">ICU4J API di Android</h2>
+
+<p>
+  Android N kini menawarkan subset <a href="http://site.icu-project.org/">ICU4J</a> API dalam kerangka kerja Android pada paket
+  <code>android.icu</code>. Migrasi mudah, dan biasanya hanya perlu
+  mengubah dari ruang nama <code>com.java.icu</code> ke
+  <code>android.icu</code>. Jika Anda sudah menggunakan bundel ICU4J dalam aplikasi,
+  maka beralih ke <code>android.icu</code> API yang disediakan dalam kerangka kerja
+  Android bisa menghasilkan penghematan besar dalam ukuran APK.
+</p>
+
+<p>
+  Untuk mengetahui selengkapnya tentang Android ICU4J API, lihat <a href="{@docRoot}preview/features/icu4j-framework.html">Dukungan ICU4J</a>.
+</p>
+
+
+
+<h2 id="gles_32">OpenGL&trade; ES 3.2 API</h2>
+
+<p>Android N menambahkan antarmuka kerangka kerja dan dukungan platform untuk OpenGL ES 3.2, termasuk:</p>
+
+<ul>
+  <li> Semua ekstensi dari <a class="external-link" href="https://www.khronos.org/registry/gles/extensions/ANDROID/ANDROID_extension_pack_es31a.txt">
+Android Extension Pack</a></a> (AEP) kecuali untuk <code>EXT_texture_sRGB_decode</code>.
+  <li> Floating-point framebuffer untuk HDR dan shading yang ditangguhkan.
+  <li> Panggilan draw BaseVertex agar batching dan streaming jadi lebih baik.
+  <li> Kontrol akses buffer yang tangguh untuk mengurangi overhead WebGL.
+</ul>
+
+<p>API kerangka kerja untuk OpenGL ES 3.2 di Android N dilengkapi dengan kelas
+  <code>GLES32</code>. Saat menggunakan OpenGL ES 3.2, pastikan
+mendeklarasikan persyaratan dalam file manifes Anda, dengan tag <code>&lt;uses-feature&gt;</code> dan
+atribut <code>android:glEsVersion</code>. </p>
+
+<p>Untuk informasi tentang menggunakan OpenGL ES, termasuk cara memeriksa versi
+OpenGL ES yang didukung perangkat saat waktu proses, lihat <a href="{@docRoot}guide/topics/graphics/opengl.html">Panduan OpenGL ES API</a>.</p>
+
+
+<h2 id="android_tv_recording">Perekaman Android TV</h2>
+
+<p>Android N menambahkan kemampuan untuk merekam dan memutar kembali materi dari layanan masukan
+Android TV melalui API perekaman baru.  Karena dibangun dengan API perekaman yang sudah
+ada, layanan masukan TV bisa mengontrol data saluran apa yang bisa direkam, cara menyimpan
+sesi rekaman, dan mengelola interaksi pengguna dengan materi rekaman. </p>
+
+<p>Untuk informasi selengkapnya, lihat <a href="{@docRoot}preview/features/tv-recording-api.html">API Perekaman Android TV</a>.</p>
+
+
+<h2 id="android_for_work">Android for Work</h2>
+
+<p>Android for Work menambahkan berbagai fitur dan API baru untuk perangkat yang menjalankan Android N.
+Beberapa fitur unggulannya ada di bawah ini &mdash; untuk mengetahui daftar lengkap perubahannya, lihat
+<a href="{@docRoot}preview/features/afw.html">Pembaruan Android for Work</a>.</p>
+
+<h3 id="work_profile_security_challenge">Pertanyaan Keamanan Profil Kerja </h3>
+
+<p>
+  Pemilik profil yang menargetkan N SDK
+  bisa menetapkan pertanyaan keamanan terpisah untuk aplikasi yang berjalan di
+  profil kerja. Pertanyaan kerja ditampilkan bila pengguna mencoba membuka
+  aplikasi kerja apa pun. Jawaban pertanyaan keamanan yang benar akan membuka
+  profil kerja dan mendekripsinya jika diperlukan. Untuk pemilik profil,
+  <code>ACTION_SET_NEW_PASSWORD</code> akan meminta pengguna untuk menetapkan pertanyaan
+  kerja, dan <code>ACTION_SET_NEW_PARENT_PROFILE_PASSWORD</code> meminta
+  pengguna menyetel kunci perangkat.
+</p>
+
+<p>
+  Pemilik profil bisa menyetel kebijakan kode sandi untuk pertanyaan kerja
+  (seperti berapa lama seharusnya PIN, atau apakah sidik jari bisa digunakan
+  untuk membuka kunci profil) menggunakan <code>setPasswordQuality()</code>,
+  <code>setPasswordMinimumLength()</code> dan metode terkait. Pemilik profil
+  juga bisa menyetel kunci perangkat, menggunakan instance <code>DevicePolicyManager</code>
+  yang dikembalikan oleh metode <code>getParentProfileInstance()</code>  baru.
+  Selain itu, pemilik profil bisa menyesuaikan layar kredensial untuk
+ pertanyaan kerja menggunakan metode baru <code>setOrganizationColor()</code> dan
+  <code>setOrganizationName()</code>.
+</p>
+<h3 id="turn_off_work">Menonaktifkan pekerjaan </h3>
+
+<p>Pada perangkat dengan profil kerja, pengguna bisa beralih mode kerja. Bila mode
+kerja dinonaktifkan, profil yang dikelola akan dinonaktifkan untuk sementara, yang akan menonaktifkan aplikasi
+profil kerja, sinkronisasi latar belakang, dan pemberitahuan. Termasuk aplikasi pemilik
+profil. Bila profil kerja dinonaktifkan, sistem akan menampilkan ikon status
+tetap untuk mengingatkan pengguna bahwa mereka tidak bisa meluncurkan aplikasi kerja. Peluncur
+menunjukkan bahwa aplikasi kerja dan widget tidak bisa diakses. </p>
+
+<h3 id="always_on_vpn">Always-On VPN </h3>
+
+<p>Pemilik perangkat dan pemilik profil bisa memastikan bahwa aplikasi kerja selalu menghubungkan
+melalui VPN yang ditetapkan. Sistem secara otomatis akan memulai VPN itu setelah booting
+perangkat.</p>
+
+<p>
+  Metode <code>DevicePolicyManager</code> baru adalah
+  <code>setAlwaysOnVpnPackage()</code> dan
+  <code>getAlwaysOnVpnPackage()</code>.
+</p>
+
+<p>Karena layanan VPN bisa diikat langsung oleh sistem tanpa interaksi
+aplikasi, klien VPN perlu menangani titik masuk baru untuk Always-On VPN. Seperti
+sebelumnya, layanan ditunjukkan ke sistem melalui
+tindakan pencocokan filter intent <code>android.net.VpnService</code>. </p>
+
+<p>
+  Pengguna bisa secara manual menyetel klien Always-On VPN yang mengimplementasikan
+  metode <code>VPNService</code> dalam pengguna utama dengan menggunakan
+  <strong>Settings&gt;More&gt;Vpn</strong>.
+</p>
+
+<h3 id="custom_provisioning">Penyediaan yang disesuaikan</h3>
+
+<p>
+  Aplikasi bisa menyesuaikan alur penyediaan pemilik profil dan pemilik perangkat
+  dengan warna dan logo perusahaan.
+  <code>DevicePolicyManager.EXTRA_PROVISIONING_MAIN_COLOR</code> menyesuaikan
+  warna alur. <code>DevicePolicyManager.EXTRA_PROVISIONING_LOGO_URI</code>
+  menyesuaikan alur dengan logo perusahaan.
+</p>
+
+<h2 id="accessibility_enhancements">Penyempurnaan Aksesibilitas</h2>
+
+<p>Android N saat ini menawarkan Vision Settings langsung di layar Sambutan untuk
+persiapan perangkat baru. Ini sangat memudahkan pengguna untuk menemukan dan mengonfigurasi
+fitur aksesibilitas pada perangkat mereka, termasuk isyarat perbesaran, ukuran
+font, ukuran layar, dan TalkBack. </p>
+
+<p>Dengan fitur aksesibilitas yang penempatannya semakin jelas, pengguna Anda
+kemungkinan besar akan mencoba aplikasi dengan fitur-fitur yang diaktifkan itu. Pastikan Anda menguji aplikasi
+lebih dini dengan mengaktifkan dahulu setelan ini. Anda bisa mengaktifkannya dari Settings &gt;
+Accessibility.</p>
+
+<p>Di Android N, layanan aksesibilitas sekarang bisa membantu pengguna yang mengalami gangguan
+motorik untuk menyentuh layar. API baru memungkinkan membangun layanan dengan
+fitur-fitur seperti pelacakan wajah, pelacakan mata, pemindaian titik, dan seterusnya, untuk
+memenuhi kebutuhan para pengguna tersebut.</p>
+
+<p>Untuk informasi selengkapnya, lihat <code>android.accessibilityservice.GestureDescription</code>
+ dalam <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referensi  API</a> yang bisa diunduh.</p>
+
+
+<h2 id="direct_boot">Direct Boot</h2>
+
+<p>Direct Boot memperbaiki waktu startup perangkat dan memungkinkan aplikasi
+yang telah didaftarkan memiliki fungsionalitas terbatas bahkan setelah boot ulang tak terduga.
+Misalnya, jika perangkat yang dienkripsi melakukan boot ulang selagi pengguna tidur,
+alarm terdaftar, pesan dan panggilan masuk sekarang bisa terus memberi tahu
+pengguna seperti biasa. Ini juga berarti layanan aksesibilitas bisa
+  segera tersedia setelah restart.</p>
+
+<p>Direct Boot memanfaatkan enkripsi berbasis file di Android N
+untuk mengaktifkan kebijakan enkripsi yang telah disesuaikan bagi sistem dan data aplikasi.
+Sistem akan menggunakan penyimpanan yang dienkripsi dengan perangkat untuk data sistem terpilih dan data
+aplikasi yang terdaftar secara eksplisit. Secara default, penyimpanan yang dienkripsi dengan kredensial digunakan untuk semua
+  data sistem lainnya, data pengguna, aplikasi, dan data aplikasi. </p>
+
+<p>Saat booting, sistem dimulai dalam mode terbatas dengan akses
+ke data yang dienkripsi dengan perangkat saja, dan tanpa akses umum ke aplikasi atau data.
+Jika Anda memiliki komponen yang ingin Anda jalankan dalam mode ini, Anda bisa mendaftarkannya
+dengan menyetel flag dalam manifes. Setelah restart, sistem akan mengaktifkan
+komponen terdaftar dengan menyiarkan intent <code>LOCKED_BOOT_COMPLETED</code>.
+ Sistem akan memastikan data aplikasi yang dienkripsi dengan perangkat tersedia
+sebelum membuka kunci. Semua data lainnya tidak tersedia sebelum Pengguna mengonfirmasi
+  kredensial layar kunci mereka untuk mendekripsinya. </p>
+
+Untuk informasi selengkapnya, lihat <a href="{@docRoot}preview/features/direct-boot.html">Direct Boot</a>.</p>
+</p>
+
+
+<h2 id="key_attestation">Key Attestation</h2>
+
+<p>Keystore yang didukung perangkat keras menyediakan metode yang jauh lebih aman untuk membuat, menyimpan,
+dan menggunakan kunci kriptografi pada perangkat Android. Keystore itu melindungi kunci dari
+kernel Linux, potensi kerentanan Android, dan ekstraksi
+dari perangkat yang di-root.</p>
+
+<p>Agar lebih mudah dan lebih aman dalam menggunakan keystore yang didukung perangkat keras,
+Android N memperkenalkan Key Attestation. Aplikasi dan perangkat-nonaktif bisa menggunakan Key
+Attestation untuk menentukan apakah penyandingan kunci RSA atau EC
+didukung perangkat keras, apa properti dari penyandingan kunci, dan batasan
+  apa yang diterapkan terhadap penggunaan dan validitasnya. </p>
+
+<p>Aplikasi dan layanan perangkat-nonaktif bisa meminta informasi tentang penyandingan kunci
+melalui sertifikat pengesahan X.509 yang harus ditandatangani dengan kunci
+pengesahan yang valid. Kunci pengesahan adalah kunci penandatanganan ECDSA yang
+telah diinjeksikan ke dalam keystore yang didukung perangkat keras pada perangkat saat di pabriknya.
+Karena itu, sertifikat pengesahan yang ditandatangani oleh kunci pengesahan yang
+valid akan mengonfirmasi keberadaan keystore yang didukung perangkat keras, bersama
+  detail pasangan kunci dalam keystore itu.</p>
+
+<p>Untuk memastikan perangkat ini menggunakan citra Android resmi yang
+aman dari pabrik, Key Attestation mengharuskan <a class="external-link" href="https://source.android.com/security/verifiedboot/verified-boot.html#bootloader_requirements">bootloader</a> perangkat
+menyediakan informasi berikut pada <a class="external-link" href="https://source.android.com/security/trusty/index.html">Trusted
+Execution Environment (TEE)</a>:</p>
+
+<ul>
+<li>Versi OS dan level patch yang dipasang pada perangkat</li>
+<li>Kunci publik <a href="https://source.android.com/security/verifiedboot/index.html" class="external-link">Verified Boot</a> dan status kunci</li>
+  </ul>
+
+<p>Untuk informasi selengkapnya tentang fitur keystore yang didukung perangkat keras,
+lihat panduan untuk <a href="https://source.android.com/security/keystore/" class="external-link">Keystore yang Didukung Perangkat Keras</a>.</p>
+
+<p>Selain Key Attestation, Android N juga memperkenalkan
+  kunci yang terikat sidik jari yang tidak dipanggil saat pendaftaran sidik jari.</p>
+
+<h2 id="network_security_config">Network Security Config</h2>
+
+<p>Di Android N, aplikasi bisa menyesuaikan perilaku koneksi aman mereka
+(HTTPS, TLS) secara aman, tanpa modifikasi kode, dengan menggunakan
+<em>Network Security Config</em> deklaratif sebagai ganti menggunakan API programatik
+konvensional yang rawan kesalahan (mis. X509TrustManager).</p>
+
+  <p>Fitur yang didukung:</p>
+<ul>
+<li><b>Trust-anchor khusus.</b> Memungkinkan aplikasi menyesuaikan
+Certificate Authorities (CA) mana yang dipercaya untuk koneksi amannya. Misalnya,
+mempercayai sertifikat tertentu yang ditandatangani sendiri atau set CA publik yang dibatasi.
+</li>
+<li><b>Penggantian hanya-debug.</b> Memungkinkan pengembang aplikasi dengan aman men-debug
+koneksi aman aplikasi mereka tanpa menambah risiko pada basis yang sudah
+dipasang.
+</li>
+<li><b>Berhenti dari lalu lintas cleartext.</b> Memungkinkan aplikasi melindungi dirinya sendiri dari
+penggunaan lalu lintas cleartext yang tidak disengaja.</li>
+<li><b>Penyematan sertifikat.</b> Sebuah fitur canggih yang memungkinkan aplikasi
+  membatasi kunci server mana yang dipercaya untuk koneksi aman.</li>
+</ul>
+
+<p>Untuk informasi selengkapnya, lihat <a href="{@docRoot}preview/features/security-config.html">Network Security
+Config</a>.</p>
+
+<h2 id="default_trusted_ca">Certificate Authority Tepercaya Default</h2>
+
+<p>Secara default, aplikasi yang menargetkan Android N hanya mempercayai sertifikat yang disediakan sistem
+dan tidak lagi mempercayai Certificate Authorities (CA) yang ditambahkan pengguna. Aplikasi yang menargetkan Android
+N dan ingin mempercayai CA yang ditambahkan pengguna harus menggunakan
+<a href="{@docRoot}preview/features/security-config.html">Network Security Config</a> untuk
+menetapkan cara mempercayai CA pengguna.</p>
+
+<h2 id="apk_signature_v2">APK Signature Scheme v2</h2>
+
+<p>
+  Android N memperkenalkan APK Signature Scheme v2, sebuah skema penandatanganan aplikasi baru yang
+  menawarkan waktu pasang aplikasi lebih cepat dan lebih banyak perlindungan terhadap perubahan
+ tidak sah pada file APK. Secara default, Android Studio 2.2 dan Android
+  Plugin untuk Gradle 2.2 menandatangani aplikasi Anda menggunakan APK Signature Scheme v2 dan
+  skema penandatanganan tradisional, yang menggunakan penandatanganan JAR.
+</p>
+
+<p>
+  Meskipun kami menyarankan untuk menerapkan APK Signature Scheme v2 pada aplikasi Anda, skema
+  baru ini tidak wajib. Jika aplikasi Anda tidak dibangun dengan benar saat menggunakan APK
+  Signature Scheme v2, Anda bisa menonaktifkan skema baru ini. Proses penonaktifan
+  menyebabkan Android Studio 2.2 dan Android Plugin untuk Gradle 2.2 menandatangani aplikasi Anda
+  menggunakan skema penandatanganan tradisional saja. Untuk menandatangani dengan
+ skema tradisional saja, buka file <code>build.gradle</code> level-modul, kemudian
+  tambahkan baris <code>v2SigningEnabled false</code> ke konfigurasi
+  penandatanganan rilis Anda:
+</p>
+
+<pre>
+  android {
+    ...
+    defaultConfig { ... }
+    signingConfigs {
+      release {
+        storeFile file("myreleasekey.keystore")
+        storePassword "password"
+        keyAlias "MyReleaseKey"
+        keyPassword "password"
+        <strong>v2SigningEnabled false</strong>
+      }
+    }
+  }
+</pre>
+
+<p class="caution"><strong>Perhatian: </strong> Jika Anda menandatangani aplikasi menggunakan APK
+  Signature Scheme v2 dan membuat perubahan lebih jauh pada aplikasi, tanda tangan aplikasi
+  menjadi tidak valid. Untuk alasan ini, gunakan alat seperti <code>zipalign</code>
+  sebelum menandatangani aplikasi Anda menggunakan APK Signature Scheme v2, bukan setelahnya.
+</p>
+
+<p>
+  Untuk informasi selengkapnya, baca dokumen Android Studio yang menjelaskan cara
+  <a href="{@docRoot}studio/publish/app-signing.html#release-mode">
+  menandatangani aplikasi</a> di Android Studio dan cara<a href="{@docRoot}studio/build/build-variants.html#signing"> mengonfigurasi
+  file build untuk menandatangani aplikasi</a> menggunakan Android Plugin untuk Gradle.
+</p>
+
+<h2 id="scoped_directory_access">Scoped Directory Access</h2>
+
+<p>Di Android N, aplikasi bisa menggunakan API baru untuk meminta akses ke direktori <a href="{@docRoot}guide/topics/data/data-storage.html#filesExternal">penyimpanan
+eksternal</a> tertentu, termasuk direktori di media lepas-pasang seperti kartu
+SD. API baru ini sangat menyederhanakan cara aplikasi Anda mengakses direktori
+penyimpanan eksternal standar, seperti direktori <code>Pictures</code>. Aplikasi
+seperti aplikasi foto bisa menggunakan API ini sebagai ganti menggunakan
+<code>READ_EXTERNAL_STORAGE</code>, yang memberikan akses ke semua direktori
+penyimpanan, atau Storage Access Framework, yang membuat pengguna mengarah ke
+direktori tersebut.</p>
+
+<p>Selain itu, API baru ini menyederhanakan langkah-langkah yang diambil pengguna untuk memberikan akses
+penyimpanan eksternal ke aplikasi Anda. Bila Anda menggunakan API baru, sistem akan menggunakan UI izin
+sederhana yang memperinci dengan jelas direktori apa yang aksesnya diminta
+oleh aplikasi.</p>
+
+<p>Untuk informasi selengkapnya, lihat dokumentasi pengembang
+<a href="{@docRoot}preview/features/scoped-folder-access.html">Scoped
+Directory Access</a>.</p>
+
+<h2 id="keyboard_shortcuts_helper">Keyboard Shortcuts Helper</h2>
+
+<p>
+Di Android N, pengguna bisa menekan "Alt + /" untuk memunculkan layar <em>Keyboard Shortcuts</em>
+yang menampilkan semua pintasan yang tersedia baik dari sistem maupun dari
+aplikasi yang sedang mendapatkan fokus. Ini diambil secara otomatis dari menu aplikasi
+jika tersedia, namun pengembang bisa menyediakan daftar pintasan yang telah disesuaikan
+untuk layar. Anda bisa melakukannya dengan mengganti metode
+<code>Activity.onProvideKeyboardShortcuts()</code> baru, yang dijelaskan dalam
+<a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referensi API</a> yang bisa diunduh.
+</p>
+
+<p>
+Untuk memunculkan Keyboard Shortcuts Helper dari mana saja di aplikasi Anda,
+panggil {@code Activity.requestKeyboardShortcutsHelper()} untuk aktivitas terkait.
+</p>
+
+<h2 id="sustained_performance_api">Sustained Performance API</h2>
+
+<p>
+Kinerja bisa berfluktuasi secara dramatis untuk aplikasi yang berjalan lama, karena
+sistem melakukan throttle pada mesin sistem-di-chip saat komponen perangkat mencapai
+batas suhunya. Fluktuasi ini memberikan target bergerak bagi pengembang
+aplikasi yang sedang membuat aplikasi berkinerja tinggi dan berjalan lama.
+</p>
+
+<p>
+Untuk menangani batasan ini, Android N menyertakan dukungan untuk
+<em>mode kinerja kontinu</em>, yang memungkinkan OEM memberikan petunjuk mengenai kemampuan kinerja
+perangkat untuk aplikasi yang berjalan lama. Pengembang aplikasi
+bisa menggunakan petunjuk ini untuk menyesuaikan aplikasi agar kinerja perangkat bisa diprediksi
+dan pada level yang konsisten dalam jangka waktu lama.
+</p>
+
+<p>
+Pengembang aplikasi bisa mencoba API baru ini dalam N Developer Preview pada
+perangkat Nexus 6P saja. Untuk menggunakan fitur ini,
+setel flag jendela kinerja kontinu
+yang ingin Anda jalankan dalam mode kinerja kontinu. Setel flag ini menggunakan metode
+{@code Window.setSustainedPerformanceMode()}. Sistem secara otomatis
+akan menonaktifkan mode ini bila jendela tidak lagi mendapatkan fokus.
+</p>
+
+<h2 id="vr">Dukungan VR</h2>
+
+<p>
+Android N menambahkan dukungan platform dan optimalisasi untuk VR Mode baru yang memungkinkan
+pengembang membuat pengalaman VR berkualitas tinggi di seluler bagi para pengguna. Ada banyak perbaikan
+kinerja, termasuk akses ke inti CPU yang eksklusif untuk aplikasi VR.
+Di dalam aplikasi, Anda bisa memanfaatkan pelacakan kepala yang cerdas,
+dan pemberitahuan stereo yang bekerja untuk VR. Hal terpenting adalah Android N menyediakan
+grafis dengan latensi sangat rendah. Untuk informasi selengkapnya tentang membangun aplikasi VR untuk Android N,
+lihat <a href="https://developers.google.com/vr/android/">Google VR SDK untuk Android</a>.
+</p>
+
+
+<h2 id="print_svc">Penyempurnaan Layanan Cetak</h2>
+
+<p>
+  Di Android N, pengembang layanan cetak kini bisa menampilkan informasi tambahan
+  tentang masing-masing printer dan pekerjaan cetak.
+</p>
+
+<p>
+  Saat mendaftarkan masing-masing printer, layanan cetak kini bisa menyetel
+  ikon per printer dalam dua cara:
+</p>
+
+<ul>
+  <li>Anda bisa menyetel ikon dari ID sumber daya dengan memanggil
+  <code>PrinterInfo.Builder.setResourceIconId()</code>
+  </li>
+
+  <li>Anda bisa menampilkan ikon dari jaringan dengan memanggil
+  <code>PrinterInfo.Builder.setHasCustomPrinterIcon()</code>, dan menyetel sebuah
+ callback bila ikon diminta menggunakan
+  <code>android.printservice.PrinterDiscoverySession.onRequestCustomPrinterIcon()</code>
+  </li>
+</ul>
+
+<p>
+  Selain itu, Anda bisa menyediakan aktivitas per printer untuk menampilkan informasi
+  tambahan dengan memanggil <code>PrinterInfo.Builder.setInfoIntent()</code>.
+</p>
+
+<p>
+  Anda bisa menunjukkan kemajuan dan status pekerjaan cetak di
+  pemberitahuan pekerjaan cetak dengan memanggil masing-masing
+  <code>android.printservice.PrintJob.setProgress()</code> dan
+  <code>android.printservice.PrintJob.setStatus()</code>.
+</p>
+
+<p>
+  Untuk informasi selengkapnya tentang metode ini,lihat  dalam <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referensi  API</a> yang bisa diunduh.
+</p>
+
+<h2 id="framemetrics_api">FrameMetricsListener API</h2>
+
+<p>
+FrameMetricsListener API memungkinkan aplikasi untuk memantau
+kinerja rendering UI. API tersebut menyediakan kemampuan ini dengan mengekspos Pub/Sub API streaming
+untuk mentransfer info frame-timing untuk jendela aplikasi saat ini. Data yang dikembalikan
+setara dengan yang ditampilkan <code><a href="{@docRoot}tools/help/shell.html#shellcommands">adb shell</a>
+dumpsys gfxinfo framestats</code>, namun tidak dibatasi pada 120 bingkai.
+</p>
+
+<p>
+Anda bisa menggunakan FrameMetricsListener untuk mengukur kinerja UI
+level interaksi di produksi, tanpa koneksi USB. API
+ini memungkinkan pengumpulan data dengan granularitas lebih tinggi daripada
+{@code adb shell dumpsys gfxinfo}. Granularitas lebih tinggi ini dimungkinkan karena
+sistem bisa mengumpulkan data untuk interaksi tertentu di aplikasi; sistem
+tidak perlu merekam ringkasan global untuk keseluruhan kinerja
+aplikasi, atau mengosongkan status global yang ada. Anda bisa menggunakan kemampuan ini
+untuk mengumpulkan data kinerja dan menangkap regresi di kinerja UI
+untuk kasus penggunaan sungguhan di dalam aplikasi.
+</p>
+
+<p>
+Untuk memantau sebuah jendela, implementasikan metode callback <code>FrameMetricsListener.onMetricsAvailable()</code>
+dan daftarkan di jendela itu. Untuk informasi selengkapnya, lihat
+dokumentasi kelas {@code FrameMetricsListener} di
+<a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referensi API</a> yang bisa diunduh.
+</p>
+
+<p>
+API menyediakan objek {@code FrameMetrics}, yang berisi data timing yang
+dilaporkan subsistem rendering untuk berbagai tahap pencapaian dalam daur hidup bingkai.
+Metrik yang didukung adalah: {@code UNKNOWN_DELAY_DURATION},
+{@code INPUT_HANDLING_DURATION}, {@code ANIMATION_DURATION},
+{@code LAYOUT_MEASURE_DURATION}, {@code DRAW_DURATION}, {@code SYNC_DURATION},
+{@code COMMAND_ISSUE_DURATION}, {@code SWAP_BUFFERS_DURATION},
+{@code TOTAL_DURATION}, dan {@code FIRST_DRAW_FRAME}.
+</p>
+
+
+<h2 id="virtual_files">File Maya</h2>
+
+<p>
+  Di versi Android sebelumnya, aplikasi Anda bisa menggunakan Storage Access
+  Framework untuk memungkinkan pengguna memilih file dari akun penyimpanan awan mereka,
+  seperti Google Drive. Akan tetapi, tidak ada cara untuk merepresentasikan file yang
+  tidak memiliki representasi bytecode langsung; setiap file diharuskan menyediakan
+  aliran masukan.
+</p>
+
+<p>
+  Android N menambahkan konsep <em>file maya</em> pada Storage Access
+  Framework. Fitur file maya memungkinkan
+  {@link android.provider.DocumentsProvider} Anda mengembalikan URI dokumen yang bisa
+  digunakan bersama intent {@link android.content.Intent#ACTION_VIEW} sekalipun
+  tidak memiliki representasi bytecode langsung. Android N juga memungkinkan Anda untuk
+  menyediakan format alternatif untuk file pengguna, maya atau dengan cara lain.
+</p>
+
+<p>
+  Untuk mendapatkan URI sebuah dokumen maya di aplikasi Anda, terlebih dahulu Anda membuat
+  {@link android.content.Intent} untuk membuka UI pemilih file. Karena aplikasi
+  tidak bisa membuka file maya secara langsung dengan menggunakan metode
+  {@link android.content.ContentResolver#openInputStream(Uri) openInputStream()},
+   aplikasi Anda tidak akan menerima file maya jika Anda memasukkan kategori
+  {@link android.content.Intent#CATEGORY_OPENABLE}.
+</p>
+
+<p>
+  Setelah pengguna menentukan pilihan, sistem akan memanggil metode
+  {@link android.app.Activity#onActivityResult onActivityResult()}.
+  Aplikasi Anda bisa mengambil URI file maya dan mendapatkan aliran masukan, seperti yang
+  diperagakan dalam cuplikan kode di bawah.
+</p>
+
+<pre>
+  // Other Activity code ...
+
+  final static private int REQUEST_CODE = 64;
+
+  // We listen to the OnActivityResult event to respond to the user's selection.
+  &#64;Override
+  public void onActivityResult(int requestCode, int resultCode,
+    Intent resultData) {
+      try {
+        if (requestCode == REQUEST_CODE &amp;&amp;
+            resultCode == Activity.RESULT_OK) {
+
+            Uri uri = null;
+
+            if (resultData != null) {
+                uri = resultData.getData();
+
+                ContentResolver resolver = getContentResolver();
+
+                // Before attempting to coerce a file into a MIME type,
+                // check to see what alternative MIME types are available to
+                // coerce this file into.
+                String[] streamTypes =
+                  resolver.getStreamTypes(uri, "*/*");
+
+                AssetFileDescriptor descriptor =
+                    resolver.openTypedAssetFileDescriptor(
+                        uri,
+                        streamTypes[0],
+                        null);
+
+                // Retrieve a stream to the virtual file.
+                InputStream inputStream = descriptor.createInputStream();
+            }
+        }
+      } catch (Exception ex) {
+        Log.e("EXCEPTION", "ERROR: ", ex);
+      }
+  }
+</pre>
+
+<p>
+  Untuk informasi selengkapnya tentang mengakses file pengguna, lihat
+  <a href="{@docRoot}guide/topics/providers/document-provider.html">Panduan Storage
+  Access Frameworks</a>.
+</p>

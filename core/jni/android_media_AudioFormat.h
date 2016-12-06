@@ -20,18 +20,20 @@
 #include <system/audio.h>
 
 // keep these values in sync with AudioFormat.java
-#define ENCODING_PCM_16BIT  2
-#define ENCODING_PCM_8BIT   3
-#define ENCODING_PCM_FLOAT  4
-#define ENCODING_AC3        5
-#define ENCODING_E_AC3      6
-#define ENCODING_DTS        7
-#define ENCODING_DTS_HD     8
-#define ENCODING_MP3        9
-#define ENCODING_AAC_LC     10
-#define ENCODING_AAC_HE_V1  11
-#define ENCODING_AAC_HE_V2  12
-#define ENCODING_IEC61937   13
+#define ENCODING_PCM_16BIT      2
+#define ENCODING_PCM_8BIT       3
+#define ENCODING_PCM_FLOAT      4
+#define ENCODING_AC3            5
+#define ENCODING_E_AC3          6
+#define ENCODING_DTS            7
+#define ENCODING_DTS_HD         8
+#define ENCODING_MP3            9
+#define ENCODING_AAC_LC         10
+#define ENCODING_AAC_HE_V1      11
+#define ENCODING_AAC_HE_V2      12
+#define ENCODING_IEC61937       13
+#define ENCODING_DOLBY_TRUEHD   14
+
 #define ENCODING_INVALID    0
 #define ENCODING_DEFAULT    1
 
@@ -65,6 +67,8 @@ static inline audio_format_t audioFormatToNative(int audioFormat)
         return AUDIO_FORMAT_AAC_HE_V1;
     case ENCODING_AAC_HE_V2:
         return AUDIO_FORMAT_AAC_HE_V2;
+    case ENCODING_DOLBY_TRUEHD:
+        return AUDIO_FORMAT_DOLBY_TRUEHD;
     case ENCODING_IEC61937:
         return AUDIO_FORMAT_IEC61937;
     case ENCODING_DEFAULT:
@@ -108,6 +112,8 @@ static inline int audioFormatFromNative(audio_format_t nativeFormat)
         return ENCODING_AAC_HE_V2;
     case AUDIO_FORMAT_IEC61937:
         return ENCODING_IEC61937;
+    case AUDIO_FORMAT_DOLBY_TRUEHD:
+        return ENCODING_DOLBY_TRUEHD;
     case AUDIO_FORMAT_DEFAULT:
         return ENCODING_DEFAULT;
     default:

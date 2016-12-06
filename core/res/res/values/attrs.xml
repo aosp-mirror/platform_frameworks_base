@@ -1048,6 +1048,9 @@ i
              the status bar (via statusBarColor) and navigation bar (via navigationBarColor). -->
         <attr name="colorPrimaryDark" format="color" />
 
+        <!-- The secondary branding color for the app. -->
+        <attr name="colorSecondary" format="color" />
+
         <!-- Bright complement to the primary branding color. By default, this is the color applied
              to framework controls (via colorControlActivated). -->
         <attr name="colorAccent" format="color" />
@@ -1832,6 +1835,10 @@ i
         <enum name="KEYCODE_CUT" value="277" />
         <enum name="KEYCODE_COPY" value="278" />
         <enum name="KEYCODE_PASTE" value="279" />
+        <enum name="KEYCODE_SYSTEM_NAVIGATION_UP" value="280" />
+        <enum name="KEYCODE_SYSTEM_NAVIGATION_DOWN" value="281" />
+        <enum name="KEYCODE_SYSTEM_NAVIGATION_LEFT" value="282" />
+        <enum name="KEYCODE_SYSTEM_NAVIGATION_RIGHT" value="283" />
     </attr>
 
     <!-- ***************************************************************** -->
@@ -2043,6 +2050,15 @@ i
         <attr name="showTitle" format="boolean" />
         <!-- @hide Whether fullDark, etc. should use default values if null. -->
         <attr name="needsDefaultBackgrounds" format="boolean" />
+        <!-- @hide Workaround until we replace AlertController with custom layout. -->
+        <attr name="controllerType">
+            <!-- The default controller. -->
+            <enum name="normal" value="0" />
+            <!-- Controller for micro specific layout. -->
+            <enum name="micro" value="1" />
+        </attr>
+        <!-- @hide Offset when scrolling to a selection. -->
+        <attr name="selectionScrollOffset" format="dimension" />
     </declare-styleable>
 
     <!-- @hide -->
@@ -2619,10 +2635,11 @@ i
             <enum name="viewEnd" value="6" />
         </attr>
 
-        <!-- Controls how this View is important for accessibility which is if it fires
-             accessibility events and if it is reported to accessibility services that
-             query the screen. Note: While not recommended, an accessibility service may
-             decide to ignore this attribute and operate on all views in the view tree. -->
+        <!-- Describes whether or not this view is important for accessibility.
+             If it is important, the view fires accessibility events and is
+             reported to accessibility services that query the screen. Note:
+             While not recommended, an accessibility service may decide to
+             ignore this attribute and operate on all views in the view tree. -->
         <attr name="importantForAccessibility" format="integer">
             <!-- The system determines whether the view is important for accessibility - default
                  (recommended). -->
@@ -3776,7 +3793,10 @@ i
         <!-- An optional argument to supply a maximum height for this view.
              See {see android.widget.ImageView#setMaxHeight} for details. -->
         <attr name="maxHeight" format="dimension" />
-        <!-- Set a tinting color for the image. By default, the tint will blend using SRC_ATOP mode. -->
+        <!-- The tinting color for the image. By default, the tint will blend using SRC_ATOP mode.
+             Please note that for compatibility reasons, this is NOT consistent with the default
+             SRC_IN tint mode used by {@link android.widget.ImageView#setImageTintList} and by
+             similar tint attributes on other views. -->
         <attr name="tint" format="color" />
         <!-- If true, the image view will be baseline aligned with based on its
              bottom edge. -->
@@ -4821,6 +4841,11 @@ i
         <!-- The list year's selected circle color in the list.
              {@deprecated No longer displayed.} -->
         <attr name="yearListSelectorColor" format="color" />
+
+        <!-- @hide Whether this time picker is being displayed within a dialog,
+             in which case it may ignore the requested time picker mode due to
+             space considerations. -->
+        <attr name="dialogMode" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="TwoLineListItem">
@@ -5149,6 +5174,11 @@ i
         <!-- The background color state list for the AM/PM selectors.
              {@deprecated Use headerBackground instead.}-->
         <attr name="amPmBackgroundColor" format="color" />
+
+        <!-- @hide Whether this time picker is being displayed within a dialog,
+             in which case it may ignore the requested time picker mode due to
+             space considerations. -->
+        <attr name="dialogMode" />
     </declare-styleable>
 
     <!-- ========================= -->
@@ -5295,6 +5325,21 @@ i
         <attr name="alpha" />
     </declare-styleable>
 
+    <!-- Drawable used to render according to the animation scale. Esp. when it is 0 due to battery
+         saver mode. It should contain one animatable drawable and one static drawable.
+         @hide -->
+    <declare-styleable name="AnimationScaleListDrawable">
+    </declare-styleable>
+
+    <!-- Attributes that can be assigned to a AnimationScaleListDrawable item.
+         @hide -->
+    <declare-styleable name="AnimationScaleListDrawableItem">
+        <!-- Reference to a drawable resource to use for the state. If not
+             given, the drawable must be defined by the first child tag. -->
+        <attr name="drawable" />
+    </declare-styleable>
+
+
     <!-- Drawable used to render a geometric shape, with a gradient or a solid color. -->
     <declare-styleable name="GradientDrawable">
         <!-- Indicates whether the drawable should intially be visible. -->
@@ -5324,7 +5369,10 @@ i
         <attr name="innerRadius" format="dimension" />
         <!-- Thickness of the ring. When defined, thicknessRatio is ignored. -->
         <attr name="thickness" format="dimension" />
-        <!-- Indicates whether the drawable's level affects the way the gradient is drawn. -->
+        <!-- Whether the drawable level value (see
+             {@link android.graphics.drawable.Drawable#getLevel()}) is used to scale the shape.
+             Scaling behavior depends on the shape type. For "ring", the angle is scaled from 0 to
+             360. For all other types, there is no effect. The default value is true. -->
         <attr name="useLevel" />
         <!-- If set, specifies the color to apply to the drawable as a tint. By default,
              no tint is applied. May be a color state list. -->
@@ -5358,28 +5406,37 @@ i
     <declare-styleable name="GradientDrawableGradient">
         <!-- Start color of the gradient. -->
         <attr name="startColor" format="color" />
-        <!-- Optional center color. For linear gradients, use centerX or centerY
-             to place the center color. -->
+        <!-- Optional center color. For linear gradients, use centerX or centerY to place the center
+             color. -->
         <attr name="centerColor" format="color" />
         <!-- End color of the gradient. -->
         <attr name="endColor" format="color" />
+        <!-- Whether the drawable level value (see
+             {@link android.graphics.drawable.Drawable#getLevel()}) is used to scale the gradient.
+             Scaling behavior varies based on gradient type. For "linear", adjusts the ending
+             position along the gradient's axis of orientation. For "radial", adjusts the outer
+             radius. For "sweep", adjusts the ending angle. The default value is false. -->
         <attr name="useLevel" format="boolean" />
-        <!-- Angle of the gradient. -->
+        <!-- Angle of the gradient, used only with linear gradient. Must be a multiple of 45 in the
+             range [0, 315]. -->
         <attr name="angle" format="float" />
         <!-- Type of gradient. The default type is linear. -->
         <attr name="type">
-            <!-- Linear gradient. -->
+            <!-- Linear gradient extending across the center point. -->
             <enum name="linear" value="0" />
-            <!-- Radial, or circular, gradient. -->
+            <!-- Radial gradient extending from the center point outward. -->
             <enum name="radial" value="1" />
-            <!-- Sweep, or angled or diamond, gradient. -->
+            <!-- Sweep (or angular) gradient sweeping counter-clockwise around the center point. -->
             <enum name="sweep"  value="2" />
         </attr>
-        <!-- X coordinate of the origin of the gradient within the shape. -->
+        <!-- X-position of the center point of the gradient within the shape as a fraction of the
+             width. The default value is 0.5. -->
         <attr name="centerX" format="float|fraction" />
-        <!-- Y coordinate of the origin of the gradient within the shape. -->
+        <!-- Y-position of the center point of the gradient within the shape as a fraction of the
+             height. The default value is 0.5. -->
         <attr name="centerY" format="float|fraction" />
-        <!-- Radius of the gradient, used only with radial gradient. -->
+        <!-- Radius of the gradient, used only with radial gradient. May be an explicit dimension
+             or a fractional value relative to the shape's minimum dimension. -->
         <attr name="gradientRadius" format="float|fraction|dimension" />
     </declare-styleable>
 
@@ -7324,14 +7381,28 @@ i
     <declare-styleable name="Wallpaper">
         <attr name="settingsActivity" />
 
-        <!-- Reference to a the wallpaper's thumbnail bitmap. -->
+        <!-- Reference to the wallpaper's thumbnail bitmap. -->
         <attr name="thumbnail" format="reference" />
 
-        <!-- Name of the author of this component, e.g. Google. -->
+        <!-- Name of the author and/or source/collection of this component, e.g. Art Collection, Picasso. -->
         <attr name="author" format="reference" />
 
         <!-- Short description of the component's purpose or behavior. -->
         <attr name="description" />
+
+        <!-- Uri that specifies a link for further context of this wallpaper, e.g. http://www.picasso.org. -->
+        <attr name="contextUri" format="reference" />
+
+        <!-- Title of the uri that specifies a link for further context of this wallpaper, e.g. Explore collection. -->
+        <attr name="contextDescription" format="reference" />
+
+        <!-- Whether to show any metadata when previewing the wallpaper. If this value is
+             set to true, any component that shows a preview of this live wallpaper should also show
+             accompanying information like the title, the description, the author and the context
+             description of this wallpaper so the user gets to know further information about this
+             wallpaper. -->
+        <attr name="showMetadataInPreview" format="boolean" />
+
     </declare-styleable>
 
     <!-- Use <code>dream</code> as the root tag of the XML resource that
@@ -7870,6 +7941,13 @@ i
         <attr name="divider" />
     </declare-styleable>
 
+    <!-- Base attributes available to PreferenceScreen. -->
+    <declare-styleable name="PreferenceScreen">
+        <!-- The layout for the PreferenceScreen. This should rarely need to be changed. -->
+        <attr name="screenLayout" format="reference" />
+        <attr name="divider" />
+    </declare-styleable>
+
     <!-- Base attributes available to PreferenceActivity. -->
     <declare-styleable name="PreferenceActivity">
         <!-- The layout for the Preference Activity. This should rarely need to be changed. -->
@@ -8225,5 +8303,18 @@ i
         <!-- @hide From Theme.colorBackground, used for the TaskDescription background 
                    color. -->
         <attr name="colorBackground" />
+    </declare-styleable>
+
+    <declare-styleable name="Shortcut">
+        <attr name="shortcutId" format="string" />
+        <attr name="enabled" />
+        <attr name="icon" />
+        <attr name="shortcutShortLabel" format="reference" />
+        <attr name="shortcutLongLabel" format="reference" />
+        <attr name="shortcutDisabledMessage" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="ShortcutCategories">
+        <attr name="name" />
     </declare-styleable>
 </resources>

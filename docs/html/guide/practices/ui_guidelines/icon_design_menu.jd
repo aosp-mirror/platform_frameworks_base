@@ -34,7 +34,7 @@ Screens</a></li>
 
 
 <div class="note design">
-<p><strong>New Guides for App Designers!</strong></p> 
+<p><strong>New Guides for App Designers!</strong></p>
 <p>Check out the new documents for designers at <strong><a
 href="{@docRoot}design/index.html">Android Design</a></strong>, including more guidelines
 for <a href="{@docRoot}design/style/iconography.html">Iconography</a>.</p>
@@ -267,7 +267,7 @@ menu icon <a href="#palette1">color palette</a>. </li>
 appropriate. For example, in Figure 3 the logical place for rounded corners is
 the roof and not the rest of the building.</span></li>
 
-<li>All dimensions specified on this page are based on a 48x48 pixel artboard 
+<li>All dimensions specified on this page are based on a 48x48 pixel artboard
 size with a 6 pixel safeframe.</li>
 
 <li>The menu icon effect (the outer glow) described in <a
@@ -277,7 +277,7 @@ safeframe.</li>
 
 <li><strong>Final art must be exported as a transparent PNG file.</strong></li>
 
-<li>Templates for creating menu icons in Adobe Photoshop are available in the 
+<li>Templates for creating menu icons in Adobe Photoshop are available in the
 Icon Templates Pack.</li>
 </ul>
 

@@ -288,20 +288,22 @@ public class RemoteCallbackList<E extends IInterface> {
      * @see #beginBroadcast
      */
     public void finishBroadcast() {
-        if (mBroadcastCount < 0) {
-            throw new IllegalStateException(
-                    "finishBroadcast() called outside of a broadcast");
-        }
-        
-        Object[] active = mActiveBroadcast;
-        if (active != null) {
-            final int N = mBroadcastCount;
-            for (int i=0; i<N; i++) {
-                active[i] = null;
+        synchronized (mCallbacks) {
+            if (mBroadcastCount < 0) {
+                throw new IllegalStateException(
+                        "finishBroadcast() called outside of a broadcast");
             }
+
+            Object[] active = mActiveBroadcast;
+            if (active != null) {
+                final int N = mBroadcastCount;
+                for (int i=0; i<N; i++) {
+                    active[i] = null;
+                }
+            }
+
+            mBroadcastCount = -1;
         }
-        
-        mBroadcastCount = -1;
     }
 
     /**

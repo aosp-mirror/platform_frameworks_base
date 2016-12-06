@@ -341,6 +341,8 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
         mDoubleTapDetected = false;
         mSecondFingerDoubleTap = false;
         mGestureStarted = false;
+        mGestureDetector.onTouchEvent(MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_CANCEL,
+                0.0f, 0.0f, 0));
         cancelGesture();
     }
 

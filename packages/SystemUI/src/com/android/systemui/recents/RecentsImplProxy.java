@@ -38,6 +38,7 @@ public class RecentsImplProxy extends IRecentsNonSystemUserCallbacks.Stub {
     private static final int MSG_DOCK_TOP_TASK = 7;
     private static final int MSG_ON_DRAGGING_IN_RECENTS = 8;
     private static final int MSG_ON_DRAGGING_IN_RECENTS_ENDED = 9;
+    private static final int MSG_SHOW_USER_TOAST = 10;
 
     private RecentsImpl mImpl;
 
@@ -109,6 +110,11 @@ public class RecentsImplProxy extends IRecentsNonSystemUserCallbacks.Stub {
         mHandler.sendMessage(mHandler.obtainMessage(MSG_ON_DRAGGING_IN_RECENTS_ENDED, velocity));
     }
 
+    @Override
+    public void showCurrentUserToast(int msgResId, int msgLength) {
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_SHOW_USER_TOAST, msgResId, msgLength));
+    }
+
     private final Handler mHandler = new Handler() {
 
         @Override
@@ -146,6 +152,9 @@ public class RecentsImplProxy extends IRecentsNonSystemUserCallbacks.Stub {
                     break;
                 case MSG_ON_DRAGGING_IN_RECENTS_ENDED:
                     mImpl.onDraggingInRecentsEnded((Float) msg.obj);
+                    break;
+                case MSG_SHOW_USER_TOAST:
+                    mImpl.onShowCurrentUserToast(msg.arg1, msg.arg2);
                     break;
                 default:
                     super.handleMessage(msg);

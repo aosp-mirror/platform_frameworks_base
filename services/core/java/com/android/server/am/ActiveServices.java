@@ -369,7 +369,7 @@ public final class ActiveServices {
         // we do not start the service and launch a review activity if the calling app
         // is in the foreground passing it a pending intent to start the service when
         // review is completed.
-        if (mAm.mPermissionReviewRequired || Build.PERMISSIONS_REVIEW_REQUIRED) {
+        if (Build.PERMISSIONS_REVIEW_REQUIRED) {
             if (!requestStartTargetPermissionsReviewIfNeededLocked(r, callingPackage,
                     callingUid, service, callerFg, userId)) {
                 return null;
@@ -700,7 +700,7 @@ public final class ActiveServices {
                         throw new IllegalArgumentException("null notification");
                     }
                     if (r.foregroundId != id) {
-                        r.cancelNotification();
+                        cancelForegroudNotificationLocked(r);
                         r.foregroundId = id;
                     }
                     notification.flags |= Notification.FLAG_FOREGROUND_SERVICE;
@@ -722,7 +722,7 @@ public final class ActiveServices {
                         }
                     }
                     if ((flags & Service.STOP_FOREGROUND_REMOVE) != 0) {
-                        r.cancelNotification();
+                        cancelForegroudNotificationLocked(r);
                         r.foregroundId = 0;
                         r.foregroundNoti = null;
                     } else if (r.appInfo.targetSdkVersion >= Build.VERSION_CODES.LOLLIPOP) {
@@ -736,6 +736,27 @@ public final class ActiveServices {
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    private void cancelForegroudNotificationLocked(ServiceRecord r) {
+        if (r.foregroundId != 0) {
+            // First check to see if this app has any other active foreground services
+            // with the same notification ID.  If so, we shouldn't actually cancel it,
+            // because that would wipe away the notification that still needs to be shown
+            // due the other service.
+            ServiceMap sm = getServiceMap(r.userId);
+            if (sm != null) {
+                for (int i = sm.mServicesByName.size()-1; i >= 0; i--) {
+                    ServiceRecord other = sm.mServicesByName.valueAt(i);
+                    if (other != r && other.foregroundId == r.foregroundId
+                            && other.packageName.equals(r.packageName)) {
+                        // Found one!  Abort the cancel.
+                        return;
+                    }
+                }
+            }
+            r.cancelNotification();
         }
     }
 
@@ -892,7 +913,7 @@ public final class ActiveServices {
         // we schedule binding to the service but do not start its process, then
         // we launch a review activity to which is passed a callback to invoke
         // when done to start the bound service's process to completing the binding.
-        if (mAm.mPermissionReviewRequired || Build.PERMISSIONS_REVIEW_REQUIRED) {
+        if (Build.PERMISSIONS_REVIEW_REQUIRED) {
             if (mAm.getPackageManagerInternalLocked().isPermissionsReviewRequired(
                     s.packageName, s.userId)) {
 
@@ -1149,9 +1170,7 @@ public final class ActiveServices {
 
                 if (r.binding.service.app != null) {
                     if (r.binding.service.app.whitelistManager) {
-                        // Must reset flag here because on computeOomAdjLocked() the service
-                        // connection will be gone...
-                        r.binding.service.app.whitelistManager = false;
+                        updateWhitelistManagerLocked(r.binding.service.app);
                     }
                     // This could have made the service less important.
                     if ((r.flags&Context.BIND_TREAT_LIKE_ACTIVITY) != 0) {
@@ -1563,7 +1582,7 @@ public final class ActiveServices {
             r.makeRestarting(mAm.mProcessStats.getMemFactorLocked(), now);
         }
 
-        r.cancelNotification();
+        cancelForegroudNotificationLocked(r);
 
         mAm.mHandler.removeCallbacks(r.restarter);
         mAm.mHandler.postAtTime(r.restarter, r.nextRestartTime);
@@ -2030,7 +2049,7 @@ public final class ActiveServices {
             }
         }
 
-        r.cancelNotification();
+        cancelForegroudNotificationLocked(r);
         r.isForeground = false;
         r.foregroundId = 0;
         r.foregroundNoti = null;

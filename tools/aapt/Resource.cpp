@@ -322,13 +322,18 @@ static status_t makeFileResources(Bundle* bundle, const sp<AaptAssets>& assets,
         }
         String8 resPath = it.getPath();
         resPath.convertToResPath();
-        table->addEntry(SourcePos(it.getPath(), 0), String16(assets->getPackage()),
+        status_t result = table->addEntry(SourcePos(it.getPath(), 0),
+                        String16(assets->getPackage()),
                         type16,
                         baseName,
                         String16(resPath),
                         NULL,
                         &it.getParams());
-        assets->addResource(it.getLeafName(), resPath, it.getFile(), type8);
+        if (result != NO_ERROR) {
+            hasErrors = true;
+        } else {
+            assets->addResource(it.getLeafName(), resPath, it.getFile(), type8);
+        }
     }
 
     return hasErrors ? STATUST(UNKNOWN_ERROR) : NO_ERROR;
@@ -1024,7 +1029,6 @@ static ssize_t extractPlatformBuildVersion(AssetManager& assets, Bundle* bundle)
         return NO_ERROR;
     }
 
-    ResXMLTree tree;
     Asset* asset = assets.openNonAsset(cookie, "AndroidManifest.xml", Asset::ACCESS_STREAMING);
     if (asset == NULL) {
         fprintf(stderr, "ERROR: Platform AndroidManifest.xml not found\n");
@@ -1032,11 +1036,17 @@ static ssize_t extractPlatformBuildVersion(AssetManager& assets, Bundle* bundle)
     }
 
     ssize_t result = NO_ERROR;
-    if (tree.setTo(asset->getBuffer(true), asset->getLength()) != NO_ERROR) {
-        fprintf(stderr, "ERROR: Platform AndroidManifest.xml is corrupt\n");
-        result = UNKNOWN_ERROR;
-    } else {
-        result = extractPlatformBuildVersion(tree, bundle);
+
+    // Create a new scope so that ResXMLTree is destroyed before we delete the memory over
+    // which it iterates (asset).
+    {
+        ResXMLTree tree;
+        if (tree.setTo(asset->getBuffer(true), asset->getLength()) != NO_ERROR) {
+            fprintf(stderr, "ERROR: Platform AndroidManifest.xml is corrupt\n");
+            result = UNKNOWN_ERROR;
+        } else {
+            result = extractPlatformBuildVersion(tree, bundle);
+        }
     }
 
     delete asset;
@@ -1364,6 +1374,10 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
         if (err != NO_ERROR) {
             hasErrors = true;
         }
+    }
+
+    if (hasErrors) {
+        return UNKNOWN_ERROR;
     }
 
     // --------------------------------------------------------------------

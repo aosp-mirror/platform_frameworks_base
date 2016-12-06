@@ -28,8 +28,8 @@ import android.os.UserManager;
  */
 public class UserInfo implements Parcelable {
 
-    /** 8 bits for user type */
-    public static final int FLAG_MASK_USER_TYPE = 0x000000FF;
+    /** 16 bits for user type */
+    public static final int FLAG_MASK_USER_TYPE = 0x0000FFFF;
 
     /**
      * *************************** NOTE ***************************
@@ -86,6 +86,11 @@ public class UserInfo implements Parcelable {
      * the foreground.
      */
     public static final int FLAG_EPHEMERAL = 0x00000100;
+
+    /**
+     * User is for demo purposes only and can be removed at any time.
+     */
+    public static final int FLAG_DEMO = 0x00000200;
 
     public static final int NO_PROFILE_GROUP_ID = UserHandle.USER_NULL;
 
@@ -151,6 +156,10 @@ public class UserInfo implements Parcelable {
 
     public boolean isInitialized() {
         return (flags & FLAG_INITIALIZED) == FLAG_INITIALIZED;
+    }
+
+    public boolean isDemo() {
+        return (flags & FLAG_DEMO) == FLAG_DEMO;
     }
 
     /**

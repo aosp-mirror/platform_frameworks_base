@@ -23,14 +23,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Resources;
 import android.content.res.Resources.Theme;
+import android.content.res.TypedArray;
 import android.net.Uri;
+import android.provider.Settings.Global;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 
 import java.net.URISyntaxException;
 import java.util.Locale;
@@ -91,6 +96,9 @@ public class HelpUtils {
      */
     public static boolean prepareHelpMenuItem(final Activity activity, MenuItem helpMenuItem,
             String helpUriString, String backupContext) {
+        if (Global.getInt(activity.getContentResolver(), Global.DEVICE_PROVISIONED, 0) == 0) {
+            return false;
+        }
         if (TextUtils.isEmpty(helpUriString)) {
             // The help url string is empty or null, so set the help menu item to be invisible.
             helpMenuItem.setVisible(false);
@@ -106,6 +114,9 @@ public class HelpUtils {
                 helpMenuItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
+                        MetricsLogger.action(activity,
+                            MetricsEvent.ACTION_SETTING_HELP_AND_FEEDBACK,
+                            intent.getStringExtra(EXTRA_CONTEXT));
                         try {
                             activity.startActivityForResult(intent, 0);
                         } catch (ActivityNotFoundException exc) {
@@ -128,11 +139,14 @@ public class HelpUtils {
 
     public static Intent getHelpIntent(Context context, String helpUriString,
             String backupContext) {
+        if (Global.getInt(context.getContentResolver(), Global.DEVICE_PROVISIONED, 0) == 0) {
+            return null;
+        }
         // Try to handle as Intent Uri, otherwise just treat as Uri.
         try {
             Intent intent = Intent.parseUri(helpUriString,
                     Intent.URI_ANDROID_APP_SCHEME | Intent.URI_INTENT_SCHEME);
-            addIntentParameters(context, intent, backupContext);
+            addIntentParameters(context, intent, backupContext, true /* sendPackageName */);
             ComponentName component = intent.resolveActivity(context.getPackageManager());
             if (component != null) {
                 return intent;
@@ -156,16 +170,32 @@ public class HelpUtils {
         return intent;
     }
 
-    private static void addIntentParameters(Context context, Intent intent, String backupContext) {
+    public static void addIntentParameters(Context context, Intent intent, String backupContext,
+            boolean sendPackageName) {
         if (!intent.hasExtra(EXTRA_CONTEXT)) {
             // Insert some context if none exists.
             intent.putExtra(EXTRA_CONTEXT, backupContext);
         }
+
+        Resources resources = context.getResources();
+        boolean includePackageName = resources.getBoolean(R.bool.config_sendPackageName);
+
+        if (sendPackageName && includePackageName) {
+            String[] packageNameKey =
+                    {resources.getString(R.string.config_helpPackageNameKey)};
+            String[] packageNameValue =
+                    {resources.getString(R.string.config_helpPackageNameValue)};
+            String intentExtraKey =
+                    resources.getString(R.string.config_helpIntentExtraKey);
+            String intentNameKey =
+                    resources.getString(R.string.config_helpIntentNameKey);
+            intent.putExtra(intentExtraKey, packageNameKey);
+            intent.putExtra(intentNameKey, packageNameValue);
+        }
         intent.putExtra(EXTRA_THEME, 1 /* Light, dark action bar */);
-        Theme theme = context.getTheme();
-        TypedValue typedValue = new TypedValue();
-        theme.resolveAttribute(android.R.attr.colorPrimary, typedValue, true);
-        intent.putExtra(EXTRA_PRIMARY_COLOR, context.getColor(typedValue.resourceId));
+        TypedArray array = context.obtainStyledAttributes(new int[]{android.R.attr.colorPrimary});
+        intent.putExtra(EXTRA_PRIMARY_COLOR, array.getColor(0, 0));
+        array.recycle();
     }
 
     /**

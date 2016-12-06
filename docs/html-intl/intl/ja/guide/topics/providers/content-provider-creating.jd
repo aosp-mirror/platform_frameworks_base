@@ -377,7 +377,7 @@ BLOB 列内のデータの内容は、MIME タイプ列の値によって示さ�
         プロバイダの任意のコンテンツ URI に一致します。
     </dd>
     <dt>
-        <code>content://com.example.app.provider/table2/*</code>: 
+        <code>content://com.example.app.provider/table2/*</code>:
     </dt>
     <dd>
         テーブル <code>dataset1</code> と <code>dataset2</code> のコンテンツ URI に一致しますが、<code>table1</code> や <code>table3</code> のコンテンツ URI には一致しません。
@@ -791,7 +791,7 @@ protected static final class MainDatabaseHelper extends SQLiteOpenHelper {
         タイプ部分: <code>vnd</code>
     </li>
     <li>
-        サブタイプ部分: 
+        サブタイプ部分:
         <ul>
             <li>
     URI パターンが 1 つの行の場合: <code>android.cursor.<strong>item</strong>/</code>

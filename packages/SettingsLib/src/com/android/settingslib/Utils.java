@@ -1,5 +1,6 @@
 package com.android.settingslib;
 
+import android.annotation.ColorInt;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -8,12 +9,14 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.content.pm.Signature;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.os.BatteryManager;
 import android.os.UserManager;
+import android.print.PrintManager;
 import com.android.internal.util.UserIcons;
 import com.android.settingslib.drawable.UserIconDrawable;
 
@@ -154,11 +157,19 @@ public class Utils {
         return statusString;
     }
 
+    @ColorInt
+    public static int getColorAccent(Context context) {
+        TypedArray ta = context.obtainStyledAttributes(new int[]{android.R.attr.colorAccent});
+        @ColorInt int colorAccent = ta.getColor(0, 0);
+        ta.recycle();
+        return colorAccent;
+    }
+
     /**
      * Determine whether a package is a "system package", in which case certain things (like
      * disabling notifications or disabling the package altogether) should be disallowed.
      */
-    public static boolean isSystemPackage(PackageManager pm, PackageInfo pkg) {
+    public static boolean isSystemPackage(Resources resources, PackageManager pm, PackageInfo pkg) {
         if (sSystemSignature == null) {
             sSystemSignature = new Signature[]{ getSystemSignature(pm) };
         }
@@ -175,7 +186,9 @@ public class Utils {
                         && sSystemSignature[0].equals(getFirstSignature(pkg)))
                 || pkg.packageName.equals(sPermissionControllerPackageName)
                 || pkg.packageName.equals(sServicesSystemSharedLibPackageName)
-                || pkg.packageName.equals(sSharedSystemSharedLibPackageName);
+                || pkg.packageName.equals(sSharedSystemSharedLibPackageName)
+                || pkg.packageName.equals(PrintManager.PRINT_SPOOLER_PACKAGE_NAME)
+                || isDeviceProvisioningPackage(resources, pkg.packageName);
     }
 
     private static Signature getFirstSignature(PackageInfo pkg) {
@@ -192,5 +205,15 @@ public class Utils {
         } catch (NameNotFoundException e) {
         }
         return null;
+    }
+
+    /**
+     * Returns {@code true} if the supplied package is the device provisioning app. Otherwise,
+     * returns {@code false}.
+     */
+    public static boolean isDeviceProvisioningPackage(Resources resources, String packageName) {
+        String deviceProvisioningPackage = resources.getString(
+                com.android.internal.R.string.config_deviceProvisioningPackage);
+        return deviceProvisioningPackage != null && deviceProvisioningPackage.equals(packageName);
     }
 }

@@ -301,7 +301,10 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
     LayerType layerType = properties().effectiveLayerType();
     // If we are not a layer OR we cannot be rendered (eg, view was detached)
     // we need to destroy any Layers we may have had previously
-    if (CC_LIKELY(layerType != LayerType::RenderLayer) || CC_UNLIKELY(!isRenderable())) {
+    if (CC_LIKELY(layerType != LayerType::RenderLayer)
+            || CC_UNLIKELY(!isRenderable())
+            || CC_UNLIKELY(properties().getWidth() == 0)
+            || CC_UNLIKELY(properties().getHeight() == 0)) {
         if (CC_UNLIKELY(mLayer)) {
             destroyLayer(mLayer);
             mLayer = nullptr;
@@ -419,6 +422,16 @@ void RenderNode::prepareTreeImpl(TreeInfo& info, bool functorsNeedLayer) {
         pushStagingDisplayListChanges(info);
     }
     prepareSubTree(info, childFunctorsNeedLayer, mDisplayList);
+
+    if (mDisplayList) {
+        for (auto& vectorDrawable : mDisplayList->getVectorDrawables()) {
+            // If any vector drawable in the display list needs update, damage the node.
+            if (vectorDrawable->isDirty()) {
+                damageSelf(info);
+            }
+            vectorDrawable->setPropertyChangeWillBeConsumed(true);
+        }
+    }
     pushLayerUpdate(info);
 
     info.damageAccumulator->popTransform();
@@ -479,8 +492,8 @@ void RenderNode::syncDisplayList(TreeInfo* info) {
         for (auto& iter : mDisplayList->getFunctors()) {
             (*iter.functor)(DrawGlInfo::kModeSync, nullptr);
         }
-        for (size_t i = 0; i < mDisplayList->getPushStagingFunctors().size(); i++) {
-            (*mDisplayList->getPushStagingFunctors()[i])();
+        for (auto& vectorDrawable : mDisplayList->getVectorDrawables()) {
+            vectorDrawable->syncProperties();
         }
     }
 }

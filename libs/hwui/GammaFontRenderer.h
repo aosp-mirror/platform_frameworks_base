@@ -22,6 +22,8 @@
 
 #include <SkPaint.h>
 
+#include <utils/String8.h>
+
 namespace android {
 namespace uirenderer {
 
@@ -46,8 +48,16 @@ public:
         return *mRenderer;
     }
 
-    uint32_t getFontRendererSize(GLenum format) const {
-        return mRenderer ? mRenderer->getCacheSize(format) : 0;
+    void dumpMemoryUsage(String8& log) const {
+        if (mRenderer) {
+            mRenderer->dumpMemoryUsage(log);
+        } else {
+            log.appendFormat("FontRenderer doesn't exist.\n");
+        }
+    }
+
+    uint32_t getSize() const {
+        return mRenderer ? mRenderer->getSize() : 0;
     }
 
     void endPrecaching();

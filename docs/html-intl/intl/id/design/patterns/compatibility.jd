@@ -1,0 +1,70 @@
+page.title=Kompatibilitas Mundur
+page.tags="support"
+page.metaDescription=Catatan tentang bagaimana Android 4.x menyesuaikan UI yang didesain untuk perangkat keras dan versi OS yang lebih lama.
+@jd:body
+
+<a class="notice-developers" href="{@docRoot}training/basics/supporting-devices/index.html">
+  <div>
+    <h3>Dokumen Pengembang</h3>
+    <p>Mendukung Perangkat Berbeda</p>
+  </div>
+</a>
+
+<p>Perubahan signifikan dalam Android 3.0 meliputi:</p>
+<ul>
+<li>Dihilangkannya tombol perangkat keras navigasi (Back, Menu, Search, Home) untuk membantu menangani navigasi
+  melalui kontrol maya (Back, Home, Recents).</li>
+<li>Pola yang tangguh untuk penggunaan menu pada action-bar.</li>
+</ul>
+<p>Android 4.0 membawa perubahan ini untuk tablet dengan platform ponsel.</p>
+
+<h2 id="older-hardware">Menyesuaikan Android 4.0 dengan Perangkat Keras dan Aplikasi yang Lebih Lama</h2>
+
+<div class="cols">
+  <div class="col-6">
+
+<h4>Ponsel dengan kontrol navigasi virtual</h4>
+<p>Aplikasi Android yang ditulis untuk Android 3.0 dan yang lebih baru menampilkan tindakan dalam action-bar. Tindakan yang tidak
+muat dalam action-bar atau tidak cukup penting untuk ditampilkan di tingkat atas akan muncul dalam
+action-overflow.</p>
+<p>Pengguna mengakses action-overflow dengan menyentuhnya dalam action-bar.</p>
+
+  </div>
+  <div class="col-7">
+
+    <img src="{@docRoot}design/media/compatibility_virtual_nav.png">
+
+  </div>
+</div>
+
+<div class="cols">
+  <div class="col-6">
+
+<h4>Ponsel dengan tombol navigasi fisik</h4>
+<p>Ponsel Android dengan tombol perangkat keras navigasi biasa tidak menampilkan baris navigasi virtual di
+bagian bawah layar. Sebagai gantinya, action-overflow tersedia dari tombol perangkat keras menu. Popup
+tindakan yang dihasilkan memiliki gaya yang sama dengan contoh sebelumnya, tetapi ditampilkan di bagian bawah layar.</p>
+
+  </div>
+  <div class="col-7">
+
+    <img src="{@docRoot}design/media/compatibility_physical_buttons.png">
+
+  </div>
+</div>
+
+<div class="cols">
+  <div class="col-6">
+
+<h4>Aplikasi lama pada ponsel dengan kontrol navigasi virtual</h4>
+<p>Bila Anda menjalankan aplikasi yang dibuat untuk Android 2.3 atau yang lebih lama pada ponsel
+dengan kontrol navigasi virtual, sebuah kontrol action-overflow akan muncul di sebelah kanan baris navigasi virtual. Anda
+dapat menyentuh kontrol itu untuk menampilkan tindakan aplikasi dalam gaya menu Android biasa.</p>
+
+  </div>
+  <div class="col-7">
+
+    <img src="{@docRoot}design/media/compatibility_legacy_apps.png">
+
+  </div>
+</div>

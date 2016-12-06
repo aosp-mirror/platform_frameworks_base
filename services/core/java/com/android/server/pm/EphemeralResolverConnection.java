@@ -16,6 +16,8 @@
 
 package com.android.server.pm;
 
+import android.app.EphemeralResolverService;
+import android.app.IEphemeralResolver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -30,12 +32,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.TimedRemoteCaller;
 
-import com.android.internal.app.EphemeralResolverService;
-import com.android.internal.app.IEphemeralResolver;
-import com.android.internal.os.TransferPipe;
-
 import java.io.FileDescriptor;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,14 +60,15 @@ final class EphemeralResolverConnection {
 
     public EphemeralResolverConnection(Context context, ComponentName componentName) {
         mContext = context;
-        mIntent = new Intent().setComponent(componentName);
+        mIntent = new Intent(Intent.ACTION_RESOLVE_EPHEMERAL_PACKAGE).setComponent(componentName);
     }
 
-    public final List<EphemeralResolveInfo> getEphemeralResolveInfoList(int hashPrefix) {
+    public final List<EphemeralResolveInfo> getEphemeralResolveInfoList(
+            int hashPrefix[], int prefixMask) {
         throwIfCalledOnMainThread();
         try {
             return mGetEphemeralResolveInfoCaller.getEphemeralResolveInfoList(
-                    getRemoteInstanceLazy(), hashPrefix);
+                    getRemoteInstanceLazy(), hashPrefix, prefixMask);
         } catch (RemoteException re) {
         } catch (TimeoutException te) {
         } finally {
@@ -87,11 +85,13 @@ final class EphemeralResolverConnection {
                     .append((mRemoteInstance != null) ? "true" : "false").println();
 
             pw.flush();
+
             try {
-                TransferPipe.dumpAsync(getRemoteInstanceLazy().asBinder(), fd,
-                        new String[] { prefix });
-            } catch (IOException | TimeoutException | RemoteException e) {
-                pw.println("Failed to dump remote instance: " + e);
+                getRemoteInstanceLazy().asBinder().dump(fd, new String[] { prefix });
+            } catch (TimeoutException te) {
+                /* ignore */
+            } catch (RemoteException re) {
+                /* ignore */
             }
         }
     }
@@ -177,10 +177,10 @@ final class EphemeralResolverConnection {
         }
 
         public List<EphemeralResolveInfo> getEphemeralResolveInfoList(
-                IEphemeralResolver target, int hashPrefix)
+                IEphemeralResolver target, int hashPrefix[], int prefixMask)
                         throws RemoteException, TimeoutException {
             final int sequence = onBeforeRemoteCall();
-            target.getEphemeralResolveInfoList(mCallback, hashPrefix, sequence);
+            target.getEphemeralResolveInfoList(mCallback, hashPrefix, prefixMask, sequence);
             return getResultTimed(sequence);
         }
     }

@@ -1270,7 +1270,7 @@ the right edge, a right gravity clips the left edge, and neither clips both edge
 progressively reveal the image:</p>
 <pre>
 ImageView imageview = (ImageView) findViewById(R.id.image);
-ClipDrawable drawable = (ClipDrawable) imageview.getDrawable();
+ClipDrawable drawable = (ClipDrawable) imageview.getBackground();
 drawable.setLevel(drawable.getLevel() + 1000);
 </pre>
 

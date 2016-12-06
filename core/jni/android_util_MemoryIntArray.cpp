@@ -160,16 +160,8 @@ static jint android_util_MemoryIntArray_size(JNIEnv* env, jobject clazz, jint fd
         return -1;
     }
 
-    // Use ASHMEM_GET_SIZE to find out if the fd refers to an ashmem region.
-    // ASHMEM_GET_SIZE should succeed for all ashmem regions, and the kernel
-    // should return ENOTTY for all other valid file descriptors
     int ashmemSize = ashmem_get_size_region(fd);
     if (ashmemSize < 0) {
-        if (errno == ENOTTY) {
-            // ENOTTY means that the ioctl does not apply to this object,
-            // i.e., it is not an ashmem region.
-            return -1;
-        }
         // Some other error, throw exception
         jniThrowIOException(env, errno);
         return -1;

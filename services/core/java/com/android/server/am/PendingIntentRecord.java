@@ -38,6 +38,7 @@ import com.android.server.am.ActivityStackSupervisor.ActivityContainer;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 
 final class PendingIntentRecord extends IIntentSender.Stub {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "PendingIntentRecord" : TAG_AM;
@@ -102,7 +103,7 @@ final class PendingIntentRecord extends IIntentSender.Stub {
             if (requestResolvedType != null) {
                 hash = (ODD_PRIME_NUMBER*hash) + requestResolvedType.hashCode();
             }
-            hash = (ODD_PRIME_NUMBER*hash) + _p.hashCode();
+            hash = (ODD_PRIME_NUMBER*hash) + (_p != null ? _p.hashCode() : 0);
             hash = (ODD_PRIME_NUMBER*hash) + _t;
             hashCode = hash;
             //Slog.i(ActivityManagerService.TAG, this + " hashCode=0x"
@@ -121,20 +122,14 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                 if (userId != other.userId){
                     return false;
                 }
-                if (!packageName.equals(other.packageName)) {
+                if (!Objects.equals(packageName, other.packageName)) {
                     return false;
                 }
                 if (activity != other.activity) {
                     return false;
                 }
-                if (who != other.who) {
-                    if (who != null) {
-                        if (!who.equals(other.who)) {
-                            return false;
-                        }
-                    } else if (other.who != null) {
-                        return false;
-                    }
+                if (!Objects.equals(who, other.who)) {
+                    return false;
                 }
                 if (requestCode != other.requestCode) {
                     return false;
@@ -148,14 +143,8 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                         return false;
                     }
                 }
-                if (requestResolvedType != other.requestResolvedType) {
-                    if (requestResolvedType != null) {
-                        if (!requestResolvedType.equals(other.requestResolvedType)) {
-                            return false;
-                        }
-                    } else if (other.requestResolvedType != null) {
-                        return false;
-                    }
+                if (!Objects.equals(requestResolvedType, other.requestResolvedType)) {
+                    return false;
                 }
                 if (flags != other.flags) {
                     return false;

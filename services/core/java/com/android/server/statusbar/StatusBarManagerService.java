@@ -29,8 +29,11 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
+import android.view.KeyEvent;
+
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
@@ -409,6 +412,18 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         if (mBar != null) {
             try {
                 mBar.clickQsTile(component);
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    @Override
+    public void handleSystemNavigationKey(int key) throws RemoteException {
+        enforceExpandStatusBar();
+
+        if (mBar != null) {
+            try {
+                mBar.handleSystemNavigationKey(key);
             } catch (RemoteException ex) {
             }
         }
@@ -928,6 +943,20 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
                                 + " token=" + tok.token);
             }
             pw.println("  mCurrentUserId=" + mCurrentUserId);
+            pw.println("  mIcons=");
+            for (String slot : mIcons.keySet()) {
+                pw.println("    ");
+                pw.print(slot);
+                pw.print(" -> ");
+                final StatusBarIcon icon = mIcons.get(slot);
+                pw.print(icon);
+                if (!TextUtils.isEmpty(icon.contentDescription)) {
+                    pw.print(" \"");
+                    pw.print(icon.contentDescription);
+                    pw.print("\"");
+                }
+                pw.println();
+            }
         }
     }
 }

@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<!-- Copyright (C) 2016 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<user locales="en-US" last-app-scan-time="3113976673">
+    <package name="com.android.test.1" call-count="0" last-reset="1468976368772">
+        <package-info version="25" last_udpate_time="1230796800000" />
+        <shortcut id="manifest-shortcut-storage" activity="com.android.test.1/com.android.test.1.Settings" title="Storage" intent="#Intent;action=android.settings.INTERNAL_STORAGE_SETTINGS;end" timestamp="1469050672334" flags="1" >
+            <intent-extras>
+                <int name="key" value="12345" />
+            </intent-extras>
+        </shortcut>
+    </package>
+</user>

@@ -176,6 +176,11 @@ public class VpnProfile implements Cloneable, Parcelable {
      * connection.
      */
     public boolean isValidLockdownProfile() {
+        // b/7064069: lockdown firewall blocks ports that would be used for PPTP
+        if (type == TYPE_PPTP) {
+            return false;
+        }
+
         try {
             InetAddress.parseNumericAddress(server);
 

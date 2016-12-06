@@ -1,5 +1,6 @@
 package com.android.server.wm;
 
+import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DIM_LAYER;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -250,6 +251,13 @@ class DimLayerController {
                     duration = getDimLayerFadeDuration(duration);
                 }
                 state.dimLayer.show(dimLayer, dimAmount, duration);
+
+                // If we showed a dim layer, make sure to redo the layout because some things depend
+                // on whether a dim layer is showing or not.
+                if (targetAlpha == 0) {
+                    mDisplayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_LAYOUT;
+                    mDisplayContent.layoutNeeded = true;
+                }
             }
         } else if (state.dimLayer.getLayer() != dimLayer) {
             state.dimLayer.setLayer(dimLayer);

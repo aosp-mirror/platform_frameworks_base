@@ -24,6 +24,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
+import com.android.internal.logging.MetricsLogger;
 
 /**
  * A class to keep track of the remove state for a given client.
@@ -46,6 +47,7 @@ public abstract class RemovalClient extends ClientMonitor {
             final int result = daemon.remove(mFingerId, getGroupId());
             if (result != 0) {
                 Slog.w(TAG, "startRemove with id = " + mFingerId + " failed, result=" + result);
+                MetricsLogger.histogram(getContext(), "fingerprintd_remove_start_error", result);
                 onError(FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE);
                 return result;
             }

@@ -319,7 +319,7 @@ private class DownloadImageTask extends AsyncTask&lt;String, Void, Bitmap&gt; {
     protected Bitmap doInBackground(String... urls) {
         return loadImageFromNetwork(urls[0]);
     }
-    
+
     /** The system calls this to perform work in the UI thread and delivers
       * the result from doInBackground() */
     protected void onPostExecute(Bitmap result) {

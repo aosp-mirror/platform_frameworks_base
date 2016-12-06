@@ -16,6 +16,8 @@
 
 package android.view.inputmethod;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.KeyCharacterMap;
@@ -41,12 +43,14 @@ import android.view.KeyEvent;
  *     in {@link android.os.Build.VERSION_CODES#HONEYCOMB}.</li>
  *     <li>{@link #requestCursorUpdates(int)}, which was introduced in
  *     {@link android.os.Build.VERSION_CODES#LOLLIPOP}.</li>
- *     <li>{@link #deleteSurroundingTextInCodePoints(int, int)}}, which
+ *     <li>{@link #deleteSurroundingTextInCodePoints(int, int)}, which
  *     was introduced in {@link android.os.Build.VERSION_CODES#N}.</li>
- *     <li>{@link #getHandler()}}, which was introduced in
+ *     <li>{@link #getHandler()}, which was introduced in
  *     {@link android.os.Build.VERSION_CODES#N}.</li>
- *     <li>{@link #closeConnection()}}, which was introduced in
+ *     <li>{@link #closeConnection()}, which was introduced in
  *     {@link android.os.Build.VERSION_CODES#N}.</li>
+ *     <li>{@link #commitContent(InputContentInfo, int, Bundle)}, which was
+ *     introduced in {@link android.os.Build.VERSION_CODES#N_MR1}.</li>
  * </ul>
  *
  * <h3>Implementing an IME or an editor</h3>
@@ -836,4 +840,53 @@ public interface InputConnection {
      * <p>Note: This does nothing when called from input methods.</p>
      */
     public void closeConnection();
+
+    /**
+     * When this flag is used, the editor will be able to request read access to the content URI
+     * contained in the {@link InputContentInfo} object.
+     *
+     * <p>Make sure that the content provider owning the Uri sets the
+     * {@link android.R.styleable#AndroidManifestProvider_grantUriPermissions
+     * grantUriPermissions} attribute in its manifest or included the
+     * {@link android.R.styleable#AndroidManifestGrantUriPermission
+     * &lt;grant-uri-permissions&gt;} tag. Otherwise {@link InputContentInfo#requestPermission()}
+     * can fail.</p>
+     *
+     * <p>Although calling this API is allowed only for the IME that is currently selected, the
+     * client is able to request a temporary read-only access even after the current IME is switched
+     * to any other IME as long as the client keeps {@link InputContentInfo} object.</p>
+     **/
+    public static int INPUT_CONTENT_GRANT_READ_URI_PERMISSION =
+            android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;  // 0x00000001
+
+    /**
+     * Called by the input method to commit a content such as PNG image to the editor.
+     *
+     * <p>In order to avoid variety of compatibility issues, this focuses on a simple use case,
+     * where we expect editors and IMEs work cooperatively as follows:</p>
+     * <ul>
+     *     <li>Editor must keep {@link EditorInfo#contentMimeTypes} to be {@code null} if it does
+     *     not support this method at all.</li>
+     *     <li>Editor can ignore this request when the MIME type specified in
+     *     {@code inputContentInfo} does not match to any of {@link EditorInfo#contentMimeTypes}.
+     *     </li>
+     *     <li>Editor can ignore the cursor position when inserting the provided context.</li>
+     *     <li>Editor can return {@code true} asynchronously, even before it starts loading the
+     *     content.</li>
+     *     <li>Editor should provide a way to delete the content inserted by this method, or revert
+     *     the effect caused by this method.</li>
+     *     <li>IME should not call this method when there is any composing text, in case calling
+     *     this method causes focus change.</li>
+     *     <li>IME should grant a permission for the editor to read the content. See
+     *     {@link EditorInfo#packageName} about how to obtain the package name of the editor.</li>
+     * </ul>
+     *
+     * @param inputContentInfo Content to be inserted.
+     * @param flags {@code 0} or {@link #INPUT_CONTENT_GRANT_READ_URI_PERMISSION}.
+     * @param opts optional bundle data. This can be {@code null}.
+     * @return {@code true} if this request is accepted by the application, no matter if the request
+     * is already handled or still being handled in background.
+     */
+    public boolean commitContent(@NonNull InputContentInfo inputContentInfo, int flags,
+            @Nullable Bundle opts);
 }

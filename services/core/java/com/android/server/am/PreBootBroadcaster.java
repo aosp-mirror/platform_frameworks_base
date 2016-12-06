@@ -19,17 +19,24 @@ package com.android.server.am;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 
 import android.app.AppOpsManager;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.os.Process;
 import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.util.ProgressReporter;
+import com.android.server.UiThread;
 
 import java.util.List;
 
@@ -44,6 +51,7 @@ public abstract class PreBootBroadcaster extends IIntentReceiver.Stub {
     private final ActivityManagerService mService;
     private final int mUserId;
     private final ProgressReporter mProgress;
+    private final boolean mQuiet;
 
     private final Intent mIntent;
     private final List<ResolveInfo> mTargets;
@@ -51,10 +59,11 @@ public abstract class PreBootBroadcaster extends IIntentReceiver.Stub {
     private int mIndex = 0;
 
     public PreBootBroadcaster(ActivityManagerService service, int userId,
-            ProgressReporter progress) {
+            ProgressReporter progress, boolean quiet) {
         mService = service;
         mUserId = userId;
         mProgress = progress;
+        mQuiet = quiet;
 
         mIntent = new Intent(Intent.ACTION_PRE_BOOT_COMPLETED);
         mIntent.addFlags(Intent.FLAG_RECEIVER_BOOT_UPGRADE | Intent.FLAG_DEBUG_TRIAGED_MISSING);
@@ -65,14 +74,20 @@ public abstract class PreBootBroadcaster extends IIntentReceiver.Stub {
 
     public void sendNext() {
         if (mIndex >= mTargets.size()) {
+            mHandler.obtainMessage(MSG_HIDE).sendToTarget();
             onFinished();
             return;
         }
 
         if (!mService.isUserRunning(mUserId, 0)) {
             Slog.i(TAG, "User " + mUserId + " is no longer running; skipping remaining receivers");
+            mHandler.obtainMessage(MSG_HIDE).sendToTarget();
             onFinished();
             return;
+        }
+
+        if (!mQuiet) {
+            mHandler.obtainMessage(MSG_SHOW, mTargets.size(), mIndex).sendToTarget();
         }
 
         final ResolveInfo ri = mTargets.get(mIndex++);
@@ -99,6 +114,59 @@ public abstract class PreBootBroadcaster extends IIntentReceiver.Stub {
             boolean ordered, boolean sticky, int sendingUser) {
         sendNext();
     }
+
+    private static final int MSG_SHOW = 1;
+    private static final int MSG_HIDE = 2;
+
+    private Handler mHandler = new Handler(UiThread.get().getLooper(), null, true) {
+        @Override
+        public void handleMessage(Message msg) {
+            final Context context = mService.mContext;
+            final NotificationManager notifManager = context
+                    .getSystemService(NotificationManager.class);
+            final int max = msg.arg1;
+            final int index = msg.arg2;
+
+            switch (msg.what) {
+                case MSG_SHOW:
+                    final CharSequence title = context
+                            .getText(R.string.android_upgrading_notification_title);
+
+                    final Intent intent = new Intent();
+                    intent.setClassName("com.android.settings",
+                            "com.android.settings.HelpTrampoline");
+                    intent.putExtra(Intent.EXTRA_TEXT, "help_url_upgrading");
+
+                    final PendingIntent contentIntent;
+                    if (context.getPackageManager().resolveActivity(intent, 0) != null) {
+                        contentIntent = PendingIntent.getActivity(context, 0, intent, 0);
+                    } else {
+                        contentIntent = null;
+                    }
+
+                    final Notification notif = new Notification.Builder(mService.mContext)
+                            .setSmallIcon(R.drawable.stat_sys_adb)
+                            .setWhen(0)
+                            .setOngoing(true)
+                            .setTicker(title)
+                            .setDefaults(0)
+                            .setPriority(Notification.PRIORITY_MAX)
+                            .setColor(context.getColor(
+                                    com.android.internal.R.color.system_notification_accent_color))
+                            .setContentTitle(title)
+                            .setContentIntent(contentIntent)
+                            .setVisibility(Notification.VISIBILITY_PUBLIC)
+                            .setProgress(max, index, false)
+                            .build();
+                    notifManager.notifyAsUser(TAG, 0, notif, UserHandle.of(mUserId));
+                    break;
+
+                case MSG_HIDE:
+                    notifManager.cancelAsUser(TAG, 0, UserHandle.of(mUserId));
+                    break;
+            }
+        }
+    };
 
     public abstract void onFinished();
 }

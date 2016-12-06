@@ -143,7 +143,9 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_4g_plus" msgid="3032226872470658661">"4G+‎"</string>
     <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
+    <string name="accessibility_data_connection_lte_plus" msgid="361876866906946007">"LTE+‎"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"رومینگ"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
@@ -236,7 +238,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"‏داده 4G موقتاً متوقف شده است"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"داده شبکه همراه موقتاً متوقف شده است"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"داده موقتاً متوقف شده است"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"چون به محدودیت داده تنظیم شده رسیده‌اید، دستگاه مصرف داده را برای باقیمانده این دوره موقتاً متوقف کرده است.\n\nاگر ادامه دهید شاید موجب کسر هزینه از طرف شرکت مخابراتی شما شود."</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"به حداکثر محدودیت داده‌ای که تنظیم کردید رسیدید. دیگر از داده شبکه تلفن همراه استفاده نمی‌کنید.\n\nدر صورت ازسرگیری، ممکن است مصرف داده هزینه‌هایی دربرداشته باشد."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"از سر‌گیری"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"اتصال اینترنتی ندارید"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"‏Wi-Fi متصل شد"</string>
@@ -252,10 +254,10 @@
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"تنظیمات اعلان"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"تنظیمات <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"صفحه به صورت خودکار می‌چرخد."</string>
-    <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"صفحه اکنون در جهت افقی قفل است."</string>
+    <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"صفحه اکنون در حالت افقی قفل است."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"صفحه اکنون در جهت عمودی قفل است."</string>
     <string name="accessibility_rotation_lock_off_changed" msgid="8134601071026305153">"صفحه اکنون به صورت خودکار می‌چرخد."</string>
-    <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"صفحه اکنون روی جهت افقی قفل شده است."</string>
+    <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"صفحه اکنون در حالت افقی قفل است."</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"صفحه اکنون روی جهت عمودی قفل شده است."</string>
     <string name="dessert_case" msgid="1295161776223959221">"ویترین دسر"</string>
     <string name="start_dreams" msgid="5640361424498338327">"محافظ صفحه"</string>
@@ -317,6 +319,9 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> محدودیت"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"هشدار <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"حالت کار"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"نور شب"</string>
+    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"نور شب روشن است، برای خاموش‌کردن آن ضربه بزنید"</string>
+    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"نور شب خاموش است، برای روشن‌شدن آن ضربه بزنید"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"بدون موارد اخیر"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"همه‌چیز را پاک کرده‌اید"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"اطلاعات برنامه"</string>
@@ -330,6 +335,8 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"تقسیم افقی"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"تقسیم عمودی"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"سفارشی کردن تقسیم"</string>
+  <string-array name="recents_blacklist_array">
+  </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"شارژ کامل شد"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"در حال شارژ شدن"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> مانده تا شارژ کامل شود"</string>
@@ -340,8 +347,8 @@
     <string name="description_direction_left" msgid="7207478719805562165">"لغزاندن به چپ برای <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"صداها و لرزش‌هایی به جز هشدارها، یادآوری‌ها، رویدادها و تماس‌گیرنده‌هایی که مشخص می‌کنید، مزاحم شما نمی‌شوند."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"سفارشی کردن"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"این کار «همه» صداها و لرزش‌ها از جمله هشدارها، موسیقی، ویدیوها و بازی‌ها را مسدود می‌کند. همچنان می‌توانید تماس تلفنی برقرار کنید."</string>
-    <string name="zen_silence_introduction" msgid="3137882381093271568">"این کار «همه» صداها و لرزش‌ها از جمله هشدارها، موسیقی، ویدیوها و بازی‌ها را مسدود می‌کند."</string>
+    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"این کار «همه» صداها و لرزش‌ها از جمله هشدارها، موسیقی، ویدئوها و بازی‌ها را مسدود می‌کند. همچنان می‌توانید تماس تلفنی برقرار کنید."</string>
+    <string name="zen_silence_introduction" msgid="3137882381093271568">"این کار «همه» صداها و لرزش‌ها از جمله هشدارها، موسیقی، ویدئوها و بازی‌ها را مسدود می‌کند."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"اعلان‌های کمتر فوری در زیر"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"دوباره ضربه بزنید تا باز شود"</string>
@@ -397,6 +404,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"ممکن است دستگاه کنترل شود"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"شاید نمایه کنترل شود"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"ممکن است شبکه کنترل شود"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"ممکن است شبکه کنترل شود"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"کنترل دستگاه"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"کنترل نمایه"</string>
     <string name="monitoring_title" msgid="169206259253048106">"کنترل شبکه"</string>
@@ -409,6 +417,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"شما به <xliff:g id="APPLICATION">%1$s</xliff:g> وصل شده‌اید، که می‌تواند فعالیت شبکه شما از جمله رایانامه‌، برنامه‌ و وب‌سایت‌ها را کنترل کند."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"شما به <xliff:g id="APPLICATION">%1$s</xliff:g> وصل شده‌اید، که می‌تواند فعالیت شبکه شخصی شما از جمله رایانامه‌، برنامه‌ و وب‌سایت‌ها را کنترل کند."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"به <xliff:g id="APPLICATION">%1$s</xliff:g> وصل شده‌اید، که می‌تواند فعالیت شبکه شخصی شما را (ازجمله رایانامه‌‌ها، برنامه‌‌ها و وب‌سایت‌ها) کنترل کند."</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"نمایه کاری‌تان توسط <xliff:g id="ORGANIZATION">%1$s</xliff:g> مدیریت می‌شود. این به <xliff:g id="APPLICATION">%2$s</xliff:g> وصل است که فعالیت شبکه کاری‌تان از جمله رایانامه، برنامه و وب‌سایت‌ها را کنترل می‌کند.\n\nبرای دریافت اطلاعات بیشتر، با سرپرستتان تماس بگیرید."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"نمایه کاری شما توسط <xliff:g id="ORGANIZATION">%1$s</xliff:g> مدیریت می‌شود. این به <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> متصل است که می‌تواند فعالیت شبکه کاری‌تان از جمله رایانامه، برنامه و وب‌سایت‌ها را کنترل کند.\n\nشما همچنین به <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> متصل هستید که می‌تواند فعالیت شبکه شخصی‌تان را کنترل کند."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"دستگاهتان توسط <xliff:g id="ORGANIZATION">%1$s</xliff:g> مدیریت می‌شود.\n\nسرپرستتان می‌تواند تنظیمات، دسترسی شرکت، برنامه‌ها، داده‌های مرتبط با دستگاهتان و اطلاعات مکان دستگاهتان را کنترل و مدیریت کند.\n\nشما به <xliff:g id="APPLICATION">%2$s</xliff:g> وصل هستید که می‌تواند فعالیت شبکه شما را کنترل کند، از جمله رایانامه‌، برنامه‌ و وب‌سایت‌ها.\n\nبرای دریافت اطلاعات بیشتر، با سرپرستتان تماس بگیرید."</string>
@@ -434,6 +443,18 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> کنترل‌کننده صدا است"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"برای بازیابی نسخه اصلی ضربه بزنید."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"درحال استفاده از نمایه کاری‌تان هستید"</string>
+  <string-array name="volume_stream_titles">
+    <item msgid="5841843895402729630">"تماس"</item>
+    <item msgid="5997713001067658559">"سیستم"</item>
+    <item msgid="7858983209929864160">"تماس"</item>
+    <item msgid="1850038478268896762">"رسانه"</item>
+    <item msgid="8265110906352372092">"هشدار"</item>
+    <item msgid="5339394737636839168"></item>
+    <item msgid="2951313578278086204">"بلوتوث"</item>
+    <item msgid="2919807739709798970"></item>
+    <item msgid="150349973435223405"></item>
+    <item msgid="6761963760295549099"></item>
+  </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"‏%1$s. برای باصدا کردن ضربه بزنید."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"‏%1$s. برای تنظیم روی لرزش ضربه بزنید. ممکن است سرویس‌های دسترس‌پذیری بی‌صدا شوند."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"‏%1$s. برای بی‌صدا کردن ضربه بزنید. ممکن است سرویس‌های دسترس‌پذیری بی‌صدا شوند."</string>
@@ -463,7 +484,7 @@
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"نمایه کاری"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"برای بعضی افراد سرگرم‌کننده است اما نه برای همه"</string>
     <string name="tuner_warning" msgid="8730648121973575701">"‏«تنظیم‌کننده واسط کاربری سیستم» روش‌های بیشتری برای تنظیم دقیق و سفارشی کردن واسط کاربری Android در اختیار شما قرار می‌دهد. ممکن است این ویژگی‌های آزمایشی تغییر کنند، خراب شوند یا در نسخه‌های آینده جود نداشته باشند. با احتیاط ادامه دهید."</string>
-    <string name="tuner_persistent_warning" msgid="8597333795565621795">"ممکن است این ویژگی‌های آزمایشی تغییر کنند، خراب شوند یا در نسخه‌های آینده وجود نداشته باشند. با احتیاط ادامه دهید."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"ممکن است این قابلیت‌های آزمایشی تغییر کنند، خراب شوند یا در نسخه‌های آینده وجود نداشته باشد. بااحتیاط ادامه دهید."</string>
     <string name="got_it" msgid="2239653834387972602">"متوجه شدم"</string>
     <string name="tuner_toast" msgid="603429811084428439">"تبریک می‌گوییم! «تنظیم‌کننده واسط کاربری سیستم» به «تنظیمات» اضافه شد"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"حذف از تنظیمات"</string>
@@ -473,8 +494,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"ثانیه‌های ساعت را در نوار وضعیت نشان می‌دهد. ممکن است بر ماندگاری باتری تأثیر بگذارد."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"ترتیب مجدد در تنظیمات سریع"</string>
     <string name="show_brightness" msgid="6613930842805942519">"نمایش روشنایی در تنظیمات سریع"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"فعال کردن تقسیم صفحه با اشاره بالا کشیدن"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"اشاره ورود به تقسیم صفحه با بالا کشیدن صفحه از دکمه نمای کلی را فعال می‌کند"</string>
     <string name="experimental" msgid="6198182315536726162">"آزمایشی"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"بلوتوث روشن شود؟"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"برای مرتبط کردن صفحه‌کلید با رایانه لوحی، ابتدا باید بلوتوث را روشن کنید."</string>
@@ -504,21 +523,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"تنظیمات بیشتر"</string>
     <string name="notification_done" msgid="5279426047273930175">"تمام"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"کنترل‌های اعلان <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"رنگ و ظاهر"</string>
-    <string name="night_mode" msgid="3540405868248625488">"حالت شب"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"درجه‌بندی نمایشگر"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"روشن"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"خاموش"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"روشن شدن خودکار"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"تغییر به حالت شب وقتی برای مکان و زمان روز مناسب است"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"وقتی حالت شب روشن است"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"‏استفاده از زمینه تیره برای سیستم‌عامل Android"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"تنظیم سایه‌رنگ"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"تنظیم روشنایی"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"‏زمینه تیره بر قسمت‌های اصلی سیستم‌عامل Android که به‌طور معمول با زمینه روشن نشان داده می‌شوند (مثل «تنظیمات») اعمال می‌شود."</string>
-    <string name="color_apply" msgid="9212602012641034283">"اعمال‌ کردن"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"تأیید تنظیمات"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"بعضی از تنظیمات رنگ می‌توانند این دستگاه را غیرقابل استفاده کنند. برای تأیید این تنظیمات رنگ روی «تأیید» کلیک کنید، در غیر این صورت این تغییرات بعد از ۱۰ ثانیه بازنشانی می‌شوند."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"مصرف باتری"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"هنگام شارژ شدن، «بهینه‌سازی باتری» در دسترس نیست"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"بهینه‌سازی باتری"</string>
@@ -647,4 +651,5 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"باز کردن تنظیمات <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ویرایش ترتیب تنظیمات."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"صفحه <xliff:g id="ID_1">%1$d</xliff:g> از <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <string name="cant_silence_or_block" msgid="999689262131488625">"نمی‌توان اعلان‌ها را بی‌صدا یا مسدود کرد"</string>
 </resources>

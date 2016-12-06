@@ -21,10 +21,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
+ * A DNS event recorded by NetdEventListenerService.
  * {@hide}
  */
 @SystemApi
-final public class DnsEvent extends IpConnectivityEvent implements Parcelable {
+final public class DnsEvent implements Parcelable {
     public final int netId;
 
     // The event type is currently only 1 or 2, so we store it as a byte.
@@ -37,7 +38,8 @@ final public class DnsEvent extends IpConnectivityEvent implements Parcelable {
     // queries.
     public final int[] latenciesMs;
 
-    private DnsEvent(int netId, byte[] eventTypes, byte[] returnCodes, int[] latenciesMs) {
+    /** {@hide} */
+    public DnsEvent(int netId, byte[] eventTypes, byte[] returnCodes, int[] latenciesMs) {
         this.netId = netId;
         this.eventTypes = eventTypes;
         this.returnCodes = returnCodes;
@@ -59,6 +61,7 @@ final public class DnsEvent extends IpConnectivityEvent implements Parcelable {
         out.writeIntArray(latenciesMs);
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
@@ -82,6 +85,5 @@ final public class DnsEvent extends IpConnectivityEvent implements Parcelable {
 
     public static void logEvent(
             int netId, byte[] eventTypes, byte[] returnCodes, int[] latenciesMs) {
-        logEvent(new DnsEvent(netId, eventTypes, returnCodes, latenciesMs));
     }
 }

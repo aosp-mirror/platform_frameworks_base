@@ -1,0 +1,39 @@
+page.title=Performance and Power
+page.article=true
+page.metaDescription=Improve your app's performance by learning how to optimize power consumption, launch times, and other important areas of performance.
+
+meta.tags="performance"
+page.tags="performance"
+
+@jd:body
+
+<iframe width="448" height="252" src="//www.youtube.com/embed/qk5F6Bxqhr4?utm_source=dac&utm_medium=video&utm_content=andfuntrain&utm_campaign=udacint?rel=0&hd=1" frameborder="0" allowfullscreen style="float: right; margin: 0 0 20px 20px;"></iframe>
+
+<p>Implementing a cool idea is a great start toward an app that delights users,
+but it's just the beginning. The next step is maximizing your app's performance.
+For example, users want apps that:</p>
+
+<ul>
+   <li>Use power sparingly.</li>
+   <li>Start up quickly.</li>
+   <li>Respond quickly to user interaction.</li>
+</ul>
+
+<p>This section provides you with the know-how you need in order to make
+your apps not only cool, but also performant. Read on to discover how to
+develop apps that are power-thrifty, responsive, efficient, and well-behaved.</p>
+
+
+
+
+<section class="dac-section dac-small" id="latest-games"><div class="wrap">
+  <h2 class="norule" style="margin:0 0">More resources</h2>
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:develop/performance/landing"
+       data-sortOrder="random"
+       data-cardSizes="6x6"
+       data-maxResults="24"
+       data-items-per-page="24"
+       data-initial-results="3"></div>
+  </div>
+</section>

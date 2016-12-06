@@ -1,0 +1,747 @@
+page.title=Configuração de segurança de rede
+page.keywords=androidn,security,network
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>Neste documento</h2>
+<ol>
+  <li><a href="#manifest">Adicionar um arquivo de configurações de segurança</a></li>
+  <li><a href="#CustomTrust">Personalizar CAs confiáveis</a>
+      <ol>
+      <li><a href="#ConfigCustom">Configurar uma CA personalizada confiável</a></li>
+      <li><a href="#LimitingCas">Limitar o conjunto de CAs confiáveis</a></li>
+      <li><a href="#TrustingAdditionalCas">Confiar em CAs adicionais</a></li>
+      </ol>
+  </li>
+  <li><a href="#TrustingDebugCa">CAs somente de depuração</a></li>
+  <li><a href="#UsesCleartextTraffic">Cancelar uso de tráfego de texto simples</a></li>
+  <li><a href="#CertificatePinning">Fixar certificados</a></li>
+  <li><a href="#ConfigInheritance">Comportamento de herança de configuração</a></li>
+  <li><a href="#FileFormat">Formato do arquivo de configurações</a></li>
+</ol>
+</div>
+</div>
+
+
+<p>
+  O Android N inclui um recurso de configurações de segurança de rede
+ que permite que os aplicativos personalizem as configurações de segurança de rede em um arquivo de configurações declarativo e seguro
+ sem modificar o código do aplicativo. Essas configurações podem
+ ser definidas para domínios específicos e para um aplicativo específico. Os principais
+ recursos são:
+</p>
+
+<ul>
+  <li>
+    <b>Âncoras de confiança personalizadas:</b> personalize quais autoridades de certificado (CA)
+ são confiáveis para as conexões seguras de um aplicativo. Por
+ exemplo, confiar em certificados autoassinados privados ou restringir
+ o conjunto de CAs públicas nas quais o aplicativo confia.
+  </li>
+
+  <li>
+    <b>Substituições somente de depuração:</b> depure conexões seguras do aplicativo com segurança,
+ sem adicionar riscos à base instalada.
+  </li>
+
+  <li>
+    <b>Cancelar uso de tráfego de texto simples:</b> proteja aplicativos contra
+ o uso acidental de tráfego de texto simples.
+  </li>
+
+  <li>
+    <b>Fixar certificados:</b> restrinja a conexão segura de um aplicativo
+ a certificados específicos.
+  </li>
+</ul>
+
+
+<h2 id="manifest">Adicionar um arquivo de configurações de segurança</h2>
+
+<p>
+  O recurso de configurações de segurança de rede usa um arquivo XML no qual você especifica
+ as configurações do seu aplicativo. Inclua uma entrada no manifesto do seu
+ aplicativo para apontar para esse arquivo. Este trecho de código de um manifesto
+ demonstra como criar essa entrada:
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest ... &gt;
+  &lt;application ... &gt;
+    &lt;meta-data android:name="android.security.net.config"
+               android:resource="@xml/network_security_config" /&gt;
+    ...
+  &lt;/application&gt;
+&lt;/manifest&gt;
+</pre>
+
+<h2 id="CustomTrust">Personalizar CAs confiáveis</h2>
+
+<p>
+  Um aplicativo pode querer confiar em um conjunto personalizado de CAs em vez de no padrão
+ da plataforma. Os motivos mais comuns para isso são:
+</p>
+
+<ul>
+  <li>Conectar-se a um host com uma autoridade de certificado personalizada (autoassinada,
+ emitida por uma CA corporativa interna etc.).
+  </li>
+
+  <li>Limitar o conjunto de CAs para apenas aquelas nas quais você confia em vez de todas
+ as CAs pré-instaladas.
+  </li>
+
+  <li>Confiar em CAs adicionais não incluídas no sistema.
+  </li>
+</ul>
+
+<p>
+  Por padrão, conexões seguras (por exemplo, TLS, HTTPS) de todos os aplicativos confiam
+ nas CAs pré-instaladas do sistema e os aplicativos direcionados ao nível da API 23
+ (Android M) e inferior também confiam no repositório de CAs adicionadas pelo usuário por padrão. Um
+ aplicativo pode personalizar as próprias conexões usando {@code base-config} (para
+ personalização em todo o aplicativo) ou {@code domain-config} (para personalização
+ por domínio).
+</p>
+
+
+<h3 id="ConfigCustom">Configurar uma CA personalizada</h3>
+
+<p>
+  Suponhamos que você queira se conectar a um host que use um certificado SSL autoassinado
+ ou a um host cujo certificado SSL foi emitido por uma CA não pública
+ na qual confia, como a CA interna da sua empresa.
+</p>
+
+<p>
+  <code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;example.com&lt;/domain&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/my_ca"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+<p>
+  Adicione o certificado da CA autoassinada ou não pública em formato PEM ou DER em
+ {@code res/raw/my_ca}.
+</p>
+
+
+<h3 id="LimitingCas">Limitar o conjunto de CAs confiáveis</h3>
+
+<p>
+  Um aplicativo que não queira confiar em todas as CAs nas quais o sistema confia
+ pode especificar o próprio conjunto limitado de CAs confiáveis. Isso protege o
+ aplicativo contra certificados fraudulentos emitidos por qualquer outra CA.
+</p>
+
+<p>
+  A configuração para limitar o conjunto de CAs confiáveis é semelhante a <a href="#TrustingACustomCa">confiar em uma CA personalizada</a> para um domínio específico, mas
+ fornecendo várias CAs no recurso.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;secure.example.com&lt;/domain&gt;
+        &lt;domain includeSubdomains="true"&gt;cdn.example.com&lt;/domain&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/trusted_roots"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+<p>
+  Adicione as CAs confiáveis em formato PEM ou DER em {@code res/raw/trusted_roots}.
+  Observe que, ao usar o formato PEM, o arquivo deve conter <em>somente</em> dados PEM,
+ sem texto adicional. Você também pode fornecer vários elementos
+ <a href="#certificates"><code>&lt;certificates&gt;</code></a>
+em vez de um.
+</p>
+
+
+<h3 id="TrustingAdditionalCas">
+  Confiar em CAs adicionais
+</h3>
+
+<p>
+  Um aplicativo pode querer confiar em CAs adicionais nas quais o sistema não confia.
+ Isso pode ocorrer se o sistema ainda não incluiu a CA ou se a CA
+ não atender aos requisitos de inclusão no sistema Android. O
+ aplicativo pode fazer isso ao especificar várias fontes de certificados para uma
+ configuração.
+</p>
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;base-config&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/extracas"/&gt;
+            &lt;certificates src="system"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/base-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="TrustingDebugCa">Configurar CAs para depuração</h2>
+
+<p>
+  Ao depurar um aplicativo conectado por HTTPS, você pode querer
+ se conectar a um servidor de desenvolvimento local que não tenha o certificado SSL
+ do seu servidor de produção. Para fazer isso sem
+ modificar o código do aplicativo, você pode especificar CAs somente de depuração que
+ sejam confiáveis <i>apenas</i> quando <a href="{@docRoot}guide/topics/manifest/application-element.html#debug">
+android:debuggable</a>
+ for {@code true} ao usar {@code debug-overrides}. Normalmente, IDEs e ferramentas de compilação
+ definem esse sinalizador automaticamente para compilações de não lançamento.
+</p>
+
+<p>
+  Isso é mais seguro do que o código condicional normal, pois, como medida
+ de segurança, os repositórios do aplicativo não aceitam aplicativos marcados como
+ depuráveis.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;debug-overrides&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/debug_cas"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/debug-overrides&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="UsesCleartextTraffic">Cancelar uso de tráfego de texto simples</h2>
+
+<p>
+  Aplicativos que pretendem se conectar a destinos usando apenas conexões
+ seguras podem cancelar o uso de texto simples de suporte (usando o protocolo HTTP não criptografado
+ em vez de HTTPS) para esses destinos. Essa opção ajuda a evitar
+ regressões acidentais em aplicativos devido a alterações nos URLs fornecidos por fontes externas,
+ como servidores de back-end.
+  Consulte {@link android.security.NetworkSecurityPolicy#isCleartextTrafficPermitted
+  NetworkSecurityPolicy.isCleartextTrafficPermitted()} para saber mais.
+</p>
+
+<p>
+  Por exemplo, um aplicativo pode querer garantir que todas as conexões com {@code
+  secure.example.com} sejam sempre realizadas por HTTPS para proteger o tráfego confidencial
+ de redes hostis.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config usesCleartextTraffic="false"&gt;
+        &lt;domain includeSubdomains="true"&gt;secure.example.com&lt;/domain&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="CertificatePinning">Fixar certificados</h2>
+
+<p>
+  Normalmente, um aplicativo confia em todas as CAs pré-instaladas. Se qualquer uma dessas CAs
+ emitir um certificado fraudulento, o aplicativo estará em risco de ataques
+ MiTM. Alguns aplicativos optam por limitar o conjunto de certificados que aceitam
+ restringindo o conjunto de CAs ou fixando certificados.
+</p>
+
+<p>
+  A fixação de certificados é realizada ao fornecer um conjunto de certificados pelo hash da
+ chave pública (SubjectPublicKeyInfo do certificado X.509). Uma cadeia de certificados
+ é válida somente se contiver pelo menos uma
+ das chaves públicas fixadas.
+</p>
+
+<p>
+  Observe que, ao usar a fixação de certificados, você deve sempre incluir uma chave de backup
+ para que, se você for forçado a alternar para novas chaves ou alterar as CAs (ao
+ fixar um certificado de CA ou um intermediário dessa CA), a
+ conectividade do seu aplicativo não seja afetada. Caso contrário, você precisará enviar
+ uma atualização ao aplicativo para restaurar a conectividade.
+</p>
+
+<p>
+  Além disso, é possível definir um tempo de expiração para as fixações, após o qual
+ elas não sejam mais realizadas. Isso ajuda a evitar problemas de conectividade
+ em aplicativos que não foram atualizados. No entanto, definir um tempo de expiração
+ para fixações pode permitir que as fixações sejam ignoradas.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;example.com&lt;/domain&gt;
+        &lt;pin-set expiration="2018-01-01"&gt;
+            &lt;pin digest="SHA-256"&gt;7HIpactkIAq2Y49orFOOQKurWxmmSFZhBCoQYcRhJ3Y=&lt;/pin&gt;
+            &lt;!-- backup pin --&gt
+            &lt;pin digest="SHA-256"&gt;fwza0LRMXouZHRC8Ei+4PyuldPDcf3UKgO/04cDM1oE=&lt;/pin&gt;
+        &lt;/pin-set&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="ConfigInheritance">Comportamento de herança de configuração</h2>
+
+<p>
+  Valores não definidos em uma configuração específica são herdados. Esse comportamento permite
+ configurações mais complexas, mantendo o arquivo de configuração legível.
+</p>
+
+<p>
+  Se um valor não for definido em uma entrada específica, o valor da próxima entrada
+ mais genérica será usado. Valores não definidos em um {@code domain-config} são
+ obtidos pelo {@code domain-config} pai, se aninhados, ou, caso contrário, pelo {@code
+  base-config}. Valores não definidos no {@code base-config} usam os
+ valores padrão da plataforma.
+</p>
+
+<p>
+  Por exemplo, considere um caso no qual todas as conexões para subdomínios de {@code
+  example.com} devem usar um conjunto personalizado de CAs. Além disso, o tráfego de texto simples para esses
+ domínios é permitido <em>exceto</em> ao se conectar com {@code
+  secure.example.com}. Ao aninhar a configuração para {@code
+  secure.example.com} dentro da configuração para {@code example.com}, o
+ {@code trust-anchors} não precisa ser duplicado.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;example.com&lt;/domain&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/my_ca"/&gt;
+        &lt;/trust-anchors&gt;
+        &lt;domain-config cleartextTrafficPermitted="false"&gt;
+            &lt;domain includeSubdomains="true"&gt;secure.example.com&lt;/domain&gt;
+        &lt;/domain-config&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="FileFormat">Formato do arquivo de configurações</h2>
+
+<p>
+  O recurso de configurações de segurança de rede usa um formato do arquivo XML.
+  A estrutura geral desse arquivo é mostrada no seguinte exemplo de código:
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;base-config&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="..."/&gt;
+            ...
+        &lt;/trust-anchors&gt;
+    &lt;/base-config&gt;
+
+    &lt;domain-config&gt;
+        &lt;domain&gt;android.com&lt;/domain&gt;
+        ...
+        &lt;trust-anchors&gt;
+            &lt;certificates src="..."/&gt;
+            ...
+        &lt;/trust-anchors&gt;
+        &lt;pin-set&gt;
+            &lt;pin digest="..."&gt;...&lt;/pin&gt;
+            ...
+        &lt;/pin-set&gt;
+    &lt;/domain-config&gt;
+    ...
+    &lt;debug-overrides&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="..."/&gt;
+            ...
+        &lt;/trust-anchors&gt;
+    &lt;/debug-overrides&gt;
+&lt;/network-security-config&gt;
+</pre>
+
+<p>
+  As seções a seguir descrevem a sintaxe e outros detalhes do formato do
+ arquivo.
+</p>
+
+<h3 id="network-security-config">
+  &lt;network-security-config&gt;
+</h3>
+
+<dl class="xml">
+  <dt>
+    pode conter:
+  </dt>
+
+  <dd>
+    0 ou 1 de <code><a href="#base-config">&lt;base-config&gt;</a></code><br>
+    Qualquer número de <code><a href=
+    "#domain-config">&lt;domain-config&gt;</a></code><br>
+    0 ou 1 de <code><a href="#debug-overrides">&lt;debug-overrides&gt;</a></code>
+  </dd>
+</dl>
+
+<h3 id="base-config">
+  &lt;base-config&gt;
+</h3>
+
+<dl class="xml">
+  <dt>
+    sintaxe:
+  </dt>
+</dl>
+
+<pre class="stx">
+&lt;base-config <a href=
+"#usesCleartextTraffic">usesCleartextTraffic</a>=["true" | "false"]&gt;
+    ...
+&lt;/base-config&gt;
+</pre>
+<dl class="xml">
+  <dt>
+    pode conter:
+  </dt>
+
+  <dd>
+    <code><a href="#trust-anchors">&lt;trust-anchors&gt;</a></code>
+  </dd>
+
+  <dt>
+    descrição:
+  </dt>
+
+  <dd>
+    A configuração padrão usada por todas as conexões cujo destino não é
+ coberto por um <a href="#domain-config"><code>domain-config</code></a>.
+
+<p>
+  Qualquer valor não definido usa os valores padrão da plataforma. A configuração padrão
+ para aplicativos direcionados a níveis de API acima do 24:
+</p>
+
+<pre>
+&lt;base-config usesCleartextTraffic="true"&gt;
+    &lt;trust-anchors&gt;
+        &lt;certificates src="system" /&gt;
+    &lt;/trust-anchors&gt;
+&lt;/base-config&gt;
+</pre>
+A configuração padrão para aplicativos direcionados a níveis de API 23 e inferiores:
+<pre>
+&lt;base-config usesCleartextTraffic="true"&gt;
+    &lt;trust-anchors&gt;
+        &lt;certificates src="system" /&gt;
+        &lt;certificates src="user" /&gt;
+    &lt;/trust-anchors&gt;
+&lt;/base-config&gt;
+</pre>
+
+  </dd>
+</dl>
+
+<h3 id="domain-config">&lt;domain-config&gt;</h3>
+<dl class="xml">
+<dt>sintaxe:</dt>
+<dd>
+<pre class="stx">&lt;domain-config <a href="#usesCleartextTraffic">usesCleartextTraffic</a>=["true" | "false"]&gt;
+    ...
+&lt;/domain-config&gt;</pre>
+</dd>
+
+<dt>Pode conter:</dt>
+
+<dd>
+1 ou mais <code><a href="#domain">&lt;domain&gt;</a></code>
+<br/>0 ou 1 <code><a href="#trust-anchors">&lt;trust-anchors&gt;</a></code>
+<br/>0 ou 1 <code><a href="#pin-set">&lt;pin-set&gt;</code></a>
+<br/>Qualquer número de <code>&lt;domain-config&gt;</code> aninhados</dd>
+
+<dt>Descrição</dt>
+<dd>A configuração usada para conexões com destinos específicos, conforme é definido pelos elementos {@code domain}.
+
+<p>Observe que, se vários elementos {@code domain-config} cobrirem um destino, a configuração com a regra de domínio correspondente
+mais específica (mais longa) será usada.</p></dd>
+</dl>
+
+
+<h3 id="domain">&lt;domain&gt;</h3>
+
+<dl class="xml">
+  <dt>
+    sintaxe:
+  </dt>
+
+  <dd>
+    <pre class="stx">
+&lt;domain includeSubdomains=["true" | "false"]&gt;example.com&lt;/domain&gt;
+</pre>
+  </dd>
+
+  <dt>
+    Atributos:
+  </dt>
+
+  <dd>
+    <dl class="attr">
+      <dt>
+        {@code includeSubdomains}
+      </dt>
+
+      <dd>
+        Se {@code "true"}, a regra de domínio corresponderá ao domínio e a todos os
+ subdomínios, incluindo subdomínios de subdomínios. Caso contrário, a regra
+ se aplica apenas a correspondências exatas.
+      </dd>
+    </dl>
+  </dd>
+
+  <dt>
+    Descrição:
+  </dt>
+</dl>
+
+<h3 id="debug-overrides">&lt;debug-overrides&gt;</h3>
+
+<dl class="xml">
+  <dt>
+    sintaxe:
+  </dt>
+
+  <dd>
+    <pre class="stx">
+&lt;debug-overrides&gt;
+    ...
+&lt;/debug-overrides&gt;
+</pre>
+  </dd>
+
+  <dt>
+    Pode conter:
+  </dt>
+
+  <dd>
+    0 ou 1 <code><a href="#trust-anchors">&lt;trust-anchors&gt;</a></code>
+  </dd>
+
+  <dt>
+    Descrição:
+  </dt>
+
+  <dd>
+    Substituições a serem aplicadas quando <a href="{@docRoot}guide/topics/manifest/application-element.html#debug">android:debuggable</a>
+ for {@code "true"}, o que normalmente ocorre em compilações de não lançamento
+ geradas por IDEs e ferramentas de compilação. Âncoras de confiança especificadas em {@code
+    debug-overrides} são adicionadas a todas as demais configurações e a fixação
+ de certificados não é realizada quando a cadeia de certificados do servidor usa uma
+ dessas âncoras de confiança somente de depuração. Se <a href="{@docRoot}guide/topics/manifest/application-element.html#debug">android:debuggable</a>
+ for {@code "false"}, esta seção será ignorada por completo.
+  </dd>
+</dl>
+
+<h3 id="trust-anchors">&lt;trust-anchors&gt;</h3>
+<dl class="xml">
+  <dt>
+    sintaxe:
+  </dt>
+
+  <dd>
+    <pre class="stx">
+&lt;trust-anchors&gt;
+...
+&lt;/trust-anchors&gt;
+</pre>
+  </dd>
+
+  <dt>
+    Pode conter:
+  </dt>
+
+  <dd>
+    Qualquer número de <code><a href="#certificates">&lt;certificates&gt;</a></code>
+  </dd>
+
+  <dt>
+    Descrição:
+  </dt>
+
+  <dd>
+    Conjunto de âncoras de confiança para conexões seguras.
+  </dd>
+</dl>
+
+
+<h3 id="certificates">&lt;certificates&gt;</h3>
+<dl class="xml">
+<dt>sintaxe:</dt>
+<dd><pre class="stx">&lt;certificates src=["system" | "user" | "<i>raw resource</i>"]
+              overridePins=["true" | "false"] /&gt;
+</pre></dd>
+<dt>descrição:</dt>
+<dd>Conjunto de certificados X.509 para elementos {@code trust-anchors}.</dd>
+
+<dt>atributos:</dt>
+<dd><dl class="attr">
+<dt>{@code src}</dt>
+<dd>
+A fonte de certificados de CA, que pode ser um dos
+<ul>
+  <li>IDs de recursos brutos que apontam para um arquivo que contém certificados X.509.
+  Os certificados devem ser codificados em formato DER ou PEM. No caso de certificados PEM,
+ o arquivo <em>não deve</em> conter dados não PEM adicionais, como
+ comentários.
+  </li>
+
+  <li>{@code "system"} para os certificados de CA pré-instalados do sistema
+  </li>
+
+  <li>{@code "user"} para certificados de CA adicionados pelo usuário
+  </li>
+</ul>
+</dd>
+
+<dt>{@code overridePins}</dt>
+<dd>
+  <p>
+    Especifica se as CAs dessa fonte ignoram a fixação de certificados. Se {@code
+    “true”} e forem certificadas cadeias de certificados que incluam uma das CAs dessa
+ fonte, a fixação não será realizada. Isso pode ser útil para depurar CAs
+ ou permitir que o usuário execute ataques MiTM no tráfego seguro do seu aplicativo.
+  </p>
+
+  <p>
+    O padrão é {@code "false"} a não ser que seja especificado em um elemento {@code debug-overrides}
+. Nesse caso, o padrão será {@code "true"}.
+  </p>
+</dd>
+</dl>
+</dd>
+
+
+<h3 id="pin-set">&lt;pin-set&gt;</h3>
+
+<dl class="xml">
+  <dt>
+    sintaxe:
+  </dt>
+
+  <dd>
+<pre class="stx">
+&lt;pin-set expiration="date"&gt;
+...
+&lt;/pin-set&gt;
+</pre>
+  </dd>
+
+  <dt>
+    Pode conter:
+  </dt>
+
+  <dd>
+    Qualquer número de <code><a href="#pin">&lt;pin&gt;</a></code>
+  </dd>
+
+  <dt>
+    Descrição:
+  </dt>
+
+  <dd>
+    Um conjunto de fixações de chave pública. Para que uma conexão segura seja confiável, uma das
+ chaves públicas na cadeia de confiança deve estar presente no conjunto de fixações. Consulte
+ <code><a href="#pin">&lt;pin&gt;</a></code> para saber mais sobre o formato das fixações.
+  </dd>
+
+  <dt>
+    Atributos:
+  </dt>
+
+  <dd>
+    <dl class="attr">
+      <dt>
+        {@code expiration}
+      </dt>
+
+      <dd>
+        A data, no formato {@code yyyy-MM-dd}, após a qual as fixações
+ expiram e são desativadas. Se o atributo não for definido, as fixações
+ não expirarão.
+        <p>
+          A expiração ajuda a evitar problemas de conectividade em aplicativos que não
+ recebem atualizações para o conjunto de fixações, por exemplo, porque o usuário
+ desativou as atualizações do aplicativo.
+        </p>
+      </dd>
+    </dl>
+  </dd>
+</dl>
+
+<h3 id="pin">&lt;pin&gt;</h3>
+<dl class="xml">
+  <dt>
+    sintaxe:
+  </dt>
+
+  <dd>
+<pre class="stx">
+&lt;pin digest=["SHA-256"]&gt;base64 encoded digest of X.509
+    SubjectPublicKeyInfo (SPKI)&lt;/pin&gt;
+</pre>
+  </dd>
+
+  <dt>
+    Atributos:
+  </dt>
+
+  <dd>
+    <dl class="attr">
+      <dt>
+        {@code digest}
+      </dt>
+
+      <dd>
+        O algoritmo de resumo usado para gerar a fixação. No momento, apenas
+ {@code "SHA-256"} é permitido.
+      </dd>
+    </dl>
+  </dd>
+</dl>

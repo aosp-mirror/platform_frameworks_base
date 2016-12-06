@@ -1,0 +1,234 @@
+page.title=Data Saver
+metaDescription=User-enabled data usage optimization.
+page.keywords="android N", "data usage", "metered network"
+page.image=images/cards/card-nyc_2x.jpg
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    <h2>
+      이 문서의 내용
+    </h2>
+
+    <ol>
+      <li>
+        <a href="#status">Data Saver 기본 설정 확인</a>
+        <ol>
+          <li>
+            <a href="#request-whitelist">허용 목록 권한 요청</a>
+          </li>
+        </ol>
+      </li>
+
+      <li>
+        <a href="#monitor-changes">Data Saver 기본 설정 변경 사항
+모니터링</a>
+      </li>
+
+      <li>
+        <a href="#testing">Android 디버그 브리지 명령을 이용한 테스트</a>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  스마트폰의 수명 전체에 걸쳐, 모바일 데이터 요금제에 따른 비용이
+ 기기 자체의 가격을 쉽게 초과할 수 있습니다. N Developer Preview에서는 사용자들이
+로밍 중이든, 결제 주기가 끝날 무렵이든, 소액 선불 데이터 팩을 사용 중이든 상관없이, 데이터 사용량을 줄이기 위해 기기 전체에서
+Data Saver를 활성화할 수 있습니다.
+</p>
+
+<p>
+  사용자가 <strong>Settings</strong>에서 Data Saver를 활성화하고
+ 해당 기기가 데이터 통신 네트워크에 있는 경우, 시스템은 백그라운드 데이터 사용을
+차단하고 가능하면 포그라운드에서 데이터를 더 적게 사용하도록 앱에게 신호를 보냅니다. 사용자는
+Data Saver가 켜진 경우에도 백그라운드 데이터 통신 연결을 허용하기 위해
+특정 앱을 허용 목록에 추가할 수 있습니다.
+</p>
+
+<p>
+  N Developer Preview는 {@link android.net.ConnectivityManager}
+ API를 확장하여 <a href="#status">사용자의 Data Saver 기본 설정을 검색</a>하고 <a href="#monitor-changes">기본
+ 설정 변경을 모니터링</a>하는 방법을
+ 앱에 제공합니다. 사용자가 Data Saver를 활성화했는지 여부를 앱이 확인하고
+포그라운드 및 백그라운드 데이터 사용을 제한하기 위해
+앱이 노력하는 것은 좋은 방법입니다.
+</p>
+
+<h2 id="status">
+  Data Saver 기본 설정 확인
+</h2>
+
+<p>
+  N Developer Preview에서 앱이 {@link
+ android.net.ConnectivityManager} API를 사용하여, 어떤 데이터 사용량 제한이
+적용되고 있는지를 확인할 수 있습니다. {@code getRestrictBackgroundStatus()}
+ 메서드는 다음 값 중 하나를 반환합니다.
+</p>
+
+<dl>
+  <dt>
+    {@code RESTRICT_BACKGROUND_STATUS_DISABLED}
+  </dt>
+
+  <dd>
+    Data Saver가 비활성화되었습니다.
+  </dd>
+
+  <dt>
+    {@code RESTRICT_BACKGROUND_STATUS_ENABLED}
+  </dt>
+
+  <dd>
+    사용자가 이 앱에 대해 Data Saver를 활성화했습니다. 앱은 포그라운드에서 데이터 사용량을
+제한하고, 백그라운드
+데이터 사용량에 대한 제한을 적절히 처리하기 위해 노력해야 합니다.
+  </dd>
+
+  <dt>
+    {@code RESTRICT_BACKGROUND_STATUS_WHITELISTED}
+  </dt>
+
+  <dd>
+    사용자가 Data Saver를 활성화했지만 앱이 허용 목록에 추가되어 있습니다. 앱은
+포그라운드 및 백그라운드 데이터 사용량을 제한하기 위해 여전히 노력해야 합니다.
+  </dd>
+</dl>
+
+<p>
+  Data Saver가 비활성화되어 있거나 앱이 허용 목록에 추가되어 있더라도,
+기기가 데이터 통신 네트워크에 연결될 때마다 항상
+ 데이터 사용량을 제한하는 것이 좋은 방법입니다. 다음 샘플 코드에서는 {@link
+ android.net.ConnectivityManager#isActiveNetworkMetered
+ ConnectivityManager.isActiveNetworkMetered()} 및 {@code
+ ConnectivityManager.getRestrictBackgroundStatus()}를 사용하여 앱이 사용해야 하는 데이터의 양을
+결정합니다.
+</p>
+
+<pre>
+ConnectivityManager connMgr = (ConnectivityManager)
+        getSystemService(Context.CONNECTIVITY_SERVICE);
+// Checks if the device is on a metered network
+if (connMgr.isActiveNetworkMetered()) {
+  // Checks user’s Data Saver settings.
+  switch (connMgr.getRestrictBackgroundStatus()) {
+    case RESTRICT_BACKGROUND_STATUS_ENABLED:
+    // Background data usage is blocked for this app. Wherever possible,
+    // the app should also use less data in the foreground.
+
+    case RESTRICT_BACKGROUND_STATUS_WHITELISTED:
+    // The app is whitelisted. Wherever possible,
+    // the app should use less data in the foreground and background.
+
+    case RESTRICT_BACKGROUND_STATUS_DISABLED:
+    // Data Saver is disabled. Since the device is connected to a
+    // metered network, the app should use less data wherever possible.
+  }
+} else {
+  // The device is not on a metered network.
+  // Use data as required to perform syncs, downloads, and updates.
+}
+</pre>
+
+<h3 id="request-whitelist">
+  허용 목록 권한 요청
+</h3>
+
+<p>
+  앱이 백그라운드에서 데이터를 사용해야 하는 경우, 앱의 패키지 이름의 URI가 포함된
+<code>Settings.ACTION_IGNORE_BACKGROUND_DATA_RESTRICTIONS_SETTINGS</code>
+인텐트(예:
+<code>package:MY_APP_ID</code>)를 앱이 보내서
+허용 목록 권한을 요청할 수 있습니다.
+</p>
+
+<p>
+  인텐트와 URI를 보내면 <strong>Settings</strong> 앱이 시작되고
+앱에 대한 데이터 사용량 설정이 표시됩니다. 그러면 사용자는 앱에 대해 백그라운드 데이터의
+사용 여부를 결정할 수 있습니다. 이 인텐트를 보내기 전에,
+백그라운드 데이터 사용을 활성화하기 위해
+<strong>Settings</strong> 앱 시작 여부를 사용자에게 먼저 묻는 것이
+좋습니다.
+</p>
+
+<h2 id="monitor-changes">
+  Data Saver 기본 설정 변경 사항 모니터링
+</h2>
+
+<p>
+  앱은 {@code
+ ConnectivityManager.ACTION_RESTRICT_BACKGROUND_CHANGED}를 수신하기 위해 {@link
+ android.content.BroadcastReceiver}를 만들고 수신기를 {@link android.content.Context#registerReceiver
+ Context.registerReceiver()}에 동적으로 등록하여
+Data Saver 기본 설정의 변경 사항을 모니터링할 수 있습니다. 앱은 이 브로드캐스트를 수신할 때 {@code
+ ConnectivityManager.getRestrictBackgroundStatus()}를 호출하여 <a href="#status">새로운 Data Saver 기본 설정이
+권한에 영향을 미치는지 확인</a>해야
+합니다.
+</p>
+
+<p class="note">
+  <strong>참고:</strong> 시스템에서는 {@link
+ android.content.Context#registerReceiver Context.registerReceiver()}로 동적으로 등록하는 앱에만 이
+브로드캐스트를 보냅니다. 이
+브로드캐스트를 수신하도록 매니페스트에 등록하는 앱은
+이를 수신하지 못합니다.
+</p>
+
+<h2 id="testing">
+  Android 디버그 브리지 명령을 이용한 테스트
+</h2>
+
+<a href="{@docRoot}tools/help/adb.html">Android 디버그 브리지</a>는
+네트워크 권한을 확인하고 구성하는 데 사용될 수 있는 몇 가지 명령을
+제공합니다.
+
+<dl>
+  <dt>
+    <code>$ adb shell dumpsys netpolicy</code>
+  </dt>
+
+  <dd>
+    현재 전역 백그라운드 네트워크
+ 제한 설정, 허용 목록에 현재 있는 패키지 UID 및 알려진
+다른 패키지의 네트워크 권한이 포함된 보고서를 생성합니다.
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy</code>
+  </dt>
+
+  <dd>
+    Network Policy Manager(netpolicy) 명령의 전체 목록을 표시합니다.
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy set restrict-background
+    &lt;boolean&gt;</code>
+  </dt>
+
+  <dd>
+    <code>true</code> 또는
+ <code>false</code>를 각각 전달할 때 Data Saver 모드를 활성화하거나 비활성화합니다.
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy add restrict-background-whitelist
+    &lt;UID&gt;</code>
+  </dt>
+
+  <dd>
+    지정된 패키지 UID를 허용 목록에 추가하여 백그라운드 데이터 통신 연결을
+ 허용합니다.
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy remove restrict-background-whitelist
+    &lt;UID&gt;</code>
+  </dt>
+
+  <dd>
+    지정된 패키지 UID를 허용 목록에서 제거하여, Data Saver가 활성화된 동안 백그라운드 데이터 통신 연결을
+차단합니다.
+  </dd>
+</dl>

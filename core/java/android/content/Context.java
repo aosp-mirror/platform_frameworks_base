@@ -1130,7 +1130,9 @@ public abstract class Context {
      * <strong>Note: you should not <em>rely</em> on the system deleting these
      * files for you; you should always have a reasonable maximum, such as 1 MB,
      * for the amount of space you consume with cache files, and prune those
-     * files when exceeding that space.</strong>
+     * files when exceeding that space.</strong> If your app requires a larger
+     * cache (larger than 1 MB), you should use {@link #getExternalCacheDir()}
+     * instead.
      * <p>
      * The returned path may change over time if the calling app is moved to an
      * adopted storage device, so only relative paths should be persisted.
@@ -1142,6 +1144,7 @@ public abstract class Context {
      * @see #openFileOutput
      * @see #getFileStreamPath
      * @see #getDir
+     * @see #getExternalCacheDir
      */
     public abstract File getCacheDir();
 
@@ -1190,7 +1193,7 @@ public abstract class Context {
      * </ul>
      * <p>
      * If a shared storage device is emulated (as determined by
-     * {@link Environment#isExternalStorageEmulated(File)}), it's contents are
+     * {@link Environment#isExternalStorageEmulated(File)}), its contents are
      * backed by a private user data partition, which means there is little
      * benefit to storing data here instead of the private directory returned by
      * {@link #getCacheDir()}.
@@ -2761,8 +2764,10 @@ public abstract class Context {
      *  <dd> A {@link android.net.ConnectivityManager ConnectivityManager} for
      *  handling management of network connections.
      *  <dt> {@link #WIFI_SERVICE} ("wifi")
-     *  <dd> A {@link android.net.wifi.WifiManager WifiManager} for management of
-     * Wi-Fi connectivity.
+     *  <dd> A {@link android.net.wifi.WifiManager WifiManager} for management of Wi-Fi
+     *  connectivity.  On releases before NYC, it should only be obtained from an application
+     *  context, and not from any other derived context to avoid memory leaks within the calling
+     *  process.
      *  <dt> {@link #WIFI_P2P_SERVICE} ("wifip2p")
      *  <dd> A {@link android.net.wifi.p2p.WifiP2pManager WifiP2pManager} for management of
      * Wi-Fi Direct connectivity.
@@ -3615,12 +3620,11 @@ public abstract class Context {
     public static final String HARDWARE_PROPERTIES_SERVICE = "hardware_properties";
 
     /**
-     * TODO Javadoc
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.content.pm.ShortcutManager} for accessing the launcher shortcut service.
      *
      * @see #getSystemService
      * @see android.content.pm.ShortcutManager
-     *
-     * @hide
      */
     public static final String SHORTCUT_SERVICE = "shortcut";
 

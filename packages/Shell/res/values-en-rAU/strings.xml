@@ -21,7 +21,7 @@
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Bug report <xliff:g id="ID">#%d</xliff:g> captured"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Adding details to the bug report"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Please wait…"</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Swipe left to share your bug report"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"The bug report will appear on the phone shortly"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Tap to share your bug report"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Tap to share your bug report without a screenshot or wait for the screenshot to finish"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Tap to share your bug report without a screenshot or wait for the screenshot to finish"</string>

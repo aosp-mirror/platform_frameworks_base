@@ -9,7 +9,7 @@ previous.link=connectivity-monitoring.html
 
 @jd:body
 
-<div id="tb-wrapper"> 
+<div id="tb-wrapper">
 <div id="tb">
 
 <h2>このレッスンの内容</h2>
@@ -23,7 +23,7 @@ previous.link=connectivity-monitoring.html
   <li><a href="{@docRoot}guide/components/intents-filters.html">インテントとインテント フィルタ</a>
 </ul>
 
-</div> 
+</div>
 </div>
 
 <p>端末の状態変化を監視する最も単純な方法は、監視対象とする状態ごとに {@link android.content.BroadcastReceiver} を作成し、それぞれをアプリのマニフェスト内で登録するというものです。これらの各レシーバ内で、端末の現在の状態に基づいて反復アラームのスケジュールを再設定します。</p>
@@ -31,10 +31,10 @@ previous.link=connectivity-monitoring.html
 <p>この方法のデメリットは、これらのレシーバのいずれかがトリガされるたびに端末がスリープから復帰することですが、このことは必要以上に頻繁に発生する可能性があります。</p>
 
 <p>これよりも良い方法は、実行時にブロードキャスト レシーバをオンまたはオフにするというものです。このようにすれば、マニフェスト内で宣言したレシーバを受動的アラームとして使用できます。つまり、このアラームは、必要なときにだけシステム イベントによって呼び出されます。</p>
- 
 
-<h2 id="ToggleReceivers">効率を上げるために状態変化レシーバのオンとオフを切り替える </h2> 
- 
+
+<h2 id="ToggleReceivers">効率を上げるために状態変化レシーバのオンとオフを切り替える </h2>
+
 <p>{@link android.content.pm.PackageManager} を使用すると、マニフェスト内で定義されているコンポーネントの有効化状態を切り替えることができます。このコンポーネントにはブロードキャスト レシーバも該当するので、次に示すようにオンとオフを切り替えることができます。</p>
 
 <pre>ComponentName receiver = new ComponentName(context, myReceiver.class);

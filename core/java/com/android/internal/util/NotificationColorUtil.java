@@ -271,7 +271,7 @@ public class NotificationColorUtil {
      * Finds a text color with sufficient contrast over bg that has the same hue as the original
      * color, assuming it is for large text.
      */
-    private static int ensureLargeTextContrast(int color, int bg) {
+    public static int ensureLargeTextContrast(int color, int bg) {
         return findContrastColor(color, bg, true, 3);
     }
 
@@ -338,6 +338,20 @@ public class NotificationColorUtil {
             }
         }
         return color;
+    }
+
+    /**
+     * Lighten a color by a specified value
+     * @param baseColor the base color to lighten
+     * @param amount the amount to lighten the color from 0 to 100. This corresponds to the L
+     *               increase in the LAB color space.
+     * @return the lightened color
+     */
+    public static int lightenColor(int baseColor, int amount) {
+        final double[] result = ColorUtilsFromCompat.getTempDouble3Array();
+        ColorUtilsFromCompat.colorToLAB(baseColor, result);
+        result[0] = Math.min(100, result[0] + amount);
+        return ColorUtilsFromCompat.LABToColor(result[0], result[1], result[2]);
     }
 
     /**
@@ -434,7 +448,7 @@ public class NotificationColorUtil {
          * Convert RGB components to its CIE Lab representative components.
          *
          * <ul>
-         * <li>outLab[0] is L [0 ...1)</li>
+         * <li>outLab[0] is L [0 ...100)</li>
          * <li>outLab[1] is a [-128...127)</li>
          * <li>outLab[2] is b [-128...127)</li>
          * </ul>
@@ -516,7 +530,7 @@ public class NotificationColorUtil {
          * 2° Standard Observer (1931).</p>
          *
          * <ul>
-         * <li>outLab[0] is L [0 ...1)</li>
+         * <li>outLab[0] is L [0 ...100)</li>
          * <li>outLab[1] is a [-128...127)</li>
          * <li>outLab[2] is b [-128...127)</li>
          * </ul>
@@ -634,7 +648,7 @@ public class NotificationColorUtil {
                     : (XYZ_KAPPA * component + 16) / 116;
         }
 
-        private static double[] getTempDouble3Array() {
+        public static double[] getTempDouble3Array() {
             double[] result = TEMP_ARRAY.get();
             if (result == null) {
                 result = new double[3];

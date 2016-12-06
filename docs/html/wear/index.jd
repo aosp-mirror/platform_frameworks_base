@@ -9,7 +9,7 @@ nonavpage=true
 
 <style>
 .fullpage>#footer,
-#jd-content>.content-footer.wrap {
+#body-content>.content-footer.wrap {
   display:none;
 }
 </style>
@@ -267,6 +267,9 @@ nonavpage=true
             <div class="col-4">
               <img src="/wear/images/partners/mips.png" alt="MIPS">
             </div>
+            <div class="col-4">
+              <img src="/wear/images/partners/mkors.png" alt=Michael Kors">
+            </div>
              <div class="col-4">
               <img src="/wear/images/partners/mobvoi.png" alt="Mobvoi">
             </div>
@@ -275,6 +278,12 @@ nonavpage=true
             </div>
              <div class="col-4">
               <img src="/wear/images/partners/nb.png" alt="New Balance">
+            </div>
+            <div class="col-4">
+              <img src="/wear/images/partners/nixon.png" alt="Nixon">
+            </div>
+            <div class="col-4">
+              <img src="/wear/images/partners/polar.png" alt="Polar">
             </div>
             <div class="col-4">
               <img src="/wear/images/partners/qualcomm.png" alt="Qualcomm">

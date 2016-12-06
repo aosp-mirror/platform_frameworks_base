@@ -143,7 +143,9 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3,5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_4g_plus" msgid="3032226872470658661">"4G+"</string>
     <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
+    <string name="accessibility_data_connection_lte_plus" msgid="361876866906946007">"LTE+"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Itinerància"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Vora"</string>
@@ -236,7 +238,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Les dades 4G estan aturades"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Les dades mòbils estan aturades"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Les dades estan aturades"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Com que has arribat al límit de dades establert, s\'ha aturat l\'ús de dades del dispositiu per a la resta d\'aquest cicle.\n\nSi el reprens, l\'operador de telefonia mòbil pot aplicar càrrecs."</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"S\'ha assolit el límit de dades establert. Ja no estàs utilitzant dades mòbils. \n\n Si reprens l\'ús de les dades, es poden aplicar càrrecs."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Reprèn"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"No hi ha connexió a Internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi: connectada"</string>
@@ -317,6 +319,9 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Límit: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Advertiment: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Mode de feina"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Llum nocturna"</string>
+    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"La llum nocturna està encesa; toca aquí per apagar-la"</string>
+    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"La llum nocturna està apagada; toca aquí per encendre-la"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"No hi ha cap element recent"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Ho has esborrat tot"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Informació de l\'aplicació"</string>
@@ -330,6 +335,8 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Divisió horitzontal"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Divisió vertical"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Divisió personalitzada"</string>
+  <string-array name="recents_blacklist_array">
+  </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Carregada"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"S\'està carregant"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> per completar la càrrega"</string>
@@ -397,6 +404,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"És possible que el dispositiu estigui supervisat."</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"El perfil es pot supervisar"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"És possible que la xarxa estigui supervisada."</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"És possible que la xarxa estigui supervisada"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Supervisió del dispositiu"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Supervisió del perfil"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Supervisió de la xarxa"</string>
@@ -409,6 +417,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"Estàs connectat a <xliff:g id="APPLICATION">%1$s</xliff:g>, que pot supervisar la teva activitat a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Estàs connectat a <xliff:g id="APPLICATION">%1$s</xliff:g>, que pot supervisar la teva activitat personal a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Estàs connectat a <xliff:g id="APPLICATION">%1$s</xliff:g>, que pot supervisar la teva activitat personal a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web."</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> gestiona el teu perfil professional. Aquest perfil està connectat a <xliff:g id="APPLICATION">%2$s</xliff:g>, que pot supervisar la teva activitat professional a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web.\n\nPer obtenir més informació, contacta amb l\'administrador."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> gestiona el teu perfil professional. Aquest perfil està connectat a <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, que pot supervisar la teva activitat professional a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web.\n\nA més, estàs connectat a <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, que també pot supervisar la teva activitat personal a la xarxa."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> gestiona el dispositiu.\n\nL\'administrador pot supervisar i gestionar el següent: configuració, accés corporatiu, aplicacions i dades associades amb el dispositiu, inclosa la informació d\'ubicació.\n\nEstàs connectat a <xliff:g id="APPLICATION">%2$s</xliff:g>, que pot supervisar l\'activitat a la xarxa, com ara els correus, les aplicacions i els llocs web.\n\nPer obtenir més informació, contacta amb l\'administrador."</string>
@@ -434,6 +443,18 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> és el diàleg de volum"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"Toca la notificació per restaurar el valor original."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Estàs utilitzant el perfil professional"</string>
+  <string-array name="volume_stream_titles">
+    <item msgid="5841843895402729630">"Truca"</item>
+    <item msgid="5997713001067658559">"Sistema"</item>
+    <item msgid="7858983209929864160">"Fes sonar"</item>
+    <item msgid="1850038478268896762">"Multimèdia"</item>
+    <item msgid="8265110906352372092">"Alarma"</item>
+    <item msgid="5339394737636839168"></item>
+    <item msgid="2951313578278086204">"Bluetooth"</item>
+    <item msgid="2919807739709798970"></item>
+    <item msgid="150349973435223405"></item>
+    <item msgid="6761963760295549099"></item>
+  </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Toca per activar el so."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Toca per activar la vibració. Pot ser que els serveis d\'accessibilitat se silenciïn."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Toca per silenciar el so. Pot ser que els serveis d\'accessibilitat se silenciïn."</string>
@@ -473,8 +494,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Mostra els segons del rellotge a la barra d\'estat. Això pot afectar la durada de la bateria."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Reorganitza Configuració ràpida"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Mostra la brillantor a Configuració ràpida"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"Activa el gest per dividir la pantalla en lliscar cap amunt"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Activa el gest per entrar al mode de pantalla dividida en lliscar cap amunt des del botó Visió general"</string>
     <string name="experimental" msgid="6198182315536726162">"Experimental"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Vols activar el Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Per connectar el teclat amb la tauleta, primer has d\'activar el Bluetooth."</string>
@@ -504,21 +523,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"Més opcions"</string>
     <string name="notification_done" msgid="5279426047273930175">"Fet"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Controls de notificació de l\'aplicació <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"Color i aparença"</string>
-    <string name="night_mode" msgid="3540405868248625488">"Mode nocturn"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"Calibra la pantalla"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"Activat"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"Desactivat"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"Activa automàticament"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Canvia al mode nocturn d\'acord amb la ubicació i l\'hora del dia"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"Quan el mode nocturn estigui activat"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Fes servir un tema fosc per a Android OS"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"Ajusta el color"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"Ajusta la brillantor"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"El tema fosc s\'aplica a les àrees clau d\'Android OS que normalment es mostren amb un tema clar, com ara Configuració."</string>
-    <string name="color_apply" msgid="9212602012641034283">"Aplica"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"Confirma la configuració"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"Algunes opcions de configuració de color poden deixar el dispositiu inservible. Fes clic a D\'acord per confirmar la configuració de color; en cas contrari, la configuració es restablirà al cap de 10 segons."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Ús de la bateria"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"La funció Estalvi de bateria no està disponible durant la càrrega"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Estalvi de bateria"</string>
@@ -600,7 +604,7 @@
     <string name="select_keycode" msgid="7413765103381924584">"Selecciona un botó de teclat"</string>
     <string name="preview" msgid="9077832302472282938">"Previsualització"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Arrossega per afegir funcions"</string>
-    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Arrossega\'ls aquí per suprimir-los"</string>
+    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Arrossega aquí per suprimir una funció"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Edita"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Hora"</string>
   <string-array name="clock_options">
@@ -647,4 +651,5 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Obre la configuració per a <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Edita l\'ordre de la configuració."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Pàgina <xliff:g id="ID_1">%1$d</xliff:g> (<xliff:g id="ID_2">%2$d</xliff:g> en total)"</string>
+    <string name="cant_silence_or_block" msgid="999689262131488625">"Les notificacions no es poden silenciar ni bloquejar"</string>
 </resources>

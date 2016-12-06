@@ -1,0 +1,125 @@
+page.title=Loading Apps on Chromebooks
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>On this page</h2>
+
+      <ol>
+        <li><a href="#enter-dev">Enter Developer Mode</a></li>
+        <li><a href="#enable-unknown">Enable Unknown Sources</a></li>
+        <li><a href="#load-app">Load Your App</a></li>
+      </ol>
+    </div>
+  </div>
+
+<p>
+This document describes how to enter <em>Developer</em> mode and enable
+<em>unknown resources</em> so that you can load Android apps on your Google
+Chromebook.
+</p>
+
+<h2 id="enter-dev">Enter Developer Mode</h2>
+
+<p>
+To load Android apps, you must enable unknown sources. Enabling unknown sources
+is available only when your device is in Developer mode.
+</p>
+
+<p class="caution"><strong>Caution: </strong>Modifications that you make to the
+system are not supported by Google and may void your warranty. Additionally,
+modifications may cause hardware, software, or security issues.
+</p>
+
+<p class="note"><strong>Note: </strong>On most devices, both the
+<em>recovery</em> button and the <em>dev-switch</em> button are virtualized. If
+these instructions don't work for you, see the <a class="external-link"
+href="https://www.chromium.org/chromium-os/developer-information-for-chrome-os-devices">
+specific instructions for your device</a>.
+</p>
+
+<p>
+To enter Developer mode, complete these steps:
+</p>
+
+<ol>
+  <li>
+    Invoke <em>Recovery</em> mode by pressing and holding the
+    <strong>Esc</strong> and <strong>Refresh (F3)</strong> keys, then pressing
+    the <strong>Power</strong> button.
+  </li>
+  <li>
+    When the <em>Recovery</em> screen appears, press <strong>Ctrl+D</strong>.
+    There's no prompt for this action, so you must simply complete it.
+    Afterwards, you are prompted to confirm and reboot into Developer mode.
+  </li>
+</ol>
+
+<p>
+If you see one of the following screens when you turn on your device, you've
+successfully entered Developer mode:
+</p>
+
+<img src="{@docRoot}images/topic/arc/sideload_figure_1.jpg" />
+
+<p class="img-caption"><strong>Figure 1. </strong>Developer mode confirmation
+screens.</p>
+
+<p class="note"><strong>Note</strong>: To skip the OS loading screen, either
+wait 30 seconds or press <strong>Ctrl+D</strong>, and your Chromebook continues
+starting.
+</p>
+
+<h2 id="enable-unknown">Enable Unknown Sources</h2>
+
+<p>
+To enable unknown sources, navigate to <strong>Chrome Settings > App Settings >
+Security</strong>, then enable <strong>Unknown sources</strong> by moving the
+slider to the right.
+</p>
+
+<p class="note"><strong>Note:</strong>You can enable unknown sources only when
+your device is in <a
+href="{@docRoot}topic/arc/sideload.html#enter-dev">Developer mode</a>.
+</p>
+
+<h2 id="load-app">Load Your App</h2>
+
+<p>
+After enabling unknown sources, you can load apps by copying an app's APK file
+to the <em>Downloads</em> folder and opening it with Android's File Manager app.
+
+</p>
+
+<p>
+You can copy the APK file to your Chromebook using one of the following methods:
+</p>
+
+<ul>
+  <li>
+    <strong>Using a cloud app</strong> &ndash; Upload your APK file to Google
+    Drive or send it to yourself via email. Open it with the Android app
+    equivalent (Drive and Gmail, respectively).
+  </li>
+  <li>
+    <strong>Using an external storage device</strong> &ndash; Transfer the APK
+    file to the Downloads folder of your Chromebook using a thumb drive, SD
+    card, or an external hard drive. Afterwards, open the Android File Manager
+    app by navigating to  <strong>Chrome Settings > App Settings > Device &amp;
+    USB > Explore</strong>.
+  </li>
+  <li>
+    <strong>Using ADB</strong> &ndash; After <a
+    href="{@docRoot}topic/arc/index.html#setup"> setting up ADB</a> on your
+    Chromebook, enter the following command into a terminal window on your
+    development workstation:
+<pre class="no-pretty-print">
+adb install <var>app-name</var>.apk
+</pre>
+    <p>This command pushes the app to your connected Chromebook and installs the
+    app. For more information about copying and installing apps from a
+    development computer, see <a
+    href="{@docRoot}studio/command-line/adb.html#move">Installing an
+    Application</a>.</p>
+  </li>
+</ul>

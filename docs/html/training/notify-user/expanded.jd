@@ -29,7 +29,7 @@ trainingnavtop=true
         </a>
     </li>
     <li>
-        <a href="{@docRoot}design/patterns/notifications.html">Notifications</a> Design Guide
+        <a href="https://material.google.com/patterns/notifications.html">Notifications</a> Design Guide
     </li>
 </ul>
 
@@ -75,7 +75,7 @@ big view give users access to same functionality:</p>
 </ul>
 
 <p>The normal view provides these features through a new activity that launches
-when the user clicks the notification. Keep this in mind as you design your notifications&mdash;first 
+when the user clicks the notification. Keep this in mind as you design your notifications&mdash;first
 provide the functionality in the normal view, since
 this is how many users will interact with the notification.</p>
 
@@ -87,19 +87,19 @@ to construct and issue the notification.</p>
 
 <p>In this snippet, the
 {@link android.app.IntentService} method
-{@link android.app.IntentService#onHandleIntent onHandleIntent()} specifies the new activity 
+{@link android.app.IntentService#onHandleIntent onHandleIntent()} specifies the new activity
 that will be launched if the user
-clicks the notification itself. The method 
-{@link android.support.v4.app.NotificationCompat.Builder#setContentIntent setContentIntent()} 
+clicks the notification itself. The method
+{@link android.support.v4.app.NotificationCompat.Builder#setContentIntent setContentIntent()}
 defines a pending intent that should be fired when the user
 clicks the notification, thereby launching the activity.</p>
 
 <pre>Intent resultIntent = new Intent(this, ResultActivity.class);
 resultIntent.putExtra(CommonConstants.EXTRA_MESSAGE, msg);
-resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | 
+resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
         Intent.FLAG_ACTIVITY_CLEAR_TASK);
-     
-// Because clicking the notification launches a new ("special") activity, 
+
+// Because clicking the notification launches a new ("special") activity,
 // there's no need to create an artificial back stack.
 PendingIntent resultPendingIntent =
          PendingIntent.getActivity(
@@ -130,8 +130,8 @@ snoozeIntent.setAction(CommonConstants.ACTION_SNOOZE);
 PendingIntent piSnooze = PendingIntent.getService(this, 0, snoozeIntent, 0);
 </pre>
 
-<p>This snippet shows how to construct the 
-{@link android.support.v4.app.NotificationCompat.Builder Builder} object. 
+<p>This snippet shows how to construct the
+{@link android.support.v4.app.NotificationCompat.Builder Builder} object.
 It sets the style for the big
 view to be "big text," and sets its content to be the reminder message. It uses
 {@link android.support.v4.app.NotificationCompat.Builder#addAction addAction()}

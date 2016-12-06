@@ -36,7 +36,7 @@ page.image=images/cards/card-analytics_2x.png
 <li><a href="https://accounts.google.com/SignUp?continue=https%3A%2F%2Fwww.google.com%2Fanalytics%2Fmobile%2F&hl=en">Create
 your Google Analytics account</a>.</li>
 <li>Write down your tracking ID. </li>
-<li>Initialize Google Analytics in your app to start measuring activity immediately.</li> 
+<li>Initialize Google Analytics in your app to start measuring activity immediately.</li>
 </ul>
 
 <p>
@@ -97,7 +97,7 @@ your Google Analytics account</a>.</li>
   </h2>
 </div>
 
-<div class="resource-widget resource-flow-layout col-13" 
+<div class="resource-widget resource-flow-layout col-13"
   data-query="collection:distribute/analyzestart"
   data-sortorder="-timestamp"
   data-cardsizes="6x3"

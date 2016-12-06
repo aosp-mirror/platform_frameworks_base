@@ -8,13 +8,13 @@ trainingnavtop=true
 
 <div id="tb-wrapper">
   <div id="tb">
-    
+
     <h2>This lesson teaches you to</h2>
     <ol>
       <li><a href="#create-layouts">Create Different Layouts</a></li>
       <li><a href="#create-bitmaps">Create Different Bitmaps</a></li>
     </ol>
-    
+
     <h2>You should also read</h2>
     <ul>
       <li><a href="{@docRoot}training/multiscreen/index.html">Designing for Multiple
@@ -26,9 +26,9 @@ Screens</a></li>
   </div>
 </div>
 
-<p>Android categorizes device screens using two general properties:  size and density.  You should 
-expect that your app will be installed on devices with screens that range in both size 
-and density. As such, you should include some alternative resources that optimize your app’s 
+<p>Android categorizes device screens using two general properties:  size and density.  You should
+expect that your app will be installed on devices with screens that range in both size
+and density. As such, you should include some alternative resources that optimize your app’s
 appearance for different screen sizes and densities.</p>
 
 <ul>
@@ -46,12 +46,12 @@ screen size, so many apps should revise the layout to optimize the user experien
 orientation.</p>
 
 
-<h2 id="create-layouts">Create Different Layouts</h2> 
+<h2 id="create-layouts">Create Different Layouts</h2>
 
 <p>To optimize your user experience on different screen sizes, you should create a unique layout XML
-file for each screen size you want to support. Each layout should be 
-saved into the appropriate resources directory, named with a <code>-&lt;screen_size></code> 
-suffix.  For example, a unique layout for large screens should be saved under 
+file for each screen size you want to support. Each layout should be
+saved into the appropriate resources directory, named with a <code>-&lt;screen_size></code>
+suffix.  For example, a unique layout for large screens should be saved under
 <code>res/layout-large/</code>.</p>
 
 <p class="note"><strong>Note:</strong> Android automatically scales your layout in order to
@@ -85,7 +85,7 @@ an optimized UI for the corresponding screen size.</p>
 }
 </pre>
 
-<p>The system loads the layout file from the appropriate layout directory based on screen size of 
+<p>The system loads the layout file from the appropriate layout directory based on screen size of
 the device on which your app is running. More information about how Android selects the
 appropriate resource is available in the <a
 href="{@docRoot}guide/topics/resources/providing-resources.html#BestMatch">Providing Resources</a>
@@ -120,7 +120,7 @@ MyProject/
             main.xml
 </pre>
 
-<p class="note"><strong>Note:</strong> Android 3.2 and above supports an advanced method of 
+<p class="note"><strong>Note:</strong> Android 3.2 and above supports an advanced method of
 defining screen sizes that allows you to specify resources for screen sizes based on
 the minimum width and height in terms of density-independent pixels. This lesson does not cover
 this new technique. For more information, read <a
@@ -128,14 +128,14 @@ href="{@docRoot}training/multiscreen/index.html">Designing for Multiple
 Screens</a>.</p>
 
 
- 
+
 <h2 id="create-bitmaps">Create Different Bitmaps</h2>
 
 <p>You should always provide bitmap resources that are properly scaled to each of the generalized
 density buckets: low, medium, high and extra-high density. This helps you achieve good graphical
 quality and performance on all screen densities.</p>
 
-<p>To generate these images, you should start with your raw resource in vector format and generate 
+<p>To generate these images, you should start with your raw resource in vector format and generate
 the images for each density using the following size scale:</p>
 <ul>
 <li>xhdpi: 2.0</li>
@@ -144,7 +144,7 @@ the images for each density using the following size scale:</p>
 <li>ldpi: 0.75</li>
 </ul>
 
-<p>This means that if you generate a 200x200 image for xhdpi devices, you should generate the same 
+<p>This means that if you generate a 200x200 image for xhdpi devices, you should generate the same
 resource in 150x150 for hdpi, 100x100 for mdpi, and 75x75 for ldpi devices.</p>
 
 <p>Then, place the files in the appropriate drawable resource directory:</p>
@@ -162,14 +162,14 @@ MyProject/
             awesomeimage.png
 </pre>
 
-<p>Any time you reference <code>@drawable/awesomeimage</code>, the system selects the 
+<p>Any time you reference <code>@drawable/awesomeimage</code>, the system selects the
 appropriate bitmap based on the screen's density.</p>
 
 <p class="note"><strong>Note:</strong> Low-density (ldpi) resources aren’t always necessary.  When
 you provide hdpi assets, the system scales them down by one half to properly fit ldpi
 screens.</p>
 
-<p>For more tips and guidelines about creating icon assets for your app, see the 
+<p>For more tips and guidelines about creating icon assets for your app, see the
 <a href="{@docRoot}design/style/iconography.html">Iconography design guide</a>.</p>
 
 

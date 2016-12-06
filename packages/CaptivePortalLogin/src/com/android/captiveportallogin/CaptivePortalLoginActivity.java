@@ -96,7 +96,7 @@ public class CaptivePortalLoginActivity extends Activity {
         // Exit app if Network disappears.
         final NetworkCapabilities networkCapabilities = mCm.getNetworkCapabilities(mNetwork);
         if (networkCapabilities == null) {
-            finish();
+            finishAndRemoveTask();
             return;
         }
         mNetworkCallback = new NetworkCallback() {
@@ -163,7 +163,7 @@ public class CaptivePortalLoginActivity extends Activity {
                 mCaptivePortal.useNetwork();
                 break;
         }
-        finish();
+        finishAndRemoveTask();
     }
 
     @Override

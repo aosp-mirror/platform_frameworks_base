@@ -143,7 +143,9 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_4g_plus" msgid="3032226872470658661">"4G+"</string>
     <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
+    <string name="accessibility_data_connection_lte_plus" msgid="361876866906946007">"LTE+"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"ໂຣມມິງ"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
@@ -236,7 +238,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"ຂໍ້​ມູນ 4G ຢຸດ​ຊົ່ວ​ຄາວແລ້ວ"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"ຂໍ້​ມູນເຊວ​ລູ​ລາຢຸດ​ຊົ່ວ​ຄາວແລ້ວ"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"ຂໍ້​ມູນ​ຢຸດ​ຊົ່ວ​ຄາວແລ້ວ"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"ເນື່ອງ​ຈາກວ່າ​ຮອດ​ຂີດ​ຈຳ​ກັດ​ຂໍ້​ມູນ​ທີ່​ຕັ້ງ​ໄວ້​ຂອ​ງ​ທ່ານ​ແລ້ວ, ອຸ​ປະ​ກອນ​ຢຸດ​ການ​ນຳ​ໃຊ້​ຂໍ້​ມູນ​ສຳ​ລັບ​ສ່ວນ​ທີ່​ຍັງ​ເຫຼືອ​ຂອງ​ຮອບ​ວຽນ​ນີ້.\n\nການ​ເລີ່ມ​ຕໍ່​ອາດ​ຈະ​ນຳ​ໄປ​ສູ່​ການ​ປ່ຽນ​ແປງ​ຈາກ​ຜູ້​ໃຫ້​ບໍ​ລິ​ການ​ເຄືອ​ຂ່າຍ​ຂອງ​ທ່ານ."</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"ທ່ານໃຊ້ອິນເຕີເນັດຮອດຈຳນວນທີ່ທ່ານຈຳກັດປະລິມານໄວ້ແລ້ວ. ທ່ານຈະບໍ່ນຳໃຊ້ການເຊື່ອມຕໍ່ຜ່ານເຄືອຂ່າຍມືຖືອີກຕໍ່ໄປ.\n\nຫາກທ່ານສືບຕໍ່ໃຊ້ໄປອີກ, ທ່ານອາດຖືກຮຽກເກັບເງິນຄ່າບໍລິການໄດ້."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"ເລີ່ມຕໍ່"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"ບໍ່ມີການເຊື່ອມຕໍ່ອິນເຕີເນັດ"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"ເຊື່ອມ​ຕໍ່ Wi-​-Fi ແລ້ວ"</string>
@@ -317,6 +319,9 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"ຈຳ​ກັດ <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"ຄຳ​ເຕືອນ <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"ໂໝດການເຮັດວຽກ"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"ແສງກາງຄືນ"</string>
+    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"ເປີດແສງກາງຄືນຢູ່, ແຕະເພື່ອປິດໄວ້"</string>
+    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"ປິດແສງກາງຄືນຢູ່, ແຕະເພື່ອເປີດໃຊ້"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"ບໍ່ມີລາຍການຫຼ້າສຸດ"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"ທ່ານລຶບລ້າງທຸກຢ່າງແລ້ວ"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"​ຂໍ້​ມູນ​ແອັບ​ພ​ລິ​ເຄ​ຊັນ"</string>
@@ -330,6 +335,8 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"ການ​ແຍກ​ລວງ​ຂວາງ"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ການ​ແຍກ​ລວງ​ຕັ້ງ"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"ການ​ແຍກ​ກຳ​ນົດ​ເອງ"</string>
+  <string-array name="recents_blacklist_array">
+  </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"ສາກເຕັມແລ້ວ."</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"ກຳລັງສາກໄຟ"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> ຈຶ່ງ​ຈະ​ເຕັມ"</string>
@@ -397,6 +404,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"ອຸ​ປະ​ກອນ​ອາດ​ມີ​ການ​ເຝົ້າ​ຕິດ​ຕາມ"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"ໂປຣ​ໄຟລ໌​ອາດ​ຖືກ​ເຝົ້າ​ຕິດ​ຕາມ​ຢູ່"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"​ເຄືອ​ຂ່າຍ​ອາດ​ມີ​ການ​ເຝົ້າ​ຕິດ​ຕາມ"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"ການນຳໃຊ້ເຄືອຂ່າຍອາດມີການກວດສອບຕິດຕາມ"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"ການກວດ​ສອບ​ຕິດ​ຕາມ​ອຸ​ປະ​ກອນ"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"ການ​ຕິດ​ຕາມ​ໂປຣ​ໄຟລ໌"</string>
     <string name="monitoring_title" msgid="169206259253048106">"ການກວດ​ສອບ​ຕິດ​ຕາມ​ເຄືອ​ຂ່າຍ"</string>
@@ -409,6 +417,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"ທ່ານເຊື່ອມຕໍ່ກັບ <xliff:g id="APPLICATION">%1$s</xliff:g>, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍຂອງທ່ານ ລວມທັງອີເມວ, ​ແອັບ ແລະເວັບໄຊທ໌."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"ທ່ານເຊື່ອມຕໍ່ກັບ <xliff:g id="APPLICATION">%1$s</xliff:g>, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍສ່ວນຕົວຂອງທ່ານ ລວມທັງອີເມວ, ​ແອັບ ແລະເວັບໄຊທ໌."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"ທ່ານເຊື່ອມຕໍ່ກັບ <xliff:g id="APPLICATION">%1$s</xliff:g> ແລ້ວ, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍສ່ວນຕົວຂອງທ່ານ ຮວມທັງອີເມວ, ​ແອັບ ແລະເວັບໄຊໄດ້."</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຂອງທ່ານຖືກຄວບຄຸມໂດຍ <xliff:g id="ORGANIZATION">%1$s</xliff:g>. ມັນຖືກເຊື່ອມຕໍ່ກັບ <xliff:g id="APPLICATION">%2$s</xliff:g>, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍບ່ອນເຮັດວຽກຂອງທ່ານ ລວມທັງອີເມວ,​ ແອັບ ແລະເວັບໄຊທ໌.\n\nສຳລັບຂໍ້ມູນເພີ່ມເຕີມ, ໃຫ້ຕິດຕໍ່ຜູ້ບໍລິຫານຂອງທ່ານ."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຂອງທ່ານຖືກຈັດການໂດຍ <xliff:g id="ORGANIZATION">%1$s</xliff:g>. ມັນເຊື່ອມຕໍ່ກັບ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍບ່ອນເຮັດວຽກຂອງທ່ານ ລວມທັງອີເມວ, ແອັບ ແລະເວັບໄຊທ໌.\n\nທ່ານເຊື່ອມຕໍ່ກັບ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍສ່ວນຕົວຂອງທ່ານ."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ຖືກ​ຄຸ້ມ​ຄອງ​ໂດຍ <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nຜູ້​ຄວບ​ຄຸມຂອງ​ທ່ານ​ສາ​ມາດ​ຕິດ​ຕາມ​ກວດ​ກາ ​ແລະ​ການ​ຄຸ້ມ​ຄອງ​ການຕັ້ງ​ຄ່າ, ແອັບ​ການ​ເຂົ້າ​ຫາ​ບໍ​ລິ​ສັດ, ຂໍ້​ມູນ​ທີ່​ກ່ຽວ​ຂ້ອງ​ກັບ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ, ແລະ​ຂໍ້​ມູນທີ່​ຕັ້ງ​ຂອງອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ.\n\nທ່ານ​ເຊື່ອມ​ຕໍ່​ກັບ <xliff:g id="APPLICATION">%2$s</xliff:g> ແລ້ວ, ເຊິ່ງ​ສາ​ມາດ​ຕິດ​ຕາມການ​ເຄື່ອນ​ໄຫວ​ເຄືອ​ຂ່າຍ​ຂອງ​ທ່ານ, ລວມ​ທັງ​ອີ​ເມວ, ແອັບ, ແລະ​ເວັບ​ໄຊ​ທ໌.\n\nສຳ​ລັບ​ຂໍ້​ມູນ​ເພີ່ມ​ເຕີມ, ຕິດ​ຕໍ່​ຜູ້​ຄວບ​ຄຸມ​ຂອງ​ທ່ານ."</string>
@@ -434,6 +443,18 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ແມ່ນ​ໜ້າ​ຕ່າງ​ລະ​ດັບ​ສຽງ"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"ແຕະເພື່ອກູ້ຕົ້ນສະບັບຄືນມາ."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"ທ່ານກຳລັງໃຊ້ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຂອງທ່ານ"</string>
+  <string-array name="volume_stream_titles">
+    <item msgid="5841843895402729630">"ໂທ"</item>
+    <item msgid="5997713001067658559">"ລະບົບ"</item>
+    <item msgid="7858983209929864160">"​ເຕືອນ​ດ້ວຍ​ສຽງ"</item>
+    <item msgid="1850038478268896762">"ມີເດຍ"</item>
+    <item msgid="8265110906352372092">"ໂມງປຸກ"</item>
+    <item msgid="5339394737636839168"></item>
+    <item msgid="2951313578278086204">"Bluetooth"</item>
+    <item msgid="2919807739709798970"></item>
+    <item msgid="150349973435223405"></item>
+    <item msgid="6761963760295549099"></item>
+  </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. ແຕະເພື່ອເຊົາປິດສຽງ."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. ແຕະເພື່ອຕັ້ງເປັນສັ່ນ. ບໍລິການຊ່ວຍເຂົ້າເຖິງອາດຖືກປິດສຽງໄວ້."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. ແຕະເພື່ອປິດສຽງ. ບໍລິການຊ່ວຍເຂົ້າເຖິງອາດຖືກປິດສຽງໄວ້."</string>
@@ -473,8 +494,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"ສະ​ແດງວິ​ນາ​ທີ​ໂມງ​ຢູ່​ໃນ​ແຖບ​ສະ​ຖາ​ນະ. ອາດ​ຈະ​ມີ​ຜົນ​ກະ​ທົບ​ຕໍ່​ອາ​ຍຸ​ແບັດ​ເຕີ​ຣີ."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"ຈັດ​ວາງ​ການ​ຕັ້ງ​ຄ່າ​ດ່ວນ​ຄືນ​ໃໝ່"</string>
     <string name="show_brightness" msgid="6613930842805942519">"ສະ​ແດງ​ຄວາມ​ແຈ້ງ​ຢູ່​ໃນ​ການ​ຕັ້ງ​ຄ່າ​ດ່ວນ"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"ເປີດໃຊ້ທ່າທາງການປັດຂຶ້ນເພື່ອເຂົ້າສູ່ໜ້າຈໍແບບແຍກກັນ"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"ເປີດໃຊ້ທ່າທາງເພື່ອເຂົ້າສູ່ໜ້າຈໍແບບແຍກກັນ ໂດຍການປັດຂຶ້ນຈາກປຸ່ມພາບຮວມ"</string>
     <string name="experimental" msgid="6198182315536726162">"ຍັງຢູ່ໃນການທົດລອງ"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"ເປີດ​ໃຊ້ Bluetooth ບໍ່?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"ເພື່ອ​ເຊື່ອມ​ຕໍ່​ແປ້ນ​ພິມ​ຂອງ​ທ່ານ​ກັບ​ແທັບ​ເລັດ​ຂອງ​ທ່ານ, ກ່ອນ​ອື່ນ​ໝົດ​ທ່ານ​ຕ້ອງ​ເປີດ Bluetooth."</string>
@@ -504,21 +523,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"​ການ​ຕັ້ງ​ຄ່າ​ເພີ່ມ​ເຕີມ"</string>
     <string name="notification_done" msgid="5279426047273930175">"ສຳເລັດແລ້ວ"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"ການຄວບຄຸມການແຈ້ງເຕືອນ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"ສີ ແລະ ລັກສະນະ"</string>
-    <string name="night_mode" msgid="3540405868248625488">"ໂໝດກາງຄືນ"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"ປັບໜ້າຈໍ"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"ເປີດ"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"ປິດ"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"ເປີດ​ໃຊ້​ອັດ​ຕະ​ໂນ​ມັດ"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"ສະລັບໄປໃຊ້ໂໝດກາງຄືນຕາມຄວາມເໝາະສົມກັບສະຖານທີ່ ແລະ ເວລາໃນແຕ່ລະມື້"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"ເມື່ອເປີດໂໝດກາງຄືນ"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"ໃຊ້ຮູບແບບສີສັນແບບມືດສຳລັບ Android OS"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"ປັບແຕ່ງໂທນສີ"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"ປັບແຕ່ງຄວາມສະຫວ່າງ"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"ຮູບແບບສີສັນມືດແມ່ນນຳໃຊ້ກັບພື້ນທີ່ຫຼັກຂອງ Android OS ທີ່ປົກກະຕິຈະສະແດງເປັນຮູບແບບສີສັນແຈ້ງ ເຊັ່ນ: ການຕັ້ງຄ່າ."</string>
-    <string name="color_apply" msgid="9212602012641034283">"ນຳໃຊ້"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"ຢືນ​ຢັນ​ການ​ຕັ້ງ​ຄ່າ"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"ບາງການຕັ້ງຄ່າສີສາມາດເຮັດໃຫ້ອຸປະກອນນີ້ບໍ່ສາມາດໃຊ້ໄດ້. ຄລິກ ຕົກລົງ ເພື່ອຢືນຢັນການຕັ້ງຄ່າສີເຫຼົ່ານີ້, ຖ້າບໍ່ດັ່ງນັ້ນ ການຕັ້ງຄ່າເຫຼົ່ານີ້ຈະຕັ້ງຄືນໃໝ່ ຫຼັງຈາກ 10 ວິນາທີ."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"ການໃຊ້ແບັດເຕີຣີ"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ຕົວປະຢັດແບັດເຕີຣີບໍ່ມີໃຫ້ນຳໃຊ້ໃນລະຫວ່າງການສາກ"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"ຕົວປະຢັດ​ແບັດເຕີຣີ"</string>
@@ -647,4 +651,5 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"ເປີດການຕັ້ງຄ່າ <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ແກ້ໄຂລຳດັບການຕັ້ງຄ່າ."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_1">%1$d</xliff:g> ຈາກທັງໝົດ <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <string name="cant_silence_or_block" msgid="999689262131488625">"ບໍ່ສາມາດປິດສຽງ ຫຼື ບລັອກການແຈ້ງເຕືອນໄດ້"</string>
 </resources>

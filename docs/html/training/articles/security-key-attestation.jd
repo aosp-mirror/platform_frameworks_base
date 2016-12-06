@@ -1,0 +1,861 @@
+page.title=Key Attestation
+page.metaDescription=A tool for verifying security properties of hardware-backed key pairs.
+page.keywords="security", "TEE", "hardware-backed", "keystore", "certificate", "key attestation"
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    <h2>In this document</h2>
+      <ol>
+        <li><a href="#verifying">Retrieving and Verifying a Hardware-backed Key Pair</a></li>
+        <li><a href="#certificate_schema">Certificate Extension Data Schema</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>
+  Key Attestation gives you more confidence that the keys you use in your app
+  are stored in a device's hardware-backed keystore. The following sections
+  describe how to verify the properties of hardware-backed keys and how to
+  interpret the schema of the attestation certificate's extension data.
+</p>
+
+<p class="note">
+  <strong>Note: </strong>Only a small number of devices running Android 7.0 (API
+  level 24) support hardware-level key attestation; all other devices running
+  Android 7.0 use software-level key attestation instead. Before you verify the
+  properties of a device's hardware-backed keys in a production-level
+  environment, you should make sure that the device supports hardware-level key
+  attestation. To do so, you should check that the attestation certificate chain
+  contains a root certificate that is signed by the Google attestation root key
+  and that the <code>attestationSecurityLevel</code> element within the <a
+  href="#certificate_schema_keydescription">key description</a> data structure
+  is set to the TrustedEnvironment security level.
+</p>
+
+<h2 id="verifying">
+  Retrieving and Verifying a Hardware-backed Key Pair
+</h2>
+
+<p>
+  During key attestation, you specify the alias of a key pair. The attestation
+  tool, in return, provides a certificate chain, which you can use to verify
+  the properties of that key pair.
+</p>
+
+<p>
+  If the device supports hardware-level key attestation, the root certificate
+  within this chain is signed using an attestation root key, which the device
+  manufacturer injects into the device’s hardware-backed keystore at the
+  factory.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> On devices that ship with hardware-level key
+  attestation, Android 7.0 (API level 24), and Google Play services, the root
+  certificate is signed by the Google attestation root key. You should verify
+  that this root certificate appears within Google’s list of root certificates.
+</p>
+
+<p>
+  To implement key attestation, complete the following steps:
+</p>
+
+<ol>
+  <li>
+    Use a {@link java.security.KeyStore KeyStore} object's
+    {@link java.security.KeyStore#getCertificateChain getCertificateChain()}
+    method to get a reference to the chain of X.509 certificates associated with
+    the hardware-backed keystore.
+  </li>
+
+  <li>
+    <p>
+      Check each certificate’s validity using a
+      {@link java.security.cert.CRL CRL} object's
+      {@link java.security.cert.CRL#isRevoked isRevoked()} method.
+    </p>
+
+    <p class="caution">
+      <strong>Caution:</strong> Although you can complete this process within
+      your app directly, it’s safer to check the certificates’ revocation lists
+      on a separate server that you trust.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Create an <code>Attestation</code> object, passing in the first element of
+      the certificate chain as an argument:</p>
+
+<pre>
+// "certificates" contains the certificate chain associated with a specific key
+// pair in the device's hardware-backed keystore.
+X509Certificate attestationCert = (X509Certificate) certificates[0];
+Attestation hardwareKeyAttestation = new Attestation(attestationCert);
+</pre>
+
+    <p>
+      An attestation object extracts the extension data within this certificate
+      and stores this information in a more accessible format. For more details
+      about the schema of the extension data, see <a href=
+      "#certificate_schema">Certificate Extension Data Schema</a>.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Use the accessor methods within the <code>Attestation</code> class to
+      retrieve the extension data from the certificate. These methods use the
+      same names and structure hierarchy as in the certificate extension data
+      schema.
+    </p>
+
+    <p>
+      For example, to view the verified boot key for the device’s TEE, use the
+      following method sequence:
+    </p>
+
+<pre>
+// "hardwareKeyAttestation" contains the first element of the attestation
+// certificate chain.
+AuthorizationList teeAuthList = hardwareKeyAttestation.getTeeEnforced();
+RootOfTrust teeRootOfTrust = teeAuthList.getRootOfTrust();
+byte[] teeVerifiedBootKey = teeRootOfTrust.getVerifiedBootKey();
+</pre>
+
+  </li>
+
+  <li>
+    <p>
+      Compare the extension data from the <code>Attestation</code> object with
+      the set of values that you expect the hardware-backed key to contain.
+    </p>
+
+    <p class="caution">
+      <strong>Caution:</strong> Although you can complete this process within
+      your app directly, it’s safer to check the certificate’s extension data
+      on a separate server that you trust.
+    </p>
+  </li>
+</ol>
+
+<h2 id="certificate_schema">
+  Certificate Extension Data Schema
+</h2>
+
+<p>
+  Key attestation verifies the extension data that appears in the first
+  certificate within the chain in a device’s hardware-backed keystore. The
+  certificate stores the information according to the following ASN.1 schema:
+</p>
+
+<pre class="no-pretty-print">
+KeyDescription ::= SEQUENCE {
+    attestationVersion  INTEGER,
+    attestationSecurityLevel  SecurityLevel,
+    keymasterVersion  INTEGER,
+    keymasterSecurityLevel  SecurityLevel,
+    attestationChallenge  OCTET_STRING,
+    <var>reserved  OCTET_STRING</var>,
+    softwareEnforced  AuthorizationList,
+    teeEnforced  AuthorizationList,
+}
+
+SecurityLevel ::= ENUMERATED {
+    Software  (0),
+    TrustedEnvironment  (1),
+}
+
+AuthorizationList ::= SEQUENCE {
+    purpose  [1] EXPLICIT SET OF INTEGER OPTIONAL,
+    algorithm  [2] EXPLICIT INTEGER OPTIONAL,
+    keySize  [3] EXPLICIT INTEGER OPTIONAL,
+    digest  [5] EXPLICIT SET OF INTEGER OPTIONAL,
+    padding  [6] EXPLICIT SET OF INTEGER OPTIONAL,
+    ecCurve  [10] EXPLICIT INTEGER OPTIONAL,
+    rsaPublicExponent  [200] EXPLICIT INTEGER OPTIONAL,
+    activeDateTime  [400] EXPLICIT INTEGER OPTIONAL,
+    originationExpireDateTime  [401] EXPLICIT INTEGER OPTIONAL,
+    usageExpireDateTime  [402] EXPLICIT INTEGER OPTIONAL,
+    noAuthRequired  [503] EXPLICIT NULL OPTIONAL,
+    userAuthType  [504] EXPLICIT INTEGER OPTIONAL,
+    authTimeout  [505] EXPLICIT INTEGER OPTIONAL,
+    allowWhileOnBody  [506] EXPLICIT NULL OPTIONAL,
+    allApplications  [600] EXPLICIT NULL OPTIONAL,
+    applicationId  [601] EXPLICIT OCTET_STRING OPTIONAL,
+    creationDateTime  [701] EXPLICIT INTEGER OPTIONAL,
+    origin  [702] EXPLICIT INTEGER OPTIONAL,
+    rollbackResistant  [703] EXPLICIT NULL OPTIONAL,
+    rootOfTrust  [704] EXPLICIT RootOfTrust OPTIONAL,
+    osVersion  [705] EXPLICIT INTEGER OPTIONAL,
+    osPatchLevel  [706] EXPLICIT INTEGER OPTIONAL,
+    attestationChallenge  [708] EXPLICIT INTEGER OPTIONAL,
+    attestationApplicationId  [709] EXPLICIT OCTET_STRING OPTIONAL,
+}
+
+RootOfTrust ::= SEQUENCE {
+    verifiedBootKey  OCTET_STRING,
+    deviceLocked  BOOLEAN,
+    verifiedBootState  VerifiedBootState,
+}
+
+VerifiedBootState ::= ENUMERATED {
+    Verified  (0),
+    SelfSigned  (1),
+    Unverified  (2),
+    Failed  (3),
+}
+</pre>
+
+<p>
+  The following list presents a description of each element within the schema:
+</p>
+
+<h3 id="certificate_schema_keydescription">
+  KeyDescription
+</h3>
+
+<p>
+  This sequence of values presents general information about the key pair being
+  verified through key attestation and provides easy access to additional
+  details.
+</p>
+
+<dl>
+  <dt>
+    <code>attestationVersion</code>
+  </dt>
+
+  <dd>
+    The version of the key attestation feature. Should be set to 1.
+  </dd>
+
+  <dt>
+    <code>attestationSecurityLevel</code>
+  </dt>
+
+  <dd>
+    <p>
+      The <a href="#certificate_schema_securitylevel">security
+      level</a> of the attestation.
+    </p>
+
+    <p class="caution">
+      <strong>Warning:</strong> Although it is possible to attest keys that are
+      stored in the Android system&mdash;that is, if the value of
+      <code>attestationSecurityLevel</code> is set to Software&mdash;you
+      cannot trust these attestations if the Android system becomes compromised.
+    </p>
+  </dd>
+
+  <dt>
+    <code>keymasterVersion</code>
+  </dt>
+
+  <dd>
+    The version of the Keymaster hardware abstraction layer (HAL). Use 0 to
+    represent version 0.2 or 0.3, 1 to represent version 1.0, and 2 to represent
+    version 2.0.
+  </dd>
+
+  <dt>
+    <code>keymasterSecurityLevel</code>
+  </dt>
+
+  <dd>
+    The <a href="#certificate_schema_securitylevel">security
+    level</a> of the Keymaster implementation.
+  </dd>
+
+  <dt>
+    <code>attestationChallenge</code>
+  </dt>
+
+  <dd>
+    The challenge string associated with a key pair that is verified using key
+    attestation.
+  </dd>
+
+  <dt>
+    <code><var>reserved</var></code>
+  </dt>
+
+  <dd>
+    Only system apps use this value. In all other apps, this value is empty.
+  </dd>
+
+  <dt>
+    <code>softwareEnforced</code>
+  </dt>
+
+  <dd>
+    Optional. The Keymaster <a href=
+    "#certificate_schema_authorizationlist">authorization
+    list</a> that is enforced by the Android system, not by the device’s TEE.
+  </dd>
+
+  <dt>
+    <code>teeEnforced</code>
+  </dt>
+
+  <dd>
+    Optional. The Keymaster <a href=
+    "#certificate_schema_authorizationlist">authorization
+    list</a> that is enforced by the device’s TEE.
+  </dd>
+</dl>
+
+<h3 id="certificate_schema_securitylevel">
+  SecurityLevel
+</h3>
+
+<p>
+  This data structure indicates the extent to which a software feature, such as
+  a key pair, is protected based on its location within the device.
+</p>
+
+<p>
+  Because the data structure is an enumeration, it takes on exactly one of the
+  following values:
+</p>
+
+<dl>
+  <dt>
+    Software
+  </dt>
+
+  <dd>
+    The logic for creating and managing the feature is implemented in the
+    Android system. For the purposes of creating and storing key pairs, this
+    location is less secure than the TEE but is more secure than your app's
+    process space.
+  </dd>
+
+  <dt>
+    TrustedEnvironment
+  </dt>
+
+  <dd>
+    The logic for creating and managing the feature is implemented in secure
+    hardware, such as a TEE. For the purposes of creating and storing key pairs,
+    this location is more secure because secure hardware is highly resistant to
+    remote compromise.
+  </dd>
+</dl>
+
+<h3 id="certificate_schema_authorizationlist">
+  AuthorizationList
+</h3>
+
+<p>
+  This data structure contains the key pair’s properties themselves, as defined
+  in the Keymaster hardware abstraction layer (HAL). You compare these values
+  to the device’s current state or to a set of expected values to verify that a
+  key pair is still valid for use in your app.
+</p>
+
+<p>
+  Each field name corresponds to a similarly-named Keymaster tag. For example,
+  the <code>keySize</code> field in an authorization list corresponds to the
+  <a href="https://source.android.com/security/keystore/implementer-ref.html#km_tag_key_size">
+  <code>KM_TAG_KEY_SIZE</code></a> Keymaster tag.
+</p>
+
+<p>
+  Each field in the following list is optional:
+</p>
+
+<dl>
+  <dt>
+    <code>purpose</code>
+  </dt>
+
+  <dd>
+    Corresponds to the <code><a href=
+    "https://source.android.com/security/keystore/implementer-ref.html#km_tag_purpose">
+    KM_TAG_PURPOSE</a></code> Keymaster tag, which uses a tag ID value of 1.
+  </dd>
+
+  <dt>
+    <code>algorithm</code>
+  </dt>
+
+  <dd>
+    <p>
+      Corresponds to the <code><a href=
+      "https://source.android.com/security/keystore/implementer-ref.html#km_tag_algorithm">
+      KM_TAG_ALGORITHM</a></code> Keymaster tag, which uses a tag ID value of
+      2.
+    </p>
+
+    <p>
+      When an <code>AuthorizationList</code> object is associated with key
+      attestation, this value is always <code>KM_ALGORITHM_RSA</code> or
+      <code>KM_ALGORITHM_EC</code>.
+    </p>
+  </dd>
+
+  <dt>
+    <code>keySize</code>
+  </dt>
+
+  <dd>
+    Corresponds to the <code><a href=
+    "https://source.android.com/security/keystore/implementer-ref.html#km_tag_key_size">
+    KM_TAG_KEY_SIZE</a></code> Keymaster tag, which uses a tag ID value of 3.
+  </dd>
+
+  <dt>
+    <code>digest</code>
+  </dt>
+
+  <dd>
+    Corresponds to the <code><a href=
+    "https://source.android.com/security/keystore/implementer-ref.html#km_tag_digest">
+    KM_TAG_DIGEST</a></code> Keymaster tag, which uses a tag ID value of 5.
+  </dd>
+
+  <dt>
+    <code>padding</code>
+  </dt>
+
+  <dd>
+    Corresponds to the <code><a href=
+    "https://source.android.com/security/keystore/implementer-ref.html#km_tag_padding">
+    KM_TAG_PADDING</a></code> Keymaster tag, which uses a tag ID value of 6.
+  </dd>
+
+  <dt>
+    <code>ecCurve</code>
+  </dt>
+
+  <dd>
+    <p>
+      Corresponds to the <code>KM_TAG_EC_CURVE</code> Keymaster tag, which uses
+      a tag ID value of 10.
+    </p>
+
+    <p>
+      The set of parameters used to generate an elliptic curve (EC) key pair,
+      which uses ECDSA for signing and verification, within the Android system
+      keystore.
+    </p>
+  </dd>
+
+  <dt>
+    <code>rsaPublicExponent</code>
+  </dt>
+
+  <dd>
+    Corresponds to the <code><a href=
+    "https://source.android.com/security/keystore/implementer-ref.html#km_tag_rsa_public_exponent">
+    KM_TAG_RSA_PUBLIC_EXPONENT</a></code> Keymaster tag, which uses a tag ID
+    value of 200.
+  </dd>
+
+  <dt>
+    <code>activeDateTime</code>
+  </dt>
+
+  <dd>
+    Corresponds to the <code><a href=
+    "https://source.android.com/security/keystore/implementer-ref.html#km_tag_active_datetime">
+    KM_TAG_ACTIVE_DATETIME</a></code> Keymaster tag, which uses a tag ID value
+    of 400.
+  </dd>
+
+  <dt>
+    <code>originationExpireDateTime</code>
+  </dt>
+
+  <dd>
+    Corresponds to the <code><a href=
+    "https://source.android.com/security/keystore/implementer-ref.html#km_tag_origination_expire_datetime">
+    KM_TAG_ORIGINATION_EXPIRE_DATETIME</a></code> Keymaster tag, which uses a
+    tag ID value of 401.
+  </dd>
+
+  <dt>
+    <code>usageExpireDateTime</code>
+  </dt>
+
+  <dd>
+    Corresponds to the <code><a href=
+    "https://source.android.com/security/keystore/implementer-ref.html#km_tag_usage_expire_datetime">
+    KM_TAG_USAGE_EXPIRE_DATETIME</a></code> Keymaster tag, which uses a tag ID
+    value of 402.
+  </dd>
+
+  <dt>
+    <code>noAuthRequired</code>
+  </dt>
+
+  <dd>
+    <p>
+      Corresponds to the <code><a href=
+      "https://source.android.com/security/keystore/implementer-ref.html#km_tag_no_auth_required">
+      KM_TAG_NO_AUTH_REQUIRED</a></code> Keymaster tag, which uses a tag ID
+      value of 503.
+    </p>
+
+    <p>
+      When an <code>AuthorizationList</code> object is associated with key
+      attestation, this value is always true.
+    </p>
+  </dd>
+
+  <dt>
+    <code>userAuthType</code>
+  </dt>
+
+  <dd>
+    Corresponds to the <code><a href=
+    "https://source.android.com/security/keystore/implementer-ref.html#km_tag_user_auth_type">
+    KM_TAG_USER_AUTH_TYPE</a></code> Keymaster tag, which uses a tag ID value
+    of 504.
+  </dd>
+
+  <dt>
+    <code>authTimeout</code>
+  </dt>
+
+  <dd>
+    Corresponds to the <code><a href=
+    "https://source.android.com/security/keystore/implementer-ref.html#km_tag_auth_timeout">
+    KM_TAG_AUTH_TIMEOUT</a></code> Keymaster tag, which uses a tag ID value of
+    505.
+  </dd>
+
+  <dt>
+    <code>allowWhileOnBody</code>
+  </dt>
+
+  <dd>
+    <p>
+      Corresponds to the <code>KM_TAG_ALLOW_WHILE_ON_BODY</code> Keymaster tag,
+      which uses a tag ID value of 506.
+    </p>
+
+    <p>
+      Allows the key to be used after its authentication timeout period if the
+      user is still wearing the device on their body. Note that a secure
+      on-body sensor determines whether the device is being worn on the user’s
+      body.
+    </p>
+
+    <p>
+      When an <code>AuthorizationList</code> object is associated with key
+      attestation, this value is always true.
+    </p>
+  </dd>
+
+  <dt>
+    <code>allApplications</code>
+  </dt>
+
+  <dd>
+    <p>
+      Corresponds to the <code>KM_TAG_ALL_APPLICATIONS</code> Keymaster tag,
+      which uses a tag ID value of 600.
+    </p>
+
+    <p>
+      Indicates whether all apps on a device can access the key pair.
+    </p>
+
+    <p>
+      When an <code>AuthorizationList</code> object is associated with key
+      attestation, this value is always true.
+    </p>
+  </dd>
+
+  <dt>
+    <code>applicationId</code>
+  </dt>
+
+  <dd>
+    Corresponds to the <code><a href=
+    "https://source.android.com/security/keystore/implementer-ref.html#km_tag_application_id">
+    KM_TAG_APPLICATION_ID</a></code> Keymaster tag, which uses a tag ID value
+    of 601.
+  </dd>
+
+  <dt>
+    <code>creationDateTime</code>
+  </dt>
+
+  <dd>
+    Corresponds to the <code><a href=
+    "https://source.android.com/security/keystore/implementer-ref.html#km_tag_creation_datetime">
+    KM_TAG_CREATION_DATETIME</a></code> Keymaster tag, which uses a tag ID
+    value of 701.
+  </dd>
+
+  <dt>
+    <code>origin</code>
+  </dt>
+
+  <dd>
+    <p>
+      Corresponds to the <code><a href=
+      "https://source.android.com/security/keystore/implementer-ref.html#km_tag_origin">
+      KM_TAG_ORIGIN</a></code> Keymaster tag, which uses a tag ID value of 702.
+    </p>
+
+    <p>
+      When an <code>AuthorizationList</code> object is associated with key
+      attestation, this value is usually set to
+      <code>KM_ORIGIN_GENERATED</code>. If the attestation uses Keymaster
+      version 0.2 or 0.3, however, the origin may be set to
+      <code>KM_ORIGIN_UNKNOWN</code> instead.
+    </p>
+  </dd>
+
+  <dt>
+    <code>rollbackResistant</code>
+  </dt>
+
+  <dd>
+    Corresponds to the <code><a href=
+    "https://source.android.com/security/keystore/implementer-ref.html#km_tag_rollback_resistant">
+    KM_TAG_ROLLBACK_RESISTANT</a></code> Keymaster tag, which uses a tag ID
+    value of 703.
+  </dd>
+
+  <dt>
+    <code>rootOfTrust</code>
+  </dt>
+
+  <dd>
+    <p>
+      Corresponds to the <code><a href=
+      "https://source.android.com/security/keystore/implementer-ref.html#km_tag_root_of_trust">
+      KM_TAG_ROOT_OF_TRUST</a></code> Keymaster tag, which uses a tag ID value
+      of 704.
+    </p>
+
+    <p>
+      For more details, see the section describing the <code><a href=
+      "#certificate_schema_rootoftrust">RootOfTrust</a></code>
+      data structure.
+    </p>
+  </dd>
+
+  <dt>
+    <code>osVersion</code>
+  </dt>
+
+  <dd>
+    <p>
+      Corresponds to the <code>KM_TAG_OS_VERSION</code> Keymaster tag, which
+      uses a tag ID value of 705.
+    </p>
+
+    <p>
+      The version of the Android operating system associated with the
+      Keymaster, specified as a six-digit integer. For example, version 6.0.1
+      is represented as 060001.
+    </p>
+
+    <p>
+      Only Keymaster version 1.0 or higher includes this value in the
+      authorization list.
+    </p>
+  </dd>
+
+  <dt>
+    <code>osPatchLevel</code>
+  </dt>
+
+  <dd>
+    <p>
+      Corresponds to the <code>KM_TAG_PATCHLEVEL</code> Keymaster tag, which
+      uses a tag ID value of 706.
+    </p>
+
+    <p>
+      The month and year associated with the security patch that is being used
+      within the Keymaster, specified as a six-digit integer. For example, the
+      June 2016 patch is represented as 201606.
+    </p>
+
+    <p>
+      Only Keymaster version 1.0 or higher includes this value in the
+      authorization list.
+    </p>
+  </dd>
+
+  <dt>
+    <code>attestationChallenge</code>
+  </dt>
+
+  <dd>
+    <p>
+      Corresponds to the <code>KM_TAG_ATTESTATION_CHALLENGE</code> Keymaster
+      tag, which uses a tag ID value of 708.
+    </p>
+
+    <p>
+      The challenge string associated with the key pair that is defined in the
+      Keymaster.
+    </p>
+  </dd>
+
+  <dt>
+    <code>attestationApplicationId</code>
+  </dt>
+
+  <dd>
+    <p>
+      Corresponds to the <code>KM_TAG_ATTESTATION_APPLICATION_ID</code>
+      Keymaster tag, which uses a tag ID value of 709.
+    </p>
+
+    <p>
+      The unique ID of the attestation certificate that signed the key pair
+      that is in the Keymaster.
+    </p>
+  </dd>
+</dl>
+
+<h3 id="certificate_schema_rootoftrust">
+  RootOfTrust
+</h3>
+
+<p>
+  This collection of values defines key information about the device’s status.
+</p>
+
+<p>
+  Each field in the following list is required:
+</p>
+
+<dl>
+  <dt>
+    <code>verifiedBootKey</code>
+  </dt>
+
+  <dd>
+    <p>
+      A secure hash of the key that verifies the system image. It is recommended
+      that you use the SHA-256 algorithm for this hash.
+    </p>
+  </dd>
+
+  <dt>
+    <code>deviceLocked</code>
+  </dt>
+
+  <dd>
+    True if the device’s bootloader is locked, which enables Verified Boot
+    checking and prevents an unsigned device image from being flashed onto the
+    device. For more information about this feature, see the <a class=
+    "external-link" href=
+    "https://source.android.com/security/verifiedboot/verified-boot.html">Verifying
+    Boot</a> documentation.
+  </dd>
+
+  <dt>
+    <code>verifiedBootState</code>
+  </dt>
+
+  <dd>
+    The <a href="#certificate_schema_verifiedbootstate">boot
+    state</a> of the device, according to the Verified Boot feature.
+  </dd>
+
+  <dt>
+    <code>osVersion</code>
+  </dt>
+
+  <dd>
+    The current version of the Android operating system on the device,
+    specified as a six-digit integer. For example, version 6.0.1 is represented
+    as 060001.
+  </dd>
+
+  <dt>
+    <code>patchMonthYear</code>
+  </dt>
+
+  <dd>
+    The month and year associated with the security patch that is currently
+    installed on the device, specified as a six-digit integer. For example, the
+    August 2016 patch is represented as 201608.
+  </dd>
+</dl>
+
+<h3 id="certificate_schema_verifiedbootstate">
+  VerifiedBootState
+</h3>
+
+<p>
+  This data structure provides the device’s current boot state, which
+  represents the level of protection provided to the user and to apps after the
+  device finishes booting. For more information about this feature, see the
+  <a class="external-link" href=
+  "https://source.android.com/security/verifiedboot/verified-boot.html#boot_state">
+  Boot State</a> section within the Verifying Boot documentation.
+</p>
+
+<p>
+  This data structure is an enumeration, so it takes on exactly one of the
+  following values:
+</p>
+
+<dl>
+  <dt>
+    Verified
+  </dt>
+
+  <dd>
+    <p>
+      Indicates a full chain of trust, which includes the bootloader, the boot
+      partition, and all verified partitions.
+    </p>
+
+    <p>
+      When the device is in this boot state, the <code>verifiedBootKey</code> is
+      the hash of the device-embedded certificate, which the device manufacturer
+      adds to the device's ROM at the factory.
+    </p>
+  </dd>
+
+  <dt>
+    SelfSigned
+  </dt>
+
+  <dd>
+    <p>
+      Indicates that the device-embedded certificate has verified the device’s
+      boot partition and that the signature is valid.
+    </p>
+
+    <p>
+      When the device is in this boot state, the <code>verifiedBootKey</code> is
+      the hash of a user-installed certificate, which signs a boot partition
+      that the user adds to the device in place of the original,
+      manufacturer-provided boot partition.
+    </p>
+  </dd>
+
+  <dt>
+    Unverified
+  </dt>
+
+  <dd>
+    Indicates that the user can modify the device freely. Therefore, the user is
+    responsible for verifying the device’s integrity.
+  </dd>
+
+  <dt>
+    Failed
+  </dt>
+
+  <dd>
+    Indicates that the device has failed verification. The attestation
+    certificate should never use this value for <code>VerifiedBootState</code>.
+  </dd>
+</dl>

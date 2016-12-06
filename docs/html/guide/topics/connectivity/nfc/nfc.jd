@@ -487,19 +487,22 @@ intent. The following example checks for the {@link android.nfc.NfcAdapter#ACTIO
 intent and gets the NDEF messages from an intent extra.</p>
 
 <pre>
-public void onResume() {
-    super.onResume();
+&#64;Override
+protected void onNewIntent(Intent intent) {
+    super.onNewIntent(intent);
     ...
-    if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
-        Parcelable[] rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
-        if (rawMsgs != null) {
-            msgs = new NdefMessage[rawMsgs.length];
-            for (int i = 0; i &lt; rawMsgs.length; i++) {
-                msgs[i] = (NdefMessage) rawMsgs[i];
+    if (intent != null &amp;&amp; NfcAdapter.ACTION_NDEF_DISCOVERED.equals(intent.getAction())) {
+        Parcelable[] rawMessages =
+            intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
+        if (rawMessages != null) {
+            NdefMessage[] messages = new NdefMessage[rawMessages.length];
+            for (int i = 0; i < rawMessages.length; i++) {
+                messages[i] = (NdefMessage) rawMessages[i];
             }
+            // Process the messages array.
+            ...
         }
     }
-    //process the msgs array
 }
 </pre>
 

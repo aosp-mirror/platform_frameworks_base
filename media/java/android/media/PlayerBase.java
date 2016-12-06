@@ -181,10 +181,15 @@ public abstract class PlayerBase {
      * @return
      */
     boolean isRestricted_sync() {
+        // check app ops
+        if (mHasAppOpsPlayAudio) {
+            return false;
+        }
+        // check bypass flag
         if ((mAttributes.getAllFlags() & AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY) != 0) {
             return false;
         }
-        return !mHasAppOpsPlayAudio;
+        return true;
     }
 
     // Abstract methods a subclass needs to implement

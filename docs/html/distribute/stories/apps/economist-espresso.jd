@@ -1,0 +1,70 @@
+page.title=The Economist Espresso Increases Ratings by Launching Rating Requests
+page.metaDescription=The Economist improves ratings through user participation.
+page.tags="developerstory", "apps", "googleplay"
+page.image=images/cards/distribute/stories/economist-espresso.png
+page.timestamp=null
+
+@jd:body
+
+
+<h3>Background</h3>
+
+<div class="figure">
+  <img src="{@docRoot}images/distribute/stories/economist-espresso-icon.png" />
+</div>
+
+<p>
+  <a class="external-link" href="https://play.google.com/store/apps/details?id=uk.co.economist">
+  The Economist</a> launched the
+  <a class="external-link" href="https://play.google.com/store/apps/details?id=com.economist.darwin">
+  Espresso</a> app in November 2014. Espresso offers a morning briefing from the editors of The
+  Economist, six days a week. Delivered to readers’ mobile phones first thing in the morning, it
+  provides an overview of the global agenda for the coming day. It informs readers about what to
+  look out for in business, finance, and politics, and most importantly, what to make of it.
+</p>
+
+<p>
+  While the app received a lot of positive feedback from users on traditional customer support
+  channels, it received less feedback through direct app reviews. The Economist decided to run
+  tests to increase app reviews, resulting in improved ratings.
+
+<h3>What they did</h3>
+
+<p>
+  In April 2016, The Economist began testing to determine if asking for reviews would improve
+  user participation. They introduced rating requests into the app whereby users received a
+  notification asking them to rate the app while using it.
+</p>
+
+<p>
+  They prompted only users who had fully experienced the app, notifying those who had read more
+  than 25 articles after using it for more than a week. The prompt text was branded:
+  <em>Are you enjoying the Economist Espresso?</em> Upon clicking <em>yes</em>, the user was
+  taken to the Google Play store to review and rate the app.
+
+<h3>Results</h3>
+
+<p>
+  By capturing readers’ feedback in the Play store, The Economist was able to share the goodwill
+  and positive sentiment, <strong>further increasing its star rating and the number of app
+  installs</strong>.
+</p>
+
+<p>
+  After just one week following the launch of rating requests, The Espresso app's star rating
+  increased by 5%, with <strong>the average number of ratings received growing 40 times</strong>.
+</p>
+
+<h3>Get started</h3>
+
+<p>
+  Find out more about
+  <a class="external-link" href="https://support.google.com/googleplay/android-developer/answer/138230">
+  ratings and reviews</a>.
+</p>
+
+<p>
+  Get best practices for news publishers in
+  <a class="external-link" href="https://play.google.com/store/books/details/Google_Inc_The_News_Publisher_Playbook_for_Android?id=O7T3CwAAQBAJ&hl=en_GB&e=-EnableAppDetailsPageRedesign">
+  The News Publisher Playbook (for Android development)</a>.
+</p>

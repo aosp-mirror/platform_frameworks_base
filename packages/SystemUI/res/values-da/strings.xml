@@ -143,7 +143,9 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_4g_plus" msgid="3032226872470658661">"Over 4G"</string>
     <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
+    <string name="accessibility_data_connection_lte_plus" msgid="361876866906946007">"LTE+"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Roaming"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
@@ -236,7 +238,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G-data er sat på pause"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Mobildata er sat på pause"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Data er sat på pause"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Eftersom din fastsatte datagrænse blev nået, har enheden sat dataforbruget på pause i den resterende del af cyklussen.\n\nHvis du genaktiverer dataforbruget, kan det medføre gebyrer fra dit mobilselskab."</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Du har nået den angivne datagrænse. Du vil ikke længere bruge mobildata.\n\nHvis du fortsætter, vil du muligvis blive opkrævet betaling for dit dataforbrug."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Genoptag"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Ingen internetforb."</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi er forbundet"</string>
@@ -262,7 +264,7 @@
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Forstyr ikke"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Kun prioritet"</string>
-    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Kun Alarmer"</string>
+    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Kun alarmer"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Total stilhed"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> enheder)"</string>
@@ -302,7 +304,7 @@
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Byt om på farver"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"Farvekorrigeringstilstand"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Flere indstillinger"</string>
-    <string name="quick_settings_done" msgid="3402999958839153376">"Udført"</string>
+    <string name="quick_settings_done" msgid="3402999958839153376">"Udfør"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Tilsluttet"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Opretter forbindelse…"</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Netdeling"</string>
@@ -317,6 +319,9 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Grænse: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Advarsel ved <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Arbejdstilstand"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Nattelys"</string>
+    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"Nattelys er tændt. Tryk for at slukke"</string>
+    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"Nattelys er slukket. Tryk for at tænde"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"Ingen nye elementer"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Du har ryddet alt"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Oplysninger om applikationen"</string>
@@ -330,6 +335,8 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Opdel vandret"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Opdel lodret"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Opdel brugerdefineret"</string>
+  <string-array name="recents_blacklist_array">
+  </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Opladet"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Oplader"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> indtil fuld opladet"</string>
@@ -352,7 +359,7 @@
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Helt lydløs. Denne handling slukker også skærmlæsere."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Total stilhed"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Kun prioritet"</string>
-    <string name="interruption_level_alarms" msgid="5226306993448328896">"Kun Alarmer"</string>
+    <string name="interruption_level_alarms" msgid="5226306993448328896">"Kun alarmer"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Total\nstilhed"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Kun\nprioritet"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Kun\nalarmer"</string>
@@ -397,6 +404,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"Enheden kan være overvåget"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Profilen kan overvåges"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Netværket kan være overvåget"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"Netværket kan være overvåget"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Overvågning af enhed"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Profilovervågning"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Overvågning af netværk"</string>
@@ -409,6 +417,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"Du har forbindelse til <xliff:g id="APPLICATION">%1$s</xliff:g>, som kan overvåge din netværksaktivitet, bl.a. e-mails, apps og websites."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Du har forbindelse til <xliff:g id="APPLICATION">%1$s</xliff:g>, som kan overvåge din private netværksaktivitet, bl.a. e-mails, apps og websites."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Du har forbindelse til <xliff:g id="APPLICATION">%1$s</xliff:g>, som kan overvåge din private netværksaktivitet, bl.a. e-mails, apps og websites."</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"Din arbejdsprofil administreres af <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Den er forbundet til <xliff:g id="APPLICATION">%2$s</xliff:g>, som kan overvåge din arbejdsrelaterede netværksaktivitet, bl.a. e-mails, apps og websites.\n\nKontakt din administrator for at få flere oplysninger."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Din arbejdsprofil administreres af <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Den er forbundet til <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, som kan overvåge din arbejdsrelaterede netværksaktivitet, bl.a. e-mails, apps og websites.\n\nDu er også forbundet til <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, som kan overvåge din private netværksaktivitet."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Din enhed administreres af <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nDin administrator kan overvåge og administrere indstillinger, virksomhedens adgang, data tilknyttet din enhed og enhedens stedoplysninger.\n\nDu er forbundet til <xliff:g id="APPLICATION">%2$s</xliff:g>, som kan overvåge din netværksaktivitet, bl.a. e-mails, apps og websites.\n\nKontakt din administrator for at få flere oplysninger."</string>
@@ -434,6 +443,18 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> er dialogboksen for lydstyrke"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"Tryk for at gendanne det oprindelige."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Du bruger din arbejdsprofil"</string>
+  <string-array name="volume_stream_titles">
+    <item msgid="5841843895402729630">"Opkald"</item>
+    <item msgid="5997713001067658559">"System"</item>
+    <item msgid="7858983209929864160">"Ring"</item>
+    <item msgid="1850038478268896762">"Medier"</item>
+    <item msgid="8265110906352372092">"Alarm"</item>
+    <item msgid="5339394737636839168"></item>
+    <item msgid="2951313578278086204">"Bluetooth"</item>
+    <item msgid="2919807739709798970"></item>
+    <item msgid="150349973435223405"></item>
+    <item msgid="6761963760295549099"></item>
+  </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Tryk for at slå lyden til."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Tryk for at konfigurere til at vibrere. Tilgængelighedstjenester kan blive deaktiveret."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Tryk for at slå lyden fra. Lyden i tilgængelighedstjenester kan blive slået fra."</string>
@@ -458,7 +479,7 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"Du vil ikke kunne høre din næste alarm <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="3980063409350522735">"kl. <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"på <xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Hurtigindstillinger <xliff:g id="TITLE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Hurtige indstillinger <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Hotspot"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Arbejdsprofil"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Sjovt for nogle, men ikke for alle"</string>
@@ -473,8 +494,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Vis sekunder i statuslinjen. Dette kan påvirke batteriets levetid."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Omarranger Hurtige indstillinger"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Vis lysstyrke i Hurtige indstillinger"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"Aktivér bevægelsen Stryg opad for at dele skærmen"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Aktivér bevægelse for at dele skærmen ved at stryge opad fra knappen Oversigt"</string>
     <string name="experimental" msgid="6198182315536726162">"Eksperimentel"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Vil du slå Bluetooth til?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Bluetooth skal være slået til, før du kan knytte dit tastatur til din tablet."</string>
@@ -502,23 +521,8 @@
     <string name="notification_importance_high" msgid="1729480727023990427">"Se altid smugkig. Ingen afbrydelse af fuld skærm."</string>
     <string name="notification_importance_max" msgid="2508384624461849111">"Se altid smugkig, og tillad afbrydelse af fuld skærm."</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Flere indstillinger"</string>
-    <string name="notification_done" msgid="5279426047273930175">"Færdig"</string>
+    <string name="notification_done" msgid="5279426047273930175">"Udfør"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Kontrolelementer til underretninger for <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"Farve og udseende"</string>
-    <string name="night_mode" msgid="3540405868248625488">"Nattilstand"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"Kalibrer skærmen"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"Til"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"Fra"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"Slå automatisk til"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Skift til natfunktion alt efter stedet og tidspunktet"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"Når natfunktion er slået til"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Brug mørkt tema til Android OS"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"Juster farvetonen"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"Juster lysstyrken"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"Det mørke tema anvendes på centrale områder i Android OS, der normalt vises med lyst tema, f.eks. Indstillinger."</string>
-    <string name="color_apply" msgid="9212602012641034283">"Anvend"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"Bekræft indstillingerne"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"Nogle farveindstillinger kan medføre, at du ikke kan bruge enheden. Klik på OK for at bekræfte disse farveindstillinger. Ellers nulstilles disse indstillinger efter ti sekunder."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Batteriforbrug"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Batterisparefunktionen er ikke tilgængelig under opladning"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Batterisparefunktion"</string>
@@ -647,4 +651,5 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Åbn <xliff:g id="ID_1">%s</xliff:g>-indstillinger."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Rediger rækkefølgen af indstillinger."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Side <xliff:g id="ID_1">%1$d</xliff:g> af <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <string name="cant_silence_or_block" msgid="999689262131488625">"Underretninger kan ikke ignoreres eller blokeres"</string>
 </resources>

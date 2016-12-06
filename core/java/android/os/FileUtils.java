@@ -605,6 +605,22 @@ public class FileUtils {
         return null;
     }
 
+    private static File buildUniqueFileWithExtension(File parent, String name, String ext)
+            throws FileNotFoundException {
+        File file = buildFile(parent, name, ext);
+
+        // If conflicting file, try adding counter suffix
+        int n = 0;
+        while (file.exists()) {
+            if (n++ >= 32) {
+                throw new FileNotFoundException("Failed to create unique file");
+            }
+            file = buildFile(parent, name + " (" + n + ")", ext);
+        }
+
+        return file;
+    }
+
     /**
      * Generates a unique file name under the given parent directory. If the display name doesn't
      * have an extension that matches the requested MIME type, the default extension for that MIME
@@ -619,20 +635,29 @@ public class FileUtils {
     public static File buildUniqueFile(File parent, String mimeType, String displayName)
             throws FileNotFoundException {
         final String[] parts = splitFileName(mimeType, displayName);
-        final String name = parts[0];
-        final String ext = parts[1];
-        File file = buildFile(parent, name, ext);
+        return buildUniqueFileWithExtension(parent, parts[0], parts[1]);
+    }
 
-        // If conflicting file, try adding counter suffix
-        int n = 0;
-        while (file.exists()) {
-            if (n++ >= 32) {
-                throw new FileNotFoundException("Failed to create unique file");
-            }
-            file = buildFile(parent, name + " (" + n + ")", ext);
+    /**
+     * Generates a unique file name under the given parent directory, keeping
+     * any extension intact.
+     */
+    public static File buildUniqueFile(File parent, String displayName)
+            throws FileNotFoundException {
+        final String name;
+        final String ext;
+
+        // Extract requested extension from display name
+        final int lastDot = displayName.lastIndexOf('.');
+        if (lastDot >= 0) {
+            name = displayName.substring(0, lastDot);
+            ext = displayName.substring(lastDot + 1);
+        } else {
+            name = displayName;
+            ext = null;
         }
 
-        return file;
+        return buildUniqueFileWithExtension(parent, name, ext);
     }
 
     /**

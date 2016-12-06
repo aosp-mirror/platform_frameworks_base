@@ -44,6 +44,12 @@ protected:
     ANDROID_API virtual ~AnimationListener() {}
 };
 
+enum class RepeatMode {
+    // These are the same values as the RESTART and REVERSE in ValueAnimator.java.
+    Restart = 1,
+    Reverse = 2
+};
+
 class BaseRenderNodeAnimator : public VirtualLightRefBase {
     PREVENT_COPY_AND_ASSIGN(BaseRenderNodeAnimator);
 public:
@@ -62,19 +68,23 @@ public:
     }
     bool mayRunAsync() { return mMayRunAsync; }
     ANDROID_API void start();
-    ANDROID_API void reset();
+    ANDROID_API virtual void reset();
     ANDROID_API void reverse();
     // Terminates the animation at its current progress.
     ANDROID_API void cancel();
 
     // Terminates the animation and skip to the end of the animation.
-    ANDROID_API void end();
+    ANDROID_API virtual void end();
 
     void attach(RenderNode* target);
     virtual void onAttached() {}
     void detach() { mTarget = nullptr; }
-    void pushStaging(AnimationContext& context);
-    bool animate(AnimationContext& context);
+    ANDROID_API void pushStaging(AnimationContext& context);
+    ANDROID_API bool animate(AnimationContext& context);
+
+    // Returns the remaining time in ms for the animation. Note this should only be called during
+    // an animation on RenderThread.
+    ANDROID_API nsecs_t getRemainingPlayTime();
 
     bool isRunning() { return mPlayState == PlayState::Running
             || mPlayState == PlayState::Reversing; }
@@ -155,6 +165,17 @@ private:
         Cancel,
         End
     };
+
+    // Defines different actions upon finish.
+    enum class Action {
+        // For animations that got canceled or finished normally. no more action needs to be done.
+        None,
+        // For animations that get reset, the reset will happen in the next animation pulse.
+        Reset,
+        // For animations being ended, in the next animation pulse the animation will skip to end.
+        End
+    };
+
     inline void checkMutable();
     virtual void transitionToRunning(AnimationContext& context);
     void doSetStartValue(float value);
@@ -162,7 +183,7 @@ private:
     void resolveStagingRequest(Request request);
 
     std::vector<Request> mStagingRequests;
-
+    Action mPendingActionUponFinish = Action::None;
 };
 
 class RenderPropertyAnimator : public BaseRenderNodeAnimator {

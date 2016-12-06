@@ -571,13 +571,12 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
      *
      * <p>If this method returns {@code null}, and the spec is used to generate an asymmetric (RSA
      * or EC) key pair, the public key will have a self-signed certificate if it has purpose {@link
-     * KeyProperties#PURPOSE_SIGN} (see {@link #KeyGenParameterSpec(String, int)). If does not have
-     * purpose {@link KeyProperties#PURPOSE_SIGN}, it will have a fake certificate.
+     * KeyProperties#PURPOSE_SIGN}. If does not have purpose {@link KeyProperties#PURPOSE_SIGN}, it
+     * will have a fake certificate.
      *
      * <p>Symmetric keys, such as AES and HMAC keys, do not have public key certificates. If a
-     * {@link KeyGenParameterSpec} with {@link #hasAttestationCertificate()} returning
-     * non-{@code null} is used to generate a symmetric (AES or HMAC) key,
-     * {@link KeyGenerator#generateKey())} will throw
+     * KeyGenParameterSpec with getAttestationChallenge returning non-null is used to generate a
+     * symmetric (AES or HMAC) key, {@link javax.crypto.KeyGenerator#generateKey()} will throw
      * {@link java.security.InvalidAlgorithmParameterException}.
      *
      * @see Builder#setAttestationChallenge(byte[])
@@ -1050,11 +1049,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
             return this;
         }
 
-        /*
-         * TODO(swillden): Update this documentation to describe the hardware and software root
-         * keys, including information about CRL/OCSP services for discovering revocations, and to
-         * link to documentation of the extension format and content.
-         */
         /**
          * Sets whether an attestation certificate will be generated for this key pair, and what
          * challenge value will be placed in the certificate.  The attestation certificate chain
@@ -1074,17 +1068,15 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
          *
          * <p>If {@code attestationChallenge} is {@code null}, and this spec is used to generate an
          * asymmetric (RSA or EC) key pair, the public key certificate will be self-signed if the
-         * key has purpose {@link KeyProperties#PURPOSE_SIGN} (see
-         * {@link #KeyGenParameterSpec(String, int)). If the key does not have purpose
-         * {@link KeyProperties#PURPOSE_SIGN}, it is not possible to use the key to sign a
-         * certificate, so the public key certificate will contain a dummy signature.
+         * key has purpose {@link android.security.keystore.KeyProperties#PURPOSE_SIGN}. If the key
+         * does not have purpose {@link android.security.keystore.KeyProperties#PURPOSE_SIGN}, it is
+         * not possible to use the key to sign a certificate, so the public key certificate will
+         * contain a dummy signature.
          *
          * <p>Symmetric keys, such as AES and HMAC keys, do not have public key certificates. If a
-         * {@code getAttestationChallenge} returns non-{@code null} and the spec is used to
-         * generate a symmetric (AES or HMAC) key, {@link KeyGenerator#generateKey()} will throw
+         * {@link #getAttestationChallenge()} returns non-null and the spec is used to generate a
+         * symmetric (AES or HMAC) key, {@link javax.crypto.KeyGenerator#generateKey()} will throw
          * {@link java.security.InvalidAlgorithmParameterException}.
-         *
-         * @see Builder#setAttestationChallenge(String attestationChallenge)
          */
         @NonNull
         public Builder setAttestationChallenge(byte[] attestationChallenge) {

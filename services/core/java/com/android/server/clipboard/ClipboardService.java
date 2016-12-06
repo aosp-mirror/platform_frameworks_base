@@ -188,6 +188,14 @@ public class ClipboardService extends IClipboard.Stub {
                     if (!canCopy) {
                         clip = null;
                     } else {
+                        // We want to fix the uris of the related user's clip without changing the
+                        // uris of the current user's clip.
+                        // So, copy the ClipData, and then copy all the items, so that nothing
+                        // is shared in memmory.
+                        clip = new ClipData(clip);
+                        for (int i = clip.getItemCount() - 1; i >= 0; i--) {
+                            clip.setItemAt(i, new ClipData.Item(clip.getItemAt(i)));
+                        }
                         clip.fixUrisLight(userId);
                     }
                     for (int i = 0; i < size; i++) {

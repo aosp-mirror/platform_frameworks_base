@@ -22,6 +22,7 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -89,6 +90,14 @@ public class SaveFragment extends Fragment {
                         // key.
                         if (event.getAction() != KeyEvent.ACTION_DOWN) {
                             return false;
+                        }
+
+                        // Returning false in this method will bubble the event up to
+                        // {@link BaseActivity#onKeyDown}. In order to prevent backspace popping
+                        // documents once the textView is empty, we are going to trap it here.
+                        if (keyCode == KeyEvent.KEYCODE_DEL
+                                && TextUtils.isEmpty(mDisplayName.getText())) {
+                            return true;
                         }
 
                         if (keyCode == KeyEvent.KEYCODE_ENTER && mSave.isEnabled()) {

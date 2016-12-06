@@ -59,8 +59,11 @@ import java.util.UUID;
  *
  * <div class="special reference">
  * <h3>Developer Guides</h3>
- * <p>For more information about using Bluetooth, read the
- * <a href="{@docRoot}guide/topics/connectivity/bluetooth.html">Bluetooth</a> developer guide.</p>
+ * <p>
+ * For more information about using Bluetooth, read the <a href=
+ * "{@docRoot}guide/topics/connectivity/bluetooth.html">Bluetooth</a> developer
+ * guide.
+ * </p>
  * </div>
  *
  * {@see BluetoothAdapter}
@@ -1172,12 +1175,12 @@ public final class BluetoothDevice implements Parcelable {
 
     /**
      * Confirm passkey for {@link #PAIRING_VARIANT_PASSKEY_CONFIRMATION} pairing.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_PRIVILEGED}.
      *
      * @return true confirmation has been sent out
      *         false for error
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean setPairingConfirmation(boolean confirm) {
         if (sService == null) {
             Log.e(TAG, "BT not enabled. Cannot set pairing confirmation");
@@ -1601,7 +1604,7 @@ public final class BluetoothDevice implements Parcelable {
                 // BLE is not supported
                 return null;
             }
-            BluetoothGatt gatt = new BluetoothGatt(context, iGatt, this, transport);
+            BluetoothGatt gatt = new BluetoothGatt(iGatt, this, transport);
             gatt.connect(autoConnect, callback);
             return gatt;
         } catch (RemoteException e) {Log.e(TAG, "", e);}

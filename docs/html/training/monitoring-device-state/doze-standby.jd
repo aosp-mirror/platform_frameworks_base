@@ -306,25 +306,22 @@ Standby</a>
 </p>
 
 <p>
-  An app that is whitelisted can use the network and hold
-
-  <a href="{@docRoot}reference/android/os/PowerManager.html#PARTIAL_WAKE_LOCK">
-  partial wake locks</a> during Doze and
-  App Standby. However, <strong>other restrictions still apply</strong> to the
-  whitelisted app, just as they do to other apps. For example, the whitelisted
-  app’s jobs and syncs are deferred, and its regular {@link android.app.AlarmManager} alarms do not
-  fire. An app can check whether it is currently on the exemption whitelist by
-  calling {@link
+  An app that is whitelisted can use the network and hold <a href=
+  "{@docRoot}reference/android/os/PowerManager.html#PARTIAL_WAKE_LOCK">partial
+  wake locks</a> during Doze and App Standby. However, <strong>other
+  restrictions still apply</strong> to the whitelisted app, just as they do to
+  other apps. For example, the whitelisted app’s jobs and syncs are deferred
+  (on API level 23 and below), and its regular {@link android.app.AlarmManager}
+  alarms do not fire. An app can check whether it is currently on the exemption
+  whitelist by calling {@link
   android.os.PowerManager#isIgnoringBatteryOptimizations(java.lang.String)
   isIgnoringBatteryOptimizations()}.
-  </li>
 </p>
 
 <p>
   Users can manually configure the whitelist in <strong>Settings &gt; Battery
   &gt; Battery Optimization.</strong> Alternatively, the system provides
   ways for apps to ask users to whitelist them.
-
 </p>
 
 <ul>

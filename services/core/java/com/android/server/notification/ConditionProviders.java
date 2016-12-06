@@ -17,6 +17,8 @@
 package com.android.server.notification;
 
 import android.annotation.NonNull;
+import android.app.INotificationManager;
+import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -159,6 +161,25 @@ public class ConditionProviders extends ManagedServices {
             if (!r.component.equals(removed.component)) continue;
             mRecords.remove(i);
         }
+    }
+
+    @Override
+    public void onPackagesChanged(boolean removingPackage, String[] pkgList) {
+        if (removingPackage) {
+            INotificationManager inm = NotificationManager.getService();
+
+            if (pkgList != null && (pkgList.length > 0)) {
+                for (String pkgName : pkgList) {
+                    try {
+                        inm.removeAutomaticZenRules(pkgName);
+                        inm.setNotificationPolicyAccessGranted(pkgName, false);
+                    } catch (Exception e) {
+                        Slog.e(TAG, "Failed to clean up rules for " + pkgName, e);
+                    }
+                }
+            }
+        }
+        super.onPackagesChanged(removingPackage, pkgList);
     }
 
     public ManagedServiceInfo checkServiceToken(IConditionProvider provider) {

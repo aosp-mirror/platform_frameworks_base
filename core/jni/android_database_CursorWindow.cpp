@@ -16,6 +16,7 @@
 
 #undef LOG_TAG
 #define LOG_TAG "CursorWindow"
+#define LOG_NDEBUG 0
 
 #include <inttypes.h>
 #include <jni.h>
@@ -30,6 +31,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <dirent.h>
+
+#undef LOG_NDEBUG
+#define LOG_NDEBUG 1
 
 #include <androidfw/CursorWindow.h>
 #include "android_os_Parcel.h"
@@ -61,6 +67,22 @@ static void throwUnknownTypeException(JNIEnv * env, jint type) {
     jniThrowException(env, "java/lang/IllegalStateException", msg.string());
 }
 
+static int getFdCount() {
+    char fdpath[PATH_MAX];
+    int count = 0;
+    snprintf(fdpath, PATH_MAX, "/proc/%d/fd", getpid());
+    DIR *dir = opendir(fdpath);
+    if (dir != NULL) {
+        struct dirent *dirent;
+        while ((dirent = readdir(dir))) {
+            count++;
+        }
+        count -= 2; // discount "." and ".."
+        closedir(dir);
+    }
+    return count;
+}
+
 static jlong nativeCreate(JNIEnv* env, jclass clazz, jstring nameObj, jint cursorWindowSize) {
     String8 name;
     const char* nameStr = env->GetStringUTFChars(nameObj, NULL);
@@ -85,7 +107,8 @@ static jlong nativeCreateFromParcel(JNIEnv* env, jclass clazz, jobject parcelObj
     CursorWindow* window;
     status_t status = CursorWindow::createFromParcel(parcel, &window);
     if (status || !window) {
-        ALOGE("Could not create CursorWindow from Parcel due to error %d.", status);
+        ALOGE("Could not create CursorWindow from Parcel due to error %d, process fd count=%d",
+                status, getFdCount());
         return 0;
     }
 

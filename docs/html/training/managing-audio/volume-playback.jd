@@ -8,8 +8,8 @@ next.link=audio-focus.html
 
 @jd:body
 
- 
-<div id="tb-wrapper"> 
+
+<div id="tb-wrapper">
 <div id="tb">
 
 <h2>This lesson teaches you to</h2>
@@ -26,11 +26,11 @@ Playback</a></li>
   <li><a href="{@docRoot}guide/topics/media/mediaplayer.html">Media Playback</a></li>
 </ul>
 
-</div> 
+</div>
 </div>
 
 
- 
+
 <p>A good user experience is a predictable one. If your app plays media it’s important that your
 users can control the volume of your app using the hardware or software volume controls of their
 device, bluetooth headset, or headphones.</p>
@@ -38,9 +38,9 @@ device, bluetooth headset, or headphones.</p>
 <p>Similarly, where appropriate and available, the play, stop, pause, skip, and previous media
 playback keys should perform their respective actions on the audio stream used by your app.</p>
 
- 
-<h2 id="IdentifyStream">Identify Which Audio Stream to Use</h2> 
- 
+
+<h2 id="IdentifyStream">Identify Which Audio Stream to Use</h2>
+
 <p>The first step to creating a predictable audio experience is understanding which audio stream
 your app will use.</p>
 
@@ -53,11 +53,11 @@ clock, you’ll almost certainly be playing your audio using the {@link
 android.media.AudioManager#STREAM_MUSIC} stream.</p>
 
 
-<h2 id="HardwareVolumeKeys">Use Hardware Volume Keys to Control Your App’s Audio Volume</h2> 
+<h2 id="HardwareVolumeKeys">Use Hardware Volume Keys to Control Your App’s Audio Volume</h2>
 
 <p>By default, pressing the volume controls modify the volume of the active audio stream. If your
 app isn't currently playing anything, hitting the volume keys adjusts the ringer volume.<p>
-    
+
 <p>If you've got a game or music app, then chances are good that when the user hits the volume keys
 they want to control the volume of the game or music, even if they’re currently between songs or
 there’s no music in the current game location.</p>
@@ -65,8 +65,8 @@ there’s no music in the current game location.</p>
 <p>You may be tempted to try and listen for volume key presses and modify the volume of your
 audio stream that way. Resist the urge. Android provides the handy {@link
 android.app.Activity#setVolumeControlStream setVolumeControlStream()} method to direct volume key
-presses to the audio stream you specify.<p> 
-  
+presses to the audio stream you specify.<p>
+
 <p>Having identified the audio stream your application
 will be using, you should set it as the volume stream target. You should make this call early in
 your app’s lifecycle&mdash;because you only need to call it once during the activity lifecycle, you
@@ -85,7 +85,7 @@ specify (in this case “music”) whenever the target activity or fragment is v
 
 
 <h2 id="PlaybackControls">Use Hardware Playback Control Keys to Control Your App’s Audio
-Playback</h2> 
+Playback</h2>
 
 <p>Media playback buttons such as play, pause, stop, skip, and previous are available on some
 handsets and many connected or wireless headsets. Whenever a user presses one of these hardware

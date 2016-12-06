@@ -22,9 +22,11 @@
 #include "Readback.h"
 #include "Rect.h"
 #include "renderthread/CanvasContext.h"
+#include "renderthread/EglManager.h"
 #include "renderthread/RenderTask.h"
 #include "renderthread/RenderThread.h"
 #include "utils/Macros.h"
+#include "utils/TimeUtils.h"
 
 namespace android {
 namespace uirenderer {
@@ -44,6 +46,8 @@ namespace renderthread {
     typedef struct { \
         a1; a2; a3; a4; a5; a6; a7; a8; \
     } ARGS(name); \
+    static_assert(std::is_trivially_destructible<ARGS(name)>::value, \
+            "Error, ARGS must be trivially destructible!"); \
     static void* Bridge_ ## name(ARGS(name)* args)
 
 #define SETUP_TASK(method) \
@@ -154,7 +158,7 @@ void RenderProxy::updateSurface(const sp<Surface>& surface) {
     SETUP_TASK(updateSurface);
     args->context = mContext;
     args->surface = surface.get();
-    postAndWait(task);
+    post(task);
 }
 
 CREATE_BRIDGE2(pauseSurface, CanvasContext* context, Surface* surface) {
@@ -514,6 +518,10 @@ void RenderProxy::setProcessStatsBuffer(int fd) {
     post(task);
 }
 
+int RenderProxy::getRenderThreadTid() {
+    return mRenderThread.getTid();
+}
+
 CREATE_BRIDGE3(addRenderNode, CanvasContext* context, RenderNode* node, bool placeFront) {
     args->context->addRenderNode(args->node, args->placeFront);
     return nullptr;
@@ -630,6 +638,41 @@ int RenderProxy::copySurfaceInto(sp<Surface>& surface, SkBitmap* bitmap) {
     args->thread = &RenderThread::getInstance();
     return static_cast<int>(
             reinterpret_cast<intptr_t>( staticPostAndWait(task) ));
+}
+
+CREATE_BRIDGE2(prepareToDraw, RenderThread* thread, SkBitmap* bitmap) {
+    if (Caches::hasInstance() && args->thread->eglManager().hasEglContext()) {
+        ATRACE_NAME("Bitmap#prepareToDraw task");
+        Caches::getInstance().textureCache.prefetch(args->bitmap);
+    }
+    delete args->bitmap;
+    args->bitmap = nullptr;
+    return nullptr;
+}
+
+void RenderProxy::prepareToDraw(const SkBitmap& bitmap) {
+    // If we haven't spun up a hardware accelerated window yet, there's no
+    // point in precaching these bitmaps as it can't impact jank.
+    // We also don't know if we even will spin up a hardware-accelerated
+    // window or not.
+    if (!RenderThread::hasInstance()) return;
+    RenderThread* renderThread = &RenderThread::getInstance();
+    SETUP_TASK(prepareToDraw);
+    args->thread = renderThread;
+    args->bitmap = new SkBitmap(bitmap);
+    nsecs_t lastVsync = renderThread->timeLord().latestVsync();
+    nsecs_t estimatedNextVsync = lastVsync + renderThread->timeLord().frameIntervalNanos();
+    nsecs_t timeToNextVsync = estimatedNextVsync - systemTime(CLOCK_MONOTONIC);
+    // We expect the UI thread to take 4ms and for RT to be active from VSYNC+4ms to
+    // VSYNC+12ms or so, so aim for the gap during which RT is expected to
+    // be idle
+    // TODO: Make this concept a first-class supported thing? RT could use
+    // knowledge of pending draws to better schedule this task
+    if (timeToNextVsync > -6_ms && timeToNextVsync < 1_ms) {
+        renderThread->queueAt(task, estimatedNextVsync + 8_ms);
+    } else {
+        renderThread->queue(task);
+    }
 }
 
 void RenderProxy::post(RenderTask* task) {

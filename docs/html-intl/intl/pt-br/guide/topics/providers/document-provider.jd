@@ -139,7 +139,7 @@ dispositivos de armazenamento USB transitórios ou login/logout do usuário.</li
 cada um deles, por sua vez, podem indicar 1 a <em>N</em> documentos. </li>
 
 <li>Cada back-end de armazenamento apresenta
-arquivos e diretórios individuais referenciando-os com um 
+arquivos e diretórios individuais referenciando-os com um
 {@link android.provider.DocumentsContract.Document#COLUMN_DOCUMENT_ID} exclusivo.
 IDs de documentos devem ser exclusivos e não podem mudar depois de emitidos, pois são usados para concessões persistentes
 da URI em reinicializações do dispositivo.</li>
@@ -236,7 +236,7 @@ imagens armazenadas em um provedor de documentos. </li>
 </ul>
 
 
-<p>Esta seção descreve como programar aplicativos clientes com base nas intenções 
+<p>Esta seção descreve como programar aplicativos clientes com base nas intenções
 {@link android.content.Intent#ACTION_OPEN_DOCUMENT}
 e {@link android.content.Intent#ACTION_CREATE_DOCUMENT}.</p>
 
@@ -521,7 +521,7 @@ os arquivos, o que, obviamente, não é o ideal.</p>
 
 <p>Para evitar que isso aconteça, você pode manter as permissões que o sistema
 forneceu ao aplicativo. Efetivamente, o aplicativo "toma" a concessão de permissão da URI persistente
-que o sistema está oferecendo. Isso concede ao usuário um acesso contínuo aos arquivos 
+que o sistema está oferecendo. Isso concede ao usuário um acesso contínuo aos arquivos
 por meio do aplicativo mesmo se o dispositivo for reiniciado:</p>
 
 
@@ -624,7 +624,7 @@ em dispositivos que executam o Android 4.4 ou posteriores.
 Se você deseja que o aplicativo seja compatível com {@link android.content.Intent#ACTION_GET_CONTENT}
 para adaptar-se a dispositivos que executam o Android 4.3 ou versões anteriores, é necessário
 desativar o filtro de intenção {@link android.content.Intent#ACTION_GET_CONTENT}
-no manifesto para dispositivos que executam Android 4.4 ou versões posteriores. 
+no manifesto para dispositivos que executam Android 4.4 ou versões posteriores.
 Um provedor de documentos e {@link android.content.Intent#ACTION_GET_CONTENT} devem ser avaliados
 de forma mutuamente exclusiva. Se houver compatibilidade com ambos simultaneamente, o aplicativo
 aparecerá duas vezes na IU do seletor do sistema, oferecendo dois meios de acesso

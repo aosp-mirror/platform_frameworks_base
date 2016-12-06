@@ -18,81 +18,107 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    >
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    >
+    android:orientation="vertical">
 
-    <Button
-        android:layout_width="wrap_content"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/load"
+            android:onClick="onLoadButtonClicked"
+            android:padding="20dp" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/start_recog"
+            android:onClick="onStartRecognitionButtonClicked"
+            android:padding="20dp" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/stop_recog"
+            android:onClick="onStopRecognitionButtonClicked"
+            android:padding="20dp" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/unload"
+            android:onClick="onUnloadButtonClicked"
+            android:padding="20dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/reload"
+            android:onClick="onReloadButtonClicked"
+            android:padding="20dp" />
+
+        <Button
+            android:id="@+id/play_trigger_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/play_trigger"
+            android:onClick="onPlayTriggerButtonClicked"
+            android:padding="20dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/enroll"
-        android:onClick="onEnrollButtonClicked"
-        android:padding="20dp" />
+        android:layout_gravity="right">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/reenroll"
-        android:onClick="onReEnrollButtonClicked"
-        android:padding="20dp" />
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/capture"
+            android:id="@+id/caputre_check_box"
+            android:layout_gravity="center_horizontal"
+            android:padding="20dp" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/start_recog"
-        android:onClick="onStartRecognitionButtonClicked"
-        android:padding="20dp" />
+        <Button
+            android:id="@+id/play_captured_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/play_capture"
+            android:padding="20dp"
+            android:enabled="false" />
+    </LinearLayout>
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/stop_recog"
-        android:onClick="onStopRecognitionButtonClicked"
-        android:padding="20dp" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/unenroll"
-        android:onClick="onUnEnrollButtonClicked"
-        android:padding="20dp" />
-
-    <Button
-        android:id="@+id/play_trigger_id"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/play_trigger"
-        android:onClick="onPlayTriggerButtonClicked"
-        android:padding="20dp" />
-
-</LinearLayout>
-
-<RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+    <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/model_group_id"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:padding="20dp"
-        android:orientation="vertical">
-</RadioGroup>
+        android:orientation="vertical" />
 
-<ScrollView
+    <ScrollView
        android:id="@+id/scroller_id"
        android:layout_width="fill_parent"
        android:layout_height="wrap_content"
        android:scrollbars="vertical"
        android:fillViewport="true">
 
-      <TextView
-        android:id="@+id/console"
-        android:paddingTop="20pt"
-        android:layout_height="fill_parent"
-        android:layout_width="fill_parent"
-        android:textSize="14dp"
-        android:layout_weight="1.0"
-        android:text="@string/none">
-     </TextView>
-</ScrollView>
+        <TextView
+            android:id="@+id/console"
+            android:paddingTop="20pt"
+            android:layout_height="fill_parent"
+            android:layout_width="fill_parent"
+            android:textSize="14dp"
+            android:layout_weight="1.0"
+            android:text="@string/none" />
+    </ScrollView>
 </LinearLayout>

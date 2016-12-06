@@ -25,6 +25,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.Log;
 import android.util.TimeUtils;
+import android.view.animation.AnimationUtils;
 
 import java.io.PrintWriter;
 
@@ -608,6 +609,7 @@ public final class Choreographer {
 
         try {
             Trace.traceBegin(Trace.TRACE_TAG_VIEW, "Choreographer#doFrame");
+            AnimationUtils.lockAnimationClock(frameTimeNanos / TimeUtils.NANOS_PER_MS);
 
             mFrameInfo.markInputHandlingStart();
             doCallbacks(Choreographer.CALLBACK_INPUT, frameTimeNanos);
@@ -620,6 +622,7 @@ public final class Choreographer {
 
             doCallbacks(Choreographer.CALLBACK_COMMIT, frameTimeNanos);
         } finally {
+            AnimationUtils.unlockAnimationClock();
             Trace.traceEnd(Trace.TRACE_TAG_VIEW);
         }
 

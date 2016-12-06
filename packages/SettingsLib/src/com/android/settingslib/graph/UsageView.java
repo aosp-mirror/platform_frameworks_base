@@ -71,10 +71,11 @@ public class UsageView extends FrameLayout {
                 layout.addView(labels);
                 // Set gravity.
                 labels.setGravity(Gravity.END);
-                // Swap the bottom label padding
+                // Swap the bottom space order.
                 LinearLayout bottomLabels = (LinearLayout) findViewById(R.id.bottom_label_group);
-                bottomLabels.setPadding(bottomLabels.getPaddingRight(), bottomLabels.getPaddingTop(),
-                        bottomLabels.getPaddingLeft(), bottomLabels.getPaddingBottom());
+                View bottomSpace = bottomLabels.findViewById(R.id.bottom_label_space);
+                bottomLabels.removeView(bottomSpace);
+                bottomLabels.addView(bottomSpace);
             } else if (gravity != Gravity.START) {
                 throw new IllegalArgumentException("Unsupported gravity " + gravity);
             }

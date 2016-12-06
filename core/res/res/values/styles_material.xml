@@ -36,12 +36,17 @@ please see styles_device_defaults.xml.
         <item name="layout">@layout/preference_material</item>
     </style>
 
-    <style name="PreferenceFragment.Material">
+    <style name="BasePreferenceFragment">
         <item name="layout">@layout/preference_list_fragment_material</item>
         <item name="paddingStart">@dimen/preference_fragment_padding_side_material</item>
         <item name="paddingEnd">@dimen/preference_fragment_padding_side_material</item>
+        <item name="paddingTop">@dimen/preference_fragment_padding_vertical_material</item>
+        <item name="paddingBottom">@dimen/preference_fragment_padding_vertical_material</item>
         <item name="divider">?attr/listDivider</item>
+        <item name="clipToPadding">@bool/config_preferenceFragmentClipToPadding</item>
     </style>
+
+    <style name="PreferenceFragment.Material" parent="BasePreferenceFragment"/>
 
     <style name="PreferenceActivity.Material">
         <item name="layout">@layout/preference_list_content_material</item>
@@ -76,7 +81,12 @@ please see styles_device_defaults.xml.
         <item name="layout">@layout/preference_widget_seekbar_material</item>
     </style>
 
-    <style name="Preference.Material.PreferenceScreen"/>
+    <style name="Preference.Material.BasePreferenceScreen">
+        <item name="screenLayout">@layout/preference_list_fragment_material</item>
+        <item name="divider">?attr/listDivider</item>
+    </style>
+
+    <style name="Preference.Material.PreferenceScreen" parent="Preference.Material.BasePreferenceScreen"/>
 
     <style name="Preference.Material.DialogPreference">
         <item name="positiveButtonText">@string/ok</item>
@@ -134,6 +144,8 @@ please see styles_device_defaults.xml.
     <style name="PreferenceFragmentList.Material">
         <item name="paddingStart">@dimen/preference_fragment_padding_side_material</item>
         <item name="paddingEnd">@dimen/preference_fragment_padding_side_material</item>
+        <item name="paddingTop">@dimen/preference_fragment_padding_vertical_material</item>
+        <item name="paddingBottom">@dimen/preference_fragment_padding_vertical_material</item>
     </style>
 
     <!-- Begin Material theme styles -->
@@ -147,6 +159,7 @@ please see styles_device_defaults.xml.
         <item name="textColorLink">?attr/textColorLink</item>
         <item name="textSize">@dimen/text_size_body_1_material</item>
         <item name="fontFamily">@string/font_family_body_1_material</item>
+        <item name="lineSpacingMultiplier">@dimen/text_line_spacing_multiplier_material</item>
     </style>
 
     <style name="TextAppearance.Material.Display4">
@@ -241,6 +254,8 @@ please see styles_device_defaults.xml.
         <item name="textAllCaps">true</item>
         <item name="textColor">?attr/textColorPrimary</item>
     </style>
+
+    <style name="TextAppearance.Material.NumberPicker" parent="TextAppearance.Material.Body1"/>
 
     <!-- Deprecated text styles -->
 
@@ -462,6 +477,9 @@ please see styles_device_defaults.xml.
         <item name="textColor">#66000000</item>
     </style>
 
+    <style name="TextAppearance.Material.ListItem" parent="TextAppearance.Material.Subhead" />
+    <style name="TextAppearance.Material.ListItemSecondary" parent="TextAppearance.Material.Body1" />
+
     <style name="Widget.Material.Notification.ProgressBar" parent="Widget.Material.Light.ProgressBar.Horizontal" />
 
     <style name="Widget.Material.Notification.MessagingText" parent="Widget.Material.Light.TextView">
@@ -667,7 +685,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Material.TimePicker">
-        <item name="timePickerMode">clock</item>
+        <item name="timePickerMode">@integer/time_picker_mode_material</item>
         <item name="legacyLayout">@layout/time_picker_legacy_material</item>
         <!-- Attributes for new-style TimePicker. -->
         <item name="internalLayout">@layout/time_picker_material</item>
@@ -681,7 +699,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Material.DatePicker">
-        <item name="datePickerMode">calendar</item>
+        <item name="datePickerMode">@integer/date_picker_mode_material</item>
         <item name="legacyLayout">@layout/date_picker_legacy_holo</item>
         <item name="calendarViewShown">true</item>
         <!-- Attributes for new-style DatePicker. -->
@@ -1190,12 +1208,18 @@ please see styles_device_defaults.xml.
         <item name="listItemLayout">@layout/select_dialog_item_material</item>
         <item name="multiChoiceItemLayout">@layout/select_dialog_multichoice_material</item>
         <item name="singleChoiceItemLayout">@layout/select_dialog_singlechoice_material</item>
+        <item name="controllerType">@integer/config_alertDialogController</item>
+        <item name="selectionScrollOffset">@dimen/config_alertDialogSelectionScrollOffset</item>
     </style>
 
     <style name="AlertDialog.Material.Light" />
 
     <style name="DatePickerDialog.Material" parent="AlertDialog.Material">
-        <item name="showTitle">true</item>
+        <item name="showTitle">false</item>
+    </style>
+
+    <style name="TimePickerDialog.Material" parent="AlertDialog.Material">
+        <item name="showTitle">false</item>
     </style>
 
     <!-- Window title -->

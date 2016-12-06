@@ -24,6 +24,7 @@ import android.net.LinkProperties;
 import android.net.LinkProperties.ProvisioningChange;
 import android.net.ProxyInfo;
 import android.net.RouteInfo;
+import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.IpReachabilityEvent;
 import android.net.netlink.NetlinkConstants;
 import android.net.netlink.NetlinkErrorMessage;
@@ -33,6 +34,7 @@ import android.net.netlink.RtNetlinkNeighborMessage;
 import android.net.netlink.StructNdaCacheInfo;
 import android.net.netlink.StructNdMsg;
 import android.net.netlink.StructNlMsgHdr;
+import android.net.util.AvoidBadWifiTracker;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.system.ErrnoException;
@@ -41,6 +43,7 @@ import android.system.OsConstants;
 import android.util.Log;
 
 import java.io.InterruptedIOException;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
@@ -128,7 +131,6 @@ import java.util.Set;
  *          state it may be best for the link to disconnect completely and
  *          reconnect afresh.
  *
- *
  * @hide
  */
 public class IpReachabilityMonitor {
@@ -149,8 +151,10 @@ public class IpReachabilityMonitor {
     private final String mInterfaceName;
     private final int mInterfaceIndex;
     private final Callback mCallback;
+    private final AvoidBadWifiTracker mAvoidBadWifiTracker;
     private final NetlinkSocketObserver mNetlinkSocketObserver;
     private final Thread mObserverThread;
+    private final IpConnectivityLog mMetricsLog = new IpConnectivityLog();
     @GuardedBy("mLock")
     private LinkProperties mLinkProperties = new LinkProperties();
     // TODO: consider a map to a private NeighborState class holding more
@@ -161,6 +165,8 @@ public class IpReachabilityMonitor {
     private int mIpWatchListVersion;
     @GuardedBy("mLock")
     private boolean mRunning;
+    // Time in milliseconds of the last forced probe request.
+    private volatile long mLastProbeTimeMs;
 
     /**
      * Make the kernel perform neighbor reachability detection (IPv4 ARP or IPv6 ND)
@@ -216,8 +222,12 @@ public class IpReachabilityMonitor {
         return errno;
     }
 
-    public IpReachabilityMonitor(Context context, String ifName, Callback callback)
-                throws IllegalArgumentException {
+    public IpReachabilityMonitor(Context context, String ifName, Callback callback) {
+        this(context, ifName, callback, null);
+    }
+
+    public IpReachabilityMonitor(Context context, String ifName, Callback callback,
+            AvoidBadWifiTracker tracker) throws IllegalArgumentException {
         mInterfaceName = ifName;
         int ifIndex = -1;
         try {
@@ -229,6 +239,7 @@ public class IpReachabilityMonitor {
         mWakeLock = ((PowerManager) context.getSystemService(Context.POWER_SERVICE)).newWakeLock(
                 PowerManager.PARTIAL_WAKE_LOCK, TAG + "." + mInterfaceName);
         mCallback = callback;
+        mAvoidBadWifiTracker = tracker;
         mNetlinkSocketObserver = new NetlinkSocketObserver();
         mObserverThread = new Thread(mNetlinkSocketObserver);
         mObserverThread.start();
@@ -337,7 +348,7 @@ public class IpReachabilityMonitor {
 
     private void handleNeighborLost(String msg) {
         InetAddress ip = null;
-        ProvisioningChange delta;
+        final ProvisioningChange delta;
         synchronized (mLock) {
             LinkProperties whatIfLp = new LinkProperties(mLinkProperties);
 
@@ -352,14 +363,17 @@ public class IpReachabilityMonitor {
                         whatIfLp.removeRoute(route);
                     }
                 }
-                whatIfLp.removeDnsServer(ip);
+
+                if (avoidingBadLinks() || !(ip instanceof Inet6Address)) {
+                    // We should do this unconditionally, but alas we cannot: b/31827713.
+                    whatIfLp.removeDnsServer(ip);
+                }
             }
 
             delta = LinkProperties.compareProvisioning(mLinkProperties, whatIfLp);
         }
 
         if (delta == ProvisioningChange.LOST_PROVISIONING) {
-            IpReachabilityEvent.logProvisioningLost(mInterfaceName);
             final String logMsg = "FAILURE: LOST_PROVISIONING, " + msg;
             Log.w(TAG, logMsg);
             if (mCallback != null) {
@@ -367,9 +381,12 @@ public class IpReachabilityMonitor {
                 // an InetAddress argument.
                 mCallback.notifyLost(ip, logMsg);
             }
-        } else {
-            IpReachabilityEvent.logNudFailed(mInterfaceName);
         }
+        logNudFailed(delta);
+    }
+
+    private boolean avoidingBadLinks() {
+        return (mAvoidBadWifiTracker != null) ? mAvoidBadWifiTracker.currentValue() : true;
     }
 
     public void probeAll() {
@@ -393,11 +410,12 @@ public class IpReachabilityMonitor {
                 break;
             }
             final int returnValue = probeNeighbor(mInterfaceIndex, target);
-            IpReachabilityEvent.logProbeEvent(mInterfaceName, returnValue);
+            logEvent(IpReachabilityEvent.PROBE, returnValue);
         }
+        mLastProbeTimeMs = SystemClock.elapsedRealtime();
     }
 
-    private long getProbeWakeLockDuration() {
+    private static long getProbeWakeLockDuration() {
         // Ideally, this would be computed by examining the values of:
         //
         //     /proc/sys/net/ipv[46]/neigh/<ifname>/ucast_solicit
@@ -411,6 +429,19 @@ public class IpReachabilityMonitor {
         final long retransTimeMs = 1000;
         final long gracePeriodMs = 500;
         return (numUnicastProbes * retransTimeMs) + gracePeriodMs;
+    }
+
+    private void logEvent(int probeType, int errorCode) {
+        int eventType = probeType | (errorCode & 0xff);
+        mMetricsLog.log(new IpReachabilityEvent(mInterfaceName, eventType));
+    }
+
+    private void logNudFailed(ProvisioningChange delta) {
+        long duration = SystemClock.elapsedRealtime() - mLastProbeTimeMs;
+        boolean isFromProbe = (duration < getProbeWakeLockDuration());
+        boolean isProvisioningLost = (delta == ProvisioningChange.LOST_PROVISIONING);
+        int eventType = IpReachabilityEvent.nudFailureEventType(isFromProbe, isProvisioningLost);
+        mMetricsLog.log(new IpReachabilityEvent(mInterfaceName, eventType));
     }
 
     // TODO: simplify the number of objects by making this extend Thread.

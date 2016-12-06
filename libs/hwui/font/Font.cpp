@@ -408,9 +408,15 @@ void Font::render(const SkPaint* paint, const glyph_t* glyphs,
         if (cachedGlyph->mIsValid && cachedGlyph->mCacheTexture) {
             int penX = x + (int) roundf(positions[(glyphsCount << 1)]);
             int penY = y + (int) roundf(positions[(glyphsCount << 1) + 1]);
-
+#ifdef BUGREPORT_FONT_CACHE_USAGE
+            mState->historyTracker().glyphRendered(cachedGlyph, penX, penY);
+#endif
             (*this.*render)(cachedGlyph, penX, penY,
                     bitmap, bitmapW, bitmapH, bounds, positions);
+        } else {
+#ifdef BUGREPORT_FONT_CACHE_USAGE
+            mState->historyTracker().glyphRendered(cachedGlyph, -1, -1);
+#endif
         }
 
         glyphsCount++;

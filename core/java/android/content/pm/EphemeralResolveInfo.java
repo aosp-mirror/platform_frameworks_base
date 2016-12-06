@@ -27,6 +27,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Information about an ephemeral application.
@@ -37,10 +38,7 @@ public final class EphemeralResolveInfo implements Parcelable {
     /** Algorithm that will be used to generate the domain digest */
     public static final String SHA_ALGORITHM = "SHA-256";
 
-    /** Full digest of the domain hash */
-    private final byte[] mDigestBytes;
-    /** The first 4 bytes of the domain hash */
-    private final int mDigestPrefix;
+    private final EphemeralDigest mDigest;
     private final String mPackageName;
     /** The filters used to match domain */
     private final List<IntentFilter> mFilters = new ArrayList<IntentFilter>();
@@ -55,29 +53,23 @@ public final class EphemeralResolveInfo implements Parcelable {
             throw new IllegalArgumentException();
         }
 
-        mDigestBytes = generateDigest(uri);
-        mDigestPrefix =
-                mDigestBytes[0] << 24
-                | mDigestBytes[1] << 16
-                | mDigestBytes[2] << 8
-                | mDigestBytes[3] << 0;
+        mDigest = new EphemeralDigest(uri, 0xFFFFFFFF, -1);
         mFilters.addAll(filters);
         mPackageName = packageName;
     }
 
     EphemeralResolveInfo(Parcel in) {
-        mDigestBytes = in.createByteArray();
-        mDigestPrefix = in.readInt();
+        mDigest = in.readParcelable(null /*loader*/);
         mPackageName = in.readString();
         in.readList(mFilters, null /*loader*/);
     }
 
     public byte[] getDigestBytes() {
-        return mDigestBytes;
+        return mDigest.getDigestBytes()[0];
     }
 
     public int getDigestPrefix() {
-        return mDigestPrefix;
+        return mDigest.getDigestPrefix()[0];
     }
 
     public String getPackageName() {
@@ -88,16 +80,6 @@ public final class EphemeralResolveInfo implements Parcelable {
         return mFilters;
     }
 
-    private static byte[] generateDigest(Uri uri) {
-        try {
-            final MessageDigest digest = MessageDigest.getInstance(SHA_ALGORITHM);
-            final byte[] hostBytes = uri.getHost().getBytes();
-            return digest.digest(hostBytes);
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("could not find digest algorithm");
-        }
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -105,8 +87,7 @@ public final class EphemeralResolveInfo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        out.writeByteArray(mDigestBytes);
-        out.writeInt(mDigestPrefix);
+        out.writeParcelable(mDigest, flags);
         out.writeString(mPackageName);
         out.writeList(mFilters);
     }
@@ -135,5 +116,122 @@ public final class EphemeralResolveInfo implements Parcelable {
         public EphemeralResolveInfo getEphemeralResolveInfo() {
             return mResolveInfo;
         }
+    }
+
+    /**
+     * Helper class to generate and store each of the digests and prefixes
+     * sent to the Ephemeral Resolver.
+     * <p>
+     * Since intent filters may want to handle multiple hosts within a
+     * domain [eg “*.google.com”], the resolver is presented with multiple
+     * hash prefixes. For example, "a.b.c.d.e" generates digests for
+     * "d.e", "c.d.e", "b.c.d.e" and "a.b.c.d.e".
+     *
+     * @hide
+     */
+    public static final class EphemeralDigest implements Parcelable {
+        /** Full digest of the domain hashes */
+        private final byte[][] mDigestBytes;
+        /** The first 4 bytes of the domain hashes */
+        private final int[] mDigestPrefix;
+
+        public EphemeralDigest(@NonNull Uri uri, int digestMask, int maxDigests) {
+            if (uri == null) {
+                throw new IllegalArgumentException();
+            }
+            mDigestBytes = generateDigest(uri, maxDigests);
+            mDigestPrefix = new int[mDigestBytes.length];
+            for (int i = 0; i < mDigestBytes.length; i++) {
+                mDigestPrefix[i] =
+                        ((mDigestBytes[i][0] & 0xFF) << 24
+                                | (mDigestBytes[i][1] & 0xFF) << 16
+                                | (mDigestBytes[i][2] & 0xFF) << 8
+                                | (mDigestBytes[i][3] & 0xFF) << 0)
+                        & digestMask;
+            }
+        }
+
+        private static byte[][] generateDigest(Uri uri, int maxDigests) {
+            ArrayList<byte[]> digests = new ArrayList<>();
+            try {
+                final String host = uri.getHost().toLowerCase(Locale.ENGLISH);
+                final MessageDigest digest = MessageDigest.getInstance(SHA_ALGORITHM);
+                if (maxDigests <= 0) {
+                    final byte[] hostBytes = host.getBytes();
+                    digests.add(digest.digest(hostBytes));
+                } else {
+                    int prevDot = host.lastIndexOf('.');
+                    prevDot = host.lastIndexOf('.', prevDot - 1);
+                    // shortcut for short URLs
+                    if (prevDot < 0) {
+                        digests.add(digest.digest(host.getBytes()));
+                    } else {
+                        byte[] hostBytes = host.substring(prevDot + 1, host.length()).getBytes();
+                        digests.add(digest.digest(hostBytes));
+                        int digestCount = 1;
+                        while (prevDot >= 0 && digestCount < maxDigests) {
+                            prevDot = host.lastIndexOf('.', prevDot - 1);
+                            hostBytes = host.substring(prevDot + 1, host.length()).getBytes();
+                            digests.add(digest.digest(hostBytes));
+                            digestCount++;
+                        }
+                    }
+                }
+            } catch (NoSuchAlgorithmException e) {
+                throw new IllegalStateException("could not find digest algorithm");
+            }
+            return digests.toArray(new byte[digests.size()][]);
+        }
+
+        EphemeralDigest(Parcel in) {
+            final int digestCount = in.readInt();
+            if (digestCount == -1) {
+                mDigestBytes = null;
+            } else {
+                mDigestBytes = new byte[digestCount][];
+                for (int i = 0; i < digestCount; i++) {
+                    mDigestBytes[i] = in.createByteArray();
+                }
+            }
+            mDigestPrefix = in.createIntArray();
+        }
+
+        public byte[][] getDigestBytes() {
+            return mDigestBytes;
+        }
+
+        public int[] getDigestPrefix() {
+            return mDigestPrefix;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            if (mDigestBytes == null) {
+                out.writeInt(-1);
+            } else {
+                out.writeInt(mDigestBytes.length);
+                for (int i = 0; i < mDigestBytes.length; i++) {
+                    out.writeByteArray(mDigestBytes[i]);
+                }
+            }
+            out.writeIntArray(mDigestPrefix);
+        }
+
+        @SuppressWarnings("hiding")
+        public static final Parcelable.Creator<EphemeralDigest> CREATOR =
+                new Parcelable.Creator<EphemeralDigest>() {
+            public EphemeralDigest createFromParcel(Parcel in) {
+                return new EphemeralDigest(in);
+            }
+
+            public EphemeralDigest[] newArray(int size) {
+                return new EphemeralDigest[size];
+            }
+        };
     }
 }

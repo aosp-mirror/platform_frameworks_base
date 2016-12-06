@@ -17,6 +17,7 @@ package com.android.server.pm;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.content.pm.PackageInfo;
 import android.content.pm.ShortcutInfo;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -25,6 +26,8 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.ShortcutUser.PackageWithUser;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -36,6 +39,8 @@ import java.util.List;
 
 /**
  * Launcher information used by {@link ShortcutService}.
+ *
+ * All methods should be guarded by {@code #mShortcutUser.mService.mLock}.
  */
 class ShortcutLauncher extends ShortcutPackageItem {
     private static final String TAG = ShortcutService.TAG;
@@ -80,26 +85,31 @@ class ShortcutLauncher extends ShortcutPackageItem {
      * Called when the new package can't receive the backup, due to signature or version mismatch.
      */
     @Override
-    protected void onRestoreBlocked(ShortcutService s) {
+    protected void onRestoreBlocked() {
         final ArrayList<PackageWithUser> pinnedPackages =
                 new ArrayList<>(mPinnedShortcuts.keySet());
         mPinnedShortcuts.clear();
         for (int i = pinnedPackages.size() - 1; i >= 0; i--) {
             final PackageWithUser pu = pinnedPackages.get(i);
-            s.getPackageShortcutsLocked(pu.packageName, pu.userId)
-                    .refreshPinnedFlags(s);
+            final ShortcutPackage p = mShortcutUser.getPackageShortcutsIfExists(pu.packageName);
+            if (p != null) {
+                p.refreshPinnedFlags();
+            }
         }
     }
 
     @Override
-    protected void onRestored(ShortcutService s) {
+    protected void onRestored() {
         // Nothing to do.
     }
 
-    public void pinShortcuts(@NonNull ShortcutService s, @UserIdInt int packageUserId,
+    public void pinShortcuts(@UserIdInt int packageUserId,
             @NonNull String packageName, @NonNull List<String> ids) {
         final ShortcutPackage packageShortcuts =
-                s.getPackageShortcutsLocked(packageName, packageUserId);
+                mShortcutUser.getPackageShortcutsIfExists(packageName);
+        if (packageShortcuts == null) {
+            return; // No need to instantiate.
+        }
 
         final PackageWithUser pu = PackageWithUser.of(packageUserId, packageName);
 
@@ -120,13 +130,14 @@ class ShortcutLauncher extends ShortcutPackageItem {
                 if (si == null) {
                     continue;
                 }
-                if (si.isDynamic() || (prevSet != null && prevSet.contains(id))) {
+                if (si.isDynamic() || si.isManifestShortcut()
+                        || (prevSet != null && prevSet.contains(id))) {
                     newSet.add(id);
                 }
             }
             mPinnedShortcuts.put(pu, newSet);
         }
-        packageShortcuts.refreshPinnedFlags(s);
+        packageShortcuts.refreshPinnedFlags();
     }
 
     /**
@@ -139,6 +150,16 @@ class ShortcutLauncher extends ShortcutPackageItem {
 
     boolean cleanUpPackage(String packageName, @UserIdInt int packageUserId) {
         return mPinnedShortcuts.remove(PackageWithUser.of(packageUserId, packageName)) != null;
+    }
+
+    public void ensureVersionInfo() {
+        final PackageInfo pi = mShortcutUser.mService.getPackageInfoWithSignatures(
+                getPackageName(), getPackageUserId());
+        if (pi == null) {
+            Slog.w(TAG, "Package not found: " + getPackageName());
+            return;
+        }
+        getPackageInfo().updateVersionInfo(pi);
     }
 
     /**
@@ -192,7 +213,7 @@ class ShortcutLauncher extends ShortcutPackageItem {
                 fromBackup ? ownerUserId
                 : ShortcutService.parseIntAttribute(parser, ATTR_LAUNCHER_USER_ID, ownerUserId);
 
-        final ShortcutLauncher ret = new ShortcutLauncher(shortcutUser, launcherUserId,
+        final ShortcutLauncher ret = new ShortcutLauncher(shortcutUser, ownerUserId,
                 launcherPackageName, launcherUserId);
 
         ArraySet<String> ids = null;
@@ -240,7 +261,7 @@ class ShortcutLauncher extends ShortcutPackageItem {
         return ret;
     }
 
-    public void dump(@NonNull ShortcutService s, @NonNull PrintWriter pw, @NonNull String prefix) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
         pw.println();
 
         pw.print(prefix);
@@ -252,7 +273,7 @@ class ShortcutLauncher extends ShortcutPackageItem {
         pw.print(getOwnerUserId());
         pw.println();
 
-        getPackageInfo().dump(s, pw, prefix + "  ");
+        getPackageInfo().dump(pw, prefix + "  ");
         pw.println();
 
         final int size = mPinnedShortcuts.size();
@@ -278,6 +299,15 @@ class ShortcutLauncher extends ShortcutPackageItem {
                 pw.println();
             }
         }
+    }
+
+    @Override
+    public JSONObject dumpCheckin(boolean clear) throws JSONException {
+        final JSONObject result = super.dumpCheckin(clear);
+
+        // Nothing really interesting to dump.
+
+        return result;
     }
 
     @VisibleForTesting

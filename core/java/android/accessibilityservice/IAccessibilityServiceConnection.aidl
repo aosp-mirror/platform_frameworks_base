@@ -88,5 +88,5 @@ interface IAccessibilityServiceConnection {
 
     void setSoftKeyboardCallbackEnabled(boolean enabled);
 
-    void sendMotionEvents(int sequence, in ParceledListSlice events);
+    void sendGesture(int sequence, in ParceledListSlice gestureSteps);
 }

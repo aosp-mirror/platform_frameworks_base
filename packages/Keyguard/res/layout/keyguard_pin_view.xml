@@ -26,7 +26,6 @@
         androidprv:layout_maxWidth="@dimen/keyguard_security_width"
         androidprv:layout_maxHeight="@dimen/keyguard_security_max_height"
         android:orientation="vertical"
-        android:contentDescription="@string/keyguard_accessibility_pin_unlock"
         >
     <include layout="@layout/keyguard_message_area"
              android:layout_width="match_parent"

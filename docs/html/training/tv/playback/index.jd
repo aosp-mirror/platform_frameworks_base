@@ -69,6 +69,10 @@ startpage=true
     <dd>Learn how to use the Leanback support library to guide a user through a series of
     decisions.</dd>
 
+  <dt><b><a href="onboarding.html">Introducing First-time Users to Your App</a></b></dt>
+    <dd>Learn how to use the Leanback support library to show first-time users
+    how to get the most out of your app.</dd>
+
   <dt><b><a href="options.html">Enabling Background Playback</a></b></dt>
     <dd>Learn how to continue playback when the user clicks on <strong>Home</strong>.</dd>
 </dl>

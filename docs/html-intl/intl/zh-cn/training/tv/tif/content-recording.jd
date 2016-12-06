@@ -1,0 +1,142 @@
+page.title=TV 录制
+page.keywords=Preview、SDK、TV 录制
+page.tags=androidn
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>本文内容</h2>
+  <ol>
+    <li><a href="#supporting">指示支持录制</a></li>
+    <li><a href="#recording">录制会话</a></li>
+    <li><a href="#errors">处理录制错误</a></li>
+    <li><a href="#sessions">管理录制的会话</a></li>
+    <li><a href="#best">最佳做法</a></li>
+  </ol>
+</div>
+</div>
+
+<p>TV 输入服务允许用户通过时移 API 暂停和继续频道播放。
+Android N 通过允许用户保存多个录制的会话，扩展了时移。
+</p>
+
+<p>用户可以提前安排录制，或在观看节目时开始录制。
+系统保存录制后，用户即可使用系统 TV 应用浏览、管理和播放录制。
+</p>
+
+<p>如果想要为 TV 输入服务提供录制功能，您必须指示系统您的应用支持录制，实现录制节目功能，处理和传达录制期间发生的所有错误，并管理录制的会话。
+
+
+</p>
+
+<p class="note"><strong>注：</strong>Live Channels 应用尚不提供可让用户创建或访问录制的方式。
+在变更 Live Channels 应用之前，可能无法充分测试您的 TV 输入服务的录制体验。
+
+</p>
+
+<h2 id="supporting">指示支持录制</h2>
+
+<p>为了通知系统您的 TV 输入服务支持录制，请将您的服务元数据 XML 文件中的 <code>android:canRecord</code> 属性设置为 <code>true</code>：
+
+
+</p>
+
+<pre>
+&lt;tv-input xmlns:android="http://schemas.android.com/apk/res/android"
+  <b>android:canRecord="true"</b>
+  android:setupActivity="com.example.sampletvinput.SampleTvInputSetupActivity" /&gt;
+</pre>
+
+<p>如需了解有关服务元数据文件的详细信息，请参阅<a href="{@docRoot}training/tv/tif/tvinput.html#manifest">在清单中声明您的 TV 输入</a>。
+
+
+</p>
+
+<p>或者，您可以使用以下步骤在您的代码中表明录制支持：
+</p>
+
+<ol>
+<li>在 <code>TvInputService.onCreate()</code> 方法中，使用 <code>TvInputInfo.Builder</code>
+类创建一个新的
+<code>TvInputInfo</code> 对象。</li>
+<li>创建新的 <code>TvInputInfo</code> 对象时，在调用 <code>build()</code> 之前先调用
+<code>setCanRecord(true)</code>，以表明您的服务支持录制。
+</li>
+<li>通过调用
+<code>TvInputManager.updateTvInputInfo()</code> 在系统中注册 <code>TvInputInfo</code> 对象。</li>
+</ol>
+
+<h2 id="recording">录制会话</h2>
+
+<p>TV 输入服务注册其支持录制功能后，系统会在需要访问应用的录制实现时调用
+<code>TvInputService.onCreateRecordingSession()</code>。
+
+实现您自己的
+<code>TvInputService.RecordingSession</code> 子类并在触发 <code>onCreateRecordingSession()</code> 回调后返回它。
+
+此子类负责切换到正确的频道数据，录制请求的数据，以及向系统传达录制状态和错误。
+
+</p>
+
+<p>系统调用在频道 URI 中传递的 <code>RecordingSession.onTune()</code> 时，将调到该 URI 指定的频道。
+通过调用 <code>notifyTuned()</code> 通知系统应用已调到所需的频道，或者，如果应用无法调到正确的频道，请调用 <code>notifyError()</code>。
+
+
+</p>
+
+<p>系统接下来调用 <code>RecordingSession.onStartRecording()</code>
+回调。您的应用必须立即开始录制。系统调用此回调时，它可能会提供一个 URI，其中包含有关将录制的节目的信息。
+
+完成录制后，您需要将此数据复制到 <code>RecordedPrograms</code> 数据表。
+</p>
+
+<p>最后，系统调用 <code>RecordingSession.onStopRecording()</code>。此时，您的应用必须立即停止录制。
+您还需要在 <code>RecordedPrograms</code> 表中创建一个条目。
+此条目应在
+<code>RecordedPrograms.COLUMN_RECORDING_DATA_URI</code> 列中包含录制的会话数据 URI，以及在初始调用
+<code>onStartRecording()</code> 时系统提供的任何节目信息。
+
+</p>
+
+<p>如需了解有关如何访问 <code>RecordedPrograms</code> 表的更多详情，请参阅<a href="#sessions">管理录制的会话</a>。
+</p>
+
+<h2 id="errors">处理录制错误</h2>
+
+<p>如果录制期间发生错误，使录制的数据无法使用，则通过调用 <code>RecordingSession.notifyError()</code> 通知系统。同样，您可以在创建录制会话后调用 <code>notifyError()</code>，以通知系统您的应用不再录制会话。
+
+
+</p>
+
+<p>如果录制期间发生错误，但您想提供可使用的部分录制供用户播放，则调用
+<code>RecordingSession.notifyRecordingStopped()</code> 以使系统可以使用部分会话。
+
+</p>
+
+<h2 id="sessions">管理录制的会话</h2>
+
+<p>系统在 <code>TvContract.RecordedPrograms</code>
+内容提供程序表中维护来自所有支持录制的频道应用的所有已录制会话的信息。
+此信息可通过
+<code>RecordedPrograms.Uri</code> 内容 URI 访问。使用内容提供程序 API 读取、添加和删除此表中的条目。
+</p>
+
+<p>如需了解有关使用内容提供程序数据的详细信息，请参阅<a href="{@docRoot}guide/topics/providers/content-provider-basics.html">内容提供程序基本知识</a>。
+
+</p>
+
+<h2 id="best">最佳做法</h2>
+
+<p>TV 设备的存储可能有限，因此请运用您的最佳判断来分配存储，以保存录制的会话。
+如果没有足够的空间存储录制的会话，请使用
+<code>RecordingCallback.onError(RECORDING_ERROR_INSUFFICIENT_SPACE)</code>。
+</p>
+
+<p>当用户发起录制时，您应尽快开始录制数据。
+为便于执行此操作，请在系统调用
+<code>onCreateRecordingSession()</code> 回调时完成前期的所有耗时任务，如访问和分配存储空间。
+这样做让您能够在触发 <code>onStartRecording()</code> 回调时立即开始录制。
+
+</p>

@@ -1,0 +1,124 @@
+page.title=Доступ к выделенным каталогам
+page.keywords=preview,sdk,scoped directory access
+page.tags=androidn
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>Содержание документа</h2>
+  <ol>
+    <li><a href="#accessing">Доступ к каталогу во внешнем хранилище</a></li>
+    <li><a href="#removable">Доступ к каталогу на съемном носителе</a></li>
+    <li><a href="#best">Советы и рекомендации</a></li>
+  </ol>
+</div>
+</div>
+
+<p>Некоторым приложениям (например, фотоприложениям) обычно требуется доступ только к отдельным каталогам
+внешнего хранилища, например, к каталогу <code>Pictures</code>. Существующие
+методы доступа к внешним хранилищам не предназначены для обеспечения приложениям такого типа удобного
+доступа к выделенным каталогам. Например:</p>
+
+<ul>
+<li>Запросы {@link android.Manifest.permission#READ_EXTERNAL_STORAGE}
+или {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} в манифесте
+разрешают доступ ко всем общедоступным каталогам внешнего хранилища, хотя
+вашему приложению может не требоваться такой уровень доступа.</li>
+<li>При использовании инфраструктуры
+<a href="{@docRoot}guide/topics/providers/document-provider.html">Storage
+Access Framework</a> пользователь обычно выбирает каталоги через
+системный пользовательский интерфейс, что не требуется, если приложение всегда использует один
+и тот же внешний каталог.</li>
+</ul>
+
+<p>Android N предоставляет новый упрощенный API для доступа
+к распространенным каталогам внешнего хранилища. </p>
+
+<h2 id="accessing">Доступ к каталогу во внешнем хранилище</h2>
+
+<p>Используйте класс <code>StorageManager</code> для получения соответствующего экземпляра
+<code>StorageVolume</code>. Затем создайте намерение, вызвав метод
+<code>StorageVolume.createAccessIntent()</code> этого экземпляра.
+Используйте это намерение для доступа к каталогам внешнего хранилища. Чтобы получить список
+всех доступных томов, в том числе томов на съемных носителях, используйте
+<code>StorageManager.getVolumesList()</code>.</p>
+
+<p>В следующем фрагменте кода приведен пример того, как открывать каталог
+<code>Pictures</code> в главном общем хранилище:</p>
+
+<pre>
+StorageManager sm = (StorageManager)getSystemService(Context.STORAGE_SERVICE);
+StorageVolume volume = sm.getPrimaryVolume();
+Intent intent = volume.createAccessIntent(Environment.DIRECTORY_PICTURES);
+startActivityForResult(intent, request_code);
+</pre>
+
+<p>Система пытается предоставить доступ к внешнему каталогу и, при необходимости,
+запрашивает подтверждение доступа у пользователя с помощью упрощенного пользовательского интерфейса:</p>
+
+<img src="{@docRoot}images/android-7.0/scoped-directory-access-framed.png" srcset="{@docRoot}images/android-7.0/scoped-directory-access-framed.png 1x,
+{@docRoot}images/android-7.0/scoped-directory-access-framed_2x.png 2x" />
+<p class="img-caption"><strong>Рисунок 1.</strong> Приложение запрашивает
+доступ к каталогу Pictures.</p>
+
+<p>Если пользователь предоставляет доступ, система вызывает переопределенный метод
+<code>onActivityResult()</code> с кодом результата
+<code>Activity.RESULT_OK</code>, а также данные намерения, содержащие URI. Используйте
+предоставленный URI для доступа к данным каталога аналогично использованию URI,
+возвращаемых
+<a href="{@docRoot}guide/topics/providers/document-provider.html">Storage
+Access Framework</a>.</p>
+
+<p>Если пользователь не предоставляет доступ, система вызывает переопределенный метод
+<code>onActivityResult()</code> с кодом результата
+<code>Activity.RESULT_CANCELED</code> и отсутствующими данными намерения.</p>
+
+<p class="note"><b>Примечание.</b> При получении доступа к определенному внешнему каталогу
+приложение также получает доступ к вложенным в него каталогам.</p>
+
+<h2 id="removable">Доступ к каталогу на съемном носителе</h2>
+
+<p>Чтобы использовать доступ к выделенным каталогам на съемном носителе,
+сначала нужно добавить объект {@link android.content.BroadcastReceiver}, отслеживающий уведомления
+{@link android.os.Environment#MEDIA_MOUNTED}, например:</p>
+
+<pre>
+&lt;receiver
+    android:name=".MediaMountedReceiver"
+    android:enabled="true"
+    android:exported="true" &gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.MEDIA_MOUNTED" /&gt;
+        &lt;data android:scheme="file" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/receiver&gt;
+</pre>
+
+<p>Когда пользователь подключает съемный носитель, например SD-карту, система отправляет уведомление
+{@link android.os.Environment#MEDIA_MOUNTED}. Это уведомление
+предоставляет в данных намерения объект <code>StorageVolume</code>, который вы можете использовать
+для доступа к каталогам на съемном носителе. В следующем примере показано,
+как осуществляется доступ к каталогу <code>Pictures</code> на съемном носителе:</p>
+
+<pre>
+// BroadcastReceiver has already cached the MEDIA_MOUNTED
+// notification Intent in mediaMountedIntent
+StorageVolume volume = (StorageVolume)
+    mediaMountedIntent.getParcelableExtra(StorageVolume.EXTRA_STORAGE_VOLUME);
+volume.createAccessIntent(Environment.DIRECTORY_PICTURES);
+startActivityForResult(intent, request_code);
+</pre>
+
+<h2 id="best">Советы и рекомендации</h2>
+
+<p>По возможности оставляйте постоянный URI для доступа к внешнему каталогу, чтобы приложению не
+приходилось многократно запрашивать у пользователя разрешение на доступ. После предоставления доступа пользователем вызовите метод
+<code>getContentResolver().takePersistableUriPermssion()</code> для
+URI доступа к каталогу. Система сохранит постоянный URI и при последующих запросах
+доступа будет возвращать ответ <code>RESULT_OK</code>. Таким образом, приложение не будет постоянно выводить
+окно с запросом подтверждения пользователя.</p>
+
+<p>Если пользователь запрещает доступ к внешнему каталогу, не нужно сразу
+же запрашивать доступ повторно. Пользователю может не понравиться, если приложение будет постоянно настаивать на
+получении доступа.</p>

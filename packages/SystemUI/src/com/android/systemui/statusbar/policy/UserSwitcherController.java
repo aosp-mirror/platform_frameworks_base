@@ -381,6 +381,18 @@ public class UserSwitcherController {
         Log.e(TAG, "Couldn't switch to user, id=" + userId);
     }
 
+    public int getSwitchableUserCount() {
+        int count = 0;
+        final int N = mUsers.size();
+        for (int i = 0; i < N; ++i) {
+            UserRecord record = mUsers.get(i);
+            if (record.info != null && record.info.supportsSwitchTo()) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     private void switchToUserId(int id) {
         try {
             pauseRefreshUsers();
@@ -419,22 +431,26 @@ public class UserSwitcherController {
     }
 
     private void listenForCallState() {
-        TelephonyManager.from(mContext).listen(new PhoneStateListener() {
-            private int mCallState;
-            @Override
-            public void onCallStateChanged(int state, String incomingNumber) {
-                if (mCallState == state) return;
-                if (DEBUG) Log.v(TAG, "Call state changed: " + state);
-                mCallState = state;
-                int currentUserId = ActivityManager.getCurrentUser();
-                UserInfo userInfo = mUserManager.getUserInfo(currentUserId);
-                if (userInfo != null && userInfo.isGuest()) {
-                    showGuestNotification(currentUserId);
-                }
-                refreshUsers(UserHandle.USER_NULL);
-            }
-        }, PhoneStateListener.LISTEN_CALL_STATE);
+        TelephonyManager.from(mContext).listen(mPhoneStateListener,
+                PhoneStateListener.LISTEN_CALL_STATE);
     }
+
+    private final PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
+        private int mCallState;
+
+        @Override
+        public void onCallStateChanged(int state, String incomingNumber) {
+            if (mCallState == state) return;
+            if (DEBUG) Log.v(TAG, "Call state changed: " + state);
+            mCallState = state;
+            int currentUserId = ActivityManager.getCurrentUser();
+            UserInfo userInfo = mUserManager.getUserInfo(currentUserId);
+            if (userInfo != null && userInfo.isGuest()) {
+                showGuestNotification(currentUserId);
+            }
+            refreshUsers(UserHandle.USER_NULL);
+        }
+    };
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override

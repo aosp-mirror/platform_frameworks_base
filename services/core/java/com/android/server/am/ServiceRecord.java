@@ -543,27 +543,25 @@ final class ServiceRecord extends Binder {
     }
     
     public void cancelNotification() {
-        if (foregroundId != 0) {
-            // Do asynchronous communication with notification manager to
-            // avoid deadlocks.
-            final String localPackageName = packageName;
-            final int localForegroundId = foregroundId;
-            ams.mHandler.post(new Runnable() {
-                public void run() {
-                    INotificationManager inm = NotificationManager.getService();
-                    if (inm == null) {
-                        return;
-                    }
-                    try {
-                        inm.cancelNotificationWithTag(localPackageName, null,
-                                localForegroundId, userId);
-                    } catch (RuntimeException e) {
-                        Slog.w(TAG, "Error canceling notification for service", e);
-                    } catch (RemoteException e) {
-                    }
+        // Do asynchronous communication with notification manager to
+        // avoid deadlocks.
+        final String localPackageName = packageName;
+        final int localForegroundId = foregroundId;
+        ams.mHandler.post(new Runnable() {
+            public void run() {
+                INotificationManager inm = NotificationManager.getService();
+                if (inm == null) {
+                    return;
                 }
-            });
-        }
+                try {
+                    inm.cancelNotificationWithTag(localPackageName, null,
+                            localForegroundId, userId);
+                } catch (RuntimeException e) {
+                    Slog.w(TAG, "Error canceling notification for service", e);
+                } catch (RemoteException e) {
+                }
+            }
+        });
     }
 
     public void stripForegroundServiceFlagFromNotification() {

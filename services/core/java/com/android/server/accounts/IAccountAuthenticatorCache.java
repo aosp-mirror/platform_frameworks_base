@@ -64,4 +64,10 @@ public interface IAccountAuthenticatorCache {
             Handler handler);
 
     void invalidateCache(int userId);
+
+    /**
+     * Request to update services info for which package has been updated, but hasn't been
+     * picked up by the cache.
+     */
+    void updateServices(int userId);
 }

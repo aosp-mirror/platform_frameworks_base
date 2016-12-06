@@ -53,7 +53,7 @@ footer.hide=1
 <section class="dac-section dac-invert dac-darken-bg" style="background-image: url(/images/distribute/google-play-bg.jpg)"><div class="wrap">
   <h1 class="dac-section-title">Google Play developer tools</h1>
   <div class="dac-section-subtitle">
-    Scale your publishing, manage your catalog, build revenue using Google Play developer tools. 
+    Scale your publishing, manage your catalog, build revenue using Google Play developer tools.
   </div>
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:google/landing/googleplay"

@@ -1,0 +1,85 @@
+page.title=示例
+page.tags="preview", "samples", "android"
+page.image=images/cards/card-n-samples_2x.png
+@jd:body
+
+<p>
+  以下是 Android N 的代码示例。要在 Android Studio 中下载示例，请选择 <b>File &gt; Import Samples</b> 菜单项。
+
+
+</p>
+
+<p class="note">
+  <strong>注：</strong>这些可下载的项目设计用于与 Gradle 和 Android Studio 结合使用。
+
+</p>
+
+
+<h3 id="mw">多窗口 Playground</h3>
+<img src="{@docRoot}images/android-7.0/sample-multiwindow.png" style="float: left; padding-right: 0.5em" height="250" width="156" />
+<p>
+  此示例演示如何在您的应用中充分利用多窗口用户界面。
+
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-MultiWindowPlayground">
+在 GitHub 中获取</a>
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="an">活动通知</h3>
+<img src="{@docRoot}images/android-7.0/sample-activenotifications.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
+<p>
+  这是一个已存在的示例，其显示一个使用 NotificationCompat 发送通知的简单服务。该服务将来自用户的每个未读会话以不同的通知形式发送。
+
+
+</p>
+<p>
+  此示例已更新，以充分利用 Android N 中提供的新的通知功能。
+
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-ActiveNotifications">在 GitHub 中获取</a>
+
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="ms">消息传递服务</h3>
+<img src="{@docRoot}images/android-7.0/sample-messagingservice.png" style="float: left; padding-right: 0.5em" height="250" width="150" />
+<p>
+  这是一个已存在的示例，其演示如何使用 NotificationManager 指示应用当前显示的通知数量。
+
+
+</p>
+<p>
+  此示例已更新，以充分利用 Android N 中提供的新的通知功能。
+
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-MessagingService">在 GitHub 中获取</a>
+
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="fbe">直接启动</h3>
+<img src="{@docRoot}images/android-7.0/sample-directboot.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
+<p>
+  此示例显示如何在设备加密的存储（启动设备后始终可用）中存储和访问数据。
+
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-DirectBoot">在 GitHub 中获取</a>
+
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="sda">作用域目录访问</h3>
+<img src="{@docRoot}images/android-7.0/sample-scopeddirectoryaccess.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
+<p>
+  此示例演示如何从特定目录读取和写入数据，同时需要较少的权限。
+
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-ScopedDirectoryAccess">在 GitHub 中获取</a>
+
+</p>

@@ -1,0 +1,69 @@
+page.title=Witch Puzzle Achieves 98% of International Installs on Android
+page.metaDescription=Witch Puzzle localized their app into 12 languages.
+page.tags="developerstory", "games", "googleplay"
+page.image=images/cards/distribute/stories/witch-puzzle.png
+page.timestamp=1468901832
+
+@jd:body
+
+
+<div class="figure">
+  <img src="{@docRoot}images/distribute/stories/witch-puzzle-icon.png"
+  width="113">
+</div>
+
+<h3>
+  Background
+</h3>
+
+<p>
+  Located in São Paulo, Brazil, <a class="external-link" href=
+  "https://play.google.com/store/apps/dev?id=8995071809141037139">Upbeat
+  Games</a> is an indie game developer with a mission to build fun and easy
+  games that anyone can play. As a small team, the Upbeat crew reacted quickly
+  to their game’s growing installs in Asian countries, and is now seeing strong
+  international growth with their game <a class="external-link" href=
+  "https://play.google.com/store/apps/details?id=com.upbeatgames.witchpuzzle">Witch
+  Puzzle</a>.
+</p>
+
+<h3>
+  What they did
+</h3>
+
+<p>
+  After noticing that Witch Puzzle was gaining traction throughout Asia, Upbeat
+  localized their game into 12 languages, prioritizing countries with an
+  existing user base and high gross national income (GNI). This led to a direct
+  increase in installs.
+</p>
+
+<div class="figure">
+  <img src="{@docRoot}images/distribute/stories/japanese-witch-puzzle.png"
+  width="214">
+  <p class="img-caption">
+    Japanese version of Witch Puzzle
+  </p>
+</div>
+
+<h3>
+  Results
+</h3>
+
+<p>
+  “In the last three months, 98% of our international installs for Witch Puzzle
+  came from Android,” said Vinicius Sormani Heimbeck, Upbeat’s founder. Upbeat
+  applied these learnings across their portfolio of games. Now, <strong>75% of
+  their portfolio’s revenue is driven by Android</strong>.
+</p>
+
+<h3>
+  Get started
+</h3>
+
+<p>
+  Use the <a href=
+  "{@docRoot}distribute/tools/localization-checklist.html">Localization
+  Checklist</a> to learn more about tailoring your app for different markets to
+  drive installs and revenue, and to create a better overall user experience.
+</p>

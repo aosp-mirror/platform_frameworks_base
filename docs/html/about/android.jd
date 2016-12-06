@@ -26,11 +26,11 @@ the fastest-growing mobile OS.</p>
 <blockquote>Every day more than a million new Android devices are activated worldwide.</blockquote>
 
 <p>Android’s openness has made it a favorite for consumers and developers alike,
-driving strong growth in app consumption. Android users download 
+driving strong growth in app consumption. Android users download
 billions of apps and games from Google Play each month. </p>
 
 <p>With its partners, Android is continuously pushing the boundaries of hardware and software
-forward to bring new capabilities to users and developers. For developers, 
+forward to bring new capabilities to users and developers. For developers,
 Android innovation lets you build powerful, differentiated applications
 that use the latest mobile technologies.</p>
 
@@ -59,7 +59,7 @@ devices&mdash;from phones to tablets and beyond.</p>
 advantage of the hardware capabilities available on each device. It
 automatically adapts your UI to look its best on each device, while giving you
 as much control as you want over your UI on different device
-types. </p> 
+types. </p>
 
 <p>For example, you can create a single app binary that's optimized for
 both phone and tablet form factors. You declare your UI in lightweight sets of XML
@@ -70,7 +70,7 @@ density, locale,
 and so on.</p>
 
 
-<p>To help you develop efficiently, the <a href="{@docRoot}tools/index.html">Android 
+<p>To help you develop efficiently, the <a href="{@docRoot}tools/index.html">Android
     Developer Tools</a>
 offer a full Java IDE with advanced features for developing, debugging, and
 packaging Android apps. Using the IDE, you can develop on any available Android

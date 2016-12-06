@@ -164,6 +164,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     @ViewDebug.ExportedProperty(category="recents")
     private boolean mAwaitingFirstLayout = true;
     @ViewDebug.ExportedProperty(category="recents")
+    private boolean mLaunchNextAfterFirstMeasure = false;
+    @ViewDebug.ExportedProperty(category="recents")
     @InitialStateAction
     private int mInitialState = INITIAL_STATE_UPDATE_ALL;
     @ViewDebug.ExportedProperty(category="recents")
@@ -218,7 +220,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     // The drop targets for a task drag
     private DropTarget mFreeformWorkspaceDropTarget = new DropTarget() {
         @Override
-        public boolean acceptsDrop(int x, int y, int width, int height, boolean isCurrentTarget) {
+        public boolean acceptsDrop(int x, int y, int width, int height, Rect insets,
+                boolean isCurrentTarget) {
             // This drop target has a fixed bounds and should be checked last, so just fall through
             // if it is the current target
             if (!isCurrentTarget) {
@@ -230,7 +233,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     private DropTarget mStackDropTarget = new DropTarget() {
         @Override
-        public boolean acceptsDrop(int x, int y, int width, int height, boolean isCurrentTarget) {
+        public boolean acceptsDrop(int x, int y, int width, int height, Rect insets,
+                boolean isCurrentTarget) {
             // This drop target has a fixed bounds and should be checked last, so just fall through
             // if it is the current target
             if (!isCurrentTarget) {
@@ -334,6 +338,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Since we always animate to the same place in (the initial state), always reset the stack
         // to the initial state when resuming
         mAwaitingFirstLayout = true;
+        mLaunchNextAfterFirstMeasure = false;
         mInitialState = INITIAL_STATE_UPDATE_ALL;
         requestLayout();
     }
@@ -1191,7 +1196,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // bounds have changed.  This is because we may get spurious measures while dragging where
         // our current stack bounds reflect the target drop region.
         mLayoutAlgorithm.getTaskStackBounds(mDisplayRect, new Rect(0, 0, width, height),
-                mLayoutAlgorithm.mSystemInsets.top, mLayoutAlgorithm.mSystemInsets.right, mTmpRect);
+                mLayoutAlgorithm.mSystemInsets.top, mLayoutAlgorithm.mSystemInsets.left,
+                mLayoutAlgorithm.mSystemInsets.right, mTmpRect);
         if (!mTmpRect.equals(mStableStackBounds)) {
             mStableStackBounds.set(mTmpRect);
             mStackBounds.set(mTmpRect);
@@ -1219,6 +1225,12 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             if (!mAwaitingFirstLayout) {
                 mInitialState = INITIAL_STATE_UPDATE_NONE;
             }
+        }
+        // If we got the launch-next event before the first layout pass, then re-send it after the
+        // initial state has been updated
+        if (mLaunchNextAfterFirstMeasure) {
+            mLaunchNextAfterFirstMeasure = false;
+            EventBus.getDefault().post(new LaunchNextTaskRequestEvent());
         }
 
         // Rebind all the views, including the ignore ones
@@ -1662,6 +1674,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     public final void onBusEvent(LaunchNextTaskRequestEvent event) {
+        if (mAwaitingFirstLayout) {
+            mLaunchNextAfterFirstMeasure = true;
+            return;
+        }
+
         int launchTaskIndex = mStack.indexOfStackTask(mStack.getLaunchTarget());
         if (launchTaskIndex != -1) {
             launchTaskIndex = Math.max(0, launchTaskIndex - 1);

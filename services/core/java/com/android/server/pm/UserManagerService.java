@@ -27,15 +27,18 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
+import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
@@ -70,6 +73,7 @@ import android.service.gatekeeper.IGateKeeperService;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
+import android.text.TextUtils;
 import android.util.AtomicFile;
 import android.util.IntArray;
 import android.util.Log;
@@ -176,7 +180,8 @@ public class UserManagerService extends IUserManager.Stub {
             UserInfo.FLAG_MANAGED_PROFILE
             | UserInfo.FLAG_EPHEMERAL
             | UserInfo.FLAG_RESTRICTED
-            | UserInfo.FLAG_GUEST;
+            | UserInfo.FLAG_GUEST
+            | UserInfo.FLAG_DEMO;
 
     private static final int MIN_USER_ID = 10;
     // We need to keep process uid within Integer.MAX_VALUE.
@@ -452,6 +457,7 @@ public class UserManagerService extends IUserManager.Stub {
             // user restriction was not a default guest restriction.
             setUserRestriction(UserManager.DISALLOW_CONFIG_WIFI, true, currentGuestUser.id);
         }
+
         mContext.registerReceiver(mDisableQuietModeCallback,
                 new IntentFilter(ACTION_DISABLE_QUIET_MODE_AFTER_UNLOCK),
                 null, mHandler);
@@ -466,6 +472,8 @@ public class UserManagerService extends IUserManager.Stub {
                 UserInfo ui = mUsers.valueAt(i).info;
                 if ((ui.partial || ui.guestToRemove || ui.isEphemeral()) && i != 0) {
                     partials.add(ui);
+                    mRemovingUserIds.append(ui.id, true);
+                    ui.partial = true;
                 }
             }
         }
@@ -548,7 +556,7 @@ public class UserManagerService extends IUserManager.Stub {
     public List<UserInfo> getProfiles(int userId, boolean enabledOnly) {
         boolean returnFullInfo = true;
         if (userId != UserHandle.getCallingUserId()) {
-            checkManageUsersPermission("getting profiles related to user " + userId);
+            checkManageOrCreateUsersPermission("getting profiles related to user " + userId);
         } else {
             returnFullInfo = hasManageUsersPermission();
         }
@@ -862,8 +870,21 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
         synchronized (mUsersLock) {
-            UserInfo userInfo =  getUserInfoLU(userId);
+            UserInfo userInfo = getUserInfoLU(userId);
             return userInfo != null && userInfo.isManagedProfile();
+        }
+    }
+
+    @Override
+    public boolean isDemoUser(int userId) {
+        int callingUserId = UserHandle.getCallingUserId();
+        if (callingUserId != userId && !hasManageUsersPermission()) {
+            throw new SecurityException("You need MANAGE_USERS permission to query if u=" + userId
+                    + " is a demo user");
+        }
+        synchronized (mUsersLock) {
+            UserInfo userInfo = getUserInfoLU(userId);
+            return userInfo != null && userInfo.isDemo();
         }
     }
 
@@ -1779,6 +1800,18 @@ public class UserManagerService extends IUserManager.Stub {
         mUserVersion = USER_VERSION;
 
         Bundle restrictions = new Bundle();
+        try {
+            final String[] defaultFirstUserRestrictions = mContext.getResources().getStringArray(
+                    com.android.internal.R.array.config_defaultFirstUserRestrictions);
+            for (String userRestriction : defaultFirstUserRestrictions) {
+                if (UserRestrictionsUtils.isValidRestriction(userRestriction)) {
+                    restrictions.putBoolean(userRestriction, true);
+                }
+            }
+        } catch (Resources.NotFoundException e) {
+            Log.e(LOG_TAG, "Couldn't find resource: config_defaultFirstUserRestrictions", e);
+        }
+
         synchronized (mRestrictionsLock) {
             mBaseUserRestrictions.append(UserHandle.USER_SYSTEM, restrictions);
         }
@@ -2162,6 +2195,7 @@ public class UserManagerService extends IUserManager.Stub {
         final boolean isGuest = (flags & UserInfo.FLAG_GUEST) != 0;
         final boolean isManagedProfile = (flags & UserInfo.FLAG_MANAGED_PROFILE) != 0;
         final boolean isRestricted = (flags & UserInfo.FLAG_RESTRICTED) != 0;
+        final boolean isDemo = (flags & UserInfo.FLAG_DEMO) != 0;
         final long ident = Binder.clearCallingIdentity();
         UserInfo userInfo;
         UserData userData;
@@ -2179,8 +2213,8 @@ public class UserManagerService extends IUserManager.Stub {
                     Log.e(LOG_TAG, "Cannot add more managed profiles for user " + parentId);
                     return null;
                 }
-                if (!isGuest && !isManagedProfile && isUserLimitReached()) {
-                    // If we're not adding a guest user or a managed profile and the limit has
+                if (!isGuest && !isManagedProfile && !isDemo && isUserLimitReached()) {
+                    // If we're not adding a guest/demo user or a managed profile and the limit has
                     // been reached, cannot add a user.
                     return null;
                 }
@@ -2206,7 +2240,8 @@ public class UserManagerService extends IUserManager.Stub {
                         return null;
                     }
                 }
-                if (!UserManager.isSplitSystemUser() && (flags & UserInfo.FLAG_EPHEMERAL) != 0) {
+                if (!UserManager.isSplitSystemUser() && (flags & UserInfo.FLAG_EPHEMERAL) != 0
+                        && (flags & UserInfo.FLAG_DEMO) == 0) {
                     Log.e(LOG_TAG,
                             "Ephemeral users are supported on split-system-user systems only.");
                     return null;
@@ -2282,6 +2317,7 @@ public class UserManagerService extends IUserManager.Stub {
             synchronized (mRestrictionsLock) {
                 mBaseUserRestrictions.append(userId, restrictions);
             }
+            mPm.onNewUserCreated(userId);
             Intent addedIntent = new Intent(Intent.ACTION_USER_ADDED);
             addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
             mContext.sendBroadcastAsUser(addedIntent, UserHandle.ALL,
@@ -2852,11 +2888,9 @@ public class UserManagerService extends IUserManager.Stub {
             synchronized (mRestrictionsLock) {
                 applyUserRestrictionsLR(userId);
             }
-            UserInfo userInfo = getUserInfoNoChecks(userId);
-            if (userInfo != null && !userInfo.isInitialized()) {
-                mPm.onBeforeUserStartUninitialized(userId);
-            }
         }
+
+        maybeInitializeDemoMode(userId);
     }
 
     /**
@@ -2871,6 +2905,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     /**
      * Make a note of the last started time of a user and do some cleanup.
+     * This is called with ActivityManagerService lock held.
      * @param userId the user that was just foregrounded
      */
     public void onUserLoggedIn(@UserIdInt int userId) {
@@ -2886,6 +2921,29 @@ public class UserManagerService extends IUserManager.Stub {
         }
         userData.info.lastLoggedInFingerprint = Build.FINGERPRINT;
         scheduleWriteUser(userData);
+    }
+
+    private void maybeInitializeDemoMode(int userId) {
+        if (UserManager.isDeviceInDemoMode(mContext) && userId != UserHandle.USER_SYSTEM) {
+            String demoLauncher =
+                    mContext.getResources().getString(
+                            com.android.internal.R.string.config_demoModeLauncherComponent);
+            if (!TextUtils.isEmpty(demoLauncher)) {
+                ComponentName componentToEnable = ComponentName.unflattenFromString(demoLauncher);
+                String demoLauncherPkg = componentToEnable.getPackageName();
+                try {
+                    final IPackageManager iPm = AppGlobals.getPackageManager();
+                    iPm.setComponentEnabledSetting(componentToEnable,
+                            PackageManager.COMPONENT_ENABLED_STATE_ENABLED, /* flags= */ 0,
+                            /* userId= */ userId);
+                    iPm.setApplicationEnabledSetting(demoLauncherPkg,
+                            PackageManager.COMPONENT_ENABLED_STATE_ENABLED, /* flags= */ 0,
+                            /* userId= */ userId, null);
+                } catch (RemoteException re) {
+                    // Internal, shouldn't happen
+                }
+            }
+        }
     }
 
     /**
@@ -2919,6 +2977,14 @@ public class UserManagerService extends IUserManager.Stub {
      *             number is mismatched.
      */
     public static void enforceSerialNumber(File file, int serialNumber) throws IOException {
+        if (StorageManager.isFileEncryptedEmulatedOnly()) {
+            // When we're emulating FBE, the directory may have been chmod
+            // 000'ed, meaning we can't read the serial number to enforce it;
+            // instead of destroying the user, just log a warning.
+            Slog.w(LOG_TAG, "Device is emulating FBE; assuming current serial number is valid");
+            return;
+        }
+
         final int foundSerial = getSerialNumber(file);
         Slog.v(LOG_TAG, "Found " + file + " with serial number " + foundSerial);
 

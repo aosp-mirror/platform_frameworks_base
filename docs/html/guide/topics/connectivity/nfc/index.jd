@@ -17,12 +17,12 @@ page.title=Near Field Communication
 <p>Android-powered devices with NFC simultaneously support three main modes of operation:</p>
 
 <ol>
-<li><strong>Reader/writer mode</strong>, allowing the NFC device to read and/or write 
+<li><strong>Reader/writer mode</strong>, allowing the NFC device to read and/or write
 passive NFC tags and stickers.</li>
-<li><strong>P2P mode</strong>, allowing the NFC device to exchange data with other NFC 
+<li><strong>P2P mode</strong>, allowing the NFC device to exchange data with other NFC
 peers; this operation mode is used by Android Beam.</li>
-<li><strong>Card emulation mode</strong>, allowing the NFC device itself to act as an NFC 
-card. The emulated NFC card can then be accessed by an external NFC reader, 
+<li><strong>Card emulation mode</strong>, allowing the NFC device itself to act as an NFC
+card. The emulated NFC card can then be accessed by an external NFC reader,
 such as an NFC point-of-sale terminal.</li>
 </ol>
 

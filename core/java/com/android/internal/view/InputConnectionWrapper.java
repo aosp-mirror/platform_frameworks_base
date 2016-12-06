@@ -16,6 +16,8 @@
 
 package com.android.internal.view;
 
+import android.annotation.NonNull;
+import android.inputmethodservice.AbstractInputMethodService;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -29,10 +31,16 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputConnectionInspector;
 import android.view.inputmethod.InputConnectionInspector.MissingMethodFlags;
+import android.view.inputmethod.InputContentInfo;
+
+import java.lang.ref.WeakReference;
 
 public class InputConnectionWrapper implements InputConnection {
     private static final int MAX_WAIT_TIME_MILLIS = 2000;
     private final IInputContext mIInputContext;
+    @NonNull
+    private final WeakReference<AbstractInputMethodService> mInputMethodService;
+
     @MissingMethodFlags
     private final int mMissingMethods;
 
@@ -46,7 +54,8 @@ public class InputConnectionWrapper implements InputConnection {
         public ExtractedText mExtractedText;
         public int mCursorCapsMode;
         public boolean mRequestUpdateCursorAnchorInfoResult;
-        
+        public boolean mCommitContentResult;
+
         // A 'pool' of one InputContextCallback.  Each ICW request will attempt to gain
         // exclusive access to this object.
         private static InputContextCallback sInstance = new InputContextCallback();
@@ -172,6 +181,19 @@ public class InputConnectionWrapper implements InputConnection {
             }
         }
 
+        public void setCommitContentResult(boolean result, int seq) {
+            synchronized (this) {
+                if (seq == mSeq) {
+                    mCommitContentResult = result;
+                    mHaveValue = true;
+                    notifyAll();
+                } else {
+                    Log.i(TAG, "Got out-of-sequence callback " + seq + " (expected " + mSeq
+                            + ") in setCommitContentResult, ignoring.");
+                }
+            }
+        }
+
         /**
          * Waits for a result for up to {@link #MAX_WAIT_TIME_MILLIS} milliseconds.
          * 
@@ -195,8 +217,10 @@ public class InputConnectionWrapper implements InputConnection {
         }
     }
 
-    public InputConnectionWrapper(IInputContext inputContext,
-            @MissingMethodFlags final int missingMethods) {
+    public InputConnectionWrapper(
+            @NonNull WeakReference<AbstractInputMethodService> inputMethodService,
+            IInputContext inputContext, @MissingMethodFlags final int missingMethods) {
+        mInputMethodService = inputMethodService;
         mIInputContext = inputContext;
         mMissingMethods = missingMethods;
     }
@@ -489,6 +513,37 @@ public class InputConnectionWrapper implements InputConnection {
 
     public void closeConnection() {
         // Nothing should happen when called from input method.
+    }
+
+    public boolean commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts) {
+        boolean result = false;
+        if (isMethodMissing(MissingMethodFlags.COMMIT_CONTENT)) {
+            // This method is not implemented.
+            return false;
+        }
+        try {
+            if ((flags & InputConnection.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0) {
+                final AbstractInputMethodService inputMethodService = mInputMethodService.get();
+                if (inputMethodService == null) {
+                    // This basically should not happen, because it's the the caller of this method.
+                    return false;
+                }
+                inputMethodService.exposeContent(inputContentInfo, this);
+            }
+
+            InputContextCallback callback = InputContextCallback.getInstance();
+            mIInputContext.commitContent(inputContentInfo, flags, opts, callback.mSeq, callback);
+            synchronized (callback) {
+                callback.waitForResultLocked();
+                if (callback.mHaveValue) {
+                    result = callback.mCommitContentResult;
+                }
+            }
+            callback.dispose();
+        } catch (RemoteException e) {
+            return false;
+        }
+        return result;
     }
 
     private boolean isMethodMissing(@MissingMethodFlags final int methodFlag) {

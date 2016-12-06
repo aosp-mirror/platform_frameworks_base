@@ -87,6 +87,7 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_DRAWN_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
@@ -165,6 +166,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean mPolicyVisibility = true;
     boolean mPolicyVisibilityAfterAnim = true;
     boolean mAppOpVisibility = true;
+    boolean mPermanentlyHidden; // the window should never be shown again
     boolean mAppFreezing;
     boolean mAttachedHidden;    // is our parent window hidden?
     boolean mWallpaperVisible;  // for wallpaper, what was last vis report?
@@ -287,6 +289,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     // "Real" frame that the application sees, in display coordinate space.
     final Rect mFrame = new Rect();
     final Rect mLastFrame = new Rect();
+    boolean mFrameSizeChanged = false;
     // Frame that is scaled to the application's coordinate space when in
     // screen size compatibility mode.
     final Rect mCompatFrame = new Rect();
@@ -394,6 +397,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean mOrientationChanging;
 
     /**
+     * The orientation during the last visible call to relayout. If our
+     * current orientation is different, the window can't be ready
+     * to be shown.
+     */
+    int mLastVisibleLayoutRotation = -1;
+
+    /**
      * How long we last kept the screen frozen.
      */
     int mLastFreezeDuration;
@@ -493,6 +503,15 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     /** @see #isResizedWhileNotDragResizingReported(). */
     private boolean mResizedWhileNotDragResizingReported;
+
+    /**
+     * During seamless rotation we have two phases, first the old window contents
+     * are rotated to look as if they didn't move in the new coordinate system. Then we
+     * have to freeze updates to this layer (to preserve the transformation) until
+     * the resize actually occurs. This is true from when the transformation is set
+     * and false until the transaction to resize is sent.
+     */
+    boolean mSeamlesslyRotated = false;
 
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
            WindowState attachedWindow, int appOp, int seq, WindowManager.LayoutParams a,
@@ -812,10 +831,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             final int height = Math.min(mFrame.height(), mContentFrame.height());
             final int width = Math.min(mContentFrame.width(), mFrame.width());
             final DisplayMetrics displayMetrics = getDisplayContent().getDisplayMetrics();
-            final int minVisibleHeight = WindowManagerService.dipToPixel(
-                    MINIMUM_VISIBLE_HEIGHT_IN_DP, displayMetrics);
-            final int minVisibleWidth = WindowManagerService.dipToPixel(
-                    MINIMUM_VISIBLE_WIDTH_IN_DP, displayMetrics);
+            final int minVisibleHeight = Math.min(height, WindowManagerService.dipToPixel(
+                    MINIMUM_VISIBLE_HEIGHT_IN_DP, displayMetrics));
+            final int minVisibleWidth = Math.min(width, WindowManagerService.dipToPixel(
+                    MINIMUM_VISIBLE_WIDTH_IN_DP, displayMetrics));
             final int top = Math.max(mContentFrame.top,
                     Math.min(mFrame.top, mContentFrame.bottom - minVisibleHeight));
             final int left = Math.max(mContentFrame.left + minVisibleWidth - width,
@@ -1046,14 +1065,16 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mAppToken != null && mAppToken.voiceInteraction;
     }
 
-    boolean setInsetsChanged() {
+    boolean setReportResizeHints() {
         mOverscanInsetsChanged |= !mLastOverscanInsets.equals(mOverscanInsets);
         mContentInsetsChanged |= !mLastContentInsets.equals(mContentInsets);
         mVisibleInsetsChanged |= !mLastVisibleInsets.equals(mVisibleInsets);
         mStableInsetsChanged |= !mLastStableInsets.equals(mStableInsets);
         mOutsetsChanged |= !mLastOutsets.equals(mOutsets);
+        mFrameSizeChanged |= (mLastFrame.width() != mFrame.width()) ||
+                (mLastFrame.height() != mFrame.height());
         return mOverscanInsetsChanged || mContentInsetsChanged || mVisibleInsetsChanged
-                || mOutsetsChanged;
+                || mOutsetsChanged || mFrameSizeChanged;
     }
 
     public DisplayContent getDisplayContent() {
@@ -1270,7 +1291,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         final boolean isViewVisible = (mAppToken == null || !mAppToken.clientHidden)
                 && (mViewVisibility == View.VISIBLE) && !mWindowRemovalAllowed;
         return (isOnScreenIgnoringKeyguard() && (!visibleOnly || isViewVisible)
-                || mWinAnimator.mAttrType == TYPE_BASE_APPLICATION)
+                || mWinAnimator.mAttrType == TYPE_BASE_APPLICATION
+                || mWinAnimator.mAttrType == TYPE_DRAWN_APPLICATION)
                 && !mAnimatingExit && !mDestroying;
     }
 
@@ -1315,7 +1337,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 && ((!mAttachedHidden && mViewVisibility == View.VISIBLE && !mRootToken.hidden)
                         || mWinAnimator.mAnimation != null
                         || ((atoken != null) && (atoken.mAppAnimator.animation != null)
-                                && !mWinAnimator.isDummyAnimation()));
+                                && !mWinAnimator.isDummyAnimation())
+                        || isAnimatingWithSavedSurface());
     }
 
     /**
@@ -1395,7 +1418,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      */
     boolean hasMoved() {
         return mHasSurface && (mContentChanged || mMovedByResize)
-                && !mAnimatingExit && mService.okToDisplay()
+                && !mAnimatingExit
                 && (mFrame.top != mLastFrame.top || mFrame.left != mLastFrame.left)
                 && (mAttachedWindow == null || !mAttachedWindow.hasMoved());
     }
@@ -1854,6 +1877,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             // Being hidden due to app op request.
             return false;
         }
+        if (mPermanentlyHidden) {
+            // Permanently hidden until the app exists as apps aren't prepared
+            // to handle their windows being removed from under them.
+            return false;
+        }
         if (mPolicyVisibility && mPolicyVisibilityAfterAnim) {
             // Already showing.
             return false;
@@ -1941,6 +1969,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             } else {
                 hideLw(true, true);
             }
+        }
+    }
+
+    public void hidePermanentlyLw() {
+        if (!mPermanentlyHidden) {
+            mPermanentlyHidden = true;
+            hideLw(true, true);
         }
     }
 
@@ -2083,6 +2118,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 Slog.v(TAG, "Destroying saved surface: " + this);
             }
             mWinAnimator.destroySurfaceLocked();
+            mSurfaceSaved = false;
         }
         mWasVisibleBeforeClientHidden = false;
     }
@@ -2091,7 +2127,18 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (!mSurfaceSaved) {
             return;
         }
+
+        // Sometimes we save surfaces due to layout invisible
+        // directly after rotation occurs. However this means
+        // the surface was never laid out in the new orientation.
+        // We can only restore to the last rotation we were
+        // laid out as visible in.
+        if (mLastVisibleLayoutRotation != mService.mRotation) {
+            destroySavedSurface();
+            return;
+        }
         mSurfaceSaved = false;
+
         if (mWinAnimator.mSurfaceController != null) {
             setHasSurface(true);
             mWinAnimator.mDrawState = WindowStateAnimator.READY_TO_SHOW;
@@ -2335,6 +2382,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mVisibleInsetsChanged = false;
             mStableInsetsChanged = false;
             mOutsetsChanged = false;
+            mFrameSizeChanged = false;
             mResizedWhileNotDragResizingReported = true;
             mWinAnimator.mSurfaceResized = false;
         } catch (RemoteException e) {
@@ -2580,7 +2628,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             pw.println(Integer.toHexString(mSystemUiVisibility));
         }
         if (!mPolicyVisibility || !mPolicyVisibilityAfterAnim || !mAppOpVisibility
-                || mAttachedHidden) {
+                || mAttachedHidden || mPermanentlyHidden) {
             pw.print(prefix); pw.print("mPolicyVisibility=");
                     pw.print(mPolicyVisibility);
                     pw.print(" mPolicyVisibilityAfterAnim=");
@@ -2588,6 +2636,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     pw.print(" mAppOpVisibility=");
                     pw.print(mAppOpVisibility);
                     pw.print(" mAttachedHidden="); pw.println(mAttachedHidden);
+                    pw.print(" mPermanentlyHidden="); pw.println(mPermanentlyHidden);
         }
         if (!mRelayoutCalled || mLayoutNeeded) {
             pw.print(prefix); pw.print("mRelayoutCalled="); pw.print(mRelayoutCalled);
@@ -2892,11 +2941,24 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     // for only child windows (as the main window is handled by window preservation)
     // and the big surface.
     //
-    // Though windows of TYPE_APPLICATION (as opposed to TYPE_BASE_APPLICATION)
-    // are not children in the sense of an attached window, we also want to replace
-    // them at such phases, as they won't be covered by window preservation,
-    // and in general we expect them to return following relaunch.
+    // Though windows of TYPE_APPLICATION or TYPE_DRAWN_APPLICATION (as opposed to
+    // TYPE_BASE_APPLICATION) are not children in the sense of an attached window,
+    // we also want to replace them at such phases, as they won't be covered by window
+    // preservation, and in general we expect them to return following relaunch.
     boolean shouldBeReplacedWithChildren() {
-        return isChildWindow() || mAttrs.type == TYPE_APPLICATION;
+        return isChildWindow() || mAttrs.type == TYPE_APPLICATION
+                || mAttrs.type == TYPE_DRAWN_APPLICATION;
+    }
+
+    public int getRotationAnimationHint() {
+        if (mAppToken != null) {
+            return mAppToken.mRotationAnimationHint;
+        } else {
+            return -1;
+        }
+    }
+
+    public boolean isRtl() {
+        return mMergedConfiguration.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
     }
 }

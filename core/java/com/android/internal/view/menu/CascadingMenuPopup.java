@@ -366,7 +366,7 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
         final int menuWidth = measureIndividualMenuWidth(adapter, null, mContext, mMenuMaxWidth);
         final MenuPopupWindow popupWindow = createPopupWindow();
         popupWindow.setAdapter(adapter);
-        popupWindow.setWidth(menuWidth);
+        popupWindow.setContentWidth(menuWidth);
         popupWindow.setDropDownGravity(mDropDownGravity);
 
         final CascadingMenuInfo parentInfo;

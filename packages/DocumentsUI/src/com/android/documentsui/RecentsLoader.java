@@ -157,6 +157,9 @@ public class RecentsLoader extends AsyncTaskLoader<DirectoryResult> {
                     throw new RuntimeException(e);
                 } catch (ExecutionException e) {
                     // We already logged on other side
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to query Recents for authority: " + task.authority
+                        + ". Skip this authority in Recents.", e);
                 }
             } else {
                 allDone = false;

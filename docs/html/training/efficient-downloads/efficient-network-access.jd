@@ -32,9 +32,9 @@ next.link=regular_updates.html
 <p>Using the wireless radio to transfer data is potentially one of your app's most significant sources of battery drain. To minimize the battery drain associated with network activity, it's critical that you understand how your connectivity model will affect the underlying radio hardware.</p>
 
 <p>This lesson introduces the wireless radio state machine and explains how your app's connectivity model interacts with it. It goes on to propose ways to minimize your data connections, use prefetching, and bundle your transfers in order to minimize the battery drain associated with your data transfers.</p>
- 
-<h2 id="RadioStateMachine">The Radio State Machine</h2> 
- 
+
+<h2 id="RadioStateMachine">The Radio State Machine</h2>
+
 <p>A fully active wireless radio consumes significant power, so it transitions between different energy states in order to conserve power when not in use, while attempting to minimize latency associated with "powering up" the radio when it's required.</p>
 
 <p>The state machine for a typical 3G network radio consists of three energy states:
@@ -57,9 +57,9 @@ next.link=regular_updates.html
 <p>This approach is particularly effective for typical web browsing as it prevents unwelcome latency while users browse the web. The relatively low tail-time also ensures that once a browsing session has finished, the radio can move to a lower energy state.</p>
 
 <p>Unfortunately, this approach can lead to inefficient apps on modern smartphone OSs like Android, where apps run both in the foreground (where latency is important) and in the background (where battery life should be prioritized).</p>
- 
-<h2 id="AppsStateMachine">How Apps Impact the Radio State Machine</h2> 
- 
+
+<h2 id="AppsStateMachine">How Apps Impact the Radio State Machine</h2>
+
 <p>Every time you create a new network connection, the radio transitions to the full power state. In the case of the typical 3G radio state machine described above, it will remain at full power for the duration of your transfer&mdash;plus an additional 5 seconds of tail time&mdash;followed by 12 seconds at the low energy state.  So for a typical 3G device, every data transfer session will cause the radio to draw energy for almost 20 seconds.</p>
 
 <p>In practice, this means an app that transfers unbundled data for 1 second every 18 seconds will keep the wireless radio perpetually active, moving it back to high power just as it was about to become idle. As a result, every minute it will consume battery at the high power state for 18 seconds, and at the low power state for the remaining 42 seconds.</p>
@@ -71,7 +71,7 @@ next.link=regular_updates.html
 <img src="{@docRoot}images/efficient-downloads/graphs.png" />
 <p class="img-caption"><strong>Figure 2.</strong> Relative wireless radio power use for bundled versus unbundled transfers.</p>
 
-<h2 id="PrefetchData">Prefetch Data</h2> 
+<h2 id="PrefetchData">Prefetch Data</h2>
 
 <p>Prefetching data is an effective way to reduce the number of independent data transfer sessions. Prefetching allows you to download all the data you are likely to need for a given time period in a single burst, over a single connection, at full capacity.</p>
 
@@ -135,7 +135,7 @@ Every time you initiate a connection&mdash;irrespective of the size of the assoc
 
 <p>Rather than creating multiple simultaneous connections to download data, or chaining multiple consecutive GET requests, where possible you should bundle those requests into a single GET.</p>
 
-<p>For example, it would be more efficient to make a single request for every news article to be returned in a single request / response than to make multiple queries for several news categories. 
+<p>For example, it would be more efficient to make a single request for every news article to be returned in a single request / response than to make multiple queries for several news categories.
 The wireless radio needs to become active in order to transmit the termination / termination acknowledgement packets associated with server and client  timeout, so it's also good practice to close your connections when they aren't in use, rather than waiting for these timeouts.</p>
 
 <p>That said, closing a connection too early can prevent it from being reused, which then requires additional overhead for establishing a new connection. A useful compromise is not to close the connection immediately, but to still close it before the inherent timeout expires.</p>

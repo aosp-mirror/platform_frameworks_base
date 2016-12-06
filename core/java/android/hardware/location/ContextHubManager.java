@@ -123,10 +123,18 @@ public final class ContextHubManager {
     /**
      * Load a nano app on a specified context hub.
      *
+     * Note that loading is asynchronous.  When we return from this method,
+     * the nano app (probably) hasn't loaded yet.  Assuming a return of 0
+     * from this method, then the final success/failure for the load, along
+     * with the "handle" for the nanoapp, is all delivered in a byte
+     * string via a call to Callback.onMessageReceipt.
+     *
+     * TODO(b/30784270): Provide a better success/failure and "handle" delivery.
+     *
      * @param hubHandle handle of context hub to load the app on.
      * @param app the nanoApp to load on the hub
      *
-     * @return int nanoAppInstance of the loaded nanoApp on success,
+     * @return 0 if the command for loading was sent to the context hub;
      *         -1 otherwise
      *
      * @see NanoApp
@@ -150,9 +158,17 @@ public final class ContextHubManager {
     /**
      * Unload a specified nanoApp
      *
-     * @param nanoAppHandle handle of the nanoApp to load
+     * Note that unloading is asynchronous.  When we return from this method,
+     * the nano app (probably) hasn't unloaded yet.  Assuming a return of 0
+     * from this method, then the final success/failure for the unload is
+     * delivered in a byte string via a call to Callback.onMessageReceipt.
      *
-     * @return int  0 on success, -1 otherwise
+     * TODO(b/30784270): Provide a better success/failure delivery.
+     *
+     * @param nanoAppHandle handle of the nanoApp to unload
+     *
+     * @return 0 if the command for unloading was sent to the context hub;
+     *         -1 otherwise
      */
     public int unloadNanoApp(int nanoAppHandle) {
         int retVal = -1;
@@ -168,6 +184,24 @@ public final class ContextHubManager {
 
     /**
      * get information about the nano app instance
+     *
+     * NOTE: The returned NanoAppInstanceInfo does _not_ contain correct
+     * information for several fields, specifically:
+     * - getName()
+     * - getPublisher()
+     * - getNeededExecMemBytes()
+     * - getNeededReadMemBytes()
+     * - getNeededWriteMemBytes()
+     *
+     * For example, say you call loadNanoApp() with a NanoApp that has
+     * getName() returning "My Name".  Later, if you call getNanoAppInstanceInfo
+     * for that nanoapp, the returned NanoAppInstanceInfo's getName()
+     * method will claim "Preloaded app, unknown", even though you would
+     * have expected "My Name".  For now, as the user, you'll need to
+     * separately track the above fields if they are of interest to you.
+     *
+     * TODO(b/30943489): Have the returned NanoAppInstanceInfo contain the
+     *     correct information.
      *
      * @param nanoAppHandle handle of the nanoAppInstance
      * @return NanoAppInstanceInfo Information about the nano app instance.
@@ -208,6 +242,14 @@ public final class ContextHubManager {
 
     /**
      * Send a message to a specific nano app instance on a context hub.
+     *
+     * Note that the return value of this method only speaks of success
+     * up to the point of sending this to the Context Hub.  It is not
+     * an assurance that the Context Hub successfully sent this message
+     * on to the nanoapp.  If assurance is desired, a protocol should be
+     * established between your code and the nanoapp, with the nanoapp
+     * sending a confirmation message (which will be reported via
+     * Callback.onMessageReceipt).
      *
      * @param hubHandle handle of the hub to send the message to
      * @param nanoAppHandle  handle of the nano app to send to

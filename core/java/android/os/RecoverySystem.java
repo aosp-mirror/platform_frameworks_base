@@ -578,18 +578,19 @@ public class RecoverySystem {
      * @throws SecurityException if the current user is not allowed to wipe data.
      */
     public static void rebootWipeUserData(Context context) throws IOException {
-        rebootWipeUserData(context, false, context.getPackageName());
+        rebootWipeUserData(context, false /* shutdown */, context.getPackageName(),
+                false /* force */);
     }
 
     /** {@hide} */
     public static void rebootWipeUserData(Context context, String reason) throws IOException {
-        rebootWipeUserData(context, false, reason);
+        rebootWipeUserData(context, false /* shutdown */, reason, false /* force */);
     }
 
     /** {@hide} */
     public static void rebootWipeUserData(Context context, boolean shutdown)
             throws IOException {
-        rebootWipeUserData(context, shutdown, context.getPackageName());
+        rebootWipeUserData(context, shutdown, context.getPackageName(), false /* force */);
     }
 
     /**
@@ -603,6 +604,9 @@ public class RecoverySystem {
      * @param shutdown  if true, the device will be powered down after
      *                  the wipe completes, rather than being rebooted
      *                  back to the regular system.
+     * @param reason    the reason for the wipe that is visible in the logs
+     * @param force     whether the {@link UserManager.DISALLOW_FACTORY_RESET} user restriction
+     *                  should be ignored
      *
      * @throws IOException  if writing the recovery command file
      * fails, or if the reboot itself fails.
@@ -610,10 +614,10 @@ public class RecoverySystem {
      *
      * @hide
      */
-    public static void rebootWipeUserData(Context context, boolean shutdown, String reason)
-            throws IOException {
+    public static void rebootWipeUserData(Context context, boolean shutdown, String reason,
+            boolean force) throws IOException {
         UserManager um = (UserManager) context.getSystemService(Context.USER_SERVICE);
-        if (um.hasUserRestriction(UserManager.DISALLOW_FACTORY_RESET)) {
+        if (!force && um.hasUserRestriction(UserManager.DISALLOW_FACTORY_RESET)) {
             throw new SecurityException("Wiping data is not allowed for this user.");
         }
         final ConditionVariable condition = new ConditionVariable();
@@ -663,6 +667,31 @@ public class RecoverySystem {
 
         final String localeArg = "--locale=" + Locale.getDefault().toString();
         bootCommand(context, "--wipe_cache", reasonArg, localeArg);
+    }
+
+    /**
+     * Reboot into recovery and wipe the A/B device.
+     *
+     * @param Context      the Context to use.
+     * @param packageFile  the wipe package to be applied.
+     * @param reason       the reason to wipe.
+     *
+     * @throws IOException if something goes wrong.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static void rebootWipeAb(Context context, File packageFile, String reason)
+            throws IOException {
+        String reasonArg = null;
+        if (!TextUtils.isEmpty(reason)) {
+            reasonArg = "--reason=" + sanitizeArg(reason);
+        }
+
+        final String filename = packageFile.getCanonicalPath();
+        final String filenameArg = "--wipe_package=" + filename;
+        final String localeArg = "--locale=" + Locale.getDefault().toString();
+        bootCommand(context, "--wipe_ab", filenameArg, reasonArg, localeArg);
     }
 
     /**

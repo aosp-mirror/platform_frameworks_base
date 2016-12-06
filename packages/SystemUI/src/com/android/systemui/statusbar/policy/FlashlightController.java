@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.policy;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
@@ -26,6 +27,8 @@ import android.os.Process;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
@@ -42,6 +45,7 @@ public class FlashlightController {
     private static final int DISPATCH_AVAILABILITY_CHANGED = 2;
 
     private final CameraManager mCameraManager;
+    private final Context mContext;
     /** Call {@link #ensureHandler()} before using */
     private Handler mHandler;
 
@@ -51,20 +55,22 @@ public class FlashlightController {
     /** Lock on {@code this} when accessing */
     private boolean mFlashlightEnabled;
 
-    private final String mCameraId;
+    private String mCameraId;
     private boolean mTorchAvailable;
 
-    public FlashlightController(Context mContext) {
+    public FlashlightController(Context context) {
+        mContext = context;
         mCameraManager = (CameraManager) mContext.getSystemService(Context.CAMERA_SERVICE);
 
-        String cameraId = null;
+        tryInitCamera();
+    }
+
+    private void tryInitCamera() {
         try {
-            cameraId = getCameraId();
+            mCameraId = getCameraId();
         } catch (Throwable e) {
             Log.e(TAG, "Couldn't initialize.", e);
             return;
-        } finally {
-            mCameraId = cameraId;
         }
 
         if (mCameraId != null) {
@@ -76,6 +82,7 @@ public class FlashlightController {
     public void setFlashlight(boolean enabled) {
         boolean pendingError = false;
         synchronized (this) {
+            if (mCameraId == null) return;
             if (mFlashlightEnabled != enabled) {
                 mFlashlightEnabled = enabled;
                 try {
@@ -94,7 +101,7 @@ public class FlashlightController {
     }
 
     public boolean hasFlashlight() {
-        return mCameraId != null;
+        return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
     }
 
     public synchronized boolean isEnabled() {
@@ -107,6 +114,9 @@ public class FlashlightController {
 
     public void addListener(FlashlightListener l) {
         synchronized (mListeners) {
+            if (mCameraId == null) {
+                tryInitCamera();
+            }
             cleanUpListenersLocked(l);
             mListeners.add(new WeakReference<>(l));
         }
@@ -227,6 +237,17 @@ public class FlashlightController {
             }
         }
     };
+
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("FlashlightController state:");
+
+        pw.print("  mCameraId=");
+        pw.println(mCameraId);
+        pw.print("  mFlashlightEnabled=");
+        pw.println(mFlashlightEnabled);
+        pw.print("  mTorchAvailable=");
+        pw.println(mTorchAvailable);
+    }
 
     public interface FlashlightListener {
 

@@ -218,7 +218,7 @@ public class ScreenSlidePagerActivity extends FragmentActivity {
   position of the page on the screen, which is obtained from the <code>position</code> parameter
   of the {@link android.support.v4.view.ViewPager.PageTransformer#transformPage transformPage()} method.</p>
 
-<p>The <code>position</code> parameter indicates where a given page is located relative to the center of the screen. 
+<p>The <code>position</code> parameter indicates where a given page is located relative to the center of the screen.
 It is a dynamic property that changes as the user scrolls through the pages. When a page fills the screen, its position value is <code>0</code>.
 When a page is drawn just off the right side of the screen, its position value is <code>1</code>. If the user scrolls halfway between pages one and two, page one has a position of -0.5 and page two has a position of 0.5. Based on the position of the pages on the screen, you can create custom slide animations by setting page properties with methods such as {@link android.view.View#setAlpha setAlpha()}, {@link android.view.View#setTranslationX setTranslationX()}, or
   {@link android.view.View#setScaleY setScaleY()}.</p>

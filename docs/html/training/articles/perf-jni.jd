@@ -564,9 +564,9 @@ be aware of:</p>
     that looked through the weak globals table, the arguments, the locals
     table, and the globals table in that order. The first time it found your
     direct pointer, it would report that your reference was of the type it
-    happened to be examining. This meant, for example, that if 
+    happened to be examining. This meant, for example, that if
     you called <code>GetObjectRefType</code> on a global jclass that happened
-    to be the same as the jclass passed as an implicit argument to your static 
+    to be the same as the jclass passed as an implicit argument to your static
     native method, you'd get <code>JNILocalRefType</code> rather than
     <code>JNIGlobalRefType</code>.
 </ul>

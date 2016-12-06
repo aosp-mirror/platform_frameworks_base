@@ -168,6 +168,7 @@ public class LockIcon extends KeyguardAffordanceView {
             setContentDescription(contentDescription);
             mHasFingerPrintIcon = anyFingerprintIcon;
             if (animation != null && isAnim) {
+                animation.forceAnimationOnUI();
                 animation.start();
             }
             mLastState = state;

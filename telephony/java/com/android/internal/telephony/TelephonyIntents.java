@@ -402,34 +402,59 @@ public class TelephonyIntents {
     /**
      * <p>Broadcast Action: when data connections get redirected with validation failure.
      * intended for sim/account status checks and only sent to the specified carrier app
-     * feedback is via carrier/system APIs to report cold-sim, out-of-credit-sim, etc
      * The intent will have the following extra values:</p>
      * <ul>
-     *   <li>redirectUrl</li><dd>A string with the redirection url info.</dd>
-     *   <li>subId</li><dd>Sub Id which associated the data redirection.</dd>
+     *   <li>apnType</li><dd>A string with the apn type.</dd>
+     *   <li>redirectionUrl</li><dd>redirection url string</dd>
+     *   <li>subId</dt><li>Sub Id which associated the data connection failure.</dd>
      * </ul>
      * <p class="note">This is a protected intent that can only be sent by the system.</p>
      */
-    public static final String ACTION_DATA_CONNECTION_REDIRECTED =
-            "android.intent.action.REDIRECTION_DETECTED";
+    public static final String ACTION_CARRIER_SIGNAL_REDIRECTED =
+            "android.intent.action.CARRIER_SIGNAL_REDIRECTED";
     /**
      * <p>Broadcast Action: when data connections setup fails.
      * intended for sim/account status checks and only sent to the specified carrier app
-     * feedback is via carrier/system APIs to report cold-sim, out-of-credit-sim, etc
      * The intent will have the following extra values:</p>
      * <ul>
      *   <li>apnType</li><dd>A string with the apn type.</dd>
      *   <li>errorCode</li><dd>A integer with dataFailCause.</dd>
-     *   <li>subId</dt><li>Sub Id which associated the data redirection.</dd>
+     *   <li>subId</dt><li>Sub Id which associated the data connection failure.</dd>
      * </ul>
      * <p class="note">This is a protected intent that can only be sent by the system. </p>
      */
-    public static final String ACTION_REQUEST_NETWORK_FAILED =
-            "android.intent.action.REQUEST_NETWORK_FAILED";
+    public static final String ACTION_CARRIER_SIGNAL_REQUEST_NETWORK_FAILED =
+            "android.intent.action.CARRIER_SIGNAL_REQUEST_NETWORK_FAILED";
 
     /**
-     * Broadcast action to trigger CI OMA-DM Session.
+     * <p>Broadcast Action: when pco value is available.
+     * intended for sim/account status checks and only sent to the specified carrier app
+     * The intent will have the following extra values:</p>
+     * <ul>
+     *   <li>apnType</li><dd>A string with the apn type.</dd>
+     *   <li>apnProto</li><dd>A string with the protocol of the apn connection (IP,IPV6,
+     *                        IPV4V6)</dd>
+     *   <li>pcoId</li><dd>An integer indicating the pco id for the data.</dd>
+     *   <li>pcoValue</li><dd>A byte array of pco data read from modem.</dd>
+     *   <li>subId</dt><li>Sub Id which associated the data connection.</dd>
+     * </ul>
+     * <p class="note">This is a protected intent that can only be sent by the system. </p>
      */
+    public static final String ACTION_CARRIER_SIGNAL_PCO_VALUE =
+            "android.intent.action.CARRIER_SIGNAL_PCO_VALUE";
+
+    // CARRIER_SIGNAL_ACTION extra keys
+    public static final String EXTRA_REDIRECTION_URL_KEY = "redirectionUrl";
+    public static final String EXTRA_ERROR_CODE_KEY = "errorCode";
+    public static final String EXTRA_APN_TYPE_KEY = "apnType";
+    public static final String EXTRA_APN_PROTO_KEY = "apnProto";
+    public static final String EXTRA_PCO_ID_KEY = "pcoId";
+    public static final String EXTRA_PCO_VALUE_KEY = "pcoValue";
+
+
+   /**
+     * Broadcast action to trigger CI OMA-DM Session.
+    */
     public static final String ACTION_REQUEST_OMADM_CONFIGURATION_UPDATE =
             "com.android.omadm.service.CONFIGURATION_UPDATE";
 }

@@ -1,0 +1,213 @@
+page.title=ピクチャ イン ピクチャ
+page.keywords=preview,sdk,PIP,Picture-in-picture
+page.tags=androidn
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>このドキュメントの内容</h2>
+<ol>
+  <li><a href="#declaring">アクティビティがピクチャ イン ピクチャをサポートしていることを宣言する
+</a></li>
+  <li><a href="#pip_button">アクティビティをピクチャ イン ピクチャに切り替える</a>
+</li>
+  <li><a href="#handling_ui">ピクチャ イン ピクチャの実行中に UI を処理する</a>
+</li>
+  <li><a href="#continuing_playback">ピクチャ イン ピクチャの実行中に動画の再生を続行する
+</a></li>
+  <li><a href="#single_playback">ピクチャ イン ピクチャで単一の再生アクティビティを使用する
+</a></li>
+  <li><a href="#best">ベスト プラクティス</a></li>
+</ol>
+
+<h2>関連ドキュメント</h2>
+<ol>
+  <li><a href="{@docRoot}preview/features/multi-window.html">マルチ ウィンドウのサポート
+</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>Android N では、Android TV ユーザーは、アプリを操作するときに画面の隅に固定されたウィンドウで動画を視聴できるようになりました。
+
+ピクチャ イン ピクチャ（PIP）モードを使用すると、アプリはバックグランドで別のアクティビティを続けながら、固定されたウィンドウで動画アクティビティを実行できるようになります。
+
+PIP ウィンドウでは、アプリの使用中にマルチタスクを実行できます。これにより、ユーザーの作業効率が向上します。
+</p>
+
+<p>アプリで、PIP モードをトリガーするタイミングを決めることができます。次に、PIP モードの開始時点の例を示します。
+</p>
+
+<ul>
+<li>ユーザーが別のコンテンツをブラウジングするために動画から別のコンテンツに切り替えると、アプリは動画を PIP モードに切り替えることができます。
+</li>
+<li>コンテンツのエピソード終了の画面が表示されている間、アプリは動画を PIP モードに切り替えることができます。
+メイン画面には、シリーズの次のエピソードに関するプロモーションや概要の情報が表示されます。
+</li>
+<li>アプリで、ユーザーが動画を視聴している間に、追加のコンテンツのキューを作成する方法を提供できます。
+メイン画面でコンテンツの選択アクティビティを表示している間に、動画は PIP モードで再生を続行できます。
+</li>
+</ul>
+
+<p>PIP ウィンドウは 240 x 135 dp で、画面の 4 つのコーナーのうちいずれかの一番上のレイヤに表示されます。表示する場所はシステムによって選択されます。
+ユーザーは PIP メニューを表示して、PIP ウィンドウを全画面表示に切り替えたり、リモコンの [<b>Home</b>] ボタンを押して PIP ウィンドウを閉じたりすることができます。
+
+別の動画がメイン画面で再生を開始すると、PIP ウィンドウは自動的に閉じます。
+
+最近使ったアプリから PIP ウィンドウを閉じることもできます。</p>
+
+<img src="{@docRoot}images/android-7.0/pip-active.png" />
+<p class="img-caption"><strong>図 1.</strong> ユーザーがメイン画面でコンテンツを閲覧中に画面の隅に表示されるピクチャ イン ピクチャの動画
+
+</p>
+
+<p>PIP では、Android N で使用可能なマルチウィンドウ API を活用し、固定された動画オーバーレイ ウィンドウを表示します。
+PIP をアプリに追加するには、PIP をサポートするアクティビティを登録し、必要に応じてアクティビティを PIP モードに切り替えて、UI 要素を非表示にして、アクティビティが PIP モードを開始しても動画の再生が続行されるようにします。
+
+
+</p>
+
+<h2 id="declaring">アクティビティがピクチャ イン ピクチャをサポートしていることを宣言する</h2>
+
+<p>デフォルトでは、システムはアプリの PIP を自動的にサポートしません。アプリで PIP をサポートする場合、マニフェストで
+<code>android:supportsPictureInPicture</code> および
+<code>android:resizeableActivity</code> を <code>true</code> に設定して、動画アクティビティを登録します。
+
+また、アクティビティがレイアウトの設定変更を処理するように指定して、PIP モードの遷移中にレイアウト変更が発生しても、アクティビティが再開しないようにします。
+
+</p>
+
+<pre>
+&lt;activity android:name="VideoActivity"
+    android:resizeableActivity="true"
+    android:supportsPictureInPicture="true"
+    android:configChanges=
+        "screenSize|smallestScreenSize|screenLayout|orientation"
+    ...
+</pre>
+
+<p>アクティビティを登録する際は、PIP モードでは、アクティビティが TV 画面の小さなオーバーレイ ウィンドウに表示される点に注意してください。
+動画の再生アクティビティは、最小限の UI にすることで最高のユーザー エクスペリエンスを提供できます。
+小さな UI 要素を含むアクティビティでは、PIP モードに切り替えたときに優れたユーザー エクスペリエンスを提供できない可能性があります。PIP ウィンドウでは、その UI 要素の詳細が見えづらくなるためです。
+
+
+</p>
+
+<h2 id="pip_button">アクティビティをピクチャ イン ピクチャに切り替える</h2>
+
+アクティビティを PIP モードに切り替える必要があるときは、
+<code>Activity.enterPictureInPictureMode()</code> を呼び出します。次の例では、ユーザーがメディア コントロール バーにある専用の PIP ボタンを選択したときに、PIP モードに切り替わります。
+
+</p>
+
+<pre>
+&#64;Override
+public void onActionClicked(Action action) {
+    if (action.getId() == R.id.lb_control_picture_in_picture) {
+        getActivity().enterPictureInPictureMode();
+        return;
+    }
+    ...
+</pre>
+
+<p>メディア コントロール バーに PIP ボタンを追加すると、ユーザーが動画の再生を操作中に、簡単に PIP モードに切り替えることができます。
+</p>
+
+<img src="{@docRoot}images/android-7.0/pip-button.png" />
+<p class="img-caption"><strong>図 1.</strong> メディア コントロール バー上の [Picture-in-picture] ボタン
+</p>
+
+<p>Android N には、新しい
+<code>PlaybackControlsRow.PictureInPictureAction</code> クラスが含まれています。このクラスは、コントロール バーの PIP アクションと PIP アイコンの使用方法を定義します。
+</p>
+
+<h2 id="handling_ui">ピクチャ イン ピクチャの実行中に UI を処理する</h2>
+
+<p>アクティビティが PIP モードを開始したら、動画の再生のみを表示する必要があります。
+アクティビティが PIP を開始する前に UI 要素を削除して、再び全画面表示に戻ったら、削除した要素を復元します。<code>Activity.onPictureInPictureModeChanged()</code> または
+<code>Fragment.onPictureInPictureModeChanged()</code> をオーバーライドして、必要に応じて UI 要素を有効または無効にします。次に例を示します。
+
+
+</p>
+
+<pre>
+&#64;Override
+public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
+    if (isInPictureInPictureMode) {
+        // Hide the controls in picture-in-picture mode.
+        ...
+    } else {
+        // Restore the playback UI based on the playback status.
+        ...
+    }
+}
+</pre>
+
+<h2 id="continuing_playback">ピクチャ イン ピクチャの実行中に動画の再生を続行する
+</h2>
+
+<p>アクティビティを PIP に切り替えると、システムはそのアクティビティを一時停止状態と見なして、アクティビティの <code>onPause()</code> メソッドを呼び出します。
+PIP モードによってアクティビティが一時停止になっても、動画の再生は一時停止せず、再生を続ける必要があります。
+
+アクティビティの
+<code>onPause()</code> メソッドで PIP を確認し、適切に再生を処理してください。次に例を示します。
+</p>
+
+<pre>
+&#64;Override
+public void onPause() {
+    // If called while in PIP mode, do not pause playback
+    if (isInPictureInPictureMode()) {
+        // Continue playback
+        ...
+    }
+    // If paused but not in PIP, pause playback if necessary
+    ...
+}
+</pre>
+
+<p>アクティビティが PIP モードを終了して全画面モードに戻ると、システムはアクティビティを再開して <code>onResume()</code> メソッドを呼び出します。
+</p>
+
+<h2 id="single_playback">ピクチャ イン ピクチャで単一の再生アクティビティを使用する
+</h2>
+
+<p>動画再生アクティビティが PIP モードのときに、ユーザーがアプリのメイン画面でコンテンツをブラウズ中に新しい動画を選択することがあります。
+全画面モードの既存の再生アクティビティで新しい動画を再生します。新しいアクティビティを起動するとユーザーが混乱する可能性があります。
+
+</p>
+
+<p>動画再生リクエストに対して単一のアクティビティが使用されるようにし、必要に応じて PIP モードの切り替えが行われるようにするには、マニフェストでアクティビティの
+<code>android:launchMode</code> を <code>singleTask</code> に設定します。
+
+</p>
+
+<pre>
+&lt;activity android:name="VideoActivity"
+    ...
+    android:supportsPictureInPicture="true"
+    android:launchMode="singleTask"
+    ...
+</pre>
+
+<p>アクティビティで、{@link android.app.Activity#onNewIntent
+Activity.onNewIntent()} をオーバーライドして新しい動画を処理し、既存の動画再生を必要に応じて停止します。
+</p>
+
+<h2 id="best">ベスト プラクティス</h2>
+
+<p>PIP は、動画を全画面表示で再生するアクティビティに使用します。アクティビティを PIP モードに切り替えるときは、動画コンテンツ以外は何も表示しないでください。アクティビティが PIP モードを開始したタイミングを検出し、<a href="#handling_ui">ピクチャ イン ピクチャの実行中に UI を処理する</a>で説明したように、UI 要素を非表示にします。
+
+
+</p>
+
+<p>PIP ウィンドウは画面の隅にフローティング ウィンドウとして表示されるため、メイン画面のどの場所にも重要な情報を表示しないでください。PIP ウィンドウによって隠れる可能性があります。
+
+</p>
+
+<p>アクティビティが PIP モードになると、デフォルトで、入力フォーカスは失われます。PIP モードで動作中に入力イベントを受け付けるには、
+<code>MediaSession.setMediaButtonReceiver()</code> を使用します。
+</p>

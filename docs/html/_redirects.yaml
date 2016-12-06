@@ -1,6 +1,8 @@
 # For information about this file's format, see
 # https://developers.google.com/internal/publishing/redirects
 redirects:
+- from: /guide/topics/fundamentals/fragments.html
+  to: /guide/components/fragments.html
 - from: /about/versions/index.html
   to: /about/index.html
 - from: /about/versions/api-levels.html
@@ -23,6 +25,10 @@ redirects:
   to: /studio/debug/index.html
 - from: /sdk/compatibility-library.html
   to: /topic/libraries/support-library/index.html
+- from: /billions
+  to: /topic/billions/index.html
+- from: /performance
+  to: /topic/performance/index.html
 - from: /tools/extras/support-library.html
   to: /topic/libraries/support-library/index.html
 - from: /training/basics/fragments/support-lib.html
@@ -37,8 +43,8 @@ redirects:
   to: /studio/intro/update.html
 - from: /sdk/ndk/overview.html
   to: /ndk/index.html
-- from: /sdk/ndk/
-  to: /ndk/
+- from: /sdk/ndk/...
+  to: /ndk/...
 - from: /go/vulkan
   to: /ndk/guides/graphics/index.html
 - from: /tools/sdk/win-usb.html
@@ -97,18 +103,18 @@ redirects:
   to: /training/testing/unit-testing/index.html
 - from: /training/activity-testing/activity-functional-testing.html
   to: /training/testing/ui-testing/index.html
-- from: /guide/market/
-  to: /google/play/
+- from: /guide/market/...
+  to: /google/play/...
 - from: /guide/google/play/services.html
   to: https://developers.google.com/android/guides/overview
-- from: /guide/google/
-  to: /google/
-- from: /training/id-auth/...
+- from: /guide/google/...
+  to: /google/...
+- from: /training/id-auth/
   to: /google/auth/http-auth.html
 - from: /google/play-services/auth.html
   to: https://developers.google.com/android/guides/http-auth
 - from: /google/play-services/games.html
-  to: https://developers.google.com/games/services/
+  to: https://developers.google.com/games/services
 - from: /google/play-services/location.html
   to: /training/location/index.html
 - from: /google/play-services/plus.html
@@ -116,21 +122,21 @@ redirects:
 - from: /google/play-services/maps.html
   to: /training/maps/index.html
 - from: /google/play-services/drive.html
-  to: https://developers.google.com/drive/android/
+  to: https://developers.google.com/drive/android
 - from: /google/play-services/cast.html
-  to: https://developers.google.com/cast/
+  to: https://developers.google.com/cast
 - from: /google/play-services/ads.html
-  to: https://developers.google.com/mobile-ads-sdk/
+  to: https://developers.google.com/mobile-ads-sdk
 - from: /google/play-services/wallet.html
-  to: https://developers.google.com/wallet/instant-buy/
+  to: https://developers.google.com/wallet/instant-buy
 - from: /google/play-services/id.html
   to: https://developers.google.com/android/reference/com/google/android/gms/ads/identifier/AdvertisingIdClient
 - from: /google/play/safetynet/...
   to: /training/safetynet/index.html
 - from: /google/gcm/...
-  to: https://developers.google.com/cloud-messaging/
+  to: https://developers.google.com/cloud-messaging/...
 - from: /google/gcs/...
-  to: https://developers.google.com/datastore/
+  to: https://developers.google.com/datastore/...
 - from: /google/play-services/safetynet.html
   to: /training/safetynet/index.html
 - from: /google/play/billing/v2/api.html
@@ -149,30 +155,34 @@ redirects:
   to: /google/play/licensing/index.html
 - from: /google/play/billing/billing_about.html
   to: /google/play/billing/index.html
-- from: /guide/developing/tools/
-  to: /studio/command-line/
-- from: /guide/developing/
-  to: /studio/
+- from: /guide/developing/tools/proguard.html
+  to: /studio/build/shrink-code.html
+- from: /guide/developing/tools/aidl.html
+  to: /guide/components/aidl.html
+- from: /guide/developing/tools/...
+  to: /studio/command-line/...
+- from: /guide/developing/...
+  to: /studio/...
 - from: /tools/aidl.html
   to: /guide/components/aidl.html
 - from: /guide/market/publishing/multiple-apks.html
   to: /google/play/publishing/multiple-apks.html
 - from: /guide/publishing/publishing.html
   to: /distribute/tools/launch-checklist.html
-- from: /guide/publishing/
+- from: /guide/publishing/...
   to: /studio/publish/index.html
 - from: /guide/topics/fundamentals.html
   to: /guide/components/fundamentals.html
 - from: /guide/topics/intents/intents-filters.html
   to: /guide/components/intents-filters.html
-- from: /guide/topics/fundamentals/
-  to: /guide/components/
+- from: /guide/topics/fundamentals/...
+  to: /guide/components/...
 - from: /guide/topics/clipboard/copy-paste.html
   to: /guide/topics/text/copy-paste.html
 - from: /guide/topics/ui/notifiers/index.html
   to: /guide/topics/ui/notifiers/notifications.html
-- from: /guide/topics/wireless/
-  to: /guide/topics/connectivity/
+- from: /guide/topics/wireless/...
+  to: /guide/topics/connectivity/...
 - from: /guide/topics/drawing/...
   to: /guide/topics/graphics/opengl.html
 - from: /guide/topics/connectivity/usb/adk.html
@@ -209,8 +219,8 @@ redirects:
   to: /training/articles/security-tips.html
 - from: /guide/appendix/market-filters.html
   to: /google/play/filters.html
-- from: /guide/topics/testing/
-  to: /studio/test/
+- from: /guide/topics/testing/...
+  to: /studio/test/...
 - from: /guide/topics/graphics/animation.html
   to: /guide/topics/graphics/overview.html
 - from: /guide/topics/graphics/renderscript/compute.html
@@ -227,24 +237,24 @@ redirects:
   to: /guide/topics/renderscript/reference/overview.html
 - from: /guide/topics/location/obtaining-user-location.html
   to: /guide/topics/location/strategies.html
-- from: /guide/topics/nfc/
-  to: /guide/topics/connectivity/nfc/
-- from: /guide/topics/wireless/
-  to: /guide/topics/connectivity/
-- from: /guide/topics/network/
-  to: /guide/topics/connectivity/
+- from: /guide/topics/nfc/...
+  to: /guide/topics/connectivity/nfc/...
+- from: /guide/topics/wireless/...
+  to: /guide/topics/connectivity/...
+- from: /guide/topics/network/...
+  to: /guide/topics/connectivity/...
 - from: /resources/articles/creating-input-method.html
   to: /guide/topics/text/creating-input-method.html
 - from: /resources/articles/spell-checker-framework.html
   to: /guide/topics/text/spell-checker-framework.html
-- from: /resources/tutorials/notepad/
+- from: /resources/tutorials/notepad/...
   to: https://developer.android.com/training/basics/firstapp/index.html
-- from: /resources/faq/
-  to: /guide/faq/
+- from: /resources/faq/...
+  to: /guide/faq/...
 - from: /resources/tutorials/hello-world.html
   to: /training/basics/firstapp/index.html
-- from: /guide/practices/design/
-  to: /guide/practices/
+- from: /guide/practices/design/...
+  to: /guide/practices/...
 - from: /guide/practices/accessibility.html
   to: /guide/topics/ui/accessibility/index.html
 - from: /guide/practices/app-design/performance.html
@@ -279,6 +289,8 @@ redirects:
   to: /design/patterns/app-structure.html
 - from: /guide/practices/ui_guidelines/menu_design.html
   to: /design/patterns/actionbar.html
+- from: /design/patterns/accessibility.html
+  to: https://material.google.com/usability/accessibility.html
 - from: /design/get-started/ui-overview.html
   to: /design/handhelds/index.html
 - from: /design/building-blocks/buttons.html
@@ -319,6 +331,8 @@ redirects:
   to: https://www.google.com/design/spec/layout/principles.html
 - from: /design/patterns/navigation-drawer.html
   to: https://www.google.com/design/spec/patterns/navigation-drawer.html
+- from: /design/patterns/notifications.html
+  to: https://material.google.com/patterns/notifications.html
 - from: /design/patterns/selection.html
   to: https://www.google.com/design/spec/patterns/selection.html
 - from: /design/patterns/settings.html
@@ -351,16 +365,18 @@ redirects:
   to: /training/wearables/notifications/pages.html
 - from: /wear/notifications/stacks.html
   to: /training/wearables/notifications/stacks.html
-- from: /reference/android/preview/support/
-  to: /reference/android/support/
+- from: /reference/android/preview/support/...
+  to: /reference/android/support/...
 - from: /wear/license.html
   to: /wear/index.html
 - from: /resources/dashboard/...
   to: /about/dashboards/index.html
 - from: /resources/community-groups.html
   to: /support.html
-- from: /guide/tutorials/
-  to: /resources/tutorials/
+- from: /community/index.html
+  to: /support.html
+- from: /guide/tutorials/...
+  to: /resources/tutorials/...
 - from: /resources/tutorials/views/hello-linearlayout.html
   to: /guide/topics/ui/layout/linear.html
 - from: /resources/tutorials/views/hello-relativelayout.html
@@ -400,11 +416,9 @@ redirects:
 - from: /resources/samples/...
   to: /samples/index.html
 - from: /resources/...
-  to: /training/
+  to: /training/...
 - from: /tools/samples/index.html
   to: /samples/index.html
-- from: /guide/publishing/publishing.html\#BuildaButton
-  to: https://play.google.com/intl/en_us/badges/
 - from: /distribute/essentials/best-practices/games.html
   to: /distribute/googleplay/guide.html
 - from: /distribute/essentials/best-practices/apps.html
@@ -417,12 +431,20 @@ redirects:
   to: /training/implementing-navigation/lateral.html
 - from: /training/cloudsync/aesync.html
   to: /google/gcm/index.html
-- from: /training/basics/location/
-  to: /training/location/
+- from: /training/cloudsync/index.html
+  to: /guide/topics/data/backup.html
+- from: /training/backup/index.html
+  to: /guide/topics/data/backup.html
+- from: /training/backup/autosyncapi.html
+  to: /guide/topics/data/autobackup.html
+- from: /training/backup/backupapi.html
+  to: /guide/topics/data/keyvaluebackup.html
+- from: /training/basics/location/...
+  to: /training/location/...
 - from: /training/monetization/index.html
   to: /distribute/monetize/index.html
 - from: /training/monetization/ads-and-ux.html
-  to: https://developers.google.com/mobile-ads-sdk/
+  to: https://developers.google.com/mobile-ads-sdk/index.html
 - from: /training/notepad/...
   to: https://developer.android.com/training/basics/firstapp/index.html
 - from: /training/basics/actionbar/setting-up.html
@@ -433,8 +455,8 @@ redirects:
   to: /training/appbar/index.html
 - from: /distribute/open.html
   to: /distribute/tools/open-distribution.html
-- from: /distribute/googleplay/promote/
-  to: /distribute/tools/promote/
+- from: /distribute/googleplay/promote/...
+  to: /distribute/tools/promote/...
 - from: /distribute/googleplay/publish/preparing.html
   to: /distribute/tools/launch-checklist.html
 - from: /distribute/googleplay/publish/index.html
@@ -463,12 +485,20 @@ redirects:
   to: /distribute/monetize/index.html
 - from: /distribute/googleplay/about/distribution.html
   to: /distribute/googleplay/developer-console.html
-- from: /distribute/googleplay/spotlight/
-  to: /distribute/stories/
+- from: /distribute/googleplay/spotlight/...
+  to: /distribute/stories/...
 - from: /distribute/stories/localization.html
   to: /distribute/stories/index.html
 - from: /distribute/stories/tablets.html
   to: /distribute/stories/index.html
+- from: /distribute/stories/glu-dh.html
+  to: /distribute/stories/games/glu-dh.html
+- from: /distribute/stories/apps/tapps.html
+  to: /distribute/stories/games/tapps.html
+- from: /distribute/stories/apps/upbeat-games.html
+  to: /distribute/stories/games/upbeat-games.html
+- from: /distribute/stories/games/two-dots.html
+  to: /distribute/stories/games/dots.html
 - from: /distribute/googleplay/edu/index.html
   to: /distribute/googleplay/edu/about.html
 - from: /distribute/googleplay/edu/contact.html
@@ -518,11 +548,11 @@ redirects:
 - from: /videos/index.html
   to: /develop/index.html
 - from: /live/index.html
-  to: https://developers.google.com/live/
-- from: /intl/zh-CN/
-  to: /intl/zh-cn/
-- from: /intl/zh-TW/
-  to: /intl/zh-tw/
+  to: https://developers.google.com/live/index.html
+- from: /intl/zh-CN/...
+  to: /intl/zh-cn/...
+- from: /intl/zh-TW/...
+  to: /intl/zh-tw/...
 - from: /4.2
   to: /about/versions/android-4.2.html
 - from: /4.1
@@ -531,111 +561,111 @@ redirects:
   to: /about/versions/android-4.0.html
 - from: /5
   to: /about/versions/android-5.0.html
-- from: /5/
+- from: /5/...
   to: /about/versions/android-5.0.html
 
 - from: /m
   to: /about/versions/marshmallow/index.html
-- from: /m/
+- from: /m/...
   to: /about/versions/marshmallow/index.html
 - from: /mm
   to: /about/versions/marshmallow/index.html
-- from: /mm/
+- from: /mm/...
   to: /about/versions/marshmallow/index.html
 - from: /marshmallow
   to: /about/versions/marshmallow/index.html
-- from: /marshmallow/
+- from: /marshmallow/...
   to: /about/versions/marshmallow/index.html
 
 - from: /l
   to: /about/versions/lollipop.html
-- from: /l/
+- from: /l/...
   to: /about/versions/lollipop.html
 - from: /ll
   to: /about/versions/lollipop.html
-- from: /ll/
+- from: /ll/...
   to: /about/versions/lollipop.html
 - from: /lp
   to: /about/versions/lollipop.html
-- from: /lp/
+- from: /lp/...
   to: /about/versions/lollipop.html
 - from: /lollipop
   to: /about/versions/lollipop.html
-- from: /lollipop/
+- from: /lollipop/...
   to: /about/versions/lollipop.html
 
 - from: /k
   to: /about/versions/kitkat.html
-- from: /k/
+- from: /k/...
   to: /about/versions/kitkat.html
 - from: /kk
   to: /about/versions/kitkat.html
-- from: /kk/
+- from: /kk/...
   to: /about/versions/kitkat.html
 - from: /kitkat
   to: /about/versions/kitkat.html
-- from: /kitkat/
+- from: /kitkat/...
   to: /about/versions/kitkat.html
 
 - from: /j
   to: /about/versions/jelly-bean.html
-- from: /j/
+- from: /j/...
   to: /about/versions/jelly-bean.html
 - from: /jj
   to: /about/versions/jelly-bean.html
-- from: /jj/
+- from: /jj/...
   to: /about/versions/jelly-bean.html
 - from: /jellybean
   to: /about/versions/jelly-bean.html
-- from: /jellybean/
+- from: /jellybean/...
   to: /about/versions/jelly-bean.html
 
 - from: /i
   to: /about/versions/android-4.0-highlights.html
-- from: /i/
+- from: /i/...
   to: /about/versions/android-4.0-highlights.html
 - from: /ics
   to: /about/versions/android-4.0-highlights.html
-- from: /ics/
+- from: /ics/...
   to: /about/versions/android-4.0-highlights.html
 - from: /icecreamsandwich
   to: /about/versions/android-4.0-highlights.html
-- from: /icecreamsandwich/
+- from: /icecreamsandwich/...
   to: /about/versions/android-4.0-highlights.html
 
 - from: /%2B
   to: https://plus.google.com/108967384991768947849/posts
-- from: /%2B/
+- from: /%2B/...
   to: https://plus.google.com/108967384991768947849/posts
 - from: /blog
-  to: https://android-developers.blogspot.com/
+  to: https://android-developers.blogspot.com
 - from: /stats
   to: /about/dashboards/index.html
 - from: /youtube
   to: https://www.youtube.com/user/androiddevelopers
 - from: /playbadge
-  to: https://play.google.com/intl/en_us/badges/
-- from: /playbadge/
-  to: https://play.google.com/intl/en_us/badges/
+  to: https://play.google.com/intl/en_us/badges
+- from: /playbadge/...
+  to: https://play.google.com/intl/en_us/badges/...
 - from: /distribute/tools/promote/badges.html
-  to: https://play.google.com/intl/en_us/badges/
+  to: https://play.google.com/intl/en_us/badges
 - from: /deviceart
   to: /distribute/tools/promote/device-art.html
-- from: /deviceart/
+- from: /deviceart/...
   to: /distribute/tools/promote/device-art.html
 - from: /distribute/promote/device-art.html
   to: /distribute/tools/promote/device-art.html
 - from: /edu/signup
   to: https://services.google.com/fb/forms/playedu
-- from: /edu/signup/
+- from: /edu/signup/...
   to: https://services.google.com/fb/forms/playedu
 - from: /edu
   to: /distribute/googleplay/edu/about.html
-- from: /edu/
+- from: /edu/...
   to: /distribute/googleplay/edu/about.html
 - from: /families
   to: /distribute/googleplay/families/about.html
-- from: /families/
+- from: /families/...
   to: /distribute/googleplay/families/about.html
 - from: /preview/google-play-services-wear.html
   to: /training/building-wearables.html
@@ -691,9 +721,9 @@ redirects:
   to: /training/material/animations.html
 - from: /preview/material/compatibility.html
   to: /training/material/compatibility.html
-- from: /preview/material/
+- from: /preview/material/...
   to: /design/material/index.html
-- from: /auto/overview/
+- from: /auto/overview/...
   to: /training/auto/start/index.html
 - from: /training/location/activity-recognition.html
   to: /training/location/index.html
@@ -716,9 +746,9 @@ redirects:
 - from: /training/enterprise/work-policy-ctrl.html
   to: https://developers.google.com/android/work/build-dpc
 - from: /distribute/tools/promote/badge-files.html
-  to: https://play.google.com/intl/en_us/badges/
+  to: https://play.google.com/intl/en_us/badges
 - from: /google/gcm/...
-  to: https://developers.google.com/cloud-messaging/
+  to: https://developers.google.com/cloud-messaging
 - from: /training/cloudsync/gcm.html
   to: /training/cloudsync/index.html
 
@@ -774,35 +804,56 @@ redirects:
 - from: /preview/features/app-linking.html
   to: /training/app-links/index.html
 - from: /preview/backup/index.html
-  to: /training/backup/autosyncapi.html
+  to: /guide/topics/data/backup/autobackup.html
 - from: /preview/features/power-mgmt.html
   to: /training/monitoring-device-state/doze-standby.html
 - from: /preview/dev-community
-  to: https://plus.google.com/communities/103655397235276743411
+  to: https://plus.google.com/communities/105153134372062985968
 - from: /preview/bug
-  to: https://code.google.com/p/android/issues/entry?template=Developer%20preview%20report
-- from: /preview/bug/
-  to: https://code.google.com/p/android/issues/entry?template=Developer%20preview%20report
+  to: https://source.android.com/source/report-bugs.html
+- from: /preview/bug/...
+  to: https://source.android.com/source/report-bugs.html
 - from: /preview/bugreport
-  to: https://code.google.com/p/android/issues/entry?template=Developer%20preview%20report
-- from: /preview/bugreport/
-  to: https://code.google.com/p/android/issues/entry?template=Developer%20preview%20report
+  to: https://source.android.com/source/report-bugs.html
+- from: /preview/bugreport/...
+  to: https://source.android.com/source/report-bugs.html
 - from: /preview/bugs
   to: https://code.google.com/p/android/issues/list?can=2&q=label%3ADevPreview-N
-- from: /preview/bugs/
+- from: /preview/bugs/...
   to: https://code.google.com/p/android/issues/list?can=2&q=label%3ADevPreview-N
 - from: /preview/bugreports
   to: https://code.google.com/p/android/issues/list?can=2&q=label%3ADevPreview-N
-- from: /preview/bugreports/
+- from: /preview/bugreports/...
   to: https://code.google.com/p/android/issues/list?can=2&q=label%3ADevPreview-N
+- from: /preview/setup-sdk.html
+  to: /studio/index.html
 - from: /2016/03/first-preview-of-android-n-developer.html
   to: http://android-developers.blogspot.com/2016/03/first-preview-of-android-n-developer.html
+
 - from: /reference/org/apache/http/...
   to: /about/versions/marshmallow/android-6.0-changes.html#behavior-apache-http-client
 - from: /shareables/...
   to: https://commondatastorage.googleapis.com/androiddevelopers/shareables/...
 - from: /downloads/...
   to: https://commondatastorage.googleapis.com/androiddevelopers/...
+- from: /training/performance/battery/network/action-any-traffic.html
+  to: /topic/performance/power/network/action-any-traffic.html
+- from: /training/performance/battery/network/action-app-traffic.html
+  to: /topic/performance/power/network/action-app-traffic.html
+- from: /training/performance/battery/network/action-server-traffic.html
+  to: /topic/performance/power/network/action-server-traffic.html
+- from: /training/performance/battery/network/action-user-traffic.html
+  to: /topic/performance/power/network/action-user-traffic.html
+- from: /training/performance/battery/network/analyze-data.html
+  to: /topic/performance/power/network/analyze-data.html
+- from: /training/performance/battery/network/gather-data.html
+  to: /topic/performance/power/network/gather-data.html
+- from: /training/performance/battery/network/index.html
+  to: /topic/performance/power/network/index.html
+- from: /training/articles/memory.html
+  to: /topic/performance/memory.html
+- from: /topic/performance/optimizing-view-hierarchies.html
+  to: /topic/performance/rendering/optimizing-view-hierarchies.html
 
 # Redirects for the new [dac]/topic/libraries/ area
 
@@ -1117,63 +1168,171 @@ redirects:
 # Vanity urls
 - from: /background_optimizations
   to: /preview/features/background-optimization.html
-- from: /background_optimizations/
+- from: /background_optimizations/...
   to: /preview/features/background-optimization.html
 - from: /bgopt
   to: /preview/features/background-optimization.html
-- from: /bgopt/
+- from: /bgopt/...
   to: /preview/features/background-optimization.html
 
 
 
 # Android Studio help button redirects
 - from: /r/studio-ui/vector-asset-studio.html
-  to: /studio/write/vector-asset-studio.html
+  to: /studio/write/vector-asset-studio.html?utm_source=android-studio
 - from: /r/studio-ui/image-asset-studio.html
-  to: /studio/write/image-asset-studio.html
+  to: /studio/write/image-asset-studio.html?utm_source=android-studio
 - from: /r/studio-ui/project-structure.html
-  to: /studio/projects/index.html
+  to: /studio/projects/index.html?utm_source=android-studio
 - from: /r/studio-ui/android-monitor.html
-  to: /studio/profile/android-monitor.html
+  to: /studio/profile/android-monitor.html?utm_source=android-studio
 - from: /r/studio-ui/am-logcat.html
-  to: /studio/debug/am-logcat.html
+  to: /studio/debug/am-logcat.html?utm_source=android-studio
 - from: /r/studio-ui/am-memory.html
-  to: /studio/profile/am-memory.html
+  to: /studio/profile/am-memory.html?utm_source=android-studio
 - from: /r/studio-ui/am-cpu.html
-  to: /studio/profile/am-cpu.html
+  to: /studio/profile/am-cpu.html?utm_source=android-studio
 - from: /r/studio-ui/am-gpu.html
-  to: /studio/profile/am-gpu.html
+  to: /studio/profile/am-gpu.html?utm_source=android-studio
 - from: /r/studio-ui/am-network.html
-  to: /studio/profile/am-network.html
+  to: /studio/profile/am-network.html?utm_source=android-studio
 - from: /r/studio-ui/am-hprof.html
-  to: /studio/profile/am-hprof.html
+  to: /studio/profile/am-hprof.html?utm_source=android-studio
 - from: /r/studio-ui/am-allocation.html
-  to: /studio/profile/am-allocation.html
+  to: /studio/profile/am-allocation.html?utm_source=android-studio
 - from: /r/studio-ui/am-methodtrace.html
-  to: /studio/profile/am-methodtrace.html
+  to: /studio/profile/am-methodtrace.html?utm_source=android-studio
 - from: /r/studio-ui/am-sysinfo.html
-  to: /studio/profile/am-sysinfo.html
+  to: /studio/profile/am-sysinfo.html?utm_source=android-studio
 - from: /r/studio-ui/am-screenshot.html
-  to: /studio/debug/am-screenshot.html
+  to: /studio/debug/am-screenshot.html?utm_source=android-studio
 - from: /r/studio-ui/am-video.html
-  to: /studio/debug/am-video.html
+  to: /studio/debug/am-video.html?utm_source=android-studio
 - from: /r/studio-ui/avd-manager.html
-  to: /studio/run/managing-avds.html
+  to: /studio/run/managing-avds.html?utm_source=android-studio
 - from: /r/studio-ui/rundebugconfig.html
-  to: /studio/run/rundebugconfig.html
+  to: /studio/run/rundebugconfig.html?utm_source=android-studio
 - from: /r/studio-ui/devicechooser.html
-  to: /studio/run/emulator.html
+  to: /studio/run/emulator.html?utm_source=android-studio
 - from: /r/studio-ui/virtualdeviceconfig.html
-  to: /studio/run/managing-avds.html
+  to: /studio/run/managing-avds.html?utm_source=android-studio
 - from: /r/studio-ui/emulator.html
-  to: /studio/run/emulator.html
+  to: /studio/run/emulator.html?utm_source=android-studio
 - from: /r/studio-ui/instant-run.html
-  to: /studio/run/index.html#instant-run
+  to: /studio/run/index.html?utm_source=android-studio#instant-run
 - from: /r/studio-ui/test-recorder.html
-  to: http://tools.android.com/tech-docs/test-recorder
+  to: /studio/test/espresso-test-recorder.html?utm_source=android-studio
 - from: /r/studio-ui/export-licenses.html
   to: http://tools.android.com/tech-docs/new-build-system/license
 - from: /r/studio-ui/experimental-to-stable-gradle.html
   to: http://tools.android.com/tech-docs/new-build-system/gradle-experimental/experimental-to-stable-gradle
 - from: /r/studio-ui/sdk-manager.html
-  to: https://developer.android.com/studio/intro/update.html#sdk-manager
+  to: /studio/intro/update.html?utm_source=android-studio#sdk-manager
+- from: /r/studio-ui/newjclass.html
+  to: /studio/write/create-java-class.html?utm_source=android-studio
+- from: /r/studio-ui/menu-help.html
+  to: /studio/intro/index.html?utm_source=android-studio
+- from: /r/studio-ui/menu-start.html
+  to: /training/index.html?utm_source=android-studio
+- from: /r/studio-ui/run-with-work-profile.html
+  to: /studio/run/index.html?utm_source=android-studio#ir-work-profile
+- from: /r/studio-ui/am-gpu-debugger.html
+  to: /studio/profile/am-gpu.html?utm_source=android-studio
+- from: /r/studio-ui/theme-editor.html
+  to: /studio/write/theme-editor.html?utm_source=android-studio
+- from: /r/studio-ui/translations-editor.html
+  to: /studio/write/translations-editor.html?utm_source=android-studio
+- from: /r/studio-ui/debug.html
+  to: /studio/debug/index.html?utm_source=android-studio
+- from: /r/studio-ui/run.html
+  to: /studio/run/index.html?utm_source=android-studio
+- from: /r/studio-ui/layout-editor.html
+  to: /studio/write/layout-editor.html?utm_source=android-studio
+- from: /r/studio-ui/project-window.html
+  to: /studio/projects/index.html?utm_source=android-studio
+- from: /r/studio-ui/lint-inspection-results.html
+  to: /studio/write/lint.html?utm_source=android-studio
+- from: /r/studio-ui/gradle-console.html
+  to: /studio/run/index.html?utm_source=android-studio#gradle-console
+- from: /r/studio-ui/app-indexing-test.html
+  to: /studio/write/app-link-indexing.html#appindexingtest?utm_source=android-studio
+- from: /r/studio-ui/vcs.html
+  to: /studio/intro/index.html#version_control_basics?utm_source=android-studio
+- from: /r/studio-ui/create-new-module.html
+  to: /studio/projects/index.html#ApplicationModules?utm_source=android-studio
+- from: /r/studio-ui/build-variants.html
+  to: /studio/run/index.html#changing-variant?utm_source=android-studio
+- from: /r/studio-ui/generate-signed-apk.html
+  to: /studio/publish/app-signing.html#release-mode?utm_source=android-studio
+- from: /r/studio-ui/import-project-vcs.html
+  to: /studio/projects/create-project.html#ImportAProject?utm_source=android-studio
+- from: /r/studio-ui/apk-analyzer.html
+  to: /studio/build/apk-analyzer.html?utm_source=android-studio
+- from: /r/studio-ui/breakpoints.html
+  to: /studio/debug/index.html#breakPointsView?utm_source=android-studio
+- from: /r/studio-ui/attach-debugger-to-process.html
+  to: /studio/debug/index.html?utm_source=android-studio
+- from: /r/studio-ui/import-sample.html
+  to: /samples/index.html?utm_source=android-studio
+- from: /r/studio-ui/import-module.html
+  to: /studio/projects/add-app-module.html#ImportAModule?utm_source=android-studio
+- from: /r/studio-ui/import-project.html
+  to: /studio/projects/create-project.html#ImportAProject?utm_source=android-studio
+- from: /r/studio-ui/create-project.html
+  to: /studio/projects/create-project.html?utm_source=android-studio
+- from: /r/studio-ui/new-activity.html
+  to: /studio/projects/template.html?utm_source=android-studio
+- from: /r/studio-ui/new-resource-file.html
+  to: /studio/write/add-resources.html?utm_source=android-studio
+- from: /r/studio-ui/new-resource-dir.html
+  to: /studio/write/add-resources.html#add_a_resource_directory?utm_source=android-studio
+- from: /r/studio-ui/configure-component.html
+  to: /studio/write/add-resources.html?utm_source=android-studio
+- from: /r/studio-ui/ninepatch.html
+  to: /studio/write/draw9patch.html?utm_source=android-studio
+- from: /r/studio-ui/firebase-assistant.html
+  to: /studio/write/firebase.html?utm_source=android-studio
+- from: /r/studio-ui/ir-flight-recorder.html
+  to: /studio/run/index.html?utm_source=android-studio#submit-feedback
+
+# Redirects from (removed) N Preview documentation
+- from: /preview/features/afw.html
+  to: https://developers.google.com/android/work/overview
+- from: /preview/features/multi-window.html
+  to: /guide/topics/ui/multi-window.html
+- from: /preview/features/icu4j-framework.html
+  to: /guide/topics/resources/icu4j-framework.html
+- from: /preview/features/key-attestation.html
+  to: /training/articles/security-key-attestation.html
+- from: /preview/features/security-config.html
+  to: /training/articles/security-config.html
+- from: /preview/features/picture-in-picture.html
+  to: /training/tv/playback/picture-in-picture.html
+- from: /preview/features/tv-recording-api.html
+  to: /training/tv/tif/content-recording.html
+- from: /preview/features/direct-boot.html
+  to: /training/articles/direct-boot.html
+- from: /preview/features/scoped-folder-access.html
+  to: /training/articles/scoped-directory-access.html
+- from: /preview/features/notification-updates.html
+  to: /guide/topics/ui/notifiers/notifications.html
+- from: /preview/features/multilingual-support.html
+  to: /guide/topics/resources/multilingual-support.html
+- from: /preview/j8-jack.html
+  to: /guide/platform/j8-jack.html
+- from: /about/versions/marshmallow/samples.html
+  to: /about/versions/marshmallow/android-6.0-samples.html
+- from: /preview/behavior-changes.html
+  to: /about/versions/nougat/android-7.0-changes.html
+- from: /preview/samples.html
+  to: /about/versions/nougat/android-7.0-samples.html
+- from: /preview/guide.html
+  to: /about/versions/nougat/index.html
+- from: /preview/api-overview.html
+  to: /about/versions/nougat/android-7.0.html
+- from: /preview/index.html
+  to: /about/versions/nougat/index.html
+- from: /preview/features/background-optimization.html
+  to: /topic/performance/background-optimization.html
+- from: /preview/features/data-saver.html
+  to: /training/basics/network-ops/data-saver.html

@@ -21,7 +21,7 @@
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Raport o błędzie <xliff:g id="ID">#%d</xliff:g> został zapisany"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Dodaję szczegóły do raportu o błędzie"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Czekaj..."</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Przesuń palcem w lewo, by udostępnić swoje zgłoszenie błędu"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Raport o błędzie będzie pojawiał się na telefonie przez chwilę"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Kliknij, by udostępnić raport o błędzie"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Kliknij, by udostępnić raport o błędzie bez zrzutu ekranu, lub poczekaj, aż zostanie on wygenerowany"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Kliknij, by udostępnić raport o błędzie bez zrzutu ekranu, lub poczekaj, aż zostanie on wygenerowany"</string>

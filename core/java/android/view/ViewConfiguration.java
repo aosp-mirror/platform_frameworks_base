@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.SystemApi;
 import android.app.AppGlobals;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -62,6 +63,12 @@ public class ViewConfiguration {
      * a long press
      */
     private static final int DEFAULT_LONG_PRESS_TIMEOUT = 500;
+
+    /**
+     * Defines the default duration in milliseconds between the first tap's up event and the second
+     * tap's down event for an interaction to be considered part of the same multi-press.
+     */
+    private static final int DEFAULT_MULTI_PRESS_TIMEOUT = 300;
 
     /**
      * Defines the time between successive key repeats in milliseconds.
@@ -213,6 +220,12 @@ public class ViewConfiguration {
     private static final int OVERFLING_DISTANCE = 6;
 
     /**
+     * Amount to scroll in response to a {@link MotionEvent#ACTION_SCROLL} event, in dips per
+     * axis value.
+     */
+    private static final int SCROLL_FACTOR = 64;
+
+    /**
      * Default duration to hide an action mode for.
      */
     private static final long ACTION_MODE_HIDE_DURATION_DEFAULT = 2000;
@@ -240,6 +253,7 @@ public class ViewConfiguration {
     private final int mOverflingDistance;
     private final boolean mFadingMarqueeEnabled;
     private final long mGlobalActionsKeyTimeout;
+    private final int mScrollFactor;
 
     private boolean sHasPermanentMenuKey;
     private boolean sHasPermanentMenuKeySet;
@@ -268,6 +282,7 @@ public class ViewConfiguration {
         mOverflingDistance = OVERFLING_DISTANCE;
         mFadingMarqueeEnabled = true;
         mGlobalActionsKeyTimeout = GLOBAL_ACTIONS_KEY_TIMEOUT;
+        mScrollFactor = SCROLL_FACTOR;
     }
 
     /**
@@ -351,6 +366,8 @@ public class ViewConfiguration {
                 com.android.internal.R.dimen.config_viewMaxFlingVelocity);
         mGlobalActionsKeyTimeout = res.getInteger(
                 com.android.internal.R.integer.config_globalActionsKeyTimeout);
+        mScrollFactor = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.config_scrollFactor);
     }
 
     /**
@@ -438,6 +455,16 @@ public class ViewConfiguration {
     public static int getLongPressTimeout() {
         return AppGlobals.getIntCoreSetting(Settings.Secure.LONG_PRESS_TIMEOUT,
                 DEFAULT_LONG_PRESS_TIMEOUT);
+    }
+
+    /**
+     * @return the duration in milliseconds between the first tap's up event and the second tap's
+     * down event for an interaction to be considered part of the same multi-press.
+     * @hide
+     */
+    public static int getMultiPressTimeout() {
+        return AppGlobals.getIntCoreSetting(Settings.Secure.MULTI_PRESS_TIMEOUT,
+                DEFAULT_MULTI_PRESS_TIMEOUT);
     }
 
     /**
@@ -650,6 +677,16 @@ public class ViewConfiguration {
      */
     public int getScaledMaximumFlingVelocity() {
         return mMaximumFlingVelocity;
+    }
+
+    /**
+     * @return Amount to scroll in response to a {@link MotionEvent#ACTION_SCROLL} event. Multiply
+     * this by the event's axis value to obtain the number of pixels to be scrolled.
+     * @hide
+     * @SystemApi
+     */
+    public int getScaledScrollFactor() {
+        return mScrollFactor;
     }
 
     /**

@@ -1,0 +1,124 @@
+page.title=限定範圍目錄存取
+page.keywords=preview,sdk,scoped directory access
+page.tags=androidn
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>此文件內容</h2>
+  <ol>
+    <li><a href="#accessing">存取外部儲存空間目錄</a></li>
+    <li><a href="#removable">存取抽取式媒體上的目錄</a></li>
+    <li><a href="#best">最佳做法</a></li>
+  </ol>
+</div>
+</div>
+
+<p>應用程式 (例如，相片應用程式) 通常只需要存取外部儲存空間中的特定目錄，例如 <code>Pictures</code> 目錄。
+目前用來存取外部儲存空間的方式並非設計來輕鬆地為這些類型的應用程式提供已設定目標的目錄存取。
+
+例如：</p>
+
+<ul>
+<li>在您的宣示說明中要求 {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} 或 {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} 可允許存取外部儲存空間ac上的所有公用目錄，但這可能超過您應用程式所需的存取權。
+
+
+</li>
+<li>使用<a href="{@docRoot}guide/topics/providers/document-provider.html">儲存空間存取架構</a>通常會使得您的使用者透過系統 UI 挑選目錄，這在您的應用程式一律存取相同外部目錄的情況下是不必要的。
+
+
+
+</li>
+</ul>
+
+<p>Android N 提供新的簡化 API，可用來存取常用外部儲存空間目錄。
+ </p>
+
+<h2 id="accessing">存取外部儲存空間目錄</h2>
+
+<p>使用 <code>StorageManager</code> 類別來取得適當的 <code>StorageVolume</code> 實例。
+接著，透過呼叫該實例的 <code>StorageVolume.createAccessIntent()</code> 方法以建立意圖。使用此意圖來存取外部儲存空間目錄。
+
+若要取得所有可用的磁碟區 (包括抽取式媒體磁碟區) 清單，請使用 <code>StorageManager.getVolumesList()</code>。
+
+</p>
+
+<p>下列程式碼片段是一個範例，它說明如何開啟主要共用儲存空間中的 <code>Pictures</code> 目錄：
+</p>
+
+<pre>
+StorageManager sm = (StorageManager)getSystemService(Context.STORAGE_SERVICE);
+StorageVolume volume = sm.getPrimaryVolume();
+Intent intent = volume.createAccessIntent(Environment.DIRECTORY_PICTURES);
+startActivityForResult(intent, request_code);
+</pre>
+
+<p>系統會嘗試授予對外部目錄的存取權，並在需要時使用簡化的 UI 向使用者確認存取權：
+</p>
+
+<img src="{@docRoot}images/android-7.0/scoped-directory-access-framed.png" srcset="{@docRoot}images/android-7.0/scoped-directory-access-framed.png 1x,
+{@docRoot}images/android-7.0/scoped-directory-access-framed_2x.png 2x" />
+<p class="img-caption"><strong>圖 1.</strong> 應用程式要求對 [圖片] 目錄的存取權。
+</p>
+
+<p>若使用者授予存取權，系統會呼叫您的 <code>onActivityResult()</code> 覆寫並傳回 <code>Activity.RESULT_OK</code> 的結果代碼，以及包含 URI 的意圖資料。
+
+使用提供的 URI 來存取目錄資訊，這類似於使用<a href="{@docRoot}guide/topics/providers/document-provider.html">儲存空間存取架構</a>所傳回的 URI。
+
+
+
+</p>
+
+<p>若使用者未授予存取權，系統會呼叫您的 <code>onActivityResult()</code> 覆寫並傳回 <code>Activity.RESULT_CANCELED</code> 的結果代碼，以及 Null 意圖資料。
+
+</p>
+
+<p class="note"><b>注意</b>：取得對特定外部目錄的存取權也會取得對該目錄之子目錄的存取權。
+</p>
+
+<h2 id="removable">存取抽取式媒體上的目錄</h2>
+
+<p>若要使用「限定範圍目錄存取」來存取抽取式媒體上的目錄，請先新增會接聽 {@link android.os.Environment#MEDIA_MOUNTED} 通知的 {@link android.content.BroadcastReceiver}，例如：
+
+</p>
+
+<pre>
+&lt;receiver
+    android:name=".MediaMountedReceiver"
+    android:enabled="true"
+    android:exported="true" &gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.MEDIA_MOUNTED" /&gt;
+        &lt;data android:scheme="file" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/receiver&gt;
+</pre>
+
+<p>當使用者掛接抽取式媒體 (例如 SD 卡) 時，系統會傳送 {@link android.os.Environment#MEDIA_MOUNTED} 通知。
+此通知會在意圖資料中提供 <code>StorageVolume</code> 物件，讓您用來存取抽取式媒體上的目錄。
+
+下列範例會存取抽取式媒體上的 <code>Pictures</code> 目錄：
+</p>
+
+<pre>
+// BroadcastReceiver has already cached the MEDIA_MOUNTED
+// notification Intent in mediaMountedIntent
+StorageVolume volume = (StorageVolume)
+    mediaMountedIntent.getParcelableExtra(StorageVolume.EXTRA_STORAGE_VOLUME);
+volume.createAccessIntent(Environment.DIRECTORY_PICTURES);
+startActivityForResult(intent, request_code);
+</pre>
+
+<h2 id="best">最佳做法</h2>
+
+<p>如果可能，請將外部目錄存取 URI 設定為持續性，這樣您就不需要重複地要求使用者授予存取權。
+一旦使用者授予存取權，請使用目錄存取 URI 呼叫 <code>getContentResolver().takePersistableUriPermssion()</code>。
+
+系統會將該 URI 設定為持續性，而且後續存取要求將會傳回 <code>RESULT_OK</code>，而且不會為使用者顯示確認 UI。
+
+</p>
+
+<p>若使用者拒絕對外部目錄的存取權，請勿立刻又要求存取權。
+重複堅持取得存取權會導致極差的使用者體驗。
+</p>

@@ -1,0 +1,142 @@
+page.title=Gravação para TV
+page.keywords=preview,sdk,tv,recording
+page.tags=androidn
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>Neste documento</h2>
+  <ol>
+    <li><a href="#supporting">Indicar suporte para gravação</a></li>
+    <li><a href="#recording">Gravar uma sessão</a></li>
+    <li><a href="#errors">Solucionar erros de gravação</a></li>
+    <li><a href="#sessions">Gerenciar sessões gravadas</a></li>
+    <li><a href="#best">Práticas recomendadas</a></li>
+  </ol>
+</div>
+</div>
+
+<p>Serviços de entrada de TV permitem que o usuário pause e retome a reprodução do canal por meio de
+APIs de time-shifting. O Android N expande o time-shifting
+ao permitir que o usuário salve várias sessões gravadas.</p>
+
+<p>Os usuários podem programar gravações antecipadamente ou iniciar uma gravação enquanto assistem a
+um programa. Quando o sistema salvar a gravação, o usuário poderá procurar, gerenciar
+e reproduzir a gravação usando o aplicativo de TV do sistema.</p>
+
+<p>Se quiser fornecer recursos de gravação para seu serviço de entrada de TV,
+indique para o sistema que o aplicativo oferece suporte a gravação, implemente
+a capacidade de gravar programas, solucione e comunique erros ocorridos
+durante a gravação e gerencie as sessões gravadas.</p>
+
+<p class="note"><strong>Observação:</strong> O aplicativo Live Channels ainda não
+oferece aos usuários uma forma de criar ou acessar gravações. Enquanto o aplicativo Live Channels não sofrer
+ alterações, será difícil testar toda a experiência de
+gravação de seu serviço de entrada de TV.</p>
+
+<h2 id="supporting">Indicar suporte para gravação</h2>
+
+<p>Para informar ao sistema que seu serviço de entrada de TV oferece suporte a gravação, defina
+ o atributo <code>android:canRecord</code> no arquivo XML de metadados do serviço
+ como <code>true</code>:
+</p>
+
+<pre>
+&lt;tv-input xmlns:android="http://schemas.android.com/apk/res/android"
+  <b>android:canRecord="true"</b>
+  android:setupActivity="com.example.sampletvinput.SampleTvInputSetupActivity" /&gt;
+</pre>
+
+<p>Para obter mais informações sobre o arquivo de metadados do serviço, consulte
+<a href="{@docRoot}training/tv/tif/tvinput.html#manifest">Declarar seu serviço
+de entrada de TV no manifesto</a> (em inglês).
+</p>
+
+<p>Como alternativa, você pode indicar suporte a gravação em seu código usando
+estas etapas:</p>
+
+<ol>
+<li>No método <code>TvInputService.onCreate()</code>, crie um novo objeto
+<code>TvInputInfo</code> usando a classe <code>TvInputInfo.Builder</code>
+.</li>
+<li>Ao criar o novo objeto <code>TvInputInfo</code>, chame
+<code>setCanRecord(true)</code> antes de chamar <code>build()</code> para
+indicar que seu serviço oferece suporte a gravação.</li>
+<li>Registre seu objeto <code>TvInputInfo</code> com o sistema chamando
+<code>TvInputManager.updateTvInputInfo()</code>.</li>
+</ol>
+
+<h2 id="recording">Gravar uma sessão</h2>
+
+<p>Depois que o serviço de entrada de TV registrar que oferece suporte ao recurso
+de gravação, o sistema chamará seu
+<code>TvInputService.onCreateRecordingSession()</code> quando precisar acessar
+a implementação de gravação do seu aplicativo. Implemente sua própria subclasse
+<code>TvInputService.RecordingSession</code> e retorne-a
+quando o retorno de chamada <code>onCreateRecordingSession()</code>
+for acionado. Essa subclasse é responsável por alternar para os dados de canal corretos,
+gravando os dados solicitados e comunicando o status de gravação e os erros ao
+sistema.</p>
+
+<p>Quando o sistema chamar <code>RecordingSession.onTune()</code>, passando um
+URI de canal, acesse o canal especificado pelo URI. Notifique o sistema de que
+seu aplicativo acessou o canal desejado ao chamar <code>notifyTuned()</code>
+ou, se o aplicativo não conseguiu acessar o canal correto, chame
+<code>notifyError()</code>.</p>
+
+<p>Em seguida, o sistema invoca o retorno de chamada <code>RecordingSession.onStartRecording()</code>
+. O aplicativo deve iniciar a gravação imediatamente. Quando o sistema invoca
+esse retorno de chamada, ele pode fornecer um URI que contenha informações sobre o programa
+que será gravado. Quando a gravação for concluída, você deverá copiar esses
+dados para a tabela de dados <code>RecordedPrograms</code>.</p>
+
+<p>Por fim, o sistema chama <code>RecordingSession.onStopRecording()</code>.
+Nesse momento, o aplicativo deve interromper a gravação imediatamente. Também é preciso
+criar uma entrada na tabela <code>RecordedPrograms</code>. Essa entrada deve
+incluir o URI dos dados da sessão gravada na coluna
+<code>RecordedPrograms.COLUMN_RECORDING_DATA_URI</code> e qualquer informação
+sobre o programa fornecida pelo sistema na chamada inicial em
+<code>onStartRecording()</code>.</p>
+
+<p>Para saber mais sobre como acessar a tabela <code>RecordedPrograms</code>,
+consulte <a href="#sessions">Gerenciar sessões gravadas</a>.</p>
+
+<h2 id="errors">Solucionar erros de gravação</h2>
+
+<p>Se um erro ocorrer durante a gravação, inutilizando os dados gravados,
+notifique o sistema chamando <code>RecordingSession.notifyError()</code>.
+Também é possível chamar <code>notifyError()</code> depois que uma sessão de gravação é
+criada para informar ao sistema que seu aplicativo não pode mais gravar sessões.</p>
+
+<p>Se um erro ocorrer durante a gravação, mas você quiser fornecer uma gravação
+parcial que pode ser usada pelos usuários para reprodução, chame
+<code>RecordingSession.notifyRecordingStopped()</code> para permitir que o sistema
+use a sessão parcial.</p>
+
+<h2 id="sessions">Gerenciar sessões gravadas</h2>
+
+<p>O sistema mantém as informações de todas as sessões gravadas de todos
+os aplicativos de canais com recursos de gravação na tabela de provedor de conteúdo <code>TvContract.RecordedPrograms</code>
+. Essas informações podem ser acessadas pelo URI de conteúdo
+<code>RecordedPrograms.Uri</code>. Use APIs de provedores de conteúdo para
+ler, adicionar e excluir entradas dessa tabela.</p>
+
+<p>Para saber mais sobre como trabalhar com dados de provedores de conteúdo, consulte
+<a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+Fundamentos do provedor de conteúdo</a> .</p>
+
+<h2 id="best">Práticas recomendadas</h2>
+
+<p>Dispositivos de TV podem ter armazenamento limitado, então tenha bom senso ao
+alocar armazenamento para salvar sessões gravadas. Use
+<code>RecordingCallback.onError(RECORDING_ERROR_INSUFFICIENT_SPACE)</code> quando
+não houver espaço suficiente para salvar uma sessão gravada.</p>
+
+<p>Quando o usuário iniciar a gravação, comece a gravar os dados assim
+que possível. Para facilitar esse processo, realize qualquer tarefa demorada imediatamente,
+como acessar e alocar o espaço de armazenamento, quando o sistema invocar o retorno de chamada
+<code>onCreateRecordingSession()</code>. Isso permite que você comece
+a gravar imediatamente após o acionamento do retorno de chamada <code>onStartRecording()</code>
+.</p>

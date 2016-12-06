@@ -43,7 +43,7 @@ page.image=/images/cards/card-google-cloud-messaging_16-9_2x.png
 
 </div>
 
-<div class="resource-widget resource-flow-layout col-13" 
+<div class="resource-widget resource-flow-layout col-13"
   data-query="collection:distribute/engage/gcm"
   data-sortorder="-timestamp"
   data-cardsizes="9x3"

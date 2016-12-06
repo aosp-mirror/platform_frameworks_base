@@ -69,6 +69,7 @@ import android.util.MutableBoolean;
 import android.view.Display;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IDockedStackListener;
+import android.view.IWindowManager;
 import android.view.WindowManager;
 import android.view.WindowManager.KeyboardShortcutsReceiver;
 import android.view.WindowManagerGlobal;
@@ -120,6 +121,7 @@ public class SystemServicesProxy {
     IPackageManager mIpm;
     AssistUtils mAssistUtils;
     WindowManager mWm;
+    IWindowManager mIwm;
     UserManager mUm;
     Display mDisplay;
     String mRecentsPackage;
@@ -207,6 +209,7 @@ public class SystemServicesProxy {
         mIpm = AppGlobals.getPackageManager();
         mAssistUtils = new AssistUtils(context);
         mWm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        mIwm = WindowManagerGlobal.getWindowManagerService();
         mUm = UserManager.get(context);
         mDisplay = mWm.getDefaultDisplay();
         mRecentsPackage = context.getPackageName();
@@ -243,6 +246,9 @@ public class SystemServicesProxy {
         if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
             Collections.addAll(sRecentsBlacklist,
                     res.getStringArray(R.array.recents_tv_blacklist_array));
+        } else {
+            Collections.addAll(sRecentsBlacklist,
+                    res.getStringArray(R.array.recents_blacklist_array));
         }
     }
 
@@ -258,6 +264,13 @@ public class SystemServicesProxy {
             sSystemServicesProxy = new SystemServicesProxy(context);
         }
         return sSystemServicesProxy;
+    }
+
+    /**
+     * @return whether the provided {@param className} is blacklisted
+     */
+    public boolean isBlackListedActivity(String className) {
+        return sRecentsBlacklist.contains(className);
     }
 
     /**
@@ -314,8 +327,12 @@ public class SystemServicesProxy {
         if (includeFrontMostExcludedTask) {
             flags |= ActivityManager.RECENT_WITH_EXCLUDED;
         }
-        List<ActivityManager.RecentTaskInfo> tasks = mAm.getRecentTasksForUser(numTasksToQuery,
-                flags, userId);
+        List<ActivityManager.RecentTaskInfo> tasks = null;
+        try {
+            tasks = mAm.getRecentTasksForUser(numTasksToQuery, flags, userId);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to get recent tasks", e);
+        }
 
         // Break early if we can't get a valid set of tasks
         if (tasks == null) {
@@ -330,8 +347,9 @@ public class SystemServicesProxy {
             // NOTE: The order of these checks happens in the expected order of the traversal of the
             // tasks
 
-            // Remove the task if it is blacklisted
-            if (sRecentsBlacklist.contains(t.realActivity.getClassName())) {
+            // Remove the task if it or it's package are blacklsited
+            if (sRecentsBlacklist.contains(t.realActivity.getClassName()) ||
+                    sRecentsBlacklist.contains(t.realActivity.getPackageName())) {
                 iter.remove();
                 continue;
             }
@@ -1073,6 +1091,28 @@ public class SystemServicesProxy {
                             scaleUp);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to override transition: " + e);
+        }
+    }
+
+    /**
+     * Updates the visibility of recents.
+     */
+    public void setRecentsVisibility(boolean visible) {
+        try {
+            mIwm.setRecentsVisibility(visible);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to reach window manager", e);
+        }
+    }
+
+    /**
+     * Updates the visibility of the picture-in-picture.
+     */
+    public void setTvPipVisibility(boolean visible) {
+        try {
+            mIwm.setTvPipVisibility(visible);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to reach window manager", e);
         }
     }
 

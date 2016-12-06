@@ -16,6 +16,8 @@
 
 package com.android.systemui.recents.views;
 
+import android.graphics.Rect;
+
 /**
  * Represents a drop target for a drag gesture.
  */
@@ -25,5 +27,5 @@ public interface DropTarget {
      * Returns whether this target can accept this drop.  The x,y are relative to the top level
      * RecentsView, and the width/height are of the RecentsView.
      */
-    boolean acceptsDrop(int x, int y, int width, int height, boolean isCurrentTarget);
+    boolean acceptsDrop(int x, int y, int width, int height, Rect insets, boolean isCurrentTarget);
 }

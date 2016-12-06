@@ -130,6 +130,9 @@ final class ProcessList {
     static final int SCHED_GROUP_DEFAULT = 1;
     // Activity manager's version of Process.THREAD_GROUP_TOP_APP
     static final int SCHED_GROUP_TOP_APP = 2;
+    // Activity manager's version of Process.THREAD_GROUP_TOP_APP
+    // Disambiguate between actual top app and processes bound to the top app
+    static final int SCHED_GROUP_TOP_APP_BOUND = 3;
 
     // The minimum number of cached apps we want to be able to keep around,
     // without empty apps being able to push them out of memory.

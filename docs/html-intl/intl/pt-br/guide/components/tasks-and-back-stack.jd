@@ -77,7 +77,7 @@ android.app.Fragment} class documentation.</p>
 </div>
 -->
 
-<p>A tela inicial do dispositivo é o ponto de partida para a maioria das tarefas. Quando o usuário toca em um ícone no inicializador do 
+<p>A tela inicial do dispositivo é o ponto de partida para a maioria das tarefas. Quando o usuário toca em um ícone no inicializador do
 aplicativo
  (ou em um atalho na tela inicial), essa tarefa do aplicativo acontece em primeiro plano. Se não
 existir nenhuma tarefa para o aplicativo (se o aplicativo não tiver sido usado recentemente), uma nova tarefa
@@ -85,7 +85,7 @@ será criada e a atividade "principal" daquele aplicativo abrirá como a ativida
 
 <p>Quando a atividade atual inicia outra, a nova atividade é colocada no topo da pilha
 e recebe foco. A atividade anterior permanece na pilha, mas é interrompida. Quando uma atividade
-para, o sistema retém o estado atual da interface do usuário. Quando o usuário pressiona o botão 
+para, o sistema retém o estado atual da interface do usuário. Quando o usuário pressiona o botão
 <em>Voltar</em>
 , a atividade atual é retirada do topo da pilha (a atividade é destruída)
 e a atividade anterior reinicia (o estado anterior da IU é restaurado). Atividades na pilha nunca
@@ -103,7 +103,7 @@ a atividade atual é
 destruída e a atividade anterior reinicia.</p>
 
 
-<p>Se o usuário continua pressionando <em>Voltar</em>, cada atividade na pilha é retirada para 
+<p>Se o usuário continua pressionando <em>Voltar</em>, cada atividade na pilha é retirada para
 revelar
 a anterior até que o usuário retorne à tela inicial (ou a qualquer atividade que estivesse em execução
 no começo da tarefa). Quando todas as atividades forem removidas da pilha, a tarefa não existirá mais.</p>
@@ -295,7 +295,7 @@ launchMode}</a> do elemento
 
 <p>O atributo <a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code
 launchMode}</a> especifica uma instrução sobre como a atividade deve ser inicializada
-em uma tarefa. Há quatro modos diferentes de inicialização que podem ser designados ao atributo 
+em uma tarefa. Há quatro modos diferentes de inicialização que podem ser designados ao atributo
 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">launchMode</a></code>:
 </p>
 
@@ -334,7 +334,7 @@ Entretanto, se uma instância da atividade já existir em uma tarefa separada, o
 a intenção àquela instância por meio de uma chamada do método {@link
 android.app.Activity#onNewIntent onNewIntent()} em vez de criar uma nova instância. Somente
 uma instância da atividade pode existir por vez.
-  <p class="note"><strong>Observação:</strong> embora a atividade inicie em uma nova tarefa, o botão 
+  <p class="note"><strong>Observação:</strong> embora a atividade inicie em uma nova tarefa, o botão
 <em>Voltar</em> ainda direciona o usuário à atividade anterior.</p></dd>
 <dt>{@code "singleInstance"}.</dt>
   <dd>Igual à {@code "singleTask"}, exceto que o sistema não inicializa nenhuma outra atividade
@@ -505,7 +505,7 @@ A tarefa reterá todas as atividades em sua pilha mesmo após um longo período.
 href="{@docRoot}guide/topics/manifest/activity-element.html#clear">clearTaskOnLaunch</a></code></dt>
 <dd>Se esse atributo for definido como {@code "true"} na atividade raiz de uma tarefa,
 a pilha será apagada da atividade raiz sempre que o usuário sair da tarefa
-e retornar a ela.  Em outras palavras, é o oposto de 
+e retornar a ela.  Em outras palavras, é o oposto de
 <a href="{@docRoot}guide/topics/manifest/activity-element.html#always">
 {@code alwaysRetainTaskState}</a>. O usuário sempre retorna à tarefa
 no estado inicial, mesmo ao retirar-se da tarefa somente por um momento.</dd>
@@ -557,13 +557,13 @@ nova tarefa, e o usuário perderia algum tempo trabalhando nessa tarefa. O usuá
 <em>Página inicial</em>. A tarefa é enviada para segundo plano e não fica mais visível. O usuário não tem como voltar
 à tarefa porque ela não é representada no inicializador do aplicativo.</p>
 
-<p>Para esses casos em que se deseja que o usuário não seja capaz de retornar a uma atividade, defina 
+<p>Para esses casos em que se deseja que o usuário não seja capaz de retornar a uma atividade, defina
 <a href="{@docRoot}guide/topics/manifest/activity-element.html#finish">{@code finishOnTaskLaunch}</a>
- do elemento 
+ do elemento
 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
 como {@code "true"} (consulte <a href="#Clearing">Apagar a pilha</a>).</p>
 
-<p>Veja mais informações sobre a representação e o gerenciamento de atividades 
+<p>Veja mais informações sobre a representação e o gerenciamento de atividades
 na tela de visão geral em <a href="{@docRoot}guide/components/recents.html">
 Tela de visão geral</a>.</p>
 

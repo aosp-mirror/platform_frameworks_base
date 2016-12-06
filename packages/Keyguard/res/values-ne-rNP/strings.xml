@@ -46,11 +46,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM कार्ड लक गरियो।"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM कार्ड PUK-लक छ।"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"SIM कार्ड अनलक हुँदै…"</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"ढाँचा अनलक।"</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Pin अनलक"</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"पासवर्ड अनलक।"</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"ढाँचा क्षेत्र।"</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"स्लाइड क्षेत्र।"</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"पीन क्षेत्र"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM पिन क्षेत्र"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM पुक क्षेत्र"</string>

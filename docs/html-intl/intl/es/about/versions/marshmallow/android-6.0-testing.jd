@@ -1,0 +1,190 @@
+page.title=Guía de prueba
+page.image=images/cards/card-n-guide_2x.png
+meta.tags="preview", "testing"
+page.tags="preview", "developer preview"
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    <h2>En este documento</h2>
+      <ol>
+        <li><a href="#runtime-permissions">Prueba de los permisos</a></li>
+        <li><a href="#doze-standby">Prueba de los modos Descanso y App Standby</a></li>
+        <li><a href="#ids">Copia de seguridad automática e identificadores de dispositivos</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>
+  Android N te brinda la oportunidad de garantizar que tus aplicaciones funcionen con la próxima versión de la plataforma.
+ Esta versión preliminar incluye diversas API y cambios en los comportamientos que pueden
+tener impactos en tu aplicación, como se describe en las secciones <a href="{@docRoot}preview/api-overview.html">Información general de la API</a> y <a href="{@docRoot}preview/behavior-changes.html">Cambios en los comportamientos</a>.
+ Al probar tu aplicación con la versión preliminar, te debes centrar en algunos cambios específicos del sistema para garantizar que los usuarios disfruten de una buena experiencia.
+
+
+</p>
+
+<p>
+  En esta guía, se describen qué y cómo probar las características preliminares con tu aplicación. Debes priorizar la prueba de estas características específicas preliminares, puesto que podrían tener un alto impacto en el comportamiento de tu aplicación:
+
+
+</p>
+
+<ul>
+  <li><a href="#runtime-permissions">Permisos</a>
+  </li>
+  <li><a href="#doze-standby">Modos Descanso y App Standby</a>
+  </li>
+  <li><a href="#ids">Copia de seguridad automática e identificadores de dispositivos</a></li>
+</ul>
+
+<p>
+  Para obtener más información sobre cómo configurar dispositivos o dispositivos virtuales con una imagen
+ del sistema de la versión preliminar para realizar pruebas, consulta la sección <a href="{@docRoot}preview/setup-sdk.html">Configurar el SDK de Android N</a>.
+
+</p>
+
+
+<h2 id="runtime-permissions">Prueba de los permisos</h2>
+
+<p>
+  El nuevo modelo de <a href="{@docRoot}preview/features/runtime-permissions.html">permisos</a> cambia el modo en que el usuario asigna permisos a tu aplicación.
+ En lugar de conceder todos los permisos durante el procedimiento de instalación, tu aplicación debe solicitar al usuario los permisos individuales en el tiempo de ejecución.
+
+ Para los usuarios, este comportamiento ofrece más control granular sobre las actividades de cada aplicación, así como un mejor contexto para comprender por qué la aplicación está solicitando un permiso específico.
+ Los usuarios pueden conceder o revocar los permisos concedidos a una aplicación de forma individual en cualquier momento.
+ Es muy probable que esta característica de la versión preliminar tenga un impacto en el comportamiento de tu aplicación y puede hacer que algunas características de tu aplicación no funcionen o funcionen en un estado degradado.
+
+
+</p>
+
+<p class="caution">
+  Este cambio afecta a todas las aplicaciones que se ejecutan en la nueva plataforma, incluso a aquellas que no tienen como destino la nueva versión de la plataforma.
+ La plataforma ofrece un comportamiento de compatibilidad limitada para las aplicaciones heredadas, pero debes comenzar a planificar ahora la migración de tu aplicación al nuevo modelo de permisos, con el objetivo de publicar una versión actualizada de tu aplicación cuando se lance la plataforma oficial.
+
+
+</p>
+
+
+<h3 id="permission-test-tips">Tips para pruebas</h3>
+
+<p>
+  Usa los siguientes tips para pruebas como ayuda para planificar y ejecutar las pruebas de tu aplicación con el nuevo comportamiento de permisos.
+
+</p>
+
+<ul>
+  <li>Identifica los permisos actuales de tu aplicación y las rutas de códigos relacionadas.</li>
+  <li>Prueba los flujos del usuario en los datos y servicios protegidos por permisos.</li>
+  <li>Realiza pruebas con varias combinaciones de permisos concedidos/revocados.</li>
+  <li>Usa la herramienta {@code adb} para administrar permisos desde la línea de comando:
+    <ul>
+      <li>Enumera los permisos y estados por grupo:
+        <pre>adb shell pm list permissions -d -g</pre>
+      </li>
+      <li>Concede o revoca un permiso o más permisos utilizando la siguiente sintaxis:<br>
+        <pre>adb shell pm [grant|revoke] &lt;permission.name&gt; ...</pre>
+      </li>
+    </ul>
+  </li>
+  <li>Analiza tu aplicación para detectar servicios que utilizan permisos.</li>
+</ul>
+
+<h3 id="permission-test-strategy">Estrategia de prueba</h3>
+
+<p>
+  El cambio en los permisos afecta la estructura y el diseño de tu aplicación, además de la experiencia del usuario y los flujos que proporcionas a los usuarios.
+ Debes evaluar el uso de los permisos actuales de tu aplicación y comenzar a planificar los nuevos flujos que deseas ofrecer.
+ La versión oficial de la plataforma proporciona un comportamiento de compatibilidad, pero debes prever la actualización de tu aplicación y no depender de estos comportamientos.
+
+
+</p>
+
+<p>
+  Identifica los permisos que tu aplicación verdaderamente necesita y utiliza, y luego busca las diversas rutas de códigos que utilizan los servicios protegidos por permisos.
+ Puedes realizar esto mediante una combinación de pruebas en la plataforma nueva y análisis de códigos.
+ Al realizar las pruebas, debes centrarte en
+ incluir permisos de tiempo de ejecución cambiando {@code targetSdkVersion} de la aplicación a la versión preliminar. Para
+ obtener más información, consulta la sección <a href="{@docRoot}preview/setup-sdk.html#">Configurar el SDK de Android N</a>.
+
+</p>
+
+<p>
+  Realiza pruebas con diversas combinaciones de permisos revocados y agregados, a fin de destacar los flujos del usuario que dependen de permisos.
+ Cuando una dependencia no sea obvia ni lógica, debes considerar la opción de refactorizar o compartimentar ese flujo para eliminar la dependencia o aclarar por qué se necesita el permiso.
+
+
+</p>
+
+<p>
+  Para obtener más información sobre el comportamiento de los permisos de tiempo de ejecución, las pruebas y las mejores prácticas, consulta la página <a href="{@docRoot}preview/features/runtime-permissions.html">Permisos</a> de la versión preliminar para desarrolladores.
+
+
+</p>
+
+
+<h2 id="doze-standby">Prueba de los modos Descanso y App Standby</h2>
+
+<p>
+  Las características de ahorro de energía de los modos Descanso y App Standby limitan la cantidad de procesamiento en segundo plano que puede realizar tu aplicación cuando un dispositivo se encuentra en estado inactivo o mientras tu aplicación no está en foco.
+ Entre las restricciones que el sistema puede imponer en las aplicaciones se incluyen el acceso limitado a la red o denegación de acceso, suspensión de las tareas en segundo plano, suspensión de notificaciones, y alarmas y solicitudes de reactivación ignoradas.
+
+ Para garantizar que tu aplicación tenga un comportamiento correcto con estas optimizaciones de ahorro de energía, debes probar tu aplicación simulando estos estados de bajo consumo.
+
+
+</p>
+
+<h4 id="doze">Cómo probar la aplicación en modo Descanso</h4>
+
+<p>Para probar el modo Descanso con tu aplicación, realiza lo siguiente:</p>
+
+<ol>
+<li>Configura un dispositivo de hardware o un dispositivo virtual con una imagen del sistema Android N.</li>
+<li>Conecta el dispositivo a tu equipo de desarrollo e instala tu aplicación.</li>
+<li>Ejecuta tu aplicación y déjala activa.</li>
+<li>Simula la activación del modo Descanso en el dispositivo ejecutando los siguientes comandos:
+
+<pre>
+$ adb shell dumpsys battery unplug
+$ adb shell dumpsys deviceidle step
+$ adb shell dumpsys deviceidle -h
+</pre>
+
+  </li>
+  <li>Observa el comportamiento de tu aplicación cuando se reactive el dispositivo. Asegúrate de que se recupere correctamente cuando el dispositivo salga del modo Descanso.
+</li>
+</ol>
+
+
+<h4 id="standby">Cómo probar aplicaciones en modo App Standby</h4>
+
+<p>Para probar el modo App Standby con tu aplicación, realiza lo siguiente:</p>
+
+<ol>
+  <li>Configura un dispositivo de hardware o un dispositivo virtual con una imagen del sistema Android N.</li>
+  <li>Conecta el dispositivo a tu equipo de desarrollo e instala tu aplicación.</li>
+  <li>Ejecuta tu aplicación y déjala activa.</li>
+  <li>Simula la activación del modo App Standby en la aplicación ejecutando los siguientes comandos:
+
+<pre>
+$ adb shell am broadcast -a android.os.action.DISCHARGING
+$ adb shell am set-idle &lt;packageName&gt; true
+</pre>
+
+  </li>
+  <li>Simula la activación de tu aplicación con el siguiente comando:
+    <pre>$ adb shell am set-idle &lt;packageName&gt; false</pre>
+  </li>
+  <li>Observa el comportamiento de tu aplicación al reactivarse. Asegúrate de que se recupere correctamente del modo App Standby.
+ En particular, debes comprobar si los trabajos en segundo plano y las notificaciones de tu aplicación continúan funcionando de la manera esperada.
+</li>
+</ol>
+
+<h2 id="ids">Copia de seguridad automática para aplicaciones e identificadores específicos del dispositivo</h2>
+
+<p>Si tu aplicación continúa teniendo algún identificador específico del dispositivo, como la Id. de registro de Google Cloud Messaging, en el almacenamiento interno, asegúrate de seguir las mejores prácticas para excluir la ubicación de almacenamiento de la copia de seguridad automática, como se describe en la sección <a href="{@docRoot}preview/backup/index.html">Copia de seguridad automática para aplicaciones</a>.
+
+
+
+ </p>

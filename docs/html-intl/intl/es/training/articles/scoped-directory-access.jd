@@ -1,0 +1,148 @@
+page.title=Acceso a directorios determinados
+page.keywords=preview,sdk,scoped directory access
+page.tags=androidn
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>En este documento</h2>
+  <ol>
+    <li><a href="#accessing">Acceder a un directorio de almacenamiento externo</a></li>
+    <li><a href="#removable">Acceder a un directorio de un medio extraíble</a></li>
+    <li><a href="#best">Prácticas recomendadas</a></li>
+  </ol>
+</div>
+</div>
+
+<p>Las aplicaciones como las aplicaciones de fotografía generalmente solo necesitan acceso a directorios de
+almacenamiento externo, como el directorio <code>Pictures</code>. Los métodos
+existentes para acceder a almacenamiento externo no están diseñados para brindar un
+acceso fácil a determinados directorios para estos tipos de aplicaciones. Por ejemplo:</p>
+
+<ul>
+<li>Solicitar {@link android.Manifest.permission#READ_EXTERNAL_STORAGE}
+o {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} en tu manifiesto
+permite el acceso a todos los directorios públicos de un almacenamiento externo, lo cual podría ser
+un acceso mayor que el que necesita tu aplicación.</li>
+<li>Usar el
+<a href="{@docRoot}guide/topics/providers/document-provider.html">framework
+de acceso al almacenamiento</a> generalmente implica que el usuario seleccione directorios
+mediante un sistema de IU, lo cual no es necesario si tu aplicación siempre accede al mismo
+directorio externo.</li>
+</ul>
+
+<p>Android N brinda una API nueva y simplificada para acceder a
+ directorios de almacenamiento externo comunes. </p>
+
+<h2 id="accessing">Acceder a un directorio de almacenamiento externo</h2>
+
+<p>Usa la clase <code>StorageManager</code> para obtener la instancia de
+<code>StorageVolume</code> correcta. Luego, crea una intent llamando al
+ método <code>StorageVolume.createAccessIntent()</code> de esa instancia.
+Usa esta intención para acceder a directorios de almacenamiento externo. Para obtener una lista de
+todos los volúmenes disponibles, incluidos los volúmenes de medios extraíbles, usa
+<code>StorageManager.getVolumesList()</code>.</p>
+
+<p>Si tienes información sobre un archivo específico, usa
+<code>StorageManager.getStorageVolume(File)</code> para obtener el
+<code>StorageVolume</code> que contiene el archivo. Llama a
+<code>createAccessIntent()</code> en este <code>StorageVolume</code> para acceder al
+directorio de almacenamiento externo del archivo.</p>
+
+<p>
+En el caso de los volúmenes secundarios, como las tarjetas SD externas, pasa un valor nulo cuando llames a
+<code>StorageVolume.createAccessIntent()</code> para solicitar acceso al volumen
+ completo, en lugar de un directorio específico.
+<code>StorageVolume.createAccessIntent()</code> regresa un valor nulo si pasas un
+ valor nulo para el volumen principal o si pasas un nombre de directorio no válido.
+</p>
+
+<p>El siguiente fragmento de código es un ejemplo de cómo abrir el
+directorio <code>Pictures</code> en el almacenamiento compartido principal:</p>
+
+<pre>
+StorageManager sm = (StorageManager)getSystemService(Context.STORAGE_SERVICE);
+StorageVolume volume = sm.getPrimaryVolume();
+Intent intent = volume.createAccessIntent(Environment.DIRECTORY_PICTURES);
+startActivityForResult(intent, request_code);
+</pre>
+
+<p>El sistema intenta otorgar acceso al directorio externo y, si
+es necesario, confirma el acceso con el usuario usando una IU simplificada:</p>
+
+<img src="{@docRoot}images/android-7.0/scoped-directory-access-framed.png" srcset="{@docRoot}images/android-7.0/scoped-directory-access-framed.png 1x,
+{@docRoot}images/android-7.0/scoped-directory-access-framed_2x.png 2x" />
+<p class="img-caption"><strong>Imagen 1.</strong> Una aplicación solicitando
+acceso al directorio Pictures.</p>
+
+<p>Si el usuario otorga el acceso, el sistema llama a tu
+ anulación de <code>onActivityResult()</code> con un código resultante de
+<code>Activity.RESULT_OK</code> y datos de intents que contienen el URI. Usa
+el URI brindado para acceder a la información del directorio. Es similar a usar URI
+generados por el
+<a href="{@docRoot}guide/topics/providers/document-provider.html">framework
+de acceso al almacenamiento</a>.</p>
+
+<p>Si el usuario no otorga el acceso, el sistema llama a tu
+anulación de <code>onActivityResult()</code> con un código resultante de
+<code>Activity.RESULT_CANCELED</code> y datos de intents nulos.</p>
+
+<p class="note"><b>Nota</b>: Obtener acceso a un directorio externo específico
+también otorga el acceso a los subdirectorios de ese directorio.</p>
+
+<h2 id="removable">Acceder a un directorio de un medio extraíble</h2>
+
+<p>Para usar el acceso a directorios determinados para acceder a directorios de medios extraíbles,
+primero debes agregar un {@link android.content.BroadcastReceiver} que escuche la
+notificación{@link android.os.Environment#MEDIA_MOUNTED}, por ejemplo:</p>
+
+<pre>
+&lt;receiver
+    android:name=".MediaMountedReceiver"
+    android:enabled="true"
+    android:exported="true" &gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.MEDIA_MOUNTED" /&gt;
+        &lt;data android:scheme="file" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/receiver&gt;
+</pre>
+
+<p>Cuando el usuario conecta un medio extraíble, como una tarjeta SD, el sistema envía una
+notificación{@link android.os.Environment#MEDIA_MOUNTED}. Esta notificación
+brinda un objeto <code>StorageVolume</code> en los datos de intents que puedes
+usar para acceder a directorios del medio extraíble. El siguiente ejemplo
+accede al directorio <code>Pictures</code> de medios extraíbles:</p>
+
+<pre>
+// BroadcastReceiver has already cached the MEDIA_MOUNTED
+// notification Intent in mediaMountedIntent
+StorageVolume volume = (StorageVolume)
+    mediaMountedIntent.getParcelableExtra(StorageVolume.EXTRA_STORAGE_VOLUME);
+volume.createAccessIntent(Environment.DIRECTORY_PICTURES);
+startActivityForResult(intent, request_code);
+</pre>
+
+<h2 id="best">Prácticas recomendadas</h2>
+
+<p>Cuando sea posible, sigue usando el URI de acceso a directorios externos de modo que no tengas
+que solicitarle acceso al usuario continuamente. Una vez que el usuario haya otorgado el acceso, llama a
+<code>getContentResolver().takePersistableUriPermssion()</code> con el
+URI de acceso a directorios. El sistema continuará el URI, y las siguientes solicitudes
+de acceso generarán <code>RESULT_OK</code> y no le mostrarán una IU de confirmación al
+usuario.</p>
+
+<p>Si el usuario deniega el acceso a un directorio externo, no vuelvas a solicitar el
+acceso inmediatamente. Hacer esto provocaría una mala experiencia
+de usuario. Si el usuario deniega una solicitud y la aplicación solicita acceso
+ nuevamente, aparece la casilla de verificación <b>Don't ask again</b> en la IU:</p>
+
+<img src="{@docRoot}images/android-7.0/scoped-directory-access-dont-ask.png" srcset="{@docRoot}images/android-7.0/scoped-directory-access-dont-ask.png 1x,
+{@docRoot}images/android-7.0/scoped-directory-access-dont-ask_2x.png 2x" />
+<p class="img-caption"><strong>Figura 1.</strong> Una aplicación que presenta una
+segunda solicitud para obtener acceso a medios extraíbles.</p>
+
+<p>Si el usuario selecciona <b>Don't ask again</b> y deniega la solicitud, todas las
+solicitudes futuras que presente la aplicación para el directorio determinado se denegarán
+ automáticamente, y el usuario no recibirá ninguna IU de solicitud.</p>

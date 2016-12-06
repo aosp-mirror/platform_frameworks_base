@@ -57,6 +57,9 @@
     <!-- The amount to scale each of the status bar icons by. A value of 1 means no scaling. -->
     <item name="status_bar_icon_scale_factor" format="float" type="dimen">1.0</item>
 
+    <!-- max height of a notification such that the content can still fade out when closing -->
+    <dimen name="max_notification_fadeout_height">100dp</dimen>
+
     <!-- Height of a small notification in the status bar-->
     <dimen name="notification_min_height">92dp</dimen>
 
@@ -130,7 +133,7 @@
     <dimen name="close_handle_underlap">32dp</dimen>
 
     <!-- Height of the status bar header bar -->
-    <dimen name="status_bar_header_height">80dp</dimen>
+    <dimen name="status_bar_header_height">104dp</dimen>
 
     <!-- Height of the status bar header bar when expanded -->
     <dimen name="status_bar_header_height_expanded">116dp</dimen>
@@ -140,6 +143,9 @@
 
     <!-- Margin start of the system icons super container -->
     <dimen name="system_icons_super_container_margin_start">16dp</dimen>
+
+    <!-- Margin end of the system icons super container when the avatar is missing. -->
+    <dimen name="system_icons_super_container_avatarless_margin_end">6dp</dimen>
 
     <!-- Width for the notification panel and related windows -->
     <dimen name="match_parent">-1px</dimen>
@@ -172,10 +178,6 @@
     <dimen name="qs_tile_margin_top">16dp</dimen>
     <dimen name="qs_quick_tile_size">48dp</dimen>
     <dimen name="qs_quick_tile_padding">12dp</dimen>
-    <dimen name="qs_date_anim_translation">32dp</dimen>
-    <dimen name="qs_date_alarm_anim_translation">22dp</dimen>
-    <dimen name="qs_date_collapsed_text_size">14sp</dimen>
-    <dimen name="qs_date_text_size">16sp</dimen>
     <dimen name="qs_header_gear_translation">16dp</dimen>
     <dimen name="qs_page_indicator_width">16dp</dimen>
     <dimen name="qs_page_indicator_height">8dp</dimen>
@@ -202,7 +204,6 @@
     <dimen name="qs_detail_margin_top">28dp</dimen>
     <dimen name="qs_data_usage_text_size">14sp</dimen>
     <dimen name="qs_data_usage_usage_text_size">36sp</dimen>
-    <dimen name="qs_expand_margin">0dp</dimen>
     <dimen name="qs_battery_padding">2dp</dimen>
     <dimen name="qs_detail_items_padding_top">4dp</dimen>
 
@@ -377,6 +378,8 @@
 
     <!-- The font size of the date in QS -->
     <dimen name="qs_date_collapsed_size">14sp</dimen>
+    <!-- Amount the date/time move when emergency calls only is present -->
+    <dimen name="qs_date_time_translation">8dp</dimen>
 
     <!-- Battery level text padding end when in expanded QS and on Keyguard -->
     <dimen name="battery_level_padding_end">2dp</dimen>
@@ -538,6 +541,19 @@
 
     <!-- Volume dialog root view bottom margin, at rest -->
     <dimen name="volume_dialog_margin_bottom">4dp</dimen>
+    <dimen name="volume_dialog_collapsed_padding_top">8dp</dimen>
+    <dimen name="volume_dialog_expanded_spacer">14dp</dimen>
+    <dimen name="volume_dialog_padding_end">40dp</dimen>
+
+    <dimen name="volume_row_padding_bottom">9.4dp</dimen>
+    <dimen name="volume_row_padding_start">4dp</dimen>
+    <dimen name="volume_row_header_padding_start">16dp</dimen>
+    <dimen name="volume_row_height">64dp</dimen>
+    <dimen name="volume_row_slider_height">48dp</dimen>
+    <dimen name="volume_row_slider_padding_start">12dp</dimen>
+
+    <dimen name="volume_expander_margin_end">2dp</dimen>
+    <dimen name="volume_expander_margin_top">6dp</dimen>
 
     <!-- Padding between icon and text for managed profile toast -->
     <dimen name="managed_profile_toast_padding">4dp</dimen>

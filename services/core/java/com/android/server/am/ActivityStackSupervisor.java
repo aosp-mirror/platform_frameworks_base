@@ -743,9 +743,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if (!mService.mUserController.shouldConfirmCredentials(userId)) {
             return false;
         }
-        final ActivityStack fullScreenStack = getStack(FULLSCREEN_WORKSPACE_STACK_ID);
-        final ActivityStack dockedStack = getStack(DOCKED_STACK_ID);
-        final ActivityStack[] activityStacks = new ActivityStack[] {fullScreenStack, dockedStack};
+        final ActivityStack[] activityStacks = {
+            getStack(DOCKED_STACK_ID),
+            getStack(FREEFORM_WORKSPACE_STACK_ID),
+            getStack(FULLSCREEN_WORKSPACE_STACK_ID),
+        };
         for (final ActivityStack activityStack : activityStacks) {
             if (activityStack == null) {
                 continue;
@@ -759,16 +761,35 @@ public final class ActivityStackSupervisor implements DisplayListener {
             if (activityStack.isDockedStack() && mIsDockMinimized) {
                 continue;
             }
-            final TaskRecord topTask = activityStack.topTask();
-            if (topTask == null) {
-                continue;
-            }
-            // To handle the case that work app is in the task but just is not the top one.
-            for (int i = topTask.mActivities.size() - 1; i >= 0; i--) {
-                final ActivityRecord activityRecord = topTask.mActivities.get(i);
-                if (activityRecord.userId == userId) {
+            if (activityStack.mStackId == FREEFORM_WORKSPACE_STACK_ID) {
+                // TODO: Only the topmost task should trigger credential confirmation. But first,
+                //       there needs to be a way to block out locked task window surfaces.
+                final List<TaskRecord> tasks = activityStack.getAllTasks();
+                final int size = tasks.size();
+                for (int i = 0; i < size; i++) {
+                    if (taskContainsActivityFromUser(tasks.get(i), userId)) {
+                        return true;
+                    }
+                }
+            } else {
+                final TaskRecord topTask = activityStack.topTask();
+                if (topTask == null) {
+                    continue;
+                }
+                if (taskContainsActivityFromUser(topTask, userId)) {
                     return true;
                 }
+            }
+        }
+        return false;
+    }
+
+    private boolean taskContainsActivityFromUser(TaskRecord task, @UserIdInt int userId) {
+        // To handle the case that work app is in the task but just is not the top one.
+        for (int i = task.mActivities.size() - 1; i >= 0; i--) {
+            final ActivityRecord activityRecord = task.mActivities.get(i);
+            if (activityRecord.userId == userId) {
+                return true;
             }
         }
         return false;
@@ -781,20 +802,25 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
+    static int nextTaskIdForUser(int taskId, int userId) {
+        int nextTaskId = taskId + 1;
+        if (nextTaskId == (userId + 1) * MAX_TASK_IDS_PER_USER) {
+            // Wrap around as there will be smaller task ids that are available now.
+            nextTaskId -= MAX_TASK_IDS_PER_USER;
+        }
+        return nextTaskId;
+    }
+
     int getNextTaskIdForUserLocked(int userId) {
         final int currentTaskId = mCurTaskIdForUser.get(userId, userId * MAX_TASK_IDS_PER_USER);
         // for a userId u, a taskId can only be in the range
         // [u*MAX_TASK_IDS_PER_USER, (u+1)*MAX_TASK_IDS_PER_USER-1], so if MAX_TASK_IDS_PER_USER
         // was 10, user 0 could only have taskIds 0 to 9, user 1: 10 to 19, user 2: 20 to 29, so on.
-        int candidateTaskId = currentTaskId;
+        int candidateTaskId = nextTaskIdForUser(currentTaskId, userId);
         while (mRecentTasks.taskIdTakenForUserLocked(candidateTaskId, userId)
                 || anyTaskForIdLocked(candidateTaskId, !RESTORE_FROM_RECENTS,
                         INVALID_STACK_ID) != null) {
-            candidateTaskId++;
-            if (candidateTaskId == (userId + 1) * MAX_TASK_IDS_PER_USER) {
-                // Wrap around as there will be smaller task ids that are available now.
-                candidateTaskId -= MAX_TASK_IDS_PER_USER;
-            }
+            candidateTaskId = nextTaskIdForUser(candidateTaskId, userId);
             if (candidateTaskId == currentTaskId) {
                 // Something wrong!
                 // All MAX_TASK_IDS_PER_USER task ids are taken up by running tasks for this user
@@ -871,6 +897,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 }
             }
         }
+        // Send launch end powerhint when idle
+        mService.mActivityStarter.sendPowerHintForLaunchEndIfNeeded();
         return true;
     }
 
@@ -916,9 +944,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
     /**
      * Pause all activities in either all of the stacks or just the back stacks.
      * @param userLeaving Passed to pauseActivity() to indicate whether to call onUserLeaving().
+     * @param resuming The resuming activity.
+     * @param dontWait The resuming activity isn't going to wait for all activities to be paused
+     *                 before resuming.
      * @return true if any activity was paused as a result of this call.
      */
-    boolean pauseBackStacks(boolean userLeaving, boolean resuming, boolean dontWait) {
+    boolean pauseBackStacks(boolean userLeaving, ActivityRecord resuming, boolean dontWait) {
         boolean someActivityPaused = false;
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
@@ -957,7 +988,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     void pauseChildStacks(ActivityRecord parent, boolean userLeaving, boolean uiSleeping,
-            boolean resuming, boolean dontWait) {
+            ActivityRecord resuming, boolean dontWait) {
         // TODO: Put all stacks in supervisor and iterate through them instead.
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
@@ -1049,7 +1080,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return r;
         }
 
-        // Return to the home stack.
+        // Look in other non-focused and non-home stacks.
         final ArrayList<ActivityStack> stacks = mHomeStack.mStacks;
         for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = stacks.get(stackNdx);
@@ -1187,7 +1218,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
             Configuration config = mWindowManager.updateOrientationFromAppTokens(
                     mService.mConfiguration,
                     r.mayFreezeScreenLocked(app) ? r.appToken : null);
-            mService.updateConfigurationLocked(config, r, false);
+            // Deferring resume here because we're going to launch new activity shortly.
+            // We don't want to perform a redundant launch of the same record while ensuring
+            // configurations and trying to resume top activity of focused stack.
+            mService.updateConfigurationLocked(config, r, false, true /* deferResume */);
         }
 
         r.app = app;
@@ -2002,7 +2036,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             boolean preserveWindows, boolean allowResizeInDockedMode, boolean deferResume) {
         if (stackId == DOCKED_STACK_ID) {
             resizeDockedStackLocked(bounds, tempTaskBounds, tempTaskInsetBounds, null, null,
-                    preserveWindows);
+                    preserveWindows, deferResume);
             return;
         }
         final ActivityStack stack = getStack(stackId);
@@ -2151,9 +2185,43 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
+    /**
+     * TODO: remove the need for this method. (b/30693465)
+     *
+     * @param userId user handle for the locked managed profile. Freeform tasks for this user will
+     *        be moved to another stack, so they are not shown in the background.
+     */
+    void moveProfileTasksFromFreeformToFullscreenStackLocked(@UserIdInt int userId) {
+        final ActivityStack stack = getStack(FREEFORM_WORKSPACE_STACK_ID);
+        if (stack == null) {
+            return;
+        }
+        mWindowManager.deferSurfaceLayout();
+        try {
+            final ArrayList<TaskRecord> tasks = stack.getAllTasks();
+            final int size = tasks.size();
+            for (int i = size - 1; i >= 0; i--) {
+                if (taskContainsActivityFromUser(tasks.get(i), userId)) {
+                    positionTaskInStackLocked(tasks.get(i).taskId, FULLSCREEN_WORKSPACE_STACK_ID,
+                            /* position */ 0);
+                }
+            }
+        } finally {
+            mWindowManager.continueSurfaceLayout();
+        }
+    }
+
     void resizeDockedStackLocked(Rect dockedBounds, Rect tempDockedTaskBounds,
-            Rect tempDockedTaskInsetBounds,
-            Rect tempOtherTaskBounds, Rect tempOtherTaskInsetBounds, boolean preserveWindows) {
+            Rect tempDockedTaskInsetBounds, Rect tempOtherTaskBounds, Rect tempOtherTaskInsetBounds,
+            boolean preserveWindows) {
+        resizeDockedStackLocked(dockedBounds, tempDockedTaskBounds, tempDockedTaskInsetBounds,
+                tempOtherTaskBounds, tempOtherTaskInsetBounds, preserveWindows,
+                false /* deferResume */);
+    }
+
+    void resizeDockedStackLocked(Rect dockedBounds, Rect tempDockedTaskBounds,
+            Rect tempDockedTaskInsetBounds, Rect tempOtherTaskBounds, Rect tempOtherTaskInsetBounds,
+            boolean preserveWindows, boolean deferResume) {
 
         if (!mAllowDockedStackResize) {
             // Docked stack resize currently disabled.
@@ -2196,11 +2264,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     if (StackId.isResizeableByDockedStack(i) && getStack(i) != null) {
                         resizeStackLocked(i, tempRect, tempOtherTaskBounds,
                                 tempOtherTaskInsetBounds, preserveWindows,
-                                true /* allowResizeInDockedMode */, !DEFER_RESUME);
+                                true /* allowResizeInDockedMode */, deferResume);
                     }
                 }
             }
-            stack.ensureVisibleActivitiesConfigurationLocked(r, preserveWindows);
+            if (!deferResume) {
+                stack.ensureVisibleActivitiesConfigurationLocked(r, preserveWindows);
+            }
         } finally {
             mAllowDockedStackResize = true;
             mWindowManager.continueSurfaceLayout();
@@ -2331,6 +2401,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // Preferred stack is the docked stack, but the task can't go in the docked stack.
             // Put it in the fullscreen stack.
             stackId = FULLSCREEN_WORKSPACE_STACK_ID;
+        } else if (stackId == FREEFORM_WORKSPACE_STACK_ID
+                && mService.mUserController.shouldConfirmCredentials(task.userId)) {
+            // Task is barred from the freeform stack. Put it in the fullscreen stack.
+            stackId = FULLSCREEN_WORKSPACE_STACK_ID;
         }
 
         if (task.stack != null) {
@@ -2402,6 +2476,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
             stackId = (prevStack != null) ? prevStack.mStackId : FULLSCREEN_WORKSPACE_STACK_ID;
             Slog.w(TAG, "Can not move unresizeable task=" + task
                     + " to docked stack. Moving to stackId=" + stackId + " instead.");
+        }
+        if (stackId == FREEFORM_WORKSPACE_STACK_ID
+                && mService.mUserController.shouldConfirmCredentials(task.userId)) {
+            stackId = (prevStack != null) ? prevStack.mStackId : FULLSCREEN_WORKSPACE_STACK_ID;
+            Slog.w(TAG, "Can not move locked profile task=" + task
+                    + " to freeform stack. Moving to stackId=" + stackId + " instead.");
         }
 
         // Temporarily disable resizeablility of task we are moving. We don't want it to be resized
@@ -2764,6 +2844,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
         }
 
+        // Send launch end powerhint before going sleep
+        mService.mActivityStarter.sendPowerHintForLaunchEndIfNeeded();
+
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
@@ -3056,11 +3139,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
         final boolean nowVisible = allResumedActivitiesVisible();
         for (int activityNdx = mStoppingActivities.size() - 1; activityNdx >= 0; --activityNdx) {
             ActivityRecord s = mStoppingActivities.get(activityNdx);
-            final boolean waitingVisible = mWaitingVisibleActivities.contains(s);
+            // TODO: Remove mWaitingVisibleActivities list and just remove activity from
+            // mStoppingActivities when something else comes up.
+            boolean waitingVisible = mWaitingVisibleActivities.contains(s);
             if (DEBUG_STATES) Slog.v(TAG, "Stopping " + s + ": nowVisible=" + nowVisible
                     + " waitingVisible=" + waitingVisible + " finishing=" + s.finishing);
             if (waitingVisible && nowVisible) {
                 mWaitingVisibleActivities.remove(s);
+                waitingVisible = false;
                 if (s.finishing) {
                     // If this activity is finishing, it is sitting on top of
                     // everyone else but we now know it is no longer needed...
@@ -3681,6 +3767,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     void activityRelaunchedLocked(IBinder token) {
         mWindowManager.notifyAppRelaunchingFinished(token);
+        if (mService.isSleepingOrShuttingDownLocked()) {
+            final ActivityRecord r = ActivityRecord.isInStackLocked(token);
+            if (r != null) {
+                r.setSleeping(true, true);
+            }
+        }
     }
 
     void activityRelaunchingLocked(ActivityRecord r) {
@@ -4176,7 +4268,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 mContainerState = CONTAINER_STATE_NO_SURFACE;
                 ((VirtualActivityDisplay) mActivityDisplay).setSurface(null);
                 if (mStack.mPausingActivity == null && mStack.mResumedActivity != null) {
-                    mStack.startPausingLocked(false, true, false, false);
+                    mStack.startPausingLocked(false, true, null, false);
                 }
             }
 
@@ -4432,6 +4524,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         // Work Challenge is present) let startActivityInPackage handle the intercepting.
         if (!mService.mUserController.shouldConfirmCredentials(task.userId)
                 && task.getRootActivity() != null) {
+            mService.mActivityStarter.sendPowerHintForLaunchStartIfNeeded(true /* forceSend */);
             mActivityMetricsLogger.notifyActivityLaunching();
             mService.moveTaskToFrontLocked(task.taskId, 0, bOptions);
             mActivityMetricsLogger.notifyActivityLaunched(ActivityManager.START_TASK_TO_FRONT,

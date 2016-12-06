@@ -41,6 +41,11 @@
                 android:background="?android:attr/colorPrimary" />
         </FrameLayout>
         <FrameLayout
+            android:id="@+id/content_header_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="?android:attr/actionBarStyle" />
+        <FrameLayout
             android:id="@+id/content_frame"
             android:layout_width="match_parent"
             android:layout_height="fill_parent"

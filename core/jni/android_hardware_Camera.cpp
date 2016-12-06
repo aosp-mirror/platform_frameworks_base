@@ -350,9 +350,16 @@ void JNICameraContext::postDataTimestamp(nsecs_t timestamp, int32_t msgType, con
     postData(msgType, dataPtr, NULL);
 }
 
-void JNICameraContext::postRecordingFrameHandleTimestamp(nsecs_t, native_handle_t*) {
-    // This is not needed at app layer. This should not be called because JNICameraContext cannot
-    // start video recording.
+void JNICameraContext::postRecordingFrameHandleTimestamp(nsecs_t, native_handle_t* handle) {
+    // Video buffers are not needed at app layer so just return the video buffers here.
+    // This may be called when stagefright just releases camera but there are still outstanding
+    // video buffers.
+    if (mCamera != nullptr) {
+        mCamera->releaseRecordingFrameHandle(handle);
+    } else {
+        native_handle_close(handle);
+        native_handle_delete(handle);
+    }
 }
 
 void JNICameraContext::postMetadata(JNIEnv *env, int32_t msgType, camera_frame_metadata_t *metadata)

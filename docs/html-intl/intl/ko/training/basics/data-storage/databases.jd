@@ -118,15 +118,15 @@ private static final String SQL_DELETE_ENTRIES =
 액세스할 수 없기 때문에 저장된 데이터는 안전하게 유지됩니다.</p>
 
 <p>유용한 API 집합이 {@link
-android.database.sqlite.SQLiteOpenHelper} 클래스에서 제공됩니다. 
+android.database.sqlite.SQLiteOpenHelper} 클래스에서 제공됩니다.
 데이터베이스에 대한 참조를 가져오기 위해 이 클래스를 사용하는 경우, 시스템은
-필요한 경우에 한해서만 데이터베이스 생성 및 업데이트와 같이 
+필요한 경우에 한해서만 데이터베이스 생성 및 업데이트와 같이
 장시간 실행될 수 있는 작업을
-수행하며, <em>앱이 시작되는 동안에는 이러한 작업을 수행하지 않습니다</em>. 
-{@link android.database.sqlite.SQLiteOpenHelper#getWritableDatabase} 또는 
+수행하며, <em>앱이 시작되는 동안에는 이러한 작업을 수행하지 않습니다</em>.
+{@link android.database.sqlite.SQLiteOpenHelper#getWritableDatabase} 또는
 {@link android.database.sqlite.SQLiteOpenHelper#getReadableDatabase}를 호출하기만 하면 됩니다.</p>
 
-<p class="note"><strong>참고:</strong> 이러한 작업은 장시간 실행될 수도 있기 때문에 
+<p class="note"><strong>참고:</strong> 이러한 작업은 장시간 실행될 수도 있기 때문에
 {@link android.os.AsyncTask} 또는 {@link android.app.IntentService}와 같이 백그라운드 스레드에서 {@link
 android.database.sqlite.SQLiteOpenHelper#getWritableDatabase} 또는 {@link
 android.database.sqlite.SQLiteOpenHelper#getReadableDatabase}를

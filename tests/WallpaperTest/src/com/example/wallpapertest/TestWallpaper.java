@@ -144,6 +144,14 @@ public class TestWallpaper extends WallpaperService {
         @Override
         public void onSurfaceCreated(SurfaceHolder holder) {
             super.onSurfaceCreated(holder);
+
+            // Simulate some slowness, so we can test the loading process in the live wallpaper
+            // picker.
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
         @Override

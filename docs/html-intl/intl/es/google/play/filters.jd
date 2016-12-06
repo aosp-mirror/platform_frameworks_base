@@ -81,7 +81,7 @@ Por ejemplo, si una aplicación requiere una cámara, Google Play no mostrará l
  solicite específicamente la aplicación al hacer clic en un vínculo profundo que apunte directamente a la
  ID de la aplicación en Google Play.</p>
 
-<p>Puedes usar cualquier combinación de los filtros disponibles para tu aplicación. Por ejemplo, puedes establecer un requisito 
+<p>Puedes usar cualquier combinación de los filtros disponibles para tu aplicación. Por ejemplo, puedes establecer un requisito
 <code>minSdkVersion</code> de <code>"4"</code> y configurar <code>smallScreens="false"</code>
  en la aplicación; luego, al cargar la aplicación a Google Play, podrías apuntar a países (operadores) europeos
  únicamente. De este modo, los filtros de Google Play evitarán que la aplicación esté disponible en un dispositivo
@@ -102,7 +102,7 @@ Play</a>, pueden ver todas las aplicaciones publicadas. No obstante, el sitio we
 
 <h2 id="manifest-filters">Filtrado en función del manifiesto de la aplicación</h2>
 
-<p>La mayoría de los filtros son activados por elementos del archivo de manifiesto de una 
+<p>La mayoría de los filtros son activados por elementos del archivo de manifiesto de una
 aplicación, <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">AndroidManifest.xml</a>
  (aunque no todo lo que se encuentra en el archivo de manifiesto puede desencadenar el filtrado).
 La tabla 1 contiene los elementos del manifiesto que debes usar para desencadenar el

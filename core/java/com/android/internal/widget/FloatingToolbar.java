@@ -737,7 +737,7 @@ public final class FloatingToolbar {
                 protected void applyTransformation(float interpolatedTime, Transformation t) {
                     int deltaWidth = (int) (interpolatedTime * (targetWidth - startWidth));
                     setWidth(mContentContainer, startWidth + deltaWidth);
-                    if (isRTL()) {
+                    if (isInRTLMode()) {
                         mContentContainer.setX(left);
 
                         // Lock the panels in place.
@@ -766,7 +766,7 @@ public final class FloatingToolbar {
                 }
             };
             final float overflowButtonStartX = mOverflowButton.getX();
-            final float overflowButtonTargetX = isRTL() ?
+            final float overflowButtonTargetX = isInRTLMode() ?
                     overflowButtonStartX + targetWidth - mOverflowButton.getWidth() :
                     overflowButtonStartX - targetWidth + mOverflowButton.getWidth();
             Animation overflowButtonAnimation = new Animation() {
@@ -774,7 +774,7 @@ public final class FloatingToolbar {
                 protected void applyTransformation(float interpolatedTime, Transformation t) {
                     float overflowButtonX = overflowButtonStartX
                             + interpolatedTime * (overflowButtonTargetX - overflowButtonStartX);
-                    float deltaContainerWidth = isRTL() ?
+                    float deltaContainerWidth = isInRTLMode() ?
                             0 :
                             mContentContainer.getWidth() - startWidth;
                     float actualOverflowButtonX = overflowButtonX + deltaContainerWidth;
@@ -812,7 +812,7 @@ public final class FloatingToolbar {
                 protected void applyTransformation(float interpolatedTime, Transformation t) {
                     int deltaWidth = (int) (interpolatedTime * (targetWidth - startWidth));
                     setWidth(mContentContainer, startWidth + deltaWidth);
-                    if (isRTL()) {
+                    if (isInRTLMode()) {
                         mContentContainer.setX(left);
 
                         // Lock the panels in place.
@@ -843,7 +843,7 @@ public final class FloatingToolbar {
                 }
             };
             final float overflowButtonStartX = mOverflowButton.getX();
-            final float overflowButtonTargetX = isRTL() ?
+            final float overflowButtonTargetX = isInRTLMode() ?
                     overflowButtonStartX - startWidth + mOverflowButton.getWidth() :
                     overflowButtonStartX + startWidth - mOverflowButton.getWidth();
             Animation overflowButtonAnimation = new Animation() {
@@ -851,7 +851,7 @@ public final class FloatingToolbar {
                 protected void applyTransformation(float interpolatedTime, Transformation t) {
                     float overflowButtonX = overflowButtonStartX
                             + interpolatedTime * (overflowButtonTargetX - overflowButtonStartX);
-                    float deltaContainerWidth = isRTL() ?
+                    float deltaContainerWidth = isInRTLMode() ?
                             0 :
                             mContentContainer.getWidth() - startWidth;
                     float actualOverflowButtonX = overflowButtonX + deltaContainerWidth;
@@ -903,7 +903,7 @@ public final class FloatingToolbar {
                         R.string.floating_toolbar_close_overflow_description));
 
                 // Update x-coordinates depending on RTL state.
-                if (isRTL()) {
+                if (isInRTLMode()) {
                     mContentContainer.setX(mMarginHorizontal);  // align left
                     mMainPanel.setX(0);  // align left
                     mOverflowButton.setX(  // align right
@@ -947,7 +947,7 @@ public final class FloatingToolbar {
 
                 if (hasOverflow()) {
                     // Update x-coordinates depending on RTL state.
-                    if (isRTL()) {
+                    if (isInRTLMode()) {
                         mContentContainer.setX(mMarginHorizontal);  // align left
                         mMainPanel.setX(0);  // align left
                         mOverflowButton.setX(0);  // align left
@@ -1087,9 +1087,10 @@ public final class FloatingToolbar {
             viewTreeObserver.addOnComputeInternalInsetsListener(mInsetsComputer);
         }
 
-        private boolean isRTL() {
-            return mContext.getResources().getConfiguration().getLayoutDirection()
-                    == View.LAYOUT_DIRECTION_RTL;
+        private boolean isInRTLMode() {
+            return mContext.getApplicationInfo().hasRtlSupport()
+                    && mContext.getResources().getConfiguration().getLayoutDirection()
+                            == View.LAYOUT_DIRECTION_RTL;
         }
 
         private boolean hasOverflow() {
@@ -1203,7 +1204,7 @@ public final class FloatingToolbar {
             // The positioning of contents in RTL is wrong when the view is first rendered.
             // Hide the view and post a runnable to recalculate positions and render the view.
             // TODO: Investigate why this happens and fix.
-            if (isRTL()) {
+            if (isInRTLMode()) {
                 mContentContainer.setAlpha(0);
                 mContentContainer.post(mPreparePopupContentRTLHelper);
             }

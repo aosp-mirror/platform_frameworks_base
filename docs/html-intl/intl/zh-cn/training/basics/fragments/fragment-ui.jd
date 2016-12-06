@@ -4,7 +4,7 @@ page.type=培训
 @jd:body
 
     <div id="tb-wrapper">
-      <div id="tb"> 
+      <div id="tb">
         <h2>本课程所教授的内容：</h2>
     <ol>
       <li><a href="#AddAtRuntime">在运行时向 Activity 添加 Fragment</a></li>
@@ -39,7 +39,7 @@ page.type=培训
 
 
 
-    <h2 id="AddAtRuntime">在运行时向 Activity 添加 Fragment</h2> 
+    <h2 id="AddAtRuntime">在运行时向 Activity 添加 Fragment</h2>
 
     <p>你可以在 Activity 运行时向其添加 Fragment，而不用像<a href="creating.html">上一课</a>中介绍的那样，使用 <code>&lt;fragment&gt;</code> 元素在布局文件中为 Activity 定义 Fragment。如果你打算在 Activity 运行周期内更改 Fragment，就必须这样做。</p>
 
@@ -88,11 +88,11 @@ page.type=培训
                     return;
                 }
 
-                // 创建一个要放入 Activity 布局中的新 Fragment 
+                // 创建一个要放入 Activity 布局中的新 Fragment
                 HeadlinesFragment firstFragment = new HeadlinesFragment();
 
                 // 如果此 Activity 是通过 Intent 发出的特殊指令来启动的，
-                // 请将该 Intent 的 extras 以参数形式传递给该 Fragment 
+                // 请将该 Intent 的 extras 以参数形式传递给该 Fragment
                 firstFragment.setArguments(getIntent().getExtras());
 
                 // 将该 Fragment 添加到“fragment_container”FrameLayout 中

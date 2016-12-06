@@ -42,7 +42,7 @@
             android:visibility="gone"
             style="?attr/borderlessButtonStyle"
             android:textAppearance="?attr/textAppearanceButton"
-            android:textColor="@color/material_deep_teal_500"
+            android:textColor="?attr/colorAccent"
             android:gravity="center_vertical"
             android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"

@@ -197,8 +197,22 @@ public class MobileSignalController extends SignalController<
 
         if (mConfig.show4gForLte) {
             mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_LTE, TelephonyIcons.FOUR_G);
+            if (mConfig.hideLtePlus) {
+                mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_LTE_CA,
+                        TelephonyIcons.FOUR_G);
+            } else {
+                mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_LTE_CA,
+                        TelephonyIcons.FOUR_G_PLUS);
+            }
         } else {
             mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_LTE, TelephonyIcons.LTE);
+            if (mConfig.hideLtePlus) {
+                mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_LTE_CA,
+                        TelephonyIcons.LTE);
+            } else {
+                mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_LTE_CA,
+                        TelephonyIcons.LTE_PLUS);
+            }
         }
         mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_IWLAN, TelephonyIcons.WFC);
     }
@@ -457,6 +471,10 @@ public class MobileSignalController extends SignalController<
             }
             mServiceState = state;
             mDataNetType = state.getDataNetworkType();
+            if (mDataNetType == TelephonyManager.NETWORK_TYPE_LTE && mServiceState != null &&
+                    mServiceState.isUsingCarrierAggregation()) {
+                mDataNetType = TelephonyManager.NETWORK_TYPE_LTE_CA;
+            }
             updateTelephony();
         }
 
@@ -468,6 +486,10 @@ public class MobileSignalController extends SignalController<
             }
             mDataState = state;
             mDataNetType = networkType;
+            if (mDataNetType == TelephonyManager.NETWORK_TYPE_LTE && mServiceState != null &&
+                    mServiceState.isUsingCarrierAggregation()) {
+                mDataNetType = TelephonyManager.NETWORK_TYPE_LTE_CA;
+            }
             updateTelephony();
         }
 

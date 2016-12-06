@@ -23,25 +23,10 @@ helpoutsWidget=true
 
 <p>Welcome to Android application development!</p>
 
-<p>This class teaches you how to build your first Android app. You’ll learn how to create an Android
-project and run a debuggable version of the app. You'll also learn some fundamentals of Android app
-design, including how to build a simple user interface and handle user input.</p>
+<p>This class teaches you how to build your first Android app. You’ll learn how
+  to create an Android project with Android Studio and run a debuggable version
+  of the app. You'll also learn some fundamentals of Android app design,
+  including how to build a simple user interface and handle user input.</p>
 
-<h2>Set Up Your Environment</h2>
-
-<p>Before you start this class, be sure you have your development environment set up. You need
-to:</p>
-<ol>
-  <li>Download <a href="{@docRoot}studio/index.html">Android Studio</a>.</li>
-  <li>Download the latest SDK tools and platforms using the
-  <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a>.</li>
-</ol>
-
-<p class="note"><strong>Note:</strong> Although most of this training class
-expects that you're using Android Studio, some procedures include alternative
-instructions for using
-the SDK tools from the command line instead.</p>
-
-<p>This class uses a tutorial format to create a small Android app that teaches
-you some fundamental concepts about Android development, so it's important that you follow each
-step.</p>
+<p>Before you start this class, download and install
+  <a href="{@docRoot}studio/index.html">Android Studio</a>.</p>

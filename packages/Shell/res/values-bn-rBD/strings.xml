@@ -21,7 +21,7 @@
     <string name="bugreport_finished_title" msgid="4429132808670114081">"ত্রুটির প্রতিবেদন <xliff:g id="ID">#%d</xliff:g> ক্যাপচার করা হয়েছে"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"ত্রুটির প্রতিবেদনে বিশদ বিবরণ যোগ করা হচ্ছে"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"অনুগ্রহ করে অপেক্ষা করুন..."</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"আপনার বাগ রিপোর্ট শেয়ার করতে বামে সোয়াইপ করুন"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"ফোনে শীঘ্রই ত্রুটির প্রতিবেদন দেখা যাবে"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"আপনার ত্রুটির প্রতিবেদন শেয়ার করতে আলতো চাপ দিন"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"কোনো স্ক্রীনশট ছাড়াই ত্রুটির প্রতিবেদন শেয়ার করতে আলতো চাপ দিন বা সম্পন্ন করতে স্ক্রীনশটের জন্য অপেক্ষা করুন"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"কোনো স্ক্রীনশট ছাড়াই ত্রুটির প্রতিবেদন শেয়ার করতে আলতো চাপ দিন বা সম্পন্ন করতে স্ক্রীনশটের জন্য অপেক্ষা করুন"</string>

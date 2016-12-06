@@ -1667,10 +1667,10 @@ public final class Bitmap implements Parcelable {
      * and therefore is harmless.
      */
     public void prepareToDraw() {
-        // TODO: Consider having this start an async upload?
-        // With inPurgeable no-op'd there's currently no use for this
-        // method, but it could have interesting future uses.
         checkRecycled("Can't prepareToDraw on a recycled bitmap!");
+        // Kick off an update/upload of the bitmap outside of the normal
+        // draw path.
+        nativePrepareToDraw(mNativePtr);
     }
 
     /**
@@ -1741,4 +1741,5 @@ public final class Bitmap implements Parcelable {
     private static native void nativeSetHasMipMap(long nativeBitmap, boolean hasMipMap);
     private static native boolean nativeSameAs(long nativeBitmap0, long nativeBitmap1);
     private static native long nativeRefPixelRef(long nativeBitmap);
+    private static native void nativePrepareToDraw(long nativeBitmap);
 }

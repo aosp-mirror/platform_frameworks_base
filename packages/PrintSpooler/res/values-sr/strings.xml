@@ -103,8 +103,8 @@
     <item msgid="3199660090246166812">"Водоравно"</item>
   </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"Уписивање у датотеку није могуће"</string>
-    <string name="print_error_default_message" msgid="8602678405502922346">"Жао нам је, ово није успело. Покушајте поново."</string>
-    <string name="print_error_retry" msgid="1426421728784259538">"Покушајте поново"</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"Жао нам је, ово није успело. Пробајте поново."</string>
+    <string name="print_error_retry" msgid="1426421728784259538">"Пробајте поново"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"Овај штампач тренутно није доступан."</string>
     <string name="print_cannot_load_page" msgid="6179560924492912009">"Није успео приказ прегледа"</string>
     <string name="print_preparing_preview" msgid="3939930735671364712">"Припрема прегледа..."</string>

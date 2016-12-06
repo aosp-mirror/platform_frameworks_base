@@ -48,7 +48,7 @@ trainingnavtop=true
     also occurs in any object that is only instantiated once. To learn more about this, read the
     <a href="{@docRoot}guide/components/processes-and-threads.html">
     Processes and Threads</a> API guide.
-    
+
 </p>
 <h2 id="ClassStructure">Define the Thread Pool Class</h2>
 <p>

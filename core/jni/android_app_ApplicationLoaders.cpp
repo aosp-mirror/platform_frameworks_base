@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "ApplicationLoaders"
+
 #include <nativehelper/ScopedUtfChars.h>
 #include <nativeloader/native_loader.h>
 #include <vulkan/vulkan_loader_data.h>
@@ -22,10 +24,17 @@
 
 static void setupVulkanLayerPath_native(JNIEnv* env, jobject clazz,
         jobject classLoader, jstring librarySearchPath) {
+    android_namespace_t* ns = android::FindNamespaceByClassLoader(env, classLoader);
     ScopedUtfChars layerPathChars(env, librarySearchPath);
+
     vulkan::LoaderData& loader_data = vulkan::LoaderData::GetInstance();
-    loader_data.layer_path = layerPathChars.c_str();
-    loader_data.app_namespace = android::FindNamespaceByClassLoader(env, classLoader);
+    if (loader_data.layer_path.empty()) {
+        loader_data.layer_path = layerPathChars.c_str();
+        loader_data.app_namespace = ns;
+    } else {
+        ALOGD("ignored Vulkan layer search path %s for namespace %p",
+                layerPathChars.c_str(), ns);
+    }
 }
 
 static const JNINativeMethod g_methods[] = {

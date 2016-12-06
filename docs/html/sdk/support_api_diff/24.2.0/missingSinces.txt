@@ -1,0 +1,183 @@
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityManagerCompat.AccessibilityStateChangeListener Interface
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityManagerCompat.TouchExplorationStateChangeListener Interface
+NO DOC BLOCK: android.support.v7.app.ActionBarActivity Class
+NO DOC BLOCK: android.support.v7.widget.ActionMenuView Class
+NO DOC BLOCK: android.support.v7.widget.ActionMenuView.LayoutParams Class
+NO DOC BLOCK: android.support.v7.widget.ActionMenuView.OnMenuItemClickListener Interface
+NO DOC BLOCK: android.support.v7.app.AppCompatActivity Class
+NO DOC BLOCK: android.support.v7.widget.AppCompatAutoCompleteTextView Class
+NO DOC BLOCK: android.support.v7.widget.AppCompatButton Class
+NO DOC BLOCK: android.support.v7.widget.AppCompatCheckBox Class
+NO DOC BLOCK: android.support.v7.widget.AppCompatCheckedTextView Class
+NO DOC BLOCK: android.support.v7.app.AppCompatDialogFragment Class
+NO DOC BLOCK: android.support.v7.widget.AppCompatEditText Class
+NO DOC BLOCK: android.support.v7.widget.AppCompatImageButton Class
+NO DOC BLOCK: android.support.v7.widget.AppCompatImageView Class
+NO DOC BLOCK: android.support.v7.widget.AppCompatMultiAutoCompleteTextView Class
+NO DOC BLOCK: android.support.v7.widget.AppCompatRadioButton Class
+NO DOC BLOCK: android.support.v7.widget.AppCompatRatingBar Class
+NO DOC BLOCK: android.support.v7.widget.AppCompatSeekBar Class
+NO DOC BLOCK: android.support.v7.widget.AppCompatSpinner Class
+NO DOC BLOCK: android.support.v7.widget.AppCompatTextView Class
+NO DOC BLOCK: android.support.v7.util.BatchingListUpdateCallback Class
+NO DOC BLOCK: android.support.v7.widget.CardView Class
+NO DOC BLOCK: android.support.v7.util.DiffUtil Class
+NO DOC BLOCK: android.support.v7.util.DiffUtil.Callback Class
+NO DOC BLOCK: android.support.v7.util.DiffUtil.DiffResult Class
+NO DOC BLOCK: android.support.v7.widget.GridLayout Class
+NO DOC BLOCK: android.support.v7.widget.GridLayout.Alignment Class
+NO DOC BLOCK: android.support.v7.widget.GridLayout.LayoutParams Class
+NO DOC BLOCK: android.support.v7.widget.GridLayout.Spec Class
+NO DOC BLOCK: android.support.v7.widget.LinearLayoutCompat Class
+NO DOC BLOCK: android.support.v7.widget.LinearLayoutCompat.LayoutParams Class
+NO DOC BLOCK: android.support.v7.widget.LinearSnapHelper Class
+NO DOC BLOCK: android.support.v7.widget.ListPopupWindow Class
+NO DOC BLOCK: android.support.v7.util.ListUpdateCallback Interface
+NO DOC BLOCK: android.support.v7.preference.MultiSelectListPreferenceDialogFragmentCompat Class
+NO DOC BLOCK: android.support.v7.app.NotificationCompat Class
+NO DOC BLOCK: android.support.v7.app.NotificationCompat.Builder Class
+NO DOC BLOCK: android.support.v7.app.NotificationCompat.MediaStyle Class
+NO DOC BLOCK: android.support.v4.util.PatternsCompat Class
+NO DOC BLOCK: android.support.v7.widget.PopupMenu Class
+NO DOC BLOCK: android.support.v7.widget.PopupMenu.OnDismissListener Interface
+NO DOC BLOCK: android.support.v7.widget.PopupMenu.OnMenuItemClickListener Interface
+NO DOC BLOCK: android.support.v7.widget.RecyclerView.OnFlingListener Class
+NO DOC BLOCK: android.support.v7.widget.RecyclerView.SmoothScroller.ScrollVectorProvider Interface
+NO DOC BLOCK: android.support.v7.widget.SearchView Class
+NO DOC BLOCK: android.support.v7.widget.SearchView.OnCloseListener Interface
+NO DOC BLOCK: android.support.v7.widget.SearchView.OnQueryTextListener Interface
+NO DOC BLOCK: android.support.v7.widget.SearchView.OnSuggestionListener Interface
+NO DOC BLOCK: android.support.v4.widget.SearchViewCompat.OnCloseListener Interface
+NO DOC BLOCK: android.support.v4.widget.SearchViewCompat.OnQueryTextListener Interface
+NO DOC BLOCK: android.support.v7.widget.ShareActionProvider Class
+NO DOC BLOCK: android.support.v7.widget.ShareActionProvider.OnShareTargetSelectedListener Interface
+NO DOC BLOCK: android.support.v4.app.SharedElementCallback.OnSharedElementsReadyListener Interface
+NO DOC BLOCK: android.support.v7.widget.SnapHelper Class
+NO DOC BLOCK: android.support.v7.widget.Space Class
+NO DOC BLOCK: android.support.v4.widget.SwipeRefreshLayout.OnChildScrollUpCallback Interface
+NO DOC BLOCK: android.support.v7.widget.SwitchCompat Class
+NO DOC BLOCK: android.support.v7.widget.ThemedSpinnerAdapter Interface
+NO DOC BLOCK: android.support.v7.widget.ThemedSpinnerAdapter.Helper Class
+NO DOC BLOCK: android.support.v7.widget.Toolbar Class
+NO DOC BLOCK: android.support.v7.widget.Toolbar.LayoutParams Class
+NO DOC BLOCK: android.support.v7.widget.Toolbar.OnMenuItemClickListener Interface
+NO DOC BLOCK: android.support.v7.widget.Toolbar.SavedState Class
+NO DOC BLOCK: android.support.v4.view.WindowInsetsCompat Constructor (android.support.v4.view.WindowInsetsCompat)
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityManagerCompat Method addTouchExplorationStateChangeListener(android.view.accessibility.AccessibilityManager, android.support.v4.view.accessibility.AccessibilityManagerCompat.TouchExplorationStateChangeListener)
+NO DOC BLOCK: android.support.v4.media.session.MediaButtonReceiver Method buildMediaButtonPendingIntent(android.content.Context, android.content.ComponentName, long)
+NO DOC BLOCK: android.support.v4.media.session.MediaButtonReceiver Method buildMediaButtonPendingIntent(android.content.Context, long)
+NO DOC BLOCK: android.support.v4.graphics.drawable.DrawableCompat Method clearColorFilter(android.graphics.drawable.Drawable)
+NO DOC BLOCK: android.support.design.widget.TabLayout Method clearOnTabSelectedListeners()
+NO DOC BLOCK: android.support.v7.widget.StaggeredGridLayoutManager Method computeScrollVectorForPosition(int)
+NO DOC BLOCK: android.support.v4.app.FragmentController Method findFragmentByWho(java.lang.String)
+NO DOC BLOCK: android.support.v4.media.MediaBrowserCompat.MediaItem Method fromMediaItem(java.lang.Object)
+NO DOC BLOCK: android.support.v4.media.MediaBrowserCompat.MediaItem Method fromMediaItemList(java.util.List<?>)
+NO DOC BLOCK: android.support.v4.media.session.MediaSessionCompat Method fromMediaSession(android.content.Context, java.lang.Object)
+NO DOC BLOCK: android.support.v4.media.session.MediaSessionCompat.QueueItem Method fromQueueItem(java.lang.Object)
+NO DOC BLOCK: android.support.v4.media.session.MediaSessionCompat.QueueItem Method fromQueueItemList(java.util.List<?>)
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityEventCompat Method getAction(android.view.accessibility.AccessibilityEvent)
+NO DOC BLOCK: android.support.v4.widget.TextViewCompat Method getCompoundDrawablesRelative(android.widget.TextView)
+NO DOC BLOCK: android.support.design.widget.CoordinatorLayout Method getDependents(android.view.View)
+NO DOC BLOCK: android.support.v7.graphics.Palette Method getDominantColor(int)
+NO DOC BLOCK: android.support.v7.graphics.Palette Method getDominantSwatch()
+NO DOC BLOCK: android.support.v7.content.res.AppCompatResources Method getDrawable(android.content.Context, int)
+NO DOC BLOCK: android.support.v7.app.ActionBarDrawerToggle Method getDrawerArrowDrawable()
+NO DOC BLOCK: android.support.design.widget.CoordinatorLayout.Behavior Method getInsetDodgeRect(android.support.design.widget.CoordinatorLayout, V, android.graphics.Rect)
+NO DOC BLOCK: android.support.design.widget.FloatingActionButton.Behavior Method getInsetDodgeRect(android.support.design.widget.CoordinatorLayout, android.support.design.widget.FloatingActionButton, android.graphics.Rect)
+NO DOC BLOCK: android.support.v4.app.ActivityOptionsCompat Method getLaunchBounds()
+NO DOC BLOCK: android.support.v17.leanback.widget.AbstractMediaItemPresenter.ViewHolder Method getMediaItemNumberViewFlipper()
+NO DOC BLOCK: android.support.v17.leanback.widget.AbstractMediaItemPresenter.ViewHolder Method getMediaItemPausedView()
+NO DOC BLOCK: android.support.v17.leanback.widget.AbstractMediaItemPresenter.ViewHolder Method getMediaItemPlayingView()
+NO DOC BLOCK: android.support.v17.leanback.widget.AbstractMediaItemPresenter Method getMediaPlayState(java.lang.Object)
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityEventCompat Method getMovementGranularity(android.view.accessibility.AccessibilityEvent)
+NO DOC BLOCK: android.support.v7.widget.RecyclerView Method getOnFlingListener()
+NO DOC BLOCK: android.support.design.widget.TextInputLayout Method getPasswordVisibilityToggleContentDescription()
+NO DOC BLOCK: android.support.design.widget.TextInputLayout Method getPasswordVisibilityToggleDrawable()
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.CollectionInfoCompat Method getSelectionMode()
+NO DOC BLOCK: android.support.v4.os.BuildCompat Method isAtLeastNMR1()
+NO DOC BLOCK: android.support.design.widget.FloatingActionButton.Behavior Method isAutoHideEnabled()
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityNodeInfoCompat Method isContextClickable()
+NO DOC BLOCK: android.support.v17.leanback.widget.ObjectAdapter Method isImmediateNotifySupported()
+NO DOC BLOCK: android.support.v4.view.ViewCompat Method isImportantForAccessibility(android.view.View)
+NO DOC BLOCK: android.support.design.widget.TextInputLayout Method isPasswordVisibilityToggleEnabled()
+NO DOC BLOCK: android.support.v4.accessibilityservice.AccessibilityServiceInfoCompat Method loadDescription(android.accessibilityservice.AccessibilityServiceInfo, android.content.pm.PackageManager)
+NO DOC BLOCK: android.support.v4.app.ActivityOptionsCompat Method makeBasic()
+NO DOC BLOCK: android.support.v4.app.ActivityOptionsCompat Method makeClipRevealAnimation(android.view.View, int, int, int, int)
+NO DOC BLOCK: android.support.v4.app.ActivityOptionsCompat Method makeTaskLaunchBehind()
+NO DOC BLOCK: android.support.v17.leanback.widget.AbstractMediaItemPresenter.ViewHolder Method notifyPlayStateChanged()
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.CollectionInfoCompat Method obtain(int, int, boolean)
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.CollectionItemInfoCompat Method obtain(int, int, int, int, boolean)
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.RangeInfoCompat Method obtain(int, float, float, float)
+NO DOC BLOCK: android.support.design.widget.CoordinatorLayout.Behavior Method onAttachedToLayoutParams(android.support.design.widget.CoordinatorLayout.LayoutParams)
+NO DOC BLOCK: android.support.v17.leanback.widget.AbstractMediaItemPresenter Method onBindMediaPlayState(android.support.v17.leanback.widget.AbstractMediaItemPresenter.ViewHolder)
+NO DOC BLOCK: android.support.v7.util.SortedList.Callback Method onChanged(int, int, java.lang.Object)
+NO DOC BLOCK: android.support.design.widget.CoordinatorLayout.Behavior Method onDetachedFromLayoutParams()
+NO DOC BLOCK: android.support.design.widget.AppBarLayout.ScrollingViewBehavior Method onRequestChildRectangleOnScreen(android.support.design.widget.CoordinatorLayout, android.view.View, android.graphics.Rect, boolean)
+NO DOC BLOCK: android.support.design.widget.CoordinatorLayout.Behavior Method onRequestChildRectangleOnScreen(android.support.design.widget.CoordinatorLayout, V, android.graphics.Rect, boolean)
+NO DOC BLOCK: android.support.v4.app.SharedElementCallback Method onSharedElementsArrived(java.util.List<java.lang.String>, java.util.List<android.view.View>, android.support.v4.app.SharedElementCallback.OnSharedElementsReadyListener)
+NO DOC BLOCK: android.support.v7.app.AppCompatDelegate Method onStart()
+NO DOC BLOCK: android.support.v17.leanback.widget.AbstractMediaItemPresenter Method onUnbindMediaPlayState(android.support.v17.leanback.widget.AbstractMediaItemPresenter.ViewHolder)
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityManagerCompat Method removeTouchExplorationStateChangeListener(android.view.accessibility.AccessibilityManager, android.support.v4.view.accessibility.AccessibilityManagerCompat.TouchExplorationStateChangeListener)
+NO DOC BLOCK: android.support.v4.app.ActivityOptionsCompat Method requestUsageTimeReport(android.app.PendingIntent)
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityEventCompat Method setAction(android.view.accessibility.AccessibilityEvent, int)
+NO DOC BLOCK: android.support.customtabs.CustomTabsIntent Method setAlwaysUseBrowserUI(android.content.Intent)
+NO DOC BLOCK: android.support.design.widget.FloatingActionButton.Behavior Method setAutoHideEnabled(boolean)
+NO DOC BLOCK: android.support.design.widget.CollapsingToolbarLayout Method setCollapsedTitleTextColor(android.content.res.ColorStateList)
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityNodeInfoCompat Method setContextClickable(boolean)
+NO DOC BLOCK: android.support.v7.app.ActionBarDrawerToggle Method setDrawerArrowDrawable(android.support.v7.graphics.drawable.DrawerArrowDrawable)
+NO DOC BLOCK: android.support.design.widget.CollapsingToolbarLayout Method setExpandedTitleTextColor(android.content.res.ColorStateList)
+NO DOC BLOCK: android.support.customtabs.CustomTabsIntent.Builder Method setInstantAppsEnabled(boolean)
+NO DOC BLOCK: android.support.v4.app.ActivityOptionsCompat Method setLaunchBounds(android.graphics.Rect)
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityEventCompat Method setMovementGranularity(android.view.accessibility.AccessibilityEvent, int)
+NO DOC BLOCK: android.support.v4.widget.SwipeRefreshLayout Method setOnChildScrollUpCallback(android.support.v4.widget.SwipeRefreshLayout.OnChildScrollUpCallback)
+NO DOC BLOCK: android.support.v7.widget.RecyclerView Method setOnFlingListener(android.support.v7.widget.RecyclerView.OnFlingListener)
+NO DOC BLOCK: android.support.design.widget.TextInputLayout Method setPasswordVisibilityToggleContentDescription(int)
+NO DOC BLOCK: android.support.design.widget.TextInputLayout Method setPasswordVisibilityToggleContentDescription(java.lang.CharSequence)
+NO DOC BLOCK: android.support.design.widget.TextInputLayout Method setPasswordVisibilityToggleDrawable(android.graphics.drawable.Drawable)
+NO DOC BLOCK: android.support.design.widget.TextInputLayout Method setPasswordVisibilityToggleDrawable(int)
+NO DOC BLOCK: android.support.design.widget.TextInputLayout Method setPasswordVisibilityToggleEnabled(boolean)
+NO DOC BLOCK: android.support.design.widget.TextInputLayout Method setPasswordVisibilityToggleTintList(android.content.res.ColorStateList)
+NO DOC BLOCK: android.support.design.widget.TextInputLayout Method setPasswordVisibilityToggleTintMode(android.graphics.PorterDuff.Mode)
+NO DOC BLOCK: android.support.customtabs.CustomTabsSession Method setSecondaryToolbarViews(android.widget.RemoteViews, int[], android.app.PendingIntent)
+NO DOC BLOCK: android.support.v17.leanback.widget.AbstractMediaItemPresenter.ViewHolder Method setSelectedMediaItemNumberView(int)
+NO DOC BLOCK: android.support.customtabs.CustomTabsIntent Method shouldAlwaysUseBrowserUI(android.content.Intent)
+NO DOC BLOCK: android.support.v4.app.ServiceCompat Method stopForeground(android.app.Service, int)
+NO DOC BLOCK: android.support.v4.media.session.PlaybackStateCompat Method toKeyCode(long)
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityNodeInfoCompat Field ACTION_ARGUMENT_COLUMN_INT
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityNodeInfoCompat Field ACTION_ARGUMENT_PROGRESS_VALUE
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityNodeInfoCompat Field ACTION_ARGUMENT_ROW_INT
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat Field ACTION_CONTEXT_CLICK
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat Field ACTION_SCROLL_DOWN
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat Field ACTION_SCROLL_LEFT
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat Field ACTION_SCROLL_RIGHT
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat Field ACTION_SCROLL_TO_POSITION
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat Field ACTION_SCROLL_UP
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat Field ACTION_SET_PROGRESS
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat Field ACTION_SHOW_ON_SCREEN
+NO DOC BLOCK: android.support.v4.media.MediaDescriptionCompat Field BT_FOLDER_TYPE_ALBUMS
+NO DOC BLOCK: android.support.v4.media.MediaDescriptionCompat Field BT_FOLDER_TYPE_ARTISTS
+NO DOC BLOCK: android.support.v4.media.MediaDescriptionCompat Field BT_FOLDER_TYPE_GENRES
+NO DOC BLOCK: android.support.v4.media.MediaDescriptionCompat Field BT_FOLDER_TYPE_MIXED
+NO DOC BLOCK: android.support.v4.media.MediaDescriptionCompat Field BT_FOLDER_TYPE_PLAYLISTS
+NO DOC BLOCK: android.support.v4.media.MediaDescriptionCompat Field BT_FOLDER_TYPE_TITLES
+NO DOC BLOCK: android.support.v4.media.MediaDescriptionCompat Field BT_FOLDER_TYPE_YEARS
+NO DOC BLOCK: android.support.design.widget.CoordinatorLayout.LayoutParams Field dodgeInsetEdges
+NO DOC BLOCK: android.support.v4.media.MediaDescriptionCompat Field EXTRA_BT_FOLDER_TYPE
+NO DOC BLOCK: android.support.customtabs.CustomTabsIntent Field EXTRA_ENABLE_INSTANT_APPS
+NO DOC BLOCK: android.support.v4.media.MediaBrowserServiceCompat.BrowserRoot Field EXTRA_SUGGESTION_KEYWORDS
+NO DOC BLOCK: android.support.v4.app.ActivityOptionsCompat Field EXTRA_USAGE_TIME_REPORT
+NO DOC BLOCK: android.support.v4.app.ActivityOptionsCompat Field EXTRA_USAGE_TIME_REPORT_PACKAGES
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityNodeProviderCompat Field HOST_VIEW_ID
+NO DOC BLOCK: android.support.design.widget.CoordinatorLayout.LayoutParams Field insetEdge
+NO DOC BLOCK: android.support.v4.media.MediaMetadataCompat Field METADATA_KEY_BT_FOLDER_TYPE
+NO DOC BLOCK: android.support.v4.media.MediaMetadataCompat Field METADATA_KEY_MEDIA_URI
+NO DOC BLOCK: android.support.design.widget.BottomSheetBehavior Field PEEK_HEIGHT_AUTO
+NO DOC BLOCK: android.support.v17.leanback.widget.AbstractMediaItemPresenter Field PLAY_STATE_INITIAL
+NO DOC BLOCK: android.support.v17.leanback.widget.AbstractMediaItemPresenter Field PLAY_STATE_PAUSED
+NO DOC BLOCK: android.support.v17.leanback.widget.AbstractMediaItemPresenter Field PLAY_STATE_PLAYING
+NO DOC BLOCK: android.support.v4.app.ServiceCompat Field STOP_FOREGROUND_DETACH
+NO DOC BLOCK: android.support.v4.app.ServiceCompat Field STOP_FOREGROUND_REMOVE
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityEventCompat Field TYPE_ASSIST_READING_CONTEXT
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityWindowInfoCompat Field TYPE_SPLIT_SCREEN_DIVIDER
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityEventCompat Field TYPE_VIEW_CONTEXT_CLICKED
+NO DOC BLOCK: android.support.v4.view.accessibility.AccessibilityEventCompat Field TYPE_WINDOWS_CHANGED

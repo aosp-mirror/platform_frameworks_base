@@ -35,7 +35,7 @@ recommended method to retrieve Android code samples.</p>
   from GitHub as a new project.
 </p>
 
-<p>To view the Android code samples that you can import, see the 
+<p>To view the Android code samples that you can import, see the
 <a class="external-link" href="https://github.com/googlesamples/">Google Samples page</a> on GitHub.</p>
 
 <h2>Download Samples</h2>
@@ -69,6 +69,6 @@ for your applications.</p>
 
 <p class="note">
   <strong>Note:</strong> At this time, the downloadable projects are designed for use with Gradle
-    and Android Studio. 
+    and Android Studio.
 </p>
 

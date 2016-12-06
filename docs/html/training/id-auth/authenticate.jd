@@ -129,7 +129,7 @@ private class OnTokenAcquired implements AccountManagerCallback&lt;Bundle&gt; {
     public void run(AccountManagerFuture&lt;Bundle&gt; result) {
         // Get the result of the operation from the AccountManagerFuture.
         Bundle bundle = result.getResult();
-    
+
         // The token is a named value in the bundle. The name of the value
         // is stored in the constant AccountManager.KEY_AUTHTOKEN.
         token = bundle.getString(AccountManager.KEY_AUTHTOKEN);

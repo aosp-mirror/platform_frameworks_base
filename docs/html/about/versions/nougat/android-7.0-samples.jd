@@ -1,0 +1,86 @@
+page.title=Android 7.0 Samples
+page.tags="Android 7.0", "nougat", "samples", "android"
+meta.tags="android n", "Nougat", "android 7.0"
+page.image=images/cards/card-n-samples_2x.png
+@jd:body
+
+<p>
+  Use the code samples below to learn about Android 7.0 capabilities and APIs. To
+  download the samples in Android Studio, select the <b>File &gt; Import
+  Samples</b> menu option.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> These downloadable projects are designed
+   for use with Gradle and Android Studio.
+</p>
+
+
+<h3 id="mw">Multi-Window Playground</h3>
+<img src="{@docRoot}images/android-7.0/sample-multiwindow.png" style="float: left; padding-right: 0.5em" height="250" width="156"/>
+<p>
+  This sample demonstrates how to take advantage of multiple window
+  user interfaces with your app.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-MultiWindowPlayground">
+  Get it on GitHub</a>
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="an">Active Notifications</h3>
+<img src="{@docRoot}images/android-7.0/sample-activenotifications.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
+<p>
+  This is a pre-existing sample which shows a simple service that sends
+  notifications using NotificationCompat. Each unread conversation from a user
+  is sent as a distinct notification.
+</p>
+<p>
+  This sample has been updated to take advantage of new notification features
+  available in Android N.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-ActiveNotifications">
+  Get it on GitHub</a>
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="ms">Messaging Service</h3>
+<img src="{@docRoot}images/android-7.0/sample-messagingservice.png" style="float: left; padding-right: 0.5em" height="250" width="150" />
+<p>
+  This is a pre-existing sample which demonstrates how to use
+  NotificationManager to tell how many notifications an application is currently
+  showing.
+</p>
+<p>
+  This sample has been updated to take advantage of new notification features
+  available in Android N.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-MessagingService">
+  Get it on GitHub</a>
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="fbe">Direct Boot</h3>
+<img src="{@docRoot}images/android-7.0/sample-directboot.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
+<p>
+  This sample demonstrates how to store and access data in a device encrypted
+  storage which is always available while the device is booted.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-DirectBoot">
+  Get it on GitHub</a>
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="sda">Scoped Directory Access</h3>
+<img src="{@docRoot}images/android-7.0/sample-scopeddirectoryaccess.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
+<p>
+  This sample demonstrates how to read and write data from specific
+  directories, while requiring fewer permissions.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-ScopedDirectoryAccess">
+  Get it on GitHub</a>
+</p>

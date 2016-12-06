@@ -15,7 +15,7 @@ startpage=true
   <li>Android 2.0 (API level 5) or higher</li>
   <li>Experience with <a href="{@docRoot}guide/components/services.html">Services</a></li>
   <li>Experience with <a href="http://oauth.net/2/">OAuth 2.0</a></li>
-</ul>  
+</ul>
 
 <h2>You should also read</h2>
 <ul>

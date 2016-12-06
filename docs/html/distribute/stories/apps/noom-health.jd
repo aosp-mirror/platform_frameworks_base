@@ -1,0 +1,115 @@
+page.title=Noom Grows International Revenue by 80% Through Localization on Google Play
+page.metaDescription=Noom increases revenue by localizing their app.
+page.tags="developerstory", "apps", "googleplay"
+page.image=images/cards/distribute/stories/noom.jpg
+page.timestamp=1468901832
+
+@jd:body
+
+<div class="figure">
+  <img src="{@docRoot}images/distribute/stories/noom-icon.png" />
+</div>
+
+<h3>
+  Background
+</h3>
+
+<p>
+  With a mission to help people live healthier lives,
+  <a class="external-link" href=
+  "https://play.google.com/store/apps/developer?id=Noom+Inc.">Noom</a> guides
+  their users through behavior change programs to create lifestyle habits and
+  target global health challenges. Available initially on Google Play,
+  Android first and Noom have achieved success expanding to international
+  markets, taking advantage of the broad reach of Android.
+</p>
+
+<h3>
+  What they did
+</h3>
+
+<p>
+  Launching first in the US, Noom created a series of programs tailored to
+  their users’ specific <a class="external-link" href=
+  "https://play.google.com/store/apps/details?id=com.wsl.noom">
+  health goals</a>. Key to their approach is offering a holistic solution,
+  including simple personalized tasks, progress tracking, meal feedback, and
+  support from both personal coaches and peers. The team has a strategic
+  approach to expanding their user base globally. Noom localized their app to
+  better connect with users in the following areas:
+</p>
+
+<ul>
+  <li><strong>Localized product</strong>
+    <ul style="list-style: none;">
+    <li>In addition to translating their app to five languages and their store
+      listing page to 11 languages, Noom conducted extensive analysis to
+      determine the right financial model tailored to each international
+      market. This included evaluation of their competitive landscape and
+      local health and wellness spending behavior, in addition to running
+      pricing experiments to determine the optimal offering between
+      subscriptions, IAPs, or a premium app.</li>
+    </ul>
+  </li>
+
+  <li><strong>Localized cuisines</strong>
+    <ul style="list-style: none;">
+    <li>When Noom started researching the Korean, Japanese, German, and Latin
+      American markets, they immediately focused on localizing their food
+      database. Using a combination of local food editors, existing food
+      databases, and user suggestions, their app now includes local cuisine
+      and popular packaged food brands, offering a simpler and more
+      comprehensive experience for users.</li>
+    </ul>
+  </li>
+
+  <li><strong>Localized coaches</strong>
+    <ul style="list-style: none;">
+    <li>Hiring local coaches not only removed language barriers, but also
+      reduced response times as they are located within the same time zone
+      as their users. Using various notification types, Noom has increased
+      user engagement by three to four times.</li>
+    </ul>
+  </li>
+</ul>
+
+<img src="{@docRoot}images/distribute/stories/noom-screenshot.png">
+  <p class="img-caption">
+  <strong>Figure 1.</strong> German Play Store listing page, Korean recipes,
+  and Japanese meal plan
+  </p>
+
+<h3>
+  Results
+</h3>
+
+<p>
+  <em>"Android's global focus and great localization tooling made the decision
+  to go global much easier. Localization to new markets has been a consistent
+  growth driver at Noom,"</em> said Artem Petakov, co-founder and President
+  at Noom.
+</p>
+
+<p>
+  Over the last three years, Noom’s localization efforts led to an <strong>80%
+  increase in international revenue growth on Android</strong>. In Japan
+  alone, <strong>revenue increased more than 480%</strong> during the same
+  time period. To identify future expansion opportunities, the team looks
+  towards countries with strong Android penetration and install growth
+  using the English product and plans to apply their localization methods to
+  achieve even greater success.
+</p>
+
+<h3>
+  Get started
+</h3>
+
+<p>
+  Learn more about <a class="external-link" href=
+  "https://material.google.com/patterns/notifications.html">Notifications</a>,
+  and find out about
+  <a href="{@docRoot}distribute/tools/localization-checklist.html">
+  app localization</a> and how to
+  <a href="{@docRoot}distribute/users/expand-to-new-markets.html">
+  Expand Into New Markets</a>.
+</p>

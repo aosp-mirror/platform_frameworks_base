@@ -26,6 +26,9 @@ public interface BluetoothController {
 
     boolean isBluetoothSupported();
     boolean isBluetoothEnabled();
+
+    int getBluetoothState();
+
     boolean isBluetoothConnected();
     boolean isBluetoothConnecting();
     String getLastDeviceName();

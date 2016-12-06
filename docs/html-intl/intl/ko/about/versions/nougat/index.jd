@@ -1,0 +1,110 @@
+page.title=Android 7.0 Nougat
+page.tags="androidn","versions"
+meta.tags="android n", "nougat", "android 7.0"
+fullpage=true
+forcelocalnav=true
+header.hide=1
+footer.hide=1
+@jd:body
+
+<section class="dac-expand dac-hero dac-light">
+  <div class="wrap" style="max-width:1100px;margin-top:0">
+  <a href="{@docRoot}about/versions/nougat/android-7.0.html">
+    <div class="cols dac-hero-content" style="padding-bottom:1em;">
+
+      <div class="col-7of16 col-push-8of16" style="padding-left:2em">
+        <h1 class="dac-hero-title">Android 7.0 Nougat</h1>
+        <p class="dac-hero-description">
+          Android Nougat을 맞이할 준비를 하세요!
+          Nexus와 다른 기기에서 <strong>앱을 테스트하세요</strong>. <strong>전력과 메모리를 절약</strong>하는 새로운 시스템
+동작을 지원하세요.
+          <strong>다중 창 UI</strong>,
+<strong>직접 회신 알림</strong> 등으로 앱을 확장하세요.
+        </p>
+
+        <a class="dac-hero-cta" href="{@docRoot}about/versions/nougat/android-7.0.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          시작하기
+        </a>
+      </div>
+      <div class="col-7of16 col-pull-6of16 dac-hero-figure" style="margin-top:1.5em;padding-right:1.5em;">
+        <a  href="{@docRoot}about/versions/nougat/android-7.0.html">
+        <img class="dac-hero-image" src="{@docRoot}images/home/n-preview-hero.png"
+             srcset="{@docRoot}images/home/n-preview-hero.png 1x,
+             {@docRoot}images/home/n-preview-hero_2x.png 2x" />
+           </a>
+      </div>
+    </div></a>
+    <div class="dac-section dac-small">
+      <div class="resource-widget resource-flow-layout col-16"
+           data-query="collection:nougat/landing/resources"
+           data-cardSizes="6x2"
+           data-maxResults="3"></div>
+         </div>
+  </div>
+</section>
+
+<div class="dac-section dac-slim dac-gray dac-expand">
+  <div class="wrap dac-offset-parent">
+    <a class="dac-fab dac-scroll-button" data-scroll-button href="#latest">
+      <i class="dac-sprite dac-arrow-down-gray"></i>
+    </a>
+    <ul class="dac-actions">
+      <li class="dac-action">
+        <a class="dac-action-link" href="https://source.android.com/source/report-bugs.html">
+          <i class="dac-action-sprite dac-sprite dac-auto-chevron-large"></i>
+          문제 보고
+        </a>
+      </li>
+      <li class="dac-action">
+        <a class="dac-action-link" href="{@docRoot}preview/dev-community">
+          <i class="dac-action-sprite dac-sprite dac-auto-chevron-large"></i>
+          개발자 커뮤니티 가입
+        </a>
+      </li>
+    </ul>
+  </div><!-- end .wrap -->
+</div><!-- end .dac-actions -->
+
+<section class="dac-section dac-light dac-small" id="latest"><div class="wrap">
+  <h2 class="norule">최신</h2>
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="type:blog+tag:androidn+tag:featured, type:youtube+tag:androidn+tag:featured"
+    data-sortOrder="-timestamp"
+    data-cardSizes="6x6"
+    data-items-per-page="6"
+    data-maxResults="15"
+    data-initial-results="3"></div>
+</div></section>
+
+<section class="dac-section dac-gray" id="videos"><div class="wrap">
+  <h1 class="dac-section-title">Videos</h1>
+  <div class="dac-section-subtitle">
+    New Android capabilities and the right way to use them in your apps.
+  </div>
+
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="collection:nougat/landing/videos/first,type:youtube+tag:androidn"
+    data-sortOrder="-timestamp"
+    data-cardSizes="6x6"
+    data-items-per-page="6"
+    data-maxResults="15"
+    data-initial-results="3">
+  </div>
+</div></section>
+
+<section class="dac-section dac-light" id="resources"><div class="wrap">
+  <h1 class="dac-section-title">리소스</h1>
+  <div class="dac-section-subtitle">
+    앱을 Android Nougat에서 사용할 수 있도록 준비하는 데 유용한 중요 정보입니다.
+  </div>
+
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:nougat/landing/more"
+       data-cardSizes="6x6"
+       data-items-per-page="6"
+       data-maxResults="15"
+       data-initial-results="6"></div>
+
+  </div>
+</section>

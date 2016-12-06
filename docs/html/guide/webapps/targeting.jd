@@ -108,7 +108,7 @@ should exactly match the device screen's width and that the ability to zoom shou
 
 
 <p>When optimizing your site for mobile devices, you should usually set the width to
-{@code "device-width"} so the size fits exactly on all devices, then use CSS media queries to 
+{@code "device-width"} so the size fits exactly on all devices, then use CSS media queries to
 flexibly adapt layouts to suit different screen sizes.
 
 <p class="note"><strong>Note:</strong> You should disable user scaling only when you're certain

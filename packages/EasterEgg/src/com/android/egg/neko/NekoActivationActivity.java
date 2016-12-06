@@ -20,6 +20,8 @@ import android.content.pm.PackageManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.android.internal.logging.MetricsLogger;
+
 public class NekoActivationActivity extends Activity {
     private void toastUp(String s) {
         Toast toast = Toast.makeText(this, s, Toast.LENGTH_SHORT);
@@ -39,6 +41,7 @@ public class NekoActivationActivity extends Activity {
             }
             pm.setComponentEnabledSetting(cn, PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                     PackageManager.DONT_KILL_APP);
+            MetricsLogger.histogram(this, "egg_neko_enable", 0);
             toastUp("\uD83D\uDEAB");
         } else {
             if (NekoLand.DEBUG) {
@@ -46,6 +49,7 @@ public class NekoActivationActivity extends Activity {
             }
             pm.setComponentEnabledSetting(cn, PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
                     PackageManager.DONT_KILL_APP);
+            MetricsLogger.histogram(this, "egg_neko_enable", 1);
             toastUp("\uD83D\uDC31");
         }
         finish();

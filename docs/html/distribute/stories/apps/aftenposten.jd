@@ -1,0 +1,80 @@
+page.title=Aftenposten Improves Retention by Allowing Readers to Customize Notifications
+page.metaDescription=Aftenposten upgraded their app and improved user retention.
+page.tags="developerstory", "apps", "googleplay"
+page.image=images/cards/distribute/stories/aftenposten.png
+page.timestamp=1468901834
+
+@jd:body
+
+<div class="figure" style="width:113px">
+  <img src="{@docRoot}images/distribute/stories/aftenposten-icon.png" height=
+  "106">
+</div>
+
+<h3>
+  Background
+</h3>
+
+<p>
+  Aftenposten is one of the largest newspapers in Norway. Their <a class=
+  "external-link" href=
+  "https://play.google.com/store/apps/details?id=no.cita&amp;e=-EnableAppDetailsPageRedesign">
+  news app</a> was released on Android in 2013.
+</p>
+
+<p>
+  Aftenposten found that sending too many notifications, with no user control
+  over the default <em>on</em> setting or differentiation between general and
+  breaking news, caused many people to uninstall their app. They changed the
+  user controls for notifications and used the native Android share button in
+  the app, <strong>which reduced user uninstalls</strong>.
+</p>
+
+<h3>
+  What they did
+</h3>
+
+<p>
+  Aftenposten created a new onboarding flow that explained what notifications
+  were available, allowing readers to manage their preferences and customize up
+  to three topics. They also changed their custom share icon for the native
+  Android app.
+</p>
+
+<h3>
+  Results
+</h3>
+
+<p>
+  The results showed that with the new notifications management onboarding
+  screen, <strong>uninstalls decreased by 9.2% over 60 days</strong>. And with
+  the option to customize notifications, 51% of readers decided to keep two out
+  of three topics turned on. This led to a <strong>28% decrease over 60 days in
+  the number of users muting notifications completely</strong>. It also
+  provided insight into users’ content preferences, with <em>Sport</em> being
+  the least-favored notification.
+</p>
+
+<p>
+  Aftenposten also increased share interactions by 17% just by replacing their
+  custom share icon with the native Android share icon.
+</p>
+
+<p>
+  Aftenposten commented that: <em>Many of our users who see the onboarding
+  screen interact with it by turning off at least one notification topic. This
+  means that users are accepting push from one or more topics, instead of
+  turning it off completely. Moreover, readers are sharing more articles since
+  we added the standard share Android icon.</em>
+</p>
+
+<h3>
+  Get started
+</h3>
+
+<p>
+  Find out more about best practices for <a href=
+  "https://material.google.com/patterns/notifications.html">Notifications</a> and <a href=
+  "{@docRoot}training/building-content-sharing.html">Building Apps with Content
+  Sharing</a>.
+</p>

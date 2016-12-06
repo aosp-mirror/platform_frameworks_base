@@ -10,9 +10,9 @@ previous.link=screendensities.html
 
 
 <!-- This is the training bar -->
-<div id="tb-wrapper"> 
-<div id="tb"> 
- 
+<div id="tb-wrapper">
+<div id="tb">
+
 <h2>This lesson teaches you to</h2>
 
 <ol>
@@ -28,18 +28,18 @@ previous.link=screendensities.html
   <li><a href="{@docRoot}guide/practices/tablets-and-handsets.html">Supporting Tablets and
 Handsets</a></li>
 </ul>
- 
+
 <h2>Try it out</h2>
- 
+
 <div class="download-box">
 <a href="http://developer.android.com/shareables/training/NewsReader.zip" class="button">Download
   the sample app</a>
-<p class="filename">NewsReader.zip</p> 
-</div> 
- 
- 
-</div> 
-</div> 
+<p class="filename">NewsReader.zip</p>
+</div>
+
+
+</div>
+</div>
 
 <p>Depending on the layout that your application is currently showing, the UI
 flow may be different. For example, if your application is in the dual-pane
@@ -66,7 +66,7 @@ public class NewsReaderActivity extends FragmentActivity {
         setContentView(R.layout.main_layout);
 
         View articleView = findViewById(R.id.article);
-        mIsDualPane = articleView != null &amp;&amp; 
+        mIsDualPane = articleView != null &amp;&amp;
                         articleView.getVisibility() == View.VISIBLE;
     }
 }
@@ -139,7 +139,7 @@ public void onCreate(Bundle savedInstanceState) {
     else {
         /* use list navigation (spinner) */
         actionBar.setNavigationMode(android.app.ActionBar.NAVIGATION_MODE_LIST);
-        SpinnerAdapter adap = new ArrayAdapter<String>(this, 
+        SpinnerAdapter adap = new ArrayAdapter<String>(this,
                 R.layout.headline_item, CATEGORIES);
         actionBar.setListNavigationCallbacks(adap, handler);
     }
@@ -157,7 +157,7 @@ large screens, but is a separate activity on smaller screens.</p>
 
 <p>In cases like this, you can usually avoid code duplication by reusing the
 same {@link android.app.Fragment} subclass in several activities.  For example,
-<code>ArticleFragment</code> 
+<code>ArticleFragment</code>
 is used in the dual-pane layout:</p>
 
 {@sample development/samples/training/multiscreen/newsreader/res/layout/twopanes.xml all}
@@ -206,7 +206,7 @@ activity (as opposed to notifying a specific hard-coded activity):</p>
 public class HeadlinesFragment extends ListFragment {
     ...
     &#64;Override
-    public void onItemClick(AdapterView&lt;?&gt; parent, 
+    public void onItemClick(AdapterView&lt;?&gt; parent,
                             View view, int position, long id) {
         if (null != mHeadlineSelectedListener) {
             mHeadlineSelectedListener.onHeadlineSelected(position);

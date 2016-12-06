@@ -21,8 +21,12 @@
 #include "font/CacheTexture.h"
 #include "font/CachedGlyphInfo.h"
 #include "font/Font.h"
+#ifdef BUGREPORT_FONT_CACHE_USAGE
+#include "font/FontCacheHistoryTracker.h"
+#endif
 
 #include <utils/LruCache.h>
+#include <utils/String8.h>
 #include <utils/StrongPointer.h>
 
 #include <SkPaint.h>
@@ -132,7 +136,12 @@ public:
         mLinearFiltering = linearFiltering;
     }
 
-    uint32_t getCacheSize(GLenum format) const;
+    uint32_t getSize() const;
+    void dumpMemoryUsage(String8& log) const;
+
+#ifdef BUGREPORT_FONT_CACHE_USAGE
+    FontCacheHistoryTracker& historyTracker() { return mHistoryTracker; }
+#endif
 
 private:
     friend class Font;
@@ -175,6 +184,10 @@ private:
         mUploadTexture = true;
     }
 
+    const std::vector<CacheTexture*>& cacheTexturesForFormat(GLenum format) const;
+    uint32_t getCacheSize(GLenum format) const;
+    uint32_t getFreeCacheSize(GLenum format) const;
+
     uint32_t mSmallCacheWidth;
     uint32_t mSmallCacheHeight;
     uint32_t mLargeCacheWidth;
@@ -198,6 +211,10 @@ private:
     bool mInitialized;
 
     bool mLinearFiltering;
+
+#ifdef BUGREPORT_FONT_CACHE_USAGE
+    FontCacheHistoryTracker mHistoryTracker;
+#endif
 
 #ifdef ANDROID_ENABLE_RENDERSCRIPT
     // RS constructs

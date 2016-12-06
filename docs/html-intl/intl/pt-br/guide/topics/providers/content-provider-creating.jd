@@ -203,7 +203,7 @@ Projeto de armazenamento de dados</a>.
 <ul>
     <li>
         O sistema Android contém uma API de banco de dados SQLite que os provedores do Android usam
-    para armazenar dados orientados a tabela. 
+    para armazenar dados orientados a tabela.
         A classe {@link android.database.sqlite.SQLiteOpenHelper} ajuda a criar bancos de dados
         e a classe {@link android.database.sqlite.SQLiteDatabase} é a classe de base para acessar
         banco de dados.
@@ -539,7 +539,7 @@ public class ExampleProvider extends ContentProvider {
     </dd>
 </dl>
 <p>
-    Observe que esses métodos têm a mesma assinatura dos métodos 
+    Observe que esses métodos têm a mesma assinatura dos métodos
         {@link android.content.ContentResolver} de mesmo nome.
 </p>
 <p>
@@ -569,7 +569,7 @@ public class ExampleProvider extends ContentProvider {
 </ul>
 <h3 id="Query">Implementação do método query()</h3>
 <p>
-    
+
     O método {@link android.content.ContentProvider#query(Uri, String[], String, String[], String)
     ContentProvider.query()} precisa retornar um objeto {@link android.database.Cursor}  ou, se
     falhar, gerar uma {@link java.lang.Exception}. Se você estiver usando um banco de dados SQLite
@@ -778,7 +778,7 @@ protected static final class MainDatabaseHelper extends SQLiteOpenHelper {
     Para tipos de dados comuns como texto, HTML ou JPEG,
     {@link android.content.ContentProvider#getType(Uri) getType()} deve retornar o tipo MIME
     padrão daqueles dados. Há uma lista completa desse tipos de padrão
-    no site de 
+    no site de
     <a href="http://www.iana.org/assignments/media-types/index.htm">Tipos de mídia MIME IANA</a>.
 </p>
 <p>
@@ -981,7 +981,7 @@ vnd.android.cursor.<strong>item</strong>/vnd.com.example.provider.table1
         Permissão de leitura, gravação ou leitura/gravação para uma URI de conteúdo no provedor. Especifica-se
         cada URI que se deseja controlar
         com um elemento filho <code><a href="{@docRoot}guide/topics/manifest/path-permission-element.html">
-        &lt;path-permission&gt;</a></code> 
+        &lt;path-permission&gt;</a></code>
         do elemento <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
         &lt;provider&gt;</a></code>. Para cada URI de conteúdo, pode-se especificar
         uma permissão de leitura/gravação, uma permissão de leitura, uma permissão de gravação ou as três. As permissões

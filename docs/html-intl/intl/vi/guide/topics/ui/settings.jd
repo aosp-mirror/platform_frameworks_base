@@ -82,7 +82,7 @@ cách xây dựng thiết đặt ứng dụng của bạn bằng cách sử dụ
 
 <img src="{@docRoot}images/ui/settings/settings.png" alt="" width="435" />
 <p class="img-caption"><strong>Hình 1.</strong> Ảnh chụp màn hình từ thiết đặt của ứng dụng
-Messaging trên Android. Chọn một mục được định nghĩa bởi một {@link android.preference.Preference} 
+Messaging trên Android. Chọn một mục được định nghĩa bởi một {@link android.preference.Preference}
 sẽ mở ra một giao diện để thay đổi thiết đặt.</p>
 
 
@@ -121,7 +121,7 @@ sau:</p>
 
 <p>Vì thiết đặt của ứng dụng của bạn được xây dựng bằng cách sử dụng các đối tượng {@link android.preference.Preference}
 thay vì đối tượng
-{@link android.view.View}, bạn nên sử dụng một lớp con {@link android.app.Activity} hoặc 
+{@link android.view.View}, bạn nên sử dụng một lớp con {@link android.app.Activity} hoặc
 {@link android.app.Fragment} chuyên dụng để hiển thị thiết đặt danh sách:</p>
 
 <ul>
@@ -226,7 +226,7 @@ android.preference.ListPreference}. Cả hai mục đều bao gồm ba thuộc t
   <dt>{@code android:key}</dt>
   <dd>Thuộc tính này được yêu cầu cho các tùy chọn duy trì một giá trị dữ liệu. Nó quy định khóa
 (xâu) duy nhất mà hệ thống sử dụng khi lưu giá trị của thiết đặt này trong {@link
-android.content.SharedPreferences}. 
+android.content.SharedPreferences}.
   <p>Các thực thể duy nhất mà thuộc tính này không <em>được yêu cầu</em> là khi tùy chọn là một
 {@link android.preference.PreferenceCategory} hoặc {@link android.preference.PreferenceScreen}, hoặc
 tùy chọn quy định một {@link android.content.Intent} để gọi ra (bằng phần tử <a href="#Intents">{@code &lt;intent&gt;}</a>) hoặc {@link android.app.Fragment} để hiển thị (bằng thuộc tính <a href="{@docRoot}reference/android/preference/Preference.html#attr_android:fragment">{@code
@@ -285,7 +285,7 @@ android.preference.PreferenceCategory}.</p>
 
 <pre>
 &lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    &lt;PreferenceCategory 
+    &lt;PreferenceCategory
         android:title="&#64;string/pref_sms_storage_title"
         android:key="pref_key_storage_settings">
         &lt;CheckBoxPreference
@@ -293,12 +293,12 @@ android.preference.PreferenceCategory}.</p>
             android:summary="&#64;string/pref_summary_auto_delete"
             android:title="&#64;string/pref_title_auto_delete"
             android:defaultValue="false"... />
-        &lt;Preference 
+        &lt;Preference
             android:key="pref_key_sms_delete_limit"
             android:dependency="pref_key_auto_delete"
             android:summary="&#64;string/pref_summary_delete_limit"
             android:title="&#64;string/pref_title_sms_delete"... />
-        &lt;Preference 
+        &lt;Preference
             android:key="pref_key_mms_delete_limit"
             android:dependency="pref_key_auto_delete"
             android:summary="&#64;string/pref_summary_delete_limit"
@@ -569,7 +569,7 @@ cũ hơn (xem phần nói về <a href="#BackCompatHeaders">Hỗ trợ các phi�
 với tiêu đề tùy chọn</a>).</p>
 
 <img src="{@docRoot}images/ui/settings/settings-headers-tablet.png" alt="" />
-<p class="img-caption"><strong>Hình 4.</strong> Bố trí có hai bảng với tiêu đề. <br/><b>1.</b> 
+<p class="img-caption"><strong>Hình 4.</strong> Bố trí có hai bảng với tiêu đề. <br/><b>1.</b>
 Tiêu đề được định nghĩa trong một tệp tiêu đề XML. <br/><b>2.</b> Mỗi nhóm thiết đặt được định nghĩa bởi một
 {@link android.preference.PreferenceFragment}, được quy định bởi một phần tử {@code &lt;header&gt;} trong tệp tiêu đề
 .</p>
@@ -588,11 +588,11 @@ tiêu đề.</p>
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
-    &lt;header 
+    &lt;header
         android:fragment="com.example.prefs.SettingsActivity$SettingsFragmentOne"
         android:title="@string/prefs_category_one"
         android:summary="@string/prefs_summ_category_one" />
-    &lt;header 
+    &lt;header
         android:fragment="com.example.prefs.SettingsActivity$SettingsFragmentTwo"
         android:title="@string/prefs_category_two"
         android:summary="@string/prefs_summ_category_two" >
@@ -672,15 +672,15 @@ android.preference.Preference &lt;Preference&gt;} sẽ gửi một {@link androi
 tải.</p>
 
 <p>Ví dụ, sau đây là một tệp XML cho các tiêu đề tùy chọn được sử dụng trên Android 3.0
-trở lên ({@code res/xml/preference_headers.xml}):</p> 
+trở lên ({@code res/xml/preference_headers.xml}):</p>
 
 <pre>
 &lt;preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
-    &lt;header 
+    &lt;header
         android:fragment="com.example.prefs.SettingsFragmentOne"
         android:title="@string/prefs_category_one"
         android:summary="@string/prefs_summ_category_one" />
-    &lt;header 
+    &lt;header
         android:fragment="com.example.prefs.SettingsFragmentTwo"
         android:title="@string/prefs_category_two"
         android:summary="@string/prefs_summ_category_two" />
@@ -692,18 +692,18 @@ Android 3.0 ({@code res/xml/preference_headers_legacy.xml}):</p>
 
 <pre>
 &lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    &lt;Preference 
+    &lt;Preference
         android:title="@string/prefs_category_one"
         android:summary="@string/prefs_summ_category_one"  >
-        &lt;intent 
+        &lt;intent
             android:targetPackage="com.example.prefs"
             android:targetClass="com.example.prefs.SettingsActivity"
             android:action="com.example.prefs.PREFS_ONE" />
     &lt;/Preference>
-    &lt;Preference 
+    &lt;Preference
         android:title="@string/prefs_category_two"
         android:summary="@string/prefs_summ_category_two" >
-        &lt;intent 
+        &lt;intent
             android:targetPackage="com.example.prefs"
             android:targetClass="com.example.prefs.SettingsActivity"
             android:action="com.example.prefs.PREFS_TWO" />
@@ -834,7 +834,7 @@ android.preference.Preference#setSummary setSummary()} khi thiết đặt thay �
 trạng thái hiện tại (chẳng hạn như thiết đặt Ngủ như minh họa trong hình 5).</p>
 
 <p class="note"><strong>Lưu ý:</strong> Như đã mô tả trong tài liệu Thiết kế Android về <a href="{@docRoot}design/patterns/settings.html">Thiết đặt</a>, chúng tôi khuyên bạn nên cập nhật
-tóm tắt cho {@link android.preference.ListPreference} mỗi khi người dùng thay đổi tùy chọn để 
+tóm tắt cho {@link android.preference.ListPreference} mỗi khi người dùng thay đổi tùy chọn để
 mô tả thiết đặt hiện tại.</p>
 
 <p>Để quản lý vòng đời trong hoạt động cho phù hợp, chúng tôi khuyên rằng bạn nên đăng ký và bỏ đăng ký
@@ -902,7 +902,7 @@ của ứng dụng của bạn từ dưới nền, bạn nên sử dụng kết 
 người dùng tinh chỉnh mức sử dụng dữ liệu cho ứng dụng của bạn thông qua thiết đặt ứng dụng.<p>
 
 <p>Ví dụ, bạn có thể cho phép người dùng kiểm soát tần suất ứng dụng của bạn đồng bộ dữ liệu, ứng dụng của bạn
-chỉ được thực hiện tải lên/tải xuống khi trên Wi-Fi, ứng dụng của bạn sử dụng dữ liệu trong khi đang chuyển vùng dữ liệu, v.v... hay không. Với 
+chỉ được thực hiện tải lên/tải xuống khi trên Wi-Fi, ứng dụng của bạn sử dụng dữ liệu trong khi đang chuyển vùng dữ liệu, v.v... hay không. Với
 những kiểm soát này, người dùng sẽ ít có khả năng vô hiệu hóa truy cập dữ liệu của ứng dụng của bạn
 hơn nhiều khi họ đạt gần mức giới hạn đặt ra trong Thiết đặt hệ thống, vì thay vào đó, họ có thể kiểm soát chính xác
 lượng dữ liệu mà ứng dụng của bạn sử dụng.</p>
@@ -946,7 +946,7 @@ mà bạn cần làm:</p>
 <ul>
   <li>Quy định giao diện người dùng sẽ xuất hiện khi người dùng chọn thiết đặt.</li>
   <li>Lưu giá trị của thiết đặt khi phù hợp.</li>
-  <li>Khởi tạo {@link android.preference.Preference} bằng giá trị hiện tại (hoặc mặc định) 
+  <li>Khởi tạo {@link android.preference.Preference} bằng giá trị hiện tại (hoặc mặc định)
 khi xét tới dạng xem.</li>
   <li>Cung cấp giá trị mặc định khi hệ thống yêu cầu.</li>
   <li>Nếu {@link android.preference.Preference} cung cấp UI của chính mình (chẳng hạn như một hộp thoại), hãy lưu
@@ -975,11 +975,11 @@ các nút hộp thoại tích cực và tiêu cực mặc định:</p>
 public class NumberPickerPreference extends DialogPreference {
     public NumberPickerPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
-        
+
         setDialogLayoutResource(R.layout.numberpicker_dialog);
         setPositiveButtonText(android.R.string.ok);
         setNegativeButtonText(android.R.string.cancel);
-        
+
         setDialogIcon(null);
     }
     ...
@@ -1034,7 +1034,7 @@ với bạn xem thiết đặt có giá trị được duy trì hay không. Nế
 cho bạn giá trị mặc định.</p>
 
 <p>Phương pháp {@link android.preference.Preference#onSetInitialValue onSetInitialValue()} chuyển một
-boolean, <code>restorePersistedValue</code>, để cho biết liệu giá trị đã được duy trì 
+boolean, <code>restorePersistedValue</code>, để cho biết liệu giá trị đã được duy trì
 cho thiết đặt hay không. Nếu nó là <code>true</code>, khi đó bạn nên truy xuất giá trị được duy trì bằng cách gọi
 một trong các phương pháp của lớp {@link
 android.preference.Preference}, {@code getPersisted*()}, chẳng hạn như {@link
@@ -1060,7 +1060,7 @@ protected void onSetInitialValue(boolean restorePersistedValue, Object defaultVa
 </pre>
 
 <p>Mỗi phương pháp {@code getPersisted*()} sẽ lấy một tham đối quy định
-giá trị mặc định sẽ sử dụng trong trường hợp thực sự không có giá trị được duy trì hoặc khóa không tồn tại. Trong 
+giá trị mặc định sẽ sử dụng trong trường hợp thực sự không có giá trị được duy trì hoặc khóa không tồn tại. Trong
 ví dụ trên, một hằng số cục bộ được sử dụng để quy định giá trị mặc định trong trường hợp {@link
 android.preference.Preference#getPersistedInt getPersistedInt()} không thể trả về một giá trị được duy trì.</p>
 
@@ -1194,7 +1194,7 @@ protected void onRestoreInstanceState(Parcelable state) {
     // Cast state to custom BaseSavedState and pass to superclass
     SavedState myState = (SavedState) state;
     super.onRestoreInstanceState(myState.getSuperState());
-    
+
     // Set this Preference's widget to reflect the restored state
     mNumberPicker.setValue(myState.value);
 }

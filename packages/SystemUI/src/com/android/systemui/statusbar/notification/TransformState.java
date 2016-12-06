@@ -30,6 +30,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
+import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.ViewTransformationHelper;
 
 /**
@@ -357,6 +358,7 @@ public class TransformState {
 
     public int[] getLaidOutLocationOnScreen() {
         int[] location = getLocationOnScreen();
+        // remove translation
         location[0] -= mTransformedView.getTranslationX();
         location[1] -= mTransformedView.getTranslationY();
         return location;
@@ -364,11 +366,29 @@ public class TransformState {
 
     public int[] getLocationOnScreen() {
         mTransformedView.getLocationOnScreen(mOwnPosition);
+
+        // remove scale
+        mOwnPosition[0] -= (1.0f - mTransformedView.getScaleX()) * mTransformedView.getPivotX();
+        mOwnPosition[1] -= (1.0f - mTransformedView.getScaleY()) * mTransformedView.getPivotY();
         return mOwnPosition;
     }
 
     protected boolean sameAs(TransformState otherState) {
         return false;
+    }
+
+    public void appear(float transformationAmount, TransformableView otherView) {
+        // There's no other view, lets fade us in
+        // Certain views need to prepare the fade in and make sure its children are
+        // completely visible. An example is the notification header.
+        if (transformationAmount == 0.0f) {
+            prepareFadeIn();
+        }
+        CrossFadeHelper.fadeIn(mTransformedView, transformationAmount);
+    }
+
+    public void disappear(float transformationAmount, TransformableView otherView) {
+        CrossFadeHelper.fadeOut(mTransformedView, transformationAmount);
     }
 
     public static TransformState createFrom(View view) {

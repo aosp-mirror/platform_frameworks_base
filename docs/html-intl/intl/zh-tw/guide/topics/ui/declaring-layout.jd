@@ -272,7 +272,7 @@ android.view.ViewGroup.LayoutParams} 的巢狀類別。這個子類別包含定�
 可定義檢視在螢幕中的實際大小 (描繪期間以及版面配置之後)。
 
 這些值可能 (但未必) 會與寬度和高度測量值不同。
-您可以呼叫 
+您可以呼叫
 {@link android.view.View#getWidth()} 和 {@link android.view.View#getHeight()} 來取得尺寸描繪值。
    </p>
 
@@ -421,7 +421,7 @@ ArrayAdapter&lt;String> adapter = new ArrayAdapter&lt;String>(this,
   <li>含有陣列中所有字串的 {@link android.widget.TextView} 的版面配置</li>
   <li>字串陣列</li>
 </ul>
-<p>接著，針對您的 {@link android.widget.ListView} 呼叫 
+<p>接著，針對您的 {@link android.widget.ListView} 呼叫
 {@link android.widget.ListView#setAdapter setAdapter()}：</p>
 <pre>
 ListView listView = (ListView) findViewById(R.id.listview);

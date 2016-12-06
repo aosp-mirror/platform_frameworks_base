@@ -1,0 +1,745 @@
+page.title=Конфигурация сетевой безопасности
+page.keywords=androidn,security,network
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>Содержание документа</h2>
+<ol>
+  <li><a href="#manifest">Добавление файла конфигурации безопасности</a></li>
+  <li><a href="#CustomTrust">Настройка доверенных ЦС</a>
+      <ol>
+      <li><a href="#ConfigCustom">Настройка доверенного пользовательского ЦС</a></li>
+      <li><a href="#LimitingCas">Ограничение набора доверенных ЦС</a></li>
+      <li><a href="#TrustingAdditionalCas">Добавление дополнительных ЦС в доверенные</a></li>
+      </ol>
+  </li>
+  <li><a href="#TrustingDebugCa">ЦС для отладки</a></li>
+  <li><a href="#UsesCleartextTraffic">Отказ от передачи данных открытым текстом</a></li>
+  <li><a href="#CertificatePinning">Прикрепление сертификатов</a></li>
+  <li><a href="#ConfigInheritance">Поведение при наследовании конфигурации</a></li>
+  <li><a href="#FileFormat">Формат файла конфигурации</a></li>
+</ol>
+</div>
+</div>
+
+
+<p>
+  В Android N имеется функция "Конфигурация сетевой безопасности",
+ позволяющая приложениям настраивать свои параметры сетевой безопасности в защищенном
+ декларативном файле конфигурации без изменения программного кода приложения. Эти параметры можно
+ настроить для определенных областей и приложений. Основные
+ возможности этой функции:
+</p>
+
+<ul>
+  <li>
+    <b>Пользовательские якоря доверия.</b> Настройка доверенных центров сертификации (ЦС)
+ для защищенных соединений приложения. Примером может служить
+ настройка доверия определенным самозаверенным сертификатам или ограничение
+ набора общих ЦС, которым доверяет приложение.
+  </li>
+
+  <li>
+    <b>Замена при отладке.</b> Безопасная отладка защищенных соединений приложения
+ без дополнительного риска для установленной базы.
+  </li>
+
+  <li>
+    <b>Отказ от передачи данных открытым текстом.</b> Защита приложений от
+ случайной передачи данных открытым текстом.
+  </li>
+
+  <li>
+    <b>Прикрепление сертификатов.</b> Ограничение защищенных соединений приложения
+ определенными сертификатами.
+  </li>
+</ul>
+
+
+<h2 id="manifest">Добавление файла конфигурации безопасности</h2>
+
+<p>
+  Функция конфигурации сетевой безопасности использует файл XML, где вы можете указать
+ настройки своего приложения. Вы должны включить в манифест своего приложения
+ запись, указывающую на этот файл. В следующем отрывке кода из манифеста
+ показано, как создать такую запись:
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+...
+&lt;app ...&gt;
+    &lt;meta-data android:name="android.security.net.config"
+               android:resource="@xml/network_security_config" /&gt;
+    ...
+&lt;/app&gt;
+</pre>
+
+<h2 id="CustomTrust">Настройка доверенных ЦС</h2>
+
+<p>
+  Приложению может потребоваться возможность доверять пользовательскому набору центров сертификации (ЦС) вместо набора ЦС платформы, установленного по умолчанию.
+ Наиболее распространенные причины:
+</p>
+
+<ul>
+  <li>Подключение к узлу с пользовательским ЦС (самозаверенным,
+ внутренним корпоративным ЦС и т. д.)
+  </li>
+
+  <li>Ограничение списка только доверенными ЦС вместо
+ предустановленных.
+  </li>
+
+  <li>Добавление дополнительных ЦС, не установленных в системе, в список доверенных.
+  </li>
+</ul>
+
+<p>
+  По умолчанию защищенные соединения всех приложений (например, TLS, HTTPS) доверяют
+  предустановленным системным ЦС, а приложения для API уровня 23
+ (Android M) и ниже также по умолчанию доверяют ЦС, добавленным пользователем. Приложение
+ может настраивать свои соединения, используя {@code base-config} (для
+ настройки на уровне приложения) или {@code domain-config} (для настройки на уровне
+ доменов).
+</p>
+
+
+<h3 id="ConfigCustom">Настройка пользовательского ЦС</h3>
+
+<p>
+  Предположим, вы хотите подключиться к своему узлу, использующему самозаверенный сертификат SSL,
+ или к узлу, чей сертификат SSL был выпущен закрытым ЦС,
+ которому вы доверяете, например внутренним ЦС вашей компании.
+</p>
+
+<p>
+  <code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;example.com&lt;/domain&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/my_ca"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+<p>
+  Добавьте самозаверенный сертификат или сертификат закрытого ЦС в формате PEM или DER в
+ {@code res/raw/my_ca}.
+</p>
+
+
+<h3 id="LimitingCas">Ограничение набора доверенных ЦС</h3>
+
+<p>
+  Если приложению не нужно доверять всем ЦС, которым доверяет система, для него
+ можно указать сокращенный набор доверенных ЦС. Это позволит защитить
+ приложение от поддельных сертификатов, выпущенных любыми другими ЦС.
+</p>
+
+<p>
+  Настройка ограниченного набора доверенных ЦС похожа на <a href="#TrustingACustomCa">настройку доверия пользовательскому ЦС</a> для определенного домена, за тем исключением,
+ что в ресурсе указывается несколько ЦС.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;secure.example.com&lt;/domain&gt;
+        &lt;domain includeSubdomains="true"&gt;cdn.example.com&lt;/domain&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/trusted_roots"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+<p>
+  Добавьте список доверенных ЦС в формате PEM или DER в {@code res/raw/trusted_roots}.
+  Обратите внимание, что файл в формате PEM должен содержать <em>только</em> данные PEM
+ без какого-либо дополнительного текста. Вы также можете указать несколько элементов
+ <a href="#certificates"><code>&lt;certificates&gt;</code></a>
+вместо одного.
+</p>
+
+
+<h3 id="TrustingAdditionalCas">
+  Добавление дополнительных ЦС в доверенные
+</h3>
+
+<p>
+  Приложению может потребоваться доверять дополнительным ЦС, которые не входят в список доверенных ЦС системы.
+ Это может быть связано с тем, что эти ЦС еще не добавлены в систему или
+ не соответствуют требованиям для включения в систему Android. Приложение
+ может добавить такие ЦС в доверенные, указав несколько источников сертификатов для
+ конфигурации.
+</p>
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;base-config&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/extracas"/&gt;
+            &lt;certificates src="system"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/base-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="TrustingDebugCa">Настройка конфигурации ЦС для отладки</h2>
+
+<p>
+  При отладке приложения, которое использует для подключения протокол HTTPS, вам может потребоваться
+ подключение к локальному серверу разработки, у которого нет сертификата SSL
+ для рабочего сервера. Чтобы выполнить отладку без изменения кода
+ приложения, вы можете указать ЦС для отладки,
+ которые входят в число доверенных, <i>только</i> если для параметра <a href="{@docRoot}guide/topics/manifest/application-element.html#debug">
+android:debuggable</a>
+ установлено значение {@code true} с использованием {@code debug-overrides}. Обычно среды разработки и инструменты
+ сборки устанавливают этот флаг автоматически для всех сборок, кроме выпускаемой версии.
+</p>
+
+<p>
+  Такая схема работы более безопасна, чем использование обычного условного кода, поскольку в качестве
+ меры предосторожности магазины приложений не принимают приложения, помеченные
+ как доступные для отладки.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;debug-overrides&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/debug_cas"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/debug-overrides&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="UsesCleartextTraffic">Отказ от передачи данных открытым текстом</h2>
+
+<p>
+  Приложения, которым нужно подключаться к узлам только через защищенные соединения,
+ могут отказаться от поддержки передачи данных открытым текстом (с использованием нешифрованного протокола HTTP
+ вместо HTTPS) на эти узлы. Эта возможность помогает предотвратить
+ случайные неполадки в приложениях, связанные с изменениями URL-адресов, предоставленных внешними
+ источниками, например, инфраструктурными серверами.
+  Дополнительную информацию можно найти в описании метода {@link android.security.NetworkSecurityPolicy#isCleartextTrafficPermitted
+  NetworkSecurityPolicy.isCleartextTrafficPermitted()}.
+</p>
+
+<p>
+  Например, приложение может потребовать обязательное использование протокола HTTPS для всех соединений с {@code
+  secure.example.com}, чтобы защитить важный трафик
+ от небезопасных сетей.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config usesCleartextTraffic="false"&gt;
+        &lt;domain includeSubdomains="true"&gt;secure.example.com&lt;/domain&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="CertificatePinning">Прикрепление сертификатов</h2>
+
+<p>
+  Обычно приложение доверяет всем предустановленным ЦС. Если любой из этих ЦС выпустит
+ поддельный сертификат, приложение подвергается риску атаки с перехватом данных.
+ Некоторым приложениям требуется ограничить принимаемый набор сертификатов
+ либо ограничением списка доверенных ЦС, либо прикреплением сертификатов.
+</p>
+
+<p>
+  Прикрепление сертификатов осуществляется путем предоставления набора сертификатов через хэш
+ открытого ключа (SubjectPublicKeyInfo сертификата X.509). В этом случае цепочка
+ сертификатов будет действительна, только если она содержит хотя бы один
+ прикрепленный открытый ключ.
+</p>
+
+<p>
+  При использовании прикрепления сертификатов всегда необходимо добавлять резервный
+ ключ, чтобы работа приложения не пострадала при необходимости перехода на новые ключи или смены ЦС (при
+ прикреплении сертификата ЦС или посредника этого ЦС).
+ Без резервного ключа для восстановления возможности подключения приложения потребуется срочно выпускать
+ его обновление.
+</p>
+
+<p>
+  Кроме того, существует возможность установить срок прикрепления, по истечении которого
+ прикрепление не выполняется. Это помогает предотвратить проблемы с подключением
+ приложений, которые не были обновлены. Однако установка срока действия
+ прикреплений позволяет обойти их ограничения.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;example.com&lt;/domain&gt;
+        &lt;pin-set expiration="2018-01-01"&gt;
+            &lt;pin digest="SHA-256"&gt;7HIpactkIAq2Y49orFOOQKurWxmmSFZhBCoQYcRhJ3Y=&lt;/pin&gt;
+            &lt;!-- backup pin --&gt
+            &lt;pin digest="SHA-256"&gt;fwza0LRMXouZHRC8Ei+4PyuldPDcf3UKgO/04cDM1oE=&lt;/pin&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="ConfigInheritance">Поведение при наследовании конфигурации</h2>
+
+<p>
+  Значения, не установленные в определенной конфигурации, наследуются. Такое поведение позволяет создавать более
+ сложные конфигурации, сохраняя при этом файл конфигурации в читаемом виде.
+</p>
+
+<p>
+  Если в определенной записи не установлено значение, используется значение из следующей более общей записи.
+ Значения, не установленные в {@code domain-config},
+ берутся из родительского элемента {@code domain-config} в многоуровневых конфигурациях или из элемента {@code
+  base-config} в простых конфигурациях. Для значений, не установленных в {@code base-config}, используются
+ значения по умолчанию для платформы.
+</p>
+
+<p>
+  Рассмотрим пример, где все соединения с доменами нижнего уровня {@code
+  example.com} должны использовать пользовательский набор ЦС. Кроме того, для этих доменов разрешена
+ передача данных открытым текстом, <em>кроме</em> случаев подключения к {@code
+  secure.example.com}. При вложении конфигурации {@code
+  secure.example.com} в конфигурацию {@code example.com} не требуется дублирование
+  {@code trust-anchors}.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;example.com&lt;/domain&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/my_ca"/&gt;
+        &lt;/trust-anchors&gt;
+        &lt;domain-config cleartextTrafficPermitted="false"&gt;
+            &lt;domain includeSubdomains="true"&gt;secure.example.com&lt;/domain&gt;
+        &lt;/domain-config&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="FileFormat">Формат файла конфигурации</h2>
+
+<p>
+  Функция конфигурации сетевой безопасности использует формат файлов XML.
+  Общая структура файла показана в следующем примере кода:
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;base-config&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="..."/&gt;
+            ...
+        &lt;/trust-anchors&gt;
+    &lt;/base-config&gt;
+
+    &lt;domain-config&gt;
+        &lt;domain&gt;android.com&lt;/domain&gt;
+        ...
+        &lt;trust-anchors&gt;
+            &lt;certificates src="..."/&gt;
+            ...
+        &lt;/trust-anchors&gt;
+        &lt;pin-set&gt;
+            &lt;pin digest="..."&gt;...&lt;/pin&gt;
+            ...
+        &lt;/pin-set&gt;
+    &lt;/domain-config&gt;
+    ...
+    &lt;debug-overrides&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="..."/&gt;
+            ...
+        &lt;/trust-anchors&gt;
+    &lt;/debug-overrides&gt;
+&lt;/network-security-config&gt;
+</pre>
+
+<p>
+  В следующих разделах содержится описание синтаксиса и других деталей формата
+ файла.
+</p>
+
+<h3 id="network-security-config">
+  &lt;network-security-config&gt;
+</h3>
+
+<dl class="xml">
+  <dt>
+    Может содержать:
+  </dt>
+
+  <dd>
+    0 или 1 <code><a href="#base-config">&lt;base-config&gt;</a></code><br>
+    Любое количество <code><a href=
+    "#domain-config">&lt;domain-config&gt;</a></code><br>
+    0 или 1 <code><a href="#debug-overrides">&lt;debug-overrides&gt;</a></code>
+  </dd>
+</dl>
+
+<h3 id="base-config">
+  &lt;base-config&gt;
+</h3>
+
+<dl class="xml">
+  <dt>
+    Синтаксис:
+  </dt>
+</dl>
+
+<pre class="stx">
+&lt;base-config <a href=
+"#usesCleartextTraffic">usesCleartextTraffic</a>=["true" | "false"]&gt;
+    ...
+&lt;/base-config&gt;
+</pre>
+<dl class="xml">
+  <dt>
+    Может содержать:
+  </dt>
+
+  <dd>
+    <code><a href="#trust-anchors">&lt;trust-anchors&gt;</a></code>
+  </dd>
+
+  <dt>
+    Описание:
+  </dt>
+
+  <dd>
+    Конфигурация по умолчанию, используемая всеми подключениями к узлам, не входящим в <a href="#domain-config"><code>domain-config</code></a>.
+
+
+<p>
+  Если значения не установлены, используются значения по умолчанию для платформы. Конфигурация по умолчанию
+ для приложений, использующих API уровня 24 или выше:
+</p>
+
+<pre>
+&lt;base-config usesCleartextTraffic="true"&gt;
+    &lt;trust-anchors&gt;
+        &lt;certificates src="system" /&gt;
+    &lt;/trust-anchors&gt;
+&lt;/base-config&gt;
+</pre>
+Конфигурация по умолчанию  для приложений, использующих API уровня 23 или ниже:
+<pre>
+&lt;base-config usesCleartextTraffic="true"&gt;
+    &lt;trust-anchors&gt;
+        &lt;certificates src="system" /&gt;
+        &lt;certificates src="user" /&gt;
+    &lt;/trust-anchors&gt;
+&lt;/base-config&gt;
+</pre>
+
+  </dd>
+</dl>
+
+<h3 id="domain-config">&lt;domain-config&gt;</h3>
+<dl class="xml">
+<dt>Синтаксис:</dt>
+<dd>
+<pre class="stx">&lt;domain-config <a href="#usesCleartextTraffic">usesCleartextTraffic</a>=["true" | "false"]&gt;
+    ...
+&lt;/domain-config&gt;</pre>
+</dd>
+
+<dt>Может содержать:</dt>
+
+<dd>
+1 или более <code><a href="#domain">&lt;domain&gt;</a></code>
+<br/>0 или 1 <code><a href="#trust-anchors">&lt;trust-anchors&gt;</a></code>
+<br/>0 или 1 <code><a href="#pin-set">&lt;pin-set&gt;</code></a>
+<br/>Любое количество вложенных <code>&lt;domain-config&gt;</code></dd>
+
+<dt>Описание</dt>
+<dd>Конфигурация, используемая для подключения к конкретным узлам, определенными элементами {@code domain}.
+
+<p>Если для узла назначения существует несколько элементов {@code domain-config}, используется правило для наиболее конкретного (самого длинного) совпадающего домена.
+</p></dd>
+</dl>
+
+
+<h3 id="domain">&lt;domain&gt;</h3>
+
+<dl class="xml">
+  <dt>
+    Синтаксис:
+  </dt>
+
+  <dd>
+    <pre class="stx">
+&lt;domain includeSubdomains=["true" | "false"]&gt;example.com&lt;/domain&gt;
+</pre>
+  </dd>
+
+  <dt>
+    Атрибуты:
+  </dt>
+
+  <dd>
+    <dl class="attr">
+      <dt>
+        {@code includeSubdomains}
+      </dt>
+
+      <dd>
+        Если значение равно {@code "true"}, то правило домена соответствует указанному домену и всем доменам его
+ нижних уровней. В противном случае правило действует
+ только для полных совпадений.
+      </dd>
+    </dl>
+  </dd>
+
+  <dt>
+    Описание:
+  </dt>
+</dl>
+
+<h3 id="debug-overrides">&lt;debug-overrides&gt;</h3>
+
+<dl class="xml">
+  <dt>
+    Синтаксис:
+  </dt>
+
+  <dd>
+    <pre class="stx">
+&lt;debug-overrides&gt;
+    ...
+&lt;/debug-overrides&gt;
+</pre>
+  </dd>
+
+  <dt>
+    Может содержать:
+  </dt>
+
+  <dd>
+    0 или 1 <code><a href="#trust-anchors">&lt;trust-anchors&gt;</a></code>
+  </dd>
+
+  <dt>
+    Описание:
+  </dt>
+
+  <dd>
+    Переопределения применяются, когда параметр <a href="{@docRoot}guide/topics/manifest/application-element.html#debug">android:debuggable</a>
+ имеет значение {@code "true"}, что обычно верно для промежуточных сборок,
+ создаваемых средами разработки и инструментами сборки. Якоря доверия, указанные в {@code
+    debug-overrides}, добавляются ко всем другим конфигурациям, и прикрепление
+ сертификатов не выполняется, если цепочка сертификатов сервера использует один из этих
+ якорей доверия, предназначенных только для отладки. Если параметр <a href="{@docRoot}guide/topics/manifest/application-element.html#debug">android:debuggable</a>
+ имеет значение {@code "false"}, этот раздел полностью игнорируется.
+  </dd>
+</dl>
+
+<h3 id="trust-anchors">&lt;trust-anchors&gt;</h3>
+<dl class="xml">
+  <dt>
+    Синтаксис:
+  </dt>
+
+  <dd>
+    <pre class="stx">
+&lt;trust-anchors&gt;
+...
+&lt;/trust-anchors&gt;
+</pre>
+  </dd>
+
+  <dt>
+    Может содержать:
+  </dt>
+
+  <dd>
+    Любое количество <code><a href="#certificates">&lt;certificates&gt;</a></code>
+  </dd>
+
+  <dt>
+    Описание:
+  </dt>
+
+  <dd>
+    Набор якорей доверия для защищенных соединений.
+  </dd>
+</dl>
+
+
+<h3 id="certificates">&lt;certificates&gt;</h3>
+<dl class="xml">
+<dt>Синтаксис:</dt>
+<dd><pre class="stx">&lt;certificates src=["system" | "user" | "<i>raw resource</i>"]
+              overridePins=["true" | "false"] /&gt;
+</pre></dd>
+<dt>Описание:</dt>
+<dd>Набор сертификатов X.509 для элементов {@code trust-anchors}.</dd>
+
+<dt>Атрибуты:</dt>
+<dd><dl class="attr">
+<dt>{@code src}</dt>
+<dd>
+Источник сертификатов ЦС может представлять собой
+<ul>
+  <li>идентификатор исходного ресурса, указывающий на файл с сертификатами X.509.
+  Сертификаты должны быть закодированы в формате DER или PEM. При использовании сертификатов PEM
+ файл <em>не должен</em> содержать ничего, кроме данных PEM, например,
+ комментариев.
+  </li>
+
+  <li>{@code "system"} для предустановленных в системе сертификатов ЦС
+  </li>
+
+  <li>{@code "user"} для добавленных пользователем сертификатов ЦС
+  </li>
+</ul>
+</dd>
+
+<dt>{@code overridePins}</dt>
+<dd>
+  <p>
+    Указывает, пропускается ли прикрепление сертификатов для ЦС из этого источника. Если значение равно {@code
+    "true"}, то прикрепление сертификатов не выполняется для цепочек сертификатов, проходящих через один из ЦС этого
+ источника. Это применяется для отладки ЦС
+ или для разрешения пользователю перехватывать защищенный трафик вашего приложения.
+  </p>
+
+  <p>
+    По умолчанию используется значение {@code "false"}, но если указан элемент {@code debug-overrides},
+ то по умолчанию используется значение {@code "true"}.
+  </p>
+</dd>
+</dl>
+</dd>
+
+
+<h3 id="pin-set">&lt;pin-set&gt;</h3>
+
+<dl class="xml">
+  <dt>
+    Синтаксис:
+  </dt>
+
+  <dd>
+<pre class="stx">
+&lt;pin-set expiration="date"&gt;
+...
+&lt;/pin-set&gt;
+</pre>
+  </dd>
+
+  <dt>
+    Может содержать:
+  </dt>
+
+  <dd>
+    Любое количество <code><a href="#pin">&lt;pin&gt;</a></code>
+  </dd>
+
+  <dt>
+    Описание:
+  </dt>
+
+  <dd>
+    Набор прикрепленных открытых ключей. Чтобы защищенное соединение было доверенным, один из
+ открытых ключей в цепочке доверия должен входить в набор прикрепленных ключей. Формат ключей указан в
+ <code><a href="#pin">&lt;pin&gt;</a></code>.
+  </dd>
+
+  <dt>
+    Атрибуты:
+  </dt>
+
+  <dd>
+    <dl class="attr">
+      <dt>
+        {@code expiration}
+      </dt>
+
+      <dd>
+        Дата в формате {@code yyyy-MM-dd}, начиная с которой истекает срок прикрепления
+ и оно отключается. Если этот атрибут не установлен,
+ срок прикрепления не истекает.
+        <p>
+          Истечение срока прикрепления помогает предотвратить проблемы с подключением в приложениях, которые
+ не получают обновления набора прикрепленных элементов, например в связи с тем, что пользователь
+ отключил обновления приложений.
+        </p>
+      </dd>
+    </dl>
+  </dd>
+</dl>
+
+<h3 id="pin">&lt;pin&gt;</h3>
+<dl class="xml">
+  <dt>
+    Синтаксис:
+  </dt>
+
+  <dd>
+<pre class="stx">
+&lt;pin digest=["SHA-256"]&gt;base64 encoded digest of X.509
+    SubjectPublicKeyInfo (SPKI)&lt;/pin&gt;
+</pre>
+  </dd>
+
+  <dt>
+    Атрибуты:
+  </dt>
+
+  <dd>
+    <dl class="attr">
+      <dt>
+        {@code digest}
+      </dt>
+
+      <dd>
+        Алгоритм хэширования, используемый для создания прикреплений. В настоящее время поддерживается только алгоритм
+ {@code "SHA-256"}.
+      </dd>
+    </dl>
+  </dd>
+</dl>

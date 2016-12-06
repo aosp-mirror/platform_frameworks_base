@@ -23,6 +23,7 @@ import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -53,8 +54,7 @@ public class NumPadKey extends ViewGroup {
             if (mTextView != null && mTextView.isEnabled()) {
                 mTextView.append(Character.forDigit(mDigit, 10));
             }
-            userActivity();
-            doHapticKeyClick();
+            userActivity();;
         }
     };
 
@@ -123,6 +123,14 @@ public class NumPadKey extends ViewGroup {
         }
         a.recycle();
         setContentDescription(mDigitText.getText().toString());
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            doHapticKeyClick();
+        }
+        return super.onTouchEvent(event);
     }
 
     @Override

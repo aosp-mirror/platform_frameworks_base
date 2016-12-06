@@ -12,8 +12,8 @@ next.link=adaptui.html
 
 
 <!-- This is the training bar -->
-<div id="tb-wrapper"> 
-<div id="tb"> 
+<div id="tb-wrapper">
+<div id="tb">
 
 <h2>En esta sección puedes aprender:</h2>
 <ol>
@@ -29,15 +29,15 @@ next.link=adaptui.html
 </ul>
 
 <h2>¡Pruébalo!</h2>
- 
-<div class="download-box"> 
+
+<div class="download-box">
 <a href="http://developer.android.com/shareables/training/NewsReader.zip" class="button">Descargar la aplicación de ejemplo</a>
-<p class="filename">NewsReader.zip</p> 
-</div> 
- 
- 
-</div> 
-</div> 
+<p class="filename">NewsReader.zip</p>
+</div>
+
+
+</div>
+</div>
 
 <p>En esta sección se explica cómo proporcionar diferentes recursos y utilizar unidades de medida de resolución independiente para admitir diferentes densidades de pantalla.</p>
 
@@ -48,8 +48,8 @@ next.link=adaptui.html
 <p>Por ejemplo, al especificar un espacio entre dos vistas, debes utilizar <code>dp</code> en lugar de <code>px</code>:</p>
 
 <pre>
-&lt;Button android:layout_width="wrap_content" 
-    android:layout_height="wrap_content" 
+&lt;Button android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:text="&#64;string/clickme"
     android:layout_marginTop="20dp" /&gt;
 </pre>
@@ -57,8 +57,8 @@ next.link=adaptui.html
 <p>Al especificar el tamaño de letra, debes usar siempre <code>sp</code>:</p>
 
 <pre>
-&lt;TextView android:layout_width="match_parent" 
-    android:layout_height="wrap_content" 
+&lt;TextView android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:textSize="20sp" /&gt;
 </pre>
 

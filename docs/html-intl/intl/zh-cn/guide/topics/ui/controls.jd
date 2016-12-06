@@ -69,7 +69,7 @@ parent.link=index.html
     <tr>
         <td><a href="controls/radiobutton.html">单选按钮</a></td>
         <td>与复选框类似，不同的是只能选择组中的一个选项。</td>
-	<td>{@link android.widget.RadioGroup RadioGroup} 
+	<td>{@link android.widget.RadioGroup RadioGroup}
 	<br>{@link android.widget.RadioButton RadioButton} </td>
     </tr>
     <tr>

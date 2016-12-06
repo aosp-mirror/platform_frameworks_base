@@ -20,6 +20,8 @@ import android.app.ActivityManager;
 import android.app.NotificationManager.Policy;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Parcel;
@@ -42,6 +44,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.Objects;
@@ -118,6 +121,7 @@ public class ZenModeConfig implements Parcelable {
     private static final String RULE_ATT_ZEN = "zen";
     private static final String RULE_ATT_CONDITION_ID = "conditionId";
     private static final String RULE_ATT_CREATION_TIME = "creationTime";
+    private static final String RULE_ATT_ENABLER = "enabler";
 
     public boolean allowCalls = DEFAULT_ALLOW_CALLS;
     public boolean allowRepeatCallers = DEFAULT_ALLOW_REPEAT_CALLERS;
@@ -502,6 +506,7 @@ public class ZenModeConfig implements Parcelable {
         rt.conditionId = safeUri(parser, RULE_ATT_CONDITION_ID);
         rt.component = safeComponentName(parser, RULE_ATT_COMPONENT);
         rt.creationTime = safeLong(parser, RULE_ATT_CREATION_TIME, 0);
+        rt.enabler = parser.getAttributeValue(null, RULE_ATT_ENABLER);
         rt.condition = readConditionXml(parser);
         return rt;
     }
@@ -520,6 +525,9 @@ public class ZenModeConfig implements Parcelable {
             out.attribute(null, RULE_ATT_CONDITION_ID, rule.conditionId.toString());
         }
         out.attribute(null, RULE_ATT_CREATION_TIME, Long.toString(rule.creationTime));
+        if (rule.enabler != null) {
+            out.attribute(null, RULE_ATT_ENABLER, rule.enabler);
+        }
         if (rule.condition != null) {
             writeConditionXml(rule.condition, out);
         }
@@ -889,8 +897,12 @@ public class ZenModeConfig implements Parcelable {
                     ", endHour=" + endHour +
                     ", endMinute=" + endMinute +
                     ", exitAtAlarm=" + exitAtAlarm +
-                    ", nextAlarm=" + nextAlarm +
+                    ", nextAlarm=" + ts(nextAlarm) +
                     '}';
+        }
+
+        protected static String ts(long time) {
+            return new Date(time) + " (" + time + ")";
         }
     }
 
@@ -989,6 +1001,25 @@ public class ZenModeConfig implements Parcelable {
         return UUID.randomUUID().toString().replace("-", "");
     }
 
+    private static String getOwnerCaption(Context context, String owner) {
+        final PackageManager pm = context.getPackageManager();
+        try {
+            final ApplicationInfo info = pm.getApplicationInfo(owner, 0);
+            if (info != null) {
+                final CharSequence seq = info.loadLabel(pm);
+                if (seq != null) {
+                    final String str = seq.toString().trim();
+                    if (str.length() > 0) {
+                        return str;
+                    }
+                }
+            }
+        } catch (Throwable e) {
+            Slog.w(TAG, "Error loading owner caption", e);
+        }
+        return "";
+    }
+
     public static String getConditionSummary(Context context, ZenModeConfig config,
             int userHandle, boolean shortVersion) {
         return getConditionLine(context, config, userHandle, false /*useLine1*/, shortVersion);
@@ -997,23 +1028,28 @@ public class ZenModeConfig implements Parcelable {
     private static String getConditionLine(Context context, ZenModeConfig config,
             int userHandle, boolean useLine1, boolean shortVersion) {
         if (config == null) return "";
+        String summary = "";
         if (config.manualRule != null) {
             final Uri id = config.manualRule.conditionId;
-            if (id == null) {
-                return context.getString(com.android.internal.R.string.zen_mode_forever);
+            if (config.manualRule.enabler != null) {
+                summary = getOwnerCaption(context, config.manualRule.enabler);
+            } else {
+                if (id == null) {
+                    summary = context.getString(com.android.internal.R.string.zen_mode_forever);
+                } else {
+                    final long time = tryParseCountdownConditionId(id);
+                    Condition c = config.manualRule.condition;
+                    if (time > 0) {
+                        final long now = System.currentTimeMillis();
+                        final long span = time - now;
+                        c = toTimeCondition(context, time, Math.round(span / (float) MINUTES_MS),
+                                userHandle, shortVersion);
+                    }
+                    final String rt = c == null ? "" : useLine1 ? c.line1 : c.summary;
+                    summary = TextUtils.isEmpty(rt) ? "" : rt;
+                }
             }
-            final long time = tryParseCountdownConditionId(id);
-            Condition c = config.manualRule.condition;
-            if (time > 0) {
-                final long now = System.currentTimeMillis();
-                final long span = time - now;
-                c = toTimeCondition(context, time, Math.round(span / (float) MINUTES_MS),
-                        userHandle, shortVersion);
-            }
-            final String rt = c == null ? "" : useLine1 ? c.line1 : c.summary;
-            return TextUtils.isEmpty(rt) ? "" : rt;
         }
-        String summary = "";
         for (ZenRule automaticRule : config.automaticRules.values()) {
             if (automaticRule.isAutomaticActive()) {
                 if (summary.isEmpty()) {
@@ -1023,6 +1059,7 @@ public class ZenModeConfig implements Parcelable {
                             .getString(R.string.zen_mode_rule_name_combination, summary,
                                     automaticRule.name);
                 }
+
             }
         }
         return summary;
@@ -1038,6 +1075,7 @@ public class ZenModeConfig implements Parcelable {
         public ComponentName component;  // optional
         public String id;                // required for automatic (unique)
         public long creationTime;        // required for automatic
+        public String enabler;          // package name, only used for manual rules.
 
         public ZenRule() { }
 
@@ -1055,6 +1093,9 @@ public class ZenModeConfig implements Parcelable {
                 id = source.readString();
             }
             creationTime = source.readLong();
+            if (source.readInt() == 1) {
+                enabler = source.readString();
+            }
         }
 
         @Override
@@ -1083,6 +1124,12 @@ public class ZenModeConfig implements Parcelable {
                 dest.writeInt(0);
             }
             dest.writeLong(creationTime);
+            if (enabler != null) {
+                dest.writeInt(1);
+                dest.writeString(enabler);
+            } else {
+                dest.writeInt(0);
+            }
         }
 
         @Override
@@ -1097,6 +1144,7 @@ public class ZenModeConfig implements Parcelable {
                     .append(",component=").append(component)
                     .append(",id=").append(id)
                     .append(",creationTime=").append(creationTime)
+                    .append(",enabler=").append(enabler)
                     .append(']').toString();
         }
 
@@ -1143,6 +1191,9 @@ public class ZenModeConfig implements Parcelable {
             if (creationTime != to.creationTime) {
                 d.addLine(item, "creationTime", creationTime, to.creationTime);
             }
+            if (enabler != to.enabler) {
+                d.addLine(item, "enabler", enabler, to.enabler);
+            }
         }
 
         @Override
@@ -1158,13 +1209,14 @@ public class ZenModeConfig implements Parcelable {
                     && Objects.equals(other.condition, condition)
                     && Objects.equals(other.component, component)
                     && Objects.equals(other.id, id)
-                    && other.creationTime == creationTime;
+                    && other.creationTime == creationTime
+                    && Objects.equals(other.enabler, enabler);
         }
 
         @Override
         public int hashCode() {
             return Objects.hash(enabled, snoozing, name, zenMode, conditionId, condition,
-                    component, id, creationTime);
+                    component, id, creationTime, enabler);
         }
 
         public boolean isAutomaticActive() {

@@ -21,7 +21,7 @@
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Извештајот за грешки <xliff:g id="ID">#%d</xliff:g> е снимен"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Се додаваат детали на извештајот за грешка"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Почекајте..."</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Повлечете налево за да споделите пријава за грешка"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Извештајот за грешки наскоро ќе се појави на телефонот"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Допрете за да го споделите извештајот за грешки"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Допрете за споделување извештај за грешки без слика од екранот или почекајте да се подготви сликата"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Допрете за споделување извештај за грешки без слика од екранот или почекајте да се подготви сликата"</string>

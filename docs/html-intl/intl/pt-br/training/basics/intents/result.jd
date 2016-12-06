@@ -29,7 +29,7 @@ receber um resultado de volta. Para receber um resultado, chame {@link android.a
 startActivityForResult()} (em vez de {@link android.app.Activity#startActivity
 startActivity()}).</p>
 
-<p>Por exemplo, o aplicativo pode iniciar um aplicativo de câmera e receber a foto capturada como resultado. Ou, 
+<p>Por exemplo, o aplicativo pode iniciar um aplicativo de câmera e receber a foto capturada como resultado. Ou,
 ao iniciar o aplicativo Pessoas para que o usuário selecione um
 contato, você receberá os detalhes do contato como resultado.</p>
 
@@ -104,7 +104,7 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 aplicativos Contatos ou Pessoas do Android fornece um conteúdo {@link android.net.Uri} que identifica o
 contato escolhido pelo usuário.</p>
 
-<p>Para que o resultado seja tratado de forma adequada, é preciso saber o formato do resultado 
+<p>Para que o resultado seja tratado de forma adequada, é preciso saber o formato do resultado
 {@link android.content.Intent}. Isso é fácil quando umas das suas atividades
 retorna o resultado. Os aplicativos incluídos na plataforma Android oferecem suas próprias APIs que
 podem ser usadas para dados de resultado específicos. Por exemplo, o aplicativo Pessoas (Contatos em algumas versões mais
@@ -155,7 +155,7 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 <p class="note"><strong>Observação:</strong> antes do Android 2.3 (API nível 9), executar uma consulta
 no {@link android.provider.ContactsContract.Contacts Contacts Provider} (como mostrado
 acima) exige que o aplicativo declare a permissão {@link
-android.Manifest.permission#READ_CONTACTS} (consulte <a href="{@docRoot}guide/topics/security/security.html">Segurança e permissões</a>). Contudo, 
+android.Manifest.permission#READ_CONTACTS} (consulte <a href="{@docRoot}guide/topics/security/security.html">Segurança e permissões</a>). Contudo,
 iniciar com Android 2.3, o aplicativo Contatos/Pessoas dá ao aplicativo permissão
 temporária para ler no Provedor de Contatos quando retornar um resultado. A permissão temporária
 aplica-se apenas a pedidos de contato específicos, portanto, não é possível consultar um contato diferente daquele

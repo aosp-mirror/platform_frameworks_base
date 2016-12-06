@@ -21,7 +21,7 @@
     <string name="bugreport_finished_title" msgid="4429132808670114081">"بگ رپورٹ <xliff:g id="ID">#%d</xliff:g> کیپچر ہو گئی"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"بگ رپورٹ میں تفصیلات شامل کی جا رہی ہیں"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"براہ کرم انتظار کریں…"</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"اپنی بگ رپورٹ کا اشتراک کرنے کیلئے بائیں سوائپ کریں"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"بگ رپورٹ فون پر تھوڑی دیر میں ظاہر ہوگی"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"اپنی بگ رپورٹ کا اشتراک کرنے کیلئے تھپتھپائیں"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"بغیر اسکرین شاٹ کے بگ رپورٹ کا اشتراک کرنے کیلئے تھپتھپائیں یا اسکرین شاٹ کے ختم ہونے کا انتظار کریں"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"بغیر اسکرین شاٹ کے بگ رپورٹ کا اشتراک کرنے کیلئے تھپتھپائیں یا اسکرین شاٹ کے ختم ہونے کا انتظار کریں"</string>

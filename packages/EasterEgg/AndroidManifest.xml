@@ -31,6 +31,7 @@ Copyright (C) 2016 The Android Open Source Project
                   android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
+                <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
 

@@ -8,13 +8,13 @@ trainingnavtop=true
 
 <div id="tb-wrapper">
   <div id="tb">
-    
+
     <h2>本课程将向您展示如何</h2>
     <ol>
       <li><a href="#SaveState">保存Activity状态</a></li>
       <li><a href="#RestoreState">恢复Activity状态</a></li>
     </ol>
-    
+
     <h2>您还应阅读</h2>
     <ul>
       <li><a href="{@docRoot}training/basics/supporting-devices/screens.html">支持不同屏幕</a>
@@ -105,7 +105,7 @@ public void onSaveInstanceState(Bundle savedInstanceState) {
     // Save the user's current game state
     savedInstanceState.putInt(STATE_SCORE, mCurrentScore);
     savedInstanceState.putInt(STATE_LEVEL, mCurrentLevel);
-    
+
     // Always call the superclass so it can save the view hierarchy state
     super.onSaveInstanceState(savedInstanceState);
 }
@@ -138,7 +138,7 @@ onCreate()} 中恢复一些状态数据：</p>
 &#64;Override
 protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState); // Always call the superclass first
-   
+
     // Check whether we're recreating a previously destroyed instance
     if (savedInstanceState != null) {
         // Restore value of members from saved state
@@ -157,12 +157,12 @@ android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} ，而不�
 系统只在存在要恢复的已保存状态时调用 {@link
 android.app.Activity#onRestoreInstanceState onRestoreInstanceState()}
 ，因此您无需检查 {@link android.os.Bundle} 是否为 null：</p>
-        
+
 <pre>
 public void onRestoreInstanceState(Bundle savedInstanceState) {
     // Always call the superclass so it can restore the view hierarchy
     super.onRestoreInstanceState(savedInstanceState);
-   
+
     // Restore state members from saved instance
     mCurrentScore = savedInstanceState.getInt(STATE_SCORE);
     mCurrentLevel = savedInstanceState.getInt(STATE_LEVEL);

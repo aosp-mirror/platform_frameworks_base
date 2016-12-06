@@ -331,7 +331,7 @@ data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
   </td>
   <td>
     <p style="margin-bottom:.5em;">
-      앱이 필요한 경우 확인 애니메이션을 표시합니다. 
+      앱이 필요한 경우 확인 애니메이션을 표시합니다.
       (<a href="{@docRoot}design/wear/patterns.html#Countdown">방법 알아보기</a>)
     </p>
   </td>

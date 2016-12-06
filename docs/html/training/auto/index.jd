@@ -8,7 +8,9 @@ page.metaDescription=Starting point for building apps for Auto, with guidelines,
 
 @jd:body
 
-<iframe width="448" height="252" src="//www.youtube.com/embed/ctiaVxgclsg?autohide=1&amp;showinfo=0" frameborder="0" allowfullscreen="" style="float: right; margin: 0 0 20px 20px;"></iframe>
+      <iframe width="338" height="169" src="//www.youtube.com/embed/LfVBFFoy9Y0?utm_source=dac&utm_medium=video&utm_content=andfuntrain&utm_campaign=udacint?rel=0&amp;hd=1" frameborder="0" allowfullscreen></iframe>
+      <p><a href="https://www.udacity.com/course/ud853" class="button"
+        style="width:100%">Start the video course</a>
 
 <p>
   The Android platform enables you to extend your app to work with in-vehicle console systems
@@ -27,7 +29,7 @@ page.metaDescription=Starting point for building apps for Auto, with guidelines,
   For more information, follow the links below to learn how to extend your Android app to support
   use in vehicles.
 </p>
- 
+
 <h2 id="overview">Get Started</h2>
 
 <p>

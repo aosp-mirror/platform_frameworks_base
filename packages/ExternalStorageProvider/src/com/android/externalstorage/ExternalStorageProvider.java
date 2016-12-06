@@ -466,10 +466,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
         displayName = FileUtils.buildValidFatFilename(displayName);
 
         final File before = getFileForDocId(docId);
-        final File after = new File(before.getParentFile(), displayName);
-        if (after.exists()) {
-            throw new IllegalStateException("Already exists " + after);
-        }
+        final File after = FileUtils.buildUniqueFile(before.getParentFile(), displayName);
         if (!before.renameTo(after)) {
             throw new IllegalStateException("Failed to rename to " + after);
         }
@@ -484,6 +481,8 @@ public class ExternalStorageProvider extends DocumentsProvider {
     @Override
     public void deleteDocument(String docId) throws FileNotFoundException {
         final File file = getFileForDocId(docId);
+        final File visibleFile = getFileForDocId(docId, true);
+
         final boolean isDirectory = file.isDirectory();
         if (isDirectory) {
             FileUtils.deleteContents(file);
@@ -492,23 +491,25 @@ public class ExternalStorageProvider extends DocumentsProvider {
             throw new IllegalStateException("Failed to delete " + file);
         }
 
-        final ContentResolver resolver = getContext().getContentResolver();
-        final Uri externalUri = MediaStore.Files.getContentUri("external");
+        if (visibleFile != null) {
+            final ContentResolver resolver = getContext().getContentResolver();
+            final Uri externalUri = MediaStore.Files.getContentUri("external");
 
-        // Remove media store entries for any files inside this directory, using
-        // path prefix match. Logic borrowed from MtpDatabase.
-        if (isDirectory) {
-            final String path = file.getAbsolutePath() + "/";
+            // Remove media store entries for any files inside this directory, using
+            // path prefix match. Logic borrowed from MtpDatabase.
+            if (isDirectory) {
+                final String path = visibleFile.getAbsolutePath() + "/";
+                resolver.delete(externalUri,
+                        "_data LIKE ?1 AND lower(substr(_data,1,?2))=lower(?3)",
+                        new String[] { path + "%", Integer.toString(path.length()), path });
+            }
+
+            // Remove media store entry for this exact file.
+            final String path = visibleFile.getAbsolutePath();
             resolver.delete(externalUri,
-                    "_data LIKE ?1 AND lower(substr(_data,1,?2))=lower(?3)",
-                    new String[] { path + "%", Integer.toString(path.length()), path });
+                    "_data LIKE ?1 AND lower(_data)=lower(?2)",
+                    new String[] { path, path });
         }
-
-        // Remove media store entry for this exact file.
-        final String path = file.getAbsolutePath();
-        resolver.delete(externalUri,
-                "_data LIKE ?1 AND lower(_data)=lower(?2)",
-                new String[] { path, path });
     }
 
     @Override
@@ -562,6 +563,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
             throws FileNotFoundException {
         final MatrixCursor result = new MatrixCursor(resolveDocumentProjection(projection));
 
+        query = query.toLowerCase();
         final File parent;
         synchronized (mRootsLock) {
             parent = mRoots.get(rootId).path;

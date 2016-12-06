@@ -10,8 +10,8 @@ next.link=screendensities.html
 
 
 <!-- This is the training bar -->
-<div id="tb-wrapper"> 
-<div id="tb"> 
+<div id="tb-wrapper">
+<div id="tb">
 
 <h2>강의 목표</h2>
 <ol>
@@ -30,26 +30,26 @@ next.link=screendensities.html
   <li><a href="{@docRoot}guide/practices/screens_support.html">다양한 화면 지원</a></li>
 </ul>
 
-<h2>다운로드 </h2> 
- 
-<div class="download-box"> 
+<h2>다운로드 </h2>
+
+<div class="download-box">
 <a href="http://developer.android.com/shareables/training/NewsReader.zip" class="button">샘플 앱 다운로드</a>
-<p class="filename">NewsReader.zip</p> 
-</div> 
- 
-</div> 
-</div> 
+<p class="filename">NewsReader.zip</p>
+</div>
+
+</div>
+</div>
 
 <p>이 강의에서는 다양한 화면 크기를 지원하는 방법을 설명합니다.</p>
-<ul> 
-  <li>화면에 맞게 레이아웃 크기 조정</li> 
-  <li>화면 구성에 따라 적합한 UI 레이아웃 제공</li> 
+<ul>
+  <li>화면에 맞게 레이아웃 크기 조정</li>
+  <li>화면 구성에 따라 적합한 UI 레이아웃 제공</li>
   <li>올바른 화면에 올바른 레이아웃 적용</li>
-  <li>정확하게 확대되는 비트맵 제공</li> 
-</ul> 
+  <li>정확하게 확대되는 비트맵 제공</li>
+</ul>
 
 
-<h2 id="TaskUseWrapMatchPar">'wrap_content' 및 'match_parent' 사용</h2> 
+<h2 id="TaskUseWrapMatchPar">'wrap_content' 및 'match_parent' 사용</h2>
 
 <p>레이아웃이 다양한 화면 크기에 따라 유연하게 조정되도록 하려면 일부 뷰 구성요소의 너비와 높이에 <code>"wrap_content"</code> 및 <code>"match_parent"</code>를 사용해야 합니다. <code>"wrap_content"</code>를 사용하면 뷰의 너비와 높이가 해당 뷰 내에 콘텐츠가 들어가는데 필요한 최소 크기로 설정되는 반면, <code>"match_parent"</code>(API 수준 8 이전에는 <code>"fill_parent"</code>라고도 함)를 사용하면 구성요소가 확장되어 부모뷰의 크기와 일치하게 됩니다.</p>
 
@@ -65,7 +65,7 @@ next.link=screendensities.html
 <p class="img-caption"><strong>그림 1.</strong> 세로 모드(왼쪽) 및 가로 모드(오른쪽)에서의 뉴스 리더 샘플 앱</p>
 
 
-<h2 id="TaskUseRelativeLayout">RelativeLayout 사용</h2> 
+<h2 id="TaskUseRelativeLayout">RelativeLayout 사용</h2>
 
 <p>비교적 복잡한 레이아웃을 만들려면 <PH>{@link android.widget.LinearLayout}의 중첩 인스턴스와</PH> <code>"wrap_content"</code> 및 <code>"match_parent"</code> 크기의 조합을 사용합니다. 하지만 <PH>{@link android.widget.LinearLayout}</PH> 을 사용하면 자식뷰의 여백 관계를 정확하게 제어할 수 없으며 <PH>{@link android.widget.LinearLayout}</PH> 단순히 나란하게 표시됩니다. 자식뷰를 일직선이 아닌 다양한 방향으로 표시해야 하는 경우 구성요소 사이의 여백 관계를 중심으로 레이아웃을 지정할 수 있는 <PH>{@link android.widget.RelativeLayout}</PH>을 사용하는 것이 더 좋은 방법일 수 있습니다. 예를 들어 화면 왼쪽에 하나의 자식뷰를, 오른쪽에 다른 자식뷰를 정렬할 수 있습니다.</p>
 
@@ -115,8 +115,8 @@ next.link=screendensities.html
 
 <p>구성요소의 크기가 변하더라도 여백 관계가  <PH>{@link android.widget.RelativeLayout.LayoutParams}</PH>.</p>
 
- 
-<h2 id="TaskUseSizeQuali">크기 한정자 사용</h2> 
+
+<h2 id="TaskUseSizeQuali">크기 한정자 사용</h2>
 
 <p>이전 섹션에서 다룬 유연한 레이아웃이나 상대적 레이아웃으로는 한계가 있습니다. 이러한 레이아웃이 구성요소 내부 및 주위의 여백을 확장하여 다양한 화면에 맞게 조정되긴 하지만 화면 크기별로 최적의 사용자 환경을 제공하지는 못할 수 있습니다. 따라서 애플리케이션은 유연한 레이아웃을 구현할 뿐 아니라 다양한 화면 구성을 타겟팅할 수 있도록 다양한 대체 레이아웃을 제공해야 합니다. 그 방법은 런타임이 현재 기기의 구성에 따라 적합한 리소스(예: 화면 크기별로 다른 레이아웃 디자인)를 자동으로 선택하도록 해 주는 <a href="http://developer.android.com/guide/practices/screens_support.html#qualifiers">구성 한정자</a>를 사용하는 것입니다.</p>
 
@@ -158,7 +158,7 @@ next.link=screendensities.html
 <p>하지만 Android 3.2 이전 기기는 <code>sw600dp</code>를 크기 한정자로 인식하지 않기 때문에 최소 너비 한정자가 제대로 작동하지 않으며 따라서 <code>large</code> 한정자도 계속 사용해야 합니다. 따라서 <code>res/layout-large/main.xml</code>라는 이름의 파일이 있어야 하며 이 파일은 <code>res/layout-sw600dp/main.xml</code>과 동일한 파일입니다. 다음 섹션에서는 이런 식으로 레이아웃 파일이 중복되지 않게 하는 기술을 살펴보겠습니다.</p>
 
 
-<h2 id="TaskUseAliasFilters">레이아웃 별칭 사용</h2> 
+<h2 id="TaskUseAliasFilters">레이아웃 별칭 사용</h2>
 
 <p>최소 너비 한정자는 Android 3.2 이상 버전에서만 사용할 수 있습니다. 따라서 이전 버전과 호환되도록 하려면 추상화 크기 빈(소형, 보통, 대형 및 초대형)을 계속 사용해야 합니다. 예를 들어 휴대전화에서는 단일 창 UI가 표시되고 7인치 태블릿, TV 및 기타 대형 기기에서는 다중 창 UI가 표시되도록 UI를 디자인하려면 다음 파일을 제공해야 합니다.</p>
 
@@ -202,7 +202,7 @@ next.link=screendensities.html
 <PH>{@code large}</PH>,3.2 이후 버전은 <code>sw600dp</code>와 일치).</p>
 
 
-<h2 id="TaskUseOriQuali">방향 한정자 사용</h2> 
+<h2 id="TaskUseOriQuali">방향 한정자 사용</h2>
 
 <p>일부 레이아웃은 가로 및 세로 방향 모두에서 잘 작동하지만 대부분의 레이아웃은 조정을 통해 많은 이점을 누릴 수 있습니다. 다음은 뉴스 리더 샘플 앱에서 화면 크기와 방향별로 레이아웃이 어떻게 작동하는지 보여줍니다.</p>
 

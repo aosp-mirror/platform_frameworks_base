@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="2783841764617238354">"Documents"</string>
+    <string name="app_label" msgid="1551050262492398204">"Files"</string>
     <string name="downloads_label" msgid="959113951084633612">"Downloads"</string>
     <string name="title_open" msgid="4353228937663917801">"Open from"</string>
     <string name="title_save" msgid="2433679664882857999">"Save to"</string>
@@ -107,7 +107,7 @@
       <item quantity="one">Copied <xliff:g id="COUNT_0">%1$d</xliff:g> file to clipboard.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Cannot paste the selected files in this location."</string>
-    <string name="menu_rename" msgid="7678802479104285353">"rename"</string>
+    <string name="menu_rename" msgid="7678802479104285353">"Rename"</string>
     <string name="rename_error" msgid="4203041674883412606">"Failed to rename document"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Some files were converted"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"Grant <xliff:g id="APPNAME"><b>^1</b></xliff:g> access to <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> directory on <xliff:g id="STORAGE"><i>^3</i></xliff:g>?"</string>

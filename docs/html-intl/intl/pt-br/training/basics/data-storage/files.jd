@@ -183,7 +183,7 @@ public File getTempFile(Context context, String url) {
     try {
         String fileName = Uri.parse(url).getLastPathSegment();
         file = File.createTempFile(fileName, null, context.getCacheDir());
-    catch (IOException e) {
+    } catch (IOException e) {
         // Error while creating file
     }
     return file;
@@ -250,12 +250,12 @@ o usuário deve continuar a ter acesso a esses arquivos.
 . Embora esses arquivos estejam teoricamente à disposição do usuário e de outros aplicativo por estarem
 no armazenamento externo, na verdade são arquivos que não têm valor para o usuário
 fora do aplicativo. Ao desinstalar o aplicativo, o sistema exclui
-todos os arquivos no diretório privado externo do aplicativo. 
+todos os arquivos no diretório privado externo do aplicativo.
   <p>Por exemplo, recursos adicionais baixados através do aplicativo ou arquivos de mídia temporários.</p>
   </dd>
 </dl>
 
-<p>Para salvar arquivos públicos no armazenamento externo, use o método 
+<p>Para salvar arquivos públicos no armazenamento externo, use o método
 {@link android.os.Environment#getExternalStoragePublicDirectory
 getExternalStoragePublicDirectory()} para obter um {@link java.io.File} que representa
 o diretório correto no armazenamento externo. O método exige um argumento que especifica
@@ -265,7 +265,7 @@ android.os.Environment#DIRECTORY_PICTURES}. Por exemplo:</p>
 
 <pre>
 public File getAlbumStorageDir(String albumName) {
-    // Get the directory for the user's public pictures directory. 
+    // Get the directory for the user's public pictures directory.
     File file = new File(Environment.getExternalStoragePublicDirectory(
             Environment.DIRECTORY_PICTURES), albumName);
     if (!file.mkdirs()) {
@@ -287,7 +287,7 @@ usuário faz a desinstalação.</p>
 
 <pre>
 public File getAlbumStorageDir(Context context, String albumName) {
-    // Get the directory for the app's private pictures directory. 
+    // Get the directory for the app's private pictures directory.
     File file = new File(context.getExternalFilesDir(
             Environment.DIRECTORY_PICTURES), albumName);
     if (!file.mkdirs()) {
@@ -366,7 +366,7 @@ myContext.deleteFile(fileName);
 
 <div class="note">
 <p><strong>Observação:</strong> quando o usuário desinstala o aplicativo, o sistema Android também
-exclui:</p> 
+exclui:</p>
 <ul>
 <li>Todos os arquivos salvos no armazenamento interno</li>
 <li>Todos os arquivos salvos no armazenamento externo usando {@link

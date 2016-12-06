@@ -21,14 +21,14 @@ parent.link=activities.html
         </ol>
     </li>
   </ol>
-    
+
   <h2>重要類別</h2>
     <ol>
       <li>{@link android.app.LoaderManager}</li>
       <li>{@link android.content.Loader}</li>
 
-    </ol>   
-    
+    </ol>
+
     <h2>相關範例</h2>
    <ol>
      <li> <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderCursor.html">LoaderCursor
@@ -51,7 +51,7 @@ android.app.Fragment} 。</li>
 因此不需要重新查詢資料。
 </li>
   </ul>
- 
+
 <h2 id="summary">載入器 API 摘要</h2>
 
 <p>有多個類別和介面可能與在應用程式中使用載入器有關。
@@ -129,7 +129,7 @@ android.content.ContentProvider} 所備份資料的 {@link android.content.Curso
 </li>
   <li>{@link android.app.LoaderManager.LoaderCallbacks} 的實作。
 您可以在這裡建立新的載入器和管理對現有載入器的參照。
-</li> 
+</li>
 <li>顯示載入器資料的一種方式，例如 {@link
 android.widget.SimpleCursorAdapter}。</li>
   <li>使用 {@link android.content.CursorLoader} 時的資料來源，例如 {@link android.content.ContentProvider}。
@@ -140,7 +140,7 @@ android.widget.SimpleCursorAdapter}。</li>
 <p>{@link android.app.LoaderManager} 可在 {@link android.app.Activity} 或 {@link android.app.Fragment} 內管理一或多個 {@link
 android.content.Loader} 執行個體。
 每個 Activity 或片段只能有一個 {@link
-android.app.LoaderManager}。</p> 
+android.app.LoaderManager}。</p>
 
 <p>您通常會在 Activity 的 {@link
 android.app.Activity#onCreate onCreate()} 方法內或在片段的 {@link android.app.Fragment#onActivityCreated onActivityCreated()} 方法內，初始化 {@link android.content.Loader}，
@@ -157,13 +157,13 @@ getLoaderManager().initLoader(0, null, this);</pre>
 <ul>
   <li>可識別載入器的不重複 ID。在本範例中，此 ID 為 0。</li>
 <li>可在建構時提供給載入器的選用引數 (在本範例中為<code>null</code>)。
-</li> 
+</li>
 
 <li>{@link android.app.LoaderManager.LoaderCallbacks} 實作，
 {@link android.app.LoaderManager} 會呼叫此實作來回報載入器事件。在本範例中，本機類別會實作 {@link
 android.app.LoaderManager.LoaderCallbacks} 執行個體，以將參照傳送給它自己 ({@code this})。
 
-</li> 
+</li>
 </ul>
 <p>{@link android.app.LoaderManager#initLoader initLoader()} 呼叫可確保載入器已初始化且處於有效狀態。
 可能會有兩種結果：</p>
@@ -343,7 +343,7 @@ public void onLoadFinished(Loader&lt;Cursor&gt; loader, Cursor data) {
 <p>這個方法是在正要重設先前建立的載入器時呼叫，以便使其資料無法使用。
 此回呼方法可讓您知道即將要發佈資料，而能先行將其參照移除。
   </p>
-<p>此實作會以 <code>null</code> 的值呼叫 
+<p>此實作會以 <code>null</code> 的值呼叫
 {@link android.widget.SimpleCursorAdapter#swapCursor swapCursor()}：
 </p>
 
@@ -366,7 +366,7 @@ public void onLoaderReset(Loader&lt;Cursor&gt; loader) {
 android.app.Fragment} 的完整實作，
 其顯示的 {@link android.widget.ListView} 包含聯絡人內容供應程式的查詢結果。它使用 {@link
 android.content.CursorLoader} 管理對供應程式的查詢。</p>
- 
+
 <p>如本範例所示，針對要存取使用者聯絡人的應用程式，它的宣示說明必須包含 {@link android.Manifest.permission#READ_CONTACTS READ_CONTACTS} 權限。
 
 </p>

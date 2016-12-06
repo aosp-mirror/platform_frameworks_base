@@ -21,6 +21,8 @@ import android.content.pm.PackageManager;
 import android.content.res.XmlResourceParser;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
+import android.os.storage.StorageManager;
+import android.os.storage.StorageVolume;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.text.TextUtils;
@@ -223,7 +225,11 @@ public class FullBackup {
 
         final int mFullBackupContent;
         final PackageManager mPackageManager;
+        final StorageManager mStorageManager;
         final String mPackageName;
+
+        // lazy initialized, only when needed
+        private StorageVolume[] mVolumes = null;
 
         /**
          * Parse out the semantic domains into the correct physical location.
@@ -260,16 +266,41 @@ public class FullBackup {
                     } else {
                         return null;
                     }
+                } else if (domainToken.startsWith(FullBackup.SHARED_PREFIX)) {
+                    return sharedDomainToPath(domainToken);
                 }
                 // Not a supported location
                 Log.i(TAG, "Unrecognized domain " + domainToken);
                 return null;
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Log.i(TAG, "Error reading directory for domain: " + domainToken);
                 return null;
             }
 
         }
+
+        private String sharedDomainToPath(String domain) throws IOException {
+            // already known to start with SHARED_PREFIX, so we just look after that
+            final String volume = domain.substring(FullBackup.SHARED_PREFIX.length());
+            final StorageVolume[] volumes = getVolumeList();
+            final int volNum = Integer.parseInt(volume);
+            if (volNum < mVolumes.length) {
+                return volumes[volNum].getPathFile().getCanonicalPath();
+            }
+            return null;
+        }
+
+        private StorageVolume[] getVolumeList() {
+            if (mStorageManager != null) {
+                if (mVolumes == null) {
+                    mVolumes = mStorageManager.getVolumeList();
+                }
+            } else {
+                Log.e(TAG, "Unable to access Storage Manager");
+            }
+            return mVolumes;
+        }
+
         /**
         * A map of domain -> list of canonical file names in that domain that are to be included.
         * We keep track of the domain so that we can go through the file system in order later on.
@@ -283,6 +314,7 @@ public class FullBackup {
 
         BackupScheme(Context context) {
             mFullBackupContent = context.getApplicationInfo().fullBackupContent;
+            mStorageManager = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
             mPackageManager = context.getPackageManager();
             mPackageName = context.getPackageName();
 

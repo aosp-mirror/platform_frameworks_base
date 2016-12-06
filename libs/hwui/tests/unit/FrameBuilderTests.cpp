@@ -1459,7 +1459,8 @@ RENDERTHREAD_TEST(FrameBuilder, buildLayer) {
 
 static void drawOrderedRect(RecordingCanvas* canvas, uint8_t expectedDrawOrder) {
     SkPaint paint;
-    paint.setColor(SkColorSetARGB(256, 0, 0, expectedDrawOrder)); // order put in blue channel
+    // order put in blue channel, transparent so overlapped content doesn't get rejected
+    paint.setColor(SkColorSetARGB(1, 0, 0, expectedDrawOrder));
     canvas->drawRect(0, 0, 100, 100, paint);
 }
 static void drawOrderedNode(RecordingCanvas* canvas, uint8_t expectedDrawOrder, float z) {

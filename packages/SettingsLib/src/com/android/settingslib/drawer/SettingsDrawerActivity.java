@@ -28,8 +28,11 @@ import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.support.v4.widget.DrawerLayout;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
@@ -41,8 +44,10 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager.LayoutParams;
 import android.widget.AdapterView;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.Toolbar;
+
 import com.android.settingslib.R;
 import com.android.settingslib.applications.InterestingConfigChanges;
 
@@ -54,6 +59,7 @@ public class SettingsDrawerActivity extends Activity {
 
     protected static final boolean DEBUG_TIMING = false;
     private static final String TAG = "SettingsDrawerActivity";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     public static final String EXTRA_SHOW_MENU = "show_drawer_menu";
 
@@ -68,8 +74,10 @@ public class SettingsDrawerActivity extends Activity {
     private final List<CategoryListener> mCategoryListeners = new ArrayList<>();
 
     private SettingsDrawerAdapter mDrawerAdapter;
+    private FrameLayout mContentHeaderContainer;
     private DrawerLayout mDrawerLayout;
     private boolean mShowingMenu;
+    private UserManager mUserManager;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -84,6 +92,7 @@ public class SettingsDrawerActivity extends Activity {
             requestWindowFeature(Window.FEATURE_NO_TITLE);
         }
         super.setContentView(R.layout.settings_with_drawer);
+        mContentHeaderContainer = (FrameLayout) findViewById(R.id.content_header_container);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (mDrawerLayout == null) {
             return;
@@ -104,8 +113,10 @@ public class SettingsDrawerActivity extends Activity {
             public void onItemClick(android.widget.AdapterView<?> parent, View view, int position,
                     long id) {
                 onTileClicked(mDrawerAdapter.getTile(position));
-            };
+            }
         });
+
+        mUserManager = UserManager.get(this);
         if (DEBUG_TIMING) Log.d(TAG, "onCreate took " + (System.currentTimeMillis() - startTime)
                 + " ms");
     }
@@ -134,8 +145,16 @@ public class SettingsDrawerActivity extends Activity {
 
             new CategoriesUpdater().execute();
         }
-        if (getIntent() != null && getIntent().getBooleanExtra(EXTRA_SHOW_MENU, false)) {
-            showMenuIcon();
+        final Intent intent = getIntent();
+        if (intent != null) {
+            if (intent.hasExtra(EXTRA_SHOW_MENU)) {
+                if (intent.getBooleanExtra(EXTRA_SHOW_MENU, false)) {
+                    // Intent explicitly set to show menu.
+                    showMenuIcon();
+                }
+            } else if (isTopLevelTile(intent)) {
+                showMenuIcon();
+            }
         }
     }
 
@@ -146,6 +165,30 @@ public class SettingsDrawerActivity extends Activity {
         }
 
         super.onPause();
+    }
+
+    private boolean isTopLevelTile(Intent intent) {
+        final ComponentName componentName = intent.getComponent();
+        if (componentName == null) {
+            return false;
+        }
+        // Look for a tile that has the same component as incoming intent
+        final List<DashboardCategory> categories = getDashboardCategories();
+        for (DashboardCategory category : categories) {
+            for (Tile tile : category.tiles) {
+                if (TextUtils.equals(tile.intent.getComponent().getClassName(),
+                        componentName.getClassName())) {
+                    if (DEBUG) {
+                        Log.d(TAG, "intent is for top level tile: " + tile.title);
+                    }
+                    return true;
+                }
+            }
+        }
+        if (DEBUG) {
+            Log.d(TAG, "Intent is not for top level settings " + intent);
+        }
+        return false;
     }
 
     public void addCategoryListener(CategoryListener listener) {
@@ -177,6 +220,13 @@ public class SettingsDrawerActivity extends Activity {
     public void closeDrawer() {
         if (mDrawerLayout != null) {
             mDrawerLayout.closeDrawers();
+        }
+    }
+
+    public void setContentHeaderView(View headerView) {
+        mContentHeaderContainer.removeAllViews();
+        if (headerView != null) {
+            mContentHeaderContainer.addView(headerView);
         }
     }
 
@@ -215,6 +265,7 @@ public class SettingsDrawerActivity extends Activity {
     public void showMenuIcon() {
         mShowingMenu = true;
         getActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
+        getActionBar().setHomeActionContentDescription(R.string.content_description_menu_button);
         getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
@@ -245,6 +296,7 @@ public class SettingsDrawerActivity extends Activity {
             return true;
         }
         try {
+            updateUserHandlesIfNeeded(tile);
             int numUserHandles = tile.userHandle.size();
             if (numUserHandles > 1) {
                 ProfileSelectDialog.show(getFragmentManager(), tile);
@@ -266,10 +318,30 @@ public class SettingsDrawerActivity extends Activity {
         return true;
     }
 
+    private void updateUserHandlesIfNeeded(Tile tile) {
+        List<UserHandle> userHandles = tile.userHandle;
+
+        for (int i = userHandles.size() - 1; i >= 0; i--) {
+            if (mUserManager.getUserInfo(userHandles.get(i).getIdentifier()) == null) {
+                if (DEBUG) {
+                    Log.d(TAG, "Delete the user: " + userHandles.get(i).getIdentifier());
+                }
+                userHandles.remove(i);
+            }
+        }
+    }
+
     protected void onTileClicked(Tile tile) {
         if (openTile(tile)) {
             finish();
         }
+    }
+
+    public HashMap<Pair<String, String>, Tile> getTileCache() {
+        if (sTileCache == null) {
+            getDashboardCategories();
+        }
+        return sTileCache;
     }
 
     public void onProfileTileOpen() {

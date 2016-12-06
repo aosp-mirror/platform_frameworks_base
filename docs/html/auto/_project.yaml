@@ -1,0 +1,6 @@
+name: "Auto"
+home_url: /auto/
+description: "Let drivers listen to and control content in your music and other audio apps."
+content_license: cc3-apache2
+buganizer_id: 30209417
+parent_project_metadata_path: /about/_project.yaml

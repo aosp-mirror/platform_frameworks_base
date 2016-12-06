@@ -23,15 +23,15 @@ object is instantiated before any of the application's components.</dd>
 <dt>attributes:</dt>
 <dd><dl class="attr">
 <dt><a name="ftest"></a>{@code android:functionalTest}</dt>
-<dd>Whether or not the Instrumentation class should run as a functional test 
+<dd>Whether or not the Instrumentation class should run as a functional test
 &mdash; "{@code true}" if it should, and "{@code false}" if not.  The
 default value is "{@code false}".</dd>
 
 <dt><a name="hprof"></a>{@code android:handleProfiling}</dt>
-<dd>Whether or not the Instrumentation object will turn profiling on and 
-off &mdash; "{@code true}" if it determines when profiling starts and 
-stops, and "{@code false}" if profiling continues the entire time it is 
-running.  A value of "{@code true}" enables the object to target profiling 
+<dd>Whether or not the Instrumentation object will turn profiling on and
+off &mdash; "{@code true}" if it determines when profiling starts and
+stops, and "{@code false}" if profiling continues the entire time it is
+running.  A value of "{@code true}" enables the object to target profiling
 at a specific set of operations.  The default value is "{@code false}".</dd>
 
 <dt><a name="icon"></a>{@code android:icon}</dt>
@@ -43,11 +43,11 @@ be set as a reference to a drawable resource.</dd>
 be set as a raw string or a reference to a string resource.</dd>
 
 <dt><a name="nm"></a>{@code android:name}</dt>
-<dd>The name of the {@link android.app.Instrumentation} subclass.  
-This should be a fully qualified class name (such as, 
-"{@code com.example.project.StringInstrumentation}").  However, as a shorthand, 
-if the first character of the name is a period, it is appended to the package 
-name specified in the <code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> element.  
+<dd>The name of the {@link android.app.Instrumentation} subclass.
+This should be a fully qualified class name (such as,
+"{@code com.example.project.StringInstrumentation}").  However, as a shorthand,
+if the first character of the name is a period, it is appended to the package
+name specified in the <code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> element.
 
 <p>
 There is no default.  The name must be specified.

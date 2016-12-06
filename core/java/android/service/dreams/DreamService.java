@@ -27,6 +27,7 @@ import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IRemoteCallback;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -942,8 +943,9 @@ public class DreamService extends Service implements Window.Callback {
      * Must run on mHandler.
      *
      * @param windowToken A window token that will allow a window to be created in the correct layer.
+     * @param started A callback that will be invoked once onDreamingStarted has completed.
      */
-    private final void attach(IBinder windowToken, boolean canDoze) {
+    private final void attach(IBinder windowToken, boolean canDoze, IRemoteCallback started) {
         if (mWindowToken != null) {
             Slog.e(TAG, "attach() called when already attached with token=" + mWindowToken);
             return;
@@ -1017,7 +1019,15 @@ public class DreamService extends Service implements Window.Callback {
                 if (mWindow != null || mWindowless) {
                     if (mDebug) Slog.v(TAG, "Calling onDreamingStarted()");
                     mStarted = true;
-                    onDreamingStarted();
+                    try {
+                        onDreamingStarted();
+                    } finally {
+                        try {
+                            started.sendResult(null);
+                        } catch (RemoteException e) {
+                            throw e.rethrowFromSystemServer();
+                        }
+                    }
                 }
             }
         });
@@ -1092,11 +1102,12 @@ public class DreamService extends Service implements Window.Callback {
 
     private final class DreamServiceWrapper extends IDreamService.Stub {
         @Override
-        public void attach(final IBinder windowToken, final boolean canDoze) {
+        public void attach(final IBinder windowToken, final boolean canDoze,
+                IRemoteCallback started) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    DreamService.this.attach(windowToken, canDoze);
+                    DreamService.this.attach(windowToken, canDoze, started);
                 }
             });
         }

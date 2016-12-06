@@ -201,12 +201,16 @@ public class Resources {
      * Create a new Resources object on top of an existing set of assets in an
      * AssetManager.
      *
+     * @deprecated Resources should not be constructed by apps.
+     * See {@link android.content.Context#createConfigurationContext(Configuration)}.
+     *
      * @param assets Previously created AssetManager.
      * @param metrics Current display metrics to consider when
      *                selecting/computing resource values.
      * @param config Desired device configuration to consider when
      *               selecting/computing resource values (optional).
      */
+    @Deprecated
     public Resources(AssetManager assets, DisplayMetrics metrics, Configuration config) {
         this(null);
         mResourcesImpl = new ResourcesImpl(assets, metrics, config, new DisplayAdjustments());
@@ -1762,7 +1766,10 @@ public class Resources {
 
     /**
      * Store the newly updated configuration.
+     *
+     * @deprecated See {@link android.content.Context#createConfigurationContext(Configuration)}.
      */
+    @Deprecated
     public void updateConfiguration(Configuration config, DisplayMetrics metrics) {
         updateConfiguration(config, metrics, null);
     }

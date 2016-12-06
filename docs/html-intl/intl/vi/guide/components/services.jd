@@ -199,7 +199,7 @@ con của phần tử <a href="{@docRoot}guide/topics/manifest/application-eleme
 &lt;/manifest&gt;
 </pre>
 
-<p>Xem tham chiếu phần tử <a href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a> 
+<p>Xem tham chiếu phần tử <a href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a>
 để biết thêm thông tin về việc khai báo dịch vụ của bạn trong bản kê khai.</p>
 
 <p>Có các thuộc tính khác mà bạn có thể bao gồm trong phần tử <a href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a> để
@@ -605,7 +605,7 @@ tài liệu riêng về <a href="{@docRoot}guide/components/bound-services.html"
 
 <p>Sau khi chạy, một dịch vụ có thể thông báo cho người dùng về sự kiện bằng cách sử dụng <a href="{@docRoot}guide/topics/ui/notifiers/toasts.html">Thông báo Cửa sổ</a> hoặc <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Thông báo Thanh Trạng thái</a>.</p>
 
-<p>Thông báo cửa sổ là một thông báo xuất hiện một lúc trên bề mặt của cửa sổ hiện tại 
+<p>Thông báo cửa sổ là một thông báo xuất hiện một lúc trên bề mặt của cửa sổ hiện tại
 rồi biến mất, trong khi thông báo thanh trạng thái cung cấp một biểu tượng trong thanh trạng thái cùng một
 thông báo, người dùng có thể chọn nó để thực hiện một hành động (chẳng hạn như bắt đầu một hoạt động).</p>
 

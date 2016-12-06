@@ -24,6 +24,7 @@ import android.annotation.Nullable;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
@@ -61,14 +62,15 @@ import android.widget.TextView;
 import java.lang.ref.WeakReference;
 
 public class AlertController {
+    public static final int MICRO = 1;
 
     private final Context mContext;
     private final DialogInterface mDialogInterface;
-    private final Window mWindow;
+    protected final Window mWindow;
 
     private CharSequence mTitle;
-    private CharSequence mMessage;
-    private ListView mListView;
+    protected CharSequence mMessage;
+    protected ListView mListView;
     private View mView;
 
     private int mViewLayoutResId;
@@ -91,14 +93,14 @@ public class AlertController {
     private CharSequence mButtonNeutralText;
     private Message mButtonNeutralMessage;
 
-    private ScrollView mScrollView;
+    protected ScrollView mScrollView;
 
     private int mIconId = 0;
     private Drawable mIcon;
 
     private ImageView mIconView;
     private TextView mTitleView;
-    private TextView mMessageView;
+    protected TextView mMessageView;
     private View mCustomTitleView;
 
     private boolean mForceInverseBackground;
@@ -176,7 +178,21 @@ public class AlertController {
         return outValue.data != 0;
     }
 
-    public AlertController(Context context, DialogInterface di, Window window) {
+    public static final AlertController create(Context context, DialogInterface di, Window window) {
+        final TypedArray a = context.obtainStyledAttributes(
+                null, R.styleable.AlertDialog, R.attr.alertDialogStyle, 0);
+        int controllerType = a.getInt(R.styleable.AlertDialog_controllerType, 0);
+        a.recycle();
+
+        switch (controllerType) {
+            case MICRO:
+                return new MicroAlertController(context, di, window);
+            default:
+                return new AlertController(context, di, window);
+        }
+    }
+
+    protected AlertController(Context context, DialogInterface di, Window window) {
         mContext = context;
         mDialogInterface = di;
         mWindow = window;
@@ -597,7 +613,7 @@ public class AlertController {
         }
     }
 
-    private void setupTitle(ViewGroup topPanel) {
+    protected void setupTitle(ViewGroup topPanel) {
         if (mCustomTitleView != null && mShowTitle) {
             // Add the custom title view directly to the topPanel layout
             final LayoutParams lp = new LayoutParams(
@@ -643,7 +659,7 @@ public class AlertController {
         }
     }
 
-    private void setupContent(ViewGroup contentPanel) {
+    protected void setupContent(ViewGroup contentPanel) {
         mScrollView = (ScrollView) contentPanel.findViewById(R.id.scrollView);
         mScrollView.setFocusable(false);
 
@@ -680,7 +696,7 @@ public class AlertController {
         }
     }
 
-    private void setupButtons(ViewGroup buttonPanel) {
+    protected void setupButtons(ViewGroup buttonPanel) {
         int BIT_BUTTON_POSITIVE = 1;
         int BIT_BUTTON_NEGATIVE = 2;
         int BIT_BUTTON_NEUTRAL = 4;
@@ -872,7 +888,8 @@ public class AlertController {
             final int checkedItem = mCheckedItem;
             if (checkedItem > -1) {
                 listView.setItemChecked(checkedItem, true);
-                listView.setSelection(checkedItem);
+                listView.setSelectionFromTop(checkedItem,
+                        a.getDimensionPixelSize(R.styleable.AlertDialog_selectionScrollOffset, 0));
             }
         }
     }
@@ -1072,7 +1089,8 @@ public class AlertController {
                         public void bindView(View view, Context context, Cursor cursor) {
                             CheckedTextView text = (CheckedTextView) view.findViewById(R.id.text1);
                             text.setText(cursor.getString(mLabelIndex));
-                            listView.setItemChecked(cursor.getPosition(),
+                            listView.setItemChecked(
+                                    cursor.getPosition(),
                                     cursor.getInt(mIsCheckedIndex) == 1);
                         }
 

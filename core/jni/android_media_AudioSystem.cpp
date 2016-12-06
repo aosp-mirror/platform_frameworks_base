@@ -20,13 +20,14 @@
 #define LOG_TAG "AudioSystem-JNI"
 #include <utils/Log.h>
 
+#include <sstream>
 #include <jni.h>
 #include <JNIHelp.h>
 #include "core_jni_helpers.h"
 
 #include <media/AudioSystem.h>
 #include <media/AudioPolicy.h>
-
+#include <nativehelper/ScopedLocalRef.h>
 #include <system/audio.h>
 #include <system/audio_policy.h>
 #include "android_media_AudioFormat.h"
@@ -903,6 +904,12 @@ static bool hasFormat(int* formats, size_t size, int format) {
     return false; // not found
 }
 
+// TODO: pull out to separate file
+template <typename T, size_t N>
+static constexpr size_t array_size(const T (&)[N]) {
+    return N;
+}
+
 static jint convertAudioPortFromNative(JNIEnv *env,
                                            jobject *jAudioPort, const struct audio_port *nAudioPort)
 {
@@ -922,6 +929,38 @@ static jint convertAudioPortFromNative(JNIEnv *env,
 
     ALOGV("convertAudioPortFromNative id %d role %d type %d name %s",
         nAudioPort->id, nAudioPort->role, nAudioPort->type, nAudioPort->name);
+
+    // Verify audio port array count info.
+    if (nAudioPort->num_sample_rates > array_size(nAudioPort->sample_rates)
+            || nAudioPort->num_channel_masks > array_size(nAudioPort->channel_masks)
+            || nAudioPort->num_formats > array_size(nAudioPort->formats)
+            || nAudioPort->num_gains > array_size(nAudioPort->gains)) {
+
+        std::stringstream ss;
+        ss << "convertAudioPortFromNative array count out of bounds:"
+                << " num_sample_rates " << nAudioPort->num_sample_rates
+                << " num_channel_masks " << nAudioPort->num_channel_masks
+                << " num_formats " << nAudioPort->num_formats
+                << " num_gains " << nAudioPort->num_gains
+                ;
+        std::string s = ss.str();
+
+        // Prefer to log through Java wtf instead of native ALOGE.
+        ScopedLocalRef<jclass> jLogClass(env, env->FindClass("android/util/Log"));
+        jmethodID jWtfId = (jLogClass.get() == nullptr)
+                ? nullptr
+                : env->GetStaticMethodID(jLogClass.get(), "wtf",
+                        "(Ljava/lang/String;Ljava/lang/String;)I");
+        if (jWtfId != nullptr) {
+            ScopedLocalRef<jstring> jMessage(env, env->NewStringUTF(s.c_str()));
+            ScopedLocalRef<jstring> jTag(env, env->NewStringUTF(LOG_TAG));
+            (void)env->CallStaticIntMethod(jLogClass.get(), jWtfId, jTag.get(), jMessage.get());
+        } else {
+            ALOGE("%s", s.c_str());
+        }
+        jStatus = (jint)AUDIO_JAVA_ERROR;
+        goto exit;
+    }
 
     jSamplingRates = env->NewIntArray(nAudioPort->num_sample_rates);
     if (jSamplingRates == NULL) {
@@ -1066,7 +1105,7 @@ static jint convertAudioPortFromNative(JNIEnv *env,
                                                        &jAudioPortConfig,
                                                        &nAudioPort->active_config);
     if (jStatus != AUDIO_JAVA_SUCCESS) {
-        return jStatus;
+        goto exit;
     }
 
     env->SetObjectField(*jAudioPort, gAudioPortFields.mActiveConfig, jAudioPortConfig);

@@ -1,0 +1,60 @@
+page.title=Rendering
+page.article=true
+
+page.tags=battery
+page.metaDescription=Learn how to optimize your app's rendering performance.
+
+@jd:body
+
+
+<iframe width="448" height="252"
+    src="//www.youtube.com/embed/wIy8g8yNhNk?autohide=1&amp;showinfo=0"
+    frameborder="0" allowfullscreen=""
+    style="float: right; margin: 0 0 20px 20px;"></iframe>
+
+<p>
+  A key aspect of your app that influences your users' perception of quality is
+  the smoothness with which it renders images and text to the screen. It is
+  important to avoid jank and sluggish responsiveness when your app is drawing
+  to the screen.
+</p>
+
+<p>
+  This section helps you learn several ways to optimize your app's rendering
+  performance: reducing overdraw, optimizing view hierarchies, and taking
+  advantage of the Profile GPU tool.
+</p>
+
+<h2>Rendering Actions</h2>
+
+<dl>
+  <dt>
+    <strong><a href="overdraw.html">
+        Reducing Overdraw</a></strong>
+  </dt>
+  <dd>
+    Minimize the number of times you app redraws the same pixel in a single
+    frame.
+  </dd>
+
+  <dt>
+    <strong><a href="optimizing-view-hierarchies.html">
+        Performance and View Hierarchies</a></strong>
+  </dt>
+  <dd>
+    Make sure your layout and measurement are executing efficiently, and
+    avoid double taxation.
+  </dd>
+
+
+  <dt>
+    <strong><a href="profile-gpu.html">
+        Analyzing with Profile GPU Rendering</a></strong>
+  </dt>
+  <dd>
+    Take advantage of this on-device tool to identify bottlenecks that
+    may be slowing your app's rendering down.
+  </dd>
+
+
+</dl>

@@ -101,6 +101,10 @@ class WindowSurfacePlacer {
     static final int SET_WALLPAPER_ACTION_PENDING       = 1 << 5;
 
     boolean mWallpaperMayChange = false;
+    // During an orientation change, we track whether all windows have rendered
+    // at the new orientation, and this will be false from changing orientation until that occurs.
+    // For seamless rotation cases this always stays true, as the windows complete their orientation
+    // changes 1 by 1 without disturbing global state.
     boolean mOrientationChangeComplete = true;
     boolean mWallpaperActionPending = false;
 
@@ -717,11 +721,13 @@ class WindowSurfacePlacer {
                     final boolean adjustedForMinimizedDockOrIme = task != null
                                 && (task.mStack.isAdjustedForMinimizedDockedStack()
                                     || task.mStack.isAdjustedForIme());
-                    if ((w.mAttrs.privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0
-                            && !w.isDragResizing() && !adjustedForMinimizedDockOrIme
-                            && (task == null || w.getTask().mStack.hasMovementAnimations())
-                            && !w.mWinAnimator.mLastHidden) {
-                        winAnimator.setMoveAnimation(left, top);
+                    if (mService.okToDisplay()) {
+                        if ((w.mAttrs.privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0
+                                && !w.isDragResizing() && !adjustedForMinimizedDockOrIme
+                                && (task == null || w.getTask().mStack.hasMovementAnimations())
+                                && !w.mWinAnimator.mLastHidden) {
+                            winAnimator.setMoveAnimation(left, top);
+                        }
                     }
 
                     //TODO (multidisplay): Accessibility supported only for the default display.
@@ -742,10 +748,6 @@ class WindowSurfacePlacer {
 
                 // Moved from updateWindowsAndWallpaperLocked().
                 if (w.mHasSurface) {
-                    // If we have recently synchronized a previous transaction for this
-                    // window ensure we don't push through an unsynchronized one now.
-                    winAnimator.deferToPendingTransaction();
-
                     // Take care of the window being ready to display.
                     final boolean committed = winAnimator.commitFinishDrawingLocked();
                     if (isDefaultDisplay && committed) {
@@ -974,7 +976,7 @@ class WindowSurfacePlacer {
             // windows, since that means "perform layout as normal,
             // just don't display").
             if (!gone || !win.mHaveFrame || win.mLayoutNeeded
-                    || ((win.isConfigChanged() || win.setInsetsChanged())
+                    || ((win.isConfigChanged() || win.setReportResizeHints())
                             && !win.isGoneForLayoutLw() &&
                             ((win.mAttrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0 ||
                             (win.mHasSurface && win.mAppToken != null &&
@@ -1074,6 +1076,8 @@ class WindowSurfacePlacer {
         if (!transitionGoodToGo(appsCount)) {
             return 0;
         }
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "AppTransitionReady");
+
         if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "**** GOOD TO GO");
         int transit = mService.mAppTransition.getAppTransition();
         if (mService.mSkipAppTransitionAnimation) {
@@ -1095,6 +1099,26 @@ class WindowSurfacePlacer {
         boolean fullscreenAnim = false;
         boolean voiceInteraction = false;
 
+        int i;
+        for (i = 0; i < appsCount; i++) {
+            final AppWindowToken wtoken = mService.mOpeningApps.valueAt(i);
+            // Clearing the mAnimatingExit flag before entering animation. It's set to
+            // true if app window is removed, or window relayout to invisible.
+            // This also affects window visibility. We need to clear it *before*
+            // maybeUpdateTransitToWallpaper() as the transition selection depends on
+            // wallpaper target visibility.
+            wtoken.clearAnimatingFlags();
+
+        }
+        // Adjust wallpaper before we pull the lower/upper target, since pending changes
+        // (like the clearAnimatingFlags() above) might affect wallpaper target result.
+        final DisplayContent displayContent = mService.getDefaultDisplayContentLocked();
+        if ((displayContent.pendingLayoutChanges & FINISH_LAYOUT_REDO_WALLPAPER) != 0 &&
+                mWallpaperControllerLocked.adjustWallpaperWindows()) {
+            mService.mLayersController.assignLayersLocked(windows);
+            displayContent.layoutNeeded = true;
+        }
+
         final WindowState lowerWallpaperTarget =
                 mWallpaperControllerLocked.getLowerWallpaperTarget();
         final WindowState upperWallpaperTarget =
@@ -1111,7 +1135,6 @@ class WindowSurfacePlacer {
             upperWallpaperAppToken = upperWallpaperTarget.mAppToken;
         }
 
-        int i;
         // Do a first pass through the tokens for two
         // things:
         // (1) Determine if both the closing and opening
@@ -1181,6 +1204,8 @@ class WindowSurfacePlacer {
         final AppWindowToken topOpeningApp = handleOpeningApps(transit,
                 animLp, voiceInteraction, topClosingLayer);
 
+        mService.mAppTransition.setLastAppTransition(transit, topOpeningApp, topClosingApp);
+
         final AppWindowAnimator openingAppAnimator = (topOpeningApp == null) ?  null :
                 topOpeningApp.mAppAnimator;
         final AppWindowAnimator closingAppAnimator = (topClosingApp == null) ? null :
@@ -1196,7 +1221,7 @@ class WindowSurfacePlacer {
 
         // This has changed the visibility of windows, so perform
         // a new layout to get them all up-to-date.
-        mService.getDefaultDisplayContentLocked().layoutNeeded = true;
+        displayContent.layoutNeeded = true;
 
         // TODO(multidisplay): IMEs are only supported on the default display.
         if (windows == mService.getDefaultWindowListLocked()
@@ -1207,6 +1232,9 @@ class WindowSurfacePlacer {
                 true /*updateInputWindows*/);
         mService.mFocusMayChange = false;
         mService.notifyActivityDrawnForKeyguard();
+
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+
         return FINISH_LAYOUT_REDO_LAYOUT | FINISH_LAYOUT_REDO_CONFIG;
     }
 
@@ -1257,26 +1285,6 @@ class WindowSurfacePlacer {
                 int layer = -1;
                 for (int j = 0; j < wtoken.allAppWindows.size(); j++) {
                     final WindowState win = wtoken.allAppWindows.get(j);
-                    // Clearing the mAnimatingExit flag before entering animation. It will be set to true
-                    // if app window is removed, or window relayout to invisible. We don't want to
-                    // clear it out for windows that get replaced, because the animation depends on
-                    // the flag to remove the replaced window.
-                    //
-                    // We also don't clear the mAnimatingExit flag for windows which have the
-                    // mRemoveOnExit flag. This indicates an explicit remove request has been issued
-                    // by the client. We should let animation proceed and not clear this flag or
-                    // they won't eventually be removed by WindowStateAnimator#finishExit.
-                    if (!win.mWillReplaceWindow && !win.mRemoveOnExit) {
-                        win.mAnimatingExit = false;
-                        // Clear mAnimating flag together with mAnimatingExit. When animation
-                        // changes from exiting to entering, we need to clear this flag until the
-                        // new animation gets applied, so that isAnimationStarting() becomes true
-                        // until then.
-                        // Otherwise applySurfaceChangesTransaction will faill to skip surface
-                        // placement for this window during this period, one or more frame will
-                        // show up with wrong position or scale.
-                        win.mWinAnimator.mAnimating = false;
-                    }
                     if (win.mWinAnimator.mAnimLayer > layer) {
                         layer = win.mWinAnimator.mAnimLayer;
                     }
@@ -1351,8 +1359,25 @@ class WindowSurfacePlacer {
                 "Checking " + appsCount + " opening apps (frozen="
                         + mService.mDisplayFrozen + " timeout="
                         + mService.mAppTransition.isTimeout() + ")...");
+        final ScreenRotationAnimation screenRotationAnimation =
+            mService.mAnimator.getScreenRotationAnimationLocked(
+                    Display.DEFAULT_DISPLAY);
+
         int reason = APP_TRANSITION_TIMEOUT;
         if (!mService.mAppTransition.isTimeout()) {
+            // Imagine the case where we are changing orientation due to an app transition, but a previous
+            // orientation change is still in progress. We won't process the orientation change
+            // for our transition because we need to wait for the rotation animation to finish.
+            // If we start the app transition at this point, we will interrupt it halfway with a new rotation
+            // animation after the old one finally finishes. It's better to defer the
+            // app transition.
+            if (screenRotationAnimation != null && screenRotationAnimation.isAnimating() &&
+                    mService.rotationNeedsUpdateLocked()) {
+                if (DEBUG_APP_TRANSITIONS) {
+                    Slog.v(TAG, "Delaying app transition for screen rotation animation to finish");
+                }
+                return false;
+            }
             for (int i = 0; i < appsCount; i++) {
                 AppWindowToken wtoken = mService.mOpeningApps.valueAt(i);
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
@@ -1477,7 +1502,7 @@ class WindowSurfacePlacer {
             mObscured = true;
         }
 
-        if (w.mHasSurface) {
+        if (w.mHasSurface && canBeSeen) {
             if ((attrFlags&FLAG_KEEP_SCREEN_ON) != 0) {
                 mHoldScreen = w.mSession;
                 mHoldScreenWindow = w;
@@ -1500,43 +1525,39 @@ class WindowSurfacePlacer {
             }
 
             final int type = attrs.type;
-            if (canBeSeen
-                    && (type == TYPE_SYSTEM_DIALOG
-                     || type == TYPE_SYSTEM_ERROR
-                     || (attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0)) {
+            if (type == TYPE_SYSTEM_DIALOG || type == TYPE_SYSTEM_ERROR
+                    || (attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
                 mSyswin = true;
             }
 
-            if (canBeSeen) {
-                // This function assumes that the contents of the default display are
-                // processed first before secondary displays.
-                final DisplayContent displayContent = w.getDisplayContent();
-                if (displayContent != null && displayContent.isDefaultDisplay) {
-                    // While a dream or keyguard is showing, obscure ordinary application
-                    // content on secondary displays (by forcibly enabling mirroring unless
-                    // there is other content we want to show) but still allow opaque
-                    // keyguard dialogs to be shown.
-                    if (type == TYPE_DREAM || (attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
-                        mObscureApplicationContentOnSecondaryDisplays = true;
-                    }
-                    mDisplayHasContent = true;
-                } else if (displayContent != null &&
-                        (!mObscureApplicationContentOnSecondaryDisplays
-                        || (mObscured && type == TYPE_KEYGUARD_DIALOG))) {
-                    // Allow full screen keyguard presentation dialogs to be seen.
-                    mDisplayHasContent = true;
+            // This function assumes that the contents of the default display are
+            // processed first before secondary displays.
+            final DisplayContent displayContent = w.getDisplayContent();
+            if (displayContent != null && displayContent.isDefaultDisplay) {
+                // While a dream or keyguard is showing, obscure ordinary application
+                // content on secondary displays (by forcibly enabling mirroring unless
+                // there is other content we want to show) but still allow opaque
+                // keyguard dialogs to be shown.
+                if (type == TYPE_DREAM || (attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
+                    mObscureApplicationContentOnSecondaryDisplays = true;
                 }
-                if (mPreferredRefreshRate == 0
-                        && w.mAttrs.preferredRefreshRate != 0) {
-                    mPreferredRefreshRate = w.mAttrs.preferredRefreshRate;
-                }
-                if (mPreferredModeId == 0
-                        && w.mAttrs.preferredDisplayModeId != 0) {
-                    mPreferredModeId = w.mAttrs.preferredDisplayModeId;
-                }
-                if ((privateflags & PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE) != 0) {
-                    mSustainedPerformanceModeCurrent = true;
-                }
+                mDisplayHasContent = true;
+            } else if (displayContent != null &&
+                    (!mObscureApplicationContentOnSecondaryDisplays
+                            || (mObscured && type == TYPE_KEYGUARD_DIALOG))) {
+                // Allow full screen keyguard presentation dialogs to be seen.
+                mDisplayHasContent = true;
+            }
+            if (mPreferredRefreshRate == 0
+                    && w.mAttrs.preferredRefreshRate != 0) {
+                mPreferredRefreshRate = w.mAttrs.preferredRefreshRate;
+            }
+            if (mPreferredModeId == 0
+                    && w.mAttrs.preferredDisplayModeId != 0) {
+                mPreferredModeId = w.mAttrs.preferredDisplayModeId;
+            }
+            if ((privateflags & PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE) != 0) {
+                mSustainedPerformanceModeCurrent = true;
             }
         }
     }

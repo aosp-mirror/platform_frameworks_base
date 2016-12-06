@@ -1,0 +1,480 @@
+page.title=行為變更
+page.keywords=preview,sdk,compatibility
+meta.tags="preview", "compatibility"
+page.tags="preview", "developer preview"
+page.image=images/cards/card-n-changes_2x.png
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>此文件內容</h2>
+
+<ol>
+  <li><a href="#perf">效能改良</a>
+    <ol>
+      <li><a href="#doze">休眠</a></li>
+      <li><a href="#bg-opt">背景最佳化</a></li>
+    </ol>
+  </li>
+  <li><a href="#perm">權限變更</a></li>
+  <li><a href="#accessibility">協助工具改良</a>
+    <ol>
+      <li><a href="#screen-zoom">螢幕縮放</a></li>
+      <li><a href="#vision-settings">設定精靈中的視覺設定</a></li>
+    </ol>
+  </li>
+  <li><a href="#ndk">NDK 應用程式連結到平台程式庫</a></li>
+  <li><a href="#afw">Android for Work</a></li>
+</ol>
+
+<h2>另請參閱</h2>
+<ol>
+  <li><a href="{@docRoot}preview/api-overview.html">Android N API 總覽</a>
+</li>
+</ol>
+
+</div>
+</div>
+
+
+<p>
+  除了新特性和功能之外，Android N 還包括各種不同的系統與 API 行為變更。此文件將強調說明一些您應該知道且在您的應用程式中加以考量的重要變更。
+
+
+
+</p>
+
+<p>
+  如果您先前曾發佈過適用於 Android 的應用程式，請注意，您的應用程式可能會受到平台中的這類變更所影響。
+
+</p>
+
+
+<h2 id="perf">效能改良</h2>
+
+<p>
+  Android N 包含的系統行為變更旨在提升裝置的電池使用時間、改進 RAM 使用狀況與應用程式效能。這些變更會影響應用程式的系統資源可用性與系統通知。您應該檢閱這些變更並評估應用程式需要如何據以調整。
+
+
+
+
+</p>
+
+<h3 id="doze">休眠</h3>
+
+<p>
+  於 Android 6.0 (API 層級 23) 引進的休眠會在使用者將裝置的電源拔除、保持靜止狀態並關閉螢幕時，延遲 CPU 與網路活動，以延長電池使用時間。Android N 會在裝置電源被到拔除並關閉螢幕，但不一定靜置不動時 (例如使用者把手持裝置放在口袋中行進時)，套用 CPU 與網路限制子集，進一步增強休眠的功能。
+
+
+
+
+
+</p>
+
+
+<img src="{@docRoot}images/android-7.0/doze-diagram-1.png" alt="" height="251px" id="figure1" />
+<p class="img-caption">
+  <strong>圖 1.</strong> 休眠如何套用第一層級的系統活動限制以延長電池使用時間的示意圖。
+
+</p>
+
+<p>
+  當裝置以電池電力運作且螢幕已關閉一段時間時，裝置會進入休眠並套用第一組限制子集：關閉應用程式網路存取並延遲工作和同步。如果裝置進入休眠後靜置不動一段時間，系統會對 {@link android.os.PowerManager.WakeLock}、
+  {@link android.app.AlarmManager} 鬧鐘、GPS 與 Wi-Fi 掃描套用其餘的休眠限制。不論是已套用某些或全部的休眠限制，系統都會喚醒裝置簡短地進行維護，應用程式能夠在該維護時段內存取網路，並能執行任何延遲的工作/同步。
+
+
+
+
+
+
+
+</p>
+
+
+<img src="{@docRoot}images/android-7.0/doze-diagram-2.png" alt="" id="figure2" />
+<p class="img-caption">
+  <strong>圖 2.</strong> 休眠如何在裝置靜置不動一段時間之後套用第二層級的系統活動限制的示意圖。
+
+</p>
+
+<p>
+  請注意，開啟螢幕或將裝置插電，就會結束休眠並移除這些處理限制。這項額外行為不會影響配合 Android 6.0 (API 層級 23) 引進的舊版休眠改寫應用程式的建議與最佳做法，如<a href="{@docRoot}training/monitoring-device-state/doze-standby.html">最佳化休眠與應用程式待命</a>中所述。像是使用 Google 雲端通訊 (GCM) 來傳送和接收訊息，以及開始規劃可適應額外休眠行為的更新等，還是應該遵循那些建議。
+
+
+
+
+
+
+
+
+</p>
+
+
+<h3 id="bg-opt">專案 Svelte：背景最佳化</h3>
+
+<p>
+  Android N 將三種隱含式廣播移除，有助於最佳化記憶體用量與電源耗用量。因為隱含式廣播常常會將註冊為在背景接聽此類廣播的應用程式啟動，所以此一變更有其必要。移除這些廣播對裝置效能與使用者體驗大有益處。
+
+
+
+
+</p>
+
+<p>
+  行動裝置的連線能力經常變更，例如在 Wi-Fi 與行動數據之間切換。目前，應用程式可以透過在宣示說明中註冊隱含式 {@link
+  android.net.ConnectivityManager#CONNECTIVITY_ACTION} broadcast in their
+ 廣播的接收器以監視連線能力變更。由於許多應用程式都註冊要接收此廣播，單一網路切換就可以喚醒所有應用程式，並立刻處理廣播。
+
+
+
+
+</p>
+
+<p>
+  同樣地，應用程式可以註冊要接收來自其他應用程式 (例如，相機) 的隱含式 {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} 與 {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO} 廣播。當使用者使用相機應用程式拍攝相片時，會喚醒這些應用程式來處理廣播。
+
+
+</p>
+
+<p>
+  為減少這些問題，Android N 採用的最佳化方式如下：
+
+</p>
+
+<ul>
+  <li>目標為 Android N 的應用程式不會收到 {@link
+  android.net.ConnectivityManager#CONNECTIVITY_ACTION} 廣播，即使其宣示說明項目要求這些事件的通知。在前景執行的應用程式如果使用 {@code CONNECTIVITY_CHANGE} 來要求通知，仍可以在主要執行緒上接聽 {@link
+  android.content.BroadcastReceiver}。
+
+
+
+  </li>
+
+  <li>應用程式無法傳送或接收 {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} 或 {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO} 廣播。這種最佳化方式會影響所有應用程式，而不只是目標為 Android N 的應用程式。
+
+  </li>
+</ul>
+
+<p>
+  未來發行的 Android 可能會將其他隱含式廣播與未繫結的背景服務視為過時。因此，為隱含式廣播在宣示說明中宣告的接收器相依性以及背景服務的相依性，都應該避免或加以移除。
+
+
+
+</p>
+
+<p>
+  Android 架構提供數種解決方案，減少這些隱含式廣播或背景服務的需求。例如，{@link
+  android.app.job.JobScheduler} API 提供的健全機制可在符合指定條件 (例如，連線到非計量付費網路) 的情況下，排程網路操作。您甚至可以使用 {@link
+  android.app.job.JobScheduler}，對內容提供者的變更採取因應動作。
+
+
+
+</p>
+
+<p>
+  如需此行為變更和如何改寫應用程式的詳細資訊，請參閱<a href="{@docRoot}preview/features/background-optimization.html">背景最佳化</a>。
+
+
+</p>
+
+
+<h2 id="perm">權限變更</h2>
+
+<p>
+  Android N 包括會影響您應用程式的權限變更，包括使用者帳戶權限和寫入外部儲存空間的新權限。以下是預覽版中已變更的權限摘要：
+
+
+
+</p>
+
+<ul>
+  <li>{@code GET_ACCOUNTS} (已過時)
+    <p>
+      GET_ACCOUNTS 權限現已過時。系統會忽略目標為 Android N 之應用程式所用的這個權限。
+
+    </p>
+  </li>
+
+</ul>
+
+
+
+<h2 id="accessibility">協助工具改良</h2>
+
+<p>
+  Android N 包括的變更旨在為視力不佳或視力受損的使用者改進平台可用性。這些變更一般應不需要變更您應用程式的程式碼，然而您應該檢閱這些功能並使用您的應用程式測試它們，以評估對使用者體驗的潛在影響。
+
+
+
+
+</p>
+
+
+<h3 id="screen-zoom">螢幕縮放</h3>
+
+<p>
+  Android N 可讓使用者設定<strong>顯示器大小</strong>以放大或縮小螢幕上的所有元素，進而改善視力不佳使用者的裝置協助工具。使用者無法將螢幕縮放到超過常見中型手機的最小螢幕寬度 <a href="http://developer.android.com/guide/topics/resources/providing-resources.html">sw320dp</a> (Nexus 4 的寬度)。
+
+
+
+
+</p>
+
+<div class="cols">
+
+<div class="col-6">
+  <img src="{@docRoot}images/android-7.0/screen-zoom-1.png" alt="" height="XXX" id="figure1" />
+</div>
+<div class="col-6">
+  <img src="{@docRoot}images/android-7.0/screen-zoom-2.png" alt="" height="XXX" id="figure1" />
+</div>
+
+</div> <!-- end cols -->
+<p class="img-caption">
+  <strong>圖 3.</strong> 右邊的螢幕顯示將執行 Android N 系統映像的裝置顯示大小增加的效果。
+
+</p>
+
+
+<p>
+  當裝置密度變更時，系統會以下列方式通知執行中的應用程式：
+
+</p>
+
+<ul>
+  <li>如果應用程式的目標為 API 層級 23 或較低版本，系統會自動終止其所有背景處理程序。這表示如果使用者切換離開應用程式，以開啟 <em>[設定]</em> 畫面並變更 <strong>[顯示器大小]</strong> 設定，系統會在記憶體極低的情況下，以相同方式終止應用程式。如果應用程式有任何前景處理程序，系統會通知那些處理程序有設定變更，如<a href="{@docRoot}guide/topics/resources/runtime-changes.html">處理執行階段變更</a>所述，有如裝置的螢幕方向有所變更。
+
+
+
+
+
+
+
+  </li>
+
+  <li>如果應用程式的目標為 Android N，其所有處理程序 (前景與背景) 都會收到設定變更的通知，如<a href="{@docRoot}guide/topics/resources/runtime-changes.html">處理執行階段變更</a>所述。
+
+
+
+  </li>
+</ul>
+
+<p>
+  大部分應用程式只要遵循 Android 最佳做法，不需要進行任何變更就能支援此功能。需檢查的特定項目如下：
+
+</p>
+
+<ul>
+  <li>在螢幕寬度為 <code><a href=
+  "{@docRoot}guide/topics/resources/providing-resources.html">sw320dp</a></code> 的裝置上測試您的應用程式，確定它能適當執行。
+
+  </li>
+
+  <li>裝置設定變更時，就會更新任何與密度相關的快取資訊，例如快取的點陣圖或從網路載入的資源。當應用程式從暫停狀態繼續時，會檢查設定更新。
+
+
+
+    <p class="note">
+      <strong>注意：</strong>如果您快取與設定相關的資料，最好包括相關中繼資料，例如該資料的適當螢幕大小或像素密度。儲存此中繼資料可讓您決定在設定變更之後，是否需要重新整理快取的資料。
+
+
+
+
+    </p>
+  </li>
+
+  <li>避免以不會隨螢幕密度調整的像素單位指定尺寸，請改為以<a href="{@docRoot}guide/practices/screens_support.html">密度獨立像素</a> (<code>dp</code>) 單位指定尺寸。
+
+
+  </li>
+</ul>
+
+<h3 id="vision-settings">設定精靈中的視覺設定</h3>
+
+<p>
+  Android N 包括在歡迎畫面的視覺化設定可讓使用者在新裝置上設定下列協助工具設定：<strong>放大手勢</strong>、<strong>字型大小</strong>、<strong>顯示器大小</strong>與 <strong>TalkBack</strong>。此變更增加和不同螢幕設定相關的錯誤能見度。您應該啟用這些設定來測試您的應用程式，以評估此功能的影響。您可以在 [設定] &gt; [協助工具]<strong></strong> 下找到設定。
+
+
+
+
+
+
+
+</p>
+
+<h2 id="ndk">NDK 應用程式連結到平台程式庫</h2>
+
+<p>
+  Android N 包括的命名空間變更可避免載入非公開 API。如果您使用 NDK，應該只能使用來自 Android 平台的公開 API。在下一版正式發行的 Android 使用非公開 API，會造成您的應用程式當機。
+
+
+
+</p>
+
+<p>
+  為了在發現使用非公開 API 時向您提出警示，當應用程式呼叫非公開 API 時，在 Android N 裝置上執行的應用程式會在 logcat 輸出產生一個錯誤，並以訊息同時顯示在裝置螢幕上，協助您更能察覺這種情況。您應該檢閱應用程式的程式碼，以移除使用的非公開平台 API，並使用預覽版裝置或模擬器全面測試您的應用程式。
+
+
+
+
+
+</p>
+
+<p>
+  如果您的應用程式依存於平台程式庫，請參閱 NDK 文件來取得以公開 API 同等項目取代常見私人 API 的一般修正。您可能也連結到平台程式庫，而不自知，特別是在應用程式使用的程式庫屬於該平台 (例如 <code>libpng</code>) 但不屬於 NDK 的時候。如為上述情況，請務必在您的 APK 包含您打算連結的所有 .so 檔案。
+
+
+
+
+
+</p>
+
+<p class="caution">
+  <strong>注意：</strong>有些第三方程式庫會連結到非公開 API。如果您的應用程式使用此類程式庫，在下一版正式發行的 Android 上執行時就會當機。
+
+
+</p>
+
+<p>
+  應用程式不應依存於或使用 NDK 所未包括的原生程式庫，原因是在不同的 Android 發行版本之間會有變更或會被移除。從 OpenSSL 切換到 BoringSSL 便是此類變更的一例。此外，因為 NDK 所未包括的平台程式庫沒有相容性需求，而使不同裝置提供不同的相容性層級。如果您必須在舊型裝置上存取非 NDK 程式庫，請讓載入取決於 Android API 層級。
+
+
+
+
+
+
+</p>
+
+<p>
+  為協助您診斷這些類型的問題，以下是您在建置要用於 Android N 的應用程式時，會遇到的一些 Java 與 NDK 錯誤範例：
+
+</p>
+
+<p>Java 錯誤範例：</p>
+<pre class="no-pretty-print">
+java.lang.UnsatisfiedLinkError: dlopen failed: library "/system/lib/libcutils.so"
+    is not accessible for the namespace "classloader-namespace"
+</pre>
+
+<p>NDK 錯誤範例：</p>
+<pre class="no-pretty-print">
+dlopen failed: cannot locate symbol "__system_property_get" referenced by ...
+</pre>
+
+
+<p>
+  以下是發生這些類型之錯誤的應用程式可用的一些一般修正：
+</p>
+
+<ul>
+  <li>改用標準 JNI 函式，以取代使用來自 libandroid_runtime.so 的 getJavaVM 與 getJNIEnv。
+
+<pre class="no-pretty-print">
+AndroidRuntime::getJavaVM -&gt; GetJavaVM from &lt;jni.h&gt;
+AndroidRuntime::getJNIEnv -&gt; JavaVM::GetEnv or
+JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
+</pre>
+  </li>
+
+  <li>改用公開替代項 {@code __system_property_get}，以取代使用來自 {@code libcutils.so} 的 {@code property_get} 符號。如果要這樣做，請使用 {@code __system_property_get} 配合以下 include：
+
+
+<pre>
+#include &lt;sys/system_properties.h&gt;
+</pre>
+  </li>
+
+  <li>應該改用應用程式本機版，以取代使用來自 {@code libcrypto.so} 的 {@code SSL_ctrl} 符號。例如，您在 {@code .so} 檔案中靜態地連結 {@code libcyrpto.a}，或在您的應用程式中從 BoringSSL 或 OpenSSL 動態地包括自己的 {@code libcrypto.so}。
+
+
+
+  </li>
+</ul>
+
+<h2 id="afw">Android for Work</h2>
+<p>
+  Android N 包含對目標為 Android for Work 的應用程式所做的變更，包括對憑證安裝、密碼重設、次要使用者管理與裝置識別碼存取的變更。如果您要建置要用於 Android for Work 環境的應用程式，應該檢閱這些變更並據以修改應用程式。
+
+
+
+
+</p>
+
+<ul>
+  <li>您必須先安裝委派的憑證安裝程式後，DPC 才能加以設定。對於目標為 N SDK 的設定檔與裝置擁有者應用程式，您應該在裝置政策控制器 (DPC) 呼叫 <code>DevicePolicyManager.setCertInstallerPackage()</code> 之前，先安裝委派的憑證安裝程式。如果該安裝程式尚未安裝，系統會擲回 <code>IllegalArgumentException</code>。
+
+
+
+
+
+
+  </li>
+
+  <li>裝置系統管理員的重設密碼限制現在適用於設定檔擁有者。裝置系統管理員無法再使用 <code>DevicePolicyManager.resetPassword()</code> 來清除密碼或變更已設定的密碼。裝置系統管理員仍能設定密碼，但只限裝置還沒有密碼、PIN 或模式的情況下。
+
+
+
+
+  </li>
+
+  <li>即使已經設定限制，裝置擁有者與設定檔擁有者還是可以管理帳戶。裝置擁有者與設定檔擁有者在已採用 <code>DISALLOW_MODIFY_ACCOUNTS</code> 使用者限制的情況下，仍能呼叫帳戶管理 API。
+
+
+  </li>
+
+  <li>裝置擁有者能輕鬆管理次要使用者。當裝置以裝置擁有者模式執行時，會自動設定 <code>DISALLOW_ADD_USER</code> 限制。這樣可防止使用者建立不受管理的次要使用者。此外，<code>CreateUser()</code> 與 <code>createAndInitial()</code> 方法已經過時，改用 <code>DevicePolicyManager.createAndManageUser()</code> 取代。
+
+
+
+
+
+  </li>
+
+  <li>裝置擁有者可以存取裝置識別碼。裝置擁有者可以使用 <code>DevicePolicyManagewr.getWifiMacAddress()</code> 存取裝置的 Wi-Fi MAC 位址。如果未曾在該裝置上啟用 Wi-Fi，此方法會傳回 {@code null} 的值。
+
+
+
+  </li>
+</ul>
+
+<p>
+  如需 Android N 中有關 Android for Work 變更的詳細資訊，請參閱 <a href="{@docRoot}preview/features/afw.html">Android for Work 更新</a>。
+
+</p>
+
+<h2 id="other">其他重點</h2>
+
+<ul>
+<li>在 Android N 上執行的應用程式如以較低的 API 層級為目標，當使用者變更顯示器大小，就會終止該應用程式的處理程序。應用程式必須要能適當處理這種情況。否則，當使用者要從最近使用記錄還原時就會當機。
+
+
+
+
+<p>
+您必須測試應用程式，確保不會發生這種行為。測試方法是透過 DDMS 手動終止應用程式，以造成相同的當機情況。
+
+
+
+</p>
+
+<p>
+目標為 N 與更新版本的應用程式不會在密度變更時自動終止；然而，它們仍會勉強地回應設定變更。
+
+</p>
+</li>
+
+<li>
+Android N 上的應用程式應該要適當處理設定變更，同時不應該在後續啟動時當機。您可以變更字型大小 ([設定]<strong></strong> &gt; [顯示]<strong></strong> &gt; [字型大小]<strong></strong>)，然後從最近使用紀錄還原應用程式，以驗證應用程式行為。
+
+
+
+
+</li>
+</ul>
+

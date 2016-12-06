@@ -46,11 +46,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"ሲም ካርድ ተዘግቷል።"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"ሲም ካርድ በፒዩኬ ተዘግቷል።"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"ሲም ካርዱን በመክፈት ላይ…"</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"በስርዓተ-ጥለት መክፈት።"</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"በፒን መክፈት።"</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"በይለፍ ቃል መክፈት።"</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"የስርዓተ-ጥለት አካባቢ።"</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"የማንሸራተቻ አካባቢ።"</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"የፒን አካባቢ"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"የሲም ፒን አካባቢ"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"የሲም PUK አካባቢ"</string>

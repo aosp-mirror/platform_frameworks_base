@@ -6,7 +6,7 @@ sdk.platform.apiLevel=17
 
 <div id="qv-wrapper">
 <div id="qv">
-  
+
 <h2>In this document</h2>
 <ol>
   <li><a href="#Behaviors">Important Behavior Changes</a></li>
@@ -46,8 +46,8 @@ Then build your apps against the Android 4.2 platform to begin using the latest 
 
 
 <div class="sidebox-wrapper">
-<div class="sidebox">  
-  
+<div class="sidebox">
+
 <h3 id="ApiLevel">Declare your app API Level</h3>
 
 <p>To better optimize your app for devices running Android {@sdkPlatformVersion},
@@ -60,7 +60,7 @@ test it, then publish an update with this change.</p>
 can use APIs in Android {@sdkPlatformVersion} while also supporting older versions by adding
 conditions to your code that check for the system API level before executing
 APIs not supported by your <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a>. 
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a>.
 To learn more about
 maintaining backward-compatibility, read <a
 href="{@docRoot}training/backward-compatible-ui/index.html">Creating Backward-Compatible
@@ -94,7 +94,7 @@ android:targetSdkVersion}</a> or <a href="{@docRoot}guide/topics/manifest/uses-s
 android:minSdkVersion}</a> to 17 or higher. Otherwise, the default value is still {@code “true"}
 even when running on Android 4.2 and higher.</p>
   </li>
-  
+
   <li>Compared to previous versions of Android, <b>user location</b> results may be less accurate
 if your app requests the {@link android.Manifest.permission#ACCESS_COARSE_LOCATION} permission but
 does not request the {@link android.Manifest.permission#ACCESS_FINE_LOCATION} permission.
@@ -102,7 +102,7 @@ does not request the {@link android.Manifest.permission#ACCESS_FINE_LOCATION} pe
 coarse location (and not fine location), the system will not provide a user location estimate
 that’s more accurate than a city block.</p>
   </li>
-  
+
   <li>Some <b>device settings</b> defined by {@link android.provider.Settings.System} are now
   read-only. If your app attempts to write changes to settings defined in {@link
   android.provider.Settings.System} that have moved to {@link android.provider.Settings.Global},
@@ -410,7 +410,7 @@ there are two basic levels of optimization:</p>
 
 <ol>
   <li>Convert left- and right-oriented layout properties to start- and end-oriented layout
-properties.   
+properties.
     <p>For example, use {@link android.R.attr#layout_marginStart android:layout_marginStart}
 in place of {@code android:layout_marginLeft} and {@link android.R.attr#layout_marginEnd
 android:layout_marginEnd} in place of  {@code android:layout_marginRight}.
@@ -526,7 +526,7 @@ add all the scripts, create the connections between the
 scripts by calling {@link android.renderscript.ScriptGroup.Builder#addConnection addConnection()}.
 When you are done adding the connections, call {@link android.renderscript.ScriptGroup.Builder#create create()}
 to create the script group. Before executing the script group, specify the input
-{@link android.renderscript.Allocation} and initial script to run with the 
+{@link android.renderscript.Allocation} and initial script to run with the
 {@link android.renderscript.ScriptGroup#setInput} method and provide the output
 {@link android.renderscript.Allocation} where the result will be written to and final script to
 run with {@link android.renderscript.ScriptGroup#setOutput setOutput()}. Finally, call

@@ -16,23 +16,21 @@
 
 package android.net.dhcp;
 
-import android.net.NetworkUtils;
 import android.net.DhcpResults;
 import android.net.LinkAddress;
+import android.net.NetworkUtils;
+import android.net.metrics.DhcpErrorEvent;
 import android.system.OsConstants;
 import android.test.suitebuilder.annotation.SmallTest;
 import com.android.internal.util.HexDump;
-
 import java.net.Inet4Address;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-
-import junit.framework.TestCase;
-import libcore.util.HexEncoding;
 import java.util.Arrays;
+import java.util.Random;
+import junit.framework.TestCase;
 
 import static android.net.dhcp.DhcpPacket.*;
-
 
 public class DhcpPacketTest extends TestCase {
 
@@ -285,7 +283,7 @@ public class DhcpPacketTest extends TestCase {
         // TODO: Turn all of these into golden files. This will probably require modifying
         // Android.mk appropriately, making this into an AndroidTestCase, and adding code to read
         // the golden files from the test APK's assets via mContext.getAssets().
-        final ByteBuffer packet = ByteBuffer.wrap(HexEncoding.decode((
+        final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // IP header.
             "451001480000000080118849c0a89003c0a89ff7" +
             // UDP header.
@@ -304,8 +302,7 @@ public class DhcpPacketTest extends TestCase {
             "0000000000000000000000000000000000000000000000000000000000000000" +
             // Options
             "638253633501023604c0a89003330400001c200104fffff0000304c0a89ffe06080808080808080404" +
-            "3a0400000e103b040000189cff00000000000000000000"
-        ).toCharArray(), false));
+            "3a0400000e103b040000189cff00000000000000000000"));
 
         DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_L3);
         assertTrue(offerPacket instanceof DhcpOfferPacket);  // Implicitly checks it's non-null.
@@ -316,7 +313,7 @@ public class DhcpPacketTest extends TestCase {
 
     @SmallTest
     public void testOffer2() throws Exception {
-        final ByteBuffer packet = ByteBuffer.wrap(HexEncoding.decode((
+        final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // IP header.
             "450001518d0600004011144dc0a82b01c0a82bf7" +
             // UDP header.
@@ -335,8 +332,7 @@ public class DhcpPacketTest extends TestCase {
             "0000000000000000000000000000000000000000000000000000000000000000" +
             // Options
             "638253633501023604c0a82b01330400000e103a04000007083b0400000c4e0104ffffff00" +
-            "1c04c0a82bff0304c0a82b010604c0a82b012b0f414e44524f49445f4d455445524544ff"
-        ).toCharArray(), false));
+            "1c04c0a82bff0304c0a82b010604c0a82b012b0f414e44524f49445f4d455445524544ff"));
 
         assertEquals(337, packet.limit());
         DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_L3);
@@ -347,6 +343,185 @@ public class DhcpPacketTest extends TestCase {
         assertTrue(dhcpResults.hasMeteredHint());
     }
 
+    @SmallTest
+    public void testBadIpPacket() throws Exception {
+        final byte[] packet = HexDump.hexStringToByteArray(
+            // IP header.
+            "450001518d0600004011144dc0a82b01c0a82bf7");
+
+        try {
+            DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, packet.length, ENCAP_L3);
+        } catch (DhcpPacket.ParseException expected) {
+            assertDhcpErrorCodes(DhcpErrorEvent.L3_TOO_SHORT, expected.errorCode);
+            return;
+        }
+        fail("Dhcp packet parsing should have failed");
+    }
+
+    @SmallTest
+    public void testBadDhcpPacket() throws Exception {
+        final byte[] packet = HexDump.hexStringToByteArray(
+            // IP header.
+            "450001518d0600004011144dc0a82b01c0a82bf7" +
+            // UDP header.
+            "00430044013d9ac7" +
+            // BOOTP header.
+            "02010600dfc23d1f0002000000000000c0a82bf7c0a82b0100000000");
+
+        try {
+            DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, packet.length, ENCAP_L3);
+        } catch (DhcpPacket.ParseException expected) {
+            assertDhcpErrorCodes(DhcpErrorEvent.L3_TOO_SHORT, expected.errorCode);
+            return;
+        }
+        fail("Dhcp packet parsing should have failed");
+    }
+
+    @SmallTest
+    public void testBadTruncatedOffer() throws Exception {
+        final byte[] packet = HexDump.hexStringToByteArray(
+            // IP header.
+            "450001518d0600004011144dc0a82b01c0a82bf7" +
+            // UDP header.
+            "00430044013d9ac7" +
+            // BOOTP header.
+            "02010600dfc23d1f0002000000000000c0a82bf7c0a82b0100000000" +
+            // MAC address.
+            "30766ff2a90c00000000000000000000" +
+            // Server name.
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            // File, missing one byte
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "00000000000000000000000000000000000000000000000000000000000000");
+
+        try {
+            DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, packet.length, ENCAP_L3);
+        } catch (DhcpPacket.ParseException expected) {
+            assertDhcpErrorCodes(DhcpErrorEvent.L3_TOO_SHORT, expected.errorCode);
+            return;
+        }
+        fail("Dhcp packet parsing should have failed");
+    }
+
+    @SmallTest
+    public void testBadOfferWithoutACookie() throws Exception {
+        final byte[] packet = HexDump.hexStringToByteArray(
+            // IP header.
+            "450001518d0600004011144dc0a82b01c0a82bf7" +
+            // UDP header.
+            "00430044013d9ac7" +
+            // BOOTP header.
+            "02010600dfc23d1f0002000000000000c0a82bf7c0a82b0100000000" +
+            // MAC address.
+            "30766ff2a90c00000000000000000000" +
+            // Server name.
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            // File.
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000"
+            // No options
+            );
+
+        try {
+            DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, packet.length, ENCAP_L3);
+        } catch (DhcpPacket.ParseException expected) {
+            assertDhcpErrorCodes(DhcpErrorEvent.DHCP_NO_COOKIE, expected.errorCode);
+            return;
+        }
+        fail("Dhcp packet parsing should have failed");
+    }
+
+    @SmallTest
+    public void testOfferWithBadCookie() throws Exception {
+        final byte[] packet = HexDump.hexStringToByteArray(
+            // IP header.
+            "450001518d0600004011144dc0a82b01c0a82bf7" +
+            // UDP header.
+            "00430044013d9ac7" +
+            // BOOTP header.
+            "02010600dfc23d1f0002000000000000c0a82bf7c0a82b0100000000" +
+            // MAC address.
+            "30766ff2a90c00000000000000000000" +
+            // Server name.
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            // File.
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            // Bad cookie
+            "DEADBEEF3501023604c0a82b01330400000e103a04000007083b0400000c4e0104ffffff00" +
+            "1c04c0a82bff0304c0a82b010604c0a82b012b0f414e44524f49445f4d455445524544ff");
+
+        try {
+            DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, packet.length, ENCAP_L3);
+        } catch (DhcpPacket.ParseException expected) {
+            assertDhcpErrorCodes(DhcpErrorEvent.DHCP_BAD_MAGIC_COOKIE, expected.errorCode);
+            return;
+        }
+        fail("Dhcp packet parsing should have failed");
+    }
+
+    private void assertDhcpErrorCodes(int expected, int got) {
+        assertEquals(Integer.toHexString(expected), Integer.toHexString(got));
+    }
+
+    public void testTruncatedOfferPackets() throws Exception {
+        final byte[] packet = HexDump.hexStringToByteArray(
+            // IP header.
+            "450001518d0600004011144dc0a82b01c0a82bf7" +
+            // UDP header.
+            "00430044013d9ac7" +
+            // BOOTP header.
+            "02010600dfc23d1f0002000000000000c0a82bf7c0a82b0100000000" +
+            // MAC address.
+            "30766ff2a90c00000000000000000000" +
+            // Server name.
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            // File.
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            // Options
+            "638253633501023604c0a82b01330400000e103a04000007083b0400000c4e0104ffffff00" +
+            "1c04c0a82bff0304c0a82b010604c0a82b012b0f414e44524f49445f4d455445524544ff");
+
+        for (int len = 0; len < packet.length; len++) {
+            try {
+                DhcpPacket.decodeFullPacket(packet, len, ENCAP_L3);
+            } catch (ParseException e) {
+                if (e.errorCode == DhcpErrorEvent.PARSING_ERROR) {
+                    fail(String.format("bad truncated packet of length %d", len));
+                }
+            }
+        }
+    }
+
+    public void testRandomPackets() throws Exception {
+        final int maxRandomPacketSize = 512;
+        final Random r = new Random();
+        for (int i = 0; i < 10000; i++) {
+            byte[] packet = new byte[r.nextInt(maxRandomPacketSize + 1)];
+            r.nextBytes(packet);
+            try {
+                DhcpPacket.decodeFullPacket(packet, packet.length, ENCAP_L3);
+            } catch (ParseException e) {
+                if (e.errorCode == DhcpErrorEvent.PARSING_ERROR) {
+                    fail("bad packet: " + HexDump.toHexString(packet));
+                }
+            }
+        }
+    }
+
     private byte[] mtuBytes(int mtu) {
         // 0x1a02: option 26, length 2. 0xff: no more options.
         if (mtu > Short.MAX_VALUE - Short.MIN_VALUE) {
@@ -354,7 +529,7 @@ public class DhcpPacketTest extends TestCase {
                 String.format("Invalid MTU %d, must be 16-bit unsigned", mtu));
         }
         String hexString = String.format("1a02%04xff", mtu);
-        return HexEncoding.decode(hexString.toCharArray(), false);
+        return HexDump.hexStringToByteArray(hexString);
     }
 
     private void checkMtu(ByteBuffer packet, int expectedMtu, byte[] mtuBytes) throws Exception {
@@ -372,7 +547,7 @@ public class DhcpPacketTest extends TestCase {
 
     @SmallTest
     public void testMtu() throws Exception {
-        final ByteBuffer packet = ByteBuffer.wrap(HexEncoding.decode((
+        final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // IP header.
             "451001480000000080118849c0a89003c0a89ff7" +
             // UDP header.
@@ -391,8 +566,7 @@ public class DhcpPacketTest extends TestCase {
             "0000000000000000000000000000000000000000000000000000000000000000" +
             // Options
             "638253633501023604c0a89003330400001c200104fffff0000304c0a89ffe06080808080808080404" +
-            "3a0400000e103b040000189cff00000000"
-        ).toCharArray(), false));
+            "3a0400000e103b040000189cff00000000"));
 
         checkMtu(packet, 0, null);
         checkMtu(packet, 0, mtuBytes(1501));
@@ -409,7 +583,7 @@ public class DhcpPacketTest extends TestCase {
 
     @SmallTest
     public void testBadHwaddrLength() throws Exception {
-        final ByteBuffer packet = ByteBuffer.wrap(HexEncoding.decode((
+        final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // IP header.
             "450001518d0600004011144dc0a82b01c0a82bf7" +
             // UDP header.
@@ -428,8 +602,7 @@ public class DhcpPacketTest extends TestCase {
             "0000000000000000000000000000000000000000000000000000000000000000" +
             // Options
             "638253633501023604c0a82b01330400000e103a04000007083b0400000c4e0104ffffff00" +
-            "1c04c0a82bff0304c0a82b010604c0a82b012b0f414e44524f49445f4d455445524544ff"
-        ).toCharArray(), false));
+            "1c04c0a82bff0304c0a82b010604c0a82b012b0f414e44524f49445f4d455445524544ff"));
         String expectedClientMac = "30766FF2A90C";
 
         final int hwAddrLenOffset = 20 + 8 + 2;
@@ -486,7 +659,7 @@ public class DhcpPacketTest extends TestCase {
         //    store any information in the overloaded fields).
         //
         // For now, we just check that it parses correctly.
-        final ByteBuffer packet = ByteBuffer.wrap(HexEncoding.decode((
+        final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // Ethernet header.
             "b4cef6000000e80462236e300800" +
             // IP header.
@@ -507,8 +680,7 @@ public class DhcpPacketTest extends TestCase {
             "0000000000000000000000000000000000000000000000000000000000000000" +
             // Options
             "638253633501023604010101010104ffff000033040000a8c03401030304ac1101010604ac110101" +
-            "0000000000000000000000000000000000000000000000ff000000"
-        ).toCharArray(), false));
+            "0000000000000000000000000000000000000000000000ff000000"));
 
         DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_L2);
         assertTrue(offerPacket instanceof DhcpOfferPacket);
@@ -519,7 +691,7 @@ public class DhcpPacketTest extends TestCase {
 
     @SmallTest
     public void testBug2111() throws Exception {
-        final ByteBuffer packet = ByteBuffer.wrap(HexEncoding.decode((
+        final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // IP header.
             "4500014c00000000ff119beac3eaf3880a3f5d04" +
             // UDP header. TODO: fix invalid checksum (due to MAC address obfuscation).
@@ -538,8 +710,7 @@ public class DhcpPacketTest extends TestCase {
             "0000000000000000000000000000000000000000000000000000000000000000" +
             // Options.
             "638253633501023604c00002fe33040000bfc60104fffff00003040a3f50010608c0000201c0000202" +
-            "0f0f646f6d61696e3132332e636f2e756b0000000000ff00000000"
-        ).toCharArray(), false));
+            "0f0f646f6d61696e3132332e636f2e756b0000000000ff00000000"));
 
         DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_L3);
         assertTrue(offerPacket instanceof DhcpOfferPacket);
@@ -550,7 +721,7 @@ public class DhcpPacketTest extends TestCase {
 
     @SmallTest
     public void testBug2136() throws Exception {
-        final ByteBuffer packet = ByteBuffer.wrap(HexEncoding.decode((
+        final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // Ethernet header.
             "bcf5ac000000d0c7890000000800" +
             // IP header.
@@ -571,8 +742,7 @@ public class DhcpPacketTest extends TestCase {
             "0000000000000000000000000000000000000000000000000000000000000000" +
             // Options.
             "6382536335010236040a20ff80330400001c200104fffff00003040a20900106089458413494584135" +
-            "0f0b6c616e63732e61632e756b000000000000000000ff00000000"
-        ).toCharArray(), false));
+            "0f0b6c616e63732e61632e756b000000000000000000ff00000000"));
 
         DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_L2);
         assertTrue(offerPacket instanceof DhcpOfferPacket);
@@ -584,7 +754,7 @@ public class DhcpPacketTest extends TestCase {
 
     @SmallTest
     public void testUdpServerAnySourcePort() throws Exception {
-        final ByteBuffer packet = ByteBuffer.wrap(HexEncoding.decode((
+        final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // Ethernet header.
             "9cd917000000001c2e0000000800" +
             // IP header.
@@ -606,8 +776,7 @@ public class DhcpPacketTest extends TestCase {
             "0000000000000000000000000000000000000000000000000000000000000000" +
             // Options.
             "6382536335010236040a0169fc3304000151800104ffff000003040a0fc817060cd1818003d1819403" +
-            "d18180060f0777766d2e6564751c040a0fffffff000000"
-        ).toCharArray(), false));
+            "d18180060f0777766d2e6564751c040a0fffffff000000"));
 
         DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_L2);
         assertTrue(offerPacket instanceof DhcpOfferPacket);
@@ -620,7 +789,7 @@ public class DhcpPacketTest extends TestCase {
 
     @SmallTest
     public void testUdpInvalidDstPort() throws Exception {
-        final ByteBuffer packet = ByteBuffer.wrap(HexEncoding.decode((
+        final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // Ethernet header.
             "9cd917000000001c2e0000000800" +
             // IP header.
@@ -642,8 +811,7 @@ public class DhcpPacketTest extends TestCase {
             "0000000000000000000000000000000000000000000000000000000000000000" +
             // Options.
             "6382536335010236040a0169fc3304000151800104ffff000003040a0fc817060cd1818003d1819403" +
-            "d18180060f0777766d2e6564751c040a0fffffff000000"
-        ).toCharArray(), false));
+            "d18180060f0777766d2e6564751c040a0fffffff000000"));
 
         try {
             DhcpPacket.decodeFullPacket(packet, ENCAP_L2);
@@ -653,7 +821,7 @@ public class DhcpPacketTest extends TestCase {
 
     @SmallTest
     public void testMultipleRouters() throws Exception {
-        final ByteBuffer packet = ByteBuffer.wrap(HexEncoding.decode((
+        final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // Ethernet header.
             "fc3d93000000" + "081735000000" + "0800" +
             // IP header.
@@ -674,8 +842,7 @@ public class DhcpPacketTest extends TestCase {
             "0000000000000000000000000000000000000000000000000000000000000000" +
             // Options.
             "638253633501023604c0abbd023304000070803a04000038403b04000062700104ffffff00" +
-            "0308c0a8bd01ffffff0006080808080808080404ff000000000000"
-        ).toCharArray(), false));
+            "0308c0a8bd01ffffff0006080808080808080404ff000000000000"));
 
         DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_L2);
         assertTrue(offerPacket instanceof DhcpOfferPacket);

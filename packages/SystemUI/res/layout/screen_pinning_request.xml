@@ -21,7 +21,8 @@
     android:layout_height="wrap_content"
     android:gravity="bottom|center_horizontal"
     android:layoutDirection="ltr"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:theme="@android:style/Theme.DeviceDefault.Light">
 
     <include
         android:layout_width="@dimen/screen_pinning_request_width"
@@ -32,7 +33,7 @@
         android:id="@+id/spacer"
         android:layout_width="@dimen/screen_pinning_request_width"
         android:layout_height="18dp"
-        android:background="@color/screen_pinning_request_bg" />
+        android:background="?android:attr/colorAccent" />
 
     <include
         android:layout_width="@dimen/screen_pinning_request_width"

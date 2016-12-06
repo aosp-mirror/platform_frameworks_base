@@ -71,9 +71,11 @@
         android:id="@+id/bottom_label_group"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingStart="@dimen/usage_graph_labels_width"
         android:orientation="horizontal">
-
+        <Space
+            android:id="@+id/bottom_label_space"
+            android:layout_width="@dimen/usage_graph_labels_width"
+            android:layout_height="wrap_content"/>
         <include android:id="@+id/label_start"
             layout="@layout/usage_side_label" />
 

@@ -68,12 +68,6 @@ public class ResolveInfo implements Parcelable {
     public EphemeralResolveInfo ephemeralResolveInfo;
 
     /**
-     * A ResolveInfo that points at the ephemeral installer.
-     * @hide
-     */
-    public ResolveInfo ephemeralInstaller;
-
-    /**
      * The IntentFilter that was matched for this ResolveInfo.
      */
     public IntentFilter filter;

@@ -204,7 +204,7 @@ public class MyAdapter extends RecyclerView.Adapter&lt;MyAdapter.ViewHolder> {
 확장하고 카드 내의 정보를 플랫폼에서 일관된 모습으로 표시할 수 있도록 합니다. {@link
 android.support.v7.widget.CardView} 위젯은 그림자와 둥근 모서리를 가질 수 있습니다.</p>
 
-<p>그림자가 있는 카드를 생성하려면 <code>card_view:cardElevation</code> 특성을 사용합니다. 
+<p>그림자가 있는 카드를 생성하려면 <code>card_view:cardElevation</code> 특성을 사용합니다.
 {@link android.support.v7.widget.CardView}는 Android 5.0(API 레벨 21) 이상에서 실제 엘리베이션 및 동적 그림자를 사용하며, 이전 버전에서는 이전의 프로그래밍 방식의 그림자 구현으로 환원됩니다. 자세한 내용은 <a href="{@docRoot}training/material/compatibility.html">호환성 유지</a>를 참조하세요.
 
 

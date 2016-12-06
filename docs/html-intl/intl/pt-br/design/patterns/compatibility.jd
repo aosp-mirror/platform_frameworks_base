@@ -57,7 +57,7 @@ de ações resultante tem o mesmo estilo que no exemplo anterior, mas é exibida
   <div class="col-6">
 
 <h4>Aplicativos legados em telefones com controles de navegação virtuais</h4>
-<p>Ao executar um aplicativo que foi desenvolvido para Android 2.3 ou anterior em um telefone com controles de 
+<p>Ao executar um aplicativo que foi desenvolvido para Android 2.3 ou anterior em um telefone com controles de
 navegação virtuais, um controle de ações adicionais é exibido no lado direito da barra de navegação virtual. É possível
 tocar no controle para exibir as ações do aplicativo no estilo tradicional de menu do Android.</p>
 

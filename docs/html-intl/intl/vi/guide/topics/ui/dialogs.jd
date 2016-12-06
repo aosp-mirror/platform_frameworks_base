@@ -32,7 +32,7 @@ page.tags=alertdialog,dialogfragment
       <li>{@link android.app.DialogFragment}</li>
       <li>{@link android.app.AlertDialog}</li>
     </ol>
-    
+
     <h2>Xem thêm</h2>
     <ol>
       <li><a href="{@docRoot}design/building-blocks/dialogs.html">Hướng dẫn thiết kế hộp thoại</a></li>
@@ -235,8 +235,8 @@ AlertDialog dialog = builder.create();
 </pre>
 
 <p>Các phương pháp <code>set...Button()</code> yêu cầu một tiêu đề cho nút (được cung cấp
-bởi một <a href="{@docRoot}guide/topics/resources/string-resource.html">tài nguyên xâu</a>) và một 
-{@link android.content.DialogInterface.OnClickListener} có chức năng định nghĩa hành động sẽ tiến hành 
+bởi một <a href="{@docRoot}guide/topics/resources/string-resource.html">tài nguyên xâu</a>) và một
+{@link android.content.DialogInterface.OnClickListener} có chức năng định nghĩa hành động sẽ tiến hành
 khi người dùng nhấn nút.</p>
 
 <p>Có ba nút hành động khác nhau mà bạn có thể thêm:</p>
@@ -248,7 +248,7 @@ khi người dùng nhấn nút.</p>
   <dt>Trung lập</dt>
   <dd>Bạn nên sử dụng nút này khi người dùng có thể không muốn tiếp tục với hành động,
   nhưng không hẳn muốn hủy bỏ. Nó nằm ở giữa nút
-  tích cực và tiêu cực. Ví dụ, hành động có thể là "Nhắc tôi sau."</dd> 
+  tích cực và tiêu cực. Ví dụ, hành động có thể là "Nhắc tôi sau."</dd>
 </dl>
 
 <p>Bạn chỉ có thể thêm một nút mỗi loại vào một {@link
@@ -271,7 +271,7 @@ Hộp thoại có tiêu đề và danh sách.</p>
 <li>Danh sách nhiều lựa chọn cố định (hộp kiểm)</li>
 </ul>
 
-<p>Để tạo danh sách một lựa chọn như danh sách trong hình 3, 
+<p>Để tạo danh sách một lựa chọn như danh sách trong hình 3,
 hãy sử dụng phương pháp {@link android.app.AlertDialog.Builder#setItems setItems()}:</p>
 
 <pre style="clear:right">
@@ -291,7 +291,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
 
 <p>Vì danh sách xuất hiện trong vùng nội dung của hộp thoại,
 hộp thoại không thể hiển thị cả thông báo và danh sách và bạn nên đặt một tiêu đề cho hộp thoại
-bằng {@link android.app.AlertDialog.Builder#setTitle setTitle()}. 
+bằng {@link android.app.AlertDialog.Builder#setTitle setTitle()}.
 Để chỉ định các mục cho danh sách, hãy gọi {@link
 android.app.AlertDialog.Builder#setItems setItems()}, chuyển một mảng.
 Hoặc, bạn có thể chỉ định một danh sách bằng cách sử dụng {@link
@@ -317,11 +317,11 @@ Danh sách nhiều mục lựa chọn.</p>
 
 <h4 id="Checkboxes">Thêm một danh sách nhiều lựa chọn hoặc một lựa chọn cố định</h4>
 
-<p>Để thêm một danh sách nhiều lựa chọn (hộp kiểm) hoặc 
+<p>Để thêm một danh sách nhiều lựa chọn (hộp kiểm) hoặc
 một lựa chọn (nút chọn một), hãy sử dụng các phương pháp
 {@link android.app.AlertDialog.Builder#setMultiChoiceItems(Cursor,String,String,
-DialogInterface.OnMultiChoiceClickListener) setMultiChoiceItems()} hoặc 
-{@link android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener) 
+DialogInterface.OnMultiChoiceClickListener) setMultiChoiceItems()} hoặc
+{@link android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener)
 setSingleChoiceItems()} tương ứng.</p>
 
 <p>Ví dụ, sau đây là cách bạn có thể tạo một danh sách nhiều lựa chọn như
@@ -346,7 +346,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
                        // If the user checked the item, add it to the selected items
                        mSelectedItems.add(which);
                    } else if (mSelectedItems.contains(which)) {
-                       // Else, if the item is already in the array, remove it 
+                       // Else, if the item is already in the array, remove it
                        mSelectedItems.remove(Integer.valueOf(which));
                    }
                }
@@ -373,7 +373,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
 
 <p>Mặc dù cả danh sách truyền thống và danh sách có nút chọn một
 đều cung cấp hành động "một lựa chọn", bạn nên sử dụng {@link
-android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener) 
+android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener)
 setSingleChoiceItems()} nếu bạn muốn cố định lựa chọn của người dùng.
 Cụ thể, nếu việc mở hộp thoại lại sau này báo hiệu lựa chọn hiện tại của người dùng, khi đó
 bạn hãy tạo một danh sách với các nút chọn một.</p>
@@ -442,7 +442,7 @@ bạn nên đổi họ phông thành {@code "sans-serif"} sao cho cả hai trư�
 một kiểu phông thống nhất.</p>
 
 <p>Để bung bố trí ra trong {@link android.support.v4.app.DialogFragment} của bạn,
-hãy lấy một {@link android.view.LayoutInflater} với 
+hãy lấy một {@link android.view.LayoutInflater} với
 {@link android.app.Activity#getLayoutInflater()} và gọi
 {@link android.view.LayoutInflater#inflate inflate()}, trong đó tham số đầu tiên
 là ID tài nguyên bố trí và tham số thứ hai là một dạng xem mẹ cho bố trí.
@@ -470,7 +470,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
                public void onClick(DialogInterface dialog, int id) {
                    LoginDialogFragment.this.getDialog().cancel();
                }
-           });      
+           });
     return builder.create();
 }
 </pre>
@@ -505,7 +505,7 @@ giao diện mà thông qua đó, nó sẽ chuyển các sự kiện lại cho ho
 
 <pre>
 public class NoticeDialogFragment extends DialogFragment {
-    
+
     /* The activity that creates an instance of this dialog fragment must
      * implement this interface in order to receive event callbacks.
      * Each method passes the DialogFragment in case the host needs to query it. */
@@ -513,10 +513,10 @@ public class NoticeDialogFragment extends DialogFragment {
         public void onDialogPositiveClick(DialogFragment dialog);
         public void onDialogNegativeClick(DialogFragment dialog);
     }
-    
+
     // Use this instance of the interface to deliver action events
     NoticeDialogListener mListener;
-    
+
     // Override the Fragment.onAttach() method to instantiate the NoticeDialogListener
     &#64;Override
     public void onAttach(Activity activity) {
@@ -543,7 +543,7 @@ của hộp thoại thông qua triển khai giao diện {@code NoticeDialogListe
 public class MainActivity extends FragmentActivity
                           implements NoticeDialogFragment.NoticeDialogListener{
     ...
-    
+
     public void showNoticeDialog() {
         // Create an instance of the dialog fragment and show it
         DialogFragment dialog = new NoticeDialogFragment();
@@ -656,7 +656,7 @@ public class CustomDialogFragment extends DialogFragment {
         // Inflate the layout to use as dialog or embedded fragment
         return inflater.inflate(R.layout.purchase_items, container, false);
     }
-  
+
     /** The system calls this only when creating the layout in a dialog. */
     &#64;Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -678,7 +678,7 @@ hay UI toàn màn hình, dựa vào kích cỡ màn hình:</p>
 public void showDialog() {
     FragmentManager fragmentManager = getSupportFragmentManager();
     CustomDialogFragment newFragment = new CustomDialogFragment();
-    
+
     if (mIsLargeLayout) {
         // The device is using a large layout, so show the fragment as a dialog
         newFragment.show(fragmentManager, "dialog");
@@ -776,7 +776,7 @@ android.support.v4.app.DialogFragment#onDismiss onDismiss()} trong {@link
 android.support.v4.app.DialogFragment} của mình.</p>
 
 <p>Bạn cũng có thể <em>hủy bỏ</em> một hộp thoại. Đây là một sự kiện đặc biệt chỉ báo người dùng
-chủ ý rời khỏi hộp thoại mà không hoàn thành tác vụ. Điều này xảy ra nếu người dùng nhấn nút 
+chủ ý rời khỏi hộp thoại mà không hoàn thành tác vụ. Điều này xảy ra nếu người dùng nhấn nút
 <em>Quay lại</em>, chạm vào màn hình ngoài vùng hộp thoại,
 hoặc nếu bạn công khai gọi {@link android.app.Dialog#cancel()} trên {@link
 android.app.Dialog} (chẳng hạn như khi hồi đáp lại một nút "Hủy bỏ" trong hộp thoại).</p>

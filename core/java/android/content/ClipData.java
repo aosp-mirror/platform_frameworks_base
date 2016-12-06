@@ -191,6 +191,14 @@ public class ClipData implements Parcelable {
         final Intent mIntent;
         Uri mUri;
 
+        /** @hide */
+        public Item(Item other) {
+            mText = other.mText;
+            mHtmlText = other.mHtmlText;
+            mIntent = other.mIntent;
+            mUri = other.mUri;
+        }
+
         /**
          * Create an Item consisting of a single block of (possibly styled) text.
          */
@@ -814,6 +822,11 @@ public class ClipData implements Parcelable {
      */
     public Item getItemAt(int index) {
         return mItems.get(index);
+    }
+
+    /** @hide */
+    public void setItemAt(int index, Item item) {
+        mItems.set(index, item);
     }
 
     /**

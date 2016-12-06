@@ -24,6 +24,9 @@ limitations under the License.
         Test wallpaper for use with the wallpaper test app.
     </string>
 
+    <string name="test_wallpaper_context_uri">https://www.google.com/maps/@37.8092876,-122.408986,1391m/data=!3m1!1e3</string>
+    <string name="test_wallpaper_context_description">Explore</string>
+
     <string name="dimens">Dimens: </string>
     <string name="width">Width: </string>
     <string name="height">Height: </string>

@@ -97,11 +97,11 @@ import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACK
 import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
-import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_DRAWN_APPLICATION;
 import static com.android.internal.policy.PhoneWindow.FEATURE_OPTIONS_PANEL;
 
 /** @hide */
@@ -162,13 +162,13 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
     private final ColorViewState mStatusColorViewState = new ColorViewState(
             SYSTEM_UI_FLAG_FULLSCREEN, FLAG_TRANSLUCENT_STATUS,
-            Gravity.TOP, Gravity.LEFT,
+            Gravity.TOP, Gravity.LEFT, Gravity.RIGHT,
             Window.STATUS_BAR_BACKGROUND_TRANSITION_NAME,
             com.android.internal.R.id.statusBarBackground,
             FLAG_FULLSCREEN);
     private final ColorViewState mNavigationColorViewState = new ColorViewState(
             SYSTEM_UI_FLAG_HIDE_NAVIGATION, FLAG_TRANSLUCENT_NAVIGATION,
-            Gravity.BOTTOM, Gravity.RIGHT,
+            Gravity.BOTTOM, Gravity.RIGHT, Gravity.LEFT,
             Window.NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME,
             com.android.internal.R.id.navigationBarBackground,
             0 /* hideWindowFlag */);
@@ -184,9 +184,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private int mLastTopInset = 0;
     private int mLastBottomInset = 0;
     private int mLastRightInset = 0;
+    private int mLastLeftInset = 0;
     private boolean mLastHasTopStableInset = false;
     private boolean mLastHasBottomStableInset = false;
     private boolean mLastHasRightStableInset = false;
+    private boolean mLastHasLeftStableInset = false;
     private int mLastWindowFlags = 0;
     private boolean mLastShouldAlwaysConsumeNavBar = false;
 
@@ -991,12 +993,21 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         return Math.min(stableRight, systemRight);
     }
 
+    static int getColorViewLeftInset(int stableLeft, int systemLeft) {
+        return Math.min(stableLeft, systemLeft);
+    }
+
     static boolean isNavBarToRightEdge(int bottomInset, int rightInset) {
         return bottomInset == 0 && rightInset > 0;
     }
 
-    static int getNavBarSize(int bottomInset, int rightInset) {
-        return isNavBarToRightEdge(bottomInset, rightInset) ? rightInset : bottomInset;
+    static boolean isNavBarToLeftEdge(int bottomInset, int leftInset) {
+        return bottomInset == 0 && leftInset > 0;
+    }
+
+    static int getNavBarSize(int bottomInset, int rightInset, int leftInset) {
+        return isNavBarToRightEdge(bottomInset, rightInset) ? rightInset
+                : isNavBarToLeftEdge(bottomInset, leftInset) ? leftInset : bottomInset;
     }
 
     WindowInsets updateColorViews(WindowInsets insets, boolean animate) {
@@ -1016,6 +1027,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                         insets.getSystemWindowInsetBottom());
                 mLastRightInset = getColorViewRightInset(insets.getStableInsetRight(),
                         insets.getSystemWindowInsetRight());
+                mLastLeftInset = getColorViewRightInset(insets.getStableInsetLeft(),
+                        insets.getSystemWindowInsetLeft());
 
                 // Don't animate if the presence of stable insets has changed, because that
                 // indicates that the window was either just added and received them for the
@@ -1031,21 +1044,32 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 boolean hasRightStableInset = insets.getStableInsetRight() != 0;
                 disallowAnimate |= (hasRightStableInset != mLastHasRightStableInset);
                 mLastHasRightStableInset = hasRightStableInset;
+
+                boolean hasLeftStableInset = insets.getStableInsetLeft() != 0;
+                disallowAnimate |= (hasLeftStableInset != mLastHasLeftStableInset);
+                mLastHasLeftStableInset = hasLeftStableInset;
+
                 mLastShouldAlwaysConsumeNavBar = insets.shouldAlwaysConsumeNavBar();
             }
 
             boolean navBarToRightEdge = isNavBarToRightEdge(mLastBottomInset, mLastRightInset);
-            int navBarSize = getNavBarSize(mLastBottomInset, mLastRightInset);
+            boolean navBarToLeftEdge = isNavBarToLeftEdge(mLastBottomInset, mLastLeftInset);
+            int navBarSize = getNavBarSize(mLastBottomInset, mLastRightInset, mLastLeftInset);
             updateColorViewInt(mNavigationColorViewState, sysUiVisibility,
-                    mWindow.mNavigationBarColor, navBarSize, navBarToRightEdge,
-                    0 /* rightInset */, animate && !disallowAnimate, false /* force */);
+                    mWindow.mNavigationBarColor, navBarSize, navBarToRightEdge || navBarToLeftEdge,
+                    navBarToLeftEdge,
+                    0 /* sideInset */, animate && !disallowAnimate, false /* force */);
 
             boolean statusBarNeedsRightInset = navBarToRightEdge
                     && mNavigationColorViewState.present;
-            int statusBarRightInset = statusBarNeedsRightInset ? mLastRightInset : 0;
+            boolean statusBarNeedsLeftInset = navBarToLeftEdge
+                    && mNavigationColorViewState.present;
+            int statusBarSideInset = statusBarNeedsRightInset ? mLastRightInset
+                    : statusBarNeedsLeftInset ? mLastLeftInset : 0;
             updateColorViewInt(mStatusColorViewState, sysUiVisibility,
                     calculateStatusBarColor(), mLastTopInset,
-                    false /* matchVertical */, statusBarRightInset, animate && !disallowAnimate,
+                    false /* matchVertical */, statusBarNeedsLeftInset, statusBarSideInset,
+                    animate && !disallowAnimate,
                     mForceWindowDrawsStatusBarBackground);
         }
 
@@ -1070,15 +1094,17 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         int consumedTop = consumingStatusBar ? mLastTopInset : 0;
         int consumedRight = consumingNavBar ? mLastRightInset : 0;
         int consumedBottom = consumingNavBar ? mLastBottomInset : 0;
+        int consumedLeft = consumingNavBar ? mLastLeftInset : 0;
 
         if (mContentRoot != null
                 && mContentRoot.getLayoutParams() instanceof MarginLayoutParams) {
             MarginLayoutParams lp = (MarginLayoutParams) mContentRoot.getLayoutParams();
             if (lp.topMargin != consumedTop || lp.rightMargin != consumedRight
-                    || lp.bottomMargin != consumedBottom) {
+                    || lp.bottomMargin != consumedBottom || lp.leftMargin != consumedLeft) {
                 lp.topMargin = consumedTop;
                 lp.rightMargin = consumedRight;
                 lp.bottomMargin = consumedBottom;
+                lp.leftMargin = consumedLeft;
                 mContentRoot.setLayoutParams(lp);
 
                 if (insets == null) {
@@ -1089,7 +1115,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             }
             if (insets != null) {
                 insets = insets.replaceSystemWindowInsets(
-                        insets.getSystemWindowInsetLeft(),
+                        insets.getSystemWindowInsetLeft() - consumedLeft,
                         insets.getSystemWindowInsetTop() - consumedTop,
                         insets.getSystemWindowInsetRight() - consumedRight,
                         insets.getSystemWindowInsetBottom() - consumedBottom);
@@ -1126,11 +1152,12 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
      * @param size the current size in the non-parent-matching dimension.
      * @param verticalBar if true the view is attached to a vertical edge, otherwise to a
      *                    horizontal edge,
-     * @param rightMargin rightMargin for the color view.
+     * @param sideMargin sideMargin for the color view.
      * @param animate if true, the change will be animated.
      */
     private void updateColorViewInt(final ColorViewState state, int sysUiVis, int color,
-            int size, boolean verticalBar, int rightMargin, boolean animate, boolean force) {
+            int size, boolean verticalBar, boolean seascape, int sideMargin,
+            boolean animate, boolean force) {
         state.present = (sysUiVis & state.systemUiHideFlag) == 0
                 && (mWindow.getAttributes().flags & state.hideWindowFlag) == 0
                 && ((mWindow.getAttributes().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0
@@ -1145,7 +1172,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
         int resolvedHeight = verticalBar ? LayoutParams.MATCH_PARENT : size;
         int resolvedWidth = verticalBar ? size : LayoutParams.MATCH_PARENT;
-        int resolvedGravity = verticalBar ? state.horizontalGravity : state.verticalGravity;
+        int resolvedGravity = verticalBar
+                ? (seascape ? state.seascapeGravity : state.horizontalGravity)
+                : state.verticalGravity;
 
         if (view == null) {
             if (showView) {
@@ -1159,7 +1188,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
                 LayoutParams lp = new LayoutParams(resolvedWidth, resolvedHeight,
                         resolvedGravity);
-                lp.rightMargin = rightMargin;
+                if (seascape) {
+                    lp.leftMargin = sideMargin;
+                } else {
+                    lp.rightMargin = sideMargin;
+                }
                 addView(view, lp);
                 updateColorViewTranslations();
             }
@@ -1168,12 +1201,16 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             visibilityChanged = state.targetVisibility != vis;
             state.targetVisibility = vis;
             LayoutParams lp = (LayoutParams) view.getLayoutParams();
+            int rightMargin = seascape ? 0 : sideMargin;
+            int leftMargin = seascape ? sideMargin : 0;
             if (lp.height != resolvedHeight || lp.width != resolvedWidth
-                    || lp.gravity != resolvedGravity || lp.rightMargin != rightMargin) {
+                    || lp.gravity != resolvedGravity || lp.rightMargin != rightMargin
+                    || lp.leftMargin != leftMargin) {
                 lp.height = resolvedHeight;
                 lp.width = resolvedWidth;
                 lp.gravity = resolvedGravity;
                 lp.rightMargin = rightMargin;
+                lp.leftMargin = leftMargin;
                 view.setLayoutParams(lp);
             }
             if (showView) {
@@ -1824,7 +1861,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         }
         final WindowManager.LayoutParams attrs = mWindow.getAttributes();
         final boolean isApplication = attrs.type == TYPE_BASE_APPLICATION ||
-                attrs.type == TYPE_APPLICATION;
+                attrs.type == TYPE_APPLICATION || attrs.type == TYPE_DRAWN_APPLICATION;
         // Only a non floating application window on one of the allowed workspaces can get a caption
         if (!mWindow.isFloating() && isApplication && StackId.hasWindowDecor(mStackId)) {
             // Dependent on the brightness of the used title we either use the
@@ -2217,17 +2254,19 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         final int translucentFlag;
         final int verticalGravity;
         final int horizontalGravity;
+        final int seascapeGravity;
         final String transitionName;
         final int hideWindowFlag;
 
         ColorViewState(int systemUiHideFlag,
                 int translucentFlag, int verticalGravity, int horizontalGravity,
-                String transitionName, int id, int hideWindowFlag) {
+                int seascapeGravity, String transitionName, int id, int hideWindowFlag) {
             this.id = id;
             this.systemUiHideFlag = systemUiHideFlag;
             this.translucentFlag = translucentFlag;
             this.verticalGravity = verticalGravity;
             this.horizontalGravity = horizontalGravity;
+            this.seascapeGravity = seascapeGravity;
             this.transitionName = transitionName;
             this.hideWindowFlag = hideWindowFlag;
         }

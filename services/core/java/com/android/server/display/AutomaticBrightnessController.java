@@ -22,6 +22,7 @@ import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
 
+import android.annotation.Nullable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -49,13 +50,7 @@ class AutomaticBrightnessController {
     // If true, enables the use of the screen auto-brightness adjustment setting.
     private static final boolean USE_SCREEN_AUTO_BRIGHTNESS_ADJUSTMENT = true;
 
-    // Hysteresis constraints for brightening or darkening.
-    // The recent lux must have changed by at least this fraction relative to the
-    // current ambient lux before a change will be considered.
-    private static final float BRIGHTENING_LIGHT_HYSTERESIS = 0.10f;
-    private static final float DARKENING_LIGHT_HYSTERESIS = 0.20f;
-
-    // How long the current sensor reading is assumed to be valid beyond the current time.
+   // How long the current sensor reading is assumed to be valid beyond the current time.
     // This provides a bit of prediction, as well as ensures that the weight for the last sample is
     // non-zero, which in turn ensures that the total weight is non-zero.
     private static final long AMBIENT_LIGHT_PREDICTION_TIME_MILLIS = 100;
@@ -70,7 +65,7 @@ class AutomaticBrightnessController {
     private static final int MSG_UPDATE_AMBIENT_LUX = 1;
     private static final int MSG_BRIGHTNESS_ADJUSTMENT_SAMPLE = 2;
 
-    // Callbacks for requesting updates to the the display's power state
+    // Callbacks for requesting updates to the display's power state
     private final Callbacks mCallbacks;
 
     // The sensor manager.
@@ -113,6 +108,9 @@ class AutomaticBrightnessController {
     // The intercept used for the weighting calculation. This is used in order to keep all possible
     // weighting values positive.
     private final int mWeightingIntercept;
+
+    // accessor object for determining lux levels
+    private final LuxLevels mLuxLevels;
 
     // Amount of time to delay auto-brightness after screen on while waiting for
     // the light sensor to warm-up in milliseconds.
@@ -174,6 +172,9 @@ class AutomaticBrightnessController {
     // Are we going to adjust brightness while dozing.
     private boolean mDozing;
 
+    // True if we are collecting one last light sample when dozing to set the screen brightness
+    private boolean mActiveDozeLightSensor = false;
+
     // True if we are collecting a brightness adjustment sample, along with some data
     // for the initial state of the sample.
     private boolean mBrightnessAdjustmentSamplePending;
@@ -189,7 +190,8 @@ class AutomaticBrightnessController {
             int brightnessMin, int brightnessMax, float dozeScaleFactor,
             int lightSensorRate, long brighteningLightDebounceConfig,
             long darkeningLightDebounceConfig, boolean resetAmbientLuxAfterWarmUpConfig,
-            int ambientLightHorizon, float autoBrightnessAdjustmentMaxGamma ) {
+            int ambientLightHorizon, float autoBrightnessAdjustmentMaxGamma,
+            LuxLevels luxLevels) {
         mCallbacks = callbacks;
         mTwilight = LocalServices.getService(TwilightManager.class);
         mSensorManager = sensorManager;
@@ -205,6 +207,7 @@ class AutomaticBrightnessController {
         mAmbientLightHorizon = ambientLightHorizon;
         mWeightingIntercept = ambientLightHorizon;
         mScreenAutoBrightnessAdjustmentMaxGamma = autoBrightnessAdjustmentMaxGamma;
+        mLuxLevels = luxLevels;
 
         mHandler = new AutomaticBrightnessHandler(looper);
         mAmbientLightRingBuffer =
@@ -218,7 +221,7 @@ class AutomaticBrightnessController {
     }
 
     public int getAutomaticScreenBrightness() {
-        if (mDozing) {
+        if (mDozing && !mLuxLevels.hasDynamicDozeBrightness()) {
             return (int) (mScreenAutoBrightness * mDozeScaleFactor);
         }
         return mScreenAutoBrightness;
@@ -232,13 +235,26 @@ class AutomaticBrightnessController {
         // and hold onto the last computed screen auto brightness.  We save the dozing flag for
         // debugging purposes.
         mDozing = dozing;
-        boolean changed = setLightSensorEnabled(enable && !dozing);
+        boolean enableSensor = enable && !dozing;
+        if (enableSensor && !mLightSensorEnabled && mActiveDozeLightSensor) {
+            mActiveDozeLightSensor = false;
+        } else if (!enableSensor && mLightSensorEnabled && mLuxLevels.hasDynamicDozeBrightness()) {
+            // keep the light sensor active until another light sample is taken in doze mode
+            mActiveDozeLightSensor = true;
+            if (mLuxLevels.useNewSensorSamplesForDoze()) {
+                mAmbientLightRingBuffer.clear();
+                mInitialHorizonAmbientLightRingBuffer.clear();
+                mAmbientLuxValid = false;
+                return;
+            }
+        }
+        boolean changed = setLightSensorEnabled(enableSensor);
         changed |= setScreenAutoBrightnessAdjustment(adjustment);
         changed |= setUseTwilight(useTwilight);
         if (changed) {
             updateAutoBrightness(false /*sendUpdate*/);
         }
-        if (enable && !dozing && userInitiatedChange) {
+        if (enableSensor && userInitiatedChange) {
             prepareBrightnessAdjustmentSample();
         }
     }
@@ -268,7 +284,7 @@ class AutomaticBrightnessController {
         pw.println();
         pw.println("Automatic Brightness Controller State:");
         pw.println("  mLightSensor=" + mLightSensor);
-        pw.println("  mTwilight.getCurrentState()=" + mTwilight.getCurrentState());
+        pw.println("  mTwilight.getLastTwilightState()=" + mTwilight.getLastTwilightState());
         pw.println("  mLightSensorEnabled=" + mLightSensorEnabled);
         pw.println("  mLightSensorEnableTime=" + TimeUtils.formatUptime(mLightSensorEnableTime));
         pw.println("  mAmbientLux=" + mAmbientLux);
@@ -292,6 +308,9 @@ class AutomaticBrightnessController {
         if (enable) {
             if (!mLightSensorEnabled) {
                 mLightSensorEnabled = true;
+                mAmbientLightRingBuffer.clear();
+                mInitialHorizonAmbientLightRingBuffer.clear();
+                mAmbientLuxValid = !mResetAmbientLuxAfterWarmUpConfig;
                 mLightSensorEnableTime = SystemClock.uptimeMillis();
                 mSensorManager.registerListener(mLightSensorListener, mLightSensor,
                         mLightSensorRate * 1000, mHandler);
@@ -300,11 +319,9 @@ class AutomaticBrightnessController {
         } else {
             if (mLightSensorEnabled) {
                 mLightSensorEnabled = false;
-                mAmbientLuxValid = !mResetAmbientLuxAfterWarmUpConfig;
                 mRecentLightSamples = 0;
-                mAmbientLightRingBuffer.clear();
-                mInitialHorizonAmbientLightRingBuffer.clear();
                 mHandler.removeMessages(MSG_UPDATE_AMBIENT_LUX);
+                Slog.d(TAG, "disabling light sensor");
                 mSensorManager.unregisterListener(mLightSensorListener);
             }
         }
@@ -316,6 +333,11 @@ class AutomaticBrightnessController {
 
         applyLightSensorMeasurement(time, lux);
         updateAmbientLux(time);
+        if (mActiveDozeLightSensor) {
+            // disable the ambient light sensor and update the screen brightness
+            setLightSensorEnabled(false);
+            updateAutoBrightness(true /*sendUpdate*/);
+        }
     }
 
     private void applyLightSensorMeasurement(long time, float lux) {
@@ -327,6 +349,7 @@ class AutomaticBrightnessController {
         }
         mAmbientLightRingBuffer.prune(time - mAmbientLightHorizon);
         mAmbientLightRingBuffer.push(time, lux);
+        Slog.d(TAG, "pushing lux: " + lux);
 
         // Remember this sample value.
         mLastObservedLux = lux;
@@ -343,8 +366,8 @@ class AutomaticBrightnessController {
 
     private void setAmbientLux(float lux) {
         mAmbientLux = lux;
-        mBrighteningLuxThreshold = mAmbientLux * (1.0f + BRIGHTENING_LIGHT_HYSTERESIS);
-        mDarkeningLuxThreshold = mAmbientLux * (1.0f - DARKENING_LIGHT_HYSTERESIS);
+        mBrighteningLuxThreshold = mLuxLevels.getBrighteningThreshold(lux);
+        mDarkeningLuxThreshold = mLuxLevels.getDarkeningThreshold(lux);
     }
 
     private float calculateAmbientLux(long now) {
@@ -495,12 +518,14 @@ class AutomaticBrightnessController {
         }
 
         if (mUseTwilight) {
-            TwilightState state = mTwilight.getCurrentState();
+            TwilightState state = mTwilight.getLastTwilightState();
             if (state != null && state.isNight()) {
-                final long now = System.currentTimeMillis();
-                gamma *= 1 + state.getAmount() * TWILIGHT_ADJUSTMENT_MAX_GAMMA;
+                final long duration = state.sunriseTimeMillis() - state.sunsetTimeMillis();
+                final long progress = System.currentTimeMillis() - state.sunsetTimeMillis();
+                final float amount = (float) Math.pow(2.0 * progress / duration - 1.0, 2.0);
+                gamma *= 1 + amount * TWILIGHT_ADJUSTMENT_MAX_GAMMA;
                 if (DEBUG) {
-                    Slog.d(TAG, "updateAutoBrightness: twilight amount=" + state.getAmount());
+                    Slog.d(TAG, "updateAutoBrightness: twilight amount=" + amount);
                 }
             }
         }
@@ -514,8 +539,14 @@ class AutomaticBrightnessController {
             }
         }
 
-        int newScreenAutoBrightness =
+        int newScreenAutoBrightness;
+        if (mActiveDozeLightSensor) {
+            newScreenAutoBrightness = mLuxLevels.getDozeBrightness(mAmbientLux);
+        } else {
+            newScreenAutoBrightness =
                 clampScreenBrightness(Math.round(value * PowerManager.BRIGHTNESS_ON));
+        }
+
         if (mScreenAutoBrightness != newScreenAutoBrightness) {
             if (DEBUG) {
                 Slog.d(TAG, "updateAutoBrightness: mScreenAutoBrightness="
@@ -621,7 +652,7 @@ class AutomaticBrightnessController {
 
     private final TwilightListener mTwilightListener = new TwilightListener() {
         @Override
-        public void onTwilightStateChanged() {
+        public void onTwilightStateChanged(@Nullable TwilightState state) {
             updateAutoBrightness(true /*sendUpdate*/);
         }
     };

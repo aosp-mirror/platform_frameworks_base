@@ -28,10 +28,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
+import android.os.Environment;
 import android.os.ServiceManager;
+import android.os.storage.StorageManager;
 import android.util.ArraySet;
 import android.util.Log;
 
+import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.TimeUnit;
 
@@ -65,6 +68,8 @@ public class BackgroundDexOptService extends JobService {
      * Atomic set to true if one job should exit early because another job was started.
      */
     final AtomicBoolean mExitPostBootUpdate = new AtomicBoolean(false);
+
+    private final File dataDir = Environment.getDataDirectory();
 
     public static void schedule(Context context) {
         JobScheduler js = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
@@ -113,6 +118,16 @@ public class BackgroundDexOptService extends JobService {
         return (100 * level / scale);
     }
 
+    private long getLowStorageThreshold() {
+        @SuppressWarnings("deprecation")
+        final long lowThreshold = StorageManager.from(this).getStorageLowBytes(dataDir);
+        if (lowThreshold == 0) {
+            Log.e(TAG, "Invalid low storage threshold");
+        }
+
+        return lowThreshold;
+    }
+
     private boolean runPostBootUpdate(final JobParameters jobParams,
             final PackageManagerService pm, final ArraySet<String> pkgs) {
         if (mExitPostBootUpdate.get()) {
@@ -123,6 +138,8 @@ public class BackgroundDexOptService extends JobService {
         // Load low battery threshold from the system config. This is a 0-100 integer.
         final int lowBatteryThreshold = getResources().getInteger(
                 com.android.internal.R.integer.config_lowBatteryWarningLevel);
+
+        final long lowThreshold = getLowStorageThreshold();
 
         mAbortPostBootUpdate.set(false);
         new Thread("BackgroundDexOptService_PostBootUpdate") {
@@ -141,6 +158,14 @@ public class BackgroundDexOptService extends JobService {
                         // Rather bail than completely drain the battery.
                         break;
                     }
+                    long usableSpace = dataDir.getUsableSpace();
+                    if (usableSpace < lowThreshold) {
+                        // Rather bail than completely fill up the disk.
+                        Log.w(TAG, "Aborting background dex opt job due to low storage: " +
+                                usableSpace);
+                        break;
+                    }
+
                     if (DEBUG_DEXOPT) {
                         Log.i(TAG, "Updating package " + pkg);
                     }
@@ -171,6 +196,9 @@ public class BackgroundDexOptService extends JobService {
         mExitPostBootUpdate.set(true);
 
         mAbortIdleOptimization.set(false);
+
+        final long lowThreshold = getLowStorageThreshold();
+
         new Thread("BackgroundDexOptService_IdleOptimization") {
             @Override
             public void run() {
@@ -183,6 +211,15 @@ public class BackgroundDexOptService extends JobService {
                         // Skip previously failing package
                         continue;
                     }
+
+                    long usableSpace = dataDir.getUsableSpace();
+                    if (usableSpace < lowThreshold) {
+                        // Rather bail than completely fill up the disk.
+                        Log.w(TAG, "Aborting background dex opt job due to low storage: " +
+                                usableSpace);
+                        break;
+                    }
+
                     // Conservatively add package to the list of failing ones in case performDexOpt
                     // never returns.
                     synchronized (sFailedPackageNames) {
@@ -213,6 +250,9 @@ public class BackgroundDexOptService extends JobService {
             Log.i(TAG, "onStartJob");
         }
 
+        // NOTE: PackageManagerService.isStorageLow uses a different set of criteria from
+        // the checks above. This check is not "live" - the value is determined by a background
+        // restart with a period of ~1 minute.
         PackageManagerService pm = (PackageManagerService)ServiceManager.getService("package");
         if (pm.isStorageLow()) {
             if (DEBUG_DEXOPT) {

@@ -1,7 +1,7 @@
 page.title=Thành phần Ứng dụng
 page.landing=true
-page.landing.intro=Khuôn khổ ứng dụng của Android cho phép bạn tạo lập nhiều ứng dụng đa dạng và sáng tạo bằng cách sử dụng một tập hợp các thành phần có thể tái sử dụng. Phần này giải thích cách bạn có thể xây dựng các thành phần định nghĩa các khối dựng cho ứng dụng của mình và cách kết nối chúng với nhau bằng cách sử dụng ý định. 
-page.metaDescription=Khuôn khổ ứng dụng của Android cho phép bạn tạo lập nhiều ứng dụng đa dạng và sáng tạo bằng cách sử dụng một tập hợp các thành phần có thể tái sử dụng. Phần này giải thích cách bạn có thể xây dựng các thành phần định nghĩa các khối dựng cho ứng dụng của mình và cách kết nối chúng với nhau bằng cách sử dụng ý định. 
+page.landing.intro=Khuôn khổ ứng dụng của Android cho phép bạn tạo lập nhiều ứng dụng đa dạng và sáng tạo bằng cách sử dụng một tập hợp các thành phần có thể tái sử dụng. Phần này giải thích cách bạn có thể xây dựng các thành phần định nghĩa các khối dựng cho ứng dụng của mình và cách kết nối chúng với nhau bằng cách sử dụng ý định.
+page.metaDescription=Khuôn khổ ứng dụng của Android cho phép bạn tạo lập nhiều ứng dụng đa dạng và sáng tạo bằng cách sử dụng một tập hợp các thành phần có thể tái sử dụng. Phần này giải thích cách bạn có thể xây dựng các thành phần định nghĩa các khối dựng cho ứng dụng của mình và cách kết nối chúng với nhau bằng cách sử dụng ý định.
 page.landing.image=images/develop/app_components.png
 page.image=images/develop/app_components.png
 
@@ -11,7 +11,7 @@ page.image=images/develop/app_components.png
 
   <div class="col-6">
     <h3>Bài viết Blog</h3>
-    
+
     <a href="http://android-developers.blogspot.com/2012/05/using-dialogfragments.html">
       <h4>Sử dụng DialogFragments</h4>
       <p>Trong bài viết này, tôi sẽ trình bày cách sử dụng DialogFragments bằng thư viện hỗ trợ v4 (cho khả năng tương thích ngược trên các thiết bị chạy phiên bản trước Honeycomb) để hiển thị một hộp thoại chỉnh sửa đơn giản và trả về một kết quả cho lệnh gọi Hoạt động bằng cách sử dụng một giao diện.</p>
@@ -21,7 +21,7 @@ page.image=images/develop/app_components.png
       <h4>Phân đoạn cho Tất cả</h4>
       <p>Hôm nay, chúng tôi đã phát hành một thư viện tĩnh giới thiệu API Phân đoạn (cũng như LoaderManager mới và một vài lớp khác) tương tự sao cho các ứng dụng tương thích với phiên bản Android 1.6 hoặc mới hơn có thể sử dụng phân đoạn để tạo các giao diện người dùng tương thích với máy tính bảng. </p>
     </a>
-    
+
     <a href="http://android-developers.blogspot.com/2010/07/multithreading-for-performance.html">
       <h4>Tạo đa luồng cho Hiệu năng</h4>
       <p>Một cách làm hay trong khi tạo các ứng dụng hồi đáp đó là đảm bảo luồng UI chính của bạn
@@ -32,7 +32,7 @@ xử lý trong một luồng khác.</p>
 
   <div class="col-6">
     <h3>Đào tạo</h3>
-    
+
     <a href="http://developer.android.com/training/basics/activity-lifecycle/index.html">
       <h4>Quản lý Vòng đời của Hoạt động</h4>
       <p>Lớp này giải thích các phương pháp gọi lại vòng đời quan trọng mà mỗi thực thể

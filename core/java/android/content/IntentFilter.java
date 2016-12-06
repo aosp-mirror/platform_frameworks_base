@@ -124,7 +124,7 @@ import java.util.Set;
  * <em>Note that authority matching here is <b>case sensitive</b>, unlike
  * formal RFC host names!</em>  You should thus always use lower case letters
  * for your authority.
- * 
+ *
  * <p><strong>Data Path</strong> matches if any of the given values match the
  * Intent's data path <em>and</em> both a scheme and authority in the filter
  * has matched against the Intent, <em>or</em> no paths were supplied in the
@@ -265,6 +265,7 @@ public class IntentFilter implements Parcelable {
     public static final String SCHEME_HTTPS = "https";
 
     private int mPriority;
+    private int mOrder;
     private final ArrayList<String> mActions;
     private ArrayList<String> mCategories = null;
     private ArrayList<String> mDataSchemes = null;
@@ -358,8 +359,8 @@ public class IntentFilter implements Parcelable {
      * the {@link MalformedMimeTypeException} exception that the constructor
      * can call and turns it into a runtime exception.
      *
-     * @param action The action to match, i.e. Intent.ACTION_VIEW.
-     * @param dataType The type to match, i.e. "vnd.android.cursor.dir/person".
+     * @param action The action to match, such as Intent.ACTION_VIEW.
+     * @param dataType The type to match, such as "vnd.android.cursor.dir/person".
      *
      * @return A new IntentFilter for the given action and type.
      *
@@ -386,7 +387,7 @@ public class IntentFilter implements Parcelable {
      * no data characteristics are subsequently specified, then the
      * filter will only match intents that contain no data.
      *
-     * @param action The action to match, i.e. Intent.ACTION_MAIN.
+     * @param action The action to match, such as Intent.ACTION_MAIN.
      */
     public IntentFilter(String action) {
         mPriority = 0;
@@ -406,8 +407,8 @@ public class IntentFilter implements Parcelable {
      * <p>Throws {@link MalformedMimeTypeException} if the given MIME type is
      * not syntactically correct.
      *
-     * @param action The action to match, i.e. Intent.ACTION_VIEW.
-     * @param dataType The type to match, i.e. "vnd.android.cursor.dir/person".
+     * @param action The action to match, such as Intent.ACTION_VIEW.
+     * @param dataType The type to match, such as "vnd.android.cursor.dir/person".
      *
      */
     public IntentFilter(String action, String dataType)
@@ -425,6 +426,7 @@ public class IntentFilter implements Parcelable {
      */
     public IntentFilter(IntentFilter o) {
         mPriority = o.mPriority;
+        mOrder = o.mOrder;
         mActions = new ArrayList<String>(o.mActions);
         if (o.mCategories != null) {
             mCategories = new ArrayList<String>(o.mCategories);
@@ -475,6 +477,16 @@ public class IntentFilter implements Parcelable {
      */
     public final int getPriority() {
         return mPriority;
+    }
+
+    /** @hide */
+    public final void setOrder(int order) {
+        mOrder = order;
+    }
+
+    /** @hide */
+    public final int getOrder() {
+        return mOrder;
     }
 
     /**
@@ -640,7 +652,7 @@ public class IntentFilter implements Parcelable {
      * in the filter, then an Intent's action must be one of those values for
      * it to match.  If no actions are included, the Intent action is ignored.
      *
-     * @param action Name of the action to match, i.e. Intent.ACTION_VIEW.
+     * @param action Name of the action to match, such as Intent.ACTION_VIEW.
      */
     public final void addAction(String action) {
         if (!mActions.contains(action)) {
@@ -709,7 +721,7 @@ public class IntentFilter implements Parcelable {
      * <p>Throws {@link MalformedMimeTypeException} if the given MIME type is
      * not syntactically correct.
      *
-     * @param type Name of the data type to match, i.e. "vnd.android.cursor.dir/person".
+     * @param type Name of the data type to match, such as "vnd.android.cursor.dir/person".
      *
      * @see #matchData
      */
@@ -786,7 +798,7 @@ public class IntentFilter implements Parcelable {
      * and any schemes you receive from outside of Android should be
      * converted to lower case before supplying them here.</em></p>
      *
-     * @param scheme Name of the scheme to match, i.e. "http".
+     * @param scheme Name of the scheme to match, such as "http".
      *
      * @see #matchData
      */
@@ -897,7 +909,7 @@ public class IntentFilter implements Parcelable {
          * Determine whether this AuthorityEntry matches the given data Uri.
          * <em>Note that this comparison is case-sensitive, unlike formal
          * RFC host names.  You thus should always normalize to lower-case.</em>
-         * 
+         *
          * @param data The Uri to match.
          * @return Returns either {@link IntentFilter#NO_MATCH_DATA},
          * {@link IntentFilter#MATCH_CATEGORY_PORT}, or
@@ -1352,7 +1364,7 @@ public class IntentFilter implements Parcelable {
      * filter has no impact on matching unless that category is specified in
      * the intent.
      *
-     * @param category Name of category to match, i.e. Intent.CATEGORY_EMBED.
+     * @param category Name of category to match, such as Intent.CATEGORY_EMBED.
      */
     public final void addCategory(String category) {
         if (mCategories == null) mCategories = new ArrayList<String>();

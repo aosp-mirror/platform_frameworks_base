@@ -46,10 +46,7 @@ forcelocalnav=true
   <strong>How do permissions work in Android Instant Apps?</strong>
   <br/>
   Android Instant Apps uses the runtime permissions model introduced in
-  Android 6.0.
-  If an app supports the permission model introduced in Android 6.0
-  (API level 23), it does not require any additional work to become an Instant
-  App that runs on older devices.
+  Android 6.0 (API level 23).
 </p>
 
 <p>

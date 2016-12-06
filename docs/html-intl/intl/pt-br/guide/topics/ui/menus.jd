@@ -83,9 +83,9 @@ não têm), então você deve migrar usando a barra de ação para fornecer aces
 e outras opções.</p>
   <p>Consulte a seção <a href="#options-menu">Criação de um menu de opções</a>.</p>
     </dd>
-    
+
   <dt><strong>Modo de ação contextual e menu de contexto</strong></dt>
-  
+
    <dd>Um menu de contexto é um <a href="#FloatingContextMenu">menu flutuante</a> que aparece quando
 o usuário realiza um clique longo em um elemento. Ele fornece ações que afetam o conteúdo selecionado
 ou a estrutura do contexto.
@@ -94,7 +94,7 @@ que afetam o conteúdo selecionado em uma barra no topo da tela e permite que o 
 selecione vários itens.</p>
   <p>Consulte a seção <a href="#context-menu">Criação de menus contextuais</a>.</p>
 </dd>
-    
+
   <dt><strong>Menu pop-up</strong></dt>
     <dd>Um menu pop-up exibe itens em uma lista vertical ancorada à vista
 que apresentou o menu. É bom para fornecer um estouro de ações relacionado a conteúdo específico
@@ -135,7 +135,7 @@ do projeto e crie o menu com os seguintes elementos:</p>
   <dt><code>&lt;item></code></dt>
     <dd>Cria um {@link android.view.MenuItem}, que representa um único item em um menu. Este
 elemento pode conter um elemento <code>&lt;menu></code> aninhado para criar um submenu.</dd>
-    
+
   <dt><code>&lt;group></code></dt>
     <dd>Um recipiente invisível e opcional para os elementos {@code &lt;item&gt;}. Ele permite que você categorize
 itens de menu para que eles compartilhem propriedades como estado ativo e visibilidade. Para obter mais informações,
@@ -218,7 +218,7 @@ para o contexto de atividade atual, como "Buscar", "Escrever e-mail" e "Configur
 foi desenvolvido:</p>
 
 <ul>
-  <li>Caso tenha desenvolvido o aplicativo para <strong>Android 2.3.x (API de nível 10) ou 
+  <li>Caso tenha desenvolvido o aplicativo para <strong>Android 2.3.x (API de nível 10) ou
 inferior</strong>, os conteúdos do menu de opções aparecerão na parte inferior da tela, quando o usuário
 pressionar o botão <em>Menu</em>, como exibido na figura 1. Quando aberto, a primeira parte visível é
 o menu
@@ -363,7 +363,7 @@ são apresentados na barra de ação. Quando um evento ocorre e você quer reali
 você deve chamar {@link android.app.Activity#invalidateOptionsMenu invalidateOptionsMenu()} para pedir
 que o sistema chame {@link android.app.Activity#onPrepareOptionsMenu(Menu) onPrepareOptionsMenu()}.</p>
 
-<p class="note"><strong>Observação:</strong> 
+<p class="note"><strong>Observação:</strong>
 você nunca deve alterar os itens no menu de opções com base no {@link android.view.View} atualmente
 em foco. Quando estiver no modo de toque (quando o usuário não está usando cursor de bola ou um teclado), as vistas
 não podem ter foco, então você nunca deve usar o foco como base para modificar
@@ -742,8 +742,8 @@ que exibe um menu pop-up:</p>
 
 <pre>
 &lt;ImageButton
-    android:layout_width="wrap_content" 
-    android:layout_height="wrap_content" 
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:src="@drawable/ic_overflow_holo_dark"
     android:contentDescription="@string/descr_overflow_button"
     android:onClick="showPopup" />
@@ -901,7 +901,7 @@ android.view.MenuItem#setChecked(boolean) setChecked()}.</p>
 (como {@link android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()}). É aqui
 que você deve definir o estado da caixa de seleção, pois a caixa de seleção ou o botão de rádio
 não altera o seu estado automaticamente. É possível consultar o estado do item (como ele era antes
-do usuário selecioná-lo) com {@link android.view.MenuItem#isChecked()} e, em seguida, definir o estado marcado com 
+do usuário selecioná-lo) com {@link android.view.MenuItem#isChecked()} e, em seguida, definir o estado marcado com
 {@link android.view.MenuItem#setChecked(boolean) setChecked()}. Por exemplo:</p>
 
 <pre>
@@ -1023,9 +1023,9 @@ do filtro de intenção. Por exemplo:</p>
 &lt;/intent-filter>
 </pre>
 
-<p>Leia mais sobre a criação de filtros de intenção no documento 
+<p>Leia mais sobre a criação de filtros de intenção no documento
 <a href="/guide/components/intents-filters.html">Intenções e filtros de intenções</a>.</p>
 
-<p>Para obter um exemplo de aplicativo que usa esta técnica, consulte o código de exemplo do 
+<p>Para obter um exemplo de aplicativo que usa esta técnica, consulte o código de exemplo do
 <a href="{@docRoot}resources/samples/NotePad/src/com/example/android/notepad/NoteEditor.html">Bloco
 de notas</a>.</p>

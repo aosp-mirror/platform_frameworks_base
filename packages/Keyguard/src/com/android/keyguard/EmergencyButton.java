@@ -152,6 +152,11 @@ public class EmergencyButton extends Button {
     }
 
     @Override
+    public boolean performLongClick() {
+        return super.performLongClick();
+    }
+
+    @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         updateEmergencyCallButton();

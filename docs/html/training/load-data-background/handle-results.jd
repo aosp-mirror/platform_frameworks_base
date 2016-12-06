@@ -127,7 +127,7 @@ public void onLoadFinished(Loader&lt;Cursor&gt; loader, Cursor cursor) {
  */
 &#64;Override
 public void onLoaderReset(Loader&lt;Cursor&gt; loader) {
-    
+
     /*
      * Clears out the adapter's reference to the Cursor.
      * This prevents memory leaks.

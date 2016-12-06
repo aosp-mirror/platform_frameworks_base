@@ -634,6 +634,12 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
             }
 
             int taskIndex = mCurrentTasks.indexOf(task);
+            if (taskIndex == -1) {
+                // If a task was added to the stack view after the start of the dismiss gesture,
+                // just ignore it
+                continue;
+            }
+
             TaskViewTransform fromTransform = mCurrentTaskTransforms.get(taskIndex);
             TaskViewTransform toTransform = mFinalTaskTransforms.get(taskIndex);
 

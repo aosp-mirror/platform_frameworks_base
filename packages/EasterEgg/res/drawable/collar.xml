@@ -18,5 +18,5 @@ Copyright (C) 2016 The Android Open Source Project
         android:height="48dp"
         android:viewportWidth="48.0"
         android:viewportHeight="48.0">
-    <path android:name="collar" android:fillColor="#FF000000" android:pathData="M9,18.4h30v1.6h-30z"/>
+    <path android:name="collar" android:fillColor="#FF000000" android:pathData="M9,18.4h30v1.7h-30z"/>
 </vector>

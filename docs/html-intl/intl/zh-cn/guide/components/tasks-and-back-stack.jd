@@ -45,7 +45,7 @@ Android 多任务运行机制</a></li>
 <p>一个 Activity 甚至可以启动设备上其他应用中存在的 Activity。例如，如果应用想要发送电子邮件，则可将 Intent 定义为执行“发送”操作并加入一些数据，如电子邮件地址和电子邮件。
 
 然后，系统将打开其他应用中声明自己处理此类
- Intent 的 Activity。在这种情况下， Intent 
+ Intent 的 Activity。在这种情况下， Intent
 是要发送电子邮件，因此将启动电子邮件应用的“撰写”Activity（如果多个 Activity 支持相同
  Intent，则系统会让用户选择要使用的 Activity）。发送电子邮件时，Activity 将恢复，看起来好像电子邮件 Activity 是您的应用的一部分。
 即使这两个 Activity 可能来自不同的应用，但是
@@ -246,7 +246,7 @@ B）。与该应用交互之后，用户再次返回主屏幕并选择最初启�
   <li>{@link android.content.Intent#FLAG_ACTIVITY_SINGLE_TOP}</li>
 </ul>
 
-<p>在下文中，您将了解如何使用这些清单文件属性和 Intent 
+<p>在下文中，您将了解如何使用这些清单文件属性和 Intent
 标志定义 Activity 与任务的关联方式，以及 Activity 在返回栈中的行为方式。</p>
 
 <p>此外，我们还单独介绍了有关如何在概览屏幕中显示和管理任务与 Activity 的注意事项。
@@ -282,7 +282,7 @@ A 启动 Activity B，则 Activity B 可以在其清单文件中定义它应该�
 B 的请求（如其清单文件中所定义）。</p>
 
 <p class="note"><strong>注：</strong>某些适用于清单文件的启动
-模式不可用作 Intent 标志，同样，某些可用作 Intent 
+模式不可用作 Intent 标志，同样，某些可用作 Intent
 标志的启动模式无法在清单文件中定义。</p>
 
 
@@ -370,7 +370,7 @@ Android 浏览器的
 属性和可接受的值。</p>
 
 <p class="note"><strong>注：</strong>使用 <a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code launchMode}</a>
-属性为 Activity 指定的行为可由 Intent 
+属性为 Activity 指定的行为可由 Intent
 附带的 Activity 启动标志替代，下文将对此进行讨论。</p>
 
 
@@ -378,7 +378,7 @@ Android 浏览器的
 <h4 id="#IntentFlagsForTasks">使用 Intent 标志</h4>
 
 <p>启动 Activity 时，您可以通过在传递给 {@link
-android.app.Activity#startActivity startActivity()} 的 Intent 
+android.app.Activity#startActivity startActivity()} 的 Intent
 中加入相应的标志，修改 Activity 与其任务的默认关联方式。可用于修改默认行为的标志包括：
 </p>
 
@@ -404,7 +404,7 @@ android.app.Activity#startActivity startActivity()} 的 Intent
 属性没有值。</p>
     <p>{@code FLAG_ACTIVITY_CLEAR_TOP} 通常与
 {@code FLAG_ACTIVITY_NEW_TASK}
-结合使用。一起使用时，通过这些标志，可以找到其他任务中的现有 Activity，并将其放入可从中响应 Intent 
+结合使用。一起使用时，通过这些标志，可以找到其他任务中的现有 Activity，并将其放入可从中响应 Intent
 的位置。 </p>
     <p class="note"><strong>注：</strong>如果指定 Activity 的启动模式为
 {@code "standard"}，则该 Activity 也会从堆栈中删除，并在其位置启动一个新实例，以便处理传入的 Intent。

@@ -163,10 +163,9 @@ public class PersistentDataBlockManager {
     /**
      * Retrieves available information about this device's flash lock state.
      *
-     * @return FLASH_LOCK_STATE_LOCKED if device bootloader is locked,
-     * FLASH_LOCK_STATE_UNLOCKED if device bootloader is unlocked,
-     * or FLASH_LOCK_STATE unknown if this information cannot be ascertained
-     * on this device.
+     * @return {@link #FLASH_LOCK_LOCKED} if device bootloader is locked,
+     * {@link #FLASH_LOCK_UNLOCKED} if device bootloader is unlocked, or {@link #FLASH_LOCK_UNKNOWN}
+     * if this information cannot be ascertained on this device.
      */
     @FlashLockState
     public int getFlashLockState() {

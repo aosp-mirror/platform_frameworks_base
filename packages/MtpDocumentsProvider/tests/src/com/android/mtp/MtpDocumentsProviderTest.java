@@ -210,7 +210,11 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             assertEquals(2, cursor.getCount());
             cursor.moveToNext();
             assertEquals("1", cursor.getString(0));
-            assertEquals(Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE, cursor.getInt(1));
+            assertEquals(
+                    Root.FLAG_SUPPORTS_IS_CHILD |
+                    Root.FLAG_SUPPORTS_CREATE |
+                    Root.FLAG_LOCAL_ONLY,
+                    cursor.getInt(1));
             assertEquals(R.drawable.ic_root_mtp, cursor.getInt(2));
             assertEquals("Device A Storage A", cursor.getString(3));
             assertEquals("1", cursor.getString(4));
@@ -225,7 +229,8 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             cursor.moveToNext();
             cursor.moveToNext();
             assertEquals("2", cursor.getString(0));
-            assertEquals(Root.FLAG_SUPPORTS_IS_CHILD, cursor.getInt(1));
+            assertEquals(
+                    Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_LOCAL_ONLY, cursor.getInt(1));
             assertEquals(R.drawable.ic_root_mtp, cursor.getInt(2));
             assertEquals("Device B Storage B", cursor.getString(3));
             assertEquals("2", cursor.getString(4));
@@ -271,7 +276,9 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
 
             cursor.moveToNext();
             assertEquals("1", cursor.getString(0));
-            assertEquals(Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE, cursor.getInt(1));
+            assertEquals(
+                    Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE | Root.FLAG_LOCAL_ONLY,
+                    cursor.getInt(1));
             assertEquals(R.drawable.ic_root_mtp, cursor.getInt(2));
             assertEquals("Device A", cursor.getString(3));
             assertEquals("1", cursor.getString(4));
@@ -279,7 +286,9 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
 
             cursor.moveToNext();
             assertEquals("2", cursor.getString(0));
-            assertEquals(Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE, cursor.getInt(1));
+            assertEquals(
+                    Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE | Root.FLAG_LOCAL_ONLY,
+                    cursor.getInt(1));
             assertEquals(R.drawable.ic_root_mtp, cursor.getInt(2));
             assertEquals("Device B Storage B", cursor.getString(3));
             assertEquals("2", cursor.getString(4));

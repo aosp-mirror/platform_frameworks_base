@@ -20,6 +20,7 @@
     android:id="@+id/parentPanel"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:gravity="start|top"
     android:orientation="vertical">
 
     <include layout="@layout/alert_dialog_title_material" />

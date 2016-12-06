@@ -51,6 +51,7 @@ final class UsageStatsXmlV1 {
     private static final String ACTIVE_ATTR = "active";
     private static final String LAST_EVENT_ATTR = "lastEvent";
     private static final String TYPE_ATTR = "type";
+    private static final String SHORTCUT_ID_ATTR = "shortcutId";
 
     // Time attributes stored as an offset of the beginTime.
     private static final String LAST_TIME_ACTIVE_ATTR = "lastTimeActive";
@@ -106,9 +107,15 @@ final class UsageStatsXmlV1 {
         event.mTimeStamp = statsOut.beginTime + XmlUtils.readLongAttribute(parser, TIME_ATTR);
 
         event.mEventType = XmlUtils.readIntAttribute(parser, TYPE_ATTR);
-        if (event.mEventType == UsageEvents.Event.CONFIGURATION_CHANGE) {
-            event.mConfiguration = new Configuration();
-            Configuration.readXmlAttrs(parser, event.mConfiguration);
+        switch (event.mEventType) {
+            case UsageEvents.Event.CONFIGURATION_CHANGE:
+                event.mConfiguration = new Configuration();
+                Configuration.readXmlAttrs(parser, event.mConfiguration);
+                break;
+            case UsageEvents.Event.SHORTCUT_INVOCATION:
+                final String id = XmlUtils.readStringAttribute(parser, SHORTCUT_ID_ATTR);
+                event.mShortcutId = (id != null) ? id.intern() : null;
+                break;
         }
 
         if (statsOut.events == null) {
@@ -165,9 +172,17 @@ final class UsageStatsXmlV1 {
         }
         XmlUtils.writeIntAttribute(xml, TYPE_ATTR, event.mEventType);
 
-        if (event.mEventType == UsageEvents.Event.CONFIGURATION_CHANGE
-                && event.mConfiguration != null) {
-            Configuration.writeXmlAttrs(xml, event.mConfiguration);
+        switch (event.mEventType) {
+            case UsageEvents.Event.CONFIGURATION_CHANGE:
+                if (event.mConfiguration != null) {
+                    Configuration.writeXmlAttrs(xml, event.mConfiguration);
+                }
+                break;
+            case UsageEvents.Event.SHORTCUT_INVOCATION:
+                if (event.mShortcutId != null) {
+                    XmlUtils.writeStringAttribute(xml, SHORTCUT_ID_ATTR, event.mShortcutId);
+                }
+                break;
         }
 
         xml.endTag(null, EVENT_TAG);

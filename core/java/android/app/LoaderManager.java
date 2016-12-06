@@ -195,6 +195,9 @@ public abstract class LoaderManager {
     public static void enableDebugLogging(boolean enabled) {
         LoaderManagerImpl.DEBUG = enabled;
     }
+
+    /** @hide for internal testing only */
+    public FragmentHostCallback getFragmentHostCallback() { return null; }
 }
 
 class LoaderManagerImpl extends LoaderManager {
@@ -541,6 +544,10 @@ class LoaderManagerImpl extends LoaderManager {
     
     void updateHostController(FragmentHostCallback host) {
         mHost = host;
+    }
+
+    public FragmentHostCallback getFragmentHostCallback() {
+        return mHost;
     }
     
     private LoaderInfo createLoader(int id, Bundle args,

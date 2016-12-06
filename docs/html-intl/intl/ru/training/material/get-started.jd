@@ -59,7 +59,7 @@ page.title=Начало работы
 
 <h2 id="ApplyTheme">Применение темы Material Design</h2>
 
-<p>Чтобы применить тему Material Design в своем приложении, укажите стиль, который наследует от 
+<p>Чтобы применить тему Material Design в своем приложении, укажите стиль, который наследует от
 <code>android:Theme.Material</code>:</p>
 
 <pre>

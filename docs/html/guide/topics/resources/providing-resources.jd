@@ -523,7 +523,7 @@ is <em>larger</em> than the current screen, the system will <strong>not</strong>
 application will crash at runtime (for example, if all layout resources are tagged with the {@code
 xlarge} qualifier, but the device is a normal-size screen).</p>
         <p><em>Added in API level 4.</em></p>
-        
+
         <p>See <a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
 Screens</a> for more information.</p>
         <p>Also see the {@link android.content.res.Configuration#screenLayout} configuration field,
@@ -608,7 +608,7 @@ which indicates the current device orientation.</p>
         </ul>
         <p><em>Added in API level 8, television added in API 13, watch added in API 20.</em></p>
         <p>For information about how your app can respond when the device is inserted into or
-        removed from a dock, read <a 
+        removed from a dock, read <a
         href="{@docRoot}training/monitoring-device-state/docking-monitoring.html">Determining
 and Monitoring the Docking State and Type</a>.</p>
         <p>This can change during the life of your application if the user places the device in a
@@ -659,8 +659,8 @@ application during runtime.</p>
 Level 8</em></li>
           <li>{@code xxhdpi}: Extra-extra-high-density screens; approximately 480dpi. <em>Added in API
 Level 16</em></li>
-          <li>{@code xxxhdpi}: Extra-extra-extra-high-density uses (launcher icon only, see the 
-            <a href="{@docRoot}guide/practices/screens_support.html#xxxhdpi-note">note</a> 
+          <li>{@code xxxhdpi}: Extra-extra-extra-high-density uses (launcher icon only, see the
+            <a href="{@docRoot}guide/practices/screens_support.html#xxxhdpi-note">note</a>
             in <em>Supporting Multiple Screens</em>); approximately 640dpi. <em>Added in API
 Level 18</em></li>
           <li>{@code nodpi}: This can be used for bitmap resources that you do not want to be scaled

@@ -10,9 +10,9 @@ previous.link=screendensities.html
 
 
 <!-- This is the training bar -->
-<div id="tb-wrapper"> 
-<div id="tb"> 
- 
+<div id="tb-wrapper">
+<div id="tb">
+
 <h2>このレッスンでの学習内容</h2>
 
 <ol>
@@ -27,17 +27,17 @@ previous.link=screendensities.html
 <ul>
   <li><a href="{@docRoot}guide/practices/tablets-and-handsets.html">タブレットと携帯端末のサポート</a></li>
 </ul>
- 
+
 <h2>試してみる</h2>
- 
+
 <div class="download-box">
 <a href="http://developer.android.com/shareables/training/NewsReader.zip" class="button">サンプル アプリのダウンロード</a>
-<p class="filename">NewsReader.zip</p> 
-</div> 
- 
- 
-</div> 
-</div> 
+<p class="filename">NewsReader.zip</p>
+</div>
+
+
+</div>
+</div>
 
 <p>アプリが現在表示しているレイアウトによって、UI フローが異なる可能性があります。たとえば、アプリがデュアルペイン モードであれば、左ペインのアイテムをクリックすると、単に右ペインにコンテンツが表示されるだけですが、シングルペイン モードであれば、コンテンツは（別のアクティビティ内の）コンテンツ専用のペインに表示される必要があります。</p>
 
@@ -56,7 +56,7 @@ public class NewsReaderActivity extends FragmentActivity {
         setContentView(R.layout.main_layout);
 
         View articleView = findViewById(R.id.article);
-        mIsDualPane = articleView != null &amp;&amp; 
+        mIsDualPane = articleView != null &amp;&amp;
                         articleView.getVisibility() == View.VISIBLE;
     }
 }
@@ -116,7 +116,7 @@ public void onCreate(Bundle savedInstanceState) {
     else {
         /* use list navigation (spinner) */
         actionBar.setNavigationMode(android.app.ActionBar.NAVIGATION_MODE_LIST);
-        SpinnerAdapter adap = new ArrayAdapter<String>(this, 
+        SpinnerAdapter adap = new ArrayAdapter<String>(this,
                 R.layout.headline_item, CATEGORIES);
         actionBar.setListNavigationCallbacks(adap, handler);
     }
@@ -168,7 +168,7 @@ public class HeadlinesFragment extends ListFragment {
 public class HeadlinesFragment extends ListFragment {
     ...
     &#64;Override
-    public void onItemClick(AdapterView&lt;?&gt; parent, 
+    public void onItemClick(AdapterView&lt;?&gt; parent,
                             View view, int position, long id) {
         if (null != mHeadlineSelectedListener) {
             mHeadlineSelectedListener.onHeadlineSelected(position);

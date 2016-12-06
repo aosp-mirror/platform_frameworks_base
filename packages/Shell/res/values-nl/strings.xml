@@ -21,7 +21,7 @@
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Bugrapport <xliff:g id="ID">#%d</xliff:g> is vastgelegd"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Details toevoegen aan het bugrapport"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Even geduld…"</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Veeg naar links om je bugmelding te delen"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Het bugrapport wordt over enkele ogenblikken op de telefoon weergegeven"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Tik om je bugrapport te delen"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Tik om je bugrapport te delen zonder screenshot of wacht tot het screenshot is voltooid"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Tik om je bugrapport te delen zonder screenshot of wacht tot het screenshot is voltooid"</string>

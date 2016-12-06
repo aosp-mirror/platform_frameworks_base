@@ -171,7 +171,9 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
           <li>
             <a href="#set_up_a_watch">Set Up a Watch</a>
           </li>
-
+          <li>
+            <a href="#set_up_a_phone">Set Up a Phone</a>
+          </li>
           <li>
             <a href="#set_up_an_emulator">Set Up an Emulator</a>
           </li>
@@ -180,7 +182,7 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
     </div>
 
     <p>
-      You can run and test your app with the Android Wear 2.0 Developer Preview
+      You can run and test your app with the Android Wear 2.0 Preview
       in either of these ways:
     </p>
 
@@ -223,8 +225,8 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
     </p>
 
     <p class="warning">
-      <strong>Warning:</strong> Installing a system image on a watch removes all data from the
-      watch, so you should back up your data first.
+      <strong>Warning:</strong> Installing a system image on a watch removes all
+      data from the watch, so you should back up your data first.
     </p>
 
     <h3 id="preview_system_images">
@@ -233,8 +235,20 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
 
     <p>
       The preview includes system images for testing your app. Based on your
-      device, you can download a preview system image from the following tables
-      and flash it to the corresponding device.
+      device, you can download a preview system image from one of the
+      following tables and flash it to the corresponding device.
+    </p>
+
+    <p class="caution"><strong>Caution:</strong>
+      After you flash an image to a watch, follow the steps for
+      <a href="#set_up_a_phone">setting up a phone</a> with the beta version of
+      the Android Wear companion app. To use a Wear 2.0 image on a watch,
+      you must have the beta companion app on a paired phone.
+    </p>
+
+    <p>
+      To restore your device to its original state during the preview,
+      you can flash the appropriate retail system image, below, to the device.
     </p>
 
     <h4 id="preview_image_for_lge_watch_urbane_2nd_edition">
@@ -261,9 +275,9 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
         <td>
           Preview image for testing
         </td>
-        <td><a href="#top" onclick="onDownload(this)">nemo-nvd36i-factory-9cdd2ac0.tgz</a><br>
-          MD5: b33ba8e59780fbe5c83d8936b108640f<br>
-          SHA-1: 9cdd2ac01f2976cafe5a21958298dac159b7a325
+        <td><a href="#top" onclick="onDownload(this)">nemo-nve68j-factory-302a33ea.tgz</a><br>
+          MD5: ddfccc3e050c7e2db8d657c82f7d6291<br>
+          SHA-1: 302a33eac348c401fcb165bad4b9aaa40c7beb2b
         </td>
       </tr>
 
@@ -271,9 +285,9 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
         <td>
           Non-preview image (for after testing)
         </td>
-        <td><a href="#top" onclick="onDownload(this)">nemo-mnc40x-factory-fa528bec.tgz</a><br>
-          MD5: 0b8ba3653d5a93cb854f4d7409d7b6c9<br>
-          SHA-1: fa528bec8aba3bf6c7d901ba63cd6ea0a08dbeb0
+        <td><a href="#top" onclick="onDownload(this)">nemo-mfd18l-factory-3faf6f2d.tgz</a><br>
+          MD5: f3a0090c0e99da82ad095b5d2a9acc6d<br>
+          SHA-1: 3faf6f2d7f422a17a5f6c54cf5e1d2c5622689b0
         </td>
       </tr>
 
@@ -302,18 +316,18 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
         <td>
           Preview image for testing
         </td>
-        <td><a href="#top" onclick="onDownload(this)">sturgeon-nvd36i-factory-2cbe5080.tgz</a><br>
-          MD5: ccc972cdc33cba778a2f624066ef5713<br>
-          SHA-1: 2cbe5080ded060ce43ba65ff27e2290b28981634
+        <td><a href="#top" onclick="onDownload(this)">sturgeon-nve68j-factory-6607cd31.tgz</a><br>
+          MD5: f78ac6ba8bb84038d163cc2d7ca85040<br>
+          SHA-1: 6607cd31858af1bfd50b905c68f7cf1f0b6e570e
         </td>
       </tr>
       <tr id="sturgeon-non-preview">
         <td>
           Non-preview image (for after testing)
         </td>
-        <td><a href="#top" onclick="onDownload(this)">sturgeon-mec23l-factory-48003078.tgz</a><br>
-          MD5: 417b5cbddb29a2262bce133e283d2732<br>
-          SHA-1: 4800307843580f818557dd7c43d8ba2161e289b2
+        <td><a href="#top" onclick="onDownload(this)">sturgeon-m6e69f-factory-e659286a.tgz</a><br>
+          MD5: 12ce6cb0b0e43b67ea46a886eae052ae<br>
+          SHA-1: e659286aa9004f4555a476ede4e8b690f56cfefd
         </td>
       </tr>
     </table>
@@ -332,7 +346,8 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
     </p>
 
     <p class="warning">
-      <strong>Warning:</strong> Installing a system image on a watch removes all data from the
+      <strong>Warning:</strong> Installing a system image on a watch
+      removes all data from the
       watch, so you should back up your data first.
     </p>
 
@@ -341,8 +356,7 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
     </h4>
 
     <p>
-      From the phone, unpair ("Forget") the watch.
-      Then on the watch, enable the Developer Options menu and ADB debugging as
+      On the watch, enable the Developer Options menu and ADB debugging as
       follows:
     </p>
 
@@ -351,14 +365,14 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
       </li>
 
       <li>Scroll to the bottom of the menu. If no <strong>Developer
-      Options</strong> item is provided, tap <strong>About</strong>.
+      Options</strong> item is provided, tap <strong>System</strong>
+      and then <strong>About</strong>.
       </li>
 
       <li>Tap the build number 7 times.
       </li>
 
-      <li>From the Settings menu, tap the <strong>Developer Options</strong>
-      item.
+      <li>From the Settings menu, tap <strong>Developer Options</strong>.
       </li>
 
       <li>Enable ADB debugging.
@@ -404,7 +418,9 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
       </li>
 
       <li>Use the following <a href="{@docRoot}tools/help/adb.html">adb
-      command</a> to confirm that the watch is available for flashing:
+      command</a> to confirm that the watch is recognized.
+      You may need to turn ADB debugging off and then on for the watch to
+      be recognized:
       <code>adb devices</code>
       </li>
 
@@ -418,11 +434,11 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
       devices, <code>fastboot oem unlock</code>
       </li>
 
-      <li>On the watch, select the <strong>Unlock</strong> option.
+      <li>On the watch, select the option to unlock the bootloader.
       </li>
 
-      <li>Navigate to the directory where you unzipped the system image in Step
-      1. At the top level of that directory,
+      <li>On your computer, navigate to the directory where you unzipped the
+      system image in Step 1. At the top level of that directory,
       execute the <code>flash-all</code> script by typing
       <code>flash-all.sh</code> or, in the case of Windows,
       <code>flash-all.bat</code>. The following may need to
@@ -432,18 +448,19 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
 
 
     <h4 id="set_up_watch">
-      Set up the watch and begin testing
+      Set up the watch
     </h4>
 
-      <p>
-        After the <code>flash-all</code> script finishes, your watch reboots.
-        Pair the watch with a phone or tablet. The preview now is available
-        for testing on the watch. Before installing an app, perform the
-        following steps on the watch to re-secure the watch's bootloader:
+    <p>
+      After the <code>flash-all</code> script finishes, the watch reboots.
+      Only pair the watch with a phone (so you can begin testing the preview)
+      by using the instructions in <a href="#set_up_a_phone">Set Up a Phone</a>.
+      Additionally, before installing an app, perform the
+      following steps on the watch to re-secure the watch's bootloader:
     </p>
 
     <ol>
-      <li>Open the Settings menu (on the watch).
+      <li>Open the Settings menu by long-pressing the physical button.
       </li>
 
       <li>Scroll to the bottom of the menu and tap <strong>About</strong>.
@@ -452,15 +469,16 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
       <li>Tap the build number 7 times.
       </li>
 
-      <li>From the Settings menu, tap the <strong>Developer Options</strong>
-      item.
+      <li>From the Settings menu, tap <strong>Developer Options</strong>.
       </li>
 
       <li>Enable ADB debugging.
       </li>
 
       <li>Connect the watch to your computer and tap <strong>Always allow from
-      this computer</strong>.
+      this computer</strong>. (You may need to turn ADB debugging off
+      and then on, to be prompted to always allow ADB debugging from
+      the connected computer.)
       </li>
 
       <li>Use the following adb command to start the device in fastboot mode:
@@ -472,13 +490,18 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
       devices, <code>fastboot oem lock</code>
       </li>
 
-      <li>On the watch, continue the boot by choosing
-      <strong>Start</strong> and touching <strong>'0'</strong>.
+      <li>On the watch, continue the boot as follows:
+      On an LGE Watch Urbane 2nd Edition, choose
+      <strong>Start</strong> and touch <strong>'0'</strong>.
+      On a Huawei Watch, confirm that <strong>Reboot</strong> is chosen and
+      long-press the physical button.
       </li>
     </ol>
 
     <p>
-      Your watch is ready for you to <a href=
+      After you follow the instructions in
+      <a href="#set_up_a_phone">Set Up a Phone</a>,
+      your watch will be ready for you to <a href=
       "{@docRoot}training/wearables/apps/creating.html#Install">install and run
       your app</a>:
     </p>
@@ -534,13 +557,116 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
       device reset and removes all user data on the device.
     </p>
 
+    <h2 id="set_up_a_phone">
+      Set Up a Phone
+    </h2>
+
+    <p>
+      On a phone, follow the instructions in this section to install the beta
+      version of the Android Wear companion app. The beta version cannot be run
+      on a phone at the same time as the non-beta version. Additionally, the
+      beta version is English-only.
+    </p>
+
+    <p>
+      <p class="caution"><strong>Caution:</strong> If you have an existing
+      pairing of the phone to a Wear 1.x
+      watch, installation of the beta companion app will cause a loss of that
+      pairing.
+    </p>
+
+    <h3 id="join-the-wear-2-0-preview-group">
+      Join the Wear 2.0 preview group
+    </h3>
+
+    <p>
+      To access the beta companion app, you must <a href=
+      "https://groups.google.com/forum/#!forum/android-wear-developer-preview">join
+      the preview group in Google Groups</a>.
+    </p>
+
+    <h3>
+      Opt in for beta testing
+    </h3>
+
+    <p>
+      On the <a href=
+      "https://play.google.com/apps/testing/com.google.android.wearable.app">Testing
+      Opt-in</a> page, select <strong>Become a Tester</strong>.
+    </p>
+
+    <h3 id="download-and-install-the-beta-version-of-the-companion-app">
+      Download and install the beta version of the companion app
+    </h3>
+
+    <p>
+      On the Play Store on your phone, go to the <a href=
+      "https://play.google.com/store/apps/details?id=com.google.android.wearable.app">
+      Android Wear app listing</a>. Tap <strong>Update</strong> to download and
+      install the beta version of the app. After installation, confirm that
+      <strong>Auto-update</strong> is selected for the app (see
+      the "Set up automatic updates for specific apps" section of <a href=
+      "https://support.google.com/googleplay/answer/113412">Update downloaded
+      apps</a>). Tap <strong>Open</strong> to start the app.
+    </p>
+
+    <h3 id="pairing">
+      Pair the phone to the watch
+    </h3>
+
+    <p>
+      After you install the beta version of the companion app on a phone,
+      unpair ("Forget") any obsolete watch pairings, if necessary.
+      Then you can pair the phone to a newly-imaged watch:
+    </p>
+
+    <ol>
+      <li>On the phone, select your device name from the list of devices.
+      A pairing code is displayed on the phone and on the watch.
+      Ensure that the codes match.
+      </li>
+
+      <li>Tap <strong>Pair</strong> to
+      continue the pairing process. When the watch is connected to
+      the phone, a confirmation message is displayed.
+      On the phone, a screen is displayed that lists
+      the accounts on the phone.
+      </li>
+
+      <li>Choose a Google Account to add and sync to your watch.
+      </li>
+
+      <li>Confirm the screen lock and enter the password to start the copying of
+      the account from the phone to the watch.
+      </li>
+
+      <li>Follow the instructions in the wizard to finish the
+      pairing process.
+      </li>
+    </ol>
+
+    <p>
+      You can begin testing your app with the preview.
+    </p>
+
     <h2 id="set_up_an_emulator">
       Set Up an Emulator
     </h2>
 
     <p>
-      To test with the Android Emulator, create a virtual device in Android
-      Studio as follows:
+      To test with the Android Emulator,
+      confirm that you have the latest version of the <strong>Android SDK
+      Platform-tools</strong> from the <a href=
+      "{@docRoot}studio/intro/update.html#sdk-manager">SDK Manager</a>.
+    </p>
+
+    <p>
+      After you create a virtual device as described below, follow the steps for
+      <a href="#set_up_a_phone">setting up a phone</a> with the beta version of
+      the Android Wear companion app.
+    </p>
+
+    <p>Create a new virtual device in Android Studio as follows:
     </p>
 
     <ol>
@@ -551,19 +677,19 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
       <li>Click <strong>Create Virtual Device</strong>.
       </li>
 
-      <li>In the <strong>Category</strong> pane, select Wear and
-       choose a hardware profile.
+      <li>In the <strong>Category</strong> pane, select <strong>Wear</strong>
+       and choose a hardware profile.
        The Android Wear 2.0 Developer Preview
        is only optimized for round devices currently, so we recommend not
        using the square or chin profiles for now.
        Click <strong>Next</strong>.
       </li>
 
-      <li>Select an <strong>N</strong> image to download. The images may be on
+      <li>Select a <strong>Nougat</strong> image to download. The images may be on
       the <strong>x86</strong> tab instead of the <strong>Recommended</strong>
       tab, until installed. For example, select the image with the
-      <strong>Release Name</strong> of N, the <strong>API Level</strong> of N,
-      and the <strong>Target</strong> of "Android 6.X (with Android Wear)".
+      <strong>Release Name</strong> of Nougat, the <strong>API Level</strong> of 24,
+      and the <strong>Target</strong> of "Android 7.0 (with Android Wear)".
       When the download and installation are complete, click
       <strong>Finish</strong> and then click <strong>Next</strong>.
       </li>
@@ -571,16 +697,68 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
       <li>Verify the configuration of the Android Virtual Device (AVD) and
       click <strong>Finish</strong>.
       </li>
+
+      <li>Start the emulator by selecting the new virtual device, clicking the
+      <strong>Play</strong> button, and waiting until
+      the emulator initializes and shows the Android Wear home screen.
+      </li>
     </ol>
 
     <p>
-      You can now test an application with a virtual preview device
+      Pair the phone with the emulator, and sync a Google Account, as follows:
+    </p>
+
+    <ol>
+      <li>Follow the steps for
+      <a href="#set_up_a_phone">setting up a phone</a> with the beta version of
+      the Android Wear companion app.
+      </li>
+
+      <li>On the phone, enable Developer Options and USB Debugging.
+      </li>
+
+      <li>Connect the phone to your computer through USB.
+      </li>
+
+      <li>Forward the AVD's communication port to the connected handheld device
+      (each time the phone is connected):<br>
+      <code>adb -d forward tcp:5601 tcp:5601</code>
+      </li>
+
+      <li>On the phone, in the Android Wear app, begin the standard pairing
+      process. For example, on the Welcome screen, tap the
+      <strong>Set It Up</strong> button.
+      Alternatively, if an existing watch already is paired, in the upper-left
+      drop-down, tap <strong>Add a New Watch</strong>.
+      </li>
+
+      <li>On the phone, in the Android Wear app, tap the
+      Overflow button, and then tap
+      <strong>Pair with Emulator</strong>.
+      </li>
+
+      <li>Tap the Settings icon.
+      </li>
+
+      <li>Under Device Settings, tap <strong>Emulator</strong>.
+      </li>
+
+      <li>Tap <strong>Accounts</strong> and select a Google Account,
+      and follow the steps in the wizard to
+      sync the account with the emulator. If necessary, type the screen-lock
+      device password, and Google Account password, to start the account sync.
+      </li>
+    </ol>
+
+    <p>
+      You can now test an app with a virtual preview device
       in the <a href=
       "{@docRoot}tools/devices/emulator.html">Android Emulator</a>. For more
       information about using virtual devices, see <a href=
-      "{@docRoot}tools/devices/managing-avds.html">Managing AVDs with the AVD
-      Manager</a>.
+      "{@docRoot}studio/run/managing-avds.html">
+      Create and Manage Virtual Devices</a>.
     </p>
+
  </div><!-- landing -->
 
 </div><!-- relative wrapper -->

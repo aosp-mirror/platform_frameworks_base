@@ -679,6 +679,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Riktig!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Prøv på nytt"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Prøv på nytt"</string>
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"Lås opp for å få alle funksjoner og data"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Du har overskredet grensen for opplåsingsforsøk med Ansiktslås"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"SIM-kortet mangler"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Nettbrettet mangler SIM-kort."</string>
@@ -1023,8 +1024,9 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android oppgraderes …"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android starter …"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optimaliser lagring."</string>
-    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android oppgraderes"</string>
+    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"Fullfører Android-oppdatering …"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Noen apper fungerer kanskje ikke skikkelig før oppgraderingen er fullført"</string>
+    <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g> oppgraderes …"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Optimaliserer app <xliff:g id="NUMBER_0">%1$d</xliff:g> av <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Forbereder <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Starter apper."</string>
@@ -1075,6 +1077,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi har ikke Internett-tilgang"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Trykk for å få alternativer"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"Byttet til <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Enheten bruker <xliff:g id="NEW_NETWORK">%1$s</xliff:g> når <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ikke har Internett-tilgang. Avgifter kan påløpe."</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"Byttet fra <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> til <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"mobildata"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"Bluetooth"</item>
+    <item msgid="5447331121797802871">"Ethernet"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"en ukjent nettverkstype"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Kan ikke koble til Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" har en dårlig Internett-tilkobling."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Vil du tillat tilkoblingen?"</string>
@@ -1152,7 +1165,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Trykk for å velge språk og layout"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ"</string>
-    <string name="candidates_style" msgid="4333913089637062257">"TAG_FONT"<u>"kandidater"</u>"CLOSE_FONT"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Forbereder <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Sjekker for feil"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"<xliff:g id="NAME">%s</xliff:g> ble oppdaget"</string>
@@ -1202,7 +1214,7 @@
     <string name="ime_action_search" msgid="658110271822807811">"Søk"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"Send"</string>
     <string name="ime_action_next" msgid="3138843904009813834">"Neste"</string>
-    <string name="ime_action_done" msgid="8971516117910934605">"Utført"</string>
+    <string name="ime_action_done" msgid="8971516117910934605">"Ferdig"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"Forrige"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Utfør"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"Ring nummeret\n<xliff:g id="NUMBER">%s</xliff:g>"</string>
@@ -1231,8 +1243,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Koblet til <xliff:g id="SESSION">%s</xliff:g>. Trykk for å administrere nettverket."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Alltid-på VPN kobler til ..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Alltid-på VPN er tilkoblet"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Alltid på-VPN er frakoblet"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Alltid-på VPN-feil"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"Trykk for å konfigurere"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Trykk for å konfigurere"</string>
     <string name="upload_file" msgid="2897957172366730416">"Velg fil"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Ingen fil er valgt"</string>
     <string name="reset" msgid="2448168080964209908">"Tilbakestill"</string>
@@ -1315,8 +1328,8 @@
     <string name="storage_usb_drive" msgid="6261899683292244209">"USB-stasjon"</string>
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB-stasjon"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB-lagring"</string>
-    <string name="extract_edit_menu_button" msgid="8940478730496610137">"Rediger"</string>
-    <string name="data_usage_warning_title" msgid="1955638862122232342">"Advarsel for høyt dataforbruk"</string>
+    <string name="extract_edit_menu_button" msgid="8940478730496610137">"Endre"</string>
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"Varsel om databruk"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Trykk for å se bruken og innstillingene."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Datagrensen for 2G-3G er nådd"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Datagrensen for 4G er nådd"</string>
@@ -1635,6 +1648,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"Skriv inn språknavn"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Foreslått"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Alle språk"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"Alle områder"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Søk"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"Jobbmodus er AV"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Slå på jobbprofilen, inkludert apper, synkronisering i bakgrunnen og relaterte funksjoner."</string>
@@ -1652,7 +1666,16 @@
     <string name="unpin_target" msgid="3556545602439143442">"Løsne"</string>
     <string name="app_info" msgid="6856026610594615344">"Info om appen"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"Tilbakestille enheten?"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Trykk for å tilbakestille enheten"</string>
+    <string name="demo_starting_message" msgid="5268556852031489931">"Starter demo …"</string>
+    <string name="demo_restarting_message" msgid="952118052531642451">"Tilbakestiller enheten …"</string>
+    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Tilbakestille enheten?"</string>
+    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Du mister eventuelle endringer, og demoen starter på nytt om <xliff:g id="TIMEOUT">%1$s</xliff:g> sekunder."</string>
+    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Avbryt"</string>
+    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Tilbakestill nå"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Tilbakestill til fabrikkstandard for å bruke denne enheten uten begrensninger"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Trykk for å finne ut mer."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> er slått av"</string>
+    <string name="conference_call" msgid="3751093130790472426">"Konferansesamtale"</string>
 </resources>

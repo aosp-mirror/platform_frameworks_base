@@ -1,0 +1,85 @@
+page.title=Samples
+page.tags="preview", "samples", "android"
+page.image=images/cards/card-n-samples_2x.png
+@jd:body
+
+<p>
+  Các mã mẫu sau được dành cho Android N. Để
+  tải xuống mã mẫu cho Android Studio, hãy chọn tùy chọn trong menu <b>File &gt; Import
+  Samples</b>.
+</p>
+
+<p class="note">
+  <strong>Chú ý:</strong>Các dự án có thể tải xuống này được thiết kế
+   để sử dụng với Gradle và Android Studio.
+</p>
+
+
+<h3 id="mw">Dùng thử đa cửa sổ</h3>
+<img src="{@docRoot}images/android-7.0/sample-multiwindow.png" style="float: left; padding-right: 0.5em" height="250" width="156" />
+<p>
+  Ví dụ này minh họa cách tận dụng giao diện người dùng
+  đa cửa sổ với ứng dụng của bạn.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-MultiWindowPlayground">
+  Tải mã trên GitHub</a>
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="an">Thông báo đang Hoạt động</h3>
+<img src="{@docRoot}images/android-7.0/sample-activenotifications.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
+<p>
+  Đây là ví dụ đã có sẵn, minh họa một dịch vụ đơn giản để gửi
+  thông báo bằng cách sử dụng NotificationCompat. Mỗi cuộc hội thoại chưa đọc từ một người dùng
+  sẽ được gửi dưới dạng một thông báo riêng.
+</p>
+<p>
+  Ví dụ này đã được cập nhật để tận dụng các tính năng thông báo mới
+  có trong Android N.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-ActiveNotifications">
+  Tải mã trên GitHub</a>
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="ms">Dịch vụ Nhắn tin</h3>
+<img src="{@docRoot}images/android-7.0/sample-messagingservice.png" style="float: left; padding-right: 0.5em" height="250" width="150" />
+<p>
+  Đây là một ví dụ đã có sẵn, minh họa cách sử dụng
+  NotificationManager để cho biết có bao nhiêu thông báo một ứng dụng hiện
+  đang hiển thị.
+</p>
+<p>
+  Ví dụ này đã được cập nhật để tận dụng các tính năng thông báo mới
+  có trong Android N.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-MessagingService">
+  Tải mã trên GitHub</a>
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="fbe">Khởi động Trực tiếp</h3>
+<img src="{@docRoot}images/android-7.0/sample-directboot.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
+<p>
+  Ví dụ này minh họa cách lưu trữ và truy cập dữ liệu trên bộ lưu trữ
+  mã hóa thiết bị, luôn khả dụng khi thiết bị được khởi động.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-DirectBoot">
+  Tải mã trên GitHub</a>
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="sda">Truy cập Thư mục theo Phạm vi</h3>
+<img src="{@docRoot}images/android-7.0/sample-scopeddirectoryaccess.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
+<p>
+  Ví dụ này minh họa cách đọc và ghi dữ liệu từ các thư mục
+  cụ thể trong khi cần ít quyền hơn.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-ScopedDirectoryAccess">
+  Tải mã trên GitHub</a>
+</p>

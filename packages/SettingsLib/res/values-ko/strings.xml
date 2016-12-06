@@ -28,7 +28,8 @@
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Wi-Fi 연결 실패"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"인증 문제"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"범위 내에 없음"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"감지된 인터넷 액세스가 없으며 자동으로 다시 연결되지 않습니다."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"감지된 인터넷 액세스가 없으며 자동으로 다시 연결되지 않습니다."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"인터넷에 연결되어 있지 않습니다."</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g>(으)로 저장됨"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Wi‑Fi 도우미를 통해 연결됨"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s을(를) 통해 연결됨"</string>
@@ -184,7 +185,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"모의 위치 허용"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"모의 위치 허용"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"보기 속성 검사 사용"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"새로운 Android DHCP 클라이언트 대신 Lollipop의 DHCP 클라이언트 사용"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Wi‑Fi가 활성화되어 있을 때에도 빠른 네트워크 전환을 위하여 항상 모바일 데이터를 활성 상태로 유지합니다."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB 디버깅을 허용하시겠습니까?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB 디버깅은 개발용으로만 설계되었습니다. 이 기능을 사용하면 컴퓨터와 기기 간에 데이터를 복사하고 알림 없이 기기에 앱을 설치하며 로그 데이터를 읽을 수 있습니다."</string>
@@ -234,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"클립 경계, 여백 등을 표시"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL 레이아웃 방향 강제 적용"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"모든 언어에 대해 화면 레이아웃 방향을 RTL로 강제 적용"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"CPU 사용량 표시"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"현재 CPU 사용량 오버레이 표시"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"GPU 렌더링 강제 설정"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"2D 드로잉용으로 GPU 강제 사용"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA 강제 사용"</string>
@@ -341,5 +339,6 @@
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"더 크게"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"가장 크게"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"맞춤(<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
-    <string name="help_feedback_label" msgid="6815040660801785649">"도움말 및 의견"</string>
+    <string name="help_feedback_label" msgid="6815040660801785649">"고객센터"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"메뉴"</string>
 </resources>

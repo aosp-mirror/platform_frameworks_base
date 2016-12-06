@@ -549,6 +549,9 @@ class UserUsageStatsService {
             if (event.mConfiguration != null) {
                 pw.printPair("config", Configuration.resourceQualifierString(event.mConfiguration));
             }
+            if (event.mShortcutId != null) {
+                pw.printPair("shortcutId", event.mShortcutId);
+            }
             pw.println();
         }
         pw.decreaseIndent();
@@ -588,6 +591,8 @@ class UserUsageStatsService {
                 return "SYSTEM_INTERACTION";
             case UsageEvents.Event.USER_INTERACTION:
                 return "USER_INTERACTION";
+            case UsageEvents.Event.SHORTCUT_INVOCATION:
+                return "SHORTCUT_INVOCATION";
             default:
                 return "UNKNOWN";
         }

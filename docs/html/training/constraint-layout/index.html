@@ -1,0 +1,498 @@
+<html devsite>
+<head>
+  <title>Build a Responsive UI with ConstraintLayout</title>
+  <meta name="book_path" value="/training/_book.yaml" />
+  <meta name="top_category" value="develop" />
+  <meta name="subcategory" value="training" />
+</head>
+<body>
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#constraints-overview">Constraints overview</a></li>
+    <li><a href="#add-constraintlayout-to-your-project">Add ConstraintLayout to your project</a></li>
+    <li><a href="#add-a-constraint">Add a constraint</a></li>
+    <li><a href="#use-autoconnect-and-infer-constraints">Use Autoconnect and Infer Constraints</a></li>
+    <li><a href="#adjust-the-view-size">Adjust the view size</a></li>
+    <li><a href="#adjust-the-constraint-bias">Adjust the constraint bias</a></li>
+    <li><a href="#adjust-the-view-margins">Adjust the view margins</a></li>
+  </ol>
+</div>
+</div>
+
+
+<p><code>ConstraintLayout</code> allows you to create large and complex layouts with a flat view
+hierarchy (no nested view groups). It's similar to <code>RelativeLayout</code> in that all views are
+layed out according to relationships between sibling views and the parent layout, but it's more
+flexible than <code>RelativeLayout</code> and easier to use with Android Studio's Layout Editor.
+</p>
+
+<p>Everything you can do with <code>ConstraintLayout</code> is available directly from the Layout Editor's visual
+tools, because the layout API and the Layout Editor were specially built for each other. So you can
+build your layout with <code>ConstraintLayout</code> entirely by drag-and-dropping instead of editing the XML.
+</p>
+
+<img src="/training/constraint-layout/images/layout-editor_2-2_2x.png" alt=""
+  width="640"/>
+<p class="img-caption"><b>Figure 1.</b> A <code>ConstraintLayout</code> in the Layout Editor</p>
+
+
+<p>
+<code>ConstraintLayout</code> is available in an API library that's compatible with Android
+2.3 (API level 9) and higher, and the new layout editor is available in Android
+Studio 2.2 and higher.
+</p>
+
+<p>
+This page provides a guide to building a layout with <code>ConstraintLayout</code> in Android
+Studio. If you'd like more information about the Layout Editor itself, see the
+Android Studio guide to <a href="/studio/write/layout-editor.html">Build a UI with
+Layout Editor</a>.
+</p>
+
+
+<h2 id="constraints-overview">Constraints overview</h2>
+<p>
+To define a view's position in <code>ConstraintLayout</code>, you must add two
+or more <em>constraints</em> for the view. Each constraint represents a connection or
+alignment to another view, the parent layout, or an invisible guideline. Each
+constraint defines the view's position along either the
+vertical or horizontal axis; so each view must have a minimum of one constraint for each
+axis, but often more are necessary.
+</p>
+
+<p>
+When you drop a view into the Layout Editor, it stays where you leave it even if
+it has no constraints. However, this is only to make editing easier; if a view has
+no constraints when you run your layout on a device, it is drawn at
+position [0,0] (the top-left corner).</p>
+
+<p>In figure 2, the layout looks good in the
+editor, but there's no vertical constraint on <code>TextView B</code>. When this
+layout draws on a device, <code>TextView B</code> horizontally aligns with the left and
+right edges of the <code>ImageView</code>, but appears at the top of the screen because
+it has no vertical constraint.
+</p>
+
+<div class="cols">
+<div class="col-1of2">
+<img src="/training/constraint-layout/images/constraint-fail_2x.png" width="100%" alt="" />
+<p class="img-caption"><strong>Figure 2.</strong> <code>TextView B</code> is missing a
+vertical constraint</p>
+</div>
+<div class="col-1of2">
+<img src="/training/constraint-layout/images/constraint-fail-fixed_2x.png" width="100%" alt="" />
+<p class="img-caption"><strong>Figure 3.</strong> <code>TextView B</code> is now vertically
+constrained to the <code>ImageView</code></p>
+</div>
+</div>
+
+<p>
+Although a missing constraint won't cause a compilation error, the Layout Editor
+indicates missing constraints as an error in the toolbar. To view the errors and
+other warnings, click <strong>Show Warnings and Errors</strong>
+<img src="/studio/images/buttons/layout-editor-errors.png" class="inline-icon" alt="" />.
+To help you avoid missing constraints, the Layout Editor can automatically add
+constraints for you with the <a
+href="#use-autoconnect-and-infer-constraints">Autoconnect and infer
+constraints</a> features.
+</p>
+
+
+<h2 id="add-constraintlayout-to-your-project">Add ConstraintLayout to your project</h2>
+<p>
+To use <code>ConstraintLayout</code> in your project, proceed as follows:
+</p>
+
+<ol>
+<li>Ensure you have the latest Constraint Layout library:
+<ol>
+ <li>Click <strong>Tools > Android > SDK Manager</strong>.
+ <li>Click the <strong>SDK Tools</strong> tab.
+ <li>Expand <strong>Support Repository</strong> and then check
+<b>ConstraintLayout for Android</b> and <b>Solver for ConstraintLayout</b>.
+Check <b>Show Package Details</b> and take note of the version you're downloading
+(you'll need this below).</p>
+ <li>Click <strong>OK</strong>.
+<li>Add the ConstraintLayout library as a dependency in your module-level
+  <code>build.gradle</code> file:
+<pre>
+dependencies {
+    compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha8'
+}
+</pre>
+  <p>The library version you download may be higher, so be sure the value you specify
+  here matches the version from step 3.</p>
+</li>
+<li>In the toolbar or sync notification, click <strong>Sync Project with Gradle
+Files</strong>.</li>
+</ol>
+</li>
+</ol>
+
+<p>Now you're ready to build your layout with <code>ConstraintLayout</code>.</p>
+
+<h3 id="convert">Convert a layout</h3>
+
+<div class="figure" style="width:415px">
+<img src="/training/constraint-layout/images/layout-editor-convert-to-constraint_2x.png"
+  width="415" alt="" />
+<p class="img-caption">
+  <b>Figure 4.</b> The menu to convert a layout to <code>ConstraintLayout</code></p>
+</div>
+
+<p>To convert an existing layout to a constraint layout, follow these steps:</p>
+<ol>
+<li>Open your layout in Android Studio and click the <strong>Design</strong> tab
+at the bottom of the editor window.
+<li>In the <strong>Component Tree</strong> window, right-click the layout and
+click <strong>Convert <em>layout</em> to ConstraintLayout</strong>.</li>
+</ol>
+
+<h3 id="createNew">Create a new layout</h3>
+
+<p>To start a new constraint layout file, follow these steps:</p>
+<ol>
+<li>Click anywhere in the <strong>Project</strong> window and then select
+<strong>File > New > XML > Layout XML</strong>.
+<li>Enter a name for the layout file and enter
+"android.support.constraint.ConstraintLayout" for the <b>Root Tag</b>.
+<li>Click <strong>Finish</strong>.</li>
+</ol>
+
+
+<h2 id="add-a-constraint">Add a constraint</h2>
+
+<p>Start by dragging a view from the <b>Palette</b> window into the editor.
+When you add a view in a <code>ConstraintLayout</code>, it displays a bounding box with square
+resizing handles on each corner and circular constraint handles on each side.
+</p>
+
+
+<div class="figure" style="width:460px">
+<div class="video-wrapper">
+<video controls poster="/training/constraint-layout/images/thumbnail-studio-constraint-first.png"
+  onclick="this.play()" width="460">
+  <source src="https://storage.googleapis.com/androiddevelopers/videos/studio/studio-constraint-first.mp4" type="video/mp4">
+  <img src="/training/constraint-layout/images/thumbnail-studio-constraint-first" alt="" />
+</video>
+</div>
+<p class="img-caption">
+<strong>Video 1. </strong>The left side of a view is constrained to the left side of the parent
+</p>
+</div>
+
+<p>
+Click the view to select it. Then click-and-hold one of the
+constraint handles and drag the line to an available anchor point (the edge of
+another view, the edge of the layout, or a guideline). When you release, the
+constraint is made, with <a href="#adjust-the-view-margins">a default margin</a>
+separating the two views.
+</p>
+
+<p>When creating constraints, remember the following rules:</p>
+
+<ul>
+<li>Every view must have at least two constraints: one horizontal and one
+vertical.
+<li>You can create constraints only between a constraint handle and an anchor
+point that share the same plane. So a vertical plane (the left and right sides)
+of a view can be constrained only to another vertical plane; and baselines can
+constrain only to other baselines.
+<li>Each constraint handle can be used for just one constraint, but you can
+create multiple constraints (from different views) to the same anchor
+point.</li>
+</ul>
+
+
+
+<div class="figure" style="width:460px">
+<div class="video-wrapper">
+<video controls poster="/training/constraint-layout/images/thumbnail-studio-constraint-second.png"
+  onclick="this.play()" width="460">
+  <source src="https://storage.googleapis.com/androiddevelopers/videos/studio/studio-constraint-second.mp4" type="video/mp4">
+  <img src="/training/constraint-layout/images/thumbnail-studio-constraint-second.png" alt="" />
+</video>
+</div>
+<p class="img-caption">
+<strong>Video 2. </strong>Adding a constraint that opposes an existing one
+</p>
+</div>
+
+
+
+<p>
+To remove a constraint, select the view and then click the constraint handle.
+</p>
+
+<p>If you add opposing constraints on a view, the constraint lines become squiggly
+like a spring to indicate the opposing forces, as shown in video 2. The effect
+is most visible when the view size is set to "fixed" or "wrap content," in which
+case the view is centered between the constraints. If you instead
+want the view to stretch its size to meet the constraints, <a
+href="#adjust-the-view-size">switch the size to "any size"</a>; or if you want
+to keep the current size but move the view so that it is not centered, <a
+href="#adjust-the-constraint-bias">adjust the constraint bias</a>.
+</p>
+
+
+
+<p>
+There are many ways to constrain a view, but the following constraint types
+provide the basic building blocks.
+</p>
+
+
+
+
+<h3>Parent constraint</h3>
+<div class="cols">
+<div class="col-2of3">
+  <p>
+  Connect the side of a view to the corresponding edge of the layout.
+  <p>
+  In figure 5, the left side of a view is connected to the left edge of the
+  parent layout.
+  <p>
+</div>
+<div class="col-1of3">
+  <img src="/training/constraint-layout/images/parent-constraint_2x.png" width="100%" alt="">
+  <p class="img-caption"><strong>Figure 5. </strong>A horizontal constraint to the parent</p>
+</div>
+</div>
+
+
+<h3>Position constraint</h3>
+<div class="cols">
+<div class="col-2of3">
+<p>Define the order of appearance for two views, either vertically or horizontally.</p>
+<p>In figure 6, a <code>Button</code> is constrained below an <code>ImageView</code> with a 24dp
+margin.</p>
+</div>
+<div class="col-1of3">
+  <img src="/training/constraint-layout/images/position-constraint_2x.png" width="100%" alt="">
+  <p class="img-caption"><strong>Figure 6.</strong> A vertical position constraint</p>
+</div>
+</div>
+
+
+
+<h3>Alignment constraint</h3>
+<div class="cols">
+<div class="col-1of3">
+<p>Align the edge of a view to the same edge of another view.<p>
+<p>In figure 7, the left side of a <code>Button</code> is aligned to the left side of an
+<code>ImageView</code>.</p>
+<p>You can offset the alignment by dragging the view
+inward from the constraint. For example, figure 8 shows the same
+<code>Button</code> with a 24dp offset alignment.
+The offset is defined by the constrained view's margin.</p>
+</div>
+<div class="col-1of3">
+  <img src="/training/constraint-layout/images/alignment-constraint_2x.png" width="100%" alt="">
+  <p class="img-caption"><strong>Figure 7.</strong> A horizontal alignment constraint</p>
+</div>
+<div class="col-1of3">
+  <img src="/training/constraint-layout/images/alignment-constraint-offset_2x.png" width="100%"
+    alt="">
+  <p class="img-caption"><strong>Figure 8.</strong> An offset horizontal alignment constraint</p>
+</div>
+</div>
+
+
+<h3>Baseline alignment constraint</h3>
+<div class="cols">
+<div class="col-2of3">
+<p>Align the text baseline of a view to the text baseline of another view.</p>
+<p>In figure 9, the first line of a <code>TextView</code> is aligned with the text in a
+<code>Button</code>.</p>
+<p>To create a baseline constraint, hover your mouse over the baseline handle for
+two seconds until the handle blinks white. Then click and drag the line to
+another baseline.</p>
+</div>
+<div class="col-1of3">
+  <img src="/training/constraint-layout/images/baseline-constraint_2x.png" width="100%" alt="">
+  <p class="img-caption"><strong>Figure 9.</strong> A baseline alignment constraint</p>
+</div>
+</div>
+
+
+
+
+
+<h3 id="constrain-to-a-guideline">Constrain to a guideline</h3>
+<div class="cols">
+<div class="col-1of2">
+
+<p>
+You can add a vertical or horizontal guideline to which you can attach
+constraints. You can position the guideline within the layout based on either dp
+units or percent, relative to the layout's edge.
+</p>
+
+<p>
+To create a guideline, click <strong>Guidelines</strong>
+<img src="/studio/images/buttons/layout-editor-guidelines.png" class="inline-icon" alt="" />
+in the toolbar, and then click either <strong>Add Vertical Guideline</strong>
+or <strong>Add Horizontal Guideline</strong>.
+</p>
+
+<p>
+Click the circle at the edge of the guideline to toggle the measurements used to
+position the guideline (either percent or dp units from the layout's edge).
+</p>
+
+<p>
+Guidelines are not visible to your users.
+</p>
+</div>
+
+<div class="col-1of2">
+  <div class="video-wrapper">
+  <video controls poster="/training/constraint-layout/images/thumbnail-add-layout-guideline_2-2.png"
+    onclick="this.play()" width="100%">
+    <source src="https://storage.googleapis.com/androiddevelopers/videos/studio/add-layout-guideline_2-2.mp4" type="video/mp4">
+    <img src="/training/constraint-layout/images/thumbnail-add-layout-guideline_2-2.png" alt="" />
+  </video>
+  </div>
+  <p class="img-caption"><strong>Video 3.</strong> Adding a constraint to a guideline</p>
+</div>
+</div>
+
+
+<h2 id="use-autoconnect-and-infer-constraints">Use Autoconnect and Infer Constraints</h2>
+
+<div class="figure" style="width:460px">
+<div class="video-wrapper">
+<video controls poster=""
+  onclick="this.play()" width="460">
+  <source src="https://storage.googleapis.com/androiddevelopers/videos/studio/constraint-autoconnect_2-2.mp4" type="video/mp4">
+</video>
+</div>
+<p class="img-caption"><b>Video 4.</b> Adding a view with Autoconnect enabled</p>
+</div>
+
+<p>
+Autoconnect is a persistent mode that automatically creates two or more
+constraints for each view you add to the layout. Autoconnect is disabled by
+default. You can enable it by clicking <strong>Turn on Autoconnect</strong>
+<img src="/studio/images/buttons/layout-editor-autoconnect-on.png" class="inline-icon" alt="" />
+in the Layout Editor toolbar.
+</p>
+
+<p>While enabled, Autoconnect creates constraints for each view as you add them; it does not create
+constraints for existing views in the layout. If you drag a view once the constraints are made, the
+constraints do not change (though the margins do), so you must delete the constraints if you want to
+significantly reposition the view.</p>
+
+<p>Alternatively, you can click  <strong>Infer Constraints</strong>
+<img src="/studio/images/buttons/layout-editor-infer.png" class="inline-icon" alt="" />
+to create constraints for all views in the layout.
+</p>
+
+<p>Infer Constraints is a one-time action that scans the entire layout to determine the most
+effective set of constraints for all views, so it may create constraints between elements that are
+far from each other. Autoconnect, however, creates constraints only for the view you are adding, and
+it creates constraints to only the nearest elements. In either case, you can always modify a
+constraint by clicking the constraint handle to delete it, and then create a new constraint.</p>
+
+
+<h2 id="adjust-the-view-size">Adjust the view size</h2>
+
+<p>
+You can use the handles on each corner of the view to resize it, but doing so
+hard codes the width and height values, which you should avoid for most views
+because hard-coded view sizes cannot adapt to different content and screen
+sizes. To select from one of the dynamic sizing modes or to define more specific
+dimensions, click a view and open the <strong>Properties</strong>
+<img src="/studio/images/buttons/window-properties.png" class="inline-icon" alt="" />
+window on the right side of the editor. At the top of the window is the view
+inspector, as shown in figure 10.
+</p>
+<div class="figure" style="width:287px" >
+<img src="/training/constraint-layout/images/layout-editor-properties-callouts_2-2_2x.png" alt=""
+  width="287" />
+<p class="img-caption"><strong>Figure 10.</strong> The <b>Properties</b> window includes controls for
+<strong>(1)</strong> view size, <strong>(2)</strong> margins, and
+<strong>(3)</strong> constraint bias.</p>
+</div>
+
+<p>
+The grey square represents the selected view. The symbols inside the square
+represent the height and width settings as follows:
+</p>
+
+<ul>
+<li>
+<img src="/studio/images/buttons/layout-width-wrap.png" class="inline-icon" alt="" />
+ <strong>Wrap Content</strong>: The view expands exactly as needed to fit its
+contents.
+<li>
+<img src="/studio/images/buttons/layout-width-match.png" class="inline-icon" alt="" />
+ <strong>Any Size</strong>: The view expands exactly as needed to match the
+constraints. The actual value is 0dp because the view has no desired dimensions, but
+it resizes as needed to meet the constraints. However, if the given dimension
+has only one constraint, then the view expands to fit its contents. Another way
+to think of it is "match constraints" (instead of <code>match_parent</code>) because it
+expands the view as much as possible after accounting for the limits of each
+constraint and its margins.
+<li>
+<img src="/studio/images/buttons/layout-width-fixed.png" class="inline-icon" alt="" />
+ <strong>Fixed</strong>: You specify the dimension in the text box below or by
+resizing the view in the editor.</li>
+</ul>
+
+<p>To toggle between these settings, click the symbols.</p>
+
+<p class="note"><strong>Note</strong>: You should not use <code>match_parent</code> for any view
+in a <code>ConstraintLayout</code>. Instead use "Any Size" (<code>0dp</code>).
+</p>
+
+
+<h2 id="adjust-the-constraint-bias">Adjust the constraint bias</h2>
+
+<p>When you add a constraint to both sides of a view (and the view size for the same dimension is
+either "fixed" or "wrap content"), the view becomes centered between the two anchor points by
+default. When a view is centered, the bias is 50%. You can adjust the bias by dragging the bias
+slider in the <b>Properties</b> window or by dragging the view, as shown in video 5.</p>
+
+<div class="video-wrapper" style="max-width:740px">
+<video controls poster="/training/constraint-layout/images/thumbnail-adjust-constraint-bias.png"
+  onclick="this.play();$(this.parentElement).addClass('playing');">
+  <source src="https://storage.googleapis.com/androiddevelopers/videos/studio/adjust-constraint-bias.mp4" type="video/mp4">
+  <img src="/training/constraint-layout/images/thumbnail-adjust-constraint-bias.png" alt="" />
+</video>
+</div>
+<p class="img-caption"><b>Video 5.</b> Adjusting the constraint bias</p>
+
+<p>If you instead want the view to stretch its size to meet the constraints, <a href="#adjust-the-
+view-size">switch the size to "any size"</a>.</p>
+
+
+<h2 id="adjust-the-view-margins">Adjust the view margins</h2>
+
+<p> To ensure that all your views are evenly spaced, click <strong>Margin</strong> <img
+src="/studio/images/buttons/layout-editor-margin.png" class="inline-icon" alt="" /> in the toolbar
+to select the default margin for each view that you add to the layout. The button changes to show
+your current margin selection. Any change you make to the default margin applies only to the views
+you add from then on. </p>
+
+
+<img src="/training/constraint-layout/images/layout-editor-margin-callout_2-2_2x.png"
+ alt="" width="232"/>
+<p class="img-caption"><strong>Figure 11.</strong> The toolbar's <b>Margin</b> button.
+Click to adjust the default margin.
+</p>
+
+<p> You can control the margin for each view in the <strong>Properties</strong> window by clicking
+the number on the line that represents each constraint (in figure 10, the margins are each set to
+16dp). </p>
+
+<p> All margins offered by the tool are factors of 8dp to help your views align to Material Design's
+<a href="https://material.google.com/layout/metrics-keylines.html">8dp square grid
+recommendations</a>. </p>
+
+</body>
+</html>

@@ -251,7 +251,7 @@ mCursor = getContentResolver().query(
 </pre>
 <p>
     表 2 显示了
-    {@link android.content.ContentResolver#query 
+    {@link android.content.ContentResolver#query
     query(Uri,projection,selection,selectionArgs,sortOrder)} 的参数如何匹配 SQL SELECT 语句：
 </p>
 <p class="table-caption">
@@ -717,7 +717,7 @@ if (mCursor != null) {
     &lt;uses-permission android:name="android.permission.READ_USER_DICTIONARY"&gt;
 </pre>
 <p>
-    
+
 <a href="{@docRoot}guide/topics/security/security.html">安全与权限</a>指南中详细介绍了权限对提供程序访问的影响。
 </p>
 
@@ -944,7 +944,7 @@ mRowsDeleted = getContentResolver().delete(
 </p>
 <p>
     要在“批量模式”下访问提供程序，
-您可以创建 {@link android.content.ContentProviderOperation} 对象数组，然后使用 {@link android.content.ContentResolver#applyBatch ContentResolver.applyBatch()} 
+您可以创建 {@link android.content.ContentProviderOperation} 对象数组，然后使用 {@link android.content.ContentResolver#applyBatch ContentResolver.applyBatch()}
 将其分派给内容提供程序。
 您需将内容提供程序的<em>授权</em>传递给此方法，而不是特定内容 URI。这样可使数组中的每个 {@link android.content.ContentProviderOperation} 对象都能适用于其他表。
 
@@ -1191,6 +1191,6 @@ vnd.android.cursor.<strong>item</strong>/vnd.example.line2
 
 </p>
 <p>
-    
+
 <a href="#ContentURIs">内容 URI</a> 部分介绍了单个行的内容 URI。
 </p>

@@ -399,7 +399,7 @@ public class ChooseTypeAndAccountActivity extends Activity
      * useless.
      */
     private void setNonLabelThemeAndCallSuperCreate(Bundle savedInstanceState) {
-        setTheme(R.style.Theme_Material_Light_Dialog_NoActionBar);
+        setTheme(R.style.Theme_DeviceDefault_Light_Dialog_NoActionBar);
         super.onCreate(savedInstanceState);
     }
 

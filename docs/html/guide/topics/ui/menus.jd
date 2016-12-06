@@ -77,9 +77,9 @@ activity. It's where you should place actions that have a global impact on the a
 "Search," "Compose email," and "Settings."
   <p>See the section about <a href="#options-menu">Creating an Options Menu</a>.</p>
     </dd>
-    
+
   <dt><strong>Context menu and contextual action mode</strong></dt>
-  
+
    <dd>A context menu is a <a href="#FloatingContextMenu">floating menu</a> that appears when the
 user performs a long-click on an element. It provides actions that affect the selected content or
 context frame.
@@ -88,7 +88,7 @@ action items that affect the selected content in a bar at the top of the screen 
 to select multiple items.</p>
   <p>See the section about <a href="#context-menu">Creating Contextual Menus</a>.</p>
 </dd>
-    
+
   <dt><strong>Popup menu</strong></dt>
     <dd>A popup menu displays a list of items in a vertical list that's anchored to the view that
 invoked the menu. It's good for providing an overflow of actions that relate to specific content or
@@ -130,9 +130,9 @@ directory and build the menu with the following elements:</p>
   <dt><code>&lt;item></code></dt>
     <dd>Creates a {@link android.view.MenuItem}, which represents a single item in a menu. This
 element may contain a nested <code>&lt;menu></code> element in order to create a submenu.</dd>
-    
+
   <dt><code>&lt;group></code></dt>
-    <dd>An optional, invisible container for {@code &lt;item&gt;} elements. It allows you to
+    <dd>An optional, invisible container for {@code <item>} elements. It allows you to
 categorize menu items so they share properties such as active state and visibility. For more
 information, see the section about <a href="#groups">Creating Menu Groups</a>.</dd>
 </dl>
@@ -172,8 +172,8 @@ when the user selects it.</dd>
 For information about all the supported attributes, see the <a
 href="{@docRoot}guide/topics/resources/menu-resource.html">Menu Resource</a> document.</p>
 
-<p>You can add a submenu to an item in any menu (except a submenu) by adding a {@code &lt;menu&gt;}
-element as the child of an {@code &lt;item&gt;}. Submenus are useful when your application has a lot
+<p>You can add a submenu to an item in any menu (except a submenu) by adding a {@code <menu>}
+element as the child of an {@code <item>}. Submenus are useful when your application has a lot
 of functions that can be organized into topics, like items in a PC application's menu bar (File,
 Edit, View, etc.). For example:</p>
 
@@ -224,13 +224,13 @@ the sixth item and the rest into the overflow menu, which the user can open by s
 <em>More</em>.</li>
 
   <li>If you've developed your application for <strong>Android 3.0 (API level 11) and
-higher</strong>, items from the options menu are available in the 
+higher</strong>, items from the options menu are available in the
 app bar. By default, the system
 places all items in the action overflow, which the user can reveal with the action overflow icon on
 the right side of the app bar (or by pressing the device <em>Menu</em> button, if available). To
 enable
 quick access to important actions, you can promote a few items to appear in the app bar by adding
-{@code android:showAsAction="ifRoom"} to the corresponding {@code &lt;item&gt;} elements (see figure
+{@code android:showAsAction="ifRoom"} to the corresponding {@code <item>} elements (see figure
 2). <p>For more information about action items and other app bar behaviors, see the <a
 href="{@docRoot}training/appbar/index.html">Adding the App Bar</a> training class. </p>
 </li>
@@ -246,7 +246,7 @@ subclass or a {@link android.app.Fragment} subclass. If both your activity and f
 declare items for the options menu, they are combined in the UI. The activity's items appear
 first, followed by those of each fragment in the order in which each fragment is added to the
 activity. If necessary, you can re-order the menu items with the {@code android:orderInCategory}
-attribute in each {@code &lt;item&gt;} you need to move.</p>
+attribute in each {@code <item>} you need to move.</p>
 
 <p>To specify the options menu for an activity, override {@link
 android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} (fragments provide their
@@ -343,7 +343,7 @@ again unless the menu is invalidated for some reason. However, you should use {@
 android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} only to create the initial
 menu state and not to make changes during the activity lifecycle.</p>
 
-<p>If you want to modify the options menu based on 
+<p>If you want to modify the options menu based on
 events that occur during the activity lifecycle, you can do so in
 the {@link android.app.Activity#onPrepareOptionsMenu(Menu) onPrepareOptionsMenu()} method. This
 method passes you the {@link android.view.Menu} object as it currently exists so you can modify it,
@@ -360,7 +360,7 @@ presented in the app bar. When an event occurs and you want to perform a menu up
 call {@link android.app.Activity#invalidateOptionsMenu invalidateOptionsMenu()} to request that the
 system call {@link android.app.Activity#onPrepareOptionsMenu(Menu) onPrepareOptionsMenu()}.</p>
 
-<p class="note"><strong>Note:</strong> 
+<p class="note"><strong>Note:</strong>
 You should never change items in the options menu based on the {@link android.view.View} currently
 in focus. When in touch mode (when the user is not using a trackball or d-pad), views
 cannot take focus, so you should never use focus as the basis for modifying
@@ -738,8 +738,8 @@ that shows a popup menu:</p>
 
 <pre>
 &lt;ImageButton
-    android:layout_width="wrap_content" 
-    android:layout_height="wrap_content" 
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:src="@drawable/ic_overflow_holo_dark"
     android:contentDescription="@string/descr_overflow_button"
     android:onClick="showPopup" />
@@ -814,7 +814,7 @@ setGroupEnabled()}</li>
 android.view.Menu#setGroupCheckable(int,boolean,boolean) setGroupCheckable()}</li>
 </ul>
 
-<p>You can create a group by nesting {@code &lt;item&gt;} elements inside a {@code &lt;group&gt;}
+<p>You can create a group by nesting {@code <item>} elements inside a {@code <group>}
 element in your menu resource or by specifying a group ID with the {@link
 android.view.Menu#add(int,int,int,int) add()} method.</p>
 
@@ -863,8 +863,8 @@ you must manually indicate the checked state by swapping the icon and/or text
 each time the state changes.</p>
 
 <p>You can define the checkable behavior for individual menu items using the {@code
-android:checkable} attribute in the {@code &lt;item&gt;} element, or for an entire group with
-the {@code android:checkableBehavior} attribute in the {@code &lt;group&gt;} element. For
+android:checkable} attribute in the {@code <item>} element, or for an entire group with
+the {@code android:checkableBehavior} attribute in the {@code <group>} element. For
 example, all items in this menu group are checkable with a radio button:</p>
 
 <pre>
@@ -890,7 +890,7 @@ example, all items in this menu group are checkable with a radio button:</p>
 </dl>
 
 <p>You can apply a default checked state to an item using the {@code android:checked} attribute in
-the {@code &lt;item&gt;} element and change it in code with the {@link
+the {@code <item>} element and change it in code with the {@link
 android.view.MenuItem#setChecked(boolean) setChecked()} method.</p>
 
 <p>When a checkable item is selected, the system calls your respective item-selected callback method
@@ -1023,6 +1023,6 @@ category. For example:</p>
 <p>Read more about writing intent filters in the
 <a href="/guide/components/intents-filters.html">Intents and Intent Filters</a> document.</p>
 
-<p>For a sample application using this technique, see the 
+<p>For a sample application using this technique, see the
 <a href="{@docRoot}resources/samples/NotePad/src/com/example/android/notepad/NoteEditor.html">Note
 Pad</a> sample code.</p>

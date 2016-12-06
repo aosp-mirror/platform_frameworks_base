@@ -36,7 +36,7 @@ parent.link=activities.html
     <li>{@link android.app.FragmentManager}</li>
     <li>{@link android.app.FragmentTransaction}</li>
   </ol>
-  
+
   <h2>另请参阅</h2>
   <ol>
     <li><a href="{@docRoot}training/basics/fragments/index.html">利用片段构建动态 UI</a></li>
@@ -362,7 +362,7 @@ findFragmentByTag()}。</p>
 
 <p>如需查看将没有 UI 的片段用作后台工作线程的示例 Activity，请参阅 {@code
 FragmentRetainInstance.java} 示例，该示例包括在 SDK 示例（通过
-Android SDK 管理器提供）中，以 
+Android SDK 管理器提供）中，以
 <code>&lt;sdk_root&gt;/APIDemos/app/src/main/java/com/example/android/apis/app/FragmentRetainInstance.java</code> 形式位于您的系统中。</p>
 
 
@@ -378,7 +378,7 @@ Android SDK 管理器提供）中，以
   <li>通过 {@link
 android.app.FragmentManager#findFragmentById findFragmentById()}（对于在 Activity 布局中提供 UI
 的片段）或 {@link android.app.FragmentManager#findFragmentByTag
-findFragmentByTag()}（对于提供或不提供 UI 的片段）获取 Activity 中存在的片段</li> 
+findFragmentByTag()}（对于提供或不提供 UI 的片段）获取 Activity 中存在的片段</li>
   <li>通过 {@link
 android.app.FragmentManager#popBackStack()}（模拟用户发出的 <em>Back</em> 命令）将片段从返回栈中弹出</li>
   <li>通过 {@link
@@ -785,7 +785,7 @@ android.widget.FrameLayout}），也可能会启动一个新活动（在该活�
 
 <p>第二个片段 {@code DetailsFragment} 显示从
 {@code TitlesFragment} 的列表中选择的项目的戏剧摘要：</p>
- 
+
 {@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java details}
 
 <p>从 {@code TitlesFragment} 类中重新调用，如果用户点击某个列表项，且当前布局“根本不”<em></em>包括 {@code R.id.details}
@@ -798,7 +798,7 @@ Activity 以显示该项目的内容。</p>
 
 {@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java
 details_activity}
- 
+
 <p>请注意，如果配置为横向，则此 Activity 会自行完成，以便主 Activity 可以接管并沿 {@code TitlesFragment}
 显示
 {@code DetailsFragment}。如果用户在纵向显示时启动

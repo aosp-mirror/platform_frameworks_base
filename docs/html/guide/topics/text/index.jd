@@ -9,7 +9,7 @@ page.landing.image=
 
   <div class="col-12">
     <h3>Blog Articles</h3>
-    
+
     <a href="http://android-developers.blogspot.com/2011/12/add-voice-typing-to-your-ime.html">
       <h4>Add Voice Typing To Your IME</h4>
       <p>A new feature available in Android 4.0 is voice typing: the difference for users is that

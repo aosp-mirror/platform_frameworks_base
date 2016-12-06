@@ -97,7 +97,6 @@ public final class RemoteConference {
          *
          * @param conference The {@code RemoteConference} invoking this method.
          * @param connectionProperties The new properties of the {@code RemoteConference}.
-         * @hide
          */
         public void onConnectionPropertiesChanged(
                 RemoteConference conference,

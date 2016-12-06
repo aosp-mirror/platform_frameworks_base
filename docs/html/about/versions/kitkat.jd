@@ -13,13 +13,13 @@ function revealSection(hashy) {
     link = $("#title-tabs a[href$="+sectionId+"]");
     link.parent().addClass("selected");
     link.parent().siblings().removeClass("selected");
-    
+
     sectionDiv = $(".version-section"+link.attr("href"));
     if (sectionDiv.length) {
       $(".version-section").hide();
       sectionDiv.show();
     }
-    
+
     $('html, body').animate({
          scrollTop: $(hashy).offset().top
      }, 100);

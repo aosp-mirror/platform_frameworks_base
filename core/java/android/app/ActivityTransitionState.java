@@ -185,7 +185,12 @@ class ActivityTransitionState {
             activity.getWindow().getDecorView().setVisibility(View.VISIBLE);
         }
         mEnterTransitionCoordinator = new EnterTransitionCoordinator(activity,
-                resultReceiver, sharedElementNames, mEnterActivityOptions.isReturning());
+                resultReceiver, sharedElementNames, mEnterActivityOptions.isReturning(),
+                mEnterActivityOptions.isCrossTask());
+        if (mEnterActivityOptions.isCrossTask()) {
+            mExitingFrom = new ArrayList<>(mEnterActivityOptions.getSharedElementNames());
+            mExitingTo = new ArrayList<>(mEnterActivityOptions.getSharedElementNames());
+        }
 
         if (!mIsEnterPostponed) {
             startEnter();
@@ -275,7 +280,8 @@ class ActivityTransitionState {
     }
 
     private void restoreReenteringViews() {
-        if (mEnterTransitionCoordinator != null && mEnterTransitionCoordinator.isReturning()) {
+        if (mEnterTransitionCoordinator != null && mEnterTransitionCoordinator.isReturning() &&
+                !mEnterTransitionCoordinator.isCrossTask()) {
             mEnterTransitionCoordinator.forceViewsToAppear();
             mExitingFrom = null;
             mExitingTo = null;
@@ -302,8 +308,9 @@ class ActivityTransitionState {
                     }
                 }
 
-                mReturnExitCoordinator =
-                        new ExitTransitionCoordinator(activity, mEnteringNames, null, null, true);
+                mReturnExitCoordinator = new ExitTransitionCoordinator(activity,
+                        activity.getWindow(), activity.mEnterTransitionListener, mEnteringNames,
+                        null, null, true);
                 if (enterViewsTransition != null && decor != null) {
                     enterViewsTransition.resume(decor);
                 }
@@ -330,11 +337,12 @@ class ActivityTransitionState {
     }
 
     public void startExitOutTransition(Activity activity, Bundle options) {
-        if (!activity.getWindow().hasFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)) {
+        mEnterTransitionCoordinator = null;
+        if (!activity.getWindow().hasFeature(Window.FEATURE_ACTIVITY_TRANSITIONS) ||
+                mExitTransitionCoordinators == null) {
             return;
         }
         ActivityOptions activityOptions = new ActivityOptions(options);
-        mEnterTransitionCoordinator = null;
         if (activityOptions.getAnimationType() == ActivityOptions.ANIM_SCENE_TRANSITION) {
             int key = activityOptions.getExitCoordinatorKey();
             int index = mExitTransitionCoordinators.indexOfKey(key);

@@ -28,7 +28,8 @@
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"WiFi ಸಂಪರ್ಕ ವಿಫಲತೆ"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"ಪ್ರಮಾಣೀಕರಣ ಸಮಸ್ಯೆ"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"ವ್ಯಾಪ್ತಿಯಲ್ಲಿಲ್ಲ"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"ಯಾವುದೇ ಇಂಟರ್ನೆಟ್‌ ಪ್ರವೇಶ ಪತ್ತೆಯಾಗಿಲ್ಲ, ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಮರುಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"ಯಾವುದೇ ಇಂಟರ್ನೆಟ್‌ ಪ್ರವೇಶ ಪತ್ತೆಯಾಗಿಲ್ಲ, ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಮರುಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"ಯಾವುದೇ ಇಂಟರ್ನೆಟ್ ಪ್ರವೇಶವಿಲ್ಲ."</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> ರಿಂದ ಉಳಿಸಲಾಗಿದೆ"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Wi‑Fi ಸಹಾಯಕದ ಮೂಲಕ ಸಂಪರ್ಕಿತಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s ಮೂಲಕ ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
@@ -71,7 +72,7 @@
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"ಇನ್‌ಪುಟ್‌ಗಾಗಿ ಬಳಸು"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"ಜೋಡಿ"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"ಜೋಡಿ ಮಾಡು"</string>
-    <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"ರದ್ದುಮಾಡು"</string>
+    <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"ರದ್ದುಮಾಡಿ"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"ಸಂಪರ್ಕಪಡಿಸಿದಾಗ, ಜೋಡಿಸುವಿಕೆಯು ನಿಮ್ಮ ಸಂಪರ್ಕಗಳು ಮತ್ತು ಕರೆ ಇತಿಹಾಸಕ್ಕೆ ಪ್ರವೇಶವನ್ನು ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಜೊತೆಗೆ ಜೋಡಣೆ ಮಾಡಲಾಗಲಿಲ್ಲ."</string>
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"ತಪ್ಪಾಗಿರುವ ಪಿನ್‌ ಅಥವಾ ಪಾಸ್‌ಕೀ ಕಾರಣದಿಂದಾಗಿ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಜೊತೆಗೆ ಜೋಡಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ."</string>
@@ -93,7 +94,7 @@
     <string name="tether_settings_title_all" msgid="8356136101061143841">"ಟೆಥರಿಂಗ್ &amp; ಪೋರ್ಟಬಲ್ ಹಾಟ್‌ಸ್ಪಾಟ್"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"ಎಲ್ಲ ಕೆಲಸದ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು"</string>
     <string name="user_guest" msgid="8475274842845401871">"ಅತಿಥಿ"</string>
-    <string name="unknown" msgid="1592123443519355854">"ಅಜ್ಞಾತ"</string>
+    <string name="unknown" msgid="1592123443519355854">"ಅಪರಿಚಿತ"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"ಬಳಕೆದಾರ: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"ಕೆಲವು ಡೀಫಾಲ್ಟ್‌ಗಳನ್ನು ಹೊಂದಿಸಲಾಗಿದೆ"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"ಡೀಫಾಲ್ಟ್‌ಗಳನ್ನು ಹೊಂದಿಸಲಾಗಿಲ್ಲ"</string>
@@ -184,7 +185,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"ಅಣಕು ಸ್ಥಾನಗಳನ್ನು ಅನುಮತಿಸು"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"ಅಣಕು ಸ್ಥಾನಗಳನ್ನು ಅನುಮತಿಸು"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"ವೀಕ್ಷಣೆ ಆಟ್ರಿಬ್ಯೂಟ್ ಪರಿಶೀಲನೆ"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"ಹೊಸ Android DHCP ಕ್ಲೈಂಟ್ ಬದಲಾಗಿ Lollipop ನಿಂದ DHCP ಕ್ಲೈಂಟ್ ಬಳಸಿ."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"ವೈ-ಫೈ ಸಕ್ರಿಯವಾಗಿರುವಾಗಲೂ, ಯಾವಾಗಲೂ ಮೊಬೈಲ್‌ ಡೇಟಾ ಸಕ್ರಿಯವಾಗಿರಿಸಿ (ವೇಗವಾಗಿ ನೆಟ್‌ವರ್ಕ್‌ ಬದಲಾಯಿಸಲು)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆಯು ಅಭಿವೃದ್ಧಿ ಉದ್ದೇಶಗಳಿಗೆ ಮಾತ್ರ ಆಗಿದೆ. ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್ ಮತ್ತು ನಿಮ್ಮ ಸಾಧನದ ನಡುವೆ ಡೇಟಾವನ್ನು ನಕಲಿಸಲು, ಅಧಿಸೂಚನೆ ಇಲ್ಲದೆ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಸ್ಥಾಪಿಸಲು ಮತ್ತು ಲಾಗ್ ಡೇಟಾ ಓದಲು ಅದನ್ನು ಬಳಸಿ."</string>
@@ -234,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"ಕ್ಲಿಪ್‌ನ ಗಡಿಗಳು, ಅಂಚುಗಳು, ಇತ್ಯಾದಿ ತೋರಿಸು."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL ಲೇಔಟ್‌ ಪರಿಮಿತಿ ಬಲಗೊಳಿಸಿ"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"ಎಲ್ಲ ಸ್ಥಳಗಳಿಗಾಗಿ RTL ಗೆ ಸ್ಕ್ರೀನ್‌ ಲೇಔಟ್‌ ದಿಕ್ಕನ್ನು ಪ್ರಬಲಗೊಳಿಸಿ"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"CPU ಬಳಕೆಯನ್ನು ತೋರಿಸು"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"ಪ್ರಸ್ತುತ CPU ಬಳಕೆಯನ್ನು ತೋರಿಸುತ್ತಿರುವ ಪರದೆಯ ಓವರ್‌ಲೇ"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"GPU ನೀಡುವಿಕೆ ಬಲಗೊಳಿಸು"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"2d ಚಿತ್ರಕಲೆಗಾಗಿ GPU ಬಳಕೆ ಬಲಗೊಳಿಸಿ"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA ಪ್ರಬಲಗೊಳಿಸಿ"</string>
@@ -313,7 +311,7 @@
     <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ವೈರ್‌‌ಲೆಸ್‌ನಿಂದ ಪೂರ್ಣವಾಗುವವರೆಗೆ"</string>
     <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="battery_info_status_unknown" msgid="196130600938058547">"ಅಜ್ಞಾತ"</string>
+    <string name="battery_info_status_unknown" msgid="196130600938058547">"ಅಪರಿಚಿತ"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ"</string>
     <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"AC ನಲ್ಲಿ ಚಾರ್ಜ್‌"</string>
     <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ"</string>
@@ -341,5 +339,6 @@
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"ಸ್ವಲ್ಪ ದೊಡ್ಡ"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"ದೊಡ್ಡ"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"ಕಸ್ಟಮ್ (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
-    <string name="help_feedback_label" msgid="6815040660801785649">"ಸಹಾಯ &amp; ಪ್ರತಿಕ್ರಿಯೆ"</string>
+    <string name="help_feedback_label" msgid="6815040660801785649">"ಸಹಾಯ ಮತ್ತು ಪ್ರತಿಕ್ರಿಯೆ"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"ಮೆನು"</string>
 </resources>

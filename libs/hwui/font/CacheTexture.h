@@ -178,6 +178,8 @@ public:
         return mCurrentQuad == mMaxQuadCount;
     }
 
+    uint32_t calculateFreeMemory() const;
+
 private:
     void setDirty(bool dirty);
 

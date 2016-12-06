@@ -5,10 +5,10 @@ parent.link=manifest-intro.html
 
 <dl class="xml">
 
-<div class="sidebox-wrapper"> 
+<div class="sidebox-wrapper">
 <div class="sidebox">
-<img src="{@docRoot}assets/images/icon_play.png" style="float:left;margin:0;padding:0;"> 
-<p style="color:#669999;padding-top:1em;">Google Play Filtering</p> 
+<img src="{@docRoot}assets/images/icon_play.png" style="float:left;margin:0;padding:0;">
+<p style="color:#669999;padding-top:1em;">Google Play Filtering</p>
 
 <p style="clear:left;">In some cases, the permissions that you request
 through <code>&lt;uses-permission&gt;</code> can affect how
@@ -43,24 +43,24 @@ href="{@docRoot}guide/topics/manifest/uses-feature-element.html#permissions-feat
 
 <dt>description:</dt>
 <dd itemprop="description">Requests a permission that the application must be granted in
-order for it to operate correctly. Permissions are granted by the user when the 
+order for it to operate correctly. Permissions are granted by the user when the
 application is installed (on devices running Android 5.1 and lower) or while the app is running (on devices running Android 6.0 and higher).
 
 <p>
-For more information on permissions, see the 
-<a href="{@docRoot}guide/topics/manifest/manifest-intro.html#perms">Permissions</a></code> 
+For more information on permissions, see the
+<a href="{@docRoot}guide/topics/manifest/manifest-intro.html#perms">Permissions</a></code>
 section in the introduction and the separate
 <a href="{@docRoot}guide/topics/security/permissions.html">System
 Permissions</a> API guide.
-A list of permissions defined by the base platform can be found at 
+A list of permissions defined by the base platform can be found at
 {@link android.Manifest.permission android.Manifest.permission}.
 
 <dt>attributes:</dt>
 <dd><dl class="attr">
 <dt><a name="nm"></a>{@code android:name}</dt>
-<dd>The name of the permission.  It can be a permission defined by the 
-application with the <code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code> 
-element, a permission defined by another application, or one of the 
+<dd>The name of the permission.  It can be a permission defined by the
+application with the <code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code>
+element, a permission defined by another application, or one of the
 standard system permissions (such as
 {@link android.Manifest.permission#CAMERA "android.permission.CAMERA"}
 or {@link android.Manifest.permission#READ_CONTACTS

@@ -85,7 +85,7 @@
     <string name="accessibility_menu" msgid="316839303324695949">"Мени"</string>
     <string name="accessibility_recent" msgid="5208608566793607626">"Краток преглед"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"Пребарај"</string>
-    <string name="accessibility_camera_button" msgid="8064671582820358152">"Фотоапарат"</string>
+    <string name="accessibility_camera_button" msgid="8064671582820358152">"Камера"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Телефон"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Гласовна помош"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Отклучување"</string>
@@ -143,7 +143,9 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_4g_plus" msgid="3032226872470658661">"4G+"</string>
     <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
+    <string name="accessibility_data_connection_lte_plus" msgid="361876866906946007">"LTE+"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Роаминг"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
@@ -236,7 +238,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Податоците 4G се паузирани"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Мобилните податоци се паузирани"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Податоците се паузирани"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Поради тоа што го достигнавте поставеното ограничување на податоци, уредот го паузираше користењето податоци до крајот на циклусот.\n\nОператорот може да ви наплати ако продолжите."</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Го достигнавте ограничувањето за сообраќај на податоци што сте го поставиле. Веќе не користите мобилен интернет.\n\nДоколку продолжите, ќе ви биде наплатено за потрошениот сообраќај."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Продолжи"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Нема интернет"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Поврзано на Wi-Fi"</string>
@@ -317,6 +319,9 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Лимит: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Предупредување за <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Режим на работа"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Ноќно светло"</string>
+    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"Ноќното светло е вклучено, допрете за да се исклучи"</string>
+    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"Ноќното светло е исклучено, допрете за да се вклучи"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"Нема неодамнешни ставки"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Исчистивте сѐ"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Информации за апликацијата"</string>
@@ -330,6 +335,8 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Раздели хоризонтално"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Раздели вертикално"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Раздели прилагодено"</string>
+  <string-array name="recents_blacklist_array">
+  </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Наполнета"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Се полни"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> додека не се наполни"</string>
@@ -397,6 +404,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"Уредот може да се следи"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Профилот можеби се следи"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Мрежата може да се следи"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"Мрежата може да се следи"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Следење на уредот"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Следење профил"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Следење на мрежата"</string>
@@ -409,6 +417,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"ВПН"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"Поврзани сте на <xliff:g id="APPLICATION">%1$s</xliff:g>, којашто може да ја следи вашата активност на мрежата, вклучувајќи ги е-пораките, апликациите и веб-локациите."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Поврзани сте на <xliff:g id="APPLICATION">%1$s</xliff:g>, којашто може да ја следи вашата лична активност на мрежата, вклучувајќи ги е-пораките, апликациите и веб-локациите."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Поврзани сте на <xliff:g id="APPLICATION">%1$s</xliff:g>, којашто може да ја следи вашата лична активност на мрежата, вклучувајќи ги е-пораките, апликациите и веб-локациите."</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> управува со вашиот работен профил. Истиот е поврзан на <xliff:g id="APPLICATION">%2$s</xliff:g>, којашто може да ја следи вашата работна активност на мрежата, вклучувајќи ги е-пораките, апликациите и веб-локациите.\n\nЗа повеќе информации, контактирајте со администраторот."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> управува со вашиот работен профил. Истиот е поврзан на <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, којашто може да ја следи вашата работна активност на мрежата, вклучувајќи ги е-пораките, апликациите и веб-локациите.\n\nВие исто така сте поврзани на <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, којашто може да ја следи вашата лична активност на мрежата."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> управува со вашиот уред.\n\nВашиот администратор може да ги следи и да управува со параметрите, корпоративниот пристап, апликациите, податоците поврзани со уредот и информациите за локацијата на уредот.\n\nПоврзани сте на <xliff:g id="APPLICATION">%2$s</xliff:g>, којашто може да ја следи вашата активност на мрежата, вклучувајќи ги е-пораките, апликациите и веб-локациите.\n\nЗа повеќе информации, контактирајте со администраторот."</string>
@@ -434,6 +443,18 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> е дијалог за јачина на звук"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"Допрете за да го вратите оригиналот."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Го користите работниот профил"</string>
+  <string-array name="volume_stream_titles">
+    <item msgid="5841843895402729630">"Повикај"</item>
+    <item msgid="5997713001067658559">"Систем"</item>
+    <item msgid="7858983209929864160">"Ѕвони"</item>
+    <item msgid="1850038478268896762">"Аудио-визуелни содржини"</item>
+    <item msgid="8265110906352372092">"Аларм"</item>
+    <item msgid="5339394737636839168"></item>
+    <item msgid="2951313578278086204">"Bluetooth"</item>
+    <item msgid="2919807739709798970"></item>
+    <item msgid="150349973435223405"></item>
+    <item msgid="6761963760295549099"></item>
+  </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Допрете за да вклучите звук."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Допрете за да поставите на вибрации. Можеби ќе се исклучи звукот на услугите за достапност."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Допрете за да исклучите звук. Можеби ќе се исклучи звукот на услугите за достапност."</string>
@@ -473,8 +494,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Прикажи ги секундите на часовникот на статусната лента. Може да влијае на траењето на батеријата."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Преуредете ги Брзи поставки"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Прикажете ја осветленоста во Брзи поставки"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"Овозможи го гестот повлекување нагоре за поделен екран"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Овозможете гест за отворање поделен екран со повлекување нагоре од копчето Краток преглед"</string>
     <string name="experimental" msgid="6198182315536726162">"Експериментално"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Да се вклучи Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"За да ја поврзете тастатурата со таблетот, најпрво треба да вклучите Bluetooth."</string>
@@ -504,21 +523,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"Повеќе поставки"</string>
     <string name="notification_done" msgid="5279426047273930175">"Готово"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Контроли за известувања на <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"Боја и изглед"</string>
-    <string name="night_mode" msgid="3540405868248625488">"Ноќен режим"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"Калибрирај го екранот"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"Вклучено"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"Исклучено"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"Вклучи автоматски"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Префрли во Ноќен режим како што е соодветно за локацијата и времето во денот"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"Кога Ноќниот режим е вклучен"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Користете ја темната тема за ОС Android"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"Приспособи ја бојата"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"Приспособи ја осветленоста"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"Темната тема се применува на основните области на Android OS што обично се прикажуваат во светла тема, како Поставки."</string>
-    <string name="color_apply" msgid="9212602012641034283">"Примени"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"Потврдете ги поставките"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"Некои поставки на боите може да го направат уредот неупотреблив. Кликнете на Во ред за да ги потврдите овие поставки на боите, инаку тие поставки ќе се ресетираат по 10 секунди."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Користење батерија"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Штедачот на батерија не е достапен при полнење"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Штедач на батерија"</string>
@@ -647,4 +651,5 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Отворете ги поставките на <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Уредете го редоследот на поставките."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Страница <xliff:g id="ID_1">%1$d</xliff:g> од <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <string name="cant_silence_or_block" msgid="999689262131488625">"Известувања не може да се стишат или блокираат"</string>
 </resources>

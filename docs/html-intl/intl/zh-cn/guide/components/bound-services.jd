@@ -636,7 +636,7 @@ onStartCommand()}
 android.content.Context#stopService stopService()}
 为止，无论其是否绑定到任何客户端。</p>
 
-<p>此外，如果您的服务已启动并接受绑定，则当系统调用您的 {@link android.app.Service#onUnbind onUnbind()} 方法时，如果您想在客户端下一次绑定到服务时接收 
+<p>此外，如果您的服务已启动并接受绑定，则当系统调用您的 {@link android.app.Service#onUnbind onUnbind()} 方法时，如果您想在客户端下一次绑定到服务时接收
 {@link android.app.Service#onRebind
 onRebind()} 调用（而不是接收 {@link
 android.app.Service#onBind onBind()} 调用），则可选择返回

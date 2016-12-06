@@ -226,7 +226,7 @@ android.preference.ListPreference}。這兩個項目都包含下列三個屬性�
   <dt>{@code android:key}</dt>
   <dd>需要這個屬性才能保留資料值的偏好設定。它會指定當系統將此設定值儲存於 {@link
 android.content.SharedPreferences} 時要使用的唯一索引鍵 (字串)。
- 
+
   <p>只有在下列情況下不需要此屬性：<em></em>偏好設定為 {@link android.preference.PreferenceCategory} 或 {@link android.preference.PreferenceScreen}，或者偏好設定指定 {@link android.content.Intent} 進行呼叫 (搭配 <a href="#Intents">{@code &lt;intent&gt;}</a> 元素) 或 {@link android.app.Fragment} 進行顯示 (搭配 <a href="{@docRoot}reference/android/preference/Preference.html#attr_android:fragment">{@code
 android:fragment}</a> 屬性)。
 
@@ -285,7 +285,7 @@ android.preference.PreferenceCategory}。
 
 <pre>
 &lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    &lt;PreferenceCategory 
+    &lt;PreferenceCategory
         android:title="&#64;string/pref_sms_storage_title"
         android:key="pref_key_storage_settings">
         &lt;CheckBoxPreference
@@ -293,12 +293,12 @@ android.preference.PreferenceCategory}。
             android:summary="&#64;string/pref_summary_auto_delete"
             android:title="&#64;string/pref_title_auto_delete"
             android:defaultValue="false"... />
-        &lt;Preference 
+        &lt;Preference
             android:key="pref_key_sms_delete_limit"
             android:dependency="pref_key_auto_delete"
             android:summary="&#64;string/pref_summary_delete_limit"
             android:title="&#64;string/pref_title_sms_delete"... />
-        &lt;Preference 
+        &lt;Preference
             android:key="pref_key_mms_delete_limit"
             android:dependency="pref_key_auto_delete"
             android:summary="&#64;string/pref_summary_delete_limit"
@@ -588,11 +588,11 @@ android.preference.PreferenceActivity#onBuildHeaders onBuildHeaders()} 回呼以
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
-    &lt;header 
+    &lt;header
         android:fragment="com.example.prefs.SettingsActivity$SettingsFragmentOne"
         android:title="@string/prefs_category_one"
         android:summary="@string/prefs_summ_category_one" />
-    &lt;header 
+    &lt;header
         android:fragment="com.example.prefs.SettingsActivity$SettingsFragmentTwo"
         android:title="@string/prefs_category_two"
         android:summary="@string/prefs_summ_category_two" >
@@ -672,15 +672,15 @@ android.preference.Preference &lt;Preference&gt;} 元素會傳送一個 {@link a
 </p>
 
 <p>例如，下列為使用 Android 3.0及更新版本的偏好設定標頭 XML 檔案 ({@code res/xml/preference_headers.xml})：
-</p> 
+</p>
 
 <pre>
 &lt;preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
-    &lt;header 
+    &lt;header
         android:fragment="com.example.prefs.SettingsFragmentOne"
         android:title="@string/prefs_category_one"
         android:summary="@string/prefs_summ_category_one" />
-    &lt;header 
+    &lt;header
         android:fragment="com.example.prefs.SettingsFragmentTwo"
         android:title="@string/prefs_category_two"
         android:summary="@string/prefs_summ_category_two" />
@@ -692,18 +692,18 @@ android.preference.Preference &lt;Preference&gt;} 元素會傳送一個 {@link a
 
 <pre>
 &lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    &lt;Preference 
+    &lt;Preference
         android:title="@string/prefs_category_one"
         android:summary="@string/prefs_summ_category_one"  >
-        &lt;intent 
+        &lt;intent
             android:targetPackage="com.example.prefs"
             android:targetClass="com.example.prefs.SettingsActivity"
             android:action="com.example.prefs.PREFS_ONE" />
     &lt;/Preference>
-    &lt;Preference 
+    &lt;Preference
         android:title="@string/prefs_category_two"
         android:summary="@string/prefs_summ_category_two" >
-        &lt;intent 
+        &lt;intent
             android:targetPackage="com.example.prefs"
             android:targetClass="com.example.prefs.SettingsActivity"
             android:action="com.example.prefs.PREFS_TWO" />
@@ -975,11 +975,11 @@ android.preference.DialogPreference} 的建構函式，該偏好設定宣告版�
 public class NumberPickerPreference extends DialogPreference {
     public NumberPickerPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
-        
+
         setDialogLayoutResource(R.layout.numberpicker_dialog);
         setPositiveButtonText(android.R.string.ok);
         setNegativeButtonText(android.R.string.cancel);
-        
+
         setDialogIcon(null);
     }
     ...
@@ -1194,7 +1194,7 @@ protected void onRestoreInstanceState(Parcelable state) {
     // Cast state to custom BaseSavedState and pass to superclass
     SavedState myState = (SavedState) state;
     super.onRestoreInstanceState(myState.getSuperState());
-    
+
     // Set this Preference's widget to reflect the restored state
     mNumberPicker.setValue(myState.value);
 }

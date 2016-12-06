@@ -263,4 +263,4 @@ href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-featur
 
 <p class="caution"><strong>警告:</strong> 同じアプリに複数の APK を公開することは拡張機能とみなされます。<strong>大部分のアプリは、広範囲のデバイス設定をサポートする APK を 1 つだけ公開すべきです</strong>。複数の APK を公開する場合、フィルタ固有のルールに従う必要があります。また、設定ごとに適切なアップデート パスを確保するため、各 APK のバージョン コードに特別な注意を払う必要があります。</p>
 
-<p>Google Play で複数の APK を公開する方法について詳しくは、<a href="{@docRoot}google/play/publishing/multiple-apks.html">複数の APK サポート（Multiple APK Support）</a>をご覧ください。</p> 
+<p>Google Play で複数の APK を公開する方法について詳しくは、<a href="{@docRoot}google/play/publishing/multiple-apks.html">複数の APK サポート（Multiple APK Support）</a>をご覧ください。</p>

@@ -42,7 +42,7 @@ page.title=日历提供程序
       <li><a href="#intent-view">使用 Intent 对象查看日历数据</a></li>
     </ol>
   </li>
-  
+
   <li><a href="#sync-adapter">同步适配器</a></li>
 </ol>
 
@@ -113,14 +113,14 @@ URI 的格式为 <code><em>&lt;class&gt;</em>.CONTENT_URI</code>。例如，{@li
   </tr>
   <tr>
     <td><p>{@link android.provider.CalendarContract.Calendars}</p></td>
-    
+
     <td>此表储存日历特定信息。
 此表中的每一行都包含一个日历的详细信息，例如名称、颜色、同步信息等。
 </td>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Events}</td>
-    
+
     <td>此表储存事件特定信息。
 此表中的每一行都包含一个事件的信息&mdash;例如事件名称、地点、开始时间、结束时间等。
 
@@ -132,7 +132,7 @@ URI 的格式为 <code><em>&lt;class&gt;</em>.CONTENT_URI</code>。例如，{@li
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Instances}</td>
-    
+
     <td>此表储存每个事件实例的开始时间和结束时间。
 此表中的每一行都表示一个事件实例。
 对于一次性事件，实例与事件为 1:1
@@ -141,7 +141,7 @@ URI 的格式为 <code><em>&lt;class&gt;</em>.CONTENT_URI</code>。例如，{@li
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Attendees}</td>
-    
+
     <td>此表储存事件参加者（来宾）信息。
 每一行都表示事件的一位来宾。
 它指定来宾的类型以及事件的来宾出席响应。
@@ -149,7 +149,7 @@ URI 的格式为 <code><em>&lt;class&gt;</em>.CONTENT_URI</code>。例如，{@li
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Reminders}</td>
-    
+
     <td>此表储存提醒/通知数据。
 每一行都表示事件的一个提醒。一个事件可以有多个提醒。
 每个事件的最大提醒数量在
@@ -159,7 +159,7 @@ URI 的格式为 <code><em>&lt;class&gt;</em>.CONTENT_URI</code>。例如，{@li
 中指定，后者由拥有给定日历的同步适配器设置。提醒以事件发生前的分钟数形式指定，其具有一个可决定用户提醒方式的方法。
 </td>
   </tr>
-  
+
 </table>
 
 <p>Calendar Provider API 以灵活、强大为设计宗旨。提供良好的最终用户体验以及保护日历及其数据的完整性也同样重要。
@@ -229,7 +229,7 @@ android.Manifest.permission#READ_CALENDAR} 权限。文件中必须包括用于�
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Calendars#VISIBLE}</td>
-    
+
     <td>表示是否选择显示该日历的布尔值。值为 0 表示不应显示与该日历关联的事件。
 
 值为 1
@@ -240,7 +240,7 @@ android.provider.CalendarContract.Instances} 表中行的生成。</td>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.CalendarColumns#SYNC_EVENTS}</td>
-    
+
     <td>一个布尔值，表示是否应同步日历并将其事件存储在设备上。
 值为 0
 表示不同步该日历，也不将其事件存储在设备上。值为 1
@@ -268,13 +268,13 @@ public static final String[] EVENT_PROJECTION = new String[] {
     Calendars.CALENDAR_DISPLAY_NAME,         // 2
     Calendars.OWNER_ACCOUNT                  // 3
 };
-  
+
 // The indices for the projection array above.
 private static final int PROJECTION_ID_INDEX = 0;
 private static final int PROJECTION_ACCOUNT_NAME_INDEX = 1;
 private static final int PROJECTION_DISPLAY_NAME_INDEX = 2;
 private static final int PROJECTION_OWNER_ACCOUNT_INDEX = 3;</pre>
-  
+
 
 <div class="sidebox-wrapper"> <div class="sidebox"> <h3>为何必须加入
 ACCOUNT_TYPE？</h3> <p>如果您查询 {@link
@@ -289,7 +289,7 @@ Calendars.ACCOUNT_NAME}，还必须将
 android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL}
 的特殊帐户类型，用于未关联设备帐户的日历。{@link
 android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL}
-帐户不会进行同步。</p> </div> </div> 
+帐户不会进行同步。</p> </div> </div>
 
 
 <p> 在示例的下一部分，您需要构建查询。选定范围指定查询的条件。
@@ -308,38 +308,38 @@ android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL}
 <pre>// Run query
 Cursor cur = null;
 ContentResolver cr = getContentResolver();
-Uri uri = Calendars.CONTENT_URI;   
-String selection = "((" + Calendars.ACCOUNT_NAME + " = ?) AND (" 
+Uri uri = Calendars.CONTENT_URI;
+String selection = "((" + Calendars.ACCOUNT_NAME + " = ?) AND ("
                         + Calendars.ACCOUNT_TYPE + " = ?) AND ("
                         + Calendars.OWNER_ACCOUNT + " = ?))";
 String[] selectionArgs = new String[] {"sampleuser@gmail.com", "com.google",
-        "sampleuser@gmail.com"}; 
-// Submit the query and get a Cursor object back. 
+        "sampleuser@gmail.com"};
+// Submit the query and get a Cursor object back.
 cur = cr.query(uri, EVENT_PROJECTION, selection, selectionArgs, null);</pre>
 
 <p>以下后续部分使用游标单步调试结果集。它使用在示例开头设置的常量来返回每个字段的值。
 
 </p>
-    
+
 <pre>// Use the cursor to step through the returned records
 while (cur.moveToNext()) {
     long calID = 0;
     String displayName = null;
     String accountName = null;
     String ownerName = null;
-      
+
     // Get the field values
     calID = cur.getLong(PROJECTION_ID_INDEX);
     displayName = cur.getString(PROJECTION_DISPLAY_NAME_INDEX);
     accountName = cur.getString(PROJECTION_ACCOUNT_NAME_INDEX);
     ownerName = cur.getString(PROJECTION_OWNER_ACCOUNT_INDEX);
-              
+
     // Do something with the values...
 
    ...
 }
 </pre>
-  
+
 <h3 id="modify-calendar">修改日历</h3>
 
 <p>如需执行日历更新，您可以通过
@@ -434,7 +434,7 @@ android.provider.CalendarContract.Events} 参考资料。</p>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#DURATION}</td>
-    
+
     <td><a href="http://tools.ietf.org/html/rfc5545#section-3.8.2.5">RFC5545</a>
 格式的事件持续时间。例如，值为
 <code>&quot;PT1H&quot;</code> 表示事件应持续一小时，值为
@@ -444,39 +444,39 @@ android.provider.CalendarContract.Events} 参考资料。</p>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#ALL_DAY}</td>
-    
+
     <td>值为 1
 表示此事件占用一整天（按照本地时区的定义）。值为 0
 表示它是常规事件，可在一天内的任何时间开始和结束。</td>
 
-    
+
   </tr>
-  
-  
+
+
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#RRULE}</td>
-    
+
     <td>事件的重复发生规则格式。例如，<code>&quot;FREQ=WEEKLY;COUNT=10;WKST=SU&quot;</code>。
 您可以在<a href="http://tools.ietf.org/html/rfc5545#section-3.8.5.3">此处</a>找到更多示例。
 </td>
-    
+
   </tr>
-  
+
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#RDATE}</td>
     <td>事件的重复发生日期。
-{@link android.provider.CalendarContract.EventsColumns#RDATE} 
-与 {@link android.provider.CalendarContract.EventsColumns#RRULE} 
+{@link android.provider.CalendarContract.EventsColumns#RDATE}
+与 {@link android.provider.CalendarContract.EventsColumns#RRULE}
 通常联合用于定义一组聚合重复实例。
 如需查看更详细的介绍，请参阅 <a href="http://tools.ietf.org/html/rfc5545#section-3.8.5.2">RFC5545 规范</a>。</td>
 </tr>
- 
+
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#AVAILABILITY}</td>
-    
+
     <td>将此事件视为忙碌时间还是可调度的空闲时间。
  </td>
-    
+
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#GUESTS_CAN_MODIFY}</td>
@@ -514,11 +514,11 @@ java.util.TimeZone#getAvailableIDs()}。请注意，如果您按<a href="#intent
 {@link
 android.content.Intent#ACTION_INSERT INSERT} Intent 对象插入事件，则此规则不适用&mdash;在该情形下，系统会提供默认时区。
 </li>
-  
+
   <li>对于非重复事件，您必须加入 {@link
 android.provider.CalendarContract.EventsColumns#DTEND}。 </li>
-  
-  
+
+
   <li>对于重复事件，您必须加入 {@link
 android.provider.CalendarContract.EventsColumns#DURATION} 以及 {@link
 android.provider.CalendarContract.EventsColumns#RRULE} 或 {@link
@@ -528,7 +528,7 @@ android.content.Intent#ACTION_INSERT INSERT} Intent 对象插入事件，则此�
 android.provider.CalendarContract.EventsColumns#RRULE} 与 {@link android.provider.CalendarContract.EventsColumns#DTSTART} 和 {@link android.provider.CalendarContract.EventsColumns#DTEND}
 联用，日历应用会自动将其转换为持续时间。
 </li>
-  
+
 </ul>
 
 <p>以下是一个插入事件的示例。为了简便起见，此操作是在 UI
@@ -539,8 +539,8 @@ android.provider.CalendarContract.EventsColumns#RRULE} 与 {@link android.provid
 
 <pre>
 long calID = 3;
-long startMillis = 0; 
-long endMillis = 0;     
+long startMillis = 0;
+long endMillis = 0;
 Calendar beginTime = Calendar.getInstance();
 beginTime.set(2012, 9, 14, 7, 30);
 startMillis = beginTime.getTimeInMillis();
@@ -561,7 +561,7 @@ Uri uri = cr.insert(Events.CONTENT_URI, values);
 
 // get the event ID that is the last element in the Uri
 long eventID = Long.parseLong(uri.getLastPathSegment());
-// 
+//
 // ... do something with event ID
 //
 //</pre>
@@ -598,7 +598,7 @@ ContentResolver cr = getContentResolver();
 ContentValues values = new ContentValues();
 Uri updateUri = null;
 // The new title for the event
-values.put(Events.TITLE, &quot;Kickboxing&quot;); 
+values.put(Events.TITLE, &quot;Kickboxing&quot;);
 updateUri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
 int rows = getContentResolver().update(updateUri, values, null, null);
 Log.i(DEBUG_TAG, &quot;Rows updated: &quot; + rows);  </pre>
@@ -625,19 +625,19 @@ ContentValues values = new ContentValues();
 Uri deleteUri = null;
 deleteUri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
 int rows = getContentResolver().delete(deleteUri, null, null);
-Log.i(DEBUG_TAG, &quot;Rows deleted: &quot; + rows);  
+Log.i(DEBUG_TAG, &quot;Rows deleted: &quot; + rows);
 </pre>
 
 <h2 id="attendees">参加者表</h2>
 
 <p>{@link android.provider.CalendarContract.Attendees}
-表的每一行都表示事件的一位参加者或来宾。调用 
-{@link android.provider.CalendarContract.Reminders#query(android.content.ContentResolver, long, java.lang.String[]) query()} 
+表的每一行都表示事件的一位参加者或来宾。调用
+{@link android.provider.CalendarContract.Reminders#query(android.content.ContentResolver, long, java.lang.String[]) query()}
 会返回一个参加者列表，其中包含具有给定 {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID}
 的事件的参加者。
-此 {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID} 
+此 {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID}
 必须匹配特定事件的 {@link
-android.provider.BaseColumns#_ID}。</p> 
+android.provider.BaseColumns#_ID}。</p>
 
 <p>下表列出了可写入的字段。
 插入新参加者时，您必须加入除 <code>ATTENDEE_NAME</code> 之外的所有字段。
@@ -718,7 +718,7 @@ Uri uri = cr.insert(Attendees.CONTENT_URI, values);
 <h2 id="reminders">提醒表</h2>
 
 <p>{@link android.provider.CalendarContract.Reminders}
-表的每一行都表示事件的一个提醒。调用 
+表的每一行都表示事件的一个提醒。调用
 {@link android.provider.CalendarContract.Reminders#query(android.content.ContentResolver, long, java.lang.String[]) query()}
 会返回一个提醒列表，其中包含具有给定 {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID} 的事件的提醒。
 </p>
@@ -727,7 +727,7 @@ Uri uri = cr.insert(Attendees.CONTENT_URI, values);
 <p>下表列出了提醒的可写入字段。插入新提醒时，必须加入所有字段。
 请注意，同步适配器指定它们在
 {@link
-android.provider.CalendarContract.Calendars} 表中支持的提醒类型。详情请参阅 
+android.provider.CalendarContract.Calendars} 表中支持的提醒类型。详情请参阅
 {@link android.provider.CalendarContract.CalendarColumns#ALLOWED_REMINDERS}
 。</p>
 
@@ -780,9 +780,9 @@ Uri uri = cr.insert(Reminders.CONTENT_URI, values);</pre>
  </p>
 
 <p>下表列出了一些您可以执行实例查询的字段。请注意，
-时区由 
-{@link android.provider.CalendarContract.CalendarCache#KEY_TIMEZONE_TYPE} 
-和 
+时区由
+{@link android.provider.CalendarContract.CalendarCache#KEY_TIMEZONE_TYPE}
+和
 {@link android.provider.CalendarContract.CalendarCache#KEY_TIMEZONE_INSTANCES} 定义。</p>
 
 
@@ -801,18 +801,18 @@ Uri uri = cr.insert(Reminders.CONTENT_URI, values);</pre>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Instances#END_DAY}</td>
-    
+
     <td>与日历时区相应的实例儒略历结束日。
- 
-    
+
+
 </td>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Instances#END_MINUTE}</td>
-    
+
     <td>从日历时区午夜开始计算的实例结束时间（分钟）。
 </td>
-    
+
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Instances#EVENT_ID}</td>
@@ -820,16 +820,16 @@ Uri uri = cr.insert(Reminders.CONTENT_URI, values);</pre>
   </tr>
     <tr>
     <td>{@link android.provider.CalendarContract.Instances#START_DAY}</td>
-    <td>与日历时区相应的实例儒略历开始日。 
+    <td>与日历时区相应的实例儒略历开始日。
  </td>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Instances#START_MINUTE}</td>
-    
+
     <td>从日历时区午夜开始计算的实例开始时间（分钟）。
- 
+
 </td>
-    
+
   </tr>
 
 </table>
@@ -853,7 +853,7 @@ public static final String[] INSTANCE_PROJECTION = new String[] {
     Instances.BEGIN,         // 1
     Instances.TITLE          // 2
   };
-  
+
 // The indices for the projection array above.
 private static final int PROJECTION_ID_INDEX = 0;
 private static final int PROJECTION_BEGIN_INDEX = 1;
@@ -868,7 +868,7 @@ long startMillis = beginTime.getTimeInMillis();
 Calendar endTime = Calendar.getInstance();
 endTime.set(2011, 10, 24, 8, 0);
 long endMillis = endTime.getTimeInMillis();
-  
+
 Cursor cur = null;
 ContentResolver cr = getContentResolver();
 
@@ -883,28 +883,28 @@ ContentUris.appendId(builder, startMillis);
 ContentUris.appendId(builder, endMillis);
 
 // Submit the query
-cur =  cr.query(builder.build(), 
-    INSTANCE_PROJECTION, 
-    selection, 
-    selectionArgs, 
+cur =  cr.query(builder.build(),
+    INSTANCE_PROJECTION,
+    selection,
+    selectionArgs,
     null);
-   
+
 while (cur.moveToNext()) {
     String title = null;
     long eventID = 0;
-    long beginVal = 0;    
-    
+    long beginVal = 0;
+
     // Get the field values
     eventID = cur.getLong(PROJECTION_ID_INDEX);
     beginVal = cur.getLong(PROJECTION_BEGIN_INDEX);
     title = cur.getString(PROJECTION_TITLE_INDEX);
-              
-    // Do something with the values. 
-    Log.i(DEBUG_TAG, "Event:  " + title); 
+
+    // Do something with the values.
+    Log.i(DEBUG_TAG, "Event:  " + title);
     Calendar calendar = Calendar.getInstance();
-    calendar.setTimeInMillis(beginVal);  
+    calendar.setTimeInMillis(beginVal);
     DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
-    Log.i(DEBUG_TAG, "Date: " + formatter.format(calendar.getTime()));    
+    Log.i(DEBUG_TAG, "Date: " + formatter.format(calendar.getTime()));
     }
  }</pre>
 
@@ -922,9 +922,9 @@ while (cur.moveToNext()) {
     <td><br>
     {@link android.content.Intent#ACTION_VIEW VIEW} <br></td>
     <td><p><code>content://com.android.calendar/time/&lt;ms_since_epoch&gt;</code></p>
-    您还可以通过 
+    您还可以通过
 {@link android.provider.CalendarContract#CONTENT_URI CalendarContract.CONTENT_URI} 引用 URI。
-如需查看使用该 Intent 对象的示例，请参阅<a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-view">使用 Intent 对象查看日历数据</a>。 
+如需查看使用该 Intent 对象的示例，请参阅<a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-view">使用 Intent 对象查看日历数据</a>。
 
     </td>
     <td>打开日历后定位到 <code>&lt;ms_since_epoch&gt;</code> 指定的时间。</td>
@@ -935,11 +935,11 @@ while (cur.moveToNext()) {
 
      </td>
     <td><p><code>content://com.android.calendar/events/&lt;event_id&gt;</code></p>
-    
-    您还可以通过 
+
+    您还可以通过
 {@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI} 引用 URI。
 如需查看使用该 Intent 对象的示例，请参阅<a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-view">使用 Intent 对象查看日历数据</a>。
-    
+
     </td>
     <td>查看 <code>&lt;event_id&gt;</code> 指定的事件。</td>
 
@@ -952,12 +952,12 @@ while (cur.moveToNext()) {
   <tr>
     <td>{@link android.content.Intent#ACTION_EDIT EDIT} </td>
     <td><p><code>content://com.android.calendar/events/&lt;event_id&gt;</code></p>
-    
-  您还可以通过 
+
+  您还可以通过
 {@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI} 引用 URI。
 如需查看使用该 Intent 对象的示例，请参阅<a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-edit">使用 Intent 对象编辑事件</a>。
-    
-    
+
+
     </td>
     <td>编辑 <code>&lt;event_id&gt;</code> 指定的事件。</td>
 
@@ -972,11 +972,11 @@ while (cur.moveToNext()) {
     <br>
     {@link android.content.Intent#ACTION_INSERT INSERT} </td>
     <td><p><code>content://com.android.calendar/events</code></p>
-    
-   您还可以通过 
+
+   您还可以通过
 {@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI} 引用 URI。
 如需查看使用该 Intent 对象的示例，请参阅<a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-insert">使用 Intent 对象插入事件</a>。
-    
+
     </td>
 
     <td>创建事件。</td>
@@ -996,7 +996,7 @@ while (cur.moveToNext()) {
     <td>事件的名称。</td>
   </tr>
   <tr>
-  
+
     <td>{@link android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME
 CalendarContract.EXTRA_EVENT_BEGIN_TIME}</td>
     <td>事件开始时间，以从公元纪年开始计算的毫秒数表示。</td>
@@ -1004,25 +1004,25 @@ CalendarContract.EXTRA_EVENT_BEGIN_TIME}</td>
   <tr>
     <td>{@link android.provider.CalendarContract#EXTRA_EVENT_END_TIME
 CalendarContract.EXTRA_EVENT_END_TIME}</td>
-    
+
     <td>事件结束时间，以从公元纪年开始计算的毫秒数表示。</td>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract#EXTRA_EVENT_ALL_DAY
 CalendarContract.EXTRA_EVENT_ALL_DAY}</td>
-    
+
     <td>一个布尔值，表示事件属于全天事件。值可以是
 <code>true</code> 或 <code>false</code>。</td> </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#EVENT_LOCATION
 Events.EVENT_LOCATION}</td>
-    
+
     <td>事件的地点。</td>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#DESCRIPTION
 Events.DESCRIPTION}</td>
-    
+
     <td>事件描述。</td>
   </tr>
   <tr>
@@ -1039,16 +1039,16 @@ Events.DESCRIPTION}</td>
     <td>
     {@link android.provider.CalendarContract.EventsColumns#ACCESS_LEVEL
 Events.ACCESS_LEVEL}</td>
-    
+
     <td>事件是私人性质还是公共性质。</td>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#AVAILABILITY
 Events.AVAILABILITY}</td>
-    
+
     <td>将此事件视为忙碌时间还是可调度的空闲时间。</td>
-    
-</table> 
+
+</table>
 <p>下文描述如何使用这些 Intent 对象。</p>
 
 
@@ -1059,23 +1059,23 @@ Events.AVAILABILITY}</td>
 {@link
 android.Manifest.permission#WRITE_CALENDAR} 权限。</p>
 
-  
+
 <p>当用户运行使用此方法的应用时，应用会将其转到日历来完成事件添加操作。
 {@link
 android.content.Intent#ACTION_INSERT INSERT}  Intent 利用 extra
 字段为表单预填充日历中事件的详细信息。用户随后可取消事件、根据需要编辑表单或将事件保存到日历中。
 
 </p>
-  
+
 
 
 <p>以下是一个代码段，用于安排一个在 2012 年 1 月 19 日上午
 7:30 开始、8:30 结束的事件。请注意该代码段中的以下内容：</p>
 
 <ul>
-  <li>它将 {@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI} 
+  <li>它将 {@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}
 指定为 URI。</li>
-  
+
   <li>它使用 {@link
 android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME
 CalendarContract.EXTRA_EVENT_BEGIN_TIME} 和 {@link
@@ -1083,10 +1083,10 @@ android.provider.CalendarContract#EXTRA_EVENT_END_TIME
 CalendarContract.EXTRA_EVENT_END_TIME} extra
 字段为表单预填充事件的时间。这些时间的值必须以从公元纪年开始计算的协调世界时毫秒数表示。
 </li>
-  
+
   <li>它使用 {@link android.content.Intent#EXTRA_EMAIL Intent.EXTRA_EMAIL}
 extra 字段提供以逗号分隔的受邀者电子邮件地址列表。</li>
-  
+
 </ul>
 <pre>
 Calendar beginTime = Calendar.getInstance();
@@ -1158,18 +1158,18 @@ startActivity(intent);
 
 <ul>
   <li>同步适配器需要通过将 {@link android.provider.CalendarContract#CALLER_IS_SYNCADAPTER} 设置为 <code>true</code> 来表明它是同步适配器。</li>
-  
-  
+
+
   <li>同步适配器需要提供 {@link
 android.provider.CalendarContract.SyncColumns#ACCOUNT_NAME} 和 {@link
 android.provider.CalendarContract.SyncColumns#ACCOUNT_TYPE} 作为 URI 中的查询参数。 </li>
-  
+
   <li>与应用或小工具相比，同步适配器拥有写入权限的列更多。
   例如，应用只能修改日历的少数几种特性，
 例如其名称、显示名称、能见度设置以及是否同步日历。
 相比之下，同步适配器不仅可以访问这些列，还能访问许多其他列，
 例如日历颜色、时区、访问级别、地点等等。不过，同步适配器受限于它指定的
-<code>ACCOUNT_NAME</code> 和 
+<code>ACCOUNT_NAME</code> 和
 <code>ACCOUNT_TYPE</code>。</li> </ul>
 
 <p>您可以利用以下 helper 方法返回供与同步适配器一起使用的 URI：</p>
@@ -1180,5 +1180,5 @@ android.provider.CalendarContract.SyncColumns#ACCOUNT_TYPE} 作为 URI 中的查
         .appendQueryParameter(Calendars.ACCOUNT_TYPE, accountType).build();
  }
 </pre>
-<p>如需查看同步适配器的实现示例（并非仅限与日历有关的实现），请参阅 
+<p>如需查看同步适配器的实现示例（并非仅限与日历有关的实现），请参阅
 <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">SampleSyncAdapter</a>。

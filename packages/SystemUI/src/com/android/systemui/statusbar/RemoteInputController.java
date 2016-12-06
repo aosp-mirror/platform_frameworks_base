@@ -21,7 +21,9 @@ import com.android.systemui.statusbar.phone.StatusBarWindowManager;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.RemoteInputView;
 
+import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Pair;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -31,8 +33,9 @@ import java.util.ArrayList;
  */
 public class RemoteInputController {
 
-    private final ArrayList<WeakReference<NotificationData.Entry>> mOpen = new ArrayList<>();
-    private final ArraySet<String> mSpinning = new ArraySet<>();
+    private final ArrayList<Pair<WeakReference<NotificationData.Entry>, Object>> mOpen
+            = new ArrayList<>();
+    private final ArrayMap<String, Object> mSpinning = new ArrayMap<>();
     private final ArrayList<Callback> mCallbacks = new ArrayList<>(3);
     private final HeadsUpManager mHeadsUpManager;
 
@@ -41,36 +44,72 @@ public class RemoteInputController {
         mHeadsUpManager = headsUpManager;
     }
 
-    public void addRemoteInput(NotificationData.Entry entry) {
+    /**
+     * Adds a currently active remote input.
+     *
+     * @param entry the entry for which a remote input is now active.
+     * @param token a token identifying the view that is managing the remote input
+     */
+    public void addRemoteInput(NotificationData.Entry entry, Object token) {
         Preconditions.checkNotNull(entry);
+        Preconditions.checkNotNull(token);
 
         boolean found = pruneWeakThenRemoveAndContains(
-                entry /* contains */, null /* remove */);
+                entry /* contains */, null /* remove */, token /* removeToken */);
         if (!found) {
-            mOpen.add(new WeakReference<>(entry));
+            mOpen.add(new Pair<>(new WeakReference<>(entry), token));
         }
 
         apply(entry);
     }
 
-    public void removeRemoteInput(NotificationData.Entry entry) {
+    /**
+     * Removes a currently active remote input.
+     *
+     * @param entry the entry for which a remote input should be removed.
+     * @param token a token identifying the view that is requesting the removal. If non-null,
+     *              the entry is only removed if the token matches the last added token for this
+     *              entry. If null, the entry is removed regardless.
+     */
+    public void removeRemoteInput(NotificationData.Entry entry, Object token) {
         Preconditions.checkNotNull(entry);
 
-        pruneWeakThenRemoveAndContains(null /* contains */, entry /* remove */);
+        pruneWeakThenRemoveAndContains(null /* contains */, entry /* remove */, token);
 
         apply(entry);
     }
 
-    public void addSpinning(String key) {
-        mSpinning.add(key);
+    /**
+     * Adds a currently spinning (i.e. sending) remote input.
+     *
+     * @param key the key of the entry that's spinning.
+     * @param token the token of the view managing the remote input.
+     */
+    public void addSpinning(String key, Object token) {
+        Preconditions.checkNotNull(key);
+        Preconditions.checkNotNull(token);
+
+        mSpinning.put(key, token);
     }
 
-    public void removeSpinning(String key) {
-        mSpinning.remove(key);
+    /**
+     * Removes a currently spinning remote input.
+     *
+     * @param key the key of the entry for which a remote input should be removed.
+     * @param token a token identifying the view that is requesting the removal. If non-null,
+     *              the entry is only removed if the token matches the last added token for this
+     *              entry. If null, the entry is removed regardless.
+     */
+    public void removeSpinning(String key, Object token) {
+        Preconditions.checkNotNull(key);
+
+        if (token == null || mSpinning.get(key) == token) {
+            mSpinning.remove(key);
+        }
     }
 
     public boolean isSpinning(String key) {
-        return mSpinning.contains(key);
+        return mSpinning.containsKey(key);
     }
 
     private void apply(NotificationData.Entry entry) {
@@ -86,14 +125,16 @@ public class RemoteInputController {
      * @return true if {@param entry} has an active RemoteInput
      */
     public boolean isRemoteInputActive(NotificationData.Entry entry) {
-        return pruneWeakThenRemoveAndContains(entry /* contains */, null /* remove */);
+        return pruneWeakThenRemoveAndContains(entry /* contains */, null /* remove */,
+                null /* removeToken */);
     }
 
     /**
      * @return true if any entry has an active RemoteInput
      */
     public boolean isRemoteInputActive() {
-        pruneWeakThenRemoveAndContains(null /* contains */, null /* remove */);
+        pruneWeakThenRemoveAndContains(null /* contains */, null /* remove */,
+                null /* removeToken */);
         return !mOpen.isEmpty();
     }
 
@@ -101,17 +142,27 @@ public class RemoteInputController {
      * Prunes dangling weak references, removes entries referring to {@param remove} and returns
      * whether {@param contains} is part of the array in a single loop.
      * @param remove if non-null, removes this entry from the active remote inputs
+     * @param removeToken if non-null, only removes an entry if this matches the token when the
+     *                    entry was added.
      * @return true if {@param contains} is in the set of active remote inputs
      */
     private boolean pruneWeakThenRemoveAndContains(
-            NotificationData.Entry contains, NotificationData.Entry remove) {
+            NotificationData.Entry contains, NotificationData.Entry remove, Object removeToken) {
         boolean found = false;
         for (int i = mOpen.size() - 1; i >= 0; i--) {
-            NotificationData.Entry item = mOpen.get(i).get();
-            if (item == null || item == remove) {
+            NotificationData.Entry item = mOpen.get(i).first.get();
+            Object itemToken = mOpen.get(i).second;
+            boolean removeTokenMatches = (removeToken == null || itemToken == removeToken);
+
+            if (item == null || (item == remove && removeTokenMatches)) {
                 mOpen.remove(i);
             } else if (item == contains) {
-                found = true;
+                if (removeToken != null && removeToken != itemToken) {
+                    // We need to update the token. Remove here and let caller reinsert it.
+                    mOpen.remove(i);
+                } else {
+                    found = true;
+                }
             }
         }
         return found;
@@ -138,7 +189,7 @@ public class RemoteInputController {
         // Make a copy because closing the remote inputs will modify mOpen.
         ArrayList<NotificationData.Entry> list = new ArrayList<>(mOpen.size());
         for (int i = mOpen.size() - 1; i >= 0; i--) {
-            NotificationData.Entry item = mOpen.get(i).get();
+            NotificationData.Entry item = mOpen.get(i).first.get();
             if (item != null && item.row != null) {
                 list.add(item);
             }

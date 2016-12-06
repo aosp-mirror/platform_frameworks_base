@@ -143,7 +143,9 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_4g_plus" msgid="3032226872470658661">"4G+"</string>
     <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
+    <string name="accessibility_data_connection_lte_plus" msgid="361876866906946007">"LTE+"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Roaming"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
@@ -236,7 +238,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G data is paused"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Mobile data is paused"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Data is paused"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Because your set data limit was reached, the device has paused data usage for the remainder of this cycle.\n\nResuming may lead to charges from your operator."</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"The data limit you have set has been reached. You are no longer using mobile data.\n\nIf you resume, charges may apply for data usage."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Resume"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"No Internet connection"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi connected"</string>
@@ -317,6 +319,9 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> limit"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> warning"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Work mode"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Night Light"</string>
+    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"Night Light on, tap to turn off"</string>
+    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"Night Light off, tap to turn on"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"No recent items"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"You\'ve cleared everything"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Application Info"</string>
@@ -330,6 +335,8 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Split Horizontal"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Split Vertical"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Split Customised"</string>
+  <string-array name="recents_blacklist_array">
+  </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Charged"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Charging"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> until full"</string>
@@ -397,6 +404,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"Device may be monitored"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Profile may be monitored"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Network may be monitored"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"Network may be monitored"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Device monitoring"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Profile monitoring"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Network monitoring"</string>
@@ -409,6 +417,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"You\'re connected to <xliff:g id="APPLICATION">%1$s</xliff:g>, which can monitor your network activity including emails, apps and websites."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"You\'re connected to <xliff:g id="APPLICATION">%1$s</xliff:g>, which can monitor your personal network activity, including emails, apps and websites."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"You\'re connected to <xliff:g id="APPLICATION">%1$s</xliff:g>, which can monitor your personal network activity, including emails, apps and websites."</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"Your work profile is managed by <xliff:g id="ORGANIZATION">%1$s</xliff:g>. It is connected to <xliff:g id="APPLICATION">%2$s</xliff:g>, which can monitor your work network activity, including emails, apps and websites.\n\nFor more information, contact your administrator."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Your work profile is managed by <xliff:g id="ORGANIZATION">%1$s</xliff:g>. It is connected to <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, which can monitor your work network activity, including emails, apps and websites.\n\nYou\'re also connected to <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, which can monitor your personal network activity."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Your device is managed by <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nYour administrator can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.\n\nYou\'re connected to <xliff:g id="APPLICATION">%2$s</xliff:g>, which can monitor your network activity, including emails, apps, and websites.\n\nFor more information, contact your administrator."</string>
@@ -434,6 +443,18 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> is the volume dialogue"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"Tap to restore the original."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"You\'re using your work profile"</string>
+  <string-array name="volume_stream_titles">
+    <item msgid="5841843895402729630">"Call"</item>
+    <item msgid="5997713001067658559">"System"</item>
+    <item msgid="7858983209929864160">"Ring"</item>
+    <item msgid="1850038478268896762">"Media"</item>
+    <item msgid="8265110906352372092">"Alarm"</item>
+    <item msgid="5339394737636839168"></item>
+    <item msgid="2951313578278086204">"Bluetooth"</item>
+    <item msgid="2919807739709798970"></item>
+    <item msgid="150349973435223405"></item>
+    <item msgid="6761963760295549099"></item>
+  </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Tap to unmute."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Tap to set to vibrate. Accessibility services may be muted."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Tap to mute. Accessibility services may be muted."</string>
@@ -473,8 +494,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Show clock seconds in the status bar. May impact battery life."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Rearrange Quick Settings"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Show brightness in Quick Settings"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"Enable split-screen swipe-up gesture"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Enable gesture to enter split-screen by swiping up from the Overview button"</string>
     <string name="experimental" msgid="6198182315536726162">"Experimental"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Turn on Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"To connect your keyboard with your tablet, you first have to turn on Bluetooth."</string>
@@ -504,21 +523,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"More settings"</string>
     <string name="notification_done" msgid="5279426047273930175">"Done"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> notification controls"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"Colour and appearance"</string>
-    <string name="night_mode" msgid="3540405868248625488">"Night mode"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"Calibrate display"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"On"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"Off"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"Turn on automatically"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Switch into Night Mode as appropriate for location and time of day"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"When Night Mode is on"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Use dark theme for Android OS"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"Adjust tint"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"Adjust brightness"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"The dark theme is applied to core areas of Android OS that are normally displayed in a light theme, such as Settings."</string>
-    <string name="color_apply" msgid="9212602012641034283">"Apply"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"Confirm Settings"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"Some colour settings can make this device unusable. Click OK to confirm these colour settings, otherwise these settings will reset after 10 seconds."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Battery usage"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Battery Saver not available during charging"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Battery Saver"</string>
@@ -647,4 +651,5 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Open <xliff:g id="ID_1">%s</xliff:g> settings."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Edit order of settings."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Page <xliff:g id="ID_1">%1$d</xliff:g> of <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <string name="cant_silence_or_block" msgid="999689262131488625">"Notifications can\'t be silenced or blocked"</string>
 </resources>

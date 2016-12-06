@@ -127,7 +127,7 @@ Una vez que hayas leído las pautas, el paso siguientes es desarrollar tu aplica
 <ul>
   <li>Cumple las pautas de Calidad de la aplicación principal.
     <ul>
-      <li>Sigue las <a href="{@docRoot}design/index.html">pautas de 
+      <li>Sigue las <a href="{@docRoot}design/index.html">pautas de
 Diseño Android</a>. Presta especial atención al uso de <a href="http://www.google.com/design/spec/material-design/introduction.html">Material
  Design</a> en tu aplicación.
       </li>
@@ -152,7 +152,7 @@ desarrollo de aplicaciones para Wear</a>.</li>
 <p>
   Una vez que hayas creado tu APK listo para el lanzamiento y lo hayas probado para asegurarte de que cumple todos los criterios de <a href="{@docRoot}distribute/essentials/quality/wear.html">Calidad de las aplicaciones para Wear</a>, cárgalo
  a la Consola para desarrolladores. Actualiza el directorio de tu tienda con capturas de pantalla de tu aplicación para Wear y configura opciones
- de distribución, según sea necesario. Si no sabes cómo prepararte para el lanzamiento en Google Play, consulta la 
+ de distribución, según sea necesario. Si no sabes cómo prepararte para el lanzamiento en Google Play, consulta la
 <a href="{@docRoot}distribute/googleplay/publish/preparing.html">Lista de comprobación para el lanzamiento.</a>
 </p>
 

@@ -9,7 +9,7 @@ trainingnavtop=true
 
 <div id="tb-wrapper">
   <div id="tb">
-    
+
     <h2>本課程示範</h2>
 <ol>
   <li><a href="#lifecycle-states">了解生命週期回呼</a></li>
@@ -17,7 +17,7 @@ trainingnavtop=true
   <li><a href="#Create">建立新執行個體</a></li>
   <li><a href="#Destroy">終結應用行為顯示</a></li>
 </ol>
-    
+
     <h2>您也應該閱讀</h2>
     <ul>
       <li><a href="{@docRoot}guide/components/activities.html">應用行為顯示</a></li>
@@ -83,7 +83,7 @@ trainingnavtop=true
 </ul>
 
 <!--
-<p class="table-caption"><strong>Table 1.</strong> Activity lifecycle state pairs and callback 
+<p class="table-caption"><strong>Table 1.</strong> Activity lifecycle state pairs and callback
 methods.</p>
 <table>
   <tr>
@@ -138,7 +138,7 @@ android.app.Activity#onResume()}。
 
 
 
-<h2 id="launching-activity">指定您應用程式的啟動器應用行為顯示</h2> 
+<h2 id="launching-activity">指定您應用程式的啟動器應用行為顯示</h2>
 
 <p>若使用者從主螢幕中選取您的應用程式圖示，系統會針對應用程式中您已宣告作為「啟動器」(或「主程式」) 應用行為顯示的 {@link android.app.Activity}，呼叫 {@link
 android.app.Activity#onCreate onCreate()} 方法。
@@ -151,7 +151,7 @@ android.app.Activity#onCreate onCreate()} 方法。
 <p>必須在宣示說明中使用 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
 <intent-filter>}</a> (包括 {@link
 android.content.Intent#ACTION_MAIN MAIN} 行為與 {@link android.content.Intent#CATEGORY_LAUNCHER LAUNCHER} 類別) 宣告您應用程式的主要應用行為顯示。
-例如：</p> 
+例如：</p>
 
 <pre>
 &lt;activity android:name=".MainActivity" android:label="&#64;string/app_name">
@@ -200,10 +200,10 @@ public void onCreate(Bundle savedInstanceState) {
     // Set the user interface layout for this Activity
     // The layout file is defined in the project res/layout/main_activity.xml file
     setContentView(R.layout.main_activity);
-    
+
     // Initialize member TextView so we can manipulate it later
     mTextView = (TextView) findViewById(R.id.text_message);
-    
+
     // Make sure we're running on Honeycomb or higher to use ActionBar APIs
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
         // For the main activity, make sure the app icon in the action bar
@@ -268,7 +268,7 @@ android.app.Activity#onDestroy} 期間終止這些執行緒或資源。
 &#64;Override
 public void onDestroy() {
     super.onDestroy();  // Always call the superclass
-    
+
     // Stop method tracing that the activity started during onCreate()
     android.os.Debug.stopMethodTracing();
 }

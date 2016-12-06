@@ -263,6 +263,9 @@ public final class AudioFormat implements Parcelable {
      * on some platforms when converting to short internally.
      */
     public static final int ENCODING_IEC61937 = 13;
+    /** Audio data format: DOLBY TRUEHD compressed
+     **/
+    public static final int ENCODING_DOLBY_TRUEHD = 14;
 
     /** Invalid audio channel configuration */
     /** @deprecated Use {@link #CHANNEL_INVALID} instead.  */

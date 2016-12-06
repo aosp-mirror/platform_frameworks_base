@@ -181,7 +181,7 @@ protected void onNewIntent(Intent intent) {
 </dl>
 
 <p class="note"><strong>注意：</strong>如果值不是 {@code none} 與 {@code never}，則 Activity 必須使用 {@code launchMode="standard"} 定義。
-如果沒有指定此屬性，則會使用 
+如果沒有指定此屬性，則會使用
 {@code documentLaunchMode="none"}。</p>
 
 <h2 id="removing">移除工作</h2>

@@ -19,6 +19,7 @@ package android.app;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
@@ -39,7 +40,6 @@ import android.media.AudioManager;
 import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.BadParcelableException;
-import android.os.BaseBundle;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -51,7 +51,9 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.AbsoluteSizeSpan;
+import android.text.style.BackgroundColorSpan;
 import android.text.style.CharacterStyle;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.TextAppearanceSpan;
 import android.util.ArraySet;
@@ -73,7 +75,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -762,14 +763,13 @@ public class Notification implements Parcelable
     public Bundle extras = new Bundle();
 
     /**
-     * All pending intents in the notification extras (notification extras, actions extras,
-     * and remote input extras) as the system needs to be able to access them but touching
-     * the extras bundle in the system process is not safe because the bundle may contain
+     * All pending intents in the notification as the system needs to be able to access them but
+     * touching the extras bundle in the system process is not safe because the bundle may contain
      * custom parcelable objects.
      *
      * @hide
      */
-    public ArraySet<PendingIntent> extrasPendingIntents;
+    public ArraySet<PendingIntent> allPendingIntents;
 
     /**
      * {@link #extras} key: this is the title of the notification,
@@ -1049,6 +1049,7 @@ public class Notification implements Parcelable
             this(Icon.createWithResource("", icon), title, intent, new Bundle(), null, false);
         }
 
+        /** Keep in sync with {@link Notification.Action.Builder#Builder(Action)}! */
         private Action(Icon icon, CharSequence title, PendingIntent intent, Bundle extras,
                 RemoteInput[] remoteInputs, boolean allowGeneratedReplies) {
             this.mIcon = icon;
@@ -1115,7 +1116,7 @@ public class Notification implements Parcelable
              */
             @Deprecated
             public Builder(int icon, CharSequence title, PendingIntent intent) {
-                this(Icon.createWithResource("", icon), title, intent, new Bundle(), null);
+                this(Icon.createWithResource("", icon), title, intent);
             }
 
             /**
@@ -1125,7 +1126,7 @@ public class Notification implements Parcelable
              * @param intent the {@link PendingIntent} to fire when users trigger this action
              */
             public Builder(Icon icon, CharSequence title, PendingIntent intent) {
-                this(icon, title, intent, new Bundle(), null);
+                this(icon, title, intent, new Bundle(), null, false);
             }
 
             /**
@@ -1134,12 +1135,13 @@ public class Notification implements Parcelable
              * @param action the action to read fields from.
              */
             public Builder(Action action) {
-                this(action.getIcon(), action.title, action.actionIntent, new Bundle(action.mExtras),
-                        action.getRemoteInputs());
+                this(action.getIcon(), action.title, action.actionIntent,
+                        new Bundle(action.mExtras), action.getRemoteInputs(),
+                        action.getAllowGeneratedReplies());
             }
 
             private Builder(Icon icon, CharSequence title, PendingIntent intent, Bundle extras,
-                    RemoteInput[] remoteInputs) {
+                    RemoteInput[] remoteInputs, boolean allowGeneratedReplies) {
                 mIcon = icon;
                 mTitle = title;
                 mIntent = intent;
@@ -1148,6 +1150,7 @@ public class Notification implements Parcelable
                     mRemoteInputs = new ArrayList<RemoteInput>(remoteInputs.length);
                     Collections.addAll(mRemoteInputs, remoteInputs);
                 }
+                mAllowGeneratedReplies = allowGeneratedReplies;
             }
 
             /**
@@ -1230,7 +1233,7 @@ public class Notification implements Parcelable
                     getIcon(),
                     title,
                     actionIntent, // safe to alias
-                    new Bundle(mExtras),
+                    mExtras == null ? new Bundle() : new Bundle(mExtras),
                     getRemoteInputs(),
                     getAllowGeneratedReplies());
         }
@@ -1308,6 +1311,7 @@ public class Notification implements Parcelable
             // Flags bitwise-ored to mFlags
             private static final int FLAG_AVAILABLE_OFFLINE = 0x1;
             private static final int FLAG_HINT_LAUNCHES_ACTIVITY = 1 << 1;
+            private static final int FLAG_HINT_DISPLAY_INLINE = 1 << 2;
 
             // Default value for flags integer
             private static final int DEFAULT_FLAGS = FLAG_AVAILABLE_OFFLINE;
@@ -1494,6 +1498,29 @@ public class Notification implements Parcelable
             public boolean getHintLaunchesActivity() {
                 return (mFlags & FLAG_HINT_LAUNCHES_ACTIVITY) != 0;
             }
+
+            /**
+             * Set a hint that this Action should be displayed inline.
+             *
+             * @param hintDisplayInline {@code true} if action should be displayed inline, false
+             *        otherwise
+             * @return this object for method chaining
+             */
+            public WearableExtender setHintDisplayActionInline(
+                    boolean hintDisplayInline) {
+                setFlag(FLAG_HINT_DISPLAY_INLINE, hintDisplayInline);
+                return this;
+            }
+
+            /**
+             * Get a hint that this Action should be displayed inline.
+             *
+             * @return {@code true} if the Action should be displayed inline, {@code false} 
+             *         otherwise. The default value is {@code false} if this was never set.
+             */
+            public boolean getHintDisplayActionInline() {
+                return (mFlags & FLAG_HINT_DISPLAY_INLINE) != 0;
+            }
         }
     }
 
@@ -1569,7 +1596,7 @@ public class Notification implements Parcelable
         // intents in extras are always written as the last entry.
         readFromParcelImpl(parcel);
         // Must be read last!
-        extrasPendingIntents = (ArraySet<PendingIntent>) parcel.readArraySet(null);
+        allPendingIntents = (ArraySet<PendingIntent>) parcel.readArraySet(null);
     }
 
     private void readFromParcelImpl(Parcel parcel)
@@ -1727,8 +1754,8 @@ public class Notification implements Parcelable
             }
         }
 
-        if (!ArrayUtils.isEmpty(extrasPendingIntents)) {
-            that.extrasPendingIntents = new ArraySet<>(extrasPendingIntents);
+        if (!ArrayUtils.isEmpty(allPendingIntents)) {
+            that.allPendingIntents = new ArraySet<>(allPendingIntents);
         }
 
         if (this.actions != null) {
@@ -1854,15 +1881,15 @@ public class Notification implements Parcelable
         // cannot look into the extras as there may be parcelables there that
         // the platform does not know how to handle. To go around that we have
         // an explicit list of the pending intents in the extras bundle.
-        final boolean collectPendingIntents = (extrasPendingIntents == null);
+        final boolean collectPendingIntents = (allPendingIntents == null);
         if (collectPendingIntents) {
             PendingIntent.setOnMarshaledListener(
                     (PendingIntent intent, Parcel out, int outFlags) -> {
                 if (parcel == out) {
-                    if (extrasPendingIntents == null) {
-                        extrasPendingIntents = new ArraySet<>();
+                    if (allPendingIntents == null) {
+                        allPendingIntents = new ArraySet<>();
                     }
-                    extrasPendingIntents.add(intent);
+                    allPendingIntents.add(intent);
                 }
             });
         }
@@ -1871,7 +1898,7 @@ public class Notification implements Parcelable
             // want to intercept all pending events written to the pacel.
             writeToParcelImpl(parcel, flags);
             // Must be written last!
-            parcel.writeArraySet(extrasPendingIntents);
+            parcel.writeArraySet(allPendingIntents);
         } finally {
             if (collectPendingIntents) {
                 PendingIntent.setOnMarshaledListener(null);
@@ -3233,11 +3260,13 @@ public class Notification implements Parcelable
          * Resets the notification header to its original state
          */
         private void resetNotificationHeader(RemoteViews contentView) {
-            contentView.setImageViewResource(R.id.icon, 0);
+            // Small icon doesn't need to be reset, as it's always set. Resetting would prevent
+            // re-using the drawable when the notification is updated.
             contentView.setBoolean(R.id.notification_header, "setExpanded", false);
             contentView.setTextViewText(R.id.app_name_text, null);
             contentView.setViewVisibility(R.id.chronometer, View.GONE);
             contentView.setViewVisibility(R.id.header_text, View.GONE);
+            contentView.setTextViewText(R.id.header_text, null);
             contentView.setViewVisibility(R.id.header_text_divider, View.GONE);
             contentView.setViewVisibility(R.id.time_divider, View.GONE);
             contentView.setViewVisibility(R.id.time, View.GONE);
@@ -3450,6 +3479,8 @@ public class Notification implements Parcelable
                 mN.mSmallIcon = Icon.createWithResource(mContext, mN.icon);
             }
             contentView.setImageViewIcon(R.id.icon, mN.mSmallIcon);
+            contentView.setDrawableParameters(R.id.icon, false /* targetBackground */,
+                    -1 /* alpha */, -1 /* colorFilter */, null /* mode */, mN.iconLevel);
             processSmallIconColor(mN.mSmallIcon, contentView);
         }
 
@@ -3495,6 +3526,8 @@ public class Notification implements Parcelable
             boolean validRemoteInput = false;
 
             int N = mActions.size();
+            boolean emphazisedMode = mN.fullScreenIntent != null;
+            big.setBoolean(R.id.actions, "setEmphasizedMode", emphazisedMode);
             if (N > 0) {
                 big.setViewVisibility(R.id.actions_container, View.VISIBLE);
                 big.setViewVisibility(R.id.actions, View.VISIBLE);
@@ -3505,7 +3538,8 @@ public class Notification implements Parcelable
                     Action action = mActions.get(i);
                     validRemoteInput |= hasValidRemoteInput(action);
 
-                    final RemoteViews button = generateActionButton(action);
+                    final RemoteViews button = generateActionButton(action, emphazisedMode,
+                            i % 2 != 0);
                     big.addView(R.id.actions, button);
                 }
             } else {
@@ -3670,13 +3704,13 @@ public class Notification implements Parcelable
 
 
 
-        private RemoteViews generateActionButton(Action action) {
+        private RemoteViews generateActionButton(Action action, boolean emphazisedMode,
+                boolean oddAction) {
             final boolean tombstone = (action.actionIntent == null);
             RemoteViews button = new BuilderRemoteViews(mContext.getApplicationInfo(),
-                    tombstone ? getActionTombstoneLayoutResource()
-                              : getActionLayoutResource());
-            final Icon ai = action.getIcon();
-            button.setTextViewText(R.id.action0, processLegacyText(action.title));
+                    emphazisedMode ? getEmphasizedActionLayoutResource()
+                            : tombstone ? getActionTombstoneLayoutResource()
+                                    : getActionLayoutResource());
             if (!tombstone) {
                 button.setOnClickPendingIntent(R.id.action0, action.actionIntent);
             }
@@ -3684,10 +3718,141 @@ public class Notification implements Parcelable
             if (action.mRemoteInputs != null) {
                 button.setRemoteInputs(R.id.action0, action.mRemoteInputs);
             }
-            if (mN.color != COLOR_DEFAULT) {
-                button.setTextColor(R.id.action0, resolveContrastColor());
+            if (emphazisedMode) {
+                // change the background bgColor
+                int bgColor = mContext.getColor(oddAction ? R.color.notification_action_list
+                        : R.color.notification_action_list_dark);
+                button.setDrawableParameters(R.id.button_holder, true, -1, bgColor,
+                        PorterDuff.Mode.SRC_ATOP, -1);
+                CharSequence title = action.title;
+                ColorStateList[] outResultColor = null;
+                if (isLegacy()) {
+                    title = clearColorSpans(title);
+                } else {
+                    outResultColor = new ColorStateList[1];
+                    title = ensureColorSpanContrast(title, bgColor, outResultColor);
+                }
+                button.setTextViewText(R.id.action0, title);
+                if (outResultColor != null && outResultColor[0] != null) {
+                    // We need to set the text color as well since changing a text to uppercase
+                    // clears its spans.
+                    button.setTextColor(R.id.action0, outResultColor[0]);
+                } else if (mN.color != COLOR_DEFAULT) {
+                    button.setTextColor(R.id.action0,resolveContrastColor());
+                }
+            } else {
+                button.setTextViewText(R.id.action0, processLegacyText(action.title));
+                if (mN.color != COLOR_DEFAULT) {
+                    button.setTextColor(R.id.action0, resolveContrastColor());
+                }
             }
             return button;
+        }
+
+        /**
+         * Clears all color spans of a text
+         * @param charSequence the input text
+         * @return the same text but without color spans
+         */
+        private CharSequence clearColorSpans(CharSequence charSequence) {
+            if (charSequence instanceof Spanned) {
+                Spanned ss = (Spanned) charSequence;
+                Object[] spans = ss.getSpans(0, ss.length(), Object.class);
+                SpannableStringBuilder builder = new SpannableStringBuilder(ss.toString());
+                for (Object span : spans) {
+                    Object resultSpan = span;
+                    if (resultSpan instanceof CharacterStyle) {
+                        resultSpan = ((CharacterStyle) span).getUnderlying();
+                    }
+                    if (resultSpan instanceof TextAppearanceSpan) {
+                        TextAppearanceSpan originalSpan = (TextAppearanceSpan) resultSpan;
+                        if (originalSpan.getTextColor() != null) {
+                            resultSpan = new TextAppearanceSpan(
+                                    originalSpan.getFamily(),
+                                    originalSpan.getTextStyle(),
+                                    originalSpan.getTextSize(),
+                                    null,
+                                    originalSpan.getLinkTextColor());
+                        }
+                    } else if (resultSpan instanceof ForegroundColorSpan
+                            || (resultSpan instanceof BackgroundColorSpan)) {
+                        continue;
+                    } else {
+                        resultSpan = span;
+                    }
+                    builder.setSpan(resultSpan, ss.getSpanStart(span), ss.getSpanEnd(span),
+                            ss.getSpanFlags(span));
+                }
+                return builder;
+            }
+            return charSequence;
+        }
+
+        /**
+         * Ensures contrast on color spans against a background color. also returns the color of the
+         * text if a span was found that spans over the whole text.
+         *
+         * @param charSequence the charSequence on which the spans are
+         * @param background the background color to ensure the contrast against
+         * @param outResultColor an array in which a color will be returned as the first element if
+         *                    there exists a full length color span.
+         * @return the contrasted charSequence
+         */
+        private CharSequence ensureColorSpanContrast(CharSequence charSequence, int background,
+                ColorStateList[] outResultColor) {
+            if (charSequence instanceof Spanned) {
+                Spanned ss = (Spanned) charSequence;
+                Object[] spans = ss.getSpans(0, ss.length(), Object.class);
+                SpannableStringBuilder builder = new SpannableStringBuilder(ss.toString());
+                for (Object span : spans) {
+                    Object resultSpan = span;
+                    int spanStart = ss.getSpanStart(span);
+                    int spanEnd = ss.getSpanEnd(span);
+                    boolean fullLength = (spanEnd - spanStart) == charSequence.length();
+                    if (resultSpan instanceof CharacterStyle) {
+                        resultSpan = ((CharacterStyle) span).getUnderlying();
+                    }
+                    if (resultSpan instanceof TextAppearanceSpan) {
+                        TextAppearanceSpan originalSpan = (TextAppearanceSpan) resultSpan;
+                        ColorStateList textColor = originalSpan.getTextColor();
+                        if (textColor != null) {
+                            int[] colors = textColor.getColors();
+                            int[] newColors = new int[colors.length];
+                            for (int i = 0; i < newColors.length; i++) {
+                                newColors[i] = NotificationColorUtil.ensureLargeTextContrast(
+                                        colors[i], background);
+                            }
+                            textColor = new ColorStateList(textColor.getStates().clone(),
+                                    newColors);
+                            resultSpan = new TextAppearanceSpan(
+                                    originalSpan.getFamily(),
+                                    originalSpan.getTextStyle(),
+                                    originalSpan.getTextSize(),
+                                    textColor,
+                                    originalSpan.getLinkTextColor());
+                            if (fullLength) {
+                                outResultColor[0] = new ColorStateList(
+                                        textColor.getStates().clone(), newColors);
+                            }
+                        }
+                    } else if (resultSpan instanceof ForegroundColorSpan) {
+                        ForegroundColorSpan originalSpan = (ForegroundColorSpan) resultSpan;
+                        int foregroundColor = originalSpan.getForegroundColor();
+                        foregroundColor = NotificationColorUtil.ensureLargeTextContrast(
+                                foregroundColor, background);
+                        resultSpan = new ForegroundColorSpan(foregroundColor);
+                        if (fullLength) {
+                            outResultColor[0] = ColorStateList.valueOf(foregroundColor);
+                        }
+                    } else {
+                        resultSpan = span;
+                    }
+
+                    builder.setSpan(resultSpan, spanStart, spanEnd, ss.getSpanFlags(span));
+                }
+                return builder;
+            }
+            return charSequence;
         }
 
         /**
@@ -3953,6 +4118,10 @@ public class Notification implements Parcelable
 
         private int getActionLayoutResource() {
             return R.layout.notification_material_action;
+        }
+
+        private int getEmphasizedActionLayoutResource() {
+            return R.layout.notification_material_action_emphasized;
         }
 
         private int getActionTombstoneLayoutResource() {
@@ -4260,9 +4429,15 @@ public class Notification implements Parcelable
             //          mN.mLargeIcon
             //   2. !mBigLargeIconSet -> mN.mLargeIcon applies
             Icon oldLargeIcon = null;
+            Bitmap largeIconLegacy = null;
             if (mBigLargeIconSet) {
                 oldLargeIcon = mBuilder.mN.mLargeIcon;
                 mBuilder.mN.mLargeIcon = mBigLargeIcon;
+                // The legacy largeIcon might not allow us to clear the image, as it's taken in
+                // replacement if the other one is null. Because we're restoring these legacy icons
+                // for old listeners, this is in general non-null.
+                largeIconLegacy = mBuilder.mN.largeIcon;
+                mBuilder.mN.largeIcon = null;
             }
 
             RemoteViews contentView = getStandardView(mBuilder.getBigPictureLayoutResource());
@@ -4274,6 +4449,7 @@ public class Notification implements Parcelable
 
             if (mBigLargeIconSet) {
                 mBuilder.mN.mLargeIcon = oldLargeIcon;
+                mBuilder.mN.largeIcon = largeIconLegacy;
             }
 
             contentView.setImageViewBitmap(R.id.big_picture, mPicture);
@@ -4477,12 +4653,12 @@ public class Notification implements Parcelable
         }
 
         /**
-         * @param userDisplayName the name to be displayed for any replies sent by the user before the
-         * posting app reposts the notification with those messages after they've been actually
-         * sent and in previous messages sent by the user added in
+         * @param userDisplayName Required - the name to be displayed for any replies sent by the
+         * user before the posting app reposts the notification with those messages after they've
+         * been actually sent and in previous messages sent by the user added in
          * {@link #addMessage(Notification.MessagingStyle.Message)}
          */
-        public MessagingStyle(CharSequence userDisplayName) {
+        public MessagingStyle(@NonNull CharSequence userDisplayName) {
             mUserDisplayName = userDisplayName;
         }
 

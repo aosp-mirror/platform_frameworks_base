@@ -263,4 +263,4 @@ href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-featur
 
 <p class="caution"><strong>注意：</strong>針對同一應用程式發行多個 APK 是進階功能，<strong>多數應用程式應僅發行為諸多裝置組態提供支援的單一 APK</strong>。發行多個 APK 需要您遵循篩選器中的特定規則，並格外注意每個 APK 的版本代碼，以確保每個組態使用正確的更新路徑。</p>
 
-<p>若您需要有關如何在 Google Play 上發行多個 APK 的詳細資訊，請參閱<a href="{@docRoot}google/play/publishing/multiple-apks.html">多 APK 支援</a>。</p> 
+<p>若您需要有關如何在 Google Play 上發行多個 APK 的詳細資訊，請參閱<a href="{@docRoot}google/play/publishing/multiple-apks.html">多 APK 支援</a>。</p>

@@ -23,12 +23,14 @@ import android.os.Parcelable;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.util.AtomicFile;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
+@SmallTest
 public class UserManagerServiceTest extends AndroidTestCase {
     private static String[] STRING_ARRAY = new String[] {"<tag", "<![CDATA["};
     private File restrictionsFile;

@@ -1,0 +1,152 @@
+page.title=作用域目录访问
+page.keywords=Preview、SDK、作用域目录访问
+page.tags=Android N
+
+@jd:body
+
+
+
+
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>本文内容</h2>
+  <ol>
+    <li><a href="#accessing">访问外部存储目录</a></li>
+    <li><a href="#removable">访问可移动介质上的目录</a></li>
+    <li><a href="#best">最佳做法</a></li>
+  </ol>
+</div>
+</div>
+
+<p>应用（如照片应用）通常只需要访问外部存储中的特定目录，例如 <code>Pictures</code> 目录。
+现有的外部存储访问方法未经专门设计，无法轻松地为这些类型的应用提供目标目录访问。
+
+例如：</p>
+
+<ul>
+<li>在您的清单中请求 {@link android.Manifest.permission#READ_EXTERNAL_STORAGE}
+或 {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} 将允许访问外部存储上的所有公共目录，这可能导致访问的内容超出应用需要的内容。
+
+</li>
+<li>使用<a href="{@docRoot}guide/topics/providers/document-provider.html">存储访问框架</a>通常会让您的用户通过一个系统 UI 选取目录，如果应用始终访问同一个外部目录，则该操作没有任何必要。
+
+
+
+</li>
+</ul>
+
+<p>Android N 提供简化的全新 API 以访问通用外部存储目录。
+ </p>
+
+<h2 id="accessing">访问外部存储目录</h2>
+
+<p>使用 <code>StorageManager</code> 类获取适当的
+<code>StorageVolume</code> 实例。然后，通过调用该实例的
+<code>StorageVolume.createAccessIntent()</code> 方法创建一个 Intent。使用此 Intent 访问外部存储目录。
+若要获取所有可用卷的列表，包括可移动介质卷，请使用
+<code>StorageManager.getVolumesList()</code>。
+</p>
+
+<p>如果您有关于特定文件的信息，使用 <code>StorageManager.getStorageVolume(File)</code> 来获得包含该文件的 <code>StorageVolume</code>。
+
+调用在 <code>StorageVolume</code> 上的 <code>createAccessIntent()</code> 以访问文件的外部存储目录。
+
+</p>
+
+<p>
+在二级卷（例如外部 SD 卡）上，当调用 <code>StorageVolume.createAccessIntent()</code> 以请求访问整个卷，而不是特定目录时，传入“null”。如果您向主要卷传入“null”，或者如果您传入无效的目录名，<code>StorageVolume.createAccessIntent()</code> 将返回“null”。
+
+
+
+
+</p>
+
+<p>以下代码段展示如何在主要共享存储中打开<code>Pictures</code> 目录：
+</p>
+
+<pre>
+StorageManager sm = (StorageManager)getSystemService(Context.STORAGE_SERVICE);
+StorageVolume volume = sm.getPrimaryVolume();
+Intent intent = volume.createAccessIntent(Environment.DIRECTORY_PICTURES);
+startActivityForResult(intent, request_code);
+</pre>
+
+<p>系统尝试授予对外部目录的访问权限，并使用一个简化的 UI 向用户确认访问权限（如果需要）：
+</p>
+
+<img src="{@docRoot}images/android-7.0/scoped-directory-access-framed.png" srcset="{@docRoot}images/android-7.0/scoped-directory-access-framed.png 1x,
+{@docRoot}images/android-7.0/scoped-directory-access-framed_2x.png 2x" />
+<p class="img-caption"><strong>图 1.</strong> 一个请求访问 Pictures 目录的应用。
+</p>
+
+<p>如果用户授予访问权限，则系统会调用
+<code>onActivityResult()</code> 重写方法，且结果代码为
+<code>Activity.RESULT_OK</code>，Intent 数据包含 URI。使用提供的 URI 访问目录信息，与使用<a href="{@docRoot}guide/topics/providers/document-provider.html">存储访问框架</a>返回的 URI 类似。
+
+
+
+</p>
+
+<p>如果用户不授予访问权限，则系统会调用
+<code>onActivityResult()</code> 重写方法，且结果代码为
+<code>Activity.RESULT_CANCELED</code>，Intent 数据为 null。</p>
+
+<p class="note"><b>注</b>：获得特定外部目录的访问权限也会获得该目录中子目录的访问权限。
+</p>
+
+<h2 id="removable">访问可移动介质上的目录</h2>
+
+<p>若要使用作用域目录访问来访问可移动介质上的目录，首先要添加一个用于侦听
+{@link android.os.Environment#MEDIA_MOUNTED} 通知的 {@link android.content.BroadcastReceiver}，例如：
+</p>
+
+<pre>
+&lt;receiver
+    android:name=".MediaMountedReceiver"
+    android:enabled="true"
+    android:exported="true" &gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.MEDIA_MOUNTED" /&gt;
+        &lt;data android:scheme="file" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/receiver&gt;
+</pre>
+
+<p>当用户装载可移动介质时，如 SD 卡，系统将发送一则
+{@link android.os.Environment#MEDIA_MOUNTED} 通知。此通知在 Intent 数据中提供一个 <code>StorageVolume</code> 对象，您可用它访问可移动介质上的目录。
+
+以下示例访问可移动介质上的 <code>Pictures</code> 目录：
+</p>
+
+<pre>
+// BroadcastReceiver has already cached the MEDIA_MOUNTED
+// notification Intent in mediaMountedIntent
+StorageVolume volume = (StorageVolume)
+    mediaMountedIntent.getParcelableExtra(StorageVolume.EXTRA_STORAGE_VOLUME);
+volume.createAccessIntent(Environment.DIRECTORY_PICTURES);
+startActivityForResult(intent, request_code);
+</pre>
+
+<h2 id="best">最佳做法</h2>
+
+<p>请尽可能保留外部目录访问 URI，这样即不必重复要求用户授予访问权限。
+在用户授予访问权限后，使用目录访问 URI 调用
+<code>getContentResolver().takePersistableUriPermssion()</code>。
+系统将保留此 URI，后续的访问请求将返回 <code>RESULT_OK</code>，且不会向用户显示确认 UI。
+
+</p>
+
+<p>如果用户拒绝授予外部目录访问权限，请勿立即再次请求访问权限。
+一再不停地请求访问权限会导致非常差的用户体验。
+如果用户拒绝了一项请求，而应用再次请求访问，UI 会显示一个 <b>Don't ask again</b> 复选框：
+</p>
+
+<img src="{@docRoot}images/android-7.0/scoped-directory-access-dont-ask.png" srcset="{@docRoot}images/android-7.0/scoped-directory-access-dont-ask.png 1x,
+{@docRoot}images/android-7.0/scoped-directory-access-dont-ask_2x.png 2x" />
+<p class="img-caption"><strong>图 1.</strong> 应用第二次请求访问可移动介质。
+</p>
+
+<p>如果用户选择 <b>Don't ask again</b> 并拒绝请求，您的应用向指定目录提出的所有未来请求都将被自动拒绝，并且将不会有请求 UI 呈现给用户。
+
+</p>

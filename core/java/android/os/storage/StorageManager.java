@@ -20,6 +20,7 @@ import static android.net.TrafficStats.MB_IN_BYTES;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SdkConstant;
 import android.app.ActivityThread;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -45,8 +46,11 @@ import android.util.SparseArray;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.Preconditions;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -92,6 +96,19 @@ public class StorageManager {
     /** {@hide} */
     public static final String UUID_PRIMARY_PHYSICAL = "primary_physical";
 
+
+    /**
+     * Activity Action: Allows the user to manage their storage. This activity provides the ability
+     * to free up space on the device by deleting data such as apps.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_STORAGE
+            = "android.os.storage.action.MANAGE_STORAGE";
+
     /** {@hide} */
     public static final int DEBUG_FORCE_ADOPTABLE = 1 << 0;
     /** {@hide} */
@@ -115,6 +132,15 @@ public class StorageManager {
     public static final int FLAG_INCLUDE_INVISIBLE = 1 << 10;
 
     private static volatile IMountService sMountService = null;
+
+    // TODO: the location of the primary storage block varies from device to device, so we need to
+    // try the most likely candidates - a long-term solution would be a device-specific vold
+    // function that returns the calculated size.
+    private static final String[] INTERNAL_STORAGE_SIZE_PATHS = {
+            "/sys/block/mmcblk0/size",
+            "/sys/block/sda/size"
+    };
+    private static final int INTERNAL_STORAGE_SECTOR_SIZE = 512;
 
     private final Context mContext;
     private final ContentResolver mResolver;
@@ -901,6 +927,27 @@ public class StorageManager {
      */
     public @NonNull StorageVolume getPrimaryStorageVolume() {
         return getVolumeList(UserHandle.myUserId(), FLAG_REAL_STATE | FLAG_INCLUDE_INVISIBLE)[0];
+    }
+
+    /** {@hide} */
+    public long getPrimaryStorageSize() {
+        for (String path : INTERNAL_STORAGE_SIZE_PATHS) {
+            final long numberBlocks = readLong(path);
+            if (numberBlocks > 0) {
+                return numberBlocks * INTERNAL_STORAGE_SECTOR_SIZE;
+            }
+        }
+        return 0;
+    }
+
+    private long readLong(String path) {
+        try (final FileInputStream fis = new FileInputStream(path);
+                final BufferedReader reader = new BufferedReader(new InputStreamReader(fis));) {
+            return Long.parseLong(reader.readLine());
+        } catch (Exception e) {
+            Slog.w(TAG, "Could not read " + path, e);
+            return 0;
+        }
     }
 
     /** @removed */

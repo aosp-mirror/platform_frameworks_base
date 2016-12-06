@@ -10,8 +10,8 @@ next.link=screendensities.html
 
 
 <!-- This is the training bar -->
-<div id="tb-wrapper"> 
-<div id="tb"> 
+<div id="tb-wrapper">
+<div id="tb">
 
 <h2>This lesson teaches you to</h2>
 <ol>
@@ -30,27 +30,27 @@ next.link=screendensities.html
   <li><a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a></li>
 </ul>
 
-<h2>Try it out</h2> 
- 
-<div class="download-box"> 
+<h2>Try it out</h2>
+
+<div class="download-box">
 <a href="http://developer.android.com/shareables/training/NewsReader.zip" class="button">Download
   the sample app</a>
-<p class="filename">NewsReader.zip</p> 
-</div> 
- 
-</div> 
-</div> 
+<p class="filename">NewsReader.zip</p>
+</div>
+
+</div>
+</div>
 
 <p>This lesson shows you how to support different screen sizes by:</p>
-<ul> 
-  <li>Ensuring your layout can be adequately resized to fit the screen</li> 
-  <li>Providing appropriate UI layout according to screen configuration</li> 
+<ul>
+  <li>Ensuring your layout can be adequately resized to fit the screen</li>
+  <li>Providing appropriate UI layout according to screen configuration</li>
   <li>Ensuring the correct layout is applied to the correct screen</li>
-  <li>Providing bitmaps that scale correctly</li> 
-</ul> 
+  <li>Providing bitmaps that scale correctly</li>
+</ul>
 
 
-<h2 id="TaskUseWrapMatchPar">Use "wrap_content" and "match_parent"</h2> 
+<h2 id="TaskUseWrapMatchPar">Use "wrap_content" and "match_parent"</h2>
 
 <p>To ensure that your layout is flexible and adapts to different screen sizes,
 you should use <code>"wrap_content"</code> and <code>"match_parent"</code> for the width
@@ -78,11 +78,11 @@ width and height:</p>
 and landscape (right).</p>
 
 
-<h2 id="TaskUseRelativeLayout">Use RelativeLayout</h2> 
+<h2 id="TaskUseRelativeLayout">Use RelativeLayout</h2>
 
 <p>You can construct fairly complex layouts using nested instances of {@link
 android.widget.LinearLayout} and
-combinations of <code>"wrap_content"</code> and <code>"match_parent"</code> sizes. 
+combinations of <code>"wrap_content"</code> and <code>"match_parent"</code> sizes.
 However, {@link android.widget.LinearLayout} does not allow you to precisely control the
 spacial relationships of child views; views in a {@link android.widget.LinearLayout} simply line up
 side-by-side. If you need child views to be oriented in variations other than a straight line, a
@@ -139,8 +139,8 @@ the right side of the screen.</p>
 spatial relationships are preserved as specified by the {@link
 android.widget.RelativeLayout.LayoutParams}.</p>
 
- 
-<h2 id="TaskUseSizeQuali">Use Size Qualifiers</h2> 
+
+<h2 id="TaskUseSizeQuali">Use Size Qualifiers</h2>
 
 <p>There's only so much mileage you can get from a flexible layout or relative layout
 like the one in the previous sections. While those layouts adapt to
@@ -148,7 +148,7 @@ different screens by stretching the space within and around components, they
 may not provide the best user experience for each screen size. Therefore, your
 application should not only implement flexible layouts, but should also provide
 several alternative layouts to target different screen configurations. You do
-so by using <a href="http://developer.android.com/guide/practices/screens_support.html#qualifiers">configuration qualifiers</a>, which allows the runtime 
+so by using <a href="http://developer.android.com/guide/practices/screens_support.html#qualifiers">configuration qualifiers</a>, which allows the runtime
 to automatically select the appropriate resource based on the current device’s
 configuration (such as a different layout design for different screen sizes).</p>
 
@@ -209,13 +209,13 @@ layout.</p>
 
 <p>However, this won't work well on pre-3.2 devices, because they don't
 recognize <code>sw600dp</code> as a size qualifier, so you still have to use the <code>large</code>
-qualifier as well. So, you should have a file named 
+qualifier as well. So, you should have a file named
 <code>res/layout-large/main.xml</code>
 which is identical to <code>res/layout-sw600dp/main.xml</code>. In the next section
 you'll see a technique that allows you to avoid duplicating the layout files this way.</p>
 
 
-<h2 id="TaskUseAliasFilters">Use Layout Aliases</h2> 
+<h2 id="TaskUseAliasFilters">Use Layout Aliases</h2>
 
 <p>The smallest-width qualifier is available only on Android 3.2 and above.
 Therefore, you should also still use the abstract size bins (small, normal,
@@ -271,7 +271,7 @@ applied to tablets and TVs regardless of Android version (pre-3.2 tablets and TV
 {@code large}, and post-3.2 will match <code>sw600dp</code>).</p>
 
 
-<h2 id="TaskUseOriQuali">Use Orientation Qualifiers</h2> 
+<h2 id="TaskUseOriQuali">Use Orientation Qualifiers</h2>
 
 <p>Some layouts work well in both landscape and portrait orientations, but most of them can
 benefit from adjustments. In the News Reader sample app, here is how the layout
@@ -287,7 +287,7 @@ behaves in each screen size and orientation:</p>
 <li><b>TV, landscape:</b> dual pane, wide, with action bar</li>
 </ul></p>
 
-<p>So each of these layouts is defined in an XML file in the 
+<p>So each of these layouts is defined in an XML file in the
 <code>res/layout/</code> directory. To then assign each layout to the various screen
 configurations, the app uses layout aliases to match them to
 each configuration:</p>
@@ -361,7 +361,7 @@ borders indicate the places where the image can be stretched, and the ones on
 the right and bottom borders indicate where the content should be
 placed.</p>
 
-<p>Also, notice the <code>.9.png</code> extension. You must use this 
+<p>Also, notice the <code>.9.png</code> extension. You must use this
 extension, since this is how the framework detects that this is a nine-patch
 image, as opposed to a regular PNG image.</p>
 

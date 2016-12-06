@@ -140,6 +140,18 @@ public class PhoneConstants {
     /** APN type for Emergency PDN. This is not an IA apn, but is used
      * for access to carrier services in an emergency call situation. */
     public static final String APN_TYPE_EMERGENCY = "emergency";
+    /** Array of all APN types */
+    public static final String[] APN_TYPES = {APN_TYPE_DEFAULT,
+            APN_TYPE_MMS,
+            APN_TYPE_SUPL,
+            APN_TYPE_DUN,
+            APN_TYPE_HIPRI,
+            APN_TYPE_FOTA,
+            APN_TYPE_IMS,
+            APN_TYPE_CBS,
+            APN_TYPE_IA,
+            APN_TYPE_EMERGENCY
+    };
 
     public static final int RIL_CARD_MAX_APPS    = 8;
 
@@ -208,4 +220,14 @@ public class PhoneConstants {
     public static final int AUTH_CONTEXT_EAP_SIM = 128;
     public static final int AUTH_CONTEXT_EAP_AKA = 129;
     public static final int AUTH_CONTEXT_UNDEFINED = -1;
+
+    /**
+     * Value for the global property CELL_ON
+     *  0: Cell radio is off
+     *  1: Cell radio is on
+     *  2: Cell radio is off because airplane mode is enabled
+     */
+    public static final int CELL_OFF_FLAG = 0;
+    public static final int CELL_ON_FLAG = 1;
+    public static final int CELL_OFF_DUE_TO_AIRPLANE_MODE_FLAG = 2;
 }

@@ -531,7 +531,7 @@ numMessages = 0;
             <li>
                 必要に応じて、{@link android.support.v4.app.TaskStackBuilder#editIntentAt TaskStackBuilder.editIntentAt()} を呼び出し、スタック上の {@link android.content.Intent} オブジェクトに引数を追加します。
 
-これは、場合によっては、ターゲット {@link android.app.Activity} に、ユーザーが 
+これは、場合によっては、ターゲット {@link android.app.Activity} に、ユーザーが
 
  <i>[戻る]</i> を使って移動したときに、適切なデータが表示されるようにするために必要です。
             </li>

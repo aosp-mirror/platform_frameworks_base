@@ -165,9 +165,9 @@ page.tags=valueanimator,objectanimator,layouttransition,ViewPropertyAnimator
   "{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/animation/index.html">API
   Demos</a> sample project provides many examples on how to use the property
   animation system.</p>
-  
+
   <h2 id="property-vs-view">How Property Animation Differs from View Animation</h2>
-  
+
   <p>The view animation system provides the capability to only animate {@link android.view.View}
   objects, so if you wanted to animate non-{@link android.view.View} objects, you have to implement
   your own code to do so. The view animation system is also constrained in the fact that it only
@@ -594,7 +594,7 @@ implementations of the methods that you can choose to override.</p>
   for just the {@link android.animation.Animator.AnimatorListener#onAnimationEnd onAnimationEnd()}
   callback:</p>
   <pre>
-ValueAnimatorAnimator fadeAnim = ObjectAnimator.ofFloat(newBall, "alpha", 1f, 0f);
+ValueAnimator fadeAnim = ObjectAnimator.ofFloat(newBall, "alpha", 1f, 0f);
 fadeAnim.setDuration(250);
 fadeAnim.addListener(new AnimatorListenerAdapter() {
 public void onAnimationEnd(Animator animation) {

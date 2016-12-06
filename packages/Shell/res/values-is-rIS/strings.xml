@@ -21,7 +21,7 @@
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Villutilkynning <xliff:g id="ID">#%d</xliff:g> búin til"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Bætir upplýsingum við villutilkynningu"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Augnablik..."</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Strjúktu til vinstri til að deila villuskýrslunni"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Villuskýrslan birtist brátt í símanum"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Ýttu til að deila villutilkynningunni"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Ýttu til að deila villutilkynningunni án skjámyndar eða hinkraðu þangað til skjámyndin er tilbúin"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Ýttu til að deila villutilkynningunni án skjámyndar eða hinkraðu þangað til skjámyndin er tilbúin"</string>

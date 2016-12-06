@@ -46,7 +46,7 @@ import java.util.ArrayList;
  */
 class DockRegion {
     public static TaskStack.DockState[] PHONE_LANDSCAPE = {
-            // We only allow docking to the left for now on small devices
+            // We only allow docking to the left in landscape for now on small devices
             TaskStack.DockState.LEFT
     };
     public static TaskStack.DockState[] PHONE_PORTRAIT = {
@@ -113,10 +113,11 @@ public class RecentsViewTouchHandler {
         boolean isLandscape = mRv.getResources().getConfiguration().orientation ==
                 Configuration.ORIENTATION_LANDSCAPE;
         RecentsConfiguration config = Recents.getConfiguration();
-        TaskStack.DockState[] dockStates = isLandscape ?
-                (config.isLargeScreen ? DockRegion.TABLET_LANDSCAPE : DockRegion.PHONE_LANDSCAPE) :
-                (config.isLargeScreen ? DockRegion.TABLET_PORTRAIT : DockRegion.PHONE_PORTRAIT);
-        return dockStates;
+        if (config.isLargeScreen) {
+            return isLandscape ? DockRegion.TABLET_LANDSCAPE : DockRegion.TABLET_PORTRAIT;
+        } else {
+            return isLandscape ? DockRegion.PHONE_LANDSCAPE : DockRegion.PHONE_PORTRAIT;
+        }
     }
 
     /**
@@ -226,7 +227,7 @@ public class RecentsViewTouchHandler {
                         // Give priority to the current drop target to retain the touch handling
                         if (mLastDropTarget != null) {
                             if (mLastDropTarget.acceptsDrop((int) evX, (int) evY, width, height,
-                                    true /* isCurrentTarget */)) {
+                                    mRv.mSystemInsets, true /* isCurrentTarget */)) {
                                 currentDropTarget = mLastDropTarget;
                             }
                         }
@@ -235,7 +236,7 @@ public class RecentsViewTouchHandler {
                         if (currentDropTarget == null) {
                             for (DropTarget target : mDropTargets) {
                                 if (target.acceptsDrop((int) evX, (int) evY, width, height,
-                                        false /* isCurrentTarget */)) {
+                                        mRv.mSystemInsets, false /* isCurrentTarget */)) {
                                     currentDropTarget = target;
                                     break;
                                 }

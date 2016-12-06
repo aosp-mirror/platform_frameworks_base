@@ -1,0 +1,1039 @@
+page.title=Android N for Developers
+meta.tags="preview", "androidn"
+page.tags="preview", "developer preview"
+page.image=images/cards/card-n-apis_2x.png
+@jd:body
+
+
+
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>주요 개발자 기능</h2>
+  <ol>
+      <ul style="list-style-type:none;">
+        <li><a href="#multi-window_support">다중 창 지원</a></li>
+        <li><a href="#notification_enhancements">알림</a></li>
+        <li><a href="#jit_aot">JIT/AOT 컴파일</a></li>
+        <li><a href="#quick_path_to_app_install">앱 설치를 위한 빠른 경로</a></li>
+        <li><a href="#doze_on_the_go">이동 중 잠자기 모드</a></li>
+        <li><a href="#background_optimizations">백그라운드 최적화</a></li>
+        <li><a href="#data_saver">Data Saver</a></li>
+        <li><a href="#vulkan">Vulkan API</a></li>
+        <li><a href="#tile_api">Quick Settings 타일 API</a></li>
+        <li><a href="#number-blocking">번호 차단</a></li>
+        <li><a href="#call_screening">통화 스크리닝</a></li>
+        <li><a href="#multi-locale_languages">로케일 및 언어</a></li>
+        <li><a href="#emoji">새 이모티콘</a></li>
+        <li><a href="#icu4">Android의 ICU4J API</a></li>
+        <li><a href="#gles_32">OpenGL ES 3.2 API</a></li>
+        <li><a href="#android_tv_recording">Android TV 녹화</a></li>
+        <li><a href="#android_for_work">Android for Work</a></li>
+        <li><a href="#accessibility_enhancements">접근성</a></li>
+        <li><a href="#direct_boot">직접 부팅</a></li>
+        <li><a href="#key_attestation">Key Attestation</a></li>
+        <li><a href="#network_security_config">네트워크 보안 구성</a></li>
+        <li><a href="#default_trusted_ca">신뢰할 수 있는 기본 CA</a></li>
+        <li><a href="#apk_signature_v2">APK Signature Scheme v2</a></li>
+        <li><a href="#scoped_directory_access">범위가 지정된 디렉터리 액세스</a></li>
+        <li><a href="#keyboard_shortcuts_helper">Keyboard Shortcuts Helper</a></li>
+        <li><a href="#sustained_performance_api">지속적인 성능 API</a></li>
+        <li><a href="#vr">VR 지원</a></li>
+        <li><a href="#print_svc">인쇄 서비스 개선 사항</a></li>
+        <li><a href="#virtual_files">가상 파일</a></li>
+        <li><a href="#framemetrics_api">FrameMetricsListener API</a></li>
+      </ol>
+</div>
+</div>
+
+
+
+<p>Android N은 아직 한창 개발 중이지만, N Developer Preview를
+통해 지금 Android N을 일부 체험해 볼 수 있습니다. 아래 섹션에서는
+개발자를 위한 몇 가지 새로운 기능을 중점적으로 다룹니다. </p>
+
+<p>
+  플랫폼 변경 사항이 앱에 영향을 미칠 수도 있는 부분에
+대해 알아보려면 <a href="{@docRoot}preview/behavior-changes.html">동작 변경 사항</a>을 살펴보고,
+ 주요 기능에 대해 자세히 알아보려면 개발자 가이드를 참조하고, 새로운 API에 대한 자세한
+내용을 보려면 <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API 참조</a>를 다운로드하세요.
+</p>
+
+<h2 id="multi-window_support">다중 창 지원</h2>
+
+
+<p>Android N에서 저희는 요청이 많은 새로운 멀티태스킹
+기능인 다중 창 지원을 플랫폼에 도입하고 있습니다. </p>
+
+  <p>이제 사용자가 화면에서 두 개의 앱을 동시에 열 수 있습니다. </p>
+  <ul>
+  <li>Android N이 실행되는
+전화와 태블릿에서 사용자가 화면 분할 모드에서 두 개의 앱을
+나란히 또는 상하로 실행할 수 있습니다. 또한 앱 사이에 있는 분할선을 끌어서 앱의 크기를
+조정할 수 있습니다. </li>
+
+<li>Android TV 기기에서, 앱이 <a href="{@docRoot}preview/features/picture-in-picture.html">PIP(Picture-In-Picture)
+모드</a>로 배치될 수 있으므로, 사용자가 검색을 수행하거나 다른
+앱과 상호 작용하는 중에도 앱이 계속해서 콘텐츠를 표시할 수 있습니다.</li>
+  </ul>
+
+<div class="col-4of10">
+<img src="{@docRoot}images/android-7.0/mw-portrait.png" alt="" style="height:460px;padding-left:1em;" id="img-split-screen" />
+<p class="img-caption">
+  <strong>그림 1.</strong> 화면 분할 모드에서 실행되는 앱.
+</p>
+
+  </div>
+
+<p>특히 태블릿이나 다른 대형 화면 기기에서 다중 창
+지원을 통해 새로운 방식으로 사용자를 참여시킬 수 있습니다. 또한, 앱에서 드래그 앤 드롭 기능을 활성화하여
+사용자가 편리하게 앱에서나 앱으로 콘텐츠를 드래그할
+수 있으므로, 사용자 환경이 크게 개선됩니다. </p>
+
+<p>다중 창 지원을 앱에 추가하고 다중 창이 표시되는 방식을
+구성하는 것은 매우 간단합니다. 예를 들어, 액티비티의
+최소 허용 크기를 지정하면 사용자가 액티비티의 크기를 지정된 크기보다
+작게 조정하지 못합니다. 또한, 앱에 대해 다중 창 표시를 비활성화할 수도 있으며
+ 이 경우 시스템은 전체 화면 모드에서만 앱을 표시합니다.</p>
+
+<p>
+  자세한 내용은 <a href="{@docRoot}preview/features/multi-window.html">다중 창 지원</a>
+ 개발자 문서를 참조하세요.
+</p>
+
+<h2 id="notification_enhancements">알림 향상</h2>
+
+<p>Android N에서 저희는 알림을 더 쉽고 빠르게 사용할 수
+있도록 재설계했습니다. 몇 가지 변경 사항은 다음과 같습니다.</p>
+
+<ul>
+  <li>
+    <strong>템플릿 업데이트</strong>: 히어로 이미지와 아바타를 새롭게
+ 강조하기 위해 알림 템플릿을 업데이트하는 중입니다. 개발자는 최소한의
+ 코드 조정만으로 새로운 템플릿을 활용할 수 있습니다.
+  </li>
+
+  <li>
+    <strong>메시지 스타일 사용자 지정</strong>: <code>MessageStyle</code> 클래스를 사용하여
+ 알림과 관련된 사용자 인터페이스 레이블을 더 많이
+사용자 지정할 수 있습니다. 메시지, 대화 제목, 콘텐츠 뷰를
+ 구성할 수 있습니다.
+  </li>
+
+  <li>
+    <strong>묶음 알림</strong>: 시스템에서 메시지를 함께
+ 그룹화하고(예: 메시지 주제별로 그룹화) 해당 그룹을 표시할 수 있습니다. 사용자는
+ 이 그룹에 대해 해제 또는 보관과 같은 동작을 적절히 수행할 수 있습니다. Android
+ Wear용 알림을 구현한 적이 있으시다면 이미 이 모델도 친숙하게 느껴질
+ 것입니다.
+  </li>
+
+  <li>
+    <strong>직접 회신</strong>: 실시간 통신 앱의 경우 Android 시스템은
+ 인라인 회신을 지원하므로, 사용자가 알림 인터페이스
+ 내에서 신속하게 SMS 또는 텍스트 메시지에 직접 응답할 수 있습니다.
+  </li>
+
+  <li>
+    <strong>사용자 지정 뷰</strong>: 두 개의 새로운 API를 사용하면 알림에 사용자
+ 지정 뷰를 사용할 때 시스템 장식(예: 알림 헤더 및 액션)을
+ 활용할 수 있습니다.
+  </li>
+</ul>
+
+<div class="col-4of12">
+  <img src="{@docRoot}images/android-7.0/notifications-1.png" alt="" style="padding:.5em;max-width:226px">
+</div>
+
+<div class="col-4of12">
+  <img src="{@docRoot}images/android-7.0/notifications-3.png" alt="" style="padding:.5em;max-width:226px">
+</div>
+
+<div class="col-4of12">
+  <img src="{@docRoot}images/android-7.0/notifications-2.png" alt="" style="padding:.5em;max-width:226px">
+</div>
+
+
+<p class="img-caption">
+  <strong>그림 2.</strong> 묶음 알림 및 직접 회신.
+</p>
+
+<p>새로운 기능을 구현하는 방법에 대해 알아보려면
+ <a href="{@docRoot}preview/features/notification-updates.html">알림</a>
+가이드를 참조하세요.</p>
+
+
+
+<h2 id="jit_aot">프로필 가이드 방식의 JIT/AOT 컴파일</h2>
+
+<p>Android N에서 저희는 코드 프로파일링이 있는
+JIT(Just in Time) 컴파일러를 ART에 추가했습니다. 이를 통해 ART에서 Android 앱이 실행되는 동안
+그 성능을 계속 향상시킬 수 있습니다. JIT 컴파일러는 ART의 현재 AOT(Ahead of Time) 컴파일러를 보완하고
+런타임 성능을 개선하고, 저장 공간을 절약하고, 앱 업데이트와
+시스템 업데이트의 시간 단축을 도와줍니다.</p>
+
+<p>프로필 가이드 방식의 컴파일을 통해 ART는 실제 사용량과 기기의
+조건에 따라 각 앱의 AOT/JIT 컴파일을 관리할 수 있습니다. 예를 들어, ART는 최상의 성능을 위해 각 앱의 핫 메서드에 대한 프로필을
+유지 관리하고 이들 메서드를 미리 컴파일하고
+캐시할 수 있습니다. 이 경우 앱의 다른 부분들은
+실제로 사용될 때까지 컴파일되지 않고 유지됩니다.</p>
+
+<p>프로필 가이드 방식의
+컴파일은 앱의 주요 부분들의 성능을 높여줄 뿐만 아니라,
+관련 바이너리를 비롯한 앱의 전체 RAM 공간을 줄이는 데 도움이 됩니다. 이 기능은 저용량 메모리 기기에 특히 중요합니다.</p>
+
+<p>ART는 기기 배터리에 미치는 영향이 최소화되는 방식으로
+프로필 가이드 방식의 컴파일을 관리합니다. ART는 기기가 유휴 상태이고 충전 중일 때만 사전 컴파일을 수행하며,
+해당 작업을 미리 수행함으로써 시간과 배터리를 절약합니다.</p>
+
+<h2 id="quick_path_to_app_install">앱 설치를 위한 빠른 경로</h2>
+
+<p>ART의 JIT 컴파일러가 가진 가장 눈에 띄는 이점 중 하나는
+앱 설치 및 시스템 업데이트 속도가 빠르다는 것입니다. Android 6.0에서 최적화하고 설치하는 데
+몇 분이 걸리는 대용량 앱조차도 이제는 단 몇 초 만에 설치할 수
+있습니다. 또한, 더 이상 최적화 단계가 없으므로 시스템 업데이트도 더 빠르게 이루어집니다. </p>
+
+<h2 id="doze_on_the_go">이동 중 잠자기 모드...</h2>
+
+<p>Android 6.0에서는 기기가 테이블 위에 올려져 있거나 서랍 안에
+들어 있는 등의 유휴 상태일 때 앱이 CPU와 네트워크를 사용하는 작업을 지연시킴으로써 배터리를
+절약하는 시스템 모드인 잠자기 모드를 도입했습니다. </p>
+
+<p>이제 Android N에서 잠자기 모드는 한걸음 더 나아가서 이동 중에도
+배터리를 절약합니다. 화면이 일정 시간 동안 꺼져 있고 기기의 플러그가
+뽑혀 있으면 잠자기 모드는 친숙한 일부 CPU 및 네트워크 제한을 앱에 적용합니다.
+즉, 사용자가 기기를 주머니에 휴대하고 다닐 때도 배터리를
+절약할 수 있습니다.</p>
+
+
+<img src="/preview/images/doze-diagram-1.png" alt="" id="figure1" />
+<p class="img-caption">
+  <strong>그림 3.</strong> 이제 잠자기 모드는 기기가 정지 상태가 아니더라도
+배터리 수명을 개선할 수 있도록 제한을 적용합니다.
+</p>
+
+
+<p>기기의 배터리가 켜져 있는 동안 화면이 꺼지면 잠시 후에
+잠자기 모드는 네트워크 액세스를 제한하고 작업과 동기화를 지연시킵니다. 잠시 동안의 유지 관리 기간 중에
+애플리케이션의 네트워크 액세스가 허용되고
+지연된 작업/동기화가 실행됩니다. 화면을 켜거나 기기의 플러그를 꽂으면 기기가 잠자기 모드 상태에서
+벗어납니다.</p>
+
+<p>기기가 다시 일정 시간 동안 배터리로 켜져 있고 화면이 꺼진
+정지 상태가 되면, 잠자기 모드는 {@link
+android.os.PowerManager.WakeLock}, {@link android.app.AlarmManager} 알람 및
+GPS/Wi-Fi 스캔에 대해 전체 CPU 및 네트워크 제한을 적용합니다.</p>
+
+<p>앱을 잠자기 모드에 맞게 적용하는 최선의 방법은 기기가 움직이든
+움직이지 않든 동일합니다. 따라서 잠자기 모드를 효율적으로 처리하도록
+앱을 이미 업데이트했다면 모든 준비가 완료된 것입니다. 아직 업데이트하지 않았다면 지금 <a href="{@docRoot}training/monitoring-device-state/doze-standby.html#assessing_your_app">앱을 잠자기 모드에 맞춰
+조정</a>해 보세요.</p>
+
+<h2 id="background_optimizations">Project Svelte: 백그라운드 최적화</h2>
+
+<p>Project Svelte는 에코시스템에 속한 전체 Android 기기에서 시스템 및 앱에
+의해 사용되는 RAM 크기를 최소화하기 위한 지속적인 노력입니다. Android N에서 Project
+Svelte는 앱이 백그라운드에서 실행되는 방식을 최적화하는 데 초점을 맞추고 있습니다. </p>
+
+<p>백그라운드 처리는 대부분의 앱에서 필수적인 부분입니다. 백그라운드 처리가 올바로
+수행된다면 즉각적이고 빠르고 상황에 맞는 멋진 사용자 환경을 만들 수 있지만, 백그라운드
+처리가 올바로 수행되지 않는다면 RAM과 배터리를 불필요하게 소모하고
+다른 앱의 시스템 성능에 영향을 미칠 것입니다. </p>
+
+<p>Android 5.0 이후로,
+사용자가 선호하는 백그라운드 작업
+수행 방식은 {@link android.app.job.JobScheduler}였습니다. 앱은 메모리, 전원 및 연결 상태에 따라 시스템을 최적화하면서도
+작업을 예약할 수 있습니다. JobScheduler는 제어 기능과 간편성을 함께
+제공하므로, 저희는 모든 앱에서 이것을 사용하기 원합니다. </p>
+
+<p>
+  또 한 가지 좋은 옵션은 <a href="https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
+<code>GCMNetworkManager</code></a>입니다. 이는 Google Play
+ 서비스의 일부분으로, 레거시 Android 버전에서 호환성이
+ 있는 유사한 작업 예약을 제공합니다.
+</p>
+
+<p>Google에서는 더 많은 사용 사례를 충족시키기 위해 <code>JobScheduler</code> 및
+<code>GCMNetworkManager</code>를 계속
+확장하고 있습니다. 예를 들어, 이제 Android N에서는 콘텐츠 공급자의 변화에 따라
+ 백그라운드 작업을 예약할 수 있습니다. 이와 동시에, Google에서는 특히
+저용량 메모리 기기에서 시스템 성능을 저하시킬 수
+있는 일부 오래된 패턴들을 없애기 시작했습니다.</p>
+
+<p>Android N에서 저희는 자주 사용되는 세 가지 암시적 브로드캐스트인
+ {@link android.net.ConnectivityManager#CONNECTIVITY_ACTION}, {@link
+ android.hardware.Camera#ACTION_NEW_PICTURE} 및 {@link
+ android.hardware.Camera#ACTION_NEW_VIDEO}를
+제거하는 중입니다. 왜냐하면 이것들은 여러 앱의 백그라운드 프로세스를 동시에 깨워서 메모리와 배터리를 과도하게 소모시킬 수 있기 때문입니다. 앱이
+이러한 브로드캐스트를 수신한다면, N Developer Preview를
+  활용하여 <code>JobScheduler</code> 및 관련 API로 마이그레이션하세요. </p>
+
+<p>
+  자세한 내용은 <a href="{@docRoot}preview/features/background-optimization.html">백그라운드
+ 최적화</a> 문서를 참조하세요.
+</p>
+
+
+<h2 id="data_saver">Data Saver</h2>
+
+<div class="col-5of12" style="margin-right:1.5em;">
+<img src="{@docRoot}images/android-7.0/datasaver.png" style="border:2px solid #ddd">
+
+<p class="img-caption" style="padding-right:2em;">
+  <strong>그림 4.</strong> Settings의 Data Saver.
+</p>
+  </div>
+
+<p>모바일 기기의 수명 전체에 걸쳐, 모바일 데이터 요금제에 따른 비용이
+기기 자체의 가격보다 일반적으로 많이 듭니다. 많은 사용자들에게 모바일 데이터는
+아껴 써야 하는 값비싼 자원입니다. </p>
+
+<p>Android N에서는 새로운 시스템 서비스인 Data Saver
+모드를 도입하며, Data Saver는 로밍 시나 결제 주기가 끝날 무렵
+또는 소액 선불 데이터 팩 사용 시에 앱에 의해 사용되는 모바일 데이터 사용량을 줄여줍니다. Data Saver를 통해 사용자는 앱이
+모바일 데이터를 사용하는 방식을 제어할 수 있으며, Data Saver가 켜져 있을 때 개발자가 더 효율적인 서비스를
+제공할 수 있습니다. </p>
+
+<p>사용자가 <strong>Settings</strong>에서 Data Saver를 활성화하고
+해당 기기가 데이터 통신 네트워크에 있는 경우, 시스템은 백그라운드
+데이터 사용을 차단하고, 가능하면 스트리밍의
+비트 전송률을 제한하거나 화질을 줄이거나 낙관적 사전 캐싱을
+지연시키는 등의 방식으로 포그라운드에서 데이터를 더 적게 사용하도록 앱에게 신호를 보냅니다. 사용자는 Data Saver가 켜진 경우에도 백그라운드 데이터 통신 연결을 허용하기 위해
+특정 앱을 허용 목록에 추가할 수 있습니다.</p>
+
+<p>Android N은 {@link android.net.ConnectivityManager}를 확장하여 <a href="{@docRoot}preview/features/data-saver.html#status">사용자의
+Data Saver 기본 설정을 검색</a>하고 <a href="{@docRoot}preview/features/data-saver.html#monitor-changes">기본
+설정 변경을 모니터링</a>하는 방법을
+앱에 제공합니다. 모든 앱은 사용자가 Data Saver를 활성화했는지 여부를 확인해야 하며
+포그라운드 및 백그라운드 데이터 사용을 제한하도록 노력해야 합니다.</p>
+
+
+<h2 id="vulkan">Vulkan API</h2>
+
+<p>
+  Android N은 새로운 3D 렌더링 API인 <a href="http://www.khronos.org/vulkan" class="external-link">Vulkan™</a>을 플랫폼에 통합합니다.
+<a href="https://www.khronos.org/opengles/" class="external-link">OpenGL™
+ ES</a>와 마찬가지로, Vulkan은 Khronos Group에 의해 관리되는 3D 그래픽 및 렌더링을 위한
+ 공개 표준입니다.
+</p>
+
+<p>
+  Vulkan은 처음부터 드라이버에서 CPU 오버헤드를 최소화하도록 설계되었고,
+ 애플리케이션이 GPU 작업을 더욱 직접적으로 제어할 수 있게 해줍니다. 또한, Vulkan은
+ 멀티스레드가 명령 버퍼 생성과 같은 작업을
+한 번에 수행하도록 허용하여 병렬 처리 성능을 높입니다.
+</p>
+
+<p>
+  Vulkan 개발 도구와 라이브러리가 Android NDK에 배포되며, 그 포함 내역은
+ 다음과 같습니다.
+</p>
+
+<ul>
+  <li>헤더
+  </li>
+
+  <li>유효성 검사 계층(디버그 라이브러리)
+  </li>
+
+  <li>SPIR-V 셰이더 컴파일러
+  </li>
+
+  <li>SPIR-V 런타임 셰이더 컴파일 라이브러리
+  </li>
+</ul>
+
+<p>
+  Vulkan은 Nexus 5X, Nexus 6P 및 Nexus Player와 같은 Vulkan 지원 하드웨어가 있는 기기의
+ 앱에만 사용될 수 있습니다. Google은
+ 최대한 조속히 Vulkan을 더 많은 기기에 도입하기 위해 파트너들과 긴밀히 협력하고 있습니다.
+</p>
+
+<p>
+  자세한 내용은 <a href="{@docRoot}ndk/guides/graphics/index.html">API 문서</a>를 참조하세요.
+</p>
+
+<h2 id="tile_api">Quick Settings 타일 API</h2>
+
+
+<div style="float:right;max-width:320px">
+<img src="{@docRoot}images/android-7.0/quicksettings.png" style="padding-left:1.5em;">
+
+<p class="img-caption" style="padding-left:2em;">
+  <strong>그림 5.</strong> 알림 창의 Quick Settings 타일.
+</p>
+
+
+  </div><p>Quick Settings는 키 설정 및 작업을 알림 창에서 직접 노출시키기
+위해 널리 사용되는 간단한 방법입니다. 더욱 유용하고 편리한 설정을
+위해 저희가 Android N에서 Quick Settings의 범위를 더욱 확장했습니다. </p>
+
+<p>Google에서는 Quick Settings 타일에 필요한 공간을 더 추가했으며,
+사용자는 페이지가 지정된 디스플레이 영역에서 왼쪽이나 오른쪽으로 스와이프하여 이들 타일에 액세스할 수 있습니다. 또한, 사용자가 Quick Settings 타일의
+모습과 표시 위치를 제어할 수 있도록 했습니다. 따라서 사용자는 끌어서 놓는 간단한 방법으로
+타일을 추가하거나 이동시킬 수 있습니다. </p>
+
+<p>또한, Android N은 개발자를 위해 새로운 API도 추가했으며
+ 이를 통해 자신만의 Quick Settings 타일을 정의할 수 있으며, 사용자가 앱에서 키 컨트롤 및 작업에 쉽게 액세스할 수 있습니다.</p>
+
+<p>
+  빠른 설정 타일은 긴급하게 필요하거나 자주 사용되는 컨트롤 또는
+작업을 위해 예약되어 있으며, 앱을 시작하기 위한 바로가기로
+사용되어서는 안 됩니다.
+</p>
+
+<p>
+  타일을 정의한 후에는 이 타일을 사용자에게 표시할 수 있으며, 사용자가
+ 드래그 앤 드롭하는 것만으로 이 타일을 Quick Settings에 추가할 수 있습니다.
+</p>
+
+<p>
+  앱 타일 만들기에 대한 자세한 내용은
+다운로드 가능한 <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API 참조</a>에서 <code>android.service.quicksettings.Tile</code>에 대한 문서를 참조하세요.
+</p>
+
+
+
+<h2 id="number-blocking">번호 차단</h2>
+
+<p>이제 Android N에서는 플랫폼에서 번호 차단을 지원하며,
+서비스 공급자가 차단된 번호 목록을 유지 관리할 수 있도록 프레임워크 API를 제공합니다. 기본
+SMS 앱, 기본 전화 앱 및 이동통신사 앱은
+차단된 번호 목록에서 읽기와 쓰기가 가능합니다. 다른 앱은 이 목록에 액세스할 수 없습니다.</p>
+
+<p>Android에서는 번호 차단을 플랫폼의 표준 기능으로 만들어,
+광범위한 기기에서 번호를 차단하기 위한 일관된 방식을 앱에
+제공합니다. 앱에서 활용할 수 있는 기타 이점은 다음과 같습니다.</p>
+
+<ul>
+  <li> 통화에서 차단된 번호가 텍스트에서도 차단됩니다.
+  <li> 차단된 번호는 재설정 시에도 백업 및 복원 기능을 통해
+기기에서 유지될 수 있습니다.
+  <li> 여러 앱이 동일한 차단된 번호 목록을 사용할 수 있습니다.
+</ul>
+
+<p>또한 Android를 통한 이동통신사 앱 통합은 이동통신사들이 기기의
+차단된 번호 목록을 읽고 서비스측 차단을 수행할 수 있음을 의미하며,
+이를 통해 사용자들은 원치 않는 통화와 문자가
+특정 매체(예: VOIP 엔드포인트 또는 착신 전화)를 통해 자신들에게 도달하는 것을 차단할 수 있습니다.</p>
+
+<p>
+  자세한 내용은
+ 다운로드 가능한 <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API
+ 참조</a>에서 <code>android.provider.BlockedNumberContract</code>를 참조하세요.
+</p>
+
+<h2 id="call_screening">통화 스크리닝</h2>
+
+<p>
+  Android N에서는 기본 전화 앱이 수신 통화를 스크리닝하도록 허용합니다. 이를 위해
+전화 앱에는 새로운 <code>CallScreeningService</code>가 구현되며, 이를 통해 전화 앱은
+수신 통화의 {@link android.telecom.Call.Details Call.Details}에 따라
+다음과 같은 다양한 작업을 수행할 수 있습니다.
+</p>
+
+<ul>
+  <li> 수신 통화 거절
+  <li> 통화를 통화 기록에 허용하지 않음
+  <li> 통화 알림을 사용자에게 표시하지 않음
+</ul>
+
+<p>
+  자세한 내용은
+ 다운로드 가능한 <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API
+ 참조</a>에서 <code>android.telecom.CallScreeningService</code>를 참조하세요.
+</p>
+
+
+<h2 id="multi-locale_languages">다중 로케일 지원, 더 많은 언어 지원 추가</h2>
+
+
+<p>두 가지 언어로 된 사용 사례를 지원하기 위해 이제
+Android N에서는 사용자가 Settings에서 <strong>다중 로케일</strong>을 선택할 수 있습니다. 앱은 새로운
+API를 사용하여 사용자의 로케일을 가져온
+다음, 검색 결과를 여러 언어로 표시하거나 사용자가 이미 알고 있는
+언어로는 웹 페이지를 번역하지 않는 등의 더욱 정교한 사용자 환경을
+다중 로케일 사용자들에게 제공합니다.</p>
+
+<p>다중 로케일 지원과 함께 Android N에서는 또한 사용자가
+사용할 수 있는 언어의 범위도 더욱 넓혔습니다. 영어, 스페인어, 프랑스어,
+아랍어 등의 자주 사용되는 언어에 대해 각각 25가지 이상의 변형을 제공하며, 100가지 이상의 새로운 언어에 대한 부분적인
+지원도 추가합니다.</p>
+
+<p>앱은
+<code>LocaleList.GetDefault()</code>를 호출하여 사용자가 설정한 로케일 목록을 가져올 수 있습니다.  더 많은 수의 로케일을 지원하기 위해 Android N에서는 리소스 확인 방식을
+바꾸는 중에 있습니다. 새로운 리소스 확인 논리에서
+앱이 예상대로 작동하는지 테스트하고 확인해야 합니다.</p>
+
+<p>새로운 리소스 확인 동작과 따라야 하는 모범 사례에 대해
+알아보려면, <a href="{@docRoot}preview/features/multilingual-support.html">다국어 지원</a>을 참조하세요.</p>
+
+
+<h2 id="emoji">새 이모티콘</h2>
+
+<p>
+  Android N에서는 피부 색조 그림 이모티콘과 변형 선택기 지원을
+ 비롯한 추가적인 그림 이모티콘과 그림 이모티콘 관련
+ 기능을 도입했습니다. 앱에서 그림 이모티콘을 지원하는 경우
+ 아래 지침에 따라 이러한 그림 이모티콘에 관련된 기능을 잘 활용해 보세요.
+</p>
+
+<ul>
+  <li>
+    <strong>그림 이모티콘을 삽입하기 전에 기기에 해당 그림 이모티콘이 들어 있는지 확인하세요.</strong>
+    시스템 글꼴에 어떤 이모티콘이 있는지
+ 확인하려면 {@link android.graphics.Paint#hasGlyph(String)} 메서드를 사용하세요.
+  </li>
+  <li>
+    <strong>그림 이모티콘이 변형 선택기를 지원하는지 확인하세요.</strong>
+    변형 선택기를 사용하면 특정 이모티콘을 컬러나
+ 흑백으로 표현할 수 있습니다.
+    모바일 기기에서는 앱이 흑백보다는 컬러로 이모티콘을 표시해야 합니다. 하지만
+ 앱이 텍스트와 함께 이모티콘을 표시하는 경우에는 흑백 변형을 사용해야 합니다.
+    그림 이모티콘에 변형 이모티콘이 있는지 확인하려면 변형 선택기를 사용하세요.
+    변형이 있는 캐릭터의 전체 목록은
+<a class="external-link" href="http://www.unicode.org/Public/9.0.0/ucd/StandardizedVariants-9.0.0d1.txt">변형에
+대한 유니코드 설명서</a>의 <em>그림 이모티콘 변형 시퀀스</em> 섹션을
+검토하세요.
+  </li>
+  <li>
+    <strong>그림 이모티콘이 피부 색조를 지원하는지 확인하세요.</strong> Android N 사용자는 이모티콘의 렌더링된 피부 색조를
+ 자신의 기본 설정에 맞게 수정할 수 있습니다. 키보드 앱은 여러 가지 피부 색조가 있는
+이모티콘에 대한 시각적 표시를 제공해야 하며, 사용자가 선호하는 피부 색조를 선택하도록
+허용해야 합니다. 어떤 시스템 이모티콘에 피부 색조
+한정자가 있는지 확인하려면 {@link android.graphics.Paint#hasGlyph(String)}
+메서드를 사용하세요.
+<a class="external-link" href="http://unicode.org/emoji/charts/full-emoji-list.html">
+유니코드 설명서</a>를 읽어보면 어떤 이모티콘에서 피부 색조가 사용되는지 확인할 수 있습니다.
+  </li>
+</ul>
+
+
+<h2 id="icu4">Android의 ICU4J API</h2>
+
+<p>
+  이제 Android N에서는 <code>android.icu</code> 패키지 아래의 Android 프레임워크에 있는 <a href="http://site.icu-project.org/">ICU4J</a> API의 하위 세트를
+ 제공합니다. 마이그레이션이
+ 용이하며, 대개는 <code>com.java.icu</code> 네임스페이스를
+ <code>android.icu</code>로 변경하는 것이 간단합니다. 앱에서 ICU4J 번들을
+ 이미 사용 중이신 경우, Android 프레임워크에서 제공되는 <code>android.icu</code>
+ API로 전환하면 APK 크기를 상당히 줄일 수 있습니다.
+</p>
+
+<p>
+  Android ICU4J API에 대해 자세히 알아보려면 <a href="{@docRoot}preview/features/icu4j-framework.html">ICU4J 지원</a>을 참조하세요.
+</p>
+
+
+
+<h2 id="gles_32">OpenGL&trade; ES 3.2 API</h2>
+
+<p>Android N에서는 다음을 비롯하여 OpenGL ES 3.2용 프레임워크 인터페이스와 플랫폼 지원을 추가합니다.</p>
+
+<ul>
+  <li> <code>EXT_texture_sRGB_decode</code>를 제외한 <a class="external-link" href="https://www.khronos.org/registry/gles/extensions/ANDROID/ANDROID_extension_pack_es31a.txt">
+Android 확장 프로그램 팩</a></a>(AEP)의 모든 확장 프로그램.
+  <li> HDR 및 지연 셰이딩을 위한 부동 소수점 프레임 버퍼.
+  <li> 일괄처리 및 스트리밍 성능을 향상시키는 BaseVertex 그리기 호출.
+  <li> WebGL 오버헤드를 줄여주는 강력한 버퍼 액세스 제어.
+</ul>
+
+<p>Android N에 있는 OpenGL ES 3.2용 프레임워크 API에는
+<code>GLES32</code> 클래스가 제공됩니다. OpenGL ES 3.2를 사용 중인
+경우 반드시 <code>&lt;uses-feature&gt;</code> 태그와 <code>android:glEsVersion</code>
+속성을 사용하여 매니페스트 파일에서 요구 사항을 선언하세요. </p>
+
+<p>기기의 지원되는 OpenGL ES 버전을 런타임에 확인하는
+방법을 비롯하여, OpenGL ES 사용에 대한 자세한 내용은 <a href="{@docRoot}guide/topics/graphics/opengl.html">OpenGL ES API 가이드</a>를 참조하세요.</p>
+
+
+<h2 id="android_tv_recording">Android TV 녹화</h2>
+
+<p>Android N에서는 새로운 녹화 API를 통해 Android TV 입력
+서비스로부터 콘텐츠를 녹화하고 재생하는 기능을 추가합니다.  기존의 타임 시프트 API를 기반으로 구축된 TV 입력
+서비스는 녹화 가능한 채널 데이터와 녹화된 세션의 저장 방식을 제어할 수 있으며,
+녹화된 콘텐츠와의 사용자 상호 작용을 관리할 수 있습니다. </p>
+
+<p>자세한 내용은 <a href="{@docRoot}preview/features/tv-recording-api.html">Android TV Recording API</a>를 참조하세요.</p>
+
+
+<h2 id="android_for_work">Android for Work</h2>
+
+<p>Android for Work에서는 Android N이 실행되는 기기를
+위해 여러 가지 새로운 기능과 API를 추가합니다. 몇 가지 특징이 아래에 나와 있으며, 변경 사항의 전체 목록은
+<a href="{@docRoot}preview/features/afw.html">Android for Work 업데이트</a>를 참조하세요.</p>
+
+<h3 id="work_profile_security_challenge">작업 프로필 보안 인증 질문 </h3>
+
+<p>
+  N SDK를
+대상으로 하는 프로필 소유자는 작업 프로필에서 작동하는 앱에 대해
+별개의 보안 인증 질문을 지정할 수 있습니다. 사용자가 업무용 앱을 열려고 시도할 때 작업 프로필 보안 인증 질문이
+표시됩니다. 보안 인증 질문에 올바로 답하면 작업 프로필의 잠금이 해제되고 필요하다면
+작업 프로필의 암호가 해독됩니다. 프로필 소유자의 경우,
+<code>ACTION_SET_NEW_PASSWORD</code>는
+작업 프로필 보안 인증 질문을 설정하라는 메시지를 사용자에게 표시하고, <code>ACTION_SET_NEW_PARENT_PROFILE_PASSWORD</code>는 기기
+잠금을 설정하라는 메시지를 사용자에게 표시합니다.
+</p>
+
+<p>
+  프로필 소유자는 <code>setPasswordQuality()</code>, <code>setPasswordMinimumLength()</code> 및 관련 메서드를 사용하여
+작업 프로필 보안 인증 질문에 대해
+별개의 비밀번호 정책을 설정할 수
+있습니다(예: PIN의 길이는 얼마로 해야 할지 또는 프로필을 잠금 해제하기 위해 지문을 사용할 수 있는지 여부). 프로필 소유자는
+새 <code>getParentProfileInstance()</code> 메서드에 의해 반환되는 <code>DevicePolicyManager</code>
+인스턴스를 사용하여 기기 잠금을 설정할 수도 있습니다.
+  그 밖에도, 프로필 소유자는
+새 <code>setOrganizationColor()</code> 및 <code>setOrganizationName()</code> 메서드를 사용하여 작업 프로필 보안 인증 질문에 대한 자격 증명 화면을
+사용자 지정할 수 있습니다.
+</p>
+<h3 id="turn_off_work">작업 해제 </h3>
+
+<p>작업 프로필이 있는 기기에서는 사용자가 작업 모드를 설정하거나 해제할 수 있습니다. 작업 모드가
+해제되면 관리된 사용자가 일시적으로 종료되며, 이 경우 작업 프로필
+앱, 백그라운드 동기화 및 알림이 비활성화됩니다. 여기에는 프로필 소유자 애플리케이션이
+포함됩니다. 작업 모드가 해제되면 사용자가 업무용 앱을 실행할 수 없음을
+미리 알려주기 위한 영구적인 상태 아이콘이 표시됩니다. 런처는
+업무용 앱과 위젯에 액세스할 수 없음을 나타냅니다. </p>
+
+<h3 id="always_on_vpn">상시 접속 VPN </h3>
+
+<p>기기 소유자 및 프로필 소유자는 항상 지정된 VPN을 통해 업무용 앱을
+연결하도록 보장할 수 있습니다. 시스템은 기기가 부팅된
+후에 해당 VPN을 자동으로 시작합니다.</p>
+
+<p>
+  새로운 <code>DevicePolicyManager</code> 메서드는
+ <code>setAlwaysOnVpnPackage()</code> 및
+ <code>getAlwaysOnVpnPackage()</code>입니다.
+</p>
+
+<p>앱 상호 작용 없이 시스템에 의해
+VPN 서비스가 직접 바인딩될 수 있으므로, VPN 클라이언트는 상시 접속 VPN에 대해 새로운 진입점을 처리해야 합니다. 이전과
+마찬가지로, 서비스는 <code>android.net.VpnService</code> 액션과 일치하는 인텐트 필터에
+의해 시스템에 표시됩니다. </p>
+
+<p>
+  또한, <strong>Settings&gt;More&gt;Vpn</strong>을 사용하여 사용자는 기본 사용자에서
+ <code>VPNService</code> 메서드를
+ 구현하는 상시 접속 VPN 클라이언트를 수동으로 설정할 수도 있습니다.
+</p>
+
+<h3 id="custom_provisioning">사용자 지정 프로비저닝</h3>
+
+<p>
+  애플리케이션은 기업 색상과 로고로 프로필 소유자 및 기기 소유자 프로비저닝
+ 흐름을 사용자 지정할 수 있습니다.
+<code>DevicePolicyManager.EXTRA_PROVISIONING_MAIN_COLOR</code>가 흐름 색상을
+사용자 지정하고, <code>DevicePolicyManager.EXTRA_PROVISIONING_LOGO_URI</code>가
+기업 로고로 흐름을 사용자 지정합니다.
+</p>
+
+<h2 id="accessibility_enhancements">접근성 향상</h2>
+
+<p>이제 Android N에서는 새로운 기기 설치 시 Welcome 화면에서
+Vision Settings를 바로 제공합니다. 이렇게 하면 사용자가 자신의
+기기에서 확대 제스처, 글꼴 크기,
+디스플레이 크기 및 TalkBack 등과 같은 접근성 기능을 휠씬 더 쉽게 검색하고 구성할 수 있습니다. </p>
+
+<p>이렇게 눈에 띄는 위치에 접근성 기능을 배치하면, 사용자가 이
+기능을 활성화하여 앱을 사용할 가능성이 더욱 커집니다. 이들 설정을 활성화하여 조기에 앱을
+테스트해야 합니다. Settings &gt;
+Accessibility에서 설정을 활성화할 수 있습니다.</p>
+
+<p>Android N에서도 마찬가지로, 운동 장애가 있는 사용자가
+이제 접근성 서비스를 통해 화면을 터치할 수 있습니다. 이 새로운 API를 사용하면 얼굴 추적, 시각 추적,
+지점 스캐닝 등의 기능으로 서비스를 구축하여 해당 사용자의
+요구를 충족시킬 수 있습니다.</p>
+
+<p>자세한 내용은
+ 다운로드 가능한 <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API 참조</a>에서 <code>android.accessibilityservice.GestureDescription</code>을 참조하세요.</p>
+
+
+<h2 id="direct_boot">직접 부팅</h2>
+
+<p>직접 부팅은 기기 시동 시간을 개선해주며, 예상치 못한 재부팅
+후에도 등록된 앱이 제한된 기능을 유지하도록 해줍니다. 예를 들어,
+사용자가 취침하는 중에 암호화된 기기가 재부팅되는 경우,
+이제는 등록되어 있는 알람, 메시지 및 수신 통화로 사용자에게 알려줄
+수 있습니다. 즉, 재시작 직후에도 접근성 서비스를
+ 바로 사용할 수 있습니다.</p>
+
+<p>직접 부팅은 Android N의 파일 기반 암호화를 활용하여 시스템
+및 앱 데이터에 대해 정밀한 암호화 정책을 활성화합니다. 이 시스템은
+선택된 시스템 데이터와 명시적으로 등록된 앱
+데이터에 대해 기기 암호화 저장소를 사용합니다. 기본적으로, 다른 모든
+ 시스템 데이터, 사용자 데이터, 앱 및 앱 데이터에 대해 자격 증명 암호화 저장소가 사용됩니다. </p>
+
+<p>부팅 시에 시스템은 제한된 모드에서 시작되며, 기기 암호화
+데이터에만 액세스할 수 있고 앱 또는 데이터에는 액세스하지
+못합니다. 이 모드에서 구성 요소를 실행하려는 경우,
+매니페스트에 플래그를 설정하여 구성 요소를 등록할 수 있습니다. 재시작 후에 시스템은 <code>LOCKED_BOOT_COMPLETED</code>
+인텐트를 브로드캐스트하여
+등록된 구성 요소를 활성화합니다. 잠금을 해제하기 전에, 시스템은 등록된 기기
+암호화 앱 데이터를 사용할 수 있는지 확인합니다. 사용자가 잠금 화면 자격 증명을 확인하여
+ 암호를 풀기 전까지는 다른 모든 데이터를 사용할 수 없습니다. </p>
+
+자세한 내용은 <a href="{@docRoot}preview/features/direct-boot.html">직접 부팅</a>을 참조하세요.</p>
+</p>
+
+
+<h2 id="key_attestation">Key Attestation</h2>
+
+<p>하드웨어 기반 키 저장소는 Android 기기에서 암호화 키를
+만들고 저장하고 사용하기 위한 훨씬 더 안전한 방법입니다. 이
+키 저장소는 Linux 커널, 잠재적 Android 취약점, 루팅된 기기의
+공격으로부터 키를 보호해 줍니다.</p>
+
+<p>하드웨어 기반 키 저장소를 더욱 쉽고 안전하게 사용하도록
+Android N에서는 Key Attestation을 도입했습니다. Key Attestation을 사용하여 앱
+및 오프-기기는 RSA 또는 EC 키 쌍이 하드웨어 기반인지 여부를 결정할 수
+있으며, 키 쌍의 속성에는 어떤 것이 있고 어떠한 제약 조건이 사용성
+및 유효성에 적용되는지 여부를 결정할 수 있습니다. </p>
+
+<p>앱 및 오프-기기 서비스는 X.509 증명 인증서를 통해 키 쌍에 대한
+정보를 요청할 수 있으며 이 인증서는 유효한 증명 키로 서명되어야
+합니다. 증명 키는 공장에서 기기의 하드웨어 기반
+키 저장소에 주입되는 ECDSA 서명 키입니다. 따라서 유효한 증명 키에 의해
+서명된 증명 인증서는 하드웨어 기반 키 저장소에 있는 키 쌍의
+세부 정보와 함께 이 키 저장소의 존재 여부를
+확인합니다.</p>
+
+<p>안전한 공식 Android 공장 이미지가 기기에 사용 중인지
+확인하기 위해, Key Attestation은
+기기 <a class="external-link" href="https://source.android.com/security/verifiedboot/verified-boot.html#bootloader_requirements">부트로더</a>가 다음의 정보를 <a class="external-link" href="https://source.android.com/security/trusty/index.html">TEE(Trusted Execution Environment)</a>에
+제공하도록 요구합니다.</p>
+
+<ul>
+<li>기기에 설치된 OS 버전 및 패치 수준</li>
+<li><a href="https://source.android.com/security/verifiedboot/index.html" class="external-link">확인된 부팅</a> 공개 키 및 잠금 상태</li>
+  </ul>
+
+<p>하드웨어 기반 키 저장소 기능에 대한 자세한
+내용은 <a href="https://source.android.com/security/keystore/" class="external-link">하드웨어 기반 키 저장소</a> 가이드를 참조하세요.</p>
+
+<p>Key Attestation 이외에도 Android N에서는 지문 등록
+시 취소되지 않는 지문 바인드 키도 도입했습니다.</p>
+
+<h2 id="network_security_config">네트워크 보안 구성</h2>
+
+<p>Android N에서 앱은 오류가 발생하기 쉬운 기존의 프로그래밍 방식
+API(예: X509TrustManager)를 사용하는 대신 선언적
+<em>네트워크 보안 구성</em>을 사용하여 보안(HTTPS, TLS) 연결의 동작을 코드
+수정 없이 안전하게 사용자 지정할 수 있습니다.</p>
+
+  <p>지원되는 기능:</p>
+<ul>
+<li><b>사용자 지정 신뢰 앵커.</b> 애플리케이션이 보안 연결을 위해
+어떤 인증 기관(CA)을 신뢰할 수 있는지 사용자 지정할 수 있게 해줍니다. 예를 들어,
+특정한 자체 서명 인증서를 신뢰하거나 제한적인 공용 CA 세트를 신뢰하도록 사용자 지정할 수 있습니다.
+</li>
+<li><b>디버그 전용 재정의.</b> 애플리케이션 개발자가 설치 기반에 위험을 더하지
+않고 애플리케이션의 보안 연결을 안전하게
+디버그할 수 있게 해줍니다.
+</li>
+<li><b>일반 텍스트 트래픽 옵트아웃.</b> 애플리케이션이 일반 텍스트 트래픽을 실수로 사용하지
+않도록 스스로를 보호할 수 있게 해줍니다.</li>
+<li><b>인증서 고정.</b> 애플리케이션이 보안 연결을 위해 어떤 서버 키를
+ 신뢰할지 제한하도록 해주는 고급 기능입니다.</li>
+</ul>
+
+<p>자세한 내용은 <a href="{@docRoot}preview/features/security-config.html">네트워크 보안 구성</a>을
+참조하세요.</p>
+
+<h2 id="default_trusted_ca">신뢰할 수 있는 기본 인증 기관</h2>
+
+<p>기본적으로, Android N을 대상으로 하는 앱은 시스템에서
+제공되는 인증서만을 신뢰하며 사용자가 추가한 인증 기관(CA)은 더 이상 신뢰하지 않습니다. Android N을 대상으로 하는 앱이 사용자가
+추가한 CA를 신뢰하려는 경우에는
+<a href="{@docRoot}preview/features/security-config.html">네트워크 보안 구성</a>을 사용하여
+사용자 CA를 신뢰해야 하는 방법을 지정해야 합니다.</p>
+
+<h2 id="apk_signature_v2">APK Signature Scheme v2</h2>
+
+<p>
+  Android N에서는 앱 설치 시간을 더욱 단축시켜 주고
+APK 파일을 무단으로 변경하지 못하도록 더욱 강력하게
+보호해주는 새로운 앱 서명 구성표인 APK Signature Scheme v2를 도입했습니다. 기본적으로, Android Studio 2.2 및 Android
+ Plugin for Gradle 2.2는 APK Signature Scheme v2 뿐만 아니라 JAR 서명을 사용하는 기존의 서명 구성표를 둘다
+ 사용하여 앱에 서명합니다.
+</p>
+
+<p>
+  앱에 APK Signature Scheme v2를 적용하는 것이 좋지만, 이 새로운
+ 구성표를 반드시 적용해야 하는 것은 아닙니다. APK
+ Signature Scheme v2를 사용할 때 앱이 올바로 빌드되지 않을 경우 이 새 구성표를 비활성화할 수 있습니다. 비활성화 프로세스가
+실행되면 Android Studio 2.2 및 Android Plugin for Gradle 2.2는 기존의 서명 구성표만 사용하여
+앱에 서명합니다. 기존 구성표만으로
+서명하려면 모듈 수준의 <code>build.gradle</code> 파일을 연 다음, 릴리스 서명
+구성에 <code>v2SigningEnabled false</code> 줄을
+추가하세요.
+</p>
+
+<pre>
+  android {
+    ...
+    defaultConfig { ... }
+    signingConfigs {
+      release {
+        storeFile file("myreleasekey.keystore")
+        storePassword "password"
+        keyAlias "MyReleaseKey"
+        keyPassword "password"
+        <strong>v2SigningEnabled false</strong>
+      }
+    }
+  }
+</pre>
+
+<p class="caution"><strong>주의: </strong> APK
+ Signature Scheme v2를 사용하여 앱에 서명하고 앱을 추가로 변경하는 경우 앱의 서명이
+ 무효화됩니다. 따라서 <code>zipalign</code>과
+ 같은 도구는 APK Signature Scheme v2를 사용하여 앱에 서명한 후가 아니라 서명하기 전에 사용되어야 합니다.
+</p>
+
+<p>
+  자세한 내용은 Android Studio에서
+<a href="{@docRoot}studio/publish/app-signing.html#release-mode">앱에
+서명</a>하는 방법을 설명하고 Android Plugin for Gradle을 사용하여 <a href="{@docRoot}studio/build/build-variants.html#signing">앱
+ 서명을 위한 빌드 파일을 구성</a>하는 방법에 대해 설명하는 Android Studio 문서를 읽어보세요.
+</p>
+
+<h2 id="scoped_directory_access">범위가 지정된 디렉터리 액세스</h2>
+
+<p>Android N에서 앱은 새로운 API를 사용하여 특정
+<a href="{@docRoot}guide/topics/data/data-storage.html#filesExternal">외부 저장소</a> 디렉터리(SD 카드와 같은 이동식 미디어의 디렉터리 포함)에
+대한 액세스를 요청할 수 있습니다. 새로운 API는 애플리케이션이
+표준 외부 저장소 디렉터리(예: <code>Pictures</code> 디렉터리)에 액세스하는 방식을 훨씬 단순화합니다. 사진
+앱과 같은 앱은 모든 저장소 디렉터리에 대해 액세스 권한을 부여하는
+<code>READ_EXTERNAL_STORAGE</code>를 사용하는 대신 또는 사용자가 디렉터리를 탐색하도록 하는 저장소 액세스 프레임워크(SAF)를
+사용하는 대신 이들 API를
+사용할 수 있습니다.</p>
+
+<p>또한, 새로운 API는 사용자가 외부 저장소 액세스 권한을
+앱에 부여하는 단계를 단순화합니다. 새로운 API를 사용하는 경우 시스템은
+애플리케이션이 어떤 디렉터리에 대한 액세스 권한을
+요청하는지를 명확하게 설명해주는 단순한 권한 UI를 사용합니다.</p>
+
+<p>자세한 내용은
+<a href="{@docRoot}preview/features/scoped-folder-access.html">범위가 지정된
+디렉터리 액세스</a> 개발자 문서를 참조하세요.</p>
+
+<h2 id="keyboard_shortcuts_helper">Keyboard Shortcuts Helper</h2>
+
+<p>
+Android N에서는 사용자가 "Alt + /" 키를 눌러 <em>Keyboard Shortcuts</em>
+화면을 트리거할 수 있는데, 이 화면에는 시스템과 해당 앱에서 둘다 사용할 수 있는 모든
+바로 가기가 표시됩니다. 이들 바로 가기는 앱의 메뉴에서 자동으로 검색되지만(사용 가능한 경우),
+개발자가 화면에 맞춰 스스로 미세 조정한 바로 가기 목록을
+제공할 수 있습니다. 이를 위해서는 다운로드 가능한
+<a href="{@docRoot}preview/setup-sdk.html#docs-dl">API 참조</a>에 설명되어 있는 새
+<code>Activity.onProvideKeyboardShortcuts()</code> 메서드를 재정의할 수 있습니다.
+</p>
+
+<p>
+앱의 어느 곳에서든 Keyboard Shortcuts Helper를 트리거하려면 관련 액티비티에 대해
+{@code Activity.requestKeyboardShortcutsHelper()}를 호출하세요.
+</p>
+
+<h2 id="sustained_performance_api">지속적인 성능 API</h2>
+
+<p>
+기기 구성 요소가 온도 제한에 도달할 때
+시스템에서는 시스템온칩(system-on-chip) 엔진을 조절하므로, 장시간 실행되는 앱의 성능이 크게 변동될
+수 있습니다. 이러한 변동은 장시간 실행되는 고성능 앱을 만들려는 앱 개발자
+입장에서는 일종의 움직이는 과녁과도 같은 것입니다.
+</p>
+
+<p>
+이러한 제한을 해결하기 위해, Android N에서는
+<em>지속적인 성능 모드</em>를 지원하며, 이 모드를 통해 OEM들은 장시간 실행되는 앱의
+기기 성능에 대한 힌트를 제공할 수 있습니다. 앱 개발자는
+이들 힌트를 사용하여 장기간에 걸쳐
+기기 성능을 예측 가능하고 이 성능을 일관된 수준으로 유지하기 위해 앱을 적절히 조정할 수 있습니다.
+</p>
+
+<p>
+앱 개발자는 N Developer Preview에 있는 이
+새 API를 Nexus 6P 기기에서만 시험해 볼 수 있습니다. 이 기능을 사용하려면
+지속적인 성능 모드에서 실행하려는 기간에 대해
+지속적인 성능 기간 플래그를 설정하세요.
+{@code Window.setSustainedPerformanceMode()} 메서드를 사용하여 이 플래그를 설정하세요. 해당 기간이 포커스 안에 없을 때는
+이 모드가 자동으로 비활성화됩니다.
+</p>
+
+<h2 id="vr">VR 지원</h2>
+
+<p>
+개발자가 사용자를 위한 고품질 모바일 VR 환경을 만들 수 있도록, Android N에서는
+새로운 VR 모드에 대한 플랫폼 지원과 최적화를 추가합니다. VR 앱 전용 CPU 코어에 대한 액세스를 비롯하여
+다수의 성능 개선 사항이 있습니다.
+지능적 머리 추적과
+VR용으로 작동하는 스테레오 알림 기능을 앱 내에서 이용할 수 있습니다. 가장 중요한 점은, 지연 시간이 매우 짧은
+그래픽을 Android N이 제공한다는 사실입니다. Android N용 VR 앱 만들기에 대한 자세한 정보는
+<a href="https://developers.google.com/vr/android/">Android용 Google VR SDK</a>를 참조하세요.
+</p>
+
+
+<h2 id="print_svc">인쇄 서비스 개선 사항</h2>
+
+<p>
+  이제 Android N에서는 인쇄 서비스 개발자가 개별 프린터와 인쇄 작업에
+대한 추가적인 정보를 노출시킬 수 있습니다.
+</p>
+
+<p>
+  개별 프린터를 나열할 때, 이제 인쇄 서비스가 다음 두 가지 방식으로 프린터마다
+아이콘을 설정할 수 있습니다.
+</p>
+
+<ul>
+  <li><code>PrinterInfo.Builder.setResourceIconId()</code>를 호출하여 리소스 ID로부터
+아이콘을 설정할 수 있습니다.
+  </li>
+
+  <li><code>PrinterInfo.Builder.setHasCustomPrinterIcon()</code>을 호출하고,
+<code>android.printservice.PrinterDiscoverySession.onRequestCustomPrinterIcon()</code>을 사용하여 아이콘이 요청될 때 콜백을 설정하여
+네트워크에서 아이콘을 표시할
+ 수 있습니다.
+  </li>
+</ul>
+
+<p>
+  또한, <code>PrinterInfo.Builder.setInfoIntent()</code>를 호출하여 추가적인 정보를 표시하도록
+프린터당 액티비티를 제공할 수 있습니다.
+</p>
+
+<p>
+  <code>android.printservice.PrintJob.setProgress()</code> 및
+<code>android.printservice.PrintJob.setStatus()</code>를 각각 호출하여
+인쇄 작업 알림에서 인쇄 작업의
+진행률과 상태를 나타낼 수 있습니다.
+</p>
+
+<p>
+  이들 메서드에 대한 자세한 내용은 다운로드 가능한 <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API 참조</a>를 확인하세요.
+</p>
+
+<h2 id="framemetrics_api">FrameMetricsListener API</h2>
+
+<p>
+앱은 FrameMetricsListener API를 통해 UI 렌더링
+성능을 모니터링할 수 있습니다. 이 기능을 제공하기 위해 이 API는 앱의 현재 창에 대한 프레임 타이밍
+정보를 전송하는 스트리밍 Pub/Sub API를 노출시킵니다. 반환되는 데이터는
+<code><a href="{@docRoot}tools/help/shell.html#shellcommands">adb shell</a>
+dumpsys gfxinfo framestats</code>가 표시하는 데이터와 동일하지만, 지난 120개 프레임으로 제한되지 않습니다.
+</p>
+
+<p>
+FrameMetricsListener를 사용하면 USB 연결 없이 프로덕션 환경에서
+상호 작용 수준의 UI 성능을 측정할 수 있습니다. 이 API를
+사용하면
+{@code adb shell dumpsys gfxinfo}보다 훨씬 세분화된 수준에서 데이터를 수집할 수 있습니다. 시스템은 앱에서 발생하는 특정한 상호 작용에
+대한 데이터를 수집할 수 있기 때문에, 이처럼 높은 수준의 세분화가 가능합니다. 시스템은
+전체 앱의 성능에 대한 전체 요약을 캡처하거나
+전체 상태를 지울 필요가 없습니다. 이 기능을 사용하면
+앱 내에서의 실제 사용 사례에 대한 UI 성능에서
+성능 데이터를 수집하고 성능 저하를 찾아낼 수 있습니다.
+</p>
+
+<p>
+창을 모니터링하려면 <code>FrameMetricsListener.onMetricsAvailable()</code>
+콜백 메서드를 구현하고 해당 창에 등록하세요. 자세한 내용은 다운로드 가능한
+<a href="{@docRoot}preview/setup-sdk.html#docs-dl">API 참조</a>에서 {@code FrameMetricsListener} 클래스 문서를
+참조하세요.
+</p>
+
+<p>
+이 API는 {@code FrameMetrics} 객체를 제공하며 여기에는 렌더링 하위 시스템이 프레임 수명 주기의 다양한 이정표에 대해 보고하는
+타이밍 데이터가 포함됩니다.
+지원되는 지표는 {@code UNKNOWN_DELAY_DURATION},
+{@code INPUT_HANDLING_DURATION}, {@code ANIMATION_DURATION},
+{@code LAYOUT_MEASURE_DURATION}, {@code DRAW_DURATION}, {@code SYNC_DURATION},
+{@code COMMAND_ISSUE_DURATION}, {@code SWAP_BUFFERS_DURATION},
+{@code TOTAL_DURATION}, {@code FIRST_DRAW_FRAME}입니다.
+</p>
+
+
+<h2 id="virtual_files">가상 파일</h2>
+
+<p>
+  이전 버전의 Android에서는 사용자가
+Google 드라이브와 같은 자신의 클라우드 저장소 계정에서 파일을 선택할 수 있도록, 앱이 저장소 액세스 프레임워크를
+사용할 수 있었습니다. 하지만 직접적인 바이트코드 표시가 없는
+파일을 표시하기 위한 방법이 없었으며, 모든 파일이 입력 스트림을
+제공해야 했습니다.
+</p>
+
+<p>
+  Android N에서는 <em>가상 파일</em>이라는 개념을 저장소 액세스
+ 프레임워크에 추가합니다. 가상 파일 기능을 사용하면,
+{@link android.content.Intent#ACTION_VIEW} 인텐트와 함께 사용될 수 있는
+문서 URI에 직접적인 바이트코드 표시가 없더라도 이 문서 URI를 {@link android.provider.DocumentsProvider}가 반환할 수
+있습니다. 또한 Android N에서는 가상 파일이든 아니든 간에, 사용자 파일에 대한
+대체 형식을 제공할 수 있습니다.
+</p>
+
+<p>
+  앱에서 가상 문서의 URI를 가져오려면 먼저
+{@link android.content.Intent}를 만들어 파일 선택기 UI를 여세요. 앱은 {@link android.content.ContentResolver#openInputStream(Uri) openInputStream()}
+ 메서드를 사용하여
+ 가상 파일을
+직접 열 수 없으므로,
+{@link android.content.Intent#CATEGORY_OPENABLE} 카테고리를 포함하는 경우에는 앱이 어떤 가상 파일도 수신하지 못합니다.
+</p>
+
+<p>
+  사용자가 선택한 후에는, 시스템이
+{@link android.app.Activity#onActivityResult onActivityResult()} 메서드를 호출합니다.
+  아래의 코드 조각에서 볼 수 있듯이, 앱이 가상 파일의 URI를 검색하고
+입력 스트림을 가져올 수 있습니다.
+</p>
+
+<pre>
+  // Other Activity code ...
+
+  final static private int REQUEST_CODE = 64;
+
+  // We listen to the OnActivityResult event to respond to the user's selection.
+  &#64;Override
+  public void onActivityResult(int requestCode, int resultCode,
+    Intent resultData) {
+      try {
+        if (requestCode == REQUEST_CODE &amp;&amp;
+            resultCode == Activity.RESULT_OK) {
+
+            Uri uri = null;
+
+            if (resultData != null) {
+                uri = resultData.getData();
+
+                ContentResolver resolver = getContentResolver();
+
+                // Before attempting to coerce a file into a MIME type,
+                // check to see what alternative MIME types are available to
+                // coerce this file into.
+                String[] streamTypes =
+                  resolver.getStreamTypes(uri, "*/*");
+
+                AssetFileDescriptor descriptor =
+                    resolver.openTypedAssetFileDescriptor(
+                        uri,
+                        streamTypes[0],
+                        null);
+
+                // Retrieve a stream to the virtual file.
+                InputStream inputStream = descriptor.createInputStream();
+            }
+        }
+      } catch (Exception ex) {
+        Log.e("EXCEPTION", "ERROR: ", ex);
+      }
+  }
+</pre>
+
+<p>
+  사용자 파일 액세스에 대한 자세한 내용은
+<a href="{@docRoot}guide/topics/providers/document-provider.html">저장소
+액세스 프레임워크 가이드</a>를 참조하세요.
+</p>

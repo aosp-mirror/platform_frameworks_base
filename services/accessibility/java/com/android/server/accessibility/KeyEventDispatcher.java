@@ -121,7 +121,7 @@ public class KeyEventDispatcher {
             Service service = boundServices.get(i);
             // Key events are handled only by services that declared
             // this capability and requested to filter key events.
-            if (!service.mRequestFilterKeyEvents) {
+            if (!service.mRequestFilterKeyEvents || (service.mServiceInterface == null)) {
                 continue;
             }
             int filterKeyEventBit = service.mAccessibilityServiceInfo.getCapabilities()

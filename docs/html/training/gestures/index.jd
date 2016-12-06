@@ -48,7 +48,7 @@ interaction to your app can greatly increase its usefulness and appeal.</p>
 provide users with a consistent, intuitive experience, your app should follow
 the accepted Android conventions for touch gestures. The <a
 href="http://developer.android.com/design/patterns/gestures.html">Gestures
-design guide</a><a href="{@docRoot}design/patterns/notifications.html"></a>
+design guide</a><a href="https://material.google.com/patterns/notifications.html"></a>
 shows you how to use common gestures in Android apps. Also see the Design Guide
 for <a href="{@docRoot}design/style/touch-feedback.html">Touch Feedback</a>.  </p>
 
@@ -60,7 +60,7 @@ for <a href="{@docRoot}design/style/touch-feedback.html">Touch Feedback</a>.  </
         <strong><a href="detector.html">Detecting Common Gestures</a></strong>
     </dt>
     <dd>
-        Learn how to detect basic touch gestures such as scrolling, flinging, and double-tapping, using 
+        Learn how to detect basic touch gestures such as scrolling, flinging, and double-tapping, using
        {@link android.view.GestureDetector}.
     </dd>
 
@@ -84,7 +84,7 @@ touch event. </dd>
     </dt>
     <dd>
         Learn how to detect multi-pointer (finger) gestures.
-    </dd> 
+    </dd>
 <dt>
         <strong><a href="scale.html">Dragging and Scaling</a></strong>
     </dt>

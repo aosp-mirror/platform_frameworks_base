@@ -1,0 +1,61 @@
+toc:
+- title: Optimizing for Battery Life
+  path: /topic/performance/power/index.html
+  path_attributes:
+  - name: description
+    value: Learn to make your app more battery-friendly.
+  section:
+  - title: Network Use and Battery Consumption
+    path: /topic/performance/power/network/index.html
+    section:
+    - title: Collecting Network Traffic Data
+      path: /topic/performance/power/network/gather-data.html
+    - title: Analyzing Data Traffic
+      path: /topic/performance/power/network/analyze-data.html
+    - title: Optimizing User-Initiated Network Use
+      path: /topic/performance/power/network/action-user-traffic.html
+    - title: Optimizing App-Initiated Network Use
+      path: topic/performance/power/network/action-app-traffic.html
+    - title: Optimizing Server-Initiated Network Use
+      path: /topic/performance/power/network/action-server-traffic.html
+    - title: Optimizing General Network Use
+      path: /topic/performance/power/network/action-any-traffic.html
+  - title: Doze and App Standby
+    path: /training/monitoring-device-state/doze-standby.html
+    path_attributes:
+    - name: description
+      value: Help ensure the device isn't depleting the battery when not in use.
+  - title: Battery Historian
+    path: /topic/performance/power/battery-historian.html
+- title: Rendering
+  path: /topic/performance/rendering/index.html
+  path_attributes:
+  - name: description
+    value: Speed up your app's rendering
+  section:
+  - title: Reducing Overdraw
+    path: /topic/performance/rendering/overdraw.html
+  - title: Performance and View Hierarchies
+    path: /topic/performance/rendering/optimizing-view-hierarchies.html
+  - title: Analyzing with Profile GPU Rendering
+    path: /topic/performance/rendering/profile-gpu.html
+- title: Intelligent Job-Scheduling
+  path: /topic/performance/scheduling.html
+- title: Background Optimization
+  path: /topic/performance/background-optimization.html
+- title: Reducing APK Size
+  path: /topic/performance/reduce-apk-size.html
+- title: Reducing Image Download Sizes
+  path: /topic/performance/network-xfer.html
+- title: Launch-Time Performance
+  path: /topic/performance/launch-time.html
+- title: Better Performance through Threading
+  path: /topic/performance/threads.html
+- title: Manage Your App's Memory
+  path: /topic/performance/memory.html
+- title: Overview of Memory Managemement
+  path: /topic/performance/memory-overview.html
+  path_attributes:
+  - name: description
+    value: How to keep your app's memory footprint small in order to improve performance on a variety of mobile devices.
+

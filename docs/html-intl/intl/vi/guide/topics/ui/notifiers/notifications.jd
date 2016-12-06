@@ -150,7 +150,7 @@ thông báo, bạn chuyển đối tượng {@link android.app.Notification} t�
     {@link android.app.PendingIntent} chứa một
     {@link android.content.Intent} có chức năng bắt đầu
     một {@link android.app.Activity} trong ứng dụng của bạn. Để liên kết
-    {@link android.app.PendingIntent} với một cử chỉ, hãy gọi phương pháp 
+    {@link android.app.PendingIntent} với một cử chỉ, hãy gọi phương pháp
     {@link android.support.v4.app.NotificationCompat.Builder} phù hợp. Ví dụ, nếu bạn muốn bắt đầu
     {@link android.app.Activity} khi người dùng nhấp vào văn bản thông báo trong
     ngăn kéo thông báo, bạn hãy thêm {@link android.app.PendingIntent} bằng cách gọi
@@ -449,7 +449,7 @@ numMessages = 0;
         <ol style="list-style-type: lower-alpha;">
             <li>
                 Thêm hỗ trợ cho phiên bản Android 4.0.3 và trước đó. Để làm điều này, hãy quy định mẹ của
-                {@link android.app.Activity} mà bạn đang bắt đầu bằng cách thêm phần tử 
+                {@link android.app.Activity} mà bạn đang bắt đầu bằng cách thêm phần tử
 <code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></code>
                 làm con của
 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>.
@@ -466,9 +466,9 @@ numMessages = 0;
                 </p>
             </li>
             <li>
-                Cũng thêm hỗ trợ cho phiên bản Android 4.1 và sau đó. Để làm điều này, hãy thêm thuộc tính 
+                Cũng thêm hỗ trợ cho phiên bản Android 4.1 và sau đó. Để làm điều này, hãy thêm thuộc tính
 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html#parent">android:parentActivityName</a></code>
-                vào phần tử 
+                vào phần tử
 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
                 của {@link android.app.Activity} mà bạn đang bắt đầu.
             </li>

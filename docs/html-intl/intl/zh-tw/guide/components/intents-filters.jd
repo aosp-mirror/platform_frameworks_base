@@ -76,7 +76,7 @@ android.content.Context#bindService bindService()} 來繫結至另一個元件�
 <li><b>如何傳送廣播：</b>
 <p>廣播是指任何應用程式都可接收的訊息。系統會傳送各種系統事件廣播，例如系統開機或裝置開始充電。
 您可以將 {@link android.content.Intent} 傳送至 {@link android.content.Context#sendBroadcast(Intent) sendBroadcast()}、
-{@link android.content.Context#sendOrderedBroadcast(Intent, String) 或{@link
+{@link android.content.Context#sendOrderedBroadcast(Intent, String)} 或{@link
 android.content.Context#sendStickyBroadcast sendStickyBroadcast()}，以向其他應用程式傳送廣播。
 
 

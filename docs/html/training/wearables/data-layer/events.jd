@@ -242,7 +242,7 @@ Standard Android filter matching rules apply. You can specify multiple services
 per manifest, multiple intent filters per service, multiple actions per filter,
 and multiple data stanzas per filter. Filters can match on a wildcard host or on
 a specific one. To match on a wildcard host, use {@code host="*"}. To match
-on a specific host, specify {@code host=&lt;node_id&gt;}.
+on a specific host, specify {@code host=<node_id>}.
 </p>
 
 <p>

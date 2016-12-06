@@ -1,0 +1,171 @@
+page.title=Supporting Content Recording
+page.keywords=tv,recording,channel,tif
+page.tags=tv, tif
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#supporting">Indicating Support for Recording</a></li>
+    <li><a href="#recording">Recording a Session</a></li>
+    <li><a href="#errors">Handling Recording Errors</a></li>
+    <li><a href="#sessions">Managing Recorded Sessions</a></li>
+    <li><a href="#best">Best Practices</a></li>
+  </ol>
+</div>
+</div>
+
+<p>TV input services let the user pause and resume channel playback via
+time-shifting APIs. Android 7.0 expands on time-shifting
+by letting the user save multiple recorded sessions.</p>
+
+<p>Users can schedule recordings in advance, or start a recording as they watch
+a program. Once the system has saved a recording, the user can browse, manage,
+and play back the recording using the system TV app.</p>
+
+<p>If you want to provide recording functionality for your TV input service,
+you must indicate to the system that your app supports recording, implement
+the ability to record programs, handle and communicate any errors that occur
+during recording, and manage your recorded sessions.</p>
+
+<p class="note"><strong>Note:</strong> The Live Channels app does not yet
+provide a way for users to create or access recordings. Until changes are
+made to the Live Channels app, it may be difficult to fully test the recording
+experience for your TV input service.</p>
+
+<h2 id="supporting">Indicating Support for Recording</h2>
+
+<p>To tell the system that your TV input service supports recording, set
+the <code>android:canRecord</code> attribute in your service metadata XML file
+to <code>true</code>:
+</p>
+
+<pre>
+&lt;tv-input xmlns:android="http://schemas.android.com/apk/res/android"
+  <b>android:canRecord="true"</b>
+  android:setupActivity="com.example.sampletvinput.SampleTvInputSetupActivity" /&gt;
+</pre>
+
+<p>For more information on the service metadata file, see
+<a href="{@docRoot}training/tv/tif/tvinput.html#manifest">Declare Your TV Input
+Service in the Manifest</a>.
+</p>
+
+<p>Alternatively, you can indicate recording support in your code using
+these steps:</p>
+
+<ol>
+<li>In your TV input service {@link android.app.Service#onCreate onCreate()}
+method, create a new {@link android.media.tv.TvInputInfo} object using the
+{@link android.media.tv.TvInputInfo.Builder TvInputInfo.Builder} class.</li>
+<li>When creating the new {@link android.media.tv.TvInputInfo} object, call
+{@link android.media.tv.TvInputInfo.Builder#setCanRecord
+setCanRecord(true)} before calling
+{@link android.media.tv.TvInputInfo.Builder#build build()} to indicate your
+service supports recording.</li>
+<li>Register your {@link android.media.tv.TvInputInfo} object with the
+system by calling
+{@link android.media.tv.TvInputManager#updateTvInputInfo
+TvInputManager.updateTvInputInfo()}.</li>
+</ol>
+
+<h2 id="recording">Recording a Session</h2>
+
+<p>After your TV input service registers that it supports recording
+functionality, the system calls your
+{@link android.media.tv.TvInputService#onCreateRecordingSession
+TvInputService.onCreateRecordingSession()} method when it needs to access
+your app's recording implementation. Implement your own
+{@link android.media.tv.TvInputService.RecordingSession
+TvInputService.RecordingSession} subclass and return it
+when the {@link android.media.tv.TvInputService#onCreateRecordingSession
+onCreateRecordingSession()} callback fires. This subclass is responsible
+for switching to the correct channel data, recording the requested data,
+and communicating recording status and errors to the system.</p>
+
+<p>When the system calls
+{@link android.media.tv.TvInputService.RecordingSession#onTune
+RecordingSession.onTune()}, passing in a channel URI, tune to the channel
+that the URI specifies. Notify the system that your app has tuned to the
+desired channel by calling
+{@link android.media.tv.TvInputService.RecordingSession#notifyTuned
+notifyTuned()} or, if your app could not tune to the proper channel, call
+{@link android.media.tv.TvInputService.RecordingSession#notifyError
+notifyError()}.</p>
+
+<p>The system next invokes the
+{@link android.media.tv.TvInputService.RecordingSession#onStartRecording
+RecordingSession.onStartRecording()} callback. Your app must start recording
+immediately. When the system invokes this callback, it may provide a URI
+that contains information about the program that is about to be recorded.
+When the recording is done, you'll copy this data to the
+{@link android.media.tv.TvContract.RecordedPrograms RecordedPrograms}
+data table.</p>
+
+<p>Finally, the system calls
+{@link android.media.tv.TvInputService.RecordingSession#onStopRecording
+RecordingSession.onStopRecording()}. At this point, your app must stop
+recording immediately. You also need to create an entry in the
+{@link android.media.tv.TvContract.RecordedPrograms RecordedPrograms}
+table. This entry should include the recorded session data URI in the
+{@link android.media.tv.TvContract.RecordedPrograms#COLUMN_RECORDING_DATA_URI
+RecordedPrograms.COLUMN_RECORDING_DATA_URI} column, and any program
+information that the system provided in the initial call to
+{@link android.media.tv.TvInputService.RecordingSession#onStartRecording
+onStartRecording()}.</p>
+
+<p>For more details on how to access the
+{@link android.media.tv.TvContract.RecordedPrograms RecordedPrograms} table
+see <a href="#sessions">Managing Recorded Sessions</a>.</p>
+
+<h2 id="errors">Handling Recording Errors</h2>
+
+<p>If an error occurs during recording, resulting in unusable recorded data,
+notify the system by calling
+{@link android.media.tv.TvInputService.RecordingSession#notifyError
+notifyError()}. Similarly, you can call
+{@link android.media.tv.TvInputService.RecordingSession#notifyError
+notifyError()} after a recording session is created to let the system know
+that your app can no longer record sessions.</p>
+
+<p>If an error occurs during recording, but you'd like to provide a
+partial recording to users for playback, call
+{@link android.media.tv.TvInputService.RecordingSession#notifyRecordingStopped
+notifyRecordingStopped()} to enable the system to
+use the partial session.</p>
+
+<h2 id="sessions">Managing Recorded Sessions</h2>
+
+<p>The system maintains information for all recorded sessions from all
+recording-capable channel apps in the
+{@link android.media.tv.TvContract.RecordedPrograms RecordedPrograms}
+content provider table. This information is accessible via the
+{@link android.media.tv.TvContract.RecordedPrograms RecordedPrograms}
+content recording URIs. Use content provider APIs to
+read, add, and delete entries from this table.</p>
+
+<p>For more information on working with content provider data see
+<a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+Content Provider Basics</a>.</p>
+
+<h2 id="best">Best Practices</h2>
+
+<p>TV devices may have limited storage, so use your best judgment when
+allocating storage to save recorded sessions. Use
+{@link android.media.tv.TvRecordingClient.RecordingCallback#onError
+RecordingCallback.onError(RECORDING_ERROR_INSUFFICIENT_SPACE)} when
+there isn't enough space to save a recorded session.</p>
+
+<p>When the user initiates recording, you should start recording data as soon
+as possible. To facilitate this, complete any up-front time-consuming tasks,
+like accessing and allocating storage space, when the system invokes the
+{@link android.media.tv.TvInputService#onCreateRecordingSession
+onCreateRecordingSession()} callback. Doing so lets you start
+recording immediately when the
+{@link android.media.tv.TvInputService.RecordingSession#onStartRecording
+onStartRecording()} callback fires.</p>

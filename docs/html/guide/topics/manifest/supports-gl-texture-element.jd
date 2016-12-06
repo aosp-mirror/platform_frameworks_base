@@ -3,16 +3,16 @@ parent.title=The AndroidManifest.xml File
 parent.link=manifest-intro.html
 @jd:body
 
- <div class="sidebox-wrapper"> 
+ <div class="sidebox-wrapper">
  <div class="sidebox">
-    <img src="{@docRoot}assets/images/icon_play.png" style="float:left;margin:0;padding:0;"> 
-    <p style="color:#669999;padding-top:1em;">Google Play Filtering</p> 
+    <img src="{@docRoot}assets/images/icon_play.png" style="float:left;margin:0;padding:0;">
+    <p style="color:#669999;padding-top:1em;">Google Play Filtering</p>
     <p style="padding-top:1em;">Google Play filters applications according
     to the texture compression formats that they support, to ensure that
     they can be installed only on devices that can handle their textures
     properly. You can use texture compression filtering
     as a way of targeting specific device types, based on GPU platform.</p>
-    
+
     <p style="margin-top:1em;">For important information about how
     Google Play uses <code>&lt;supports-gl-texture&gt;</code> elements as
     the basis for filtering, please read <a href="#market-texture-filtering">Google

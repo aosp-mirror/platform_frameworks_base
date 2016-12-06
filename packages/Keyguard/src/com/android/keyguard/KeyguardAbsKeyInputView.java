@@ -137,12 +137,21 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
                 entry,
                 userId,
                 new LockPatternChecker.OnCheckCallback() {
+
+                    @Override
+                    public void onEarlyMatched() {
+                        onPasswordChecked(userId, true /* matched */, 0 /* timeoutMs */,
+                                true /* isValidPassword */);
+                    }
+
                     @Override
                     public void onChecked(boolean matched, int timeoutMs) {
                         setPasswordEntryInputEnabled(true);
                         mPendingLockCheck = null;
-                        onPasswordChecked(userId, matched, timeoutMs,
-                                true /* isValidPassword */);
+                        if (!matched) {
+                            onPasswordChecked(userId, false /* matched */, timeoutMs,
+                                    true /* isValidPassword */);
+                        }
                     }
                 });
     }

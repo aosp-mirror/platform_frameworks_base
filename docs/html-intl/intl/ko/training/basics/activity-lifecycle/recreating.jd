@@ -8,13 +8,13 @@ trainingnavtop=true
 
 <div id="tb-wrapper">
   <div id="tb">
-    
+
     <h2>이 과정에서 다루는 내용</h2>
     <ol>
       <li><a href="#SaveState">액티비티 상태 저장하기</a></li>
       <li><a href="#RestoreState">액티비티 상태 복원하기</a></li>
     </ol>
-    
+
     <h2>필독 항목</h2>
     <ul>
       <li><a href="{@docRoot}training/basics/supporting-devices/screens.html">다양한
@@ -105,7 +105,7 @@ public void onSaveInstanceState(Bundle savedInstanceState) {
     // Save the user's current game state
     savedInstanceState.putInt(STATE_SCORE, mCurrentScore);
     savedInstanceState.putInt(STATE_LEVEL, mCurrentLevel);
-    
+
     // Always call the superclass so it can save the view hierarchy state
     super.onSaveInstanceState(savedInstanceState);
 }
@@ -138,7 +138,7 @@ onCreate()}에서 몇 가지 상태 데이터를 복원하는 방법에 대한 �
 &#64;Override
 protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState); // Always call the superclass first
-   
+
     // Check whether we're recreating a previously destroyed instance
     if (savedInstanceState != null) {
         // Restore value of members from saved state
@@ -157,12 +157,12 @@ protected void onCreate(Bundle savedInstanceState) {
 android.app.Activity#onRestoreInstanceState onRestoreInstanceState()}를 구현하도록 선택할 수 있습니다. 시스템은 복원할 저장
 상태가 있을 경우에만 {@link
 android.app.Activity#onRestoreInstanceState onRestoreInstanceState()}를 호출합니다. 따라서 {@link android.os.Bundle}이 null인지 확인할 필요가 없습니다.</p>
-        
+
 <pre>
 public void onRestoreInstanceState(Bundle savedInstanceState) {
     // Always call the superclass so it can restore the view hierarchy
     super.onRestoreInstanceState(savedInstanceState);
-   
+
     // Restore state members from saved instance
     mCurrentScore = savedInstanceState.getInt(STATE_SCORE);
     mCurrentLevel = savedInstanceState.getInt(STATE_LEVEL);

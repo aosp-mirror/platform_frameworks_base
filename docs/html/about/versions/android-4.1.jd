@@ -103,8 +103,8 @@ useful new APIs for app developers.</p>
 
 
 <div class="sidebox-wrapper">
-<div class="sidebox">  
-  
+<div class="sidebox">
+
 <h3 id="ApiLevel">Declare your app API Level</h3>
 
 <p>To better optimize your app for devices running Android {@sdkPlatformVersion},
@@ -117,7 +117,7 @@ test it, then publish an update with this change.</p>
 can use APIs in Android {@sdkPlatformVersion} while also supporting older versions by adding
 conditions to your code that check for the system API level before executing
 APIs not supported by your <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a>. 
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a>.
 To learn more about
 maintaining backward-compatibility, read <a
 href="{@docRoot}training/backward-compatible-ui/index.html">Creating Backward-Compatible
@@ -148,15 +148,15 @@ app on Android 4.1.</p>
 
 <h3 id="Isolated">Isolated services</h3>
 
-<p>By specifying <a href="{@docRoot}guide/topics/manifest/service-element.html#isolated">{@code android:isolatedProcess="true"}</a> in the 
+<p>By specifying <a href="{@docRoot}guide/topics/manifest/service-element.html#isolated">{@code android:isolatedProcess="true"}</a> in the
 <a href="{@docRoot}guide/topics/manifest/service-element.html">{@code <service>}</a> tag, your {@link android.app.Service} will run under
 its own isolated user ID process that has no permissions of its own.</p>
 
 
 <h3 id="Memory">Memory management</h3>
 
-<p>New {@link android.content.ComponentCallbacks2} constants such as {@link 
-android.content.ComponentCallbacks2#TRIM_MEMORY_RUNNING_LOW} and {@link 
+<p>New {@link android.content.ComponentCallbacks2} constants such as {@link
+android.content.ComponentCallbacks2#TRIM_MEMORY_RUNNING_LOW} and {@link
 android.content.ComponentCallbacks2#TRIM_MEMORY_RUNNING_CRITICAL} provide foreground
 processes more information about
 memory state before the system calls {@link android.app.Activity#onLowMemory()}.</p>
@@ -178,7 +178,7 @@ app.</p>
 <h3 id="LiveWallpapers">Live Wallpapers</h3>
 
 <p>New intent protocol to directly launch the live wallpaper preview activity so you can help
-  users easily select your live wallpaper without forcing them to leave 
+  users easily select your live wallpaper without forcing them to leave
 your app and navigate through the Home wallpaper picker.</p>
 
 <p>To launch the live wallpaper picker, call {@link android.content.Context#startActivity
@@ -207,7 +207,7 @@ creates the appropriate activity.</p>
 
 <p>This is particularly powerful for scenarios in which the user enters one of your app's activities
 through a "deep dive" intent such as from a notification or an intent from
-different app (as described in the design guide for <a 
+different app (as described in the design guide for <a
 href="{@docRoot}design/patterns/navigation.html#between-apps">Navigating Between Apps</a>). When
 the user enters your activity this way, your app may not naturally have a back stack of
 activities that can be resumed as the user navigates up. However, when you supply the <a
@@ -216,12 +216,12 @@ android:parentActivityName}</a> attribute for your activities, the system recogn
  whether or not your app already contains a back stack of parent activities and, if not, constructs
 a synthetic back stack that contains all parent activities.</p>
 
-<p class="note"><strong>Note:</strong> When the user enters a deep activity in your app and 
-  it creates a new task for your app, the system actually inserts the stack of parent activities 
+<p class="note"><strong>Note:</strong> When the user enters a deep activity in your app and
+  it creates a new task for your app, the system actually inserts the stack of parent activities
   into the task. As such, pressing the Back button also navigates back through the stack of parent
   activities.</p>
 
-<p>When the system creates a synthetic back stack for your app, it builds a basic {@link 
+<p>When the system creates a synthetic back stack for your app, it builds a basic {@link
   android.content.Intent} to create a new instance of each parent activity. So there's no
   saved state for the parent activities the way you'd expect had the user naturally navigated
 through
@@ -251,9 +251,9 @@ you want to modify the {@link android.content.Intent} for the activity's parent,
 the length of the array with {@link android.app.TaskStackBuilder#getIntentCount()} and pass that
 value to {@link android.app.TaskStackBuilder#editIntentAt editIntentAt()}.</p>
 
-<p>If your app structure is more complex, there are several other APIs 
+<p>If your app structure is more complex, there are several other APIs
   available that allow you to handle the behavior of Up navigation and
-  fully customize the synthetic back stack. Some of the APIs that give you additional 
+  fully customize the synthetic back stack. Some of the APIs that give you additional
   control include:</p>
 <dl>
   <dt>{@link android.app.Activity#onNavigateUp}</dt>
@@ -342,7 +342,7 @@ android.media.MediaCodec#queueInputBuffer queueInputBuffer()}.</p>
 <!--
 <h3 id="Routing">Media routing</h3>
 
-<p>The new {@link android.media.MediaRouter} class allows you to route media channels and 
+<p>The new {@link android.media.MediaRouter} class allows you to route media channels and
   streams from the current device to external speakers and other devices. You
 can acquire an instance of {@link android.media.MediaRouter} by calling {@link
 android.content.Context#getSystemService getSystemService(}{@link
@@ -354,7 +354,7 @@ android.content.Context#MEDIA_ROUTER_SERVICE MEDIA_ROUTER_SERVICE)}.</p>
 
 <p>New method {@link android.media.AudioRecord#startRecording startRecording()} allows
 you to begin audio recording based on a cue defined by a {@link android.media.MediaSyncEvent}.
-The {@link android.media.MediaSyncEvent} specifies an audio session 
+The {@link android.media.MediaSyncEvent} specifies an audio session
 (such as one defined by {@link android.media.MediaPlayer}), which when complete, triggers
 the audio recorder to begin recording. For example, you can use this functionality to
 play an audio tone that indicates the beginning of a recording session and recording
@@ -423,7 +423,7 @@ standard mechanisms and UI for choosing where to play media.
 for changes to the auto focus movement. You can register your interface with {@link
 android.hardware.Camera#setAutoFocusMoveCallback setAutoFocusMoveCallback()}. Then when the camera
 is in a continuous autofocus mode ({@link
-android.hardware.Camera.Parameters#FOCUS_MODE_CONTINUOUS_VIDEO} or 
+android.hardware.Camera.Parameters#FOCUS_MODE_CONTINUOUS_VIDEO} or
 {@link android.hardware.Camera.Parameters#FOCUS_MODE_CONTINUOUS_PICTURE}), you'll receive a call
 to {@link android.hardware.Camera.AutoFocusMoveCallback#onAutoFocusMoving onAutoFocusMoving()},
 which tells you whether auto focus has started moving or has stopped moving.</p>
@@ -434,7 +434,7 @@ which tells you whether auto focus has started moving or has stopped moving.</p>
 standard sounds made by the camera or other media actions. You should use these APIs to play
 the appropriate sound when building a custom still or video camera.</p>
 
-<p>To play a sound, simply instantiate a {@link android.media.MediaActionSound} object, call 
+<p>To play a sound, simply instantiate a {@link android.media.MediaActionSound} object, call
 {@link android.media.MediaActionSound#load load()} to pre-load the desired sound, then at the
 appropriate time, call {@link android.media.MediaActionSound#play play()}.</p>
 
@@ -483,7 +483,7 @@ connect to devices.</p>
 
 <p>To register your service, you must first create an {@link android.net.nsd.NsdServiceInfo}
   object and define the various properties of your service with methods such as
-  {@link android.net.nsd.NsdServiceInfo#setServiceName setServiceName()}, 
+  {@link android.net.nsd.NsdServiceInfo#setServiceName setServiceName()},
   {@link android.net.nsd.NsdServiceInfo#setServiceType setServiceType()}, and
   {@link android.net.nsd.NsdServiceInfo#setPort setPort()}.
 </p>
@@ -498,7 +498,7 @@ with your {@link android.net.nsd.NsdServiceInfo}.</p>
 
 <p>When your {@link
   android.net.nsd.NsdManager.DiscoveryListener} receives callbacks about services
-found, you need to resolve the service by calling 
+found, you need to resolve the service by calling
 {@link android.net.nsd.NsdManager#resolveService resolveService()}, passing it an
 implementation of {@link android.net.nsd.NsdManager.ResolveListener} that receives
 an {@link android.net.nsd.NsdServiceInfo} object that contains information about the
@@ -515,13 +515,13 @@ Discovery allows you to discover a service on an existing connected network (suc
 network).</p>
 
 <p>To broadcast your app as a service over Wi-Fi so that other devices can discover
-  your app and connect to it, call {@link 
+  your app and connect to it, call {@link
   android.net.wifi.p2p.WifiP2pManager#addLocalService addLocalService()} with a
   {@link android.net.wifi.p2p.nsd.WifiP2pServiceInfo} object that describes your app services.</p>
 
 <p>To initiate discover of nearby devices over Wi-Fi, you need to first decide whether you'll
   communicate using Bonjour or Upnp. To use Bonjour, first set up some callback listeners with
-  {@link android.net.wifi.p2p.WifiP2pManager#setDnsSdResponseListeners setDnsSdResponseListeners()}, which takes both a {@link android.net.wifi.p2p.WifiP2pManager.DnsSdServiceResponseListener} and {@link android.net.wifi.p2p.WifiP2pManager.DnsSdTxtRecordListener}. To use Upnp, call 
+  {@link android.net.wifi.p2p.WifiP2pManager#setDnsSdResponseListeners setDnsSdResponseListeners()}, which takes both a {@link android.net.wifi.p2p.WifiP2pManager.DnsSdServiceResponseListener} and {@link android.net.wifi.p2p.WifiP2pManager.DnsSdTxtRecordListener}. To use Upnp, call
   {@link android.net.wifi.p2p.WifiP2pManager#setUpnpServiceResponseListener setUpnpServiceResponseListener()}, which takes a {@link android.net.wifi.p2p.WifiP2pManager.UpnpServiceResponseListener}.</p>
 
 <p>Before you can start discovering services on local devices, you also need to call {@link android.net.wifi.p2p.WifiP2pManager#addServiceRequest addServiceRequest()}. When the {@link android.net.wifi.p2p.WifiP2pManager.ActionListener} you pass to this method receives a
@@ -644,7 +644,7 @@ deprecated.</p>
 <h3 id="ActivityOptions">Activity launch animations</h3>
 
 <p>You can now launch an {@link android.app.Activity} using zoom animations or
-your own custom animations. To specify the animation you want, use the {@link 
+your own custom animations. To specify the animation you want, use the {@link
 android.app.ActivityOptions} APIs to build a {@link android.os.Bundle} that you can
 then pass to any of the
 methods that start an activity, such as {@link
@@ -659,8 +659,8 @@ type of animation you may want to show as your activity opens:</p>
   Android 4.1 uses this when opening an app.</dd>
   <dt>{@link android.app.ActivityOptions#makeThumbnailScaleUpAnimation
     makeThumbnailScaleUpAnimation()}</dt>
-    <dd>Creates an animation that scales up the activity window starting from a specified 
-      position and a provided thumbnail image. For example, the Recent Apps window in 
+    <dd>Creates an animation that scales up the activity window starting from a specified
+      position and a provided thumbnail image. For example, the Recent Apps window in
       Android 4.1 uses this when returning to an app.</dd>
   <dt>{@link android.app.ActivityOptions#makeCustomAnimation
     makeCustomAnimation()}</dt>
@@ -672,7 +672,7 @@ type of animation you may want to show as your activity opens:</p>
 
 <h3 id="TimeAnimator">Time animator</h3>
 
-<p>The new {@link android.animation.TimeAnimator} provides a simple callback 
+<p>The new {@link android.animation.TimeAnimator} provides a simple callback
   mechanism with the {@link android.animation.TimeAnimator.TimeListener} that notifies
   you upon every frame of the animation. There is no duration, interpolation, or object value-setting with this Animator. The listener's callback receives information for each frame including
   total elapsed time and the elapsed time since the previous animation frame.</p>
@@ -692,7 +692,7 @@ type of animation you may want to show as your activity opens:</p>
 
 <p>The new method {@link android.app.Notification.Builder#setStyle setStyle()} allows you to specify
   one of three new styles for your notification that each offer a larger content region. To
-specify the style for your large content region, pass {@link 
+specify the style for your large content region, pass {@link
 android.app.Notification.Builder#setStyle setStyle()} one of the following objects:</p>
 <dl>
   <dt>{@link android.app.Notification.BigPictureStyle}</dt>
@@ -720,7 +720,7 @@ android.app.Notification.Builder#setStyle setStyle()} one of the following objec
   order of your notification in the list by setting
 the priority with {@link android.app.Notification.Builder#setPriority setPriority()}. You
 can pass this one of five different priority levels defined by {@code PRIORITY_*} constants
-in the {@link android.app.Notification} class. The default is {@link 
+in the {@link android.app.Notification} class. The default is {@link
 android.app.Notification#PRIORITY_DEFAULT}, and there's two levels higher and two levels lower.</p>
 
 <p>High priority notifications are things that users generally want to respond to quickly,
@@ -738,17 +738,17 @@ and passing the following flags:</p>
 
 <dl>
   <dt>{@link android.view.View#SYSTEM_UI_FLAG_FULLSCREEN}</dt>
-    <dd>Hides non-critical system UI (such as the status bar). 
+    <dd>Hides non-critical system UI (such as the status bar).
       If your activity uses the action bar in overlay mode (by
       enabling <a href="{@docRoot}reference/android/R.attr.html#windowActionBarOverlay">{@code
       android:windowActionBarOverlay}</a>), then this flag also hides the action bar and does
       so with a coordinated animation when both hiding and showing the two.</dd>
-  
+
   <dt>{@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}</dt>
     <dd>Sets your activity layout to use the same screen area that's available when you've
     enabled {@link android.view.View#SYSTEM_UI_FLAG_FULLSCREEN} even if the system UI elements
     are still visible. Although parts of your layout will be overlayed by the
-    system UI, this is useful if your app often hides and shows the system UI with 
+    system UI, this is useful if your app often hides and shows the system UI with
   {@link android.view.View#SYSTEM_UI_FLAG_FULLSCREEN}, because it avoids your layout from
   adjusting to the new layout bounds each time the system UI hides or appears.</dd>
 
@@ -779,7 +779,7 @@ and passing the following flags:</p>
 
 <h3 id="RemoteViews">Remote views</h3>
 
-<p>{@link android.widget.GridLayout} and {@link android.view.ViewStub} 
+<p>{@link android.widget.GridLayout} and {@link android.view.ViewStub}
   are now remotable views so you can use them in layouts for your
   app widgets and notification custom layouts.</p>
 
@@ -787,7 +787,7 @@ and passing the following flags:</p>
 
 <h3 id="Fonts">Font families</h3>
 
-<p>Android 4.1 adds several more variants of the Roboto font style for a total of 10 variants, 
+<p>Android 4.1 adds several more variants of the Roboto font style for a total of 10 variants,
   and they're all usable by apps. Your apps now have access to the full set of both light and
 condensed variants.</p>
 
@@ -820,14 +820,14 @@ condensed variants.</p>
 {@code "bold"} and {@code "italic"}. You can apply both like so: {@code
 android:textStyle="bold|italic"}.</p>
 
-<p>You can also use {@link android.graphics.Typeface#create Typeface.create()}. 
+<p>You can also use {@link android.graphics.Typeface#create Typeface.create()}.
   For example, {@code Typeface.create("sans-serif-light", Typeface.NORMAL)}.</p>
 
 
 
 
 
-    
+
 <h2 id="Input">Input Framework</h2>
 
 
@@ -864,7 +864,7 @@ by calling {@link android.view.InputDevice#getVibrator()} on the {@link android.
 
 <dl>
   <dt>{@link android.Manifest.permission#READ_EXTERNAL_STORAGE}</dt>
-  <dd>Provides protected read access to external storage.  In Android 4.1 by 
+  <dd>Provides protected read access to external storage.  In Android 4.1 by
     default all applications still have read
 access.  This will be changed in a future release to require that applications explicitly request
 read access using this permission.  If your application already requests write access, it will
@@ -898,9 +898,9 @@ a television interface, declare this feature in your manifest file with the <a h
 &lt;/manifest&gt;
 </pre>
 
-<p>This feature defines "television" to be a typical living room television experience: 
-  displayed on a big screen, where the user is sitting far away and the dominant form of 
-  input is be something like a d-pad, and generally not through touch or a 
+<p>This feature defines "television" to be a typical living room television experience:
+  displayed on a big screen, where the user is sitting far away and the dominant form of
+  input is be something like a d-pad, and generally not through touch or a
   mouse/pointer-device.</p>
 
 

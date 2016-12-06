@@ -21,13 +21,13 @@ function revealSection(hashy) {
     link = $("#title-tabs a[href$="+sectionId+"]");
     link.parent().addClass("selected");
     link.parent().siblings().removeClass("selected");
-    
+
     sectionDiv = $(".version-section"+link.attr("href"));
     if (sectionDiv.length) {
       $(".version-section").hide();
       sectionDiv.show();
     }
-    
+
     $('html, body').animate({
          scrollTop: $(hashy).offset().top
      }, 100);
@@ -672,7 +672,7 @@ this GPU integration <strong>without recompiling</strong>.</p>
 <div style="float:left;margin:16px 24px 12px 0px;">
 <a href="" target="_android">
 <img src="{@docRoot}images/jb-nexus10-1.png" alt="10-inch tablet running Android 4.2" width="380" height="281" /></a>
-</div> 
+</div>
 
 <h2 id="42-ui" style="margin-top:2em;">Refined, refreshed UI</h2>
 
@@ -902,7 +902,7 @@ equivalents. The system then handles the mirroring and display of your UI as
 appropriate.</p>
 
 <p>For precise control over your app UI, Android 4.2 includes new APIs that let
-you manage layout direction, text direction, text alignment, gravity, and 
+you manage layout direction, text direction, text alignment, gravity, and
 locale direction in View components. You can even create custom versions of
 layout, drawables, and other resources for display when a right-to-left script
 is in use.</p>
@@ -1005,7 +1005,7 @@ compatibility and improved optimization across CPUs, GPUs, and DSPs.</p>
 <p>Filterscript is ideal for hardware-accelerating simple image-processing and
 computation operations such as those that might be written for OpenGL ES
 fragment shaders. Because it places a relaxed set of constraints on hardware,
-your operations are optimized and accelerated on more types of device chipsets. 
+your operations are optimized and accelerated on more types of device chipsets.
 Any app targeting API level 17 or higher can make use of Filterscript.</p>
 
 <h3 id="42-rs-intrinsics">Script intrinsics</h3>
@@ -1028,7 +1028,7 @@ could not do if the scripts were executed individually.</p>
 <div style="float:right;padding-top:1em;width:400px;margin-left:2em;">
 <img src="{@docRoot}images/jb-rs-chart-versions.png" alt="Renderscipt optimizations chart" width="360" height="252"
 style="border:1px solid #ddd;border-radius: 6px;" />
-<p style="image-caption">Renderscript image-processing 
+<p style="image-caption">Renderscript image-processing
 benchmarks run on different Android platform versions (Android 4.0, 4.1, and 4.2)
 in CPU only on a Galaxy Nexus device.</p>
 <img src="{@docRoot}images/jb-rs-chart-gpu.png" style="border:1px solid #ddd;border-radius: 6px; alt="" width="360" height="252" />
@@ -1143,7 +1143,7 @@ validation failure if the certificate does not chain to a set of expected
 certificates.  This protects against possible compromise of Certificate
 Authorities.</li>
 <li><strong>Improved display of Android permissions</strong> &mdash; Permissions
-have been organized into groups that are more easily understood by users. 
+have been organized into groups that are more easily understood by users.
 During review of the permissions, the user can click on the permission to see
 more detailed information about the permission.</li>
 <li><strong>installd hardening</strong> &mdash; The installd daemon does not run
@@ -1196,7 +1196,7 @@ such as burst mode capture with processing controls.
 Android 4.2 introduces support for controllers based on the NCI standard from
 the NFC-Forum. NCI provides a standard communication protocol between an NFC
 Controller (NFCC) and a device Host, and the new NFC stack developed in
-collaboration between Google and Broadcom supports it.  
+collaboration between Google and Broadcom supports it.
 
 <h3 id="42-dalvik">Dalvik runtime optimizations</h3>
 
@@ -1248,7 +1248,7 @@ a wider range of architectures:</p>
 </div>
 <p>Welcome to Android 4.1 the first version of Jelly Bean!</p>
 
-<p>Android 4.1 is the fastest and smoothest version of Android yet. We’ve made 
+<p>Android 4.1 is the fastest and smoothest version of Android yet. We’ve made
 improvements throughout the platform and added great new features
 for users and developers. This document provides a glimpse of what's new for developers.
 
@@ -1552,7 +1552,7 @@ data and sessions, even where there is no cell network or Wi-Fi available.</p>
 
 <h3 id="gps">Google Play services</h3>
 
-<p>Google Play services helps developers to <strong>integrate Google services</strong> such as authentication and Google+ into their apps delivered through Google Play.</p> 
+<p>Google Play services helps developers to <strong>integrate Google services</strong> such as authentication and Google+ into their apps delivered through Google Play.</p>
 
 <p>Google Play services is automatically provisioned to end user devices by Google Play, so all you need is a <strong>thin client library</strong> in your apps.</p>
 

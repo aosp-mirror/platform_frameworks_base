@@ -144,7 +144,9 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_4g_plus" msgid="3032226872470658661">"4G+"</string>
     <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
+    <string name="accessibility_data_connection_lte_plus" msgid="361876866906946007">"LTE+"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Roaming"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"EDGE"</string>
@@ -239,7 +241,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Conexiunea de date 4G este întreruptă"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Conexiunea de date mobile este întreruptă"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Conexiunea de date este întreruptă"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Deoarece limita setată pentru date a fost atinsă, dispozitivul a întrerupt utilizarea datelor pentru restul acestui ciclu.\n\nReluarea utilizării de date poate genera aplicarea de taxe de către operator."</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"A fost atinsă limita de date setată. Datele mobile nu mai sunt folosite \n\nDacă reluați, este posibil să se aplice taxe pentru utilizarea datelor."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Reluați"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Fără conex. internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi conectat"</string>
@@ -321,10 +323,13 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Limită de <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Avertizare: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Modul de lucru"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Lumină de noapte"</string>
+    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"Lumina de noapte este activată; atingeți pentru a o dezactiva"</string>
+    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"Lumina de noapte este dezactivată; atingeți pentru a o activa"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"Niciun element recent"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Ați șters tot"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Informații despre aplicație"</string>
-    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"fixare pe ecran"</string>
+    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"fixarea ecranului"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"căutare"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> nu a putut porni."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Aplicația <xliff:g id="APP">%s</xliff:g> este dezactivată în modul sigur."</string>
@@ -334,6 +339,8 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Divizare pe orizontală"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Divizare pe verticală"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Divizare personalizată"</string>
+  <string-array name="recents_blacklist_array">
+  </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Încărcată"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Se încarcă"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> până la încărcare completă"</string>
@@ -401,6 +408,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"Dispozitivul poate fi monitorizat"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Profilul poate fi monitorizat"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Rețeaua poate fi monitorizată"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"Este posibil ca rețeaua să fie monitorizată"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Monitorizarea dispozitivului"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Monitorizarea profilului"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Monitorizarea rețelei"</string>
@@ -413,6 +421,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"Sunteți conectat(ă) la <xliff:g id="APPLICATION">%1$s</xliff:g>, care vă poate monitoriza activitatea în rețea, inclusiv e-mailurile, aplicațiile și site-urile."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Sunteți conectat(ă) la <xliff:g id="APPLICATION">%1$s</xliff:g>, care vă poate monitoriza activitatea în rețeaua personală, inclusiv e-mailurile, aplicațiile și site-urile."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"V-ați conectat la aplicația <xliff:g id="APPLICATION">%1$s</xliff:g>, care vă poate monitoriza activitatea personală în rețea, inclusiv e-mailurile, aplicațiile și site-urile accesate."</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"Profilul de serviciu este gestionat de <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Este conectat la <xliff:g id="APPLICATION">%2$s</xliff:g>, care vă poate monitoriza activitatea în rețeaua de serviciu, inclusiv e-mailurile, aplicațiile și site-urile.\n\nPentru mai multe informații, contactați administratorul."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Profilul de serviciu este gestionat de <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Este conectat la <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, care vă poate monitoriza activitatea în rețeaua de serviciu, inclusiv e-mailurile, aplicațiile și site-urile.\n\nDe asemenea, sunteți conectat(ă) la <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, care vă poate monitoriza activitatea în rețeaua personală."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Dispozitivul este gestionat de <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministratorul poate monitoriza și gestiona setările, accesul la rețeaua companiei, aplicațiile, datele asociate cu dispozitivul și informațiile privind locația dispozitivului.\n\nSunteți conectat(ă) la <xliff:g id="APPLICATION">%2$s</xliff:g>, care vă poate monitoriza activitatea în rețea, inclusiv e-mailurile, aplicațiile și site-urile.\n\nPentru mai multe informații, contactați administratorul."</string>
@@ -438,6 +447,18 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> afișează caseta de dialog pentru volum"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"Atingeți pentru a restabili versiunea originală."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Acum folosiți profilul de serviciu"</string>
+  <string-array name="volume_stream_titles">
+    <item msgid="5841843895402729630">"Apel"</item>
+    <item msgid="5997713001067658559">"Sistem"</item>
+    <item msgid="7858983209929864160">"Sonerie"</item>
+    <item msgid="1850038478268896762">"Conținut media"</item>
+    <item msgid="8265110906352372092">"Alarmă"</item>
+    <item msgid="5339394737636839168"></item>
+    <item msgid="2951313578278086204">"Bluetooth"</item>
+    <item msgid="2919807739709798970"></item>
+    <item msgid="150349973435223405"></item>
+    <item msgid="6761963760295549099"></item>
+  </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Atingeți pentru a activa sunetul."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Atingeți pentru a seta vibrarea. Sunetul se poate dezactiva pentru serviciile de accesibilitate."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Atingeți pentru a dezactiva sunetul. Sunetul se poate dezactiva pentru serviciile de accesibilitate."</string>
@@ -477,8 +498,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Afișează secundele pe ceas în bara de stare. Poate afecta autonomia bateriei."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Rearanjați Setările rapide"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Afișați luminozitatea în Setările rapide"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"Activați gestul de accesare a ecranului împărțit prin glisare în sus"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Activați gestul de accesare a ecranului împărțit prin glisarea în sus de la butonul Recente"</string>
     <string name="experimental" msgid="6198182315536726162">"Experimentale"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Activați Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Pentru a conecta tastatura la tabletă, mai întâi trebuie să activați Bluetooth."</string>
@@ -508,21 +527,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"Mai multe setări"</string>
     <string name="notification_done" msgid="5279426047273930175">"Terminat"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Opțiuni privind notificările pentru <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"Culoare și aspect"</string>
-    <string name="night_mode" msgid="3540405868248625488">"Modul Noapte"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"Calibrați afișarea"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"Activat"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"Dezactivat"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"Activați automat"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Comutați la modul Noapte în funcție de locație și de momentul zilei"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"Când modul Noapte este activat"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Folosiți tema întunecată pentru SO Android"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"Ajustați culoarea"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"Ajustați luminozitatea"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"Tema întunecată se aplică zonelor principale ale sistemului de operare Android care sunt de obicei afișate cu o temă deschisă la culoare, cum ar fi Setările."</string>
-    <string name="color_apply" msgid="9212602012641034283">"Aplicați"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"Confirmați setările"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"Unele setări pentru culori pot face dispozitivul să nu mai funcționeze. Dați clic pe OK pentru a confirma aceste setări pentru culori. În caz contrar, acestea se vor reseta după 10 secunde."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Utilizarea bateriei"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Economisirea bateriei nu este disponibilă pe durata încărcării"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Economisirea bateriei"</string>
@@ -651,4 +655,5 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Deschideți setările <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Editați ordinea setărilor."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Pagina <xliff:g id="ID_1">%1$d</xliff:g> din <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <string name="cant_silence_or_block" msgid="999689262131488625">"Notificările nu pot fi dezactivate sau blocate"</string>
 </resources>

@@ -545,9 +545,16 @@
          <li><a href="<?cs var:toroot ?>guide/topics/data/data-storage.html">
             <span class="en">Storage Options</span>
            </a></li>
-        <li><a href="<?cs var:toroot ?>guide/topics/data/backup.html">
+        <li class="nav-section">
+          <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/topics/data/backup.html">
             <span class="en">Data Backup</span>
-          </a></li>
+          </a></div>
+          <ul>
+            <li><a href="<?cs var:toroot ?>guide/topics/data/autobackup.html">Auto Backup</a></li>
+            <li><a href="<?cs var:toroot ?>guide/topics/data/keyvaluebackup.html">Key/Value Backup</a></li>
+            <li><a href="<?cs var:toroot ?>guide/topics/data/testingbackup.html">Testing Backup and Restore</a></li>
+          </ul>
+        </li>
         <li><a href="<?cs var:toroot ?>guide/topics/data/install-location.html">
             <span class="en">App Install Location</span>
           </a></li>

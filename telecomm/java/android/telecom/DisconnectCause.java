@@ -67,13 +67,11 @@ public final class DisconnectCause implements Parcelable {
     /**
      * Disconnected because the user did not locally answer the incoming call, but it was answered
      * on another device where the call was ringing.
-     * @hide
      */
     public static final int ANSWERED_ELSEWHERE = 11;
 
     /**
      * Disconnected because the call was pulled from the current device to another device.
-     * @hide
      */
     public static final int CALL_PULLED = 12;
 
@@ -276,6 +274,12 @@ public final class DisconnectCause implements Parcelable {
                 break;
             case CONNECTION_MANAGER_NOT_SUPPORTED:
                 code = "CONNECTION_MANAGER_NOT_SUPPORTED";
+                break;
+            case CALL_PULLED:
+                code = "CALL_PULLED";
+                break;
+            case ANSWERED_ELSEWHERE:
+                code = "ANSWERED_ELSEWHERE";
                 break;
             default:
                 code = "invalid code: " + mDisconnectCode;

@@ -143,7 +143,9 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_4g_plus" msgid="3032226872470658661">"4G 이상"</string>
     <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
+    <string name="accessibility_data_connection_lte_plus" msgid="361876866906946007">"LTE+"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"로밍"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
@@ -238,7 +240,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G 데이터 사용 중지됨"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"모바일 데이터 사용 중지됨"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"데이터 사용 중지됨"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"설정된 데이터 한도에 도달했기 때문에 기기에서 사이클의 나머지 기간 동안 데이터 사용을 일시 중지했습니다. \n\n데이터 사용을 재개하면 이동통신사 요금이 청구될 수 있습니다."</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"설정한 데이터 한도에 도달했습니다. 더 이상 모바일 데이터를 사용하지 않습니다.\n\n계속 사용하면 데이터 사용 요금이 부과될 수 있습니다."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"재개"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"인터넷에 연결되지 않음"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi 연결됨"</string>
@@ -319,6 +321,9 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"한도: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> 경고"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"작업 모드"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"야간 조명"</string>
+    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"야간 조명 사용 설정됨, 사용 중지하려면 탭"</string>
+    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"야간 조명 사용 중지됨, 사용 설정하려면 탭"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"최근 항목이 없습니다."</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"모든 항목을 삭제했습니다."</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"애플리케이션 정보"</string>
@@ -332,6 +337,8 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"수평 분할"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"수직 분할"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"맞춤 분할"</string>
+  <string-array name="recents_blacklist_array">
+  </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"충전됨"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"충전 중"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"완충까지 <xliff:g id="CHARGING_TIME">%s</xliff:g> 남음"</string>
@@ -399,6 +406,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"기기가 모니터링될 수 있음"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"프로필이 모니터링될 수 있음"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"네트워크가 모니터링될 수 있음"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"네트워크가 모니터링될 수 있음"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"기기 모니터링"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"프로필 모니터링"</string>
     <string name="monitoring_title" msgid="169206259253048106">"네트워크 모니터링"</string>
@@ -411,6 +419,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"<xliff:g id="APPLICATION">%1$s</xliff:g>에 연결되었습니다. 이 앱은 이메일, 앱, 웹사이트와 같은 내 네트워크 활동을 모니터링할 수 있습니다."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"<xliff:g id="APPLICATION">%1$s</xliff:g>에 연결되었습니다. 이 앱은 이메일, 앱, 웹사이트와 같은 내 네트워크 활동을 모니터링할 수 있습니다."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"<xliff:g id="APPLICATION">%1$s</xliff:g>에 연결되었습니다. 이 앱은 이메일, 앱, 웹사이트와 같은 내 개인 네트워크 활동을 모니터링할 수 있습니다."</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"직장 프로필은 <xliff:g id="ORGANIZATION">%1$s</xliff:g>에서 관리합니다. 이는 <xliff:g id="APPLICATION">%2$s</xliff:g>에 연결되어 있으며 여기에서 이메일, 앱, 웹사이트와 같은 직장 네트워크 활동을 모니터링할 수 있습니다.\n\n자세한 내용은 관리자에게 문의하세요."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"직장 프로필은 <xliff:g id="ORGANIZATION">%1$s</xliff:g>에서 관리합니다. 이는 <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>에 연결되어 있으며 여기에서 이메일, 앱, 웹사이트와 같은 직장 네트워크 활동을 모니터링할 수 있습니다.\n\n또한 <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>에 연결되어 있으며, 여기에서 내 개인 네트워크 활동을 모니터링할 수 있습니다."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"<xliff:g id="ORGANIZATION">%1$s</xliff:g>에서 기기를 관리합니다.\n\n관리자는 설정, 기업 액세스, 앱, 기기와 연결된 데이터, 기기의 위치 정보를 모니터링하고 관리할 수 있습니다.\n\n<xliff:g id="APPLICATION">%2$s</xliff:g>에 연결되어 있으며 여기에서 이메일, 앱, 웹사이트와 같은 내 네트워크 활동을 모니터링할 수 있습니다.\n\n자세한 내용은 관리자에게 문의하세요."</string>
@@ -436,6 +445,18 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g>은(는) 볼륨 대화입니다."</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"원본을 복원하려면 탭하세요."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"직장 프로필을 사용하고 있습니다."</string>
+  <string-array name="volume_stream_titles">
+    <item msgid="5841843895402729630">"통화"</item>
+    <item msgid="5997713001067658559">"시스템"</item>
+    <item msgid="7858983209929864160">"벨 울리기"</item>
+    <item msgid="1850038478268896762">"미디어"</item>
+    <item msgid="8265110906352372092">"알람"</item>
+    <item msgid="5339394737636839168"></item>
+    <item msgid="2951313578278086204">"블루투스"</item>
+    <item msgid="2919807739709798970"></item>
+    <item msgid="150349973435223405"></item>
+    <item msgid="6761963760295549099"></item>
+  </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. 탭하여 음소거를 해제하세요."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. 탭하여 진동으로 설정하세요. 접근성 서비스가 음소거될 수 있습니다."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. 탭하여 음소거로 설정하세요. 접근성 서비스가 음소거될 수 있습니다."</string>
@@ -446,7 +467,7 @@
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"충전 중이 아닌 경우 상태 표시줄 아이콘 내에 배터리 잔량 비율 표시"</string>
     <string name="quick_settings" msgid="10042998191725428">"빠른 설정"</string>
     <string name="status_bar" msgid="4877645476959324760">"상태 표시줄"</string>
-    <string name="overview" msgid="4018602013895926956">"개요"</string>
+    <string name="overview" msgid="4018602013895926956">"최근 사용"</string>
     <string name="demo_mode" msgid="2389163018533514619">"데모 모드"</string>
     <string name="enable_demo_mode" msgid="4844205668718636518">"데모 모드 사용"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"데모 모드 표시"</string>
@@ -475,8 +496,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"상태 표시줄에 시계 초 단위를 표시합니다. 배터리 수명에 영향을 줄 수도 있습니다."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"빠른 설정 재정렬"</string>
     <string name="show_brightness" msgid="6613930842805942519">"빠른 설정에서 밝기 표시"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"화면 분할 위로 스와이프 동작 사용"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"최근 사용 버튼에서 위로 스와이프하기 동작으로 창 분할 모드를 사용 설정합니다."</string>
     <string name="experimental" msgid="6198182315536726162">"베타"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"블루투스를 켜시겠습니까?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"키보드를 태블릿에 연결하려면 먼저 블루투스를 켜야 합니다."</string>
@@ -506,21 +525,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"설정 더보기"</string>
     <string name="notification_done" msgid="5279426047273930175">"완료"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> 알림 관리"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"색상 및 모양"</string>
-    <string name="night_mode" msgid="3540405868248625488">"야간 모드"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"디스플레이 보정"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"사용"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"사용 안함"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"자동으로 사용 설정"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"위치 및 시간대에 맞게 야간 모드로 전환"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"야간 모드 사용 중일 때"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Android OS용 어두운 테마 사용"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"농담 효과 조정"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"밝기 조정"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"설정 등 밝은 테마에서 일반적으로 표시되는 Android OS의 핵심 영역에 어두운 테마가 적용됩니다."</string>
-    <string name="color_apply" msgid="9212602012641034283">"적용"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"설정 확인"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"일부 색상 설정으로 인해 이 기기를 사용하지 못할 수 있습니다. 확인을 클릭하여 이러한 색상 설정을 확인하지 않으면 10초 후에 설정이 초기화됩니다."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"배터리 사용량"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"충전하는 동안 배터리 세이버는 사용할 수 없습니다."</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"배터리 세이버"</string>
@@ -649,4 +653,5 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> 설정 열기"</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"설정 순서 수정"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g>페이지 중 <xliff:g id="ID_1">%1$d</xliff:g>페이지"</string>
+    <string name="cant_silence_or_block" msgid="999689262131488625">"알림을 무음으로 설정하거나 차단할 수 없습니다."</string>
 </resources>

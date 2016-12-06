@@ -49,6 +49,10 @@ public class TypedArray {
             attrs.mLength = len;
             attrs.mRecycled = false;
 
+            // Reset the assets, which may have changed due to configuration changes
+            // or further resource loading.
+            attrs.mAssets = res.getAssets();
+
             final int fullLen = len * AssetManager.STYLE_NUM_ENTRIES;
             if (attrs.mData.length >= fullLen) {
                 return attrs;
@@ -66,7 +70,7 @@ public class TypedArray {
 
     private final Resources mResources;
     private final DisplayMetrics mMetrics;
-    private final AssetManager mAssets;
+    private AssetManager mAssets;
 
     private boolean mRecycled;
 
@@ -1086,6 +1090,7 @@ public class TypedArray {
         // These may have been set by the client.
         mXml = null;
         mTheme = null;
+        mAssets = null;
 
         mResources.mTypedArrayPool.release(this);
     }

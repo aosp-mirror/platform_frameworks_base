@@ -43,7 +43,10 @@ public class BurnInProtectionHelper implements DisplayManager.DisplayListener,
     // Default value when max burnin radius is not set.
     public static final int BURN_IN_MAX_RADIUS_DEFAULT = -1;
 
-    private static final long BURNIN_PROTECTION_WAKEUP_INTERVAL_MS = TimeUnit.MINUTES.toMillis(1);
+    private static final long BURNIN_PROTECTION_FIRST_WAKEUP_INTERVAL_MS =
+            TimeUnit.MINUTES.toMillis(1);
+    private static final long BURNIN_PROTECTION_SUBSEQUENT_WAKEUP_INTERVAL_MS =
+            TimeUnit.MINUTES.toMillis(2);
     private static final long BURNIN_PROTECTION_MINIMAL_INTERVAL_MS = TimeUnit.SECONDS.toMillis(10);
 
     private static final boolean DEBUG = false;
@@ -138,6 +141,9 @@ public class BurnInProtectionHelper implements DisplayManager.DisplayListener,
             // We don't want to adjust offsets immediately after the device goes into ambient mode.
             // Instead, we want to wait until it's more likely that the user is not observing the
             // screen anymore.
+            final long interval = mFirstUpdate
+                ? BURNIN_PROTECTION_FIRST_WAKEUP_INTERVAL_MS
+                : BURNIN_PROTECTION_SUBSEQUENT_WAKEUP_INTERVAL_MS;
             if (mFirstUpdate) {
                 mFirstUpdate = false;
             } else {
@@ -156,8 +162,7 @@ public class BurnInProtectionHelper implements DisplayManager.DisplayListener,
             // Next adjustment at least ten seconds in the future.
             long nextWall = nowWall + BURNIN_PROTECTION_MINIMAL_INTERVAL_MS;
             // And aligned to the minute.
-            nextWall = nextWall - nextWall % BURNIN_PROTECTION_WAKEUP_INTERVAL_MS
-                    + BURNIN_PROTECTION_WAKEUP_INTERVAL_MS;
+            nextWall = (nextWall - (nextWall % interval)) + interval;
             // Use elapsed real time that is adjusted to full minute on wall clock.
             final long nextElapsed = nowElapsed + (nextWall - nowWall);
             if (DEBUG) {

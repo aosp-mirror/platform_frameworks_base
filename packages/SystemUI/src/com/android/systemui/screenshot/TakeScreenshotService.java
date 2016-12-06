@@ -23,6 +23,8 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.os.UserManager;
+import android.util.Log;
 import android.view.WindowManager;
 
 public class TakeScreenshotService extends Service {
@@ -44,6 +46,16 @@ public class TakeScreenshotService extends Service {
                     }
                 }
             };
+
+            // If the storage for this user is locked, we have no place to store
+            // the screenshot, so skip taking it instead of showing a misleading
+            // animation and error notification.
+            if (!getSystemService(UserManager.class).isUserUnlocked()) {
+                Log.w(TAG, "Skipping screenshot because storage is locked!");
+                post(finisher);
+                return;
+            }
+
             if (mScreenshot == null) {
                 mScreenshot = new GlobalScreenshot(TakeScreenshotService.this);
             }

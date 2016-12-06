@@ -16,6 +16,7 @@
 #include "JankTracker.h"
 
 #include "Properties.h"
+#include "utils/TimeUtils.h"
 
 #include <algorithm>
 #include <cutils/ashmem.h>
@@ -119,11 +120,27 @@ static uint32_t frameTimeForFrameCountIndex(uint32_t index) {
     return index;
 }
 
-JankTracker::JankTracker(nsecs_t frameIntervalNanos) {
+JankTracker::JankTracker(const DisplayInfo& displayInfo) {
     // By default this will use malloc memory. It may be moved later to ashmem
     // if there is shared space for it and a request comes in to do that.
     mData = new ProfileData;
     reset();
+    nsecs_t frameIntervalNanos = static_cast<nsecs_t>(1_s / displayInfo.fps);
+#if USE_HWC2
+    nsecs_t sfOffset = frameIntervalNanos - (displayInfo.presentationDeadline - 1_ms);
+    nsecs_t offsetDelta = sfOffset - displayInfo.appVsyncOffset;
+    // There are two different offset cases. If the offsetDelta is positive
+    // and small, then the intention is to give apps extra time by leveraging
+    // pipelining between the UI & RT threads. If the offsetDelta is large or
+    // negative, the intention is to subtract time from the total duration
+    // in which case we can't afford to wait for dequeueBuffer blockage.
+    if (offsetDelta <= 4_ms && offsetDelta >= 0) {
+        // SF will begin composition at VSYNC-app + offsetDelta. If we are triple
+        // buffered, this is the expected time at which dequeueBuffer will
+        // return due to the staggering of VSYNC-app & VSYNC-sf.
+        mDequeueTimeForgiveness = offsetDelta + 4_ms;
+    }
+#endif
     setFrameInterval(frameIntervalNanos);
 }
 
@@ -213,6 +230,19 @@ void JankTracker::addFrame(const FrameInfo& frame) {
     mData->totalFrameCount++;
     // Fast-path for jank-free frames
     int64_t totalDuration = frame.duration(sFrameStart, FrameInfoIndex::FrameCompleted);
+    if (mDequeueTimeForgiveness
+            && frame[FrameInfoIndex::DequeueBufferDuration] > 500_us) {
+        nsecs_t expectedDequeueDuration =
+                mDequeueTimeForgiveness + frame[FrameInfoIndex::Vsync]
+                - frame[FrameInfoIndex::IssueDrawCommandsStart];
+        if (expectedDequeueDuration > 0) {
+            // Forgive only up to the expected amount, but not more than
+            // the actual time spent blocked.
+            nsecs_t forgiveAmount = std::min(expectedDequeueDuration,
+                    frame[FrameInfoIndex::DequeueBufferDuration]);
+            totalDuration -= forgiveAmount;
+        }
+    }
     uint32_t framebucket = frameCountIndexForFrameTime(totalDuration);
     // Keep the fast path as fast as possible.
     if (CC_LIKELY(totalDuration < mFrameInterval)) {

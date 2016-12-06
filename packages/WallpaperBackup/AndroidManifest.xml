@@ -24,6 +24,7 @@
                  android:process="system"
                  android:killAfterRestore="false"
                  android:allowBackup="true"
+                 android:backupInForeground="true"
                  android:backupAgent=".WallpaperBackupAgent"
                  android:fullBackupOnly="true" >
     </application>

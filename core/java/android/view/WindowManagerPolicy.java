@@ -136,6 +136,12 @@ public interface WindowManagerPolicy {
             throws RemoteException;
 
     /**
+     * @return true if windows with FLAG_DISMISS_KEYGUARD should be allowed to show even if
+     *         the keyguard is locked.
+     */
+    boolean canShowDismissingWindowWhileLockedLw();
+
+    /**
      * Interface to the Window Manager state associated with a particular
      * window.  You can hold on to an instance of this interface from the call
      * to prepareAddWindow() until removeWindow().
@@ -416,6 +422,8 @@ public interface WindowManagerPolicy {
          * screen with other application windows.
          */
         public boolean isInMultiWindowMode();
+
+        public int getRotationAnimationHint();
     }
 
     /**
@@ -476,6 +484,7 @@ public interface WindowManagerPolicy {
         public void switchInputMethod(boolean forwardDirection);
 
         public void shutdown(boolean confirm);
+        public void reboot(boolean confirm);
         public void rebootSafeMode(boolean confirm);
 
         /**
@@ -498,6 +507,11 @@ public interface WindowManagerPolicy {
          * Retrieves the {@param outBounds} from the stack with id {@param stackId}.
          */
         void getStackBounds(int stackId, Rect outBounds);
+
+        /**
+         * Overrides all currently playing app animations with {@param a}.
+         */
+        void overridePlayingAppAnimationsLw(Animation a);
     }
 
     public interface PointerEventListener {
@@ -1292,6 +1306,16 @@ public interface WindowManagerPolicy {
     public int adjustSystemUiVisibilityLw(int visibility);
 
     /**
+     * Called by System UI to notify of changes to the visibility of Recents.
+     */
+    public void setRecentsVisibilityLw(boolean visible);
+
+    /**
+     * Called by System UI to notify of changes to the visibility of PIP.
+     */
+    public void setTvPipVisibilityLw(boolean visible);
+
+    /**
      * Specifies whether there is an on-screen navigation bar separate from the status bar.
      */
     public boolean hasNavigationBar();
@@ -1410,4 +1434,6 @@ public interface WindowManagerPolicy {
      * Called when the configuration has changed, and it's safe to load new values from resources.
      */
     public void onConfigurationChanged();
+
+    public boolean shouldRotateSeamlessly(int oldRotation, int newRotation);
 }

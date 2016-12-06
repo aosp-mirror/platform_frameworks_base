@@ -1,0 +1,6 @@
+name: "Wear Preview"
+home_url: /wear/preview/
+description: "Small, powerful devices, worn on the body. Useful information when you need it most."
+content_license: cc3-apache2
+buganizer_id: 30209417
+parent_project_metadata_path: /wear/_project.yaml

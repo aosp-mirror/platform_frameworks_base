@@ -1,0 +1,6 @@
+name: "Training"
+home_url: /training/
+description: "Android Training provides a collection of classes that aim to help you build great apps for Android."
+content_license: cc3-apache2
+buganizer_id: 30209417
+parent_project_metadata_path: /develop/_project.yaml

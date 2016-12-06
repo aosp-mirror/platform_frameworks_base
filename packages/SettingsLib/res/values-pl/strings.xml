@@ -28,7 +28,8 @@
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Błąd połączenia Wi-Fi"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Problem z uwierzytelnianiem"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Poza zasięgiem"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"Nie wykryto dostępu do internetu. Nie można automatycznie przywrócić połączenia."</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"Nie wykryto dostępu do internetu. Nie można automatycznie przywrócić połączenia."</string>
+    <string name="wifi_no_internet" msgid="5011955173375805204">"Brak dostępu do internetu."</string>
     <string name="saved_network" msgid="4352716707126620811">"Zapisane przez: <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Połączono przez Asystenta Wi‑Fi"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Połączono przez %1$s"</string>
@@ -184,7 +185,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Pozorowanie lokalizacji"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Zezwalaj na pozorowanie lokalizacji"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Inspekcja wyświetlania atrybutu"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Użyj klienta DHCP z Lollipop zamiast nowego klienta DHCP Androida"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Nie wyłączaj transmisji danych przez sieć komórkową, nawet gdy aktywne jest połączenie Wi-Fi (aby szybko przełączać sieci)"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Czy zezwalać na debugowanie USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Debugowanie USB jest przeznaczone wyłącznie do celów programistycznych. Może służyć do kopiowania danych między komputerem a urządzeniem, instalowania aplikacji na urządzeniu bez powiadamiania, a także odczytu danych dziennika."</string>
@@ -234,8 +234,6 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Pokaż granice przycięcia, marginesy itd."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Układ od prawej do lewej"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Wymuś wszędzie układ ekranu od prawej do lewej"</string>
-    <string name="show_cpu_usage" msgid="2389212910758076024">"Pokaż użycie procesora"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Nakładka na ekranie pokazująca użycie procesora"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Renderowanie na GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Wymuszaj użycie GPU do rysowania 2D"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Wymuś 4x MSAA"</string>
@@ -342,4 +340,5 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Największy"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Niestandardowe (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Pomoc i opinie"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"Menu"</string>
 </resources>

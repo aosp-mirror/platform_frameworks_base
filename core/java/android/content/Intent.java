@@ -128,7 +128,7 @@ import static android.content.ContentProvider.maybeAddUserId;
  *     a list of people, which the user can browse through.  This example is a
  *     typical top-level entry into the Contacts application, showing you the
  *     list of people. Selecting a particular person to view would result in a
- *     new intent { <b>{@link #ACTION_VIEW} <i>content://contacts/N</i></b> }
+ *     new intent { <b>{@link #ACTION_VIEW} <i>content://contacts/people/N</i></b> }
  *     being used to start an activity to display that person.</p>
  *   </li>
  * </ul>
@@ -2219,6 +2219,22 @@ public class Intent implements Parcelable, Cloneable {
         "android.intent.action.EXTERNAL_APPLICATIONS_UNAVAILABLE";
 
     /**
+     * Broadcast Action: preferred activities have changed *explicitly*.
+     *
+     * <p>Note there are cases where a preferred activity is invalidated *implicitly*, e.g.
+     * when an app is installed or uninstalled, but in such cases this broadcast will *not*
+     * be sent.
+     *
+     * {@link #EXTRA_USER_HANDLE} contains the user ID in question.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PREFERRED_ACTIVITY_CHANGED =
+            "android.intent.action.ACTION_PREFERRED_ACTIVITY_CHANGED";
+
+
+    /**
      * Broadcast Action:  The current system wallpaper has changed.  See
      * {@link android.app.WallpaperManager} for retrieving the new wallpaper.
      * This should <em>only</em> be used to determine when the wallpaper
@@ -3172,6 +3188,14 @@ public class Intent implements Parcelable, Cloneable {
 
     /** {@hide} */
     public static final String ACTION_MASTER_CLEAR = "android.intent.action.MASTER_CLEAR";
+
+    /**
+     * Boolean intent extra to be used with {@link ACTION_MASTER_CLEAR} in order to force a factory
+     * reset even if {@link android.os.UserManager.DISALLOW_FACTORY_RESET} is set.
+     * @hide
+     */
+    public static final String EXTRA_FORCE_MASTER_CLEAR =
+            "android.intent.extra.FORCE_MASTER_CLEAR";
 
     /**
      * Broadcast action: report that a settings element is being restored from backup.  The intent
@@ -4288,6 +4312,14 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     public static final int FLAG_DEBUG_TRIAGED_MISSING = 0x00000100;
+
+    /**
+     * Internal flag used to indicate ephemeral applications should not be
+     * considered when resolving the intent.
+     *
+     * @hide
+     */
+    public static final int FLAG_IGNORE_EPHEMERAL = 0x00000200;
 
     /**
      * If set, the new activity is not kept in the history stack.  As soon as
@@ -6541,7 +6573,7 @@ public class Intent implements Parcelable, Cloneable {
      */
     public void removeUnsafeExtras() {
         if (mExtras != null) {
-            mExtras.filterValues();
+            mExtras = mExtras.filterValues();
         }
     }
 

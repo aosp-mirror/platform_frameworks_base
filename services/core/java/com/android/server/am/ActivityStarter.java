@@ -102,6 +102,8 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.PowerManagerInternal;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -130,6 +132,9 @@ class ActivityStarter {
     private static final String TAG_FOCUS = TAG + POSTFIX_FOCUS;
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
     private static final String TAG_USER_LEAVING = TAG + POSTFIX_USER_LEAVING;
+
+    // TODO b/30204367 remove when the platform fully supports ephemeral applications
+    private static final boolean USE_DEFAULT_EPHEMERAL_LAUNCHER = false;
 
     private final ActivityManagerService mService;
     private final ActivityStackSupervisor mSupervisor;
@@ -173,6 +178,7 @@ class ActivityStarter {
     private boolean mNoAnimation;
     private boolean mKeepCurTransition;
     private boolean mAvoidMoveToFront;
+    private boolean mPowerHintSent;
 
     private IVoiceInteractionSession mVoiceSession;
     private IVoiceInteractor mVoiceInteractor;
@@ -410,8 +416,7 @@ class ActivityStarter {
         // If permissions need a review before any of the app components can run, we
         // launch the review activity and pass a pending intent to start the activity
         // we are to launching now after the review is completed.
-        if ((mService.mPermissionReviewRequired
-                || Build.PERMISSIONS_REVIEW_REQUIRED) && aInfo != null) {
+        if (Build.PERMISSIONS_REVIEW_REQUIRED && aInfo != null) {
             if (mService.getPackageManagerInternalLocked().isPermissionsReviewRequired(
                     aInfo.packageName, userId)) {
                 IIntentSender target = mService.getIntentSenderLocked(
@@ -455,39 +460,13 @@ class ActivityStarter {
         // starts either the intent we resolved here [on install error] or the ephemeral
         // app [on install success].
         if (rInfo != null && rInfo.ephemeralResolveInfo != null) {
-            // Create a pending intent to start the intent resolved here.
-            final IIntentSender failureTarget = mService.getIntentSenderLocked(
-                    ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage,
-                    Binder.getCallingUid(), userId, null, null, 0, new Intent[]{ intent },
-                    new String[]{ resolvedType },
-                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT
-                            | PendingIntent.FLAG_IMMUTABLE, null);
-
-            // Create a pending intent to start the ephemeral application; force it to be
-            // directed to the ephemeral package.
-            ephemeralIntent.setPackage(rInfo.ephemeralResolveInfo.getPackageName());
-            final IIntentSender ephemeralTarget = mService.getIntentSenderLocked(
-                    ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage,
-                    Binder.getCallingUid(), userId, null, null, 0, new Intent[]{ ephemeralIntent },
-                    new String[]{ resolvedType },
-                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT
-                            | PendingIntent.FLAG_IMMUTABLE, null);
-
-            int flags = intent.getFlags();
-            intent = new Intent();
-            intent.setFlags(flags
-                    | Intent.FLAG_ACTIVITY_NEW_TASK
-                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-            intent.putExtra(Intent.EXTRA_PACKAGE_NAME,
-                    rInfo.ephemeralResolveInfo.getPackageName());
-            intent.putExtra(Intent.EXTRA_EPHEMERAL_FAILURE, new IntentSender(failureTarget));
-            intent.putExtra(Intent.EXTRA_EPHEMERAL_SUCCESS, new IntentSender(ephemeralTarget));
-
+            intent = buildEphemeralInstallerIntent(intent, ephemeralIntent,
+                    rInfo.ephemeralResolveInfo.getPackageName(), callingPackage, resolvedType,
+                    userId);
             resolvedType = null;
             callingUid = realCallingUid;
             callingPid = realCallingPid;
 
-            rInfo = rInfo.ephemeralInstaller;
             aInfo = mSupervisor.resolveActivity(intent, rInfo, startFlags, null /*profilerInfo*/);
         }
 
@@ -542,6 +521,58 @@ class ActivityStarter {
         return err;
     }
 
+    /**
+     * Builds and returns an intent to launch the ephemeral installer.
+     */
+    private Intent buildEphemeralInstallerIntent(Intent launchIntent, Intent origIntent,
+            String ephemeralPackage, String callingPackage, String resolvedType, int userId) {
+        final Intent nonEphemeralIntent = new Intent(origIntent);
+        nonEphemeralIntent.setFlags(nonEphemeralIntent.getFlags() | Intent.FLAG_IGNORE_EPHEMERAL);
+        // Intent that is launched if the ephemeral package couldn't be installed
+        // for any reason.
+        final IIntentSender failureIntentTarget = mService.getIntentSenderLocked(
+                ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage,
+                Binder.getCallingUid(), userId, null /*token*/, null /*resultWho*/, 1,
+                new Intent[]{ nonEphemeralIntent }, new String[]{ resolvedType },
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT
+                | PendingIntent.FLAG_IMMUTABLE, null /*bOptions*/);
+
+        final Intent ephemeralIntent;
+        if (USE_DEFAULT_EPHEMERAL_LAUNCHER) {
+            // Force the intent to be directed to the ephemeral package
+            ephemeralIntent = new Intent(origIntent);
+            ephemeralIntent.setPackage(ephemeralPackage);
+        } else {
+            // Success intent goes back to the installer
+            ephemeralIntent = new Intent(launchIntent);
+        }
+
+        // Intent that is eventually launched if the ephemeral package was
+        // installed successfully. This will actually be launched by a platform
+        // broadcast receiver.
+        final IIntentSender successIntentTarget = mService.getIntentSenderLocked(
+                ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage,
+                Binder.getCallingUid(), userId, null /*token*/, null /*resultWho*/, 0,
+                new Intent[]{ ephemeralIntent }, new String[]{ resolvedType },
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT
+                | PendingIntent.FLAG_IMMUTABLE, null /*bOptions*/);
+
+        // Finally build the actual intent to launch the ephemeral installer
+        int flags = launchIntent.getFlags();
+        final Intent intent = new Intent();
+        intent.setFlags(flags
+                | Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                | Intent.FLAG_ACTIVITY_NO_HISTORY
+                | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+        intent.putExtra(Intent.EXTRA_PACKAGE_NAME, ephemeralPackage);
+        intent.putExtra(Intent.EXTRA_EPHEMERAL_FAILURE, new IntentSender(failureIntentTarget));
+        intent.putExtra(Intent.EXTRA_EPHEMERAL_SUCCESS, new IntentSender(successIntentTarget));
+        // TODO: Remove when the platform has fully implemented ephemeral apps
+        intent.setData(origIntent.getData().buildUpon().clearQuery().build());
+        return intent;
+    }
+
     void postStartActivityUncheckedProcessing(
             ActivityRecord r, int result, int prevFocusedStackId, ActivityRecord sourceRecord,
             ActivityStack targetStack) {
@@ -571,6 +602,9 @@ class ActivityStarter {
         // If we launched the activity from a no display activity that was launched from the home
         // screen, we also need to start recents to un-minimize the docked stack, since the
         // noDisplay activity will be finished shortly after.
+        // Note that some apps have trampoline activities without noDisplay being set. In that case,
+        // we have another heuristic in DockedStackDividerController.notifyAppTransitionStarting
+        // that tries to detect that case.
         // TODO: We should prevent noDisplay activities from affecting task/stack ordering and
         // visibility instead of using this flag.
         final boolean noDisplayActivityOverHome = sourceRecord != null
@@ -624,10 +658,15 @@ class ActivityStarter {
         ActivityStack targetStack;
         ActivityStack fullscreenStack =
                 mSupervisor.getStack(FULLSCREEN_WORKSPACE_STACK_ID);
+        ActivityStack freeformStack =
+                mSupervisor.getStack(FREEFORM_WORKSPACE_STACK_ID);
         if (fullscreenStack != null &&
                 fullscreenStack.getStackVisibilityLocked(null) != ActivityStack.STACK_INVISIBLE) {
             // Single window case and the case that the docked stack is shown with fullscreen stack.
             targetStack = fullscreenStack;
+        } else if (freeformStack != null &&
+                freeformStack.getStackVisibilityLocked(null) != ActivityStack.STACK_INVISIBLE) {
+            targetStack = freeformStack;
         } else {
             // The case that the docked stack is shown with recent.
             targetStack = mSupervisor.getStack(HOME_STACK_ID);
@@ -894,13 +933,15 @@ class ActivityStarter {
             throw new IllegalArgumentException("intents are length different than resolvedTypes");
         }
 
+        final int realCallingPid = Binder.getCallingPid();
+        final int realCallingUid = Binder.getCallingUid();
 
         int callingPid;
         if (callingUid >= 0) {
             callingPid = -1;
         } else if (caller == null) {
-            callingPid = Binder.getCallingPid();
-            callingUid = Binder.getCallingUid();
+            callingPid = realCallingPid;
+            callingUid = realCallingUid;
         } else {
             callingPid = callingUid = -1;
         }
@@ -941,7 +982,8 @@ class ActivityStarter {
                             i == intents.length - 1 ? bOptions : null);
                     int res = startActivityLocked(caller, intent, null /*ephemeralIntent*/,
                             resolvedTypes[i], aInfo, null /*rInfo*/, null, null, resultTo, null, -1,
-                            callingPid, callingUid, callingPackage, callingPid, callingUid, 0,
+                            callingPid, callingUid, callingPackage,
+                            realCallingPid, realCallingUid, 0,
                             options, false, componentSpecified, outActivity, null, null);
                     if (res < 0) {
                         return res;
@@ -955,6 +997,28 @@ class ActivityStarter {
         }
 
         return START_SUCCESS;
+    }
+
+    void sendPowerHintForLaunchStartIfNeeded(boolean forceSend) {
+        // Trigger launch power hint if activity being launched is not in the current task
+        final ActivityStack focusStack = mSupervisor.getFocusedStack();
+        final ActivityRecord curTop = (focusStack == null)
+            ? null : focusStack.topRunningNonDelayedActivityLocked(mNotTop);
+        if ((forceSend || (!mPowerHintSent && curTop != null &&
+                curTop.task != null && mStartActivity != null &&
+                curTop.task != mStartActivity.task )) &&
+                mService.mLocalPowerManager != null) {
+            mService.mLocalPowerManager.powerHint(PowerManagerInternal.POWER_HINT_LAUNCH, 1);
+            mPowerHintSent = true;
+        }
+    }
+
+    void sendPowerHintForLaunchEndIfNeeded() {
+        // Trigger launch power hint if activity is launched
+        if (mPowerHintSent && mService.mLocalPowerManager != null) {
+            mService.mLocalPowerManager.powerHint(PowerManagerInternal.POWER_HINT_LAUNCH, 0);
+            mPowerHintSent = false;
+        }
     }
 
     private int startActivityUnchecked(final ActivityRecord r, ActivityRecord sourceRecord,
@@ -1017,6 +1081,8 @@ class ActivityStarter {
                             mStartActivity.launchedFromPackage);
                 }
             }
+
+            sendPowerHintForLaunchStartIfNeeded(false /* forceSend */);
 
             mReusedActivity = setTargetStackAndMoveToFrontIfNeeded(mReusedActivity);
 
@@ -1096,7 +1162,11 @@ class ActivityStarter {
                 return START_RETURN_LOCK_TASK_MODE_VIOLATION;
             }
             if (!mMovedOtherTask) {
-                updateTaskReturnToType(mStartActivity.task, mLaunchFlags, topStack);
+                // If stack id is specified in activity options, usually it means that activity is
+                // launched not from currently focused stack (e.g. from SysUI or from shell) - in
+                // that case we check the target stack.
+                updateTaskReturnToType(mStartActivity.task, mLaunchFlags,
+                        preferredLaunchStackId != INVALID_STACK_ID ? mTargetStack : topStack);
             }
         } else if (mSourceRecord != null) {
             if (mSupervisor.isLockTaskModeViolation(mSourceRecord.task)) {
@@ -1139,6 +1209,9 @@ class ActivityStarter {
         ActivityStack.logStartActivity(
                 EventLogTags.AM_CREATE_ACTIVITY, mStartActivity, mStartActivity.task);
         mTargetStack.mLastPausedActivity = null;
+
+        sendPowerHintForLaunchStartIfNeeded(false /* forceSend */);
+
         mTargetStack.startActivityLocked(mStartActivity, newTask, mKeepCurTransition, mOptions);
         if (mDoResume) {
             if (!mLaunchTaskBehind) {

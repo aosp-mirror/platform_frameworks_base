@@ -104,6 +104,8 @@ public class DctConstants {
     public static final int CMD_CLEAR_PROVISIONING_SPINNER = BASE + 42;
     public static final int EVENT_DEVICE_PROVISIONED_CHANGE = BASE + 43;
     public static final int EVENT_REDIRECTION_DETECTED = BASE + 44;
+    public static final int EVENT_PCO_DATA_RECEIVED = BASE + 45;
+    public static final int EVENT_SET_CARRIER_DATA_ENABLED = BASE + 46;
 
     /***** Constants *****/
 

@@ -1,0 +1,285 @@
+page.title=Intelligent Job-Scheduling
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+<ol>
+   <li><a href="#js">Android Framework JobScheduler</a></li>
+   <li><a href="#am">AlarmManager</a></li>
+   <li><a href="#fjd">Firebase JobDispatcher</a></li>
+   <li><a href="#gcmnm">GCM Network Manager</a></li>
+   <li><a href="#af">Additional Facilities</a></li>
+   <ul>
+      <li><a href="#sa">SyncAdapter</a></li>
+      <li><a href="#services">Services</a></li>
+   </ul>
+   <li><a href="#ap">Additional Points</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>
+Modern apps can perform many of their tasks asynchronously, outside the
+direct flow of user interaction. Some examples of these asynchronous tasks are:
+</p>
+
+<ul>
+   <li>Updating network resources.</li>
+   <li>Downloading information.</li>
+   <li>Updating background tasks.</li>
+   <li>Scheduling system service calls.</li>
+</ul>
+
+<p>
+Scheduling this work intelligently can improve your app’s performance,
+along with aspects of system health such as battery life. {@link android.app.job.JobScheduler}
+does this scheduling work for you.
+<p>
+
+<p>
+There are several APIs that your app can use to schedule background work. Chief
+among these options is {@link android.app.job.JobScheduler}.
+The {@link android.app.job.JobScheduler} API allows you to specify robust
+conditions for executing tasks,
+along with centralized task scheduling across the device for optimal
+system health. {@link android.app.job.JobScheduler} also offers highly
+scalable functionality: it is suitable for small tasks like clearing a cache,
+and for large ones such as syncing a database to the cloud.
+<p>
+
+<p>
+In addition to {@link android.app.job.JobScheduler}, there are several other
+facilities available to help your app schedule work. These include:
+</p>
+
+<ul>
+   <li><a href="{@docRoot}reference/android/app/AlarmManager.html">AlarmManager
+   </a></li>
+   <li><a href="https://github.com/firebase/firebase-jobdispatcher-android#user-content-firebase-jobdispatcher-">
+   Firebase JobDispatcher</a></li>
+   <li><a href="https://developers.google.com/cloud-messaging/network-manager">
+   GCM Network Manager</a></li>
+   <li><a href="{@docRoot}reference/android/content/AbstractThreadedSyncAdapter.html">
+   SyncAdapter</a></li>
+   <li><a href="{@docRoot}reference/android/content/AbstractThreadedSyncAdapter.html">
+   Additional Facilities</a></li>
+</ul>
+
+<p>
+This page provides brief introductions to {@link android.app.job.JobScheduler}
+and other APIs that can help your app schedule work to maximize app performance
+and system health.
+</p>
+
+<h2 id="js">Android Framework JobScheduler</h2>
+
+<p>
+{@link android.app.job.JobScheduler} is the Android framework’s native platform
+for scheduling tasks or work. It first became available in Android 5.0 (API
+level 21), and remains under active development. Notably, Android N (API
+level 24) added the ability to trigger jobs based on
+{@link android.content.ContentProvider} changes.
+</p>
+
+<p>
+{@link android.app.job.JobScheduler} is implemented in the platform, which
+allows it to collect information about jobs that need to run across all apps.
+This information is used to schedule jobs to run at, or around, the same time.
+Batching job execution in this fashion allows the device to enter and stay in
+sleep states longer, preserving battery life.
+</p>
+
+<p>
+You use {@link android.app.job.JobScheduler} by registering jobs, specifying
+their requirements for network and timing. The system then gracefully schedules
+the jobs to execute at the appropriate times. At the same time, it also defers
+job execution as necessary to comply with
+<a href="{@docRoot}topic/performance/monitoring-device-state/doze-standby.html">
+Doze and App Standby</a> restrictions.
+{@link android.app.job.JobScheduler} provides many methods to define
+job-execution conditions.
+</p>
+
+<p>
+If your app targets Android 5.0 (API level 21), we recommend that you use the
+{@link android.app.job.JobScheduler} to execute background tasks. For more
+information about {@link android.app.job.JobScheduler}, see its
+<a href="{@docRoot}reference/android/app/job/JobScheduler.html">API-reference
+documentation.</a>
+</p>
+
+<h2 id="am">AlarmManager</h2>
+
+<p>
+The {@link android.app.AlarmManager} API is another option that the framework
+provides for scheduling tasks. This API is useful in cases in which an app
+needs to post a notification or set off an alarm at a very specific time.
+</p>
+
+<p>
+You should only use this API for tasks that must execute at a specific time,
+but do not require the other, more robust, execution conditions that
+{@link android.app.job.JobScheduler} allows you to specify, such as device
+idle and charging detect.
+</p>
+
+<p>
+{@link android.app.AlarmManager} does not honor
+<a href="{@docRoot}topic/performance/monitoring-device-state/doze-standby.html">
+Doze and App Standby</a> restrictions; it runs tasks even during
+<a href="{@docRoot}topic/performance/monitoring-device-state/doze-standby.html">
+Doze or App Standby</a> mode. Additionally,
+an app running during
+<a href="{@docRoot}topic/performance/monitoring-device-state/doze-standby.html">
+Doze or App Standby</a> mode cannot use the network.
+</p>
+
+<h2 id="fjd">Firebase JobDispatcher</h2>
+
+<p>
+<a href="https://github.com/firebase/firebase-jobdispatcher-android#user-content-firebase-jobdispatcher-">
+Firebase JobDispatcher</a> is an open-source library that provides an API similar to
+{@link android.app.job.JobScheduler} in the Android platform.
+<a href="https://github.com/firebase/firebase-jobdispatcher-android#user-content-firebase-jobdispatcher-">
+Firebase JobDispatcher</a> serves as a
+{@link android.app.job.JobScheduler}-compatibility layer for apps targeting
+versions of Android lower than 5.0 (API level 21).
+</p>
+
+<p>
+<a href="https://github.com/firebase/firebase-jobdispatcher-android#user-content-firebase-jobdispatcher-">
+Firebase JobDispatcher</a> supports the use of Google Play services as an
+implementation for dispatching (running) jobs, but the library also allows you
+to define and use other implementations: For example, you might decide to use
+{@link android.app.job.JobScheduler} or write your own, custom code.
+Because of this versatility, we recommend that you use this
+<a href="https://github.com/firebase/firebase-jobdispatcher-android#user-content-firebase-jobdispatcher-">
+Firebase JobDispatcher</a> if your app targets a version of Android lower
+than 5.0 (API level 21).
+</p>
+
+<p>
+For more information about
+<a href="https://github.com/firebase/firebase-jobdispatcher-android#user-content-firebase-jobdispatcher-">
+Firebase JobDispatcher</a>, refer to its
+<a href="https://github.com/firebase/firebase-jobdispatcher-android#user-content-firebase-jobdispatcher-">
+documentation and source code</a>.
+</p>
+
+<h2 id = "gcmnm">GCM Network Manager</h2>
+
+<p>
+<a href="https://developers.google.com/cloud-messaging/network-manager">GCM
+Network Manager</a> is a compatibility port of the Android
+{@link android.app.job.JobScheduler} for apps that support versions of Android
+prior to 5.0 (API level 21). This API has all of the same advantages as
+{@link android.app.job.JobScheduler}. However, it depends on Google Play
+services, which acts like {@link android.app.job.JobScheduler} by taking care
+of cross-app job scheduling to improve battery life. This client library is
+part of the Google Play services GCM client library, but does not require
+that an app use
+<a href="https://developers.google.com/cloud-messaging/">Google Cloud
+Messaging</a>.
+</p>
+
+<p>
+This library is an earlier version of
+<a href="https://github.com/firebase/firebase-jobdispatcher-android#user-content-firebase-jobdispatcher-">
+Firebase JobDispatcher</a>. Forward development on GCM Network Manager has
+stopped; we recommend that you use
+<a href="https://github.com/firebase/firebase-jobdispatcher-android#user-content-firebase-jobdispatcher-">
+Firebase JobDispatcher</a> going forward.
+</p>
+
+<h2 id="af">Additional Facilities</h2>
+
+<p>
+In addition to the APIs and libraries described above, there are also sync
+adapters and services that can enable your app, under specific conditions,
+to perform better and more robustly.
+</p>
+
+<h3 id="sa">SyncAdapter</h3>
+
+<p>
+The framework continues to provide the
+{@link android.content.AbstractThreadedSyncAdapter SyncAdapter} class for
+managing tasks that sync data between the device and a server. Sync adapters are
+designed specifically for syncing data between a device and the cloud; you
+should only use them for this type of task. Sync adapters are more complex to
+implement than the libraries and APIs mentioned above, because they require at
+least a fake
+<a href="{@docRoot}training/sync-adapters/creating-authenticator.html">
+authenticator</a>and
+<a href="{@docRoot}training/sync-adapters/creating-stub-provider.html">
+content provider</a> implementation. For these reasons, you typically should
+not create a sync adapter just to sync data to the cloud in the
+background. Wherever possible, you should instead use
+{@link android.app.job.JobScheduler},
+<a href="https://github.com/firebase/firebase-jobdispatcher-android#user-content-firebase-jobdispatcher-">
+Firebase JobDispatcher</a>, or
+<a href="https://developers.google.com/cloud-messaging/network-manager">GCM
+Network Manager</a> .
+</p>
+
+<p>
+In Android N (API level 24), the {@code SyncManager} sits on top of
+the {@link android.app.job.JobScheduler}. You should only use the
+{@link android.content.AbstractThreadedSyncAdapter SyncAdapter}
+class if you require the additional functionality that it provides.
+</p>
+
+<h3 id="services">Services</h3>
+
+<p>
+The <a href="{@docRoot}guide/components/services.html">Services</a>
+framework allows you to perform long-running operations in the background.
+We recommend foreground services for tasks, such as playing
+music, which need to stay resident for the user. Bound services also continue
+to be useful for various use cases: for example, when a service needs to
+run only when a user is viewing a fragment or activity.
+</p>
+
+<p>
+You should avoid using started services that run perpetually or
+perform periodic work, since they continue to use device resources
+even when they are not performing useful tasks. Instead, you
+should use other solutions that this page describes,
+and that provide native lifecycle management. Use started services
+only as a last resort. The Android platform may not support
+started services in the future.
+</p>
+
+<h2 id="ap">Additional Points</h2>
+
+<p>
+Regardless of the solution you adopt, keep the following points in mind:
+</p>
+
+<ul>
+   <li>Captive Internet Portals, VPNs, and proxies can pose
+   Internet-connectivity detection problems. A library or API may think the
+   Internet is available, but your service may not be accessible. Fail
+   gracefully and reschedule as few of your tasks as possible.</li>
+   <li>Depending on the conditions you assign for running a task,
+   such as network availability, after the task is triggered, a
+   change may occur so that those conditions are no longer met.
+   In such a case, your operation may fail unexpectedly and repeatedly.
+   For this reason, you
+   should code your background task logic to notice when tasks are failing
+   persistently, and perform exponential back-off to avoid
+   inadvertently over-using resources.</li>
+
+
+
+   <li>Remember to use exponential backoff when rescheduling any work,
+   especially when using {@link android.app.AlarmManager}. If your app uses
+   {@link android.app.job.JobScheduler},
+   <a href="https://developers.google.com/cloud-messaging/network-manager">GCM
+   Network Manager</a>,
+   <a href="https://github.com/firebase/firebase-jobdispatcher-android#user-content-firebase-jobdispatcher-">
+   Firebase JobDispatcher</a>, or sync adapters, exponential backoff is automatically used.</li>
+</ul>

@@ -43,12 +43,9 @@ import android.printservice.PrintService;
 import android.util.Slog;
 import android.util.TimedRemoteCaller;
 
-import com.android.internal.os.TransferPipe;
-
 import libcore.io.IoUtils;
 
 import java.io.FileDescriptor;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.List;
@@ -60,6 +57,9 @@ import java.util.concurrent.TimeoutException;
  * spooler if needed, to make the timed remote calls, to handle
  * remote exceptions, and to bind/unbind to the remote instance as
  * needed.
+ *
+ * The calls might be blocking and need the main thread of to be unblocked to finish. Hence do not
+ * call this while holding any monitors that might need to be acquired the main thread.
  */
 final class RemotePrintSpooler {
 
@@ -572,11 +572,13 @@ final class RemotePrintSpooler {
                     .append((mRemoteInstance != null) ? "true" : "false").println();
 
             pw.flush();
+
             try {
-                TransferPipe.dumpAsync(getRemoteInstanceLazy().asBinder(), fd,
-                        new String[] { prefix });
-            } catch (IOException | TimeoutException | RemoteException e) {
-                pw.println("Failed to dump remote instance: " + e);
+                getRemoteInstanceLazy().asBinder().dump(fd, new String[]{prefix});
+            } catch (TimeoutException te) {
+                /* ignore */
+            } catch (RemoteException re) {
+                /* ignore */
             }
         }
     }

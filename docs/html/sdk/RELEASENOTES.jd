@@ -64,13 +64,13 @@ changes include: </p>
     <li>Emulator support for multiple screen sizes/densities, including new
 skins. </li>
     <li>Android SDK and AVD Manager, a graphical UI to let you manage your
-SDK and AVD environments more easily. The tool lets you create and manage 
+SDK and AVD environments more easily. The tool lets you create and manage
 your <a href="{@docRoot}tools/devices/managing-avds.html">Android Virtual
-Devices</a> and download new SDK packages (such as platform versions and 
+Devices</a> and download new SDK packages (such as platform versions and
 add-ons) into your environment.</li>
     <li>Improved support for test packages in New Project Wizard</li>
-    <li>The reference documentation now offers a "Filter by API Level" 
-capability that lets you display only the parts of the API that are actually 
+    <li>The reference documentation now offers a "Filter by API Level"
+capability that lets you display only the parts of the API that are actually
 available to your application, based on the <code>android:minSdkVersion</code>
 value the application declares in its manifest. For more information, see
 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">Android API Levels</a></li>
@@ -114,7 +114,7 @@ href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin for Eclipse</a>. </p>
 
 <h3>Android SDK and AVD Manager</h3>
 
-<p>The SDK offers a new tool called Android SDK and AVD Manager that lets you 
+<p>The SDK offers a new tool called Android SDK and AVD Manager that lets you
 manage your SDK and AVD environments more efficiently. </p>
 
 <p>Using the tool, you can quickly check what Android platforms, add-ons,
@@ -129,15 +129,15 @@ environment that were not included in the SDK package.</p>
 <p>The tool also lets you quickly create new AVDs, manage
 their properties, and run a target AVD from a single window. </p>
 
-<p>If you are developing in Eclipse with ADT, you can access the Android SDK 
+<p>If you are developing in Eclipse with ADT, you can access the Android SDK
 and AVD Manager from the <strong>Window</strong> menu. </p>
 
-<p>If you are developing in another IDE, you can access the Android SDK and 
+<p>If you are developing in another IDE, you can access the Android SDK and
 AVD Manager through the <code>android</code> command-line tool, located in the
 &lt;sdk&gt;/tools directory. You can launch the tool with a graphical UI by
 using the <code>android</code> command without specifying any options. You can
 also simply double-click the android.bat (Windows) or android (OS X/Linux) file.
-You can still use <code>android</code> commands to create and manage AVDs, 
+You can still use <code>android</code> commands to create and manage AVDs,
 including AVDs with custom hardware configurations.</p>
 
 <h3>Integration with zipalign</h3>
@@ -160,9 +160,9 @@ manually from the command line if you choose. </p>
   <li>If you are developing in Eclipse with ADT, support for
 <code>zipalign</code> is integrated into the Export Wizard. When you use the
 Wizard to export a signed application package, ADT signs and then automatically
-runs <code>zipalign</code> against the exported package. If you use the Wizard 
-to export an unsigned application package, then it will not zipalign the 
-package because zipalign must be performed only after the APK has been signed. 
+runs <code>zipalign</code> against the exported package. If you use the Wizard
+to export an unsigned application package, then it will not zipalign the
+package because zipalign must be performed only after the APK has been signed.
 You must manually sign and zipalign the package after export. </li>
   <li>If you are developing using Ant and are compiling in release mode, the
 build tools will automatically sign and then <code>zipalign</code> the
@@ -182,14 +182,14 @@ alignment.</p>
 <h3>Support for Test Packages in New Project Wizard</h3>
 
 <p>The New Project Wizard available in the ADT 0.9.3 now lets you add a test
-package containing Instrumentation or other classes of tests while you are 
+package containing Instrumentation or other classes of tests while you are
 creating or importing a new Android application project. </p>
 
 <h3>New USB Driver for Windows</h3>
 
 <p>If you are using Windows and want to develop or test your application on an
 Android-powered device (such as the T-Mobile G1), you need an appropriate USB
-driver. 
+driver.
 
 <p>The Windows version of the Android 1.6 SDK includes a new, WinUSB-based
 driver that you can install. The driver is compatible with both 32- and 64-bit
@@ -241,19 +241,19 @@ only) has been fixed.</li>
 <h2 id="1.5_r3">Android 1.5 SDK, Release 3</h2>
 
 <p>Provides an updated Android 1.5 system image that includes permissions
-fixes, as described below, and a new application &mdash; an IME for Japanese 
-text input. Also provides the same set of developer tools included in the 
+fixes, as described below, and a new application &mdash; an IME for Japanese
+text input. Also provides the same set of developer tools included in the
 previous SDK, but with bug fixes and several new features.</p>
 
 <h3>Permissions Fixes</h3>
 
-<p>The latest version of the Android platform, deployable to 
+<p>The latest version of the Android platform, deployable to
 Android-powered devices, includes fixes to the permissions-checking
 in certain areas of the framework. Specifically, the Android system
 now properly checks and enforces several existing permissions where it
-did not do so in the previous release. Because of these changes in 
-enforcement, you are strongly encouraged to test your application 
-against the new Android 1.5 system image included in this SDK, to ensure 
+did not do so in the previous release. Because of these changes in
+enforcement, you are strongly encouraged to test your application
+against the new Android 1.5 system image included in this SDK, to ensure
 that it functions normally. </p>
 
 <p>In particular, if your application uses any of the system areas listed below,
@@ -292,14 +292,14 @@ Google APIs add-on and the library it provides, see:
 href="http://code.google.com/android/add-ons/google-apis">http://code.google.com/android/add-ons/google-apis</a> </p></li>
 
 <li>The SDK add-on architecture now lets device manufacturers specify a USB
-Vendor ID in their add-ons. 
+Vendor ID in their add-ons.
 <li>The <code>android</code> tool provides a new command that scans SDK add-ons
 for their USB Vendor IDs and makes them available to adb (OS X and Linux
 versions of the SDK only). The command is  <code>android update adb</code>. On
 Windows versions of the SDK, a custom USB driver is included that supports the
 "Google" and "HTC" Vendor IDs, which allow adb to recognize G1 and HTC
-Magic devices. For other devices, contact the device manufacturer 
-to obtain a USB driver, especially if you have an SDK add-on that defines 
+Magic devices. For other devices, contact the device manufacturer
+to obtain a USB driver, especially if you have an SDK add-on that defines
 a new USB Vendor ID.</li>
 <li>The telephony, sensor, and geo fix issues in the emulator are now
 fixed.</li>
@@ -329,12 +329,12 @@ changes include: </p>
   <ul>
     <li>Multiple versions of the Android platform are included (Android 1.1,
 Android 1.5). The tools are updated to let you deploy your application
-on any platform in the SDK, which helps you ensure forward-compatibility and, 
+on any platform in the SDK, which helps you ensure forward-compatibility and,
 if applicable, backward-compatibility.</li>
     <li>Introduces <a href="{@docRoot}tools/devices/managing-avds.html">Android
 Virtual Devices</a> &mdash; (AVD) configurations of options that you
 run in the emulator to better model actual devices. Each AVD gets its
-own dedicated storage area, making it much easier to work with multiple emulators 
+own dedicated storage area, making it much easier to work with multiple emulators
 that are running concurrently.</li>
     <li>Support for SDK add-ons, which extend the
 Android SDK to give you access to one or more external Android libraries and/or
@@ -383,13 +383,13 @@ is similar to any of the Android platform targets included in the SDK &mdash; it
 includes an external library, a system image, as well as custom emulator skins
 and system properties. The add-on differs in that the Android platform it
 provides may include customized UI, resources, or behaviors, a different set of
-preinstalled applications, or other similar modifications. 
+preinstalled applications, or other similar modifications.
 
 <p>The SDK includes a single SDK add-on &mdash; the Google APIs add-on. The
 Google APIs add-on gives your application access to the com.google.android.maps
-external library that is included on many (if not most) Android-powered devices. 
+external library that is included on many (if not most) Android-powered devices.
 The Google APIs add-on also includes a {@link android.location.Geocoder Geocoder}
-backend service implementation. For more information, see the "Maps External 
+backend service implementation. For more information, see the "Maps External
 Library" section below. </p>
 
 <h3>Android Virtual Devices (AVDs)</h3>
@@ -401,7 +401,7 @@ compatible system image. There are two types of targets:</p>
 <li>Targets that represent core Android platform versions. </li>
 <li>Targets that are SDK add-ons, which typically provide application access to
 one or more external libraries and/or a customized (but compliant) system image
-that can run in the emulator. 
+that can run in the emulator.
 </ul>
 
 <p>A new tool called "android" lets you discover what targets and AVDs are
@@ -427,7 +427,7 @@ href="http://code.google.com/android/add-ons/google-apis">http://code.google.com
 
 <p>For your convenience, the Google APIs add-on is included in the SDK. </p>
 
-<p>For information about how to register for a Maps API Key, see 
+<p>For information about how to register for a Maps API Key, see
 <a href="http://code.google.com/android/add-ons/google-apis/mapkey.html">
 Obtaining a Maps API Key</a>.</p>
 
@@ -566,8 +566,8 @@ service and receive a Maps API Key, which you then add to your MapView
 for authentication to the server.</p>
 
 <p>Developers should note that the registration service for MapView is now
-active and Google Maps is actively enforcing the Maps API Key requirement. 
-For information about how to register for a Maps API Key, see 
+active and Google Maps is actively enforcing the Maps API Key requirement.
+For information about how to register for a Maps API Key, see
 <a href="http://code.google.com/android/add-ons/google-apis/mapkey.html">
 Obtaining a Maps API Key</a>.</p>
 
@@ -615,21 +615,21 @@ in Eclipse</a>.</li>
 <li>In some cases, you may encounter problems when using the browser on an
 emulator started with the command-line option <code>-http-proxy</code>. </li>
 <li>On the OSX platform, if you manually remove the ~/.android directory
-using <code>rm -rf ~/.android</code>, then try to run 
-the emulator, it crashes. This happens because the emulator fails to create 
+using <code>rm -rf ~/.android</code>, then try to run
+the emulator, it crashes. This happens because the emulator fails to create
 a new .android directory before attempting to create the child SDK1.0 directory.
 To work around this issue, manually create a new .android directory using
-<code>mkdir ~/.android</code>, then run the emulator. The emulator 
+<code>mkdir ~/.android</code>, then run the emulator. The emulator
 creates the SDK1.0 directory and starts normally. </li>
-<li>We regret to inform developers that Android 1.1 will not include support 
+<li>We regret to inform developers that Android 1.1 will not include support
 for ARCNet network interfaces.</li>
 <li>The final set of Intent patterns honored by Android 1.0 has not yet been
 fully documented. Documentation will be provided in future releases.</li>
 <li>In ADT Editor, you can add at most ten new resource values at a time,
-in a given res/values/*.xml, using the form in the Android Resources pane. 
+in a given res/values/*.xml, using the form in the Android Resources pane.
 If you add more than ten, the Android Resources pane will not display the
-attributes fields for the additional resource entries. To work around this 
-problem, you can close the file in the editor and open it again, or you 
+attributes fields for the additional resource entries. To work around this
+problem, you can close the file in the editor and open it again, or you
 can edit the resource entries in the XML text mode. </li>
 <li>The emulator's battery-control commands (<code>power &lt;option&gt</code>)
 are not working in this release.</li>
@@ -657,7 +657,7 @@ href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin for Eclipse</a>.</p>
 
 <p><strong>T-Mobile G1 Compatibility</strong></p>
 
-<p>This version of the SDK has been tested for compatibility with the first 
+<p>This version of the SDK has been tested for compatibility with the first
 Android-powered mobile device, the T-Mobile
 G1. </p>
 
@@ -679,7 +679,7 @@ href="http://code.google.com/android/add-ons/google-apis/mapkey.html">http://cod
 Android-powered device (such as the T-Mobile G1), you need an appropriate USB
 driver. For your convenience, the Windows version of the Android SDK includes a
 USB driver that you can install, to let you develop on the device. The USB
-driver files are located in the <code>&lt;SDK&gt;/usb_driver</code> directory. 
+driver files are located in the <code>&lt;SDK&gt;/usb_driver</code> directory.
 
 </p>
 
@@ -694,23 +694,23 @@ change across versions, so were not suitable for use by applications. You can
 still access the platform's styleable attributes from your resources or code. To
 do so, declare a custom resource element using a
 <code>&lt;declare-styleable&gt;</code> in your project's res/values/R.attrs
-file, then declare the attribute inside. For examples, see 
+file, then declare the attribute inside. For examples, see
 &lt;sdk&gt;/samples/ApiDemos/res/values/attrs.xml. For more information about
 custom resources, see <a
 href="{@docRoot}guide/topics/resources/available-resources.html#customresources">Custom
 Layout Resources</a>. Note that the android.R.styleable documentation is still
 provided in the SDK, but only as a reference of the platform's styleable
 attributes for the various elements.</li>
-<li>The VM now properly ensures that private classes are not 
+<li>The VM now properly ensures that private classes are not
 available to applications through reflection. If you were using reflection
-to access private classes in a previous release, you will now get a run-time 
+to access private classes in a previous release, you will now get a run-time
 error. </li>
 
 <li>The Settings and Email applications are now included in the SDK and
 available in the emulator.</li>
-<li>We regret to inform developers that SDK 1.0_r2 does not support MFM, RLL, 
+<li>We regret to inform developers that SDK 1.0_r2 does not support MFM, RLL,
 or Winchester hard disk drives.</li>
-<li>In the emulator, the control key for enabling/disabling trackball mode 
+<li>In the emulator, the control key for enabling/disabling trackball mode
 is changed from Control-T to F6. You can also enter trackball mode temporarily
 using the Delete key. While the key is pressed, you can send trackball events.</li>
 </ul>
@@ -783,19 +783,19 @@ emulator started with the command-line option <code>-http-proxy</code>. </li>
 <li>We regret to inform developers that Android 1.0 will not include support for
 dot-matrix printers.</li>
 <li>On the OSX platform, if you manually remove the ~/.android directory
-using <code>rm -rf ~/.android</code>, then try to run 
-the emulator, it crashes. This happens because the emulator fails to create 
+using <code>rm -rf ~/.android</code>, then try to run
+the emulator, it crashes. This happens because the emulator fails to create
 a new .android directory before attempting to create the child SDK1.0 directory.
 To work around this issue, manually create a new .android directory using
-<code>mkdir ~/.android</code>, then run the emulator. The emulator 
+<code>mkdir ~/.android</code>, then run the emulator. The emulator
 creates the SDK1.0 directory and starts normally. </li>
 <li>The final set of Intent patterns honored by Android 1.0 has not yet been
 fully documented. Documentation will be provided in future releases.</li>
 <li>In ADT Editor, you can add at most ten new resource values at a time,
-in a given res/values/*.xml, using the form in the Android Resources pane. 
+in a given res/values/*.xml, using the form in the Android Resources pane.
 If you add more than ten, the Android Resources pane will not display the
-attributes fields for the additional resource entries. To work around this 
-problem, you can close the file in the editor and open it again, or you 
+attributes fields for the additional resource entries. To work around this
+problem, you can close the file in the editor and open it again, or you
 can edit the resource entries in the XML text mode. </li>
 <li>The emulator's battery-control commands (<code>power &lt;option&gt</code>)
 are not working in this release.</li>

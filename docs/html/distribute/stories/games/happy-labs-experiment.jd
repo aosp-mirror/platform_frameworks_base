@@ -1,0 +1,105 @@
+page.title=Happy Labs Increases Installs by 32% on Google Play with Store Listing Experiments
+page.metaDescription=Happy Labs Increases Installs by 32%.
+page.tags="developerstory", "games", "googleplay", "google play"
+page.image=images/cards/distribute/stories/happylabs-logo.png
+
+@jd:body
+
+<style type="text/css">
+  span.positive{
+    color:green;
+    font-size: 125%;
+    font-weight:bold;">
+  }
+  span.negative{
+    color:red;
+    font-size: 125%;
+    font-weight:bold;">
+  }
+</style>
+
+<h3>Background</h3>
+
+<div class="figure">
+  <img src="{@docRoot}images/distribute/stories/happylabs-logo.png" />
+</div>
+
+<p>
+  <a class="external-link"
+  href="https://play.google.com/store/apps/dev?id=5211519071117278745&hl=en">
+  Happy Labs</a>, founded in 2012, is a successful game developer in Southeast Asia with 13
+  game titles and over 30 million downloads. Its flagship free-to-play virtual sim game,
+  <a class="external-link"
+  href="https://play.google.com/store/apps/dev?id=5211519071117278745&hl=en">Happy Pet Story</a>,
+  launched in February 2016 and is designed for female gamers of all ages.
+</p>
+
+<p>
+ Following the announcement of Store Listing Experiments in May, Happy Labs decided to test
+ variations of their game icon and screenshots to optimize their store listing.
+</p>
+
+<h3>What they did</h3>
+
+<p>
+ Happy Labs used the Store Listing Experiments feature in the Google Play Developer Console to
+ test three new variations of their new game icon. Encouraged by early results, they then
+ optimized the game screenshots displayed in their store listing.
+</p>
+
+<h3>Results</h3>
+
+<p>
+ The results showed that the new icon, <em>Sweet Bubbles</em> without a frame, outperformed
+ the initial <em>Mojo</em> icon and two other variants, with a 38.6% increase in installs:
+</p>
+
+<p>
+ <img src="{@docRoot}images/distribute/stories/happylabs-happy_pet_icon.png" />
+</p>
+
+<p>
+ Based on these findings, Happy Labs changed the Happy Pet Story icon to the new image globally
+ on Google Play.
+</p>
+
+<p>
+ Following the positive icon testing results, Happy Labs ran global store listing experiments
+ with a combination of screenshots from their store listing over a five week period. They then took
+ their best performing screenshots from the experiments and tested them across three specific
+ countries: Indonesia, Thailand, and Japan. The results showed an average increase of 19.87% in
+ installs.
+</p>
+
+<p>
+ Migrating from the original images to the variants shown in the following figure increased organic
+ installs in Thailand by 13.9%:
+</p>
+
+<p>
+ <img src="{@docRoot}images/distribute/stories/happylabs-variant.png" />
+</p>
+
+<p>
+ With the combination of both store listing experiments, Happy Pet Story saw an average increase of
+ 32% in month-on-month organic daily downloads globally, as described by Jeffrey Chee, CEO of Happy
+ Labs:
+</p>
+
+<p>
+ <em>“Store listing experiments have been an invaluable tool for us in optimizing our Play store
+ presence. I am really happy that we were able to get an uplift of 32% in organic installs with
+ minimal investment in terms of resources.”</em>
+</p>
+
+<h3>Get started</h3>
+
+<p>
+ Learn how to run
+ <a class="external-link" href="https://support.google.com/googleplay/android-developer/answer/6227309">
+ Store Listing Experiments</a> and read our best practices for
+ <a href="https://developer.android.com/distribute/users/experiments.html">
+ running successful experiments</a>. For more best practices on growing your business with Google
+ Play, <a class="external-link" href="http://g.co/play/playbook-dac-writtenstudies-evergreen">
+ get the Playbook for Developers app</a>.
+</p>

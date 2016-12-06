@@ -309,7 +309,7 @@ href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a
 </ul>
 
 <p>系統看不到您納入來源但未在宣示說明中宣告的 Activity、服務和內容供應程式，因此系統無法執行這些項目。
-不過，您可在宣示說明宣告廣播接收器，或是透過程式碼以動態方式建立廣播接收器 (將廣播接收器建立為 
+不過，您可在宣示說明宣告廣播接收器，或是透過程式碼以動態方式建立廣播接收器 (將廣播接收器建立為
 {@link android.content.BroadcastReceiver} 物件)，然後呼叫 {@link android.content.Context#registerReceiver registerReceiver()}
 向系統註冊廣播接收器。
 
@@ -379,7 +379,7 @@ startActivity()}，系統就可能會啟動您的 Activity 讓使用者撰寫及
 </p>
 
 <p>例如，假設您的應用程式需要相機且採用 Android 2.1 (<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API 級別</a> 7) 導入的 API，建議您用下列方式在宣示說明檔案中宣告這些需求：
-</p> 
+</p>
 
 <pre>
 &lt;manifest ... >

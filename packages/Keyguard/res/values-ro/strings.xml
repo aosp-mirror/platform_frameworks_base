@@ -46,11 +46,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"Cardul SIM este blocat."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"Cardul SIM este blocat cu codul PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Se deblochează cardul SIM…"</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Deblocare cu model."</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Deblocare cu PIN."</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Deblocare cu parolă."</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Zonă model."</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Zonă glisare."</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"Zona codului PIN"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"Zona codului PIN al cardului SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"Zona codului PUK al cardului SIM"</string>
@@ -61,7 +56,7 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Model greșit"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Parolă greșită"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Cod PIN greșit"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Încercați din nou peste <xliff:g id="NUMBER">%d</xliff:g> (de) secunde."</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Încercați din nou peste <xliff:g id="NUMBER">%d</xliff:g>   secunde."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Desenați modelul"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Introduceți codul PIN al cardului SIM"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"Introduceți codul PIN al cardului SIM pentru „<xliff:g id="CARRIER">%1$s</xliff:g>”"</string>
@@ -77,9 +72,9 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Reintroduceți codul PUK corect. Încercările repetate vor dezactiva definitiv cardul SIM."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Codurile PIN nu coincid"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Prea multe încercări de desenare a modelului"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Ați introdus incorect codul PIN de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori.\n\nÎncercați din nou peste <xliff:g id="NUMBER_1">%2$d</xliff:g> (de) secunde."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Ați introdus incorect parola de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori. \n\nÎncercați din nou peste <xliff:g id="NUMBER_1">%2$d</xliff:g> (de) secunde."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Ați desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori. \n\nÎncercați din nou peste <xliff:g id="NUMBER_1">%2$d</xliff:g> (de) secunde."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Ați introdus incorect codul PIN de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori.\n\nÎncercați din nou peste <xliff:g id="NUMBER_1">%2$d</xliff:g>   secunde."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Ați introdus incorect parola de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori. \n\nÎncercați din nou peste <xliff:g id="NUMBER_1">%2$d</xliff:g>   secunde."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Ați desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori. \n\nÎncercați din nou peste <xliff:g id="NUMBER_1">%2$d</xliff:g>   secunde."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"Ați efectuat <xliff:g id="NUMBER_0">%1$d</xliff:g> încercări incorecte de deblocare a tabletei. După încă <xliff:g id="NUMBER_1">%2$d</xliff:g> încercări nereușite, această tabletă va fi resetată, iar toate datele acesteia vor fi șterse."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"Ați efectuat <xliff:g id="NUMBER_0">%1$d</xliff:g> încercări incorecte de deblocare a telefonului. După încă <xliff:g id="NUMBER_1">%2$d</xliff:g> încercări nereușite, acest telefon va fi resetat, iar toate datele acestuia vor fi șterse."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"Ați efectuat <xliff:g id="NUMBER">%d</xliff:g> încercări incorecte de deblocare a tabletei. Această tabletă va fi resetată, iar toate datele acesteia vor fi șterse."</string>
@@ -92,8 +87,8 @@
     <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"Ați efectuat <xliff:g id="NUMBER_0">%1$d</xliff:g> încercări incorecte de deblocare a telefonului. După încă <xliff:g id="NUMBER_1">%2$d</xliff:g> încercări nereușite, profilul de serviciu va fi eliminat, iar toate datele profilului vor fi șterse."</string>
     <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"Ați efectuat <xliff:g id="NUMBER">%d</xliff:g> încercări incorecte de deblocare a tabletei. Profilul de serviciu va fi eliminat, iar toate datele profilului vor fi șterse."</string>
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"Ați efectuat <xliff:g id="NUMBER">%d</xliff:g> încercări incorecte de deblocare a telefonului. Profilul de serviciu va fi eliminat, iar toate datele profilului vor fi șterse."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Ați desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%2$d</xliff:g> încercări nereușite, vi se va solicita să deblocați tableta cu ajutorul unui cont de e-mail.\n\n Încercați din nou peste <xliff:g id="NUMBER_2">%3$d</xliff:g> (de) secunde."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Ați desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%2$d</xliff:g> încercări nereușite, vi se va solicita să deblocați telefonul cu ajutorul unui cont de e-mail.\n\n Încercați din nou peste <xliff:g id="NUMBER_2">%3$d</xliff:g> (de) secunde."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Ați desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%2$d</xliff:g> încercări nereușite, vi se va solicita să deblocați tableta cu ajutorul unui cont de e-mail.\n\n Încercați din nou peste <xliff:g id="NUMBER_2">%3$d</xliff:g>   secunde."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Ați desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%2$d</xliff:g> încercări nereușite, vi se va solicita să deblocați telefonul cu ajutorul unui cont de e-mail.\n\n Încercați din nou peste <xliff:g id="NUMBER_2">%3$d</xliff:g>   secunde."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Codul PIN pentru cardul SIM este incorect. Contactați operatorul pentru a vă debloca dispozitivul."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
       <item quantity="few">Codul PIN pentru cardul SIM este incorect. V-au mai rămas <xliff:g id="NUMBER_1">%d</xliff:g> încercări.</item>

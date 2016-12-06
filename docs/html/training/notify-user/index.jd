@@ -27,7 +27,7 @@ startpage=true
         </a>
     </li>
     <li>
-        <a href="{@docRoot}design/patterns/notifications.html">Notifications</a> Design Guide
+        <a href="https://material.google.com/patterns/notifications.html">Notifications</a> Design Guide
     </li>
 </ul>
 
@@ -43,14 +43,14 @@ class="button">Download the sample</a>
 </div>
 
 <p>
-   A notification is a user interface element that you display outside your app's normal UI to indicate 
-   that an event has occurred. Users can choose to view the notification while using other apps and respond 
-   to it when it's convenient for them. 
+   A notification is a user interface element that you display outside your app's normal UI to indicate
+   that an event has occurred. Users can choose to view the notification while using other apps and respond
+   to it when it's convenient for them.
 
 </p>
 
 <p>
-    The <a href="{@docRoot}design/patterns/notifications.html">Notifications design guide</a> shows
+    The <a href="https://material.google.com/patterns/notifications.html">Notifications design guide</a> shows
     you how to design effective notifications and when to use them. This class shows you how to
     implement the most common notification designs.
 </p>
@@ -86,10 +86,10 @@ class="button">Download the sample</a>
         </strong>
     </dt>
     <dd>
-        Learn how to create a big view within an expanded notification, while still maintaining 
+        Learn how to create a big view within an expanded notification, while still maintaining
         backward compatibility.
     </dd>
-   
+
     <dt>
         <strong>
         <a href="display-progress.html">Displaying Progress in a Notification</a>

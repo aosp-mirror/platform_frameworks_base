@@ -18,5 +18,5 @@ Copyright (C) 2016 The Android Open Source Project
         android:height="48dp"
         android:viewportWidth="48.0"
         android:viewportHeight="48.0">
-    <path android:name="leg2_shadow" android:fillColor="#FF000000" android:pathData="M16,38h5v1h-5z"/>
+    <path android:name="leg2_shadow" android:fillColor="#FF000000" android:pathData="M16,37h5v3h-5z"/>
 </vector>

@@ -92,8 +92,6 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
-import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
@@ -2057,9 +2055,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     static private final String FOCUSED_ID_TAG = "android:focusedViewId";
-    static private final String ACCESSIBILITY_FOCUSED_ID_TAG = "android:accessibilityFocusedViewId";
-    static private final String ACCESSIBILITY_FOCUSED_VIRTUAL_ID_TAG =
-            "android:accessibilityFocusedVirtualViewId";
     static private final String VIEWS_TAG = "android:views";
     static private final String PANELS_TAG = "android:Panels";
     static private final String ACTION_BAR_TAG = "android:ActionBar";
@@ -2080,26 +2075,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         final View focusedView = mContentParent.findFocus();
         if (focusedView != null && focusedView.getId() != View.NO_ID) {
             outState.putInt(FOCUSED_ID_TAG, focusedView.getId());
-        }
-
-        // Save the accessibility focused view ID.
-        if (mDecor != null) {
-            final ViewRootImpl viewRootImpl = mDecor.getViewRootImpl();
-            if (viewRootImpl != null) {
-                final View accessFocusHost = viewRootImpl.getAccessibilityFocusedHost();
-                if (accessFocusHost != null && accessFocusHost.getId() != View.NO_ID) {
-                    outState.putInt(ACCESSIBILITY_FOCUSED_ID_TAG, accessFocusHost.getId());
-
-                    // If we have a focused virtual node ID, save that too.
-                    final AccessibilityNodeInfo accessFocusedNode =
-                            viewRootImpl.getAccessibilityFocusedVirtualView();
-                    if (accessFocusedNode != null) {
-                        final int virtualNodeId = AccessibilityNodeInfo.getVirtualDescendantId(
-                                accessFocusedNode.getSourceNodeId());
-                        outState.putInt(ACCESSIBILITY_FOCUSED_VIRTUAL_ID_TAG, virtualNodeId);
-                    }
-                }
-            }
         }
 
         // save the panels
@@ -2144,13 +2119,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
         }
 
-        // Restore the accessibility focused view.
-        final int accessFocusHostViewId = savedInstanceState.getInt(
-                ACCESSIBILITY_FOCUSED_ID_TAG, View.NO_ID);
-        final int accessFocusVirtualViewId = savedInstanceState.getInt(
-                ACCESSIBILITY_FOCUSED_VIRTUAL_ID_TAG, AccessibilityNodeInfo.UNDEFINED_ITEM_ID);
-        tryRestoreAccessibilityFocus(accessFocusHostViewId, accessFocusVirtualViewId);
-
         // Restore the panels.
         SparseArray<Parcelable> panelStates = savedInstanceState.getSparseParcelableArray(PANELS_TAG);
         if (panelStates != null) {
@@ -2168,33 +2136,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         "State will not be restored.");
             }
         }
-    }
-
-    private void tryRestoreAccessibilityFocus(int hostViewId, int virtualViewId) {
-        if (hostViewId != View.NO_ID && mDecor != null) {
-            final View needsAccessFocus = mDecor.findViewById(hostViewId);
-            if (needsAccessFocus != null) {
-                if (!tryFocusingVirtualView(needsAccessFocus, virtualViewId)
-                        && !needsAccessFocus.requestAccessibilityFocus()) {
-                    Log.w(TAG, "Failed to restore focus to previously accessibility"
-                            + " focused view with id " + hostViewId);
-                }
-            } else {
-                Log.w(TAG, "Previously accessibility focused view reported id " + hostViewId
-                        + " during save, but can't be found during restore.");
-            }
-        }
-    }
-
-    private boolean tryFocusingVirtualView(View host, int virtualViewId) {
-        if (virtualViewId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
-            final AccessibilityNodeProvider nodeProvider = host.getAccessibilityNodeProvider();
-            if (nodeProvider != null) {
-                return nodeProvider.performAction(virtualViewId,
-                        AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS, null);
-            }
-        }
-        return false;
     }
 
     /**

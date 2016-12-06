@@ -9,7 +9,7 @@ previous.link=connectivity-monitoring.html
 
 @jd:body
 
-<div id="tb-wrapper"> 
+<div id="tb-wrapper">
 <div id="tb">
 
 <h2>En esta sección puedes aprender:</h2>
@@ -23,7 +23,7 @@ previous.link=connectivity-monitoring.html
   <li><a href="{@docRoot}guide/components/intents-filters.html">Intentos y filtros de intentos</a>
 </ul>
 
-</div> 
+</div>
 </div>
 
 <p>La forma más sencilla de controlar los cambios en el estado del dispositivo es crear un {@link android.content.BroadcastReceiver} para cada estado que vayas a controlar y registrar cada uno de ellos en el archivo de manifiesto de tu aplicación. A continuación, en cada uno de esos receptores solo tienes que volver a programar las alarmas recurrentes en función del estado actual del dispositivo.</p>
@@ -31,10 +31,10 @@ previous.link=connectivity-monitoring.html
 <p>Un efecto secundario de este método es que tu aplicación activará el dispositivo siempre que uno de los receptores se active (probablemente, con más frecuencia de la necesaria).</p>
 
 <p>Te recomendamos que inhabilites o habilites los receptores de emisión en el momento de la ejecución. De este modo, puedes utilizar los receptores que hayas declarado en el archivo de manifiesto como alarmas pasivas que se activan mediante los eventos del sistema solo cuando es necesario.</p>
- 
 
-<h2 id="ToggleReceivers">Cómo alternar y superponer receptores de cambio de estado para mejorar el rendimiento </h2> 
- 
+
+<h2 id="ToggleReceivers">Cómo alternar y superponer receptores de cambio de estado para mejorar el rendimiento </h2>
+
 <p>Se puede utilizar el {@link android.content.pm.PackageManager} para alternar el estado habilitado en cualquier componente definido en el archivo de manifiesto, incluidos los receptores de emisión que quieras habilitar o inhabilitar, como se muestra en el fragmento que aparece a continuación:</p>
 
 <pre>ComponentName receiver = new ComponentName(context, myReceiver.class);

@@ -1,0 +1,60 @@
+page.title=Desain Bahan untuk Pengembang
+page.image=images/cards/material_2x.png
+page.metaDescription=Pelajari cara menerapkan desain bahan pada aplikasi Anda.
+
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>Dependensi dan Prasyarat</h2>
+  <ul>
+    <li>Android 5.0 (API Level 21)</li>
+  </ul>
+</div>
+</div>
+
+<p>Desain bahan adalah panduan komprehensif untuk desain visual, gerak, dan interaksi di
+berbagai platform dan perangkat. Untuk menggunakan desain bahan di aplikasi Android, ikuti panduan
+yang dijelaskan dalam
+<a href="http://www.google.com/design/spec/material-design/introduction.html">spesifikasi desain bahan
+</a> dan gunakan komponen serta fungsionalitas baru yang tersedia di Android 5.0
+(API level 21).</p>
+
+<p>Kelas ini menampilkan kepada Anda cara membuat aplikasi desain bahan dengan elemen-elemen berikut:</p>
+
+<ul>
+<li>Tema bahan</li>
+<li>Widget untuk kartu dan daftar</li>
+<li>Bayangan custom dan pemangkasan tampilan</li>
+<li>Drawable vektor</li>
+<li>Animasi custom</li>
+</ul>
+
+<p>Kelas ini juga mengajarkan cara mempertahankan kompatibilitas dengan versi Android sebelum
+5.0 (API level 21) bila Anda menggunakan fitur desain bahan dalam aplikasi.</p>
+
+<h2>Pelajaran</h2>
+
+<dl>
+  <dt><a href="{@docRoot}training/material/get-started.html">Memulai</a></dt>
+  <dd>Pelajari cara memperbarui aplikasi Anda dengan fitur desain bahan.</dd>
+
+  <dt><a href="{@docRoot}training/material/theme.html">Menggunakan Tema Bahan</a></dt>
+  <dd>Pelajari cara menerapkan gaya desain bahan pada aplikasi Anda.</dd>
+
+  <dt><a href="{@docRoot}training/material/lists-cards.html">Membuat Daftar dan Kartu</a></dt>
+  <dd>Pelajari cara membuat daftar dan kartu dengan tampilan dan cara kerja yang konsisten menggunakan widget sistem.</dd>
+
+  <dt><a href="{@docRoot}training/material/shadows-clipping.html">Mendefinisikan Bayangan dan Memangkas Tampilan</a></dt>
+  <dd>Pelajari cara mengatur elevasi tampilan Anda untuk membuat bayangan custom dan cara memangkas tampilan.</dd>
+
+  <dt><a href="{@docRoot}training/material/drawables.html">Bekerja dengan Drawable</a></dt>
+  <dd>Pelajari cara membuat drawable vektor dan cara mewarnai sumber daya drawable.</dd>
+
+  <dt><a href="{@docRoot}training/material/animations.html">Mendefinisikan Animasi Custom</a></dt>
+  <dd>Pelajari cara membuat animasi custom untuk tampilan dan transisi aktivitas dengan elemen bersama.</dd>
+
+  <dt><a href="{@docRoot}training/material/compatibility.html">Mempertahankan Kompatibilitas</a></dt>
+  <dd>Pelajari cara mempertahankan kompatibilitas dengan versi platform sebelum Android 5.0.</dd>
+</dl>

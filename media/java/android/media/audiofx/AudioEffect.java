@@ -53,7 +53,7 @@ import java.util.UUID;
  * than the priority used by the current effect engine owner, the control will be transfered to the
  * new object. Otherwise control will remain with the previous object. In this case, the new
  * application will be notified of changes in effect engine state or control ownership by the
- * appropiate listener.
+ * appropriate listener.
  */
 
 public class AudioEffect {

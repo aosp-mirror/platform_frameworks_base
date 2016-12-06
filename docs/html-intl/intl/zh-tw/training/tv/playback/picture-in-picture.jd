@@ -1,0 +1,186 @@
+page.title=子母畫面
+page.keywords=preview,sdk,PIP,Picture-in-picture
+page.tags=androidn
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>此文件內容</h2>
+<ol>
+  <li><a href="#declaring">宣告您的活動支援子母畫面</a>
+</li>
+  <li><a href="#pip_button">將您的活動切換到子母畫面</a>
+</li>
+  <li><a href="#handling_ui">處理子母畫面模式中的 UI</a>
+</li>
+  <li><a href="#continuing_playback">在子母畫面模式中繼續播放影片</a>
+</li>
+  <li><a href="#best">最佳做法</a></li>
+</ol>
+
+<h2>另請參閱</h2>
+<ol>
+  <li><a href="{@docRoot}preview/features/multi-window.html">多視窗支援</a>
+</li>
+</ol>
+
+</div>
+</div>
+
+<p>在 Android N 中，Android TV 使用者現在可以在應用程式內瀏覽時，同時觀賞螢幕角色中釘選視窗中的影片。
+
+子母畫面 (PIP) 模式讓應用程式在釘選視窗中執行影片活動，同時讓另一個活動在背景持續進行。
+
+PIP 視窗讓使用者在使用您的應用程式時同時多工處理，協助提高使用者的生產力。
+</p>
+
+<p>您的應用程式可決定何時觸發 PIP 模式。以下是一些何時進入 PIP 模式的範例：
+</p>
+
+<ul>
+<li>當使用者從影片返回瀏覽其他內容，您的應用程式可以將影片移入 PIP 模式。
+</li>
+<li>當使用者觀看到影片內容的結尾時，您的應用程式可將影片切換到 PIP 模式。
+主畫面顯示系列中下一集的預告或摘要資訊時。
+</li>
+<li>您的應用程式可以為使用者提供一個觀賞影片時佇列其他內容的方式。
+當主畫面顯示內容選擇活動時，影片繼續在 PIP 模式中播放。
+</li>
+</ul>
+
+<p>PIP 視窗為 240x135 dp，在系統所選的螢幕上四個角落之一的最上層顯示。
+使用者只要按住遙控器上的 <b>Home</b> 按鈕，即可帶出 PIP 選單，讓他們將 PIP 視窗切換成全螢幕或關閉 PIP 視窗。
+
+如果另一個影片開始在主畫面上播放，會自動關閉 PIP 視窗。
+
+使用者也可以透過 Recents 關閉 PIP 視窗。</p>
+
+<img src="{@docRoot}images/android-7.0/pip-active.png" />
+<p class="img-caption"><strong>圖 1.</strong> 當使用者瀏覽主畫面上的內容時，可看到螢幕角落的子母畫面中的影片。
+
+</p>
+
+<p>PIP 利用 Android N 中提供的多視窗 API 來提供釘選影片疊加層視窗。
+若要將 PIP 新增到您的應用程式，您需要註冊支援 PIP 的活動，在需要時將活動切換到 PIP 模式，以及確定活動在 PIP 模式時會隱藏 UI 元素且影片繼續播放。
+
+
+</p>
+
+<h2 id="declaring">宣告您的活動支援子母畫面</h2>
+
+<p>根據預設，系統不會自動為應用程式支援 PIP。如果您想要應用程式 PIP，請將
+<code>android:supportsPictureInPicture</code> 和
+<code>android:resizeableActivity</code> 設定成 <code>true</code>，在宣示說明中註冊影片活動。
+
+另外也請指定您的活動處理版面配置設定變更，如此一來，在 PIP 模式轉換期間版面配置變更時，才不會重新啟動您的活動。
+
+</p>
+
+<pre>
+&lt;activity android:name="VideoActivity"
+    android:resizeableActivity="true"
+    android:supportsPictureInPicture="true"
+    android:configChanges=
+        "screenSize|smallestScreenSize|screenLayout|orientation"
+    ...
+</pre>
+
+<p>註冊您的活動時，請記住在 PIP 模式中，您的活動會顯示在電視螢幕上小的疊加層視窗中。
+顯示最少 UI 的影片播放活動可提供最佳的使用者體驗。
+包含小型 UI 元素的活動在切換到 PIP 模式時無法提供出色的使用者體驗，因為使用者在 PIP 視窗中看不到 UI 元素的詳細資訊。
+
+
+</p>
+
+<h2 id="pip_button">將您的活動切換到子母畫面</h2>
+
+您需要將活動切換到 PIP 模式時，請呼叫
+<code>Activity.enterPictureInPicture()</code>。下列範例會在使用者選取媒體控制列上的專用 PIP 按鈕時切換到 PIP 模式：
+
+</p>
+
+<pre>
+&#64;Override
+public void onActionClicked(Action action) {
+    if (action.getId() == R.id.lb_control_picture_in_picture) {
+        getActivity().enterPictureInPicture();
+        return;
+    }
+    ...
+</pre>
+
+<p>將 PIP 按鈕新增到媒體控制列，可讓您的使用者在控制影片播放時輕鬆地切換到 PIP 模式。
+</p>
+
+<img src="{@docRoot}images/android-7.0/pip-button.png" />
+<p class="img-caption"><strong>圖 1.</strong> 媒體控制列上的子母畫面按鈕。
+</p>
+
+<p>Android N 包含新的
+<code>PlaybackControlsRow.PictureInPictureAction</code> 類別，它可定義控制列 PIP 動作和使用 PIP 圖示。
+</p>
+
+<h2 id="handling_ui">處理子母畫面模式中的 UI</h2>
+
+<p>當您的活動進入 PIP 模式時，您的活動應該只播放影片。
+在您的活動進入 PIP 時移除 UI 元素，並在您的活動重新進入全螢幕時還原這些元素。覆寫 <code>Activity.onPictureInPictureChanged()</code> 或
+<code>Fragment.onPictureInPictureChanged()</code> 並依需要啟用或停用 UI 元素，例如：
+
+
+</p>
+
+<pre>
+&#64;Override
+public void onPictureInPictureChanged(boolean inPictureInPicture) {
+    if (inPictureInPicture) {
+        // Hide the controls in picture-in-picture mode.
+        ...
+    } else {
+        // Restore the playback UI based on the playback status.
+        ...
+    }
+}
+</pre>
+
+<h2 id="continuing_playback">在子母畫面模式中繼續播放影片
+</h2>
+
+<p>當您的活動切換到 PIP 時，系統會將活動視為暫停狀態並呼叫您活動的 <code>onPause()</code> 方法。
+影片播放不應該暫停，而且活動因為 PIP 模式而暫停時，影片應該繼續播放。
+
+查看您活動的
+<code>onPause()</code> 方法中的 PIP 並適當地處理播放，例如：
+</p>
+
+<pre>
+&#64;Override
+public void onPause() {
+    // If called due to PIP, do not pause playback
+    if (inPictureInPicture()) {
+        // Continue playback
+        ...
+    }
+    // If paused but not in PIP, pause playback if necessary
+    ...
+}
+</pre>
+
+<p>當您的活動從 PIP 模式切換回全螢幕模式時，系統會繼續您的活動並呼叫您的 <code>onResume()</code>方法。
+</p>
+
+<h2 id="best">最佳做法</h2>
+
+<p>PIP 主要針對播放全螢幕影片的活動。將您的活動切換到 PIP 模式時，避免顯示影片內容以外的任何項目。追蹤當您的活動進入 PIP 模式時隱藏 UI 元素，如<a href="#handling_ui">處理子母畫面模式中的 UI</a> 中所述。
+
+
+</p>
+
+<p>因為 PIP 視窗會在螢幕角落上以浮動視窗顯示，所以您應該避免在主畫面上 PIP 視窗可能遮蓋的任何地方顯示重要資訊。
+
+</p>
+
+<p>當活動處於 PIP 模式時，預設它不會取得輸入焦點。若要在處於 PIP 模式時接收輸入事件，請使用
+<code>MediaSession.setMediaButtonReceiver()</code>。
+</p>

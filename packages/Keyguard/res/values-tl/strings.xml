@@ -46,11 +46,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"Naka-lock ang SIM card."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"Naka-lock ang SIM card gamit ang PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Ina-unlock ang SIM card…"</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Pag-unlock ng pattern."</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Pag-unlock ng pin."</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Pag-unlock ng password."</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Bahagi ng pattern."</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Bahagi ng slide."</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"Lugar ng PIN"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"Lugar ng PIN ng SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"Lugar ng PUK ng SIM"</string>

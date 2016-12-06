@@ -83,7 +83,7 @@ href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filter
           </td>
       </tr>
       <tr>
-          <td>Google Streetview</td>          
+          <td>Google Streetview</td>
 <td>google.streetview:cbll=<em>lat</em>,<em>lng</em>&amp;cbp=1,<em>yaw</em>,,<em>pitch</em>,<em>zoom</em>&amp;mz=<em>mapZoom</em>
           </td>
           <td>VIEW</td>

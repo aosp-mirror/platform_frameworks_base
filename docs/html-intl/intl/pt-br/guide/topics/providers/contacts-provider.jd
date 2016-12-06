@@ -113,14 +113,14 @@ o Provedor de Contatos.
     Este guia considera que o leitor conhece os preceitos dos provedores de conteúdo do Android. Para saber mais
     sobre provedores de conteúdo do Android, leia o guia
     <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
-    Preceitos do provedor de conteúdo</a>. 
+    Preceitos do provedor de conteúdo</a>.
     O aplicativo <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">Exemplo de adaptador de sincronização</a>
     é um exemplo de uso de um adaptador de sincronização que transfere dados entre o Provedor
     de contatos e um aplicativo de amostra hospedado pelo Google Web Services.
 </p>
 <h2 id="InformationTypes">Organização do Provedor de Contatos</h2>
 <p>
-    O Provedor de Contatos é um componente do provedor de conteúdo do Android. Ele mantém três tipos de 
+    O Provedor de Contatos é um componente do provedor de conteúdo do Android. Ele mantém três tipos de
     dados sobre uma pessoa, sendo cada um deles correspondente a uma tabela fornecida pelo provedor, como
     ilustrado na figura 1:
 </p>
@@ -199,7 +199,7 @@ de dados de uma pessoa, ele permite diversos contatos brutos para a mesma pessoa
             {@link android.provider.ContactsContract.SyncColumns#ACCOUNT_TYPE}.
         </td>
         <td>
-            O formato desse nome é específico deste tipo de conta. 
+            O formato desse nome é específico deste tipo de conta.
             Não se trata necessariamente de um endereço de e-mail.
         </td>
     </tr>
@@ -239,7 +239,7 @@ de dados de uma pessoa, ele permite diversos contatos brutos para a mesma pessoa
 <ul>
     <li>
         O nome de um contato bruto não é armazenado em sua linha em
-        {@link android.provider.ContactsContract.RawContacts}. Em vez disso, é armazenado na 
+        {@link android.provider.ContactsContract.RawContacts}. Em vez disso, é armazenado na
         tabela {@link android.provider.ContactsContract.Data}, em uma
         linha {@link android.provider.ContactsContract.CommonDataKinds.StructuredName}. Os contatos brutos
         têm apenas uma linha desse tipo na tabela {@link android.provider.ContactsContract.Data}.
@@ -275,7 +275,7 @@ de dados de uma pessoa, ele permite diversos contatos brutos para a mesma pessoa
     Configurações da <em>conta</em>.
 </p>
 <p>
-    Suponhamos que Emily Dickinson abra uma janela do navegador, acesse o Gmail como 
+    Suponhamos que Emily Dickinson abra uma janela do navegador, acesse o Gmail como
     <code>emily.dickinson@gmail.com</code>, abra
     Contatos e adicione "Thomas Higginson". Mais tarde, ela acessa o Gmail como
     <code>emilyd@gmail.com</code> e envia um e-mail para "Thomas Higginson", o que automaticamente
@@ -309,7 +309,7 @@ de dados de uma pessoa, ele permite diversos contatos brutos para a mesma pessoa
     tipo de dados, como endereços de e-mail ou números de telefone. Por exemplo: se
     "Thomas Higginson" para {@code emilyd@gmail.com}  (a linha do contato bruto de Thomas Higginson
     associada à conta Google <code>emilyd@gmail.com</code>) tem um endereço de e-mail pessoal
-    <code>thigg@gmail.com</code> e um de trabalho 
+    <code>thigg@gmail.com</code> e um de trabalho
     <code>thomas.higginson@gmail.com</code>, o Provedor de Contatos armazena as duas linhas de endereço de e-mail
     e vincula ambas ao contato bruto.
 </p>
@@ -490,7 +490,7 @@ de dados de uma pessoa, ele permite diversos contatos brutos para a mesma pessoa
     {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} do contato continuará
     apontado para a linha do contato para permitir o uso de
     {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY}
-    e manter ligações com contatos "favoritos" e assim por diante. Essa coluna tem o próprio formato, que 
+    e manter ligações com contatos "favoritos" e assim por diante. Essa coluna tem o próprio formato, que
     não tem nenhuma relação com o formato da coluna {@code android.provider.BaseColumns#_ID}.
 </p>
 <p>
@@ -981,7 +981,7 @@ public Loader&lt;Cursor&gt; onCreateLoader(int id, Bundle args) {
     {@code android.provider.BaseColumns#_ID} do contato bruto como
     o valor {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID}. Contudo, esse
     valor não está disponível ao criar a {@link android.content.ContentProviderOperation}
-    para a linha de dados porque 
+    para a linha de dados porque
     {@link android.content.ContentProviderOperation} ainda não foi aplicada à linha de contato bruto. Para trabalhar com isso,
     a classe {@link android.content.ContentProviderOperation.Builder} tem o método
     {@link android.content.ContentProviderOperation.Builder#withValueBackReference(String, int) withValueBackReference()}.
@@ -1403,7 +1403,7 @@ StructuredPostal.CONTENT_URI},
             RawContacts.CONTENT_TYPE}, tipo MIME para um grupo de contatos brutos.
         </td>
         <td>
-            Exibe a tela <strong>Adicionar contato</strong> do aplicativo de contatos do dispositivo. 
+            Exibe a tela <strong>Adicionar contato</strong> do aplicativo de contatos do dispositivo.
             São exibidos os valores extras adicionados à intenção. Se enviada com
         {@link android.app.Activity#startActivityForResult(Intent, int) startActivityForResult()},
             a URI de conteúdo do contato bruto recentemente adicionado é passada de volta
@@ -1636,7 +1636,7 @@ startActivity(insertIntent);
     a disponibilidade dos dados dos contatos mesmo quando o dispositivo não está conectado à rede.
 </p>
 <p>
-    Embora seja possível implementar a sincronização de diversos modos, o sistema Android fornece 
+    Embora seja possível implementar a sincronização de diversos modos, o sistema Android fornece
     uma estrutura de sincronização de extensão que automatiza as seguintes tarefas:
     <ul>
 
@@ -1652,7 +1652,7 @@ startActivity(insertIntent);
     </ul>
 <p>
     Para usar essa estrutura, deve-se fornecer uma extensão do adaptador de sincronização. Cada adaptador de sincronização é exclusivo
-    de um serviço e um provedor de conteúdo, mas pode tratar diversos nomes de conta do mesmo serviço. 
+    de um serviço e um provedor de conteúdo, mas pode tratar diversos nomes de conta do mesmo serviço.
     A estrutura também permite diversos adaptadores de sincronização para o mesmo serviço e provedor.
 </p>
 <h3 id="SyncClassesFiles">Classes e arquivos do adaptador de sincronização</h3>
@@ -1830,7 +1830,7 @@ elemento <code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.ht
 </p>
 <h3 id="StreamText">Textos de fluxos sociais</h3>
 <p>
-    Itens de fluxo sempre são associados a um contato bruto. 
+    Itens de fluxo sempre são associados a um contato bruto.
     O {@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID} conecta-se ao
     valor <code>_ID</code> do contato bruto. O tipo e o nome da conta do contato
     bruto também são armazenados na linha do item de fluxo.
@@ -1861,17 +1861,17 @@ elemento <code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.ht
         ao inserir um item de fluxo:
         <ul>
             <li>
-                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_ID}: 
+                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_ID}:
                 o valor {@code android.provider.BaseColumns#_ID} do contato ao qual esse item
                 de fluxo está associado.
             </li>
             <li>
-                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_LOOKUP_KEY}: 
+                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_LOOKUP_KEY}:
                 o valor{@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} do
                 contato ao qual esse item de fluxo está associado.
             </li>
             <li>
-                {@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID}: 
+                {@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID}:
                 o valor {@code android.provider.BaseColumns#_ID} do contato bruto ao qual esse item
                 de fluxo está associado.
             </li>
@@ -2275,14 +2275,14 @@ elemento <code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.ht
     </dd>
     <dt>{@code android:icon}</dt>
     <dd>
-        
+
         <a href="{@docRoot}guide/topics/resources/drawable-resource.html">Recurso desenhável</a> do Android
         que o aplicativo de contatos exibe próximo aos dados. Use isso para indicar
         ao usuário que os dados são advindos do seu serviço.
     </dd>
     <dt>{@code android:summaryColumn}</dt>
     <dd>
-        O nome de coluna do primeiro de dois valores recuperados da linha de dados. 
+        O nome de coluna do primeiro de dois valores recuperados da linha de dados.
         O valor é exibido como a primeira linha da entrada para essa linha de dados. A primeira linha
         destina-se ao uso como um resumo dos dados, mas isso é opcional. Veja também
         <a href="#detailColumn">android:detailColumn</a>.

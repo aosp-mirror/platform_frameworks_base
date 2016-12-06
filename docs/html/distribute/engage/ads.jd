@@ -54,7 +54,7 @@ conversions in your app.
 
 <h2 id="related_resources">Related resources</h2>
 
-<div class="resource-widget resource-flow-layout col-13" 
+<div class="resource-widget resource-flow-layout col-13"
   data-query="collection:distribute/engage/reengage"
   data-sortorder="-timestamp"
   data-cardsizes="9x3"

@@ -83,9 +83,9 @@ không có), vì thế bạn nên chuyển sang sử dụng thanh hành động 
 các tùy chọn khác.</p>
   <p>Xem phần về <a href="#options-menu">Tạo một Menu Tùy chọn</a>.</p>
     </dd>
-    
+
   <dt><strong>Menu ngữ cảnh và chế độ hành động theo ngữ cảnh</strong></dt>
-  
+
    <dd>Menu ngữ cảnh là một <a href="#FloatingContextMenu">menu nổi</a> xuất hiện khi
 người dùng thực hiện nhấp giữ trên một phần tử. Nó cung cấp các hành động ảnh hưởng tới nội dung hoặc
 khung ngữ cảnh được chọn.
@@ -94,7 +94,7 @@ các mục hành động ảnh hưởng tới nội dung được chọn trong m
 chọn nhiều mục.</p>
   <p>Xem phần nói về <a href="#context-menu">Tạo Menu Ngữ cảnh</a>.</p>
 </dd>
-    
+
   <dt><strong>Menu bật lên</strong></dt>
     <dd>Menu bật lên sẽ hiển thị danh sách các mục trong một danh sách thẳng đứng được neo vào dạng xem
 đã gọi ra menu. Nên cung cấp một phần tràn gồm các hành động liên quan tới nội dung cụ thể hoặc
@@ -128,14 +128,14 @@ kích cỡ màn hình khác nhau và các cấu hình khác bằng cách tận d
 dự án của bạn và xây dựng menu với các phần tử sau:</p>
 <dl>
   <dt><code>&lt;menu></code></dt>
-    <dd>Định nghĩa một {@link android.view.Menu}, đó là một bộ chứa các mục menu. Phần tử 
+    <dd>Định nghĩa một {@link android.view.Menu}, đó là một bộ chứa các mục menu. Phần tử
 <code>&lt;menu></code> phải là một nút gốc cho tệp và có thể giữ một hoặc nhiều phần tử
 <code>&lt;item></code> và <code>&lt;group></code>.</dd>
 
   <dt><code>&lt;item></code></dt>
     <dd>Tạo một {@link android.view.MenuItem}, nó biểu diễn một mục đơn trong một menu. Phần tử
 này có thể chứa một phần tử <code>&lt;menu></code> được lồng nhau để tạo một menu con.</dd>
-    
+
   <dt><code>&lt;group></code></dt>
     <dd>Một bộ chứa tùy chọn, vô hình cho các phần tử {@code &lt;item&gt;}. Nó cho phép bạn
 phân loại các mục menu sao cho chúng chia sẻ các tính chất như trạng thái hiện hoạt và khả năng hiển thị. Để biết thêm
@@ -273,7 +273,7 @@ tính chất của chúng bằng các API {@link android.view.MenuItem}.</p>
 
 <p>Nếu bạn phát triển ứng dụng của mình cho phiên bản Android 2.3.x và thấp hơn, hệ thống gọi {@link
 android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} để tạo menu tùy chọn
-khi người dùng mở menu lần đầu tiên. Nếu bạn phát triển cho phiên bản Android 3.0 vào cao hơn, 
+khi người dùng mở menu lần đầu tiên. Nếu bạn phát triển cho phiên bản Android 3.0 vào cao hơn,
 hệ thống sẽ gọi {@link android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} khi
 bắt đầu hoạt động để hiển thị các mục cho thanh hành động.</p>
 
@@ -346,7 +346,7 @@ trừ khi menu bị vô hiệu hóa vì lý do nào đó. Tuy nhiên, bạn ch�
 android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} để tạo trạng thái menu
 ban đầu chứ không phải để thực hiện thay đổi trong vòng đời của hoạt động.</p>
 
-<p>Nếu bạn muốn sửa đổi menu tùy chọn dựa trên 
+<p>Nếu bạn muốn sửa đổi menu tùy chọn dựa trên
 các sự kiện xảy ra trong vòng đời của hoạt động, bạn có thể làm vậy trong phương pháp
  {@link android.app.Activity#onPrepareOptionsMenu(Menu) onPrepareOptionsMenu()}. Phương pháp
 này chuyển cho bạn đối tượng {@link android.view.Menu} như hiện đang có để bạn có thể sửa đổi nó,
@@ -363,7 +363,7 @@ trình bày trong thanh hành động. Khi một sự kiện xảy ra và bạn 
 gọi {@link android.app.Activity#invalidateOptionsMenu invalidateOptionsMenu()} để yêu cầu
 hệ thống gọi {@link android.app.Activity#onPrepareOptionsMenu(Menu) onPrepareOptionsMenu()}.</p>
 
-<p class="note"><strong>Lưu ý:</strong> 
+<p class="note"><strong>Lưu ý:</strong>
 Bạn không nên thay đổi các mục trong menu tùy chọn dựa trên {@link android.view.View} đang
 trong tiêu điểm. Khi ở chế độ cảm ứng (khi người dùng không sử dụng bi xoay hay d-pad), các dạng xem
 không thể lấy tiêu điểm, vì thế bạn không nên sử dụng tiêu điểm làm cơ sở để sửa đổi
@@ -609,7 +609,7 @@ someView.setOnLongClickListener(new View.OnLongClickListener() {
 
 <p>Khi bạn gọi {@link android.app.Activity#startActionMode startActionMode()}, hệ thống sẽ trả về
 {@link android.view.ActionMode} được tạo. Bằng cách lưu điều này trong một biến thành viên, bạn có thể
-thực hiện thay đổi thanh hành động theo ngữ cảnh để hồi đáp những sự kiện khác. Trong mẫu trên, 
+thực hiện thay đổi thanh hành động theo ngữ cảnh để hồi đáp những sự kiện khác. Trong mẫu trên,
 {@link android.view.ActionMode} được sử dụng để đảm bảo rằng thực thể {@link android.view.ActionMode} không
 được tạo lại nếu nó đã hiện hoạt, bằng cách kiểm tra xem thành viên có rỗng không trước khi khởi động
 chế độ hành động.</p>
@@ -742,8 +742,8 @@ hiển thị một menu bật lên:</p>
 
 <pre>
 &lt;ImageButton
-    android:layout_width="wrap_content" 
-    android:layout_height="wrap_content" 
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:src="@drawable/ic_overflow_holo_dark"
     android:contentDescription="@string/descr_overflow_button"
     android:onClick="showPopup" />
@@ -1026,6 +1026,6 @@ bộ lọc ý định. Ví dụ:</p>
 <p>Tìm hiểu thêm về việc ghi các bộ lọc ý định trong tài liệu
 <a href="/guide/components/intents-filters.html">Ý định và Bộ lọc Ý định</a>.</p>
 
-<p>Để tham khảo một ứng dụng mẫu sử dụng kỹ thuật này, hãy xem mã mẫu 
+<p>Để tham khảo một ứng dụng mẫu sử dụng kỹ thuật này, hãy xem mã mẫu
 <a href="{@docRoot}resources/samples/NotePad/src/com/example/android/notepad/NoteEditor.html">Note
 Pad</a>.</p>

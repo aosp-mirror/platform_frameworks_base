@@ -36,7 +36,7 @@ parent.link=activities.html
     <li>{@link android.app.FragmentManager}</li>
     <li>{@link android.app.FragmentTransaction}</li>
   </ol>
-  
+
   <h2>Veja também</h2>
   <ol>
     <li><a href="{@docRoot}training/basics/fragments/index.html">Construção de uma IU dinâmica com Fragmentos</a></li>
@@ -361,8 +361,8 @@ você precisará usar {@link android.app.FragmentManager#findFragmentByTag
 findFragmentByTag()}.</p>
 
 <p>Para ver uma atividade de exemplo que usa um fragmento como um trabalhador de segundo plano, sem uma IU, consulte o exemplo de {@code
-FragmentRetainInstance.java}, incluso nos exemplos do SDK (disponibilizados pelo 
-Android SDK Manager) e localizado no sistema como 
+FragmentRetainInstance.java}, incluso nos exemplos do SDK (disponibilizados pelo
+Android SDK Manager) e localizado no sistema como
 <code>&lt;sdk_root&gt;/APIDemos/app/src/main/java/com/example/android/apis/app/FragmentRetainInstance.java</code>.</p>
 
 
@@ -378,7 +378,7 @@ chame {@link android.app.Activity#getFragmentManager()} a partir da atividade.</
   <li>Adquirir fragmentos existentes na atividade, com {@link
 android.app.FragmentManager#findFragmentById findFragmentById()} (para fragmentos que forneçam uma IU
 no layout da atividade) ou {@link android.app.FragmentManager#findFragmentByTag
-findFragmentByTag()} (para fragmentos que forneçam ou não uma IU).</li> 
+findFragmentByTag()} (para fragmentos que forneçam ou não uma IU).</li>
   <li>Retire os fragmentos da pilha de retorno com {@link
 android.app.FragmentManager#popBackStack()} (simulando um comando de <em>Voltar</em> do usuário).</li>
   <li>Registre uma escuta para as alterações na pilha de retorno com {@link
@@ -600,7 +600,7 @@ como usar o provedor de conteúdo estão disponíveis na documentação <a href=
 
 <h3 id="ActionBar">Adição de itens à barra de ação</h3>
 
-<p>Os fragmentos podem contribuir com itens de menu para o <a href="{@docRoot}guide/topics/ui/menus.html#options-menu">menu de opções</a> da atividade (e, consequentemente, para a <a href="{@docRoot}guide/topics/ui/actionbar.html">barra de ação</a>) implementando 
+<p>Os fragmentos podem contribuir com itens de menu para o <a href="{@docRoot}guide/topics/ui/menus.html#options-menu">menu de opções</a> da atividade (e, consequentemente, para a <a href="{@docRoot}guide/topics/ui/actionbar.html">barra de ação</a>) implementando
 {@link android.app.Fragment#onCreateOptionsMenu(Menu,MenuInflater) onCreateOptionsMenu()}. Para que este método
 receba chamadas, no entanto, você deve chamar {@link
 android.app.Fragment#setHasOptionsMenu(boolean) setHasOptionsMenu()} durante {@link
@@ -785,7 +785,7 @@ android.widget.FrameLayout}), ou iniciar uma nova atividade (onde o fragmento po
 
 <p>O segundo fragmento, {@code DetailsFragment}, exibe o resumo da peça para o item selecionado
 na lista de {@code TitlesFragment}:</p>
- 
+
 {@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java details}
 
 <p>Uma nova chamada da classe {@code TitlesFragment}, ou seja, se o usuário clicar em um item de lista
@@ -798,7 +798,7 @@ o resumo da peça selecionada quando a tela está na orientação de retrato:</p
 
 {@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java
 details_activity}
- 
+
 <p>Observe que esta atividade finaliza-se se a configuração for de paisagem,
 pois a atividade principal pode tomar o controle e exibir {@code DetailsFragment} juntamente com {@code TitlesFragment}.
 Isto pode acontecer se o usuário iniciar {@code DetailsActivity} enquanto estiver na orientação de retrato,

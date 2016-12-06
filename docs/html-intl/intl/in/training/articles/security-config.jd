@@ -1,0 +1,747 @@
+page.title=Konfigurasi Keamanan Jaringan
+page.keywords=androidn,keamanan,jaringan
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>Dalam dokumen ini</h2>
+<ol>
+  <li><a href="#manifest">Menambahkan File Konfigurasi Keamanan</a></li>
+  <li><a href="#CustomTrust">Menyesuaikan CA Tepercaya</a>
+      <ol>
+      <li><a href="#ConfigCustom">Mengonfigurasi CA Tepercaya Khusus</a></li>
+      <li><a href="#LimitingCas">Membatasi Set CA Tepercaya</a></li>
+      <li><a href="#TrustingAdditionalCas">Mempercayai CA Tambahan</a></li>
+      </ol>
+  </li>
+  <li><a href="#TrustingDebugCa">CA Debug Saja</a></li>
+  <li><a href="#UsesCleartextTraffic">Berhenti dari Lalu Lintas Cleartext</a></li>
+  <li><a href="#CertificatePinning">Menyematkan Sertifikat</a></li>
+  <li><a href="#ConfigInheritance">Perilaku Pewarisan Konfigurasi</a></li>
+  <li><a href="#FileFormat">Format File Konfigurasi</a></li>
+</ol>
+</div>
+</div>
+
+
+<p>
+  Android N menyertakan fitur
+  Network Security Configuration yang memungkinkan aplikasi menyesuaikan setelan keamanan jaringan mereka dalam
+  file konfigurasi deklaratif yang aman tanpa memodifikasi kode aplikasi. Setelan ini bisa
+  dikonfigurasi untuk domain dan aplikasi tertentu. Kemampuan
+  utama fitur ini adalah sebagai berikut:
+</p>
+
+<ul>
+  <li>
+    <b>Trust-anchor khusus:</b> Menyesuaikan Certificate Authorities (CA) mana
+    yang dipercaya untuk koneksi aman aplikasi. Misalnya,
+    mempercayai sertifikat tertentu yang ditandatangani sendiri atau membatasi
+    set CA umum yang dipercaya aplikasi.
+  </li>
+
+  <li>
+    <b>Penggantian hanya-debug:</b> Men-debug secara aman koneksi aman dalam aplikasi
+    tanpa menambahkan risiko pada basis yang telah dipasang.
+  </li>
+
+  <li>
+    <b>Berhenti dari lalu lintas cleartext:</b> Melindungi aplikasi dari
+    penggunaan lalu lintas cleartext secara tidak sengaja.
+  </li>
+
+  <li>
+    <b>Penyematan sertifikat:</b> Membatasi koneksi aman aplikasi ke
+    sertifikat tertentu.
+  </li>
+</ul>
+
+
+<h2 id="manifest">Menambahkan File Konfigurasi Keamanan</h2>
+
+<p>
+  Fitur Network Security Configuration menggunakan file XML tempat Anda menetapkan
+  setelan untuk aplikasi. Anda harus menyertakan sebuah entri dalam manifes aplikasi
+  untuk menunjuk ke file ini. Kutipan kode berikut dari sebuah manifes
+  yang memperagakan cara membuat entri ini:
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest ... &gt;
+  &lt;application ... &gt;
+    &lt;meta-data android:name="android.security.net.config"
+               android:resource="@xml/network_security_config" /&gt;
+    ...
+  &lt;/application&gt;
+&lt;/manifest&gt;
+</pre>
+
+<h2 id="CustomTrust">Menyesuaikan CA Tepercaya</h2>
+
+<p>
+  Aplikasi mungkin perlu mempercayai set CA khusus sebagai ganti default
+  platform. Alasannya yang paling umum adalah:
+</p>
+
+<ul>
+  <li>Menghubungkan ke host dengan otoritas sertifikat khusus (ditandatangani sendiri,
+  dikeluarkan oleh CA internal, dll).
+  </li>
+
+  <li>Membatasi set CA hanya untuk CA yang Anda percaya sebagai ganti setiap CA
+  yang sudah terpasang.
+  </li>
+
+  <li>Mempercayai CA tambahan yang tidak disertakan dalam sistem.
+  </li>
+</ul>
+
+<p>
+  Secara default koneksi (mis. TLS, HTTPS) aman dari semua aplikasi mempercayai
+  CA yang telah dipasang oleh sistem, dan aplikasi yang menargetkan API level 23
+  (Android M) ke bawah, juga mempercayai penyimpanan CA yang ditambahkan pengguna secara default. Aplikasi
+  bisa menyesuaikan koneksinya menggunakan {@code base-config} (untuk
+  penyesuaian lebar-aplikasi) atau {@code domain-config} (untuk penyesuaian
+  per-domain).
+</p>
+
+
+<h3 id="ConfigCustom">Mengonfigurasi CA Khusus</h3>
+
+<p>
+  Anggaplah Anda ingin menghubungkan ke host Anda yang menggunakan sertifikat
+  SSL yang ditandatangani sendiri atau ke host yang sertifikat SSL-nya dikeluarkan oleh CA non-publik
+  yang Anda percaya, seperti CA internal perusahaan Anda.
+</p>
+
+<p>
+  <code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;example.com&lt;/domain&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/my_ca"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+<p>
+  Menambahkan sertifikat CA yang ditandatangani sendiri atau sertifikat CA non-publik, dalam format PEM atau DER, ke
+  {@code res/raw/my_ca}.
+</p>
+
+
+<h3 id="LimitingCas">Membatasi Set CA Tepercaya</h3>
+
+<p>
+  Aplikasi yang tidak ingin mempercayai semua CA yang dipercaya oleh sistem
+  sebagai gantinya bisa menetapkan set CA sendiri yang telah dikurangi untuk dipercaya. Ini akan melindungi
+  aplikasi dari sertifikat palsu yang dikeluarkan oleh selain CA.
+</p>
+
+<p>
+  Konfigurasi untuk membatasi set CA tepercaya mirip dengan <a href="#TrustingACustomCa">mempercayai CA khusus</a> untuk domain tertentu selain
+  beberapa CA disediakan dalam sumber daya.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;secure.example.com&lt;/domain&gt;
+        &lt;domain includeSubdomains="true"&gt;cdn.example.com&lt;/domain&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/trusted_roots"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+<p>
+  Menambahkan CA tepercaya, dalam format PEM atau DER, ke {@code res/raw/trusted_roots}.
+  Perhatikan, jika menggunakan format PEM, file <em>hanya</em> boleh berisi data PEM
+  dan tidak ada teks tambahan. Anda juga bisa menyediakan beberapa elemen
+  <a href="#certificates"><code>&lt;certificates&gt;</code></a>
+sebagai ganti satu elemen.
+</p>
+
+
+<h3 id="TrustingAdditionalCas">
+  Mempercayai CA Tambahan
+</h3>
+
+<p>
+  Sebuah aplikasi mungkin perlu mempercayai CA tambahan yang tidak dipercaya oleh sistem,
+  hal ini bisa disebabkan karena sistem belum menyertakan CA atau CA tidak
+  memenuhi persyaratan untuk memasukkan ke dalam sistem Android. Aplikasi
+  bisa melakukannya dengan menetapkan beberapa sumber sertifikat untuk
+  konfigurasi.
+</p>
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;base-config&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/extracas"/&gt;
+            &lt;certificates src="system"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/base-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="TrustingDebugCa">Mengonfigurasi CA untuk Debug</h2>
+
+<p>
+  Saat men-debug aplikasi yang terhubung melalui HTTPS, Anda mungkin perlu
+  menghubungkan ke server pengembangan lokal, yang tidak memiliki sertifikat
+  SSL untuk server produksi Anda. Untuk mendukungnya tanpa
+  memodifikasi kode aplikasi, Anda bisa menetapkan CA hanya-debug
+  yang <i>hanya</i> dipercaya bila <a href="{@docRoot}guide/topics/manifest/application-element.html#debug">
+android:debuggable</a>
+  adalah {@code true} dengan menggunakan {@code debug-overrides}. Biasanya IDE dan alat
+  build menyetel flag ini secara otomatis untuk build non-rilis.
+</p>
+
+<p>
+  Ini lebih aman daripada kode kondisional biasa karena, sebagai tindakan
+  pencegahan keamanan, toko aplikasi tidak menerima aplikasi yang ditandai
+  bisa-di-debug.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;debug-overrides&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/debug_cas"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/debug-overrides&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="UsesCleartextTraffic">Berhenti dari Lalu Lintas Cleartext</h2>
+
+<p>
+  Aplikasi bermaksud menyambung ke tujuan hanya menggunakan koneksi
+ aman dapat memilih keluar dari dukungan cleartext (menggunakan protokol
+ HTTP yang tidak terenkripsi sebagai ganti HTTPS) ke tujuan tersebut. Opsi ini akan membantu mencegah
+  regresi tidak disengaja dalam aplikasi karena perubahan dalam URL yang disediakan oleh sumber-sumber
+  eksternal seperti server backend.
+  Lihat {@link android.security.NetworkSecurityPolicy#isCleartextTrafficPermitted
+  NetworkSecurityPolicy.isCleartextTrafficPermitted()} untuk detail selengkapnya.
+</p>
+
+<p>
+  Misalnya, aplikasi mungkin ingin memastikan semua koneksi ke {@code
+  secure.example.com} selalu dilakukan melalui HTTPS untuk melindungi lalu lintas sensitif
+  dari jaringan yang berbahaya.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config usesCleartextTraffic="false"&gt;
+        &lt;domain includeSubdomains="true"&gt;secure.example.com&lt;/domain&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="CertificatePinning">Menyematkan Sertifikat</h2>
+
+<p>
+  Biasanya aplikasi mempercayai semua CA yang telah terpasang. Jika salah satu dari CA ini
+  mengeluarkan sertifikat palsu, aplikasi akan berisiko terkena serangan
+  MiTM. Beberapa aplikasi memilih untuk membatasi set sertifikat yang mereka terima
+  baik dengan membatasi set CA yang mereka percaya atau dengan menyematkan sertifikat.
+</p>
+
+<p>
+  Penyematan sertifikat dilakukan dengan memberikan seperangkat sertifikat dengan hash
+  kunci publik (SubjectPublicKeyInfo pada sertifikat X.509). Rantai
+  sertifikat nanti hanya berlaku jika rantai sertifikat berisi setidaknya salah satu
+  dari kunci publik yang disematkan.
+</p>
+
+<p>
+  Perhatikan, saat menggunakan penyematan sertifikat, Anda harus selalu menyertakan kunci
+  cadangan sehingga jika Anda terpaksa beralih ke kunci baru, atau mengubah CA (saat
+  menyematkan ke sertifikat CA atau perantara CA tersebut), konektivitas
+  aplikasi Anda tidak terpengaruh. Jika tidak, Anda harus mendorong
+  pembaruan ke aplikasi tersebut untuk memulihkan konektivitas.
+</p>
+
+<p>
+  Selain itu dimungkinkan juga menyetel waktu habis masa berlaku untuk pin setelah
+  penyematan tidak dilakukan. Hal ini membantu mencegah masalah konektivitas dalam
+  aplikasi yang belum diperbarui. Akan tetapi, menyetel waktu kedaluwarsa
+  pada pin mungkin akan membuat penyematan bisa diabaikan.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;example.com&lt;/domain&gt;
+        &lt;pin-set expiration="2018-01-01"&gt;
+            &lt;pin digest="SHA-256"&gt;7HIpactkIAq2Y49orFOOQKurWxmmSFZhBCoQYcRhJ3Y=&lt;/pin&gt;
+            &lt;!-- backup pin --&gt
+            &lt;pin digest="SHA-256"&gt;fwza0LRMXouZHRC8Ei+4PyuldPDcf3UKgO/04cDM1oE=&lt;/pin&gt;
+        &lt;/pin-set&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="ConfigInheritance">Perilaku Pewarisan Konfigurasi</h2>
+
+<p>
+  Nilai yang tidak disetel dalam konfigurasi tertentu akan diwariskan. Perilaku ini memungkinkan konfigurasi
+  yang lebih kompleks sambil menjaga file konfigurasi tetap terbaca.
+</p>
+
+<p>
+  Jika nilai tidak disetel dalam entri tertentu maka nilai dari entri berikutnya yang lebih
+  umum akan digunakan. Nilai yang tidak disetel dalam {@code domain-config} akan
+  diambil dari {@code domain-config} induk, jika tersarang, atau dari {@code
+  base-config} jika tidak. Nilai yang tidak disetel dalam {@code base-config} akan menggunakan
+  nilai default platform.
+</p>
+
+<p>
+  Misalnya pertimbangkan, bila semua koneksi ke subdomain {@code
+  example.com} harus menggunakan set CA khusus. Selain itu, lalu lintas cleartext ke
+  domain ini diizinkan <em>kecuali</em> saat menghubungkan ke {@code
+  secure.example.com}. Dengan menyarangkan konfigurasi untuk {@code
+  secure.example.com} dalam konfigurasi untuk {@code example.com},
+  {@code trust-anchors} tidak perlu digandakan.
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;example.com&lt;/domain&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/my_ca"/&gt;
+        &lt;/trust-anchors&gt;
+        &lt;domain-config cleartextTrafficPermitted="false"&gt;
+            &lt;domain includeSubdomains="true"&gt;secure.example.com&lt;/domain&gt;
+        &lt;/domain-config&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="FileFormat">Format File Konfigurasi</h2>
+
+<p>
+  Fitur Network Security Configuration menggunakan format file XML.
+  Struktur keseluruhan file ditampilkan dalam contoh kode berikut:
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;base-config&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="..."/&gt;
+            ...
+        &lt;/trust-anchors&gt;
+    &lt;/base-config&gt;
+
+    &lt;domain-config&gt;
+        &lt;domain&gt;android.com&lt;/domain&gt;
+        ...
+        &lt;trust-anchors&gt;
+            &lt;certificates src="..."/&gt;
+            ...
+        &lt;/trust-anchors&gt;
+        &lt;pin-set&gt;
+            &lt;pin digest="..."&gt;...&lt;/pin&gt;
+            ...
+        &lt;/pin-set&gt;
+    &lt;/domain-config&gt;
+    ...
+    &lt;debug-overrides&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="..."/&gt;
+            ...
+        &lt;/trust-anchors&gt;
+    &lt;/debug-overrides&gt;
+&lt;/network-security-config&gt;
+</pre>
+
+<p>
+  Bagian berikut menjelaskan sintaks dan detail lainnya dari format
+  file.
+</p>
+
+<h3 id="network-security-config">
+  &lt;network-security-config&gt;
+</h3>
+
+<dl class="xml">
+  <dt>
+    bisa berisi:
+  </dt>
+
+  <dd>
+    0 atau 1 <code><a href="#base-config">&lt;base-config&gt;</a></code><br>
+    Sejumlah <code><a href=
+    "#domain-config">&lt;domain-config&gt;</a></code><br>
+    0 atau 1 <code><a href="#debug-overrides">&lt;debug-overrides&gt;</a></code>
+  </dd>
+</dl>
+
+<h3 id="base-config">
+  &lt;base-config&gt;
+</h3>
+
+<dl class="xml">
+  <dt>
+    sintaks:
+  </dt>
+</dl>
+
+<pre class="stx">
+&lt;base-config <a href=
+"#usesCleartextTraffic">usesCleartextTraffic</a>=["true" | "false"]&gt;
+    ...
+&lt;/base-config&gt;
+</pre>
+<dl class="xml">
+  <dt>
+    bisa berisi:
+  </dt>
+
+  <dd>
+    <code><a href="#trust-anchors">&lt;trust-anchors&gt;</a></code>
+  </dd>
+
+  <dt>
+    keterangan:
+  </dt>
+
+  <dd>
+    Konfigurasi default yang digunakan oleh semua koneksi yang tujuannya tidak
+    tercakup oleh <a href="#domain-config"><code>domain-config</code></a>.
+
+<p>
+  Nilai yang tidak disetel akan menggunakan nilai default platform. Konfigurasi
+  default untuk aplikasi yang menargetkan API level 24 ke atas:
+</p>
+
+<pre>
+&lt;base-config usesCleartextTraffic="true"&gt;
+    &lt;trust-anchors&gt;
+        &lt;certificates src="system" /&gt;
+    &lt;/trust-anchors&gt;
+&lt;/base-config&gt;
+</pre>
+Konfigurasi default untuk aplikasi yang menargetkan API level 23 ke bawah:
+<pre>
+&lt;base-config usesCleartextTraffic="true"&gt;
+    &lt;trust-anchors&gt;
+        &lt;certificates src="system" /&gt;
+        &lt;certificates src="user" /&gt;
+    &lt;/trust-anchors&gt;
+&lt;/base-config&gt;
+</pre>
+
+  </dd>
+</dl>
+
+<h3 id="domain-config">&lt;domain-config&gt;</h3>
+<dl class="xml">
+<dt>sintaks:</dt>
+<dd>
+<pre class="stx">&lt;domain-config <a href="#usesCleartextTraffic">usesCleartextTraffic</a>=["true" | "false"]&gt;
+    ...
+&lt;/domain-config&gt;</pre>
+</dd>
+
+<dt>Bisa Berisi:</dt>
+
+<dd>
+1 atau beberapa <code><a href="#domain">&lt;domain&gt;</a></code>
+<br/>0 atau 1 <code><a href="#trust-anchors">&lt;trust-anchors&gt;</a></code>
+<br/>0 atau 1 <code><a href="#pin-set">&lt;pin-set&gt;</code></a>
+<br/>Sejumlah <code>&lt;domain-config&gt;</code> tersarang</dd>
+
+<dt>Keterangan</dt>
+<dd>Konfigurasi yang digunakan untuk koneksi ke tujuan tertentu seperti didefinisikan oleh elemen {@code domain}.
+
+<p>Perhatikan, jika beberapa elemen {@code domain-config} mencakup suatu tujuan, konfigurasi dengan aturan domain paling spesifik (terpanjang) yang cocok
+akan digunakan.</p></dd>
+</dl>
+
+
+<h3 id="domain">&lt;domain&gt;</h3>
+
+<dl class="xml">
+  <dt>
+    sintaks:
+  </dt>
+
+  <dd>
+    <pre class="stx">
+&lt;domain includeSubdomains=["true" | "false"]&gt;example.com&lt;/domain&gt;
+</pre>
+  </dd>
+
+  <dt>
+    Atribut:
+  </dt>
+
+  <dd>
+    <dl class="attr">
+      <dt>
+        {@code includeSubdomains}
+      </dt>
+
+      <dd>
+        Jika {@code "true"} maka aturan domain ini akan dicocokkan dengan domain dan semua
+        subdomain, termasuk subdomain dari subdomain, jika tidak peraturan hanya
+        diterapkan pada kecocokan yang persis tepat.
+      </dd>
+    </dl>
+  </dd>
+
+  <dt>
+    Keterangan:
+  </dt>
+</dl>
+
+<h3 id="debug-overrides">&lt;debug-overrides&gt;</h3>
+
+<dl class="xml">
+  <dt>
+    sintaks:
+  </dt>
+
+  <dd>
+    <pre class="stx">
+&lt;debug-overrides&gt;
+    ...
+&lt;/debug-overrides&gt;
+</pre>
+  </dd>
+
+  <dt>
+    Bisa Berisi:
+  </dt>
+
+  <dd>
+    0 atau 1 <code><a href="#trust-anchors">&lt;trust-anchors&gt;</a></code>
+  </dd>
+
+  <dt>
+    Keterangan:
+  </dt>
+
+  <dd>
+    Pengesampingan yang akan diterapkan bila <a href="{@docRoot}guide/topics/manifest/application-element.html#debug">android:debuggable</a>
+    adalah {@code "true"} yang biasanya terjadi untuk build non-rilis
+    yang dihasilkan oleh alat IDE dan build. Trust-anchor yang ditetapkan dalam {@code
+    debug-overrides} akan ditambahkan ke semua konfigurasi lainnya dan penyematan
+    sertifikat tidak dilakukan bila rantai sertifikat server menggunakan satu dari
+    trust-anchor hanya-debug ini. Jika <a href="{@docRoot}guide/topics/manifest/application-element.html#debug">android:debuggable</a>
+    adalah {@code "false"} maka bagian ini akan diabaikan sepenuhnya.
+  </dd>
+</dl>
+
+<h3 id="trust-anchors">&lt;trust-anchors&gt;</h3>
+<dl class="xml">
+  <dt>
+    sintaks:
+  </dt>
+
+  <dd>
+    <pre class="stx">
+&lt;trust-anchors&gt;
+...
+&lt;/trust-anchors&gt;
+</pre>
+  </dd>
+
+  <dt>
+    Bisa Berisi:
+  </dt>
+
+  <dd>
+    Sejumlah <code><a href="#certificates">&lt;certificates&gt;</a></code>
+  </dd>
+
+  <dt>
+    Keterangan:
+  </dt>
+
+  <dd>
+    Set trust-anchor untuk koneksi aman.
+  </dd>
+</dl>
+
+
+<h3 id="certificates">&lt;certificates&gt;</h3>
+<dl class="xml">
+<dt>sintaks:</dt>
+<dd><pre class="stx">&lt;certificates src=["system" | "user" | "<i>raw resource</i>"]
+              overridePins=["true" | "false"] /&gt;
+</pre></dd>
+<dt>keterangan:</dt>
+<dd>Set sertifikat X.509 untuk elemen {@code trust-anchors}.</dd>
+
+<dt>atribut:</dt>
+<dd><dl class="attr">
+<dt>{@code src}</dt>
+<dd>
+Sumber sertifikat CA, bisa salah satu dari
+<ul>
+  <li>ID sumber daya mentah yang menunjuk ke file berisi sertifikat X.509.
+  Sertifikat harus dikodekan dalam format DER atau PEM. Dalam hal sertifikat
+  PEM, file <em>tidak boleh</em> berisi data tambahan non-PEM seperti
+  komentar.
+  </li>
+
+  <li>{@code "system"} untuk sertifikat CA sistem yang telah terpasang.
+  </li>
+
+  <li>{@code "user"} untuk sertifikat CA yang ditambahkan pengguna.
+  </li>
+</ul>
+</dd>
+
+<dt>{@code overridePins}</dt>
+<dd>
+  <p>
+    Menetapkan apakah CA dari sumber akan mengabaikan penyematan sertifikat. Jika {@code
+    "true"} kemudian rangkaian sertifikat melalui salah satu CA dari
+    sumber ini maka tidak dilakukan penyematan. Hal ini bisa berguna untuk debug CA
+    atau untuk mendukung dengan memungkinkan pengguna melakukan MiTM atas lalu lintas aman aplikasi Anda.
+  </p>
+
+  <p>
+    Default-nya adalah {@code "false"} kecuali jika ditetapkan dalam elemen {@code debug-overrides},
+    dalam hal demikian default-nya adalah {@code "true"}.
+  </p>
+</dd>
+</dl>
+</dd>
+
+
+<h3 id="pin-set">&lt;pin-set&gt;</h3>
+
+<dl class="xml">
+  <dt>
+    sintaks:
+  </dt>
+
+  <dd>
+<pre class="stx">
+&lt;pin-set expiration="date"&gt;
+...
+&lt;/pin-set&gt;
+</pre>
+  </dd>
+
+  <dt>
+    Bisa Berisi:
+  </dt>
+
+  <dd>
+    Sejumlah <code><a href="#pin">&lt;pin&gt;</a></code>
+  </dd>
+
+  <dt>
+    Keterangan:
+  </dt>
+
+  <dd>
+    Satu set pin kunci publik. Agar koneksi aman bisa dipercaya, salah satu
+    kunci publik dalam rantai kepercayaan harus berada dalam set pin. Lihat
+    <code><a href="#pin">&lt;pin&gt;</a></code> untuk mengetahui format pin.
+  </dd>
+
+  <dt>
+    Atribut:
+  </dt>
+
+  <dd>
+    <dl class="attr">
+      <dt>
+        {@code expiration}
+      </dt>
+
+      <dd>
+        Tanggal, dalam format {@code yyyy-MM-dd}, pada saat dan setelah pin
+        kedaluwarsa, sehingga menonaktifkan penyematan. Jika atribut tidak disetel maka
+        pin tidak kedaluwarsa.
+        <p>
+          Tanggal kedaluwarsa membantu mencegah masalah konektivitas di aplikasi yang
+          tidak mengambil pembaruan untuk set pin mereka, misalnya karena pengguna
+          menonaktifkan pembaruan aplikasi.
+        </p>
+      </dd>
+    </dl>
+  </dd>
+</dl>
+
+<h3 id="pin">&lt;pin&gt;</h3>
+<dl class="xml">
+  <dt>
+    sintaks:
+  </dt>
+
+  <dd>
+<pre class="stx">
+&lt;pin digest=["SHA-256"]&gt;base64 encoded digest of X.509
+    SubjectPublicKeyInfo (SPKI)&lt;/pin&gt;
+</pre>
+  </dd>
+
+  <dt>
+    Atribut:
+  </dt>
+
+  <dd>
+    <dl class="attr">
+      <dt>
+        {@code digest}
+      </dt>
+
+      <dd>
+        Algoritme intisari yang digunakan untuk menghasilkan pin. Saat ini, hanya
+        {@code "SHA-256"} yang didukung.
+      </dd>
+    </dl>
+  </dd>
+</dl>

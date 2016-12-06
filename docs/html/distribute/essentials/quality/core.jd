@@ -12,7 +12,7 @@ page.image=/distribute/images/core-quality-guidelines.jpg
         <li><a href="#listing">Google Play</a></li>
 
   </ol>
-  
+
   <h2>Testing</h2>
   <ol>
     <li><a href="#test-environment">Setting Up a Test Environment</a></li>
@@ -24,7 +24,7 @@ page.image=/distribute/images/core-quality-guidelines.jpg
     <li><a href="{@docRoot}distribute/essentials/quality/tablets.html">Tablet App Quality</a></li>
         <li><a href="{@docRoot}distribute/essentials/optimizing-your-app.html">Optimize Your App</a></li>
   </ol>
-  
+
 
 </div>
 </div>
@@ -85,7 +85,7 @@ page.image=/distribute/images/core-quality-guidelines.jpg
     <th style="width:54px;">
       ID
     </th>
-    
+
 
     <th>
       Description
@@ -186,7 +186,7 @@ page.image=/distribute/images/core-quality-guidelines.jpg
   <td>
     <p style="margin-bottom:.5em;">
     Notifications follow Android Design <a href=
-    "{@docRoot}design/patterns/notifications.html">guidelines</a>. In
+    "https://material.google.com/patterns/notifications.html">guidelines</a>. In
     particular:
     </p>
 

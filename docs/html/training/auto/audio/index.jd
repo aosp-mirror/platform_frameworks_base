@@ -596,7 +596,7 @@ href="https://www.youtube.com/watch?v=xc2HZSwPcwM">
 </a>
 <h2 id="support_voice">Support Voice Actions</h2>
 
-<p>To reduce driver distractions, you can add voice actions in your audio playback app. With voice
+<p>To reduce driver distractions, you must add voice actions in your audio playback app. With voice
 action support, users can launch your app and play audio by providing voice input on Auto screens.
 If your audio playback app is already active and the user says
 <i>“Play a song”</i>, the system starts playing music without requiring the user to look at or touch

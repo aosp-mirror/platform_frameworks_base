@@ -201,7 +201,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
                 createContextThemeWrapper);
 
         mWindow.alwaysReadCloseOnTouchAttr();
-        mAlert = new AlertController(getContext(), this, getWindow());
+        mAlert = AlertController.create(getContext(), this, getWindow());
     }
 
     static int resolveDialogTheme(Context context, int themeResId) {

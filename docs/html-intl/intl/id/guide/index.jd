@@ -1,0 +1,74 @@
+page.title=Pengantar Android
+
+@jd:body
+
+
+<div class="sidebox" style="width:220px"><!-- width to match col-4 below -->
+<p>Untuk mempelajari cara kerja aplikasi, mulailah dengan
+<a href="{@docRoot}guide/components/fundamentals.html">Dasar-Dasar Aplikasi</a>.</p>
+<p>Untuk langsung memulai pemrograman, bacalah <a href="{@docRoot}training/basics/firstapp/index.html">Membangun Aplikasi Pertama Anda.</a></p>
+</div>
+
+<p>Android menyediakan kerangka kerja aplikasi yang kaya dan memungkinkan Anda membangun aplikasi dan permainan
+inovatif untuk perangkat seluler di lingkungan bahasa pemrograman Java. Dokumen yang tercantum di navigasi
+sebelah kiri menyediakan detail tentang cara membangun aplikasi menggunakan berbagai API Android.</p>
+
+<p>Jika Anda masih baru dengan pengembangan Android, Anda perlu memahami
+konsep dasar berikut mengenai kerangka kerja aplikasi Android:</p>
+
+
+<div class="landing-banner">
+
+<div class="col-6">
+
+<h4>Aplikasi menyediakan beberapa titik masuk</h4>
+
+<p>Aplikasi Android dibangun sebagai kombinasi beragam komponen yang bisa dipanggil
+satu per satu. Misalnya, satu <em>aktivitas</em> individual menyediakan satu
+layar untuk antarmuka pengguna, dan <em>layanan</em> yang secara terpisah melakukan
+tugas di latar belakang.</p>
+
+<p>Dari satu komponen Anda dapat memulai komponen lainnya menggunakan <em>intent</em>. Anda bahkan dapat memulai
+satu komponen dalam aplikasi berbeda, seperti aktivitas dalam aplikasi peta untuk menampilkan alamat. Model ini
+menyediakan beberapa titik masuk untuk aplikasi tunggal dan memungkinkan setiap aplikasi untuk berfungsi sebagai "default"
+pengguna bagi tindakan yang dapat dipanggil aplikasi lain.</p>
+
+
+<p><b>Ketahui selengkapnya:</b></p>
+<ul class="nolist">
+<li><a href="{@docRoot}guide/components/fundamentals.html">Dasar-Dasar Aplikasi</a>
+<li><a href="{@docRoot}guide/components/intents-filters.html">Intent dan Filter Intent</a>
+<li><a href="{@docRoot}guide/components/activities.html">Aktivitas</a>
+</ul>
+
+</div>
+
+
+<div class="col-6">
+
+<h4>Aplikasi beradaptasi dengan perangkat berbeda</h4>
+
+<p>Android menyediakan kerangka kerja aplikasi adaptif yang memungkinkan Anda menyediakan sumber daya unik
+bagi konfigurasi perangkat yang berbeda-beda. Misalnya, Anda bisa membuat berbagai file layout
+XML untuk ukuran layar yang berbeda-beda dan sistem akan menentukan
+layout yang akan diterapkan berdasarkan ukuran layar perangkat yang ada saat ini.</p>
+
+<p>Anda dapat melakukan query ketersediaan fitur perangkat saat dijalankan (runtime) jika ada fitur aplikasi yang memerlukan
+perangkat keras spesifik seperti kamera. Jika diperlukan, Anda juga bisa mendeklarasikan fitur yang dibutuhkan aplikasi
+agar pasar aplikasi seperti Google Play Store tidak mengizinkan instalasi pada perangkat yang tidak
+mendukung fitur itu.</p>
+
+
+<p><b>Ketahui selengkapnya:</b></p>
+<ul class="nolist">
+<li><a href="{@docRoot}guide/practices/compatibility.html">Kompatibilitas Perangkat</a>
+<li><a href="{@docRoot}guide/topics/resources/overview.html">Ikhtisar Sumber Daya</a>
+<li><a href="{@docRoot}guide/topics/ui/overview.html">Ikhtisar Antarmuka Pengguna</a>
+</ul>
+
+</div>
+
+</div><!-- end landing-banner -->
+
+
+

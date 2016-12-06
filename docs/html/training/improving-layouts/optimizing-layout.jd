@@ -145,7 +145,7 @@ href="http://tools.android.com/tips/lint-checks">rules</a> are:</p>
 <li>Deep layouts - Layouts with too much nesting are bad for performance. Consider using flatter layouts such as {@link android.widget.RelativeLayout} or {@link android.widget.GridLayout} to improve performance. The default maximum depth is 10.</li>
 </ul>
 
-<p>Another benefit of Lint is that it is integrated into Android Studio. Lint automatically runs 
+<p>Another benefit of Lint is that it is integrated into Android Studio. Lint automatically runs
 whenever you compile your program. With Android Studio, you can also run lint inspections for a
 specific build variant, or for all build variants. </p>
 
@@ -153,7 +153,7 @@ specific build variant, or for all build variants. </p>
 <strong>File&gt;Settings&gt;Project Settings</strong> option. The Inspection Configuration page
 appears with the supported inspections.</p>
 <p><img src="{@docRoot}images/tools/studio-inspections-config.png" alt="" /> </p>
-<p class="img-caption"><strong>Figure 5.</strong> Inspection Configuration</p> 
+<p class="img-caption"><strong>Figure 5.</strong> Inspection Configuration</p>
 
 <p>Lint has the ability to automatically fix some issues, provide suggestions for others and jump
 directly to the offending code for review.</p>

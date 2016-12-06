@@ -81,7 +81,7 @@ JUnit 4 test classes and using JUnit 4 assertion methods, see
 <a href="{@docRoot}training/testing/unit-testing/instrumented-unit-tests.html#build">
 Create an Instrumented Unit Test Class</a>.</p>
 
-<p>To create an integration test for your service, add the {@code &#64;RunWith(AndroidJUnit4.class)}
+<p>To create an integration test for your service, add the {@code @RunWith(AndroidJUnit4.class)}
 annotation at the beginning of your test class definition. You also need to specify the
 <a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">
 {@code AndroidJUnitRunner}</a> class that the Android Testing Support Library provides as your
@@ -91,7 +91,7 @@ Run Instrumented Unit Tests</a>.</p>
 
 <p>Next, create a
 <a href="{@docRoot}reference/android/support/test/rule/ServiceTestRule.html">ServiceTestRule</a>
-instance in your test by using the {@code &#64;Rule} annotation.</p>
+instance in your test by using the {@code @Rule} annotation.</p>
 
 <pre>
 &#64;Rule

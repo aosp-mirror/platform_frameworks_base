@@ -277,7 +277,7 @@ page.title=创建内容提供程序
 
 </p>
 <p>
-    
+
     <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">内容提供程序基础知识</a>主题中描述了内容 URI 的基础知识。
 
 </p>
@@ -569,7 +569,7 @@ public class ExampleProvider extends ContentProvider {
 </ul>
 <h3 id="Query">实现 query() 方法</h3>
 <p>
-    
+
     {@link android.content.ContentProvider#query(Uri, String[], String, String[], String)
     ContentProvider.query()} 方法必须返回 {@link android.database.Cursor} 对象。如果失败，则会引发 {@link java.lang.Exception}。
 如果您使用 SQLite 数据库作为数据存储，则只需返回由 {@link android.database.sqlite.SQLiteDatabase} 类的其中一个
@@ -831,7 +831,7 @@ vnd.android.cursor.<strong>item</strong>/vnd.com.example.provider.table1
 </pre>
 <h3 id="FileMIMETypes">文件的 MIME 类型</h3>
 <p>
-    如果您的提供程序提供文件，请实现 
+    如果您的提供程序提供文件，请实现
     {@link android.content.ContentProvider#getStreamTypes(Uri, String) getStreamTypes()}。
     该方法会为您的提供程序可以为给定内容 URI 返回的文件返回一个 MIME 类型 {@link java.lang.String} 数组。您应该通过 MIME 类型过滤器参数过滤您提供的 MIME 类型，以便只返回客户端想处理的那些 MIME 类型。
 

@@ -1,0 +1,85 @@
+page.title=샘플
+page.tags="preview", "samples", "android"
+page.image=images/cards/card-n-samples_2x.png
+@jd:body
+
+<p>
+  Android N용으로 다음과 같은 코드 샘플이 제공됩니다. Android Studio에서 샘플을 다운로드하려면 <b>File &gt; Import Samples</b> 메뉴 옵션을 선택합니다.
+
+
+</p>
+
+<p class="note">
+  <strong>참고:</strong> 이러한 다운로드 가능 프로젝트는 Gradle 및 Android Studio와 함께 사용하도록 고안되었습니다.
+
+</p>
+
+
+<h3 id="mw">다중 창 플레이그라운드</h3>
+<img src="{@docRoot}images/android-7.0/sample-multiwindow.png" style="float: left; padding-right: 0.5em" height="250" width="156" />
+<p>
+  이 샘플은 앱으로 다중 창 사용자 인터페이스를 활용하는
+방법을 보여줍니다.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-MultiWindowPlayground">
+GitHub에서 가져오기</a>
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="an">활성 알림</h3>
+<img src="{@docRoot}images/android-7.0/sample-activenotifications.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
+<p>
+  이것은 NotificationCompat를 사용하여 알림을 발송하는 간단한 서비스를 보여주는 기존 샘플입니다.
+ 각각의 읽지 않은 사용자 대화는 고유한 알림으로 발송됩니다.
+
+</p>
+<p>
+  이 샘플은 Android N에서 사용할 수 있는 새로운 알림 기능을
+활용하도록 업데이트되었습니다.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-ActiveNotifications">
+GitHub에서 가져오기</a>
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="ms">메시징 서비스</h3>
+<img src="{@docRoot}images/android-7.0/sample-messagingservice.png" style="float: left; padding-right: 0.5em" height="250" width="150" />
+<p>
+  NotificationManager를
+사용하여 현재 애플리케이션이 표시할 알림 개수를 지시하는
+방법을 보여주는 기존 샘플입니다.
+</p>
+<p>
+  이 샘플은 Android N에서 사용할 수 있는 새로운 알림 기능을
+활용하도록 업데이트되었습니다.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-MessagingService">
+GitHub에서 가져오기</a>
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="fbe">직접 부팅</h3>
+<img src="{@docRoot}images/android-7.0/sample-directboot.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
+<p>
+  이 샘플은 기기 암호화된 저장소에 데이터를 저장하고 액세스하는 방법을 보여줍니다.
+이 저장소는 기기가 부팅된 동안 항상 사용할 수 있습니다.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-DirectBoot">
+GitHub에서 가져오기</a>
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="sda">범위가 지정된 디렉터리 액세스</h3>
+<img src="{@docRoot}images/android-7.0/sample-scopeddirectoryaccess.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
+<p>
+  이 샘플은 적은 권한을 요구하면서도
+특정 디렉터리에서 데이터를 읽고 쓰는 방법을 보여줍니다.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-ScopedDirectoryAccess">
+GitHub에서 가져오기</a>
+</p>

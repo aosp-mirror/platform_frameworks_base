@@ -57,7 +57,7 @@ hoạt động có thể bắt đầu một hoạt động khác để thực hi
 mới bắt đầu, hoạt động trước đó sẽ bị dừng lại, nhưng hệ thống vẫn giữ nguyên hoạt động
 trong một ngăn xếp ("back stack"). Khi một hoạt động mới bắt đầu, nó được đẩy lên ngăn xếp và
 chiếm lấy tiêu điểm của người dùng. Ngăn xếp sẽ tuân theo cơ chế xếp chồng cơ bản "vào cuối, ra đầu",
-vì thế, khi người dùng kết thúc hoạt động hiện tại và nhấn nút <em>Quay lại</em>, nó 
+vì thế, khi người dùng kết thúc hoạt động hiện tại và nhấn nút <em>Quay lại</em>, nó
 sẽ được đẩy ra khỏi ngăn xếp (và bị hủy) và hoạt động trước đó sẽ tiếp tục. (Ngăn xếp được
 đề cập kỹ hơn trong tài liệu <a href="{@docRoot}guide/components/tasks-and-back-stack.html">Tác vụ
 và Ngăn Xếp</a>.)</p>
@@ -139,7 +139,7 @@ setContentView()}.</p>
 <h3 id="Declaring">Khai báo hoạt động trong bản kê khai</h3>
 
 <p>Bạn phải khai báo hoạt động của mình trong tệp bản kê khai để hoạt động
-có thể truy cập được vào hệ thống. Để khai báo hoạt động của mình, hãy mở tệp bản kê khai của bạn và thêm một phần tử  <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> 
+có thể truy cập được vào hệ thống. Để khai báo hoạt động của mình, hãy mở tệp bản kê khai của bạn và thêm một phần tử  <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
 làm con của phần tử <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
 . Ví dụ:</p>
 
@@ -161,7 +161,7 @@ bạn phát hành ứng dụng của mình, bạn không nên thay đổi tên n
 một số tính năng, chẳng hạn như các lối tắt của ứng dụng (hãy đọc bài đăng trên blog, <a href="http://android-developers.blogspot.com/2011/06/things-that-cannot-change.html">Những Điều
 Không Thay Đổi Được</a>).</p>
 
-<p>Xem tài liệu tham khảo phần tử <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> 
+<p>Xem tài liệu tham khảo phần tử <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
 để biết thêm thông tin về việc khai báo hoạt động của bạn trong bản kê khai.</p>
 
 
@@ -200,7 +200,7 @@ tự mình bắt đầu chúng bằng cách sử dụng các ý định rõ ràn
 <p>Tuy nhiên, nếu bạn muốn hoạt động của mình phản hồi lại những ý định ngầm mà được chuyển giao từ
 các ứng dụng khác (và chính bạn), thì bạn phải định nghĩa các bộ lọc ý định bổ sung cho hoạt động
 của mình. Với mỗi loại ý định mà bạn muốn phản hồi, bạn phải nêu một <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
-&lt;intent-filter&gt;}</a> bao gồm một phần tử 
+&lt;intent-filter&gt;}</a> bao gồm một phần tử
 <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
 &lt;action&gt;}</a> và, không bắt buộc, một phần tử <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
 &lt;category&gt;}</a> và/hoặc một phần tử <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
@@ -324,7 +324,7 @@ finish()} của nó. Bạn cũng có thể tắt một hoạt động riêng mà
 bằng cách sử dụng những phương pháp này. Như đề cập trong phần sau về vòng đời của hoạt động, hệ thống
 Android quản lý tuổi thọ của một hoạt động cho bạn, vì vậy bạn không cần kết thúc các hoạt động
 của chính mình. Việc gọi những phương pháp này có thể ảnh hưởng tiêu cực tới trải nghiệm người dùng
-kỳ vọng và chỉ nên được sử dụng khi bạn tuyệt đối không muốn người dùng quay lại thực thể này của 
+kỳ vọng và chỉ nên được sử dụng khi bạn tuyệt đối không muốn người dùng quay lại thực thể này của
 hoạt động.</p>
 
 
@@ -350,7 +350,7 @@ che toàn bộ màn hình. Trạng thái tạm dừng hoàn toàn đang hoạt �
 trình quản lý cửa sổ), nhưng có thể bị hệ thống tắt bỏ trong trường hợp bộ nhớ cực kỳ thấp.</dd>
 
   <dt><i>Dừng</i></dt>
-    <dd>Hoạt động bị che khuất hoàn toàn bởi một hoạt động khác (hoạt động hiện đang 
+    <dd>Hoạt động bị che khuất hoàn toàn bởi một hoạt động khác (hoạt động hiện đang
 “dưới nền"). Hoạt động dừng cũng vẫn đang hoạt động ({@link android.app.Activity}
 đối tượng được giữ lại trong bộ nhớ, nó duy trì tất cả thông tin về trạng thái và thành viên, nhưng <em>không</em>
 gắn với trình quản lý cửa sổ). Tuy nhiên, hoạt động không còn hiển thị với người dùng nữa và hệ thống
@@ -608,7 +608,7 @@ android.app.Activity#onSaveInstanceState onSaveInstanceState()}.</p>
 
 <p>Hệ thống gọi {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()}
 trước khi khiến hoạt động dễ bị hủy. Hệ thống chuyển cho phương pháp này
-một {@link android.os.Bundle} trong đó bạn có thể lưu 
+một {@link android.os.Bundle} trong đó bạn có thể lưu
 thông tin trạng thái về hoạt động như cặp tên giá trị, bằng cách sử dụng các phương pháp như {@link
 android.os.Bundle#putString putString()} và {@link
 android.os.Bundle#putInt putInt()}. Sau đó, nếu hệ thống tắt bỏ tiến trình ứng dụng của bạn

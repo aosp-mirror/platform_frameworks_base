@@ -74,7 +74,7 @@ screens.</p>
 transition from Android 1.5 to 1.6, when support for multiple screens was first introduced. You
 should not use it.</p>
   </dd>
-  
+
   <dt><a name="small"></a>{@code android:smallScreens}</dt>
   <dd>Indicates whether the application supports smaller screen form-factors.
      A small screen is defined as one with a smaller aspect ratio than
@@ -84,14 +84,14 @@ should not use it.</p>
 the platform can do to make such an application work on a smaller screen. This is {@code "true"} by
 default.
   </dd>
-  
+
   <dt><a name="normal"></a>{@code android:normalScreens}</dt>
   <dd>Indicates whether an application supports the "normal" screen
      form-factors.  Traditionally this is an HVGA medium density
      screen, but WQVGA low density and WVGA high density are also
      considered to be normal.  This attribute is "true" by default.
   </dd>
-  
+
   <dt><a name="large"></a>{@code android:largeScreens}</dt>
   <dd>Indicates whether the application supports larger screen form-factors.
      A large screen is defined as a screen that is significantly larger
@@ -116,7 +116,7 @@ generally enable <a href="{@docRoot}guide/practices/screen-compat-mode.html">scr
 compatibility mode</a>.</p>
      <p>This attribute was introduced in API level 9.</p>
   </dd>
-  
+
   <dt><a name="any"></a>{@code android:anyDensity}</dt>
   <dd>Indicates whether the application includes resources to accommodate any screen
      density.
@@ -127,14 +127,14 @@ is if your app directly manipulates bitmaps (see the <a
 href="{@docRoot}guide/practices/screens_support.html#DensityConsiderations">Supporting Multiple
 Screens</a> document for more information).</p>
   </dd>
-  
+
   <dt id="requiresSmallest">{@code android:requiresSmallestWidthDp}</dt>
   <dd>Specifies the minimum smallestWidth required. The smallestWidth is the shortest dimension of
 the screen space (in {@code dp} units) that must be available to your application UI&mdash;that is,
 the shortest of the available screen's two dimensions. So, in order for a device to be considered
 compatible with your application, the device's smallestWidth must be equal to or greater than this
 value. (Usually, the value you supply for this is the "smallest width" that your layout supports,
-regardless of the screen's current orientation.) 
+regardless of the screen's current orientation.)
 
   <p>For example, a typical handset screen has a smallestWidth of 320dp, a 7" tablet has a
 smallestWidth of 600dp, and a 10" tablet has a smallestWidth of 720dp. These values are generally
@@ -209,7 +209,7 @@ screens with a 320dp width, so screen compatibility mode is not applied if your 
 android:largestWidthLimitDp} is larger than 320.</p>
      <p>This attribute was introduced in API level 13.</p>
   </dd>
-  
+
 
 </dl></dd>
 

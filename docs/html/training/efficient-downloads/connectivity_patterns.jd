@@ -26,7 +26,7 @@ previous.link=redundant_redundant.html
 </div>
 
 <p>When it comes to impact on battery life, not all connection types are created equal. Not only does the Wi-Fi radio use significantly less battery than its wireless radio counterparts, but the radios used in different wireless radio technologies have different battery implications.</p>
- 
+
 <h2 id="WiFi">Use Wi-Fi</h2>
 
 <p>In most cases a Wi-Fi radio will offer greater bandwidth at a significantly lower battery cost. As a result, you should endeavor to perform data transfers when connected over Wi-Fi whenever possible.</p>
@@ -50,22 +50,22 @@ previous.link=redundant_redundant.html
 
 TelephonyManager tm =
   (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
-  
+
 NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
- 
+
 int PrefetchCacheSize = DEFAULT_PREFETCH_CACHE;
- 
+
 switch (activeNetwork.getType()) {
-  case (ConnectivityManager.TYPE_WIFI): 
+  case (ConnectivityManager.TYPE_WIFI):
     PrefetchCacheSize = MAX_PREFETCH_CACHE; break;
   case (ConnectivityManager.TYPE_MOBILE): {
     switch (tm.getNetworkType()) {
-      case (TelephonyManager.NETWORK_TYPE_LTE | 
-            TelephonyManager.NETWORK_TYPE_HSPAP): 
+      case (TelephonyManager.NETWORK_TYPE_LTE |
+            TelephonyManager.NETWORK_TYPE_HSPAP):
         PrefetchCacheSize *= 4;
         break;
-      case (TelephonyManager.NETWORK_TYPE_EDGE | 
-            TelephonyManager.NETWORK_TYPE_GPRS): 
+      case (TelephonyManager.NETWORK_TYPE_EDGE |
+            TelephonyManager.NETWORK_TYPE_GPRS):
         PrefetchCacheSize /= 2;
         break;
       default: break;

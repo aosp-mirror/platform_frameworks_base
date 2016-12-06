@@ -248,6 +248,13 @@ public class RecentsTaskLoadPlan {
         return mStack;
     }
 
+    /**
+     * Returns the raw list of recent tasks.
+     */
+    public List<ActivityManager.RecentTaskInfo> getRawTasks() {
+        return mRawTasks;
+    }
+
     /** Returns whether there are any tasks in any stacks. */
     public boolean hasTasks() {
         if (mStack != null) {

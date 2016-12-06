@@ -51,7 +51,7 @@ public class SurfaceControl {
 
     private static native void nativeSetLayer(long nativeObject, int zorder);
     private static native void nativeSetPosition(long nativeObject, float x, float y);
-    private static native void nativeSetPositionAppliesWithResize(long nativeObject);
+    private static native void nativeSetGeometryAppliesWithResize(long nativeObject);
     private static native void nativeSetSize(long nativeObject, int w, int h);
     private static native void nativeSetTransparentRegionHint(long nativeObject, Region region);
     private static native void nativeSetAlpha(long nativeObject, float alpha);
@@ -82,6 +82,10 @@ public class SurfaceControl {
             IBinder displayToken);
     private static native int nativeGetActiveConfig(IBinder displayToken);
     private static native boolean nativeSetActiveConfig(IBinder displayToken, int id);
+    private static native int[] nativeGetDisplayColorModes(IBinder displayToken);
+    private static native int nativeGetActiveColorMode(IBinder displayToken);
+    private static native boolean nativeSetActiveColorMode(IBinder displayToken,
+            int colorMode);
     private static native void nativeSetDisplayPowerMode(
             IBinder displayToken, int mode);
     private static native void nativeDeferTransactionUntil(long nativeObject,
@@ -89,6 +93,8 @@ public class SurfaceControl {
     private static native void nativeSetOverrideScalingMode(long nativeObject,
             int scalingMode);
     private static native IBinder nativeGetHandle(long nativeObject);
+    private static native boolean nativeGetTransformToDisplayInverse(long nativeObject);
+
     private static native Display.HdrCapabilities nativeGetHdrCapabilities(IBinder displayToken);
 
 
@@ -393,6 +399,10 @@ public class SurfaceControl {
         return nativeGetHandle(mNativeObject);
     }
 
+    public boolean getTransformToDisplayInverse() {
+        return nativeGetTransformToDisplayInverse(mNativeObject);
+    }
+
     /** flag the transaction as an animation */
     public static void setAnimationTransaction() {
         nativeSetAnimationTransaction();
@@ -409,13 +419,15 @@ public class SurfaceControl {
     }
 
     /**
-     * If the size changes in this transaction, position updates specified
+     * If the buffer size changes in this transaction, position and crop updates specified
      * in this transaction will not complete until a buffer of the new size
-     * arrives.
+     * arrives. As transform matrix and size are already frozen in this fashion,
+     * this enables totally freezing the surface until the resize has completed
+     * (at which point the geometry influencing aspects of this transaction will then occur)
      */
-    public void setPositionAppliesWithResize() {
+    public void setGeometryAppliesWithResize() {
         checkNotReleased();
-        nativeSetPositionAppliesWithResize(mNativeObject);
+        nativeSetGeometryAppliesWithResize(mNativeObject);
     }
 
     public void setSize(int w, int h) {
@@ -539,7 +551,6 @@ public class SurfaceControl {
         public boolean secure;
         public long appVsyncOffsetNanos;
         public long presentationDeadlineNanos;
-        public int colorTransform;
 
         public PhysicalDisplayInfo() {
         }
@@ -563,8 +574,7 @@ public class SurfaceControl {
                     && yDpi == other.yDpi
                     && secure == other.secure
                     && appVsyncOffsetNanos == other.appVsyncOffsetNanos
-                    && presentationDeadlineNanos == other.presentationDeadlineNanos
-                    && colorTransform == other.colorTransform;
+                    && presentationDeadlineNanos == other.presentationDeadlineNanos;
         }
 
         @Override
@@ -582,7 +592,6 @@ public class SurfaceControl {
             secure = other.secure;
             appVsyncOffsetNanos = other.appVsyncOffsetNanos;
             presentationDeadlineNanos = other.presentationDeadlineNanos;
-            colorTransform = other.colorTransform;
         }
 
         // For debugging purposes
@@ -591,8 +600,7 @@ public class SurfaceControl {
             return "PhysicalDisplayInfo{" + width + " x " + height + ", " + refreshRate + " fps, "
                     + "density " + density + ", " + xDpi + " x " + yDpi + " dpi, secure " + secure
                     + ", appVsyncOffset " + appVsyncOffsetNanos
-                    + ", bufferDeadline " + presentationDeadlineNanos
-                    + ", colorTransform " + colorTransform + "}";
+                    + ", bufferDeadline " + presentationDeadlineNanos + "}";
         }
     }
 
@@ -622,6 +630,27 @@ public class SurfaceControl {
             throw new IllegalArgumentException("displayToken must not be null");
         }
         return nativeSetActiveConfig(displayToken, id);
+    }
+
+    public static int[] getDisplayColorModes(IBinder displayToken) {
+        if (displayToken == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+        return nativeGetDisplayColorModes(displayToken);
+    }
+
+    public static int getActiveColorMode(IBinder displayToken) {
+        if (displayToken == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+        return nativeGetActiveColorMode(displayToken);
+    }
+
+    public static boolean setActiveColorMode(IBinder displayToken, int colorMode) {
+        if (displayToken == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+        return nativeSetActiveColorMode(displayToken, colorMode);
     }
 
     public static void setDisplayProjection(IBinder displayToken,

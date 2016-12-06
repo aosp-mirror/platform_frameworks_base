@@ -54,6 +54,46 @@ WeakResourceFilter::parse(const String8& str)
     return NO_ERROR;
 }
 
+// Returns true if the locale script of the config should be considered matching
+// the locale script of entry.
+//
+// If both the scripts are empty, the scripts are considered matching for
+// backward compatibility reasons.
+//
+// If only one script is empty, we try to compute it based on the provided
+// language and country. If we could not compute it, we assume it's either a
+// new language we don't know about, or a private use language. We return true
+// since we don't know any better and they might as well be a match.
+//
+// Finally, when we have two scripts (one of which could be computed), we return
+// true if and only if they are an exact match.
+inline bool
+scriptsMatch(const ResTable_config& config, const ResTable_config& entry) {
+    const char* configScript = config.localeScript;
+    const char* entryScript = entry.localeScript;
+    if (configScript[0] == '\0' && entryScript[0] == '\0') {
+        return true;  // both scripts are empty. We match for backward compatibility reasons.
+    }
+
+    char scriptBuffer[sizeof(config.localeScript)];
+    if (configScript[0] == '\0') {
+        localeDataComputeScript(scriptBuffer, config.language, config.country);
+        if (scriptBuffer[0] == '\0') {  // We can't compute the script, so we match.
+            return true;
+        }
+        configScript = scriptBuffer;
+    } else if (entryScript[0] == '\0') {
+        localeDataComputeScript(
+                scriptBuffer, entry.language, entry.country);
+        if (scriptBuffer[0] == '\0') {  // We can't compute the script, so we match.
+            return true;
+        }
+        entryScript = scriptBuffer;
+    }
+    return (memcmp(configScript, entryScript, sizeof(config.localeScript)) == 0);
+}
+
+
 bool
 WeakResourceFilter::match(const ResTable_config& config) const
 {
@@ -75,11 +115,19 @@ WeakResourceFilter::match(const ResTable_config& config) const
             // If the locales differ, but the languages are the same and
             // the locale we are matching only has a language specified,
             // we match.
-            if (config.language[0] &&
-                    memcmp(config.language, entry.first.language, sizeof(config.language)) == 0) {
-                if (config.country[0] == 0) {
-                    matchedAxis |= ResTable_config::CONFIG_LOCALE;
-                }
+            //
+            // Exception: we won't match if a script is specified for at least
+            // one of the locales and it's different from the other locale's
+            // script. (We will compute the other script if at least one of the
+            // scripts were explicitly set. In cases we can't compute an script,
+            // we match.)
+            if (config.language[0] != '\0' &&
+                    config.country[0] == '\0' &&
+                    config.localeVariant[0] == '\0' &&
+                    config.language[0] == entry.first.language[0] &&
+                    config.language[1] == entry.first.language[1] &&
+                    scriptsMatch(config, entry.first)) {
+                matchedAxis |= ResTable_config::CONFIG_LOCALE;
             }
         } else if ((diff & entry.second) == ResTable_config::CONFIG_SMALLEST_SCREEN_SIZE) {
             // Special case if the smallest screen width doesn't match. We check that the

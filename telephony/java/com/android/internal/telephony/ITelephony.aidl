@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.net.Uri;
+import android.service.carrier.CarrierIdentifier;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telephony.CellInfo;
@@ -28,8 +29,11 @@ import android.telephony.ModemActivityInfo;
 import android.telephony.NeighboringCellInfo;
 import android.telephony.RadioAccessFamily;
 import android.telephony.ServiceState;
+import android.telephony.TelephonyHistogram;
+import android.telephony.VisualVoicemailSmsFilterSettings;
 import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.OperatorInfo;
+
 import java.util.List;
 
 
@@ -449,6 +453,26 @@ interface ITelephony {
      * Returns the unread count of voicemails
      */
     int getVoiceMessageCountForSubscriber(int subId);
+
+    oneway void setVisualVoicemailEnabled(String callingPackage,
+            in PhoneAccountHandle accountHandle, boolean enabled);
+
+    boolean isVisualVoicemailEnabled(String callingPackage,
+            in PhoneAccountHandle accountHandle);
+
+    // Not oneway, caller needs to make sure the vaule is set before receiving a SMS
+    void enableVisualVoicemailSmsFilter(String callingPackage, int subId,
+            in VisualVoicemailSmsFilterSettings settings);
+
+    oneway void disableVisualVoicemailSmsFilter(String callingPackage, int subId);
+
+    // Get settings set by the calling package
+    VisualVoicemailSmsFilterSettings getVisualVoicemailSmsFilterSettings(String callingPackage,
+            int subId);
+
+    // Get settings set by the package, requires READ_PRIVILEGED_PHONE_STATE permission
+    VisualVoicemailSmsFilterSettings getSystemVisualVoicemailSmsFilterSettings(String packageName,
+            int subId);
 
     /**
      * Returns the network type for data transmission
@@ -1067,4 +1091,95 @@ interface ITelephony {
      * Returns a list of packages that have carrier privileges.
      */
     List<String> getPackagesWithCarrierPrivileges();
+
+    /**
+     * Return the application ID for the app type.
+     *
+     * @param subId the subscription ID that this request applies to.
+     * @param appType the uicc app type,
+     * @return Application ID for specificied app type or null if no uicc or error.
+     */
+    String getAidForAppType(int subId, int appType);
+
+    /**
+    * Return the Electronic Serial Number.
+    *
+    * Requires that the calling app has READ_PRIVILEGED_PHONE_STATE permission
+    *
+    * @param subId the subscription ID that this request applies to.
+    * @return ESN or null if error.
+    * @hide
+    */
+    String getEsn(int subId);
+
+    /**
+    * Return the Preferred Roaming List Version
+    *
+    * Requires that the calling app has READ_PRIVILEGED_PHONE_STATE permission
+    * @param subId the subscription ID that this request applies to.
+    * @return PRLVersion or null if error.
+    * @hide
+    */
+    String getCdmaPrlVersion(int subId);
+
+    /**
+     * Get snapshot of Telephony histograms
+     * @return List of Telephony histograms
+     * Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges.
+     */
+    List<TelephonyHistogram> getTelephonyHistograms();
+
+    /**
+     * Set the allowed carrier list for slotId
+     * Require system privileges. In the future we may add this to carrier APIs.
+     *
+     * @return The number of carriers set successfully. Should match length of
+     * carriers on success.
+     */
+    int setAllowedCarriers(int slotId, in List<CarrierIdentifier> carriers);
+
+    /**
+     * Get the allowed carrier list for slotId.
+     * Require system privileges. In the future we may add this to carrier APIs.
+     *
+     * @return List of {@link android.service.carrier.CarrierIdentifier}; empty list
+     * means all carriers are allowed.
+     */
+    List<CarrierIdentifier> getAllowedCarriers(int slotId);
+
+    /**
+     * Action set from carrier signalling broadcast receivers to enable/disable metered apns
+     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
+     * @param subId the subscription ID that this action applies to.
+     * @param enabled control enable or disable metered apns.
+     * @hide
+     */
+    void carrierActionSetMeteredApnsEnabled(int subId, boolean visible);
+
+    /**
+     * Action set from carrier signalling broadcast receivers to enable/disable radio
+     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
+     * @param subId the subscription ID that this action applies to.
+     * @param enabled control enable or disable radio.
+     * @hide
+     */
+    void carrierActionSetRadioEnabled(int subId, boolean enabled);
+
+    /**
+     * Get aggregated video call data usage since boot.
+     * Permissions android.Manifest.permission.READ_NETWORK_USAGE_HISTORY is required.
+     * @return total data usage in bytes
+     * @hide
+     */
+    long getVtDataUsage();
+
+    /**
+     * Policy control of data connection. Usually used when data limit is passed.
+     * @param enabled True if enabling the data, otherwise disabling.
+     * @param subId Subscription index
+     * @hide
+     */
+    void setPolicyDataEnabled(boolean enabled, int subId);
 }

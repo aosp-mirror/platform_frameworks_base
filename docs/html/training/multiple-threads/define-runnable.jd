@@ -23,11 +23,10 @@ trainingnavtop=true
 <div class="download-box">
     <a href="{@docRoot}shareables/training/ThreadSample.zip" class="button">Download the sample</a>
     <p class="filename">ThreadSample.zip</p>
-</div>
-</div>
+</div> <!-- download-box -->
 
-</div>
-</div>
+</div> <!-- tb -->
+</div> <!-- tb-wrapper -->
 
 <p>
     This lesson shows you how to implement a {@link java.lang.Runnable} class, which runs the code

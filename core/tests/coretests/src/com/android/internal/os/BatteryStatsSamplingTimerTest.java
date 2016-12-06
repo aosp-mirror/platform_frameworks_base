@@ -178,19 +178,40 @@ public class BatteryStatsSamplingTimerTest extends TestCase {
                 clocks.elapsedRealtime() * 1000);
         offBatterySummaryParcel.setDataPosition(0);
 
-        // Read the on battery summary from the parcel.
-        BatteryStatsImpl.SamplingTimer unparceledTimer = new BatteryStatsImpl.SamplingTimer(
-                clocks, timeBase);
-        unparceledTimer.readSummaryFromParcelLocked(onBatterySummaryParcel);
+        // Set the timebase running again. That way any issues with tracking reported values
+        // get tested when we unparcel the timers below.
+        timeBase.setRunning(true, clocks.uptimeMillis(), clocks.elapsedRealtime());
 
-        assertEquals(10, unparceledTimer.getTotalTimeLocked(0, BatteryStats.STATS_SINCE_CHARGED));
-        assertEquals(1, unparceledTimer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
+        // Read the on battery summary from the parcel.
+        BatteryStatsImpl.SamplingTimer unparceledOnBatteryTimer =
+                new BatteryStatsImpl.SamplingTimer(clocks, timeBase);
+        unparceledOnBatteryTimer.readSummaryFromParcelLocked(onBatterySummaryParcel);
+
+        assertEquals(10, unparceledOnBatteryTimer.getTotalTimeLocked(0,
+                BatteryStats.STATS_SINCE_CHARGED));
+        assertEquals(1, unparceledOnBatteryTimer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
 
         // Read the off battery summary from the parcel.
-        unparceledTimer = new BatteryStatsImpl.SamplingTimer(clocks, timeBase);
-        unparceledTimer.readSummaryFromParcelLocked(offBatterySummaryParcel);
+        BatteryStatsImpl.SamplingTimer unparceledOffBatteryTimer =
+                new BatteryStatsImpl.SamplingTimer(clocks, timeBase);
+        unparceledOffBatteryTimer.readSummaryFromParcelLocked(offBatterySummaryParcel);
 
-        assertEquals(10, unparceledTimer.getTotalTimeLocked(0, BatteryStats.STATS_SINCE_CHARGED));
-        assertEquals(1, unparceledTimer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
+        assertEquals(10, unparceledOffBatteryTimer.getTotalTimeLocked(0,
+                BatteryStats.STATS_SINCE_CHARGED));
+        assertEquals(1, unparceledOffBatteryTimer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
+
+        // Now, just like with a fresh timer, the first update should be absorbed to account for
+        // data being collected when we weren't recording.
+        unparceledOnBatteryTimer.update(10, 10);
+
+        assertEquals(10, unparceledOnBatteryTimer.getTotalTimeLocked(0,
+                BatteryStats.STATS_SINCE_CHARGED));
+        assertEquals(1, unparceledOnBatteryTimer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
+
+        unparceledOffBatteryTimer.update(10, 10);
+
+        assertEquals(10, unparceledOffBatteryTimer.getTotalTimeLocked(0,
+                BatteryStats.STATS_SINCE_CHARGED));
+        assertEquals(1, unparceledOffBatteryTimer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
     }
 }

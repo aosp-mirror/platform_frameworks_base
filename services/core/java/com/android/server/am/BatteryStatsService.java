@@ -484,6 +484,20 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
+    public void noteLongPartialWakelockStart(String name, String historyName, int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteLongPartialWakelockStart(name, historyName, uid);
+        }
+    }
+
+    public void noteLongPartialWakelockFinish(String name, String historyName, int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteLongPartialWakelockFinish(name, historyName, uid);
+        }
+    }
+
     public void noteStartSensor(int uid, int sensor) {
         enforceCallingPermission();
         synchronized (mStats) {
@@ -710,7 +724,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     @Override
-    public void noteWifiRadioPowerState(int powerState, long tsNanos) {
+    public void noteWifiRadioPowerState(int powerState, long tsNanos, int uid) {
         enforceCallingPermission();
 
         // There was a change in WiFi power state.
@@ -723,7 +737,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 mHandler.scheduleSync("wifi-data: " + type,
                         BatteryStatsImpl.ExternalStatsSync.UPDATE_WIFI);
             }
-            mStats.noteWifiRadioPowerState(powerState, tsNanos);
+            mStats.noteWifiRadioPowerState(powerState, tsNanos, uid);
         }
     }
 

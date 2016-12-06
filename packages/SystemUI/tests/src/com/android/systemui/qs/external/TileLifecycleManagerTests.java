@@ -58,7 +58,7 @@ public class TileLifecycleManagerTests extends AndroidTestCase {
         mHandler = new Handler(mThread.getLooper());
         ComponentName component = new ComponentName(mContext, FakeTileService.class);
         mStateManager = new TileLifecycleManager(mHandler, getContext(),
-                Mockito.mock(IQSService.class), new Tile(component),
+                Mockito.mock(IQSService.class), new Tile(),
                 new Intent().setComponent(component),
                 new UserHandle(UserHandle.myUserId()));
         mCallbacks.clear();

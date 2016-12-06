@@ -4,8 +4,8 @@ page.image=/distribute/images/developer-console.jpg
 Xnonavpage=true
 
 @jd:body
-    
-    <div id="qv-wrapper">           
+
+    <div id="qv-wrapper">
   <div id="qv">
     <h2>게시 기능</h2>
     <ol>
@@ -420,7 +420,7 @@ Xnonavpage=true
   <li>가격을 책정합니다.
   </li>
 
-  <li>앱을 포함한 제품을 게시하거나, 사용하지 않는 제품을 회수합니다. 
+  <li>앱을 포함한 제품을 게시하거나, 사용하지 않는 제품을 회수합니다.
   </li>
 </ul>
 

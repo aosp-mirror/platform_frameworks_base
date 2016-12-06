@@ -454,7 +454,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
     @Override
     public String toString() {
-        return mPackageName + "/" + mTag;
+        return mPackageName + "/" + mTag + " (uid=" + mUserId + ")";
     }
 
     private void postAdjustLocalVolume(final int stream, final int direction, final int flags,

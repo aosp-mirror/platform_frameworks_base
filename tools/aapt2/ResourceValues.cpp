@@ -39,6 +39,14 @@ void BaseItem<Derived>::accept(RawValueVisitor* visitor) {
 RawString::RawString(const StringPool::Ref& ref) : value(ref) {
 }
 
+bool RawString::equals(const Value* value) const {
+    const RawString* other = valueCast<RawString>(value);
+    if (!other) {
+        return false;
+    }
+    return *this->value == *other->value;
+}
+
 RawString* RawString::clone(StringPool* newPool) const {
     RawString* rs = new RawString(newPool->makeRef(*value));
     rs->mComment = mComment;
@@ -64,6 +72,15 @@ Reference::Reference(const ResourceNameRef& n, Type t) :
 }
 
 Reference::Reference(const ResourceId& i, Type type) : id(i), referenceType(type) {
+}
+
+bool Reference::equals(const Value* value) const {
+    const Reference* other = valueCast<Reference>(value);
+    if (!other) {
+        return false;
+    }
+    return referenceType == other->referenceType && privateReference == other->privateReference &&
+            id == other->id && name == other->name;
 }
 
 bool Reference::flatten(android::Res_value* outValue) const {
@@ -97,6 +114,10 @@ void Reference::print(std::ostream* out) const {
     }
 }
 
+bool Id::equals(const Value* value) const {
+    return valueCast<Id>(value) != nullptr;
+}
+
 bool Id::flatten(android::Res_value* out) const {
     out->dataType = android::Res_value::TYPE_INT_BOOLEAN;
     out->data = util::hostToDevice32(0);
@@ -111,15 +132,15 @@ void Id::print(std::ostream* out) const {
     *out << "(id)";
 }
 
-String::String(const StringPool::Ref& ref) : value(ref), mTranslateable(true) {
+String::String(const StringPool::Ref& ref) : value(ref) {
 }
 
-void String::setTranslateable(bool val) {
-    mTranslateable = val;
-}
-
-bool String::isTranslateable() const {
-    return mTranslateable;
+bool String::equals(const Value* value) const {
+    const String* other = valueCast<String>(value);
+    if (!other) {
+        return false;
+    }
+    return *this->value == *other->value;
 }
 
 bool String::flatten(android::Res_value* outValue) const {
@@ -144,15 +165,24 @@ void String::print(std::ostream* out) const {
     *out << "(string) \"" << *value << "\"";
 }
 
-StyledString::StyledString(const StringPool::StyleRef& ref) : value(ref), mTranslateable(true) {
+StyledString::StyledString(const StringPool::StyleRef& ref) : value(ref) {
 }
 
-void StyledString::setTranslateable(bool val) {
-    mTranslateable = val;
-}
+bool StyledString::equals(const Value* value) const {
+    const StyledString* other = valueCast<StyledString>(value);
+    if (!other) {
+        return false;
+    }
 
-bool StyledString::isTranslateable() const {
-    return mTranslateable;
+    if (*this->value->str == *other->value->str) {
+        const std::vector<StringPool::Span>& spansA = this->value->spans;
+        const std::vector<StringPool::Span>& spansB = other->value->spans;
+        return std::equal(spansA.begin(), spansA.end(), spansB.begin(),
+                          [](const StringPool::Span& a, const StringPool::Span& b) -> bool {
+            return *a.name == *b.name && a.firstChar == b.firstChar && a.lastChar == b.lastChar;
+        });
+    }
+    return false;
 }
 
 bool StyledString::flatten(android::Res_value* outValue) const {
@@ -174,9 +204,20 @@ StyledString* StyledString::clone(StringPool* newPool) const {
 
 void StyledString::print(std::ostream* out) const {
     *out << "(styled string) \"" << *value->str << "\"";
+    for (const StringPool::Span& span : value->spans) {
+        *out << " "<< *span.name << ":" << span.firstChar << "," << span.lastChar;
+    }
 }
 
 FileReference::FileReference(const StringPool::Ref& _path) : path(_path) {
+}
+
+bool FileReference::equals(const Value* value) const {
+    const FileReference* other = valueCast<FileReference>(value);
+    if (!other) {
+        return false;
+    }
+    return *path == *other->path;
 }
 
 bool FileReference::flatten(android::Res_value* outValue) const {
@@ -209,6 +250,14 @@ BinaryPrimitive::BinaryPrimitive(uint8_t dataType, uint32_t data) {
     value.data = data;
 }
 
+bool BinaryPrimitive::equals(const Value* value) const {
+    const BinaryPrimitive* other = valueCast<BinaryPrimitive>(value);
+    if (!other) {
+        return false;
+    }
+    return this->value.dataType == other->value.dataType && this->value.data == other->value.data;
+}
+
 bool BinaryPrimitive::flatten(android::Res_value* outValue) const {
     outValue->dataType = value.dataType;
     outValue->data = util::hostToDevice32(value.data);
@@ -228,7 +277,7 @@ void BinaryPrimitive::print(std::ostream* out) const {
             *out << "(integer) " << static_cast<int32_t>(value.data);
             break;
         case android::Res_value::TYPE_INT_HEX:
-            *out << "(integer) " << std::hex << value.data << std::dec;
+            *out << "(integer) 0x" << std::hex << value.data << std::dec;
             break;
         case android::Res_value::TYPE_INT_BOOLEAN:
             *out << "(boolean) " << (value.data != 0 ? "true" : "false");
@@ -251,6 +300,21 @@ Attribute::Attribute(bool w, uint32_t t) :
         minInt(std::numeric_limits<int32_t>::min()),
         maxInt(std::numeric_limits<int32_t>::max()) {
     mWeak = w;
+}
+
+bool Attribute::equals(const Value* value) const {
+    const Attribute* other = valueCast<Attribute>(value);
+    if (!other) {
+        return false;
+    }
+
+    return this->typeMask == other->typeMask && this->minInt == other->minInt &&
+            this->maxInt == other->maxInt &&
+            std::equal(this->symbols.begin(), this->symbols.end(),
+                       other->symbols.begin(),
+                       [](const Symbol& a, const Symbol& b) -> bool {
+        return a.symbol.equals(&b.symbol) && a.value == b.value;
+    });
 }
 
 Attribute* Attribute::clone(StringPool* /*newPool*/) const {
@@ -365,6 +429,14 @@ void Attribute::print(std::ostream* out) const {
             << "]";
     }
 
+    if (minInt != std::numeric_limits<int32_t>::min()) {
+        *out << " min=" << minInt;
+    }
+
+    if (maxInt != std::numeric_limits<int32_t>::max()) {
+        *out << " max=" << maxInt;
+    }
+
     if (isWeak()) {
         *out << " [weak]";
     }
@@ -445,6 +517,21 @@ bool Attribute::matches(const Item* item, DiagMessage* outMsg) const {
     return true;
 }
 
+bool Style::equals(const Value* value) const {
+    const Style* other = valueCast<Style>(value);
+    if (!other) {
+        return false;
+    }
+    if (bool(parent) != bool(other->parent) ||
+            (parent && other->parent && !parent.value().equals(&other->parent.value()))) {
+        return false;
+    }
+    return std::equal(entries.begin(), entries.end(), other->entries.begin(),
+                      [](const Entry& a, const Entry& b) -> bool {
+        return a.key.equals(&b.key) && a.value->equals(b.value.get());
+    });
+}
+
 Style* Style::clone(StringPool* newPool) const {
     Style* style = new Style();
     style->parent = parent;
@@ -484,6 +571,18 @@ static ::std::ostream& operator<<(::std::ostream& out, const Style::Entry& value
     return out;
 }
 
+bool Array::equals(const Value* value) const {
+    const Array* other = valueCast<Array>(value);
+    if (!other) {
+        return false;
+    }
+
+    return std::equal(items.begin(), items.end(), other->items.begin(),
+                      [](const std::unique_ptr<Item>& a, const std::unique_ptr<Item>& b) -> bool {
+        return a->equals(b.get());
+    });
+}
+
 Array* Array::clone(StringPool* newPool) const {
     Array* array = new Array();
     array->mComment = mComment;
@@ -498,6 +597,21 @@ void Array::print(std::ostream* out) const {
     *out << "(array) ["
         << util::joiner(items.begin(), items.end(), ", ")
         << "]";
+}
+
+bool Plural::equals(const Value* value) const {
+    const Plural* other = valueCast<Plural>(value);
+    if (!other) {
+        return false;
+    }
+
+    return std::equal(values.begin(), values.end(), other->values.begin(),
+                      [](const std::unique_ptr<Item>& a, const std::unique_ptr<Item>& b) -> bool {
+        if (bool(a) != bool(b)) {
+            return false;
+        }
+        return bool(a) == bool(b) || a->equals(b.get());
+    });
 }
 
 Plural* Plural::clone(StringPool* newPool) const {
@@ -515,10 +629,40 @@ Plural* Plural::clone(StringPool* newPool) const {
 
 void Plural::print(std::ostream* out) const {
     *out << "(plural)";
+    if (values[Zero]) {
+        *out << " zero=" << *values[Zero];
+    }
+
+    if (values[One]) {
+        *out << " one=" << *values[One];
+    }
+
+    if (values[Two]) {
+        *out << " two=" << *values[Two];
+    }
+
+    if (values[Few]) {
+        *out << " few=" << *values[Few];
+    }
+
+    if (values[Many]) {
+        *out << " many=" << *values[Many];
+    }
 }
 
 static ::std::ostream& operator<<(::std::ostream& out, const std::unique_ptr<Item>& item) {
     return out << *item;
+}
+
+bool Styleable::equals(const Value* value) const {
+    const Styleable* other = valueCast<Styleable>(value);
+    if (!other) {
+        return false;
+    }
+    return std::equal(entries.begin(), entries.end(), other->entries.begin(),
+                      [](const Reference& a, const Reference& b) -> bool {
+        return a.equals(&b);
+    });
 }
 
 Styleable* Styleable::clone(StringPool* /*newPool*/) const {

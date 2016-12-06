@@ -132,7 +132,7 @@ provides these tools:</p>
 
 <ul>
 <li>New resource qualifiers for targeting layouts and other resources to a
-minimum smallestWidth, width, or height, and</li> 
+minimum smallestWidth, width, or height, and</li>
 <li>New manifest attributes, for specifying the app's maximum
 screen compatibility range</li>
 </ul>
@@ -201,7 +201,7 @@ the resource should be used, measured in "dp" units. As mentioned above, a
 screen's smallestWidth is constant, regardless of orientation. Examples:
 <code>sw320dp</code>, <code>sw720dp</code>, <code>sw720dp</code>.</li>
 
-<li><code>wNNNdp</code> and <code>hNNNdp</code> &mdash; Specifies the minimum 
+<li><code>wNNNdp</code> and <code>hNNNdp</code> &mdash; Specifies the minimum
 width or height on which the resource should be used, measured in "dp" units. As
 mentioned above, a screen's width and height are relative to the orientation of
 the screen and change whenever the orientation changes. Examples:
@@ -214,7 +214,7 @@ dp, others for wider than 600  dp, and others for wider than 720 dp. When
 multiple resource configurations are qualified for a given screen, the system
 selects the configuration that is the closest match. For precise control over
 which resources are loaded on a given screen, you can tag resources with one
-qualifier or combine several new or existing qualifiers. 
+qualifier or combine several new or existing qualifiers.
 
 <p>Based on the typical dimensions listed earlier, here are some examples of how
 you could use the new qualifiers:</p>

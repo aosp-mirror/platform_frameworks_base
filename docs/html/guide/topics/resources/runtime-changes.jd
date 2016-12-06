@@ -17,6 +17,8 @@ page.tags=activity,lifecycle
     <li><a href="accessing-resources.html">Accessing Resources</a></li>
     <li><a href="http://android-developers.blogspot.com/2009/02/faster-screen-orientation-change.html">Faster
         Screen Orientation Change</a></li>
+    <li><a href="{@docRoot}guide/topics/ui/multi-window.html#lifecycle">
+      Multi-Window Lifecycle</a></li>
   </ol>
 </div>
 </div>
@@ -84,12 +86,12 @@ your activity to preserve stateful objects.</p>
 <p>To retain stateful objects in a fragment during a runtime configuration change:</p>
 
 <ol>
-  <li>Extend the {@link android.app.Fragment} class and declare references to your stateful 
+  <li>Extend the {@link android.app.Fragment} class and declare references to your stateful
       objects.</li>
   <li>Call {@link android.app.Fragment#setRetainInstance(boolean)} when the fragment is created.
       </li>
   <li>Add the fragment to your activity.</li>
-  <li>Use {@link android.app.FragmentManager} to retrieve the fragment when the activity is 
+  <li>Use {@link android.app.FragmentManager} to retrieve the fragment when the activity is
       restarted.</li>
 </ol>
 
@@ -127,8 +129,8 @@ leak all the views and resources of the original activity instance. (Leaking res
 means that your application maintains a hold on them and they cannot be garbage-collected, so
 lots of memory can be lost.)</p>
 
-<p>Then use {@link android.app.FragmentManager} to add the fragment to the activity. 
-You can obtain the data object from the fragment when the activity starts again during runtime 
+<p>Then use {@link android.app.FragmentManager} to add the fragment to the activity.
+You can obtain the data object from the fragment when the activity starts again during runtime
 configuration changes. For example, define your activity as follows:</p>
 
 <pre>
@@ -170,7 +172,7 @@ public class MyActivity extends Activity {
 <p>In this example, {@link android.app.Activity#onCreate(Bundle) onCreate()} adds a fragment
 or restores a reference to it. {@link android.app.Activity#onCreate(Bundle) onCreate()} also
 stores the stateful object inside the fragment instance.
-{@link android.app.Activity#onDestroy() onDestroy()} updates the stateful object inside the 
+{@link android.app.Activity#onDestroy() onDestroy()} updates the stateful object inside the
 retained fragment instance.</p>
 
 

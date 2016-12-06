@@ -25,6 +25,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.UserHandle;
 import android.service.quicksettings.IQSTileService;
 import android.service.quicksettings.Tile;
@@ -32,6 +33,7 @@ import android.service.quicksettings.TileService;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
+import com.android.systemui.qs.customize.TileQueryHelper.TileStateListener;
 import com.android.systemui.qs.external.TileLifecycleManager.TileChangeListener;
 
 import java.util.List;
@@ -86,8 +88,15 @@ public class TileServiceManager {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addDataScheme("package");
-        mServices.getContext().registerReceiverAsUser(mUninstallReceiver,
+        Context context = mServices.getContext();
+        context.registerReceiverAsUser(mUninstallReceiver,
                 new UserHandle(ActivityManager.getCurrentUser()), filter, null, mHandler);
+        ComponentName component = tileLifecycleManager.getComponent();
+        if (!TileLifecycleManager.isTileAdded(context, component)) {
+            TileLifecycleManager.setTileAdded(context, component, true);
+            mStateManager.onTileAdded();
+            mStateManager.flushMessagesAndUnbind();
+        }
     }
 
     public void setTileChangeListener(TileChangeListener changeListener) {
@@ -104,6 +113,10 @@ public class TileServiceManager {
 
     public IQSTileService getTileService() {
         return mStateManager;
+    }
+
+    public IBinder getToken() {
+        return mStateManager.getToken();
     }
 
     public void setBindRequested(boolean bindRequested) {

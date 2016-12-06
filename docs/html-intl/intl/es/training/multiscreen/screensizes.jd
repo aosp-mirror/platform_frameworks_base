@@ -10,8 +10,8 @@ next.link=screendensities.html
 
 
 <!-- This is the training bar -->
-<div id="tb-wrapper"> 
-<div id="tb"> 
+<div id="tb-wrapper">
+<div id="tb">
 
 <h2>En esta sección puedes aprender:</h2>
 <ol>
@@ -30,26 +30,26 @@ next.link=screendensities.html
   <li><a href="{@docRoot}guide/practices/screens_support.html">Cómo admitir varias pantallas</a></li>
 </ul>
 
-<h2>¡Pruébalo!</h2> 
- 
-<div class="download-box"> 
+<h2>¡Pruébalo!</h2>
+
+<div class="download-box">
 <a href="http://developer.android.com/shareables/training/NewsReader.zip" class="button">Descargar la aplicación de ejemplo</a>
-<p class="filename">NewsReader.zip</p> 
-</div> 
- 
-</div> 
-</div> 
+<p class="filename">NewsReader.zip</p>
+</div>
+
+</div>
+</div>
 
 <p>En esta sección se explica cómo admitir varios tamaños de pantalla. Para ello, sigue estos pasos:</p>
-<ul> 
-  <li>Asegúrate de que el diseño se haya ajustado correctamente al tamaño de la pantalla.</li> 
-  <li>Configura la pantalla con el diseño de interfaz adecuado.</li> 
+<ul>
+  <li>Asegúrate de que el diseño se haya ajustado correctamente al tamaño de la pantalla.</li>
+  <li>Configura la pantalla con el diseño de interfaz adecuado.</li>
   <li>Asegúrate de aplicar el diseño adecuado a la pantalla correspondiente.</li>
-  <li>Utiliza el mapa de bits con la escala adecuada.</li> 
-</ul> 
+  <li>Utiliza el mapa de bits con la escala adecuada.</li>
+</ul>
 
 
-<h2 id="TaskUseWrapMatchPar">Cómo utilizar los valores "wrap_content" y "match_parent"</h2> 
+<h2 id="TaskUseWrapMatchPar">Cómo utilizar los valores "wrap_content" y "match_parent"</h2>
 
 <p>Para garantizar que el diseño es flexible y que se adapta a varios tamaños de pantalla, debes utilizar los valores <code>"wrap_content"</code> y <code>"match_parent"</code> para la altura y el ancho de algunos componentes de la vista. Si utilizas <code>"wrap_content"</code>, el ancho o la altura de la vista se establece en el tamaño mínimo necesario para adaptar el contenido a esta vista, mientras que <code>"match_parent"</code> (también conocido como <code>"fill_parent"</code> antes del nivel 8 del API) provoca que el componente se amplíe hasta coincidir con el tamaño de la vista principal.</p>
 
@@ -65,7 +65,7 @@ next.link=screendensities.html
 <p class="img-caption"><strong>Figura 1.</strong> La aplicación de ejemplo News Reader en modo vertical (izquierda) y horizontal (derecha)</p>
 
 
-<h2 id="TaskUseRelativeLayout">Cómo utilizar RelativeLayout</h2> 
+<h2 id="TaskUseRelativeLayout">Cómo utilizar RelativeLayout</h2>
 
 <p>Puedes crear diseños de un cierto nivel de complejidad con instancias anidadas de <PH>{@link android.widget.LinearLayout}</PH> y combinaciones de los valores de tamaño <code>"wrap_content"</code> y <code>"match_parent"</code>. Sin embargo, <PH>{@link android.widget.LinearLayout}</PH> no te permite controlar con precisión las relaciones espaciales de las vistas secundarias; las vistas de <PH>{@link android.widget.LinearLayout}</PH> simplemente se alinean en paralelo. Si quieres orientar las vistas secundarias de una forma que no sea una línea recta, a menudo la mejor solución es utilizar <PH>{@link android.widget.RelativeLayout}</PH>que te permite especificar el diseño según las relaciones espaciales entre los componentes. Por ejemplo, puedes alinear una vista secundaria en el lateral izquierdo y otra vista en el lateral derecho de la pantalla.</p>
 
@@ -115,8 +115,8 @@ next.link=screendensities.html
 
 <p>Ten en cuenta que aunque el tamaño de los componentes es diferente, las relaciones espaciales se mantienen según se ha especificado con <PH>{@link android.widget.RelativeLayout.LayoutParams}</PH>.</p>
 
- 
-<h2 id="TaskUseSizeQuali">Cómo utilizar calificadores de tamaño</h2> 
+
+<h2 id="TaskUseSizeQuali">Cómo utilizar calificadores de tamaño</h2>
 
 <p>Hay mucha diferencia entre un diseño flexible y un diseño relativo como el que se ha utilizado en las secciones anteriores. Aunque ambos diseños se adaptan a diferentes pantalla estirando el espacio dentro de los componentes y alrededor de los mismos, puede que no ofrezcan la mejor experiencia de usuario para cada tamaño de pantalla. Por tanto, tu aplicación no solo debe implementar los diseños flexibles, sino que también debe ofrecer varios diseños alternativos para diferentes configuraciones de pantalla. Para ello, se utilizan <a href="http://developer.android.com/guide/practices/screens_support.html#qualifiers">calificadores de configuración</a>, que permiten que el tiempo de ejecución seleccione el recurso adecuado en función de la configuración actual del dispositivo (por ejemplo, un diseño diferente para diferentes tamaños de pantalla).</p>
 
@@ -158,7 +158,7 @@ next.link=screendensities.html
 <p>No obstante, esto no funcionará en los dispositivos anteriores a Android 3.2 porque no reconocen <code>sw600dp</code> como calificador de tamaño, por lo que también tendrás que seguir utilizando el calificador <code>large</code>. Por tanto, debes tener un archivo con el nombre <code>res/layout-large/main.xml</code> idéntico a <code>res/layout-sw600dp/main.xml</code>. En la siguiente sección, obtendrás información sobre una técnica que te permite evitar que se dupliquen los archivos de diseños.</p>
 
 
-<h2 id="TaskUseAliasFilters">Cómo utilizar alias de diseño</h2> 
+<h2 id="TaskUseAliasFilters">Cómo utilizar alias de diseño</h2>
 
 <p>El calificador de ancho mínimo solo está disponible en Android 3.2 o superior. Por tanto, tendrás que seguir utilizando los contenedores de tamaño abstractos (pequeño, normal, grande y extragrande) para que sean compatibles con versiones anteriores. Por ejemplo, si quieres que tu interfaz de usuario sea de panel único en teléfonos pero multipanel en tablets de 7", televisiones y otros dispositivos grandes, tendrás que utilizar los siguientes archivos:</p>
 
@@ -202,7 +202,7 @@ next.link=screendensities.html
 <PH>{@code large}</PH>y las televisiones y los tablets posteriores a la versión 3.2 utilizarán <code>sw600dp</code>).</p>
 
 
-<h2 id="TaskUseOriQuali">Cómo utilizar calificadores de orientación</h2> 
+<h2 id="TaskUseOriQuali">Cómo utilizar calificadores de orientación</h2>
 
 <p>Aunque algunos diseños se pueden utilizar tanto en modo horizontal como vertical, la mayoría de ellos pueden beneficiarse de los ajustes. A continuación, se indica cómo se comporta el diseño según cada tamaño y orientación de la pantalla en la aplicación de ejemplo News Reader:</p>
 

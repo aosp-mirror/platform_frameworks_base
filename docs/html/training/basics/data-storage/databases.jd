@@ -75,16 +75,14 @@ single table:</p>
 <pre>
 public final class FeedReaderContract {
     // To prevent someone from accidentally instantiating the contract class,
-    // give it an empty constructor.
-    public FeedReaderContract() {}
+    // make the constructor private.
+    private FeedReaderContract() {}
 
     /* Inner class that defines the table contents */
-    public static abstract class FeedEntry implements BaseColumns {
+    public static class FeedEntry implements BaseColumns {
         public static final String TABLE_NAME = &quot;entry&quot;;
-        public static final String COLUMN_NAME_ENTRY_ID = &quot;entryid&quot;;
         public static final String COLUMN_NAME_TITLE = &quot;title&quot;;
         public static final String COLUMN_NAME_SUBTITLE = &quot;subtitle&quot;;
-        ...
     }
 }
 </pre>
@@ -103,10 +101,8 @@ private static final String COMMA_SEP = &quot;,&quot;;
 private static final String SQL_CREATE_ENTRIES =
     &quot;CREATE TABLE &quot; + FeedEntry.TABLE_NAME + &quot; (&quot; +
     FeedEntry._ID + &quot; INTEGER PRIMARY KEY,&quot; +
-    FeedEntry.COLUMN_NAME_ENTRY_ID + TEXT_TYPE + COMMA_SEP +
     FeedEntry.COLUMN_NAME_TITLE + TEXT_TYPE + COMMA_SEP +
-    ... // Any other options for the CREATE command
-    &quot; )&quot;;
+    FeedEntry.COLUMN_NAME_SUBTITLE + TEXT_TYPE + &quot; )&quot;;
 
 private static final String SQL_DELETE_ENTRIES =
     &quot;DROP TABLE IF EXISTS &quot; + FeedEntry.TABLE_NAME;
@@ -119,11 +115,11 @@ application. Your data is secure, because by default this area is not
 accessible to other applications.</p>
 
 <p>A useful set of APIs is available in the {@link
-android.database.sqlite.SQLiteOpenHelper} class. 
+android.database.sqlite.SQLiteOpenHelper} class.
 When you use this class to obtain references to your database, the system
-performs the potentially 
+performs the potentially
 long-running operations of creating and updating the database only when
-needed and <em>not during app startup</em>. All you need to do is call 
+needed and <em>not during app startup</em>. All you need to do is call
 {@link android.database.sqlite.SQLiteOpenHelper#getWritableDatabase} or
 {@link android.database.sqlite.SQLiteOpenHelper#getReadableDatabase}.</p>
 
@@ -189,23 +185,22 @@ SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
 // Create a new map of values, where column names are the keys
 ContentValues values = new ContentValues();
-values.put(FeedEntry.COLUMN_NAME_ENTRY_ID, id);
 values.put(FeedEntry.COLUMN_NAME_TITLE, title);
-values.put(FeedEntry.COLUMN_NAME_CONTENT, content);
+values.put(FeedEntry.COLUMN_NAME_SUBTITLE, subtitle);
 
 // Insert the new row, returning the primary key value of the new row
-long newRowId;
-newRowId = db.insert(
-         FeedEntry.TABLE_NAME,
-         FeedEntry.COLUMN_NAME_NULLABLE,
-         values);
+long newRowId = db.insert(FeedEntry.TABLE_NAME, null, values);
 </pre>
 
 <p>The first argument for {@link android.database.sqlite.SQLiteDatabase#insert insert()}
-is simply the table name. The second argument provides
-the name of a column in which the framework can insert NULL in the event that the
-{@link android.content.ContentValues} is empty (if you instead set this to {@code "null"},
-then the framework will not insert a row when there are no values).</p>
+is simply the table name. </p>
+
+<p>The second argument tells the framework what to do in the event that the
+{@link android.content.ContentValues} is empty (i.e., you did not
+{@link android.content.ContentValues#put put} any values).
+If you specify the name of a column, the framework inserts a row and sets
+the value of that column to null. If you specify <code>null</code>, like in this
+code sample, the framework does not insert a row when there are no values.</p>
 
 
 
@@ -227,16 +222,19 @@ SQLiteDatabase db = mDbHelper.getReadableDatabase();
 String[] projection = {
     FeedEntry._ID,
     FeedEntry.COLUMN_NAME_TITLE,
-    FeedEntry.COLUMN_NAME_UPDATED,
-    ...
+    FeedEntry.COLUMN_NAME_SUBTITLE
     };
+
+// Filter results WHERE "title" = 'My Title'
+String selection = FeedEntry.COLUMN_NAME_TITLE + &quot; = ?&quot;;
+String[] selectionArgs = { &quot;My Title&quot; };
 
 // How you want the results sorted in the resulting Cursor
 String sortOrder =
-    FeedEntry.COLUMN_NAME_UPDATED + " DESC";
+    FeedEntry.COLUMN_NAME_SUBTITLE + " DESC";
 
 Cursor c = db.query(
-    FeedEntry.TABLE_NAME,  // The table to query
+    FeedEntry.TABLE_NAME,                     // The table to query
     projection,                               // The columns to return
     selection,                                // The columns for the WHERE clause
     selectionArgs,                            // The values for the WHERE clause
@@ -280,11 +278,11 @@ immune to SQL injection.</p>
 
 <pre>
 // Define 'where' part of query.
-String selection = FeedEntry.COLUMN_NAME_ENTRY_ID + &quot; LIKE ?&quot;;
+String selection = FeedEntry.COLUMN_NAME_TITLE + &quot; LIKE ?&quot;;
 // Specify arguments in placeholder order.
-String[] selectionArgs = { String.valueOf(rowId) };
+String[] selectionArgs = { &quot;MyTitle&quot; };
 // Issue SQL statement.
-db.delete(table_name, selection, selectionArgs);
+db.delete(FeedEntry.TABLE_NAME, selection, selectionArgs);
 </pre>
 
 
@@ -305,9 +303,9 @@ SQLiteDatabase db = mDbHelper.getReadableDatabase();
 ContentValues values = new ContentValues();
 values.put(FeedEntry.COLUMN_NAME_TITLE, title);
 
-// Which row to update, based on the ID
-String selection = FeedEntry.COLUMN_NAME_ENTRY_ID + &quot; LIKE ?&quot;;
-String[] selectionArgs = { String.valueOf(rowId) };
+// Which row to update, based on the title
+String selection = FeedEntry.COLUMN_NAME_TITLE + &quot; LIKE ?&quot;;
+String[] selectionArgs = { &quot;MyTitle&quot; };
 
 int count = db.update(
     FeedReaderDbHelper.FeedEntry.TABLE_NAME,

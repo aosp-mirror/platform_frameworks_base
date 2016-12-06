@@ -15,6 +15,7 @@ import android.graphics.PixelFormat;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -28,6 +29,7 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 
 import com.android.internal.app.AssistUtils;
+import com.android.internal.app.IVoiceInteractionSessionListener;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
@@ -45,13 +47,13 @@ public class AssistManager {
     private static final long TIMEOUT_SERVICE = 2500;
     private static final long TIMEOUT_ACTIVITY = 1000;
 
-    private final Context mContext;
+    protected final Context mContext;
     private final WindowManager mWindowManager;
     private final AssistDisclosure mAssistDisclosure;
 
     private AssistOrbContainer mView;
     private final BaseStatusBar mBar;
-    private final AssistUtils mAssistUtils;
+    protected final AssistUtils mAssistUtils;
 
     private IVoiceInteractionSessionShowCallback mShowCallback =
             new IVoiceInteractionSessionShowCallback.Stub() {
@@ -81,6 +83,23 @@ public class AssistManager {
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mAssistUtils = new AssistUtils(context);
         mAssistDisclosure = new AssistDisclosure(context, new Handler());
+
+        registerVoiceInteractionSessionListener();
+    }
+
+    protected void registerVoiceInteractionSessionListener() {
+        mAssistUtils.registerVoiceInteractionSessionListener(
+                new IVoiceInteractionSessionListener.Stub() {
+            @Override
+            public void onVoiceSessionShown() throws RemoteException {
+                Log.v(TAG, "Voice open");
+            }
+
+            @Override
+            public void onVoiceSessionHidden() throws RemoteException {
+                Log.v(TAG, "Voice closed");
+            }
+        });
     }
 
     public void onConfigurationChanged() {
@@ -103,6 +122,10 @@ public class AssistManager {
         }
     }
 
+    protected boolean shouldShowOrb() {
+        return true;
+    }
+
     public void startAssist(Bundle args) {
         final ComponentName assistComponent = getAssistInfo();
         if (assistComponent == null) {
@@ -110,7 +133,7 @@ public class AssistManager {
         }
 
         final boolean isService = assistComponent.equals(getVoiceInteractorComponentName());
-        if (!isService || !isVoiceSessionRunning()) {
+        if (!isService || (!isVoiceSessionRunning() && shouldShowOrb())) {
             showOrb(assistComponent, isService);
             mView.postDelayed(mHideRunnable, isService
                     ? TIMEOUT_SERVICE

@@ -94,6 +94,7 @@ public final class RemotePrintDocument {
                     // but the content has changed.
                     if (mNextCommand == null) {
                         if (mUpdateSpec.pages != null && (mDocumentInfo.changed
+                                || mDocumentInfo.writtenPages == null
                                 || (mDocumentInfo.info.getPageCount()
                                         != PrintDocumentInfo.PAGE_COUNT_UNKNOWN
                                 && !PageRangeUtils.contains(mDocumentInfo.writtenPages,

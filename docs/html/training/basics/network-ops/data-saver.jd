@@ -1,0 +1,253 @@
+page.title=Optimizing Network Data Usage
+parent.title=Performing Network Operations
+parent.link=index.html
+
+trainingnavtop=true
+next.title=Parsing XML Data
+next.link=xml.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#status">Check Data-Saver Preferences</a>
+  <ul>
+     <li><a href="#request-whitelist">Request whitelist permissions</a></li>
+  </ul>
+  </li>
+  <li><a href="#monitor-changes">Monitor Changes to Data Saver Preferences</a></li>
+  <li><a href="#testing">Test with Android Debug Bridge Commands</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>
+  Over the life of a smartphone, the cost of a cellular data plan can easily
+  exceed the cost of the device itself. From Android 7.0 (API level 24),
+  users users can enable Data Saver on a device-wide basis in order
+  optimize their device's data usage, and use less data. This ability
+  is especially useful when roaming, near the end of the billing cycle,
+  or for a small prepaid data pack.
+</p>
+
+<p>
+  When a user enables Data Saver in <strong>Settings</strong> and the device is
+  on a metered network, the system blocks background data usage and signals
+  apps to use less data in the foreground wherever possible. Users can
+  whitelist specific apps to allow background metered data usage even when Data
+  Saver is turned on.
+</p>
+
+<p>
+  Android 7.0 (API level 24) extends the {@link android.net.ConnectivityManager}
+  API to provide apps with a way to <a href="#status">retrieve the user’s Data
+  Saver preferences</a> and <a href="#monitor-changes">monitor preference
+  changes</a>. It is considered good practice for apps to check whether the
+  user has enabled Data Saver and make an effort to limit foreground and
+  background data usage.
+</p>
+
+<h2 id="status">
+  Checking Data Saver Preferences
+</h2>
+
+<p>
+  In Android 7.0 (API level 24), apps can use the {@link
+  android.net.ConnectivityManager} API to determine what data usage
+  restrictions are being applied. The {@code getRestrictBackgroundStatus()}
+  method returns one of the following values:
+</p>
+
+<dl>
+  <dt>
+    {@code RESTRICT_BACKGROUND_STATUS_DISABLED}
+  </dt>
+
+  <dd>
+    Data Saver is disabled.
+  </dd>
+
+  <dt>
+    {@code RESTRICT_BACKGROUND_STATUS_ENABLED}
+  </dt>
+
+  <dd>
+    The user has enabled Data Saver for this app. Apps should make an effort to limit data
+    usage in the foreground and gracefully handle restrictions to background
+    data usage.
+  </dd>
+
+  <dt>
+    {@code RESTRICT_BACKGROUND_STATUS_WHITELISTED}
+  </dt>
+
+  <dd>
+    The user has enabled Data Saver but the app is whitelisted. Apps should
+    still make an effort to limit foreground and background data usage.
+  </dd>
+</dl>
+
+<p>
+  It is considered good practice to limit data usage whenever the device is
+  connected to a metered network, even if Data Saver is disabled or the app
+  is whitelisted. The following sample code uses {@link
+  android.net.ConnectivityManager#isActiveNetworkMetered
+  ConnectivityManager.isActiveNetworkMetered()} and {@code
+  ConnectivityManager.getRestrictBackgroundStatus()} to determine how much data
+  the app should use:
+</p>
+
+<pre>
+ConnectivityManager connMgr = (ConnectivityManager)
+        getSystemService(Context.CONNECTIVITY_SERVICE);
+// Checks if the device is on a metered network
+if (connMgr.isActiveNetworkMetered()) {
+  // Checks user’s Data Saver settings.
+  switch (connMgr.getRestrictBackgroundStatus()) {
+    case RESTRICT_BACKGROUND_STATUS_ENABLED:
+    // Background data usage is blocked for this app. Wherever possible,
+    // the app should also use less data in the foreground.
+
+    case RESTRICT_BACKGROUND_STATUS_WHITELISTED:
+    // The app is whitelisted. Wherever possible,
+    // the app should use less data in the foreground and background.
+
+    case RESTRICT_BACKGROUND_STATUS_DISABLED:
+    // Data Saver is disabled. Since the device is connected to a
+    // metered network, the app should use less data wherever possible.
+  }
+} else {
+  // The device is not on a metered network.
+  // Use data as required to perform syncs, downloads, and updates.
+}
+</pre>
+
+<h3 id="request-whitelist">
+  Requesting whitelist permissions
+</h3>
+
+<p>
+  If your app needs to use data in the background, it can request whitelist
+  permissions by sending a
+  <code>Settings.ACTION_IGNORE_BACKGROUND_DATA_RESTRICTIONS_SETTINGS</code>
+  intent containing a URI of your app's package name: for example,
+  <code>package:MY_APP_ID</code>.
+</p>
+
+<p>
+  Sending the intent and URI launches the <strong>Settings</strong> app and
+  displays data usage settings for your app. The user can then decide whether
+  to enable background data for your app. Before you send this intent, it is
+  good practice to first ask the user if they want to launch the
+  <strong>Settings</strong> app for the purpose of enabling background data
+  usage.
+</p>
+
+<h2 id="monitor-changes">
+  Monitoring Changes to Data Saver Preferences
+</h2>
+
+<p>
+  Apps can monitor changes to Data Saver preferences by creating a {@link
+  android.content.BroadcastReceiver} to listen for {@code
+  ConnectivityManager.ACTION_RESTRICT_BACKGROUND_CHANGED} and dynamically
+  registering the receiver with {@link android.content.Context#registerReceiver
+  Context.registerReceiver()}. When an app receives this broadcast, it should
+  <a href="#status">check if the new Data Saver preferences affect its
+  permissions</a> by calling {@code
+  ConnectivityManager.getRestrictBackgroundStatus()}.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> The system only sends this broadcast to apps that
+  dynamically register for them with {@link
+  android.content.Context#registerReceiver Context.registerReceiver()}. Apps
+  that register to receive this broadcast in their manifest will not receive
+  them.
+</p>
+
+<h2 id="testing">
+  Testing with Android Debug Bridge Commands
+</h2>
+
+<p>
+  The <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge (ADB)</a>
+  provides a few commands that you can use to test your app in Data Saver
+  conditions. You can check and configure network
+  permissions or set wireless networks as metered to test your app on unmetered
+  networks.
+</p>
+<dl>
+  <dt>
+    <code>$ adb shell dumpsys netpolicy</code>
+  </dt>
+
+  <dd>
+    Generates a report that includes the current global background network
+    restriction setting, package UIDs currently on a whitelist, and the network
+    permissions of other known packages.
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy</code>
+  </dt>
+
+  <dd>
+    Displays a full list of Network Policy Manager (netpolicy) commands.
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy set restrict-background
+    &lt;boolean&gt;</code>
+  </dt>
+
+  <dd>
+    Enables or disables Data Saver mode when passing <code>true</code> or
+    <code>false</code>, respectively.
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy add restrict-background-whitelist
+    &lt;UID&gt;</code>
+  </dt>
+
+  <dd>
+    Adds the specified package UID to the whitelist to allow background metered
+    data usage.
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy remove restrict-background-whitelist
+    &lt;UID&gt;</code>
+  </dt>
+
+  <dd>
+    Removes the specified package UID from the whitelist to block background
+    metered data usage while Data Saver is enabled.
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy list wifi-networks</code>
+  </dt>
+
+  <dd>
+    Lists all wifi networks, displaying whether they're metered.
+  </dd>
+
+
+  <dt>
+    <code>$  adb shell cmd netpolicy set metered-network &lt;WIFI_SSID&gt;
+      true</code>
+  </dt>
+
+  <dd>
+    Sets wifi with the specified SSID as metered, allowing you to simulate a
+    metered network on an unmetered network.
+  </dd>
+</dl>

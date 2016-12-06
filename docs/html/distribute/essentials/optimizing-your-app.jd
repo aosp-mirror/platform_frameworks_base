@@ -4,7 +4,7 @@ page.image=/distribute/images/gp-optimize-card.jpg
 
 @jd:body
 
-<div id="qv-wrapper">           
+<div id="qv-wrapper">
   <div id="qv">
     <h2>Strategies</h2>
     <ol>
@@ -475,7 +475,7 @@ who can help automate, measure, and optimize your mobile marketing.
   A great way to deliver a delightful user experience is to integrate tightly
   with the operating system. Features like <a href=
   "{@docRoot}guide/topics/appwidgets/index.html">Home screen widgets</a>,
-  <a href="{@docRoot}design/patterns/notifications.html">rich
+  <a href="https://material.google.com/patterns/notifications.html">rich
   notifications</a>, <a href="{@docRoot}guide/topics/search/index.html">global
   search integration</a>, and <a href=
   "{@docRoot}reference/android/widget/QuickContactBadge.html">Quick

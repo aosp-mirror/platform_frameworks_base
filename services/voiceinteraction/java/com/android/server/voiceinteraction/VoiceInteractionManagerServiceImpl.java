@@ -41,6 +41,7 @@ import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.view.IWindowManager;
 
+import com.android.internal.app.IVoiceInteractionSessionListener;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.server.LocalServices;
@@ -58,7 +59,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
 
     final Context mContext;
     final Handler mHandler;
-    final Object mLock;
+    final VoiceInteractionManagerService.VoiceInteractionManagerServiceStub mServiceStub;
     final int mUser;
     final ComponentName mComponent;
     final IActivityManager mAm;
@@ -77,7 +78,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
                 String reason = intent.getStringExtra("reason");
                 if (!CLOSE_REASON_VOICE_INTERACTION.equals(reason) && !"dream".equals(reason)) {
-                    synchronized (mLock) {
+                    synchronized (mServiceStub) {
                         if (mActiveSession != null && mActiveSession.mSession != null) {
                             try {
                                 mActiveSession.mSession.closeSystemDialogs();
@@ -93,7 +94,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     final ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            synchronized (mLock) {
+            synchronized (mServiceStub) {
                 mService = IVoiceInteractionService.Stub.asInterface(service);
                 try {
                     mService.ready();
@@ -108,11 +109,12 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         }
     };
 
-    VoiceInteractionManagerServiceImpl(Context context, Handler handler, Object lock,
+    VoiceInteractionManagerServiceImpl(Context context, Handler handler,
+            VoiceInteractionManagerService.VoiceInteractionManagerServiceStub stub,
             int userHandle, ComponentName service) {
         mContext = context;
         mHandler = handler;
-        mLock = lock;
+        mServiceStub = stub;
         mUser = userHandle;
         mComponent = service;
         mAm = ActivityManagerNative.getDefault();
@@ -148,8 +150,9 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     public boolean showSessionLocked(Bundle args, int flags,
             IVoiceInteractionSessionShowCallback showCallback, IBinder activityToken) {
         if (mActiveSession == null) {
-            mActiveSession = new VoiceInteractionSessionConnection(mLock, mSessionComponentName,
-                    mUser, mContext, this, mInfo.getServiceInfo().applicationInfo.uid, mHandler);
+            mActiveSession = new VoiceInteractionSessionConnection(mServiceStub,
+                    mSessionComponentName, mUser, mContext, this,
+                    mInfo.getServiceInfo().applicationInfo.uid, mHandler);
         }
         List<IBinder> activityTokens = null;
         if (activityToken == null) {
@@ -355,8 +358,18 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
 
     @Override
     public void sessionConnectionGone(VoiceInteractionSessionConnection connection) {
-        synchronized (mLock) {
+        synchronized (mServiceStub) {
             finishLocked(connection.mToken, false);
         }
+    }
+
+    @Override
+    public void onSessionShown(VoiceInteractionSessionConnection connection) {
+        mServiceStub.onSessionShown();
+    }
+
+    @Override
+    public void onSessionHidden(VoiceInteractionSessionConnection connection) {
+        mServiceStub.onSessionHidden();
     }
 }

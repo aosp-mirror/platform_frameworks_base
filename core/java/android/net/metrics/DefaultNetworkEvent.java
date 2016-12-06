@@ -22,10 +22,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
+ * An event recorded by ConnectivityService when there is a change in the default network.
  * {@hide}
  */
 @SystemApi
-public final class DefaultNetworkEvent extends IpConnectivityEvent implements Parcelable {
+public final class DefaultNetworkEvent implements Parcelable {
     // The ID of the network that has become the new default or NETID_UNSET if none.
     public final int netId;
     // The list of transport types of the new default network, for example TRANSPORT_WIFI, as
@@ -37,7 +38,8 @@ public final class DefaultNetworkEvent extends IpConnectivityEvent implements Pa
     public final boolean prevIPv4;
     public final boolean prevIPv6;
 
-    private DefaultNetworkEvent(int netId, int[] transportTypes,
+    /** {@hide} */
+    public DefaultNetworkEvent(int netId, int[] transportTypes,
                 int prevNetId, boolean prevIPv4, boolean prevIPv6) {
         this.netId = netId;
         this.transportTypes = transportTypes;
@@ -54,6 +56,7 @@ public final class DefaultNetworkEvent extends IpConnectivityEvent implements Pa
         this.prevIPv6 = (in.readByte() > 0);
     }
 
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(netId);
         out.writeIntArray(transportTypes);
@@ -62,6 +65,7 @@ public final class DefaultNetworkEvent extends IpConnectivityEvent implements Pa
         out.writeByte(prevIPv6 ? (byte) 1 : (byte) 0);
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
@@ -105,6 +109,5 @@ public final class DefaultNetworkEvent extends IpConnectivityEvent implements Pa
 
     public static void logEvent(
             int netId, int[] transports, int prevNetId, boolean hadIPv4, boolean hadIPv6) {
-        logEvent(new DefaultNetworkEvent(netId, transports, prevNetId, hadIPv4, hadIPv6));
     }
-};
+}

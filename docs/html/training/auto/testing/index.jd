@@ -523,7 +523,7 @@ to <strong>Settings &gt; About phone</strong> (or <strong>About tablet</strong>)
 
 <ol>
 <li>Install the Android Media Browser simulator
-({@code &lt;sdk&gt;/extras/google/simulators/media-browser-simulator.apk}) on
+({@code <sdk>/extras/google/simulators/media-browser-simulator.apk}) on
 the test device. You can do this using
 the <a href="{@docRoot}tools/help/adb.html#move">adb</a> command line tool.</li>
 <li>Enable <a href="{@docRoot}tools/device.html#developer-device-options">
@@ -540,7 +540,7 @@ appears in Auto. If your app does not appear, stop the simulator from
 
 <ol>
 <li>Install the Android Messaging simulator
-  ({@code &lt;sdk&gt;/extras/google/simulators/messaging-simulator.apk})
+  ({@code <sdk>/extras/google/simulators/messaging-simulator.apk})
 on the test device. You can do this using the
 <a href="{@docRoot}tools/help/adb.html#move">adb</a> command line tool.</li>
 <li>Enable the simulator to read notifications posted on the system:

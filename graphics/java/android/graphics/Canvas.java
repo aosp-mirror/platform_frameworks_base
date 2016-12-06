@@ -788,7 +788,7 @@ public class Canvas {
      * @return     true if the resulting is non-empty
      */
     public boolean clipPath(@NonNull Path path, @NonNull Region.Op op) {
-        return native_clipPath(mNativeCanvasWrapper, path.ni(), op.nativeInt);
+        return native_clipPath(mNativeCanvasWrapper, path.readOnlyNI(), op.nativeInt);
     }
 
     /**
@@ -907,7 +907,7 @@ public class Canvas {
      *                    does not intersect with the canvas' clip
      */
     public boolean quickReject(@NonNull Path path, @NonNull EdgeType type) {
-        return native_quickReject(mNativeCanvasWrapper, path.ni());
+        return native_quickReject(mNativeCanvasWrapper, path.readOnlyNI());
     }
 
     /**
@@ -1259,7 +1259,7 @@ public class Canvas {
         if (path.isSimplePath && path.rects != null) {
             native_drawRegion(mNativeCanvasWrapper, path.rects.mNativeRegion, paint.getNativeInstance());
         } else {
-            native_drawPath(mNativeCanvasWrapper, path.ni(), paint.getNativeInstance());
+            native_drawPath(mNativeCanvasWrapper, path.readOnlyNI(), paint.getNativeInstance());
         }
     }
 
@@ -1895,7 +1895,7 @@ public class Canvas {
             throw new ArrayIndexOutOfBoundsException();
         }
         native_drawTextOnPath(mNativeCanvasWrapper, text, index, count,
-                path.ni(), hOffset, vOffset,
+                path.readOnlyNI(), hOffset, vOffset,
                 paint.mBidiFlags, paint.getNativeInstance(), paint.mNativeTypeface);
     }
 
@@ -1915,7 +1915,7 @@ public class Canvas {
     public void drawTextOnPath(@NonNull String text, @NonNull Path path, float hOffset,
             float vOffset, @NonNull Paint paint) {
         if (text.length() > 0) {
-            native_drawTextOnPath(mNativeCanvasWrapper, text, path.ni(), hOffset, vOffset,
+            native_drawTextOnPath(mNativeCanvasWrapper, text, path.readOnlyNI(), hOffset, vOffset,
                     paint.mBidiFlags, paint.getNativeInstance(), paint.mNativeTypeface);
         }
     }

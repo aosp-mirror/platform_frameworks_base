@@ -3,6 +3,7 @@ include $(CLEAR_VARS)
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 
 HWUI_NEW_OPS := true
+BUGREPORT_FONT_CACHE_USAGE := false
 
 # Enables fine-grained GLES error checking
 # If set to true, every GLES call is wrapped & error checked
@@ -113,6 +114,10 @@ hwui_cflags := \
     -DATRACE_TAG=ATRACE_TAG_VIEW -DLOG_TAG=\"OpenGLRenderer\" \
     -Wall -Wno-unused-parameter -Wunreachable-code -Werror
 
+ifeq ($(TARGET_USES_HWC2),true)
+    hwui_cflags += -DUSE_HWC2
+endif
+
 # GCC false-positives on this warning, and since we -Werror that's
 # a problem
 hwui_cflags += -Wno-free-nonheap-object
@@ -130,6 +135,13 @@ ifeq (true, $(HWUI_NEW_OPS))
     hwui_cflags += -DHWUI_NEW_OPS
 
 endif
+
+ifeq (true, $(BUGREPORT_FONT_CACHE_USAGE))
+    hwui_src_files += \
+        font/FontCacheHistoryTracker.cpp
+    hwui_cflags += -DBUGREPORT_FONT_CACHE_USAGE
+endif
+
 
 ifndef HWUI_COMPILE_SYMBOLS
     hwui_cflags += -fvisibility=hidden

@@ -341,8 +341,18 @@ public class FilesActivity extends BaseActivity {
 
         // Fall back to traditional VIEW action...
         intent = new Intent(Intent.ACTION_VIEW);
-        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        intent.setData(doc.derivedUri);
+        intent.setDataAndType(doc.derivedUri, doc.mimeType);
+
+        // Downloads has traditionally added the WRITE permission
+        // in the TrampolineActivity. Since this behavior is long
+        // established, we set the same permission for non-managed files
+        // This ensures consistent behavior between the Downloads root
+        // and other roots.
+        int flags = Intent.FLAG_GRANT_READ_URI_PERMISSION;
+        if (doc.isWriteSupported()) {
+            flags |= Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
+        }
+        intent.setFlags(flags);
 
         if (DEBUG && intent.getClipData() != null) {
             Log.d(TAG, "Starting intent w/ clip data: " + intent.getClipData());

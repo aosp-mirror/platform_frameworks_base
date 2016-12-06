@@ -9,7 +9,7 @@ trainingnavtop=true
 
 <div id="tb-wrapper">
   <div id="tb">
-    
+
     <h2>This lesson teaches you to</h2>
 <ol>
   <li><a href="#lifecycle-states">Understand the Lifecycle Callbacks</a></li>
@@ -17,7 +17,7 @@ trainingnavtop=true
   <li><a href="#Create">Create a New Instance</a></li>
   <li><a href="#Destroy">Destroy the Activity</a></li>
 </ol>
-    
+
     <h2>You should also read</h2>
     <ul>
       <li><a href="{@docRoot}guide/components/activities.html">Activities</a></li>
@@ -84,7 +84,7 @@ landscape and portrait orientation.</li>
 </ul>
 
 <!--
-<p class="table-caption"><strong>Table 1.</strong> Activity lifecycle state pairs and callback 
+<p class="table-caption"><strong>Table 1.</strong> Activity lifecycle state pairs and callback
 methods.</p>
 <table>
   <tr>
@@ -139,7 +139,7 @@ specific lifecycle behaviors.</p>
 
 
 
-<h2 id="launching-activity">Specify Your App's Launcher Activity</h2> 
+<h2 id="launching-activity">Specify Your App's Launcher Activity</h2>
 
 <p>When the user selects your app icon from the Home screen, the system calls the {@link
 android.app.Activity#onCreate onCreate()} method for the {@link android.app.Activity} in your app
@@ -154,7 +154,7 @@ at the root of your project directory.</p>
 href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
 <intent-filter>}</a> that includes the {@link
 android.content.Intent#ACTION_MAIN MAIN} action and
-{@link android.content.Intent#CATEGORY_LAUNCHER LAUNCHER} category. For example:</p> 
+{@link android.content.Intent#CATEGORY_LAUNCHER LAUNCHER} category. For example:</p>
 
 <pre>
 &lt;activity android:name=".MainActivity" android:label="&#64;string/app_name">
@@ -203,10 +203,10 @@ public void onCreate(Bundle savedInstanceState) {
     // Set the user interface layout for this Activity
     // The layout file is defined in the project res/layout/main_activity.xml file
     setContentView(R.layout.main_activity);
-    
+
     // Initialize member TextView so we can manipulate it later
     mTextView = (TextView) findViewById(R.id.text_message);
-    
+
     // Make sure we're running on Honeycomb or higher to use ActionBar APIs
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
         // For the main activity, make sure the app icon in the action bar
@@ -271,7 +271,7 @@ android.app.Activity#onDestroy}.</p>
 &#64;Override
 public void onDestroy() {
     super.onDestroy();  // Always call the superclass
-    
+
     // Stop method tracing that the activity started during onCreate()
     android.os.Debug.stopMethodTracing();
 }

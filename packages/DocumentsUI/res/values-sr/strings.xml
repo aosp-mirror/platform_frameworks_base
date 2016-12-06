@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="2783841764617238354">"Документи"</string>
+    <string name="app_label" msgid="1551050262492398204">"Датотеке"</string>
     <string name="downloads_label" msgid="959113951084633612">"Преузимања"</string>
     <string name="title_open" msgid="4353228937663917801">"Отвори са"</string>
     <string name="title_save" msgid="2433679664882857999">"Сачувај у"</string>
@@ -44,7 +44,7 @@
     <string name="button_copy" msgid="8706475544635021302">"Копирај"</string>
     <string name="button_move" msgid="2202666023104202232">"Премести"</string>
     <string name="button_dismiss" msgid="3714065566893946085">"Одбаци"</string>
-    <string name="button_retry" msgid="4392027584153752797">"Покушај поново"</string>
+    <string name="button_retry" msgid="4392027584153752797">"Пробај поново"</string>
     <string name="sort_name" msgid="9183560467917256779">"Према имену"</string>
     <string name="sort_date" msgid="586080032956151448">"Према датуму измене"</string>
     <string name="sort_size" msgid="3350681319735474741">"Према величини"</string>

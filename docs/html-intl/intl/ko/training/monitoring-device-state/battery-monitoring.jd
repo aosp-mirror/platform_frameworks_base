@@ -7,8 +7,8 @@ next.title=도킹 상태와 유형 확인 및 모니터링
 next.link=docking-monitoring.html
 
 @jd:body
- 
-<div id="tb-wrapper"> 
+
+<div id="tb-wrapper">
 <div id="tb">
 
 <h2>강의 목표</h2>
@@ -24,9 +24,9 @@ next.link=docking-monitoring.html
   <li><a href="{@docRoot}guide/components/intents-filters.html">인텐트 및 인텐트 필터</a>
 </ul>
 
-</div> 
 </div>
- 
+</div>
+
 <p>백그라운드 업데이트가 배터리 수명에 미치는 영향을 줄이기 위하여 백그라운드 업데이트 빈도수를 변경하는 경우, 현재 배터리 수준과 충전 상태부터 확인하는 것이 좋습니다.</p>
 
 <p>애플리케이션 업데이트 수행이 배터리 수명에 미치는 영향은 배터리 수준 및 기기의 충전 상태에 따라 다릅니다. 기기를 AC 충전기로 충전하는 동안 업데이트 수행이 미치는 영향은 무시해도 좋습니다. 따라서 기기가 범용 충전기에 연결되어 있을 때는 대부분 새로고침 빈도를 최대화할 수 있습니다. 반대로 기기가 충전 중이 아니라면, 업데이트 빈도를 줄이는 것이 배터리 수명 연장에 도움이 됩니다.</p>
@@ -34,8 +34,8 @@ next.link=docking-monitoring.html
 <p>마찬가지로 배터리가 거의 방전된 경우, 업데이트 빈도를 줄이거나 중단할 수 있습니다.</p>
 
 
-<h2 id="DetermineChargeState">현재 충전 상태 확인</h2> 
- 
+<h2 id="DetermineChargeState">현재 충전 상태 확인</h2>
+
 <p>먼저 현재 충전 상태를 확인하는 것부터 시작합니다. {@link android.os.BatteryManager}는 배터리 충전 상태 등 충전 정보를 스티키 {@link android.content.Intent}를 통해 브로드캐스트합니다.</p>
 
 <p>스티키 인텐트이므로 {@link android.content.BroadcastReceiver}를 등록할 필요가 없으며 아래 코드 상의 리시버와 같이 간단히 {@code registerReceiver}을(를) 호출하여 {@code null}에 제출하면 현재 배터리 상태가 담긴 인텐트가 반환됩니다. 여기에 실제 {@link android.content.BroadcastReceiver} 개체 사용할 수 있으나, 이후 섹션에서 업데이트를 다루게 되므로 그럴 필요는 없습니다.</p>
@@ -58,7 +58,7 @@ boolean acCharge = chargePlug == BATTERY_PLUGGED_AC;</pre>
 <p>일반적으로 기기가 AC 충전기에 연결된 경우 백그라운드 업데이트 빈도를 최대화합니다. USB를 통해 충전하는 경우 업데이트 빈도를 낮춥니다. 배터리가 방전 중이라면 빈도를 더 많이 낮추도록 합니다.</p>
 
 
-<h2 id="MonitorChargeState">충전 상태 변경사항 모니터링</h2> 
+<h2 id="MonitorChargeState">충전 상태 변경사항 모니터링</h2>
 
 <p>충전 상태는 수시로 변하므로 충전 상태의 변경사항을 확인하고 이에 따라 업데이트 주기를 변경하는 것이 중요합니다.</p>
 
@@ -75,11 +75,11 @@ boolean acCharge = chargePlug == BATTERY_PLUGGED_AC;</pre>
 
 <pre>public class PowerConnectionReceiver extends BroadcastReceiver {
     &#64;Override
-    public void onReceive(Context context, Intent intent) { 
+    public void onReceive(Context context, Intent intent) {
         int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
         boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
                             status == BatteryManager.BATTERY_STATUS_FULL;
-    
+
         int chargePlug = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
         boolean usbCharge = chargePlug == BATTERY_PLUGGED_USB;
         boolean acCharge = chargePlug == BATTERY_PLUGGED_AC;
@@ -87,7 +87,7 @@ boolean acCharge = chargePlug == BATTERY_PLUGGED_AC;</pre>
 }</pre>
 
 
-<h2 id="CurrentLevel">현재 배터리 수준 확인</h2> 
+<h2 id="CurrentLevel">현재 배터리 수준 확인</h2>
 
 <p>현재 배터리 수준을 확인하는 것이 유용한 경우도 있습니다. 배터리 충전이 수준 이하인 경우 백그라운드 업데이트 빈도를 줄일 수 있습니다.</p>
 
@@ -99,7 +99,7 @@ int scale = battery.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
 float batteryPct = level / (float)scale;</pre>
 
 
-<h2 id="MonitorLevel">배터리 수준 중요 변경사항 모니터링</h2> 
+<h2 id="MonitorLevel">배터리 수준 중요 변경사항 모니터링</h2>
 
 <p>배터리 상태를 지속적으로 확인하는 것은 쉽지 않지만, 꼭 그럴 필요도 없습니다.</p>
 

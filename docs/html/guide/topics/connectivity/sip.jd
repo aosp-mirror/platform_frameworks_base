@@ -12,10 +12,10 @@ page.tags=sipmanager,sipprofile,sipaudiocall,telephony
       <li><a href="#manager">Creating a SIP Manager</a></li>
       <li><a href="#profiles">Registering with a SIP Server</a></li>
       <li><a href="#audio">Making an Audio Call</a></li>
-      <li><a href="#receiving">Receiving Calls</a></li>   
+      <li><a href="#receiving">Receiving Calls</a></li>
       <li><a href="#testing">Testing SIP Applications</a></li>
     </ol>
-    
+
   <h2>Key classes</h2>
     <ol>
       <li>{@link android.net.sip.SipManager}</li>
@@ -23,7 +23,7 @@ page.tags=sipmanager,sipprofile,sipaudiocall,telephony
       <li>{@link android.net.sip.SipAudioCall}</li>
 
     </ol>
-    
+
    <h2>Related samples</h2>
    <ol>
      <li> <a href="{@docRoot}resources/samples/SipDemo/index.html"> SipDemo</a></li>
@@ -46,9 +46,9 @@ record or playback directly.</p>
 <h2 id="requirements">Requirements and Limitations</h2>
 <p>Here are the requirements for developing a SIP application:</p>
 <ul>
-  
+
   <li>You must have a mobile device that is running Android 2.3 or higher. </li>
-  
+
   <li>SIP runs over a wireless data connection, so your device must have a data
 connection (with a mobile data service or Wi-Fi)</span>. This means that you
 can't test on AVD&#8212;you can only test on a physical device. For details, see
@@ -139,7 +139,7 @@ capable of supporting SIP,  add the following to your application's
 manifest:</p>
 
 <ul>
-  <li><code>&lt;uses-sdk android:minSdkVersion=&quot;9&quot; /&gt;</code>. This 
+  <li><code>&lt;uses-sdk android:minSdkVersion=&quot;9&quot; /&gt;</code>. This
  indicates that your application requires   Android 2.3 or higher. For more
 information, see <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API
 Levels</a> and the documentation for the <a
@@ -162,7 +162,7 @@ may also be   needed, depending on your implementation. For more information,
 see the   documentation for the <a
 href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-
 feature&gt;</a> element.</li>
-  
+
 </ul>
 <p>If your application is designed to receive calls, you must also define a receiver ({@link android.content.BroadcastReceiver} subclass) in the application's manifest: </p>
 
@@ -261,7 +261,7 @@ public void onRegistering(String localProfileUri) {
 public void onRegistrationDone(String localProfileUri, long expiryTime) {
     updateStatus(&quot;Ready&quot;);
 }
-   
+
 public void onRegistrationFailed(String localProfileUri, int errorCode,
     String errorMessage) {
     updateStatus(&quot;Registration failed.  Please check settings.&quot;);
@@ -291,8 +291,8 @@ example:</p>
 
   <li>A {@link android.net.sip.SipProfile} that is making the call (the
 &quot;local profile&quot;), and a valid SIP address to receive the call (the
-&quot;peer profile&quot;). 
-  
+&quot;peer profile&quot;).
+
   <li>A {@link android.net.sip.SipManager} object. </li>
 </ul>
 
@@ -304,7 +304,7 @@ established:</p>
 
 <pre>
 SipAudioCall.Listener listener = new SipAudioCall.Listener() {
-  
+
    &#64;Override
    public void onCallEstablished(SipAudioCall call) {
       call.startAudio();
@@ -312,7 +312,7 @@ SipAudioCall.Listener listener = new SipAudioCall.Listener() {
       call.toggleMute();
          ...
    }
-   
+
    &#64;Override
    public void onCallEnded(SipAudioCall call) {
       // Do something.
@@ -326,12 +326,12 @@ make the  call. The {@link android.net.sip.SipManager} method
 <ul>
   <li>A local SIP profile (the caller).</li>
   <li>A peer SIP profile (the user being called).</li>
-  
+
   <li>A {@link android.net.sip.SipAudioCall.Listener} to listen to the call
 events from {@link android.net.sip.SipAudioCall}. This can be <code>null</code>,
 but as shown above, the listener is used to set things up once the call is
 established.</li>
-  
+
   <li>The timeout value, in seconds.</li>
 </ul>
 <p>For example:</p>
@@ -349,15 +349,15 @@ your application:</p>
 <code>&lt;receiver&gt;</code>. In <strong>SipDemo</strong>, this is
 <code>&lt;receiver android:name=&quot;.IncomingCallReceiver&quot;
 android:label=&quot;Call Receiver&quot;/&gt;</code>.</li>
-  
+
   <li>Implement the receiver, which is a subclass of {@link
 android.content.BroadcastReceiver}. In <strong>SipDemo</strong>, this is
 <code>IncomingCallReceiver</code>.</li>
-  
+
   <li>Initialize the local profile ({@link android.net.sip.SipProfile}) with a
 pending intent that fires your receiver when someone calls the local profile.
 </li>
-  
+
   <li>Set up an intent filter that filters by the action that represents an
 incoming call. In <strong>SipDemo</strong>, this action is
 <code>android.SipDemo.INCOMING_CALL</code>. </li>
@@ -427,16 +427,16 @@ action  string provided by the application. In SipDemo, this action string is
 android.net.sip.SipProfile} object gets created with a pending intent based on
 the action string <code>android.SipDemo.INCOMING_CALL</code>. The
 <code>PendingIntent</code> object   will perform a broadcast when the {@link
-android.net.sip.SipProfile}  receives a call:</p> 
+android.net.sip.SipProfile}  receives a call:</p>
 
 <pre>
 public SipManager mSipManager = null;
 public SipProfile mSipProfile = null;
 ...
 
-Intent intent = new Intent(); 
-intent.setAction(&quot;android.SipDemo.INCOMING_CALL&quot;); 
-PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, Intent.FILL_IN_DATA); 
+Intent intent = new Intent();
+intent.setAction(&quot;android.SipDemo.INCOMING_CALL&quot;);
+PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, Intent.FILL_IN_DATA);
 mSipManager.open(mSipProfile, pendingIntent, null);</pre>
 
 <p>The broadcast will be intercepted by the intent filter, which will then fire
@@ -485,8 +485,8 @@ href="{@docRoot}tools/device.html">Developing on a Device</a>.</li>
 href="{@docRoot}tools/device.html">Developing on a Device</a>.</li>
 
 <li>If you are using Android Studio, you can view the application log output by
-opening the Event Log console (<strong>View > Tool Windows > Event Log</strong>). 
-<li>Ensure your application is configured to launch Logcat automatically when it runs: 
+opening the Event Log console (<strong>View > Tool Windows > Event Log</strong>).
+<li>Ensure your application is configured to launch Logcat automatically when it runs:
 <ol TYPE=a>
 <li>Select <strong>Run > Edit Configurations</strong>.
 <li>Select the <strong>Miscellaneous</strong> tab in the <strong>Run/Debug Configurations</strong> window.

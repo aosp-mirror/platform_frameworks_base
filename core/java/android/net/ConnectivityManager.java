@@ -343,6 +343,15 @@ public class ConnectivityManager {
     public static final String ACTION_PROMPT_UNVALIDATED = "android.net.conn.PROMPT_UNVALIDATED";
 
     /**
+     * Action used to display a dialog that asks the user whether to avoid a network that is no
+     * longer validated. This intent is used to start the dialog in settings via startActivity.
+     *
+     * @hide
+     */
+    public static final String ACTION_PROMPT_LOST_VALIDATION =
+            "android.net.conn.PROMPT_LOST_VALIDATION";
+
+    /**
      * Invalid tethering type.
      * @see #startTethering(int, OnStartTetheringCallback, boolean)
      * @hide
@@ -1035,6 +1044,26 @@ public class ConnectivityManager {
     }
 
     /**
+     * Request that this callback be invoked at ConnectivityService's earliest
+     * convenience with the current satisfying network's LinkProperties.
+     * If no such network exists no callback invocation is performed.
+     *
+     * The callback must have been registered with #requestNetwork() or
+     * #registerDefaultNetworkCallback(); callbacks registered with
+     * registerNetworkCallback() are not specific to any particular Network so
+     * do not cause any updates.
+     *
+     * @hide
+     */
+    public void requestLinkProperties(NetworkCallback networkCallback) {
+        try {
+            mService.requestLinkProperties(networkCallback.networkRequest);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Get the {@link android.net.NetworkCapabilities} for the given {@link Network}.  This
      * will return {@code null} if the network is unknown.
      * <p>This method requires the caller to hold the permission
@@ -1046,6 +1075,26 @@ public class ConnectivityManager {
     public NetworkCapabilities getNetworkCapabilities(Network network) {
         try {
             return mService.getNetworkCapabilities(network);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Request that this callback be invoked at ConnectivityService's earliest
+     * convenience with the current satisfying network's NetworkCapabilities.
+     * If no such network exists no callback invocation is performed.
+     *
+     * The callback must have been registered with #requestNetwork() or
+     * #registerDefaultNetworkCallback(); callbacks registered with
+     * registerNetworkCallback() are not specific to any particular Network so
+     * do not cause any updates.
+     *
+     * @hide
+     */
+    public void requestNetworkCapabilities(NetworkCallback networkCallback) {
+        try {
+            mService.requestNetworkCapabilities(networkCallback.networkRequest);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1774,6 +1823,16 @@ public class ConnectivityManager {
     /** {@hide} */
     public static ConnectivityManager from(Context context) {
         return (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+    }
+
+    /* TODO: These permissions checks don't belong in client-side code. Move them to
+     * services.jar, possibly in com.android.server.net. */
+
+    /** {@hide} */
+    public static final boolean checkChangePermission(Context context) {
+        int uid = Binder.getCallingUid();
+        return Settings.checkAndNoteChangeNetworkStateOperation(context, uid, Settings
+                .getPackageNameForUid(context, uid), false /* throwException */);
     }
 
     /** {@hide} */
@@ -3103,13 +3162,10 @@ public class ConnectivityManager {
             throw new IllegalArgumentException("Invalid NetworkCallback");
         }
         try {
+            // CallbackHandler will release callback when receiving CALLBACK_RELEASED.
             mService.releaseNetworkRequest(networkCallback.networkRequest);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
-        }
-
-        synchronized (sNetworkCallback) {
-            sNetworkCallback.remove(networkCallback.networkRequest);
         }
     }
 
@@ -3146,6 +3202,27 @@ public class ConnectivityManager {
     public void setAcceptUnvalidated(Network network, boolean accept, boolean always) {
         try {
             mService.setAcceptUnvalidated(network, accept, always);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Informs the system to penalize {@code network}'s score when it becomes unvalidated. This is
+     * only meaningful if the system is configured not to penalize such networks, e.g., if the
+     * {@code config_networkAvoidBadWifi} configuration variable is set to 0 and the {@code
+     * NETWORK_AVOID_BAD_WIFI setting is unset}.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#CONNECTIVITY_INTERNAL}
+     *
+     * @param network The network to accept.
+     *
+     * @hide
+     */
+    public void setAvoidUnvalidated(Network network) {
+        try {
+            mService.setAvoidUnvalidated(network);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

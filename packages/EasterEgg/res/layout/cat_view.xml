@@ -20,12 +20,14 @@
     android:minHeight="?android:attr/listPreferredItemHeightSmall"
     android:paddingStart="?android:attr/listPreferredItemPaddingStart"
     android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
     android:background="?android:attr/selectableItemBackgroundBorderless"
     android:gravity="center_horizontal"
     android:clipToPadding="false">
 
     <FrameLayout
-        android:layout_width="wrap_content"
+        android:layout_width="96dp"
         android:layout_height="wrap_content">
 
         <ImageView
@@ -33,6 +35,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="10dp"
+            android:layout_gravity="center"
             android:scaleType="fitCenter" />
 
         <LinearLayout

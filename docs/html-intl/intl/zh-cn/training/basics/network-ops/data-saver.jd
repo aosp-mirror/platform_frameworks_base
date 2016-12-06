@@ -1,0 +1,234 @@
+page.title=Data Saver
+metaDescription=用户启用的流量消耗优化。
+page.keywords="android N", "data usage", "metered network"
+page.image=images/cards/card-nyc_2x.jpg
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    <h2>
+      本文内容
+    </h2>
+
+    <ol>
+      <li>
+        <a href="#status">检查 Data Saver 首选项</a>
+        <ol>
+          <li>
+            <a href="#request-whitelist">请求白名单权限</a>
+          </li>
+        </ol>
+      </li>
+
+      <li>
+        <a href="#monitor-changes">监控 Data Saver 首选项变更</a>
+
+      </li>
+
+      <li>
+        <a href="#testing">使用 Android 调试桥命令测试</a>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  在智能手机的整个生命周期，蜂窝数据计划的成本通常会超出设备本身的成本。
+在 N Developer Preview 中，用户可以在整个设备上启用 Data Saver，以减少流量消耗，无论是在漫游，账单周期即将结束，还是使用少量的预付费数据包。
+
+
+</p>
+
+<p>
+  当用户在 <strong>Settings</strong> 中启用 Data Saver 且设备位于按流量计费的网络上时，系统屏蔽后台流量消耗，同时指示应用在前台尽可能使用较少的数据。
+
+用户可以将特定应用加入白名单以允许后台按流量计费的流量消耗，即使在打开 Data Saver 时也是如此。
+
+
+</p>
+
+<p>
+  N Developer Preview 扩展{@link android.net.ConnectivityManager} API，为应用提供<a href="#status">检索用户的 Data Saver 首选项</a>和<a href="#monitor-changes">监控首选项变更的方式</a>。
+
+
+这被认为是应用检查用户是否启用了 Data Saver 并努力限制前台和后台流量消耗的有效方法。
+
+
+</p>
+
+<h2 id="status">
+  检查 Data Saver 首选项
+</h2>
+
+<p>
+  在 N Developer Preview 中，应用可以使用 {@link
+  android.net.ConnectivityManager} API 来确定正在应用的是哪些流量消耗限制。
+{@code getRestrictBackgroundStatus()}方法返回下列值之一：
+
+</p>
+
+<dl>
+  <dt>
+    {@code RESTRICT_BACKGROUND_STATUS_DISABLED}
+  </dt>
+
+  <dd>
+    Data Saver 已禁用。
+  </dd>
+
+  <dt>
+    {@code RESTRICT_BACKGROUND_STATUS_ENABLED}
+  </dt>
+
+  <dd>
+    用户已为此应用禁用 Data Saver。应用应努力限制前台流量消耗，并妥善处理后台流量消耗限制。
+
+
+  </dd>
+
+  <dt>
+    {@code RESTRICT_BACKGROUND_STATUS_WHITELISTED}
+  </dt>
+
+  <dd>
+    用户已启用 Data Saver，但应用在白名单中。应用应努力限制前台和后台流量消耗。
+
+  </dd>
+</dl>
+
+<p>
+  这被认为是在设备连接到按流量计费的网络时限制流量消耗的有效方法，即使 Data Saver 被禁用或应用在白名单中。
+
+以下示例代码使用 {@link
+  android.net.ConnectivityManager#isActiveNetworkMetered
+  ConnectivityManager.isActiveNetworkMetered()} 和 {@code
+  ConnectivityManager.getRestrictBackgroundStatus()} 来确定应用应使用多少数据：
+
+</p>
+
+<pre>
+ConnectivityManager connMgr = (ConnectivityManager)
+        getSystemService(Context.CONNECTIVITY_SERVICE);
+// Checks if the device is on a metered network
+if (connMgr.isActiveNetworkMetered()) {
+  // Checks user’s Data Saver settings.
+  switch (connMgr.getRestrictBackgroundStatus()) {
+    case RESTRICT_BACKGROUND_STATUS_ENABLED:
+    // Background data usage is blocked for this app. Wherever possible,
+    // the app should also use less data in the foreground.
+
+    case RESTRICT_BACKGROUND_STATUS_WHITELISTED:
+    // The app is whitelisted. Wherever possible,
+    // the app should use less data in the foreground and background.
+
+    case RESTRICT_BACKGROUND_STATUS_DISABLED:
+    // Data Saver is disabled. Since the device is connected to a
+    // metered network, the app should use less data wherever possible.
+  }
+} else {
+  // The device is not on a metered network.
+  // Use data as required to perform syncs, downloads, and updates.
+}
+</pre>
+
+<h3 id="request-whitelist">
+  请求白名单权限
+</h3>
+
+<p>
+  如果您的应用需要使用后台数据，它可以通过发送一项包含您的应用软件包名称的 URI 的 <code>Settings.ACTION_IGNORE_BACKGROUND_DATA_RESTRICTIONS_SETTINGS</code> Intent 来请求白名单权限：例如 <code>package:MY_APP_ID</code>。
+
+
+
+
+</p>
+
+<p>
+  发送 Intent 和 URI 将启动 <strong>Settings</strong> 应用，还会显示您的应用的流量消耗设置。
+用户随后可以决定是否启用应用的后台数据。
+在您发送此 Intent 之前，先询问用户是否希望启用 <strong>Settings</strong> 应用，以启用后台流量消耗，这是一种有效的做法。
+
+
+
+</p>
+
+<h2 id="monitor-changes">
+  监控 Data Saver 首选项变更
+</h2>
+
+<p>
+  应用可以通过创建一条 {@link
+android.content.BroadcastReceiver} 以侦听 {@code
+  ConnectivityManager.ACTION_RESTRICT_BACKGROUND_CHANGED} 以及使用 {@link android.content.Context#registerReceiver
+  Context.registerReceiver()}动态注册接收器来监控 Data Saver 首选项变更。
+当应用接收到这条广播时，应通过调用 {@code
+  ConnectivityManager.getRestrictBackgroundStatus()} 来<a href="#status">检查新的 Data Saver 首选项是否会影响其权限</a>。
+
+
+</p>
+
+<p class="note">
+  <strong>注：</strong>系统只会向使用 {@link
+  android.content.Context#registerReceiver Context.registerReceiver()} 进行动态注册的应用发送此广播。
+在其清单中注册接收此广播的应用将不会收到它们。
+
+
+</p>
+
+<h2 id="testing">
+  使用 Android 调试桥命令测试
+</h2>
+
+<a href="{@docRoot}tools/help/adb.html">Android 调试桥 (ADB)</a> 提供了多条命令，可用于检查和配置网络权限：
+
+
+
+<dl>
+  <dt>
+    <code>$ adb shell dumpsys netpolicy</code>
+  </dt>
+
+  <dd>
+    生成包括当前全局后台网络限制设置、目前在白名单中的软件包 UID 以及其他已知软件包的权限的报告。
+
+
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy</code>
+  </dt>
+
+  <dd>
+    显示网络政策管理器 (netpolicy) 命令的完整清单。
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy set restrict-background
+    &lt;boolean&gt;</code>
+  </dt>
+
+  <dd>
+    当分别传递 <code>true</code> 或 <code>false</code> 时，启用或禁用 Data Saver 模式。
+
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy add restrict-background-whitelist
+    &lt;UID&gt;</code>
+  </dt>
+
+  <dd>
+    将指定软件包 UID 加入白名单，以允许后台按流量计费的流量消耗
+。
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy remove restrict-background-whitelist
+    &lt;UID&gt;</code>
+  </dt>
+
+  <dd>
+    从白名单中移除指定软件包 UID，以阻止当 Data Saver 启用时后台按流量计费的流量消耗。
+
+  </dd>
+</dl>

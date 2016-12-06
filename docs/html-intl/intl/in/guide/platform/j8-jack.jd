@@ -1,0 +1,197 @@
+page.title=Fitur Bahasa Java 8
+page.keywords="android N", "Java 8", "Jack"
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <ol>
+      <li>
+        <a href="#supported-features">API dan Fitur Bahasa Java 8 yang didukung</a>
+      </li>
+      <li>
+        <a href="#configuration">Mengaktifkan Fitur Java 8 dan Jack Toolchain</a>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<p>Android N memperkenalkan dukungan untuk fitur bahasa Java 8
+  yang bisa Anda gunakan saat mengembangkan aplikasi yang menargetkan Android N.
+  Halaman ini menjelaskan fitur bahasa baru yang didukung dalam Android N
+  Preview, cara menyiapkan proyek Anda dengan benar untuk menggunakannya, dan setiap masalah
+  yang diketahui yang mungkin Anda temui.
+</p>
+
+<p>Untuk mulai menggunakan fitur-fitur ini, Anda perlu mengunduh dan menyiapkan Android
+Studio 2.1 dan Android N Preview SDK, yang menyertakan
+Jack toolchain yang diperlukan dan Plugin Android untuk Gradle yang telah diperbarui. Jika Anda belum
+memasang Android N Preview SDK, lihat <a href="{@docRoot}preview/setup-sdk.html">Menyiapkan Pengembangan untuk Android N</a>.</p>
+
+
+
+<p class="note">
+  <strong>Catatan:</strong> Menggunakan fitur bahasa Java 8 yang baru bukanlah
+  persyaratan untuk mengembangkan aplikasi yang menargetkan platform Android N. Jika Anda
+  tidak ingin menulis kode dengan fitur bahasa Java 8, Anda bisa membiarkan nilai kompatibilitas
+  sumber dan target proyek disetel ke Java 7, namun Anda tetap harus
+  mengompilasi dengan JDK 8 untuk membangun pada platform Android N.
+</p>
+
+<h2 id="supported-features">
+  API dan Fitur Bahasa Java 8 yang Didukung
+</h2>
+
+<p>
+  Saat ini tidak semua fitur bahasa Java 8 didukung Android. Akan tetapi,
+  fitur berikut sekarang tersedia saat mengembangkan aplikasi yang menargetkan
+  Android N Preview:
+</p>
+
+<ul>
+  <li>
+    <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/IandI/defaultmethods.html">Metode
+    antarmuka default dan statis</a>
+  </li>
+
+  <li>
+    <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html">
+    Ekspresi Lambda</a> (juga tersedia pada API level 23 dan yang lebih rendah)
+  </li>
+
+  <li>
+    <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/annotations/repeating.html">Anotasi
+    yang bisa diulang</a>
+  </li>
+
+  <li>
+    <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/javaOO/methodreferences.html">
+    Referensi Metode</a> (juga tersedia pada API level 23 dan yang lebih rendah)
+  </li>
+</ul>
+
+<p class="note">
+  <strong>Catatan:</strong> Untuk menguji ekspresi lambda dan referensi metode pada
+  Android versi sebelumnya, bukalah file {@code build.gradle}
+  Anda, serta setel {@code compileSdkVersion} dan {@code targetSdkVersion} ke 23 atau
+  yang lebih rendah. Anda tetap perlu <a href="#configuration">mengaktifkan Jack
+  toolchain</a> untuk menggunakan fitur Java 8 ini.
+</p>
+
+<p>
+  Selain itu, API fitur bahasa Java 8 berikut ini sekarang tersedia:
+</p>
+
+<ul>
+  <li>Reflection API dan API terkait bahasa:
+    <ul>
+      <li>
+        <a class="external-link" href="https://docs.oracle.com/javase/8/docs/api/java/lang/FunctionalInterface.html">
+        {@code java.lang.FunctionalInterface}</a>
+      </li>
+
+      <li>
+        <a class="external-link" href="https://docs.oracle.com/javase/8/docs/api/java/lang/annotation/Repeatable.html">
+        {@code java.lang.annotation.Repeatable}</a>
+      </li>
+
+      <li>
+        <a class="external-link" href="https://docs.oracle.com/javase/8/docs/api/java/lang/reflect/Method.html#isDefault--">
+        {@code java.lang.reflect.Method.isDefault()}</a>
+      </li>
+
+      <li>dan Reflection API yang terkait dengan anotasi yang bisa diulang, seperti
+     <a class="external-link" href="https://docs.oracle.com/javase/8/docs/api/java/lang/reflect/AnnotatedElement.html#getAnnotationsByType-java.lang.Class-">
+{@code AnnotatedElement.getAnnotationsByType(Class)}</a>
+      </li>
+    </ul>
+  </li>
+
+  <li>Utility API:
+    <ul>
+      <li>
+        <a class="external-link" href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">
+        {@code java.util.function}</a>
+      </li>
+
+      <li>
+        <a class="external-link" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html">
+        {@code java.util.stream}</a>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="configuration">
+  Mengaktifkan Fitur Java 8 dan Jack Toolchain
+</h2>
+
+<p>
+  Agar dapat menggunakan fitur bahasa Java 8 yang baru, Anda juga perlu menggunakan
+  <a class="external-link" href="https://source.android.com/source/jack.html">Jack toolchain</a> yang baru.  Toolchain Android
+ yang baru ini mengompilasi sumber bahasa Java menjadi dex
+  bytecode yang bisa dibaca Android, memiliki format  pustaka {@code .jack} sendiri, dan menyediakan sebagian besar fitur toolchain
+  sebagai bagian dari alat bantu tunggal: pengemasan ulang, penciutan, pengaburan, dan
+  multidex.
+</p>
+
+<p>Inilah perbandingan dua toolchain yang digunakan untuk membangun file Android DEX:</p>
+<ul>
+  <li>Toolchain javac lawas:<br>
+  <b>javac</b> ({@code .java} --&gt; {@code .class}) --&gt; <b>dx</b> ({@code
+ .class} --&gt; {@code .dex})
+  </li>
+
+  <li>Jack Toolchain baru:<br>
+  <b>Jack</b> ({@code .java} --&gt; {@code .jack} --&gt; {@code .dex})
+  </li>
+</ul>
+
+<h3>
+  Mengonfigurasi Gradle
+</h3>
+
+<p>
+  Untuk mengaktifkan fitur bahasa Java 8 dan Jack bagi proyek Anda, masukkan
+  yang berikut dalam file {@code build.gradle} level modul Anda:
+</p>
+
+<pre>
+android {
+  ...
+  defaultConfig {
+    ...
+    jackOptions {
+      enabled true
+    }
+  }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+}
+</pre>
+
+<h3 id="known-issues">
+  Masalah yang Diketahui
+</h3>
+
+<p>
+  <a href="{@docRoot}tools/building/building-studio.html#instant-run">Instant
+  Run</a> saat ini tidak berfungsi pada Jack dan akan dinonaktifkan saat menggunakan
+  toolchain baru.
+</p>
+
+<p>Karena Jack tidak menghasilkan file kelas antara saat mengompilasi sebuah
+aplikasi, alat yang bergantung pada file-file ini sekarang tidak berfungsi pada Jack. Beberapa
+contoh alat ini adalah:</p>
+
+<ul>
+  <li>Pendeteksi lint yang beroperasi pada file kelas
+  </li>
+
+  <li>Alat dan pustaka yang mewajibkan file kelas aplikasi (misalnya
+pengujian instrumentasi dengan JaCoCo)
+  </li>
+</ul>
+
+<p>Jika Anda menemukan masalah lain saat menggunakan Jack, <a href="http://tools.android.com/filing-bugs">laporkan bug</a>.</p>

@@ -20,19 +20,27 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="@dimen/volume_dialog_margin_bottom"
     android:background="@drawable/volume_dialog_background"
-    android:translationZ="4dp"
-    android:paddingTop="8dp">
+    android:translationZ="4dp" >
 
     <LinearLayout
         android:id="@+id/volume_dialog_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingBottom="8dp"
-        android:paddingStart="8dp"
-        android:animateLayoutChanges="true" >
+        android:orientation="vertical" >
 
-        <!-- volume rows added and removed here! :-) -->
+        <LinearLayout
+                android:id="@+id/volume_dialog_rows"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingEnd="@dimen/volume_button_size"
+                android:paddingTop="@dimen/volume_dialog_collapsed_padding_top"
+                android:orientation="vertical" >
+            <View android:id="@+id/spacer"
+                  android:layout_width="match_parent"
+                  android:layout_height="@dimen/volume_dialog_expanded_spacer"
+                  android:visibility="gone"/>
+            <!-- volume rows added and removed here! :-) -->
+        </LinearLayout>
 
         <include layout="@layout/volume_zen_footer" />
 
@@ -50,8 +58,11 @@
             android:clickable="true"
             android:soundEffectsEnabled="false"
             android:src="@drawable/ic_volume_collapse_animation"
+            android:background="@drawable/ripple_drawable"
             tools:ignore="RtlHardcoded"
             android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true"/>
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="@dimen/volume_expander_margin_top"
+            android:layout_marginEnd="@dimen/volume_expander_margin_end"/>
 
 </RelativeLayout>

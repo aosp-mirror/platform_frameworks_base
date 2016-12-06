@@ -171,7 +171,7 @@ include the following in your app's manifest:</p>
 </pre>
 
 <p>However, if you want to make your app available to devices that don't support BLE,
-you should still include this element in your app's manifest, but set {@code required="false"}. 
+you should still include this element in your app's manifest, but set {@code required="false"}.
 Then at run-time you can determine BLE availability by using
 {@link android.content.pm.PackageManager#hasSystemFeature PackageManager.hasSystemFeature()}:
 

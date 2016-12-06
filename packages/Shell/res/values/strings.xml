@@ -25,8 +25,8 @@
     <!-- Content notification indicating a bugreport is being updated before it can be shared, asking the user to wait [CHAR LIMIT=50] -->
     <string name="bugreport_updating_wait">Please wait\u2026</string>
 
-    <!-- Text of notification indicating that swipe left will share the captured bugreport. [CHAR LIMIT=100] -->
-    <string name="bugreport_finished_text" product="watch">Swipe left to share your bug report</string>
+    <!-- Text of notification indicating that bugreport will appear on the phone. [CHAR LIMIT=100] -->
+    <string name="bugreport_finished_text" product="watch">The bug report will appear on the phone shortly</string>
     <!-- Text of notification indicating that tapping will share the captured bugreport. [CHAR LIMIT=100] -->
     <string name="bugreport_finished_text" product="default">Tap to share your bug report</string>
     <!-- Text of notification indicating that swipe left will share the captured bugreport, but giving user the option to wait for the screenshot. [CHAR LIMIT=100] -->

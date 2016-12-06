@@ -25,6 +25,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
+#include <sys/system_properties.h>
 
 #include <private/android_filesystem_config.h> // for AID_SYSTEM
 
@@ -41,6 +42,7 @@
 #include "ScopedUtfChars.h"
 #include "utils/Log.h"
 #include "utils/misc.h"
+#include "utils/String8.h"
 
 extern "C" int capget(cap_user_header_t hdrp, cap_user_data_t datap);
 extern "C" int capset(cap_user_header_t hdrp, const cap_user_data_t datap);
@@ -184,11 +186,20 @@ static void verifySystemIdmaps()
                 argv[argc++] = AssetManager::TARGET_APK_PATH;
                 argv[argc++] = AssetManager::IDMAP_DIR;
 
-                // Directories to scan for overlays
-                // /vendor/overlay
-                if (stat(AssetManager::OVERLAY_DIR, &st) == 0) {
-                    argv[argc++] = AssetManager::OVERLAY_DIR;
-                 }
+                // Directories to scan for overlays: if OVERLAY_SKU_DIR_PROPERTY is defined,
+                // use OVERLAY_DIR/<value of OVERLAY_SKU_DIR_PROPERTY> if exists, otherwise
+                // use OVERLAY_DIR if exists.
+                char subdir[PROP_VALUE_MAX];
+                int len = __system_property_get(AssetManager::OVERLAY_SKU_DIR_PROPERTY, subdir);
+                String8 overlayPath;
+                if (len > 0) {
+                    overlayPath = String8(AssetManager::OVERLAY_DIR) + "/" + subdir;
+                } else {
+                    overlayPath = String8(AssetManager::OVERLAY_DIR);
+                }
+                if (stat(overlayPath.string(), &st) == 0) {
+                    argv[argc++] = overlayPath.string();
+                }
 
                 // Finally, invoke idmap (if any overlay directory exists)
                 if (argc > 5) {

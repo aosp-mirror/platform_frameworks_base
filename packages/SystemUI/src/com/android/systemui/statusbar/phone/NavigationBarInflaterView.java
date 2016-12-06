@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Space;
+
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 import com.android.systemui.tuner.TunerService;
@@ -68,6 +69,8 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
 
     private View mLastRot0;
     private View mLastRot90;
+
+    private boolean mAlternativeOrder;
 
     public NavigationBarInflaterView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -112,6 +115,7 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
                 false);
         mRot90.setId(R.id.rot90);
         addView(mRot90);
+        updateAlternativeOrder();
         if (getParent() instanceof NavigationBarView) {
             ((NavigationBarView) getParent()).updateRotatedViews();
         }
@@ -147,6 +151,26 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
         mButtonDispatchers = buttonDisatchers;
         for (int i = 0; i < buttonDisatchers.size(); i++) {
             initiallyFill(buttonDisatchers.valueAt(i));
+        }
+    }
+
+    public void setAlternativeOrder(boolean alternativeOrder) {
+        if (alternativeOrder != mAlternativeOrder) {
+            mAlternativeOrder = alternativeOrder;
+            updateAlternativeOrder();
+        }
+    }
+
+    private void updateAlternativeOrder() {
+        updateAlternativeOrder(mRot0.findViewById(R.id.ends_group));
+        updateAlternativeOrder(mRot0.findViewById(R.id.center_group));
+        updateAlternativeOrder(mRot90.findViewById(R.id.ends_group));
+        updateAlternativeOrder(mRot90.findViewById(R.id.center_group));
+    }
+
+    private void updateAlternativeOrder(View v) {
+        if (v instanceof ReverseLinearLayout) {
+            ((ReverseLinearLayout) v).setAlternativeOrder(mAlternativeOrder);
         }
     }
 
@@ -256,7 +280,7 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
             params.width = (int) (params.width * size);
         }
         parent.addView(v);
-        addToDispatchers(v);
+        addToDispatchers(v, landscape);
         View lastView = landscape ? mLastRot90 : mLastRot0;
         if (lastView != null) {
             v.setAccessibilityTraversalAfter(lastView.getId());
@@ -303,16 +327,16 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
         return buttonSpec.substring(0, buttonSpec.indexOf(SIZE_MOD_START));
     }
 
-    private void addToDispatchers(View v) {
+    private void addToDispatchers(View v, boolean landscape) {
         if (mButtonDispatchers != null) {
             final int indexOfKey = mButtonDispatchers.indexOfKey(v.getId());
             if (indexOfKey >= 0) {
-                mButtonDispatchers.valueAt(indexOfKey).addView(v);
+                mButtonDispatchers.valueAt(indexOfKey).addView(v, landscape);
             } else if (v instanceof ViewGroup) {
                 final ViewGroup viewGroup = (ViewGroup)v;
                 final int N = viewGroup.getChildCount();
                 for (int i = 0; i < N; i++) {
-                    addToDispatchers(viewGroup.getChildAt(i));
+                    addToDispatchers(viewGroup.getChildAt(i), landscape);
                 }
             }
         }

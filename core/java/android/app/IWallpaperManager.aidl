@@ -44,12 +44,12 @@ interface IWallpaperManager {
      */
     ParcelFileDescriptor setWallpaper(String name, in String callingPackage,
             in Rect cropHint, boolean allowBackup, out Bundle extras, int which,
-            IWallpaperManagerCallback completion);
+            IWallpaperManagerCallback completion, int userId);
 
     /**
      * Set the live wallpaper. This only affects the system wallpaper.
      */
-    void setWallpaperComponentChecked(in ComponentName name, in String callingPackage);
+    void setWallpaperComponentChecked(in ComponentName name, in String callingPackage, int userId);
 
     /**
      * Set the live wallpaper. This only affects the system wallpaper.
@@ -72,7 +72,7 @@ interface IWallpaperManager {
      * information about that wallpaper.  Otherwise, if it is a static image,
      * simply return null.
      */
-    WallpaperInfo getWallpaperInfo();
+    WallpaperInfo getWallpaperInfo(int userId);
 
     /**
      * Clear the system wallpaper.
@@ -128,7 +128,7 @@ interface IWallpaperManager {
     /*
      * Backup: is the current system wallpaper image eligible for off-device backup?
      */
-    boolean isWallpaperBackupEligible(int userId);
+    boolean isWallpaperBackupEligible(int which, int userId);
 
     /*
      * Keyguard: register a callback for being notified that lock-state relevant

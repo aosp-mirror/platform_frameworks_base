@@ -127,7 +127,8 @@ int RecordingCanvas::saveLayer(float left, float top, float right, float bottom,
     // operations will be able to store and restore the current clip and transform info, and
     // quick rejection will be correct (for display lists)
 
-    const Rect unmappedBounds(left, top, right, bottom);
+    Rect unmappedBounds(left, top, right, bottom);
+    unmappedBounds.roundOut();
 
     // determine clipped bounds relative to previous viewport.
     Rect visibleBounds = unmappedBounds;
@@ -148,50 +149,53 @@ int RecordingCanvas::saveLayer(float left, float top, float right, float bottom,
 
     // Map visible bounds back to layer space, and intersect with parameter bounds
     Rect layerBounds = visibleBounds;
-    Matrix4 inverse;
-    inverse.loadInverse(*previous.transform);
-    inverse.mapRect(layerBounds);
-    layerBounds.doIntersect(unmappedBounds);
+    if (CC_LIKELY(!layerBounds.isEmpty())) {
+        // if non-empty, can safely map by the inverse transform
+        Matrix4 inverse;
+        inverse.loadInverse(*previous.transform);
+        inverse.mapRect(layerBounds);
+        layerBounds.doIntersect(unmappedBounds);
+    }
 
     int saveValue = mState.save((int) flags);
     Snapshot& snapshot = *mState.writableSnapshot();
 
     // layerBounds is in original bounds space, but clipped by current recording clip
-    if (layerBounds.isEmpty() || unmappedBounds.isEmpty()) {
-        // Don't bother recording layer, since it's been rejected
+    if (!layerBounds.isEmpty() && !unmappedBounds.isEmpty()) {
         if (CC_LIKELY(clippedLayer)) {
-            snapshot.resetClip(0, 0, 0, 0);
+            auto previousClip = getRecordedClip(); // capture before new snapshot clip has changed
+            if (addOp(alloc().create_trivial<BeginLayerOp>(
+                    unmappedBounds,
+                    *previous.transform, // transform to *draw* with
+                    previousClip, // clip to *draw* with
+                    refPaint(paint))) >= 0) {
+                snapshot.flags |= Snapshot::kFlagIsLayer | Snapshot::kFlagIsFboLayer;
+                snapshot.initializeViewport(unmappedBounds.getWidth(), unmappedBounds.getHeight());
+                snapshot.transform->loadTranslate(-unmappedBounds.left, -unmappedBounds.top, 0.0f);
+
+                Rect clip = layerBounds;
+                clip.translate(-unmappedBounds.left, -unmappedBounds.top);
+                snapshot.resetClip(clip.left, clip.top, clip.right, clip.bottom);
+                snapshot.roundRectClipState = nullptr;
+                return saveValue;
+            }
+        } else {
+            if (addOp(alloc().create_trivial<BeginUnclippedLayerOp>(
+                    unmappedBounds,
+                    *mState.currentSnapshot()->transform,
+                    getRecordedClip(),
+                    refPaint(paint))) >= 0) {
+                snapshot.flags |= Snapshot::kFlagIsLayer;
+                return saveValue;
+            }
         }
-        return saveValue;
     }
 
+    // Layer not needed, so skip recording it...
     if (CC_LIKELY(clippedLayer)) {
-        auto previousClip = getRecordedClip(); // note: done before new snapshot's clip has changed
-
-        snapshot.flags |= Snapshot::kFlagIsLayer | Snapshot::kFlagIsFboLayer;
-        snapshot.initializeViewport(unmappedBounds.getWidth(), unmappedBounds.getHeight());
-        snapshot.transform->loadTranslate(-unmappedBounds.left, -unmappedBounds.top, 0.0f);
-
-        Rect clip = layerBounds;
-        clip.translate(-unmappedBounds.left, -unmappedBounds.top);
-        snapshot.resetClip(clip.left, clip.top, clip.right, clip.bottom);
-        snapshot.roundRectClipState = nullptr;
-
-        addOp(alloc().create_trivial<BeginLayerOp>(
-                unmappedBounds,
-                *previous.transform, // transform to *draw* with
-                previousClip, // clip to *draw* with
-                refPaint(paint)));
-    } else {
-        snapshot.flags |= Snapshot::kFlagIsLayer;
-
-        addOp(alloc().create_trivial<BeginUnclippedLayerOp>(
-                unmappedBounds,
-                *mState.currentSnapshot()->transform,
-                getRecordedClip(),
-                refPaint(paint)));
+        // ... and set empty clip to reject inner content, if possible
+        snapshot.resetClip(0, 0, 0, 0);
     }
-
     return saveValue;
 }
 
@@ -267,7 +271,7 @@ static Rect calcBoundsOfPoints(const float* points, int floatCount) {
 
 // Geometry
 void RecordingCanvas::drawPoints(const float* points, int floatCount, const SkPaint& paint) {
-    if (floatCount < 2) return;
+    if (CC_UNLIKELY(floatCount < 2 || PaintUtils::paintWillNotDraw(paint))) return;
     floatCount &= ~0x1; // round down to nearest two
 
     addOp(alloc().create_trivial<PointsOp>(
@@ -278,7 +282,7 @@ void RecordingCanvas::drawPoints(const float* points, int floatCount, const SkPa
 }
 
 void RecordingCanvas::drawLines(const float* points, int floatCount, const SkPaint& paint) {
-    if (floatCount < 4) return;
+    if (CC_UNLIKELY(floatCount < 4 || PaintUtils::paintWillNotDraw(paint))) return;
     floatCount &= ~0x3; // round down to nearest four
 
     addOp(alloc().create_trivial<LinesOp>(
@@ -289,6 +293,8 @@ void RecordingCanvas::drawLines(const float* points, int floatCount, const SkPai
 }
 
 void RecordingCanvas::drawRect(float left, float top, float right, float bottom, const SkPaint& paint) {
+    if (CC_UNLIKELY(PaintUtils::paintWillNotDraw(paint))) return;
+
     addOp(alloc().create_trivial<RectOp>(
             Rect(left, top, right, bottom),
             *(mState.currentSnapshot()->transform),
@@ -330,6 +336,8 @@ void RecordingCanvas::drawSimpleRects(const float* rects, int vertexCount, const
 }
 
 void RecordingCanvas::drawRegion(const SkRegion& region, const SkPaint& paint) {
+    if (CC_UNLIKELY(PaintUtils::paintWillNotDraw(paint))) return;
+
     if (paint.getStyle() == SkPaint::kFill_Style
             && (!paint.isAntiAlias() || mState.currentTransform()->isSimple())) {
         int count = 0;
@@ -354,8 +362,11 @@ void RecordingCanvas::drawRegion(const SkRegion& region, const SkPaint& paint) {
         }
     }
 }
+
 void RecordingCanvas::drawRoundRect(float left, float top, float right, float bottom,
             float rx, float ry, const SkPaint& paint) {
+    if (CC_UNLIKELY(PaintUtils::paintWillNotDraw(paint))) return;
+
     if (CC_LIKELY(MathUtils::isPositive(rx) || MathUtils::isPositive(ry))) {
         addOp(alloc().create_trivial<RoundRectOp>(
                 Rect(left, top, right, bottom),
@@ -390,7 +401,8 @@ void RecordingCanvas::drawRoundRect(
 
 void RecordingCanvas::drawCircle(float x, float y, float radius, const SkPaint& paint) {
     // TODO: move to Canvas.h
-    if (radius <= 0) return;
+    if (CC_UNLIKELY(radius <= 0 || PaintUtils::paintWillNotDraw(paint))) return;
+
     drawOval(x - radius, y - radius, x + radius, y + radius, paint);
 }
 
@@ -410,6 +422,8 @@ void RecordingCanvas::drawCircle(
 }
 
 void RecordingCanvas::drawOval(float left, float top, float right, float bottom, const SkPaint& paint) {
+    if (CC_UNLIKELY(PaintUtils::paintWillNotDraw(paint))) return;
+
     addOp(alloc().create_trivial<OvalOp>(
             Rect(left, top, right, bottom),
             *(mState.currentSnapshot()->transform),
@@ -419,6 +433,8 @@ void RecordingCanvas::drawOval(float left, float top, float right, float bottom,
 
 void RecordingCanvas::drawArc(float left, float top, float right, float bottom,
         float startAngle, float sweepAngle, bool useCenter, const SkPaint& paint) {
+    if (CC_UNLIKELY(PaintUtils::paintWillNotDraw(paint))) return;
+
     if (fabs(sweepAngle) >= 360.0f) {
         drawOval(left, top, right, bottom, paint);
     } else {
@@ -432,6 +448,8 @@ void RecordingCanvas::drawArc(float left, float top, float right, float bottom,
 }
 
 void RecordingCanvas::drawPath(const SkPath& path, const SkPaint& paint) {
+    if (CC_UNLIKELY(PaintUtils::paintWillNotDraw(paint))) return;
+
     addOp(alloc().create_trivial<PathOp>(
             Rect(path.getBounds()),
             *(mState.currentSnapshot()->transform),
@@ -440,8 +458,8 @@ void RecordingCanvas::drawPath(const SkPath& path, const SkPaint& paint) {
 }
 
 void RecordingCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
-    mDisplayList->pushStagingFunctors.push_back(tree->getFunctor());
     mDisplayList->ref(tree);
+    mDisplayList->vectorDrawables.push_back(tree);
     addOp(alloc().create_trivial<VectorDrawableOp>(
             tree,
             Rect(tree->stagingProperties()->getBounds()),
@@ -604,7 +622,7 @@ void RecordingCanvas::callDrawGLFunction(Functor* functor,
             functor));
 }
 
-size_t RecordingCanvas::addOp(RecordedOp* op) {
+int RecordingCanvas::addOp(RecordedOp* op) {
     // skip op with empty clip
     if (op->localClip && op->localClip->rect.isEmpty()) {
         // NOTE: this rejection happens after op construction/content ref-ing, so content ref'd

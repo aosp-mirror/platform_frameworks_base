@@ -11,7 +11,7 @@ page.image=images/develop/app_components.png
 
   <div class="col-6">
     <h3>ブログの記事</h3>
-    
+
     <a href="http://android-developers.blogspot.com/2012/05/using-dialogfragments.html">
       <h4>DialogFragments の使用</h4>
       <p>この投稿では、DialogFragments を v4 サポート ライブラリで使用して（Honeycomb 以前の端末での下方互換性のため）ダイアログを編集したり、インターフェースを使用して呼び出し元の Activity に結果を返したりする方法について説明します。</p>
@@ -21,7 +21,7 @@ page.image=images/develop/app_components.png
       <h4>すべてに Fragments を</h4>
       <p>本日、同じ Fragments API を利用できる静的なライブラリが公開され、Android 1.6 以降でもフラグメントを使用してタブレット対応のユーザー インターフェースを作成できるようになりました。 </p>
     </a>
-    
+
     <a href="http://android-developers.blogspot.com/2010/07/multithreading-for-performance.html">
       <h4>マルチスレッドでパフォーマンス向上</h4>
       <p>応答の速いアプリケーションを作成する上で重要なのは、メイン UI スレッドが最小限の作業を行うようにすることです。
@@ -32,7 +32,7 @@ page.image=images/develop/app_components.png
 
   <div class="col-6">
     <h3>トレーニング</h3>
-    
+
     <a href="http://developer.android.com/training/basics/activity-lifecycle/index.html">
       <h4>アクティビティのライフサイクルの管理</h4>
       <p>このレッスンでは、各 Activity インスタンスが受け取る重要なライフサイクル コールバック メソッドについて、それらを使用してユーザーの予期する内容でアクティビティを動作させる方法と、アクティビティがそれらを必要としないときに、システムのリソースを消費しないようにする方法について学習します。

@@ -21,5 +21,4 @@
         android:viewportHeight="24">
     <path android:fillColor="@color/ksh_key_item_color"
             android:pathData="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-    <path android:pathData="M0 0h24v24H0z" />
 </vector>

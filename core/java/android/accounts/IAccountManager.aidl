@@ -19,8 +19,10 @@ package android.accounts;
 import android.accounts.IAccountManagerResponse;
 import android.accounts.Account;
 import android.accounts.AuthenticatorDescription;
+import android.content.IntentSender;
 import android.os.Bundle;
-
+import android.os.RemoteCallback;
+import android.os.UserHandle;
 
 /**
  * Central application service that provides account management.
@@ -102,4 +104,12 @@ interface IAccountManager {
     /* Check if credentials update is suggested */
     void isCredentialsUpdateSuggested(in IAccountManagerResponse response, in Account account,
         String statusToken);
+
+    /* Check if the package in a user can access an account */
+    boolean hasAccountAccess(in Account account, String packageName, in UserHandle userHandle);
+    /* Crate an intent to request account access for package and a given user id */
+    IntentSender createRequestAccountAccessIntentSenderAsUser(in Account account,
+        String packageName, in UserHandle userHandle);
+
+    void onAccountAccessed(String token);
 }

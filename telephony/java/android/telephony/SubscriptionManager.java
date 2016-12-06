@@ -232,24 +232,11 @@ public class SubscriptionManager {
     /** Indicates that data roaming is disabled for a subscription */
     public static final int DATA_ROAMING_DISABLE = 0;
 
-    /** Sim provisioning status: provisioned */
-    /** @hide */
-    public static final int SIM_PROVISIONED = 0;
-
-    /** Sim provisioning status: un-provisioned due to cold sim */
-    /** @hide */
-    public static final int SIM_UNPROVISIONED_COLD = 1;
-
-    /** Sim provisioning status: un-provisioned due to out of credit */
-    /** @hide */
-    public static final int SIM_UNPROVISIONED_OUT_OF_CREDIT = 2;
-
-    /** Maximum possible sim provisioning status */
-    /** @hide */
-    public static final int MAX_SIM_PROVISIONING_STATUS = SIM_UNPROVISIONED_OUT_OF_CREDIT;
-
     /** @hide */
     public static final int DATA_ROAMING_DEFAULT = DATA_ROAMING_DISABLE;
+
+    /** @hide */
+    public static final int SIM_PROVISIONED = 0;
 
     /**
      * TelephonyProvider column name for the MCC associated with a SIM.
@@ -839,40 +826,6 @@ public class SubscriptionManager {
             // ignore it
         }
 
-        return result;
-    }
-
-    /**
-     * Set Sim Provisioning Status by subscription ID
-     * @param simProvisioningStatus with the subscription
-     * {@See SubscriptionManager#SIM_PROVISIONED}
-     * {@See SubscriptionManager#SIM_UNPROVISIONED_COLD}
-     * {@See SubscriptionManager#SIM_UNPROVISIONED_OUT_OF_CREDIT}
-     * @param subId the unique SubInfoRecord index in database
-     * @return the number of records updated
-     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
-     * @hide
-     */
-    public int setSimProvisioningStatus(int simProvisioningStatus, int subId) {
-        if (VDBG) {
-            logd("[setSimProvisioningStatus]+ status:" + simProvisioningStatus + " subId:" + subId);
-        }
-        if (simProvisioningStatus < 0 || simProvisioningStatus > MAX_SIM_PROVISIONING_STATUS ||
-                !isValidSubscriptionId(subId)) {
-            logd("[setSimProvisioningStatus]- fail");
-            return -1;
-        }
-
-        int result = 0;
-
-        try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-            if (iSub != null) {
-                result = iSub.setSimProvisioningStatus(simProvisioningStatus, subId);
-            }
-        } catch (RemoteException ex) {
-            // ignore it
-        }
         return result;
     }
 

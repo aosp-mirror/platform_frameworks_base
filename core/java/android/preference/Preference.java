@@ -719,6 +719,9 @@ public class Preference implements Comparable<Preference> {
      * @see #setIcon(Drawable)
      */
     public Drawable getIcon() {
+        if (mIcon == null && mIconResId != 0) {
+            mIcon = getContext().getDrawable(mIconResId);
+        }
         return mIcon;
     }
 

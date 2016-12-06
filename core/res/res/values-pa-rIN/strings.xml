@@ -363,7 +363,7 @@
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"ਐਪ ਨੂੰ ਤੁਹਾਡਾ ਅਨੁਮਾਨਿਤ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਨੈੱਟਵਰਕ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਸਰੋਤ ਵਰਤਦੇ ਹੋਏ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਸੇਵਾਵਾਂ ਰਾਹੀਂ ਪ੍ਰਾਪਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਜਿਵੇਂ ਸੈਲ ਟਾਵਰ ਅਤੇ Wi-Fi. ਇਹ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਸੇਵਾਵਾਂ ਚਾਲੂ ਅਤੇ ਐਪ ਨੂੰ ਉਹਨਾਂ ਨੂੰ ਵਰਤਣ ਲਈ ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਤੇ ਹੋਣੀਆਂ ਚਾਹੀਦੀਆਂ ਹਨ। ਐਪਸ ਇਸਦੀ ਵਰਤੋਂ ਇਹ ਅਨੁਮਾਨ ਲਗਾਉਣ ਲਈ ਕਰ ਸਕਦੇ ਹਨ ਕਿ ਤੁਸੀਂ ਕਿੱਥੇ ਹੋ।"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ਆਪਣੀਆਂ ਔਡੀਓ ਸੈਟਿੰਗਾਂ ਬਦਲੋ"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ਔਪ ਨੂੰ ਗਲੋਬਲ ਔਡੀਓ ਸੈਟਿੰਗਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ ਜਿਵੇਂ ਵੌਲਿਊਮ ਅਤੇ ਆਊਟਪੁਟ ਲਈ ਕਿਹੜਾ ਸਪੀਕਰ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ।"</string>
-    <string name="permlab_recordAudio" msgid="3876049771427466323">"ਔਡੀਓ ਰਿਕਾਰਡ ਕਰੋ"</string>
+    <string name="permlab_recordAudio" msgid="3876049771427466323">"ਔਡੀਓ ਰਿਕਾਰਡ ਕਰਨ"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"ਐਪ ਨੂੰ ਮਾਈਕ੍ਰੋਫੋਨ ਨਾਲ ਔਡੀਓ ਰਿਕਾਰਡ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਅਨੁਮਤੀ ਐਪ ਨੂੰ ਤੁਹਾਡੀ ਪੁਸ਼ਟੀ ਤੋਂ ਬਿਨਾਂ ਕਿਸੇ ਵੀ ਸਮੇਂ ਔਡੀਓ ਰਿਕਾਰਡ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"SIM ਨੂੰ ਕਮਾਂਡਾਂ ਭੇਜੋ"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"ਐਪ ਨੂੰ SIM ਨੂੰ ਕਮਾਂਡਾਂ ਭੇਜਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਬਹੁਤ ਘਾਤਕ ਹੈ।"</string>
@@ -679,6 +679,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"ਸਹੀ!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"ਸਾਰੀਆਂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਅਤੇ ਡੈਟੇ ਲਈ ਅਨਲੌਕ ਕਰੋ"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"ਅਧਿਕਤਮ ਚਿਹਰਾ ਅਨਲੌਕ ਕੋਸ਼ਿਸ਼ਾਂ ਵਧੀਆਂ"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"ਕੋਈ SIM ਕਾਰਡ ਨਹੀਂ"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"ਟੈਬਲੇਟ ਵਿੱਚ ਕੋਈ SIM ਕਾਰਡ ਨਹੀਂ।"</string>
@@ -1023,8 +1024,9 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android ਅਪਗ੍ਰੇਡ ਕਰ ਰਿਹਾ ਹੈ…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android ਚਾਲੂ ਕਰ ਰਿਹਾ ਹੈ…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"ਸਟੋਰੇਜ ਅਨੁਕੂਲ ਕਰ ਰਿਹਾ ਹੈ।"</string>
-    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android ਅੱਪਗ੍ਰੇਡ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
+    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"Android ਅੱਪਡੇਟ ਮੁਕੰਮਲ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਕੁਝ ਐਪਾਂ ਅੱਪਗ੍ਰੇਡ ਦੇ ਪੂਰੀ ਹੋਣ ਤੱਕ ਸਹੀ ਢੰਗ ਨਾਲ ਕੰਮ ਨਾ ਕਰਨ"</string>
+    <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g> ਅੱਪਗ੍ਰੇਡ ਹੋ ਰਹੀ ਹੈ…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_0">%1$d</xliff:g> <xliff:g id="NUMBER_1">%2$d</xliff:g> ਦਾ ਐਪ ਅਨੁਕੂਲ ਕਰ ਰਿਹਾ ਹੈ।"</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> ਤਿਆਰ ਕਰ ਰਿਹਾ ਹੈ।"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"ਐਪਸ ਚਾਲੂ ਕਰ ਰਿਹਾ ਹੈ।"</string>
@@ -1075,6 +1077,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi ਦੀ ਕੋਈ ਇੰਟਰਨੈਟ ਪਹੁੰਚ ਨਹੀਂ ਹੈ"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ਵਿਕਲਪਾਂ ਲਈ ਟੈਪ ਕਰੋ"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"ਬਦਲਕੇ <xliff:g id="NETWORK_TYPE">%1$s</xliff:g> ਲਿਆਂਦਾ ਗਿਆ"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ਦੀ ਇੰਟਰਨੈੱਟ \'ਤੇ ਪਹੁੰਚ ਨਾ ਹੋਣ \'ਤੇ ਡੀਵਾਈਸ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰਦੀ ਹੈ। ਖਰਚੇ ਲਾਗੂ ਹੋ ਸਕਦੇ ਹਨ।"</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> ਤੋਂ ਬਦਲਕੇ <xliff:g id="NEW_NETWORK">%2$s</xliff:g> \'ਤੇ ਕੀਤਾ ਗਿਆ"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"ਸੈਲਿਊਲਰ ਡੈਟਾ"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"ਬਲੂਟੁੱਥ"</item>
+    <item msgid="5447331121797802871">"ਈਥਰਨੈੱਟ"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"ਇੱਕ ਅਗਿਆਤ ਨੈੱਟਵਰਕ ਕਿਸਮ"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi ਨਾਲ ਕਨੈਕਟ ਨਹੀਂ ਕਰ ਸਕਿਆ"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" ਇਸਦਾ ਇੱਕ ਖ਼ਰਾਬ ਇੰਟਰਨੈਟ ਕਨੈਕਸ਼ਨ ਹੈ।"</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"ਕੀ ਕਨੈਕਸ਼ਨ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
@@ -1152,7 +1165,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"ਭਾਸ਼ਾ ਅਤੇ ਖਾਕਾ ਚੁਣਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"ਉਮੀਦਵਾਰ"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> ਤਿਆਰ ਹੋ ਰਿਹਾ ਹੈ"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"ਤਰੁੱਟੀਆਂ ਦੀ ਜਾਂਚ ਕਰ ਰਿਹਾ ਹੈ"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"ਨਵੇਂ <xliff:g id="NAME">%s</xliff:g> ਦਾ ਪਤਾ ਲਗਾਇਆ ਗਿਆ"</string>
@@ -1231,8 +1243,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ ਗਿਆ। ਨੈੱਟਵਰਕ ਦੇ ਪ੍ਰਬੰਧਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"ਹਮੇਸ਼ਾਂ-ਚਾਲੂ VPN ਕਨੈਕਟ ਕਰ ਰਿਹਾ ਹੈ..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"ਹਮੇਸ਼ਾਂ-ਚਾਲੂ VPN ਕਨੈਕਟ ਕੀਤਾ"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"ਹਮੇਸ਼ਾ-ਚਾਲੂ VPN ਡਿਸਕਨੈਕਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"ਹਮੇਸ਼ਾਂ-ਚਾਲੂ VPN ਅਸ਼ੁੱਧੀ"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"ਸੰਰੂਪਣ ਲਈ ਟੈਪ ਕਰੋ"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"ਸਥਾਪਤ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="upload_file" msgid="2897957172366730416">"ਫਾਈਲ ਚੁਣੋ"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"ਕੋਈ ਫਾਈਲ ਨਹੀਂ ਚੁਣੀ ਗਈ"</string>
     <string name="reset" msgid="2448168080964209908">"ਰੀਸੈੱਟ ਕਰੋ"</string>
@@ -1316,7 +1329,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB ਡ੍ਰਾਇਵ"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB ਸਟੋਰੇਜ"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"ਸੰਪਾਦਿਤ ਕਰੋ"</string>
-    <string name="data_usage_warning_title" msgid="1955638862122232342">"ਡੈਟਾ ਉਪਯੋਗ ਚਿਤਾਵਨੀ"</string>
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"ਡੈਟਾ ਵਰਤੋਂ ਚੇਤਾਵਨੀ"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"ਵਰਤੋਂ ਅਤੇ ਸੈਟਿੰਗਾਂ ਨੂੰ ਵੇਖਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G ਡੈਟਾ ਸੀਮਾ ਪੂਰੀ ਹੋ ਗਈ"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G ਡੈਟਾ ਸੀਮਾ ਪੂਰੀ ਹੋਈ"</string>
@@ -1635,6 +1648,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"ਭਾਸ਼ਾ ਨਾਮ ਟਾਈਪ ਕਰੋ"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"ਸੁਝਾਈਆਂ ਗਈਆਂ"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"ਸਾਰੀਆਂ ਭਾਸ਼ਾਵਾਂ"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"ਸਾਰੇ ਖੇਤਰ"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ਖੋਜ"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"ਕੰਮ ਮੋਡ ਬੰਦ ਹੈ"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"ਐਪਾਂ, ਬੈਕਗ੍ਰਾਊਂਡ ਸਮਕਾਲੀਕਰਨ, ਅਤੇ ਸਬੰਧਿਤ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਸ਼ਾਮਲ ਕਰਦੇ ਹੋਏ ਕੰਮ ਪ੍ਰੋਫਾਈਲ ਨੂੰ ਕੰਮ ਕਰਨ ਦੀ ਮਨਜ਼ੂਰੀ ਦਿਓ।"</string>
@@ -1652,7 +1666,16 @@
     <string name="unpin_target" msgid="3556545602439143442">"ਅਨਪਿੰਨ ਕਰੋ"</string>
     <string name="app_info" msgid="6856026610594615344">"ਐਪ ਜਾਣਕਾਰੀ"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"ਕੀ ਡੀਵਾਈਸ ਮੁੜ-ਸੈੱਟ ਕਰਨੀ ਹੈ?"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"ਡੀਵਾਈਸ ਮੁੜ-ਸੈੱਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
+    <string name="demo_starting_message" msgid="5268556852031489931">"ਡੈਮੋ ਚਾਲੂ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
+    <string name="demo_restarting_message" msgid="952118052531642451">"ਡੀਵਾਈਸ ਮੁੜ-ਸੈੱਟ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ…"</string>
+    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"ਕੀ ਡੀਵਾਈਸ ਮੁੜ-ਸੈੱਟ ਕਰਨੀ ਹੈ?"</string>
+    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"ਤੁਸੀਂ ਕਿਸੇ ਵੀ ਤਬਦੀਲੀਆਂ ਨੂੰ ਗੁਆ ਬੈਠੋਂਗੇ ਅਤੇ ਡੈਮੋ <xliff:g id="TIMEOUT">%1$s</xliff:g> ਸਕਿੰਟਾਂ ਵਿੱਚ ਦੁਬਾਰਾ ਚਾਲੂ ਕੀਤਾ ਜਾਵੇਗਾ…"</string>
+    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"ਰੱਦ ਕਰੋ"</string>
+    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"ਹੁਣੇ ਮੁੜ-ਸੈੱਟ ਕਰੋ"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"ਇਸ ਡੀਵਾਈਸ ਨੂੰ ਬਿਨਾਂ ਪਾਬੰਦੀਆਂ ਦੇ ਵਰਤਣ ਲਈ ਫੈਕਟਰੀ ਰੀਸੈੱਟ ਕਰੋ"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"ਹੋਰ ਜਾਣਨ ਲਈ ਸਪਰਸ਼ ਕਰੋ।"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"ਅਯੋਗ ਬਣਾਇਆ ਗਿਆ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="conference_call" msgid="3751093130790472426">"ਕਾਨਫਰੰਸ ਕਾਲ"</string>
 </resources>

@@ -197,7 +197,7 @@ public class SyncOperation {
             } else if (value instanceof Boolean) {
                 syncExtrasBundle.putBoolean(key, (Boolean) value);
             } else if (value instanceof Float) {
-                syncExtrasBundle.putDouble(key, (Double) value);
+                syncExtrasBundle.putDouble(key, (double) (float) value);
             } else if (value instanceof Double) {
                 syncExtrasBundle.putDouble(key, (Double) value);
             } else if (value instanceof String) {

@@ -221,6 +221,7 @@ public interface WindowManager extends ViewManager {
          * @see #TYPE_BASE_APPLICATION
          * @see #TYPE_APPLICATION
          * @see #TYPE_APPLICATION_STARTING
+         * @see #TYPE_DRAWN_APPLICATION
          * @see #TYPE_APPLICATION_PANEL
          * @see #TYPE_APPLICATION_MEDIA
          * @see #TYPE_APPLICATION_SUB_PANEL
@@ -244,6 +245,7 @@ public interface WindowManager extends ViewManager {
             @ViewDebug.IntToString(from = TYPE_BASE_APPLICATION, to = "TYPE_BASE_APPLICATION"),
             @ViewDebug.IntToString(from = TYPE_APPLICATION, to = "TYPE_APPLICATION"),
             @ViewDebug.IntToString(from = TYPE_APPLICATION_STARTING, to = "TYPE_APPLICATION_STARTING"),
+            @ViewDebug.IntToString(from = TYPE_DRAWN_APPLICATION, to = "TYPE_DRAWN_APPLICATION"),
             @ViewDebug.IntToString(from = TYPE_APPLICATION_PANEL, to = "TYPE_APPLICATION_PANEL"),
             @ViewDebug.IntToString(from = TYPE_APPLICATION_MEDIA, to = "TYPE_APPLICATION_MEDIA"),
             @ViewDebug.IntToString(from = TYPE_APPLICATION_SUB_PANEL, to = "TYPE_APPLICATION_SUB_PANEL"),
@@ -313,6 +315,13 @@ public interface WindowManager extends ViewManager {
          * In multiuser systems shows on all users' windows.
          */
         public static final int TYPE_APPLICATION_STARTING = 3;
+
+        /**
+         * Window type: a variation on TYPE_APPLICATION that ensures the window
+         * manager will wait for this window to be drawn before the app is shown.
+         * In multiuser systems shows only on the owning user's window.
+         */
+        public static final int TYPE_DRAWN_APPLICATION = 4;
 
         /**
          * End of types of application windows.
@@ -636,7 +645,7 @@ public interface WindowManager extends ViewManager {
 
         /**
          * Window type: shares similar characteristics with {@link #TYPE_DREAM}. The layer is
-         * reserved for screenshot region selection.
+         * reserved for screenshot region selection. These windows must not take input focus.
          * @hide
          */
         public static final int TYPE_SCREENSHOT = FIRST_SYSTEM_WINDOW + 36;
@@ -1581,6 +1590,15 @@ public interface WindowManager extends ViewManager {
         public static final int ROTATION_ANIMATION_JUMPCUT = 2;
 
         /**
+         * Value for {@link #rotationAnimation} to specify seamless rotation mode.
+         * This works like JUMPCUT but will fall back to CROSSFADE if rotation
+         * can't be applied without pausing the screen.
+         *
+         * @hide
+         */
+        public static final int ROTATION_ANIMATION_SEAMLESS = 3;
+
+        /**
          * Define the exit and entry animations used on this window when the device is rotated.
          * This only has an affect if the incoming and outgoing topmost
          * opaque windows have the #FLAG_FULLSCREEN bit set and are not covered
@@ -1734,14 +1752,18 @@ public interface WindowManager extends ViewManager {
         public CharSequence accessibilityTitle;
 
         /**
-         * Sets a timeout in milliseconds before which the window will be removed
+         * Sets a timeout in milliseconds before which the window will be hidden
          * by the window manager. Useful for transient notifications like toasts
          * so we don't have to rely on client cooperation to ensure the window
-         * is removed. Must be specified at window creation time.
+         * is hidden. Must be specified at window creation time. Note that apps
+         * are not prepared to handle their windows being removed without their
+         * explicit request and may try to interact with the removed window
+         * resulting in undefined behavior and crashes. Therefore, we do hide
+         * such windows to prevent them from overlaying other apps.
          *
          * @hide
          */
-        public long removeTimeoutMilliseconds = -1;
+        public long hideTimeoutMilliseconds = -1;
 
         public LayoutParams() {
             super(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
@@ -1877,7 +1899,7 @@ public interface WindowManager extends ViewManager {
             out.writeInt(needsMenuKey);
             out.writeInt(accessibilityIdOfAnchor);
             TextUtils.writeToParcel(accessibilityTitle, out, parcelableFlags);
-            out.writeLong(removeTimeoutMilliseconds);
+            out.writeLong(hideTimeoutMilliseconds);
         }
 
         public static final Parcelable.Creator<LayoutParams> CREATOR
@@ -1931,7 +1953,7 @@ public interface WindowManager extends ViewManager {
             needsMenuKey = in.readInt();
             accessibilityIdOfAnchor = in.readInt();
             accessibilityTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
-            removeTimeoutMilliseconds = in.readLong();
+            hideTimeoutMilliseconds = in.readLong();
         }
 
         @SuppressWarnings({"PointlessBitwiseExpression"})
@@ -2153,7 +2175,7 @@ public interface WindowManager extends ViewManager {
             }
 
             // This can't change, it's only set at window creation time.
-            removeTimeoutMilliseconds = o.removeTimeoutMilliseconds;
+            hideTimeoutMilliseconds = o.hideTimeoutMilliseconds;
 
             return changes;
         }

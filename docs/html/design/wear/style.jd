@@ -67,7 +67,7 @@ href="{@docRoot}design/wear/patterns.html#Continuing">Continuing activities on p
 
 <h2 id="KeepMinimum" style="clear:both">Keep Notifications to a Minimum</h2>
 
-<p>Don’t abuse the user’s attention. Active notifications (that is, those that cause the device to vibrate) should only be used in cases that are both timely and involve a contact, for example receiving a message from a friend. Non-urgent notifications should be silently added to the Context Stream. See also the general <a href="{@docRoot}design/patterns/notifications.html">Android Notifications Guidelines</a>.</p>
+<p>Don’t abuse the user’s attention. Active notifications (that is, those that cause the device to vibrate) should only be used in cases that are both timely and involve a contact, for example receiving a message from a friend. Non-urgent notifications should be silently added to the Context Stream. See also the general <a href="https://material.google.com/patterns/notifications.html">Android Notifications Guidelines</a>.</p>
 
 
 

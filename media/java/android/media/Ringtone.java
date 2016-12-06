@@ -368,6 +368,7 @@ public class Ringtone {
 
     private void destroyLocalPlayer() {
         if (mLocalPlayer != null) {
+            mLocalPlayer.setOnCompletionListener(null);
             mLocalPlayer.reset();
             mLocalPlayer.release();
             mLocalPlayer = null;
@@ -464,10 +465,13 @@ public class Ringtone {
     }
 
     class MyOnCompletionListener implements MediaPlayer.OnCompletionListener {
-        public void onCompletion(MediaPlayer mp)
-        {
+        @Override
+        public void onCompletion(MediaPlayer mp) {
             synchronized (sActiveRingtones) {
                 sActiveRingtones.remove(Ringtone.this);
+            }
+            if (mLocalPlayer != null) {
+                mLocalPlayer.setOnCompletionListener(null);
             }
         }
     }

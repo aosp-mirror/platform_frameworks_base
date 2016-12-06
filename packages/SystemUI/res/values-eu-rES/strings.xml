@@ -143,7 +143,9 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_4g_plus" msgid="3032226872470658661">"4G+"</string>
     <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
+    <string name="accessibility_data_connection_lte_plus" msgid="361876866906946007">"LTE+"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Ibiltaritza"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"EDGE"</string>
@@ -238,7 +240,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G datuen erabilera eten da"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Sare mugikorreko datuen erabilera eten da"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Datuen erabilera eten da"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Zehaztuta duzun datuen erabilera-mugara iritsi zarenez, gailuak datuen erabilera eten du zikloa amaitzen den arte.\n\nDatuak erabiltzen jarraitzen baduzu, gastu gehiago ordaindu beharko dizkiozu agian operadoreari."</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Gainditu egin da ezarri duzun datu-muga. Datu-konexioa erabiltzeari utzi diozu.\n\nBerriro hasten bazara erabiltzen, baliteke datuen erabileraren kostua ordaindu behar izatea."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Jarraitu erabiltzen"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Ez duzu Interneteko konexiorik"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi konektatuta"</string>
@@ -319,6 +321,9 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Muga: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Abisua: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Lan modua"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Gaueko argia"</string>
+    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"Aktibatuta dago gaueko argia. Sakatu desaktibatzeko."</string>
+    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"Desaktibatuta dago gaueko argia. Sakatu aktibatzeko."</string>
     <string name="recents_empty_message" msgid="808480104164008572">"Ez dago azkenaldi honetako ezer"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Dena garbitu duzu"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Aplikazioaren informazioa"</string>
@@ -332,6 +337,8 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Zatitze horizontala"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Zatitze bertikala"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Zatitze pertsonalizatua"</string>
+  <string-array name="recents_blacklist_array">
+  </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Kargatuta"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Kargatzen"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> falta zaizkio guztiz kargatzeko"</string>
@@ -399,6 +406,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"Baliteke gailua kontrolatuta egotea"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Baliteke profila kontrolatuta egotea"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Baliteke sarea kontrolatuta egotea"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"Baliteke sarea kontrolatuta egotea"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Gailuen kontrola"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Profila kontrolatzeko aukera"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Sareen kontrola"</string>
@@ -411,6 +419,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN konexioa"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"<xliff:g id="APPLICATION">%1$s</xliff:g> aplikaziora konektatuta zaude. Aplikazio horrek sarean egiten dituzun jarduerak kontrola ditzake, mezu elektronikoak, aplikazioak eta webguneak barne."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"<xliff:g id="APPLICATION">%1$s</xliff:g> aplikaziora konektatuta zaude. Aplikazio horrek sarean egiten dituzun jarduera pertsonalak kontrola ditzake, mezu elektronikoak, aplikazioak eta webguneak barne."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"<xliff:g id="APPLICATION">%1$s</xliff:g> aplikaziora konektatuta zaude. Aplikazio horrek sarean egiten dituzun jarduera pertsonalak kontrola ditzake, mezu elektronikoak, aplikazioak eta webguneak barne."</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> da laneko profilaren kudeatzailea, eta profila <xliff:g id="APPLICATION">%2$s</xliff:g> aplikaziora konektatuta dago. Aplikazio horrek sarean egiten dituzun laneko jarduerak kontrola ditzake, mezu elektronikoak, aplikazioak eta webguneak barne.\n\nInformazio gehiago lortzeko, jarri administratzailearekin harremanetan."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> da laneko profilaren kudeatzailea, eta profila <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> aplikaziora konektatuta dago. Aplikazio horrek sarean egiten dituzun laneko jarduerak kontrola ditzake, mezu elektronikoak, aplikazioak eta webguneak barne.\n\nHorrez gain, sarean egiten dituzun jarduera pertsonalak kontrola ditzakeen <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> aplikaziora konektatuta zaude."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> da gailuaren kudeatzailea.\n\nAdministratzaileak ezarpenak, enpresako sarbidea, aplikazioak, gailuarekin lotutako datuak eta gailuaren kokapenari buruzko informazioa kontrola eta kudea ditzake.\n\n<xliff:g id="APPLICATION">%2$s</xliff:g> aplikaziora konektatuta zaude. Aplikazio horrek sarean egiten dituzun jarduerak kontrola ditzake, mezu elektronikoak, aplikazioak eta webguneak barne.\n\nInformazio gehiago lortzeko, jarri administratzailearekin harremanetan."</string>
@@ -436,6 +445,18 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> da bolumenaren leihoa"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"Sakatu jatorrizkora leheneratzeko."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Work profila erabiltzen ari zara"</string>
+  <string-array name="volume_stream_titles">
+    <item msgid="5841843895402729630">"Deitu"</item>
+    <item msgid="5997713001067658559">"Sistema"</item>
+    <item msgid="7858983209929864160">"Tonua"</item>
+    <item msgid="1850038478268896762">"Multimedia-edukia"</item>
+    <item msgid="8265110906352372092">"Alarma"</item>
+    <item msgid="5339394737636839168"></item>
+    <item msgid="2951313578278086204">"Bluetooth konexioa"</item>
+    <item msgid="2919807739709798970"></item>
+    <item msgid="150349973435223405"></item>
+    <item msgid="6761963760295549099"></item>
+  </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Sakatu audioa aktibatzeko."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Sakatu dardara ezartzeko. Baliteke erabilerraztasun-eginbideen audioa desaktibatzea."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Sakatu audioa desaktibatzeko. Baliteke erabilerraztasun-eginbideen audioa desaktibatzea."</string>
@@ -475,8 +496,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Erakutsi erlojuko segundoak egoera-barran. Baliteke bateria gehiago erabiltzea."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Berrantolatu ezarpen bizkorrak"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Erakutsi distira Ezarpen bizkorretan"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"Gaitu pantaila zatitzeko keinua hatza gora pasatuta"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Sakatu Ikuspegi nagusia botoia eta gaitu hatza gora pasatuta pantaila zatitzeko keinua"</string>
     <string name="experimental" msgid="6198182315536726162">"Esperimentala"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth eginbidea aktibatu nahi duzu?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Teklatua tabletara konektatzeko, Bluetooth eginbidea aktibatu behar duzu."</string>
@@ -506,21 +525,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"Ezarpen gehiago"</string>
     <string name="notification_done" msgid="5279426047273930175">"Eginda"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioaren jakinarazpenak kontrolatzeko aukerak"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"Kolorea eta itxura"</string>
-    <string name="night_mode" msgid="3540405868248625488">"Gau modua"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"Kalibratu pantaila"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"Aktibatuta"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"Desaktibatuta"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"Aktibatu automatikoki"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Aldatu Gau modura, kokapena eta ordua kontuan izanda"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"Gau modua aktibatuta dagoenean"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Erabili gai iluna Android sistema eragilean"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"Doitu kolorea"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"Doitu distira"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"Gai iluna Android sistema eragileko eremu nagusietan aplikatzen da. Normalean gai argian bistaratzen dira eremu horiek, adibidez, Ezarpenak atalean."</string>
-    <string name="color_apply" msgid="9212602012641034283">"Aplikatu"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"Berretsi ezarpenak"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"Baliteke gailua kolore-ezarpen batzuekin ezin erabili izatea. Kolore-ezarpenak berresteko, sakatu Ados. Bestela, hamar segundoren buruan berrezarriko dira ezarpenak."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Bateriaren erabilera"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Bateria-aurrezlea ez dago erabilgarri gailua kargatzen ari denean"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Bateria-aurrezlea"</string>
@@ -649,4 +653,5 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Ireki <xliff:g id="ID_1">%s</xliff:g> ezarpenak."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Editatu ezarpenen ordena."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_1">%1$d</xliff:g>/<xliff:g id="ID_2">%2$d</xliff:g> orria"</string>
+    <string name="cant_silence_or_block" msgid="999689262131488625">"Jakinarazpenak ezin dira ezkutatu edo blokeatu"</string>
 </resources>

@@ -12,19 +12,19 @@ parent.link=manifest-intro.html
 
 <dt>description:</dt>
 <dd itemprop="description">Adds a category name to an intent filter.  See
-<a href="{@docRoot}guide/components/intents-filters.html">Intents and 
+<a href="{@docRoot}guide/components/intents-filters.html">Intents and
 Intent Filters</a> for details on intent filters and the role of category
 specifications within a filter.</dd>
 
 <dt>attributes:</dt>
 <dd><dl class="attr">
 <dt><a name="nm"></a>{@code android:name}</dt>
-<dd>The name of the category.  Standard categories are defined in the 
+<dd>The name of the category.  Standard categories are defined in the
 {@link android.content.Intent} class as <code>CATEGORY_<i>name</i></code>
-constants.  The name assigned here can be derived from those constants 
-by prefixing "{@code android.intent.category.}" to the 
+constants.  The name assigned here can be derived from those constants
+by prefixing "{@code android.intent.category.}" to the
 <code><i>name</i></code> that follows {@code CATEGORY_}.  For example,
-the string value for {@code CATEGORY_LAUNCHER} is 
+the string value for {@code CATEGORY_LAUNCHER} is
 "{@code android.intent.category.LAUNCHER}".
 
 <p class="note"><strong>Note:</strong> In order to receive implicit intents, you must include the
@@ -39,7 +39,7 @@ your activity.</p>
 Custom categories should use the package name as a prefix, to ensure
 that they are unique.
 </p></dd>
-</dl></dd> 
+</dl></dd>
 
 <!-- ##api level indication## -->
 <dt>introduced in:</dt>

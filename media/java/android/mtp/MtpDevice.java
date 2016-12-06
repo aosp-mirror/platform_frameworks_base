@@ -18,11 +18,13 @@ package android.mtp;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
 
+import android.os.UserManager;
 import com.android.internal.util.Preconditions;
 
 import java.io.IOException;
@@ -62,7 +64,17 @@ public final class MtpDevice {
      * @return true if the device was successfully opened.
      */
     public boolean open(UsbDeviceConnection connection) {
-        boolean result = native_open(mDevice.getDeviceName(), connection.getFileDescriptor());
+        boolean result = false;
+
+        Context context = connection.getContext();
+        if (context != null) {
+            UserManager userManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
+
+            if (!userManager.hasUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER)) {
+                result = native_open(mDevice.getDeviceName(), connection.getFileDescriptor());
+            }
+        }
+
         if (!result) {
             connection.close();
         }

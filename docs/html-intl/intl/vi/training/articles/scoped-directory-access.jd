@@ -1,0 +1,124 @@
+page.title=Truy cập Thư mục theo Phạm vi
+page.keywords=preview,sdk,scoped directory access
+page.tags=androidn
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>Trong tài liệu này</h2>
+  <ol>
+    <li><a href="#accessing">Truy cập một Thư mục lưu trữ bên ngoài</a></li>
+    <li><a href="#removable">Truy cập một Thư mục trên Phương tiện tháo lắp được</a></li>
+    <li><a href="#best">Thực hành Tốt nhất</a></li>
+  </ol>
+</div>
+</div>
+
+<p>Các ứng dụng như ứng dụng ảnh thường chỉ cần truy cập đến các thư mục đã quy định trong
+bộ nhớ ngoài như thư mục <code>Pictures</code>. Các phương pháp
+  hiện tại để truy cập bộ nhớ lưu trữ ngoài vẫn chưa được thiết kế để dễ dàng cho phép
+truy cập thư mục đích cho những kiểu ứng dụng này. Ví dụ:</p>
+
+<ul>
+<li>Việc yêu cầu {@link android.Manifest.permission#READ_EXTERNAL_STORAGE}
+hoặc {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} trong bản kê khai của bạn
+sẽ cho phép truy cập đến tất cả các thư mục công khai trên bộ nhớ lưu trữ ngoài, mà có thể
+cấp nhiều quyền truy cập hơn những gì ứng dụng của bạn cần.</li>
+<li>Sử dụng
+<a href="{@docRoot}guide/topics/providers/document-provider.html">Khuôn khổ
+ Truy cập Kho lưu trữ</a> thường khiến người dùng chọn thư mục
+thông qua UI hệ thống. Đây là điều không cần thiết nếu ứng dụng của bạn luôn truy cập cùng
+một thư mục bên ngoài.</li>
+</ul>
+
+<p>Android N cung cấp một API mới được đơn giản hóa để truy cập
+các thư mục lưu trữ bên ngoài thường dùng. </p>
+
+<h2 id="accessing">Truy cập một Thư mục lưu trữ bên ngoài</h2>
+
+<p>Sử dụng lớp <code>StorageManager</code> để lấy thực thể
+<code>StorageVolume</code> phù hợp. Sau đó tạo một ý định bằng cách gọi phương thức
+<code>StorageVolume.createAccessIntent()</code> của thực thể đó.
+Sử dụng ý định này để truy cập các thư mục lưu trữ bên ngoài. Để lấy danh sách
+tất cả các ổ đĩa, bao gồm các ổ đĩa media có thể tháo lắp, hãy sử dụng
+<code>StorageManager.getVolumesList()</code>.</p>
+
+<p>Đoạn mã sau là một ví dụ về cách mở thư mục
+<code>Pictures</code> trong bộ nhớ lưu trữ chính được chia sẻ:</p>
+
+<pre>
+StorageManager sm = (StorageManager)getSystemService(Context.STORAGE_SERVICE);
+StorageVolume volume = sm.getPrimaryVolume();
+Intent intent = volume.createAccessIntent(Environment.DIRECTORY_PICTURES);
+startActivityForResult(intent, request_code);
+</pre>
+
+<p>Hệ thống sẽ cố gắng cấp quyền truy cập tới thư mục bên ngoài và nếu
+cần sẽ xác nhận quyền truy cập với người dùng bằng một UI được đơn giản hóa:</p>
+
+<img src="{@docRoot}images/android-7.0/scoped-directory-access-framed.png" srcset="{@docRoot}images/android-7.0/scoped-directory-access-framed.png 1x,
+{@docRoot}images/android-7.0/scoped-directory-access-framed_2x.png 2x" />
+<p class="img-caption"><strong>Hình 1.</strong> Một ứng dụng yêu cầu
+truy cập tới thư mục Pictures.</p>
+
+<p>Nếu người dùng cấp quyền truy cập, hệ thống sẽ gọi phương thức ghi đè
+<code>onActivityResult()</code> của bạn với mã kết quả là
+<code>Activity.RESULT_OK</code> và dữ liệu ý định có chứa URI. Hãy sử dụng
+URI được cung cấp để truy cập thông tin thư mục, giống như sử dụng các URI
+được trả về bởi
+<a href="{@docRoot}guide/topics/providers/document-provider.html">Khuôn khổ
+ Truy cập Kho lưu trữ</a>.</p>
+
+<p>Nếu người dùng không cấp quyền truy cập, hệ thống sẽ gọi phương thức ghi đè
+<code>onActivityResult()</code> của bạn với mã kết quả là
+<code>Activity.RESULT_CANCELED</code> và dữ liệu ý định có giá trị null.</p>
+
+<p class="note"><b>Lưu ý</b>: Lấy quyền truy cập tới một thư mục bên ngoài được chỉ định
+cũng sẽ cấp quyền truy cập tới các thư mục con thuộc thư mục đó.</p>
+
+<h2 id="removable">Truy cập một Thư mục trên phương tiện tháo lắp được</h2>
+
+<p>Để sử dụng Truy cập Thư mục theo Phạm vi nhằm truy cập các thư mục trên phương tiện có thể tháo lắp,
+trước hết, hãy thêm một {@link android.content.BroadcastReceiver} để lắng nghe
+thông báo {@link android.os.Environment#MEDIA_MOUNTED}, ví dụ:</p>
+
+<pre>
+&lt;receiver
+    android:name=".MediaMountedReceiver"
+    android:enabled="true"
+    android:exported="true" &gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.MEDIA_MOUNTED" /&gt;
+        &lt;data android:scheme="file" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/receiver&gt;
+</pre>
+
+<p>Khi người dùng kết nối một phương tiện có thể tháo lắp như thẻ SD thì hệ thống sẽ gửi một thông báo
+{@link android.os.Environment#MEDIA_MOUNTED}. Thông báo này
+sẽ cung cấp một đối tượng <code>StorageVolume</code> trong dữ liệu ý định mà bạn có thể
+sử dụng để truy cập các thư mục trên phương tiện có thể tháo lắp đó. Ví dụ sau
+sẽ truy cập thư mục <code>Pictures</code> trên phương tiện có thể tháo lắp:</p>
+
+<pre>
+// BroadcastReceiver has already cached the MEDIA_MOUNTED
+// notification Intent in mediaMountedIntent
+StorageVolume volume = (StorageVolume)
+    mediaMountedIntent.getParcelableExtra(StorageVolume.EXTRA_STORAGE_VOLUME);
+volume.createAccessIntent(Environment.DIRECTORY_PICTURES);
+startActivityForResult(intent, request_code);
+</pre>
+
+<h2 id="best">Thực hành Tốt nhất</h2>
+
+<p>Khi có thể, hãy duy trì URI truy cập thư mục bên ngoài để bạn không phải
+lặp lại yêu cầu người dùng cấp quyền truy cập. Khi người dùng đã cấp quyền truy cập, hãy gọi
+<code>getContentResolver().takePersistableUriPermssion()</code> với
+URI truy cập thư mục. Hệ thống sẽ duy trì URI và các yêu cầu
+truy cập sau này sẽ trả về <code>RESULT_OK</code> và không hiển thị UI xác nhận cho
+người dùng nữa.</p>
+
+<p>Nếu người dùng từ chối quyền truy cập đến một thư mục bên ngoài thì đừng
+yêu cầu truy cập lại ngay lập tức. Lặp đi lặp lại yêu cầu truy cập sẽ dẫn đến trải nghiệm
+người dùng không tốt.</p>

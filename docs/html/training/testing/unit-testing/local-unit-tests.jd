@@ -80,7 +80,7 @@ name with the {@code ‘test’} keyword, or use any classes in the {@code junit
 {@code junit.extensions} package.</p>
 
 <p>To create a basic JUnit 4 test class, create a Java class that contains one or more test methods.
-A test method begins with the {@code &#64;Test} annotation and contains the code to exercise
+A test method begins with the {@code @Test} annotation and contains the code to exercise
 and verify a single functionality in the component that you want to test.</p>
 
 <p>The following example shows how you might implement a local unit test class. The test method
@@ -112,12 +112,16 @@ Hamcrest matchers</a> (such as the {@code is()} and {@code equalTo()} methods) t
 returned result against the expected result.</p>
 
 <h3 id="mocking-dependencies">Mock Android dependencies</h3>
-<p>
-By default, the <a href="{@docRoot}tools/building/plugin-for-gradle.html">
-Android Plug-in for Gradle</a> executes your local unit tests against a modified
-version of the {@code android.jar} library, which does not contain any actual code. Instead, method
-calls to Android classes from your unit test throw an exception.
-</p>
+
+<p>By default, the <a href=
+"{@docRoot}tools/building/plugin-for-gradle.html">Android Plug-in for
+Gradle</a> executes your local unit tests against a modified version of the
+{@code android.jar} library, which does not contain any actual code. Instead,
+method calls to Android classes from your unit test throw an exception. This is
+to make sure you test only your code and do not depend on any
+particular behavior of the Android platform (that you have not explicitly
+mocked).</p>
+
 <p>
 You can use a mocking framework to stub out external dependencies in your code, to easily test that
 your component interacts with a dependency in an expected way. By substituting Android dependencies
@@ -136,11 +140,11 @@ Include the Mockito library dependency in your {@code build.gradle} file, as des
 <a href="#setup">Set Up Your Testing Environment</a>.
 </li>
 <li>At the beginning of your unit test class definition, add the
-{@code &#64;RunWith(MockitoJUnitRunner.class)} annotation. This annotation tells the Mockito test
+{@code @RunWith(MockitoJUnitRunner.class)} annotation. This annotation tells the Mockito test
 runner to validate that your usage of the framework is correct and simplifies the initialization of
 your mock objects.
 </li>
-<li>To create a mock object for an Android dependency, add the {@code &#64;Mock} annotation before
+<li>To create a mock object for an Android dependency, add the {@code @Mock} annotation before
 the field declaration.</li>
 <li>To stub the behavior of the dependency, you can specify a condition and return
 value when the condition is met by using the {@code when()} and {@code thenReturn()} methods.
@@ -194,6 +198,26 @@ class="external-link">Mockito API reference</a> and the
 <a href="https://github.com/googlesamples/android-testing/tree/master/unit/BasicSample"
 class="external-link">sample code</a>.
 </p>
+
+<p>If the exceptions thrown by Android APIs in the
+<code>android.jar</code> are problematic for your tests, you can change the behavior so that methods
+instead return either null or zero by adding the following configuration in your project's
+top-level <code>build.gradle</code> file:</p>
+
+<pre>
+android {
+  ...
+  testOptions {
+    unitTests.returnDefaultValues = true
+  }
+}
+</pre>
+
+<p class="caution"><strong>Caution:</strong>
+Setting the <code>returnDefaultValues</code> property to <code>true</code>
+should be done with care. The null/zero return values can introduce
+regressions in your tests, which are hard to debug and might allow failing tests
+to pass. Only use it as a last resort.</p>
 
 
 <h2 id="run">Run Local Unit Tests</h2>

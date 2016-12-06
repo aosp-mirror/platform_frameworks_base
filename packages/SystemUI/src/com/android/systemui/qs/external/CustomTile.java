@@ -71,7 +71,7 @@ public class CustomTile extends QSTile<QSTile.State> implements TileChangeListen
         super(host);
         mWindowManager = WindowManagerGlobal.getWindowManagerService();
         mComponent = ComponentName.unflattenFromString(action);
-        mTile = new Tile(mComponent);
+        mTile = new Tile();
         setTileIcon();
         mServiceManager = host.getTileServices().getTileWrapper(this);
         mService = mServiceManager.getTileService();
@@ -82,8 +82,11 @@ public class CustomTile extends QSTile<QSTile.State> implements TileChangeListen
     private void setTileIcon() {
         try {
             PackageManager pm = mContext.getPackageManager();
-            ServiceInfo info = pm.getServiceInfo(mComponent,
-                    PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE);
+            int flags = PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE;
+            if (isSystemApp(pm)) {
+                flags |= PackageManager.MATCH_DISABLED_COMPONENTS;
+            }
+            ServiceInfo info = pm.getServiceInfo(mComponent, flags);
             int icon = info.icon != 0 ? info.icon
                     : info.applicationInfo.icon;
             // Update the icon if its not set or is the default icon.
@@ -101,6 +104,10 @@ public class CustomTile extends QSTile<QSTile.State> implements TileChangeListen
         } catch (Exception e) {
             mDefaultIcon = null;
         }
+    }
+
+    private boolean isSystemApp(PackageManager pm) throws PackageManager.NameNotFoundException {
+        return pm.getApplicationInfo(mComponent.getPackageName(), 0).isSystemApp();
     }
 
     /**

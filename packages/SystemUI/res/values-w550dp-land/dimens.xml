@@ -18,6 +18,4 @@
 <resources>
     <!-- Standard notification width + gravity -->
     <dimen name="notification_panel_width">544dp</dimen>
-
-    <dimen name="qs_expand_margin">32dp</dimen>
 </resources>

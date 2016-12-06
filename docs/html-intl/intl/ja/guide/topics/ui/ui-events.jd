@@ -187,7 +187,7 @@ dispatchKeyEvent()}</code> メソッドを介して伝わっていると判断�
     ViewGroup.onInterceptTouchEvent(MotionEvent)}</code> - {@link android.view.ViewGroup} が、イベントが子ビューにディスパッチされたときにイベントを監視できるようにします。
 </li>
   <li><code>{@link  android.view.ViewParent#requestDisallowInterceptTouchEvent(boolean)
-    ViewParent.requestDisallowInterceptTouchEvent(boolean)}</code> - このメソッドを親ビュー上で呼び出すことで、<code>{@link 
+    ViewParent.requestDisallowInterceptTouchEvent(boolean)}</code> - このメソッドを親ビュー上で呼び出すことで、<code>{@link
     android.view.ViewGroup#onInterceptTouchEvent(MotionEvent)}</code> による親ビューのタップイベントのインターセプトを許可しないことを示すことができます。
 </li>
 </ul>
@@ -199,7 +199,7 @@ dispatchKeyEvent()}</code> メソッドを介して伝わっていると判断�
 ただし、端末にタッチ機能がある場合は、ユーザーはタップでインターフェースの操作を開始するため、アイテムをハイライトすることや、特定のビューにフォーカスを与えることは必要ではなくなりました。
 
 そのため、「タッチモード」と名付けられた操作モードが存在します。
- 
+
 </p>
 <p>
 タッチ可能な端末では、ユーザーが画面をタップすると、端末がタッチモードになります。
@@ -233,7 +233,7 @@ dispatchKeyEvent()}</code> メソッドを介して伝わっていると判断�
 
 <p>フォーカスの移動は、所定の方向で最も近くにあるアイテムを見つけるアルゴリズムに基づきますが、
 まれに、デフォルトのアルゴリズムが開発者の意図する動作と一致しない場合もあります。
-この場合、レイアウト ファイルの 
+この場合、レイアウト ファイルの
 
 <var>nextFocusDown</var>、 <var>nextFocusLeft</var>、 <var>nextFocusRight</var>、
 <var>nextFocusUp</var> の各 XML 属性を明示的にオーバーライドできます。これらの属性のいずれかを、フォーカスの移動<em>元</em>のビューに追加します。
@@ -253,11 +253,11 @@ dispatchKeyEvent()}</code> メソッドを介して伝わっていると判断�
 </pre>
 
 <p>本来、上記の縦方向のレイアウトでは、1 番上のボタンから上に移動しようとしても、2 番目のボタンから下に移動しようしても、どこにもフォーカスが移動しないはずでしたが、上記の処理により、
-1 番上のボタンによって 1 番下のボタンが 
+1 番上のボタンによって 1 番下のボタンが
  <var>nextFocusUp</var>  として定義され（逆の場合も同様）、フォーカスが、上から下と下から上に順番に移動するようになります。
 </p>
 
-<p>UI でビューをフォーカス可能にする場合は（従来は、ビューはフォーカス可能ではありません）、レイアウトの宣言で <code>android:focusable</code> XML 属性をビューに追加し、値を 
+<p>UI でビューをフォーカス可能にする場合は（従来は、ビューはフォーカス可能ではありません）、レイアウトの宣言で <code>android:focusable</code> XML 属性をビューに追加し、値を
 
  <var>true</var> に設定します。また、<code>android:focusableInTouchMode</code> を使用して、タッチモードのときにビューをフォーカス可能にすることもできます。
 </p>
@@ -282,7 +282,7 @@ dispatchKeyEvent()}</code> メソッドを介して伝わっていると判断�
     the framework will take care of measuring, laying out, and drawing the tree
     as appropriate.</li>
    </ol>
-   
+
    <p class="note"><strong>Note:</strong> The entire View tree is single threaded. You must always be on
    the UI thread when calling any method on any View.
    If you are doing work on other threads and want to update the state of a View

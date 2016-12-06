@@ -139,7 +139,7 @@ or position in a density-independent way.
   <p>The density-independent pixel is equivalent to one physical pixel on a 160 dpi screen, which is
 the baseline density assumed by the system for a "medium" density screen. At runtime, the system
 transparently handles any scaling of the dp units, as necessary, based on the actual density of the
-screen in use. The conversion of dp units to screen pixels is simple: 
+screen in use. The conversion of dp units to screen pixels is simple:
 <nobr><code>px = dp * (dpi / 160)</code></nobr>.
 For example, on a 240 dpi screen, 1 dp equals 1.5 physical pixels. You should always use dp units
 when defining your application's UI, to ensure proper display of your UI on screens with different
@@ -214,7 +214,7 @@ changes in screen density.</p>
 </ul>
 
 <p class="note"><strong>Note:</strong> These minimum screen sizes were not as well defined prior to
-Android 3.0, so you may encounter some devices that are mis-classified between normal and large. 
+Android 3.0, so you may encounter some devices that are mis-classified between normal and large.
 These are also based on the physical resolution of the screen, so may vary across devices&mdash;for
 example a 1024x720 tablet with a system bar actually has a bit less space available to the
 application due to it being used by the system bar.</p>
@@ -904,7 +904,7 @@ href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;support
 manifest element:</p>
 
 <dl>
-  
+
   <dt><a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html#requiresSmallest">
 {@code android:requiresSmallestWidthDp}</a></dt>

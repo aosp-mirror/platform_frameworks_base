@@ -808,13 +808,13 @@ static void checkNinePatchSerialization(Res_png_9patch* inPatch,  void* data)
     assert(outPatch->paddingTop == inPatch->paddingTop);
     assert(outPatch->paddingBottom == inPatch->paddingBottom);
     for (int i = 0; i < outPatch->numXDivs; i++) {
-        assert(outPatch->xDivs[i] == inPatch->xDivs[i]);
+        assert(outPatch->getXDivs()[i] == inPatch->getXDivs()[i]);
     }
     for (int i = 0; i < outPatch->numYDivs; i++) {
-        assert(outPatch->yDivs[i] == inPatch->yDivs[i]);
+        assert(outPatch->getYDivs()[i] == inPatch->getYDivs()[i]);
     }
     for (int i = 0; i < outPatch->numColors; i++) {
-        assert(outPatch->colors[i] == inPatch->colors[i]);
+        assert(outPatch->getColors()[i] == inPatch->getColors()[i]);
     }
     free(newData);
 }

@@ -23,16 +23,16 @@ import android.service.quicksettings.Tile;
  * @hide
  */
 interface IQSService {
-    Tile getTile(in ComponentName component);
-    void updateQsTile(in Tile tile);
-    void updateStatusIcon(in Tile tile, in Icon icon,
+    Tile getTile(in IBinder tile);
+    void updateQsTile(in Tile tile, in IBinder service);
+    void updateStatusIcon(in IBinder tile, in Icon icon,
             String contentDescription);
-    void onShowDialog(in Tile tile);
-    void onStartActivity(in Tile tile);
+    void onShowDialog(in IBinder tile);
+    void onStartActivity(in IBinder tile);
     boolean isLocked();
     boolean isSecure();
-    void startUnlockAndRun(in Tile tile);
+    void startUnlockAndRun(in IBinder tile);
 
-    void onDialogHidden(in Tile tile);
-    void onStartSuccessful(in Tile tile);
+    void onDialogHidden(in IBinder tile);
+    void onStartSuccessful(in IBinder tile);
 }

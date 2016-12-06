@@ -35,7 +35,7 @@ resources and other features so your app can provide an optimized user experienc
 variety of Android-compatible devices, using a single application package (APK).</p>
 
 <h2>Lessons</h2>
- 
+
 <dl>
   <dt><b><a href="languages.html">Supporting Different Languages</a></b></dt>
   <dd>Learn how to support multiple languages with alternative string resources.</dd>
@@ -44,5 +44,5 @@ variety of Android-compatible devices, using a single application package (APK).
   <dt><b><a href="platforms.html">Supporting Different Platform Versions</a></b></dt>
   <dd>Learn how to use APIs available in new versions of Android while continuing to support
 older versions of Android.</dd>
-</dl> 
+</dl>
 

@@ -2788,6 +2788,18 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * @hide
+     * Equivalent to calling {@link android.widget.TextView#setTextColor(ColorStateList)}.
+     *
+     * @param viewId The id of the view whose text color should change
+     * @param colors the text colors to set
+     */
+    public void setTextColor(int viewId, @ColorInt ColorStateList colors) {
+        addAction(new ReflectionAction(viewId, "setTextColor", ReflectionAction.COLOR_STATE_LIST,
+                colors));
+    }
+
+    /**
      * Equivalent to calling {@link android.widget.AbsListView#setRemoteViewsAdapter(Intent)}.
      *
      * @param appWidgetId The id of the app widget which contains the specified view. (This
@@ -3195,7 +3207,9 @@ public class RemoteViews implements Parcelable, Filter {
         // we don't add a filter to the static version returned by getSystemService.
         inflater = inflater.cloneInContext(inflationContext);
         inflater.setFilter(this);
-        return inflater.inflate(rv.getLayoutId(), parent, false);
+        View v = inflater.inflate(rv.getLayoutId(), parent, false);
+        v.setTagInternal(R.id.widget_frame, rv.getLayoutId());
+        return v;
     }
 
     private static void loadTransitionOverride(Context context,
@@ -3373,7 +3387,7 @@ public class RemoteViews implements Parcelable, Filter {
         // across orientation change, and has the RemoteViews re-applied in the new orientation,
         // we throw an exception, since the layouts may be completely unrelated.
         if (hasLandscapeAndPortraitLayouts()) {
-            if (v.getId() != rvToApply.getLayoutId()) {
+            if ((Integer) v.getTag(R.id.widget_frame) != rvToApply.getLayoutId()) {
                 throw new RuntimeException("Attempting to re-apply RemoteViews to a view that" +
                         " that does not share the same root layout id.");
             }
@@ -3409,7 +3423,7 @@ public class RemoteViews implements Parcelable, Filter {
         // across orientation change, and has the RemoteViews re-applied in the new orientation,
         // we throw an exception, since the layouts may be completely unrelated.
         if (hasLandscapeAndPortraitLayouts()) {
-            if (v.getId() != rvToApply.getLayoutId()) {
+            if ((Integer) v.getTag(R.id.widget_frame) != rvToApply.getLayoutId()) {
                 throw new RuntimeException("Attempting to re-apply RemoteViews to a view that" +
                         " that does not share the same root layout id.");
             }

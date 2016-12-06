@@ -51,7 +51,7 @@ page.metaDescription=ほんの数ステップで Designed for Families に参加
 </p>
 
 <p class="note">
-  <strong>注:</strong> Designed for Families プログラムで公開されたアプリは Google Play ですべてのユーザーも利用できます。 
+  <strong>注:</strong> Designed for Families プログラムで公開されたアプリは Google Play ですべてのユーザーも利用できます。
 </p>
 
 <p>
@@ -67,4 +67,4 @@ page.metaDescription=ほんの数ステップで Designed for Families に参加
 
 <div class="paging-links" style="padding-top:.75em;">
   <a href="{@docRoot}distribute/googleplay/families/faq.html" class="next-class-link">次のトピック:よくある質問</a>
-</div> 
+</div>

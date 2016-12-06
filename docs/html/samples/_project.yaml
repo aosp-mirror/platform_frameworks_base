@@ -1,0 +1,6 @@
+name: "Samples"
+home_url: /samples/
+description: "Welcome to code samples where you can browse sample code and learn how to build different components for your applications."
+content_license: cc3-apache2
+buganizer_id: 30209417
+parent_project_metadata_path: /develop/_project.yaml

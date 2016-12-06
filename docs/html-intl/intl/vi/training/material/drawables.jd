@@ -57,7 +57,7 @@ Lớp này trích xuất những màu nổi bật sau:</p>
 <li>Sáng lặng</li>
 </ul>
 
-<p>Để trích xuất những màu này, hãy chuyển một đối tượng {@link android.graphics.Bitmap} cho phương thức tĩnh 
+<p>Để trích xuất những màu này, hãy chuyển một đối tượng {@link android.graphics.Bitmap} cho phương thức tĩnh
 {@link android.support.v7.graphics.Palette#generate Palette.generate()} trong
 luồng chạy ngầm nơi bạn tải hình ảnh của mình. Nếu bạn không thể sử dụng luồng đó, hãy gọi phương thức
 {@link android.support.v7.graphics.Palette#generateAsync Palette.generateAsync()} và

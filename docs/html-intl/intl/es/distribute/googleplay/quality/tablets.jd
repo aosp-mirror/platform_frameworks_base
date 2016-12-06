@@ -56,7 +56,7 @@ Xnonavpage=true
 
 <p>El primer paso en la provisión de una excelente experiencia con la aplicación en tablets es asegurarte
  de que la aplicación cumpla con los <em>criterios de calidad de la aplicación principal</em> en todos los dispositivos
- y formatos a los que apunte. Para obtener información completa, consulta las <a href="{@docRoot}distribute/essentials/quality/core.html">Pautas de calidad de la aplicación principal</a>. 
+ y formatos a los que apunte. Para obtener información completa, consulta las <a href="{@docRoot}distribute/essentials/quality/core.html">Pautas de calidad de la aplicación principal</a>.
 </p>
 
 <p>
@@ -119,7 +119,7 @@ style="font-weight:500;">Despídete de tu IU "estirada"</span>: En las tablets, 
   <li>Proporciona diseños personalizados, según sea necesario, para las pantallas <code>large</code> y
  <code>xlarge</code>. También puedes proporcionar diseños que se cargarán
  en función de la <a href="{@docRoot}guide/practices/screens_support.html#NewQualifiers">dimensión
- más corta</a> de la pantalla o la <a href="{@docRoot}guide/practices/screens_support.html#NewQualifiers">altura y el ancho 
+ más corta</a> de la pantalla o la <a href="{@docRoot}guide/practices/screens_support.html#NewQualifiers">altura y el ancho
  mínimos disponibles</a>.
   </li>
 
@@ -208,7 +208,7 @@ android.app.Fragment}. Esto te permite
  maximizar la reutilización de códigos entre diferentes factores y pantallas que
  compartan contenido.</li>
 <li>Decide en qué tamaños de pantalla usarás una IU multipanel y luego proporciona los
- diferentes diseños en los depósitos para el tamaño de pantalla correspondiente (como 
+ diferentes diseños en los depósitos para el tamaño de pantalla correspondiente (como
 <code>large</code>/<code>xlarge</code>) o anchos mínimos de pantalla (como
 <code>sw600dp</code>/<code>sw720</code>).</li>
 </ul>
@@ -492,7 +492,7 @@ o simplemente centrando el icono dentro del botón transparente.</li>
 
 <pre>&lt;uses-feature android:name="android.hardware.telephony" android:required="false" /&gt;</pre></li>
 
-<li>En forma similar, revisa el manifiesto para detectar elementos <a href="{@docRoot}guide/topics/manifest/permission-element.html"><code>&lt;permission&gt;</code></a> que 
+<li>En forma similar, revisa el manifiesto para detectar elementos <a href="{@docRoot}guide/topics/manifest/permission-element.html"><code>&lt;permission&gt;</code></a> que
 <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#permissions">impliquen requisitos
  de características de hardware</a> que no sean adecuadas para tablets. Si encuentras esos
  permisos, asegúrate de declarar explícitamente un elemento
@@ -735,7 +735,7 @@ o simplemente centrando el icono dentro del botón transparente.</li>
  distribución. </p>
 
 <p>Si la página de Sugerencias para la optimización indica problemas "Pendientes" que crees que no
- corresponden a tu aplicación o afectan la calidad de la aplicación en las tablets, 
+ corresponden a tu aplicación o afectan la calidad de la aplicación en las tablets,
 usa el <a href="https://support.google.com/googleplay/android-developer/contact/tabletq" target="_googleplay" style="white-space:nowrap">Formulario de contacto de Diseñado para tablets&raquo;</a> para comunicárnoslo. Revisaremos
  tu aplicación y actualizaremos tu página de Sugerencias para la optimización
  según corresponda.</p>

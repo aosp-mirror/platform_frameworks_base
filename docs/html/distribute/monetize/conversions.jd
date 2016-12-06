@@ -1,0 +1,100 @@
+page.title=Drive Conversions
+page.image=images/cards/card-drive-conversions_16-9_2x.png
+page.metaDescription=Discover where your users are coming from, drive engagement, and surface your in-app products to maximize your conversions.
+page.tags="conversions"
+
+@jd:body
+
+<div class="figure">
+  <img src="{@docRoot}images/cards/card-drive-conversions_16-9_2x.png">
+</div>
+
+<p>
+  Users who've made in-app purchases or converted in other ways are more likely
+  to do so again.
+  You can now easily discover where those users are coming from, drive engagement,
+  and surface your in-app products to maximize your conversions.
+</p>
+
+<div class="headerLine">
+  <h2 id="dicover">
+  Discover your most valuable channels
+  </h2>
+
+</div>
+
+<p>
+  From the <strong>User Acquisition</strong> page in the Google Play Developer Console, explore
+  how users convert into spenders across your acquisition channels and find the best prospects
+  for app install campaigns.
+</p>
+
+<p>For more information, view the guide on how to <a class="external-link"
+ href="https://support.google.com/googleplay/android-developer/answer/6263332">
+ measure your app's user acquisition</a> in the Google Play Developer Console Help Center.</p>
+
+</p>
+
+<div class="headerLine">
+  <h2 id="adwords">
+  Re-engage users with AdWords ads
+  </h2>
+
+</div>
+
+<p>
+  Bring users back to your app by creating an AdWords re-engagement campaign.
+  Use display and search ads that appear only to users who have installed your app.
+  Use deep links to bring them to where they'll find the content or actions they're
+  searching for.
+</p>
+
+<p>For more information, view the guide on <a class="external-link"
+ href="https://support.google.com/adwords/topic/3119078?hl=en">campaign settings</a> in the
+ AdWords Help Center.</p>
+
+<div class="headerLine">
+  <h2 id="gift-cards">
+  Drive spending with AdMob in-app purchase ads
+  </h2>
+</div>
+
+<p>Use your Google Analytics data to create Remarketing Audience lists for the high-value
+ users most likely to purchase products within your app. Then create an AdMob campaign that
+ targets these users to increase their awareness of your products.</p>
+
+<p>For more information, view the guide on how to <a class="external-link"
+ href="https://www.google.com/admob/promote.html">drive more in-app purchases and installs</a>
+ in the AdMob platform.</p>
+
+<div class="headerLine">
+  <h2 id="tips">
+  Tips
+  </h2>
+</div>
+<ul>
+<li>Add <a class="external-link"
+ href="https://developers.google.com/app-indexing/webmasters/app">deep links</a>
+ to your app so ads bring users directly to
+ conversion activities.</li>
+<li>Track what users do in your app by installing the
+ AdWords <a class="external-link"
+ href="https://developers.google.com/app-conversion-tracking">
+ Conversion Tracking SDK</a>.</li>
+<li>Link your Google Analytics and AdMob accounts to share audience lists.</li>
+<li>Make conversion ads compelling, such as promoting a booking search or
+ in-app product special offer.</li>
+<li>Use the AdMob Conversion Optimizer with existing campaigns. Predictions
+ are more accurate when there is more data to work with.</li>
+<li>Re-engage with your app's users across the Display Network with remarketing
+ lists in AdMob and with search keywords in AdWords.</li>
+</ul>
+
+
+<div class="headerLine"><h2 id="related-resources">Related resources</h2></div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/monetize/conversions"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="8"></div>

@@ -19,6 +19,7 @@ import android.app.AlertDialog.Builder;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
@@ -71,6 +72,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private final Handler mHandler = new Handler();
     private final List<TileInfo> mTiles = new ArrayList<>();
     private final ItemTouchHelper mItemTouchHelper;
+    private final ItemDecoration mDecoration;
     private final AccessibilityManager mAccessibilityManager;
     private int mEditIndex;
     private int mTileDividerIndex;
@@ -88,6 +90,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         mContext = context;
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         mItemTouchHelper = new ItemTouchHelper(mCallbacks);
+        mDecoration = new TileItemDecoration(context);
     }
 
     public void setHost(QSTileHost host) {
@@ -294,6 +297,9 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         mAccessibilityMoving = false;
         mTiles.remove(mEditIndex--);
         notifyItemRemoved(mEditIndex - 1);
+        // Don't remove items when the last position is selected.
+        if (position == mEditIndex) position--;
+
         move(mAccessibilityFromIndex, position, v);
         notifyDataSetChanged();
     }
@@ -459,9 +465,16 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         }
     };
 
-    private final ItemDecoration mDecoration = new ItemDecoration() {
-        // TODO: Move this to resource.
-        private final ColorDrawable mDrawable = new ColorDrawable(0xff384248);
+    private class TileItemDecoration extends ItemDecoration {
+        private final ColorDrawable mDrawable;
+
+        private TileItemDecoration(Context context) {
+            TypedArray ta =
+                    context.obtainStyledAttributes(new int[]{android.R.attr.colorSecondary});
+            mDrawable = new ColorDrawable(ta.getColor(0, 0));
+            ta.recycle();
+        }
+
 
         @Override
         public void onDraw(Canvas c, RecyclerView parent, State state) {

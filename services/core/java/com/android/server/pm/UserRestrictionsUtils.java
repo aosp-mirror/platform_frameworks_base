@@ -26,13 +26,12 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.service.persistentdata.PersistentDataBlockManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.util.Log;
@@ -104,7 +103,9 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_RUN_IN_BACKGROUND,
             UserManager.DISALLOW_DATA_ROAMING,
             UserManager.DISALLOW_SET_USER_ICON,
-            UserManager.DISALLOW_SET_WALLPAPER
+            UserManager.DISALLOW_SET_WALLPAPER,
+            UserManager.DISALLOW_OEM_UNLOCK,
+            UserManager.DISALLLOW_UNMUTE_DEVICE,
     });
 
     /**
@@ -139,7 +140,8 @@ public class UserRestrictionsUtils {
      */
     private static final Set<String> IMMUTABLE_BY_OWNERS = Sets.newArraySet(
             UserManager.DISALLOW_RECORD_AUDIO,
-            UserManager.DISALLOW_WALLPAPER
+            UserManager.DISALLOW_WALLPAPER,
+            UserManager.DISALLOW_OEM_UNLOCK
     );
 
     /**
@@ -149,7 +151,8 @@ public class UserRestrictionsUtils {
     private static final Set<String> GLOBAL_RESTRICTIONS = Sets.newArraySet(
             UserManager.DISALLOW_ADJUST_VOLUME,
             UserManager.DISALLOW_RUN_IN_BACKGROUND,
-            UserManager.DISALLOW_UNMUTE_MICROPHONE
+            UserManager.DISALLOW_UNMUTE_MICROPHONE,
+            UserManager.DISALLLOW_UNMUTE_DEVICE
     );
 
     /**
@@ -185,8 +188,7 @@ public class UserRestrictionsUtils {
         serializer.endTag(null, tag);
     }
 
-    public static void readRestrictions(XmlPullParser parser, Bundle restrictions)
-            throws IOException {
+    public static void readRestrictions(XmlPullParser parser, Bundle restrictions) {
         for (String key : USER_RESTRICTIONS) {
             final String value = parser.getAttributeValue(null, key);
             if (value != null) {
@@ -332,6 +334,9 @@ public class UserRestrictionsUtils {
         // set, and in that case even if the restriction is lifted, changing it to ON would be
         // wrong.  So just don't do anything in such a case.  If the user hopes to enable location
         // later, they can do it on the Settings UI.
+        // WARNING: Remember that Settings.Global and Settings.Secure are changeable via adb.
+        // To prevent this from happening for a given user restriction, you have to add a check to
+        // SettingsProvider.isGlobalOrSecureSettingRestrictedForUser.
 
         final ContentResolver cr = context.getContentResolver();
         final long id = Binder.clearCallingIdentity();
@@ -425,6 +430,22 @@ public class UserRestrictionsUtils {
                             context.getContentResolver(),
                             android.provider.Settings.Global.SAFE_BOOT_DISALLOWED,
                             newValue ? 1 : 0);
+                    break;
+                case UserManager.DISALLOW_FACTORY_RESET:
+                case UserManager.DISALLOW_OEM_UNLOCK:
+                    if (newValue) {
+                        PersistentDataBlockManager manager = (PersistentDataBlockManager) context
+                                .getSystemService(Context.PERSISTENT_DATA_BLOCK_SERVICE);
+                        if (manager != null
+                                && manager.getOemUnlockEnabled()
+                                && manager.getFlashLockState()
+                                        != PersistentDataBlockManager.FLASH_LOCK_UNLOCKED) {
+                            // Only disable OEM unlock if the bootloader is locked. If it's already
+                            // unlocked, setting the OEM unlock enabled flag to false has no effect
+                            // (the bootloader would remain unlocked).
+                            manager.setOemUnlockEnabled(false);
+                        }
+                    }
                     break;
             }
         } finally {

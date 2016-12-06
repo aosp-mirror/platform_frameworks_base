@@ -41,6 +41,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -55,15 +56,16 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.app.IVoiceInteractionSessionListener;
 import com.android.internal.app.IVoiceInteractionManagerService;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
-import com.android.server.soundtrigger.SoundTriggerInternal;
 import com.android.server.SystemService;
 import com.android.server.UiThread;
+import com.android.server.soundtrigger.SoundTriggerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -83,6 +85,9 @@ public class VoiceInteractionManagerService extends SystemService {
     final ActivityManagerInternal mAmInternal;
     final TreeSet<Integer> mLoadedKeyphraseIds;
     SoundTriggerInternal mSoundTriggerInternal;
+
+    private final RemoteCallbackList<IVoiceInteractionSessionListener>
+            mVoiceInteractionSessionListeners = new RemoteCallbackList<>();
 
     public VoiceInteractionManagerService(Context context) {
         super(context);
@@ -528,6 +533,18 @@ public class VoiceInteractionManagerService extends SystemService {
                     comp != null ? comp.flattenToShortString() : "", userHandle);
             if (DEBUG) Slog.d(TAG, "setCurRecognizer comp=" + comp
                     + " user=" + userHandle);
+        }
+
+        ComponentName getCurAssistant(int userHandle) {
+            String curAssistant = Settings.Secure.getStringForUser(
+                    mContext.getContentResolver(),
+                    Settings.Secure.ASSISTANT, userHandle);
+            if (TextUtils.isEmpty(curAssistant)) {
+                return null;
+            }
+            if (DEBUG) Slog.d(TAG, "getCurAssistant curAssistant=" + curAssistant
+                    + " user=" + userHandle);
+            return ComponentName.unflattenFromString(curAssistant);
         }
 
         void resetCurAssistant(int userHandle) {
@@ -1038,6 +1055,48 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
+        public void registerVoiceInteractionSessionListener(
+                IVoiceInteractionSessionListener listener) {
+            enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
+            synchronized (this) {
+                mVoiceInteractionSessionListeners.register(listener);
+            }
+        }
+
+        public void onSessionShown() {
+            synchronized (this) {
+                final int size = mVoiceInteractionSessionListeners.beginBroadcast();
+                for (int i = 0; i < size; ++i) {
+                    final IVoiceInteractionSessionListener listener =
+                            mVoiceInteractionSessionListeners.getBroadcastItem(i);
+                    try {
+                        listener.onVoiceSessionShown();
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Error delivering voice interaction open event.", e);
+                    }
+                }
+                mVoiceInteractionSessionListeners.finishBroadcast();
+            }
+        }
+
+        public void onSessionHidden() {
+            synchronized (this) {
+                final int size = mVoiceInteractionSessionListeners.beginBroadcast();
+                for (int i = 0; i < size; ++i) {
+                    final IVoiceInteractionSessionListener listener =
+                            mVoiceInteractionSessionListeners.getBroadcastItem(i);
+                    try {
+                        listener.onVoiceSessionHidden();
+
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Error delivering voice interaction closed event.", e);
+                    }
+                }
+                mVoiceInteractionSessionListeners.finishBroadcast();
+            }
+        }
+
+        @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (mContext.checkCallingOrSelfPermission(Manifest.permission.DUMP)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -1131,6 +1190,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 synchronized (VoiceInteractionManagerServiceStub.this) {
                     ComponentName curInteractor = getCurInteractor(userHandle);
                     ComponentName curRecognizer = getCurRecognizer(userHandle);
+                    ComponentName curAssistant = getCurAssistant(userHandle);
                     if (curRecognizer == null) {
                         // Could a new recognizer appear when we don't have one pre-installed?
                         if (anyPackagesAppearing()) {
@@ -1149,6 +1209,7 @@ public class VoiceInteractionManagerService extends SystemService {
                             // the default config.
                             setCurInteractor(null, userHandle);
                             setCurRecognizer(null, userHandle);
+                            resetCurAssistant(userHandle);
                             initForUser(userHandle);
                             return;
                         }
@@ -1163,6 +1224,20 @@ public class VoiceInteractionManagerService extends SystemService {
                             }
                         }
                         return;
+                    }
+
+                    if (curAssistant != null) {
+                        int change = isPackageDisappearing(curAssistant.getPackageName());
+                        if (change == PACKAGE_PERMANENT_CHANGE) {
+                            // If the currently set assistant is being removed, then we should
+                            // reset back to the default state (which is probably that we prefer
+                            // to have the default full voice interactor enabled).
+                            setCurInteractor(null, userHandle);
+                            setCurRecognizer(null, userHandle);
+                            resetCurAssistant(userHandle);
+                            initForUser(userHandle);
+                            return;
+                        }
                     }
 
                     // There is no interactor, so just deal with a simple recognizer.

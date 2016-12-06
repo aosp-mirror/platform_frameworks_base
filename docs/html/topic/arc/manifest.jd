@@ -1,0 +1,341 @@
+page.title=App Manifest Compatibility for Chromebooks
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>On this page</h2>
+
+      <ol>
+        <li><a href="#incompat-entries">Incompatible Manifest Entries</a></li>
+        <li>
+          <a href="#implied-features">Permissions That Imply Feature
+          Requirements</a>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+<p>
+As you prepare your Android app to run on Chromebooks, you should consider the
+device features that your app uses. Chromebooks don't support all of the
+hardware and software features that are available on other devices running
+Android. If your app requires specific features that aren't supported on
+Chromebooks, it won't be available for installation on Chromebooks.
+</p>
+
+<p>
+You declare your app's requirements for hardware features and certain software
+features in the <a
+href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest file</a>.
+This document describes the app manifest feature declarations that aren't
+compatible with Chromebooks.
+</p>
+
+<h2 id="incompat-entries">Incompatible Manifest Entries</h2>
+
+<p>
+The manifest entries listed in this section aren't currently compatible with
+Chromebooks. If your app uses any of these entries, consider removing them or
+including the <code>required="false"</code> attribute value with them so that
+your app can be installed on Chromebooks. For more information about declaring
+feature use without requiring that the feature be available on the device, see
+the guide for the <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html#market-feature-filtering">
+<code>&lt;uses-feature&gt;</code></a> manifest element.
+</p>
+
+<p class="note"><strong>Note</strong>: See the <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html#features-reference">
+Features Reference</a> for a complete list of app manifest features and
+descriptions.
+</p>
+
+<h3 id="incompat-hardware-features">Hardware features</h3>
+
+<p>
+Support for hardware features varies on Chromebooks. Some features aren't
+supported on any Chromebooks while others are supported on some Chromebooks.
+</p>
+
+<h4>Unsupported hardware features</h4>
+
+<p>
+The following list includes the hardware features that aren't currently
+supported on Chromebooks:
+</p>
+
+<ul>
+  <li>
+    <code>android.hardware.camera</code> &ndash; Back-facing camera
+  </li>
+  <li>
+    <code>android.hardware.camera.autofocus</code> &ndash; Camera that uses
+    autofocus
+  </li>
+  <li>
+    <code>android.hardware.camera.capability.manual_post_processing</code>&nbsp;
+    &ndash; Camera that uses the <code>MANUAL_POST_PROCESSING</code> feature,
+    including functionality for overriding auto white balance
+  </li>
+  <li>
+    <code>android.hardware.camera.capability.manual_sensor</code> &ndash; Camera
+    that uses the <code>MANUAL_SENSOR</code> feature, including auto-exposure
+    locking support
+  </li>
+  <li>
+    <code>android.hardware.camera.capability.raw</code> &ndash; Camera that uses
+    the <code>RAW</code> feature, including the ability to save DNG (raw) files
+    and provide DNG-related metadata
+  </li>
+  <li>
+    <code>android.hardware.camera.flash</code> &ndash; Camera that uses flash
+  </li>
+  <li>
+    <code>android.hardware.camera.level.full</code> &ndash; Camera that uses
+    <code>FULL</code>-level image-capturing support
+  </li>
+  <li>
+    <code>android.hardware.consumerir</code> &ndash; Infrared (IR)
+  </li>
+  <li>
+    <code>android.hardware.location.gps</code> &ndash; GPS
+  </li>
+  <li>
+    <code>android.hardware.nfc</code> &ndash; Near-Field Communication (NFC)
+  </li>
+  <li>
+    <code>android.hardware.nfc.hce</code> &ndash; NFC card emulation
+    (<em>deprecated</em>)
+  </li>
+  <li>
+    <code>android.hardware.sensor.barometer</code> &ndash; Barometer (air
+    pressure)
+  </li>
+  <li>
+    <code>android.hardware.telephony</code> &ndash; Telephony, including radio
+    with data communication services
+  </li>
+  <li>
+    <code>android.hardware.telephony.cdma</code> &ndash; Telephony Code Division
+    Multiple Access (CDMA) network support
+  </li>
+  <li>
+    <code>android.hardware.telephony.gsm</code> &ndash; Telephony Global System
+    for Mobile Communications (GSM) network support
+  </li>
+  <li>
+    <code>android.hardware.type.automotive</code> &ndash; Android Auto user
+    interface
+  </li>
+  <li>
+    <code>android.hardware.type.television</code> &ndash; Television
+    (<em>deprecated</em>)
+  <li>
+    <code>android.hardware.usb.accessory</code> &ndash; USB accessory mode
+  </li>
+  <li>
+    <code>android.hardware.usb.host</code> &ndash; USB host mode
+  </li>
+</ul>
+
+<h4>Partially-supported hardware features</h4>
+
+<p>
+The following list includes the hardware features that may be available on some
+Chromebooks:
+</p>
+
+<ul>
+  <li>
+    <code>android.hardware.sensor.accelerometer</code> &ndash; Accelerometer
+    (device orientation)
+  </li>
+  <li>
+    <code>android.hardware.sensor.compass</code> &ndash; Compass
+  </li>
+  <li>
+    <code>android.hardware.sensor.gyroscope</code> &ndash; Gyroscope (device
+    rotation and twist)
+  </li>
+  <li>
+    <code>android.hardware.sensor.light</code> &ndash; Light
+  </li>
+  <li>
+    <code>android.hardware.sensor.proximity</code> &ndash; Proximity (to user)
+  </li>
+  <li>
+    <code>android.hardware.sensor.stepcounter</code> &ndash; Step counter
+  </li>
+  <li>
+    <code>android.hardware.sensor.stepdetector</code> &ndash; Step detector
+  </li>
+</ul>
+
+<h4>Touchscreen hardware support</h4>
+
+<p>
+As of Chrome OS version M53, all Android apps that don't explicitly require the
+<a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#touchscreen-hw-features">
+<code>android.hardware.touchscreen</code></a> feature will also work on Chrome
+OS devices that support the <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html#touchscreen-hw-features">
+<code>android.hardware.faketouch</code></a> feature. Devices that have fake
+touch interfaces provide a user input system that emulates basic touch events.
+For example, the user could interact with a mouse or remote control to move an
+on-screen cursor, scroll through a list, and drag elements from one part of the
+screen to another.
+</p>
+
+<p>
+If you don't want your app to be installed on devices that have fake touch
+interfaces but not touchscreens, you can complete one of the following actions:
+</p>
+
+<ul>
+  <li>Exclude specific devices in the <a class="external-link"
+  href="https://play.google.com/apps/publish">Google Play Developer Console.</a>
+  </li>
+  <li>Filter devices with no touchscreen hardware by explicitly declaring <a
+  href="{@docRoot}guide/topics/manifest/uses-feature-element.html#touchscreen-hw-features">
+  <code>android.hardware.touchscreen</code></a> as being required in order to
+  install your app.</li>
+</ul>
+
+<h3 id="incompat-software-features">Software features</h3>
+
+<p>
+The following list includes the software features that aren't currently
+supported on Chromebooks:
+</p>
+
+<ul>
+  <li>
+    <code>android.software.app_widgets</code> &ndash; App Widgets on the Home
+    screen
+  </li>
+  <li>
+    <code>android.software.device_admin</code> &ndash; Device policy
+    administration
+  </li>
+  <li>
+    <code>android.software.home_screen</code> &ndash; Replaces device's Home
+    screen
+  </li>
+  <li>
+    <code>android.software.input_methods</code> &ndash; Custom input methods
+    (instances of <a href="{@docRoot}reference/android/inputmethodservice/InputMethodService.html">
+    <code>InputMethodService</code></a>)
+  </li>
+  <li>
+    <code>android.software.leanback</code> &ndash; UI designed for large-screen
+    viewing
+  </li>
+  <li>
+    <code>android.software.live_wallpaper</code> &ndash; Animated wallpapers
+  </li>
+  <li>
+    <code>android.software.live_tv</code> &ndash; Streaming live TV programs
+  </li>
+  <li>
+    <code>android.software.managed_users</code> &ndash; Secondary users and
+    managed profiles
+  </li>
+  <li>
+    <code>android.software.midi</code> &ndash; Musical Instrument Digital
+    Interface (MIDI) protocol, which supports connecting to musical instruments
+    and providing sound
+  </li>
+  <li>
+    <code>android.software.sip</code> &ndash; Session Initiation Protocol (SIP)
+    service, which supports video conferencing and instant messaging
+  </li>
+  <li>
+    <code>android.software.sip.voip</code> &ndash; Voice Over Internet Protocol
+    (VoIP) service based on SIP, which supports two-way video conferencing
+  </li>
+</ul>
+
+<h2 id="implied-features">Permissions That Imply Feature Requirements</h2>
+
+<p>
+Some permissions that you request in your manifest files can create implied
+requests for hardware and software features. By requesting these permissions,
+you'll prevent your app from being installed on Chromebooks.
+</p>
+
+<p>
+For details about how to prevent permission requests from making your app
+unavailable on Chromebooks, see the <a href="#incompat-entries">Incompatible
+Manifest Entries</a> section of this page.
+</p>
+
+<p>
+The following table shows the permissions that imply certain feature
+requirements which make an app incompatible with Chromebooks:
+</p>
+
+<p class="table-caption">
+<strong>Table 1. </strong>Device permissions that imply hardware features which
+are incompatible with Chromebooks.
+</p>
+
+<table>
+  <tr>
+    <th scope="col">Category</th>
+    <th scope="col">This Permission...</th>
+    <th scope="col">...Implies This Feature Requirement</th>
+  </tr>
+  <tr>
+    <td>Camera</td>
+    <td><code>CAMERA</code></td>
+    <td>
+      <code>android.hardware.camera</code> and<br>
+      <code>android.hardware.camera.autofocus</code>
+    </td>
+  </tr>
+  <tr>
+    <td rowspan="11">Telephony</td>
+    <td><code>CALL_PHONE</code></td>
+    <td><code>android.hardware.telephony</code></td>
+  </tr>
+  <tr>
+    <td><code>CALL_PRIVILEGED</code></td>
+    <td><code>android.hardware.telephony</code></td>
+  </tr>
+  <tr>
+    <td><code>MODIFY_PHONE_STATE</code></td>
+    <td><code>android.hardware.telephony</code></td>
+  </tr>
+  <tr>
+    <td><code>PROCESS_OUTGOING_CALLS</code></td>
+    <td><code>android.hardware.telephony</code></td>
+  </tr>
+  <tr>
+    <td><code>READ_SMSREAD_SMS</code></td>
+    <td><code>android.hardware.telephony</code></td>
+  </tr>
+  <tr>
+    <td><code>RECEIVE_SMS</code></td>
+    <td><code>android.hardware.telephony</code></td>
+  </tr>
+  <tr>
+    <td><code>RECEIVE_MMS</code></td>
+    <td><code>android.hardware.telephony</code></td>
+  </tr>
+  <tr>
+    <td><code>RECEIVE_WAP_PUSH</code></td>
+    <td><code>android.hardware.telephony</code></td>
+  </tr>
+  <tr>
+    <td><code>SEND_SMS</code></td>
+    <td><code>android.hardware.telephony</code></td>
+  </tr>
+  <tr>
+    <td><code>WRITE_APN_SETTINGS</code></td>
+    <td><code>android.hardware.telephony</code></td>
+  </tr>
+  <tr>
+    <td><code>WRITE_SMS</code></td>
+    <td><code>android.hardware.telephony</code></td>
+  </tr>
+</table>

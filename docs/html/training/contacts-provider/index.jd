@@ -55,7 +55,7 @@ startpage=true
     <a href="{@docRoot}guide/topics/providers/contacts-provider.html">Contacts Provider</a>.
 </p>
 <h2>Lessons</h2>
- 
+
 <dl>
     <dt>
         <b><a href="retrieve-names.html">Retrieving a List of Contacts</a></b>

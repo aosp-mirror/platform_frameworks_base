@@ -685,6 +685,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Teisingai!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Bandykite dar kartą"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Bandykite dar kartą"</string>
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"Atrakinę pasieksite visas funkcijas ir duomenis"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Viršijote maksimalų atrakinimo pagal veidą bandymų skaičių"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Nėra SIM kortelės"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Planšetiniame kompiuteryje nėra SIM kortelės."</string>
@@ -1069,8 +1070,9 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"„Android“ naujovinama..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Paleidžiama „Android“…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optimizuojama saugykla."</string>
-    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"„Android“ naujovinama"</string>
+    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"Baigiamas „Android“ atnauj. procesas…"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Kai kurios programos gali tinkamai neveikti, kol naujovinimo procesas nebus baigtas"</string>
+    <string name="app_upgrading_toast" msgid="3008139776215597053">"„<xliff:g id="APPLICATION">%1$s</xliff:g>“ naujovinama..."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Optimizuojama <xliff:g id="NUMBER_0">%1$d</xliff:g> progr. iš <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Ruošiama „<xliff:g id="APPNAME">%1$s</xliff:g>“."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Paleidžiamos programos."</string>
@@ -1103,7 +1105,7 @@
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Medijos garsumas"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Pranešimo apimtis"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Numatytasis skambėjimo tonas"</string>
-    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Numatytasis skambėjimo tonas (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Numatytasis skambėjimo tonas („<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>“)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Nėra"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Skambėjimo tonai"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Nežinomas skambėjimo tonas"</string>
@@ -1125,6 +1127,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"„Wi-Fi“ tinkle nėra interneto ryšio"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Palieskite, kad būtų rodomos parinktys."</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"Perjungta į tinklą <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Įrenginys naudoja tinklą <xliff:g id="NEW_NETWORK">%1$s</xliff:g> kai tinkle <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nėra interneto ryšio. Gali būti taikomi mokesčiai."</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"Perjungta iš tinklo <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> į tinklą <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"mobiliojo ryšio duomenys"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"Bluetooth"</item>
+    <item msgid="5447331121797802871">"Eternetas"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"nežinomas tinklo tipas"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Nepavyko prisijungti prie „Wi-Fi“"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" turi prastą interneto ryšį."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Leisti prisijungti?"</string>
@@ -1202,7 +1215,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Palieskite, kad pasirinktumėte kalbą ir išdėstymą"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" AĄBCČDEĘĖFGHIĮYJKLMNOPRSŠTUŲŪVZŽ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789AĄBCČDEĘĖFGHIĮYJKLMNOPRSŠTUŲŪVZŽ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"kandidatai"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Ruošiama <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Tikrinama, ar nėra klaidų"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Aptikta nauja <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1281,8 +1293,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Prisijungta prie <xliff:g id="SESSION">%s</xliff:g>. Jei norite valdyti tinklą, palieskite."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Prisijungiama prie visada įjungto VPN…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Prisijungta prie visada įjungto VPN"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Visada įjungtas VPN atjungtas"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Visada įjungto VPN klaida"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"Palieskite, kad konfigūruotumėte"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Palieskite, kad nustatytumėte"</string>
     <string name="upload_file" msgid="2897957172366730416">"Pasirinkti failą"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nepasirinktas joks failas"</string>
     <string name="reset" msgid="2448168080964209908">"Atstatyti"</string>
@@ -1368,7 +1381,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"„<xliff:g id="MANUFACTURER">%s</xliff:g>“ atmintukas"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB atmintis"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Redaguoti"</string>
-    <string name="data_usage_warning_title" msgid="1955638862122232342">"Įspėjimas dėl duomenų naudojimo"</string>
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"Duomenų naudojimo įspėjimas"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Pal. ir perž. naud. i. bei nust."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Pasiektas 2G–3G duomenų apribojimas"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Pasiektas 4G duomenų apribojimas"</string>
@@ -1707,6 +1720,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"Įveskite kalbos pav."</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Siūloma"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Visos kalbos"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"Visi regionai"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Paieška"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"Darbo režimas išjungtas"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Leisti veikti darbo profiliui, įskaitant programas, sinchronizavimą fone ir susijusias funkcijas."</string>
@@ -1724,7 +1738,16 @@
     <string name="unpin_target" msgid="3556545602439143442">"Atsegti"</string>
     <string name="app_info" msgid="6856026610594615344">"Programos informacija"</string>
     <string name="negative_duration" msgid="5688706061127375131">"–<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"Iš naujo nustatyti įrenginį?"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Palieskite, kad iš naujo nustatytumėte įrenginį"</string>
+    <string name="demo_starting_message" msgid="5268556852031489931">"Paleidžiama demonstracinė versija…"</string>
+    <string name="demo_restarting_message" msgid="952118052531642451">"Įrenginys nustatomas iš naujo…"</string>
+    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Iš naujo nustatyti įrenginį?"</string>
+    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Prarasite visus pakeitimus, o demonstracinė versija bus paleista iš naujo po <xliff:g id="TIMEOUT">%1$s</xliff:g> sek…"</string>
+    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Atšaukti"</string>
+    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Nustatyti iš naujo dabar"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Atkurkite gamyklinius nustatymus, kad galėtumėte naudoti šį įrenginį be apribojimų"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Palieskite, kad sužinotumėte daugiau."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Išj. valdiklis „<xliff:g id="LABEL">%1$s</xliff:g>“"</string>
+    <string name="conference_call" msgid="3751093130790472426">"Konferencinis skambutis"</string>
 </resources>

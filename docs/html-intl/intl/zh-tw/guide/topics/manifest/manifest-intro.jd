@@ -33,15 +33,15 @@ page.title=應用程式宣示說明
 
 <li>描述應用程式的元件 &mdash; 組成應用程式的 Activity、服務、廣播接收器和內容供應程式。
 
-為實作每個元件的類別命名以及發佈類別的功能 (例如，類別可處理的 {@link android.content.Intent 
+為實作每個元件的類別命名以及發佈類別的功能 (例如，類別可處理的 {@link android.content.Intent
 Intent} 訊息)。
 這些宣告可讓 Android 系統瞭解元件為何以及可在哪些情況下啟動。
 </li>
 
-<li>決定代管應用程式元件的程序。</li>  
+<li>決定代管應用程式元件的程序。</li>
 
 <li>宣告應用程式必須擁有哪些權限，才能存取 API 受保護的部分以及與其他應用程式互動。
-</li>  
+</li>
 
 <li>宣示說明亦可宣告其他項目必須擁有哪些權限，才能與應用程式的元件互動。
 </li>
@@ -66,7 +66,7 @@ Intent} 訊息)。
 如要查看任一元素的詳細資訊，只要按一下圖表中的元素名稱、圖表後方按字母順序列出的元素清單，或在他處提及的任何元素名稱。
 
 
- 
+
 </p>
 
 <pre>
@@ -128,7 +128,7 @@ Intent} 訊息)。
 <p>
 下方按字母順序列出可出現在宣示說明檔案中的所有元素。
 只有這些才是符合資格的元素，您無法新增自己的元素或屬性。
-  
+
 </p>
 
 <p style="margin-left: 2em">
@@ -158,7 +158,7 @@ Intent} 訊息)。
 </p>
 
 
-    
+
 
 <h2 id="filec">檔案轉換</h2>
 
@@ -185,7 +185,7 @@ Intent} 訊息)。
 <p>
 系統通常不會將位於相同層級的元素排序。例如，
 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>、
-<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code> 和 
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code> 和
 <code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code> 元素能以任何順序排列組合。
 (
 <code><a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;activity-alias&gt;</a></code> 元素是這項規則的例外狀況：
@@ -218,7 +218,7 @@ Intent} 訊息)。
 
 
 
-  
+
 
 <p>
 如果您一如往常定義元件類別 ({@link android.app.Activity}、{@link android.app.Service}、
@@ -244,7 +244,7 @@ Intent} 訊息)。
 <code><a href="{@docRoot}guide/topics/manifest/manifest-element.html#package">package</a></code> 屬性指定)。
 
 
-下列的指派結果會和上述相同： 
+下列的指派結果會和上述相同：
 </p>
 
 <pre>&lt;manifest package="com.example.project" . . . &gt;
@@ -375,7 +375,7 @@ Android 會找出適當的元件來回應意圖、視需要啟動元件的新執
 <code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code> 元素預設值。
 
 
-如果 
+如果
 <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 元素設有一個標籤，但 Activity 與其意圖篩選器並未設定該標籤，系統會將應用程式標籤視為 Activity 和意圖篩選器的標籤。
 
 
@@ -399,7 +399,7 @@ Android 會找出適當的元件來回應意圖、視需要啟動元件的新執
 <p>
 單一 <i>權限</i> 是指一項限制，可限制某部分程式碼或裝置上資料的存取權。
    系統會強制實施這項限制，以保護會遭到誤用而扭曲或損害使用者體驗的重要資料與程式碼。
-  
+
 </p>
 
 <p>
@@ -427,12 +427,12 @@ Android 會找出適當的元件來回應意圖、視需要啟動元件的新執
 如果授予權限，該應用程式就能夠使用受保護的功能。
 
 如果不授予權限，存取相關功能的嘗試就會失敗，但使用者不會收到任何通知。
- 
+
 </p>
 
 <p>
 應用程式也能利用權限來保護自己的元件 (Activity、服務、廣播接收器和內容供應程式)。
-它能使用 Android 定義的任何權限 (列於 
+它能使用 Android 定義的任何權限 (列於
 {@link android.Manifest.permission android.Manifest.permission}) 或其他應用程式宣告的任何權限。
 
 此外，應用程式也能自行定義權限。新的權限是以
@@ -458,13 +458,13 @@ Android 會找出適當的元件來回應意圖、視需要啟動元件的新執
 
 <p>
 請注意，在本範例中，不只以
-<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code> 元素宣告 {@code DEBIT_ACCT} 權限，還使用 
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code> 元素宣告 {@code DEBIT_ACCT} 權限，還使用
 <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code> 元素來要求使用此權限。
 
 
 即使保護是由應用程式本身強制施行，還是必須要求使用該權限，應用程式的其他元件才能啟動受保護的 Activity。
 
-  
+
 </p>
 
 <p>
@@ -474,7 +474,7 @@ Android 會找出適當的元件來回應意圖、視需要啟動元件的新執
 
 
 不過，還是必須利用
-<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code> 來要求使用。 
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code> 來要求使用。
 </p>
 
 <p>

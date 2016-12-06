@@ -47,7 +47,7 @@ page.title=사용자지정 애니메이션의 정의
 
 <ul>
 <li>제한된 물결의 경우, <code>?android:attr/selectableItemBackground</code></li>
-<li>뷰를 넘어 확장되는 물결의 경우, <code>?android:attr/selectableItemBackgroundBorderless</code> 
+<li>뷰를 넘어 확장되는 물결의 경우, <code>?android:attr/selectableItemBackgroundBorderless</code>
  이 경우 물결이 null이 아닌 배경을 가진 뷰의 가장 가까운 상위 요소 위에 그려지고 해당 상위 요소까지로 제한됩니다.
 </li>
 </ul>
@@ -139,7 +139,7 @@ anim.start();
   </video>
   </div>
   <div style="font-size:10pt;margin-left:20px;margin-bottom:30px">
-    <p class="img-caption" style="margin-top:3px;margin-bottom:10px"><strong>그림 1</strong> - 
+    <p class="img-caption" style="margin-top:3px;margin-bottom:10px"><strong>그림 1</strong> -
     공유 요소를 이용한 전환.</p>
     <em>영화를 재생하려면 기기 화면을 클릭하세요.</em>
   </div>
@@ -263,7 +263,7 @@ setSharedElementEnterTransition()} 메서드는 호출되는 액티비티의 들
  그렇지 않으면 호출하는 액티비티가 나가기 전환을 시작하지만, 배율 또는 페이드와 같은 창 전환이 나타납니다.
 </p>
 
-<p>들어가기 전환을 최대한 빨리 시작하려면 호출되는 액티비티에서 
+<p>들어가기 전환을 최대한 빨리 시작하려면 호출되는 액티비티에서
 {@link android.view.Window#setAllowEnterTransitionOverlap Window.setAllowEnterTransitionOverlap()}
  메서드를 사용하세요. 그러면 더욱 인상적인 들어가기 전환이 가능합니다.</p>
 
@@ -317,7 +317,7 @@ imgContainerView.setOnClickListener(new View.OnClickListener() {
 });
 </pre>
 
-<p>코드에서 생성하는 공유된 동적 뷰의 경우, 
+<p>코드에서 생성하는 공유된 동적 뷰의 경우,
 {@link android.view.View#setTransitionName View.setTransitionName()} 메서드를 사용하여 두 액티비티의 공통 요소 이름을 지정합니다.
 </p>
 
@@ -414,7 +414,7 @@ android.animation.StateListAnimator}를 XML 리소스로 정의하는 방법을 
 &lt;/selector>
 </pre>
 
-<p>사용자지정 뷰 상태 애니메이션을 뷰에 첨부하려면 이 예와 같이 XML 리소스 파일의 
+<p>사용자지정 뷰 상태 애니메이션을 뷰에 첨부하려면 이 예와 같이 XML 리소스 파일의
 <code>selector</code> 요소를 사용하여 애니메이터를 정의한 후에 <code>android:stateListAnimator</code> 특성을 통해 뷰에 할당합니다.
  코드에서 뷰에 상태 목록 애니메이터를 할당하려면 {@link android.animation.AnimatorInflater#loadStateListAnimator
 AnimationInflater.loadStateListAnimator()} 메서드를 사용하고,

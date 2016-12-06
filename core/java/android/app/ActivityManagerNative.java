@@ -683,10 +683,10 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             int maxNum = data.readInt();
             int fl = data.readInt();
             int userId = data.readInt();
-            List<ActivityManager.RecentTaskInfo> list = getRecentTasks(maxNum,
+            ParceledListSlice<ActivityManager.RecentTaskInfo> list = getRecentTasks(maxNum,
                     fl, userId);
             reply.writeNoException();
-            reply.writeTypedList(list);
+            list.writeToParcel(reply, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
             return true;
         }
 
@@ -2371,7 +2371,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             data.enforceInterface(IActivityManager.descriptor);
             IUserSwitchObserver observer = IUserSwitchObserver.Stub.asInterface(
                     data.readStrongBinder());
-            registerUserSwitchObserver(observer);
+            String name = data.readString();
+            registerUserSwitchObserver(observer, name);
             reply.writeNoException();
             return true;
         }
@@ -2993,6 +2994,35 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
                     requiredPermission, options);
             reply.writeNoException();
             reply.writeInt(result);
+            return true;
+        }
+        case SET_VR_THREAD_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final int tid = data.readInt();
+            setVrThread(tid);
+            reply.writeNoException();
+            return true;
+        }
+        case SET_RENDER_THREAD_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final int tid = data.readInt();
+            setRenderThread(tid);
+            reply.writeNoException();
+            return true;
+        }
+        case SET_HAS_TOP_UI: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final boolean hasTopUi = data.readInt() != 0;
+            setHasTopUi(hasTopUi);
+            reply.writeNoException();
+            return true;
+        }
+        case CAN_BYPASS_WORK_CHALLENGE: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final PendingIntent intent = PendingIntent.CREATOR.createFromParcel(data);
+            final boolean result = canBypassWorkChallenge(intent);
+            reply.writeNoException();
+            reply.writeInt(result ? 1 : 0);
             return true;
         }
         }
@@ -3740,7 +3770,7 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
         return list;
     }
-    public List<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum,
+    public ParceledListSlice<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum,
             int flags, int userId) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -3750,8 +3780,8 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInt(userId);
         mRemote.transact(GET_RECENT_TASKS_TRANSACTION, data, reply, 0);
         reply.readException();
-        ArrayList<ActivityManager.RecentTaskInfo> list
-            = reply.createTypedArrayList(ActivityManager.RecentTaskInfo.CREATOR);
+        final ParceledListSlice<ActivityManager.RecentTaskInfo> list = ParceledListSlice.CREATOR
+                .createFromParcel(reply);
         data.recycle();
         reply.recycle();
         return list;
@@ -6060,11 +6090,13 @@ class ActivityManagerProxy implements IActivityManager
         return result;
     }
 
-    public void registerUserSwitchObserver(IUserSwitchObserver observer) throws RemoteException {
+    public void registerUserSwitchObserver(IUserSwitchObserver observer,
+            String name) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(observer != null ? observer.asBinder() : null);
+        data.writeString(name);
         mRemote.transact(REGISTER_USER_SWITCH_OBSERVER_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
@@ -7026,6 +7058,60 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
         return res;
+    }
+
+    @Override
+    public void setVrThread(int tid)
+        throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(tid);
+        mRemote.transact(SET_VR_THREAD_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+        return;
+    }
+
+    public void setRenderThread(int tid)
+        throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(tid);
+        mRemote.transact(SET_RENDER_THREAD_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+        return;
+    }
+
+    public void setHasTopUi(boolean hasTopUi)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(hasTopUi ? 1 : 0);
+        mRemote.transact(SET_HAS_TOP_UI, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+        return;
+    }
+    @Override
+    public boolean canBypassWorkChallenge(PendingIntent intent)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        intent.writeToParcel(data, 0);
+        mRemote.transact(CAN_BYPASS_WORK_CHALLENGE, data, reply, 0);
+        reply.readException();
+        final int result = reply.readInt();
+        data.recycle();
+        reply.recycle();
+        return result != 0;
     }
 
     private IBinder mRemote;

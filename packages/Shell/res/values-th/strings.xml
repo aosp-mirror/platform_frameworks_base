@@ -21,7 +21,7 @@
     <string name="bugreport_finished_title" msgid="4429132808670114081">"บันทึกรายงานข้อบกพร่อง <xliff:g id="ID">#%d</xliff:g> แล้ว"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"กำลังเพิ่มรายละเอียดในรายงานข้อบกพร่อง"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"โปรดรอสักครู่…"</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"กวาดไปทางซ้ายเพื่อแชร์รายงานข้อบกพร่อง"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"รายงานข้อบกพร่องจะปรากฏบนโทรศัพท์ในไม่ช้า"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"แตะเพื่อแชร์รายงานข้อบกพร่องของคุณ"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"แตะเพื่อแชร์รายงานข้อบกพร่องของคุณโดยไม่มีภาพหน้าจอ หรือรอให้ภาพหน้าจอเสร็จสมบูรณ์"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"แตะเพื่อแชร์รายงานข้อบกพร่องของคุณโดยไม่มีภาพหน้าจอ หรือรอให้ภาพหน้าจอเสร็จสมบูรณ์"</string>

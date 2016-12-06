@@ -16,6 +16,7 @@
 
 package com.android.providers.settings;
 
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -26,6 +27,7 @@ import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Base64;
 import android.util.Slog;
+import android.util.TimeUtils;
 import android.util.Xml;
 import com.android.internal.annotations.GuardedBy;
 import libcore.io.IoUtils;
@@ -39,6 +41,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,7 +63,7 @@ final class SettingsState {
 
     private static final String LOG_TAG = "SettingsState";
 
-    static final int SETTINGS_VERSOIN_NEW_ENCODING = 121;
+    static final int SETTINGS_VERSION_NEW_ENCODING = 121;
 
     private static final long WRITE_SETTINGS_DELAY_MILLIS = 200;
     private static final long MAX_WRITE_SETTINGS_DELAY_MILLIS = 2000;
@@ -93,6 +96,12 @@ final class SettingsState {
     // This was used in version 120 and before.
     private static final String NULL_VALUE_OLD_STYLE = "null";
 
+    private static final int HISTORICAL_OPERATION_COUNT = 20;
+    private static final String HISTORICAL_OPERATION_UPDATE = "update";
+    private static final String HISTORICAL_OPERATION_DELETE = "delete";
+    private static final String HISTORICAL_OPERATION_PERSIST = "persist";
+    private static final String HISTORICAL_OPERATION_INITIALIZE = "initialize";
+
     private final Object mLock;
 
     private final Handler mHandler;
@@ -117,6 +126,9 @@ final class SettingsState {
     };
 
     @GuardedBy("mLock")
+    private final List<HistoricalOperation> mHistoricalOperations;
+
+    @GuardedBy("mLock")
     public final int mKey;
 
     @GuardedBy("mLock")
@@ -134,6 +146,9 @@ final class SettingsState {
     @GuardedBy("mLock")
     private long mNextId;
 
+    @GuardedBy("mLock")
+    private int mNextHistoricalOpIdx;
+
     public SettingsState(Object lock, File file, int key, int maxBytesPerAppPackage,
             Looper looper) {
         // It is important that we use the same lock as the settings provider
@@ -150,6 +165,10 @@ final class SettingsState {
             mMaxBytesPerAppPackage = maxBytesPerAppPackage;
             mPackageToMemoryUsage = null;
         }
+
+        mHistoricalOperations = Build.IS_DEBUGGABLE
+                ? new ArrayList<>(HISTORICAL_OPERATION_COUNT) : null;
+
         synchronized (mLock) {
             readStateSyncLocked();
         }
@@ -238,15 +257,19 @@ final class SettingsState {
 
         Setting oldState = mSettings.get(name);
         String oldValue = (oldState != null) ? oldState.value : null;
+        Setting newState;
 
         if (oldState != null) {
             if (!oldState.update(value, packageName)) {
                 return false;
             }
+            newState = oldState;
         } else {
-            Setting state = new Setting(name, value, packageName);
-            mSettings.put(name, state);
+            newState = new Setting(name, value, packageName);
+            mSettings.put(name, newState);
         }
+
+        addHistoricalOperationLocked(HISTORICAL_OPERATION_UPDATE, newState);
 
         updateMemoryUsagePerPackageLocked(packageName, oldValue, value);
 
@@ -271,6 +294,8 @@ final class SettingsState {
 
         updateMemoryUsagePerPackageLocked(oldState.packageName, oldState.value, null);
 
+        addHistoricalOperationLocked(HISTORICAL_OPERATION_DELETE, oldState);
+
         scheduleWriteIfNeededLocked();
 
         return true;
@@ -287,6 +312,51 @@ final class SettingsState {
                 return;
             }
             callback.run();
+        }
+    }
+
+    private void addHistoricalOperationLocked(String type, Setting setting) {
+        if (mHistoricalOperations == null) {
+            return;
+        }
+        HistoricalOperation operation = new HistoricalOperation(
+                SystemClock.elapsedRealtime(), type,
+                setting != null ? new Setting(setting) : null);
+        if (mNextHistoricalOpIdx >= mHistoricalOperations.size()) {
+            mHistoricalOperations.add(operation);
+        } else {
+            mHistoricalOperations.set(mNextHistoricalOpIdx, operation);
+        }
+        mNextHistoricalOpIdx++;
+        if (mNextHistoricalOpIdx >= HISTORICAL_OPERATION_COUNT) {
+            mNextHistoricalOpIdx = 0;
+        }
+    }
+
+    public void dumpHistoricalOperations(PrintWriter pw) {
+        synchronized (mLock) {
+            if (mHistoricalOperations == null) {
+                return;
+            }
+            pw.println("Historical operations");
+            final int operationCount = mHistoricalOperations.size();
+            for (int i = 0; i < operationCount; i++) {
+                int index = mNextHistoricalOpIdx - 1 - i;
+                if (index < 0) {
+                    index = operationCount + index;
+                }
+                HistoricalOperation operation = mHistoricalOperations.get(index);
+                pw.print(TimeUtils.formatForLogging(operation.mTimestamp));
+                pw.print(" ");
+                pw.print(operation.mOperation);
+                if (operation.mSetting != null) {
+                    pw.print("  ");
+                    pw.print(operation.mSetting);
+                }
+                pw.println();
+            }
+            pw.println();
+            pw.println();
         }
     }
 
@@ -407,6 +477,10 @@ final class SettingsState {
             serializer.endDocument();
             destination.finishWrite(out);
 
+            synchronized (mLock) {
+                addHistoricalOperationLocked(HISTORICAL_OPERATION_PERSIST, null);
+            }
+
             if (DEBUG_PERSISTENCE) {
                 Slog.i(LOG_TAG, "[PERSIST END]");
             }
@@ -435,7 +509,7 @@ final class SettingsState {
 
     static void setValueAttribute(int version, XmlSerializer serializer, String value)
             throws IOException {
-        if (version >= SETTINGS_VERSOIN_NEW_ENCODING) {
+        if (version >= SETTINGS_VERSION_NEW_ENCODING) {
             if (value == null) {
                 // Null value -> No ATTR_VALUE nor ATTR_VALUE_BASE64.
             } else if (isBinary(value)) {
@@ -454,7 +528,7 @@ final class SettingsState {
     }
 
     private String getValueAttribute(XmlPullParser parser) {
-        if (mVersion >= SETTINGS_VERSOIN_NEW_ENCODING) {
+        if (mVersion >= SETTINGS_VERSION_NEW_ENCODING) {
             final String value = parser.getAttributeValue(null, ATTR_VALUE);
             if (value != null) {
                 return value;
@@ -479,22 +553,26 @@ final class SettingsState {
     private void readStateSyncLocked() {
         FileInputStream in;
         if (!mStatePersistFile.exists()) {
+            Slog.i(LOG_TAG, "No settings state " + mStatePersistFile);
+            addHistoricalOperationLocked(HISTORICAL_OPERATION_INITIALIZE, null);
             return;
         }
         try {
             in = new AtomicFile(mStatePersistFile).openRead();
         } catch (FileNotFoundException fnfe) {
-            Slog.i(LOG_TAG, "No settings state");
+            String message = "No settings state " + mStatePersistFile;
+            Slog.wtf(LOG_TAG, message);
+            Slog.i(LOG_TAG, message);
             return;
         }
         try {
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(in, StandardCharsets.UTF_8.name());
             parseStateLocked(parser);
-
         } catch (XmlPullParserException | IOException e) {
-            throw new IllegalStateException("Failed parsing settings file: "
-                    + mStatePersistFile , e);
+            String message = "Failed parsing settings file: " + mStatePersistFile;
+            Slog.wtf(LOG_TAG, message);
+            throw new IllegalStateException(message , e);
         } finally {
             IoUtils.closeQuietly(in);
         }
@@ -567,6 +645,19 @@ final class SettingsState {
         }
     }
 
+    private class HistoricalOperation {
+        final long mTimestamp;
+        final String mOperation;
+        final Setting mSetting;
+
+        public HistoricalOperation(long timestamp,
+                String operation, Setting setting) {
+            mTimestamp = timestamp;
+            mOperation = operation;
+            mSetting = setting;
+        }
+    }
+
     class Setting {
         private String name;
         private String value;
@@ -628,6 +719,10 @@ final class SettingsState {
             this.packageName = packageName;
             this.id = String.valueOf(mNextId++);
             return true;
+        }
+
+        public String toString() {
+            return "Setting{name=" + value + " from " + packageName + "}";
         }
     }
 

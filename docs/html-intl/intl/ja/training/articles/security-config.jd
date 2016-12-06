@@ -1,0 +1,747 @@
+page.title=ネットワーク セキュリティ構成
+page.keywords=androidn,security,network
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>このドキュメントの内容</h2>
+<ol>
+  <li><a href="#manifest">セキュリティ構成ファイルの追加</a></li>
+  <li><a href="#CustomTrust">信頼できる CA のカスタマイズ</a>
+      <ol>
+      <li><a href="#ConfigCustom">カスタムの CA の設定</a></li>
+      <li><a href="#LimitingCas">信頼できる CA の制限</a></li>
+      <li><a href="#TrustingAdditionalCas">信頼できる CA の追加</a></li>
+      </ol>
+  </li>
+  <li><a href="#TrustingDebugCa">デバッグ限定の CA</a></li>
+  <li><a href="#UsesCleartextTraffic">クリアテキスト トラフィックのオプトアウト</a></li>
+  <li><a href="#CertificatePinning">証明書のピン留め</a></li>
+  <li><a href="#ConfigInheritance">構成の継承の動作</a></li>
+  <li><a href="#FileFormat">構成ファイルの形式</a></li>
+</ol>
+</div>
+</div>
+
+
+<p>
+  Android N には、ネットワーク セキュリティ構成機能が含まれています。これにより、アプリのコードを修正しなくても、安全な宣言型構成ファイルで、アプリのネットワーク セキュリティの設定をカスタマイズできます。
+
+これらの設定は、特定のドメインおよび特定のアプリに対して構成できます。
+主な機能は次のとおりです。
+
+</p>
+
+<ul>
+  <li>
+    <b>カスタム トラスト アンカー:</b>アプリのセキュアな接続にどの証明機関（CA）を信頼するかをカスタマイズできます。
+たとえば、特定の自己署名証明書や制限された一連の公的 CA を信頼できます。
+
+
+  </li>
+
+  <li>
+    <b>デバッグのみのオーバーライド:</b>インストール ベースに対する追加リスクなしに、アプリのセキュアな接続を安全にデバッグできます。
+
+  </li>
+
+  <li>
+    <b>クリアテキスト トラフィックのオプトアウト:</b>クリアテキスト トラフィックの意図しない使用からアプリを保護できます。
+
+  </li>
+
+  <li>
+    <b>証明書のピン留め:</b>アプリのセキュアな接続を特定の証明書に制限します。
+
+  </li>
+</ul>
+
+
+<h2 id="manifest">セキュリティ構成ファイルの追加</h2>
+
+<p>
+  ネットワーク セキュリティ構成機能は、XML ファイルを使用します。このファイルで、アプリの設定を指定できます。
+アプリのマニフェストに、このファイルを指すエントリを含める必要があります。
+次のコードはマニフェストからの抜粋で、このエントリの作成方法を示しています。
+
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest ... &gt;
+  &lt;application ... &gt;
+    &lt;meta-data android:name="android.security.net.config"
+               android:resource="@xml/network_security_config" /&gt;
+    ...
+  &lt;/application&gt;
+&lt;/manifest&gt;
+</pre>
+
+<h2 id="CustomTrust">信頼できる CA のカスタマイズ</h2>
+
+<p>
+  アプリで、プラットフォームのデフォルトの設定ではなく、カスタマイズした一連の CA を信頼することが必要な場合があります。
+主な理由は次のとおりです。
+</p>
+
+<ul>
+  <li>カスタムの証明機関（自己署名、社内の CA で発行など）を使用してホストに接続する。
+
+  </li>
+
+  <li>プレインストールされたすべての CA ではなく、信頼する一部の CA のみに制限する。
+
+  </li>
+
+  <li>システムに含まれていない追加の CA を信頼する。
+  </li>
+</ul>
+
+<p>
+  デフォルトで、すべてのアプリのセキュアな接続（TLS、HTTPS など）は、システムにプレインストールされた CA を信頼し、API レベル 23（Android M）以下をターゲットにしたアプリは、ユーザーが追加した CA も信頼します。
+
+アプリは {@code base-config}（アプリ全体のカスタマイズ）または {@code domain-config} （ドメイン単位のカスタマイズ）を使用して、独自の接続をカスタマイズすることもできます。
+
+
+
+</p>
+
+
+<h3 id="ConfigCustom">カスタムの CA の設定</h3>
+
+<p>
+  自己署名 SSL 証明書を使用するホストか、または信頼できる非パブリック CA（社内の CA など）によって SSL 証明書が発行されているホストに接続するケースで説明します。
+
+
+</p>
+
+<p>
+  <code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;example.com&lt;/domain&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/my_ca"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+<p>
+  PEM または DER 形式で、自己署名または非パブリック CA 証明書を
+{@code res/raw/my_ca} に追加します。
+</p>
+
+
+<h3 id="LimitingCas">信頼できる CA の制限</h3>
+
+<p>
+  システムによって信頼されているすべての CA をアプリで信頼したくない場合は、信頼する CA を制限できます。
+これにより、他の CA が発行した偽造証明書からアプリを保護できます。
+
+</p>
+
+<p>
+  信頼できる CA を制限するための設定は、特定のドメインで<a href="#TrustingACustomCa">カスタムの CA を信頼する</a>設定と似ています。ただし、リソースで複数の CA を指定できる点が異なります。
+
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;secure.example.com&lt;/domain&gt;
+        &lt;domain includeSubdomains="true"&gt;cdn.example.com&lt;/domain&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/trusted_roots"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+<p>
+  PEM または DER 形式で、信頼できる CA を {@code res/raw/trusted_roots} に追加します。
+  PEM 形式を使用する場合、そのファイルには PEM データのみを含めるようにして、余分なテキストを含めないでください。<em></em>
+1 つだけでなく複数の
+<a href="#certificates"><code>&lt;certificates&gt;</code></a> 要素を指定できます。
+
+</p>
+
+
+<h3 id="TrustingAdditionalCas">
+  信頼できる CA の追加
+</h3>
+
+<p>
+  システムで信頼されていない CA を、アプリが追加で信頼しなければならない場合があります。これは、システムに CA がまだ組み込まれていなかったり、CA が Android システムに組み込まれるための要件を満たしていないことが原因です。
+
+CA を追加するには、アプリの構成で複数の証明書ソースを指定します。
+
+
+</p>
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;base-config&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/extracas"/&gt;
+            &lt;certificates src="system"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/base-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="TrustingDebugCa">デバッグ用の CA の構成</h2>
+
+<p>
+  HTTPS で接続するアプリをデバッグするときは、運用サーバーの SSL 証明書がインストールされていないローカルの開発サーバーへの接続が必要になります。
+
+アプリのコードを変更せずにこの接続をサポートするには
+
+ <i>、</i> {@code debug-overrides} を使用して、<a href="{@docRoot}guide/topics/manifest/application-element.html#debug">android:debuggable</a> が {@code true} の場合にのみ信頼されるデバッグ限定の CA を指定できます。
+
+通常、IDE およびビルド ツールによって、非リリース ビルドには自動的にこのフラグが設定されます。
+
+</p>
+
+<p>
+  この方法は、通常の条件付きコードよりも安全です。セキュリティ対策として、アプリ ストアでは debuggable とマークされたアプリは拒否されるからです。
+
+
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;debug-overrides&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/debug_cas"/&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/debug-overrides&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="UsesCleartextTraffic">クリアテキスト トラフィックのオプトアウト</h2>
+
+<p>
+  アプリケーションで、セキュアな接続のみを使用して接続する場合、それらの接続先に対して（HTTPS ではなく暗号化されていない HTTP プロトコルを使用する）クリアテキストのサポートを除外できます。
+
+このオプションにより、バックエンド サーバーなど外部ソースが提供する URL の変更によって、アプリで思わぬパフォーマンスの低下が発生するのを防ぐことができます。
+
+
+  詳細については、{@link android.security.NetworkSecurityPolicy#isCleartextTrafficPermitted
+  NetworkSecurityPolicy.isCleartextTrafficPermitted()} をご覧ください。
+</p>
+
+<p>
+  たとえば、アプリで {@code
+  secure.example.com} へのすべての接続には常に HTTPS を使用して、機密性の高いトラフィックを有害なネットワークから保護することが必要な場合があります。
+
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config usesCleartextTraffic="false"&gt;
+        &lt;domain includeSubdomains="true"&gt;secure.example.com&lt;/domain&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="CertificatePinning">証明書のピン留め</h2>
+
+<p>
+  通常、アプリはプレインストールされたすべての CA を信頼します。これらの CA が偽造証明書を発行すると、アプリは MiTM 攻撃のリスクにさらされます。
+
+アプリによっては、信頼する CA を制限するか証明書をピン留めすることで、受け入れる証明書を制限できます。
+
+</p>
+
+<p>
+  証明書をピン留めするには、公開鍵のハッシュによって証明書のセットを指定します（X.509 証明書の SubjectPublicKeyInfo）。
+証明書チェーンが有効になるのは、証明書チェーンに 1 つ以上のピン留めされた公開鍵が含まれている場合のみです。
+
+
+</p>
+
+<p>
+  証明書のピン留めを使用するときは、必ずバックアップの鍵を含めてください。そうすれば、新しい鍵に切り替えたり、CA を変更したりする必要が生じた場合に（CA 証明書またはその CA の中間証明書にピン留めしていても）、アプリの接続が影響を受けることはありません。
+
+
+そうしないと、接続を復元するためにアプリにアップデートをプッシュしなければならなくなります。
+
+</p>
+
+<p>
+  また、ピン留めの有効期限を設定することもできます。その有効期限を過ぎると、ピン留めが無効になります。
+これにより、アップデートされていないアプリの接続の問題を防ぐことができます。
+ただし、ピン留めに有効期限を設定すると、ピン留めを回避できるようになります。
+
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;example.com&lt;/domain&gt;
+        &lt;pin-set expiration="2018-01-01"&gt;
+            &lt;pin digest="SHA-256"&gt;7HIpactkIAq2Y49orFOOQKurWxmmSFZhBCoQYcRhJ3Y=&lt;/pin&gt;
+            &lt;!-- backup pin --&gt
+            &lt;pin digest="SHA-256"&gt;fwza0LRMXouZHRC8Ei+4PyuldPDcf3UKgO/04cDM1oE=&lt;/pin&gt;
+        &lt;/pin-set&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="ConfigInheritance">構成の継承の動作</h2>
+
+<p>
+  固有の構成で設定されていない値は、継承されます。この動作により、より複雑な構成が可能になるうえ、構成ファイルの読みやすさを維持できます。
+
+</p>
+
+<p>
+  固有のエントリに値が設定されていない場合、その次に汎用的なエントリの値が使用されます。
+{@code domain-config} で設定されていない値は、ネストされている場合は親の {@code domain-config} から、ネストされていない場合は {@code
+  base-config} から取得されます。
+{@code base-config} で設定されていない値には、プラットフォームの既定値を使用します。
+
+</p>
+
+<p>
+  たとえば、{@code
+  example.com} のサブドメインに対するすべての接続で、CA のカスタム セットを使用する必要があるケースを考えてみましょう。また、これらのドメインに対するクリアテキストのトラフィックは、{@code
+  secure.example.com} に接続する場合を除いて許可します。<em></em>
+{@code example.com} の構成で {@code
+  secure.example.com} の構成をネストすることで、
+{@code trust-anchors} の重複を回避できます。
+</p>
+
+<p>
+<code>res/xml/network_security_config.xml</code>:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;domain-config&gt;
+        &lt;domain includeSubdomains="true"&gt;example.com&lt;/domain&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="@raw/my_ca"/&gt;
+        &lt;/trust-anchors&gt;
+        &lt;domain-config cleartextTrafficPermitted="false"&gt;
+            &lt;domain includeSubdomains="true"&gt;secure.example.com&lt;/domain&gt;
+        &lt;/domain-config&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+</pre>
+</p>
+
+
+<h2 id="FileFormat">構成ファイルの形式</h2>
+
+<p>
+  ネットワーク セキュリティ構成機能では、XML ファイル形式を使用します。
+  ファイルの全体的な構造については、次のコード サンプルをご覧ください。
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;base-config&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="..."/&gt;
+            ...
+        &lt;/trust-anchors&gt;
+    &lt;/base-config&gt;
+
+    &lt;domain-config&gt;
+        &lt;domain&gt;android.com&lt;/domain&gt;
+        ...
+        &lt;trust-anchors&gt;
+            &lt;certificates src="..."/&gt;
+            ...
+        &lt;/trust-anchors&gt;
+        &lt;pin-set&gt;
+            &lt;pin digest="..."&gt;...&lt;/pin&gt;
+            ...
+        &lt;/pin-set&gt;
+    &lt;/domain-config&gt;
+    ...
+    &lt;debug-overrides&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="..."/&gt;
+            ...
+        &lt;/trust-anchors&gt;
+    &lt;/debug-overrides&gt;
+&lt;/network-security-config&gt;
+</pre>
+
+<p>
+  次のセクションでは、このファイル形式の構文とその他の詳細について説明します。
+
+</p>
+
+<h3 id="network-security-config">
+  &lt;network-security-config&gt;
+</h3>
+
+<dl class="xml">
+  <dt>
+    含めることのできる要素:
+  </dt>
+
+  <dd>
+    0 または 1 つの <code><a href="#base-config">&lt;base-config&gt;</a></code><br>
+    任意の数の <code><a href=
+    "#domain-config">&lt;domain-config&gt;</a></code><br>
+    0 または 1 つの <code><a href="#debug-overrides">&lt;debug-overrides&gt;</a></code>
+  </dd>
+</dl>
+
+<h3 id="base-config">
+  &lt;base-config&gt;
+</h3>
+
+<dl class="xml">
+  <dt>
+    構文:
+  </dt>
+</dl>
+
+<pre class="stx">
+&lt;base-config <a href=
+"#usesCleartextTraffic">usesCleartextTraffic</a>=["true" | "false"]&gt;
+    ...
+&lt;/base-config&gt;
+</pre>
+<dl class="xml">
+  <dt>
+    含めることのできる要素:
+  </dt>
+
+  <dd>
+    <code><a href="#trust-anchors">&lt;trust-anchors&gt;</a></code>
+  </dd>
+
+  <dt>
+    説明:
+  </dt>
+
+  <dd>
+    <a href="#domain-config"><code>domain-config</code></a> に含まれていない接続先に対するすべての接続に使用される、デフォルトの構成。
+
+
+<p>
+  設定されていない値はすべて、プラットフォームの既定値を使用します。API レベル 24 以上をターゲットにしたアプリのデフォルトの構成は次のとおりです。
+
+</p>
+
+<pre>
+&lt;base-config usesCleartextTraffic="true"&gt;
+    &lt;trust-anchors&gt;
+        &lt;certificates src="system" /&gt;
+    &lt;/trust-anchors&gt;
+&lt;/base-config&gt;
+</pre>
+API レベル 23 以下をターゲットにしたアプリのデフォルトの構成は次のとおりです。
+<pre>
+&lt;base-config usesCleartextTraffic="true"&gt;
+    &lt;trust-anchors&gt;
+        &lt;certificates src="system" /&gt;
+        &lt;certificates src="user" /&gt;
+    &lt;/trust-anchors&gt;
+&lt;/base-config&gt;
+</pre>
+
+  </dd>
+</dl>
+
+<h3 id="domain-config">&lt;domain-config&gt;</h3>
+<dl class="xml">
+<dt>構文:</dt>
+<dd>
+<pre class="stx">&lt;domain-config <a href="#usesCleartextTraffic">usesCleartextTraffic</a>=["true" | "false"]&gt;
+    ...
+&lt;/domain-config&gt;</pre>
+</dd>
+
+<dt>含めることのできる要素:</dt>
+
+<dd>
+1 つ以上の <code><a href="#domain">&lt;domain&gt;</a></code>
+<br/>0 または 1 つの <code><a href="#trust-anchors">&lt;trust-anchors&gt;</a></code>
+<br/>0 または 1 つの <code><a href="#pin-set">&lt;pin-set&gt;</code></a>
+<br/>任意の数のネストされた <code>&lt;domain-config&gt;</code></dd>
+
+<dt>説明</dt>
+<dd>固有の接続先への接続に使用される構成です。{@code domain} 要素の定義に従います。
+
+<p>複数の {@code domain-config} 要素で接続先を指定している場合は、最も具体的な（長い）マッチング ドメイン ルールを持つ構成が採用されます。
+</p></dd>
+</dl>
+
+
+<h3 id="domain">&lt;domain&gt;</h3>
+
+<dl class="xml">
+  <dt>
+    構文:
+  </dt>
+
+  <dd>
+    <pre class="stx">
+&lt;domain includeSubdomains=["true" | "false"]&gt;example.com&lt;/domain&gt;
+</pre>
+  </dd>
+
+  <dt>
+    属性:
+  </dt>
+
+  <dd>
+    <dl class="attr">
+      <dt>
+        {@code includeSubdomains}
+      </dt>
+
+      <dd>
+        {@code "true"} の場合、このドメイン ルールはドメインおよびすべてのサブドメイン（サブドメインのサブドメインも含む）に一致します。そうでない場合、このルールは完全一致のみに適用されます。
+
+
+      </dd>
+    </dl>
+  </dd>
+
+  <dt>
+    説明:
+  </dt>
+</dl>
+
+<h3 id="debug-overrides">&lt;debug-overrides&gt;</h3>
+
+<dl class="xml">
+  <dt>
+    構文:
+  </dt>
+
+  <dd>
+    <pre class="stx">
+&lt;debug-overrides&gt;
+    ...
+&lt;/debug-overrides&gt;
+</pre>
+  </dd>
+
+  <dt>
+    含めることのできる要素:
+  </dt>
+
+  <dd>
+    0 または 1 つの <code><a href="#trust-anchors">&lt;trust-anchors&gt;</a></code>
+  </dd>
+
+  <dt>
+    説明:
+  </dt>
+
+  <dd>
+    オーバーライドは、<a href="{@docRoot}guide/topics/manifest/application-element.html#debug">android:debuggable</a> が {@code "true"} の場合に適用されます。これは通常、IDE およびビルド ツールで生成された非リリース ビルドに使用します。
+
+{@code
+    debug-overrides} で指定されたトラスト アンカーは、その他すべての構成に追加されます。サーバーの証明書チェーンでデバッグ限定のトラスト アンカーのいずれかを使用するときは、証明書のピン留めは実行されません。
+
+<a href="{@docRoot}guide/topics/manifest/application-element.html#debug">android:debuggable</a> が {@code "false"} の場合、このセクションは完全に無視されます。
+
+  </dd>
+</dl>
+
+<h3 id="trust-anchors">&lt;trust-anchors&gt;</h3>
+<dl class="xml">
+  <dt>
+    構文:
+  </dt>
+
+  <dd>
+    <pre class="stx">
+&lt;trust-anchors&gt;
+...
+&lt;/trust-anchors&gt;
+</pre>
+  </dd>
+
+  <dt>
+    含めることのできる要素:
+  </dt>
+
+  <dd>
+    任意の数の <code><a href="#certificates">&lt;certificates&gt;</a></code>
+  </dd>
+
+  <dt>
+    説明:
+  </dt>
+
+  <dd>
+    セキュアな接続に使用するトラスト アンカーのセット。
+  </dd>
+</dl>
+
+
+<h3 id="certificates">&lt;certificates&gt;</h3>
+<dl class="xml">
+<dt>構文:</dt>
+<dd><pre class="stx">&lt;certificates src=["system" | "user" | "<i>raw resource</i>"]
+              overridePins=["true" | "false"] /&gt;
+</pre></dd>
+<dt>説明:</dt>
+<dd>{@code trust-anchors} 要素の X.509 証明書のセットです。</dd>
+
+<dt>属性:</dt>
+<dd><dl class="attr">
+<dt>{@code src}</dt>
+<dd>
+CA 証明書のソースには、次のいずれかを指定します。
+<ul>
+  <li>X.509 証明書を含むファイルを指す未加工のリソース ID。
+  証明書は、DER または PEM 形式でエンコードする必要があります。PEM 証明書の場合、ファイルには PEM 以外の余分なデータ（コメントなど）を含めないでください。
+<em></em>
+
+  </li>
+
+  <li>{@code "system"}: プレインストールされたシステムの CA 証明書
+  </li>
+
+  <li>{@code "user"}: ユーザーが追加した CA 証明書
+  </li>
+</ul>
+</dd>
+
+<dt>{@code overridePins}</dt>
+<dd>
+  <p>
+    ソースから取得した CA が証明書のピン留めを回避するかどうかを指定します。{@code
+    "true"} の場合、証明書チェーンはこのソースから取得したいずれかの CA を使用して作成され、ピン留めは実行されません。
+この設定は、CA をデバッグしたり、アプリのセキュアなトラフィックでユーザーの MiTM の許可をサポートするために役立ちます。
+
+  </p>
+
+  <p>
+    デフォルトは {@code "false"} です。ただし、{@code debug-overrides} 要素で指定された場合の既定値は {@code "true"} です。
+
+  </p>
+</dd>
+</dl>
+</dd>
+
+
+<h3 id="pin-set">&lt;pin-set&gt;</h3>
+
+<dl class="xml">
+  <dt>
+    構文:
+  </dt>
+
+  <dd>
+<pre class="stx">
+&lt;pin-set expiration="date"&gt;
+...
+&lt;/pin-set&gt;
+</pre>
+  </dd>
+
+  <dt>
+    含めることのできる要素:
+  </dt>
+
+  <dd>
+    任意の数の <code><a href="#pin">&lt;pin&gt;</a></code>
+  </dd>
+
+  <dt>
+    説明:
+  </dt>
+
+  <dd>
+    公開鍵のピンのセットです。セキュアな接続を信頼するには、信頼チェーン内の公開鍵一式のうちどれかが、ピンのセットに含まれている必要があります。
+ピンの形式については、
+<code><a href="#pin">&lt;pin&gt;</a></code> をご覧ください。
+  </dd>
+
+  <dt>
+    属性:
+  </dt>
+
+  <dd>
+    <dl class="attr">
+      <dt>
+        {@code expiration}
+      </dt>
+
+      <dd>
+        {@code yyyy-MM-dd} 形式のピン留めの有効期限、つまりピン留めを無効にする日付です。
+この属性が設定されていない場合、ピン留めの有効期限はありません。
+
+        <p>
+          有効期限を設定しておくと、ユーザーがアプリのアップデートを無効にしているなどの原因で、ピンのセットのアップデートを取得していないアプリで、アプリの接続上の問題を回避できます。
+
+
+        </p>
+      </dd>
+    </dl>
+  </dd>
+</dl>
+
+<h3 id="pin">&lt;pin&gt;</h3>
+<dl class="xml">
+  <dt>
+    構文:
+  </dt>
+
+  <dd>
+<pre class="stx">
+&lt;pin digest=["SHA-256"]&gt;base64 encoded digest of X.509
+    SubjectPublicKeyInfo (SPKI)&lt;/pin&gt;
+</pre>
+  </dd>
+
+  <dt>
+    属性:
+  </dt>
+
+  <dd>
+    <dl class="attr">
+      <dt>
+        {@code digest}
+      </dt>
+
+      <dd>
+        PIN の生成にはダイジェスト アルゴリズムが使用されます。現在サポートされているのは
+{@code "SHA-256"} のみです。
+      </dd>
+    </dl>
+  </dd>
+</dl>

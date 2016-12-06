@@ -18,6 +18,7 @@
 package android.os;
 
 import android.net.InterfaceConfiguration;
+import android.net.INetd;
 import android.net.INetworkManagementEventObserver;
 import android.net.Network;
 import android.net.NetworkStats;
@@ -35,7 +36,7 @@ interface INetworkManagementService
      **/
 
     /**
-     * Register an observer to receive events
+     * Register an observer to receive events.
      */
     void registerObserver(INetworkManagementEventObserver obs);
 
@@ -43,6 +44,11 @@ interface INetworkManagementService
      * Unregister an observer from receiving events.
      */
     void unregisterObserver(INetworkManagementEventObserver obs);
+
+    /**
+     * Retrieve an INetd to talk to netd.
+     */
+    INetd getNetdService();
 
     /**
      * Returns a list of currently known network interfaces
@@ -414,6 +420,7 @@ interface INetworkManagementService
 
     void addInterfaceToLocalNetwork(String iface, in List<RouteInfo> routes);
     void removeInterfaceFromLocalNetwork(String iface);
+    int removeRoutesFromLocalNetwork(in List<RouteInfo> routes);
 
     void setAllowOnlyVpnForUids(boolean enable, in UidRange[] uidRanges);
 }

@@ -21,7 +21,7 @@
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Raporti i defekteve në kod <xliff:g id="ID">#%d</xliff:g> u regjistrua"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Po shtohen detajet te raporti i defekteve në kod"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Qëndro në pritje..."</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Rrëshqit majtas për të ndarë raportin e defektit në kod"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Raporti i defektit nëkod do të shfaqet së shpejti në telefon"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Trokit për të ndarë raportin e defekteve në kod"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Trokit për të ndarë raportin e defekteve në kod pa një pamje çasti ose prit që pamja e çastit të përfundojë"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Trokit për të ndarë raportin e defekteve në kod pa një pamje çasti ose prit që pamja e çastit të përfundojë"</string>

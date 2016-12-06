@@ -22,7 +22,7 @@ import android.hardware.location.IFusedLocationHardware;
  * Interface definition for Location providers that require FLP services.
  * @hide
  */
-oneway interface IFusedProvider {
+interface IFusedProvider {
     /**
      * Provides access to a FusedLocationHardware instance needed for the provider to work.
      *

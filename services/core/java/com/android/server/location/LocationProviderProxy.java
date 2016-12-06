@@ -17,7 +17,6 @@
 package com.android.server.location;
 
 import java.io.FileDescriptor;
-import java.io.IOException;
 import java.io.PrintWriter;
 
 import android.content.Context;
@@ -31,7 +30,6 @@ import android.util.Log;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ILocationProvider;
 import com.android.internal.location.ProviderRequest;
-import com.android.internal.os.TransferPipe;
 import com.android.server.LocationManagerService;
 import com.android.server.ServiceWatcher;
 
@@ -232,9 +230,14 @@ public class LocationProviderProxy implements LocationProviderInterface {
         pw.flush();
 
         try {
-            TransferPipe.dumpAsync(service.asBinder(), fd, args);
-        } catch (IOException | RemoteException e) {
-            pw.println("Failed to dump location provider: " + e);
+            service.asBinder().dump(fd, args);
+        } catch (RemoteException e) {
+            pw.println("service down (RemoteException)");
+            Log.w(TAG, e);
+        } catch (Exception e) {
+            pw.println("service down (Exception)");
+            // never let remote service crash system server
+            Log.e(TAG, "Exception from " + mServiceWatcher.getBestPackageName(), e);
         }
     }
 

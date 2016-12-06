@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="2783841764617238354">"ಡಾಕ್ಯುಮೆಂಟ್‌ಗಳು"</string>
+    <string name="app_label" msgid="1551050262492398204">"ಫೈಲ್‌ಗಳು"</string>
     <string name="downloads_label" msgid="959113951084633612">"ಡೌನ್‌ಲೋಡ್‌ಗಳು"</string>
     <string name="title_open" msgid="4353228937663917801">"ಇದರ ಮೂಲಕ ತೆರೆಯಿರಿ"</string>
     <string name="title_save" msgid="2433679664882857999">"ಇವುಗಳಲ್ಲಿ ಉಳಿಸಿ"</string>
@@ -24,7 +24,7 @@
     <string name="menu_grid" msgid="6878021334497835259">"ಗ್ರಿಡ್ ವೀಕ್ಷಣೆ"</string>
     <string name="menu_list" msgid="7279285939892417279">"ಪಟ್ಟಿ ವೀಕ್ಷಣೆ"</string>
     <string name="menu_sort" msgid="7677740407158414452">"ಈ ಪ್ರಕಾರ ವಿಂಗಡಿಸು"</string>
-    <string name="menu_search" msgid="3816712084502856974">"ಹುಡುಕು"</string>
+    <string name="menu_search" msgid="3816712084502856974">"ಹುಡುಕಿ"</string>
     <string name="menu_settings" msgid="8239065133341597825">"ಸಂಗ್ರಹಣೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="menu_open" msgid="432922957274920903">"ತೆರೆ"</string>
     <string name="menu_save" msgid="2394743337684426338">"ಉಳಿಸು"</string>

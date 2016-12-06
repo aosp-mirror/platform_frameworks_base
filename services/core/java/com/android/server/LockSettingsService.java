@@ -69,6 +69,7 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.widget.ICheckCredentialProgressCallback;
 import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.VerifyCredentialResponse;
@@ -300,9 +301,12 @@ public class LockSettingsService extends ILockSettings.Stub {
         for (int i = 0; i < users.size(); i++) {
             UserInfo user = users.get(i);
             UserHandle userHandle = user.getUserHandle();
-            if (!mUserManager.isUserUnlockingOrUnlocked(userHandle)) {
+            final boolean isSecure = mStorage.hasPassword(user.id) || mStorage.hasPattern(user.id);
+            if (isSecure && !mUserManager.isUserUnlockingOrUnlocked(userHandle)) {
                 if (!user.isManagedProfile()) {
-                    showEncryptionNotification(userHandle);
+                    // When the user is locked, we communicate it loud-and-clear
+                    // on the lockscreen; we only show a notification below for
+                    // locked managed profiles.
                 } else {
                     UserInfo parent = mUserManager.getProfileParent(user.id);
                     if (parent != null &&
@@ -333,21 +337,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
         unlockIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
         PendingIntent intent = PendingIntent.getActivity(mContext, 0, unlockIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-
-        showEncryptionNotification(user, title, message, detail, intent);
-    }
-
-    private void showEncryptionNotification(UserHandle user) {
-        Resources r = mContext.getResources();
-        CharSequence title = r.getText(
-                com.android.internal.R.string.user_encrypted_title);
-        CharSequence message = r.getText(
-                com.android.internal.R.string.user_encrypted_message);
-        CharSequence detail = r.getText(
-                com.android.internal.R.string.user_encrypted_detail);
-
-        PendingIntent intent = PendingIntent.getBroadcast(mContext, 0, ACTION_NULL,
                 PendingIntent.FLAG_UPDATE_CURRENT);
 
         showEncryptionNotification(user, title, message, detail, intent);
@@ -407,7 +396,9 @@ public class LockSettingsService extends ILockSettings.Stub {
         List<UserInfo> profiles = mUserManager.getProfiles(userId);
         for (int i = 0; i < profiles.size(); i++) {
             UserInfo profile = profiles.get(i);
-            if (profile.isManagedProfile()) {
+            final boolean isSecure =
+                    mStorage.hasPassword(profile.id) || mStorage.hasPattern(profile.id);
+            if (isSecure && profile.isManagedProfile()) {
                 UserHandle userHandle = profile.getUserHandle();
                 if (!mUserManager.isUserUnlockingOrUnlocked(userHandle) &&
                         !mUserManager.isQuietModeEnabled(userHandle)) {
@@ -579,6 +570,18 @@ public class LockSettingsService extends ILockSettings.Stub {
                         // It should not happen
                         Slog.e(TAG, "Invalid tied profile lock type: " + quality);
                     }
+                }
+                try {
+                    final String alias = LockPatternUtils.PROFILE_KEY_NAME_ENCRYPT + userInfo.id;
+                    java.security.KeyStore keyStore =
+                            java.security.KeyStore.getInstance("AndroidKeyStore");
+                    keyStore.load(null);
+                    if (keyStore.containsAlias(alias)) {
+                        keyStore.deleteEntry(alias);
+                    }
+                } catch (KeyStoreException | NoSuchAlgorithmException |
+                        CertificateException | IOException e) {
+                    Slog.e(TAG, "Unable to remove tied profile key", e);
                 }
             }
         } catch (RemoteException re) {
@@ -757,7 +760,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     private void unlockChildProfile(int profileHandle) throws RemoteException {
         try {
             doVerifyPassword(getDecryptedPasswordForTiedProfile(profileHandle), false,
-                    0 /* no challenge */, profileHandle);
+                    0 /* no challenge */, profileHandle, null /* progressCallback */);
         } catch (UnrecoverableKeyException | InvalidKeyException | KeyStoreException
                 | NoSuchAlgorithmException | NoSuchPaddingException
                 | InvalidAlgorithmParameterException | IllegalBlockSizeException
@@ -944,7 +947,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             CredentialHash willStore
                 = new CredentialHash(enrolledHandle, CredentialHash.VERSION_GATEKEEPER);
             setUserKeyProtection(userId, pattern,
-                doVerifyPattern(pattern, willStore, true, 0, userId));
+                doVerifyPattern(pattern, willStore, true, 0, userId, null /* progressCallback */));
             mStorage.writePatternHash(enrolledHandle, userId);
             fixateNewestUserKeyAuth(userId);
             onUserLockChanged(userId);
@@ -1004,7 +1007,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             CredentialHash willStore
                 = new CredentialHash(enrolledHandle, CredentialHash.VERSION_GATEKEEPER);
             setUserKeyProtection(userId, password,
-                doVerifyPassword(password, willStore, true, 0, userId));
+                doVerifyPassword(password, willStore, true, 0, userId,
+                        null /* progressCallback */));
             mStorage.writePasswordHash(enrolledHandle, userId);
             fixateNewestUserKeyAuth(userId);
             onUserLockChanged(userId);
@@ -1022,37 +1026,38 @@ public class LockSettingsService extends ILockSettings.Stub {
             KeyGenerator keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES);
             keyGenerator.init(new SecureRandom());
             SecretKey secretKey = keyGenerator.generateKey();
-
             java.security.KeyStore keyStore = java.security.KeyStore.getInstance("AndroidKeyStore");
             keyStore.load(null);
-            keyStore.setEntry(
-                    LockPatternUtils.PROFILE_KEY_NAME_ENCRYPT + userId,
-                    new java.security.KeyStore.SecretKeyEntry(secretKey),
-                    new KeyProtection.Builder(KeyProperties.PURPOSE_ENCRYPT)
-                            .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                            .build());
-            keyStore.setEntry(
-                    LockPatternUtils.PROFILE_KEY_NAME_DECRYPT + userId,
-                    new java.security.KeyStore.SecretKeyEntry(secretKey),
-                    new KeyProtection.Builder(KeyProperties.PURPOSE_DECRYPT)
-                            .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                            .setUserAuthenticationRequired(true)
-                            .setUserAuthenticationValidityDurationSeconds(30)
-                            .build());
-
-            // Key imported, obtain a reference to it.
-            SecretKey keyStoreEncryptionKey = (SecretKey) keyStore.getKey(
-                    LockPatternUtils.PROFILE_KEY_NAME_ENCRYPT + userId, null);
-            // The original key can now be discarded.
-
-            Cipher cipher = Cipher.getInstance(
-                    KeyProperties.KEY_ALGORITHM_AES + "/" + KeyProperties.BLOCK_MODE_GCM + "/"
-                            + KeyProperties.ENCRYPTION_PADDING_NONE);
-            cipher.init(Cipher.ENCRYPT_MODE, keyStoreEncryptionKey);
-            encryptionResult = cipher.doFinal(randomLockSeed);
-            iv = cipher.getIV();
+            try {
+                keyStore.setEntry(
+                        LockPatternUtils.PROFILE_KEY_NAME_ENCRYPT + userId,
+                        new java.security.KeyStore.SecretKeyEntry(secretKey),
+                        new KeyProtection.Builder(KeyProperties.PURPOSE_ENCRYPT)
+                                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                                .build());
+                keyStore.setEntry(
+                        LockPatternUtils.PROFILE_KEY_NAME_DECRYPT + userId,
+                        new java.security.KeyStore.SecretKeyEntry(secretKey),
+                        new KeyProtection.Builder(KeyProperties.PURPOSE_DECRYPT)
+                                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                                .setUserAuthenticationRequired(true)
+                                .setUserAuthenticationValidityDurationSeconds(30)
+                                .build());
+                // Key imported, obtain a reference to it.
+                SecretKey keyStoreEncryptionKey = (SecretKey) keyStore.getKey(
+                        LockPatternUtils.PROFILE_KEY_NAME_ENCRYPT + userId, null);
+                Cipher cipher = Cipher.getInstance(
+                        KeyProperties.KEY_ALGORITHM_AES + "/" + KeyProperties.BLOCK_MODE_GCM + "/"
+                                + KeyProperties.ENCRYPTION_PADDING_NONE);
+                cipher.init(Cipher.ENCRYPT_MODE, keyStoreEncryptionKey);
+                encryptionResult = cipher.doFinal(randomLockSeed);
+                iv = cipher.getIV();
+            } finally {
+                // The original key can now be discarded.
+                keyStore.deleteEntry(LockPatternUtils.PROFILE_KEY_NAME_ENCRYPT + userId);
+            }
         } catch (CertificateException | UnrecoverableKeyException
                 | IOException | BadPaddingException | IllegalBlockSizeException | KeyStoreException
                 | NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException e) {
@@ -1202,25 +1207,36 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public VerifyCredentialResponse checkPattern(String pattern, int userId) throws RemoteException {
-        return doVerifyPattern(pattern, false, 0, userId);
+    public VerifyCredentialResponse checkPattern(String pattern, int userId,
+            ICheckCredentialProgressCallback progressCallback) throws RemoteException {
+        return doVerifyPattern(pattern, false, 0, userId, progressCallback);
     }
 
     @Override
     public VerifyCredentialResponse verifyPattern(String pattern, long challenge, int userId)
             throws RemoteException {
-        return doVerifyPattern(pattern, true, challenge, userId);
+        return doVerifyPattern(pattern, true, challenge, userId, null /* progressCallback */);
     }
 
     private VerifyCredentialResponse doVerifyPattern(String pattern, boolean hasChallenge,
-            long challenge, int userId) throws RemoteException {
+            long challenge, int userId, ICheckCredentialProgressCallback progressCallback)
+            throws RemoteException {
        checkPasswordReadPermission(userId);
+       if (TextUtils.isEmpty(pattern)) {
+           throw new IllegalArgumentException("Pattern can't be null or empty");
+       }
        CredentialHash storedHash = mStorage.readPatternHash(userId);
-       return doVerifyPattern(pattern, storedHash, hasChallenge, challenge, userId);
+       return doVerifyPattern(pattern, storedHash, hasChallenge, challenge, userId,
+               progressCallback);
     }
 
     private VerifyCredentialResponse doVerifyPattern(String pattern, CredentialHash storedHash,
-            boolean hasChallenge, long challenge, int userId) throws RemoteException {
+            boolean hasChallenge, long challenge, int userId,
+            ICheckCredentialProgressCallback progressCallback) throws RemoteException {
+
+       if (TextUtils.isEmpty(pattern)) {
+           throw new IllegalArgumentException("Pattern can't be null or empty");
+       }
        boolean shouldReEnrollBaseZero = storedHash != null && storedHash.isBaseZeroPattern;
 
        String patternToVerify;
@@ -1249,7 +1265,8 @@ public class LockSettingsService extends ILockSettings.Stub {
                    public String adjustForKeystore(String pattern) {
                        return LockPatternUtils.patternStringToBaseZero(pattern);
                    }
-               }
+               },
+               progressCallback
        );
 
        if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK
@@ -1261,15 +1278,15 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public VerifyCredentialResponse checkPassword(String password, int userId)
-            throws RemoteException {
-        return doVerifyPassword(password, false, 0, userId);
+    public VerifyCredentialResponse checkPassword(String password, int userId,
+            ICheckCredentialProgressCallback progressCallback) throws RemoteException {
+        return doVerifyPassword(password, false, 0, userId, progressCallback);
     }
 
     @Override
     public VerifyCredentialResponse verifyPassword(String password, long challenge, int userId)
             throws RemoteException {
-        return doVerifyPassword(password, true, challenge, userId);
+        return doVerifyPassword(password, true, challenge, userId, null /* progressCallback */);
     }
 
     @Override
@@ -1282,8 +1299,10 @@ public class LockSettingsService extends ILockSettings.Stub {
         final int parentProfileId = mUserManager.getProfileParent(userId).id;
         // Unlock parent by using parent's challenge
         final VerifyCredentialResponse parentResponse = isPattern
-                ? doVerifyPattern(password, true, challenge, parentProfileId)
-                : doVerifyPassword(password, true, challenge, parentProfileId);
+                ? doVerifyPattern(password, true, challenge, parentProfileId,
+                        null /* progressCallback */)
+                : doVerifyPassword(password, true, challenge, parentProfileId,
+                        null /* progressCallback */);
         if (parentResponse.getResponseCode() != VerifyCredentialResponse.RESPONSE_OK) {
             // Failed, just return parent's response
             return parentResponse;
@@ -1293,7 +1312,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             // Unlock work profile, and work profile with unified lock must use password only
             return doVerifyPassword(getDecryptedPasswordForTiedProfile(userId), true,
                     challenge,
-                    userId);
+                    userId, null /* progressCallback */);
         } catch (UnrecoverableKeyException | InvalidKeyException | KeyStoreException
                 | NoSuchAlgorithmException | NoSuchPaddingException
                 | InvalidAlgorithmParameterException | IllegalBlockSizeException
@@ -1304,14 +1323,23 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private VerifyCredentialResponse doVerifyPassword(String password, boolean hasChallenge,
-            long challenge, int userId) throws RemoteException {
+            long challenge, int userId, ICheckCredentialProgressCallback progressCallback)
+            throws RemoteException {
        checkPasswordReadPermission(userId);
+       if (TextUtils.isEmpty(password)) {
+           throw new IllegalArgumentException("Password can't be null or empty");
+       }
        CredentialHash storedHash = mStorage.readPasswordHash(userId);
-       return doVerifyPassword(password, storedHash, hasChallenge, challenge, userId);
+       return doVerifyPassword(password, storedHash, hasChallenge, challenge, userId,
+               progressCallback);
     }
 
     private VerifyCredentialResponse doVerifyPassword(String password, CredentialHash storedHash,
-            boolean hasChallenge, long challenge, int userId) throws RemoteException {
+            boolean hasChallenge, long challenge, int userId,
+            ICheckCredentialProgressCallback progressCallback) throws RemoteException {
+       if (TextUtils.isEmpty(password)) {
+           throw new IllegalArgumentException("Password can't be null or empty");
+       }
        return verifyCredential(userId, storedHash, password, hasChallenge, challenge,
                new CredentialUtil() {
                    @Override
@@ -1329,12 +1357,12 @@ public class LockSettingsService extends ILockSettings.Stub {
                    public String adjustForKeystore(String password) {
                        return password;
                    }
-               }
-       );
+               }, progressCallback);
     }
 
     private VerifyCredentialResponse verifyCredential(int userId, CredentialHash storedHash,
-            String credential, boolean hasChallenge, long challenge, CredentialUtil credentialUtil)
+            String credential, boolean hasChallenge, long challenge, CredentialUtil credentialUtil,
+            ICheckCredentialProgressCallback progressCallback)
                 throws RemoteException {
         if ((storedHash == null || storedHash.hash.length == 0) && TextUtils.isEmpty(credential)) {
             // don't need to pass empty credentials to GateKeeper
@@ -1391,7 +1419,13 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
+
+
             // credential has matched
+
+            if (progressCallback != null) {
+                progressCallback.onCredentialVerified();
+            }
             unlockKeystore(credential, userId);
 
             Slog.i(TAG, "Unlocking user " + userId +
@@ -1447,7 +1481,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         try {
             if (mLockPatternUtils.isLockPatternEnabled(userId)) {
-                if (checkPattern(password, userId).getResponseCode()
+                if (checkPattern(password, userId, null /* progressCallback */).getResponseCode()
                         == GateKeeperResponse.RESPONSE_OK) {
                     return true;
                 }
@@ -1457,7 +1491,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         try {
             if (mLockPatternUtils.isLockPasswordEnabled(userId)) {
-                if (checkPassword(password, userId).getResponseCode()
+                if (checkPassword(password, userId, null /* progressCallback */).getResponseCode()
                         == GateKeeperResponse.RESPONSE_OK) {
                     return true;
                 }

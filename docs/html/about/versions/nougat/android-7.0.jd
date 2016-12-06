@@ -1,0 +1,1205 @@
+page.title=Android 7.0 for Developers
+meta.tags="Nougat", "android n"
+page.tags="Android 7.0", "Nougat", "android n"
+page.image=images/cards/card-n-apis_2x.png
+@jd:body
+
+
+
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Key Developer Features</h2>
+  <ol>
+      <ul style="list-style-type:none;">
+        <li><a href="#multi-window_support">Multi-window Support</a></li>
+        <li><a href="#notification_enhancements">Notifications</a></li>
+        <li><a href="#jit_aot">JIT/AOT Compilation</a></li>
+        <li><a href="#quick_path_to_app_install">Quick Path to App Install</a></li>
+        <li><a href="#doze_on_the_go">Doze on the Go</a></li>
+        <li><a href="#background_optimizations">Background Optimizations</a></li>
+        <li><a href="#surfaceview">SurfaceView</a></li>
+        <li><a href="#data_saver">Data Saver</a></li>
+        <li><a href="#vulkan">Vulkan API</a></li>
+        <li><a href="#tile_api">Quick Settings Tile API</a></li>
+        <li><a href="#number-blocking">Number Blocking</a></li>
+        <li><a href="#call_screening">Call Screening</a></li>
+        <li><a href="#multi-locale_languages">Locales and Languages</a></li>
+        <li><a href="#emoji">New Emojis</a></li>
+        <li><a href="#icu4">ICU4J APIs in Android</a></li>
+        <li><a href="#webview">WebView</a></li>
+        <li><a href="#gles_32">OpenGL ES 3.2 API</a></li>
+        <li><a href="#android_tv_recording">Android TV Recording</a></li>
+        <li><a href="#android_for_work">Android for Work</a></li>
+        <li><a href="#accessibility_enhancements">Accessibility</a></li>
+        <li><a href="#direct_boot">Direct Boot</a></li>
+        <li><a href="#key_attestation">Key Attestation</a></li>
+        <li><a href="#network_security_config">Network Security Config</a></li>
+        <li><a href="#default_trusted_ca">Default Trusted CA</a></li>
+        <li><a href="#apk_signature_v2">APK Signature Scheme v2</a></li>
+        <li><a href="#scoped_directory_access">Scoped Directory Access</a></li>
+        <li><a href="#keyboard_shortcuts_helper">Keyboard Shortcuts Helper</a></li>
+        <li><a href="#custom_pointer_api">Custom Pointer API</a></li>
+        <li><a href="#sustained_performance_api">Sustained Performance API</a></li>
+        <li><a href="#vr">VR Support</a></li>
+        <li><a href="#print_svc">Print Service Enhancements</a></li>
+        <li><a href="#virtual_files">Virtual Files</a></li>
+        <li><a href="#framemetrics_api">Frame Metrics API</a></li>
+      </ol>
+</div>
+</div>
+
+
+
+<p>
+Android 7.0 Nougat introduces a variety of
+new features and capabilities for users and developers.
+This document highlights what's new for developers. </p>
+
+<p>Make sure check out the
+<href="{@docRoot}about/versions/nougat/android-7.0-changes.html">
+Android 7.0 behavior changes</a> to learn about areas where platform changes
+may affect your apps.
+</p>
+
+<p>To learn more about
+the consumer features of Android 7.0, visit <a
+href="http://www.android.com">www.android.com</a>.</p>
+
+<h2 id="multi-window_support">Multi-window Support</h2>
+
+
+<p>In Android 7.0, we're introducing a new and much-requested
+multitasking feature into the platform &mdash; multi-window support. </p>
+
+  <p>Users can now pop open two apps on the screen at once. </p>
+  <ul>
+  <li>On phones and tablets
+running Android 7.0, users can run two apps side-by-side or
+one-above-the-other in splitscreen mode. Users can resize the apps by dragging
+the divider between them. </li>
+
+<li>On Android TV devices, apps can put themselves in <a
+href="{@docRoot}preview/features/picture-in-picture.html">picture-in-picture
+mode</a>, allowing them to continue showing content while the user browses or
+interacts with other apps.</li>
+  </ul>
+
+<div class="col-4of10">
+<img src="{@docRoot}images/android-7.0/mw-portrait.png" alt="" style="height:460px;padding-left:1em;"
+    id="img-split-screen" />
+<p class="img-caption">
+  <strong>Figure 1.</strong> Apps running in split-screen mode.
+</p>
+
+  </div>
+
+<p>Especially on tablets and other larger-screen devices, multi-window support
+gives you new ways to engage users. You can even enable drag-and-drop in
+your app to let users conveniently drag content to or from your app &mdash; a great
+way to enhance your user experience. </p>
+
+<p>It's straightforward to add multi-window support to your app and configure how it
+handles multi-window display. For example, you can specify your activity's
+minimum allowable dimensions, preventing users from resizing the activity below
+that size. You can also disable multi-window display for your app, which
+  ensures that the system will only show your app in full-screen mode.</p>
+
+<p>
+  For more information, see the <a href=
+  "{@docRoot}preview/features/multi-window.html">Multi-Window Support</a>
+  developer documentation.
+</p>
+
+<h2 id="notification_enhancements">Notification Enhancements</h2>
+
+<p>In Android 7.0 we've redesigned notifications to make them easier and
+faster to use. Some of the changes include:</p>
+
+<ul>
+  <li>
+    <strong>Template updates</strong>: We're updating notification templates to
+    put a new emphasis on hero image and avatar. Developers will be able to
+    take advantage of the new templates with minimal adjustments in their code.
+  </li>
+
+  <li>
+    <strong>Messaging style customization</strong>: You can customize more of
+    the user interface labels associated with your notifications using the
+    <code>MessagingStyle</code> class. You can configure the message,
+    conversation title, and content view.
+  </li>
+
+  <li>
+    <strong>Bundled notifications</strong>: The system can group messages
+    together, for example by message topic, and display the group. A user can
+    take actions, such as Dismiss or Archive, on them in place. If you’ve
+    implemented notifications for Android Wear, you’ll already be familiar with
+    this model.
+  </li>
+
+  <li>
+    <strong>Direct reply</strong>: For real-time communication apps, the
+    Android system supports inline replies so that users can quickly respond to
+    an SMS or text message directly within the notification interface.
+  </li>
+
+  <li>
+    <strong>Custom views</strong>: Two new APIs enable you to leverage system
+    decorations, such as notification headers and actions, when using custom
+    views in notifications.
+  </li>
+</ul>
+
+<div class="col-4of12">
+  <img src="{@docRoot}images/android-7.0/notifications-1.png" alt=""
+  style="padding:.5em;max-width:226px">
+</div>
+
+<div class="col-4of12">
+  <img src="{@docRoot}images/android-7.0/notifications-3.png" alt=""
+  style="padding:.5em;max-width:226px">
+</div>
+
+<div class="col-4of12">
+  <img src="{@docRoot}images/android-7.0/notifications-2.png" alt=""
+  style="padding:.5em;max-width:226px">
+</div>
+
+
+<p class="img-caption">
+  <strong>Figure 2.</strong> Bundled notifications and direct reply.
+</p>
+
+<p>To learn how to implement the new features, see the
+  <a href="{@docRoot}preview/features/notification-updates.html">Notifications</a>
+  guide.</p>
+
+
+
+<h2 id="jit_aot">Profile-guided JIT/AOT Compilation</h2>
+
+<p>In Android 7.0, we've added a Just in Time (JIT) compiler with code
+profiling to ART, which lets it constantly improve the performance of
+Android apps as they run. The JIT compiler complements ART's current
+Ahead of Time (AOT) compiler and helps improve runtime performance, save
+storage space, and speed up app updates and system updates.</p>
+
+<p>Profile-guided compilation lets ART manage the AOT/JIT compilation for
+each app according to its actual usage, as well as conditions on the device.
+For example, ART maintains a profile of each app's hot methods and can
+precompile and cache those methods for best performance. It leaves other parts
+of the app uncompiled until they are actually used.</p>
+
+<p>Besides improving performance for key parts of the app, profile-guided
+compilation helps reduce an app's overall RAM footprint, including associated
+binaries. This feature is especially important on low-memory devices.</p>
+
+<p>ART manages profile-guided compilation in a way that minimizes impact on the
+device battery. It does precompilation only when then the device is idle and
+charging, saving time and battery by doing that work in advance.</p>
+
+<h2 id="quick_path_to_app_install">Quick Path to App Install</h2>
+
+<p>One of the most tangible benefits of ART's JIT compiler is the speed of app
+installs and system updates. Even large apps that required several minutes to
+optimize and install in Android 6.0 can now install in just a matter of
+seconds. System updates are also faster, since there's no more optimizing step. </p>
+
+<h2 id="doze_on_the_go">Doze on the Go...</h2>
+
+<p>Android 6.0 introduced Doze, a system mode that saves battery by deferring
+apps' CPU and network activities when the device is idle, such as when it's
+sitting on a table or in a drawer. </p>
+
+<p>Now in Android 7.0, Doze takes a step further and saves battery while on the go.
+Any time the screen is off for a period of time and the device is unplugged,
+Doze applies a subset of the familiar CPU and network restrictions to apps.
+This means users can save battery even when carrying their devices in their
+pockets.</p>
+
+
+<img src="/images/android-7.0/doze-diagram-1.png"
+  alt="" id="figure1" />
+<p class="img-caption">
+  <strong>Figure 3.</strong> Doze now applies
+  restrictions to improve battery life even when the device is not stationary.
+</p>
+
+
+<p>A short time after the screen turns off while the device is on battery, Doze
+restricts network access and defers jobs and syncs. During brief maintenance
+windows, applications are allowed network access and any of their deferred
+jobs/syncs are executed. Turning the screen on or plugging in the device brings
+the device out of Doze.</p>
+
+<p>When the device is stationary again, with screen off and on battery for a
+period of time, Doze applies the full CPU and network restrictions on {@link
+android.os.PowerManager.WakeLock}, {@link android.app.AlarmManager} alarms, and
+GPS/Wi-Fi scans.</p>
+
+<p>The best practices for adapting your app to Doze are the same whether the
+device is moving or not, so if you already updated your app to gracefully
+handle Doze, you're all set. If not, start <a
+href="{@docRoot}training/monitoring-device-state/doze-standby.html#assessing_your_app">adapting
+your app to Doze</a> now.</p>
+
+<h2 id="background_optimizations">Project Svelte: Background Optimizations</h2>
+
+<p>Project Svelte is an ongoing effort to minimize RAM use by system and apps
+across the range of Android devices in the ecosystem. In Android 7.0, Project
+Svelte is focused on optimizing the way apps run in the background. </p>
+
+<p>Background processing is an essential part of most apps. When handled right, it
+can make your user experience amazing &mdash; immediate, fast, and context-aware.
+When not handled right, background processing can needlessly consume RAM (and
+battery) and affect system performance for other apps. </p>
+
+<p>Since Android 5.0, {@link android.app.job.JobScheduler} has been the
+preferred way of performing background work in a way that's good
+for users. Apps can schedule jobs while letting the system optimize based on
+memory, power, and connectivity conditions. JobScheduler offers control and
+simplicity, and we want all apps to use it. </p>
+
+<p>
+  Another good option is <a href=
+  "https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
+  <code>GCMNetworkManager</code></a>, part of Google Play Services, which
+  offers similar job scheduling with compatibility across legacy versions of
+  Android.
+</p>
+
+<p>We're continuing to extend <code>JobScheduler</code> and
+<code>GCMNetworkManager</code> to meet more of
+your use cases &mdash; for example, in Android 7.0 you can now schedule background
+work based on changes in Content Providers. At the same time we're starting to
+deprecate some of the older patterns that can reduce system performance,
+especially on low-memory devices.</p>
+
+<p>In Android 7.0 we're removing three commonly-used implicit broadcasts &mdash;
+ {@link android.net.ConnectivityManager#CONNECTIVITY_ACTION}, {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE}, and {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO} &mdash; since those can wake the
+background processes of multiple apps at once and strain memory and battery. If
+your app is receiving these, take advantage of the Android 7.0 to
+  migrate to <code>JobScheduler</code> and related APIs instead. </p>
+
+<p>
+  Take a look at the <a href=
+  "{@docRoot}preview/features/background-optimization.html">Background
+  Optimizations</a> documentation for details.
+</p>
+
+<h2 id="surfaceview">SurfaceView</h2>
+<p>
+Android 7.0 brings synchronous movement to the {@link android.view.SurfaceView}
+class, which provides better battery performance
+than {@link android.view.TextureView} in certain cases: When rendering video or
+3D content, apps with scrolling and animated video position use less power with
+{@link android.view.SurfaceView} than with {@link android.view.TextureView}.
+</p>
+
+The {@link android.view.SurfaceView} class enables more battery-efficient compositing on
+screen, because it is composited in dedicated hardware, separately from app
+window content. As a result, it makes fewer intermediate
+copies than {@link android.view.TextureView}.
+</p>
+
+<p>
+A {@link android.view.SurfaceView} object's content position is now updated synchronously
+with the containing app content. One result of this change is that simple
+translations or scales of a video playing in a {@link android.view.SurfaceView}
+no longer produce black bars alongside the view as it moves.
+</p>
+
+<p>
+Starting with Android 7.0, we strongly recommend that you save power by using
+{@link android.view.SurfaceView} instead of {@link android.view.TextureView}.
+</p>
+
+<h2 id="data_saver">Data Saver</h2>
+
+<div class="col-5of12" style="margin-right:1.5em;">
+<img src="{@docRoot}images/android-7.0/datasaver.png" style="border:2px solid #ddd">
+
+<p class="img-caption" style="padding-right:2em;">
+  <strong>Figure 4.</strong> Data Saver in Settings.
+</p>
+  </div>
+
+<p>Over the life of a mobile device, the cost of a cellular data plan typically
+exceeds the cost of the device itself. For many users, cellular data is an
+expensive resource that they want to conserve. </p>
+
+<p>Android 7.0 introduces Data Saver mode, a new system service that helps reduce
+cellular data use by apps, whether roaming, near the end of the billing cycle,
+or on a small prepaid data pack. Data Saver gives users control over how apps
+use cellular data and lets developers provide more efficient service when Data
+Saver is on. </p>
+
+<p>When a user enables Data Saver in <strong>Settings</strong> and the device is
+on a metered network, the system blocks background data usage and signals apps
+to use less data in the foreground wherever possible &mdash; such as by limiting
+bit rate for streaming, reducing image quality, deferring optimistic precaching,
+and so on. Users can whitelist specific apps to allow background metered data
+usage even when Data Saver is turned on.</p>
+
+<p>Android 7.0 extends the {@link android.net.ConnectivityManager} to provide apps a
+way to <a href="{@docRoot}preview/features/data-saver.html#status">retrieve the
+user's Data Saver preferences</a> and <a
+href="{@docRoot}preview/features/data-saver.html#monitor-changes">monitor
+preference changes</a>. All apps should check whether the user has enabled Data
+Saver and make an effort to limit foreground and background data usage.</p>
+
+
+<h2 id="vulkan">Vulkan API</h2>
+
+<p>
+  Android 7.0 integrates <a href="http://www.khronos.org/vulkan" class=
+  "external-link">Vulkan™</a>, a new 3D rendering API, into the platform. Like
+  <a href="https://www.khronos.org/opengles/" class="external-link">OpenGL™
+  ES</a>, Vulkan is an open standard for 3D graphics and rendering maintained
+  by the Khronos Group.
+</p>
+
+<p>
+  Vulkan is designed from the ground up to minimize CPU overhead in the driver,
+  and allow your application to control GPU operation more directly. Vulkan
+  also enables better parallelization by allowing multiple threads to perform
+  work such as command buffer construction at once.
+</p>
+
+<p>
+  Vulkan development tools and libraries are rolled into the Android 7.0DK. They
+  include:
+</p>
+
+<ul>
+  <li>Headers
+  </li>
+
+  <li>Validation layers (debug libraries)
+  </li>
+
+  <li>SPIR-V shader compiler
+  </li>
+
+  <li>SPIR-V runtime shader compilation library
+  </li>
+</ul>
+
+<p>
+  Vulkan is only available to apps on devices with Vulkan-capable hardware,
+  such as Nexus 5X, Nexus 6P, and Nexus Player. We're working closely with our
+  partners to bring Vulkan to more devices as soon as possible.
+</p>
+
+<p>
+  For more information, see the the <a href=
+  "{@docRoot}ndk/guides/graphics/index.html">API documentation</a>.
+</p>
+
+<h2 id="tile_api">Quick Settings Tile API</h2>
+
+
+<div style="float:right;max-width:320px">
+<img src="{@docRoot}images/android-7.0/quicksettings.png" style="padding-left:1.5em;">
+
+<p class="img-caption" style="padding-left:2em;">
+  <strong>Figure 5.</strong> Quick Settings tiles in the notification shade.
+</p>
+
+
+  </div><p>Quick Settings is a popular and simple way to expose key settings and actions,
+directly from the notification shade. In Android 7.0, we've expanded the scope of
+Quick Settings to make it even more useful and convenient. </p>
+
+<p>We've added more room for additional Quick Settings tiles, which users can
+access across a paginated display area by swiping left or right. We've also
+given users control over what Quick Settings tiles appear and where they are
+displayed &mdash; users can add or move tiles just by dragging and dropping them. </p>
+
+<p>For developers, Android 7.0 also adds a new API that lets you define your own
+  Quick Settings tiles to give users easy access to key controls and actions in your app.</p>
+
+<p>
+  Quick Settings tiles are reserved for controls or actions that are either
+  urgently required or frequently used, and should not be used as shortcuts to
+  launching an app.
+</p>
+
+<p>
+  Once you’ve defined your tiles, you can surface them to users, who can add
+  them to Quick Settings just by drag and drop.
+</p>
+
+<p>
+  For information about creating an app tile, see the reference documentation
+  for {@link android.service.quicksettings.Tile Tile}.
+</p>
+
+
+
+<h2 id="number-blocking">Number Blocking</h2>
+
+<p>Android 7.0 now supports number blocking in the platform and provides a
+framework API to let service providers maintain a blocked-number list. The
+default SMS app, the default phone app, and carrier apps can read from and
+write to the blocked-number list. The list is not accessible to other apps.</p>
+
+<p>By making number blocking a standard feature of the platform, Android provides
+a consistent way for apps to support number blocking across a wide range of
+devices. Among the other benefits that apps can take advantage of are:</p>
+
+<ul>
+  <li> Numbers blocked on calls are also blocked on texts
+  <li> Blocked numbers can persist across resets and devices through the Backup &amp;
+Restore feature
+  <li> Multiple apps can use the same blocked numbers list
+</ul>
+
+<p>Additionally, carrier app integration through Android means that carriers can
+read the blocked numbers list on the device and perform service-side blocking
+for the user in order to stop unwanted calls and texts from reaching the user
+through any medium, such as a VOIP endpoint or forwarding phones.</p>
+
+<p>
+  For more information, see the reference documentation for
+  {@link android.provider.BlockedNumberContract BlockedNumberContract}.
+</p>
+
+<h2 id="call_screening">Call Screening</h2>
+
+<p>
+  Android 7.0 allows the default phone app to screen incoming calls. The phone
+  app does this by implementing the new <code>CallScreeningService</code>,
+  which allows the phone app to perform a number of actions based on an
+  incoming call's {@link android.telecom.Call.Details Call.Details}, such as:
+</p>
+
+<ul>
+  <li> Reject the incoming call
+  <li> Do not allow the call to the call log
+  <li> Do not show the user a notification for the call
+</ul>
+
+<p>
+  For more information, see the reference documentation for
+  {@link android.telecom.CallScreeningService CallScreeningService}.
+</p>
+
+
+<h2 id="multi-locale_languages">Multi-locale Support, More Languages</h2>
+
+
+<p>Android 7.0 now lets users select <strong>multiple locales</strong> in Settings,
+to better support bilingual use-cases. Apps can use
+a new API to get the user's selected locales and then offer more sophisticated
+user experiences for multi-locale users &mdash; such as showing search results in
+multiple languages and not offering to translate webpages in a language the
+user already knows.</p>
+
+<p>Along with multi-locale support, Android 7.0 also expands the range of languages
+available to users. It offers more than 25 variants each for commonly used
+languages such as English, Spanish, French, and Arabic. It also adds partial
+support for more than 100 new languages.</p>
+
+<p>Apps can get the list of locales set by the user by calling
+<code>LocaleList.GetDefault()</code>.  To support the expanded number of locales, Android 7.0 is
+changing the way that it resolves resources. Make sure that you test and verify that your apps
+working as expected with the new resource resolution logic.</p>
+
+<p>To learn about the new resource-resolution behavior and the best practices you
+should follow, see <a href="{@docRoot}preview/features/multilingual-support.html"
+>Multilingual Support</a>.</p>
+
+
+<h2 id="emoji">New Emojis</h2>
+
+<p>
+  Android 7.0 introduces additional emojis and emoji-related features including
+  skin tone emojis and support for variation
+  selectors. If your app supports emojis,
+  follow the guidelines below to take advantage of these emoji-related features.
+</p>
+
+<ul>
+  <li>
+    <strong>Check that a device contains an emoji before inserting it.</strong>
+    To check which emojis are present in the
+    system font, use the {@link android.graphics.Paint#hasGlyph(String)} method.
+  </li>
+  <li>
+    <strong>Check that an emoji supports variation selectors.</strong>
+    Variation selectors allow you to
+    present certain emojis in color or in black-and-white.
+    On mobile devices, apps should represent emojis in color rather than black-and-white. However,
+    if your app displays emojis inline with text, then it should use the black-and-white variation.
+    To determine whether an emoji has a variation, use the variation selector.
+    For a complete list of characters with variations, review the
+    <em>emoji variation sequences</em> section of the
+    <a class="external-link"
+    href="http://www.unicode.org/Public/9.0.0/ucd/StandardizedVariants-9.0.0d1.txt">
+      Unicode documentation on variations</a>.
+  </li>
+  <li>
+    <strong>Check that an emoji supports skin tone.</strong> Android 7.0 allows users to modify the
+    rendered skin tone of emojis to their preference. Keyboard apps should provide visual
+    indications for emojis that have multiple skin tones and should allow users to
+    select the skin tone that they prefer. To determine which system emojis have
+    skin tone modifiers, use the {@link android.graphics.Paint#hasGlyph(String)}
+    method. You can determine which emojis use skin tones by reading the
+    <a class="external-link"
+    href="http://unicode.org/emoji/charts/full-emoji-list.html">
+     Unicode documentation</a>.
+  </li>
+</ul>
+
+
+<h2 id="icu4">ICU4J APIs in Android</h2>
+
+<p>
+  Android 7.0 now offers a subset of <a href=
+  "http://site.icu-project.org/">ICU4J</a> APIs in the Android framework under
+  the <code>android.icu</code> package. Migration is easy, and mostly entails
+  simply changing from the <code>com.java.icu</code> namespace to
+  <code>android.icu</code>. If you are already using an ICU4J bundle in your
+  apps, switching to the <code>android.icu</code> APIs provided in the Android
+  framework can produce substantial savings in APK size.
+</p>
+
+<p>
+  To learn more about the Android ICU4J APIs, see <a href=
+  "{@docRoot}preview/features/icu4j-framework.html">ICU4J Support</a>.
+</p>
+
+<h2 id="webview">WebView</h2>
+
+<h3>Chrome + WebView, Together</h3>
+
+<p>
+  Starting with Chrome version 51 on Android 7.0 and above, the Chrome APK on your device
+  is used to provide and render Android System WebViews. This approach improves memory
+  usage on the device itself and also reduces the bandwidth required to keep
+  WebView up to date (as the standalone WebView APK will no longer be updated
+  as long as Chrome remains enabled).
+</p>
+
+<p>
+  You can choose your WebView provider by enabling Developer Options and
+  selecting <strong>WebView implementation</strong>. You can use any compatible
+  Chrome version (Dev, Beta or Stable) that is installed on your device or the
+  standalone Webview APK to act as the WebView implementation.
+</p>
+
+<h3>Multiprocess</h3>
+
+<p>
+  Starting with Chrome version 51 in Android 7.0, WebView will run web content in a
+  separate sandboxed process when the developer option "Multiprocess WebView"
+  is enabled.
+</p>
+
+<p>
+  We're looking for feedback on compatibility and runtime performance in N
+  before enabling multiprocess WebView in a future version of Android. In this
+  version, regressions in startup time, total memory usage and software
+  rendering performance are expected.
+</p>
+
+<p>
+  If you find unexpected issues in multiprocess mode we’d like to hear about
+  them. Please get in touch with the WebView team on the <a href=
+  "https://bugs.chromium.org/p/chromium/issues/entry?template=Webview%20Bugs"
+  >Chromium bug tracker</a>.
+</p>
+
+<h3>Javascript run before page load</h3>
+<p>
+  Starting with apps targeting Android 7.0, the Javascript context will be reset
+  when a new page is loaded. Currently, the context is carried over for the
+  first page loaded in a new WebView instance.
+</p>
+
+<p>
+  Developers looking to inject Javascript into the WebView should execute the
+  script after the page has started to load.
+</p>
+
+<h3>Geolocation on insecure origins</h3>
+
+<p>
+  Starting with apps targeting Android 7.0, the geolocation API will only be
+  allowed on secure origins (over HTTPS.) This policy is designed to protect
+  users’ private information when they’re using an insecure connection.
+</p>
+
+<h3>Testing with WebView Beta</h3>
+
+<p>
+  WebView is updated regularly, so we recommend that you test compatibility
+  with your app frequently using WebView’s beta channel. To get started testing
+  pre-release versions of WebView on Android 7.0, download and install either
+  Chrome Dev or Chrome Beta, and select it as the WebView implementation under
+  developer options as described above. Please report issues via the <a href=
+  "https://bugs.chromium.org/p/chromium/issues/entry?template=Webview%20Bugs">Chromium
+  bug tracker</a> so that we can fix them before a new version of WebView is
+  released.
+</p>
+
+<p>
+  If you have any other questions or issues, feel free to reach out to the
+  WebView team via our <a href=
+  "https://plus.google.com/communities/105434725573080290360">G+ community</a>.
+</p>
+
+<h2 id="gles_32">OpenGL&trade; ES 3.2 API</h2>
+
+<p>Android 7.0 adds framework interfaces and platform support for OpenGL ES 3.2, including:</p>
+
+<ul>
+  <li> All extensions from the <a class="external-link"
+href="https://www.khronos.org/registry/gles/extensions/ANDROID/ANDROID_extension_pack_es31a.txt">
+Android Extension Pack</a></a> (AEP) except for <code>EXT_texture_sRGB_decode</code>.
+  <li> Floating-point framebuffers for HDR and deferred shading.
+  <li> BaseVertex draw calls to enable better batching and streaming.
+  <li> Robust buffer access control to reduce WebGL overhead.
+</ul>
+
+<p>The framework API for OpenGL ES 3.2 on Android 7.0 is provided with the
+<code>GLES32</code> class. When using OpenGL ES 3.2, be sure to declare the
+requirement in your manifest file, using the <code>&lt;uses-feature&gt;</code> tag and
+the <code>android:glEsVersion</code> attribute. </p>
+
+<p>For information about using OpenGL ES, including how to check a device's
+supported OpenGL ES version at runtime, see the <a
+href="{@docRoot}guide/topics/graphics/opengl.html">OpenGL ES API guide</a>.</p>
+
+
+<h2 id="android_tv_recording">Android TV Recording</h2>
+
+<p>Android 7.0 adds the ability to record and playback content from Android TV input
+services via new recording APIs.  Building on top of existing time-shifting
+APIs, TV input services can control what channel data can be recorded, how
+recorded sessions are saved, and manage user interaction with recorded content. </p>
+
+<p>For more information, see <a
+href="{@docRoot}preview/features/tv-recording-api.html">Android TV Recording APIs</a>.</p>
+
+
+<h2 id="android_for_work">Android for Work</h2>
+
+<p>Android for Work adds many new features and APIs for devices running Android 7.0.
+Some highlights are below &mdash; for a complete list of changes, see
+<a href="{@docRoot}preview/features/afw.html">Android for Work Updates</a>.</p>
+
+<h3 id="work_profile_security_challenge">Work profile security challenge </h3>
+
+<p>
+  Profile owners targeting the N SDK
+  can specify a separate security challenge for apps running in
+  the work profile. The work challenge is shown when a user attempts to open
+  any work apps. Successful completion of the security challenge unlocks the
+  work profile and decrypts it if necessary. For profile owners,
+  <code>ACTION_SET_NEW_PASSWORD</code> prompts the user to set a work
+  challenge, and <code>ACTION_SET_NEW_PARENT_PROFILE_PASSWORD</code> prompts
+  the user to set a device lock.
+</p>
+
+<p>
+  Profile owners can set distinct passcode policies for the work challenge
+  (such as how long the PIN needs to be, or whether a fingerprint can be used
+  to unlock the profile) using the <code>setPasswordQuality()</code>,
+  <code>setPasswordMinimumLength()</code> and related methods. The profile
+  owner can also set the device lock using the <code>DevicePolicyManager</code>
+  instance returned by the new <code>getParentProfileInstance()</code> method.
+  Additionally, profile owners can customize the credentials screen for the
+  work challenge using the new <code>setOrganizationColor()</code> and
+  <code>setOrganizationName()</code> methods.
+</p>
+<h3 id="turn_off_work">Turn off work </h3>
+
+<p>On a device with a work profile, users can toggle work mode. When work mode is
+off the managed user is temporarily shut down, which disables work profile
+apps, background sync, and notifications. This includes the profile owner
+application. When work mode is off, the system displays a persistent status
+icon to remind the user that they can't launch work apps. The launcher
+indicates that work apps and widgets are not accessible. </p>
+
+<h3 id="always_on_vpn">Always on VPN </h3>
+
+<p>Device owners and profile owners can ensure that work apps always connect
+through a specified VPN. The system automatically starts that VPN after the
+device boots.</p>
+
+<p>
+  New <code>DevicePolicyManager</code> methods are
+  <code>setAlwaysOnVpnPackage()</code> and
+  <code>getAlwaysOnVpnPackage()</code>.
+</p>
+
+<p>Because VPN services can be bound directly by the system without app
+interaction, VPN clients need to handle new entry points for Always on VPN. As
+before, services are indicated to the system by an intent filter matching
+action <code>android.net.VpnService</code>. </p>
+
+<p>
+  Users can also manually set Always on VPN clients that implement
+  <code>VPNService</code> methods using
+  <strong>Settings&gt;More&gt;Vpn</strong>. The option to enable Always on VPN
+  from Settings is available only if VPN client targets API level 24.
+</p>
+
+<h3 id="custom_provisioning">Customized provisioning</h3>
+
+<p>
+  An application can customize the profile owner and device owner provisioning
+  flows with corporate colors and logos.
+  <code>DevicePolicyManager.EXTRA_PROVISIONING_MAIN_COLOR</code> customizes
+  flow color. <code>DevicePolicyManager.EXTRA_PROVISIONING_LOGO_URI</code>
+  customizes the flow with a corporate logo.
+</p>
+
+<h2 id="accessibility_enhancements">Accessibility Enhancements</h2>
+
+<p>Android 7.0 now offers Vision Settings directly on the Welcome screen for new
+device setup. This makes it much easier for users to discover and configure
+accessibility features on their devices, including magnification gesture, font
+size, display size, and TalkBack. </p>
+
+<p>With these accessibility features getting more prominent placement, your users
+are more likely to try your app with them enabled. Make sure you test your apps
+early with these settings enabled. You can enable them from Settings >
+Accessibility.</p>
+
+<p>Also in Android 7.0, accessibility services can now help users with motor
+impairments to touch the screen. The new API allows building services with
+features such as face-tracking, eye-tracking, point scanning, and so on, to
+meet the needs of those users.</p>
+
+<p>For more information, see the reference documentation for
+{@link android.accessibilityservice.GestureDescription GestureDescription}.
+</p>
+
+
+<h2 id="direct_boot">Direct Boot</h2>
+
+<p>Direct boot improves device startup times and lets registered
+apps have limited functionality even after an unexpected reboot.
+For example, if an encrypted device reboots while the user is sleeping,
+registered alarms, messages and incoming calls can now continue to notify
+the user as normal. This also means accessibility services can also be
+  available immediately after a restart.</p>
+
+<p>Direct boot takes advantage of file based encryption in Android 7.0
+to enable fine grained encryption policies for both system and app data.
+The system uses a device-encrypted store for select system data and explicitly
+registered app data. By default a credential-encrypted store is used for all
+  other system data, user data, apps, and app data. </p>
+
+<p>At boot, the system starts in a restricted mode with access to
+device-encrypted data only, and without general access to apps or data.
+If you have components that you want to run in this mode, you can register
+them by setting a flag in the manifest. After restart, the system activates
+registered components by broadcasting the <code>LOCKED_BOOT_COMPLETED</code>
+intent. The system ensures registered device-encrypted app data is available
+before unlock. All other data is unavailable until the User confirms their lock
+  screen credentials to decrypt it. </p>
+
+For more information, see <a href="{@docRoot}preview/features/direct-boot.html">Direct Boot</a>.</p>
+</p>
+
+<h2 id="key_attestation">Key Attestation</h2>
+
+<p>
+  Android 7.0 introduces <em>key attestation</em>, a new security tool that helps
+  you make sure that the key pairs stored within a device's <a class=
+  "external-link" href=
+  "https://source.android.com/security/keystore/"><em>hardware-backed
+  keystore</em></a> properly protect the sensitive information that your app
+  uses. By using this tool, you gain additional confidence that your app
+  interacts with keys that reside in secure hardware, even if the device
+  running your app is rooted. If you use keys from the hardware-backed keystore
+  in your apps, you should use this tool, particularly if you use the keys to
+  verify sensitive information within your app.
+</p>
+
+<p>
+  Key attestation allows you to verify that an RSA or EC key pair has been
+  created and stored in a device’s hardware-backed keystore within the device’s
+  trusted execution environment (TEE). The tool also allows you to use an
+  off-device service, such as your app's back-end server, to determine and
+  strongly verify the uses and validity of the key pair. These features provide
+  an additional level of security that protects the key pair, even if someone
+  roots the device or compromises the security of the Android platform running
+  on the device.
+</p>
+
+<p class="note">
+  <strong>Note: </strong>Only a small number of devices running Android 7.0
+  support hardware-level key attestation; all other devices running Android 7.0
+  use software-level key attestation instead. Before you verify the properties
+  of a device's hardware-backed keys in a production-level environment, you
+  should make sure that the device supports hardware-level key attestation. To
+  do so, you should check that the attestation certificate chain contains a root
+  certificate that is signed by the Google attestation root key and that the
+  <code>attestationSecurityLevel</code> element within the <a
+  href="{@docRoot}preview/features/key-attestation.html#certificate_schema_keydescription">key
+  description</a> data structure is set to the TrustedEnvironment security
+  level.
+</p>
+
+<p>
+  For more information, see the
+  <a href="{@docRoot}preview/features/key-attestation.html">Key Attestation</a>
+  developer documentation.
+</p>
+
+<h2 id="network_security_config">Network Security Config</h2>
+
+<p>In Android 7.0, apps can customize the behavior of their secure (HTTPS, TLS)
+connections safely, without any code modification, by using the declarative
+<em>Network Security Config</em> instead of using the conventional
+error-prone programmatic APIs (e.g. X509TrustManager).</p>
+
+  <p>Supported features:</p>
+<ul>
+<li><b>Custom trust anchors.</b> Lets an application customize which
+Certificate Authorities (CA) are trusted for its secure connections. For
+example, trusting particular self-signed certificates or a restricted set of public CAs.
+</li>
+<li><b>Debug-only overrides.</b> Lets an application developer safely debug
+secure connections of their application without added risk to the installed
+base.
+</li>
+<li><b>Cleartext traffic opt-out.</b> Lets an application protect itself from
+accidental usage of cleartext traffic.</li>
+<li><b>Certificate pinning.</b> An advanced feature that lets an application
+  limit which server keys are trusted for secure connections.</li>
+</ul>
+
+<p>For more information, see <a
+href="{@docRoot}preview/features/security-config.html">Network Security
+Config</a>.</p>
+
+<h2 id="default_trusted_ca">Default Trusted Certificate Authority</h2>
+
+<p>By default, apps that target Android 7.0 only trust system-provided certificates
+and no longer trust user-added Certificate Authorities (CA). Apps targeting Android
+N that wish to trust user-added CAs should use the
+<a href="{@docRoot}preview/features/security-config.html">Network Security Config</a> to
+specify how user CAs should be trusted.</p>
+
+<h2 id="apk_signature_v2">APK Signature Scheme v2</h2>
+
+<p>
+  Android 7.0 introduces APK Signature Scheme v2, a new app-signing scheme that
+  offers faster app install times and more protection against unauthorized
+  alterations to APK files. By default, Android Studio 2.2 and the Android
+  Plugin for Gradle 2.2 sign your app using both APK Signature Scheme v2 and
+  the traditional signing scheme, which uses JAR signing.
+</p>
+
+<p>
+  Although we recommend applying APK Signature Scheme v2 to your app, this new
+  scheme is not mandatory. If your app doesn't build properly when using APK
+  Signature Scheme v2, you can disable the new scheme. The disabling process
+  causes Android Studio 2.2 and the Android Plugin for Gradle 2.2 to sign your
+  app using only the traditional signing scheme. To sign with only the
+  traditional scheme, open the module-level <code>build.gradle</code> file, then
+  add the line <code>v2SigningEnabled false</code> to your release signing
+  configuration:
+</p>
+
+<pre>
+  android {
+    ...
+    defaultConfig { ... }
+    signingConfigs {
+      release {
+        storeFile file("myreleasekey.keystore")
+        storePassword "password"
+        keyAlias "MyReleaseKey"
+        keyPassword "password"
+        <strong>v2SigningEnabled false</strong>
+      }
+    }
+  }
+</pre>
+
+<p class="caution"><strong>Caution: </strong> If you sign your app using APK
+  Signature Scheme v2 and make further changes to the app, the app's signature
+  is invalidated. For this reason, use tools such as <code>zipalign</code>
+  before signing your app using APK Signature Scheme v2, not after.
+</p>
+
+<p>
+  For more information, read the Android Studio documents that describe how to
+  <a href="{@docRoot}studio/publish/app-signing.html#release-mode">
+  sign an app</a> in Android Studio and how to <a href=
+  "{@docRoot}studio/build/build-variants.html#signing"> configure
+  the build file for signing apps</a> using the Android Plugin for Gradle.
+</p>
+
+<h2 id="scoped_directory_access">Scoped Directory Access</h2>
+
+<p>In Android 7.0, apps can use new APIs to request access to specific <a
+href="{@docRoot}guide/topics/data/data-storage.html#filesExternal">external
+storage</a> directories, including directories on removable media such as SD
+cards. The new APIs greatly simplify how your application accesses standard
+external storage directories, such as the <code>Pictures</code> directory. Apps
+like photo apps can use these APIs instead of using
+<code>READ_EXTERNAL_STORAGE</code>, which grants access to all storage
+directories, or the Storage Access Framework, which makes the user navigate to
+the directory.</p>
+
+<p>Additionally, the new APIs simplify the steps a user takes to grant external
+storage access to your app. When you use the new APIs, the system uses a simple
+permissions UI that clearly details what directory the application is
+requesting access to.</p>
+
+<p>For more information, see the
+<a href="{@docRoot}preview/features/scoped-folder-access.html">Scoped
+Directory Access</a> developer documentation.</p>
+
+<h2 id="keyboard_shortcuts_helper">Keyboard Shortcuts Helper</h2>
+
+<p>
+  In Android 7.0, the user can press <strong>Meta + /</strong> to trigger a
+  <em>Keyboard Shortcuts</em> screen that displays all shortcuts available both
+  from the system and from the app in focus. The system retrieves these
+  shortcuts automatically from the app’s menu if the shortcuts exist. You can
+  also provide your own fine-tuned shortcuts lists for the screen. You can do
+  this by overriding the {@link android.view.Window.Callback#onProvideKeyboardShortcuts
+  onProvideKeyboardShortcuts()} method.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> The <strong>Meta</strong> key is not present on all
+  keyboards: on a Macintosh keyboard, it is the <strong>Command</strong> key,
+  on the Windows keyboard, it is the <strong>Windows</strong> key, and on the
+  Pixel C and the Chrome OS keyboards, it is the <strong>Search</strong> key.
+</p>
+
+<p>
+  To trigger Keyboard Shortcuts Helper from anywhere in your app, call
+  {@link android.app.Activity#requestShowKeyboardShortcuts requestShowKeyboardShortcuts()}
+  from the relevant activity.
+</p>
+
+<h2 id="custom_pointer_api">
+  Custom Pointer API
+</h2>
+
+<p>
+  Android 7.0 introduces the Custom Pointer API, which lets you customize the
+  appearance, visibility, and behavior of the pointer. This capability is
+  especially useful when a user is using a mouse or touchpad to interact with
+  UI objects. The default pointer uses a standard icon. This API also includes
+  advanced functionality such as changing the pointer icon's appearance based
+  on specific mouse or touchpad movements.
+</p>
+
+<p>
+  To set a pointer icon, override the <code>onResolvePointerIcon()</code>
+  method of the <code>View</code> class. This method uses a
+  <code>PointerIcon</code> object to draw the icon that corresponds to a
+  specific motion event.
+</p>
+
+<h2 id="sustained_performance_api">Sustained Performance API</h2>
+
+<p>
+Performance can fluctuate dramatically for long-running apps, because the
+system throttles system-on-chip engines as device components reach their
+temperature limits. This fluctuation presents a moving target for app
+developers creating high-performance, long-running apps.
+</p>
+
+<p>
+To address these limitations, Android 7.0 includes support for
+<em>sustained performance mode</em>, enabling OEMs to provide hints about
+device-performance capabilities for long-running apps. App developers
+can use these hints to tune apps for a predictable,
+consistent level of device performance over long periods of time.
+</p>
+
+<p>
+App developers can try out this new API in Android 7.0 on
+Nexus 6P devices only. To use this feature,
+set the sustained performance window flag for the window
+you want to run in sustained performance mode. Set this flag using the
+{@code Window.setSustainedPerformanceMode()} method. The system automatically
+disables this mode when the window is no longer in focus.
+</p>
+
+<h2 id="vr">VR Support</h2>
+
+<p>
+Android 7.0 adds platform support and optimizations for a new VR Mode to let developers
+build high-quality mobile VR experiences for users. There are a number of performance
+enhancements, including access to an exclusive CPU core for VR apps.
+Within your apps, you can take advantage of intelligent head-tracking,
+and stereo notifications that work for VR. Most importantly, Android 7.0 provides for
+very low latency graphics. For complete information about building VR apps for Android 7.0,
+see the <a href="https://developers.google.com/vr/android/">Google VR SDK for Android</a>.
+</p>
+
+
+<h2 id="print_svc">Print Service Enhancements</h2>
+
+<p>
+  In Android 7.0, print service developers can now surface additional information
+  about individual printers and print jobs.
+</p>
+
+<p>
+  When listing individual printers, a print service can now set per-printer
+  icons in two ways:
+</p>
+
+<ul>
+  <li>You can set an icon from a resource ID by calling
+  {@link android.print.PrinterInfo.Builder#setIconResourceId setIconResourceId()}.
+  </li>
+
+  <li>You can show an icon from the network by calling
+  {@link android.print.PrinterInfo.Builder#setHasCustomPrinterIcon setHasCustomPrinterIcon()},
+  and setting a callback for when the icon is requested using
+  {@link android.printservice.PrinterDiscoverySession#onRequestCustomPrinterIcon onRequestCustomPrinterIcon()}.
+  </li>
+</ul>
+
+<p>
+  In addition, you can provide a per-printer activity to display additional
+  information by calling {@link android.print.PrinterInfo.Builder#setInfoIntent setInfoIntent()}.
+</p>
+
+<p>
+  You can indicate the progress and status of print jobs in the print job
+  notification by calling
+  {@link android.printservice.PrintJob#setProgress setProgress()} and
+  {@link android.printservice.PrintJob#setStatus setStatus()}, respectively.
+</p>
+
+<h2 id="framemetrics_api">Frame Metrics API</h2>
+
+<p>
+The Frame Metrics API allows an app to monitor its UI rendering
+performance. The API provides this capability by exposing a streaming Pub/Sub API to transfer frame
+timing info for the app's current window. The data returned is
+equivalent to that which <code><a href="{@docRoot}tools/help/shell.html#shellcommands">adb shell</a>
+dumpsys gfxinfo framestats</code> displays, but is not limited to the past 120 frames.
+</p>
+
+<p>
+You can use the Frame Metrics API to measure interaction-level UI
+performance in production, without a USB connection. This API
+allows collection of data at a much higher granularity than does
+{@code adb shell dumpsys gfxinfo}. This higher granularity is possible because
+the system can collect data for particular interactions in the app; the system
+need not capture a global summary of the entire app’s
+performance, or clear any global state. You can use this
+capability to gather performance data and catch regressions in UI performance
+for real use cases within an app.
+</p>
+
+<p>
+To monitor a window, implement the
+{@link android.view.Window.OnFrameMetricsAvailableListener#onFrameMetricsAvailable OnFrameMetricsAvailableListener.onFrameMetricsAvailable()}
+callback method and register it on that window.
+</p>
+
+<p>
+The API provides a {@link android.view.FrameMetrics FrameMetrics} object, which
+contains timing data that the rendering subsystem reports for various milestones
+in a frame lifecycle. The supported metrics are: {@code UNKNOWN_DELAY_DURATION},
+{@code INPUT_HANDLING_DURATION}, {@code ANIMATION_DURATION},
+{@code LAYOUT_MEASURE_DURATION}, {@code DRAW_DURATION}, {@code SYNC_DURATION},
+{@code COMMAND_ISSUE_DURATION}, {@code SWAP_BUFFERS_DURATION},
+{@code TOTAL_DURATION}, and {@code FIRST_DRAW_FRAME}.
+</p>
+
+
+<h2 id="virtual_files">Virtual Files</h2>
+
+<p>
+  In previous versions of Android, your app could use the Storage Access
+  Framework to allow users to select files from their cloud storage accounts,
+  such as Google Drive. However, there was no way to represent files that did
+  not have a direct bytecode representation; every file was required to provide
+  an input stream.
+</p>
+
+<p>
+  Android 7.0 adds the concept of <em>virtual files</em> to the Storage Access
+  Framework. The virtual files feature allows your
+  {@link android.provider.DocumentsProvider} to return document URIs that can be
+  used with an {@link android.content.Intent#ACTION_VIEW} intent even if they
+  don't have a direct bytecode representation. Android 7.0 also allows you to
+  provide alternate formats for user files, virtual or otherwise.
+</p>
+
+<p>
+  To get a URI for a virtual document in your app, first you create an
+  {@link android.content.Intent} to open the file picker UI. Since an app
+  cannot directly open a virtual file by using the
+  {@link android.content.ContentResolver#openInputStream(Uri) openInputStream()}
+  method, your app does not receive any virtual files if you include the
+  {@link android.content.Intent#CATEGORY_OPENABLE} category.
+</p>
+
+<p>
+  After the user has made a selection, the system calls the
+  {@link android.app.Activity#onActivityResult onActivityResult()} method.
+  Your app can retrieve the URI of the virtual file and get an input stream, as
+  demonstrated in the code snippet below.
+</p>
+
+<pre>
+  // Other Activity code ...
+
+  final static private int REQUEST_CODE = 64;
+
+  // We listen to the OnActivityResult event to respond to the user's selection.
+  &#64;Override
+  public void onActivityResult(int requestCode, int resultCode,
+    Intent resultData) {
+      try {
+        if (requestCode == REQUEST_CODE &amp;&amp;
+            resultCode == Activity.RESULT_OK) {
+
+            Uri uri = null;
+
+            if (resultData != null) {
+                uri = resultData.getData();
+
+                ContentResolver resolver = getContentResolver();
+
+                // Before attempting to coerce a file into a MIME type,
+                // check to see what alternative MIME types are available to
+                // coerce this file into.
+                String[] streamTypes =
+                  resolver.getStreamTypes(uri, "*/*");
+
+                AssetFileDescriptor descriptor =
+                    resolver.openTypedAssetFileDescriptor(
+                        uri,
+                        streamTypes[0],
+                        null);
+
+                // Retrieve a stream to the virtual file.
+                InputStream inputStream = descriptor.createInputStream();
+            }
+        }
+      } catch (Exception ex) {
+        Log.e("EXCEPTION", "ERROR: ", ex);
+      }
+  }
+</pre>
+
+<p>
+  For more information about accessing user files, see the
+  <a href="{@docRoot}guide/topics/providers/document-provider.html">Storage
+  Access Frameworks guide</a>.
+</p>

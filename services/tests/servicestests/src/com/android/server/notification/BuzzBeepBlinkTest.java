@@ -76,6 +76,7 @@ public class BuzzBeepBlinkTest extends AndroidTestCase {
         mService.setVibrator(mVibrator);
         mService.setSystemReady(true);
         mService.setHandler(mHandler);
+        mService.setSystemNotificationSound("beep!");
     }
 
     //

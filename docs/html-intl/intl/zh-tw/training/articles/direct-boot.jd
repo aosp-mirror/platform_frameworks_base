@@ -1,0 +1,181 @@
+page.title=直接開機
+page.keywords=preview,sdk,direct boot
+page.tags=androidn
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>此文件內容</h2>
+  <ol>
+    <li><a href="#run">要求直接開機期間的執行權限</a></li>
+    <li><a href="#access">存取裝置加密的儲存空間</a></li>
+    <li><a href="#notification">接收使用者解鎖的通知</a></li>
+    <li><a href="#migrating">遷移現有資料</a></li>
+    <li><a href="#testing">測試您的加密感知應用程式</a></li>
+  </ol>
+</div>
+</div>
+
+<p>Android N 會在一個安全的 <i>直接開機</i> 模式下執行，這是裝置已經開啟電源但使用者尚未解鎖裝置的期間。
+
+為了支援這種方式，系統為資料提供兩個儲存位置：</p>
+
+<ul>
+<li><i>認證加密的儲存空間</i>：這是預設的儲存位置，只有在使用者解鎖裝置之後才能使用。
+</li>
+<li><i>裝置加密的儲存空間</i>：這是「直接開機」模式期間與使用者解鎖裝置之後都可以使用的儲存位置。
+</li>
+</ul>
+
+<p>根據預設，應用程式不會在「直接開機」模式下執行。如果您的應用程式需要在「直接開機」模式期間執行動作，您可以註冊應該在此模式下執行的應用程式元件。
+
+需要在「直接開機」模式下執行的一些常見應用程式使用案例包括：
+</p>
+
+<ul>
+<li>已排程通知的應用程式，例如鬧鐘應用程式。
+</li>
+<li>提供重要使用者通知的應用程式，例如簡訊應用程式。</li>
+<li>提供協助工具服務的應用程式，例如 Talkback。</li>
+</ul>
+
+<p>如果您的應用程式需要在「直接開機」模式期間存取資料，請使用裝置加密的儲存空間。
+裝置加密的儲存空間包含以金鑰加密的資料，這個金錀只有在裝置執行成功的驗證開機之後才能使用。
+
+</p>
+
+<p>對於應該使用與使用者認證關聯之金鑰 (例如 PIN 或密碼) 加密的資料，請使用認證加密的儲存空間。認證加密的儲存空間只有在使用者成功解鎖裝置之後到使用者再次重新啟動裝置之間的時間可以使用。
+
+
+如果使用者在解鎖裝置之後啟用鎖定螢幕，並不會鎖定認證加密的儲存空間。
+
+</p>
+
+<h2 id="run">要求直接開機期間的執行權限</h2>
+
+<p>應用程式必須先向系統註冊其元件，這些元件才能在「直接開機」模式期間執行或存取裝置加密的儲存空間。
+
+向系統註冊的應用程式會將元件標記為
+<i>加密感知</i>。如果要將元件標記為加密感知，請將宣示說明中的
+<code>android:encryptionAware</code> 屬性設定為 true。<p>
+
+<p>當裝置重新啟動時，加密感知元件可以註冊為從系統接收
+<code>LOCKED_BOOT_COMPLETED</code> 廣播訊息。
+這個時候可以使用裝置加密的儲存空間，而且您的元件可以執行在「直接開機」模式期間需要執行的工作，例如觸發排程的鬧鐘。
+
+</p>
+
+<p>下列程式碼片段是一個範例，示範如何在應用程式宣示說明中將
+{@link android.content.BroadcastReceiver} 註冊為加密感知以及如何為
+<code>LOCKED_BOOT_COMPLETED</code> 新增意圖篩選器：</p>
+
+<pre>
+&lt;receiever
+  android:encryptionAware="true" &gt;
+  ...
+  &lt;intent-filter&gt;
+    &lt;action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" /&gt;
+  &lt;/intent-filter&gt;
+&lt;/receiver&gt;
+</pre>
+
+<p>一旦使用者將裝置解鎖，所有元件都可存取裝置加密的儲存空間與認證加密的儲存空間。
+</p>
+
+<h2 id="access">存取裝置加密的儲存空間</h2>
+
+<p>如果要存取裝置加密的儲存空間，請透過呼叫
+<code>Context.createDeviceEncryptedStorageContext()</code> 以建立第二個
+{@link android.content.Context} 實例。使用此內容建立的所有儲存 API 呼叫都可以存取裝置加密的儲存空間。
+下列範例會存取裝置加密的儲存空間並開啟現有的應用程式資料檔案：
+
+</p>
+
+<pre>
+Context directBootContext = Context.createDeviceEncryptedStorageContext();
+// Access appDataFilename that lives in device encrypted storage
+FileInputStream inStream = directBootContext.openFileInput(appDataFilename);
+// Use inStream to read content...
+</pre>
+
+<p>只針對必須在「直接開機」模式期間存取的資訊使用裝置加密的儲存空間。不要將裝置加密的儲存空間做為一般用途的加密存放區。對於私密使用者資訊或「直接開機」模式期間不需要的加密資料，請使用認證加密的儲存空間。
+
+
+
+</p>
+
+<h2 id="notification">接收使用者解鎖的通知</h2>
+
+<p>裝置重新啟動之後，一旦使用者將裝置解鎖，您的應用程式就可以切換為存取認證加密的儲存空間，並使用倚賴使用者認證的一般系統服務。
+
+</p>
+
+<p>如果要接收裝置重新開機後使用者解鎖裝置的通知，請從執行中元件註冊 {@link android.content.BroadcastReceiver} 以接聽 <code>ACTION_USER_UNLOCKED</code> 訊息。
+
+或者，您可以接收現有的 {@link android.content.Intent#ACTION_BOOT_COMPLETED
+ACTION_BOOT_COMPLETED} 訊息，它現在可以指出裝置已開機且使用者已解鎖裝置。
+
+</p>
+
+<p>您可以透過呼叫
+<code>UserManager.isUserUnlocked()</code>，以直接查詢使用者是否已將裝置解鎖。</p>
+
+<h2 id="migrating">遷移現有資料</h2>
+
+<p>如果使用者更新其裝置來使用「直接開機」模式，您可能有現有的資料必須遷移到裝置加密的儲存空間。
+使用
+<code>Context.migrateSharedPreferencesFrom()</code> 與
+<code>Context.migrateDatabaseFrom()</code>，在認證加密的儲存空間與裝置加密的儲存空間之間遷移偏好設定與資料庫資料。
+</p>
+
+<p>決定要將哪些資料從認證加密的儲存空間遷移到裝置加密的儲存空間時，請使用最佳判斷。
+您不應該將私密使用者資訊 (例如密碼或授權權杖) 遷移到裝置加密的儲存空間。
+
+在某些情況下，您需要在這兩種加密的存放區中管理不同的資料集。
+</p>
+
+<h2 id="testing">測試您的加密感知應用程式</h2>
+
+<p>使用新的「直接開機」模式測試您的加密感知應用程式。您可以透過兩種方式啟用「直接開機」。
+</p>
+
+<p class="caution"><strong>注意：</strong>啟用「直接開機」會清除裝置上的所有使用者資料。
+</p>
+
+<p>在已安裝 Android N 的支援裝置上，執行下列其中一個動作來啟用「直接開機」：
+</p>
+
+<ul>
+<li>在裝置上，請移至 [設定] &gt; [關於手機]<b></b>，然後點選 [Android 版本]<b></b> 7 次以啟用 [開發人員選項]<b></b> (如果尚未啟用)。
+
+當開發人員選項畫面可用時，請移至 [設定] &gt; [開發人員選項]<b></b>，然後選取 [轉換到檔案加密]<b></b>。
+
+</li>
+<li>使用下列 adb shell 命令來啟用「直接開機」模式：
+<pre class="no-pretty-print">
+$ adb reboot-bootloader
+$ fastboot --wipe-and-use-fbe
+</pre>
+</li>
+</ul>
+
+<p>另外也提供模擬的「直接開機」模式，如果您需要在測試裝置上切換模式時即可利用。
+模擬模式應該只在開發期間使用，而且它可能造成資料遺失。
+如果要啟用模擬的「直接開機」模式，請在裝置上設定鎖定模式；設定鎖定模式時如果系統提示您設定安全啟動畫面，請選擇 [No thanks]，然後使用下列 adb shell 命令：
+
+
+</p>
+
+<pre class="no-pretty-print">
+$ adb shell sm set-emulate-fbe true
+</pre>
+
+<p>如果要關閉模擬的「直接開機」模式，請使用下列命令：</p>
+
+<pre class="no-pretty-print">
+$ adb shell sm set-emulate-fbe false
+</pre>
+
+<p>使用這些命令會使得裝置重新開機。</p>

@@ -1,5 +1,17 @@
 <ul id="nav">
   <li class="nav-section">
+    <div class="nav-section-header"><a href="<?cs var:toroot ?>about/versions/nougat/index.html">
+      <span class="en">Nougat</span></a></div>
+      <ul>
+        <li><a href="<?cs var:toroot ?>about/versions/nougat/android-7.0.html">
+        Android 7.0 for Developers</a></li>
+        <li><a href="<?cs var:toroot ?>about/versions/nougat/android-7.0-changes.html">
+        Android 7.0 Changes</a></li>
+        <li><a href="<?cs var:toroot ?>about/versions/nougat/android-7.0-samples.html">
+        Android 7.0 Samples</a></li>
+      </ul>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot ?>about/versions/marshmallow/index.html">
       <span class="en">Marshmallow</span></a></div>
       <ul>

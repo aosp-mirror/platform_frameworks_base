@@ -160,7 +160,7 @@ focus navigation</a>.</p>
 {@code android:focusable}</a> attribute is set to {@code true}. This setting allows users to focus
 on the element using the directional controls and then interact with it. The user interface controls
 provided by the Android framework are focusable by default and visually indicate focus by changing
-the control’s appearance.</p>
+the control's appearance.</p>
 
 <p>Android provides several APIs that let you control whether a user interface control is focusable
 and even request that a control be given focus:</p>
@@ -436,7 +436,7 @@ public boolean onKeyUp (int keyCode, KeyEvent event) {
 <h3 id="populate-events">Populating accessibility events</h3>
 
 <p>Each {@link android.view.accessibility.AccessibilityEvent} has a set of required properties that
-describe the current state of the view. These properties include things such as the view’s class
+describe the current state of the view. These properties include things such as the view's class
 name, content description and checked state. The specific properties required for each event type
 are described in the {@link android.view.accessibility.AccessibilityEvent} reference documentation.
 The {@link android.view.View} implementation provides default values for these properties. Many of
@@ -454,10 +454,10 @@ following example code demonstrates a basic implementation of this method.</p>
 
 <pre>
 &#64;Override
-public void dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
-    super.dispatchPopulateAccessibilityEvent(event);
+public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
     // Call the super implementation to populate its text to the event, which
     // calls onPopulateAccessibilityEvent() on API Level 14 and up.
+    boolean completed = super.dispatchPopulateAccessibilityEvent(event);
 
     // In case this is running on a API revision earlier that 14, check
     // the text content of the event and add an appropriate text
@@ -465,7 +465,9 @@ public void dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
     CharSequence text = getText();
     if (!TextUtils.isEmpty(text)) {
         event.getText().add(text);
+        return true;
     }
+    return completed;
 }
 </pre>
 

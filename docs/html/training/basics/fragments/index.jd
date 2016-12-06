@@ -56,7 +56,7 @@ app's user experience for devices with different screen sizes, all while continu
 devices running versions as old as Android 1.6.</p>
 
 <h2>Lessons</h2>
- 
+
 <dl>
   <dt><b><a href="creating.html">Creating a Fragment</a></b></dt>
     <dd>Learn how to build a fragment and implement basic behaviors within its callback
@@ -67,5 +67,5 @@ different screens.</dd>
   <dt><b><a href="communicating.html">Communicating with Other Fragments</a></b></dt>
     <dd>Learn how to set up communication paths from a fragment to the activity and other
 fragments.</dd>
-</dl> 
+</dl>
 

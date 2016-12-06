@@ -19,6 +19,9 @@ package android.app;
 import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.IIntentSender;
+import android.content.Intent;
+import android.content.res.Configuration;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.service.voice.IVoiceInteractionSession;
 
@@ -151,4 +154,29 @@ public abstract class ActivityManagerInternal {
      *  such as Power Save mode.
      */
     public abstract void setPendingIntentWhitelistDuration(IIntentSender target, long duration);
+
+    /**
+     * Updates and persists the {@link Configuration} for a given user.
+     *
+     * @param values the configuration to update
+     * @param userId the user to update the configuration for
+     */
+    public abstract void updatePersistentConfigurationForUser(@NonNull Configuration values,
+            int userId);
+
+    /**
+     * Start activity {@code intents} as if {@code packageName} on user {@code userId} did it.
+     *
+     * @return error codes used by {@link IActivityManager#startActivity} and its siblings.
+     */
+    public abstract int startActivitiesAsPackage(String packageName,
+            int userId, Intent[] intents, Bundle bOptions);
+
+    /**
+     * Get the procstate for the UID.  The return value will be between
+     * {@link ActivityManager#MIN_PROCESS_STATE} and {@link ActivityManager#MAX_PROCESS_STATE}.
+     * Note if the UID doesn't exist, it'll return {@link ActivityManager#PROCESS_STATE_NONEXISTENT}
+     * (-1).
+     */
+    public abstract int getUidProcessState(int uid);
 }

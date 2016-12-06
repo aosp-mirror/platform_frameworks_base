@@ -26,7 +26,7 @@
     android:paddingBottom="16dp"
     android:paddingStart="@dimen/notification_content_margin_start"
     android:paddingEnd="16dp">
-    <ImageView
+    <com.android.internal.widget.CachingIconView
         android:id="@+id/icon"
         android:layout_width="18dp"
         android:layout_height="18dp"

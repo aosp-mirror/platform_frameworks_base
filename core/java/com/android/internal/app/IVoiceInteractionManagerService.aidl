@@ -22,6 +22,7 @@ import android.os.Bundle;
 
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
+import com.android.internal.app.IVoiceInteractionSessionListener;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.service.voice.IVoiceInteractionService;
@@ -136,4 +137,9 @@ interface IVoiceInteractionManagerService {
      * Called when the lockscreen got shown.
      */
     void onLockscreenShown();
+
+    /**
+     * Register a voice interaction listener.
+     */
+    void registerVoiceInteractionSessionListener(IVoiceInteractionSessionListener listener);
 }

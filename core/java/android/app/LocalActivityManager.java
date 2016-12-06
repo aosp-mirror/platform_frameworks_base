@@ -314,7 +314,7 @@ public class LocalActivityManager {
                     ArrayList<ReferrerIntent> intents = new ArrayList<>(1);
                     intents.add(new ReferrerIntent(intent, mParent.getPackageName()));
                     if (localLOGV) Log.v(TAG, r.id + ": new intent");
-                    mActivityThread.performNewIntents(r, intents);
+                    mActivityThread.performNewIntents(r, intents, false /* andPause */);
                     r.intent = intent;
                     moveToState(r, mCurState);
                     if (mSingleMode) {

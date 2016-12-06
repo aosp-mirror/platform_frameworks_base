@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.app.ActivityManagerNative;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.content.Context;
@@ -23,6 +24,7 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -518,16 +520,6 @@ public final class ThreadedRenderer {
     }
 
     /**
-     * This method should be invoked whenever the current hardware renderer
-     * context should be reset.
-     *
-     * @param surface The surface to hardware accelerate
-     */
-    void invalidate(Surface surface) {
-        updateSurface(surface);
-    }
-
-    /**
      * Detaches the layer's surface texture from the GL context and releases
      * the texture id
      */
@@ -881,6 +873,12 @@ public final class ThreadedRenderer {
         nRegisterAnimatingRenderNode(mRootNode.mNativeRenderNode, animator.mNativeRenderNode);
     }
 
+    void registerVectorDrawableAnimator(
+        AnimatedVectorDrawable.VectorDrawableAnimatorRT animator) {
+        nRegisterVectorDrawableAnimator(mRootNode.mNativeRenderNode,
+                animator.getAnimatorNativePtr());
+    }
+
     public void serializeDisplayListTree() {
         nSerializeDisplayListTree(mNativeProxy);
     }
@@ -910,8 +908,18 @@ public final class ThreadedRenderer {
         synchronized void init(Context context, long renderProxy) {
             if (mInitialized) return;
             mInitialized = true;
+            initSched(context, renderProxy);
             initGraphicsStats(context, renderProxy);
             initAssetAtlas(context, renderProxy);
+        }
+
+        private static void initSched(Context context, long renderProxy) {
+            try {
+                int tid = nGetRenderThreadTid(renderProxy);
+                ActivityManagerNative.getDefault().setRenderThread(tid);
+            } catch (Throwable t) {
+                Log.w(LOG_TAG, "Failed to set scheduler for RenderThread", t);
+            }
         }
 
         private static void initGraphicsStats(Context context, long renderProxy) {
@@ -972,6 +980,7 @@ public final class ThreadedRenderer {
 
     private static native void nSetAtlas(long nativeProxy, GraphicBuffer buffer, long[] map);
     private static native void nSetProcessStatsBuffer(long nativeProxy, int fd);
+    private static native int nGetRenderThreadTid(long nativeProxy);
 
     private static native long nCreateRootRenderNode();
     private static native long nCreateProxy(boolean translucent, long rootRenderNode);
@@ -992,6 +1001,7 @@ public final class ThreadedRenderer {
     private static native int nSyncAndDrawFrame(long nativeProxy, long[] frameInfo, int size);
     private static native void nDestroy(long nativeProxy, long rootRenderNode);
     private static native void nRegisterAnimatingRenderNode(long rootRenderNode, long animatingNode);
+    private static native void nRegisterVectorDrawableAnimator(long rootRenderNode, long animator);
 
     private static native void nInvokeFunctor(long functor, boolean waitForCompletion);
 

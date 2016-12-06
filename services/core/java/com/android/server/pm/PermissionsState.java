@@ -274,7 +274,7 @@ public final class PermissionsState {
             return Collections.emptySet();
         }
 
-        Set<String> permissions = new ArraySet<>();
+        Set<String> permissions = new ArraySet<>(mPermissions.size());
 
         final int permissionCount = mPermissions.size();
         for (int i = 0; i < permissionCount; i++) {
@@ -282,6 +282,7 @@ public final class PermissionsState {
 
             if (hasInstallPermission(permission)) {
                 permissions.add(permission);
+                continue;
             }
 
             if (userId != UserHandle.USER_ALL) {

@@ -82,15 +82,13 @@ public class ScheduleCalendar {
         if (end <= start) {
             end = addDays(end, 1);
         }
-        boolean isInSchedule =
-                isInSchedule(-1, time, start, end) || isInSchedule(0, time, start, end);
-        if (isInSchedule && mSchedule.exitAtAlarm
+        return isInSchedule(-1, time, start, end) || isInSchedule(0, time, start, end);
+    }
+
+    public boolean shouldExitForAlarm(long time) {
+        return mSchedule.exitAtAlarm
                 && mSchedule.nextAlarm != 0
-                && time >= mSchedule.nextAlarm) {
-            return false;
-        } else {
-            return isInSchedule;
-        }
+                && time >= mSchedule.nextAlarm;
     }
 
     private boolean isInSchedule(int daysOffset, long time, long start, long end) {

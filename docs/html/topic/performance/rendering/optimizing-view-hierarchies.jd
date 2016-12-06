@@ -1,0 +1,388 @@
+page.title=Performance and View Hierarchies
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+<ol>
+<li><a href="#lmp">Layout-and-Measure Performance</a>
+  <ol>
+    <li><a href="#managing">Managing complexity: layouts matter</a></li>
+    <li><a href="#double">Double taxation</a></li>
+  </ol>
+</li>
+<li><a href="#dx">Diagnosing View Hierarchy Issues</a>
+  <ol>
+    <li><a href="#systrace">Systrace</a></li>
+    <li><a href="#profile">Profile GPU rendering</a></li>
+    <li><a href="#lint">Lint</a></li>
+    <li><a href="#hv">Hierarchy Viewer</a></li>
+  </ol>
+</li>
+<li><a href="#solving">Solving View Hierarchy Issues</a>
+   <ol>
+      <li><a href="#removing">Removing redundant nested layouts</a></li>
+      <li><a href="#cheaper">Adopting a cheaper layout</a></li>
+   </ol>
+      </li>
+</ol>
+</div>
+</div>
+
+
+<p>
+The way you manage the hierarchy of your {@link android.view.View} objects can
+have a substantial impact on your app’s performance. This page describes how to
+assess whether your view hierarchy is slowing your app down, and offers some
+strategies for addressing issues that may arise.
+</p>
+
+<h2 id="lmp">Layout and Measure Performance</h2>
+<p>
+The rendering pipeline includes a <em>layout-and-measure</em>
+stage, during which the system appropriately positions the relevant items in
+your view hierarchy. The measure part of this stage determines the sizes and
+boundaries of {@link android.view.View} objects. The layout part determines where on the screen to
+position the {@link android.view.View} objects.
+</p>
+
+<p>
+Both of these pipeline stages incur some small cost per view or layout that they
+process. Most of the time, this cost is minimal and doesn’t noticeably affect
+performance. However, it can be greater when an app adds or removes View
+objects, such as when a {@link android.support.v7.widget.RecyclerView}
+object recycles them or reuses them. The
+cost can also be higher if a {@link android.view.View} object needs to consider
+resizing to main its constraints: For example, if your app calls
+{@link android.widget.TextView#setText(char[], int, int) SetText()} on a
+{@link android.view.View} object that wraps text, the
+{@link android.view.View} may need to resize.
+</p>
+
+<p>
+If cases like these take too long, they can prevent a frame from rendering
+within the allowed 16ms, so that frames are dropped, and animation becomes
+janky.
+</p>
+
+<p>
+Because you cannot move these operations to a worker thread&mdash;your app must
+process them on the main thread&mdash;your best bet is to optimize them so that
+they can take as little time as possible.
+</p>
+
+<h3 id="managing">Managing complexity: layouts matter</h3>
+
+<p>
+Android <a
+href="{@docRoot}guide/topics/ui/declaring-layout.html">Layouts</a>
+allow you to nest UI objects in the view hierarchy. This nesting can also impose
+a layout cost. When your app processes an object for layout, the app performs
+the same process on all children of the layout as well. For a complicated
+layout, sometimes a cost only arises the first time the system computes the
+layout. For instance, when your app recycles a complex list item in a
+{@link android.support.v7.widget.RecyclerView} object, the
+system needs to lay out all of the objects. In another example, trivial changes
+can propagate up the chain toward the parent
+until they reach an object that doesn’t affect the size of the parent.
+</p>
+
+<p>
+The most common case in which layout takes an especially long time is when
+hierarchies of {@link android.view.View} objects are nested within one another. Each nested layout
+object adds cost to the layout stage. The flatter your hierarchy, the less
+time that it takes for the layout stage to complete.
+</p>
+
+<p>
+If you are using the {@link android.widget.RelativeLayout} class, you may be able to achieve the same
+effect, at lower cost, by using nested, unweighted
+{@link android.widget.LinearLayout} views instead. Additionally, if your app
+targets Android N (API level 24), it is likely that
+you can use a special layout editor to create a <a
+href="http://tools.android.com/tech-docs/layout-editor">{@code ConstraintLayout}</a>
+object instead of {@link android.widget.RelativeLayout}. Doing so allows you
+to avoid many of the issues this section
+describes. The <a
+href="http://tools.android.com/tech-docs/layout-editor">{@code ConstraintLayout}</a>
+class offers similar layout control, but
+with much-improved performance. This class uses its own constraint-solving
+system to resolve relationships between views in a very different way from
+standard layouts.
+</p>
+
+<h3 id="double">Double Taxation</h3>
+
+<p>
+Typically, the framework executes the <a
+href="{@docRoot}guide/topics/ui/declaring-layout.html">layout</a>
+or measure stage in a single pass and quite quickly. However, with some more
+complicated layout cases, the framework may have to iterate multiple times on
+the layout or measure stage before ultimately positioning the elements. Having
+to perform more than one layout-and-measure iteration is referred to as
+<em>double taxation.</em>
+</p>
+
+<p>
+For example, when you use the {@link android.widget.RelativeLayout} container, which allows you to
+position {@link android.view.View} objects with respect to the positions of other {@link android.view.View} objects, the
+framework performs the following actions:
+</p>
+
+<ol style="1">
+   <li>Executes a layout-and-measure pass, during which the framework calculates
+each child object’s position and size, based on each child’s request.
+   <li>Uses this data, also taking object weights into account, to figure out the
+proper position of correlated views.
+   <li>Performs a second layout pass to finalize the objects’ positions.
+   <li>Goes on to the next stage of the rendering process.</li></ol>
+
+<p>
+The more levels your view hierarchy has, the greater the potential performance
+penalty.
+</p>
+
+<p>
+Containers other than {@link android.widget.RelativeLayout} may also give rise to double taxation. For
+example:
+</p>
+
+<ul>
+   <li>A {@link android.widget.LinearLayout} view
+could result in a double layout-and-measure pass if you make it horizontal.
+A double layout-and-measure pass may also occur in a vertical orientation if you
+add <a
+href="{@docRoot}reference/android/widget/LinearLayout.html#attr_android:measureWithLargestChild">measureWithLargestChild</a>,
+in which case the framework may need to do a second pass to resolve the proper
+sizes of objects.
+   <li>The {@link android.widget.GridLayout}
+has a similar issue. While this container also allows relative positioning, it
+normally avoids double taxation by pre-processing the positional relationships
+among child views. However, if the layout uses weights or fill with the
+{@link android.view.Gravity} class, the
+benefit of that preprocessing is lost, and the framework may have to perform
+multiple passes if it the container were a {@link android.widget.RelativeLayout}.</li>
+</ul>
+<p>
+Multiple layout-and-measure passes are not, in themselves, a performance burden.
+But they can become so if they’re in the wrong spot. You should be wary of
+situations where one of the following conditions applies to your container:
+</p>
+
+<ul>
+   <li>It is a root element in your view hierarchy.
+   <li>It has a deep view hierarchy beneath it.
+   <li>It is nested.
+   <li>There are many instances of it populating the screen, similar to children
+   in a {@link android.widget.ListView} object.</li>
+</ul>
+
+<h2 id="dx">Diagnosing View Hierarchy Issues</h2>
+
+<p>
+Layout performance is a complex problem with many facets. There are a couple of
+tools that can give you solid indications about where performance bottlenecks
+are occurring. A few other tools provide less definitive information, but can
+also provide helpful hints.
+</p>
+
+<p>
+<h3 id="systrace">Systrace</h3>
+</p>
+
+<p>
+One tool that provides excellent data about performance is <a
+href="{@docRoot}studio/profile/systrace.html">Systrace</a>,
+which is built into Android Studio. The Systrace tool allows you to collect and
+inspect timing information across an entire Android device, allowing you to see
+specifically where performance bottlenecks arise. For more information about
+Systrace, see <a href=”{docRoot}<a href="{@docRoot}studio/profile/systrace.html">
+Analyze UI Performance with Systrace</a>.
+</p>
+
+<h3 id="profile">Profile GPU rendering</h3>
+
+<p>
+The other tool most likely to provide you with concrete information about
+performance bottlenecks is the on-device <a
+href="{@docRoot}studio/profile/dev-options-rendering.html">
+Profile GPU rendering</a> tool, available on devices powered by Android 6.0 (API
+level 23) and later.  This tool allows you to see how long the layout-and-measurestage is
+ taking for <a href="https://youtu.be/erGJw8WDV74">each frame
+of rendering</a>. This data can help you diagnose runtime performance issues,
+and help you determine what, if any layout-and-measure issues you need to
+address.
+</p>
+
+<p>
+In its graphical representation of the data it captures, <a
+href="{@docRoot}studio/profile/dev-options-rendering.html">Profile
+GPU rendering</a> uses the color blue to represent layout time. For more
+information about how to use this tool, see <a
+href="{@docRoot}studio/profile/dev-options-rendering.html">Profile
+GPU Rendering Walkthrough.</a>
+</p>
+
+<h3 id="lint">Lint</h3>
+
+<p>
+Android Studio’s <a
+href="{@docRoot}studio/write/lint.html">Lint</a> tool can
+help you gain a sense of inefficiencies in the view hierarchy. To use this tool,
+select <strong>Analyze > Inspect Code</strong>, as shown in Figure 1.
+</p>
+
+  <img src="{@docRoot}topic/performance/images/lint-inspect-code.png">
+  <p class="img-caption">
+    <strong>Figure 1.</strong> Locating <strong>Inspect Code</strong> in the
+Android Studio.
+  </p>
+
+<p>
+Information about various layout items appears under
+<em>Android > Lint > Performance</em>. To see more detail,
+you can click on each item to expand it, and see more
+information in the pane on the right side of the screen.
+Figure 2 shows an example of such a display.
+</p>
+
+  <img src="{@docRoot}topic/performance/images/lint-display.png">
+  <p class="img-caption">
+    <strong>Figure 2.</strong> Viewing information about specific
+issues that the lint tool has identified.
+  </p>
+
+
+<p>
+Clicking on one of these items reveals, in the pane to the right, the problem
+associated with that item.
+</p>
+
+<p>
+To understand more about specific topics and issues in this area, see the <a
+href="{@docRoot}studio/write/lint.html">Lint
+</a>documentation.
+</p>
+
+<h3 id="hv">Hierarchy Viewer</h3>
+
+<p>
+Android Studio’s <a
+href="{@docRoot}studio/profile/hierarchy-viewer.html">Hierarchy
+Viewer</a> tool provides a visual representation of your app’s view hierarchy.
+It is a good way to navigate the hierarchy of your app, providing a clear visual
+representation of a particular view’s parent chain, and allowing you to inspect
+the layouts that your app constructs.
+</p>
+
+<p>
+The views that Hierarchy Viewer presents can also help identify performance
+problems arising from double taxation. It can also provide an easy way for you
+to identify deep chains of nested layouts, or layout areas with a large amount
+of nested children, another potential source of performance costs. In these
+scenarios, the layout-and-measure stages can be particularly costly,
+resulting in performance issues.
+</p>
+
+<p>
+You can also can get a sense of relative time taken by layout-and-measure
+operations by clicking the “profile node” button.
+</p>
+
+<p>
+For more information about Hierarchy Viewer, see <a
+href="{@docRoot}studio/profile/optimize-ui.html#HierarchyViewer">Optimizing
+Your UI</a>.
+</p>
+
+<h2 id="solving">Solving View Hierarchy Issues</h2>
+
+<p>
+The fundamental concept behind solving performance problems that arise from view
+hierarchies is simple in concept, but more difficult in practice. Preventing
+view hierarchies from imposing performance penalties encompasses the dual goals
+of flattening your view hierarchy and reducing double taxation. This section
+discusses some strategies for pursuing these goals.
+</p>
+
+<h3 id="removing">Removing redundant nested layouts</h3>
+
+<p>
+Developers often use more nested layouts than necessary. For example, a
+{@link android.widget.RelativeLayout} container might contain a single child that is also a
+{@link android.widget.RelativeLayout} container. This nesting amounts to redundancy, and adds
+unnecessary cost to the view hierarchy.
+</p>
+
+<p>
+Lint can often flag this problem for you, reducing debugging time.
+</p>
+
+<h3>Adopting Merge/Include </h3>
+<p>
+One frequent cause of redundant nested layouts is the <a
+href="{@docRoot}training/improving-layouts/reusing-layouts.html">
+&lt;include&gt;
+tag</a>. For example, you may define a re-usable layout as follows:
+</p>
+
+<pre class="prettyprint">
+&lt;LinearLayout&gt;
+    &lt;!-- some stuff here --&gt;
+&lt;/LinearLayout&gt;
+&lt;/pre&gt;
+</pre>
+
+<p>
+And then an include tag to add this item to the parent container:
+</p>
+
+<pre class="prettyprint">
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/app_bg"
+    android:gravity="center_horizontal"&gt;
+
+    &lt;include layout="@layout/titlebar"/&gt;
+
+    &lt;TextView android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:text="@string/hello"
+              android:padding="10dp" /&gt;
+
+    ...
+
+&lt;/LinearLayout&gt;
+</pre>
+
+<p>
+The include unnecessarily nests the first layout within the second layout.
+</p>
+
+<p>
+The <a
+href="{@docRoot}training/improving-layouts/reusing-layouts.html#Merge">merge
+</a>tag can help prevent this issue. For information about this tag, see <a
+href="{@docRoot}training/improving-layouts/reusing-layouts.html#Merge">Re-using
+Layouts with &lt;include&gt;</a>.
+</p>
+
+<h3 id="cheaper">Adopting a cheaper layout</h3>
+
+<p>
+You may not be able to adjust your existing layout scheme so that it doesn’t
+contain redundant layouts. In certain cases, the only solution may be to flatten
+your hierarchy by switching over to an entirely different layout type.
+</p>
+
+<p>
+For example, you may find that a {@link android.widget.TableLayout}
+provides the same functionality as a more complex layout with many
+positional dependencies. In the N release of Android, the
+<a
+href="http://tools.android.com/tech-docs/layout-editor">{@code ConstraintLayout}</a> class provides similar functionality to
+{@link android.widget.RelativeLayout}, but at a significantly lower cost.
+</p>

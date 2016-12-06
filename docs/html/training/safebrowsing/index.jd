@@ -1,0 +1,315 @@
+page.title=Checking URLs with the Safe Browsing API
+
+@jd:body
+
+
+<div id="tb-wrapper">
+  <div id="tb">
+    <h2>
+      In this document
+    </h2>
+
+    <ol>
+      <li>
+        <a href="#tos">Terms of Service</a>
+      </li>
+
+      <li>
+        <a href="#api-key">Requesting and Registering an Android API Key</a>
+        <ol>
+          <li>
+            <a href="#manifest">Adding the Android API to your
+            AndroidManifest.xml</a>
+          </li>
+        </ol>
+      </li>
+
+      <li>
+        <a href="#connect-google-play">Connect to Google Play Services</a>
+      </li>
+
+      <li>
+        <a href="#url-check">Requesting a URL Check</a>
+        <ol>
+          <li>
+            <a href="#threat-types">Specifying threat types of interest</a>
+          </li>
+
+          <li>
+            <a href="#url-check-request">Send the URL check request</a>
+          </li>
+
+          <li>
+            <a href="#url-check-response">Read the URL check response</a>
+          </li>
+        </ol>
+      </li>
+
+      <li>
+        <a href="#warning-lang">Suggested Warning Language</a>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  SafetyNet provides services for determining whether a URL has been marked as
+  a known threat by Google.
+</p>
+
+<p>
+  The service provides an API your app can use to determine whether a
+  particular URL has been classified by Google as a known threat. Internally,
+  SafetyNet implements a client for the Safe Browsing Network Protocol v4
+  developed by Google. Both the client code and the v4 network protocol were
+  designed to preserve users' privacy, as well as keep battery and bandwidth
+  consumption to a minimum. This API allows you to take full advantage of
+  Google's Safe Browsing service on Android in the most resource-optimized way,
+  and without having to implement its network protocol.
+</p>
+
+<p>
+  This document shows you how to use SafetyNet for checking a URL for threat
+  types of interest.
+</p>
+
+<h2 id="tos">
+  Terms of Service
+</h2>
+
+<p>
+  By using the Safe Browsing API, you consent to be bound by the <a href=
+  "https://developers.google.com/safe-browsing/terms">Terms of Service</a>.
+  Please read and understand all applicable terms and policies before accessing
+  the Safe Browsing API.
+</p>
+
+<h2 id="api-key">
+  Requesting and Registering an Android API Key
+</h2>
+
+<p>
+  To create an API key, complete the following steps:
+</p>
+
+<ol>
+  <li>Go to the <a href="https://console.developers.google.com/project"
+    class="external-link">Google Developers Console</a>.
+  </li>
+
+  <li>On the upper toolbar, choose <strong>Select a project &gt;
+  <em>your-project-name</em></strong>.
+  </li>
+
+  <li>In the search box, enter <em>Safe Browsing APIs</em>; when the Safe
+  Browsing API name appears in the table, select it.
+  </li>
+
+  <li>After the page redisplays, select <strong>Enable</strong> then select
+  <strong>Go to Credentials</strong>.
+  </li>
+
+  <li>When the <em>Add credentials to your project</em> window appears, choose
+  your parameters then select <strong>What credentials do I need?</strong>.
+  </li>
+
+  <li>Enter a name for your API key then select <strong>Create API
+  key</strong>.
+  </li>
+
+  <li>
+    <p>
+      Your new API key appears; copy and paste this key for future use.
+    </p>
+
+    <p class="note">
+      <strong>Note:</strong> Your API key allows you to perform a URL check
+      10,000 times each day. The key, in this instance, should just be a
+      hexadecimal string, not part of a URL.
+    </p>
+  </li>
+
+  <li>Select <strong>Done</strong> to complete the process.
+  </li>
+</ol>
+
+<p>
+  If you need more help, check out the <a href=
+  "https://developers.google.com/console/help/new/">Google Developers Console
+  Help Center</a>.
+</p>
+
+<h3 id="manifest">
+  Adding the Android API key to your AndroidManifest.xml
+</h3>
+
+<p>
+  Once your key has been whitelisted, you need to add the key to the
+  <code>AndroidManifest.xml</code> file for your app:
+</p>
+
+<pre>
+&lt;application&gt;
+
+    ...
+
+   &lt;!-- SafetyNet API metadata --&gt;
+   &lt;meta-data android:name="com.google.android.safetynet.API_KEY"
+   android:value="<var>your-API-key</var>" /&gt;
+
+    ...
+
+&lt;/application&gt;
+</pre>
+<h2 id="connect-google-play">
+  Connect to Google Play Services
+</h2>
+
+<p>
+  The SafetyNet API is part of Google Play services. To connect to the API, you
+  need to create an instance of the Google Play services API client. For
+  details about using the client in your app, see <a href=
+  "https://developers.google.com/android/guides/api-client#Starting">Accessing
+  Google APIs</a>. Once you have established a connection to Google Play
+  services, you can use the Google API client classes to connect to the
+  SafetyNet API.
+</p>
+
+<p>
+  To connect to the API, in your activity's <code><a href=
+  "{@docRoot}reference/android/app/Activity.html#onCreate(android.os.Bundle)">onCreate()</a></code>
+  method, create an instance of Google API Client using <code><a href=
+  "https://developers.google.com/android/reference/com/google/android/gms/common/api/GoogleApiClient.Builder">
+  GoogleApiClient.Builder</a></code>. Use the builder to add the SafetyNet API,
+  as shown in the following code example:
+</p>
+
+<pre>
+protected synchronized void buildGoogleApiClient() {
+    mGoogleApiClient = new GoogleApiClient.Builder(this)
+            .addApi(SafetyNet.API)
+            .addConnectionCallbacks(myMainActivity.this)
+            .build();
+}
+</pre>
+<p class="note">
+  <strong>Note:</strong> You can only call these methods after your app has
+  established a connection to Google Play services by receiving the <code>
+  <a href="https://developers.google.com/android/reference/com/google/android/gms/common/api/GoogleApiClient.ConnectionCallbacks#public-methods">
+  onConnected()</a></code> callback. For details about listening for a completed
+  client connection, see <a href=
+  "https://developers.google.com/android/guides/api-client#Starting">Accessing
+  Google APIs</a>.
+</p>
+
+<h2 id="url-check">
+  Requesting a URL Check
+</h2>
+
+<p>
+  A URL check allows your app to determine if a URL has been marked as a threat
+  of interest. Some threat types may not be of interest to your particular
+  app, and the API allows you to choose which threat types are important for
+  your needs. You can specify multiple threat types of interest.
+</p>
+
+<h3 id="threat-types">
+  Specifying threat types of interest
+</h3>
+
+<p>
+  The constants in the {@code SafeBrowsingThreat} class contain the
+  currently-supported threat types:
+</p>
+
+<pre>
+package com.google.android.gms.safetynet;
+
+public class SafeBrowsingThreat {
+
+  /**
+   * This threat type identifies URLs of pages that are flagged as containing potentially
+   * harmful applications.
+   */
+  public static final int TYPE_POTENTIALLY_HARMFUL_APPLICATION = 4;
+
+  /**
+   * This threat type identifies URLs of pages that are flagged as containing social
+   * engineering threats.
+   */
+  public static final int TYPE_SOCIAL_ENGINEERING = 5;
+}
+</pre>
+<p>
+  When using the API, you must use constants that are not marked as deprecated.
+  You add threat type constants as arguments to the API. You may add as many
+  threat type constants as is required for your app.
+</p>
+
+<h3 id="url-check-request">
+  Send the URL check request
+</h3>
+
+<p>
+  The API is agnostic to the scheme used, so you can pass the URL with or
+  without a scheme. For example, either
+</p>
+
+<pre>
+String url = "https://www.google.com";
+</pre>
+<p>
+  or
+</p>
+
+<pre>
+String url = "www.google.com";
+</pre>
+<p>
+  is valid.
+</p>
+
+<pre>
+SafetyNet.SafetyNetApi.lookupUri(mGoogleApiClient, url,
+       SafeBrowsingThreat.TYPE_POTENTIALLY_HARMFUL_APPLICATION,
+       SafeBrowsingThreat.TYPE_SOCIAL_ENGINEERING)
+               .setResultCallback(
+                       new ResultCallback&lt;SafetyNetApi.SafeBrowsingResult&gt;() {
+
+    &#64;Override
+    public void onResult(SafetyNetApi.SafeBrowsingResult result) {
+        Status status = result.getStatus();
+        if ((status != null) &amp;&amp; status.isSuccess()) {
+            // Indicates communication with the service was successful.
+            // Identify any detected threats.
+            if (result.getDetectedThreats().isEmpty()) {
+
+            }
+        } else {
+            // An error occurred. Let the user proceed without warning.
+        }
+    }
+});
+</pre>
+<h3 id="url-check-response">
+  Read the URL check response
+</h3>
+
+<p>
+  The result is provided as a list of {@code SafeBrowsingThreat} objects by
+  calling the {@code SafetyNetApi.SafeBrowsingResult.getDetectedThreats()}
+  method of the returned {@code SafetyNetApi.SafeBrowsingResult} object. If the
+  list is empty, no threats were detected; otherwise, calling {@code
+  SafeBrowsingThreat.getThreatType()} on each element in the list enumerates
+  the threats that were detected.
+</p>
+
+<h2 id="warning-lang">
+  Suggested Warning Language
+</h2>
+
+<p>
+  Please see the Safe Browsing API Developer's Guide for <a href=
+  "https://developers.google.com/safe-browsing/v4/usage-limits#suggested--warning-language">
+  suggested warning language</a>.
+</p>

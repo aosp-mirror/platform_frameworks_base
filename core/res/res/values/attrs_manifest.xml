@@ -62,6 +62,20 @@
          a reference to a Drawable resource containing the image definition. -->
     <attr name="icon" format="reference" />
 
+    <!-- A Drawable resource providing a graphical representation of its
+         associated item.  Use with the
+         application tag (to supply a default round icon for all application
+         components), or with the activity, receiver, service, or instrumentation
+         tag (to supply a specific round icon for that component).  It may also be
+         used with the intent-filter tag to supply a round icon to show to the
+         user when an activity is being selected based on a particular Intent.
+
+         <p>The given round icon will be used to display to the user a graphical
+         representation of its associated component; for example, as the round icon
+         for main activity that is displayed in the launcher.  This must be
+         a reference to a Drawable resource containing the image definition. -->
+    <attr name="roundIcon" format="reference" />
+
     <!-- A Drawable resource providing an extended graphical banner for its
          associated item. Use with the application tag (to supply a default
          banner for all application activities), or with the activity, tag to
@@ -1236,6 +1250,7 @@
         <attr name="theme" />
         <attr name="label" />
         <attr name="icon" />
+        <attr name="roundIcon" />
         <attr name="banner" />
         <attr name="logo" />
         <attr name="description" />
@@ -1335,6 +1350,7 @@
         <attr name="name" />
         <attr name="label" />
         <attr name="icon" />
+        <attr name="roundIcon" />
         <attr name="banner" />
         <attr name="logo" />
         <attr name="permissionGroup" />
@@ -1362,6 +1378,7 @@
         <attr name="name" />
         <attr name="label" />
         <attr name="icon" />
+        <attr name="roundIcon" />
         <attr name="banner" />
         <attr name="logo" />
         <attr name="description" />
@@ -1395,6 +1412,7 @@
         <attr name="name" />
         <attr name="label" />
         <attr name="icon" />
+        <attr name="roundIcon" />
         <attr name="banner" />
         <attr name="logo" />
     </declare-styleable>
@@ -1676,6 +1694,7 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
+        <attr name="roundIcon" />
         <attr name="banner" />
         <attr name="logo" />
         <attr name="process" />
@@ -1759,6 +1778,7 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
+        <attr name="roundIcon" />
         <attr name="banner" />
         <attr name="logo" />
         <attr name="permission" />
@@ -1807,6 +1827,7 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
+        <attr name="roundIcon" />
         <attr name="banner" />
         <attr name="logo" />
         <attr name="permission" />
@@ -1843,6 +1864,7 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
+        <attr name="roundIcon" />
         <attr name="banner" />
         <attr name="logo" />
         <attr name="launchMode" />
@@ -1926,6 +1948,7 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
+        <attr name="roundIcon" />
         <attr name="banner" />
         <attr name="logo" />
         <attr name="permission" />
@@ -1998,6 +2021,7 @@
          parent="AndroidManifestActivity AndroidManifestReceiver AndroidManifestService">
         <attr name="label" />
         <attr name="icon" />
+        <attr name="roundIcon" />
         <attr name="banner" />
         <attr name="logo" />
         <attr name="priority" />
@@ -2128,6 +2152,7 @@
         <attr name="targetPackage" />
         <attr name="label" />
         <attr name="icon" />
+        <attr name="roundIcon" />
         <attr name="banner" />
         <attr name="logo" />
         <attr name="handleProfiling" />

@@ -92,7 +92,7 @@ page.title=Уведомления
 <p>Поскольку уведомления являются как важной составной частью пользовательского интерфейса Android, для них имеются собственные инструкции по проектированию.
 Появившиеся в Android 5.0 (уровень API 21) значительные изменения дизайна имеют особо важное
 значение, поэтому для получения более подробной информации вам следует ознакомиться с учебником по интерфейсу <a href="{@docRoot}training/material/index.html">Material Design</a>
-. Чтобы узнать, как проектировать уведомления и взаимодействие с ними, прочитайте руководство по проектированию 
+. Чтобы узнать, как проектировать уведомления и взаимодействие с ними, прочитайте руководство по проектированию
 <a href="{@docRoot}design/patterns/notifications.html">Уведомления</a>.</p>
 
 <h2 id="CreateNotification">Создание уведомления</h2>
@@ -294,7 +294,7 @@ mBuilder.setStyle(inBoxStyle);
         Обеспечьте доступ к этой функции операции {@link android.app.Activity} всех пользователей,
         сделав так, чтобы эта операция запускалась, когда пользователь нажимает уведомление. Для этого
         создайте объект {@link android.app.PendingIntent}
-        для операции {@link android.app.Activity}. Вызовите 
+        для операции {@link android.app.Activity}. Вызовите
         {@link android.support.v4.app.NotificationCompat.Builder#setContentIntent
         setContentIntent()}, чтобы добавить объект {@link android.app.PendingIntent} в уведомление.
     </li>
@@ -333,7 +333,7 @@ mBuilder.setStyle(inBoxStyle);
     вызова метода {@link android.app.NotificationManager#notify(int, android.app.Notification) NotificationManager.notify()}.
     Чтобы изменить это уведомление, после того как оно выдано,
     обновите или создайте объект {@link android.support.v4.app.NotificationCompat.Builder},
-    постройте на его основе объект {@link android.app.Notification} и выдайте 
+    постройте на его основе объект {@link android.app.Notification} и выдайте
     объект {@link android.app.Notification} с тем же идентификатором, который использовался ранее. Если
     предыдущее уведомление все еще отображается на экране, система обновит его с использованием содержимого
     объекта{@link android.app.Notification}. Если предыдущее уведомление было закрыто, то
@@ -451,14 +451,14 @@ numMessages = 0;
                 Добавьте поддержку для версии Android 4.0.3 и более ранних версий. Для этого укажите родительский объект операции
                 {@link android.app.Activity}, которую запускаете, добавив элемент
 <code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></code>
-                в качестве дочернего для элемента 
+                в качестве дочернего для элемента
 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>.
                 <p>
                     Для этого элемента задайте
 <code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html#nm">android:name</a>="android.support.PARENT_ACTIVITY"</code>.
                     Задайте
 <code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html#val">android:value</a>="&lt;parent_activity_name&gt;"</code>,
-                    где <code>&lt;parent_activity_name&gt;</code> ― это значение 
+                    где <code>&lt;parent_activity_name&gt;</code> ― это значение
 <code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html#nm">android:name</a></code>
                     для родительского элемента
 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
@@ -466,7 +466,7 @@ numMessages = 0;
                 </p>
             </li>
             <li>
-                Также добавьте поддержку для версии Android 4.1 и более поздних версий. Для этого добавьте атрибут 
+                Также добавьте поддержку для версии Android 4.1 и более поздних версий. Для этого добавьте атрибут
 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html#parent">android:parentActivityName</a></code>
                 в элемент
 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
@@ -513,7 +513,7 @@ numMessages = 0;
                 запускает {@link android.app.Activity}. Этот метод также добавляет флаги, которые запускают
                 стек в новой задаче.
                 <p class="note">
-                    <strong>Примечание.</strong> Несмотря на то что аргумент 
+                    <strong>Примечание.</strong> Несмотря на то что аргумент
                     {@link android.support.v4.app.TaskStackBuilder#addParentStack addParentStack()}
                     является ссылкой на запускаемую операцию {@link android.app.Activity}, при вызове этого метода
                     не добавляется объект {@link android.content.Intent}, который запускает операцию
@@ -536,7 +536,7 @@ numMessages = 0;
                 в нее с помощью действия <i>"Назад"</i>.
             </li>
             <li>
-                Получите объект {@link android.app.PendingIntent} для этого стека переходов назад путем вызова метода 
+                Получите объект {@link android.app.PendingIntent} для этого стека переходов назад путем вызова метода
                 {@link android.support.v4.app.TaskStackBuilder#getPendingIntent getPendingIntent()}.
                 Затем этот объект {@link android.app.PendingIntent} можно будет использовать в качестве аргумента для метода
                 {@link android.support.v4.app.NotificationCompat.Builder#setContentIntent
@@ -576,7 +576,7 @@ mNotificationManager.notify(id, builder.build());
     Особой операции {@link android.app.Activity} не требуется стек перехода назад, поэтому не нужно
     определять иерархию объектов {@link android.app.Activity} в файле манифеста и
     вызывать
-    метод {@link android.support.v4.app.TaskStackBuilder#addParentStack  addParentStack()} для построения 
+    метод {@link android.support.v4.app.TaskStackBuilder#addParentStack  addParentStack()} для построения
     стека перехода назад. Вместо этого в файле манифеста задайте параметры задачи {@link android.app.Activity}
     и создайте объект {@link android.app.PendingIntent} путем вызова метода
     {@link android.app.PendingIntent#getActivity getActivity()}:
@@ -597,7 +597,7 @@ mNotificationManager.notify(id, builder.build());
 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">android:taskAffinity</a>=""</code>
             </dt>
             <dd>
-                В сочетании с 
+                В сочетании с
                 флагом {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK FLAG_ACTIVITY_NEW_TASK},
                 который вы задали в коде, это гарантирует, что данная операция {@link android.app.Activity} не
                 перейдет в задачу приложения, используемую по умолчанию. Любые существующие задачи, имеющие
@@ -629,11 +629,11 @@ mNotificationManager.notify(id, builder.build());
         Построение и выдача уведомления:
         <ol style="list-style-type: lower-alpha;">
             <li>
-                Создайте объект {@link android.content.Intent}, который запускает операцию 
+                Создайте объект {@link android.content.Intent}, который запускает операцию
                 {@link android.app.Activity}.
             </li>
             <li>
-                Настройте операцию {@link android.app.Activity}, запускаемую в новой пустой задаче, путем вызова метода 
+                Настройте операцию {@link android.app.Activity}, запускаемую в новой пустой задаче, путем вызова метода
                 {@link android.content.Intent#setFlags setFlags()} с флагами
                 {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK FLAG_ACTIVITY_NEW_TASK}
                 и
@@ -714,7 +714,7 @@ mNotificationManager.notify(id, builder.build());
     {@link android.support.v4.app.NotificationCompat.Builder#setProgress
     setProgress(max, progress, false)}, а затем выдайте уведомление. По мере выполнения
     увеличивайте значение <code>progress</code> и обновляйте уведомление. По окончании операции
-    <code>progress</code> должен быть равен <code>max</code>. Стандартный способ вызова метода 
+    <code>progress</code> должен быть равен <code>max</code>. Стандартный способ вызова метода
     {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()}
     заключается в следующем: задать значение <code>max</code> равным 100 с последующим увеличением <code>progress</code> в виде
     величины "процента выполнения" операции.
@@ -841,7 +841,7 @@ mNotifyManager.notify(0, mBuilder.build());
 <p>Примеры ситуаций, в которых могут быть вызваны уведомления heads-up:</p>
 
 <ul>
-  <li>операция пользователя выполняется в полноэкранном режиме (приложение использует 
+  <li>операция пользователя выполняется в полноэкранном режиме (приложение использует
 {@link android.app.Notification#fullScreenIntent}) или;</li>
   <li>уведомление имеет высокий приоритет и использует рингтоны или
     вибрацию.</li>
@@ -915,7 +915,7 @@ Notification notification = new Notification.Builder(context)
 </pre>
 
 <p class="note"><strong>Примечание.</strong> Прекращение использования класса {@link android.media.RemoteControlClient}
-имеет и другие последствия для управления мультимедиа. Подробные сведения о новых API-интерфейсах для управления сеансами воспроизведения мультимедиа см. в разделе 
+имеет и другие последствия для управления мультимедиа. Подробные сведения о новых API-интерфейсах для управления сеансами воспроизведения мультимедиа см. в разделе
 <a href="{@docRoot}about/versions/android-5.0.html#MediaPlaybackControl">Управление воспроизведением мультимедиа</a>
 .</p>
 

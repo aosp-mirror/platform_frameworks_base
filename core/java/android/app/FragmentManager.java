@@ -59,7 +59,7 @@ import java.util.List;
  * <div class="special reference">
  * <h3>Developer Guides</h3>
  * <p>For more information about using fragments, read the
- * <a href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a> developer guide.</p>
+ * <a href="{@docRoot}guide/components/fragments.html">Fragments</a> developer guide.</p>
  * </div>
  *
  * While the FragmentManager API was introduced in

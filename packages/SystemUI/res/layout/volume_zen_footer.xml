@@ -18,7 +18,8 @@
     android:id="@+id/volume_zen_footer"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical" > <!-- extends LinearLayout -->
+    android:orientation="vertical"
+    android:paddingBottom="8dp" > <!-- extends LinearLayout -->
 
     <View
         android:id="@+id/zen_embedded_divider"
@@ -78,7 +79,7 @@
         android:paddingStart="15dp"
         android:paddingEnd="15dp"
         android:text="@string/volume_zen_end_now"
-        android:textColor="@color/system_accent_color"
+        android:textColor="?android:attr/colorAccent"
         android:textAppearance="@style/TextAppearance.QS.DetailButton" />
 
 </com.android.systemui.volume.ZenFooter>

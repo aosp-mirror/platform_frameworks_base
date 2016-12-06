@@ -226,7 +226,7 @@ android.preference.ListPreference}。这两项均包括以下三个属性：</p>
   <dt>{@code android:key}</dt>
   <dd>对于要保留数据值的首选项，必须拥有此属性。它指定系统在将此设置的值保存在
 {@link
-android.content.SharedPreferences} 中时所用的唯一键（字符串）。 
+android.content.SharedPreferences} 中时所用的唯一键（字符串）。
   <p>不需要此属性的仅有情形是：首选项是
 {@link android.preference.PreferenceCategory} 或{@link android.preference.PreferenceScreen}，或者首选项指定要调用的
 {@link android.content.Intent}（使用 <a href="#Intents">{@code &lt;intent&gt;}</a> 元素）或要显示的 {@link android.app.Fragment}（使用 <a href="{@docRoot}reference/android/preference/Preference.html#attr_android:fragment">{@code
@@ -285,7 +285,7 @@ android.preference.PreferenceCategory} 内。</p>
 
 <pre>
 &lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    &lt;PreferenceCategory 
+    &lt;PreferenceCategory
         android:title="&#64;string/pref_sms_storage_title"
         android:key="pref_key_storage_settings">
         &lt;CheckBoxPreference
@@ -293,12 +293,12 @@ android.preference.PreferenceCategory} 内。</p>
             android:summary="&#64;string/pref_summary_auto_delete"
             android:title="&#64;string/pref_title_auto_delete"
             android:defaultValue="false"... />
-        &lt;Preference 
+        &lt;Preference
             android:key="pref_key_sms_delete_limit"
             android:dependency="pref_key_auto_delete"
             android:summary="&#64;string/pref_summary_delete_limit"
             android:title="&#64;string/pref_title_sms_delete"... />
-        &lt;Preference 
+        &lt;Preference
             android:key="pref_key_mms_delete_limit"
             android:dependency="pref_key_auto_delete"
             android:summary="&#64;string/pref_summary_delete_limit"
@@ -588,11 +588,11 @@ XML 标头文件定义。 <br/><b>2.</b>每组设置均由
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
-    &lt;header 
+    &lt;header
         android:fragment="com.example.prefs.SettingsActivity$SettingsFragmentOne"
         android:title="@string/prefs_category_one"
         android:summary="@string/prefs_summ_category_one" />
-    &lt;header 
+    &lt;header
         android:fragment="com.example.prefs.SettingsActivity$SettingsFragmentTwo"
         android:title="@string/prefs_category_two"
         android:summary="@string/prefs_summ_category_two" >
@@ -672,15 +672,15 @@ android.preference.Preference &lt;Preference&gt;} 元素均会向 {@link android
 </p>
 
 <p>例如，下面就是一个用于 Android 3.0
-及更高版本系统的首选项标头 XML 文件 ({@code res/xml/preference_headers.xml})：</p> 
+及更高版本系统的首选项标头 XML 文件 ({@code res/xml/preference_headers.xml})：</p>
 
 <pre>
 &lt;preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
-    &lt;header 
+    &lt;header
         android:fragment="com.example.prefs.SettingsFragmentOne"
         android:title="@string/prefs_category_one"
         android:summary="@string/prefs_summ_category_one" />
-    &lt;header 
+    &lt;header
         android:fragment="com.example.prefs.SettingsFragmentTwo"
         android:title="@string/prefs_category_two"
         android:summary="@string/prefs_summ_category_two" />
@@ -692,18 +692,18 @@ Android 3.0 版本的系统提供相同标头的首选项文件 ({@code res/xml/
 
 <pre>
 &lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    &lt;Preference 
+    &lt;Preference
         android:title="@string/prefs_category_one"
         android:summary="@string/prefs_summ_category_one"  >
-        &lt;intent 
+        &lt;intent
             android:targetPackage="com.example.prefs"
             android:targetClass="com.example.prefs.SettingsActivity"
             android:action="com.example.prefs.PREFS_ONE" />
     &lt;/Preference>
-    &lt;Preference 
+    &lt;Preference
         android:title="@string/prefs_category_two"
         android:summary="@string/prefs_summ_category_two" >
-        &lt;intent 
+        &lt;intent
             android:targetPackage="com.example.prefs"
             android:targetClass="com.example.prefs.SettingsActivity"
             android:action="com.example.prefs.PREFS_TWO" />
@@ -920,7 +920,7 @@ android.content.Intent#ACTION_MANAGE_NETWORK_USAGE} 添加 Intent 过滤器。�
 &lt;/activity>
 </pre>
 
-<p>此 Intent 
+<p>此 Intent
 过滤器指示系统此 Activity 控制应用的数据使用情况。因此，当用户从系统的“设置”应用检查应用所使用的数据量时，可以使用“查看应用设置”按钮启动
 {@link android.preference.PreferenceActivity}，这样，用户就能够优化应用使用的数据量。
 
@@ -975,11 +975,11 @@ android.preference.DialogPreference}
 public class NumberPickerPreference extends DialogPreference {
     public NumberPickerPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
-        
+
         setDialogLayoutResource(R.layout.numberpicker_dialog);
         setPositiveButtonText(android.R.string.ok);
         setNegativeButtonText(android.R.string.cancel);
-        
+
         setDialogIcon(null);
     }
     ...
@@ -1194,7 +1194,7 @@ protected void onRestoreInstanceState(Parcelable state) {
     // Cast state to custom BaseSavedState and pass to superclass
     SavedState myState = (SavedState) state;
     super.onRestoreInstanceState(myState.getSuperState());
-    
+
     // Set this Preference's widget to reflect the restored state
     mNumberPicker.setValue(myState.value);
 }

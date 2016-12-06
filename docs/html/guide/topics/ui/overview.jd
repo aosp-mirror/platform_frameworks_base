@@ -39,7 +39,7 @@ group. </p>
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="fill_parent" 
+              android:layout_width="fill_parent"
               android:layout_height="fill_parent"
               android:orientation="vertical" >
     &lt;TextView android:id="@+id/text"
@@ -60,7 +60,7 @@ layout.</p>
 <p>For a complete guide to creating a UI layout, see <a href="declaring-layout.html">XML
 Layouts</a>.
 
-  
+
 <h2 id="UIComponents">User Interface Components</h2>
 
 <p>You don't have to build all of your UI using {@link android.view.View} and {@link

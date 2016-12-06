@@ -3,10 +3,10 @@ parent.title=The AndroidManifest.xml File
 parent.link=manifest-intro.html
 @jd:body
 
-<div class="sidebox-wrapper"> 
+<div class="sidebox-wrapper">
 <div class="sidebox">
-    <img src="{@docRoot}assets/images/icon_play.png" style="float:left;margin:0;padding:0;"> 
-    <p style="color:#669999;padding-top:1em;">Google Play Filtering</p> 
+    <img src="{@docRoot}assets/images/icon_play.png" style="float:left;margin:0;padding:0;">
+    <p style="color:#669999;padding-top:1em;">Google Play Filtering</p>
     <p style="padding-top:1em;">Google Play uses the &lt;uses-library&gt; elements declared
     in your app manifest to filter your app from devices that do not meet it's library
     requirements. For more information about filtering, see the topic

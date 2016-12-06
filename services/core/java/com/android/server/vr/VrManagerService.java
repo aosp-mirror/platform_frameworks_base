@@ -46,6 +46,7 @@ import android.service.vr.IVrListener;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
 import android.service.vr.VrListenerService;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -218,6 +219,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                     String packageName = mNotificationAccessPackageToUserId.keyAt(i);
                     revokeNotificationListenerAccess(packageName, grantUserId);
                     revokeNotificationPolicyAccess(packageName);
+                    revokeCoarseLocationPermissionIfNeeded(packageName, grantUserId);
                     mNotificationAccessPackageToUserId.removeAt(i);
                 }
             }
@@ -226,6 +228,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                 if (!packageNames.contains(pkg)) {
                     revokeNotificationListenerAccess(pkg, currentUserId);
                     revokeNotificationPolicyAccess(pkg);
+                    revokeCoarseLocationPermissionIfNeeded(pkg, currentUserId);
                     mNotificationAccessPackageToUserId.remove(pkg);
                 }
             }
@@ -233,6 +236,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                 if (!allowed.contains(pkg)) {
                     grantNotificationPolicyAccess(pkg);
                     grantNotificationListenerAccess(pkg, currentUserId);
+                    grantCoarseLocationPermissionIfNeeded(pkg, currentUserId);
                     mNotificationAccessPackageToUserId.put(pkg, currentUserId);
                 }
             }
@@ -403,107 +407,6 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
         publishLocalService(VrManagerInternal.class, new LocalService());
         publishBinderService(VR_MANAGER_BINDER_SERVICE, mVrManager.asBinder());
-
-        // If there are no VR packages installed on the device, then disable VR
-        // components, otherwise, enable them.
-        setEnabledStatusOfVrComponents();
-    }
-
-    private void setEnabledStatusOfVrComponents() {
-        ArraySet<ComponentName> vrComponents = SystemConfig.getInstance().getDefaultVrComponents();
-        if (vrComponents == null) {
-           return;
-        }
-
-        // We only want to enable VR components if there is a VR package installed on the device.
-        // The VR components themselves do not quality as a VR package, so exclude them.
-        ArraySet<String> vrComponentPackageNames = new ArraySet<>();
-        for (ComponentName componentName : vrComponents) {
-            vrComponentPackageNames.add(componentName.getPackageName());
-        }
-
-        // Check to see if there are any packages on the device, other than the VR component
-        // packages.
-        PackageManager pm = mContext.getPackageManager();
-        List<PackageInfo> packageInfos = pm.getInstalledPackages(
-                PackageManager.GET_CONFIGURATIONS);
-        boolean vrModeIsUsed = false;
-        for (PackageInfo packageInfo : packageInfos) {
-            if (packageInfo != null && packageInfo.packageName != null &&
-                    pm.getApplicationEnabledSetting(packageInfo.packageName) ==
-                            PackageManager.COMPONENT_ENABLED_STATE_DEFAULT) {
-                vrModeIsUsed = enableVrComponentsIfVrModeUsed(pm, packageInfo,
-                        vrComponentPackageNames, vrComponents);
-                if (vrModeIsUsed) {
-                    break;
-                }
-            }
-        }
-
-        if (!vrModeIsUsed) {
-            Slog.i(TAG, "No VR packages found, disabling VR components");
-            setVrComponentsEnabledOrDisabled(vrComponents, false);
-
-            // Register to receive an intent when a new package is installed, in case that package
-            // requires VR components.
-            IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
-            intentFilter.addDataScheme("package");
-            mContext.registerReceiver(new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    PackageManager pm = context.getPackageManager();
-                    final String packageName = intent.getData().getSchemeSpecificPart();
-                    if (packageName != null) {
-                        try {
-                            PackageInfo packageInfo = pm.getPackageInfo(packageName,
-                                    PackageManager.GET_CONFIGURATIONS);
-                            enableVrComponentsIfVrModeUsed(pm, packageInfo,
-                                    vrComponentPackageNames, vrComponents);
-                        } catch (NameNotFoundException e) {
-                        }
-                    }
-                };
-            }, intentFilter);
-        }
-    }
-
-    private void setVrComponentsEnabledOrDisabled(ArraySet<ComponentName> vrComponents,
-            boolean enabled) {
-        int state = enabled ?
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED :
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
-        PackageManager pm = mContext.getPackageManager();
-        for (ComponentName componentName : vrComponents) {
-            try {
-                // Note that we must first check for the existance of the package before trying
-                // to set its enabled state.  This is to prevent PackageManager from throwing
-                // an excepton if the package is not found (not just a NameNotFoundException
-                // exception).
-                PackageInfo packageInfo = pm.getPackageInfo(componentName.getPackageName(),
-                        PackageManager.GET_CONFIGURATIONS);
-                pm.setApplicationEnabledSetting(componentName.getPackageName(), state , 0);
-            } catch (NameNotFoundException e) {
-            }
-        }
-    }
-
-    private boolean enableVrComponentsIfVrModeUsed(PackageManager pm, PackageInfo packageInfo,
-            ArraySet<String> vrComponentPackageNames, ArraySet<ComponentName> vrComponents) {
-        boolean isVrComponent = vrComponents != null &&
-                vrComponentPackageNames.contains(packageInfo.packageName);
-        if (packageInfo != null && packageInfo.reqFeatures != null && !isVrComponent) {
-            for (FeatureInfo featureInfo : packageInfo.reqFeatures) {
-                if (featureInfo.name != null &&
-                    (featureInfo.name.equals(PackageManager.FEATURE_VR_MODE) ||
-                     featureInfo.name.equals(PackageManager.FEATURE_VR_MODE_HIGH_PERFORMANCE))) {
-                    Slog.i(TAG, "VR package found, enabling VR components");
-                    setVrComponentsEnabledOrDisabled(vrComponents, true);
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     @Override
@@ -744,7 +647,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
         for (String c : current) {
             ComponentName component = ComponentName.unflattenFromString(c);
-            if (component.getPackageName().equals(pkg)) {
+            if (component != null && component.getPackageName().equals(pkg)) {
                 toRemove.add(c);
             }
         }
@@ -755,6 +658,22 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         Settings.Secure.putStringForUser(resolver,
                 Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
                 flatSettings, userId);
+    }
+
+    private void grantCoarseLocationPermissionIfNeeded(String pkg, int userId) {
+        // Don't clobber the user if permission set in current state explicitly
+        if (!isPermissionUserUpdated(Manifest.permission.ACCESS_COARSE_LOCATION, pkg, userId)) {
+            mContext.getPackageManager().grantRuntimePermission(pkg,
+                    Manifest.permission.ACCESS_COARSE_LOCATION, new UserHandle(userId));
+        }
+    }
+
+    private void revokeCoarseLocationPermissionIfNeeded(String pkg, int userId) {
+        // Don't clobber the user if permission set in current state explicitly
+        if (!isPermissionUserUpdated(Manifest.permission.ACCESS_COARSE_LOCATION, pkg, userId)) {
+            mContext.getPackageManager().revokeRuntimePermission(pkg,
+                    Manifest.permission.ACCESS_COARSE_LOCATION, new UserHandle(userId));
+        }
     }
 
     private boolean isPermissionUserUpdated(String permission, String pkg, int userId) {
@@ -772,7 +691,9 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         if (flat != null) {
             String[] allowed = flat.split(":");
             for (String s : allowed) {
-                current.add(s);
+                if (!TextUtils.isEmpty(s)) {
+                    current.add(s);
+                }
             }
         }
         return current;

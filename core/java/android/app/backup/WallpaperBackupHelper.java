@@ -42,7 +42,7 @@ public class WallpaperBackupHelper extends FileBackupHelperBase implements Backu
     // If 'true', then apply an acceptable-size heuristic at restore time, dropping back
     // to the factory default wallpaper if the restored one differs "too much" from the
     // device's preferred wallpaper image dimensions.
-    private static final boolean REJECT_OUTSIZED_RESTORE = true;
+    private static final boolean REJECT_OUTSIZED_RESTORE = false;
 
     // When outsized restore rejection is enabled, this is the maximum ratio between the
     // source and target image heights that will be permitted.  The ratio is checked both
@@ -60,6 +60,9 @@ public class WallpaperBackupHelper extends FileBackupHelperBase implements Backu
     public static final String WALLPAPER_IMAGE =
             new File(Environment.getUserSystemDirectory(UserHandle.USER_SYSTEM),
                     "wallpaper").getAbsolutePath();
+    public static final String WALLPAPER_ORIG_IMAGE =
+            new File(Environment.getUserSystemDirectory(UserHandle.USER_SYSTEM),
+                    "wallpaper_orig").getAbsolutePath();
     public static final String WALLPAPER_INFO =
             new File(Environment.getUserSystemDirectory(UserHandle.USER_SYSTEM),
                     "wallpaper_info.xml").getAbsolutePath();
@@ -199,7 +202,7 @@ public class WallpaperBackupHelper extends FileBackupHelperBase implements Backu
             // since it does not exist anywhere other than the private wallpaper
             // file.
             Slog.d(TAG, "Applying restored wallpaper image.");
-            f.renameTo(new File(WALLPAPER_IMAGE));
+            f.renameTo(new File(WALLPAPER_ORIG_IMAGE));
         }
     }
 }

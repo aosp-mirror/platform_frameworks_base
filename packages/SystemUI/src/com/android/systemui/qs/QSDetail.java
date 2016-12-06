@@ -63,11 +63,12 @@ public class QSDetail extends LinearLayout {
     private boolean mScanState;
     private boolean mClosingDetail;
     private boolean mFullyExpanded;
-    private View mQsDetailHeaderBack;
     private BaseStatusBarHeader mHeader;
     private boolean mTriggeredExpand;
     private int mOpenX;
     private int mOpenY;
+    private boolean mAnimatingOpen;
+    private boolean mSwitchState;
 
     public QSDetail(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -92,7 +93,6 @@ public class QSDetail extends LinearLayout {
         mDetailDoneButton = (TextView) findViewById(android.R.id.button1);
 
         mQsDetailHeader = findViewById(R.id.qs_detail_header);
-        mQsDetailHeaderBack = mQsDetailHeader.findViewById(com.android.internal.R.id.up);
         mQsDetailHeaderTitle = (TextView) mQsDetailHeader.findViewById(android.R.id.title);
         mQsDetailHeaderSwitch = (Switch) mQsDetailHeader.findViewById(android.R.id.toggle);
         mQsDetailHeaderProgress = (ImageView) findViewById(R.id.qs_detail_header_progress);
@@ -109,7 +109,6 @@ public class QSDetail extends LinearLayout {
                 mQsPanel.closeDetail();
             }
         };
-        mQsDetailHeaderBack.setOnClickListener(doneListener);
         mDetailDoneButton.setOnClickListener(doneListener);
     }
 
@@ -161,7 +160,7 @@ public class QSDetail extends LinearLayout {
                 mQsDetailHeader.setClickable(false);
             } else {
                 mQsDetailHeaderSwitch.setVisibility(VISIBLE);
-                mQsDetailHeaderSwitch.setChecked(toggleState);
+                handleToggleStateChanged(toggleState, adapter.getToggleEnabled());
                 mQsDetailHeader.setClickable(true);
                 mQsDetailHeader.setOnClickListener(new OnClickListener() {
                     @Override
@@ -231,6 +230,7 @@ public class QSDetail extends LinearLayout {
         }
         sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
         if (visibleDiff) {
+            mAnimatingOpen = adapter != null;
             if (mFullyExpanded || mDetailAdapter != null) {
                 setAlpha(1);
                 mClipper.animateCircularClip(x, y, mDetailAdapter != null, listener);
@@ -243,8 +243,14 @@ public class QSDetail extends LinearLayout {
         }
     }
 
-    private void handleToggleStateChanged(boolean state) {
+    private void handleToggleStateChanged(boolean state, boolean toggleEnabled) {
+        mSwitchState = state;
+        if (mAnimatingOpen) {
+            return;
+        }
         mQsDetailHeaderSwitch.setChecked(state);
+        mQsDetailHeader.setEnabled(toggleEnabled);
+        mQsDetailHeaderSwitch.setEnabled(toggleEnabled);
     }
 
     private void handleScanStateChanged(boolean state) {
@@ -260,13 +266,19 @@ public class QSDetail extends LinearLayout {
         }
     }
 
+    private void checkPendingAnimations() {
+        handleToggleStateChanged(mSwitchState,
+                            mDetailAdapter != null && mDetailAdapter.getToggleEnabled());
+    }
+
     private final QSPanel.Callback mQsPanelCallback = new QSPanel.Callback() {
         @Override
         public void onToggleStateChanged(final boolean state) {
             post(new Runnable() {
                 @Override
                 public void run() {
-                    handleToggleStateChanged(state);
+                    handleToggleStateChanged(state,
+                            mDetailAdapter != null && mDetailAdapter.getToggleEnabled());
                 }
             });
         }
@@ -297,6 +309,8 @@ public class QSDetail extends LinearLayout {
             // If we have been cancelled, remove the listener so that onAnimationEnd doesn't get
             // called, this will avoid accidentally turning off the grid when we don't want to.
             animation.removeListener(this);
+            mAnimatingOpen = false;
+            checkPendingAnimations();
         };
 
         @Override
@@ -306,6 +320,8 @@ public class QSDetail extends LinearLayout {
                 mQsPanel.setGridContentVisibility(false);
                 mHeader.setVisibility(View.INVISIBLE);
             }
+            mAnimatingOpen = false;
+            checkPendingAnimations();
         }
     };
 

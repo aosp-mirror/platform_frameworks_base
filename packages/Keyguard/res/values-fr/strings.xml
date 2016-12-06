@@ -46,11 +46,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"La carte SIM est verrouillée."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"La carte SIM est verrouillée par clé PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Déverrouillage de la carte SIM en cours…"</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Déverrouillage par schéma"</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Déverrouillage par code PIN"</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Déverrouillage par mot de passe"</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Zone du schéma"</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Zone où faire glisser votre doigt sur l\'écran"</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"Champ du code PIN"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"Champ du code PIN de la carte SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"Champ du code PUK de la carte SIM"</string>

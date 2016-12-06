@@ -297,13 +297,13 @@ private void zoomImageFromThumb(final View thumbView, int imageResId) {
             set.play(ObjectAnimator
                         .ofFloat(expandedImageView, View.X, startBounds.left))
                         .with(ObjectAnimator
-                                .ofFloat(expandedImageView, 
+                                .ofFloat(expandedImageView,
                                         View.Y,startBounds.top))
                         .with(ObjectAnimator
-                                .ofFloat(expandedImageView, 
+                                .ofFloat(expandedImageView,
                                         View.SCALE_X, startScaleFinal))
                         .with(ObjectAnimator
-                                .ofFloat(expandedImageView, 
+                                .ofFloat(expandedImageView,
                                         View.SCALE_Y, startScaleFinal));
             set.setDuration(mShortAnimationDuration);
             set.setInterpolator(new DecelerateInterpolator());

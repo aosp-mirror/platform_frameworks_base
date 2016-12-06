@@ -10,8 +10,8 @@ next.link=screendensities.html
 
 
 <!-- This is the training bar -->
-<div id="tb-wrapper"> 
-<div id="tb"> 
+<div id="tb-wrapper">
+<div id="tb">
 
 <h2>本教程将指导您</h2>
 <ol>
@@ -30,26 +30,26 @@ next.link=screendensities.html
   <li><a href="{@docRoot}guide/practices/screens_support.html">支持多种屏幕</a></li>
 </ul>
 
-<h2>试试看</h2> 
- 
-<div class="download-box"> 
+<h2>试试看</h2>
+
+<div class="download-box">
 <a href="http://developer.android.com/shareables/training/NewsReader.zip" class="button">下载示例应用</a>
-<p class="filename">NewsReader.zip</p> 
-</div> 
- 
-</div> 
-</div> 
+<p class="filename">NewsReader.zip</p>
+</div>
+
+</div>
+</div>
 
 <p>此教程将向您介绍如何通过以下方法支持各种尺寸的屏幕：</p>
-<ul> 
-  <li>确保系统可以适当地调整您布局的尺寸以便适应屏幕</li> 
-  <li>根据屏幕配置提供合适的用户界面布局</li> 
+<ul>
+  <li>确保系统可以适当地调整您布局的尺寸以便适应屏幕</li>
+  <li>根据屏幕配置提供合适的用户界面布局</li>
   <li>确保正确的布局应用到了正确的屏幕上</li>
-  <li>提供可正确缩放的位图</li> 
-</ul> 
+  <li>提供可正确缩放的位图</li>
+</ul>
 
 
-<h2 id="TaskUseWrapMatchPar">使用“wrap_content”和“match_parent”</h2> 
+<h2 id="TaskUseWrapMatchPar">使用“wrap_content”和“match_parent”</h2>
 
 <p>要确保布局的灵活性并适应各种尺寸的屏幕，您应使用 <code>"wrap_content"</code> 和 <code>"match_parent"</code> 控制某些视图组件的宽度和高度。如果您使用 <code>"wrap_content"</code>，系统就会将视图的宽度或高度设置成所需的最小尺寸以适应视图中的内容，而 <code>"match_parent"</code>（在低于 API 级别 8 的级别中称为 <code>"fill_parent"</code>）则会展开组件以匹配其父视图的尺寸。</p>
 
@@ -65,7 +65,7 @@ next.link=screendensities.html
 <p class="img-caption"><strong>图 1</strong>。纵向模式（左）和横向模式（右）下的新闻阅读器示例应用。</p>
 
 
-<h2 id="TaskUseRelativeLayout">使用相对布局</h2> 
+<h2 id="TaskUseRelativeLayout">使用相对布局</h2>
 
 <p>您可以使用  <PH>{@link android.widget.LinearLayout}</PH>  的嵌套实例并结合 <code>"wrap_content"</code> 和 <code>"match_parent"</code> 尺寸，以便构建相当复杂的布局。不过，您无法通过  <PH>{@link android.widget.LinearLayout}</PH>  精确控制子视图的特殊关系；系统会将  <PH>{@link android.widget.LinearLayout}</PH>  中的视图直接并排列出。如果您需要将子视图排列出各种效果而不是一条直线，通常更合适的解决方法是使用  <PH>{@link android.widget.RelativeLayout}</PH>，这样您就可以根据各组件之间的特殊关系指定布局了。例如，您可以将某个子视图对齐到屏幕左侧，同时将另一个视图对齐到屏幕右侧。</p>
 
@@ -115,8 +115,8 @@ next.link=screendensities.html
 
 <p>请注意，虽然组件的尺寸有所变化，但它们的空间关系仍会保留，具体由  <PH>{@link android.widget.RelativeLayout.LayoutParams}</PH> 指定。</p>
 
- 
-<h2 id="TaskUseSizeQuali">使用尺寸限定符</h2> 
+
+<h2 id="TaskUseSizeQuali">使用尺寸限定符</h2>
 
 <p>上文所述的灵活布局或相对布局可以为您带来的优势就只有这么多了。虽然这些布局可以拉伸组件内外的空间以适应各种屏幕，但它们不一定能为每种屏幕都提供最佳的用户体验。因此，您的应用不仅应实施灵活布局，还应针对各种屏幕配置提供一些备用布局。要做到这一点，您可以使用<a href="http://developer.android.com/guide/practices/screens_support.html#qualifiers">配置限定符</a>，这样就可以在运行时根据当前的设备配置自动选择合适的资源了（例如根据各种屏幕尺寸选择不同的布局）。</p>
 
@@ -158,7 +158,7 @@ next.link=screendensities.html
 <p>但 Android 版本低于 3.2 的设备不支持此技术，原因是这些设备无法将 <code>sw600dp</code> 识别为尺寸限定符，因此您仍需使用 <code>large</code> 限定符。这样一来，就会有一个名称为 <code>res/layout-large/main.xml</code> 的文件（与 <code>res/layout-sw600dp/main.xml</code> 一样）。您将在下一教程中了解到避免此类布局文件出现重复的技术。</p>
 
 
-<h2 id="TaskUseAliasFilters">使用布局别名</h2> 
+<h2 id="TaskUseAliasFilters">使用布局别名</h2>
 
 <p>最小宽度限定符仅适用于 Android 3.2 及更高版本。因此，您仍需使用与较低版本兼容的概括尺寸范围（小、正常、大和特大）。例如，如果您要将用户界面设计成在手机上显示单面板，但在 7 英寸平板电脑、电视和其他较大的设备上显示多面板，请提供以下文件：</p>
 
@@ -198,11 +198,11 @@ next.link=screendensities.html
 </li>
 </ul></p>
 
-<p>后两个文件的内容相同，但它们并未实际定义布局。它们只是将  <PH>{@code main}</PH> 设置成了  <PH>{@code main_twopanes}</PH> 的别名。由于这些文件包含 <code>large</code> 和 <code>sw600dp</code> 选择器，因此无论 Android 版本如何，系统都会将这些文件应用到平板电脑和电视上（版本低于 3.2 的平板电脑和电视会匹配 
+<p>后两个文件的内容相同，但它们并未实际定义布局。它们只是将  <PH>{@code main}</PH> 设置成了  <PH>{@code main_twopanes}</PH> 的别名。由于这些文件包含 <code>large</code> 和 <code>sw600dp</code> 选择器，因此无论 Android 版本如何，系统都会将这些文件应用到平板电脑和电视上（版本低于 3.2 的平板电脑和电视会匹配
 <PH>{@code large}</PH>，版本低于 3.2 的平板电脑和电视则会匹配 <code>sw600dp</code>）。</p>
 
 
-<h2 id="TaskUseOriQuali">使用屏幕方向限定符</h2> 
+<h2 id="TaskUseOriQuali">使用屏幕方向限定符</h2>
 
 <p>某些布局会同时支持横向模式和纵向模式，但您可以通过调整优化其中大部分布局的效果。在新闻阅读器示例应用中，每种屏幕尺寸和屏幕方向下的布局行为方式如下所示：</p>
 
