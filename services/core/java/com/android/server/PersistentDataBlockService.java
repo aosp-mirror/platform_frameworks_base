@@ -46,6 +46,8 @@ import java.nio.channels.FileChannel;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Service for reading and writing blocks to a persistent partition.
@@ -79,6 +81,7 @@ public class PersistentDataBlockService extends SystemService {
     private final Context mContext;
     private final String mDataBlockFile;
     private final Object mLock = new Object();
+    private final CountDownLatch mInitDoneSignal = new CountDownLatch(1);
 
     private int mAllowedUid = -1;
     private long mBlockDeviceSize;
@@ -109,9 +112,29 @@ public class PersistentDataBlockService extends SystemService {
 
     @Override
     public void onStart() {
-        enforceChecksumValidity();
-        formatIfOemUnlockEnabled();
-        publishBinderService(Context.PERSISTENT_DATA_BLOCK_SERVICE, mService);
+        // Do init on a separate thread, will join in PHASE_ACTIVITY_MANAGER_READY
+        FgThread.getHandler().post(() -> {
+            enforceChecksumValidity();
+            formatIfOemUnlockEnabled();
+            publishBinderService(Context.PERSISTENT_DATA_BLOCK_SERVICE, mService);
+            mInitDoneSignal.countDown();
+        });
+    }
+
+    @Override
+    public void onBootPhase(int phase) {
+        // Wait for initialization in onStart to finish
+        if (phase == PHASE_SYSTEM_SERVICES_READY) {
+            try {
+                if (!mInitDoneSignal.await(10, TimeUnit.SECONDS)) {
+                    throw new IllegalStateException("Service " + TAG + " init timeout");
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException("Service " + TAG + " init interrupted", e);
+            }
+        }
+        super.onBootPhase(phase);
     }
 
     private void formatIfOemUnlockEnabled() {
