@@ -2997,19 +2997,17 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         swipeDismiss.setOnDismissedListener(new SwipeDismissLayout.OnDismissedListener() {
             @Override
             public void onDismissed(SwipeDismissLayout layout) {
-                dispatchOnWindowDismissed(false /*finishTask*/);
+                dispatchOnWindowDismissed(false /*finishTask*/, true /*suppressWindowTransition*/);
             }
         });
         swipeDismiss.setOnSwipeProgressChangedListener(
                 new SwipeDismissLayout.OnSwipeProgressChangedListener() {
-                    private static final float ALPHA_DECREASE = 0.5f;
-                    private boolean mIsTranslucent = false;
                     @Override
                     public void onSwipeProgressChanged(
-                            SwipeDismissLayout layout, float progress, float translate) {
+                            SwipeDismissLayout layout, float alpha, float translate) {
                         WindowManager.LayoutParams newParams = getAttributes();
                         newParams.x = (int) translate;
-                        newParams.alpha = 1 - (progress * ALPHA_DECREASE);
+                        newParams.alpha = alpha;
                         setAttributes(newParams);
 
                         int flags = 0;
