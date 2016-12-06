@@ -581,8 +581,10 @@ public abstract class Window {
          * Called when a window is dismissed. This informs the callback that the
          * window is gone, and it should finish itself.
          * @param finishTask True if the task should also be finished.
+         * @param suppressWindowTransition True if the resulting exit and enter window transition
+         * animations should be suppressed.
          */
-        void onWindowDismissed(boolean finishTask);
+        void onWindowDismissed(boolean finishTask, boolean suppressWindowTransition);
     }
 
     /** @hide */
@@ -871,9 +873,10 @@ public abstract class Window {
     }
 
     /** @hide */
-    public final void dispatchOnWindowDismissed(boolean finishTask) {
+    public final void dispatchOnWindowDismissed(
+            boolean finishTask, boolean suppressWindowTransition) {
         if (mOnWindowDismissedCallback != null) {
-            mOnWindowDismissedCallback.onWindowDismissed(finishTask);
+            mOnWindowDismissedCallback.onWindowDismissed(finishTask, suppressWindowTransition);
         }
     }
 

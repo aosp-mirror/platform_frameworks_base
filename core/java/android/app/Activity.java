@@ -2946,8 +2946,11 @@ public class Activity extends ContextThemeWrapper
      * @hide
      */
     @Override
-    public void onWindowDismissed(boolean finishTask) {
+    public void onWindowDismissed(boolean finishTask, boolean suppressWindowTransition) {
         finish(finishTask ? FINISH_TASK_WITH_ACTIVITY : DONT_FINISH_TASK_WITH_ACTIVITY);
+        if (suppressWindowTransition) {
+            overridePendingTransition(0, 0);
+        }
     }
 
 
