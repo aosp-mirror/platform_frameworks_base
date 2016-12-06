@@ -117,6 +117,14 @@ public class NetworkScoreManager {
     public static final String ACTION_SCORER_CHANGED = "android.net.scoring.SCORER_CHANGED";
 
     /**
+     * Service action: Used to discover and bind to a network recommendation provider.
+     * Implementations should return {@link NetworkRecommendationProvider#getBinder()} from
+     * their <code>onBind()</code> method.
+     */
+    @SdkConstant(SdkConstantType.SERVICE_ACTION)
+    public static final String ACTION_RECOMMEND_NETWORKS = "android.net.action.RECOMMEND_NETWORKS";
+
+    /**
      * Extra used with {@link #ACTION_SCORER_CHANGED} to specify the newly selected scorer's package
      * name. Will be null if scoring was disabled. Can be obtained with
      * {@link android.content.Intent#getStringExtra(String)}.
@@ -265,6 +273,24 @@ public class NetworkScoreManager {
     public void registerNetworkScoreCache(int networkType, INetworkScoreCache scoreCache) {
         try {
             mService.registerNetworkScoreCache(networkType, scoreCache);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Request a recommendation for which network to connect to.
+     *
+     * @param request a {@link RecommendationRequest} instance containing additional
+     *                request details
+     * @return a {@link RecommendationResult} instance containing the recommended network
+     *         to connect to
+     * @throws SecurityException
+     */
+    public RecommendationResult requestRecommendation(RecommendationRequest request)
+            throws SecurityException {
+        try {
+            return mService.requestRecommendation(request);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
