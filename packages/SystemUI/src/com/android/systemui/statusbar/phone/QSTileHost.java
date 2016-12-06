@@ -335,12 +335,16 @@ public class QSTileHost implements QSTile.Host, Tunable {
             QSTile<?> tile = mTiles.get(tileSpec);
             if (tile != null && (!(tile instanceof CustomTile)
                     || ((CustomTile) tile).getUser() == currentUser)) {
-                if (DEBUG) Log.d(TAG, "Adding " + tile);
-                tile.removeCallbacks();
-                if (!(tile instanceof CustomTile) && mCurrentUser != currentUser) {
-                    tile.userSwitch(currentUser);
+                if (tile.isAvailable()) {
+                    if (DEBUG) Log.d(TAG, "Adding " + tile);
+                    tile.removeCallbacks();
+                    if (!(tile instanceof CustomTile) && mCurrentUser != currentUser) {
+                        tile.userSwitch(currentUser);
+                    }
+                    newTiles.put(tileSpec, tile);
+                } else {
+                    tile.destroy();
                 }
-                newTiles.put(tileSpec, tile);
             } else {
                 if (DEBUG) Log.d(TAG, "Creating tile: " + tileSpec);
                 try {
