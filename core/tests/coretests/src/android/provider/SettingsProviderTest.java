@@ -351,6 +351,10 @@ public class SettingsProviderTest extends AndroidTestCase {
         assertCanBeHandled(new Intent(Settings.ACTION_WIFI_SETTINGS));
         assertCanBeHandled(new Intent(Settings.ACTION_WIFI_SAVED_NETWORK_SETTINGS));
         assertCanBeHandled(new Intent(Settings.ACTION_WIRELESS_SETTINGS));
+
+        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_DEVICE_ADMIN)) {
+            assertCanBeHandled(new Intent(Settings.ACTION_ENTERPRISE_PRIVACY_SETTINGS));
+        }
     }
 
     private void assertCanBeHandled(final Intent intent) {
