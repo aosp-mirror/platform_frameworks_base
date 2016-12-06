@@ -438,7 +438,7 @@ public class CallerInfoAsyncQuery {
         // check to see if these are recognized numbers, and use shortcuts if we can.
         if (PhoneNumberUtils.isLocalEmergencyNumber(context, number)) {
             cw.event = EVENT_EMERGENCY_NUMBER;
-        } else if (PhoneNumberUtils.isVoiceMailNumber(subId, number)) {
+        } else if (PhoneNumberUtils.isVoiceMailNumber(context, subId, number)) {
             cw.event = EVENT_VOICEMAIL_NUMBER;
         } else {
             cw.event = EVENT_NEW_QUERY;
