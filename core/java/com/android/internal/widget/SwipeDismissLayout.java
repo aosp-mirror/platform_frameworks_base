@@ -16,6 +16,10 @@
 
 package com.android.internal.widget;
 
+import android.animation.Animator;
+import android.animation.TimeInterpolator;
+import android.animation.ValueAnimator;
+import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -30,6 +34,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 
 /**
@@ -49,12 +54,12 @@ public class SwipeDismissLayout extends FrameLayout {
         /**
          * Called when the layout has been swiped and the position of the window should change.
          *
-         * @param progress A number in [0, 1] representing how far to the
-         * right the window has been swiped
+         * @param alpha A number in [0, 1] representing what the alpha transparency of the window
+         * should be.
          * @param translate A number in [0, w], where w is the width of the
          * layout. This is equivalent to progress * layout.getWidth().
          */
-        void onSwipeProgressChanged(SwipeDismissLayout layout, float progress, float translate);
+        void onSwipeProgressChanged(SwipeDismissLayout layout, float alpha, float translate);
 
         void onSwipeCancelled(SwipeDismissLayout layout);
     }
@@ -72,6 +77,9 @@ public class SwipeDismissLayout extends FrameLayout {
     private boolean mDiscardIntercept;
     private VelocityTracker mVelocityTracker;
     private float mTranslationX;
+    private boolean mBlockGesture = false;
+
+    private final DismissAnimator mDismissAnimator = new DismissAnimator();
 
     private OnDismissedListener mDismissedListener;
     private OnSwipeProgressChangedListener mProgressListener;
@@ -168,6 +176,10 @@ public class SwipeDismissLayout extends FrameLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+        checkGesture((ev));
+        if (mBlockGesture) {
+            return true;
+        }
         if (!mDismissable) {
             return super.onInterceptTouchEvent(ev);
         }
@@ -231,6 +243,10 @@ public class SwipeDismissLayout extends FrameLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        checkGesture((ev));
+        if (mBlockGesture) {
+            return true;
+        }
         if (mVelocityTracker == null || !mDismissable) {
             return super.onTouchEvent(ev);
         }
@@ -240,9 +256,9 @@ public class SwipeDismissLayout extends FrameLayout {
             case MotionEvent.ACTION_UP:
                 updateDismiss(ev);
                 if (mDismissed) {
-                    dismiss();
+                    mDismissAnimator.animateDismissal(ev.getRawX() - mDownX);
                 } else if (mSwiping) {
-                    cancel();
+                    mDismissAnimator.animateRecovery(ev.getRawX() - mDownX);
                 }
                 resetMembers();
                 break;
@@ -270,7 +286,8 @@ public class SwipeDismissLayout extends FrameLayout {
     private void setProgress(float deltaX) {
         mTranslationX = deltaX;
         if (mProgressListener != null && deltaX >= 0)  {
-            mProgressListener.onSwipeProgressChanged(this, deltaX / getWidth(), deltaX);
+            mProgressListener.onSwipeProgressChanged(
+                    this, progressToAlpha(deltaX / getWidth()), deltaX);
         }
     }
 
@@ -377,5 +394,92 @@ public class SwipeDismissLayout extends FrameLayout {
         }
 
         mDismissable = dismissable;
+    }
+
+    private void checkGesture(MotionEvent ev) {
+        if (ev.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            mBlockGesture = mDismissAnimator.isAnimating();
+        }
+    }
+
+    private float progressToAlpha(float progress) {
+        return 1 - progress * progress * progress;
+    }
+
+    private class DismissAnimator implements AnimatorUpdateListener, Animator.AnimatorListener {
+        private final TimeInterpolator DISMISS_INTERPOLATOR = new DecelerateInterpolator(1.5f);
+        private final long DISMISS_DURATION = 250;
+
+        private final ValueAnimator mDismissAnimator = new ValueAnimator();
+        private boolean mWasCanceled = false;
+        private boolean mDismissOnComplete = false;
+
+        /* package */ DismissAnimator() {
+            mDismissAnimator.addUpdateListener(this);
+            mDismissAnimator.addListener(this);
+        }
+
+        /* package */ void animateDismissal(float currentTranslation) {
+            animate(
+                    currentTranslation / getWidth(),
+                    1,
+                    DISMISS_DURATION,
+                    DISMISS_INTERPOLATOR,
+                    true /* dismiss */);
+        }
+
+        /* package */ void animateRecovery(float currentTranslation) {
+            animate(
+                    currentTranslation / getWidth(),
+                    0,
+                    DISMISS_DURATION,
+                    DISMISS_INTERPOLATOR,
+                    false /* don't dismiss */);
+        }
+
+        /* package */ boolean isAnimating() {
+            return mDismissAnimator.isStarted();
+        }
+
+        private void animate(float from, float to, long duration, TimeInterpolator interpolator,
+                boolean dismissOnComplete) {
+            mDismissAnimator.cancel();
+            mDismissOnComplete = dismissOnComplete;
+            mDismissAnimator.setFloatValues(from, to);
+            mDismissAnimator.setDuration(duration);
+            mDismissAnimator.setInterpolator(interpolator);
+            mDismissAnimator.start();
+        }
+
+        @Override
+        public void onAnimationUpdate(ValueAnimator animation) {
+            float value = (Float) animation.getAnimatedValue();
+            setProgress(value * getWidth());
+        }
+
+        @Override
+        public void onAnimationStart(Animator animation) {
+            mWasCanceled = false;
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+            mWasCanceled = true;
+        }
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            if (!mWasCanceled) {
+                if (mDismissOnComplete) {
+                    dismiss();
+                } else {
+                    cancel();
+                }
+            }
+        }
+
+        @Override
+        public void onAnimationRepeat(Animator animation) {
+        }
     }
 }
