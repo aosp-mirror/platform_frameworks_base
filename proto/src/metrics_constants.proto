@@ -3089,6 +3089,22 @@ message MetricsEvent {
     // ACTION: Logged when a provisioning session has completed
     PROVISIONING_SESSION_COMPLETED = 735;
 
+    // ACTION: An app requested the permission READ_PHONE_NUMBER
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_REQUEST_READ_PHONE_NUMBER = 736;
+
+    // ACTION: An app was granted the permission READ_PHONE_NUMBER
+    // PACKAGE: The package name of the app that was granted the permission
+    ACTION_PERMISSION_GRANT_READ_PHONE_NUMBER = 737;
+
+    // ACTION: An app requested the permission READ_PHONE_NUMBER and the request was denied
+    // PACKAGE: The package name of the app requesting the permission
+    ACTION_PERMISSION_DENIED_READ_PHONE_NUMBER = 738;
+
+    // ACTION: The permission READ_PHONE_NUMBER was revoked for an app
+    // PACKAGE: The package name of the app the permission was revoked for
+    ACTION_PERMISSION_REVOKE_READ_PHONE_NUMBER = 739;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.

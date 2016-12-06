@@ -544,7 +544,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.READ_PHONE_STATE,
-            Manifest.permission.READ_PHONE_NUMBER,
             Manifest.permission.CALL_PHONE,
             Manifest.permission.READ_CALL_LOG,
             Manifest.permission.WRITE_CALL_LOG,
@@ -559,7 +558,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             Manifest.permission.RECEIVE_WAP_PUSH,
             Manifest.permission.RECEIVE_MMS,
             Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_PHONE_NUMBER);
 
     final ServiceThread mHandlerThread;
 
