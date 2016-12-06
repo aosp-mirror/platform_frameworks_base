@@ -1010,6 +1010,13 @@ public class CarrierConfigManager {
      */
     public static final String KEY_CARRIER_WIFI_STRING_ARRAY = "carrier_wifi_string_array";
 
+    /**
+     * Time delay (in ms) after which we show the notification to switch the preferred network.
+     * @hide
+     */
+    public static final String KEY_PREF_NETWORK_NOTIFICATION_DELAY_INT =
+            "network_notification_delay_int";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -1188,6 +1195,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_EDITABLE_WFC_ROAMING_MODE_BOOL, false);
         sDefaults.putBoolean(KEY_STK_DISABLE_LAUNCH_BROWSER_BOOL, false);
         sDefaults.putStringArray(KEY_CARRIER_WIFI_STRING_ARRAY, null);
+        sDefaults.putInt(KEY_PREF_NETWORK_NOTIFICATION_DELAY_INT, -1);
     }
 
     /**
