@@ -1047,18 +1047,29 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_ORIENTATION;
             orientation = delta.orientation;
         }
-        if (getScreenLayoutNoDirection(delta.screenLayout) !=
-                    (SCREENLAYOUT_SIZE_UNDEFINED | SCREENLAYOUT_LONG_UNDEFINED)
-                && (getScreenLayoutNoDirection(screenLayout) !=
-                    getScreenLayoutNoDirection(delta.screenLayout))) {
+
+        if (((delta.screenLayout & SCREENLAYOUT_SIZE_MASK) != SCREENLAYOUT_SIZE_UNDEFINED)
+                && (delta.screenLayout & SCREENLAYOUT_SIZE_MASK)
+                != (screenLayout & SCREENLAYOUT_SIZE_MASK)) {
             changed |= ActivityInfo.CONFIG_SCREEN_LAYOUT;
-            // We need to preserve the previous layout dir bits if they were defined
-            if ((delta.screenLayout&SCREENLAYOUT_LAYOUTDIR_MASK) == 0) {
-                screenLayout = (screenLayout&SCREENLAYOUT_LAYOUTDIR_MASK)|delta.screenLayout;
-            } else {
-                screenLayout = delta.screenLayout;
-            }
+            screenLayout = (screenLayout & ~SCREENLAYOUT_SIZE_MASK)
+                    | (delta.screenLayout & SCREENLAYOUT_SIZE_MASK);
         }
+        if (((delta.screenLayout & SCREENLAYOUT_LONG_MASK) != SCREENLAYOUT_LONG_UNDEFINED)
+                && (delta.screenLayout & SCREENLAYOUT_LONG_MASK)
+                != (screenLayout & SCREENLAYOUT_LONG_MASK)) {
+            changed |= ActivityInfo.CONFIG_SCREEN_LAYOUT;
+            screenLayout = (screenLayout & ~SCREENLAYOUT_LONG_MASK)
+                    | (delta.screenLayout & SCREENLAYOUT_LONG_MASK);
+        }
+        if (((delta.screenLayout & SCREENLAYOUT_ROUND_MASK) != SCREENLAYOUT_ROUND_UNDEFINED)
+                && (delta.screenLayout & SCREENLAYOUT_ROUND_MASK)
+                != (screenLayout & SCREENLAYOUT_ROUND_MASK)) {
+            changed |= ActivityInfo.CONFIG_SCREEN_LAYOUT;
+            screenLayout = (screenLayout & ~SCREENLAYOUT_ROUND_MASK)
+                    | (delta.screenLayout & SCREENLAYOUT_ROUND_MASK);
+        }
+
         if (delta.uiMode != (UI_MODE_TYPE_UNDEFINED|UI_MODE_NIGHT_UNDEFINED)
                 && uiMode != delta.uiMode) {
             changed |= ActivityInfo.CONFIG_UI_MODE;
