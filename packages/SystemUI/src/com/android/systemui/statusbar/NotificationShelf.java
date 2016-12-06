@@ -471,7 +471,15 @@ public class NotificationShelf extends ActivatableNotificationView {
                 mShelfIcons.getWidth(),
                 openedAmount);
         mShelfIcons.setActualLayoutWidth(width);
-        float padding = NotificationUtils.interpolate(mCollapsedIcons.getPaddingEnd(),
+        boolean hasOverflow = mCollapsedIcons.hasOverflow();
+        int collapsedPadding = mCollapsedIcons.getPaddingEnd();
+        if (!hasOverflow) {
+            // we have to ensure that adding the low priority notification won't lead to an
+            // overflow
+            collapsedPadding -= (1.0f + NotificationIconContainer.OVERFLOW_EARLY_AMOUNT)
+                    * mCollapsedIcons.getIconSize();
+        }
+        float padding = NotificationUtils.interpolate(collapsedPadding,
                 mShelfIcons.getPaddingEnd(),
                 openedAmount);
         mShelfIcons.setActualPaddingEnd(padding);
@@ -479,6 +487,7 @@ public class NotificationShelf extends ActivatableNotificationView {
                 mShelfIcons.getPaddingStart(), openedAmount);
         mShelfIcons.setActualPaddingStart(paddingStart);
         mShelfIcons.setOpenedAmount(openedAmount);
+        mShelfIcons.setVisualOverflowAdaption(mCollapsedIcons.getVisualOverflowAdaption());
     }
 
     public void setMaxLayoutHeight(int maxLayoutHeight) {

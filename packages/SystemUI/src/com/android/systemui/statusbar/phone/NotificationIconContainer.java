@@ -38,6 +38,13 @@ import java.util.HashMap;
  * correctly on the screen.
  */
 public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
+    /**
+     * A float value indicating how much before the overflow start the icons should transform into
+     * a dot. A value of 0 means that they are exactly at the end and a value of 1 means it starts
+     * 1 icon width early.
+     */
+    public static final float OVERFLOW_EARLY_AMOUNT = 0.2f;
+    private static final int NO_VALUE = Integer.MIN_VALUE;
     private static final String TAG = "NotificationIconContainer";
     private static final boolean DEBUG = false;
     private static final int CANNED_ANIMATION_DURATION = 100;
@@ -83,15 +90,16 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     private final HashMap<View, IconState> mIconStates = new HashMap<>();
     private int mDotPadding;
     private int mStaticDotRadius;
-    private int mActualLayoutWidth = -1;
-    private float mActualPaddingEnd = -1;
-    private float mActualPaddingStart = -1;
+    private int mActualLayoutWidth = NO_VALUE;
+    private float mActualPaddingEnd = NO_VALUE;
+    private float mActualPaddingStart = NO_VALUE;
     private boolean mChangingViewPositions;
     private int mAddAnimationStartIndex = -1;
     private int mCannedAnimationStartIndex = -1;
     private int mSpeedBumpIndex = -1;
     private int mIconSize;
     private float mOpenedAmount = 0.0f;
+    private float mVisualOverflowAdaption;
 
     public NotificationIconContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -226,7 +234,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         int firstOverflowIndex = -1;
         int childCount = getChildCount();
         float layoutEnd = getLayoutEnd();
-        float overflowStart = layoutEnd - mIconSize * 2.2f;
+        float overflowStart = layoutEnd - mIconSize * (2 + OVERFLOW_EARLY_AMOUNT);
         boolean hasAmbient = mSpeedBumpIndex != -1 && mSpeedBumpIndex < getChildCount();
         float visualOverflowStart = 0;
         for (int i = 0; i < childCount; i++) {
@@ -244,7 +252,8 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                     || (translationX >= (noOverflowAfter ? layoutEnd - mIconSize : overflowStart)))) {
                 firstOverflowIndex = noOverflowAfter ? i - 1 : i;
                 int totalDotLength = mStaticDotRadius * 6 + 2 * mDotPadding;
-                visualOverflowStart = overflowStart + mIconSize * 1.2f - totalDotLength / 2
+                visualOverflowStart = overflowStart + mIconSize * (1 + OVERFLOW_EARLY_AMOUNT)
+                        - totalDotLength / 2
                         - mIconSize * 0.5f + mStaticDotRadius;
                 if (isAmbient) {
                     visualOverflowStart = Math.min(translationX, visualOverflowStart
@@ -252,6 +261,23 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                 } else {
                     visualOverflowStart += (translationX - overflowStart) / mIconSize
                             * (mStaticDotRadius * 2 + mDotPadding);
+                }
+                if (mShowAllIcons) {
+                    // We want to perfectly position the overflow in the static state, such that
+                    // it's perfectly centered instead of measuring it from the end.
+                    mVisualOverflowAdaption = 0;
+                    if (firstOverflowIndex != -1) {
+                        View firstOverflowView = getChildAt(i);
+                        IconState overflowState = mIconStates.get(firstOverflowView);
+                        float totalAmount = layoutEnd - overflowState.xTranslation;
+                        float newPosition = overflowState.xTranslation + totalAmount / 2
+                                - totalDotLength / 2
+                                - mIconSize * 0.5f + mStaticDotRadius;
+                        mVisualOverflowAdaption = newPosition - visualOverflowStart;
+                        visualOverflowStart = newPosition;
+                    }
+                } else {
+                    visualOverflowStart += mVisualOverflowAdaption * (1f - mOpenedAmount);
                 }
             }
             translationX += iconState.iconAppearAmount * view.getWidth();
@@ -293,14 +319,14 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     }
 
     private float getActualPaddingEnd() {
-        if (mActualPaddingEnd < 0) {
+        if (mActualPaddingEnd == NO_VALUE) {
             return getPaddingEnd();
         }
         return mActualPaddingEnd;
     }
 
     private float getActualPaddingStart() {
-        if (mActualPaddingStart < 0) {
+        if (mActualPaddingStart == NO_VALUE) {
             return getPaddingStart();
         }
         return mActualPaddingStart;
@@ -338,7 +364,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     }
 
     public int getActualWidth() {
-        if (mActualLayoutWidth < 0) {
+        if (mActualLayoutWidth == NO_VALUE) {
             return getWidth();
         }
         return mActualLayoutWidth;
@@ -358,6 +384,23 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
 
     public void setOpenedAmount(float expandAmount) {
         mOpenedAmount = expandAmount;
+    }
+
+    public float getVisualOverflowAdaption() {
+        return mVisualOverflowAdaption;
+    }
+
+    public void setVisualOverflowAdaption(float visualOverflowAdaption) {
+        mVisualOverflowAdaption = visualOverflowAdaption;
+    }
+
+    public boolean hasOverflow() {
+        float width = (getChildCount() + OVERFLOW_EARLY_AMOUNT) * mIconSize;
+        return width - (getWidth() - getActualPaddingStart() - getActualPaddingEnd()) > 0;
+    }
+
+    public int getIconSize() {
+        return mIconSize;
     }
 
     public class IconState extends ViewState {
