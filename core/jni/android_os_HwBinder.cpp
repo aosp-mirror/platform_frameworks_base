@@ -241,7 +241,14 @@ static void JHwBinder_native_registerService(
     using android::hidl::manager::V1_0::IServiceManager;
 
     sp<hardware::IBinder> binder = JHwBinder::GetNativeContext(env, thiz);
+
     sp<hidl::base::V1_0::IBase> base = hidl::base::V1_0::IHwBase::asInterface(binder);
+    if (base.get() == nullptr) {
+        LOG(ERROR) << "IBinder object cannot be casted to the base interface.";
+        signalExceptionForError(env, UNKNOWN_ERROR);
+        return;
+    }
+
     bool ok = hardware::defaultServiceManager()->add(
                 interfaceChain,
                 serviceName,
