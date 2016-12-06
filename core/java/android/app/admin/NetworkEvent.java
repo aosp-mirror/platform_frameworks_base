@@ -23,11 +23,12 @@ import android.os.ParcelFormatException;
 
 /**
  * An abstract class that represents a network event.
- * @hide
  */
 public abstract class NetworkEvent implements Parcelable {
 
+    /** @hide */
     static final int PARCEL_TOKEN_DNS_EVENT = 1;
+    /** @hide */
     static final int PARCEL_TOKEN_CONNECT_EVENT = 2;
 
     /** The package name of the UID that performed the query. */

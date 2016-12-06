@@ -21,7 +21,6 @@ import android.os.Parcelable;
 
 /**
  * A class that represents a connect library call event.
- * @hide
  */
 public final class ConnectEvent extends NetworkEvent implements Parcelable {
 
