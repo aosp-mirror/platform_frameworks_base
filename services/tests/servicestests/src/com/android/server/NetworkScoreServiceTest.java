@@ -17,12 +17,9 @@
 package com.android.server;
 
 import static android.net.NetworkScoreManager.CACHE_FILTER_NONE;
-
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
-
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyListOf;
@@ -30,7 +27,6 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -46,7 +42,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.net.INetworkScoreCache;
 import android.net.NetworkKey;
-import android.net.NetworkScoreManager;
 import android.net.NetworkScorerAppManager;
 import android.net.NetworkScorerAppManager.NetworkScorerAppData;
 import android.net.ScoredNetwork;
@@ -54,15 +49,10 @@ import android.net.WifiKey;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.provider.Settings;
-import android.provider.Settings.Global;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
-
-import com.android.internal.R;
 import com.android.server.devicepolicy.MockUtils;
-
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -73,7 +63,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 /**
@@ -85,12 +74,8 @@ public class NetworkScoreServiceTest {
     private static final ScoredNetwork SCORED_NETWORK =
             new ScoredNetwork(new NetworkKey(new WifiKey("\"ssid\"", "00:00:00:00:00:00")),
                     null /* rssiCurve*/);
-    private static final NetworkScorerAppData PREV_SCORER = new NetworkScorerAppData(
-            "prevPackageName", 0, "prevScorerName", null /* configurationActivityClassName */,
-            "prevScoringServiceClass");
-    private static final NetworkScorerAppData NEW_SCORER = new NetworkScorerAppData(
-            "newPackageName", 1, "newScorerName", null /* configurationActivityClassName */,
-            "newScoringServiceClass");
+    private static final NetworkScorerAppData NEW_SCORER =
+        new NetworkScorerAppData("newPackageName", 1, "newScoringServiceClass");
 
     @Mock private PackageManager mPackageManager;
     @Mock private NetworkScorerAppManager mNetworkScorerAppManager;
@@ -115,51 +100,14 @@ public class NetworkScoreServiceTest {
     }
 
     @Test
-    public void testSystemReady_networkScorerProvisioned() throws Exception {
-        Settings.Global.putInt(mContentResolver, Global.NETWORK_SCORING_PROVISIONED, 1);
-
-        mNetworkScoreService.systemReady();
-
-        verify(mNetworkScorerAppManager, never()).setActiveScorer(anyString());
-    }
-
-    @Test
-    public void testSystemReady_networkScorerNotProvisioned_defaultScorer() throws Exception {
-        Settings.Global.putInt(mContentResolver, Global.NETWORK_SCORING_PROVISIONED, 0);
-
-        when(mResources.getString(R.string.config_defaultNetworkScorerPackageName))
-                .thenReturn(NEW_SCORER.mPackageName);
-
-        mNetworkScoreService.systemReady();
-
-        verify(mNetworkScorerAppManager).setActiveScorer(NEW_SCORER.mPackageName);
-        assertEquals(1,
-                Settings.Global.getInt(mContentResolver, Global.NETWORK_SCORING_PROVISIONED));
-
-    }
-
-    @Test
-    public void testSystemReady_networkScorerNotProvisioned_noDefaultScorer() throws Exception {
-        Settings.Global.putInt(mContentResolver, Global.NETWORK_SCORING_PROVISIONED, 0);
-
-        when(mResources.getString(R.string.config_defaultNetworkScorerPackageName))
-                .thenReturn(null);
-
-        mNetworkScoreService.systemReady();
-
-        verify(mNetworkScorerAppManager, never()).setActiveScorer(anyString());
-        assertEquals(1,
-                Settings.Global.getInt(mContentResolver, Global.NETWORK_SCORING_PROVISIONED));
-    }
-
-    @Test
     public void testSystemRunning() {
         when(mNetworkScorerAppManager.getActiveScorer()).thenReturn(NEW_SCORER);
 
         mNetworkScoreService.systemRunning();
 
         verify(mContext).bindServiceAsUser(MockUtils.checkIntent(new Intent().setComponent(
-                new ComponentName(NEW_SCORER.mPackageName, NEW_SCORER.mScoringServiceClassName))),
+                new ComponentName(NEW_SCORER.packageName,
+                    NEW_SCORER.recommendationServiceClassName))),
                 any(ServiceConnection.class),
                 eq(Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE),
                 eq(UserHandle.SYSTEM));
@@ -288,45 +236,6 @@ public class NetworkScoreServiceTest {
     }
 
     @Test
-    public void testSetActiveScorer_failure() throws RemoteException {
-        when(mNetworkScorerAppManager.getActiveScorer()).thenReturn(PREV_SCORER);
-        when(mNetworkScorerAppManager.setActiveScorer(NEW_SCORER.mPackageName)).thenReturn(false);
-        mNetworkScoreService.registerNetworkScoreCache(NetworkKey.TYPE_WIFI, mNetworkScoreCache,
-                CACHE_FILTER_NONE);
-
-        boolean success = mNetworkScoreService.setActiveScorer(NEW_SCORER.mPackageName);
-
-        assertFalse(success);
-        verify(mNetworkScoreCache).clearScores();
-        verify(mContext).bindServiceAsUser(MockUtils.checkIntent(new Intent().setComponent(
-                new ComponentName(PREV_SCORER.mPackageName, PREV_SCORER.mScoringServiceClassName))),
-                any(ServiceConnection.class),
-                eq(Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE),
-                eq(UserHandle.SYSTEM));
-    }
-
-    @Test
-    public void testSetActiveScorer_success() throws RemoteException {
-        when(mNetworkScorerAppManager.getActiveScorer()).thenReturn(PREV_SCORER, NEW_SCORER);
-        when(mNetworkScorerAppManager.setActiveScorer(NEW_SCORER.mPackageName)).thenReturn(true);
-        mNetworkScoreService.registerNetworkScoreCache(NetworkKey.TYPE_WIFI, mNetworkScoreCache,
-                CACHE_FILTER_NONE);
-
-        boolean success = mNetworkScoreService.setActiveScorer(NEW_SCORER.mPackageName);
-
-        assertTrue(success);
-        verify(mNetworkScoreCache).clearScores();
-        verify(mContext).bindServiceAsUser(MockUtils.checkIntent(new Intent().setComponent(
-                new ComponentName(NEW_SCORER.mPackageName, NEW_SCORER.mScoringServiceClassName))),
-                any(ServiceConnection.class),
-                eq(Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE),
-                eq(UserHandle.SYSTEM));
-        verify(mContext, times(2)).sendBroadcastAsUser(
-                MockUtils.checkIntentAction(NetworkScoreManager.ACTION_SCORER_CHANGED),
-                eq(UserHandle.SYSTEM));
-    }
-
-    @Test
     public void testDisableScoring_notActiveScorer_noBroadcastNetworkPermission() {
         when(mNetworkScorerAppManager.isCallerActiveScorer(anyInt())).thenReturn(false);
         when(mContext.checkCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED))
@@ -338,48 +247,6 @@ public class NetworkScoreServiceTest {
         } catch (SecurityException e) {
             // expected
         }
-
-    }
-
-    @Test
-    public void testDisableScoring_activeScorer() throws RemoteException {
-        when(mNetworkScorerAppManager.isCallerActiveScorer(anyInt())).thenReturn(true);
-        when(mNetworkScorerAppManager.getActiveScorer()).thenReturn(PREV_SCORER, null);
-        when(mNetworkScorerAppManager.setActiveScorer(null)).thenReturn(true);
-        mNetworkScoreService.registerNetworkScoreCache(NetworkKey.TYPE_WIFI, mNetworkScoreCache,
-                CACHE_FILTER_NONE);
-
-        mNetworkScoreService.disableScoring();
-
-        verify(mNetworkScoreCache).clearScores();
-        verify(mContext).sendBroadcastAsUser(
-                MockUtils.checkIntent(new Intent(NetworkScoreManager.ACTION_SCORER_CHANGED)
-                        .setPackage(PREV_SCORER.mPackageName)),
-                eq(UserHandle.SYSTEM));
-        verify(mContext, never()).bindServiceAsUser(any(Intent.class),
-                any(ServiceConnection.class), anyInt(), any(UserHandle.class));
-    }
-
-    @Test
-    public void testDisableScoring_notActiveScorer_hasBroadcastNetworkPermission()
-            throws RemoteException {
-        when(mNetworkScorerAppManager.isCallerActiveScorer(anyInt())).thenReturn(false);
-        when(mContext.checkCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED))
-                .thenReturn(PackageManager.PERMISSION_GRANTED);
-        when(mNetworkScorerAppManager.getActiveScorer()).thenReturn(PREV_SCORER, null);
-        when(mNetworkScorerAppManager.setActiveScorer(null)).thenReturn(true);
-        mNetworkScoreService.registerNetworkScoreCache(NetworkKey.TYPE_WIFI, mNetworkScoreCache,
-                CACHE_FILTER_NONE);
-
-        mNetworkScoreService.disableScoring();
-
-        verify(mNetworkScoreCache).clearScores();
-        verify(mContext).sendBroadcastAsUser(
-                MockUtils.checkIntent(new Intent(NetworkScoreManager.ACTION_SCORER_CHANGED)
-                        .setPackage(PREV_SCORER.mPackageName)),
-                eq(UserHandle.SYSTEM));
-        verify(mContext, never()).bindServiceAsUser(any(Intent.class),
-                any(ServiceConnection.class), anyInt(), any(UserHandle.class));
     }
 
     @Test
