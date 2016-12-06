@@ -43,7 +43,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
@@ -78,7 +77,6 @@ import android.net.INetworkPolicyListener;
 import android.net.INetworkStatsService;
 import android.net.LinkProperties;
 import android.net.NetworkInfo;
-import android.net.NetworkPolicyManager;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkPolicy;
 import android.net.NetworkState;
@@ -292,7 +290,7 @@ public class NetworkPolicyManagerServiceTest {
         expectCurrentTime();
 
         // Prepare NPMS.
-        mService.systemReady();
+        mService.systemReady(mService.networkScoreAndNetworkManagementServiceReady());
 
         // catch INetworkManagementEventObserver during systemReady()
         final ArgumentCaptor<INetworkManagementEventObserver> networkObserver =

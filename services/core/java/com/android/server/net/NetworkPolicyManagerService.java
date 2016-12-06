@@ -139,6 +139,7 @@ import android.os.Message;
 import android.os.MessageQueue.IdleHandler;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
+import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -197,6 +198,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Service that maintains low-level network policy rules, using
@@ -565,9 +568,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
-    public void systemReady() {
+    private void initService(CountDownLatch initCompleteSignal) {
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "systemReady");
+        final int oldPriority = Process.getThreadPriority(Process.myTid());
         try {
+            // Boost thread's priority during system server init
+            Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
             if (!isBandwidthControlEnabled()) {
                 Slog.w(TAG, "bandwidth controls disabled, unable to enforce policy");
                 return;
@@ -672,8 +678,30 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             mContext.registerReceiver(mWifiStateReceiver, wifiStateFilter, null, mHandler);
 
             mUsageStats.addAppIdleStateChangeListener(new AppIdleStateChangeListener());
+            // tell systemReady() that the service has been initialized
+            initCompleteSignal.countDown();
         } finally {
+            // Restore the default priority after init is done
+            Process.setThreadPriority(oldPriority);
             Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
+        }
+    }
+
+    public CountDownLatch networkScoreAndNetworkManagementServiceReady() {
+        final CountDownLatch initCompleteSignal = new CountDownLatch(1);
+        mHandler.post(() -> initService(initCompleteSignal));
+        return initCompleteSignal;
+    }
+
+    public void systemReady(CountDownLatch initCompleteSignal) {
+        // wait for initService to complete
+        try {
+            if (!initCompleteSignal.await(30, TimeUnit.SECONDS)) {
+                throw new IllegalStateException("Service " + TAG +" init timeout");
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Service " + TAG + " init interrupted", e);
         }
     }
 
