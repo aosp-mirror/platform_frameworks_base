@@ -53,6 +53,7 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.GraphicBuffer;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -595,6 +596,11 @@ interface IActivityManager {
 
     /** Cancels the thumbnail transitions for the given task. */
     void cancelTaskThumbnailTransition(int taskId);
+
+    /**
+     * @return a graphic buffer representing a screenshot of a task
+     */
+    GraphicBuffer getTaskSnapshot(int taskId);
 
     // WARNING: when these transactions are updated, check if they are any callers on the native
     // side. If so, make sure they are using the correct transaction ids and arguments.

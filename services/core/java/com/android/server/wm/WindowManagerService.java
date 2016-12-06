@@ -39,6 +39,7 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
+import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
 import android.graphics.Matrix;
 import android.graphics.Point;
@@ -183,6 +184,7 @@ import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHA
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TASK_SNAPSHOT;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
@@ -580,6 +582,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final UnknownAppVisibilityController mUnknownAppVisibilityController =
             new UnknownAppVisibilityController(this);
+    final TaskSnapshotController mTaskSnapshotController = new TaskSnapshotController(this);
 
     boolean mIsTouchDevice;
 
@@ -1215,7 +1218,9 @@ public class WindowManagerService extends IWindowManager.Stub
                           + token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_APP_EXITING;
                 }
-                if (rootType == TYPE_APPLICATION_STARTING && atoken.firstWindowDrawn) {
+                if (rootType == TYPE_APPLICATION_STARTING
+                        && (attrs.privateFlags & PRIVATE_FLAG_TASK_SNAPSHOT) == 0
+                        && atoken.firstWindowDrawn) {
                     // No need for this guy!
                     if (DEBUG_STARTING_WINDOW || localLOGV) Slog.v(
                             TAG_WM, "**** NO NEED TO START: " + attrs.getTitle());
@@ -1966,7 +1971,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         + " newVis=" + viewVisibility, stack);
             }
             if (viewVisibility == View.VISIBLE &&
-                    (win.mAppToken == null || !win.mAppToken.clientHidden)) {
+                    (win.mAppToken == null || win.mAttrs.type == TYPE_APPLICATION_STARTING
+                            || !win.mAppToken.clientHidden)) {
                 result = relayoutVisibleWindow(outConfig, result, win, winAnimator, attrChanges,
                         oldVisibility);
                 try {
@@ -2073,7 +2079,10 @@ public class WindowManagerService extends IWindowManager.Stub
             win.setDisplayLayoutNeeded();
             win.mGivenInsetsPending = (flags&WindowManagerGlobal.RELAYOUT_INSETS_PENDING) != 0;
             configChanged = updateOrientationFromAppTokensLocked(false, displayId);
-            mWindowPlacerLocked.performSurfacePlacement();
+
+            // We may be deferring layout passes at the moment, but since the client is interested
+            // in the new out values right now we need to force a layout.
+            mWindowPlacerLocked.performSurfacePlacement(true /* force */);
             if (toBeDisplayed && win.mIsWallpaper) {
                 DisplayInfo displayInfo = win.getDisplayContent().getDisplayInfo();
                 dc.mWallpaperController.updateWallpaperOffset(
@@ -3858,7 +3867,8 @@ public class WindowManagerService extends IWindowManager.Stub
             Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "screenshotWallpaper");
             return screenshotApplications(null /* appToken */, DEFAULT_DISPLAY, -1 /* width */,
                     -1 /* height */, true /* includeFullDisplay */, 1f /* frameScale */,
-                    Bitmap.Config.ARGB_8888, true /* wallpaperOnly */);
+                    Bitmap.Config.ARGB_8888, true /* wallpaperOnly */, false /* includeDecor */,
+                    true /* toAshmem */);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
         }
@@ -3879,7 +3889,8 @@ public class WindowManagerService extends IWindowManager.Stub
         FgThread.getHandler().post(() -> {
             Bitmap bm = screenshotApplications(null /* appToken */, DEFAULT_DISPLAY,
                     -1 /* width */, -1 /* height */, true /* includeFullDisplay */,
-                    1f /* frameScale */, Bitmap.Config.ARGB_8888, false /* wallpaperOnly */);
+                    1f /* frameScale */, Bitmap.Config.ARGB_8888, false /* wallpaperOnly */,
+                    false /* includeDecor */, true /* toAshmem */);
             try {
                 receiver.send(bm);
             } catch (RemoteException e) {
@@ -3900,10 +3911,14 @@ public class WindowManagerService extends IWindowManager.Stub
      * @param frameScale the scale to apply to the frame, only used when width = -1 and height = -1
      * @param config of the output bitmap
      * @param wallpaperOnly true if only the wallpaper layer should be included in the screenshot
+     * @param includeDecor whether to include window decors, like the status or navigation bar
+     *                     background of the window
+     * @param toAshmem whether to convert the resulting bitmap to ashmem; this should be set to
+     *                 true if the Bitmap is sent over binder, and false otherwise
      */
     private Bitmap screenshotApplications(IBinder appToken, int displayId, int width,
             int height, boolean includeFullDisplay, float frameScale, Bitmap.Config config,
-            boolean wallpaperOnly) {
+            boolean wallpaperOnly, boolean includeDecor, boolean toAshmem) {
         final DisplayContent displayContent;
         synchronized(mWindowMap) {
             displayContent = mRoot.getDisplayContentOrCreate(displayId);
@@ -3914,7 +3929,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
         return displayContent.screenshotApplications(appToken, width, height,
-                includeFullDisplay, frameScale, config, wallpaperOnly);
+                includeFullDisplay, frameScale, config, wallpaperOnly, includeDecor, toAshmem);
     }
 
     /**

@@ -31,6 +31,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.GraphicBuffer;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
@@ -49,6 +50,10 @@ import com.android.server.AttributeCache;
  */
 public class AppWindowContainerController
         extends WindowContainerController<AppWindowToken, AppWindowContainerListener> {
+
+    private static final int STARTING_WINDOW_TYPE_NONE = 0;
+    private static final int STARTING_WINDOW_TYPE_SNAPSHOT = 1;
+    private static final int STARTING_WINDOW_TYPE_SPLASH_SCREEN = 2;
 
     private final IApplicationToken mToken;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
@@ -80,16 +85,39 @@ public class AppWindowContainerController
         mListener.onWindowsGone();
     };
 
+    private final Runnable mRemoveStartingWindow = () -> {
+        StartingSurface surface = null;
+        StartingData data = null;
+        synchronized (mWindowMap) {
+            if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Remove starting " + mContainer
+                    + ": startingWindow=" + mContainer.startingWindow
+                    + " startingView=" + mContainer.startingSurface);
+            if (mContainer.startingWindow != null) {
+                surface = mContainer.startingSurface;
+                data = mContainer.startingData;
+                mContainer.startingData = null;
+                mContainer.startingSurface = null;
+                mContainer.startingWindow = null;
+                mContainer.startingDisplayed = false;
+            }
+        }
+        if (data != null && surface != null) {
+            try {
+                surface.remove();
+            } catch (Exception e) {
+                Slog.w(TAG_WM, "Exception when removing starting window", e);
+            }
+        }
+    };
+
     private final Runnable mAddStartingWindow = () -> {
         final StartingData startingData;
-        final Configuration mergedOverrideConfiguration;
 
         synchronized (mWindowMap) {
             if (mContainer == null) {
                 return;
             }
             startingData = mContainer.startingData;
-            mergedOverrideConfiguration = mContainer.getMergedOverrideConfiguration();
         }
 
         if (startingData == null) {
@@ -98,20 +126,16 @@ public class AppWindowContainerController
         }
 
         if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Add starting "
-                + this + ": pkg=" + mContainer.startingData.pkg);
+                + this + ": startingData=" + mContainer.startingData);
 
-        StartingSurface contents = null;
+        StartingSurface surface = null;
         try {
-            contents = mService.mPolicy.addSplashScreen(mContainer.token, startingData.pkg,
-                    startingData.theme, startingData.compatInfo, startingData.nonLocalizedLabel,
-                    startingData.labelRes, startingData.icon, startingData.logo,
-                    startingData.windowFlags, mergedOverrideConfiguration);
+            surface = startingData.createStartingSurface();
         } catch (Exception e) {
             Slog.w(TAG_WM, "Exception when adding starting window", e);
         }
-        if (contents != null) {
+        if (surface != null) {
             boolean abort = false;
-
             synchronized(mWindowMap) {
                 if (mContainer.removed || mContainer.startingData == null) {
                     // If the window was successfully added, then
@@ -121,12 +145,10 @@ public class AppWindowContainerController
                                 "Aborted starting " + mContainer
                                         + ": removed=" + mContainer.removed
                                         + " startingData=" + mContainer.startingData);
-                        mContainer.startingWindow = null;
-                        mContainer.startingData = null;
                         abort = true;
                     }
                 } else {
-                    mContainer.startingSurface = contents;
+                    mContainer.startingSurface = surface;
                 }
                 if (DEBUG_STARTING_WINDOW && !abort) Slog.v(TAG_WM,
                         "Added starting " + mContainer
@@ -134,42 +156,11 @@ public class AppWindowContainerController
                                 + mContainer.startingWindow + " startingView="
                                 + mContainer.startingSurface);
             }
-
             if (abort) {
-                try {
-                    mService.mPolicy.removeSplashScreen(mContainer.token, contents);
-                } catch (Exception e) {
-                    Slog.w(TAG_WM, "Exception when removing starting window", e);
-                }
-            }
-        }
-    };
-
-    private final Runnable mRemoveStartingWindow = () -> {
-        IBinder token = null;
-        StartingSurface contents = null;
-        synchronized (mWindowMap) {
-            if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Remove starting "
-                    + mContainer + ": startingWindow="
-                    + mContainer.startingWindow + " startingView="
-                    + mContainer.startingSurface);
+                mRemoveStartingWindow.run();
             if (mContainer == null) {
                 return;
             }
-            if (mContainer.startingWindow != null) {
-                contents = mContainer.startingSurface;
-                token = mContainer.token;
-                mContainer.startingData = null;
-                mContainer.startingSurface = null;
-                mContainer.startingWindow = null;
-                mContainer.startingDisplayed = false;
-            }
-        }
-        if (contents != null) {
-            try {
-                mService.mPolicy.removeSplashScreen(token, contents);
-            } catch (Exception e) {
-                Slog.w(TAG_WM, "Exception when removing starting window", e);
             }
         }
     };
@@ -389,7 +380,7 @@ public class AppWindowContainerController
 
     public boolean addStartingWindow(String pkg, int theme, CompatibilityInfo compatInfo,
             CharSequence nonLocalizedLabel, int labelRes, int icon, int logo, int windowFlags,
-            IBinder transferFrom, boolean createIfNeeded) {
+            IBinder transferFrom, boolean newTask, boolean taskSwitch, boolean processRunning) {
         synchronized(mWindowMap) {
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "setAppStartingWindow: token=" + mToken
                     + " pkg=" + pkg + " transferFrom=" + transferFrom);
@@ -407,6 +398,12 @@ public class AppWindowContainerController
 
             if (mContainer.startingData != null) {
                 return false;
+            }
+
+            final int type = getStartingWindowType(newTask, taskSwitch, processRunning);
+
+            if (type == STARTING_WINDOW_TYPE_SNAPSHOT) {
+                return createSnapshot();
             }
 
             // If this is a translucent window, then don't show a starting window -- the current
@@ -458,27 +455,50 @@ public class AppWindowContainerController
                 return true;
             }
 
-            // There is no existing starting window, and the caller doesn't
-            // want us to create one, so that's it!
-            if (!createIfNeeded) {
+            // There is no existing starting window, and we don't want to create a splash screen, so
+            // that's it!
+            if (type != STARTING_WINDOW_TYPE_SPLASH_SCREEN) {
                 return false;
             }
 
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Creating StartingData");
-            mContainer.startingData = new StartingData(pkg, theme, compatInfo, nonLocalizedLabel,
-                    labelRes, icon, logo, windowFlags);
+            mContainer.startingData = new SplashScreenStartingData(mService, mContainer, pkg, theme,
+                    compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
+                    mContainer.getMergedOverrideConfiguration());
             scheduleAddStartingWindow();
         }
         return true;
     }
 
-    void scheduleAddStartingWindow() {
+    private int getStartingWindowType(boolean newTask, boolean taskSwitch, boolean processRunning) {
+        if (newTask || !processRunning) {
+            return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
+        } else if (taskSwitch) {
+            return STARTING_WINDOW_TYPE_SNAPSHOT;
+        } else {
+            return STARTING_WINDOW_TYPE_NONE;
+        }
+    }
 
+    void scheduleAddStartingWindow() {
         // Note: we really want to do sendMessageAtFrontOfQueue() because we
         // want to process the message ASAP, before any other queued
         // messages.
         if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Enqueueing ADD_STARTING");
         mHandler.postAtFrontOfQueue(mAddStartingWindow);
+    }
+
+    private boolean createSnapshot() {
+        final GraphicBuffer snapshot = mService.mTaskSnapshotController.getSnapshot(
+                mContainer.mTask);
+
+        if (snapshot == null) {
+            return false;
+        }
+
+        mContainer.startingData = new SnapshotStartingData(mService, mContainer, snapshot);
+        scheduleAddStartingWindow();
+        return true;
     }
 
     public void removeStartingWindow() {
@@ -593,7 +613,7 @@ public class AppWindowContainerController
             }
             return dc.screenshotApplications(mToken.asBinder(), width, height,
                     false /* includeFullDisplay */, frameScale, Bitmap.Config.RGB_565,
-                    false /* wallpaperOnly */);
+                    false /* wallpaperOnly */, false /* includeDecor */, true /* toAshmem */);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
         }

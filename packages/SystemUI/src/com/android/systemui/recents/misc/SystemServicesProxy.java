@@ -22,13 +22,15 @@ import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 
 import android.app.ActivityManager;
+import android.app.ActivityManager.TaskThumbnailInfo;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
-import android.app.ITaskStackListener;
+import android.app.KeyguardManager;
 import android.app.UiModeManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -45,6 +47,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.GraphicBuffer;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
@@ -74,13 +77,13 @@ import android.view.WindowManager;
 import android.view.WindowManager.KeyboardShortcutsReceiver;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
-import android.app.KeyguardManager;
 
 import com.android.internal.app.AssistUtils;
 import com.android.internal.os.BackgroundThread;
 import com.android.systemui.R;
 import com.android.systemui.pip.tv.PipMenuActivity;
 import com.android.systemui.pip.tv.PipOnboardingActivity;
+import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.RecentsImpl;
@@ -603,7 +606,7 @@ public class SystemServicesProxy {
         }
 
         getThumbnail(taskId, thumbnailData);
-        if (thumbnailData.thumbnail != null) {
+        if (thumbnailData.thumbnail != null && !ActivityManager.ENABLE_TASK_SNAPSHOTS) {
             thumbnailData.thumbnail.setHasAlpha(false);
             // We use a dumb heuristic for now, if the thumbnail is purely transparent in the top
             // left pixel, then assume the whole thumbnail is transparent. Generally, proper
@@ -627,25 +630,43 @@ public class SystemServicesProxy {
             return;
         }
 
-        ActivityManager.TaskThumbnail taskThumbnail = mAm.getTaskThumbnail(taskId);
-        if (taskThumbnail == null) {
-            return;
-        }
-
-        Bitmap thumbnail = taskThumbnail.mainThumbnail;
-        ParcelFileDescriptor descriptor = taskThumbnail.thumbnailFileDescriptor;
-        if (thumbnail == null && descriptor != null) {
-            thumbnail = BitmapFactory.decodeFileDescriptor(descriptor.getFileDescriptor(),
-                    null, sBitmapOptions);
-        }
-        if (descriptor != null) {
+        if (ActivityManager.ENABLE_TASK_SNAPSHOTS) {
+            GraphicBuffer graphicBuffer = null;
             try {
-                descriptor.close();
-            } catch (IOException e) {
+                graphicBuffer = ActivityManager.getService().getTaskSnapshot(taskId);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed to retrieve snapshot", e);
             }
+            if (graphicBuffer != null) {
+                thumbnailDataOut.thumbnail = Bitmap.createHardwareBitmap(graphicBuffer);
+            } else {
+                thumbnailDataOut.thumbnail = null;
+            }
+
+            // TODO: Retrieve screen orientation.
+            thumbnailDataOut.thumbnailInfo = new TaskThumbnailInfo();
+            thumbnailDataOut.thumbnailInfo.screenOrientation = ORIENTATION_PORTRAIT;
+        } else {
+            ActivityManager.TaskThumbnail taskThumbnail = mAm.getTaskThumbnail(taskId);
+            if (taskThumbnail == null) {
+                return;
+            }
+
+            Bitmap thumbnail = taskThumbnail.mainThumbnail;
+            ParcelFileDescriptor descriptor = taskThumbnail.thumbnailFileDescriptor;
+            if (thumbnail == null && descriptor != null) {
+                thumbnail = BitmapFactory.decodeFileDescriptor(descriptor.getFileDescriptor(),
+                        null, sBitmapOptions);
+            }
+            if (descriptor != null) {
+                try {
+                    descriptor.close();
+                } catch (IOException e) {
+                }
+            }
+            thumbnailDataOut.thumbnail = thumbnail;
+            thumbnailDataOut.thumbnailInfo = taskThumbnail.thumbnailInfo;
         }
-        thumbnailDataOut.thumbnail = thumbnail;
-        thumbnailDataOut.thumbnailInfo = taskThumbnail.thumbnailInfo;
     }
 
     /**

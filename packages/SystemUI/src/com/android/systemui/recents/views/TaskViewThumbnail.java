@@ -239,8 +239,7 @@ public class TaskViewThumbnail extends View {
             // We consider this a stack task if it is not freeform (ie. has no bounds) or has been
             // dragged into the stack from the freeform workspace
             boolean isStackTask = !mTask.isFreeformTask() || mTask.bounds == null;
-            if (mTaskViewRect.isEmpty() || mThumbnailInfo == null ||
-                    mThumbnailInfo.taskWidth == 0 || mThumbnailInfo.taskHeight == 0) {
+            if (mTaskViewRect.isEmpty() || mThumbnailInfo == null) {
                 // If we haven't measured or the thumbnail is invalid, skip the thumbnail drawing
                 // and only draw the background color
                 mThumbnailScale = 0f;

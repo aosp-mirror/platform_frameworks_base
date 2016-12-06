@@ -34,6 +34,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.GraphicBuffer;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Debug;
@@ -543,6 +544,13 @@ final class TaskRecord extends ConfigurationContainer {
 
     void cancelThumbnailTransition() {
         mWindowContainerController.cancelThumbnailTransition();
+    }
+
+    public GraphicBuffer getSnapshot() {
+        if (mWindowContainerController == null) {
+            return null;
+        }
+        return mWindowContainerController.getSnapshot();
     }
 
     void touchActiveTime() {

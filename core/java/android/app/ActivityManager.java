@@ -125,6 +125,16 @@ public class ActivityManager {
 
     private static volatile boolean sSystemReady = false;
 
+    /**
+     * System property to enable task snapshots.
+     * @hide
+     */
+    public final static boolean ENABLE_TASK_SNAPSHOTS;
+
+    static {
+        ENABLE_TASK_SNAPSHOTS = SystemProperties.getBoolean("persist.enable_task_snapshots", false);
+    }
+
     static final class UidObserver extends IUidObserver.Stub {
         final OnUidImportanceListener mListener;
 

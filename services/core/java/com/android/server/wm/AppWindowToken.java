@@ -205,7 +205,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         // We now have a good window to show, remove dead placeholders
         removeDeadWindows();
 
-        if (startingData != null) {
+        if (startingWindow != null) {
             if (DEBUG_STARTING_WINDOW || DEBUG_ANIM) Slog.v(TAG, "Finish starting "
                     + win.mToken + ": first real window is shown, no animation");
             // If this initial window is animating, stop it -- we will do an animation to reveal
@@ -671,7 +671,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         } else if (mChildren.size() == 0 && startingData != null) {
             // If this is the last window and we had requested a starting transition window,
             // well there is no point now.
-            if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Nulling last startingWindow");
+            if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Nulling last startingData");
             startingData = null;
         } else if (mChildren.size() == 1 && startingSurface != null) {
             // If this is the last window except for a starting transition window,

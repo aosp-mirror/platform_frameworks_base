@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.graphics.GraphicBuffer;
 import android.graphics.Point;
 import android.graphics.Rect;
 import com.android.internal.app.IAssistScreenshotReceiver;

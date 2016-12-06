@@ -16,7 +16,13 @@
 
 package com.android.server.policy;
 
+import static com.android.server.policy.PhoneWindowManager.DEBUG_SPLASH_SCREEN;
+
+import android.os.Debug;
+import android.os.IBinder;
+import android.util.Slog;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
 import android.view.WindowManagerPolicy.StartingSurface;
 
@@ -30,9 +36,21 @@ import com.android.internal.policy.PhoneWindow;
  */
 class SplashScreenSurface implements StartingSurface {
 
-    final View view;
+    private static final String TAG = PhoneWindowManager.TAG;
+    private final View mView;
+    private final IBinder mAppToken;
 
-    SplashScreenSurface(View view) {
-        this.view = view;
+    SplashScreenSurface(View view, IBinder appToken) {
+        mView = view;
+        mAppToken = appToken;
+    }
+
+    @Override
+    public void remove() {
+        if (DEBUG_SPLASH_SCREEN) Slog.v(TAG, "Removing splash screen window for " + mAppToken + ": "
+                        + this + " Callers=" + Debug.getCallers(4));
+
+        final WindowManager wm = mView.getContext().getSystemService(WindowManager.class);
+        wm.removeView(mView);
     }
 }
