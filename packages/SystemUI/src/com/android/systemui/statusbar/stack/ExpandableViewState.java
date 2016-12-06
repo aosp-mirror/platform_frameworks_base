@@ -80,6 +80,12 @@ public class ExpandableViewState extends ViewState {
      */
     public static final int LOCATION_GONE = 0x40;
 
+    /**
+     * The visible locations of a view.
+     */
+    public static final int VISIBLE_LOCATIONS = ExpandableViewState.LOCATION_FIRST_HUN
+            | ExpandableViewState.LOCATION_MAIN_AREA;
+
     public int height;
     public boolean dimmed;
     public boolean dark;
