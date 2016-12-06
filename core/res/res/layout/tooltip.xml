@@ -25,15 +25,17 @@
     <TextView
         android:id="@android:id/message"
         android:layout_width="wrap_content"
-        android:layout_height="@dimen/tooltip_height"
+        android:layout_height="wrap_content"
         android:layout_margin="@dimen/tooltip_margin"
         android:paddingStart="@dimen/tooltip_horizontal_padding"
         android:paddingEnd="@dimen/tooltip_horizontal_padding"
-        android:gravity="center"
+        android:paddingTop="@dimen/tooltip_vertical_padding"
+        android:paddingBottom="@dimen/tooltip_vertical_padding"
+        android:maxWidth="256dp"
         android:background="?android:attr/tooltipFrameBackground"
         android:textAppearance="@style/TextAppearance.Tooltip"
         android:textColor="?android:attr/tooltipForegroundColor"
-        android:singleLine="true"
+        android:maxLines="3"
         android:ellipsize="end"
     />
 

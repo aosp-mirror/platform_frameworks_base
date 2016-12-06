@@ -2477,7 +2477,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                   1               PFLAG3_ASSIST_BLOCKED
      *                  1                PFLAG3_CLUSTER
      *                 1                 PFLAG3_SECTION
-     *           xxxxxx                  * NO LONGER NEEDED, SHOULD BE REUSED *
+     *                1                  PFLAG3_FINGER_DOWN
+     *           xxxxx                   * NO LONGER NEEDED, SHOULD BE REUSED *
      *          1                        PFLAG3_OVERLAPPING_RENDERING_FORCED_VALUE
      *         1                         PFLAG3_HAS_OVERLAPPING_RENDERING_FORCED
      *        1                          PFLAG3_TEMPORARY_DETACH
@@ -2690,6 +2691,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #setKeyboardNavigationSection(boolean)
      */
     private static final int PFLAG3_SECTION = 0x10000;
+
+    /**
+     * Indicates that the user is currently touching the screen.
+     * Currently used for the tooltip positioning only.
+     */
+    private static final int PFLAG3_FINGER_DOWN = 0x20000;
 
     /**
      * Whether this view has rendered elements that overlap (see {@link
@@ -10661,6 +10668,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (isPressed()) {
                 setPressed(false);
             }
+            mPrivateFlags3 &= ~PFLAG3_FINGER_DOWN;
             if (imm != null && (mPrivateFlags & PFLAG_FOCUSED) != 0) {
                 imm.focusOut(this);
             }
@@ -11562,6 +11570,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (action == MotionEvent.ACTION_UP && (mPrivateFlags & PFLAG_PRESSED) != 0) {
                 setPressed(false);
             }
+            mPrivateFlags3 &= ~PFLAG3_FINGER_DOWN;
             // A disabled view that is clickable still consumes the touch
             // events, it just doesn't respond to them.
             return clickable;
@@ -11575,6 +11584,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (clickable || (viewFlags & TOOLTIP) == TOOLTIP) {
             switch (action) {
                 case MotionEvent.ACTION_UP:
+                    mPrivateFlags3 &= ~PFLAG3_FINGER_DOWN;
                     if ((viewFlags & TOOLTIP) == TOOLTIP) {
                         handleTooltipUp();
                     }
@@ -11639,6 +11649,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     break;
 
                 case MotionEvent.ACTION_DOWN:
+                    if (event.getSource() == InputDevice.SOURCE_TOUCHSCREEN) {
+                        mPrivateFlags3 |= PFLAG3_FINGER_DOWN;
+                    }
                     mHasPerformedLongPress = false;
 
                     if (!clickable) {
@@ -11679,6 +11692,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     mInContextButtonPress = false;
                     mHasPerformedLongPress = false;
                     mIgnoreNextUpEvent = false;
+                    mPrivateFlags3 &= ~PFLAG3_FINGER_DOWN;
                     break;
 
                 case MotionEvent.ACTION_MOVE:
@@ -11695,6 +11709,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         if ((mPrivateFlags & PFLAG_PRESSED) != 0) {
                             setPressed(false);
                         }
+                        mPrivateFlags3 &= ~PFLAG3_FINGER_DOWN;
                     }
                     break;
             }
@@ -24440,7 +24455,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         hideTooltip();
         mTooltipInfo.mTooltipFromLongClick = fromLongClick;
         mTooltipInfo.mTooltipPopup = new TooltipPopup(getContext());
-        mTooltipInfo.mTooltipPopup.show(this, x, y, tooltipText);
+        final boolean fromTouch = (mPrivateFlags3 & PFLAG3_FINGER_DOWN) == PFLAG3_FINGER_DOWN;
+        mTooltipInfo.mTooltipPopup.show(this, x, y, fromTouch, tooltipText);
         mAttachInfo.mTooltipHost = this;
         return true;
     }

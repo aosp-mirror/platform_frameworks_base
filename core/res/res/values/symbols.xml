@@ -437,7 +437,9 @@
   <java-symbol type="dimen" name="textview_error_popup_default_width" />
   <java-symbol type="dimen" name="toast_y_offset" />
   <java-symbol type="dimen" name="tooltip_precise_anchor_threshold" />
-  <java-symbol type="dimen" name="tooltip_y_offset" />
+  <java-symbol type="dimen" name="tooltip_precise_anchor_extra_offset" />
+  <java-symbol type="dimen" name="tooltip_y_offset_touch" />
+  <java-symbol type="dimen" name="tooltip_y_offset_non_touch" />
   <java-symbol type="dimen" name="action_bar_stacked_max_height" />
   <java-symbol type="dimen" name="action_bar_stacked_tab_max_width" />
   <java-symbol type="dimen" name="notification_text_size" />
