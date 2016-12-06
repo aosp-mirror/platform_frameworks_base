@@ -37,8 +37,6 @@ import java.util.Arrays;
 public final class Installer extends SystemService {
     private static final String TAG = "Installer";
 
-    private static final boolean USE_BINDER = true;
-
     /* ***************************************************************************
      * IMPORTANT: These values are passed to native code. Keep them in sync with
      * frameworks/native/cmds/installd/installd.h
@@ -63,6 +61,8 @@ public final class Installer extends SystemService {
     private final InstallerConnection mInstaller;
     private final IInstalld mInstalld;
 
+    private volatile Object mWarnIfHeld;
+
     public Installer(Context context) {
         super(context);
         mInstaller = new InstallerConnection();
@@ -85,6 +85,7 @@ public final class Installer extends SystemService {
      */
     public void setWarnIfHeld(Object warnIfHeld) {
         mInstaller.setWarnIfHeld(warnIfHeld);
+        mWarnIfHeld = warnIfHeld;
     }
 
     @Override
@@ -93,18 +94,21 @@ public final class Installer extends SystemService {
         mInstaller.waitForConnection();
     }
 
-    public void createAppData(String uuid, String pkgname, int userid, int flags, int appid,
-            String seinfo, int targetSdkVersion) throws InstallerException {
-        if (USE_BINDER) {
-            try {
-                mInstalld.createAppData(uuid, pkgname, userid, flags, appid, seinfo,
-                        targetSdkVersion);
-            } catch (RemoteException | ServiceSpecificException e) {
-                throw new InstallerException(e.getMessage());
-            }
-        } else {
-            mInstaller.execute("create_app_data", uuid, pkgname, userid, flags, appid, seinfo,
+    private void checkLock() {
+        if (mWarnIfHeld != null && Thread.holdsLock(mWarnIfHeld)) {
+            Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName() + " is holding 0x"
+                    + Integer.toHexString(System.identityHashCode(mWarnIfHeld)), new Throwable());
+        }
+    }
+
+    public void createAppData(String uuid, String packageName, int userId, int flags, int appId,
+            String seInfo, int targetSdkVersion) throws InstallerException {
+        checkLock();
+        try {
+            mInstalld.createAppData(uuid, packageName, userId, flags, appId, seInfo,
                     targetSdkVersion);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new InstallerException(e.getMessage());
         }
     }
 
@@ -129,11 +133,16 @@ public final class Installer extends SystemService {
         mInstaller.execute("destroy_app_data", uuid, pkgname, userid, flags, ceDataInode);
     }
 
-    public void moveCompleteApp(String from_uuid, String to_uuid, String package_name,
-            String data_app_name, int appid, String seinfo, int targetSdkVersion)
+    public void moveCompleteApp(String fromUuid, String toUuid, String packageName,
+            String dataAppName, int appId, String seInfo, int targetSdkVersion)
             throws InstallerException {
-        mInstaller.execute("move_complete_app", from_uuid, to_uuid, package_name,
-                data_app_name, appid, seinfo, targetSdkVersion);
+        checkLock();
+        try {
+            mInstalld.moveCompleteApp(fromUuid, toUuid, packageName, dataAppName, appId, seInfo,
+                    targetSdkVersion);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new InstallerException(e.getMessage());
+        }
     }
 
     public void getAppSize(String uuid, String pkgname, int userid, int flags, long ceDataInode,
