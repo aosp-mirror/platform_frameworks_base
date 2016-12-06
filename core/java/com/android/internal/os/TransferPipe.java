@@ -16,6 +16,7 @@
 
 package com.android.internal.os;
 
+import java.io.Closeable;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -32,13 +33,13 @@ import android.util.Slog;
 /**
  * Helper for transferring data through a pipe from a client app.
  */
-public final class TransferPipe implements Runnable {
+public final class TransferPipe implements Runnable, Closeable {
     static final String TAG = "TransferPipe";
     static final boolean DEBUG = false;
 
     static final long DEFAULT_TIMEOUT = 5000;  // 5 seconds
 
-    final Thread mThread;;
+    final Thread mThread;
     final ParcelFileDescriptor[] mFds;
 
     FileDescriptor mOutFd;
@@ -54,8 +55,13 @@ public final class TransferPipe implements Runnable {
     }
 
     public TransferPipe() throws IOException {
+        this(null);
+    }
+
+    public TransferPipe(String bufferPrefix) throws IOException {
         mThread = new Thread(this, "TransferPipe");
         mFds = ParcelFileDescriptor.createPipe();
+        mBufferPrefix = bufferPrefix;
     }
 
     ParcelFileDescriptor getReadFd() {
@@ -68,6 +74,11 @@ public final class TransferPipe implements Runnable {
 
     public void setBufferPrefix(String prefix) {
         mBufferPrefix = prefix;
+    }
+
+    public static void dumpAsync(IBinder binder, FileDescriptor out, String[] args)
+            throws IOException, RemoteException {
+        goDump(binder, out, args);
     }
 
     static void go(Caller caller, IInterface iface, FileDescriptor out,
@@ -86,12 +97,9 @@ public final class TransferPipe implements Runnable {
             return;
         }
 
-        TransferPipe tp = new TransferPipe();
-        try {
+        try (TransferPipe tp = new TransferPipe()) {
             caller.go(iface, tp.getWriteFd().getFileDescriptor(), prefix, args);
             tp.go(out, timeout);
-        } finally {
-            tp.kill();
         }
     }
 
@@ -111,12 +119,9 @@ public final class TransferPipe implements Runnable {
             return;
         }
 
-        TransferPipe tp = new TransferPipe();
-        try {
+        try (TransferPipe tp = new TransferPipe()) {
             binder.dumpAsync(tp.getWriteFd().getFileDescriptor(), args);
             tp.go(out, timeout);
-        } finally {
-            tp.kill();
         }
     }
 
@@ -171,6 +176,11 @@ public final class TransferPipe implements Runnable {
             }
             mFds[num] = null;
         }
+    }
+
+    @Override
+    public void close() {
+        kill();
     }
 
     public void kill() {
