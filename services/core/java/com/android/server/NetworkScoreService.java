@@ -25,32 +25,28 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.database.ContentObserver;
 import android.net.INetworkScoreCache;
 import android.net.INetworkScoreService;
 import android.net.NetworkKey;
-import android.net.NetworkScoreManager;
 import android.net.NetworkScorerAppManager;
 import android.net.NetworkScorerAppManager.NetworkScorerAppData;
 import android.net.RecommendationRequest;
 import android.net.RecommendationResult;
 import android.net.ScoredNetwork;
+import android.net.Uri;
 import android.net.wifi.WifiConfiguration;
-import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.provider.Settings;
-import android.text.TextUtils;
+import android.provider.Settings.Global;
 import android.util.ArrayMap;
 import android.util.Log;
-
-import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.TransferPipe;
-
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -99,10 +95,10 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
      * manages the service connection.
      */
     private class NetworkScorerPackageMonitor extends PackageMonitor {
-        final String mRegisteredPackage;
+        final List<String> mPackagesToWatch;
 
-        private NetworkScorerPackageMonitor(String mRegisteredPackage) {
-            this.mRegisteredPackage = mRegisteredPackage;
+        private NetworkScorerPackageMonitor(List<String> packagesToWatch) {
+            mPackagesToWatch = packagesToWatch;
         }
 
         @Override
@@ -136,7 +132,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         }
 
         private void evaluateBinding(String scorerPackageName, boolean forceUnbind) {
-            if (mRegisteredPackage.equals(scorerPackageName)) {
+            if (mPackagesToWatch.contains(scorerPackageName)) {
                 if (DBG) {
                     Log.d(TAG, "Evaluating binding for: " + scorerPackageName
                             + ", forceUnbind=" + forceUnbind);
@@ -146,19 +142,41 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                 if (activeScorer == null) {
                     // Package change has invalidated a scorer, this will also unbind any service
                     // connection.
-                    Log.i(TAG, "Package " + mRegisteredPackage +
-                            " is no longer valid, disabling scoring.");
-                    setScorerInternal(null);
-                } else if (activeScorer.mScoringServiceClassName == null) {
-                    // The scoring service is not available, make sure it's unbound.
+                    if (DBG) Log.d(TAG, "No active scorers available.");
                     unbindFromScoringServiceIfNeeded();
-                } else { // The scoring service changed in some way.
+                } else if (activeScorer.packageName.equals(scorerPackageName)) {
+                    if (DBG) {
+                        Log.d(TAG, "Possible change to the active scorer: "
+                            + activeScorer.packageName);
+                    }
+                    // The scoring service changed in some way.
                     if (forceUnbind) {
                         unbindFromScoringServiceIfNeeded();
                     }
                     bindToScoringServiceIfNeeded(activeScorer);
                 }
             }
+        }
+    }
+
+    /**
+     * Reevaluates the service binding when the Settings toggle is changed.
+     */
+    private class SettingsObserver extends ContentObserver {
+
+        public SettingsObserver() {
+            super(null /*handler*/);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            onChange(selfChange, null);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            if (DBG) Log.d(TAG, String.format("onChange(%s, %s)", selfChange, uri));
+            bindToScoringServiceIfNeeded();
         }
     }
 
@@ -181,19 +199,8 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     /** Called when the system is ready to run third-party code but before it actually does so. */
     void systemReady() {
         if (DBG) Log.d(TAG, "systemReady");
-        ContentResolver cr = mContext.getContentResolver();
-        if (Settings.Global.getInt(cr, Settings.Global.NETWORK_SCORING_PROVISIONED, 0) == 0) {
-            // On first run, we try to initialize the scorer to the one configured at build time.
-            // This will be a no-op if the scorer isn't actually valid.
-            String defaultPackage = mContext.getResources().getString(
-                    R.string.config_defaultNetworkScorerPackageName);
-            if (!TextUtils.isEmpty(defaultPackage)) {
-                mNetworkScorerAppManager.setActiveScorer(defaultPackage);
-            }
-            Settings.Global.putInt(cr, Settings.Global.NETWORK_SCORING_PROVISIONED, 1);
-        }
-
         registerPackageMonitorIfNeeded();
+        registerRecommendationSettingObserverIfNeeded();
     }
 
     /** Called when the system is ready for us to start third-party code. */
@@ -207,29 +214,40 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         bindToScoringServiceIfNeeded();
     }
 
+    private void registerRecommendationSettingObserverIfNeeded() {
+        final List<String> providerPackages =
+            mNetworkScorerAppManager.getPotentialRecommendationProviderPackages();
+        if (!providerPackages.isEmpty()) {
+            final ContentResolver resolver = mContext.getContentResolver();
+            final Uri uri = Global.getUriFor(Global.NETWORK_RECOMMENDATIONS_ENABLED);
+            resolver.registerContentObserver(uri, false, new SettingsObserver());
+        }
+    }
+
     private void registerPackageMonitorIfNeeded() {
         if (DBG) Log.d(TAG, "registerPackageMonitorIfNeeded");
-        NetworkScorerAppData scorer = mNetworkScorerAppManager.getActiveScorer();
+        final List<String> providerPackages =
+            mNetworkScorerAppManager.getPotentialRecommendationProviderPackages();
         synchronized (mPackageMonitorLock) {
             // Unregister the current monitor if needed.
             if (mPackageMonitor != null) {
                 if (DBG) {
                     Log.d(TAG, "Unregistering package monitor for "
-                            + mPackageMonitor.mRegisteredPackage);
+                            + mPackageMonitor.mPackagesToWatch);
                 }
                 mPackageMonitor.unregister();
                 mPackageMonitor = null;
             }
 
-            // Create and register the monitor if a scorer is active.
-            if (scorer != null) {
-                mPackageMonitor = new NetworkScorerPackageMonitor(scorer.mPackageName);
+            // Create and register the monitor if there are packages that could be providers.
+            if (!providerPackages.isEmpty()) {
+                mPackageMonitor = new NetworkScorerPackageMonitor(providerPackages);
                 // TODO: Need to update when we support per-user scorers. http://b/23422763
                 mPackageMonitor.register(mContext, null /* thread */, UserHandle.SYSTEM,
                         false /* externalStorage */);
                 if (DBG) {
                     Log.d(TAG, "Registered package monitor for "
-                            + mPackageMonitor.mRegisteredPackage);
+                            + mPackageMonitor.mPackagesToWatch);
                 }
             }
         }
@@ -243,9 +261,9 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
     private void bindToScoringServiceIfNeeded(NetworkScorerAppData scorerData) {
         if (DBG) Log.d(TAG, "bindToScoringServiceIfNeeded(" + scorerData + ")");
-        if (scorerData != null && scorerData.mScoringServiceClassName != null) {
-            ComponentName componentName =
-                    new ComponentName(scorerData.mPackageName, scorerData.mScoringServiceClassName);
+        if (scorerData != null && scorerData.recommendationServiceClassName != null) {
+            ComponentName componentName = new ComponentName(scorerData.packageName,
+                    scorerData.recommendationServiceClassName);
             // If we're connected to a different component then drop it.
             if (mServiceConnection != null
                     && !mServiceConnection.mComponentName.equals(componentName)) {
@@ -270,6 +288,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
             mServiceConnection.disconnect(mContext);
         }
         mServiceConnection = null;
+        clearInternal();
     }
 
     @Override
@@ -349,7 +368,8 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         // mContext.enforceCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED, TAG);
         mContext.enforceCallingOrSelfPermission(permission.SCORE_NETWORKS, TAG);
 
-        return setScorerInternal(packageName);
+        // Scorers (recommendation providers) are selected and no longer set.
+        return false;
     }
 
     @Override
@@ -359,53 +379,10 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         if (mNetworkScorerAppManager.isCallerActiveScorer(getCallingUid()) ||
                 mContext.checkCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED) ==
                         PackageManager.PERMISSION_GRANTED) {
-            // The return value is discarded here because at this point, the call should always
-            // succeed. The only reason for failure is if the new package is not a valid scorer, but
-            // we're disabling scoring altogether here.
-            setScorerInternal(null /* packageName */);
+            // no-op for now but we could write to the setting if needed.
         } else {
             throw new SecurityException(
                     "Caller is neither the active scorer nor the scorer manager.");
-        }
-    }
-
-    /** Set the active scorer. Callers are responsible for checking permissions as appropriate. */
-    private boolean setScorerInternal(String packageName) {
-        if (DBG) Log.d(TAG, "setScorerInternal(" + packageName + ")");
-        long token = Binder.clearCallingIdentity();
-        try {
-            unbindFromScoringServiceIfNeeded();
-            // Preemptively clear scores even though the set operation could fail. We do this for
-            // safety as scores should never be compared across apps; in practice, Settings should
-            // only be allowing valid apps to be set as scorers, so failure here should be rare.
-            clearInternal();
-            // Get the scorer that is about to be replaced, if any, so we can notify it directly.
-            NetworkScorerAppData prevScorer = mNetworkScorerAppManager.getActiveScorer();
-            boolean result = mNetworkScorerAppManager.setActiveScorer(packageName);
-            // Unconditionally attempt to bind to the current scorer. If setActiveScorer() failed
-            // then we'll attempt to restore the previous binding (if any), otherwise an attempt
-            // will be made to bind to the new scorer.
-            bindToScoringServiceIfNeeded();
-            if (result) { // new scorer successfully set
-                registerPackageMonitorIfNeeded();
-
-                Intent intent = new Intent(NetworkScoreManager.ACTION_SCORER_CHANGED);
-                if (prevScorer != null) { // Directly notify the old scorer.
-                    intent.setPackage(prevScorer.mPackageName);
-                    // TODO: Need to update when we support per-user scorers. http://b/23422763
-                    mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
-                }
-
-                if (packageName != null) { // Then notify the new scorer
-                    intent.putExtra(NetworkScoreManager.EXTRA_NEW_SCORER, packageName);
-                    intent.setPackage(packageName);
-                    // TODO: Need to update when we support per-user scorers. http://b/23422763
-                    mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
-                }
-            }
-            return result;
-        } finally {
-            Binder.restoreCallingIdentity(token);
         }
     }
 
@@ -486,7 +463,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
             writer.println("Scoring is disabled.");
             return;
         }
-        writer.println("Current scorer: " + currentScorer.mPackageName);
+        writer.println("Current scorer: " + currentScorer.packageName);
 
         sendCallback(new Consumer<INetworkScoreCache>() {
             @Override
