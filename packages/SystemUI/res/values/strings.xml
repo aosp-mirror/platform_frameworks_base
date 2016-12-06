@@ -840,10 +840,10 @@
     <!-- Shows when people have pressed the unlock icon to explain how to unlock. [CHAR LIMIT=60] -->
     <string name="keyguard_unlock">Swipe up to unlock</string>
 
-    <!-- Text on keyguard screen indicating that the device is enterprise-managed by a Device Owner [CHAR LIMIT=60] -->
+    <!-- Text on keyguard screen and in Quick Settings footer indicating that the device is enterprise-managed by a Device Owner [CHAR LIMIT=60] -->
     <string name="do_disclosure_generic">This device is managed</string>
 
-    <!-- Text on keyguard screen indicating that the device is enterprise-managed by a Device Owner [CHAR LIMIT=40] -->
+    <!-- Text on keyguard screen and in Quick Settings footer indicating that the device is enterprise-managed by a Device Owner [CHAR LIMIT=40] -->
     <string name="do_disclosure_with_name">This device is managed by <xliff:g id="organization_name" example="Foo, Inc.">%s</xliff:g></string>
 
     <!-- Shows when people have clicked on the phone icon [CHAR LIMIT=60] -->
@@ -992,9 +992,6 @@
     <!-- Text which is shown in the notification shade when there are no notifications. [CHAR LIMIT=30] -->
     <string name="empty_shade_text">No notifications</string>
 
-    <!-- Footer device owned text [CHAR LIMIT=50] -->
-    <string name="device_owned_footer">Device may be monitored</string>
-
     <!-- Footer profile owned text [CHAR LIMIT=50] -->
     <string name="profile_owned_footer">Profile may be monitored</string>
 
@@ -1019,14 +1016,26 @@
     <!-- Monitoring dialog disconnect vpn button [CHAR LIMIT=30] -->
     <string name="disconnect_vpn">Disconnect VPN</string>
 
-    <!-- Monitoring dialog device owner body text [CHAR LIMIT=400] -->
-    <string name="monitoring_description_device_owned">Your device is managed by <xliff:g id="organization">%1$s</xliff:g>.\n\nYour administrator can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information. For more information, contact your administrator.</string>
+    <!-- Monitoring dialog: Header indicating that the device is managed by a Device Owner app [CHAR LIMIT=80] -->
+    <string name="monitoring_description_do_header_generic">Your device is managed by <xliff:g id="device_owner_app" example="Google Mobile Management">%1$s</xliff:g>.</string>
+
+    <!-- Monitoring dialog: Header indicating that the device is managed by a Device Owner app [CHAR LIMIT=60] -->
+    <string name="monitoring_description_do_header_with_name"><xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g> uses <xliff:g id="device_owner_app" example="Google Mobile Management">%2$s</xliff:g> to manage your device.</string>
+
+    <!-- Monitoring dialog: Part of text body explaining what a Device Owner app can do [CHAR LIMIT=130] -->
+    <string name="monitoring_description_do_body">Your administrator can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.</string>
+
+    <!-- Monitoring dialog: Part of text body explaining that a VPN is connected and what it can do, for devices managed by a Device Owner app [CHAR LIMIT=130] -->
+    <string name="monitoring_description_do_body_vpn">You\'re connected to <xliff:g id="vpn_app">%1$s</xliff:g>, which can monitor your network activity, including emails, apps, and websites.</string>
+
+    <!-- Monitoring dialog: Space that separates the body text and the "learn more" link that follows it. [CHAR LIMIT=5] -->
+    <string name="monitoring_description_do_learn_more_separator">" "</string>
+
+    <!-- Monitoring dialog: Link to learn more about what a Device Owner app can do [CHAR LIMIT=55] -->
+    <string name="monitoring_description_do_learn_more">Learn more</string>
 
     <!-- Monitoring dialog VPN text [CHAR LIMIT=400] -->
     <string name="monitoring_description_vpn">You gave an app permission to set up a VPN connection.\n\nThis app can monitor your device and network activity, including emails, apps, and websites.</string>
-
-    <!-- Monitoring dialog VPN with device owner text [CHAR LIMIT=400] -->
-    <string name="monitoring_description_vpn_device_owned">Your device is managed by <xliff:g id="organization">%1$s</xliff:g>.\n\nYour administrator can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.\n\nYou\'re connected to a VPN, which can monitor your network activity, including emails, apps, and websites.\n\nFor more information, contact your administrator.</string>
 
     <!-- Monitoring dialog VPN with profile owner text [CHAR LIMIT=400] -->
     <string name="monitoring_description_vpn_profile_owned">Your work profile is managed by <xliff:g id="organization">%1$s</xliff:g>.\n\nYour administrator is capable of monitoring your network activity including emails, apps, and websites.\n\nFor more information, contact your administrator.\n\nYou\'re also connected to a VPN, which can monitor your network activity.</string>
@@ -1048,9 +1057,6 @@
 
     <!-- Monitoring dialog text for multiple apps (in personal and work profiles) [CHAR LIMIT=400] -->
     <string name="monitoring_description_app_personal_work">Your work profile is managed by <xliff:g id="organization">%1$s</xliff:g>. It is connected to <xliff:g id="application_work">%2$s</xliff:g>, which can monitor your work network activity, including emails, apps, and websites.\n\nYou\'re also connected to <xliff:g id="application_personal">%3$s</xliff:g>, which can monitor your personal network activity.</string>
-
-    <!-- Monitoring dialog text for single app (with device owner) [CHAR LIMIT=400] -->
-    <string name="monitoring_description_vpn_app_device_owned">Your device is managed by <xliff:g id="organization">%1$s</xliff:g>.\n\nYour administrator can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.\n\nYou\'re connected to <xliff:g id="application">%2$s</xliff:g>, which can monitor your network activity, including emails, apps, and websites.\n\nFor more information, contact your administrator.</string>
 
     <!-- Indication on the keyguard that appears when the user disables trust agents until the next time they unlock manually. [CHAR LIMIT=NONE] -->
     <string name="keyguard_indication_trust_disabled">Device will stay locked until you manually unlock</string>

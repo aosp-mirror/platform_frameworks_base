@@ -24,10 +24,15 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.UserHandle;
+import android.provider.Settings;
+import android.text.SpannableStringBuilder;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -52,12 +57,12 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
     private SecurityController mSecurityController;
     private AlertDialog mDialog;
     private QSTileHost mHost;
-    private Handler mHandler;
+    protected Handler mHandler;
     private final Handler mMainHandler;
 
     private boolean mIsVisible;
     private boolean mIsIconVisible;
-    private int mFooterTextId;
+    private CharSequence mFooterTextContent = null;
     private int mFooterIconId;
 
     public QSFooter(QSPanel qsPanel, Context context) {
@@ -68,13 +73,14 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
         mFooterIcon = (ImageView) mRootView.findViewById(R.id.footer_icon);
         mFooterIconId = R.drawable.ic_qs_vpn;
         mContext = context;
-        mMainHandler = new Handler();
+        mMainHandler = new Handler(Looper.getMainLooper());
     }
 
-    public void setHost(QSTileHost host) {
+    public void setHostEnvironment(QSTileHost host, SecurityController securityController,
+            Looper looper) {
         mHost = host;
-        mSecurityController = host.getSecurityController();
-        mHandler = new H(host.getLooper());
+        mSecurityController = securityController;
+        mHandler = new H(looper);
     }
 
     public void setListening(boolean listening) {
@@ -114,14 +120,21 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
 
     private void handleRefreshState() {
         mIsIconVisible = mSecurityController.isVpnEnabled();
-        // If the device has device owner, show "Device may be monitored", but --
-        // TODO See b/25779452 -- device owner doesn't actually have monitoring power.
         if (mSecurityController.isDeviceManaged()) {
-            mFooterTextId = R.string.device_owned_footer;
+            final CharSequence organizationName =
+                    mSecurityController.getDeviceOwnerOrganizationName();
+            if (organizationName != null) {
+                mFooterTextContent = mContext.getResources().getString(
+                        R.string.do_disclosure_with_name, organizationName);
+            } else {
+                mFooterTextContent =
+                        mContext.getResources().getString(R.string.do_disclosure_generic);
+            }
             mIsVisible = true;
         } else {
             boolean isBranded = mSecurityController.isVpnBranded();
-            mFooterTextId = isBranded ? R.string.branded_vpn_footer : R.string.vpn_footer;
+            mFooterTextContent = mContext.getResources().getText(
+                    isBranded ? R.string.branded_vpn_footer : R.string.vpn_footer);
             // Update the VPN footer icon, if needed.
             int footerIconId = isBranded ? R.drawable.ic_qs_branded_vpn : R.drawable.ic_qs_vpn;
             if (mFooterIconId != footerIconId) {
@@ -142,23 +155,36 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
     }
 
     private void createDialog() {
-        String deviceOwner = mSecurityController.getDeviceOwnerName();
-        String profileOwner = mSecurityController.getProfileOwnerName();
-        String primaryVpn = mSecurityController.getPrimaryVpnName();
-        String profileVpn = mSecurityController.getProfileVpnName();
-        boolean managed = mSecurityController.hasProfileOwner();
-        boolean isBranded = deviceOwner == null && mSecurityController.isVpnBranded();
+        final String deviceOwnerPackage = mSecurityController.getDeviceOwnerName();
+        final String profileOwnerPackage = mSecurityController.getProfileOwnerName();
+        final String primaryVpn = mSecurityController.getPrimaryVpnName();
+        final String profileVpn = mSecurityController.getProfileVpnName();
+        final CharSequence deviceOwnerOrganization =
+                mSecurityController.getDeviceOwnerOrganizationName();
+        boolean hasProfileOwner = mSecurityController.hasProfileOwner();
+        boolean isBranded = deviceOwnerPackage == null && mSecurityController.isVpnBranded();
 
         mDialog = new SystemUIDialog(mContext);
         if (!isBranded) {
-            mDialog.setTitle(getTitle(deviceOwner));
+            mDialog.setTitle(getTitle(deviceOwnerPackage));
         }
-        mDialog.setMessage(getMessage(deviceOwner, profileOwner, primaryVpn, profileVpn, managed,
-                isBranded));
+        mDialog.setMessage(getMessage(deviceOwnerPackage, profileOwnerPackage, primaryVpn,
+                profileVpn, deviceOwnerOrganization, hasProfileOwner, isBranded));
+
         mDialog.setButton(DialogInterface.BUTTON_POSITIVE, getPositiveButton(isBranded), this);
         if (mSecurityController.isVpnEnabled() && !mSecurityController.isVpnRestricted()) {
             mDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getSettingsButton(), this);
         }
+
+        // Make the link "learn more" clickable.
+        // TODO: Reaching into SystemUIDialog's internal View hierarchy is ugly and error-prone.
+        // This is a temporary solution. b/33126622 will introduce a custom View hierarchy for this
+        // dialog, allowing us to set the movement method on the appropriate View without any
+        // knowledge of SystemUIDialog's internals.
+        mDialog.create();
+        ((TextView) mDialog.getWindow().findViewById(com.android.internal.R.id.message))
+                .setMovementMethod(new LinkMovementMethod());
+
         mDialog.show();
     }
 
@@ -170,22 +196,35 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
         return mContext.getString(isBranded ? android.R.string.ok : R.string.quick_settings_done);
     }
 
-    private String getMessage(String deviceOwner, String profileOwner, String primaryVpn,
-            String profileVpn, boolean primaryUserIsManaged, boolean isBranded) {
-        // Show a special warning when the device has device owner, but --
-        // TODO See b/25779452 -- device owner doesn't actually have monitoring power.
-        if (deviceOwner != null) {
-            if (primaryVpn != null) {
-                return mContext.getString(R.string.monitoring_description_vpn_app_device_owned,
-                        deviceOwner, primaryVpn);
+    protected CharSequence getMessage(String deviceOwnerPackage, String profileOwnerPackage,
+            String primaryVpn, String profileVpn, CharSequence deviceOwnerOrganization,
+            boolean hasProfileOwner, boolean isBranded) {
+        if (deviceOwnerPackage != null) {
+            final SpannableStringBuilder message = new SpannableStringBuilder();
+            if (deviceOwnerOrganization != null) {
+                message.append(mContext.getString(
+                        R.string.monitoring_description_do_header_with_name,
+                        deviceOwnerOrganization, deviceOwnerPackage));
             } else {
-                return mContext.getString(R.string.monitoring_description_device_owned,
-                        deviceOwner);
+                message.append(mContext.getString(R.string.monitoring_description_do_header_generic,
+                        deviceOwnerPackage));
             }
+            message.append("\n\n");
+            message.append(mContext.getString(R.string.monitoring_description_do_body));
+            if (primaryVpn != null) {
+                message.append("\n\n");
+                message.append(mContext.getString(R.string.monitoring_description_do_body_vpn,
+                        primaryVpn));
+            }
+            message.append(mContext.getString(
+                    R.string.monitoring_description_do_learn_more_separator));
+            message.append(mContext.getString(R.string.monitoring_description_do_learn_more),
+                    new EnterprisePrivacySpan(), 0);
+            return message;
         } else if (primaryVpn != null) {
             if (profileVpn != null) {
                 return mContext.getString(R.string.monitoring_description_app_personal_work,
-                        profileOwner, profileVpn, primaryVpn);
+                        profileOwnerPackage, profileVpn, primaryVpn);
             } else {
                 if (isBranded) {
                     return mContext.getString(R.string.branded_monitoring_description_app_personal,
@@ -197,10 +236,10 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
             }
         } else if (profileVpn != null) {
             return mContext.getString(R.string.monitoring_description_app_work,
-                    profileOwner, profileVpn);
-        } else if (profileOwner != null && primaryUserIsManaged) {
+                    profileOwnerPackage, profileVpn);
+        } else if (profileOwnerPackage != null && hasProfileOwner) {
             return mContext.getString(R.string.monitoring_description_device_owned,
-                    profileOwner);
+                    profileOwnerPackage);
         } else {
             // No device owner, no personal VPN, no work VPN, no user owner. Why are we here?
             return null;
@@ -225,8 +264,8 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
     private final Runnable mUpdateDisplayState = new Runnable() {
         @Override
         public void run() {
-            if (mFooterTextId != 0) {
-                mFooterText.setText(mFooterTextId);
+            if (mFooterTextContent != null) {
+                mFooterText.setText(mFooterTextContent);
             }
             mRootView.setVisibility(mIsVisible ? View.VISIBLE : View.GONE);
             mFooterIcon.setVisibility(mIsIconVisible ? View.VISIBLE : View.INVISIBLE);
@@ -267,4 +306,18 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
         }
     }
 
+    protected class EnterprisePrivacySpan extends ClickableSpan {
+        @Override
+        public void onClick(View widget) {
+            final Intent intent = new Intent(Settings.ACTION_ENTERPRISE_PRIVACY_SETTINGS);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            mDialog.dismiss();
+            mContext.startActivity(intent);
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            return object instanceof EnterprisePrivacySpan;
+        }
+    }
 }

@@ -130,6 +130,11 @@ public class SecurityControllerImpl implements SecurityController {
     }
 
     @Override
+    public CharSequence getDeviceOwnerOrganizationName() {
+        return mDevicePolicyManager.getDeviceOwnerOrganizationName();
+    }
+
+    @Override
     public String getPrimaryVpnName() {
         VpnConfig cfg = mCurrentVpns.get(mVpnUserId);
         if (cfg != null) {

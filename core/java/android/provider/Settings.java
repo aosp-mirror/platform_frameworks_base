@@ -1321,6 +1321,20 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_WEBVIEW_SETTINGS = "android.settings.WEBVIEW_SETTINGS";
 
+    /**
+     * Activity Action: Show enterprise privacy section.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_ENTERPRISE_PRIVACY_SETTINGS
+            = "android.settings.ENTERPRISE_PRIVACY_SETTINGS";
+
     // End of Intent actions for Settings
 
     /**
