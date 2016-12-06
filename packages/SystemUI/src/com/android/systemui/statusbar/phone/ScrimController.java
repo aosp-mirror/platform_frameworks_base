@@ -556,10 +556,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         mScrimBehind.setExcludedArea(area);
     }
 
-    public void setLeftInset(int inset) {
-        mScrimBehind.setLeftInset(inset);
-    }
-
     public int getScrimBehindColor() {
         return mScrimBehind.getScrimColorWithAlpha();
     }
