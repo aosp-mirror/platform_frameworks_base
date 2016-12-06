@@ -98,9 +98,9 @@ public class WindowTestsBase {
         Assert.assertTrue("Excepted " + first + " to be greater than " + second, first > second);
     }
 
-    WindowToken createWindowToken(DisplayContent dc, int type) {
+    private WindowToken createWindowToken(DisplayContent dc, int type) {
         if (type < FIRST_APPLICATION_WINDOW || type > LAST_APPLICATION_WINDOW) {
-            return new WindowToken(sWm, mock(IBinder.class), type, false, dc);
+            return new TestWindowToken(type, dc);
         }
 
         final int stackId = sNextStackId++;
@@ -108,7 +108,7 @@ public class WindowTestsBase {
         final TaskStack stack = sWm.mStackIdToStack.get(stackId);
         final Task task = new Task(sNextTaskId++, stack, 0, sWm, null, EMPTY, false);
         stack.addTask(task, true);
-        final AppWindowToken token = new AppWindowToken(sWm, null, false, dc);
+        final TestAppWindowToken token = new TestAppWindowToken(dc);
         task.addAppToken(0, token, 0, false);
         return token;
     }
@@ -128,5 +128,49 @@ public class WindowTestsBase {
         // adding it to the token...
         token.addWindow(w);
         return w;
+    }
+
+    /* Used so we can gain access to some protected members of the {@link WindowToken} class */
+    class TestWindowToken extends WindowToken {
+
+        TestWindowToken(int type, DisplayContent dc) {
+            this(type, dc, false /* persistOnEmpty */);
+        }
+
+        TestWindowToken(int type, DisplayContent dc, boolean persistOnEmpty) {
+            super(sWm, mock(IBinder.class), type, persistOnEmpty, dc);
+        }
+
+        int getWindowsCount() {
+            return mChildren.size();
+        }
+
+        boolean hasWindow(WindowState w) {
+            return mChildren.contains(w);
+        }
+    }
+
+    /* Used so we can gain access to some protected members of the {@link AppWindowToken} class */
+    class TestAppWindowToken extends AppWindowToken {
+
+        TestAppWindowToken(DisplayContent dc) {
+            super(sWm, null, false, dc);
+        }
+
+        int getWindowsCount() {
+            return mChildren.size();
+        }
+
+        boolean hasWindow(WindowState w) {
+            return mChildren.contains(w);
+        }
+
+        WindowState getFirstChild() {
+            return mChildren.getFirst();
+        }
+
+        WindowState getLastChild() {
+            return mChildren.getLast();
+        }
     }
 }

@@ -1654,7 +1654,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "Removing " + win + " from " + token);
         // Window will already be removed from token before this post clean-up method is called.
         if (token.isEmpty()) {
-            if (!token.explicit) {
+            if (!token.mPersistOnEmpty) {
                 token.removeImmediately();
             } else if (atoken != null) {
                 // TODO: Should this be moved into AppWindowToken.removeWindow? Might go away after
@@ -2442,8 +2442,6 @@ public class WindowManagerService extends IWindowManager.Stub
                             "removeWindowToken: Attempted to remove non-existing token: " + binder);
                     return;
                 }
-
-                token.setExiting();
 
                 mInputMonitor.updateInputWindowsLw(true /*force*/);
             }
@@ -8924,7 +8922,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         return;
                     }
 
-                    token.removeAllWindows();
+                    token.removeAllWindowsIfPossible();
                 }
                 WindowManagerService.this.removeWindowToken(binder, displayId);
             }

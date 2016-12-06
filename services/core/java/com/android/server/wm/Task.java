@@ -146,11 +146,11 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         if (content != null) {
             content.mDimLayerController.removeDimLayerUser(this);
         }
-        getParent().removeChild(this);
+        removeImmediately();
         mService.mTaskIdToTask.delete(mTaskId);
     }
 
-    // Change to use reparenting in WC when TaskStack is switched to use WC.
+    // Change to use re-parenting in WC when TaskStack is switched to use WC.
     void moveTaskToStack(TaskStack stack, boolean toTop) {
         if (stack == mStack) {
             return;

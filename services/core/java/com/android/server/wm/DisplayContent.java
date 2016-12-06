@@ -300,7 +300,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return token.asAppWindowToken();
     }
 
-    void setWindowToken(IBinder binder, WindowToken token) {
+    void addWindowToken(IBinder binder, WindowToken token) {
         final DisplayContent dc = mService.mRoot.getWindowTokenDisplay(token);
         if (dc != null) {
             // We currently don't support adding a window token to the display if the display
@@ -333,20 +333,33 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     WindowToken removeWindowToken(IBinder binder) {
         final WindowToken token = mTokenMap.remove(binder);
         if (token != null && token.asAppWindowToken() == null) {
+            token.setExiting();
+        }
+        return token;
+    }
+
+    /** Changes the display the input window token is housed on to this one. */
+    void reParentWindowToken(WindowToken token) {
+        final DisplayContent prevDc = token.getDisplayContent();
+        if (prevDc == this) {
+            return;
+        }
+        if (prevDc != null && prevDc.mTokenMap.remove(token.token) != null) {
             switch (token.windowType) {
                 case TYPE_WALLPAPER:
-                    mBelowAppWindowsContainers.removeChild(token);
+                    prevDc.mBelowAppWindowsContainers.removeChild(token);
                     break;
                 case TYPE_INPUT_METHOD:
                 case TYPE_INPUT_METHOD_DIALOG:
-                    mImeWindowsContainers.removeChild(token);
+                    prevDc.mImeWindowsContainers.removeChild(token);
                     break;
                 default:
-                    mAboveAppWindowsContainers.removeChild(token);
+                    prevDc.mAboveAppWindowsContainers.removeChild(token);
                     break;
             }
         }
-        return token;
+
+        addWindowToken(token.token, token);
     }
 
     void removeAppToken(IBinder binder) {

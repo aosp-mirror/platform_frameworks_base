@@ -42,7 +42,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.NOTIFY_ACTIVITY_DRAWN;
 import static com.android.server.wm.WindowManagerService.H.NOTIFY_STARTING_WINDOW_DRAWN;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
-import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowManagerService.logWithStack;
 
@@ -62,12 +61,10 @@ import android.util.Slog;
 import android.view.IApplicationToken;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.animation.Animation;
 
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.function.Function;
 
 class AppTokenList extends ArrayList<AppWindowToken> {
 }
@@ -390,10 +387,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     @Override
     void removeIfPossible() {
         mIsExiting = false;
-        removeAllWindows();
+        removeAllWindowsIfPossible();
         if (mTask != null) {
             mTask.mStack.mExitingAppTokens.remove(this);
-            mTask.removeChild(this);
+            removeImmediately();
         }
     }
 
