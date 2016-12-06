@@ -16,36 +16,28 @@
 
 package com.android.internal.os;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.ArrayList;
-
-import android.os.BatteryStats;
-import android.os.Parcel;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.util.Log;
-
-import junit.framework.Assert;
-import junit.framework.TestCase;
-
-import com.android.internal.os.BatteryStatsImpl;
-
-import org.mockito.Mockito;
-
 /**
  * Mocks a BatteryStatsImpl object.
  */
 public class MockBatteryStatsImpl extends BatteryStatsImpl {
     public BatteryStatsImpl.Clocks clocks;
+    public boolean mForceOnBattery;
+
+    MockBatteryStatsImpl(Clocks clocks) {
+        super(clocks);
+        this.clocks = mClocks;
+    }
 
     MockBatteryStatsImpl() {
-        super(new MockClocks());
-        this.clocks = mClocks;
+        this(new MockClocks());
     }
 
     public TimeBase getOnBatteryTimeBase() {
         return mOnBatteryTimeBase;
     }
 
+    public boolean isOnBattery() {
+        return mForceOnBattery ? true : super.isOnBattery();
+    }
 }
 
