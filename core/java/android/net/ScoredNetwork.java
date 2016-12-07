@@ -16,11 +16,14 @@
 
 package android.net;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.lang.Math;
+import java.lang.UnsupportedOperationException;
 import java.util.Objects;
 
 /**
@@ -43,7 +46,17 @@ public class ScoredNetwork implements Parcelable {
      * <p>
      * If no value is associated with this key then it's unknown.
      */
-    public static final String EXTRA_HAS_CAPTIVE_PORTAL = "android.net.extra.HAS_CAPTIVE_PORTAL";
+    public static final String ATTRIBUTES_KEY_HAS_CAPTIVE_PORTAL =
+            "android.net.attributes.key.HAS_CAPTIVE_PORTAL";
+
+    /**
+     * Key used with the {@link #attributes} bundle to define the rankingScoreOffset int value.
+     *
+     * <p>The rankingScoreOffset is used when calculating the ranking score used to rank networks
+     * against one another. See {@link #calculateRankingScore} for more information.
+     */
+    public static final String ATTRIBUTES_KEY_RANKING_SCORE_OFFSET =
+            "android.net.attributes.key.RANKING_SCORE_OFFSET";
 
     /** A {@link NetworkKey} uniquely identifying this network. */
     public final NetworkKey networkKey;
@@ -71,8 +84,10 @@ public class ScoredNetwork implements Parcelable {
      * An additional collection of optional attributes set by
      * the Network Recommendation Provider.
      *
-     * @see #EXTRA_HAS_CAPTIVE_PORTAL
+     * @see #ATTRIBUTES_KEY_HAS_CAPTIVE_PORTAL
+     * @see #ATTRIBUTES_KEY_RANKING_SCORE_OFFSET_KEY
      */
+    @Nullable
     public final Bundle attributes;
 
     /**
@@ -122,7 +137,7 @@ public class ScoredNetwork implements Parcelable {
      * @param attributes optional provider specific attributes
      */
     public ScoredNetwork(NetworkKey networkKey, RssiCurve rssiCurve, boolean meteredHint,
-            Bundle attributes) {
+            @Nullable Bundle attributes) {
         this.networkKey = networkKey;
         this.rssiCurve = rssiCurve;
         this.meteredHint = meteredHint;
@@ -136,7 +151,7 @@ public class ScoredNetwork implements Parcelable {
         } else {
             rssiCurve = null;
         }
-        meteredHint = in.readByte() != 0;
+        meteredHint = (in.readByte() == 1);
         attributes = in.readBundle();
     }
 
@@ -156,7 +171,6 @@ public class ScoredNetwork implements Parcelable {
         }
         out.writeByte((byte) (meteredHint ? 1 : 0));
         out.writeBundle(attributes);
-
     }
 
     @Override
@@ -185,6 +199,54 @@ public class ScoredNetwork implements Parcelable {
                 ", meteredHint=" + meteredHint +
                 ", attributes=" + attributes +
                 '}';
+    }
+
+    /**
+     * Returns true if a ranking score can be calculated for this network.
+     *
+     * @hide
+     */
+    public boolean hasRankingScore() {
+        return (rssiCurve != null)
+                || (attributes != null
+                        && attributes.containsKey(ATTRIBUTES_KEY_RANKING_SCORE_OFFSET));
+    }
+
+    /**
+     * Returns a ranking score for a given RSSI which can be used to comparatively
+     * rank networks.
+     *
+     * <p>The score obtained by the rssiCurve is bitshifted left by 8 bits to expand it to an
+     * integer and then the offset is added. If the addition operation overflows or underflows,
+     * Integer.MAX_VALUE and Integer.MIN_VALUE will be returned respectively.
+     *
+     * <p>{@link #hasRankingScore} should be called first to ensure this network is capable
+     * of returning a ranking score.
+     *
+     * @throws UnsupportedOperationException if there is no RssiCurve and no rankingScoreOffset
+     * for this network (hasRankingScore returns false).
+     *
+     * @hide
+     */
+    public int calculateRankingScore(int rssi) throws UnsupportedOperationException {
+        if (!hasRankingScore()) {
+            throw new UnsupportedOperationException(
+                    "Either rssiCurve or rankingScoreOffset is required to calculate the "
+                            + "ranking score");
+        }
+
+        int offset = 0;
+        if (attributes != null) {
+             offset += attributes.getInt(ATTRIBUTES_KEY_RANKING_SCORE_OFFSET, 0 /* default */);
+        }
+
+        int score = (rssiCurve == null) ? 0 : rssiCurve.lookupScore(rssi) << Byte.SIZE;
+
+        try {
+            return Math.addExact(score, offset);
+        } catch (ArithmeticException e) {
+            return (score < 0) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+        }
     }
 
     public static final Parcelable.Creator<ScoredNetwork> CREATOR =
