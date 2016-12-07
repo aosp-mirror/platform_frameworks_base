@@ -16,23 +16,18 @@
 
 package com.android.server.wm;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import android.content.Context;
-import android.os.Binder;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.view.IWindow;
-import android.view.WindowManager;
 
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
+import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -41,30 +36,19 @@ import static org.junit.Assert.assertTrue;
 /**
  * Tests for the {@link WindowState} class.
  *
- * runtest frameworks-services -c com.android.server.wm.WindowStateTests
+ * Build/Install/Run:
+ *  bit FrameworksServicesTests:com.android.server.wm.WindowStateTests
  */
 @SmallTest
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class WindowStateTests extends WindowTestsBase {
 
-    private WindowToken mWindowToken;
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        mWindowToken = new WindowToken(sWm, new Binder(), 0, false,
-                sWm.getDefaultDisplayContentLocked());
-    }
-
     @Test
     public void testIsParentWindowHidden() throws Exception {
-        final WindowState parentWindow =
-                createWindow(null, TYPE_APPLICATION, mWindowToken, "parentWindow");
-        final WindowState child1 =
-                createWindow(parentWindow, FIRST_SUB_WINDOW, mWindowToken, "child1");
-        final WindowState child2 =
-                createWindow(parentWindow, FIRST_SUB_WINDOW, mWindowToken, "child2");
+        final WindowState parentWindow = createWindow(null, TYPE_APPLICATION, "parentWindow");
+        final WindowState child1 = createWindow(parentWindow, FIRST_SUB_WINDOW, "child1");
+        final WindowState child2 = createWindow(parentWindow, FIRST_SUB_WINDOW, "child2");
 
         assertFalse(parentWindow.mHidden);
         assertFalse(parentWindow.isParentWindowHidden());
@@ -79,14 +63,10 @@ public class WindowStateTests extends WindowTestsBase {
 
     @Test
     public void testIsChildWindow() throws Exception {
-        final WindowState parentWindow =
-                createWindow(null, TYPE_APPLICATION, mWindowToken, "parentWindow");
-        final WindowState child1 =
-                createWindow(parentWindow, FIRST_SUB_WINDOW, mWindowToken, "child1");
-        final WindowState child2 =
-                createWindow(parentWindow, FIRST_SUB_WINDOW, mWindowToken, "child2");
-        final WindowState randomWindow =
-                createWindow(null, TYPE_APPLICATION, mWindowToken, "randomWindow");
+        final WindowState parentWindow = createWindow(null, TYPE_APPLICATION, "parentWindow");
+        final WindowState child1 = createWindow(parentWindow, FIRST_SUB_WINDOW, "child1");
+        final WindowState child2 = createWindow(parentWindow, FIRST_SUB_WINDOW, "child2");
+        final WindowState randomWindow = createWindow(null, TYPE_APPLICATION, "randomWindow");
 
         assertFalse(parentWindow.isChildWindow());
         assertTrue(child1.isChildWindow());
@@ -96,13 +76,12 @@ public class WindowStateTests extends WindowTestsBase {
 
     @Test
     public void testHasChild() throws Exception {
-        final WindowState win1 = createWindow(null, TYPE_APPLICATION, mWindowToken, "win1");
-        final WindowState win11 = createWindow(win1, FIRST_SUB_WINDOW, mWindowToken, "win11");
-        final WindowState win12 = createWindow(win1, FIRST_SUB_WINDOW, mWindowToken, "win12");
-        final WindowState win2 = createWindow(null, TYPE_APPLICATION, mWindowToken, "win2");
-        final WindowState win21 = createWindow(win2, FIRST_SUB_WINDOW, mWindowToken, "win21");
-        final WindowState randomWindow =
-                createWindow(null, TYPE_APPLICATION, mWindowToken, "randomWindow");
+        final WindowState win1 = createWindow(null, TYPE_APPLICATION, "win1");
+        final WindowState win11 = createWindow(win1, FIRST_SUB_WINDOW, "win11");
+        final WindowState win12 = createWindow(win1, FIRST_SUB_WINDOW, "win12");
+        final WindowState win2 = createWindow(null, TYPE_APPLICATION, "win2");
+        final WindowState win21 = createWindow(win2, FIRST_SUB_WINDOW, "win21");
+        final WindowState randomWindow = createWindow(null, TYPE_APPLICATION, "randomWindow");
 
         assertTrue(win1.hasChild(win11));
         assertTrue(win1.hasChild(win12));
@@ -118,12 +97,9 @@ public class WindowStateTests extends WindowTestsBase {
 
     @Test
     public void testGetParentWindow() throws Exception {
-        final WindowState parentWindow =
-                createWindow(null, TYPE_APPLICATION, mWindowToken, "parentWindow");
-        final WindowState child1 =
-                createWindow(parentWindow, FIRST_SUB_WINDOW, mWindowToken, "child1");
-        final WindowState child2 =
-                createWindow(parentWindow, FIRST_SUB_WINDOW, mWindowToken, "child2");
+        final WindowState parentWindow = createWindow(null, TYPE_APPLICATION, "parentWindow");
+        final WindowState child1 = createWindow(parentWindow, FIRST_SUB_WINDOW, "child1");
+        final WindowState child2 = createWindow(parentWindow, FIRST_SUB_WINDOW, "child2");
 
         assertNull(parentWindow.getParentWindow());
         assertEquals(parentWindow, child1.getParentWindow());
@@ -132,9 +108,9 @@ public class WindowStateTests extends WindowTestsBase {
 
     @Test
     public void testGetTopParentWindow() throws Exception {
-        final WindowState root = createWindow(null, TYPE_APPLICATION, mWindowToken, "root");
-        final WindowState child1 = createWindow(root, FIRST_SUB_WINDOW, mWindowToken, "child1");
-        final WindowState child2 = createWindow(child1, FIRST_SUB_WINDOW, mWindowToken, "child2");
+        final WindowState root = createWindow(null, TYPE_APPLICATION, "root");
+        final WindowState child1 = createWindow(root, FIRST_SUB_WINDOW, "child1");
+        final WindowState child2 = createWindow(child1, FIRST_SUB_WINDOW, "child2");
 
         assertEquals(root, root.getTopParentWindow());
         assertEquals(root, child1.getTopParentWindow());
@@ -144,10 +120,46 @@ public class WindowStateTests extends WindowTestsBase {
 
     @Test
     public void testIsOnScreen_hiddenByPolicy() {
-        final WindowState window = createWindow(null, TYPE_APPLICATION, mWindowToken, "window");
+        final WindowState window = createWindow(null, TYPE_APPLICATION, "window");
         window.setHasSurface(true);
         assertTrue(window.isOnScreen());
         window.hideLw(false /* doAnimation */);
         assertFalse(window.isOnScreen());
+    }
+
+    @Test
+    public void testCanBeImeTarget() throws Exception {
+        final WindowState appWindow = createWindow(null, TYPE_APPLICATION, "appWindow");
+        final WindowState imeWindow = createWindow(null, TYPE_INPUT_METHOD, "imeWindow");
+
+        // Setting FLAG_NOT_FOCUSABLE without FLAG_ALT_FOCUSABLE_IM prevents the window from being
+        // an IME target.
+        appWindow.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
+        imeWindow.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
+
+        // Make windows visible
+        appWindow.setHasSurface(true);
+        imeWindow.setHasSurface(true);
+
+        // Windows without flags (FLAG_NOT_FOCUSABLE|FLAG_ALT_FOCUSABLE_IM) can't be IME targets
+        assertFalse(appWindow.canBeImeTarget());
+        assertFalse(imeWindow.canBeImeTarget());
+
+        // Add IME target flags
+        appWindow.mAttrs.flags |= (FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM);
+        imeWindow.mAttrs.flags |= (FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM);
+
+        // Visible app window with flags can be IME target while an IME window can never be an IME
+        // target regardless of its visibility or flags.
+        assertTrue(appWindow.canBeImeTarget());
+        assertFalse(imeWindow.canBeImeTarget());
+
+        // Make windows invisible
+        appWindow.hideLw(false /* doAnimation */);
+        imeWindow.hideLw(false /* doAnimation */);
+
+        // Invisible window can't be IME targets even if they have the right flags.
+        assertFalse(appWindow.canBeImeTarget());
+        assertFalse(imeWindow.canBeImeTarget());
     }
 }
