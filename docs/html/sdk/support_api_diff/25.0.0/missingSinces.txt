@@ -1,0 +1,27 @@
+NO DOC BLOCK: android.support.design.widget.BottomNavigationView Class
+NO DOC BLOCK: android.support.design.widget.BottomNavigationView.OnNavigationItemSelectedListener Interface
+NO DOC BLOCK: android.support.v7.widget.DividerItemDecoration Class
+NO DOC BLOCK: android.support.v7.app.NotificationCompat.DecoratedCustomViewStyle Class
+NO DOC BLOCK: android.support.v7.app.NotificationCompat.DecoratedMediaCustomViewStyle Class
+NO DOC BLOCK: android.support.v13.app.ActivityCompat Constructor ()
+NO DOC BLOCK: android.support.v4.app.NotificationCompat.WearableExtender Method getBridgeTag()
+NO DOC BLOCK: android.support.v7.widget.RecyclerView Method getDecoratedBoundsWithMargins(android.view.View, android.graphics.Rect)
+NO DOC BLOCK: android.support.v4.view.ViewCompat Method getDisplay(android.view.View)
+NO DOC BLOCK: android.support.v4.widget.SwipeRefreshLayout Method getProgressViewEndOffset()
+NO DOC BLOCK: android.support.v4.widget.SwipeRefreshLayout Method getProgressViewStartOffset()
+NO DOC BLOCK: android.support.v4.net.ConnectivityManagerCompat Method getRestrictBackgroundStatus(android.net.ConnectivityManager)
+NO DOC BLOCK: android.support.design.widget.FloatingActionButton Method getRippleColor()
+NO DOC BLOCK: android.support.v7.widget.RecyclerView.LayoutManager Method isItemPrefetchEnabled()
+NO DOC BLOCK: android.support.v4.text.BidiFormatter Method isRtl(java.lang.CharSequence)
+NO DOC BLOCK: android.support.v4.view.ViewCompat Method setBackground(android.view.View, android.graphics.drawable.Drawable)
+NO DOC BLOCK: android.support.v4.app.NotificationCompat.WearableExtender Method setBridgeTag(java.lang.String)
+NO DOC BLOCK: android.support.v7.widget.RecyclerView.LayoutManager Method setItemPrefetchEnabled(boolean)
+NO DOC BLOCK: android.support.v4.view.ViewPager Method setPageTransformer(boolean, android.support.v4.view.ViewPager.PageTransformer, int)
+NO DOC BLOCK: android.support.v4.content.ContextCompat Method startActivity(android.content.Context, android.content.Intent, android.os.Bundle)
+NO DOC BLOCK: android.support.v4.text.BidiFormatter Method unicodeWrap(java.lang.CharSequence)
+NO DOC BLOCK: android.support.v4.text.BidiFormatter Method unicodeWrap(java.lang.CharSequence, android.support.v4.text.TextDirectionHeuristicCompat)
+NO DOC BLOCK: android.support.v4.text.BidiFormatter Method unicodeWrap(java.lang.CharSequence, android.support.v4.text.TextDirectionHeuristicCompat, boolean)
+NO DOC BLOCK: android.support.v4.text.BidiFormatter Method unicodeWrap(java.lang.CharSequence, boolean)
+NO DOC BLOCK: android.support.v4.net.ConnectivityManagerCompat Field RESTRICT_BACKGROUND_STATUS_DISABLED
+NO DOC BLOCK: android.support.v4.net.ConnectivityManagerCompat Field RESTRICT_BACKGROUND_STATUS_ENABLED
+NO DOC BLOCK: android.support.v4.net.ConnectivityManagerCompat Field RESTRICT_BACKGROUND_STATUS_WHITELISTED
