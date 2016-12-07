@@ -134,6 +134,7 @@ public final class StrictJarFile {
         } catch (IOException | SecurityException e) {
             nativeClose(this.nativeHandle);
             IoUtils.closeQuietly(fd);
+            closed = true;
             throw e;
         }
 
