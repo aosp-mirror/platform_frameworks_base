@@ -7,6 +7,7 @@
 
 #include "Movie.h"
 #include "SkStream.h"
+#include "SkTRegistry.h"
 
 typedef SkTRegistry<Movie*(*)(SkStreamRewindable*)> MovieReg;
 
