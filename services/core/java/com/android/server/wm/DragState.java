@@ -68,7 +68,8 @@ import java.util.ArrayList;
  * Drag/drop state
  */
 class DragState {
-    private static final long ANIMATION_DURATION_MS = 500;
+    private static final long MIN_ANIMATION_DURATION_MS = 195;
+    private static final long MAX_ANIMATION_DURATION_MS = 375;
 
     private static final int DRAG_FLAGS_URI_ACCESS = View.DRAG_FLAG_GLOBAL_URI_READ |
             View.DRAG_FLAG_GLOBAL_URI_WRITE;
@@ -103,6 +104,7 @@ class DragState {
     private Animation mAnimation;
     final Transformation mTransformation = new Transformation();
     private final Interpolator mCubicEaseOutInterpolator = new DecelerateInterpolator(1.5f);
+    private Point mDisplaySize = new Point();
 
     DragState(WindowManagerService service, IBinder token, SurfaceControl surface,
             int flags, IBinder localWin) {
@@ -171,10 +173,8 @@ class DragState {
             // The drag window covers the entire display
             mDragWindowHandle.frameLeft = 0;
             mDragWindowHandle.frameTop = 0;
-            Point p = new Point();
-            display.getRealSize(p);
-            mDragWindowHandle.frameRight = p.x;
-            mDragWindowHandle.frameBottom = p.y;
+            mDragWindowHandle.frameRight = mDisplaySize.x;
+            mDragWindowHandle.frameBottom = mDisplaySize.y;
 
             // Pause rotations before a drag.
             if (DEBUG_ORIENTATION) {
@@ -215,6 +215,7 @@ class DragState {
      * @param display The Display that the window being dragged is on.
      */
     void register(Display display) {
+        display.getRealSize(mDisplaySize);
         if (DEBUG_DRAG) Slog.d(TAG_WM, "registering drag input channel");
         if (mInputInterceptor != null) {
             Slog.e(TAG_WM, "Duplicate register of drag input channel");
@@ -583,10 +584,17 @@ class DragState {
 
     private Animation createReturnAnimationLocked() {
         final AnimationSet set = new AnimationSet(false);
-        set.addAnimation(new TranslateAnimation(
-                0, mOriginalX - mCurrentX, 0, mOriginalY - mCurrentY));
+        final float translateX = mOriginalX - mCurrentX;
+        final float translateY = mOriginalY - mCurrentY;
+        set.addAnimation(new TranslateAnimation( 0, translateX, 0, translateY));
         set.addAnimation(new AlphaAnimation(mOriginalAlpha, mOriginalAlpha / 2));
-        set.setDuration(ANIMATION_DURATION_MS);
+        // Adjust the duration to the travel distance.
+        final double travelDistance = Math.sqrt(translateX * translateX + translateY * translateY);
+        final double displayDiagonal =
+                Math.sqrt(mDisplaySize.x * mDisplaySize.x + mDisplaySize.y * mDisplaySize.y);
+        final long duration = MIN_ANIMATION_DURATION_MS + (long) (travelDistance / displayDiagonal
+                * (MAX_ANIMATION_DURATION_MS - MIN_ANIMATION_DURATION_MS));
+        set.setDuration(duration);
         set.setInterpolator(mCubicEaseOutInterpolator);
         set.initialize(0, 0, 0, 0);
         set.start();  // Will start on the first call to getTransformation.
@@ -597,7 +605,7 @@ class DragState {
         final AnimationSet set = new AnimationSet(false);
         set.addAnimation(new ScaleAnimation(1, 0, 1, 0, mThumbOffsetX, mThumbOffsetY));
         set.addAnimation(new AlphaAnimation(mOriginalAlpha, 0));
-        set.setDuration(ANIMATION_DURATION_MS);
+        set.setDuration(MIN_ANIMATION_DURATION_MS);
         set.setInterpolator(mCubicEaseOutInterpolator);
         set.initialize(0, 0, 0, 0);
         set.start();  // Will start on the first call to getTransformation.
