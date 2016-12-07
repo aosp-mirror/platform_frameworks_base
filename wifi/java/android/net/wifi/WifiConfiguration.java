@@ -746,50 +746,6 @@ public class WifiConfiguration implements Parcelable {
     @SystemApi
     public int numAssociation;
 
-    /**
-     * @hide
-     * Number of time user disabled WiFi while associated to this configuration with Low RSSI.
-     */
-    public int numUserTriggeredWifiDisableLowRSSI;
-
-    /**
-     * @hide
-     * Number of time user disabled WiFi while associated to this configuration with Bad RSSI.
-     */
-    public int numUserTriggeredWifiDisableBadRSSI;
-
-    /**
-     * @hide
-     * Number of time user disabled WiFi while associated to this configuration
-     * and RSSI was not HIGH.
-     */
-    public int numUserTriggeredWifiDisableNotHighRSSI;
-
-    /**
-     * @hide
-     * Number of ticks associated to this configuration with Low RSSI.
-     */
-    public int numTicksAtLowRSSI;
-
-    /**
-     * @hide
-     * Number of ticks associated to this configuration with Bad RSSI.
-     */
-    public int numTicksAtBadRSSI;
-
-    /**
-     * @hide
-     * Number of ticks associated to this configuration
-     * and RSSI was not HIGH.
-     */
-    public int numTicksAtNotHighRSSI;
-    /**
-     * @hide
-     * Number of time user (WifiManager) triggered association to this configuration.
-     * TODO: count this only for Wifi Settings uuid, so as to not count 3rd party apps
-     */
-    public int numUserTriggeredJoinAttempts;
-
     /** @hide
      * Boost given to RSSI on a home network for the purpose of calculating the score
      * This adds stickiness to home networks, as defined by:
@@ -1630,16 +1586,6 @@ public class WifiConfiguration implements Parcelable {
                 sbuf.append('\n');
             }
         }
-        sbuf.append("triggeredLow: ").append(this.numUserTriggeredWifiDisableLowRSSI);
-        sbuf.append(" triggeredBad: ").append(this.numUserTriggeredWifiDisableBadRSSI);
-        sbuf.append(" triggeredNotHigh: ").append(this.numUserTriggeredWifiDisableNotHighRSSI);
-        sbuf.append('\n');
-        sbuf.append("ticksLow: ").append(this.numTicksAtLowRSSI);
-        sbuf.append(" ticksBad: ").append(this.numTicksAtBadRSSI);
-        sbuf.append(" ticksNotHigh: ").append(this.numTicksAtNotHighRSSI);
-        sbuf.append('\n');
-        sbuf.append("triggeredJoin: ").append(this.numUserTriggeredJoinAttempts);
-        sbuf.append('\n');
 
         return sbuf.toString();
     }
@@ -1946,13 +1892,6 @@ public class WifiConfiguration implements Parcelable {
             numScorerOverride = source.numScorerOverride;
             numScorerOverrideAndSwitchedNetwork = source.numScorerOverrideAndSwitchedNetwork;
             numAssociation = source.numAssociation;
-            numUserTriggeredWifiDisableLowRSSI = source.numUserTriggeredWifiDisableLowRSSI;
-            numUserTriggeredWifiDisableBadRSSI = source.numUserTriggeredWifiDisableBadRSSI;
-            numUserTriggeredWifiDisableNotHighRSSI = source.numUserTriggeredWifiDisableNotHighRSSI;
-            numTicksAtLowRSSI = source.numTicksAtLowRSSI;
-            numTicksAtBadRSSI = source.numTicksAtBadRSSI;
-            numTicksAtNotHighRSSI = source.numTicksAtNotHighRSSI;
-            numUserTriggeredJoinAttempts = source.numUserTriggeredJoinAttempts;
             userApproved = source.userApproved;
             numNoInternetAccessReports = source.numNoInternetAccessReports;
             noInternetAccessExpected = source.noInternetAccessExpected;
@@ -2018,13 +1957,6 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(numScorerOverride);
         dest.writeInt(numScorerOverrideAndSwitchedNetwork);
         dest.writeInt(numAssociation);
-        dest.writeInt(numUserTriggeredWifiDisableLowRSSI);
-        dest.writeInt(numUserTriggeredWifiDisableBadRSSI);
-        dest.writeInt(numUserTriggeredWifiDisableNotHighRSSI);
-        dest.writeInt(numTicksAtLowRSSI);
-        dest.writeInt(numTicksAtBadRSSI);
-        dest.writeInt(numTicksAtNotHighRSSI);
-        dest.writeInt(numUserTriggeredJoinAttempts);
         dest.writeInt(userApproved);
         dest.writeInt(numNoInternetAccessReports);
         dest.writeInt(noInternetAccessExpected ? 1 : 0);
@@ -2090,13 +2022,6 @@ public class WifiConfiguration implements Parcelable {
                 config.numScorerOverride = in.readInt();
                 config.numScorerOverrideAndSwitchedNetwork = in.readInt();
                 config.numAssociation = in.readInt();
-                config.numUserTriggeredWifiDisableLowRSSI = in.readInt();
-                config.numUserTriggeredWifiDisableBadRSSI = in.readInt();
-                config.numUserTriggeredWifiDisableNotHighRSSI = in.readInt();
-                config.numTicksAtLowRSSI = in.readInt();
-                config.numTicksAtBadRSSI = in.readInt();
-                config.numTicksAtNotHighRSSI = in.readInt();
-                config.numUserTriggeredJoinAttempts = in.readInt();
                 config.userApproved = in.readInt();
                 config.numNoInternetAccessReports = in.readInt();
                 config.noInternetAccessExpected = in.readInt() != 0;
