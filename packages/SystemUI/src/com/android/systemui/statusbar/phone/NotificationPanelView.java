@@ -208,6 +208,7 @@ public class NotificationPanelView extends PanelView implements
     };
     private NotificationGroupManager mGroupManager;
     private boolean mOpening;
+    private int mIndicationBottomPadding;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -273,6 +274,8 @@ public class NotificationPanelView extends PanelView implements
                 R.dimen.notification_panel_min_side_margin);
         mMaxFadeoutHeight = getResources().getDimensionPixelSize(
                 R.dimen.max_notification_fadeout_height);
+        mIndicationBottomPadding = getResources().getDimensionPixelSize(
+                R.dimen.keyguard_indication_bottom_padding);
     }
 
     public void updateResources() {
@@ -406,7 +409,8 @@ public class NotificationPanelView extends PanelView implements
                 R.dimen.notification_divider_height));
         float shelfSize = mNotificationStackScroller.getNotificationShelf().getIntrinsicHeight()
                 + notificationPadding;
-        float availableSpace = mNotificationStackScroller.getHeight() - minPadding - shelfSize;
+        float availableSpace = mNotificationStackScroller.getHeight() - minPadding - shelfSize
+                - mIndicationBottomPadding;
         int count = 0;
         for (int i = 0; i < mNotificationStackScroller.getChildCount(); i++) {
             ExpandableView child = (ExpandableView) mNotificationStackScroller.getChildAt(i);
