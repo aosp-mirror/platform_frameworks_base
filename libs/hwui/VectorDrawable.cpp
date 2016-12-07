@@ -576,7 +576,7 @@ bool Tree::allocateBitmapIfNeeded(SkBitmap* outCache, int width, int height) {
 }
 
 bool Tree::canReuseBitmap(const SkBitmap& bitmap, int width, int height) {
-    return width == bitmap.width() && height == bitmap.height();
+    return width <= bitmap.width() && height <= bitmap.height();
 }
 
 void Tree::onPropertyChanged(TreeProperties* prop) {
