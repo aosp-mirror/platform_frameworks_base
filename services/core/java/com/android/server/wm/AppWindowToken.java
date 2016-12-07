@@ -1253,7 +1253,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             mService.mAnimator.mAppWindowAnimating = true;
         } else if (mAppAnimator.wasAnimating) {
             // stopped animating, do one more pass through the layout
-            setAppLayoutChanges(FINISH_LAYOUT_REDO_WALLPAPER, "appToken " + this + " done");
+            setAppLayoutChanges(FINISH_LAYOUT_REDO_WALLPAPER,
+                    DEBUG_LAYOUT_REPEATS ? "appToken " + this + " done" : null);
             if (DEBUG_ANIM) Slog.v(TAG, "updateWindowsApps...: done animating " + this);
         }
     }

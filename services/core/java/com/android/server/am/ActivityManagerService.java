@@ -1386,6 +1386,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     final long[] mTmpLong = new long[2];
 
+    private final ArraySet<BroadcastQueue> mTmpBroadcastQueue = new ArraySet();
+
     static final class ProcessChangeItem {
         static final int CHANGE_ACTIVITIES = 1<<0;
         static final int CHANGE_PROCESS_STATE = 1<<1;
@@ -19521,7 +19523,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         int schedGroup;
         int procState;
         boolean foregroundActivities = false;
-        final ArraySet<BroadcastQueue> queues = new ArraySet<BroadcastQueue>();
+        mTmpBroadcastQueue.clear();
         if (app == TOP_APP) {
             // The last app on the list is the foreground app.
             adj = ProcessList.FOREGROUND_APP_ADJ;
@@ -19535,13 +19537,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
             app.adjType = "instrumentation";
             procState = ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
-        } else if (isReceivingBroadcastLocked(app, queues)) {
+        } else if (isReceivingBroadcastLocked(app, mTmpBroadcastQueue)) {
             // An app that is currently receiving a broadcast also
             // counts as being in the foreground for OOM killer purposes.
             // It's placed in a sched group based on the nature of the
             // broadcast as reflected by which queue it's active in.
             adj = ProcessList.FOREGROUND_APP_ADJ;
-            schedGroup = (queues.contains(mFgBroadcastQueue))
+            schedGroup = (mTmpBroadcastQueue.contains(mFgBroadcastQueue))
                     ? ProcessList.SCHED_GROUP_DEFAULT : ProcessList.SCHED_GROUP_BACKGROUND;
             app.adjType = "broadcast";
             procState = ActivityManager.PROCESS_STATE_RECEIVER;

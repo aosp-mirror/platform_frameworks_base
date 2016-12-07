@@ -18,12 +18,13 @@ package com.android.server.wm;
 
 import android.annotation.CallSuper;
 import android.content.res.Configuration;
+import android.util.Pools;
+
 import com.android.internal.util.ToBooleanFunction;
 
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
@@ -67,6 +68,9 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
 
     // The specified orientation for this window container.
     protected int mOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
+
+    private final Pools.SynchronizedPool<ForAllWindowsConsumerWrapper> mConsumerWrapperPool =
+            new Pools.SynchronizedPool<>(3);
 
     final protected WindowContainer getParent() {
         return mParent;
@@ -496,7 +500,7 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
      * @param   traverseTopToBottom If true traverses the hierarchy from top-to-bottom in terms of
      *                              z-order, else from bottom-to-top.
      * @return  True if the search ended before we reached the end of the hierarchy due to
-     *          {@link Function#apply} returning true.
+     *          {@link ToBooleanFunction#apply} returning true.
      */
     boolean forAllWindows(ToBooleanFunction<WindowState> callback, boolean traverseTopToBottom) {
         if (traverseTopToBottom) {
@@ -517,10 +521,9 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
     }
 
     void forAllWindows(Consumer<WindowState> callback, boolean traverseTopToBottom) {
-        forAllWindows(w -> {
-            callback.accept(w);
-            return false;
-        }, traverseTopToBottom);
+        ForAllWindowsConsumerWrapper wrapper = obtainConsumerWrapper(callback);
+        forAllWindows(wrapper, traverseTopToBottom);
+        wrapper.release();
     }
 
     WindowState getWindow(Predicate<WindowState> callback) {
@@ -613,4 +616,32 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
         return toString();
     }
 
+    private ForAllWindowsConsumerWrapper obtainConsumerWrapper(Consumer<WindowState> consumer) {
+        ForAllWindowsConsumerWrapper wrapper = mConsumerWrapperPool.acquire();
+        if (wrapper == null) {
+            wrapper = new ForAllWindowsConsumerWrapper();
+        }
+        wrapper.setConsumer(consumer);
+        return wrapper;
+    }
+
+    private final class ForAllWindowsConsumerWrapper implements ToBooleanFunction<WindowState> {
+
+        private Consumer<WindowState> mConsumer;
+
+        void setConsumer(Consumer<WindowState> consumer) {
+            mConsumer = consumer;
+        }
+
+        @Override
+        public boolean apply(WindowState w) {
+            mConsumer.accept(w);
+            return false;
+        }
+
+        void release() {
+            mConsumer = null;
+            mConsumerWrapperPool.release(this);
+        }
+    }
 }
