@@ -7445,6 +7445,8 @@ public final class Settings {
 
         /**
          * Value to specify if Wi-Fi Wakeup feature is enabled.
+         *
+         * Type: int (0 for false, 1 for true)
          * @hide
          */
         @SystemApi
@@ -7453,6 +7455,8 @@ public final class Settings {
         /**
          * Value to specify if network recommendations from
          * {@link com.android.server.NetworkScoreService} are enabled.
+         *
+         * Type: int (0 for false, 1 for true)
          * @hide
          */
         @SystemApi
