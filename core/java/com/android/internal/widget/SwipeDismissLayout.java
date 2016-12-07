@@ -23,6 +23,7 @@ import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.TypedArray;
@@ -33,7 +34,6 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 
@@ -44,7 +44,6 @@ public class SwipeDismissLayout extends FrameLayout {
     private static final String TAG = "SwipeDismissLayout";
 
     private static final float DISMISS_MIN_DRAG_WIDTH_RATIO = .33f;
-    private boolean mUseDynamicTranslucency = true;
 
     public interface OnDismissedListener {
         void onDismissed(SwipeDismissLayout layout);
@@ -63,6 +62,8 @@ public class SwipeDismissLayout extends FrameLayout {
 
         void onSwipeCancelled(SwipeDismissLayout layout);
     }
+
+    private boolean mIsWindowNativelyTranslucent;
 
     // Cached ViewConfiguration and system-wide constant values
     private int mSlop;
@@ -83,19 +84,6 @@ public class SwipeDismissLayout extends FrameLayout {
 
     private OnDismissedListener mDismissedListener;
     private OnSwipeProgressChangedListener mProgressListener;
-    private ViewTreeObserver.OnEnterAnimationCompleteListener mOnEnterAnimationCompleteListener =
-            new ViewTreeObserver.OnEnterAnimationCompleteListener() {
-                @Override
-                public void onEnterAnimationComplete() {
-                    // SwipeDismissLayout assumes that the host Activity is translucent
-                    // and temporarily disables translucency when it is fully visible.
-                    // As soon as the user starts swiping, we will re-enable
-                    // translucency.
-                    if (mUseDynamicTranslucency && getContext() instanceof Activity) {
-                        ((Activity) getContext()).convertFromTranslucent();
-                    }
-                }
-            };
     private BroadcastReceiver mScreenOffReceiver = new BroadcastReceiver() {
         private Runnable mRunnable = new Runnable() {
             @Override
@@ -141,8 +129,8 @@ public class SwipeDismissLayout extends FrameLayout {
         mMinFlingVelocity = vc.getScaledMinimumFlingVelocity();
         TypedArray a = context.getTheme().obtainStyledAttributes(
                 com.android.internal.R.styleable.Theme);
-        mUseDynamicTranslucency = !a.hasValue(
-                com.android.internal.R.styleable.Window_windowIsTranslucent);
+        mIsWindowNativelyTranslucent = a.getBoolean(
+                com.android.internal.R.styleable.Window_windowIsTranslucent, false);
         a.recycle();
     }
 
@@ -157,20 +145,12 @@ public class SwipeDismissLayout extends FrameLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        if (getContext() instanceof Activity) {
-            getViewTreeObserver().addOnEnterAnimationCompleteListener(
-                    mOnEnterAnimationCompleteListener);
-        }
         getContext().registerReceiver(mScreenOffReceiver, mScreenOffFilter);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         getContext().unregisterReceiver(mScreenOffReceiver);
-        if (getContext() instanceof Activity) {
-            getViewTreeObserver().removeOnEnterAnimationCompleteListener(
-                    mOnEnterAnimationCompleteListener);
-        }
         super.onDetachedFromWindow();
     }
 
@@ -273,9 +253,6 @@ public class SwipeDismissLayout extends FrameLayout {
                 mLastX = ev.getRawX();
                 updateSwiping(ev);
                 if (mSwiping) {
-                    if (mUseDynamicTranslucency && getContext() instanceof Activity) {
-                        ((Activity) getContext()).convertToTranslucent(null, null);
-                    }
                     setProgress(ev.getRawX() - mDownX);
                     break;
                 }
@@ -298,8 +275,11 @@ public class SwipeDismissLayout extends FrameLayout {
     }
 
     protected void cancel() {
-        if (mUseDynamicTranslucency && getContext() instanceof Activity) {
-            ((Activity) getContext()).convertFromTranslucent();
+        if (!mIsWindowNativelyTranslucent) {
+            Activity activity = findActivity();
+            if (activity != null) {
+                activity.convertFromTranslucent();
+            }
         }
         if (mProgressListener != null) {
             mProgressListener.onSwipeCancelled(this);
@@ -323,6 +303,7 @@ public class SwipeDismissLayout extends FrameLayout {
     }
 
     private void updateSwiping(MotionEvent ev) {
+        boolean oldSwiping = mSwiping;
         if (!mSwiping) {
             float deltaX = ev.getRawX() - mDownX;
             float deltaY = ev.getRawY() - mDownY;
@@ -330,6 +311,16 @@ public class SwipeDismissLayout extends FrameLayout {
                 mSwiping = deltaX > mSlop * 2 && Math.abs(deltaY) < Math.abs(deltaX);
             } else {
                 mSwiping = false;
+            }
+        }
+
+        if (mSwiping && !oldSwiping) {
+            // Swiping has started
+            if (!mIsWindowNativelyTranslucent) {
+                Activity activity = findActivity();
+                if (activity != null) {
+                    activity.convertToTranslucent(null, null);
+                }
             }
         }
     }
@@ -404,6 +395,17 @@ public class SwipeDismissLayout extends FrameLayout {
 
     private float progressToAlpha(float progress) {
         return 1 - progress * progress * progress;
+    }
+
+    private Activity findActivity() {
+        Context context = getContext();
+        while (context instanceof ContextWrapper) {
+            if (context instanceof Activity) {
+                return (Activity) context;
+            }
+            context = ((ContextWrapper) context).getBaseContext();
+        }
+        return null;
     }
 
     private class DismissAnimator implements AnimatorUpdateListener, Animator.AnimatorListener {

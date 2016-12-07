@@ -710,12 +710,7 @@ final class ActivityRecord {
             AttributeCache.Entry ent = AttributeCache.instance().get(packageName,
                     realTheme, com.android.internal.R.styleable.Window, userId);
             final boolean translucent = ent != null && (ent.array.getBoolean(
-                    com.android.internal.R.styleable.Window_windowIsTranslucent, false)
-                    || (!ent.array.hasValue(
-                            com.android.internal.R.styleable.Window_windowIsTranslucent)
-                            && ent.array.getBoolean(
-                                    com.android.internal.R.styleable.Window_windowSwipeToDismiss,
-                                            false)));
+                    com.android.internal.R.styleable.Window_windowIsTranslucent, false));
             fullscreen = ent != null && !ent.array.getBoolean(
                     com.android.internal.R.styleable.Window_windowIsFloating, false)
                     && !translucent;
