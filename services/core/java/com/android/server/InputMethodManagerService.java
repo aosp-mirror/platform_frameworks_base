@@ -25,6 +25,7 @@ import com.android.internal.inputmethod.InputMethodUtils;
 import com.android.internal.inputmethod.InputMethodUtils.InputMethodSettings;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.os.TransferPipe;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethod;
@@ -4030,9 +4031,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (client != null) {
             pw.flush();
             try {
-                client.client.asBinder().dump(fd, args);
-            } catch (RemoteException e) {
-                p.println("Input method client dead: " + e);
+                TransferPipe.dumpAsync(client.client.asBinder(), fd, args);
+            } catch (IOException | RemoteException e) {
+                p.println("Failed to dump input method client: " + e);
             }
         } else {
             p.println("No input method client.");
@@ -4046,9 +4047,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             p.println(" ");
             pw.flush();
             try {
-                focusedWindowClient.client.asBinder().dump(fd, args);
-            } catch (RemoteException e) {
-                p.println("Input method client in focused window dead: " + e);
+                TransferPipe.dumpAsync(focusedWindowClient.client.asBinder(), fd, args);
+            } catch (IOException | RemoteException e) {
+                p.println("Failed to dump input method client in focused window: " + e);
             }
         }
 
@@ -4056,9 +4057,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (method != null) {
             pw.flush();
             try {
-                method.asBinder().dump(fd, args);
-            } catch (RemoteException e) {
-                p.println("Input method service dead: " + e);
+                TransferPipe.dumpAsync(method.asBinder(), fd, args);
+            } catch (IOException | RemoteException e) {
+                p.println("Failed to dump input method service: " + e);
             }
         } else {
             p.println("No input method service.");

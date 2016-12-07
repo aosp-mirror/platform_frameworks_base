@@ -32,7 +32,10 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.TimedRemoteCaller;
 
+import com.android.internal.os.TransferPipe;
+
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,13 +88,11 @@ final class EphemeralResolverConnection {
                     .append((mRemoteInstance != null) ? "true" : "false").println();
 
             pw.flush();
-
             try {
-                getRemoteInstanceLazy().asBinder().dump(fd, new String[] { prefix });
-            } catch (TimeoutException te) {
-                /* ignore */
-            } catch (RemoteException re) {
-                /* ignore */
+                TransferPipe.dumpAsync(getRemoteInstanceLazy().asBinder(), fd,
+                        new String[] { prefix });
+            } catch (IOException | TimeoutException | RemoteException e) {
+                pw.println("Failed to dump remote instance: " + e);
             }
         }
     }
