@@ -27,3 +27,15 @@ LOCAL_STATIC_JAVA_LIBRARIES := core-junit-static
 LOCAL_MODULE := legacy-test
 
 include $(BUILD_JAVA_LIBRARY)
+
+ifeq ($(HOST_OS),linux)
+# Build the legacy-performance-test-hostdex library
+# =================================================
+# This contains the android.test.PerformanceTestCase class only
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES := ../core/java/android/test/PerformanceTestCase.java
+LOCAL_MODULE := legacy-performance-test-hostdex
+
+include $(BUILD_HOST_DALVIK_JAVA_LIBRARY)
+endif  # HOST_OS == linux
