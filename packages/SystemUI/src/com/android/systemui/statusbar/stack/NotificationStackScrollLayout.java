@@ -575,6 +575,9 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     private void updateChildren() {
         updateScrollStateForAddedChildren();
+        mAmbientState.setCurrentScrollVelocity(mScroller.isFinished()
+                ? 0
+                : mScroller.getCurrVelocity());
         mAmbientState.setScrollY(mOwnScrollY);
         mStackScrollAlgorithm.getStackScrollState(mAmbientState, mCurrentStackScrollState);
         if (!isCurrentlyAnimating() && !mNeedsAnimation) {

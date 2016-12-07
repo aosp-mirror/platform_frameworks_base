@@ -52,6 +52,7 @@ public class AmbientState {
     private int mBaseZHeight;
     private int mMaxLayoutHeight;
     private ActivatableNotificationView mLastVisibleBackgroundChild;
+    private float mCurrentScrollVelocity;
 
     public AmbientState(Context context) {
         reload(context);
@@ -240,5 +241,13 @@ public class AmbientState {
 
     public ActivatableNotificationView getLastVisibleBackgroundChild() {
         return mLastVisibleBackgroundChild;
+    }
+
+    public void setCurrentScrollVelocity(float currentScrollVelocity) {
+        mCurrentScrollVelocity = currentScrollVelocity;
+    }
+
+    public float getCurrentScrollVelocity() {
+        return mCurrentScrollVelocity;
     }
 }
