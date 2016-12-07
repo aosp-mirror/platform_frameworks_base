@@ -124,13 +124,16 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     }
 
     public void resetViews() {
+        ViewGroup decorView = getDecor();
+        if (decorView != null) {
+            TransitionManager.endTransitions(decorView);
+        }
         if (mTransitioningViews != null) {
             showViews(mTransitioningViews, true);
             setTransitioningViewsVisiblity(View.VISIBLE, true);
         }
         showViews(mSharedElements, true);
         mIsHidden = true;
-        ViewGroup decorView = getDecor();
         if (!mIsReturning && decorView != null) {
             decorView.suppressLayout(false);
         }
