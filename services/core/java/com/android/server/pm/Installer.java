@@ -185,35 +185,70 @@ public final class Installer extends SystemService {
                 outputPath, dexFlags, compilerFilter, volumeUuid, sharedLibraries);
     }
 
-    public boolean mergeProfiles(int uid, String pkgName) throws InstallerException {
-        return mInstaller.mergeProfiles(uid, pkgName);
+    public boolean mergeProfiles(int uid, String packageName) throws InstallerException {
+        checkLock();
+        try {
+            return mInstalld.mergeProfiles(uid, packageName);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new InstallerException(e.getMessage());
+        }
     }
 
-    public boolean dumpProfiles(String gid, String packageName, String codePaths)
+    public boolean dumpProfiles(int uid, String packageName, String codePaths)
             throws InstallerException {
-        return mInstaller.dumpProfiles(gid, packageName, codePaths);
+        checkLock();
+        try {
+            return mInstalld.dumpProfiles(uid, packageName, codePaths);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new InstallerException(e.getMessage());
+        }
     }
 
     public void idmap(String targetApkPath, String overlayApkPath, int uid)
             throws InstallerException {
-        mInstaller.execute("idmap", targetApkPath, overlayApkPath, uid);
+        checkLock();
+        try {
+            mInstalld.idmap(targetApkPath, overlayApkPath, uid);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new InstallerException(e.getMessage());
+        }
     }
 
     public void rmdex(String codePath, String instructionSet) throws InstallerException {
         assertValidInstructionSet(instructionSet);
-        mInstaller.execute("rmdex", codePath, instructionSet);
+        checkLock();
+        try {
+            mInstalld.rmdex(codePath, instructionSet);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new InstallerException(e.getMessage());
+        }
     }
 
     public void rmPackageDir(String packageDir) throws InstallerException {
-        mInstaller.execute("rmpackagedir", packageDir);
+        checkLock();
+        try {
+            mInstalld.rmPackageDir(packageDir);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new InstallerException(e.getMessage());
+        }
     }
 
-    public void clearAppProfiles(String pkgName) throws InstallerException {
-        mInstaller.execute("clear_app_profiles", pkgName);
+    public void clearAppProfiles(String packageName) throws InstallerException {
+        checkLock();
+        try {
+            mInstalld.clearAppProfiles(packageName);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new InstallerException(e.getMessage());
+        }
     }
 
-    public void destroyAppProfiles(String pkgName) throws InstallerException {
-        mInstaller.execute("destroy_app_profiles", pkgName);
+    public void destroyAppProfiles(String packageName) throws InstallerException {
+        checkLock();
+        try {
+            mInstalld.destroyAppProfiles(packageName);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new InstallerException(e.getMessage());
+        }
     }
 
     public void createUserData(String uuid, int userId, int userSerial, int flags)
@@ -227,11 +262,21 @@ public final class Installer extends SystemService {
 
     public void markBootComplete(String instructionSet) throws InstallerException {
         assertValidInstructionSet(instructionSet);
-        mInstaller.execute("markbootcomplete", instructionSet);
+        checkLock();
+        try {
+            mInstalld.markBootComplete(instructionSet);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new InstallerException(e.getMessage());
+        }
     }
 
     public void freeCache(String uuid, long freeStorageSize) throws InstallerException {
-        mInstaller.execute("freecache", uuid, freeStorageSize);
+        checkLock();
+        try {
+            mInstalld.freeCache(uuid, freeStorageSize);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new InstallerException(e.getMessage());
+        }
     }
 
     /**
@@ -239,29 +284,54 @@ public final class Installer extends SystemService {
      * directory to the real location for backward compatibility. Note that no
      * such symlink is created for 64 bit shared libraries.
      */
-    public void linkNativeLibraryDirectory(String uuid, String dataPath, String nativeLibPath32,
+    public void linkNativeLibraryDirectory(String uuid, String packageName, String nativeLibPath32,
             int userId) throws InstallerException {
-        mInstaller.execute("linklib", uuid, dataPath, nativeLibPath32, userId);
+        checkLock();
+        try {
+            mInstalld.linkNativeLibraryDirectory(uuid, packageName, nativeLibPath32, userId);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new InstallerException(e.getMessage());
+        }
     }
 
     public void createOatDir(String oatDir, String dexInstructionSet)
             throws InstallerException {
-        mInstaller.execute("createoatdir", oatDir, dexInstructionSet);
+        checkLock();
+        try {
+            mInstalld.createOatDir(oatDir, dexInstructionSet);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new InstallerException(e.getMessage());
+        }
     }
 
     public void linkFile(String relativePath, String fromBase, String toBase)
             throws InstallerException {
-        mInstaller.execute("linkfile", relativePath, fromBase, toBase);
+        checkLock();
+        try {
+            mInstalld.linkFile(relativePath, fromBase, toBase);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new InstallerException(e.getMessage());
+        }
     }
 
     public void moveAb(String apkPath, String instructionSet, String outputPath)
             throws InstallerException {
-        mInstaller.execute("move_ab", apkPath, instructionSet, outputPath);
+        checkLock();
+        try {
+            mInstalld.moveAb(apkPath, instructionSet, outputPath);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new InstallerException(e.getMessage());
+        }
     }
 
     public void deleteOdex(String apkPath, String instructionSet, String outputPath)
             throws InstallerException {
-        mInstaller.execute("delete_odex", apkPath, instructionSet, outputPath);
+        checkLock();
+        try {
+            mInstalld.deleteOdex(apkPath, instructionSet, outputPath);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new InstallerException(e.getMessage());
+        }
     }
 
     private static void assertValidInstructionSet(String instructionSet)
