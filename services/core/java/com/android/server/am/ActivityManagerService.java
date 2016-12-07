@@ -269,10 +269,8 @@ import static android.app.ActivityManager.RESIZE_MODE_PRESERVE_WINDOW;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
 import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK_ONLY;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
@@ -7494,46 +7492,51 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void enterPictureInPictureMode(IBinder token) {
-        enterPictureInPictureMode(token, DEFAULT_DISPLAY, null /* aspectRatio */);
+        enterPictureInPictureMode(token, DEFAULT_DISPLAY, -1f /* aspectRatio */,
+                false /* checkAspectRatio */);
     }
 
     @Override
     public void enterPictureInPictureModeWithAspectRatio(IBinder token, float aspectRatio) {
-        enterPictureInPictureMode(token, DEFAULT_DISPLAY, aspectRatio);
+        enterPictureInPictureMode(token, DEFAULT_DISPLAY, aspectRatio, true /* checkAspectRatio */);
     }
 
-    public void enterPictureInPictureMode(IBinder token, int displayId, Float aspectRatio) {
+    private void enterPictureInPictureMode(IBinder token, int displayId, float aspectRatio,
+            boolean checkAspectRatio) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized(this) {
-                if (!mSupportsPictureInPicture) {
-                    throw new IllegalStateException("enterPictureInPictureMode: "
-                            + "Device doesn't support picture-in-picture mode.");
-                }
+                final ActivityRecord r = ensureValidPictureInPictureActivityLocked(
+                        "enterPictureInPictureMode", token, aspectRatio, checkAspectRatio,
+                        true /* checkActivityVisibility */);
 
-                final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-                if (r == null) {
-                    throw new IllegalStateException("enterPictureInPictureMode: "
-                            + "Can't find activity for token=" + token);
-                }
+                enterPictureInPictureModeLocked(r, displayId, aspectRatio,
+                        true /* moveHomeStackToFront */, "enterPictureInPictureMode");
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
 
-                if (!r.canEnterPictureInPicture()) {
-                    throw new IllegalArgumentException("enterPictureInPictureMode: "
-                            + "Current activity does not support picture-in-picture or is not "
-                            + "visible r=" + r);
-                }
+    void enterPictureInPictureModeLocked(ActivityRecord r, int displayId, float aspectRatio,
+            boolean moveHomeStackToFront, String reason) {
+        final Rect bounds = isValidPictureInPictureAspectRatio(aspectRatio)
+                ? mWindowManager.getPictureInPictureBounds(displayId, aspectRatio)
+                : mWindowManager.getPictureInPictureDefaultBounds(displayId);
+        mStackSupervisor.moveActivityToPinnedStackLocked(r, reason, bounds, moveHomeStackToFront);
+    }
 
-                if (aspectRatio != null && !isValidPictureInPictureAspectRatio(aspectRatio)) {
-                    throw new IllegalArgumentException(String.format("enterPictureInPictureMode: "
-                            + "Aspect ratio is too extreme (must be between %f and %f).",
-                                    mMinPipAspectRatio, mMaxPipAspectRatio));
-                }
+    @Override
+    public void enterPictureInPictureModeOnMoveToBackground(IBinder token,
+            boolean enterPictureInPictureOnMoveToBg) {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized(this) {
+                final ActivityRecord r = ensureValidPictureInPictureActivityLocked(
+                        "requestAutoEnterPictureInPicture", token, -1f /* aspectRatio */,
+                        false /* checkAspectRatio */, false /* checkActivityVisibility */);
 
-                final Rect bounds = isValidPictureInPictureAspectRatio(aspectRatio)
-                        ? mWindowManager.getPictureInPictureBounds(displayId, aspectRatio)
-                        : mWindowManager.getPictureInPictureDefaultBounds(displayId);
-                mStackSupervisor.moveActivityToPinnedStackLocked(r, "enterPictureInPictureMode",
-                        bounds);
+                r.supportsPipOnMoveToBackground = enterPictureInPictureOnMoveToBg;
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -7545,31 +7548,66 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized(this) {
-                final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-                if (r == null || r.getStack().mStackId != PINNED_STACK_ID) {
-                    throw new IllegalStateException("setPictureInPictureAspectRatio: "
-                            + "Requesting activity must be in picture-in-picture mode.");
-                }
+                final ActivityRecord r = ensureValidPictureInPictureActivityLocked(
+                        "setPictureInPictureAspectRatio", token, aspectRatio,
+                        true /* checkAspectRatio */, false /* checkActivityVisibility */);
 
-                if (!isValidPictureInPictureAspectRatio(aspectRatio)) {
-                    throw new IllegalArgumentException(String.format(
-                            "setPictureInPictureAspectRatio: Aspect ratio is too extreme (must be "
-                                    + "between %f and %f).", mMinPipAspectRatio,
-                            mMaxPipAspectRatio));
+                if (r.getStack().getStackId() == PINNED_STACK_ID) {
+                    // If the activity is already in picture-in-picture, update the pinned stack now
+                    mWindowManager.setPictureInPictureAspectRatio(aspectRatio);
                 }
-
-                mWindowManager.setPictureInPictureAspectRatio(aspectRatio);
+                r.pictureInPictureAspectRatio = aspectRatio;
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
     }
 
-    private boolean isValidPictureInPictureAspectRatio(Float aspectRatio) {
-        if (aspectRatio == null) {
-            return false;
-        }
+    private boolean isValidPictureInPictureAspectRatio(float aspectRatio) {
         return mMinPipAspectRatio <= aspectRatio && aspectRatio <= mMaxPipAspectRatio;
+    }
+
+    /**
+     * Checks the state of the system and the activity associated with the given {@param token} to
+     * verify that picture-in-picture is supported for that activity.
+     *
+     * @param checkAspectRatio whether or not to check {@param aspectRatio} is within a valid range
+     * @param checkActivityVisibility whether or not to enforce that the activity is currently
+     *                                visible
+     *
+     * @return the activity record for the given {@param token} if all the checks pass.
+     */
+    private ActivityRecord ensureValidPictureInPictureActivityLocked(String caller, IBinder token,
+            float aspectRatio, boolean checkAspectRatio, boolean checkActivityVisibility) {
+        if (!mSupportsPictureInPicture) {
+            throw new IllegalStateException(caller
+                    + ": Device doesn't support picture-in-picture mode.");
+        }
+
+        final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+        if (r == null) {
+            throw new IllegalStateException(caller
+                    + ": Can't find activity for token=" + token);
+        }
+
+        if (!r.canEnterPictureInPicture(checkActivityVisibility)) {
+            throw new IllegalArgumentException(caller
+                    + "Current activity does not support picture-in-picture or is not "
+                    + "visible r=" + r);
+        }
+
+        if (r.getStack().isHomeStack()) {
+            throw new IllegalStateException(caller
+                    + ": Activities on the home stack not supported");
+        }
+
+        if (checkAspectRatio && !isValidPictureInPictureAspectRatio(aspectRatio)) {
+            throw new IllegalArgumentException(String.format(caller
+                    + ": Aspect ratio is too extreme (must be between %f and %f).",
+                            mMinPipAspectRatio, mMaxPipAspectRatio));
+        }
+
+        return r;
     }
 
     // =========================================================

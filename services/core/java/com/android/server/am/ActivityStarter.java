@@ -1068,6 +1068,7 @@ class ActivityStarter {
         // If the activity being launched is the same as the one currently at the top, then
         // we need to check if it should only be launched once.
         final ActivityStack topStack = mSupervisor.mFocusedStack;
+        final ActivityRecord topFocused = topStack.topActivity();
         final ActivityRecord top = topStack.topRunningNonDelayedActivityLocked(mNotTop);
         final boolean dontStart = top != null && mStartActivity.resultTo == null
                 && top.realActivity.equals(mStartActivity.realActivity)
@@ -1139,7 +1140,8 @@ class ActivityStarter {
 
         sendPowerHintForLaunchStartIfNeeded(false /* forceSend */);
 
-        mTargetStack.startActivityLocked(mStartActivity, newTask, mKeepCurTransition, mOptions);
+        mTargetStack.startActivityLocked(mStartActivity, topFocused, newTask, mKeepCurTransition,
+                mOptions);
         if (mDoResume) {
             final ActivityRecord topTaskActivity = mStartActivity.task.topRunningActivityLocked();
             if (!mTargetStack.isFocusable()

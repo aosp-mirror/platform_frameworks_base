@@ -2638,11 +2638,13 @@ public class ActivityStackSupervisor extends ConfigurationContainer
             return false;
         }
 
-        moveActivityToPinnedStackLocked(r, "moveTopActivityToPinnedStack", bounds);
+        moveActivityToPinnedStackLocked(r, "moveTopActivityToPinnedStack", bounds,
+                true /* moveHomeStackToFront */);
         return true;
     }
 
-    void moveActivityToPinnedStackLocked(ActivityRecord r, String reason, Rect bounds) {
+    void moveActivityToPinnedStackLocked(ActivityRecord r, String reason, Rect bounds,
+            boolean moveHomeStackToFront) {
         mWindowManager.deferSurfaceLayout();
         try {
             final TaskRecord task = r.task;
@@ -2666,7 +2668,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer
             if (task.mActivities.size() == 1) {
                 // There is only one activity in the task. So, we can just move the task over to
                 // the stack without re-parenting the activity in a different task.
-                if (task.getTaskToReturnTo() == HOME_ACTIVITY_TYPE) {
+                if (moveHomeStackToFront && task.getTaskToReturnTo() == HOME_ACTIVITY_TYPE) {
                     // Move the home stack forward if the task we just moved to the pinned stack
                     // was launched from home so home should be visible behind it.
                     moveHomeStackToFront(reason);
@@ -2674,6 +2676,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer
                 moveTaskToStackLocked(
                         task.taskId, PINNED_STACK_ID, ON_TOP, FORCE_FOCUS, reason, !ANIMATE);
             } else {
+                // There are multiple activities in the task and moving the top activity should
+                // reveal/leave the other activities in their original task
                 stack.moveActivityToStack(r);
             }
         } finally {

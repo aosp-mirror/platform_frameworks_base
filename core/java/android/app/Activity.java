@@ -2030,6 +2030,28 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Requests to the system that the activity can be automatically put into picture-in-picture
+     * mode when the user leaves the activity causing it normally to be hidden.  This is a *not*
+     * a guarantee that the activity will actually be put in picture-in-picture mode, and depends
+     * on a number of factors, including whether there is already something in picture-in-picture.
+     *
+     * If {@param enterPictureInPictureOnMoveToBg} is true, then you may also call
+     * {@link #setPictureInPictureAspectRatio(float)} to specify the aspect ratio to automatically
+     * enter picture-in-picture with.
+     *
+     * @param enterPictureInPictureOnMoveToBg whether or not this activity can automatically enter
+     *                                     picture-in-picture
+     */
+    public void enterPictureInPictureModeOnMoveToBackground(
+            boolean enterPictureInPictureOnMoveToBg) {
+        try {
+            ActivityManagerNative.getDefault().enterPictureInPictureModeOnMoveToBackground(mToken,
+                    enterPictureInPictureOnMoveToBg);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
      * Called by the system when the device configuration changes while your
      * activity is running.  Note that this will <em>only</em> be called if
      * you have selected configurations you would like to handle with the

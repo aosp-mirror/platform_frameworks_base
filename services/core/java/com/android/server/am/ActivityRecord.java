@@ -21,7 +21,6 @@ import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
 import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE;
@@ -84,7 +83,6 @@ import android.util.Slog;
 import android.util.TimeUtils;
 import android.view.AppTransitionAnimationSpec;
 import android.view.IApplicationToken;
-import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.app.ResolverActivity;
@@ -218,6 +216,14 @@ final class ActivityRecord {
     boolean frozenBeforeDestroy;// has been frozen but not yet destroyed.
     boolean immersive;      // immersive mode (don't interrupt if possible)
     boolean forceNewConfig; // force re-create with new config next time
+    boolean supportsPipOnMoveToBackground;   // Supports automatically entering picture-in-picture
+            // when this activity is hidden. This flag is requested by the activity.
+    private boolean enterPipOnMoveToBackground; // Flag to enter picture in picture when this
+            // activity is made invisible. This flag is set specifically when another task is being
+            // launched or moved to the front which may cause this activity to try and enter PiP
+            // when it is next made invisible.
+    float pictureInPictureAspectRatio; // The aspect ratio to use when auto-entering
+            // picture-in-picture
     int launchCount;        // count of launches since last state
     long lastLaunchTime;    // time of last launch of this activity
     ComponentName requestedVrComponent; // the requested component for handling VR mode.
@@ -433,6 +439,11 @@ final class ActivityRecord {
         }
         if (info != null) {
             pw.println(prefix + "resizeMode=" + ActivityInfo.resizeModeToString(info.resizeMode));
+        }
+        if (supportsPipOnMoveToBackground) {
+            pw.println(prefix + "supportsPipOnMoveToBackground=1 "
+                    + "enterPipOnMoveToBackground="
+                            + (enterPipOnMoveToBackground ? 1 : 0));
         }
     }
 
@@ -842,6 +853,23 @@ final class ActivityRecord {
     }
 
     /**
+     * If this activity has requested that it auto-enter picture-in-picture and we can actually do
+     * this, then mark it to enter picture in picture at that point.
+     */
+    void setEnterPipOnMoveToBackground(boolean enterPipOnInvisible) {
+        if (supportsPipOnMoveToBackground) {
+            enterPipOnMoveToBackground = enterPipOnInvisible;
+        }
+    }
+
+    /**
+     * @return whether to enter PiP when this activity is made invisible.
+     */
+    public boolean shouldEnterPictureInPictureOnInvisible() {
+        return enterPipOnMoveToBackground;
+    }
+
+    /**
      * @return Stack value from current task, null if there is no task.
      */
     ActivityStack getStack() {
@@ -930,9 +958,15 @@ final class ActivityRecord {
     }
 
     /**
-     * @return whether this activity is currently allowed to enter PIP.
+     * @return whether this activity is currently allowed to enter PIP, if
+     * {@param checkActivityVisibility} is set, then the current activity visibility is taken into
+     * account.
      */
-    boolean canEnterPictureInPicture() {
+    boolean canEnterPictureInPicture(boolean checkActivityVisibility) {
+        if (!checkActivityVisibility) {
+            return supportsPictureInPicture();
+        }
+
         if (supportsPictureInPicture() && visible) {
             switch (state) {
                 case RESUMED:
