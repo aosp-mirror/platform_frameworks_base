@@ -631,6 +631,11 @@ public class IpManager extends StateMachine {
         return shouldLog;
     }
 
+    // TODO: Migrate all Log.e(...) to logError(...).
+    private void logError(String fmt, Object... args) {
+        mLocalLog.log("ERROR " + String.format(fmt, args));
+    }
+
     private void getNetworkInterface() {
         try {
             mNetworkInterface = NetworkInterface.getByName(mInterfaceName);
@@ -880,7 +885,7 @@ public class IpManager extends StateMachine {
             mNwService.setInterfaceConfig(mInterfaceName, ifcg);
             if (VDBG) Log.d(mTag, "IPv4 configuration succeeded");
         } catch (IllegalStateException | RemoteException e) {
-            Log.e(mTag, "IPv4 configuration failed: ", e);
+            logError("IPv4 configuration failed: %s", e);
             return false;
         }
         return true;
@@ -944,6 +949,12 @@ public class IpManager extends StateMachine {
         }
     }
 
+    private void doImmediateProvisioningFailure(int failureType) {
+        if (DBG) { Log.e(mTag, "onProvisioningFailure(): " + failureType); }
+        recordMetric(failureType);
+        mCallback.onProvisioningFailure(new LinkProperties(mLinkProperties));
+    }
+
     private boolean startIPv4() {
         // If we have a StaticIpConfiguration attempt to apply it and
         // handle the result accordingly.
@@ -951,9 +962,6 @@ public class IpManager extends StateMachine {
             if (setIPv4Address(mConfiguration.mStaticIpConfig.ipAddress)) {
                 handleIPv4Success(new DhcpResults(mConfiguration.mStaticIpConfig));
             } else {
-                if (VDBG) { Log.d(mTag, "onProvisioningFailure()"); }
-                recordMetric(IpManagerEvent.PROVISIONING_FAIL);
-                mCallback.onProvisioningFailure(new LinkProperties(mLinkProperties));
                 return false;
             }
         } else {
@@ -972,14 +980,38 @@ public class IpManager extends StateMachine {
             mNwService.setInterfaceIpv6PrivacyExtensions(mInterfaceName, true);
             mNwService.enableIpv6(mInterfaceName);
         } catch (RemoteException re) {
-            Log.e(mTag, "Unable to change interface settings: " + re);
+            logError("Unable to change interface settings: %s", re);
             return false;
         } catch (IllegalStateException ie) {
-            Log.e(mTag, "Unable to change interface settings: " + ie);
+            logError("Unable to change interface settings: %s", ie);
             return false;
         }
 
         return true;
+    }
+
+    private boolean startIpReachabilityMonitor() {
+        try {
+            mIpReachabilityMonitor = new IpReachabilityMonitor(
+                    mContext,
+                    mInterfaceName,
+                    new IpReachabilityMonitor.Callback() {
+                        @Override
+                        public void notifyLost(InetAddress ip, String logMsg) {
+                            mCallback.onReachabilityLost(logMsg);
+                        }
+                    },
+                    mAvoidBadWifiTracker);
+        } catch (IllegalArgumentException iae) {
+            // Failed to start IpReachabilityMonitor. Log it and call
+            // onProvisioningFailure() immediately.
+            //
+            // See http://b/31038971.
+            logError("IpReachabilityMonitor failure: %s", iae);
+            mIpReachabilityMonitor = null;
+        }
+
+        return (mIpReachabilityMonitor != null);
     }
 
     private void stopAllIP() {
@@ -1165,29 +1197,23 @@ public class IpManager extends StateMachine {
                 mCallback.setFallbackMulticastFilter(mMulticastFiltering);
             }
 
-            if (mConfiguration.mEnableIPv6) {
-                // TODO: Consider transitionTo(mStoppingState) if this fails.
-                startIPv6();
+            if (mConfiguration.mEnableIPv6 && !startIPv6()) {
+                doImmediateProvisioningFailure(IpManagerEvent.ERROR_STARTING_IPV6);
+                transitionTo(mStoppingState);
+                return;
             }
 
-            if (mConfiguration.mEnableIPv4) {
-                if (!startIPv4()) {
-                    transitionTo(mStoppingState);
-                    return;
-                }
+            if (mConfiguration.mEnableIPv4 && !startIPv4()) {
+                doImmediateProvisioningFailure(IpManagerEvent.ERROR_STARTING_IPV4);
+                transitionTo(mStoppingState);
+                return;
             }
 
-            if (mConfiguration.mUsingIpReachabilityMonitor) {
-                mIpReachabilityMonitor = new IpReachabilityMonitor(
-                        mContext,
-                        mInterfaceName,
-                        new IpReachabilityMonitor.Callback() {
-                            @Override
-                            public void notifyLost(InetAddress ip, String logMsg) {
-                                mCallback.onReachabilityLost(logMsg);
-                            }
-                        },
-                        mAvoidBadWifiTracker);
+            if (mConfiguration.mUsingIpReachabilityMonitor && !startIpReachabilityMonitor()) {
+                doImmediateProvisioningFailure(
+                        IpManagerEvent.ERROR_STARTING_IPREACHABILITYMONITOR);
+                transitionTo(mStoppingState);
+                return;
             }
         }
 
