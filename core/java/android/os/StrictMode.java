@@ -1432,9 +1432,6 @@ public final class StrictMode {
                 if (violations == null) {
                     violations = new ArrayList<ViolationInfo>(1);
                     gatheredViolations.set(violations);
-                } else if (violations.size() >= 5) {
-                    // Too many.  In a loop or something?  Don't gather them all.
-                    return;
                 }
                 for (ViolationInfo previous : violations) {
                     if (info.crashInfo.stackTrace.equals(previous.crashInfo.stackTrace)) {
@@ -1931,18 +1928,14 @@ public final class StrictMode {
         if (violations == null) {
             p.writeInt(0);
         } else {
-            p.writeInt(violations.size());
-            for (int i = 0; i < violations.size(); ++i) {
-                int start = p.dataPosition();
-                violations.get(i).writeToParcel(p, 0 /* unused flags? */);
-                int size = p.dataPosition()-start;
-                if (size > 10*1024) {
-                    Slog.d(TAG, "Wrote violation #" + i + " of " + violations.size() + ": "
-                            + (p.dataPosition()-start) + " bytes");
-                }
+            // To avoid taking up too much transaction space, only include
+            // details for the first 3 violations. Deep inside, CrashInfo
+            // will truncate each stack trace to ~20kB.
+            final int size = Math.min(violations.size(), 3);
+            p.writeInt(size);
+            for (int i = 0; i < size; i++) {
+                violations.get(i).writeToParcel(p, 0);
             }
-            if (LOG_V) Log.d(TAG, "wrote violations to response parcel; num=" + violations.size());
-            violations.clear(); // somewhat redundant, as we're about to null the threadlocal
         }
         gatheredViolations.set(null);
     }
@@ -1956,40 +1949,19 @@ public final class StrictMode {
     /* package */ static void readAndHandleBinderCallViolations(Parcel p) {
         // Our own stack trace to append
         StringWriter sw = new StringWriter();
+        sw.append("# via Binder call with stack:\n");
         PrintWriter pw = new FastPrintWriter(sw, false, 256);
         new LogStackTrace().printStackTrace(pw);
         pw.flush();
         String ourStack = sw.toString();
 
-        int policyMask = getThreadPolicyMask();
-        boolean currentlyGathering = (policyMask & PENALTY_GATHER) != 0;
+        final int policyMask = getThreadPolicyMask();
+        final boolean currentlyGathering = (policyMask & PENALTY_GATHER) != 0;
 
-        int numViolations = p.readInt();
-        for (int i = 0; i < numViolations; ++i) {
-            if (LOG_V) Log.d(TAG, "strict mode violation stacks read from binder call.  i=" + i);
-            ViolationInfo info = new ViolationInfo(p, !currentlyGathering);
-            if (info.crashInfo.stackTrace != null && info.crashInfo.stackTrace.length() > 30000) {
-                String front = info.crashInfo.stackTrace.substring(0, 256);
-                // 30000 characters is way too large for this to be any sane kind of
-                // strict mode collection of stacks.  We've had a problem where we leave
-                // strict mode violations associated with the thread, and it keeps tacking
-                // more and more stacks on to the violations.  Looks like we're in this casse,
-                // so we'll report it and bail on all of the current strict mode violations
-                // we currently are maintaining for this thread.
-                // First, drain the remaining violations from the parcel.
-                i++;  // Skip the current entry.
-                for (; i < numViolations; i++) {
-                    info = new ViolationInfo(p, !currentlyGathering);
-                }
-                // Next clear out all gathered violations.
-                clearGatheredViolations();
-                // Now report the problem.
-                Slog.wtfStack(TAG, "Stack is too large: numViolations=" + numViolations
-                        + " policy=#" + Integer.toHexString(policyMask)
-                        + " front=" + front);
-                return;
-            }
-            info.crashInfo.stackTrace += "# via Binder call with stack:\n" + ourStack;
+        final int size = p.readInt();
+        for (int i = 0; i < size; i++) {
+            final ViolationInfo info = new ViolationInfo(p, !currentlyGathering);
+            info.crashInfo.appendStackTrace(ourStack);
             BlockGuard.Policy policy = BlockGuard.getThreadPolicy();
             if (policy instanceof AndroidBlockGuardPolicy) {
                 ((AndroidBlockGuardPolicy) policy).handleViolationWithTimingAttempt(info);
@@ -2320,7 +2292,7 @@ public final class StrictMode {
      * @hide
      */
     public static class ViolationInfo {
-        public String message;
+        public final String message;
 
         /**
          * Stack and other stuff info.
@@ -2379,6 +2351,7 @@ public final class StrictMode {
          * Create an uninitialized instance of ViolationInfo
          */
         public ViolationInfo() {
+            message = null;
             crashInfo = null;
             policy = 0;
         }
@@ -2425,7 +2398,9 @@ public final class StrictMode {
         @Override
         public int hashCode() {
             int result = 17;
-            result = 37 * result + crashInfo.stackTrace.hashCode();
+            if (crashInfo != null) {
+                result = 37 * result + crashInfo.stackTrace.hashCode();
+            }
             if (numAnimationsRunning != 0) {
                 result *= 37;
             }
@@ -2455,7 +2430,11 @@ public final class StrictMode {
          */
         public ViolationInfo(Parcel in, boolean unsetGatheringBit) {
             message = in.readString();
-            crashInfo = new ApplicationErrorReport.CrashInfo(in);
+            if (in.readInt() != 0) {
+                crashInfo = new ApplicationErrorReport.CrashInfo(in);
+            } else {
+                crashInfo = null;
+            }
             int rawPolicy = in.readInt();
             if (unsetGatheringBit) {
                 policy = rawPolicy & ~PENALTY_GATHER;
@@ -2476,7 +2455,12 @@ public final class StrictMode {
          */
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeString(message);
-            crashInfo.writeToParcel(dest, flags);
+            if (crashInfo != null) {
+                dest.writeInt(1);
+                crashInfo.writeToParcel(dest, flags);
+            } else {
+                dest.writeInt(0);
+            }
             int start = dest.dataPosition();
             dest.writeInt(policy);
             dest.writeInt(durationMillis);
@@ -2504,7 +2488,9 @@ public final class StrictMode {
          * Dump a ViolationInfo instance to a Printer.
          */
         public void dump(Printer pw, String prefix) {
-            crashInfo.dump(pw, prefix);
+            if (crashInfo != null) {
+                crashInfo.dump(pw, prefix);
+            }
             pw.println(prefix + "policy: " + policy);
             if (durationMillis != -1) {
                 pw.println(prefix + "durationMillis: " + durationMillis);
