@@ -737,6 +737,14 @@ public final class Sensor {
     private static final int ADDITIONAL_INFO_MASK = 0x40;
     private static final int ADDITIONAL_INFO_SHIFT = 6;
 
+    // Mask for direct mode highest rate level, bit 7, 8, 9.
+    private static final int DIRECT_REPORT_MASK = 0x380;
+    private static final int DIRECT_REPORT_SHIFT = 7;
+
+    // Mask for supported direct channel, bit 10, 11
+    private static final int DIRECT_CHANNEL_MASK = 0xC00;
+    private static final int DIRECT_CHANNEL_SHIFT = 10;
+
     // TODO(): The following arrays are fragile and error-prone. This needs to be refactored.
 
     // Note: This needs to be updated, whenever a new sensor is added.
@@ -808,7 +816,9 @@ public final class Sensor {
      */
     @SensorDirectChannel.RateLevel
     public int getHighestDirectReportRateLevel() {
-        return SensorDirectChannel.RATE_STOP;
+        int rateLevel = ((mFlags & DIRECT_REPORT_MASK) >> DIRECT_REPORT_SHIFT);
+        return rateLevel <= SensorDirectChannel.RATE_VERY_FAST
+                ? rateLevel : SensorDirectChannel.RATE_VERY_FAST;
     }
 
     /**
@@ -820,7 +830,14 @@ public final class Sensor {
      * @see SensorDirectChannel#TYPE_HARDWARE_BUFFER
      */
     public boolean isDirectChannelTypeSupported(@SensorDirectChannel.MemoryType int sharedMemType) {
-        return false;
+        switch (sharedMemType) {
+            case SensorDirectChannel.TYPE_ASHMEM:
+                return (mFlags & (1 << DIRECT_CHANNEL_SHIFT)) > 0;
+            case SensorDirectChannel.TYPE_HARDWARE_BUFFER:
+                return (mFlags & (1 << DIRECT_CHANNEL_SHIFT + 1)) > 0;
+            default:
+                return false;
+        }
     }
 
     static int getMaxLengthValuesArray(Sensor sensor, int sdkLevel) {

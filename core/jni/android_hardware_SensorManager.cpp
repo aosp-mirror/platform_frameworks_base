@@ -26,6 +26,7 @@
 #include <gui/Sensor.h>
 #include <gui/SensorEventQueue.h>
 #include <gui/SensorManager.h>
+#include <cutils/native_handle.h>
 #include <utils/Log.h>
 #include <utils/Looper.h>
 #include <utils/Vector.h>
@@ -243,6 +244,54 @@ static jboolean nativeIsDataInjectionEnabled(JNIEnv *_env, jclass _this, jlong s
     return mgr->isDataInjectionEnabled();
 }
 
+static jint nativeCreateDirectChannel(JNIEnv *_env, jclass _this, jlong sensorManager,
+        jlong size, jint channelType, jlongArray channelData) {
+    jint ret = -1;
+    jsize len = _env->GetArrayLength(channelData);
+    if (len > 2) {
+        jlong *data = _env->GetLongArrayElements(channelData, NULL);
+        if (data != nullptr) {
+            // construct native handle from jlong*
+            jlong numFd = data[0];
+            jlong numInt = data[1];
+            if ((numFd + numInt + 2) == len) {
+                native_handle_t *nativeHandle = native_handle_create(numFd, numInt);
+                if (nativeHandle != nullptr) {
+                    const jlong *readPointer = data + 2;
+                    int *writePointer = nativeHandle->data;
+                    size_t n = static_cast<size_t>(numFd + numInt);
+                    while (n--) {
+                        // native type of data is int, jlong is just to ensure Java does not
+                        // truncate data on 64-bit system. The cast here is safe.
+                        *writePointer++ = static_cast<int>(*readPointer++);
+                    }
+
+                    SensorManager* mgr = reinterpret_cast<SensorManager*>(sensorManager);
+                    ret = mgr->createDirectChannel(size, channelType, nativeHandle);
+
+                    // do not native_handle_close() here as handle is owned by java
+                    native_handle_delete(nativeHandle);
+                }
+            }
+            // unidirectional parameter passing, thus JNI_ABORT
+            _env->ReleaseLongArrayElements(channelData, data, JNI_ABORT);
+        }
+    }
+    return ret;
+}
+
+static void nativeDestroyDirectChannel(JNIEnv *_env, jclass _this, jlong sensorManager,
+        jint channelHandle) {
+    SensorManager* mgr = reinterpret_cast<SensorManager*>(sensorManager);
+    mgr->destroyDirectChannel(channelHandle);
+}
+
+static jint nativeConfigDirectChannel(JNIEnv *_env, jclass _this, jlong sensorManager,
+        jint channelHandle, jint sensorHandle, jint rate) {
+    SensorManager* mgr = reinterpret_cast<SensorManager*>(sensorManager);
+    return mgr->configureDirectChannel(channelHandle, sensorHandle, rate);
+}
+
 //----------------------------------------------------------------------------
 
 class Receiver : public LooperCallback {
@@ -447,7 +496,19 @@ static const JNINativeMethod gSystemSensorManagerMethods[] = {
 
     {"nativeIsDataInjectionEnabled",
             "(J)Z",
-            (void*)nativeIsDataInjectionEnabled},
+            (void*)nativeIsDataInjectionEnabled },
+
+    {"nativeCreateDirectChannel",
+            "(JJI[J)I",
+            (void*)nativeCreateDirectChannel },
+
+    {"nativeDestroyDirectChannel",
+            "(JI)V",
+            (void*)nativeDestroyDirectChannel },
+
+    {"nativeConfigDirectChannel",
+            "(JIII)I",
+            (void*)nativeConfigDirectChannel },
 };
 
 static const JNINativeMethod gBaseEventQueueMethods[] = {

@@ -99,7 +99,7 @@ public final class SensorDirectChannel implements AutoCloseable {
      * @return <code>true</code> if channel is valid.
      */
     public boolean isValid() {
-        return false;
+        return !mClosed.get();
     }
 
     /**
@@ -123,7 +123,30 @@ public final class SensorDirectChannel implements AutoCloseable {
     /** @hide */
     SensorDirectChannel(SensorManager manager, int id, int type, long size) {
         mManager = manager;
+        mNativeHandle = id;
+        mType = type;
+        mSize = size;
         mCloseGuard.open("SensorDirectChannel");
+    }
+
+    /** @hide */
+    int getNativeHandle() {
+        return mNativeHandle;
+    }
+
+    /**
+     * This function encode handle information in {@link android.os.Memory} into a long array to be
+     * passed down to native methods.
+     *
+     * @hide */
+    static long[] encodeData(MemoryFile ashmem) {
+        int fd;
+        try {
+            fd = ashmem.getFileDescriptor().getInt$();
+        } catch (IOException e) {
+            fd = -1;
+        }
+        return new long[] { 1 /*numFds*/, 0 /*numInts*/, fd };
     }
 
     @Override
@@ -139,4 +162,7 @@ public final class SensorDirectChannel implements AutoCloseable {
     private final AtomicBoolean mClosed = new AtomicBoolean();
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private final SensorManager mManager;
+    private final int mNativeHandle;
+    private final long mSize;
+    private final int mType;
 }

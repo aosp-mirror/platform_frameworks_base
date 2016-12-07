@@ -895,7 +895,7 @@ public abstract class SensorManager {
      * @see #configureDirectChannel(SensorDirectChannel, Sensor, int)
      */
     public SensorDirectChannel createDirectChannel(MemoryFile mem) {
-        return null;
+        return createDirectChannelImpl(mem.length(), mem, null);
     }
 
     /**
@@ -917,8 +917,16 @@ public abstract class SensorManager {
     }
 
     /** @hide */
+    protected abstract SensorDirectChannel createDirectChannelImpl(long size,
+            MemoryFile ashmemFile, HardwareBuffer hardwareBuffer);
+
+    /** @hide */
     void destroyDirectChannel(SensorDirectChannel channel) {
+        destroyDirectChannelImpl(channel);
     }
+
+    /** @hide */
+    protected abstract void destroyDirectChannelImpl(SensorDirectChannel channel);
 
     /**
      * Configure sensor rate or stop sensor report on a direct report channel specified.
@@ -964,8 +972,12 @@ public abstract class SensorManager {
      */
     public int configureDirectChannel(SensorDirectChannel channel, Sensor sensor,
             @SensorDirectChannel.RateLevel int rateLevel) {
-        return 0;
+        return configureDirectChannelImpl(channel, sensor, rateLevel);
     }
+
+    /** @hide */
+    protected abstract int configureDirectChannelImpl(
+            SensorDirectChannel channel, Sensor s, int rate);
 
     /**
      * Used for receiving notifications from the SensorManager when dynamic sensors are connected or
