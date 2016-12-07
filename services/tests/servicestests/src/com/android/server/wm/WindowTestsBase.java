@@ -113,6 +113,12 @@ public class WindowTestsBase {
         return token;
     }
 
+    WindowState createWindow(WindowState parent, int type, String name) {
+        return (parent == null)
+                ? createWindow(parent, type, sDisplayContent, name)
+                : createWindow(parent, type, parent.mToken, name);
+    }
+
     WindowState createWindow(WindowState parent, int type, DisplayContent dc, String name) {
         final WindowToken token = createWindowToken(dc, type);
         return createWindow(parent, type, token, name);

@@ -1925,9 +1925,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     boolean canBeImeTarget() {
-        final int fl = mAttrs.flags & (FLAG_NOT_FOCUSABLE|FLAG_ALT_FOCUSABLE_IM);
+        if (mIsImWindow) {
+            // IME windows can't be IME targets. IME targets are required to be below the IME
+            // windows and that wouldn't be possible if the IME window is its own target...silly.
+            return false;
+        }
+
+        final int fl = mAttrs.flags & (FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM);
         final int type = mAttrs.type;
 
+        // Can only be an IME target if both FLAG_NOT_FOCUSABLE and FLAG_ALT_FOCUSABLE_IM are set or
+        // both are cleared...and not a starting window.
         if (fl != 0 && fl != (FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM)
                 && type != TYPE_APPLICATION_STARTING) {
             return false;
