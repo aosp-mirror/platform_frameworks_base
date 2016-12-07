@@ -21,6 +21,7 @@ import com.android.layoutlib.bridge.MockView;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.util.AttributeSet;
 
 /**
@@ -47,6 +48,19 @@ public class SurfaceView extends MockView {
 
     public SurfaceView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+    }
+
+    public boolean gatherTransparentRegion(Region region) {
+      return false;
+    }
+
+    public void setZOrderMediaOverlay(boolean isMediaOverlay) {
+    }
+
+    public void setZOrderOnTop(boolean onTop) {
+    }
+
+    public void setSecure(boolean isSecure) {
     }
 
     public SurfaceHolder getHolder() {
