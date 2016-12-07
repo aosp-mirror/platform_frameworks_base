@@ -22,6 +22,7 @@ import android.view.View;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ActivatableNotificationView;
 import com.android.systemui.statusbar.NotificationShelf;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.ArrayList;
@@ -53,6 +54,7 @@ public class AmbientState {
     private int mMaxLayoutHeight;
     private ActivatableNotificationView mLastVisibleBackgroundChild;
     private float mCurrentScrollVelocity;
+    private int mStatusBarState;
 
     public AmbientState(Context context) {
         reload(context);
@@ -249,5 +251,13 @@ public class AmbientState {
 
     public float getCurrentScrollVelocity() {
         return mCurrentScrollVelocity;
+    }
+
+    public boolean isOnKeyguard() {
+        return mStatusBarState == StatusBarState.KEYGUARD;
+    }
+
+    public void setStatusBarState(int statusBarState) {
+        mStatusBarState = statusBarState;
     }
 }

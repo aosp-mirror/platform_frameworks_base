@@ -4558,6 +4558,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mGroupManager.setStatusBarState(state);
         mFalsingManager.setStatusBarState(state);
         mStatusBarWindowManager.setStatusBarState(state);
+        mStackScroller.setStatusBarState(state);
         updateReportRejectedTouchVisibility();
         updateDozing();
     }
