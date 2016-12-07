@@ -710,10 +710,12 @@ public final class SystemServer {
                 traceEnd();
             }
 
+            traceBeginAndSlog("SetWindowManagerService");
             mActivityManagerService.setWindowManager(wm);
+            traceEnd();
 
-            inputManager.setWindowManagerCallbacks(wm.getInputMonitor());
             traceBeginAndSlog("StartInputManager");
+            inputManager.setWindowManagerCallbacks(wm.getInputMonitor());
             inputManager.start();
             traceEnd();
 
@@ -1238,8 +1240,10 @@ public final class SystemServer {
             }
 
             if (!disableNetwork && !disableNonCoreServices && EmergencyAffordanceManager.ENABLED) {
-                // EmergencyMode sevice
+                // EmergencyMode service
+                traceBeginAndSlog("StartEmergencyAffordanceService");
                 mSystemServiceManager.startService(EmergencyAffordanceService.class);
+                traceEnd();
             }
 
             if (!disableNonCoreServices) {
@@ -1482,176 +1486,167 @@ public final class SystemServer {
         // where third party code can really run (but before it has actually
         // started launching the initial applications), for us to complete our
         // initialization.
-        mActivityManagerService.systemReady(new Runnable() {
-            @Override
-            public void run() {
-                Slog.i(TAG, "Making services ready");
-                traceBeginAndSlog("StartActivityManagerReadyPhase");
-                mSystemServiceManager.startBootPhase(
-                        SystemService.PHASE_ACTIVITY_MANAGER_READY);
-                traceEnd();
-                traceBeginAndSlog("PhaseActivityManagerReady");
-
-                traceBeginAndSlog("StartObservingNativeCrashes");
-                try {
-                    mActivityManagerService.startObservingNativeCrashes();
-                } catch (Throwable e) {
-                    reportWtf("observing native crashes", e);
-                }
-                traceEnd();
-
-                if (!mOnlyCore) {
-                    Slog.i(TAG, "WebViewFactory preparation");
-                    traceBeginAndSlog("WebViewFactoryPreparation");
-                    mWebViewUpdateService.prepareWebViewInSystemServer();
-                    traceEnd();
-                }
-
-                traceBeginAndSlog("StartSystemUI");
-                try {
-                    startSystemUi(context);
-                } catch (Throwable e) {
-                    reportWtf("starting System UI", e);
-                }
-                traceEnd();
-                traceBeginAndSlog("MakeNetworkScoreReady");
-                try {
-                    if (networkScoreF != null) networkScoreF.systemReady();
-                } catch (Throwable e) {
-                    reportWtf("making Network Score Service ready", e);
-                }
-                traceEnd();
-                traceBeginAndSlog("MakeNetworkManagementServiceReady");
-                try {
-                    if (networkManagementF != null) networkManagementF.systemReady();
-                } catch (Throwable e) {
-                    reportWtf("making Network Managment Service ready", e);
-                }
-                CountDownLatch networkPolicyInitReadySignal = null;
-                if (networkPolicyF != null) {
-                    networkPolicyInitReadySignal = networkPolicyF
-                            .networkScoreAndNetworkManagementServiceReady();
-                }
-                traceEnd();
-                traceBeginAndSlog("MakeNetworkStatsServiceReady");
-                try {
-                    if (networkStatsF != null) networkStatsF.systemReady();
-                } catch (Throwable e) {
-                    reportWtf("making Network Stats Service ready", e);
-                }
-                traceEnd();
-                traceBeginAndSlog("MakeConnectivityServiceReady");
-                try {
-                    if (connectivityF != null) connectivityF.systemReady();
-                } catch (Throwable e) {
-                    reportWtf("making Connectivity Service ready", e);
-                }
-                traceEnd();
-                traceBeginAndSlog("MakeNetworkPolicyServiceReady");
-                try {
-                    if (networkPolicyF != null) {
-                        networkPolicyF.systemReady(networkPolicyInitReadySignal);
-                    }
-                } catch (Throwable e) {
-                    reportWtf("making Network Policy Service ready", e);
-                }
-                traceEnd();
-
-                traceBeginAndSlog("StartWatchdog");
-                Watchdog.getInstance().start();
-                traceEnd();
-
-                // It is now okay to let the various system services start their
-                // third party code...
-                traceBeginAndSlog("PhaseThirdPartyAppsCanStart");
-                mSystemServiceManager.startBootPhase(
-                        SystemService.PHASE_THIRD_PARTY_APPS_CAN_START);
-                traceEnd();
-
-                traceBeginAndSlog("MakeLocationServiceReady");
-                try {
-                    if (locationF != null) locationF.systemRunning();
-                } catch (Throwable e) {
-                    reportWtf("Notifying Location Service running", e);
-                }
-                traceEnd();
-                traceBeginAndSlog("MakeCountryDetectionServiceReady");
-                try {
-                    if (countryDetectorF != null) countryDetectorF.systemRunning();
-                } catch (Throwable e) {
-                    reportWtf("Notifying CountryDetectorService running", e);
-                }
-                traceEnd();
-                traceBeginAndSlog("MakeNetworkTimeUpdateReady");
-                try {
-                    if (networkTimeUpdaterF != null) networkTimeUpdaterF.systemRunning();
-                } catch (Throwable e) {
-                    reportWtf("Notifying NetworkTimeService running", e);
-                }
-                traceEnd();
-                traceBeginAndSlog("MakeCommonTimeManagementServiceReady");
-                try {
-                    if (commonTimeMgmtServiceF != null) {
-                        commonTimeMgmtServiceF.systemRunning();
-                    }
-                } catch (Throwable e) {
-                    reportWtf("Notifying CommonTimeManagementService running", e);
-                }
-                traceEnd();
-                traceBeginAndSlog("MakeInputManagerServiceReady");
-                try {
-                    // TODO(BT) Pass parameter to input manager
-                    if (inputManagerF != null) inputManagerF.systemRunning();
-                } catch (Throwable e) {
-                    reportWtf("Notifying InputManagerService running", e);
-                }
-                traceEnd();
-                traceBeginAndSlog("MakeTelephonyRegistryReady");
-                try {
-                    if (telephonyRegistryF != null) telephonyRegistryF.systemRunning();
-                } catch (Throwable e) {
-                    reportWtf("Notifying TelephonyRegistry running", e);
-                }
-                traceEnd();
-                traceBeginAndSlog("MakeMediaRouterServiceReady");
-                try {
-                    if (mediaRouterF != null) mediaRouterF.systemRunning();
-                } catch (Throwable e) {
-                    reportWtf("Notifying MediaRouterService running", e);
-                }
-                traceEnd();
-                traceBeginAndSlog("MakeMmsServiceReady");
-                try {
-                    if (mmsServiceF != null) mmsServiceF.systemRunning();
-                } catch (Throwable e) {
-                    reportWtf("Notifying MmsService running", e);
-                }
-                traceEnd();
-
-                traceBeginAndSlog("MakeNetworkScoreServiceReady");
-                try {
-                    if (networkScoreF != null) networkScoreF.systemRunning();
-                } catch (Throwable e) {
-                    reportWtf("Notifying NetworkScoreService running", e);
-                }
-                traceEnd();
-
-                traceBeginAndSlog("IncidentDaemonReady");
-                try {
-                    // TODO: Switch from checkService to getService once it's always
-                    // in the build and should reliably be there.
-                    final IIncidentManager incident = IIncidentManager.Stub.asInterface(
-                            ServiceManager.checkService("incident"));
-                    if (incident != null) incident.systemRunning();
-                } catch (Throwable e) {
-                    reportWtf("Notifying incident daemon running", e);
-                }
-                traceEnd();
-                
-
-                traceEnd();  // PhaseActivityManagerReady
+        mActivityManagerService.systemReady(() -> {
+            Slog.i(TAG, "Making services ready");
+            traceBeginAndSlog("StartActivityManagerReadyPhase");
+            mSystemServiceManager.startBootPhase(
+                    SystemService.PHASE_ACTIVITY_MANAGER_READY);
+            traceEnd();
+            traceBeginAndSlog("StartObservingNativeCrashes");
+            try {
+                mActivityManagerService.startObservingNativeCrashes();
+            } catch (Throwable e) {
+                reportWtf("observing native crashes", e);
             }
-        });
+            traceEnd();
+
+            if (!mOnlyCore) {
+                Slog.i(TAG, "WebViewFactory preparation");
+                traceBeginAndSlog("WebViewFactoryPreparation");
+                mWebViewUpdateService.prepareWebViewInSystemServer();
+                traceEnd();
+            }
+
+            traceBeginAndSlog("StartSystemUI");
+            try {
+                startSystemUi(context);
+            } catch (Throwable e) {
+                reportWtf("starting System UI", e);
+            }
+            traceEnd();
+            traceBeginAndSlog("MakeNetworkScoreReady");
+            try {
+                if (networkScoreF != null) networkScoreF.systemReady();
+            } catch (Throwable e) {
+                reportWtf("making Network Score Service ready", e);
+            }
+            traceEnd();
+            traceBeginAndSlog("MakeNetworkManagementServiceReady");
+            try {
+                if (networkManagementF != null) networkManagementF.systemReady();
+            } catch (Throwable e) {
+                reportWtf("making Network Managment Service ready", e);
+            }
+            CountDownLatch networkPolicyInitReadySignal = null;
+            if (networkPolicyF != null) {
+                networkPolicyInitReadySignal = networkPolicyF
+                        .networkScoreAndNetworkManagementServiceReady();
+            }
+            traceEnd();
+            traceBeginAndSlog("MakeNetworkStatsServiceReady");
+            try {
+                if (networkStatsF != null) networkStatsF.systemReady();
+            } catch (Throwable e) {
+                reportWtf("making Network Stats Service ready", e);
+            }
+            traceEnd();
+            traceBeginAndSlog("MakeConnectivityServiceReady");
+            try {
+                if (connectivityF != null) connectivityF.systemReady();
+            } catch (Throwable e) {
+                reportWtf("making Connectivity Service ready", e);
+            }
+            traceEnd();
+            traceBeginAndSlog("MakeNetworkPolicyServiceReady");
+            try {
+                if (networkPolicyF != null) {
+                    networkPolicyF.systemReady(networkPolicyInitReadySignal);
+                }
+            } catch (Throwable e) {
+                reportWtf("making Network Policy Service ready", e);
+            }
+            traceEnd();
+
+            traceBeginAndSlog("StartWatchdog");
+            Watchdog.getInstance().start();
+            traceEnd();
+
+            // It is now okay to let the various system services start their
+            // third party code...
+            traceBeginAndSlog("PhaseThirdPartyAppsCanStart");
+            mSystemServiceManager.startBootPhase(
+                    SystemService.PHASE_THIRD_PARTY_APPS_CAN_START);
+            traceEnd();
+
+            traceBeginAndSlog("MakeLocationServiceReady");
+            try {
+                if (locationF != null) locationF.systemRunning();
+            } catch (Throwable e) {
+                reportWtf("Notifying Location Service running", e);
+            }
+            traceEnd();
+            traceBeginAndSlog("MakeCountryDetectionServiceReady");
+            try {
+                if (countryDetectorF != null) countryDetectorF.systemRunning();
+            } catch (Throwable e) {
+                reportWtf("Notifying CountryDetectorService running", e);
+            }
+            traceEnd();
+            traceBeginAndSlog("MakeNetworkTimeUpdateReady");
+            try {
+                if (networkTimeUpdaterF != null) networkTimeUpdaterF.systemRunning();
+            } catch (Throwable e) {
+                reportWtf("Notifying NetworkTimeService running", e);
+            }
+            traceEnd();
+            traceBeginAndSlog("MakeCommonTimeManagementServiceReady");
+            try {
+                if (commonTimeMgmtServiceF != null) {
+                    commonTimeMgmtServiceF.systemRunning();
+                }
+            } catch (Throwable e) {
+                reportWtf("Notifying CommonTimeManagementService running", e);
+            }
+            traceEnd();
+            traceBeginAndSlog("MakeInputManagerServiceReady");
+            try {
+                // TODO(BT) Pass parameter to input manager
+                if (inputManagerF != null) inputManagerF.systemRunning();
+            } catch (Throwable e) {
+                reportWtf("Notifying InputManagerService running", e);
+            }
+            traceEnd();
+            traceBeginAndSlog("MakeTelephonyRegistryReady");
+            try {
+                if (telephonyRegistryF != null) telephonyRegistryF.systemRunning();
+            } catch (Throwable e) {
+                reportWtf("Notifying TelephonyRegistry running", e);
+            }
+            traceEnd();
+            traceBeginAndSlog("MakeMediaRouterServiceReady");
+            try {
+                if (mediaRouterF != null) mediaRouterF.systemRunning();
+            } catch (Throwable e) {
+                reportWtf("Notifying MediaRouterService running", e);
+            }
+            traceEnd();
+            traceBeginAndSlog("MakeMmsServiceReady");
+            try {
+                if (mmsServiceF != null) mmsServiceF.systemRunning();
+            } catch (Throwable e) {
+                reportWtf("Notifying MmsService running", e);
+            }
+            traceEnd();
+
+            traceBeginAndSlog("MakeNetworkScoreServiceReady");
+            try {
+                if (networkScoreF != null) networkScoreF.systemRunning();
+            } catch (Throwable e) {
+                reportWtf("Notifying NetworkScoreService running", e);
+            }
+            traceEnd();
+            traceBeginAndSlog("IncidentDaemonReady");
+            try {
+                // TODO: Switch from checkService to getService once it's always
+                // in the build and should reliably be there.
+                final IIncidentManager incident = IIncidentManager.Stub.asInterface(
+                        ServiceManager.checkService("incident"));
+                if (incident != null) incident.systemRunning();
+            } catch (Throwable e) {
+                reportWtf("Notifying incident daemon running", e);
+            }
+            traceEnd();
+        }, BOOT_TIMINGS_TRACE_LOG);
     }
 
     static final void startSystemUi(Context context) {
