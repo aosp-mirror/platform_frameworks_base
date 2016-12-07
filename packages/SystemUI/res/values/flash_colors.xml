@@ -56,4 +56,8 @@
     <!-- External QS tile tint color -->
     <color name="external_qs_tile_tint_color">@android:color/white</color>
 
+    <!-- Clear-All recents FAB -->
+    <color name="fab_color">@*android:color/material_deep_teal_500</color>
+    <color name="floating_action_button_icon_color">#FFFFFFFF</color>
+
 </resources>
