@@ -112,25 +112,44 @@ public final class Installer extends SystemService {
         }
     }
 
-    public void restoreconAppData(String uuid, String pkgname, int userid, int flags, int appid,
-            String seinfo) throws InstallerException {
-        mInstaller.execute("restorecon_app_data", uuid, pkgname, userid, flags, appid,
-                seinfo);
+    public void restoreconAppData(String uuid, String packageName, int userId, int flags, int appId,
+            String seInfo) throws InstallerException {
+        checkLock();
+        try {
+            mInstalld.restoreconAppData(uuid, packageName, userId, flags, appId, seInfo);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new InstallerException(e.getMessage());
+        }
     }
 
-    public void migrateAppData(String uuid, String pkgname, int userid, int flags)
+    public void migrateAppData(String uuid, String packageName, int userId, int flags)
             throws InstallerException {
-        mInstaller.execute("migrate_app_data", uuid, pkgname, userid, flags);
+        checkLock();
+        try {
+            mInstalld.migrateAppData(uuid, packageName, userId, flags);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new InstallerException(e.getMessage());
+        }
     }
 
-    public void clearAppData(String uuid, String pkgname, int userid, int flags, long ceDataInode)
-            throws InstallerException {
-        mInstaller.execute("clear_app_data", uuid, pkgname, userid, flags, ceDataInode);
+    public void clearAppData(String uuid, String packageName, int userId, int flags,
+            long ceDataInode) throws InstallerException {
+        checkLock();
+        try {
+            mInstalld.clearAppData(uuid, packageName, userId, flags, ceDataInode);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new InstallerException(e.getMessage());
+        }
     }
 
-    public void destroyAppData(String uuid, String pkgname, int userid, int flags, long ceDataInode)
-            throws InstallerException {
-        mInstaller.execute("destroy_app_data", uuid, pkgname, userid, flags, ceDataInode);
+    public void destroyAppData(String uuid, String packageName, int userId, int flags,
+            long ceDataInode) throws InstallerException {
+        checkLock();
+        try {
+            mInstalld.destroyAppData(uuid, packageName, userId, flags, ceDataInode);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new InstallerException(e.getMessage());
+        }
     }
 
     public void moveCompleteApp(String fromUuid, String toUuid, String packageName,
@@ -158,13 +177,13 @@ public final class Installer extends SystemService {
         }
     }
 
-    public long getAppDataInode(String uuid, String pkgname, int userid, int flags)
+    public long getAppDataInode(String uuid, String packageName, int userId, int flags)
             throws InstallerException {
-        final String[] res = mInstaller.execute("get_app_data_inode", uuid, pkgname, userid, flags);
+        checkLock();
         try {
-            return Long.parseLong(res[1]);
-        } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
-            throw new InstallerException("Invalid inode result: " + Arrays.toString(res));
+            return mInstalld.getAppDataInode(uuid, packageName, userId, flags);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new InstallerException(e.getMessage());
         }
     }
 
@@ -218,11 +237,21 @@ public final class Installer extends SystemService {
 
     public void createUserData(String uuid, int userId, int userSerial, int flags)
             throws InstallerException {
-        mInstaller.execute("create_user_data", uuid, userId, userSerial, flags);
+        checkLock();
+        try {
+            mInstalld.createUserData(uuid, userId, userSerial, flags);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new InstallerException(e.getMessage());
+        }
     }
 
     public void destroyUserData(String uuid, int userId, int flags) throws InstallerException {
-        mInstaller.execute("destroy_user_data", uuid, userId, flags);
+        checkLock();
+        try {
+            mInstalld.destroyUserData(uuid, userId, flags);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw new InstallerException(e.getMessage());
+        }
     }
 
     public void markBootComplete(String instructionSet) throws InstallerException {
