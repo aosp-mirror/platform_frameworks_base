@@ -64,13 +64,15 @@ public class Media extends BaseCommand {
                 "       media dispatch KEY\n" +
                 "       media list-sessions\n" +
                 "       media monitor <tag>\n" +
+                "       media volume [options]\n" +
                 "\n" +
                 "media dispatch: dispatch a media key to the system.\n" +
                 "                KEY may be: play, pause, play-pause, mute, headsethook,\n" +
                 "                stop, next, previous, rewind, record, fast-forword.\n" +
                 "media list-sessions: print a list of the current sessions.\n" +
                         "media monitor: monitor updates to the specified session.\n" +
-                "                       Use the tag from list-sessions.\n"
+                "                       Use the tag from list-sessions.\n" +
+                "media volume:  " + VolumeCtrl.USAGE
         );
     }
 
@@ -92,6 +94,8 @@ public class Media extends BaseCommand {
             runListSessions();
         } else if (op.equals("monitor")) {
             runMonitor();
+        } else if (op.equals("volume")) {
+            runVolume();
         } else {
             showError("Error: unknown command '" + op + "'");
             return;
@@ -321,5 +325,11 @@ public class Media extends BaseCommand {
         } catch (Exception e) {
             System.out.println("***Error listing sessions***");
         }
+    }
+
+    //=================================
+    // "volume" command for stream volume control
+    private void runVolume() throws Exception {
+        VolumeCtrl.run(this);
     }
 }
