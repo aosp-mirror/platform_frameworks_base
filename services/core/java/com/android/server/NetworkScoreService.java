@@ -30,7 +30,10 @@ import android.net.INetworkScoreService;
 import android.net.NetworkScoreManager;
 import android.net.NetworkScorerAppManager;
 import android.net.NetworkScorerAppManager.NetworkScorerAppData;
+import android.net.RecommendationRequest;
+import android.net.RecommendationResult;
 import android.net.ScoredNetwork;
+import android.net.wifi.WifiConfiguration;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -414,6 +417,16 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
             }
             mScoreCaches.put(networkType, scoreCache);
         }
+    }
+
+    @Override
+    public RecommendationResult requestRecommendation(RecommendationRequest request) {
+        // TODO(jjoslin): 11/25/16 - Update with real impl.
+        WifiConfiguration selectedConfig = null;
+        if (request != null) {
+            selectedConfig = request.getCurrentSelectedConfig();
+        }
+        return new RecommendationResult(selectedConfig);
     }
 
     @Override
