@@ -378,6 +378,11 @@ public class ApplicationErrorReport implements Parcelable {
             exceptionMessage = sanitizeString(exceptionMessage);
         }
 
+        /** {@hide} */
+        public void appendStackTrace(String tr) {
+            stackTrace = sanitizeString(stackTrace + tr);
+        }
+
         /**
          * Ensure that the string is of reasonable size, truncating from the middle if needed.
          */
