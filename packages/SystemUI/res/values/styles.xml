@@ -127,7 +127,7 @@
     <style name="TextAppearance.StatusBar.Expanded.Clock">
         <item name="android:textSize">@dimen/qs_time_expanded_size</item>
         <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:textColor">#ffffff</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Expanded.Date">
@@ -159,7 +159,7 @@
 
     <style name="TextAppearance.QS">
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">@color/qs_text</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:fontFamily">sans-serif</item>
     </style>
 
