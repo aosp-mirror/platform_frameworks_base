@@ -18,7 +18,7 @@ LOCAL_PATH:= $(call my-dir)
 
 uiautomator.core_src_files := $(call all-java-files-under, core-src) \
 	$(call all-java-files-under, testrunner-src)
-uiautomator.core_java_libraries := android.test.runner core-junit
+uiautomator.core_java_libraries := android.test.runner junit
 
 uiautomator_internal_api_file := $(TARGET_OUT_COMMON_INTERMEDIATES)/PACKAGING/uiautomator_api.txt
 uiautomator_internal_removed_api_file := \
