@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="no"?>
+<comments
+  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+  xsi:noNamespaceSchemaLocation='comments.xsd'
+  name="24.2.0_to_25.0.0"
+  jdversion="1.1.0">
+
+<!-- Use this file to enter an API change description. For example, when you remove a class, 
+     you can enter a comment for that class that points developers to the replacement class. 
+     You can also provide a change summary for modified API, to give an overview of the changes 
+     why they were made, workarounds, etc.  -->
+
+<!-- When the API diffs report is generated, the comments in this file get added to the tables of 
+     removed, added, and modified packages, classes, methods, and fields. This file does not ship 
+     with the final report. -->
+
+<!-- The id attribute in an identifier element identifies the change as noted in the report. 
+     An id has the form package[.class[.[ctor|method|field].signature]], where [] indicates optional 
+     text. A comment element can have multiple identifier elements, which will will cause the same 
+     text to appear at each place in the report, but will be converted to separate comments when the 
+     comments file is used. -->
+
+<!-- HTML tags in the text field will appear in the report. You also need to close p HTML elements, 
+     used for paragraphs - see the top-level documentation. -->
+
+<!-- You can include standard javadoc links in your change descriptions. You can use the @first command  
+     to cause jdiff to include the first line of the API documentation. You also need to close p HTML 
+     elements, used for paragraphs - see the top-level documentation. -->
+
+<comment>
+  <identifier id="android.support.customtabs"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.customtabs.CustomTabsIntent"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.customtabs.CustomTabsIntent.launchUrl_changed(android.content.Context, android.net.Uri)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.BottomNavigationView"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.BottomNavigationView.OnNavigationItemSelectedListener"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.FloatingActionButton"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.FloatingActionButton.getRippleColor_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v13.app"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v13.app.ActivityCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v13.app.ActivityCompat.ctor_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v13.view.inputmethod"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.app"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.app.ActivityCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.app.ActivityCompat.ctor_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.app.ActivityCompat.getReferrer_changed(android.app.Activity)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.app.NotificationCompat.WearableExtender"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.app.NotificationCompat.WearableExtender.getBridgeTag_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.app.NotificationCompat.WearableExtender.setBridgeTag_added(java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.content"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.content.ContextCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.content.ContextCompat.ctor_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.content.ContextCompat.startActivity_added(android.content.Context, android.content.Intent, android.os.Bundle)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.content.ContextCompat.startActivity_changed(android.content.Context, android.content.Intent, android.os.Bundle)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.net"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.net.ConnectivityManagerCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.net.ConnectivityManagerCompat.RESTRICT_BACKGROUND_STATUS_DISABLED"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.net.ConnectivityManagerCompat.RESTRICT_BACKGROUND_STATUS_ENABLED"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.net.ConnectivityManagerCompat.RESTRICT_BACKGROUND_STATUS_WHITELISTED"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.net.ConnectivityManagerCompat.getRestrictBackgroundStatus_added(android.net.ConnectivityManager)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.text"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.text.BidiFormatter"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.text.BidiFormatter.isRtl_added(java.lang.CharSequence)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.text.BidiFormatter.unicodeWrap_added(java.lang.CharSequence)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.text.BidiFormatter.unicodeWrap_added(java.lang.CharSequence, android.support.v4.text.TextDirectionHeuristicCompat)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.text.BidiFormatter.unicodeWrap_added(java.lang.CharSequence, android.support.v4.text.TextDirectionHeuristicCompat, boolean)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.text.BidiFormatter.unicodeWrap_added(java.lang.CharSequence, boolean)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.ViewCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.ViewCompat.getDisplay_added(android.view.View)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.ViewCompat.setBackground_added(android.view.View, android.graphics.drawable.Drawable)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.ViewPager"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.ViewPager.setPageTransformer_added(boolean, android.support.v4.view.ViewPager.PageTransformer, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.widget"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.widget.SwipeRefreshLayout"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.widget.SwipeRefreshLayout.getProgressViewEndOffset_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.widget.SwipeRefreshLayout.getProgressViewStartOffset_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.app"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.app.NotificationCompat.DecoratedCustomViewStyle"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.app.NotificationCompat.DecoratedMediaCustomViewStyle"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.DividerItemDecoration"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.RecyclerView"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.RecyclerView.LayoutManager"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.RecyclerView.LayoutManager.isItemPrefetchEnabled_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.RecyclerView.LayoutManager.setItemPrefetchEnabled_added(boolean)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.RecyclerView.getDecoratedBoundsWithMargins_added(android.view.View, android.graphics.Rect)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.Space"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+
+</comments>
