@@ -482,16 +482,6 @@ public interface WindowManagerPolicy {
          */
         public void switchInputMethod(boolean forwardDirection);
 
-        /**
-         * Returns the visibility of the current input method window (false if there is none).
-         */
-        public boolean isInputMethodWindowVisible();
-
-        /**
-         * Hides the current input method, if visible.
-         */
-        public void hideCurrentInputMethod();
-
         public void shutdown(boolean confirm);
         public void reboot(boolean confirm);
         public void rebootSafeMode(boolean confirm);
