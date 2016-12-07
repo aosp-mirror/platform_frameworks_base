@@ -32,6 +32,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -143,6 +144,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
     private boolean mLeftIsVoiceAssist;
     private AssistManager mAssistManager;
+    private Drawable mLeftAssistIcon;
 
     private IntentButton mRightButton = new DefaultRightButton();
     private IntentButton mLeftButton = new DefaultLeftButton();
@@ -346,6 +348,14 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         }
         mRightAffordanceView.setVisibility(mRightButton.getIcon().isVisible
                 ? View.VISIBLE : View.GONE);
+    }
+
+    /**
+     * Set an alternate icon for the left assist affordance (replace the mic icon)
+     */
+    public void setLeftAssistIcon(Drawable drawable) {
+        mLeftAssistIcon = drawable;
+        updateLeftAffordanceIcon();
     }
 
     private void updateLeftAffordanceIcon() {
@@ -814,7 +824,11 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             mLeftIsVoiceAssist = canLaunchVoiceAssist();
             if (mLeftIsVoiceAssist) {
                 mIconState.isVisible = mUserSetupComplete;
-                mIconState.drawable = mContext.getDrawable(R.drawable.ic_mic_26dp);
+                if (mLeftAssistIcon == null) {
+                    mIconState.drawable = mContext.getDrawable(R.drawable.ic_mic_26dp);
+                } else {
+                    mIconState.drawable = mLeftAssistIcon;
+                }
                 mIconState.contentDescription = mContext.getString(
                         R.string.accessibility_voice_assist_button);
             } else {
