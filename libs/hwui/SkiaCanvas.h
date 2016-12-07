@@ -92,9 +92,9 @@ public:
     virtual bool quickRejectRect(float left, float top, float right, float bottom) const override;
     virtual bool quickRejectPath(const SkPath& path) const override;
     virtual bool clipRect(float left, float top, float right, float bottom,
-            SkRegion::Op op) override;
-    virtual bool clipPath(const SkPath* path, SkRegion::Op op) override;
-    virtual bool clipRegion(const SkRegion* region, SkRegion::Op op) override;
+            SkClipOp op) override;
+    virtual bool clipPath(const SkPath* path, SkClipOp op) override;
+    virtual bool clipRegion(const SkRegion* region, SkClipOp op) override;
 
     virtual SkDrawFilter* getDrawFilter() override;
     virtual void setDrawFilter(SkDrawFilter* drawFilter) override;
@@ -174,7 +174,7 @@ private:
     void recordPartialSave(SaveFlags::Flags flags);
 
     template<typename T>
-    void recordClip(const T&, SkRegion::Op);
+    void recordClip(const T&, SkClipOp);
     void applyPersistentClips(size_t clipStartIndex);
 
     void drawPoints(const float* points, int count, const SkPaint& paint,

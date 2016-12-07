@@ -234,13 +234,13 @@ bool RecordingCanvas::quickRejectPath(const SkPath& path) const {
     SkRect bounds = path.getBounds();
     return mState.quickRejectConservative(bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom);
 }
-bool RecordingCanvas::clipRect(float left, float top, float right, float bottom, SkRegion::Op op) {
+bool RecordingCanvas::clipRect(float left, float top, float right, float bottom, SkClipOp op) {
     return mState.clipRect(left, top, right, bottom, op);
 }
-bool RecordingCanvas::clipPath(const SkPath* path, SkRegion::Op op) {
+bool RecordingCanvas::clipPath(const SkPath* path, SkClipOp op) {
     return mState.clipPath(path, op);
 }
-bool RecordingCanvas::clipRegion(const SkRegion* region, SkRegion::Op op) {
+bool RecordingCanvas::clipRegion(const SkRegion* region, SkClipOp op) {
     return mState.clipRegion(region, op);
 }
 

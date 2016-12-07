@@ -78,13 +78,13 @@ class ClipCopier : public SkCanvas::ClipVisitor {
 public:
     explicit ClipCopier(SkCanvas* dstCanvas) : m_dstCanvas(dstCanvas) {}
 
-    virtual void clipRect(const SkRect& rect, SkRegion::Op op, bool antialias) {
+    virtual void clipRect(const SkRect& rect, SkClipOp op, bool antialias) {
         m_dstCanvas->clipRect(rect, op, antialias);
     }
-    virtual void clipRRect(const SkRRect& rrect, SkRegion::Op op, bool antialias) {
+    virtual void clipRRect(const SkRRect& rrect, SkClipOp op, bool antialias) {
         m_dstCanvas->clipRRect(rrect, op, antialias);
     }
-    virtual void clipPath(const SkPath& path, SkRegion::Op op, bool antialias) {
+    virtual void clipPath(const SkPath& path, SkClipOp op, bool antialias) {
         m_dstCanvas->clipPath(path, op, antialias);
     }
 
@@ -218,11 +218,11 @@ int SkiaCanvas::saveLayerAlpha(float left, float top, float right, float bottom,
 
 class SkiaCanvas::Clip {
 public:
-    Clip(const SkRect& rect, SkRegion::Op op, const SkMatrix& m)
+    Clip(const SkRect& rect, SkClipOp op, const SkMatrix& m)
         : mType(Type::Rect), mOp(op), mMatrix(m), mRRect(SkRRect::MakeRect(rect)) {}
-    Clip(const SkRRect& rrect, SkRegion::Op op, const SkMatrix& m)
+    Clip(const SkRRect& rrect, SkClipOp op, const SkMatrix& m)
         : mType(Type::RRect), mOp(op), mMatrix(m), mRRect(rrect) {}
-    Clip(const SkPath& path, SkRegion::Op op, const SkMatrix& m)
+    Clip(const SkPath& path, SkClipOp op, const SkMatrix& m)
         : mType(Type::Path), mOp(op), mMatrix(m), mPath(&path) {}
 
     void apply(SkCanvas* canvas) const {
@@ -247,9 +247,9 @@ private:
         Path,
     };
 
-    Type            mType;
-    SkRegion::Op    mOp;
-    SkMatrix        mMatrix;
+    Type        mType;
+    SkClipOp    mOp;
+    SkMatrix    mMatrix;
 
     // These are logically a union (tracked separately due to non-POD path).
     SkTLazy<SkPath> mPath;
@@ -293,7 +293,7 @@ void SkiaCanvas::recordPartialSave(SaveFlags::Flags flags) {
 }
 
 template <typename T>
-void SkiaCanvas::recordClip(const T& clip, SkRegion::Op op) {
+void SkiaCanvas::recordClip(const T& clip, SkClipOp op) {
     // Only need tracking when in a partial save frame which
     // doesn't restore the clip.
     const SaveRec* rec = this->currentSaveRec();
@@ -397,14 +397,14 @@ bool SkiaCanvas::quickRejectPath(const SkPath& path) const {
     return mCanvas->quickReject(path);
 }
 
-bool SkiaCanvas::clipRect(float left, float top, float right, float bottom, SkRegion::Op op) {
+bool SkiaCanvas::clipRect(float left, float top, float right, float bottom, SkClipOp op) {
     SkRect rect = SkRect::MakeLTRB(left, top, right, bottom);
     this->recordClip(rect, op);
     mCanvas->clipRect(rect, op);
     return !mCanvas->isClipEmpty();
 }
 
-bool SkiaCanvas::clipPath(const SkPath* path, SkRegion::Op op) {
+bool SkiaCanvas::clipPath(const SkPath* path, SkClipOp op) {
     SkRRect roundRect;
     if (path->isRRect(&roundRect)) {
         this->recordClip(roundRect, op);
@@ -416,7 +416,7 @@ bool SkiaCanvas::clipPath(const SkPath* path, SkRegion::Op op) {
     return !mCanvas->isClipEmpty();
 }
 
-bool SkiaCanvas::clipRegion(const SkRegion* region, SkRegion::Op op) {
+bool SkiaCanvas::clipRegion(const SkRegion* region, SkClipOp op) {
     SkPath rgnPath;
     if (region->getBoundaryPath(&rgnPath)) {
         // The region is specified in device space.

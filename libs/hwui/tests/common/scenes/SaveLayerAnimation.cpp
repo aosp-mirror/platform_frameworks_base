@@ -36,7 +36,7 @@ public:
             // nested clipped saveLayers
             canvas.saveLayerAlpha(0, 0, 400, 400, 200, SaveFlags::ClipToLayer);
             canvas.drawColor(Color::Green_700, SkBlendMode::kSrcOver);
-            canvas.clipRect(50, 50, 350, 350, SkRegion::kIntersect_Op);
+            canvas.clipRect(50, 50, 350, 350, kIntersect_SkClipOp);
             canvas.saveLayerAlpha(100, 100, 300, 300, 128, SaveFlags::ClipToLayer);
             canvas.drawColor(Color::Blue_500, SkBlendMode::kSrcOver);
             canvas.restore();

@@ -202,17 +202,17 @@ void CanvasState::concatMatrix(const Matrix4& matrix) {
 // Clip
 ///////////////////////////////////////////////////////////////////////////////
 
-bool CanvasState::clipRect(float left, float top, float right, float bottom, SkRegion::Op op) {
+bool CanvasState::clipRect(float left, float top, float right, float bottom, SkClipOp op) {
     mSnapshot->clip(Rect(left, top, right, bottom), op);
     return !mSnapshot->clipIsEmpty();
 }
 
-bool CanvasState::clipPath(const SkPath* path, SkRegion::Op op) {
+bool CanvasState::clipPath(const SkPath* path, SkClipOp op) {
     mSnapshot->clipPath(*path, op);
     return !mSnapshot->clipIsEmpty();
 }
 
-bool CanvasState::clipRegion(const SkRegion* region, SkRegion::Op op) {
+bool CanvasState::clipRegion(const SkRegion* region, SkClipOp op) {
     mSnapshot->clipRegionTransformed(*region, op);
     return !mSnapshot->clipIsEmpty();
 }
@@ -225,7 +225,7 @@ void CanvasState::setClippingOutline(LinearAllocator& allocator, const Outline* 
     bool outlineIsRounded = MathUtils::isPositive(radius);
     if (!outlineIsRounded || currentTransform()->isSimple()) {
         // TODO: consider storing this rect separately, so that this can't be replaced with clip ops
-        clipRect(bounds.left, bounds.top, bounds.right, bounds.bottom, SkRegion::kIntersect_Op);
+        clipRect(bounds.left, bounds.top, bounds.right, bounds.bottom, kIntersect_SkClipOp);
     }
     if (outlineIsRounded) {
         setClippingRoundRect(allocator, bounds, radius, false);

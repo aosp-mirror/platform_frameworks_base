@@ -430,21 +430,21 @@ void SkiaCanvasProxy::onDrawPatch(const SkPoint cubics[12], const SkColor colors
     }
 }
 
-void SkiaCanvasProxy::onClipRect(const SkRect& rect, SkRegion::Op op, ClipEdgeStyle) {
+void SkiaCanvasProxy::onClipRect(const SkRect& rect, SkClipOp op, ClipEdgeStyle) {
     mCanvas->clipRect(rect.fLeft, rect.fTop, rect.fRight, rect.fBottom, op);
 }
 
-void SkiaCanvasProxy::onClipRRect(const SkRRect& roundRect, SkRegion::Op op, ClipEdgeStyle) {
+void SkiaCanvasProxy::onClipRRect(const SkRRect& roundRect, SkClipOp op, ClipEdgeStyle) {
     SkPath path;
     path.addRRect(roundRect);
     mCanvas->clipPath(&path, op);
 }
 
-void SkiaCanvasProxy::onClipPath(const SkPath& path, SkRegion::Op op, ClipEdgeStyle) {
+void SkiaCanvasProxy::onClipPath(const SkPath& path, SkClipOp op, ClipEdgeStyle) {
     mCanvas->clipPath(&path, op);
 }
 
-void SkiaCanvasProxy::onClipRegion(const SkRegion& region, SkRegion::Op op) {
+void SkiaCanvasProxy::onClipRegion(const SkRegion& region, SkClipOp op) {
     mCanvas->clipRegion(&region, op);
 }
 

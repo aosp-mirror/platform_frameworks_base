@@ -68,7 +68,7 @@ static void clipOutline(const Outline& outline, SkCanvas* canvas, const SkRect* 
         if (pendingClip && !pendingClip->contains(rect)) {
             canvas->clipRect(*pendingClip);
         }
-        canvas->clipRRect(SkRRect::MakeRectXY(rect, radius, radius), SkRegion::kIntersect_Op, true);
+        canvas->clipRRect(SkRRect::MakeRectXY(rect, radius, radius), kIntersect_SkClipOp, true);
     } else {
         if (pendingClip) {
             (void)rect.intersect(*pendingClip);
@@ -263,7 +263,7 @@ void RenderNodeDrawable::setViewProperties(const RenderProperties& properties, S
     }
 
     if (properties.getRevealClip().willClip()) {
-        canvas->clipPath(*properties.getRevealClip().getPath(), SkRegion::kIntersect_Op, true);
+        canvas->clipPath(*properties.getRevealClip().getPath(), kIntersect_SkClipOp, true);
     } else if (properties.getOutline().willClip()) {
         clipOutline(properties.getOutline(), canvas, pendingClip);
         pendingClip = nullptr;

@@ -34,11 +34,11 @@ public:
                 [](RenderProperties& props, Canvas& canvas) {
             canvas.save(SaveFlags::MatrixClip);
             {
-                canvas.clipRect(0, 0, 200, 200, SkRegion::kIntersect_Op);
+                canvas.clipRect(0, 0, 200, 200, kIntersect_SkClipOp);
                 canvas.translate(100, 100);
                 canvas.rotate(45);
                 canvas.translate(-100, -100);
-                canvas.clipRect(0, 0, 200, 200, SkRegion::kIntersect_Op);
+                canvas.clipRect(0, 0, 200, 200, kIntersect_SkClipOp);
                 canvas.drawColor(Color::Blue_500, SkBlendMode::kSrcOver);
             }
             canvas.restore();
@@ -47,7 +47,7 @@ public:
             {
                 SkPath clipCircle;
                 clipCircle.addCircle(100, 300, 100);
-                canvas.clipPath(&clipCircle, SkRegion::kIntersect_Op);
+                canvas.clipPath(&clipCircle, kIntersect_SkClipOp);
                 canvas.drawColor(Color::Red_500, SkBlendMode::kSrcOver);
             }
             canvas.restore();

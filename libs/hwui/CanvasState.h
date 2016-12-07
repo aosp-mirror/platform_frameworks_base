@@ -18,6 +18,7 @@
 
 #include "Snapshot.h"
 
+#include <SkClipOp.h>
 #include <SkMatrix.h>
 #include <SkPath.h>
 #include <SkRegion.h>
@@ -121,9 +122,9 @@ public:
 
     bool quickRejectConservative(float left, float top, float right, float bottom) const;
 
-    bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
-    bool clipPath(const SkPath* path, SkRegion::Op op);
-    bool clipRegion(const SkRegion* region, SkRegion::Op op);
+    bool clipRect(float left, float top, float right, float bottom, SkClipOp op);
+    bool clipPath(const SkPath* path, SkClipOp op);
+    bool clipRegion(const SkRegion* region, SkClipOp op);
 
     /**
      * Sets a "clipping outline", which is independent from the regular clip.

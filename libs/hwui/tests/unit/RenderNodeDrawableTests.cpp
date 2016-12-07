@@ -469,7 +469,7 @@ RENDERTHREAD_TEST(RenderNodeDrawable, projectionChildScroll) {
     auto child = TestUtils::createSkiaNode(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT,
             [&projectingRipple](RenderProperties& properties, SkiaRecordingCanvas& canvas) {
         // Record time clip will be ignored by projectee
-        canvas.clipRect(100, 100, 300, 300, SkRegion::kIntersect_Op);
+        canvas.clipRect(100, 100, 300, 300, kIntersect_SkClipOp);
 
         canvas.translate(-SCROLL_X, -SCROLL_Y); // Apply scroll (note: bg undoes this internally)
         canvas.drawRenderNode(projectingRipple.get());

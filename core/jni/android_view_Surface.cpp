@@ -339,7 +339,7 @@ static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
 
     if (dirtyRectPtr) {
         nativeCanvas->clipRect(dirtyRect.left, dirtyRect.top,
-                dirtyRect.right, dirtyRect.bottom);
+                dirtyRect.right, dirtyRect.bottom, kIntersect_SkClipOp);
     }
 
     if (dirtyRectObj) {
