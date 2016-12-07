@@ -27,7 +27,7 @@ import android.net.NetworkCapabilities;
 import android.os.UserHandle;
 import android.telephony.TelephonyManager;
 import android.util.Slog;
-
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.R;
 
 import static android.net.NetworkCapabilities.*;
@@ -37,7 +37,8 @@ public class NetworkNotificationManager {
 
     public static enum NotificationType { SIGN_IN, NO_INTERNET, LOST_INTERNET, NETWORK_SWITCH };
 
-    private static final String NOTIFICATION_ID = "Connectivity.Notification";
+    @VisibleForTesting
+    static final String NOTIFICATION_ID = "Connectivity.Notification";
 
     private static final String TAG = NetworkNotificationManager.class.getSimpleName();
     private static final boolean DBG = true;
