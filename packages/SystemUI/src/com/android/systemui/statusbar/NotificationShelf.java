@@ -20,8 +20,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.SystemProperties;
 import android.util.AttributeSet;
-import android.util.FloatProperty;
-import android.util.Property;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -287,49 +285,50 @@ public class NotificationShelf extends ActivatableNotificationView {
         }
         float viewEnd = viewStart + fullHeight;
         float fullTransitionAmount;
-        float iconTransitonAmount;
-        if (viewEnd >= getTranslationY() && (mAmbientState.isShadeExpanded()
+        float iconTransitionAmount;
+        float shelfStart = getTranslationY();
+        if (viewEnd >= shelfStart && (mAmbientState.isShadeExpanded()
                 || (!row.isPinned() && !row.isHeadsUpAnimatingAway()))) {
-            if (viewStart < getTranslationY()) {
+            if (viewStart < shelfStart) {
 
-                float fullAmount = (getTranslationY() - viewStart) / fullHeight;
+                float fullAmount = (shelfStart - viewStart) / fullHeight;
                 float interpolatedAmount =  Interpolators.ACCELERATE_DECELERATE.getInterpolation(
                         fullAmount);
                 interpolatedAmount = NotificationUtils.interpolate(
                         interpolatedAmount, fullAmount, expandAmount);
                 fullTransitionAmount = 1.0f - interpolatedAmount;
 
-                iconTransitonAmount = (getTranslationY() - viewStart) / iconTransformDistance;
-                iconTransitonAmount = Math.min(1.0f, iconTransitonAmount);
-                iconTransitonAmount = 1.0f - iconTransitonAmount;
+                iconTransitionAmount = (shelfStart - viewStart) / iconTransformDistance;
+                iconTransitionAmount = Math.min(1.0f, iconTransitionAmount);
+                iconTransitionAmount = 1.0f - iconTransitionAmount;
 
             } else {
                 fullTransitionAmount = 1.0f;
-                iconTransitonAmount = 1.0f;
+                iconTransitionAmount = 1.0f;
             }
         } else {
             fullTransitionAmount = 0.0f;
-            iconTransitonAmount = 0.0f;
+            iconTransitionAmount = 0.0f;
         }
-        row.setContentTransformationAmount(iconTransitonAmount, isLastChild);
-        updateIconPositioning(row, iconTransitonAmount, fullTransitionAmount);
+        updateIconPositioning(row, iconTransitionAmount, fullTransitionAmount, isLastChild);
         return fullTransitionAmount;
     }
 
     private void updateIconPositioning(ExpandableNotificationRow row, float iconTransitionAmount,
-            float fullTransitionAmount) {
+            float fullTransitionAmount, boolean isLastChild) {
         StatusBarIconView icon = row.getEntry().expandedIcon;
         NotificationIconContainer.IconState iconState = getIconState(icon);
         if (iconState == null) {
             return;
         }
         float clampedAmount = iconTransitionAmount > 0.5f ? 1.0f : 0.0f;
-        boolean isLastChild = isLastChild(row);
         if (clampedAmount == iconTransitionAmount) {
             iconState.keepClampedPosition = false;
         }
         if (clampedAmount == fullTransitionAmount) {
             iconState.useFullTransitionAmount = fullTransitionAmount == 0.0f;
+            iconState.translateContent = mMaxLayoutHeight - getTranslationY()
+                    - getIntrinsicHeight() > 0;
         }
         float transitionAmount;
         boolean needCannedAnimation = iconState.clampedAppearAmount == 1.0f
@@ -358,6 +357,10 @@ public class NotificationShelf extends ActivatableNotificationView {
                 : transitionAmount;
         iconState.clampedAppearAmount = clampedAmount;
         setIconTransformationAmount(row, transitionAmount);
+        float contentTransformationAmount = isLastChild || iconState.translateContent
+                ? iconTransitionAmount
+                : 0.0f;
+        row.setContentTransformationAmount(contentTransformationAmount, isLastChild);
     }
 
     private boolean isLastChild(ExpandableNotificationRow row) {

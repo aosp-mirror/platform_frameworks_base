@@ -411,6 +411,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         public boolean needsCannedAnimation;
         public boolean keepClampedPosition;
         public boolean useFullTransitionAmount;
+        public boolean translateContent;
 
         @Override
         public void applyToView(View view) {

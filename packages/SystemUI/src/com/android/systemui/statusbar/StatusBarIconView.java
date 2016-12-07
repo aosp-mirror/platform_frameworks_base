@@ -515,7 +515,9 @@ public class StatusBarIconView extends AnimatedImageView {
                 }
             } else {
                 setIconAppearAmount(visibleState == STATE_ICON ? 1.0f : 0.0f);
-                setDotAppearAmount(visibleState == STATE_DOT ? 1.0f : 0.0f);
+                setDotAppearAmount(visibleState == STATE_DOT ? 1.0f
+                        : visibleState == STATE_ICON ? 2.0f
+                        : 0.0f);
             }
         }
         if (!runnableAdded) {
