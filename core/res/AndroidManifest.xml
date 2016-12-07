@@ -2715,6 +2715,8 @@
          This is a normal permission: an app requesting it will always be granted the
          permission, without the user needing to approve or see it. -->
     <permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"
+        android:label="@string/permlab_requestIgnoreBatteryOptimizations"
+        android:description="@string/permdesc_requestIgnoreBatteryOptimizations"
         android:protectionLevel="normal" />
 
     <!-- @SystemApi Allows an application to collect battery statistics -->
