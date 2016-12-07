@@ -7530,9 +7530,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
             try {
                 List<String> allCodePaths = pkg.getAllCodePathsExcludingResourceOnly();
-                String gid = Integer.toString(sharedGid);
                 String codePaths = TextUtils.join(";", allCodePaths);
-                mInstaller.dumpProfiles(gid, packageName, codePaths);
+                mInstaller.dumpProfiles(sharedGid, packageName, codePaths);
             } catch (InstallerException e) {
                 Slog.w(TAG, "Failed to dump profiles", e);
             }
