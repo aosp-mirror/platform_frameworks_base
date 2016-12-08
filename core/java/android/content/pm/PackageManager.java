@@ -436,9 +436,10 @@ public abstract class PackageManager {
 
     /**
      * Allows querying of packages installed for any user, not just the specific one. This flag
-     * is only meant for use by apps that have INTERACT_ACROSS_USERS_FULL permission.
+     * is only meant for use by apps that have INTERACT_ACROSS_USERS permission.
      * @hide
      */
+    @SystemApi
     public static final int MATCH_ANY_USER = 0x00400000;
 
     /**
