@@ -1287,7 +1287,8 @@
          This may be empty if network scoring and recommending isn't supported.
          -->
     <string-array name="config_networkRecommendationPackageNames" translatable="false">
-        <!-- Add packages here -->
+        <!-- The standard AOSP network recommendation provider -->
+        <item>com.android.networkrecommendation</item>
     </string-array>
 
     <!-- Whether to enable Hardware FLP overlay which allows Hardware FLP to be
