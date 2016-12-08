@@ -40,7 +40,7 @@ final class RemoteIntArray implements ServiceConnection, Closeable {
 
     private android.util.IRemoteMemoryIntArray mRemoteInstance;
 
-    public RemoteIntArray(int size, boolean clientWritable) throws IOException, TimeoutException {
+    public RemoteIntArray(int size) throws IOException, TimeoutException {
         mIntent.setComponent(new ComponentName(InstrumentationRegistry.getContext(),
                 RemoteMemoryIntArrayService.class));
         synchronized (mLock) {
@@ -48,7 +48,7 @@ final class RemoteIntArray implements ServiceConnection, Closeable {
                 bindLocked();
             }
             try {
-                mRemoteInstance.create(size, clientWritable);
+                mRemoteInstance.create(size);
             } catch (RemoteException e) {
                 throw new IOException(e);
             }
@@ -145,6 +145,14 @@ final class RemoteIntArray implements ServiceConnection, Closeable {
             }
             mRemoteInstance = null;
             InstrumentationRegistry.getContext().unbindService(this);
+        }
+    }
+
+    public void accessLastElementInRemoteProcess(MemoryIntArray array) {
+        try {
+            mRemoteInstance.accessLastElementInRemoteProcess(array);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
         }
     }
 
