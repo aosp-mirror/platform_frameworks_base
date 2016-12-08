@@ -56,15 +56,24 @@ interface INetworkScoreService
     void disableScoring();
 
     /**
-     * Register a network subsystem for scoring.
+     * Register a cache to receive scoring updates.
      *
      * @param networkType the type of network this cache can handle. See {@link NetworkKey#type}.
      * @param scoreCache implementation of {@link INetworkScoreCache} to store the scores.
      * @throws SecurityException if the caller is not the system.
-     * @throws IllegalArgumentException if a score cache is already registed for this type.
      * @hide
      */
     void registerNetworkScoreCache(int networkType, INetworkScoreCache scoreCache);
+
+    /**
+     * Unregister a cache to receive scoring updates.
+     *
+     * @param networkType the type of network this cache can handle. See {@link NetworkKey#type}.
+     * @param scoreCache implementation of {@link INetworkScoreCache} to store the scores.
+     * @throws SecurityException if the caller is not the system.
+     * @hide
+     */
+    void unregisterNetworkScoreCache(int networkType, INetworkScoreCache scoreCache);
 
     /**
      * Request a recommendation for the best network to connect to
