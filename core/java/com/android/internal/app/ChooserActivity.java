@@ -69,6 +69,7 @@ import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity.TargetInfo;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -93,6 +94,7 @@ public class ChooserActivity extends ResolverActivity {
     private IntentSender mRefinementIntentSender;
     private RefinementResultReceiver mRefinementResultReceiver;
     private ChooserTarget[] mCallerChooserTargets;
+    private ComponentName[] mFilteredComponentNames;
 
     private Intent mReferrerFillInIntent;
 
@@ -235,7 +237,7 @@ public class ChooserActivity extends ResolverActivity {
                 }
                 names[i] = (ComponentName) pa[i];
             }
-            setFilteredComponents(names);
+            mFilteredComponentNames = names;
         }
 
         pa = intent.getParcelableArrayExtra(Intent.EXTRA_CHOOSER_TARGETS);
@@ -642,15 +644,63 @@ public class ChooserActivity extends ResolverActivity {
         }
     }
 
+    public class ChooserListController extends ResolverListController {
+        public ChooserListController(Context context,
+                PackageManager pm,
+                Intent targetIntent,
+                String referrerPackageName,
+                int launchedFromUid) {
+            super(context, pm, targetIntent, referrerPackageName, launchedFromUid);
+        }
+
+        @Override
+        boolean isComponentPinned(ComponentName name) {
+            return mPinnedSharedPrefs.getBoolean(name.flattenToString(), false);
+        }
+
+        @Override
+        boolean isComponentFiltered(ComponentName name) {
+            if (mFilteredComponentNames == null) {
+                return false;
+            }
+            for (ComponentName filteredComponentName : mFilteredComponentNames) {
+                if (name.equals(filteredComponentName)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public float getScore(DisplayResolveInfo target) {
+            if (target == null) {
+                return CALLER_TARGET_SCORE_BOOST;
+            }
+            float score = super.getScore(target);
+            if (target.isPinned()) {
+                score += PINNED_TARGET_SCORE_BOOST;
+            }
+            return score;
+        }
+    }
+
     @Override
     public ResolveListAdapter createAdapter(Context context, List<Intent> payloadIntents,
             Intent[] initialIntents, List<ResolveInfo> rList, int launchedFromUid,
             boolean filterLastUsed) {
         final ChooserListAdapter adapter = new ChooserListAdapter(context, payloadIntents,
-                initialIntents, rList, launchedFromUid, filterLastUsed);
-        if (DEBUG) Log.d(TAG, "Adapter created; querying services");
-        queryTargetServices(adapter);
+                initialIntents, rList, launchedFromUid, filterLastUsed, createListController());
         return adapter;
+    }
+
+    @VisibleForTesting
+    protected ResolverListController createListController() {
+        return new ChooserListController(
+                this,
+                mPm,
+                getTargetIntent(),
+                getReferrerPackageName(),
+                mLaunchedFromUid);
     }
 
     final class ChooserTargetInfo implements TargetInfo {
@@ -853,10 +903,11 @@ public class ChooserActivity extends ResolverActivity {
 
         public ChooserListAdapter(Context context, List<Intent> payloadIntents,
                 Intent[] initialIntents, List<ResolveInfo> rList, int launchedFromUid,
-                boolean filterLastUsed) {
+                boolean filterLastUsed, ResolverListController resolverListController) {
             // Don't send the initial intents through the shared ResolverActivity path,
             // we want to separate them into a different section.
-            super(context, payloadIntents, null, rList, launchedFromUid, filterLastUsed);
+            super(context, payloadIntents, null, rList, launchedFromUid, filterLastUsed,
+                    resolverListController);
 
             if (initialIntents != null) {
                 final PackageManager pm = getPackageManager();
@@ -922,18 +973,6 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         @Override
-        public float getScore(DisplayResolveInfo target) {
-            if (target == null) {
-                return CALLER_TARGET_SCORE_BOOST;
-            }
-            float score = super.getScore(target);
-            if (target.isPinned()) {
-                score += PINNED_TARGET_SCORE_BOOST;
-            }
-            return score;
-        }
-
-        @Override
         public View onCreateView(ViewGroup parent) {
             return mInflater.inflate(
                     com.android.internal.R.layout.resolve_grid_item, parent, false);
@@ -944,6 +983,8 @@ public class ChooserActivity extends ResolverActivity {
             if (mServiceTargets != null) {
                 pruneServiceTargets();
             }
+            if (DEBUG) Log.d(TAG, "List built querying services");
+            queryTargetServices(this);
         }
 
         @Override
