@@ -5726,7 +5726,8 @@ public class WindowManagerService extends IWindowManager.Stub
             win = windowForClientLocked(null, window, false);
             // win shouldn't be null here, pass it down to startPositioningLocked
             // to get warning if it's null.
-            if (!startPositioningLocked(win, false /*resize*/, startX, startY)) {
+            if (!startPositioningLocked(
+                        win, false /*resize*/, false /*preserveOrientation*/, startX, startY)) {
                 return false;
             }
         }
@@ -5741,8 +5742,8 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             final Task task = displayContent.findTaskForResizePoint(x, y);
             if (task != null) {
-                if (!startPositioningLocked(
-                        task.getTopVisibleAppMainWindow(), true /*resize*/, x, y)) {
+                if (!startPositioningLocked(task.getTopVisibleAppMainWindow(), true /*resize*/,
+                            task.preserveOrientationOnResize(), x, y)) {
                     return;
                 }
                 taskId = task.mTaskId;
@@ -5757,10 +5758,12 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private boolean startPositioningLocked(
-            WindowState win, boolean resize, float startX, float startY) {
-        if (DEBUG_TASK_POSITIONING) Slog.d(TAG_WM, "startPositioningLocked: "
-            + "win=" + win + ", resize=" + resize + ", {" + startX + ", " + startY + "}");
+    private boolean startPositioningLocked(WindowState win, boolean resize,
+            boolean preserveOrientation, float startX, float startY) {
+        if (DEBUG_TASK_POSITIONING)
+            Slog.d(TAG_WM, "startPositioningLocked: "
+                            + "win=" + win + ", resize=" + resize + ", preserveOrientation="
+                            + preserveOrientation + ", {" + startX + ", " + startY + "}");
 
         if (win == null || win.getAppToken() == null) {
             Slog.w(TAG_WM, "startPositioningLocked: Bad window " + win);
@@ -5801,7 +5804,7 @@ public class WindowManagerService extends IWindowManager.Stub
             return false;
         }
 
-        mTaskPositioner.startDragLocked(win, resize, startX, startY);
+        mTaskPositioner.startDrag(win, resize, preserveOrientation, startX, startY);
         return true;
     }
 

@@ -88,6 +88,9 @@ import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
 import static android.content.pm.ActivityInfo.FLAG_IMMERSIVE;
 import static android.content.pm.ActivityInfo.FLAG_ON_TOP_LAUNCHER;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
@@ -3896,8 +3899,15 @@ public class PackageParser {
 
         // resize preference isn't set and target sdk version doesn't support resizing apps by
         // default. For the app to be resizeable if it isn't fixed orientation or immersive.
-        aInfo.resizeMode = (aInfo.isFixedOrientation() || (aInfo.flags & FLAG_IMMERSIVE) != 0)
-                ? RESIZE_MODE_UNRESIZEABLE : RESIZE_MODE_FORCE_RESIZEABLE;
+        if (aInfo.isFixedOrientationPortrait()) {
+            aInfo.resizeMode = RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY;
+        } else if (aInfo.isFixedOrientationLandscape()) {
+            aInfo.resizeMode = RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY;
+        } else if (aInfo.isFixedOrientation()) {
+            aInfo.resizeMode = RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION;
+        } else {
+            aInfo.resizeMode = RESIZE_MODE_FORCE_RESIZEABLE;
+        }
     }
 
     private void parseLayout(Resources res, AttributeSet attrs, Activity a) {

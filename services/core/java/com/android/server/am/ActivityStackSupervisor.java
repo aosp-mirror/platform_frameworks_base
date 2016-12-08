@@ -2322,6 +2322,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer
             return true;
         }
 
+        if (!task.canResizeToBounds(bounds)) {
+            throw new IllegalArgumentException("resizeTaskLocked: Can not resize task=" + task
+                    + " to bounds=" + bounds + " resizeMode=" + task.mResizeMode);
+        }
+
         // Do not move the task to another stack here.
         // This method assumes that the task is already placed in the right stack.
         // we do not mess with that decision and we only do the resize!

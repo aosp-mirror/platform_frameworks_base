@@ -182,11 +182,29 @@ public class ActivityInfo extends ComponentInfo
      */
     public static final int RESIZE_MODE_RESIZEABLE_AND_PIPABLE = 3;
     /**
-     * Activity is does not support resizing, but we are forcing it to be resizeable. Only affects
+     * Activity does not support resizing, but we are forcing it to be resizeable. Only affects
      * certain pre-N apps where we force them to be resizeable.
      * @hide
      */
     public static final int RESIZE_MODE_FORCE_RESIZEABLE = 4;
+    /**
+     * Activity does not support resizing, but we are forcing it to be resizeable as long
+     * as the size remains landscape.
+     * @hide
+     */
+    public static final int RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY = 5;
+    /**
+     * Activity does not support resizing, but we are forcing it to be resizeable as long
+     * as the size remains portrait.
+     * @hide
+     */
+    public static final int RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY = 6;
+    /**
+     * Activity does not support resizing, but we are forcing it to be resizeable as long
+     * as the bounds remain in the same orientation as they are.
+     * @hide
+     */
+    public static final int RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION = 7;
     /**
      * Value indicating if the resizing mode the activity supports.
      * See {@link android.R.attr#resizeableActivity}.
@@ -859,15 +877,30 @@ public class ActivityInfo extends ComponentInfo
      * @hide
      */
     boolean isFixedOrientation() {
-        return screenOrientation == SCREEN_ORIENTATION_LANDSCAPE
-                || screenOrientation == SCREEN_ORIENTATION_PORTRAIT
-                || screenOrientation == SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-                || screenOrientation == SCREEN_ORIENTATION_SENSOR_PORTRAIT
-                || screenOrientation == SCREEN_ORIENTATION_REVERSE_LANDSCAPE
-                || screenOrientation == SCREEN_ORIENTATION_REVERSE_PORTRAIT
-                || screenOrientation == SCREEN_ORIENTATION_USER_LANDSCAPE
-                || screenOrientation == SCREEN_ORIENTATION_USER_PORTRAIT
+        return isFixedOrientationLandscape() || isFixedOrientationPortrait()
                 || screenOrientation == SCREEN_ORIENTATION_LOCKED;
+    }
+
+    /**
+     * Returns true if the activity's orientation is fixed to landscape.
+     * @hide
+     */
+    boolean isFixedOrientationLandscape() {
+        return screenOrientation == SCREEN_ORIENTATION_LANDSCAPE
+                || screenOrientation == SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                || screenOrientation == SCREEN_ORIENTATION_REVERSE_LANDSCAPE
+                || screenOrientation == SCREEN_ORIENTATION_USER_LANDSCAPE;
+    }
+
+    /**
+     * Returns true if the activity's orientation is fixed to portrait.
+     * @hide
+     */
+    boolean isFixedOrientationPortrait() {
+        return screenOrientation == SCREEN_ORIENTATION_PORTRAIT
+                || screenOrientation == SCREEN_ORIENTATION_SENSOR_PORTRAIT
+                || screenOrientation == SCREEN_ORIENTATION_REVERSE_PORTRAIT
+                || screenOrientation == SCREEN_ORIENTATION_USER_PORTRAIT;
     }
 
     /** @hide */
@@ -875,7 +908,17 @@ public class ActivityInfo extends ComponentInfo
         return mode == RESIZE_MODE_RESIZEABLE
                 || mode == RESIZE_MODE_RESIZEABLE_AND_PIPABLE
                 || mode == RESIZE_MODE_FORCE_RESIZEABLE
+                || mode == RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY
+                || mode == RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY
+                || mode == RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION
                 || mode == RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
+    }
+
+    /** @hide */
+    public static boolean isPreserveOrientationMode(int mode) {
+        return mode == RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY
+                || mode == RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY
+                || mode == RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION;
     }
 
     /** @hide */
@@ -891,6 +934,12 @@ public class ActivityInfo extends ComponentInfo
                 return "RESIZE_MODE_RESIZEABLE_AND_PIPABLE";
             case RESIZE_MODE_FORCE_RESIZEABLE:
                 return "RESIZE_MODE_FORCE_RESIZEABLE";
+            case RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY:
+                return "RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY";
+            case RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY:
+                return "RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY";
+            case RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION:
+                return "RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION";
             default:
                 return "unknown=" + mode;
         }
