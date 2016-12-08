@@ -408,12 +408,6 @@ public final class StreamConfigurationMap {
         // See if consumer is flexible.
         boolean isFlexible = SurfaceUtils.isFlexibleConsumer(surface);
 
-        // Override RGB formats to IMPLEMENTATION_DEFINED, b/9487482
-        if ((surfaceFormat >= LegacyMetadataMapper.HAL_PIXEL_FORMAT_RGBA_8888 &&
-                        surfaceFormat <= LegacyMetadataMapper.HAL_PIXEL_FORMAT_BGRA_8888)) {
-            surfaceFormat = HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED;
-        }
-
         StreamConfiguration[] configs =
                 surfaceDataspace != HAL_DATASPACE_DEPTH ? mConfigurations : mDepthConfigurations;
         for (StreamConfiguration config : configs) {

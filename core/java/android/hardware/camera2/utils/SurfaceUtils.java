@@ -118,15 +118,7 @@ public class SurfaceUtils {
      * @param surface The high speed output surface to be checked.
      */
     private static void checkHighSpeedSurfaceFormat(Surface surface) {
-        // TODO: remove this override since the default format should be
-        // ImageFormat.PRIVATE. b/9487482
-        final int HAL_FORMAT_RGB_START = 1; // HAL_PIXEL_FORMAT_RGBA_8888 from graphics.h
-        final int HAL_FORMAT_RGB_END = 5; // HAL_PIXEL_FORMAT_BGRA_8888 from graphics.h
         int surfaceFormat = SurfaceUtils.getSurfaceFormat(surface);
-        if (surfaceFormat >= HAL_FORMAT_RGB_START &&
-                surfaceFormat <= HAL_FORMAT_RGB_END) {
-            surfaceFormat = ImageFormat.PRIVATE;
-        }
 
         if (surfaceFormat != ImageFormat.PRIVATE) {
             throw new IllegalArgumentException("Surface format(" + surfaceFormat + ") is not"
