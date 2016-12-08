@@ -28,14 +28,22 @@ import libcore.io.IoUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.lang.reflect.Field;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 @RunWith(AndroidJUnit4.class)
 public class MemoryIntArrayTest {
+    static {
+        System.loadLibrary("cutils");
+        System.loadLibrary("memoryintarraytest");
+    }
 
     @Test
     public void testSize() throws Exception {
         MemoryIntArray array = null;
         try {
-            array = new MemoryIntArray(3, false);
+            array = new MemoryIntArray(3);
             assertEquals("size must be three", 3, array.size());
         } finally {
             IoUtils.closeQuietly(array);
@@ -46,7 +54,7 @@ public class MemoryIntArrayTest {
     public void testGetSet() throws Exception {
         MemoryIntArray array = null;
         try {
-            array = new MemoryIntArray(3, false);
+            array = new MemoryIntArray(3);
 
             array.set(0, 1);
             array.set(1, 2);
@@ -64,7 +72,7 @@ public class MemoryIntArrayTest {
     public void testWritable() throws Exception {
         MemoryIntArray array = null;
         try {
-            array = new MemoryIntArray(3, true);
+            array = new MemoryIntArray(3);
             assertTrue("Must be mutable", array.isWritable());
         } finally {
             IoUtils.closeQuietly(array);
@@ -75,7 +83,7 @@ public class MemoryIntArrayTest {
     public void testClose() throws Exception {
         MemoryIntArray array = null;
         try {
-            array = new MemoryIntArray(3, false);
+            array = new MemoryIntArray(3);
             array.close();
             assertTrue("Must be closed", array.isClosed());
         } finally {
@@ -90,7 +98,7 @@ public class MemoryIntArrayTest {
         MemoryIntArray firstArray = null;
         MemoryIntArray secondArray = null;
         try {
-            firstArray = new MemoryIntArray(3, false);
+            firstArray = new MemoryIntArray(3);
 
             firstArray.set(0, 1);
             firstArray.set(1, 2);
@@ -117,7 +125,7 @@ public class MemoryIntArrayTest {
     public void testInteractOnceClosed() throws Exception {
         MemoryIntArray array = null;
         try {
-            array = new MemoryIntArray(3, false);
+            array = new MemoryIntArray(3);
             array.close();
 
             array.close();
@@ -160,7 +168,7 @@ public class MemoryIntArrayTest {
     public void testInteractPutOfBounds() throws Exception {
         MemoryIntArray array = null;
         try {
-            array = new MemoryIntArray(3, false);
+            array = new MemoryIntArray(3);
 
             try {
                 array.get(-1);
@@ -198,7 +206,7 @@ public class MemoryIntArrayTest {
     public void testOverMaxSize() throws Exception {
         MemoryIntArray array = null;
         try {
-            array = new MemoryIntArray(MemoryIntArray.getMaxSize() + 1, false);
+            array = new MemoryIntArray(MemoryIntArray.getMaxSize() + 1);
             fail("Cannot use over max size");
         } catch (IllegalArgumentException e) {
             /* expected */
@@ -209,7 +217,7 @@ public class MemoryIntArrayTest {
 
     @Test
     public void testNotMutableByUnprivilegedClients() throws Exception {
-        RemoteIntArray remoteIntArray = new RemoteIntArray(1, false);
+        RemoteIntArray remoteIntArray = new RemoteIntArray(1);
         try {
             assertNotNull("Couldn't get remote instance", remoteIntArray);
             MemoryIntArray localIntArray = remoteIntArray.peekInstance();
@@ -230,4 +238,64 @@ public class MemoryIntArrayTest {
             remoteIntArray.destroy();
         }
     }
+
+    @Test
+    public void testAshmemSizeMatchesMemoryIntArraySize() throws Exception {
+        boolean success = false;
+
+        // Get a handle to a remote process to send the fd
+        RemoteIntArray remoteIntArray = new RemoteIntArray(1);
+        try {
+            // Let us try 100 times
+            for (int i = 0; i < 100; i++) {
+                // Create a MemoryIntArray to muck with
+                MemoryIntArray array = new MemoryIntArray(1);
+
+                // Create the fd to stuff in the MemoryIntArray
+                final int fd = nativeCreateAshmem("foo", 1);
+
+                // Replace the fd with our ahsmem region
+                Field fdFiled = MemoryIntArray.class.getDeclaredField("mFd");
+                fdFiled.setAccessible(true);
+                fdFiled.set(array, fd);
+
+                CountDownLatch countDownLatch = new CountDownLatch(2);
+
+                new Thread() {
+                    @Override
+                    public void run() {
+                        for (int i = 2; i < Integer.MAX_VALUE; i++) {
+                            if (countDownLatch.getCount() == 1) {
+                                countDownLatch.countDown();
+                                return;
+                            }
+                            nativeSetAshmemSize(fd, i);
+                        }
+                    }
+                }.start();
+
+                try {
+                    remoteIntArray.accessLastElementInRemoteProcess(array);
+                } catch (IllegalArgumentException e) {
+                    success = true;
+                }
+
+                countDownLatch.countDown();
+                countDownLatch.await(1000, TimeUnit.MILLISECONDS);
+
+                if (success) {
+                    break;
+                }
+            }
+        } finally {
+            remoteIntArray.destroy();
+        }
+
+        if (!success) {
+            fail("MemoryIntArray should catch ahshmem size changing under it");
+        }
+    }
+
+    private native int nativeCreateAshmem(String name, int size);
+    private native void nativeSetAshmemSize(int fd, int size);
 }
