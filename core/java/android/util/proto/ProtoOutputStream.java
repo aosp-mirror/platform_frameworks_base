@@ -19,6 +19,10 @@ package android.util.proto;
 import android.annotation.TestApi;
 import android.util.Log;
 
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
@@ -179,6 +183,11 @@ public final class ProtoOutputStream {
     private EncodedBuffer mBuffer;
 
     /**
+     * Our stream.  If there is one.
+     */
+    private OutputStream mStream;
+
+    /**
      * Current nesting depth of startObject calls.
      */
     private int mDepth;
@@ -226,6 +235,690 @@ public final class ProtoOutputStream {
         mBuffer = new EncodedBuffer(chunkSize);
     }
 
+    /**
+     * Construct a ProtoOutputStream that sits on top of an OutputStream.
+     * @more
+     * The {@link #flush() flush()} method must be called when done writing
+     * to flush any remanining data, althought data *may* be written at intermediate
+     * points within the writing as well.
+     */
+    public ProtoOutputStream(OutputStream stream) {
+        this();
+        mStream = stream;
+    }
+
+    /**
+     * Construct a ProtoOutputStream that sits on top of a FileDescriptor.
+     * @more
+     * The {@link #flush() flush()} method must be called when done writing
+     * to flush any remanining data, althought data *may* be written at intermediate
+     * points within the writing as well.
+     */
+    public ProtoOutputStream(FileDescriptor fd) {
+        this(new FileOutputStream(fd));
+    }
+
+    /**
+     * Write a value for the given fieldId.
+     *
+     * Will automatically convert for the following field types, and
+     * throw an exception for others: double, float, int32, int64, uint32, uint64,
+     * sint32, sint64, fixed32, fixed64, sfixed32, sfixed64, bool, enum.
+     *
+     * @param fieldId The field identifier constant from the generated class.
+     * @param val The value.
+     */
+    public void write(long fieldId, double val) {
+        assertNotCompacted();
+        final int id = (int)fieldId;
+
+        switch ((int)((fieldId & (FIELD_TYPE_MASK | FIELD_COUNT_MASK)) >> FIELD_TYPE_SHIFT)) {
+            // double
+            case (int)((FIELD_TYPE_DOUBLE | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeDoubleImpl(id, (double)val);
+                break;
+            case (int)((FIELD_TYPE_DOUBLE | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_DOUBLE | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedDoubleImpl(id, (double)val);
+                break;
+            // float
+            case (int)((FIELD_TYPE_FLOAT | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeFloatImpl(id, (float)val);
+                break;
+            case (int)((FIELD_TYPE_FLOAT | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_FLOAT | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedFloatImpl(id, (float)val);
+                break;
+            // int32
+            case (int)((FIELD_TYPE_INT32 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeInt32Impl(id, (int)val);
+                break;
+            case (int)((FIELD_TYPE_INT32 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_INT32 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedInt32Impl(id, (int)val);
+                break;
+            // int64
+            case (int)((FIELD_TYPE_INT64 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeInt64Impl(id, (long)val);
+                break;
+            case (int)((FIELD_TYPE_INT64 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_INT64 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedInt64Impl(id, (long)val);
+                break;
+            // uint32
+            case (int)((FIELD_TYPE_UINT32 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeUInt32Impl(id, (int)val);
+                break;
+            case (int)((FIELD_TYPE_UINT32 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_UINT32 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedUInt32Impl(id, (int)val);
+                break;
+            // uint64
+            case (int)((FIELD_TYPE_UINT64 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeUInt64Impl(id, (long)val);
+                break;
+            case (int)((FIELD_TYPE_UINT64 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_UINT64 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedUInt64Impl(id, (long)val);
+                break;
+            // sint32
+            case (int)((FIELD_TYPE_SINT32 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeSInt32Impl(id, (int)val);
+                break;
+            case (int)((FIELD_TYPE_SINT32 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_SINT32 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedSInt32Impl(id, (int)val);
+                break;
+            // sint64
+            case (int)((FIELD_TYPE_SINT64 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeSInt64Impl(id, (long)val);
+                break;
+            case (int)((FIELD_TYPE_SINT64 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_SINT64 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedSInt64Impl(id, (long)val);
+                break;
+            // fixed32
+            case (int)((FIELD_TYPE_FIXED32 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeFixed32Impl(id, (int)val);
+                break;
+            case (int)((FIELD_TYPE_FIXED32 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_FIXED32 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedFixed32Impl(id, (int)val);
+                break;
+            // fixed64
+            case (int)((FIELD_TYPE_FIXED64 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeFixed64Impl(id, (long)val);
+                break;
+            case (int)((FIELD_TYPE_FIXED64 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_FIXED64 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedFixed64Impl(id, (long)val);
+                break;
+            // sfixed32
+            case (int)((FIELD_TYPE_SFIXED32 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeSFixed32Impl(id, (int)val);
+                break;
+            case (int)((FIELD_TYPE_SFIXED32 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_SFIXED32 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedSFixed32Impl(id, (int)val);
+                break;
+            // sfixed64
+            case (int)((FIELD_TYPE_SFIXED64 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeSFixed64Impl(id, (long)val);
+                break;
+            case (int)((FIELD_TYPE_SFIXED64 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_SFIXED64 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedSFixed64Impl(id, (long)val);
+                break;
+            // bool
+            case (int)((FIELD_TYPE_BOOL | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeBoolImpl(id, val != 0);
+                break;
+            case (int)((FIELD_TYPE_BOOL | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_BOOL | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedBoolImpl(id, val != 0);
+                break;
+            // enum
+            case (int)((FIELD_TYPE_ENUM | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeEnumImpl(id, (int)val);
+                break;
+            case (int)((FIELD_TYPE_ENUM | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_ENUM | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedEnumImpl(id, (int)val);
+                break;
+            // string, bytes, object not allowed here.
+            default: {
+                throw new IllegalArgumentException("Attempt to call write(long, double) with "
+                        + getFieldIdString(fieldId));
+            }
+        }
+    }
+
+    /**
+     * Write a value for the given fieldId.
+     *
+     * Will automatically convert for the following field types, and
+     * throw an exception for others: double, float, int32, int64, uint32, uint64,
+     * sint32, sint64, fixed32, fixed64, sfixed32, sfixed64, bool, enum.
+     *
+     * @param fieldId The field identifier constant from the generated class.
+     * @param val The value.
+     */
+    public void write(long fieldId, float val) {
+        assertNotCompacted();
+        final int id = (int)fieldId;
+
+        switch ((int)((fieldId & (FIELD_TYPE_MASK | FIELD_COUNT_MASK)) >> FIELD_TYPE_SHIFT)) {
+            // double
+            case (int)((FIELD_TYPE_DOUBLE | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeDoubleImpl(id, (double)val);
+                break;
+            case (int)((FIELD_TYPE_DOUBLE | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_DOUBLE | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedDoubleImpl(id, (double)val);
+                break;
+            // float
+            case (int)((FIELD_TYPE_FLOAT | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeFloatImpl(id, (float)val);
+                break;
+            case (int)((FIELD_TYPE_FLOAT | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_FLOAT | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedFloatImpl(id, (float)val);
+                break;
+            // int32
+            case (int)((FIELD_TYPE_INT32 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeInt32Impl(id, (int)val);
+                break;
+            case (int)((FIELD_TYPE_INT32 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_INT32 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedInt32Impl(id, (int)val);
+                break;
+            // int64
+            case (int)((FIELD_TYPE_INT64 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeInt64Impl(id, (long)val);
+                break;
+            case (int)((FIELD_TYPE_INT64 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_INT64 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedInt64Impl(id, (long)val);
+                break;
+            // uint32
+            case (int)((FIELD_TYPE_UINT32 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeUInt32Impl(id, (int)val);
+                break;
+            case (int)((FIELD_TYPE_UINT32 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_UINT32 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedUInt32Impl(id, (int)val);
+                break;
+            // uint64
+            case (int)((FIELD_TYPE_UINT64 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeUInt64Impl(id, (long)val);
+                break;
+            case (int)((FIELD_TYPE_UINT64 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_UINT64 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedUInt64Impl(id, (long)val);
+                break;
+            // sint32
+            case (int)((FIELD_TYPE_SINT32 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeSInt32Impl(id, (int)val);
+                break;
+            case (int)((FIELD_TYPE_SINT32 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_SINT32 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedSInt32Impl(id, (int)val);
+                break;
+            // sint64
+            case (int)((FIELD_TYPE_SINT64 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeSInt64Impl(id, (long)val);
+                break;
+            case (int)((FIELD_TYPE_SINT64 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_SINT64 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedSInt64Impl(id, (long)val);
+                break;
+            // fixed32
+            case (int)((FIELD_TYPE_FIXED32 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeFixed32Impl(id, (int)val);
+                break;
+            case (int)((FIELD_TYPE_FIXED32 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_FIXED32 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedFixed32Impl(id, (int)val);
+                break;
+            // fixed64
+            case (int)((FIELD_TYPE_FIXED64 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeFixed64Impl(id, (long)val);
+                break;
+            case (int)((FIELD_TYPE_FIXED64 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_FIXED64 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedFixed64Impl(id, (long)val);
+                break;
+            // sfixed32
+            case (int)((FIELD_TYPE_SFIXED32 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeSFixed32Impl(id, (int)val);
+                break;
+            case (int)((FIELD_TYPE_SFIXED32 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_SFIXED32 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedSFixed32Impl(id, (int)val);
+                break;
+            // sfixed64
+            case (int)((FIELD_TYPE_SFIXED64 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeSFixed64Impl(id, (long)val);
+                break;
+            case (int)((FIELD_TYPE_SFIXED64 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_SFIXED64 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedSFixed64Impl(id, (long)val);
+                break;
+            // bool
+            case (int)((FIELD_TYPE_BOOL | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeBoolImpl(id, val != 0);
+                break;
+            case (int)((FIELD_TYPE_BOOL | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_BOOL | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedBoolImpl(id, val != 0);
+                break;
+            // enum
+            case (int)((FIELD_TYPE_ENUM | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeEnumImpl(id, (int)val);
+                break;
+            case (int)((FIELD_TYPE_ENUM | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_ENUM | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedEnumImpl(id, (int)val);
+                break;
+            // string, bytes, object not allowed here.
+            default: {
+                throw new IllegalArgumentException("Attempt to call write(long, float) with "
+                        + getFieldIdString(fieldId));
+            }
+        }
+    }
+
+    /**
+     * Write a value for the given fieldId.
+     *
+     * Will automatically convert for the following field types, and
+     * throw an exception for others: double, float, int32, int64, uint32, uint64,
+     * sint32, sint64, fixed32, fixed64, sfixed32, sfixed64, bool, enum.
+     *
+     * @param fieldId The field identifier constant from the generated class.
+     * @param val The value.
+     */
+    public void write(long fieldId, int val) {
+        assertNotCompacted();
+        final int id = (int)fieldId;
+
+        switch ((int)((fieldId & (FIELD_TYPE_MASK | FIELD_COUNT_MASK)) >> FIELD_TYPE_SHIFT)) {
+            // double
+            case (int)((FIELD_TYPE_DOUBLE | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeDoubleImpl(id, (double)val);
+                break;
+            case (int)((FIELD_TYPE_DOUBLE | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_DOUBLE | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedDoubleImpl(id, (double)val);
+                break;
+            // float
+            case (int)((FIELD_TYPE_FLOAT | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeFloatImpl(id, (float)val);
+                break;
+            case (int)((FIELD_TYPE_FLOAT | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_FLOAT | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedFloatImpl(id, (float)val);
+                break;
+            // int32
+            case (int)((FIELD_TYPE_INT32 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeInt32Impl(id, (int)val);
+                break;
+            case (int)((FIELD_TYPE_INT32 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_INT32 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedInt32Impl(id, (int)val);
+                break;
+            // int64
+            case (int)((FIELD_TYPE_INT64 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeInt64Impl(id, (long)val);
+                break;
+            case (int)((FIELD_TYPE_INT64 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_INT64 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedInt64Impl(id, (long)val);
+                break;
+            // uint32
+            case (int)((FIELD_TYPE_UINT32 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeUInt32Impl(id, (int)val);
+                break;
+            case (int)((FIELD_TYPE_UINT32 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_UINT32 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedUInt32Impl(id, (int)val);
+                break;
+            // uint64
+            case (int)((FIELD_TYPE_UINT64 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeUInt64Impl(id, (long)val);
+                break;
+            case (int)((FIELD_TYPE_UINT64 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_UINT64 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedUInt64Impl(id, (long)val);
+                break;
+            // sint32
+            case (int)((FIELD_TYPE_SINT32 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeSInt32Impl(id, (int)val);
+                break;
+            case (int)((FIELD_TYPE_SINT32 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_SINT32 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedSInt32Impl(id, (int)val);
+                break;
+            // sint64
+            case (int)((FIELD_TYPE_SINT64 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeSInt64Impl(id, (long)val);
+                break;
+            case (int)((FIELD_TYPE_SINT64 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_SINT64 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedSInt64Impl(id, (long)val);
+                break;
+            // fixed32
+            case (int)((FIELD_TYPE_FIXED32 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeFixed32Impl(id, (int)val);
+                break;
+            case (int)((FIELD_TYPE_FIXED32 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_FIXED32 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedFixed32Impl(id, (int)val);
+                break;
+            // fixed64
+            case (int)((FIELD_TYPE_FIXED64 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeFixed64Impl(id, (long)val);
+                break;
+            case (int)((FIELD_TYPE_FIXED64 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_FIXED64 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedFixed64Impl(id, (long)val);
+                break;
+            // sfixed32
+            case (int)((FIELD_TYPE_SFIXED32 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeSFixed32Impl(id, (int)val);
+                break;
+            case (int)((FIELD_TYPE_SFIXED32 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_SFIXED32 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedSFixed32Impl(id, (int)val);
+                break;
+            // sfixed64
+            case (int)((FIELD_TYPE_SFIXED64 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeSFixed64Impl(id, (long)val);
+                break;
+            case (int)((FIELD_TYPE_SFIXED64 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_SFIXED64 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedSFixed64Impl(id, (long)val);
+                break;
+            // bool
+            case (int)((FIELD_TYPE_BOOL | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeBoolImpl(id, val != 0);
+                break;
+            case (int)((FIELD_TYPE_BOOL | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_BOOL | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedBoolImpl(id, val != 0);
+                break;
+            // enum
+            case (int)((FIELD_TYPE_ENUM | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeEnumImpl(id, (int)val);
+                break;
+            case (int)((FIELD_TYPE_ENUM | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_ENUM | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedEnumImpl(id, (int)val);
+                break;
+            // string, bytes, object not allowed here.
+            default: {
+                throw new IllegalArgumentException("Attempt to call write(long, int) with "
+                        + getFieldIdString(fieldId));
+            }
+        }
+    }
+
+    /**
+     * Write a value for the given fieldId.
+     *
+     * Will automatically convert for the following field types, and
+     * throw an exception for others: double, float, int32, int64, uint32, uint64,
+     * sint32, sint64, fixed32, fixed64, sfixed32, sfixed64, bool, enum.
+     *
+     * @param fieldId The field identifier constant from the generated class.
+     * @param val The value.
+     */
+    public void write(long fieldId, long val) {
+        assertNotCompacted();
+        final int id = (int)fieldId;
+
+        switch ((int)((fieldId & (FIELD_TYPE_MASK | FIELD_COUNT_MASK)) >> FIELD_TYPE_SHIFT)) {
+            // double
+            case (int)((FIELD_TYPE_DOUBLE | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeDoubleImpl(id, (double)val);
+                break;
+            case (int)((FIELD_TYPE_DOUBLE | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_DOUBLE | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedDoubleImpl(id, (double)val);
+                break;
+            // float
+            case (int)((FIELD_TYPE_FLOAT | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeFloatImpl(id, (float)val);
+                break;
+            case (int)((FIELD_TYPE_FLOAT | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_FLOAT | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedFloatImpl(id, (float)val);
+                break;
+            // int32
+            case (int)((FIELD_TYPE_INT32 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeInt32Impl(id, (int)val);
+                break;
+            case (int)((FIELD_TYPE_INT32 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_INT32 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedInt32Impl(id, (int)val);
+                break;
+            // int64
+            case (int)((FIELD_TYPE_INT64 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeInt64Impl(id, (long)val);
+                break;
+            case (int)((FIELD_TYPE_INT64 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_INT64 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedInt64Impl(id, (long)val);
+                break;
+            // uint32
+            case (int)((FIELD_TYPE_UINT32 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeUInt32Impl(id, (int)val);
+                break;
+            case (int)((FIELD_TYPE_UINT32 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_UINT32 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedUInt32Impl(id, (int)val);
+                break;
+            // uint64
+            case (int)((FIELD_TYPE_UINT64 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeUInt64Impl(id, (long)val);
+                break;
+            case (int)((FIELD_TYPE_UINT64 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_UINT64 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedUInt64Impl(id, (long)val);
+                break;
+            // sint32
+            case (int)((FIELD_TYPE_SINT32 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeSInt32Impl(id, (int)val);
+                break;
+            case (int)((FIELD_TYPE_SINT32 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_SINT32 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedSInt32Impl(id, (int)val);
+                break;
+            // sint64
+            case (int)((FIELD_TYPE_SINT64 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeSInt64Impl(id, (long)val);
+                break;
+            case (int)((FIELD_TYPE_SINT64 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_SINT64 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedSInt64Impl(id, (long)val);
+                break;
+            // fixed32
+            case (int)((FIELD_TYPE_FIXED32 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeFixed32Impl(id, (int)val);
+                break;
+            case (int)((FIELD_TYPE_FIXED32 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_FIXED32 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedFixed32Impl(id, (int)val);
+                break;
+            // fixed64
+            case (int)((FIELD_TYPE_FIXED64 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeFixed64Impl(id, (long)val);
+                break;
+            case (int)((FIELD_TYPE_FIXED64 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_FIXED64 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedFixed64Impl(id, (long)val);
+                break;
+            // sfixed32
+            case (int)((FIELD_TYPE_SFIXED32 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeSFixed32Impl(id, (int)val);
+                break;
+            case (int)((FIELD_TYPE_SFIXED32 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_SFIXED32 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedSFixed32Impl(id, (int)val);
+                break;
+            // sfixed64
+            case (int)((FIELD_TYPE_SFIXED64 | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeSFixed64Impl(id, (long)val);
+                break;
+            case (int)((FIELD_TYPE_SFIXED64 | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_SFIXED64 | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedSFixed64Impl(id, (long)val);
+                break;
+            // bool
+            case (int)((FIELD_TYPE_BOOL | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeBoolImpl(id, val != 0);
+                break;
+            case (int)((FIELD_TYPE_BOOL | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_BOOL | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedBoolImpl(id, val != 0);
+                break;
+            // enum
+            case (int)((FIELD_TYPE_ENUM | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeEnumImpl(id, (int)val);
+                break;
+            case (int)((FIELD_TYPE_ENUM | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_ENUM | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedEnumImpl(id, (int)val);
+                break;
+            // string, bytes, object not allowed here.
+            default: {
+                throw new IllegalArgumentException("Attempt to call write(long, long) with "
+                        + getFieldIdString(fieldId));
+            }
+        }
+    }
+
+    /**
+     * Write a boolean value for the given fieldId.
+     *
+     * If the field is not a bool field, an exception will be thrown.
+     *
+     * @param fieldId The field identifier constant from the generated class.
+     * @param val The value.
+     */
+    public void write(long fieldId, boolean val) {
+        assertNotCompacted();
+        final int id = (int)fieldId;
+
+        switch ((int)((fieldId & (FIELD_TYPE_MASK | FIELD_COUNT_MASK)) >> FIELD_TYPE_SHIFT)) {
+            // bool
+            case (int)((FIELD_TYPE_BOOL | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeBoolImpl(id, val);
+                break;
+            case (int)((FIELD_TYPE_BOOL | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_BOOL | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedBoolImpl(id, val);
+                break;
+            // nothing else allowed
+            default: {
+                throw new IllegalArgumentException("Attempt to call write(long, boolean) with "
+                        + getFieldIdString(fieldId));
+            }
+        }
+    }
+
+    /**
+     * Write a string value for the given fieldId.
+     *
+     * If the field is not a string field, an exception will be thrown.
+     *
+     * @param fieldId The field identifier constant from the generated class.
+     * @param val The value.
+     */
+    public void write(long fieldId, String val) {
+        assertNotCompacted();
+        final int id = (int)fieldId;
+
+        switch ((int)((fieldId & (FIELD_TYPE_MASK | FIELD_COUNT_MASK)) >> FIELD_TYPE_SHIFT)) {
+            // string
+            case (int)((FIELD_TYPE_STRING | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeStringImpl(id, val);
+                break;
+            case (int)((FIELD_TYPE_STRING | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_STRING | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedStringImpl(id, val);
+                break;
+            // nothing else allowed
+            default: {
+                throw new IllegalArgumentException("Attempt to call write(long, String) with "
+                        + getFieldIdString(fieldId));
+            }
+        }
+    }
+
+    /**
+     * Write a byte[] value for the given fieldId.
+     *
+     * If the field is not a bytes or object field, an exception will be thrown.
+     *
+     * @param fieldId The field identifier constant from the generated class.
+     * @param val The value.
+     */
+    public void write(long fieldId, byte[] val) {
+        assertNotCompacted();
+        final int id = (int)fieldId;
+
+        switch ((int)((fieldId & (FIELD_TYPE_MASK | FIELD_COUNT_MASK)) >> FIELD_TYPE_SHIFT)) {
+            // bytes
+            case (int)((FIELD_TYPE_BYTES | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeBytesImpl(id, val);
+                break;
+            case (int)((FIELD_TYPE_BYTES | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_BYTES | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedBytesImpl(id, val);
+                break;
+            // Object
+            case (int)((FIELD_TYPE_OBJECT | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+                writeObjectImpl(id, val);
+                break;
+            case (int)((FIELD_TYPE_OBJECT | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int)((FIELD_TYPE_OBJECT | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+                writeRepeatedObjectImpl(id, val);
+                break;
+            // nothing else allowed
+            default: {
+                throw new IllegalArgumentException("Attempt to call write(long, byte[]) with "
+                        + getFieldIdString(fieldId));
+            }
+        }
+    }
+
+    /**
+     * Start a sub object.
+     */
+    public long start(long fieldId) {
+        assertNotCompacted();
+        final int id = (int)fieldId;
+
+        if ((fieldId & FIELD_TYPE_MASK) == FIELD_TYPE_OBJECT) {
+            final long count = fieldId & FIELD_COUNT_MASK;
+            if (count == FIELD_COUNT_SINGLE) {
+                return startObjectImpl(id, false);
+            } else if (count == FIELD_COUNT_REPEATED || count == FIELD_COUNT_PACKED) {
+                return startObjectImpl(id, true);
+            }
+        }
+        throw new IllegalArgumentException("Attempt to call start(long) with "
+                + getFieldIdString(fieldId));
+    }
+
+    /**
+     * End the object started by start() that returned token.
+     */
+    public void end(long token) {
+        endObjectImpl(token, getRepeatedFromToken(token));
+    }
+
     //
     // proto3 type: double
     // java type: double
@@ -240,6 +933,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_DOUBLE);
 
+        writeDoubleImpl(id, val);
+    }
+
+    private void writeDoubleImpl(int id, double val) {
         if (val != 0) {
             writeTag(id, WIRE_TYPE_FIXED64);
             mBuffer.writeRawFixed64(Double.doubleToLongBits(val));
@@ -253,6 +950,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_DOUBLE);
 
+        writeRepeatedDoubleImpl(id, val);
+    }
+
+    private void writeRepeatedDoubleImpl(int id, double val) {
         writeTag(id, WIRE_TYPE_FIXED64);
         mBuffer.writeRawFixed64(Double.doubleToLongBits(val));
     }
@@ -287,6 +988,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_FLOAT);
 
+        writeFloatImpl(id, val);
+    }
+
+    private void writeFloatImpl(int id, float val) {
         if (val != 0) {
             writeTag(id, WIRE_TYPE_FIXED32);
             mBuffer.writeRawFixed32(Float.floatToIntBits(val));
@@ -300,6 +1005,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_FLOAT);
 
+        writeRepeatedFloatImpl(id, val);
+    }
+
+    private void writeRepeatedFloatImpl(int id, float val) {
         writeTag(id, WIRE_TYPE_FIXED32);
         mBuffer.writeRawFixed32(Float.floatToIntBits(val));
     }
@@ -357,6 +1066,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_INT32);
 
+        writeInt32Impl(id, val);
+    }
+
+    private void writeInt32Impl(int id, int val) {
         if (val != 0) {
             writeTag(id, WIRE_TYPE_VARINT);
             writeUnsignedVarintFromSignedInt(val);
@@ -374,6 +1087,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_INT32);
 
+        writeRepeatedInt32Impl(id, val);
+    }
+
+    private void writeRepeatedInt32Impl(int id, int val) {
         writeTag(id, WIRE_TYPE_VARINT);
         writeUnsignedVarintFromSignedInt(val);
     }
@@ -418,6 +1135,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_INT64);
 
+        writeInt64Impl(id, val);
+    }
+
+    private void writeInt64Impl(int id, long val) {
         if (val != 0) {
             writeTag(id, WIRE_TYPE_VARINT);
             mBuffer.writeRawVarint64(val);
@@ -431,6 +1152,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_INT64);
 
+        writeRepeatedInt64Impl(id, val);
+    }
+
+    private void writeRepeatedInt64Impl(int id, long val) {
         writeTag(id, WIRE_TYPE_VARINT);
         mBuffer.writeRawVarint64(val);
     }
@@ -470,6 +1195,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_UINT32);
 
+        writeUInt32Impl(id, val);
+    }
+
+    private void writeUInt32Impl(int id, int val) {
         if (val != 0) {
             writeTag(id, WIRE_TYPE_VARINT);
             mBuffer.writeRawVarint32(val);
@@ -483,6 +1212,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_UINT32);
 
+        writeRepeatedUInt32Impl(id, val);
+    }
+
+    private void writeRepeatedUInt32Impl(int id, int val) {
         writeTag(id, WIRE_TYPE_VARINT);
         mBuffer.writeRawVarint32(val);
     }
@@ -522,6 +1255,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_UINT64);
 
+        writeUInt64Impl(id, val);
+    }
+
+    private void writeUInt64Impl(int id, long val) {
         if (val != 0) {
             writeTag(id, WIRE_TYPE_VARINT);
             mBuffer.writeRawVarint64(val);
@@ -535,6 +1272,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_UINT64);
 
+        writeRepeatedUInt64Impl(id, val);
+    }
+
+    private void writeRepeatedUInt64Impl(int id, long val) {
         writeTag(id, WIRE_TYPE_VARINT);
         mBuffer.writeRawVarint64(val);
     }
@@ -574,6 +1315,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_SINT32);
 
+        writeSInt32Impl(id, val);
+    }
+
+    private void writeSInt32Impl(int id, int val) {
         if (val != 0) {
             writeTag(id, WIRE_TYPE_VARINT);
             mBuffer.writeRawZigZag32(val);
@@ -587,6 +1332,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_SINT32);
 
+        writeRepeatedSInt32Impl(id, val);
+    }
+
+    private void writeRepeatedSInt32Impl(int id, int val) {
         writeTag(id, WIRE_TYPE_VARINT);
         mBuffer.writeRawZigZag32(val);
     }
@@ -626,6 +1375,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_SINT64);
 
+        writeSInt64Impl(id, val);
+    }
+
+    private void writeSInt64Impl(int id, long val) {
         if (val != 0) {
             writeTag(id, WIRE_TYPE_VARINT);
             mBuffer.writeRawZigZag64(val);
@@ -639,6 +1392,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_SINT64);
 
+        writeRepeatedSInt64Impl(id, val);
+    }
+
+    private void writeRepeatedSInt64Impl(int id, long val) {
         writeTag(id, WIRE_TYPE_VARINT);
         mBuffer.writeRawZigZag64(val);
     }
@@ -677,6 +1434,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_FIXED32);
 
+        writeFixed32Impl(id, val);
+    }
+
+    private void writeFixed32Impl(int id, int val) {
         if (val != 0) {
             writeTag(id, WIRE_TYPE_FIXED32);
             mBuffer.writeRawFixed32(val);
@@ -690,6 +1451,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_FIXED32);
 
+        writeRepeatedFixed32Impl(id, val);
+    }
+
+    private void writeRepeatedFixed32Impl(int id, int val) {
         writeTag(id, WIRE_TYPE_FIXED32);
         mBuffer.writeRawFixed32(val);
     }
@@ -724,6 +1489,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_FIXED64);
 
+        writeFixed64Impl(id, val);
+    }
+
+    private void writeFixed64Impl(int id, long val) {
         if (val != 0) {
             writeTag(id, WIRE_TYPE_FIXED64);
             mBuffer.writeRawFixed64(val);
@@ -737,6 +1506,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_FIXED64);
 
+        writeRepeatedFixed64(id, val);
+    }
+
+    private void writeRepeatedFixed64Impl(int id, long val) {
         writeTag(id, WIRE_TYPE_FIXED64);
         mBuffer.writeRawFixed64(val);
     }
@@ -770,6 +1543,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_SFIXED32);
 
+        writeSFixed32Impl(id, val);
+    }
+
+    private void writeSFixed32Impl(int id, int val) {
         if (val != 0) {
             writeTag(id, WIRE_TYPE_FIXED32);
             mBuffer.writeRawFixed32(val);
@@ -783,6 +1560,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_SFIXED32);
 
+        writeRepeatedSFixed32Impl(id, val);
+    }
+
+    private void writeRepeatedSFixed32Impl(int id, int val) {
         writeTag(id, WIRE_TYPE_FIXED32);
         mBuffer.writeRawFixed32(val);
     }
@@ -817,6 +1598,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_SFIXED64);
 
+        writeSFixed64Impl(id, val);
+    }
+
+    private void writeSFixed64Impl(int id, long val) {
         if (val != 0) {
             writeTag(id, WIRE_TYPE_FIXED64);
             mBuffer.writeRawFixed64(val);
@@ -830,6 +1615,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_SFIXED64);
 
+        writeRepeatedSFixed64(id, val);
+    }
+
+    private void writeRepeatedSFixed64Impl(int id, long val) {
         writeTag(id, WIRE_TYPE_FIXED64);
         mBuffer.writeRawFixed64(val);
     }
@@ -864,6 +1653,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_BOOL);
 
+        writeBoolImpl(id, val);
+    }
+
+    private void writeBoolImpl(int id, boolean val) {
         if (val) {
             writeTag(id, WIRE_TYPE_VARINT);
             // 0 and 1 are the same as their varint counterparts
@@ -878,6 +1671,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_BOOL);
 
+        writeRepeatedBool(id, val);
+    }
+
+    private void writeRepeatedBoolImpl(int id, boolean val) {
         writeTag(id, WIRE_TYPE_VARINT);
         mBuffer.writeRawByte((byte)(val ? 1 : 0));
     }
@@ -916,6 +1713,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_STRING);
 
+        writeStringImpl(id, val);
+    }
+
+    private void writeStringImpl(int id, String val) {
         if (val != null && val.length() > 0) {
             writeUtf8String(id, val);
         }
@@ -928,6 +1729,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_STRING);
 
+        writeRepeatedStringImpl(id, val);
+    }
+
+    private void writeRepeatedStringImpl(int id, String val) {
         if (val == null || val.length() == 0) {
             writeKnownLengthHeader(id, 0);
         } else {
@@ -963,6 +1768,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_BYTES);
 
+        writeBytesImpl(id, val);
+    }
+
+    private void writeBytesImpl(int id, byte[] val) {
         if (val != null && val.length > 0) {
             writeKnownLengthHeader(id, val.length);
             mBuffer.writeRawBuffer(val);
@@ -976,6 +1785,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_BYTES);
 
+        writeRepeatedBytesImpl(id, val);
+    }
+
+    private void writeRepeatedBytesImpl(int id, byte[] val) {
         writeKnownLengthHeader(id, val == null ? 0 : val.length);
         mBuffer.writeRawBuffer(val);
     }
@@ -995,6 +1808,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_ENUM);
 
+        writeEnumImpl(id, val);
+    }
+
+    private void writeEnumImpl(int id, int val) {
         if (val != 0) {
             writeTag(id, WIRE_TYPE_VARINT);
             writeUnsignedVarintFromSignedInt(val);
@@ -1008,6 +1825,10 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_ENUM);
 
+        writeRepeatedEnumImpl(id, val);
+    }
+
+    private void writeRepeatedEnumImpl(int id, int val) {
         writeTag(id, WIRE_TYPE_VARINT);
         writeUnsignedVarintFromSignedInt(val);
     }
@@ -1239,6 +2060,38 @@ public final class ProtoOutputStream {
         }
     }
 
+    /**
+     * Write an object that has already been flattend.
+     */
+    public void writeObject(long fieldId, byte[] value) {
+        assertNotCompacted();
+        final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_OBJECT);
+
+        writeObjectImpl(id, value);
+    }
+
+    public void writeObjectImpl(int id, byte[] value) {
+        if (value != null && value.length != 0) {
+            writeKnownLengthHeader(id, value.length);
+            mBuffer.writeRawBuffer(value);
+        }
+    }
+
+    /**
+     * Write an object that has already been flattend.
+     */
+    public void writeRepeatedObject(long fieldId, byte[] value) {
+        assertNotCompacted();
+        final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_OBJECT);
+
+        writeRepeatedObjectImpl(id, value);
+    }
+
+    public void writeRepeatedObjectImpl(int id, byte[] value) {
+        writeKnownLengthHeader(id, value == null ? 0 : value.length);
+        mBuffer.writeRawBuffer(value);
+    }
+
     //
     // Tags
     //
@@ -1358,6 +2211,25 @@ public final class ProtoOutputStream {
         }
     }
 
+    /**
+     * Get a debug string for a fieldId.
+     */
+    private String getFieldIdString(long fieldId) {
+        final long fieldCount = fieldId & FIELD_COUNT_MASK;
+        String countString = getFieldCountString(fieldCount);
+        if (countString == null) {
+            countString = "fieldCount=" + fieldCount;
+        }
+
+        final long fieldType = fieldId & FIELD_TYPE_MASK;
+        String typeString = getFieldTypeString(fieldType);
+        if (typeString == null) {
+            typeString = "fieldType=" + fieldType;
+        }
+
+        return fieldCount + " " + typeString + " tag=" + ((int)fieldId)
+                + " fieldId=0x" + Long.toHexString(fieldId);
+    }
 
     /**
      * Return how many bytes an encoded field tag will require.
@@ -1576,6 +2448,37 @@ public final class ProtoOutputStream {
                             + Integer.toHexString(tag) + " wireType=" + wireType
                             + " -- " + mBuffer.getDebugString());
             }
+        }
+    }
+
+    /**
+     * Write remaining data to the output stream.  If there is no output stream,
+     * this function does nothing. Any currently open objects (i.e. ones that
+     * have not had endObject called for them will not be written).  Whether this
+     * writes objects that are closed if there are remaining open objects is
+     * undefined (current implementation does not write it, future ones will).
+     * For now, can either call getBytes() or flush(), but not both.
+     */
+    public void flush() {
+        if (mStream == null) {
+            return;
+        }
+        if (mDepth != 0) {
+            // TODO: The compacting code isn't ready yet to compact unless we're done.
+            // TODO: Fix that.
+            return;
+        }
+        if (mCompacted) {
+            // If we're compacted, we already wrote it finished.
+            return;
+        }
+        compactIfNecessary();
+        final byte[] data = mBuffer.getBytes(mBuffer.getReadableSize());
+        try {
+            mStream.write(data);
+            mStream.flush();
+        } catch (IOException ex) {
+            throw new RuntimeException("Error flushing proto to stream", ex);
         }
     }
 

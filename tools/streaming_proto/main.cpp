@@ -94,7 +94,7 @@ make_java_package(const FileDescriptorProto& file_descriptor) {
  * Figure out the name of the file we are generating.
  */
 static string
-make_file_name(const FileDescriptorProto& file_descriptor)
+make_file_name(const FileDescriptorProto& file_descriptor, const string& class_name)
 {
     string const package = make_java_package(file_descriptor);
     string result;
@@ -103,7 +103,7 @@ make_file_name(const FileDescriptorProto& file_descriptor)
         result += '/';
     }
 
-    result += make_outer_class_name(file_descriptor);
+    result += class_name;
     result += ".java";
 
     return result;
@@ -320,10 +320,16 @@ write_message(stringstream& text, const DescriptorProto& message, const string& 
 
 /**
  * Write the contents of a file.
+ *
+ * If there are enums and generate_outer is false, invalid java code will be generated.
  */
 static void
-write_file(stringstream& text, const FileDescriptorProto& file_descriptor)
+write_file(CodeGeneratorResponse* response, const FileDescriptorProto& file_descriptor,
+        const string& filename, bool generate_outer,
+        const vector<EnumDescriptorProto>& enums, const vector<DescriptorProto>& messages)
 {
+    stringstream text;
+
     string const package_name = make_java_package(file_descriptor);
     string const outer_class_name = make_outer_class_name(file_descriptor);
 
@@ -338,27 +344,92 @@ write_file(stringstream& text, const FileDescriptorProto& file_descriptor)
     }
 
     // This bit of policy is android api rules specific: Raw proto classes
-    // must never be in the API, but they should all be available for testing.
+    // must never be in the API
     text << "/** @hide */" << endl;
-    text << "@android.annotation.TestApi" << endl;
+//    text << "@android.annotation.TestApi" << endl;
 
-    text << "public final class " << outer_class_name << " {" << endl;
-    text << endl;
+    if (generate_outer) {
+        text << "public final class " << outer_class_name << " {" << endl;
+        text << endl;
+    }
 
-    int N;
-    const string indented = indent_more("");
+    size_t N;
+    const string indented = generate_outer ? indent_more("") : string();
     
+    N = enums.size();
+    for (size_t i=0; i<N; i++) {
+        write_enum(text, enums[i], indented);
+    }
+
+    N = messages.size();
+    for (size_t i=0; i<N; i++) {
+        write_message(text, messages[i], indented);
+    }
+
+    if (generate_outer) {
+        text << "}" << endl;
+    }
+
+    CodeGeneratorResponse::File* file_response = response->add_file();
+    file_response->set_name(filename);
+    file_response->set_content(text.str());
+}
+
+/**
+ * Write one file per class.  Put all of the enums into the "outer" class.
+ */
+static void
+write_multiple_files(CodeGeneratorResponse* response, const FileDescriptorProto& file_descriptor)
+{
+    // If there is anything to put in the outer class file, create one
+    if (file_descriptor.enum_type_size() > 0) {
+        vector<EnumDescriptorProto> enums;
+        int N = file_descriptor.enum_type_size();
+        for (int i=0; i<N; i++) {
+            enums.push_back(file_descriptor.enum_type(i));
+        }
+
+        vector<DescriptorProto> messages;
+
+        write_file(response, file_descriptor,
+                make_file_name(file_descriptor, make_outer_class_name(file_descriptor)),
+                true, enums, messages);
+    }
+
+    // For each of the message types, make a file
+    int N = file_descriptor.message_type_size();
+    for (int i=0; i<N; i++) {
+        vector<EnumDescriptorProto> enums;
+
+        vector<DescriptorProto> messages;
+        messages.push_back(file_descriptor.message_type(i));
+
+        write_file(response, file_descriptor,
+                make_file_name(file_descriptor, file_descriptor.message_type(i).name()),
+                false, enums, messages);
+    }
+}
+
+static void
+write_single_file(CodeGeneratorResponse* response, const FileDescriptorProto& file_descriptor)
+{
+    int N;
+
+    vector<EnumDescriptorProto> enums;
     N = file_descriptor.enum_type_size();
     for (int i=0; i<N; i++) {
-        write_enum(text, file_descriptor.enum_type(i), indented);
+        enums.push_back(file_descriptor.enum_type(i));
     }
 
+    vector<DescriptorProto> messages;
     N = file_descriptor.message_type_size();
     for (int i=0; i<N; i++) {
-        write_message(text, file_descriptor.message_type(i), indented);
+        messages.push_back(file_descriptor.message_type(i));
     }
 
-    text << "}" << endl;
+    write_file(response, file_descriptor,
+            make_file_name(file_descriptor, make_outer_class_name(file_descriptor)),
+            true, enums, messages);
 }
 
 /**
@@ -383,16 +454,11 @@ main(int argc, char const*const* argv)
     for (int i=0; i<N; i++) {
         const FileDescriptorProto& file_descriptor = request.proto_file(i);
         if (should_generate_for_file(request, file_descriptor.name())) {
-            // Generate the text
-            stringstream text;
-            write_file(text, file_descriptor);
-
-            // Put the text in the response
-            CodeGeneratorResponse::File* file_response = response.add_file();
-            file_response->set_name(make_file_name(file_descriptor));
-            file_response->set_content(text.str());
-
-            cerr << "writing file: " << file_response->name() << endl;
+            if (file_descriptor.options().java_multiple_files()) {
+                write_multiple_files(&response, file_descriptor);
+            } else {
+                write_single_file(&response, file_descriptor);
+            }
         }
     }
 
