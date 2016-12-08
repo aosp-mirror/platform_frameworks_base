@@ -35,10 +35,10 @@ public class RemoteMemoryIntArrayService extends Service {
         return new android.util.IRemoteMemoryIntArray.Stub() {
 
             @Override
-            public void create(int size, boolean clientWritable) {
+            public void create(int size) {
                 synchronized (mLock) {
                     try {
-                        mArray = new MemoryIntArray(size, clientWritable);
+                        mArray = new MemoryIntArray(size);
                     } catch (IOException e) {
                         throw new IllegalStateException(e);
                     }
@@ -107,6 +107,15 @@ public class RemoteMemoryIntArrayService extends Service {
             public boolean isClosed() {
                 synchronized (mLock) {
                     return mArray.isClosed();
+                }
+            }
+
+            @Override
+            public void accessLastElementInRemoteProcess(MemoryIntArray array) {
+                try {
+                    array.get(array.size() - 1);
+                } catch (IOException e) {
+                    throw new IllegalStateException(e);
                 }
             }
         };
