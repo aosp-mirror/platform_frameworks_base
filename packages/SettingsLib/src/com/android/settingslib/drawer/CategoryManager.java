@@ -72,21 +72,30 @@ public class CategoryManager {
     }
 
     public synchronized DashboardCategory getTilesByCategory(Context context, String categoryKey) {
-        tryInitCategories(context);
+        return getTilesByCategory(context, categoryKey, TileUtils.SETTING_PKG);
+    }
+
+    public synchronized DashboardCategory getTilesByCategory(Context context, String categoryKey,
+            String settingPkg) {
+        tryInitCategories(context, settingPkg);
 
         return mCategoryByKeyMap.get(categoryKey);
     }
 
     public synchronized List<DashboardCategory> getCategories(Context context) {
-        tryInitCategories(context);
+        return getCategories(context, TileUtils.SETTING_PKG);
+    }
+
+    public synchronized List<DashboardCategory> getCategories(Context context, String settingPkg) {
+        tryInitCategories(context, settingPkg);
         return mCategories;
     }
 
-    public synchronized void reloadAllCategories(Context context) {
+    public synchronized void reloadAllCategories(Context context, String settingPkg) {
         final boolean forceClearCache = mInterestingConfigChanges.applyNewConfig(
                 context.getResources());
         mCategories = null;
-        tryInitCategories(context, forceClearCache);
+        tryInitCategories(context, forceClearCache, settingPkg);
     }
 
     public synchronized void updateCategoryFromBlacklist(Set<ComponentName> tileBlacklist) {
@@ -104,20 +113,21 @@ public class CategoryManager {
         }
     }
 
-    private synchronized void tryInitCategories(Context context) {
+    private synchronized void tryInitCategories(Context context, String settingPkg) {
         // Keep cached tiles by default. The cache is only invalidated when InterestingConfigChange
         // happens.
-        tryInitCategories(context, false /* forceClearCache */);
+        tryInitCategories(context, false /* forceClearCache */, settingPkg);
     }
 
-    private synchronized void tryInitCategories(Context context, boolean forceClearCache) {
+    private synchronized void tryInitCategories(Context context, boolean forceClearCache,
+            String settingPkg) {
         if (mCategories == null) {
             if (forceClearCache) {
                 mTileByComponentCache.clear();
             }
             mCategoryByKeyMap.clear();
             mCategories = TileUtils.getCategories(context, mTileByComponentCache,
-                    false /* categoryDefinedInManifest */, mExtraAction);
+                    false /* categoryDefinedInManifest */, mExtraAction, settingPkg);
             for (DashboardCategory category : mCategories) {
                 mCategoryByKeyMap.put(category.key, category);
             }

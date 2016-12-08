@@ -68,9 +68,9 @@ public class SettingsDrawerAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
-    public void updateHomepageCategories() {
+    public void updateHomepageCategories(String settingPkg) {
         final DashboardCategory category = CategoryManager.get(mActivity)
-                        .getTilesByCategory(mActivity, CategoryKey.CATEGORY_HOMEPAGE);
+                        .getTilesByCategory(mActivity, CategoryKey.CATEGORY_HOMEPAGE, settingPkg);
         mItems.clear();
         // Spacer.
         mItems.add(null);

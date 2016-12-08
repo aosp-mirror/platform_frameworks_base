@@ -193,8 +193,9 @@ public class SettingsDrawerActivity extends Activity {
         }
         if (isDashboardFeatureEnabled()) {
             final DashboardCategory homepageCategories = CategoryManager.get(this)
-                    .getTilesByCategory(this, CategoryKey.CATEGORY_HOMEPAGE);
-            return homepageCategories.containsComponent(componentName);
+                    .getTilesByCategory(this, CategoryKey.CATEGORY_HOMEPAGE, getSettingPkg());
+            return homepageCategories ==
+                    null ? false : homepageCategories.containsComponent(componentName);
         } else {
             // Look for a tile that has the same component as incoming intent
             final List<DashboardCategory> categories = getDashboardCategories();
@@ -208,6 +209,14 @@ public class SettingsDrawerActivity extends Activity {
             }
             return false;
         }
+    }
+
+    /**
+     * Gets the name of the intent action of the default setting app. Used to launch setting app
+     * when Settings Home is clicked.
+     */
+    public String getSettingAction() {
+        return Settings.ACTION_SETTINGS;
     }
 
     public void addCategoryListener(CategoryListener listener) {
@@ -274,7 +283,7 @@ public class SettingsDrawerActivity extends Activity {
         }
         // TODO: Do this in the background with some loading.
         if (isDashboardFeatureEnabled()) {
-            mDrawerAdapter.updateHomepageCategories();
+            mDrawerAdapter.updateHomepageCategories(getSettingPkg());
         } else {
             mDrawerAdapter.updateCategories();
         }
@@ -317,8 +326,9 @@ public class SettingsDrawerActivity extends Activity {
     public boolean openTile(Tile tile) {
         closeDrawer();
         if (tile == null) {
-            startActivity(new Intent(Settings.ACTION_SETTINGS).addFlags(
-                    Intent.FLAG_ACTIVITY_CLEAR_TASK));
+            Intent intent = new Intent(getSettingAction()).addFlags(
+                        Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
             return true;
         }
         try {
@@ -376,6 +386,10 @@ public class SettingsDrawerActivity extends Activity {
         }
     }
 
+    public String getSettingPkg() {
+        return TileUtils.SETTING_PKG;
+    }
+
     public interface CategoryListener {
         void onCategoriesChanged();
     }
@@ -426,7 +440,7 @@ public class SettingsDrawerActivity extends Activity {
 
         @Override
         protected Void doInBackground(Void... params) {
-            mCategoryManager.reloadAllCategories(SettingsDrawerActivity.this);
+            mCategoryManager.reloadAllCategories(SettingsDrawerActivity.this, getSettingPkg());
             return null;
         }
 
@@ -437,6 +451,9 @@ public class SettingsDrawerActivity extends Activity {
         }
     }
 
+    /**
+     * @return {@code true} if IA (Information Architecture) is enabled.
+     */
     protected boolean isDashboardFeatureEnabled() {
         return false;
     }
