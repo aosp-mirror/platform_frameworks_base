@@ -38,7 +38,7 @@ public class MediaFrameworkIntegrationTestRunner extends InstrumentationTestRunn
 
     private static final String TAG = "MediaFrameworkIntegrationTestRunner";
 
-    public static int mCameraId = 0;
+    public static String mCameraId = "0";
 
     @Override
     public TestSuite getAllTests() {
@@ -62,7 +62,7 @@ public class MediaFrameworkIntegrationTestRunner extends InstrumentationTestRunn
             try {
                 Log.v(TAG,
                         String.format("Reading camera_id from icicle: '%s'", cameraId));
-                mCameraId = Integer.parseInt(cameraId);
+                mCameraId = cameraId;
             }
             catch (NumberFormatException e) {
                 Log.e(TAG, String.format("Failed to convert camera_id to integer"));
