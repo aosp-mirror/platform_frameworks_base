@@ -54,7 +54,7 @@ static jint android_util_MemoryIntArray_create(JNIEnv* env, jobject clazz, jstri
 }
 
 static jlong android_util_MemoryIntArray_open(JNIEnv* env, jobject clazz, jint fd,
-    jboolean owner, jboolean writable)
+    jboolean owner)
 {
     if (fd < 0) {
         jniThrowException(env, "java/io/IOException", "bad file descriptor");
@@ -67,10 +67,26 @@ static jlong android_util_MemoryIntArray_open(JNIEnv* env, jobject clazz, jint f
         return -1;
     }
 
-    int protMode = (owner || writable) ? (PROT_READ | PROT_WRITE) : PROT_READ;
+    // IMPORTANT: Ashmem allows the caller to change its size until
+    // it is memory mapped for the first time which lazily creates
+    // the underlying VFS file. So the size we get above may not
+    // reflect the size of the underlying shared memory region. Therefore,
+    // we first memory map to set the size in stone an verify if
+    // the underlying ashmem region has the same size as the one we
+    // memory mapped. This is critical as we use the underlying
+    // ashmem size for boundary checks and memory unmapping.
+    int protMode = owner ? (PROT_READ | PROT_WRITE) : PROT_READ;
     void* ashmemAddr = mmap(NULL, ashmemSize, protMode, MAP_SHARED, fd, 0);
     if (ashmemAddr == MAP_FAILED) {
         jniThrowException(env, "java/io/IOException", "cannot mmap ashmem");
+        return -1;
+    }
+
+    // Check if the mapped size is the same as the ashmem region.
+    int mmapedSize = ashmem_get_size_region(fd);
+    if (mmapedSize != ashmemSize) {
+        munmap(reinterpret_cast<void *>(ashmemAddr), ashmemSize);
+        jniThrowException(env, "java/io/IOException", "bad file descriptor");
         return -1;
     }
 
@@ -79,7 +95,7 @@ static jlong android_util_MemoryIntArray_open(JNIEnv* env, jobject clazz, jint f
         new (ashmemAddr) std::atomic_int[size];
     }
 
-    if (owner && !writable) {
+    if (owner) {
         int setProtResult = ashmem_set_prot_region(fd, PROT_READ);
         if (setProtResult < 0) {
             jniThrowException(env, "java/io/IOException", "cannot set ashmem prot mode");
@@ -121,7 +137,7 @@ static void android_util_MemoryIntArray_close(JNIEnv* env, jobject clazz, jint f
 }
 
 static jint android_util_MemoryIntArray_get(JNIEnv* env, jobject clazz,
-        jint fd, jlong address, jint index, jboolean owner)
+        jint fd, jlong address, jint index)
 {
     if (fd < 0) {
         jniThrowException(env, "java/io/IOException", "bad file descriptor");
@@ -138,7 +154,7 @@ static jint android_util_MemoryIntArray_get(JNIEnv* env, jobject clazz,
 }
 
 static void android_util_MemoryIntArray_set(JNIEnv* env, jobject clazz,
-        jint fd, jlong address, jint index, jint newValue, jboolean owner)
+        jint fd, jlong address, jint index, jint newValue)
 {
     if (fd < 0) {
         jniThrowException(env, "java/io/IOException", "bad file descriptor");
@@ -171,10 +187,10 @@ static jint android_util_MemoryIntArray_size(JNIEnv* env, jobject clazz, jint fd
 
 static const JNINativeMethod methods[] = {
     {"nativeCreate",  "(Ljava/lang/String;I)I", (void*)android_util_MemoryIntArray_create},
-    {"nativeOpen",  "(IZZ)J", (void*)android_util_MemoryIntArray_open},
+    {"nativeOpen",  "(IZ)J", (void*)android_util_MemoryIntArray_open},
     {"nativeClose", "(IJZ)V", (void*)android_util_MemoryIntArray_close},
-    {"nativeGet",  "(IJIZ)I", (void*)android_util_MemoryIntArray_get},
-    {"nativeSet", "(IJIIZ)V", (void*) android_util_MemoryIntArray_set},
+    {"nativeGet",  "(IJI)I", (void*)android_util_MemoryIntArray_get},
+    {"nativeSet", "(IJII)V", (void*) android_util_MemoryIntArray_set},
     {"nativeSize", "(I)I", (void*) android_util_MemoryIntArray_size},
 };
 
