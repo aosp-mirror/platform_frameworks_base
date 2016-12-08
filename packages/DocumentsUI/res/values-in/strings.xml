@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="1551050262492398204">"File"</string>
-    <string name="downloads_label" msgid="959113951084633612">"Unduhan"</string>
+    <string name="downloads_label" msgid="959113951084633612">"Download"</string>
     <string name="title_open" msgid="4353228937663917801">"Buka dari"</string>
     <string name="title_save" msgid="2433679664882857999">"Simpan ke"</string>
     <string name="menu_create_dir" msgid="2547620241173881754">"Folder baru"</string>

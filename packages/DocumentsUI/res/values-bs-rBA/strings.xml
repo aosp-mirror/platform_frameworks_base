@@ -23,7 +23,7 @@
     <string name="menu_create_dir" msgid="2547620241173881754">"Nova fascikla"</string>
     <string name="menu_grid" msgid="6878021334497835259">"Prikaz u vidu mreže"</string>
     <string name="menu_list" msgid="7279285939892417279">"Prikaz u vidu liste"</string>
-    <string name="menu_sort" msgid="7677740407158414452">"Sortiraj po"</string>
+    <string name="menu_sort" msgid="7677740407158414452">"Poredano po"</string>
     <string name="menu_search" msgid="3816712084502856974">"Traži"</string>
     <string name="menu_settings" msgid="8239065133341597825">"Postavke pohrane"</string>
     <string name="menu_open" msgid="432922957274920903">"Otvori"</string>
