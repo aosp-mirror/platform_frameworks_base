@@ -88,7 +88,7 @@ import android.test.suitebuilder.annotation.Suppress;
 import android.util.TrustedTime;
 
 import com.android.internal.net.VpnInfo;
-import com.android.server.BroadcastInterceptingContext;
+import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.server.net.NetworkStatsService;
 import com.android.server.net.NetworkStatsService.NetworkStatsSettings;
 import com.android.server.net.NetworkStatsService.NetworkStatsSettings.Config;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.internal.util.test;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -25,13 +25,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.UserHandle;
 
-import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.AbstractFuture;
-
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -42,9 +41,17 @@ import java.util.concurrent.TimeoutException;
 public class BroadcastInterceptingContext extends ContextWrapper {
     private static final String TAG = "WatchingContext";
 
-    private final List<BroadcastInterceptor> mInterceptors = Lists.newArrayList();
+    private final List<BroadcastInterceptor> mInterceptors = new ArrayList<>();
 
-    public class BroadcastInterceptor extends AbstractFuture<Intent> {
+    public abstract class FutureIntent extends FutureTask<Intent> {
+        public FutureIntent() {
+            super(
+                () -> { throw new IllegalStateException("Cannot happen"); }
+            );
+        }
+    }
+
+    public class BroadcastInterceptor extends FutureIntent {
         private final BroadcastReceiver mReceiver;
         private final IntentFilter mFilter;
 
@@ -82,11 +89,11 @@ public class BroadcastInterceptingContext extends ContextWrapper {
         super(base);
     }
 
-    public Future<Intent> nextBroadcastIntent(String action) {
+    public FutureIntent nextBroadcastIntent(String action) {
         return nextBroadcastIntent(new IntentFilter(action));
     }
 
-    public Future<Intent> nextBroadcastIntent(IntentFilter filter) {
+    public FutureIntent nextBroadcastIntent(IntentFilter filter) {
         final BroadcastInterceptor interceptor = new BroadcastInterceptor(null, filter);
         synchronized (mInterceptors) {
             mInterceptors.add(interceptor);

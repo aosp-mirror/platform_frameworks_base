@@ -45,7 +45,7 @@ import java.util.Objects;
 /**
  * @hide
  */
-class IPv6TetheringInterfaceServices {
+public class IPv6TetheringInterfaceServices {
     private static final String TAG = IPv6TetheringInterfaceServices.class.getSimpleName();
     private static final IpPrefix LINK_LOCAL_PREFIX = new IpPrefix("fe80::/64");
     private static final int RFC7421_IP_PREFIX_LENGTH = 64;
@@ -59,7 +59,7 @@ class IPv6TetheringInterfaceServices {
     private RouterAdvertisementDaemon mRaDaemon;
     private RaParams mLastRaParams;
 
-    IPv6TetheringInterfaceServices(String ifname, INetworkManagementService nms) {
+    public IPv6TetheringInterfaceServices(String ifname, INetworkManagementService nms) {
         mIfName = ifname;
         mNMService = nms;
     }

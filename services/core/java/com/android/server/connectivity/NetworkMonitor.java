@@ -211,7 +211,9 @@ public class NetworkMonitor extends StateMachine {
     private final NetworkRequest mDefaultRequest;
     private final IpConnectivityLog mMetricsLog;
 
-    private boolean mIsCaptivePortalCheckEnabled;
+    @VisibleForTesting
+    protected boolean mIsCaptivePortalCheckEnabled;
+
     private boolean mUseHttps;
 
     // Set if the user explicitly selected "Do not use this network" in captive portal sign-in app.
@@ -265,7 +267,8 @@ public class NetworkMonitor extends StateMachine {
         setInitialState(mDefaultState);
 
         mIsCaptivePortalCheckEnabled = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.CAPTIVE_PORTAL_DETECTION_ENABLED, 1) == 1;
+                Settings.Global.CAPTIVE_PORTAL_MODE, Settings.Global.CAPTIVE_PORTAL_MODE_PROMPT)
+                != Settings.Global.CAPTIVE_PORTAL_MODE_IGNORE;
         mUseHttps = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.CAPTIVE_PORTAL_USE_HTTPS, 1) == 1;
 
@@ -632,7 +635,10 @@ public class NetworkMonitor extends StateMachine {
 
     @VisibleForTesting
     protected CaptivePortalProbeResult isCaptivePortal() {
-        if (!mIsCaptivePortalCheckEnabled) return new CaptivePortalProbeResult(204);
+        if (!mIsCaptivePortalCheckEnabled) {
+            validationLog("Validation disabled.");
+            return new CaptivePortalProbeResult(204);
+        }
 
         URL pacUrl = null, httpsUrl = null, httpUrl = null, fallbackUrl = null;
 

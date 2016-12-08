@@ -2592,7 +2592,8 @@ public class ConnectivityManager {
 
         /**
          * Called if no network is found in the given timeout time.  If no timeout is given,
-         * this will not be called.
+         * this will not be called. The associated {@link NetworkRequest} will have already
+         * been removed and released, as if {@link #unregisterNetworkCallback} had been called.
          * @hide
          */
         public void onUnavailable() {}
@@ -2664,6 +2665,26 @@ public class ConnectivityManager {
     public static final int CALLBACK_SUSPENDED           = BASE + 11;
     /** @hide */
     public static final int CALLBACK_RESUMED             = BASE + 12;
+
+    /** @hide */
+    public static String getCallbackName(int whichCallback) {
+        switch (whichCallback) {
+            case CALLBACK_PRECHECK:     return "CALLBACK_PRECHECK";
+            case CALLBACK_AVAILABLE:    return "CALLBACK_AVAILABLE";
+            case CALLBACK_LOSING:       return "CALLBACK_LOSING";
+            case CALLBACK_LOST:         return "CALLBACK_LOST";
+            case CALLBACK_UNAVAIL:      return "CALLBACK_UNAVAIL";
+            case CALLBACK_CAP_CHANGED:  return "CALLBACK_CAP_CHANGED";
+            case CALLBACK_IP_CHANGED:   return "CALLBACK_IP_CHANGED";
+            case CALLBACK_RELEASED:     return "CALLBACK_RELEASED";
+            case CALLBACK_EXIT:         return "CALLBACK_EXIT";
+            case EXPIRE_LEGACY_REQUEST: return "EXPIRE_LEGACY_REQUEST";
+            case CALLBACK_SUSPENDED:    return "CALLBACK_SUSPENDED";
+            case CALLBACK_RESUMED:      return "CALLBACK_RESUMED";
+            default:
+                return Integer.toString(whichCallback);
+        }
+    }
 
     private class CallbackHandler extends Handler {
         private final HashMap<NetworkRequest, NetworkCallback>mCallbackMap;
@@ -2831,7 +2852,7 @@ public class ConnectivityManager {
     private final static int REQUEST = 2;
 
     private NetworkRequest sendRequestForNetwork(NetworkCapabilities need,
-            NetworkCallback networkCallback, int timeoutSec, int action,
+            NetworkCallback networkCallback, int timeoutMs, int action,
             int legacyType) {
         if (networkCallback == null) {
             throw new IllegalArgumentException("null NetworkCallback");
@@ -2847,7 +2868,7 @@ public class ConnectivityManager {
                             new Messenger(sCallbackHandler), new Binder());
                 } else {
                     networkCallback.networkRequest = mService.requestNetwork(need,
-                            new Messenger(sCallbackHandler), timeoutSec, new Binder(), legacyType);
+                            new Messenger(sCallbackHandler), timeoutMs, new Binder(), legacyType);
                 }
                 if (networkCallback.networkRequest != null) {
                     sNetworkCallback.put(networkCallback.networkRequest, networkCallback);
