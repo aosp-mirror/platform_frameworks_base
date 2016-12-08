@@ -82,6 +82,21 @@ public class MockUtils {
         return Mockito.argThat(m);
     }
 
+    public static Intent checkIntent(final Intent intent) {
+        final Matcher<Intent> m = new BaseMatcher<Intent>() {
+            @Override
+            public boolean matches(Object item) {
+                if (item == null) return false;
+                return intent.filterEquals((Intent) item);
+            }
+            @Override
+            public void describeTo(Description description) {
+                description.appendText(intent.toString());
+            }
+        };
+        return Mockito.argThat(m);
+    }
+
     public static Bundle checkUserRestrictions(String... keys) {
         final Bundle expected = DpmTestUtils.newRestrictions(Preconditions.checkNotNull(keys));
         final Matcher<Bundle> m = new BaseMatcher<Bundle>() {
