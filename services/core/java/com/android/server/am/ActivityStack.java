@@ -22,7 +22,6 @@ import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
 import static android.content.pm.ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
@@ -723,7 +722,6 @@ final class ActivityStack extends ConfigurationContainer {
 
         mStacks.remove(this);
         int addIndex = mStacks.size();
-
         if (addIndex > 0) {
             final ActivityStack topStack = mStacks.get(addIndex - 1);
             if (StackId.isAlwaysOnTop(topStack.mStackId) && topStack != this) {
@@ -1718,7 +1716,9 @@ final class ActivityStack extends ConfigurationContainer {
                                 + stackInvisible + " behindFullscreenActivity="
                                 + behindFullscreenActivity + " mLaunchTaskBehind="
                                 + r.mLaunchTaskBehind);
-                        makeInvisible(r, visibleBehind);
+                        if (!enterPictureInPictureOnActivityInvisible(r)) {
+                            makeInvisible(r, visibleBehind);
+                        }
                     }
                 }
                 if (mStackId == FREEFORM_WORKSPACE_STACK_ID) {
@@ -1872,6 +1872,32 @@ final class ActivityStack extends ConfigurationContainer {
                 mStackSupervisor.startSpecificActivityLocked(r, andResume, false);
                 return true;
             }
+        }
+        return false;
+    }
+
+    /**
+     * Attempts to enter picture-in-picture if the activity that is being made invisible supports
+     * it.  If not, then
+     *
+     * @return whether or not picture-in-picture mode was entered.
+     */
+    private boolean enterPictureInPictureOnActivityInvisible(ActivityRecord r) {
+        final boolean hasPinnedStack =
+                mStackSupervisor.getStack(PINNED_STACK_ID) != null;
+        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, " enterPictureInPictureOnInvisible="
+                + r.shouldEnterPictureInPictureOnInvisible()
+                + " hasPinnedStack=" + hasPinnedStack);
+        if (!hasPinnedStack && r.visible && r.shouldEnterPictureInPictureOnInvisible()) {
+            r.setEnterPipOnMoveToBackground(false);
+
+            // Enter picture in picture, but don't move the home stack to the front
+            // since it will affect the focused stack's visibility and occlude
+            // starting activities
+            mService.enterPictureInPictureModeLocked(r, r.getDisplayId(),
+                    r.pictureInPictureAspectRatio, false /* moveHomeStackToFront */,
+                    "ensureActivitiesVisibleLocked");
+            return true;
         }
         return false;
     }
@@ -2613,8 +2639,8 @@ final class ActivityStack extends ConfigurationContainer {
         mWindowManager.moveTaskToTop(task.taskId);
     }
 
-    final void startActivityLocked(ActivityRecord r, boolean newTask, boolean keepCurTransition,
-            ActivityOptions options) {
+    final void startActivityLocked(ActivityRecord r, ActivityRecord focusedTopActivity,
+            boolean newTask, boolean keepCurTransition, ActivityOptions options) {
         TaskRecord rTask = r.task;
         final int taskId = rTask.taskId;
         // mLaunchTaskBehind tasks get placed at the back of the task stack.
@@ -2693,11 +2719,20 @@ final class ActivityStack extends ConfigurationContainer {
                 mWindowManager.prepareAppTransition(TRANSIT_NONE, keepCurTransition);
                 mNoAnimActivities.add(r);
             } else {
-                mWindowManager.prepareAppTransition(newTask
-                        ? r.mLaunchTaskBehind
-                                ? TRANSIT_TASK_OPEN_BEHIND
-                                : TRANSIT_TASK_OPEN
-                        : TRANSIT_ACTIVITY_OPEN, keepCurTransition);
+                int transit = TRANSIT_ACTIVITY_OPEN;
+                if (newTask) {
+                    if (r.mLaunchTaskBehind) {
+                        transit = TRANSIT_TASK_OPEN_BEHIND;
+                    } else {
+                        // If a new task is being launched, then mark the existing top activity to
+                        // enter picture-in-picture if it supports auto-entering PiP
+                        if (focusedTopActivity != null) {
+                            focusedTopActivity.setEnterPipOnMoveToBackground(true);
+                        }
+                        transit = TRANSIT_TASK_OPEN;
+                    }
+                }
+                mWindowManager.prepareAppTransition(transit, keepCurTransition);
                 mNoAnimActivities.remove(r);
             }
             addConfigOverride(r, task);
@@ -4193,6 +4228,8 @@ final class ActivityStack extends ConfigurationContainer {
             AppTimeTracker timeTracker, String reason) {
         if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "moveTaskToFront: " + tr);
 
+        final ActivityRecord focusedTopActivity = mStackSupervisor.getFocusedStack() != null
+                ? mStackSupervisor.getFocusedStack().topActivity() : null;
         final int numTasks = mTaskHistory.size();
         final int index = mTaskHistory.indexOf(tr);
         if (numTasks == 0 || index < 0)  {
@@ -4237,6 +4274,11 @@ final class ActivityStack extends ConfigurationContainer {
             ActivityOptions.abort(options);
         } else {
             updateTransitLocked(TRANSIT_TASK_TO_FRONT, options);
+        }
+        // If a new task is moved to the front, then mark the existing top activity to enter
+        // picture-in-picture if it supports auto-entering PiP
+        if (focusedTopActivity != null) {
+            focusedTopActivity.setEnterPipOnMoveToBackground(true);
         }
 
         mStackSupervisor.resumeFocusedStackTopActivityLocked();

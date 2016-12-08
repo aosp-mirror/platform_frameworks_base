@@ -468,6 +468,10 @@ interface IActivityManager {
     boolean isInPictureInPictureMode(in IBinder token);
     void killPackageDependents(in String packageName, int userId);
     void enterPictureInPictureMode(in IBinder token);
+    void enterPictureInPictureModeWithAspectRatio(in IBinder token, float aspectRatio);
+    void enterPictureInPictureModeOnMoveToBackground(in IBinder token,
+            boolean enterPictureInPictureOnMoveToBg);
+    void setPictureInPictureAspectRatio(in IBinder token, float aspectRatio);
     void activityRelaunched(in IBinder token);
     IBinder getUriPermissionOwnerForActivity(in IBinder activityToken);
     /**
@@ -568,8 +572,6 @@ interface IActivityManager {
     boolean updateDisplayOverrideConfiguration(in Configuration values, int displayId);
     void unregisterTaskStackListener(ITaskStackListener listener);
     void moveStackToDisplay(int stackId, int displayId);
-    void enterPictureInPictureModeWithAspectRatio(in IBinder token, float aspectRatio);
-    void setPictureInPictureAspectRatio(in IBinder token, float aspectRatio);
     boolean requestAutoFillData(in IResultReceiver receiver, in Bundle receiverExtras,
             in IBinder activityToken);
     void dismissKeyguard(in IBinder token, in IKeyguardDismissCallback callback);

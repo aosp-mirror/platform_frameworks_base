@@ -135,7 +135,7 @@ class PinnedStackController {
         mService = service;
         mDisplayContent = displayContent;
         mSnapAlgorithm = new PipSnapAlgorithm(service.mContext);
-        mMotionHelper = new PipMotionHelper(BackgroundThread.getHandler());
+        mMotionHelper = new PipMotionHelper(UiThread.getHandler());
         mDisplayInfo.copyFrom(mDisplayContent.getDisplayInfo());
         reloadResources();
     }
