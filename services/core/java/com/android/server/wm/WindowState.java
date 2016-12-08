@@ -2883,7 +2883,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mShowToOwnerOnly = showToOwnerOnly;
     }
 
-    boolean isHiddenFromUserLocked() {
+    private boolean isHiddenFromUserLocked() {
         // Child windows are evaluated based on their parent window.
         final WindowState win = getTopParentWindow();
         if (win.mAttrs.type < FIRST_SYSTEM_WINDOW
@@ -3552,16 +3552,23 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     /** Returns the topmost parent window if this is a child of another window, else this. */
     WindowState getTopParentWindow() {
-        WindowState w = this;
-        while (w != null && w.mIsChildWindow) {
-            w = w.getParentWindow();
+        WindowState current = this;
+        WindowState topParent = current;
+        while (current != null && current.mIsChildWindow) {
+            current = current.getParentWindow();
+            // Parent window can be null if the child is detached from it's parent already, but
+            // someone still has a reference to access it. So, we return the top parent value we
+            // already have instead of null.
+            if (current != null) {
+                topParent = current;
+            }
         }
-        return w;
+        return topParent;
     }
 
     boolean isParentWindowHidden() {
         final WindowState parent = getParentWindow();
-        return (parent == null) ? false : parent.mHidden;
+        return parent != null && parent.mHidden;
     }
 
     void setWillReplaceWindow(boolean animate) {
