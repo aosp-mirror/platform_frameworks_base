@@ -20,11 +20,12 @@ import android.util.MemoryIntArray;
 
 interface IRemoteMemoryIntArray {
     MemoryIntArray peekInstance();
-    void create(int size, boolean clientWritable);
+    void create(int size);
     boolean isWritable();
     int get(int index);
     void set(int index, int value);
     int size();
     void close();
     boolean isClosed();
+    void accessLastElementInRemoteProcess(in MemoryIntArray array);
 }
