@@ -456,8 +456,8 @@
     <item msgid="6761963760295549099"></item>
   </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"‏‎%1$s۔ آواز چالو کرنے کیلئے تھپتھپائیں۔"</string>
-    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"‏‎%1$s۔ ارتعاش پر سیٹ کرنے کیلئے تھپتھپائیں۔ Accessibility سروسز شاید خاموش ہوں۔"</string>
-    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"‏‎%1$s۔ خاموش کرنے کیلئے تھپتھپائیں۔ Accessibility سروسز شاید خاموش ہوں۔"</string>
+    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"‏‎%1$s۔ ارتعاش پر سیٹ کرنے کیلئے تھپتھپائیں۔ ایکسیسبیلٹی سروسز شاید خاموش ہوں۔"</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"‏‎%1$s۔ خاموش کرنے کیلئے تھپتھپائیں۔ ایکسیسبیلٹی سروسز شاید خاموش ہوں۔"</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"‏%s والیوم کے کنٹرولز دکھائے جا رہے ہیں۔ برخاست کرنے کیلئے سوائپ کریں۔"</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"والیوم کے کنٹرولز مخفی ہیں"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"‏سسٹم UI ٹیونر"</string>
