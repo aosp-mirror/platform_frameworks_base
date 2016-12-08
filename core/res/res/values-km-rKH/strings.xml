@@ -605,9 +605,9 @@
     <string name="phoneTypeRadio" msgid="4093738079908667513">"វិទ្យុ"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"ទូរសារ"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"ទូរស័ព្ទ​​កន្លែងធ្វើការ"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"ទូរសព្ទ​​កន្លែងធ្វើការ"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"ភេយ័រ​កន្លែង​ធ្វើ​ការ"</string>
-    <string name="phoneTypeAssistant" msgid="5596772636128562884">"អ្នក​ជំនួយ​ការ"</string>
+    <string name="phoneTypeAssistant" msgid="5596772636128562884">"ជំនួយ​ការ"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"សារ MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"តាម​តម្រូវ​ការ"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"ថ្ងៃ​ខួប​កំណើត"</string>
@@ -640,10 +640,10 @@
     <string name="orgTypeOther" msgid="3951781131570124082">"ផ្សេងៗ"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"តាម​តម្រូវការ"</string>
     <string name="relationTypeCustom" msgid="3542403679827297300">"តាម​បំណង"</string>
-    <string name="relationTypeAssistant" msgid="6274334825195379076">"អ្នក​ជំនួយ​ការ"</string>
+    <string name="relationTypeAssistant" msgid="6274334825195379076">"ជំនួយ​ការ"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"បងប្អូន​ប្រុស"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"កូន"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"ដៃគូ​ក្នុងស្រុក"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"ដៃគូ​រួមរស់ជាមួយគ្នា"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"ឪពុក"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"មិត្តភ័ក្ដិ"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"អ្នក​គ្រប់គ្រង"</string>

@@ -646,7 +646,7 @@
     <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"同居伴侶"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"父親"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"朋友"</string>
-    <string name="relationTypeManager" msgid="6365677861610137895">"管理員"</string>
+    <string name="relationTypeManager" msgid="6365677861610137895">"主管"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"母親"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"父母"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"夥伴"</string>
@@ -1234,7 +1234,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"桌布"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"變更桌布"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"通知接聽器"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"虛擬現實接聽器"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"VR 接聽器"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"條件供應商"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"通知排序服務"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN 已啟用。"</string>

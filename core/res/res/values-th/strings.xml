@@ -1547,7 +1547,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"ลองอีกครั้งในภายหลัง"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"กำลังดูแบบเต็มหน้าจอ"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"หากต้องการออกไป ให้เลื่อนลงจากด้านบน"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"หากต้องการออก ให้เลื่อนลงจากด้านบน"</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"รับทราบ"</string>
     <string name="done_label" msgid="2093726099505892398">"เสร็จสิ้น"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"ตัวเลื่อนหมุนระบุชั่วโมง"</string>

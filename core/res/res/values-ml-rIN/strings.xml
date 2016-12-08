@@ -163,7 +163,7 @@
     <string name="notification_title" msgid="8967710025036163822">"<xliff:g id="ACCOUNT">%1$s</xliff:g> എന്നതിൽ സൈൻ ഇൻ ചെയ്യുന്നതിൽ പിശക്"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"സമന്വയിപ്പിക്കുക"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"സമന്വയിപ്പിക്കുക"</string>
-    <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"വളരെയധികം <xliff:g id="CONTENT_TYPE">%s</xliff:g> ഇല്ലാതാക്കലുകൾ."</string>
+    <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"വളരെയധികം <xliff:g id="CONTENT_TYPE">%s</xliff:g> ഇല്ലാതാക്കുന്നു."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"ടാബ്‌ലെറ്റ് സ്റ്റോറേജ്  കഴിഞ്ഞു. ഇടം ശൂന്യമാക്കാൻ ചില ഫയലുകൾ ഇല്ലാതാക്കുക."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"വാച്ചിലെ സ്റ്റോറേജ്  നിറഞ്ഞു. ഇടം ശൂന്യമാക്കാൻ കുറച്ച് ഫയലുകൾ ഇല്ലാതാക്കുക."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"ടിവി സ്റ്റോറേജ്  നിറഞ്ഞു. ഇടം ശൂന്യമാക്കാൻ കുറച്ച് ഫയലുകൾ ഇല്ലാതാക്കുക."</string>

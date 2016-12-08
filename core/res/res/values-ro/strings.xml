@@ -1084,7 +1084,7 @@
     <string name="ringtone_default" msgid="3789758980357696936">"Ton de apel prestabilit"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Ton de apel prestabilit (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Niciunul"</string>
-    <string name="ringtone_picker_title" msgid="3515143939175119094">"Tonuri de sonerie"</string>
+    <string name="ringtone_picker_title" msgid="3515143939175119094">"Tonuri de apel"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Ton de apel necunoscut"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
       <item quantity="few">Rețele Wi-Fi disponibile</item>

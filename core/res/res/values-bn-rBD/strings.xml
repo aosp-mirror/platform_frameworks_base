@@ -605,7 +605,7 @@
     <string name="phoneTypeRadio" msgid="4093738079908667513">"রেডিও"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"টেলেক্স"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"কার্যক্ষেত্রের মোবাইল"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"অফিসের মোবাইল"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"কার্যক্ষেত্রের পেজার"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"সহায়ক"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
@@ -1234,7 +1234,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"ওয়ালপেপার"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"ওয়ালপেপার পরিবর্তন করুন"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"বিজ্ঞপ্তির শ্রোতা"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"VR শ্রোতা"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"(ভিআর)VR শ্রোতা"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"শর্ত প্রদানকারী"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"বিজ্ঞপ্তি র‌্যাঙ্কার পরিষেবা"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN সক্রিয়"</string>

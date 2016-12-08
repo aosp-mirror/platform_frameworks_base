@@ -599,7 +599,7 @@
     <string name="phoneTypeMobile" msgid="6501463557754751037">"נייד"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"עבודה"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"פקס בעבודה"</string>
-    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"מס\' פקס בבית"</string>
+    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"פקס בבית"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"זימונית"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"אחר"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"התקשרות חזרה"</string>
@@ -612,7 +612,7 @@
     <string name="phoneTypeTelex" msgid="3367879952476250512">"טלקס"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"נייד של העבודה"</string>
-    <string name="phoneTypeWorkPager" msgid="649938731231157056">"איתורית של העבודה"</string>
+    <string name="phoneTypeWorkPager" msgid="649938731231157056">"זימונית מהעבודה"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"מסייע"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"מותאם אישית"</string>
