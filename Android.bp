@@ -17,3 +17,7 @@ subdirs = [
     "native/android",
     "native/graphics/jni",
 ]
+
+optional_subdirs = [
+    "core/tests/utiltests/jni",
+]
