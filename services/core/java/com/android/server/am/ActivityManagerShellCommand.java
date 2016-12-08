@@ -233,6 +233,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runAttachAgent(pw);
                 case "supports-multiwindow":
                     return runSupportsMultiwindow(pw);
+                case "supports-split-screen-multi-window":
+                    return runSupportsSplitScreenMultiwindow(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -2300,20 +2302,36 @@ final class ActivityManagerShellCommand extends ShellCommand {
     }
 
     int runSupportsMultiwindow(PrintWriter pw) throws RemoteException {
+        final Resources res = getResources(pw);
+        if (res == null) {
+            return -1;
+        }
+        pw.println(res.getBoolean(com.android.internal.R.bool.config_supportsMultiWindow));
+        return 0;
+    }
+
+    int runSupportsSplitScreenMultiwindow(PrintWriter pw) throws RemoteException {
+        final Resources res = getResources(pw);
+        if (res == null) {
+            return -1;
+        }
+        pw.println(
+                res.getBoolean(com.android.internal.R.bool.config_supportsSplitScreenMultiWindow));
+        return 0;
+    }
+
+    private Resources getResources(PrintWriter pw) throws RemoteException {
         // system resources does not contain all the device configuration, construct it manually.
         Configuration config = mInterface.getConfiguration();
         if (config == null) {
             pw.println("Error: Activity manager has no configuration");
-            return -1;
+            return null;
         }
 
         final DisplayMetrics metrics = new DisplayMetrics();
         metrics.setToDefaults();
 
-        Resources res = new Resources(AssetManager.getSystem(), metrics, config);
-
-        pw.println(res.getBoolean(com.android.internal.R.bool.config_supportsMultiWindow));
-        return 0;
+        return new Resources(AssetManager.getSystem(), metrics, config);
     }
 
     @Override
@@ -2495,6 +2513,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Rtrieve the configuration and any recent configurations of the device.");
             pw.println("  supports-multiwindow");
             pw.println("      Returns true if the device supports multiwindow.");
+            pw.println("  supports-split-screen-multi-window");
+            pw.println("      Returns true if the device supports split screen multiwindow.");
             pw.println("  suppress-resize-config-changes <true|false>");
             pw.println("      Suppresses configuration changes due to user resizing an activity/task.");
             pw.println("  set-inactive [--user <USER_ID>] <PACKAGE> true|false");

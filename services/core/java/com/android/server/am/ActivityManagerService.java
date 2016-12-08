@@ -1362,6 +1362,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     boolean mAlwaysFinishActivities = false;
     boolean mForceResizableActivities;
     boolean mSupportsMultiWindow;
+    boolean mSupportsSplitScreenMultiWindow;
     boolean mSupportsFreeformWindowManagement;
     boolean mSupportsPictureInPicture;
     boolean mSupportsLeanbackOnly;
@@ -13125,6 +13126,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mContext.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE);
 
         final boolean supportsMultiWindow = ActivityManager.supportsMultiWindow();
+        final boolean supportsSplitScreenMultiWindow =
+                ActivityManager.supportsSplitScreenMultiWindow();
         final String debugApp = Settings.Global.getString(resolver, DEBUG_APP);
         final boolean waitForDebugger = Settings.Global.getInt(resolver, WAIT_FOR_DEBUGGER, 0) != 0;
         final boolean alwaysFinishActivities =
@@ -13160,6 +13163,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mSupportsFreeformWindowManagement = false;
                 mSupportsPictureInPicture = false;
             }
+            mSupportsSplitScreenMultiWindow = supportsSplitScreenMultiWindow;
             mWindowManager.setForceResizableTasks(mForceResizableActivities);
             mWindowManager.setSupportsPictureInPicture(mSupportsPictureInPicture);
             // This happens before any activities are started, so we can change global configuration
