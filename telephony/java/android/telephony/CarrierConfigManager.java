@@ -658,6 +658,24 @@ public class CarrierConfigManager {
     public static final String KEY_SUPPORT_CONFERENCE_CALL_BOOL = "support_conference_call_bool";
 
     /**
+     * Determines whether a maximum size limit for IMS conference calls is enforced on the device.
+     * When {@code true}, IMS conference calls will be limited to at most
+     * {@link #KEY_IMS_CONFERENCE_SIZE_LIMIT_INT} participants.  When {@code false}, no attempt is made
+     * to limit the number of participants in a conference (the carrier will raise an error when an
+     * attempt is made to merge too many participants into a conference).
+     */
+    public static final String KEY_IS_IMS_CONFERENCE_SIZE_ENFORCED_BOOL =
+            "is_ims_conference_size_enforced_bool";
+
+    /**
+     * Determines the maximum number of participants the carrier supports for a conference call.
+     * This number is exclusive of the current device.  A conference between 3 devices, for example,
+     * would have a size limit of 2 participants.
+     * Enforced when {@link #KEY_IS_IMS_CONFERENCE_SIZE_ENFORCED_BOOL} is {@code true}.
+     */
+    public static final String KEY_IMS_CONFERENCE_SIZE_LIMIT_INT = "ims_conference_size_limit_int";
+
+    /**
      * Determines whether High Definition audio property is displayed in the dialer UI.
      * If {@code false}, remove the HD audio property from the connection so that HD audio related
      * UI is not displayed. If {@code true}, keep HD audio property as it is configured.
@@ -1232,6 +1250,8 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_CDMA_3WAYCALL_FLASH_DELAY_INT , 0);
         sDefaults.putBoolean(KEY_SUPPORT_CONFERENCE_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_VIDEO_CONFERENCE_CALL_BOOL, false);
+        sDefaults.putBoolean(KEY_IS_IMS_CONFERENCE_SIZE_ENFORCED_BOOL, false);
+        sDefaults.putInt(KEY_IMS_CONFERENCE_SIZE_LIMIT_INT, 5);
         sDefaults.putBoolean(KEY_DISPLAY_HD_AUDIO_PROPERTY_BOOL, true);
         sDefaults.putBoolean(KEY_EDITABLE_ENHANCED_4G_LTE_BOOL, true);
         sDefaults.putBoolean(KEY_HIDE_IMS_APN_BOOL, false);
