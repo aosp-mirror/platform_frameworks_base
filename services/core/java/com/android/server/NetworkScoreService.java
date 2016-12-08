@@ -36,10 +36,12 @@ import android.net.ScoredNetwork;
 import android.net.wifi.WifiConfiguration;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.R;
@@ -52,11 +54,11 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * Backing service for {@link android.net.NetworkScoreManager}.
@@ -68,7 +70,8 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
     private final Context mContext;
     private final NetworkScorerAppManager mNetworkScorerAppManager;
-    private final Map<Integer, INetworkScoreCache> mScoreCaches;
+    @GuardedBy("mScoreCaches")
+    private final Map<Integer, RemoteCallbackList<INetworkScoreCache>> mScoreCaches;
     /** Lock used to update mPackageMonitor when scorer package changes occur. */
     private final Object mPackageMonitorLock = new Object[0];
 
@@ -166,7 +169,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     NetworkScoreService(Context context, NetworkScorerAppManager networkScoreAppManager) {
         mContext = context;
         mNetworkScorerAppManager = networkScoreAppManager;
-        mScoreCaches = new HashMap<>();
+        mScoreCaches = new ArrayMap<>();
         IntentFilter filter = new IntentFilter(Intent.ACTION_USER_UNLOCKED);
         // TODO: Need to update when we support per-user scorers. http://b/23422763
         mContext.registerReceiverAsUser(
@@ -276,7 +279,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         }
 
         // Separate networks by type.
-        Map<Integer, List<ScoredNetwork>> networksByType = new HashMap<>();
+        Map<Integer, List<ScoredNetwork>> networksByType = new ArrayMap<>();
         for (ScoredNetwork network : networks) {
             List<ScoredNetwork> networkList = networksByType.get(network.networkKey.type);
             if (networkList == null) {
@@ -287,19 +290,32 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         }
 
         // Pass the scores of each type down to the appropriate network scorer.
-        for (Map.Entry<Integer, List<ScoredNetwork>> entry : networksByType.entrySet()) {
-            INetworkScoreCache scoreCache = mScoreCaches.get(entry.getKey());
-            if (scoreCache != null) {
-                try {
-                    scoreCache.updateScores(entry.getValue());
-                } catch (RemoteException e) {
-                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                        Log.v(TAG, "Unable to update scores of type " + entry.getKey(), e);
+        for (final Map.Entry<Integer, List<ScoredNetwork>> entry : networksByType.entrySet()) {
+            final RemoteCallbackList<INetworkScoreCache> callbackList;
+            final boolean isEmpty;
+            synchronized (mScoreCaches) {
+                callbackList = mScoreCaches.get(entry.getKey());
+                isEmpty = callbackList == null || callbackList.getRegisteredCallbackCount() == 0;
+            }
+            if (isEmpty) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "No scorer registered for type " + entry.getKey() + ", discarding");
+                }
+                continue;
+            }
+
+            sendCallback(new Consumer<INetworkScoreCache>() {
+                @Override
+                public void accept(INetworkScoreCache networkScoreCache) {
+                    try {
+                        networkScoreCache.updateScores(entry.getValue());
+                    } catch (RemoteException e) {
+                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                            Log.v(TAG, "Unable to update scores of type " + entry.getKey(), e);
+                        }
                     }
                 }
-            } else if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.v(TAG, "No scorer registered for type " + entry.getKey() + ", discarding");
-            }
+            }, Collections.singleton(callbackList));
         }
 
         return true;
@@ -394,28 +410,52 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
     /** Clear scores. Callers are responsible for checking permissions as appropriate. */
     private void clearInternal() {
-        Set<INetworkScoreCache> cachesToClear = getScoreCaches();
-
-        for (INetworkScoreCache scoreCache : cachesToClear) {
-            try {
-                scoreCache.clearScores();
-            } catch (RemoteException e) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "Unable to clear scores", e);
+        sendCallback(new Consumer<INetworkScoreCache>() {
+            @Override
+            public void accept(INetworkScoreCache networkScoreCache) {
+                try {
+                    networkScoreCache.clearScores();
+                } catch (RemoteException e) {
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, "Unable to clear scores", e);
+                    }
                 }
             }
-        }
+        }, getScoreCacheLists());
     }
 
     @Override
     public void registerNetworkScoreCache(int networkType, INetworkScoreCache scoreCache) {
         mContext.enforceCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED, TAG);
         synchronized (mScoreCaches) {
-            if (mScoreCaches.containsKey(networkType)) {
-                throw new IllegalArgumentException(
-                        "Score cache already registered for type " + networkType);
+            RemoteCallbackList<INetworkScoreCache> callbackList = mScoreCaches.get(networkType);
+            if (callbackList == null) {
+                callbackList = new RemoteCallbackList<>();
+                mScoreCaches.put(networkType, callbackList);
             }
-            mScoreCaches.put(networkType, scoreCache);
+            if (!callbackList.register(scoreCache)) {
+                if (callbackList.getRegisteredCallbackCount() == 0) {
+                    mScoreCaches.remove(networkType);
+                }
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "Unable to register NetworkScoreCache for type " + networkType);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void unregisterNetworkScoreCache(int networkType, INetworkScoreCache scoreCache) {
+        mContext.enforceCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED, TAG);
+        synchronized (mScoreCaches) {
+            RemoteCallbackList<INetworkScoreCache> callbackList = mScoreCaches.get(networkType);
+            if (callbackList == null || !callbackList.unregister(scoreCache)) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "Unable to unregister NetworkScoreCache for type " + networkType);
+                }
+            } else if (callbackList.getRegisteredCallbackCount() == 0) {
+                mScoreCaches.remove(networkType);
+            }
         }
     }
 
@@ -430,7 +470,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     }
 
     @Override
-    protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+    protected void dump(final FileDescriptor fd, final PrintWriter writer, final String[] args) {
         mContext.enforceCallingOrSelfPermission(permission.DUMP, TAG);
         NetworkScorerAppData currentScorer = mNetworkScorerAppManager.getActiveScorer();
         if (currentScorer == null) {
@@ -439,13 +479,17 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         }
         writer.println("Current scorer: " + currentScorer.mPackageName);
 
-        for (INetworkScoreCache scoreCache : getScoreCaches()) {
-            try {
-                TransferPipe.dumpAsync(scoreCache.asBinder(), fd, args);
-            } catch (IOException | RemoteException e) {
-                writer.println("Failed to dump score cache: " + e);
+        sendCallback(new Consumer<INetworkScoreCache>() {
+            @Override
+            public void accept(INetworkScoreCache networkScoreCache) {
+                try {
+                  TransferPipe.dumpAsync(networkScoreCache.asBinder(), fd, args);
+                } catch (IOException | RemoteException e) {
+                  writer.println("Failed to dump score cache: " + e);
+                }
             }
-        }
+        }, getScoreCacheLists());
+
         if (mServiceConnection != null) {
             mServiceConnection.dump(fd, writer, args);
         } else {
@@ -455,14 +499,30 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     }
 
     /**
-     * Returns a set of all score caches that are currently active.
+     * Returns a {@link Collection} of all {@link RemoteCallbackList}s that are currently active.
      *
      * <p>May be used to perform an action on all score caches without potentially strange behavior
      * if a new scorer is registered during that action's execution.
      */
-    private Set<INetworkScoreCache> getScoreCaches() {
+    private Collection<RemoteCallbackList<INetworkScoreCache>> getScoreCacheLists() {
         synchronized (mScoreCaches) {
-            return new HashSet<>(mScoreCaches.values());
+            return new ArrayList<>(mScoreCaches.values());
+        }
+    }
+
+    private void sendCallback(Consumer<INetworkScoreCache> consumer,
+            Collection<RemoteCallbackList<INetworkScoreCache>> remoteCallbackLists) {
+        for (RemoteCallbackList<INetworkScoreCache> callbackList : remoteCallbackLists) {
+            synchronized (callbackList) { // Ensure only one active broadcast per RemoteCallbackList
+                final int count = callbackList.beginBroadcast();
+                try {
+                    for (int i = 0; i < count; i++) {
+                        consumer.accept(callbackList.getBroadcastItem(i));
+                    }
+                } finally {
+                    callbackList.finishBroadcast();
+                }
+            }
         }
     }
 
