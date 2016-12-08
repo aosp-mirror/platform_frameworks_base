@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.policy;
 
 import android.annotation.Nullable;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -41,10 +42,18 @@ import java.util.List;
 public class EmergencyCryptkeeperText extends TextView {
 
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    private KeyguardUpdateMonitorCallback mCallback = new KeyguardUpdateMonitorCallback() {
+    private final KeyguardUpdateMonitorCallback mCallback = new KeyguardUpdateMonitorCallback() {
         @Override
         public void onPhoneStateChanged(int phoneState) {
             update();
+        }
+    };
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_AIRPLANE_MODE_CHANGED.equals(intent.getAction())) {
+                update();
+            }
         }
     };
 
@@ -58,6 +67,8 @@ public class EmergencyCryptkeeperText extends TextView {
         super.onAttachedToWindow();
         mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
         mKeyguardUpdateMonitor.registerCallback(mCallback);
+        getContext().registerReceiver(mReceiver,
+                new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED));
         update();
     }
 
@@ -67,6 +78,7 @@ public class EmergencyCryptkeeperText extends TextView {
         if (mKeyguardUpdateMonitor != null) {
             mKeyguardUpdateMonitor.removeCallback(mCallback);
         }
+        getContext().unregisterReceiver(mReceiver);
     }
 
     public void update() {
