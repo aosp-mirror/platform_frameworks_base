@@ -12,6 +12,8 @@ LOCAL_MODULE_TAGS := tests
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 LOCAL_SRC_FILES += src/android/util/IRemoteMemoryIntArray.aidl
 
+LOCAL_JNI_SHARED_LIBRARIES := libmemoryintarraytest libcutils libc++
+
 LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-test \
     mockito-target
