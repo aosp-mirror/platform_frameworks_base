@@ -20,28 +20,22 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityManager;
 import android.widget.ActionMenuView;
 import android.widget.ForwardingListener;
 import android.widget.TextView;
-import android.widget.Toast;
 
 /**
  * @hide
  */
 public class ActionMenuItemView extends TextView
-        implements MenuView.ItemView, View.OnClickListener, View.OnLongClickListener,
-        ActionMenuView.ActionMenuChildView {
+        implements MenuView.ItemView, View.OnClickListener, ActionMenuView.ActionMenuChildView {
     private static final String TAG = "ActionMenuItemView";
 
     private MenuItemImpl mItemData;
@@ -58,9 +52,6 @@ public class ActionMenuItemView extends TextView
 
     private static final int MAX_ICON_SIZE = 32; // dp
     private int mMaxIconSize;
-
-    private Toast mTooltip;
-    private Runnable mShowTooltipRunnable = () -> showTooltip(Toast.LENGTH_LONG);
 
     public ActionMenuItemView(Context context) {
         this(context, null);
@@ -88,7 +79,6 @@ public class ActionMenuItemView extends TextView
         mMaxIconSize = (int) (MAX_ICON_SIZE * density + 0.5f);
 
         setOnClickListener(this);
-        setOnLongClickListener(this);
 
         mSavedPaddingLeft = -1;
         setSaveEnabled(false);
@@ -193,6 +183,9 @@ public class ActionMenuItemView extends TextView
                 (mItemData.showsTextAsAction() && (mAllowTextWithIcon || mExpandedFormat));
 
         setText(visible ? mTitle : null);
+
+        // Show the tooltip for items that do not already show text.
+        setTooltip(visible ? null : mTitle);
     }
 
     public void setIcon(Drawable icon) {
@@ -249,7 +242,6 @@ public class ActionMenuItemView extends TextView
 
     @Override
     public boolean dispatchHoverEvent(MotionEvent event) {
-        updateTooltip(event);
         // Don't allow children to hover; we want this to be treated as a single component.
         return onHoverEvent(event);
     }
@@ -264,68 +256,6 @@ public class ActionMenuItemView extends TextView
 
     public boolean needsDividerAfter() {
         return hasText();
-    }
-
-    @Override
-    public boolean onLongClick(View v) {
-        return showTooltip(Toast.LENGTH_SHORT);
-    }
-
-    private boolean showTooltip(@Toast.Duration int duration) {
-        if (hasText()) {
-            // Don't show the cheat sheet for items that already show text.
-            return false;
-        }
-
-        final int[] screenPos = new int[2];
-        final Rect displayFrame = new Rect();
-        getLocationOnScreen(screenPos);
-        getWindowVisibleDisplayFrame(displayFrame);
-
-        final Context context = getContext();
-        final int width = getWidth();
-        final int height = getHeight();
-        final int midy = screenPos[1] + height / 2;
-        int referenceX = screenPos[0] + width / 2;
-        if (getLayoutDirection() == View.LAYOUT_DIRECTION_LTR) {
-            final int screenWidth = context.getResources().getDisplayMetrics().widthPixels;
-            referenceX = screenWidth - referenceX; // mirror
-        }
-        hideTooltip ();
-        mTooltip = Toast.makeText(context, mItemData.getTitle(), duration);
-        if (midy < displayFrame.height()) {
-            // Show along the top; follow action buttons
-            mTooltip.setGravity(Gravity.TOP | Gravity.END, referenceX,
-                    screenPos[1] + height - displayFrame.top);
-        } else {
-            // Show along the bottom center
-            mTooltip.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, height);
-        }
-        mTooltip.show();
-        return true;
-    }
-
-    private void hideTooltip() {
-        if (mTooltip != null) {
-            mTooltip.cancel();
-            mTooltip = null;
-        }
-        getHandler().removeCallbacks(mShowTooltipRunnable);
-    }
-
-    private void updateTooltip(MotionEvent event) {
-        AccessibilityManager manager = AccessibilityManager.getInstance(mContext);
-        if (manager.isEnabled() && manager.isTouchExplorationEnabled()) {
-            return;
-        }
-
-        final int action = event.getAction();
-        if (action == MotionEvent.ACTION_HOVER_MOVE) {
-            hideTooltip();
-            getHandler().postDelayed(mShowTooltipRunnable, ViewConfiguration.getLongPressTimeout());
-        } else if (action == MotionEvent.ACTION_HOVER_EXIT) {
-            hideTooltip();
-        }
     }
 
     @Override
