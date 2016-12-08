@@ -32,6 +32,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.keyguard.KeyguardStatusView;
@@ -236,13 +237,8 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     }
 
     @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        mHost.getUserInfoController().addCallback(this);
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
+    @VisibleForTesting
+    public void onDetachedFromWindow() {
         setListening(false);
         mHost.getUserInfoController().removeCallback(this);
         mHost.getNetworkController().removeEmergencyListener(this);
@@ -375,7 +371,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     }
 
     public void setUserInfoController(UserInfoController userInfoController) {
-        // Don't care
+        userInfoController.addCallback(this);
     }
 
     @Override
