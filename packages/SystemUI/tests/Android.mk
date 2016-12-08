@@ -44,7 +44,7 @@ LOCAL_STATIC_ANDROID_LIBRARIES := \
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-test \
-    mockito-target-minus-junit4 \
+    mockito-updated-target-minus-junit4 \
     SystemUI-proto \
     SystemUI-tags
 
