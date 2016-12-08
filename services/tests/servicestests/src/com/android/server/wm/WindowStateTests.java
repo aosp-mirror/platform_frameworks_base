@@ -116,6 +116,11 @@ public class WindowStateTests extends WindowTestsBase {
         assertEquals(root, child1.getTopParentWindow());
         assertEquals(child1, child2.getParentWindow());
         assertEquals(root, child2.getTopParentWindow());
+
+        // Test case were child is detached from parent.
+        root.removeChild(child1);
+        assertEquals(child1, child1.getTopParentWindow());
+        assertEquals(child1, child2.getParentWindow());
     }
 
     @Test
