@@ -2573,6 +2573,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         return getBarState() == StatusBarState.KEYGUARD;
     }
 
+    @Override
     public boolean isDozing() {
         return mDozing;
     }
@@ -4484,6 +4485,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mDozeScrimController.setDozing(mDozing &&
                 mFingerprintUnlockController.getMode()
                         != FingerprintUnlockController.MODE_WAKE_AND_UNLOCK_PULSING, animate);
+        updateRowStates();
         Trace.endSection();
     }
 
