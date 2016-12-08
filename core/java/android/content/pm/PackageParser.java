@@ -3780,6 +3780,13 @@ public class PackageParser {
                     ApplicationInfo.PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE;
         }
 
+        final boolean isEphemeral = ((flags & PARSE_IS_EPHEMERAL) != 0);
+        final boolean visibleToEphemeral = isEphemeral
+                || sa.getBoolean(R.styleable.AndroidManifestActivity_visibleToEphemeral, false);
+        if (visibleToEphemeral) {
+            a.info.flags |= ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL;
+        }
+
         sa.recycle();
 
         if (receiver && (owner.applicationInfo.privateFlags
@@ -3806,9 +3813,12 @@ public class PackageParser {
 
             if (parser.getName().equals("intent-filter")) {
                 ActivityIntentInfo intent = new ActivityIntentInfo(a);
-                if (!parseIntent(res, parser, true, true, intent, outError)) {
+                if (!parseIntent(res, parser, true /*allowGlobs*/, true /*allowAutoVerify*/,
+                        intent, outError)) {
                     return null;
                 }
+                intent.setEphemeral(isEphemeral);
+                intent.setVisibleToEphemeral(visibleToEphemeral);
                 if (intent.countActions() == 0) {
                     Slog.w(TAG, "No actions in intent filter at "
                             + mArchiveSourcePath + " "
@@ -3818,9 +3828,12 @@ public class PackageParser {
                 }
             } else if (!receiver && parser.getName().equals("preferred")) {
                 ActivityIntentInfo intent = new ActivityIntentInfo(a);
-                if (!parseIntent(res, parser, false, false, intent, outError)) {
+                if (!parseIntent(res, parser, false /*allowGlobs*/, false /*allowAutoVerify*/,
+                        intent, outError)) {
                     return null;
                 }
+                intent.setEphemeral(isEphemeral);
+                intent.setVisibleToEphemeral(visibleToEphemeral);
                 if (intent.countActions() == 0) {
                     Slog.w(TAG, "No actions in preferred at "
                             + mArchiveSourcePath + " "
@@ -4071,6 +4084,10 @@ public class PackageParser {
             }
         }
 
+        final boolean isEphemeral = ((flags & PARSE_IS_EPHEMERAL) != 0);
+        final boolean visibleToEphemeral = isEphemeral
+                || ((a.info.flags & ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL) != 0);
+
         sa.recycle();
 
         if (outError[0] != null) {
@@ -4088,7 +4105,8 @@ public class PackageParser {
 
             if (parser.getName().equals("intent-filter")) {
                 ActivityIntentInfo intent = new ActivityIntentInfo(a);
-                if (!parseIntent(res, parser, true, true, intent, outError)) {
+                if (!parseIntent(res, parser, true /*allowGlobs*/, true /*allowAutoVerify*/,
+                        intent, outError)) {
                     return null;
                 }
                 if (intent.countActions() == 0) {
@@ -4096,6 +4114,8 @@ public class PackageParser {
                             + mArchiveSourcePath + " "
                             + parser.getPositionDescription());
                 } else {
+                    intent.setEphemeral(isEphemeral);
+                    intent.setVisibleToEphemeral(visibleToEphemeral);
                     a.intents.add(intent);
                 }
             } else if (parser.getName().equals("meta-data")) {
@@ -4233,6 +4253,13 @@ public class PackageParser {
                     ApplicationInfo.PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE;
         }
 
+        final boolean isEphemeral = ((flags & PARSE_IS_EPHEMERAL) != 0);
+        final boolean visibleToEphemeral = isEphemeral
+                || sa.getBoolean(R.styleable.AndroidManifestProvider_visibleToEphemeral, false);
+        if (visibleToEphemeral) {
+            p.info.flags |= ProviderInfo.FLAG_VISIBLE_TO_EPHEMERAL;
+        }
+
         sa.recycle();
 
         if ((owner.applicationInfo.privateFlags&ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE)
@@ -4255,15 +4282,15 @@ public class PackageParser {
         }
         p.info.authority = cpname.intern();
 
-        if (!parseProviderTags(res, parser, p, outError)) {
+        if (!parseProviderTags(res, parser, isEphemeral, visibleToEphemeral, p, outError)) {
             return null;
         }
 
         return p;
     }
 
-    private boolean parseProviderTags(Resources res,
-            XmlResourceParser parser, Provider outInfo, String[] outError)
+    private boolean parseProviderTags(Resources res, XmlResourceParser parser,
+            boolean isEphemeral, boolean visibleToEphemeral, Provider outInfo, String[] outError)
             throws XmlPullParserException, IOException {
         int outerDepth = parser.getDepth();
         int type;
@@ -4276,9 +4303,12 @@ public class PackageParser {
 
             if (parser.getName().equals("intent-filter")) {
                 ProviderIntentInfo intent = new ProviderIntentInfo(outInfo);
-                if (!parseIntent(res, parser, true, false, intent, outError)) {
+                if (!parseIntent(res, parser, true /*allowGlobs*/, false /*allowAutoVerify*/,
+                        intent, outError)) {
                     return false;
                 }
+                intent.setEphemeral(isEphemeral);
+                intent.setVisibleToEphemeral(visibleToEphemeral);
                 outInfo.intents.add(intent);
 
             } else if (parser.getName().equals("meta-data")) {
@@ -4526,6 +4556,13 @@ public class PackageParser {
                     ApplicationInfo.PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE;
         }
 
+        final boolean isEphemeral = ((flags & PARSE_IS_EPHEMERAL) != 0);
+        final boolean visibleToEphemeral = isEphemeral
+                || sa.getBoolean(R.styleable.AndroidManifestService_visibleToEphemeral, false);
+        if (visibleToEphemeral) {
+            s.info.flags |= ServiceInfo.FLAG_VISIBLE_TO_EPHEMERAL;
+        }
+
         sa.recycle();
 
         if ((owner.applicationInfo.privateFlags&ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE)
@@ -4549,9 +4586,12 @@ public class PackageParser {
 
             if (parser.getName().equals("intent-filter")) {
                 ServiceIntentInfo intent = new ServiceIntentInfo(s);
-                if (!parseIntent(res, parser, true, false, intent, outError)) {
+                if (!parseIntent(res, parser, true /*allowGlobs*/, false /*allowAutoVerify*/,
+                        intent, outError)) {
                     return null;
                 }
+                intent.setEphemeral(isEphemeral);
+                intent.setVisibleToEphemeral(visibleToEphemeral);
 
                 s.intents.add(intent);
             } else if (parser.getName().equals("meta-data")) {
@@ -4755,9 +4795,9 @@ public class PackageParser {
     private static final String ANDROID_RESOURCES
             = "http://schemas.android.com/apk/res/android";
 
-    private boolean parseIntent(Resources res, XmlResourceParser parser,
-            boolean allowGlobs, boolean allowAutoVerify, IntentInfo outInfo, String[] outError)
-            throws XmlPullParserException, IOException {
+    private boolean parseIntent(Resources res, XmlResourceParser parser, boolean allowGlobs,
+            boolean allowAutoVerify, IntentInfo outInfo, String[] outError)
+                    throws XmlPullParserException, IOException {
 
         TypedArray sa = res.obtainAttributes(parser,
                 com.android.internal.R.styleable.AndroidManifestIntentFilter);

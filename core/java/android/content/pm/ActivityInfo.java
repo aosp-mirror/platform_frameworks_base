@@ -363,6 +363,12 @@ public class ActivityInfo extends ComponentInfo
     public static final int FLAG_ON_TOP_LAUNCHER = 0x80000;
 
     /**
+     * Bit in {@link #flags} indicating if the activity is visible to ephemeral applications.
+     * @hide
+     */
+    public static final int FLAG_VISIBLE_TO_EPHEMERAL = 0x100000;
+
+    /**
      * @hide Bit in {@link #flags}: If set, this component will only be seen
      * by the system user.  Only works with broadcast receivers.  Set from the
      * android.R.attr#systemUserOnly attribute.

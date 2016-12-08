@@ -2775,6 +2775,7 @@
         <public name="layout_marginVertical" />
         <public name="paddingHorizontal" />
         <public name="paddingVertical" />
+        <public name="visibleToEphemeral" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">

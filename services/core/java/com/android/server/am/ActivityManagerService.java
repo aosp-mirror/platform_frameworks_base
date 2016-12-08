@@ -18363,7 +18363,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     List<BroadcastFilter> registeredReceiversForUser =
                             mReceiverResolver.queryIntent(intent,
-                                    resolvedType, false, users[i]);
+                                    resolvedType, false, false /*visibleToEphemeral*/,
+                                    false /*isEphemeral*/, users[i]);
                     if (registeredReceivers == null) {
                         registeredReceivers = registeredReceiversForUser;
                     } else if (registeredReceiversForUser != null) {
@@ -18372,7 +18373,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             } else {
                 registeredReceivers = mReceiverResolver.queryIntent(intent,
-                        resolvedType, false, userId);
+                        resolvedType, false, false /*visibleToEphemeral*/,
+                        false /*isEphemeral*/, userId);
             }
         }
 
