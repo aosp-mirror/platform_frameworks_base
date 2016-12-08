@@ -12,16 +12,19 @@
  * permissions and limitations under the License.
  */
 
-package com.android.systemui.statusbar.policy;
+package com.android.systemui.utils.leaks;
 
-import com.android.systemui.statusbar.policy.DataSaverController.Listener;
+import com.android.systemui.statusbar.policy.UserInfoController;
+import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener;
 
-public interface DataSaverController extends CallbackController<Listener> {
+public class FakeUserInfoController extends BaseLeakChecker<OnUserInfoChangedListener>
+        implements UserInfoController {
+    public FakeUserInfoController(LeakCheckedTest test) {
+        super(test, "user_info");
+    }
 
-    boolean isDataSaverEnabled();
-    void setDataSaverEnabled(boolean enabled);
+    @Override
+    public void reloadUserInfo() {
 
-    public interface Listener {
-        void onDataSaverChanged(boolean isDataSaving);
     }
 }

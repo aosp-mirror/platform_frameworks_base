@@ -26,6 +26,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import com.android.systemui.utils.leaks.LeakCheckedTest;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -139,7 +141,7 @@ public abstract class FragmentTestCase extends LeakCheckedTest {
 
     private class HostCallbacks extends FragmentHostCallback<FragmentTestCase> {
         public HostCallbacks() {
-            super(getTrackedContext(), FragmentTestCase.this.mHandler, 0);
+            super(mContext, FragmentTestCase.this.mHandler, 0);
         }
 
         @Override

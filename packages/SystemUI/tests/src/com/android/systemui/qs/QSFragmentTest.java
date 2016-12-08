@@ -38,6 +38,7 @@ import com.android.systemui.statusbar.policy.SecurityController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.tuner.TunerService;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,7 +60,7 @@ public class QSFragmentTest extends FragmentTestCase {
         KeyguardMonitor keyguardMonitor = getLeakChecker(KeyguardMonitor.class);
         when(userSwitcher.getKeyguardMonitor()).thenReturn(keyguardMonitor);
         when(userSwitcher.getUsers()).thenReturn(new ArrayList<>());
-        QSTileHost host = new QSTileHost(getTrackedContext(),
+        QSTileHost host = new QSTileHost(mContext,
                 mock(PhoneStatusBar.class),
                 getLeakChecker(BluetoothController.class),
                 getLeakChecker(LocationController.class),
@@ -86,5 +87,7 @@ public class QSFragmentTest extends FragmentTestCase {
         waitForIdleSync(h);
 
         host.destroy();
+        // Ensure the tuner cleans up its persistent listeners.
+        TunerService.get(mContext).destroy();
     }
 }

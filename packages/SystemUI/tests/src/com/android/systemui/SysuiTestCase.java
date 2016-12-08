@@ -22,6 +22,7 @@ import android.os.Looper;
 import android.os.MessageQueue;
 
 import com.android.systemui.utils.TestableContext;
+import com.android.systemui.utils.leaks.Tracker;
 
 import org.junit.After;
 import org.junit.Before;
@@ -29,14 +30,14 @@ import org.junit.Before;
 /**
  * Base class that does System UI specific setup.
  */
-public class SysuiTestCase {
+public abstract class SysuiTestCase {
 
     private Handler mHandler;
     protected TestableContext mContext;
 
     @Before
     public void SysuiSetup() throws Exception {
-        mContext = new TestableContext(InstrumentationRegistry.getTargetContext());
+        mContext = new TestableContext(InstrumentationRegistry.getTargetContext(), this);
     }
 
     @After
@@ -69,6 +70,11 @@ public class SysuiTestCase {
             throw new RuntimeException(
                 "This method can not be called from the looper being synced");
         }
+    }
+
+    // Used for leak tracking, returns null to indicate no leak tracking by default.
+    public Tracker getTracker(String tag) {
+        return null;
     }
 
     public static final class EmptyRunnable implements Runnable {

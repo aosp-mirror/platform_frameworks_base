@@ -12,16 +12,24 @@
  * permissions and limitations under the License.
  */
 
-package com.android.systemui.statusbar.policy;
+package com.android.systemui.utils.leaks;
 
-import com.android.systemui.statusbar.policy.DataSaverController.Listener;
+import com.android.systemui.statusbar.policy.LocationController;
+import com.android.systemui.statusbar.policy.LocationController.LocationSettingsChangeCallback;
 
-public interface DataSaverController extends CallbackController<Listener> {
+public class FakeLocationController extends BaseLeakChecker<LocationSettingsChangeCallback>
+        implements LocationController {
+    public FakeLocationController(LeakCheckedTest test) {
+        super(test, "location");
+    }
 
-    boolean isDataSaverEnabled();
-    void setDataSaverEnabled(boolean enabled);
+    @Override
+    public boolean isLocationEnabled() {
+        return false;
+    }
 
-    public interface Listener {
-        void onDataSaverChanged(boolean isDataSaving);
+    @Override
+    public boolean setLocationEnabled(boolean enabled) {
+        return false;
     }
 }

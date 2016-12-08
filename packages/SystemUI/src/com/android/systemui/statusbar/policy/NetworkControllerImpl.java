@@ -159,7 +159,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mConfig = config;
         mReceiverHandler = new Handler(bgLooper);
         mCallbackHandler = callbackHandler;
-        mDataSaverController = new DataSaverController(context);
+        mDataSaverController = new DataSaverControllerImpl(context);
 
         mSubscriptionManager = subManager;
         mSubDefaults = defaultsHandler;

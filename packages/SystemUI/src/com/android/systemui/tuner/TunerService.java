@@ -92,6 +92,10 @@ public class TunerService extends SystemUI {
         mUserTracker.startTracking();
     }
 
+    public void destroy() {
+        mUserTracker.stopTracking();
+    }
+
     private void upgradeTuner(int oldVersion, int newVersion) {
         if (oldVersion < 1) {
             String blacklistStr = getValue(StatusBarIconController.ICON_BLACKLIST);
