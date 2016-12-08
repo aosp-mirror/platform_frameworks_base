@@ -81,6 +81,9 @@
     <!-- Height of a heads up notification in the status bar -->
     <dimen name="notification_max_heads_up_height">148dp</dimen>
 
+    <!-- a threshold in dp per second that is considered fast scrolling -->
+    <dimen name="scroll_fast_threshold">1500dp</dimen>
+
     <!-- Height of a the shelf with the notification icons -->
     <dimen name="notification_shelf_height">32dp</dimen>
 
@@ -93,6 +96,9 @@
 
     <!-- The amount the content shifts upwards when transforming into the icon -->
     <dimen name="notification_icon_transform_content_shift">32dp</dimen>
+
+    <!-- The padding on the bottom of the notifications on the keyguard -->
+    <dimen name="keyguard_indication_bottom_padding">12sp</dimen>
 
     <!-- Minimum layouted height of a notification in the statusbar-->
     <dimen name="min_notification_layout_height">48dp</dimen>

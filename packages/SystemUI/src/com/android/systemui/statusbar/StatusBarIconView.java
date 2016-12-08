@@ -37,6 +37,7 @@ import android.util.FloatProperty;
 import android.util.Log;
 import android.util.Property;
 import android.util.TypedValue;
+import android.view.View;
 import android.view.ViewDebug;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.Interpolator;
@@ -102,6 +103,7 @@ public class StatusBarIconView extends AnimatedImageView {
     private ObjectAnimator mIconAppearAnimator;
     private ObjectAnimator mDotAnimator;
     private float mDotAppearAmount;
+    private OnVisibilityChangedListener mOnVisibilityChangedListener;
 
     public StatusBarIconView(Context context, String slot, Notification notification) {
         this(context, slot, notification, false);
@@ -453,6 +455,7 @@ public class StatusBarIconView extends AnimatedImageView {
     }
 
     public void setVisibleState(int visibleState, boolean animate, Runnable endRunnable) {
+        boolean runnableAdded = false;
         if (visibleState != mVisibleState) {
             mVisibleState = visibleState;
             if (animate) {
@@ -465,20 +468,22 @@ public class StatusBarIconView extends AnimatedImageView {
                     targetAmount = 1.0f;
                     interpolator = Interpolators.LINEAR_OUT_SLOW_IN;
                 }
-                mIconAppearAnimator = ObjectAnimator.ofFloat(this, ICON_APPEAR_AMOUNT,
-                        targetAmount);
-                mIconAppearAnimator.setInterpolator(interpolator);
-                mIconAppearAnimator.setDuration(100);
-                mIconAppearAnimator.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        mIconAppearAnimator = null;
-                        if (endRunnable != null) {
-                            endRunnable.run();
+                float currentAmount = getIconAppearAmount();
+                if (targetAmount != currentAmount) {
+                    mIconAppearAnimator = ObjectAnimator.ofFloat(this, ICON_APPEAR_AMOUNT,
+                            currentAmount, targetAmount);
+                    mIconAppearAnimator.setInterpolator(interpolator);
+                    mIconAppearAnimator.setDuration(100);
+                    mIconAppearAnimator.addListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            mIconAppearAnimator = null;
+                            runRunnable(endRunnable);
                         }
-                    }
-                });
-                mIconAppearAnimator.start();
+                    });
+                    mIconAppearAnimator.start();
+                    runnableAdded = true;
+                }
 
                 if (mDotAnimator != null) {
                     mDotAnimator.cancel();
@@ -489,21 +494,40 @@ public class StatusBarIconView extends AnimatedImageView {
                     targetAmount = 1.0f;
                     interpolator = Interpolators.LINEAR_OUT_SLOW_IN;
                 }
-                mDotAnimator = ObjectAnimator.ofFloat(this, DOT_APPEAR_AMOUNT,
-                        targetAmount);
-                mDotAnimator.setInterpolator(interpolator);
-                mDotAnimator.setDuration(100);
-                mDotAnimator.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        mDotAnimator = null;
-                    }
-                });
-                mDotAnimator.start();
+                currentAmount = getDotAppearAmount();
+                if (targetAmount != currentAmount) {
+                    mDotAnimator = ObjectAnimator.ofFloat(this, DOT_APPEAR_AMOUNT,
+                            currentAmount, targetAmount);
+                    mDotAnimator.setInterpolator(interpolator);
+                    mDotAnimator.setDuration(100);
+                    final boolean runRunnable = !runnableAdded;
+                    mDotAnimator.addListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            mDotAnimator = null;
+                            if (runRunnable) {
+                                runRunnable(endRunnable);
+                            }
+                        }
+                    });
+                    mDotAnimator.start();
+                    runnableAdded = true;
+                }
             } else {
                 setIconAppearAmount(visibleState == STATE_ICON ? 1.0f : 0.0f);
-                setDotAppearAmount(visibleState == STATE_DOT ? 1.0f : 0.0f);
+                setDotAppearAmount(visibleState == STATE_DOT ? 1.0f
+                        : visibleState == STATE_ICON ? 2.0f
+                        : 0.0f);
             }
+        }
+        if (!runnableAdded) {
+            runRunnable(endRunnable);
+        }
+    }
+
+    private void runRunnable(Runnable runnable) {
+        if (runnable != null) {
+            runnable.run();
         }
     }
 
@@ -525,7 +549,23 @@ public class StatusBarIconView extends AnimatedImageView {
         invalidate();
     }
 
+    @Override
+    public void setVisibility(int visibility) {
+        super.setVisibility(visibility);
+        if (mOnVisibilityChangedListener != null) {
+            mOnVisibilityChangedListener.onVisibilityChanged(visibility);
+        }
+    }
+
     public float getDotAppearAmount() {
         return mDotAppearAmount;
+    }
+
+    public void setOnVisibilityChangedListener(OnVisibilityChangedListener listener) {
+        mOnVisibilityChangedListener = listener;
+    }
+
+    public interface OnVisibilityChangedListener {
+        void onVisibilityChanged(int newVisibility);
     }
 }

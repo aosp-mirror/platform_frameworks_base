@@ -193,7 +193,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private View mChildAfterViewWhenDismissed;
     private View mGroupParentWhenDismissed;
     private boolean mRefocusOnDismiss;
-    private float mIconTransformationAmount;
+    private float mContentTransformationAmount;
     private boolean mIconsVisible = true;
     private boolean mAboveShelf;
     private boolean mIsLastChild;
@@ -837,23 +837,29 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     /**
      * Set how much this notification is transformed into an icon.
      *
-     * @param iconTransformationAmount A value from 0 to 1 indicating how much we are transformed
-     *                                 to an icon
+     * @param contentTransformationAmount A value from 0 to 1 indicating how much we are transformed
+     *                                 to the content away
      * @param isLastChild is this the last child in the list. If true, then the transformation is
      *                    different since it's content fades out.
      */
-    public void setIconTransformationAmount(float iconTransformationAmount, boolean isLastChild) {
+    public void setContentTransformationAmount(float contentTransformationAmount,
+            boolean isLastChild) {
         boolean changeTransformation = isLastChild != mIsLastChild;
-        changeTransformation |= mIconTransformationAmount != iconTransformationAmount;
+        changeTransformation |= mContentTransformationAmount != contentTransformationAmount;
         mIsLastChild = isLastChild;
-        mIconTransformationAmount = iconTransformationAmount;
+        mContentTransformationAmount = contentTransformationAmount;
         if (changeTransformation) {
             updateContentTransformation();
-            boolean iconsVisible = mIconTransformationAmount == 0.0f;
-            if (iconsVisible != mIconsVisible) {
-                mIconsVisible = iconsVisible;
-                updateIconVisibilities();
-            }
+        }
+    }
+
+    /**
+     * Set the icons to be visible of this notification.
+     */
+    public void setIconsVisible(boolean iconsVisible) {
+        if (iconsVisible != mIconsVisible) {
+            mIconsVisible = iconsVisible;
+            updateIconVisibilities();
         }
     }
 
@@ -864,9 +870,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     private void updateContentTransformation() {
         float contentAlpha;
-        float translationY = - mIconTransformationAmount * mIconTransformContentShift;
+        float translationY = -mContentTransformationAmount * mIconTransformContentShift;
         if (mIsLastChild) {
-            contentAlpha = 1.0f - mIconTransformationAmount;
+            contentAlpha = 1.0f - mContentTransformationAmount;
             contentAlpha = Math.min(contentAlpha / 0.5f, 1.0f);
             contentAlpha = Interpolators.ALPHA_OUT.getInterpolation(contentAlpha);
             translationY *= 0.4f;
@@ -885,7 +891,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     private void updateIconVisibilities() {
-        boolean visible = isChildInGroup() || isBelowSpeedBump() || mIconsVisible;
+        boolean visible = isChildInGroup()
+                || (isBelowSpeedBump() && !NotificationShelf.SHOW_AMBIENT_ICONS)
+                || mIconsVisible;
         mPublicLayout.setIconsVisible(visible);
         mPrivateLayout.setIconsVisible(visible);
         if (mChildrenContainer != null) {
@@ -1679,13 +1687,17 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     @Override
     public void setClipBottomAmount(int clipBottomAmount) {
-        super.setClipBottomAmount(clipBottomAmount);
-        mPrivateLayout.setClipBottomAmount(clipBottomAmount);
-        mPublicLayout.setClipBottomAmount(clipBottomAmount);
-        if (mGuts != null) {
-            mGuts.setClipBottomAmount(clipBottomAmount);
+        if (clipBottomAmount != mClipBottomAmount) {
+            super.setClipBottomAmount(clipBottomAmount);
+            mPrivateLayout.setClipBottomAmount(clipBottomAmount);
+            mPublicLayout.setClipBottomAmount(clipBottomAmount);
+            if (mGuts != null) {
+                mGuts.setClipBottomAmount(clipBottomAmount);
+            }
         }
         if (mChildrenContainer != null) {
+            // We have to update this even if it hasn't changed, since the children locations can
+            // have changed
             mChildrenContainer.setClipBottomAmount(clipBottomAmount);
         }
     }
@@ -1871,8 +1883,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
 
         @Override
-        protected void onYTranslationAnimationFinished() {
-            super.onYTranslationAnimationFinished();
+        protected void onYTranslationAnimationFinished(View view) {
+            super.onYTranslationAnimationFinished(view);
             if (mHeadsupDisappearRunning) {
                 setHeadsUpAnimatingAway(false);
             }

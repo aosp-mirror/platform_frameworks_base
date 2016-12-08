@@ -685,7 +685,7 @@ public abstract class PanelView extends FrameLayout {
         mOverExpandedBeforeFling = getOverExpansionAmount() > 0f;
         ValueAnimator animator = createHeightAnimator(target);
         if (expand) {
-            if (expandBecauseOfFalsing) {
+            if (expandBecauseOfFalsing && vel < 0) {
                 vel = 0;
             }
             mFlingAnimationUtils.apply(animator, mExpandedHeight, target, vel, getHeight());

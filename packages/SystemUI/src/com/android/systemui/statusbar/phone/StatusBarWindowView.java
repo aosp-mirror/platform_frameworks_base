@@ -130,7 +130,6 @@ public class StatusBarWindowView extends FrameLayout {
     }
 
     private void applyMargins() {
-        mService.mScrimController.setLeftInset(mLeftInset);
         final int N = getChildCount();
         for (int i = 0; i < N; i++) {
             View child = getChildAt(i);

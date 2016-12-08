@@ -357,6 +357,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private Rect mRequestedClipBounds;
     private boolean mInHeadsUpPinnedMode;
     private boolean mHeadsUpAnimatingAway;
+    private int mStatusBarState;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -575,6 +576,9 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     private void updateChildren() {
         updateScrollStateForAddedChildren();
+        mAmbientState.setCurrentScrollVelocity(mScroller.isFinished()
+                ? 0
+                : mScroller.getCurrVelocity());
         mAmbientState.setScrollY(mOwnScrollY);
         mStackScrollAlgorithm.getStackScrollState(mAmbientState, mCurrentStackScrollState);
         if (!isCurrentlyAnimating() && !mNeedsAnimation) {
@@ -715,7 +719,6 @@ public class NotificationStackScrollLayout extends ViewGroup
             requestChildrenUpdate();
         }
         setStackTranslation(translationY);
-        requestChildrenUpdate();
     }
 
     private void setRequestedClipBounds(Rect clipRect) {
@@ -1185,7 +1188,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private boolean onKeyguard() {
-        return mPhoneStatusBar.getBarState() == StatusBarState.KEYGUARD;
+        return mStatusBarState == StatusBarState.KEYGUARD;
     }
 
     private void setSwipingInProgress(boolean isSwiped) {
@@ -2122,7 +2125,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             top = mTopPadding;
             bottom = top;
         }
-        if (mPhoneStatusBar.getBarState() != StatusBarState.KEYGUARD) {
+        if (mStatusBarState != StatusBarState.KEYGUARD) {
             top = (int) Math.max(mTopPadding + mStackTranslation, top);
         } else {
             // otherwise the animation from the shade to the keyguard will jump as it's maxed
@@ -2356,7 +2359,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                if (mPhoneStatusBar.getBarState() != StatusBarState.KEYGUARD && mTouchIsClick &&
+                if (mStatusBarState != StatusBarState.KEYGUARD && mTouchIsClick &&
                         isBelowLastNotification(mInitialTouchX, mInitialTouchY)) {
                     mOnEmptySpaceClickListener.onEmptySpaceClicked(mInitialTouchX, mInitialTouchY);
                 }
@@ -3977,6 +3980,11 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void setHeadsUpAnimatingAway(boolean headsUpAnimatingAway) {
         mHeadsUpAnimatingAway = headsUpAnimatingAway;
         updateClipping();
+    }
+
+    public void setStatusBarState(int statusBarState) {
+        mStatusBarState = statusBarState;
+        mAmbientState.setStatusBarState(statusBarState);
     }
 
     /**

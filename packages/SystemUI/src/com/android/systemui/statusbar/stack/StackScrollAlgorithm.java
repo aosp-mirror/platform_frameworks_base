@@ -124,7 +124,8 @@ public class StackScrollAlgorithm {
 
     private void updateClipping(StackScrollState resultState,
             StackScrollAlgorithmState algorithmState, AmbientState ambientState) {
-        float drawStart = ambientState.getTopPadding() + ambientState.getStackTranslation();
+        float drawStart = !ambientState.isOnKeyguard() ? ambientState.getTopPadding()
+                + ambientState.getStackTranslation() : 0;
         float previousNotificationEnd = 0;
         float previousNotificationStart = 0;
         int childCount = algorithmState.visibleChildren.size();

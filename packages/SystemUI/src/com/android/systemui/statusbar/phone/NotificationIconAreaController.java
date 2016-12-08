@@ -127,9 +127,9 @@ public class NotificationIconAreaController {
         return mPhoneStatusBar.getStatusBarHeight();
     }
 
-    protected boolean shouldShowNotification(NotificationData.Entry entry,
-            NotificationData notificationData) {
-        if (notificationData.isAmbient(entry.key)
+    protected boolean shouldShowNotificationIcon(NotificationData.Entry entry,
+            NotificationData notificationData, boolean showAmbient) {
+        if (notificationData.isAmbient(entry.key) && !showAmbient
                 && !NotificationData.showNotificationEvenIfUnprovisioned(entry.notification)) {
             return false;
         }
@@ -148,8 +148,10 @@ public class NotificationIconAreaController {
      */
     public void updateNotificationIcons(NotificationData notificationData) {
 
-        updateIconsForLayout(notificationData, entry -> entry.icon, mNotificationIcons);
-        updateIconsForLayout(notificationData, entry -> entry.expandedIcon, mShelfIcons);
+        updateIconsForLayout(notificationData, entry -> entry.icon, mNotificationIcons,
+                false /* showAmbient */);
+        updateIconsForLayout(notificationData, entry -> entry.expandedIcon, mShelfIcons,
+                NotificationShelf.SHOW_AMBIENT_ICONS);
 
         applyNotificationIconsTint();
         ArrayList<NotificationData.Entry> activeNotifications
@@ -173,10 +175,11 @@ public class NotificationIconAreaController {
      * @param notificationData the notification data to look up which notifications are relevant
      * @param function A function to look up an icon view based on an entry
      * @param hostLayout which layout should be updated
+     * @param showAmbient should ambient notification icons be shown
      */
     private void updateIconsForLayout(NotificationData notificationData,
             Function<NotificationData.Entry, StatusBarIconView> function,
-            NotificationIconContainer hostLayout) {
+            NotificationIconContainer hostLayout, boolean showAmbient) {
         ArrayList<StatusBarIconView> toShow = new ArrayList<>(
                 mNotificationScrollLayout.getChildCount());
 
@@ -185,7 +188,7 @@ public class NotificationIconAreaController {
             View view = mNotificationScrollLayout.getChildAt(i);
             if (view instanceof ExpandableNotificationRow) {
                 NotificationData.Entry ent = ((ExpandableNotificationRow) view).getEntry();
-                if (shouldShowNotification(ent, notificationData)) {
+                if (shouldShowNotificationIcon(ent, notificationData, showAmbient)) {
                     toShow.add(function.apply(ent));
                 }
             }
