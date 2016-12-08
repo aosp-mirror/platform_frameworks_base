@@ -264,7 +264,7 @@
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Forstyr ikke"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Kun prioritet"</string>
-    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Kun Alarmer"</string>
+    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Kun alarmer"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Total stilhed"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> enheder)"</string>
@@ -359,7 +359,7 @@
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Helt lydløs. Denne handling slukker også skærmlæsere."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Total stilhed"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Kun prioritet"</string>
-    <string name="interruption_level_alarms" msgid="5226306993448328896">"Kun Alarmer"</string>
+    <string name="interruption_level_alarms" msgid="5226306993448328896">"Kun alarmer"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Total\nstilhed"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Kun\nprioritet"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Kun\nalarmer"</string>
