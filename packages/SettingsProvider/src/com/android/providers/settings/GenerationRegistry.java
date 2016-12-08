@@ -119,7 +119,7 @@ final class GenerationRegistry {
             // and twice max user count for system and secure.
             final int size = 1 + 2 + 10 + 2 * UserManager.getMaxSupportedUsers();
             try {
-                mBackingStore = new MemoryIntArray(size, false);
+                mBackingStore = new MemoryIntArray(size);
             } catch (IOException e) {
                 Slog.e(LOG_TAG, "Error creating generation tracker", e);
             }
