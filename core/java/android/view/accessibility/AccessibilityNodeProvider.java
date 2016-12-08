@@ -102,6 +102,27 @@ public abstract class AccessibilityNodeProvider {
     }
 
     /**
+     * Adds extra data to an {@link AccessibilityNodeInfo} based on an explicit request for the
+     * additional data.
+     * <p>
+     * This method only needs to be implemented if a virtual view offers to provide additional
+     * data.
+     * </p>
+     *
+     * @param virtualViewId The virtual view id used to create the node
+     * @param info The info to which to add the extra data
+     * @param extraDataKey A key specifying the type of extra data to add to the info. The
+     *                     extra data should be added to the {@link Bundle} returned by
+     *                     the info's {@link AccessibilityNodeInfo#getExtras} method.
+     * @param arguments A {@link Bundle} holding any arguments relevant for this request.
+     *
+     * @see AccessibilityNodeInfo#setExtraAvailableData
+     */
+    public void addExtraDataToAccessibilityNodeInfo(
+            int virtualViewId, AccessibilityNodeInfo info, String extraDataKey, Bundle arguments) {
+    }
+
+    /**
      * Performs an accessibility action on a virtual view, i.e. a descendant of the
      * host View, with the given <code>virtualViewId</code> or the host View itself
      * if <code>virtualViewId</code> equals to {@link #HOST_VIEW_ID}.

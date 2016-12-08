@@ -7492,13 +7492,13 @@ public final class ViewRootImpl implements ViewParent,
         public void findAccessibilityNodeInfoByAccessibilityId(long accessibilityNodeId,
                 Region interactiveRegion, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, int flags,
-                int interrogatingPid, long interrogatingTid, MagnificationSpec spec) {
+                int interrogatingPid, long interrogatingTid, MagnificationSpec spec, Bundle args) {
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
                     .findAccessibilityNodeInfoByAccessibilityIdClientThread(accessibilityNodeId,
                             interactiveRegion, interactionId, callback, flags, interrogatingPid,
-                            interrogatingTid, spec);
+                            interrogatingTid, spec, args);
             } else {
                 // We cannot make the call and notify the caller so it does not wait.
                 try {

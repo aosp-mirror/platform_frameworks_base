@@ -17,6 +17,10 @@
 package android.widget;
 
 import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
+import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH;
+import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX;
+import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY;
+import static android.view.inputmethod.CursorAnchorInfo.FLAG_HAS_VISIBLE_REGION;
 
 import android.R;
 import android.annotation.ColorInt;
@@ -142,6 +146,7 @@ import android.view.autofill.AutoFillValue;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
+import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
@@ -166,6 +171,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Locale;
 
 /**
@@ -268,6 +274,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     static final String LOG_TAG = "TextView";
     static final boolean DEBUG_EXTRACT = false;
     static final boolean DEBUG_AUTOFILL = false;
+    private static final float[] TEMP_POSITION = new float[2];
 
     // Enum for the "typeface" XML parameter.
     // TODO: How can we get this from the XML instead of hardcoding it here?
@@ -9889,6 +9896,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PARAGRAPH
                     | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PAGE);
             info.addAction(AccessibilityNodeInfo.ACTION_SET_SELECTION);
+            info.setAvailableExtraData(
+                    Arrays.asList(EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY));
         }
 
         if (isFocused()) {
@@ -9923,6 +9932,164 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (!isSingleLine()) {
             info.setMultiLine(true);
         }
+    }
+
+    @Override
+    public void addExtraDataToAccessibilityNodeInfo(
+            AccessibilityNodeInfo info, String extraDataKey, Bundle arguments) {
+        if (extraDataKey.equals(EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY)) {
+            int positionInfoStartIndex = arguments.getInt(
+                    EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX, -1);
+            int positionInfoLength = arguments.getInt(
+                    EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH, -1);
+            if ((positionInfoLength <= 0) || (positionInfoStartIndex < 0)
+                    || (positionInfoStartIndex >= mText.length())) {
+                Log.e(LOG_TAG, "Invalid arguments for accessibility character locations");
+                return;
+            }
+            RectF[] boundingRects = new RectF[positionInfoLength];
+            final CursorAnchorInfo.Builder builder = new CursorAnchorInfo.Builder();
+            populateCharacterBounds(builder, positionInfoStartIndex,
+                    positionInfoStartIndex + positionInfoLength,
+                    viewportToContentHorizontalOffset(), viewportToContentVerticalOffset());
+            CursorAnchorInfo cursorAnchorInfo = builder.setMatrix(null).build();
+            if (mTempRect == null) mTempRect = new Rect();
+            Rect viewBoundsInScreen = mTempRect;
+            info.getBoundsInScreen(viewBoundsInScreen);
+            for (int i = 0; i < positionInfoLength; i++) {
+                int flags = cursorAnchorInfo.getCharacterBoundsFlags(positionInfoStartIndex + i);
+                if ((flags & FLAG_HAS_VISIBLE_REGION) == FLAG_HAS_VISIBLE_REGION) {
+                    RectF bounds = cursorAnchorInfo
+                            .getCharacterBounds(positionInfoStartIndex + i);
+                    if (bounds != null) {
+                        bounds.offset(viewBoundsInScreen.left, viewBoundsInScreen.top);
+                        boundingRects[i] = bounds;
+                    }
+                }
+            }
+            info.getExtras().putParcelableArray(extraDataKey, boundingRects);
+        }
+    }
+
+    /**
+     * Populate requested character bounds in a {@link CursorAnchorInfo.Builder}
+     *
+     * @param builder The builder to populate
+     * @param startIndex The starting character index to populate
+     * @param endIndex The ending character index to populate
+     * @param viewportToContentHorizontalOffset The horizontal offset from the viewport to the
+     * content
+     * @param viewportToContentVerticalOffset The vertical offset from the viewport to the content
+     * @hide
+     */
+    public void populateCharacterBounds(CursorAnchorInfo.Builder builder,
+            int startIndex, int endIndex, float viewportToContentHorizontalOffset,
+            float viewportToContentVerticalOffset) {
+        final int minLine = mLayout.getLineForOffset(startIndex);
+        final int maxLine = mLayout.getLineForOffset(endIndex - 1);
+        for (int line = minLine; line <= maxLine; ++line) {
+            final int lineStart = mLayout.getLineStart(line);
+            final int lineEnd = mLayout.getLineEnd(line);
+            final int offsetStart = Math.max(lineStart, startIndex);
+            final int offsetEnd = Math.min(lineEnd, endIndex);
+            final boolean ltrLine =
+                    mLayout.getParagraphDirection(line) == Layout.DIR_LEFT_TO_RIGHT;
+            final float[] widths = new float[offsetEnd - offsetStart];
+            mLayout.getPaint().getTextWidths(mText, offsetStart, offsetEnd, widths);
+            final float top = mLayout.getLineTop(line);
+            final float bottom = mLayout.getLineBottom(line);
+            for (int offset = offsetStart; offset < offsetEnd; ++offset) {
+                final float charWidth = widths[offset - offsetStart];
+                final boolean isRtl = mLayout.isRtlCharAt(offset);
+                final float primary = mLayout.getPrimaryHorizontal(offset);
+                final float secondary = mLayout.getSecondaryHorizontal(offset);
+                // TODO: This doesn't work perfectly for text with custom styles and
+                // TAB chars.
+                final float left;
+                final float right;
+                if (ltrLine) {
+                    if (isRtl) {
+                        left = secondary - charWidth;
+                        right = secondary;
+                    } else {
+                        left = primary;
+                        right = primary + charWidth;
+                    }
+                } else {
+                    if (!isRtl) {
+                        left = secondary;
+                        right = secondary + charWidth;
+                    } else {
+                        left = primary - charWidth;
+                        right = primary;
+                    }
+                }
+                // TODO: Check top-right and bottom-left as well.
+                final float localLeft = left + viewportToContentHorizontalOffset;
+                final float localRight = right + viewportToContentHorizontalOffset;
+                final float localTop = top + viewportToContentVerticalOffset;
+                final float localBottom = bottom + viewportToContentVerticalOffset;
+                final boolean isTopLeftVisible = isPositionVisible(localLeft, localTop);
+                final boolean isBottomRightVisible =
+                        isPositionVisible(localRight, localBottom);
+                int characterBoundsFlags = 0;
+                if (isTopLeftVisible || isBottomRightVisible) {
+                    characterBoundsFlags |= FLAG_HAS_VISIBLE_REGION;
+                }
+                if (!isTopLeftVisible || !isBottomRightVisible) {
+                    characterBoundsFlags |= CursorAnchorInfo.FLAG_HAS_INVISIBLE_REGION;
+                }
+                if (isRtl) {
+                    characterBoundsFlags |= CursorAnchorInfo.FLAG_IS_RTL;
+                }
+                // Here offset is the index in Java chars.
+                builder.addCharacterBounds(offset, localLeft, localTop, localRight,
+                        localBottom, characterBoundsFlags);
+            }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isPositionVisible(final float positionX, final float positionY) {
+        synchronized (TEMP_POSITION) {
+            final float[] position = TEMP_POSITION;
+            position[0] = positionX;
+            position[1] = positionY;
+            View view = this;
+
+            while (view != null) {
+                if (view != this) {
+                    // Local scroll is already taken into account in positionX/Y
+                    position[0] -= view.getScrollX();
+                    position[1] -= view.getScrollY();
+                }
+
+                if (position[0] < 0 || position[1] < 0 || position[0] > view.getWidth()
+                        || position[1] > view.getHeight()) {
+                    return false;
+                }
+
+                if (!view.getMatrix().isIdentity()) {
+                    view.getMatrix().mapPoints(position);
+                }
+
+                position[0] += view.getLeft();
+                position[1] += view.getTop();
+
+                final ViewParent parent = view.getParent();
+                if (parent instanceof View) {
+                    view = (View) parent;
+                } else {
+                    // We've reached the ViewRoot, stop iterating
+                    view = null;
+                }
+            }
+        }
+
+        // We've been able to walk up the view hierarchy and the position was never clipped
+        return true;
     }
 
     /**

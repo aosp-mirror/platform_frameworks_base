@@ -7367,6 +7367,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Adds extra data to an {@link AccessibilityNodeInfo} based on an explicit request for the
+     * additional data.
+     * <p>
+     * This method only needs overloading if the node is marked as having extra data available.
+     * </p>
+     *
+     * @param info The info to which to add the extra data
+     * @param extraDataKey A key specifying the type of extra data to add to the info. The
+     *                     extra data should be added to the {@link Bundle} returned by
+     *                     the info's {@link AccessibilityNodeInfo#getExtras} method.
+     * @param arguments A {@link Bundle} holding any arguments relevant for this request.
+     *
+     * @see AccessibilityNodeInfo#setExtraAvailableData
+     */
+    public void addExtraDataToAccessibilityNodeInfo(
+            AccessibilityNodeInfo info, String extraDataKey, Bundle arguments) {
+    }
+
+    /**
      * Determine the order in which this view will be drawn relative to its siblings for a11y
      *
      * @param info The info whose drawing order should be populated
@@ -24366,6 +24385,32 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          */
         public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
             host.onInitializeAccessibilityNodeInfoInternal(info);
+        }
+
+        /**
+         * Adds extra data to an {@link AccessibilityNodeInfo} based on an explicit request for the
+         * additional data.
+         * <p>
+         * This method only needs to be implemented if the View offers to provide additional data.
+         * </p>
+         * <p>
+         * The default implementation behaves as
+         * {@link View#addExtraDataToAccessibilityNodeInfo(AccessibilityNodeInfo, int) for
+         * the case where no accessibility delegate is set.
+         * </p>
+         *
+         * @param host The View hosting the delegate.
+         * @param info The info to which to add the extra data
+         * @param extraDataKey A key specifying the type of extra data to add to the info. The
+         *                     extra data should be added to the {@link Bundle} returned by
+         *                     the info's {@link AccessibilityNodeInfo#getExtras} method.
+         * @param arguments A {@link Bundle} holding any arguments relevant for this request.
+         *
+         * @see AccessibilityNodeInfo#setExtraAvailableData
+         */
+        public void addExtraDataToAccessibilityNodeInfo(
+                View host, AccessibilityNodeInfo info, String extraDataKey, Bundle arguments) {
+            host.addExtraDataToAccessibilityNodeInfo(info, extraDataKey, arguments);
         }
 
         /**

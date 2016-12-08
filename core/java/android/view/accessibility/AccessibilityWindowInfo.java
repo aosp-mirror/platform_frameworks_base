@@ -183,7 +183,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId,
                 mId, AccessibilityNodeInfo.ROOT_NODE_ID,
-                true, AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS);
+                true, AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS, null);
     }
 
     /**
@@ -209,7 +209,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
 
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId,
-                mParentId, mAnchorId, true, 0);
+                mParentId, mAnchorId, true, 0, null);
     }
 
     /**

@@ -95,7 +95,6 @@ import android.view.View.OnClickListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -140,7 +139,6 @@ public class Editor {
     private static final boolean DEBUG_UNDO = false;
 
     static final int BLINK = 500;
-    private static final float[] TEMP_POSITION = new float[2];
     private static final int DRAG_SHADOW_MAX_TEXT_LENGTH = 20;
     private static final float LINE_SLOP_MULTIPLIER_FOR_HANDLEVIEWS = 0.5f;
     private static final int UNSET_X_VALUE = -1;
@@ -1032,46 +1030,6 @@ public class Editor {
                 boolean parentPositionChanged, boolean parentScrolled);
     }
 
-    private boolean isPositionVisible(final float positionX, final float positionY) {
-        synchronized (TEMP_POSITION) {
-            final float[] position = TEMP_POSITION;
-            position[0] = positionX;
-            position[1] = positionY;
-            View view = mTextView;
-
-            while (view != null) {
-                if (view != mTextView) {
-                    // Local scroll is already taken into account in positionX/Y
-                    position[0] -= view.getScrollX();
-                    position[1] -= view.getScrollY();
-                }
-
-                if (position[0] < 0 || position[1] < 0 || position[0] > view.getWidth()
-                        || position[1] > view.getHeight()) {
-                    return false;
-                }
-
-                if (!view.getMatrix().isIdentity()) {
-                    view.getMatrix().mapPoints(position);
-                }
-
-                position[0] += view.getLeft();
-                position[1] += view.getTop();
-
-                final ViewParent parent = view.getParent();
-                if (parent instanceof View) {
-                    view = (View) parent;
-                } else {
-                    // We've reached the ViewRoot, stop iterating
-                    view = null;
-                }
-            }
-        }
-
-        // We've been able to walk up the view hierarchy and the position was never clipped
-        return true;
-    }
-
     private boolean isOffsetVisible(int offset) {
         Layout layout = mTextView.getLayout();
         if (layout == null) return false;
@@ -1079,7 +1037,8 @@ public class Editor {
         final int line = layout.getLineForOffset(offset);
         final int lineBottom = layout.getLineBottom(line);
         final int primaryHorizontal = (int) layout.getPrimaryHorizontal(offset);
-        return isPositionVisible(primaryHorizontal + mTextView.viewportToContentHorizontalOffset(),
+        return mTextView.isPositionVisible(
+                primaryHorizontal + mTextView.viewportToContentHorizontalOffset(),
                 lineBottom + mTextView.viewportToContentVerticalOffset());
     }
 
@@ -4080,69 +4039,9 @@ public class Editor {
                     final CharSequence composingText = text.subSequence(composingTextStart,
                             composingTextEnd);
                     builder.setComposingText(composingTextStart, composingText);
-
-                    final int minLine = layout.getLineForOffset(composingTextStart);
-                    final int maxLine = layout.getLineForOffset(composingTextEnd - 1);
-                    for (int line = minLine; line <= maxLine; ++line) {
-                        final int lineStart = layout.getLineStart(line);
-                        final int lineEnd = layout.getLineEnd(line);
-                        final int offsetStart = Math.max(lineStart, composingTextStart);
-                        final int offsetEnd = Math.min(lineEnd, composingTextEnd);
-                        final boolean ltrLine =
-                                layout.getParagraphDirection(line) == Layout.DIR_LEFT_TO_RIGHT;
-                        final float[] widths = new float[offsetEnd - offsetStart];
-                        layout.getPaint().getTextWidths(text, offsetStart, offsetEnd, widths);
-                        final float top = layout.getLineTop(line);
-                        final float bottom = layout.getLineBottom(line);
-                        for (int offset = offsetStart; offset < offsetEnd; ++offset) {
-                            final float charWidth = widths[offset - offsetStart];
-                            final boolean isRtl = layout.isRtlCharAt(offset);
-                            final float primary = layout.getPrimaryHorizontal(offset);
-                            final float secondary = layout.getSecondaryHorizontal(offset);
-                            // TODO: This doesn't work perfectly for text with custom styles and
-                            // TAB chars.
-                            final float left;
-                            final float right;
-                            if (ltrLine) {
-                                if (isRtl) {
-                                    left = secondary - charWidth;
-                                    right = secondary;
-                                } else {
-                                    left = primary;
-                                    right = primary + charWidth;
-                                }
-                            } else {
-                                if (!isRtl) {
-                                    left = secondary;
-                                    right = secondary + charWidth;
-                                } else {
-                                    left = primary - charWidth;
-                                    right = primary;
-                                }
-                            }
-                            // TODO: Check top-right and bottom-left as well.
-                            final float localLeft = left + viewportToContentHorizontalOffset;
-                            final float localRight = right + viewportToContentHorizontalOffset;
-                            final float localTop = top + viewportToContentVerticalOffset;
-                            final float localBottom = bottom + viewportToContentVerticalOffset;
-                            final boolean isTopLeftVisible = isPositionVisible(localLeft, localTop);
-                            final boolean isBottomRightVisible =
-                                    isPositionVisible(localRight, localBottom);
-                            int characterBoundsFlags = 0;
-                            if (isTopLeftVisible || isBottomRightVisible) {
-                                characterBoundsFlags |= CursorAnchorInfo.FLAG_HAS_VISIBLE_REGION;
-                            }
-                            if (!isTopLeftVisible || !isBottomRightVisible) {
-                                characterBoundsFlags |= CursorAnchorInfo.FLAG_HAS_INVISIBLE_REGION;
-                            }
-                            if (isRtl) {
-                                characterBoundsFlags |= CursorAnchorInfo.FLAG_IS_RTL;
-                            }
-                            // Here offset is the index in Java chars.
-                            builder.addCharacterBounds(offset, localLeft, localTop, localRight,
-                                    localBottom, characterBoundsFlags);
-                        }
-                    }
+                    mTextView.populateCharacterBounds(builder, composingTextStart,
+                            composingTextEnd, viewportToContentHorizontalOffset,
+                            viewportToContentVerticalOffset);
                 }
             }
 
@@ -4158,10 +4057,10 @@ public class Editor {
                         + viewportToContentVerticalOffset;
                 final float insertionMarkerBottom = layout.getLineBottom(line)
                         + viewportToContentVerticalOffset;
-                final boolean isTopVisible =
-                        isPositionVisible(insertionMarkerX, insertionMarkerTop);
-                final boolean isBottomVisible =
-                        isPositionVisible(insertionMarkerX, insertionMarkerBottom);
+                final boolean isTopVisible = mTextView
+                        .isPositionVisible(insertionMarkerX, insertionMarkerTop);
+                final boolean isBottomVisible = mTextView
+                        .isPositionVisible(insertionMarkerX, insertionMarkerBottom);
                 int insertionMarkerFlags = 0;
                 if (isTopVisible || isBottomVisible) {
                     insertionMarkerFlags |= CursorAnchorInfo.FLAG_HAS_VISIBLE_REGION;
@@ -4369,7 +4268,8 @@ public class Editor {
                 return false;
             }
 
-            return isPositionVisible(mPositionX + mHotspotX + getHorizontalOffset(), mPositionY);
+            return mTextView.isPositionVisible(
+                    mPositionX + mHotspotX + getHorizontalOffset(), mPositionY);
         }
 
         public abstract int getCurrentCursorOffset();

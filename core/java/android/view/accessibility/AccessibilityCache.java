@@ -554,7 +554,7 @@ public final class AccessibilityCache {
     // Layer of indirection included to break dependency chain for testing
     public static class AccessibilityNodeRefresher {
         public boolean refreshNode(AccessibilityNodeInfo info, boolean bypassCache) {
-            return info.refresh(bypassCache);
+            return info.refresh(null, bypassCache);
         }
     }
 }
