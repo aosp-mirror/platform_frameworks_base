@@ -54,13 +54,13 @@
     <string name="create_error" msgid="3735649141335444215">"ෆෝල්ඩරය සැදීම අසාර්ථක විය"</string>
     <string name="query_error" msgid="5999895349602476581">"මේ මොහොතේ අන්තර්ගතය පූරණය කිරීමට නොහැකිය"</string>
     <string name="root_recent" msgid="4470053704320518133">"මෑත"</string>
-    <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> ඉතිරියි"</string>
+    <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> නිදහස්"</string>
     <string name="root_type_service" msgid="2178854894416775409">"ආචයන සේවා"</string>
     <string name="root_type_shortcut" msgid="3318760609471618093">"කෙටිමං"</string>
     <string name="root_type_device" msgid="7121342474653483538">"උපාංග"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"තවත් යෙදුම්"</string>
     <string name="empty" msgid="7858882803708117596">"අයිතම නැත"</string>
-    <string name="no_results" msgid="6622510343880730446">"%1$s හි තරඟ නැත"</string>
+    <string name="no_results" msgid="6622510343880730446">"%1$s හි ගැළපුම් නැත"</string>
     <string name="toast_no_application" msgid="4632640357724698144">"ගොනුව විවෘත කළ නොහැකිය"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"සමහර ලේඛන මැකීමට නොහැකි විය"</string>
     <string name="share_via" msgid="8966594246261344259">"හරහා බෙදාගන්න"</string>
