@@ -194,8 +194,10 @@ public class ApfFilter {
             { (byte) 0xff, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 };
 
     private static final int ICMP6_TYPE_OFFSET = ETH_HEADER_LEN + IPV6_HEADER_LEN;
-    private static final int ICMP6_NEIGHBOR_ANNOUNCEMENT = 136;
+    private static final int ICMP6_ROUTER_SOLICITATION = 133;
     private static final int ICMP6_ROUTER_ADVERTISEMENT = 134;
+    private static final int ICMP6_NEIGHBOR_SOLICITATION = 135;
+    private static final int ICMP6_NEIGHBOR_ANNOUNCEMENT = 136;
 
     // NOTE: this must be added to the IPv4 header length in IPV4_HEADER_SIZE_MEMORY_SLOT
     private static final int UDP_DESTINATION_PORT_OFFSET = ETH_HEADER_LEN + 2;
@@ -795,6 +797,8 @@ public class ApfFilter {
         //   if it's multicast and we're dropping multicast:
         //     drop
         //   pass
+        // if it's ICMPv6 RS to any:
+        //   drop
         // if it's ICMPv6 NA to ff02::1:
         //   drop
 
@@ -819,10 +823,12 @@ public class ApfFilter {
 
         // Add unsolicited multicast neighbor announcements filter
         String skipUnsolicitedMulticastNALabel = "skipUnsolicitedMulticastNA";
-        // If not neighbor announcements, skip unsolicited multicast NA filter
         gen.addLoad8(Register.R0, ICMP6_TYPE_OFFSET);
+        // Drop all router solicitations (b/32833400)
+        gen.addJumpIfR0Equals(ICMP6_ROUTER_SOLICITATION, gen.DROP_LABEL);
+        // If not neighbor announcements, skip filter.
         gen.addJumpIfR0NotEquals(ICMP6_NEIGHBOR_ANNOUNCEMENT, skipUnsolicitedMulticastNALabel);
-        // If to ff02::1, drop
+        // If to ff02::1, drop.
         // TODO: Drop only if they don't contain the address of on-link neighbours.
         gen.addLoadImmediate(Register.R0, IPV6_DEST_ADDR_OFFSET);
         gen.addJumpIfBytesNotEqual(Register.R0, IPV6_ALL_NODES_ADDRESS,
@@ -842,6 +848,7 @@ public class ApfFilter {
      * <li>Pass all non-ICMPv6 IPv6 packets,
      * <li>Pass all non-IPv4 and non-IPv6 packets,
      * <li>Drop IPv6 ICMPv6 NAs to ff02::1.
+     * <li>Drop IPv6 ICMPv6 RSs.
      * <li>Let execution continue off the end of the program for IPv6 ICMPv6 packets. This allows
      *     insertion of RA filters here, or if there aren't any, just passes the packets.
      * </ul>
