@@ -37,6 +37,10 @@ int main()
     char value[PROPERTY_VALUE_MAX];
     property_get("debug.sf.nobootanimation", value, "0");
     int noBootAnimation = atoi(value);
+    if (!noBootAnimation) {
+        property_get("ro.boot.quiescent", value, "0");
+        noBootAnimation = atoi(value);
+    }
     ALOGI_IF(noBootAnimation,  "boot animation disabled");
     if (!noBootAnimation) {
 
@@ -47,7 +51,6 @@ int main()
         sp<BootAnimation> boot = new BootAnimation();
 
         IPCThreadState::self()->joinThreadPool();
-
     }
     return 0;
 }

@@ -134,6 +134,8 @@ public final class PowerManagerService extends SystemService
     private static final int DIRTY_DOCK_STATE = 1 << 10;
     // Dirty bit: brightness boost changed
     private static final int DIRTY_SCREEN_BRIGHTNESS_BOOST = 1 << 11;
+    // Dirty bit: sQuiescent changed
+    private static final int DIRTY_QUIESCENT = 1 << 12;
 
     // Summarizes the state of all active wakelocks.
     private static final int WAKE_LOCK_CPU = 1 << 0;
@@ -168,6 +170,9 @@ public final class PowerManagerService extends SystemService
 
     // Default setting for double tap to wake.
     private static final int DEFAULT_DOUBLE_TAP_TO_WAKE = 0;
+
+    // System property indicating that the screen should remain off until an explicit user action
+    private static final String SYSTEM_PROPERTY_QUIESCENT = "ro.boot.quiescent";
 
     /** Constants for {@link #shutdownOrRebootInternal} */
     @Retention(RetentionPolicy.SOURCE)
@@ -398,6 +403,9 @@ public final class PowerManagerService extends SystemService
     // True if the device should stay on.
     private boolean mStayOn;
 
+    // True if the lights should stay off until an explicit user action.
+    private static boolean sQuiescent;
+
     // True if the proximity sensor reads a positive result.
     private boolean mProximityPositive;
 
@@ -529,6 +537,8 @@ public final class PowerManagerService extends SystemService
             mHalInteractiveModeEnabled = true;
 
             mWakefulness = WAKEFULNESS_AWAKE;
+
+            sQuiescent = SystemProperties.get(SYSTEM_PROPERTY_QUIESCENT, "0").equals("1");
 
             nativeInit();
             nativeSetAutoSuspend(false);
@@ -1190,12 +1200,19 @@ public final class PowerManagerService extends SystemService
                         && eventTime > mLastUserActivityTime) {
                     mLastUserActivityTimeNoChangeLights = eventTime;
                     mDirty |= DIRTY_USER_ACTIVITY;
+                    if (event == PowerManager.USER_ACTIVITY_EVENT_BUTTON) {
+                        mDirty |= DIRTY_QUIESCENT;
+                    }
+
                     return true;
                 }
             } else {
                 if (eventTime > mLastUserActivityTime) {
                     mLastUserActivityTime = eventTime;
                     mDirty |= DIRTY_USER_ACTIVITY;
+                    if (event == PowerManager.USER_ACTIVITY_EVENT_BUTTON) {
+                        mDirty |= DIRTY_QUIESCENT;
+                    }
                     return true;
                 }
             }
@@ -2096,7 +2113,7 @@ public final class PowerManagerService extends SystemService
         final boolean oldDisplayReady = mDisplayReady;
         if ((dirty & (DIRTY_WAKE_LOCKS | DIRTY_USER_ACTIVITY | DIRTY_WAKEFULNESS
                 | DIRTY_ACTUAL_DISPLAY_POWER_STATE_UPDATED | DIRTY_BOOT_COMPLETED
-                | DIRTY_SETTINGS | DIRTY_SCREEN_BRIGHTNESS_BOOST)) != 0) {
+                | DIRTY_SETTINGS | DIRTY_SCREEN_BRIGHTNESS_BOOST | DIRTY_QUIESCENT)) != 0) {
             mDisplayPowerRequest.policy = getDesiredScreenPolicyLocked();
 
             // Determine appropriate screen brightness and auto-brightness adjustments.
@@ -2163,6 +2180,9 @@ public final class PowerManagerService extends SystemService
                     mRequestWaitForNegativeProximity);
             mRequestWaitForNegativeProximity = false;
 
+            if ((dirty & DIRTY_QUIESCENT) != 0) {
+                sQuiescent = false;
+            }
             if (DEBUG_SPEW) {
                 Slog.d(TAG, "updateDisplayPowerStateLocked: mDisplayReady=" + mDisplayReady
                         + ", policy=" + mDisplayPowerRequest.policy
@@ -2170,8 +2190,8 @@ public final class PowerManagerService extends SystemService
                         + ", mWakeLockSummary=0x" + Integer.toHexString(mWakeLockSummary)
                         + ", mUserActivitySummary=0x" + Integer.toHexString(mUserActivitySummary)
                         + ", mBootCompleted=" + mBootCompleted
-                        + ", mScreenBrightnessBoostInProgress="
-                                + mScreenBrightnessBoostInProgress);
+                        + ", mScreenBrightnessBoostInProgress=" + mScreenBrightnessBoostInProgress
+                        + ", sQuiescent=" + sQuiescent);
             }
         }
         return mDisplayReady && !oldDisplayReady;
@@ -2210,7 +2230,7 @@ public final class PowerManagerService extends SystemService
     }
 
     private int getDesiredScreenPolicyLocked() {
-        if (mWakefulness == WAKEFULNESS_ASLEEP) {
+        if (mWakefulness == WAKEFULNESS_ASLEEP || sQuiescent) {
             return DisplayPowerRequest.POLICY_OFF;
         }
 
@@ -2899,10 +2919,25 @@ public final class PowerManagerService extends SystemService
         }
         if (reason.equals(PowerManager.REBOOT_RECOVERY)
                 || reason.equals(PowerManager.REBOOT_RECOVERY_UPDATE)) {
-            SystemProperties.set("sys.powerctl", "reboot,recovery");
-        } else {
-            SystemProperties.set("sys.powerctl", "reboot," + reason);
+            reason = "recovery";
         }
+
+        // If the reason is "quiescent", it means that the boot process should proceed
+        // without turning on the screen/lights.
+        // The "quiescent" property is sticky, meaning that any number
+        // of subsequent reboots should honor the property until it is reset.
+        if (reason.equals(PowerManager.REBOOT_QUIESCENT)) {
+            sQuiescent = true;
+            reason = "";
+        }
+
+        if (sQuiescent) {
+            // Pass the optional "quiescent" argument to the bootloader to let it know
+            // that it should not turn the screen/lights on.
+            reason = reason + ",quiescent";
+        }
+
+        SystemProperties.set("sys.powerctl", "reboot," + reason);
         try {
             Thread.sleep(20 * 1000L);
         } catch (InterruptedException e) {

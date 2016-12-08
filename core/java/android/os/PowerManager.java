@@ -421,6 +421,12 @@ public final class PowerManager {
     public static final String REBOOT_SAFE_MODE = "safemode";
 
     /**
+     * The 'reason' value used when rebooting the device without turning on the screen.
+     * @hide
+     */
+    public static final String REBOOT_QUIESCENT = "quiescent";
+
+    /**
      * The value to pass as the 'reason' argument to android_reboot().
      * @hide
      */
