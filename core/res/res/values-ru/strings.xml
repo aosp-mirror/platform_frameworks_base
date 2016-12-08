@@ -90,7 +90,7 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Идентификация абонента по умолчанию не запрещена. След. вызов: разрешена"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Услуга не предоставляется."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Невозможно изменить параметр идентификатора вызывающего абонента."</string>
-    <string name="RestrictedOnData" msgid="8653794784690065540">"Служба данных заблокирована."</string>
+    <string name="RestrictedOnData" msgid="8653794784690065540">"Передача данных заблокирована."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Служба экстренной помощи заблокирована."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Служба передачи голосовых сообщений заблокирована."</string>
     <string name="RestrictedOnAllVoice" msgid="3396963652108151260">"Все службы передачи голосовых сообщений заблокированы."</string>

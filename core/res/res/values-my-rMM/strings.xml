@@ -643,7 +643,7 @@
     <string name="relationTypeAssistant" msgid="6274334825195379076">"အထောက်အကူ"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"ညီအကို"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"သားသမီး"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"အတူနေအပေါင်းအဖော်"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"အတူနေအဖော်"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"ဖခင်"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"သူငယ်ချင်း"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"မန်နေဂျာ"</string>
@@ -651,7 +651,7 @@
     <string name="relationTypeParent" msgid="4755635567562925226">"မိဘ"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"လုပ်ဖော်ကိုင်ဖက်"</string>
     <string name="relationTypeReferredBy" msgid="101573059844135524">"မှရည်ညွှန်းပေးသည်"</string>
-    <string name="relationTypeRelative" msgid="1799819930085610271">"ဆွေးမျိုး"</string>
+    <string name="relationTypeRelative" msgid="1799819930085610271">"ဆွေမျိုး"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"ညီအမ"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"အိမ်ထောင်ဖက်"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"မိမိစိတ်ကြိုက်"</string>

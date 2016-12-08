@@ -596,7 +596,7 @@
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Fax de casa"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Cercapersones"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Altres"</string>
-    <string name="phoneTypeCallback" msgid="2712175203065678206">"Torna la trucada"</string>
+    <string name="phoneTypeCallback" msgid="2712175203065678206">"Devolució de trucada"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Cotxe"</string>
     <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Telèfon d\'empresa"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"XDSI"</string>

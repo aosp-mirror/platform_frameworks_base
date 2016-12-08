@@ -605,7 +605,7 @@
     <string name="phoneTypeRadio" msgid="4093738079908667513">"無線電"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"電報"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY/TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"公司行動電話"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"公司手機"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"公司呼叫器"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"助理"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"多媒體簡訊"</string>

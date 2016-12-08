@@ -650,7 +650,7 @@
     <string name="relationTypeMother" msgid="4578571352962758304">"Ema"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Vanem"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Partner"</string>
-    <string name="relationTypeReferredBy" msgid="101573059844135524">"Viitas:"</string>
+    <string name="relationTypeReferredBy" msgid="101573059844135524">"Soovitaja"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"Sugulane"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Õde"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Abikaasa"</string>

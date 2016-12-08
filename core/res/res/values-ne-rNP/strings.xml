@@ -553,30 +553,30 @@
     <item msgid="1735177144948329370">"घरको फ्याक्स"</item>
     <item msgid="603878674477207394">"पेजर"</item>
     <item msgid="1650824275177931637">"अन्य"</item>
-    <item msgid="9192514806975898961">"अनुकूलन"</item>
+    <item msgid="9192514806975898961">"आफू अनुकूल"</item>
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="8073994352956129127">"गृह"</item>
     <item msgid="7084237356602625604">"काम"</item>
     <item msgid="1112044410659011023">"अन्य"</item>
-    <item msgid="2374913952870110618">"अनुकूलन"</item>
+    <item msgid="2374913952870110618">"आफू अनुकूल"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="6880257626740047286">"गृह"</item>
     <item msgid="5629153956045109251">"काम"</item>
     <item msgid="4966604264500343469">"अन्य"</item>
-    <item msgid="4932682847595299369">"अनुकूलन"</item>
+    <item msgid="4932682847595299369">"आफू अनुकूल"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="1738585194601476694">"गृह"</item>
     <item msgid="1359644565647383708">"काम"</item>
     <item msgid="7868549401053615677">"अन्य"</item>
-    <item msgid="3145118944639869809">"अनुकूलन"</item>
+    <item msgid="3145118944639869809">"आफू अनुकूल"</item>
   </string-array>
   <string-array name="organizationTypes">
     <item msgid="7546335612189115615">"काम गर्नुहोस्"</item>
     <item msgid="4378074129049520373">"अन्य"</item>
-    <item msgid="3455047468583965104">"अनुकूलन"</item>
+    <item msgid="3455047468583965104">"आफू अनुकूल"</item>
   </string-array>
   <string-array name="imProtocols">
     <item msgid="8595261363518459565">"AIM"</item>
@@ -588,7 +588,7 @@
     <item msgid="2506857312718630823">"ICQ"</item>
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
-    <string name="phoneTypeCustom" msgid="1644738059053355820">"अनुकूलन"</string>
+    <string name="phoneTypeCustom" msgid="1644738059053355820">"आफू अनुकूल"</string>
     <string name="phoneTypeHome" msgid="2570923463033985887">"गृह"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"मोबाइल"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"काम"</string>
@@ -609,24 +609,24 @@
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"कार्य पेजर"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"सहायक"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
-    <string name="eventTypeCustom" msgid="7837586198458073404">"अनुकूलन"</string>
+    <string name="eventTypeCustom" msgid="7837586198458073404">"आफू अनुकूल"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"जन्मदिन"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"वार्षिक समारोह"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"अन्य"</string>
-    <string name="emailTypeCustom" msgid="8525960257804213846">"अनुकूलन"</string>
+    <string name="emailTypeCustom" msgid="8525960257804213846">"आफू अनुकूल"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"गृह"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"काम"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"अन्य"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"मोबाइल"</string>
-    <string name="postalTypeCustom" msgid="8903206903060479902">"अनुकूलन"</string>
+    <string name="postalTypeCustom" msgid="8903206903060479902">"आफू अनुकूल"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"गृह"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"काम"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"अन्य"</string>
-    <string name="imTypeCustom" msgid="2074028755527826046">"अनुकूलन"</string>
+    <string name="imTypeCustom" msgid="2074028755527826046">"आफू अनुकूल"</string>
     <string name="imTypeHome" msgid="6241181032954263892">"गृह"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"काम"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"अन्य"</string>
-    <string name="imProtocolCustom" msgid="6919453836618749992">"अनुकूलन"</string>
+    <string name="imProtocolCustom" msgid="6919453836618749992">"आफू अनुकूल"</string>
     <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
     <string name="imProtocolMsn" msgid="144556545420769442">"Windows Live"</string>
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
@@ -638,8 +638,8 @@
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
     <string name="orgTypeWork" msgid="29268870505363872">"काम"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"अन्य"</string>
-    <string name="orgTypeCustom" msgid="225523415372088322">"अनुकूलन"</string>
-    <string name="relationTypeCustom" msgid="3542403679827297300">"अनुकूलन"</string>
+    <string name="orgTypeCustom" msgid="225523415372088322">"आफू अनुकूल"</string>
+    <string name="relationTypeCustom" msgid="3542403679827297300">"आफू अनुकूल"</string>
     <string name="relationTypeAssistant" msgid="6274334825195379076">"सहायक"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"भाइ"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"सन्तान"</string>
@@ -653,8 +653,8 @@
     <string name="relationTypeReferredBy" msgid="101573059844135524">"द्वारा उल्लिखित"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"आफन्त"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"बहिनी"</string>
-    <string name="relationTypeSpouse" msgid="394136939428698117">"पति-पत्नि"</string>
-    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"अनुकूलन"</string>
+    <string name="relationTypeSpouse" msgid="394136939428698117">"पति-पत्नी"</string>
+    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"आफू अनुकूल"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"गृह"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"काम गर्नुहोस्"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"अन्य"</string>
@@ -1029,7 +1029,7 @@
     <string name="smv_process" msgid="5120397012047462446">"प्रक्रिया <xliff:g id="PROCESS">%1$s</xliff:g> यसको आफ्नै कडामोड नीतिका कारण उल्लङ्घन गरिएको छ।"</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"एन्ड्रोइड अपग्रेड हुँदैछ…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android शुरू हुँदैछ..."</string>
-    <string name="android_upgrading_fstrim" msgid="8036718871534640010">"भण्डारण अनुकूलन गर्दै।"</string>
+    <string name="android_upgrading_fstrim" msgid="8036718871534640010">"भण्डारण आफू अनुकूल गर्दै।"</string>
     <string name="android_upgrading_notification_title" msgid="8428357096969413169">"Android को अद्यावधिकलाई सम्पन्न गर्दै…"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"स्तरवृद्धि सम्पन्न नभएसम्म केही अनुप्रयोगहरू राम्ररी काम नगर्न सक्छन्"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g> को स्तरवृद्धि हुँदैछ…"</string>
@@ -1100,8 +1100,8 @@
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"अनुप्रयोग %1$s Wifi सञ्जाल %2$s मा जडान गर्न चाहन्छ"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"एउटा अनुप्रयोग"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi प्रत्यक्ष"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Wi-Fi सिधा सुरु गर्नुहोस्। यसले Wi-Fi ग्राहक/हट्स्पटलाई बन्द गराउने छ।"</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Wi-Fi सिधा सुरु हुन सकेन।"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Wi-Fi सीधा सुरु गर्नुहोस्। यसले Wi-Fi ग्राहक/हट्स्पटलाई बन्द गराउने छ।"</string>
+    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Wi-Fi सीधा सुरु हुन सकेन।"</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi प्रत्यक्ष खुल्ला छ"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"सेटिङहरूका लागि ट्याप गर्नुहोस्"</string>
     <string name="accept" msgid="1645267259272829559">"स्वीकार्नुहोस्"</string>

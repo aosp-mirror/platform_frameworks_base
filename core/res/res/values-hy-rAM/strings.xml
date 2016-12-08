@@ -598,7 +598,7 @@
     <string name="phoneTypeOther" msgid="1544425847868765990">"Այլ"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Ետզանգ"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Մեքենա"</string>
-    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Ընկերության գլխավոր"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Ընկերության հիմնական"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"Հիմնական"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Այլ ֆաքս"</string>
@@ -643,14 +643,14 @@
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Օգնական"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Եղբայր"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"Երեխա"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Տեղական գործընկեր"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Կենակից"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"Հայր"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"Ընկեր"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"Կառավարիչ"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"Մայր"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Ծնող"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Գործընկեր"</string>
-    <string name="relationTypeReferredBy" msgid="101573059844135524">"Հղված է"</string>
+    <string name="relationTypeReferredBy" msgid="101573059844135524">"Հանձնարարված"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"Բարեկամ"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Քույր"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Ամուսին"</string>

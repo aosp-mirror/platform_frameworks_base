@@ -646,7 +646,7 @@
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Pomoćnik"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Brat"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"Dijete"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Partner u kućan."</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Vanbračni partner"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"Otac"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"Prijatelj"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"Voditelj"</string>
