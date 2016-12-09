@@ -201,6 +201,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
 
     public void startExit() {
         if (!mIsExitStarted) {
+            backgroundAnimatorComplete();
             mIsExitStarted = true;
             pauseInput();
             ViewGroup decorView = getDecor();
@@ -303,11 +304,13 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                             mIsBackgroundReady = true;
                             notifyComplete();
                         }
+                        backgroundAnimatorComplete();
                     }
                 });
                 mBackgroundAnimator.setDuration(getFadeDuration());
                 mBackgroundAnimator.start();
             } else {
+                backgroundAnimatorComplete();
                 mIsBackgroundReady = true;
             }
         }

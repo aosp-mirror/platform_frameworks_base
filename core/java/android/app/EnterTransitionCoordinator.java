@@ -587,6 +587,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         makeOpaque();
+                        backgroundAnimatorComplete();
                     }
                 });
                 mBackgroundAnimator.start();
@@ -598,9 +599,13 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                         makeOpaque();
                     }
                 });
+                backgroundAnimatorComplete();
             } else {
                 makeOpaque();
+                backgroundAnimatorComplete();
             }
+        } else {
+            backgroundAnimatorComplete();
         }
     }
 

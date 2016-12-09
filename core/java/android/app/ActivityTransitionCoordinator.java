@@ -208,6 +208,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     private ArrayList<Matrix> mSharedElementParentMatrices;
     private boolean mSharedElementTransitionComplete;
     private boolean mViewsTransitionComplete;
+    private boolean mBackgroundAnimatorComplete;
     private ArrayList<View> mStrippedTransitioningViews = new ArrayList<>();
 
     public ActivityTransitionCoordinator(Window window,
@@ -884,6 +885,10 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         startInputWhenTransitionsComplete();
     }
 
+    protected void backgroundAnimatorComplete() {
+        mBackgroundAnimatorComplete = true;
+    }
+
     protected void sharedElementTransitionComplete() {
         mSharedElementTransitionComplete = true;
         startInputWhenTransitionsComplete();
@@ -964,6 +969,11 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
                 noLayoutSuppressionForVisibilityTransitions(set.getTransitionAt(i));
             }
         }
+    }
+
+    public boolean isTransitionRunning() {
+        return !(mViewsTransitionComplete && mSharedElementTransitionComplete &&
+                mBackgroundAnimatorComplete);
     }
 
     private static class FixedEpicenterCallback extends Transition.EpicenterCallback {

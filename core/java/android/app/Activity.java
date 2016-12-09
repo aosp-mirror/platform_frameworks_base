@@ -4326,6 +4326,18 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
+    /**
+     * Returns whether there are any activity transitions currently running on this
+     * activity. A return value of {@code true} can mean that either an enter or
+     * exit transition is running, including whether the background of the activity
+     * is animating as a part of that transition.
+     *
+     * @return true if a transition is currently running on this activity, false otherwise.
+     */
+    public boolean isActivityTransitionRunning() {
+        return mActivityTransitionState.isTransitionRunning();
+    }
+
     private Bundle transferSpringboardActivityOptions(Bundle options) {
         if (options == null && (mWindow != null && !mWindow.isActive())) {
             final ActivityOptions activityOptions = getActivityOptions();

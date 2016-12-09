@@ -2058,6 +2058,18 @@ public class ProgressBar extends View {
     }
 
     /**
+     * Returns whether the ProgressBar is animating or not. This is essentially the same
+     * as whether the ProgressBar is {@link #isIndeterminate() indeterminate} and visible,
+     * as indeterminate ProgressBars are always animating, and non-indeterminate
+     * ProgressBars are not animating.
+     *
+     * @return true if the ProgressBar is animating, false otherwise.
+     */
+    public boolean isAnimating() {
+        return isIndeterminate() && getWindowVisibility() == VISIBLE && isShown();
+    }
+
+    /**
      * Command for sending an accessibility event.
      */
     private class AccessibilityEventSender implements Runnable {

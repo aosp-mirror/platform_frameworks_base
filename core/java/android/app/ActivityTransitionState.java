@@ -336,6 +336,26 @@ class ActivityTransitionState {
         }
     }
 
+    public boolean isTransitionRunning() {
+        // Note that *only* enter *or* exit will be running at any given time
+        if (mEnterTransitionCoordinator != null) {
+            if (mEnterTransitionCoordinator.isTransitionRunning()) {
+                return true;
+            }
+        }
+        if (mCalledExitCoordinator != null) {
+            if (mCalledExitCoordinator.isTransitionRunning()) {
+                return true;
+            }
+        }
+        if (mReturnExitCoordinator != null) {
+            if (mReturnExitCoordinator.isTransitionRunning()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void startExitOutTransition(Activity activity, Bundle options) {
         mEnterTransitionCoordinator = null;
         if (!activity.getWindow().hasFeature(Window.FEATURE_ACTIVITY_TRANSITIONS) ||

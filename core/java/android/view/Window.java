@@ -1924,7 +1924,7 @@ public abstract class Window {
     public Transition getEnterTransition() { return null; }
 
     /**
-     * Returns he Transition that will be used to move Views out of the scene when the Window is
+     * Returns the Transition that will be used to move Views out of the scene when the Window is
      * preparing to close, for example after a call to
      * {@link android.app.Activity#finishAfterTransition()}. The exiting
      * Views will be those that are regular Views or ViewGroups that have
