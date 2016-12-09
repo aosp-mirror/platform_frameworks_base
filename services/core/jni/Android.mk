@@ -74,6 +74,7 @@ LOCAL_SHARED_LIBRARIES += \
     libutils \
     android.hardware.audio.common@2.0 \
     android.hardware.gnss@1.0 \
+    android.hardware.ir@1.0 \
     android.hardware.light@2.0 \
     android.hardware.power@1.0 \
     android.hardware.thermal@1.0 \
