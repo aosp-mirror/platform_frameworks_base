@@ -725,6 +725,7 @@
   <java-symbol type="string" name="mmiComplete" />
   <java-symbol type="string" name="mmiError" />
   <java-symbol type="string" name="mmiFdnError" />
+  <java-symbol type="string" name="mmiErrorWhileRoaming" />
   <java-symbol type="string" name="month_day_year" />
   <java-symbol type="string" name="more_item_label" />
   <java-symbol type="string" name="needPuk" />
