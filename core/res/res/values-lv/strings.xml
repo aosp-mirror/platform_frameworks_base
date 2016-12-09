@@ -1237,6 +1237,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Ļauj lietojumprogrammai lasīt instalēšanas sesijas. Tādējādi lietojumprogrammai ir pieejama informācija par aktīvajām pakotņu instalācijām."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"Pieprasīt pakotņu instalēšanu"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Ļauj lietojumprogrammai pieprasīt pakotņu instalēšanu."</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Pieskarieties divreiz, lai kontrolētu tālummaiņu."</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Nevarēja pievienot logrīku."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Doties uz"</string>
@@ -1719,6 +1723,5 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Atiestatīt tūlīt"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> atspējots"</string>
     <string name="conference_call" msgid="3751093130790472426">"Konferences zvans"</string>
-    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
-    <skip />
+    <string name="tooltip_popup_title" msgid="5253721848739260181">"Rīka padoms"</string>
 </resources>

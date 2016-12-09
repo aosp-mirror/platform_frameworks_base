@@ -785,7 +785,7 @@
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"تأكيد الانتقال"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"مغادرة هذه الصفحة"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"البقاء في هذه الصفحة"</string>
-    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nهل تريد بالتأكيد الانتقال بعيدًا عن هذه الصفحة؟"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nهل تريد فعلًا الانتقال بعيدًا عن هذه الصفحة؟"</string>
     <string name="save_password_label" msgid="6860261758665825069">"تأكيد"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"نصيحة: اضغط مرتين للتكبير والتصغير."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"ملء تلقائي"</string>
@@ -1312,6 +1312,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"للسماح لأحد التطبيقات بقراءة جلسات التثبيت. ويسمح لك هذا بالاطلاع على تفاصيل بشأن عمليات تثبيت الحزم النشطة."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"طلب حزم التثبيت"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"للسماح لتطبيق ما بطلب تثبيت الحزم."</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"اضغط مرتين للتحكم في التكبير/التصغير"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"تعذرت إضافة أداة."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"تنفيذ"</string>
@@ -1827,6 +1831,5 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"إعادة التعيين الآن"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"تم تعطيل <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"مكالمة جماعية"</string>
-    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
-    <skip />
+    <string name="tooltip_popup_title" msgid="5253721848739260181">"تلميح"</string>
 </resources>

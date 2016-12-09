@@ -384,7 +384,7 @@
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"чытанне статусу тэлефона і ідэнтыфікацыя"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Дазваляе прыкладанням атрымлiваць доступ да функцый тэлефона на прыладзе. Дзякуючы гэтаму дазволу прыкладанне можа вызначаць iдэнтыфiкатары нумару тэлефона i прылады, незалежна ад таго, цi актыўны выклiк, i аддалены нумар, на якi робiцца выклiк."</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"чытаць нумар тэлефона"</string>
-    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Праграма зможа атрымліваць доступ да нумара тэлефона прылады."</string>
+    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Праграма зможа атрымліваць доступ да тэлефоннага нумара прылады."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"прадухіліць планшэт ад пераходу ў рэжым сну"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"прадухіленне пераходу тэлевізара ў рэжым сну"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"забараняць тэлефону пераходзіць ў рэжым сну"</string>
@@ -1262,6 +1262,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Дазваляе праграме счытваць сеансы ўсталёўкі. Гэта дазваляе ёй праглядаць інфармацыю аб актыўных усталёўках пакета."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"запытваць усталёўку пакетаў"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Дазваляе праграме запытваць усталёўку пакетаў."</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Націсніце двойчы, каб кіраваць маштабаваннем"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Немагчыма дадаць віджэт."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Пачаць"</string>
@@ -1755,6 +1759,5 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Выканаць скід"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Адключаны <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"Канферэнц-выклік"</string>
-    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
-    <skip />
+    <string name="tooltip_popup_title" msgid="5253721848739260181">"Падказка"</string>
 </resources>
