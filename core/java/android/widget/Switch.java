@@ -1404,10 +1404,19 @@ public class Switch extends CompoundButton {
     }
 
     @Override
-    public void onProvideStructure(ViewStructure structure, int flags) {
-        super.onProvideStructure(structure, flags);
+    public void onProvideStructure(ViewStructure structure) {
+        super.onProvideStructure(structure);
+        onProvideAutoFillStructureForAssistOrAutoFill(structure);
+    }
 
-        // NOTE: current there is no difference for Assist (flags=0) or AutoFill (flags>0);
+    @Override
+    public void onProvideAutoFillStructure(ViewStructure structure, int flags) {
+        super.onProvideAutoFillStructure(structure, flags);
+        onProvideAutoFillStructureForAssistOrAutoFill(structure);
+    }
+
+    // NOTE: currently there is no difference for Assist or AutoFill, so it doesn't take flags
+    private void onProvideAutoFillStructureForAssistOrAutoFill(ViewStructure structure) {
         CharSequence switchText = isChecked() ? mTextOn : mTextOff;
         if (!TextUtils.isEmpty(switchText)) {
             CharSequence oldText = structure.getText();

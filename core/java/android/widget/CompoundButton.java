@@ -34,6 +34,8 @@ import android.view.ViewDebug;
 import android.view.ViewHierarchyEncoder;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.autofill.AutoFillType;
+import android.view.autofill.AutoFillValue;
 
 import com.android.internal.R;
 
@@ -52,6 +54,7 @@ import com.android.internal.R;
  * </p>
  */
 public abstract class CompoundButton extends Button implements Checkable {
+
     private boolean mChecked;
     private boolean mBroadcasting;
 
@@ -111,6 +114,7 @@ public abstract class CompoundButton extends Button implements Checkable {
         applyButtonTint();
     }
 
+    @Override
     public void toggle() {
         setChecked(!mChecked);
     }
@@ -130,6 +134,7 @@ public abstract class CompoundButton extends Button implements Checkable {
     }
 
     @ViewDebug.ExportedProperty
+    @Override
     public boolean isChecked() {
         return mChecked;
     }
@@ -139,6 +144,7 @@ public abstract class CompoundButton extends Button implements Checkable {
      *
      * @param checked true to check the button, false to uncheck it
      */
+    @Override
     public void setChecked(boolean checked) {
         if (mChecked != checked) {
             mChecked = checked;
@@ -514,12 +520,15 @@ public abstract class CompoundButton extends Button implements Checkable {
                     + " checked=" + checked + "}";
         }
 
-        public static final Parcelable.Creator<SavedState> CREATOR
-                = new Parcelable.Creator<SavedState>() {
+        @SuppressWarnings("hiding")
+        public static final Parcelable.Creator<SavedState> CREATOR =
+                new Parcelable.Creator<SavedState>() {
+            @Override
             public SavedState createFromParcel(Parcel in) {
                 return new SavedState(in);
             }
 
+            @Override
             public SavedState[] newArray(int size) {
                 return new SavedState[size];
             }
@@ -550,5 +559,17 @@ public abstract class CompoundButton extends Button implements Checkable {
     protected void encodeProperties(@NonNull ViewHierarchyEncoder stream) {
         super.encodeProperties(stream);
         stream.addProperty("checked", isChecked());
+    }
+
+    // TODO(b/33197203): add unit/CTS tests for auto-fill methods
+
+    @Override
+    public void autoFill(AutoFillValue value) {
+        setChecked(value.getToggleValue());
+    }
+
+    @Override
+    public AutoFillType getAutoFillType() {
+        return AutoFillType.forToggle();
     }
 }

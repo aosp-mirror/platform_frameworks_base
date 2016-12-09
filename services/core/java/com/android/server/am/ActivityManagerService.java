@@ -690,19 +690,21 @@ public class ActivityManagerService extends IActivityManager.Stub
         public AssistStructure structure = null;
         public AssistContent content = null;
         public Bundle receiverExtras;
+        public int resultCode;
         public int flags;
 
         public PendingAssistExtras(ActivityRecord _activity, Bundle _extras, Intent _intent,
-                String _hint, IResultReceiver _receiver, Bundle _receiverExtras, int _flags,
-                int _userHandle) {
+                String _hint, IResultReceiver _receiver, Bundle _receiverExtras, int _resultCode,
+                int _userHandle, int _flags) {
             activity = _activity;
             extras = _extras;
             intent = _intent;
             hint = _hint;
             receiver = _receiver;
             receiverExtras = _receiverExtras;
-            flags = _flags;
+            resultCode = _resultCode;
             userHandle = _userHandle;
+            flags = _flags;
         }
         @Override
         public void run() {
@@ -12190,7 +12192,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public Bundle getAssistContextExtras(int requestType) {
         PendingAssistExtras pae = enqueueAssistContext(requestType, null, null, null,
-                null, null, true /* focused */, true /* newSessionId */,
+                null, 0, null, true /* focused */, true /* newSessionId */,
                 UserHandle.getCallingUserId(), null, PENDING_ASSIST_EXTRAS_TIMEOUT, 0);
         if (pae == null) {
             return null;
@@ -12258,22 +12260,37 @@ public class ActivityManagerService extends IActivityManager.Stub
             Bundle receiverExtras,
             IBinder activityToken, boolean focused, boolean newSessionId) {
         return enqueueAssistContext(requestType, null, null, receiver, receiverExtras,
-                activityToken, focused, newSessionId,
-                UserHandle.getCallingUserId(), null, PENDING_ASSIST_EXTRAS_LONG_TIMEOUT, 0)
-                != null;
+                0, activityToken, focused, newSessionId, UserHandle.getCallingUserId(), null,
+                PENDING_ASSIST_EXTRAS_LONG_TIMEOUT, 0) != null;
     }
 
     @Override
     public boolean requestAutoFillData(IResultReceiver receiver, Bundle receiverExtras,
-            IBinder activityToken, int flags) {
-        return enqueueAssistContext(ActivityManager.ASSIST_CONTEXT_FULL, null, null, receiver,
-                receiverExtras, activityToken, true, true,
-                UserHandle.getCallingUserId(), null, PENDING_AUTO_FILL_ASSIST_STRUCTURE_TIMEOUT,
-                flags) != null;
+            int resultCode, IBinder activityToken, int flags) {
+        final boolean forFill = (flags & View.AUTO_FILL_FLAG_TYPE_FILL) != 0;
+        final boolean forSave = (flags & View.AUTO_FILL_FLAG_TYPE_SAVE) != 0;
+        if ((forFill && forSave) || (!forFill) && !(forSave)) {
+            // There can be only one!
+            Slog.w(TAG,  "requestAutoFillData(): invalid flags (" + flags + ")");
+            return false;
+        }
+
+        // NOTE: we could always use ActivityManager.ASSIST_CONTEXT_FULL and let ActivityThread
+        // rely on the flags to decide whether the handleRequestAssistContextExtras() is for
+        // auto-fill, but it's safer to explicitly use new AutoFill types, in case the Assist
+        // requests use flags in the future as well (since their flags value might collide with the
+        // auto-fill flag values).
+        final int type = forFill?
+                ActivityManager.ASSIST_CONTEXT_AUTO_FILL :
+                    ActivityManager.ASSIST_CONTEXT_AUTO_FILL_SAVE;
+
+        return enqueueAssistContext(type, null, null, receiver, receiverExtras, resultCode,
+                activityToken, true, true, UserHandle.getCallingUserId(), null,
+                PENDING_AUTO_FILL_ASSIST_STRUCTURE_TIMEOUT, flags) != null;
     }
 
     private PendingAssistExtras enqueueAssistContext(int requestType, Intent intent, String hint,
-            IResultReceiver receiver, Bundle receiverExtras, IBinder activityToken,
+            IResultReceiver receiver, Bundle receiverExtras, int resultCode, IBinder activityToken,
             boolean focused, boolean newSessionId, int userHandle, Bundle args, long timeout,
             int flags) {
         enforceCallingPermission(android.Manifest.permission.GET_TOP_ACTIVITY_INFO,
@@ -12314,7 +12331,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             extras.putString(Intent.EXTRA_ASSIST_PACKAGE, activity.packageName);
             extras.putInt(Intent.EXTRA_ASSIST_UID, activity.app.uid);
             pae = new PendingAssistExtras(activity, extras, intent, hint, receiver, receiverExtras,
-                    flags, userHandle);
+                    resultCode, userHandle, flags);
             // Increment the sessionId if necessary
             if (newSessionId) {
                 mViSessionId++;
@@ -12400,17 +12417,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (pae.flags > 0) {
                     sendBundle.putInt(VoiceInteractionSession.KEY_FLAGS, pae.flags);
                 }
-                IBinder autoFillCallback =
-                        extras.getBinder(AutoFillService.KEY_CALLBACK);
-                if (autoFillCallback != null) {
-                    sendBundle.putBinder(AutoFillService.KEY_CALLBACK,
-                            autoFillCallback);
+                IBinder cb = extras.getBinder(AutoFillService.KEY_CALLBACK);
+                if (cb != null) {
+                    sendBundle.putBinder(AutoFillService.KEY_CALLBACK, cb);
                 }
             }
         }
         if (sendReceiver != null) {
             try {
-                sendReceiver.send(0, sendBundle);
+                sendReceiver.send(pae.resultCode, sendBundle);
             } catch (RemoteException e) {
             }
             return;
@@ -12435,9 +12450,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     public boolean launchAssistIntent(Intent intent, int requestType, String hint, int userHandle,
             Bundle args) {
-        return enqueueAssistContext(requestType, intent, hint, null, null, null,
-                true /* focused */, true /* newSessionId */,
-                userHandle, args, PENDING_ASSIST_EXTRAS_TIMEOUT, 0) != null;
+        return enqueueAssistContext(requestType, intent, hint, null, null, 0, null,
+                true /* focused */, true /* newSessionId */, userHandle, args,
+                PENDING_ASSIST_EXTRAS_TIMEOUT, 0) != null;
     }
 
     public void registerProcessObserver(IProcessObserver observer) {

@@ -16,10 +16,11 @@
 
 package com.android.server.autofill;
 
-import static android.view.View.ASSIST_FLAG_SANITIZED_TEXT;
-import static android.view.View.ASSIST_FLAG_NON_SANITIZED_TEXT;
+import static android.view.View.AUTO_FILL_FLAG_TYPE_FILL;
+import static android.view.View.AUTO_FILL_FLAG_TYPE_SAVE;
 
 import android.app.ActivityManager;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.os.UserHandle;
@@ -44,9 +45,9 @@ public final class AutoFillManagerServiceShellCommand extends ShellCommand {
         try {
             switch (cmd) {
                 case "fill":
-                    return requestAutoFill(ASSIST_FLAG_SANITIZED_TEXT);
+                    return requestAutoFill(AUTO_FILL_FLAG_TYPE_FILL);
                 case "save":
-                    return requestAutoFill(ASSIST_FLAG_NON_SANITIZED_TEXT);
+                    return requestAutoFill(AUTO_FILL_FLAG_TYPE_SAVE);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -73,7 +74,7 @@ public final class AutoFillManagerServiceShellCommand extends ShellCommand {
 
     private int requestAutoFill(int flags) throws RemoteException {
         final int userId = getUserIdFromArgs();
-        mService.requestAutoFill(null, userId, flags);
+        mService.requestAutoFill(null, userId, null, flags);
         return 0;
     }
 

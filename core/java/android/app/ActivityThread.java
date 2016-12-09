@@ -89,7 +89,7 @@ import android.provider.Settings;
 import android.security.NetworkSecurityPolicy;
 import android.security.net.config.NetworkSecurityConfigProvider;
 import android.service.autofill.AutoFillService;
-import android.service.autofill.IAutoFillCallback;
+import android.service.autofill.IAutoFillAppCallback;
 import android.service.voice.VoiceInteractionSession;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
@@ -2884,9 +2884,8 @@ public final class ActivityThread {
         // - it does not call onProvideAssistData()
         // - it needs an IAutoFillCallback
         // - it sets the flags so views can provide autofill-specific data (such as passwords)
-        boolean forAutoFill = (cmd.flags
-                & (View.ASSIST_FLAG_SANITIZED_TEXT
-                        | View.ASSIST_FLAG_NON_SANITIZED_TEXT)) != 0;
+        boolean forAutoFill = cmd.requestType == ActivityManager.ASSIST_CONTEXT_AUTO_FILL
+                || cmd.requestType == ActivityManager.ASSIST_CONTEXT_AUTO_FILL_SAVE;
 
         // TODO(b/33197203): decide if lastSessionId logic applies to auto-fill sessions
         if (mLastSessionId != cmd.sessionId) {
@@ -2910,22 +2909,23 @@ public final class ActivityThread {
             if (!forAutoFill) {
                 r.activity.getApplication().dispatchOnProvideAssistData(r.activity, data);
                 r.activity.onProvideAssistData(data);
+                referrer = r.activity.onProvideReferrer();
             }
-            referrer = r.activity.onProvideReferrer();
             if (cmd.requestType == ActivityManager.ASSIST_CONTEXT_FULL || forAutoFill) {
                 structure = new AssistStructure(r.activity, cmd.flags);
                 Intent activityIntent = r.activity.getIntent();
-                if (cmd.flags > 0) {
+                if (forAutoFill) {
                     data.putInt(VoiceInteractionSession.KEY_FLAGS, cmd.flags);
                 }
+                boolean addAutoFillCallback = false;
                 // TODO(b/33197203): re-evaluate conditions below for auto-fill. In particular,
                 // FLAG_SECURE might be allowed on AUTO_FILL but not on AUTO_FILL_SAVE)
-                if (activityIntent != null && (r.window == null ||
+                boolean notSecure = r.window == null ||
                         (r.window.getAttributes().flags
-                                & WindowManager.LayoutParams.FLAG_SECURE) == 0)) {
+                                & WindowManager.LayoutParams.FLAG_SECURE) == 0;
+                if (activityIntent != null && notSecure) {
                     if (forAutoFill) {
-                        IAutoFillCallback autoFillCallback = r.activity.getAutoFillCallback();
-                        data.putBinder(AutoFillService.KEY_CALLBACK, autoFillCallback.asBinder());
+                        addAutoFillCallback = true;
                     } else {
                         Intent intent = new Intent(activityIntent);
                         intent.setFlags(intent.getFlags() & ~(Intent.FLAG_GRANT_WRITE_URI_PERMISSION
@@ -2936,10 +2936,21 @@ public final class ActivityThread {
                 } else {
                     if (!forAutoFill) {
                         content.setDefaultIntent(new Intent());
+                    } else {
+                        // activityIntent is unlikely to be null, but if it is, we should still
+                        // set the auto-fill callback.
+                        addAutoFillCallback = notSecure;
                     }
                 }
                 if (!forAutoFill) {
                     r.activity.onProvideAssistContent(content);
+                } else if (addAutoFillCallback) {
+                    IAutoFillAppCallback cb = r.activity.getAutoFillCallback().get();
+                    if (cb != null) {
+                        data.putBinder(AutoFillService.KEY_CALLBACK, cb.asBinder());
+                    } else {
+                        Slog.w(TAG, "handleRequestAssistContextExtras(): callback was GCed");
+                    }
                 }
             }
         }

@@ -20,9 +20,11 @@ import static android.service.autofill.AutoFillService.DEBUG;
 
 import android.app.Activity;
 import android.app.assist.AssistStructure.ViewNode;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.autofill.AutoFillId;
 
 import com.android.internal.util.Preconditions;
 
@@ -34,46 +36,64 @@ public final class SaveCallback {
 
     private static final String TAG = "SaveCallback";
 
-    private final IAutoFillCallback mCallback;
+    private final IAutoFillServerCallback mCallback;
+
+    private boolean mReplied = false;
 
     /** @hide */
-    SaveCallback(IBinder binder) {
-        mCallback = IAutoFillCallback.Stub.asInterface(binder);
+    SaveCallback(IAutoFillServerCallback callback) {
+        mCallback = callback;
     }
 
     /**
-     * Notifies the {@link Activity} that the save request succeeded.
+     * Notifies the Android System that an
+     * {@link AutoFillService#onSaveRequest(android.app.assist.AssistStructure, Bundle, android.os.CancellationSignal, SaveCallback)}
+     * was successfully fulfilled by the service.
      *
      * @param ids ids ({@link ViewNode#getAutoFillId()}) of the fields that were saved.
      *
-     * @throws RuntimeException if an error occurred while saving the data.
+     * @throws RuntimeException if an error occurred while calling the Android System.
      */
-    public void onSuccess(int[] ids) {
+    public void onSuccess(AutoFillId[] ids) {
+        if (DEBUG) Log.d(TAG, "onSuccess(): ids=" + ((ids == null) ? "null" : ids.length));
+
         Preconditions.checkArgument(ids != null, "ids cannot be null");
+        checkNotRepliedYet();
 
         Preconditions.checkArgument(ids.length > 0, "ids cannot be empty");
 
-        if (DEBUG) Log.d(TAG, "onSuccess(): ids=" + ids.length);
-
-        // TODO(b/33197203): display which ids were saved
+        try {
+            mCallback.highlightSavedFields(ids);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
     }
 
     /**
-     * Notifies the {@link Activity} that the save request failed.
+     * Notifies the Android System that an
+     * {@link AutoFillService#onSaveRequest(android.app.assist.AssistStructure, Bundle, android.os.CancellationSignal, SaveCallback)}
+     * could not be fulfilled by the service.
      *
-     * @param message error message to be displayed.
+     * @param message error message to be displayed to the user.
      *
-     * @throws RuntimeException if an error occurred while notifying the activity.
+     * @throws RuntimeException if an error occurred while calling the Android System.
      */
     public void onFailure(CharSequence message) {
         if (DEBUG) Log.d(TAG, "onFailure(): message=" + message);
 
         Preconditions.checkArgument(message != null, "message cannot be null");
+        checkNotRepliedYet();
 
         try {
             mCallback.showError(message.toString());
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
+    }
+
+    // There can be only one!!
+    private void checkNotRepliedYet() {
+        Preconditions.checkState(!mReplied, "already replied");
+        mReplied = true;
     }
 }

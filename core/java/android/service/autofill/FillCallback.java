@@ -18,18 +18,15 @@ package android.service.autofill;
 
 import static android.service.autofill.AutoFillService.DEBUG;
 
+import android.annotation.Nullable;
 import android.app.Activity;
-import android.app.assist.AssistStructure.ViewNode;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
-import android.util.SparseArray;
+import android.view.autofill.FillResponse;
 
 import com.android.internal.util.Preconditions;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Handles auto-fill requests from the {@link AutoFillService} into the {@link Activity} being
@@ -39,40 +36,50 @@ public final class FillCallback {
 
     private static final String TAG = "FillCallback";
 
-    private final IAutoFillCallback mCallback;
+    private final IAutoFillServerCallback mCallback;
+
+    private boolean mReplied = false;
 
     /** @hide */
-    FillCallback(IBinder binder) {
-        mCallback = IAutoFillCallback.Stub.asInterface(binder);
+    FillCallback(IAutoFillServerCallback callback) {
+        mCallback = callback;
     }
 
     /**
-     * Auto-fills the {@link Activity}.
+     * Notifies the Android System that an
+     * {@link AutoFillService#onFillRequest(android.app.assist.AssistStructure, Bundle, android.os.CancellationSignal, FillCallback)}
+     * was successfully fulfilled by the service.
      *
-     * @throws RuntimeException if an error occurred while auto-filling it.
+     * @param response auto-fill information for that activity, or {@code null} when the activity
+     * cannot be auto-filled (for example, if it only contains read-only fields).
+     *
+     * @throws RuntimeException if an error occurred while calling the Android System.
      */
-    public void onSuccess(FillData data) {
-        if (DEBUG) Log.d(TAG, "onSuccess(): data=" + data);
+    public void onSuccess(@Nullable FillResponse response) {
+        if (DEBUG) Log.d(TAG, "onSuccess(): respose=" + response);
 
-        Preconditions.checkArgument(data != null, "data cannot be null");
+        checkNotRepliedYet();
 
         try {
-            mCallback.autofill(data.asList());
+            mCallback.showResponse(response);
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
     }
 
     /**
-     * Notifies the {@link Activity} that the auto-fill request failed.
+     * Notifies the Android System that an
+     * {@link AutoFillService#onFillRequest(android.app.assist.AssistStructure, Bundle, android.os.CancellationSignal, FillCallback)}
+     * could not be fulfilled by the service.
      *
-     * @param message error message to be displayed.
+     * @param message error message to be displayed to the user.
      *
-     * @throws RuntimeException if an error occurred while notifying the activity.
+     * @throws RuntimeException if an error occurred while calling the Android System.
      */
     public void onFailure(CharSequence message) {
         if (DEBUG) Log.d(TAG, "onFailure(): message=" + message);
 
+        checkNotRepliedYet();
         Preconditions.checkArgument(message != null, "message cannot be null");
 
         try {
@@ -82,70 +89,9 @@ public final class FillCallback {
         }
     }
 
-    /**
-     * Data used to fill the fields of an {@link Activity}.
-     *
-     * <p>This class is immutable.
-     */
-    public static final class FillData {
-
-        private final List<FillableInputField> mList;
-
-        private FillData(Builder builder) {
-            final int size = builder.mFields.size();
-            final List<FillableInputField> list = new ArrayList<>(size);
-            for (int i = 0; i < size; i++) {
-                list.add(builder.mFields.valueAt(i));
-            }
-            mList = Collections.unmodifiableList(list);
-            // TODO: use FastImmutableArraySet or a similar structure instead?
-        }
-
-        /**
-         * Gets the response as a {@code List} so it can be used in a binder call.
-         */
-        List<FillableInputField> asList() {
-            return mList;
-        }
-
-        @Override
-        public String toString() {
-            return "[AutoFillResponse: " + mList + "]";
-        }
-
-        /**
-         * Builder for {@link FillData} objects.
-         *
-         * <p>Typical usage:
-         *
-         * <pre class="prettyprint">
-         * FillCallback.FillData data = new FillCallback.FillData.Builder()
-         *     .setTextField(id1, "value 1")
-         *     .setTextField(id2, "value 2")
-         *     .build()
-         * </pre>
-         */
-        public static class Builder {
-            private final SparseArray<FillableInputField> mFields = new SparseArray<>();
-
-            /**
-             * Auto-fills a text field.
-             *
-             * @param id view id as returned by {@link ViewNode#getAutoFillId()}.
-             * @param text text to be auto-filled.
-             * @return same builder so it can be chained.
-             */
-            public Builder setTextField(int id, String text) {
-                mFields.put(id, FillableInputField.forText(id, text));
-                return this;
-            }
-
-            /**
-             * Builds a new {@link FillData} instance.
-             */
-            public FillData build() {
-                return new FillData(this);
-            }
-        }
+    // There can be only one!!
+    private void checkNotRepliedYet() {
+        Preconditions.checkState(!mReplied, "already replied");
+        mReplied = true;
     }
 }

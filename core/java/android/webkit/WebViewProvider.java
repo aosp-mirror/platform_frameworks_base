@@ -312,7 +312,7 @@ public interface WebViewProvider {
         public void onProvideVirtualStructure(android.view.ViewStructure structure);
 
         @SuppressWarnings("unused")
-        public default void onProvideVirtualStructure(android.view.ViewStructure structure,
+        public default void onProvideAutoFillVirtualStructure(android.view.ViewStructure structure,
                 int flags) {
         }
 
