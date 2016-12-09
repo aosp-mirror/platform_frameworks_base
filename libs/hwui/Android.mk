@@ -46,6 +46,7 @@ hwui_src_files := \
     renderthread/RenderTask.cpp \
     renderthread/RenderThread.cpp \
     renderthread/TimeLord.cpp \
+    renderthread/Frame.cpp \
     thread/TaskManager.cpp \
     utils/Blur.cpp \
     utils/GLUtils.cpp \

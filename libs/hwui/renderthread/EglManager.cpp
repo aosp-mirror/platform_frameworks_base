@@ -19,6 +19,7 @@
 #include "Texture.h"
 #include "Caches.h"
 #include "DeviceInfo.h"
+#include "Frame.h"
 #include "Properties.h"
 #include "RenderThread.h"
 #include "renderstate/RenderState.h"
@@ -73,24 +74,6 @@ static struct {
     bool bufferAge = false;
     bool setDamage = false;
 } EglExtensions;
-
-void Frame::map(const SkRect& in, EGLint* out) const {
-    /* The rectangles are specified relative to the bottom-left of the surface
-     * and the x and y components of each rectangle specify the bottom-left
-     * position of that rectangle.
-     *
-     * HWUI does everything with 0,0 being top-left, so need to map
-     * the rect
-     */
-    SkIRect idirty;
-    in.roundOut(&idirty);
-    EGLint y = mHeight - (idirty.y() + idirty.height());
-    // layout: {x, y, width, height}
-    out[0] = idirty.x();
-    out[1] = y;
-    out[2] = idirty.width();
-    out[3] = idirty.height();
-}
 
 EglManager::EglManager(RenderThread& thread)
         : mRenderThread(thread)

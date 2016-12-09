@@ -18,6 +18,7 @@
 
 #include "DeferredLayerUpdater.h"
 #include "EglManager.h"
+#include "Frame.h"
 #include "ProfileRenderer.h"
 #include "renderstate/RenderState.h"
 #include "OpenGLReadback.h"

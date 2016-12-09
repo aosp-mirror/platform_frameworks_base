@@ -16,6 +16,7 @@
 #include "Bitmap.h"
 
 #include "Caches.h"
+#include "renderthread/EglManager.h"
 #include "renderthread/RenderThread.h"
 #include "renderthread/RenderProxy.h"
 

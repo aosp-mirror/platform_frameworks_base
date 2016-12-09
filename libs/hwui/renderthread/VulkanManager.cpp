@@ -17,6 +17,7 @@
 #include "VulkanManager.h"
 
 #include "DeviceInfo.h"
+#include "Properties.h"
 #include "RenderThread.h"
 
 #include <GrContext.h>
@@ -100,6 +101,10 @@ void VulkanManager::initialize() {
     mRenderThread.setGrContext(GrContext::Create(kVulkan_GrBackend,
             (GrBackendContext) mBackendContext.get()));
     DeviceInfo::initialize(mRenderThread.getGrContext()->caps()->maxRenderTargetSize());
+
+    if (Properties::enablePartialUpdates && Properties::useBufferAge) {
+        mSwapBehavior = SwapBehavior::BufferAge;
+    }
 }
 
 // Returns the next BackbufferInfo to use for the next draw. The function will make sure all
@@ -162,7 +167,7 @@ SkSurface* VulkanManager::getBackbufferSurface(VulkanSurface* surface) {
     }
 
     // set up layout transfer from initial to color attachment
-    VkImageLayout layout = surface->mImageLayouts[backbuffer->mImageIndex];
+    VkImageLayout layout = surface->mImageInfos[backbuffer->mImageIndex].mImageLayout;
     SkASSERT(VK_IMAGE_LAYOUT_UNDEFINED == layout || VK_IMAGE_LAYOUT_PRESENT_SRC_KHR == layout);
     VkPipelineStageFlags srcStageMask = (VK_IMAGE_LAYOUT_UNDEFINED == layout) ?
                                         VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT :
@@ -215,7 +220,7 @@ SkSurface* VulkanManager::getBackbufferSurface(VulkanSurface* surface) {
 
     // We need to notify Skia that we changed the layout of the wrapped VkImage
     GrVkImageInfo* imageInfo;
-    sk_sp<SkSurface> skSurface = surface->mSurfaces[backbuffer->mImageIndex];
+    sk_sp<SkSurface> skSurface = surface->mImageInfos[backbuffer->mImageIndex].mSurface;
     skSurface->getRenderTargetHandle((GrBackendObject*)&imageInfo,
             SkSurface::kFlushRead_BackendHandleAccess);
     imageInfo->updateImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
@@ -243,10 +248,8 @@ void VulkanManager::destroyBuffers(VulkanSurface* surface) {
 
     delete[] surface->mBackbuffers;
     surface->mBackbuffers = nullptr;
-    delete[] surface->mSurfaces;
-    surface->mSurfaces = nullptr;
-    delete[] surface->mImageLayouts;
-    surface->mImageLayouts = nullptr;
+    delete[] surface->mImageInfos;
+    surface->mImageInfos = nullptr;
     delete[] surface->mImages;
     surface->mImages = nullptr;
 }
@@ -286,8 +289,7 @@ void VulkanManager::createBuffers(VulkanSurface* surface, VkFormat format, VkExt
     GrPixelConfig config = wantSRGB ? kSRGBA_8888_GrPixelConfig : kRGBA_8888_GrPixelConfig;
 
     // set up initial image layouts and create surfaces
-    surface->mImageLayouts = new VkImageLayout[surface->mImageCount];
-    surface->mSurfaces = new sk_sp<SkSurface>[surface->mImageCount];
+    surface->mImageInfos = new VulkanSurface::ImageInfo[surface->mImageCount];
     for (uint32_t i = 0; i < surface->mImageCount; ++i) {
         GrBackendRenderTargetDesc desc;
         GrVkImageInfo info;
@@ -306,9 +308,9 @@ void VulkanManager::createBuffers(VulkanSurface* surface, VkFormat format, VkExt
         desc.fStencilBits = 0;
         desc.fRenderTargetHandle = (GrBackendObject) &info;
 
-        surface->mSurfaces[i] = SkSurface::MakeFromBackendRenderTarget(mRenderThread.getGrContext(),
+        VulkanSurface::ImageInfo& imageInfo = surface->mImageInfos[i];
+        imageInfo.mSurface = SkSurface::MakeFromBackendRenderTarget(mRenderThread.getGrContext(),
                 desc, &props);
-        surface->mImageLayouts[i] = VK_IMAGE_LAYOUT_UNDEFINED;
     }
 
     SkASSERT(mCommandPool != VK_NULL_HANDLE);
@@ -595,7 +597,7 @@ void VulkanManager::swapBuffers(VulkanSurface* surface) {
     VulkanSurface::BackbufferInfo* backbuffer = surface->mBackbuffers +
             surface->mCurrentBackbufferIndex;
     GrVkImageInfo* imageInfo;
-    SkSurface* skSurface = surface->mSurfaces[backbuffer->mImageIndex].get();
+    SkSurface* skSurface = surface->mImageInfos[backbuffer->mImageIndex].mSurface.get();
     skSurface->getRenderTargetHandle((GrBackendObject*)&imageInfo,
             SkSurface::kFlushRead_BackendHandleAccess);
     // Check to make sure we never change the actually wrapped image
@@ -632,7 +634,7 @@ void VulkanManager::swapBuffers(VulkanSurface* surface) {
             0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
     mEndCommandBuffer(backbuffer->mTransitionCmdBuffers[1]);
 
-    surface->mImageLayouts[backbuffer->mImageIndex] = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    surface->mImageInfos[backbuffer->mImageIndex].mImageLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
     // insert the layout transfer into the queue and wait on the acquire
     VkSubmitInfo submitInfo;
@@ -668,6 +670,20 @@ void VulkanManager::swapBuffers(VulkanSurface* surface) {
     mQueuePresentKHR(mPresentQueue, &presentInfo);
 
     surface->mBackbuffer.reset();
+    surface->mImageInfos[backbuffer->mImageIndex].mLastUsed = surface->mCurrentTime;
+    surface->mImageInfos[backbuffer->mImageIndex].mInvalid = false;
+    surface->mCurrentTime++;
+}
+
+int VulkanManager::getAge(VulkanSurface* surface) {
+    VulkanSurface::BackbufferInfo* backbuffer = surface->mBackbuffers +
+            surface->mCurrentBackbufferIndex;
+    if (mSwapBehavior == SwapBehavior::Discard
+            || surface->mImageInfos[backbuffer->mImageIndex].mInvalid) {
+        return 0;
+    }
+    uint16_t lastUsed = surface->mImageInfos[backbuffer->mImageIndex].mLastUsed;
+    return surface->mCurrentTime - lastUsed;
 }
 
 } /* namespace renderthread */

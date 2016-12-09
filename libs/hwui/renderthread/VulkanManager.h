@@ -46,6 +46,13 @@ private:
         VkFence         mUsageFences[2];
     };
 
+    struct ImageInfo {
+        VkImageLayout mImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        sk_sp<SkSurface> mSurface;
+        uint16_t mLastUsed = 0;
+        bool mInvalid = true;
+    };
+
     sk_sp<SkSurface> mBackbuffer;
 
     VkSurfaceKHR mVkSurface = VK_NULL_HANDLE;
@@ -56,8 +63,8 @@ private:
 
     uint32_t mImageCount;
     VkImage* mImages;
-    VkImageLayout* mImageLayouts;
-    sk_sp<SkSurface>* mSurfaces;
+    ImageInfo* mImageInfos;
+    uint16_t mCurrentTime = 0;
 };
 
 // This class contains the shared global Vulkan objects, such as VkInstance, VkDevice and VkQueue,
@@ -86,6 +93,8 @@ public:
     // No work is needed to make a VulkanSurface current, and all functions require that a
     // VulkanSurface is passed into them so we just return true here.
     bool isCurrent(VulkanSurface* surface) { return true; }
+
+    int getAge(VulkanSurface* surface);
 
     // Returns an SkSurface which wraps the next image returned from vkAcquireNextImageKHR. It also
     // will transition the VkImage from a present layout to color attachment so that it can be used
@@ -161,6 +170,12 @@ private:
     uint32_t mPresentQueueIndex;
     VkQueue mPresentQueue = VK_NULL_HANDLE;
     VkCommandPool mCommandPool = VK_NULL_HANDLE;
+
+    enum class SwapBehavior {
+        Discard,
+        BufferAge,
+    };
+    SwapBehavior mSwapBehavior = SwapBehavior::Discard;
 };
 
 } /* namespace renderthread */

@@ -17,7 +17,6 @@
 #pragma once
 
 #include "FrameInfoVisualizer.h"
-#include "EglManager.h"
 
 #include <SkRect.h>
 #include <utils/RefBase.h>
