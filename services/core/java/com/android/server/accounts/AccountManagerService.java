@@ -2136,14 +2136,17 @@ public class AccountManagerService
             try {
                 accountId = accounts.accountsDb.findDeAccountId(account);
                 if (accountId >= 0) {
-                    accounts.accountsDb.deleteDeAccount(accountId);
-                    if (userUnlocked) {
-                        // Delete from CE table
-                        accounts.accountsDb.deleteCeAccount(accountId);
-                    }
-                    accounts.accountsDb.setTransactionSuccessful();
-                    isChanged = true;
+                    isChanged = accounts.accountsDb.deleteDeAccount(accountId);
                 }
+                // always delete from CE table if CE storage is available
+                // DE account could be removed while CE was locked
+                if (userUnlocked) {
+                    long ceAccountId = accounts.accountsDb.findCeAccountId(account);
+                    if (ceAccountId >= 0) {
+                        accounts.accountsDb.deleteCeAccount(ceAccountId);
+                    }
+                }
+                accounts.accountsDb.setTransactionSuccessful();
             } finally {
                 accounts.accountsDb.endTransaction();
             }

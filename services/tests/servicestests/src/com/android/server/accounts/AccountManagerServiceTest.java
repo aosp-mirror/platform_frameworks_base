@@ -254,11 +254,11 @@ public class AccountManagerServiceTest extends AndroidTestCase {
 
         // Unlock the user and verify that db has been updated
         ams2.onUserUnlocked(newIntentForUser(UserHandle.USER_SYSTEM));
-        accountsNumber = readNumberOfAccountsFromDbFile(originalContext, ceDatabaseName);
-        assertEquals("CE database should now have 1 account", 2, accountsNumber);
         accounts = ams2.getAccounts(UserHandle.USER_SYSTEM, mContext.getOpPackageName());
         assertEquals(1, accounts.length);
         assertEquals("Only a2 should be returned", a2, accounts[0]);
+        accountsNumber = readNumberOfAccountsFromDbFile(originalContext, ceDatabaseName);
+        assertEquals("CE database should now have 1 account", 1, accountsNumber);
     }
 
     @SmallTest
