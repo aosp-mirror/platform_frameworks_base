@@ -1552,9 +1552,6 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void createNotificationChannel(String pkg, NotificationChannel channel,
                 IOnNotificationChannelCreatedListener listener) throws RemoteException {
-            Preconditions.checkNotNull(channel);
-            Preconditions.checkNotNull(channel.getId());
-            Preconditions.checkNotNull(channel.getName());
             checkCallerIsSystemOrSameApp(pkg);
             mRankingHelper.createNotificationChannel(pkg, Binder.getCallingUid(), channel);
             savePolicyFile();
@@ -1563,7 +1560,6 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public NotificationChannel getNotificationChannel(String pkg, String channelId) {
-            Preconditions.checkNotNull(channelId);
             checkCallerIsSystemOrSameApp(pkg);
             return mRankingHelper.getNotificationChannel(pkg, Binder.getCallingUid(), channelId);
         }
@@ -1571,14 +1567,12 @@ public class NotificationManagerService extends SystemService {
         @Override
         public NotificationChannel getNotificationChannelForPackage(String pkg, int uid,
                 String channelId) {
-            Preconditions.checkNotNull(channelId);
             checkCallerIsSystem();
             return mRankingHelper.getNotificationChannel(pkg, uid, channelId);
         }
 
         @Override
         public void deleteNotificationChannel(String pkg, String channelId) {
-            Preconditions.checkNotNull(channelId);
             checkCallerIsSystemOrSameApp(pkg);
             if (NotificationChannel.DEFAULT_CHANNEL_ID.equals(channelId)) {
                 throw new IllegalArgumentException("Cannot delete default channel");
@@ -1592,8 +1586,6 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void updateNotificationChannelForPackage(String pkg, int uid,
                 NotificationChannel channel) {
-            Preconditions.checkNotNull(channel);
-            Preconditions.checkNotNull(channel.getId());
             checkCallerIsSystem();
             if (channel.getImportance() == NotificationManager.IMPORTANCE_NONE) {
                 // cancel
@@ -2383,7 +2375,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void applyAdjustmentFromAssistantService(INotificationListener token,
+        public void applyAdjustmentFromAssistant(INotificationListener token,
                 Adjustment adjustment) throws RemoteException {
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -2398,7 +2390,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void applyAdjustmentsFromAssistantService(INotificationListener token,
+        public void applyAdjustmentsFromAssistant(INotificationListener token,
                 List<Adjustment> adjustments) throws RemoteException {
 
             final long identity = Binder.clearCallingIdentity();
@@ -2413,6 +2405,52 @@ public class NotificationManagerService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
+        }
+
+        @Override
+        public void createNotificationChannelFromAssistant(INotificationListener token, String pkg,
+                NotificationChannel channel) throws RemoteException {
+            ManagedServiceInfo info = mNotificationAssistants.checkServiceTokenLocked(token);
+            int uid = mPackageManager.getPackageUid(pkg, 0, info.userid);
+            mRankingHelper.createNotificationChannel(pkg, uid, channel);
+            savePolicyFile();
+        }
+
+        @Override
+        public void deleteNotificationChannelFromAssistant(INotificationListener token, String pkg,
+                String channelId) throws RemoteException {
+            ManagedServiceInfo info = mNotificationAssistants.checkServiceTokenLocked(token);
+            if (NotificationChannel.DEFAULT_CHANNEL_ID.equals(channelId)) {
+                throw new IllegalArgumentException("Cannot delete default channel");
+            }
+
+            int uid = mPackageManager.getPackageUid(pkg, 0, info.userid);
+            cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channelId, 0, 0, true,
+                    info.userid, REASON_CHANNEL_BANNED, null);
+            mRankingHelper.deleteNotificationChannel(pkg, uid, channelId);
+            savePolicyFile();
+        }
+
+        @Override
+        public void updateNotificationChannelFromAssistant(INotificationListener token, String pkg,
+                NotificationChannel channel) throws RemoteException {
+            ManagedServiceInfo info = mNotificationAssistants.checkServiceTokenLocked(token);
+            if (channel.getImportance() == NotificationManager.IMPORTANCE_NONE) {
+                // cancel
+                cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channel.getId(), 0, 0, true,
+                        info.userid, REASON_CHANNEL_BANNED, null);
+            }
+            int uid = mPackageManager.getPackageUid(pkg, 0, info.userid);
+            mRankingHelper.updateNotificationChannelFromAssistant(pkg, uid, channel);
+            savePolicyFile();
+        }
+
+        @Override
+        public ParceledListSlice<NotificationChannel> getNotificationChannelsFromAssistant(
+                INotificationListener token, String pkg) throws RemoteException {
+            ManagedServiceInfo info = mNotificationAssistants.checkServiceTokenLocked(token);
+            int uid = mPackageManager.getPackageUid(pkg, 0, info.userid);
+            return mRankingHelper.getNotificationChannels(pkg, uid);
         }
     };
 

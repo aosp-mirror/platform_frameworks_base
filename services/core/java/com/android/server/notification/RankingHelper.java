@@ -18,6 +18,7 @@ package com.android.server.notification;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 
 import com.android.internal.R;
+import com.android.internal.util.Preconditions;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -451,7 +452,14 @@ public class RankingHelper implements RankingConfig {
 
     @Override
     public void createNotificationChannel(String pkg, int uid, NotificationChannel channel) {
+        Preconditions.checkNotNull(pkg);
+        Preconditions.checkNotNull(channel);
+        Preconditions.checkNotNull(channel.getId());
+        Preconditions.checkNotNull(channel.getName());
         Record r = getOrCreateRecord(pkg, uid);
+        if (r == null) {
+            throw new IllegalArgumentException("Invalid package");
+        }
         if (IMPORTANCE_NONE == r.importance) {
             throw new IllegalArgumentException("Package blocked");
         }
@@ -472,7 +480,12 @@ public class RankingHelper implements RankingConfig {
 
     @Override
     public void updateNotificationChannel(String pkg, int uid, NotificationChannel updatedChannel) {
+        Preconditions.checkNotNull(updatedChannel);
+        Preconditions.checkNotNull(updatedChannel.getId());
         Record r = getOrCreateRecord(pkg, uid);
+        if (r == null) {
+            throw new IllegalArgumentException("Invalid package");
+        }
         NotificationChannel channel = r.channels.get(updatedChannel.getId());
         if (channel == null) {
             throw new IllegalArgumentException("Channel does not exist");
@@ -485,9 +498,12 @@ public class RankingHelper implements RankingConfig {
     }
 
     @Override
-    public void updateNotificationChannelFromRanker(String pkg, int uid,
+    public void updateNotificationChannelFromAssistant(String pkg, int uid,
             NotificationChannel updatedChannel) {
         Record r = getOrCreateRecord(pkg, uid);
+        if (r == null) {
+            throw new IllegalArgumentException("Invalid package");
+        }
         NotificationChannel channel = r.channels.get(updatedChannel.getId());
         if (channel == null) {
             throw new IllegalArgumentException("Channel does not exist");
@@ -538,7 +554,11 @@ public class RankingHelper implements RankingConfig {
 
     @Override
     public NotificationChannel getNotificationChannel(String pkg, int uid, String channelId) {
+        Preconditions.checkNotNull(pkg);
         Record r = getOrCreateRecord(pkg, uid);
+        if (r == null) {
+            throw new IllegalArgumentException("Invalid package");
+        }
         if (channelId == null) {
             channelId = NotificationChannel.DEFAULT_CHANNEL_ID;
         }
@@ -547,7 +567,12 @@ public class RankingHelper implements RankingConfig {
 
     @Override
     public void deleteNotificationChannel(String pkg, int uid, String channelId) {
+        Preconditions.checkNotNull(pkg);
+        Preconditions.checkNotNull(channelId);
         Record r = getRecord(pkg, uid);
+        if (r == null) {
+            throw new IllegalArgumentException("Invalid package");
+        }
         if (r != null) {
             r.channels.remove(channelId);
         }
@@ -555,8 +580,12 @@ public class RankingHelper implements RankingConfig {
 
     @Override
     public ParceledListSlice<NotificationChannel> getNotificationChannels(String pkg, int uid) {
+        Preconditions.checkNotNull(pkg);
         List<NotificationChannel> channels = new ArrayList<>();
-        Record r = getOrCreateRecord(pkg, uid);
+        Record r = getRecord(pkg, uid);
+        if (r == null) {
+            throw new IllegalArgumentException("Invalid package");
+        }
         int N = r.channels.size();
         for (int i = 0; i < N; i++) {
             channels.add(r.channels.valueAt(i));

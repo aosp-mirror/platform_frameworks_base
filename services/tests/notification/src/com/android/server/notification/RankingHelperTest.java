@@ -375,7 +375,7 @@ public class RankingHelperTest {
         final NotificationChannel channel2 =
             new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_HIGH);
 
-        mHelper.updateNotificationChannelFromRanker(pkg, uid, channel2);
+        mHelper.updateNotificationChannelFromAssistant(pkg, uid, channel2);
 
         // no fields should be changed
         assertEquals(channel, mHelper.getNotificationChannel(pkg, uid, channel.getId()));
@@ -396,7 +396,7 @@ public class RankingHelperTest {
             new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_HIGH);
         channel2.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
 
-        mHelper.updateNotificationChannelFromRanker(pkg, uid, channel2);
+        mHelper.updateNotificationChannelFromAssistant(pkg, uid, channel2);
 
         // no fields should be changed
         assertEquals(channel, mHelper.getNotificationChannel(pkg, uid, channel.getId()));
@@ -418,7 +418,7 @@ public class RankingHelperTest {
         channel2.enableVibration(true);
         channel2.setVibrationPattern(new long[] {100});
 
-        mHelper.updateNotificationChannelFromRanker(pkg, uid, channel2);
+        mHelper.updateNotificationChannelFromAssistant(pkg, uid, channel2);
 
         // no fields should be changed
         assertEquals(channel, mHelper.getNotificationChannel(pkg, uid, channel.getId()));
@@ -439,7 +439,7 @@ public class RankingHelperTest {
             new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_HIGH);
         channel2.setLights(true);
 
-        mHelper.updateNotificationChannelFromRanker(pkg, uid, channel2);
+        mHelper.updateNotificationChannelFromAssistant(pkg, uid, channel2);
 
         // no fields should be changed
         assertEquals(channel, mHelper.getNotificationChannel(pkg, uid, channel.getId()));
@@ -460,7 +460,7 @@ public class RankingHelperTest {
             new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_HIGH);
         channel2.setBypassDnd(false);
 
-        mHelper.updateNotificationChannelFromRanker(pkg, uid, channel2);
+        mHelper.updateNotificationChannelFromAssistant(pkg, uid, channel2);
 
         // no fields should be changed
         assertEquals(channel, mHelper.getNotificationChannel(pkg, uid, channel.getId()));
@@ -481,7 +481,7 @@ public class RankingHelperTest {
             new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_HIGH);
         channel2.setSound(new Uri.Builder().scheme("test2").build());
 
-        mHelper.updateNotificationChannelFromRanker(pkg, uid, channel2);
+        mHelper.updateNotificationChannelFromAssistant(pkg, uid, channel2);
 
         // no fields should be changed
         assertEquals(channel, mHelper.getNotificationChannel(pkg, uid, channel.getId()));

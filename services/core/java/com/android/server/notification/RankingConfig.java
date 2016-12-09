@@ -34,7 +34,7 @@ public interface RankingConfig {
 
     void createNotificationChannel(String pkg, int uid, NotificationChannel channel);
     void updateNotificationChannel(String pkg, int uid, NotificationChannel channel);
-    void updateNotificationChannelFromRanker(String pkg, int uid, NotificationChannel channel);
+    void updateNotificationChannelFromAssistant(String pkg, int uid, NotificationChannel channel);
     NotificationChannel getNotificationChannel(String pkg, int uid, String channelId);
     NotificationChannel getNotificationChannelWithFallback(String pkg, int uid, String channelId);
     void deleteNotificationChannel(String pkg, int uid, String channelId);

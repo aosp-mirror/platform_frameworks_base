@@ -99,8 +99,12 @@ interface INotificationManager
     void setOnNotificationPostedTrimFromListener(in INotificationListener token, int trim);
     void setInterruptionFilter(String pkg, int interruptionFilter);
 
-    void applyAdjustmentFromAssistantService(in INotificationListener token, in Adjustment adjustment);
-    void applyAdjustmentsFromAssistantService(in INotificationListener token, in List<Adjustment> adjustments);
+    void applyAdjustmentFromAssistant(in INotificationListener token, in Adjustment adjustment);
+    void applyAdjustmentsFromAssistant(in INotificationListener token, in List<Adjustment> adjustments);
+    void createNotificationChannelFromAssistant(in INotificationListener token, String pkg, in NotificationChannel channel);
+    void updateNotificationChannelFromAssistant(in INotificationListener token, String pkg, in NotificationChannel channel);
+    void deleteNotificationChannelFromAssistant(in INotificationListener token, String pkg, String channelId);
+    ParceledListSlice getNotificationChannelsFromAssistant(in INotificationListener token, String pkg);
 
     ComponentName getEffectsSuppressor();
     boolean matchesCallFilter(in Bundle extras);

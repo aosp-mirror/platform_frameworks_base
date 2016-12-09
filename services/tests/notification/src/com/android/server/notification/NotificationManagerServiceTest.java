@@ -57,8 +57,6 @@ public class NotificationManagerServiceTest {
         when(mockPackageManager.getApplicationInfo(any(), anyInt(), anyInt()))
                 .thenReturn(applicationInfo);
         mNotificationManagerService.setPackageManager(mockPackageManager);
-
-        mNotificationManagerService.setRankingHelper(mock(RankingHelper.class));
         mNotificationManagerService.setHandler(new Handler(context.getMainLooper()));
 
         // Tests call directly into the Binder.
@@ -69,6 +67,7 @@ public class NotificationManagerServiceTest {
     public void testCreateNotificationChannel_SuccessCallsListener() throws Exception {
         final NotificationChannel channel =
                 new NotificationChannel("id", "name", NotificationManager.IMPORTANCE_DEFAULT);
+        mNotificationManagerService.setRankingHelper(mock(RankingHelper.class));
         final CountDownLatch latch = new CountDownLatch(1);
         mBinderService.createNotificationChannel("test_pkg", channel,
                 new IOnNotificationChannelCreatedListener.Stub() {
