@@ -599,7 +599,7 @@
     <string name="phoneTypeMobile" msgid="6501463557754751037">"נייד"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"עבודה"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"פקס בעבודה"</string>
-    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"מס\' פקס בבית"</string>
+    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"פקס בבית"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"זימונית"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"אחר"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"התקשרות חזרה"</string>
@@ -612,7 +612,7 @@
     <string name="phoneTypeTelex" msgid="3367879952476250512">"טלקס"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"נייד של העבודה"</string>
-    <string name="phoneTypeWorkPager" msgid="649938731231157056">"איתורית של העבודה"</string>
+    <string name="phoneTypeWorkPager" msgid="649938731231157056">"זימונית מהעבודה"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"מסייע"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"מותאם אישית"</string>
@@ -1258,6 +1258,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"מאפשר לאפליקציה לקרוא הפעלות התקנה. הרשאה זו מאפשרת לה לראות פרטים על התקנות פעילות של חבילות."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"בקשה להתקנת חבילות"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"מתיר לאפליקציה לבקש התקנה של חבילות."</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"הקש פעמיים לבקרת מרחק מתצוגה"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"‏לא ניתן להוסיף widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"התחל"</string>

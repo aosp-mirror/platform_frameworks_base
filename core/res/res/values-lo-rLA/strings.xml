@@ -1208,6 +1208,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ພລິ​ເຄ​ຊັນ​ອ່ານ​ເຊດ​ຊັນ​ການ​ຕິດ​ຕັ້ງ​ໄດ້. ນີ້​ຈະ​ອະ​ນຸ​ຍາດ​ໃຫ້​ມັນ​ເບິ່ງ​ເຫັນ​ລາຍ​ລະ​ອຽດ​ກ່ຽວ​ກັບ​ການ​ຕິດ​ຕັ້ງ​ແພັກ​ເກດ​ທີ່​ເຮັດ​​ວຽກ​ຢູ່​ໄດ້."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"ຂໍ​ຕິດ​ຕັ້ງ​ແພັກ​ເກດ"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ພ​ລິ​ເຄ​ຊັນ​ຂອງ​ການ​ຕິດ​ຕັ້ງ​ແພັກ​ເກດ."</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"ແຕະສອງເທື່ອເພື່ອຄວບຄຸມການຊູມ"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ບໍ່ສາມາດເພີ່ມວິດເຈັດໄດ້."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"ໄປ"</string>

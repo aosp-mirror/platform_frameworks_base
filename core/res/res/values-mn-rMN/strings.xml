@@ -436,7 +436,7 @@
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"хурууны хээний програм хангамжийг удирдах"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Хурууны хээний загварыг нэмэх эсвэл усгтах үйлдлийг хийх зөвшөөрлийг програмд олгодог."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"хурууны хээний програм хангамжийг ашиглах"</string>
-    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Баталгаажуулалт хийх зорилгоор хурууны хээний програм хамгамжийг ашиглах зөвшөөрлийг програмд олгодог"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Баталгаажуулалт хийх зорилгоор хурууны хээний апп хамгамжийг ашиглах зөвшөөрлийг аппд олгодог"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Хурууны хээг дутуу уншуулсан байна. Дахин оролдоно уу."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Хурууны хээ боловсруулж чадахгүй байна. Дахин оролдоно уу."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Хурууны хээ мэдрэгч бохирдсон байна. Та цэвэрлэсний дараагаар дахин оролдоно уу."</string>
@@ -1202,12 +1202,16 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"Хэлбэршүүлж байна..."</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"Оруулаагүй байна"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Таарах активити олдсонгүй."</string>
-    <string name="permlab_route_media_output" msgid="6243022988998972085">"медиа гаралтын маршрут"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"медиа гаралтын чиглэл"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Аппликешн нь медиа гаралтыг бусад гадаад төхөөрөмжрүү чиглүүлэх боломжтой."</string>
     <string name="permlab_readInstallSessions" msgid="3713753067455750349">"Суулгах харилцан үйлдлийг унших"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Аппликешн-д суулгах сешн уншихыг зөвшөөрнө. Энэ нь идэвхтэй багцуудыг суулгалтын талаар дэлгэрэнгүй мэдээллийг үзэх боломж олгоно."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"багц суулгахыг хүсэх"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Аппликейшн нь багц суулгахыг хүсэх боломжтой."</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Өсгөх контрол дээр хоёр удаа товшино уу"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Виджет нэмж чадсангүй."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Очих"</string>
@@ -1234,7 +1238,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Ханын зураг"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Ханын зураг солих"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Мэдэгдэл сонсогч"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"VR сонсогч"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Виртуал Орчин (VR) сонсогч"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Нөхцөл нийлүүлэгч"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Мэдэгдлийг ангилах үйлчилгээ"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN идэвхтэй болов"</string>

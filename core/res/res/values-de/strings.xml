@@ -1208,6 +1208,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Ermöglicht der App, Installationssitzungen zu lesen. Dadurch kann sie Details aktiver Paketinstallationen abrufen."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"Installation von Paketen anfordern"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Ermöglicht der App, die Installation von Paketen anzufordern"</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Für Zoomeinstellung zweimal berühren"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Widget konnte nicht hinzugefügt werden."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Los"</string>
@@ -1226,7 +1230,7 @@
     <string name="deny" msgid="2081879885755434506">"Ablehnen"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Berechtigung angefordert"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Berechtigung angefordert\nfür Konto <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
-    <string name="forward_intent_to_owner" msgid="1207197447013960896">"Sie verwenden diese App außerhalb Ihres Arbeitsprofils"</string>
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"Du verwendest diese App außerhalb deines Arbeitsprofils"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"Du verwendest diese App in deinem Arbeitsprofil."</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Eingabemethode"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Synchronisieren"</string>

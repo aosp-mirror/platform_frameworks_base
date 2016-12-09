@@ -596,7 +596,7 @@
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Fax de casa"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Cercapersones"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Altres"</string>
-    <string name="phoneTypeCallback" msgid="2712175203065678206">"Torna la trucada"</string>
+    <string name="phoneTypeCallback" msgid="2712175203065678206">"Devolució de trucada"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Cotxe"</string>
     <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Telèfon d\'empresa"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"XDSI"</string>
@@ -1208,6 +1208,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Permet que una aplicació llegeixi les sessions d\'instal·lació i això permet veure detalls sobre les instal·lacions de paquet actives."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"sol·licitar la instal·lació de paquets"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Permet que una aplicació sol·liciti la instal·lació de paquets."</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Piqueu dos cops per controlar el zoom"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"No s\'ha pogut afegir el widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Vés"</string>
@@ -1246,7 +1250,7 @@
     <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"La VPN sempre activada està desconnectada"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Error de la VPN sempre activada"</string>
     <string name="vpn_lockdown_config" msgid="5099330695245008680">"Toca per configurar"</string>
-    <string name="upload_file" msgid="2897957172366730416">"Trieu un fitxer"</string>
+    <string name="upload_file" msgid="2897957172366730416">"Tria un fitxer"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"No s\'ha escollit cap fitxer"</string>
     <string name="reset" msgid="2448168080964209908">"Restableix"</string>
     <string name="submit" msgid="1602335572089911941">"Envia"</string>

@@ -258,7 +258,7 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Cámara"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"hacer fotos y grabar vídeos"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Teléfono"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"hacer y administrar llamadas de teléfono"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"hacer y administrar llamadas telefónicas"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Sensores corporales"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"acceder a datos de sensores de tus constantes vitales"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperar el contenido de la ventana"</string>
@@ -1208,6 +1208,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Permite que una aplicación consulte sesiones de instalación para ver detalles sobre instalaciones de paquetes activos."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"solicitar instalación de paquetes"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Permite a una aplicación solicitar la instalación de paquetes."</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Da dos toques para acceder al control de zoom."</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"No se ha podido añadir el widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Ir"</string>

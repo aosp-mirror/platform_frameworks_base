@@ -650,7 +650,7 @@
     <string name="relationTypeMother" msgid="4578571352962758304">"Ema"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Vanem"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Partner"</string>
-    <string name="relationTypeReferredBy" msgid="101573059844135524">"Viitas:"</string>
+    <string name="relationTypeReferredBy" msgid="101573059844135524">"Soovitaja"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"Sugulane"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Õde"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Abikaasa"</string>
@@ -1208,6 +1208,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Lubab rakendusel lugeda installiseansse. See võimaldab näha aktiivse paketi installimise üksikasju."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"installipakettide taotlemine"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Võimaldab rakendusel pakettide installimist taotleda."</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Suumi kasutamiseks koputage kaks korda"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Vidinat ei saanud lisada."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Mine"</string>

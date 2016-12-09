@@ -1208,6 +1208,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"อนุญาตให้แอปพลิเคชันอ่านเซสชันการติดตั้ง ซึ่งจะอนุญาตให้อ่านรายละเอียดเกี่ยวกับการติดตั้งแพ็กเกจที่ใช้งาน"</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"ขอติดตั้งแพ็กเกจ"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"อนุญาตให้แอปพลิเคชันขอการติดตั้งแพ็กเกจ"</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"แตะสองครั้งเพื่อควบคุมการซูม"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ไม่สามารถเพิ่มวิดเจ็ต"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"ไป"</string>
@@ -1547,7 +1551,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"ลองอีกครั้งในภายหลัง"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"กำลังดูแบบเต็มหน้าจอ"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"หากต้องการออกไป ให้เลื่อนลงจากด้านบน"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"หากต้องการออก ให้เลื่อนลงจากด้านบน"</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"รับทราบ"</string>
     <string name="done_label" msgid="2093726099505892398">"เสร็จสิ้น"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"ตัวเลื่อนหมุนระบุชั่วโมง"</string>

@@ -649,10 +649,10 @@
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Asistent"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Brat"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"Dieťa"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Partner(ka)"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Druh(-žka)"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"Otec"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"Kamarát(ka)"</string>
-    <string name="relationTypeManager" msgid="6365677861610137895">"Manažér"</string>
+    <string name="relationTypeManager" msgid="6365677861610137895">"Vedúci(-a)"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"Matka"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Rodič"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Partner(ka)"</string>
@@ -1258,6 +1258,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Toto povolenie umožňuje aplikácii čítať relácie inštalácií a zobraziť tak podrobnosti o aktívnych inštaláciách balíkov."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"odosielanie žiadostí o inštaláciu balíkov"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Umožňuje aplikácii vyžiadať inštaláciu balíkov."</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Dvojitým klepnutím môžete ovládať priblíženie"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Miniaplikáciu sa nepodarilo pridať."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Hľadať"</string>

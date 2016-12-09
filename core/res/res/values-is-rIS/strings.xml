@@ -1208,6 +1208,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Leyfir forriti að lesa uppsetningarlotur. Þetta gerir því kleift að sjá upplýsingar um virkar pakkauppsetningar."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"fara fram á uppsetningu pakka"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Leyfir forriti að fara fram á uppsetningu pakka."</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Ýttu tvisvar til að opna aðdráttarstýringar"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Ekki tókst að bæta græju við."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Áfram"</string>
