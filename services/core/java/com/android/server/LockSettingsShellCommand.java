@@ -77,7 +77,8 @@ class LockSettingsShellCommand extends ShellCommand {
             }
             return 0;
         } catch (Exception e) {
-            getErrPrintWriter().println("Error while executing command: " + e);
+            getErrPrintWriter().println("Error while executing command: " + cmd);
+            e.printStackTrace(getErrPrintWriter());
             return -1;
         }
     }

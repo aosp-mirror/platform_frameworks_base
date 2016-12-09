@@ -23,6 +23,7 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STR
 
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.IActivityManager;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -70,6 +71,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.ICheckCredentialProgressCallback;
 import com.android.internal.widget.ILockSettings;
@@ -123,20 +125,23 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private final Object mSeparateChallengeLock = new Object();
 
+    private final Injector mInjector;
     private final Context mContext;
     private final Handler mHandler;
-    private final LockSettingsStorage mStorage;
+    @VisibleForTesting
+    protected final LockSettingsStorage mStorage;
     private final LockSettingsStrongAuth mStrongAuth;
     private final SynchronizedStrongAuthTracker mStrongAuthTracker;
 
-    private LockPatternUtils mLockPatternUtils;
+    private final LockPatternUtils mLockPatternUtils;
+    private final NotificationManager mNotificationManager;
+    private final UserManager mUserManager;
+    private final IActivityManager mActivityManager;
+
+    private final KeyStore mKeyStore;
+
     private boolean mFirstCallToVold;
-    private IGateKeeperService mGateKeeperService;
-    private NotificationManager mNotificationManager;
-    private UserManager mUserManager;
-
-    private final KeyStore mKeyStore = KeyStore.getInstance();
-
+    protected IGateKeeperService mGateKeeperService;
     /**
      * The UIDs that are used for system credential storage in keystore.
      */
@@ -177,7 +182,9 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    private class SynchronizedStrongAuthTracker extends LockPatternUtils.StrongAuthTracker {
+    @VisibleForTesting
+    protected static class SynchronizedStrongAuthTracker
+            extends LockPatternUtils.StrongAuthTracker {
         public SynchronizedStrongAuthTracker(Context context) {
             super(context);
         }
@@ -196,8 +203,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
         }
 
-        void register() {
-            mStrongAuth.registerStrongAuthTracker(this.mStub);
+        void register(LockSettingsStrongAuth strongAuth) {
+            strongAuth.registerStrongAuthTracker(this.mStub);
         }
     }
 
@@ -211,7 +218,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     public void tieManagedProfileLockIfNecessary(int managedUserId, String managedUserPassword) {
         if (DEBUG) Slog.v(TAG, "Check child profile lock for user: " + managedUserId);
         // Only for managed profile
-        if (!UserManager.get(mContext).getUserInfo(managedUserId).isManagedProfile()) {
+        if (!mUserManager.getUserInfo(managedUserId).isManagedProfile()) {
             return;
         }
         // Do not tie managed profile when work challenge is enabled
@@ -258,38 +265,103 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    public LockSettingsService(Context context) {
-        mContext = context;
-        mHandler = new Handler();
-        mStrongAuth = new LockSettingsStrongAuth(context);
-        // Open the database
+    static class Injector {
 
-        mLockPatternUtils = new LockPatternUtils(context);
+        protected Context mContext;
+
+        public Injector(Context context) {
+            mContext = context;
+        }
+
+        public Context getContext() {
+            return mContext;
+        }
+
+        public Handler getHandler() {
+            return new Handler();
+        }
+
+        public LockSettingsStorage getStorage() {
+            final LockSettingsStorage storage = new LockSettingsStorage(mContext);
+            storage.setDatabaseOnCreateCallback(new LockSettingsStorage.Callback() {
+                @Override
+                public void initialize(SQLiteDatabase db) {
+                    // Get the lockscreen default from a system property, if available
+                    boolean lockScreenDisable = SystemProperties.getBoolean(
+                            "ro.lockscreen.disable.default", false);
+                    if (lockScreenDisable) {
+                        storage.writeKeyValue(db, LockPatternUtils.DISABLE_LOCKSCREEN_KEY, "1", 0);
+                    }
+                }
+            });
+            return storage;
+        }
+
+        public LockSettingsStrongAuth getStrongAuth() {
+            return new LockSettingsStrongAuth(mContext);
+        }
+
+        public SynchronizedStrongAuthTracker getStrongAuthTracker() {
+            return new SynchronizedStrongAuthTracker(mContext);
+        }
+
+        public IActivityManager getActivityManager() {
+            return ActivityManager.getService();
+        }
+
+        public LockPatternUtils getLockPatternUtils() {
+            return new LockPatternUtils(mContext);
+        }
+
+        public NotificationManager getNotificationManager() {
+            return (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        }
+
+        public UserManager getUserManager() {
+            return (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        }
+
+        public KeyStore getKeyStore() {
+            return KeyStore.getInstance();
+        }
+
+        public IStorageManager getStorageManager() {
+            final IBinder service = ServiceManager.getService("mount");
+            if (service != null) {
+                return IStorageManager.Stub.asInterface(service);
+            }
+            return null;
+        }
+    }
+
+    public LockSettingsService(Context context) {
+        this(new Injector(context));
+    }
+
+    @VisibleForTesting
+    protected LockSettingsService(Injector injector) {
+        mInjector = injector;
+        mContext = injector.getContext();
+        mKeyStore = injector.getKeyStore();
+        mHandler = injector.getHandler();
+        mStrongAuth = injector.getStrongAuth();
+        mActivityManager = injector.getActivityManager();
+
+        mLockPatternUtils = injector.getLockPatternUtils();
         mFirstCallToVold = true;
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_ADDED);
         filter.addAction(Intent.ACTION_USER_STARTING);
         filter.addAction(Intent.ACTION_USER_REMOVED);
-        mContext.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter, null, null);
+        injector.getContext().registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter,
+                null, null);
 
-        mStorage = new LockSettingsStorage(context, new LockSettingsStorage.Callback() {
-            @Override
-            public void initialize(SQLiteDatabase db) {
-                // Get the lockscreen default from a system property, if available
-                boolean lockScreenDisable = SystemProperties.getBoolean(
-                        "ro.lockscreen.disable.default", false);
-                if (lockScreenDisable) {
-                    mStorage.writeKeyValue(db, LockPatternUtils.DISABLE_LOCKSCREEN_KEY, "1", 0);
-                }
-            }
-        });
-        mNotificationManager = (NotificationManager)
-                mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-        mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        mStrongAuthTracker = new SynchronizedStrongAuthTracker(mContext);
-        mStrongAuthTracker.register();
-
+        mStorage = injector.getStorage();
+        mNotificationManager = injector.getNotificationManager();
+        mUserManager = injector.getUserManager();
+        mStrongAuthTracker = injector.getStrongAuthTracker();
+        mStrongAuthTracker.register(mStrongAuth);
     }
 
     /**
@@ -748,7 +820,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         ks.unlock(userHandle, password);
     }
 
-    private String getDecryptedPasswordForTiedProfile(int userId)
+    @VisibleForTesting
+    protected String getDecryptedPasswordForTiedProfile(int userId)
             throws KeyStoreException, UnrecoverableKeyException,
             NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
             InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
@@ -814,7 +887,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         };
 
         try {
-            ActivityManager.getService().unlockUser(userId, token, secret, listener);
+            mActivityManager.unlockUser(userId, token, secret, listener);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -961,7 +1034,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    private void tieProfileLockToParent(int userId, String password) {
+    @VisibleForTesting
+    protected void tieProfileLockToParent(int userId, String password) {
         if (DEBUG) Slog.v(TAG, "tieProfileLockToParent for user: " + userId);
         byte[] randomLockSeed = password.getBytes(StandardCharsets.UTF_8);
         byte[] encryptionResult;
@@ -1085,8 +1159,8 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private void addUserKeyAuth(int userId, byte[] token, byte[] secret)
             throws RemoteException {
-        final UserInfo userInfo = UserManager.get(mContext).getUserInfo(userId);
-        final IStorageManager storageManager = getStorageManager();
+        final UserInfo userInfo = mUserManager.getUserInfo(userId);
+        final IStorageManager storageManager = mInjector.getStorageManager();
         final long callingId = Binder.clearCallingIdentity();
         try {
             storageManager.addUserKeyAuth(userId, userInfo.serialNumber, token, secret);
@@ -1097,7 +1171,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private void fixateNewestUserKeyAuth(int userId)
             throws RemoteException {
-        final IStorageManager storageManager = getStorageManager();
+        final IStorageManager storageManager = mInjector.getStorageManager();
         final long callingId = Binder.clearCallingIdentity();
         try {
             storageManager.fixateNewestUserKeyAuth(userId);
@@ -1396,7 +1470,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         // we should, within the first minute of decrypting the phone if this
         // service can't connect to vold, it restarts, and then the new instance
         // does successfully connect.
-        final IStorageManager service = getStorageManager();
+        final IStorageManager service = mInjector.getStorageManager();
         String password;
         long identity = Binder.clearCallingIdentity();
         try {
@@ -1560,14 +1634,6 @@ public class LockSettingsService extends ILockSettings.Stub {
             Secure.LOCK_SCREEN_OWNER_INFO_ENABLED,
             Secure.LOCK_SCREEN_OWNER_INFO
     };
-
-    private IStorageManager getStorageManager() {
-        final IBinder service = ServiceManager.getService("mount");
-        if (service != null) {
-            return IStorageManager.Stub.asInterface(service);
-        }
-        return null;
-    }
 
     private class GateKeeperDiedRecipient implements IBinder.DeathRecipient {
         @Override

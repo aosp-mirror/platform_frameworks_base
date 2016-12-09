@@ -119,9 +119,13 @@ class LockSettingsStorage {
         boolean isBaseZeroPattern;
     }
 
-    public LockSettingsStorage(Context context, Callback callback) {
+    public LockSettingsStorage(Context context) {
         mContext = context;
-        mOpenHelper = new DatabaseHelper(context, callback);
+        mOpenHelper = new DatabaseHelper(context);
+    }
+
+    public void setDatabaseOnCreateCallback(Callback callback) {
+        mOpenHelper.setCallback(callback);
     }
 
     public void writeKeyValue(String key, String value, int userId) {
@@ -472,11 +476,14 @@ class LockSettingsStorage {
 
         private static final int DATABASE_VERSION = 2;
 
-        private final Callback mCallback;
+        private Callback mCallback;
 
-        public DatabaseHelper(Context context, Callback callback) {
+        public DatabaseHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
             setWriteAheadLoggingEnabled(true);
+        }
+
+        public void setCallback(Callback callback) {
             mCallback = callback;
         }
 
@@ -492,7 +499,9 @@ class LockSettingsStorage {
         @Override
         public void onCreate(SQLiteDatabase db) {
             createTable(db);
-            mCallback.initialize(db);
+            if (mCallback != null) {
+                mCallback.initialize(db);
+            }
         }
 
         @Override

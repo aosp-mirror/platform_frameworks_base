@@ -20,6 +20,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.UserInfo;
@@ -60,46 +61,22 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         assertTrue(FileUtils.deleteContents(mStorageDir));
         assertTrue(!mDb.exists() || mDb.delete());
 
-        final Context ctx = getContext();
         final UserManager mockUserManager = mock(UserManager.class);
         // User 2 is a profile of user 1.
         when(mockUserManager.getProfileParent(eq(2))).thenReturn(new UserInfo(1, "name", 0));
         // User 3 is a profile of user 0.
         when(mockUserManager.getProfileParent(eq(3))).thenReturn(new UserInfo(0, "name", 0));
-        setContext(new ContextWrapper(ctx) {
-            @Override
-            public Object getSystemService(String name) {
-                if (USER_SERVICE.equals(name)) {
-                    return mockUserManager;
-                }
-                return super.getSystemService(name);
-            }
-        });
 
-        mStorage = new LockSettingsStorage(getContext(), new LockSettingsStorage.Callback() {
-            @Override
-            public void initialize(SQLiteDatabase db) {
-                mStorage.writeKeyValue(db, "initializedKey", "initialValue", 0);
-            }
-        }) {
-            @Override
-            String getLockPatternFilename(int userId) {
-                return new File(mStorageDir,
-                        super.getLockPatternFilename(userId).replace('/', '-')).getAbsolutePath();
-            }
-
-            @Override
-            String getLockPasswordFilename(int userId) {
-                return new File(mStorageDir,
-                        super.getLockPasswordFilename(userId).replace('/', '-')).getAbsolutePath();
-            }
-
-            @Override
-            String getChildProfileLockFile(int userId) {
-                return new File(mStorageDir,
-                        super.getChildProfileLockFile(userId).replace('/', '-')).getAbsolutePath();
-            }
-        };
+        MockLockSettingsContext context = new MockLockSettingsContext(getContext(), mockUserManager,
+                mock(NotificationManager.class));
+        mStorage = new LockSettingsStorageTestable(context,
+                new File(getContext().getFilesDir(), "locksettings"));
+        mStorage.setDatabaseOnCreateCallback(new LockSettingsStorage.Callback() {
+                    @Override
+                    public void initialize(SQLiteDatabase db) {
+                        mStorage.writeKeyValue(db, "initializedKey", "initialValue", 0);
+                    }
+                });
     }
 
     @Override
@@ -323,7 +300,7 @@ public class LockSettingsStorageTests extends AndroidTestCase {
     }
 
     public void testFileLocation_Owner() {
-        LockSettingsStorage storage = new LockSettingsStorage(getContext(), null);
+        LockSettingsStorage storage = new LockSettingsStorage(getContext());
 
         assertEquals("/data/system/gesture.key", storage.getLegacyLockPatternFilename(0));
         assertEquals("/data/system/password.key", storage.getLegacyLockPasswordFilename(0));
@@ -332,21 +309,21 @@ public class LockSettingsStorageTests extends AndroidTestCase {
     }
 
     public void testFileLocation_SecondaryUser() {
-        LockSettingsStorage storage = new LockSettingsStorage(getContext(), null);
+        LockSettingsStorage storage = new LockSettingsStorage(getContext());
 
         assertEquals("/data/system/users/1/gatekeeper.pattern.key", storage.getLockPatternFilename(1));
         assertEquals("/data/system/users/1/gatekeeper.password.key", storage.getLockPasswordFilename(1));
     }
 
     public void testFileLocation_ProfileToSecondary() {
-        LockSettingsStorage storage = new LockSettingsStorage(getContext(), null);
+        LockSettingsStorage storage = new LockSettingsStorage(getContext());
 
         assertEquals("/data/system/users/2/gatekeeper.pattern.key", storage.getLockPatternFilename(2));
         assertEquals("/data/system/users/2/gatekeeper.password.key", storage.getLockPasswordFilename(2));
     }
 
     public void testFileLocation_ProfileToOwner() {
-        LockSettingsStorage storage = new LockSettingsStorage(getContext(), null);
+        LockSettingsStorage storage = new LockSettingsStorage(getContext());
 
         assertEquals("/data/system/users/3/gatekeeper.pattern.key", storage.getLockPatternFilename(3));
         assertEquals("/data/system/users/3/gatekeeper.password.key", storage.getLockPasswordFilename(3));
