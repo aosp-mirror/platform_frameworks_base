@@ -20,6 +20,7 @@ import android.app.ActivityManager;
 import android.app.ContentProviderHolder;
 import android.app.IActivityManager;
 import android.app.UiAutomation;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.IContentProvider;
 import android.database.Cursor;
@@ -69,10 +70,12 @@ public class ShellUiAutomatorBridge extends UiAutomatorBridge {
                 cursor = provider.query(null, Settings.Secure.CONTENT_URI,
                         new String[] {
                             Settings.Secure.VALUE
-                        }, "name=?",
-                        new String[] {
-                            Settings.Secure.LONG_PRESS_TIMEOUT
-                        }, null, null);
+                        },
+                        ContentResolver.createSqlQueryBundle(
+                                "name=?",
+                                new String[] { Settings.Secure.LONG_PRESS_TIMEOUT },
+                                null),
+                        null);
                 if (cursor.moveToFirst()) {
                     longPressTimeout = cursor.getInt(0);
                 }

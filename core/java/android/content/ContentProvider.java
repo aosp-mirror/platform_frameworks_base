@@ -97,6 +97,7 @@ import java.util.Arrays;
  * developer guide.</p>
  */
 public abstract class ContentProvider implements ComponentCallbacks2 {
+
     private static final String TAG = "ContentProvider";
 
     /*
@@ -118,7 +119,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
     private boolean mNoPerms;
     private boolean mSingleUser;
 
-    private final ThreadLocal<String> mCallingPackage = new ThreadLocal<String>();
+    private final ThreadLocal<String> mCallingPackage = new ThreadLocal<>();
 
     private Transport mTransport = new Transport();
 
@@ -205,9 +206,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         }
 
         @Override
-        public Cursor query(String callingPkg, Uri uri, String[] projection,
-                String selection, String[] selectionArgs, String sortOrder,
-                ICancellationSignal cancellationSignal) {
+        public Cursor query(String callingPkg, Uri uri, @Nullable String[] projection,
+                @Nullable Bundle queryArgs, @Nullable ICancellationSignal cancellationSignal) {
             validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
             if (enforceReadPermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
@@ -225,9 +225,9 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 // However, the caller may be expecting to access them my index. Hence,
                 // we have to execute the query as if allowed to get a cursor with the
                 // columns. We then use the column names to return an empty cursor.
-                Cursor cursor = ContentProvider.this.query(uri, projection, selection,
-                        selectionArgs, sortOrder, CancellationSignal.fromTransport(
-                                cancellationSignal));
+                Cursor cursor = ContentProvider.this.query(
+                        uri, projection, queryArgs,
+                        CancellationSignal.fromTransport(cancellationSignal));
                 if (cursor == null) {
                     return null;
                 }
@@ -238,7 +238,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             final String original = setCallingPackage(callingPkg);
             try {
                 return ContentProvider.this.query(
-                        uri, projection, selection, selectionArgs, sortOrder,
+                        uri, projection, queryArgs,
                         CancellationSignal.fromTransport(cancellationSignal));
             } finally {
                 setCallingPackage(original);
@@ -893,6 +893,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * (Content providers do not usually care about things like screen
      * orientation, but may want to know about locale changes.)
      */
+    @Override
     public void onConfigurationChanged(Configuration newConfig) {
     }
 
@@ -904,9 +905,11 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * <p>The default content provider implementation does nothing.
      * Subclasses may override this method to take appropriate action.
      */
+    @Override
     public void onLowMemory() {
     }
 
+    @Override
     public void onTrimMemory(int level) {
     }
 
@@ -1036,6 +1039,45 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             @Nullable String selection, @Nullable String[] selectionArgs,
             @Nullable String sortOrder, @Nullable CancellationSignal cancellationSignal) {
         return query(uri, projection, selection, selectionArgs, sortOrder);
+    }
+
+    /**
+     * Implement this to handle query requests where the arguments are packed into a {@link Bundle}.
+     * Arguments may include traditional SQL style query arguments. When present these
+     * should be handled  according to the contract established in
+     * {@link #query(Uri, String[], String, String[], String, CancellationSignal).
+     *
+     * <p>Traditional SQL arguments can be found in the bundle using the following keys:
+     * <li>{@link ContentResolver#QUERY_ARG_SELECTION}
+     * <li>{@link ContentResolver#QUERY_ARG_SELECTION_ARGS}
+     * <li>{@link ContentResolver#QUERY_ARG_SORT_ORDER}
+     *
+     * @see #query(Uri, String[], String, String[], String, CancellationSignal) for
+     *     implementation details.
+     *
+     * @param uri The URI to query. This will be the full URI sent by the client.
+     *            TODO: Me wonders about this use case, and how we adapt it.
+     *            If the client is requesting a specific record, the URI will end
+     *            in a record number that the implementation should parse and add
+     *            to a WHERE or HAVING clause, specifying that _id value.
+     * @param projection The list of columns to put into the cursor.
+     *            If {@code null} provide a default set of columns.
+     * @param queryArgs A Bundle containing all additional information necessary for the query.
+     *            Values in the Bundle may include SQL style arguments.
+     * @param cancellationSignal A signal to cancel the operation in progress,
+     *            or {@code null}.
+     * @return a Cursor or {@code null}.
+     */
+    public @Nullable Cursor query(@NonNull Uri uri, @Nullable String[] projection,
+            @Nullable Bundle queryArgs, @Nullable CancellationSignal cancellationSignal) {
+        queryArgs = queryArgs != null ? queryArgs : Bundle.EMPTY;
+        return query(
+                uri,
+                projection,
+                queryArgs.getString(ContentResolver.QUERY_ARG_SELECTION),
+                queryArgs.getStringArray(ContentResolver.QUERY_ARG_SELECTION_ARGS),
+                queryArgs.getString(ContentResolver.QUERY_ARG_SORT_ORDER),
+                cancellationSignal);
     }
 
     /**
@@ -1412,7 +1454,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * no file associated with the given URI or the mode is invalid.
      * @throws SecurityException Throws SecurityException if the caller does
      * not have permission to access the file.
-     * 
+     *
      * @see #openFile(Uri, String)
      * @see #openFileHelper(Uri, String)
      * @see #getType(android.net.Uri)
@@ -1851,7 +1893,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
     /**
      * Implement this to shut down the ContentProvider instance. You can then
      * invoke this method in unit tests.
-     * 
+     *
      * <p>
      * Android normally handles ContentProvider startup and shutdown
      * automatically. You do not need to start up or shut down a

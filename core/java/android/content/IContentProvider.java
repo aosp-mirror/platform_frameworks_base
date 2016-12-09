@@ -35,9 +35,9 @@ import java.util.ArrayList;
  * @hide
  */
 public interface IContentProvider extends IInterface {
-    public Cursor query(String callingPkg, Uri url, String[] projection, String selection,
-            String[] selectionArgs, String sortOrder, ICancellationSignal cancellationSignal)
-                    throws RemoteException;
+    public Cursor query(String callingPkg, Uri url, @Nullable String[] projection,
+            @Nullable Bundle queryArgs, @Nullable ICancellationSignal cancellationSignal)
+            throws RemoteException;
     public String getType(Uri url) throws RemoteException;
     public Uri insert(String callingPkg, Uri url, ContentValues initialValues)
             throws RemoteException;

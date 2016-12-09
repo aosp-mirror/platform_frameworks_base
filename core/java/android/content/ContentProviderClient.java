@@ -128,11 +128,20 @@ public class ContentProviderClient implements AutoCloseable {
     }
 
     /** See {@link ContentProvider#query ContentProvider.query} */
-    public @Nullable Cursor query(@NonNull Uri url, @Nullable String[] projection,
+    public @Nullable Cursor query(@NonNull Uri uri, @Nullable String[] projection,
             @Nullable String selection, @Nullable String[] selectionArgs,
             @Nullable String sortOrder, @Nullable CancellationSignal cancellationSignal)
                     throws RemoteException {
-        Preconditions.checkNotNull(url, "url");
+        Bundle queryArgs =
+                ContentResolver.createSqlQueryBundle(selection, selectionArgs, sortOrder);
+        return query(uri, projection, queryArgs, cancellationSignal);
+    }
+
+    /** See {@link ContentProvider#query ContentProvider.query} */
+    public @Nullable Cursor query(@NonNull Uri uri, @Nullable String[] projection,
+            Bundle queryArgs, @Nullable CancellationSignal cancellationSignal)
+                    throws RemoteException {
+        Preconditions.checkNotNull(uri, "url");
 
         beforeRemote();
         try {
@@ -142,8 +151,8 @@ public class ContentProviderClient implements AutoCloseable {
                 remoteCancellationSignal = mContentProvider.createCancellationSignal();
                 cancellationSignal.setRemote(remoteCancellationSignal);
             }
-            final Cursor cursor = mContentProvider.query(mPackageName, url, projection, selection,
-                    selectionArgs, sortOrder, remoteCancellationSignal);
+            final Cursor cursor = mContentProvider.query(
+                    mPackageName, uri, projection, queryArgs, remoteCancellationSignal);
             if (cursor == null) {
                 return null;
             }

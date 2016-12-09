@@ -19,6 +19,7 @@ package com.android.commands.content;
 import android.app.ActivityManager;
 import android.app.ContentProviderHolder;
 import android.app.IActivityManager;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.IContentProvider;
 import android.database.Cursor;
@@ -589,8 +590,8 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            Cursor cursor = provider.query(resolveCallingPackage(), mUri, mProjection, mWhere,
-                    null, mSortOrder, null);
+            Cursor cursor = provider.query(resolveCallingPackage(), mUri, mProjection,
+                    ContentResolver.createSqlQueryBundle(mWhere, null, mSortOrder), null);
             if (cursor == null) {
                 System.out.println("No result found.");
                 return;
