@@ -110,6 +110,7 @@ import android.service.notification.IStatusBarNotificationHolder;
 import android.service.notification.NotificationAssistantService;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationRankingUpdate;
+import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
 import android.telephony.PhoneStateListener;
@@ -1020,7 +1021,7 @@ public class NotificationManagerService extends SystemService {
                 synchronized (mNotificationList) {
                     addAutogroupKeyLocked(key);
                 }
-                mRankingHandler.requestSort();
+                mRankingHandler.requestSort(false);
             }
 
             @Override
@@ -1028,7 +1029,7 @@ public class NotificationManagerService extends SystemService {
                 synchronized (mNotificationList) {
                     removeAutogroupKeyLocked(key);
                 }
-                mRankingHandler.requestSort();
+                mRankingHandler.requestSort(false);
             }
 
             @Override
@@ -2390,7 +2391,7 @@ public class NotificationManagerService extends SystemService {
                     mNotificationAssistants.checkServiceTokenLocked(token);
                     applyAdjustmentLocked(adjustment);
                 }
-                mRankingHandler.requestSort();
+                mRankingHandler.requestSort(true);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -2408,7 +2409,7 @@ public class NotificationManagerService extends SystemService {
                         applyAdjustmentLocked(adjustment);
                     }
                 }
-                mRankingHandler.requestSort();
+                mRankingHandler.requestSort(true);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -2420,12 +2421,20 @@ public class NotificationManagerService extends SystemService {
         if (n == null) {
             return;
         }
-        if (adjustment.getImportance() != IMPORTANCE_NONE) {
-            n.setImportance(adjustment.getImportance(), adjustment.getExplanation());
-        }
         if (adjustment.getSignals() != null) {
             Bundle.setDefusable(adjustment.getSignals(), true);
-            // TODO: apply signals
+            final String overrideChannelId =
+                    adjustment.getSignals().getString(Adjustment.KEY_CHANNEL_ID, null);
+            final ArrayList<String> people =
+                    adjustment.getSignals().getStringArrayList(Adjustment.KEY_PEOPLE);
+            final ArrayList<SnoozeCriterion> snoozeCriterionList =
+                    adjustment.getSignals().getParcelableArrayList(Adjustment.KEY_SNOOZE_CRITERIA);
+            if (!TextUtils.isEmpty(overrideChannelId)) {
+                n.setNotificationChannelOverride(mRankingHelper.getNotificationChannel(
+                        n.sbn.getPackageName(), n.sbn.getUid(), overrideChannelId));
+            }
+            n.setPeopleOverride(people);
+            n.setSnoozeCriteria(snoozeCriterionList);
         }
     }
 
@@ -3309,27 +3318,27 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private void handleRankingSort() {
+    private void handleRankingSort(Message msg) {
+        if (!(msg.obj instanceof Boolean)) return;
+        boolean forceUpdate = ((Boolean) msg.obj == null) ? false : (boolean) msg.obj;
         synchronized (mNotificationList) {
             final int N = mNotificationList.size();
             ArrayList<String> orderBefore = new ArrayList<String>(N);
             ArrayList<String> groupOverrideBefore = new ArrayList<>(N);
             int[] visibilities = new int[N];
-            int[] importances = new int[N];
             for (int i = 0; i < N; i++) {
                 final NotificationRecord r = mNotificationList.get(i);
                 orderBefore.add(r.getKey());
                 groupOverrideBefore.add(r.sbn.getGroupKey());
                 visibilities[i] = r.getPackageVisibilityOverride();
-                importances[i] = r.getImportance();
                 mRankingHelper.extractSignals(r);
             }
             mRankingHelper.sort(mNotificationList);
             for (int i = 0; i < N; i++) {
                 final NotificationRecord r = mNotificationList.get(i);
-                if (!orderBefore.get(i).equals(r.getKey())
+                if (forceUpdate
+                        || !orderBefore.get(i).equals(r.getKey())
                         || visibilities[i] != r.getPackageVisibilityOverride()
-                        || importances[i] != r.getImportance()
                         || !groupOverrideBefore.get(i).equals(r.sbn.getGroupKey())) {
                     scheduleSendRankingUpdate();
                     return;
@@ -3439,14 +3448,17 @@ public class NotificationManagerService extends SystemService {
                     handleRankingReconsideration(msg);
                     break;
                 case MESSAGE_RANKING_SORT:
-                    handleRankingSort();
+                    handleRankingSort(msg);
                     break;
             }
         }
 
-        public void requestSort() {
+        public void requestSort(boolean forceUpdate) {
             removeMessages(MESSAGE_RANKING_SORT);
-            sendEmptyMessage(MESSAGE_RANKING_SORT);
+            Message msg = Message.obtain();
+            msg.what = MESSAGE_RANKING_SORT;
+            msg.obj = forceUpdate;
+            sendMessage(msg);
         }
 
         public void requestReconsideration(RankingReconsideration recon) {
@@ -3987,6 +3999,9 @@ public class NotificationManagerService extends SystemService {
         Bundle visibilityOverrides = new Bundle();
         Bundle suppressedVisualEffects = new Bundle();
         Bundle explanation = new Bundle();
+        Bundle overrideChannels = new Bundle();
+        Bundle overridePeople = new Bundle();
+        Bundle snoozeCriteria = new Bundle();
         for (int i = 0; i < N; i++) {
             NotificationRecord record = mNotificationList.get(i);
             if (!isVisibleToListener(record.sbn, info)) {
@@ -4008,6 +4023,9 @@ public class NotificationManagerService extends SystemService {
                 visibilityOverrides.putInt(key, record.getPackageVisibilityOverride());
             }
             overrideGroupKeys.putString(key, record.sbn.getOverrideGroupKey());
+            overrideChannels.putParcelable(key, record.getChannel());
+            overridePeople.putStringArrayList(key, record.getPeopleOverride());
+            snoozeCriteria.putParcelableArrayList(key, record.getSnoozeCriteria());
         }
         final int M = keys.size();
         String[] keysAr = keys.toArray(new String[M]);
@@ -4017,7 +4035,8 @@ public class NotificationManagerService extends SystemService {
             importanceAr[i] = importance.get(i);
         }
         return new NotificationRankingUpdate(keysAr, interceptedKeysAr, visibilityOverrides,
-                suppressedVisualEffects, importanceAr, explanation, overrideGroupKeys);
+                suppressedVisualEffects, importanceAr, explanation, overrideGroupKeys,
+                overrideChannels, overridePeople, snoozeCriteria);
     }
 
     private boolean isVisibleToListener(StatusBarNotification sbn, ManagedServiceInfo listener) {
