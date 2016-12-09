@@ -16,7 +16,11 @@
 
 package com.android.server;
 
+import static android.net.NetworkRecommendationProvider.EXTRA_RECOMMENDATION_RESULT;
+import static android.net.NetworkRecommendationProvider.EXTRA_SEQUENCE;
+
 import android.Manifest.permission;
+import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -26,6 +30,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
+import android.net.INetworkRecommendationProvider;
 import android.net.INetworkScoreCache;
 import android.net.INetworkScoreService;
 import android.net.NetworkKey;
@@ -36,17 +41,22 @@ import android.net.RecommendationResult;
 import android.net.ScoredNetwork;
 import android.net.Uri;
 import android.net.wifi.WifiConfiguration;
+import android.os.Bundle;
 import android.os.IBinder;
+import android.os.IRemoteCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.TimedRemoteCaller;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.TransferPipe;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -55,6 +65,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 /**
@@ -63,17 +74,20 @@ import java.util.function.Consumer;
  */
 public class NetworkScoreService extends INetworkScoreService.Stub {
     private static final String TAG = "NetworkScoreService";
-    private static final boolean DBG = false;
+    private static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final Context mContext;
     private final NetworkScorerAppManager mNetworkScorerAppManager;
+    private final RequestRecommendationCaller mRequestRecommendationCaller;
     @GuardedBy("mScoreCaches")
     private final Map<Integer, RemoteCallbackList<INetworkScoreCache>> mScoreCaches;
     /** Lock used to update mPackageMonitor when scorer package changes occur. */
     private final Object mPackageMonitorLock = new Object[0];
+    private final Object mServiceConnectionLock = new Object[0];
 
     @GuardedBy("mPackageMonitorLock")
     private NetworkScorerPackageMonitor mPackageMonitor;
+    @GuardedBy("mServiceConnectionLock")
     private ScoringServiceConnection mServiceConnection;
 
     private BroadcastReceiver mUserIntentReceiver = new BroadcastReceiver() {
@@ -194,6 +208,9 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         mContext.registerReceiverAsUser(
                 mUserIntentReceiver, UserHandle.SYSTEM, filter, null /* broadcastPermission*/,
                 null /* scheduler */);
+        // TODO(jjoslin): 12/15/16 - Make timeout configurable.
+        mRequestRecommendationCaller =
+            new RequestRecommendationCaller(TimedRemoteCaller.DEFAULT_CALL_TIMEOUT_MILLIS);
     }
 
     /** Called when the system is ready to run third-party code but before it actually does so. */
@@ -264,19 +281,21 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         if (scorerData != null && scorerData.recommendationServiceClassName != null) {
             ComponentName componentName = new ComponentName(scorerData.packageName,
                     scorerData.recommendationServiceClassName);
-            // If we're connected to a different component then drop it.
-            if (mServiceConnection != null
-                    && !mServiceConnection.mComponentName.equals(componentName)) {
-                unbindFromScoringServiceIfNeeded();
-            }
+            synchronized (mServiceConnectionLock) {
+                // If we're connected to a different component then drop it.
+                if (mServiceConnection != null
+                        && !mServiceConnection.mComponentName.equals(componentName)) {
+                    unbindFromScoringServiceIfNeeded();
+                }
 
-            // If we're not connected at all then create a new connection.
-            if (mServiceConnection == null) {
-                mServiceConnection = new ScoringServiceConnection(componentName);
-            }
+                // If we're not connected at all then create a new connection.
+                if (mServiceConnection == null) {
+                    mServiceConnection = new ScoringServiceConnection(componentName);
+                }
 
-            // Make sure the connection is connected (idempotent)
-            mServiceConnection.connect(mContext);
+                // Make sure the connection is connected (idempotent)
+                mServiceConnection.connect(mContext);
+            }
         } else { // otherwise make sure it isn't bound.
             unbindFromScoringServiceIfNeeded();
         }
@@ -284,10 +303,12 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
     private void unbindFromScoringServiceIfNeeded() {
         if (DBG) Log.d(TAG, "unbindFromScoringServiceIfNeeded");
-        if (mServiceConnection != null) {
-            mServiceConnection.disconnect(mContext);
+        synchronized (mServiceConnectionLock) {
+            if (mServiceConnection != null) {
+                mServiceConnection.disconnect(mContext);
+            }
+            mServiceConnection = null;
         }
-        mServiceConnection = null;
         clearInternal();
     }
 
@@ -441,7 +462,22 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
     @Override
     public RecommendationResult requestRecommendation(RecommendationRequest request) {
-        // TODO(jjoslin): 11/25/16 - Update with real impl.
+        mContext.enforceCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED, TAG);
+        throwIfCalledOnMainThread();
+        final INetworkRecommendationProvider provider = getRecommendationProvider();
+        if (provider != null) {
+            try {
+                return mRequestRecommendationCaller.getRecommendationResult(provider, request);
+            } catch (RemoteException | TimeoutException e) {
+                Log.w(TAG, "Failed to request a recommendation.", e);
+                // TODO(jjoslin): 12/15/16 - Keep track of failures.
+            }
+        }
+
+        if (DBG) {
+            Log.d(TAG, "Returning the default network recommendation.");
+        }
+
         WifiConfiguration selectedConfig = null;
         if (request != null) {
             selectedConfig = request.getCurrentSelectedConfig();
@@ -451,7 +487,19 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
     @Override
     public boolean requestScores(NetworkKey[] networks) {
-        // TODO(jjoslin): 12/13/16 - Implement
+        mContext.enforceCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED, TAG);
+        final INetworkRecommendationProvider provider = getRecommendationProvider();
+        if (provider != null) {
+            try {
+                provider.requestScores(networks);
+                // TODO(jjoslin): 12/15/16 - Consider pushing null scores into the cache to prevent
+                // repeated requests for the same scores.
+                return true;
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed to request scores.", e);
+                // TODO(jjoslin): 12/15/16 - Keep track of failures.
+            }
+        }
         return false;
     }
 
@@ -476,10 +524,12 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
             }
         }, getScoreCacheLists());
 
-        if (mServiceConnection != null) {
-            mServiceConnection.dump(fd, writer, args);
-        } else {
-            writer.println("ScoringServiceConnection: null");
+        synchronized (mServiceConnectionLock) {
+            if (mServiceConnection != null) {
+                mServiceConnection.dump(fd, writer, args);
+            } else {
+                writer.println("ScoringServiceConnection: null");
+            }
         }
         writer.flush();
     }
@@ -512,10 +562,27 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         }
     }
 
+    private void throwIfCalledOnMainThread() {
+        if (Thread.currentThread() == mContext.getMainLooper().getThread()) {
+            throw new RuntimeException("Cannot invoke on the main thread");
+        }
+    }
+
+    @Nullable
+    private INetworkRecommendationProvider getRecommendationProvider() {
+        synchronized (mServiceConnectionLock) {
+            if (mServiceConnection != null) {
+                return mServiceConnection.getRecommendationProvider();
+            }
+        }
+        return null;
+    }
+
     private static class ScoringServiceConnection implements ServiceConnection {
         private final ComponentName mComponentName;
-        private boolean mBound = false;
-        private boolean mConnected = false;
+        private volatile boolean mBound = false;
+        private volatile boolean mConnected = false;
+        private volatile INetworkRecommendationProvider mRecommendationProvider;
 
         ScoringServiceConnection(ComponentName componentName) {
             mComponentName = componentName;
@@ -546,12 +613,19 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
             } catch (RuntimeException e) {
                 Log.e(TAG, "Unbind failed.", e);
             }
+
+            mRecommendationProvider = null;
+        }
+
+        INetworkRecommendationProvider getRecommendationProvider() {
+            return mRecommendationProvider;
         }
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             if (DBG) Log.d(TAG, "ScoringServiceConnection: " + name.flattenToString());
             mConnected = true;
+            mRecommendationProvider = INetworkRecommendationProvider.Stub.asInterface(service);
         }
 
         @Override
@@ -560,11 +634,51 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                 Log.d(TAG, "ScoringServiceConnection, disconnected: " + name.flattenToString());
             }
             mConnected = false;
+            mRecommendationProvider = null;
         }
 
         public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
             writer.println("ScoringServiceConnection: " + mComponentName + ", bound: " + mBound
                     + ", connected: " + mConnected);
+        }
+    }
+
+    /**
+     * Executes the async requestRecommendation() call with a timeout.
+     */
+    private static final class RequestRecommendationCaller
+            extends TimedRemoteCaller<RecommendationResult> {
+        private final IRemoteCallback mCallback;
+
+        RequestRecommendationCaller(long callTimeoutMillis) {
+            super(callTimeoutMillis);
+            mCallback = new IRemoteCallback.Stub() {
+                @Override
+                public void sendResult(Bundle data) throws RemoteException {
+                    final RecommendationResult result =
+                            data.getParcelable(EXTRA_RECOMMENDATION_RESULT);
+                    final int sequence = data.getInt(EXTRA_SEQUENCE, -1);
+                    onRemoteMethodResult(result, sequence);
+                }
+            };
+        }
+
+        /**
+         * Runs the requestRecommendation() call on the given {@link INetworkRecommendationProvider}
+         * instance.
+         *
+         * @param target the {@link INetworkRecommendationProvider} to request a recommendation
+         *               from
+         * @param request the {@link RecommendationRequest} from the calling client
+         * @return a {@link RecommendationResult} from the provider
+         * @throws RemoteException if the call failed
+         * @throws TimeoutException if the call took longer than the set timeout
+         */
+        RecommendationResult getRecommendationResult(INetworkRecommendationProvider target,
+                RecommendationRequest request) throws RemoteException, TimeoutException {
+            final int sequence = onBeforeRemoteCall();
+            target.requestRecommendation(request, mCallback, sequence);
+            return getResultTimed(sequence);
         }
     }
 }
