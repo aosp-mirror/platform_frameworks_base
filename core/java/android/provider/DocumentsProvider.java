@@ -575,6 +575,8 @@ public abstract class DocumentsProvider extends ContentProvider {
      * <p>
      * A provider may perform a conversion if the documents's MIME type is not
      * matching the specified MIME type filter.
+     * <p>
+     * Virtual documents must have at least one streamable format.
      *
      * @param documentId the document to return.
      * @param mimeTypeFilter the MIME type filter for the requested format. May
@@ -1043,6 +1045,8 @@ public abstract class DocumentsProvider extends ContentProvider {
      * <p>The default implementation returns a MIME type provided by
      * {@link #queryDocument(String, String[])} as long as it matches the filter and the document
      * does not have the {@link Document#FLAG_VIRTUAL_DOCUMENT} flag set.
+     *
+     * <p>Virtual documents must have at least one streamable format.
      *
      * @see #getStreamTypes(Uri, String)
      * @see #openTypedDocument(String, String, Bundle, CancellationSignal)
