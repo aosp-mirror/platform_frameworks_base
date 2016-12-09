@@ -134,13 +134,6 @@ public class InstallerConnection {
         return resRaw;
     }
 
-    public void dexopt(String apkPath, int uid, String instructionSet, int dexoptNeeded,
-            int dexFlags, String compilerFilter, String volumeUuid, String sharedLibraries)
-            throws InstallerException {
-        dexopt(apkPath, uid, "*", instructionSet, dexoptNeeded, null /*outputPath*/, dexFlags,
-                compilerFilter, volumeUuid, sharedLibraries);
-    }
-
     public void dexopt(String apkPath, int uid, String pkgName, String instructionSet,
             int dexoptNeeded, String outputPath, int dexFlags, String compilerFilter,
             String volumeUuid, String sharedLibraries) throws InstallerException {
