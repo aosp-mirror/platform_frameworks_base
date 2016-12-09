@@ -6939,11 +6939,13 @@ public class DevicePolicyManager {
     /**
      * Return whether network logging is enabled by a device owner.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Can only
+     * be {@code null} if the caller has MANAGE_USERS permission.
      * @return {@code true} if network logging is enabled by device owner, {@code false} otherwise.
-     * @throws {@link SecurityException} if {@code admin} is not a device owner.
+     * @throws {@link SecurityException} if {@code admin} is not a device owner and caller has
+     * no MANAGE_USERS permission
      */
-    public boolean isNetworkLoggingEnabled(@NonNull ComponentName admin) {
+    public boolean isNetworkLoggingEnabled(@Nullable ComponentName admin) {
         throwIfParentInstance("isNetworkLoggingEnabled");
         try {
             return mService.isNetworkLoggingEnabled(admin);
