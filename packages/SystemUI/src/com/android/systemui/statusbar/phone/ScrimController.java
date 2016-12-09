@@ -59,6 +59,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private static final int TAG_START_ALPHA = R.id.scrim_alpha_start;
     private static final int TAG_END_ALPHA = R.id.scrim_alpha_end;
 
+    private final LightBarController mLightBarController;
     protected final ScrimView mScrimBehind;
     private final ScrimView mScrimInFront;
     private final UnlockMethodCache mUnlockMethodCache;
@@ -99,13 +100,15 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private boolean mKeyguardFadingOutInProgress;
     private ValueAnimator mKeyguardFadeoutAnimation;
 
-    public ScrimController(ScrimView scrimBehind, ScrimView scrimInFront, View headsUpScrim) {
+    public ScrimController(LightBarController lightBarController, ScrimView scrimBehind,
+            ScrimView scrimInFront, View headsUpScrim) {
         mScrimBehind = scrimBehind;
         mScrimInFront = scrimInFront;
         mHeadsUpScrim = headsUpScrim;
         final Context context = scrimBehind.getContext();
         mUnlockMethodCache = UnlockMethodCache.getInstance(context);
         mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(context);
+        mLightBarController = lightBarController;
         updateHeadsUpScrim(false);
     }
 
@@ -341,6 +344,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             alpha = Math.max(0.0f, Math.min(1.0f, alpha));
             mCurrentHeadsUpAlpha = alpha;
         }
+        mLightBarController.setScrimAlpha(mCurrentBehindAlpha);
     }
 
     protected void updateScrimColor(View scrim) {

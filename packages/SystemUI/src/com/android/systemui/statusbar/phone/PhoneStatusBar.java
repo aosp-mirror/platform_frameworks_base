@@ -333,7 +333,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     BrightnessMirrorController mBrightnessMirrorController;
     AccessibilityController mAccessibilityController;
     protected FingerprintUnlockController mFingerprintUnlockController;
-    LightStatusBarController mLightStatusBarController;
+    LightBarController mLightBarController;
     protected LockscreenWallpaper mLockscreenWallpaper;
 
     int mNaturalBarHeight = -1;
@@ -829,10 +829,45 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mLockscreenWallpaper = new LockscreenWallpaper(mContext, this, mHandler);
         }
 
+        mKeyguardStatusBar = (KeyguardStatusBarView) mStatusBarWindow.findViewById(R.id.keyguard_header);
+        mKeyguardStatusView =
+                (KeyguardStatusView) mStatusBarWindow.findViewById(R.id.keyguard_status_view);
+        mKeyguardBottomArea =
+                (KeyguardBottomAreaView) mStatusBarWindow.findViewById(R.id.keyguard_bottom_area);
+        mKeyguardBottomArea.setActivityStarter(this);
+        mKeyguardBottomArea.setAssistManager(mAssistManager);
+        mKeyguardIndicationController = new KeyguardIndicationController(mContext,
+                (ViewGroup) mStatusBarWindow.findViewById(R.id.keyguard_indication_area),
+                mKeyguardBottomArea.getLockIcon());
+        mKeyguardBottomArea.setKeyguardIndicationController(mKeyguardIndicationController);
+
+        // set the initial view visibility
+        setAreThereNotifications();
+
+        createIconController();
+
+        mBatteryController = createBatteryController();
+        mBatteryController.addCallback(new BatteryStateChangeCallback() {
+            @Override
+            public void onPowerSaveChanged(boolean isPowerSave) {
+                mHandler.post(mCheckBarModes);
+                if (mDozeServiceHost != null) {
+                    mDozeServiceHost.firePowerSaveChanged(isPowerSave);
+                }
+            }
+            @Override
+            public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
+                // noop
+            }
+        });
+
+        mLightBarController = new LightBarController(mIconController, mNavigationBarView,
+                mBatteryController);
+
         ScrimView scrimBehind = (ScrimView) mStatusBarWindow.findViewById(R.id.scrim_behind);
         ScrimView scrimInFront = (ScrimView) mStatusBarWindow.findViewById(R.id.scrim_in_front);
         View headsUpScrim = mStatusBarWindow.findViewById(R.id.heads_up_scrim);
-        mScrimController = SystemUIFactory.getInstance().createScrimController(
+        mScrimController = SystemUIFactory.getInstance().createScrimController(mLightBarController,
                 scrimBehind, scrimInFront, headsUpScrim, mLockscreenWallpaper);
         if (mScrimSrcModeEnabled) {
             Runnable runnable = new Runnable() {
@@ -851,23 +886,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStatusBarView.setScrimController(mScrimController);
         mDozeScrimController = new DozeScrimController(mScrimController, context, mStackScroller);
 
-        mKeyguardStatusBar = (KeyguardStatusBarView) mStatusBarWindow.findViewById(R.id.keyguard_header);
-        mKeyguardStatusView =
-                (KeyguardStatusView) mStatusBarWindow.findViewById(R.id.keyguard_status_view);
-        mKeyguardBottomArea =
-                (KeyguardBottomAreaView) mStatusBarWindow.findViewById(R.id.keyguard_bottom_area);
-        mKeyguardBottomArea.setActivityStarter(this);
-        mKeyguardBottomArea.setAssistManager(mAssistManager);
-        mKeyguardIndicationController = new KeyguardIndicationController(mContext,
-                (ViewGroup) mStatusBarWindow.findViewById(R.id.keyguard_indication_area),
-                mKeyguardBottomArea.getLockIcon());
-        mKeyguardBottomArea.setKeyguardIndicationController(mKeyguardIndicationController);
-
-        // set the initial view visibility
-        setAreThereNotifications();
-
-        createIconController();
-
         // Background thread for any controllers that need it.
         mHandlerThread = new HandlerThread(TAG, Process.THREAD_PRIORITY_BACKGROUND);
         mHandlerThread.start();
@@ -875,20 +893,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         // Other icons
         mLocationController = new LocationControllerImpl(mContext,
                 mHandlerThread.getLooper()); // will post a notification
-        mBatteryController = createBatteryController();
-        mBatteryController.addCallback(new BatteryStateChangeCallback() {
-            @Override
-            public void onPowerSaveChanged(boolean isPowerSave) {
-                mHandler.post(mCheckBarModes);
-                if (mDozeServiceHost != null) {
-                    mDozeServiceHost.firePowerSaveChanged(isPowerSave);
-                }
-            }
-            @Override
-            public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
-                // noop
-            }
-        });
         mNetworkController = new NetworkControllerImpl(mContext, mHandlerThread.getLooper());
         mNetworkController.setUserSetupComplete(mUserSetup);
         mHotspotController = new HotspotControllerImpl(mContext);
@@ -915,8 +919,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mAccessibilityController = new AccessibilityController(mContext);
         mKeyguardBottomArea.setAccessibilityController(mAccessibilityController);
         mNextAlarmController = new NextAlarmControllerImpl(mContext);
-        mLightStatusBarController = new LightStatusBarController(mIconController,
-                mBatteryController);
         mKeyguardMonitor = new KeyguardMonitorImpl(mContext);
             mUserSwitcherController = createUserSwitcherController();
         if (UserManager.get(mContext).isUserSwitcherEnabled()) {
@@ -1305,7 +1307,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         });
 
         mKeyguardViewMediatorCallback = keyguardViewMediator.getViewMediatorCallback();
-        mLightStatusBarController.setFingerprintUnlockController(mFingerprintUnlockController);
+        mLightBarController.setFingerprintUnlockController(mFingerprintUnlockController);
         Trace.endSection();
     }
 
@@ -3080,6 +3082,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 Integer.toHexString(oldVal), Integer.toHexString(newVal),
                 Integer.toHexString(diff)));
         boolean sbModeChanged = false;
+        boolean nbModeChanged = false;
         if (diff != 0) {
             mSystemUiVisibility = newVal;
 
@@ -3103,7 +3106,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     View.NAVIGATION_BAR_TRANSIENT, View.NAVIGATION_BAR_TRANSLUCENT,
                     View.NAVIGATION_BAR_TRANSPARENT);
             sbModeChanged = sbMode != -1;
-            final boolean nbModeChanged = nbMode != -1;
+            nbModeChanged = nbMode != -1;
             boolean checkBarModes = false;
             if (sbModeChanged && sbMode != mStatusBarMode) {
                 mStatusBarMode = sbMode;
@@ -3133,8 +3136,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             notifyUiVisibilityChanged(mSystemUiVisibility);
         }
 
-        mLightStatusBarController.onSystemUiVisibilityChanged(fullscreenStackVis, dockedStackVis,
-                mask, fullscreenStackBounds, dockedStackBounds, sbModeChanged, mStatusBarMode);
+        mLightBarController.onSystemUiVisibilityChanged(vis, fullscreenStackVis, dockedStackVis,
+                mask, fullscreenStackBounds, dockedStackBounds, sbModeChanged, mStatusBarMode,
+                nbModeChanged, mNavigationBarMode);
     }
 
     protected int computeStatusBarMode(int oldVal, int newVal) {
@@ -4195,8 +4199,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                                 onLaunchTransitionFadingEnded();
                             }
                         });
-                mIconController.appTransitionStarting(SystemClock.uptimeMillis(),
-                        StatusBarIconController.DEFAULT_TINT_ANIMATION_DURATION);
+                mIconController.getTransitionsController().appTransitionStarting(
+                        SystemClock.uptimeMillis(),
+                        LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION);
+                if (mNavigationBarView != null) {
+                    mNavigationBarView.getLightTransitionsController().appTransitionStarting(
+                            SystemClock.uptimeMillis(),
+                            LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION);
+                }
             }
         };
         if (mNotificationPanel.isLaunchTransitionRunning()) {
@@ -4327,7 +4337,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         // Treat Keyguard exit animation as an app transition to achieve nice transition for status
         // bar.
         mKeyguardGoingAway = true;
-        mIconController.appTransitionPending();
+        mIconController.getTransitionsController().appTransitionPending();
+        if (mNavigationBarView != null) {
+            mNavigationBarView.getLightTransitionsController().appTransitionPending();
+        }
     }
 
     /**
@@ -4342,11 +4355,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mKeyguardFadingAwayDelay = delay;
         mKeyguardFadingAwayDuration = fadeoutDuration;
         mWaitingForKeyguardExit = false;
-        mIconController.appTransitionStarting(
+        mIconController.getTransitionsController().appTransitionStarting(
                 startTime + fadeoutDuration
-                        - StatusBarIconController.DEFAULT_TINT_ANIMATION_DURATION,
-                StatusBarIconController.DEFAULT_TINT_ANIMATION_DURATION);
+                        - LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION,
+                LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION);
         recomputeDisableFlags(fadeoutDuration > 0 /* animate */);
+        if (mNavigationBarView != null) {
+            mNavigationBarView.getLightTransitionsController().appTransitionStarting(
+                    startTime - LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION,
+                    LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION);
+        }
     }
 
     public boolean isKeyguardFadingAway() {
@@ -4977,13 +4995,19 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         // Use own timings when Keyguard is going away, see keyguardGoingAway and
         // setKeyguardFadingAway
         if (!mKeyguardFadingAway) {
-            mIconController.appTransitionPending();
+            mIconController.getTransitionsController().appTransitionPending();
+            if (mNavigationBarView != null) {
+                mNavigationBarView.getLightTransitionsController().appTransitionPending();
+            }
         }
     }
 
     @Override
     public void appTransitionCancelled() {
-        mIconController.appTransitionCancelled();
+        mIconController.getTransitionsController().appTransitionCancelled();
+        if (mNavigationBarView != null) {
+            mNavigationBarView.getLightTransitionsController().appTransitionCancelled();
+        }
         EventBus.getDefault().send(new AppTransitionFinishedEvent());
     }
 
@@ -4993,7 +5017,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         // Use own timings when Keyguard is going away, see keyguardGoingAway and
         // setKeyguardFadingAway.
         if (!mKeyguardGoingAway) {
-            mIconController.appTransitionStarting(startTime, duration);
+            mIconController.getTransitionsController().appTransitionStarting(startTime, duration);
+            if (mNavigationBarView != null) {
+                mNavigationBarView.getLightTransitionsController().appTransitionStarting(
+                        startTime, duration);
+            }
         }
         if (mIconPolicy != null) {
             mIconPolicy.appTransitionStarting(startTime, duration);

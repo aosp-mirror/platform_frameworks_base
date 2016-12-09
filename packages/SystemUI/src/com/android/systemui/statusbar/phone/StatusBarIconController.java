@@ -60,7 +60,6 @@ import java.util.ArrayList;
  */
 public class StatusBarIconController extends StatusBarIconList implements Tunable {
 
-    public static final long DEFAULT_TINT_ANIMATION_DURATION = 120;
     public static final String ICON_BLACKLIST = "icon_blacklist";
     public static final int DEFAULT_ICON_TINT = Color.WHITE;
 
@@ -90,30 +89,15 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
     private static final Rect sTmpRect = new Rect();
     private static final int[] sTmpInt2 = new int[2];
 
-    private boolean mTransitionPending;
-    private boolean mTintChangePending;
-    private float mPendingDarkIntensity;
-    private ValueAnimator mTintAnimator;
-
     private int mDarkModeIconColorSingleTone;
     private int mLightModeIconColorSingleTone;
 
-    private final Handler mHandler;
-    private boolean mTransitionDeferring;
-    private long mTransitionDeferringStartTime;
-    private long mTransitionDeferringDuration;
+    private final LightBarTransitionsController mTransitionsController;
 
     private boolean mClockVisibleByPolicy = true;
     private boolean mClockVisibleByUser = true;
 
     private final ArraySet<String> mIconBlacklist = new ArraySet<>();
-
-    private final Runnable mTransitionDeferringDoneRunnable = new Runnable() {
-        @Override
-        public void run() {
-            mTransitionDeferring = false;
-        }
-    };
 
     public StatusBarIconController(Context context, View statusBar, View keyguardStatusBar,
             PhoneStatusBar phoneStatusBar) {
@@ -144,14 +128,19 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
         mClock = (TextView) statusBar.findViewById(R.id.clock);
         mDarkModeIconColorSingleTone = context.getColor(R.color.dark_mode_icon_color_single_tone);
         mLightModeIconColorSingleTone = context.getColor(R.color.light_mode_icon_color_single_tone);
-        mHandler = new Handler();
         loadDimens();
 
         TunerService.get(mContext).addTunable(this, ICON_BLACKLIST);
+
+        mTransitionsController = new LightBarTransitionsController(this::setIconTintInternal);
     }
 
     public void setSignalCluster(SignalClusterView signalCluster) {
         mSignalCluster = signalCluster;
+    }
+
+    public LightBarTransitionsController getTransitionsController() {
+        return mTransitionsController;
     }
 
     /**
@@ -444,55 +433,12 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
         mNotificationIconAreaController.setTintArea(darkArea);
     }
 
-    public void setIconsDark(boolean dark, boolean animate) {
-        if (!animate) {
-            setIconTintInternal(dark ? 1.0f : 0.0f);
-        } else if (mTransitionPending) {
-            deferIconTintChange(dark ? 1.0f : 0.0f);
-        } else if (mTransitionDeferring) {
-            animateIconTint(dark ? 1.0f : 0.0f,
-                    Math.max(0, mTransitionDeferringStartTime - SystemClock.uptimeMillis()),
-                    mTransitionDeferringDuration);
-        } else {
-            animateIconTint(dark ? 1.0f : 0.0f, 0 /* delay */, DEFAULT_TINT_ANIMATION_DURATION);
-        }
-    }
-
-    private void animateIconTint(float targetDarkIntensity, long delay,
-            long duration) {
-        if (mTintAnimator != null) {
-            mTintAnimator.cancel();
-        }
-        if (mDarkIntensity == targetDarkIntensity) {
-            return;
-        }
-        mTintAnimator = ValueAnimator.ofFloat(mDarkIntensity, targetDarkIntensity);
-        mTintAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                setIconTintInternal((Float) animation.getAnimatedValue());
-            }
-        });
-        mTintAnimator.setDuration(duration);
-        mTintAnimator.setStartDelay(delay);
-        mTintAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
-        mTintAnimator.start();
-    }
-
     private void setIconTintInternal(float darkIntensity) {
         mDarkIntensity = darkIntensity;
         mIconTint = (int) ArgbEvaluator.getInstance().evaluate(darkIntensity,
                 mLightModeIconColorSingleTone, mDarkModeIconColorSingleTone);
         mNotificationIconAreaController.setIconTint(mIconTint);
         applyIconTint();
-    }
-
-    private void deferIconTintChange(float darkIntensity) {
-        if (mTintChangePending && darkIntensity == mPendingDarkIntensity) {
-            return;
-        }
-        mTintChangePending = true;
-        mPendingDarkIntensity = darkIntensity;
     }
 
     /**
@@ -549,38 +495,6 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
         mBatteryMeterView.setDarkIntensity(
                 isInArea(mTintArea, mBatteryMeterView) ? mDarkIntensity : 0);
         mClock.setTextColor(getTint(mTintArea, mClock, mIconTint));
-    }
-
-    public void appTransitionPending() {
-        mTransitionPending = true;
-    }
-
-    public void appTransitionCancelled() {
-        if (mTransitionPending && mTintChangePending) {
-            mTintChangePending = false;
-            animateIconTint(mPendingDarkIntensity, 0 /* delay */, DEFAULT_TINT_ANIMATION_DURATION);
-        }
-        mTransitionPending = false;
-    }
-
-    public void appTransitionStarting(long startTime, long duration) {
-        if (mTransitionPending && mTintChangePending) {
-            mTintChangePending = false;
-            animateIconTint(mPendingDarkIntensity,
-                    Math.max(0, startTime - SystemClock.uptimeMillis()),
-                    duration);
-
-        } else if (mTransitionPending) {
-
-            // If we don't have a pending tint change yet, the change might come in the future until
-            // startTime is reached.
-            mTransitionDeferring = true;
-            mTransitionDeferringStartTime = startTime;
-            mTransitionDeferringDuration = duration;
-            mHandler.removeCallbacks(mTransitionDeferringDoneRunnable);
-            mHandler.postAtTime(mTransitionDeferringDoneRunnable, startTime);
-        }
-        mTransitionPending = false;
     }
 
     public static ArraySet<String> getIconBlacklist(String blackListStr) {

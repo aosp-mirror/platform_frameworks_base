@@ -3602,6 +3602,11 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
+    public WindowManagerPolicy.WindowState getInputMethodWindowLw() {
+        return mInputMethodWindow;
+    }
+
+    @Override
     public void notifyKeyguardTrustedChanged() {
         mH.sendEmptyMessage(H.NOTIFY_KEYGUARD_TRUSTED_CHANGED);
     }
