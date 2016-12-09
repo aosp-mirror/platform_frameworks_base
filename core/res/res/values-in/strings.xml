@@ -988,7 +988,7 @@
     <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"Jepret gambar"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Gunakan secara default untuk tindakan ini."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Gunakan aplikasi yang berbeda"</string>
-    <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Menghapus default di Setelan sistem &gt; Apl &gt; Terunduh."</string>
+    <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Menghapus default di Setelan sistem &gt; Apl &gt; Terdownload."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Pilih tindakan"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Pilih apl untuk perangkat USB"</string>
     <string name="noApplications" msgid="2991814273936504689">"Tidak ada apl yang dapat melakukan tindakan ini."</string>
@@ -1016,7 +1016,7 @@
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> telah diluncurkan aslinya."</string>
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Skala"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Selalu tampilkan"</string>
-    <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Aktifkan kembali dialog ini di Setelan sistem &gt; Apl &gt; Terunduh."</string>
+    <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Aktifkan kembali dialog ini di Setelan sistem &gt; Apl &gt; Terdownload."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak mendukung setelan Ukuran layar saat ini dan dapat menunjukkan perilaku yang tak diharapkan."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Selalu tampilkan"</string>
     <string name="smv_application" msgid="3307209192155442829">"Apl <xliff:g id="APPLICATION">%1$s</xliff:g> (proses <xliff:g id="PROCESS">%2$s</xliff:g>) telah melanggar kebijakan StrictMode yang diberlakukannya sendiri."</string>
@@ -1208,6 +1208,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Memungkinkan aplikasi membaca sesi pemasangan. Tindakan ini memungkinkannya melihat detail tentang pemasangan paket aktif."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"minta pasang paket"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Mengizinkan aplikasi meminta pemasangan paket."</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Ketuk dua kali untuk kontrol perbesar/perkecil"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Tidak dapat menambahkan widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Buka"</string>

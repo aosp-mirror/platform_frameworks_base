@@ -40,7 +40,7 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> ਸਕਿੰਟ"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> ਸਕਿੰਟ"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;ਬਿਨਾਂ ਸਿਰਲੇਖ&gt;"</string>
-    <string name="emptyPhoneNumber" msgid="7694063042079676517">"(ਕੋਈ ਫੋਨ ਨੰਬਰ ਨਹੀਂ)"</string>
+    <string name="emptyPhoneNumber" msgid="7694063042079676517">"(ਕੋਈ ਫ਼ੋਨ ਨੰਬਰ ਨਹੀਂ)"</string>
     <string name="unknownName" msgid="6867811765370350269">"ਅਗਿਆਤ"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"ਵੌਇਸਮੇਲ"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
@@ -252,7 +252,7 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS ਸੁਨੇਹੇ ਭੇਜਣ ਅਤੇ ਦੇਖਣ"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"ਸਟੋਰੇਜ"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"ਆਪਣੀ ਡੀਵਾਈਸ ’ਤੇ ਫੋਟੋਆਂ, ਮੀਡੀਆ ਅਤੇ ਫਾਈਲਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"ਆਪਣੀ ਡੀਵਾਈਸ ’ਤੇ ਫ਼ੋਟੋਆਂ, ਮੀਡੀਆ ਅਤੇ ਫਾਈਲਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"ਮਾਈਕ੍ਰੋਫੋਨ"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ਔਡੀਓ ਰਿਕਾਰਡ ਕਰਨ"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ਕੈਮਰਾ"</string>
@@ -376,7 +376,7 @@
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS ਕਾਲ ਸੇਵਾ ਤੱਕ ਪਹੁੰਚ"</string>
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਦਖ਼ਲ ਤੋਂ ਬਿਨਾਂ ਕਾਲਾਂ ਕਰਨ ਲਈ IMS ਸੇਵਾ ਵਰਤਣ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"ਫੋਨ ਸਥਿਤੀ ਅਤੇ ਪਛਾਣ ਪੜ੍ਹੋ"</string>
-    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ਐਪ ਨੂੰ ਡੀਵਾਈਸ ਦੀਆਂ ਫੋਨ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਤੱਕ ਪਹੁੰਚ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਅਨੁਮਤੀ ਐਪ ਨੂੰ ਫੋਨ ਨੰਬਰ ਅਤੇ ਡੀਵਾਈਸ ID ਨਿਰਧਾਰਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ, ਇੱਕ ਕਾਲ ਸਕਿਰਿਆ ਹੈ ਜਾਂ ਨਹੀਂ ਅਤੇ ਰਿਮੋਟ ਨੰਬਰ ਇੱਕ ਕਾਲ ਨਾਲ ਕਨੈਕਟ ਹੈ ਜਾਂ ਨਹੀਂ।"</string>
+    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ਐਪ ਨੂੰ ਡੀਵਾਈਸ ਦੀਆਂ ਫੋਨ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਤੱਕ ਪਹੁੰਚ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਅਨੁਮਤੀ ਐਪ ਨੂੰ ਫ਼ੋਨ ਨੰਬਰ ਅਤੇ ਡੀਵਾਈਸ ID ਨਿਰਧਾਰਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ, ਇੱਕ ਕਾਲ ਸਕਿਰਿਆ ਹੈ ਜਾਂ ਨਹੀਂ ਅਤੇ ਰਿਮੋਟ ਨੰਬਰ ਇੱਕ ਕਾਲ ਨਾਲ ਕਨੈਕਟ ਹੈ ਜਾਂ ਨਹੀਂ।"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ਟੈਬਲੇਟ ਨੂੰ ਸਲੀਪਿੰਗ ਤੋਂ ਰੋਕੋ"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"TV ਨੂੰ ਸਲੀਪਿੰਗ ਤੋਂ ਰੋਕੋ"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ਫੋਨ ਨੂੰ ਸਲੀਪਿੰਗ ਤੋਂ ਰੋਕੋ"</string>
@@ -549,7 +549,7 @@
     <item msgid="8901098336658710359">"ਘਰ"</item>
     <item msgid="869923650527136615">"ਮੋਬਾਈਲ"</item>
     <item msgid="7897544654242874543">"ਕੰਮ"</item>
-    <item msgid="1103601433382158155">"ਦਫ਼ਤਰ ਦੀ ਫੈਕਸ"</item>
+    <item msgid="1103601433382158155">"ਕਾਰਜ-ਸਥਾਨ ਫੈਕਸ"</item>
     <item msgid="1735177144948329370">"ਘਰ ਦੀ ਫੈਕਸ"</item>
     <item msgid="603878674477207394">"ਪੇਜਰ"</item>
     <item msgid="1650824275177931637">"ਹੋਰ"</item>
@@ -592,7 +592,7 @@
     <string name="phoneTypeHome" msgid="2570923463033985887">"ਘਰ"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"ਮੋਬਾਈਲ"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"ਕੰਮ"</string>
-    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"ਦਫ਼ਤਰ ਦੀ ਫੈਕਸ"</string>
+    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"ਕਾਰਜ-ਸਥਾਨ ਫੈਕਸ"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"ਘਰ ਦੀ ਫੈਕਸ"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"ਪੇਜਰ"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"ਹੋਰ"</string>
@@ -1146,7 +1146,7 @@
     <string name="usb_charging_notification_title" msgid="6895185153353640787">"ਇਹ ਡੀਵਾਈਸ USB ਰਾਹੀਂ ਚਾਰਜ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ"</string>
     <string name="usb_supplying_notification_title" msgid="5310642257296510271">"ਨੱਥੀ ਕੀਤੀ ਡੀਵਾਈਸ ਨੂੰ USB ਰਾਹੀਂ ਪਾਵਰ ਮਿਲ ਰਹੀ ਹੈ"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"ਫ਼ਾਈਲ ਟ੍ਰਾਂਸਫ਼ਰ ਲਈ USB"</string>
-    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"ਫੋਟੋ ਟ੍ਰਾਂਸਫ਼ਰ ਲਈ USB"</string>
+    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"ਫ਼ੋਟੋ ਟ੍ਰਾਂਸਫ਼ਰ ਲਈ USB"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI ਲਈ USB"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"ਇੱਕ USB ਐਕਸੈਸਰੀ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"ਹੋਰ ਵਿਕਲਪਾਂ ਲਈ ਟੈਪ ਕਰੋ।"</string>
@@ -1168,7 +1168,7 @@
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> ਤਿਆਰ ਹੋ ਰਿਹਾ ਹੈ"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"ਤਰੁੱਟੀਆਂ ਦੀ ਜਾਂਚ ਕਰ ਰਿਹਾ ਹੈ"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"ਨਵੇਂ <xliff:g id="NAME">%s</xliff:g> ਦਾ ਪਤਾ ਲਗਾਇਆ ਗਿਆ"</string>
-    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"ਫੋਟੋਆਂ ਅਤੇ ਮੀਡੀਆ ਨੂੰ ਟ੍ਰਾਂਸਫ਼ਰ ਕਰਨ ਲਈ"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"ਫ਼ੋਟੋਆਂ ਅਤੇ ਮੀਡੀਆ ਨੂੰ ਟ੍ਰਾਂਸਫ਼ਰ ਕਰਨ ਲਈ"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"ਕਰਪਟਿਡ <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> ਗ਼ਲਤ ਹੈ। ਠੀਕ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"ਅਸਮਰਥਿਤ <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1208,6 +1208,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ਇੱਕ ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਇੰਸਟੌਲ ਸੈਸ਼ਨ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਇਸਨੂੰ ਸਕਿਰਿਆ ਪੈਕੇਜ ਇੰਸਟੌਲੇਸ਼ਨਾਂ ਬਾਰੇ ਵੇਰਵੇ ਦੇਖਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"ਪੈਕੇਜ ਸਥਾਪਿਤ ਕਰਨ ਦੀ ਬੇਨਤੀ ਕਰੋ"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"ਪੈਕੇਜ ਦੀ ਸਥਾਪਨਾ ਦੀ ਬੇਨਤੀ ਕਰਨ ਲਈ ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਅਨੁਮਤੀ ਦਿੰਦਾ ਹੈ"</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"ਜ਼ੂਮ ਕੰਟਰੋਲ ਲਈ ਦੋ ਵਾਰ ਟੈਪ ਕਰੋ"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ਵਿਜੇਟ ਨਹੀਂ ਜੋੜ ਸਕਿਆ।"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"ਜਾਓ"</string>

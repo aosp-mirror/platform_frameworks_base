@@ -1258,6 +1258,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Дазваляе праграме счытваць сеансы ўсталёўкі. Гэта дазваляе ёй праглядаць інфармацыю аб актыўных усталёўках пакета."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"запытваць усталёўку пакетаў"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Дазваляе праграме запытваць усталёўку пакетаў."</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Націсніце двойчы, каб кіраваць маштабаваннем"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Немагчыма дадаць віджэт."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Пачаць"</string>

@@ -278,7 +278,7 @@
     <string name="permlab_statusBarService" msgid="4826835508226139688">"用作状态栏"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"允许以状态栏形式显示应用。"</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"展开/收拢状态栏"</string>
-    <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"允许应用展开或折叠状态栏。"</string>
+    <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"允许应用展开或收起状态栏。"</string>
     <string name="permlab_install_shortcut" msgid="4279070216371564234">"安装快捷方式"</string>
     <string name="permdesc_install_shortcut" msgid="8341295916286736996">"允许应用自行添加主屏幕快捷方式。"</string>
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"卸载快捷方式"</string>
@@ -738,7 +738,7 @@
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"添加小部件。"</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"空白"</string>
     <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"已展开解锁区域。"</string>
-    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"已折叠解锁区域。"</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"已收起解锁区域。"</string>
     <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g>小部件。"</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"用户选择器"</string>
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"状态"</string>
@@ -1208,6 +1208,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"允许应用读取安装会话。这样，应用将可以查看有关当前软件包安装的详情。"</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"请求安装文件包"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"允许应用请求安装文件包。"</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"双击可以进行缩放控制"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"无法添加小部件。"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"开始"</string>

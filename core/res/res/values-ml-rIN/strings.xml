@@ -163,7 +163,7 @@
     <string name="notification_title" msgid="8967710025036163822">"<xliff:g id="ACCOUNT">%1$s</xliff:g> എന്നതിൽ സൈൻ ഇൻ ചെയ്യുന്നതിൽ പിശക്"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"സമന്വയിപ്പിക്കുക"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"സമന്വയിപ്പിക്കുക"</string>
-    <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"വളരെയധികം <xliff:g id="CONTENT_TYPE">%s</xliff:g> ഇല്ലാതാക്കലുകൾ."</string>
+    <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"വളരെയധികം <xliff:g id="CONTENT_TYPE">%s</xliff:g> ഇല്ലാതാക്കുന്നു."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"ടാബ്‌ലെറ്റ് സ്റ്റോറേജ്  കഴിഞ്ഞു. ഇടം ശൂന്യമാക്കാൻ ചില ഫയലുകൾ ഇല്ലാതാക്കുക."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"വാച്ചിലെ സ്റ്റോറേജ്  നിറഞ്ഞു. ഇടം ശൂന്യമാക്കാൻ കുറച്ച് ഫയലുകൾ ഇല്ലാതാക്കുക."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"ടിവി സ്റ്റോറേജ്  നിറഞ്ഞു. ഇടം ശൂന്യമാക്കാൻ കുറച്ച് ഫയലുകൾ ഇല്ലാതാക്കുക."</string>
@@ -1208,6 +1208,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ഇൻസ്റ്റാൾ ചെയ്‌ത സെഷനുകൾ റീഡുചെയ്യുന്നതിന് ഒരു അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സജീവ പാക്കേജ് ഇൻസ്റ്റാളേഷനുകളെക്കുറിച്ചുള്ള വിശദാംശങ്ങൾ കാണുന്നതിന് ഇത് അനുവദിക്കുന്നു."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"പാക്കേജുകൾ ഇൻസ്റ്റാൾ ചെയ്യാൻ അഭ്യർത്ഥിക്കുക"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"പാക്കേജുകളുടെ ഇൻസ്റ്റാളേഷൻ അഭ്യർത്ഥിക്കാൻ ഒരു അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"സൂം നിയന്ത്രണം ലഭിക്കാൻ രണ്ടുതവണ ടാപ്പുചെയ്യുക"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"വിജറ്റ് ചേർക്കാനായില്ല."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"പോവുക"</string>

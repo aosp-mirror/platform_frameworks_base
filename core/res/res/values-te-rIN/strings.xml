@@ -1208,6 +1208,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ఇన్‌స్టాల్ సెషన్‌లను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది సక్రియ ప్యాకేజీ ఇన్‌స్టాలేషన్‌ల గురించి వివరాలను చూడటానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"ఇన్‌స్టాల్ ప్యాకేజీలను అభ్యర్థించడం"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"ప్యాకేజీల ఇన్‌స్టాలేషన్ అభ్యర్థించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"జూమ్ నియంత్రణ కోసం రెండుసార్లు నొక్కండి"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"విడ్జెట్‌ను జోడించడం సాధ్యపడలేదు."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"వెళ్లు"</string>

@@ -82,10 +82,10 @@
     <string name="RuacMmi" msgid="7827887459138308886">"Avvisande av oönskade irriterande samtal"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Leverans av nummer för inkommande samtal"</string>
     <string name="DndMmi" msgid="1265478932418334331">"Stör ej"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Nummerpresentatören är begränsad som standard. Nästa samtal: Begränsad"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Nummerpresentatörens standardinställning är begränsad. Nästa samtal: Inte begränsad"</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Nummerpresentatörens standardinställning är inte begränsad. Nästa samtal: Begränsad"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Nummerpresentatörens standardinställning är inte begränsad. Nästa samtal: Inte begränsad"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Nummerpresentatören är blockerad som standard. Nästa samtal: Blockerad"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Nummerpresentatörens standardinställning är blockerad. Nästa samtal: Inte blockerad"</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Nummerpresentatörens standardinställning är inte blockerad. Nästa samtal: Blockerad"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Nummerpresentatörens standardinställning är inte blockerad. Nästa samtal: Inte blockerad"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Tjänsten är inte etablerad."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Det går inte att ändra inställningen för nummerpresentatör."</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Datatjänsten är blockerad."</string>
@@ -650,7 +650,7 @@
     <string name="relationTypeMother" msgid="4578571352962758304">"Mamma"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Förälder"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Partner"</string>
-    <string name="relationTypeReferredBy" msgid="101573059844135524">"Genom"</string>
+    <string name="relationTypeReferredBy" msgid="101573059844135524">"Känner genom"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"Släkting"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Syster"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Make/maka"</string>
@@ -1208,6 +1208,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Tillåt appen att läsa installationssessioner. Det ger den tillgång till uppgifter om aktiva paketinstallationer."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"begära installationspaket"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Tillåter att en app begär paketinstallation."</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Peka två gånger för zoomkontroll"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Det gick inte att lägga till widgeten."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Kör"</string>

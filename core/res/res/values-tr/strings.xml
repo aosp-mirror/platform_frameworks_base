@@ -605,7 +605,7 @@
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Telsiz"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Teleks"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"İş Cep Telefonu"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"İş Mobil"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"İş Çağrı Cihazı"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Yardımcı"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
@@ -649,7 +649,7 @@
     <string name="relationTypeManager" msgid="6365677861610137895">"Yönetici"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"Anne"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Ebeveyn"</string>
-    <string name="relationTypePartner" msgid="7266490285120262781">"Hayat Arkadaşı"</string>
+    <string name="relationTypePartner" msgid="7266490285120262781">"Ortak"</string>
     <string name="relationTypeReferredBy" msgid="101573059844135524">"Öneren"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"Akraba"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Kız Kardeş"</string>
@@ -1208,6 +1208,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Bir uygulamanın yükleme oturumlarını okumasına izin verir. Bu, etkin paket yüklemeleriyle ilgili ayrıntıların görülmesine olanak tanır."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"paket yükleme isteğinde bulunma"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Uygulamaya, paketleri yükleme isteğinde bulunma izni verir."</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Zum denetimi için iki kez dokun"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Widget eklenemedi."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Git"</string>

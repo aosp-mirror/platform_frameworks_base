@@ -646,7 +646,7 @@
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Pomoćnik"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Brat"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"Dijete"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Partner u kućan."</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Vanbračni partner"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"Otac"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"Prijatelj"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"Voditelj"</string>
@@ -1233,6 +1233,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Omogućuje aplikaciji čitanje sesija instaliranja. Aplikacija može vidjeti pojedinosti o aktivnim instaliranjima paketa."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"zahtijevati instaliranje paketa"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Aplikaciji omogućuje zahtijevanje instaliranja paketa."</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Dvaput dotaknite za upravljanje zumiranjem"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Widget nije moguće dodati."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Idi"</string>

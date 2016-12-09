@@ -204,9 +204,9 @@
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Je tv wordt uitgeschakeld.."</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Je horloge wordt uitgeschakeld."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Je telefoon wordt uitgeschakeld."</string>
-    <string name="shutdown_confirm_question" msgid="2906544768881136183">"Wilt u afsluiten?"</string>
+    <string name="shutdown_confirm_question" msgid="2906544768881136183">"Wil je afsluiten?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Opnieuw opstarten in veilige modus"</string>
-    <string name="reboot_safemode_confirm" msgid="55293944502784668">"Wilt u opnieuw opstarten in de veilige modus? Als u dit doet, worden alle geïnstalleerde applicaties van derden uitgeschakeld. Ze worden weer ingeschakeld als u weer opnieuw opstart."</string>
+    <string name="reboot_safemode_confirm" msgid="55293944502784668">"Wil je opnieuw opstarten in de veilige modus? Als u dit doet, worden alle geïnstalleerde applicaties van derden uitgeschakeld. Ze worden weer ingeschakeld als u weer opnieuw opstart."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Recent"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Geen recente apps."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Tabletopties"</string>
@@ -356,9 +356,9 @@
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Hiermee kan de app afspraken toevoegen, verwijderen en wijzigen die u op je tv kunt aanpassen, inclusief afspraken van vrienden of collega\'s. Met deze toestemming zou de app berichten kunnen verzenden die afkomstig lijken te zijn van agenda-eigenaren of afspraken kunnen aanpassen zonder medeweten van de eigenaar."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Hiermee kan de app afspraken toevoegen, verwijderen en wijzigen die u kunt bewerken op je telefoon, inclusief afspraken van vrienden of collega\'s. Zo kan de app berichten verzenden die afkomstig lijken te zijn van agenda-eigenaren, of afspraken aanpassen zonder medeweten van de eigenaar."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"toegang tot extra opdrachten van locatieaanbieder"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Hiermee kan de app toegang krijgen tot extra opdrachten voor de locatieprovider. De app kan hiermee de werking van GPS of andere locatiebronnen te verstoren."</string>
-    <string name="permlab_accessFineLocation" msgid="251034415460950944">"toegang tot precieze locatie (GPS- en netwerkgebaseerd)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Hiermee kan de app je precieze locatie bepalen via GPS (Global Positioning System) of netwerklocatiebronnen zoals zendmasten en wifi. Deze locatieservices moeten zijn ingeschakeld en beschikbaar zijn op je apparaat voordat de app ze kan gebruiken. Apps kunnen dit gebruiken om te bepalen waar u bent en verbruiken mogelijk extra acculading."</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Hiermee kan de app toegang krijgen tot extra opdrachten voor de locatieprovider. De app kan hiermee de werking van gps of andere locatiebronnen te verstoren."</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"toegang tot precieze locatie (gps- en netwerkgebaseerd)"</string>
+    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Hiermee kan de app je precieze locatie bepalen via gps (Global Positioning System) of netwerklocatiebronnen zoals zendmasten en wifi. Deze locatieservices moeten zijn ingeschakeld en beschikbaar zijn op je apparaat voordat de app ze kan gebruiken. Apps kunnen dit gebruiken om te bepalen waar u bent en verbruiken mogelijk extra acculading."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"toegang tot geschatte locatie (netwerkgebaseerd)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Hiermee kan de app beschikken over je geschatte locatie. Deze locatie wordt afgeleid van locatieservices die netwerklocatiebronnen zoals zendmasten en wifi gebruiken. Deze locatieservices moeten zijn ingeschakeld en beschikbaar zijn op je apparaat voordat de app ze kan gebruiken. Apps kunnen dit gebruiken om ongeveer te bepalen waar u zich bevindt."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"je audio-instellingen wijzigen"</string>
@@ -804,7 +804,7 @@
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Hiermee kan de app berichten toevoegen aan de inbox van je voicemail."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"geolocatiemachtigingen voor browser aanpassen"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Hiermee kan de app de geolocatiemachtigingen van de browser aanpassen. Schadelijke apps kunnen dit gebruiken om locatiegegevens te verzenden naar willekeurige websites."</string>
-    <string name="save_password_message" msgid="767344687139195790">"Wilt u dat de browser dit wachtwoord onthoudt?"</string>
+    <string name="save_password_message" msgid="767344687139195790">"Wil je dat de browser dit wachtwoord onthoudt?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Niet nu"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Onthouden"</string>
     <string name="save_password_never" msgid="8274330296785855105">"Nooit"</string>
@@ -1010,7 +1010,7 @@
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"Melden"</string>
     <string name="wait" msgid="7147118217226317732">"Wachten"</string>
-    <string name="webpage_unresponsive" msgid="3272758351138122503">"De pagina reageert niet meer.\n\nWilt u de pagina sluiten?"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"De pagina reageert niet meer.\n\nWil je de pagina sluiten?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"App verplaatst"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> is nu actief."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> was het eerst gestart."</string>
@@ -1111,7 +1111,7 @@
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"De verbinding met het wifi-netwerk wordt tijdelijk uitgeschakeld terwijl de telefoon verbonden is met <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Teken invoegen"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS-berichten verzenden"</string>
-    <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; verzendt moment een groot aantal sms-berichten. Wilt u toestaan ​​dat deze app berichten blijft verzenden?"</string>
+    <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; verzendt moment een groot aantal sms-berichten. Wil je toestaan ​​dat deze app berichten blijft verzenden?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Toestaan"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Weigeren"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; wil graag een bericht verzenden naar &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
@@ -1208,6 +1208,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Hiermee wordt een app toegestaan installatiesessies te lezen. Zo kan de app informatie bekijken over actieve pakketinstallaties."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"installatiepakketten aanvragen"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Hiermee kan een app installatie van pakketten aanvragen."</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Tik twee keer voor zoomregeling"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Kan widget niet toevoegen."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Ga"</string>
@@ -1220,7 +1224,7 @@
     <string name="dial_number_using" msgid="5789176425167573586">"Nummer bellen\nmet <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"Contact maken\nmet <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"De volgende apps verzoeken om toegang tot je account, nu en in de toekomst."</string>
-    <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Wilt u dit verzoek toestaan?"</string>
+    <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Wil je dit verzoek toestaan?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"Verzoek om toegang"</string>
     <string name="allow" msgid="7225948811296386551">"Toestaan"</string>
     <string name="deny" msgid="2081879885755434506">"Weigeren"</string>
@@ -1277,7 +1281,7 @@
     <string name="gpsVerifYes" msgid="2346566072867213563">"Ja"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"Nee"</string>
     <string name="sync_too_many_deletes" msgid="5296321850662746890">"Verwijderingslimiet overschreden"</string>
-    <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"Er zijn <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> verwijderde items voor <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> , account <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> . Wat wilt u doen?"</string>
+    <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"Er zijn <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> verwijderde items voor <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> , account <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> . Wat wil je doen?"</string>
     <string name="sync_really_delete" msgid="2572600103122596243">"De items verwijderen."</string>
     <string name="sync_undo_deletes" msgid="2941317360600338602">"Verwijderingen ongedaan maken"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"Nu niets doen."</string>
@@ -1333,7 +1337,7 @@
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Tik voor gebruik en instellingen"</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Gegevenslimiet van 2G-3G bereikt"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Gegevenslimiet van 4G bereikt"</string>
-    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Mobiele gegevenslimiet bereikt"</string>
+    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Mobiele datalimiet bereikt"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wifi-gegevenslimiet bereikt"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"Gegev. onderbr. voor rest cyclus"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Gegevenslimiet 2G-3G overschreden"</string>
@@ -1524,8 +1528,8 @@
     <string name="mediasize_japanese_kahu" msgid="6872696027560065173">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="2359077233775455405">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="2091777168747058008">"You4"</string>
-    <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"Onbekend portret"</string>
-    <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"Onbekend landschap"</string>
+    <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"Onbekend staand"</string>
+    <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"Onbekend liggend"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Geannuleerd"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Fout bij schrijven van content"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"onbekend"</string>
