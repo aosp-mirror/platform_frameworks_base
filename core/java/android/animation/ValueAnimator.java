@@ -49,8 +49,8 @@ import java.util.HashMap;
  *
  * {@sample development/samples/ApiDemos/res/anim/animator.xml ValueAnimatorResources}
  *
- * <p>It is also possible to use a combination of {@link PropertyValuesHolder} and
- * {@link Keyframe} resource tags to create a multi-step animation.
+ * <p>Starting from API 23, it is also possible to use a combination of {@link PropertyValuesHolder}
+ * and {@link Keyframe} resource tags to create a multi-step animation.
  * Note that you can specify explicit fractional values (from 0 to 1) for
  * each keyframe to determine when, in the overall duration, the animation should arrive at that
  * value. Alternatively, you can leave the fractions off and the keyframes will be equally
