@@ -82,8 +82,15 @@ CopyResult OpenGLReadback::copyGraphicBufferInto(GraphicBuffer* graphicBuffer,
         return CopyResult::UnknownError;
     }
 
-    CopyResult copyResult = copyImageInto(sourceImage, texTransform, graphicBuffer->getWidth(),
-            graphicBuffer->getHeight(), srcRect, bitmap);
+    uint32_t width = graphicBuffer->getWidth();
+    uint32_t height = graphicBuffer->getHeight();
+    // If this is a 90 or 270 degree rotation we need to swap width/height
+    // This is a fuzzy way of checking that.
+    if (texTransform[Matrix4::kSkewX] >= 0.5f || texTransform[Matrix4::kSkewX] <= -0.5f) {
+        std::swap(width, height);
+    }
+    CopyResult copyResult = copyImageInto(sourceImage, texTransform, width, height,
+            srcRect, bitmap);
 
     // All we're flushing & finishing is the deletion of the texture since
     // copyImageInto already did a major flush & finish as an implicit
