@@ -146,10 +146,12 @@ import com.android.systemui.plugins.qs.QS.ActivityStarter;
 import com.android.systemui.plugins.qs.QS.BaseStatusBarHeader;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanel;
+import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.AppTransitionFinishedEvent;
 import com.android.systemui.recents.events.activity.UndockingTaskEvent;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.stackdivider.WindowManagerProxy;
 import com.android.systemui.statusbar.ActivatableNotificationView;
@@ -1359,6 +1361,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             if (mRecents == null || !ActivityManager.supportsMultiWindow()
                     || !getComponent(Divider.class).getView().getSnapAlgorithm()
                             .isSplitScreenFeasible()) {
+                return false;
+            }
+
+            ActivityManager.RunningTaskInfo runningTask =
+                    Recents.getSystemServices().getRunningTask();
+            boolean isRunningTaskInHomeOrRecentsStack = runningTask != null &&
+                    ActivityManager.StackId.isHomeOrRecentsStack(runningTask.stackId);
+            if (isRunningTaskInHomeOrRecentsStack) {
                 return false;
             }
 
