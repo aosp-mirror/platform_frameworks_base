@@ -1212,6 +1212,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Permite que una aplicación consulte sesiones de instalación para ver detalles sobre instalaciones de paquetes activos."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"solicitar instalación de paquetes"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Permite a una aplicación solicitar la instalación de paquetes."</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Da dos toques para acceder al control de zoom."</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"No se ha podido añadir el widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Ir"</string>
@@ -1683,6 +1687,5 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Restablecer ahora"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> inhabilitado"</string>
     <string name="conference_call" msgid="3751093130790472426">"Conferencia"</string>
-    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
-    <skip />
+    <string name="tooltip_popup_title" msgid="5253721848739260181">"Descripción emergente"</string>
 </resources>

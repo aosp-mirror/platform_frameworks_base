@@ -1212,6 +1212,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"애플리케이션의 설치 세션 읽기를 허용하면, 활성 패키지 설치에 대한 세부 정보를 볼 수 있습니다."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"패키지 설치 요청"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"애플리케이션이 패키지 설치를 요청하도록 허용합니다."</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"확대/축소하려면 두 번 탭하세요."</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"위젯을 추가할 수 없습니다."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"이동"</string>
@@ -1562,8 +1566,8 @@
     <string name="select_year" msgid="7952052866994196170">"연도 선택"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> 삭제됨"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"업무용 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"두번째 작업 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"세번째 작업<xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"두 번째 업무용 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"세 번째 업무용<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"이 화면을 고정 해제하려면 \'뒤로\'를 길게 터치합니다."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"앱이 고정되었습니다. 이 기기에서는 고정 해제를 허용하지 않습니다."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"화면 고정됨"</string>
@@ -1683,6 +1687,5 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"지금 초기화"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> 사용 중지됨"</string>
     <string name="conference_call" msgid="3751093130790472426">"다자간 통화"</string>
-    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
-    <skip />
+    <string name="tooltip_popup_title" msgid="5253721848739260181">"도움말"</string>
 </resources>

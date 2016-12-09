@@ -378,7 +378,7 @@
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"ဖုန်းရဲ့ အခြေအနေ နှင့် အမှတ်သညာအား ဖတ်ခြင်း"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"အပလီကေးရှင်းအား ဖုန်းရဲ့ စွမ်းဆောင်ချက်များအား သုံးခွင့်ပြုပါ။ အပလီကေးရှင်းအနေဖြင့် ဖုန်းနံပါတ်၊ စက်နံပါတ်၊ ဖုန်းခေါ်နေမှု ရှိမရှိနှင့် တဖက်မှ ဖုန်းနံပါတ် များအား သိရှိနိုင်ပါသည်"</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"ဖုန်းနံပါတ်ကို ဖတ်ရန်"</string>
-    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"စက်ပစ္စည်း၏ ဖုန်းနံပါတ်အား အက်ပ်ကို အသုံးပြုခွင့်ပေးပါ။"</string>
+    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"အက်ပ်ကို စက်ပစ္စည်း၏ ဖုန်းနံပါတ် အသုံးပြုခွင့်ပေးပါ။"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"တက်ပလက်အား ပိတ်ခြင်းမှ ကာကွယ်ခြင်း"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"တီဗွီအား နားနေခြင်းမှ ကာကွယ်ရန်"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ဖုန်းအနားယူခြင်းမပြုလုပ်စေရန်"</string>
@@ -1212,6 +1212,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"အပလီကေးရှင်းအား တပ်ဆင်ရေး ချိတ်ဆက်မှုများကို ဖတ်ခွင့်ပြုသည်။ ၎င်းသည် ဖွင့်သုံးနေသည့် အထုပ်အား တပ်ဆင်မှုဆိုင်ရာ အသေးိစတ်များကို ကြည့်ရှုခွင့် ပြုသည်။"</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"တပ်ဆင်ရေး အထုပ်များကို တောင်းဆိုပါ"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"ပက်ကေ့များ သွင်းယူခြင်းအတွက် တောင်းဆိုရန် အပလီကေးရှင်းအား ခွင့်ပြုပါ"</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"ဇူးမ်အသုံးပြုရန် နှစ်ချက်တို့ပါ"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ဝဒ်ဂျက်ထည့်လို့ မရပါ"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"သွားပါ"</string>
@@ -1683,6 +1687,5 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"ယခုပြန်လည်သတ်မှတ်ပါ"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"ပိတ်ထားသည့် <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"လူအမြောက်အမြားတပြိုင်နက် ခေါ်ဆိုမှု"</string>
-    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
-    <skip />
+    <string name="tooltip_popup_title" msgid="5253721848739260181">"အကြံပြုချက်ပြ ပေါ့အပ် ဝင်းဒိုး"</string>
 </resources>

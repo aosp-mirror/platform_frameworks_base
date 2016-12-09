@@ -1212,6 +1212,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ഇൻസ്റ്റാൾ ചെയ്‌ത സെഷനുകൾ റീഡുചെയ്യുന്നതിന് ഒരു അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സജീവ പാക്കേജ് ഇൻസ്റ്റാളേഷനുകളെക്കുറിച്ചുള്ള വിശദാംശങ്ങൾ കാണുന്നതിന് ഇത് അനുവദിക്കുന്നു."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"പാക്കേജുകൾ ഇൻസ്റ്റാൾ ചെയ്യാൻ അഭ്യർത്ഥിക്കുക"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"പാക്കേജുകളുടെ ഇൻസ്റ്റാളേഷൻ അഭ്യർത്ഥിക്കാൻ ഒരു അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"സൂം നിയന്ത്രണം ലഭിക്കാൻ രണ്ടുതവണ ടാപ്പുചെയ്യുക"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"വിജറ്റ് ചേർക്കാനായില്ല."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"പോവുക"</string>
@@ -1683,6 +1687,5 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"ഇപ്പോൾ പുനക്രമീകരിക്കുക"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> പ്രവർത്തനരഹിതമാക്കി"</string>
     <string name="conference_call" msgid="3751093130790472426">"കോൺഫറൻസ് കോൾ"</string>
-    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
-    <skip />
+    <string name="tooltip_popup_title" msgid="5253721848739260181">"ടൂൾ ടിപ്പ്"</string>
 </resources>

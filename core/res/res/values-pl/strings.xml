@@ -1262,6 +1262,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Pozwala aplikacji odczytywać sesje instalacji. Umożliwia to jej na poznanie szczegółów aktywnych instalacji pakietów."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"żądanie instalacji pakietów"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Zezwala aplikacji żądanie instalacji pakietów."</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Dotknij dwukrotnie, aby sterować powiększeniem"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Nie można dodać widżetu."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"OK"</string>
@@ -1755,6 +1759,5 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Resetuj teraz"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Wyłączono: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"Połączenie konferencyjne"</string>
-    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
-    <skip />
+    <string name="tooltip_popup_title" msgid="5253721848739260181">"Etykietka"</string>
 </resources>

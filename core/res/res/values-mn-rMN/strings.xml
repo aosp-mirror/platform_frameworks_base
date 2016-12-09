@@ -1212,6 +1212,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Аппликешн-д суулгах сешн уншихыг зөвшөөрнө. Энэ нь идэвхтэй багцуудыг суулгалтын талаар дэлгэрэнгүй мэдээллийг үзэх боломж олгоно."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"багц суулгахыг хүсэх"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Аппликейшн нь багц суулгахыг хүсэх боломжтой."</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Өсгөх контрол дээр хоёр удаа товшино уу"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Виджет нэмж чадсангүй."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Очих"</string>
@@ -1681,6 +1685,5 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Одоо шинэчлэх"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g>-г цуцалсан"</string>
     <string name="conference_call" msgid="3751093130790472426">"Хурлын дуудлага"</string>
-    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
-    <skip />
+    <string name="tooltip_popup_title" msgid="5253721848739260181">"Зөвлөмж"</string>
 </resources>

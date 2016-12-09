@@ -1212,6 +1212,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"به برنامه اجازه می‌دهد جلسات نصب را بخواند. این کار به برنامه اجازه می‌دهد جزئیات نصب‌های بسته فعال را ببیند."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"درخواست نصب بسته"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"به برنامه اجازه می‌دهد درخواست نصب بسته‌بندی کند."</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"برای کنترل بزرگ‌نمایی، دو بار ضربه بزنید"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"افزودن ابزارک انجام نشد."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"برو"</string>
@@ -1683,6 +1687,5 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"بازنشانی در این لحظه"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> غیرفعال شد"</string>
     <string name="conference_call" msgid="3751093130790472426">"تماس کنفرانسی"</string>
-    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
-    <skip />
+    <string name="tooltip_popup_title" msgid="5253721848739260181">"نکته‌ابزار"</string>
 </resources>

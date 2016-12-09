@@ -378,7 +378,7 @@
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"ਫੋਨ ਸਥਿਤੀ ਅਤੇ ਪਛਾਣ ਪੜ੍ਹੋ"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ਐਪ ਨੂੰ ਡੀਵਾਈਸ ਦੀਆਂ ਫੋਨ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਤੱਕ ਪਹੁੰਚ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਅਨੁਮਤੀ ਐਪ ਨੂੰ ਫ਼ੋਨ ਨੰਬਰ ਅਤੇ ਡੀਵਾਈਸ ID ਨਿਰਧਾਰਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ, ਇੱਕ ਕਾਲ ਸਕਿਰਿਆ ਹੈ ਜਾਂ ਨਹੀਂ ਅਤੇ ਰਿਮੋਟ ਨੰਬਰ ਇੱਕ ਕਾਲ ਨਾਲ ਕਨੈਕਟ ਹੈ ਜਾਂ ਨਹੀਂ।"</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"ਫ਼ੋਨ ਨੰਬਰ ਪੜ੍ਹੋ"</string>
-    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"ਡੀਵਾਈਸ ਦੇ ਫ਼ੋਨ ਨੰਬਰ \'ਤੇ ਪਹੁੰਚ ਕਰਨ ਲਈ ਐਪ ਨੂੰ ਇਜਾਜ਼ਤ ਦਿੰਦਾ ਹੈ।"</string>
+    <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"ਡੀਵਾਈਸ ਦੇ ਫ਼ੋਨ ਨੰਬਰ \'ਤੇ ਪਹੁੰਚ ਕਰਨ ਲਈ ਐਪ ਨੂੰ ਇਜਾਜ਼ਤ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ਟੈਬਲੇਟ ਨੂੰ ਸਲੀਪਿੰਗ ਤੋਂ ਰੋਕੋ"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"TV ਨੂੰ ਸਲੀਪਿੰਗ ਤੋਂ ਰੋਕੋ"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ਫੋਨ ਨੂੰ ਸਲੀਪਿੰਗ ਤੋਂ ਰੋਕੋ"</string>
@@ -1212,6 +1212,10 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ਇੱਕ ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਇੰਸਟੌਲ ਸੈਸ਼ਨ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਇਸਨੂੰ ਸਕਿਰਿਆ ਪੈਕੇਜ ਇੰਸਟੌਲੇਸ਼ਨਾਂ ਬਾਰੇ ਵੇਰਵੇ ਦੇਖਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"ਪੈਕੇਜ ਸਥਾਪਿਤ ਕਰਨ ਦੀ ਬੇਨਤੀ ਕਰੋ"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"ਪੈਕੇਜ ਦੀ ਸਥਾਪਨਾ ਦੀ ਬੇਨਤੀ ਕਰਨ ਲਈ ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਅਨੁਮਤੀ ਦਿੰਦਾ ਹੈ"</string>
+    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
+    <skip />
+    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"ਜ਼ੂਮ ਕੰਟਰੋਲ ਲਈ ਦੋ ਵਾਰ ਟੈਪ ਕਰੋ"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ਵਿਜੇਟ ਨਹੀਂ ਜੋੜ ਸਕਿਆ।"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"ਜਾਓ"</string>
@@ -1683,6 +1687,5 @@
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"ਹੁਣੇ ਮੁੜ-ਸੈੱਟ ਕਰੋ"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"ਅਯੋਗ ਬਣਾਇਆ ਗਿਆ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"ਕਾਨਫਰੰਸ ਕਾਲ"</string>
-    <!-- no translation found for tooltip_popup_title (5253721848739260181) -->
-    <skip />
+    <string name="tooltip_popup_title" msgid="5253721848739260181">"ਟੂਲਟਿਪ"</string>
 </resources>
