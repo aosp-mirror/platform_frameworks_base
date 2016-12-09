@@ -21,10 +21,11 @@ LOCAL_PATH:= $(call my-dir)
 # This contains the junit.framework classes that were in Android API level 25.
 include $(CLEAR_VARS)
 
-LOCAL_NO_STANDARD_LIBRARIES := true
-LOCAL_STATIC_JAVA_LIBRARIES := core-junit-static
-
+LOCAL_SRC_FILES := $(call all-java-files-under, src)
 LOCAL_MODULE := legacy-test
+LOCAL_NO_STANDARD_LIBRARIES := true
+LOCAL_JAVA_LIBRARIES := core-oj core-libart framework
+LOCAL_STATIC_JAVA_LIBRARIES := core-junit-static
 
 include $(BUILD_JAVA_LIBRARY)
 
@@ -34,7 +35,7 @@ ifeq ($(HOST_OS),linux)
 # This contains the android.test.PerformanceTestCase class only
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := ../core/java/android/test/PerformanceTestCase.java
+LOCAL_SRC_FILES := src/android/test/PerformanceTestCase.java
 LOCAL_MODULE := legacy-performance-test-hostdex
 
 include $(BUILD_HOST_DALVIK_JAVA_LIBRARY)
