@@ -26,7 +26,11 @@ import android.icu.text.DecimalFormatSymbols;
 import android.icu.util.ULocale;
 import android.net.LocalServerSocket;
 import android.opengl.EGL14;
+import android.os.IInstalld;
 import android.os.Process;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.os.ServiceSpecificException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
@@ -42,7 +46,6 @@ import android.util.Log;
 import android.webkit.WebViewFactory;
 import android.widget.TextView;
 
-import com.android.internal.os.InstallerConnection.InstallerException;
 
 import dalvik.system.DexFile;
 import dalvik.system.PathClassLoader;
@@ -493,59 +496,55 @@ public class ZygoteInit {
      */
     private static void performSystemServerDexOpt(String classPath) {
         final String[] classPathElements = classPath.split(":");
-        final InstallerConnection installer = new InstallerConnection();
-        installer.waitForConnection();
+        final IInstalld installd = IInstalld.Stub
+                .asInterface(ServiceManager.getService("installd"));
         final String instructionSet = VMRuntime.getRuntime().vmInstructionSet();
 
-        try {
-            String sharedLibraries = "";
-            for (String classPathElement : classPathElements) {
-                // System server is fully AOTed and never profiled
-                // for profile guided compilation.
-                // TODO: Make this configurable between INTERPRET_ONLY, SPEED, SPACE and EVERYTHING?
+        String sharedLibraries = "";
+        for (String classPathElement : classPathElements) {
+            // System server is fully AOTed and never profiled
+            // for profile guided compilation.
+            // TODO: Make this configurable between INTERPRET_ONLY, SPEED, SPACE and EVERYTHING?
 
-                int dexoptNeeded;
-                try {
-                    dexoptNeeded = DexFile.getDexOptNeeded(
-                        classPathElement, instructionSet, "speed",
-                        false /* newProfile */);
-                } catch (FileNotFoundException ignored) {
-                    // Do not add to the classpath.
-                    Log.w(TAG, "Missing classpath element for system server: " + classPathElement);
-                    continue;
-                } catch (IOException e) {
-                    // Not fully clear what to do here as we don't know the cause of the
-                    // IO exception. Add to the classpath to be conservative, but don't
-                    // attempt to compile it.
-                    Log.w(TAG, "Error checking classpath element for system server: "
-                            + classPathElement, e);
-                    dexoptNeeded = DexFile.NO_DEXOPT_NEEDED;
-                }
-
-                if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
-                    final String packageName = "*";
-                    final String outputPath = null;
-                    final int dexFlags = 0;
-                    final String compilerFilter = "speed";
-                    final String uuid = StorageManager.UUID_PRIVATE_INTERNAL;
-                    try {
-                        installer.dexopt(classPathElement, Process.SYSTEM_UID, packageName,
-                                instructionSet, dexoptNeeded, outputPath, dexFlags, compilerFilter,
-                                uuid, sharedLibraries);
-                    } catch (InstallerException e) {
-                        // Ignore (but log), we need this on the classpath for fallback mode.
-                        Log.w(TAG, "Failed compiling classpath element for system server: "
-                                + classPathElement, e);
-                    }
-                }
-
-                if (!sharedLibraries.isEmpty()) {
-                    sharedLibraries += ":";
-                }
-                sharedLibraries += classPathElement;
+            int dexoptNeeded;
+            try {
+                dexoptNeeded = DexFile.getDexOptNeeded(
+                    classPathElement, instructionSet, "speed",
+                    false /* newProfile */);
+            } catch (FileNotFoundException ignored) {
+                // Do not add to the classpath.
+                Log.w(TAG, "Missing classpath element for system server: " + classPathElement);
+                continue;
+            } catch (IOException e) {
+                // Not fully clear what to do here as we don't know the cause of the
+                // IO exception. Add to the classpath to be conservative, but don't
+                // attempt to compile it.
+                Log.w(TAG, "Error checking classpath element for system server: "
+                        + classPathElement, e);
+                dexoptNeeded = DexFile.NO_DEXOPT_NEEDED;
             }
-        } finally {
-            installer.disconnect();
+
+            if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
+                final String packageName = "*";
+                final String outputPath = null;
+                final int dexFlags = 0;
+                final String compilerFilter = "speed";
+                final String uuid = StorageManager.UUID_PRIVATE_INTERNAL;
+                try {
+                    installd.dexopt(classPathElement, Process.SYSTEM_UID, packageName,
+                            instructionSet, dexoptNeeded, outputPath, dexFlags, compilerFilter,
+                            uuid, sharedLibraries);
+                } catch (RemoteException | ServiceSpecificException e) {
+                    // Ignore (but log), we need this on the classpath for fallback mode.
+                    Log.w(TAG, "Failed compiling classpath element for system server: "
+                            + classPathElement, e);
+                }
+            }
+
+            if (!sharedLibraries.isEmpty()) {
+                sharedLibraries += ":";
+            }
+            sharedLibraries += classPathElement;
         }
     }
 
