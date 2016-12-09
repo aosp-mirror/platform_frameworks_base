@@ -19,19 +19,25 @@ package com.android.server.connectivity;
 import android.content.Context;
 import android.net.ConnectivityMetricsEvent;
 import android.net.IIpConnectivityMetrics;
+import android.net.metrics.ApfProgramEvent;
 import android.net.metrics.IpConnectivityLog;
 import android.os.IBinder;
 import android.os.Parcelable;
+import android.provider.Settings;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
+import android.util.ArrayMap;
 import android.util.Base64;
 import android.util.Log;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.TokenBucket;
 import com.android.server.SystemService;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.function.ToIntFunction;
 
 import static com.android.server.connectivity.metrics.IpConnectivityLogClass.IpConnectivityEvent;
 
@@ -40,10 +46,21 @@ final public class IpConnectivityMetrics extends SystemService {
     private static final String TAG = IpConnectivityMetrics.class.getSimpleName();
     private static final boolean DBG = false;
 
+    // The logical version numbers of ipconnectivity.proto, corresponding to the
+    // "version" field of IpConnectivityLog.
+    private static final int NYC      = 0;
+    private static final int NYC_MR1  = 1;
+    private static final int NYC_MR2  = 2;
+    public static final int VERSION   = NYC_MR2;
+
     private static final String SERVICE_NAME = IpConnectivityLog.SERVICE_NAME;
 
     // Default size of the event buffer. Once the buffer is full, incoming events are dropped.
     private static final int DEFAULT_BUFFER_SIZE = 2000;
+    // Maximum size of the event buffer.
+    private static final int MAXIMUM_BUFFER_SIZE = DEFAULT_BUFFER_SIZE * 10;
+
+    private static final int ERROR_RATE_LIMITED = -1;
 
     // Lock ensuring that concurrent manipulations of the event buffer are correct.
     // There are three concurrent operations to synchronize:
@@ -62,10 +79,19 @@ final public class IpConnectivityMetrics extends SystemService {
     private int mDropped;
     @GuardedBy("mLock")
     private int mCapacity;
+    @GuardedBy("mLock")
+    private final ArrayMap<Class<?>, TokenBucket> mBuckets = makeRateLimitingBuckets();
+
+    private final ToIntFunction<Context> mCapacityGetter;
+
+    public IpConnectivityMetrics(Context ctx, ToIntFunction<Context> capacityGetter) {
+        super(ctx);
+        mCapacityGetter = capacityGetter;
+        initBuffer();
+    }
 
     public IpConnectivityMetrics(Context ctx) {
-        super(ctx);
-        initBuffer();
+        this(ctx, READ_BUFFER_SIZE);
     }
 
     @Override
@@ -86,7 +112,7 @@ final public class IpConnectivityMetrics extends SystemService {
 
     @VisibleForTesting
     public int bufferCapacity() {
-        return DEFAULT_BUFFER_SIZE; // TODO: read from config
+        return mCapacityGetter.applyAsInt(getContext());
     }
 
     private void initBuffer() {
@@ -104,6 +130,10 @@ final public class IpConnectivityMetrics extends SystemService {
             if (event == null) {
                 return left;
             }
+            if (isRateLimited(event)) {
+                // Do not count as a dropped event. TODO: consider adding separate counter
+                return ERROR_RATE_LIMITED;
+            }
             if (left == 0) {
                 mDropped++;
                 return 0;
@@ -111,6 +141,11 @@ final public class IpConnectivityMetrics extends SystemService {
             mBuffer.add(event);
             return left - 1;
         }
+    }
+
+    private boolean isRateLimited(ConnectivityMetricsEvent event) {
+        TokenBucket tb = mBuckets.get(event.data.getClass());
+        return (tb != null) && !tb.get();
     }
 
     private String flushEncodedOutput() {
@@ -186,6 +221,7 @@ final public class IpConnectivityMetrics extends SystemService {
         static final String CMD_FLUSH   = "flush";
         static final String CMD_LIST    = "list";
         static final String CMD_STATS   = "stats";
+        static final String CMD_DUMPSYS = "-a"; // dumpsys.cpp dumps services with "-a" as arguments
         static final String CMD_DEFAULT = CMD_STATS;
 
         @Override
@@ -203,6 +239,8 @@ final public class IpConnectivityMetrics extends SystemService {
                 case CMD_FLUSH:
                     cmdFlush(fd, pw, args);
                     return;
+                case CMD_DUMPSYS:
+                    // Fallthrough to CMD_LIST when dumpsys.cpp dumps services states (bug reports)
                 case CMD_LIST:
                     cmdList(fd, pw, args);
                     return;
@@ -226,4 +264,20 @@ final public class IpConnectivityMetrics extends SystemService {
             getContext().enforceCallingOrSelfPermission(what, "IpConnectivityMetrics");
         }
     };
+
+    private static final ToIntFunction<Context> READ_BUFFER_SIZE = (ctx) -> {
+        int size = Settings.Global.getInt(ctx.getContentResolver(),
+                Settings.Global.CONNECTIVITY_METRICS_BUFFER_SIZE, DEFAULT_BUFFER_SIZE);
+        if (size <= 0) {
+            return DEFAULT_BUFFER_SIZE;
+        }
+        return Math.min(size, MAXIMUM_BUFFER_SIZE);
+    };
+
+    private static ArrayMap<Class<?>, TokenBucket> makeRateLimitingBuckets() {
+        ArrayMap<Class<?>, TokenBucket> map = new ArrayMap<>();
+        // one token every minute, 50 tokens max: burst of ~50 events every hour.
+        map.put(ApfProgramEvent.class, new TokenBucket((int)DateUtils.MINUTE_IN_MILLIS, 50));
+        return map;
+    }
 }

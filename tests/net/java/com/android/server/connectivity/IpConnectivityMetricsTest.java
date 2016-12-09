@@ -19,6 +19,7 @@ package com.android.server.connectivity;
 import android.content.Context;
 import android.net.ConnectivityMetricsEvent;
 import android.net.IIpConnectivityMetrics;
+import android.net.metrics.ApfProgramEvent;
 import android.net.metrics.ApfStats;
 import android.net.metrics.DefaultNetworkEvent;
 import android.net.metrics.DhcpClientEvent;
@@ -57,7 +58,7 @@ public class IpConnectivityMetricsTest extends TestCase {
 
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mService = new IpConnectivityMetrics(mCtx);
+        mService = new IpConnectivityMetrics(mCtx, (ctx) -> 2000);
     }
 
     public void testLoggingEvents() throws Exception {
@@ -110,6 +111,27 @@ public class IpConnectivityMetricsTest extends TestCase {
 
         String output3 = getdump("flush");
         assertEquals("", output3);
+    }
+
+    public void testRateLimiting() {
+        final IpConnectivityLog logger = new IpConnectivityLog(mService.impl);
+        final ApfProgramEvent ev = new ApfProgramEvent(0, 0, 0, 0, 0);
+        final long fakeTimestamp = 1;
+
+        int attempt = 100; // More than burst quota, but less than buffer size.
+        for (int i = 0; i < attempt; i++) {
+            logger.log(ev);
+        }
+
+        String output1 = getdump("flush");
+        assertFalse("".equals(output1));
+
+        for (int i = 0; i < attempt; i++) {
+            assertFalse("expected event to be dropped", logger.log(fakeTimestamp, ev));
+        }
+
+        String output2 = getdump("flush");
+        assertEquals("", output2);
     }
 
     public void testEndToEndLogging() {
@@ -204,7 +226,8 @@ public class IpConnectivityMetricsTest extends TestCase {
                 "    router_lifetime: 2000",
                 "  >",
                 "  time_ms: 700",
-                ">");
+                ">",
+                "version: 2");
 
         verifySerialization(want, getdump("flush"));
     }

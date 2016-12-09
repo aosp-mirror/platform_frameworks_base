@@ -53,6 +53,7 @@ message IpReachabilityEvent {
 
   // The event type code of the probe, represented by constants defined in
   // android.net.metrics.IpReachabilityEvent.
+  // NUD_FAILED_ORGANIC and PROVISIONING_LOST_ORGANIC recorded since version 1.
   optional int32 event_type = 2;
 };
 
@@ -126,11 +127,12 @@ message DHCPEvent {
 
   // Lifetime duration in milliseconds of a DhcpClient state, or transition
   // time in milliseconds between specific pairs of DhcpClient's states.
-  // Only populated when state_transition is populated.
+  // Only populated since version 1, when state_transition is populated.
   optional int32 duration_ms = 4;
 }
 
 // Represents the generation of an Android Packet Filter program.
+// Since version 1.
 message ApfProgramEvent {
   // Lifetime of the program in seconds.
   optional int64 lifetime = 1;
@@ -154,6 +156,7 @@ message ApfProgramEvent {
 
 // Represents Router Advertisement listening statistics for an interface with
 // Android Packet Filter enabled.
+// Since version 1.
 message ApfStatistics {
   // The time interval in milliseconds these stastistics cover.
   optional int64 duration_ms = 1;
@@ -183,6 +186,7 @@ message ApfStatistics {
 
 // Represents the reception of a Router Advertisement packet for an interface
 // with Android Packet Filter enabled.
+// Since version 1.
 message RaEvent {
   // All lifetime values are expressed in seconds. The default value for an
   // option lifetime that was not present in the RA option list is -1.
@@ -271,4 +275,11 @@ message IpConnectivityLog {
 
   // The number of events that had to be dropped due to a full buffer.
   optional int32 dropped_events = 2;
+
+  // The version number of the metrics events being collected.
+  //  nyc-dev: not populated, implicitly 0
+  //  nyc-dr1: not populated, implicitly 1 (sailfish and marlin only)
+  //  nyc-mr1: not populated, implicitly 1
+  //  nyc-mr2: 2
+  optional int32 version = 3;
 };
