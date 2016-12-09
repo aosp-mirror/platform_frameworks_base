@@ -49,6 +49,11 @@ public class FakeSecurityController extends BaseLeakChecker<SecurityControllerCa
     }
 
     @Override
+    public boolean isNetworkLoggingEnabled() {
+        return false;
+    }
+
+    @Override
     public boolean isVpnEnabled() {
         return false;
     }
