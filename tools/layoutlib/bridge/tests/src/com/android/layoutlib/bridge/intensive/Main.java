@@ -334,6 +334,20 @@ public class Main {
     }
 
     @Test
+    public void testActivityOnOldTheme() throws ClassNotFoundException {
+        LayoutLibTestCallback layoutLibCallback =
+                new LayoutLibTestCallback(getLogger(), mDefaultClassLoader);
+        layoutLibCallback.initResources();
+
+        LayoutPullParser parser = createLayoutPullParser("simple_activity.xml");
+        SessionParams params = getSessionParams(parser, ConfigGenerator.NEXUS_5,
+                layoutLibCallback, "Theme.NoTitleBar", false,
+                RenderingMode.NORMAL, 22);
+
+        renderAndVerify(params, "simple_activity-old-theme.png");
+    }
+
+    @Test
     public void testTranslucentBars() throws ClassNotFoundException {
         LayoutLibTestCallback layoutLibCallback =
                 new LayoutLibTestCallback(getLogger(), mDefaultClassLoader);
