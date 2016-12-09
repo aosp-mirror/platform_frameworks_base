@@ -251,7 +251,7 @@ class PackageDexOptimizer {
                 Log.i(TAG, "Running dexopt (" + dexoptType + ") on: " + path + " pkg="
                         + pkg.applicationInfo.packageName + " isa=" + dexCodeInstructionSet
                         + " vmSafeMode=" + vmSafeMode + " debuggable=" + debuggable
-                        + " target-filter=" + targetCompilerFilter + " oatDir = " + oatDir
+                        + " target-filter=" + targetCompilerFilter + " oatDir=" + oatDir
                         + " sharedLibraries=" + sharedLibrariesPath);
                 // Profile guide compiled oat files should not be public.
                 final boolean isPublic = !pkg.isForwardLocked() && !isProfileGuidedFilter;
