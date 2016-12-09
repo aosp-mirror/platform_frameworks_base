@@ -1146,6 +1146,14 @@ public class CarrierConfigManager {
     public static final String KEY_PREF_NETWORK_NOTIFICATION_DELAY_INT =
             "network_notification_delay_int";
 
+    /**
+     * Indicates whether the carrier supports 3gpp call forwarding MMI codes while roaming. If
+     * false, the user will be notified that call forwarding is not available when the MMI code
+     * fails.
+     */
+    public static final String KEY_SUPPORT_3GPP_CALL_FORWARDING_WHILE_ROAMING_BOOL =
+        "support_3gpp_call_forwarding_while_roaming_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -1349,6 +1357,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_PERSIST_LPP_MODE_BOOL, false);
         sDefaults.putStringArray(KEY_CARRIER_WIFI_STRING_ARRAY, null);
         sDefaults.putInt(KEY_PREF_NETWORK_NOTIFICATION_DELAY_INT, -1);
+        sDefaults.putBoolean(KEY_SUPPORT_3GPP_CALL_FORWARDING_WHILE_ROAMING_BOOL, true);
     }
 
     /**
