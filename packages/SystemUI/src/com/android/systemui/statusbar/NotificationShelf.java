@@ -34,6 +34,7 @@ import com.android.systemui.statusbar.stack.AnimationProperties;
 import com.android.systemui.statusbar.stack.ExpandableViewState;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.StackScrollState;
+import com.android.systemui.statusbar.stack.ViewState;
 
 /**
  * A notification shelf view that is placed inside the notification scroller. It manages the
@@ -200,7 +201,11 @@ public class NotificationShelf extends ActivatableNotificationView {
         int colorTwoBefore = NO_COLOR;
         int previousColor = NO_COLOR;
         float transitionAmount = 0.0f;
-        boolean scrollingFast = mAmbientState.getCurrentScrollVelocity() > mScrollFastThreshold;
+        boolean scrollingFast = mAmbientState.getCurrentScrollVelocity() > mScrollFastThreshold
+                || (mAmbientState.isExpansionChanging()
+                        && Math.abs(mAmbientState.getExpandingVelocity()) > mScrollFastThreshold);
+        boolean expandingAnimated = mAmbientState.isExpansionChanging()
+                && !mAmbientState.isPanelTracking();
         int baseZHeight = mAmbientState.getBaseZHeight();
         while (notificationIndex < mHostLayout.getChildCount()) {
             ExpandableView child = (ExpandableView) mHostLayout.getChildAt(notificationIndex);
@@ -228,7 +233,7 @@ public class NotificationShelf extends ActivatableNotificationView {
             }
             updateNotificationClipHeight(row, notificationClipEnd);
             float inShelfAmount = updateIconAppearance(row, expandAmount, scrollingFast,
-                    isLastChild);
+                    expandingAnimated, isLastChild);
             numViewsInShelf += inShelfAmount;
             int ownColorUntinted = row.getBackgroundColorWithoutTint();
             if (rowTranslationY >= shelfStart && mNotGoneIndex == -1) {
@@ -278,7 +283,7 @@ public class NotificationShelf extends ActivatableNotificationView {
      * @return the icon amount how much this notification is in the shelf;
      */
     private float updateIconAppearance(ExpandableNotificationRow row, float expandAmount,
-            boolean scrollingFast, boolean isLastChild) {
+            boolean scrollingFast, boolean expandingAnimated, boolean isLastChild) {
         // Let calculate how much the view is in the shelf
         float viewStart = row.getTranslationY();
         int fullHeight = row.getActualHeight() + mPaddingBetweenElements;
@@ -316,12 +321,13 @@ public class NotificationShelf extends ActivatableNotificationView {
             iconTransitionAmount = 0.0f;
         }
         updateIconPositioning(row, iconTransitionAmount, fullTransitionAmount, scrollingFast,
-                isLastChild);
+                expandingAnimated, isLastChild);
         return fullTransitionAmount;
     }
 
     private void updateIconPositioning(ExpandableNotificationRow row, float iconTransitionAmount,
-            float fullTransitionAmount, boolean scrollingFast, boolean isLastChild) {
+            float fullTransitionAmount, boolean scrollingFast, boolean expandingAnimated,
+            boolean isLastChild) {
         StatusBarIconView icon = row.getEntry().expandedIcon;
         NotificationIconContainer.IconState iconState = getIconState(icon);
         if (iconState == null) {
@@ -332,9 +338,15 @@ public class NotificationShelf extends ActivatableNotificationView {
             iconState.keepClampedPosition = false;
         }
         if (clampedAmount == fullTransitionAmount) {
-            iconState.useFullTransitionAmount = fullTransitionAmount == 0.0f || scrollingFast;
+            iconState.useFullTransitionAmount = fullTransitionAmount == 0.0f || scrollingFast
+                    || expandingAnimated;
             iconState.translateContent = mMaxLayoutHeight - getTranslationY()
                     - getIntrinsicHeight() > 0;
+        }
+        if (scrollingFast || (expandingAnimated && iconState.useFullTransitionAmount
+                && !ViewState.isAnimatingY(icon))) {
+            iconState.cancelAnimations(icon);
+            iconState.useFullTransitionAmount = true;
         }
         float transitionAmount;
         boolean needCannedAnimation = iconState.clampedAppearAmount == 1.0f

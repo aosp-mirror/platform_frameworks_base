@@ -3124,10 +3124,12 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public void onExpansionStarted() {
         mIsExpansionChanging = true;
+        mAmbientState.setExpansionChanging(true);
     }
 
     public void onExpansionStopped() {
         mIsExpansionChanging = false;
+        mAmbientState.setExpansionChanging(false);
         if (!mIsExpanded) {
             setOwnScrollY(0);
             mPhoneStatusBar.resetUserExpandedStates();
@@ -3155,9 +3157,11 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public void onPanelTrackingStarted() {
         mPanelTracking = true;
+        mAmbientState.setPanelTracking(true);
     }
     public void onPanelTrackingStopped() {
         mPanelTracking = false;
+        mAmbientState.setPanelTracking(false);
     }
 
     public void resetScrollPosition() {
@@ -3985,6 +3989,10 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void setStatusBarState(int statusBarState) {
         mStatusBarState = statusBarState;
         mAmbientState.setStatusBarState(statusBarState);
+    }
+
+    public void setExpandingVelocity(float expandingVelocity) {
+        mAmbientState.setExpandingVelocity(expandingVelocity);
     }
 
     /**

@@ -55,6 +55,9 @@ public class AmbientState {
     private ActivatableNotificationView mLastVisibleBackgroundChild;
     private float mCurrentScrollVelocity;
     private int mStatusBarState;
+    private float mExpandingVelocity;
+    private boolean mPanelTracking;
+    private boolean mExpansionChanging;
 
     public AmbientState(Context context) {
         reload(context);
@@ -259,5 +262,29 @@ public class AmbientState {
 
     public void setStatusBarState(int statusBarState) {
         mStatusBarState = statusBarState;
+    }
+
+    public void setExpandingVelocity(float expandingVelocity) {
+        mExpandingVelocity = expandingVelocity;
+    }
+
+    public void setExpansionChanging(boolean expansionChanging) {
+        mExpansionChanging = expansionChanging;
+    }
+
+    public boolean isExpansionChanging() {
+        return mExpansionChanging;
+    }
+
+    public float getExpandingVelocity() {
+        return mExpandingVelocity;
+    }
+
+    public void setPanelTracking(boolean panelTracking) {
+        mPanelTracking = panelTracking;
+    }
+
+    public boolean isPanelTracking() {
+        return mPanelTracking;
     }
 }

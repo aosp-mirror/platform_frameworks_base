@@ -105,7 +105,7 @@ public class NotificationPanelView extends PanelView implements
     private boolean mAnimateNextTopPaddingChange;
 
     private int mTrackingPointer;
-    private VelocityTracker mVelocityTracker;
+    private VelocityTracker mQsVelocityTracker;
     private boolean mQsTracking;
 
     /**
@@ -688,7 +688,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private void flingQsWithCurrentVelocity(float y, boolean isCancelMotionEvent) {
-        float vel = getCurrentVelocity();
+        float vel = getCurrentQSVelocity();
         final boolean expandsQs = flingExpandsQs(vel);
         if (expandsQs) {
             logQsSwipeDown(y);
@@ -697,7 +697,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private void logQsSwipeDown(float y) {
-        float vel = getCurrentVelocity();
+        float vel = getCurrentQSVelocity();
         final int gesture = mStatusBarState == StatusBarState.KEYGUARD
                 ? EventLogConstants.SYSUI_LOCKSCREEN_GESTURE_SWIPE_DOWN_QS
                 : EventLogConstants.SYSUI_SHADE_GESTURE_SWIPE_DOWN_QS;
@@ -926,9 +926,9 @@ public class NotificationPanelView extends PanelView implements
                     flingQsWithCurrentVelocity(y,
                             event.getActionMasked() == MotionEvent.ACTION_CANCEL);
                 }
-                if (mVelocityTracker != null) {
-                    mVelocityTracker.recycle();
-                    mVelocityTracker = null;
+                if (mQsVelocityTracker != null) {
+                    mQsVelocityTracker.recycle();
+                    mQsVelocityTracker = null;
                 }
                 break;
         }
@@ -1290,24 +1290,24 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private void trackMovement(MotionEvent event) {
-        if (mVelocityTracker != null) mVelocityTracker.addMovement(event);
+        if (mQsVelocityTracker != null) mQsVelocityTracker.addMovement(event);
         mLastTouchX = event.getX();
         mLastTouchY = event.getY();
     }
 
     private void initVelocityTracker() {
-        if (mVelocityTracker != null) {
-            mVelocityTracker.recycle();
+        if (mQsVelocityTracker != null) {
+            mQsVelocityTracker.recycle();
         }
-        mVelocityTracker = VelocityTracker.obtain();
+        mQsVelocityTracker = VelocityTracker.obtain();
     }
 
-    private float getCurrentVelocity() {
-        if (mVelocityTracker == null) {
+    private float getCurrentQSVelocity() {
+        if (mQsVelocityTracker == null) {
             return 0;
         }
-        mVelocityTracker.computeCurrentVelocity(1000);
-        return mVelocityTracker.getYVelocity();
+        mQsVelocityTracker.computeCurrentVelocity(1000);
+        return mQsVelocityTracker.getYVelocity();
     }
 
     private void cancelQsAnimation() {
@@ -2282,6 +2282,9 @@ public class NotificationPanelView extends PanelView implements
     }
 
     protected void updateExpandedHeight(float expandedHeight) {
+        if (mTracking) {
+            mNotificationStackScroller.setExpandingVelocity(getCurrentExpandVelocity());
+        }
         mNotificationStackScroller.setExpandedHeight(expandedHeight);
         updateKeyguardBottomAreaAlpha();
         setOpening(expandedHeight <= getOpeningHeight());

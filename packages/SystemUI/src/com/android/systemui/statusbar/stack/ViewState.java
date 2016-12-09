@@ -568,7 +568,26 @@ public class ViewState {
         }
     }
 
-    public static boolean isAnimatingY(ExpandableView child) {
+    public static boolean isAnimatingY(View child) {
         return getChildTag(child, TAG_ANIMATOR_TRANSLATION_Y) != null;
+    }
+
+    public void cancelAnimations(View view) {
+        Animator animator = getChildTag(view, TAG_ANIMATOR_TRANSLATION_X);
+        if (animator != null) {
+            animator.cancel();
+        }
+        animator = getChildTag(view, TAG_ANIMATOR_TRANSLATION_Y);
+        if (animator != null) {
+            animator.cancel();
+        }
+        animator = getChildTag(view, TAG_ANIMATOR_TRANSLATION_Z);
+        if (animator != null) {
+            animator.cancel();
+        }
+        animator = getChildTag(view, TAG_ANIMATOR_ALPHA);
+        if (animator != null) {
+            animator.cancel();
+        }
     }
 }
