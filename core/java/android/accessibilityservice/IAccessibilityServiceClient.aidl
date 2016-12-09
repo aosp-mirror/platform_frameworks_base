@@ -50,4 +50,8 @@ import android.view.KeyEvent;
     void onFingerprintCapturingGesturesChanged(boolean capturing);
 
     void onFingerprintGesture(int gesture);
+
+    void onAccessibilityButtonClicked();
+
+    void onAccessibilityButtonAvailabilityChanged(boolean available);
 }

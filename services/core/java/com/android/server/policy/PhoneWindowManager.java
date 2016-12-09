@@ -990,6 +990,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
             View.NAVIGATION_BAR_TRANSPARENT);
 
+    private final BarController.OnBarVisibilityChangedListener mNavBarVisibilityListener =
+            new BarController.OnBarVisibilityChangedListener() {
+        @Override
+        public void onBarVisibilityChanged(boolean visible) {
+            mAccessibilityManager.notifyAccessibilityButtonAvailabilityChanged(visible);
+        }
+    };
+
     private ImmersiveModeConfirmation mImmersiveModeConfirmation;
 
     private SystemGesturesPointerEventListener mSystemGestures;
@@ -2900,6 +2908,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 mNavigationBar = win;
                 mNavigationBarController.setWindow(win);
+                mNavigationBarController.setOnBarVisibilityChangedListener(
+                        mNavBarVisibilityListener);
                 if (DEBUG_LAYOUT) Slog.i(TAG, "NAVIGATION BAR: " + mNavigationBar);
                 break;
             case TYPE_NAVIGATION_BAR_PANEL:

@@ -23,6 +23,7 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRAN
 import static com.android.systemui.statusbar.phone.StatusBar.DEBUG_WINDOW_STATE;
 import static com.android.systemui.statusbar.phone.StatusBar.dumpBarTransitions;
 
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -79,6 +80,7 @@ import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -101,7 +103,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
     private int mNavigationIconHints = 0;
     private int mNavigationBarMode;
-    protected AccessibilityManager mAccessibilityManager;
+    private AccessibilityManager mAccessibilityManager;
 
     private int mDisabledFlags1;
     private StatusBar mStatusBar;
@@ -132,6 +134,8 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         mDivider = SysUiServiceProvider.getComponent(getContext(), Divider.class);
         mWindowManager = getContext().getSystemService(WindowManager.class);
         mAccessibilityManager = getContext().getSystemService(AccessibilityManager.class);
+        mAccessibilityManager.addAccessibilityServicesStateChangeListener(
+                this::updateAccessibilityServicesState);
         if (savedInstanceState != null) {
             mDisabledFlags1 = savedInstanceState.getInt(EXTRA_DISABLE_STATE, 0);
         }
@@ -149,6 +153,8 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     public void onDestroy() {
         super.onDestroy();
         mCommandQueue.removeCallbacks(this);
+        mAccessibilityManager.removeAccessibilityServicesStateChangeListener(
+                this::updateAccessibilityServicesState);
         try {
             WindowManagerGlobal.getWindowManagerService()
                     .removeRotationWatcher(mRotationWatcher);
@@ -402,6 +408,10 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         ButtonDispatcher homeButton = mNavigationBarView.getHomeButton();
         homeButton.setOnTouchListener(this::onHomeTouch);
         homeButton.setOnLongClickListener(this::onHomeLongClick);
+
+        ButtonDispatcher accessibilityButton = mNavigationBarView.getAccessibilityButton();
+        accessibilityButton.setOnClickListener(this::onAccessibilityClick);
+        accessibilityButton.setOnLongClickListener(this::onAccessibilityLongClick);
     }
 
     private boolean onHomeTouch(View v, MotionEvent event) {
@@ -551,6 +561,34 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
         return mStatusBar.toggleSplitScreenMode(MetricsEvent.ACTION_WINDOW_DOCK_LONGPRESS,
                 MetricsEvent.ACTION_WINDOW_UNDOCK_LONGPRESS);
+    }
+
+    private void onAccessibilityClick(View v) {
+        mAccessibilityManager.notifyAccessibilityButtonClicked();
+    }
+
+    private boolean onAccessibilityLongClick(View v) {
+        // TODO(b/34720082): Target service selection via long click
+        android.widget.Toast.makeText(getContext(), "Service selection coming soon...",
+                android.widget.Toast.LENGTH_LONG).show();
+        return true;
+    }
+
+    private void updateAccessibilityServicesState() {
+        final List<AccessibilityServiceInfo> services =
+                mAccessibilityManager.getEnabledAccessibilityServiceList(
+                        AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
+        int requestingServices = 0;
+        for (int i = services.size() - 1; i >= 0; --i) {
+            AccessibilityServiceInfo info = services.get(i);
+            if ((info.flags & AccessibilityServiceInfo.FLAG_REQUEST_ACCESSIBILITY_BUTTON) != 0) {
+                requestingServices++;
+            }
+        }
+
+        final boolean showAccessibilityButton = requestingServices >= 1;
+        final boolean targetSelection = requestingServices >= 2;
+        mNavigationBarView.setAccessibilityButtonState(showAccessibilityButton, targetSelection);
     }
 
     // ----- Methods that StatusBar talks to (should be minimized) -----

@@ -378,6 +378,8 @@ public abstract class AccessibilityService extends Service {
         void onPerformGestureResult(int sequence, boolean completedSuccessfully);
         void onFingerprintCapturingGesturesChanged(boolean active);
         void onFingerprintGesture(int gesture);
+        void onAccessibilityButtonClicked();
+        void onAccessibilityButtonAvailabilityChanged(boolean available);
     }
 
     /**
@@ -400,6 +402,7 @@ public abstract class AccessibilityService extends Service {
 
     private MagnificationController mMagnificationController;
     private SoftKeyboardController mSoftKeyboardController;
+    private AccessibilityButtonController mAccessibilityButtonController;
 
     private int mGestureStatusCallbackSequence;
 
@@ -430,6 +433,9 @@ public abstract class AccessibilityService extends Service {
     private void dispatchServiceConnected() {
         if (mMagnificationController != null) {
             mMagnificationController.onServiceConnected();
+        }
+        if (mSoftKeyboardController != null) {
+            mSoftKeyboardController.onServiceConnected();
         }
 
         // The client gets to handle service connection last, after we've set
@@ -809,12 +815,10 @@ public abstract class AccessibilityService extends Service {
         }
 
         /**
-         * Removes all instances of the specified change listener from the list
-         * of magnification change listeners.
+         * Removes the specified change listener from the list of magnification change listeners.
          *
          * @param listener the listener to remove, must be non-null
-         * @return {@code true} if at least one instance of the listener was
-         *         removed
+         * @return {@code true} if the listener was removed, {@code false} otherwise
          */
         public boolean removeListener(@NonNull OnMagnificationChangedListener listener) {
             if (mListeners == null) {
@@ -1203,11 +1207,11 @@ public abstract class AccessibilityService extends Service {
         }
 
         /**
-         * Removes all instances of the specified change listener from the list of magnification
-         * change listeners.
+         * Removes the specified change listener from the list of keyboard show mode change
+         * listeners.
          *
          * @param listener the listener to remove, must be non-null
-         * @return {@code true} if at least one instance of the listener was removed
+         * @return {@code true} if the listener was removed, {@code false} otherwise
          */
         public boolean removeOnShowModeChangedListener(@NonNull OnShowModeChangedListener listener) {
             if (mListeners == null) {
@@ -1252,7 +1256,7 @@ public abstract class AccessibilityService extends Service {
             final ArrayMap<OnShowModeChangedListener, Handler> entries;
             synchronized (mLock) {
                 if (mListeners == null || mListeners.isEmpty()) {
-                    Slog.d(LOG_TAG, "Received soft keyboard show mode changed callback"
+                    Slog.w(LOG_TAG, "Received soft keyboard show mode changed callback"
                             + " with no listeners registered!");
                     setSoftKeyboardCallbackEnabled(false);
                     return;
@@ -1308,9 +1312,9 @@ public abstract class AccessibilityService extends Service {
          * The lastto this method will be honored, regardless of any previous calls (including those
          * made by other AccessibilityServices).
          * <p>
-         * <strong>Note:</strong> If the service is not yet conected (e.g.
+         * <strong>Note:</strong> If the service is not yet connected (e.g.
          * {@link AccessibilityService#onServiceConnected()} has not yet been called) or the
-         * service has been disconnected, this method will hav no effect and return {@code false}.
+         * service has been disconnected, this method will have no effect and return {@code false}.
          *
          * @param showMode the new show mode for the soft keyboard
          * @return {@code true} on success
@@ -1346,6 +1350,39 @@ public abstract class AccessibilityService extends Service {
             void onShowModeChanged(@NonNull SoftKeyboardController controller,
                     @SoftKeyboardShowMode int showMode);
         }
+    }
+
+    /**
+     * Returns the controller for the accessibility button within the system's navigation area.
+     * This instance may be used to query the accessibility button's state and register listeners
+     * for interactions with and state changes for the accessibility button when
+     * {@link AccessibilityServiceInfo#FLAG_REQUEST_ACCESSIBILITY_BUTTON} is set.
+     * <p>
+     * <strong>Note:</strong> Not all devices are capable of displaying the accessibility button
+     * within a navigation area, and as such, use of this class should be considered only as an
+     * optional feature or shortcut on supported device implementations.
+     * </p>
+     *
+     * @return the accessibility button controller for this {@link AccessibilityService}
+     */
+    @NonNull
+    public final AccessibilityButtonController getAccessibilityButtonController() {
+        synchronized (mLock) {
+            if (mAccessibilityButtonController == null) {
+                mAccessibilityButtonController = new AccessibilityButtonController(
+                        AccessibilityInteractionClient.getInstance().getConnection(mConnectionId));
+            }
+            return mAccessibilityButtonController;
+        }
+    }
+
+    private void onAccessibilityButtonClicked() {
+        getAccessibilityButtonController().dispatchAccessibilityButtonClicked();
+    }
+
+    private void onAccessibilityButtonAvailabilityChanged(boolean available) {
+        getAccessibilityButtonController().dispatchAccessibilityButtonAvailabilityChanged(
+                available);
     }
 
     /**
@@ -1543,6 +1580,16 @@ public abstract class AccessibilityService extends Service {
             public void onFingerprintGesture(int gesture) {
                 AccessibilityService.this.onFingerprintGesture(gesture);
             }
+
+            @Override
+            public void onAccessibilityButtonClicked() {
+                AccessibilityService.this.onAccessibilityButtonClicked();
+            }
+
+            @Override
+            public void onAccessibilityButtonAvailabilityChanged(boolean available) {
+                AccessibilityService.this.onAccessibilityButtonAvailabilityChanged(available);
+            }
         });
     }
 
@@ -1565,6 +1612,8 @@ public abstract class AccessibilityService extends Service {
         private static final int DO_GESTURE_COMPLETE = 9;
         private static final int DO_ON_FINGERPRINT_ACTIVE_CHANGED = 10;
         private static final int DO_ON_FINGERPRINT_GESTURE = 11;
+        private static final int DO_ACCESSIBILITY_BUTTON_CLICKED = 12;
+        private static final int DO_ACCESSIBILITY_BUTTON_AVAILABILITY_CHANGED = 13;
 
         private final HandlerCaller mCaller;
 
@@ -1643,6 +1692,17 @@ public abstract class AccessibilityService extends Service {
 
         public void onFingerprintGesture(int gesture) {
             mCaller.sendMessage(mCaller.obtainMessageI(DO_ON_FINGERPRINT_GESTURE, gesture));
+        }
+
+        public void onAccessibilityButtonClicked() {
+            final Message message = mCaller.obtainMessage(DO_ACCESSIBILITY_BUTTON_CLICKED);
+            mCaller.sendMessage(message);
+        }
+
+        public void onAccessibilityButtonAvailabilityChanged(boolean available) {
+            final Message message = mCaller.obtainMessageI(
+                    DO_ACCESSIBILITY_BUTTON_AVAILABILITY_CHANGED, (available ? 1 : 0));
+            mCaller.sendMessage(message);
         }
 
         @Override
@@ -1748,6 +1808,15 @@ public abstract class AccessibilityService extends Service {
                 } return;
                 case DO_ON_FINGERPRINT_GESTURE: {
                     mCallback.onFingerprintGesture(message.arg1);
+                } return;
+
+                case (DO_ACCESSIBILITY_BUTTON_CLICKED): {
+                    mCallback.onAccessibilityButtonClicked();
+                } return;
+
+                case (DO_ACCESSIBILITY_BUTTON_AVAILABILITY_CHANGED): {
+                    final boolean available = (message.arg1 != 0);
+                    mCallback.onAccessibilityButtonAvailabilityChanged(available);
                 } return;
 
                 default :

@@ -306,6 +306,12 @@ public class AccessibilityServiceInfo implements Parcelable {
      */
     public static final int FLAG_ENABLE_ACCESSIBILITY_VOLUME = 0x00000080;
 
+     /**
+     * This flag indicates to the system that the accessibility service requests that an
+     * accessibility button be shown within the system's navigation area, if available.
+     */
+    public static final int FLAG_REQUEST_ACCESSIBILITY_BUTTON = 0x00000100;
+
     /**
      * This flag requests that all fingerprint gestures be sent to the accessibility service.
      * It is handled in {@link FingerprintGestureController}
@@ -396,6 +402,8 @@ public class AccessibilityServiceInfo implements Parcelable {
      * @see #FLAG_REQUEST_FILTER_KEY_EVENTS
      * @see #FLAG_REPORT_VIEW_IDS
      * @see #FLAG_RETRIEVE_INTERACTIVE_WINDOWS
+     * @see #FLAG_ENABLE_ACCESSIBILITY_VOLUME
+     * @see #FLAG_REQUEST_ACCESSIBILITY_BUTTON
      */
     public int flags;
 
@@ -631,7 +639,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      * @see #CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT
      * @see #CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION
      * @see #CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY
-     * @see #CAPABILITY_FILTER_KEY_EVENTS
+     * @see #CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS
      * @see #CAPABILITY_CAN_CONTROL_MAGNIFICATION
      * @see #CAPABILITY_CAN_PERFORM_GESTURES
      */
@@ -648,7 +656,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      * @see #CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT
      * @see #CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION
      * @see #CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY
-     * @see #CAPABILITY_FILTER_KEY_EVENTS
+     * @see #CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS
      * @see #CAPABILITY_CAN_CONTROL_MAGNIFICATION
      * @see #CAPABILITY_CAN_PERFORM_GESTURES
      *
@@ -936,6 +944,8 @@ public class AccessibilityServiceInfo implements Parcelable {
                 return "FLAG_RETRIEVE_INTERACTIVE_WINDOWS";
             case FLAG_ENABLE_ACCESSIBILITY_VOLUME:
                 return "FLAG_ENABLE_ACCESSIBILITY_VOLUME";
+            case FLAG_REQUEST_ACCESSIBILITY_BUTTON:
+                return "FLAG_REQUEST_ACCESSIBILITY_BUTTON";
             case FLAG_CAPTURE_FINGERPRINT_GESTURES:
                 return "FLAG_CAPTURE_FINGERPRINT_GESTURES";
             default:
@@ -960,7 +970,7 @@ public class AccessibilityServiceInfo implements Parcelable {
             case CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY:
                 return "CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY";
             case CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS:
-                return "CAPABILITY_CAN_FILTER_KEY_EVENTS";
+                return "CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS";
             case CAPABILITY_CAN_CONTROL_MAGNIFICATION:
                 return "CAPABILITY_CAN_CONTROL_MAGNIFICATION";
             case CAPABILITY_CAN_PERFORM_GESTURES:

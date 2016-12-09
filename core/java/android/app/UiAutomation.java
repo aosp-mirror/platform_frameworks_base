@@ -1118,6 +1118,16 @@ public final class UiAutomation {
                 public void onFingerprintGesture(int gesture) {
                     /* do nothing */
                 }
+
+                @Override
+                public void onAccessibilityButtonClicked() {
+                    /* do nothing */
+                }
+
+                @Override
+                public void onAccessibilityButtonAvailabilityChanged(boolean available) {
+                    /* do nothing */
+                }
             });
         }
     }
