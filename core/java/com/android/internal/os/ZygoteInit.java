@@ -31,6 +31,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.ZygoteProcess;
+import android.os.storage.StorageManager;
 import android.security.keystore.AndroidKeyStoreProvider;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -524,10 +525,15 @@ public class ZygoteInit {
                 }
 
                 if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
+                    final String packageName = "*";
+                    final String outputPath = null;
+                    final int dexFlags = 0;
+                    final String compilerFilter = "speed";
+                    final String uuid = StorageManager.UUID_PRIVATE_INTERNAL;
                     try {
-                        installer.dexopt(classPathElement, Process.SYSTEM_UID, instructionSet,
-                                dexoptNeeded, 0 /*dexFlags*/, "speed", null /*volumeUuid*/,
-                                sharedLibraries);
+                        installer.dexopt(classPathElement, Process.SYSTEM_UID, packageName,
+                                instructionSet, dexoptNeeded, outputPath, dexFlags, compilerFilter,
+                                uuid, sharedLibraries);
                     } catch (InstallerException e) {
                         // Ignore (but log), we need this on the classpath for fallback mode.
                         Log.w(TAG, "Failed compiling classpath element for system server: "

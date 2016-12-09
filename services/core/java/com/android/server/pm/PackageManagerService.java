@@ -2299,8 +2299,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                                     getCompilerFilterForReason(REASON_SHARED_APK),
                                     false /* newProfile */);
                             if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
-                                mInstaller.dexopt(lib, Process.SYSTEM_UID, dexCodeInstructionSet,
-                                        dexoptNeeded, DEXOPT_PUBLIC /*dexFlags*/,
+                                mInstaller.dexopt(lib, Process.SYSTEM_UID, "*",
+                                        dexCodeInstructionSet, dexoptNeeded, null,
+                                        DEXOPT_PUBLIC,
                                         getCompilerFilterForReason(REASON_SHARED_APK),
                                         StorageManager.UUID_PRIVATE_INTERNAL,
                                         SKIP_SHARED_LIBRARY_CHECK);

@@ -21,6 +21,7 @@ import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getCompilerFilterForReason;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.IOtaDexopt;
 import android.content.pm.PackageParser;
@@ -30,15 +31,17 @@ import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.storage.StorageManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
+
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.os.InstallerConnection;
 import com.android.internal.os.InstallerConnection.InstallerException;
 
 import java.io.File;
 import java.io.FileDescriptor;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -277,9 +280,27 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
      */
     private synchronized List<String> generatePackageDexopts(PackageParser.Package pkg,
             int compilationReason) {
-        // Use our custom connection that just collects the commands.
-        RecordingInstallerConnection collectingConnection = new RecordingInstallerConnection();
-        Installer collectingInstaller = new Installer(mContext, collectingConnection);
+        // Intercept and collect dexopt requests
+        final List<String> commands = new ArrayList<String>();
+        final Installer collectingInstaller = new Installer(mContext, true) {
+            @Override
+            public void dexopt(String apkPath, int uid, @Nullable String pkgName,
+                    String instructionSet, int dexoptNeeded, @Nullable String outputPath,
+                    int dexFlags, String compilerFilter, @Nullable String volumeUuid,
+                    @Nullable String sharedLibraries) throws InstallerException {
+                commands.add(buildCommand("dexopt",
+                        apkPath,
+                        uid,
+                        pkgName,
+                        instructionSet,
+                        dexoptNeeded,
+                        outputPath,
+                        dexFlags,
+                        compilerFilter,
+                        volumeUuid,
+                        sharedLibraries));
+            }
+        };
 
         // Use the package manager install and install lock here for the OTA dex optimizer.
         PackageDexOptimizer optimizer = new OTADexoptPackageDexOptimizer(
@@ -296,7 +317,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                 getCompilerFilterForReason(compilationReason),
                 null /* CompilerStats.PackageStats */);
 
-        return collectingConnection.commands;
+        return commands;
     }
 
     @Override
@@ -415,39 +436,27 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
 
     }
 
-    private static class RecordingInstallerConnection extends InstallerConnection {
-        public List<String> commands = new ArrayList<String>(1);
-
-        @Override
-        public void setWarnIfHeld(Object warnIfHeld) {
-            throw new IllegalStateException("Should not reach here");
+    /**
+     * Cook up argument list in the format that {@code installd} expects.
+     */
+    private static String buildCommand(Object... args) {
+        final StringBuilder builder = new StringBuilder();
+        for (Object arg : args) {
+            String escaped;
+            if (arg == null) {
+                escaped = "";
+            } else {
+                escaped = String.valueOf(arg);
+            }
+            if (escaped.indexOf('\0') != -1 || escaped.indexOf(' ') != -1 || "!".equals(escaped)) {
+                throw new IllegalArgumentException(
+                        "Invalid argument while executing " + Arrays.toString(args));
+            }
+            if (TextUtils.isEmpty(escaped)) {
+                escaped = "!";
+            }
+            builder.append(' ').append(escaped);
         }
-
-        @Override
-        public synchronized String transact(String cmd) {
-            commands.add(cmd);
-            return "0";
-        }
-
-        @Override
-        public boolean mergeProfiles(int uid, String pkgName) throws InstallerException {
-            throw new IllegalStateException("Should not reach here");
-        }
-
-        @Override
-        public boolean dumpProfiles(String gid, String packageName, String codePaths)
-                throws InstallerException {
-            throw new IllegalStateException("Should not reach here");
-        }
-
-        @Override
-        public void disconnect() {
-            throw new IllegalStateException("Should not reach here");
-        }
-
-        @Override
-        public void waitForConnection() {
-            throw new IllegalStateException("Should not reach here");
-        }
+        return builder.toString();
     }
 }
