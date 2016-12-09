@@ -136,7 +136,6 @@ LOCAL_SRC_FILES:= \
     android/graphics/PathEffect.cpp \
     android/graphics/Picture.cpp \
     android/graphics/BitmapRegionDecoder.cpp \
-    android/graphics/Rasterizer.cpp \
     android/graphics/Region.cpp \
     android/graphics/Shader.cpp \
     android/graphics/SurfaceTexture.cpp \

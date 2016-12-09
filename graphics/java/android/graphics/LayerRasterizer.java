@@ -16,26 +16,20 @@
 
 package android.graphics;
 
+/**
+ * @removed feature is not supported by hw-accerlerated or PDF backends
+ */
 @Deprecated
 public class LayerRasterizer extends Rasterizer {
-    public LayerRasterizer() {
-        native_instance = nativeConstructor();
-    }
+    public LayerRasterizer() { }
 
     /** Add a new layer (above any previous layers) to the rasterizer.
         The layer will extract those fields that affect the mask from
         the specified paint, but will not retain a reference to the paint
         object itself, so it may be reused without danger of side-effects.
     */
-    public void addLayer(Paint paint, float dx, float dy) {
-        nativeAddLayer(native_instance, paint.getNativeInstance(), dx, dy);
-    }
+    public void addLayer(Paint paint, float dx, float dy) { }
 
-    public void addLayer(Paint paint) {
-        nativeAddLayer(native_instance, paint.getNativeInstance(), 0, 0);
-    }
-
-    private static native long nativeConstructor();
-    private static native void nativeAddLayer(long native_layer, long native_paint, float dx, float dy);
+    public void addLayer(Paint paint) { }
 }
 

@@ -61,7 +61,6 @@ public class Paint {
     private ColorFilter mColorFilter;
     private MaskFilter  mMaskFilter;
     private PathEffect  mPathEffect;
-    private Rasterizer  mRasterizer;
     private Shader      mShader;
     private Typeface    mTypeface;
     private Xfermode    mXfermode;
@@ -494,7 +493,6 @@ public class Paint {
         mColorFilter = null;
         mMaskFilter = null;
         mPathEffect = null;
-        mRasterizer = null;
         mShader = null;
         mNativeShader = 0;
         mTypeface = null;
@@ -532,7 +530,6 @@ public class Paint {
         mColorFilter = paint.mColorFilter;
         mMaskFilter = paint.mMaskFilter;
         mPathEffect = paint.mPathEffect;
-        mRasterizer = paint.mRasterizer;
         mShader = paint.mShader;
         mNativeShader = paint.mNativeShader;
         mTypeface = paint.mTypeface;
@@ -1164,11 +1161,12 @@ public class Paint {
      *
      * @return         the paint's rasterizer (or null)
      *
-     *  @deprecated Rasterizer is not supported by either the HW or PDF backends.
+     * @deprecated Rasterizer is not supported by either the HW or PDF backends.
+     * @removed
      */
     @Deprecated
     public Rasterizer getRasterizer() {
-        return mRasterizer;
+        return null;
     }
 
     /**
@@ -1181,16 +1179,11 @@ public class Paint {
      *                   the paint.
      * @return           rasterizer
      *
-     *  @deprecated Rasterizer is not supported by either the HW or PDF backends.
+     * @deprecated Rasterizer is not supported by either the HW or PDF backends.
+     * @removed
      */
     @Deprecated
     public Rasterizer setRasterizer(Rasterizer rasterizer) {
-        long rasterizerNative = 0;
-        if (rasterizer != null) {
-            rasterizerNative = rasterizer.native_instance;
-        }
-        nSetRasterizer(mNativePaint, rasterizerNative);
-        mRasterizer = rasterizer;
         return rasterizer;
     }
 
@@ -2714,8 +2707,6 @@ public class Paint {
     private static native long nSetMaskFilter(long paintPtr, long maskfilter);
     @CriticalNative
     private static native long nSetTypeface(long paintPtr, long typeface);
-    @CriticalNative
-    private static native long nSetRasterizer(long paintPtr, long rasterizer);
     @CriticalNative
     private static native int nGetTextAlign(long paintPtr);
     @CriticalNative
