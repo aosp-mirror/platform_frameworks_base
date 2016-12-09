@@ -400,7 +400,6 @@
     <string name="clear_all_notifications_text" msgid="814192889771462828">"सबै हटाउनुहोस्"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"अहिले सुरु गर्नुहोस्"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"कुनै सूचनाहरू छैनन्"</string>
-    <string name="device_owned_footer" msgid="3802752663326030053">"उपकरण अनुगमन हुन सक्छ"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"प्रोफाइल अनुगमन हुन सक्छ"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"सञ्जाल अनुगमित हुन सक्छ"</string>
     <string name="branded_vpn_footer" msgid="2168111859226496230">"नेटवर्कको अनुगमन गरिने सम्भावना छ"</string>
@@ -409,9 +408,13 @@
     <string name="monitoring_title" msgid="169206259253048106">"सञ्जाल अनुगमन"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"VPN असक्षम गर्नुहोस्"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"विच्छेद VPN"</string>
-    <string name="monitoring_description_device_owned" msgid="5780988291898461883">"तपाईँको यन्त्र <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ।\n\n तपाईँको प्रशासकले सेटिङहरू, कर्पोरेट पहुँच, अनुप्रयोगहरू, आफ्नो उपकरण सम्बन्धित डेटा, र उपकरणको स्थानीय जानकारीको अनुगमन तथा व्यवस्थापन गर्न सक्छ। थप जानकारीको लागि, आफ्नो प्रशासकसँग सम्पर्क राख्नुहोस्।"</string>
+    <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"तपाईंको यन्त्र <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> द्वारा व्यवस्थापन गरिएको छ।"</string>
+    <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ले तपाईंको यन्त्रको व्यवस्थापन गर्न <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> को प्रयोग गर्दछ।"</string>
+    <string name="monitoring_description_do_body" msgid="6764108354701060766">"तपाईंको प्रशासकले सेटिङ, संस्थागत पहुँच, अनुप्रयोग, तपाईंको यन्त्रसँग सम्बन्धित डेटा र तपाईंको यन्त्रको स्थान सम्बन्धी जानकारीको अनुगमन तथा व्यवस्थापन गर्न सक्नुहुन्छ।"</string>
+    <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"तपाईं <xliff:g id="VPN_APP">%1$s</xliff:g> मा जोडिनुभएको छ जसले इमेल, अनुप्रयोग र वेबसाइटहरू लगायत तपाईंको नेटवर्क सम्बन्धी गतिविधिको अनुगमन गर्न सक्छ।"</string>
+    <string name="monitoring_description_do_learn_more_separator" msgid="3785251953067436862">" "</string>
+    <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"थप जान्नुहोस्"</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"तपाईँले VPN जडान गर्न अनुप्रयोगलाई अनुमति दिनुभयो।\n\nयो अनुप्रयोगले तपाईँका यन्त्र र  नेटवर्क गतिविधि लगायत इमेल, अनुप्रयोग र वेबसाइटहरू अनुगमन गर्न सक्छ।"</string>
-    <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"तपाईँको यन्त्र <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ।\n\n तपाईँको प्रशासकले सेटिङ्हरू, कर्पोरेट पहुँच, अनुप्रयोगहरू, आफ्नो उपकरण सम्बन्धित डेटा, र उपकरणको स्थानीय जानकारीको अनुगमन तथा व्यवस्थापन गर्न सक्छ।\n\nतपाईँ VPN सँग जडित हुनुहुन्छ, जसले तपाईँको इमेल, अनुप्रयोगहरू, र वेबसाइटहरू सहित आफ्नो सञ्जाल गतिविधि अनुगमन गर्न सक्छ। \n\nथप जानकारीको लागि, आफ्नो प्रशासकसँग सम्पर्क राख्नुहोस्।"</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"तपाईँको कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g>द्वारा व्यवस्थापन गरिन्छ।.\n\nतपाईँको प्रशासक इमेल, अनुप्रयोगहरू, र सुरक्षित वेबसाइटहरू लगायतका तपाईँका नेटवर्क गतिविधि अनुगमन गर्न सक्षम छ।\n\nथप जानकारीको लागि, आफ्नो प्रशासकसँग सम्पर्क राख्नुहोस्।\n\nतपाईँ VPN सँग पनि जडित हुनुहुन्छ, जसले तपाईँको नेटवर्क गतिविधि अनुगमन गर्न सक्छ।"</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"तपाईँ <xliff:g id="APPLICATION">%1$s</xliff:g> सँग जडित हुनुहुन्छ जसले इ-मेल, अनुप्रयोगहरू र वेबसाइट लगायतका तपाईँका नेटवर्क गतिविधिको अनुगमन गर्न सक्छ।"</string>
@@ -419,7 +422,6 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"तपाईं <xliff:g id="APPLICATION">%1$s</xliff:g> मा जोडिनुभएको छ जसले इमेल, अनुप्रयोग र वेबसाइटहरू लगायतको तपाईंको  व्यक्तिगत नेटवर्क सम्बन्धी गतिविधिको अनुगमन गर्न सक्छ।"</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"तपाईँको कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ। यो <xliff:g id="APPLICATION">%2$s</xliff:g> सँग जोडिएको छ जसले इमेल, अनुप्रयोगहरू, र वेबसाइटहरू लगायतका तपाईँका नेटवर्क गतिविधि अनुगमन गर्न सक्छ।\n\nथप जानकारीको लागि, आफ्नो प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"तपाईँको कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ। यो <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> सँग जोडिएको छ जसले इमेल, अनुप्रयोगहरू, र वेबसाइटहरू लगायतका तपाईँका नेटवर्क गतिविधि अनुगमन गर्न सक्छ।\n\nतपाईँ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> सँग पनि जडित हुनुहुन्छ, जसले तपाईँको व्यक्तिगत नेटवर्क गतिविधि अनुगमन गर्न सक्छ।"</string>
-    <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"तपाईँको उपकरण <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्थित गरिन्छ।\n\nतपाईँको प्रशासकले तपाईँको यन्त्र र त्यसको स्थान जानकारीमार्फत सेटिङहरू,  कर्पोरेट पहुँच, अनुप्रयोगहरू, तपाईँको यन्त्रसँग सम्बद्ध डेटा  र तपाईँको यन्त्रको स्थान जानकारीको अनुगमन र व्यवस्थापन गर्न सक्छ।\n\nतपाईँ <xliff:g id="APPLICATION">%2$s</xliff:g> सँग जडित हुनुहुन्छ जसले इमेल, अनुप्रयोगहरू, र वेबसाइटहरू लगायतका तपाईँका नेटवर्क गतिविधिका अनुगमन गर्न सक्छ।\n\nथप जानकारीको लागि तपाईको प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"तपाईँले नखोले सम्म उपकरण बन्द रहनेछ"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"छिटो सूचनाहरू प्राप्त गर्नुहोस्"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"तपाईँले अनलक गर्नअघि तिनीहरूलाई हेर्नुहोस्"</string>
