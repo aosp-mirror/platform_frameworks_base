@@ -101,6 +101,8 @@
     <!-- Displayed when the user dialed an MMI code whose function
          could not be performed because FDN is enabled. This will be displayed in a toast. -->
     <string name="mmiFdnError">Operation is restricted to fixed dialing numbers only.</string>
+    <!-- Displayed when a carrier does not support call forwarding queries when roaming. -->
+    <string name="mmiErrorWhileRoaming">Can not change call forwarding settings from your phone while you are roaming.</string>
 
     <!-- Displayed when a phone feature such as call barring was activated. -->
     <string name="serviceEnabled">Service was enabled.</string>
