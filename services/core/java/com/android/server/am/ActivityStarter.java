@@ -1642,8 +1642,8 @@ class ActivityStarter {
             final TaskRecord task = mTargetStack.createTaskRecord(
                     mSupervisor.getNextTaskIdForUserLocked(mStartActivity.userId),
                     mNewTaskInfo != null ? mNewTaskInfo : mStartActivity.info,
-                    mNewTaskIntent != null ? mNewTaskIntent : mIntent,
-                    mVoiceSession, mVoiceInteractor, !mLaunchTaskBehind /* toTop */);
+                    mNewTaskIntent != null ? mNewTaskIntent : mIntent, mVoiceSession,
+                    mVoiceInteractor, !mLaunchTaskBehind /* toTop */, mStartActivity.mActivityType);
             mStartActivity.setTask(task, taskToAffiliate);
             if (mLaunchBounds != null) {
                 final int stackId = mTargetStack.mStackId;
@@ -1817,8 +1817,8 @@ class ActivityStarter {
         }
         final ActivityRecord prev = mTargetStack.topActivity();
         final TaskRecord task = (prev != null) ? prev.task : mTargetStack.createTaskRecord(
-                        mSupervisor.getNextTaskIdForUserLocked(mStartActivity.userId),
-                        mStartActivity.info, mIntent, null, null, true);
+                mSupervisor.getNextTaskIdForUserLocked(mStartActivity.userId), mStartActivity.info,
+                mIntent, null, null, true, mStartActivity.mActivityType);
         mStartActivity.setTask(task, null);
         mWindowManager.moveTaskToTop(mStartActivity.task.taskId);
         if (DEBUG_TASKS) Slog.v(TAG_TASKS,

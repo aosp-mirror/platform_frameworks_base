@@ -89,51 +89,33 @@ interface IWindowManager
     void addWindowToken(IBinder token, int type, int displayId);
     void removeWindowToken(IBinder token, int displayId);
     /**
-     * Adds an application token to the specified task Id.
+     * Creates the object representation for the application token in the window manager and adds it
+     * to the specified task Id.
+     *
      * @param addPos The position to add the token to in the task.
      * @param token The token to add.
      * @param taskId The Id of the task we are adding the token to.
-     * @param stackId Stack Id to create a new Task with the input task Id on
-     *                if the task doesn't exist yet.
      * @param requestedOrientation Orientation to use.
      * @param fullscreen True if the application token is fullscreen.
      * @param showWhenLocked True if the application token should be shown when locked.
-     * @param userId Id of user to associate the token with.
      * @param configChanges Input configuration changes.
      * @param voiceInteraction True if the token is in voice interaction mode.
      * @param launchTaskBehind True if the token is been launched from behind.
-     * @param taskBounds Bounds to use when creating a new Task with the input task Id if
-     *                   the task doesn't exist yet.
-     * @param overrideConfig Override configuration that is being used with this task.
-     * @param taskResizeMode The resize mode of the task.
      * @param alwaysFocusable True if the app windows are always focusable regardless of the stack
      *                        they are in.
-     * @param homeTask True if this is the task.
      * @param targetSdkVersion The application's target SDK version
-     * @param isOnTopLauncher True if this task is an on-top launcher.
      */
-    void addAppToken(int addPos, IApplicationToken token, int taskId, int stackId,
-            int requestedOrientation, boolean fullscreen, boolean showWhenLocked, int userId,
-            int configChanges, boolean voiceInteraction, boolean launchTaskBehind,
-            in Rect taskBounds, in Configuration overrideConfig, int taskResizeMode,
-            boolean alwaysFocusable, boolean homeTask, int targetSdkVersion,
-            int rotationAnimationHint, boolean isOnTopLauncher);
+    void addAppToken(int addPos, IApplicationToken token, int taskId, int requestedOrientation,
+            boolean fullscreen, boolean showWhenLocked, int configChanges, boolean voiceInteraction,
+            boolean launchTaskBehind, boolean alwaysFocusable, int targetSdkVersion,
+            int rotationAnimationHint);
     /**
+     * Adds an already existing application token on the window manager side to the input task id.
      *
      * @param token The token we are adding to the input task Id.
      * @param taskId The Id of the task we are adding the token to.
-     * @param stackId Stack Id to create a new Task with the input task Id on
-     *                if the task doesn't exist yet.
-     * @param taskBounds Bounds to use when creating a new Task with the input task Id if
-     *                   the task doesn't exist yet.
-     * @param overrideConfig Override configuration that is being used with this task.
-     * @param taskResizeMode The resize mode of the task.
-     * @param homeTask True if this is the task.
-     * @param isOnTopLauncher True if this task is an on-top launcher.
      */
-    void setAppTask(IBinder token, int taskId, int stackId, in Rect taskBounds,
-            in Configuration overrideConfig, int taskResizeMode, boolean homeTask,
-            boolean isOnTopLauncher);
+    void addAppToTask(IBinder token, int taskId);
     void setAppOrientation(IApplicationToken token, int requestedOrientation);
     int getAppOrientation(IApplicationToken token);
     void setFocusedApp(IBinder token, boolean moveFocusNow);

@@ -124,7 +124,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SURFACE_TRACE
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.SEND_NEW_CONFIGURATION;
@@ -634,7 +633,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         mIsFloatingLayer = mIsImWindow || mIsWallpaper;
 
-        if (mAppToken != null && mAppToken.showForAllUsers) {
+        if (mAppToken != null && mAppToken.mShowForAllUsers) {
             // Windows for apps that can show for all users should also show when the device is
             // locked.
             mAttrs.flags |= FLAG_SHOW_WHEN_LOCKED;
@@ -1035,7 +1034,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     public boolean isVoiceInteraction() {
-        return mAppToken != null && mAppToken.voiceInteraction;
+        return mAppToken != null && mAppToken.mVoiceInteraction;
     }
 
     boolean setReportResizeHints() {
@@ -1225,7 +1224,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     public long getInputDispatchingTimeoutNanos() {
         return mAppToken != null
-                ? mAppToken.inputDispatchingTimeoutNanos
+                ? mAppToken.mInputDispatchingTimeoutNanos
                 : WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
     }
 
@@ -2887,7 +2886,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // Child windows are evaluated based on their parent window.
         final WindowState win = getTopParentWindow();
         if (win.mAttrs.type < FIRST_SYSTEM_WINDOW
-                && win.mAppToken != null && win.mAppToken.showForAllUsers) {
+                && win.mAppToken != null && win.mAppToken.mShowForAllUsers) {
 
             // All window frames that are fullscreen extend above status bar, but some don't extend
             // below navigation bar. Thus, check for display frame for top/left and stable frame for

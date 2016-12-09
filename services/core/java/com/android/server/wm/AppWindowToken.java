@@ -17,6 +17,8 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.StackId;
+import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
+import static android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
@@ -45,6 +47,7 @@ import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowManagerService.logWithStack;
 
+import android.content.pm.ActivityInfo;
 import android.os.Debug;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.input.InputApplicationHandle;
@@ -81,18 +84,18 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     @NonNull final AppWindowAnimator mAppAnimator;
 
-    final boolean voiceInteraction;
+    final boolean mVoiceInteraction;
 
     // TODO: Use getParent instead?
     Task mTask;
     /** @see WindowContainer#fillsParent() */
     private boolean mFillsParent;
     boolean layoutConfigChanges;
-    boolean showForAllUsers;
-    int targetSdk;
+    boolean mShowForAllUsers;
+    int mTargetSdk;
 
     // The input dispatching timeout for this application token in nanoseconds.
-    long inputDispatchingTimeoutNanos;
+    long mInputDispatchingTimeoutNanos;
 
     // These are used for determining when all windows associated with
     // an activity have been drawn, so they can be made visible together
@@ -152,7 +155,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     boolean mLaunchTaskBehind;
     boolean mEnteringAnimation;
 
-    boolean mAlwaysFocusable;
+    private boolean mAlwaysFocusable;
 
     boolean mAppStopped;
     int mRotationAnimationHint;
@@ -167,12 +170,31 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     ArrayDeque<Rect> mFrozenBounds = new ArrayDeque<>();
     ArrayDeque<Configuration> mFrozenMergedConfig = new ArrayDeque<>();
 
-    AppWindowToken(WindowManagerService service, IApplicationToken token, boolean _voiceInteraction,
-            DisplayContent displayContent) {
-        super(service, token != null ? token.asBinder() : null, TYPE_APPLICATION, true,
-                displayContent);
+    AppWindowToken(WindowManagerService service, IApplicationToken token, boolean voiceInteraction,
+            DisplayContent dc, long inputDispatchingTimeoutNanos, boolean fullscreen,
+            boolean showForAllUsers, int targetSdk, int orientation, int rotationAnimationHint,
+            int configChanges, boolean launchTaskBehind, boolean alwaysFocusable) {
+        this(service, token, voiceInteraction, dc);
+        mInputDispatchingTimeoutNanos = inputDispatchingTimeoutNanos;
+        mFillsParent = fullscreen;
+        mShowForAllUsers = showForAllUsers;
+        mTargetSdk = targetSdk;
+        mOrientation = orientation;
+        layoutConfigChanges = (configChanges & (CONFIG_SCREEN_SIZE | CONFIG_ORIENTATION)) != 0;
+        mLaunchTaskBehind = launchTaskBehind;
+        mAlwaysFocusable = alwaysFocusable;
+        mRotationAnimationHint = rotationAnimationHint;
+
+        // Application tokens start out hidden.
+        hidden = true;
+        hiddenRequested = true;
+    }
+
+    AppWindowToken(WindowManagerService service, IApplicationToken token, boolean voiceInteraction,
+            DisplayContent dc) {
+        super(service, token != null ? token.asBinder() : null, TYPE_APPLICATION, true, dc);
         appToken = token;
-        voiceInteraction = _voiceInteraction;
+        mVoiceInteraction = voiceInteraction;
         mInputApplicationHandle = new InputApplicationHandle(this);
         mAppAnimator = new AppWindowAnimator(this, service);
     }
@@ -407,7 +429,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
         if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM, "Removing app token: " + this);
 
-        boolean delayed = setVisibility(null, false, TRANSIT_UNSET, true, voiceInteraction);
+        boolean delayed = setVisibility(null, false, TRANSIT_UNSET, true, mVoiceInteraction);
 
         mService.mOpeningApps.remove(this);
         mService.mUnknownAppVisibilityController.appRemoved(this);
@@ -1350,7 +1372,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     void dump(PrintWriter pw, String prefix) {
         super.dump(pw, prefix);
         if (appToken != null) {
-            pw.print(prefix); pw.print("app=true voiceInteraction="); pw.println(voiceInteraction);
+            pw.println(prefix + "app=true mVoiceInteraction=" + mVoiceInteraction);
         }
         pw.print(prefix); pw.print("task="); pw.println(mTask);
         pw.print(prefix); pw.print(" mFillsParent="); pw.print(mFillsParent);

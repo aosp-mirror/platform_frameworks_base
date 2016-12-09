@@ -34,7 +34,6 @@ import android.os.IRemoteCallback;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
-import android.view.AppTransitionAnimationSpec;
 
 import java.lang.Override;
 
@@ -78,11 +77,10 @@ public class IWindowManagerImpl implements IWindowManager {
     // ---- unused implementation of IWindowManager ----
 
     @Override
-    public void addAppToken(int arg0, IApplicationToken arg1, int arg2, int arg3, int arg4,
-            boolean arg5, boolean arg6, int arg7, int arg8, boolean arg9, boolean arg10,
-            Rect arg11, Configuration arg12, int arg13, boolean arg14, boolean arg15, int arg16,
-            int arg17, boolean arg18)
-            throws RemoteException {
+    public void addAppToken(int addPos, IApplicationToken token, int taskId,
+            int requestedOrientation, boolean fullscreen, boolean showWhenLocked, int configChanges,
+            boolean voiceInteraction, boolean launchTaskBehind, boolean alwaysFocusable,
+            int targetSdkVersion, int rotationAnimationHint) throws RemoteException {
         // TODO Auto-generated method stub
     }
 
@@ -327,9 +325,7 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void setAppTask(IBinder arg0, int arg1, int arg2, Rect arg3, Configuration arg4,
-            int arg5, boolean arg6, boolean arg7)
-            throws RemoteException {
+    public void addAppToTask(IBinder arg0, int arg1) throws RemoteException {
         // TODO Auto-generated method stub
     }
 

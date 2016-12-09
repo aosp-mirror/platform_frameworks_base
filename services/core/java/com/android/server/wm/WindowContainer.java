@@ -129,7 +129,7 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
 
     /** Adds the input window container has a child of this container at the input index. */
     @CallSuper
-    protected void addChild(E child, int index) {
+    void addChild(E child, int index) {
         if (child.getParent() != null) {
             throw new IllegalArgumentException("addChild: container=" + child.getName()
                     + " is already a child of container=" + child.getParent().getName()
