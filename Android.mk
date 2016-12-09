@@ -503,7 +503,7 @@ framework_res_R_stamp := \
 LOCAL_ADDITIONAL_DEPENDENCIES := $(framework_res_R_stamp)
 
 LOCAL_NO_STANDARD_LIBRARIES := true
-LOCAL_JAVA_LIBRARIES := core-oj core-libart conscrypt okhttp legacy-test bouncycastle ext
+LOCAL_JAVA_LIBRARIES := core-oj core-libart conscrypt okhttp bouncycastle ext
 LOCAL_STATIC_JAVA_LIBRARIES := framework-protos
 
 LOCAL_MODULE := framework
@@ -730,6 +730,7 @@ packages_to_document := \
 # Search through the base framework dirs for these packages.
 # The result will be relative to frameworks/base.
 fwbase_dirs_to_document := \
+	legacy-test/src \
 	test-runner/src \
 	$(patsubst $(LOCAL_PATH)/%,%, \
 	  $(wildcard \
