@@ -63,7 +63,7 @@ public class QSFragmentTest extends FragmentTestCase {
         when(userSwitcher.getKeyguardMonitor()).thenReturn(keyguardMonitor);
         when(userSwitcher.getUsers()).thenReturn(new ArrayList<>());
         QSTileHost host = new QSTileHost(mContext,
-                mock(PhoneStatusBar.class),
+                null,
                 getLeakChecker(BluetoothController.class),
                 getLeakChecker(LocationController.class),
                 getLeakChecker(RotationLockController.class),

@@ -16,15 +16,19 @@ package com.android.systemui.utils;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks;
+import android.content.ComponentName;
 import android.content.ContentProviderClient;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.res.Resources;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.ArrayMap;
 
 import com.android.systemui.utils.leaks.Tracker;
 import com.android.systemui.SysuiTestCase;
@@ -33,6 +37,10 @@ public class TestableContext extends ContextWrapper {
 
     private final FakeContentResolver mFakeContentResolver;
     private final FakeSettingsProvider mSettingsProvider;
+
+    private ArrayMap<String, Object> mMockSystemServices;
+    private ArrayMap<ComponentName, IBinder> mMockServices;
+    private ArrayMap<ServiceConnection, ComponentName> mActiveServices;
 
     private Tracker mReceiver;
     private Tracker mService;
@@ -49,6 +57,33 @@ public class TestableContext extends ContextWrapper {
         mReceiver = test.getTracker("receiver");
         mService = test.getTracker("service");
         mComponent = test.getTracker("component");
+    }
+
+    @Override
+    public Resources getResources() {
+        return super.getResources();
+    }
+
+    public void addMockSystemService(String name, Object service) {
+        mMockSystemServices = lazyInit(mMockSystemServices);
+        mMockSystemServices.put(name, service);
+    }
+
+    public void addMockService(ComponentName component, IBinder service) {
+        mMockServices = lazyInit(mMockServices);
+        mMockServices.put(component, service);
+    }
+
+    private <T, V> ArrayMap<T, V> lazyInit(ArrayMap<T, V> services) {
+        return services != null ? services : new ArrayMap<T, V>();
+    }
+
+    @Override
+    public Object getSystemService(String name) {
+        if (mMockSystemServices != null && mMockSystemServices.containsKey(name)) {
+            return mMockSystemServices.get(name);
+        }
+        return super.getSystemService(name);
     }
 
     public FakeSettingsProvider getSettingsProvider() {
@@ -96,6 +131,7 @@ public class TestableContext extends ContextWrapper {
     @Override
     public boolean bindService(Intent service, ServiceConnection conn, int flags) {
         if (mService != null) mService.getLeakInfo(conn).addAllocation(new Throwable());
+        if (checkMocks(service.getComponent(), conn)) return true;
         return super.bindService(service, conn, flags);
     }
 
@@ -103,6 +139,7 @@ public class TestableContext extends ContextWrapper {
     public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
             Handler handler, UserHandle user) {
         if (mService != null) mService.getLeakInfo(conn).addAllocation(new Throwable());
+        if (checkMocks(service.getComponent(), conn)) return true;
         return super.bindServiceAsUser(service, conn, flags, handler, user);
     }
 
@@ -110,13 +147,33 @@ public class TestableContext extends ContextWrapper {
     public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
             UserHandle user) {
         if (mService != null) mService.getLeakInfo(conn).addAllocation(new Throwable());
+        if (checkMocks(service.getComponent(), conn)) return true;
         return super.bindServiceAsUser(service, conn, flags, user);
+    }
+
+    private boolean checkMocks(ComponentName component, ServiceConnection conn) {
+        if (mMockServices != null && component != null && mMockServices.containsKey(component)) {
+            mActiveServices = lazyInit(mActiveServices);
+            mActiveServices.put(conn, component);
+            conn.onServiceConnected(component, mMockServices.get(component));
+            return true;
+        }
+        return false;
     }
 
     @Override
     public void unbindService(ServiceConnection conn) {
         if (mService != null) mService.getLeakInfo(conn).clearAllocations();
+        if (mActiveServices != null && mActiveServices.containsKey(conn)) {
+            conn.onServiceDisconnected(mActiveServices.get(conn));
+            mActiveServices.remove(conn);
+            return;
+        }
         super.unbindService(conn);
+    }
+
+    public boolean isBound(ComponentName component) {
+        return mActiveServices != null && mActiveServices.containsValue(component);
     }
 
     @Override

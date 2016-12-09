@@ -165,10 +165,6 @@ public class QSTileHost implements QSTile.Host, Tunable {
         mHeader = view;
     }
 
-    public PhoneStatusBar getPhoneStatusBar() {
-        return mStatusBar;
-    }
-
     public void destroy() {
         mHandlerThread.quitSafely();
         mTiles.values().forEach(tile -> tile.destroy());

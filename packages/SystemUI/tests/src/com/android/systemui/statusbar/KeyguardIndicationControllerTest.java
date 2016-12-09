@@ -16,15 +16,18 @@
 
 package com.android.systemui.statusbar;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
-import android.content.ContentResolver;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.content.res.Resources;
+import android.hardware.fingerprint.FingerprintManager;
 import android.os.Looper;
 import android.support.test.runner.AndroidJUnit4;
-import android.telephony.SubscriptionManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,22 +40,15 @@ import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
     private final String ORGANIZATION_NAME = "organization";
-    private final String DISCLOSURE_WITH_ORGANIZATION_NAME = "managed by organization";
 
-    private Context mContext = mock(Context.class);
+    private String mDisclosureWithOrganization;
+
     private DevicePolicyManager mDevicePolicyManager = mock(DevicePolicyManager.class);
     private ViewGroup mIndicationArea = mock(ViewGroup.class);
     private KeyguardIndicationTextView mDisclosure = mock(KeyguardIndicationTextView.class);
@@ -61,19 +57,11 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        final Resources resources = mock(Resources.class);
-        when(mContext.getResources()).thenReturn(resources);
-        when(mContext.getContentResolver()).thenReturn(mock(ContentResolver.class));
-        when(mContext.getPackageManager()).thenReturn(mock(PackageManager.class));
-        when(mContext.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE)).thenReturn(
-                mock(SubscriptionManager.class));
-        when(mContext.getSystemService(Context.TRUST_SERVICE)).thenReturn(
-                mock(TrustManager.class));
-        when(mContext.getSystemService(Context.DEVICE_POLICY_SERVICE)).thenReturn(
-                mDevicePolicyManager);
-
-        when(resources.getString(R.string.do_disclosure_with_name, ORGANIZATION_NAME))
-                .thenReturn(DISCLOSURE_WITH_ORGANIZATION_NAME);
+        mContext.addMockSystemService(Context.DEVICE_POLICY_SERVICE, mDevicePolicyManager);
+        mContext.addMockSystemService(Context.TRUST_SERVICE, mock(TrustManager.class));
+        mContext.addMockSystemService(Context.FINGERPRINT_SERVICE, mock(FingerprintManager.class));
+        mDisclosureWithOrganization = mContext.getString(R.string.do_disclosure_with_name,
+                ORGANIZATION_NAME);
 
         when(mIndicationArea.findViewById(R.id.keyguard_indication_enterprise_disclosure))
                 .thenReturn(mDisclosure);
@@ -113,7 +101,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         createController();
 
         verify(mDisclosure).setVisibility(View.VISIBLE);
-        verify(mDisclosure).switchIndication(DISCLOSURE_WITH_ORGANIZATION_NAME);
+        verify(mDisclosure).switchIndication(mDisclosureWithOrganization);
         verifyNoMoreInteractions(mDisclosure);
     }
 
@@ -140,7 +128,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         monitor.onKeyguardVisibilityChanged(true);
 
         verify(mDisclosure).setVisibility(View.VISIBLE);
-        verify(mDisclosure).switchIndication(DISCLOSURE_WITH_ORGANIZATION_NAME);
+        verify(mDisclosure).switchIndication(mDisclosureWithOrganization);
         verifyNoMoreInteractions(mDisclosure);
         reset(mDisclosure);
 

@@ -15,8 +15,10 @@
  */
 package com.android.systemui.qs.external;
 
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
@@ -26,9 +28,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.ServiceInfo;
 import android.net.Uri;
@@ -50,15 +50,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class TileLifecycleManagerTest extends SysuiTestCase {
     private static final int TEST_FAIL_TIMEOUT = 5000;
 
-    private final Context mMockContext = Mockito.mock(Context.class);
     private final PackageManagerAdapter mMockPackageManagerAdapter =
             Mockito.mock(PackageManagerAdapter.class);
     private final IQSTileService.Stub mMockTileService = Mockito.mock(IQSTileService.Stub.class);
@@ -77,19 +74,7 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
         // Stub.asInterface will just return itself.
         when(mMockTileService.queryLocalInterface(anyString())).thenReturn(mMockTileService);
 
-        // Default behavior for bind is success and connects as mMockTileService.
-        when(mMockContext.bindServiceAsUser(any(), any(), anyInt(), any()))
-                .thenAnswer(
-                        new Answer<Boolean>() {
-                            @Override
-                            public Boolean answer(InvocationOnMock invocation) {
-                                ServiceConnection connection =
-                                        (ServiceConnection) invocation.getArguments()[1];
-                                connection.onServiceConnected(
-                                        mTileServiceComponentName, mMockTileService);
-                                return true;
-                            }
-                        });
+        mContext.addMockService(mTileServiceComponentName, mMockTileService);
 
 
         mTileServiceIntent = new Intent().setComponent(mTileServiceComponentName);
@@ -97,7 +82,7 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
         mThread = new HandlerThread("TestThread");
         mThread.start();
         mHandler = new Handler(mThread.getLooper());
-        mStateManager = new TileLifecycleManager(mHandler, mMockContext,
+        mStateManager = new TileLifecycleManager(mHandler, mContext,
                 Mockito.mock(IQSService.class), new Tile(),
                 mTileServiceIntent,
                 mUser,
@@ -126,11 +111,7 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
     }
 
     private void verifyBind(int times) {
-        verify(mMockContext, times(times)).bindServiceAsUser(
-                mTileServiceIntent,
-                mStateManager,
-                Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
-                mUser);
+        assertEquals(times > 0, mContext.isBound(mTileServiceComponentName));
     }
 
     @Test
@@ -143,7 +124,7 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
     public void testUnbind() {
         mStateManager.setBindService(true);
         mStateManager.setBindService(false);
-        verify(mMockContext).unbindService(mStateManager);
+        assertFalse(mContext.isBound(mTileServiceComponentName));
     }
 
     @Test
@@ -203,7 +184,7 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
 
         verifyBind(1);
         mStateManager.setBindService(false);
-        verify(mMockContext).unbindService(mStateManager);
+        assertFalse(mContext.isBound(mTileServiceComponentName));
         verify(mMockTileService, never()).onStartListening();
     }
 
@@ -217,7 +198,7 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
 
         verifyBind(1);
         mStateManager.setBindService(false);
-        verify(mMockContext).unbindService(mStateManager);
+        assertFalse(mContext.isBound(mTileServiceComponentName));
         verify(mMockTileService, never()).onClick(null);
     }
 
@@ -233,7 +214,7 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
         // Package is re-enabled.
         setPackageEnabled(true);
         mStateManager.onReceive(
-                mMockContext,
+                mContext,
                 new Intent(
                         Intent.ACTION_PACKAGE_CHANGED,
                         Uri.fromParts(

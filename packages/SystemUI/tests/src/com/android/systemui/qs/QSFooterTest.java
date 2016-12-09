@@ -14,36 +14,30 @@
 
 package com.android.systemui.qs;
 
+import static junit.framework.Assert.assertEquals;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import android.content.Context;
-import android.content.res.Resources;
+import android.os.Handler;
 import android.os.Looper;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.text.SpannableStringBuilder;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.policy.SecurityController;
+import com.android.systemui.util.LayoutInflaterBuilder;
+import com.android.systemui.utils.TestableImageView;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import static junit.framework.Assert.assertEquals;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -53,28 +47,26 @@ public class QSFooterTest extends SysuiTestCase {
     private final String DEVICE_OWNER_PACKAGE = "TestDPC";
     private final String VPN_PACKAGE = "TestVPN";
 
-    private ViewGroup mRootView = mock(ViewGroup.class);
-    private TextView mFooterText = mock(TextView.class);
-    private ImageView mFooterIcon = mock(ImageView.class);
-    private ImageView mFooterIcon2 = mock(ImageView.class);
+    private ViewGroup mRootView;
+    private TextView mFooterText;
+    private TestableImageView mFooterIcon;
+    private TestableImageView mFooterIcon2;
     private QSFooter mFooter;
-    private Resources mResources;
     private SecurityController mSecurityController = mock(SecurityController.class);
 
     @Before
     public void setUp() {
-        when(mRootView.findViewById(R.id.footer_text)).thenReturn(mFooterText);
-        when(mRootView.findViewById(R.id.footer_icon)).thenReturn(mFooterIcon);
-        when(mRootView.findViewById(R.id.footer_icon2)).thenReturn(mFooterIcon2);
-        final LayoutInflater layoutInflater = mock(LayoutInflater.class);
-        when(layoutInflater.inflate(eq(R.layout.quick_settings_footer), anyObject(), anyBoolean()))
-                .thenReturn(mRootView);
-        final Context context = mock(Context.class);
-        when(context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).thenReturn(layoutInflater);
-        mResources = mContext.getResources();
-        when(context.getResources()).thenReturn(mResources);
-        mFooter = new QSFooter(null, context);
-        reset(mRootView);
+        mContext.addMockSystemService(Context.LAYOUT_INFLATER_SERVICE,
+                new LayoutInflaterBuilder(mContext)
+                        .replace("ImageView", TestableImageView.class)
+                        .build());
+        Handler h = new Handler(Looper.getMainLooper());
+        h.post(() -> mFooter = new QSFooter(null, mContext));
+        waitForIdleSync(h);
+        mRootView = (ViewGroup) mFooter.getView();
+        mFooterText = (TextView) mRootView.findViewById(R.id.footer_text);
+        mFooterIcon = (TestableImageView) mRootView.findViewById(R.id.footer_icon);
+        mFooterIcon2 = (TestableImageView) mRootView.findViewById(R.id.footer_icon2);
         mFooter.setHostEnvironment(null, mSecurityController, Looper.getMainLooper());
     }
 
@@ -86,8 +78,7 @@ public class QSFooterTest extends SysuiTestCase {
         mFooter.refreshState();
 
         waitForIdleSync(mFooter.mHandler);
-        verify(mRootView).setVisibility(View.GONE);
-        verifyNoMoreInteractions(mRootView);
+        assertEquals(View.GONE, mRootView.getVisibility());
     }
 
     @Test
@@ -97,10 +88,8 @@ public class QSFooterTest extends SysuiTestCase {
         mFooter.refreshState();
 
         waitForIdleSync(mFooter.mHandler);
-        verify(mFooterText).setText(mResources.getString(R.string.do_disclosure_generic));
-        verifyNoMoreInteractions(mFooterText);
-        verify(mRootView).setVisibility(View.VISIBLE);
-        verifyNoMoreInteractions(mRootView);
+        assertEquals(mContext.getString(R.string.do_disclosure_generic), mFooterText.getText());
+        assertEquals(View.VISIBLE, mRootView.getVisibility());
     }
 
     @Test
@@ -111,11 +100,9 @@ public class QSFooterTest extends SysuiTestCase {
         mFooter.refreshState();
 
         waitForIdleSync(mFooter.mHandler);
-        verify(mFooterText).setText(mResources.getString(R.string.do_disclosure_with_name,
-                MANAGING_ORGANIZATION));
-        verifyNoMoreInteractions(mFooterText);
-        verify(mRootView).setVisibility(View.VISIBLE);
-        verifyNoMoreInteractions(mRootView);
+        assertEquals(mContext.getString(R.string.do_disclosure_with_name, MANAGING_ORGANIZATION),
+                mFooterText.getText());
+        assertEquals(View.VISIBLE, mRootView.getVisibility());
     }
 
     @Test
@@ -126,9 +113,9 @@ public class QSFooterTest extends SysuiTestCase {
         mFooter.refreshState();
 
         waitForIdleSync(mFooter.mHandler);
-        verify(mFooterIcon).setVisibility(View.VISIBLE);
-        verify(mFooterIcon).setImageResource(R.drawable.ic_qs_network_logging);
-        verify(mFooterIcon2).setVisibility(View.INVISIBLE);
+        assertEquals(View.VISIBLE, mFooterIcon.getVisibility());
+        assertEquals(R.drawable.ic_qs_network_logging, mFooterIcon.getLastImageResource());
+        assertEquals(View.INVISIBLE, mFooterIcon2.getVisibility());
     }
 
     @Test
@@ -140,9 +127,10 @@ public class QSFooterTest extends SysuiTestCase {
         mFooter.refreshState();
 
         waitForIdleSync(mFooter.mHandler);
-        verify(mFooterIcon).setVisibility(View.VISIBLE);
-        verify(mFooterIcon, never()).setImageResource(anyInt());
-        verify(mFooterIcon2).setVisibility(View.INVISIBLE);
+        assertEquals(View.VISIBLE, mFooterIcon.getVisibility());
+        // -1 == never set.
+        assertEquals(-1, mFooterIcon.getLastImageResource());
+        assertEquals(View.INVISIBLE, mFooterIcon2.getVisibility());
     }
 
     @Test
@@ -154,10 +142,11 @@ public class QSFooterTest extends SysuiTestCase {
         mFooter.refreshState();
 
         waitForIdleSync(mFooter.mHandler);
-        verify(mFooterIcon).setVisibility(View.VISIBLE);
-        verify(mFooterIcon, never()).setImageResource(anyInt());
-        verify(mFooterIcon2).setVisibility(View.VISIBLE);
-        verify(mFooterIcon2, never()).setImageResource(anyInt());
+        assertEquals(View.VISIBLE, mFooterIcon.getVisibility());
+        assertEquals(View.VISIBLE, mFooterIcon2.getVisibility());
+        // -1 == never set.
+        assertEquals(-1, mFooterIcon.getLastImageResource());
+        assertEquals(-1, mFooterIcon2.getLastImageResource());
     }
 
     @Test
@@ -211,15 +200,15 @@ public class QSFooterTest extends SysuiTestCase {
     private CharSequence getExpectedMessage(boolean hasDeviceOwnerOrganization, boolean hasVPN) {
         final SpannableStringBuilder message = new SpannableStringBuilder();
         message.append(hasDeviceOwnerOrganization ?
-                mResources.getString(R.string.monitoring_description_do_header_with_name,
+                mContext.getString(R.string.monitoring_description_do_header_with_name,
                         MANAGING_ORGANIZATION, DEVICE_OWNER_PACKAGE) :
-                mResources.getString(R.string.monitoring_description_do_header_generic,
+                mContext.getString(R.string.monitoring_description_do_header_generic,
                         DEVICE_OWNER_PACKAGE));
         message.append("\n\n");
-        message.append(mResources.getString(R.string.monitoring_description_do_body));
-        message.append(mResources.getString(
+        message.append(mContext.getString(R.string.monitoring_description_do_body));
+        message.append(mContext.getString(
                 R.string.monitoring_description_do_learn_more_separator));
-        message.append(mResources.getString(R.string.monitoring_description_do_learn_more),
+        message.append(mContext.getString(R.string.monitoring_description_do_learn_more),
                 mFooter.new EnterprisePrivacySpan(), 0);
         return message;
     }
