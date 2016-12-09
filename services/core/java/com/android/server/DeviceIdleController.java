@@ -211,7 +211,10 @@ public class DeviceIdleController extends SystemService
     private long mMaintenanceStartTime;
 
     private int mActiveIdleOpCount;
-    private PowerManager.WakeLock mActiveIdleWakeLock;
+    private PowerManager.WakeLock mActiveIdleWakeLock; // held when there are operations in progress
+    private PowerManager.WakeLock mGoingIdleWakeLock;  // held when we are going idle so hardware
+                                                       // (especially NetworkPolicyManager) can shut
+                                                       // down.
     private boolean mJobsActive;
     private boolean mAlarmsActive;
     private boolean mReportedMaintenanceActivity;
@@ -998,14 +1001,14 @@ public class DeviceIdleController extends SystemService
         }
     }
 
-    static final int MSG_WRITE_CONFIG = 1;
-    static final int MSG_REPORT_IDLE_ON = 2;
-    static final int MSG_REPORT_IDLE_ON_LIGHT = 3;
-    static final int MSG_REPORT_IDLE_OFF = 4;
-    static final int MSG_REPORT_ACTIVE = 5;
-    static final int MSG_TEMP_APP_WHITELIST_TIMEOUT = 6;
-    static final int MSG_REPORT_MAINTENANCE_ACTIVITY = 7;
-    static final int MSG_FINISH_IDLE_OP = 8;
+    private static final int MSG_WRITE_CONFIG = 1;
+    private static final int MSG_REPORT_IDLE_ON = 2;
+    private static final int MSG_REPORT_IDLE_ON_LIGHT = 3;
+    private static final int MSG_REPORT_IDLE_OFF = 4;
+    private static final int MSG_REPORT_ACTIVE = 5;
+    private static final int MSG_TEMP_APP_WHITELIST_TIMEOUT = 6;
+    private static final int MSG_REPORT_MAINTENANCE_ACTIVITY = 7;
+    private static final int MSG_FINISH_IDLE_OP = 8;
 
     final class MyHandler extends Handler {
         MyHandler(Looper looper) {
@@ -1016,10 +1019,12 @@ public class DeviceIdleController extends SystemService
             if (DEBUG) Slog.d(TAG, "handleMessage(" + msg.what + ")");
             switch (msg.what) {
                 case MSG_WRITE_CONFIG: {
+                    // Does not hold a wakelock. Just let this happen whenever.
                     handleWriteConfigFile();
                 } break;
                 case MSG_REPORT_IDLE_ON:
                 case MSG_REPORT_IDLE_ON_LIGHT: {
+                    // mGoingIdleWakeLock is held at this point
                     EventLogTags.writeDeviceIdleOnStart();
                     final boolean deepChanged;
                     final boolean lightChanged;
@@ -1044,8 +1049,10 @@ public class DeviceIdleController extends SystemService
                         getContext().sendBroadcastAsUser(mLightIdleIntent, UserHandle.ALL);
                     }
                     EventLogTags.writeDeviceIdleOnComplete();
+                    mGoingIdleWakeLock.release();
                 } break;
                 case MSG_REPORT_IDLE_OFF: {
+                    // mActiveIdleWakeLock is held at this point
                     EventLogTags.writeDeviceIdleOffStart("unknown");
                     final boolean deepChanged = mLocalPowerManager.setDeviceIdleMode(false);
                     final boolean lightChanged = mLocalPowerManager.setLightDeviceIdleMode(false);
@@ -1071,6 +1078,7 @@ public class DeviceIdleController extends SystemService
                     EventLogTags.writeDeviceIdleOffComplete();
                 } break;
                 case MSG_REPORT_ACTIVE: {
+                    // The device is awake at this point, so no wakelock necessary.
                     String activeReason = (String)msg.obj;
                     int activeUid = msg.arg1;
                     EventLogTags.writeDeviceIdleOffStart(
@@ -1092,10 +1100,12 @@ public class DeviceIdleController extends SystemService
                     EventLogTags.writeDeviceIdleOffComplete();
                 } break;
                 case MSG_TEMP_APP_WHITELIST_TIMEOUT: {
+                    // TODO: What is keeping the device awake at this point? Does it need to be?
                     int uid = msg.arg1;
                     checkTempAppWhitelistTimeout(uid);
                 } break;
                 case MSG_REPORT_MAINTENANCE_ACTIVITY: {
+                    // TODO: What is keeping the device awake at this point? Does it need to be?
                     boolean active = (msg.arg1 == 1);
                     final int size = mMaintenanceActivityListeners.beginBroadcast();
                     try {
@@ -1111,6 +1121,7 @@ public class DeviceIdleController extends SystemService
                     }
                 } break;
                 case MSG_FINISH_IDLE_OP: {
+                    // mActiveIdleWakeLock is held at this point
                     decActiveIdleOps();
                 } break;
             }
@@ -1356,6 +1367,9 @@ public class DeviceIdleController extends SystemService
                 mActiveIdleWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                         "deviceidle_maint");
                 mActiveIdleWakeLock.setReferenceCounted(false);
+                mGoingIdleWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                        "deviceidle_going_idle");
+                mGoingIdleWakeLock.setReferenceCounted(true);
                 mConnectivityService = (ConnectivityService)ServiceManager.getService(
                         Context.CONNECTIVITY_SERVICE);
                 mLocalAlarmManager = getLocalService(AlarmManagerService.LocalService.class);
@@ -1898,6 +1912,7 @@ public class DeviceIdleController extends SystemService
                 mLightState = LIGHT_STATE_IDLE;
                 EventLogTags.writeDeviceIdleLight(mLightState, reason);
                 addEvent(EVENT_LIGHT_IDLE);
+                mGoingIdleWakeLock.acquire();
                 mHandler.sendEmptyMessage(MSG_REPORT_IDLE_ON_LIGHT);
                 break;
             case LIGHT_STATE_IDLE:
@@ -2023,6 +2038,7 @@ public class DeviceIdleController extends SystemService
                 }
                 EventLogTags.writeDeviceIdle(mState, reason);
                 addEvent(EVENT_DEEP_IDLE);
+                mGoingIdleWakeLock.acquire();
                 mHandler.sendEmptyMessage(MSG_REPORT_IDLE_ON);
                 break;
             case STATE_IDLE:
