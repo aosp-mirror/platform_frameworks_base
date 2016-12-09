@@ -22,6 +22,8 @@ import android.net.Network;
 import android.net.metrics.DnsEvent;
 import android.net.metrics.INetdEventListener;
 import android.net.metrics.IpConnectivityLog;
+import android.os.RemoteException;
+import android.test.suitebuilder.annotation.SmallTest;
 
 import junit.framework.TestCase;
 import org.junit.Before;
@@ -82,6 +84,7 @@ public class NetdEventListenerServiceTest extends TestCase {
         verify(mCm, times(1)).registerNetworkCallback(any(), mCallbackCaptor.capture());
     }
 
+    @SmallTest
     public void testOneBatch() throws Exception {
         log(105, LATENCIES);
         log(106, Arrays.copyOf(LATENCIES, BATCH_SIZE - 1)); // one lookup short of a batch event
@@ -96,6 +99,7 @@ public class NetdEventListenerServiceTest extends TestCase {
             new DnsEvent(106, EVENT_TYPES, RETURN_CODES, LATENCIES));
     }
 
+    @SmallTest
     public void testSeveralBatches() throws Exception {
         log(105, LATENCIES);
         log(106, LATENCIES);
@@ -109,6 +113,7 @@ public class NetdEventListenerServiceTest extends TestCase {
             new DnsEvent(107, EVENT_TYPES, RETURN_CODES, LATENCIES));
     }
 
+    @SmallTest
     public void testBatchAndNetworkLost() throws Exception {
         byte[] eventTypes = Arrays.copyOf(EVENT_TYPES, 20);
         byte[] returnCodes = Arrays.copyOf(RETURN_CODES, 20);
@@ -125,6 +130,7 @@ public class NetdEventListenerServiceTest extends TestCase {
             new DnsEvent(105, EVENT_TYPES, RETURN_CODES, LATENCIES));
     }
 
+    @SmallTest
     public void testConcurrentBatchesAndDumps() throws Exception {
         final long stop = System.currentTimeMillis() + 100;
         final PrintWriter pw = new PrintWriter(new FileOutputStream("/dev/null"));
@@ -146,6 +152,7 @@ public class NetdEventListenerServiceTest extends TestCase {
             new DnsEvent(107, EVENT_TYPES, RETURN_CODES, LATENCIES));
     }
 
+    @SmallTest
     public void testConcurrentBatchesAndNetworkLoss() throws Exception {
         logAsync(105, LATENCIES);
         Thread.sleep(10L);
@@ -157,9 +164,13 @@ public class NetdEventListenerServiceTest extends TestCase {
     }
 
     void log(int netId, int[] latencies) {
-        for (int l : latencies) {
-            mNetdEventListenerService.onDnsEvent(netId, EVENT_TYPE, RETURN_CODE, l, null, null, 0,
-                    0);
+        try {
+            for (int l : latencies) {
+                mNetdEventListenerService.onDnsEvent(netId, EVENT_TYPE, RETURN_CODE, l, null, null,
+                        0, 0);
+            }
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
         }
     }
 

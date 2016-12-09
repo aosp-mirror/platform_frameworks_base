@@ -16,6 +16,7 @@
 
 package com.android.internal.net;
 
+import static android.net.NetworkStats.METERED_NO;
 import static android.net.NetworkStats.ROAMING_NO;
 import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.SET_DEFAULT;
@@ -101,12 +102,14 @@ public class NetworkStatsFactoryTest extends AndroidTestCase {
 
         final NetworkStats stats = mFactory.readNetworkStatsDetail();
         assertEquals(70, stats.size());
-        assertStatsEntry(stats, "rmnet1", 10021, SET_DEFAULT, 0x30100000, 219110L, 578L, 227423L, 676L);
+        assertStatsEntry(stats, "rmnet1", 10021, SET_DEFAULT, 0x30100000, 219110L, 578L, 227423L,
+                676L);
         assertStatsEntry(stats, "rmnet1", 10021, SET_FOREGROUND, 0x30100000, 742L, 3L, 1265L, 3L);
     }
 
     public void testNetworkStatsSingle() throws Exception {
-        stageFile(R.raw.xt_qtaguid_iface_typical, new File(mTestProc, "net/xt_qtaguid/iface_stat_all"));
+        stageFile(R.raw.xt_qtaguid_iface_typical,
+                new File(mTestProc, "net/xt_qtaguid/iface_stat_all"));
 
         final NetworkStats stats = mFactory.readNetworkStatsSummaryDev();
         assertEquals(6, stats.size());
@@ -122,7 +125,8 @@ public class NetworkStatsFactoryTest extends AndroidTestCase {
         final NetworkStats stats = mFactory.readNetworkStatsSummaryXt();
         assertEquals(3, stats.size());
         assertStatsEntry(stats, "rmnet0", UID_ALL, SET_ALL, TAG_NONE, 6824L, 16L, 5692L, 10L);
-        assertStatsEntry(stats, "rmnet1", UID_ALL, SET_ALL, TAG_NONE, 11153922L, 8051L, 190226L, 2468L);
+        assertStatsEntry(stats, "rmnet1", UID_ALL, SET_ALL, TAG_NONE, 11153922L, 8051L, 190226L,
+                2468L);
         assertStatsEntry(stats, "rmnet2", UID_ALL, SET_ALL, TAG_NONE, 4968L, 35L, 3081L, 39L);
     }
 
@@ -157,7 +161,7 @@ public class NetworkStatsFactoryTest extends AndroidTestCase {
 
     private static void assertStatsEntry(NetworkStats stats, String iface, int uid, int set,
             int tag, long rxBytes, long txBytes) {
-        final int i = stats.findIndex(iface, uid, set, tag, ROAMING_NO);
+        final int i = stats.findIndex(iface, uid, set, tag, METERED_NO, ROAMING_NO);
         final NetworkStats.Entry entry = stats.getValues(i, null);
         assertEquals("unexpected rxBytes", rxBytes, entry.rxBytes);
         assertEquals("unexpected txBytes", txBytes, entry.txBytes);
@@ -165,7 +169,7 @@ public class NetworkStatsFactoryTest extends AndroidTestCase {
 
     private static void assertStatsEntry(NetworkStats stats, String iface, int uid, int set,
             int tag, long rxBytes, long rxPackets, long txBytes, long txPackets) {
-        final int i = stats.findIndex(iface, uid, set, tag, ROAMING_NO);
+        final int i = stats.findIndex(iface, uid, set, tag, METERED_NO, ROAMING_NO);
         final NetworkStats.Entry entry = stats.getValues(i, null);
         assertEquals("unexpected rxBytes", rxBytes, entry.rxBytes);
         assertEquals("unexpected rxPackets", rxPackets, entry.rxPackets);

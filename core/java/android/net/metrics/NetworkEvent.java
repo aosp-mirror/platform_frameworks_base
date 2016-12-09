@@ -42,6 +42,15 @@ public final class NetworkEvent implements Parcelable {
     public static final int NETWORK_DISCONNECTED         = 7;
 
     /** {@hide} */
+    public static final int NETWORK_FIRST_VALIDATION_SUCCESS      = 8;
+    /** {@hide} */
+    public static final int NETWORK_REVALIDATION_SUCCESS          = 9;
+    /** {@hide} */
+    public static final int NETWORK_FIRST_VALIDATION_PORTAL_FOUND = 10;
+    /** {@hide} */
+    public static final int NETWORK_REVALIDATION_PORTAL_FOUND     = 11;
+
+    /** {@hide} */
     @IntDef(value = {
             NETWORK_CONNECTED,
             NETWORK_VALIDATED,
@@ -50,6 +59,10 @@ public final class NetworkEvent implements Parcelable {
             NETWORK_LINGER,
             NETWORK_UNLINGER,
             NETWORK_DISCONNECTED,
+            NETWORK_FIRST_VALIDATION_SUCCESS,
+            NETWORK_REVALIDATION_SUCCESS,
+            NETWORK_FIRST_VALIDATION_PORTAL_FOUND,
+            NETWORK_REVALIDATION_PORTAL_FOUND,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventType {}

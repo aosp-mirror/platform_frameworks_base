@@ -171,7 +171,8 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
         String subscriberId = null;
         String networkId = null;
         boolean roaming = false;
-        boolean metered = false;
+        boolean metered = !state.networkCapabilities.hasCapability(
+                NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
 
         if (isNetworkTypeMobile(type)) {
             if (state.subscriberId == null) {
@@ -184,9 +185,6 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
 
             subscriberId = state.subscriberId;
             roaming = state.networkInfo.isRoaming();
-
-            metered = !state.networkCapabilities.hasCapability(
-                    NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
 
         } else if (type == TYPE_WIFI) {
             if (state.networkId != null) {

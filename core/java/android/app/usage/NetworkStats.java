@@ -164,6 +164,29 @@ public final class NetworkStats implements AutoCloseable {
         public static final int UID_TETHERING = TrafficStats.UID_TETHERING;
 
         /** @hide */
+        @IntDef({METERED_ALL, METERED_NO, METERED_YES})
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface Metered {}
+
+        /**
+         * Combined usage across all metered states. Covers metered and unmetered usage.
+         */
+        public static final int METERED_ALL = -1;
+
+        /**
+         * Usage that occurs on an unmetered network.
+         */
+        public static final int METERED_NO = 0x1;
+
+        /**
+         * Usage that occurs on a metered network.
+         *
+         * <p>A network is classified as metered when the user is sensitive to heavy data usage on
+         * that connection.
+         */
+        public static final int METERED_YES = 0x2;
+
+        /** @hide */
         @IntDef({ROAMING_ALL, ROAMING_NO, ROAMING_YES})
         @Retention(RetentionPolicy.SOURCE)
         public @interface Roaming {}
@@ -200,6 +223,7 @@ public final class NetworkStats implements AutoCloseable {
         private int mUid;
         private int mTag;
         private int mState;
+        private int mMetered;
         private int mRoaming;
         private long mBeginTimeStamp;
         private long mEndTimeStamp;
@@ -230,6 +254,15 @@ public final class NetworkStats implements AutoCloseable {
                 case android.net.NetworkStats.TAG_NONE: return TAG_NONE;
             }
             return tag;
+        }
+
+        private static @Metered int convertMetered(int metered) {
+            switch (metered) {
+                case android.net.NetworkStats.METERED_ALL : return METERED_ALL;
+                case android.net.NetworkStats.METERED_NO: return METERED_NO;
+                case android.net.NetworkStats.METERED_YES: return METERED_YES;
+            }
+            return 0;
         }
 
         private static @Roaming int convertRoaming(int roaming) {
@@ -276,6 +309,21 @@ public final class NetworkStats implements AutoCloseable {
          */
         public @State int getState() {
             return mState;
+        }
+
+        /**
+         * Metered state. One of the following values:<p/>
+         * <ul>
+         * <li>{@link #METERED_ALL}</li>
+         * <li>{@link #METERED_NO}</li>
+         * <li>{@link #METERED_YES}</li>
+         * </ul>
+         * <p>A network is classified as metered when the user is sensitive to heavy data usage on
+         * that connection. Apps may warn before using these networks for large downloads. The
+         * metered state can be set by the user within data usage network restrictions.
+         */
+        public @Metered int getMetered() {
+            return mMetered;
         }
 
         /**
@@ -491,6 +539,7 @@ public final class NetworkStats implements AutoCloseable {
         bucketOut.mUid = Bucket.convertUid(mRecycledSummaryEntry.uid);
         bucketOut.mTag = Bucket.convertTag(mRecycledSummaryEntry.tag);
         bucketOut.mState = Bucket.convertState(mRecycledSummaryEntry.set);
+        bucketOut.mMetered = Bucket.convertMetered(mRecycledSummaryEntry.metered);
         bucketOut.mRoaming = Bucket.convertRoaming(mRecycledSummaryEntry.roaming);
         bucketOut.mBeginTimeStamp = mStartTimeStamp;
         bucketOut.mEndTimeStamp = mEndTimeStamp;
@@ -539,6 +588,7 @@ public final class NetworkStats implements AutoCloseable {
                 bucketOut.mUid = Bucket.convertUid(getUid());
                 bucketOut.mTag = Bucket.convertTag(mTag);
                 bucketOut.mState = Bucket.STATE_ALL;
+                bucketOut.mMetered = Bucket.METERED_ALL;
                 bucketOut.mRoaming = Bucket.ROAMING_ALL;
                 bucketOut.mBeginTimeStamp = mRecycledHistoryEntry.bucketStart;
                 bucketOut.mEndTimeStamp = mRecycledHistoryEntry.bucketStart +
