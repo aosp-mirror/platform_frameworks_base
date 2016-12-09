@@ -6290,8 +6290,19 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private final ProcessRecord removeProcessNameLocked(final String name, final int uid) {
-        ProcessRecord old = mProcessNames.remove(name, uid);
-        if (old != null) {
+        return removeProcessNameLocked(name, uid, null);
+    }
+
+    private final ProcessRecord removeProcessNameLocked(final String name, final int uid,
+            final ProcessRecord expecting) {
+        ProcessRecord old = mProcessNames.get(name, uid);
+        // Only actually remove when the currently recorded value matches the
+        // record that we expected; if it doesn't match then we raced with a
+        // newly created process and we don't want to destroy the new one.
+        if ((expecting == null) || (old == expecting)) {
+            mProcessNames.remove(name, uid);
+        }
+        if (old != null && old.uidRecord != null) {
             old.uidRecord.numProcs--;
             if (old.uidRecord.numProcs == 0) {
                 // No more processes using this uid, tell clients it is gone.
@@ -17068,7 +17079,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (DEBUG_PROCESSES || DEBUG_CLEANUP) Slog.v(TAG_CLEANUP,
                     "Removing non-persistent process during cleanup: " + app);
             if (!replacingPid) {
-                removeProcessNameLocked(app.processName, app.uid);
+                removeProcessNameLocked(app.processName, app.uid, app);
             }
             if (mHeavyWeightProcess == app) {
                 mHandler.sendMessage(mHandler.obtainMessage(CANCEL_HEAVY_NOTIFICATION_MSG,
