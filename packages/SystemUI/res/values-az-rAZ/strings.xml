@@ -400,6 +400,7 @@
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Hamısını silin"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"İndi başlayın"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Heç bir bildiriş yoxdur"</string>
+    <string name="device_owned_footer" msgid="3802752663326030053">"Cihaz nəzarət altında ola bilər"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Profil izlənə bilər"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Şəbəkə nəzərdən keçirilə bilər"</string>
     <string name="branded_vpn_footer" msgid="2168111859226496230">"Şəbəkə nəzərdən keçirilə bilər"</string>
@@ -408,13 +409,9 @@
     <string name="monitoring_title" msgid="169206259253048106">"Şəbəkə monitorinqi"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"VPN-i deaktiv edin"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN-i bağlantıdan ayırın"</string>
-    <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"Cihaz <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> tərəfindən idarə olunur."</string>
-    <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> cihazınızı idarə etmək üçün <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> istifadə edir."</string>
-    <string name="monitoring_description_do_body" msgid="6764108354701060766">"Administratorunuz ayarlara, korporativ girişə, tətbiqlərə, cihaz ilə əlaqədar dataya və cihazın məkan məlumatına nəzarət və idarə edə bilər."</string>
-    <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"<xliff:g id="VPN_APP">%1$s</xliff:g> tətbiqinə qoşulmusunuz və o, e-məktublar, tətbiq və veb saytlar daxil olmaqla şəbəkə fəaliyyətinizə nəzarət edə bilər."</string>
-    <string name="monitoring_description_do_learn_more_separator" msgid="3785251953067436862">" ("</string>
-    <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Ətraflı məlumat"</string>
+    <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Cihazınız <xliff:g id="ORGANIZATION">%1$s</xliff:g> tərəfindən idarə olunur.\n\nAdministratorunuz cihazınız ilə əlaqədar ayarlar, korporativ giriş, tətbiqlər, data və cihaz yeri məlumatına nəzarət və idarə edə bilər. Ətraflı məlumat üçün, administratorunuz ilə əlaqə saxlayın."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"VPN bağlantısı quraşdırmağa icazə vermisiniz.\n\nBu tətbiq cihazınızı və şəbəkə fəaliyyətinizi, həmçinin, e-məktubları, tətbiq və veb saytları izləyə bilər."</string>
+    <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Cihazınız <xliff:g id="ORGANIZATION">%1$s</xliff:g> tərəfindən idarə olunur.\n\nAdministratorunuz cihazınız ilə əlaqədar ayarlar, korporativ giriş, tətbiqlər, data və cihaz yeri məlumatına nəzarət və idarə edə bilər.\n\nSiz, həmçinin, e-poçt, tətbiq və veb saytlar daxil olmaqla şəbəkə fəaliyyətinizi yoxlaya bilən VPN şəbəkəsinə qoşulmusunuz..\n\nƏtraflı məlumat üçün, administratorunuz ilə əlaqə saxlayın."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Sizin iş profile tərəfindən idarə olunur <xliff:g id="ORGANIZATION">%1$s</xliff:g> . \n\n Sizin administrator e-poçt, apps, və web o cümlədən şəbəkə fəaliyyəti monitorinq qadirdir. \n\n Daha ətraflı məlumat üçün, administratora müraciət. \n\n Siz həmçinin şəbəkə fəaliyyətinə nəzarət edə bilərsiniz bir VPN, bağlı olduğunuz."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN (Virtual Şəxsi Şəbəkələr)"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"<xliff:g id="APPLICATION">%1$s</xliff:g> tətbiqinə qoşulmusunuz və o, e-məktublar, tətbiq və veb saytlar daxil olmaqla şəbəkə fəaliyyətinizə nəzarət edə bilər."</string>
@@ -422,6 +419,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"<xliff:g id="APPLICATION">%1$s</xliff:g> tətbiqinə qoşulmusunuz və o, e-məktublar, tətbiq və veb saytlar daxil olmaqla şəxsi şəbəkə fəaliyyətinizə nəzarət edə bilər."</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"İş profiliniz <xliff:g id="ORGANIZATION">%1$s</xliff:g> tərəfindən idarə olunur. <xliff:g id="APPLICATION">%2$s</xliff:g> tətbiqinə qoşuludur və iş şəbəkə fəaliyyətinizə nəzarət edə bilər, bura e-məktubıar, tətbiq və veb saytlar daxildir.\n\nƏtraflı məlumat üçün administratorunuz ilə əlaqə saxlayın."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"İş profiliniz <xliff:g id="ORGANIZATION">%1$s</xliff:g> tərəfindən idarə olunur. <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> tətbiqinə qoşuludur və iş şəbəkə fəaliyyətinizi idarə edə bilər, bura e-məktubıar, tətbiq və veb saytlar daxildir\n\nSiz, həmçinin, <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> tətbiqinə də qoşulsunuz və o, şəxsi şəbəkə fəaliyyətinizə nəzarət edə bilər."</string>
+    <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Sizin cihaz tərəfindən idarə olunur <xliff:g id="ORGANIZATION">%1$s</xliff:g> . \n\n Sizin administrator nəzarət və parametrləri, korporativ giriş, apps, sizin cihaz ilə bağlı məlumat və cihaz yer məlumat idarə edə bilərsiniz. \n\n Siz bağlı olduğunuz <xliff:g id="APPLICATION">%2$s</xliff:g> , E-poçt, apps, və web o cümlədən, şəbəkə fəaliyyətinə nəzarət edə bilər. \n\n Daha ətraflı məlumat üçün, administratora müraciət."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Device will stay locked until you manually unlock"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Bildirişləri daha sürətlə əldə edin"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Kiliddən çıxarmadan öncə onları görün"</string>

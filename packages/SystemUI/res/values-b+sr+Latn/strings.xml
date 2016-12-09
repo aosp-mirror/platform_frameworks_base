@@ -402,6 +402,7 @@
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Obriši sve"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Započni odmah"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Nema obaveštenja"</string>
+    <string name="device_owned_footer" msgid="3802752663326030053">"Uređaj se možda nadgleda"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Profil se možda nadgleda"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Mreža se možda nadgleda"</string>
     <string name="branded_vpn_footer" msgid="2168111859226496230">"Mreža se možda nadgleda"</string>
@@ -410,13 +411,9 @@
     <string name="monitoring_title" msgid="169206259253048106">"Nadgledanje mreže"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"Onemogući VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Prekini vezu sa VPN-om"</string>
-    <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"Uređajem upravlja <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>."</string>
-    <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> koristi <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> za upravljanje uređajem."</string>
-    <string name="monitoring_description_do_body" msgid="6764108354701060766">"Administrator može da nadgleda podešavanja, korporativni pristup, aplikacije, podatke povezane sa uređajem i informacije o lokaciji uređaja, kao i da upravlja njima."</string>
-    <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Povezani ste sa aplikacijom <xliff:g id="VPN_APP">%1$s</xliff:g>, koja može da nadgleda aktivnosti na mreži, uključujući imejlove, aplikacije i veb-sajtove."</string>
-    <string name="monitoring_description_do_learn_more_separator" msgid="3785251953067436862">" "</string>
-    <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Saznajte više"</string>
+    <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Uređajem upravlja <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrator može da nadgleda podešavanja, korporativni pristup, aplikacije, podatke povezane sa uređajem i informacije o lokaciji uređaja, kao i da upravlja njima. Više informacija potražite od administratora."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Dali ste dozvolu aplikaciji da podešava VPN vezu.\n\nTa aplikacija može da nadgleda aktivnosti na uređaju i mreži, uključujući imejlove, aplikacije i veb-sajtove."</string>
+    <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Uređajem upravlja <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrator može da nadgleda podešavanja, korporativni pristup, aplikacije, podatke povezane sa uređajem i informacije o lokaciji uređaja, kao i da upravlja njima.\n\nPovezani ste na VPN, koji može da nadgleda aktivnosti na mreži, uključujući imejlove, aplikacije i bezbedne veb-sajtove.\n\nViše informacija potražite od administratora."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Profilom za Work upravlja <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrator može da nadgleda aktivnosti na mreži, uključujući imejlove, aplikacije i veb-sajtove.\n\nViše informacija potražite od administratora.\n\nPovezani ste i na VPN, koji može da nadgleda aktivnosti na ličnoj mreži."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"Povezani ste sa aplikacijom <xliff:g id="APPLICATION">%1$s</xliff:g>, koja može da nadgleda aktivnosti na mreži, uključujući imejlove, aplikacije i veb-sajtove."</string>
@@ -424,6 +421,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Povezani ste sa aplikacijom <xliff:g id="APPLICATION">%1$s</xliff:g>, koja može da nadgleda aktivnosti na ličnoj mreži, uključujući imejlove, aplikacije i veb-sajtove."</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"Profilom za Work upravlja <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Povezan je sa aplikacijom <xliff:g id="APPLICATION">%2$s</xliff:g>, koja može da nadgleda aktivnosti na poslovnoj mreži, uključujući imejlove, aplikacije i veb-sajtove.\n\nViše informacija potražite od administratora."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Profilom za Work upravlja <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Povezan je sa aplikacijom <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, koja može da nadgleda aktivnosti na poslovnoj mreži, uključujući imejlove, aplikacije i veb-sajtove.\n\nPovezani ste i sa aplikacijom <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, koja može da nadgleda aktivnosti na ličnoj mreži."</string>
+    <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Uređajem upravlja <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrator može da nadgleda podešavanja, korporativni pristup, aplikacije, podatke povezane sa uređajem i informacije o lokaciji uređaja, kao i da upravlja njima.\n\nPovezani ste sa aplikacijom <xliff:g id="APPLICATION">%2$s</xliff:g>, koja može da nadgleda aktivnosti na mreži, uključujući imejlove, aplikacije i veb-sajtove.\n\nViše informacija potražite od administratora."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Uređaj će ostati zaključan dok ga ne otključate ručno"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Brže dobijajte obaveštenja"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Pregledajte ih pre otključavanja"</string>
