@@ -45,7 +45,6 @@ import org.mockito.invocation.InvocationOnMock;
  * runtest frameworks-services -c com.android.server.wm.UnknownVisibilityControllerTest
  */
 @SmallTest
-@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class UnknownAppVisibilityControllerTest {
 
