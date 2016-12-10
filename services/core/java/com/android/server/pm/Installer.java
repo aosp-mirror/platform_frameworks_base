@@ -26,13 +26,9 @@ import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.util.Slog;
 
-import com.android.internal.os.InstallerConnection;
-import com.android.internal.os.InstallerConnection.InstallerException;
 import com.android.server.SystemService;
 
 import dalvik.system.VMRuntime;
-
-import java.util.Arrays;
 
 public class Installer extends SystemService {
     private static final String TAG = "Installer";
@@ -61,9 +57,7 @@ public class Installer extends SystemService {
     private final boolean mIsolated;
 
     // TODO: reconnect if installd restarts
-    private final InstallerConnection mInstaller;
-    private final IInstalld mInstalld;
-
+    private volatile IInstalld mInstalld;
     private volatile Object mWarnIfHeld;
 
     public Installer(Context context) {
@@ -78,13 +72,6 @@ public class Installer extends SystemService {
     public Installer(Context context, boolean isolated) {
         super(context);
         mIsolated = isolated;
-        if (isolated) {
-            mInstaller = null;
-            mInstalld = null;
-        } else {
-            mInstaller = new InstallerConnection();
-            mInstalld = IInstalld.Stub.asInterface(ServiceManager.getService("installd"));
-        }
     }
 
     /**
@@ -92,17 +79,15 @@ public class Installer extends SystemService {
      * the given object.
      */
     public void setWarnIfHeld(Object warnIfHeld) {
-        if (mInstaller != null) {
-            mInstaller.setWarnIfHeld(warnIfHeld);
-        }
         mWarnIfHeld = warnIfHeld;
     }
 
     @Override
     public void onStart() {
-        if (mInstaller != null) {
-            Slog.i(TAG, "Waiting for installd to be ready.");
-            mInstaller.waitForConnection();
+        if (mIsolated) {
+            mInstalld = null;
+        } else {
+            mInstalld = IInstalld.Stub.asInterface(ServiceManager.getService("installd"));
         }
     }
 
@@ -131,7 +116,7 @@ public class Installer extends SystemService {
             mInstalld.createAppData(uuid, packageName, userId, flags, appId, seInfo,
                     targetSdkVersion);
         } catch (RemoteException | ServiceSpecificException e) {
-            throw new InstallerException(e.getMessage());
+            throw InstallerException.from(e);
         }
     }
 
@@ -141,7 +126,7 @@ public class Installer extends SystemService {
         try {
             mInstalld.restoreconAppData(uuid, packageName, userId, flags, appId, seInfo);
         } catch (RemoteException | ServiceSpecificException e) {
-            throw new InstallerException(e.getMessage());
+            throw InstallerException.from(e);
         }
     }
 
@@ -151,7 +136,7 @@ public class Installer extends SystemService {
         try {
             mInstalld.migrateAppData(uuid, packageName, userId, flags);
         } catch (RemoteException | ServiceSpecificException e) {
-            throw new InstallerException(e.getMessage());
+            throw InstallerException.from(e);
         }
     }
 
@@ -161,7 +146,7 @@ public class Installer extends SystemService {
         try {
             mInstalld.clearAppData(uuid, packageName, userId, flags, ceDataInode);
         } catch (RemoteException | ServiceSpecificException e) {
-            throw new InstallerException(e.getMessage());
+            throw InstallerException.from(e);
         }
     }
 
@@ -171,7 +156,7 @@ public class Installer extends SystemService {
         try {
             mInstalld.destroyAppData(uuid, packageName, userId, flags, ceDataInode);
         } catch (RemoteException | ServiceSpecificException e) {
-            throw new InstallerException(e.getMessage());
+            throw InstallerException.from(e);
         }
     }
 
@@ -183,21 +168,21 @@ public class Installer extends SystemService {
             mInstalld.moveCompleteApp(fromUuid, toUuid, packageName, dataAppName, appId, seInfo,
                     targetSdkVersion);
         } catch (RemoteException | ServiceSpecificException e) {
-            throw new InstallerException(e.getMessage());
+            throw InstallerException.from(e);
         }
     }
 
-    public void getAppSize(String uuid, String pkgname, int userid, int flags, long ceDataInode,
+    public void getAppSize(String uuid, String packageName, int userId, int flags, long ceDataInode,
             String codePath, PackageStats stats) throws InstallerException {
         if (!checkBeforeRemote()) return;
-        final String[] res = mInstaller.execute("get_app_size", uuid, pkgname, userid, flags,
-                ceDataInode, codePath);
         try {
-            stats.codeSize += Long.parseLong(res[1]);
-            stats.dataSize += Long.parseLong(res[2]);
-            stats.cacheSize += Long.parseLong(res[3]);
-        } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
-            throw new InstallerException("Invalid size result: " + Arrays.toString(res));
+            final long[] res = mInstalld.getAppSize(uuid, packageName, userId, flags, ceDataInode,
+                    codePath);
+            stats.codeSize += res[0];
+            stats.dataSize += res[1];
+            stats.cacheSize += res[2];
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw InstallerException.from(e);
         }
     }
 
@@ -207,7 +192,7 @@ public class Installer extends SystemService {
         try {
             return mInstalld.getAppDataInode(uuid, packageName, userId, flags);
         } catch (RemoteException | ServiceSpecificException e) {
-            throw new InstallerException(e.getMessage());
+            throw InstallerException.from(e);
         }
     }
 
@@ -217,8 +202,12 @@ public class Installer extends SystemService {
             throws InstallerException {
         assertValidInstructionSet(instructionSet);
         if (!checkBeforeRemote()) return;
-        mInstaller.dexopt(apkPath, uid, pkgName, instructionSet, dexoptNeeded,
-                outputPath, dexFlags, compilerFilter, volumeUuid, sharedLibraries);
+        try {
+            mInstalld.dexopt(apkPath, uid, pkgName, instructionSet, dexoptNeeded, outputPath,
+                    dexFlags, compilerFilter, volumeUuid, sharedLibraries);
+        } catch (RemoteException | ServiceSpecificException e) {
+            throw InstallerException.from(e);
+        }
     }
 
     public boolean mergeProfiles(int uid, String packageName) throws InstallerException {
@@ -226,7 +215,7 @@ public class Installer extends SystemService {
         try {
             return mInstalld.mergeProfiles(uid, packageName);
         } catch (RemoteException | ServiceSpecificException e) {
-            throw new InstallerException(e.getMessage());
+            throw InstallerException.from(e);
         }
     }
 
@@ -236,7 +225,7 @@ public class Installer extends SystemService {
         try {
             return mInstalld.dumpProfiles(uid, packageName, codePaths);
         } catch (RemoteException | ServiceSpecificException e) {
-            throw new InstallerException(e.getMessage());
+            throw InstallerException.from(e);
         }
     }
 
@@ -246,7 +235,7 @@ public class Installer extends SystemService {
         try {
             mInstalld.idmap(targetApkPath, overlayApkPath, uid);
         } catch (RemoteException | ServiceSpecificException e) {
-            throw new InstallerException(e.getMessage());
+            throw InstallerException.from(e);
         }
     }
 
@@ -256,7 +245,7 @@ public class Installer extends SystemService {
         try {
             mInstalld.rmdex(codePath, instructionSet);
         } catch (RemoteException | ServiceSpecificException e) {
-            throw new InstallerException(e.getMessage());
+            throw InstallerException.from(e);
         }
     }
 
@@ -265,7 +254,7 @@ public class Installer extends SystemService {
         try {
             mInstalld.rmPackageDir(packageDir);
         } catch (RemoteException | ServiceSpecificException e) {
-            throw new InstallerException(e.getMessage());
+            throw InstallerException.from(e);
         }
     }
 
@@ -274,7 +263,7 @@ public class Installer extends SystemService {
         try {
             mInstalld.clearAppProfiles(packageName);
         } catch (RemoteException | ServiceSpecificException e) {
-            throw new InstallerException(e.getMessage());
+            throw InstallerException.from(e);
         }
     }
 
@@ -283,7 +272,7 @@ public class Installer extends SystemService {
         try {
             mInstalld.destroyAppProfiles(packageName);
         } catch (RemoteException | ServiceSpecificException e) {
-            throw new InstallerException(e.getMessage());
+            throw InstallerException.from(e);
         }
     }
 
@@ -293,7 +282,7 @@ public class Installer extends SystemService {
         try {
             mInstalld.createUserData(uuid, userId, userSerial, flags);
         } catch (RemoteException | ServiceSpecificException e) {
-            throw new InstallerException(e.getMessage());
+            throw InstallerException.from(e);
         }
     }
 
@@ -302,7 +291,7 @@ public class Installer extends SystemService {
         try {
             mInstalld.destroyUserData(uuid, userId, flags);
         } catch (RemoteException | ServiceSpecificException e) {
-            throw new InstallerException(e.getMessage());
+            throw InstallerException.from(e);
         }
     }
 
@@ -312,7 +301,7 @@ public class Installer extends SystemService {
         try {
             mInstalld.markBootComplete(instructionSet);
         } catch (RemoteException | ServiceSpecificException e) {
-            throw new InstallerException(e.getMessage());
+            throw InstallerException.from(e);
         }
     }
 
@@ -321,7 +310,7 @@ public class Installer extends SystemService {
         try {
             mInstalld.freeCache(uuid, freeStorageSize);
         } catch (RemoteException | ServiceSpecificException e) {
-            throw new InstallerException(e.getMessage());
+            throw InstallerException.from(e);
         }
     }
 
@@ -336,7 +325,7 @@ public class Installer extends SystemService {
         try {
             mInstalld.linkNativeLibraryDirectory(uuid, packageName, nativeLibPath32, userId);
         } catch (RemoteException | ServiceSpecificException e) {
-            throw new InstallerException(e.getMessage());
+            throw InstallerException.from(e);
         }
     }
 
@@ -346,7 +335,7 @@ public class Installer extends SystemService {
         try {
             mInstalld.createOatDir(oatDir, dexInstructionSet);
         } catch (RemoteException | ServiceSpecificException e) {
-            throw new InstallerException(e.getMessage());
+            throw InstallerException.from(e);
         }
     }
 
@@ -356,7 +345,7 @@ public class Installer extends SystemService {
         try {
             mInstalld.linkFile(relativePath, fromBase, toBase);
         } catch (RemoteException | ServiceSpecificException e) {
-            throw new InstallerException(e.getMessage());
+            throw InstallerException.from(e);
         }
     }
 
@@ -366,7 +355,7 @@ public class Installer extends SystemService {
         try {
             mInstalld.moveAb(apkPath, instructionSet, outputPath);
         } catch (RemoteException | ServiceSpecificException e) {
-            throw new InstallerException(e.getMessage());
+            throw InstallerException.from(e);
         }
     }
 
@@ -376,7 +365,7 @@ public class Installer extends SystemService {
         try {
             mInstalld.deleteOdex(apkPath, instructionSet, outputPath);
         } catch (RemoteException | ServiceSpecificException e) {
-            throw new InstallerException(e.getMessage());
+            throw InstallerException.from(e);
         }
     }
 
@@ -388,5 +377,15 @@ public class Installer extends SystemService {
             }
         }
         throw new InstallerException("Invalid instruction set: " + instructionSet);
+    }
+
+    public static class InstallerException extends Exception {
+        public InstallerException(String detailMessage) {
+            super(detailMessage);
+        }
+
+        public static InstallerException from(Exception e) throws InstallerException {
+            throw new InstallerException(e.getMessage());
+        }
     }
 }
