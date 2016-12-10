@@ -478,11 +478,11 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
             Log.d(TAG, "Returning the default network recommendation.");
         }
 
-        WifiConfiguration selectedConfig = null;
-        if (request != null) {
-            selectedConfig = request.getCurrentSelectedConfig();
+        if (request != null && request.getCurrentSelectedConfig() != null) {
+            return RecommendationResult.createConnectRecommendation(
+                request.getCurrentSelectedConfig());
         }
-        return new RecommendationResult(selectedConfig);
+        return RecommendationResult.createDoNotConnectRecommendation();
     }
 
     @Override
