@@ -761,6 +761,12 @@
     <string name="quick_settings_night_display_summary_on">Night Light on, tap to turn off</string>
     <!-- QuickSettings: Label for the toggle to activate Night display when it's off (renamed "Night Light" with title caps). [CHAR LIMIT=NONE] -->
     <string name="quick_settings_night_display_summary_off">Night Light off, tap to turn on</string>
+    <!-- QuickSettings: NFC tile [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_nfc_label">NFC</string>
+    <!-- QuickSettings: NFC (off) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_nfc_off">NFC is disabled</string>
+    <!-- QuickSettings: NFC (on) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_nfc_on">NFC is enabled</string>
 
     <!-- Recents: The empty recents string. [CHAR LIMIT=NONE] -->
     <string name="recents_empty_message">No recent items</string>
