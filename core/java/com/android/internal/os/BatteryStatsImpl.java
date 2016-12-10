@@ -108,7 +108,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 150 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 151 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -1593,7 +1593,7 @@ public class BatteryStatsImpl extends BatteryStats {
         @Override
         public void writeToParcel(Parcel out, long elapsedRealtimeUs) {
             super.writeToParcel(out, elapsedRealtimeUs);
-            out.writeLong(mMaxDurationMs);
+            out.writeLong(getMaxDurationMsLocked(elapsedRealtimeUs / 1000));
         }
 
         /**
@@ -1606,7 +1606,7 @@ public class BatteryStatsImpl extends BatteryStats {
         @Override
         public void writeSummaryFromParcelLocked(Parcel out, long elapsedRealtimeUs) {
             super.writeSummaryFromParcelLocked(out, elapsedRealtimeUs);
-            out.writeLong(mMaxDurationMs);
+            out.writeLong(getMaxDurationMsLocked(elapsedRealtimeUs / 1000));
         }
 
         /**
@@ -1630,7 +1630,7 @@ public class BatteryStatsImpl extends BatteryStats {
         public void onTimeStarted(long elapsedRealtimeUs, long baseUptime, long baseRealtime) {
             super.onTimeStarted(elapsedRealtimeUs, baseUptime, baseRealtime);
             if (mNesting > 0) {
-                mStartTimeMs = mTimeBase.getRealtime(mClocks.elapsedRealtime()*1000) / 1000;
+                mStartTimeMs = baseRealtime / 1000;
             }
         }
 
@@ -1640,10 +1640,11 @@ public class BatteryStatsImpl extends BatteryStats {
          * If the timer is running, add the duration into mCurrentDurationMs.
          */
         @Override
-        public void onTimeStopped(long elapsedRealtimeUs, long baseUptime, long baseRealtime) {
-            super.onTimeStopped(elapsedRealtimeUs, baseUptime, baseRealtime);
+        public void onTimeStopped(long elapsedRealtimeUs, long baseUptime, long baseRealtimeUs) {
+            super.onTimeStopped(elapsedRealtimeUs, baseUptime, baseRealtimeUs);
             if (mNesting > 0) {
-                mCurrentDurationMs += (elapsedRealtimeUs / 1000) - mStartTimeMs;
+                // baseRealtimeUs has already been converted to the timebase's realtime.
+                mCurrentDurationMs += (baseRealtimeUs / 1000) - mStartTimeMs;
             }
             mStartTimeMs = -1;
         }
@@ -1658,7 +1659,7 @@ public class BatteryStatsImpl extends BatteryStats {
             super.startRunningLocked(elapsedRealtimeMs);
             if (mNesting == 1 && mTimeBase.isRunning()) {
                 // Just started
-                mStartTimeMs = mTimeBase.getRealtime(mClocks.elapsedRealtime()*1000) / 1000;
+                mStartTimeMs = mTimeBase.getRealtime(elapsedRealtimeMs * 1000) / 1000;
             }
         }
 
@@ -1670,8 +1671,7 @@ public class BatteryStatsImpl extends BatteryStats {
          */
         @Override
         public void stopRunningLocked(long elapsedRealtimeMs) {
-            super.stopRunningLocked(elapsedRealtimeMs);
-            if (mNesting == 0) {
+            if (mNesting == 1) {
                 final long durationMs = getCurrentDurationMsLocked(elapsedRealtimeMs);
                 if (durationMs > mMaxDurationMs) {
                     mMaxDurationMs = durationMs;
@@ -1679,6 +1679,9 @@ public class BatteryStatsImpl extends BatteryStats {
                 mStartTimeMs = -1;
                 mCurrentDurationMs = 0;
             }
+            // super method decrements mNesting, which getCurrentDurationMsLocked relies on,
+            // so call super.stopRunningLocked after calling getCurrentDurationMsLocked.
+            super.stopRunningLocked(elapsedRealtimeMs);
         }
 
         @Override
@@ -1720,11 +1723,9 @@ public class BatteryStatsImpl extends BatteryStats {
         @Override
         public long getCurrentDurationMsLocked(long elapsedRealtimeMs) {
             long durationMs = mCurrentDurationMs;
-            if (mNesting > 0) {
-                if (mTimeBase.isRunning()) {
-                    durationMs += (mTimeBase.getRealtime(elapsedRealtimeMs*1000)/1000)
-                            - mStartTimeMs;
-                }
+            if (mNesting > 0 && mTimeBase.isRunning()) {
+                durationMs += (mTimeBase.getRealtime(elapsedRealtimeMs*1000)/1000)
+                        - mStartTimeMs;
             }
             return durationMs;
         }
