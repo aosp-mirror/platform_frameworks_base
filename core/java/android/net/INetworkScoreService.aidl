@@ -58,12 +58,14 @@ interface INetworkScoreService
     /**
      * Register a cache to receive scoring updates.
      *
-     * @param networkType the type of network this cache can handle. See {@link NetworkKey#type}.
-     * @param scoreCache implementation of {@link INetworkScoreCache} to store the scores.
-     * @throws SecurityException if the caller is not the system.
+     * @param networkType the type of network this cache can handle. See {@link NetworkKey#type}
+     * @param scoreCache implementation of {@link INetworkScoreCache} to store the scores
+     * @param filterType the {@link CacheUpdateFilter} to apply
+     * @throws SecurityException if the caller is not the system
+     * @throws IllegalArgumentException if a score cache is already registed for this type
      * @hide
      */
-    void registerNetworkScoreCache(int networkType, INetworkScoreCache scoreCache);
+    void registerNetworkScoreCache(int networkType, INetworkScoreCache scoreCache, int filterType);
 
     /**
      * Unregister a cache to receive scoring updates.
