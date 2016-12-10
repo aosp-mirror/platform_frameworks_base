@@ -47,8 +47,6 @@ public class Installer extends SystemService {
     public static final int DEXOPT_BOOTCOMPLETE   = 1 << 4;
     /** Hint that the dexopt type is profile-guided. */
     public static final int DEXOPT_PROFILE_GUIDED = 1 << 5;
-    /** This is an OTA update dexopt */
-    public static final int DEXOPT_OTA            = 1 << 6;
 
     // NOTE: keep in sync with installd
     public static final int FLAG_CLEAR_CACHE_ONLY = 1 << 8;
