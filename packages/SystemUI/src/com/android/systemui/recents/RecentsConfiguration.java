@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
 
+import android.os.SystemProperties;
 import com.android.systemui.R;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 
@@ -58,6 +59,10 @@ public class RecentsConfiguration {
     public boolean fakeShadows;
     public int svelteLevel;
 
+    // Whether this product supports Grid-based Recents. If this is field is set to true, then
+    // Recents will layout task views in a grid mode when there's enough space in the screen.
+    public boolean isGridEnabled;
+
     public RecentsConfiguration(Context context) {
         // Load only resources that can not change after the first load either through developer
         // settings or via multi window
@@ -66,6 +71,7 @@ public class RecentsConfiguration {
         Resources res = appContext.getResources();
         fakeShadows = res.getBoolean(R.bool.config_recents_fake_shadows);
         svelteLevel = res.getInteger(R.integer.recents_svelte_level);
+        isGridEnabled = SystemProperties.getBoolean("ro.recents.grid", false);
 
         float screenDensity = context.getResources().getDisplayMetrics().density;
         smallestWidth = ssp.getDeviceSmallestWidth();
