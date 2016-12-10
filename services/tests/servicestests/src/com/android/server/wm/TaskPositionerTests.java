@@ -44,7 +44,6 @@ import static org.junit.Assert.assertTrue;
  * runtest frameworks-services -c com.android.server.wm.TaskPositionerTests
  */
 @SmallTest
-@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class TaskPositionerTests extends WindowTestsBase {
 
