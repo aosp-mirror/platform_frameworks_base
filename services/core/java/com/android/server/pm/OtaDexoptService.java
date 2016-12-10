@@ -16,7 +16,6 @@
 
 package com.android.server.pm;
 
-import static com.android.server.pm.Installer.DEXOPT_OTA;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getCompilerFilterForReason;
@@ -422,18 +421,10 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
 
     private static class OTADexoptPackageDexOptimizer extends
             PackageDexOptimizer.ForcedUpdatePackageDexOptimizer {
-
         public OTADexoptPackageDexOptimizer(Installer installer, Object installLock,
                 Context context) {
             super(installer, installLock, context, "*otadexopt*");
         }
-
-        @Override
-        protected int adjustDexoptFlags(int dexoptFlags) {
-            // Add the OTA flag.
-            return dexoptFlags | DEXOPT_OTA;
-        }
-
     }
 
     /**
