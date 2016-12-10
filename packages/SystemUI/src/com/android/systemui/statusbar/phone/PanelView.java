@@ -306,6 +306,7 @@ public abstract class PanelView extends FrameLayout {
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
+                trackMovement(event);
                 float h = y - mInitialTouchY;
 
                 // If the panel was collapsed when touching, we only need to check for the
@@ -346,8 +347,6 @@ public abstract class PanelView extends FrameLayout {
                         !isTrackingBlocked()) {
                     setExpandedHeightInternal(newHeight);
                 }
-
-                trackMovement(event);
                 break;
 
             case MotionEvent.ACTION_UP:
@@ -447,6 +446,14 @@ public abstract class PanelView extends FrameLayout {
             mVelocityTracker = null;
         }
         mPeekTouching = false;
+    }
+
+    protected float getCurrentExpandVelocity() {
+        if (mVelocityTracker == null) {
+            return 0;
+        }
+        mVelocityTracker.computeCurrentVelocity(1000);
+        return mVelocityTracker.getYVelocity();
     }
 
     private int getFalsingThreshold() {
