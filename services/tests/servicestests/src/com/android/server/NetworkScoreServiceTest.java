@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import static android.net.NetworkScoreManager.CACHE_FILTER_NONE;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -26,6 +28,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -70,6 +73,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 /**
@@ -177,7 +181,8 @@ public class NetworkScoreServiceTest {
     public void testUpdateScores_oneRegisteredCache() throws RemoteException {
         when(mNetworkScorerAppManager.isCallerActiveScorer(anyInt())).thenReturn(true);
 
-        mNetworkScoreService.registerNetworkScoreCache(NetworkKey.TYPE_WIFI, mNetworkScoreCache);
+        mNetworkScoreService.registerNetworkScoreCache(NetworkKey.TYPE_WIFI,
+                mNetworkScoreCache, CACHE_FILTER_NONE);
 
         mNetworkScoreService.updateScores(new ScoredNetwork[]{SCORED_NETWORK});
 
@@ -191,9 +196,10 @@ public class NetworkScoreServiceTest {
     public void testUpdateScores_twoRegisteredCaches() throws RemoteException {
         when(mNetworkScorerAppManager.isCallerActiveScorer(anyInt())).thenReturn(true);
 
-        mNetworkScoreService.registerNetworkScoreCache(NetworkKey.TYPE_WIFI, mNetworkScoreCache);
+        mNetworkScoreService.registerNetworkScoreCache(NetworkKey.TYPE_WIFI,
+                mNetworkScoreCache, CACHE_FILTER_NONE);
         mNetworkScoreService.registerNetworkScoreCache(
-                NetworkKey.TYPE_WIFI, mNetworkScoreCache2);
+                NetworkKey.TYPE_WIFI, mNetworkScoreCache2, CACHE_FILTER_NONE);
 
         // updateScores should update both caches
         mNetworkScoreService.updateScores(new ScoredNetwork[]{SCORED_NETWORK});
@@ -215,6 +221,9 @@ public class NetworkScoreServiceTest {
         // updateScores should not update any caches since they are both unregistered
         mNetworkScoreService.updateScores(new ScoredNetwork[]{SCORED_NETWORK});
 
+        // The register and unregister calls grab the binder from the score cache.
+        verify(mNetworkScoreCache, atLeastOnce()).asBinder();
+        verify(mNetworkScoreCache2, atLeastOnce()).asBinder();
         verifyNoMoreInteractions(mNetworkScoreCache, mNetworkScoreCache2);
     }
 
@@ -244,7 +253,8 @@ public class NetworkScoreServiceTest {
     public void testClearScores_activeScorer() throws RemoteException {
         when(mNetworkScorerAppManager.isCallerActiveScorer(anyInt())).thenReturn(true);
 
-        mNetworkScoreService.registerNetworkScoreCache(NetworkKey.TYPE_WIFI, mNetworkScoreCache);
+        mNetworkScoreService.registerNetworkScoreCache(NetworkKey.TYPE_WIFI, mNetworkScoreCache,
+                CACHE_FILTER_NONE);
         mNetworkScoreService.clearScores();
 
         verify(mNetworkScoreCache).clearScores();
@@ -257,7 +267,8 @@ public class NetworkScoreServiceTest {
         when(mContext.checkCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED))
                 .thenReturn(PackageManager.PERMISSION_GRANTED);
 
-        mNetworkScoreService.registerNetworkScoreCache(NetworkKey.TYPE_WIFI, mNetworkScoreCache);
+        mNetworkScoreService.registerNetworkScoreCache(NetworkKey.TYPE_WIFI, mNetworkScoreCache,
+                CACHE_FILTER_NONE);
         mNetworkScoreService.clearScores();
 
         verify(mNetworkScoreCache).clearScores();
@@ -280,7 +291,8 @@ public class NetworkScoreServiceTest {
     public void testSetActiveScorer_failure() throws RemoteException {
         when(mNetworkScorerAppManager.getActiveScorer()).thenReturn(PREV_SCORER);
         when(mNetworkScorerAppManager.setActiveScorer(NEW_SCORER.mPackageName)).thenReturn(false);
-        mNetworkScoreService.registerNetworkScoreCache(NetworkKey.TYPE_WIFI, mNetworkScoreCache);
+        mNetworkScoreService.registerNetworkScoreCache(NetworkKey.TYPE_WIFI, mNetworkScoreCache,
+                CACHE_FILTER_NONE);
 
         boolean success = mNetworkScoreService.setActiveScorer(NEW_SCORER.mPackageName);
 
@@ -297,7 +309,8 @@ public class NetworkScoreServiceTest {
     public void testSetActiveScorer_success() throws RemoteException {
         when(mNetworkScorerAppManager.getActiveScorer()).thenReturn(PREV_SCORER, NEW_SCORER);
         when(mNetworkScorerAppManager.setActiveScorer(NEW_SCORER.mPackageName)).thenReturn(true);
-        mNetworkScoreService.registerNetworkScoreCache(NetworkKey.TYPE_WIFI, mNetworkScoreCache);
+        mNetworkScoreService.registerNetworkScoreCache(NetworkKey.TYPE_WIFI, mNetworkScoreCache,
+                CACHE_FILTER_NONE);
 
         boolean success = mNetworkScoreService.setActiveScorer(NEW_SCORER.mPackageName);
 
@@ -333,7 +346,8 @@ public class NetworkScoreServiceTest {
         when(mNetworkScorerAppManager.isCallerActiveScorer(anyInt())).thenReturn(true);
         when(mNetworkScorerAppManager.getActiveScorer()).thenReturn(PREV_SCORER, null);
         when(mNetworkScorerAppManager.setActiveScorer(null)).thenReturn(true);
-        mNetworkScoreService.registerNetworkScoreCache(NetworkKey.TYPE_WIFI, mNetworkScoreCache);
+        mNetworkScoreService.registerNetworkScoreCache(NetworkKey.TYPE_WIFI, mNetworkScoreCache,
+                CACHE_FILTER_NONE);
 
         mNetworkScoreService.disableScoring();
 
@@ -354,7 +368,8 @@ public class NetworkScoreServiceTest {
                 .thenReturn(PackageManager.PERMISSION_GRANTED);
         when(mNetworkScorerAppManager.getActiveScorer()).thenReturn(PREV_SCORER, null);
         when(mNetworkScorerAppManager.setActiveScorer(null)).thenReturn(true);
-        mNetworkScoreService.registerNetworkScoreCache(NetworkKey.TYPE_WIFI, mNetworkScoreCache);
+        mNetworkScoreService.registerNetworkScoreCache(NetworkKey.TYPE_WIFI, mNetworkScoreCache,
+                CACHE_FILTER_NONE);
 
         mNetworkScoreService.disableScoring();
 
@@ -374,7 +389,7 @@ public class NetworkScoreServiceTest {
 
         try {
             mNetworkScoreService.registerNetworkScoreCache(
-                NetworkKey.TYPE_WIFI, mNetworkScoreCache);
+                NetworkKey.TYPE_WIFI, mNetworkScoreCache, CACHE_FILTER_NONE);
             fail("SecurityException expected");
         } catch (SecurityException e) {
             // expected
