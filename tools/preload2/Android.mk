@@ -17,6 +17,8 @@ LOCAL_STATIC_JAVA_LIBRARIES += apache-harmony-jdwp-tests-host junit-host
 LOCAL_MODULE:= preload2
 
 include $(BUILD_HOST_JAVA_LIBRARY)
+# Copy to build artifacts
+$(call dist-for-goals,dist_files,$(LOCAL_BUILT_MODULE):$(LOCAL_MODULE).jar)
 
 # Copy the preload-tool shell script to the host's bin directory.
 include $(CLEAR_VARS)
