@@ -107,4 +107,14 @@ interface IImsRegistrationListener {
      * Notifies the application when the list of URIs associated with IMS client is updated.
      */
     void registrationAssociatedUriChanged(in Uri[] uris);
+
+    /**
+     * Notifies the application when IMS registration attempt on a target
+     * access tech fails.
+     *
+     * @param targetAccessTech Radio access technology on which the IMS registration was
+     *         attempted.
+     * @param imsReasonInfo Reason for the failure.
+     */
+    void registrationChangeFailed(in int targetAccessTech, in ImsReasonInfo imsReasonInfo);
 }
