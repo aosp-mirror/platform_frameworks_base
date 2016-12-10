@@ -19,7 +19,7 @@ package com.android.server.pm;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser.PackageParserException;
 
-import com.android.internal.os.InstallerConnection.InstallerException;
+import com.android.server.pm.Installer.InstallerException;
 
 /** {@hide} */
 public class PackageManagerException extends Exception {

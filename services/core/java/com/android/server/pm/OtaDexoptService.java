@@ -35,7 +35,7 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.os.InstallerConnection.InstallerException;
+import com.android.server.pm.Installer.InstallerException;
 
 import java.io.File;
 import java.io.FileDescriptor;
