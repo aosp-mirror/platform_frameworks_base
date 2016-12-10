@@ -7508,6 +7508,8 @@
         <attr name="title" />
         <!-- @SystemApi Summary for the same preference as the title. @hide -->
         <attr name="summary" />
+        <!-- @SystemApi Whether trust agent can unlock a user profile @hide -->
+        <attr name="unlockProfile" format="boolean"/>
     </declare-styleable>
 
     <!-- =============================== -->
@@ -8378,13 +8380,13 @@
         <attr name="color" />
     </declare-styleable>
 
-    <!-- @hide Attributes which will be read by the Activity to intialize the 
+    <!-- @hide Attributes which will be read by the Activity to intialize the
                base activity TaskDescription. -->
     <declare-styleable name="ActivityTaskDescription">
         <!-- @hide From Theme.colorPrimary, used for the TaskDescription primary 
                    color. -->
         <attr name="colorPrimary" />
-        <!-- @hide From Theme.colorBackground, used for the TaskDescription background 
+        <!-- @hide From Theme.colorBackground, used for the TaskDescription background
                    color. -->
         <attr name="colorBackground" />
     </declare-styleable>

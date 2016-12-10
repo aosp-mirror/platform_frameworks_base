@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.PersistableBundle;
+import android.os.UserManager;
 import android.preference.PreferenceManager;
 import android.service.trust.TrustAgentService;
 import android.support.v4.content.LocalBroadcastManager;
@@ -57,26 +58,47 @@ public class SampleTrustAgent extends TrustAgentService
             = "preference.report_unlock_attempts";
     private static final String PREFERENCE_MANAGING_TRUST
             = "preference.managing_trust";
+    private static final String PREFERENCE_MANAGING_TRUST_DIRECT_BOOT
+            = "preference.managing_trust_direct_boot";
     private static final String PREFERENCE_REPORT_DEVICE_LOCKED = "preference.report_device_locked";
 
     private static final String TAG = "SampleTrustAgent";
 
+    private static final BroadcastReceiver mUnlockReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+        }
+    };
+
+    private boolean mIsUserUnlocked;
+
     @Override
     public void onCreate() {
         super.onCreate();
+        UserManager um = (UserManager) getSystemService(Context.USER_SERVICE);
+        mIsUserUnlocked = um.isUserUnlocked();
+        Log.i(TAG,, "onCreate, is user unlocked=" + mIsUserUnlocked);
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_GRANT_TRUST);
         filter.addAction(ACTION_REVOKE_TRUST);
+        if (!mIsUserUnlocked) {
+            filter.addAction(Intent.ACTION_BOOT_COMPLETED);
+        }
         mLocalBroadcastManager.registerReceiver(mReceiver, filter);
         if (ALLOW_EXTERNAL_BROADCASTS) {
             registerReceiver(mReceiver, filter);
         }
 
-        setManagingTrust(getIsManagingTrust(this));
-        PreferenceManager.getDefaultSharedPreferences(this)
-                .registerOnSharedPreferenceChangeListener(this);
+        if (!mIsUserUnlocked) {
+            boolean trustManaged = getIsManagingTrustDirectBoot(this);
+            Log.i(TAG, "in Direct boot." + (trustManaged ? "manage" : "cannot manage") + "trust");
+            setManagingTrust(getIsManagingTrustDirectBoot(this));
+        } else {
+            onBootCompleted();
+        }
     }
 
     @Override
@@ -137,6 +159,12 @@ public class SampleTrustAgent extends TrustAgentService
                 .unregisterOnSharedPreferenceChangeListener(this);
     }
 
+    private void onBootCompleted() {
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .registerOnSharedPreferenceChangeListener(this);
+        setManagingTrust(getIsManagingTrust(this));
+    }
+
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -158,6 +186,9 @@ public class SampleTrustAgent extends TrustAgentService
                 }
             } else if (ACTION_REVOKE_TRUST.equals(action)) {
                 revokeTrust();
+            } else if (intent.ACTION_BOOT_COMPLETED.equals(action)) {
+                Log.d(TAG, "User unlocked and boot completed.");
+                onBootCompleted();
             }
         }
     };
@@ -203,6 +234,7 @@ public class SampleTrustAgent extends TrustAgentService
     public static void setIsManagingTrust(Context context, boolean enabled) {
         SharedPreferences sharedPreferences = PreferenceManager
                 .getDefaultSharedPreferences(context);
+        Log.d("AAAA", "save manage trust preference. Enabled=" + enabled);
         sharedPreferences.edit().putBoolean(PREFERENCE_MANAGING_TRUST, enabled).apply();
     }
 
@@ -210,6 +242,21 @@ public class SampleTrustAgent extends TrustAgentService
         SharedPreferences sharedPreferences = PreferenceManager
                 .getDefaultSharedPreferences(context);
         return sharedPreferences.getBoolean(PREFERENCE_MANAGING_TRUST, false);
+    }
+
+    public static void setIsManagingTrustDirectBoot(Context context, boolean enabled) {
+        Context directBootContext = context.createDeviceProtectedStorageContext();
+        SharedPreferences sharedPreferences = PreferenceManager
+                .getDefaultSharedPreferences(directBootContext);
+        Log.d("AAAA", "save to direct boot preference. Enabled=" + enabled);
+        sharedPreferences.edit().putBoolean(PREFERENCE_MANAGING_TRUST_DIRECT_BOOT, enabled).apply();
+    }
+
+    public static boolean getIsManagingTrustDirectBoot(Context context) {
+        Context directBootContext = context.createDeviceProtectedStorageContext();
+        SharedPreferences sharedPreferences = PreferenceManager
+                .getDefaultSharedPreferences(directBootContext);
+        return sharedPreferences.getBoolean(PREFERENCE_MANAGING_TRUST_DIRECT_BOOT, false);
     }
 
     @Override

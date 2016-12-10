@@ -15,4 +15,5 @@
   ~ limitations under the License
   -->
 <trust-agent xmlns:android="http://schemas.android.com/apk/res/android"
-             android:settingsActivity=".SampleTrustAgentSettings" />
+             android:settingsActivity=".SampleTrustAgentSettings"
+             android:unlockProfile="true" />
