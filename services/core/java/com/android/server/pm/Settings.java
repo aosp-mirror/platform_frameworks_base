@@ -77,13 +77,13 @@ import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.os.InstallerConnection.InstallerException;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.XmlUtils;
 import com.android.server.backup.PreferredActivityBackupHelper;
+import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.PackageManagerService.DumpState;
 import com.android.server.pm.PermissionsState.PermissionState;
 
