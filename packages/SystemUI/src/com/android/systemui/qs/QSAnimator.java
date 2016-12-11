@@ -168,31 +168,30 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             if (count < mNumQuickTiles && mAllowFancy) {
                 // Quick tiles.
                 QSTileBaseView quickTileView = mQuickQsPanel.getTileView(tile);
+                if (quickTileView != null) {
+                    lastX = loc1[0];
+                    getRelativePosition(loc1, quickTileView.getIcon(), mQsContainer);
+                    getRelativePosition(loc2, tileIcon, mQsContainer);
+                    final int xDiff = loc2[0] - loc1[0];
+                    final int yDiff = loc2[1] - loc1[1];
+                    lastXDiff = loc1[0] - lastX;
+                    // Move the quick tile right from its location to the new one.
+                    translationXBuilder.addFloat(quickTileView, "translationX", 0, xDiff);
+                    translationYBuilder.addFloat(quickTileView, "translationY", 0, yDiff);
 
-                lastX = loc1[0];
-                if (quickTileView.getIcon() != null) {
-            	    getRelativePosition(loc1, quickTileView.getIcon(), mQsContainer);
+                    // Counteract the parent translation on the tile. So we have a static base to
+                    // animate the label position off from.
+                    firstPageBuilder.addFloat(tileView, "translationY", mQsPanel.getHeight(), 0);
+
+                    // Move the real tile's label from the quick tile position to its final
+                    // location.
+                    translationXBuilder.addFloat(label, "translationX", -xDiff, 0);
+                    translationYBuilder.addFloat(label, "translationY", -yDiff, 0);
+
+                    mTopFiveQs.add(tileIcon);
+                    mAllViews.add(tileIcon);
+                    mAllViews.add(quickTileView);
                 }
-                getRelativePosition(loc2, tileIcon, mQsContainer);
-                final int xDiff = loc2[0] - loc1[0];
-                final int yDiff = loc2[1] - loc1[1];
-                lastXDiff = loc1[0] - lastX;
-                // Move the quick tile right from its location to the new one.
-                translationXBuilder.addFloat(quickTileView, "translationX", 0, xDiff);
-                translationYBuilder.addFloat(quickTileView, "translationY", 0, yDiff);
-
-                // Counteract the parent translation on the tile. So we have a static base to
-                // animate the label position off from.
-                firstPageBuilder.addFloat(tileView, "translationY", mQsPanel.getHeight(), 0);
-
-                // Move the real tile's label from the quick tile position to its final
-                // location.
-                translationXBuilder.addFloat(label, "translationX", -xDiff, 0);
-                translationYBuilder.addFloat(label, "translationY", -yDiff, 0);
-
-                mTopFiveQs.add(tileView.getIcon());
-                mAllViews.add(tileView.getIcon());
-                mAllViews.add(quickTileView);
             } else if (mFullRows && isIconInAnimatedRow(count)) {
                 // TODO: Refactor some of this, it shares a lot with the above block.
                 // Move the last tile position over by the last difference between quick tiles.
