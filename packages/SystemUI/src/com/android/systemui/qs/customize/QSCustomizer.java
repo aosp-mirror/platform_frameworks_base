@@ -198,8 +198,15 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             tiles.add(tile);
         }
         mTileAdapter.setTileSpecs(tiles);
+        // Reset QS columns
         Settings.System.putInt(mContext.getContentResolver(),
                 Settings.System.QS_LAYOUT_COLUMNS, mDefaultColumns);
+        // Reset QS portrait rows
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.QS_ROWS_PORTRAIT, 3);
+        // Reset QS landscape rows
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.QS_ROWS_LANDSCAPE, 2);
     }
 
     private void setTileSpecs() {
