@@ -36,7 +36,7 @@
     <fraction name="def_window_transition_scale">100%</fraction>
     <bool name="def_haptic_feedback">true</bool>
 
-    <bool name="def_bluetooth_on">true</bool>
+    <bool name="def_bluetooth_on">false</bool>
     <bool name="def_wifi_display_on">false</bool>
     <bool name="def_install_non_market_apps">false</bool>
     <bool name="def_package_verifier_enable">true</bool>

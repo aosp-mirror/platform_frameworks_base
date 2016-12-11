@@ -308,7 +308,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         mContext.registerReceiver(mReceiver, filter);
         loadStoredNameAndAddress();
         if (isBluetoothPersistedStateOn()) {
-            if (DBG) Slog.d(TAG, "Startup: Bluetooth persisted state is ON.");
             mEnableExternal = true;
         }
 
@@ -335,10 +334,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
      *  Returns true if the Bluetooth saved state is "on"
      */
     private final boolean isBluetoothPersistedStateOn() {
-        int state = Settings.Global.getInt(mContentResolver,
-                                           Settings.Global.BLUETOOTH_ON, -1);
-        if (DBG) Slog.d(TAG, "Bluetooth persisted state: " + state);
-        return state != BLUETOOTH_OFF;
+        return Settings.Global.getInt(mContentResolver,
+                Settings.Global.BLUETOOTH_ON, 0) != BLUETOOTH_OFF;
     }
 
     /**
@@ -346,14 +343,13 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
      */
     private final boolean isBluetoothPersistedStateOnBluetooth() {
         return Settings.Global.getInt(mContentResolver,
-                Settings.Global.BLUETOOTH_ON, BLUETOOTH_ON_BLUETOOTH) == BLUETOOTH_ON_BLUETOOTH;
+                Settings.Global.BLUETOOTH_ON, 0) == BLUETOOTH_ON_BLUETOOTH;
     }
 
     /**
      *  Save the Bluetooth on/off state
      */
     private void persistBluetoothSetting(int value) {
-        if (DBG) Slog.d(TAG, "Persisting Bluetooth Setting: " + value);
         // waive WRITE_SECURE_SETTINGS permission check
         long callingIdentity = Binder.clearCallingIdentity();
         Settings.Global.putInt(mContext.getContentResolver(),
