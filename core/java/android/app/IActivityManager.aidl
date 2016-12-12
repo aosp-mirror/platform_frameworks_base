@@ -78,10 +78,12 @@ import java.util.List;
  */
 interface IActivityManager {
     // WARNING: when these transactions are updated, check if they are any callers on the native
-    // side. If so, make sure they are using the correct transaction ids.
+    // side. If so, make sure they are using the correct transaction ids and arguments.
     // If a transaction which will also be used on the native side is being inserted, add it to
     // below block of transactions.
 
+    // Since these transactions are also called from native code, these must be kept in sync with
+    // the ones in frameworks/native/include/binder/IActivityManager.h
     // =============== Beginning of transactions used on native side as well ======================
     ParcelFileDescriptor openContentUri(in String uriString);
     // =============== End of transactions used on native side as well ============================
@@ -577,7 +579,7 @@ interface IActivityManager {
     void dismissKeyguard(in IBinder token, in IKeyguardDismissCallback callback);
 
     // WARNING: when these transactions are updated, check if they are any callers on the native
-    // side. If so, make sure they are using the correct transaction ids.
+    // side. If so, make sure they are using the correct transaction ids and arguments.
     // If a transaction which will also be used on the native side is being inserted, add it
     // alongside with other transactions of this kind at the top of this file.
 }
