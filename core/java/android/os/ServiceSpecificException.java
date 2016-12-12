@@ -39,4 +39,9 @@ public class ServiceSpecificException extends RuntimeException {
     public ServiceSpecificException(int errorCode) {
         this.errorCode = errorCode;
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + " (code " + errorCode + ")";
+    }
 }
