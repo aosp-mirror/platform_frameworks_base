@@ -25,8 +25,6 @@ import android.view.ViewTreeObserver;
  *     OneShotPreDrawListener.add(view, () -> { view.doSomething(); })
  * </code></pre>
  * <p>
- * The onPreDraw always returns true.
- * <p>
  * The listener will also remove itself from the ViewTreeObserver when the view
  * is detached from the view hierarchy. In that case, the Runnable will never be
  * executed.
@@ -36,22 +34,39 @@ public class OneShotPreDrawListener implements ViewTreeObserver.OnPreDrawListene
     private final View mView;
     private ViewTreeObserver mViewTreeObserver;
     private final Runnable mRunnable;
+    private final boolean mReturnValue;
 
-    private OneShotPreDrawListener(View view, Runnable runnable) {
+    private OneShotPreDrawListener(View view, boolean returnValue, Runnable runnable) {
         mView = view;
         mViewTreeObserver = view.getViewTreeObserver();
         mRunnable = runnable;
+        mReturnValue = returnValue;
     }
 
     /**
-     * Creates a OneShotPreDrawListener and adds it to view's ViewTreeObserver.
+     * Creates a OneShotPreDrawListener and adds it to view's ViewTreeObserver. The
+     * return value from the OnPreDrawListener is {@code true}.
+     *
      * @param view The view whose ViewTreeObserver the OnPreDrawListener should listen.
      * @param runnable The Runnable to execute in the OnPreDraw (once)
      * @return The added OneShotPreDrawListener. It can be removed prior to
      * the onPreDraw by calling {@link #removeListener()}.
      */
     public static OneShotPreDrawListener add(View view, Runnable runnable) {
-        OneShotPreDrawListener listener = new OneShotPreDrawListener(view, runnable);
+        return add(view, true, runnable);
+    }
+
+    /**
+     * Creates a OneShotPreDrawListener and adds it to view's ViewTreeObserver.
+     *
+     * @param view The view whose ViewTreeObserver the OnPreDrawListener should listen.
+     * @param returnValue The value to be returned from the OnPreDrawListener.
+     * @param runnable The Runnable to execute in the OnPreDraw (once)
+     * @return The added OneShotPreDrawListener. It can be removed prior to
+     * the onPreDraw by calling {@link #removeListener()}.
+     */
+    public static OneShotPreDrawListener add(View view, boolean returnValue, Runnable runnable) {
+        OneShotPreDrawListener listener = new OneShotPreDrawListener(view, returnValue, runnable);
         view.getViewTreeObserver().addOnPreDrawListener(listener);
         view.addOnAttachStateChangeListener(listener);
         return listener;
@@ -61,7 +76,7 @@ public class OneShotPreDrawListener implements ViewTreeObserver.OnPreDrawListene
     public boolean onPreDraw() {
         removeListener();
         mRunnable.run();
-        return true;
+        return mReturnValue;
     }
 
     /**

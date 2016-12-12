@@ -457,7 +457,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             public void onSharedElementsReady() {
                 final View decorView = getDecor();
                 if (decorView != null) {
-                    OneShotPreDrawListener.add(decorView, () -> {
+                    OneShotPreDrawListener.add(decorView, false, () -> {
                         startTransition(() -> {
                                 startSharedElementTransition(sharedElementState);
                         });
