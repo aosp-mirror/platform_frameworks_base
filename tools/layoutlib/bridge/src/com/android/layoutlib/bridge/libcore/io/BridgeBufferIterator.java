@@ -40,6 +40,11 @@ public class BridgeBufferIterator extends BufferIterator {
     }
 
     @Override
+    public int pos() {
+        return mByteBuffer.position();
+    }
+
+    @Override
     public void skip(int byteCount) {
         int newPosition = mByteBuffer.position() + byteCount;
         assert newPosition <= mSize;
