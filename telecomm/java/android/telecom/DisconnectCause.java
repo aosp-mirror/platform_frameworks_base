@@ -75,6 +75,14 @@ public final class DisconnectCause implements Parcelable {
      */
     public static final int CALL_PULLED = 12;
 
+    /**
+     * Reason code (returned via {@link #getReason()}) which indicates that a call could not be
+     * completed because the cellular radio is off or out of service, the device is connected to
+     * a wifi network, but the user has not enabled wifi calling.
+     * @hide
+     */
+    public static final String REASON_WIFI_ON_BUT_WFC_OFF = "REASON_WIFI_ON_BUT_WFC_OFF";
+
     private int mDisconnectCode;
     private CharSequence mDisconnectLabel;
     private CharSequence mDisconnectDescription;
