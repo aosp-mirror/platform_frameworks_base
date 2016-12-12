@@ -16,13 +16,17 @@
 
 package android.graphics.perftests;
 
+import android.graphics.Outline;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.support.test.filters.LargeTest;
+import android.view.DisplayListCanvas;
 import android.view.RenderNode;
 
 import org.junit.Rule;
 import org.junit.Test;
+
+import java.util.ArrayList;
 
 @LargeTest
 public class RenderNodePerfTest {
@@ -63,6 +67,60 @@ public class RenderNodePerfTest {
         RenderNode node = RenderNode.create("LinearLayout", null);
         while (state.keepRunning()) {
             node.isValid();
+        }
+    }
+
+    @Test
+    public void testStartEnd() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        RenderNode node = RenderNode.create("LinearLayout", null);
+        while (state.keepRunning()) {
+            DisplayListCanvas canvas = node.start(100, 100);
+            node.end(canvas);
+        }
+    }
+
+    @Test
+    public void testStartEndDeepHierarchy() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        RenderNode[] nodes = new RenderNode[30];
+        DisplayListCanvas[] canvases = new DisplayListCanvas[nodes.length];
+        for (int i = 0; i < nodes.length; i++) {
+            nodes[i] = RenderNode.create("LinearLayout", null);
+        }
+
+        while (state.keepRunning()) {
+            for (int i = 0; i < nodes.length; i++) {
+                canvases[i] = nodes[i].start(100, 100);
+            }
+            for (int i = nodes.length - 1; i >= 0; i--) {
+                nodes[i].end(canvases[i]);
+            }
+        }
+    }
+
+    @Test
+    public void testHasIdentityMatrix() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        RenderNode node = RenderNode.create("LinearLayout", null);
+        while (state.keepRunning()) {
+            node.hasIdentityMatrix();
+        }
+    }
+
+    @Test
+    public void testSetOutline() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        RenderNode node = RenderNode.create("LinearLayout", null);
+        Outline a = new Outline();
+        a.setRoundRect(0, 0, 100, 100, 10);
+        Outline b = new Outline();
+        b.setRect(50, 50, 150, 150);
+        b.setAlpha(0.5f);
+
+        while (state.keepRunning()) {
+            node.setOutline(a);
+            node.setOutline(b);
         }
     }
 }
