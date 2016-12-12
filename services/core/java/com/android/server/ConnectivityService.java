@@ -4579,26 +4579,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         } catch (Exception e) {
             loge("Exception in setDnsConfigurationForNetwork: " + e);
         }
-        final NetworkAgentInfo defaultNai = getDefaultNetwork();
-        if (defaultNai != null && defaultNai.network.netId == netId) {
-            setDefaultDnsSystemProperties(dnses);
-        }
         flushVmDnsCache();
-    }
-
-    private void setDefaultDnsSystemProperties(Collection<InetAddress> dnses) {
-        int last = 0;
-        for (InetAddress dns : dnses) {
-            ++last;
-            String key = "net.dns" + last;
-            String value = dns.getHostAddress();
-            SystemProperties.set(key, value);
-        }
-        for (int i = last + 1; i <= mNumDnsEntries; ++i) {
-            String key = "net.dns" + i;
-            SystemProperties.set(key, "");
-        }
-        mNumDnsEntries = last;
     }
 
     private String getNetworkPermission(NetworkCapabilities nc) {
@@ -4817,7 +4798,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         notifyLockdownVpn(newNetwork);
         handleApplyDefaultProxy(newNetwork.linkProperties.getHttpProxy());
         updateTcpBufferSizes(newNetwork);
-        setDefaultDnsSystemProperties(newNetwork.linkProperties.getDnsServers());
     }
 
     private void processListenRequests(NetworkAgentInfo nai, boolean capabilitiesChanged) {
