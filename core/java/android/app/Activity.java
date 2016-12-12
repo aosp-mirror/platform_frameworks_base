@@ -75,6 +75,7 @@ import android.service.autofill.IAutoFillCallback;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
 import android.text.TextAssistant;
+import android.text.TextClassificationManager;
 import android.text.TextUtils;
 import android.text.method.TextKeyListener;
 import android.transition.Scene;
@@ -1402,7 +1403,7 @@ public class Activity extends ContextThemeWrapper
         if (mTextAssistant != null) {
             return mTextAssistant;
         }
-        return TextAssistant.NO_OP;
+        return getSystemService(TextClassificationManager.class);
     }
 
     /**

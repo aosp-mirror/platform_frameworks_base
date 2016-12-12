@@ -115,6 +115,7 @@ import android.telecom.TelecomManager;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.text.TextClassificationManager;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
@@ -219,6 +220,13 @@ final class SystemServiceRegistry {
             public HdmiControlManager createService() throws ServiceNotFoundException {
                 IBinder b = ServiceManager.getServiceOrThrow(Context.HDMI_CONTROL_SERVICE);
                 return new HdmiControlManager(IHdmiControlService.Stub.asInterface(b));
+            }});
+
+        registerService(Context.TEXT_CLASSIFICATION_SERVICE, TextClassificationManager.class,
+                new StaticServiceFetcher<TextClassificationManager>() {
+            @Override
+            public TextClassificationManager createService() {
+                return new TextClassificationManager();
             }});
 
         registerService(Context.CLIPBOARD_SERVICE, ClipboardManager.class,

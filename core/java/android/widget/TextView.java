@@ -77,6 +77,7 @@ import android.text.Spanned;
 import android.text.SpannedString;
 import android.text.StaticLayout;
 import android.text.TextAssistant;
+import android.text.TextClassificationManager;
 import android.text.TextDirectionHeuristic;
 import android.text.TextDirectionHeuristics;
 import android.text.TextPaint;
@@ -10027,8 +10028,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mTextAssistant = ((Activity) mContext).getTextAssistant();
         } else {
             // The context of this TextView should be an Activity. If it is not and no
-            // text assistant has been set, return a NO_OP TextAssistant.
-            mTextAssistant = TextAssistant.NO_OP;
+            // text assistant has been set, return the TextClassificationManager.
+            mTextAssistant = mContext.getSystemService(TextClassificationManager.class);
         }
         return  mTextAssistant;
     }
