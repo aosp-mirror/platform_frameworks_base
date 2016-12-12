@@ -1201,7 +1201,7 @@ class AccountsDb implements AutoCloseable {
     }
 
     boolean deleteCeAccount(long accountId) {
-        SQLiteDatabase db = mDeDatabase.getReadableDatabaseUserIsUnlocked();
+        SQLiteDatabase db = mDeDatabase.getWritableDatabaseUserIsUnlocked();
         return db.delete(
                 CE_TABLE_ACCOUNTS, ACCOUNTS_ID + "=" + accountId, null) > 0;
     }
