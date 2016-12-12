@@ -385,6 +385,14 @@ public final class ViewTreeObserver {
             }
         }
 
+        if (observer.mOnDrawListeners != null) {
+            if (mOnDrawListeners != null) {
+                mOnDrawListeners.addAll(observer.mOnDrawListeners);
+            } else {
+                mOnDrawListeners = observer.mOnDrawListeners;
+            }
+        }
+
         if (observer.mOnTouchModeChangeListeners != null) {
             if (mOnTouchModeChangeListeners != null) {
                 mOnTouchModeChangeListeners.addAll(observer.mOnTouchModeChangeListeners);
