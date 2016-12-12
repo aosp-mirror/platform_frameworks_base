@@ -135,6 +135,12 @@ public abstract class UserManagerInternal {
     public abstract boolean isUserUnlockingOrUnlocked(int userId);
 
     /**
+     * Return whether the given user is running in an
+     * {@code UserState.STATE_RUNNING_UNLOCKED} state.
+     */
+    public abstract boolean isUserUnlocked(int userId);
+
+    /**
      * Return whether the given user is running
      */
     public abstract boolean isUserRunning(int userId);
