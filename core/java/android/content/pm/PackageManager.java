@@ -450,6 +450,20 @@ public abstract class PackageManager {
     public static final int MATCH_KNOWN_PACKAGES = MATCH_UNINSTALLED_PACKAGES | MATCH_ANY_USER;
 
     /**
+     * Internal {@link PackageInfo} flag: include components that are part of an
+     * ephemeral app. By default, ephemeral components are not matched.
+     * @hide
+     */
+    public static final int MATCH_EPHEMERAL = 0x00800000;
+
+    /**
+     * Internal {@link PackageInfo} flag: include only components that are exposed to
+     * ephemeral apps.
+     * @hide
+     */
+    public static final int MATCH_VISIBLE_TO_EPHEMERAL_ONLY = 0x01000000;
+
+    /**
      * Internal flag used to indicate that a system component has done their
      * homework and verified that they correctly handle packages and components
      * that come and go over time. In particular:

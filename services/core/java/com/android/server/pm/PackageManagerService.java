@@ -3641,6 +3641,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (mSafeMode) {
             flags |= PackageManager.MATCH_SYSTEM_ONLY;
         }
+        final String ephemeralPkgName = getEphemeralPackageName(Binder.getCallingUid());
+        if (ephemeralPkgName != null) {
+            flags |= PackageManager.MATCH_VISIBLE_TO_EPHEMERAL_ONLY;
+            flags |= PackageManager.MATCH_EPHEMERAL;
+        }
 
         return updateFlagsForComponent(flags, userId, cookie);
     }
@@ -5214,7 +5219,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (DEBUG_PREFERRED || debug) Slog.v(TAG, "Looking for presistent preferred activities...");
         List<PersistentPreferredActivity> pprefs = ppir != null
                 ? ppir.queryIntent(intent, resolvedType,
-                        (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0, userId)
+                        (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0,
+                        (flags & PackageManager.MATCH_VISIBLE_TO_EPHEMERAL_ONLY) != 0,
+                        (flags & PackageManager.MATCH_EPHEMERAL) != 0, userId)
                 : null;
         if (pprefs != null && pprefs.size() > 0) {
             final int M = pprefs.size();
@@ -5289,7 +5296,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (DEBUG_PREFERRED || debug) Slog.v(TAG, "Looking for preferred activities...");
             List<PreferredActivity> prefs = pir != null
                     ? pir.queryIntent(intent, resolvedType,
-                            (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0, userId)
+                            (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0,
+                            (flags & PackageManager.MATCH_VISIBLE_TO_EPHEMERAL_ONLY) != 0,
+                            (flags & PackageManager.MATCH_EPHEMERAL) != 0, userId)
                     : null;
             if (prefs != null && prefs.size() > 0) {
                 boolean changed = false;
@@ -5460,7 +5469,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             String resolvedType, int userId) {
         CrossProfileIntentResolver resolver = mSettings.mCrossProfileIntentResolvers.get(userId);
         if (resolver != null) {
-            return resolver.queryIntent(intent, resolvedType, false, userId);
+            return resolver.queryIntent(intent, resolvedType, false /*defaultOnly*/,
+                    false /*visibleToEphemeral*/, false /*isEphemeral*/, userId);
         }
         return null;
     }
@@ -5478,9 +5488,26 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    /**
+     * Returns the package name of the calling Uid if it's an ephemeral app. If it isn't
+     * ephemeral, returns {@code null}.
+     */
+    private String getEphemeralPackageName(int callingUid) {
+        final int appId = UserHandle.getAppId(callingUid);
+        synchronized (mPackages) {
+            final Object obj = mSettings.getUserIdLPr(appId);
+            if (obj instanceof PackageSetting) {
+                final PackageSetting ps = (PackageSetting) obj;
+                return ps.pkg.applicationInfo.isEphemeralApp() ? ps.pkg.packageName : null;
+            }
+        }
+        return null;
+    }
+
     private @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
             String resolvedType, int flags, int userId) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
+        final String ephemeralPkgName = getEphemeralPackageName(Binder.getCallingUid());
         flags = updateFlagsForResolve(flags, userId, intent);
         enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 false /* requireFullPermission */, false /* checkShell */,
@@ -5507,7 +5534,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         // reader
         boolean sortResult = false;
         boolean addEphemeral = false;
-        boolean matchEphemeralPackage = false;
         List<ResolveInfo> result;
         final String pkgName = intent.getPackage();
         synchronized (mPackages) {
@@ -5520,7 +5546,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (xpResolveInfo != null) {
                     List<ResolveInfo> xpResult = new ArrayList<ResolveInfo>(1);
                     xpResult.add(xpResolveInfo);
-                    return filterIfNotSystemUser(xpResult, userId);
+                    return filterForEphemeral(
+                            filterIfNotSystemUser(xpResult, userId), ephemeralPkgName);
                 }
 
                 // Check for results in the current profile.
@@ -5560,13 +5587,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                             // And we are not going to add emphemeral app, so we can return the
                             // result straight away.
                             result.add(xpDomainInfo.resolveInfo);
-                            return result;
+                            return filterForEphemeral(result, ephemeralPkgName);
                         }
                     } else if (result.size() <= 1 && !addEphemeral) {
                         // No result in parent user and <= 1 result in current profile, and we
                         // are not going to add emphemeral app, so we can return the result without
                         // further processing.
-                        return result;
+                        return filterForEphemeral(result, ephemeralPkgName);
                     }
                     // We have more than one candidate (combining results from current and parent
                     // profile), so we need filtering and sorting.
@@ -5586,7 +5613,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                     // were no installed results, so, try to find an ephemeral result
                     addEphemeral = isEphemeralAllowed(
                             intent, null /*result*/, userId, true /*skipPackageCheck*/);
-                    matchEphemeralPackage = true;
                     result = new ArrayList<ResolveInfo>();
                 }
             }
@@ -5619,7 +5645,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (sortResult) {
             Collections.sort(result, mResolvePrioritySorter);
         }
-        return result;
+        return filterForEphemeral(result, ephemeralPkgName);
     }
 
     private static class CrossProfileDomainInfo {
@@ -5713,6 +5739,38 @@ public class PackageManagerService extends IPackageManager.Stub {
             if ((info.activityInfo.flags & ActivityInfo.FLAG_SYSTEM_USER_ONLY) != 0) {
                 resolveInfos.remove(i);
             }
+        }
+        return resolveInfos;
+    }
+
+    /**
+     * Filters out ephemeral activities.
+     * <p>When resolving for an ephemeral app, only activities that 1) are defined in the
+     * ephemeral app or 2) marked with {@code visibleToEphemeral} are returned.
+     *
+     * @param resolveInfos The pre-filtered list of resolved activities
+     * @param ephemeralPkgName The ephemeral package name. If {@code null}, no filtering
+     *          is performed.
+     * @return A filtered list of resolved activities.
+     */
+    private List<ResolveInfo> filterForEphemeral(List<ResolveInfo> resolveInfos,
+            String ephemeralPkgName) {
+        if (ephemeralPkgName == null) {
+            return resolveInfos;
+        }
+        for (int i = resolveInfos.size() - 1; i >= 0; i--) {
+            ResolveInfo info = resolveInfos.get(i);
+            final boolean isEphemeralApp = info.activityInfo.applicationInfo.isEphemeralApp();
+            // allow activities that are defined in the provided package
+            if (isEphemeralApp && ephemeralPkgName.equals(info.activityInfo.packageName)) {
+                continue;
+            }
+            // allow activities that have been explicitly exposed to ephemeral apps
+            if (!isEphemeralApp
+                    && ((info.activityInfo.flags & ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL) != 0)) {
+                continue;
+            }
+            resolveInfos.remove(i);
         }
         return resolveInfos;
     }
@@ -10742,10 +10800,13 @@ public class PackageManagerService extends IPackageManager.Stub {
     final class ActivityIntentResolver
             extends IntentResolver<PackageParser.ActivityIntentInfo, ResolveInfo> {
         public List<ResolveInfo> queryIntent(Intent intent, String resolvedType,
-                boolean defaultOnly, int userId) {
+                boolean defaultOnly, boolean visibleToEphemeral, boolean isEphemeral, int userId) {
             if (!sUserManager.exists(userId)) return null;
-            mFlags = defaultOnly ? PackageManager.MATCH_DEFAULT_ONLY : 0;
-            return super.queryIntent(intent, resolvedType, defaultOnly, userId);
+            mFlags = (defaultOnly ? PackageManager.MATCH_DEFAULT_ONLY : 0)
+                    | (visibleToEphemeral ? PackageManager.MATCH_VISIBLE_TO_EPHEMERAL_ONLY : 0)
+                    | (isEphemeral ? PackageManager.MATCH_EPHEMERAL : 0);
+            return super.queryIntent(intent, resolvedType, defaultOnly, visibleToEphemeral,
+                    isEphemeral, userId);
         }
 
         public List<ResolveInfo> queryIntent(Intent intent, String resolvedType, int flags,
@@ -10753,7 +10814,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (!sUserManager.exists(userId)) return null;
             mFlags = flags;
             return super.queryIntent(intent, resolvedType,
-                    (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0, userId);
+                    (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0,
+                    (flags & PackageManager.MATCH_VISIBLE_TO_EPHEMERAL_ONLY) != 0,
+                    (flags & PackageManager.MATCH_EPHEMERAL) != 0, userId);
         }
 
         public List<ResolveInfo> queryIntentForPackage(Intent intent, String resolvedType,
@@ -10763,7 +10826,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return null;
             }
             mFlags = flags;
-            final boolean defaultOnly = (flags&PackageManager.MATCH_DEFAULT_ONLY) != 0;
+            final boolean defaultOnly = (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0;
+            final boolean vislbleToEphemeral =
+                    (flags & PackageManager.MATCH_VISIBLE_TO_EPHEMERAL_ONLY) != 0;
+            final boolean isEphemeral = (flags & PackageManager.MATCH_EPHEMERAL) != 0;
             final int N = packageActivities.size();
             ArrayList<PackageParser.ActivityIntentInfo[]> listCut =
                 new ArrayList<PackageParser.ActivityIntentInfo[]>(N);
@@ -10778,7 +10844,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     listCut.add(array);
                 }
             }
-            return super.queryIntentFromList(intent, resolvedType, defaultOnly, listCut, userId);
+            return super.queryIntentFromList(intent, resolvedType, defaultOnly,
+                    vislbleToEphemeral, isEphemeral, listCut, userId);
         }
 
         /**
@@ -11263,9 +11330,10 @@ public class PackageManagerService extends IPackageManager.Stub {
     private final class ServiceIntentResolver
             extends IntentResolver<PackageParser.ServiceIntentInfo, ResolveInfo> {
         public List<ResolveInfo> queryIntent(Intent intent, String resolvedType,
-                boolean defaultOnly, int userId) {
+                boolean defaultOnly, boolean visibleToEphemeral, boolean isEphemeral, int userId) {
             mFlags = defaultOnly ? PackageManager.MATCH_DEFAULT_ONLY : 0;
-            return super.queryIntent(intent, resolvedType, defaultOnly, userId);
+            return super.queryIntent(intent, resolvedType, defaultOnly, visibleToEphemeral,
+                    isEphemeral, userId);
         }
 
         public List<ResolveInfo> queryIntent(Intent intent, String resolvedType, int flags,
@@ -11273,7 +11341,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (!sUserManager.exists(userId)) return null;
             mFlags = flags;
             return super.queryIntent(intent, resolvedType,
-                    (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0, userId);
+                    (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0,
+                    (flags & PackageManager.MATCH_VISIBLE_TO_EPHEMERAL_ONLY) != 0,
+                    (flags & PackageManager.MATCH_EPHEMERAL) != 0, userId);
         }
 
         public List<ResolveInfo> queryIntentForPackage(Intent intent, String resolvedType,
@@ -11284,6 +11354,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             mFlags = flags;
             final boolean defaultOnly = (flags&PackageManager.MATCH_DEFAULT_ONLY) != 0;
+            final boolean vislbleToEphemeral =
+                    (flags&PackageManager.MATCH_VISIBLE_TO_EPHEMERAL_ONLY) != 0;
+            final boolean isEphemeral = (flags&PackageManager.MATCH_EPHEMERAL) != 0;
             final int N = packageServices.size();
             ArrayList<PackageParser.ServiceIntentInfo[]> listCut =
                 new ArrayList<PackageParser.ServiceIntentInfo[]>(N);
@@ -11298,7 +11371,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     listCut.add(array);
                 }
             }
-            return super.queryIntentFromList(intent, resolvedType, defaultOnly, listCut, userId);
+            return super.queryIntentFromList(intent, resolvedType, defaultOnly,
+                    vislbleToEphemeral, isEphemeral, listCut, userId);
         }
 
         public final void addService(PackageParser.Service s) {
@@ -11468,14 +11542,15 @@ public class PackageManagerService extends IPackageManager.Stub {
         private final ArrayMap<ComponentName, PackageParser.Service> mServices
                 = new ArrayMap<ComponentName, PackageParser.Service>();
         private int mFlags;
-    };
+    }
 
     private final class ProviderIntentResolver
             extends IntentResolver<PackageParser.ProviderIntentInfo, ResolveInfo> {
         public List<ResolveInfo> queryIntent(Intent intent, String resolvedType,
-                boolean defaultOnly, int userId) {
+                boolean defaultOnly, boolean visibleToEphemeral, boolean isEphemeral, int userId) {
             mFlags = defaultOnly ? PackageManager.MATCH_DEFAULT_ONLY : 0;
-            return super.queryIntent(intent, resolvedType, defaultOnly, userId);
+            return super.queryIntent(intent, resolvedType, defaultOnly, visibleToEphemeral,
+                    isEphemeral, userId);
         }
 
         public List<ResolveInfo> queryIntent(Intent intent, String resolvedType, int flags,
@@ -11484,7 +11559,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return null;
             mFlags = flags;
             return super.queryIntent(intent, resolvedType,
-                    (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0, userId);
+                    (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0,
+                    (flags & PackageManager.MATCH_VISIBLE_TO_EPHEMERAL_ONLY) != 0,
+                    (flags & PackageManager.MATCH_EPHEMERAL) != 0, userId);
         }
 
         public List<ResolveInfo> queryIntentForPackage(Intent intent, String resolvedType,
@@ -11496,6 +11573,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             mFlags = flags;
             final boolean defaultOnly = (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0;
+            final boolean isEphemeral = (flags&PackageManager.MATCH_EPHEMERAL) != 0;
+            final boolean vislbleToEphemeral =
+                    (flags&PackageManager.MATCH_VISIBLE_TO_EPHEMERAL_ONLY) != 0;
             final int N = packageProviders.size();
             ArrayList<PackageParser.ProviderIntentInfo[]> listCut =
                     new ArrayList<PackageParser.ProviderIntentInfo[]>(N);
@@ -11510,7 +11590,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     listCut.add(array);
                 }
             }
-            return super.queryIntentFromList(intent, resolvedType, defaultOnly, listCut, userId);
+            return super.queryIntentFromList(intent, resolvedType, defaultOnly,
+                    vislbleToEphemeral, isEphemeral, listCut, userId);
         }
 
         public final void addProvider(PackageParser.Provider p) {

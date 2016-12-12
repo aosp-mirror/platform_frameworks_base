@@ -227,8 +227,9 @@ public abstract class EphemeralResolver {
                         ephemeralResolver.addFilter(intentInfo);
                     }
                 }
-                List<EphemeralResponse> matchedResolveInfoList = ephemeralResolver
-                        .queryIntent(intent, resolvedType, false /*defaultOnly*/, userId);
+                List<EphemeralResponse> matchedResolveInfoList = ephemeralResolver.queryIntent(
+                        intent, resolvedType, false /*defaultOnly*/, false /*visibleToEphemeral*/,
+                        false /*isEphemeral*/, userId);
                 if (!matchedResolveInfoList.isEmpty()) {
                     return matchedResolveInfoList.get(0);
                 }
