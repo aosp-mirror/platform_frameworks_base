@@ -2716,7 +2716,6 @@
 
   <java-symbol type="bool" name="config_permissionReviewRequired" />
 
-
   <java-symbol type="drawable" name="ic_restart" />
 
   <java-symbol type="drawable" name="emergency_icon" />
@@ -2731,5 +2730,4 @@
 
 <!-- Network Recommendation -->
   <java-symbol type="array" name="config_networkRecommendationPackageNames" />
-
 </resources>
