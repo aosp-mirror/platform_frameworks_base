@@ -136,6 +136,12 @@ public final class NotificationRecord {
     private boolean isPreChannelsNotification() {
         try {
             if (NotificationChannel.DEFAULT_CHANNEL_ID.equals(getChannel().getId())) {
+                final boolean isSystemNotification =
+                        NotificationManagerService.isUidSystem(sbn.getUid())
+                                || ("android".equals(sbn.getPackageName()));
+                if (isSystemNotification) {
+                    return false;
+                }
                 final ApplicationInfo applicationInfo =
                         mContext.getPackageManager().getApplicationInfoAsUser(sbn.getPackageName(),
                                 0, sbn.getUserId());

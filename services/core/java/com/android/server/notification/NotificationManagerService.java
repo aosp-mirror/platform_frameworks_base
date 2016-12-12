@@ -3924,7 +3924,7 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private static boolean isUidSystem(int uid) {
+    protected static boolean isUidSystem(int uid) {
         final int appid = UserHandle.getAppId(uid);
         return (appid == Process.SYSTEM_UID || appid == Process.PHONE_UID || uid == 0);
     }
