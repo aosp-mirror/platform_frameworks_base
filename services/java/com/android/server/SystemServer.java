@@ -273,7 +273,7 @@ public final class SystemServer {
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_SYSTEM_RUN, uptimeMillis);
             MetricsLogger.histogram(null, "boot_system_server_init", uptimeMillis);
             // Also report when first stage of init has started
-            long initStartNs = SystemProperties.getLong("init.start", -1);
+            long initStartNs = SystemProperties.getLong("ro.boottime.init", -1);
             if (initStartNs >= 0) {
                 MetricsLogger.histogram(null, "boot_android_init", (int)(initStartNs / 1000000));
             }
