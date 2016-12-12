@@ -125,7 +125,7 @@ interface IBatteryStats {
     void noteNetworkStatsEnabled();
     void noteDeviceIdleMode(int mode, String activeReason, int activeUid);
     void setBatteryState(int status, int health, int plugType, int level, int temp, int volt,
-            int chargeUAh);
+            int chargeUAh, int chargeFullUAh);
     long getAwakeTimeBattery();
     long getAwakeTimePlugged();
 

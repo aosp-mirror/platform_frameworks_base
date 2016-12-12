@@ -24,6 +24,7 @@ import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -1336,9 +1337,11 @@ public abstract class BatteryStats implements Parcelable {
         public static final int EVENT_WAKEUP_AP = 0x0013;
         // Event for reporting that a specific partial wake lock has been held for a long duration.
         public static final int EVENT_LONG_WAKE_LOCK = 0x0014;
+        // Event reporting the new estimated (learned) capacity of the battery in mAh.
+        public static final int EVENT_ESTIMATED_BATTERY_CAP = 0x0015;
 
         // Number of event types.
-        public static final int EVENT_COUNT = 0x0015;
+        public static final int EVENT_COUNT = 0x0016;
         // Mask to extract out only the type part of the event.
         public static final int EVENT_TYPE_MASK = ~(EVENT_FLAG_START|EVENT_FLAG_FINISH);
 
@@ -2034,13 +2037,28 @@ public abstract class BatteryStats implements Parcelable {
     public static final String[] HISTORY_EVENT_NAMES = new String[] {
             "null", "proc", "fg", "top", "sync", "wake_lock_in", "job", "user", "userfg", "conn",
             "active", "pkginst", "pkgunin", "alarm", "stats", "inactive", "active", "tmpwhitelist",
-            "screenwake", "wakeupap", "longwake"
+            "screenwake", "wakeupap", "longwake", "est_capacity"
     };
 
     public static final String[] HISTORY_EVENT_CHECKIN_NAMES = new String[] {
             "Enl", "Epr", "Efg", "Etp", "Esy", "Ewl", "Ejb", "Eur", "Euf", "Ecn",
             "Eac", "Epi", "Epu", "Eal", "Est", "Eai", "Eaa", "Etw",
-            "Esw", "Ewa", "Elw"
+            "Esw", "Ewa", "Elw", "Eec"
+    };
+
+    @FunctionalInterface
+    public interface IntToString {
+        String applyAsString(int val);
+    }
+
+    private static final IntToString sUidToString = UserHandle::formatUid;
+    private static final IntToString sIntToString = Integer::toString;
+
+    public static final IntToString[] HISTORY_EVENT_INT_FORMATTERS = new IntToString[] {
+            sUidToString, sUidToString, sUidToString, sUidToString, sUidToString, sUidToString,
+            sUidToString, sUidToString, sUidToString, sUidToString, sUidToString, sUidToString,
+            sUidToString, sUidToString, sUidToString, sUidToString, sUidToString, sUidToString,
+            sUidToString, sUidToString, sUidToString, sIntToString
     };
 
     /**
@@ -4958,7 +4976,8 @@ public abstract class BatteryStats implements Parcelable {
                     if (checkin) {
                         pw.print(rec.eventTag.poolIdx);
                     } else {
-                        UserHandle.formatUid(pw, rec.eventTag.uid);
+                        pw.append(HISTORY_EVENT_INT_FORMATTERS[idx]
+                                .applyAsString(rec.eventTag.uid));
                         pw.print(":\"");
                         pw.print(rec.eventTag.string);
                         pw.print("\"");
