@@ -1621,6 +1621,27 @@
         <attr name="name" />
     </declare-styleable>
 
+
+    <!-- The <code>static-library</code> tag declares that this apk is providing itself
+       as a static shared library for other applications to use. Any app can declare such
+       a library and there can be only one static shared library per package. These libraries
+       are updatable, multiple versions can be installed at the same time, and an app links
+       against a specific version simulating static linking while allowing code sharing.
+       Other apks can link to it with the {@link #AndroidManifestUsesLibrary uses-static-library}
+       tag.
+
+     <p>This appears as a child tag of the
+     {@link #AndroidManifestApplication application} tag. -->
+    <declare-styleable name="AndroidManifestStaticLibrary" parent="AndroidManifestApplication">
+        <!-- Required public name of the library, which other components and
+        packages will use when referring to this library.  This is a string using
+        Java-style scoping to ensure it is unique.  The name should typically
+        be the same as the apk's package name. -->
+        <attr name="name" />
+        <!-- Required specific library version. -->
+        <attr name="version" />
+    </declare-styleable>
+
     <!-- The <code>uses-libraries</code> specifies a shared library that this
          package requires to be linked against.  Specifying this flag tells the
          system to include this library's code in your class loader.
@@ -1638,6 +1659,24 @@
               doesn't exist, and you will need to check for its presence
               dynamically at runtime. -->
         <attr name="required" />
+    </declare-styleable>
+
+    <!-- The <code>uses-static-library</code> specifies a shared <strong>static</strong>
+         library that this package requires to be statically linked against. Specifying
+         this tag tells the system to include this library's code in your class loader.
+         Depending on a static shared library is equivalent to statically linking with
+         the library at build time while it offers apps to share code defined in such
+         libraries. Hence, static libraries are strictly required.
+
+         <p>This appears as a child tag of the
+         {@link #AndroidManifestApplication application} tag. -->
+    <declare-styleable name="AndroidManifestUsesStaticLibrary" parent="AndroidManifestApplication">
+        <!-- Required name of the library you use. -->
+        <attr name="name" />
+        <!-- Specify which version of the shared library should be statically linked. -->
+        <attr name="version" />
+        <!-- The SHA-256 digest of the library signing certificate. -->
+        <attr name="certDigest" format="string" />
     </declare-styleable>
 
     <!-- The <code>supports-screens</code> specifies the screen dimensions an

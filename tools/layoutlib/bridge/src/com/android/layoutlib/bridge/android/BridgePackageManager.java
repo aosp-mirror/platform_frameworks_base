@@ -42,14 +42,15 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.SharedLibraryInfo;
 import android.content.pm.VerifierDeviceIdentity;
+import android.content.pm.VersionedPackage;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.storage.VolumeInfo;
 import java.util.List;
@@ -67,6 +68,23 @@ public class BridgePackageManager extends PackageManager {
     @Override
     public PackageInfo getPackageInfoAsUser(String packageName, int flags, int userId)
             throws NameNotFoundException {
+        return null;
+    }
+
+    @Override
+    public PackageInfo getPackageInfo(VersionedPackage versionedPackage,
+            @PackageInfoFlags int flags) throws NameNotFoundException {
+        return null;
+    }
+
+    @Override
+    public List<SharedLibraryInfo> getSharedLibraries(@InstallFlags int flags) {
+        return null;
+    }
+
+    @Override
+    public List<SharedLibraryInfo> getSharedLibrariesAsUser(@InstallFlags int flags,
+            int userId) {
         return null;
     }
 

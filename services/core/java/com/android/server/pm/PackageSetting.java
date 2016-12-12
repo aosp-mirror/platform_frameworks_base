@@ -46,10 +46,12 @@ final class PackageSetting extends PackageSettingBase {
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, String cpuAbiOverrideString,
             int pVersionCode, int pkgFlags, int privateFlags, String parentPackageName,
-            List<String> childPackageNames, int sharedUserId) {
+            List<String> childPackageNames, int sharedUserId, String[] usesStaticLibraries,
+            int[] usesStaticLibrariesVersions) {
         super(name, realName, codePath, resourcePath, legacyNativeLibraryPathString,
                 primaryCpuAbiString, secondaryCpuAbiString, cpuAbiOverrideString,
-                pVersionCode, pkgFlags, privateFlags, parentPackageName, childPackageNames);
+                pVersionCode, pkgFlags, privateFlags, parentPackageName, childPackageNames,
+                usesStaticLibraries, usesStaticLibrariesVersions);
         this.sharedUserId = sharedUserId;
     }
 

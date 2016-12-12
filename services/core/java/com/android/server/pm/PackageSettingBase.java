@@ -32,6 +32,7 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -67,6 +68,9 @@ abstract class PackageSettingBase extends SettingBase {
     String codePathString;
     File resourcePath;
     String resourcePathString;
+
+    String[] usesStaticLibraries;
+    int[] usesStaticLibrariesVersions;
 
     /**
      * The path under which native libraries have been unpacked. This path is
@@ -139,13 +143,16 @@ abstract class PackageSettingBase extends SettingBase {
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, String cpuAbiOverrideString,
             int pVersionCode, int pkgFlags, int pkgPrivateFlags,
-            String parentPackageName, List<String> childPackageNames) {
+            String parentPackageName, List<String> childPackageNames,
+            String[] usesStaticLibraries, int[] usesStaticLibrariesVersions) {
         super(pkgFlags, pkgPrivateFlags);
         this.name = name;
         this.realName = realName;
         this.parentPackageName = parentPackageName;
         this.childPackageNames = (childPackageNames != null)
                 ? new ArrayList<>(childPackageNames) : null;
+        this.usesStaticLibraries = usesStaticLibraries;
+        this.usesStaticLibrariesVersions = usesStaticLibrariesVersions;
         init(codePath, resourcePath, legacyNativeLibraryPathString, primaryCpuAbiString,
                 secondaryCpuAbiString, cpuAbiOverrideString, pVersionCode);
     }
@@ -250,6 +257,12 @@ abstract class PackageSettingBase extends SettingBase {
         versionCode = orig.versionCode;
         volumeUuid = orig.volumeUuid;
         categoryHint = orig.categoryHint;
+        usesStaticLibraries = orig.usesStaticLibraries != null
+                ? Arrays.copyOf(orig.usesStaticLibraries,
+                        orig.usesStaticLibraries.length) : null;
+        usesStaticLibrariesVersions = orig.usesStaticLibrariesVersions != null
+                ? Arrays.copyOf(orig.usesStaticLibrariesVersions,
+                       orig.usesStaticLibrariesVersions.length) : null;
     }
 
     private PackageUserState modifyUserState(int userId) {

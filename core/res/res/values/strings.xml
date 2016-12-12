@@ -3190,6 +3190,11 @@
     <!-- Description of an application permission that lets it read install sessions. -->
     <string name="permdesc_requestInstallPackages">Allows an application to request installation of packages.</string>
 
+    <!-- Title of an application permission that lets it read install sessions. -->
+    <string name="permlab_requestDeletePackages">request delete packages</string>
+    <!-- Description of an application permission that lets it read install sessions. -->
+    <string name="permdesc_requestDeletePackages">Allows an application to request deletion of packages.</string>
+
     <!-- Title of an application permission that lets it ask user to ignore battery optimizations for that app. -->
     <string name="permlab_requestIgnoreBatteryOptimizations">ask to ignore battery optimizations</string>
     <!-- Description of an application permission that lets it ask user to ignore battery optimizations for that app-->

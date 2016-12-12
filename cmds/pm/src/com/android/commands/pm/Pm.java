@@ -1556,7 +1556,7 @@ public final class Pm {
         System.err.println("       pm install-write [-S BYTES] SESSION_ID SPLIT_NAME [PATH]");
         System.err.println("       pm install-commit SESSION_ID");
         System.err.println("       pm install-abandon SESSION_ID");
-        System.err.println("       pm uninstall [-k] [--user USER_ID] PACKAGE");
+        System.err.println("       pm uninstall [-k] [--user USER_ID] [--versionCode VERSION_CODE] PACKAGE");
         System.err.println("       pm set-installer PACKAGE INSTALLER");
         System.err.println("       pm move-package PACKAGE [internal|UUID]");
         System.err.println("       pm move-primary-storage [internal|UUID]");

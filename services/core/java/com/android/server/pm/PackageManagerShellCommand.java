@@ -40,6 +40,7 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.ResolveInfo;
+import android.content.pm.VersionedPackage;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.net.Uri;
@@ -663,7 +664,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     pw.print(info.applicationInfo.sourceDir);
                     pw.print("=");
                 }
-                pw.print(info.packageName);
+                pw.print(info.packageName); pw.print( " versionCode:"
+                        + info.applicationInfo.versionCode);
                 if (listInstaller) {
                     pw.print("  installer=");
                     pw.print(mInterface.getInstallerPackageName(info.packageName));
@@ -770,6 +772,7 @@ class PackageManagerShellCommand extends ShellCommand {
         final PrintWriter pw = getOutPrintWriter();
         int flags = 0;
         int userId = UserHandle.USER_ALL;
+        int versionCode = PackageManager.VERSION_CODE_HIGHEST;
 
         String opt;
         while ((opt = getNextOption()) != null) {
@@ -779,6 +782,9 @@ class PackageManagerShellCommand extends ShellCommand {
                     break;
                 case "--user":
                     userId = UserHandle.parseUserArg(getNextArgRequired());
+                    break;
+                case "--versionCode":
+                    versionCode = Integer.parseInt(getNextArgRequired());
                     break;
                 default:
                     pw.println("Error: Unknown option: " + opt);
@@ -819,7 +825,8 @@ class PackageManagerShellCommand extends ShellCommand {
         }
 
         final LocalIntentReceiver receiver = new LocalIntentReceiver();
-        mInterface.getPackageInstaller().uninstall(packageName, null /*callerPackageName*/, flags,
+        mInterface.getPackageInstaller().uninstall(new VersionedPackage(packageName,
+                versionCode), null /*callerPackageName*/, flags,
                 receiver.getIntentSender(), userId);
 
         final Intent result = receiver.getResult();

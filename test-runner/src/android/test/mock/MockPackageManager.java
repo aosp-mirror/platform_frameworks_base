@@ -16,6 +16,7 @@
 
 package android.test.mock;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PackageInstallObserver;
@@ -43,7 +44,9 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.SharedLibraryInfo;
 import android.content.pm.VerifierDeviceIdentity;
+import android.content.pm.VersionedPackage;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Rect;
@@ -69,6 +72,12 @@ public class MockPackageManager extends PackageManager {
 
     @Override
     public PackageInfo getPackageInfo(String packageName, int flags) throws NameNotFoundException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public PackageInfo getPackageInfo(VersionedPackage versionedPackage,
+            int flags) throws NameNotFoundException {
         throw new UnsupportedOperationException();
     }
 
@@ -715,8 +724,7 @@ public class MockPackageManager extends PackageManager {
      * @hide - to match hiding in superclass
      */
     @Override
-    public void deletePackage(
-            String packageName, IPackageDeleteObserver observer, int flags) {
+    public void deletePackage(String packageName, IPackageDeleteObserver observer, int flags) {
         throw new UnsupportedOperationException();
     }
 
@@ -724,8 +732,8 @@ public class MockPackageManager extends PackageManager {
      * @hide - to match hiding in superclass
      */
     @Override
-    public void deletePackageAsUser(
-            String packageName, IPackageDeleteObserver observer, int flags, int userId) {
+    public void deletePackageAsUser(String packageName, IPackageDeleteObserver observer,
+            int flags, int userId) {
         throw new UnsupportedOperationException();
     }
 
@@ -815,6 +823,17 @@ public class MockPackageManager extends PackageManager {
 
     @Override
     public String[] getSystemSharedLibraryNames() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public @NonNull List<SharedLibraryInfo> getSharedLibraries(int flags) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public @NonNull List<SharedLibraryInfo> getSharedLibrariesAsUser(int flags, int userId) {
         throw new UnsupportedOperationException();
     }
 
