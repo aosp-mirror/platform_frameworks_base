@@ -49,7 +49,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.IDeviceIdleController;
 import android.os.IMaintenanceActivityListener;
 import android.os.Looper;
@@ -1238,7 +1237,7 @@ public class DeviceIdleController extends SystemService
         }
     }
 
-    public final class LocalService {
+    public class LocalService {
         public void addPowerSaveTempWhitelistAppDirect(int appId, long duration, boolean sync,
                 String reason) {
             addPowerSaveTempWhitelistAppDirectInternal(0, appId, duration, sync, reason);
