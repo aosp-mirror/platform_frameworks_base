@@ -553,15 +553,21 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             @Override
             public NetworkStats getSummaryForAllUid(
                     NetworkTemplate template, long start, long end, boolean includeTags) {
-                @NetworkStatsAccess.Level int accessLevel = checkAccessLevel(mCallingPackage);
-                final NetworkStats stats =
-                        getUidComplete().getSummary(template, start, end, accessLevel);
-                if (includeTags) {
-                    final NetworkStats tagStats = getUidTagComplete()
-                            .getSummary(template, start, end, accessLevel);
-                    stats.combineAllValues(tagStats);
+                try {
+                    @NetworkStatsAccess.Level int accessLevel = checkAccessLevel(mCallingPackage);
+                    final NetworkStats stats =
+                            getUidComplete().getSummary(template, start, end, accessLevel);
+                    if (includeTags) {
+                        final NetworkStats tagStats = getUidTagComplete()
+                                .getSummary(template, start, end, accessLevel);
+                        stats.combineAllValues(tagStats);
+                    }
+                    return stats;
+                } catch (NullPointerException e) {
+                    // TODO: Track down and fix the cause of this crash and remove this catch block.
+                    Slog.wtf(TAG, "NullPointerException in getSummaryForAllUid", e);
+                    throw e;
                 }
-                return stats;
             }
 
             @Override
