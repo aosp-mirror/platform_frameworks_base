@@ -17,4 +17,6 @@
 
 set -e
 
-aapt package -M AndroidManifest.xml -S res --feature-of ../basic/basic.apk -F feature.apk -f
+PATH_TO_FRAMEWORK_RES=${ANDROID_BUILD_TOP}/prebuilts/sdk/current/android.jar
+
+aapt package -M AndroidManifest.xml -S res -I $PATH_TO_FRAMEWORK_RES --feature-of ../basic/basic.apk -F feature.apk -f
