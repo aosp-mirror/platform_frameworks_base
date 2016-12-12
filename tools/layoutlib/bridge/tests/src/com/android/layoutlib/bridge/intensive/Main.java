@@ -39,6 +39,7 @@ import com.android.layoutlib.bridge.intensive.setup.LayoutPullParser;
 import com.android.resources.Density;
 import com.android.resources.Navigation;
 import com.android.resources.ResourceType;
+import com.android.resources.ScreenOrientation;
 import com.android.tools.layoutlib.java.System_Delegate;
 import com.android.utils.ILogger;
 
@@ -339,6 +340,31 @@ public class Main {
     @Test
     public void testActivity() throws ClassNotFoundException {
         renderAndVerify("activity.xml", "activity.png");
+    }
+
+    @Test
+    public void testTranslucentBars() throws ClassNotFoundException {
+        LayoutLibTestCallback layoutLibCallback =
+                new LayoutLibTestCallback(getLogger(), mDefaultClassLoader);
+        layoutLibCallback.initResources();
+
+        LayoutPullParser parser = createLayoutPullParser("four_corners.xml");
+        SessionParams params = getSessionParams(parser, ConfigGenerator.NEXUS_5,
+                layoutLibCallback, "Theme.Material.Light.NoActionBar.TranslucentDecor", false,
+                RenderingMode.NORMAL, 22);
+        renderAndVerify(params, "four_corners_translucent.png");
+
+        parser = createLayoutPullParser("four_corners.xml");
+        params = getSessionParams(parser, ConfigGenerator.NEXUS_5_LAND,
+                layoutLibCallback, "Theme.Material.Light.NoActionBar.TranslucentDecor", false,
+                RenderingMode.NORMAL, 22);
+        renderAndVerify(params, "four_corners_translucent_land.png");
+
+        parser = createLayoutPullParser("four_corners.xml");
+        params = getSessionParams(parser, ConfigGenerator.NEXUS_5,
+                layoutLibCallback, "Theme.Material.Light.NoActionBar", false,
+                RenderingMode.NORMAL, 22);
+        renderAndVerify(params, "four_corners.png");
     }
 
     private static void gc() {
