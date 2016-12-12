@@ -21,9 +21,7 @@ import android.content.Context;
 import android.content.pm.PackageStats;
 import android.os.Build;
 import android.os.IInstalld;
-import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.ServiceSpecificException;
 import android.util.Slog;
 
 import com.android.server.SystemService;
@@ -113,7 +111,7 @@ public class Installer extends SystemService {
         try {
             mInstalld.createAppData(uuid, packageName, userId, flags, appId, seInfo,
                     targetSdkVersion);
-        } catch (RemoteException | ServiceSpecificException e) {
+        } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
@@ -123,7 +121,7 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.restoreconAppData(uuid, packageName, userId, flags, appId, seInfo);
-        } catch (RemoteException | ServiceSpecificException e) {
+        } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
@@ -133,7 +131,7 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.migrateAppData(uuid, packageName, userId, flags);
-        } catch (RemoteException | ServiceSpecificException e) {
+        } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
@@ -143,7 +141,7 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.clearAppData(uuid, packageName, userId, flags, ceDataInode);
-        } catch (RemoteException | ServiceSpecificException e) {
+        } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
@@ -153,7 +151,7 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.destroyAppData(uuid, packageName, userId, flags, ceDataInode);
-        } catch (RemoteException | ServiceSpecificException e) {
+        } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
@@ -165,7 +163,7 @@ public class Installer extends SystemService {
         try {
             mInstalld.moveCompleteApp(fromUuid, toUuid, packageName, dataAppName, appId, seInfo,
                     targetSdkVersion);
-        } catch (RemoteException | ServiceSpecificException e) {
+        } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
@@ -179,7 +177,7 @@ public class Installer extends SystemService {
             stats.codeSize += res[0];
             stats.dataSize += res[1];
             stats.cacheSize += res[2];
-        } catch (RemoteException | ServiceSpecificException e) {
+        } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
@@ -189,7 +187,7 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return -1;
         try {
             return mInstalld.getAppDataInode(uuid, packageName, userId, flags);
-        } catch (RemoteException | ServiceSpecificException e) {
+        } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
@@ -203,7 +201,7 @@ public class Installer extends SystemService {
         try {
             mInstalld.dexopt(apkPath, uid, pkgName, instructionSet, dexoptNeeded, outputPath,
                     dexFlags, compilerFilter, volumeUuid, sharedLibraries);
-        } catch (RemoteException | ServiceSpecificException e) {
+        } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
@@ -212,7 +210,7 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return false;
         try {
             return mInstalld.mergeProfiles(uid, packageName);
-        } catch (RemoteException | ServiceSpecificException e) {
+        } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
@@ -222,7 +220,7 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return false;
         try {
             return mInstalld.dumpProfiles(uid, packageName, codePaths);
-        } catch (RemoteException | ServiceSpecificException e) {
+        } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
@@ -232,7 +230,7 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.idmap(targetApkPath, overlayApkPath, uid);
-        } catch (RemoteException | ServiceSpecificException e) {
+        } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
@@ -242,7 +240,7 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.rmdex(codePath, instructionSet);
-        } catch (RemoteException | ServiceSpecificException e) {
+        } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
@@ -251,7 +249,7 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.rmPackageDir(packageDir);
-        } catch (RemoteException | ServiceSpecificException e) {
+        } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
@@ -260,7 +258,7 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.clearAppProfiles(packageName);
-        } catch (RemoteException | ServiceSpecificException e) {
+        } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
@@ -269,7 +267,7 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.destroyAppProfiles(packageName);
-        } catch (RemoteException | ServiceSpecificException e) {
+        } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
@@ -279,7 +277,7 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.createUserData(uuid, userId, userSerial, flags);
-        } catch (RemoteException | ServiceSpecificException e) {
+        } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
@@ -288,7 +286,7 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.destroyUserData(uuid, userId, flags);
-        } catch (RemoteException | ServiceSpecificException e) {
+        } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
@@ -298,7 +296,7 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.markBootComplete(instructionSet);
-        } catch (RemoteException | ServiceSpecificException e) {
+        } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
@@ -307,7 +305,7 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.freeCache(uuid, freeStorageSize);
-        } catch (RemoteException | ServiceSpecificException e) {
+        } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
@@ -322,7 +320,7 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.linkNativeLibraryDirectory(uuid, packageName, nativeLibPath32, userId);
-        } catch (RemoteException | ServiceSpecificException e) {
+        } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
@@ -332,7 +330,7 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.createOatDir(oatDir, dexInstructionSet);
-        } catch (RemoteException | ServiceSpecificException e) {
+        } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
@@ -342,7 +340,7 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.linkFile(relativePath, fromBase, toBase);
-        } catch (RemoteException | ServiceSpecificException e) {
+        } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
@@ -352,7 +350,7 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.moveAb(apkPath, instructionSet, outputPath);
-        } catch (RemoteException | ServiceSpecificException e) {
+        } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
@@ -362,7 +360,7 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.deleteOdex(apkPath, instructionSet, outputPath);
-        } catch (RemoteException | ServiceSpecificException e) {
+        } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
@@ -383,7 +381,7 @@ public class Installer extends SystemService {
         }
 
         public static InstallerException from(Exception e) throws InstallerException {
-            throw new InstallerException(e.getMessage());
+            throw new InstallerException(e.toString());
         }
     }
 }
