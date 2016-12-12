@@ -32,6 +32,7 @@ public class ManifestConfigSource implements ConfigSource {
     private final int mApplicationInfoFlags;
     private final int mTargetSdkVersion;
     private final int mConfigResourceId;
+    private final boolean mEphemeralApp;
 
     private ConfigSource mConfigSource;
 
@@ -42,6 +43,7 @@ public class ManifestConfigSource implements ConfigSource {
         mApplicationInfoFlags = info.flags;
         mTargetSdkVersion = info.targetSdkVersion;
         mConfigResourceId = info.networkSecurityConfigRes;
+        mEphemeralApp = info.isEphemeralApp();
     }
 
     @Override
@@ -69,14 +71,18 @@ public class ManifestConfigSource implements ConfigSource {
                             + " debugBuild: " + debugBuild);
                 }
                 source = new XmlConfigSource(mContext, mConfigResourceId, debugBuild,
-                        mTargetSdkVersion);
+                        mTargetSdkVersion, mEphemeralApp);
             } else {
                 if (DBG) {
                     Log.d(LOG_TAG, "No Network Security Config specified, using platform default");
                 }
+                // the legacy FLAG_USES_CLEARTEXT_TRAFFIC is not supported for Ephemeral apps, they
+                // should use the network security config.
                 boolean usesCleartextTraffic =
-                        (mApplicationInfoFlags & ApplicationInfo.FLAG_USES_CLEARTEXT_TRAFFIC) != 0;
-                source = new DefaultConfigSource(usesCleartextTraffic, mTargetSdkVersion);
+                        (mApplicationInfoFlags & ApplicationInfo.FLAG_USES_CLEARTEXT_TRAFFIC) != 0
+                        && !mEphemeralApp;
+                source = new DefaultConfigSource(usesCleartextTraffic, mTargetSdkVersion,
+                        mEphemeralApp);
             }
             mConfigSource = source;
             return mConfigSource;
@@ -87,8 +93,10 @@ public class ManifestConfigSource implements ConfigSource {
 
         private final NetworkSecurityConfig mDefaultConfig;
 
-        public DefaultConfigSource(boolean usesCleartextTraffic, int targetSdkVersion) {
-            mDefaultConfig = NetworkSecurityConfig.getDefaultBuilder(targetSdkVersion)
+        public DefaultConfigSource(boolean usesCleartextTraffic, int targetSdkVersion,
+                boolean ephemeralApp) {
+            mDefaultConfig = NetworkSecurityConfig.getDefaultBuilder(targetSdkVersion,
+                    ephemeralApp)
                     .setCleartextTrafficPermitted(usesCleartextTraffic)
                     .build();
         }
