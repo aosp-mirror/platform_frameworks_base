@@ -24,6 +24,8 @@
 #include <utils/Unicode.h>
 #include <SkClipStack.h>
 
+#include <SkGlyphCache.h>
+
 namespace android {
 namespace uirenderer {
 

@@ -18,6 +18,7 @@
 
 #include "utils/TraceUtils.h"
 #include <SkImageEncoder.h>
+#include <SkImagePriv.h>
 #include <SkOSFile.h>
 #include <SkOverdrawCanvas.h>
 #include <SkOverdrawColorFilter.h>

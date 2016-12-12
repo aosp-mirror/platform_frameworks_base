@@ -25,6 +25,7 @@
 #include <utils/Color.h>
 
 #include <SkGradientShader.h>
+#include <SkImagePriv.h>
 #include <SkShader.h>
 
 namespace android {
