@@ -104,7 +104,7 @@ public class ScoredNetwork implements Parcelable {
      *     metered.
      */
     public ScoredNetwork(NetworkKey networkKey, RssiCurve rssiCurve, boolean meteredHint) {
-        this(networkKey, rssiCurve, false /* meteredHint */, null /* attributes */);
+        this(networkKey, rssiCurve, meteredHint, null /* attributes */);
     }
 
     /**
