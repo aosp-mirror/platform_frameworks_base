@@ -593,6 +593,7 @@ which indicates the current device orientation.</p>
         <code>television<br/>
         <code>appliance</code>
         <code>watch</code>
+        <code>vrheadset</code>
       </td>
       <td>
         <ul class="nolist">
@@ -605,8 +606,9 @@ which indicates the current device orientation.</p>
           <li>{@code appliance}: Device is serving as an appliance, with
           no display</li>
           <li>{@code watch}: Device has a display and is worn on the wrist</li>
+          <li>{@code vrheadset}: Device has a virtual reality capable display and is showing the the apps UI on a virtual display</li>
         </ul>
-        <p><em>Added in API level 8, television added in API 13, watch added in API 20.</em></p>
+        <p><em>Added in API level 8, television added in API 13, watch added in API 20, vrheadset added in API 26.</em></p>
         <p>For information about how your app can respond when the device is inserted into or
         removed from a dock, read <a
         href="{@docRoot}training/monitoring-device-state/docking-monitoring.html">Determining

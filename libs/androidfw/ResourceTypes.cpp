@@ -2994,6 +2994,9 @@ String8 ResTable_config::toString() const {
             case ResTable_config::UI_MODE_TYPE_WATCH:
                 res.append("watch");
                 break;
+            case ResTable_config::UI_MODE_TYPE_VR_HEADSET:
+                res.append("vrheadset");
+                break;
             default:
                 res.appendFormat("uiModeType=%d",
                         dtohs(screenLayout&ResTable_config::MASK_UI_MODE_TYPE));
