@@ -1208,10 +1208,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Lubab rakendusel lugeda installiseansse. See võimaldab näha aktiivse paketi installimise üksikasju."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"installipakettide taotlemine"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Võimaldab rakendusel pakettide installimist taotleda."</string>
-    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
-    <skip />
-    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
-    <skip />
+    <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"küsida luba aku optimeerimise eiramiseks"</string>
+    <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Lubab rakendusel küsida luba rakenduse aku optimeerimise eiramiseks."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Suumi kasutamiseks koputage kaks korda"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Vidinat ei saanud lisada."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Mine"</string>

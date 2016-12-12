@@ -1208,10 +1208,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"애플리케이션의 설치 세션 읽기를 허용하면, 활성 패키지 설치에 대한 세부 정보를 볼 수 있습니다."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"패키지 설치 요청"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"애플리케이션이 패키지 설치를 요청하도록 허용합니다."</string>
-    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
-    <skip />
-    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
-    <skip />
+    <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"배터리 최적화를 무시하도록 요청"</string>
+    <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"앱에서 배터리 최적화를 무시할 수 있는 권한을 요청할 수 있도록 허용합니다."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"확대/축소하려면 두 번 탭하세요."</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"위젯을 추가할 수 없습니다."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"이동"</string>

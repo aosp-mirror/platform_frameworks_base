@@ -1208,10 +1208,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Tillader, at en applikation læser installationssessioner. Dermed kan applikationen se oplysninger om aktive pakkeinstallationer."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"anmod om installation af pakker"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Tillader, at en app anmoder om installation af pakker."</string>
-    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
-    <skip />
-    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
-    <skip />
+    <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"bede om at ignorere batterioptimeringer"</string>
+    <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Gør det muligt for en app at bede om tilladelse til at ignorere batterioptimeringer for den pågældende app."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Tryk to gange for zoomkontrol"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Widget kunne ikke tilføjes."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Gå"</string>

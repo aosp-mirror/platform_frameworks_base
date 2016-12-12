@@ -1208,10 +1208,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"কোনো অ্যাপ্লিকেশানকে সেশনগুলি পড়ার অনুমতি দেয়। এটি সক্রিয় প্যাকেজ ইনস্টলেশনের বিশদ বিবরণ দেখতে দেয়।"</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"প্যাকেজগুলি ইনস্টল করার অনুরোধ"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"একটি অ্যাপ্লিকেশানকে প্যাকেজগুলির ইনস্টল করার অনুরোধ জানাতে অনুমতি দেয়৷"</string>
-    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
-    <skip />
-    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
-    <skip />
+    <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"ব্যাটারি অপ্টিমাইজেশন উপেক্ষা করার জন্য অনুমতি চাওয়া"</string>
+    <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"কোনো অ্যাপের জন্য ব্যাটারি অপ্টিমাইজেশন উপেক্ষা করতে সেটিকে অনুমতির চাওয়ার মঞ্জুরি দেয়৷"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"জুম নিয়ন্ত্রণের জন্য দুবার আলতো চাপুন"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"উইজেট যোগ করা যায়নি৷"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"যান"</string>

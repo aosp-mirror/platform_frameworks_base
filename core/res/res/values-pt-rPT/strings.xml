@@ -1208,10 +1208,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Permite que uma aplicação leia sessões de instalação. Isto permite que veja detalhes acerca de instalações de pacotes ativas."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"solicitar pacotes de instalação"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Permite que uma aplicação solicite a instalação de pacotes."</string>
-    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
-    <skip />
-    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
-    <skip />
+    <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"pedir para ignorar as otimizações da bateria"</string>
+    <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Permite que uma aplicação solicite autorização para ignorar as otimizações da bateria para a mesma."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Tocar duas vezes para controlar o zoom"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Não foi possível adicionar widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Ir"</string>
