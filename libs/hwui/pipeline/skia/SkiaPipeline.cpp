@@ -221,6 +221,14 @@ void SkiaPipeline::renderFrame(const LayerUpdateQueue& layers, const SkRect& cli
     canvas->flush();
 }
 
+namespace {
+static Rect nodeBounds(RenderNode& node) {
+    auto& props = node.properties();
+    return Rect(props.getLeft(), props.getTop(),
+            props.getRight(), props.getBottom());
+}
+}
+
 void SkiaPipeline::renderFrameImpl(const LayerUpdateQueue& layers, const SkRect& clip,
         const std::vector<sp<RenderNode>>& nodes, bool opaque, const Rect &contentDrawBounds,
         SkCanvas* canvas) {
@@ -231,57 +239,85 @@ void SkiaPipeline::renderFrameImpl(const LayerUpdateQueue& layers, const SkRect&
         canvas->clear(SK_ColorTRANSPARENT);
     }
 
-    // If there are multiple render nodes, they are laid out as follows:
-    // #0 - backdrop (content + caption)
-    // #1 - content (positioned at (0,0) and clipped to - its bounds mContentDrawBounds)
-    // #2 - additional overlay nodes
-    // Usually the backdrop cannot be seen since it will be entirely covered by the content. While
-    // resizing however it might become partially visible. The following render loop will crop the
-    // backdrop against the content and draw the remaining part of it. It will then draw the content
-    // cropped to the backdrop (since that indicates a shrinking of the window).
-    //
-    // Additional nodes will be drawn on top with no particular clipping semantics.
+    if (1 == nodes.size()) {
+        if (!nodes[0]->nothingToDraw()) {
+            SkAutoCanvasRestore acr(canvas, true);
+            RenderNodeDrawable root(nodes[0].get(), canvas);
+            root.draw(canvas);
+        }
+    } else if (0 == nodes.size()) {
+        //nothing to draw
+    } else {
+        // It there are multiple render nodes, they are laid out as follows:
+        // #0 - backdrop (content + caption)
+        // #1 - content (local bounds are at (0,0), will be translated and clipped to backdrop)
+        // #2 - additional overlay nodes
+        // Usually the backdrop cannot be seen since it will be entirely covered by the content. While
+        // resizing however it might become partially visible. The following render loop will crop the
+        // backdrop against the content and draw the remaining part of it. It will then draw the content
+        // cropped to the backdrop (since that indicates a shrinking of the window).
+        //
+        // Additional nodes will be drawn on top with no particular clipping semantics.
 
-    // The bounds of the backdrop against which the content should be clipped.
-    Rect backdropBounds = contentDrawBounds;
-    // Usually the contents bounds should be mContentDrawBounds - however - we will
-    // move it towards the fixed edge to give it a more stable appearance (for the moment).
-    // If there is no content bounds we ignore the layering as stated above and start with 2.
-    int layer = (contentDrawBounds.isEmpty() || nodes.size() == 1) ? 2 : 0;
+        // Usually the contents bounds should be mContentDrawBounds - however - we will
+        // move it towards the fixed edge to give it a more stable appearance (for the moment).
+        // If there is no content bounds we ignore the layering as stated above and start with 2.
 
-    for (const sp<RenderNode>& node : nodes) {
-        if (node->nothingToDraw()) continue;
+        // Backdrop bounds in render target space
+        const Rect backdrop = nodeBounds(*nodes[0]);
 
-        SkASSERT(node->getDisplayList()->isSkiaDL());
+        // Bounds that content will fill in render target space (note content node bounds may be bigger)
+        Rect content(contentDrawBounds.getWidth(), contentDrawBounds.getHeight());
+        content.translate(backdrop.left, backdrop.top);
+        if (!content.contains(backdrop) && !nodes[0]->nothingToDraw()) {
+            // Content doesn't entirely overlap backdrop, so fill around content (right/bottom)
 
-        int count = canvas->save();
-
-        if (layer == 0) {
-            const RenderProperties& properties = node->properties();
-            Rect targetBounds(properties.getLeft(), properties.getTop(),
-                              properties.getRight(), properties.getBottom());
-            // Move the content bounds towards the fixed corner of the backdrop.
-            const int x = targetBounds.left;
-            const int y = targetBounds.top;
-            // Remember the intersection of the target bounds and the intersection bounds against
-            // which we have to crop the content.
-            backdropBounds.set(x, y, x + backdropBounds.getWidth(), y + backdropBounds.getHeight());
-            backdropBounds.doIntersect(targetBounds);
-        } else if (layer == 1) {
-            // We shift and clip the content to match its final location in the window.
-            const SkRect clip = SkRect::MakeXYWH(contentDrawBounds.left, contentDrawBounds.top,
-                                                 backdropBounds.getWidth(), backdropBounds.getHeight());
-            const float dx = backdropBounds.left - contentDrawBounds.left;
-            const float dy = backdropBounds.top - contentDrawBounds.top;
-            canvas->translate(dx, dy);
-            // It gets cropped against the bounds of the backdrop to stay inside.
-            canvas->clipRect(clip);
+            // Note: in the future, if content doesn't snap to backdrop's left/top, this may need to
+            // also fill left/top. Currently, both 2up and freeform position content at the top/left of
+            // the backdrop, so this isn't necessary.
+            RenderNodeDrawable backdropNode(nodes[0].get(), canvas);
+            if (content.right < backdrop.right) {
+                // draw backdrop to right side of content
+                SkAutoCanvasRestore acr(canvas, true);
+                canvas->clipRect(SkRect::MakeLTRB(content.right, backdrop.top,
+                        backdrop.right, backdrop.bottom));
+                backdropNode.draw(canvas);
+            }
+            if (content.bottom < backdrop.bottom) {
+                // draw backdrop to bottom of content
+                // Note: bottom fill uses content left/right, to avoid overdrawing left/right fill
+                SkAutoCanvasRestore acr(canvas, true);
+                canvas->clipRect(SkRect::MakeLTRB(content.left, content.bottom,
+                        content.right, backdrop.bottom));
+                backdropNode.draw(canvas);
+            }
         }
 
-        RenderNodeDrawable root(node.get(), canvas);
-        root.draw(canvas);
-        canvas->restoreToCount(count);
-        layer++;
+        RenderNodeDrawable contentNode(nodes[1].get(), canvas);
+        if (!backdrop.isEmpty()) {
+            // content node translation to catch up with backdrop
+            float dx = backdrop.left - contentDrawBounds.left;
+            float dy = backdrop.top - contentDrawBounds.top;
+
+            SkAutoCanvasRestore acr(canvas, true);
+            canvas->translate(dx, dy);
+            const SkRect contentLocalClip = SkRect::MakeXYWH(contentDrawBounds.left,
+                    contentDrawBounds.top, backdrop.getWidth(), backdrop.getHeight());
+            canvas->clipRect(contentLocalClip);
+            contentNode.draw(canvas);
+        } else {
+            SkAutoCanvasRestore acr(canvas, true);
+            contentNode.draw(canvas);
+        }
+
+        // remaining overlay nodes, simply defer
+        for (size_t index = 2; index < nodes.size(); index++) {
+            if (!nodes[index]->nothingToDraw()) {
+                SkAutoCanvasRestore acr(canvas, true);
+                RenderNodeDrawable overlayNode(nodes[index].get(), canvas);
+                overlayNode.draw(canvas);
+            }
+        }
     }
 }
 
