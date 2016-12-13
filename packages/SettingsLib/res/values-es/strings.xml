@@ -31,7 +31,7 @@
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"No se establecerá conexión automáticamente"</string>
     <string name="wifi_no_internet" msgid="3880396223819116454">"No se ha detectado acceso a Internet"</string>
     <string name="saved_network" msgid="4352716707126620811">"Guardadas por <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="connected_via_wfa" msgid="3805736726317410714">"Conectado a través de asistente Wi‑Fi"</string>
+    <string name="connected_via_wfa" msgid="3805736726317410714">"Conectado a través del asistente de Wi‑Fi"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Conectado a través de %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Disponible a través de %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Conexión sin Internet"</string>
