@@ -22,13 +22,15 @@
 #include <utils/KeyedVector.h>
 
 #include <SkScalar.h>
-#include <SkGlyphCache.h>
 #include <SkPaint.h>
 #include <SkPathMeasure.h>
+#include <SkTypeface.h>
 
 #include "FontUtil.h"
 #include "../Rect.h"
 #include "../Matrix.h"
+
+class SkGlyphCache;
 
 namespace android {
 namespace uirenderer {

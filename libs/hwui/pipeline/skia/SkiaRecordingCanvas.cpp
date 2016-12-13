@@ -21,6 +21,7 @@
 #include "LayerDrawable.h"
 #include "NinePatchUtils.h"
 #include "pipeline/skia/AnimatedDrawables.h"
+#include <SkImagePriv.h>
 
 namespace android {
 namespace uirenderer {

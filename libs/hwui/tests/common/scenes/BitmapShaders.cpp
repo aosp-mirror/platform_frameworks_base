@@ -17,6 +17,7 @@
 #include "TestSceneBase.h"
 #include "utils/Color.h"
 #include "tests/common/BitmapAllocationTestUtils.h"
+#include <SkImagePriv.h>
 
 class BitmapShaders;
 
