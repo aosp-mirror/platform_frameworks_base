@@ -165,7 +165,7 @@ TEST_F(SplitTest, TypeEntrySpecFlagsAreUpdated) {
                                     &specFlags, NULL);
   EXPECT_GE(block, 0);
 
-  EXPECT_EQ(static_cast<uint32_t>(0), specFlags);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), specFlags);
 
   ASSERT_EQ(NO_ERROR, table.add(basic_de_fr_contents_.data(),
                                 basic_de_fr_contents_.size()));
@@ -173,9 +173,10 @@ TEST_F(SplitTest, TypeEntrySpecFlagsAreUpdated) {
   uint32_t frSpecFlags = 0;
   block = table.getResource(R::string::test1, &val, MAY_NOT_BE_BAG, 0,
                             &frSpecFlags, NULL);
-  EXPECT_GE(block, 0);
+  ASSERT_GE(block, 0);
 
-  EXPECT_EQ(ResTable_config::CONFIG_LOCALE, frSpecFlags);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_config::CONFIG_LOCALE | ResTable_typeSpec::SPEC_PUBLIC),
+            frSpecFlags);
 }
 
 TEST_F(SplitTest, SelectBestDensity) {
@@ -222,7 +223,7 @@ TEST_F(SplitTest, TestNewResourceIsAccessible) {
             table.add(feature_contents_.data(), feature_contents_.size()));
 
   block = table.getResource(R::string::test3, &val, MAY_NOT_BE_BAG);
-  EXPECT_GE(block, 0);
+  ASSERT_GE(block, 0);
 
   EXPECT_EQ(Res_value::TYPE_STRING, val.dataType);
 }
