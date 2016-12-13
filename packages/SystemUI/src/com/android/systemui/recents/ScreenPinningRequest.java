@@ -27,6 +27,7 @@ import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Binder;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
@@ -106,6 +107,7 @@ public class ScreenPinningRequest implements View.OnClickListener {
                         | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
                 ,
                 PixelFormat.TRANSLUCENT);
+        lp.token = new Binder();
         lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
         lp.setTitle("ScreenPinningConfirmation");
         lp.gravity = Gravity.FILL;
