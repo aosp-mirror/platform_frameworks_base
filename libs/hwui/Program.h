@@ -54,6 +54,7 @@ namespace uirenderer {
 #define PROGRAM_KEY_COLOR_MATRIX        0x20
 #define PROGRAM_KEY_COLOR_BLEND         0x40
 #define PROGRAM_KEY_BITMAP_NPOT         0x80
+#define PROGRAM_KEY_BITMAP_EXTERNAL    0x100
 
 #define PROGRAM_KEY_SWAP_SRC_DST      0x2000
 
@@ -133,6 +134,7 @@ struct ProgramDescription {
 
     // Shaders
     bool hasBitmap;
+    bool isShaderBitmapExternal;
     bool useShaderBasedWrap;
 
     bool hasVertexAlpha;
@@ -180,6 +182,7 @@ struct ProgramDescription {
         modulate = false;
 
         hasBitmap = false;
+        isShaderBitmapExternal = false;
         useShaderBasedWrap = false;
 
         hasGradient = false;
@@ -238,6 +241,9 @@ struct ProgramDescription {
                 key |= PROGRAM_KEY_BITMAP_NPOT;
                 key |= getEnumForWrap(bitmapWrapS) << PROGRAM_BITMAP_WRAPS_SHIFT;
                 key |= getEnumForWrap(bitmapWrapT) << PROGRAM_BITMAP_WRAPT_SHIFT;
+            }
+            if (isShaderBitmapExternal) {
+                key |= PROGRAM_KEY_BITMAP_EXTERNAL;
             }
         }
         if (hasGradient) key |= PROGRAM_KEY_GRADIENT;
