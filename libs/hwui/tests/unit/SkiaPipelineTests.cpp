@@ -206,7 +206,6 @@ public:
         , mCanvas(canvas) {
     }
     SkCanvas* onNewCanvas() override {
-        mCanvas->ref();
         return mCanvas;
     }
     sk_sp<SkSurface> onNewSurface(const SkImageInfo&) override {
@@ -216,7 +215,7 @@ public:
         return sk_sp<SkImage>();
     }
     void onCopyOnWrite(ContentChangeMode) override {}
-    T* mCanvas;
+    T* mCanvas;  // bare pointer, not owned/ref'd
 };
 }
 
@@ -281,10 +280,10 @@ RENDERTHREAD_TEST(SkiaPipeline, deferRenderNodeScene) {
     LayerUpdateQueue layerUpdateQueue;
     SkRect dirty = SkRect::MakeWH(800, 600);
     auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
-    sk_sp<DeferTestCanvas> canvas(new DeferTestCanvas());
-    sk_sp<SkSurface> surface(new DeferLayer<DeferTestCanvas>(canvas.get()));
+    DeferTestCanvas canvas;
+    sk_sp<SkSurface> surface(new DeferLayer<DeferTestCanvas>(&canvas));
     pipeline->renderFrame(layerUpdateQueue, dirty, nodes, true, contentDrawBounds, surface);
-    EXPECT_EQ(4, canvas->mDrawCounter);
+    EXPECT_EQ(4, canvas.mDrawCounter);
 }
 
 RENDERTHREAD_TEST(SkiaPipeline, clipped) {
@@ -312,11 +311,11 @@ RENDERTHREAD_TEST(SkiaPipeline, clipped) {
     LayerUpdateQueue layerUpdateQueue;
     SkRect dirty = SkRect::MakeLTRB(10, 20, 30, 40);
     auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
-    sk_sp<ClippedTestCanvas> canvas(new ClippedTestCanvas());
-    sk_sp<SkSurface> surface(new DeferLayer<ClippedTestCanvas>(canvas.get()));
+    ClippedTestCanvas canvas;
+    sk_sp<SkSurface> surface(new DeferLayer<ClippedTestCanvas>(&canvas));
     pipeline->renderFrame(layerUpdateQueue, dirty, nodes, true,
             SkRect::MakeWH(CANVAS_WIDTH, CANVAS_HEIGHT), surface);
-    EXPECT_EQ(1, canvas->mDrawCounter);
+    EXPECT_EQ(1, canvas.mDrawCounter);
 }
 
 RENDERTHREAD_TEST(SkiaPipeline, clip_replace) {
@@ -347,9 +346,9 @@ RENDERTHREAD_TEST(SkiaPipeline, clip_replace) {
     LayerUpdateQueue layerUpdateQueue;
     SkRect dirty = SkRect::MakeLTRB(10, 10, 40, 40);
     auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
-    sk_sp<ClipReplaceTestCanvas> canvas(new ClipReplaceTestCanvas());
-    sk_sp<SkSurface> surface(new DeferLayer<ClipReplaceTestCanvas>(canvas.get()));
+    ClipReplaceTestCanvas canvas;
+    sk_sp<SkSurface> surface(new DeferLayer<ClipReplaceTestCanvas>(&canvas));
     pipeline->renderFrame(layerUpdateQueue, dirty, nodes, true,
             SkRect::MakeWH(CANVAS_WIDTH, CANVAS_HEIGHT), surface);
-    EXPECT_EQ(1, canvas->mDrawCounter);
+    EXPECT_EQ(1, canvas.mDrawCounter);
 }

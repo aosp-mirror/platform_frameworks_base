@@ -121,13 +121,13 @@ public:
             const SkPaint*) {
         ADD_FAILURE() << "onDrawBitmapLattice not expected in this test";
     }
-    void onClipRRect(const SkRRect& rrect, ClipOp, ClipEdgeStyle) {
+    void onClipRRect(const SkRRect& rrect, SkClipOp, ClipEdgeStyle) {
         ADD_FAILURE() << "onClipRRect not expected in this test";
     }
-    void onClipPath(const SkPath& path, ClipOp, ClipEdgeStyle) {
+    void onClipPath(const SkPath& path, SkClipOp, ClipEdgeStyle) {
         ADD_FAILURE() << "onClipPath not expected in this test";
     }
-    void onClipRegion(const SkRegion& deviceRgn, ClipOp) {
+    void onClipRegion(const SkRegion& deviceRgn, SkClipOp) {
         ADD_FAILURE() << "onClipRegion not expected in this test";
     }
     void onDiscard() {
