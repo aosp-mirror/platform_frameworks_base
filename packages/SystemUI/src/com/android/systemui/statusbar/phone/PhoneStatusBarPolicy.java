@@ -137,7 +137,7 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
 
         public void updateSettings() {
             ContentResolver resolver = mContext.getContentResolver();
-            boolean mShowBluetoothBattery = Settings.System.getIntForUser(resolver,
+            mShowBluetoothBattery = Settings.System.getIntForUser(resolver,
                     Settings.System.BLUETOOTH_SHOW_BATTERY, 0, UserHandle.USER_CURRENT) == 1;
         }
     }
