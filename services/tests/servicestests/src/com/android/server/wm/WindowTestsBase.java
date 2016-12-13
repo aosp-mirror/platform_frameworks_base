@@ -82,11 +82,10 @@ public class WindowTestsBase {
         sImeDialogWindow =
                 createWindow(null, TYPE_INPUT_METHOD_DIALOG, sDisplayContent, "sImeDialogWindow");
         sStatusBarWindow = createWindow(null, TYPE_STATUS_BAR, sDisplayContent, "sStatusBarWindow");
-        final WindowToken statusBarToken = sStatusBarWindow.mToken;
         sNavBarWindow =
-                createWindow(null, TYPE_NAVIGATION_BAR, statusBarToken, "sNavBarWindow");
+                createWindow(null, TYPE_NAVIGATION_BAR, sDisplayContent, "sNavBarWindow");
         sDockedDividerWindow =
-                createWindow(null, TYPE_DOCK_DIVIDER, statusBarToken, "sDockedDividerWindow");
+                createWindow(null, TYPE_DOCK_DIVIDER, sDisplayContent, "sDockedDividerWindow");
         sAppWindow = createWindow(null, TYPE_BASE_APPLICATION, sDisplayContent, "sAppWindow");
         sChildAppWindowAbove = createWindow(sAppWindow,
                 TYPE_APPLICATION_ATTACHED_DIALOG, sAppWindow.mToken, "sChildAppWindowAbove");
