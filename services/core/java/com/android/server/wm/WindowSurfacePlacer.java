@@ -5,8 +5,6 @@ import static android.app.ActivityManagerInternal.APP_TRANSITION_SAVED_SURFACE;
 import static android.app.ActivityManagerInternal.APP_TRANSITION_STARTING_WINDOW;
 import static android.app.ActivityManagerInternal.APP_TRANSITION_TIMEOUT;
 import static android.app.ActivityManagerInternal.APP_TRANSITION_WINDOWS_DRAWN;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
-import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_CLOSE;
@@ -27,7 +25,6 @@ import static com.android.server.wm.AppTransition.TRANSIT_WALLPAPER_INTRA_OPEN;
 import static com.android.server.wm.AppTransition.TRANSIT_WALLPAPER_OPEN;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -35,7 +32,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.DO_TRAVERSAL;
 import static com.android.server.wm.WindowManagerService.H.NOTIFY_APP_TRANSITION_STARTING;
 import static com.android.server.wm.WindowManagerService.H.REPORT_WINDOWS_CHANGE;
-import static com.android.server.wm.WindowManagerService.H.UPDATE_DOCKED_STACK_DIVIDER;
 import static com.android.server.wm.WindowManagerService.LAYOUT_REPEAT_THRESHOLD;
 import static com.android.server.wm.WindowManagerService.MAX_ANIMATION_DURATION;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_PLACING_SURFACES;
@@ -53,7 +49,6 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.SurfaceControl;
-import android.view.View;
 import android.view.WindowManager.LayoutParams;
 import android.view.animation.Animation;
 
@@ -293,7 +288,7 @@ class WindowSurfacePlacer {
                 }
             }
 
-            voiceInteraction |= wtoken.voiceInteraction;
+            voiceInteraction |= wtoken.mVoiceInteraction;
 
             if (wtoken.fillsParent()) {
                 final WindowState ws = wtoken.findMainWindow();

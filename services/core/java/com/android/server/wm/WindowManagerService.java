@@ -32,7 +32,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
@@ -238,6 +237,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_VERBOSE_TRANSA
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_KEEP_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static java.lang.Integer.MAX_VALUE;
 
 /** {@hide} */
 public class WindowManagerService extends IWindowManager.Stub
@@ -1480,7 +1480,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // Try using the target SDK of the root window
         if (attachedWindow != null) {
             return attachedWindow.mAppToken != null
-                    && attachedWindow.mAppToken.targetSdk > Build.VERSION_CODES.N_MR1;
+                    && attachedWindow.mAppToken.mTargetSdk > Build.VERSION_CODES.N_MR1;
         } else {
             // Otherwise, look at the package
             try {
@@ -2439,28 +2439,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private Task createTaskLocked(int taskId, int stackId, int userId, AppWindowToken atoken,
-            Rect bounds, Configuration overrideConfig, boolean isOnTopLauncher) {
-        if (DEBUG_STACK) Slog.i(TAG_WM, "createTaskLocked: taskId=" + taskId + " stackId=" + stackId
-                + " atoken=" + atoken + " bounds=" + bounds);
-        final TaskStack stack = mStackIdToStack.get(stackId);
-        if (stack == null) {
-            throw new IllegalArgumentException("createTaskLocked: invalid stackId=" + stackId);
-        }
-        EventLog.writeEvent(WM_TASK_CREATED, taskId, stackId);
-        Task task = new Task(taskId, stack, userId, this, bounds, overrideConfig, isOnTopLauncher);
-        mTaskIdToTask.put(taskId, task);
-        stack.addTask(task, !atoken.mLaunchTaskBehind /* toTop */, atoken.showForAllUsers);
-        return task;
-    }
-
     @Override
-    public void addAppToken(int addPos, IApplicationToken token, int taskId, int stackId,
-            int requestedOrientation, boolean fullscreen, boolean showForAllUsers, int userId,
+    public void addAppToken(int addPos, IApplicationToken token, int taskId,
+            int requestedOrientation, boolean fullscreen, boolean showForAllUsers,
             int configChanges, boolean voiceInteraction, boolean launchTaskBehind,
-            Rect taskBounds, Configuration overrideConfig, int taskResizeMode,
-            boolean alwaysFocusable, boolean homeTask, int targetSdkVersion,
-            int rotationAnimationHint, boolean isOnTopLauncher) {
+            boolean alwaysFocusable, int targetSdkVersion, int rotationAnimationHint) {
         if (!checkCallingPermission(MANAGE_APP_TOKENS, "addAppToken()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
@@ -2486,42 +2469,24 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
 
-            final TaskStack stack = mStackIdToStack.get(stackId);
-            if (stack == null) {
-                throw new IllegalArgumentException("addAppToken: invalid stackId=" + stackId);
-            }
-
-            atoken = new AppWindowToken(this, token, voiceInteraction, stack.getDisplayContent());
-            atoken.inputDispatchingTimeoutNanos = inputDispatchingTimeoutNanos;
-            atoken.setFillsParent(fullscreen);
-            atoken.showForAllUsers = showForAllUsers;
-            atoken.targetSdk = targetSdkVersion;
-            atoken.setOrientation(requestedOrientation);
-            atoken.layoutConfigChanges = (configChanges &
-                    (ActivityInfo.CONFIG_SCREEN_SIZE | ActivityInfo.CONFIG_ORIENTATION)) != 0;
-            atoken.mLaunchTaskBehind = launchTaskBehind;
-            atoken.mAlwaysFocusable = alwaysFocusable;
-            if (DEBUG_TOKEN_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "addAppToken: " + atoken
-                    + " to stack=" + stackId + " task=" + taskId + " at " + addPos);
-            atoken.mRotationAnimationHint = rotationAnimationHint;
-
             Task task = mTaskIdToTask.get(taskId);
             if (task == null) {
-                task = createTaskLocked(taskId, stackId, userId, atoken, taskBounds, overrideConfig,
-                        isOnTopLauncher);
+                throw new IllegalArgumentException("addAppToken: invalid taskId=" + taskId);
             }
-            task.addAppToken(addPos, atoken, taskResizeMode, homeTask);
 
-            // Application tokens start out hidden.
-            atoken.hidden = true;
-            atoken.hiddenRequested = true;
+            atoken = new AppWindowToken(this, token, voiceInteraction, task.getDisplayContent(),
+                    inputDispatchingTimeoutNanos, fullscreen, showForAllUsers, targetSdkVersion,
+                    requestedOrientation, rotationAnimationHint, configChanges, launchTaskBehind,
+                    alwaysFocusable);
+            if (DEBUG_TOKEN_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "addAppToken: " + atoken
+                    + " task=" + taskId + " at " + addPos);
+
+            task.addChild(atoken, addPos);
         }
     }
 
     @Override
-    public void setAppTask(IBinder token, int taskId, int stackId, Rect taskBounds,
-            Configuration overrideConfig, int taskResizeMode, boolean homeTask,
-            boolean isOnTopLauncher) {
+    public void addAppToTask(IBinder token, int taskId) {
         if (!checkCallingPermission(MANAGE_APP_TOKENS, "setAppTask()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
@@ -2533,12 +2498,40 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
 
-            Task newTask = mTaskIdToTask.get(taskId);
-            if (newTask == null) {
-                newTask = createTaskLocked(taskId, stackId, atoken.mTask.mUserId, atoken,
-                        taskBounds, overrideConfig, isOnTopLauncher);
+            Task task = mTaskIdToTask.get(taskId);
+            if (task == null) {
+                throw new IllegalArgumentException("setAppTask: invalid taskId=" + taskId);
             }
-            newTask.addAppToken(Integer.MAX_VALUE /* at top */, atoken, taskResizeMode, homeTask);
+            task.addChild(atoken, MAX_VALUE /* at top */);
+        }
+    }
+
+    public void addTask(int taskId, int stackId, int userId, Rect bounds,
+            Configuration overrideConfig, int resizeMode, boolean homeTask, boolean isOnTopLauncher,
+            boolean toTop, boolean showForAllUsers) {
+        if (!checkCallingPermission(MANAGE_APP_TOKENS, "addTask()")) {
+            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
+        }
+
+        synchronized(mWindowMap) {
+            Task task = mTaskIdToTask.get(taskId);
+            if (task != null) {
+                throw new IllegalArgumentException(
+                        "addTask: Attempt to add already existing task=" + task);
+            }
+
+            if (DEBUG_STACK) Slog.i(TAG_WM, "createTaskLocked: taskId=" + taskId
+                    + " stackId=" + stackId + " bounds=" + bounds);
+
+            final TaskStack stack = mStackIdToStack.get(stackId);
+            if (stack == null) {
+                throw new IllegalArgumentException("addTask: invalid stackId=" + stackId);
+            }
+            EventLog.writeEvent(WM_TASK_CREATED, taskId, stackId);
+            task = new Task(taskId, stack, userId, this, bounds, overrideConfig, isOnTopLauncher,
+                    resizeMode, homeTask);
+            mTaskIdToTask.put(taskId, task);
+            stack.addTask(task, toTop, showForAllUsers);
         }
     }
 
@@ -3203,7 +3196,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             final long origId = Binder.clearCallingIdentity();
-            wtoken.setVisibility(null, visible, TRANSIT_UNSET, true, wtoken.voiceInteraction);
+            wtoken.setVisibility(null, visible, TRANSIT_UNSET, true, wtoken.mVoiceInteraction);
             wtoken.updateReportedVisibilityLocked();
             Binder.restoreCallingIdentity(origId);
         }

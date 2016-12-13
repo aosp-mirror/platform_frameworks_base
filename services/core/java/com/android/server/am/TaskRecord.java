@@ -281,7 +281,7 @@ final class TaskRecord extends ConfigurationContainer {
     private Configuration mTmpConfig = new Configuration();
 
     TaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info, Intent _intent,
-            IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor) {
+            IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor, int type) {
         mService = service;
         mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX +
                 TaskPersister.IMAGE_EXTENSION;
@@ -296,6 +296,7 @@ final class TaskRecord extends ConfigurationContainer {
         mActivities = new ArrayList<>();
         mCallingUid = info.applicationInfo.uid;
         mCallingPackage = info.packageName;
+        taskType = type;
         setIntent(_intent, info);
         setMinDimensions(info);
         touchActiveTime();
@@ -321,7 +322,6 @@ final class TaskRecord extends ConfigurationContainer {
         setIntent(_intent, info);
         setMinDimensions(info);
 
-        taskType = ActivityRecord.APPLICATION_ACTIVITY_TYPE;
         isPersistable = true;
         // Clamp to [1, max].
         maxRecents = Math.min(Math.max(info.maxRecents, 1),

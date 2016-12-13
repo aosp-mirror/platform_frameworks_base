@@ -2857,7 +2857,7 @@ final class ActivityStack extends ConfigurationContainer {
                 } else {
                     targetTask = createTaskRecord(
                             mStackSupervisor.getNextTaskIdForUserLocked(target.userId),
-                            target.info, null, null, null, false);
+                            target.info, null, null, null, false, target.mActivityType);
                     targetTask.affinityIntent = target.intent;
                     if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Start pushing activity " + target
                             + " out to new task " + target.task);
@@ -4897,9 +4897,9 @@ final class ActivityStack extends ConfigurationContainer {
 
     TaskRecord createTaskRecord(int taskId, ActivityInfo info, Intent intent,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
-            boolean toTop) {
+            boolean toTop, int type) {
         TaskRecord task = new TaskRecord(mService, taskId, info, intent, voiceSession,
-                voiceInteractor);
+                voiceInteractor, type);
         // add the task to stack first, mTaskPositioner might need the stack association
         addTask(task, toTop, "createTaskRecord");
         final boolean isLockscreenShown =
@@ -4908,6 +4908,11 @@ final class ActivityStack extends ConfigurationContainer {
                 && !isLockscreenShown) {
             task.updateOverrideConfiguration(mBounds);
         }
+        final Rect bounds = task.updateOverrideConfigurationFromLaunchBounds();
+        final boolean showForAllUsers = (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0;
+        mWindowManager.addTask(taskId, mStackId, task.userId, bounds,
+                task.getOverrideConfiguration(), task.mResizeMode, task.isHomeTask(),
+                task.isOnTopLauncher(), toTop, showForAllUsers);
         return task;
     }
 
@@ -4974,15 +4979,13 @@ final class ActivityStack extends ConfigurationContainer {
     }
 
     void addConfigOverride(ActivityRecord r, TaskRecord task) {
-        final Rect bounds = task.updateOverrideConfigurationFromLaunchBounds();
+        task.updateOverrideConfigurationFromLaunchBounds();
         // TODO: VI deal with activity
         mWindowManager.addAppToken(task.mActivities.indexOf(r), r.appToken,
-                r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
-                (r.info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0, r.userId, r.info.configChanges,
-                task.voiceSession != null, r.mLaunchTaskBehind, bounds,
-                task.getOverrideConfiguration(), task.mResizeMode, r.isAlwaysFocusable(),
-                task.isHomeTask(), r.appInfo.targetSdkVersion, r.mRotationAnimationHint,
-                task.isOnTopLauncher());
+                r.task.taskId, r.info.screenOrientation, r.fullscreen,
+                (r.info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0, r.info.configChanges,
+                task.voiceSession != null, r.mLaunchTaskBehind, r.isAlwaysFocusable(),
+                r.appInfo.targetSdkVersion, r.mRotationAnimationHint);
         r.onOverrideConfigurationSent();
     }
 
@@ -5021,7 +5024,7 @@ final class ActivityStack extends ConfigurationContainer {
 
         final TaskRecord task = createTaskRecord(
                 mStackSupervisor.getNextTaskIdForUserLocked(r.userId),
-                r.info, r.intent, null, null, true);
+                r.info, r.intent, null, null, true, r.mActivityType);
         r.setTask(task, null);
         task.addActivityToTop(r);
         setAppTask(r, task);
@@ -5033,10 +5036,8 @@ final class ActivityStack extends ConfigurationContainer {
     }
 
     private void setAppTask(ActivityRecord r, TaskRecord task) {
-        final Rect bounds = task.updateOverrideConfigurationFromLaunchBounds();
-        mWindowManager.setAppTask(r.appToken, task.taskId, mStackId, bounds,
-                task.getOverrideConfiguration(), task.mResizeMode, task.isHomeTask(),
-                task.isOnTopLauncher());
+        task.updateOverrideConfigurationFromLaunchBounds();
+        mWindowManager.addAppToTask(r.appToken, task.taskId);
         r.onOverrideConfigurationSent();
     }
 

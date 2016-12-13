@@ -106,10 +106,10 @@ public class WindowTestsBase {
         final int stackId = sNextStackId++;
         dc.addStackToDisplay(stackId, true);
         final TaskStack stack = sWm.mStackIdToStack.get(stackId);
-        final Task task = new Task(sNextTaskId++, stack, 0, sWm, null, EMPTY, false);
+        final Task task = new Task(sNextTaskId++, stack, 0, sWm, null, EMPTY, false, 0, false);
         stack.addTask(task, true);
         final TestAppWindowToken token = new TestAppWindowToken(dc);
-        task.addAppToken(0, token, 0, false);
+        task.addChild(token, 0);
         return token;
     }
 

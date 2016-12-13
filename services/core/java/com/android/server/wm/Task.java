@@ -88,12 +88,15 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     private boolean mIsOnTopLauncher;
 
     Task(int taskId, TaskStack stack, int userId, WindowManagerService service, Rect bounds,
-            Configuration overrideConfig, boolean isOnTopLauncher) {
+            Configuration overrideConfig, boolean isOnTopLauncher, int resizeMode,
+            boolean homeTask) {
         mTaskId = taskId;
         mStack = stack;
         mUserId = userId;
         mService = service;
         mIsOnTopLauncher = isOnTopLauncher;
+        mResizeMode = resizeMode;
+        mHomeTask = homeTask;
         setBounds(bounds, overrideConfig);
     }
 
@@ -101,7 +104,8 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         return mStack.getDisplayContent();
     }
 
-    void addAppToken(int addPos, AppWindowToken wtoken, int resizeMode, boolean homeTask) {
+    @Override
+    void addChild(AppWindowToken wtoken, int addPos) {
         final int lastPos = mChildren.size();
         if (addPos >= lastPos) {
             addPos = lastPos;
@@ -118,11 +122,9 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         if (parent != null) {
             parent.removeChild(wtoken);
         }
-        addChild(wtoken, addPos);
+        super.addChild(wtoken, addPos);
         wtoken.mTask = this;
         mDeferRemoval = false;
-        mResizeMode = resizeMode;
-        mHomeTask = homeTask;
     }
 
     private boolean hasWindowsAlive() {
@@ -536,7 +538,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
 
     boolean showForAllUsers() {
         final int tokensCount = mChildren.size();
-        return (tokensCount != 0) && mChildren.get(tokensCount - 1).showForAllUsers;
+        return (tokensCount != 0) && mChildren.get(tokensCount - 1).mShowForAllUsers;
     }
 
     boolean inFreeformWorkspace() {

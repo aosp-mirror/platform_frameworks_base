@@ -258,7 +258,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                 if (! abort) {
                     // The activity manager declined to abort dispatching.
                     // Wait a bit longer and timeout again later.
-                    return appWindowToken.inputDispatchingTimeoutNanos;
+                    return appWindowToken.mInputDispatchingTimeoutNanos;
                 }
             } catch (RemoteException ex) {
             }
@@ -504,7 +504,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         } else {
             final InputApplicationHandle handle = newApp.mInputApplicationHandle;
             handle.name = newApp.toString();
-            handle.dispatchingTimeoutNanos = newApp.inputDispatchingTimeoutNanos;
+            handle.dispatchingTimeoutNanos = newApp.mInputDispatchingTimeoutNanos;
 
             mService.mInputManager.setFocusedApplication(handle);
         }

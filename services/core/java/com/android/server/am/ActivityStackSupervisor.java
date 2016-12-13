@@ -2424,7 +2424,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer
             return false;
         }
 
-        stack.addTask(task, false, "restoreRecentTask");
+        stack.addTask(task, false /* toTop */, "restoreRecentTask");
+        final Rect bounds = task.updateOverrideConfigurationFromLaunchBounds();
+        mWindowManager.addTask(task.taskId, stack.mStackId, task.userId, bounds,
+                task.getOverrideConfiguration(), task.mResizeMode, task.isHomeTask(),
+                task.isOnTopLauncher(), false /* toTop */, true /* showForAllUsers */);
         if (DEBUG_RECENTS) Slog.v(TAG_RECENTS,
                 "Added restored task=" + task + " to stack=" + stack);
         final ArrayList<ActivityRecord> activities = task.mActivities;
