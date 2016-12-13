@@ -59,7 +59,7 @@ public class NotificationRecordTest {
     @Mock PackageManager mPm;
 
     private final String pkg = "com.android.server.notification";
-    private final int uid = 0;
+    private final int uid = 9583;
     private final String pkg2 = "pkg2";
     private final int uid2 = 1111111;
     private final int id1 = 1;
