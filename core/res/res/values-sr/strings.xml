@@ -1237,10 +1237,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Дозвољава апликацији да чита сесије инсталирања. То јој дозвољава да види детаље о активним инсталацијама пакета."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"захтевање пакета за инсталирање"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Омогућава да апликација захтева инсталацију пакета."</string>
-    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
-    <skip />
-    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
-    <skip />
+    <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"тражење дозволе за игнорисање оптимизација батерије"</string>
+    <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Дозвољава апликацији да тражи дозволу за игнорисање оптимизација батерије за ту апликацију."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Додирните двапут за контролу зумирања"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Није могуће додати виџет."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Иди"</string>

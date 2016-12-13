@@ -1237,10 +1237,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Permite unei aplicații accesul la citirea sesiunilor de instalare. Aceasta poate vedea detalii despre instalările de pachete active."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"să solicite pachete de instalare"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Permite unei aplicații să solicite instalarea pachetelor."</string>
-    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
-    <skip />
-    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
-    <skip />
+    <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"să solicite ignorarea optimizărilor bateriei"</string>
+    <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Permite unei aplicații să solicite permisiunea de a ignora optimizările bateriei pentru aplicația respectivă."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Apăsați de două ori pentru a controla mărirea/micșorarea"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Nu s-a putut adăuga widgetul."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Accesați"</string>

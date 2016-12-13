@@ -1212,10 +1212,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"એપ્લિકેશનને ઇન્સ્ટોલ સત્રોને વાંચવાની મંજૂરી આપે છે. આ તેને સક્રિય પૅકેજ ઇન્સ્ટોલેશન્સ વિશે વિગતો જોવાની મંજૂરી આપે છે."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"પૅકેજેસ ઇન્સ્ટૉલ કરવાની વિનંતી કરો"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"એપ્લિકેશનને પૅકેજેસના ઇન્સ્ટોલેશનની વિનંતી કરવાની મંજૂરી આપો."</string>
-    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
-    <skip />
-    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
-    <skip />
+    <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"બૅટરી ઓપ્ટિમાઇઝેશન્સને અવગણવા માટે પૂછો"</string>
+    <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"ઍપ્લિકેશનને તે ઍપ્લિકેશન માટે બૅટરી ઓપ્ટિમાઇઝેશન્સને અવગણવાની પરવાનગી આપવા માટે પૂછવાની મંજૂરી આપે છે."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"ઝૂમ નિયંત્રણ માટે બેવાર ટૅપ કરો"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"વિજેટ ઉમેરી શકાયું નથી."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"જાઓ"</string>
