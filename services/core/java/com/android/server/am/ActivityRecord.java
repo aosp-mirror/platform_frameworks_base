@@ -967,7 +967,7 @@ final class ActivityRecord {
             return supportsPictureInPicture();
         }
 
-        if (supportsPictureInPicture() && visible) {
+        if (supportsPictureInPicture()) {
             switch (state) {
                 case RESUMED:
                 case PAUSING:
