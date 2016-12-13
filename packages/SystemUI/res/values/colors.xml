@@ -120,8 +120,6 @@
     <color name="screen_pinning_request_window_bg">#80000000</color>
 
     <color name="segmented_buttons_background">#14FFFFFF</color><!-- 8% white -->
-    <color name="segmented_button_selected">#FFFFFFFF</color>
-    <color name="segmented_button_unselected">@*android:color/quaternary_device_default_settings</color>
 
     <color name="dark_mode_icon_color_single_tone">#99000000</color>
     <color name="dark_mode_icon_color_dual_tone_background">#3d000000</color>
