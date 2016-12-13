@@ -56,17 +56,16 @@ static inline MtpServer* getMtpServer(JNIEnv *env, jobject thiz) {
     return (MtpServer*)env->GetLongField(thiz, field_MtpServer_nativeContext);
 }
 
+static void android_mtp_configure(JNIEnv *, jobject, jboolean usePtp) {
+    MtpServer::configure(usePtp);
+}
+
 static void
 android_mtp_MtpServer_setup(JNIEnv *env, jobject thiz, jobject javaDatabase, jboolean usePtp)
 {
-    int fd = open("/dev/mtp_usb", O_RDWR);
-    if (fd >= 0) {
-        MtpServer* server = new MtpServer(fd, getMtpDatabase(env, javaDatabase),
-                usePtp, AID_MEDIA_RW, 0664, 0775);
-        env->SetLongField(thiz, field_MtpServer_nativeContext, (jlong)server);
-    } else {
-        ALOGE("could not open MTP driver, errno: %d", errno);
-    }
+    MtpServer* server = new MtpServer(getMtpDatabase(env, javaDatabase),
+            usePtp, AID_MEDIA_RW, 0664, 0775);
+    env->SetLongField(thiz, field_MtpServer_nativeContext, (jlong)server);
 }
 
 static void
@@ -180,6 +179,7 @@ android_mtp_MtpServer_remove_storage(JNIEnv *env, jobject thiz, jint storageId)
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gMethods[] = {
+    {"native_configure",              "(Z)V",  (void *)android_mtp_configure},
     {"native_setup",                "(Landroid/mtp/MtpDatabase;Z)V",
                                             (void *)android_mtp_MtpServer_setup},
     {"native_run",                  "()V",  (void *)android_mtp_MtpServer_run},
