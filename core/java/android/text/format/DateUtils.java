@@ -19,6 +19,10 @@ package android.text.format;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.icu.text.MeasureFormat;
+import android.icu.text.MeasureFormat.FormatWidth;
+import android.icu.util.Measure;
+import android.icu.util.MeasureUnit;
 
 import com.android.internal.R;
 
@@ -351,26 +355,54 @@ public class DateUtils
     }
 
     /**
-     * Return given duration in a human-friendly format. For example, "4
-     * minutes" or "1 second". Returns only largest meaningful unit of time,
+     * Returns the given duration in a human-friendly format. For example,
+     * "4 minutes" or "1 second". Returns only the largest meaningful unit of time,
      * from seconds up to hours.
      *
      * @hide
      */
     public static CharSequence formatDuration(long millis) {
-        final Resources res = Resources.getSystem();
+        return formatDuration(millis, LENGTH_LONG);
+    }
+
+    /**
+     * Returns the given duration in a human-friendly format. For example,
+     * "4 minutes" or "1 second". Returns only the largest meaningful unit of time,
+     * from seconds up to hours.
+     * <p>
+     * You can use abbrev to specify a preference for abbreviations (but note that some
+     * locales may not have abbreviations). Use LENGTH_LONG for the full spelling (e.g. "2 hours"),
+     * LENGTH_SHORT for the abbreviated spelling if available (e.g. "2 hr"), and LENGTH_SHORTEST for
+     * the briefest form available (e.g. "2h").
+     * @hide
+     */
+    public static CharSequence formatDuration(long millis, int abbrev) {
+        final FormatWidth width;
+        switch (abbrev) {
+            case LENGTH_LONG:
+                width = FormatWidth.WIDE;
+                break;
+            case LENGTH_SHORT:
+            case LENGTH_SHORTER:
+            case LENGTH_MEDIUM:
+                width = FormatWidth.SHORT;
+                break;
+            case LENGTH_SHORTEST:
+                width = FormatWidth.NARROW;
+                break;
+            default:
+                width = FormatWidth.WIDE;
+        }
+        final MeasureFormat formatter = MeasureFormat.getInstance(Locale.getDefault(), width);
         if (millis >= HOUR_IN_MILLIS) {
             final int hours = (int) ((millis + 1800000) / HOUR_IN_MILLIS);
-            return res.getQuantityString(
-                    com.android.internal.R.plurals.duration_hours, hours, hours);
+            return formatter.format(new Measure(hours, MeasureUnit.HOUR));
         } else if (millis >= MINUTE_IN_MILLIS) {
             final int minutes = (int) ((millis + 30000) / MINUTE_IN_MILLIS);
-            return res.getQuantityString(
-                    com.android.internal.R.plurals.duration_minutes, minutes, minutes);
+            return formatter.format(new Measure(minutes, MeasureUnit.MINUTE));
         } else {
             final int seconds = (int) ((millis + 500) / SECOND_IN_MILLIS);
-            return res.getQuantityString(
-                    com.android.internal.R.plurals.duration_seconds, seconds, seconds);
+            return formatter.format(new Measure(seconds, MeasureUnit.SECOND));
         }
     }
 

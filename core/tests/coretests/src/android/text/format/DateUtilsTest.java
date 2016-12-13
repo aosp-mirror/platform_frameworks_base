@@ -61,6 +61,18 @@ public class DateUtilsTest extends TestCase {
         assertEquals("1 second", DateUtils.formatDuration(500));
         assertEquals("1 second", DateUtils.formatDuration(1000));
         assertEquals("2 seconds", DateUtils.formatDuration(1500));
+
+        assertEquals("0 seconds", DateUtils.formatDuration(0, DateUtils.LENGTH_LONG));
+        assertEquals("1 second", DateUtils.formatDuration(1000, DateUtils.LENGTH_LONG));
+        assertEquals("2 seconds", DateUtils.formatDuration(1500, DateUtils.LENGTH_LONG));
+
+        assertEquals("0 sec", DateUtils.formatDuration(0, DateUtils.LENGTH_SHORT));
+        assertEquals("1 sec", DateUtils.formatDuration(1000, DateUtils.LENGTH_SHORT));
+        assertEquals("2 sec", DateUtils.formatDuration(1500, DateUtils.LENGTH_SHORT));
+
+        assertEquals("0s", DateUtils.formatDuration(0, DateUtils.LENGTH_SHORTEST));
+        assertEquals("1s", DateUtils.formatDuration(1000, DateUtils.LENGTH_SHORTEST));
+        assertEquals("2s", DateUtils.formatDuration(1500, DateUtils.LENGTH_SHORTEST));
     }
 
     @SmallTest
@@ -69,6 +81,15 @@ public class DateUtilsTest extends TestCase {
         assertEquals("60 seconds", DateUtils.formatDuration(59500));
         assertEquals("1 minute", DateUtils.formatDuration(60000));
         assertEquals("2 minutes", DateUtils.formatDuration(120000));
+
+        assertEquals("1 minute", DateUtils.formatDuration(60000, DateUtils.LENGTH_LONG));
+        assertEquals("2 minutes", DateUtils.formatDuration(120000, DateUtils.LENGTH_LONG));
+
+        assertEquals("1 min", DateUtils.formatDuration(60000, DateUtils.LENGTH_SHORT));
+        assertEquals("2 min", DateUtils.formatDuration(120000, DateUtils.LENGTH_SHORT));
+
+        assertEquals("1m", DateUtils.formatDuration(60000, DateUtils.LENGTH_SHORTEST));
+        assertEquals("2m", DateUtils.formatDuration(120000, DateUtils.LENGTH_SHORTEST));
     }
 
     @SmallTest
@@ -76,5 +97,14 @@ public class DateUtilsTest extends TestCase {
         assertEquals("59 minutes", DateUtils.formatDuration(3540000));
         assertEquals("1 hour", DateUtils.formatDuration(3600000));
         assertEquals("48 hours", DateUtils.formatDuration(172800000));
+
+        assertEquals("1 hour", DateUtils.formatDuration(3600000, DateUtils.LENGTH_LONG));
+        assertEquals("48 hours", DateUtils.formatDuration(172800000, DateUtils.LENGTH_LONG));
+
+        assertEquals("1 hr", DateUtils.formatDuration(3600000, DateUtils.LENGTH_SHORT));
+        assertEquals("48 hr", DateUtils.formatDuration(172800000, DateUtils.LENGTH_SHORT));
+
+        assertEquals("1h", DateUtils.formatDuration(3600000, DateUtils.LENGTH_SHORTEST));
+        assertEquals("48h", DateUtils.formatDuration(172800000, DateUtils.LENGTH_SHORTEST));
     }
 }
