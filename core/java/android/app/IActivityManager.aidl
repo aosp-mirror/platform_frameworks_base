@@ -453,6 +453,11 @@ interface IActivityManager {
     // Stop Binder transaction tracking for all applications and dump trace data to the given file
     // descriptor.
     boolean stopBinderTrackingAndDump(in ParcelFileDescriptor fd);
+    /**
+     * Try to place task to provided position. The final position might be different depending on
+     * current user and stacks state. The task will be moved to target stack if it's currently in
+     * different stack.
+     */
     void positionTaskInStack(int taskId, int stackId, int position);
     int getActivityStackId(in IBinder token);
     void exitFreeformMode(in IBinder token);

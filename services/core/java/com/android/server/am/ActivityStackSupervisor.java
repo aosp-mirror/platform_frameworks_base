@@ -2200,7 +2200,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer
             } else {
                 for (int i = size - 1; i >= 0; i--) {
                     positionTaskInStackLocked(tasks.get(i).taskId,
-                            FULLSCREEN_WORKSPACE_STACK_ID, 0);
+                            FULLSCREEN_WORKSPACE_STACK_ID, 0 /* position */);
                 }
             }
         } finally {
@@ -2872,6 +2872,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer
         return true;
     }
 
+    /** @see ActivityManagerService#positionTaskInStack(int, int, int). */
     void positionTaskInStackLocked(int taskId, int stackId, int position) {
         final TaskRecord task = anyTaskForIdLocked(taskId);
         if (task == null) {
@@ -2882,6 +2883,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer
 
         task.updateOverrideConfigurationForStack(stack);
 
+        // TODO: Return final position from WM for AM to use instead of duplicating computations in
+        // ActivityStack#insertTaskAtPosition.
         mWindowManager.positionTaskInStack(
                 taskId, stackId, position, task.mBounds, task.getOverrideConfiguration());
         stack.positionTask(task, position);
@@ -4322,7 +4325,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer
                 if (activityDisplay == null) {
                     return;
                 }
-                addToDisplayLocked(activityDisplay, true);
+                addToDisplayLocked(activityDisplay, true /* onTop */);
             }
         }
 
@@ -4538,7 +4541,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer
                         new VirtualActivityDisplay(width, height, density);
                 mActivityDisplay = virtualActivityDisplay;
                 mActivityDisplays.put(virtualActivityDisplay.mDisplayId, virtualActivityDisplay);
-                addToDisplayLocked(virtualActivityDisplay, true);
+                addToDisplayLocked(virtualActivityDisplay, true /* onTop */);
             }
 
             if (mSurface != null) {

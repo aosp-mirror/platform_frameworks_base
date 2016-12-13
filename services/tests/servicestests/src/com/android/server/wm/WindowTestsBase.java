@@ -75,6 +75,7 @@ public class WindowTestsBase {
         sLayersController = new WindowLayersController(sWm);
         sDisplayContent = new DisplayContent(context.getDisplay(), sWm, sLayersController,
                 new WallpaperController(sWm));
+        sWm.mRoot.addChild(sDisplayContent, 0);
 
         // Set-up some common windows.
         sWallpaperWindow = createWindow(null, TYPE_WALLPAPER, sDisplayContent, "wallpaperWindow");
@@ -103,11 +104,8 @@ public class WindowTestsBase {
             return new TestWindowToken(type, dc);
         }
 
-        final int stackId = sNextStackId++;
-        dc.addStackToDisplay(stackId, true);
-        final TaskStack stack = sWm.mStackIdToStack.get(stackId);
-        final Task task = new Task(sNextTaskId++, stack, 0, sWm, null, EMPTY, false, 0, false);
-        stack.addTask(task, true);
+        final TaskStack stack = createTaskStackOnDisplay(dc);
+        final Task task = createTaskInStack(stack, 0 /* userId */);
         final TestAppWindowToken token = new TestAppWindowToken(dc);
         task.addChild(token, 0);
         return token;
@@ -134,6 +132,21 @@ public class WindowTestsBase {
         // adding it to the token...
         token.addWindow(w);
         return w;
+    }
+
+    /** Creates a {@link TaskStack} and adds it to the specified {@link DisplayContent}. */
+    TaskStack createTaskStackOnDisplay(DisplayContent dc) {
+        final int stackId = sNextStackId++;
+        dc.addStackToDisplay(stackId, true);
+        return sWm.mStackIdToStack.get(stackId);
+    }
+
+    /**Creates a {@link Task} and adds it to the specified {@link TaskStack}. */
+    Task createTaskInStack(TaskStack stack, int userId) {
+        final Task newTask = new Task(sNextTaskId++, stack, userId, sWm, null, EMPTY, false, 0,
+                false);
+        stack.addTask(newTask, true);
+        return newTask;
     }
 
     /* Used so we can gain access to some protected members of the {@link WindowToken} class */

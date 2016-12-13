@@ -39,6 +39,9 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
  */
 class WindowContainer<E extends WindowContainer> implements Comparable<WindowContainer> {
 
+    static final int POSITION_TOP = Integer.MAX_VALUE;
+    static final int POSITION_BOTTOM = Integer.MIN_VALUE;
+
     /**
      * The parent of this window container.
      * For removing or setting new parent {@link #setParent} should be used, because it also
@@ -86,6 +89,16 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
             // Update merged override configuration of this container and all its children.
             onMergedOverrideConfigurationChanged();
         }
+
+        onParentSet();
+    }
+
+    /**
+     * Callback that is triggered when @link WindowContainer#setParent(WindowContainer)} was called.
+     * Supposed to be overridden and contain actions that should be executed after parent was set.
+     */
+    void onParentSet() {
+        // Do nothing by default.
     }
 
     // Temp. holders for a chain of containers we are currently processing.
@@ -200,6 +213,57 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
             }
         }
         return false;
+    }
+
+    /**
+     * Move a child from it's current place in siblings list to the specified position,
+     * with an option to move all its parents to top.
+     * @param position Target position to move the child to.
+     * @param child Child to move to selected position.
+     * @param includingParents Flag indicating whether we need to move the entire branch of the
+     *                         hierarchy when we're moving a child to {@link #POSITION_TOP} or
+     *                         {@link #POSITION_BOTTOM}. When moving to other intermediate positions
+     *                         this flag will do nothing.
+     */
+    @CallSuper
+    void positionChildAt(int position, E child, boolean includingParents) {
+        if ((position < 0 && position != POSITION_BOTTOM)
+                || (position >= mChildren.size() && position != POSITION_TOP)) {
+            throw new IllegalArgumentException("positionAt: invalid position=" + position
+                    + ", children number=" + mChildren.size());
+        }
+
+        if (position == mChildren.size() - 1) {
+            position = POSITION_TOP;
+        } else if (position == 0) {
+            position = POSITION_BOTTOM;
+        }
+
+        switch (position) {
+            case POSITION_TOP:
+                if (mChildren.getLast() != child) {
+                    mChildren.remove(child);
+                    mChildren.addLast(child);
+                }
+                if (includingParents && getParent() != null) {
+                    getParent().positionChildAt(POSITION_TOP, this /* child */,
+                            true /* includingParents */);
+                }
+                break;
+            case POSITION_BOTTOM:
+                if (mChildren.getFirst() != child) {
+                    mChildren.remove(child);
+                    mChildren.addFirst(child);
+                }
+                if (includingParents && getParent() != null) {
+                    getParent().positionChildAt(POSITION_BOTTOM, this /* child */,
+                            true /* includingParents */);
+                }
+                break;
+            default:
+                mChildren.remove(child);
+                mChildren.add(position, child);
+        }
     }
 
     /**

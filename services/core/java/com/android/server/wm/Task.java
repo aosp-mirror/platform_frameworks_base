@@ -23,6 +23,7 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_LANDSC
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.RESIZE_TASK;
@@ -154,7 +155,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         mService.mTaskIdToTask.delete(mTaskId);
     }
 
-    // Change to use re-parenting in WC when TaskStack is switched to use WC.
+    // TODO: Change to use re-parenting in WC.
     void moveTaskToStack(TaskStack stack, boolean toTop) {
         if (stack == mStack) {
             return;
@@ -166,19 +167,38 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         stack.addTask(this, toTop);
     }
 
+    /** @see com.android.server.am.ActivityManagerService#positionTaskInStack(int, int, int). */
     void positionTaskInStack(TaskStack stack, int position, Rect bounds,
             Configuration overrideConfig) {
         if (mStack != null && stack != mStack) {
+            // Task is already attached to a different stack. First we need to remove it from there
+            // and add to top of the target stack. We will move it proper position afterwards.
             if (DEBUG_STACK) Slog.i(TAG, "positionTaskInStack: removing taskId=" + mTaskId
                     + " from stack=" + mStack);
             EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, mTaskId, "moveTask");
             mStack.removeChild(this);
+            stack.addTask(this, true /* toTop */);
         }
-        stack.positionTask(this, position, showForAllUsers());
+
+        stack.positionChildAt(position, this, true /* includingParents */);
         resizeLocked(bounds, overrideConfig, false /* force */);
 
         for (int activityNdx = mChildren.size() - 1; activityNdx >= 0; --activityNdx) {
             mChildren.get(activityNdx).notifyMovedInStack();
+        }
+    }
+
+    @Override
+    void onParentSet() {
+        // Update task bounds if needed.
+        updateDisplayInfo(getDisplayContent());
+
+        if (StackId.windowsAreScaleable(mStack.mStackId)) {
+            // We force windows out of SCALING_MODE_FREEZE so that we can continue to animate them
+            // while a resize is pending.
+            forceWindowsScaleable(true /* force */);
+        } else {
+            forceWindowsScaleable(false /* force */);
         }
     }
 

@@ -512,27 +512,67 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     }
 
     /**
-     * Put a Task in this stack. Used for adding and moving.
+     * Put a Task in this stack. Used for adding only.
+     * When task is added to top of the stack, the entire branch of the hierarchy (including stack
+     * and display) will be brought to top.
      * @param task The task to add.
      * @param toTop Whether to add it to the top or bottom.
      * @param showForAllUsers Whether to show the task regardless of the current user.
      */
     void addTask(Task task, boolean toTop, boolean showForAllUsers) {
-        positionTask(task, toTop ? mChildren.size() : 0, showForAllUsers);
+        final TaskStack currentStack = task.mStack;
+        // TODO: We pass stack to task's constructor, but we still need to call this method.
+        // This doesn't make sense, mStack will already be set equal to "this" at this point.
+        if (currentStack != null && currentStack.mStackId != mStackId) {
+            throw new IllegalStateException("Trying to add taskId=" + task.mTaskId
+                    + " to stackId=" + mStackId
+                    + ", but it is already attached to stackId=" + task.mStack.mStackId);
+        }
+
+        final int targetPosition = toTop ? mChildren.size() : 0;
+
+        // Add child task.
+        task.mStack = this;
+        addChild(task, targetPosition);
+
+        // Move child to a proper position, as some restriction for position might apply.
+        positionChildAt(targetPosition, task, true /* includingParents */, showForAllUsers);
+    }
+
+    @Override
+    void positionChildAt(int position, Task child, boolean includingParents) {
+        positionChildAt(position, child, includingParents, child.showForAllUsers());
+    }
+
+    /**
+     * Overridden version of {@link TaskStack#positionChildAt(int, Task, boolean)}. Used in
+     * {@link TaskStack#addTask(Task, boolean, boolean showForAllUsers)}, as it can receive
+     * showForAllUsers param from {@link AppWindowToken} instead of {@link Task#showForAllUsers()}.
+     */
+    private void positionChildAt(int position, Task child, boolean includingParents,
+            boolean showForAllUsers) {
+        final int targetPosition = findPositionForTask(child, position, showForAllUsers,
+                false /* addingNew */);
+        super.positionChildAt(targetPosition, child, includingParents);
+
+        // Log positioning.
+        if (DEBUG_TASK_MOVEMENT)
+            Slog.d(TAG_WM, "positionTask: task=" + this + " position=" + position);
+
+        final int toTop = targetPosition == mChildren.size() - 1 ? 1 : 0;
+        EventLog.writeEvent(EventLogTags.WM_TASK_MOVED, child.mTaskId, toTop, targetPosition);
     }
 
     // TODO: We should really have users as a window container in the hierarchy so that we don't
-    // have to do complicated things like we are doing in this method and also also the method to
-    // just be WindowContainer#addChild
-    void positionTask(Task task, int position, boolean showForAllUsers) {
+    // have to do complicated things like we are doing in this method.
+    private int findPositionForTask(Task task, int targetPosition, boolean showForAllUsers,
+            boolean addingNew) {
         final boolean canShowTask =
                 showForAllUsers || mService.isCurrentProfileLocked(task.mUserId);
-        if (mChildren.contains(task)) {
-            super.removeChild(task);
-        }
-        int stackSize = mChildren.size();
+
+        final int stackSize = mChildren.size();
         int minPosition = 0;
-        int maxPosition = stackSize;
+        int maxPosition = addingNew ? stackSize : stackSize - 1;
 
         if (canShowTask) {
             minPosition = computeMinPosition(minPosition, stackSize);
@@ -540,28 +580,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
             maxPosition = computeMaxPosition(maxPosition);
         }
         // Reset position based on minimum/maximum possible positions.
-        position = Math.min(Math.max(position, minPosition), maxPosition);
-
-        if (DEBUG_TASK_MOVEMENT) Slog.d(TAG_WM,
-                "positionTask: task=" + task + " position=" + position);
-        addChild(task, position);
-        task.mStack = this;
-        task.updateDisplayInfo(mDisplayContent);
-        boolean toTop = position == mChildren.size() - 1;
-        if (toTop) {
-            // TODO: Have a WidnowContainer method that moves all parents of a container to the
-            // front for cases like this.
-            mDisplayContent.moveStack(this, true);
-        }
-
-        if (StackId.windowsAreScaleable(mStackId)) {
-            // We force windows out of SCALING_MODE_FREEZE so that we can continue to animate them
-            // while a resize is pending.
-            task.forceWindowsScaleable(true);
-        } else {
-            task.forceWindowsScaleable(false);
-        }
-        EventLog.writeEvent(EventLogTags.WM_TASK_MOVED, task.mTaskId, toTop ? 1 : 0, position);
+        return Math.min(Math.max(targetPosition, minPosition), maxPosition);
     }
 
     /** Calculate the minimum possible position for a task that can be shown to the user.
@@ -591,7 +610,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
      */
     private int computeMaxPosition(int maxPosition) {
         while (maxPosition > 0) {
-            final Task tmpTask = mChildren.get(maxPosition - 1);
+            final Task tmpTask = mChildren.get(maxPosition);
             final boolean canShowTmpTask =
                     tmpTask.showForAllUsers()
                             || mService.isCurrentProfileLocked(tmpTask.mUserId);
@@ -601,20 +620,6 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
             maxPosition--;
         }
         return maxPosition;
-    }
-
-    // TODO: Have functionality in WC to move things to the bottom or top. Also, look at the call
-    // points for this methods to see if we need functionality to move something to the front/bottom
-    // with its parents.
-    void moveTaskToTop(Task task) {
-        if (DEBUG_TASK_MOVEMENT) Slog.d(TAG_WM, "moveTaskToTop: task=" + task + " Callers="
-                + Debug.getCallers(6));
-        addTask(task, true);
-    }
-
-    void moveTaskToBottom(Task task) {
-        if (DEBUG_TASK_MOVEMENT) Slog.d(TAG_WM, "moveTaskToBottom: task=" + task);
-        addTask(task, false);
     }
 
     /**
@@ -627,10 +632,11 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         if (DEBUG_TASK_MOVEMENT) Slog.d(TAG_WM, "removeChild: task=" + task);
 
         super.removeChild(task);
+        task.mStack = null;
 
         if (mDisplayContent != null) {
             if (mChildren.isEmpty()) {
-                mDisplayContent.moveStack(this, false);
+                getParent().positionChildAt(POSITION_BOTTOM, this, false /* includingParents */);
             }
             mDisplayContent.setLayoutNeeded();
         }
