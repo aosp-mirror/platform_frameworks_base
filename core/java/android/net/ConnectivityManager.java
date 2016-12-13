@@ -223,6 +223,13 @@ public class ConnectivityManager {
     public static final String EXTRA_CAPTIVE_PORTAL_URL = "android.net.extra.CAPTIVE_PORTAL_URL";
 
     /**
+     * Key for passing a user agent string to the captive portal login activity.
+     * {@hide}
+     */
+    public static final String EXTRA_CAPTIVE_PORTAL_USER_AGENT =
+            "android.net.extra.CAPTIVE_PORTAL_USER_AGENT";
+
+    /**
      * Broadcast action to indicate the change of data activity status
      * (idle or active) on a network in a recent period.
      * The network becomes active when data transmission is started, or
