@@ -35,6 +35,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
@@ -155,6 +156,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private final Map <Integer, ProfileServiceConnections> mProfileServices =
             new HashMap <Integer, ProfileServiceConnections>();
 
+    private final boolean mPermissionReviewRequired;
+
     private void registerForAirplaneMode(IntentFilter filter) {
         final ContentResolver resolver = mContext.getContentResolver();
         final String airplaneModeRadios = Settings.Global.getString(resolver,
@@ -263,6 +266,11 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         mHandler = new BluetoothHandler(IoThread.get().getLooper());
 
         mContext = context;
+
+        mPermissionReviewRequired = Build.PERMISSIONS_REVIEW_REQUIRED
+                    || context.getResources().getBoolean(
+                com.android.internal.R.bool.config_permissionReviewRequired);
+
         mBluetooth = null;
         mBluetoothBinder = null;
         mBluetoothGatt = null;
@@ -717,14 +725,24 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         return true;
     }
 
-    public boolean disable(boolean persist) {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
-                                                "Need BLUETOOTH ADMIN permissicacheNameAndAddresson");
+    public boolean disable(String packageName, boolean persist) throws RemoteException {
+        final int callingUid = Binder.getCallingUid();
+        final boolean callerSystem = UserHandle.getAppId(callingUid) == Process.SYSTEM_UID;
 
-        if ((Binder.getCallingUid() != Process.SYSTEM_UID) &&
-            (!checkIfCallerIsForegroundUser())) {
-            Slog.w(TAG,"disable(): not allowed for non-active and non system user");
-            return false;
+        if (!callerSystem) {
+            if (!checkIfCallerIsForegroundUser()) {
+                Slog.w(TAG, "disable(): not allowed for non-active and non system user");
+                return false;
+            }
+
+            mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                    "Need BLUETOOTH ADMIN permission");
+
+            if (isEnabled() && mPermissionReviewRequired
+                    && startConsentUiIfNeeded(packageName, callingUid,
+                            BluetoothAdapter.ACTION_REQUEST_DISABLE)) {
+                return false;
+            }
         }
 
         if (DBG) {
@@ -743,6 +761,31 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             sendDisableMsg();
         }
         return true;
+    }
+
+    private boolean startConsentUiIfNeeded(String packageName,
+            int callingUid, String intentAction) throws RemoteException {
+        try {
+            // Validate the package only if we are going to use it
+            ApplicationInfo applicationInfo = mContext.getPackageManager()
+                    .getApplicationInfoAsUser(packageName,
+                            PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
+                            UserHandle.getUserId(callingUid));
+            if (applicationInfo.uid != callingUid) {
+                throw new SecurityException("Package " + callingUid
+                        + " not in uid " + callingUid);
+            }
+
+            // Legacy apps in permission review mode trigger a user prompt
+            if (applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
+                Intent intent = new Intent(intentAction);
+                mContext.startActivity(intent);
+                return true;
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new RemoteException(e.getMessage());
+        }
+        return false;
     }
 
     public void unbindAndFinish() {
