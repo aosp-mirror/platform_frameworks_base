@@ -145,6 +145,8 @@ const char* gFS_Uniforms_GradientSampler[2] = {
 };
 const char* gFS_Uniforms_BitmapSampler =
         "uniform sampler2D bitmapSampler;\n";
+const char* gFS_Uniforms_BitmapExternalSampler =
+        "uniform samplerExternalOES bitmapSampler;\n";
 const char* gFS_Uniforms_ColorOp[3] = {
         // None
         "",
@@ -576,7 +578,8 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     if (blendFramebuffer) {
         shader.append(gFS_Header_Extension_FramebufferFetch);
     }
-    if (description.hasExternalTexture) {
+    if (description.hasExternalTexture
+            || (description.hasBitmap && description.isShaderBitmapExternal)) {
         shader.append(gFS_Header_Extension_ExternalTexture);
     }
 
@@ -693,7 +696,11 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     }
 
     if (description.hasBitmap) {
-        shader.append(gFS_Uniforms_BitmapSampler);
+        if (description.isShaderBitmapExternal) {
+            shader.append(gFS_Uniforms_BitmapExternalSampler);
+        } else {
+            shader.append(gFS_Uniforms_BitmapSampler);
+        }
     }
     shader.append(gFS_Uniforms_ColorOp[static_cast<int>(description.colorOp)]);
 
