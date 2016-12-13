@@ -51,7 +51,7 @@ static void testProperty(std::function<void(RenderProperties&)> propSetupCallbac
             EXPECT_EQ(mDrawCounter++, 0);
             mCallback(*this);
         }
-        void onClipRRect(const SkRRect& rrect, ClipOp op, ClipEdgeStyle style) {
+        void onClipRRect(const SkRRect& rrect, SkClipOp op, ClipEdgeStyle style) {
             SkCanvas::onClipRRect(rrect, op, style);
         }
         std::function<void(const SkCanvas&)> mCallback;
@@ -65,10 +65,10 @@ static void testProperty(std::function<void(RenderProperties&)> propSetupCallbac
         canvas.drawRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, paint);
     });
 
-    sk_sp<PropertyTestCanvas> canvas(new PropertyTestCanvas(opValidateCallback));
-    RenderNodeDrawable drawable(node.get(), canvas.get(), true);
-    canvas->drawDrawable(&drawable);
-    EXPECT_EQ(1, canvas->mDrawCounter);
+    PropertyTestCanvas canvas(opValidateCallback);
+    RenderNodeDrawable drawable(node.get(), &canvas, true);
+    canvas.drawDrawable(&drawable);
+    EXPECT_EQ(1, canvas.mDrawCounter);
 }
 
 }
