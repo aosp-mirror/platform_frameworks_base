@@ -17,7 +17,10 @@
 package com.android.server.storage;
 
 import android.annotation.IntDef;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.storage.StorageManager;
+import android.os.storage.VolumeInfo;
 import android.util.ArrayMap;
 
 import java.io.File;
@@ -148,6 +151,32 @@ public class FileCollector {
     public static MeasurementResult getMeasurementResult(File path) {
         return collectFiles(StorageManager.maybeTranslateEmulatedPathToInternal(path),
                 new MeasurementResult());
+    }
+
+    /**
+     * Returns the size of a system for a given context. This is done by finding the difference
+     * between the shared data and the total primary storage size.
+     * @param context Context to use to get storage information.
+     */
+    public static long getSystemSize(Context context) {
+        PackageManager pm = context.getPackageManager();
+        VolumeInfo primaryVolume = pm.getPrimaryStorageCurrentVolume();
+
+        StorageManager sm = context.getSystemService(StorageManager.class);
+        VolumeInfo shared = sm.findEmulatedForPrivate(primaryVolume);
+        if (shared == null) {
+            return 0;
+        }
+
+        final long sharedDataSize = shared.getPath().getTotalSpace();
+        long systemSize = sm.getPrimaryStorageSize() - sharedDataSize;
+
+        // This case is not exceptional -- we just fallback to the shared data volume in this case.
+        if (systemSize <= 0) {
+            return 0;
+        }
+
+        return systemSize;
     }
 
     private static MeasurementResult collectFiles(File file, MeasurementResult result) {
