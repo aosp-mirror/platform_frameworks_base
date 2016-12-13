@@ -110,6 +110,7 @@ public class DeviceIdleController extends SystemService
     private AlarmManager mAlarmManager;
     private IBatteryStats mBatteryStats;
     private PowerManagerInternal mLocalPowerManager;
+    private PowerManager mPowerManager;
     private INetworkPolicyManager mNetworkPolicyManager;
     private DisplayManager mDisplayManager;
     private SensorManager mSensorManager;
@@ -167,6 +168,11 @@ public class DeviceIdleController extends SystemService
     private long mNextAlarmTime;
     private long mNextIdlePendingDelay;
     private long mNextIdleDelay;
+
+    /**
+     * Wakelock held when going idle so hardware (especially NetworkPolicyManager) can shut down.
+     */
+    private PowerManager.WakeLock mGoingIdleWakelock;
 
     public final AtomicFile mConfigFile;
 
@@ -685,11 +691,11 @@ public class DeviceIdleController extends SystemService
         }
     }
 
-    static final int MSG_WRITE_CONFIG = 1;
-    static final int MSG_REPORT_IDLE_ON = 2;
-    static final int MSG_REPORT_IDLE_OFF = 3;
-    static final int MSG_REPORT_ACTIVE = 4;
-    static final int MSG_TEMP_APP_WHITELIST_TIMEOUT = 5;
+    private static final int MSG_WRITE_CONFIG = 1;
+    private static final int MSG_REPORT_IDLE_ON = 2;
+    private static final int MSG_REPORT_IDLE_OFF = 3;
+    private static final int MSG_REPORT_ACTIVE = 4;
+    private static final int MSG_TEMP_APP_WHITELIST_TIMEOUT = 5;
 
     final class MyHandler extends Handler {
         MyHandler(Looper looper) {
@@ -700,9 +706,11 @@ public class DeviceIdleController extends SystemService
             if (DEBUG) Slog.d(TAG, "handleMessage(" + msg.what + ")");
             switch (msg.what) {
                 case MSG_WRITE_CONFIG: {
+                    // Does not hold a wakelock. Just let this happen whenever.
                     handleWriteConfigFile();
                 } break;
                 case MSG_REPORT_IDLE_ON: {
+                    // mGoingIdleWakelock is held at this point
                     EventLogTags.writeDeviceIdleOnStart();
                     mLocalPowerManager.setDeviceIdleMode(true);
                     try {
@@ -712,6 +720,7 @@ public class DeviceIdleController extends SystemService
                     }
                     getContext().sendBroadcastAsUser(mIdleIntent, UserHandle.ALL);
                     EventLogTags.writeDeviceIdleOnComplete();
+                    mGoingIdleWakelock.release();
                 } break;
                 case MSG_REPORT_IDLE_OFF: {
                     EventLogTags.writeDeviceIdleOffStart("unknown");
@@ -725,6 +734,7 @@ public class DeviceIdleController extends SystemService
                     EventLogTags.writeDeviceIdleOffComplete();
                 } break;
                 case MSG_REPORT_ACTIVE: {
+                    // The device is awake at this point, so no wakelock necessary.
                     String activeReason = (String)msg.obj;
                     int activeUid = msg.arg1;
                     boolean needBroadcast = msg.arg2 != 0;
@@ -742,6 +752,7 @@ public class DeviceIdleController extends SystemService
                     EventLogTags.writeDeviceIdleOffComplete();
                 } break;
                 case MSG_TEMP_APP_WHITELIST_TIMEOUT: {
+                    // TODO: What is keeping the device awake at this point? Does it need to be?
                     int uid = msg.arg1;
                     checkTempAppWhitelistTimeout(uid);
                 } break;
@@ -931,6 +942,10 @@ public class DeviceIdleController extends SystemService
                 mAlarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
                 mBatteryStats = BatteryStatsService.getService();
                 mLocalPowerManager = getLocalService(PowerManagerInternal.class);
+                mPowerManager = getContext().getSystemService(PowerManager.class);
+                mGoingIdleWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                        "deviceidle_going_idle");
+                mGoingIdleWakeLock.setReferenceCounted(true);
                 mNetworkPolicyManager = INetworkPolicyManager.Stub.asInterface(
                         ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
                 mDisplayManager = (DisplayManager) getContext().getSystemService(
@@ -1396,6 +1411,7 @@ public class DeviceIdleController extends SystemService
                 mNextIdleDelay = Math.min(mNextIdleDelay, mConstants.MAX_IDLE_TIMEOUT);
                 mState = STATE_IDLE;
                 EventLogTags.writeDeviceIdle(mState, "step");
+                mGoingIdleWakelock.acquire();
                 mHandler.sendEmptyMessage(MSG_REPORT_IDLE_ON);
                 break;
             case STATE_IDLE:
