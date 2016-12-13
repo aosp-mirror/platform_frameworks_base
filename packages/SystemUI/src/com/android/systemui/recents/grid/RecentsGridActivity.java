@@ -76,6 +76,7 @@ public class RecentsGridActivity extends Activity {
     public final static int MAX_VISIBLE_TASKS = 9;
 
     private final static String TAG = "RecentsGridActivity";
+    private final static int TITLE_BAR_HEIGHT_DP = 64;
 
     private ArrayList<Integer> mMargins = new ArrayList<>();
 
@@ -119,10 +120,11 @@ public class RecentsGridActivity extends Activity {
         mTouchExplorationEnabled = ssp.isTouchExplorationEnabled();
         mScreenSize = new Point();
         getWindowManager().getDefaultDisplay().getRealSize(mScreenSize);
+        DisplayMetrics metrics = res.getDisplayMetrics();
+        mTitleBarHeightPx = (int) (TITLE_BAR_HEIGHT_DP *
+                ((float) metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT));
         mStatusBarHeightPx = res.getDimensionPixelSize(R.dimen.status_bar_height);
         mNavigationBarHeightPx = res.getDimensionPixelSize(R.dimen.navigation_bar_height);
-        mTitleBarHeightPx = getResources().getDimensionPixelSize(
-                R.dimen.recents_grid_task_header_height);
 
         mRecentsView = (FrameLayout) findViewById(R.id.recents_view);
         mRecentsView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
@@ -158,28 +160,6 @@ public class RecentsGridActivity extends Activity {
 
     private TaskView createView() {
         return (TaskView) mInflater.inflate(R.layout.recents_task_view, mRecentsView, false);
-    }
-
-    private void customizeTaskView(TaskView taskView) {
-        Resources res = getResources();
-        taskView.setOverlayHeaderOnThumbnailActionBar(false);
-        View thumbnail = taskView.findViewById(R.id.task_view_thumbnail);
-        thumbnail.setTranslationY(mTitleBarHeightPx);
-
-        // These need to be adjusted in code to override behavior in TaskViewHeader (not defined
-        // in layout XML code).
-        View title = taskView.findViewById(R.id.title);
-        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) title.getLayoutParams();
-        lp.setMarginStart(res.getDimensionPixelSize(R.dimen.recents_grid_task_title_margin_start));
-        title.setLayoutParams(lp);
-
-        View dismiss = taskView.findViewById(R.id.dismiss_task);
-        int padding = res.getDimensionPixelSize(R.dimen.recents_grid_task_dismiss_button_padding);
-        dismiss.setPadding(padding, padding, padding, padding);
-        dismiss.getLayoutParams().height = mTitleBarHeightPx;
-        dismiss.getLayoutParams().width = mTitleBarHeightPx;
-        View header = taskView.findViewById(R.id.task_view_bar);
-        header.getLayoutParams().height = mTitleBarHeightPx;
     }
 
     private void removeTaskViews() {
@@ -311,7 +291,6 @@ public class RecentsGridActivity extends Activity {
                 taskView = mTaskViews.get(i);
             } else {
                 taskView = createView();
-                customizeTaskView(taskView);
             }
             taskView.onTaskBound(task, mTouchExplorationEnabled, mLastDisplayOrientation,
                     mDisplayRect);

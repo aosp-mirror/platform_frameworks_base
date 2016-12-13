@@ -25,8 +25,6 @@
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:windowAnimationStyle">@null</item>
         <item name="android:ambientShadowAlpha">0.35</item>
-        <item name="clearAllStyle">@style/ClearAllButtonDefaultStyle</item>
-        <item name="taskIconStyle">@style/TaskIconDefaultStyle</item>
     </style>
 
 
@@ -36,34 +34,30 @@
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowShowWallpaper">true</item>
         <item name="android:windowDisablePreview">true</item>
+        <item name="clearAllStyle">@style/ClearAllButtonDefaultMargins</item>
     </style>
 
-    <style name="ClearAllButtonDefaultStyle">
+    <style name="ClearAllButtonDefaultMargins">
         <item name="android:layout_marginStart">0dp</item>
         <item name="android:layout_marginTop">0dp</item>
         <item name="android:layout_marginEnd">0dp</item>
         <item name="android:layout_marginBottom">0dp</item>
     </style>
 
-    <style name="TaskIconDefaultStyle">
-        <item name="android:visibility">visible</item>
-    </style>
-
     <!-- Grid-based Recents theme. -->
-    <style name="RecentsTheme.Wallpaper.Grid">
-        <item name="clearAllStyle">@style/ClearAllButtonGridStyle</item>
-        <item name="taskIconStyle">@style/TaskIconGridStyle</item>
+    <style name="RecentsTheme.Grid">
+        <item name="android:windowBackground">@color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowShowWallpaper">true</item>
+        <item name="android:windowDisablePreview">true</item>
+        <item name="clearAllStyle">@style/ClearAllButtonLargeMargins</item>
     </style>
 
-    <style name="ClearAllButtonGridStyle">
+    <style name="ClearAllButtonLargeMargins">
         <item name="android:layout_marginStart">@dimen/recents_grid_clear_all_margin_left</item>
         <item name="android:layout_marginTop">@dimen/recents_grid_clear_all_margin_top</item>
         <item name="android:layout_marginEnd">@dimen/recents_grid_clear_all_margin_right</item>
         <item name="android:layout_marginBottom">@dimen/recents_grid_clear_all_margin_bottom</item>
-    </style>
-
-    <style name="TaskIconGridStyle">
-        <item name="android:visibility">gone</item>
     </style>
 
     <!-- Performance optimized Recents theme (no wallpaper) -->
