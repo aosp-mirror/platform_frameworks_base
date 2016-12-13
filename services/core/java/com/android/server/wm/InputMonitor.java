@@ -591,8 +591,6 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
 
         private void updateInputWindows(boolean inDrag) {
 
-            clearInputWindowHandlesLw();
-
             // TODO: multi-display
             navInputConsumer = getInputConsumer(INPUT_CONSUMER_NAVIGATION, DEFAULT_DISPLAY);
             pipInputConsumer = getInputConsumer(INPUT_CONSUMER_PIP, DEFAULT_DISPLAY);
@@ -614,6 +612,8 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
 
             // Send windows to native code.
             mService.mInputManager.setInputWindows(mInputWindowHandles);
+
+            clearInputWindowHandlesLw();
         }
 
         @Override
