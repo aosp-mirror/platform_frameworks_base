@@ -432,40 +432,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         return mService.getPowerStatus();
     }
 
-    /**
-     * Sends key to a target CEC device.
-     *
-     * @param keyCode key code to send. Defined in {@link android.view.KeyEvent}.
-     * @param isPressed true if this is key press event
-     */
     @Override
-    @ServiceThreadOnly
-    protected void sendKeyEvent(int keyCode, boolean isPressed) {
-        assertRunOnServiceThread();
-        if (!HdmiCecKeycode.isSupportedKeycode(keyCode)) {
-            Slog.w(TAG, "Unsupported key: " + keyCode);
-            return;
-        }
-        List<SendKeyAction> action = getActions(SendKeyAction.class);
-        int logicalAddress = findKeyReceiverAddress();
-        if (logicalAddress == mAddress) {
-            Slog.w(TAG, "Discard key event to itself :" + keyCode + " pressed:" + isPressed);
-            return;
-        }
-        if (!action.isEmpty()) {
-            action.get(0).processKeyEvent(keyCode, isPressed);
-        } else {
-            if (isPressed) {
-                if (logicalAddress != Constants.ADDR_INVALID) {
-                    addAndStartAction(new SendKeyAction(this, logicalAddress, keyCode));
-                    return;
-                }
-            }
-            Slog.w(TAG, "Discard key event: " + keyCode + " pressed:" + isPressed);
-        }
-    }
-
-    private int findKeyReceiverAddress() {
+    protected int findKeyReceiverAddress() {
         if (getActiveSource().isValid()) {
             return getActiveSource().logicalAddress;
         }
