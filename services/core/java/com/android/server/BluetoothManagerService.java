@@ -40,6 +40,7 @@ import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -183,7 +184,12 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             final boolean bluetoothDisallowed =
                     newRestrictions.getBoolean(UserManager.DISALLOW_BLUETOOTH);
             if ((mEnable || mEnableExternal) && bluetoothDisallowed) {
-                disable(true);
+                try {
+                  disable("android.os.UserManagerInternal", true);
+                } catch (RemoteException e) {
+                  // Shouldn't happen: startConsentUiIfNeeded not called
+                  // when from system.
+                }
             }
         }
     };
@@ -669,7 +675,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         return true;
     }
 
-    public boolean enable() {
+    public boolean enable(String packageName) throws RemoteException {
         if (isBluetoothDisallowed()) {
             if (DBG) {
                 Slog.d(TAG,"enable(): not enabling - bluetooth disallowed");
@@ -677,14 +683,25 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             return false;
         }
 
-        if ((Binder.getCallingUid() != Process.SYSTEM_UID) &&
-            (!checkIfCallerIsForegroundUser())) {
-            Slog.w(TAG,"enable(): not allowed for non-active and non system user");
-            return false;
+        final int callingUid = Binder.getCallingUid();
+        final boolean callerSystem = UserHandle.getAppId(callingUid) == Process.SYSTEM_UID;
+
+        if (!callerSystem) {
+            if (!checkIfCallerIsForegroundUser()) {
+                Slog.w(TAG, "enable(): not allowed for non-active and non system user");
+                return false;
+            }
+
+            mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                    "Need BLUETOOTH ADMIN permission");
+
+            if (!isEnabled() && mPermissionReviewRequired
+                    && startConsentUiIfNeeded(packageName, callingUid,
+                            BluetoothAdapter.ACTION_REQUEST_ENABLE)) {
+                return false;
+            }
         }
 
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
-                                                "Need BLUETOOTH ADMIN permission");
         if (DBG) {
             Slog.d(TAG,"enable():  mBluetooth =" + mBluetooth +
                     " mBinding = " + mBinding + " mState = " + mState);
