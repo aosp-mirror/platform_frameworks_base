@@ -183,6 +183,14 @@ public class UsbManager {
     public static final String USB_DATA_UNLOCKED = "unlocked";
 
     /**
+     * Boolean extra indicating whether the intent represents a change in the usb
+     * configuration (as opposed to a state update).
+     *
+     * {@hide}
+     */
+    public static final String USB_CONFIG_CHANGED = "config_changed";
+
+    /**
      * A placeholder indicating that no USB function is being specified.
      * Used to distinguish between selecting no function vs. the default function in
      * {@link #setCurrentFunction(String)}.
