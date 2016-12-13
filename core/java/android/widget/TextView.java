@@ -9386,11 +9386,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Override
-    public void onProvideStructure(ViewStructure structure) {
-        super.onProvideStructure(structure);
+    public void onProvideStructure(ViewStructure structure, int flags) {
+        super.onProvideStructure(structure, flags);
+
+        final boolean forAutoFillSave =
+                (flags & ASSIST_FLAG_NON_SANITIZED_TEXT) != 0;
         final boolean isPassword = hasPasswordTransformationMethod()
                 || isPasswordInputType(getInputType());
-        if (!isPassword) {
+        if (!isPassword || forAutoFillSave) {
             if (mLayout == null) {
                 assumeLayout();
             }

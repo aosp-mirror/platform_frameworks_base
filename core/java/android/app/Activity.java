@@ -1738,8 +1738,8 @@ public class Activity extends ContextThemeWrapper
                                 FillableInputField autoFillField = (FillableInputField) field;
                                 final int viewId = autoFillField.getId();
                                 final View view = root.findViewByAccessibilityIdTraversal(viewId);
-                                // TODO: should handle other types of view as well, but that will
-                                // require:
+                                // TODO(b/33197203): should handle other types of view as well, but
+                                // that will require:
                                 // - a new interface like AutoFillable
                                 // - a way for the views to define the type of the autofield value
                                 if ((view instanceof EditText)) {
@@ -1752,7 +1752,7 @@ public class Activity extends ContextThemeWrapper
                     @Override
                     public void showError(String message) {
                         runOnUiThread(() -> {
-                            // TODO: temporary show a toast until it uses the Snack bar.
+                            // TODO(b/33197203): temporary show a toast until it uses the Snack bar.
                             Toast.makeText(Activity.this, "Auto-fill request failed: " + message,
                                     Toast.LENGTH_LONG).show();
                         });

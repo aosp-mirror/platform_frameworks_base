@@ -25,11 +25,5 @@ import android.os.Bundle;
  */
 oneway interface IAutoFillManagerService {
 
-    /**
-     * Request auto-fill on the top activity of a given user.
-     *
-     * @param userId user handle.
-     * @param activityToken optional token of activity that needs to be on top.
-     */
-    void requestAutoFill(int userId, IBinder activityToken);
+    void requestAutoFill(IBinder activityToken, int userId, int flags);
 }

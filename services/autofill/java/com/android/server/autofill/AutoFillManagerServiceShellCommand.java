@@ -16,6 +16,9 @@
 
 package com.android.server.autofill;
 
+import static android.view.View.ASSIST_FLAG_SANITIZED_TEXT;
+import static android.view.View.ASSIST_FLAG_NON_SANITIZED_TEXT;
+
 import android.app.ActivityManager;
 import android.os.RemoteException;
 import android.os.ShellCommand;
@@ -40,8 +43,10 @@ public final class AutoFillManagerServiceShellCommand extends ShellCommand {
         final PrintWriter pw = getOutPrintWriter();
         try {
             switch (cmd) {
-                case "request":
-                    return requestAutoFill();
+                case "fill":
+                    return requestAutoFill(ASSIST_FLAG_SANITIZED_TEXT);
+                case "save":
+                    return requestAutoFill(ASSIST_FLAG_NON_SANITIZED_TEXT);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -58,15 +63,17 @@ public final class AutoFillManagerServiceShellCommand extends ShellCommand {
             pw.println("  help");
             pw.println("    Prints this help text.");
             pw.println("");
-            pw.println("  request [--user USER_ID]");
-            pw.println("    Request auto-fill on the top activity. ");
+            pw.println("  fill [--user USER_ID]");
+            pw.println("    Request provider to auto-fill the top activity. ");
+            pw.println("  save [--user USER_ID]");
+            pw.println("    Request provider to save contents of the top activity. ");
             pw.println("");
         }
     }
 
-    private int requestAutoFill() throws RemoteException {
+    private int requestAutoFill(int flags) throws RemoteException {
         final int userId = getUserIdFromArgs();
-        mService.requestAutoFill(userId, null);
+        mService.requestAutoFill(null, userId, flags);
         return 0;
     }
 

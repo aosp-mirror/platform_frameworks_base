@@ -17,7 +17,6 @@
 package android.service.autofill;
 
 import static android.service.autofill.AutoFillService.DEBUG;
-import static android.service.autofill.AutoFillService.TAG;
 
 import android.app.Activity;
 import android.app.assist.AssistStructure.ViewNode;
@@ -37,6 +36,8 @@ import java.util.List;
  * auto-filled.
  */
 public final class FillCallback {
+
+    private static final String TAG = "FillCallback";
 
     private final IAutoFillCallback mCallback;
 
@@ -62,6 +63,13 @@ public final class FillCallback {
         }
     }
 
+    /**
+     * Notifies the {@link Activity} that the auto-fill request failed.
+     *
+     * @param message error message to be displayed.
+     *
+     * @throws RuntimeException if an error occurred while notifying the activity.
+     */
     public void onFailure(CharSequence message) {
         if (DEBUG) Log.d(TAG, "onFailure(): message=" + message);
 

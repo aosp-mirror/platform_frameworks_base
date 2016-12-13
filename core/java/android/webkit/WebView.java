@@ -2504,6 +2504,7 @@ public class WebView extends AbsoluteLayout
         return mProvider.getViewDelegate().shouldDelayChildPressedState();
     }
 
+    @Override
     public CharSequence getAccessibilityClassName() {
         return WebView.class.getName();
     }
@@ -2511,6 +2512,11 @@ public class WebView extends AbsoluteLayout
     @Override
     public void onProvideVirtualStructure(ViewStructure structure) {
         mProvider.getViewDelegate().onProvideVirtualStructure(structure);
+    }
+
+    @Override
+    public void onProvideVirtualStructure(ViewStructure structure, int flags) {
+        mProvider.getViewDelegate().onProvideVirtualStructure(structure, flags);
     }
 
     /** @hide */

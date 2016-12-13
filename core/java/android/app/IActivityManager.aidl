@@ -575,7 +575,7 @@ interface IActivityManager {
     void unregisterTaskStackListener(ITaskStackListener listener);
     void moveStackToDisplay(int stackId, int displayId);
     boolean requestAutoFillData(in IResultReceiver receiver, in Bundle receiverExtras,
-            in IBinder activityToken);
+            in IBinder activityToken, int flags);
     void dismissKeyguard(in IBinder token, in IKeyguardDismissCallback callback);
 
     // WARNING: when these transactions are updated, check if they are any callers on the native

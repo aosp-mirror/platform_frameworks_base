@@ -3964,6 +3964,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     int mLayerType = LAYER_TYPE_NONE;
     Paint mLayerPaint;
 
+
+    /**
+     * <p>When setting a {@link android.app.assist.AssistStructure}, its nodes should not contain
+     * PII (Personally Identifiable Information).
+     */
+    // TODO(b/33197203) (b/33269702): improve documentation: mention all cases, show examples, etc.
+    public static final int ASSIST_FLAG_SANITIZED_TEXT = 0x1;
+
+    /**
+     * <p>When setting a {@link android.app.assist.AssistStructure}, its nodes should contain all
+     * type of data, even sensitive PII (Personally Identifiable Information) like passwords or
+     * credit card numbers.
+     */
+    public static final int ASSIST_FLAG_NON_SANITIZED_TEXT = 0x2;
+
     /**
      * Set to true when drawing cache is enabled and cannot be created.
      *
@@ -6781,8 +6796,35 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link android.app.Activity#onProvideAssistData Activity.onProvideAssistData}.
      * @param structure Fill in with structured view data.  The default implementation
      * fills in all data that can be inferred from the view itself.
+     *
+     * @deprecated As of API O sub-classes should override
+     * {@link #onProvideStructure(ViewStructure, int)} instead.
      */
+    // TODO(b/33197203): set proper API above
+    @Deprecated
     public void onProvideStructure(ViewStructure structure) {
+        onProvideStructure(structure, 0);
+    }
+
+    /**
+     * Called when assist structure is being retrieved from a view as part of
+     * {@link android.app.Activity#onProvideAssistData Activity.onProvideAssistData} or as part
+     * of an auto-fill request.
+     *
+     * <p>The default implementation fills in all data that can be inferred from the view itself.
+     *
+     * <p>The structure must be filled according to the request type, which is set in the
+     * {@code flags} parameter - see the documentation on each flag for more details.
+     *
+     * @param structure Fill in with structured view data. The default implementation
+     * fills in all data that can be inferred from the view itself.
+     * @param flags optional flags (see {@link #ASSIST_FLAG_SANITIZED_TEXT} and
+     * {@link #ASSIST_FLAG_NON_SANITIZED_TEXT} for more info).
+     */
+    public void onProvideStructure(ViewStructure structure, int flags) {
+        boolean forAutoFill = (flags
+                & (View.ASSIST_FLAG_SANITIZED_TEXT
+                        | View.ASSIST_FLAG_NON_SANITIZED_TEXT)) != 0;
         final int id = mID;
         if (id > 0 && (id&0xff000000) != 0 && (id&0x00ff0000) != 0
                 && (id&0x0000ffff) != 0) {
@@ -6800,9 +6842,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             structure.setId(id, null, null, null);
         }
 
-        // The auto-fill id needs to be unique, but its value doesn't matter, so it's better to
-        // reuse the accessibility id to save space.
-        structure.setAutoFillId(getAccessibilityViewId());
+        if (forAutoFill) {
+            // The auto-fill id needs to be unique, but its value doesn't matter, so it's better to
+            // reuse the accessibility id to save space.
+            structure.setAutoFillId(getAccessibilityViewId());
+        }
 
         structure.setDimens(mLeft, mTop, mScrollX, mScrollY, mRight - mLeft, mBottom - mTop);
         if (!hasIdentityMatrix()) {
@@ -6852,20 +6896,52 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * uses {@link #getAccessibilityNodeProvider()} to try to generate this from the
      * view's virtual accessibility nodes, if any.  You can override this for a more
      * optimal implementation providing this data.
+     *
+     * @deprecated As of API O, sub-classes should override
+     * {@link #onProvideVirtualStructure(ViewStructure, int)} instead.
      */
+    // TODO(b/33197203): set proper API above
+    @Deprecated
     public void onProvideVirtualStructure(ViewStructure structure) {
+        onProvideVirtualStructure(structure, 0);
+    }
+
+    /**
+     * Called when assist structure is being retrieved from a view as part of
+     * {@link android.app.Activity#onProvideAssistData Activity.onProvideAssistData} or as part
+     * of an auto-fill request to generate additional virtual structure under this view.
+     *
+     * <p>The defaullt implementation uses {@link #getAccessibilityNodeProvider()} to try to
+     * generate this from the view's virtual accessibility nodes, if any.  You can override this
+     * for a more optimal implementation providing this data.
+     *
+     * <p>The structure must be filled according to the request type, which is set in the
+     * {@code flags} parameter - see the documentation on each flag for more details.
+     *
+     * @param structure Fill in with structured view data.
+     * @param flags optional flags (see {@link #ASSIST_FLAG_SANITIZED_TEXT} and
+     * {@link #ASSIST_FLAG_NON_SANITIZED_TEXT} for more info).
+     */
+    public void onProvideVirtualStructure(ViewStructure structure, int flags) {
+        boolean sanitize = (flags & View.ASSIST_FLAG_SANITIZED_TEXT) != 0;
+
+        if (sanitize) {
+            // TODO(b/33197203): change populateVirtualStructure so it sanitizes data in this case.
+            return;
+        }
+
         AccessibilityNodeProvider provider = getAccessibilityNodeProvider();
         if (provider != null) {
             AccessibilityNodeInfo info = createAccessibilityNodeInfo();
             structure.setChildCount(1);
             ViewStructure root = structure.newChild(0);
-            populateVirtualStructure(root, provider, info);
+            populateVirtualStructure(root, provider, info, flags);
             info.recycle();
         }
     }
 
     private void populateVirtualStructure(ViewStructure structure,
-            AccessibilityNodeProvider provider, AccessibilityNodeInfo info) {
+            AccessibilityNodeProvider provider, AccessibilityNodeInfo info, int flags) {
         structure.setId(AccessibilityNodeInfo.getVirtualDescendantId(info.getSourceNodeId()),
                 null, null, null);
         Rect rect = structure.getTempRect();
@@ -6914,7 +6990,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 AccessibilityNodeInfo cinfo = provider.createAccessibilityNodeInfo(
                         AccessibilityNodeInfo.getVirtualDescendantId(info.getChildId(i)));
                 ViewStructure child = structure.newChild(i);
-                populateVirtualStructure(child, provider, cinfo);
+                populateVirtualStructure(child, provider, cinfo, flags);
                 cinfo.recycle();
             }
         }
@@ -6924,11 +7000,38 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Dispatch creation of {@link ViewStructure} down the hierarchy.  The default
      * implementation calls {@link #onProvideStructure} and
      * {@link #onProvideVirtualStructure}.
+     *
+     * @deprecated As of API O,  sub-classes should override
+     * {@link #dispatchProvideStructure(ViewStructure, int)} instead.
      */
+    // TODO(b/33197203): set proper API above
+    @Deprecated
     public void dispatchProvideStructure(ViewStructure structure) {
-        if (!isAssistBlocked()) {
-            onProvideStructure(structure);
-            onProvideVirtualStructure(structure);
+        dispatchProvideStructure(structure, 0);
+    }
+
+    /**
+     * Dispatch creation of {@link ViewStructure} down the hierarchy.
+     *
+     * <p>The structure must be filled according to the request type, which is set in the
+     * {@code flags} parameter - see the documentation on each flag for more details.
+     *
+     * <p>The default implementation calls {@link #onProvideStructure(ViewStructure, int)} and
+     * {@link #onProvideVirtualStructure(ViewStructure, int)}.
+     *
+     * @param structure Fill in with structured view data.
+     * @param flags optional flags (see {@link #ASSIST_FLAG_SANITIZED_TEXT} and
+     * {@link #ASSIST_FLAG_NON_SANITIZED_TEXT} for more info).
+     */
+    public void dispatchProvideStructure(ViewStructure structure, int flags) {
+        boolean forAutoFill = (flags
+                & (View.ASSIST_FLAG_SANITIZED_TEXT
+                        | View.ASSIST_FLAG_NON_SANITIZED_TEXT)) != 0;
+
+        boolean blocked = forAutoFill ? isAutoFillBlocked() : isAssistBlocked();
+        if (!blocked) {
+            onProvideStructure(structure, flags);
+            onProvideVirtualStructure(structure, flags);
         } else {
             structure.setClassName(getAccessibilityClassName().toString());
             structure.setAssistBlocked(true);
@@ -8663,6 +8766,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public boolean isAssistBlocked() {
         return (mPrivateFlags3 & PFLAG3_ASSIST_BLOCKED) != 0;
+    }
+
+    /**
+     * @hide
+     * Indicates whether this view will participate in data collection through
+     * {@link ViewStructure} for auto-fill purposes.
+     *
+     * <p>If {@code true}, it will not provide any data for itself or its children.
+     * <p>If {@code false}, the normal data collection will be allowed.
+     *
+     * @return Returns {@code false} if assist data collection for auto-fill is not blocked,
+     * else {@code true}.
+     *
+     * TODO(b/33197203): update / remove javadoc tags below
+     * @see #setAssistBlocked(boolean)
+     * @attr ref android.R.styleable#View_assistBlocked
+     */
+    public boolean isAutoFillBlocked() {
+        return false; // TODO(b/33197203): properly implement it
     }
 
     /**

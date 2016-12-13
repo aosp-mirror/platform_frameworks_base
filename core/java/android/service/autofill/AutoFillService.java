@@ -15,6 +15,11 @@
  */
 package android.service.autofill;
 
+import static android.service.voice.VoiceInteractionSession.KEY_FLAGS;
+import static android.service.voice.VoiceInteractionSession.KEY_STRUCTURE;
+import static android.view.View.ASSIST_FLAG_SANITIZED_TEXT;
+import static android.view.View.ASSIST_FLAG_NON_SANITIZED_TEXT;
+
 import android.annotation.SdkConstant;
 import android.app.Activity;
 import android.app.Service;
@@ -26,12 +31,13 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
-import android.service.voice.VoiceInteractionSession;
 import android.util.Log;
 
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.SomeArgs;
+
+// TODO(b/33197203): improve javadoc (class and methods)
 
 /**
  * Top-level service of the current auto-fill service for a given user.
@@ -52,6 +58,11 @@ public abstract class AutoFillService extends Service {
     @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
     public static final String SERVICE_INTERFACE = "android.service.autofill.AutoFillService";
 
+    // Bundle keys.
+    /** @hide */
+    public static final String KEY_CALLBACK = "callback";
+
+    // Handler messages.
     private static final int MSG_CONNECT = 1;
     private static final int MSG_AUTO_FILL_ACTIVITY = 2;
     private static final int MSG_DISCONNECT = 3;
@@ -59,14 +70,12 @@ public abstract class AutoFillService extends Service {
     private final IResultReceiver mAssistReceiver = new IResultReceiver.Stub() {
         @Override
         public void send(int resultCode, Bundle resultData) throws RemoteException {
-            final AssistStructure structure = resultData
-                    .getParcelable(VoiceInteractionSession.KEY_STRUCTURE);
-
-            final IBinder binder = resultData
-                    .getBinder(VoiceInteractionSession.KEY_AUTO_FILL_CALLBACK);
+            final AssistStructure structure = resultData.getParcelable(KEY_STRUCTURE);
+            final IBinder binder = resultData.getBinder(KEY_CALLBACK);
+            final int flags = resultData.getInt(KEY_FLAGS, 0);
 
             mHandlerCaller
-                .obtainMessageOO(MSG_AUTO_FILL_ACTIVITY, structure, binder).sendToTarget();
+                .obtainMessageIOO(MSG_AUTO_FILL_ACTIVITY, flags, structure, binder).sendToTarget();
         }
 
     };
@@ -100,7 +109,8 @@ public abstract class AutoFillService extends Service {
                     final SomeArgs args = (SomeArgs) msg.obj;
                     final AssistStructure structure = (AssistStructure) args.arg1;
                     final IBinder binder = (IBinder) args.arg2;
-                    requestAutoFill(structure, binder);
+                    final int flags = msg.arg1;
+                    requestAutoFill(structure, flags, binder);
                     break;
                 } case MSG_DISCONNECT: {
                     onDisconnected();
@@ -145,19 +155,46 @@ public abstract class AutoFillService extends Service {
     }
 
     /**
-     * Handles an auto-fill request.
+     * Called when user requests service to auto-fill an {@link Activity}.
      *
      * @param structure {@link Activity}'s view structure .
+     * @param data bundle with optional parameters (currently none) which is passed along on
+     * subsequent calls (so it can be used by the service to share data).
      * @param cancellationSignal signal for observing cancel requests.
-     * @param callback object used to fulllfill the request.
      */
     public abstract void onFillRequest(AssistStructure structure,
-            CancellationSignal cancellationSignal, FillCallback callback);
+            Bundle data, CancellationSignal cancellationSignal, FillCallback callback);
 
-    private void requestAutoFill(AssistStructure structure, IBinder binder) {
-        final FillCallback callback = new FillCallback(binder);
-        // TODO: hook up the cancelationSignal
-        onFillRequest(structure, new CancellationSignal(), callback);
+    /**
+     * Called when user requests service to save the fields of an {@link Activity}.
+     *
+     * @param structure {@link Activity}'s view structure.
+     * @param data same bundle passed to
+     * {@link #onFillRequest(AssistStructure, Bundle, CancellationSignal, FillCallback)};
+     * might also contain with optional parameters (currently none).
+     * @param cancellationSignal signal for observing cancel requests.
+     * @param callback object used to notify the result of the request.
+     */
+    public abstract void onSaveRequest(AssistStructure structure,
+            Bundle data, CancellationSignal cancellationSignal, SaveCallback callback);
+
+    private void requestAutoFill(AssistStructure structure, int flags, IBinder binder) {
+        // TODO(b/33197203): pass the Bundle received from mAssistReceiver instead?
+        final Bundle data = new Bundle();
+        switch (flags) {
+            case ASSIST_FLAG_SANITIZED_TEXT:
+                final FillCallback fillCallback = new FillCallback(binder);
+                // TODO(b/33197203): hook up the cancelationSignal
+                onFillRequest(structure, data, new CancellationSignal(), fillCallback);
+                break;
+            case ASSIST_FLAG_NON_SANITIZED_TEXT:
+                final SaveCallback saveCallback = new SaveCallback(binder);
+                // TODO(b/33197203): hook up the cancelationSignal
+                onSaveRequest(structure, null, new CancellationSignal(), saveCallback);
+                break;
+            default:
+                Log.w(TAG, "invalid flag on requestAutoFill(): " + flags);
+        }
     }
 
     /**
