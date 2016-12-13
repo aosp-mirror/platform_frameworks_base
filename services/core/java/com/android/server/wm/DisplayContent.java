@@ -2622,22 +2622,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * Apps. E.g. status bar.
      */
     private final class NonAppWindowContainers extends DisplayChildWindowContainer<WindowToken> {
-        final LinkedList<WindowState> mTmpWindows = new LinkedList();
-
-        private final ToBooleanFunction<WindowState> mCollectWindowsInOrder = w -> {
-            int addIndex = mTmpWindows.size();
-            for (int i = mTmpWindows.size() - 1; i >= 0; --i) {
-                final WindowState current = mTmpWindows.get(i);
-                if (w.mBaseLayer > current.mBaseLayer) {
-                    break;
-                }
-                addIndex = i;
-            }
-
-            mTmpWindows.add(addIndex, w);
-            return false;
-        };
-
         /**
          * Compares two child window tokens returns -1 if the first is lesser than the second in
          * terms of z-order and 1 otherwise.
@@ -2666,29 +2650,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         void addChild(WindowToken token) {
             addChild(token, mWindowComparator);
-        }
-
-        @Override
-        boolean forAllWindows(ToBooleanFunction<WindowState> callback,
-                boolean traverseTopToBottom) {
-            // Hack to work around WindowToken containing windows of various types there by causing
-            // the windows not to be returned in visual order if there is another token with a
-            // window that should be z-order in-between the windows of the first token. This is an
-            // issue due to the various window types sys-ui adds with its token.
-            // TODO: Have a separate token for each type of window sys-ui wants to add. Would
-            // require some changes to sys-ui on the token it uses for window creation vs. just
-            // using the default token of its process.
-            mTmpWindows.clear();
-            super.forAllWindows(mCollectWindowsInOrder, false /* traverseTopToBottom */);
-
-            while(!mTmpWindows.isEmpty()) {
-                final WindowState current = traverseTopToBottom
-                        ? mTmpWindows.pollLast() : mTmpWindows.pollFirst();
-                if (callback.apply(current)) {
-                    return true;
-                }
-            }
-            return false;
         }
 
         @Override

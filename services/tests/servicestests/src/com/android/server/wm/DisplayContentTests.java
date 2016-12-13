@@ -83,7 +83,7 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
-    public void testForAllWindows_WithImeTarget() throws Exception {
+    public void testForAllWindows_WithAppImeTarget() throws Exception {
         final WindowState imeAppTarget =
                 createWindow(null, TYPE_BASE_APPLICATION, sDisplayContent, "imeAppTarget");
 
@@ -123,6 +123,44 @@ public class DisplayContentTests extends WindowTestsBase {
         // Clean-up
         sWm.mInputMethodTarget = null;
         imeAppTarget.removeImmediately();
+    }
+
+    @Test
+    public void testForAllWindows_WithStatusBarImeTarget() throws Exception {
+
+        sWm.mInputMethodTarget = sStatusBarWindow;
+
+        final ArrayList<WindowState> windows = new ArrayList();
+
+        // Test forward traversal.
+        sDisplayContent.forAllWindows(w -> {windows.add(w);}, false /* traverseTopToBottom */);
+
+        assertEquals(sWallpaperWindow, windows.get(0));
+        assertEquals(sChildAppWindowBelow, windows.get(1));
+        assertEquals(sAppWindow, windows.get(2));
+        assertEquals(sChildAppWindowAbove, windows.get(3));
+        assertEquals(sDockedDividerWindow, windows.get(4));
+        assertEquals(sStatusBarWindow, windows.get(5));
+        assertEquals(sImeWindow, windows.get(6));
+        assertEquals(sImeDialogWindow, windows.get(7));
+        assertEquals(sNavBarWindow, windows.get(8));
+
+        // Test backward traversal.
+        windows.clear();
+        sDisplayContent.forAllWindows(w -> {windows.add(w);}, true /* traverseTopToBottom */);
+
+        assertEquals(sWallpaperWindow, windows.get(8));
+        assertEquals(sChildAppWindowBelow, windows.get(7));
+        assertEquals(sAppWindow, windows.get(6));
+        assertEquals(sChildAppWindowAbove, windows.get(5));
+        assertEquals(sDockedDividerWindow, windows.get(4));
+        assertEquals(sStatusBarWindow, windows.get(3));
+        assertEquals(sImeWindow, windows.get(2));
+        assertEquals(sImeDialogWindow, windows.get(1));
+        assertEquals(sNavBarWindow, windows.get(0));
+
+        // Clean-up
+        sWm.mInputMethodTarget = null;
     }
 
     @Test
