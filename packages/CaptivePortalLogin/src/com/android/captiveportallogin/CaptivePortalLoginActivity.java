@@ -63,6 +63,7 @@ public class CaptivePortalLoginActivity extends Activity {
     private enum Result { DISMISSED, UNWANTED, WANTED_AS_IS };
 
     private URL mUrl;
+    private String mUserAgent;
     private Network mNetwork;
     private CaptivePortal mCaptivePortal;
     private NetworkCallback mNetworkCallback;
@@ -76,6 +77,8 @@ public class CaptivePortalLoginActivity extends Activity {
         mCm = ConnectivityManager.from(this);
         mNetwork = getIntent().getParcelableExtra(ConnectivityManager.EXTRA_NETWORK);
         mCaptivePortal = getIntent().getParcelableExtra(ConnectivityManager.EXTRA_CAPTIVE_PORTAL);
+        mUserAgent = getIntent().getParcelableExtra(
+                ConnectivityManager.EXTRA_CAPTIVE_PORTAL_USER_AGENT);
         mUrl = getUrl();
         if (mUrl == null) {
             // getUrl() failed to parse the url provided in the intent: bail out in a way that
@@ -252,6 +255,7 @@ public class CaptivePortalLoginActivity extends Activity {
     }
 
     private void testForCaptivePortal() {
+        // TODO: reuse NetworkMonitor facilities for consistent captive portal detection.
         new Thread(new Runnable() {
             public void run() {
                 // Give time for captive portal to open.
@@ -262,11 +266,14 @@ public class CaptivePortalLoginActivity extends Activity {
                 HttpURLConnection urlConnection = null;
                 int httpResponseCode = 500;
                 try {
-                    urlConnection = (HttpURLConnection) mUrl.openConnection();
+                    urlConnection = (HttpURLConnection) mNetwork.openConnection(mUrl);
                     urlConnection.setInstanceFollowRedirects(false);
                     urlConnection.setConnectTimeout(SOCKET_TIMEOUT_MS);
                     urlConnection.setReadTimeout(SOCKET_TIMEOUT_MS);
                     urlConnection.setUseCaches(false);
+                    if (mUserAgent != null) {
+                       urlConnection.setRequestProperty("User-Agent", mUserAgent);
+                    }
                     urlConnection.getInputStream();
                     httpResponseCode = urlConnection.getResponseCode();
                 } catch (IOException e) {
