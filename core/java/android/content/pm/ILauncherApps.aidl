@@ -55,7 +55,8 @@ interface ILauncherApps {
             String callingPackage, String packageName, int flags, in UserHandle user);
 
     ParceledListSlice getShortcuts(String callingPackage, long changedSince, String packageName,
-            in List shortcutIds, in ComponentName componentName, int flags, in UserHandle user);
+            in List shortcutIds, in ComponentName componentName, in Intent intent, int flags,
+            in UserHandle user);
     void pinShortcuts(String callingPackage, String packageName, in List<String> shortcutIds,
             in UserHandle user);
     boolean startShortcut(String callingPackage, String packageName, String id,

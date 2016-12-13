@@ -44,8 +44,8 @@ public abstract class ShortcutServiceInternal {
             getShortcuts(int launcherUserId,
             @NonNull String callingPackage, long changedSince,
             @Nullable String packageName, @Nullable List<String> shortcutIds,
-            @Nullable ComponentName componentName, @ShortcutQuery.QueryFlags int flags,
-            int userId);
+            @Nullable ComponentName componentName, @Nullable Intent intent,
+            @ShortcutQuery.QueryFlags int flags, int userId);
 
     public abstract boolean
             isPinnedByCaller(int launcherUserId, @NonNull String callingPackage,

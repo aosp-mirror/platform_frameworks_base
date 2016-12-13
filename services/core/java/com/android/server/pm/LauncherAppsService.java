@@ -442,8 +442,8 @@ public class LauncherAppsService extends SystemService {
 
         @Override
         public ParceledListSlice getShortcuts(String callingPackage, long changedSince,
-                String packageName, List shortcutIds, ComponentName componentName, int flags,
-                UserHandle targetUser) {
+                String packageName, List shortcutIds, ComponentName componentName, Intent intent,
+                int flags, UserHandle targetUser) {
             ensureShortcutPermission(callingPackage);
             if (!canAccessProfile(callingPackage, targetUser, "Cannot get shortcuts")
                     || !isUserEnabled(targetUser)) {
@@ -454,11 +454,17 @@ public class LauncherAppsService extends SystemService {
                         "To query by shortcut ID, package name must also be set");
             }
 
+            if ((flags & ShortcutQuery.FLAG_MATCH_CHOOSER) == 0
+                    && intent != null) {
+                throw new IllegalArgumentException("Supplied an intent in the query, but did "
+                        + "not request chooser targets");
+            }
+
             // TODO(b/29399275): Eclipse compiler requires explicit List<ShortcutInfo> cast below.
             return new ParceledListSlice<>((List<ShortcutInfo>)
                     mShortcutServiceInternal.getShortcuts(getCallingUserId(),
                             callingPackage, changedSince, packageName, shortcutIds,
-                            componentName, flags, targetUser.getIdentifier()));
+                            componentName, intent, flags, targetUser.getIdentifier()));
         }
 
         @Override
@@ -906,6 +912,7 @@ public class LauncherAppsService extends SystemService {
                                         cookie.packageName,
                                         /* changedSince= */ 0, packageName, /* shortcutIds=*/ null,
                                         /* component= */ null,
+                                        /* intent= */ null,
                                         ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY
                                         | ShortcutQuery.FLAG_GET_ALL_KINDS
                                         , userId);

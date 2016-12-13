@@ -275,7 +275,18 @@ public class LauncherApps {
         @Deprecated
         public static final int FLAG_GET_MANIFEST = FLAG_MATCH_MANIFEST;
 
-        /** @hide */
+        /**
+         * Include chooser shortcuts in the result.
+         * STOPSHIP TODO: Unless explicitly requesting chooser fields, we should strip out chooser
+         *           relevant fields from the Shortcut. This should also be adequately documented.
+         */
+        public static final int FLAG_MATCH_CHOOSER = 1 << 4;
+
+        /**
+         * Does not retrieve CHOOSER only shortcuts.
+         * TODO: Add another flag for MATCH_ALL_PINNED
+         * @hide
+         */
         public static final int FLAG_MATCH_ALL_KINDS =
                 FLAG_GET_DYNAMIC | FLAG_GET_PINNED | FLAG_GET_MANIFEST;
 
@@ -308,6 +319,7 @@ public class LauncherApps {
                         FLAG_MATCH_DYNAMIC,
                         FLAG_MATCH_PINNED,
                         FLAG_MATCH_MANIFEST,
+                        FLAG_MATCH_CHOOSER,
                         FLAG_GET_KEY_FIELDS_ONLY,
                 })
         @Retention(RetentionPolicy.SOURCE)
@@ -323,6 +335,9 @@ public class LauncherApps {
 
         @Nullable
         ComponentName mActivity;
+
+        @Nullable
+        Intent mIntent;
 
         @QueryFlags
         int mQueryFlags;
@@ -364,6 +379,14 @@ public class LauncherApps {
          */
         public ShortcutQuery setActivity(@Nullable ComponentName activity) {
             mActivity = activity;
+            return this;
+        }
+
+        /**
+         * If non-null, returns only shortcuts with intent filters that match this intent.
+         */
+        public ShortcutQuery setIntent(@Nullable Intent intent) {
+            mIntent = intent;
             return this;
         }
 
@@ -681,7 +704,7 @@ public class LauncherApps {
         try {
             return mService.getShortcuts(mContext.getPackageName(),
                     query.mChangedSince, query.mPackage, query.mShortcutIds, query.mActivity,
-                    query.mQueryFlags, user)
+                    query.mIntent, query.mQueryFlags, user)
                     .getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
