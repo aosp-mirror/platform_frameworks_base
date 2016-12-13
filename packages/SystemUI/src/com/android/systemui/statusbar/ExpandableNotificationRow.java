@@ -202,6 +202,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private boolean mIsLastChild;
     private Runnable mOnDismissRunnable;
 
+    @Override
     public boolean isGroupExpansionChanging() {
         if (isChildInGroup()) {
             return mNotificationParent.isGroupExpansionChanging();
@@ -403,6 +404,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         row.setIsChildInGroup(false, null);
     }
 
+    @Override
     public boolean isChildInGroup() {
         return mNotificationParent != null;
     }
@@ -1071,7 +1073,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
         invalidateOutline();
         if (mSettingsIconRow != null) {
-            mSettingsIconRow.resetState();
+            mSettingsIconRow.resetState(true /* notify */);
         }
     }
 
@@ -1137,7 +1139,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             @Override
             public void onAnimationEnd(Animator anim) {
                 if (!cancelled && mSettingsIconRow != null && leftTarget == 0) {
-                    mSettingsIconRow.resetState();
+                    mSettingsIconRow.resetState(true /* notify */);
                     mTranslateAnim = null;
                 }
             }
@@ -1378,6 +1380,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
     }
 
+    @Override
     public boolean isGroupExpanded() {
         return mGroupManager.isGroupExpanded(mStatusBarNotification);
     }
@@ -1479,6 +1482,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mSensitiveHiddenInGeneral = hideSensitive;
     }
 
+    @Override
     public void setHideSensitiveForIntrinsicHeight(boolean hideSensitive) {
         mHideSensitiveForIntrinsicHeight = hideSensitive;
         if (mIsSummaryWithChildren) {
@@ -1491,6 +1495,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
     }
 
+    @Override
     public void setHideSensitive(boolean hideSensitive, boolean animated, long delay,
             long duration) {
         boolean oldShowingPublic = mShowingPublic;
@@ -1555,6 +1560,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
     }
 
+    @Override
     public boolean mustStayOnScreen() {
         return mIsHeadsUp;
     }

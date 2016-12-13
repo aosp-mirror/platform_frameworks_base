@@ -32,7 +32,9 @@ import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.systemui.classifier.FalsingManager;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.MenuItem;
 import com.android.systemui.statusbar.FlingAnimationUtils;
+import com.android.systemui.statusbar.NotificationSettingsIconRow;
 
 import java.util.HashMap;
 
@@ -85,10 +87,12 @@ public class SwipeHelper implements Gefingerpoken {
     private int mFalsingThreshold;
     private boolean mTouchAboveFalsingThreshold;
     private boolean mDisableHwLayers;
+    private Context mContext;
 
     private HashMap<View, Animator> mDismissPendingMap = new HashMap<>();
 
     public SwipeHelper(int swipeDirection, Callback callback, Context context) {
+        mContext = context;
         mCallback = callback;
         mHandler = new Handler();
         mSwipeDirection = swipeDirection;
@@ -249,6 +253,7 @@ public class SwipeHelper implements Gefingerpoken {
         }
     }
 
+    @Override
     public boolean onInterceptTouchEvent(final MotionEvent ev) {
         final int action = ev.getAction();
 
@@ -280,7 +285,9 @@ public class SwipeHelper implements Gefingerpoken {
                                         mCurrView.getLocationOnScreen(mTmpPos);
                                         final int x = (int) ev.getRawX() - mTmpPos[0];
                                         final int y = (int) ev.getRawY() - mTmpPos[1];
-                                        mLongPressListener.onLongPress(mCurrView, x, y);
+                                        mLongPressListener.onLongPress(mCurrView, x, y,
+                                                NotificationSettingsIconRow
+                                                        .getSettingsMenuItem(mContext));
                                     }
                                 }
                             };
@@ -379,6 +386,7 @@ public class SwipeHelper implements Gefingerpoken {
             animView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         }
         AnimatorUpdateListener updateListener = new AnimatorUpdateListener() {
+            @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 onTranslationUpdate(animView, (float) animation.getAnimatedValue(), canBeDismissed);
             }
@@ -401,10 +409,12 @@ public class SwipeHelper implements Gefingerpoken {
         anim.addListener(new AnimatorListenerAdapter() {
             private boolean mCancelled;
 
+            @Override
             public void onAnimationCancel(Animator animation) {
                 mCancelled = true;
             }
 
+            @Override
             public void onAnimationEnd(Animator animation) {
                 updateSwipeProgressFromOffset(animView, canBeDismissed);
                 mDismissPendingMap.remove(animView);
@@ -435,6 +445,7 @@ public class SwipeHelper implements Gefingerpoken {
     public void snapChild(final View animView, final float targetLeft, float velocity) {
         final boolean canBeDismissed = mCallback.canChildBeDismissed(animView);
         AnimatorUpdateListener updateListener = new AnimatorUpdateListener() {
+            @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 onTranslationUpdate(animView, (float) animation.getAnimatedValue(), canBeDismissed);
             }
@@ -447,6 +458,7 @@ public class SwipeHelper implements Gefingerpoken {
         int duration = SNAP_ANIM_LEN;
         anim.setDuration(duration);
         anim.addListener(new AnimatorListenerAdapter() {
+            @Override
             public void onAnimationEnd(Animator animator) {
                 mSnappingChild = false;
                 updateSwipeProgressFromOffset(animView, canBeDismissed);
@@ -522,6 +534,7 @@ public class SwipeHelper implements Gefingerpoken {
         }
     }
 
+    @Override
     public boolean onTouchEvent(MotionEvent ev) {
         if (mLongPressSent) {
             return true;
@@ -690,6 +703,6 @@ public class SwipeHelper implements Gefingerpoken {
          * Equivalent to {@link View.OnLongClickListener#onLongClick(View)} with coordinates
          * @return whether the longpress was handled
          */
-        boolean onLongPress(View v, int x, int y);
+        boolean onLongPress(View v, int x, int y, MenuItem item);
     }
 }

@@ -63,6 +63,8 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.classifier.FalsingManager;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.MenuItem;
 import com.android.systemui.statusbar.ActivatableNotificationView;
 import com.android.systemui.statusbar.DismissView;
 import com.android.systemui.statusbar.EmptyShadeView;
@@ -70,7 +72,6 @@ import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.NotificationGuts;
 import com.android.systemui.statusbar.NotificationSettingsIconRow;
-import com.android.systemui.statusbar.NotificationSettingsIconRow.SettingsIconRowListener;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StackScrollerDecorView;
 import com.android.systemui.statusbar.StatusBarState;
@@ -94,7 +95,8 @@ import java.util.HashSet;
 public class NotificationStackScrollLayout extends ViewGroup
         implements SwipeHelper.Callback, ExpandHelper.Callback, ScrollAdapter,
         ExpandableView.OnHeightChangedListener, NotificationGroupManager.OnGroupChangeListener,
-        SettingsIconRowListener, ScrollContainer, VisibilityLocationProvider {
+        NotificationMenuRowProvider.OnMenuClickListener, ScrollContainer,
+        VisibilityLocationProvider {
 
     public static final float BACKGROUND_ALPHA_DIMMED = 0.7f;
     private static final String TAG = "StackScroller";
@@ -399,16 +401,20 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     @Override
-    public void onGearTouched(ExpandableNotificationRow row, int x, int y) {
-        if (mLongPressListener != null) {
+    public void onMenuClicked(View view, int x, int y, MenuItem item) {
+        if (mLongPressListener == null) {
+            return;
+        }
+        if (view instanceof ExpandableNotificationRow) {
+            ExpandableNotificationRow row = (ExpandableNotificationRow) view;
             MetricsLogger.action(mContext, MetricsEvent.ACTION_TOUCH_GEAR,
                     row.getStatusBarNotification().getPackageName());
-            mLongPressListener.onLongPress(row, x, y);
         }
+        mLongPressListener.onLongPress(view, x, y, item);
     }
 
     @Override
-    public void onSettingsIconRowReset(ExpandableNotificationRow row) {
+    public void onMenuReset(View row) {
         if (mTranslatingParentView != null && row == mTranslatingParentView) {
             mSwipeHelper.setSnappedToGear(false);
             mGearExposedView = null;
@@ -425,7 +431,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (DEBUG) {
             int y = mTopPadding;
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
-            y = (int) getLayoutHeight();
+            y = getLayoutHeight();
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
             y = getHeight() - getEmptyBottomMargin();
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
@@ -911,7 +917,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             mDragAnimPendingChildren.remove(animView);
         }
         if (mCurrIconRow != null && targetLeft == 0) {
-            mCurrIconRow.resetState();
+            mCurrIconRow.resetState(true /* notify */);
             mCurrIconRow = null;
         }
     }
@@ -4147,7 +4153,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                     } else {
                         // Check scheduled, reset alpha and update location; check will fade it in
                         mCurrIconRow.setGearAlpha(0f);
-                        mCurrIconRow.setIconLocation(translation > 0 /* onLeft */);
+                        mCurrIconRow.setIconLocation((int) translation);
                     }
                 }
             }

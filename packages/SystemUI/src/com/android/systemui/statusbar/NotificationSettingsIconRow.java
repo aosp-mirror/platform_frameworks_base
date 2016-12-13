@@ -21,33 +21,32 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import java.util.ArrayList;
+
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.plugins.PluginListener;
+import com.android.systemui.plugins.PluginManager;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.MenuItem;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.OnMenuClickListener;
 
-public class NotificationSettingsIconRow extends FrameLayout implements View.OnClickListener {
+public class NotificationSettingsIconRow extends FrameLayout
+        implements PluginListener<NotificationMenuRowProvider>, View.OnClickListener {
 
-    private static final int GEAR_ALPHA_ANIM_DURATION = 200;
-
-    public interface SettingsIconRowListener {
-        /**
-         * Called when the gear behind a notification is touched.
-         */
-        public void onGearTouched(ExpandableNotificationRow row, int x, int y);
-
-        /**
-         * Called when a notification is slid back over the gear.
-         */
-        public void onSettingsIconRowReset(ExpandableNotificationRow row);
-    }
+    private static final int ICON_ALPHA_ANIM_DURATION = 200;
 
     private ExpandableNotificationRow mParent;
-    private AlphaOptimizedImageView mGearIcon;
-    private float mHorizSpaceForGear;
-    private SettingsIconRowListener mListener;
+    private OnMenuClickListener mListener;
+    private NotificationMenuRowProvider mMenuProvider;
+    private ArrayList<MenuItem> mMenuItems = new ArrayList<>();
 
     private ValueAnimator mFadeAnimator;
     private boolean mSettingsFadedIn = false;
@@ -59,7 +58,14 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
 
     private int[] mGearLocation = new int[2];
     private int[] mParentLocation = new int[2];
-    private int mVertSpaceForGear;
+
+    private float mHorizSpaceForIcon;
+    private int mVertSpaceForIcons;
+
+    private int mIconPadding;
+    private int mIconTint;
+
+    private float mAlpha = 0f;
 
     public NotificationSettingsIconRow(Context context) {
         this(context, null);
@@ -76,47 +82,90 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
     public NotificationSettingsIconRow(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs);
+        PluginManager.getInstance(getContext()).addPluginListener(
+                NotificationMenuRowProvider.ACTION, this,
+                NotificationMenuRowProvider.VERSION, false /* Allow multiple */);
+        mMenuItems.add(getSettingsMenuItem(context));
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mGearIcon = (AlphaOptimizedImageView) findViewById(R.id.gear_icon);
-        mGearIcon.setOnClickListener(this);
-        setOnClickListener(this);
-        mHorizSpaceForGear =
-                getResources().getDimensionPixelOffset(R.dimen.notification_gear_width);
-        mVertSpaceForGear = getResources().getDimensionPixelOffset(R.dimen.notification_min_height);
-        resetState();
+        mHorizSpaceForIcon =
+                getResources().getDimensionPixelSize(R.dimen.notification_gear_width);
+        mVertSpaceForIcons = getResources().getDimensionPixelSize(R.dimen.notification_min_height);
+        mIconPadding = getResources().getDimensionPixelSize(R.dimen.notification_gear_padding);
+        mIconTint = getResources().getColor(R.color.notification_gear_color);
+        updateMenu(false /* notify */);
     }
 
-    public void resetState() {
+    public static MenuItem getSettingsMenuItem(Context context) {
+        Drawable d = context.getResources().getDrawable(R.drawable.ic_settings);
+        String s = context.getResources().getString(R.string.notification_menu_gear_description);
+        MenuItem settings = new MenuItem(d, s);
+        return settings;
+    }
+
+    private void updateMenu(boolean notify) {
+        removeAllViews();
+        mMenuItems.clear();
+        if (mMenuProvider != null) {
+            mMenuItems.addAll(mMenuProvider.getMenuItems(getContext()));
+        }
+        mMenuItems.add(getSettingsMenuItem(getContext()));
+        for (int i = 0; i < mMenuItems.size(); i++) {
+            final View v = createMenuView(mMenuItems.get(i));
+            mMenuItems.get(i).menuView = v;
+        }
+        resetState(notify);
+    }
+
+    private View createMenuView(MenuItem item) {
+        AlphaOptimizedImageView iv = new AlphaOptimizedImageView(getContext());
+        addView(iv);
+        iv.setPadding(mIconPadding, mIconPadding, mIconPadding, mIconPadding);
+        iv.setImageDrawable(item.icon);
+        iv.setOnClickListener(this);
+        iv.setColorFilter(mIconTint);
+        iv.setAlpha(mAlpha);
+        FrameLayout.LayoutParams lp = (LayoutParams) iv.getLayoutParams();
+        lp.width = (int) mHorizSpaceForIcon;
+        lp.height = (int) mHorizSpaceForIcon;
+        return iv;
+    }
+
+    public void resetState(boolean notify) {
         setGearAlpha(0f);
         mIconPlaced = false;
         mSettingsFadedIn = false;
         mAnimating = false;
         mSnapping = false;
         mDismissing = false;
-        setIconLocation(true /* on left */);
-        if (mListener != null) {
-            mListener.onSettingsIconRowReset(mParent);
+        setIconLocation(mOnLeft ? 1 : -1 /* on left */);
+        if (mListener != null && notify) {
+            mListener.onMenuReset(mParent);
         }
     }
 
-    public void setGearListener(SettingsIconRowListener listener) {
+    public void setGearListener(OnMenuClickListener listener) {
         mListener = listener;
     }
 
     public void setNotificationRowParent(ExpandableNotificationRow parent) {
         mParent = parent;
-        setIconLocation(mOnLeft);
+        setIconLocation(mOnLeft ? 1 : -1);
     }
 
     public void setAppName(String appName) {
         Resources res = getResources();
-        String description = String.format(res.getString(R.string.notification_gear_accessibility),
-                appName);
-        mGearIcon.setContentDescription(description);
+        final int count = mMenuItems.size();
+        for (int i = 0; i < count; i++) {
+            MenuItem item = mMenuItems.get(i);
+            String description = String.format(
+                    res.getString(R.string.notification_menu_accessibility),
+                    appName, item.menuDescription);
+            item.menuView.setContentDescription(description);
+        }
     }
 
     public ExpandableNotificationRow getNotificationParent() {
@@ -124,27 +173,31 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
     }
 
     public void setGearAlpha(float alpha) {
+        mAlpha = alpha;
         if (alpha == 0) {
             mSettingsFadedIn = false; // Can fade in again once it's gone.
             setVisibility(View.INVISIBLE);
         } else {
             setVisibility(View.VISIBLE);
         }
-        mGearIcon.setAlpha(alpha);
+        final int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            getChildAt(i).setAlpha(mAlpha);
+        }
     }
 
     /**
-     * Returns whether the icon is on the left side of the view or not.
+     * Returns whether the icons are on the left side of the view or not.
      */
     public boolean isIconOnLeft() {
         return mOnLeft;
     }
 
     /**
-     * Returns the horizontal space in pixels required to display the gear behind a notification.
+     * Returns the horizontal space in pixels required to display the icons behind a notification.
      */
     public float getSpaceForGear() {
-        return mHorizSpaceForGear;
+        return mHorizSpaceForIcon * getChildCount();
     }
 
     /**
@@ -152,7 +205,7 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
      * if entire view is visible.
      */
     public boolean isVisible() {
-        return mGearIcon.getAlpha() > 0;
+        return mAlpha > 0;
     }
 
     public void cancelFadeAnimator() {
@@ -189,8 +242,8 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
         if (isIconLocationChange(transX)) {
             setGearAlpha(0f);
         }
-        setIconLocation(transX > 0 /* fromLeft */);
-        mFadeAnimator = ValueAnimator.ofFloat(mGearIcon.getAlpha(), 1);
+        setIconLocation((int) transX);
+        mFadeAnimator = ValueAnimator.ofFloat(mAlpha, 1);
         mFadeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
@@ -212,59 +265,66 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
             @Override
             public void onAnimationCancel(Animator animation) {
                 // TODO should animate back to 0f from current alpha
-                mGearIcon.setAlpha(0f);
+                setGearAlpha(0f);
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
                 mAnimating = false;
-                mSettingsFadedIn = mGearIcon.getAlpha() == 1;
+                mSettingsFadedIn = mAlpha == 1;
             }
         });
         mFadeAnimator.setInterpolator(Interpolators.ALPHA_IN);
-        mFadeAnimator.setDuration(GEAR_ALPHA_ANIM_DURATION);
+        mFadeAnimator.setDuration(ICON_ALPHA_ANIM_DURATION);
         mFadeAnimator.start();
     }
 
     public void updateVerticalLocation() {
-        if (mParent == null) {
+        if (mParent == null || mMenuItems.size() == 0) {
             return;
         }
+        final int iconHeight = getChildAt(0).getHeight();
         int parentHeight = mParent.getCollapsedHeight();
-        if (parentHeight < mVertSpaceForGear) {
-            mGearIcon.setTranslationY((parentHeight / 2) - (mGearIcon.getHeight() / 2));
+        int translationY;
+        if (parentHeight < mVertSpaceForIcons) {
+            translationY = (parentHeight / 2) - (iconHeight / 2);
         } else {
-            mGearIcon.setTranslationY((mVertSpaceForGear - mGearIcon.getHeight()) / 2);
+            translationY = (mVertSpaceForIcons - iconHeight) / 2;
         }
+        setTranslationY(translationY);
     }
 
     @Override
     public void onRtlPropertiesChanged(int layoutDirection) {
-        setIconLocation(mOnLeft);
+        setIconLocation(mOnLeft ? 1 : -1);
     }
 
-    public void setIconLocation(boolean onLeft) {
-        if ((mIconPlaced && onLeft == mOnLeft) || mSnapping || mParent == null
-                || mGearIcon.getWidth() == 0) {
-            // Do nothing
+    public void setIconLocation(int translation) {
+        boolean onLeft = translation > 0;
+        if ((mIconPlaced && onLeft == mOnLeft) || mSnapping || mParent == null) {
             return;
         }
+
         final boolean isRtl = mParent.isLayoutRtl();
-        final float left = isRtl
-                ? -(mParent.getWidth() - mHorizSpaceForGear)
-                : 0;
-        final float right = isRtl
-                ? 0
-                : mParent.getWidth() - mHorizSpaceForGear;
-        final float centerX = ((mHorizSpaceForGear - mGearIcon.getWidth()) / 2);
-        setTranslationX(onLeft ? left + centerX : right + centerX);
+        final int count = getChildCount();
+        final int width = getWidth();
+        for (int i = 0; i < count; i++) {
+            final View v = getChildAt(i);
+            final float left = isRtl
+                    ? -(width - mHorizSpaceForIcon * (i + 1))
+                    : i * mHorizSpaceForIcon;
+            final float right = isRtl
+                    ? -i * mHorizSpaceForIcon
+                    : width - (mHorizSpaceForIcon * (i + 1));
+            v.setTranslationX(onLeft ? left : right);
+        }
         mOnLeft = onLeft;
         mIconPlaced = true;
     }
 
     public boolean isIconLocationChange(float translation) {
-        boolean onLeft = translation > mGearIcon.getPaddingStart();
-        boolean onRight = translation < -mGearIcon.getPaddingStart();
+        boolean onLeft = translation > mIconPadding;
+        boolean onRight = translation < -mIconPadding;
         if ((mOnLeft && onRight) || (!mOnLeft && onLeft)) {
             return true;
         }
@@ -281,20 +341,29 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.gear_icon) {
-            if (mListener != null) {
-                mGearIcon.getLocationOnScreen(mGearLocation);
-                mParent.getLocationOnScreen(mParentLocation);
-
-                final int centerX = (int) (mHorizSpaceForGear / 2);
-                final int centerY =
-                        (int) (mGearIcon.getTranslationY() * 2 + mGearIcon.getHeight())/ 2;
-                final int x = mGearLocation[0] - mParentLocation[0] + centerX;
-                final int y = mGearLocation[1] - mParentLocation[1] + centerY;
-                mListener.onGearTouched(mParent, x, y);
-            }
-        } else {
-            // Do nothing when the background is touched.
+        if (mListener == null) {
+            // Nothing to do
+            return;
         }
+        v.getLocationOnScreen(mGearLocation);
+        mParent.getLocationOnScreen(mParentLocation);
+        final int centerX = (int) (mHorizSpaceForIcon / 2);
+        final int centerY = (int) (v.getTranslationY() * 2 + v.getHeight()) / 2;
+        final int x = mGearLocation[0] - mParentLocation[0] + centerX;
+        final int y = mGearLocation[1] - mParentLocation[1] + centerY;
+        final int index = indexOfChild(v);
+        mListener.onMenuClicked(mParent, x, y, mMenuItems.get(index));
+    }
+
+    @Override
+    public void onPluginConnected(NotificationMenuRowProvider plugin, Context pluginContext) {
+        mMenuProvider = plugin;
+        updateMenu(false /* notify */);
+    }
+
+    @Override
+    public void onPluginDisconnected(NotificationMenuRowProvider plugin) {
+        mMenuProvider = null;
+        updateMenu(false /* notify */);
     }
 }

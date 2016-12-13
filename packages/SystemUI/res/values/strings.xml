@@ -1375,8 +1375,11 @@
     <!-- Notification: Control panel: Label for button that dismisses control panel. [CHAR LIMIT=NONE] -->
     <string name="notification_done">Done</string>
 
-    <!-- Notification: Gear: Content description for the gear. [CHAR LIMIT=NONE] -->
-    <string name="notification_gear_accessibility"><xliff:g id="app_name" example="YouTube">%1$s</xliff:g> notification controls</string>
+    <!-- Notification: Menu row: Content description for menu items. [CHAR LIMIT=NONE] -->
+    <string name="notification_menu_accessibility"><xliff:g id="app_name" example="YouTube">%1$s</xliff:g> <xliff:g id="menu_description" example="notification controls">%2$s</xliff:g></string>
+
+    <!-- Notification: Menu row: Content description for the gear menu item. [CHAR LIMIT=NONE] -->
+    <string name="notification_menu_gear_description">notification controls</string>
 
     <!-- Title of the battery settings detail panel [CHAR LIMIT=20] -->
     <string name="battery_panel_title">Battery usage</string>
