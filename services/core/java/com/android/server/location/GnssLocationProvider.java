@@ -464,6 +464,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
             if (mDownloadXtraDataPending == STATE_PENDING_NETWORK) {
                 xtraDownloadRequest();
             }
+            // Always on, notify HAL so it can get data it needs
             sendMessage(UPDATE_NETWORK_STATE, 0 /*arg*/, network);
         }
 
@@ -480,6 +481,12 @@ public class GnssLocationProvider implements LocationProviderInterface {
      */
     private final ConnectivityManager.NetworkCallback mSuplConnectivityCallback =
             new ConnectivityManager.NetworkCallback() {
+        @Override
+        public void onAvailable(Network network) {
+            // Specific to a change to a SUPL enabled network becoming ready
+            sendMessage(UPDATE_NETWORK_STATE, 0 /*arg*/, network);
+        }
+
         @Override
         public void onLost(Network network) {
             releaseSuplConnection(GPS_RELEASE_AGPS_DATA_CONN);
