@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.view.accessibility.AccessibilityNodeInfo.ACTION_ARGUMENT_ACCESSIBLE_CLICKABLE_SPAN;
+
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -24,8 +26,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
+import android.text.TextUtils;
+import android.text.style.AccessibilityClickableSpan;
+import android.text.style.ClickableSpan;
 import android.util.LongSparseArray;
 import android.view.View.AttachInfo;
 import android.view.accessibility.AccessibilityInteractionClient;
@@ -33,6 +39,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 
+import com.android.internal.R;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.Predicate;
 
@@ -655,17 +662,23 @@ final class AccessibilityInteractionController {
                 target = mViewRootImpl.mView;
             }
             if (target != null && isShown(target)) {
-                AccessibilityNodeProvider provider = target.getAccessibilityNodeProvider();
-                if (provider != null) {
-                    if (virtualDescendantId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
-                        succeeded = provider.performAction(virtualDescendantId, action,
-                                arguments);
-                    } else {
-                        succeeded = provider.performAction(AccessibilityNodeProvider.HOST_VIEW_ID,
-                                action, arguments);
+                if (action == R.id.accessibilityActionClickOnClickableSpan) {
+                    // Handle this hidden action separately
+                    succeeded = handleClickableSpanActionUiThread(
+                            target, virtualDescendantId, arguments);
+                } else {
+                    AccessibilityNodeProvider provider = target.getAccessibilityNodeProvider();
+                    if (provider != null) {
+                        if (virtualDescendantId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
+                            succeeded = provider.performAction(virtualDescendantId, action,
+                                    arguments);
+                        } else {
+                            succeeded = provider.performAction(
+                                    AccessibilityNodeProvider.HOST_VIEW_ID, action, arguments);
+                        }
+                    } else if (virtualDescendantId == AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
+                        succeeded = target.performAccessibilityAction(action, arguments);
                     }
-                } else if (virtualDescendantId == AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
-                    succeeded = target.performAccessibilityAction(action, arguments);
                 }
             }
         } finally {
@@ -814,6 +827,37 @@ final class AccessibilityInteractionController {
     private boolean shouldApplyAppScaleAndMagnificationSpec(float appScale,
             MagnificationSpec spec) {
         return (appScale != 1.0f || (spec != null && !spec.isNop()));
+    }
+
+    private boolean handleClickableSpanActionUiThread(
+            View view, int virtualDescendantId, Bundle arguments) {
+        Parcelable span = arguments.getParcelable(ACTION_ARGUMENT_ACCESSIBLE_CLICKABLE_SPAN);
+        if (!(span instanceof AccessibilityClickableSpan)) {
+            return false;
+        }
+
+        // Find the original ClickableSpan if it's still on the screen
+        AccessibilityNodeInfo infoWithSpan = null;
+        AccessibilityNodeProvider provider = view.getAccessibilityNodeProvider();
+        if (provider != null) {
+            int idForNode = (virtualDescendantId == AccessibilityNodeInfo.UNDEFINED_ITEM_ID)
+                    ? AccessibilityNodeProvider.HOST_VIEW_ID : virtualDescendantId;
+            infoWithSpan = provider.createAccessibilityNodeInfo(idForNode);
+        } else if (virtualDescendantId == AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
+            infoWithSpan = view.createAccessibilityNodeInfo();
+        }
+        if (infoWithSpan == null) {
+            return false;
+        }
+
+        // Click on the corresponding span
+        ClickableSpan clickableSpan = ((AccessibilityClickableSpan) span).findClickableSpan(
+                infoWithSpan.getOriginalText());
+        if (clickableSpan != null) {
+            clickableSpan.onClick(view);
+            return true;
+        }
+        return false;
     }
 
     /**
