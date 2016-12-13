@@ -81,7 +81,7 @@ static void computeScreenSpaceMatrix(mat4& screenSpace, const SkMatrix& unitMatr
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// gradient shader matrix helpers
+// Gradient shader matrix helpers
 ///////////////////////////////////////////////////////////////////////////////
 
 static void toLinearUnitMatrix(const SkPoint pts[2], SkMatrix* matrix) {
@@ -161,7 +161,7 @@ bool tryStoreGradient(Caches& caches, const SkShader& shader, const Matrix4 mode
     gradInfo.fColorOffsets = &colorOffsets[0];
     shader.asAGradient(&gradInfo);
 
-    if (CC_UNLIKELY(!isSimpleGradient(gradInfo))) {
+    if (CC_UNLIKELY(!description->isSimpleGradient)) {
         outData->gradientSampler = (*textureUnit)++;
 
 #ifndef SK_SCALAR_IS_FLOAT
@@ -174,8 +174,8 @@ bool tryStoreGradient(Caches& caches, const SkShader& shader, const Matrix4 mode
         outData->gradientSampler = 0;
         outData->gradientTexture = nullptr;
 
-        outData->startColor.setSRGB(gradInfo.fColors[0]);
-        outData->endColor.setSRGB(gradInfo.fColors[1]);
+        outData->startColor.setUnPreMultipliedSRGB(gradInfo.fColors[0]);
+        outData->endColor.setUnPreMultipliedSRGB(gradInfo.fColors[1]);
     }
 
     return true;

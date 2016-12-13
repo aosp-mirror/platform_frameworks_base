@@ -175,10 +175,11 @@ const char* gFS_Gradient_Functions =
 const char* gFS_Gradient_Preamble[2] = {
         // Linear framebuffer
         "\nvec4 dither(const vec4 color) {\n"
-        "    return vec4(color.rgb + (triangleNoise(gl_FragCoord.xy * screenSize.xy) / 255.0), color.a);"
+        "    return vec4(color.rgb + (triangleNoise(gl_FragCoord.xy * screenSize.xy) / 255.0), color.a);\n"
         "}\n"
         "\nvec4 gammaMix(const vec4 a, const vec4 b, float v) {\n"
-        "    return pow(mix(a, b, v), vec4(vec3(1.0 / 2.2), 1.0));"
+        "    vec4 c = pow(mix(a, b, v), vec4(vec3(1.0 / 2.2), 1.0));\n"
+        "    return vec4(c.rgb * c.a, c.a);\n"
         "}\n",
         // sRGB framebuffer
         "\nvec4 dither(const vec4 color) {\n"
@@ -186,7 +187,8 @@ const char* gFS_Gradient_Preamble[2] = {
         "    return vec4(dithered * dithered, color.a);\n"
         "}\n"
         "\nvec4 gammaMix(const vec4 a, const vec4 b, float v) {\n"
-        "    return mix(a, b, v);"
+        "    vec4 c = mix(a, b, v);\n"
+        "    return vec4(c.rgb * c.a, c.a);\n"
         "}\n"
 };
 
