@@ -22,6 +22,7 @@ import android.view.Display;
 import java.util.ArrayDeque;
 import java.util.function.Consumer;
 
+import static android.app.ActivityManager.StackId.ASSISTANT_STACK_ID;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -58,6 +59,7 @@ class WindowLayersController {
     private int mHighestApplicationLayer = 0;
     private ArrayDeque<WindowState> mPinnedWindows = new ArrayDeque<>();
     private ArrayDeque<WindowState> mDockedWindows = new ArrayDeque<>();
+    private ArrayDeque<WindowState> mAssistantWindows = new ArrayDeque<>();
     private ArrayDeque<WindowState> mInputMethodWindows = new ArrayDeque<>();
     private WindowState mDockDivider = null;
     private ArrayDeque<WindowState> mReplacingWindows = new ArrayDeque<>();
@@ -137,6 +139,7 @@ class WindowLayersController {
         mPinnedWindows.clear();
         mInputMethodWindows.clear();
         mDockedWindows.clear();
+        mAssistantWindows.clear();
         mReplacingWindows.clear();
         mDockDivider = null;
 
@@ -188,6 +191,8 @@ class WindowLayersController {
             mPinnedWindows.add(w);
         } else if (stack.mStackId == DOCKED_STACK_ID) {
             mDockedWindows.add(w);
+        } else if (stack.mStackId == ASSISTANT_STACK_ID) {
+            mAssistantWindows.add(w);
         }
     }
 
@@ -206,6 +211,12 @@ class WindowLayersController {
         // treatment, e.g. to be above the dock divider.
         while (!mReplacingWindows.isEmpty()) {
             layer = assignAndIncreaseLayerIfNeeded(mReplacingWindows.remove(), layer);
+        }
+
+        // Adjust the assistant stack windows to be above the docked and fullscreen stack windows,
+        // but under the pinned stack windows
+        while (!mAssistantWindows.isEmpty()) {
+            layer = assignAndIncreaseLayerIfNeeded(mAssistantWindows.remove(), layer);
         }
 
         while (!mPinnedWindows.isEmpty()) {

@@ -37,6 +37,7 @@ import android.view.IWindow;
 import android.view.WindowManager;
 
 import static android.app.ActivityManager.StackId.FIRST_DYNAMIC_STACK_ID;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -145,6 +146,21 @@ class WindowTestsBase {
         return win;
     }
 
+    /**
+     * Creates a window for a task on a the given {@param stackId}.
+     */
+    private WindowState createStackWindow(int stackId, String name) {
+        final StackWindowController stackController = createStackControllerOnStackOnDisplay(stackId,
+                sDisplayContent);
+        final TestTaskWindowContainerController taskController =
+                new TestTaskWindowContainerController(stackController);
+        TestAppWindowToken appWinToken = new TestAppWindowToken(sDisplayContent);
+        appWinToken.mTask = taskController.mContainer;
+        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, name);
+        win.mAppToken = appWinToken;
+        return win;
+    }
+
     /** Asserts that the first entry is greater than the second entry. */
     void assertGreaterThan(int first, int second) throws Exception {
         Assert.assertTrue("Excepted " + first + " to be greater than " + second, first > second);
@@ -157,12 +173,14 @@ class WindowTestsBase {
         sWm.mH.runWithScissors(() -> { }, 0);
     }
 
-    private static WindowToken createWindowToken(DisplayContent dc, int type) {
+    private static WindowToken createWindowToken(DisplayContent dc, int stackId, int type) {
         if (type < FIRST_APPLICATION_WINDOW || type > LAST_APPLICATION_WINDOW) {
             return new TestWindowToken(type, dc);
         }
 
-        final TaskStack stack = createTaskStackOnDisplay(dc);
+        final TaskStack stack = stackId == INVALID_STACK_ID
+                ? createTaskStackOnDisplay(dc)
+                : createStackControllerOnStackOnDisplay(stackId, dc).mContainer;
         final Task task = createTaskInStack(stack, 0 /* userId */);
         final TestAppWindowToken token = new TestAppWindowToken(dc);
         task.addChild(token, 0);
@@ -175,6 +193,12 @@ class WindowTestsBase {
                 : createWindow(parent, type, parent.mToken, name);
     }
 
+    static WindowState createWindowOnStack(WindowState parent, int stackId, int type,
+            DisplayContent dc, String name) {
+        final WindowToken token = createWindowToken(dc, stackId, type);
+        return createWindow(parent, type, token, name);
+    }
+
     WindowState createAppWindow(Task task, int type, String name) {
         final AppWindowToken token = new TestAppWindowToken(sDisplayContent);
         task.addChild(token, 0);
@@ -182,13 +206,13 @@ class WindowTestsBase {
     }
 
     static WindowState createWindow(WindowState parent, int type, DisplayContent dc, String name) {
-        final WindowToken token = createWindowToken(dc, type);
+        final WindowToken token = createWindowToken(dc, INVALID_STACK_ID, type);
         return createWindow(parent, type, token, name);
     }
 
     static WindowState createWindow(WindowState parent, int type, DisplayContent dc, String name,
             boolean ownerCanAddInternalSystemWindow) {
-        final WindowToken token = createWindowToken(dc, type);
+        final WindowToken token = createWindowToken(dc, INVALID_STACK_ID, type);
         return createWindow(parent, type, token, name, ownerCanAddInternalSystemWindow);
     }
 
@@ -216,6 +240,11 @@ class WindowTestsBase {
 
     static StackWindowController createStackControllerOnDisplay(DisplayContent dc) {
         final int stackId = ++sNextStackId;
+        return createStackControllerOnStackOnDisplay(stackId, dc);
+    }
+
+    static StackWindowController createStackControllerOnStackOnDisplay(int stackId,
+            DisplayContent dc) {
         return new StackWindowController(stackId, null, dc.getDisplayId(),
                 true /* onTop */, new Rect(), sWm);
     }

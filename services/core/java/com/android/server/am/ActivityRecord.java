@@ -19,8 +19,10 @@ package com.android.server.am;
 import static android.app.ActivityManager.ENABLE_TASK_SNAPSHOTS;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.StackId;
+import static android.app.ActivityManager.StackId.ASSISTANT_STACK_ID;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.AppOpsManager.MODE_ALLOWED;
@@ -178,6 +180,7 @@ final class ActivityRecord implements AppWindowContainerListener {
     static final int APPLICATION_ACTIVITY_TYPE = 0;
     static final int HOME_ACTIVITY_TYPE = 1;
     static final int RECENTS_ACTIVITY_TYPE = 2;
+    static final int ASSISTANT_ACTIVITY_TYPE = 3;
     int mActivityType;
 
     private CharSequence nonLocalizedLabel;  // the label information from the package mgr.
@@ -721,7 +724,7 @@ final class ActivityRecord implements AppWindowContainerListener {
         noDisplay = ent != null && ent.array.getBoolean(
                 com.android.internal.R.styleable.Window_windowNoDisplay, false);
 
-        setActivityType(_componentSpecified, _launchedFromUid, _intent, sourceRecord);
+        setActivityType(_componentSpecified, _launchedFromUid, _intent, options, sourceRecord);
 
         immersive = (aInfo.flags & FLAG_IMMERSIVE) != 0;
 
@@ -812,8 +815,23 @@ final class ActivityRecord implements AppWindowContainerListener {
         return sourceRecord != null && sourceRecord.isResolverActivity();
     }
 
-    private void setActivityType(boolean componentSpecified,
-            int launchedFromUid, Intent intent, ActivityRecord sourceRecord) {
+    /**
+     * @return whether the given package name can launch an assist activity.
+     */
+    private boolean canLaunchAssistActivity(String packageName) {
+        if (service.mAssistUtils == null) {
+            return false;
+        }
+
+        final ComponentName assistComponent = service.mAssistUtils.getActiveServiceComponentName();
+        if (assistComponent != null) {
+            return assistComponent.getPackageName().equals(packageName);
+        }
+        return false;
+    }
+
+    private void setActivityType(boolean componentSpecified, int launchedFromUid, Intent intent,
+            ActivityOptions options, ActivityRecord sourceRecord) {
         if ((!componentSpecified || canLaunchHomeActivity(launchedFromUid, sourceRecord))
                 && isHomeIntent(intent) && !isResolverActivity()) {
             // This sure looks like a home activity!
@@ -826,6 +844,9 @@ final class ActivityRecord implements AppWindowContainerListener {
             }
         } else if (realActivity.getClassName().contains(RECENTS_PACKAGE_NAME)) {
             mActivityType = RECENTS_ACTIVITY_TYPE;
+        } else if (options != null && options.getLaunchStackId() == ASSISTANT_STACK_ID
+                && canLaunchAssistActivity(launchedFromPackage)) {
+            mActivityType = ASSISTANT_ACTIVITY_TYPE;
         } else {
             mActivityType = APPLICATION_ACTIVITY_TYPE;
         }
@@ -881,6 +902,10 @@ final class ActivityRecord implements AppWindowContainerListener {
 
     boolean isRecentsActivity() {
         return mActivityType == RECENTS_ACTIVITY_TYPE;
+    }
+
+    boolean isAssistantActivity() {
+        return mActivityType == ASSISTANT_ACTIVITY_TYPE;
     }
 
     boolean isApplicationActivity() {
@@ -2317,6 +2342,7 @@ final class ActivityRecord implements AppWindowContainerListener {
             case APPLICATION_ACTIVITY_TYPE: return "APPLICATION_ACTIVITY_TYPE";
             case HOME_ACTIVITY_TYPE: return "HOME_ACTIVITY_TYPE";
             case RECENTS_ACTIVITY_TYPE: return "RECENTS_ACTIVITY_TYPE";
+            case ASSISTANT_ACTIVITY_TYPE: return "ASSISTANT_ACTIVITY_TYPE";
             default: return Integer.toString(type);
         }
     }

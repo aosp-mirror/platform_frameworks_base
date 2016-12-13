@@ -389,6 +389,8 @@ interface IActivityManager {
             in Intent intent, in String resolvedType, in IVoiceInteractionSession session,
             in IVoiceInteractor interactor, int flags, in ProfilerInfo profilerInfo,
             in Bundle options, int userId);
+    int startAssistantActivity(in String callingPackage, int callingPid, int callingUid,
+            in Intent intent, in String resolvedType, in Bundle options, int userId);
     Bundle getActivityOptions(in IBinder token);
     List<IBinder> getAppTasks(in String callingPackage);
     void startSystemLockTaskMode(int taskId);

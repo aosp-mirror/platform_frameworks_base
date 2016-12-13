@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.StackId.ASSISTANT_STACK_ID;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
@@ -62,6 +63,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBILIT
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
+import static com.android.server.am.ActivityRecord.ASSISTANT_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityStackSupervisor.FindTaskResult;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
@@ -776,6 +778,10 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
 
     final boolean isPinnedStack() {
         return mStackId == PINNED_STACK_ID;
+    }
+
+    final boolean isAssistantStack() {
+        return mStackId == ASSISTANT_STACK_ID;
     }
 
     final boolean isOnHomeDisplay() {
@@ -1556,11 +1562,11 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
         final ActivityStack focusedStack = mStackSupervisor.getFocusedStack();
         final int focusedStackId = focusedStack.mStackId;
 
-        if (mStackId == FULLSCREEN_WORKSPACE_STACK_ID
+        if (StackId.isBackdropToTranslucentActivity(mStackId)
                 && hasVisibleBehindActivity() && StackId.isHomeOrRecentsStack(focusedStackId)
                 && !focusedStack.topActivity().fullscreen) {
-            // The fullscreen stack should be visible if it has a visible behind activity behind
-            // the home or recents stack that is translucent.
+            // The fullscreen or assistant stack should be visible if it has a visible behind
+            // activity behind the home or recents stack that is translucent.
             return STACK_VISIBLE_ACTIVITY_BEHIND;
         }
 
@@ -1589,10 +1595,10 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
         final int stackBehindFocusedId = (stackBehindFocusedIndex >= 0)
                 ? mStacks.get(stackBehindFocusedIndex).mStackId : INVALID_STACK_ID;
 
-        if (focusedStackId == FULLSCREEN_WORKSPACE_STACK_ID
+        if (StackId.isBackdropToTranslucentActivity(focusedStackId)
                 && focusedStack.isStackTranslucent(starting, stackBehindFocusedId)) {
-            // Stacks behind the fullscreen stack with a translucent activity are always
-            // visible so they can act as a backdrop to the translucent activity.
+            // Stacks behind the fullscreen or assistant stack with a translucent activity are
+            // always visible so they can act as a backdrop to the translucent activity.
             // For example, dialog activities
             if (stackIndex == stackBehindFocusedIndex) {
                 return STACK_VISIBLE;
@@ -2544,8 +2550,7 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
 
     private boolean resumeTopActivityInNextFocusableStack(ActivityRecord prev,
             ActivityOptions options, String reason) {
-        if ((!mFullscreen || !isOnHomeDisplay())
-                && adjustFocusToNextFocusableStackLocked(reason)) {
+        if ((!mFullscreen || !isOnHomeDisplay()) && adjustFocusToNextFocusableStackLocked(reason)) {
             // Try to move focus to the next visible stack with a running activity if this
             // stack is not covering the entire screen or is on a secondary display (with no home
             // stack).
@@ -2630,10 +2635,14 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
                 true /* includingParents */);
     }
 
+    /**
+     * Updates the {@param task}'s return type before it is moved to the top.
+     */
     private void updateTaskReturnToForTopInsertion(TaskRecord task) {
         boolean isLastTaskOverHome = false;
-        // If the moving task is over home stack, transfer its return type to next task
-        if (task.isOverHomeStack()) {
+        // If the moving task is over the home or assistant stack, transfer its return type to next
+        // task so that they return to the same stack
+        if (task.isOverHomeStack() || task.isOverAssistantStack()) {
             final TaskRecord nextTask = getNextTask(task);
             if (nextTask != null) {
                 nextTask.setTaskToReturnTo(task.getTaskToReturnTo());
@@ -2642,24 +2651,32 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
             }
         }
 
+        // If this is not on the default display, then just set the return type to application
+        if (!isOnHomeDisplay()) {
+            task.setTaskToReturnTo(APPLICATION_ACTIVITY_TYPE);
+            return;
+        }
+
+        // If the task was launched from the assistant stack, set the return type to assistant
+        final ActivityStack lastStack = mStackSupervisor.getLastStack();
+        if (lastStack != null && lastStack.isAssistantStack()) {
+            task.setTaskToReturnTo(ASSISTANT_ACTIVITY_TYPE);
+            return;
+        }
+
         // If this is being moved to the top by another activity or being launched from the home
         // activity, set mTaskToReturnTo accordingly.
-        if (isOnHomeDisplay()) {
-            ActivityStack lastStack = mStackSupervisor.getLastStack();
-            final boolean fromHomeOrRecents = lastStack.isHomeOrRecentsStack();
-            final TaskRecord topTask = lastStack.topTask();
-            if (!isHomeOrRecentsStack() && (fromHomeOrRecents || topTask() != task)) {
-                // If it's a last task over home - we default to keep its return to type not to
-                // make underlying task focused when this one will be finished.
-                int returnToType = isLastTaskOverHome
-                        ? task.getTaskToReturnTo() : APPLICATION_ACTIVITY_TYPE;
-                if (fromHomeOrRecents && StackId.allowTopTaskToReturnHome(mStackId)) {
-                    returnToType = topTask == null ? HOME_ACTIVITY_TYPE : topTask.taskType;
-                }
-                task.setTaskToReturnTo(returnToType);
+        final boolean fromHomeOrRecents = lastStack.isHomeOrRecentsStack();
+        final TaskRecord topTask = lastStack.topTask();
+        if (!isHomeOrRecentsStack() && (fromHomeOrRecents || topTask() != task)) {
+            // If it's a last task over home - we default to keep its return to type not to
+            // make underlying task focused when this one will be finished.
+            int returnToType = isLastTaskOverHome
+                    ? task.getTaskToReturnTo() : APPLICATION_ACTIVITY_TYPE;
+            if (fromHomeOrRecents && StackId.allowTopTaskToReturnHome(mStackId)) {
+                returnToType = topTask == null ? HOME_ACTIVITY_TYPE : topTask.taskType;
             }
-        } else {
-            task.setTaskToReturnTo(APPLICATION_ACTIVITY_TYPE);
+            task.setTaskToReturnTo(returnToType);
         }
     }
 
@@ -3159,11 +3176,14 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
                 return;
             } else {
                 final TaskRecord task = r.task;
-                if (r.frontOfTask && task == topTask() && task.isOverHomeStack()) {
-                    // For non-fullscreen stack, we want to move the focus to the next visible
-                    // stack to prevent the home screen from moving to the top and obscuring
+                final boolean isAssistantOrOverAssistant = task.getStack().isAssistantStack() ||
+                        task.isOverAssistantStack();
+                if (r.frontOfTask && task == topTask() &&
+                        (task.isOverHomeStack() || isAssistantOrOverAssistant)) {
+                    // For non-fullscreen or assistant stack, we want to move the focus to the next
+                    // visible stack to prevent the home screen from moving to the top and obscuring
                     // other visible stacks.
-                    if (!mFullscreen
+                    if ((!mFullscreen || isAssistantOrOverAssistant)
                             && adjustFocusToNextFocusableStackLocked(myReason)) {
                         return;
                     }
@@ -4358,13 +4378,21 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
 
         if (mStackId == HOME_STACK_ID && topTask().isHomeTask()) {
             // For the case where we are moving the home task back and there is an activity visible
-            // behind it on the fullscreen stack, we want to move the focus to the visible behind
-            // activity to maintain order with what the user is seeing.
+            // behind it on the fullscreen or assistant stack, we want to move the focus to the
+            // visible behind activity to maintain order with what the user is seeing.
+            ActivityRecord visibleBehind = null;
             final ActivityStack fullscreenStack =
                     mStackSupervisor.getStack(FULLSCREEN_WORKSPACE_STACK_ID);
+            final ActivityStack assistantStack =
+                    mStackSupervisor.getStack(ASSISTANT_STACK_ID);
             if (fullscreenStack != null && fullscreenStack.hasVisibleBehindActivity()) {
-                final ActivityRecord visibleBehind = fullscreenStack.getVisibleBehindActivity();
-                mStackSupervisor.moveFocusableActivityStackToFrontLocked(visibleBehind, "moveTaskToBack");
+                visibleBehind = fullscreenStack.getVisibleBehindActivity();
+            } else if (assistantStack != null && assistantStack.hasVisibleBehindActivity()) {
+                visibleBehind = assistantStack.getVisibleBehindActivity();
+            }
+            if (visibleBehind != null) {
+                mStackSupervisor.moveFocusableActivityStackToFrontLocked(visibleBehind,
+                        "moveTaskToBack");
                 mStackSupervisor.resumeFocusedStackTopActivityLocked();
                 return true;
             }
@@ -4858,7 +4886,7 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
         final int topTaskNdx = mTaskHistory.size() - 1;
         if (task.isOverHomeStack() && taskNdx < topTaskNdx) {
             final TaskRecord nextTask = mTaskHistory.get(taskNdx + 1);
-            if (!nextTask.isOverHomeStack()) {
+            if (!nextTask.isOverHomeStack() && !nextTask.isOverAssistantStack()) {
                 nextTask.setTaskToReturnTo(HOME_ACTIVITY_TYPE);
             }
         }

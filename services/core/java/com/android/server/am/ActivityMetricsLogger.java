@@ -1,5 +1,6 @@
 package com.android.server.am;
 
+import static android.app.ActivityManager.StackId.ASSISTANT_STACK_ID;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
@@ -33,6 +34,7 @@ class ActivityMetricsLogger {
     private static final int WINDOW_STATE_STANDARD = 0;
     private static final int WINDOW_STATE_SIDE_BY_SIDE = 1;
     private static final int WINDOW_STATE_FREEFORM = 2;
+    private static final int WINDOW_STATE_ASSISTANT = 3;
     private static final int WINDOW_STATE_INVALID = -1;
 
     private static final long INVALID_START_TIME = -1;
@@ -40,7 +42,7 @@ class ActivityMetricsLogger {
     // Preallocated strings we are sending to tron, so we don't have to allocate a new one every
     // time we log.
     private static final String[] TRON_WINDOW_STATE_VARZ_STRINGS = {
-            "window_time_0", "window_time_1", "window_time_2"};
+            "window_time_0", "window_time_1", "window_time_2", "window_time_3"};
 
     private int mWindowState = WINDOW_STATE_STANDARD;
     private long mLastLogTimeSecs;
@@ -88,6 +90,8 @@ class ActivityMetricsLogger {
             mWindowState = WINDOW_STATE_INVALID;
         } else if (stack.mStackId == FREEFORM_WORKSPACE_STACK_ID) {
             mWindowState = WINDOW_STATE_FREEFORM;
+        } else if (stack.mStackId == ASSISTANT_STACK_ID) {
+            mWindowState = WINDOW_STATE_ASSISTANT;
         } else if (StackId.isStaticStack(stack.mStackId)) {
             throw new IllegalStateException("Unknown stack=" + stack);
         }

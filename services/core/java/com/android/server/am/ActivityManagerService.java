@@ -54,6 +54,7 @@ import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIV
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RTL;
 import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
 import static android.provider.Settings.System.FONT_SCALE;
+import static android.service.voice.VoiceInteractionSession.SHOW_SOURCE_APPLICATION;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
@@ -283,7 +284,6 @@ import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
 import android.provider.Downloads;
 import android.provider.Settings;
-import android.service.autofill.AutoFillService;
 import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.service.voice.VoiceInteractionSession;
@@ -556,10 +556,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     // Determines whether to take full screen screenshots
     static final boolean TAKE_FULLSCREEN_SCREENSHOTS = true;
-    public static final float FULLSCREEN_SCREENSHOT_SCALE = 0.6f;
 
     /** All system services */
     SystemServiceManager mSystemServiceManager;
+    AssistUtils mAssistUtils;
 
     private Installer mInstaller;
 
@@ -4518,6 +4518,25 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
+    public int startAssistantActivity(String callingPackage, int callingPid, int callingUid,
+            Intent intent, String resolvedType, Bundle bOptions, int userId) {
+        if (checkCallingPermission(Manifest.permission.BIND_VOICE_INTERACTION)
+                != PackageManager.PERMISSION_GRANTED) {
+            final String msg = "Permission Denial: startAssistantActivity() from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid()
+                    + " requires " + Manifest.permission.BIND_VOICE_INTERACTION;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+        userId = mUserController.handleIncomingUser(callingPid, callingUid, userId, false,
+                ALLOW_FULL_ONLY, "startAssistantActivity", null);
+        return mActivityStarter.startActivityMayWait(null, callingUid, callingPackage, intent,
+                resolvedType, null, null, null, null, 0, 0, null, null, null, bOptions, false,
+                userId, null, null);
+    }
+
+    @Override
     public void startLocalVoiceInteraction(IBinder callingActivity, Bundle options)
             throws RemoteException {
         Slog.i(TAG, "Activity tried to startVoiceInteraction");
@@ -7767,9 +7786,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     + ": Current activity does not support picture-in-picture.");
         }
 
-        if (r.getStack().isHomeStack()) {
+        if (!StackId.isAllowedToEnterPictureInPicture(r.getStack().getStackId())) {
             throw new IllegalStateException(caller
-                    + ": Activities on the home stack not supported");
+                    + ": Activities on the home, assistant, or recents stack not supported");
         }
 
         if (args.hasSetAspectRatio()
@@ -9971,8 +9990,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return;
             }
             final ActivityRecord prev = mStackSupervisor.topRunningActivityLocked();
-            if (prev != null && prev.isRecentsActivity()) {
-                task.setTaskToReturnTo(ActivityRecord.RECENTS_ACTIVITY_TYPE);
+            if (prev != null) {
+                task.setTaskToReturnTo(prev);
             }
             mStackSupervisor.findTaskToMoveToFrontLocked(task, flags, options, "moveTaskToFront",
                     false /* forceNonResizable */);
@@ -12479,8 +12498,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     public boolean isAssistDataAllowedOnCurrentActivity() {
         int userId;
         synchronized (this) {
-            userId = mUserController.getCurrentUserIdLocked();
-            ActivityRecord activity = getFocusedStack().topActivity();
+            final ActivityStack focusedStack = getFocusedStack();
+            if (focusedStack == null || focusedStack.isAssistantStack()) {
+                return false;
+            }
+
+            final ActivityRecord activity = focusedStack.topActivity();
             if (activity == null) {
                 return false;
             }
@@ -12509,9 +12532,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     return false;
                 }
             }
-            AssistUtils utils = new AssistUtils(mContext);
-            return utils.showSessionForActiveService(args,
-                    VoiceInteractionSession.SHOW_SOURCE_APPLICATION, null, token);
+            return mAssistUtils.showSessionForActiveService(args, SHOW_SOURCE_APPLICATION, null,
+                    token);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -13493,6 +13515,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             mLocalDeviceIdleController
                     = LocalServices.getService(DeviceIdleController.LocalService.class);
+            mAssistUtils = new AssistUtils(mContext);
 
             // Make sure we have the current profile info, since it is needed for security checks.
             mUserController.onSystemReady();
