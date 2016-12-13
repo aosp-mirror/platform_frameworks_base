@@ -114,7 +114,7 @@ public class NetworkNotificationManager {
         }
 
         if (DBG) {
-            Slog.d(TAG, "showNotification " + notifyType
+            Slog.d(TAG, "showNotification id=" + id + " " + notifyType
                     + " transportType=" + getTransportName(transportType)
                     + " extraInfo=" + extraInfo + " highPriority=" + highPriority);
         }
@@ -187,7 +187,7 @@ public class NetworkNotificationManager {
         try {
             mNotificationManager.notifyAsUser(NOTIFICATION_ID, id, notification, UserHandle.ALL);
         } catch (NullPointerException npe) {
-            Slog.d(TAG, "setNotificationVisible: visible notificationManager npe=" + npe);
+            Slog.d(TAG, "setNotificationVisible: visible notificationManager error", npe);
         }
     }
 
@@ -198,7 +198,7 @@ public class NetworkNotificationManager {
         try {
             mNotificationManager.cancelAsUser(NOTIFICATION_ID, id, UserHandle.ALL);
         } catch (NullPointerException npe) {
-            Slog.d(TAG, "setNotificationVisible: cancel notificationManager npe=" + npe);
+            Slog.d(TAG, "setNotificationVisible: cancel notificationManager error", npe);
         }
     }
 
