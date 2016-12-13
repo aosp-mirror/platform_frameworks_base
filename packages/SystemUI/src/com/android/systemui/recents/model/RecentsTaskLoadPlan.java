@@ -28,6 +28,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.ArraySet;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
 import com.android.systemui.Prefs;
@@ -130,6 +131,7 @@ public class RecentsTaskLoadPlan {
 
         SparseArray<Task.TaskKey> affiliatedTasks = new SparseArray<>();
         SparseIntArray affiliatedTaskCounts = new SparseIntArray();
+        SparseBooleanArray lockedUsers = new SparseBooleanArray();
         String dismissDescFormat = mContext.getString(
                 R.string.accessibility_recents_item_will_be_dismissed);
         String appInfoDescFormat = mContext.getString(
@@ -177,12 +179,17 @@ public class RecentsTaskLoadPlan {
             int backgroundColor = loader.getActivityBackgroundColor(t.taskDescription);
             boolean isSystemApp = (info != null) &&
                     ((info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0);
+            if (lockedUsers.indexOfKey(t.userId) < 0) {
+                lockedUsers.put(t.userId, Recents.getSystemServices().isDeviceLocked(t.userId));
+            }
+            boolean isLocked = lockedUsers.get(t.userId);
 
             // Add the task to the stack
             Task task = new Task(taskKey, t.affiliatedTaskId, t.affiliatedTaskColor, icon,
                     thumbnail, title, titleDescription, dismissDescription, appInfoDescription,
                     activityColor, backgroundColor, isLaunchTarget, isStackTask, isSystemApp,
-                    t.isDockable, t.bounds, t.taskDescription, t.resizeMode, t.topActivity);
+                    t.isDockable, t.bounds, t.taskDescription, t.resizeMode, t.topActivity,
+                    isLocked);
 
             allTasks.add(task);
             affiliatedTaskCounts.put(taskKey.id, affiliatedTaskCounts.get(taskKey.id, 0) + 1);

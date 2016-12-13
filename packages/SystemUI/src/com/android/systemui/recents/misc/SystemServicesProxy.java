@@ -74,6 +74,7 @@ import android.view.WindowManager;
 import android.view.WindowManager.KeyboardShortcutsReceiver;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
+import android.app.KeyguardManager;
 
 import com.android.internal.app.AssistUtils;
 import com.android.internal.os.BackgroundThread;
@@ -124,6 +125,7 @@ public class SystemServicesProxy {
     AssistUtils mAssistUtils;
     WindowManager mWm;
     IWindowManager mIwm;
+    KeyguardManager mKgm;
     UserManager mUm;
     Display mDisplay;
     String mRecentsPackage;
@@ -212,6 +214,7 @@ public class SystemServicesProxy {
         mAssistUtils = new AssistUtils(context);
         mWm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         mIwm = WindowManagerGlobal.getWindowManagerService();
+        mKgm = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
         mUm = UserManager.get(context);
         mDisplay = mWm.getDefaultDisplay();
         mRecentsPackage = context.getPackageName();
@@ -860,6 +863,16 @@ public class SystemServicesProxy {
             label = mPm.getUserBadgedLabel(label, new UserHandle(userId)).toString();
         }
         return label;
+    }
+
+    /**
+     * Returns whether the provided {@param userId} is currently locked (and showing Keyguard).
+     */
+    public boolean isDeviceLocked(int userId) {
+        if (mKgm == null) {
+            return false;
+        }
+        return mKgm.isDeviceLocked(userId);
     }
 
     /** Returns the package name of the home activity. */

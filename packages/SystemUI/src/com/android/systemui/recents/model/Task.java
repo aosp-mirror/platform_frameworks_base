@@ -189,6 +189,9 @@ public class Task {
     @ViewDebug.ExportedProperty(category="recents")
     public ComponentName topActivity;
 
+    @ViewDebug.ExportedProperty(category="recents")
+    public boolean isLocked;
+
     private ArrayList<TaskCallbacks> mCallbacks = new ArrayList<>();
 
     public Task() {
@@ -200,7 +203,7 @@ public class Task {
                 String appInfoDescription, int colorPrimary, int colorBackground,
                 boolean isLaunchTarget, boolean isStackTask, boolean isSystemApp,
                 boolean isDockable, Rect bounds, ActivityManager.TaskDescription taskDescription,
-                int resizeMode, ComponentName topActivity) {
+                int resizeMode, ComponentName topActivity, boolean isLocked) {
         boolean isInAffiliationGroup = (affiliationTaskId != key.id);
         boolean hasAffiliationGroupColor = isInAffiliationGroup && (affiliationColor != 0);
         this.key = key;
@@ -224,6 +227,7 @@ public class Task {
         this.isDockable = isDockable;
         this.resizeMode = resizeMode;
         this.topActivity = topActivity;
+        this.isLocked = isLocked;
     }
 
     /**
@@ -250,6 +254,7 @@ public class Task {
         this.isSystemApp = o.isSystemApp;
         this.isDockable = o.isDockable;
         this.resizeMode = o.resizeMode;
+        this.isLocked = o.isLocked;
         this.topActivity = o.topActivity;
     }
 
@@ -354,6 +359,9 @@ public class Task {
         }
         if (isFreeformTask()) {
             writer.print(" freeform=Y");
+        }
+        if (isLocked) {
+            writer.print(" locked=Y");
         }
         writer.print(" "); writer.print(title);
         writer.println();
