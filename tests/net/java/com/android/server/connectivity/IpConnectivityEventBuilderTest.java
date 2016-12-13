@@ -39,13 +39,13 @@ import android.net.metrics.IpReachabilityEvent;
 import android.net.metrics.NetworkEvent;
 import android.net.metrics.RaEvent;
 import android.net.metrics.ValidationProbeEvent;
-
-import junit.framework.TestCase;
-
+import android.test.suitebuilder.annotation.SmallTest;
 import java.util.Arrays;
+import junit.framework.TestCase;
 
 public class IpConnectivityEventBuilderTest extends TestCase {
 
+    @SmallTest
     public void testDefaultNetworkEventSerialization() {
         ConnectivityMetricsEvent ev = describeIpEvent(
                 aType(DefaultNetworkEvent.class),
@@ -58,6 +58,8 @@ public class IpConnectivityEventBuilderTest extends TestCase {
         String want = joinLines(
                 "dropped_events: 0",
                 "events <",
+                "  time_ms: 1",
+                "  transport: 0",
                 "  default_network_event <",
                 "    network_id <",
                 "      network_id: 102",
@@ -70,13 +72,13 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "    transport_types: 2",
                 "    transport_types: 3",
                 "  >",
-                "  time_ms: 1",
                 ">",
                 "version: 2");
 
         verifySerialization(want, ev);
     }
 
+    @SmallTest
     public void testDhcpClientEventSerialization() {
         ConnectivityMetricsEvent ev = describeIpEvent(
                 aType(DhcpClientEvent.class),
@@ -87,19 +89,20 @@ public class IpConnectivityEventBuilderTest extends TestCase {
         String want = joinLines(
                 "dropped_events: 0",
                 "events <",
+                "  time_ms: 1",
+                "  transport: 0",
                 "  dhcp_event <",
                 "    duration_ms: 192",
-                "    error_code: 0",
                 "    if_name: \"wlan0\"",
                 "    state_transition: \"SomeState\"",
                 "  >",
-                "  time_ms: 1",
                 ">",
                 "version: 2");
 
         verifySerialization(want, ev);
     }
 
+    @SmallTest
     public void testDhcpErrorEventSerialization() {
         ConnectivityMetricsEvent ev = describeIpEvent(
                 aType(DhcpErrorEvent.class),
@@ -109,19 +112,20 @@ public class IpConnectivityEventBuilderTest extends TestCase {
         String want = joinLines(
                 "dropped_events: 0",
                 "events <",
+                "  time_ms: 1",
+                "  transport: 0",
                 "  dhcp_event <",
                 "    duration_ms: 0",
-                "    error_code: 50397184",
                 "    if_name: \"wlan0\"",
-                "    state_transition: \"\"",
+                "    error_code: 50397184",
                 "  >",
-                "  time_ms: 1",
                 ">",
                 "version: 2");
 
         verifySerialization(want, ev);
     }
 
+    @SmallTest
     public void testDnsEventSerialization() {
         ConnectivityMetricsEvent ev = describeIpEvent(
                 aType(DnsEvent.class),
@@ -133,6 +137,8 @@ public class IpConnectivityEventBuilderTest extends TestCase {
         String want = joinLines(
                 "dropped_events: 0",
                 "events <",
+                "  time_ms: 1",
+                "  transport: 0",
                 "  dns_lookup_batch <",
                 "    event_types: 1",
                 "    event_types: 1",
@@ -162,13 +168,13 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "    return_codes: 200",
                 "    return_codes: 178",
                 "  >",
-                "  time_ms: 1",
                 ">",
                 "version: 2");
 
         verifySerialization(want, ev);
     }
 
+    @SmallTest
     public void testIpManagerEventSerialization() {
         ConnectivityMetricsEvent ev = describeIpEvent(
                 aType(IpManagerEvent.class),
@@ -179,18 +185,20 @@ public class IpConnectivityEventBuilderTest extends TestCase {
         String want = joinLines(
                 "dropped_events: 0",
                 "events <",
+                "  time_ms: 1",
+                "  transport: 0",
                 "  ip_provisioning_event <",
                 "    event_type: 1",
                 "    if_name: \"wlan0\"",
                 "    latency_ms: 5678",
                 "  >",
-                "  time_ms: 1",
                 ">",
                 "version: 2");
 
         verifySerialization(want, ev);
     }
 
+    @SmallTest
     public void testIpReachabilityEventSerialization() {
         ConnectivityMetricsEvent ev = describeIpEvent(
                 aType(IpReachabilityEvent.class),
@@ -200,17 +208,19 @@ public class IpConnectivityEventBuilderTest extends TestCase {
         String want = joinLines(
                 "dropped_events: 0",
                 "events <",
+                "  time_ms: 1",
+                "  transport: 0",
                 "  ip_reachability_event <",
                 "    event_type: 512",
                 "    if_name: \"wlan0\"",
                 "  >",
-                "  time_ms: 1",
                 ">",
                 "version: 2");
 
         verifySerialization(want, ev);
     }
 
+    @SmallTest
     public void testNetworkEventSerialization() {
         ConnectivityMetricsEvent ev = describeIpEvent(
                 aType(NetworkEvent.class),
@@ -221,6 +231,8 @@ public class IpConnectivityEventBuilderTest extends TestCase {
         String want = joinLines(
                 "dropped_events: 0",
                 "events <",
+                "  time_ms: 1",
+                "  transport: 0",
                 "  network_event <",
                 "    event_type: 5",
                 "    latency_ms: 20410",
@@ -228,13 +240,13 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "      network_id: 100",
                 "    >",
                 "  >",
-                "  time_ms: 1",
                 ">",
                 "version: 2");
 
         verifySerialization(want, ev);
     }
 
+    @SmallTest
     public void testValidationProbeEventSerialization() {
         ConnectivityMetricsEvent ev = describeIpEvent(
                 aType(ValidationProbeEvent.class),
@@ -247,6 +259,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "dropped_events: 0",
                 "events <",
                 "  time_ms: 1",
+                "  transport: 0",
                 "  validation_probe_event <",
                 "    latency_ms: 40730",
                 "    network_id <",
@@ -261,6 +274,7 @@ public class IpConnectivityEventBuilderTest extends TestCase {
         verifySerialization(want, ev);
     }
 
+    @SmallTest
     public void testApfProgramEventSerialization() {
         ConnectivityMetricsEvent ev = describeIpEvent(
                 aType(ApfProgramEvent.class),
@@ -273,6 +287,8 @@ public class IpConnectivityEventBuilderTest extends TestCase {
         String want = joinLines(
                 "dropped_events: 0",
                 "events <",
+                "  time_ms: 1",
+                "  transport: 0",
                 "  apf_program_event <",
                 "    current_ras: 9",
                 "    drop_multicast: true",
@@ -281,13 +297,13 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "    lifetime: 200",
                 "    program_length: 2048",
                 "  >",
-                "  time_ms: 1",
                 ">",
                 "version: 2");
 
         verifySerialization(want, ev);
     }
 
+    @SmallTest
     public void testApfStatsSerialization() {
         ConnectivityMetricsEvent ev = describeIpEvent(
                 aType(ApfStats.class),
@@ -303,6 +319,8 @@ public class IpConnectivityEventBuilderTest extends TestCase {
         String want = joinLines(
                 "dropped_events: 0",
                 "events <",
+                "  time_ms: 1",
+                "  transport: 0",
                 "  apf_statistics <",
                 "    dropped_ras: 2",
                 "    duration_ms: 45000",
@@ -313,13 +331,13 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "    received_ras: 10",
                 "    zero_lifetime_ras: 1",
                 "  >",
-                "  time_ms: 1",
                 ">",
                 "version: 2");
 
         verifySerialization(want, ev);
     }
 
+    @SmallTest
     public void testRaEventSerialization() {
         ConnectivityMetricsEvent ev = describeIpEvent(
                 aType(RaEvent.class),
@@ -333,6 +351,8 @@ public class IpConnectivityEventBuilderTest extends TestCase {
         String want = joinLines(
                 "dropped_events: 0",
                 "events <",
+                "  time_ms: 1",
+                "  transport: 0",
                 "  ra_event <",
                 "    dnssl_lifetime: -1",
                 "    prefix_preferred_lifetime: 300",
@@ -341,7 +361,6 @@ public class IpConnectivityEventBuilderTest extends TestCase {
                 "    route_info_lifetime: -1",
                 "    router_lifetime: 2000",
                 "  >",
-                "  time_ms: 1",
                 ">",
                 "version: 2");
 
