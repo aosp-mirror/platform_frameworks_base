@@ -188,26 +188,28 @@ size_t GradientCache::sourceBytesPerPixel() const {
 void GradientCache::mixBytes(const FloatColor& start, const FloatColor& end,
         float amount, uint8_t*& dst) const {
     float oppAmount = 1.0f - amount;
-    *dst++ = uint8_t(OECF_sRGB(start.r * oppAmount + end.r * amount) * 255.0f);
-    *dst++ = uint8_t(OECF_sRGB(start.g * oppAmount + end.g * amount) * 255.0f);
-    *dst++ = uint8_t(OECF_sRGB(start.b * oppAmount + end.b * amount) * 255.0f);
-    *dst++ = uint8_t(         (start.a * oppAmount + end.a * amount) * 255.0f);
+    float a = start.a * oppAmount + end.a * amount;
+    *dst++ = uint8_t(a * OECF_sRGB((start.r * oppAmount + end.r * amount)) * 255.0f);
+    *dst++ = uint8_t(a * OECF_sRGB((start.g * oppAmount + end.g * amount)) * 255.0f);
+    *dst++ = uint8_t(a * OECF_sRGB((start.b * oppAmount + end.b * amount)) * 255.0f);
+    *dst++ = uint8_t(a * 255.0f);
 }
 
 void GradientCache::mixFloats(const FloatColor& start, const FloatColor& end,
         float amount, uint8_t*& dst) const {
     float oppAmount = 1.0f - amount;
+    float a = start.a * oppAmount + end.a * amount;
     float* d = (float*) dst;
 #ifdef ANDROID_ENABLE_LINEAR_BLENDING
-    *d++ = start.r * oppAmount + end.r * amount;
-    *d++ = start.g * oppAmount + end.g * amount;
-    *d++ = start.b * oppAmount + end.b * amount;
+    *d++ = a * (start.r * oppAmount + end.r * amount);
+    *d++ = a * (start.g * oppAmount + end.g * amount);
+    *d++ = a * (start.b * oppAmount + end.b * amount);
 #else
-    *d++ = OECF_sRGB(start.r * oppAmount + end.r * amount);
-    *d++ = OECF_sRGB(start.g * oppAmount + end.g * amount);
-    *d++ = OECF_sRGB(start.b * oppAmount + end.b * amount);
+    *d++ = a * OECF_sRGB(start.r * oppAmount + end.r * amount);
+    *d++ = a * OECF_sRGB(start.g * oppAmount + end.g * amount);
+    *d++ = a * OECF_sRGB(start.b * oppAmount + end.b * amount);
 #endif
-    *d++ = start.a * oppAmount + end.a * amount;
+    *d++ = a;
     dst += 4 * sizeof(float);
 }
 
@@ -217,16 +219,19 @@ void GradientCache::generateTexture(uint32_t* colors, float* positions,
     uint8_t pixels[rowBytes * height];
 
     static ChannelMixer gMixers[] = {
-            &android::uirenderer::GradientCache::mixBytes,  // colors are stored gamma-encoded
-            &android::uirenderer::GradientCache::mixFloats, // colors are stored in linear
+            // colors are stored gamma-encoded
+            &android::uirenderer::GradientCache::mixBytes,
+            // colors are stored in linear (linear blending on)
+            // or gamma-encoded (linear blending off)
+            &android::uirenderer::GradientCache::mixFloats,
     };
     ChannelMixer mix = gMixers[mUseFloatTexture];
 
     FloatColor start;
-    start.setSRGB(colors[0]);
+    start.setUnPreMultipliedSRGB(colors[0]);
 
     FloatColor end;
-    end.setSRGB(colors[1]);
+    end.setUnPreMultipliedSRGB(colors[1]);
 
     int currentPos = 1;
     float startPos = positions[0];
@@ -241,7 +246,7 @@ void GradientCache::generateTexture(uint32_t* colors, float* positions,
 
             currentPos++;
 
-            end.setSRGB(colors[currentPos]);
+            end.setUnPreMultipliedSRGB(colors[currentPos]);
             distance = positions[currentPos] - startPos;
         }
 
