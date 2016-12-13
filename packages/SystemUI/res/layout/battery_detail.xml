@@ -41,7 +41,7 @@
         android:layout_marginEnd="24dp"
         systemui:sideLabels="@array/battery_labels"
         android:colorAccent="?android:attr/colorAccent"
-        systemui:textColor="#66FFFFFF" />
+        systemui:textColor="?android:attr/textColorSecondary" />
 
     <com.android.systemui.ResizingSpace
         android:layout_width="match_parent"
