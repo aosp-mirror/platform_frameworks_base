@@ -253,7 +253,13 @@ public class StackStateAnimator {
                     View viewAfterChangingView = noNextView
                             ? mHostLayout.getLastChildNotGone()
                             : event.viewAfterChangingView;
-
+                    if (viewAfterChangingView == null) {
+                        // This can happen when the last view in the list is removed.
+                        // Since the shelf is still around and the only view, the code still goes
+                        // in here and tries to calculate the delay for it when case its properties
+                        // have changed.
+                        continue;
+                    }
                     int nextIndex = finalState
                             .getViewStateForView(viewAfterChangingView).notGoneIndex;
                     if (ownIndex >= nextIndex) {
