@@ -1208,10 +1208,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Laat \'n program toe om installasiesessies te lees. Dit laat dit toe om besonderhede van aktiewe pakketinstallasies te sien."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"versoek installeerpakkette"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Laat \'n program toe om te versoek dat pakkette geïnstalleer word."</string>
-    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
-    <skip />
-    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
-    <skip />
+    <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"vra om batteryoptimerings te ignoreer"</string>
+    <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Laat \'n program toe om toestemming te vra om batteryoptimerings vir daardie program ignoreer."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Klop twee keer vir zoembeheer"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Kon nie legstuk byvoeg nie."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Gaan"</string>

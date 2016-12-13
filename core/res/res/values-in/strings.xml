@@ -1208,10 +1208,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Memungkinkan aplikasi membaca sesi pemasangan. Tindakan ini memungkinkannya melihat detail tentang pemasangan paket aktif."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"minta pasang paket"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Mengizinkan aplikasi meminta pemasangan paket."</string>
-    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
-    <skip />
-    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
-    <skip />
+    <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"meminta mengabaikan pengoptimalan baterai"</string>
+    <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Mengizinkan aplikasi meminta izin untuk mengabaikan pengoptimalan baterai bagi aplikasi tersebut."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Ketuk dua kali untuk kontrol perbesar/perkecil"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Tidak dapat menambahkan widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Buka"</string>

@@ -1208,10 +1208,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"நிறுவல் அமர்வுகளைப் படிக்க, பயன்பாட்டை அனுமதிக்கிறது. இது செயல்படும் தொகுப்பு நிறுவல்களைப் பற்றிய விவரங்களைப் பார்க்க அனுமதிக்கிறது."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"நிறுவல் தொகுப்புகளைக் கோருதல்"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"தொகுப்புகளின் நிறுவலைக் கோர, பயன்பாட்டை அனுமதிக்கும்."</string>
-    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
-    <skip />
-    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
-    <skip />
+    <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"பேட்டரி மேம்படுத்தல்களைப் புறக்கணிப்பதற்கான அனுமதியைக் கோரு"</string>
+    <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"பயன்பாட்டிற்கான பேட்டரி மேம்படுத்தல்களைப் புறக்கணிப்பதற்கான அனுமதியைக் கோர, பயன்பாட்டை அனுமதிக்கும்."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"அளவை மாற்றுவதற்கான கட்டுப்பாட்டிற்கு, இருமுறை தட்டவும்"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"விட்ஜெட்டைச் சேர்க்க முடியவில்லை."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"செல்"</string>

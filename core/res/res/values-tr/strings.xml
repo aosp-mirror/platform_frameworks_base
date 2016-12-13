@@ -1208,10 +1208,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Bir uygulamanın yükleme oturumlarını okumasına izin verir. Bu, etkin paket yüklemeleriyle ilgili ayrıntıların görülmesine olanak tanır."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"paket yükleme isteğinde bulunma"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Uygulamaya, paketleri yükleme isteğinde bulunma izni verir."</string>
-    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
-    <skip />
-    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
-    <skip />
+    <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"pil optimizasyonlarını göz ardı etme izni iste"</string>
+    <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Bir uygulamanın, kendisi için pil optimizasyonlarını göz ardı etme izni istemesine olanak sağlar."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Zum denetimi için iki kez dokun"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Widget eklenemedi."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Git"</string>

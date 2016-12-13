@@ -1210,10 +1210,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ឲ្យ​កម្មវិធី​អាន​សម័យ​ដំឡើង។ វា​អនុញ្ញាត​ឲ្យ​ឃើញ​ព័ត៌មាន​លម្អិត​អំពី​​ការដំឡើង​កញ្ចប់​សកម្ម។"</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"ស្នើសុំកញ្ចប់ដំឡើង"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"អនុញ្ញាតឲ្យកម្មវិធីស្នើសុំដំឡើងកញ្ចប់ (ឯកសារ/មាតិកា)។"</string>
-    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
-    <skip />
-    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
-    <skip />
+    <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"ស្នើឲ្យមិនអើពើចំពោះការបង្កើនប្រសិទ្ធភាពថ្ម"</string>
+    <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"អនុញ្ញាតឲ្យកម្មវិធីស្នើសុំការអនុញ្ញាត ដើម្បីមិនអើពើចំពោះការបង្កើនប្រសិទ្ធភាពថ្ម។"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"ប៉ះ ពីរ​ដង​ដើម្បី​ពិនិត្យ​ការ​ពង្រីក"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"មិន​អាច​បន្ថែម​ធាតុ​ក្រាហ្វិក។"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"ទៅ"</string>

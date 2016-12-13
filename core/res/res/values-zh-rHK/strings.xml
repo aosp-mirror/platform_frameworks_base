@@ -1208,10 +1208,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"允許應用程式讀取安裝工作階段。應用程式將可查看目前安裝套裝的詳細資料。"</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"要求安裝套件"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"允許應用程式要求安裝套件"</string>
-    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
-    <skip />
-    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
-    <skip />
+    <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"要求忽略電池優化"</string>
+    <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"允許應用程式要求就該應用程式忽略電池優化。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"輕觸兩下控制縮放"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"無法新增小工具。"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"開始"</string>

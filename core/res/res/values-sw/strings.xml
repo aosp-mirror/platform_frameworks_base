@@ -1206,10 +1206,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Huruhusu programu kusoma vipindi vya kusanikisha. Hii huiruhusu kuona maelezo kuhusu usanikishaji wa programu unaoendelea."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"omba ruhusa ya kusakinisha vifurushi"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Huruhusu programu kuomba idhini ya kusakinisha vifurushi."</string>
-    <!-- no translation found for permlab_requestIgnoreBatteryOptimizations (8021256345643918264) -->
-    <skip />
-    <!-- no translation found for permdesc_requestIgnoreBatteryOptimizations (8359147856007447638) -->
-    <skip />
+    <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"omba kupuuza uimarishji wa betri"</string>
+    <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Huruhusu programu kuomba ruhusa ya kupuuza uimarishaji wa betri katika programu yako."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Gonga mara mbili kwa udhibiti wa kuza"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Haikuweza kuongeza wijeti."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Nenda"</string>
