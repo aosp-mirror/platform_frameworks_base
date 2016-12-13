@@ -3165,6 +3165,13 @@ message MetricsEvent {
     // CATEGORY: Settings
     DIALOG_SUPPORT_SYSTEM_INFORMATION = 756;
 
+    // These values should never appear in log outputs - they are reserved for
+    // internal Tron use.
+    RESERVED_FOR_LOGBUILDER_VIEW = 757;
+    RESERVED_FOR_LOGBUILDER_CATEGORY = 758;
+    RESERVED_FOR_LOGBUILDER_TYPE = 759;
+
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
