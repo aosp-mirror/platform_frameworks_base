@@ -351,8 +351,6 @@ public class UsbDeviceManager {
                             UsbManager.removeFunction(persisted, UsbManager.USB_FUNCTION_MTP));
                 }
 
-                setEnabledFunctions(null, false, false);
-
                 String state = FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim();
                 updateState(state);
 
@@ -446,13 +444,12 @@ public class UsbDeviceManager {
             return false;
         }
 
-        private boolean setUsbConfig(String config) {
+        private void setUsbConfig(String config) {
             if (DEBUG) Slog.d(TAG, "setUsbConfig(" + config + ")");
             // set the new configuration
             // we always set it due to b/23631400, where adbd was getting killed
             // and not restarted due to property timeouts on some devices
             SystemProperties.set(USB_CONFIG_PROPERTY, config);
-            return waitForState(config);
         }
 
         private void setAdbEnabled(boolean enable) {
@@ -547,8 +544,18 @@ public class UsbDeviceManager {
                 // Kick the USB stack to close existing connections.
                 setUsbConfig(UsbManager.USB_FUNCTION_NONE);
 
+                if (!waitForState(UsbManager.USB_FUNCTION_NONE)) {
+                    Slog.e(TAG, "Failed to kick USB config");
+                    return false;
+                }
+
                 // Set the new USB configuration.
-                if (!setUsbConfig(functions)) {
+                setUsbConfig(functions);
+
+                // Start up dependent services.
+                updateUsbStateBroadcastIfNeeded(true);
+
+                if (!waitForState(functions)) {
                     Slog.e(TAG, "Failed to switch USB config to " + functions);
                     return false;
                 }
@@ -631,7 +638,7 @@ public class UsbDeviceManager {
             return false;
         }
 
-        private void updateUsbStateBroadcastIfNeeded() {
+        private void updateUsbStateBroadcastIfNeeded(boolean configChanged) {
             // send a sticky broadcast containing current USB state
             Intent intent = new Intent(UsbManager.ACTION_USB_STATE);
             intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
@@ -640,6 +647,7 @@ public class UsbDeviceManager {
             intent.putExtra(UsbManager.USB_HOST_CONNECTED, mHostConnected);
             intent.putExtra(UsbManager.USB_CONFIGURED, mConfigured);
             intent.putExtra(UsbManager.USB_DATA_UNLOCKED, isUsbTransferAllowed() && mUsbDataUnlocked);
+            intent.putExtra(UsbManager.USB_CONFIG_CHANGED, configChanged);
 
             if (mCurrentFunctions != null) {
                 String[] functions = mCurrentFunctions.split(",");
@@ -737,7 +745,7 @@ public class UsbDeviceManager {
                         setEnabledFunctions(null, false, false);
                     }
                     if (mBootCompleted) {
-                        updateUsbStateBroadcastIfNeeded();
+                        updateUsbStateBroadcastIfNeeded(false);
                         updateUsbFunctions();
                     }
                     break;
@@ -749,7 +757,7 @@ public class UsbDeviceManager {
                     args.recycle();
                     updateUsbNotification();
                     if (mBootCompleted) {
-                        updateUsbStateBroadcastIfNeeded();
+                        updateUsbStateBroadcastIfNeeded(false);
                     }
                     break;
                 case MSG_ENABLE_ADB:
@@ -765,11 +773,11 @@ public class UsbDeviceManager {
                 case MSG_SYSTEM_READY:
                     updateUsbNotification();
                     updateAdbNotification();
-                    updateUsbStateBroadcastIfNeeded();
                     updateUsbFunctions();
                     break;
                 case MSG_BOOT_COMPLETED:
                     mBootCompleted = true;
+                    setEnabledFunctions(null, false, false);
                     if (mCurrentAccessory != null) {
                         getCurrentSettings().accessoryAttached(mCurrentAccessory);
                     }
