@@ -176,8 +176,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         super(context, attrs, defStyleAttr, defStyleRes);
         RecentsConfiguration config = Recents.getConfiguration();
         Resources res = context.getResources();
-        mViewBounds = new AnimateableViewBounds(this, res.getDimensionPixelSize(
-                R.dimen.recents_task_view_shadow_rounded_corners_radius));
+        mViewBounds = createOutlineProvider();
         if (config.fakeShadows) {
             setBackground(new FakeShadowDrawable(res, config));
         }
@@ -205,6 +204,12 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     /** Gets the task */
     public Task getTask() {
         return mTask;
+    }
+
+    /* Create an outline provider to clip and outline the view */
+    protected AnimateableViewBounds createOutlineProvider() {
+        return new AnimateableViewBounds(this, mContext.getResources().getDimensionPixelSize(
+            R.dimen.recents_task_view_shadow_rounded_corners_radius));
     }
 
     /** Returns the view bounds. */

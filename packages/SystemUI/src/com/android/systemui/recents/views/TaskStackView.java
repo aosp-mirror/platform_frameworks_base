@@ -92,6 +92,7 @@ import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
+import com.android.systemui.recents.views.grid.GridTaskView;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -782,6 +783,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      * Updates the clip for each of the task views from back to front.
      */
     private void clipTaskViews() {
+        // We never clip task views in grid layout
+        if (Recents.getConfiguration().isGridEnabled) {
+            return;
+        }
+
         // Update the clip on each task child
         List<TaskView> taskViews = getTaskViews();
         TaskView tmpTv = null;
@@ -1506,7 +1512,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     @Override
     public TaskView createView(Context context) {
-        return (TaskView) mInflater.inflate(R.layout.recents_task_view, this, false);
+        if (Recents.getConfiguration().isGridEnabled) {
+            return (GridTaskView) mInflater.inflate(R.layout.recents_grid_task_view, this, false);
+        } else {
+            return (TaskView) mInflater.inflate(R.layout.recents_task_view, this, false);
+        }
     }
 
     @Override
