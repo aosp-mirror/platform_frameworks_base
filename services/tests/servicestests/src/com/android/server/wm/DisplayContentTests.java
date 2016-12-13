@@ -26,6 +26,7 @@ import android.support.test.runner.AndroidJUnit4;
 import java.util.ArrayList;
 
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -77,6 +78,8 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(sNavBarWindow, windows.get(2));
         assertEquals(sImeWindow, windows.get(1));
         assertEquals(sImeDialogWindow, windows.get(0));
+
+        exitingAppWindow.removeImmediately();
     }
 
     @Test
@@ -120,5 +123,46 @@ public class DisplayContentTests extends WindowTestsBase {
         // Clean-up
         sWm.mInputMethodTarget = null;
         imeAppTarget.removeImmediately();
+    }
+
+    @Test
+    public void testForAllWindows_WithInBetweenWindowToken() throws Exception {
+        // This window is set-up to be z-ordered between some windows that go in the same token like
+        // the nav bar and status bar.
+        final WindowState voiceInteractionWindow = createWindow(null, TYPE_VOICE_INTERACTION,
+                sDisplayContent, "voiceInteractionWindow");
+
+        final ArrayList<WindowState> windows = new ArrayList();
+
+        // Test forward traversal.
+        sDisplayContent.forAllWindows(w -> {windows.add(w);}, false /* traverseTopToBottom */);
+
+        assertEquals(sWallpaperWindow, windows.get(0));
+        assertEquals(sChildAppWindowBelow, windows.get(1));
+        assertEquals(sAppWindow, windows.get(2));
+        assertEquals(sChildAppWindowAbove, windows.get(3));
+        assertEquals(sDockedDividerWindow, windows.get(4));
+        assertEquals(voiceInteractionWindow, windows.get(5));
+        assertEquals(sStatusBarWindow, windows.get(6));
+        assertEquals(sNavBarWindow, windows.get(7));
+        assertEquals(sImeWindow, windows.get(8));
+        assertEquals(sImeDialogWindow, windows.get(9));
+
+        // Test backward traversal.
+        windows.clear();
+        sDisplayContent.forAllWindows(w -> {windows.add(w);}, true /* traverseTopToBottom */);
+
+        assertEquals(sWallpaperWindow, windows.get(9));
+        assertEquals(sChildAppWindowBelow, windows.get(8));
+        assertEquals(sAppWindow, windows.get(7));
+        assertEquals(sChildAppWindowAbove, windows.get(6));
+        assertEquals(sDockedDividerWindow, windows.get(5));
+        assertEquals(voiceInteractionWindow, windows.get(4));
+        assertEquals(sStatusBarWindow, windows.get(3));
+        assertEquals(sNavBarWindow, windows.get(2));
+        assertEquals(sImeWindow, windows.get(1));
+        assertEquals(sImeDialogWindow, windows.get(0));
+
+        voiceInteractionWindow.removeImmediately();
     }
 }
