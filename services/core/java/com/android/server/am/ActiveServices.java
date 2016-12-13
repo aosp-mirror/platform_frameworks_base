@@ -368,7 +368,7 @@ public final class ActiveServices {
         // we do not start the service and launch a review activity if the calling app
         // is in the foreground passing it a pending intent to start the service when
         // review is completed.
-        if (Build.PERMISSIONS_REVIEW_REQUIRED) {
+        if (mAm.mPermissionReviewRequired || Build.PERMISSIONS_REVIEW_REQUIRED) {
             if (!requestStartTargetPermissionsReviewIfNeededLocked(r, callingPackage,
                     callingUid, service, callerFg, userId)) {
                 return null;
@@ -912,7 +912,7 @@ public final class ActiveServices {
         // we schedule binding to the service but do not start its process, then
         // we launch a review activity to which is passed a callback to invoke
         // when done to start the bound service's process to completing the binding.
-        if (Build.PERMISSIONS_REVIEW_REQUIRED) {
+        if (mAm.mPermissionReviewRequired || Build.PERMISSIONS_REVIEW_REQUIRED) {
             if (mAm.getPackageManagerInternalLocked().isPermissionsReviewRequired(
                     s.packageName, s.userId)) {
 
