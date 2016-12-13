@@ -182,7 +182,7 @@ public abstract class BatteryStats implements Parcelable {
      * New in version 19:
      *   - Wakelock data (wl) gets current and max times.
      */
-    static final String CHECKIN_VERSION = "19";
+    static final String CHECKIN_VERSION = "20";
 
     /**
      * Old version, we hit 9 and ran out of room, need to remove.
