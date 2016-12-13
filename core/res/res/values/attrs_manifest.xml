@@ -1159,18 +1159,15 @@
          resizeable activities when in multi-window mode. -->
     <attr name="resizeableActivity" format="boolean" />
 
-    <!-- Indicates that the activity supports the picture-in-picture (PiP) form of multi-window.
-         While it makes sense to be able to resize most activities types in multi-window mode when
-         {@link android.R.attr#resizeableActivity} is set. It only makes sense to put specific types
-         of activities in PiP mode of multi-window. For example, activities that play video. When
-         set the activity will be allowed to enter PiP mode when the system deems it appropriate on
-         devices that support PiP.
+    <!-- Indicates that the activity specifically supports the picture-in-picture form of
+         multi-window. If true, this activity will support entering picture-in-picture, but will
+         only support split-screen and other forms of multi-window if
+         {@link android.R.attr#resizeableActivity} is also set to true.
 
-         <p>The default value is <code>false</code> for applications with
-         <code>targetSdkVersion</code> lesser than {@link android.os.Build.VERSION_CODES#N} and
-         <code>true</code> otherwise.
+         Note that your activity may still be resized even if this attribute is true and
+         {@link android.R.attr#resizeableActivity} is false.
 
-         <p>NOTE: Attribute is only used if {@link android.R.attr#resizeableActivity} is true. -->
+         <p>The default value is <code>false</code>.  -->
     <attr name="supportsPictureInPicture" format="boolean" />
 
     <!-- This value indicates how tasks rooted at this activity will behave in lockTask mode.

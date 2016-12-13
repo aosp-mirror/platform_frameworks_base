@@ -90,7 +90,6 @@ import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_PINNABLE;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_WHITELISTED;
 import static com.android.server.wm.AppTransition.TRANSIT_DOCK_TASK_FROM_RECENTS;
 import static java.lang.Integer.MAX_VALUE;
-import static java.lang.Integer.MIN_VALUE;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -2576,7 +2575,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             // This means that tasks that were on external displays will be restored on the
             // primary display.
             stackId = task.getLaunchStackId();
-        } else if (stackId == DOCKED_STACK_ID && !task.canGoInDockedStack()) {
+        } else if (stackId == DOCKED_STACK_ID && !task.supportsSplitScreen()) {
             // Preferred stack is the docked stack, but the task can't go in the docked stack.
             // Put it in the fullscreen stack.
             stackId = FULLSCREEN_WORKSPACE_STACK_ID;
@@ -3895,14 +3894,14 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         final ActivityRecord topActivity = task.getTopActivity();
-        if (!task.canGoInDockedStack() || forceNonResizable) {
+        if (!task.supportsSplitScreen() || forceNonResizable) {
             // Display a warning toast that we tried to put a non-dockable task in the docked stack.
             mService.mTaskChangeNotificationController.notifyActivityDismissingDockedStack();
 
             // Dismiss docked stack. If task appeared to be in docked stack but is not resizable -
             // we need to move it to top of fullscreen stack, otherwise it will be covered.
             moveTasksToFullscreenStackLocked(DOCKED_STACK_ID, actualStackId == DOCKED_STACK_ID);
-        } else if (topActivity != null && topActivity.isNonResizableOrForced()
+        } else if (topActivity != null && topActivity.isNonResizableOrForcedResizable()
                 && !topActivity.noDisplay) {
             String packageName = topActivity.appInfo.packageName;
             mService.mTaskChangeNotificationController.notifyActivityForcedResizable(

@@ -438,7 +438,7 @@ public class Recents extends SystemUI
                 ActivityManager.StackId.isHomeOrRecentsStack(runningTask.stackId);
         if (runningTask != null && !isRunningTaskInHomeOrRecentsStack && !screenPinningActive) {
             logDockAttempt(mContext, runningTask.topActivity, runningTask.resizeMode);
-            if (runningTask.isDockable) {
+            if (runningTask.supportsSplitScreenMultiWindow) {
                 if (metricsDockAction != -1) {
                     MetricsLogger.action(mContext, metricsDockAction,
                             runningTask.topActivity.flattenToShortString());
@@ -486,7 +486,6 @@ public class Recents extends SystemUI
             case ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE:
                 return COUNTER_WINDOW_UNSUPPORTED;
             case ActivityInfo.RESIZE_MODE_RESIZEABLE:
-            case ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE:
             case ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION:
                 return COUNTER_WINDOW_SUPPORTED;
             default:

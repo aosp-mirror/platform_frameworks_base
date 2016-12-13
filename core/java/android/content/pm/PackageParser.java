@@ -18,12 +18,12 @@ package android.content.pm;
 
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
 import static android.content.pm.ActivityInfo.FLAG_ON_TOP_LAUNCHER;
+import static android.content.pm.ActivityInfo.FLAG_SUPPORTS_PICTURE_IN_PICTURE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -2402,7 +2402,7 @@ public class PackageParser {
         // cannot be windowed / resized. Note that an SDK version of 0 is common for
         // pre-Doughnut applications.
         if (pkg.applicationInfo.usesCompatibilityMode()) {
-            adjustPackageToBeUnresizeable(pkg);
+            adjustPackageToBeUnresizeableAndUnpipable(pkg);
         }
         return pkg;
     }
@@ -2413,9 +2413,10 @@ public class PackageParser {
      *
      * @param pkg The package which needs to be marked as unresizable.
      */
-    private void adjustPackageToBeUnresizeable(Package pkg) {
+    private void adjustPackageToBeUnresizeableAndUnpipable(Package pkg) {
         for (Activity a : pkg.activities) {
             a.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
+            a.info.flags &= ~FLAG_SUPPORTS_PICTURE_IN_PICTURE;
         }
     }
 
@@ -4000,6 +4001,11 @@ public class PackageParser {
 
             setActivityResizeMode(a.info, sa, owner);
 
+            if (sa.getBoolean(R.styleable.AndroidManifestActivity_supportsPictureInPicture,
+                    false)) {
+                a.info.flags |= FLAG_SUPPORTS_PICTURE_IN_PICTURE;
+            }
+
             if (sa.getBoolean(R.styleable.AndroidManifestActivity_alwaysFocusable, false)) {
                 a.info.flags |= FLAG_ALWAYS_FOCUSABLE;
             }
@@ -4161,16 +4167,13 @@ public class PackageParser {
     private void setActivityResizeMode(ActivityInfo aInfo, TypedArray sa, Package owner) {
         final boolean appExplicitDefault = (owner.applicationInfo.privateFlags
                 & PRIVATE_FLAG_RESIZEABLE_ACTIVITIES_EXPLICITLY_SET) != 0;
-        final boolean supportsPip =
-                sa.getBoolean(R.styleable.AndroidManifestActivity_supportsPictureInPicture, false);
 
         if (sa.hasValue(R.styleable.AndroidManifestActivity_resizeableActivity)
                 || appExplicitDefault) {
             // Activity or app explicitly set if it is resizeable or not;
             if (sa.getBoolean(R.styleable.AndroidManifestActivity_resizeableActivity,
                     appExplicitDefault)) {
-                aInfo.resizeMode =
-                        supportsPip ? RESIZE_MODE_RESIZEABLE_AND_PIPABLE : RESIZE_MODE_RESIZEABLE;
+                aInfo.resizeMode = RESIZE_MODE_RESIZEABLE;
             } else {
                 aInfo.resizeMode = RESIZE_MODE_UNRESIZEABLE;
             }

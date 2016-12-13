@@ -1966,10 +1966,10 @@ class ActivityStarter {
                 canUseFocusedStack = true;
                 break;
             case DOCKED_STACK_ID:
-                canUseFocusedStack = r.canGoInDockedStack();
+                canUseFocusedStack = r.supportsSplitScreen();
                 break;
             case FREEFORM_WORKSPACE_STACK_ID:
-                canUseFocusedStack = r.isResizeableOrForced();
+                canUseFocusedStack = r.supportsFreeform();
                 break;
             default:
                 canUseFocusedStack = isDynamicStack(focusedStackId)
@@ -2056,29 +2056,24 @@ class ActivityStarter {
     }
 
     boolean isValidLaunchStackId(int stackId, ActivityRecord r) {
-        if (stackId == INVALID_STACK_ID || stackId == HOME_STACK_ID) {
-            return false;
+        switch (stackId) {
+            case INVALID_STACK_ID:
+            case HOME_STACK_ID:
+                return false;
+            case FULLSCREEN_WORKSPACE_STACK_ID:
+                return true;
+            case FREEFORM_WORKSPACE_STACK_ID:
+                return r.supportsFreeform();
+            case DOCKED_STACK_ID:
+                return r.supportsSplitScreen();
+            case PINNED_STACK_ID:
+                return r.supportsPictureInPicture();
+            case RECENTS_STACK_ID:
+                return r.isRecentsActivity();
+            default:
+                Slog.e(TAG, "isValidLaunchStackId: Unexpected stackId=" + stackId);
+                return false;
         }
-
-        if (stackId != FULLSCREEN_WORKSPACE_STACK_ID
-                && (!mService.mSupportsMultiWindow || !r.isResizeableOrForced())) {
-            return false;
-        }
-
-        if (stackId == DOCKED_STACK_ID && r.canGoInDockedStack()) {
-            return true;
-        }
-
-        if (stackId == FREEFORM_WORKSPACE_STACK_ID && !mService.mSupportsFreeformWindowManagement) {
-            return false;
-        }
-
-        final boolean supportsPip = mService.mSupportsPictureInPicture
-                && (r.supportsPictureInPicture() || mService.mForceResizableActivities);
-        if (stackId == PINNED_STACK_ID && !supportsPip) {
-            return false;
-        }
-        return true;
     }
 
     Rect getOverrideBounds(ActivityRecord r, ActivityOptions options, TaskRecord inTask) {

@@ -1482,7 +1482,7 @@ public class ActivityManager {
          * True if the task can go in the docked stack.
          * @hide
          */
-        public boolean isDockable;
+        public boolean supportsSplitScreenMultiWindow;
 
         /**
          * The resize mode of the task. See {@link ActivityInfo#resizeMode}.
@@ -1533,7 +1533,7 @@ public class ActivityManager {
             } else {
                 dest.writeInt(0);
             }
-            dest.writeInt(isDockable ? 1 : 0);
+            dest.writeInt(supportsSplitScreenMultiWindow ? 1 : 0);
             dest.writeInt(resizeMode);
         }
 
@@ -1557,7 +1557,7 @@ public class ActivityManager {
             numActivities = source.readInt();
             bounds = source.readInt() > 0 ?
                     Rect.CREATOR.createFromParcel(source) : null;
-            isDockable = source.readInt() == 1;
+            supportsSplitScreenMultiWindow = source.readInt() == 1;
             resizeMode = source.readInt();
         }
 
@@ -1745,7 +1745,7 @@ public class ActivityManager {
          * True if the task can go in the docked stack.
          * @hide
          */
-        public boolean isDockable;
+        public boolean supportsSplitScreenMultiWindow;
 
         /**
          * The resize mode of the task. See {@link ActivityInfo#resizeMode}.
@@ -1775,7 +1775,7 @@ public class ActivityManager {
                     Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
             dest.writeInt(numActivities);
             dest.writeInt(numRunning);
-            dest.writeInt(isDockable ? 1 : 0);
+            dest.writeInt(supportsSplitScreenMultiWindow ? 1 : 0);
             dest.writeInt(resizeMode);
         }
 
@@ -1792,7 +1792,7 @@ public class ActivityManager {
             description = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
             numActivities = source.readInt();
             numRunning = source.readInt();
-            isDockable = source.readInt() != 0;
+            supportsSplitScreenMultiWindow = source.readInt() != 0;
             resizeMode = source.readInt();
         }
 

@@ -85,6 +85,7 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PORTRA
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE_DEPRECATED;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
@@ -141,6 +142,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
     private static final String ATTR_TASK_AFFILIATION_COLOR = "task_affiliation_color";
     private static final String ATTR_CALLING_UID = "calling_uid";
     private static final String ATTR_CALLING_PACKAGE = "calling_package";
+    private static final String ATTR_SUPPORTS_PICTURE_IN_PICTURE = "supports_picture_in_picture";
     private static final String ATTR_RESIZE_MODE = "resize_mode";
     private static final String ATTR_PRIVILEGED = "privileged";
     private static final String ATTR_NON_FULLSCREEN_BOUNDS = "non_fullscreen_bounds";
@@ -188,6 +190,9 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
 
     int mResizeMode;        // The resize mode of this task and its activities.
                             // Based on the {@link ActivityInfo#resizeMode} of the root activity.
+    boolean mSupportsPictureInPicture;  // Whether or not this task and its activities support PiP.
+            // Based on the {@link ActivityInfo#FLAG_SUPPORTS_PICTURE_IN_PICTURE} flag of the root
+            // activity.
     boolean mTemporarilyUnresizable; // Separate flag from mResizeMode used to suppress resize
                                      // changes on a temporary basis.
     private int mLockTaskMode;  // Which tasklock mode to launch this task in. One of
@@ -356,8 +361,9 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
             boolean neverRelinquishIdentity, TaskDescription _lastTaskDescription,
             TaskThumbnailInfo lastThumbnailInfo, int taskAffiliation, int prevTaskId,
             int nextTaskId, int taskAffiliationColor, int callingUid, String callingPackage,
-            int resizeMode, boolean privileged, boolean _realActivitySuspended,
-            boolean userSetupComplete, int minWidth, int minHeight) {
+            int resizeMode, boolean supportsPictureInPicture, boolean privileged,
+            boolean _realActivitySuspended, boolean userSetupComplete, int minWidth,
+            int minHeight) {
         mService = service;
         mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX +
                 TaskPersister.IMAGE_EXTENSION;
@@ -396,6 +402,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         mCallingUid = callingUid;
         mCallingPackage = callingPackage;
         mResizeMode = resizeMode;
+        mSupportsPictureInPicture = supportsPictureInPicture;
         mPrivileged = privileged;
         mMinWidth = minWidth;
         mMinHeight = minHeight;
@@ -415,8 +422,8 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         final Rect bounds = updateOverrideConfigurationFromLaunchBounds();
         final Configuration overrideConfig = getOverrideConfiguration();
         mWindowContainerController = new TaskWindowContainerController(taskId, this, getStackId(),
-                userId, bounds, overrideConfig, mResizeMode, isHomeTask(), isOnTopLauncher(), onTop,
-                showForAllUsers, lastTaskDescription);
+                userId, bounds, overrideConfig, mResizeMode, mSupportsPictureInPicture,
+                isHomeTask(), isOnTopLauncher(), onTop, showForAllUsers, lastTaskDescription);
     }
 
     void removeWindowContainer() {
@@ -691,6 +698,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
             autoRemoveRecents = false;
         }
         mResizeMode = info.resizeMode;
+        mSupportsPictureInPicture = info.supportsPictureInPicture();
         mIsOnTopLauncher = (info.flags & FLAG_ON_TOP_LAUNCHER) != 0;
         mLockTaskMode = info.lockTaskLaunchMode;
         mPrivileged = (info.applicationInfo.privateFlags & PRIVATE_FLAG_PRIVILEGED) != 0;
@@ -1301,9 +1309,21 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         return mTaskToReturnTo == HOME_ACTIVITY_TYPE;
     }
 
+    private boolean isResizeable(boolean checkSupportsPip) {
+        return (mService.mForceResizableActivities || ActivityInfo.isResizeableMode(mResizeMode)
+                || (checkSupportsPip && mSupportsPictureInPicture)) && !mTemporarilyUnresizable;
+    }
+
     boolean isResizeable() {
-        return (mService.mForceResizableActivities || ActivityInfo.isResizeableMode(mResizeMode))
-                && !mTemporarilyUnresizable;
+        return isResizeable(true /* checkSupportsPip */);
+    }
+
+    boolean supportsSplitScreen() {
+        // A task can not be docked even if it is considered resizeable because it only supports
+        // picture-in-picture mode but has a non-resizeable resizeMode
+        return mService.mSupportsSplitScreenMultiWindow
+                && isResizeable(false /* checkSupportsPip */)
+                && !ActivityInfo.isPreserveOrientationMode(mResizeMode);
     }
 
     /**
@@ -1327,11 +1347,6 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
 
     boolean isOnTopLauncher() {
         return isHomeTask() && mIsOnTopLauncher;
-    }
-
-    boolean canGoInDockedStack() {
-        return isResizeable() && mService.mSupportsSplitScreenMultiWindow &&
-                !ActivityInfo.isPreserveOrientationMode(mResizeMode);
     }
 
     /**
@@ -1482,6 +1497,8 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         out.attribute(null, ATTR_CALLING_UID, String.valueOf(mCallingUid));
         out.attribute(null, ATTR_CALLING_PACKAGE, mCallingPackage == null ? "" : mCallingPackage);
         out.attribute(null, ATTR_RESIZE_MODE, String.valueOf(mResizeMode));
+        out.attribute(null, ATTR_SUPPORTS_PICTURE_IN_PICTURE,
+                String.valueOf(mSupportsPictureInPicture));
         out.attribute(null, ATTR_PRIVILEGED, String.valueOf(mPrivileged));
         if (mLastNonFullscreenBounds != null) {
             out.attribute(
@@ -1552,6 +1569,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         int callingUid = -1;
         String callingPackage = "";
         int resizeMode = RESIZE_MODE_FORCE_RESIZEABLE;
+        boolean supportsPictureInPicture = false;
         boolean privileged = false;
         Rect bounds = null;
         int minWidth = INVALID_MIN_SIZE;
@@ -1618,6 +1636,8 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
                 callingPackage = attrValue;
             } else if (ATTR_RESIZE_MODE.equals(attrName)) {
                 resizeMode = Integer.parseInt(attrValue);
+            } else if (ATTR_SUPPORTS_PICTURE_IN_PICTURE.equals(attrName)) {
+                supportsPictureInPicture = Boolean.parseBoolean(attrValue);
             } else if (ATTR_PRIVILEGED.equals(attrName)) {
                 privileged = Boolean.parseBoolean(attrValue);
             } else if (ATTR_NON_FULLSCREEN_BOUNDS.equals(attrName)) {
@@ -1690,6 +1710,15 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
             if (taskType == HOME_ACTIVITY_TYPE && resizeMode == RESIZE_MODE_RESIZEABLE) {
                 resizeMode = RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
             }
+        } else {
+            // This activity has previously marked itself explicitly as both resizeable and
+            // supporting picture-in-picture.  Since there is no longer a requirement for
+            // picture-in-picture activities to be resizeable, we can mark this simply as
+            // resizeable and supporting picture-in-picture separately.
+            if (resizeMode == RESIZE_MODE_RESIZEABLE_AND_PIPABLE_DEPRECATED) {
+                resizeMode = RESIZE_MODE_RESIZEABLE;
+                supportsPictureInPicture = true;
+            }
         }
 
         final TaskRecord task = new TaskRecord(stackSupervisor.mService, taskId, intent,
@@ -1697,8 +1726,9 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
                 autoRemoveRecents, askedCompatMode, taskType, userId, effectiveUid, lastDescription,
                 activities, firstActiveTime, lastActiveTime, lastTimeOnTop, neverRelinquishIdentity,
                 taskDescription, thumbnailInfo, taskAffiliation, prevTaskId, nextTaskId,
-                taskAffiliationColor, callingUid, callingPackage, resizeMode, privileged,
-                realActivitySuspended, userSetupComplete, minWidth, minHeight);
+                taskAffiliationColor, callingUid, callingPackage, resizeMode,
+                supportsPictureInPicture, privileged, realActivitySuspended, userSetupComplete,
+                minWidth, minHeight);
         task.updateOverrideConfiguration(bounds);
 
         for (int activityNdx = activities.size() - 1; activityNdx >=0; --activityNdx) {
@@ -2084,6 +2114,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         pw.print(prefix); pw.print("stackId="); pw.println(getStackId());
         pw.print(prefix + "hasBeenVisible=" + hasBeenVisible);
                 pw.print(" mResizeMode=" + ActivityInfo.resizeModeToString(mResizeMode));
+                pw.print(" mSupportsPictureInPicture=" + mSupportsPictureInPicture);
                 pw.print(" isResizeable=" + isResizeable());
                 pw.print(" firstActiveTime=" + lastActiveTime);
                 pw.print(" lastActiveTime=" + lastActiveTime);
