@@ -10,6 +10,11 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
+
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * The base class for implementing a network recommendation provider.
  * @hide
@@ -42,11 +47,12 @@ public abstract class NetworkRecommendationProvider {
      *
      * @param request a {@link RecommendationRequest} instance containing additional
      *                request details
-     * @return a {@link RecommendationResult} instance containing the recommended
-     *         network to connect to
+     * @param callback a {@link ResultCallback} instance. When a {@link RecommendationResult} is
+     *                 available it must be passed into
+     *                 {@link ResultCallback#onResult(RecommendationResult)}.
      */
-    public abstract RecommendationResult onRequestRecommendation(RecommendationRequest request);
-
+    public abstract void onRequestRecommendation(RecommendationRequest request,
+            ResultCallback callback);
 
     /**
      * Services that can handle {@link NetworkScoreManager#ACTION_RECOMMEND_NETWORKS} should
@@ -54,6 +60,60 @@ public abstract class NetworkRecommendationProvider {
      */
     public final IBinder getBinder() {
         return mService;
+    }
+
+    /**
+     * A callback implementing applications should invoke when a {@link RecommendationResult}
+     * is available.
+     */
+    public static final class ResultCallback {
+        private final IRemoteCallback mCallback;
+        private final int mSequence;
+        private final AtomicBoolean mCallbackRun;
+
+        /**
+         * @hide
+         */
+        @VisibleForTesting
+        public ResultCallback(IRemoteCallback callback, int sequence) {
+            mCallback = callback;
+            mSequence = sequence;
+            mCallbackRun = new AtomicBoolean(false);
+        }
+
+        /**
+         * Run the callback with the available {@link RecommendationResult}.
+         * @param result a {@link RecommendationResult} instance.
+         */
+        public void onResult(RecommendationResult result) {
+            if (!mCallbackRun.compareAndSet(false, true)) {
+                throw new IllegalStateException("The callback cannot be run more than once.");
+            }
+            final Bundle data = new Bundle();
+            data.putInt(EXTRA_SEQUENCE, mSequence);
+            data.putParcelable(EXTRA_RECOMMENDATION_RESULT, result);
+            try {
+                mCallback.sendResult(data);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Callback failed for seq: " + mSequence, e);
+            }
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            ResultCallback that = (ResultCallback) o;
+
+            return mSequence == that.mSequence
+                    && Objects.equals(mCallback, that.mCallback);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mCallback, mSequence);
+        }
     }
 
     private final class ServiceHandler extends Handler {
@@ -72,16 +132,8 @@ public abstract class NetworkRecommendationProvider {
                     final int seq = msg.arg1;
                     final RecommendationRequest request =
                             msg.getData().getParcelable(EXTRA_RECOMMENDATION_REQUEST);
-                    final RecommendationResult result = onRequestRecommendation(request);
-                    final Bundle data = new Bundle();
-                    data.putInt(EXTRA_SEQUENCE, seq);
-                    data.putParcelable(EXTRA_RECOMMENDATION_RESULT, result);
-                    try {
-                        callback.sendResult(data);
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "Callback failed for seq: " + seq, e);
-                    }
-
+                    final ResultCallback resultCallback = new ResultCallback(callback, seq);
+                    onRequestRecommendation(request, resultCallback);
                     break;
 
                 default:
