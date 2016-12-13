@@ -23,6 +23,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
+import android.app.ActivityThread;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
@@ -253,6 +254,29 @@ public final class BluetoothAdapter {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_REQUEST_ENABLE =
             "android.bluetooth.adapter.action.REQUEST_ENABLE";
+
+    /**
+     * Activity Action: Show a system activity that allows the user to turn off
+     * Bluetooth. This is used only if permission review is enabled which is for
+     * apps targeting API less than 23 require a permission review before any of
+     * the app's components can run.
+     * <p>This system activity will return once Bluetooth has completed turning
+     * off, or the user has decided not to turn Bluetooth off.
+     * <p>Notification of the result of this activity is posted using the
+     * {@link android.app.Activity#onActivityResult} callback. The
+     * <code>resultCode</code>
+     * will be {@link android.app.Activity#RESULT_OK} if Bluetooth has been
+     * turned off or {@link android.app.Activity#RESULT_CANCELED} if the user
+     * has rejected the request or an error has occurred.
+     * <p>Applications can also listen for {@link #ACTION_STATE_CHANGED}
+     * for global notification whenever Bluetooth is turned on or off.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_REQUEST_DISABLE =
+            "android.bluetooth.adapter.action.REQUEST_DISABLE";
 
     /**
      * Activity Action: Show a system activity that allows user to enable BLE scans even when
@@ -772,7 +796,7 @@ public final class BluetoothAdapter {
                 return true;
             }
             if (DBG) Log.d(TAG, "enableBLE(): Calling enable");
-            return mManagerService.enable();
+            return mManagerService.enable(ActivityThread.currentPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -899,7 +923,7 @@ public final class BluetoothAdapter {
             return true;
         }
         try {
-            return mManagerService.enable();
+            return mManagerService.enable(ActivityThread.currentPackageName());
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
@@ -931,7 +955,7 @@ public final class BluetoothAdapter {
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public boolean disable() {
         try {
-            return mManagerService.disable(true);
+            return mManagerService.disable(ActivityThread.currentPackageName(), true);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
@@ -949,7 +973,7 @@ public final class BluetoothAdapter {
     public boolean disable(boolean persist) {
 
         try {
-            return mManagerService.disable(persist);
+            return mManagerService.disable(ActivityThread.currentPackageName(), persist);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
