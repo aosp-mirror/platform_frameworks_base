@@ -634,11 +634,14 @@ public class UserManager {
      * <code>false</code>. Setting this restriction has no effect if the bootloader is already
      * unlocked.
      *
+     * <p>Not for use by third-party applications.
+     *
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      * @hide
      */
+    @SystemApi
     public static final String DISALLOW_OEM_UNLOCK = "no_oem_unlock";
 
     /**
