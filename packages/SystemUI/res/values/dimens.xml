@@ -716,19 +716,4 @@
 
     <!-- The size of the PIP dismiss target. -->
     <dimen name="pip_dismiss_target_size">48dp</dimen>
-
-    <!-- Values specific to grid-based recents. -->
-    <!-- Margins around recent tasks. -->
-    <dimen name="recents_grid_margin_left">15dp</dimen>
-    <dimen name="recents_grid_margin_top">70dp</dimen>
-    <dimen name="recents_grid_margin_right">15dp</dimen>
-    <dimen name="recents_grid_margin_bottom">90dp</dimen>
-    <!-- Margins around the "Clear all" button. -->
-    <dimen name="recents_grid_clear_all_margin_left">0dp</dimen>
-    <dimen name="recents_grid_clear_all_margin_top">30dp</dimen>
-    <dimen name="recents_grid_clear_all_margin_right">15dp</dimen>
-    <dimen name="recents_grid_clear_all_margin_bottom">0dp</dimen>
-    <!-- Padding in between task views. -->
-    <dimen name="recents_grid_inter_task_padding">15dp</dimen>
-
 </resources>
