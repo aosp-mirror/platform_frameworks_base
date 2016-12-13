@@ -30,8 +30,7 @@
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
         android:paddingStart="16dp"
-        android:paddingEnd="12dp"
-        style="?attr/taskIconStyle" />
+        android:paddingEnd="12dp" />
     <TextView
         android:id="@+id/title"
         android:layout_width="match_parent"

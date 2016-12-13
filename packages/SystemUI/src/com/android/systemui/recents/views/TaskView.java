@@ -146,7 +146,6 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     private ObjectAnimator mOutlineAnimator;
     private final TaskViewTransform mTargetAnimationTransform = new TaskViewTransform();
     private ArrayList<Animator> mTmpAnimators = new ArrayList<>();
-    private boolean mOverlayHeaderOnThumbnailActionBar;
 
     @ViewDebug.ExportedProperty(deepExport=true, prefix="thumbnail_")
     TaskViewThumbnail mThumbnailView;
@@ -360,19 +359,6 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         Utilities.cancelAnimationWithoutCallbacks(mTransformAnimation);
         Utilities.cancelAnimationWithoutCallbacks(mDimAnimator);
         Utilities.cancelAnimationWithoutCallbacks(mOutlineAnimator);
-    }
-
-    /**
-     * Sets whether the header should overlap (and hide) the action bar in the thumbnail, or
-     * be stacked just above it.
-     */
-    public void setOverlayHeaderOnThumbnailActionBar(boolean flag) {
-        mOverlayHeaderOnThumbnailActionBar = flag;
-        if (!mOverlayHeaderOnThumbnailActionBar) {
-            mThumbnailView.setSizeToFit(true);
-            mThumbnailView.setOverlayHeaderOnThumbnailActionBar(false);
-            mThumbnailView.updateThumbnailScale();
-        }
     }
 
     /** Enables/disables handling touch on this task view. */

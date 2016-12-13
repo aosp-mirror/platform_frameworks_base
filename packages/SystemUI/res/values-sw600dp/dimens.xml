@@ -99,28 +99,4 @@
 
     <!-- The offsets the tasks animate from when recents is launched while docking -->
     <dimen name="recents_task_stack_animation_launched_while_docking_offset">192dp</dimen>
-
-    <!--                                        -->
-    <!-- Values specific to grid-based recents. -->
-    <!--                                        -->
-
-    <!-- Margins around recent tasks. -->
-    <dimen name="recents_grid_margin_left">32dp</dimen>
-    <dimen name="recents_grid_margin_top">70dp</dimen>
-    <dimen name="recents_grid_margin_right">32dp</dimen>
-    <dimen name="recents_grid_margin_bottom">90dp</dimen>
-    <!-- Margins around the "Clear all" button. -->
-    <dimen name="recents_grid_clear_all_margin_left">0dp</dimen>
-    <dimen name="recents_grid_clear_all_margin_top">36dp</dimen>
-    <dimen name="recents_grid_clear_all_margin_right">12dp</dimen>
-    <dimen name="recents_grid_clear_all_margin_bottom">0dp</dimen>
-    <!-- Padding in between task views. -->
-    <dimen name="recents_grid_inter_task_padding">20dp</dimen>
-    <!-- The height of each task view's header. -->
-    <dimen name="recents_grid_task_header_height">44dp</dimen>
-    <!-- The margin to separate the title from the edge of the header. -->
-    <dimen name="recents_grid_task_title_margin_start">12dp</dimen>
-    <!-- The padding for the dismiss button. -->
-    <dimen name="recents_grid_task_dismiss_button_padding">8dp</dimen>
-
 </resources>
