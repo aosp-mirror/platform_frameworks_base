@@ -299,6 +299,11 @@ public class ChooserActivity extends ResolverActivity {
                 || aInfo.name.equals(IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE)) {
             result = Intent.createChooser(result,
                     getIntent().getCharSequenceExtra(Intent.EXTRA_TITLE));
+
+            // Don't auto-launch single intents if the intent is being forwarded. This is done
+            // because automatically launching a resolving application as a response to the user
+            // action of switching accounts is pretty unexpected.
+            result.putExtra(Intent.EXTRA_AUTO_LAUNCH_SINGLE_CHOICE, false);
         }
         return result;
     }
