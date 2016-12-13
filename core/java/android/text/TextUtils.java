@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.PluralsRes;
 import android.content.Context;
 import android.content.res.Resources;
+import android.icu.lang.UCharacter;
 import android.icu.util.ULocale;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -545,9 +546,10 @@ public class TextUtils {
         }
 
         public char charAt(int off) {
-            return AndroidCharacter.getMirror(mSource.charAt(mEnd - 1 - off));
+            return (char) UCharacter.getMirror(mSource.charAt(mEnd - 1 - off));
         }
 
+        @SuppressWarnings("deprecation")
         public void getChars(int start, int end, char[] dest, int destoff) {
             TextUtils.getChars(mSource, start + mStart, end + mStart,
                                dest, destoff);
