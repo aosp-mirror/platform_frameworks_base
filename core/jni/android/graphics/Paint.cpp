@@ -30,7 +30,6 @@
 #include "SkMaskFilter.h"
 #include "SkPath.h"
 #include "SkPathEffect.h"
-#include "SkRasterizer.h"
 #include "SkShader.h"
 #include "SkBlendMode.h"
 #include "unicode/uloc.h"
@@ -848,12 +847,6 @@ namespace PaintGlue {
         return 0;
     }
 
-    static jlong setRasterizer(jlong objHandle, jlong rasterizerHandle) {
-        Paint* obj = reinterpret_cast<Paint*>(objHandle);
-        obj->setRasterizer(GraphicsJNI::refNativeRasterizer(rasterizerHandle));
-        return reinterpret_cast<jlong>(obj->getRasterizer());
-    }
-
     static jint getTextAlign(jlong objHandle) {
         Paint* obj = reinterpret_cast<Paint*>(objHandle);
         return static_cast<jint>(obj->getTextAlign());
@@ -1038,7 +1031,6 @@ static const JNINativeMethod methods[] = {
     {"nSetPathEffect","(JJ)J", (void*) PaintGlue::setPathEffect},
     {"nSetMaskFilter","(JJ)J", (void*) PaintGlue::setMaskFilter},
     {"nSetTypeface","(JJ)J", (void*) PaintGlue::setTypeface},
-    {"nSetRasterizer","(JJ)J", (void*) PaintGlue::setRasterizer},
     {"nGetTextAlign","(J)I", (void*) PaintGlue::getTextAlign},
     {"nSetTextAlign","(JI)V", (void*) PaintGlue::setTextAlign},
     {"nSetTextLocalesByMinikinLangListId","(JI)V",

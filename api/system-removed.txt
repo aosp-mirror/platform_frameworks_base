@@ -76,8 +76,23 @@ package android.graphics {
     enum_constant public static final android.graphics.AvoidXfermode.Mode TARGET;
   }
 
+  public deprecated class LayerRasterizer extends android.graphics.Rasterizer {
+    ctor public LayerRasterizer();
+    method public void addLayer(android.graphics.Paint, float, float);
+    method public void addLayer(android.graphics.Paint);
+  }
+
+  public class Paint {
+    method public deprecated android.graphics.Rasterizer getRasterizer();
+    method public deprecated android.graphics.Rasterizer setRasterizer(android.graphics.Rasterizer);
+  }
+
   public deprecated class PixelXorXfermode extends android.graphics.Xfermode {
     ctor public PixelXorXfermode(int);
+  }
+
+  public class Rasterizer {
+    ctor public Rasterizer();
   }
 
 }
@@ -383,6 +398,15 @@ package android.text.format {
     field public static final deprecated char STANDALONE_MONTH = 76; // 0x004c 'L'
     field public static final deprecated char TIME_ZONE = 122; // 0x007a 'z'
     field public static final deprecated char YEAR = 121; // 0x0079 'y'
+  }
+
+}
+
+package android.text.style {
+
+  public class RasterizerSpan extends android.text.style.CharacterStyle implements android.text.style.UpdateAppearance {
+    ctor public RasterizerSpan(android.graphics.Rasterizer);
+    method public android.graphics.Rasterizer getRasterizer();
   }
 
 }
