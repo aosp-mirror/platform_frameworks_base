@@ -116,8 +116,8 @@ public class CameraBinderTest extends AndroidTestCase {
     @SmallTest
     public void testSupportsCamera2Api() throws Exception {
         for (int cameraId = 0; cameraId < mUtils.getGuessedNumCameras(); ++cameraId) {
-
-            boolean supports = mUtils.getCameraService().supportsCameraApi(cameraId, API_VERSION_2);
+            boolean supports = mUtils.getCameraService().supportsCameraApi(
+                String.valueOf(cameraId), API_VERSION_2);
 
             Log.v(TAG, "Camera " + cameraId + " supports api2: " + supports);
         }
@@ -128,7 +128,8 @@ public class CameraBinderTest extends AndroidTestCase {
     public void testSupportsCamera1Api() throws Exception {
         for (int cameraId = 0; cameraId < mUtils.getGuessedNumCameras(); ++cameraId) {
 
-            boolean supports = mUtils.getCameraService().supportsCameraApi(cameraId, API_VERSION_1);
+            boolean supports = mUtils.getCameraService().supportsCameraApi(
+                String.valueOf(cameraId), API_VERSION_1);
             assertTrue(
                     "Camera service returned false when queried if it supports camera1 api " +
                     " for camera ID " + cameraId, supports);
@@ -285,7 +286,7 @@ public class CameraBinderTest extends AndroidTestCase {
 
             ICameraDeviceUser cameraUser =
                     mUtils.getCameraService().connectDevice(
-                        dummyCallbacks, cameraId,
+                        dummyCallbacks, String.valueOf(cameraId),
                         clientPackageName,
                         ICameraService.USE_CALLING_UID);
             assertNotNull(String.format("Camera %s was null", cameraId), cameraUser);
@@ -298,9 +299,9 @@ public class CameraBinderTest extends AndroidTestCase {
 
     static class DummyCameraServiceListener extends ICameraServiceListener.Stub {
         @Override
-        public void onStatusChanged(int status, int cameraId)
+        public void onStatusChanged(int status, String cameraId)
                 throws RemoteException {
-            Log.v(TAG, String.format("Camera %d has status changed to 0x%x", cameraId, status));
+            Log.v(TAG, String.format("Camera %s has status changed to 0x%x", cameraId, status));
         }
         public void onTorchStatusChanged(int status, String cameraId)
                 throws RemoteException {
