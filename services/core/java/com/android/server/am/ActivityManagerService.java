@@ -18746,7 +18746,14 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             if (doNext) {
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                      String.format("ProcessBroadcast from %s (%s) %s", r.callerPackage,
+                        r.callerApp == null ? "caller unknown" : r.callerApp.toShortString(),
+                        r.intent == null ? "" : r.intent.toString()));
+                }
                 r.queue.processNextBroadcast(false);
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             }
             trimApplications();
         } finally {
