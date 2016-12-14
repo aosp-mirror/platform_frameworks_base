@@ -3489,15 +3489,15 @@ public abstract class PackageManager {
     public abstract @Nullable String[] getPackagesForUid(int uid);
 
     /**
-     * Retrieve the official name associated with a user id.  This name is
+     * Retrieve the official name associated with a uid. This name is
      * guaranteed to never change, though it is possible for the underlying
-     * user id to be changed.  That is, if you are storing information about
-     * user ids in persistent storage, you should use the string returned
-     * by this function instead of the raw user-id.
+     * uid to be changed.  That is, if you are storing information about
+     * uids in persistent storage, you should use the string returned
+     * by this function instead of the raw uid.
      *
-     * @param uid The user id for which you would like to retrieve a name.
-     * @return Returns a unique name for the given user id, or null if the
-     * user id is not currently assigned.
+     * @param uid The uid for which you would like to retrieve a name.
+     * @return Returns a unique name for the given uid, or null if the
+     * uid is not currently assigned.
      */
     public abstract @Nullable String getNameForUid(int uid);
 
