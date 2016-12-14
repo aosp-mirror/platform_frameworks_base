@@ -37,6 +37,7 @@ public final class DnsEvent extends NetworkEvent implements Parcelable {
      */
     private final int ipAddressesCount;
 
+    /** @hide */
     public DnsEvent(String hostname, String[] ipAddresses, int ipAddressesCount,
             String packageName, long timestamp) {
         super(packageName, timestamp);
