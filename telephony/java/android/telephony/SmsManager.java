@@ -34,7 +34,6 @@ import android.util.Log;
 import com.android.internal.telephony.IMms;
 import com.android.internal.telephony.ISms;
 import com.android.internal.telephony.SmsRawData;
-import com.android.internal.telephony.uicc.IccConstants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -71,6 +70,16 @@ public final class SmsManager {
     public static final int CELL_BROADCAST_RAN_TYPE_GSM = 0;
     /** @hide */
     public static final int CELL_BROADCAST_RAN_TYPE_CDMA = 1;
+
+    /** SMS record length from TS 51.011 10.5.3
+     * @hide
+     */
+    public static final int SMS_RECORD_LENGTH = 176;
+
+    /** SMS record length from C.S0023 3.4.27
+     * @hide
+     */
+    public static final int CDMA_SMS_RECORD_LENGTH = 255;
 
     private static final Map<Integer, SmsManager> sSubInstances =
             new ArrayMap<Integer, SmsManager>();
@@ -744,7 +753,7 @@ public final class SmsManager {
     public boolean
     deleteMessageFromIcc(int messageIndex) {
         boolean success = false;
-        byte[] pdu = new byte[IccConstants.SMS_RECORD_LENGTH-1];
+        byte[] pdu = new byte[SMS_RECORD_LENGTH-1];
         Arrays.fill(pdu, (byte)0xff);
 
         try {
