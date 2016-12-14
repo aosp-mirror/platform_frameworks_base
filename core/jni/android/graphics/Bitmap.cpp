@@ -1131,8 +1131,19 @@ static jboolean Bitmap_sameAs(JNIEnv* env, jobject, jlong bm0Handle,
                               jlong bm1Handle) {
     SkBitmap bm0;
     SkBitmap bm1;
-    reinterpret_cast<BitmapWrapper*>(bm0Handle)->getSkBitmap(&bm0);
-    reinterpret_cast<BitmapWrapper*>(bm1Handle)->getSkBitmap(&bm1);
+
+    LocalScopedBitmap bitmap0(bm0Handle);
+    LocalScopedBitmap bitmap1(bm1Handle);
+
+    // Paying the price for making Hardware Bitmap as Config:
+    // later check for colorType will pass successfully,
+    // because Hardware Config internally may be RGBA8888 or smth like that.
+    if (bitmap0->bitmap().isHardware() != bitmap1->bitmap().isHardware()) {
+        return JNI_FALSE;
+    }
+
+    bitmap0->bitmap().getSkBitmap(&bm0);
+    bitmap1->bitmap().getSkBitmap(&bm1);
     if (bm0.width() != bm1.width() ||
         bm0.height() != bm1.height() ||
         bm0.colorType() != bm1.colorType() ||
