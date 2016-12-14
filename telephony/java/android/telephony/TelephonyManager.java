@@ -124,6 +124,20 @@ public class TelephonyManager {
         static final int NEVER_USE = 2;
     }
 
+    /** The otaspMode passed to PhoneStateListener#onOtaspChanged */
+    /** @hide */
+    static public final int OTASP_UNINITIALIZED = 0;
+    /** @hide */
+    static public final int OTASP_UNKNOWN = 1;
+    /** @hide */
+    static public final int OTASP_NEEDED = 2;
+    /** @hide */
+    static public final int OTASP_NOT_NEEDED = 3;
+    /* OtaUtil has conflict enum 4: OtaUtils.OTASP_FAILURE_SPC_RETRIES */
+    /** @hide */
+    static public final int OTASP_SIM_UNPROVISIONED = 5;
+
+
     private final Context mContext;
     private final int mSubId;
     private SubscriptionManager mSubscriptionManager;
