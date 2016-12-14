@@ -6827,10 +6827,13 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Returns whether the device has been provisioned.
+     *
+     * <p>Not for use by third-party applications.
+     *
      * @hide
-     * @return whether {@link android.provider.Settings.Global#DEVICE_PROVISIONED} has ever been set
-     * to 1.
      */
+    @SystemApi
     public boolean isDeviceProvisioned() {
         try {
             return mService.isDeviceProvisioned();
@@ -6840,9 +6843,16 @@ public class DevicePolicyManager {
     }
 
     /**
-     * @hide
-     * Writes that the provisioning configuration has been applied.
-     */
+      * Writes that the provisioning configuration has been applied.
+      *
+      * <p>The caller must hold the {@link android.Manifest.permission#MANAGE_USERS}
+      * permission.
+      *
+      * <p>Not for use by third-party applications.
+      *
+      * @hide
+      */
+    @SystemApi
     public void setDeviceProvisioningConfigApplied() {
         try {
             mService.setDeviceProvisioningConfigApplied();
@@ -6852,9 +6862,17 @@ public class DevicePolicyManager {
     }
 
     /**
-     * @hide
+     * Returns whether the provisioning configuration has been applied.
+     *
+     * <p>The caller must hold the {@link android.Manifest.permission#MANAGE_USERS} permission.
+     *
+     * <p>Not for use by third-party applications.
+     *
      * @return whether the provisioning configuration has been applied.
+     *
+     * @hide
      */
+    @SystemApi
     public boolean isDeviceProvisioningConfigApplied() {
         try {
             return mService.isDeviceProvisioningConfigApplied();
