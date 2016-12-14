@@ -283,8 +283,8 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
 
     // Create the codec.
     NinePatchPeeker peeker;
-    std::unique_ptr<SkAndroidCodec> codec(SkAndroidCodec::NewFromStream(streamDeleter.release(),
-            &peeker));
+    std::unique_ptr<SkAndroidCodec> codec(SkAndroidCodec::NewFromStream(
+            streamDeleter.release(), &peeker));
     if (!codec.get()) {
         return nullObjectReturn("SkAndroidCodec::NewFromStream returned null");
     }
@@ -399,7 +399,8 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
 
     // We always decode to sRGB, but only mark the bitmap with a color space if linear
     // blending is enabled.
-    SkImageInfo bitmapInfo = decodeInfo.makeColorSpace(GraphicsJNI::defaultColorSpace());
+    SkImageInfo bitmapInfo = decodeInfo.makeColorSpace(
+            GraphicsJNI::colorSpaceForType(decodeColorType));
     if (decodeColorType == kGray_8_SkColorType) {
         // The legacy implementation of BitmapFactory used kAlpha8 for
         // grayscale images (before kGray8 existed).  While the codec

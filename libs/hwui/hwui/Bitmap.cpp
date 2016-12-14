@@ -108,6 +108,8 @@ static PixelFormat internalFormatToPixelFormat(GLint internalFormat) {
         return PIXEL_FORMAT_RGBA_8888;
     case GL_RGB:
         return PIXEL_FORMAT_RGB_565;
+    case GL_RGBA16F:
+        return PIXEL_FORMAT_RGBA_FP16;
     default:
         LOG_ALWAYS_FATAL("Unsupported bitmap colorType: %d", internalFormat);
         return PIXEL_FORMAT_UNKNOWN;
@@ -306,7 +308,8 @@ sk_sp<Bitmap> Bitmap::createFrom(const SkImageInfo& info, SkPixelRef& pixelRef) 
 
 sk_sp<Bitmap> Bitmap::createFrom(sp<GraphicBuffer> graphicBuffer) {
     PixelFormat format = graphicBuffer->getPixelFormat();
-    if (!graphicBuffer.get() || format != PIXEL_FORMAT_RGBA_8888) {
+    if (!graphicBuffer.get() ||
+            (format != PIXEL_FORMAT_RGBA_8888 && format != PIXEL_FORMAT_RGBA_FP16)) {
         return nullptr;
     }
     SkImageInfo info = SkImageInfo::Make(graphicBuffer->getWidth(), graphicBuffer->getHeight(),
