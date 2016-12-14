@@ -390,9 +390,8 @@ public class DockedStackDividerController implements DimLayerUser {
                 inputMethodManagerInternal.hideCurrentInputMethod();
                 mImeHideRequested = true;
             }
-        } else if (setMinimizedDockedStack(false)) {
-            mService.mWindowPlacerLocked.performSurfacePlacement();
         }
+        setMinimizedDockedStack(false, false /* animate */);
     }
 
     /**
