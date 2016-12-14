@@ -1104,7 +1104,7 @@ final class TaskRecord extends ConfigurationContainer {
     }
 
     boolean canGoInDockedStack() {
-        return isResizeable() &&
+        return isResizeable() && mService.mSupportsSplitScreenMultiWindow &&
                 !ActivityInfo.isPreserveOrientationMode(mResizeMode);
     }
 

@@ -1002,6 +1002,16 @@ public class ActivityManager {
     }
 
     /**
+     * Returns true if the system supports split screen multi-window.
+     * @hide
+     */
+    static public boolean supportsSplitScreenMultiWindow() {
+        return supportsMultiWindow()
+                && Resources.getSystem().getBoolean(
+                    com.android.internal.R.bool.config_supportsSplitScreenMultiWindow);
+    }
+
+    /**
      * Information you can set and retrieve about the current activity within the recent task list.
      */
     public static class TaskDescription implements Parcelable {
