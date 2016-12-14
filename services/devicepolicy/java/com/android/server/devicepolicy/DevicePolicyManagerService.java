@@ -9490,6 +9490,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * A maximum of 1200 events are returned, and the total marshalled size is in the order of
      * 100kB, so returning a List instead of ParceledListSlice is acceptable.
      * Ideally this would be done with ParceledList, however it only supports homogeneous types.
+     *
+     * @see NetworkLoggingHandler#MAX_EVENTS_PER_BATCH
      */
     @Override
     public synchronized List<NetworkEvent> retrieveNetworkLogs(ComponentName admin,
