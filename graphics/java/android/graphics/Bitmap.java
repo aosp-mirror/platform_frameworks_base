@@ -467,7 +467,11 @@ public final class Bitmap implements Parcelable {
 
 
         /**
-          * @hide
+         * Special configuration, when bitmap is stored only in graphic memory.
+         * Bitmaps in this configuration are always immutable.
+         *
+         * It is optimal for cases, when the only operation with the bitmap is to draw it on a
+         * screen.
          */
         HARDWARE    (6);
 
@@ -810,7 +814,8 @@ public final class Bitmap implements Parcelable {
      * @param width    The width of the bitmap
      * @param height   The height of the bitmap
      * @param config   The bitmap config to create.
-     * @throws IllegalArgumentException if the width or height are <= 0
+     * @throws IllegalArgumentException if the width or height are <= 0, or if
+     *         Config is Config.HARDWARE, because hardware bitmaps are always immutable
      */
     public static Bitmap createBitmap(int width, int height, Config config) {
         return createBitmap(width, height, config, true);
@@ -825,7 +830,8 @@ public final class Bitmap implements Parcelable {
      * @param width    The width of the bitmap
      * @param height   The height of the bitmap
      * @param config   The bitmap config to create.
-     * @throws IllegalArgumentException if the width or height are <= 0
+     * @throws IllegalArgumentException if the width or height are <= 0, or if
+     *         Config is Config.HARDWARE, because hardware bitmaps are always immutable
      */
     public static Bitmap createBitmap(DisplayMetrics display, int width,
             int height, Config config) {
@@ -843,7 +849,8 @@ public final class Bitmap implements Parcelable {
      *                 bitmap as opaque. Doing so will clear the bitmap in black
      *                 instead of transparent.
      *
-     * @throws IllegalArgumentException if the width or height are <= 0
+     * @throws IllegalArgumentException if the width or height are <= 0, or if
+     *         Config is Config.HARDWARE, because hardware bitmaps are always immutable
      */
     private static Bitmap createBitmap(int width, int height, Config config, boolean hasAlpha) {
         return createBitmap(null, width, height, config, hasAlpha);
@@ -862,12 +869,16 @@ public final class Bitmap implements Parcelable {
      *                 bitmap as opaque. Doing so will clear the bitmap in black
      *                 instead of transparent.
      *
-     * @throws IllegalArgumentException if the width or height are <= 0
+     * @throws IllegalArgumentException if the width or height are <= 0, or if
+     *         Config is Config.HARDWARE, because hardware bitmaps are always immutable
      */
     private static Bitmap createBitmap(DisplayMetrics display, int width, int height,
             Config config, boolean hasAlpha) {
         if (width <= 0 || height <= 0) {
             throw new IllegalArgumentException("width and height must be > 0");
+        }
+        if (config == Config.HARDWARE) {
+            throw new IllegalArgumentException("can't create mutable bitmap with Config.HARDWARE");
         }
         Bitmap bm = nativeCreate(null, 0, width, width, height, config.nativeInt, true);
         if (display != null) {

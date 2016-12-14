@@ -276,6 +276,11 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         }
     }
 
+    if (isMutable && isHardware) {
+        doThrowIAE(env, "Bitmaps with Config.HARWARE are always immutable");
+        return nullObjectReturn("Cannot create mutable hardware bitmap");
+    }
+
     // Create the codec.
     NinePatchPeeker peeker;
     std::unique_ptr<SkAndroidCodec> codec(SkAndroidCodec::NewFromStream(streamDeleter.release(),

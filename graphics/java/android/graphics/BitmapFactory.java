@@ -16,6 +16,8 @@
 
 package android.graphics;
 
+import static android.graphics.BitmapFactory.Options.validate;
+
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.os.Trace;
@@ -103,6 +105,9 @@ public class BitmapFactory {
          * If set, decode methods will always return a mutable Bitmap instead of
          * an immutable one. This can be used for instance to programmatically apply
          * effects to a Bitmap loaded through BitmapFactory.
+         * <p>Can not be set simultaneously with inPreferredConfig =
+         * {@link android.graphics.Bitmap.Config#HARDWARE},
+         * because hardware bitmaps are always immutable.
          */
         @SuppressWarnings({"UnusedDeclaration"}) // used in native code
         public boolean inMutable;
@@ -381,6 +386,12 @@ public class BitmapFactory {
         public void requestCancelDecode() {
             mCancel = true;
         }
+
+        static void validate(Options opts) {
+            if (opts != null && opts.inMutable && opts.inPreferredConfig == Bitmap.Config.HARDWARE) {
+                throw new IllegalArgumentException("Bitmaps with Config.HARWARE are always immutable");
+            }
+        }
     }
 
     /**
@@ -393,8 +404,12 @@ public class BitmapFactory {
      * @return The decoded bitmap, or null if the image data could not be
      *         decoded, or, if opts is non-null, if opts requested only the
      *         size be returned (in opts.outWidth and opts.outHeight)
+     * @throws IllegalArgumentException if {@link BitmapFactory.Options#inPreferredConfig}
+     *         is {@link android.graphics.Bitmap.Config#HARDWARE}
+     *         and {@link BitmapFactory.Options#inMutable} is set.
      */
     public static Bitmap decodeFile(String pathName, Options opts) {
+        validate(opts);
         Bitmap bm = null;
         InputStream stream = null;
         try {
@@ -431,10 +446,13 @@ public class BitmapFactory {
     /**
      * Decode a new Bitmap from an InputStream. This InputStream was obtained from
      * resources, which we pass to be able to scale the bitmap accordingly.
+     * @throws IllegalArgumentException if {@link BitmapFactory.Options#inPreferredConfig}
+     *         is {@link android.graphics.Bitmap.Config#HARDWARE}
+     *         and {@link BitmapFactory.Options#inMutable} is set.
      */
     public static Bitmap decodeResourceStream(Resources res, TypedValue value,
             InputStream is, Rect pad, Options opts) {
-
+        validate(opts);
         if (opts == null) {
             opts = new Options();
         }
@@ -466,8 +484,12 @@ public class BitmapFactory {
      * @return The decoded bitmap, or null if the image data could not be
      *         decoded, or, if opts is non-null, if opts requested only the
      *         size be returned (in opts.outWidth and opts.outHeight)
+     * @throws IllegalArgumentException if {@link BitmapFactory.Options#inPreferredConfig}
+     *         is {@link android.graphics.Bitmap.Config#HARDWARE}
+     *         and {@link BitmapFactory.Options#inMutable} is set.
      */
     public static Bitmap decodeResource(Resources res, int id, Options opts) {
+        validate(opts);
         Bitmap bm = null;
         InputStream is = null; 
         
@@ -520,11 +542,15 @@ public class BitmapFactory {
      * @return The decoded bitmap, or null if the image data could not be
      *         decoded, or, if opts is non-null, if opts requested only the
      *         size be returned (in opts.outWidth and opts.outHeight)
+     * @throws IllegalArgumentException if {@link BitmapFactory.Options#inPreferredConfig}
+     *         is {@link android.graphics.Bitmap.Config#HARDWARE}
+     *         and {@link BitmapFactory.Options#inMutable} is set.
      */
     public static Bitmap decodeByteArray(byte[] data, int offset, int length, Options opts) {
         if ((offset | length) < 0 || data.length < offset + length) {
             throw new ArrayIndexOutOfBoundsException();
         }
+        validate(opts);
 
         Bitmap bm;
 
@@ -598,6 +624,9 @@ public class BitmapFactory {
      * @return The decoded bitmap, or null if the image data could not be
      *         decoded, or, if opts is non-null, if opts requested only the
      *         size be returned (in opts.outWidth and opts.outHeight)
+     * @throws IllegalArgumentException if {@link BitmapFactory.Options#inPreferredConfig}
+     *         is {@link android.graphics.Bitmap.Config#HARDWARE}
+     *         and {@link BitmapFactory.Options#inMutable} is set.
      *
      * <p class="note">Prior to {@link android.os.Build.VERSION_CODES#KITKAT},
      * if {@link InputStream#markSupported is.markSupported()} returns true,
@@ -610,6 +639,7 @@ public class BitmapFactory {
         if (is == null) {
             return null;
         }
+        validate(opts);
 
         Bitmap bm = null;
 
@@ -673,8 +703,12 @@ public class BitmapFactory {
      * @param opts null-ok; Options that control downsampling and whether the
      *             image should be completely decoded, or just its size returned.
      * @return the decoded bitmap, or null
+     * @throws IllegalArgumentException if {@link BitmapFactory.Options#inPreferredConfig}
+     *         is {@link android.graphics.Bitmap.Config#HARDWARE}
+     *         and {@link BitmapFactory.Options#inMutable} is set.
      */
     public static Bitmap decodeFileDescriptor(FileDescriptor fd, Rect outPadding, Options opts) {
+        validate(opts);
         Bitmap bm;
 
         Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, "decodeFileDescriptor");
