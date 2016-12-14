@@ -663,16 +663,28 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     private void grantCoarseLocationPermissionIfNeeded(String pkg, int userId) {
         // Don't clobber the user if permission set in current state explicitly
         if (!isPermissionUserUpdated(Manifest.permission.ACCESS_COARSE_LOCATION, pkg, userId)) {
-            mContext.getPackageManager().grantRuntimePermission(pkg,
-                    Manifest.permission.ACCESS_COARSE_LOCATION, new UserHandle(userId));
+            try {
+                mContext.getPackageManager().grantRuntimePermission(pkg,
+                        Manifest.permission.ACCESS_COARSE_LOCATION, new UserHandle(userId));
+            } catch (IllegalArgumentException e) {
+                // Package was removed during update.
+                Slog.w(TAG, "Could not grant coarse location permission, package " + pkg
+                    + " was removed.");
+            }
         }
     }
 
     private void revokeCoarseLocationPermissionIfNeeded(String pkg, int userId) {
         // Don't clobber the user if permission set in current state explicitly
         if (!isPermissionUserUpdated(Manifest.permission.ACCESS_COARSE_LOCATION, pkg, userId)) {
-            mContext.getPackageManager().revokeRuntimePermission(pkg,
-                    Manifest.permission.ACCESS_COARSE_LOCATION, new UserHandle(userId));
+            try {
+                mContext.getPackageManager().revokeRuntimePermission(pkg,
+                        Manifest.permission.ACCESS_COARSE_LOCATION, new UserHandle(userId));
+            } catch (IllegalArgumentException e) {
+                // Package was removed during update.
+                Slog.w(TAG, "Could not revoke coarse location permission, package " + pkg
+                    + " was removed.");
+            }
         }
     }
 
