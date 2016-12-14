@@ -225,7 +225,7 @@ void CanvasState::setClippingOutline(LinearAllocator& allocator, const Outline* 
     bool outlineIsRounded = MathUtils::isPositive(radius);
     if (!outlineIsRounded || currentTransform()->isSimple()) {
         // TODO: consider storing this rect separately, so that this can't be replaced with clip ops
-        clipRect(bounds.left, bounds.top, bounds.right, bounds.bottom, kIntersect_SkClipOp);
+        clipRect(bounds.left, bounds.top, bounds.right, bounds.bottom, SkClipOp::kIntersect);
     }
     if (outlineIsRounded) {
         setClippingRoundRect(allocator, bounds, radius, false);

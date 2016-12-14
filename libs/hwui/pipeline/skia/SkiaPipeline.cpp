@@ -100,7 +100,7 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque)
             int saveCount = layerCanvas->save();
             SkASSERT(saveCount == 1);
 
-            layerCanvas->clipRect(layerDamage.toSkRect(), kReplace_SkClipOp);
+            layerCanvas->clipRect(layerDamage.toSkRect(), SkClipOp::kReplace);
 
             auto savedLightCenter = mLightCenter;
             // map current light center into RenderNode's coordinate space
@@ -234,7 +234,7 @@ void SkiaPipeline::renderFrameImpl(const LayerUpdateQueue& layers, const SkRect&
         const std::vector<sp<RenderNode>>& nodes, bool opaque, const Rect &contentDrawBounds,
         SkCanvas* canvas) {
 
-    canvas->clipRect(clip, kReplace_SkClipOp);
+    canvas->clipRect(clip, SkClipOp::kReplace);
 
     if (!opaque) {
         canvas->clear(SK_ColorTRANSPARENT);

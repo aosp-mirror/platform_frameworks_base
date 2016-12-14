@@ -82,7 +82,7 @@ public:
                     int middleCount = canvas.save(SaveFlags::MatrixClip);
                     for (auto op : ops) {
                         int innerCount = canvas.save(SaveFlags::MatrixClip);
-                        canvas.clipRect(0, 0, cellSize, cellSize, kIntersect_SkClipOp);
+                        canvas.clipRect(0, 0, cellSize, cellSize, SkClipOp::kIntersect);
                         canvas.drawColor(Color::White, SkBlendMode::kSrcOver);
                         op(canvas, cellSize, paint);
                         canvas.restoreToCount(innerCount);
