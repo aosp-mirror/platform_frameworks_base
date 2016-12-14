@@ -4710,6 +4710,8 @@
         <attr name="autoSizeStepSizeSet"/>
         <!-- The minimum text size constraint to be used when auto-sizing text -->
         <attr name="autoSizeMinTextSize" format="dimension" />
+        <!-- The maximum text size constraint to be used when auto-sizing text -->
+        <attr name="autoSizeMaxTextSize" format="dimension" />
     </declare-styleable>
     <declare-styleable name="TextViewAppearance">
         <!-- Base text color, typeface, size, and style. -->
