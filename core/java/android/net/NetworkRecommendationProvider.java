@@ -55,6 +55,15 @@ public abstract class NetworkRecommendationProvider {
             ResultCallback callback);
 
     /**
+     * Invoked when network scores have been requested.
+     * <p>
+     * Use {@link NetworkScoreManager#updateScores(ScoredNetwork[])} to respond to score requests.
+     *
+     * @param networks a non-empty array of {@link NetworkKey}s to score.
+     */
+    public abstract void onRequestScores(NetworkKey[] networks);
+
+    /**
      * Services that can handle {@link NetworkScoreManager#ACTION_RECOMMEND_NETWORKS} should
      * return this Binder from their <code>onBind()</code> method.
      */
@@ -118,6 +127,7 @@ public abstract class NetworkRecommendationProvider {
 
     private final class ServiceHandler extends Handler {
         static final int MSG_GET_RECOMMENDATION = 1;
+        static final int MSG_REQUEST_SCORES = 2;
 
         ServiceHandler(Looper looper) {
             super(looper, null /*callback*/, true /*async*/);
@@ -134,6 +144,11 @@ public abstract class NetworkRecommendationProvider {
                             msg.getData().getParcelable(EXTRA_RECOMMENDATION_REQUEST);
                     final ResultCallback resultCallback = new ResultCallback(callback, seq);
                     onRequestRecommendation(request, resultCallback);
+                    break;
+
+                case MSG_REQUEST_SCORES:
+                    final NetworkKey[] networks = (NetworkKey[]) msg.obj;
+                    onRequestScores(networks);
                     break;
 
                 default:
@@ -161,6 +176,13 @@ public abstract class NetworkRecommendationProvider {
             data.putParcelable(EXTRA_RECOMMENDATION_REQUEST, request);
             msg.setData(data);
             msg.sendToTarget();
+        }
+
+        @Override
+        public void requestScores(NetworkKey[] networks) throws RemoteException {
+            if (networks != null && networks.length > 0) {
+                mHandler.obtainMessage(ServiceHandler.MSG_REQUEST_SCORES, networks).sendToTarget();
+            }
         }
     }
 }
