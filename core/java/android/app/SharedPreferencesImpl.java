@@ -592,17 +592,17 @@ final class SharedPreferencesImpl implements SharedPreferences {
         if (mFile.exists()) {
             boolean needsWrite = false;
 
-            if (isFromSyncCommit) {
-                // Only need to write if the disk state is older than this commit
-                if (mDiskStateGeneration < mcr.memoryStateGeneration) {
+            // Only need to write if the disk state is older than this commit
+            if (mDiskStateGeneration < mcr.memoryStateGeneration) {
+                if (isFromSyncCommit) {
                     needsWrite = true;
-                }
-            } else {
-                synchronized (this) {
-                    // No need to persist intermediate states. Just wait for the latest state to be
-                    // persisted.
-                    if (mCurrentMemoryStateGeneration == mcr.memoryStateGeneration) {
-                        needsWrite = true;
+                } else {
+                    synchronized (this) {
+                        // No need to persist intermediate states. Just wait for the latest state to
+                        // be persisted.
+                        if (mCurrentMemoryStateGeneration == mcr.memoryStateGeneration) {
+                            needsWrite = true;
+                        }
                     }
                 }
             }
