@@ -98,7 +98,7 @@ public:
      * Called when the Java application exits to perform additional cleanup actions
      * before the process is terminated.
      */
-    virtual void onExit(int code) { }
+    virtual void onExit(int /*code*/) { }
 
     /** create a new thread that is visible from Java */
     static android_thread_id_t createJavaThread(const char* name, void (*start)(void *),
