@@ -979,15 +979,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
-    protected void bindDismissListener(final ExpandableNotificationRow row) {
-        row.setOnDismissListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // Accessibility feedback
-                v.announceForAccessibility(
-                        mContext.getString(R.string.accessibility_notification_dismissed));
-                performRemoveNotification(row.getStatusBarNotification());
-            }
-        });
+    protected void bindDismissRunnable(final ExpandableNotificationRow row) {
+        row.setOnDismissRunnable(() -> performRemoveNotification(row.getStatusBarNotification()));
     }
 
     protected void performRemoveNotification(StatusBarNotification n) {
@@ -1653,7 +1646,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
 
         workAroundBadLayerDrawableOpacity(row);
-        bindDismissListener(row);
+        bindDismissRunnable(row);
 
         // NB: the large icon is now handled entirely by the template
 
