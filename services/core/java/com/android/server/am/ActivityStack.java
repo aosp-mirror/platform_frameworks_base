@@ -2150,9 +2150,7 @@ final class ActivityStack extends ConfigurationContainer {
                     mStackSupervisor.allResumedActivitiesComplete()) {
             // Make sure we have executed any pending transitions, since there
             // should be nothing left to do at this point.
-            mWindowManager.executeAppTransition();
-            mNoAnimActivities.clear();
-            ActivityOptions.abort(options);
+            executeAppTransition(options);
             if (DEBUG_STATES) Slog.d(TAG_STATES,
                     "resumeTopActivityLocked: Top activity resumed " + next);
             if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
@@ -2187,9 +2185,7 @@ final class ActivityStack extends ConfigurationContainer {
                 && mStackSupervisor.allPausedActivitiesComplete()) {
             // Make sure we have executed any pending transitions, since there
             // should be nothing left to do at this point.
-            mWindowManager.executeAppTransition();
-            mNoAnimActivities.clear();
-            ActivityOptions.abort(options);
+            executeAppTransition(options);
             if (DEBUG_STATES) Slog.d(TAG_STATES,
                     "resumeTopActivityLocked: Going to sleep and all paused");
             if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
@@ -2252,9 +2248,7 @@ final class ActivityStack extends ConfigurationContainer {
             // So, nothing else to-do except:
             // Make sure we have executed any pending transitions, since there
             // should be nothing left to do at this point.
-            mWindowManager.executeAppTransition();
-            mNoAnimActivities.clear();
-            ActivityOptions.abort(options);
+            executeAppTransition(options);
             if (DEBUG_STATES) Slog.d(TAG_STATES,
                     "resumeTopActivityLocked: Top activity resumed (dontWaitForPause) " + next);
             if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
@@ -5055,5 +5049,11 @@ final class ActivityStack extends ConfigurationContainer {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             mTaskHistory.get(taskNdx).setLockTaskAuth();
         }
+    }
+
+    void executeAppTransition(ActivityOptions options) {
+        mWindowManager.executeAppTransition();
+        mNoAnimActivities.clear();
+        ActivityOptions.abort(options);
     }
 }

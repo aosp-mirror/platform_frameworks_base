@@ -1844,6 +1844,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer
         final ActivityRecord r = mFocusedStack.topRunningActivityLocked();
         if (r == null || r.state != RESUMED) {
             mFocusedStack.resumeTopActivityUncheckedLocked(null, null);
+        } else if (r.state == RESUMED) {
+            // Kick off any lingering app transitions form the MoveTaskToFront operation.
+            mFocusedStack.executeAppTransition(targetOptions);
         }
         return false;
     }
