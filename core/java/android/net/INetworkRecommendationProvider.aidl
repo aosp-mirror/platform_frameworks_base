@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.net.NetworkKey;
 import android.net.RecommendationRequest;
 import android.os.IRemoteCallback;
 
@@ -38,4 +39,15 @@ oneway interface INetworkRecommendationProvider {
     void requestRecommendation(in RecommendationRequest request,
                                in IRemoteCallback callback,
                                int sequence);
+
+    /**
+     * Request scoring for networks.
+     *
+     * Implementations should use {@link NetworkScoreManager#updateScores(ScoredNetwork[])} to
+     * respond to score requests.
+     *
+     * @param networks an array of {@link NetworkKey}s to score
+     * @hide
+     */
+    void requestScores(in NetworkKey[] networks);
 }
