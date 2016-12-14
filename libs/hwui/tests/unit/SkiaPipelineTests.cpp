@@ -339,7 +339,7 @@ RENDERTHREAD_TEST(SkiaPipeline, clip_replace) {
     std::vector<sp<RenderNode>> nodes;
     nodes.push_back(TestUtils::createSkiaNode(20, 20, 30, 30,
             [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
-        canvas.clipRect(0, -20, 10, 30, kReplace_SkClipOp);
+        canvas.clipRect(0, -20, 10, 30, SkClipOp::kReplace);
         canvas.drawColor(SK_ColorWHITE, SkBlendMode::kSrcOver);
     }));
 

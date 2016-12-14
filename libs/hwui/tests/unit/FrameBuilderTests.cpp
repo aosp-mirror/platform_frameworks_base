@@ -174,7 +174,7 @@ RENDERTHREAD_TEST(FrameBuilder, simpleRejection) {
     auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.save(SaveFlags::MatrixClip);
-        canvas.clipRect(200, 200, 400, 400, kIntersect_SkClipOp); // intersection should be empty
+        canvas.clipRect(200, 200, 400, 400, SkClipOp::kIntersect); // intersection should be empty
         canvas.drawRect(0, 0, 400, 400, SkPaint());
         canvas.restore();
     });
@@ -453,19 +453,19 @@ RENDERTHREAD_TEST(FrameBuilder, clippedMerging) {
         sk_sp<Bitmap> bitmap(TestUtils::createBitmap(20, 20));
 
         // left side clipped (to inset left half)
-        canvas.clipRect(10, 0, 50, 100, kReplace_SkClipOp);
+        canvas.clipRect(10, 0, 50, 100, SkClipOp::kReplace);
         canvas.drawBitmap(*bitmap, 0, 40, nullptr);
 
         // top side clipped (to inset top half)
-        canvas.clipRect(0, 10, 100, 50, kReplace_SkClipOp);
+        canvas.clipRect(0, 10, 100, 50, SkClipOp::kReplace);
         canvas.drawBitmap(*bitmap, 40, 0, nullptr);
 
         // right side clipped (to inset right half)
-        canvas.clipRect(50, 0, 90, 100, kReplace_SkClipOp);
+        canvas.clipRect(50, 0, 90, 100, SkClipOp::kReplace);
         canvas.drawBitmap(*bitmap, 80, 40, nullptr);
 
         // bottom not clipped, just abutting (inset bottom half)
-        canvas.clipRect(0, 50, 100, 90, kReplace_SkClipOp);
+        canvas.clipRect(0, 50, 100, 90, SkClipOp::kReplace);
         canvas.drawBitmap(*bitmap, 40, 70, nullptr);
     });
 
@@ -488,7 +488,7 @@ RENDERTHREAD_TEST(FrameBuilder, regionClipStopsMerge) {
         SkPath path;
         path.addCircle(200, 200, 200, SkPath::kCW_Direction);
         canvas.save(SaveFlags::MatrixClip);
-        canvas.clipPath(&path, kIntersect_SkClipOp);
+        canvas.clipPath(&path, SkClipOp::kIntersect);
         SkPaint paint;
         paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         paint.setAntiAlias(true);
@@ -649,7 +649,7 @@ RENDERTHREAD_TEST(FrameBuilder, textureLayer_clipLocalMatrix) {
     auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
             [&layerUpdater](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.save(SaveFlags::MatrixClip);
-        canvas.clipRect(50, 50, 150, 150, kIntersect_SkClipOp);
+        canvas.clipRect(50, 50, 150, 150, SkClipOp::kIntersect);
         canvas.drawLayer(layerUpdater.get());
         canvas.restore();
     });
@@ -973,7 +973,7 @@ RENDERTHREAD_TEST(FrameBuilder, saveLayer_contentRejection) {
         auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
                 [](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.save(SaveFlags::MatrixClip);
-        canvas.clipRect(200, 200, 400, 400, kIntersect_SkClipOp);
+        canvas.clipRect(200, 200, 400, 400, SkClipOp::kIntersect);
         canvas.saveLayerAlpha(200, 200, 400, 400, 128, SaveFlags::ClipToLayer);
 
         // draw within save layer may still be recorded, but shouldn't be drawn
@@ -1781,7 +1781,7 @@ RENDERTHREAD_TEST(FrameBuilder, projectionChildScroll) {
     auto child = TestUtils::createNode<RecordingCanvas>(0, 0, 400, 400,
             [&projectingRipple](RenderProperties& properties, RecordingCanvas& canvas) {
         // Record time clip will be ignored by projectee
-        canvas.clipRect(100, 100, 300, 300, kIntersect_SkClipOp);
+        canvas.clipRect(100, 100, 300, 300, SkClipOp::kIntersect);
 
         canvas.translate(-scrollX, -scrollY); // Apply scroll (note: bg undoes this internally)
         canvas.drawRenderNode(projectingRipple.get());
@@ -1993,7 +1993,7 @@ RENDERTHREAD_TEST(FrameBuilder, shadowClipping) {
             [](RenderProperties& props, RecordingCanvas& canvas) {
         // Apply a clip before the reorder barrier/shadow casting child is drawn.
         // This clip must be applied to the shadow cast by the child.
-        canvas.clipRect(25, 25, 75, 75, kIntersect_SkClipOp);
+        canvas.clipRect(25, 25, 75, 75, SkClipOp::kIntersect);
         canvas.insertReorderBarrier(true);
         canvas.drawRenderNode(createWhiteRectShadowCaster(5.0f).get());
     });
@@ -2252,7 +2252,7 @@ RENDERTHREAD_TEST(FrameBuilder, clip_replace) {
     };
     auto node = TestUtils::createNode<RecordingCanvas>(20, 20, 30, 30,
             [](RenderProperties& props, RecordingCanvas& canvas) {
-        canvas.clipRect(0, -20, 10, 30, kReplace_SkClipOp);
+        canvas.clipRect(0, -20, 10, 30, SkClipOp::kReplace);
         canvas.drawColor(SK_ColorWHITE, SkBlendMode::kSrcOver);
     });
 

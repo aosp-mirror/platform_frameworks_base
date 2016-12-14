@@ -197,7 +197,7 @@ static jboolean android_view_GraphicBuffer_lockCanvas(JNIEnv* env, jobject,
     Canvas* nativeCanvas = GraphicsJNI::getNativeCanvas(env, canvas);
     nativeCanvas->setBitmap(bitmap);
     nativeCanvas->clipRect(rect.left, rect.top, rect.right, rect.bottom,
-            kIntersect_SkClipOp);
+            SkClipOp::kIntersect);
 
     if (dirtyRect) {
         INVOKEV(dirtyRect, gRectClassInfo.set,

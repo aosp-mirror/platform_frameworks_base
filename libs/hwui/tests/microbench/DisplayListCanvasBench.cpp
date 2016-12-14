@@ -177,7 +177,7 @@ void BM_DisplayListCanvas_basicViewGroupDraw(benchmark::State& benchState) {
         // Clip to padding
         // Can expect ~25% of views to have clip to padding with a non-null padding
         int clipRestoreCount = canvas->save(SaveFlags::MatrixClip);
-        canvas->clipRect(1, 1, 199, 199, kIntersect_SkClipOp);
+        canvas->clipRect(1, 1, 199, 199, SkClipOp::kIntersect);
 
         canvas->insertReorderBarrier(true);
 

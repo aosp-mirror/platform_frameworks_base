@@ -58,7 +58,7 @@ TEST(RecordingCanvas, emptyPlayback) {
 TEST(RecordingCanvas, clipRect) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 100, [](RecordingCanvas& canvas) {
         canvas.save(SaveFlags::MatrixClip);
-        canvas.clipRect(0, 0, 100, 100, kIntersect_SkClipOp);
+        canvas.clipRect(0, 0, 100, 100, SkClipOp::kIntersect);
         canvas.drawRect(0, 0, 50, 50, SkPaint());
         canvas.drawRect(50, 50, 100, 100, SkPaint());
         canvas.restore();
@@ -74,8 +74,8 @@ TEST(RecordingCanvas, clipRect) {
 TEST(RecordingCanvas, emptyClipRect) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         canvas.save(SaveFlags::MatrixClip);
-        canvas.clipRect(0, 0, 100, 100, kIntersect_SkClipOp);
-        canvas.clipRect(100, 100, 200, 200, kIntersect_SkClipOp);
+        canvas.clipRect(0, 0, 100, 100, SkClipOp::kIntersect);
+        canvas.clipRect(100, 100, 200, 200, SkClipOp::kIntersect);
         canvas.drawRect(0, 0, 50, 50, SkPaint()); // rejected at record time
         canvas.restore();
     });
@@ -441,7 +441,7 @@ TEST(RecordingCanvas, saveLayer_simpleUnclipped) {
 TEST(RecordingCanvas, saveLayer_addClipFlag) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         canvas.save(SaveFlags::MatrixClip);
-        canvas.clipRect(10, 20, 190, 180, kIntersect_SkClipOp);
+        canvas.clipRect(10, 20, 190, 180, SkClipOp::kIntersect);
         canvas.saveLayerAlpha(10, 20, 190, 180, 128, (SaveFlags::Flags)0); // unclipped
         canvas.drawRect(10, 20, 190, 180, SkPaint());
         canvas.restore();
@@ -460,7 +460,7 @@ TEST(RecordingCanvas, saveLayer_addClipFlag) {
 TEST(RecordingCanvas, saveLayer_viewportCrop) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         // shouldn't matter, since saveLayer will clip to its bounds
-        canvas.clipRect(-1000, -1000, 1000, 1000, kReplace_SkClipOp);
+        canvas.clipRect(-1000, -1000, 1000, 1000, SkClipOp::kReplace);
 
         canvas.saveLayerAlpha(100, 100, 300, 300, 128, SaveFlags::ClipToLayer);
         canvas.drawRect(0, 0, 400, 400, SkPaint());
@@ -550,7 +550,7 @@ TEST(RecordingCanvas, saveLayer_rejectBegin) {
         canvas.save(SaveFlags::MatrixClip);
         canvas.translate(0, -20); // avoid identity case
         // empty clip rect should force layer + contents to be rejected
-        canvas.clipRect(0, -20, 200, -20, kIntersect_SkClipOp);
+        canvas.clipRect(0, -20, 200, -20, SkClipOp::kIntersect);
         canvas.saveLayerAlpha(0, 0, 200, 200, 128, SaveFlags::ClipToLayer);
         canvas.drawRect(0, 0, 200, 200, SkPaint());
         canvas.restore();
@@ -569,7 +569,7 @@ TEST(RecordingCanvas, drawRenderNode_rejection) {
     });
 
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [&child](RecordingCanvas& canvas) {
-        canvas.clipRect(0, 0, 0, 0, kIntersect_SkClipOp); // empty clip, reject node
+        canvas.clipRect(0, 0, 0, 0, SkClipOp::kIntersect); // empty clip, reject node
         canvas.drawRenderNode(child.get()); // shouldn't crash when rejecting node...
     });
     ASSERT_TRUE(dl->isEmpty());
@@ -622,7 +622,7 @@ TEST(RecordingCanvas, firstClipWillReplace) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         canvas.save(SaveFlags::MatrixClip);
         // since no explicit clip set on canvas, this should be the one observed on op:
-        canvas.clipRect(-100, -100, 300, 300, kIntersect_SkClipOp);
+        canvas.clipRect(-100, -100, 300, 300, SkClipOp::kIntersect);
 
         SkPaint paint;
         paint.setColor(SK_ColorWHITE);
@@ -638,7 +638,7 @@ TEST(RecordingCanvas, firstClipWillReplace) {
 TEST(RecordingCanvas, replaceClipIntersectWithRoot) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 100, [](RecordingCanvas& canvas) {
         canvas.save(SaveFlags::MatrixClip);
-        canvas.clipRect(-10, -10, 110, 110, kReplace_SkClipOp);
+        canvas.clipRect(-10, -10, 110, 110, SkClipOp::kReplace);
         canvas.drawColor(SK_ColorWHITE, SkBlendMode::kSrcOver);
         canvas.restore();
     });
@@ -676,7 +676,7 @@ TEST(RecordingCanvas, insertReorderBarrier_clip) {
         canvas.drawRect(0, 0, 400, 400, SkPaint());
 
         // second chunk: no recorded clip, since inorder region
-        canvas.clipRect(0, 0, 200, 200, kIntersect_SkClipOp);
+        canvas.clipRect(0, 0, 200, 200, SkClipOp::kIntersect);
         canvas.insertReorderBarrier(false);
         canvas.drawRect(0, 0, 400, 400, SkPaint());
 

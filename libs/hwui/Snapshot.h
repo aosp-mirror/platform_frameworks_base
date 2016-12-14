@@ -115,7 +115,7 @@ public:
      * the specified operation. The specified rectangle is considered
      * already transformed.
      */
-    void clipTransformed(const Rect& r, SkClipOp op = kIntersect_SkClipOp);
+    void clipTransformed(const Rect& r, SkClipOp op = SkClipOp::kIntersect);
 
     /**
      * Modifies the current clip with the specified region and operation.
