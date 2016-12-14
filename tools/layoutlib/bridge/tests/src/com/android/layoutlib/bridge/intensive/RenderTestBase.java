@@ -35,6 +35,7 @@ import com.android.layoutlib.bridge.intensive.setup.LayoutLibTestCallback;
 import com.android.layoutlib.bridge.intensive.setup.LayoutPullParser;
 import com.android.layoutlib.bridge.intensive.util.ImageUtils;
 import com.android.layoutlib.bridge.intensive.util.ModuleClassLoader;
+import com.android.layoutlib.bridge.intensive.util.TestUtils;
 import com.android.tools.layoutlib.java.System_Delegate;
 import com.android.utils.ILogger;
 
@@ -50,7 +51,6 @@ import android.annotation.Nullable;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -272,7 +272,7 @@ public class RenderTestBase {
      * Initialize the bridge and the resource maps.
      */
     @BeforeClass
-    public static void setUp() {
+    public static void beforeClass() {
         File data_dir = new File(PLATFORM_DIR, "data");
         File res = new File(data_dir, "res");
         sFrameworkRepo = new FrameworkResources(new FolderWrapper(res));
@@ -304,21 +304,6 @@ public class RenderTestBase {
         }
     }
 
-    private static void gc() {
-        // See RuntimeUtil#gc in jlibs (http://jlibs.in/)
-        Object obj = new Object();
-        WeakReference ref = new WeakReference<>(obj);
-        //noinspection UnusedAssignment
-        obj = null;
-        while (ref.get() != null) {
-            System.gc();
-            System.runFinalization();
-        }
-
-        System.gc();
-        System.runFinalization();
-    }
-
     @AfterClass
     public static void tearDown() {
         sLayoutLibLog = null;
@@ -327,7 +312,7 @@ public class RenderTestBase {
         sLogger = null;
         sBridge = null;
 
-        gc();
+        TestUtils.gc();
 
         System.out.println("Objects still linked from the DelegateManager:");
         DelegateManager.dump(System.out);
@@ -435,6 +420,27 @@ public class RenderTestBase {
         return sLayoutLibLog;
     }
 
+    protected static void ignoreAllLogging() {
+        sLayoutLibLog = new LayoutLog();
+        sLogger = new ILogger() {
+            @Override
+            public void error(Throwable t, String msgFormat, Object... args) {
+            }
+
+            @Override
+            public void warning(String msgFormat, Object... args) {
+            }
+
+            @Override
+            public void info(String msgFormat, Object... args) {
+            }
+
+            @Override
+            public void verbose(String msgFormat, Object... args) {
+            }
+        };
+    }
+
     protected static ILogger getLogger() {
         if (sLogger == null) {
             sLogger = new ILogger() {
@@ -500,7 +506,7 @@ public class RenderTestBase {
         return renderAndVerify(params, goldenFileName);
     }
 
-    private SessionParams createSessionParams(String layoutFileName, ConfigGenerator deviceConfig)
+    protected SessionParams createSessionParams(String layoutFileName, ConfigGenerator deviceConfig)
             throws ClassNotFoundException {
         // Create the layout pull parser.
         LayoutPullParser parser = createLayoutPullParser(layoutFileName);
