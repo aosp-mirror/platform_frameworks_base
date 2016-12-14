@@ -6049,7 +6049,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private void clearDeviceOwnerLocked(ActiveAdmin admin, int userId) {
-        disableDeviceOwnerManagedSingleUserFeaturesIfNeeded();
         if (admin != null) {
             admin.disableCamera = false;
             admin.userRestrictions = null;
@@ -6061,6 +6060,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mOwners.clearDeviceOwner();
         mOwners.writeDeviceOwner();
         updateDeviceOwnerLocked();
+        disableDeviceOwnerManagedSingleUserFeaturesIfNeeded();
         try {
             if (mInjector.getIBackupManager() != null) {
                 // Reactivate backup service.
@@ -9071,19 +9071,33 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private synchronized void disableDeviceOwnerManagedSingleUserFeaturesIfNeeded() {
-        if (!isDeviceOwnerManagedSingleUserDevice()) {
+        final boolean isSingleUserManagedDevice = isDeviceOwnerManagedSingleUserDevice();
+
+        // disable security logging if needed
+        if (!isSingleUserManagedDevice) {
             mInjector.securityLogSetLoggingEnabledProperty(false);
-            Slog.w(LOG_TAG, "Security logging turned off as it's no longer a single user device.");
-
-            getDeviceOwnerAdminLocked().isNetworkLoggingEnabled = false;
-            saveSettingsLocked(mInjector.userHandleGetCallingUserId());
-            setNetworkLoggingActiveInternal(false);
-            Slog.w(LOG_TAG, "Network logging turned off as it's no longer a single user"
+            Slog.w(LOG_TAG, "Security logging turned off as it's no longer a single user managed"
                     + " device.");
+        }
 
+        // disable backup service if needed
+        // note: when clearing DO, the backup service shouldn't be disabled if it was enabled by
+        // the device owner
+        if (mOwners.hasDeviceOwner() && !isSingleUserManagedDevice) {
+            setBackupServiceEnabledInternal(false);
+            Slog.w(LOG_TAG, "Backup is off as it's a managed device that has more that one user.");
+        }
+
+        // disable network logging if needed
+        if (!isSingleUserManagedDevice) {
+            setNetworkLoggingActiveInternal(false);
+            Slog.w(LOG_TAG, "Network logging turned off as it's no longer a single user managed"
+                    + " device.");
+            // if there still is a device owner, disable logging policy, otherwise the admin
+            // has been nuked
             if (mOwners.hasDeviceOwner()) {
-                setBackupServiceEnabledInternal(false);
-                Slog.w(LOG_TAG, "Backup is off as it's a managed device that has more that one user.");
+                getDeviceOwnerAdminLocked().isNetworkLoggingEnabled = false;
+                saveSettingsLocked(mOwners.getDeviceOwnerUserId());
             }
         }
     }
