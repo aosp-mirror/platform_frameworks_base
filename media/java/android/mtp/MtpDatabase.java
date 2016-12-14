@@ -29,6 +29,7 @@ import android.media.MediaScanner;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Audio;
 import android.provider.MediaStore.Files;
@@ -133,6 +134,8 @@ public class MtpDatabase implements AutoCloseable {
     private int mBatteryLevel;
     private int mBatteryScale;
 
+    private int mDeviceType;
+
     static {
         System.loadLibrary("media_jni");
     }
@@ -195,6 +198,7 @@ public class MtpDatabase implements AutoCloseable {
         }
 
         initDeviceProperties(context);
+        mDeviceType = SystemProperties.getInt("sys.usb.mtp.device_type", 0);
 
         mCloseGuard.open("close");
     }
@@ -710,6 +714,7 @@ public class MtpDatabase implements AutoCloseable {
             MtpConstants.DEVICE_PROPERTY_DEVICE_FRIENDLY_NAME,
             MtpConstants.DEVICE_PROPERTY_IMAGE_SIZE,
             MtpConstants.DEVICE_PROPERTY_BATTERY_LEVEL,
+            MtpConstants.DEVICE_PROPERTY_PERCEIVED_DEVICE_TYPE,
         };
     }
 
@@ -867,6 +872,10 @@ public class MtpDatabase implements AutoCloseable {
                 String imageSize = Integer.toString(width) + "x" +  Integer.toString(height);
                 imageSize.getChars(0, imageSize.length(), outStringValue, 0);
                 outStringValue[imageSize.length()] = 0;
+                return MtpConstants.RESPONSE_OK;
+
+            case MtpConstants.DEVICE_PROPERTY_PERCEIVED_DEVICE_TYPE:
+                outIntValue[0] = mDeviceType;
                 return MtpConstants.RESPONSE_OK;
 
             // DEVICE_PROPERTY_BATTERY_LEVEL is implemented in the JNI code
