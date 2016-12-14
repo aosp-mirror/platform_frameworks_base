@@ -19,10 +19,13 @@ package com.android.server.connectivity;
 import android.content.Context;
 import android.net.ConnectivityMetricsEvent;
 import android.net.IIpConnectivityMetrics;
+import android.net.INetdEventCallback;
 import android.net.metrics.ApfProgramEvent;
 import android.net.metrics.IpConnectivityLog;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcelable;
+import android.os.Process;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
@@ -259,6 +262,33 @@ final public class IpConnectivityMetrics extends SystemService {
 
         private void enforcePermission(String what) {
             getContext().enforceCallingOrSelfPermission(what, "IpConnectivityMetrics");
+        }
+
+        private void enforceNetdEventListeningPermission() {
+            final int uid = Binder.getCallingUid();
+            if (uid != Process.SYSTEM_UID) {
+                throw new SecurityException(String.format("Uid %d has no permission to listen for"
+                        + " netd events.", uid));
+            }
+        }
+
+        @Override
+        public boolean registerNetdEventCallback(INetdEventCallback callback) {
+            enforceNetdEventListeningPermission();
+            if (mNetdListener == null) {
+                return false;
+            }
+            return mNetdListener.registerNetdEventCallback(callback);
+        }
+
+        @Override
+        public boolean unregisterNetdEventCallback() {
+            enforceNetdEventListeningPermission();
+            if (mNetdListener == null) {
+                // if the service is null, we aren't registered anyway
+                return true;
+            }
+            return mNetdListener.unregisterNetdEventCallback();
         }
     };
 

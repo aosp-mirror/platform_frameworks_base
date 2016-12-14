@@ -6609,4 +6609,46 @@ public class DevicePolicyManager {
             throw re.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Called by a device owner to control the network logging feature. Logging can only be
+     * enabled on single user devices where the sole user is managed by the device owner. If a new
+     * user is added on the device, logging is disabled.
+     *
+     * <p> Network logs contain DNS lookup and connect() library call events.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param enabled whether network logging should be enabled or not.
+     * @throws {@link SecurityException} if {@code admin} is not a device owner.
+     * @throws {@link RemoteException} if network logging could not be enabled or disabled due to
+     *         the logging service not being available
+     *
+     * @hide
+     */
+    public void setNetworkLoggingEnabled(@NonNull ComponentName admin, boolean enabled) {
+        throwIfParentInstance("setNetworkLoggingEnabled");
+        try {
+            mService.setNetworkLoggingEnabled(admin, enabled);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Return whether network logging is enabled by a device owner.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @return {@code true} if network logging is enabled by device owner, {@code false} otherwise.
+     * @throws {@link SecurityException} if {@code admin} is not a device owner.
+     *
+     * @hide
+     */
+    public boolean isNetworkLoggingEnabled(@NonNull ComponentName admin) {
+        throwIfParentInstance("isNetworkLoggingEnabled");
+        try {
+            return mService.isNetworkLoggingEnabled(admin);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
 }
