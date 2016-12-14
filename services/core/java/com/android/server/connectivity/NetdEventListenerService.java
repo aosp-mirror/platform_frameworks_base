@@ -20,10 +20,12 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.Network;
+import android.net.INetdEventCallback;
 import android.net.NetworkRequest;
 import android.net.metrics.DnsEvent;
 import android.net.metrics.INetdEventListener;
 import android.net.metrics.IpConnectivityLog;
+import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -119,6 +121,21 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
         }
     };
 
+    // Callback should only be registered/unregistered when logging is being enabled/disabled in DPM
+    // by the device owner. It's DevicePolicyManager's responsibility to ensure that.
+    @GuardedBy("this")
+    private INetdEventCallback mNetdEventCallback;
+
+    public synchronized boolean registerNetdEventCallback(INetdEventCallback callback) {
+        mNetdEventCallback = callback;
+        return true;
+    }
+
+    public synchronized boolean unregisterNetdEventCallback() {
+        mNetdEventCallback = null;
+        return true;
+    }
+
     public NetdEventListenerService(Context context) {
         this(context.getSystemService(ConnectivityManager.class), new IpConnectivityLog());
     }
@@ -136,7 +153,8 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
     // Called concurrently by multiple binder threads.
     // This method must not block or perform long-running operations.
     public synchronized void onDnsEvent(int netId, int eventType, int returnCode, int latencyMs,
-            String hostname, String[] ipAddresses, int ipAddressesCount, int uid) {
+            String hostname, String[] ipAddresses, int ipAddressesCount, int uid)
+            throws RemoteException {
         maybeVerboseLog(String.format("onDnsEvent(%d, %d, %d, %d)",
                 netId, eventType, returnCode, latencyMs));
 
@@ -146,14 +164,23 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
             mEventBatches.put(netId, batch);
         }
         batch.addResult((byte) eventType, (byte) returnCode, latencyMs);
+
+        if (mNetdEventCallback != null) {
+            mNetdEventCallback.onDnsEvent(hostname, ipAddresses, ipAddressesCount,
+                    System.currentTimeMillis(), uid);
+        }
     }
 
     @Override
     // Called concurrently by multiple binder threads.
     // This method must not block or perform long-running operations.
     public synchronized void onConnectEvent(int netId, int latencyMs, String ipAddr, int port,
-            int uid) {
+            int uid) throws RemoteException {
         maybeVerboseLog(String.format("onConnectEvent(%d, %d)", netId, latencyMs));
+
+        if (mNetdEventCallback != null) {
+            mNetdEventCallback.onConnectEvent(ipAddr, port, System.currentTimeMillis(), uid);
+        }
     }
 
     public synchronized void dump(PrintWriter writer) {

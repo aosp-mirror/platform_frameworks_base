@@ -50,6 +50,7 @@ import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.IDevicePolicyManager;
+import android.app.admin.NetworkEvent;
 import android.app.admin.SecurityLog;
 import android.app.admin.SecurityLog.SecurityEvent;
 import android.app.admin.SystemUpdatePolicy;
@@ -77,8 +78,10 @@ import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.net.ConnectivityManager;
+import android.net.IIpConnectivityMetrics;
 import android.net.ProxyInfo;
 import android.net.Uri;
+import android.net.metrics.IpConnectivityLog;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
@@ -352,6 +355,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     boolean mIsWatch;
 
     private final SecurityLogMonitor mSecurityLogMonitor;
+    private NetworkLogger mNetworkLogger;
 
     private final AtomicBoolean mRemoteBugreportServiceIsActive = new AtomicBoolean();
     private final AtomicBoolean mRemoteBugreportSharingAccepted = new AtomicBoolean();
@@ -478,6 +482,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
                     getSendingUserId());
 
+            /*
+             * Network logging would ideally be started in setDeviceOwnerSystemPropertyLocked(),
+             * however it's too early in the boot process to register with IIpConnectivityMetrics
+             * to listen for events.
+             */
+            if (Intent.ACTION_USER_STARTED.equals(action)
+                    && userHandle == mOwners.getDeviceOwnerUserId()) {
+                synchronized (DevicePolicyManagerService.this) {
+                    if (isNetworkLoggingEnabledInternalLocked()) {
+                        setNetworkLoggingActiveInternal(true);
+                    }
+                }
+            }
             if (Intent.ACTION_BOOT_COMPLETED.equals(action)
                     && userHandle == mOwners.getDeviceOwnerUserId()
                     && getDeviceOwnerRemoteBugreportUri() != null) {
@@ -549,6 +566,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         private static final String TAG_DISABLE_ACCOUNT_MANAGEMENT = "disable-account-management";
         private static final String TAG_REQUIRE_AUTO_TIME = "require_auto_time";
         private static final String TAG_FORCE_EPHEMERAL_USERS = "force_ephemeral_users";
+        private static final String TAG_IS_NETWORK_LOGGING_ENABLED = "is_network_logging_enabled";
         private static final String TAG_ACCOUNT_TYPE = "account-type";
         private static final String TAG_PERMITTED_ACCESSIBILITY_SERVICES
                 = "permitted-accessiblity-services";
@@ -643,6 +661,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         boolean disableScreenCapture = false; // Can only be set by a device/profile owner.
         boolean requireAutoTime = false; // Can only be set by a device owner.
         boolean forceEphemeralUsers = false; // Can only be set by a device owner.
+        boolean isNetworkLoggingEnabled = false; // Can only be set by a device owner.
 
         ActiveAdmin parentAdmin;
         final boolean isParent;
@@ -851,6 +870,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.attribute(null, ATTR_VALUE, Boolean.toString(forceEphemeralUsers));
                 out.endTag(null, TAG_FORCE_EPHEMERAL_USERS);
             }
+            if (isNetworkLoggingEnabled) {
+                out.startTag(null, TAG_IS_NETWORK_LOGGING_ENABLED);
+                out.attribute(null, ATTR_VALUE, Boolean.toString(isNetworkLoggingEnabled));
+                out.endTag(null, TAG_IS_NETWORK_LOGGING_ENABLED);
+            }
             if (disabledKeyguardFeatures != DEF_KEYGUARD_FEATURES_DISABLED) {
                 out.startTag(null, TAG_DISABLE_KEYGUARD_FEATURES);
                 out.attribute(null, ATTR_VALUE, Integer.toString(disabledKeyguardFeatures));
@@ -1036,6 +1060,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_FORCE_EPHEMERAL_USERS.equals(tag)) {
                     forceEphemeralUsers = Boolean.parseBoolean(
+                            parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_IS_NETWORK_LOGGING_ENABLED.equals(tag)) {
+                    isNetworkLoggingEnabled = Boolean.parseBoolean(
                             parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_DISABLE_KEYGUARD_FEATURES.equals(tag)) {
                     disabledKeyguardFeatures = Integer.parseInt(
@@ -1277,6 +1304,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     pw.println(requireAutoTime);
             pw.print(prefix); pw.print("forceEphemeralUsers=");
                     pw.println(forceEphemeralUsers);
+            pw.print(prefix); pw.print("isNetworkLoggingEnabled=");
+                    pw.println(isNetworkLoggingEnabled);
             pw.print(prefix); pw.print("disabledKeyguardFeatures=");
                     pw.println(disabledKeyguardFeatures);
             pw.print(prefix); pw.print("crossProfileWidgetProviders=");
@@ -1401,6 +1430,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         NotificationManager getNotificationManager() {
             return mContext.getSystemService(NotificationManager.class);
+        }
+
+        IIpConnectivityMetrics getIIpConnectivityMetrics() {
+            return (IIpConnectivityMetrics) IIpConnectivityMetrics.Stub.asInterface(
+                ServiceManager.getService(IpConnectivityLog.SERVICE_NAME));
         }
 
         PowerManagerInternal getPowerManagerInternal() {
@@ -9037,12 +9071,33 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private synchronized void disableDeviceOwnerManagedSingleUserFeaturesIfNeeded() {
-        if (!isDeviceOwnerManagedSingleUserDevice()) {
+        final boolean isSingleUserManagedDevice = isDeviceOwnerManagedSingleUserDevice();
+
+        // disable security logging if needed
+        if (!isSingleUserManagedDevice) {
             mInjector.securityLogSetLoggingEnabledProperty(false);
-            Slog.w(LOG_TAG, "Security logging turned off as it's no longer a single user device.");
+            Slog.w(LOG_TAG, "Security logging turned off as it's no longer a single user managed"
+                    + " device.");
+        }
+
+        // disable backup service if needed
+        // note: when clearing DO, the backup service shouldn't be disabled if it was enabled by
+        // the device owner
+        if (mOwners.hasDeviceOwner() && !isSingleUserManagedDevice) {
+            setBackupServiceEnabledInternal(false);
+            Slog.w(LOG_TAG, "Backup is off as it's a managed device that has more that one user.");
+        }
+
+        // disable network logging if needed
+        if (!isSingleUserManagedDevice) {
+            setNetworkLoggingActiveInternal(false);
+            Slog.w(LOG_TAG, "Network logging turned off as it's no longer a single user managed"
+                    + " device.");
+            // if there still is a device owner, disable logging policy, otherwise the admin
+            // has been nuked
             if (mOwners.hasDeviceOwner()) {
-                setBackupServiceEnabledInternal(false);
-                Slog.w(LOG_TAG, "Backup is off as it's a managed device that has more that one user.");
+                getDeviceOwnerAdminLocked().isNetworkLoggingEnabled = false;
+                saveSettingsLocked(mOwners.getDeviceOwnerUserId());
             }
         }
     }
@@ -9385,5 +9440,87 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 throw new IllegalStateException("Failed requesting backup service state.", e);
             }
         }
+    }
+
+    @Override
+    public synchronized void setNetworkLoggingEnabled(ComponentName admin, boolean enabled) {
+        if (!mHasFeature) {
+            return;
+        }
+        Preconditions.checkNotNull(admin);
+        ensureDeviceOwnerManagingSingleUser(admin);
+
+        if (enabled == isNetworkLoggingEnabledInternalLocked()) {
+            // already in the requested state
+            return;
+        }
+        getDeviceOwnerAdminLocked().isNetworkLoggingEnabled = enabled;
+        saveSettingsLocked(mInjector.userHandleGetCallingUserId());
+
+        setNetworkLoggingActiveInternal(enabled);
+    }
+
+    private synchronized void setNetworkLoggingActiveInternal(boolean active) {
+        final long callingIdentity = mInjector.binderClearCallingIdentity();
+        try {
+            if (active) {
+                mNetworkLogger = new NetworkLogger(this, mInjector.getPackageManagerInternal());
+                if (!mNetworkLogger.startNetworkLogging()) {
+                    mNetworkLogger = null;
+                    Slog.wtf(LOG_TAG, "Network logging could not be started due to the logging"
+                            + " service not being available yet.");
+                }
+            } else {
+                if (mNetworkLogger != null && !mNetworkLogger.stopNetworkLogging()) {
+                    mNetworkLogger = null;
+                    Slog.wtf(LOG_TAG, "Network logging could not be stopped due to the logging"
+                            + " service not being available yet.");
+                }
+                mNetworkLogger = null;
+            }
+        } finally {
+            mInjector.binderRestoreCallingIdentity(callingIdentity);
+        }
+    }
+
+    @Override
+    public boolean isNetworkLoggingEnabled(ComponentName admin) {
+        if (!mHasFeature) {
+            return false;
+        }
+        Preconditions.checkNotNull(admin);
+        synchronized (this) {
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            return isNetworkLoggingEnabledInternalLocked();
+        }
+    }
+
+    private boolean isNetworkLoggingEnabledInternalLocked() {
+        ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
+        return (deviceOwner != null) && deviceOwner.isNetworkLoggingEnabled;
+    }
+
+    /*
+     * A maximum of 1200 events are returned, and the total marshalled size is in the order of
+     * 100kB, so returning a List instead of ParceledListSlice is acceptable.
+     * Ideally this would be done with ParceledList, however it only supports homogeneous types.
+     *
+     * @see NetworkLoggingHandler#MAX_EVENTS_PER_BATCH
+     */
+    @Override
+    public synchronized List<NetworkEvent> retrieveNetworkLogs(ComponentName admin,
+            long batchToken) {
+        if (!mHasFeature) {
+            return null;
+        }
+        Preconditions.checkNotNull(admin);
+        ensureDeviceOwnerManagingSingleUser(admin);
+
+        if (mNetworkLogger == null) {
+            return null;
+        }
+        return isNetworkLoggingEnabledInternalLocked()
+                ? mNetworkLogger.retrieveLogs(batchToken)
+                : null;
     }
 }

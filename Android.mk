@@ -202,6 +202,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/net/IIpConnectivityMetrics.aidl \
 	core/java/android/net/IEthernetManager.aidl \
 	core/java/android/net/IEthernetServiceListener.aidl \
+	core/java/android/net/INetdEventCallback.aidl \
 	core/java/android/net/INetworkManagementEventObserver.aidl \
 	core/java/android/net/INetworkPolicyListener.aidl \
 	core/java/android/net/INetworkPolicyManager.aidl \
@@ -574,6 +575,9 @@ aidl_files := \
 	frameworks/base/graphics/java/android/graphics/drawable/Icon.aidl \
 	frameworks/base/core/java/android/accounts/AuthenticatorDescription.aidl \
 	frameworks/base/core/java/android/accounts/Account.aidl \
+	frameworks/base/core/java/android/app/admin/ConnectEvent.aidl \
+	frameworks/base/core/java/android/app/admin/DnsEvent.aidl \
+	frameworks/base/core/java/android/app/admin/NetworkEvent.aidl \
 	frameworks/base/core/java/android/app/admin/SystemUpdatePolicy.aidl \
 	frameworks/base/core/java/android/print/PrintDocumentInfo.aidl \
 	frameworks/base/core/java/android/print/PageRange.aidl \

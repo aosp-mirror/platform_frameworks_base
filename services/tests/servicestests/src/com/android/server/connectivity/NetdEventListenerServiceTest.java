@@ -22,6 +22,7 @@ import android.net.Network;
 import android.net.metrics.DnsEvent;
 import android.net.metrics.INetdEventListener;
 import android.net.metrics.IpConnectivityLog;
+import android.os.RemoteException;
 
 import junit.framework.TestCase;
 import org.junit.Before;
@@ -157,9 +158,13 @@ public class NetdEventListenerServiceTest extends TestCase {
     }
 
     void log(int netId, int[] latencies) {
-        for (int l : latencies) {
-            mNetdEventListenerService.onDnsEvent(netId, EVENT_TYPE, RETURN_CODE, l, null, null, 0,
-                    0);
+        try {
+            for (int l : latencies) {
+                mNetdEventListenerService.onDnsEvent(netId, EVENT_TYPE, RETURN_CODE, l, null, null,
+                        0, 0);
+            }
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
         }
     }
 

@@ -17,6 +17,7 @@
 
 package android.app.admin;
 
+import android.app.admin.NetworkEvent;
 import android.app.admin.SystemUpdatePolicy;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -311,4 +312,8 @@ interface IDevicePolicyManager {
 
     void setBackupServiceEnabled(in ComponentName admin, boolean enabled);
     boolean isBackupServiceEnabled(in ComponentName admin);
+
+    void setNetworkLoggingEnabled(in ComponentName admin, boolean enabled);
+    boolean isNetworkLoggingEnabled(in ComponentName admin);
+    List<NetworkEvent> retrieveNetworkLogs(in ComponentName admin, long batchToken);
 }

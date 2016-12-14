@@ -276,6 +276,36 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             = "android.app.action.SECURITY_LOGS_AVAILABLE";
 
     /**
+     * Broadcast action: notify that a new batch of network logs is ready to be collected.
+     * @see DeviceAdminReceiver#onNetworkLogsAvailable
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_NETWORK_LOGS_AVAILABLE
+            = "android.app.action.NETWORK_LOGS_AVAILABLE";
+
+    /**
+     * A {@code long} containing a token of the current batch of network logs, that has to be used
+     * to retrieve the batch of logs by the device owner.
+     *
+     * @see #ACTION_NETWORK_LOGS_AVAILABLE
+     * @see DevicePolicyManager#retrieveNetworkLogs
+     * @hide
+     */
+    public static final String EXTRA_NETWORK_LOGS_TOKEN =
+            "android.app.extra.EXTRA_NETWORK_LOGS_TOKEN";
+
+    /**
+     * An {@code int} count representing a total count of network logs inside the current batch of
+     * network logs.
+     *
+     * @see #ACTION_NETWORK_LOGS_AVAILABLE
+     * @hide
+     */
+    public static final String EXTRA_NETWORK_LOGS_COUNT =
+            "android.app.extra.EXTRA_NETWORK_LOGS_COUNT";
+
+    /**
      * A string containing the SHA-256 hash of the bugreport file.
      *
      * @see #ACTION_BUGREPORT_SHARE
@@ -635,6 +665,25 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     }
 
     /**
+     * Called each time a new batch of network logs can be retrieved. This callback method will only
+     * ever be called when network logging is enabled. The logs can only be retrieved while network
+     * logging is enabled.
+     *
+     * <p>This callback is only applicable to device owners.
+     *
+     * @param context The running context as per {@link #onReceive}.
+     * @param intent The received intent as per {@link #onReceive}.
+     * @param batchToken The token representing the current batch of network logs.
+     * @param networkLogsCount The total count of events in the current batch of network logs.
+     * @see DevicePolicyManager#retrieveNetworkLogs(ComponentName)
+     *
+     * @hide
+     */
+    public void onNetworkLogsAvailable(Context context, Intent intent, long batchToken,
+            int networkLogsCount) {
+    }
+
+    /**
      * Intercept standard device administrator broadcasts.  Implementations
      * should not override this method; it is better to implement the
      * convenience callbacks for each action.
@@ -688,6 +737,10 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             onBugreportFailed(context, intent, failureCode);
         } else if (ACTION_SECURITY_LOGS_AVAILABLE.equals(action)) {
             onSecurityLogsAvailable(context, intent);
+        } else if (ACTION_NETWORK_LOGS_AVAILABLE.equals(action)) {
+            long batchToken = intent.getLongExtra(EXTRA_NETWORK_LOGS_TOKEN, -1);
+            int networkLogsCount = intent.getIntExtra(EXTRA_NETWORK_LOGS_COUNT, 0);
+            onNetworkLogsAvailable(context, intent, batchToken, networkLogsCount);
         }
     }
 }
