@@ -19,7 +19,6 @@ LOCAL_AIDL_INCLUDES += \
 
 LOCAL_JAVA_LIBRARIES := \
     services.net \
-    telephony-common \
     android.hardware.light@2.0-java \
     android.hardware.power@1.0-java \
     android.hardware.tv.cec@1.0-java
