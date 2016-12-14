@@ -57,6 +57,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.provider.Settings;
+import android.provider.Settings.Global;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -2175,7 +2176,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 135;
+            private static final int SETTINGS_VERSION = 136;
 
             private final int mUserId;
 
@@ -2551,6 +2552,30 @@ public class SettingsProvider extends ContentProvider {
                     getSecureSettingsLocked(userId).deleteSettingLocked(
                             Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_AUTO_UPDATE);
                     currentVersion = 135;
+                }
+
+                if (currentVersion == 135) {
+                    // Version 135: Migrating the NETWORK_SCORER_APP setting to the
+                    // NETWORK_RECOMMENDATIONS_ENABLED setting.
+                    if (userId == UserHandle.USER_SYSTEM) {
+                        final SettingsState globalSettings = getGlobalSettingsLocked();
+                        Setting currentSetting = globalSettings.getSettingLocked(
+                            Global.NETWORK_SCORER_APP);
+                        if (!currentSetting.isNull()) {
+                            // A scorer was set so enable recommendations.
+                            globalSettings.insertSettingLocked(
+                                Global.NETWORK_RECOMMENDATIONS_ENABLED,
+                                "1",
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+
+                            // and clear the scorer setting since it's no longer needed.
+                            globalSettings.insertSettingLocked(
+                                Global.NETWORK_SCORER_APP,
+                                null,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+                    }
+                    currentVersion = 136;
                 }
 
                 if (currentVersion != newVersion) {
