@@ -26,6 +26,8 @@ import android.system.StructStat;
 import android.util.Log;
 
 import com.google.android.collect.Maps;
+
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.XmlUtils;
 
 import dalvik.system.BlockGuard;
@@ -71,6 +73,14 @@ final class SharedPreferencesImpl implements SharedPreferences {
     private static final Object mContent = new Object();
     private final WeakHashMap<OnSharedPreferenceChangeListener, Object> mListeners =
             new WeakHashMap<OnSharedPreferenceChangeListener, Object>();
+
+    /** Current memory state (always increasing) */
+    @GuardedBy("this")
+    private long mCurrentMemoryStateGeneration;
+
+    /** Latest memory state that was committed to disk */
+    @GuardedBy("mWritingToDiskLock")
+    private long mDiskStateGeneration;
 
     SharedPreferencesImpl(File file, int mode) {
         mFile = file;
@@ -289,7 +299,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
 
     // Return value from EditorImpl#commitToMemory()
     private static class MemoryCommitResult {
-        public boolean changesMade;  // any keys different?
+        public long memoryStateGeneration;
         public List<String> keysModified;  // may be null
         public Set<OnSharedPreferenceChangeListener> listeners;  // may be null
         public Map<?, ?> mapToWriteToDisk;
@@ -412,9 +422,11 @@ final class SharedPreferencesImpl implements SharedPreferences {
                 }
 
                 synchronized (this) {
+                    boolean changesMade = false;
+
                     if (mClear) {
                         if (!mMap.isEmpty()) {
-                            mcr.changesMade = true;
+                            changesMade = true;
                             mMap.clear();
                         }
                         mClear = false;
@@ -441,13 +453,19 @@ final class SharedPreferencesImpl implements SharedPreferences {
                             mMap.put(k, v);
                         }
 
-                        mcr.changesMade = true;
+                        changesMade = true;
                         if (hasListeners) {
                             mcr.keysModified.add(k);
                         }
                     }
 
                     mModified.clear();
+
+                    if (changesMade) {
+                        mCurrentMemoryStateGeneration++;
+                    }
+
+                    mcr.memoryStateGeneration = mCurrentMemoryStateGeneration;
                 }
             }
             return mcr;
@@ -509,10 +527,12 @@ final class SharedPreferencesImpl implements SharedPreferences {
      */
     private void enqueueDiskWrite(final MemoryCommitResult mcr,
                                   final Runnable postWriteRunnable) {
+        final boolean isFromSyncCommit = (postWriteRunnable == null);
+
         final Runnable writeToDiskRunnable = new Runnable() {
                 public void run() {
                     synchronized (mWritingToDiskLock) {
-                        writeToFile(mcr);
+                        writeToFile(mcr, isFromSyncCommit);
                     }
                     synchronized (SharedPreferencesImpl.this) {
                         mDiskWritesInFlight--;
@@ -522,8 +542,6 @@ final class SharedPreferencesImpl implements SharedPreferences {
                     }
                 }
             };
-
-        final boolean isFromSyncCommit = (postWriteRunnable == null);
 
         // Typical #commit() path with fewer allocations, doing a write on
         // the current thread.
@@ -536,6 +554,10 @@ final class SharedPreferencesImpl implements SharedPreferences {
                 writeToDiskRunnable.run();
                 return;
             }
+        }
+
+        if (DEBUG) {
+            Log.d(TAG, "added " + mcr.memoryStateGeneration + " -> " + mFile.getName());
         }
 
         QueuedWork.singleThreadExecutor().execute(writeToDiskRunnable);
@@ -565,17 +587,34 @@ final class SharedPreferencesImpl implements SharedPreferences {
     }
 
     // Note: must hold mWritingToDiskLock
-    private void writeToFile(MemoryCommitResult mcr) {
+    private void writeToFile(MemoryCommitResult mcr, boolean isFromSyncCommit) {
         // Rename the current file so it may be used as a backup during the next read
         if (mFile.exists()) {
-            if (!mcr.changesMade) {
-                // If the file already exists, but no changes were
-                // made to the underlying map, it's wasteful to
-                // re-write the file.  Return as if we wrote it
-                // out.
+            boolean needsWrite = false;
+
+            // Only need to write if the disk state is older than this commit
+            if (mDiskStateGeneration < mcr.memoryStateGeneration) {
+                if (isFromSyncCommit) {
+                    needsWrite = true;
+                } else {
+                    synchronized (this) {
+                        // No need to persist intermediate states. Just wait for the latest state to
+                        // be persisted.
+                        if (mCurrentMemoryStateGeneration == mcr.memoryStateGeneration) {
+                            needsWrite = true;
+                        }
+                    }
+                }
+            }
+
+            if (!needsWrite) {
+                if (DEBUG) {
+                    Log.d(TAG, "skipped " + mcr.memoryStateGeneration + " -> " + mFile.getName());
+                }
                 mcr.setDiskWriteResult(true);
                 return;
             }
+
             if (!mBackupFile.exists()) {
                 if (!mFile.renameTo(mBackupFile)) {
                     Log.e(TAG, "Couldn't rename file " + mFile
@@ -599,6 +638,11 @@ final class SharedPreferencesImpl implements SharedPreferences {
             }
             XmlUtils.writeMapXml(mcr.mapToWriteToDisk, str);
             FileUtils.sync(str);
+
+            if (DEBUG) {
+                Log.d(TAG, "wrote " + mcr.memoryStateGeneration + " -> " + mFile.getName());
+            }
+
             str.close();
             ContextImpl.setFilePermissionsFromMode(mFile.getPath(), mMode, 0);
             try {
@@ -612,7 +656,11 @@ final class SharedPreferencesImpl implements SharedPreferences {
             }
             // Writing was successful, delete the backup file if there is one.
             mBackupFile.delete();
+
+            mDiskStateGeneration = mcr.memoryStateGeneration;
+
             mcr.setDiskWriteResult(true);
+
             return;
         } catch (XmlPullParserException e) {
             Log.w(TAG, "writeToFile: Got exception:", e);
