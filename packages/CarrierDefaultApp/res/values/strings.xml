@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CarrierDefaultApp</string>
+    <string name="portal_notification_id">Activate your service</string>
+    <string name="no_data_notification_id">No data service</string>
+    <string name="portal_notification_detail">Tap to activate your service</string>
+    <string name="no_data_notification_detail">No Service, please contact your service provider</string>
+    <string name="progress_dialogue_network_connection">Connecting to captive portal...</string>
+    <string name="alert_dialogue_network_timeout">Network timeout, would you like to retry?</string>
+    <string name="alert_dialogue_network_timeout_title">Network unavailable</string>
+    <string name="quit">Quit</string>
+    <string name="wait">Wait</string>
+</resources>
