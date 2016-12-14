@@ -33,7 +33,6 @@ import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.LAST_STATIC_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -179,8 +178,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-public class ActivityStackSupervisor extends ConfigurationContainer
-        implements DisplayListener {
+public class ActivityStackSupervisor extends ConfigurationContainer implements DisplayListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStackSupervisor" : TAG_AM;
     private static final String TAG_CONTAINERS = TAG + POSTFIX_CONTAINERS;
     private static final String TAG_FOCUS = TAG + POSTFIX_FOCUS;
@@ -1204,7 +1202,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer
 
         if (andResume) {
             r.startFreezingScreenLocked(app, 0);
-            mWindowManager.setAppVisibility(r.appToken, true);
+            r.setVisibility(true);
 
             // schedule launch ticks to collect information about slow apps.
             r.startLaunchTickingLocked();
@@ -1227,7 +1225,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer
         }
 
         if (mKeyguardController.isKeyguardLocked()) {
-            mWindowManager.notifyUnknownAppVisibilityLaunched(r.appToken);
+            r.notifyUnknownVisibilityLaunched();
         }
 
         r.app = app;
@@ -2577,7 +2575,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer
                 "Added restored task=" + task + " to stack=" + stack);
         final ArrayList<ActivityRecord> activities = task.mActivities;
         for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-            stack.addConfigOverride(activities.get(activityNdx), task);
+            activities.get(activityNdx).createWindowContainer();
         }
         return true;
     }
@@ -3169,7 +3167,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer
         task.setLastThumbnailLocked(r.screenshotActivityLocked());
         mRecentTasks.addLocked(task);
         mService.mTaskChangeNotificationController.notifyTaskStackChanged();
-        mWindowManager.setAppVisibility(r.appToken, false);
+        r.setVisibility(false);
 
         // When launching tasks behind, update the last active time of the top task after the new
         // task has been shown briefly
@@ -3360,7 +3358,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer
                     // normal flow and hide it once we determine that it is
                     // hidden by the activities in front of it.
                     if (DEBUG_STATES) Slog.v(TAG, "Before stopping, can hide: " + s);
-                    mWindowManager.setAppVisibility(s.appToken, false);
+                    s.setVisibility(false);
                 }
             }
             if ((!waitingVisible || mService.isSleepingOrShuttingDownLocked()) && remove) {

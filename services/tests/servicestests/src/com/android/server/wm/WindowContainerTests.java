@@ -52,7 +52,7 @@ import static org.junit.Assert.assertTrue;
 @SmallTest
 @Presubmit
 @RunWith(AndroidJUnit4.class)
-public class WindowContainerTests {
+public class WindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testCreation() throws Exception {
@@ -189,6 +189,44 @@ public class WindowContainerTests {
 
         root.removeImmediately();
         assertEquals(0, root.getChildrenCount());
+    }
+
+    @Test
+    public void testRemoveImmediately_WithController() throws Exception {
+        final WindowContainer container = new WindowContainer();
+        final WindowContainerController controller = new WindowContainerController(null, sWm);
+
+        container.setController(controller);
+        assertEquals(controller, container.getController());
+        assertEquals(container, controller.mContainer);
+
+        container.removeImmediately();
+        assertNull(container.getController());
+        assertNull(controller.mContainer);
+    }
+
+    @Test
+    public void testSetController() throws Exception {
+        final WindowContainerController controller = new WindowContainerController(null, sWm);
+        final WindowContainer container = new WindowContainer();
+
+        container.setController(controller);
+        assertEquals(controller, container.getController());
+        assertEquals(container, controller.mContainer);
+
+        // Assert we can't change the controller to another one once set
+        boolean gotException = false;
+        try {
+            container.setController(new WindowContainerController(null, sWm));
+        } catch (IllegalArgumentException e) {
+            gotException = true;
+        }
+        assertTrue(gotException);
+
+        // Assert that we can set the controller to null.
+        container.setController(null);
+        assertNull(container.getController());
+        assertNull(controller.mContainer);
     }
 
     @Test

@@ -47,7 +47,6 @@ import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowManagerService.logWithStack;
 
-import android.content.pm.ActivityInfo;
 import android.os.Debug;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.input.InputApplicationHandle;
@@ -173,8 +172,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     AppWindowToken(WindowManagerService service, IApplicationToken token, boolean voiceInteraction,
             DisplayContent dc, long inputDispatchingTimeoutNanos, boolean fullscreen,
             boolean showForAllUsers, int targetSdk, int orientation, int rotationAnimationHint,
-            int configChanges, boolean launchTaskBehind, boolean alwaysFocusable) {
+            int configChanges, boolean launchTaskBehind, boolean alwaysFocusable,
+            AppWindowContainerController controller) {
         this(service, token, voiceInteraction, dc);
+        setController(controller);
         mInputDispatchingTimeoutNanos = inputDispatchingTimeoutNanos;
         mFillsParent = fullscreen;
         mShowForAllUsers = showForAllUsers;
@@ -251,9 +252,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
         if (DEBUG_VISIBILITY) Slog.v(TAG, "VIS " + this + ": interesting="
                 + numInteresting + " visible=" + numVisible);
+        final AppWindowContainerController controller = getController();
         if (nowDrawn != reportedDrawn) {
             if (nowDrawn) {
-                mService.mH.obtainMessage(H.REPORT_APPLICATION_TOKEN_DRAWN, this).sendToTarget();
+                if (controller != null) {
+                    controller.reportWindowsDrawn();
+                }
             }
             reportedDrawn = nowDrawn;
         }
@@ -261,8 +265,13 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             if (DEBUG_VISIBILITY) Slog.v(TAG,
                     "Visibility changed in " + this + ": vis=" + nowVisible);
             reportedVisible = nowVisible;
-            mService.mH.obtainMessage(H.REPORT_APPLICATION_TOKEN_WINDOWS,
-                    nowVisible ? 1 : 0, nowGone ? 1 : 0, this).sendToTarget();
+            if (controller != null) {
+                if (nowVisible) {
+                    controller.reportWindowsVisible();
+                } else {
+                    controller.reportWindowsGone();
+                }
+            }
         }
     }
 
@@ -397,6 +406,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     boolean windowsAreFocusable() {
         return StackId.canReceiveKeys(mTask.mStack.mStackId) || mAlwaysFocusable;
+    }
+
+    AppWindowContainerController getController() {
+        final WindowContainerController controller = super.getController();
+        return controller != null ? (AppWindowContainerController) controller : null;
     }
 
     @Override
