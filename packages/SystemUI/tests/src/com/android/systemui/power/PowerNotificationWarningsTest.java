@@ -117,4 +117,18 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
                 .notifyAsUser(anyString(), anyInt(), captor.capture(), any());
         assertNotEqual(null, captor.getValue().sound);
     }
+
+    @Test
+    public void testShowTemperatureWarning_NotifyAsUser() {
+        mPowerNotificationWarnings.showTemperatureWarning();
+        verify(mMockNotificationManager, times(1))
+                .notifyAsUser(anyString(), anyInt(), any(), any());
+    }
+
+    @Test
+    public void testDismissTemperatureWarning_CancelAsUser() {
+        mPowerNotificationWarnings.showTemperatureWarning();
+        mPowerNotificationWarnings.dismissTemperatureWarning();
+        verify(mMockNotificationManager, times(1)).cancelAsUser(anyString(), anyInt(), any());
+    }
 }
