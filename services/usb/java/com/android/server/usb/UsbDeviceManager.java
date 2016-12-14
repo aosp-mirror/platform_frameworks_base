@@ -606,8 +606,12 @@ public class UsbDeviceManager {
                 } else {
                     Slog.e(TAG, "nativeGetAccessoryStrings failed");
                 }
-            } else if (!mConnected && !enteringAccessoryMode) {
-                notifyAccessoryModeExit();
+            } else {
+                if (!enteringAccessoryMode) {
+                    notifyAccessoryModeExit();
+                } else if (DEBUG) {
+                    Slog.v(TAG, "Debouncing accessory mode exit");
+                }
             }
         }
 
@@ -813,6 +817,9 @@ public class UsbDeviceManager {
                     break;
                 }
                 case MSG_ACCESSORY_MODE_ENTER_TIMEOUT: {
+                    if (DEBUG) {
+                        Slog.v(TAG, "Accessory mode enter timeout: " + mConnected);
+                    }
                     if (!mConnected) {
                         notifyAccessoryModeExit();
                     }
