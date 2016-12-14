@@ -18,17 +18,23 @@ package android.widget;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Paint;
 import android.platform.test.annotations.Presubmit;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.text.GetChars;
+import android.text.Layout;
 import android.text.Selection;
 import android.text.Spannable;
+import android.util.Log;
+import android.view.View;
+import java.util.Locale;
 
 /**
  * TextViewTest tests {@link TextView}.
  */
 public class TextViewTest extends ActivityInstrumentationTestCase2<TextViewActivity> {
+    private static final String TAG = "TextViewTest";
     private TextView mTextView;
 
     public TextViewTest() {
@@ -168,5 +174,55 @@ public class TextViewTest extends ActivityInstrumentationTestCase2<TextViewActiv
         mTextView.onActivityResult(TextView.PROCESS_TEXT_REQUEST_CODE, Activity.RESULT_OK, null);
 
         assertEquals(originalText, mTextView.getText().toString());
+    }
+
+    @SmallTest
+    public void testHyphenationWidth() {
+        TextView textView = new TextView(getActivity());
+        textView.setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_FULL);
+        textView.setTextLocale(Locale.US);
+
+        Paint paint = textView.getPaint();
+
+        String word = "thisissuperlonglongword";
+        float wordWidth = paint.measureText(word, 0, word.length());
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 100; ++i) {
+            sb.append(word);
+            sb.append(" ");
+        }
+        textView.setText(sb.toString());
+
+        int width = (int)(wordWidth * 0.7);
+        int height = 4096;  // enough for all text.
+
+        textView.measure(
+                View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY));
+        textView.layout(0, 0, width, height);
+
+        Layout layout = textView.getLayout();
+        assertNotNull(layout);
+
+        int lineCount = layout.getLineCount();
+        boolean hyphenationHappend = false;
+        for (int i = 0; i < lineCount; ++i) {
+            if (layout.getHyphen(i) != 1) {
+                continue;  // Hyphantion does not happen.
+            }
+            hyphenationHappend = true;
+
+            int start = layout.getLineStart(i);
+            int end = layout.getLineEnd(i);
+
+            float withoutHyphenLength = paint.measureText(sb, start, end);
+            float withHyphenLength = layout.getLineWidth(i);
+
+            assertTrue("LineWidth should take account of hyphen length.",
+                    withHyphenLength > withoutHyphenLength);
+        }
+        assertTrue("Hyphenation must happen on TextView narrower than the word width",
+                hyphenationHappend);
     }
 }
