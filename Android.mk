@@ -747,9 +747,6 @@ fwbase_dirs_to_document := \
 # include definition of libcore_to_document
 include libcore/Docs.mk
 
-# include definition of junit_to_document
-include external/junit/Common.mk
-
 non_base_dirs := \
 	../opt/telephony/src/java/android/provider \
 	../opt/telephony/src/java/android/telephony \
@@ -790,8 +787,7 @@ html_dirs := \
 # Common sources for doc check and api check
 common_src_files := \
 	$(call find-other-html-files, $(html_dirs)) \
-	$(addprefix ../../, $(libcore_to_document)) \
-	$(addprefix ../../external/junit/, $(junit_to_document))
+	$(addprefix ../../, $(libcore_to_document))
 
 # These are relative to frameworks/base
 framework_docs_LOCAL_SRC_FILES := \
