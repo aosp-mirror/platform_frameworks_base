@@ -488,9 +488,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
              * to listen for events.
              */
             if (Intent.ACTION_USER_STARTED.equals(action)
-                    && userHandle == mOwners.getDeviceOwnerUserId()
-                    && isNetworkLoggingEnabledInternal()) {
-                setNetworkLoggingActiveInternal(true);
+                    && userHandle == mOwners.getDeviceOwnerUserId()) {
+                synchronized (DevicePolicyManagerService.this) {
+                    if (isNetworkLoggingEnabledInternalLocked()) {
+                        setNetworkLoggingActiveInternal(true);
+                    }
+                }
             }
             if (Intent.ACTION_BOOT_COMPLETED.equals(action)
                     && userHandle == mOwners.getDeviceOwnerUserId()
@@ -9433,7 +9436,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkNotNull(admin);
         ensureDeviceOwnerManagingSingleUser(admin);
 
-        if (enabled == isNetworkLoggingEnabledInternal()) {
+        if (enabled == isNetworkLoggingEnabledInternalLocked()) {
             // already in the requested state
             return;
         }
@@ -9474,11 +9477,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkNotNull(admin);
         synchronized (this) {
             getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-            return isNetworkLoggingEnabledInternal();
+            return isNetworkLoggingEnabledInternalLocked();
         }
     }
 
-    private synchronized boolean isNetworkLoggingEnabledInternal() {
+    private boolean isNetworkLoggingEnabledInternalLocked() {
         ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
         return (deviceOwner != null) && deviceOwner.isNetworkLoggingEnabled;
     }
@@ -9489,7 +9492,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * Ideally this would be done with ParceledList, however it only supports homogeneous types.
      */
     @Override
-    public synchronized List<NetworkEvent> retrieveNetworkLogs(ComponentName admin) {
+    public synchronized List<NetworkEvent> retrieveNetworkLogs(ComponentName admin,
+            long batchToken) {
         if (!mHasFeature) {
             return null;
         }
@@ -9499,6 +9503,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (mNetworkLogger == null) {
             return null;
         }
-        return isNetworkLoggingEnabledInternal() ? mNetworkLogger.retrieveLogs() : null;
+        return isNetworkLoggingEnabledInternalLocked()
+                ? mNetworkLogger.retrieveLogs(batchToken)
+                : null;
     }
 }

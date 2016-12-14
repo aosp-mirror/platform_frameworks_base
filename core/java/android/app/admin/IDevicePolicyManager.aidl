@@ -315,5 +315,5 @@ interface IDevicePolicyManager {
 
     void setNetworkLoggingEnabled(in ComponentName admin, boolean enabled);
     boolean isNetworkLoggingEnabled(in ComponentName admin);
-    List<NetworkEvent> retrieveNetworkLogs(in ComponentName admin);
+    List<NetworkEvent> retrieveNetworkLogs(in ComponentName admin, long batchToken);
 }
