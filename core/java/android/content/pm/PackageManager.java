@@ -3319,7 +3319,8 @@ public abstract class PackageManager {
      * Grant a runtime permission to an application which the application does not
      * already have. The permission must have been requested by the application.
      * If the application is not allowed to hold the permission, a {@link
-     * java.lang.SecurityException} is thrown.
+     * java.lang.SecurityException} is thrown. If the package or permission is
+     * invalid, a {@link java.lang.IllegalArgumentException} is thrown.
      * <p>
      * <strong>Note: </strong>Using this API requires holding
      * android.permission.GRANT_RUNTIME_PERMISSIONS and if the user id is
@@ -3343,7 +3344,8 @@ public abstract class PackageManager {
      * #grantRuntimePermission(String, String, android.os.UserHandle)}. The
      * permission must have been requested by and granted to the application.
      * If the application is not allowed to hold the permission, a {@link
-     * java.lang.SecurityException} is thrown.
+     * java.lang.SecurityException} is thrown. If the package or permission is
+     * invalid, a {@link java.lang.IllegalArgumentException} is thrown.
      * <p>
      * <strong>Note: </strong>Using this API requires holding
      * android.permission.REVOKE_RUNTIME_PERMISSIONS and if the user id is
