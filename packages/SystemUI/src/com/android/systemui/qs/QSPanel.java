@@ -511,6 +511,10 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         return mFooter;
     }
 
+    public void showDeviceMonitoringDialog() {
+        mFooter.showDeviceMonitoringDialog();
+    }
+
     private class H extends Handler {
         private static final int SHOW_DETAIL = 1;
         private static final int SET_TILE_VISIBILITY = 2;
