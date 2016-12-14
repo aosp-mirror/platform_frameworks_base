@@ -57,7 +57,11 @@ public class AvoidBadWifiTracker {
     private final Context mContext;
     private final Handler mHandler;
     private final Runnable mReevaluateRunnable;
+    private final Uri mUri;
+    private final ContentResolver mResolver;
     private final SettingObserver mSettingObserver;
+    private final BroadcastReceiver mBroadcastReceiver;
+
     private volatile boolean mAvoidBadWifi = true;
 
     public AvoidBadWifiTracker(Context ctx, Handler handler) {
@@ -68,17 +72,34 @@ public class AvoidBadWifiTracker {
         mContext = ctx;
         mHandler = handler;
         mReevaluateRunnable = () -> { if (update() && cb != null) cb.run(); };
+        mUri = Settings.Global.getUriFor(NETWORK_AVOID_BAD_WIFI);
+        mResolver = mContext.getContentResolver();
         mSettingObserver = new SettingObserver();
-
-        final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
-        mContext.registerReceiverAsUser(new BroadcastReceiver() {
+        mBroadcastReceiver = new BroadcastReceiver() {
+            @Override
             public void onReceive(Context context, Intent intent) {
                 reevaluate();
             }
-        }, UserHandle.ALL, intentFilter, null, null);
+        };
 
         update();
+    }
+
+    public void start() {
+        mResolver.registerContentObserver(mUri, false, mSettingObserver);
+
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
+        mContext.registerReceiverAsUser(
+                mBroadcastReceiver, UserHandle.ALL, intentFilter, null, null);
+
+        reevaluate();
+    }
+
+    public void shutdown() {
+        mResolver.unregisterContentObserver(mSettingObserver);
+
+        mContext.unregisterReceiver(mBroadcastReceiver);
     }
 
     public boolean currentValue() {
@@ -100,8 +121,7 @@ public class AvoidBadWifiTracker {
     }
 
     public String getSettingsValue() {
-        final ContentResolver resolver = mContext.getContentResolver();
-        return Settings.Global.getString(resolver, NETWORK_AVOID_BAD_WIFI);
+        return Settings.Global.getString(mResolver, NETWORK_AVOID_BAD_WIFI);
     }
 
     @VisibleForTesting
@@ -117,12 +137,8 @@ public class AvoidBadWifiTracker {
     }
 
     private class SettingObserver extends ContentObserver {
-        private final Uri mUri = Settings.Global.getUriFor(NETWORK_AVOID_BAD_WIFI);
-
         public SettingObserver() {
             super(null);
-            final ContentResolver resolver = mContext.getContentResolver();
-            resolver.registerContentObserver(mUri, false, this);
         }
 
         @Override
