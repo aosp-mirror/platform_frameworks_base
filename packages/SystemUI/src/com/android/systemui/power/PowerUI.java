@@ -24,13 +24,15 @@ import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.os.BatteryManager;
 import android.os.Handler;
+import android.os.HardwarePropertiesManager;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Slog;
-
+import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
@@ -41,11 +43,13 @@ import java.util.Arrays;
 public class PowerUI extends SystemUI {
     static final String TAG = "PowerUI";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final long TEMPERATURE_INTERVAL = 30 * DateUtils.SECOND_IN_MILLIS;
 
     private final Handler mHandler = new Handler();
     private final Receiver mReceiver = new Receiver();
 
     private PowerManager mPowerManager;
+    private HardwarePropertiesManager mHardwarePropertiesManager;
     private WarningsUI mWarnings;
     private int mBatteryLevel = 100;
     private int mBatteryStatus = BatteryManager.BATTERY_STATUS_UNKNOWN;
@@ -57,8 +61,12 @@ public class PowerUI extends SystemUI {
 
     private long mScreenOffTime = -1;
 
+    private float mThrottlingTemp;
+
     public void start() {
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        mHardwarePropertiesManager = (HardwarePropertiesManager)
+                mContext.getSystemService(Context.HARDWARE_PROPERTIES_SERVICE);
         mScreenOffTime = mPowerManager.isScreenOn() ? -1 : SystemClock.elapsedRealtime();
         mWarnings = new PowerNotificationWarnings(mContext, getComponent(PhoneStatusBar.class));
 
@@ -74,6 +82,8 @@ public class PowerUI extends SystemUI {
                 false, obs, UserHandle.USER_ALL);
         updateBatteryWarningLevels();
         mReceiver.init();
+
+        initTemperatureWarning();
     }
 
     void updateBatteryWarningLevels() {
@@ -209,6 +219,47 @@ public class PowerUI extends SystemUI {
         }
     };
 
+    private void initTemperatureWarning() {
+        if (!mContext.getResources().getBoolean(R.bool.config_showTemperatureWarning)) {
+            return;
+        }
+
+        // Get the throttling temperature. No need to check if we're not throttling.
+        float[] throttlingTemps = mHardwarePropertiesManager.getDeviceTemperatures(
+                HardwarePropertiesManager.DEVICE_TEMPERATURE_SKIN,
+                HardwarePropertiesManager.TEMPERATURE_THROTTLING);
+        if (throttlingTemps == null
+                || throttlingTemps.length == 0
+                || throttlingTemps[0] == HardwarePropertiesManager.UNDEFINED_TEMPERATURE) {
+            return;
+        }
+        mThrottlingTemp = throttlingTemps[0];
+
+        // We have passed all of the checks, start checking the temp
+        updateTemperatureWarning();
+    }
+
+    private void updateTemperatureWarning() {
+        // TODO: Add VR mode check
+        float[] temps = mHardwarePropertiesManager.getDeviceTemperatures(
+                HardwarePropertiesManager.DEVICE_TEMPERATURE_SKIN,
+                HardwarePropertiesManager.TEMPERATURE_CURRENT);
+        boolean shouldShowTempWarning = false;
+        for (float temp : temps) {
+            if (temp >= mThrottlingTemp) {
+                shouldShowTempWarning = true;
+                break;
+            }
+        }
+        if (shouldShowTempWarning) {
+            mWarnings.showTemperatureWarning();
+        } else {
+            mWarnings.dismissTemperatureWarning();
+        }
+
+        mHandler.postDelayed(this::updateTemperatureWarning, TEMPERATURE_INTERVAL);
+    }
+
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.print("mLowBatteryAlertCloseLevel=");
         pw.println(mLowBatteryAlertCloseLevel);
@@ -235,6 +286,8 @@ public class PowerUI extends SystemUI {
                 Settings.Global.LOW_BATTERY_SOUND_TIMEOUT, 0));
         pw.print("bucket: ");
         pw.println(Integer.toString(findBatteryLevelBucket(mBatteryLevel)));
+        pw.print("mThrottlingTemp=");
+        pw.println(Float.toString(mThrottlingTemp));
         mWarnings.dump(pw);
     }
 
@@ -246,6 +299,8 @@ public class PowerUI extends SystemUI {
         void showInvalidChargerWarning();
         void updateLowBatteryWarning();
         boolean isInvalidChargerWarningShowing();
+        void dismissTemperatureWarning();
+        void showTemperatureWarning();
         void dump(PrintWriter pw);
         void userSwitched();
     }
