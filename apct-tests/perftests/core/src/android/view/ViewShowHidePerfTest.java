@@ -121,7 +121,7 @@ public class ViewShowHidePerfTest {
     @Parameterized.Parameters(name = "Factory:{0},depth:{1}")
     public static Iterable<Object[]> params() {
         List<Object[]> params = new ArrayList<>();
-        for (int depth : new int[] {1, 6, 10}) {
+        for (int depth : new int[] { 6 }) {
             for (SubTreeFactory subTreeFactory : sSubTreeFactories) {
                 params.add(new Object[]{ subTreeFactory, depth });
             }
@@ -198,6 +198,21 @@ public class ViewShowHidePerfTest {
         });
     }
 
+    @Test
+    public void testRecordAfterAdd() throws Throwable {
+        testParentWithChild((state, width, height, parent, child) -> {
+            while (state.keepRunning()) {
+                state.pauseTiming();
+                parent.removeAllViews();
+                updateAndValidateDisplayList(parent); // Note, done to be safe, likely not needed
+                parent.addView(child);
+                layout(width, height, child);
+                state.resumeTiming();
+
+                updateAndValidateDisplayList(parent);
+            }
+        });
+    }
 
     private void testVisibility(int fromVisibility, int toVisibility) throws Throwable {
         testParentWithChild((state, width, height, parent, child) -> {

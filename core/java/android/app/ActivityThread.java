@@ -113,9 +113,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.renderscript.RenderScriptCacheDir;
-import android.system.Os;
-import android.system.OsConstants;
-import android.system.ErrnoException;
 import android.webkit.WebView;
 
 import com.android.internal.annotations.GuardedBy;
@@ -138,11 +135,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -652,8 +647,6 @@ public final class ActivityThread {
             overrideConfig = config;
         }
     }
-
-    private native void dumpGraphicsInfo(FileDescriptor fd);
 
     private class ApplicationThread extends IApplicationThread.Stub {
         private static final String DB_INFO_FORMAT = "  %8s %8s %14s %14s  %s";
@@ -1195,7 +1188,7 @@ public final class ActivityThread {
 
         @Override
         public void dumpGfxInfo(ParcelFileDescriptor pfd, String[] args) {
-            dumpGraphicsInfo(pfd.getFileDescriptor());
+            nDumpGraphicsInfo(pfd.getFileDescriptor());
             WindowManagerGlobal.getInstance().dumpGfxInfo(pfd.getFileDescriptor(), args);
             IoUtils.closeQuietly(pfd);
         }
@@ -6240,4 +6233,8 @@ public final class ActivityThread {
 
         throw new RuntimeException("Main thread loop unexpectedly exited");
     }
+
+    // ------------------ Regular JNI ------------------------
+
+    private native void nDumpGraphicsInfo(FileDescriptor fd);
 }
