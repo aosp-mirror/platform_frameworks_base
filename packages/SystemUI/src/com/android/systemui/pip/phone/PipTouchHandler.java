@@ -17,7 +17,6 @@
 package com.android.systemui.pip.phone;
 
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.INPUT_CONSUMER_PIP;
 
 import static com.android.systemui.Interpolators.FAST_OUT_LINEAR_IN;
@@ -38,7 +37,6 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.IPinnedStackController;
-import android.view.IPinnedStackListener;
 import android.view.IWindowManager;
 import android.view.InputChannel;
 import android.view.InputEvent;
@@ -80,7 +78,6 @@ public class PipTouchHandler implements TunerService.Tunable {
     private final IActivityManager mActivityManager;
     private final IWindowManager mWindowManager;
     private final ViewConfiguration mViewConfig;
-    private final PinnedStackListener mPinnedStackListener = new PinnedStackListener();
     private final PipMenuListener mMenuListener = new PipMenuListener();
     private IPinnedStackController mPinnedStackController;
 
@@ -149,26 +146,6 @@ public class PipTouchHandler implements TunerService.Tunable {
     }
 
     /**
-     * Handler for messages from the PIP controller.
-     */
-    private class PinnedStackListener extends IPinnedStackListener.Stub {
-
-        @Override
-        public void onListenerRegistered(IPinnedStackController controller) {
-            mPinnedStackController = controller;
-
-            // Update the controller with the current tuner state
-            setMinimizedState(mIsMinimized);
-            setSnapToEdge(mEnableSnapToEdge);
-        }
-
-        @Override
-        public void onBoundsChanged(boolean adjustedForIme) {
-            // Do nothing
-        }
-    }
-
-    /**
      * A listener for the PIP menu activity.
      */
     private class PipMenuListener implements PipMenuActivityController.Listener {
@@ -181,17 +158,30 @@ public class PipTouchHandler implements TunerService.Tunable {
                 unregisterInputConsumer();
             }
         }
+
+        @Override
+        public void onPipExpand() {
+            if (!mIsMinimized) {
+                expandPinnedStackToFullscreen();
+            }
+        }
+
+        @Override
+        public void onPipMinimize() {
+            setMinimizedState(true);
+            animateToClosestMinimizedTarget();
+        }
+
+        @Override
+        public void onPipDismiss() {
+            animateDismissPinnedStack(mPinnedStackBounds);
+        }
     }
 
     public PipTouchHandler(Context context, PipMenuActivityController menuController,
             IActivityManager activityManager, IWindowManager windowManager) {
 
         // Initialize the Pip input consumer
-        try {
-            windowManager.registerPinnedStackListener(DEFAULT_DISPLAY, mPinnedStackListener);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to create PIP input consumer", e);
-        }
         mContext = context;
         mActivityManager = activityManager;
         mWindowManager = windowManager;
@@ -253,6 +243,14 @@ public class PipTouchHandler implements TunerService.Tunable {
     public void onConfigurationChanged() {
         mSnapAlgorithm.onConfigurationChanged();
         updateBoundedPinnedStackBounds(false /* updatePinnedStackBounds */);
+    }
+
+    public void onMinimizedStateChanged(boolean isMinimized) {
+        mIsMinimized = isMinimized;
+    }
+
+    public void onSnapToEdgeStateChanged(boolean isSnapToEdge) {
+        mSnapAlgorithm.setSnapToEdge(isSnapToEdge);
     }
 
     private boolean handleTouchEvent(MotionEvent ev) {
@@ -353,10 +351,17 @@ public class PipTouchHandler implements TunerService.Tunable {
     }
 
     /**
-     * Sets the snap-to-edge state.
+     * Sets the controller to update the system of changes from user interaction.
+     */
+    void setPinnedStackController(IPinnedStackController controller) {
+        mPinnedStackController = controller;
+    }
+
+    /**
+     * Sets the snap-to-edge state and notifies the controller.
      */
     private void setSnapToEdge(boolean snapToEdge) {
-        mSnapAlgorithm.setSnapToEdge(snapToEdge);
+        onSnapToEdgeStateChanged(snapToEdge);
 
         if (mPinnedStackController != null) {
             try {
@@ -371,7 +376,7 @@ public class PipTouchHandler implements TunerService.Tunable {
      * Sets the minimized state and notifies the controller.
      */
     private void setMinimizedState(boolean isMinimized) {
-        mIsMinimized = isMinimized;
+        onMinimizedStateChanged(isMinimized);
 
         if (mPinnedStackController != null) {
             try {
@@ -432,6 +437,12 @@ public class PipTouchHandler implements TunerService.Tunable {
         mPinnedStackBoundsAnimator = mMotionHelper.createAnimationToBounds(mPinnedStackBounds,
                 toBounds, MINIMIZE_STACK_MAX_DURATION, LINEAR_OUT_SLOW_IN,
                 mUpdatePinnedStackBoundsListener);
+        mPinnedStackBoundsAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mMenuController.hideMenu();
+            }
+        });
         mPinnedStackBoundsAnimator.start();
     }
 
@@ -759,7 +770,8 @@ public class PipTouchHandler implements TunerService.Tunable {
 
         @Override
         public boolean onUp(PipTouchState touchState) {
-            if (mEnableTapThrough && !touchState.isDragging() && !mIsTappingThrough) {
+            if (mEnableTapThrough && !touchState.isDragging() && !mIsMinimized &&
+                    !mIsTappingThrough) {
                 mMenuController.showMenu();
                 mIsTappingThrough = true;
                 return true;

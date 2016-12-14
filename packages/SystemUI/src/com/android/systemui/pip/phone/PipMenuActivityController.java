@@ -1,14 +1,13 @@
 package com.android.systemui.pip.phone;
 
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-import static android.view.WindowManager.INPUT_CONSUMER_PIP;
 
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityOptions;
 import android.app.IActivityManager;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Rect;
+import android.content.pm.ParceledListSlice;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
@@ -24,8 +23,12 @@ public class PipMenuActivityController {
     private static final String TAG = "PipMenuActivityController";
 
     public static final String EXTRA_CONTROLLER_MESSENGER = "messenger";
-    public static final int MESSAGE_ACTIVITY_VISIBILITY_CHANGED = 1;
-    public static final int MESSAGE_EXPAND_PIP = 3;
+    public static final String EXTRA_ACTIONS = "actions";
+
+    public static final int MESSAGE_ACTIVITY_VISIBILITY_CHANGED = 100;
+    public static final int MESSAGE_EXPAND_PIP = 101;
+    public static final int MESSAGE_MINIMIZE_PIP = 102;
+    public static final int MESSAGE_DISMISS_PIP = 103;
 
     /**
      * A listener interface to receive notification on changes in PIP.
@@ -35,12 +38,29 @@ public class PipMenuActivityController {
          * Called when the PIP menu visibility changes.
          */
         void onPipMenuVisibilityChanged(boolean visible);
+
+        /**
+         * Called when the PIP requested to be expanded.
+         */
+        void onPipExpand();
+
+        /**
+         * Called when the PIP requested to be minimized.
+         */
+        void onPipMinimize();
+
+        /**
+         * Called when the PIP requested to be expanded.
+         */
+        void onPipDismiss();
     }
 
     private Context mContext;
     private IActivityManager mActivityManager;
     private IWindowManager mWindowManager;
+
     private ArrayList<Listener> mListeners = new ArrayList<>();
+    private ParceledListSlice mActions;
 
     private Messenger mToActivityMessenger;
     private Messenger mMessenger = new Messenger(new Handler() {
@@ -57,10 +77,23 @@ public class PipMenuActivityController {
                     break;
                 }
                 case MESSAGE_EXPAND_PIP: {
-                    try {
-                        mActivityManager.resizeStack(PINNED_STACK_ID, null, true, true, true, 225);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Error showing PIP menu activity", e);
+                    int listenerCount = mListeners.size();
+                    for (int i = 0; i < listenerCount; i++) {
+                        mListeners.get(i).onPipExpand();
+                    }
+                    break;
+                }
+                case MESSAGE_MINIMIZE_PIP: {
+                    int listenerCount = mListeners.size();
+                    for (int i = 0; i < listenerCount; i++) {
+                        mListeners.get(i).onPipMinimize();
+                    }
+                    break;
+                }
+                case MESSAGE_DISMISS_PIP: {
+                    int listenerCount = mListeners.size();
+                    for (int i = 0; i < listenerCount; i++) {
+                        mListeners.get(i).onPipDismiss();
                     }
                     break;
                 }
@@ -95,6 +128,7 @@ public class PipMenuActivityController {
                     pinnedStackInfo.taskIds.length > 0) {
                 Intent intent = new Intent(mContext, PipMenuActivity.class);
                 intent.putExtra(EXTRA_CONTROLLER_MESSENGER, mMessenger);
+                intent.putExtra(EXTRA_ACTIONS, mActions);
                 ActivityOptions options = ActivityOptions.makeBasic();
                 options.setLaunchTaskId(
                         pinnedStackInfo.taskIds[pinnedStackInfo.taskIds.length - 1]);
@@ -121,6 +155,24 @@ public class PipMenuActivityController {
                 Log.e(TAG, "Could not notify menu activity to finish", e);
             }
             mToActivityMessenger = null;
+        }
+    }
+
+    /**
+     * Sets the {@param actions} associated with the PiP.
+     */
+    public void setActions(ParceledListSlice actions) {
+        mActions = actions;
+
+        if (mToActivityMessenger != null) {
+            Message m = Message.obtain();
+            m.what = PipMenuActivity.MESSAGE_UPDATE_ACTIONS;
+            m.obj = actions;
+            try {
+                mToActivityMessenger.send(m);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Could not notify menu activity to update actions", e);
+            }
         }
     }
 }

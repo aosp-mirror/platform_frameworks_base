@@ -717,6 +717,9 @@
     <!-- The size of the PIP dismiss target. -->
     <dimen name="pip_dismiss_target_size">48dp</dimen>
 
+    <!-- The size of a PIP menu action icon. -->
+    <dimen name="pip_menu_action_icon_size">32dp</dimen>
+
     <!-- Values specific to grid-based recents. -->
     <!-- Margins around recent tasks. -->
     <dimen name="recents_grid_margin_left">15dp</dimen>

@@ -54,6 +54,7 @@ import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager.TaskDescription;
+import android.app.ActivityManagerInternal.PictureInPictureArguments;
 import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.app.ResultInfo;
@@ -217,13 +218,13 @@ final class ActivityRecord {
     boolean immersive;      // immersive mode (don't interrupt if possible)
     boolean forceNewConfig; // force re-create with new config next time
     boolean supportsPipOnMoveToBackground;   // Supports automatically entering picture-in-picture
-            // when this activity is hidden. This flag is requested by the activity.
+        // when this activity is hidden. This flag is requested by the activity.
     private boolean enterPipOnMoveToBackground; // Flag to enter picture in picture when this
-            // activity is made invisible. This flag is set specifically when another task is being
-            // launched or moved to the front which may cause this activity to try and enter PiP
-            // when it is next made invisible.
-    float pictureInPictureAspectRatio; // The aspect ratio to use when auto-entering
-            // picture-in-picture
+        // activity is made invisible. This flag is set specifically when another task is being
+        // launched or moved to the front which may cause this activity to try and enter PiP
+        // when it is next made invisible.
+    PictureInPictureArguments pictureInPictureArgs = new PictureInPictureArguments();  // The PiP
+        // arguments used when deferring the entering of picture-in-picture.
     int launchCount;        // count of launches since last state
     long lastLaunchTime;    // time of last launch of this activity
     ComponentName requestedVrComponent; // the requested component for handling VR mode.
@@ -441,9 +442,10 @@ final class ActivityRecord {
             pw.println(prefix + "resizeMode=" + ActivityInfo.resizeModeToString(info.resizeMode));
         }
         if (supportsPipOnMoveToBackground) {
-            pw.println(prefix + "supportsPipOnMoveToBackground=1 "
-                    + "enterPipOnMoveToBackground="
-                            + (enterPipOnMoveToBackground ? 1 : 0));
+            pw.println(prefix + "supportsPipOnMoveToBackground=1");
+            pw.println(prefix + "enterPipOnMoveToBackground=" +
+                    (enterPipOnMoveToBackground ? 1 : 0));
+            pictureInPictureArgs.dump(pw, prefix);
         }
     }
 

@@ -18,12 +18,13 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.util.TypedValue.COMPLEX_UNIT_DIP;
-import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.animation.ValueAnimator;
+import android.app.RemoteAction;
+import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -41,12 +42,13 @@ import android.view.Gravity;
 import android.view.IPinnedStackController;
 import android.view.IPinnedStackListener;
 
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.policy.PipMotionHelper;
 import com.android.internal.policy.PipSnapAlgorithm;
 import com.android.server.UiThread;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Holds the common state of the pinned stack between the system and SystemUI.
@@ -70,9 +72,13 @@ class PinnedStackController {
     // States that affect how the PIP can be manipulated
     private boolean mInInteractiveMode;
     private boolean mIsMinimized;
+    private boolean mIsSnappingToEdge;
     private boolean mIsImeShowing;
     private int mImeHeight;
     private ValueAnimator mBoundsAnimator = null;
+
+    // The set of actions that are currently allowed on the PiP activity
+    private ArrayList<RemoteAction> mActions = new ArrayList<>();
 
     // Used to calculate stack bounds across rotations
     private final DisplayInfo mDisplayInfo = new DisplayInfo();
@@ -113,6 +119,7 @@ class PinnedStackController {
         @Override
         public void setSnapToEdge(final boolean snapToEdge) {
             mHandler.post(() -> {
+                mIsSnappingToEdge = snapToEdge;
                 mSnapAlgorithm.setSnapToEdge(snapToEdge);
             });
         }
@@ -171,6 +178,9 @@ class PinnedStackController {
             listener.onListenerRegistered(mCallbacks);
             mPinnedStackListener = listener;
             notifyBoundsChanged(mIsImeShowing);
+            notifyMinimizeChanged(mIsMinimized);
+            notifySnapToEdgeChanged(mIsSnappingToEdge);
+            notifyActionsChanged(mActions);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to register pinned stack listener", e);
         }
@@ -315,7 +325,16 @@ class PinnedStackController {
     }
 
     /**
-     * Sends a broadcast that the PIP movement bounds have changed.
+     * Sets the current set of actions.
+     */
+    void setActions(List<RemoteAction> actions) {
+        mActions.clear();
+        mActions.addAll(actions);
+        notifyActionsChanged(mActions);
+    }
+
+    /**
+     * Notifies listeners that the PIP movement bounds have changed.
      */
     private void notifyBoundsChanged(boolean adjustedForIme) {
         if (mPinnedStackListener != null) {
@@ -323,6 +342,45 @@ class PinnedStackController {
                 mPinnedStackListener.onBoundsChanged(adjustedForIme);
             } catch (RemoteException e) {
                 Slog.e(TAG_WM, "Error delivering bounds changed event.", e);
+            }
+        }
+    }
+
+    /**
+     * Notifies listeners that the PIP minimized state has changed.
+     */
+    private void notifyMinimizeChanged(boolean isMinimized) {
+        if (mPinnedStackListener != null) {
+            try {
+                mPinnedStackListener.onMinimizedStateChanged(isMinimized);
+            } catch (RemoteException e) {
+                Slog.e(TAG_WM, "Error delivering minimize changed event.", e);
+            }
+        }
+    }
+
+    /**
+     * Notifies listeners that the PIP snap-to-edge state has changed.
+     */
+    private void notifySnapToEdgeChanged(boolean isSnappingToEdge) {
+        if (mPinnedStackListener != null) {
+            try {
+                mPinnedStackListener.onSnapToEdgeStateChanged(isSnappingToEdge);
+            } catch (RemoteException e) {
+                Slog.e(TAG_WM, "Error delivering snap-to-edge changed event.", e);
+            }
+        }
+    }
+
+    /**
+     * Notifies listeners that the PIP actions have changed.
+     */
+    private void notifyActionsChanged(List<RemoteAction> actions) {
+        if (mPinnedStackListener != null) {
+            try {
+                mPinnedStackListener.onActionsChanged(new ParceledListSlice(actions));
+            } catch (RemoteException e) {
+                Slog.e(TAG_WM, "Error delivering actions changed event.", e);
             }
         }
     }
@@ -355,5 +413,16 @@ class PinnedStackController {
         pw.println(prefix + "  mIsImeShowing=" + mIsImeShowing);
         pw.println(prefix + "  mInInteractiveMode=" + mInInteractiveMode);
         pw.println(prefix + "  mIsMinimized=" + mIsMinimized);
+        if (mActions.isEmpty()) {
+            pw.println(prefix + "  mActions=[]");
+        } else {
+            pw.println(prefix + "  mActions=[");
+            for (int i = 0; i < mActions.size(); i++) {
+                RemoteAction action = mActions.get(i);
+                pw.print(prefix + "    Action[" + i + "]: ");
+                action.dump("", pw);
+            }
+            pw.println(prefix + "  ]");
+        }
     }
 }

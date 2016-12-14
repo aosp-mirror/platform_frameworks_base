@@ -26,6 +26,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
+import android.app.RemoteAction;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -3405,22 +3406,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void setPictureInPictureAspectRatio(float aspectRatio) {
-        synchronized (mWindowMap) {
-            if (!mSupportsPictureInPicture) {
-                return;
-            }
-
-            final TaskStack stack = mStackIdToStack.get(PINNED_STACK_ID);
-            if (stack == null) {
-                return;
-            }
-
-            animateResizePinnedStack(getPictureInPictureBounds(
-                    stack.getDisplayContent().getDisplayId(), aspectRatio), -1);
-        }
-    }
-
     public Rect getPictureInPictureBounds(int displayId, float aspectRatio) {
         synchronized (mWindowMap) {
             if (!mSupportsPictureInPicture) {
@@ -3443,6 +3428,36 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             return displayContent.getPinnedStackController().getAspectRatioBounds(stackBounds,
                     aspectRatio);
+        }
+    }
+
+    /**
+     * Sets the current picture-in-picture aspect ratio.
+     */
+    public void setPictureInPictureAspectRatio(float aspectRatio) {
+        synchronized (mWindowMap) {
+            final TaskStack stack = mStackIdToStack.get(PINNED_STACK_ID);
+            if (!mSupportsPictureInPicture || stack == null) {
+                return;
+            }
+
+            final int displayId = stack.getDisplayContent().getDisplayId();
+            final Rect toBounds = getPictureInPictureBounds(displayId, aspectRatio);
+            animateResizePinnedStack(toBounds, -1 /* duration */);
+        }
+    }
+
+    /**
+     * Sets the current picture-in-picture actions.
+     */
+    public void setPictureInPictureActions(List<RemoteAction> actions) {
+        synchronized (mWindowMap) {
+            final TaskStack stack = mStackIdToStack.get(PINNED_STACK_ID);
+            if (!mSupportsPictureInPicture || stack == null) {
+                return;
+            }
+
+            stack.getDisplayContent().getPinnedStackController().setActions(actions);
         }
     }
 

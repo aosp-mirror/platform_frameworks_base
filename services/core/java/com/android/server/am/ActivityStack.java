@@ -1895,7 +1895,7 @@ final class ActivityStack extends ConfigurationContainer {
             // since it will affect the focused stack's visibility and occlude
             // starting activities
             mService.enterPictureInPictureModeLocked(r, r.getDisplayId(),
-                    r.pictureInPictureAspectRatio, false /* moveHomeStackToFront */,
+                    r.pictureInPictureArgs, false /* moveHomeStackToFront */,
                     "ensureActivitiesVisibleLocked");
             return true;
         }
