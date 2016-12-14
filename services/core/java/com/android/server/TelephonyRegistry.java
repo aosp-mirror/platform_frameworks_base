@@ -59,7 +59,6 @@ import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.IPhoneStateListener;
 import com.android.internal.telephony.PhoneConstantConversions;
 import com.android.internal.telephony.PhoneConstants;
-import com.android.internal.telephony.ServiceStateTracker;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.server.am.BatteryStatsService;
 
@@ -171,7 +170,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private int[] mDataConnectionNetworkType;
 
-    private int mOtaspMode = ServiceStateTracker.OTASP_UNKNOWN;
+    private int mOtaspMode = TelephonyManager.OTASP_UNKNOWN;
 
     private ArrayList<List<CellInfo>> mCellInfo = null;
 
