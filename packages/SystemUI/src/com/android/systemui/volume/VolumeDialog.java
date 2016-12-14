@@ -46,6 +46,7 @@ import android.transition.Transition;
 import android.transition.TransitionManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -109,7 +110,7 @@ public class VolumeDialog implements TunerService.Tunable {
     private ViewGroup mDialogContentView;
     private ImageButton mExpandButton;
     private final List<VolumeRow> mRows = new ArrayList<>();
-    private SpTexts mSpTexts;
+    private ConfigurableTexts mConfigurableTexts;
     private final SparseBooleanArray mDynamic = new SparseBooleanArray();
     private final KeyguardManager mKeyguard;
     private final AudioManager mAudioManager;
@@ -128,7 +129,6 @@ public class VolumeDialog implements TunerService.Tunable {
     private boolean mExpanded;
 
     private int mActiveStream;
-    private boolean mShowHeaders = VolumePrefs.DEFAULT_SHOW_HEADERS;
     private boolean mAutomute = VolumePrefs.DEFAULT_ENABLE_AUTOMUTE;
     private boolean mSilentMode = VolumePrefs.DEFAULT_ENABLE_SILENT_MODE;
     private State mState;
@@ -173,7 +173,7 @@ public class VolumeDialog implements TunerService.Tunable {
     private void initDialog() {
         mDialog = new CustomDialog(mContext);
 
-        mSpTexts = new SpTexts(mContext);
+        mConfigurableTexts = new ConfigurableTexts(mContext);
         mHovering = false;
         mShowing = false;
         mWindow = mDialog.getWindow();
@@ -294,12 +294,6 @@ public class VolumeDialog implements TunerService.Tunable {
         mHandler.obtainMessage(H.SET_STREAM_IMPORTANT, stream, important ? 1 : 0).sendToTarget();
     }
 
-    public void setShowHeaders(boolean showHeaders) {
-        if (showHeaders == mShowHeaders) return;
-        mShowHeaders = showHeaders;
-        mHandler.sendEmptyMessage(H.RECHECK_ALL);
-    }
-
     public void setAutomute(boolean automute) {
         if (mAutomute == automute) return;
         mAutomute = automute;
@@ -357,7 +351,6 @@ public class VolumeDialog implements TunerService.Tunable {
         writer.println(mExpandButtonAnimationRunning);
         writer.print("  mActiveStream: "); writer.println(mActiveStream);
         writer.print("  mDynamic: "); writer.println(mDynamic);
-        writer.print("  mShowHeaders: "); writer.println(mShowHeaders);
         writer.print("  mAutomute: "); writer.println(mAutomute);
         writer.print("  mSilentMode: "); writer.println(mSilentMode);
         writer.print("  mCollapseTime: "); writer.println(mCollapseTime);
@@ -385,11 +378,9 @@ public class VolumeDialog implements TunerService.Tunable {
         row.view.setTag(row);
         row.header = (TextView) row.view.findViewById(R.id.volume_row_header);
         row.header.setId(20 * row.stream);
-        mSpTexts.add(row.header);
         row.slider = (SeekBar) row.view.findViewById(R.id.volume_row_slider);
         row.slider.setOnSeekBarChangeListener(new VolumeSeekBarChangeListener(row));
         row.anim = null;
-        row.cachedShowHeaders = VolumePrefs.DEFAULT_SHOW_HEADERS;
 
         // forward events above the slider into the slider
         row.view.setOnTouchListener(new OnTouchListener() {
@@ -617,8 +608,8 @@ public class VolumeDialog implements TunerService.Tunable {
             final boolean isActive = row == activeRow;
             final boolean shouldBeVisible = shouldBeVisibleH(row, isActive);
             Util.setVisOrGone(row.view, shouldBeVisible);
+            Util.setVisOrGone(row.header, shouldBeVisible);
             if (row.view.isShown()) {
-                updateVolumeRowHeaderVisibleH(row);
                 updateVolumeRowSliderTintH(row, isActive);
             }
         }
@@ -731,11 +722,9 @@ public class VolumeDialog implements TunerService.Tunable {
             row.slider.setMax(max);
         }
 
-        // update header visible
-        updateVolumeRowHeaderVisibleH(row);
-
         // update header text
-        Util.setText(row.header, ss.name);
+        Util.setText(row.header, getStreamLabelH(ss));
+        mConfigurableTexts.add(row.header, ss.name);
 
         // update icon
         final boolean iconEnabled = (mAutomute || ss.muteSupported) && !zenMuted;
@@ -768,31 +757,31 @@ public class VolumeDialog implements TunerService.Tunable {
                 if (isRingVibrate) {
                     row.icon.setContentDescription(mContext.getString(
                             R.string.volume_stream_content_description_unmute,
-                            ss.name));
+                            getStreamLabelH(ss)));
                 } else {
                     if (mController.hasVibrator()) {
                         row.icon.setContentDescription(mContext.getString(
                                 R.string.volume_stream_content_description_vibrate,
-                                ss.name));
+                                getStreamLabelH(ss)));
                     } else {
                         row.icon.setContentDescription(mContext.getString(
                                 R.string.volume_stream_content_description_mute,
-                                ss.name));
+                                getStreamLabelH(ss)));
                     }
                 }
             } else {
                 if (ss.muted || mAutomute && ss.level == 0) {
                    row.icon.setContentDescription(mContext.getString(
                            R.string.volume_stream_content_description_unmute,
-                           ss.name));
+                           getStreamLabelH(ss)));
                 } else {
                     row.icon.setContentDescription(mContext.getString(
                             R.string.volume_stream_content_description_mute,
-                            ss.name));
+                            getStreamLabelH(ss)));
                 }
             }
         } else {
-            row.icon.setContentDescription(ss.name);
+            row.icon.setContentDescription(getStreamLabelH(ss));
         }
 
         // update slider
@@ -800,15 +789,6 @@ public class VolumeDialog implements TunerService.Tunable {
         final int vlevel = row.ss.muted && (!isRingStream && !zenMuted) ? 0
                 : row.ss.level;
         updateVolumeRowSliderH(row, enableSlider, vlevel);
-    }
-
-    private void updateVolumeRowHeaderVisibleH(VolumeRow row) {
-        final boolean dynamic = row.ss != null && row.ss.dynamic;
-        final boolean showHeaders = mExpanded && (mShowHeaders || dynamic);
-        if (row.cachedShowHeaders != showHeaders) {
-            row.cachedShowHeaders = showHeaders;
-            Util.setVisOrGone(row.header, showHeaders);
-        }
     }
 
     private void updateVolumeRowSliderTintH(VolumeRow row, boolean isActive) {
@@ -920,6 +900,18 @@ public class VolumeDialog implements TunerService.Tunable {
         rescheduleTimeoutH();
     }
 
+    private String getStreamLabelH(StreamState ss) {
+        if (ss.remoteLabel != null) {
+            return ss.remoteLabel;
+        }
+        try {
+            return mContext.getString(ss.name);
+        } catch (Resources.NotFoundException e) {
+            Slog.e(TAG, "Can't find translation for stream " + ss);
+            return "";
+        }
+    }
+
     private AutoTransition getTransistion() {
         AutoTransition transition = new AutoTransition();
         transition.setDuration(mExpandButtonAnimationDuration);
@@ -995,7 +987,7 @@ public class VolumeDialog implements TunerService.Tunable {
                 mDensity = density;
             }
             updateWindowWidthH();
-            mSpTexts.update();
+            mConfigurableTexts.update();
             mZenFooter.onConfigurationChanged();
         }
 
@@ -1125,7 +1117,7 @@ public class VolumeDialog implements TunerService.Tunable {
                 if (mShowing) {
                     event.getText().add(mContext.getString(
                             R.string.volume_dialog_accessibility_shown_message,
-                            getActiveRow().ss.name));
+                            getStreamLabelH(getActiveRow().ss)));
                     return true;
                 }
             }
@@ -1253,7 +1245,6 @@ public class VolumeDialog implements TunerService.Tunable {
         private int cachedIconRes;
         private ColorStateList cachedSliderTint;
         private int iconState;  // from Events
-        private boolean cachedShowHeaders = VolumePrefs.DEFAULT_SHOW_HEADERS;
         private ObjectAnimator anim;  // slider progress animation for non-touch-related updates
         private int animTargetProgress;
         private int lastAudibleLevel = 1;

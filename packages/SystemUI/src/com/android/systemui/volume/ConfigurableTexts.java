@@ -25,19 +25,23 @@ import android.view.View.OnAttachStateChangeListener;
 import android.widget.TextView;
 
 /**
- * Capture initial sp values for registered textviews, and update properly when configuration
- * changes.
+ * Class for updating textviews on configuration change.
  */
-public class SpTexts {
+public class ConfigurableTexts {
 
     private final Context mContext;
     private final ArrayMap<TextView, Integer> mTexts = new ArrayMap<>();
+    private final ArrayMap<TextView, Integer> mTextLabels = new ArrayMap<>();
 
-    public SpTexts(Context context) {
+    public ConfigurableTexts(Context context) {
         mContext = context;
     }
 
     public int add(final TextView text) {
+        return add(text, -1);
+    }
+
+    public int add(final TextView text, final int labelResId) {
         if (text == null) return 0;
         final Resources res = mContext.getResources();
         final float fontScale = res.getConfiguration().fontScale;
@@ -55,6 +59,7 @@ public class SpTexts {
                setTextSizeH(text, sp);
             }
         });
+        mTextLabels.put(text, labelResId);
         return sp;
     }
 
@@ -67,11 +72,24 @@ public class SpTexts {
         text.setTextSize(TypedValue.COMPLEX_UNIT_SP, sp);
     }
 
+    private void setTextLabelH(TextView text, int labelResId) {
+        try {
+            if (labelResId >= 0) {
+                Util.setText(text, mContext.getString(labelResId));
+            }
+        } catch (Resources.NotFoundException e) {
+            // oh well.
+        }
+    }
+
     private final Runnable mUpdateAll = new Runnable() {
         @Override
         public void run() {
             for (int i = 0; i < mTexts.size(); i++) {
                 setTextSizeH(mTexts.keyAt(i), mTexts.valueAt(i));
+            }
+            for (int i = 0; i < mTextLabels.size(); i++) {
+                setTextLabelH(mTextLabels.keyAt(i), mTextLabels.valueAt(i));
             }
         }
     };

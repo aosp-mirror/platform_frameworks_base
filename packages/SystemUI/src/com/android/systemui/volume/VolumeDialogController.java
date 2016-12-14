@@ -16,6 +16,7 @@
 
 package com.android.systemui.volume;
 
+import android.annotation.IntegerRes;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -41,6 +42,7 @@ import android.os.RemoteException;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.Condition;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -67,19 +69,20 @@ public class VolumeDialogController {
     private static final int DYNAMIC_STREAM_START_INDEX = 100;
     private static final int VIBRATE_HINT_DURATION = 50;
 
-    private static final int[] STREAMS = {
-        AudioSystem.STREAM_ALARM,
-        AudioSystem.STREAM_BLUETOOTH_SCO,
-        AudioSystem.STREAM_DTMF,
-        AudioSystem.STREAM_MUSIC,
-        AudioSystem.STREAM_NOTIFICATION,
-        AudioSystem.STREAM_RING,
-        AudioSystem.STREAM_SYSTEM,
-        AudioSystem.STREAM_SYSTEM_ENFORCED,
-        AudioSystem.STREAM_TTS,
-        AudioSystem.STREAM_VOICE_CALL,
-        AudioSystem.STREAM_ACCESSIBILITY,
-    };
+    private static final ArrayMap<Integer, Integer> STREAMS = new ArrayMap<>();
+    static {
+        STREAMS.put(AudioSystem.STREAM_ALARM, R.string.stream_alarm);
+        STREAMS.put(AudioSystem.STREAM_BLUETOOTH_SCO, R.string.stream_bluetooth_sco);
+        STREAMS.put(AudioSystem.STREAM_DTMF, R.string.stream_dtmf);
+        STREAMS.put(AudioSystem.STREAM_MUSIC, R.string.stream_music);
+        STREAMS.put(AudioSystem.STREAM_NOTIFICATION, R.string.stream_notification);
+        STREAMS.put(AudioSystem.STREAM_RING, R.string.stream_ring);
+        STREAMS.put(AudioSystem.STREAM_SYSTEM, R.string.stream_system);
+        STREAMS.put(AudioSystem.STREAM_SYSTEM_ENFORCED, R.string.stream_system_enforced);
+        STREAMS.put(AudioSystem.STREAM_TTS, R.string.stream_tts);
+        STREAMS.put(AudioSystem.STREAM_VOICE_CALL, R.string.stream_voice_call);
+        STREAMS.put(AudioSystem.STREAM_ACCESSIBILITY, R.string.stream_accessibility);
+    }
 
     private final HandlerThread mWorkerThread;
     private final W mWorker;
@@ -92,7 +95,6 @@ public class VolumeDialogController {
     private final MediaSessions mMediaSessions;
     private final C mCallbacks = new C();
     private final State mState = new State();
-    private final String[] mStreamTitles;
     private final MediaSessionsCallbacks mMediaSessionsCallbacksW = new MediaSessionsCallbacks();
     private final Vibrator mVibrator;
     private final boolean mHasVibrator;
@@ -120,26 +122,6 @@ public class VolumeDialogController {
         mObserver = new SettingObserver(mWorker);
         mObserver.init();
         mReceiver.init();
-        final String[] titles =
-                mContext.getResources().getStringArray(R.array.volume_stream_titles);
-        if (STREAMS.length == titles.length) {
-            mStreamTitles = titles;
-        } else if (STREAMS.length > titles.length) {
-            Log.e(TAG, String.format("Missing stream titles (found %d, expected %d): "
-                    + " invalid resources for volume_stream_titles",
-                    titles.length, STREAMS.length));
-            mStreamTitles = new String[STREAMS.length];
-            System.arraycopy(titles, 0, mStreamTitles, 0, titles.length);
-            for (int i = titles.length ; i < STREAMS.length ; i++) {
-                mStreamTitles[i] = "";
-            }
-        } else { // STREAMS.length < titles.length
-            Log.e(TAG, String.format("Too many stream titles (found %d, expected %d): "
-                    + " invalid resources for volume_stream_titles",
-                    titles.length, STREAMS.length));
-            mStreamTitles = new String[STREAMS.length];
-            System.arraycopy(titles, 0, mStreamTitles, 0, STREAMS.length);
-        }
         mVibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
         mHasVibrator = mVibrator != null && mVibrator.hasVibrator();
     }
@@ -385,14 +367,14 @@ public class VolumeDialogController {
     }
 
     private void onGetStateW() {
-        for (int stream : STREAMS) {
+        for (int stream : STREAMS.keySet()) {
             updateStreamLevelW(stream, getAudioManagerStreamVolume(stream));
             streamStateW(stream).levelMin = getAudioManagerStreamMinVolume(stream);
             streamStateW(stream).levelMax = getAudioManagerStreamMaxVolume(stream);
             updateStreamMuteW(stream, mAudio.isStreamMute(stream));
             final StreamState ss = streamStateW(stream);
             ss.muteSupported = mAudio.isStreamAffectedByMute(stream);
-            ss.name = mStreamTitles[stream];
+            ss.name = STREAMS.get(stream);
             checkRoutedToBluetoothW(stream);
         }
         updateRingerModeExternalW(mAudio.getRingerMode());
@@ -912,8 +894,9 @@ public class VolumeDialogController {
                 ss.level = pi.getCurrentVolume();
                 changed = true;
             }
-            if (!Objects.equals(ss.name, name)) {
-                ss.name = name;
+            if (!Objects.equals(ss.remoteLabel, name)) {
+                ss.name = -1;
+                ss.remoteLabel = name;
                 changed = true;
             }
             if (changed) {
@@ -975,7 +958,8 @@ public class VolumeDialogController {
         public int levelMax;
         public boolean muted;
         public boolean muteSupported;
-        public String name;
+        public @IntegerRes int name;
+        public String remoteLabel;
         public boolean routedToBluetooth;
 
         public StreamState copy() {
@@ -987,6 +971,7 @@ public class VolumeDialogController {
             rt.muted = muted;
             rt.muteSupported = muteSupported;
             rt.name = name;
+            rt.remoteLabel = remoteLabel;
             rt.routedToBluetooth = routedToBluetooth;
             return rt;
         }
