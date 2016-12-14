@@ -712,6 +712,9 @@ static jint Bitmap_rowBytes(JNIEnv* env, jobject, jlong bitmapHandle) {
 
 static jint Bitmap_config(JNIEnv* env, jobject, jlong bitmapHandle) {
     LocalScopedBitmap bitmap(bitmapHandle);
+    if (bitmap->bitmap().isHardware()) {
+        return GraphicsJNI::hardwareLegacyBitmapConfig();
+    }
     return GraphicsJNI::colorTypeToLegacyBitmapConfig(bitmap->info().colorType());
 }
 

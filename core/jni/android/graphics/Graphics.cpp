@@ -366,6 +366,10 @@ bool GraphicsJNI::isHardwareConfig(JNIEnv* env, jobject jconfig) {
     return c == kHardware_LegacyBitmapConfig;
 }
 
+jint GraphicsJNI::hardwareLegacyBitmapConfig() {
+    return kHardware_LegacyBitmapConfig;
+}
+
 android::Canvas* GraphicsJNI::getNativeCanvas(JNIEnv* env, jobject canvas) {
     SkASSERT(env);
     SkASSERT(canvas);
