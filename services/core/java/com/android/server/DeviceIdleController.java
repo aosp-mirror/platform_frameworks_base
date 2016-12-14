@@ -172,7 +172,7 @@ public class DeviceIdleController extends SystemService
     /**
      * Wakelock held when going idle so hardware (especially NetworkPolicyManager) can shut down.
      */
-    private PowerManager.WakeLock mGoingIdleWakelock;
+    private PowerManager.WakeLock mGoingIdleWakeLock;
 
     public final AtomicFile mConfigFile;
 
@@ -710,7 +710,7 @@ public class DeviceIdleController extends SystemService
                     handleWriteConfigFile();
                 } break;
                 case MSG_REPORT_IDLE_ON: {
-                    // mGoingIdleWakelock is held at this point
+                    // mGoingIdleWakeLock is held at this point
                     EventLogTags.writeDeviceIdleOnStart();
                     mLocalPowerManager.setDeviceIdleMode(true);
                     try {
@@ -720,7 +720,7 @@ public class DeviceIdleController extends SystemService
                     }
                     getContext().sendBroadcastAsUser(mIdleIntent, UserHandle.ALL);
                     EventLogTags.writeDeviceIdleOnComplete();
-                    mGoingIdleWakelock.release();
+                    mGoingIdleWakeLock.release();
                 } break;
                 case MSG_REPORT_IDLE_OFF: {
                     EventLogTags.writeDeviceIdleOffStart("unknown");
@@ -1411,7 +1411,7 @@ public class DeviceIdleController extends SystemService
                 mNextIdleDelay = Math.min(mNextIdleDelay, mConstants.MAX_IDLE_TIMEOUT);
                 mState = STATE_IDLE;
                 EventLogTags.writeDeviceIdle(mState, "step");
-                mGoingIdleWakelock.acquire();
+                mGoingIdleWakeLock.acquire();
                 mHandler.sendEmptyMessage(MSG_REPORT_IDLE_ON);
                 break;
             case STATE_IDLE:
