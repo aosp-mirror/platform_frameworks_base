@@ -16,8 +16,10 @@
 
 package android.app.usage;
 
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.ArrayMap;
 
 /**
  * Contains usage statistics for an app package for a specific
@@ -64,6 +66,11 @@ public final class UsageStats implements Parcelable {
     /**
      * {@hide}
      */
+    public ArrayMap<String, ArrayMap<String, Integer>> mChooserCounts;
+
+    /**
+     * {@hide}
+     */
     public UsageStats() {
     }
 
@@ -75,6 +82,7 @@ public final class UsageStats implements Parcelable {
         mTotalTimeInForeground = stats.mTotalTimeInForeground;
         mLaunchCount = stats.mLaunchCount;
         mLastEvent = stats.mLastEvent;
+        mChooserCounts = stats.mChooserCounts;
     }
 
     public String getPackageName() {
@@ -142,6 +150,26 @@ public final class UsageStats implements Parcelable {
         mEndTimeStamp = Math.max(mEndTimeStamp, right.mEndTimeStamp);
         mTotalTimeInForeground += right.mTotalTimeInForeground;
         mLaunchCount += right.mLaunchCount;
+        if (mChooserCounts == null) {
+            mChooserCounts = right.mChooserCounts;
+        } else if (right.mChooserCounts != null) {
+            final int chooserCountsSize = right.mChooserCounts.size();
+            for (int i = 0; i < chooserCountsSize; i++) {
+                String action = right.mChooserCounts.keyAt(i);
+                ArrayMap<String, Integer> counts = right.mChooserCounts.valueAt(i);
+                if (!mChooserCounts.containsKey(action) || mChooserCounts.get(action) == null) {
+                    mChooserCounts.put(action, counts);
+                    continue;
+                }
+                final int annotationSize = counts.size();
+                for (int j = 0; j < annotationSize; j++) {
+                    String key = counts.keyAt(j);
+                    int rightValue = counts.valueAt(j);
+                    int leftValue = mChooserCounts.get(action).getOrDefault(key, 0);
+                    mChooserCounts.get(action).put(key, leftValue + rightValue);
+                }
+            }
+        }
     }
 
     @Override
@@ -158,6 +186,21 @@ public final class UsageStats implements Parcelable {
         dest.writeLong(mTotalTimeInForeground);
         dest.writeInt(mLaunchCount);
         dest.writeInt(mLastEvent);
+        Bundle allCounts = new Bundle();
+        if (mChooserCounts != null) {
+            final int chooserCountSize = mChooserCounts.size();
+            for (int i = 0; i < chooserCountSize; i++) {
+                String action = mChooserCounts.keyAt(i);
+                ArrayMap<String, Integer> counts = mChooserCounts.valueAt(i);
+                Bundle currentCounts = new Bundle();
+                final int annotationSize = counts.size();
+                for (int j = 0; j < annotationSize; j++) {
+                    currentCounts.putInt(counts.keyAt(j), counts.valueAt(j));
+                }
+                allCounts.putBundle(action, currentCounts);
+            }
+        }
+        dest.writeBundle(allCounts);
     }
 
     public static final Creator<UsageStats> CREATOR = new Creator<UsageStats>() {
@@ -171,6 +214,25 @@ public final class UsageStats implements Parcelable {
             stats.mTotalTimeInForeground = in.readLong();
             stats.mLaunchCount = in.readInt();
             stats.mLastEvent = in.readInt();
+            Bundle allCounts = in.readBundle();
+            if (allCounts != null) {
+                stats.mChooserCounts = new ArrayMap<>();
+                for (String action : allCounts.keySet()) {
+                    if (!stats.mChooserCounts.containsKey(action)) {
+                        ArrayMap<String, Integer> newCounts = new ArrayMap<>();
+                        stats.mChooserCounts.put(action, newCounts);
+                    }
+                    Bundle currentCounts = allCounts.getBundle(action);
+                    if (currentCounts != null) {
+                        for (String key : currentCounts.keySet()) {
+                            int value = currentCounts.getInt(key);
+                            if (value > 0) {
+                                stats.mChooserCounts.get(action).put(key, value);
+                            }
+                        }
+                    }
+                }
+            }
             return stats;
         }
 

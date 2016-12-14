@@ -86,6 +86,12 @@ public final class UsageEvents implements Parcelable {
         public static final int SHORTCUT_INVOCATION = 8;
 
         /**
+         * An event type denoting that a package was selected by the user for ChooserActivity.
+         * @hide
+         */
+        public static final int CHOOSER_ACTION = 9;
+
+        /**
          * {@hide}
          */
         public String mPackage;
@@ -117,6 +123,27 @@ public final class UsageEvents implements Parcelable {
          * {@hide}
          */
         public String mShortcutId;
+
+        /**
+         * Action type passed to ChooserActivity
+         * Only present for {@link #CHOOSER_ACTION} event types.
+         * {@hide}
+         */
+        public String mAction;
+
+        /**
+         * Content type passed to ChooserActivity.
+         * Only present for {@link #CHOOSER_ACTION} event types.
+         * {@hide}
+         */
+        public String mContentType;
+
+        /**
+         * Content annotations passed to ChooserActivity.
+         * Only present for {@link #CHOOSER_ACTION} event types.
+         * {@hide}
+         */
+        public String[] mContentAnnotations;
 
         /**
          * The package name of the source of this event.
@@ -307,6 +334,11 @@ public final class UsageEvents implements Parcelable {
             case Event.SHORTCUT_INVOCATION:
                 p.writeString(event.mShortcutId);
                 break;
+            case Event.CHOOSER_ACTION:
+                p.writeString(event.mAction);
+                p.writeString(event.mContentType);
+                p.writeStringArray(event.mContentAnnotations);
+                break;
         }
     }
 
@@ -333,6 +365,9 @@ public final class UsageEvents implements Parcelable {
         // Fill out the event-dependant fields.
         eventOut.mConfiguration = null;
         eventOut.mShortcutId = null;
+        eventOut.mAction = null;
+        eventOut.mContentType = null;
+        eventOut.mContentAnnotations = null;
 
         switch (eventOut.mEventType) {
             case Event.CONFIGURATION_CHANGE:
@@ -341,6 +376,11 @@ public final class UsageEvents implements Parcelable {
                 break;
             case Event.SHORTCUT_INVOCATION:
                 eventOut.mShortcutId = p.readString();
+                break;
+            case Event.CHOOSER_ACTION:
+                eventOut.mAction = p.readString();
+                eventOut.mContentType = p.readString();
+                eventOut.mContentAnnotations = p.createStringArray();
                 break;
         }
     }
