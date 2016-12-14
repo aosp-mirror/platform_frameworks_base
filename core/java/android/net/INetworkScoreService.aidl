@@ -17,6 +17,7 @@
 package android.net;
 
 import android.net.INetworkScoreCache;
+import android.net.NetworkKey;
 import android.net.RecommendationRequest;
 import android.net.RecommendationResult;
 import android.net.ScoredNetwork;
@@ -87,4 +88,16 @@ interface INetworkScoreService
      */
     RecommendationResult requestRecommendation(in RecommendationRequest request);
 
+    /**
+     * Request scoring for networks.
+     *
+     * Implementations should delegate to the registered network recommendation provider or
+     * fulfill the request locally if possible.
+     *
+     * @param networks an array of {@link NetworkKey}s to score
+     * @return true if the request was delegated or fulfilled locally, false otherwise
+     * @throws SecurityException if the caller is not the system
+     * @hide
+     */
+    boolean requestScores(in NetworkKey[] networks);
 }

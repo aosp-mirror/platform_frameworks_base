@@ -27,6 +27,7 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.INetworkScoreCache;
 import android.net.INetworkScoreService;
+import android.net.NetworkKey;
 import android.net.NetworkScoreManager;
 import android.net.NetworkScorerAppManager;
 import android.net.NetworkScorerAppManager.NetworkScorerAppData;
@@ -469,6 +470,12 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
             selectedConfig = request.getCurrentSelectedConfig();
         }
         return new RecommendationResult(selectedConfig);
+    }
+
+    @Override
+    public boolean requestScores(NetworkKey[] networks) {
+        // TODO(jjoslin): 12/13/16 - Implement
+        return false;
     }
 
     @Override

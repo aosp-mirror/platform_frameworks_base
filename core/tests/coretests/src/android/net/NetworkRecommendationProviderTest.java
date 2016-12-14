@@ -28,7 +28,9 @@ public class NetworkRecommendationProviderTest extends InstrumentationTestCase {
     private NetworkRecProvider mRecProvider;
     private Handler mHandler;
     private INetworkRecommendationProvider mStub;
-    private CountDownLatch mCountDownLatch;
+    private CountDownLatch mRecRequestLatch;
+    private CountDownLatch mScoreRequestLatch;
+    private NetworkKey[] mTestNetworkKeys;
 
     @Override
     public void setUp() throws Exception {
@@ -45,20 +47,24 @@ public class NetworkRecommendationProviderTest extends InstrumentationTestCase {
 
         HandlerThread thread = new HandlerThread("NetworkRecommendationProviderTest");
         thread.start();
-        mCountDownLatch = new CountDownLatch(1);
+        mRecRequestLatch = new CountDownLatch(1);
+        mScoreRequestLatch = new CountDownLatch(1);
         mHandler = new Handler(thread.getLooper());
-        mRecProvider = new NetworkRecProvider(mHandler, mCountDownLatch);
+        mRecProvider = new NetworkRecProvider(mHandler, mRecRequestLatch, mScoreRequestLatch);
         mStub = INetworkRecommendationProvider.Stub.asInterface(mRecProvider.getBinder());
+        mTestNetworkKeys = new NetworkKey[2];
+        mTestNetworkKeys[0] = new NetworkKey(new WifiKey("\"ssid_01\"", "00:00:00:00:00:11"));
+        mTestNetworkKeys[1] = new NetworkKey(new WifiKey("\"ssid_02\"", "00:00:00:00:00:22"));
     }
 
     @MediumTest
-    public void testRequestReceived() throws Exception {
+    public void testRecommendationRequestReceived() throws Exception {
         final RecommendationRequest request = new RecommendationRequest.Builder().build();
         final int sequence = 100;
         mStub.requestRecommendation(request, mMockRemoteCallback, sequence);
 
         // wait for onRequestRecommendation() to be called in our impl below.
-        mCountDownLatch.await(200, TimeUnit.MILLISECONDS);
+        mRecRequestLatch.await(200, TimeUnit.MILLISECONDS);
         NetworkRecommendationProvider.ResultCallback expectedResultCallback =
                 new NetworkRecommendationProvider.ResultCallback(mMockRemoteCallback, sequence);
         assertEquals(request, mRecProvider.mCapturedRequest);
@@ -98,14 +104,44 @@ public class NetworkRecommendationProviderTest extends InstrumentationTestCase {
         }
     }
 
+    @MediumTest
+    public void testScoreRequestReceived() throws Exception {
+        mStub.requestScores(mTestNetworkKeys);
+
+        // wait for onRequestScores() to be called in our impl below.
+        mScoreRequestLatch.await(200, TimeUnit.MILLISECONDS);
+
+        assertSame(mTestNetworkKeys, mRecProvider.mCapturedNetworks);
+    }
+
+    @MediumTest
+    public void testScoreRequest_nullInput() throws Exception {
+        mStub.requestScores(null);
+
+        // onRequestScores() should never be called
+        assertFalse(mScoreRequestLatch.await(200, TimeUnit.MILLISECONDS));
+    }
+
+    @MediumTest
+    public void testScoreRequest_emptyInput() throws Exception {
+        mStub.requestScores(new NetworkKey[0]);
+
+        // onRequestScores() should never be called
+        assertFalse(mScoreRequestLatch.await(200, TimeUnit.MILLISECONDS));
+    }
+
     private static class NetworkRecProvider extends NetworkRecommendationProvider {
-        private final CountDownLatch mCountDownLatch;
+        private final CountDownLatch mRecRequestLatch;
+        private final CountDownLatch mScoreRequestLatch;
         RecommendationRequest mCapturedRequest;
         ResultCallback mCapturedCallback;
+        NetworkKey[] mCapturedNetworks;
 
-        NetworkRecProvider(Handler handler, CountDownLatch countDownLatch) {
+        NetworkRecProvider(Handler handler, CountDownLatch recRequestLatch,
+            CountDownLatch networkRequestLatch) {
             super(handler);
-            mCountDownLatch = countDownLatch;
+            mRecRequestLatch = recRequestLatch;
+            mScoreRequestLatch = networkRequestLatch;
         }
 
         @Override
@@ -113,7 +149,13 @@ public class NetworkRecommendationProviderTest extends InstrumentationTestCase {
                 ResultCallback callback) {
             mCapturedRequest = request;
             mCapturedCallback = callback;
-            mCountDownLatch.countDown();
+            mRecRequestLatch.countDown();
+        }
+
+        @Override
+        public void onRequestScores(NetworkKey[] networks) {
+            mCapturedNetworks = networks;
+            mScoreRequestLatch.countDown();
         }
     }
 }
