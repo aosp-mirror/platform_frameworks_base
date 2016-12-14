@@ -57,7 +57,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
 import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.IPhoneStateListener;
-import com.android.internal.telephony.DefaultPhoneNotifier;
+import com.android.internal.telephony.PhoneConstantConversions;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.ServiceStateTracker;
 import com.android.internal.telephony.TelephonyIntents;
@@ -1497,7 +1497,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
         Intent intent = new Intent(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         intent.putExtra(PhoneConstants.STATE_KEY,
-                DefaultPhoneNotifier.convertCallState(state).toString());
+                PhoneConstantConversions.convertCallState(state).toString());
         if (!TextUtils.isEmpty(incomingNumber)) {
             intent.putExtra(TelephonyManager.EXTRA_INCOMING_NUMBER, incomingNumber);
         }
@@ -1531,7 +1531,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         // required info.
         Intent intent = new Intent(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
         intent.putExtra(PhoneConstants.STATE_KEY,
-                DefaultPhoneNotifier.convertDataState(state).toString());
+                PhoneConstantConversions.convertDataState(state).toString());
         if (!isDataConnectivityPossible) {
             intent.putExtra(PhoneConstants.NETWORK_UNAVAILABLE_KEY, true);
         }
