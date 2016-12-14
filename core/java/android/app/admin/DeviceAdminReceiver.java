@@ -276,6 +276,15 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             = "android.app.action.SECURITY_LOGS_AVAILABLE";
 
     /**
+     * Broadcast action: notify that a new batch of network logs is ready to be collected.
+     * @see DeviceAdminReceiver#onNetworkLogsAvailable
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_NETWORK_LOGS_AVAILABLE
+            = "android.app.action.NETWORK_LOGS_AVAILABLE";
+
+    /**
      * A string containing the SHA-256 hash of the bugreport file.
      *
      * @see #ACTION_BUGREPORT_SHARE
@@ -635,6 +644,22 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     }
 
     /**
+     * Called when a new batch of network logs can be retrieved. This callback method will only ever
+     * be called when network logging is enabled. The logs can only be retrieved while network
+     * logging is enabled.
+     *
+     * <p>This callback is only applicable to device owners.
+     *
+     * @param context The running context as per {@link #onReceive}.
+     * @param intent The received intent as per {@link #onReceive}.
+     * @see DevicePolicyManager#retrieveNetworkLogs(ComponentName)
+     *
+     * @hide
+     */
+    public void onNetworkLogsAvailable(Context context, Intent intent) {
+    }
+
+    /**
      * Intercept standard device administrator broadcasts.  Implementations
      * should not override this method; it is better to implement the
      * convenience callbacks for each action.
@@ -688,6 +713,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             onBugreportFailed(context, intent, failureCode);
         } else if (ACTION_SECURITY_LOGS_AVAILABLE.equals(action)) {
             onSecurityLogsAvailable(context, intent);
+        } else if (ACTION_NETWORK_LOGS_AVAILABLE.equals(action)) {
+            onNetworkLogsAvailable(context, intent);
         }
     }
 }

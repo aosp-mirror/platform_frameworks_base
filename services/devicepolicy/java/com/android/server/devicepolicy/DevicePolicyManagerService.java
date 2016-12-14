@@ -50,6 +50,7 @@ import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.IDevicePolicyManager;
+import android.app.admin.NetworkEvent;
 import android.app.admin.SecurityLog;
 import android.app.admin.SecurityLog.SecurityEvent;
 import android.app.admin.SystemUpdatePolicy;
@@ -9480,5 +9481,24 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private synchronized boolean isNetworkLoggingEnabledInternal() {
         ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
         return (deviceOwner != null) && deviceOwner.isNetworkLoggingEnabled;
+    }
+
+    /*
+     * A maximum of 1200 events are returned, and the total marshalled size is in the order of
+     * 100kB, so returning a List instead of ParceledListSlice is acceptable.
+     * Ideally this would be done with ParceledList, however it only supports homogeneous types.
+     */
+    @Override
+    public synchronized List<NetworkEvent> retrieveNetworkLogs(ComponentName admin) {
+        if (!mHasFeature) {
+            return null;
+        }
+        Preconditions.checkNotNull(admin);
+        ensureDeviceOwnerManagingSingleUser(admin);
+
+        if (mNetworkLogger == null) {
+            return null;
+        }
+        return isNetworkLoggingEnabledInternal() ? mNetworkLogger.retrieveLogs() : null;
     }
 }

@@ -25,6 +25,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.UserIdInt;
 import android.app.Activity;
+import android.app.admin.NetworkEvent;
 import android.app.admin.SecurityLog.SecurityEvent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -6622,6 +6623,7 @@ public class DevicePolicyManager {
      * @throws {@link SecurityException} if {@code admin} is not a device owner.
      * @throws {@link RemoteException} if network logging could not be enabled or disabled due to
      *         the logging service not being available
+     * @see #retrieveNetworkLogs
      *
      * @hide
      */
@@ -6647,6 +6649,33 @@ public class DevicePolicyManager {
         throwIfParentInstance("isNetworkLoggingEnabled");
         try {
             return mService.isNetworkLoggingEnabled(admin);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Called by device owner to retrieve a new batch of network logging events.
+     *
+     * <p> {@link NetworkEvent} can be one of {@link DnsEvent} or {@link ConnectEvent}.
+     *
+     * <p> The list of network events is sorted chronologically, and contains at most 1200 events.
+     *
+     * <p> Access to the logs is rate limited and this method will only return a new batch of logs
+     * after the device device owner has been notified via
+     * {@link DeviceAdminReceiver#onNetworkLogsAvailable}.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @return A new batch of network logs which is a list of {@link NetworkEvent}. Returns
+     * {@code null} if there's no batch currently awaiting for retrieval or if logging is disabled.
+     * @throws {@link SecurityException} if {@code admin} is not a device owner.
+     *
+     * @hide
+     */
+    public List<NetworkEvent> retrieveNetworkLogs(@NonNull ComponentName admin) {
+        throwIfParentInstance("retrieveNetworkLogs");
+        try {
+            return mService.retrieveNetworkLogs(admin);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

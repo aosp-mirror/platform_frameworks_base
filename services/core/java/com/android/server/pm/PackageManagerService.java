@@ -21120,6 +21120,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 return mSettings.wasPackageEverLaunchedLPr(packageName, userId);
             }
         }
+
+        @Override
+        public String getNameForUid(int uid) {
+            return PackageManagerService.this.getNameForUid(uid);
+        }
     }
 
     @Override
