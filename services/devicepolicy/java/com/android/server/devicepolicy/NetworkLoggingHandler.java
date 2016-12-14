@@ -106,6 +106,8 @@ final class NetworkLoggingHandler extends Handler {
             Bundle extras = new Bundle();
             extras.putLong(DeviceAdminReceiver.EXTRA_NETWORK_LOGS_TOKEN, mCurrentFullBatchToken);
             extras.putInt(DeviceAdminReceiver.EXTRA_NETWORK_LOGS_COUNT, mFullBatch.size());
+            Log.d(TAG, "Sending network logging batch broadcast to device owner, batchToken: "
+                    + mCurrentFullBatchToken);
             mDpm.sendDeviceOwnerCommand(DeviceAdminReceiver.ACTION_NETWORK_LOGS_AVAILABLE, extras);
         } else {
             mFullBatch = null;
