@@ -438,6 +438,9 @@ public class IpManager extends StateMachine {
         mCallback = new LoggingCallbackWrapper(callback);
         mNwService = nwService;
 
+        mLocalLog = new LocalLog(MAX_LOG_RECORDS);
+        mMsgStateLogger = new MessageHandlingLogger();
+
         mNetlinkTracker = new NetlinkTracker(
                 mInterfaceName,
                 new NetlinkTracker.Callback() {
@@ -451,46 +454,77 @@ public class IpManager extends StateMachine {
                 super.interfaceAdded(iface);
                 if (mClatInterfaceName.equals(iface)) {
                     mCallback.setNeighborDiscoveryOffload(false);
+                } else if (!mInterfaceName.equals(iface)) {
+                    return;
                 }
+
+                final String msg = "interfaceAdded(" + iface +")";
+                logMsg(msg);
             }
 
             @Override
             public void interfaceRemoved(String iface) {
                 super.interfaceRemoved(iface);
+                // TODO: Also observe mInterfaceName going down and take some
+                // kind of appropriate action.
                 if (mClatInterfaceName.equals(iface)) {
                     // TODO: consider sending a message to the IpManager main
                     // StateMachine thread, in case "NDO enabled" state becomes
                     // tied to more things that 464xlat operation.
                     mCallback.setNeighborDiscoveryOffload(true);
+                } else if (!mInterfaceName.equals(iface)) {
+                    return;
                 }
+
+                final String msg = "interfaceRemoved(" + iface +")";
+                logMsg(msg);
+            }
+
+            private void logMsg(String msg) {
+                Log.d(mTag, msg);
+                getHandler().post(() -> { mLocalLog.log("OBSERVED " + msg); });
             }
         };
 
-        try {
-            mNwService.registerObserver(mNetlinkTracker);
-        } catch (RemoteException e) {
-            Log.e(mTag, "Couldn't register NetlinkTracker: " + e.toString());
-        }
+        mLinkProperties = new LinkProperties();
+        mLinkProperties.setInterfaceName(mInterfaceName);
 
-        mAvoidBadWifiTracker = new AvoidBadWifiTracker(mContext, getHandler());
-
-        resetLinkProperties();
+        mAvoidBadWifiTracker = new AvoidBadWifiTracker(mContext, getHandler(),
+                () -> { mLocalLog.log("OBSERVED AvoidBadWifi changed"); });
 
         mProvisioningTimeoutAlarm = new WakeupMessage(mContext, getHandler(),
                 mTag + ".EVENT_PROVISIONING_TIMEOUT", EVENT_PROVISIONING_TIMEOUT);
         mDhcpActionTimeoutAlarm = new WakeupMessage(mContext, getHandler(),
                 mTag + ".EVENT_DHCPACTION_TIMEOUT", EVENT_DHCPACTION_TIMEOUT);
 
-        // Super simple StateMachine.
+        // Anything the StateMachine may access must have been instantiated
+        // before this point.
+        configureAndStartStateMachine();
+
+        // Anything that may send messages to the StateMachine must only be
+        // configured to do so after the StateMachine has started (above).
+        startStateMachineUpdaters();
+    }
+
+    private void configureAndStartStateMachine() {
         addState(mStoppedState);
         addState(mStartedState);
             addState(mRunningState, mStartedState);
         addState(mStoppingState);
 
         setInitialState(mStoppedState);
-        mLocalLog = new LocalLog(MAX_LOG_RECORDS);
-        mMsgStateLogger = new MessageHandlingLogger();
+
         super.start();
+    }
+
+    private void startStateMachineUpdaters() {
+        try {
+            mNwService.registerObserver(mNetlinkTracker);
+        } catch (RemoteException e) {
+            Log.e(mTag, "Couldn't register NetlinkTracker: " + e.toString());
+        }
+
+        mAvoidBadWifiTracker.start();
     }
 
     @Override
@@ -501,6 +535,7 @@ public class IpManager extends StateMachine {
     // Shut down this IpManager instance altogether.
     public void shutdown() {
         stop();
+        mAvoidBadWifiTracker.shutdown();
         quit();
     }
 
