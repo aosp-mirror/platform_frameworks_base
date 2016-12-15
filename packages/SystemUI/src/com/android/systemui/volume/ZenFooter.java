@@ -38,7 +38,7 @@ public class ZenFooter extends LinearLayout {
     private static final String TAG = Util.logTag(ZenFooter.class);
 
     private final Context mContext;
-    private final SpTexts mSpTexts;
+    private final ConfigurableTexts mConfigurableTexts;
 
     private ImageView mIcon;
     private TextView mSummaryLine1;
@@ -51,7 +51,7 @@ public class ZenFooter extends LinearLayout {
     public ZenFooter(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
-        mSpTexts = new SpTexts(mContext);
+        mConfigurableTexts = new ConfigurableTexts(mContext);
         final LayoutTransition layoutTransition = new LayoutTransition();
         layoutTransition.setDuration(new ValueAnimator().getDuration() / 2);
         setLayoutTransition(layoutTransition);
@@ -64,9 +64,9 @@ public class ZenFooter extends LinearLayout {
         mSummaryLine1 = (TextView) findViewById(R.id.volume_zen_summary_line_1);
         mSummaryLine2 = (TextView) findViewById(R.id.volume_zen_summary_line_2);
         mEndNowButton = (TextView) findViewById(R.id.volume_zen_end_now);
-        mSpTexts.add(mSummaryLine1);
-        mSpTexts.add(mSummaryLine2);
-        mSpTexts.add(mEndNowButton);
+        mConfigurableTexts.add(mSummaryLine1);
+        mConfigurableTexts.add(mSummaryLine2);
+        mConfigurableTexts.add(mEndNowButton, R.string.volume_zen_end_now);
     }
 
     public void init(final ZenModeController controller) {
@@ -130,8 +130,7 @@ public class ZenFooter extends LinearLayout {
     }
 
     public void onConfigurationChanged() {
-        Util.setText(mEndNowButton, mContext.getString(R.string.volume_zen_end_now));
-        mSpTexts.update();
+        mConfigurableTexts.update();
     }
 
     private final ZenModeController.Callback mZenCallback = new ZenModeController.Callback() {

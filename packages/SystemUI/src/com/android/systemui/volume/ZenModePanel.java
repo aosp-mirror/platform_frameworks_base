@@ -92,7 +92,7 @@ public class ZenModePanel extends LinearLayout {
     private final ZenPrefs mPrefs;
     private final TransitionHelper mTransitionHelper = new TransitionHelper();
     private final Uri mForeverId;
-    private final SpTexts mSpTexts;
+    private final ConfigurableTexts mConfigurableTexts;
 
     private String mTag = TAG + "/" + Integer.toHexString(System.identityHashCode(this));
 
@@ -131,7 +131,7 @@ public class ZenModePanel extends LinearLayout {
         mPrefs = new ZenPrefs();
         mInflater = LayoutInflater.from(mContext.getApplicationContext());
         mForeverId = Condition.newId(mContext).appendPath("forever").build();
-        mSpTexts = new SpTexts(mContext);
+        mConfigurableTexts = new ConfigurableTexts(mContext);
         mVoiceCapable = Util.isVoiceCapable(mContext);
         mZenModeConditionLayoutId = R.layout.zen_mode_condition;
         mZenModeButtonLayoutId = R.layout.zen_mode_button;
@@ -175,7 +175,6 @@ public class ZenModePanel extends LinearLayout {
         createZenButtons();
         mZenIntroduction = findViewById(R.id.zen_introduction);
         mZenIntroductionMessage = (TextView) findViewById(R.id.zen_introduction_message);
-        mSpTexts.add(mZenIntroductionMessage);
         mZenIntroductionConfirm = findViewById(R.id.zen_introduction_confirm);
         mZenIntroductionConfirm.setOnClickListener(new OnClickListener() {
             @Override
@@ -193,7 +192,7 @@ public class ZenModePanel extends LinearLayout {
                 }
             }
         });
-        mSpTexts.add(mZenIntroductionCustomize);
+        mConfigurableTexts.add(mZenIntroductionCustomize, R.string.zen_priority_customize_button);
 
         mZenConditions = (LinearLayout) findViewById(R.id.zen_conditions);
         mZenAlarmWarning = (TextView) findViewById(R.id.zen_alarm_warning);
@@ -204,11 +203,9 @@ public class ZenModePanel extends LinearLayout {
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        mConfigurableTexts.update();
         if (mZenButtons != null) {
-            mZenButtons.updateLocale();
-        }
-        if (mZenIntroductionCustomize != null) {
-            mZenIntroductionCustomize.setText(R.string.zen_priority_customize_button);
+            mZenButtons.update();
         }
     }
 
@@ -341,10 +338,6 @@ public class ZenModePanel extends LinearLayout {
         hideAllConditions();
     }
 
-    public void updateLocale() {
-        mZenButtons.updateLocale();
-    }
-
     private void setExitCondition(Condition exitCondition) {
         if (Objects.equals(mExitCondition, exitCondition)) return;
         mExitCondition = exitCondition;
@@ -439,9 +432,11 @@ public class ZenModePanel extends LinearLayout {
         mZenButtons.setVisibility(mHidden ? GONE : VISIBLE);
         mZenIntroduction.setVisibility(introduction ? VISIBLE : GONE);
         if (introduction) {
-            mZenIntroductionMessage.setText(zenImportant ? R.string.zen_priority_introduction
+            mConfigurableTexts.add(mZenIntroductionMessage, zenImportant
+                    ? R.string.zen_priority_introduction
                     : mVoiceCapable ? R.string.zen_silence_introduction_voice
                     : R.string.zen_silence_introduction);
+            mConfigurableTexts.update();
             mZenIntroductionCustomize.setVisibility(zenImportant ? VISIBLE : GONE);
         }
         final String warning = computeAlarmWarningText(zenNone);
@@ -655,11 +650,11 @@ public class ZenModePanel extends LinearLayout {
         }
         if (tag.line1 == null) {
             tag.line1 = (TextView) row.findViewById(android.R.id.text1);
-            mSpTexts.add(tag.line1);
+            mConfigurableTexts.add(tag.line1);
         }
         if (tag.line2 == null) {
             tag.line2 = (TextView) row.findViewById(android.R.id.text2);
-            mSpTexts.add(tag.line2);
+            mConfigurableTexts.add(tag.line2);
         }
         final String line1 = !TextUtils.isEmpty(condition.line1) ? condition.line1
                 : condition.summary;
