@@ -37,8 +37,7 @@
                 android:layout_height="wrap_content"
                 android:navigationContentDescription="@*android:string/action_bar_up_description"
                 android:theme="?android:attr/actionBarTheme"
-                style="?android:attr/toolbarStyle"
-                android:background="?android:attr/colorPrimary" />
+                style="?android:attr/toolbarStyle"/>
         </FrameLayout>
         <FrameLayout
             android:id="@+id/content_header_container"
