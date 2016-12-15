@@ -86,7 +86,7 @@ public class SystemProperties {
      */
     public static String get(String key) {
         if (key.length() > PROP_NAME_MAX) {
-            throw new IllegalArgumentException("key.length > " + PROP_NAME_MAX);
+            throw newKeyTooLargeException(key);
         }
         if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get(key);
@@ -99,7 +99,7 @@ public class SystemProperties {
      */
     public static String get(String key, String def) {
         if (key.length() > PROP_NAME_MAX) {
-            throw new IllegalArgumentException("key.length > " + PROP_NAME_MAX);
+            throw newKeyTooLargeException(key);
         }
         if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get(key, def);
@@ -115,7 +115,7 @@ public class SystemProperties {
      */
     public static int getInt(String key, int def) {
         if (key.length() > PROP_NAME_MAX) {
-            throw new IllegalArgumentException("key.length > " + PROP_NAME_MAX);
+            throw newKeyTooLargeException(key);
         }
         if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get_int(key, def);
@@ -131,7 +131,7 @@ public class SystemProperties {
      */
     public static long getLong(String key, long def) {
         if (key.length() > PROP_NAME_MAX) {
-            throw new IllegalArgumentException("key.length > " + PROP_NAME_MAX);
+            throw newKeyTooLargeException(key);
         }
         if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get_long(key, def);
@@ -152,7 +152,7 @@ public class SystemProperties {
      */
     public static boolean getBoolean(String key, boolean def) {
         if (key.length() > PROP_NAME_MAX) {
-            throw new IllegalArgumentException("key.length > " + PROP_NAME_MAX);
+            throw newKeyTooLargeException(key);
         }
         if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get_boolean(key, def);
@@ -165,11 +165,10 @@ public class SystemProperties {
      */
     public static void set(String key, String val) {
         if (key.length() > PROP_NAME_MAX) {
-            throw new IllegalArgumentException("key.length > " + PROP_NAME_MAX);
+            throw newKeyTooLargeException(key);
         }
         if (val != null && val.length() > PROP_VALUE_MAX) {
-            throw new IllegalArgumentException("val.length > " +
-                PROP_VALUE_MAX);
+            throw newValueTooLargeException(key, val);
         }
         if (TRACK_KEY_ACCESS) onKeyAccess(key);
         native_set(key, val);
@@ -195,6 +194,16 @@ public class SystemProperties {
                 callbacks.get(i).run();
             }
         }
+    }
+
+    private static IllegalArgumentException newKeyTooLargeException(String key) {
+        return new IllegalArgumentException("system property key '" + key + "' is longer than "
+                + PROP_NAME_MAX + " characters");
+    }
+
+    private static IllegalArgumentException newValueTooLargeException(String key, String value) {
+        return new IllegalArgumentException("value of system property '" + key + "' is longer than "
+                + PROP_VALUE_MAX + " characters: " + value);
     }
 
     /*
