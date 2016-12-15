@@ -856,6 +856,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         mAvoidBadWifiTracker = createAvoidBadWifiTracker(
                 mContext, mHandler, () -> rematchForAvoidBadWifiUpdate());
+        mAvoidBadWifiTracker.start();
     }
 
     private NetworkRequest createInternetRequestForTransport(
