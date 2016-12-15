@@ -2851,33 +2851,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void scheduleRemoveStartingWindowLocked(AppWindowToken wtoken) {
-        if (wtoken == null) {
-            return;
-        }
-        if (mH.hasMessages(H.REMOVE_STARTING, wtoken)) {
-            // Already scheduled.
-            return;
-        }
-
-        if (wtoken.startingWindow == null) {
-            if (wtoken.startingData != null) {
-                // Starting window has not been added yet, but it is scheduled to be added.
-                // Go ahead and cancel the request.
-                if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM,
-                        "Clearing startingData for token=" + wtoken);
-                wtoken.startingData = null;
-            }
-            return;
-        }
-
-        if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, Debug.getCallers(1) +
-                ": Schedule remove starting " + wtoken + (wtoken != null ?
-                " startingWindow=" + wtoken.startingWindow : ""));
-        Message m = mH.obtainMessage(H.REMOVE_STARTING, wtoken);
-        mH.sendMessage(m);
-    }
-
     public void moveTaskToTop(int taskId) {
         final long origId = Binder.clearCallingIdentity();
         try {
@@ -5578,9 +5551,6 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int REPORT_FOCUS_CHANGE = 2;
         public static final int REPORT_LOSING_FOCUS = 3;
         public static final int DO_TRAVERSAL = 4;
-        public static final int ADD_STARTING = 5;
-        public static final int REMOVE_STARTING = 6;
-        public static final int FINISHED_STARTING = 7;
         public static final int WINDOW_FREEZE_TIMEOUT = 11;
 
         public static final int APP_TRANSITION_TIMEOUT = 13;
@@ -5719,126 +5689,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 case DO_TRAVERSAL: {
                     synchronized(mWindowMap) {
                         mWindowPlacerLocked.performSurfacePlacement();
-                    }
-                } break;
-
-                case ADD_STARTING: {
-                    final AppWindowToken wtoken = (AppWindowToken)msg.obj;
-                    final StartingData sd = wtoken.startingData;
-
-                    if (sd == null) {
-                        // Animation has been canceled... do nothing.
-                        return;
-                    }
-
-                    if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Add starting "
-                            + wtoken + ": pkg=" + sd.pkg);
-
-                    View view = null;
-                    try {
-                        view = mPolicy.addStartingWindow(wtoken.token, sd.pkg, sd.theme,
-                            sd.compatInfo, sd.nonLocalizedLabel, sd.labelRes, sd.icon, sd.logo,
-                            sd.windowFlags, wtoken.getMergedOverrideConfiguration());
-                    } catch (Exception e) {
-                        Slog.w(TAG_WM, "Exception when adding starting window", e);
-                    }
-
-                    if (view != null) {
-                        boolean abort = false;
-
-                        synchronized(mWindowMap) {
-                            if (wtoken.removed || wtoken.startingData == null) {
-                                // If the window was successfully added, then
-                                // we need to remove it.
-                                if (wtoken.startingWindow != null) {
-                                    if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM,
-                                            "Aborted starting " + wtoken
-                                            + ": removed=" + wtoken.removed
-                                            + " startingData=" + wtoken.startingData);
-                                    wtoken.startingWindow = null;
-                                    wtoken.startingData = null;
-                                    abort = true;
-                                }
-                            } else {
-                                wtoken.startingView = view;
-                            }
-                            if (DEBUG_STARTING_WINDOW && !abort) Slog.v(TAG_WM,
-                                    "Added starting " + wtoken
-                                    + ": startingWindow="
-                                    + wtoken.startingWindow + " startingView="
-                                    + wtoken.startingView);
-                        }
-
-                        if (abort) {
-                            try {
-                                mPolicy.removeStartingWindow(wtoken.token, view);
-                            } catch (Exception e) {
-                                Slog.w(TAG_WM, "Exception when removing starting window", e);
-                            }
-                        }
-                    }
-                } break;
-
-                case REMOVE_STARTING: {
-                    final AppWindowToken wtoken = (AppWindowToken)msg.obj;
-                    IBinder token = null;
-                    View view = null;
-                    synchronized (mWindowMap) {
-                        if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Remove starting "
-                                + wtoken + ": startingWindow="
-                                + wtoken.startingWindow + " startingView="
-                                + wtoken.startingView);
-                        if (wtoken.startingWindow != null) {
-                            view = wtoken.startingView;
-                            token = wtoken.token;
-                            wtoken.startingData = null;
-                            wtoken.startingView = null;
-                            wtoken.startingWindow = null;
-                            wtoken.startingDisplayed = false;
-                        }
-                    }
-                    if (view != null) {
-                        try {
-                            mPolicy.removeStartingWindow(token, view);
-                        } catch (Exception e) {
-                            Slog.w(TAG_WM, "Exception when removing starting window", e);
-                        }
-                    }
-                } break;
-
-                case FINISHED_STARTING: {
-                    IBinder token = null;
-                    View view = null;
-                    while (true) {
-                        synchronized (mWindowMap) {
-                            final int N = mFinishedStarting.size();
-                            if (N <= 0) {
-                                break;
-                            }
-                            AppWindowToken wtoken = mFinishedStarting.remove(N-1);
-
-                            if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM,
-                                    "Finished starting " + wtoken
-                                    + ": startingWindow=" + wtoken.startingWindow
-                                    + " startingView=" + wtoken.startingView);
-
-                            if (wtoken.startingWindow == null) {
-                                continue;
-                            }
-
-                            view = wtoken.startingView;
-                            token = wtoken.token;
-                            wtoken.startingData = null;
-                            wtoken.startingView = null;
-                            wtoken.startingWindow = null;
-                            wtoken.startingDisplayed = false;
-                        }
-
-                        try {
-                            mPolicy.removeStartingWindow(token, view);
-                        } catch (Exception e) {
-                            Slog.w(TAG_WM, "Exception when removing starting window", e);
-                        }
                     }
                 } break;
 
@@ -7348,21 +7198,6 @@ public class WindowManagerService extends IWindowManager.Stub
     private void dumpTokensLocked(PrintWriter pw, boolean dumpAll) {
         pw.println("WINDOW MANAGER TOKENS (dumpsys window tokens)");
         mRoot.dumpTokens(pw, dumpAll);
-        if (!mFinishedStarting.isEmpty()) {
-            pw.println();
-            pw.println("  Finishing start of application tokens:");
-            for (int i=mFinishedStarting.size()-1; i>=0; i--) {
-                WindowToken token = mFinishedStarting.get(i);
-                pw.print("  Finished Starting #"); pw.print(i);
-                        pw.print(' '); pw.print(token);
-                if (dumpAll) {
-                    pw.println(':');
-                    token.dump(pw, "    ");
-                } else {
-                    pw.println();
-                }
-            }
-        }
         if (!mOpeningApps.isEmpty() || !mClosingApps.isEmpty()) {
             pw.println();
             if (mOpeningApps.size() > 0) {

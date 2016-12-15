@@ -251,9 +251,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final boolean DEBUG_INPUT = false;
     static final boolean DEBUG_KEYGUARD = false;
     static final boolean DEBUG_LAYOUT = false;
-    static final boolean DEBUG_STARTING_WINDOW = false;
+    static final boolean DEBUG_SPLASH_SCREEN = false;
     static final boolean DEBUG_WAKEUP = false;
-    static final boolean SHOW_STARTING_ANIMATIONS = true;
+    static final boolean SHOW_SPLASH_SCREENS = true;
 
     // Whether to allow dock apps with METADATA_DOCK_HOME to temporarily take over the Home key.
     // No longer recommended for desk docks;
@@ -2794,10 +2794,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     @Override
-    public View addStartingWindow(IBinder appToken, String packageName, int theme,
-            CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes,
-            int icon, int logo, int windowFlags, Configuration overrideConfig) {
-        if (!SHOW_STARTING_ANIMATIONS) {
+    public StartingSurface addSplashScreen(IBinder appToken, String packageName, int theme,
+            CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes, int icon,
+            int logo, int windowFlags, Configuration overrideConfig) {
+        if (!SHOW_SPLASH_SCREENS) {
             return null;
         }
         if (packageName == null) {
@@ -2809,7 +2809,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         try {
             Context context = mContext;
-            if (DEBUG_STARTING_WINDOW) Slog.d(TAG, "addStartingWindow " + packageName
+            if (DEBUG_SPLASH_SCREEN) Slog.d(TAG, "addSplashScreen " + packageName
                     + ": nonLocalizedLabel=" + nonLocalizedLabel + " theme="
                     + Integer.toHexString(theme));
             if (theme != context.getThemeResId() || labelRes != 0) {
@@ -2822,8 +2822,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
 
             if (overrideConfig != null && !overrideConfig.equals(EMPTY)) {
-                if (DEBUG_STARTING_WINDOW) Slog.d(TAG, "addStartingWindow: creating context based"
-                        + " on overrideConfig" + overrideConfig + " for starting window");
+                if (DEBUG_SPLASH_SCREEN) Slog.d(TAG, "addSplashScreen: creating context based"
+                        + " on overrideConfig" + overrideConfig + " for splash screen");
                 final Context overrideContext = context.createConfigurationContext(overrideConfig);
                 overrideContext.setTheme(theme);
                 final TypedArray typedArray = overrideContext.obtainStyledAttributes(
@@ -2833,7 +2833,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     // We want to use the windowBackground for the override context if it is
                     // available, otherwise we use the default one to make sure a themed starting
                     // window is displayed for the app.
-                    if (DEBUG_STARTING_WINDOW) Slog.d(TAG, "addStartingWindow: apply overrideConfig"
+                    if (DEBUG_SPLASH_SCREEN) Slog.d(TAG, "addSplashScreen: apply overrideConfig"
                             + overrideConfig + " to starting window resId=" + resId);
                     context = overrideContext;
                 }
@@ -2895,19 +2895,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 params.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
             }
 
-            params.setTitle("Starting " + packageName);
+            params.setTitle("Splash Screen " + packageName);
 
             wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
             view = win.getDecorView();
 
-            if (DEBUG_STARTING_WINDOW) Slog.d(TAG, "Adding starting window for "
+            if (DEBUG_SPLASH_SCREEN) Slog.d(TAG, "Adding splash screen window for "
                 + packageName + " / " + appToken + ": " + (view.getParent() != null ? view : null));
 
             wm.addView(view, params);
 
             // Only return the view if it was successfully added to the
             // window manager... which we can tell by it having a parent.
-            return view.getParent() != null ? view : null;
+            return view.getParent() != null ? new SplashScreenSurface(view) : null;
         } catch (WindowManager.BadTokenException e) {
             // ignore
             Log.w(TAG, appToken + " already running, starting window not displayed. " +
@@ -2929,13 +2929,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     @Override
-    public void removeStartingWindow(IBinder appToken, View window) {
-        if (DEBUG_STARTING_WINDOW) Slog.v(TAG, "Removing starting window for " + appToken + ": "
-                + window + " Callers=" + Debug.getCallers(4));
+    public void removeSplashScreen(IBinder appToken, StartingSurface surface) {
+        if (DEBUG_SPLASH_SCREEN) Slog.v(TAG, "Removing splash screen window for " + appToken + ": "
+                + surface + " Callers=" + Debug.getCallers(4));
 
-        if (window != null) {
+        if (surface != null) {
             WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
-            wm.removeView(window);
+            wm.removeView(((SplashScreenSurface) surface).view);
         }
     }
 

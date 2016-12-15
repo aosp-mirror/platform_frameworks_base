@@ -27,21 +27,21 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WIND
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TOKEN_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowManagerService.H.ADD_STARTING;
-
-import android.graphics.Bitmap;
-import android.os.Trace;
-import com.android.server.AttributeCache;
 
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.os.Binder;
 import android.os.Debug;
+import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
+import android.os.Looper;
+import android.os.Trace;
 import android.util.Slog;
 import android.view.IApplicationToken;
+import android.view.WindowManagerPolicy.StartingSurface;
 
+import com.android.server.AttributeCache;
 /**
  * Controller for the app window token container. This is created by activity manager to link
  * activity records to the app window token container they use in window manager.
@@ -52,6 +52,7 @@ public class AppWindowContainerController
         extends WindowContainerController<AppWindowToken, AppWindowContainerListener> {
 
     private final IApplicationToken mToken;
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
 
     private final Runnable mOnWindowsDrawn = () -> {
         if (mListener == null) {
@@ -78,6 +79,94 @@ public class AppWindowContainerController
         if (DEBUG_VISIBILITY) Slog.v(TAG_WM, "Reporting gone in "
                 + AppWindowContainerController.this.mToken);
         mListener.onWindowsGone();
+    };
+
+    private final Runnable mAddStartingWindow = () -> {
+        final StartingData startingData;
+        final Configuration mergedOverrideConfiguration;
+
+        synchronized (mWindowMap) {
+            startingData = mContainer.startingData;
+            mergedOverrideConfiguration = mContainer.getMergedOverrideConfiguration();
+        }
+
+        if (startingData == null) {
+            // Animation has been canceled... do nothing.
+            return;
+        }
+
+        if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Add starting "
+                + this + ": pkg=" + mContainer.startingData.pkg);
+
+        StartingSurface contents = null;
+        try {
+            contents = mService.mPolicy.addSplashScreen(mContainer.token, startingData.pkg,
+                    startingData.theme, startingData.compatInfo, startingData.nonLocalizedLabel,
+                    startingData.labelRes, startingData.icon, startingData.logo,
+                    startingData.windowFlags, mergedOverrideConfiguration);
+        } catch (Exception e) {
+            Slog.w(TAG_WM, "Exception when adding starting window", e);
+        }
+        if (contents != null) {
+            boolean abort = false;
+
+            synchronized(mWindowMap) {
+                if (mContainer.removed || mContainer.startingData == null) {
+                    // If the window was successfully added, then
+                    // we need to remove it.
+                    if (mContainer.startingWindow != null) {
+                        if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM,
+                                "Aborted starting " + mContainer
+                                        + ": removed=" + mContainer.removed
+                                        + " startingData=" + mContainer.startingData);
+                        mContainer.startingWindow = null;
+                        mContainer.startingData = null;
+                        abort = true;
+                    }
+                } else {
+                    mContainer.startingSurface = contents;
+                }
+                if (DEBUG_STARTING_WINDOW && !abort) Slog.v(TAG_WM,
+                        "Added starting " + mContainer
+                                + ": startingWindow="
+                                + mContainer.startingWindow + " startingView="
+                                + mContainer.startingSurface);
+            }
+
+            if (abort) {
+                try {
+                    mService.mPolicy.removeSplashScreen(mContainer.token, contents);
+                } catch (Exception e) {
+                    Slog.w(TAG_WM, "Exception when removing starting window", e);
+                }
+            }
+        }
+    };
+
+    private final Runnable mRemoveStartingWindow = () -> {
+        IBinder token = null;
+        StartingSurface contents = null;
+        synchronized (mWindowMap) {
+            if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Remove starting "
+                    + mContainer + ": startingWindow="
+                    + mContainer.startingWindow + " startingView="
+                    + mContainer.startingSurface);
+            if (mContainer.startingWindow != null) {
+                contents = mContainer.startingSurface;
+                token = mContainer.token;
+                mContainer.startingData = null;
+                mContainer.startingSurface = null;
+                mContainer.startingWindow = null;
+                mContainer.startingDisplayed = false;
+            }
+        }
+        if (contents != null) {
+            try {
+                mService.mPolicy.removeSplashScreen(token, contents);
+            } catch (Exception e) {
+                Slog.w(TAG_WM, "Exception when removing starting window", e);
+            }
+        }
     };
 
     public AppWindowContainerController(IApplicationToken token,
@@ -393,19 +482,42 @@ public class AppWindowContainerController
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Creating StartingData");
             mContainer.startingData = new StartingData(pkg, theme, compatInfo, nonLocalizedLabel,
                     labelRes, icon, logo, windowFlags);
-            final Message m = mService.mH.obtainMessage(ADD_STARTING, mContainer);
-            // Note: we really want to do sendMessageAtFrontOfQueue() because we
-            // want to process the message ASAP, before any other queued
-            // messages.
-            if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Enqueueing ADD_STARTING");
-            mService.mH.sendMessageAtFrontOfQueue(m);
+            scheduleAddStartingWindow();
         }
         return true;
     }
 
+    void scheduleAddStartingWindow() {
+
+        // Note: we really want to do sendMessageAtFrontOfQueue() because we
+        // want to process the message ASAP, before any other queued
+        // messages.
+        if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Enqueueing ADD_STARTING");
+        mHandler.postAtFrontOfQueue(mAddStartingWindow);
+    }
+
     public void removeStartingWindow() {
         synchronized (mWindowMap) {
-            mService.scheduleRemoveStartingWindowLocked(mContainer);
+            if (mHandler.hasCallbacks(mRemoveStartingWindow)) {
+                // Already scheduled.
+                return;
+            }
+
+            if (mContainer.startingWindow == null) {
+                if (mContainer.startingData != null) {
+                    // Starting window has not been added yet, but it is scheduled to be added.
+                    // Go ahead and cancel the request.
+                    if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM,
+                            "Clearing startingData for token=" + mContainer);
+                    mContainer.startingData = null;
+                }
+                return;
+            }
+
+            if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, Debug.getCallers(1)
+                    + ": Schedule remove starting " + mContainer
+                    + " startingWindow=" + mContainer.startingWindow);
+            mHandler.post(mRemoveStartingWindow);
         }
     }
 
@@ -508,15 +620,15 @@ public class AppWindowContainerController
 
 
     void reportWindowsDrawn() {
-        mService.mH.post(mOnWindowsDrawn);
+        mHandler.post(mOnWindowsDrawn);
     }
 
     void reportWindowsVisible() {
-        mService.mH.post(mOnWindowsVisible);
+        mHandler.post(mOnWindowsVisible);
     }
 
     void reportWindowsGone() {
-        mService.mH.post(mOnWindowsGone);
+        mHandler.post(mOnWindowsGone);
     }
 
     /** Calls directly into activity manager so window manager lock shouldn't held. */

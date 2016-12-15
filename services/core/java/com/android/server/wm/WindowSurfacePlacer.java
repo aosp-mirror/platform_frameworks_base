@@ -441,8 +441,9 @@ class WindowSurfacePlacer {
             wtoken.deferClearAllDrawn = false;
             // Ensure that apps that are mid-starting are also scheduled to have their
             // starting windows removed after the animation is complete
-            if (wtoken.startingWindow != null && !wtoken.startingWindow.mAnimatingExit) {
-                mService.scheduleRemoveStartingWindowLocked(wtoken);
+            if (wtoken.startingWindow != null && !wtoken.startingWindow.mAnimatingExit
+                    && wtoken.getController() != null) {
+                wtoken.getController().removeStartingWindow();
             }
             mService.mAnimator.mAppWindowAnimating |= appAnimator.isAnimating();
 
