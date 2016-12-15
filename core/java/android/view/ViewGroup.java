@@ -59,6 +59,7 @@ import com.android.internal.R;
 import com.android.internal.util.Predicate;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -880,6 +881,23 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
+    public View keyboardNavigationClusterSearch(View currentCluster, int direction) {
+        if (isKeyboardNavigationCluster()) {
+            currentCluster = this;
+        }
+        if (isRootNamespace()) {
+            // root namespace means we should consider ourselves the top of the
+            // tree for cluster searching; otherwise we could be focus searching
+            // into other tabs.  see LocalActivityManager and TabHost for more info
+            return FocusFinder.getInstance().findNextKeyboardNavigationCluster(
+                    this, currentCluster, direction);
+        } else if (mParent != null) {
+            return mParent.keyboardNavigationClusterSearch(currentCluster, direction);
+        }
+        return null;
+    }
+
+    @Override
     public boolean requestChildRectangleOnScreen(View child, Rect rectangle, boolean immediate) {
         return false;
     }
@@ -1115,6 +1133,32 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 || (focusableCount == views.size())) &&
                 (isFocusableInTouchMode() || !shouldBlockFocusForTouchscreen())) {
             super.addFocusables(views, direction, focusableMode);
+        }
+    }
+
+    @Override
+    public void addKeyboardNavigationClusters(Collection<View> views, int direction) {
+        final int focusableCount = views.size();
+
+        super.addKeyboardNavigationClusters(views, direction);
+
+        if (focusableCount != views.size()) {
+            // No need to look for clusters inside a cluster.
+            return;
+        }
+
+        if (getDescendantFocusability() == FOCUS_BLOCK_DESCENDANTS) {
+            return;
+        }
+
+        final int count = mChildrenCount;
+        final View[] children = mChildren;
+
+        for (int i = 0; i < count; i++) {
+            final View child = children[i];
+            if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE) {
+                child.addKeyboardNavigationClusters(views, direction);
+            }
         }
     }
 

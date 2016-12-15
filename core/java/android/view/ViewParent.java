@@ -147,6 +147,19 @@ public interface ViewParent {
     public View focusSearch(View v, int direction);
 
     /**
+     * Find the nearest keyboard navigation cluster in the specified direction.
+     * This does not actually give focus to that cluster.
+     *
+     * @param currentCluster The starting point of the search. Null means the current cluster is not
+     *                       found yet
+     * @param direction Direction to look
+     *
+     * @return The nearest keyboard navigation cluster in the specified direction, or null if none
+     *         can be found
+     */
+    View keyboardNavigationClusterSearch(View currentCluster, int direction);
+
+    /**
      * Change the z order of the child so it's on top of all other children.
      * This ordering change may affect layout, if this container
      * uses an order-dependent layout scheme (e.g., LinearLayout). Prior
