@@ -140,6 +140,23 @@ public final class DocumentsContract {
      */
     public static final String EXTRA_PROMPT = "android.provider.extra.PROMPT";
 
+    /**
+     * Action of intent issued by DocumentsUI when user wishes to open/configure/manage a particular
+     * document in the provider application.
+     * 
+     * <p>When issued, the intent will include the URI of the document as the intent data.
+     * 
+     * <p>A provider wishing to provide support for this action should do two things.
+     * <li>Add an {@code <intent-filter>} matching this action.
+     * <li>When supplying information in {@link DocumentsProvider#queryChildDocuments}, include
+     * {@link Document#FLAG_SUPPORTS_SETTINGS} in the flags for each document that supports
+     * settings.
+     *
+     * @see DocumentsContact#Document#FLAG_SUPPORTS_SETTINGS
+     */
+    public static final String
+            ACTION_DOCUMENT_SETTINGS = "android.provider.action.DOCUMENT_SETTINGS";
+
     /** {@hide} */
     public static final String ACTION_MANAGE_DOCUMENT = "android.provider.action.MANAGE_DOCUMENT";
 
@@ -392,6 +409,14 @@ public final class DocumentsContract {
          * @see DocumentsProvider#removeDocument(String, String)
          */
         public static final int FLAG_SUPPORTS_REMOVE = 1 << 10;
+
+        /**
+         * Flag indicating that a document has settings that can be configured by user.
+         *
+         * @see #COLUMN_FLAGS
+         * @see #ACTION_DOCUMENT_SETTINGS
+         */
+        public static final int FLAG_SUPPORTS_SETTINGS = 1 << 11;
 
         /**
          * Flag indicating that a document is not complete, likely its
