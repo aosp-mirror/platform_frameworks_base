@@ -73,7 +73,7 @@ public class RankingHelper implements RankingConfig {
     private static final int DEFAULT_IMPORTANCE = NotificationManager.IMPORTANCE_UNSPECIFIED;
 
     private final NotificationSignalExtractor[] mSignalExtractors;
-    private final NotificationComparator mPreliminaryComparator = new NotificationComparator();
+    private final NotificationComparator mPreliminaryComparator;
     private final GlobalSortKeyComparator mFinalComparator = new GlobalSortKeyComparator();
 
     private final ArrayMap<String, Record> mRecords = new ArrayMap<>(); // pkg|uid => Record
@@ -89,6 +89,8 @@ public class RankingHelper implements RankingConfig {
         mContext = context;
         mRankingHandler = rankingHandler;
         mPm = pm;
+
+        mPreliminaryComparator = new NotificationComparator(mContext);
 
         final int N = extractorNames.length;
         mSignalExtractors = new NotificationSignalExtractor[N];

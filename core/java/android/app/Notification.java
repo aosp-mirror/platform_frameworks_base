@@ -3985,19 +3985,6 @@ public class Notification implements Parcelable
             return new Builder(builderContext, n);
         }
 
-        private static Class<? extends Style> getNotificationStyleClass(String templateClass) {
-            Class<? extends Style>[] classes = new Class[] {
-                    BigTextStyle.class, BigPictureStyle.class, InboxStyle.class, MediaStyle.class,
-                    DecoratedCustomViewStyle.class, DecoratedMediaCustomViewStyle.class,
-                    MessagingStyle.class };
-            for (Class<? extends Style> innerClass : classes) {
-                if (templateClass.equals(innerClass.getName())) {
-                    return innerClass;
-                }
-            }
-            return null;
-        }
-
         /**
          * @deprecated Use {@link #build()} instead.
          */
@@ -4172,6 +4159,23 @@ public class Notification implements Parcelable
      */
     public boolean showsChronometer() {
         return when != 0 && extras.getBoolean(EXTRA_SHOW_CHRONOMETER);
+    }
+
+    /**
+     * @hide
+     */
+    @SystemApi
+    public static Class<? extends Style> getNotificationStyleClass(String templateClass) {
+        Class<? extends Style>[] classes = new Class[] {
+                BigTextStyle.class, BigPictureStyle.class, InboxStyle.class, MediaStyle.class,
+                DecoratedCustomViewStyle.class, DecoratedMediaCustomViewStyle.class,
+                MessagingStyle.class };
+        for (Class<? extends Style> innerClass : classes) {
+            if (templateClass.equals(innerClass.getName())) {
+                return innerClass;
+            }
+        }
+        return null;
     }
 
     /**
