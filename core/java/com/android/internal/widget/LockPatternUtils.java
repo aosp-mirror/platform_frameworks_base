@@ -147,6 +147,10 @@ public class LockPatternUtils {
 
     public static final String PROFILE_KEY_NAME_ENCRYPT = "profile_key_name_encrypt_";
     public static final String PROFILE_KEY_NAME_DECRYPT = "profile_key_name_decrypt_";
+    public static final String SYNTHETIC_PASSWORD_KEY_PREFIX = "synthetic_password_";
+
+    public static final String SYNTHETIC_PASSWORD_HANDLE_KEY = "sp-handle";
+    public static final String SYNTHETIC_PASSWORD_ENABLED_KEY = "enable-sp";
 
     private final Context mContext;
     private final ContentResolver mContentResolver;
@@ -1559,6 +1563,14 @@ public class LockPatternUtils {
                         break;
                 }
             }
-        };
+        }
+    }
+
+    public void enableSyntheticPassword() {
+        setLong(SYNTHETIC_PASSWORD_ENABLED_KEY, 1L, UserHandle.USER_SYSTEM);
+    }
+
+    public boolean isSyntheticPasswordEnabled() {
+        return getLong(SYNTHETIC_PASSWORD_ENABLED_KEY, 0, UserHandle.USER_SYSTEM) != 0;
     }
 }

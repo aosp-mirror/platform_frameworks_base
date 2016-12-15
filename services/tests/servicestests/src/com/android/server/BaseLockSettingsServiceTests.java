@@ -134,5 +134,13 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
         File storageDir = mStorage.mStorageDir;
         assertTrue(FileUtils.deleteContents(storageDir));
     }
+
+    protected static void assertArrayEquals(byte[] expected, byte[] actual) {
+        assertTrue(Arrays.equals(expected, actual));
+    }
+
+    protected static void assertArrayNotSame(byte[] expected, byte[] actual) {
+        assertFalse(Arrays.equals(expected, actual));
+    }
 }
 

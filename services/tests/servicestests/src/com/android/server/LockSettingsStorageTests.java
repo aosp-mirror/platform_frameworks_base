@@ -329,6 +329,16 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         assertEquals("/data/system/users/3/gatekeeper.password.key", storage.getLockPasswordFilename(3));
     }
 
+    public void testSyntheticPasswordState() {
+        final byte[] data = {1,2,3,4};
+        mStorage.writeSyntheticPasswordState(10, 1234L, "state", data);
+        assertArrayEquals(data, mStorage.readSyntheticPasswordState(10, 1234L, "state"));
+        assertEquals(null, mStorage.readSyntheticPasswordState(0, 1234L, "state"));
+
+        mStorage.deleteSyntheticPasswordState(10, 1234L, "state", true);
+        assertEquals(null, mStorage.readSyntheticPasswordState(10, 1234L, "state"));
+    }
+
     private static void assertArrayEquals(byte[] expected, byte[] actual) {
         if (!Arrays.equals(expected, actual)) {
             fail("expected:<" + Arrays.toString(expected) +

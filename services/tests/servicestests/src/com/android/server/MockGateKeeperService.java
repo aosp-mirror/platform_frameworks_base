@@ -149,6 +149,15 @@ public class MockGateKeeperService implements IGateKeeperService {
         return authTokenMap.get(uid);
     }
 
+    public AuthToken getAuthTokenForSid(long sid) {
+        for(AuthToken token : authTokenMap.values()) {
+            if (token.sid == sid) {
+                return token;
+            }
+        }
+        return null;
+    }
+
     public void clearAuthToken(int uid) {
         authTokenMap.remove(uid);
     }

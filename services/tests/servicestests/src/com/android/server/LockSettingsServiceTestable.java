@@ -21,9 +21,11 @@ import static org.mockito.Mockito.mock;
 import android.app.IActivityManager;
 import android.content.Context;
 import android.os.Handler;
+import android.os.Process;
+import android.os.RemoteException;
 import android.os.storage.IStorageManager;
 import android.security.KeyStore;
-import android.service.gatekeeper.IGateKeeperService;
+import android.security.keystore.KeyPermanentlyInvalidatedException;
 
 import com.android.internal.widget.LockPatternUtils;
 
@@ -38,16 +40,18 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         private IActivityManager mActivityManager;
         private LockPatternUtils mLockPatternUtils;
         private IStorageManager mStorageManager;
+        private MockGateKeeperService mGatekeeper;
 
         public MockInjector(Context context, LockSettingsStorage storage, KeyStore keyStore,
                 IActivityManager activityManager, LockPatternUtils lockPatternUtils,
-                IStorageManager storageManager) {
+                IStorageManager storageManager, MockGateKeeperService gatekeeper) {
             super(context);
             mLockSettingsStorage = storage;
             mKeyStore = keyStore;
             mActivityManager = activityManager;
             mLockPatternUtils = lockPatternUtils;
             mStorageManager = storageManager;
+            mGatekeeper = gatekeeper;
         }
 
         @Override
@@ -89,13 +93,25 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         public IStorageManager getStorageManager() {
             return mStorageManager;
         }
+
+        @Override
+        public SyntheticPasswordManager getSyntheticPasswordManager(LockSettingsStorage storage) {
+            return new MockSyntheticPasswordManager(storage, mGatekeeper);
+        }
+
+        @Override
+        public int binderGetCallingUid() {
+            return Process.SYSTEM_UID;
+        }
+
+
     }
 
     protected LockSettingsServiceTestable(Context context, LockPatternUtils lockPatternUtils,
-            LockSettingsStorage storage, IGateKeeperService gatekeeper, KeyStore keystore,
+            LockSettingsStorage storage, MockGateKeeperService gatekeeper, KeyStore keystore,
             IStorageManager storageManager, IActivityManager mActivityManager) {
         super(new MockInjector(context, storage, keystore, mActivityManager, lockPatternUtils,
-                storageManager));
+                storageManager, gatekeeper));
         mGateKeeperService = gatekeeper;
     }
 
@@ -105,12 +121,18 @@ public class LockSettingsServiceTestable extends LockSettingsService {
     }
 
     @Override
-    protected String getDecryptedPasswordForTiedProfile(int userId) throws FileNotFoundException {
+    protected String getDecryptedPasswordForTiedProfile(int userId) throws FileNotFoundException, KeyPermanentlyInvalidatedException {
         byte[] storedData = mStorage.readChildProfileLock(userId);
         if (storedData == null) {
             throw new FileNotFoundException("Child profile lock file not found");
         }
+        try {
+            if (mGateKeeperService.getSecureUserId(userId) == 0) {
+                throw new KeyPermanentlyInvalidatedException();
+            }
+        } catch (RemoteException e) {
+            // shouldn't happen.
+        }
         return new String(storedData);
     }
-
 }

@@ -123,6 +123,12 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
                 UnifiedPassword, PRIMARY_USER_ID);
         mStorageManager.setIgnoreBadUnlock(false);
         assertEquals(profileSid, mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID));
+
+        //Clear unified challenge
+        mService.setLockCredential(null, LockPatternUtils.CREDENTIAL_TYPE_NONE, UnifiedPassword,
+                PRIMARY_USER_ID);
+        assertEquals(0, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
+        assertEquals(0, mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID));
     }
 
     public void testManagedProfileSeparateChallenge() throws RemoteException {
