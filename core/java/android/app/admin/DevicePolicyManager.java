@@ -44,6 +44,7 @@ import android.graphics.Bitmap;
 import android.net.ProxyInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteCallback;
@@ -152,6 +153,7 @@ public class DevicePolicyManager {
      * <li>{@link #EXTRA_PROVISIONING_MAIN_COLOR}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_SKIP_USER_CONSENT}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_KEEP_ACCOUNT_ON_MIGRATION}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_DISCLAIMERS}, optional</li>
      * </ul>
      *
      * <p>When managed provisioning has completed, broadcasts are sent to the application specified
@@ -233,6 +235,7 @@ public class DevicePolicyManager {
      * <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_LOGO_URI}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_MAIN_COLOR}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_DISCLAIMERS}, optional</li>
      * </ul>
      *
      * <p>When device owner provisioning has completed, an intent of the type
@@ -804,7 +807,7 @@ public class DevicePolicyManager {
      * <li>android.resource ({@link android.content.ContentResolver#SCHEME_ANDROID_RESOURCE})</li>
      * </ul>
      *
-     * <p> It is the responsability of the caller to provide an image with a reasonable
+     * <p> It is the responsibility of the caller to provide an image with a reasonable
      * pixed density for the device.
      *
      * <p> If a content: URI is passed, the intent should have the flag
@@ -816,6 +819,58 @@ public class DevicePolicyManager {
      */
     public static final String EXTRA_PROVISIONING_LOGO_URI =
             "android.app.extra.PROVISIONING_LOGO_URI";
+
+    /**
+     * A {@link Bundle}[] extra consisting of list of disclaimer headers and disclaimer contents.
+     * Each {@link Bundle} must have both {@link #EXTRA_PROVISIONING_DISCLAIMER_HEADER}
+     * as disclaimer header, and {@link #EXTRA_PROVISIONING_DISCLAIMER_CONTENT} as disclaimer
+     * content.
+     *
+     * <p> The extra typically contains one disclaimer from the company of mobile device
+     * management application (MDM), and one disclaimer from the organization.
+     *
+     * <p> Call {@link Bundle#putParcelableArray(String, Parcelable[])} to put the {@link Bundle}[]
+     *
+     * <p> Maximum 3 key-value pairs can be specified. The rest will be ignored.
+     *
+     * <p> Use in an intent with action {@link #ACTION_PROVISION_MANAGED_PROFILE} or
+     * {@link #ACTION_PROVISION_MANAGED_DEVICE}
+     */
+    public static final String EXTRA_PROVISIONING_DISCLAIMERS =
+            "android.app.extra.PROVISIONING_DISCLAIMERS";
+
+    /**
+     * A String extra of localized disclaimer header.
+     *
+     * <p> The extra is typically the company name of mobile device management application (MDM)
+     * or the organization name.
+     *
+     * <p> Use in Bundle {@link #EXTRA_PROVISIONING_DISCLAIMERS}
+     */
+    public static final String EXTRA_PROVISIONING_DISCLAIMER_HEADER =
+            "android.app.extra.PROVISIONING_DISCLAIMER_HEADER";
+
+    /**
+     * A {@link Uri} extra pointing to disclaimer content.
+     *
+     * <h5>The following URI schemes are accepted:</h5>
+     * <ul>
+     * <li>content ({@link android.content.ContentResolver#SCHEME_CONTENT})</li>
+     * <li>android.resource ({@link android.content.ContentResolver#SCHEME_ANDROID_RESOURCE})</li>
+     * </ul>
+     *
+     * <p> Styled text is supported in the disclaimer content. The content is parsed by
+     * {@link android.text.Html#fromHtml(String)} and displayed in a
+     * {@link android.widget.TextView}.
+     *
+     * <p> If a <code>content:</code> URI is passed, URI is passed, the intent should have the flag
+     * {@link Intent#FLAG_GRANT_READ_URI_PERMISSION} and the uri should be added to the
+     * {@link android.content.ClipData} of the intent too.
+     *
+     * <p> Use in Bundle {@link #EXTRA_PROVISIONING_DISCLAIMERS}
+     */
+    public static final String EXTRA_PROVISIONING_DISCLAIMER_CONTENT =
+            "android.app.extra.PROVISIONING_DISCLAIMER_CONTENT";
 
     /**
      * A boolean extra indicating if user setup should be skipped, for when provisioning is started
