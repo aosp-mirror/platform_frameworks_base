@@ -108,6 +108,15 @@ CopyResult OpenGLReadback::copyGraphicBufferInto(GraphicBuffer* graphicBuffer, S
     return copyGraphicBufferInto(graphicBuffer, transform, srcRect, bitmap);
 }
 
+static float sFlipVInit[16] = {
+    1, 0, 0, 0,
+    0, -1, 0, 0,
+    0, 0, 1, 0,
+    0, 1, 0, 1,
+};
+
+static const Matrix4 sFlipV(sFlipVInit);
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -183,11 +192,15 @@ inline CopyResult copyTextureInto(Caches& caches, RenderState& renderState,
 
         Matrix4 croppedTexTransform(texTransform);
         if (!srcRect.isEmpty()) {
-            croppedTexTransform.loadTranslate(srcRect.left / sourceTexture.width(),
+            // We flipV to convert to 0,0 top-left for the srcRect
+            // coordinates then flip back to 0,0 bottom-left for
+            // GLES coordinates.
+            croppedTexTransform.multiply(sFlipV);
+            croppedTexTransform.translate(srcRect.left / sourceTexture.width(),
                     srcRect.top / sourceTexture.height(), 0);
             croppedTexTransform.scale(srcRect.getWidth() / sourceTexture.width(),
                     srcRect.getHeight() / sourceTexture.height(), 1);
-            croppedTexTransform.multiply(texTransform);
+            croppedTexTransform.multiply(sFlipV);
         }
         Glop glop;
         GlopBuilder(renderState, caches, &glop)
