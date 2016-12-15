@@ -13902,11 +13902,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     receiver.damageInParent();
                 }
             }
-
-            // Damage the entire IsolatedZVolume receiving this view's shadow.
-            if (isHardwareAccelerated() && getZ() != 0) {
-                damageShadowReceiver();
-            }
         }
     }
 
@@ -13931,23 +13926,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private boolean isProjectionReceiver() {
         return mBackground != null;
-    }
-
-    /**
-     * Damage area of the screen that can be covered by this View's shadow.
-     *
-     * This method will guarantee that any changes to shadows cast by a View
-     * are damaged on the screen for future redraw.
-     */
-    private void damageShadowReceiver() {
-        final AttachInfo ai = mAttachInfo;
-        if (ai != null) {
-            ViewParent p = getParent();
-            if (p != null && p instanceof ViewGroup) {
-                final ViewGroup vg = (ViewGroup) p;
-                vg.damageInParent();
-            }
-        }
     }
 
     /**
@@ -13979,9 +13957,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             invalidate(false);
         } else {
             damageInParent();
-        }
-        if (isHardwareAccelerated() && invalidateParent && getZ() != 0) {
-            damageShadowReceiver();
         }
     }
 
