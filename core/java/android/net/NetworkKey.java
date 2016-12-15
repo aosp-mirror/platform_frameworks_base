@@ -17,6 +17,7 @@
 package android.net;
 
 import android.annotation.SystemApi;
+import android.net.wifi.ScanResult;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -50,6 +51,18 @@ public class NetworkKey implements Parcelable {
      * {@link #TYPE_WIFI}.
      */
     public final WifiKey wifiKey;
+
+    /**
+     * Constructs a new NetworkKey for the given wifi {@link ScanResult}.
+     *
+     * @throws IllegalArgumentException if the given ScanResult is malformed
+     * @hide
+     */
+    public static NetworkKey createFromScanResult(ScanResult result) {
+        return new NetworkKey(
+                new WifiKey(
+                        '"' + result.wifiSsid.toString() + '"', result.BSSID));
+    }
 
     /**
      * Construct a new {@link NetworkKey} for a Wi-Fi network.
