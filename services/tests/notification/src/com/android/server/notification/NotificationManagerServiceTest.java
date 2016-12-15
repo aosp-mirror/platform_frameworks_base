@@ -16,14 +16,21 @@
 
 package com.android.server.notification;
 
+import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
+
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.INotificationManager;
 import android.app.IOnNotificationChannelCreatedListener;
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -31,6 +38,8 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.UserHandle;
+import android.service.notification.StatusBarNotification;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -42,8 +51,11 @@ import org.junit.runner.RunWith;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class NotificationManagerServiceTest {
+    private final String pkg = "com.android.server.notification";
+    private final int uid = 0;
     private NotificationManagerService mNotificationManagerService;
     private INotificationManager mBinderService;
+    private IPackageManager mPackageManager = mock(IPackageManager.class);
 
     @Before
     public void setUp() throws Exception {
@@ -51,12 +63,11 @@ public class NotificationManagerServiceTest {
         mNotificationManagerService = new NotificationManagerService(context);
 
         // MockPackageManager - default returns ApplicationInfo with matching calling UID
-        final IPackageManager mockPackageManager = mock(IPackageManager.class);
         final ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.uid = Binder.getCallingUid();
-        when(mockPackageManager.getApplicationInfo(any(), anyInt(), anyInt()))
+        when(mPackageManager.getApplicationInfo(any(), anyInt(), anyInt()))
                 .thenReturn(applicationInfo);
-        mNotificationManagerService.setPackageManager(mockPackageManager);
+        mNotificationManagerService.setPackageManager(mPackageManager);
         mNotificationManagerService.setHandler(new Handler(context.getMainLooper()));
 
         // Tests call directly into the Binder.
@@ -91,5 +102,64 @@ public class NotificationManagerServiceTest {
         } catch (NullPointerException e) {
             // pass
         }
+    }
+
+    @Test
+    public void testBlockedNotifications_suspended() throws Exception {
+        NotificationUsageStats usageStats = mock(NotificationUsageStats.class);
+        when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(true);
+
+        NotificationChannel channel = new NotificationChannel("id", "name",
+                NotificationManager.IMPORTANCE_HIGH);
+        NotificationRecord r = generateNotificationRecord(channel);
+        NotificationManagerService.EnqueueNotificationRunnable enqueue =
+                mNotificationManagerService.new EnqueueNotificationRunnable(UserHandle.USER_SYSTEM,
+                        r);
+        assertTrue(enqueue.isBlocked(r, usageStats));
+        verify(usageStats, times(1)).registerSuspendedByAdmin(eq(r));
+    }
+
+    @Test
+    public void testBlockedNotifications_blockedChannel() throws Exception {
+        NotificationUsageStats usageStats = mock(NotificationUsageStats.class);
+        when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(false);
+
+        NotificationChannel channel = new NotificationChannel("id", "name",
+                NotificationManager.IMPORTANCE_HIGH);
+        channel.setAllowed(false);
+        NotificationRecord r = generateNotificationRecord(channel);
+        NotificationManagerService.EnqueueNotificationRunnable enqueue =
+                mNotificationManagerService.new EnqueueNotificationRunnable(UserHandle.USER_SYSTEM,
+                        r);
+        assertTrue(enqueue.isBlocked(r, usageStats));
+        verify(usageStats, times(1)).registerBlocked(eq(r));
+    }
+
+    @Test
+    public void testBlockedNotifications_blockedApp() throws Exception {
+        NotificationUsageStats usageStats = mock(NotificationUsageStats.class);
+        when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(false);
+
+        NotificationChannel channel = new NotificationChannel("id", "name",
+                NotificationManager.IMPORTANCE_HIGH);
+        NotificationRecord r = generateNotificationRecord(channel);
+        r.setUserImportance(NotificationManager.IMPORTANCE_NONE);
+        NotificationManagerService.EnqueueNotificationRunnable enqueue =
+                mNotificationManagerService.new EnqueueNotificationRunnable(UserHandle.USER_SYSTEM,
+                        r);
+        assertTrue(enqueue.isBlocked(r, usageStats));
+        verify(usageStats, times(1)).registerBlocked(eq(r));
+    }
+
+    private NotificationRecord generateNotificationRecord(NotificationChannel channel) {
+        final Context context = InstrumentationRegistry.getTargetContext();
+        Notification n = new Notification.Builder(context)
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setPriority(Notification.PRIORITY_HIGH)
+                .build();
+        StatusBarNotification sbn = new StatusBarNotification(pkg, pkg, channel, 1, "tag", uid, uid,
+                n, UserHandle.SYSTEM, null, uid);
+        return new NotificationRecord(context, sbn);
     }
 }

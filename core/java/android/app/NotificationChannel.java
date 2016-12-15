@@ -53,7 +53,9 @@ public final class NotificationChannel implements Parcelable {
     private static final String ATT_SOUND = "sound";
     //TODO: add audio attributes support
     private static final String ATT_AUDIO_ATTRIBUTES = "audio_attributes";
+    private static final String ATT_SHOW_BADGE = "show_badge";
     private static final String ATT_USER_LOCKED = "locked";
+    private static final String ATT_ALLOWED = "allowed";
     private static final String DELIMITER = ",";
 
     /**
@@ -87,10 +89,39 @@ public final class NotificationChannel implements Parcelable {
     @SystemApi
     public static final int USER_LOCKED_SOUND = 0x00000020;
 
+    /**
+     * @hide
+     */
+    @SystemApi
+    public static final int USER_LOCKED_ALLOWED = 0x00000040;
+
+    /**
+     * @hide
+     */
+    @SystemApi
+    public static final int USER_LOCKED_SHOW_BADGE = 0x00000080;
+
+    /**
+     * @hide
+     */
+    @SystemApi
+    public static final int[] LOCKABLE_FIELDS = new int[] {
+            USER_LOCKED_PRIORITY,
+            USER_LOCKED_VISIBILITY,
+            USER_LOCKED_IMPORTANCE,
+            USER_LOCKED_LIGHTS,
+            USER_LOCKED_VIBRATION,
+            USER_LOCKED_SOUND,
+            USER_LOCKED_ALLOWED,
+            USER_LOCKED_SHOW_BADGE
+    };
+
+
     private static final int DEFAULT_VISIBILITY =
             NotificationManager.VISIBILITY_NO_OVERRIDE;
     private static final int DEFAULT_IMPORTANCE =
             NotificationManager.IMPORTANCE_UNSPECIFIED;
+    private static final boolean DEFAULT_ALLOWED = true;
 
     private final String mId;
     private CharSequence mName;
@@ -102,6 +133,8 @@ public final class NotificationChannel implements Parcelable {
     private long[] mVibration;
     private int mUserLockedFields;
     private boolean mVibrationEnabled;
+    private boolean mShowBadge;
+    private boolean mAllowed = DEFAULT_ALLOWED;
 
     /**
      * Creates a notification channel.
@@ -137,6 +170,8 @@ public final class NotificationChannel implements Parcelable {
         mVibration = in.createLongArray();
         mUserLockedFields = in.readInt();
         mVibrationEnabled = in.readByte() != 0;
+        mShowBadge = in.readByte() != 0;
+        mAllowed = in.readByte() != 0;
     }
 
     @Override
@@ -161,6 +196,8 @@ public final class NotificationChannel implements Parcelable {
         dest.writeLongArray(mVibration);
         dest.writeInt(mUserLockedFields);
         dest.writeByte(mVibrationEnabled ? (byte) 1 : (byte) 0);
+        dest.writeByte(mShowBadge ? (byte) 1 : (byte) 0);
+        dest.writeByte(mAllowed ? (byte) 1 : (byte) 0);
     }
 
     /**
@@ -174,29 +211,29 @@ public final class NotificationChannel implements Parcelable {
     // Modifiable by a notification ranker.
 
     /**
-     * Only modifiable by the system and notification ranker.
-     *
-     * Sets whether or not this notification can interrupt the user in
+     * Sets whether or not notifications posted to this channel can interrupt the user in
      * {@link android.app.NotificationManager.Policy#INTERRUPTION_FILTER_PRIORITY} mode.
+     *
+     * Only modifiable by the system and notification ranker.
      */
     public void setBypassDnd(boolean bypassDnd) {
         this.mBypassDnd = bypassDnd;
     }
 
     /**
-     * Only modifiable by the system and notification ranker.
+     * Sets whether notifications posted to this channel appear on the lockscreen or not, and if so,
+     * whether they appear in a redacted form. See e.g. {@link Notification#VISIBILITY_SECRET}.
      *
-     * Sets whether this notification appears on the lockscreen or not, and if so, whether it
-     * appears in a redacted form. See e.g. {@link Notification#VISIBILITY_SECRET}.
+     * Only modifiable by the system and notification ranker.
      */
     public void setLockscreenVisibility(int lockscreenVisibility) {
         this.mLockscreenVisibility = lockscreenVisibility;
     }
 
     /**
-     * Only modifiable by the system and notification ranker.
-     *
      * Sets the level of interruption of this notification channel.
+     *
+     * Only modifiable by the system and notification ranker.
      *
      * @param importance the amount the user should be interrupted by notifications from this
      *                   channel. See e.g.
@@ -205,6 +242,30 @@ public final class NotificationChannel implements Parcelable {
     public void setImportance(int importance) {
         this.mImportance = importance;
     }
+
+    /**
+     * Sets whether notifications posted to this channel can appear as application icon badges
+     * in a Launcher.
+     *
+     * Only modifiable by the system and notification ranker.
+     *
+     * @param showBadge true if badges should be allowed to be shown.
+     */
+    public void setShowBadge(boolean showBadge) {
+        this.mShowBadge = showBadge;
+    }
+
+    /**
+     * Sets whether notifications are allowed to be posted to this channel.
+     *
+     * Only modifiable by the system and notification ranker.
+     *
+     * @param allowed true if notifications are not allowed from this channel.
+     */
+    public void setAllowed(boolean allowed) {
+        this.mAllowed = allowed;
+    }
+
 
     // Modifiable by apps on channel creation.
 
@@ -311,6 +372,21 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
+     * Returns whether notifications posted to this channel can appear as badges in a Launcher
+     * application.
+     */
+    public boolean canShowBadge() {
+        return mShowBadge;
+    }
+
+    /**
+     * Returns whether notifications are allowed to post to this channel.
+     */
+    public boolean isAllowed() {
+        return mAllowed;
+    }
+
+    /**
      * @hide
      */
     @SystemApi
@@ -331,6 +407,8 @@ public final class NotificationChannel implements Parcelable {
         setLights(safeBool(parser, ATT_LIGHTS, false));
         enableVibration(safeBool(parser, ATT_VIBRATION_ENABLED, false));
         setVibrationPattern(safeLongArray(parser, ATT_VIBRATION, null));
+        setShowBadge(safeBool(parser, ATT_SHOW_BADGE, false));
+        setAllowed(safeBool(parser, ATT_ALLOWED, true));
         lockFields(safeInt(parser, ATT_USER_LOCKED, 0));
     }
 
@@ -369,6 +447,12 @@ public final class NotificationChannel implements Parcelable {
         if (getUserLockedFields() != 0) {
             out.attribute(null, ATT_USER_LOCKED, Integer.toString(getUserLockedFields()));
         }
+        if (canShowBadge()) {
+            out.attribute(null, ATT_SHOW_BADGE, Boolean.toString(canShowBadge()));
+        }
+        if (!isAllowed()) {
+            out.attribute(null, ATT_ALLOWED, Boolean.toString(isAllowed()));
+        }
 
         out.endTag(null, TAG_CHANNEL);
     }
@@ -398,6 +482,8 @@ public final class NotificationChannel implements Parcelable {
         record.put(ATT_VIBRATION_ENABLED, Boolean.toString(shouldVibrate()));
         record.put(ATT_USER_LOCKED, Integer.toString(getUserLockedFields()));
         record.put(ATT_VIBRATION, longArrayToString(getVibrationPattern()));
+        record.put(ATT_SHOW_BADGE, Boolean.toString(canShowBadge()));
+        record.put(ATT_ALLOWED, Boolean.toString(isAllowed()));
 
         return record;
     }
@@ -481,6 +567,8 @@ public final class NotificationChannel implements Parcelable {
         if (mLights != that.mLights) return false;
         if (mUserLockedFields != that.mUserLockedFields) return false;
         if (mVibrationEnabled != that.mVibrationEnabled) return false;
+        if (mShowBadge != that.mShowBadge) return false;
+        if (mAllowed != that.mAllowed) return false;
         if (mId != null ? !mId.equals(that.mId) : that.mId != null) return false;
         if (mName != null ? !mName.equals(that.mName) : that.mName != null) return false;
         if (mSound != null ? !mSound.equals(that.mSound) : that.mSound != null) return false;
@@ -500,9 +588,10 @@ public final class NotificationChannel implements Parcelable {
         result = 31 * result + Arrays.hashCode(mVibration);
         result = 31 * result + mUserLockedFields;
         result = 31 * result + (mVibrationEnabled ? 1 : 0);
+        result = 31 * result + (mShowBadge ? 1 : 0);
+        result = 31 * result + (mAllowed ? 1 : 0);
         return result;
     }
-
 
     @Override
     public String toString() {
@@ -517,6 +606,8 @@ public final class NotificationChannel implements Parcelable {
                 ", mVibration=" + Arrays.toString(mVibration) +
                 ", mUserLockedFields=" + mUserLockedFields +
                 ", mVibrationEnabled=" + mVibrationEnabled +
+                ", mShowBadge=" + mShowBadge +
+                ", mAllowed=" + mAllowed +
                 '}';
     }
 }

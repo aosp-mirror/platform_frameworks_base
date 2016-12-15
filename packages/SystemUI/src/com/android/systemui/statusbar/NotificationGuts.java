@@ -182,10 +182,6 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
         mINotificationManager = INotificationManager.Stub.asInterface(
                 ServiceManager.getService(Context.NOTIFICATION_SERVICE));
         mStartingUserImportance = NotificationManager.IMPORTANCE_UNSPECIFIED;
-        try {
-            mStartingUserImportance =
-                    mINotificationManager.getImportance(sbn.getPackageName(), sbn.getUid());
-        } catch (RemoteException e) {}
         mNotificationImportance = importance;
         boolean nonBlockable = false;
         try {
@@ -220,11 +216,6 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
         int progress = getSelectedImportance();
         MetricsLogger.action(mContext, MetricsEvent.ACTION_SAVE_IMPORTANCE,
                 progress - mStartingUserImportance);
-        try {
-            mINotificationManager.setImportance(sbn.getPackageName(), sbn.getUid(), progress);
-        } catch (RemoteException e) {
-            // :(
-        }
     }
 
     private int getSelectedImportance() {

@@ -43,11 +43,8 @@ public class PriorityExtractor implements NotificationSignalExtractor {
             return null;
         }
 
-        int priority = mConfig.getPriority(record.sbn.getPackageName(), record.sbn.getUid());
-        if (priority == Notification.PRIORITY_DEFAULT && record.getChannel().canBypassDnd()){
-            priority = Notification.PRIORITY_MAX;
-        }
-        record.setPackagePriority(priority);
+        record.setPackagePriority(record.getChannel().canBypassDnd()
+                ? Notification.PRIORITY_MAX : Notification.PRIORITY_DEFAULT);
 
         return null;
     }

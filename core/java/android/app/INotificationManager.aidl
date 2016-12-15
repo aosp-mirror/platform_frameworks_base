@@ -50,13 +50,6 @@ interface INotificationManager
     void setNotificationsEnabledForPackage(String pkg, int uid, boolean enabled);
     boolean areNotificationsEnabledForPackage(String pkg, int uid);
     boolean areNotificationsEnabled(String pkg);
-
-    void setVisibilityOverride(String pkg, int uid, int visibility);
-    int getVisibilityOverride(String pkg, int uid);
-    void setPriority(String pkg, int uid, int priority);
-    int getPriority(String pkg, int uid);
-    void setImportance(String pkg, int uid, int importance);
-    int getImportance(String pkg, int uid);
     int getPackageImportance(String pkg);
 
     void createNotificationChannel(String pkg, in NotificationChannel channel,
