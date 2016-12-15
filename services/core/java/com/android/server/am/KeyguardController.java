@@ -121,6 +121,8 @@ class KeyguardController {
                 // Some stack visibility might change (e.g. docked stack)
                 mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
                 mWindowManager.executeAppTransition();
+                mService.applyVrModeIfNeededLocked(mStackSupervisor.getResumedActivityLocked(),
+                        true /* enable */);
             } finally {
                 mWindowManager.continueSurfaceLayout();
             }

@@ -1220,15 +1220,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * Set while we are wanting to sleep, to prevent any
      * activities from being started/resumed.
-     *
-     * TODO(b/33594039): Clarify the actual state transitions represented by mSleeping.
-     *
-     * Currently mSleeping is set to true when transitioning into the sleep state, and remains true
-     * while in the sleep state until there is a pending transition out of sleep, in which case
-     * mSleeping is set to false, and remains false while awake.
-     *
-     * Whether mSleeping can quickly toggled between true/false without the device actually
-     * display changing states is undefined.
      */
     private boolean mSleeping = false;
 
@@ -1560,9 +1551,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int SYSTEM_USER_UNLOCK_MSG = 59;
     static final int LOG_STACK_STATE = 60;
     static final int VR_MODE_CHANGE_MSG = 61;
-    static final int SHOW_UNSUPPORTED_DISPLAY_SIZE_DIALOG_MSG = 62;
-    static final int HANDLE_TRUST_STORAGE_UPDATE_MSG = 63;
-    static final int REPORT_LOCKED_BOOT_COMPLETE_MSG = 64;
+    static final int VR_MODE_APPLY_IF_NEEDED_MSG = 62;
+    static final int SHOW_UNSUPPORTED_DISPLAY_SIZE_DIALOG_MSG = 63;
+    static final int HANDLE_TRUST_STORAGE_UPDATE_MSG = 64;
+    static final int REPORT_LOCKED_BOOT_COMPLETE_MSG = 65;
     static final int START_USER_SWITCH_FG_MSG = 712;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
@@ -2297,6 +2289,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
                 vrService.setVrMode(vrMode, requestedPackage, userId, callingPackage);
+            } break;
+            case VR_MODE_APPLY_IF_NEEDED_MSG: {
+                final ActivityRecord r = (ActivityRecord) msg.obj;
+                final boolean needsVrMode = r != null && r.requestedVrComponent != null;
+                if (needsVrMode) {
+                    applyVrMode(msg.arg1 == 1, r.requestedVrComponent, r.userId,
+                            r.info.getComponentName(), false);
+                }
             } break;
             case HANDLE_TRUST_STORAGE_UPDATE_MSG: {
                 synchronized (ActivityManagerService.this) {
@@ -3070,12 +3070,20 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mHandler.obtainMessage(VR_MODE_CHANGE_MSG, 0, 0, r));
     }
 
-    private void notifyVrManagerOfSleepState(boolean isSleeping) {
-        final VrManagerInternal vrService = LocalServices.getService(VrManagerInternal.class);
-        if (vrService == null) {
-            return;
+    void applyVrModeIfNeededLocked(ActivityRecord r, boolean enable) {
+        mHandler.sendMessage(
+                mHandler.obtainMessage(VR_MODE_APPLY_IF_NEEDED_MSG, enable ? 1 : 0, 0, r));
+    }
+
+    private void applyVrMode(boolean enabled, ComponentName packageName, int userId,
+            ComponentName callingPackage, boolean immediate) {
+        VrManagerInternal vrService =
+                LocalServices.getService(VrManagerInternal.class);
+        if (immediate) {
+            vrService.setVrModeImmediate(enabled, packageName, userId, callingPackage);
+        } else {
+            vrService.setVrMode(enabled, packageName, userId, callingPackage);
         }
-        vrService.onSleepStateChanged(isSleeping);
     }
 
     final void showAskCompatModeDialogLocked(ActivityRecord r) {
@@ -11684,7 +11692,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             startTimeTrackingFocusedActivityLocked();
             mTopProcessState = ActivityManager.PROCESS_STATE_TOP;
             mStackSupervisor.comeOutOfSleepIfNeededLocked();
-            notifyVrManagerOfSleepState(false);
             updateOomAdjLocked();
         } else if (!mSleeping && shouldSleepLocked()) {
             mSleeping = true;
@@ -11693,7 +11700,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             mTopProcessState = ActivityManager.PROCESS_STATE_TOP_SLEEPING;
             mStackSupervisor.goingToSleepLocked();
-            notifyVrManagerOfSleepState(true);
             updateOomAdjLocked();
 
             // Initialize the wake times of all processes.
@@ -22226,6 +22232,22 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public SleepToken acquireSleepToken(String tag) {
             Preconditions.checkNotNull(tag);
+
+            ComponentName requestedVrService = null;
+            ComponentName callingVrActivity = null;
+            int userId = -1;
+            synchronized (ActivityManagerService.this) {
+                final ActivityRecord resumedActivity = mStackSupervisor.getResumedActivityLocked();
+                if (resumedActivity != null) {
+                    requestedVrService = resumedActivity.requestedVrComponent;
+                    callingVrActivity = resumedActivity.info.getComponentName();
+                    userId = resumedActivity.userId;
+                }
+            }
+
+            if (requestedVrService != null) {
+                applyVrMode(false, requestedVrService, userId, callingVrActivity, true);
+            }
 
             synchronized (ActivityManagerService.this) {
                 SleepTokenImpl token = new SleepTokenImpl(tag);
