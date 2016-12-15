@@ -136,6 +136,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     // The view contained within this ViewGroup that has or contains focus.
     private View mFocused;
+    // The last view contained within this ViewGroup (excluding nested keyboard navigation clusters)
+    // that had or contained focus.
+    private View mLastFocused;
 
     /**
      * A Transformation used when drawing children, to
@@ -719,6 +722,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (mFocused != null) {
             mFocused.unFocus(this);
             mFocused = null;
+            mLastFocused = null;
         }
         super.handleFocusGainInternal(direction, previouslyFocusedRect);
     }
@@ -745,6 +749,20 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
         if (mParent != null) {
             mParent.requestChildFocus(this, focused);
+        }
+    }
+
+    /**
+     * Saves the current focus as the last focus for this view and all its ancestors.
+     * If the view is inside a keyboard navigation cluster, stops at the root of the cluster since
+     * the cluster forms a separate keyboard navigation hierarchy from the focus saving point of
+     * view.
+     */
+    void saveFocus() {
+        mLastFocused = mFocused;
+
+        if (!isKeyboardNavigationCluster() && mParent instanceof ViewGroup) {
+            ((ViewGroup) mParent).saveFocus();
         }
     }
 
@@ -3035,6 +3053,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return false;
     }
 
+    @Override
+    public boolean restoreLastFocus() {
+        if (mLastFocused != null && !mLastFocused.isKeyboardNavigationCluster()
+                && getDescendantFocusability() != FOCUS_BLOCK_DESCENDANTS
+                && (mLastFocused.mViewFlags & VISIBILITY_MASK) == VISIBLE
+                && mLastFocused.restoreLastFocus()) {
+            return true;
+        }
+        return super.restoreLastFocus();
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -4887,6 +4916,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             view.unFocus(null);
             clearChildFocus = true;
         }
+        if (view == mLastFocused) {
+            mLastFocused = null;
+        }
 
         view.clearAccessibilityFocus();
 
@@ -4997,6 +5029,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 view.unFocus(null);
                 clearChildFocus = true;
             }
+            if (view == mLastFocused) {
+                mLastFocused = null;
+            }
 
             view.clearAccessibilityFocus();
 
@@ -5070,6 +5105,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         boolean clearChildFocus = false;
 
         needGlobalAttributesUpdate(false);
+        mLastFocused = null;
 
         for (int i = count - 1; i >= 0; i--) {
             final View view = children[i];
@@ -5140,6 +5176,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         if (child == mFocused) {
             child.clearFocus();
+        }
+        if (child == mLastFocused) {
+            mLastFocused = null;
         }
 
         child.clearAccessibilityFocus();
@@ -6143,6 +6182,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             output = debugIndent(depth);
             output += "mFocused";
             Log.d(VIEW_LOG_TAG, output);
+            mFocused.debug(depth + 1);
+        }
+        if (mLastFocused != null) {
+            output = debugIndent(depth);
+            output += "mLastFocused";
+            Log.d(VIEW_LOG_TAG, output);
+            mLastFocused.debug(depth + 1);
         }
         if (mChildrenCount != 0) {
             output = debugIndent(depth);
