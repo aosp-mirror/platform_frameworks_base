@@ -59,8 +59,9 @@ public final class SELinuxMMAC {
     private static List<Policy> sPolicies = new ArrayList<>();
 
     /** Path to MAC permissions on system image */
-    private static final File MAC_PERMISSIONS = new File(Environment.getRootDirectory(),
-            "/etc/security/mac_permissions.xml");
+    private static final File[] MAC_PERMISSIONS =
+    { new File(Environment.getRootDirectory(), "/etc/security/plat_mac_permissions.xml"),
+      new File(Environment.getRootDirectory(), "/etc/security/nonplat_mac_permissions.xml") };
 
     // Append privapp to existing seinfo label
     private static final String PRIVILEGED_APP_STR = ":privapp";
@@ -87,49 +88,51 @@ public final class SELinuxMMAC {
 
         FileReader policyFile = null;
         XmlPullParser parser = Xml.newPullParser();
-        try {
-            policyFile = new FileReader(MAC_PERMISSIONS);
-            Slog.d(TAG, "Using policy file " + MAC_PERMISSIONS);
+        for (int i = 0; i < MAC_PERMISSIONS.length; i++) {
+            try {
+                policyFile = new FileReader(MAC_PERMISSIONS[i]);
+                Slog.d(TAG, "Using policy file " + MAC_PERMISSIONS[i]);
 
-            parser.setInput(policyFile);
-            parser.nextTag();
-            parser.require(XmlPullParser.START_TAG, null, "policy");
+                parser.setInput(policyFile);
+                parser.nextTag();
+                parser.require(XmlPullParser.START_TAG, null, "policy");
 
-            while (parser.next() != XmlPullParser.END_TAG) {
-                if (parser.getEventType() != XmlPullParser.START_TAG) {
-                    continue;
+                while (parser.next() != XmlPullParser.END_TAG) {
+                    if (parser.getEventType() != XmlPullParser.START_TAG) {
+                        continue;
+                    }
+
+                    switch (parser.getName()) {
+                        case "signer":
+                            policies.add(readSignerOrThrow(parser));
+                            break;
+                        default:
+                            skip(parser);
+                    }
                 }
-
-                switch (parser.getName()) {
-                    case "signer":
-                        policies.add(readSignerOrThrow(parser));
-                        break;
-                    default:
-                        skip(parser);
-                }
+            } catch (IllegalStateException | IllegalArgumentException |
+                     XmlPullParserException ex) {
+                StringBuilder sb = new StringBuilder("Exception @");
+                sb.append(parser.getPositionDescription());
+                sb.append(" while parsing ");
+                sb.append(MAC_PERMISSIONS[i]);
+                sb.append(":");
+                sb.append(ex);
+                Slog.w(TAG, sb.toString());
+                return false;
+            } catch (IOException ioe) {
+                Slog.w(TAG, "Exception parsing " + MAC_PERMISSIONS[i], ioe);
+                return false;
+            } finally {
+                IoUtils.closeQuietly(policyFile);
             }
-        } catch (IllegalStateException | IllegalArgumentException |
-                XmlPullParserException ex) {
-            StringBuilder sb = new StringBuilder("Exception @");
-            sb.append(parser.getPositionDescription());
-            sb.append(" while parsing ");
-            sb.append(MAC_PERMISSIONS);
-            sb.append(":");
-            sb.append(ex);
-            Slog.w(TAG, sb.toString());
-            return false;
-        } catch (IOException ioe) {
-            Slog.w(TAG, "Exception parsing " + MAC_PERMISSIONS, ioe);
-            return false;
-        } finally {
-            IoUtils.closeQuietly(policyFile);
         }
 
         // Now sort the policy stanzas
         PolicyComparator policySort = new PolicyComparator();
         Collections.sort(policies, policySort);
         if (policySort.foundDuplicate()) {
-            Slog.w(TAG, "ERROR! Duplicate entries found parsing " + MAC_PERMISSIONS);
+            Slog.w(TAG, "ERROR! Duplicate entries found parsing mac_permissions.xml files");
             return false;
         }
 
