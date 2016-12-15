@@ -312,11 +312,6 @@ interface INetworkManagementService
      */
     void setDnsConfigurationForNetwork(int netId, in String[] servers, String domains);
 
-    /**
-     * Bind name servers to a network in the DNS resolver.
-     */
-    void setDnsServersForNetwork(int netId, in String[] servers, String domains);
-
     void setFirewallEnabled(boolean enabled);
     boolean isFirewallEnabled();
     void setFirewallInterfaceRule(String iface, boolean allow);
