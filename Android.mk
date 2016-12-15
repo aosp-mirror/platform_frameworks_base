@@ -145,6 +145,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/content/ISyncStatusObserver.aidl \
 	core/java/android/content/pm/ILauncherApps.aidl \
 	core/java/android/content/pm/IOnAppsChangedListener.aidl \
+	core/java/android/content/pm/IOnPermissionsChangeListener.aidl \
 	core/java/android/content/pm/IOtaDexopt.aidl \
 	core/java/android/content/pm/IPackageDataObserver.aidl \
 	core/java/android/content/pm/IPackageDeleteObserver.aidl \
@@ -157,7 +158,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/content/pm/IPackageManager.aidl \
 	core/java/android/content/pm/IPackageMoveObserver.aidl \
 	core/java/android/content/pm/IPackageStatsObserver.aidl \
-	core/java/android/content/pm/IOnPermissionsChangeListener.aidl \
+	core/java/android/content/pm/IPinItemRequest.aidl \
 	core/java/android/content/pm/IShortcutService.aidl \
 	core/java/android/content/pm/permission/IRuntimePermissionPresenter.aidl \
 	core/java/android/database/IContentObserver.aidl \

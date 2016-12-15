@@ -19,6 +19,8 @@ package android.content.pm;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.TestApi;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -32,11 +34,14 @@ import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -68,6 +73,36 @@ public class LauncherApps {
 
     static final String TAG = "LauncherApps";
     static final boolean DEBUG = false;
+
+    /**
+     * Activity Action: For the default launcher to show the confirmation dialog to create
+     * a pinned shortcut.
+     *
+     * <p>See the {@link ShortcutManager} javadoc for details.
+     *
+     * <p>
+     * Use {@link #getPinItemRequest(Intent)} to get a {@link PinItemRequest} object,
+     * and call {@link PinItemRequest#accept(Bundle)}
+     * if the user accepts.  If the user doesn't accept, no further action is required.
+     *
+     * @see #EXTRA_PIN_ITEM_REQUEST
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_CONFIRM_PIN_ITEM =
+            "android.content.pm.action.CONFIRM_PIN_ITEM";
+
+    /**
+     * An extra for {@link #ACTION_CONFIRM_PIN_ITEM} containing a
+     * {@link ShortcutInfo} of the shortcut the publisher app asked to pin.
+     *
+     * <p>A helper function {@link #getPinItemRequest(Intent)} can be used
+     * instead of using this constant directly.
+     *
+     * @see #ACTION_CONFIRM_PIN_ITEM
+     */
+    public static final String EXTRA_PIN_ITEM_REQUEST =
+            "android.content.pm.extra.PIN_ITEM_REQUEST";
+
 
     private Context mContext;
     private ILauncherApps mService;
@@ -655,20 +690,38 @@ public class LauncherApps {
                 }
             }
         } else if (shortcut.hasIconResource()) {
-            try {
-                final int resId = shortcut.getIconResourceId();
-                if (resId == 0) {
-                    return null; // Shouldn't happen but just in case.
+            return loadDrawableResourceFromPackage(shortcut.getPackage(),
+                    shortcut.getIconResourceId(), shortcut.getUserHandle(), density);
+        } else if (shortcut.getIcon() != null) {
+            // This happens if a shortcut is pending-approval.
+            final Icon icon = shortcut.getIcon();
+            switch (icon.getType()) {
+                case Icon.TYPE_RESOURCE: {
+                    return loadDrawableResourceFromPackage(shortcut.getPackage(),
+                            icon.getResId(), shortcut.getUserHandle(), density);
                 }
-                final ApplicationInfo ai = getApplicationInfo(shortcut.getPackage(),
-                        /* flags =*/ 0, shortcut.getUserHandle());
-                final Resources res = mContext.getPackageManager().getResourcesForApplication(ai);
-                return res.getDrawableForDensity(resId, density);
-            } catch (NameNotFoundException | Resources.NotFoundException e) {
-                return null;
+                case Icon.TYPE_BITMAP: {
+                    return icon.loadDrawable(mContext);
+                }
+                default:
+                    return null; // Shouldn't happen though.
             }
         } else {
             return null; // Has no icon.
+        }
+    }
+
+    private Drawable loadDrawableResourceFromPackage(String packageName, int resId,
+            UserHandle user, int density) {
+        try {
+            if (resId == 0) {
+                return null; // Shouldn't happen but just in case.
+            }
+            final ApplicationInfo ai = getApplicationInfo(packageName, /* flags =*/ 0, user);
+            final Resources res = mContext.getPackageManager().getResourcesForApplication(ai);
+            return res.getDrawableForDensity(resId, density);
+        } catch (NameNotFoundException | Resources.NotFoundException e) {
+            return null;
         }
     }
 
@@ -1062,6 +1115,123 @@ public class LauncherApps {
             info.user = user;
             info.shortcuts = shortcuts;
             obtainMessage(MSG_SHORTCUT_CHANGED, info).sendToTarget();
+        }
+    }
+
+    /**
+     * A helper method to extract a {@link PinItemRequest} set to
+     * the {@link #EXTRA_PIN_ITEM_REQUEST} extra.
+     */
+    public PinItemRequest getPinItemRequest(Intent intent) {
+        return intent.getParcelableExtra(EXTRA_PIN_ITEM_REQUEST);
+    }
+
+    /**
+     * Represents a "pin shortcut" request made by an app, which is sent with
+     * an {@link #ACTION_CONFIRM_PIN_ITEM} intent to the default launcher app.
+     *
+     * @see #EXTRA_PIN_ITEM_REQUEST
+     * @see #getPinItemRequest(Intent)
+     */
+    public static final class PinItemRequest implements Parcelable {
+
+        /** This is a request to pin shortcut. */
+        public static final int REQUEST_TYPE_SHORTCUT = 1;
+
+        @IntDef(value = {REQUEST_TYPE_SHORTCUT})
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface RequestType {}
+
+        private final int mRequestType;
+        private final ShortcutInfo mShortcutInfo;
+        private final IPinItemRequest mInner;
+
+        /**
+         * @hide
+         */
+        public PinItemRequest(@RequestType int requestType, ShortcutInfo shortcutInfo,
+                IPinItemRequest inner) {
+            mRequestType = requestType;
+            mShortcutInfo = shortcutInfo;
+            mInner = inner;
+        }
+
+        /**
+         * Represents the type of a request.  For now {@link #REQUEST_TYPE_SHORTCUT} is the only
+         * valid type.
+         */
+        @RequestType
+        public int getRequestType() {
+            return mRequestType;
+        }
+
+        /**
+         * {@link ShortcutInfo} sent by the requesting app.  Always non-null for a
+         * {@link #REQUEST_TYPE_SHORTCUT} request.
+         */
+        @Nullable
+        public ShortcutInfo getShortcutInfo() {
+            return mShortcutInfo;
+        }
+
+        /**
+         * Return {@code TRUE} if a request is valid -- i.e. {@link #accept(Bundle)} has not been
+         * called, and it has not been canceled.
+         */
+        public boolean isValid() {
+            try {
+                return mInner.isValid();
+            } catch (RemoteException e) {
+                return false;
+            }
+        }
+
+        /**
+         * Called by the receiving launcher app when the user accepts the request.
+         */
+        public boolean accept(@Nullable Bundle options) {
+            try {
+                return mInner.accept(options);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Same as as {@link #accept(Bundle)} with no options.
+         */
+        public boolean accept() {
+            return accept(/* options= */ null);
+        }
+
+        private PinItemRequest(Parcel source) {
+            final ClassLoader cl = getClass().getClassLoader();
+
+            mRequestType = source.readInt();
+            mShortcutInfo = source.readParcelable(cl);
+            mInner = IPinItemRequest.Stub.asInterface(source.readStrongBinder());
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(mRequestType);
+            dest.writeParcelable(mShortcutInfo, flags);
+            dest.writeStrongBinder(mInner.asBinder());
+        }
+
+        public static final Creator<PinItemRequest> CREATOR =
+                new Creator<PinItemRequest>() {
+                    public PinItemRequest createFromParcel(Parcel source) {
+                        return new PinItemRequest(source);
+                    }
+                    public PinItemRequest[] newArray(int size) {
+                        return new PinItemRequest[size];
+                    }
+                };
+
+        @Override
+        public int describeContents() {
+            return 0;
         }
     }
 }
