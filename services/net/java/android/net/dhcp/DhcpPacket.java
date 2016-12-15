@@ -25,8 +25,10 @@ import java.util.List;
  * Defines basic data and operations needed to build and use packets for the
  * DHCP protocol.  Subclasses create the specific packets used at each
  * stage of the negotiation.
+ *
+ * @hide
  */
-abstract class DhcpPacket {
+public abstract class DhcpPacket {
     protected static final String TAG = "DhcpPacket";
 
     // dhcpcd has a minimum lease of 20 seconds, but DhcpStateMachine would refuse to wake up the
