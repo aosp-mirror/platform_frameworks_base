@@ -857,7 +857,7 @@ public abstract class PanelView extends FrameLayout {
 
     public void collapse(boolean delayed, float speedUpFactor) {
         if (DEBUG) logf("collapse: " + this);
-        if (!isFullyCollapsed() && !mTracking && !mClosing) {
+        if (canPanelBeCollapsed()) {
             cancelHeightAnimator();
             notifyExpandingStarted();
 
@@ -870,6 +870,10 @@ public abstract class PanelView extends FrameLayout {
                 fling(0, false /* expand */, speedUpFactor, false /* expandBecauseOfFalsing */);
             }
         }
+    }
+
+    public boolean canPanelBeCollapsed() {
+        return !isFullyCollapsed() && !mTracking && !mClosing;
     }
 
     private final Runnable mFlingCollapseRunnable = new Runnable() {

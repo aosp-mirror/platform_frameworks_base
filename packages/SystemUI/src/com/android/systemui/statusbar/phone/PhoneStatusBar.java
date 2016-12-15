@@ -2891,7 +2891,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
         }
 
-        if (mStatusBarWindow != null) {
+        if (mStatusBarWindow != null && mNotificationPanel.canPanelBeCollapsed()) {
             // release focus immediately to kick off focus change transition
             mStatusBarWindowManager.setStatusBarFocusable(false);
 
@@ -4622,6 +4622,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public void onClosingFinished() {
         runPostCollapseRunnables();
+        if (!isPanelFullyCollapsed()) {
+            // if we set it not to be focusable when collapsing, we have to undo it when we aborted
+            // the closing
+            mStatusBarWindowManager.setStatusBarFocusable(true);
+        }
     }
 
     public void onUnlockHintStarted() {
