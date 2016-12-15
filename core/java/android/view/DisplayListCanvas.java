@@ -23,6 +23,7 @@ import android.graphics.CanvasProperty;
 import android.graphics.Paint;
 import android.util.Pools.SynchronizedPool;
 
+import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
 
 /**
@@ -230,30 +231,37 @@ public final class DisplayListCanvas extends RecordingCanvas {
         }
     }
 
-    @FastNative
-    private static native long nCreateDisplayListCanvas(long node, int width, int height);
-    @FastNative
-    private static native void nResetDisplayListCanvas(long canvas, long node,
-            int width, int height);
-    @FastNative
-    private static native int nGetMaximumTextureWidth();
-    @FastNative
-    private static native int nGetMaximumTextureHeight();
-    @FastNative
-    private static native void nInsertReorderBarrier(long renderer, boolean enableReorder);
+
+    // ------------------ Fast JNI ------------------------
+
     @FastNative
     private static native void nCallDrawGLFunction(long renderer,
             long drawGLFunction, Runnable releasedCallback);
-    @FastNative
+
+
+    // ------------------ Critical JNI ------------------------
+
+    @CriticalNative
+    private static native long nCreateDisplayListCanvas(long node, int width, int height);
+    @CriticalNative
+    private static native void nResetDisplayListCanvas(long canvas, long node,
+            int width, int height);
+    @CriticalNative
+    private static native int nGetMaximumTextureWidth();
+    @CriticalNative
+    private static native int nGetMaximumTextureHeight();
+    @CriticalNative
+    private static native void nInsertReorderBarrier(long renderer, boolean enableReorder);
+    @CriticalNative
     private static native long nFinishRecording(long renderer);
-    @FastNative
+    @CriticalNative
     private static native void nDrawRenderNode(long renderer, long renderNode);
-    @FastNative
+    @CriticalNative
     private static native void nDrawLayer(long renderer, long layer);
-    @FastNative
+    @CriticalNative
     private static native void nDrawCircle(long renderer, long propCx,
             long propCy, long propRadius, long propPaint);
-    @FastNative
+    @CriticalNative
     private static native void nDrawRoundRect(long renderer, long propLeft, long propTop,
             long propRight, long propBottom, long propRx, long propRy, long propPaint);
 }
