@@ -25,3 +25,5 @@ LOCAL_PACKAGE_NAME := FrameworksUtilTests
 LOCAL_CERTIFICATE := platform
 
 include $(BUILD_PACKAGE)
+
+include $(call all-makefiles-under,$(LOCAL_PATH))
