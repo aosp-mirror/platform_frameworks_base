@@ -23,4 +23,5 @@ for pid in $( adb shell ps | awk '{ if ( $9 == "surfaceflinger" ) { print $2 } }
 done
 adb shell setprop debug.egl.traceGpuCompletion 1
 adb shell setprop debug.sf.nobootanimation 1
+# Daemonize command is available only in eng builds.
 adb shell daemonize surfaceflinger
