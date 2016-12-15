@@ -663,12 +663,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         array.clear();
     }
 
-    private final View.OnClickListener mShelfClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (mState == StatusBarState.KEYGUARD) {
-                goToLockedShade(null);
-            }
+    private final View.OnClickListener mGoToLockedShadeListener = v -> {
+        if (mState == StatusBarState.KEYGUARD) {
+            goToLockedShade(null);
         }
     };
     private HashMap<ExpandableNotificationRow, List<ExpandableNotificationRow>> mTmpChildOrderMap
@@ -1061,8 +1058,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 (NotificationShelf) LayoutInflater.from(mContext).inflate(
                         R.layout.status_bar_notification_shelf, mStackScroller, false);
         mNotificationShelf.setOnActivatedListener(this);
-        mNotificationShelf.setOnClickListener(mShelfClickListener);
         mStackScroller.setShelf(mNotificationShelf);
+        mNotificationShelf.setOnClickListener(mGoToLockedShadeListener);
+        mNotificationShelf.setStatusBarState(mState);
     }
 
     @Override
@@ -4598,6 +4596,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStackScroller.setStatusBarState(state);
         updateReportRejectedTouchVisibility();
         updateDozing();
+        mNotificationShelf.setStatusBarState(state);
     }
 
     @Override
