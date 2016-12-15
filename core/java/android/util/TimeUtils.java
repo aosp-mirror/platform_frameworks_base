@@ -19,7 +19,6 @@ package android.util;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.os.SystemClock;
-import android.text.format.DateUtils;
 
 import com.android.internal.util.XmlUtils;
 

@@ -18,28 +18,33 @@ package android.view.autofill;
 
 import android.os.Bundle;
 
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.Set;
 
 /** @hide */
 public final class Helper {
 
-    // TODO(b/33197203): set to false when stable
-    static final boolean DEBUG = true;
+    static final boolean DEBUG = true; // TODO(b/33197203): set to false when stable
     static final String REDACTED = "[REDACTED]";
 
-    static void append(StringBuilder builder, Bundle bundle) {
+    static StringBuilder append(StringBuilder builder, Bundle bundle) {
         if (bundle == null) {
             builder.append("N/A");
         } else if (!DEBUG) {
             builder.append(REDACTED);
         } else {
             final Set<String> keySet = bundle.keySet();
-            builder.append("[bundle with ").append(keySet.size()).append(" extras:");
+            builder.append("[Bundle with ").append(keySet.size()).append(" extras:");
             for (String key : keySet) {
-                builder.append(' ').append(key).append('=').append(bundle.get(key)).append(',');
+                final Object value = bundle.get(key);
+                builder.append(' ').append(key).append('=');
+                builder.append((value instanceof Object[])
+                        ? Arrays.toString((Objects[]) value) : value);
             }
             builder.append(']');
         }
+        return builder;
     }
 
     private Helper() {

@@ -1074,7 +1074,7 @@ public class FingerprintManager {
 
         @Override // binder call
         public void onAuthenticationFailed(long deviceId) {
-            mHandler.obtainMessage(MSG_AUTHENTICATION_FAILED).sendToTarget();;
+            mHandler.obtainMessage(MSG_AUTHENTICATION_FAILED).sendToTarget();
         }
 
         @Override // binder call
