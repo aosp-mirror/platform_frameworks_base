@@ -324,11 +324,8 @@ RENDERTHREAD_TEST(SkiaPipeline, clip_replace) {
         }
         void onDrawPaint(const SkPaint&) {
             EXPECT_EQ(0, mDrawCounter++);
-            //TODO: this unit test is failing on the commented check below, because of a missing
-            //feature. In Snapshot::applyClip HWUI is intersecting the clip with the clip root,
-            //even for kReplace_Op clips. We need to implement the same for Skia pipelines.
-            //EXPECT_EQ(SkRect::MakeLTRB(20, 10, 30, 40), TestUtils::getClipBounds(this)) //got instead 20 0 30 50
-            //        << "Expect resolved clip to be intersection of viewport clip and clip op";
+            EXPECT_EQ(SkRect::MakeLTRB(20, 10, 30, 40), TestUtils::getClipBounds(this))
+                    << "Expect resolved clip to be intersection of viewport clip and clip op";
         }
         int mDrawCounter = 0;
     };

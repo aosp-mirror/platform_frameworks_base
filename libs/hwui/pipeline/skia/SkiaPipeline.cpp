@@ -100,7 +100,7 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque)
             int saveCount = layerCanvas->save();
             SkASSERT(saveCount == 1);
 
-            layerCanvas->clipRect(layerDamage.toSkRect(), SkClipOp::kReplace);
+            layerCanvas->androidFramework_setDeviceClipRestriction(layerDamage.toSkIRect());
 
             auto savedLightCenter = mLightCenter;
             // map current light center into RenderNode's coordinate space
@@ -233,8 +233,8 @@ static Rect nodeBounds(RenderNode& node) {
 void SkiaPipeline::renderFrameImpl(const LayerUpdateQueue& layers, const SkRect& clip,
         const std::vector<sp<RenderNode>>& nodes, bool opaque, const Rect &contentDrawBounds,
         SkCanvas* canvas) {
-
-    canvas->clipRect(clip, SkClipOp::kReplace);
+    SkAutoCanvasRestore saver(canvas, true);
+    canvas->androidFramework_setDeviceClipRestriction(clip.roundOut());
 
     if (!opaque) {
         canvas->clear(SK_ColorTRANSPARENT);
@@ -242,7 +242,6 @@ void SkiaPipeline::renderFrameImpl(const LayerUpdateQueue& layers, const SkRect&
 
     if (1 == nodes.size()) {
         if (!nodes[0]->nothingToDraw()) {
-            SkAutoCanvasRestore acr(canvas, true);
             RenderNodeDrawable root(nodes[0].get(), canvas);
             root.draw(canvas);
         }
