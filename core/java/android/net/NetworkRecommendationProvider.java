@@ -75,7 +75,7 @@ public abstract class NetworkRecommendationProvider {
      * A callback implementing applications should invoke when a {@link RecommendationResult}
      * is available.
      */
-    public static final class ResultCallback {
+    public static class ResultCallback {
         private final IRemoteCallback mCallback;
         private final int mSequence;
         private final AtomicBoolean mCallbackRun;
