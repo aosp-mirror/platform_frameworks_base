@@ -374,6 +374,7 @@ public class IpManager extends StateMachine {
     private static final int EVENT_DHCPACTION_TIMEOUT = 10;
 
     private static final int MAX_LOG_RECORDS = 500;
+    private static final int MAX_PACKET_RECORDS = 100;
 
     private static final boolean NO_CALLBACKS = false;
     private static final boolean SEND_CALLBACKS = true;
@@ -399,6 +400,7 @@ public class IpManager extends StateMachine {
     private final WakeupMessage mDhcpActionTimeoutAlarm;
     private final AvoidBadWifiTracker mAvoidBadWifiTracker;
     private final LocalLog mLocalLog;
+    private final LocalLog mConnectivityPacketLog;
     private final MessageHandlingLogger mMsgStateLogger;
     private final IpConnectivityLog mMetricsLog = new IpConnectivityLog();
 
@@ -439,6 +441,7 @@ public class IpManager extends StateMachine {
         mNwService = nwService;
 
         mLocalLog = new LocalLog(MAX_LOG_RECORDS);
+        mConnectivityPacketLog = new LocalLog(MAX_PACKET_RECORDS);
         mMsgStateLogger = new MessageHandlingLogger();
 
         mNetlinkTracker = new NetlinkTracker(
@@ -609,7 +612,7 @@ public class IpManager extends StateMachine {
         }
 
         IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
-        pw.println("APF dump:");
+        pw.println(mTag + " APF dump:");
         pw.increaseIndent();
         // Thread-unsafe access to mApfFilter but just used for debugging.
         ApfFilter apfFilter = mApfFilter;
@@ -624,6 +627,12 @@ public class IpManager extends StateMachine {
         pw.println(mTag + " StateMachine dump:");
         pw.increaseIndent();
         mLocalLog.readOnlyLocalLog().dump(fd, pw, args);
+        pw.decreaseIndent();
+
+        pw.println();
+        pw.println(mTag + " connectivity packet log:");
+        pw.increaseIndent();
+        mConnectivityPacketLog.readOnlyLocalLog().dump(fd, pw, args);
         pw.decreaseIndent();
     }
 
@@ -1220,6 +1229,7 @@ public class IpManager extends StateMachine {
     }
 
     class RunningState extends State {
+        private ConnectivityPacketTracker mPacketTracker;
         private boolean mDhcpActionInFlight;
 
         @Override
@@ -1231,6 +1241,9 @@ public class IpManager extends StateMachine {
             if (mApfFilter == null) {
                 mCallback.setFallbackMulticastFilter(mMulticastFiltering);
             }
+
+            mPacketTracker = createPacketTracker();
+            if (mPacketTracker != null) mPacketTracker.start();
 
             if (mConfiguration.mEnableIPv6 && !startIPv6()) {
                 doImmediateProvisioningFailure(IpManagerEvent.ERROR_STARTING_IPV6);
@@ -1266,12 +1279,25 @@ public class IpManager extends StateMachine {
                 mDhcpClient.doQuit();
             }
 
+            if (mPacketTracker != null) {
+                mPacketTracker.stop();
+                mPacketTracker = null;
+            }
+
             if (mApfFilter != null) {
                 mApfFilter.shutdown();
                 mApfFilter = null;
             }
 
             resetLinkProperties();
+        }
+
+        private ConnectivityPacketTracker createPacketTracker() {
+            try {
+                return new ConnectivityPacketTracker(mNetworkInterface, mConnectivityPacketLog);
+            } catch (IllegalArgumentException e) {
+                return null;
+            }
         }
 
         private void ensureDhcpAction() {
