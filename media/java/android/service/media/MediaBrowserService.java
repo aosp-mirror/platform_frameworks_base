@@ -52,9 +52,9 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Base class for media browse services.
+ * Base class for media browser services.
  * <p>
- * Media browse services enable applications to browse media content provided by an application
+ * Media browser services enable applications to browse media content provided by an application
  * and ask the application to start playing it. They may also be used to control content that
  * is already playing by way of a {@link MediaSession}.
  * </p>
@@ -85,18 +85,27 @@ public abstract class MediaBrowserService extends Service {
 
     /**
      * A key for passing the MediaItem to the ResultReceiver in getItem.
-     *
      * @hide
      */
     public static final String KEY_MEDIA_ITEM = "media_item";
 
-    private static final int RESULT_FLAG_OPTION_NOT_HANDLED = 0x00000001;
-    private static final int RESULT_FLAG_ON_LOAD_ITEM_NOT_IMPLEMENTED = 0x00000002;
+    /**
+     * A key for passing the list of MediaItems to the ResultReceiver in search.
+     * @hide
+     */
+    public static final String KEY_SEARCH_RESULTS = "search_results";
+
+    private static final int RESULT_FLAG_OPTION_NOT_HANDLED = 1 << 0;
+    private static final int RESULT_FLAG_ON_LOAD_ITEM_NOT_IMPLEMENTED = 1 << 1;
+    private static final int RESULT_FLAG_ON_SEARCH_NOT_IMPLEMENTED = 1 << 2;
+
+    private static final int RESULT_ERROR = -1;
+    private static final int RESULT_OK = 0;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag=true, value = { RESULT_FLAG_OPTION_NOT_HANDLED,
-            RESULT_FLAG_ON_LOAD_ITEM_NOT_IMPLEMENTED })
+            RESULT_FLAG_ON_LOAD_ITEM_NOT_IMPLEMENTED, RESULT_FLAG_ON_SEARCH_NOT_IMPLEMENTED })
     private @interface ResultFlags { }
 
     private final ArrayMap<IBinder, ConnectionRecord> mConnections = new ArrayMap<>();
@@ -307,10 +316,6 @@ public abstract class MediaBrowserService extends Service {
         @Override
         public void getMediaItem(final String mediaId, final ResultReceiver receiver,
                 final IMediaBrowserServiceCallbacks callbacks) {
-            if (TextUtils.isEmpty(mediaId) || receiver == null) {
-                return;
-            }
-
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -321,6 +326,23 @@ public abstract class MediaBrowserService extends Service {
                         return;
                     }
                     performLoadItem(mediaId, connection, receiver);
+                }
+            });
+        }
+
+        @Override
+        public void search(final String query, Bundle extras, ResultReceiver receiver,
+                final IMediaBrowserServiceCallbacks callbacks) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    final IBinder b = callbacks.asBinder();
+                    ConnectionRecord connection = mConnections.get(b);
+                    if (connection == null) {
+                        Log.w(TAG, "search for callback that isn't registered query=" + query);
+                        return;
+                    }
+                    performSearch(query, extras, connection, receiver);
                 }
             });
         }
@@ -358,7 +380,7 @@ public abstract class MediaBrowserService extends Service {
      * @param clientUid The uid of the application which is requesting access to
      *            browse media.
      * @param rootHints An optional bundle of service-specific arguments to send
-     *            to the media browse service when connecting and retrieving the
+     *            to the media browser service when connecting and retrieving the
      *            root id for browsing, or null if none. The contents of this
      *            bundle may affect the information returned when browsing.
      * @return The {@link BrowserRoot} for accessing this app's content or null.
@@ -412,8 +434,8 @@ public abstract class MediaBrowserService extends Service {
      * @param parentId The id of the parent media item whose children are to be
      *            queried.
      * @param result The Result to send the list of children to.
-     * @param options A bundle of service-specific arguments sent from the media
-     *            browse. The information returned through the result should be
+     * @param options The bundle of service-specific arguments sent from the media
+     *            browser. The information returned through the result should be
      *            affected by the contents of this bundle.
      */
     public void onLoadChildren(@NonNull String parentId,
@@ -446,6 +468,32 @@ public abstract class MediaBrowserService extends Service {
      */
     public void onLoadItem(String itemId, Result<MediaBrowser.MediaItem> result) {
         result.setFlags(RESULT_FLAG_ON_LOAD_ITEM_NOT_IMPLEMENTED);
+        result.sendResult(null);
+    }
+
+    /**
+     * Called to get the search result.
+     * <p>
+     * Implementations must call {@link Result#sendResult result.sendResult}. If
+     * the search will be an expensive operation {@link Result#detach result.detach}
+     * may be called before returning from this function, and then {@link Result#sendResult
+     * result.sendResult} called when the search has been completed.
+     * </p><p>
+     * In case there are no search results, call {@link Result#sendResult} with an empty list.
+     * In case there are some errors happened, call {@link Result#sendResult result.sendResult}
+     * with {@code null}, which will invoke {@link MediaBrowser.SearchCallback#onError}.
+     * </p><p>
+     * The default implementation will invoke {@link MediaBrowser.SearchCallback#onError}.
+     * </p>
+     *
+     * @param query The search query sent from the media browser. It contains keywords separated
+     *            by space.
+     * @param extras The bundle of service-specific arguments sent from the media browser.
+     * @param result The {@link Result} to send the search result.
+     */
+    public void onSearch(@NonNull String query, Bundle extras,
+            Result<List<MediaBrowser.MediaItem>> result) {
+        result.setFlags(RESULT_FLAG_ON_SEARCH_NOT_IMPLEMENTED);
         result.sendResult(null);
     }
 
@@ -531,8 +579,8 @@ public abstract class MediaBrowserService extends Service {
      *
      * @param parentId The id of the parent media item whose
      *            children changed.
-     * @param options A bundle of service-specific arguments to send
-     *            to the media browse. The contents of this bundle may
+     * @param options The bundle of service-specific arguments to send
+     *            to the media browser. The contents of this bundle may
      *            contain the information about the change.
      */
     public void notifyChildrenChanged(@NonNull String parentId, @NonNull Bundle options) {
@@ -705,12 +753,12 @@ public abstract class MediaBrowserService extends Service {
             @Override
             void onResultSent(MediaBrowser.MediaItem item, @ResultFlags int flag) {
                 if ((flag & RESULT_FLAG_ON_LOAD_ITEM_NOT_IMPLEMENTED) != 0) {
-                    receiver.send(-1, null);
+                    receiver.send(RESULT_ERROR, null);
                     return;
                 }
                 Bundle bundle = new Bundle();
                 bundle.putParcelable(KEY_MEDIA_ITEM, item);
-                receiver.send(0, bundle);
+                receiver.send(RESULT_OK, bundle);
             }
         };
 
@@ -721,6 +769,34 @@ public abstract class MediaBrowserService extends Service {
         if (!result.isDone()) {
             throw new IllegalStateException("onLoadItem must call detach() or sendResult()"
                     + " before returning for id=" + itemId);
+        }
+    }
+
+    private void performSearch(String query, Bundle extras, final ConnectionRecord connection,
+            final ResultReceiver receiver) {
+        final Result<List<MediaBrowser.MediaItem>> result =
+                new Result<List<MediaBrowser.MediaItem>>(query) {
+            @Override
+            void onResultSent(List<MediaBrowser.MediaItem> items, @ResultFlags int flag) {
+                if ((flag & RESULT_FLAG_ON_SEARCH_NOT_IMPLEMENTED) != 0
+                        || items == null) {
+                    receiver.send(RESULT_ERROR, null);
+                    return;
+                }
+                Bundle bundle = new Bundle();
+                bundle.putParcelableArray(KEY_SEARCH_RESULTS,
+                        items.toArray(new MediaBrowser.MediaItem[0]));
+                receiver.send(RESULT_OK, bundle);
+            }
+        };
+
+        mCurConnection = connection;
+        onSearch(query, extras, result);
+        mCurConnection = null;
+
+        if (!result.isDone()) {
+            throw new IllegalStateException("onSearch must call detach() or sendResult()"
+                    + " before returning for query=" + query);
         }
     }
 
