@@ -106,6 +106,8 @@ static PixelFormat internalFormatToPixelFormat(GLint internalFormat) {
         return PIXEL_FORMAT_RGBA_8888;
     case GL_RGBA:
         return PIXEL_FORMAT_RGBA_8888;
+    case GL_RGB:
+        return PIXEL_FORMAT_RGB_565;
     default:
         LOG_ALWAYS_FATAL("Unsupported bitmap colorType: %d", internalFormat);
         return PIXEL_FORMAT_UNKNOWN;
