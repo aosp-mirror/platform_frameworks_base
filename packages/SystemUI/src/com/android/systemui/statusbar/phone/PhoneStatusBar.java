@@ -2913,7 +2913,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         runPostCollapseRunnables();
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, false);
-        showBouncer();
+        showBouncerIfKeyguard();
         recomputeDisableFlags(true /* animate */);
 
         // Trimming will happen later if Keyguard is showing - doing it here might cause a jank in
@@ -4438,11 +4438,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         return false;
     }
 
-    private void showBouncer() {
+    private void showBouncerIfKeyguard() {
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
-            mWaitingForKeyguardExit = mStatusBarKeyguardViewManager.isShowing();
-            mStatusBarKeyguardViewManager.dismiss();
+            showBouncer();
         }
+    }
+
+    private void showBouncer() {
+        mWaitingForKeyguardExit = mStatusBarKeyguardViewManager.isShowing();
+        mStatusBarKeyguardViewManager.dismiss();
     }
 
     private void instantExpandNotificationsPanel() {
@@ -4541,7 +4545,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public void onTrackingStopped(boolean expand) {
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
             if (!expand && !mUnlockMethodCache.canSkipBouncer()) {
-                showBouncer();
+                showBouncerIfKeyguard();
             }
         }
     }
@@ -4632,7 +4636,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 || !mShowLockscreenNotifications || mFalsingManager.shouldEnforceBouncer();
         if (isLockscreenPublicMode() && fullShadeNeedsBouncer) {
             mLeaveOpenOnKeyguardHide = true;
-            showBouncer();
+            showBouncerIfKeyguard();
             mDraggedDownRow = row;
             mPendingRemoteInputView = null;
         } else {
