@@ -39,7 +39,9 @@ public:
     static sk_sp<Bitmap> allocateHardwareBitmap(int width, int height,
             SkColorType colorType, std::function<void(SkBitmap& bitmap)> setup) {
         SkBitmap skBitmap;
-        sk_sp<Bitmap> heapBitmap(TestUtils::createBitmap(width, height, &skBitmap));
+        SkImageInfo info = SkImageInfo::Make(width, height, colorType, kPremul_SkAlphaType);
+        skBitmap.setInfo(info);
+        sk_sp<Bitmap> heapBitmap(Bitmap::allocateHeapBitmap(&skBitmap, nullptr));
         setup(skBitmap);
         return Bitmap::allocateHardwareBitmap(skBitmap);
     }
