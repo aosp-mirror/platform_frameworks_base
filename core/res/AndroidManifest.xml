@@ -3393,7 +3393,10 @@
             android:permission="android.permission.MASTER_CLEAR">
             <intent-filter
                     android:priority="100" >
-                <!-- For Checkin, Settings, etc.: action=MASTER_CLEAR -->
+                <!-- For Checkin, Settings, etc.: action=FACTORY_RESET -->
+                <action android:name="android.intent.action.FACTORY_RESET" />
+                <!-- As above until all the references to the deprecated MASTER_CLEAR get updated to
+                     FACTORY_RESET. -->
                 <action android:name="android.intent.action.MASTER_CLEAR" />
 
                 <!-- MCS always uses REMOTE_INTENT: category=MASTER_CLEAR -->

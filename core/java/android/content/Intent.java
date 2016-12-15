@@ -3226,16 +3226,52 @@ public class Intent implements Parcelable, Cloneable {
     public static final String
             ACTION_DYNAMIC_SENSOR_CHANGED = "android.intent.action.DYNAMIC_SENSOR_CHANGED";
 
-    /** {@hide} */
+    /**
+     * Deprecated - use {@link #ACTION_FACTORY_RESET} instead.
+     *
+     * {@hide}
+     */
+    @Deprecated
     public static final String ACTION_MASTER_CLEAR = "android.intent.action.MASTER_CLEAR";
 
     /**
-     * Boolean intent extra to be used with {@link ACTION_MASTER_CLEAR} in order to force a factory
-     * reset even if {@link android.os.UserManager.DISALLOW_FACTORY_RESET} is set.
+     * Boolean intent extra to be used with {@link #ACTION_MASTER_CLEAR} in order to force a factory
+     * reset even if {@link android.os.UserManager#DISALLOW_FACTORY_RESET} is set.
+     *
+     * <p>Deprecated - use {@link #EXTRA_FORCE_FACTORY_RESET} instead.
+     *
      * @hide
      */
+    @Deprecated
     public static final String EXTRA_FORCE_MASTER_CLEAR =
             "android.intent.extra.FORCE_MASTER_CLEAR";
+
+    /**
+     * A broadcast action to trigger a factory reset.
+     *
+     * <p> The sender must hold the {@link android.Manifest.permission#MASTER_CLEAR} permission.
+     *
+     * <p>Not for use by third-party applications.
+     *
+     * @see #EXTRA_FORCE_MASTER_CLEAR
+     *
+     * {@hide}
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_FACTORY_RESET = "android.intent.action.FACTORY_RESET";
+
+    /**
+     * Boolean intent extra to be used with {@link #ACTION_MASTER_CLEAR} in order to force a factory
+     * reset even if {@link android.os.UserManager#DISALLOW_FACTORY_RESET} is set.
+     *
+     * <p>Not for use by third-party applications.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_FORCE_FACTORY_RESET =
+            "android.intent.extra.FORCE_FACTORY_RESET";
 
     /**
      * Broadcast action: report that a settings element is being restored from backup.  The intent
