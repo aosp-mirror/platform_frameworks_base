@@ -18,6 +18,7 @@ package com.android.server.devicepolicy;
 
 import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
 import static android.app.admin.DevicePolicyManager.CODE_ACCOUNTS_NOT_EMPTY;
+import static android.app.admin.DevicePolicyManager.CODE_ADD_MANAGED_PROFILE_DISALLOWED;
 import static android.app.admin.DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE;
 import static android.app.admin.DevicePolicyManager.CODE_DEVICE_ADMIN_NOT_SUPPORTED;
 import static android.app.admin.DevicePolicyManager.CODE_HAS_DEVICE_OWNER;
@@ -1689,9 +1690,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         mSecurityLogMonitor = new SecurityLogMonitor(this);
 
-        mHasFeature = mContext.getPackageManager()
+        mHasFeature = mInjector.getPackageManager()
                 .hasSystemFeature(PackageManager.FEATURE_DEVICE_ADMIN);
-        mIsWatch = mContext.getPackageManager()
+        mIsWatch = mInjector.getPackageManager()
                 .hasSystemFeature(PackageManager.FEATURE_WATCH);
         if (!mHasFeature) {
             // Skip the rest of the initialization
@@ -4460,7 +4461,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
 
             try {
-                int uid = mContext.getPackageManager().getPackageUidAsUser(
+                int uid = mInjector.getPackageManager().getPackageUidAsUser(
                         policy.mDelegatedCertInstallerPackage, userHandle);
                 return uid == callingUid;
             } catch (NameNotFoundException e) {
@@ -6021,6 +6022,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    private boolean isDeviceOwnerPackage(String packageName, int userId) {
+        synchronized (this) {
+            return mOwners.hasDeviceOwner()
+                    && mOwners.getDeviceOwnerUserId() == userId
+                    && mOwners.getDeviceOwnerPackageName().equals(packageName);
+        }
+    }
+
     public boolean isProfileOwner(ComponentName who, int userId) {
         final ComponentName profileOwner = getProfileOwner(userId);
         return who != null && who.equals(profileOwner);
@@ -6103,7 +6112,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkNotNull(packageName, "packageName is null");
         final int callingUid = mInjector.binderGetCallingUid();
         try {
-            int uid = mContext.getPackageManager().getPackageUidAsUser(packageName,
+            int uid = mInjector.getPackageManager().getPackageUidAsUser(packageName,
                     UserHandle.getUserId(callingUid));
             if (uid != callingUid) {
                 throw new SecurityException("Invalid packageName");
@@ -6847,7 +6856,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
 
             try {
-                int uid = mContext.getPackageManager().getPackageUidAsUser(
+                int uid = mInjector.getPackageManager().getPackageUidAsUser(
                         policy.mApplicationRestrictionsManagingPackage, userHandle);
                 return uid == callingUid;
             } catch (NameNotFoundException e) {
@@ -8635,7 +8644,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             final String deviceOwnerPackageName = mOwners.getDeviceOwnerComponent()
                     .getPackageName();
-            final String[] pkgs = mContext.getPackageManager().getPackagesForUid(callerUid);
+            final String[] pkgs = mInjector.getPackageManager().getPackagesForUid(callerUid);
 
             for (String pkg : pkgs) {
                 if (deviceOwnerPackageName.equals(pkg)) {
@@ -8672,7 +8681,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             ActivityInfo[] receivers = null;
             try {
-                receivers  = mContext.getPackageManager().getPackageInfo(
+                receivers  = mInjector.getPackageManager().getPackageInfo(
                         deviceOwnerPackage, PackageManager.GET_RECEIVERS).receivers;
             } catch (NameNotFoundException e) {
                 Log.e(LOG_TAG, "Cannot find device owner package", e);
@@ -8728,7 +8737,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         < android.os.Build.VERSION_CODES.M) {
                     return false;
                 }
-                final PackageManager packageManager = mContext.getPackageManager();
+                final PackageManager packageManager = mInjector.getPackageManager();
                 switch (grantState) {
                     case DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED: {
                         mInjector.getPackageManagerInternal().grantRuntimePermission(packageName,
@@ -8763,7 +8772,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public int getPermissionGrantState(ComponentName admin, String packageName,
             String permission) throws RemoteException {
-        PackageManager packageManager = mContext.getPackageManager();
+        PackageManager packageManager = mInjector.getPackageManager();
 
         UserHandle user = mInjector.binderGetCallingUserHandle();
         synchronized (this) {
@@ -8800,17 +8809,33 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean isProvisioningAllowed(String action) {
-        return checkProvisioningPreConditionSkipPermission(action) == CODE_OK;
+    public boolean isProvisioningAllowed(String action, String packageName) {
+        Preconditions.checkNotNull(packageName);
+
+        final int callingUid = mInjector.binderGetCallingUid();
+        final long ident = mInjector.binderClearCallingIdentity();
+        try {
+            final int uidForPackage = mInjector.getPackageManager().getPackageUidAsUser(
+                    packageName, UserHandle.getUserId(callingUid));
+            Preconditions.checkArgument(callingUid == uidForPackage,
+                    "Caller uid doesn't match the one for the provided package.");
+        } catch (NameNotFoundException e) {
+            throw new IllegalArgumentException("Invalid package provided " + packageName, e);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(ident);
+        }
+
+        return checkProvisioningPreConditionSkipPermission(action, packageName) == CODE_OK;
     }
 
     @Override
-    public int checkProvisioningPreCondition(String action) {
+    public int checkProvisioningPreCondition(String action, String packageName) {
+        Preconditions.checkNotNull(packageName);
         enforceCanManageProfileAndDeviceOwners();
-        return checkProvisioningPreConditionSkipPermission(action);
+        return checkProvisioningPreConditionSkipPermission(action, packageName);
     }
 
-    private int checkProvisioningPreConditionSkipPermission(String action) {
+    private int checkProvisioningPreConditionSkipPermission(String action, String packageName) {
         if (!mHasFeature) {
             return CODE_DEVICE_ADMIN_NOT_SUPPORTED;
         }
@@ -8819,7 +8844,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (action != null) {
             switch (action) {
                 case DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE:
-                    return checkManagedProfileProvisioningPreCondition(callingUserId);
+                    return checkManagedProfileProvisioningPreCondition(packageName, callingUserId);
                 case DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE:
                     return checkDeviceOwnerProvisioningPreCondition(callingUserId);
                 case DevicePolicyManager.ACTION_PROVISION_MANAGED_USER:
@@ -8888,7 +8913,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private int checkManagedProfileProvisioningPreCondition(int callingUserId) {
+    private int checkManagedProfileProvisioningPreCondition(String packageName, int callingUserId) {
         if (!hasFeatureManagedUsers()) {
             return CODE_MANAGED_USERS_NOT_SUPPORTED;
         }
@@ -8901,24 +8926,25 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Managed user cannot have a managed profile.
             return CODE_USER_HAS_PROFILE_OWNER;
         }
+
         final long ident = mInjector.binderClearCallingIdentity();
         try {
-             /* STOPSHIP(b/31952368) Reinstate a check similar to this once ManagedProvisioning
-                   uses checkProvisioningPreCondition (see ag/1607846) and passes the packageName
-                   there. In isProvisioningAllowed we should check isCallerDeviceOwner, but for
-                   managed provisioning we need to check the package that is going to be set as PO
-                if (mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE)) {
-                    if (!isCallerDeviceOwner(callingUid)
-                            || isAdminAffectedByRestriction(mOwners.getDeviceOwnerComponent(),
-                                    UserManager.DISALLOW_ADD_MANAGED_PROFILE, callingUserId)) {
+            final UserHandle callingUserHandle = UserHandle.of(callingUserId);
+            if (mUserManager.hasUserRestriction(
+                    UserManager.DISALLOW_ADD_MANAGED_PROFILE, callingUserHandle)) {
+                // The DO can initiate provisioning if the restriction was set by the DO.
+                if (!isDeviceOwnerPackage(packageName, callingUserId)
+                        || isAdminAffectedByRestriction(mOwners.getDeviceOwnerComponent(),
+                                UserManager.DISALLOW_ADD_MANAGED_PROFILE, callingUserId)) {
                     // Caller is not DO or the restriction was set by the system.
-                    return false;
-                    }
-                } */
+                    return CODE_ADD_MANAGED_PROFILE_DISALLOWED;
+                }
+            }
+
             // TODO: Allow it if the caller is the DO? DO could just call removeUser() before
             // provisioning, so not strictly required...
             boolean canRemoveProfile = !mUserManager.hasUserRestriction(
-                        UserManager.DISALLOW_REMOVE_MANAGED_PROFILE, UserHandle.of(callingUserId));
+                        UserManager.DISALLOW_REMOVE_MANAGED_PROFILE, callingUserHandle);
             if (!mUserManager.canAddMoreManagedProfiles(callingUserId, canRemoveProfile)) {
                 return CODE_CANNOT_ADD_MANAGED_PROFILE;
             }
