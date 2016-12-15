@@ -40,8 +40,6 @@ import android.text.style.TypefaceSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
 
-import com.android.internal.util.ArrayUtils;
-
 import org.ccil.cowan.tagsoup.HTMLSchema;
 import org.ccil.cowan.tagsoup.Parser;
 import org.xml.sax.Attributes;
@@ -342,19 +340,10 @@ public class Html {
     }
 
     private static String getTextDirection(Spanned text, int start, int end) {
-        final int len = end - start;
-        final byte[] levels = ArrayUtils.newUnpaddedByteArray(len);
-        final char[] buffer = TextUtils.obtain(len);
-        TextUtils.getChars(text, start, end, buffer, 0);
-
-        int paraDir = AndroidBidi.bidi(Layout.DIR_REQUEST_DEFAULT_LTR, buffer, levels, len,
-                false /* no info */);
-        switch(paraDir) {
-            case Layout.DIR_RIGHT_TO_LEFT:
-                return " dir=\"rtl\"";
-            case Layout.DIR_LEFT_TO_RIGHT:
-            default:
-                return " dir=\"ltr\"";
+        if (TextDirectionHeuristics.FIRSTSTRONG_LTR.isRtl(text, start, end - start)) {
+            return " dir=\"rtl\"";
+        } else {
+            return " dir=\"ltr\"";
         }
     }
 
