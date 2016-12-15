@@ -26,10 +26,11 @@
 #include <JNIHelp.h>
 #include <android/hidl/manager/1.0/IServiceManager.h>
 #include <android/hidl/base/1.0/IBase.h>
-#include <android/hidl/base/1.0/IHwBase.h>
+#include <android/hidl/base/1.0/BpBase.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <hidl/ServiceManagement.h>
 #include <hidl/Status.h>
+#include <hidl/HidlTransportSupport.h>
 #include <hwbinder/ProcessState.h>
 #include <nativehelper/ScopedLocalRef.h>
 
@@ -241,14 +242,8 @@ static void JHwBinder_native_registerService(
     using android::hidl::manager::V1_0::IServiceManager;
 
     sp<hardware::IBinder> binder = JHwBinder::GetNativeContext(env, thiz);
-
-    sp<hidl::base::V1_0::IBase> base = hidl::base::V1_0::IHwBase::asInterface(binder);
-    if (base.get() == nullptr) {
-        LOG(ERROR) << "IBinder object cannot be casted to the base interface.";
-        signalExceptionForError(env, UNKNOWN_ERROR);
-        return;
-    }
-
+    /* TODO(b/33440494) this is not right */
+    sp<hidl::base::V1_0::IBase> base = new hidl::base::V1_0::BpBase(binder);
     bool ok = hardware::defaultServiceManager()->add(
                 interfaceChain,
                 serviceName,
@@ -300,7 +295,7 @@ static jobject JHwBinder_native_getService(
             serviceName,
             [&service](sp<hidl::base::V1_0::IBase> out) {
                 service = hardware::toBinder<
-                        hidl::base::V1_0::IBase, hidl::base::V1_0::IHwBase
+                        hidl::base::V1_0::IBase, hidl::base::V1_0::BpBase
                     >(out);
             });
 
