@@ -5524,9 +5524,21 @@ public class PackageManagerService extends IPackageManager.Stub {
             final List<ResolveInfo> list = new ArrayList<ResolveInfo>(1);
             final ActivityInfo ai = getActivityInfo(comp, flags, userId);
             if (ai != null) {
-                final ResolveInfo ri = new ResolveInfo();
-                ri.activityInfo = ai;
-                list.add(ri);
+                // When specifying an explicit component, we prevent the activity from being
+                // used when either 1) the calling package is normal and the activity is within
+                // an ephemeral application or 2) the calling package is ephemeral and the
+                // activity is not visible to ephemeral applications.
+                boolean blockResolution =
+                        (ephemeralPkgName == null
+                                && (ai.applicationInfo.privateFlags
+                                        & ApplicationInfo.PRIVATE_FLAG_EPHEMERAL) != 0)
+                        || (ephemeralPkgName != null
+                                && (ai.flags & ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL) == 0);
+                if (!blockResolution) {
+                    final ResolveInfo ri = new ResolveInfo();
+                    ri.activityInfo = ai;
+                    list.add(ri);
+                }
             }
             return list;
         }
@@ -5604,10 +5616,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             } else {
                 final PackageParser.Package pkg = mPackages.get(pkgName);
                 if (pkg != null) {
-                    result = filterIfNotSystemUser(
+                    result = filterForEphemeral(filterIfNotSystemUser(
                             mActivities.queryIntentForPackage(
                                     intent, resolvedType, flags, pkg.activities, userId),
-                            userId);
+                            userId), ephemeralPkgName);
                 } else {
                     // the caller wants to resolve for a particular package; however, there
                     // were no installed results, so, try to find an ephemeral result
