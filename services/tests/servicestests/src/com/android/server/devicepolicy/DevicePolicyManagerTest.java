@@ -2683,8 +2683,26 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         final int ANOTHER_USER_ID = 36;
         mContext.addUser(ANOTHER_USER_ID, 0);
 
+        // Since the managed profile is not affiliated, they should not be allowed to talk to each
+        // other.
+        targetUsers = dpm.getBindDeviceAdminTargetUsers(admin1);
+        MoreAsserts.assertEmpty(targetUsers);
+
+        mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
+        targetUsers = dpm.getBindDeviceAdminTargetUsers(admin1);
+        MoreAsserts.assertEmpty(targetUsers);
+
+        // Setting affiliation ids
+        final List<String> userAffiliationIds = Arrays.asList("some.affiliation-id");
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        dpm.setAffiliationIds(admin1, userAffiliationIds);
+
+        mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
+        dpm.setAffiliationIds(admin1, userAffiliationIds);
+
         // Calling from device owner admin, the result list should just contain the managed
         // profile user id.
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         targetUsers = dpm.getBindDeviceAdminTargetUsers(admin1);
         MoreAsserts.assertContentsInAnyOrder(targetUsers, UserHandle.of(MANAGED_PROFILE_USER_ID));
 
@@ -2693,6 +2711,18 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
         targetUsers = dpm.getBindDeviceAdminTargetUsers(admin1);
         MoreAsserts.assertContentsInAnyOrder(targetUsers, UserHandle.SYSTEM);
+
+        // Changing affiliation ids in one
+        dpm.setAffiliationIds(admin1, Arrays.asList("some-different-affiliation-id"));
+
+        // Since the managed profile is not affiliated any more, they should not be allowed to talk
+        // to each other.
+        targetUsers = dpm.getBindDeviceAdminTargetUsers(admin1);
+        MoreAsserts.assertEmpty(targetUsers);
+
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        targetUsers = dpm.getBindDeviceAdminTargetUsers(admin1);
+        MoreAsserts.assertEmpty(targetUsers);
     }
 
     public void testGetBindDeviceAdminTargetUsers_differentPackage() throws Exception {
@@ -2707,8 +2737,16 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 new ComponentName("another.package", "whatever.class");
         addManagedProfile(adminDifferentPackage, MANAGED_PROFILE_ADMIN_UID, admin2);
 
+        // Setting affiliation ids
+        final List<String> userAffiliationIds = Arrays.asList("some-affiliation-id");
+        dpm.setAffiliationIds(admin1, userAffiliationIds);
+
+        mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
+        dpm.setAffiliationIds(adminDifferentPackage, userAffiliationIds);
+
         // Calling from device owner admin, we should get zero bind device admin target users as
         // their packages are different.
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         List<UserHandle> targetUsers = dpm.getBindDeviceAdminTargetUsers(admin1);
         MoreAsserts.assertEmpty(targetUsers);
 

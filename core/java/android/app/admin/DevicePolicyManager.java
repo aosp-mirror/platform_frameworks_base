@@ -7058,7 +7058,7 @@ public class DevicePolicyManager {
      * <li>The managed profile is a profile of the user where the device owner is set.
      *     See {@link UserManager#getUserProfiles()}
      * <li>Both users are affiliated.
-     *         STOPSHIP(b/32326223) Add reference to setAffiliationIds here once public.
+     *     See {@link #setAffiliationIds}.
      * </ul>
      */
     public @NonNull List<UserHandle> getBindDeviceAdminTargetUsers(@NonNull ComponentName admin) {

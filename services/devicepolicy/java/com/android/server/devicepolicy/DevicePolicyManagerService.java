@@ -9749,9 +9749,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             final int callingUserId = mInjector.userHandleGetCallingUserId();
             final boolean isCallerDeviceOwner = isDeviceOwner(callingOwner);
             final boolean isCallerManagedProfile = isManagedProfile(callingUserId);
-            if (!isCallerDeviceOwner && !isCallerManagedProfile
-                    /* STOPSHIP(b/32326223) Reinstate when setAffiliationIds is public
-                    ||   !isAffiliatedUser(callingUserId) */) {
+            if ((!isCallerDeviceOwner && !isCallerManagedProfile)
+                    || !isUserAffiliatedWithDevice(callingUserId)) {
                 return targetUsers;
             }
 
@@ -9771,8 +9770,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
                         // Both must be the same package and be affiliated in order to bind.
                         if (callingOwnerPackage.equals(targetOwnerPackage)
-                            /* STOPSHIP(b/32326223) Reinstate when setAffiliationIds is public
-                               && isAffiliatedUser(userId)*/) {
+                               && isUserAffiliatedWithDevice(userId)) {
                             targetUsers.add(UserHandle.of(userId));
                         }
                     }
