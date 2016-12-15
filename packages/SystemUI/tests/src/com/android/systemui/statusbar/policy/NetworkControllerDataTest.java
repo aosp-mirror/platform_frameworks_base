@@ -29,8 +29,8 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
 
         verifyLastMobileDataIndicators(true,
                 TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH_ROAMING[1][DEFAULT_LEVEL],
-                TelephonyIcons.ROAMING_ICON);
-        verifyLastQsMobileDataIndicators(true,
+                TelephonyIcons.ROAMING_ICON,
+                true,
                 TelephonyIcons.QS_TELEPHONY_SIGNAL_STRENGTH[1][DEFAULT_LEVEL],
                 TelephonyIcons.QS_DATA_R, false, false);
     }
@@ -183,14 +183,13 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
     private void testDataActivity(int direction, boolean in, boolean out) {
         updateDataActivity(direction);
 
-        verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, DEFAULT_ICON);
-        verifyLastQsMobileDataIndicators(true, DEFAULT_QS_SIGNAL_STRENGTH,
-                DEFAULT_QS_ICON, in, out);
+        verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, DEFAULT_ICON, true,
+                DEFAULT_QS_SIGNAL_STRENGTH, DEFAULT_QS_ICON, in, out);
     }
 
     private void verifyDataIndicators(int dataIcon, int qsDataIcon) {
-        verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, dataIcon);
-        verifyLastQsMobileDataIndicators(true, DEFAULT_QS_SIGNAL_STRENGTH, qsDataIcon, false,
+        verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, dataIcon,
+                true, DEFAULT_QS_SIGNAL_STRENGTH, qsDataIcon, false,
                 false);
     }
 

@@ -49,6 +49,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -282,14 +287,11 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         ArgumentCaptor<Boolean> dataOutArg = ArgumentCaptor.forClass(Boolean.class);
 
         Mockito.verify(mCallbackHandler, Mockito.atLeastOnce()).setMobileDataIndicators(
-                    ArgumentCaptor.forClass(IconState.class).capture(),
+                    any(),
                     iconArg.capture(),
-                    ArgumentCaptor.forClass(Integer.class).capture(),
+                    anyInt(),
                     typeIconArg.capture(), dataInArg.capture(), dataOutArg.capture(),
-                    ArgumentCaptor.forClass(String.class).capture(),
-                    ArgumentCaptor.forClass(String.class).capture(),
-                    ArgumentCaptor.forClass(Boolean.class).capture(),
-                    ArgumentCaptor.forClass(Integer.class).capture());
+                    anyString(), anyString(), anyBoolean(), anyInt());
         IconState iconState = iconArg.getValue();
         assertEquals("Visibility in, quick settings", visible, iconState.visible);
         assertEquals("Signal icon in, quick settings", icon, iconState.icon);
@@ -307,19 +309,48 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         // TODO: Verify all fields.
         Mockito.verify(mCallbackHandler, Mockito.atLeastOnce()).setMobileDataIndicators(
                 iconArg.capture(),
-                ArgumentCaptor.forClass(IconState.class).capture(),
+                any(),
                 typeIconArg.capture(),
-                ArgumentCaptor.forClass(Integer.class).capture(),
-                ArgumentCaptor.forClass(Boolean.class).capture(),
-                ArgumentCaptor.forClass(Boolean.class).capture(),
-                ArgumentCaptor.forClass(String.class).capture(),
-                ArgumentCaptor.forClass(String.class).capture(),
-                ArgumentCaptor.forClass(Boolean.class).capture(),
-                ArgumentCaptor.forClass(Integer.class).capture());
+                anyInt(), anyBoolean(), anyBoolean(), anyString(), anyString(), anyBoolean(),
+                anyInt());
         IconState iconState = iconArg.getValue();
 
         assertEquals("Data icon in status bar", typeIcon, (int) typeIconArg.getValue());
         assertEquals("Visibility in status bar", visible, iconState.visible);
+    }
+
+    protected void verifyLastMobileDataIndicators(boolean visible, int icon, int typeIcon,
+            boolean qsVisible, int qsIcon, int qsTypeIcon, boolean dataIn, boolean dataOut) {
+        ArgumentCaptor<IconState> iconArg = ArgumentCaptor.forClass(IconState.class);
+        ArgumentCaptor<Integer> typeIconArg = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<IconState> qsIconArg = ArgumentCaptor.forClass(IconState.class);
+        ArgumentCaptor<Integer> qsTypeIconArg = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<Boolean> dataInArg = ArgumentCaptor.forClass(Boolean.class);
+        ArgumentCaptor<Boolean> dataOutArg = ArgumentCaptor.forClass(Boolean.class);
+
+        Mockito.verify(mCallbackHandler, Mockito.atLeastOnce()).setMobileDataIndicators(
+                iconArg.capture(),
+                qsIconArg.capture(),
+                typeIconArg.capture(),
+                qsTypeIconArg.capture(),
+                dataInArg.capture(),
+                dataOutArg.capture(),
+                anyString(), anyString(), anyBoolean(), anyInt());
+
+        IconState iconState = iconArg.getValue();
+
+        assertEquals("Data icon in status bar", typeIcon, (int) typeIconArg.getValue());
+        assertEquals("Signal icon in status bar", icon, iconState.icon);
+        assertEquals("Visibility in status bar", visible, iconState.visible);
+
+        iconState = qsIconArg.getValue();
+        assertEquals("Visibility in quick settings", qsVisible, iconState.visible);
+        assertEquals("Signal icon in quick settings", qsIcon, iconState.icon);
+        assertEquals("Data icon in quick settings", qsTypeIcon, (int) qsTypeIconArg.getValue());
+        assertEquals("Data direction in in quick settings", dataIn,
+                (boolean) dataInArg.getValue());
+        assertEquals("Data direction out in quick settings", dataOut,
+                (boolean) dataOutArg.getValue());
     }
 
    protected void assertNetworkNameEquals(String expected) {
