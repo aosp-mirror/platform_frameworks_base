@@ -34,6 +34,7 @@ import com.android.server.ServiceThread;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A class for managing network logging.
@@ -49,13 +50,13 @@ final class NetworkLogger {
     private IIpConnectivityMetrics mIpConnectivityMetrics;
     private ServiceThread mHandlerThread;
     private NetworkLoggingHandler mNetworkLoggingHandler;
-    private boolean mIsLoggingEnabled;
+    private AtomicBoolean mIsLoggingEnabled;
 
     private final INetdEventCallback mNetdEventCallback = new INetdEventCallback.Stub() {
         @Override
         public void onDnsEvent(String hostname, String[] ipAddresses, int ipAddressesCount,
                 long timestamp, int uid) {
-            if (!mIsLoggingEnabled) {
+            if (!mIsLoggingEnabled.get()) {
                 return;
             }
             DnsEvent dnsEvent = new DnsEvent(hostname, ipAddresses, ipAddressesCount,
@@ -65,7 +66,7 @@ final class NetworkLogger {
 
         @Override
         public void onConnectEvent(String ipAddr, int port, long timestamp, int uid) {
-            if (!mIsLoggingEnabled) {
+            if (!mIsLoggingEnabled.get()) {
                 return;
             }
             ConnectEvent connectEvent = new ConnectEvent(ipAddr, port, mPm.getNameForUid(uid),
@@ -116,7 +117,7 @@ final class NetworkLogger {
                         mDpm);
                 mNetworkLoggingHandler.scheduleBatchFinalization(
                         NetworkLoggingHandler.BATCH_FINALIZATION_TIMEOUT_MS);
-                mIsLoggingEnabled = true;
+                mIsLoggingEnabled.set(true);
                 return true;
             } else {
                 return false;
@@ -130,7 +131,7 @@ final class NetworkLogger {
     boolean stopNetworkLogging() {
         Log.d(TAG, "Stopping network logging");
         // stop the logging regardless of whether we fail to unregister listener
-        mIsLoggingEnabled = false;
+        mIsLoggingEnabled.set(false);
         try {
             if (!checkIpConnectivityMetricsService()) {
                 // the IIpConnectivityMetrics service should have been present at this point
