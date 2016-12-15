@@ -9,6 +9,9 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_MODULE:= libstorage
 
+LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/include
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
+
 LOCAL_CFLAGS += -Wall -Werror
 
 LOCAL_SHARED_LIBRARIES := libbinder
