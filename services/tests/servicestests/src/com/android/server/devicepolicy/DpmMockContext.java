@@ -389,6 +389,18 @@ public class DpmMockContext extends MockContext {
         return dir;
     }
 
+    public void removeUser(int userId) {
+        for (int i = 0; i < mUserInfos.size(); i++) {
+            if (mUserInfos.get(i).id == userId) {
+                mUserInfos.remove(i);
+                break;
+            }
+        }
+        when(userManager.getUserInfo(eq(userId))).thenReturn(null);
+
+        when(userManager.isUserRunning(eq(new UserHandle(userId)))).thenReturn(false);
+    }
+
     private UserInfo getUserInfo(int userId) {
         for (UserInfo ui : mUserInfos) {
             if (ui.id == userId) {

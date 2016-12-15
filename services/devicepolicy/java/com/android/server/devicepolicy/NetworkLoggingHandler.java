@@ -55,9 +55,15 @@ final class NetworkLoggingHandler extends Handler {
     @GuardedBy("this")
     private ArrayList<NetworkEvent> mFullBatch;
 
-    // each full batch is represented by its token, which the DPC has to provide back to revieve it
+    @GuardedBy("this")
+    private boolean mPaused = false;
+
+    // each full batch is represented by its token, which the DPC has to provide back to retrieve it
     @GuardedBy("this")
     private long mCurrentFullBatchToken;
+
+    @GuardedBy("this")
+    private long mLastRetrievedFullBatchToken;
 
     NetworkLoggingHandler(Looper looper, DevicePolicyManagerService dpm) {
         super(looper);
@@ -70,15 +76,19 @@ final class NetworkLoggingHandler extends Handler {
             case LOG_NETWORK_EVENT_MSG: {
                 NetworkEvent networkEvent = msg.getData().getParcelable(NETWORK_EVENT_KEY);
                 if (networkEvent != null) {
-                    mNetworkEvents.add(networkEvent);
-                    if (mNetworkEvents.size() >= MAX_EVENTS_PER_BATCH) {
-                        finalizeBatchAndNotifyDeviceOwnerIfNotEmpty();
+                    synchronized (NetworkLoggingHandler.this) {
+                        mNetworkEvents.add(networkEvent);
+                        if (mNetworkEvents.size() >= MAX_EVENTS_PER_BATCH) {
+                            finalizeBatchAndNotifyDeviceOwnerLocked();
+                        }
                     }
                 }
                 break;
             }
             case FINALIZE_BATCH_MSG: {
-                finalizeBatchAndNotifyDeviceOwnerIfNotEmpty();
+                synchronized (NetworkLoggingHandler.this) {
+                    finalizeBatchAndNotifyDeviceOwnerLocked();
+                }
                 break;
             }
         }
@@ -91,22 +101,49 @@ final class NetworkLoggingHandler extends Handler {
                 + "ms from now.");
     }
 
-    private synchronized void finalizeBatchAndNotifyDeviceOwnerIfNotEmpty() {
+    synchronized void pause() {
+        Log.d(TAG, "Paused network logging");
+        mPaused = true;
+    }
+
+    synchronized void resume() {
+        if (!mPaused) {
+            Log.d(TAG, "Attempted to resume network logging, but logging is not paused.");
+            return;
+        }
+
+        Log.d(TAG, "Resumed network logging. Current batch="
+                + mCurrentFullBatchToken + ", LastRetrievedBatch=" + mLastRetrievedFullBatchToken);
+        mPaused = false;
+
+        // If there is a full batch ready that the device owner hasn't been notified about, do it
+        // now.
+        if (mFullBatch != null && mFullBatch.size() > 0
+                && mLastRetrievedFullBatchToken != mCurrentFullBatchToken) {
+            scheduleBatchFinalization();
+            notifyDeviceOwnerLocked();
+        }
+    }
+
+    synchronized void discardLogs() {
+        mFullBatch = null;
+        mNetworkEvents = new ArrayList<NetworkEvent>();
+        Log.d(TAG, "Discarded all network logs");
+    }
+
+    @GuardedBy("this")
+    private void finalizeBatchAndNotifyDeviceOwnerLocked() {
         if (mNetworkEvents.size() > 0) {
             // finalize the batch and start a new one from scratch
             mFullBatch = mNetworkEvents;
             mCurrentFullBatchToken++;
             mNetworkEvents = new ArrayList<NetworkEvent>();
-            // notify DO that there's a new non-empty batch waiting
-            Bundle extras = new Bundle();
-            extras.putLong(DeviceAdminReceiver.EXTRA_NETWORK_LOGS_TOKEN, mCurrentFullBatchToken);
-            extras.putInt(DeviceAdminReceiver.EXTRA_NETWORK_LOGS_COUNT, mFullBatch.size());
-            Log.d(TAG, "Sending network logging batch broadcast to device owner, batchToken: "
-                    + mCurrentFullBatchToken);
-            mDpm.sendDeviceOwnerCommand(DeviceAdminReceiver.ACTION_NETWORK_LOGS_AVAILABLE, extras);
+            if (!mPaused) {
+                notifyDeviceOwnerLocked();
+            }
         } else {
             // don't notify the DO, since there are no events; DPC can still retrieve
-            // the last full batch
+            // the last full batch if not paused.
             Log.d(TAG, "Was about to finalize the batch, but there were no events to send to"
                     + " the DPC, the batchToken of last available batch: "
                     + mCurrentFullBatchToken);
@@ -115,10 +152,21 @@ final class NetworkLoggingHandler extends Handler {
         scheduleBatchFinalization();
     }
 
+    @GuardedBy("this")
+    private void notifyDeviceOwnerLocked() {
+        Bundle extras = new Bundle();
+        extras.putLong(DeviceAdminReceiver.EXTRA_NETWORK_LOGS_TOKEN, mCurrentFullBatchToken);
+        extras.putInt(DeviceAdminReceiver.EXTRA_NETWORK_LOGS_COUNT, mFullBatch.size());
+        Log.d(TAG, "Sending network logging batch broadcast to device owner, batchToken: "
+                + mCurrentFullBatchToken);
+        mDpm.sendDeviceOwnerCommand(DeviceAdminReceiver.ACTION_NETWORK_LOGS_AVAILABLE, extras);
+    }
+
     synchronized List<NetworkEvent> retrieveFullLogBatch(long batchToken) {
         if (batchToken != mCurrentFullBatchToken) {
             return null;
         }
+        mLastRetrievedFullBatchToken = mCurrentFullBatchToken;
         return mFullBatch;
     }
 }

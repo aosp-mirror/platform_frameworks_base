@@ -2767,7 +2767,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testGetLastSecurityLogRetrievalTime() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
-        when(mContext.userManager.getUserCount()).thenReturn(1);
+
+        // setUp() adds a secondary user for CALLER_USER_HANDLE. Remove it as otherwise the
+        // feature is disabled because there are non-affiliated secondary users.
+        mContext.removeUser(DpmMockContext.CALLER_USER_HANDLE);
         when(mContext.resources.getBoolean(R.bool.config_supportPreRebootSecurityLogs))
                 .thenReturn(true);
 
@@ -2776,6 +2779,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Enabling logging should not change the timestamp.
         dpm.setSecurityLoggingEnabled(admin1, true);
+        verify(mContext.settings)
+                .securityLogSetLoggingEnabledProperty(true);
+        when(mContext.settings.securityLogGetLoggingEnabledProperty())
+                .thenReturn(true);
         assertEquals(-1, dpm.getLastSecurityLogRetrievalTime());
 
         // Retrieving the logs should update the timestamp.
@@ -2828,13 +2835,17 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testGetLastBugReportRequestTime() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
-        when(mContext.userManager.getUserCount()).thenReturn(1);
+
         mContext.packageName = admin1.getPackageName();
         mContext.applicationInfo = new ApplicationInfo();
         when(mContext.resources.getColor(eq(R.color.notification_action_list), anyObject()))
                 .thenReturn(Color.WHITE);
         when(mContext.resources.getColor(eq(R.color.notification_material_background_color),
                 anyObject())).thenReturn(Color.WHITE);
+
+        // setUp() adds a secondary user for CALLER_USER_HANDLE. Remove it as otherwise the
+        // feature is disabled because there are non-affiliated secondary users.
+        mContext.removeUser(DpmMockContext.CALLER_USER_HANDLE);
 
         // No bug reports were requested so far.
         assertEquals(-1, dpm.getLastBugReportRequestTime());
@@ -2873,7 +2884,16 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testGetLastNetworkLogRetrievalTime() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
-        when(mContext.userManager.getUserCount()).thenReturn(1);
+        mContext.packageName = admin1.getPackageName();
+        mContext.applicationInfo = new ApplicationInfo();
+        when(mContext.resources.getColor(eq(R.color.notification_action_list), anyObject()))
+                .thenReturn(Color.WHITE);
+        when(mContext.resources.getColor(eq(R.color.notification_material_background_color),
+                anyObject())).thenReturn(Color.WHITE);
+
+        // setUp() adds a secondary user for CALLER_USER_HANDLE. Remove it as otherwise the
+        // feature is disabled because there are non-affiliated secondary users.
+        mContext.removeUser(DpmMockContext.CALLER_USER_HANDLE);
         when(mContext.iipConnectivityMetrics.registerNetdEventCallback(anyObject()))
                 .thenReturn(true);
 

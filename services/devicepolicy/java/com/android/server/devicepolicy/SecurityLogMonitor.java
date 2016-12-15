@@ -19,6 +19,7 @@ package com.android.server.devicepolicy;
 import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.SecurityLog;
 import android.app.admin.SecurityLog.SecurityEvent;
+import android.os.SystemClock;
 import android.util.Log;
 import android.util.Slog;
 
@@ -50,7 +51,7 @@ class SecurityLogMonitor implements Runnable {
         mService = service;
     }
 
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = false;  // STOPSHIP if true.
     private static final String TAG = "SecurityLogMonitor";
     /**
      * Each log entry can hold up to 4K bytes (but as of {@link android.os.Build.VERSION_CODES#N}
@@ -78,17 +79,25 @@ class SecurityLogMonitor implements Runnable {
     private ArrayList<SecurityEvent> mPendingLogs = new ArrayList<SecurityEvent>();
     @GuardedBy("mLock")
     private boolean mAllowedToRetrieve = false;
-    // When DO will be allowed to retrieves the log, in milliseconds.
+
+    /**
+     * When DO will be allowed to retrieve the log, in milliseconds since boot (as per
+     * {@link SystemClock#elapsedRealtime()})
+     */
     @GuardedBy("mLock")
-    private long mNextAllowedRetrivalTimeMillis = -1;
+    private long mNextAllowedRetrievalTimeMillis = -1;
+    @GuardedBy("mLock")
+    private boolean mPaused = false;
 
     void start() {
+        Slog.i(TAG, "Starting security logging.");
         mLock.lock();
         try {
             if (mMonitorThread == null) {
                 mPendingLogs = new ArrayList<SecurityEvent>();
                 mAllowedToRetrieve = false;
-                mNextAllowedRetrivalTimeMillis = -1;
+                mNextAllowedRetrievalTimeMillis = -1;
+                mPaused = false;
 
                 mMonitorThread = new Thread(this);
                 mMonitorThread.start();
@@ -99,6 +108,7 @@ class SecurityLogMonitor implements Runnable {
     }
 
     void stop() {
+        Slog.i(TAG, "Stopping security logging.");
         mLock.lock();
         try {
             if (mMonitorThread != null) {
@@ -111,12 +121,65 @@ class SecurityLogMonitor implements Runnable {
                 // Reset state and clear buffer
                 mPendingLogs = new ArrayList<SecurityEvent>();
                 mAllowedToRetrieve = false;
-                mNextAllowedRetrivalTimeMillis = -1;
+                mNextAllowedRetrievalTimeMillis = -1;
+                mPaused = false;
                 mMonitorThread = null;
             }
         } finally {
             mLock.unlock();
         }
+    }
+
+    /**
+     * If logs are being collected, keep collecting them but stop notifying the device owner that
+     * new logs are available (since they cannot be retrieved).
+     */
+    void pause() {
+        Slog.i(TAG, "Paused.");
+
+        mLock.lock();
+        mPaused = true;
+        mAllowedToRetrieve = false;
+        mLock.unlock();
+    }
+
+    /**
+     * If logs are being collected, start notifying the device owner when logs are ready to be
+     * retrieved again (if it was paused).
+     * <p>If logging is enabled and there are logs ready to be retrieved, this method will attempt
+     * to notify the device owner. Therefore calling identity should be cleared before calling it
+     * (in case the method is called from a user other than the DO's user).
+     */
+    void resume() {
+        mLock.lock();
+        try {
+            if (!mPaused) {
+                Log.d(TAG, "Attempted to resume, but logging is not paused.");
+                return;
+            }
+            mPaused = false;
+            mAllowedToRetrieve = false;
+        } finally {
+            mLock.unlock();
+        }
+
+        Slog.i(TAG, "Resumed.");
+        try {
+            notifyDeviceOwnerIfNeeded();
+        } catch (InterruptedException e) {
+            Log.w(TAG, "Thread interrupted.", e);
+        }
+    }
+
+    /**
+     * Discard all collected logs.
+     */
+    void discardLogs() {
+        mLock.lock();
+        mAllowedToRetrieve = false;
+        mPendingLogs = new ArrayList<SecurityEvent>();
+        mLock.unlock();
+        Slog.i(TAG, "Discarded all logs.");
     }
 
     /**
@@ -128,7 +191,7 @@ class SecurityLogMonitor implements Runnable {
         try {
             if (mAllowedToRetrieve) {
                 mAllowedToRetrieve = false;
-                mNextAllowedRetrivalTimeMillis = System.currentTimeMillis()
+                mNextAllowedRetrievalTimeMillis = SystemClock.elapsedRealtime()
                         + RATE_LIMIT_INTERVAL_MILLISECONDS;
                 List<SecurityEvent> result = mPendingLogs;
                 mPendingLogs = new ArrayList<SecurityEvent>();
@@ -163,7 +226,7 @@ class SecurityLogMonitor implements Runnable {
                     SecurityLog.readEventsSince(lastLogTimestampNanos + 1, logs);
                 }
                 if (!logs.isEmpty()) {
-                    if (DEBUG) Slog.d(TAG, "processing new logs");
+                    if (DEBUG) Slog.d(TAG, "processing new logs. Events: " + logs.size());
                     mLock.lockInterruptibly();
                     try {
                         mPendingLogs.addAll(logs);
@@ -172,6 +235,7 @@ class SecurityLogMonitor implements Runnable {
                             mPendingLogs = new ArrayList<SecurityEvent>(mPendingLogs.subList(
                                     mPendingLogs.size() - (BUFFER_ENTRIES_MAXIMUM_LEVEL / 2),
                                     mPendingLogs.size()));
+                            Slog.i(TAG, "Pending logs buffer full. Discarding old logs.");
                         }
                     } finally {
                         mLock.unlock();
@@ -188,7 +252,7 @@ class SecurityLogMonitor implements Runnable {
                 break;
             }
         }
-        if (DEBUG) Slog.d(TAG, "MonitorThread exit.");
+        Slog.i(TAG, "MonitorThread exit.");
     }
 
     private void notifyDeviceOwnerIfNeeded() throws InterruptedException {
@@ -196,15 +260,24 @@ class SecurityLogMonitor implements Runnable {
         boolean allowToRetrieveNow = false;
         mLock.lockInterruptibly();
         try {
+            if (mPaused) {
+                return;
+            }
+
+            // STOPSHIP(b/34186771): If the previous notification didn't reach the DO and logs were
+            // not retrieved (e.g. the broadcast was sent before the user was unlocked), no more
+            // subsequent callbacks will be sent. We should make sure that the DO gets notified
+            // before logs are lost.
             int logSize = mPendingLogs.size();
             if (logSize >= BUFFER_ENTRIES_NOTIFICATION_LEVEL) {
                 // Allow DO to retrieve logs if too many pending logs
                 allowToRetrieveNow = true;
+                if (DEBUG) Slog.d(TAG, "Number of log entries over threshold: " + logSize);
             } else if (logSize > 0) {
-                if (mNextAllowedRetrivalTimeMillis == -1 ||
-                        System.currentTimeMillis() >= mNextAllowedRetrivalTimeMillis) {
+                if (SystemClock.elapsedRealtime() >= mNextAllowedRetrievalTimeMillis) {
                     // Rate limit reset
                     allowToRetrieveNow = true;
+                    if (DEBUG) Slog.d(TAG, "Timeout reached");
                 }
             }
             shouldNotifyDO = (!mAllowedToRetrieve) && allowToRetrieveNow;
@@ -213,7 +286,7 @@ class SecurityLogMonitor implements Runnable {
             mLock.unlock();
         }
         if (shouldNotifyDO) {
-            if (DEBUG) Slog.d(TAG, "notify DO");
+            Slog.i(TAG, "notify DO");
             mService.sendDeviceOwnerCommand(DeviceAdminReceiver.ACTION_SECURITY_LOGS_AVAILABLE,
                     null);
         }
