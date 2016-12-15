@@ -45,6 +45,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -2019,7 +2020,29 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Updates the aspect ratio of the current picture-in-picture activity.
+     * Requests to the system that the activity can be automatically put into picture-in-picture
+     * mode when the user leaves the activity causing it normally to be hidden.  Generally, this
+     * happens when another task is brought to the forground or the task containing this activity
+     * is moved to the background.  This is a *not* a guarantee that the activity will actually be
+     * put in picture-in-picture mode, and depends on a number of factors, including whether there
+     * is already something in picture-in-picture.
+     *
+     * @param enterPictureInPictureOnMoveToBg whether or not this activity can automatically enter
+     *                                        picture-in-picture
+     */
+    public void enterPictureInPictureModeOnMoveToBackground(
+            boolean enterPictureInPictureOnMoveToBg) {
+        try {
+            ActivityManagerNative.getDefault().enterPictureInPictureModeOnMoveToBackground(mToken,
+                    enterPictureInPictureOnMoveToBg);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Updates the aspect ratio of the current picture-in-picture activity if this activity is
+     * already in picture-in-picture mode, or sets it to be used later if
+     * {@link #enterPictureInPictureModeOnMoveToBackground(boolean)} is requested.
      *
      * @param aspectRatio the new aspect ratio of the picture-in-picture.
      */
@@ -2031,23 +2054,19 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Requests to the system that the activity can be automatically put into picture-in-picture
-     * mode when the user leaves the activity causing it normally to be hidden.  This is a *not*
-     * a guarantee that the activity will actually be put in picture-in-picture mode, and depends
-     * on a number of factors, including whether there is already something in picture-in-picture.
+     * Updates the set of user actions associated with the picture-in-picture activity.
      *
-     * If {@param enterPictureInPictureOnMoveToBg} is true, then you may also call
-     * {@link #setPictureInPictureAspectRatio(float)} to specify the aspect ratio to automatically
-     * enter picture-in-picture with.
-     *
-     * @param enterPictureInPictureOnMoveToBg whether or not this activity can automatically enter
-     *                                     picture-in-picture
+     * @param actions the new actions for picture-in-picture (can be null to reset the set of
+     *                actions).  The maximum number of actions that will be displayed on this device
+     *                is defined by {@link ActivityManager#getMaxNumPictureInPictureActions()}.
      */
-    public void enterPictureInPictureModeOnMoveToBackground(
-            boolean enterPictureInPictureOnMoveToBg) {
+    public void setPictureInPictureActions(List<RemoteAction> actions) {
         try {
-            ActivityManagerNative.getDefault().enterPictureInPictureModeOnMoveToBackground(mToken,
-                    enterPictureInPictureOnMoveToBg);
+            if (actions == null) {
+                actions = new ArrayList<>();
+            }
+            ActivityManagerNative.getDefault().setPictureInPictureActions(mToken,
+                    new ParceledListSlice<RemoteAction>(actions));
         } catch (RemoteException e) {
         }
     }

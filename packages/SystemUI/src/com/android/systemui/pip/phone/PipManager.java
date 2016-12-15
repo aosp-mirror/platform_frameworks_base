@@ -16,9 +16,17 @@
 
 package com.android.systemui.pip.phone;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.content.Context;
+import android.content.pm.ParceledListSlice;
+import android.os.Handler;
+import android.os.RemoteException;
+import android.util.Log;
+import android.view.IPinnedStackController;
+import android.view.IPinnedStackListener;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 
@@ -33,9 +41,51 @@ public class PipManager {
     private Context mContext;
     private IActivityManager mActivityManager;
     private IWindowManager mWindowManager;
+    private Handler mHandler = new Handler();
+
+    private final PinnedStackListener mPinnedStackListener = new PinnedStackListener();
 
     private PipMenuActivityController mMenuController;
     private PipTouchHandler mTouchHandler;
+
+    /**
+     * Handler for messages from the PIP controller.
+     */
+    private class PinnedStackListener extends IPinnedStackListener.Stub {
+
+        @Override
+        public void onListenerRegistered(IPinnedStackController controller) {
+            mHandler.post(() -> {
+                mTouchHandler.setPinnedStackController(controller);
+            });
+        }
+
+        @Override
+        public void onBoundsChanged(boolean adjustedForIme) {
+            // Do nothing
+        }
+
+        @Override
+        public void onActionsChanged(ParceledListSlice actions) {
+            mHandler.post(() -> {
+                mMenuController.setActions(actions);
+            });
+        }
+
+        @Override
+        public void onMinimizedStateChanged(boolean isMinimized) {
+            mHandler.post(() -> {
+                mTouchHandler.onMinimizedStateChanged(isMinimized);
+            });
+        }
+
+        @Override
+        public void onSnapToEdgeStateChanged(boolean isSnapToEdge) {
+            mHandler.post(() -> {
+                mTouchHandler.onSnapToEdgeStateChanged(isSnapToEdge);
+            });
+        }
+    }
 
     private PipManager() {}
 
@@ -46,6 +96,12 @@ public class PipManager {
         mContext = context;
         mActivityManager = ActivityManager.getService();
         mWindowManager = WindowManagerGlobal.getWindowManagerService();
+
+        try {
+            mWindowManager.registerPinnedStackListener(DEFAULT_DISPLAY, mPinnedStackListener);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to register pinned stack listener", e);
+        }
 
         mMenuController = new PipMenuActivityController(context, mActivityManager, mWindowManager);
         mTouchHandler = new PipTouchHandler(context, mMenuController, mActivityManager,

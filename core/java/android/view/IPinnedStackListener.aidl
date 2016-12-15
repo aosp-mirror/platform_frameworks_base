@@ -16,13 +16,14 @@
 
 package android.view;
 
+import android.content.pm.ParceledListSlice;
 import android.view.IPinnedStackController;
 
 /**
-  * Listener for changes to the pinned stack made by the WindowManager.
-  *
-  * @hide
-  */
+ * Listener for changes to the pinned stack made by the WindowManager.
+ *
+ * @hide
+ */
 oneway interface IPinnedStackListener {
 
     /**
@@ -36,4 +37,24 @@ oneway interface IPinnedStackListener {
      * is first registered to allow the listener to synchronized its state with the controller.
      */
     void onBoundsChanged(boolean adjustedForIme);
+
+    /**
+     * Called when window manager decides to adjust the minimized state, or when the listener
+     * is first registered to allow the listener to synchronized its state with the controller.
+     */
+    void onMinimizedStateChanged(boolean isMinimized);
+
+    /**
+     * Called when window manager decides to adjust the snap-to-edge state, which determines whether
+     * to snap only to the corners of the screen or to the closest edge.  It is called when the
+     * listener is first registered to allow the listener to synchronized its state with the
+     * controller.
+     */
+    void onSnapToEdgeStateChanged(boolean isSnapToEdge);
+
+    /**
+     * Called when the set of actions for the current PiP activity changes, or when the listener
+     * is first registered to allow the listener to synchronized its state with the controller.
+     */
+    void onActionsChanged(in ParceledListSlice actions);
 }

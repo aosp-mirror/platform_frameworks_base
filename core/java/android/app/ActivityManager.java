@@ -87,8 +87,9 @@ public class ActivityManager {
 
     private static int gMaxRecentTasks = -1;
 
+    private static final int NUM_ALLOWED_PIP_ACTIONS = 3;
+
     private final Context mContext;
-    private final Handler mHandler;
 
     private static volatile boolean sSystemReady = false;
 
@@ -491,7 +492,6 @@ public class ActivityManager {
 
     /*package*/ ActivityManager(Context context, Handler handler) {
         mContext = context;
-        mHandler = handler;
     }
 
     /**
@@ -1009,6 +1009,14 @@ public class ActivityManager {
         return supportsMultiWindow()
                 && Resources.getSystem().getBoolean(
                     com.android.internal.R.bool.config_supportsSplitScreenMultiWindow);
+    }
+
+    /**
+     * Return the maximum number of actions that will be displayed in the picture-in-picture UI when
+     * the user interacts with the activity currently in picture-in-picture mode.
+     */
+    public static int getMaxNumPictureInPictureActions() {
+        return NUM_ALLOWED_PIP_ACTIONS;
     }
 
     /**

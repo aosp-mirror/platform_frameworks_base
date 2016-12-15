@@ -16,11 +16,7 @@
 
 package com.android.systemui.pip.phone;
 
-import android.app.IActivityManager;
 import android.graphics.PointF;
-import android.view.IPinnedStackController;
-import android.view.IPinnedStackListener;
-import android.view.IWindowManager;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;

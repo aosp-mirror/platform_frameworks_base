@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2014 The Android Open Source Project
+<!-- Copyright (C) 2016 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -16,21 +16,44 @@
 
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/menu"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#33000000">
+
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center">
-        <Button
-            android:id="@+id/expand_pip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:textSize="14sp"
+        android:id="@+id/actions"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="48dp">
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_gravity="bottom"
+        android:orientation="horizontal">
+        <TextView
+            android:id="@+id/dismiss"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:textSize="12sp"
             android:textColor="#ffffffff"
-            android:text="@string/pip_phone_expand"
-            android:fontFamily="sans-serif" />
+            android:fontFamily="sans-serif"
+            android:text="@string/pip_phone_dismiss"
+            android:background="?android:selectableItemBackground" />
+        <TextView
+            android:id="@+id/minimize"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:textSize="12sp"
+            android:textColor="#ffffffff"
+            android:fontFamily="sans-serif"
+            android:text="@string/pip_phone_minimize"
+            android:background="?android:selectableItemBackground" />
     </LinearLayout>
 </FrameLayout>

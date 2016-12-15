@@ -1687,8 +1687,14 @@
         not appear on production builds ever. -->
     <string name="tuner_doze_always_on" translatable="false">Always on</string>
 
-    <!-- Making the PIP fullscreen -->
+    <!-- Making the PIP fullscreen [CHAR LIMIT=25] -->
     <string name="pip_phone_expand">Expand</string>
+
+    <!-- Label for PIP action to Minimize the PIP [CHAR LIMIT=25] -->
+    <string name="pip_phone_minimize">Minimize</string>
+
+    <!-- Label for PIP action to Dismiss the PIP -->
+    <string name="pip_phone_dismiss">Dismiss</string>
 
     <!-- PIP section of the tuner. Non-translatable since it should
         not appear on production builds ever. -->

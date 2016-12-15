@@ -474,6 +474,7 @@ interface IActivityManager {
     void enterPictureInPictureModeOnMoveToBackground(in IBinder token,
             boolean enterPictureInPictureOnMoveToBg);
     void setPictureInPictureAspectRatio(in IBinder token, float aspectRatio);
+    void setPictureInPictureActions(in IBinder token, in ParceledListSlice actions);
     void activityRelaunched(in IBinder token);
     IBinder getUriPermissionOwnerForActivity(in IBinder activityToken);
     /**
