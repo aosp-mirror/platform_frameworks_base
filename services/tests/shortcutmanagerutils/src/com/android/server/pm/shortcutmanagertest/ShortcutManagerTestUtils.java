@@ -934,6 +934,16 @@ public class ShortcutManagerTestUtils {
             return this;
         }
 
+        public ShortcutListAsserter areAllWithIntent() {
+            forAllShortcuts(s -> assertNotNull("id=" + s.getId(), s.getIntent()));
+            return this;
+        }
+
+        public ShortcutListAsserter areAllWithNoIntent() {
+            forAllShortcuts(s -> assertNull("id=" + s.getId(), s.getIntent()));
+            return this;
+        }
+
         public ShortcutListAsserter forAllShortcuts(Consumer<ShortcutInfo> sa) {
             boolean found = false;
             for (int i = 0; i < mList.size(); i++) {
@@ -1090,6 +1100,16 @@ public class ShortcutManagerTestUtils {
         // launcherApps.unregisterCallback(asserter.getMockCallback());
 
         return asserter;
+    }
+
+    public static LauncherCallbackAsserter assertForLauncherCallbackNoThrow(
+            LauncherApps launcherApps, Runnable body) {
+        try {
+            return assertForLauncherCallback(launcherApps, body);
+        } catch (InterruptedException e) {
+            fail("Caught InterruptedException");
+            return null; // Never happens.
+        }
     }
 
     public static void retryUntil(BooleanSupplier checker, String message) {

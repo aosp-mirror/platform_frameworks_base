@@ -71,6 +71,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.PersistableBundle;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.test.InstrumentationTestCase;
@@ -1289,6 +1290,13 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     }
 
     /**
+     * Make a shortcut with an ID only.
+     */
+    protected ShortcutInfo makeShortcutIdOnly(String id) {
+        return new ShortcutInfo.Builder(mClientContext, id).build();
+    }
+
+    /**
      * Make a shortcut with an ID.
      */
     protected ShortcutInfo makeShortcut(String id) {
@@ -1297,9 +1305,16 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                 makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0);
     }
 
+    @Deprecated // Title was renamed to short label.
     protected ShortcutInfo makeShortcutWithTitle(String id, String title) {
         return makeShortcut(
                 id, title, /* activity =*/ null, /* icon =*/ null,
+                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0);
+    }
+
+    protected ShortcutInfo makeShortcutWithShortLabel(String id, String shortLabel) {
+        return makeShortcut(
+                id, shortLabel, /* activity =*/ null, /* icon =*/ null,
                 makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0);
     }
 
@@ -1695,6 +1710,13 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         return getLauncherShortcuts(launcher, userId, ShortcutQuery.FLAG_GET_PINNED);
     }
 
+    protected List<ShortcutInfo> getShortcutAsLauncher(int targetUserId) {
+        final ShortcutQuery q = new ShortcutQuery();
+        q.setQueryFlags(ShortcutQuery.FLAG_MATCH_DYNAMIC | ShortcutQuery.FLAG_MATCH_DYNAMIC
+                | ShortcutQuery.FLAG_MATCH_PINNED);
+        return mLauncherApps.getShortcuts(q, UserHandle.of(targetUserId));
+    }
+
     protected ShortcutInfo getShortcutInfoAsLauncher(String packageName, String shortcutId,
             int userId) {
         final List<ShortcutInfo> infoList =
@@ -1968,7 +1990,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     public static List<ShortcutInfo> assertAllHaveIcon(
             List<ShortcutInfo> actualShortcuts) {
         for (ShortcutInfo s : actualShortcuts) {
-            assertTrue("ID " + s.getId() + " has no icon ", s.hasIconFile() || s.hasIconResource());
+            assertTrue("ID " + s.getId() + " has no icon ",
+                    s.hasIconFile() || s.hasIconResource() || s.getIcon() != null);
         }
         return actualShortcuts;
     }
@@ -2029,5 +2052,32 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected static ResolveInfo getFallbackLauncher() {
         return ri(PACKAGE_FALLBACK_LAUNCHER, PACKAGE_FALLBACK_LAUNCHER_NAME, true,
                 PACKAGE_FALLBACK_LAUNCHER_PRIORITY);
+    }
+
+    protected void makeCallerForeground() {
+        try {
+            mService.mUidObserver.onUidStateChanged(
+                    mInjectedCallingUid, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+    }
+
+    protected void makeCallerBackground() {
+        try {
+            mService.mUidObserver.onUidStateChanged(
+                    mInjectedCallingUid, ActivityManager.PROCESS_STATE_TOP_SLEEPING);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+    }
+
+    protected void publishManifestShortcutsAsCaller(int resId) {
+        addManifestShortcutResource(
+                new ComponentName(getCallingPackage(), ShortcutActivity.class.getName()),
+                resId);
+        updatePackageVersion(getCallingPackage(), 1);
+        mService.mPackageMonitor.onReceive(getTestContext(),
+                genPackageAddIntent(getCallingPackage(), getCallingUserId()));
     }
 }

@@ -1865,9 +1865,10 @@ public class ShortcutService extends IShortcutService.Stub {
         synchronized (mLock) {
             throwIfUserLockedL(userId);
 
-            // TODO Make sure the caller is in the foreground.
+            Preconditions.checkState(isUidForegroundLocked(injectBinderCallingUid()),
+                    "Calling application must have a foreground activity or a foreground service");
 
-            // TODO Cancel all pending request from the same app.
+            // TODO Cancel all pending requests from the caller.
 
             // Send request to the launcher, if supported.
             ret = mShortcutRequestPinProcessor.requestPinShortcutLocked(shortcut, resultIntent);

@@ -48,7 +48,15 @@ class ShortcutRequestPinProcessor {
      */
     private static class PinShortcutRequestInner extends IPinItemRequest.Stub {
         private final ShortcutRequestPinProcessor mProcessor;
-        public final ShortcutInfo shortcut;
+        /** Original shortcut passed by the app. */
+        public final ShortcutInfo shortcutOriginal;
+
+        /**
+         * Cloned shortcut that's passed to the launcher.  The notable difference from
+         * {@link #shortcutOriginal} is it must not have the intent.
+         */
+        public final ShortcutInfo shortcutForLauncher;
+
         private final IntentSender mResultIntent;
 
         public final String launcherPackage;
@@ -59,10 +67,12 @@ class ShortcutRequestPinProcessor {
         private boolean mAccepted;
 
         private PinShortcutRequestInner(ShortcutRequestPinProcessor processor,
-                ShortcutInfo shortcut, IntentSender resultIntent,
+                ShortcutInfo shortcutOriginal, ShortcutInfo shortcutForLauncher,
+                IntentSender resultIntent,
                 String launcherPackage, int launcherUserId, boolean preExisting) {
             mProcessor = processor;
-            this.shortcut = shortcut;
+            this.shortcutOriginal = shortcutOriginal;
+            this.shortcutForLauncher = shortcutForLauncher;
             mResultIntent = resultIntent;
             this.launcherPackage = launcherPackage;
             this.launcherUserId = launcherUserId;
@@ -99,8 +109,8 @@ class ShortcutRequestPinProcessor {
                 mAccepted = true;
             }
             if (DEBUG) {
-                Slog.d(TAG, "Launcher accepted shortcut. ID=" + shortcut.getId()
-                        + " package=" + shortcut.getPackage()
+                Slog.d(TAG, "Launcher accepted shortcut. ID=" + shortcutOriginal.getId()
+                        + " package=" + shortcutOriginal.getPackage()
                         + " options=" + options);
             }
 
@@ -163,7 +173,7 @@ class ShortcutRequestPinProcessor {
         }
 
         // This is the shortcut that'll be sent to the launcher.
-        final ShortcutInfo shortcutToSend;
+        final ShortcutInfo shortcutForLauncher;
 
         if (existsAlready) {
             validateExistingShortcut(existing);
@@ -179,8 +189,10 @@ class ShortcutRequestPinProcessor {
 
             // Pass a clone, not the original.
             // Note this will remove the intent and icons.
-            shortcutToSend = existing.clone(ShortcutInfo.CLONE_REMOVE_FOR_LAUNCHER);
-            shortcutToSend.clearFlags(ShortcutInfo.FLAG_PINNED);
+            shortcutForLauncher = existing.clone(ShortcutInfo.CLONE_REMOVE_FOR_LAUNCHER);
+
+            // FLAG_PINNED is still set, if it's pinned by other launchers.
+            shortcutForLauncher.clearFlags(ShortcutInfo.FLAG_PINNED);
         } else {
             // It doesn't exist, so it must have all mandatory fields.
             mService.validateShortcutForPinRequest(inShortcut);
@@ -191,17 +203,18 @@ class ShortcutRequestPinProcessor {
             if (DEBUG) {
                 Slog.d(TAG, "resolved shortcut=" + inShortcut.toInsecureString());
             }
-            // TODO Remove the intent here -- don't pass shortcut intents to the launcher.
-            shortcutToSend = inShortcut;
+            // We should strip out the intent, but should preserve the icon.
+            shortcutForLauncher = inShortcut.clone(
+                    ShortcutInfo.CLONE_REMOVE_FOR_LAUNCHER_APPROVAL);
         }
 
         // Create a request object.
         final PinShortcutRequestInner inner =
-                new PinShortcutRequestInner(this, shortcutToSend, resultIntent,
+                new PinShortcutRequestInner(this, inShortcut, shortcutForLauncher, resultIntent,
                         launcherPackage, launcherUserId, existsAlready);
 
         final PinItemRequest outer = new PinItemRequest(PinItemRequest.REQUEST_TYPE_SHORTCUT,
-                shortcutToSend, inner);
+                shortcutForLauncher, inner);
 
         return startRequestConfirmActivity(launcherComponent, launcherUserId, outer);
     }
@@ -210,7 +223,7 @@ class ShortcutRequestPinProcessor {
         // Make sure it's enabled.
         // (Because we can't always force enable it automatically as it may be a stale
         // manifest shortcut.)
-        Preconditions.checkState(shortcutInfo.isEnabled(),
+        Preconditions.checkArgument(shortcutInfo.isEnabled(),
                 "Shortcut ID=" + shortcutInfo + " already exists but disabled.");
 
     }
@@ -270,7 +283,7 @@ class ShortcutRequestPinProcessor {
      */
     public boolean directPinShortcut(PinShortcutRequestInner request) {
 
-        final ShortcutInfo original = request.shortcut;
+        final ShortcutInfo original = request.shortcutOriginal;
         final int appUserId = original.getUserId();
         final String appPackageName = original.getPackage();
         final int launcherUserId = request.launcherUserId;
@@ -292,7 +305,7 @@ class ShortcutRequestPinProcessor {
             try {
                 if (current == null) {
                     // It doesn't exist, so it must have all necessary fields.
-                    mService.validateShortcutForPinRequest(request.shortcut);
+                    mService.validateShortcutForPinRequest(original);
                 } else {
                     validateExistingShortcut(current);
                 }
