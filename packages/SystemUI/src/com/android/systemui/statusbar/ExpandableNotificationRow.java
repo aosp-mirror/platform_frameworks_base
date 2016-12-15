@@ -921,6 +921,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         return topPadding;
     }
 
+    public float getContentTranslation() {
+        return mPrivateLayout.getTranslationY();
+    }
+
     public interface ExpansionLogger {
         public void logNotificationExpansion(String key, boolean userAction, boolean expanded);
     }

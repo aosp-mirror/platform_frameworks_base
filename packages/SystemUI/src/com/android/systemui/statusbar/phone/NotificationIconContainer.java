@@ -409,8 +409,8 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         public int visibleState;
         public boolean justAdded = true;
         public boolean needsCannedAnimation;
-        public boolean keepClampedPosition;
         public boolean useFullTransitionAmount;
+        public boolean useLinearTransitionAmount;
         public boolean translateContent;
 
         @Override
