@@ -1212,8 +1212,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Permite que unha aplicación consulte as sesións de instalación. Desta forma, pode ver os detalles acerca das instalacións de paquetes activas."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"solicitar instalación de paquetes"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Permite a unha aplicación solicitar a instalación dos paquetes."</string>
-    <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"solicitar ignorar optimizacións da batería"</string>
-    <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Permite que unha aplicación solicite permiso para ignorar optimizacións da batería para esa aplicación."</string>
+    <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"pedir que se ignore a optimización da batería"</string>
+    <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Fai que unha aplicación poida solicitar permiso para ignorar as optimizacións da batería."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Toca dúas veces para controlar o zoom"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Non se puido engadir o widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Ir"</string>
@@ -1614,7 +1614,8 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Ata as <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Ata as <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (próxima alarma)"</string>
-    <string name="zen_mode_forever" msgid="7420011936770086993">"Ata que desactives isto"</string>
+    <!-- no translation found for zen_mode_forever (1916263162129197274) -->
+    <skip />
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Ata que desactives o modo Non molestar"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Contraer"</string>
