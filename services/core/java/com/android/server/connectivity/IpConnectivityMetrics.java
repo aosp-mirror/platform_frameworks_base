@@ -36,13 +36,13 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.TokenBucket;
 import com.android.server.SystemService;
+import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityEvent;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.ToIntFunction;
-
-import static com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityEvent;
 
 /** {@hide} */
 final public class IpConnectivityMetrics extends SystemService {
@@ -62,6 +62,8 @@ final public class IpConnectivityMetrics extends SystemService {
     private static final int DEFAULT_BUFFER_SIZE = 2000;
     // Maximum size of the event buffer.
     private static final int MAXIMUM_BUFFER_SIZE = DEFAULT_BUFFER_SIZE * 10;
+
+    private static final int MAXIMUM_CONNECT_LATENCY_RECORDS = 20000;
 
     private static final int ERROR_RATE_LIMITED = -1;
 
@@ -160,9 +162,15 @@ final public class IpConnectivityMetrics extends SystemService {
             initBuffer();
         }
 
+        final List<IpConnectivityEvent> protoEvents = IpConnectivityEventBuilder.toProto(events);
+
+        if (mNetdListener != null) {
+            mNetdListener.flushStatistics(protoEvents);
+        }
+
         final byte[] data;
         try {
-            data = IpConnectivityEventBuilder.serialize(dropped, events);
+            data = IpConnectivityEventBuilder.serialize(dropped, protoEvents);
         } catch (IOException e) {
             Log.e(TAG, "could not serialize events", e);
             return "";
