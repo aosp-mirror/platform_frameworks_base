@@ -573,6 +573,14 @@ static jobject Bitmap_copy(JNIEnv* env, jobject, jlong srcHandle,
                            jint dstConfigHandle, jboolean isMutable) {
     SkBitmap src;
     reinterpret_cast<BitmapWrapper*>(srcHandle)->getSkBitmap(&src);
+    if (dstConfigHandle == GraphicsJNI::hardwareLegacyBitmapConfig()) {
+        sk_sp<Bitmap> bitmap(Bitmap::allocateHardwareBitmap(src));
+        if (!bitmap.get()) {
+            return NULL;
+        }
+        return createBitmap(env, bitmap.release(), kBitmapCreateFlag_None);
+    }
+
     SkColorType dstCT = GraphicsJNI::legacyBitmapConfigToColorType(dstConfigHandle);
     SkBitmap result;
     HeapAllocator allocator;
