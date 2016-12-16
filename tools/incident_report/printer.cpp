@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 #define INITIAL_BUF_SIZE (16*1024)
 
