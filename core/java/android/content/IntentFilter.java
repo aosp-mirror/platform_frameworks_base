@@ -531,7 +531,7 @@ public class IntentFilter implements Parcelable {
      * @hide
      */
     public final boolean getAutoVerify() {
-        return ((mVerifyState & STATE_VERIFY_AUTO) == 1);
+        return ((mVerifyState & STATE_VERIFY_AUTO) == STATE_VERIFY_AUTO);
     }
 
     /**

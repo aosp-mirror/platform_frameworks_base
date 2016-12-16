@@ -181,7 +181,7 @@ public final class IntentFilterVerificationInfo implements Parcelable {
     }
 
     public String getStatusString() {
-        return getStatusStringFromValue(mMainStatus);
+        return getStatusStringFromValue(((long)mMainStatus) << 32);
     }
 
     public static String getStatusStringFromValue(long val) {
