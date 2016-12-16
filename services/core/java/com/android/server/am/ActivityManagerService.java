@@ -257,6 +257,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.CountDownLatch;
 
 import dalvik.system.VMRuntime;
 
@@ -1465,6 +1466,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             MONITOR_THREAD_CPU_USAGE);
     final AtomicLong mLastCpuTime = new AtomicLong(0);
     final AtomicBoolean mProcessCpuMutexFree = new AtomicBoolean(true);
+    final CountDownLatch mProcessCpuInitLatch = new CountDownLatch(1);
 
     long mLastWriteTime = 0;
 
@@ -2647,13 +2649,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         mTrackingAssociations = "1".equals(SystemProperties.get("debug.track-associations"));
-
         mTempConfig.setToDefaults();
         mTempConfig.setLocales(LocaleList.getDefault());
         mConfigurationSeq = mTempConfig.seq = 1;
-
-        mProcessCpuTracker.init();
-
         mStackSupervisor = new ActivityStackSupervisor(this);
         mStackSupervisor.onConfigurationChanged(mTempConfig);
         mKeyguardController = mStackSupervisor.mKeyguardController;
@@ -2667,6 +2665,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         mProcessCpuThread = new Thread("CpuTracker") {
             @Override
             public void run() {
+                synchronized (mProcessCpuTracker) {
+                    mProcessCpuInitLatch.countDown();
+                    mProcessCpuTracker.init();
+                }
                 while (true) {
                     try {
                         try {
@@ -2714,6 +2716,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         mAppOpsService.publish(mContext);
         Slog.d("AppOps", "AppOpsService published");
         LocalServices.addService(ActivityManagerInternal.class, new LocalService());
+        // Wait for the synchronized block started in mProcessCpuThread,
+        // so that any other acccess to mProcessCpuTracker from main thread
+        // will be blocked during mProcessCpuTracker initialization.
+        try {
+            mProcessCpuInitLatch.await();
+        } catch (InterruptedException e) {
+            Slog.wtf(TAG, "Interrupted wait during start", e);
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Interrupted wait during start");
+        }
     }
 
     void onUserStoppedLocked(int userId) {
