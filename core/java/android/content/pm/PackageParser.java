@@ -357,6 +357,7 @@ public class PackageParser {
         public final int[] splitRevisionCodes;
 
         public final boolean coreApp;
+        public final boolean debuggable;
         public final boolean multiArch;
         public final boolean use32bitAbi;
         public final boolean extractNativeLibs;
@@ -374,6 +375,7 @@ public class PackageParser {
             this.baseRevisionCode = baseApk.revisionCode;
             this.splitRevisionCodes = splitRevisionCodes;
             this.coreApp = baseApk.coreApp;
+            this.debuggable = baseApk.debuggable;
             this.multiArch = baseApk.multiArch;
             this.use32bitAbi = baseApk.use32bitAbi;
             this.extractNativeLibs = baseApk.extractNativeLibs;
@@ -403,6 +405,7 @@ public class PackageParser {
         public final Signature[] signatures;
         public final Certificate[][] certificates;
         public final boolean coreApp;
+        public final boolean debuggable;
         public final boolean multiArch;
         public final boolean use32bitAbi;
         public final boolean extractNativeLibs;
@@ -410,7 +413,8 @@ public class PackageParser {
         public ApkLite(String codePath, String packageName, String splitName, int versionCode,
                 int revisionCode, int installLocation, List<VerifierInfo> verifiers,
                 Signature[] signatures, Certificate[][] certificates, boolean coreApp,
-                boolean multiArch, boolean use32bitAbi, boolean extractNativeLibs) {
+                boolean debuggable, boolean multiArch, boolean use32bitAbi,
+                boolean extractNativeLibs) {
             this.codePath = codePath;
             this.packageName = packageName;
             this.splitName = splitName;
@@ -421,6 +425,7 @@ public class PackageParser {
             this.signatures = signatures;
             this.certificates = certificates;
             this.coreApp = coreApp;
+            this.debuggable = debuggable;
             this.multiArch = multiArch;
             this.use32bitAbi = use32bitAbi;
             this.extractNativeLibs = extractNativeLibs;
@@ -1621,6 +1626,7 @@ public class PackageParser {
         int versionCode = 0;
         int revisionCode = 0;
         boolean coreApp = false;
+        boolean debuggable = false;
         boolean multiArch = false;
         boolean use32bitAbi = false;
         boolean extractNativeLibs = true;
@@ -1660,6 +1666,9 @@ public class PackageParser {
             if (parser.getDepth() == searchDepth && "application".equals(parser.getName())) {
                 for (int i = 0; i < attrs.getAttributeCount(); ++i) {
                     final String attr = attrs.getAttributeName(i);
+                    if ("debuggable".equals(attr)) {
+                        debuggable = attrs.getAttributeBooleanValue(i, false);
+                    }
                     if ("multiArch".equals(attr)) {
                         multiArch = attrs.getAttributeBooleanValue(i, false);
                     }
@@ -1675,7 +1684,7 @@ public class PackageParser {
 
         return new ApkLite(codePath, packageSplit.first, packageSplit.second, versionCode,
                 revisionCode, installLocation, verifiers, signatures, certificates, coreApp,
-                multiArch, use32bitAbi, extractNativeLibs);
+                debuggable, multiArch, use32bitAbi, extractNativeLibs);
     }
 
     /**
