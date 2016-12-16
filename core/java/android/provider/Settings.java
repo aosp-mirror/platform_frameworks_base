@@ -286,6 +286,21 @@ public final class Settings {
             "android.settings.SECURITY_SETTINGS";
 
     /**
+     * Activity Action: Show settings to allow configuration of trusted external sources
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_EXTERNAL_SOURCES =
+            "android.settings.action.MANAGE_EXTERNAL_SOURCES";
+
+    /**
      * Activity Action: Show trusted credentials settings, opening to the user tab,
      * to allow management of installed credentials.
      * <p>
