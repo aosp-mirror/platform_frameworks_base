@@ -190,6 +190,7 @@ LOCAL_SRC_FILES:= \
     hwbinder/EphemeralStorage.cpp \
 
 LOCAL_C_INCLUDES += \
+    $(LOCAL_PATH)/include \
     $(JNI_H_INCLUDE) \
     $(LOCAL_PATH)/android/graphics \
     $(LOCAL_PATH)/../../libs/hwui \
@@ -283,8 +284,10 @@ LOCAL_SHARED_LIBRARIES += \
 # <bionic_tls.h> in com_google_android_gles_jni_GLImpl.cpp
 LOCAL_C_INCLUDES += bionic/libc/private
 
+LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/include
+
 # AndroidRuntime.h depends on nativehelper/jni.h
-LOCAL_EXPORT_C_INCLUDE_DIRS := libnativehelper/include
+LOCAL_EXPORT_C_INCLUDE_DIRS += libnativehelper/include
 
 LOCAL_MODULE:= libandroid_runtime
 
