@@ -2632,6 +2632,9 @@
     <!-- Component that is the default launcher when demo mode is enabled. -->
     <string name="config_demoModeLauncherComponent">com.android.retaildemo/.DemoPlayer</string>
 
+    <!-- Hashed password (SHA-256) used to restrict demo mode operation -->
+    <string name="config_demoModePassword" translatable="false"></string>
+
     <!-- Flag indicating whether round icons should be parsed from the application manifest. -->
     <bool name="config_useRoundIcon">false</bool>
 
