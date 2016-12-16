@@ -46,7 +46,11 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.service.fingerprint.FingerprintActionStatsProto;
+import android.service.fingerprint.FingerprintServiceDumpProto;
+import android.service.fingerprint.FingerprintUserStatsProto;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
@@ -968,7 +972,11 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
 
             final long ident = Binder.clearCallingIdentity();
             try {
-                dumpInternal(pw);
+                if (args.length > 0 && "--proto".equals(args[0])) {
+                    dumpProto(fd);
+                } else {
+                    dumpInternal(pw);
+                }
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -1025,6 +1033,45 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             Slog.e(TAG, "dump formatting failure", e);
         }
         pw.println(dump);
+    }
+
+    private void dumpProto(FileDescriptor fd) {
+        final ProtoOutputStream proto = new ProtoOutputStream(fd);
+        for (UserInfo user : UserManager.get(getContext()).getUsers()) {
+            final int userId = user.getUserHandle().getIdentifier();
+
+            final long userToken = proto.start(FingerprintServiceDumpProto.USERS);
+
+            proto.write(FingerprintUserStatsProto.USER_ID, userId);
+            proto.write(FingerprintUserStatsProto.NUM_FINGERPRINTS,
+                    mFingerprintUtils.getFingerprintsForUser(mContext, userId).size());
+
+            // Normal fingerprint authentications (e.g. lockscreen)
+            final PerformanceStats normal = mPerformanceMap.get(userId);
+            if (normal != null) {
+                final long countsToken = proto.start(FingerprintUserStatsProto.NORMAL);
+                proto.write(FingerprintActionStatsProto.ACCEPT, normal.accept);
+                proto.write(FingerprintActionStatsProto.REJECT, normal.reject);
+                proto.write(FingerprintActionStatsProto.ACQUIRE, normal.acquire);
+                proto.write(FingerprintActionStatsProto.LOCKOUT, normal.lockout);
+                proto.end(countsToken);
+            }
+
+            // Statistics about secure fingerprint transactions (e.g. to unlock password
+            // storage, make secure purchases, etc.)
+            final PerformanceStats crypto = mPerformanceMap.get(userId);
+            if (crypto != null) {
+                final long countsToken = proto.start(FingerprintUserStatsProto.CRYPTO);
+                proto.write(FingerprintActionStatsProto.ACCEPT, crypto.accept);
+                proto.write(FingerprintActionStatsProto.REJECT, crypto.reject);
+                proto.write(FingerprintActionStatsProto.ACQUIRE, crypto.acquire);
+                proto.write(FingerprintActionStatsProto.LOCKOUT, crypto.lockout);
+                proto.end(countsToken);
+            }
+
+            proto.end(userToken);
+        }
+        proto.flush();
     }
 
     @Override
