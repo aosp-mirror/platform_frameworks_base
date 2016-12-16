@@ -214,6 +214,16 @@ public class DozeMachineTest {
 
     @Test
     @UiThreadTest
+    public void testSuppressingPulse_doesntCrash() {
+        mMachine.requestState(INITIALIZED);
+
+        mMachine.requestState(DOZE);
+        mMachine.requestState(DOZE_REQUEST_PULSE);
+        mMachine.requestState(DOZE_PULSE_DONE);
+    }
+
+    @Test
+    @UiThreadTest
     public void testScreen_offInDoze() {
         mMachine.requestState(INITIALIZED);
 

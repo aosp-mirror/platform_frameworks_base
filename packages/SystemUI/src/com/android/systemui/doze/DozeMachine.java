@@ -218,7 +218,8 @@ public class DozeMachine {
                     Preconditions.checkState(mState == State.DOZE_REQUEST_PULSE);
                     break;
                 case DOZE_PULSE_DONE:
-                    Preconditions.checkState(mState == State.DOZE_PULSING);
+                    Preconditions.checkState(
+                            mState == State.DOZE_REQUEST_PULSE || mState == State.DOZE_PULSING);
                     break;
                 default:
                     break;
