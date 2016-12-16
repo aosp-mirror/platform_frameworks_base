@@ -561,10 +561,10 @@ public class SystemServicesProxy {
      * Cancels the current window transtion to/from Recents for the given task id.
      */
     public void cancelWindowTransition(int taskId) {
-        if (mWm == null) return;
+        if (mIam == null) return;
 
         try {
-            WindowManagerGlobal.getWindowManagerService().cancelTaskWindowTransition(taskId);
+            mIam.cancelTaskWindowTransition(taskId);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -574,10 +574,10 @@ public class SystemServicesProxy {
      * Cancels the current thumbnail transtion to/from Recents for the given task id.
      */
     public void cancelThumbnailTransition(int taskId) {
-        if (mWm == null) return;
+        if (mIam == null) return;
 
         try {
-            WindowManagerGlobal.getWindowManagerService().cancelTaskThumbnailTransition(taskId);
+            mIam.cancelTaskThumbnailTransition(taskId);
         } catch (RemoteException e) {
             e.printStackTrace();
         }

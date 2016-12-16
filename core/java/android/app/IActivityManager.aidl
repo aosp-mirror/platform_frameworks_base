@@ -590,6 +590,12 @@ interface IActivityManager {
     void dismissKeyguard(in IBinder token, in IKeyguardDismissCallback callback);
     int restartUserInBackground(int userId);
 
+    /** Cancels the window transitions for the given task. */
+    void cancelTaskWindowTransition(int taskId);
+
+    /** Cancels the thumbnail transitions for the given task. */
+    void cancelTaskThumbnailTransition(int taskId);
+
     // WARNING: when these transactions are updated, check if they are any callers on the native
     // side. If so, make sure they are using the correct transaction ids and arguments.
     // If a transaction which will also be used on the native side is being inserted, add it

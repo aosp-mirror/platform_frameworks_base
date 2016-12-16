@@ -367,6 +367,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBLE_B
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityStackSupervisor.ActivityContainer.FORCE_NEW_TASK_FLAGS;
+import static com.android.server.am.ActivityStackSupervisor.CREATE_IF_NEEDED;
 import static com.android.server.am.ActivityStackSupervisor.DEFER_RESUME;
 import static com.android.server.am.ActivityStackSupervisor.FORCE_FOCUS;
 import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
@@ -9527,12 +9528,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Slog.w(TAG, "setTaskResizeable: taskId=" + taskId + " not found");
                 return;
             }
-            if (task.mResizeMode != resizeableMode) {
-                task.mResizeMode = resizeableMode;
-                mWindowManager.setTaskResizeable(taskId, resizeableMode);
-                mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
-                mStackSupervisor.resumeFocusedStackTopActivityLocked();
-            }
+            task.setResizeMode(resizeableMode);
         }
     }
 
@@ -9565,13 +9561,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 boolean preserveWindow = (resizeMode & RESIZE_MODE_PRESERVE_WINDOW) != 0;
                 if (stackId != task.getStackId()) {
-                    mStackSupervisor.moveTaskToStackUncheckedLocked(
-                            task, stackId, ON_TOP, !FORCE_FOCUS, "resizeTask");
+                    mStackSupervisor.moveTaskToStackUncheckedLocked(task, stackId, ON_TOP,
+                            !FORCE_FOCUS, "resizeTask", true /* allowStackOnTop */);
                     preserveWindow = false;
                 }
 
-                mStackSupervisor.resizeTaskLocked(task, bounds, resizeMode, preserveWindow,
-                        false /* deferResume */);
+                task.resize(bounds, resizeMode, preserveWindow, false /* deferResume */);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -9594,7 +9589,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (task.getStack() != null) {
                     // Return the bounds from window manager since it will be adjusted for various
                     // things like the presense of a docked stack for tasks that aren't resizeable.
-                    mWindowManager.getTaskBounds(task.taskId, rect);
+                    task.getWindowContainerBounds(rect);
                 } else {
                     // Task isn't in window manager yet since it isn't associated with a stack.
                     // Return the persist value from activity manager
@@ -9609,6 +9604,44 @@ public class ActivityManagerService extends IActivityManager.Stub
             Binder.restoreCallingIdentity(ident);
         }
         return rect;
+    }
+
+    @Override
+    public void cancelTaskWindowTransition(int taskId) {
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "cancelTaskWindowTransition()");
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(
+                        taskId, !RESTORE_FROM_RECENTS, INVALID_STACK_ID);
+                if (task == null) {
+                    Slog.w(TAG, "cancelTaskWindowTransition: taskId=" + taskId + " not found");
+                    return;
+                }
+                task.cancelWindowTransition();
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public void cancelTaskThumbnailTransition(int taskId) {
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "cancelTaskThumbnailTransition()");
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(
+                        taskId, !RESTORE_FROM_RECENTS, INVALID_STACK_ID);
+                if (task == null) {
+                    Slog.w(TAG, "cancelTaskThumbnailTransition: taskId=" + taskId + " not found");
+                    return;
+                }
+                task.cancelThumbnailTransition();
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     @Override
@@ -9949,7 +9982,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // Defer the resume so resume/pausing while moving stacks is dangerous.
                 mStackSupervisor.moveTaskToStackLocked(topTask.taskId, DOCKED_STACK_ID,
                         false /* toTop */, !FORCE_FOCUS, "swapDockedAndFullscreenStack",
-                        ANIMATE, true /* deferResume */);
+                        ANIMATE, true /* deferResume */, true /* allowStackOnTop */);
                 final int size = tasks.size();
                 for (int i = 0; i < size; i++) {
                     final int id = tasks.get(i).taskId;
@@ -9958,7 +9991,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     mStackSupervisor.moveTaskToStackLocked(id,
                             FULLSCREEN_WORKSPACE_STACK_ID, true /* toTop */, !FORCE_FOCUS,
-                            "swapDockedAndFullscreenStack", ANIMATE, true /* deferResume */);
+                            "swapDockedAndFullscreenStack", ANIMATE, true /* deferResume */,
+                            true /* allowStackOnTop */);
                 }
 
                 // Because we deferred the resume, to avoid conflicts with stack switches while
@@ -9999,7 +10033,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mWindowManager.setDockedStackCreateState(createMode, initialBounds);
                 final boolean moved = mStackSupervisor.moveTaskToStackLocked(
                         taskId, DOCKED_STACK_ID, toTop, !FORCE_FOCUS, "moveTaskToDockedStack",
-                        animate, DEFER_RESUME);
+                        animate, DEFER_RESUME, true /* allowStackOnTop */);
                 if (moved) {
                     if (moveHomeStackFront) {
                         mStackSupervisor.moveHomeStackToFront("moveTaskToDockedStack");
@@ -10113,10 +10147,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized (this) {
             long ident = Binder.clearCallingIdentity();
             try {
-                if (DEBUG_STACK) Slog.d(TAG_STACK,
-                        "positionTaskInStack: positioning task=" + taskId
-                        + " in stackId=" + stackId + " at position=" + position);
-                mStackSupervisor.positionTaskInStackLocked(taskId, stackId, position);
+                if (DEBUG_STACK) Slog.d(TAG_STACK, "positionTaskInStack: positioning task="
+                        + taskId + " in stackId=" + stackId + " at position=" + position);
+                final ActivityStack stack = mStackSupervisor.getStack(stackId, CREATE_IF_NEEDED,
+                        !ON_TOP);
+
+                stack.positionChildAt(taskId, position);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

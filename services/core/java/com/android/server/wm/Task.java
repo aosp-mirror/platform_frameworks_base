@@ -22,6 +22,7 @@ import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY;
+import static com.android.server.EventLogTags.WM_TASK_REMOVED;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -89,8 +90,8 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     private boolean mIsOnTopLauncher;
 
     Task(int taskId, TaskStack stack, int userId, WindowManagerService service, Rect bounds,
-            Configuration overrideConfig, boolean isOnTopLauncher, int resizeMode,
-            boolean homeTask) {
+            Configuration overrideConfig, boolean isOnTopLauncher, int resizeMode, boolean homeTask,
+            TaskWindowContainerController controller) {
         mTaskId = taskId;
         mStack = stack;
         mUserId = userId;
@@ -98,6 +99,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         mIsOnTopLauncher = isOnTopLauncher;
         mResizeMode = resizeMode;
         mHomeTask = homeTask;
+        setController(controller);
         setBounds(bounds, overrideConfig);
     }
 
@@ -150,7 +152,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     @Override
     void removeImmediately() {
         if (DEBUG_STACK) Slog.i(TAG, "removeTask: removing taskId=" + mTaskId);
-        EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, mTaskId, "removeTask");
+        EventLog.writeEvent(WM_TASK_REMOVED, mTaskId, "removeTask");
         mDeferRemoval = false;
 
         // Make sure to remove dim layer user first before removing task its from parent.
@@ -160,19 +162,17 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         }
 
         super.removeImmediately();
-        mService.mTaskIdToTask.delete(mTaskId);
     }
 
-    // TODO: Change to use re-parenting in WC.
-    void moveTaskToStack(TaskStack stack, boolean toTop) {
+    void reparent(TaskStack stack, int position) {
         if (stack == mStack) {
             return;
         }
-        if (DEBUG_STACK) Slog.i(TAG, "moveTaskToStack: removing taskId=" + mTaskId
+        if (DEBUG_STACK) Slog.i(TAG, "reParentTask: removing taskId=" + mTaskId
                 + " from stack=" + mStack);
-        EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, mTaskId, "moveTask");
+        EventLog.writeEvent(WM_TASK_REMOVED, mTaskId, "reParentTask");
         getParent().removeChild(this);
-        stack.addTask(this, toTop);
+        stack.addTask(this, position, showForAllUsers(), false /* moveParents */);
     }
 
     /** @see com.android.server.am.ActivityManagerService#positionTaskInStack(int, int, int). */
@@ -188,12 +188,13 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
             // and add to top of the target stack. We will move it proper position afterwards.
             if (DEBUG_STACK) Slog.i(TAG, "positionTaskInStack: removing taskId=" + mTaskId
                     + " from stack=" + mStack);
-            EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, mTaskId, "moveTask");
+            EventLog.writeEvent(WM_TASK_REMOVED, mTaskId, "positionTaskInStack");
             mStack.removeChild(this);
-            stack.addTask(this, true /* toTop */);
+            stack.addTask(this, position);
+        } else {
+            stack.positionChildAt(position, this, true /* includingParents */);
         }
 
-        stack.positionChildAt(position, this, true /* includingParents */);
         resizeLocked(bounds, overrideConfig, false /* force */);
 
         for (int activityNdx = mChildren.size() - 1; activityNdx >= 0; --activityNdx) {
@@ -225,7 +226,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         super.removeChild(token);
 
         if (mChildren.isEmpty()) {
-            EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, mTaskId, "removeAppToken: last token");
+            EventLog.writeEvent(WM_TASK_REMOVED, mTaskId, "removeAppToken: last token");
             if (mDeferRemoval) {
                 removeIfPossible();
             }
