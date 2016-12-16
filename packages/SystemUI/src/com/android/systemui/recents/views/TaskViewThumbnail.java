@@ -67,6 +67,7 @@ public class TaskViewThumbnail extends View {
     private float mDimAlpha;
     private Matrix mScaleMatrix = new Matrix();
     private Paint mDrawPaint = new Paint();
+    private Paint mLockedPaint = new Paint();
     private Paint mBgFillPaint = new Paint();
     private BitmapShader mBitmapShader;
     private LightingColorFilter mLightingColorFilter = new LightingColorFilter(0xffffffff, 0);
@@ -102,6 +103,7 @@ public class TaskViewThumbnail extends View {
         mCornerRadius = getResources().getDimensionPixelSize(
                 R.dimen.recents_task_view_rounded_corners_radius);
         mBgFillPaint.setColor(Color.WHITE);
+        mLockedPaint.setColor(Color.WHITE);
         mFullscreenThumbnailScale = context.getResources().getFraction(
                 com.android.internal.R.fraction.thumbnail_fullscreen_scale, 1, 1);
     }
@@ -133,7 +135,11 @@ public class TaskViewThumbnail extends View {
                 (int) (mThumbnailRect.width() * mThumbnailScale));
         int thumbnailHeight = Math.min(viewHeight,
                 (int) (mThumbnailRect.height() * mThumbnailScale));
-        if (mBitmapShader != null && thumbnailWidth > 0 && thumbnailHeight > 0) {
+
+        if (mTask.isLocked) {
+            canvas.drawRoundRect(0, 0, viewWidth, viewHeight, mCornerRadius, mCornerRadius,
+                    mLockedPaint);
+        } else if (mBitmapShader != null && thumbnailWidth > 0 && thumbnailHeight > 0) {
             int topOffset = mTaskBar != null
                     ? mTaskBar.getHeight() - mCornerRadius
                     : 0;
@@ -200,11 +206,13 @@ public class TaskViewThumbnail extends View {
                 ColorMatrixColorFilter filter = new ColorMatrixColorFilter(TMP_FILTER_COLOR_MATRIX);
                 mDrawPaint.setColorFilter(filter);
                 mBgFillPaint.setColorFilter(filter);
+                mLockedPaint.setColorFilter(filter);
             } else {
                 mLightingColorFilter.setColorMultiply(Color.argb(255, mul, mul, mul));
                 mDrawPaint.setColorFilter(mLightingColorFilter);
                 mDrawPaint.setColor(0xFFffffff);
                 mBgFillPaint.setColorFilter(mLightingColorFilter);
+                mLockedPaint.setColorFilter(mLightingColorFilter);
             }
         } else {
             int grey = mul;
@@ -299,6 +307,7 @@ public class TaskViewThumbnail extends View {
         if (t.colorBackground != 0) {
             mBgFillPaint.setColor(t.colorBackground);
         }
+        mLockedPaint.setColor(t.colorPrimary);
     }
 
     /**
