@@ -7625,12 +7625,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                     final float aspectRatio = r.pictureInPictureArgs.getAspectRatio();
                     final List<RemoteAction> actions = r.pictureInPictureArgs.getActions();
                     final Rect bounds = isValidPictureInPictureAspectRatio(aspectRatio)
-                            ? mWindowManager.getPictureInPictureBounds(DEFAULT_DISPLAY,
-                                    aspectRatio)
+                            ? mWindowManager.getPictureInPictureBounds(DEFAULT_DISPLAY, aspectRatio)
                             : mWindowManager.getPictureInPictureDefaultBounds(DEFAULT_DISPLAY);
                     mStackSupervisor.moveActivityToPinnedStackLocked(r, "enterPictureInPictureMode",
                             bounds, true /* moveHomeStackToFront */);
-                    mWindowManager.setPictureInPictureActions(actions);
+                    mStackSupervisor.getStack(PINNED_STACK_ID).setPictureInPictureActions(actions);
                 };
 
                 if (isKeyguardLocked()) {
@@ -7678,12 +7677,11 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 // Only update the saved args from the args that are set
                 r.pictureInPictureArgs.copyOnlySet(args);
-                if (r.getStack().getStackId() == PINNED_STACK_ID) {
+                final ActivityStack stack = r.getStack();
+                if (stack.getStackId() == PINNED_STACK_ID) {
                     // If the activity is already in picture-in-picture, update the pinned stack now
-                    mWindowManager.setPictureInPictureAspectRatio(
-                            r.pictureInPictureArgs.getAspectRatio());
-                    mWindowManager.setPictureInPictureActions(
-                            r.pictureInPictureArgs.getActions());
+                    stack.setPictureInPictureAspectRatio(r.pictureInPictureArgs.getAspectRatio());
+                    stack.setPictureInPictureActions(r.pictureInPictureArgs.getActions());
                 }
             }
         } finally {
@@ -10221,7 +10219,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized (this) {
                 if (animate) {
                     if (stackId == PINNED_STACK_ID) {
-                        mWindowManager.animateResizePinnedStack(bounds, animationDuration);
+                        final ActivityStack pinnedStack =
+                                mStackSupervisor.getStack(PINNED_STACK_ID);
+                        pinnedStack.animateResizePinnedStack(bounds, animationDuration);
                     } else {
                         throw new IllegalArgumentException("Stack: " + stackId
                                 + " doesn't support animated resize.");
@@ -19593,7 +19593,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     /** Helper method that requests bounds from WM and applies them to stack. */
     private void resizeStackWithBoundsFromWindowManager(int stackId, boolean deferResume) {
-        final Rect newBounds = mWindowManager.getBoundsForNewConfiguration(stackId);
+        final Rect newBounds = mStackSupervisor.getStack(stackId).getBoundsForNewConfiguration();
         mStackSupervisor.resizeStackLocked(
                 stackId, newBounds, null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
                 false /* preserveWindows */, false /* allowResizeInDockedMode */, deferResume);

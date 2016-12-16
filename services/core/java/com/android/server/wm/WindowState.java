@@ -2304,6 +2304,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     final WindowState win = mService.windowForClientLocked(mSession, mClient, false);
                     Slog.i(TAG, "WIN DEATH: " + win);
                     if (win != null) {
+                        final DisplayContent dc = getDisplayContent();
                         if (win.mAppToken != null && win.mAppToken.findMainWindow() == win) {
                             mService.mTaskSnapshotController.onAppDied(win.mAppToken);
                         }
@@ -2313,7 +2314,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                             // just in case they have the divider at an unstable position. Better
                             // also reset drag resizing state, because the owner can't do it
                             // anymore.
-                            final TaskStack stack = mService.mStackIdToStack.get(DOCKED_STACK_ID);
+                            final TaskStack stack = dc.getDockedStackIgnoringVisibility();
                             if (stack != null) {
                                 stack.resetDockedStackToMiddle();
                             }

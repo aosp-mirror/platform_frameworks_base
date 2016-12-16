@@ -1835,7 +1835,7 @@ class ActivityStarter {
                 mSupervisor.getNextTaskIdForUserLocked(mStartActivity.userId), mStartActivity.info,
                 mIntent, null, null, true, mStartActivity.mActivityType);
         mStartActivity.setTask(task, null);
-        mStartActivity.task.moveWindowContainerToTop(true /* includingParents */);
+        mStartActivity.task.getStack().positionChildWindowContainerAtTop(mStartActivity.task);
         if (DEBUG_TASKS) Slog.v(TAG_TASKS,
                 "Starting new activity " + mStartActivity + " in new guessed " + mStartActivity.task);
     }

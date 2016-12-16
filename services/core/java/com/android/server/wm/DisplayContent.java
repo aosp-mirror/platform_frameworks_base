@@ -57,6 +57,7 @@ import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_BOOT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
@@ -69,6 +70,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TOKEN_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_STACK_CRAWLS;
@@ -634,6 +636,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     DisplayContent(Display display, WindowManagerService service,
             WindowLayersController layersController, WallpaperController wallpaperController) {
+
+        if (service.mRoot.getDisplayContent(display.getDisplayId()) != null) {
+            throw new IllegalArgumentException("Display with ID=" + display.getDisplayId()
+                    + " already exists=" + service.mRoot.getDisplayContent(display.getDisplayId())
+                    + " new=" + display);
+        }
+
         mDisplay = display;
         mDisplayId = display.getDisplayId();
         mLayersController = layersController;
@@ -957,75 +966,43 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         out.set(mContentRect);
     }
 
-    /**
-     * Adds the stack to this display.
-     * @see WindowManagerService#addStackToDisplay(int, int, boolean)
-     */
-    Rect addStackToDisplay(int stackId, boolean onTop) {
-        boolean attachedToDisplay = false;
-        TaskStack stack = mService.mStackIdToStack.get(stackId);
-        if (stack == null) {
-            if (DEBUG_STACK) Slog.d(TAG_WM, "Create new stackId=" + stackId + " on displayId="
-                    + mDisplayId);
+    TaskStack addStackToDisplay(int stackId, boolean onTop) {
+        if (DEBUG_STACK) Slog.d(TAG_WM, "Create new stackId=" + stackId + " on displayId="
+                + mDisplayId);
 
-            stack = getStackById(stackId);
-            if (stack != null) {
-                // It's already attached to the display...clear mDeferRemoval and move stack to
-                // appropriate z-order on display as needed.
-                stack.mDeferRemoval = false;
-                // We're not moving the display to front when we're adding stacks, only when
-                // requested to change the position of stack explicitly.
-                mTaskStackContainers.positionChildAt(onTop ? POSITION_TOP : POSITION_BOTTOM, stack,
-                        false /* includingParents */);
-                attachedToDisplay = true;
-            } else {
-                stack = new TaskStack(mService, stackId);
-            }
-
-            mService.mStackIdToStack.put(stackId, stack);
-            if (stackId == DOCKED_STACK_ID) {
-                mDividerControllerLocked.notifyDockedStackExistsChanged(true);
-            }
+        TaskStack stack = getStackById(stackId);
+        if (stack != null) {
+            // It's already attached to the display...clear mDeferRemoval and move stack to
+            // appropriate z-order on display as needed.
+            stack.mDeferRemoval = false;
+            // We're not moving the display to front when we're adding stacks, only when
+            // requested to change the position of stack explicitly.
+            mTaskStackContainers.positionChildAt(onTop ? POSITION_TOP : POSITION_BOTTOM, stack,
+                    false /* includingParents */);
         } else {
-            final DisplayContent currentDC = stack.getDisplayContent();
-            if (currentDC != null) {
-                throw new IllegalStateException("Trying to add stackId=" + stackId
-                        + "to displayId=" + mDisplayId + ", but it's already attached to displayId="
-                        + currentDC.getDisplayId());
-            }
-        }
-
-        if (!attachedToDisplay) {
+            stack = new TaskStack(mService, stackId);
             mTaskStackContainers.addStackToDisplay(stack, onTop);
         }
 
-        if (stack.getRawFullscreen()) {
-            return null;
+        if (stackId == DOCKED_STACK_ID) {
+            mDividerControllerLocked.notifyDockedStackExistsChanged(true);
         }
-        final Rect bounds = new Rect();
-        stack.getRawBounds(bounds);
-        return bounds;
+        return stack;
     }
 
-    /** Removes the stack from the display and prepares for changing the parent. */
-    private void removeStackFromDisplay(TaskStack stack) {
-        mTaskStackContainers.removeStackFromDisplay(stack);
-    }
-
-    /** Moves the stack to this display and returns the updated bounds. */
-    Rect moveStackToDisplay(TaskStack stack) {
-        final DisplayContent currentDisplayContent = stack.getDisplayContent();
-        if (currentDisplayContent == null) {
+    void moveStackToDisplay(TaskStack stack) {
+        final DisplayContent prevDc = stack.getDisplayContent();
+        if (prevDc == null) {
             throw new IllegalStateException("Trying to move stackId=" + stack.mStackId
                     + " which is not currently attached to any display");
         }
-        if (stack.getDisplayContent().getDisplayId() == mDisplayId) {
+        if (prevDc.getDisplayId() == mDisplayId) {
             throw new IllegalArgumentException("Trying to move stackId=" + stack.mStackId
                     + " to its current displayId=" + mDisplayId);
         }
 
-        currentDisplayContent.removeStackFromDisplay(stack);
-        return addStackToDisplay(stack.mStackId, true /* onTop */);
+        prevDc.mTaskStackContainers.removeStackFromDisplay(stack);
+        mTaskStackContainers.addStackToDisplay(stack, true /* onTop */);
     }
 
     @Override
@@ -1172,7 +1149,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             super.removeImmediately();
             if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Removing display=" + this);
             mDimLayerController.close();
-            if (mDisplayId == DEFAULT_DISPLAY) {
+            if (mDisplayId == DEFAULT_DISPLAY && mService.canDispatchPointerEvents()) {
                 mService.unregisterPointerEventListener(mTapDetector);
                 mService.unregisterPointerEventListener(mService.mMousePositionTracker);
             }
@@ -1250,7 +1227,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final WindowState imeWin = mService.mInputMethodWindow;
         final boolean imeVisible = imeWin != null && imeWin.isVisibleLw() && imeWin.isDisplayedLw()
                 && !mDividerControllerLocked.isImeHideRequested();
-        final boolean dockVisible = mService.isStackVisibleLocked(DOCKED_STACK_ID);
+        final boolean dockVisible = isStackVisible(DOCKED_STACK_ID);
         final TaskStack imeTargetStack = mService.getImeFocusStackLocked();
         final int imeDockSide = (dockVisible && imeTargetStack != null) ?
                 imeTargetStack.getDockSide() : DOCKED_INVALID;
@@ -1447,7 +1424,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @return The docked stack, but only if it is visible, and {@code null} otherwise.
      */
     TaskStack getDockedStackLocked() {
-        final TaskStack stack = mService.mStackIdToStack.get(DOCKED_STACK_ID);
+        final TaskStack stack = getStackById(DOCKED_STACK_ID);
         return (stack != null && stack.isVisible()) ? stack : null;
     }
 
@@ -1456,7 +1433,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * visible.
      */
     TaskStack getDockedStackIgnoringVisibility() {
-        return mService.mStackIdToStack.get(DOCKED_STACK_ID);
+        return getStackById(DOCKED_STACK_ID);
     }
 
     /** Find the visible, touch-deliverable window under the given point */
@@ -1532,6 +1509,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
     }
 
+    // TODO: This should probably be called any time a visual change is made to the hierarchy like
+    // moving containers or resizing them. Need to investigate the best way to have it automatically
+    // happen so we don't run into issues with programmers forgetting to do it.
     void layoutAndAssignWindowLayersIfNeeded() {
         mService.mWindowsChanged = true;
         setLayoutNeeded();
@@ -2441,6 +2421,27 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
     }
 
+    void setExitingTokensHasVisible(boolean hasVisible) {
+        for (int i = mExitingTokens.size() - 1; i >= 0; i--) {
+            mExitingTokens.get(i).hasVisible = hasVisible;
+        }
+
+        // Initialize state of exiting applications.
+        mTaskStackContainers.setExitingTokensHasVisible(hasVisible);
+    }
+
+    void removeExistingTokensIfPossible() {
+        for (int i = mExitingTokens.size() - 1; i >= 0; i--) {
+            final WindowToken token = mExitingTokens.get(i);
+            if (!token.hasVisible) {
+                mExitingTokens.remove(i);
+            }
+        }
+
+        // Time to remove any exiting applications?
+        mTaskStackContainers.removeExistingAppTokensIfPossible();
+    }
+
     static final class TaskForResizePointSearchResult {
         boolean searchDone;
         Task taskForResize;
@@ -2650,10 +2651,38 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             return false;
         }
 
+        void setExitingTokensHasVisible(boolean hasVisible) {
+            for (int i = mChildren.size() - 1; i >= 0; --i) {
+                final AppTokenList appTokens = mChildren.get(i).mExitingAppTokens;
+                for (int j = appTokens.size() - 1; j >= 0; --j) {
+                    appTokens.get(j).hasVisible = hasVisible;
+                }
+            }
+        }
+
+        void removeExistingAppTokensIfPossible() {
+            for (int i = mChildren.size() - 1; i >= 0; --i) {
+                final AppTokenList appTokens = mChildren.get(i).mExitingAppTokens;
+                for (int j = appTokens.size() - 1; j >= 0; --j) {
+                    final AppWindowToken token = appTokens.get(j);
+                    if (!token.hasVisible && !mService.mClosingApps.contains(token)
+                            && (!token.mIsExiting || token.isEmpty())) {
+                        // Make sure there is no animation running on this token, so any windows
+                        // associated with it will be removed as soon as their animations are
+                        // complete.
+                        token.mAppAnimator.clearAnimation();
+                        token.mAppAnimator.animating = false;
+                        if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG,
+                                "performLayout: App token exiting now removed" + token);
+                        token.removeIfPossible();
+                    }
+                }
+            }
+        }
+
         @Override
         int getOrientation() {
-            if (mService.isStackVisibleLocked(DOCKED_STACK_ID)
-                    || mService.isStackVisibleLocked(FREEFORM_WORKSPACE_STACK_ID)) {
+            if (isStackVisible(DOCKED_STACK_ID) || isStackVisible(FREEFORM_WORKSPACE_STACK_ID)) {
                 // Apps and their containers are not allowed to specify an orientation while the
                 // docked or freeform stack is visible...except for the home stack/task if the
                 // docked stack is minimized and it actually set something.

@@ -35,17 +35,12 @@ import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVID
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowManagerService.H.RESIZE_STACK;
 import static com.android.server.wm.WindowManagerService.LAYER_OFFSET_DIM;
 
 import android.app.ActivityManager.StackId;
-import android.app.IActivityManager;
 import android.content.res.Configuration;
-import android.graphics.Point;
-import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.os.Debug;
 import android.os.RemoteException;
 import android.util.EventLog;
 import android.util.Slog;
@@ -53,11 +48,9 @@ import android.util.SparseArray;
 import android.view.DisplayInfo;
 import android.view.Surface;
 
-import android.view.WindowManagerPolicy;
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
 import com.android.internal.policy.DockedDividerUtils;
-import com.android.internal.policy.PipSnapAlgorithm;
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
@@ -204,14 +197,6 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
             final Task task = mChildren.get(taskNdx);
             task.prepareFreezingBounds();
         }
-    }
-
-    boolean isFullscreenBounds(Rect bounds) {
-        if (mDisplayContent == null || bounds == null) {
-            return true;
-        }
-        mDisplayContent.getLogicalDisplayRect(mTmpRect);
-        return mTmpRect.equals(bounds);
     }
 
     /**
@@ -658,7 +643,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
 
         final Rect oldBounds = new Rect(mBounds);
         Rect bounds = null;
-        final TaskStack dockedStack = mService.mStackIdToStack.get(DOCKED_STACK_ID);
+        final TaskStack dockedStack = dc.getDockedStackIgnoringVisibility();
         if (mStackId == DOCKED_STACK_ID
                 || (dockedStack != null && StackId.isResizeableByDockedStack(mStackId)
                         && !dockedStack.fillsParent())) {
@@ -697,7 +682,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
             return;
         }
 
-        final TaskStack dockedStack = mService.mStackIdToStack.get(DOCKED_STACK_ID);
+        final TaskStack dockedStack = mDisplayContent.getDockedStackIgnoringVisibility();
         if (dockedStack == null) {
             // Not sure why you are calling this method when there is no docked stack...
             throw new IllegalStateException(
@@ -805,8 +790,12 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
 
         final Rect bounds = new Rect();
         getStackDockedModeBoundsLocked(bounds, true /*ignoreVisibility*/);
-        mService.mH.obtainMessage(RESIZE_STACK, DOCKED_STACK_ID,
-                1 /*allowResizeInDockedMode*/, bounds).sendToTarget();
+        getController().requestResize(bounds);
+    }
+
+    @Override
+    StackWindowController getController() {
+        return (StackWindowController) super.getController();
     }
 
     @Override

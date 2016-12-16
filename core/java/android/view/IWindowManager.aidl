@@ -135,9 +135,6 @@ interface IWindowManager
     // ids that were affected by the update, ActivityManager should resize these stacks.
     int[] setNewDisplayOverrideConfiguration(in Configuration overrideConfig, int displayId);
 
-    // Retrieves the new bounds after the configuration update evaluated by window manager.
-    Rect getBoundsForNewConfiguration(int stackId);
-
     void startFreezingScreen(int exitAnim, int enterAnim);
     void stopFreezingScreen();
 

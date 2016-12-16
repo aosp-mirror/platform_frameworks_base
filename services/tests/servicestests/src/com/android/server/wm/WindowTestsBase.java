@@ -28,6 +28,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import android.app.ActivityManager.TaskSnapshot;
 import android.content.Context;
 import android.os.IBinder;
 import android.support.test.InstrumentationRegistry;
@@ -95,6 +96,10 @@ class WindowTestsBase {
         sWm = TestWindowManagerPolicy.getWindowManagerService(context);
         sPolicy = (TestWindowManagerPolicy) sWm.mPolicy;
         sLayersController = new WindowLayersController(sWm);
+        sDisplayContent = sWm.mRoot.getDisplayContent(context.getDisplay().getDisplayId());
+        if (sDisplayContent != null) {
+            sDisplayContent.removeImmediately();
+        }
         sDisplayContent = new DisplayContent(context.getDisplay(), sWm, sLayersController,
                 new WallpaperController(sWm));
         sWm.mRoot.addChild(sDisplayContent, 0);
@@ -173,9 +178,13 @@ class WindowTestsBase {
 
     /** Creates a {@link TaskStack} and adds it to the specified {@link DisplayContent}. */
     static TaskStack createTaskStackOnDisplay(DisplayContent dc) {
-        final int stackId = sNextStackId++;
-        dc.addStackToDisplay(stackId, true);
-        return sWm.mStackIdToStack.get(stackId);
+        return createStackControllerOnDisplay(dc).mContainer;
+    }
+
+    static StackWindowController createStackControllerOnDisplay(DisplayContent dc) {
+        final int stackId = ++sNextStackId;
+        return new StackWindowController(stackId, null, dc.getDisplayId(),
+                true /* onTop */, new Rect(), sWm);
     }
 
     /**Creates a {@link Task} and adds it to the specified {@link TaskStack}. */
@@ -235,6 +244,8 @@ class WindowTestsBase {
 
         boolean mShouldDeferRemoval = false;
         boolean mOnDisplayChangedCalled = false;
+        private boolean mUseLocalIsAnimating = false;
+        private boolean mIsAnimating = false;
 
         TestTask(int taskId, TaskStack stack, int userId, WindowManagerService service, Rect bounds,
                 Configuration overrideConfig, boolean isOnTopLauncher, int resizeMode,
@@ -258,6 +269,16 @@ class WindowTestsBase {
             super.onDisplayChanged(dc);
             mOnDisplayChangedCalled = true;
         }
+
+        @Override
+        boolean isAnimating() {
+            return mUseLocalIsAnimating ? mIsAnimating : super.isAnimating();
+        }
+
+        void setLocalIsAnimating(boolean isAnimating) {
+            mUseLocalIsAnimating = true;
+            mIsAnimating = isAnimating;
+        }
     }
 
     /**
@@ -267,15 +288,25 @@ class WindowTestsBase {
     class TestTaskWindowContainerController extends TaskWindowContainerController {
 
         TestTaskWindowContainerController() {
-            this(createTaskStackOnDisplay(sDisplayContent).mStackId);
+            this(createStackControllerOnDisplay(sDisplayContent));
         }
 
-        TestTaskWindowContainerController(int stackId) {
-            super(sNextTaskId++, snapshot -> {}, stackId, 0 /* userId */, null /* bounds */,
+        TestTaskWindowContainerController(StackWindowController stackController) {
+            super(sNextTaskId++, new TaskWindowContainerListener() {
+                        @Override
+                        public void onSnapshotChanged(TaskSnapshot snapshot) {
+
+                        }
+
+                        @Override
+                        public void requestResize(Rect bounds, int resizeMode) {
+
+                        }
+                    }, stackController, 0 /* userId */, null /* bounds */,
                     EMPTY /* overrideConfig*/, RESIZE_MODE_UNRESIZEABLE,
                     false /* supportsPictureInPicture */, false /* homeTask*/,
                     false /* isOnTopLauncher */, true /* toTop*/, true /* showForAllUsers */,
-                    new TaskDescription());
+                    new TaskDescription(), sWm);
         }
 
         @Override

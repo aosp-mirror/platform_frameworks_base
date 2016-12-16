@@ -447,7 +447,7 @@ class WallpaperController {
 
     private void findWallpaperTarget(DisplayContent dc) {
         mFindResults.reset();
-        if (mService.isStackVisibleLocked(FREEFORM_WORKSPACE_STACK_ID)) {
+        if (dc.isStackVisible(FREEFORM_WORKSPACE_STACK_ID)) {
             // In freeform mode we set the wallpaper as its own target, so we don't need an
             // additional window to make it visible.
             mFindResults.setUseTopWallpaperAsTarget(true);

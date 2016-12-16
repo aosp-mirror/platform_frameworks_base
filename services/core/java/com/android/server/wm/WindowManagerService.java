@@ -706,12 +706,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final WindowAnimator mAnimator;
 
-    private final BoundsAnimationController mBoundsAnimationController;
-
-    /** All of the TaskStacks in the window manager, unordered. For an ordered list call
-     * DisplayContent.getStacks(). */
-    // TODO: Don't believe this is needed with the WindowContainer model.
-    SparseArray<TaskStack> mStackIdToStack = new SparseArray<>();
+    final BoundsAnimationController mBoundsAnimationController;
 
     private final PointerEventDispatcher mPointerEventDispatcher;
 
@@ -2573,16 +2568,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    @Override
-    public Rect getBoundsForNewConfiguration(int stackId) {
-        synchronized(mWindowMap) {
-            final TaskStack stack = mStackIdToStack.get(stackId);
-            final Rect outBounds = new Rect();
-            stack.getBoundsForNewConfiguration(outBounds);
-            return outBounds;
-        }
-    }
-
     void setFocusTaskRegionLocked() {
         final Task focusedTask = mFocusedApp != null ? mFocusedApp.mTask : null;
         if (focusedTask != null) {
@@ -2827,11 +2812,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    boolean isStackVisibleLocked(int stackId) {
-        final TaskStack stack = mStackIdToStack.get(stackId);
-        return (stack != null && stack.isVisible());
-    }
-
     public void setDockedStackCreateState(int mode, Rect bounds) {
         synchronized (mWindowMap) {
             setDockedStackCreateStateLocked(mode, bounds);
@@ -2880,17 +2860,19 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             final Rect stackBounds;
-            final DisplayContent displayContent;
-            final TaskStack stack = mStackIdToStack.get(PINNED_STACK_ID);
+            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            if (displayContent == null) {
+                return null;
+            }
+
+            final TaskStack stack = displayContent.getStackById(PINNED_STACK_ID);
             if (stack != null) {
                 // If the stack exists, then use its final bounds to calculate the new aspect ratio
                 // bounds.
-                displayContent = stack.getDisplayContent();
                 stackBounds = new Rect();
                 stack.getAnimatingBounds(stackBounds);
             } else {
                 // Otherwise, just calculate the aspect ratio bounds from the default bounds
-                displayContent = mRoot.getDisplayContent(displayId);
                 stackBounds = displayContent.getPinnedStackController().getDefaultBounds();
             }
             return displayContent.getPinnedStackController().getAspectRatioBounds(stackBounds,
@@ -2898,119 +2880,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    /**
-     * Sets the current picture-in-picture aspect ratio.
-     */
-    public void setPictureInPictureAspectRatio(float aspectRatio) {
-        synchronized (mWindowMap) {
-            final TaskStack stack = mStackIdToStack.get(PINNED_STACK_ID);
-            if (!mSupportsPictureInPicture || stack == null) {
-                return;
-            }
-
-            final int displayId = stack.getDisplayContent().getDisplayId();
-            final Rect toBounds = getPictureInPictureBounds(displayId, aspectRatio);
-            animateResizePinnedStack(toBounds, -1 /* duration */);
-        }
-    }
-
-    /**
-     * Sets the current picture-in-picture actions.
-     */
-    public void setPictureInPictureActions(List<RemoteAction> actions) {
-        synchronized (mWindowMap) {
-            final TaskStack stack = mStackIdToStack.get(PINNED_STACK_ID);
-            if (!mSupportsPictureInPicture || stack == null) {
-                return;
-            }
-
-            stack.getDisplayContent().getPinnedStackController().setActions(actions);
-        }
-    }
-
-    /**
-     * Place a TaskStack on a DisplayContent. Will create a new TaskStack if none is found with
-     * specified stackId.
-     * @param stackId The unique identifier of the new stack.
-     * @param displayId The unique identifier of the DisplayContent.
-     * @param onTop If true the stack will be place at the top of the display,
-     *              else at the bottom.
-     * @return The bounds that the stack has after adding. null means fullscreen.
-     */
-    public Rect addStackToDisplay(int stackId, int displayId, boolean onTop) {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mWindowMap) {
-                final DisplayContent dc = mRoot.getDisplayContent(displayId);
-                if (dc == null) {
-                    throw new IllegalArgumentException("Trying to add stackId=" + stackId
-                            + " to unknown displayId=" + displayId);
-                }
-
-                return dc.addStackToDisplay(stackId, onTop);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
-    }
-
-    /**
-     * Move a TaskStack from current DisplayContent to specified one.
-     * @param stackId The unique identifier of the new stack.
-     * @param displayId The unique identifier of the new display.
-     */
-    public Rect moveStackToDisplay(int stackId, int displayId) {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mWindowMap) {
-                TaskStack stack = mStackIdToStack.get(stackId);
-                if (stack == null) {
-                    throw new IllegalArgumentException("Trying to move unknown stackId=" + stackId
-                            + " to displayId=" + displayId);
-                }
-
-                final DisplayContent targetDisplayContent = mRoot.getDisplayContent(displayId);
-                if (targetDisplayContent == null) {
-                    throw new IllegalArgumentException("Trying to move stackId=" + stackId
-                            + " to unknown displayId=" + displayId);
-                }
-
-                return targetDisplayContent.moveStackToDisplay(stack);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
-    }
-
-    /**
-     * Remove a TaskStack completely.
-     * @param stackId The unique identifier of the stack.
-     */
-    public void removeStack(int stackId) {
-        synchronized (mWindowMap) {
-            final TaskStack stack = mStackIdToStack.get(stackId);
-            if (stack != null) {
-                stack.removeIfPossible();
-                mStackIdToStack.remove(stackId);
-            }
-        }
-    }
-
-    public void getStackDockedModeBounds(int stackId, Rect bounds, boolean ignoreVisibility) {
-        synchronized (mWindowMap) {
-            final TaskStack stack = mStackIdToStack.get(stackId);
-            if (stack != null) {
-                stack.getStackDockedModeBoundsLocked(bounds, ignoreVisibility);
-                return;
-            }
-            bounds.setEmpty();
-        }
-    }
-
     @Override
     public void getStackBounds(int stackId, Rect bounds) {
         synchronized (mWindowMap) {
-            final TaskStack stack = mStackIdToStack.get(stackId);
+            final TaskStack stack = mRoot.getStackById(stackId);
             if (stack != null) {
                 stack.getBounds(bounds);
                 return;
@@ -3032,43 +2905,6 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void notifyKeyguardTrustedChanged() {
         mH.sendEmptyMessage(H.NOTIFY_KEYGUARD_TRUSTED_CHANGED);
-    }
-
-    /**
-     * Re-sizes a stack and its containing tasks.
-     * @param stackId Id of stack to resize.
-     * @param bounds New stack bounds. Passing in null sets the bounds to fullscreen.
-     * @param configs Configurations for tasks in the resized stack, keyed by task id.
-     * @param taskBounds Bounds for tasks in the resized stack, keyed by task id.
-     * @return True if the stack is now fullscreen.
-     * */
-    public boolean resizeStack(int stackId, Rect bounds,
-            SparseArray<Configuration> configs, SparseArray<Rect> taskBounds,
-            SparseArray<Rect> taskTempInsetBounds) {
-        synchronized (mWindowMap) {
-            final TaskStack stack = mStackIdToStack.get(stackId);
-            if (stack == null) {
-                throw new IllegalArgumentException("resizeStack: stackId " + stackId
-                        + " not found.");
-            }
-            if (stack.setBounds(bounds, configs, taskBounds, taskTempInsetBounds)
-                    && stack.isVisible()) {
-                stack.getDisplayContent().setLayoutNeeded();
-                mWindowPlacerLocked.performSurfacePlacement();
-            }
-            return stack.getRawFullscreen();
-        }
-    }
-
-    public void prepareFreezingTaskBounds(int stackId) {
-        synchronized (mWindowMap) {
-            final TaskStack stack = mStackIdToStack.get(stackId);
-            if (stack == null) {
-                throw new IllegalArgumentException("prepareFreezingTaskBounds: stackId " + stackId
-                        + " not found.");
-            }
-            stack.prepareFreezingTaskBounds();
-        }
     }
 
     /**
@@ -3505,8 +3341,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // Notify whether the docked stack exists for the current user
             final DisplayContent displayContent = getDefaultDisplayContentLocked();
-            displayContent.mDividerControllerLocked
-                    .notifyDockedStackExistsChanged(hasDockedTasksForUser(newUserId));
+            final TaskStack stack = displayContent.getDockedStackIgnoringVisibility();
+            displayContent.mDividerControllerLocked.notifyDockedStackExistsChanged(
+                    stack != null && stack.hasTaskForUser(newUserId));
 
             // If the display is already prepared, update the density.
             // Otherwise, we'll update it when it's prepared.
@@ -3517,15 +3354,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 setForcedDisplayDensityLocked(displayContent, targetDensity);
             }
         }
-    }
-
-    /** Returns whether there is a docked task for the current user. */
-    boolean hasDockedTasksForUser(int userId) {
-        final TaskStack stack = mStackIdToStack.get(DOCKED_STACK_ID);
-        if (stack == null) {
-            return false;
-        }
-        return stack.hasTaskForUser(userId);
     }
 
     /* Called by WindowState */
@@ -5417,8 +5245,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
         public static final int UPDATE_DOCKED_STACK_DIVIDER = 41;
 
-        public static final int RESIZE_STACK = 42;
-        public static final int RESIZE_TASK = 43;
         public static final int TEAR_DOWN_DRAG_AND_DROP_INPUT = 44;
 
         public static final int WINDOW_REPLACEMENT_TIMEOUT = 46;
@@ -5841,23 +5667,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         final DisplayContent displayContent = getDefaultDisplayContentLocked();
                         displayContent.getDockedDividerController().reevaluateVisibility(false);
                         displayContent.adjustForImeIfNeeded();
-                    }
-                }
-                break;
-                case RESIZE_TASK: {
-                    try {
-                        mActivityManager.resizeTask(msg.arg1, (Rect) msg.obj, msg.arg2);
-                    } catch (RemoteException e) {
-                        // This will not happen since we are in the same process.
-                    }
-                }
-                break;
-                case RESIZE_STACK: {
-                    try {
-                        mActivityManager.resizeStack(
-                                msg.arg1, (Rect) msg.obj, msg.arg2 == 1, false, false, -1);
-                    } catch (RemoteException e) {
-                        // This will not happen since we are in the same process.
                     }
                 }
                 break;
@@ -7646,26 +7455,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void animateResizePinnedStack(final Rect bounds, final int animationDuration) {
-        synchronized (mWindowMap) {
-            final TaskStack stack = mStackIdToStack.get(PINNED_STACK_ID);
-            if (stack == null) {
-                Slog.w(TAG, "animateResizePinnedStack: stackId " + PINNED_STACK_ID + " not found.");
-                return;
-            }
-            final Rect originalBounds = new Rect();
-            stack.getBounds(originalBounds);
-            stack.setAnimatingBounds(bounds);
-            UiThread.getHandler().post(new Runnable() {
-                @Override
-                public void run() {
-                    mBoundsAnimationController.animateBounds(
-                            stack, originalBounds, bounds, animationDuration);
-                }
-            });
-        }
-    }
-
     public void setForceResizableTasks(boolean forceResizableTasks) {
         synchronized (mWindowMap) {
             mForceResizableTasks = forceResizableTasks;
@@ -8123,7 +7912,8 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public boolean isStackVisible(int stackId) {
             synchronized (mWindowMap) {
-                return WindowManagerService.this.isStackVisibleLocked(stackId);
+                final DisplayContent dc = getDefaultDisplayContentLocked();
+                return dc.isStackVisible(stackId);
             }
         }
 
