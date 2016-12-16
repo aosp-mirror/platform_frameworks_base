@@ -38,7 +38,7 @@ import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
-
+import com.android.systemui.recents.views.grid.TaskGridLayoutAlgorithm;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -326,7 +326,7 @@ public class TaskStackLayoutAlgorithm {
     @ViewDebug.ExportedProperty(category="recents")
     int mMinTranslationZ;
     @ViewDebug.ExportedProperty(category="recents")
-    int mMaxTranslationZ;
+    public int mMaxTranslationZ;
 
     // Optimization, allows for quick lookup of task -> index
     private SparseIntArray mTaskIndexMap = new SparseIntArray();
@@ -334,6 +334,7 @@ public class TaskStackLayoutAlgorithm {
 
     // The freeform workspace layout
     FreeformWorkspaceLayoutAlgorithm mFreeformLayoutAlgorithm;
+    TaskGridLayoutAlgorithm mTaskGridLayoutAlgorithm;
 
     // The transform to place TaskViews at the front and back of the stack respectively
     TaskViewTransform mBackOfStackTransform = new TaskViewTransform();
@@ -344,6 +345,7 @@ public class TaskStackLayoutAlgorithm {
         mContext = context;
         mCb = cb;
         mFreeformLayoutAlgorithm = new FreeformWorkspaceLayoutAlgorithm(context);
+        mTaskGridLayoutAlgorithm = new TaskGridLayoutAlgorithm(context);
         reloadOnConfigurationChange(context);
     }
 
@@ -377,6 +379,7 @@ public class TaskStackLayoutAlgorithm {
                 R.dimen.recents_layout_initial_bottom_offset_tablet,
                 R.dimen.recents_layout_initial_bottom_offset_tablet);
         mFreeformLayoutAlgorithm.reloadOnConfigurationChange(context);
+        mTaskGridLayoutAlgorithm.reloadOnConfigurationChange(context);
         mMinMargin = res.getDimensionPixelSize(R.dimen.recents_layout_min_margin);
         mBaseTopMargin = getDimensionForDevice(context,
                 R.dimen.recents_layout_top_margin_phone,
@@ -470,6 +473,9 @@ public class TaskStackLayoutAlgorithm {
 
             updateFrontBackTransforms();
         }
+
+        // Initialize the grid layout
+        mTaskGridLayoutAlgorithm.initialize(displayRect, windowRect);
     }
 
     /**
@@ -825,23 +831,29 @@ public class TaskStackLayoutAlgorithm {
      * is what the view is measured and laid out with.
      */
     public TaskViewTransform getStackTransform(Task task, float stackScroll,
-            TaskViewTransform transformOut, TaskViewTransform frontTransform) {
+            TaskViewTransform transformOut, TaskViewTransform frontTransform,
+            boolean useGridLayout) {
         return getStackTransform(task, stackScroll, mFocusState, transformOut, frontTransform,
-                false /* forceUpdate */, false /* ignoreTaskOverrides */);
+                false /* forceUpdate */, false /* ignoreTaskOverrides */, useGridLayout);
     }
 
     public TaskViewTransform getStackTransform(Task task, float stackScroll,
             TaskViewTransform transformOut, TaskViewTransform frontTransform,
-            boolean ignoreTaskOverrides) {
+            boolean ignoreTaskOverrides, boolean useGridLayout) {
         return getStackTransform(task, stackScroll, mFocusState, transformOut, frontTransform,
-                false /* forceUpdate */, ignoreTaskOverrides);
+                false /* forceUpdate */, ignoreTaskOverrides, useGridLayout);
     }
 
     public TaskViewTransform getStackTransform(Task task, float stackScroll, int focusState,
             TaskViewTransform transformOut, TaskViewTransform frontTransform, boolean forceUpdate,
-            boolean ignoreTaskOverrides) {
+            boolean ignoreTaskOverrides, boolean useGridLayout) {
         if (mFreeformLayoutAlgorithm.isTransformAvailable(task, this)) {
             mFreeformLayoutAlgorithm.getTransform(task, transformOut, this);
+            return transformOut;
+        } else if (useGridLayout) {
+            int taskIndex = mTaskIndexMap.get(task.key.id);
+            int taskCount = mTaskIndexMap.size();
+            mTaskGridLayoutAlgorithm.getTransform(taskIndex, taskCount, transformOut, this);
             return transformOut;
         } else {
             // Return early if we have an invalid index
@@ -867,7 +879,7 @@ public class TaskStackLayoutAlgorithm {
             Rect windowOverrideRect) {
         TaskViewTransform transform = getStackTransform(task, stackScroll, mFocusState,
                 transformOut, frontTransform, true /* forceUpdate */,
-                false /* ignoreTaskOverrides */);
+                false /* ignoreTaskOverrides */, false /* useGridLayout */);
         return transformToScreenCoordinates(transform, windowOverrideRect);
     }
 
