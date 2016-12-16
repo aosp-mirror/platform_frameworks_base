@@ -1097,6 +1097,17 @@ public class CarrierConfigManager {
     public static final String KEY_PREF_NETWORK_NOTIFICATION_DELAY_INT =
             "network_notification_delay_int";
 
+    /**
+     * Determine whether user edited tether APN (type dun) has effect
+     * {@code false} - Default. APN with dun type in telephony database has no effect.
+     *
+     * {@code true}  - DUN APN added/edited in ApnEditor will be used for tethering data call.
+     *
+     * @hide
+     */
+    public static final String KEY_EDITABLE_TETHER_APN_BOOL =
+            "editable_tether_apn_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -1293,6 +1304,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_STK_DISABLE_LAUNCH_BROWSER_BOOL, false);
         sDefaults.putStringArray(KEY_CARRIER_WIFI_STRING_ARRAY, null);
         sDefaults.putInt(KEY_PREF_NETWORK_NOTIFICATION_DELAY_INT, -1);
+        sDefaults.putBoolean(KEY_EDITABLE_TETHER_APN_BOOL, false);
     }
 
     /**
