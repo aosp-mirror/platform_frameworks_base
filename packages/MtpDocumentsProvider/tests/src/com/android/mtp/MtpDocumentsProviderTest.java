@@ -162,7 +162,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             assertEquals(0, openedDevice.length);
         }
         // Device is opened automatically when querying its children.
-        try (final Cursor cursor = mProvider.queryChildDocuments("1", null, null)) {}
+        try (final Cursor cursor = mProvider.queryChildDocuments("1", null, (String) null)) {}
 
         {
             final MtpDeviceRecord[] openedDevice = mProvider.getOpenedDeviceRecordsCache();
@@ -412,7 +412,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                                 .build()
                 });
 
-        final Cursor cursor = mProvider.queryChildDocuments("1", null, null);
+        final Cursor cursor = mProvider.queryChildDocuments("1", null, (String) null);
         assertEquals(1, cursor.getCount());
 
         assertTrue(cursor.moveToNext());
@@ -429,7 +429,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     public void testQueryChildDocuments_cursorError() throws Exception {
         setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         try {
-            mProvider.queryChildDocuments("1", null, null);
+            mProvider.queryChildDocuments("1", null, (String) null);
             fail();
         } catch (FileNotFoundException error) {}
     }
@@ -438,7 +438,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         setupRoots(0, new MtpRoot[] { new MtpRoot(0, 0, "Storage", 1000, 1000, "") });
         mMtpManager.setObjectHandles(0, 0, -1, new int[] { 1 });
-        try (final Cursor cursor = mProvider.queryChildDocuments("1", null, null)) {
+        try (final Cursor cursor = mProvider.queryChildDocuments("1", null, (String) null)) {
             assertEquals(0, cursor.getCount());
             assertFalse(cursor.getExtras().getBoolean(DocumentsContract.EXTRA_LOADING));
         }
@@ -590,7 +590,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             assertEquals(1, cursor.getCount());
         }
 
-        try (final Cursor cursor = mProvider.queryChildDocuments("1", null, null)) {
+        try (final Cursor cursor = mProvider.queryChildDocuments("1", null, (String) null)) {
             assertEquals(0, cursor.getCount());
             assertEquals(
                     "error_busy_device",
@@ -611,7 +611,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             assertEquals(1, cursor.getCount());
         }
 
-        try (final Cursor cursor = mProvider.queryChildDocuments("1", null, null)) {
+        try (final Cursor cursor = mProvider.queryChildDocuments("1", null, (String) null)) {
             assertEquals(0, cursor.getCount());
             assertEquals(
                     "error_locked_device",
@@ -663,7 +663,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             try (final Cursor cursor = mProvider.queryChildDocuments(
                     String.valueOf(documentIdOffset + i),
                     strings(Document.COLUMN_DOCUMENT_ID, Document.COLUMN_DISPLAY_NAME),
-                    null)) {
+                    (String) null)) {
                 assertEquals(1, cursor.getCount());
                 cursor.moveToNext();
                 assertEquals(String.valueOf(documentIdOffset + i + 1), cursor.getString(0));
@@ -684,7 +684,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             try (final Cursor cursor = mProvider.queryChildDocuments(
                     String.valueOf(documentIdOffset + i),
                     strings(Document.COLUMN_DOCUMENT_ID),
-                    null)) {
+                    (String) null)) {
                 assertEquals(1, cursor.getCount());
                 cursor.moveToNext();
                 assertEquals(String.valueOf(documentIdOffset + i + 1), cursor.getString(0));
@@ -758,7 +758,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         mProvider.resumeRootScanner();
         mResolver.waitForNotification(ROOTS_URI, 1);
         try (final Cursor cursor = mProvider.queryChildDocuments(
-                "1", strings(Document.COLUMN_DOCUMENT_ID), null)) {
+                "1", strings(Document.COLUMN_DOCUMENT_ID), (String) null)) {
             assertEquals(1, cursor.getCount());
             cursor.moveToNext();
             assertEquals("3", cursor.getString(0));
@@ -917,7 +917,9 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         }
         mMtpManager.setObjectHandles(deviceId, storageId, parentHandle, handles);
         return getStrings(mProvider.queryChildDocuments(
-                parentDocumentId, strings(DocumentsContract.Document.COLUMN_DOCUMENT_ID), null));
+                parentDocumentId,
+                strings(DocumentsContract.Document.COLUMN_DOCUMENT_ID),
+                (String) null));
     }
 
     static class HierarchyDocument {

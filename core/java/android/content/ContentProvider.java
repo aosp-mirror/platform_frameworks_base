@@ -915,7 +915,12 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
     /**
      * Implement this to handle query requests from clients.
-     * This method can be called from multiple threads, as described in
+     *
+     * <p>Apps targeting {@link android.os.Build.VERSION_CODES#O} or higher should override
+     * {@link #query(Uri, String[], Bundle, CancellationSignal)} and provide a stub
+     * implementation of this method.
+     *
+     * <p>This method can be called from multiple threads, as described in
      * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
      * and Threads</a>.
      * <p>
@@ -974,7 +979,11 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
     /**
      * Implement this to handle query requests from clients with support for cancellation.
-     * This method can be called from multiple threads, as described in
+     *
+     * <p>Apps targeting {@link android.os.Build.VERSION_CODES#O} or higher should override
+     * {@link #query(Uri, String[], Bundle, CancellationSignal)} instead of this method.
+     *
+     * <p>This method can be called from multiple threads, as described in
      * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
      * and Threads</a>.
      * <p>
@@ -1048,9 +1057,9 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * {@link #query(Uri, String[], String, String[], String, CancellationSignal).
      *
      * <p>Traditional SQL arguments can be found in the bundle using the following keys:
-     * <li>{@link ContentResolver#QUERY_ARG_SELECTION}
-     * <li>{@link ContentResolver#QUERY_ARG_SELECTION_ARGS}
-     * <li>{@link ContentResolver#QUERY_ARG_SORT_ORDER}
+     * <li>{@link ContentResolver#QUERY_ARG_SQL_SELECTION}
+     * <li>{@link ContentResolver#QUERY_ARG_SQL_SELECTION_ARGS}
+     * <li>{@link ContentResolver#QUERY_ARG_SQL_SORT_ORDER}
      *
      * @see #query(Uri, String[], String, String[], String, CancellationSignal) for
      *     implementation details.
@@ -1071,12 +1080,21 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
     public @Nullable Cursor query(@NonNull Uri uri, @Nullable String[] projection,
             @Nullable Bundle queryArgs, @Nullable CancellationSignal cancellationSignal) {
         queryArgs = queryArgs != null ? queryArgs : Bundle.EMPTY;
+
+        String sortClause = queryArgs.getString(ContentResolver.QUERY_ARG_SQL_SORT_ORDER);
+
+        // if client didn't explicitly supply and sql sort order argument, we try to build
+        // one from sort columns if present.
+        if (sortClause == null && queryArgs.containsKey(ContentResolver.QUERY_ARG_SORT_COLUMNS)) {
+            sortClause = ContentResolver.createSqlSortClause(queryArgs);
+        }
+
         return query(
                 uri,
                 projection,
-                queryArgs.getString(ContentResolver.QUERY_ARG_SELECTION),
-                queryArgs.getStringArray(ContentResolver.QUERY_ARG_SELECTION_ARGS),
-                queryArgs.getString(ContentResolver.QUERY_ARG_SORT_ORDER),
+                queryArgs.getString(ContentResolver.QUERY_ARG_SQL_SELECTION),
+                queryArgs.getStringArray(ContentResolver.QUERY_ARG_SQL_SELECTION_ARGS),
+                sortClause,
                 cancellationSignal);
     }
 
