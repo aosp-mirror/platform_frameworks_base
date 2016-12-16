@@ -98,12 +98,12 @@ void onRenderNodeRemoved(JNIEnv* env, RenderNode* node) {
 // DisplayList view properties
 // ----------------------------------------------------------------------------
 
-static void android_view_RenderNode_output(jlong renderNodePtr) {
+static void android_view_RenderNode_output(JNIEnv* env, jobject clazz, jlong renderNodePtr) {
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     renderNode->output();
 }
 
-static jint android_view_RenderNode_getDebugSize(jlong renderNodePtr) {
+static jint android_view_RenderNode_getDebugSize(JNIEnv* env, jobject clazz, jlong renderNodePtr) {
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     return renderNode->getDebugSize();
 }
@@ -472,13 +472,15 @@ static jfloat android_view_RenderNode_getPivotY(jlong renderNodePtr) {
 // RenderProperties - Animations
 // ----------------------------------------------------------------------------
 
-static void android_view_RenderNode_addAnimator(jlong renderNodePtr, jlong animatorPtr) {
+static void android_view_RenderNode_addAnimator(JNIEnv* env, jobject clazz, jlong renderNodePtr,
+        jlong animatorPtr) {
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     RenderPropertyAnimator* animator = reinterpret_cast<RenderPropertyAnimator*>(animatorPtr);
     renderNode->addAnimator(animator);
 }
 
-static void android_view_RenderNode_endAllAnimators(jlong renderNodePtr) {
+static void android_view_RenderNode_endAllAnimators(JNIEnv* env, jobject clazz,
+        jlong renderNodePtr) {
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     renderNode->animators().endAllStagingAnimators();
 }
