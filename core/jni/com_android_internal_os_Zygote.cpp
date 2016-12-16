@@ -37,6 +37,7 @@
 #include <sys/prctl.h>
 #include <sys/resource.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <sys/types.h>
 #include <sys/utsname.h>
 #include <sys/wait.h>
@@ -150,6 +151,24 @@ static void SetSigChldHandler() {
   int err = sigaction(SIGCHLD, &sa, NULL);
   if (err < 0) {
     ALOGW("Error setting SIGCHLD handler: %s", strerror(errno));
+  }
+}
+
+// Resets nice priority for zygote process. Zygote priority can be set
+// to high value during boot phase to speed it up. We want to ensure
+// zygote is running at normal priority before childs are forked from it.
+//
+// This ends up being called repeatedly before each fork(), but there's
+// no real harm in that.
+static void ResetNicePriority(JNIEnv* env) {
+  errno = 0;
+  int prio = getpriority(PRIO_PROCESS, 0);
+  if (prio == -1 && errno != 0) {
+    ALOGW("getpriority failed: %s\n", strerror(errno));
+  }
+  if (prio != 0 && setpriority(PRIO_PROCESS, 0, 0) != 0) {
+    ALOGE("setpriority(%d, 0, 0) failed: %s", PRIO_PROCESS, strerror(errno));
+    RuntimeAbort(env, __LINE__, "setpriority failed");
   }
 }
 
@@ -418,27 +437,6 @@ void SetThreadName(const char* thread_name) {
   }
 }
 
-#ifdef ENABLE_SCHED_BOOST
-static void SetForkLoad(bool boost) {
-  // set scheduler knob to boost forked processes
-  pid_t currentPid = getpid();
-  // fits at most "/proc/XXXXXXX/sched_init_task_load\0"
-  char schedPath[35];
-  snprintf(schedPath, sizeof(schedPath), "/proc/%u/sched_init_task_load", currentPid);
-  int schedBoostFile = open(schedPath, O_WRONLY);
-  if (schedBoostFile < 0) {
-    ALOGW("Unable to set zygote scheduler boost");
-    return;
-  }
-  if (boost) {
-    write(schedBoostFile, "100\0", 4);
-  } else {
-    write(schedBoostFile, "0\0", 2);
-  }
-  close(schedBoostFile);
-}
-#endif
-
 // The list of open zygote file descriptors.
 static FileDescriptorTable* gOpenFdTable = NULL;
 
@@ -451,10 +449,6 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
                                      bool is_system_server, jintArray fdsToClose,
                                      jstring instructionSet, jstring dataDir) {
   SetSigChldHandler();
-
-#ifdef ENABLE_SCHED_BOOST
-  SetForkLoad(true);
-#endif
 
   // Close any logging related FDs before we start evaluating the list of
   // file descriptors.
@@ -471,6 +465,8 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
   } else if (!gOpenFdTable->Restat()) {
     RuntimeAbort(env, __LINE__, "Unable to restat file descriptor table.");
   }
+
+  ResetNicePriority(env);
 
   pid_t pid = fork();
 
@@ -614,12 +610,6 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
     }
   } else if (pid > 0) {
     // the parent process
-
-#ifdef ENABLE_SCHED_BOOST
-    // unset scheduler knob
-    SetForkLoad(false);
-#endif
-
   }
   return pid;
 }
@@ -750,4 +740,3 @@ int register_com_android_internal_os_Zygote(JNIEnv* env) {
   return RegisterMethodsOrDie(env, "com/android/internal/os/Zygote", gMethods, NELEM(gMethods));
 }
 }  // namespace android
-
