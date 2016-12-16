@@ -185,6 +185,11 @@ public class Dialog implements DialogInterface, Window.Callback,
         mWindow = w;
         w.setCallback(this);
         w.setOnWindowDismissedCallback(this);
+        w.setOnWindowSwipeDismissedCallback(() -> {
+            if (mCancelable) {
+                cancel();
+            }
+        });
         w.setWindowManager(mWindowManager, null, null);
         w.setGravity(Gravity.CENTER);
 
