@@ -199,11 +199,11 @@ static inline SkCanvas::SaveLayerFlags layerFlags(SaveFlags::Flags flags) {
 int SkiaCanvas::saveLayer(float left, float top, float right, float bottom,
             const SkPaint* paint, SaveFlags::Flags flags) {
     const SkRect bounds = SkRect::MakeLTRB(left, top, right, bottom);
-    const SkCanvas::SaveLayerRec rec(&bounds, paint, layerFlags(flags));
+    //always save matrix and clip to match the behaviour of Skia and HWUI pipelines and to ensure
+    //android state tracking behavior matches that of the Skia API (partial save is not supported)
+    const SkCanvas::SaveLayerRec rec(&bounds, paint, layerFlags(flags | SaveFlags::MatrixClip));
 
-    int count = mCanvas->saveLayer(rec);
-    recordPartialSave(flags);
-    return count;
+    return mCanvas->saveLayer(rec);
 }
 
 int SkiaCanvas::saveLayerAlpha(float left, float top, float right, float bottom,

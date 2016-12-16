@@ -168,6 +168,59 @@ TEST(RenderNodeDrawable, composeOnLayer)
 }
 
 namespace {
+static SkRect getRecorderClipBounds(const SkiaRecordingCanvas& recorder) {
+    SkRect clipBounds;
+    recorder.getClipBounds(&clipBounds);
+    return clipBounds;
+}
+
+static SkMatrix getRecorderMatrix(const SkiaRecordingCanvas& recorder) {
+    SkMatrix matrix;
+    recorder.getMatrix(&matrix);
+    return matrix;
+}
+}
+
+TEST(RenderNodeDrawable, saveLayerClipAndMatrixRestore)
+{
+    auto surface = SkSurface::MakeRasterN32Premul(400, 800);
+    SkCanvas& canvas = *surface->getCanvas();
+    canvas.drawColor(SK_ColorWHITE, SkBlendMode::kSrcOver);
+    ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorWHITE);
+
+    auto rootNode = TestUtils::createSkiaNode(0, 0, 400, 800,
+        [](RenderProperties& props, SkiaRecordingCanvas& recorder) {
+            SkPaint layerPaint;
+            ASSERT_EQ(SkRect::MakeLTRB(0, 0, 400, 800), getRecorderClipBounds(recorder));
+            EXPECT_TRUE(getRecorderMatrix(recorder).isIdentity());
+
+            //note we don't pass SaveFlags::MatrixClip, but matrix and clip will be saved
+            recorder.saveLayer(0, 0, 400, 400, &layerPaint, SaveFlags::ClipToLayer);
+            ASSERT_EQ(SkRect::MakeLTRB(0, 0, 400, 400), getRecorderClipBounds(recorder));
+            EXPECT_TRUE(getRecorderMatrix(recorder).isIdentity());
+
+            recorder.clipRect(50, 50, 350, 350, SkClipOp::kIntersect);
+            ASSERT_EQ(SkRect::MakeLTRB(50, 50, 350, 350), getRecorderClipBounds(recorder));
+
+            recorder.translate(300.0f, 400.0f);
+            EXPECT_EQ(SkMatrix::MakeTrans(300.0f, 400.0f), getRecorderMatrix(recorder));
+
+            recorder.restore();
+            ASSERT_EQ(SkRect::MakeLTRB(0, 0, 400, 800), getRecorderClipBounds(recorder));
+            EXPECT_TRUE(getRecorderMatrix(recorder).isIdentity());
+
+            SkPaint paint;
+            paint.setAntiAlias(true);
+            paint.setColor(SK_ColorGREEN);
+            recorder.drawRect(0.0f, 400.0f, 400.0f, 800.0f, paint);
+        });
+
+    RenderNodeDrawable drawable(rootNode.get(), &canvas, true);
+    canvas.drawDrawable(&drawable);
+    ASSERT_EQ(SK_ColorGREEN, TestUtils::getColor(surface, 200, 600));
+}
+
+namespace {
 class ContextFactory : public IContextFactory {
 public:
     virtual AnimationContext* createAnimationContext(renderthread::TimeLord& clock) override {
