@@ -46,11 +46,11 @@ final class NetworkLogger {
 
     private final DevicePolicyManagerService mDpm;
     private final PackageManagerInternal mPm;
+    private final AtomicBoolean mIsLoggingEnabled = new AtomicBoolean(false);
 
     private IIpConnectivityMetrics mIpConnectivityMetrics;
     private ServiceThread mHandlerThread;
     private NetworkLoggingHandler mNetworkLoggingHandler;
-    private AtomicBoolean mIsLoggingEnabled;
 
     private final INetdEventCallback mNetdEventCallback = new INetdEventCallback.Stub() {
         @Override
