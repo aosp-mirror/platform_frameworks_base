@@ -1547,6 +1547,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int NOTIFY_FORCED_RESIZABLE_MSG = 67;
     static final int NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG = 68;
     static final int SHOW_UNSUPPORTED_DISPLAY_SIZE_DIALOG_MSG = 69;
+    static final int NOTIFY_VR_SLEEPING_MSG = 70;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -2362,6 +2363,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
                 vrService.setVrMode(vrMode, requestedPackage, userId, callingPackage);
+            } case NOTIFY_VR_SLEEPING_MSG: {
+                notifyVrManagerOfSleepState(msg.arg1 != 0);
             } break;
             }
         }
@@ -3162,6 +3165,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     final void applyUpdateVrModeLocked(ActivityRecord r) {
         mHandler.sendMessage(
                 mHandler.obtainMessage(VR_MODE_CHANGE_MSG, 0, 0, r));
+    }
+
+    private void sendNotifyVrManagerOfSleepState(boolean isSleeping) {
+        mHandler.sendMessage(
+                mHandler.obtainMessage(NOTIFY_VR_SLEEPING_MSG, isSleeping ? 1 : 0, 0));
     }
 
     private void notifyVrManagerOfSleepState(boolean isSleeping) {
@@ -11690,7 +11698,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             startTimeTrackingFocusedActivityLocked();
             mTopProcessState = ActivityManager.PROCESS_STATE_TOP;
             mStackSupervisor.comeOutOfSleepIfNeededLocked();
-            notifyVrManagerOfSleepState(false);
+            sendNotifyVrManagerOfSleepState(false);
             updateOomAdjLocked();
         } else if (!mSleeping && shouldSleepLocked()) {
             mSleeping = true;
@@ -11699,7 +11707,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             mTopProcessState = ActivityManager.PROCESS_STATE_TOP_SLEEPING;
             mStackSupervisor.goingToSleepLocked();
-            notifyVrManagerOfSleepState(true);
+            sendNotifyVrManagerOfSleepState(true);
             updateOomAdjLocked();
 
             // Initialize the wake times of all processes.
