@@ -89,11 +89,15 @@ public:
         mProxy->setup(800.0f, 255 * 0.075f, 255 * 0.15f);
         mProxy->setLightCenter(lightVector);
         mCanvas.reset(new android::uirenderer::RecordingCanvas(mSize.width(), mSize.height()));
+
+        mCanvas->save(SaveFlags::MatrixClip);  // balanced in prepareToDraw()
     }
 
     SkCanvas* prepareToDraw() {
         //mCanvas->reset(mSize.width(), mSize.height());
-        mCanvas->clipRect(0, 0, mSize.width(), mSize.height(), SkClipOp::kReplace);
+        mCanvas->restore();  // balancing inital save in constructor
+        mCanvas->save(SaveFlags::MatrixClip);
+        mCanvas->clipRect(0, 0, mSize.width(), mSize.height(), SkClipOp::kIntersect);
         return mCanvas->asSkCanvas();
     }
 
