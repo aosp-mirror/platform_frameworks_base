@@ -2690,4 +2690,7 @@
          user-set value if toggled by settings so the "Transition animation scale" setting
          should also be hidden if intended to be permanent. -->
     <item name="config_appTransitionAnimationDurationScaleDefault" format="float" type="dimen">1.0</item>
+
+    <!-- Flag indicates that whether non-system apps can be installed on internal storage. -->
+    <bool name="config_allow3rdPartyAppOnInternal">true</bool>
 </resources>

@@ -16,8 +16,6 @@
 
 package com.android.internal.content;
 
-import static android.net.TrafficStats.MB_IN_BYTES;
-
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -38,7 +36,7 @@ import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.Log;
 
-import libcore.io.IoUtils;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -49,6 +47,11 @@ import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
+
+import libcore.io.IoUtils;
+
+import static android.net.TrafficStats.MB_IN_BYTES;
+import static android.os.storage.VolumeInfo.ID_PRIVATE_INTERNAL;
 
 /**
  * Constants used internally between the PackageManager
@@ -73,6 +76,8 @@ public class PackageHelper {
     public static final int APP_INSTALL_AUTO = 0;
     public static final int APP_INSTALL_INTERNAL = 1;
     public static final int APP_INSTALL_EXTERNAL = 2;
+
+    private static TestableInterface sDefaultTestableInterface = null;
 
     public static IStorageManager getStorageManager() throws RemoteException {
         IBinder service = ServiceManager.getService("mount");
@@ -338,6 +343,65 @@ public class PackageHelper {
     }
 
     /**
+     * A group of external dependencies used in
+     * {@link #resolveInstallVolume(Context, String, int, long)}. It can be backed by real values
+     * from the system or mocked ones for testing purposes.
+     */
+    public static abstract class TestableInterface {
+        abstract public StorageManager getStorageManager(Context context);
+        abstract public boolean getForceAllowOnExternalSetting(Context context);
+        abstract public boolean getAllow3rdPartyOnInternalConfig(Context context);
+        abstract public ApplicationInfo getExistingAppInfo(Context context, String packageName);
+        abstract public File getDataDirectory();
+
+        public boolean fitsOnInternalStorage(Context context, long sizeBytes) {
+            StorageManager storage = getStorageManager(context);
+            File target = getDataDirectory();
+            return (sizeBytes <= storage.getStorageBytesUntilLow(target));
+        }
+    }
+
+    private synchronized static TestableInterface getDefaultTestableInterface() {
+        if (sDefaultTestableInterface == null) {
+            sDefaultTestableInterface = new TestableInterface() {
+                @Override
+                public StorageManager getStorageManager(Context context) {
+                    return context.getSystemService(StorageManager.class);
+                }
+
+                @Override
+                public boolean getForceAllowOnExternalSetting(Context context) {
+                    return Settings.Global.getInt(context.getContentResolver(),
+                            Settings.Global.FORCE_ALLOW_ON_EXTERNAL, 0) != 0;
+                }
+
+                @Override
+                public boolean getAllow3rdPartyOnInternalConfig(Context context) {
+                    return context.getResources().getBoolean(
+                            com.android.internal.R.bool.config_allow3rdPartyAppOnInternal);
+                }
+
+                @Override
+                public ApplicationInfo getExistingAppInfo(Context context, String packageName) {
+                    ApplicationInfo existingInfo = null;
+                    try {
+                        existingInfo = context.getPackageManager().getApplicationInfo(packageName,
+                                PackageManager.MATCH_ANY_USER);
+                    } catch (NameNotFoundException ignored) {
+                    }
+                    return existingInfo;
+                }
+
+                @Override
+                public File getDataDirectory() {
+                    return Environment.getDataDirectory();
+                }
+            };
+        }
+        return sDefaultTestableInterface;
+    }
+
+    /**
      * Given a requested {@link PackageInfo#installLocation} and calculated
      * install size, pick the actual volume to install the app. Only considers
      * internal and private volumes, and prefers to keep an existing package on
@@ -348,25 +412,44 @@ public class PackageHelper {
      */
     public static String resolveInstallVolume(Context context, String packageName,
             int installLocation, long sizeBytes) throws IOException {
-        final boolean forceAllowOnExternal = Settings.Global.getInt(
-                context.getContentResolver(), Settings.Global.FORCE_ALLOW_ON_EXTERNAL, 0) != 0;
+        TestableInterface testableInterface = getDefaultTestableInterface();
+        return resolveInstallVolume(context, packageName,
+                installLocation, sizeBytes, testableInterface);
+    }
+
+    @VisibleForTesting
+    public static String resolveInstallVolume(Context context, String packageName,
+            int installLocation, long sizeBytes, TestableInterface testInterface)
+            throws IOException {
+        final boolean forceAllowOnExternal = testInterface.getForceAllowOnExternalSetting(context);
+        final boolean allow3rdPartyOnInternal =
+                testInterface.getAllow3rdPartyOnInternalConfig(context);
         // TODO: handle existing apps installed in ASEC; currently assumes
         // they'll end up back on internal storage
-        ApplicationInfo existingInfo = null;
-        try {
-            existingInfo = context.getPackageManager().getApplicationInfo(packageName,
-                    PackageManager.MATCH_ANY_USER);
-        } catch (NameNotFoundException ignored) {
+        ApplicationInfo existingInfo = testInterface.getExistingAppInfo(context, packageName);
+
+        final boolean fitsOnInternal = testInterface.fitsOnInternalStorage(context, sizeBytes);
+        final StorageManager storageManager =
+                testInterface.getStorageManager(context);
+
+        // System apps always forced to internal storage
+        if (existingInfo != null && existingInfo.isSystemApp()) {
+            if (fitsOnInternal) {
+                return StorageManager.UUID_PRIVATE_INTERNAL;
+            } else {
+                throw new IOException("Not enough space on existing volume "
+                        + existingInfo.volumeUuid + " for system app " + packageName + " upgrade");
+            }
         }
 
-        final StorageManager storageManager = context.getSystemService(StorageManager.class);
-        final boolean fitsOnInternal = fitsOnInternal(context, sizeBytes);
-
+        // Now deal with non-system apps.
         final ArraySet<String> allCandidates = new ArraySet<>();
         VolumeInfo bestCandidate = null;
         long bestCandidateAvailBytes = Long.MIN_VALUE;
         for (VolumeInfo vol : storageManager.getVolumes()) {
-            if (vol.type == VolumeInfo.TYPE_PRIVATE && vol.isMountedWritable()) {
+            boolean isInternalStorage = ID_PRIVATE_INTERNAL.equals(vol.id);
+            if (vol.type == VolumeInfo.TYPE_PRIVATE && vol.isMountedWritable()
+                    && (!isInternalStorage || allow3rdPartyOnInternal)) {
                 final long availBytes = storageManager.getStorageBytesUntilLow(new File(vol.path));
                 if (availBytes >= sizeBytes) {
                     allCandidates.add(vol.fsUuid);
@@ -378,11 +461,6 @@ public class PackageHelper {
             }
         }
 
-        // System apps always forced to internal storage
-        if (existingInfo != null && existingInfo.isSystemApp()) {
-            installLocation = PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY;
-        }
-
         // If app expresses strong desire for internal storage, honor it
         if (!forceAllowOnExternal
                 && installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
@@ -391,6 +469,11 @@ public class PackageHelper {
                 throw new IOException("Cannot automatically move " + packageName + " from "
                         + existingInfo.volumeUuid + " to internal storage");
             }
+
+            if (!allow3rdPartyOnInternal) {
+                throw new IOException("Not allowed to install non-system apps on internal storage");
+            }
+
             if (fitsOnInternal) {
                 return StorageManager.UUID_PRIVATE_INTERNAL;
             } else {
@@ -411,14 +494,13 @@ public class PackageHelper {
             }
         }
 
-        // We're left with either preferring external or auto, so just pick
+        // We're left with new installations with either preferring external or auto, so just pick
         // volume with most space
         if (bestCandidate != null) {
             return bestCandidate.fsUuid;
-        } else if (fitsOnInternal) {
-            return StorageManager.UUID_PRIVATE_INTERNAL;
         } else {
-            throw new IOException("No special requests, but no room anywhere");
+            throw new IOException("No special requests, but no room on allowed volumes. "
+                + " allow3rdPartyOnInternal? " + allow3rdPartyOnInternal);
         }
     }
 
