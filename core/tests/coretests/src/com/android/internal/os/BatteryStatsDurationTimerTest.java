@@ -18,11 +18,8 @@ package com.android.internal.os;
 import android.os.BatteryStats;
 import android.os.Parcel;
 import android.support.test.filters.SmallTest;
-import android.util.Log;
 
 import junit.framework.TestCase;
-
-import org.mockito.Mockito;
 
 /**
  * Test BatteryStatsImpl.DurationTimer.
@@ -39,7 +36,7 @@ public class BatteryStatsDurationTimerTest extends TestCase {
         final BatteryStatsImpl.TimeBase timeBase = new BatteryStatsImpl.TimeBase();
         timeBase.init(clocks.uptimeMillis(), clocks.elapsedRealtime());
 
-        final BatteryStatsImpl.DurationTimer timer = new BatteryStatsImpl.DurationTimer(clocks, 
+        final BatteryStatsImpl.DurationTimer timer = new BatteryStatsImpl.DurationTimer(clocks,
                 null, BatteryStats.WAKE_TYPE_PARTIAL, null, timeBase);
 
         // TimeBase running, timer not running: current and max are 0
@@ -82,15 +79,15 @@ public class BatteryStatsDurationTimerTest extends TestCase {
         // Stop the TimeBase. The values should be frozen.
         timeBase.setRunning(false, /* uptimeUs */ 10, /* realtimeUs */ 55000*1000);
         assertTrue(timer.isRunningLocked());
-        assertEquals(28100, timer.getCurrentDurationMsLocked(110100)); // Why 28100 and not 28000?
-        assertEquals(28100, timer.getMaxDurationMsLocked(110101));
+        assertEquals(28000, timer.getCurrentDurationMsLocked(110100));
+        assertEquals(28000, timer.getMaxDurationMsLocked(110101));
 
         // Start the TimeBase. The values should be the old value plus the delta
         // between when the timer restarted and the current time
         timeBase.setRunning(true, /* uptimeUs */ 10, /* realtimeUs */ 220100*1000);
         assertTrue(timer.isRunningLocked());
-        assertEquals(28300, timer.getCurrentDurationMsLocked(220300)); // extra 100 from above??
-        assertEquals(28301, timer.getMaxDurationMsLocked(220301));
+        assertEquals(28200, timer.getCurrentDurationMsLocked(220300));
+        assertEquals(28201, timer.getMaxDurationMsLocked(220301));
     }
 
     @SmallTest
@@ -104,7 +101,7 @@ public class BatteryStatsDurationTimerTest extends TestCase {
         final BatteryStatsImpl.TimeBase timeBase = new BatteryStatsImpl.TimeBase();
         timeBase.init(clocks.uptimeMillis(), clocks.elapsedRealtime());
 
-        final BatteryStatsImpl.DurationTimer timer = new BatteryStatsImpl.DurationTimer(clocks, 
+        final BatteryStatsImpl.DurationTimer timer = new BatteryStatsImpl.DurationTimer(clocks,
                 null, BatteryStats.WAKE_TYPE_PARTIAL, null, timeBase);
 
         // Start running on battery.
@@ -124,7 +121,7 @@ public class BatteryStatsDurationTimerTest extends TestCase {
         summaryParcel.setDataPosition(0);
 
         // Read summary
-        final BatteryStatsImpl.DurationTimer summary = new BatteryStatsImpl.DurationTimer(clocks, 
+        final BatteryStatsImpl.DurationTimer summary = new BatteryStatsImpl.DurationTimer(clocks,
                 null, BatteryStats.WAKE_TYPE_PARTIAL, null, timeBase);
         summary.startRunningLocked(3100);
         summary.readSummaryFromParcelLocked(summaryParcel);
@@ -138,9 +135,9 @@ public class BatteryStatsDurationTimerTest extends TestCase {
         final Parcel fullParcel = Parcel.obtain();
         timer.writeToParcel(fullParcel, 1500*1000);
         fullParcel.setDataPosition(0);
- 
+
         // Read full - Should be the same as the summary as far as DurationTimer is concerned.
-        final BatteryStatsImpl.DurationTimer full = new BatteryStatsImpl.DurationTimer(clocks, 
+        final BatteryStatsImpl.DurationTimer full = new BatteryStatsImpl.DurationTimer(clocks,
                 null, BatteryStats.WAKE_TYPE_PARTIAL, null, timeBase, fullParcel);
         // The new one shouldn't be running, and therefore 0 for current time
         assertFalse(full.isRunningLocked());
