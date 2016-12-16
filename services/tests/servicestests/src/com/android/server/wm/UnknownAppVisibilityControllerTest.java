@@ -42,9 +42,10 @@ import org.mockito.invocation.InvocationOnMock;
 /**
  * Test class for {@link AppTransition}.
  *
- * runtest frameworks-services -c com.android.server.wm.UnknownVisibilityControllerTest
+ * runtest frameworks-services -c com.android.server.wm.UnknownAppVisibilityControllerTest
  */
 @SmallTest
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class UnknownAppVisibilityControllerTest {
 
