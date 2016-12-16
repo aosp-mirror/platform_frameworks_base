@@ -1560,6 +1560,14 @@
     <permission android:name="android.permission.BIND_INCALL_SERVICE"
         android:protectionLevel="signature|privileged" />
 
+    <!-- Must be required by a link {@link android.telephony.VisualVoicemailService} to ensure that
+         only the system can bind to it.
+         <p>Protection level: signature|privileged
+    -->
+    <permission
+      android:name="android.permission.BIND_VISUAL_VOICEMAIL_SERVICE"
+      android:protectionLevel="signature|privileged"/>
+
     <!-- Must be required by a {@link android.telecom.CallScreeningService},
          to ensure that only the system can bind to it.
          <p>Protection level: signature|privileged

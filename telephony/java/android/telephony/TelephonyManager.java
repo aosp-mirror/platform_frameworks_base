@@ -25,12 +25,14 @@ import android.annotation.SystemApi;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.ActivityThread;
+import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.BatteryStats;
+import android.os.Binder;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.os.Bundle;
@@ -65,6 +67,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -2785,24 +2788,52 @@ public class TelephonyManager {
 
     /**
      * @returns the settings of the visual voicemail SMS filter for a phone account set by the
-     * package, or {@code null} if the filter is disabled.
+     * current active visual voicemail client, or {@code null} if the filter is disabled.
      *
      * <p>Requires the calling app to have READ_PRIVILEGED_PHONE_STATE permission.
      */
     /** @hide */
     @Nullable
-    public VisualVoicemailSmsFilterSettings getVisualVoicemailSmsFilterSettings(String packageName,
-            int subId) {
+    public VisualVoicemailSmsFilterSettings getActiveVisualVoicemailSmsFilterSettings(int subId) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getSystemVisualVoicemailSmsFilterSettings(packageName, subId);
+                return telephony.getActiveVisualVoicemailSmsFilterSettings(subId);
             }
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
 
         return null;
+    }
+
+    /**
+     * Send a visual voicemail SMS. The IPC caller must be the current default dialer.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#SEND_SMS SEND_SMS}
+     *
+     * @param phoneAccountHandle The account to send the SMS with.
+     * @param number The destination number.
+     * @param port The destination port for data SMS, or 0 for text SMS.
+     * @param text The message content. For data sms, it will be encoded as a UTF-8 byte stream.
+     * @param sentIntent The sent intent passed to the {@link SmsManager}
+     *
+     * @see SmsManager#sendDataMessage(String, String, short, byte[], PendingIntent, PendingIntent)
+     * @see SmsManager#sendTextMessage(String, String, String, PendingIntent, PendingIntent)
+     *
+     * @hide
+     */
+    public void sendVisualVoicemailSmsForSubscriber(int subId, String number, int port,
+            String text, PendingIntent sentIntent) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.sendVisualVoicemailSmsForSubscriber(
+                        mContext.getOpPackageName(), subId, number, port, text, sentIntent);
+            }
+        } catch (RemoteException ex) {
+        }
     }
 
     /**
