@@ -95,6 +95,8 @@ public:
             const SkBitmap& dstBitmap);
 
     static sk_sp<SkColorSpace> defaultColorSpace();
+    static sk_sp<SkColorSpace> linearColorSpace();
+    static sk_sp<SkColorSpace> colorSpaceForType(SkColorType type);
 };
 
 class HeapAllocator : public SkBRDAllocator {

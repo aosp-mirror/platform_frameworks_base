@@ -5,7 +5,11 @@
 #include "SkPixelRef.h"
 #include "SkImageEncoder.h"
 #include "SkImageInfo.h"
+#include "SkColor.h"
 #include "SkColorPriv.h"
+#include "SkHalf.h"
+#include "SkPM4f.h"
+#include "SkPM4fPriv.h"
 #include "GraphicsJNI.h"
 #include "SkDither.h"
 #include "SkUnPreMultiply.h"
@@ -232,6 +236,28 @@ using namespace android::bitmap;
 typedef void (*FromColorProc)(void* dst, const SkColor src[], int width,
                               int x, int y);
 
+static void FromColor_F16(void* dst, const SkColor src[], int width,
+                          int, int) {
+    uint64_t* d = (uint64_t*)dst;
+
+    for (int i = 0; i < width; i++) {
+        *d++ = SkColor4f::FromColor(*src++).premul().toF16();
+    }
+}
+
+static void FromColor_F16_Raw(void* dst, const SkColor src[], int width,
+                          int, int) {
+    uint64_t* d = (uint64_t*)dst;
+
+    for (int i = 0; i < width; i++) {
+        const float* color = SkColor4f::FromColor(*src++).vec();
+        uint16_t* scratch = reinterpret_cast<uint16_t*>(d++);
+        for (int i = 0; i < 4; ++i) {
+            scratch[i] = SkFloatToHalf(color[i]);
+        }
+    }
+}
+
 static void FromColor_D32(void* dst, const SkColor src[], int width,
                           int, int) {
     SkPMColor* d = (SkPMColor*)dst;
@@ -321,6 +347,8 @@ static FromColorProc ChooseFromColorProc(const SkBitmap& bitmap) {
             return FromColor_D565;
         case kAlpha_8_SkColorType:
             return FromColor_DA8;
+        case kRGBA_F16_SkColorType:
+            return bitmap.alphaType() == kPremul_SkAlphaType ? FromColor_F16 : FromColor_F16_Raw;
         default:
             break;
     }
@@ -351,8 +379,7 @@ bool GraphicsJNI::SetPixels(JNIEnv* env, jintArray srcColors, int srcOffset, int
 
     dstBitmap.notifyPixelsChanged();
 
-    env->ReleaseIntArrayElements(srcColors, const_cast<jint*>(array),
-                                 JNI_ABORT);
+    env->ReleaseIntArrayElements(srcColors, const_cast<jint*>(array), JNI_ABORT);
     return true;
 }
 
@@ -360,6 +387,24 @@ bool GraphicsJNI::SetPixels(JNIEnv* env, jintArray srcColors, int srcOffset, int
 
 typedef void (*ToColorProc)(SkColor dst[], const void* src, int width,
                             SkColorTable*);
+
+static void ToColor_F16_Alpha(SkColor dst[], const void* src, int width,
+                              SkColorTable*) {
+    SkASSERT(width > 0);
+    uint64_t* s = (uint64_t*)src;
+    do {
+        *dst++ = SkPM4f::FromF16((const uint16_t*) s++).unpremul().toSkColor();
+    } while (--width != 0);
+}
+
+static void ToColor_F16_Raw(SkColor dst[], const void* src, int width,
+                            SkColorTable*) {
+    SkASSERT(width > 0);
+    uint64_t* s = (uint64_t*)src;
+    do {
+        *dst++ = Sk4f_toS32(swizzle_rb(SkHalfToFloat_finite_ftz(*s++)));
+    } while (--width != 0);
+}
 
 static void ToColor_S32_Alpha(SkColor dst[], const void* src, int width,
                               SkColorTable*) {
@@ -520,6 +565,17 @@ static ToColorProc ChooseToColorProc(const SkBitmap& src) {
             }
         case kAlpha_8_SkColorType:
             return ToColor_SA8;
+        case kRGBA_F16_SkColorType:
+            switch (src.alphaType()) {
+                case kOpaque_SkAlphaType:
+                    return ToColor_F16_Raw;
+                case kPremul_SkAlphaType:
+                    return ToColor_F16_Alpha;
+                case kUnpremul_SkAlphaType:
+                    return ToColor_F16_Raw;
+                default:
+                    return NULL;
+            }
         default:
             break;
     }
@@ -554,7 +610,7 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
 
     SkBitmap bitmap;
     bitmap.setInfo(SkImageInfo::Make(width, height, colorType, kPremul_SkAlphaType,
-            GraphicsJNI::defaultColorSpace()));
+            GraphicsJNI::colorSpaceForType(colorType)));
 
     sk_sp<Bitmap> nativeBitmap = Bitmap::allocateHeapBitmap(&bitmap, NULL);
     if (!nativeBitmap) {
@@ -562,8 +618,7 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
     }
 
     if (jColors != NULL) {
-        GraphicsJNI::SetPixels(env, jColors, offset, stride,
-                0, 0, width, height, bitmap);
+        GraphicsJNI::SetPixels(env, jColors, offset, stride, 0, 0, width, height, bitmap);
     }
 
     return createBitmap(env, nativeBitmap.release(), getPremulBitmapCreateFlags(isMutable));
@@ -790,6 +845,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
     const int         density = p->readInt32();
 
     if (kN32_SkColorType != colorType &&
+            kRGBA_F16_SkColorType != colorType &&
             kRGB_565_SkColorType != colorType &&
             kARGB_4444_SkColorType != colorType &&
             kIndex_8_SkColorType != colorType &&
@@ -800,8 +856,15 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
 
     std::unique_ptr<SkBitmap> bitmap(new SkBitmap);
 
-    if (!bitmap->setInfo(SkImageInfo::Make(width, height, colorType, alphaType,
-            isSRGB ? SkColorSpace::MakeNamed(SkColorSpace::kSRGB_Named) : nullptr), rowBytes)) {
+    sk_sp<SkColorSpace> colorSpace;
+    if (kRGBA_F16_SkColorType == colorType) {
+        colorSpace = SkColorSpace::MakeNamed(SkColorSpace::kSRGBLinear_Named);
+    } else {
+        colorSpace = isSRGB ? SkColorSpace::MakeNamed(SkColorSpace::kSRGB_Named) : nullptr;
+    }
+
+    if (!bitmap->setInfo(SkImageInfo::Make(width, height, colorType, alphaType, colorSpace),
+            rowBytes)) {
         return NULL;
     }
 

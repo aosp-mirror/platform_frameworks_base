@@ -297,13 +297,16 @@ enum LegacyBitmapConfig {
     kRGB_565_LegacyBitmapConfig     = 3,
     kARGB_4444_LegacyBitmapConfig   = 4,
     kARGB_8888_LegacyBitmapConfig   = 5,
-    kHardware_LegacyBitmapConfig    = 6,
+    kRGBA_16F_LegacyBitmapConfig    = 6,
+    kHardware_LegacyBitmapConfig    = 7,
 
     kLastEnum_LegacyBitmapConfig = kHardware_LegacyBitmapConfig
 };
 
 jint GraphicsJNI::colorTypeToLegacyBitmapConfig(SkColorType colorType) {
     switch (colorType) {
+        case kRGBA_F16_SkColorType:
+            return kRGBA_16F_LegacyBitmapConfig;
         case kN32_SkColorType:
             return kARGB_8888_LegacyBitmapConfig;
         case kARGB_4444_SkColorType:
@@ -329,6 +332,7 @@ SkColorType GraphicsJNI::legacyBitmapConfigToColorType(jint legacyConfig) {
         kRGB_565_SkColorType,
         kARGB_4444_SkColorType,
         kN32_SkColorType,
+        kRGBA_F16_SkColorType,
         kN32_SkColorType
     };
 
@@ -456,6 +460,19 @@ sk_sp<SkColorSpace> GraphicsJNI::defaultColorSpace() {
 #else
     return nullptr;
 #endif
+}
+
+sk_sp<SkColorSpace> GraphicsJNI::linearColorSpace() {
+    return SkColorSpace::MakeNamed(SkColorSpace::kSRGBLinear_Named);
+}
+
+sk_sp<SkColorSpace> GraphicsJNI::colorSpaceForType(SkColorType type) {
+    switch (type) {
+        case kRGBA_F16_SkColorType:
+            return linearColorSpace();
+        default:
+            return defaultColorSpace();
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -22,13 +22,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 public class PixelFormat {
-
     /** @hide */
     @IntDef({UNKNOWN, TRANSLUCENT, TRANSPARENT, OPAQUE})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Opacity {}
 
-    /* these constants need to match those in hardware/hardware.h */
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({RGBA_8888, RGBX_8888, RGBA_F16, RGBX_F16, RGB_888, RGB_565})
+    public @interface Format { };
+
+    // NOTE: these constants must match the values from graphics/common/x.x/types.hal
 
     public static final int UNKNOWN     = 0;
 
@@ -62,7 +66,6 @@ public class PixelFormat {
     @Deprecated
     public static final int RGB_332     = 0xB;
 
-
     /**
      * @deprecated use {@link android.graphics.ImageFormat#NV16
      * ImageFormat.NV16} instead.
@@ -84,6 +87,9 @@ public class PixelFormat {
     @Deprecated
     public static final int YCbCr_422_I = 0x14;
 
+    public static final int RGBA_F16    = 0x16;
+    public static final int RGBX_F16    = 0x17;
+
     /**
      * @deprecated use {@link android.graphics.ImageFormat#JPEG
      * ImageFormat.JPEG} instead.
@@ -91,7 +97,10 @@ public class PixelFormat {
     @Deprecated
     public static final int JPEG        = 0x100;
 
-    public static void getPixelFormatInfo(int format, PixelFormat info) {
+    public int bytesPerPixel;
+    public int bitsPerPixel;
+
+    public static void getPixelFormatInfo(@Format int format, PixelFormat info) {
         switch (format) {
             case RGBA_8888:
             case RGBX_8888:
@@ -124,27 +133,30 @@ public class PixelFormat {
                 info.bitsPerPixel = 12;
                 info.bytesPerPixel = 1;
                 break;
+            case RGBA_F16:
+            case RGBX_F16:
+                info.bitsPerPixel = 64;
+                info.bytesPerPixel = 8;
+                break;
             default:
                 throw new IllegalArgumentException("unknown pixel format " + format);
         }
     }
 
-    public static boolean formatHasAlpha(int format) {
+    public static boolean formatHasAlpha(@Format int format) {
         switch (format) {
             case PixelFormat.A_8:
             case PixelFormat.LA_88:
             case PixelFormat.RGBA_4444:
             case PixelFormat.RGBA_5551:
             case PixelFormat.RGBA_8888:
+            case PixelFormat.RGBA_F16:
             case PixelFormat.TRANSLUCENT:
             case PixelFormat.TRANSPARENT:
                 return true;
         }
         return false;
     }
-
-    public int  bytesPerPixel;
-    public int  bitsPerPixel;
 
     /**
      * Determine whether or not this is a public-visible and non-deprecated {@code format}.
@@ -159,12 +171,14 @@ public class PixelFormat {
      *
      * @hide
      */
-    public static boolean isPublicFormat(int format) {
+    public static boolean isPublicFormat(@Format int format) {
         switch (format) {
             case RGBA_8888:
             case RGBX_8888:
             case RGB_888:
             case RGB_565:
+            case RGBA_F16:
+            case RGBX_F16:
                 return true;
         }
 

@@ -131,6 +131,13 @@ inline CopyResult copyTextureInto(Caches& caches, RenderState& renderState,
                 destWidth, destHeight, caches.maxTextureSize);
         return CopyResult::DestinationInvalid;
     }
+
+    // TODO: Add support for RGBA_F16 destinations
+    if (bitmap->colorType() == kRGBA_F16_SkColorType) {
+        ALOGW("Can't copy surface into bitmap, RGBA_F16 config is not supported");
+        return CopyResult::DestinationInvalid;
+    }
+
     GLuint fbo = renderState.createFramebuffer();
     if (!fbo) {
         ALOGW("Could not obtain an FBO");

@@ -1671,6 +1671,28 @@ public abstract class ColorSpace {
     }
 
     /**
+     * Converts values from CIE xyY to CIE L*u*v*. Y is assumed to be 1 so the
+     * input xyY array only contains the x and y components. After this method
+     * returns, the xyY array contains the converted u and v components.
+     *
+     * @param xyY The xyY value to convert to XYZ, cannot be null,
+     *            length must be a multiple of 2
+     */
+    private static void xyYToUv(@NonNull @Size(multiple = 2) float[] xyY) {
+        for (int i = 0; i < xyY.length; i += 2) {
+            float x = xyY[i];
+            float y = xyY[i + 1];
+
+            float d = -2.0f * x + 12.0f * y + 3;
+            float u = (4.0f * x) / d;
+            float v = (9.0f * y) / d;
+
+            xyY[i] = u;
+            xyY[i + 1] = v;
+        }
+    }
+
+    /**
      * <p>Computes the chromatic adaptation transform from the specified
      * source white point to the specified destination white point.</p>
      *
@@ -3162,10 +3184,10 @@ public abstract class ColorSpace {
     /**
      * <p>A color space renderer can be used to visualize and compare the gamut and
      * white point of one or more color spaces. The output is an sRGB {@link Bitmap}
-     * showing a CIE 1931 xyY chromaticity diagram.</p>
+     * showing a CIE 1931 xyY or a CIE 1976 UCS chromaticity diagram.</p>
      *
      * <p>The following code snippet shows how to compare the {@link Named#SRGB}
-     * and {@link Named#DCI_P3} color spaces:</p>
+     * and {@link Named#DCI_P3} color spaces in a CIE 1931 diagram:</p>
      *
      * <pre class="prettyprint">
      * Bitmap bitmap = ColorSpace.createRenderer()
@@ -3188,12 +3210,18 @@ public abstract class ColorSpace {
      */
     public static class Renderer {
         private static final int NATIVE_SIZE = 1440;
+        private static final float UCS_SCALE = 9.0f / 6.0f;
+
+        // Number of subdivision of the inside of the spectral locus
+        private static final int CHROMATICITY_RESOLUTION = 32;
+        private static final double ONE_THIRD = 1.0 / 3.0;
 
         @IntRange(from = 128, to = Integer.MAX_VALUE)
         private int mSize = 1024;
 
         private boolean mShowWhitePoint = true;
         private boolean mClip = false;
+        private boolean mUcs = false;
 
         private final List<Pair<ColorSpace, Integer>> mColorSpaces = new ArrayList<>(2);
         private final List<Point> mPoints = new ArrayList<>(0);
@@ -3237,6 +3265,35 @@ public abstract class ColorSpace {
         @NonNull
         public Renderer clip(boolean clip) {
             mClip = clip;
+            return this;
+        }
+
+        /**
+         * <p>Defines whether the chromaticity diagram should use the uniform
+         * chromaticity scale (CIE 1976 UCS). When the uniform chromaticity scale
+         * is used, the distance between two points on the diagram is approximately
+         * proportional to the perceived color difference.</p>
+         *
+         * <p>The following code snippet shows how to enable the uniform chromaticity
+         * scale. The image below shows the result:</p>
+         * <pre class="prettyprint">
+         * Bitmap bitmap = ColorSpace.createRenderer()
+         *     .uniformChromaticityScale(true)
+         *     .add(ColorSpace.get(ColorSpace.Named.SRGB), 0xffffffff)
+         *     .add(ColorSpace.get(ColorSpace.Named.DCI_P3), 0xffffc845)
+         *     .render();
+         * </pre>
+         * <p>
+         *     <img src="{@docRoot}reference/android/images/graphics/colorspace_ucs.png" />
+         *     <figcaption style="text-align: center;">CIE 1976 UCS diagram</figcaption>
+         * </p>
+         *
+         * @param ucs True to render the chromaticity diagram as the CIE 1976 UCS diagram
+         * @return This instance of {@link Renderer}
+         */
+        @NonNull
+        public Renderer uniformChromaticityScale(boolean ucs) {
+            mUcs = ucs;
             return this;
         }
 
@@ -3302,7 +3359,7 @@ public abstract class ColorSpace {
          * </pre>
          * <p>
          *     <img src="{@docRoot}reference/android/images/graphics/colorspace_comparison2.png" />
-         *     <figcaption style="text-align: center;">sRGB vs DCI-P3</figcaption>
+         *     <figcaption style="text-align: center;">sRGB, DCI-P3, ACES and scRGB</figcaption>
          * </p>
          *
          * @param colorSpace The color space whose gamut to render on the diagram
@@ -3385,6 +3442,7 @@ public abstract class ColorSpace {
 
             setTransform(canvas, width, height, primaries);
             drawBox(canvas, width, height, paint, path);
+            setUcsTransform(canvas, height);
             drawLocus(canvas, width, height, paint, path, primaries);
             drawGamuts(canvas, width, height, paint, path, primaries, whitePoint);
             drawPoints(canvas, width, height, paint);
@@ -3406,7 +3464,11 @@ public abstract class ColorSpace {
 
             paint.setStyle(Paint.Style.FILL);
 
+            float radius = 4.0f / (mUcs ? UCS_SCALE : 1.0f);
+
             float[] v = new float[3];
+            float[] xy = new float[2];
+
             for (final Point point : mPoints) {
                 v[0] = point.mRgb[0];
                 v[1] = point.mRgb[1];
@@ -3415,10 +3477,13 @@ public abstract class ColorSpace {
 
                 paint.setColor(point.mColor);
 
-                // XYZ to xyY, assuming Y=1.0
+                // XYZ to xyY, assuming Y=1.0, then to L*u*v* if needed
                 float sum = v[0] + v[1] + v[2];
-                canvas.drawCircle(width * v[0] / sum, height - height * v[1] / sum,
-                        4.0f, paint);
+                xy[0] = v[0] / sum;
+                xy[1] = v[1] / sum;
+                if (mUcs) xyYToUv(xy);
+
+                canvas.drawCircle(width * xy[0], height - height * xy[1], radius, paint);
             }
         }
 
@@ -3440,6 +3505,8 @@ public abstract class ColorSpace {
                 @NonNull Paint paint, @NonNull Path path,
                 @NonNull @Size(6) float[] primaries, @NonNull @Size(2) float[] whitePoint) {
 
+            float radius = 4.0f / (mUcs ? UCS_SCALE : 1.0f);
+
             for (final Pair<ColorSpace, Integer> item : mColorSpaces) {
                 ColorSpace colorSpace = item.first;
                 int color = item.second;
@@ -3447,7 +3514,7 @@ public abstract class ColorSpace {
                 if (colorSpace.getModel() != Model.RGB) continue;
 
                 Rgb rgb = (Rgb) colorSpace;
-                getPrimaries(rgb, primaries);
+                getPrimaries(rgb, primaries, mUcs);
 
                 path.rewind();
                 path.moveTo(width * primaries[0], height - height * primaries[1]);
@@ -3462,11 +3529,12 @@ public abstract class ColorSpace {
                 // Draw the white point
                 if (mShowWhitePoint) {
                     rgb.getWhitePoint(whitePoint);
+                    if (mUcs) xyYToUv(whitePoint);
 
                     paint.setStyle(Paint.Style.FILL);
                     paint.setColor(color);
-                    canvas.drawCircle(width * whitePoint[0], height - height * whitePoint[1],
-                            4.0f, paint);
+                    canvas.drawCircle(
+                            width * whitePoint[0], height - height * whitePoint[1], radius, paint);
                 }
             }
         }
@@ -3477,10 +3545,12 @@ public abstract class ColorSpace {
          *
          * @param rgb The color space whose primaries to extract
          * @param primaries A pre-allocated array of 6 floats that will hold the result
+         * @param asUcs True if the primaries should be returned in Luv, false for xyY
          */
         @NonNull
         @Size(6)
-        private static float[] getPrimaries(@NonNull Rgb rgb, @NonNull @Size(6) float[] primaries) {
+        private static float[] getPrimaries(@NonNull Rgb rgb,
+                @NonNull @Size(6) float[] primaries, boolean asUcs) {
             // TODO: We should find a better way to handle these cases
             if (rgb.equals(ColorSpace.get(Named.EXTENDED_SRGB)) ||
                     rgb.equals(ColorSpace.get(Named.LINEAR_EXTENDED_SRGB))) {
@@ -3490,9 +3560,11 @@ public abstract class ColorSpace {
                 primaries[3] = 1.24f;
                 primaries[4] = -0.23f;
                 primaries[5] = -0.57f;
-                return primaries;
+            } else {
+                rgb.getPrimaries(primaries);
             }
-            return rgb.getPrimaries(primaries);
+            if (asUcs) xyYToUv(primaries);
+            return primaries;
         }
 
         /**
@@ -3513,7 +3585,13 @@ public abstract class ColorSpace {
             int vertexCount = SPECTRUM_LOCUS_X.length * CHROMATICITY_RESOLUTION * 6;
             float[] vertices = new float[vertexCount * 2];
             int[] colors = new int[vertices.length];
-            computeChromaticityMesh(NATIVE_SIZE, NATIVE_SIZE, vertices, colors);
+            computeChromaticityMesh(vertices, colors);
+
+            if (mUcs) xyYToUv(vertices);
+            for (int i = 0; i < vertices.length; i += 2) {
+                vertices[i] *= width;
+                vertices[i + 1] = height - vertices[i + 1] * height;
+            }
 
             // Draw the spectral locus
             if (mClip && mColorSpaces.size() > 0) {
@@ -3522,7 +3600,8 @@ public abstract class ColorSpace {
                     if (colorSpace.getModel() != Model.RGB) continue;
 
                     Rgb rgb = (Rgb) colorSpace;
-                    getPrimaries(rgb, primaries);
+                    getPrimaries(rgb, primaries, mUcs);
+
                     break;
                 }
 
@@ -3559,6 +3638,7 @@ public abstract class ColorSpace {
             }
             path.close();
 
+            paint.setStrokeWidth(4.0f / (mUcs ? UCS_SCALE : 1.0f));
             paint.setStyle(Paint.Style.STROKE);
             paint.setColor(0xff000000);
             canvas.drawPath(path, paint);
@@ -3576,25 +3656,38 @@ public abstract class ColorSpace {
          */
         private void drawBox(@NonNull Canvas canvas, int width, int height, @NonNull Paint paint,
                 @NonNull Path path) {
+
+            int lineCount = 10;
+            float scale = 1.0f;
+            if (mUcs) {
+                lineCount = 7;
+                scale = UCS_SCALE;
+            }
+
             // Draw the unit grid
             paint.setStyle(Paint.Style.STROKE);
             paint.setStrokeWidth(2.0f);
             paint.setColor(0xffc0c0c0);
-            for (int i = 1; i <= 9; i++) {
-                canvas.drawLine(0.0f, height - (height * i / 10.0f),
-                        0.9f * width, height - (height * i / 10.0f), paint);
-                canvas.drawLine(width * i / 10.0f, height,
-                        width * i / 10.0f, 0.1f * height, paint);
+
+            for (int i = 1; i < lineCount - 1; i++) {
+                float v = i / 10.0f;
+                float x = (width * v) * scale;
+                float y = height - (height * v) * scale;
+
+                canvas.drawLine(0.0f, y, 0.9f * width, y, paint);
+                canvas.drawLine(x, height, x, 0.1f * height, paint);
             }
 
             // Draw tick marks
             paint.setStrokeWidth(4.0f);
             paint.setColor(0xff000000);
-            for (int i = 1; i <= 9; i++) {
-                canvas.drawLine(0.0f, height - (height * i / 10.0f),
-                        width / 100.0f, height - (height * i / 10.0f), paint);
-                canvas.drawLine(width * i / 10.0f, height,
-                        width * i / 10.0f, height - (height / 100.0f), paint);
+            for (int i = 1; i < lineCount - 1; i++) {
+                float v = i / 10.0f;
+                float x = (width * v) * scale;
+                float y = height - (height * v) * scale;
+
+                canvas.drawLine(0.0f, y, width / 100.0f, y, paint);
+                canvas.drawLine(x, height, x, height - (height / 100.0f), paint);
             }
 
             // Draw the axis labels
@@ -3603,14 +3696,15 @@ public abstract class ColorSpace {
             paint.setTypeface(Typeface.create("sans-serif-light", Typeface.NORMAL));
 
             Rect bounds = new Rect();
-            for (int i = 1; i < 9; i++) {
+            for (int i = 1; i < lineCount - 1; i++) {
                 String text = "0." + i;
                 paint.getTextBounds(text, 0, text.length(), bounds);
 
-                float y = height - (height * i / 10.0f);
-                canvas.drawText(text, -0.05f * width + 10, y + bounds.height() / 2.0f, paint);
+                float v = i / 10.0f;
+                float x = (width * v) * scale;
+                float y = height - (height * v) * scale;
 
-                float x = width * i / 10.0f;
+                canvas.drawText(text, -0.05f * width + 10, y + bounds.height() / 2.0f, paint);
                 canvas.drawText(text, x - bounds.width() / 2.0f,
                         height + bounds.height() + 16, paint);
             }
@@ -3643,7 +3737,7 @@ public abstract class ColorSpace {
                 if (colorSpace.getModel() != Model.RGB) continue;
 
                 Rgb rgb = (Rgb) colorSpace;
-                getPrimaries(rgb, primaries);
+                getPrimaries(rgb, primaries, mUcs);
 
                 primariesBounds.left = Math.min(primariesBounds.left, primaries[4]);
                 primariesBounds.top = Math.min(primariesBounds.top, primaries[5]);
@@ -3651,24 +3745,40 @@ public abstract class ColorSpace {
                 primariesBounds.bottom = Math.max(primariesBounds.bottom, primaries[3]);
             }
 
+            float max = mUcs ? 0.6f : 0.9f;
+
             primariesBounds.left = Math.min(0.0f, primariesBounds.left);
             primariesBounds.top = Math.min(0.0f, primariesBounds.top);
-            primariesBounds.right = Math.max(0.9f, primariesBounds.right);
-            primariesBounds.bottom = Math.max(0.9f, primariesBounds.bottom);
+            primariesBounds.right = Math.max(max, primariesBounds.right);
+            primariesBounds.bottom = Math.max(max, primariesBounds.bottom);
 
-            float scaleX = 0.9f / primariesBounds.width();
-            float scaleY = 0.9f / primariesBounds.height();
+            float scaleX = max / primariesBounds.width();
+            float scaleY = max / primariesBounds.height();
             float scale = Math.min(scaleX, scaleY);
 
             canvas.scale(mSize / (float) NATIVE_SIZE, mSize / (float) NATIVE_SIZE);
             canvas.scale(scale, scale);
             canvas.translate(
-                    (primariesBounds.width() - 0.9f) * width / 2.0f,
-                    (primariesBounds.height() - 0.9f) * height / 2.0f);
+                    (primariesBounds.width() - max) * width / 2.0f,
+                    (primariesBounds.height() - max) * height / 2.0f);
 
             // The spectrum extends ~0.85 vertically and ~0.65 horizontally
             // We shift the canvas a little bit to get nicer margins
             canvas.translate(0.05f * width, -0.05f * height);
+        }
+
+        /**
+         * Computes and applies the Canvas transforms required to render the CIE
+         * 197 UCS chromaticity diagram.
+         *
+         * @param canvas The canvas to transform
+         * @param height Height in pixel of the final image
+         */
+        private void setUcsTransform(@NonNull Canvas canvas, int height) {
+            if (mUcs) {
+                canvas.translate(0.0f, (height - height * UCS_SCALE));
+                canvas.scale(UCS_SCALE, UCS_SCALE);
+            }
         }
 
         // X coordinates of the spectral locus in CIE 1931
@@ -3716,21 +3826,15 @@ public abstract class ColorSpace {
                 0.037799f, 0.029673f, 0.021547f, 0.013421f, 0.005295f
         };
 
-        // Number of subdivision of the inside of the spectral locus
-        private static final int CHROMATICITY_RESOLUTION = 32;
-        private static final double ONE_THIRD = 1.0 / 3.0;
-
         /**
          * Computes a 2D mesh representation of the CIE 1931 chromaticity
          * diagram.
          *
-         * @param width Width in pixels of the mesh
-         * @param height Height in pixels of the mesh
          * @param vertices Array of floats that will hold the mesh vertices
          * @param colors Array of floats that will hold the mesh colors
          */
-        private static void computeChromaticityMesh(int width, int height,
-                @NonNull float[] vertices, @NonNull int[] colors) {
+        private static void computeChromaticityMesh(@NonNull float[] vertices,
+                @NonNull int[] colors) {
 
             ColorSpace colorSpace = get(Named.SRGB);
 
@@ -3796,18 +3900,18 @@ public abstract class ColorSpace {
                     colorIndex += 6;
 
                     // Flip the mesh upside down to match Canvas' coordinates system
-                    vertices[vertexIndex++] = v1x * width;
-                    vertices[vertexIndex++] = height - v1y * height;
-                    vertices[vertexIndex++] = v2x * width;
-                    vertices[vertexIndex++] = height - v2y * height;
-                    vertices[vertexIndex++] = v3x * width;
-                    vertices[vertexIndex++] = height - v3y * height;
-                    vertices[vertexIndex++] = v1x * width;
-                    vertices[vertexIndex++] = height - v1y * height;
-                    vertices[vertexIndex++] = v3x * width;
-                    vertices[vertexIndex++] = height - v3y * height;
-                    vertices[vertexIndex++] = v4x * width;
-                    vertices[vertexIndex++] = height - v4y * height;
+                    vertices[vertexIndex++] = v1x;
+                    vertices[vertexIndex++] = v1y;
+                    vertices[vertexIndex++] = v2x;
+                    vertices[vertexIndex++] = v2y;
+                    vertices[vertexIndex++] = v3x;
+                    vertices[vertexIndex++] = v3y;
+                    vertices[vertexIndex++] = v1x;
+                    vertices[vertexIndex++] = v1y;
+                    vertices[vertexIndex++] = v3x;
+                    vertices[vertexIndex++] = v3y;
+                    vertices[vertexIndex++] = v4x;
+                    vertices[vertexIndex++] = v4y;
                 }
             }
         }

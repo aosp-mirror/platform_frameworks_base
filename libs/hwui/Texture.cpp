@@ -225,6 +225,12 @@ void Texture::colorTypeToGlFormatAndType(const Caches& caches, SkColorType color
         *outInternalFormat = GL_LUMINANCE;
         *outType = GL_UNSIGNED_BYTE;
         break;
+    case kRGBA_F16_SkColorType:
+        // This format is always linear
+        *outFormat = GL_RGBA;
+        *outInternalFormat = GL_RGBA16F;
+        *outType = GL_HALF_FLOAT;
+        break;
     default:
         LOG_ALWAYS_FATAL("Unsupported bitmap colorType: %d", colorType);
         break;

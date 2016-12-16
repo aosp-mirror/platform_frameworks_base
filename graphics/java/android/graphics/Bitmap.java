@@ -140,7 +140,7 @@ public final class Bitmap implements Parcelable {
      * Native bitmap has been reconfigured, so set premult and cached
      * width/height values
      */
-    // called from JNI
+    @SuppressWarnings("unused") // called from JNI
     void reinit(int width, int height, boolean requestPremultiplied) {
         mWidth = width;
         mHeight = height;
@@ -465,6 +465,15 @@ public final class Bitmap implements Parcelable {
          */
         ARGB_8888   (5),
 
+        /**
+         * Each pixels is stored on 8 bytes. Each channel (RGB and alpha
+         * for translucency) is stored as a
+         * {@link android.util.Half half-precision floating point value}.
+         *
+         * This configuration is particularly suited for wide-gamut and
+         * HDR content.
+         */
+        RGBA_F16    (6),
 
         /**
          * Special configuration, when bitmap is stored only in graphic memory.
@@ -473,12 +482,12 @@ public final class Bitmap implements Parcelable {
          * It is optimal for cases, when the only operation with the bitmap is to draw it on a
          * screen.
          */
-        HARDWARE    (6);
+        HARDWARE    (7);
 
         final int nativeInt;
 
         private static Config sConfigs[] = {
-            null, ALPHA_8, null, RGB_565, ARGB_4444, ARGB_8888, HARDWARE
+            null, ALPHA_8, null, RGB_565, ARGB_4444, ARGB_8888, RGBA_F16, HARDWARE
         };
 
         Config(int ni) {
@@ -760,6 +769,9 @@ public final class Bitmap implements Parcelable {
                 case ALPHA_8:
                     newConfig = Config.ALPHA_8;
                     break;
+                case RGBA_F16:
+                    newConfig = Config.RGBA_F16;
+                    break;
                 //noinspection deprecation
                 case ARGB_4444:
                 case ARGB_8888:
@@ -781,8 +793,13 @@ public final class Bitmap implements Parcelable {
             neww = Math.round(deviceR.width());
             newh = Math.round(deviceR.height());
 
-            bitmap = createBitmap(neww, newh, transformed ? Config.ARGB_8888 : newConfig,
-                    transformed || source.hasAlpha());
+            Config transformedConfig = newConfig;
+            if (transformed) {
+                if (transformedConfig != Config.ARGB_8888 && transformedConfig != Config.RGBA_F16) {
+                    transformedConfig = Config.ARGB_8888;
+                }
+            }
+            bitmap = createBitmap(neww, newh, transformedConfig, transformed || source.hasAlpha());
 
             canvas.translate(-deviceR.left, -deviceR.top);
             canvas.concat(m);
@@ -845,14 +862,14 @@ public final class Bitmap implements Parcelable {
      * @param width    The width of the bitmap
      * @param height   The height of the bitmap
      * @param config   The bitmap config to create.
-     * @param hasAlpha If the bitmap is ARGB_8888 this flag can be used to mark the
-     *                 bitmap as opaque. Doing so will clear the bitmap in black
+     * @param hasAlpha If the bitmap is ARGB_8888 or RGBA_16F this flag can be used to
+     *                 mark the bitmap as opaque. Doing so will clear the bitmap in black
      *                 instead of transparent.
      *
      * @throws IllegalArgumentException if the width or height are <= 0, or if
      *         Config is Config.HARDWARE, because hardware bitmaps are always immutable
      */
-    private static Bitmap createBitmap(int width, int height, Config config, boolean hasAlpha) {
+    public static Bitmap createBitmap(int width, int height, Config config, boolean hasAlpha) {
         return createBitmap(null, width, height, config, hasAlpha);
     }
 
@@ -865,14 +882,14 @@ public final class Bitmap implements Parcelable {
      * @param width    The width of the bitmap
      * @param height   The height of the bitmap
      * @param config   The bitmap config to create.
-     * @param hasAlpha If the bitmap is ARGB_8888 this flag can be used to mark the
-     *                 bitmap as opaque. Doing so will clear the bitmap in black
+     * @param hasAlpha If the bitmap is ARGB_8888 or RGBA_16F this flag can be used to
+     *                 mark the bitmap as opaque. Doing so will clear the bitmap in black
      *                 instead of transparent.
      *
      * @throws IllegalArgumentException if the width or height are <= 0, or if
      *         Config is Config.HARDWARE, because hardware bitmaps are always immutable
      */
-    private static Bitmap createBitmap(DisplayMetrics display, int width, int height,
+    public static Bitmap createBitmap(DisplayMetrics display, int width, int height,
             Config config, boolean hasAlpha) {
         if (width <= 0 || height <= 0) {
             throw new IllegalArgumentException("width and height must be > 0");
@@ -885,7 +902,7 @@ public final class Bitmap implements Parcelable {
             bm.mDensity = display.densityDpi;
         }
         bm.setHasAlpha(hasAlpha);
-        if (config == Config.ARGB_8888 && !hasAlpha) {
+        if ((config == Config.ARGB_8888 || config == Config.RGBA_F16) && !hasAlpha) {
             nativeErase(bm.mNativePtr, 0xff000000);
         }
         // No need to initialize the bitmap to zeroes with other configs;
@@ -1526,7 +1543,7 @@ public final class Bitmap implements Parcelable {
 
     /**
      * <p>Replace pixels in the bitmap with the colors in the array. Each element
-     * in the array is a packed int prepresenting a non-premultiplied ARGB
+     * in the array is a packed int representing a non-premultiplied ARGB
      * {@link Color}.</p>
      *
      * @param pixels   The colors to write to the bitmap
