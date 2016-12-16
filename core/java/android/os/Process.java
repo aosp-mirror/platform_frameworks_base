@@ -399,7 +399,8 @@ public class Process {
      * <var>processClass</var> to start them.
      * 
      * When invokeWith is not null, the process will be started as a fresh app
-     * and not a zygote fork. Note that this is only allowed for uid 0.
+     * and not a zygote fork. Note that this is only allowed for uid 0 or when
+     * debugFlags contains DEBUG_ENABLE_DEBUGGER.
      *
      * @param processClass The class to use as the process's main entry
      *                     point.

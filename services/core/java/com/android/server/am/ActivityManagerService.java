@@ -3684,6 +3684,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mNativeDebuggingApp = null;
             }
 
+            String invokeWith = null;
+            if ((app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+                // Debuggable apps may include a wrapper script with their library directory.
+                String wrapperFileName = app.info.nativeLibraryDir + "/wrap.sh";
+                if (new File(wrapperFileName).exists()) {
+                    invokeWith = "/system/bin/logwrapper " + wrapperFileName;
+                }
+            }
+
             String requiredAbi = (abiOverride != null) ? abiOverride : app.info.primaryCpuAbi;
             if (requiredAbi == null) {
                 requiredAbi = Build.SUPPORTED_ABIS[0];
@@ -3715,7 +3724,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 startResult = Process.start(entryPoint,
                         app.processName, uid, uid, gids, debugFlags, mountExternal,
                         app.info.targetSdkVersion, app.info.seinfo, requiredAbi, instructionSet,
-                        app.info.dataDir, null, entryPointArgs);
+                        app.info.dataDir, invokeWith, entryPointArgs);
             }
             checkTime(startTime, "startProcess: returned from zygote!");
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
