@@ -516,4 +516,34 @@ public class WordIteratorTest  extends AndroidTestCase {
         assertFalse(wordIterator.isOnPunctuation(text.length()));
         assertFalse(wordIterator.isOnPunctuation(text.length() + 1));
     }
+
+    @SmallTest
+    public void testApostropheMiddleOfWord() {
+        // These tests confirm that the word "isn't" is treated like one word.
+        final String text = "isn't he";
+        WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
+        wordIterator.setCharSequence(text, 0, text.length());
+
+        assertEquals(text.indexOf('i'), wordIterator.preceding(text.indexOf('h')));
+        assertEquals(text.indexOf('t') + 1, wordIterator.following(text.indexOf('i')));
+
+        assertTrue(wordIterator.isBoundary(text.indexOf('i')));
+        assertFalse(wordIterator.isBoundary(text.indexOf('\'')));
+        assertFalse(wordIterator.isBoundary(text.indexOf('t')));
+        assertTrue(wordIterator.isBoundary(text.indexOf('t') + 1));
+        assertTrue(wordIterator.isBoundary(text.indexOf('h')));
+
+        assertEquals(text.indexOf('i'), wordIterator.getBeginning(text.indexOf('i')));
+        assertEquals(text.indexOf('i'), wordIterator.getBeginning(text.indexOf('n')));
+        assertEquals(text.indexOf('i'), wordIterator.getBeginning(text.indexOf('\'')));
+        assertEquals(text.indexOf('i'), wordIterator.getBeginning(text.indexOf('t')));
+        assertEquals(text.indexOf('i'), wordIterator.getBeginning(text.indexOf('t') + 1));
+        assertEquals(text.indexOf('h'), wordIterator.getBeginning(text.indexOf('h')));
+
+        assertEquals(text.indexOf('t') + 1, wordIterator.getEnd(text.indexOf('i')));
+        assertEquals(text.indexOf('t') + 1, wordIterator.getEnd(text.indexOf('n')));
+        assertEquals(text.indexOf('t') + 1, wordIterator.getEnd(text.indexOf('\'')));
+        assertEquals(text.indexOf('t') + 1, wordIterator.getEnd(text.indexOf('t')));
+        assertEquals(text.indexOf('e') + 1, wordIterator.getEnd(text.indexOf('h')));
+    }
 }
