@@ -697,9 +697,11 @@ class ZygoteConnection {
             throws ZygoteSecurityException {
         int peerUid = peer.getUid();
 
-        if (args.invokeWith != null && peerUid != 0) {
-            throw new ZygoteSecurityException("Peer is not permitted to specify "
-                    + "an explicit invoke-with wrapper command");
+        if (args.invokeWith != null && peerUid != 0 &&
+            (args.debugFlags & Zygote.DEBUG_ENABLE_DEBUGGER) == 0) {
+            throw new ZygoteSecurityException("Peer is permitted to specify an"
+                    + "explicit invoke-with wrapper command only for debuggable"
+                    + "applications.");
         }
     }
 
