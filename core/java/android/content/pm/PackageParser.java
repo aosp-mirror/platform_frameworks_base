@@ -3780,6 +3780,8 @@ public class PackageParser {
                     ApplicationInfo.PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE;
         }
 
+        final boolean hasVisibleToEphemeral =
+                sa.hasValue(R.styleable.AndroidManifestActivity_visibleToEphemeral);
         final boolean isEphemeral = ((flags & PARSE_IS_EPHEMERAL) != 0);
         final boolean visibleToEphemeral = isEphemeral
                 || sa.getBoolean(R.styleable.AndroidManifestActivity_visibleToEphemeral, false);
@@ -3818,13 +3820,17 @@ public class PackageParser {
                     return null;
                 }
                 intent.setEphemeral(isEphemeral);
-                intent.setVisibleToEphemeral(visibleToEphemeral);
+                intent.setVisibleToEphemeral(visibleToEphemeral || isWebBrowsableIntent(intent));
                 if (intent.countActions() == 0) {
                     Slog.w(TAG, "No actions in intent filter at "
                             + mArchiveSourcePath + " "
                             + parser.getPositionDescription());
                 } else {
                     a.intents.add(intent);
+                }
+                // adjust activity flags when we implicitly expose it via a browsable filter
+                if (!hasVisibleToEphemeral && intent.isVisibleToEphemeral()) {
+                    a.info.flags |= ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL;
                 }
             } else if (!receiver && parser.getName().equals("preferred")) {
                 ActivityIntentInfo intent = new ActivityIntentInfo(a);
@@ -3833,7 +3839,7 @@ public class PackageParser {
                     return null;
                 }
                 intent.setEphemeral(isEphemeral);
-                intent.setVisibleToEphemeral(visibleToEphemeral);
+                intent.setVisibleToEphemeral(visibleToEphemeral || isWebBrowsableIntent(intent));
                 if (intent.countActions() == 0) {
                     Slog.w(TAG, "No actions in preferred at "
                             + mArchiveSourcePath + " "
@@ -3843,6 +3849,10 @@ public class PackageParser {
                         owner.preferredActivityFilters = new ArrayList<ActivityIntentInfo>();
                     }
                     owner.preferredActivityFilters.add(intent);
+                }
+                // adjust activity flags when we implicitly expose it via a browsable filter
+                if (!hasVisibleToEphemeral && intent.isVisibleToEphemeral()) {
+                    a.info.flags |= ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL;
                 }
             } else if (parser.getName().equals("meta-data")) {
                 if ((a.metaData = parseMetaData(res, parser, a.metaData,
@@ -4084,6 +4094,7 @@ public class PackageParser {
             }
         }
 
+        // TODO add visibleToInstantApp attribute to activity alias
         final boolean isEphemeral = ((flags & PARSE_IS_EPHEMERAL) != 0);
         final boolean visibleToEphemeral = isEphemeral
                 || ((a.info.flags & ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL) != 0);
@@ -4115,8 +4126,13 @@ public class PackageParser {
                             + parser.getPositionDescription());
                 } else {
                     intent.setEphemeral(isEphemeral);
-                    intent.setVisibleToEphemeral(visibleToEphemeral);
+                    intent.setVisibleToEphemeral(visibleToEphemeral
+                            || isWebBrowsableIntent(intent));
                     a.intents.add(intent);
+                }
+                // adjust activity flags when we implicitly expose it via a browsable filter
+                if (intent.isVisibleToEphemeral()) {
+                    a.info.flags |= ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL;
                 }
             } else if (parser.getName().equals("meta-data")) {
                 if ((a.metaData=parseMetaData(res, parser, a.metaData,
@@ -4253,6 +4269,8 @@ public class PackageParser {
                     ApplicationInfo.PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE;
         }
 
+        final boolean hasVisibleToEphemeral =
+                sa.hasValue(R.styleable.AndroidManifestProvider_visibleToEphemeral);
         final boolean isEphemeral = ((flags & PARSE_IS_EPHEMERAL) != 0);
         final boolean visibleToEphemeral = isEphemeral
                 || sa.getBoolean(R.styleable.AndroidManifestProvider_visibleToEphemeral, false);
@@ -4282,7 +4300,8 @@ public class PackageParser {
         }
         p.info.authority = cpname.intern();
 
-        if (!parseProviderTags(res, parser, isEphemeral, visibleToEphemeral, p, outError)) {
+        if (!parseProviderTags(
+                res, parser, isEphemeral, hasVisibleToEphemeral, visibleToEphemeral, p, outError)) {
             return null;
         }
 
@@ -4290,8 +4309,9 @@ public class PackageParser {
     }
 
     private boolean parseProviderTags(Resources res, XmlResourceParser parser,
-            boolean isEphemeral, boolean visibleToEphemeral, Provider outInfo, String[] outError)
-            throws XmlPullParserException, IOException {
+            boolean isEphemeral, boolean hasVisibleToEphemeral, boolean visibleToEphemeral,
+            Provider outInfo, String[] outError)
+                    throws XmlPullParserException, IOException {
         int outerDepth = parser.getDepth();
         int type;
         while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
@@ -4308,8 +4328,12 @@ public class PackageParser {
                     return false;
                 }
                 intent.setEphemeral(isEphemeral);
-                intent.setVisibleToEphemeral(visibleToEphemeral);
+                intent.setVisibleToEphemeral(visibleToEphemeral || isWebBrowsableIntent(intent));
                 outInfo.intents.add(intent);
+                // adjust provider flags when we implicitly expose it via a browsable filter
+                if (!hasVisibleToEphemeral && intent.isVisibleToEphemeral()) {
+                    outInfo.info.flags |= ProviderInfo.FLAG_VISIBLE_TO_EPHEMERAL;
+                }
 
             } else if (parser.getName().equals("meta-data")) {
                 if ((outInfo.metaData=parseMetaData(res, parser,
@@ -4556,6 +4580,8 @@ public class PackageParser {
                     ApplicationInfo.PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE;
         }
 
+        final boolean hasVisibleToEphemeral =
+                sa.hasValue(R.styleable.AndroidManifestService_visibleToEphemeral);
         final boolean isEphemeral = ((flags & PARSE_IS_EPHEMERAL) != 0);
         final boolean visibleToEphemeral = isEphemeral
                 || sa.getBoolean(R.styleable.AndroidManifestService_visibleToEphemeral, false);
@@ -4591,8 +4617,11 @@ public class PackageParser {
                     return null;
                 }
                 intent.setEphemeral(isEphemeral);
-                intent.setVisibleToEphemeral(visibleToEphemeral);
-
+                intent.setVisibleToEphemeral(visibleToEphemeral || isWebBrowsableIntent(intent));
+                // adjust activity flags when we implicitly expose it via a browsable filter
+                if (!hasVisibleToEphemeral && intent.isVisibleToEphemeral()) {
+                    s.info.flags |= ServiceInfo.FLAG_VISIBLE_TO_EPHEMERAL;
+                }
                 s.intents.add(intent);
             } else if (parser.getName().equals("meta-data")) {
                 if ((s.metaData=parseMetaData(res, parser, s.metaData,
@@ -4618,6 +4647,12 @@ public class PackageParser {
         }
 
         return s;
+    }
+
+    private boolean isWebBrowsableIntent(IntentInfo intent) {
+        return intent.hasAction(Intent.ACTION_VIEW)
+                && intent.hasCategory(Intent.CATEGORY_BROWSABLE)
+                && (intent.hasDataScheme("http") || intent.hasDataScheme("https"));
     }
 
     private boolean parseAllMetaData(Resources res, XmlResourceParser parser, String tag,
