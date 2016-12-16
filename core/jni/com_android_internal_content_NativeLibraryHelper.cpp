@@ -243,7 +243,7 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
         return INSTALL_FAILED_INTERNAL_ERROR;
     }
 
-    *(localFileName + nativeLibPath.size()) = '/';
+    *(localTmpFileName + nativeLibPath.size()) = '/';
 
     if (strlcpy(localTmpFileName + nativeLibPath.size(), TMP_FILE_PATTERN,
                     TMP_FILE_PATTERN_LEN - nativeLibPath.size()) != TMP_FILE_PATTERN_LEN) {
@@ -343,6 +343,11 @@ public:
 
             const char* lastSlash = strrchr(fileName, '/');
             ALOG_ASSERT(lastSlash != NULL, "last slash was null somehow for %s\n", fileName);
+
+            // Skip directories.
+            if (*(lastSlash + 1) == 0) {
+                continue;
+            }
 
             // Make sure the filename is safe.
             if (!isFilenameSafe(lastSlash + 1)) {
