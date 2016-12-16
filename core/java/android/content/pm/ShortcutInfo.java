@@ -129,6 +129,10 @@ public final class ShortcutInfo implements Parcelable {
             | CLONE_REMOVE_RES_NAMES;
 
     /** @hide */
+    public static final int CLONE_REMOVE_FOR_LAUNCHER_APPROVAL = CLONE_REMOVE_INTENT
+            | CLONE_REMOVE_RES_NAMES;
+
+    /** @hide */
     @IntDef(flag = true,
             value = {
                     CLONE_REMOVE_ICON,
