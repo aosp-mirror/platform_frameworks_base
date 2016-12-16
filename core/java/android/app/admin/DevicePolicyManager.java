@@ -3950,6 +3950,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @SystemApi
     public ComponentName getDeviceOwnerComponentOnAnyUser() {
         return getDeviceOwnerComponentInner(/* callingUserOnly =*/ false);
     }
