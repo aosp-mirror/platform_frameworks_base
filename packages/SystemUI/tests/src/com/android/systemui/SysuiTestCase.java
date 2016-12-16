@@ -37,6 +37,7 @@ public abstract class SysuiTestCase {
 
     @Before
     public void SysuiSetup() throws Exception {
+        System.setProperty("dexmaker.share_classloader", "true");
         mContext = new TestableContext(InstrumentationRegistry.getTargetContext(), this);
     }
 
