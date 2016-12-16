@@ -62,6 +62,9 @@ class WebViewZygoteInit {
             ClassLoader loader = ApplicationLoaders.getDefault().createAndCacheWebViewClassLoader(
                     packagePath, libsPath);
 
+            // Add the APK to the Zygote's list of allowed files for children.
+            Zygote.nativeAllowFileAcrossFork(packagePath);
+
             // Once we have the classloader, look up the WebViewFactoryProvider implementation and
             // call preloadInZygote() on it to give it the opportunity to preload the native library
             // and perform any other initialisation work that should be shared among the children.
