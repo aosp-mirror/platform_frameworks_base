@@ -459,6 +459,9 @@ TEST(RecordingCanvas, saveLayer_addClipFlag) {
 
 TEST(RecordingCanvas, saveLayer_viewportCrop) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+        // shouldn't matter, since saveLayer will clip to its bounds
+        canvas.clipRect(-1000, -1000, 1000, 1000, SkClipOp::kReplace);
+
         canvas.saveLayerAlpha(100, 100, 300, 300, 128, SaveFlags::ClipToLayer);
         canvas.drawRect(0, 0, 400, 400, SkPaint());
         canvas.restore();
@@ -635,7 +638,7 @@ TEST(RecordingCanvas, firstClipWillReplace) {
 TEST(RecordingCanvas, replaceClipIntersectWithRoot) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 100, [](RecordingCanvas& canvas) {
         canvas.save(SaveFlags::MatrixClip);
-        canvas.clipRect(-10, -10, 110, 110, SkClipOp::kReplace_private_internal_do_not_use);
+        canvas.clipRect(-10, -10, 110, 110, SkClipOp::kReplace);
         canvas.drawColor(SK_ColorWHITE, SkBlendMode::kSrcOver);
         canvas.restore();
     });
