@@ -29,7 +29,7 @@ public class PixelFormat {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({RGBA_8888, RGBX_8888, RGBA_F16, RGBX_F16, RGB_888, RGB_565})
+    @IntDef({RGBA_8888, RGBX_8888, RGBA_F16, RGB_888, RGB_565})
     public @interface Format { };
 
     // NOTE: these constants must match the values from graphics/common/x.x/types.hal
@@ -88,7 +88,6 @@ public class PixelFormat {
     public static final int YCbCr_422_I = 0x14;
 
     public static final int RGBA_F16    = 0x16;
-    public static final int RGBX_F16    = 0x17;
 
     /**
      * @deprecated use {@link android.graphics.ImageFormat#JPEG
@@ -134,7 +133,6 @@ public class PixelFormat {
                 info.bytesPerPixel = 1;
                 break;
             case RGBA_F16:
-            case RGBX_F16:
                 info.bitsPerPixel = 64;
                 info.bytesPerPixel = 8;
                 break;
@@ -178,7 +176,6 @@ public class PixelFormat {
             case RGB_888:
             case RGB_565:
             case RGBA_F16:
-            case RGBX_F16:
                 return true;
         }
 
