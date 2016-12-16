@@ -170,6 +170,9 @@ public class ZygoteProcess {
      * make easily identifyable processes even if you are using the same base
      * <var>processClass</var> to start them.
      *
+     * When invokeWith is not null, the process will be started as a fresh app
+     * and not a zygote fork. Note that this is only allowed for uid 0.
+     *
      * @param processClass The class to use as the process's main entry
      *                     point.
      * @param niceName A more readable name to use for the process.
@@ -182,6 +185,7 @@ public class ZygoteProcess {
      * @param abi non-null the ABI this app should be started with.
      * @param instructionSet null-ok the instruction set to use.
      * @param appDataDir null-ok the data directory of the app.
+     * @param invokeWith null-ok the command to invoke with.
      * @param zygoteArgs Additional arguments to supply to the zygote process.
      *
      * @return An object that describes the result of the attempt to start the process.
@@ -196,11 +200,12 @@ public class ZygoteProcess {
                                                   String abi,
                                                   String instructionSet,
                                                   String appDataDir,
+                                                  String invokeWith,
                                                   String[] zygoteArgs) {
         try {
             return startViaZygote(processClass, niceName, uid, gid, gids,
                     debugFlags, mountExternal, targetSdkVersion, seInfo,
-                    abi, instructionSet, appDataDir, zygoteArgs);
+                    abi, instructionSet, appDataDir, invokeWith, zygoteArgs);
         } catch (ZygoteStartFailedEx ex) {
             Log.e(LOG_TAG,
                     "Starting VM process through Zygote failed");
@@ -330,6 +335,7 @@ public class ZygoteProcess {
                                                       String abi,
                                                       String instructionSet,
                                                       String appDataDir,
+                                                      String invokeWith,
                                                       String[] extraArgs)
                                                       throws ZygoteStartFailedEx {
         ArrayList<String> argsForZygote = new ArrayList<String>();
@@ -405,6 +411,11 @@ public class ZygoteProcess {
 
         if (appDataDir != null) {
             argsForZygote.add("--app-data-dir=" + appDataDir);
+        }
+
+        if (invokeWith != null) {
+            argsForZygote.add("--invoke-with");
+            argsForZygote.add(invokeWith);
         }
 
         argsForZygote.add(processClass);
