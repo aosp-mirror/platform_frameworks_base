@@ -408,6 +408,7 @@ public class TaskStackLayoutAlgorithm {
     public boolean setSystemInsets(Rect systemInsets) {
         boolean changed = !mSystemInsets.equals(systemInsets);
         mSystemInsets.set(systemInsets);
+        mTaskGridLayoutAlgorithm.setSystemInsets(systemInsets);
         return changed;
     }
 

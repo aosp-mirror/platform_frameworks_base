@@ -17,7 +17,7 @@
 -->
 <resources>
   <dimen name="recents_grid_padding_left_right">32dp</dimen>
-  <dimen name="recents_grid_padding_top_bottom">84dp</dimen>
+  <dimen name="recents_grid_padding_top_bottom">150dp</dimen>
   <dimen name="recents_grid_padding_task_view">20dp</dimen>
 </resources>
 
