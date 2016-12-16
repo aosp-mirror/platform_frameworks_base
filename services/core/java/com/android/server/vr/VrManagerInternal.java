@@ -56,25 +56,27 @@ public abstract class VrManagerInternal {
             int userId, @NonNull ComponentName calling);
 
     /**
-     * Set the current VR mode state immediately.
+     * Set whether the system has acquired a sleep token.
      *
-     * @param enabled {@code true} to enable VR mode.
-     * @param packageName The package name of the requested VrListenerService to bind.
-     * @param userId the user requesting the VrListenerService component.
-     * @param calling the component currently using VR mode, or null to leave unchanged.
+     * @param isAsleep is {@code true} if the device is asleep, or {@code false} otherwise.
      */
-    public abstract void setVrModeImmediate(boolean enabled, @NonNull ComponentName packageName,
-            int userId, @NonNull ComponentName calling);
+    public abstract void onSleepStateChanged(boolean isAsleep);
 
+    /**
+     * Set whether the display used for VR output is on.
+     *
+     * @param isScreenOn is {@code true} if the display is on and can receive commands,
+     *      or {@code false} otherwise.
+     */
+    public abstract void onScreenStateChanged(boolean isScreenOn);
 
-   /**
-    * Return NO_ERROR if the given package is installed on the device and enabled as a
-    * VrListenerService for the given current user, or a negative error code indicating a failure.
-    *
-    * @param packageName the name of the package to check, or null to select the default package.
-    * @return NO_ERROR if the given package is installed and is enabled, or a negative error code
-    *       given in {@link android.service.vr.VrModeException} on failure.
-    */
+    /**
+     * Return NO_ERROR if the given package is installed on the device and enabled as a
+     * VrListenerService for the given current user, or a negative error code indicating a failure.
+     *
+     * @param packageName the name of the package to check, or null to select the default package.
+     * @return NO_ERROR if the given package is installed and is enabled, or a negative error code
+     *       given in {@link android.service.vr.VrModeException} on failure.
+     */
     public abstract int hasVrPackage(@NonNull ComponentName packageName, int userId);
-
 }
