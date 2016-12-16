@@ -1852,21 +1852,14 @@ public class TelephonyManager {
     public static final int SIM_STATE_NETWORK_LOCKED = 4;
     /** SIM card state: Ready */
     public static final int SIM_STATE_READY = 5;
-    /** SIM card state: SIM Card is NOT READY
-     *@hide
-     */
+    /** SIM card state: SIM Card is NOT READY */
     public static final int SIM_STATE_NOT_READY = 6;
-    /** SIM card state: SIM Card Error, permanently disabled
-     *@hide
-     */
+    /** SIM card state: SIM Card Error, permanently disabled */
     public static final int SIM_STATE_PERM_DISABLED = 7;
-    /** SIM card state: SIM Card Error, present but faulty
-     *@hide
-     */
+    /** SIM card state: SIM Card Error, present but faulty */
     public static final int SIM_STATE_CARD_IO_ERROR = 8;
     /** SIM card state: SIM Card restricted, present but not usable due to
      * carrier restrictions.
-     *@hide
      */
     public static final int SIM_STATE_CARD_RESTRICTED = 9;
 
@@ -1912,6 +1905,7 @@ public class TelephonyManager {
      * @see #SIM_STATE_NOT_READY
      * @see #SIM_STATE_PERM_DISABLED
      * @see #SIM_STATE_CARD_IO_ERROR
+     * @see #SIM_STATE_CARD_RESTRICTED
      */
     public int getSimState() {
         int slotIdx = getDefaultSim();
@@ -1949,8 +1943,8 @@ public class TelephonyManager {
      * @see #SIM_STATE_NOT_READY
      * @see #SIM_STATE_PERM_DISABLED
      * @see #SIM_STATE_CARD_IO_ERROR
+     * @see #SIM_STATE_CARD_RESTRICTED
      */
-    /** {@hide} */
     public int getSimState(int slotIdx) {
         int simState = SubscriptionManager.getSimStateForSlotIdx(slotIdx);
         return simState;
