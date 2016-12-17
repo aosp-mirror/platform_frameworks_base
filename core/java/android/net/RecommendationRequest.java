@@ -105,7 +105,16 @@ public final class RecommendationRequest implements Parcelable {
     }
 
     protected RecommendationRequest(Parcel in) {
-        mScanResults = (ScanResult[]) in.readParcelableArray(ScanResult.class.getClassLoader());
+        final int resultCount = in.readInt();
+        if (resultCount > 0) {
+            mScanResults = new ScanResult[resultCount];
+            for (int i = 0; i < resultCount; i++) {
+                mScanResults[i] = in.readParcelable(ScanResult.class.getClassLoader());
+            }
+        } else {
+            mScanResults = null;
+        }
+
         mCurrentSelectedConfig = in.readParcelable(WifiConfiguration.class.getClassLoader());
         mRequiredCapabilities = in.readParcelable(NetworkCapabilities.class.getClassLoader());
     }
@@ -117,7 +126,14 @@ public final class RecommendationRequest implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeParcelableArray(mScanResults, flags);
+        if (mScanResults != null) {
+            dest.writeInt(mScanResults.length);
+            for (int i = 0; i < mScanResults.length; i++) {
+                dest.writeParcelable(mScanResults[i], flags);
+            }
+        } else {
+            dest.writeInt(0);
+        }
         dest.writeParcelable(mCurrentSelectedConfig, flags);
         dest.writeParcelable(mRequiredCapabilities, flags);
     }
