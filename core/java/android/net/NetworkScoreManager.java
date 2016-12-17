@@ -183,7 +183,7 @@ public class NetworkScoreManager {
         if (app == null) {
             return null;
         }
-        return app.mPackageName;
+        return app.packageName;
     }
 
     /**
@@ -272,19 +272,11 @@ public class NetworkScoreManager {
      * @hide
      */
     public boolean requestScores(NetworkKey[] networks) throws SecurityException {
-        String activeScorer = getActiveScorerPackage();
-        if (activeScorer == null) {
-            return false;
+        try {
+            return mService.requestScores(networks);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        Intent intent = new Intent(ACTION_SCORE_NETWORKS);
-        intent.setPackage(activeScorer);
-        intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-        intent.putExtra(EXTRA_NETWORKS_TO_SCORE, networks);
-        // A scorer should never become active if its package doesn't hold SCORE_NETWORKS, but
-        // ensure the package still holds it to be extra safe.
-        // TODO: http://b/23422763
-        mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM, Manifest.permission.SCORE_NETWORKS);
-        return true;
     }
 
     /**
@@ -343,6 +335,8 @@ public class NetworkScoreManager {
 
     /**
      * Request a recommendation for which network to connect to.
+     *
+     * <p>It is not safe to call this method from the main thread.
      *
      * @param request a {@link RecommendationRequest} instance containing additional
      *                request details
