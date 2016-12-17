@@ -57,7 +57,6 @@ import com.android.systemui.recents.events.component.ShowUserToastEvent;
 import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsTaskLoader;
-import com.android.systemui.recents.grid.RecentsGridImpl;
 import com.android.systemui.recents.tv.RecentsTvImpl;
 import com.android.systemui.stackdivider.Divider;
 
@@ -84,7 +83,6 @@ public class Recents extends SystemUI
     static {
         RECENTS_ACTIVITIES.add(RecentsImpl.RECENTS_ACTIVITY);
         RECENTS_ACTIVITIES.add(RecentsTvImpl.RECENTS_TV_ACTIVITY);
-        RECENTS_ACTIVITIES.add(RecentsGridImpl.RECENTS_MOSAIC_ACTIVITY);
     }
 
     // Purely for experimentation
