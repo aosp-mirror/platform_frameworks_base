@@ -1190,8 +1190,7 @@ static void Bitmap_copyPixelsFromBuffer(JNIEnv* env, jobject,
     }
 }
 
-static jboolean Bitmap_sameAs(JNIEnv* env, jobject, jlong bm0Handle,
-                              jlong bm1Handle) {
+static jboolean Bitmap_sameAs(JNIEnv* env, jobject, jlong bm0Handle, jlong bm1Handle) {
     SkBitmap bm0;
     SkBitmap bm1;
 
@@ -1207,11 +1206,11 @@ static jboolean Bitmap_sameAs(JNIEnv* env, jobject, jlong bm0Handle,
 
     bitmap0->bitmap().getSkBitmap(&bm0);
     bitmap1->bitmap().getSkBitmap(&bm1);
-    if (bm0.width() != bm1.width() ||
-        bm0.height() != bm1.height() ||
-        bm0.colorType() != bm1.colorType() ||
-        bm0.alphaType() != bm1.alphaType() ||
-        bm0.colorSpace() != bm1.colorSpace()) {
+    if (bm0.width() != bm1.width()
+            || bm0.height() != bm1.height()
+            || bm0.colorType() != bm1.colorType()
+            || bm0.alphaType() != bm1.alphaType()
+            || !SkColorSpace::Equals(bm0.colorSpace(), bm1.colorSpace())) {
         return JNI_FALSE;
     }
 
