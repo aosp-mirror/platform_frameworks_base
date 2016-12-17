@@ -369,6 +369,7 @@ import static com.android.server.am.ActivityStackSupervisor.DEFER_RESUME;
 import static com.android.server.am.ActivityStackSupervisor.FORCE_FOCUS;
 import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.am.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.am.ActivityStackSupervisor.RESTORE_FROM_RECENTS;
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
@@ -539,8 +540,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     private static final String INTENT_REMOTE_BUGREPORT_FINISHED =
             "android.intent.action.REMOTE_BUGREPORT_FINISHED";
 
-    // Used to indicate that a task is removed it should also be removed from recents.
-    private static final boolean REMOVE_FROM_RECENTS = true;
     // Used to indicate that an app transition should be animated.
     static final boolean ANIMATE = true;
 
@@ -4826,7 +4825,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // because we don't support returning them across task boundaries. Also, to
                     // keep backwards compatibility we remove the task from recents when finishing
                     // task with root activity.
-                    res = removeTaskByIdLocked(tr.taskId, false, finishWithRootActivity);
+                    res = mStackSupervisor.removeTaskByIdLocked(tr.taskId, false, finishWithRootActivity);
                     if (!res) {
                         Slog.i(TAG, "Removing task failed to finish activity");
                     }
@@ -5471,7 +5470,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             tr.getBaseIntent().getComponent().getPackageName();
                     if (tr.userId != userId) continue;
                     if (!taskPackageName.equals(packageName)) continue;
-                    removeTaskByIdLocked(tr.taskId, false, REMOVE_FROM_RECENTS);
+                    mStackSupervisor.removeTaskByIdLocked(tr.taskId, false, REMOVE_FROM_RECENTS);
                 }
             }
 
@@ -9585,79 +9584,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mWindowManager.executeAppTransition();
     }
 
-    private void cleanUpRemovedTaskLocked(TaskRecord tr, boolean killProcess,
-            boolean removeFromRecents) {
-        if (removeFromRecents) {
-            mRecentTasks.remove(tr);
-            tr.removedFromRecents();
-        }
-        ComponentName component = tr.getBaseIntent().getComponent();
-        if (component == null) {
-            Slog.w(TAG, "No component for base intent of task: " + tr);
-            return;
-        }
-
-        // Find any running services associated with this app and stop if needed.
-        mServices.cleanUpRemovedTaskLocked(tr, component, new Intent(tr.getBaseIntent()));
-
-        if (!killProcess) {
-            return;
-        }
-
-        // Determine if the process(es) for this task should be killed.
-        final String pkg = component.getPackageName();
-        ArrayList<ProcessRecord> procsToKill = new ArrayList<>();
-        ArrayMap<String, SparseArray<ProcessRecord>> pmap = mProcessNames.getMap();
-        for (int i = 0; i < pmap.size(); i++) {
-
-            SparseArray<ProcessRecord> uids = pmap.valueAt(i);
-            for (int j = 0; j < uids.size(); j++) {
-                ProcessRecord proc = uids.valueAt(j);
-                if (proc.userId != tr.userId) {
-                    // Don't kill process for a different user.
-                    continue;
-                }
-                if (proc == mHomeProcess) {
-                    // Don't kill the home process along with tasks from the same package.
-                    continue;
-                }
-                if (!proc.pkgList.containsKey(pkg)) {
-                    // Don't kill process that is not associated with this task.
-                    continue;
-                }
-
-                for (int k = 0; k < proc.activities.size(); k++) {
-                    TaskRecord otherTask = proc.activities.get(k).task;
-                    if (tr.taskId != otherTask.taskId && otherTask.inRecents) {
-                        // Don't kill process(es) that has an activity in a different task that is
-                        // also in recents.
-                        return;
-                    }
-                }
-
-                if (proc.foregroundServices) {
-                    // Don't kill process(es) with foreground service.
-                    return;
-                }
-
-                // Add process to kill list.
-                procsToKill.add(proc);
-            }
-        }
-
-        // Kill the running processes.
-        for (int i = 0; i < procsToKill.size(); i++) {
-            ProcessRecord pr = procsToKill.get(i);
-            if (pr.setSchedGroup == ProcessList.SCHED_GROUP_BACKGROUND
-                    && pr.curReceivers.isEmpty()) {
-                pr.kill("remove task", true);
-            } else {
-                // We delay killing processes that are not in the background or running a receiver.
-                pr.waitingToKill = "remove task";
-            }
-        }
-    }
-
     private void removeTasksByPackageNameLocked(String packageName, int userId) {
         // Remove all tasks with activities in the specified package from the list of recent tasks
         for (int i = mRecentTasks.size() - 1; i >= 0; i--) {
@@ -9667,7 +9593,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             ComponentName cn = tr.intent.getComponent();
             if (cn != null && cn.getPackageName().equals(packageName)) {
                 // If the package name matches, remove the task.
-                removeTaskByIdLocked(tr.taskId, true, REMOVE_FROM_RECENTS);
+                mStackSupervisor.removeTaskByIdLocked(tr.taskId, true, REMOVE_FROM_RECENTS);
             }
         }
     }
@@ -9685,33 +9611,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             final boolean sameComponent = cn != null && cn.getPackageName().equals(packageName)
                     && (filterByClasses == null || filterByClasses.contains(cn.getClassName()));
             if (sameComponent) {
-                removeTaskByIdLocked(tr.taskId, false, REMOVE_FROM_RECENTS);
+                mStackSupervisor.removeTaskByIdLocked(tr.taskId, false, REMOVE_FROM_RECENTS);
             }
         }
-    }
-
-    /**
-     * Removes the task with the specified task id.
-     *
-     * @param taskId Identifier of the task to be removed.
-     * @param killProcess Kill any process associated with the task if possible.
-     * @param removeFromRecents Whether to also remove the task from recents.
-     * @return Returns true if the given task was found and removed.
-     */
-    private boolean removeTaskByIdLocked(int taskId, boolean killProcess,
-            boolean removeFromRecents) {
-        final TaskRecord tr = mStackSupervisor.anyTaskForIdLocked(
-                taskId, !RESTORE_FROM_RECENTS, INVALID_STACK_ID);
-        if (tr != null) {
-            tr.removeTaskActivitiesLocked();
-            cleanUpRemovedTaskLocked(tr, killProcess, removeFromRecents);
-            if (tr.isPersistable) {
-                notifyTaskPersisterLocked(null, true);
-            }
-            return true;
-        }
-        Slog.w(TAG, "Request to remove task ignored for non-existent task " + taskId);
-        return false;
     }
 
     @Override
@@ -9724,15 +9626,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized (this) {
             final long ident = Binder.clearCallingIdentity();
             try {
-                final ActivityStack stack = mStackSupervisor.getStack(stackId);
-                if (stack == null) {
-                    return;
-                }
-                final ArrayList<TaskRecord> tasks = stack.getAllTasks();
-                for (int i = tasks.size() - 1; i >= 0; i--) {
-                    removeTaskByIdLocked(
-                            tasks.get(i).taskId, true /* killProcess */, REMOVE_FROM_RECENTS);
-                }
+                mStackSupervisor.removeStackLocked(stackId);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -9761,7 +9655,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized (this) {
             final long ident = Binder.clearCallingIdentity();
             try {
-                return removeTaskByIdLocked(taskId, true, REMOVE_FROM_RECENTS);
+                return mStackSupervisor.removeTaskByIdLocked(taskId, true, REMOVE_FROM_RECENTS);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -22520,7 +22414,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 long origId = Binder.clearCallingIdentity();
                 try {
                     // We remove the task from recents to preserve backwards
-                    if (!removeTaskByIdLocked(mTaskId, false, REMOVE_FROM_RECENTS)) {
+                    if (!mStackSupervisor.removeTaskByIdLocked(mTaskId, false,
+                            REMOVE_FROM_RECENTS)) {
                         throw new IllegalArgumentException("Unable to find task ID " + mTaskId);
                     }
                 } finally {

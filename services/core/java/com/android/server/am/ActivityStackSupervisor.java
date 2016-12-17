@@ -249,6 +249,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer
     // Don't execute any calls to resume.
     static final boolean DEFER_RESUME = true;
 
+    // Used to indicate that a task is removed it should also be removed from recents.
+    static final boolean REMOVE_FROM_RECENTS = true;
+
     // Activity actions an app cannot start if it uses a permission which is not granted.
     private static final ArrayMap<String, String> ACTION_TO_RUNTIME_PERMISSION =
             new ArrayMap<>();
@@ -2183,7 +2186,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer
                         // Update the return-to to reflect where the pinned stack task was moved
                         // from so that we retain the stack that was previously visible if the
                         // pinned stack is recreated. See moveActivityToPinnedStackLocked().
-                        task.setTaskToReturnTo(getFocusedStack().getStackId() == HOME_STACK_ID
+                        final int focusedStackId = getFocusedStack().getStackId();
+                        task.setTaskToReturnTo(focusedStackId == HOME_STACK_ID || !onTop
                                 ? HOME_ACTIVITY_TYPE : APPLICATION_ACTIVITY_TYPE);
                     }
                     moveTaskToStackLocked(tasks.get(i).taskId,
@@ -2372,6 +2376,141 @@ public class ActivityStackSupervisor extends ConfigurationContainer
         mActivityContainers.put(stackId, activityContainer);
         activityContainer.addToDisplayLocked(activityDisplay, onTop);
         return activityContainer.mStack;
+    }
+
+    /**
+     * Removes the stack associed with the given {@param stackId}.  If the {@param stackId} is the
+     * pinned stack, then its tasks are not explicitly removed when the stack is destroyed, but
+     * instead moved back onto the fullscreen stack.
+     */
+    void removeStackLocked(int stackId) {
+        final ActivityStack stack = getStack(stackId);
+        if (stack == null) {
+            return;
+        }
+
+        final ArrayList<TaskRecord> tasks = stack.getAllTasks();
+        if (stack.getStackId() == PINNED_STACK_ID) {
+            final ActivityStack fullscreenStack = getStack(FULLSCREEN_WORKSPACE_STACK_ID);
+            if (fullscreenStack != null) {
+                final boolean isFullscreenStackVisible =
+                        fullscreenStack.getStackVisibilityLocked(null) == STACK_VISIBLE;
+                for (int i = 0; i < tasks.size(); i++) {
+                    // Insert the task either at the top of the fullscreen stack if it is hidden,
+                    // or just under the top task if it is currently visible
+                    final int insertPosition = isFullscreenStackVisible
+                            ? Math.max(0, fullscreenStack.getChildCount() - 1)
+                            : fullscreenStack.getChildCount();
+                    positionTaskInStackLocked(tasks.get(i).taskId, FULLSCREEN_WORKSPACE_STACK_ID,
+                            insertPosition);
+                }
+                ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
+                resumeFocusedStackTopActivityLocked();
+            } else {
+                // If there is no fullscreen stack, then create the stack and move all the tasks
+                // onto the stack
+                moveTasksToFullscreenStackLocked(PINNED_STACK_ID, false /* onTop */);
+            }
+        } else {
+            for (int i = tasks.size() - 1; i >= 0; i--) {
+                removeTaskByIdLocked(tasks.get(i).taskId, true /* killProcess */,
+                        REMOVE_FROM_RECENTS);
+            }
+        }
+    }
+
+    /**
+     * Removes the task with the specified task id.
+     *
+     * @param taskId Identifier of the task to be removed.
+     * @param killProcess Kill any process associated with the task if possible.
+     * @param removeFromRecents Whether to also remove the task from recents.
+     * @return Returns true if the given task was found and removed.
+     */
+    boolean removeTaskByIdLocked(int taskId, boolean killProcess, boolean removeFromRecents) {
+        final TaskRecord tr = anyTaskForIdLocked(taskId, !RESTORE_FROM_RECENTS, INVALID_STACK_ID);
+        if (tr != null) {
+            tr.removeTaskActivitiesLocked();
+            cleanUpRemovedTaskLocked(tr, killProcess, removeFromRecents);
+            if (tr.isPersistable) {
+                mService.notifyTaskPersisterLocked(null, true);
+            }
+            return true;
+        }
+        Slog.w(TAG, "Request to remove task ignored for non-existent task " + taskId);
+        return false;
+    }
+
+    void cleanUpRemovedTaskLocked(TaskRecord tr, boolean killProcess, boolean removeFromRecents) {
+        if (removeFromRecents) {
+            mRecentTasks.remove(tr);
+            tr.removedFromRecents();
+        }
+        ComponentName component = tr.getBaseIntent().getComponent();
+        if (component == null) {
+            Slog.w(TAG, "No component for base intent of task: " + tr);
+            return;
+        }
+
+        // Find any running services associated with this app and stop if needed.
+        mService.mServices.cleanUpRemovedTaskLocked(tr, component, new Intent(tr.getBaseIntent()));
+
+        if (!killProcess) {
+            return;
+        }
+
+        // Determine if the process(es) for this task should be killed.
+        final String pkg = component.getPackageName();
+        ArrayList<ProcessRecord> procsToKill = new ArrayList<>();
+        ArrayMap<String, SparseArray<ProcessRecord>> pmap = mService.mProcessNames.getMap();
+        for (int i = 0; i < pmap.size(); i++) {
+
+            SparseArray<ProcessRecord> uids = pmap.valueAt(i);
+            for (int j = 0; j < uids.size(); j++) {
+                ProcessRecord proc = uids.valueAt(j);
+                if (proc.userId != tr.userId) {
+                    // Don't kill process for a different user.
+                    continue;
+                }
+                if (proc == mService.mHomeProcess) {
+                    // Don't kill the home process along with tasks from the same package.
+                    continue;
+                }
+                if (!proc.pkgList.containsKey(pkg)) {
+                    // Don't kill process that is not associated with this task.
+                    continue;
+                }
+
+                for (int k = 0; k < proc.activities.size(); k++) {
+                    TaskRecord otherTask = proc.activities.get(k).task;
+                    if (tr.taskId != otherTask.taskId && otherTask.inRecents) {
+                        // Don't kill process(es) that has an activity in a different task that is
+                        // also in recents.
+                        return;
+                    }
+                }
+
+                if (proc.foregroundServices) {
+                    // Don't kill process(es) with foreground service.
+                    return;
+                }
+
+                // Add process to kill list.
+                procsToKill.add(proc);
+            }
+        }
+
+        // Kill the running processes.
+        for (int i = 0; i < procsToKill.size(); i++) {
+            ProcessRecord pr = procsToKill.get(i);
+            if (pr.setSchedGroup == ProcessList.SCHED_GROUP_BACKGROUND
+                    && pr.curReceivers.isEmpty()) {
+                pr.kill("remove task", true);
+            } else {
+                // We delay killing processes that are not in the background or running a receiver.
+                pr.waitingToKill = "remove task";
+            }
+        }
     }
 
     int getNextStackId() {
