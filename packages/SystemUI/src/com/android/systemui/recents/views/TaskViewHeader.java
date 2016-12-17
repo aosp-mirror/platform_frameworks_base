@@ -290,14 +290,16 @@ public class TaskViewHeader extends FrameLayout
                 R.dimen.recents_task_view_header_height,
                 R.dimen.recents_task_view_header_height_tablet_land,
                 R.dimen.recents_task_view_header_height,
-                R.dimen.recents_task_view_header_height_tablet_land);
+                R.dimen.recents_task_view_header_height_tablet_land,
+                R.dimen.recents_grid_task_view_header_height);
         int headerButtonPadding = TaskStackLayoutAlgorithm.getDimensionForDevice(getContext(),
                 R.dimen.recents_task_view_header_button_padding,
                 R.dimen.recents_task_view_header_button_padding,
                 R.dimen.recents_task_view_header_button_padding,
                 R.dimen.recents_task_view_header_button_padding_tablet_land,
                 R.dimen.recents_task_view_header_button_padding,
-                R.dimen.recents_task_view_header_button_padding_tablet_land);
+                R.dimen.recents_task_view_header_button_padding_tablet_land,
+                R.dimen.recents_grid_task_view_header_button_padding);
         if (headerBarHeight != mHeaderBarHeight || headerButtonPadding != mHeaderButtonPadding) {
             mHeaderBarHeight = headerBarHeight;
             mHeaderButtonPadding = headerButtonPadding;
