@@ -87,10 +87,6 @@ static inline SkImageInfo convertPixelFormat(const ANativeWindow_Buffer& buffer)
             colorType = kRGBA_F16_SkColorType;
             alphaType = kPremul_SkAlphaType;
             break;
-        case WINDOW_FORMAT_RGBX_FP16:
-            colorType = kRGBA_F16_SkColorType;
-            alphaType = kOpaque_SkAlphaType;
-            break;
         case WINDOW_FORMAT_RGB_565:
             colorType = kRGB_565_SkColorType;
             alphaType = kOpaque_SkAlphaType;

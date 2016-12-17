@@ -42,6 +42,7 @@ enum class PublicFormat {
     NV16              = 0x10,
     NV21              = 0x11,
     YUY2              = 0x14,
+    RGBA_FP16         = 0x16,
     RAW_SENSOR        = 0x20,
     PRIVATE           = 0x22,
     YUV_420_888       = 0x23,

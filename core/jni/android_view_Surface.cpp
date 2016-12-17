@@ -169,7 +169,6 @@ PublicFormat android_view_Surface_mapHalFormatDataspaceToPublicFormat(
         case HAL_PIXEL_FORMAT_RGBA_8888:
         case HAL_PIXEL_FORMAT_RGBX_8888:
         case HAL_PIXEL_FORMAT_RGBA_FP16:
-        case HAL_PIXEL_FORMAT_RGBX_FP16:
         case HAL_PIXEL_FORMAT_RGB_888:
         case HAL_PIXEL_FORMAT_RGB_565:
         case HAL_PIXEL_FORMAT_Y8:
@@ -285,7 +284,6 @@ static inline SkColorType convertPixelFormat(PixelFormat format) {
     switch (format) {
     case PIXEL_FORMAT_RGBX_8888:    return kN32_SkColorType;
     case PIXEL_FORMAT_RGBA_8888:    return kN32_SkColorType;
-    case PIXEL_FORMAT_RGBX_FP16:    return kRGBA_F16_SkColorType;
     case PIXEL_FORMAT_RGBA_FP16:    return kRGBA_F16_SkColorType;
     case PIXEL_FORMAT_RGB_565:      return kRGB_565_SkColorType;
     default:                        return kUnknown_SkColorType;
