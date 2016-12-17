@@ -49,8 +49,8 @@ public class BitmapFactory {
         /**
          * If set, decode methods that take the Options object will attempt to
          * reuse this bitmap when loading content. If the decode operation
-         * cannot use this bitmap, the decode method will return
-         * <code>null</code> and will throw an IllegalArgumentException. The
+         * cannot use this bitmap, the decode method will throw an
+         * {@link java.lang.IllegalArgumentException}. The
          * current implementation necessitates that the reused bitmap be
          * mutable, and the resulting reused bitmap will continue to remain
          * mutable even when decoding a resource which would normally result in
