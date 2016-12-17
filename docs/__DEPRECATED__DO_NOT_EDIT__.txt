@@ -1,0 +1,16 @@
+### DEPRECATED: DO NOT EDIT ###
+
+The source files for developer.android.com are NO LONGER MAINTAINED HERE, as
+of 12/2016. Migration of content was completed on 10/16/2016.
+
+All authoring of content has been moved to Piper (go/dac-source).
+
+Exceptions and Caveats:
+
+- Reference documentation is still maintained via building of .java source files,
+  so you may continue to update JavaDoc comments to update documentation.
+
+- Sample code documentation is not maintained in Piper, but is published from
+  a separate code repository.
+
+For answers to further questions, please email: android-writers@google.com
