@@ -19,7 +19,7 @@
     android:id="@+id/menu"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#33000000">
+    android:background="#66000000">
 
     <LinearLayout
         android:id="@+id/actions"
@@ -45,7 +45,7 @@
             android:text="@string/pip_phone_dismiss"
             android:background="?android:selectableItemBackground" />
         <TextView
-            android:id="@+id/minimize"
+            android:id="@+id/expand"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -53,7 +53,7 @@
             android:textSize="12sp"
             android:textColor="#ffffffff"
             android:fontFamily="sans-serif"
-            android:text="@string/pip_phone_minimize"
+            android:text="@string/pip_phone_expand"
             android:background="?android:selectableItemBackground" />
     </LinearLayout>
 </FrameLayout>

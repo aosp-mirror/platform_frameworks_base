@@ -174,7 +174,7 @@ public class PipTouchHandler implements TunerService.Tunable {
 
         @Override
         public void onPipDismiss() {
-            animateDismissPinnedStack(mPinnedStackBounds);
+            BackgroundThread.getHandler().post(PipTouchHandler.this::dismissPinnedStack);
         }
     }
 
@@ -328,26 +328,31 @@ public class PipTouchHandler implements TunerService.Tunable {
      * Registers the input consumer.
      */
     private void registerInputConsumer() {
-        final InputChannel inputChannel = new InputChannel();
-        try {
-            mWindowManager.destroyInputConsumer(INPUT_CONSUMER_PIP);
-            mWindowManager.createInputConsumer(INPUT_CONSUMER_PIP, inputChannel);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to create PIP input consumer", e);
+        if (mInputEventReceiver == null) {
+            final InputChannel inputChannel = new InputChannel();
+            try {
+                mWindowManager.destroyInputConsumer(INPUT_CONSUMER_PIP);
+                mWindowManager.createInputConsumer(INPUT_CONSUMER_PIP, inputChannel);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to create PIP input consumer", e);
+            }
+            mInputEventReceiver = new PipInputEventReceiver(inputChannel, Looper.myLooper());
         }
-        mInputEventReceiver = new PipInputEventReceiver(inputChannel, Looper.myLooper());
     }
 
     /**
      * Unregisters the input consumer.
      */
     private void unregisterInputConsumer() {
-        try {
-            mWindowManager.destroyInputConsumer(INPUT_CONSUMER_PIP);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to destroy PIP input consumer", e);
+        if (mInputEventReceiver != null) {
+            try {
+                mWindowManager.destroyInputConsumer(INPUT_CONSUMER_PIP);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to destroy PIP input consumer", e);
+            }
+            mInputEventReceiver.dispose();
+            mInputEventReceiver = null;
         }
-        mInputEventReceiver.dispose();
     }
 
     /**
@@ -761,10 +766,6 @@ public class PipTouchHandler implements TunerService.Tunable {
     private PipTouchGesture mTapThroughGesture = new PipTouchGesture() {
         @Override
         boolean onMove(PipTouchState touchState) {
-            if (mEnableTapThrough && touchState.startedDragging()) {
-                mIsTappingThrough = false;
-                mMenuController.hideMenu();
-            }
             return false;
         }
 
