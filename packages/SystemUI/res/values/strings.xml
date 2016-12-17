@@ -1166,8 +1166,8 @@
     <!-- Name of overview -->
     <string name="overview">Overview</string>
 
-    <!-- Name of demo mode (mode with preset icons for screenshots) -->
-    <string name="demo_mode">Demo mode</string>
+    <!-- Name of System UI demo mode (mode with preset icons for screenshots) -->
+    <string name="demo_mode">System UI demo mode</string>
 
     <!-- Enable demo mode -->
     <string name="enable_demo_mode">Enable demo mode</string>
