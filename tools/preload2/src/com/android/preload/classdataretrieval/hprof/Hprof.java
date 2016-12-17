@@ -171,6 +171,9 @@ public class Hprof implements ClassDataRetriever {
                     arg1.getDevice().getSyncService().pullFile(arg0,
                             target.getAbsoluteFile().toString(), new NullProgressMonitor());
                 } catch (Exception e) {
+                    if (target != null) {
+                        target.delete();
+                    }
                     e.printStackTrace();
                     target = null;
                 }
@@ -189,6 +192,9 @@ public class Hprof implements ClassDataRetriever {
                     out.write(arg0);
                     out.close();
                 } catch (Exception e) {
+                    if (target != null) {
+                        target.delete();
+                    }
                     e.printStackTrace();
                     target = null;
                 }
@@ -215,6 +221,8 @@ public class Hprof implements ClassDataRetriever {
             return analyzeHprof(hprofLocalFile);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            hprofLocalFile.delete();
         }
     }
 }
