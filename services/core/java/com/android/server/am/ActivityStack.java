@@ -1810,9 +1810,10 @@ final class ActivityStack extends ConfigurationContainer {
      */
     private boolean checkKeyguardVisibility(ActivityRecord r, boolean shouldBeVisible,
             boolean isTop) {
+        final boolean isInPinnedStack = r.getStack().getStackId() == PINNED_STACK_ID;
         final boolean keyguardShowing = mStackSupervisor.mKeyguardController.isKeyguardShowing();
         final boolean keyguardLocked = mStackSupervisor.mKeyguardController.isKeyguardLocked();
-        final boolean showWhenLocked = r.hasShowWhenLockedWindows();
+        final boolean showWhenLocked = r.hasShowWhenLockedWindows() && !isInPinnedStack;
         final boolean dismissKeyguard = r.hasDismissKeyguardWindows();
         if (shouldBeVisible) {
             if (dismissKeyguard && mTopDismissingKeyguardActivity == null) {
@@ -1885,10 +1886,13 @@ final class ActivityStack extends ConfigurationContainer {
     private boolean enterPictureInPictureOnActivityInvisible(ActivityRecord r) {
         final boolean hasPinnedStack =
                 mStackSupervisor.getStack(PINNED_STACK_ID) != null;
+        final boolean isKeyguardLocked = mService.isKeyguardLocked();
         if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, " enterPictureInPictureOnInvisible="
                 + r.shouldEnterPictureInPictureOnInvisible()
-                + " hasPinnedStack=" + hasPinnedStack);
-        if (!hasPinnedStack && r.visible && r.shouldEnterPictureInPictureOnInvisible()) {
+                + " hasPinnedStack=" + hasPinnedStack
+                + " isKeyguardLocked=" + isKeyguardLocked);
+        if (!hasPinnedStack && !isKeyguardLocked && r.visible &&
+                r.shouldEnterPictureInPictureOnInvisible()) {
             r.setEnterPipOnMoveToBackground(false);
 
             // Enter picture in picture, but don't move the home stack to the front
