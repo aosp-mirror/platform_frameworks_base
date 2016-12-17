@@ -1929,6 +1929,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     childIndex++) {
                 ExpandableNotificationRow childView = orderedChildren.get(childIndex);
                 if (children == null || !children.contains(childView)) {
+                    if (childView.getParent() != null) {
+                        Log.wtf(TAG, "trying to add a notification child that already has " +
+                                "a parent. class:" + childView.getParent().getClass() +
+                                "\n child: " + childView);
+                        // This shouldn't happen. We can recover by removing it though.
+                        ((ViewGroup) childView.getParent()).removeView(childView);
+                    }
                     mVisualStabilityManager.notifyViewAddition(childView);
                     parent.addChildNotification(childView, childIndex);
                     mStackScroller.notifyGroupChildAdded(childView);
