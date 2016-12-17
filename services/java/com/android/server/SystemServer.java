@@ -345,6 +345,8 @@ public final class SystemServer {
             // Create the system service manager.
             mSystemServiceManager = new SystemServiceManager(mSystemContext);
             LocalServices.addService(SystemServiceManager.class, mSystemServiceManager);
+            // Prepare the thread pool for init tasks that can be parallelized
+            SystemServerInitThreadPool.get();
         } finally {
             traceEnd();  // InitBeforeStartServices
         }
@@ -362,6 +364,7 @@ public final class SystemServer {
         } finally {
             traceEnd();
         }
+        SystemServerInitThreadPool.shutdown();
 
         // For debug builds, log event loop stalls to dropbox for analysis.
         if (StrictMode.conditionallyEnableDebugLogging()) {

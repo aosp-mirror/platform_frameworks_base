@@ -116,12 +116,12 @@ public class PersistentDataBlockService extends SystemService {
     @Override
     public void onStart() {
         // Do init on a separate thread, will join in PHASE_ACTIVITY_MANAGER_READY
-        FgThread.getHandler().post(() -> {
+        SystemServerInitThreadPool.get().submit(() -> {
             enforceChecksumValidity();
             formatIfOemUnlockEnabled();
             publishBinderService(Context.PERSISTENT_DATA_BLOCK_SERVICE, mService);
             mInitDoneSignal.countDown();
-        });
+        }, TAG + ".onStart");
     }
 
     @Override
