@@ -1492,26 +1492,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (hint != null) setHint(hint);
 
         /*
-         * Views are not normally focusable unless specified to be.
+         * Views are not normally clickable unless specified to be.
          * However, TextViews that have input or movement methods *are*
-         * focusable by default.
+         * clickable by default. By setting clickable here, we implicitly set focusable as well
+         * if not overridden by the developer.
          */
         a = context.obtainStyledAttributes(
                 attrs, com.android.internal.R.styleable.View, defStyleAttr, defStyleRes);
-
-        boolean focusable = mMovement != null || getKeyListener() != null;
-        boolean clickable = focusable || isClickable();
-        boolean longClickable = focusable || isLongClickable();
+        boolean canInputOrMove = (mMovement != null || getKeyListener() != null);
+        boolean clickable = canInputOrMove || isClickable();
+        boolean longClickable = canInputOrMove || isLongClickable();
 
         n = a.getIndexCount();
         for (int i = 0; i < n; i++) {
             int attr = a.getIndex(i);
 
             switch (attr) {
-                case com.android.internal.R.styleable.View_focusable:
-                    focusable = a.getBoolean(attr, focusable);
-                    break;
-
                 case com.android.internal.R.styleable.View_clickable:
                     clickable = a.getBoolean(attr, clickable);
                     break;
@@ -1523,7 +1519,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
         a.recycle();
 
-        setFocusable(focusable);
         setClickable(clickable);
         setLongClickable(longClickable);
 
@@ -1968,11 +1963,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private void fixFocusableAndClickableSettings() {
         if (mMovement != null || (mEditor != null && mEditor.mKeyListener != null)) {
-            setFocusable(true);
+            setFocusable(FOCUSABLE);
             setClickable(true);
             setLongClickable(true);
         } else {
-            setFocusable(false);
+            setFocusable(FOCUSABLE_AUTO);
             setClickable(false);
             setLongClickable(false);
         }
@@ -5936,7 +5931,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         mEditor.mTextIsSelectable = selectable;
         setFocusableInTouchMode(selectable);
-        setFocusable(selectable);
+        setFocusable(FOCUSABLE_AUTO);
         setClickable(selectable);
         setLongClickable(selectable);
 

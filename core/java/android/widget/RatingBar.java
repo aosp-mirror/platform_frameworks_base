@@ -150,7 +150,11 @@ public class RatingBar extends AbsSeekBar {
      */
     public void setIsIndicator(boolean isIndicator) {
         mIsUserSeekable = !isIndicator;
-        setFocusable(!isIndicator);
+        if (isIndicator) {
+            setFocusable(FOCUSABLE_AUTO);
+        } else {
+            setFocusable(FOCUSABLE);
+        }
     }
 
     /**
