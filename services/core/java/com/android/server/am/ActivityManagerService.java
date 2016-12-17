@@ -6710,6 +6710,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    /**
+     * @return whther the keyguard is currently locked.
+     */
+    boolean isKeyguardLocked() {
+        return mKeyguardController.isKeyguardLocked();
+    }
+
     final void finishBooting() {
         synchronized (this) {
             if (!mBootAnimationComplete) {
@@ -7557,10 +7564,40 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final ActivityRecord r = ensureValidPictureInPictureActivityLocked(
                         "enterPictureInPictureMode", token, aspectRatio, checkAspectRatio,
                         true /* checkActivityVisibility */);
+                final Runnable enterPipRunnable = () -> {
+                    r.pictureInPictureArgs.aspectRatio = aspectRatio;
+                    enterPictureInPictureModeLocked(r, displayId, r.pictureInPictureArgs,
+                            true /* moveHomeStackToFront */, "enterPictureInPictureMode");
+                };
 
-                r.pictureInPictureArgs.aspectRatio = aspectRatio;
-                enterPictureInPictureModeLocked(r, displayId, r.pictureInPictureArgs,
-                        true /* moveHomeStackToFront */, "enterPictureInPictureMode");
+                if (isKeyguardLocked()) {
+                    // If the keyguard is showing or occluded, then try and dismiss it before
+                    // entering picture-in-picture (this will prompt the user to authenticate if the
+                    // device is currently locked).
+                    try {
+                        dismissKeyguard(token, new IKeyguardDismissCallback.Stub() {
+                            @Override
+                            public void onDismissError() throws RemoteException {
+                                // Do nothing
+                            }
+
+                            @Override
+                            public void onDismissSucceeded() throws RemoteException {
+                                mHandler.post(enterPipRunnable);
+                            }
+
+                            @Override
+                            public void onDismissCancelled() throws RemoteException {
+                                // Do nothing
+                            }
+                        });
+                    } catch (RemoteException e) {
+                        // Local call
+                    }
+                } else {
+                    // Enter picture in picture immediately otherwise
+                    enterPipRunnable.run();
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

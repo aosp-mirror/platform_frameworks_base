@@ -3592,17 +3592,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             final boolean dismissShade,
             final boolean afterKeyguardGone,
             final boolean deferred) {
-        final Runnable dismissAction = () -> {
-            if (runnable != null) {
-                AsyncTask.execute(runnable);
-            }
-        };
         dismissKeyguardThenExecute(() -> {
-            if (mStatusBarKeyguardViewManager.isShowing()
-                    && mStatusBarKeyguardViewManager.isOccluded()) {
-                mStatusBarKeyguardViewManager.addAfterKeyguardGoneRunnable(runnable);
-            } else {
-                dismissAction.run();
+            if (runnable != null) {
+                if (mStatusBarKeyguardViewManager.isShowing()
+                        && mStatusBarKeyguardViewManager.isOccluded()) {
+                    mStatusBarKeyguardViewManager.addAfterKeyguardGoneRunnable(runnable);
+                } else {
+                    AsyncTask.execute(runnable);
+                }
             }
             if (dismissShade) {
                 if (mExpandedVisible) {
