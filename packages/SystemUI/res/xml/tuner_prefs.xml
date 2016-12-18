@@ -121,12 +121,10 @@
 
     </PreferenceScreen>
 
-    <!--
     <Preference
         android:key="nav_bar"
         android:title="@string/nav_bar"
         android:fragment="com.android.systemui.tuner.NavBarTuner" />
-    -->
 
     <Preference
             android:key="other"
