@@ -294,8 +294,17 @@
     <family lang="und-Olck">
         <font weight="400" style="normal">NotoSansOlChiki-Regular.ttf</font>
     </family>
+    <family lang="und-Phag">
+        <font weight="400" style="normal">NotoSansPhagsPa-Regular.ttf</font>
+    </family>
     <family lang="und-Rjng">
         <font weight="400" style="normal">NotoSansRejang-Regular.ttf</font>
+    </family>
+    <family lang="und-Runr">
+        <font weight="400" style="normal">NotoSansRunic-Regular.ttf</font>
+    </family>
+    <family lang="und-Samr">
+        <font weight="400" style="normal">NotoSansSamaritan-Regular.ttf</font>
     </family>
     <family lang="und-Saur">
         <font weight="400" style="normal">NotoSansSaurashtra-Regular.ttf</font>
@@ -306,8 +315,18 @@
     <family lang="und-Sylo">
         <font weight="400" style="normal">NotoSansSylotiNagri-Regular.ttf</font>
     </family>
+    <!-- Esrangela should precede Eastern and Western Syriac, since it's our default form. -->
     <family lang="und-Syre">
         <font weight="400" style="normal">NotoSansSyriacEstrangela-Regular.ttf</font>
+    </family>
+    <family lang="und-Syrn">
+        <font weight="400" style="normal">NotoSansSyriacEastern-Regular.ttf</font>
+    </family>
+    <family lang="und-Syrj">
+        <font weight="400" style="normal">NotoSansSyriacWestern-Regular.ttf</font>
+    </family>
+    <family lang="und-Tglg">
+        <font weight="400" style="normal">NotoSansTagalog-Regular.ttf</font>
     </family>
     <family lang="und-Tagb">
         <font weight="400" style="normal">NotoSansTagbanwa-Regular.ttf</font>
