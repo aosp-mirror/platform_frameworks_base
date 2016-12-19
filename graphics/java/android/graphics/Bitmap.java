@@ -1402,10 +1402,14 @@ public final class Bitmap implements Parcelable {
      * @param y    The y coordinate (0...height-1) of the pixel to return
      * @return     The argb {@link Color} at the specified coordinate
      * @throws IllegalArgumentException if x, y exceed the bitmap's bounds
+     * @throws IllegalStateException if the bitmap's config is {@link Config#HARDWARE}
      */
     @ColorInt
     public int getPixel(int x, int y) {
         checkRecycled("Can't call getPixel() on a recycled bitmap");
+        if (getConfig() == Config.HARDWARE) {
+            throw new IllegalStateException("Can't access pixels in hardware Bitmaps");
+        }
         checkPixelAccess(x, y);
         return nativeGetPixel(mNativePtr, x, y);
     }
@@ -1432,10 +1436,14 @@ public final class Bitmap implements Parcelable {
      *         bounds of the bitmap, or if abs(stride) < width.
      * @throws ArrayIndexOutOfBoundsException if the pixels array is too small
      *         to receive the specified number of pixels.
+     * @throws IllegalStateException if the bitmap's config is {@link Config#HARDWARE}
      */
     public void getPixels(@ColorInt int[] pixels, int offset, int stride,
                           int x, int y, int width, int height) {
         checkRecycled("Can't call getPixels() on a recycled bitmap");
+        if (getConfig() == Config.HARDWARE) {
+            throw new IllegalStateException("Can't access pixels in hardware Bitmaps");
+        }
         if (width == 0 || height == 0) {
             return; // nothing to do
         }
