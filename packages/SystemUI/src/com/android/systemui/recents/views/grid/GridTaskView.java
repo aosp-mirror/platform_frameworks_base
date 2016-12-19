@@ -23,6 +23,10 @@ import com.android.systemui.recents.views.AnimateableViewBounds;
 import com.android.systemui.recents.views.TaskView;
 
 public class GridTaskView extends TaskView {
+
+    /** The height, in pixels, of the header view. */
+    private int mHeaderHeight;
+
     public GridTaskView(Context context) {
         this(context, null);
     }
@@ -37,11 +41,31 @@ public class GridTaskView extends TaskView {
 
     public GridTaskView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        mHeaderHeight = context.getResources().getDimensionPixelSize(
+                R.dimen.recents_task_view_header_height);
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        // Show the full thumbnail and don't overlap with the header.
+        mThumbnailView.setSizeToFit(true);
+        mThumbnailView.setOverlayHeaderOnThumbnailActionBar(false);
+        mThumbnailView.updateThumbnailScale();
+        mThumbnailView.setTranslationY(mHeaderHeight);
     }
 
     @Override
     protected AnimateableViewBounds createOutlineProvider() {
         return new AnimateableGridViewBounds(this, mContext.getResources().getDimensionPixelSize(
             R.dimen.recents_task_view_shadow_rounded_corners_radius));
+    }
+
+    @Override
+    protected void onConfigurationChanged() {
+        super.onConfigurationChanged();
+        mHeaderHeight = mContext.getResources().getDimensionPixelSize(
+                R.dimen.recents_task_view_header_height);
+        mThumbnailView.setTranslationY(mHeaderHeight);
     }
 }

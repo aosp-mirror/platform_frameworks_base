@@ -148,7 +148,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     private ArrayList<Animator> mTmpAnimators = new ArrayList<>();
 
     @ViewDebug.ExportedProperty(deepExport=true, prefix="thumbnail_")
-    TaskViewThumbnail mThumbnailView;
+    protected TaskViewThumbnail mThumbnailView;
     @ViewDebug.ExportedProperty(deepExport=true, prefix="header_")
     TaskViewHeader mHeaderView;
     private View mActionButtonView;
@@ -239,7 +239,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     /**
      * Update the task view when the configuration changes.
      */
-    void onConfigurationChanged() {
+    protected void onConfigurationChanged() {
         mHeaderView.onConfigurationChanged();
     }
 
