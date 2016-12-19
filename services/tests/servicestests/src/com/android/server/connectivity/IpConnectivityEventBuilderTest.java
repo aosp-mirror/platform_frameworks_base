@@ -369,7 +369,8 @@ public class IpConnectivityEventBuilderTest extends TestCase {
 
     static void verifySerialization(String want, ConnectivityMetricsEvent... input) {
         try {
-            byte[] got = IpConnectivityEventBuilder.serialize(0, Arrays.asList(input));
+            byte[] got = IpConnectivityEventBuilder.serialize(0,
+                    IpConnectivityEventBuilder.toProto(Arrays.asList(input)));
             IpConnectivityLog log = IpConnectivityLog.parseFrom(got);
             assertEquals(want, log.toString());
         } catch (Exception e) {
