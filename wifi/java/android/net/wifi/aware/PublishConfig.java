@@ -33,9 +33,9 @@ import java.util.List;
 /**
  * Defines the configuration of a Aware publish session. Built using
  * {@link PublishConfig.Builder}. A publish session is created using
- * {@link WifiAwareSession#publish(PublishConfig, WifiAwareDiscoverySessionCallback,
+ * {@link WifiAwareSession#publish(PublishConfig, DiscoverySessionCallback,
  * android.os.Handler)} or updated using
- * {@link WifiAwarePublishDiscoverySession#updatePublish(PublishConfig)}.
+ * {@link PublishDiscoverySession#updatePublish(PublishConfig)}.
  *
  * @hide PROPOSED_AWARE_API
  */
@@ -184,7 +184,7 @@ public final class PublishConfig implements Parcelable {
      *
      * @hide
      */
-    public void assertValid(WifiAwareCharacteristics characteristics)
+    public void assertValid(Characteristics characteristics)
             throws IllegalArgumentException {
         WifiAwareUtils.validateServiceName(mServiceName);
 
@@ -322,12 +322,12 @@ public final class PublishConfig implements Parcelable {
          * Sets the number of times an unsolicited (configured using
          * {@link PublishConfig.Builder#setPublishType(int)}) publish session
          * will be broadcast. When the count is reached an event will be
-         * generated for {@link WifiAwareDiscoverySessionCallback#onSessionTerminated(int)}
-         * with {@link WifiAwareDiscoverySessionCallback#TERMINATE_REASON_DONE} [unless
+         * generated for {@link DiscoverySessionCallback#onSessionTerminated(int)}
+         * with {@link DiscoverySessionCallback#TERMINATE_REASON_DONE} [unless
          * {@link #setTerminateNotificationEnabled(boolean)} disables the callback].
          * <p>
          *     Optional. 0 by default - indicating the session doesn't terminate on its own.
-         *     Session will be terminated when {@link WifiAwareDiscoveryBaseSession#destroy()} is
+         *     Session will be terminated when {@link DiscoverySession#destroy()} is
          *     called.
          *
          * @param publishCount Number of publish packets to broadcast.
@@ -348,12 +348,12 @@ public final class PublishConfig implements Parcelable {
          * {@link PublishConfig.Builder#setPublishType(int)}) publish session
          * will be alive - broadcasting a packet. When the TTL is reached
          * an event will be generated for
-         * {@link WifiAwareDiscoverySessionCallback#onSessionTerminated(int)} with
-         * {@link WifiAwareDiscoverySessionCallback#TERMINATE_REASON_DONE}  [unless
+         * {@link DiscoverySessionCallback#onSessionTerminated(int)} with
+         * {@link DiscoverySessionCallback#TERMINATE_REASON_DONE}  [unless
          * {@link #setTerminateNotificationEnabled(boolean)} disables the callback].
          * <p>
          *     Optional. 0 by default - indicating the session doesn't terminate on its own.
-         *     Session will be terminated when {@link WifiAwareDiscoveryBaseSession#destroy()} is
+         *     Session will be terminated when {@link DiscoverySession#destroy()} is
          *     called.
          *
          * @param ttlSec Lifetime of a publish session in seconds.
@@ -371,7 +371,7 @@ public final class PublishConfig implements Parcelable {
 
         /**
          * Configure whether a publish terminate notification
-         * {@link WifiAwareDiscoverySessionCallback#onSessionTerminated(int)} is reported
+         * {@link DiscoverySessionCallback#onSessionTerminated(int)} is reported
          * back to the callback.
          *
          * @param enable If true the terminate callback will be called when the
