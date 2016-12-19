@@ -24,7 +24,10 @@ import com.android.internal.util.XmlUtils;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -58,7 +61,6 @@ import android.util.jar.StrictJarFile;
 import android.view.Gravity;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -85,7 +87,6 @@ import java.util.zip.ZipEntry;
 import libcore.io.IoUtils;
 
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
-import static android.content.pm.ActivityInfo.FLAG_IMMERSIVE;
 import static android.content.pm.ActivityInfo.FLAG_ON_TOP_LAUNCHER;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY;
@@ -2103,63 +2104,22 @@ public class PackageParser {
 
                     sa.recycle();
 
-                    if (minCode != null) {
-                        boolean allowedCodename = false;
-                        for (String codename : SDK_CODENAMES) {
-                            if (minCode.equals(codename)) {
-                                allowedCodename = true;
-                                break;
-                            }
-                        }
-                        if (!allowedCodename) {
-                            if (SDK_CODENAMES.length > 0) {
-                                outError[0] = "Requires development platform " + minCode
-                                        + " (current platform is any of "
-                                        + Arrays.toString(SDK_CODENAMES) + ")";
-                            } else {
-                                outError[0] = "Requires development platform " + minCode
-                                        + " but this is a release platform.";
-                            }
-                            mParseError = PackageManager.INSTALL_FAILED_OLDER_SDK;
-                            return null;
-                        }
-                        pkg.applicationInfo.minSdkVersion =
-                                android.os.Build.VERSION_CODES.CUR_DEVELOPMENT;
-                    } else if (minVers > SDK_VERSION) {
-                        outError[0] = "Requires newer sdk version #" + minVers
-                                + " (current version is #" + SDK_VERSION + ")";
+                    final int minSdkVersion = PackageParser.computeMinSdkVersion(minVers, minCode,
+                            SDK_VERSION, SDK_CODENAMES, outError);
+                    if (minSdkVersion < 0) {
                         mParseError = PackageManager.INSTALL_FAILED_OLDER_SDK;
                         return null;
-                    } else {
-                        pkg.applicationInfo.minSdkVersion = minVers;
                     }
 
-                    if (targetCode != null) {
-                        boolean allowedCodename = false;
-                        for (String codename : SDK_CODENAMES) {
-                            if (targetCode.equals(codename)) {
-                                allowedCodename = true;
-                                break;
-                            }
-                        }
-                        if (!allowedCodename) {
-                            if (SDK_CODENAMES.length > 0) {
-                                outError[0] = "Requires development platform " + targetCode
-                                        + " (current platform is any of "
-                                        + Arrays.toString(SDK_CODENAMES) + ")";
-                            } else {
-                                outError[0] = "Requires development platform " + targetCode
-                                        + " but this is a release platform.";
-                            }
-                            mParseError = PackageManager.INSTALL_FAILED_OLDER_SDK;
-                            return null;
-                        }
-                        // If the code matches, it definitely targets this SDK.
-                        pkg.applicationInfo.targetSdkVersion
-                                = android.os.Build.VERSION_CODES.CUR_DEVELOPMENT;
-                    } else {
-                        pkg.applicationInfo.targetSdkVersion = targetVers;
+                    final int targetSdkVersion = PackageParser.computeTargetSdkVersion(targetVers,
+                            targetCode, SDK_VERSION, SDK_CODENAMES, outError);
+                    if (targetSdkVersion < 0) {
+                        mParseError = PackageManager.INSTALL_FAILED_OLDER_SDK;
+                        return null;
                     }
+
+                    pkg.applicationInfo.minSdkVersion = minSdkVersion;
+                    pkg.applicationInfo.targetSdkVersion = targetSdkVersion;
                 }
 
                 XmlUtils.skipCurrentTag(parser);
@@ -2405,6 +2365,137 @@ public class PackageParser {
         }
 
         return pkg;
+    }
+
+    /**
+     * Computes the targetSdkVersion to use at runtime. If the package is not
+     * compatible with this platform, populates {@code outError[0]} with an
+     * error message.
+     * <p>
+     * If {@code targetCode} is not specified, e.g. the value is {@code null},
+     * then the {@code targetVers} will be returned unmodified.
+     * <p>
+     * Otherwise, the behavior varies based on whether the current platform
+     * is a pre-release version, e.g. the {@code platformSdkCodenames} array
+     * has length > 0:
+     * <ul>
+     * <li>If this is a pre-release platform and the value specified by
+     * {@code targetCode} is contained within the array of allowed pre-release
+     * codenames, this method will return {@link Build.VERSION_CODES#CUR_DEVELOPMENT}.
+     * <li>If this is a released platform, this method will return -1 to
+     * indicate that the package is not compatible with this platform.
+     * </ul>
+     *
+     * @param targetVers targetSdkVersion number, if specified in the
+     *                   application manifest, or 0 otherwise
+     * @param targetCode targetSdkVersion code, if specified in the application
+     *                   manifest, or {@code null} otherwise
+     * @param platformSdkVersion platform SDK version number, typically
+     *                           Build.VERSION.SDK_INT
+     * @param platformSdkCodenames array of allowed pre-release SDK codenames
+     *                             for this platform
+     * @param outError output array to populate with error, if applicable
+     * @return the targetSdkVersion to use at runtime, or -1 if the package is
+     *         not compatible with this platform
+     * @hide Exposed for unit testing only.
+     */
+    @TestApi
+    public static int computeTargetSdkVersion(@IntRange(from = 0) int targetVers,
+            @Nullable String targetCode, @IntRange(from = 1) int platformSdkVersion,
+            @NonNull String[] platformSdkCodenames, @NonNull String[] outError) {
+        // If it's a release SDK, return the version number unmodified.
+        if (targetCode == null) {
+            return targetVers;
+        }
+
+        // If it's a pre-release SDK and the codename matches this platform, it
+        // definitely targets this SDK.
+        if (ArrayUtils.contains(platformSdkCodenames, targetCode)) {
+            return Build.VERSION_CODES.CUR_DEVELOPMENT;
+        }
+
+        // Otherwise, we're looking at an incompatible pre-release SDK.
+        if (platformSdkCodenames.length > 0) {
+            outError[0] = "Requires development platform " + targetCode
+                    + " (current platform is any of "
+                    + Arrays.toString(platformSdkCodenames) + ")";
+        } else {
+            outError[0] = "Requires development platform " + targetCode
+                    + " but this is a release platform.";
+        }
+        return -1;
+    }
+
+    /**
+     * Computes the minSdkVersion to use at runtime. If the package is not
+     * compatible with this platform, populates {@code outError[0]} with an
+     * error message.
+     * <p>
+     * If {@code minCode} is not specified, e.g. the value is {@code null},
+     * then behavior varies based on the {@code platformSdkVersion}:
+     * <ul>
+     * <li>If the platform SDK version is greater than or equal to the
+     * {@code minVers}, returns the {@code mniVers} unmodified.
+     * <li>Otherwise, returns -1 to indicate that the package is not
+     * compatible with this platform.
+     * </ul>
+     * <p>
+     * Otherwise, the behavior varies based on whether the current platform
+     * is a pre-release version, e.g. the {@code platformSdkCodenames} array
+     * has length > 0:
+     * <ul>
+     * <li>If this is a pre-release platform and the value specified by
+     * {@code targetCode} is contained within the array of allowed pre-release
+     * codenames, this method will return {@link Build.VERSION_CODES#CUR_DEVELOPMENT}.
+     * <li>If this is a released platform, this method will return -1 to
+     * indicate that the package is not compatible with this platform.
+     * </ul>
+     *
+     * @param minVers minSdkVersion number, if specified in the application
+     *                manifest, or 1 otherwise
+     * @param minCode minSdkVersion code, if specified in the application
+     *                manifest, or {@code null} otherwise
+     * @param platformSdkVersion platform SDK version number, typically
+     *                           Build.VERSION.SDK_INT
+     * @param platformSdkCodenames array of allowed prerelease SDK codenames
+     *                             for this platform
+     * @param outError output array to populate with error, if applicable
+     * @return the minSdkVersion to use at runtime, or -1 if the package is not
+     *         compatible with this platform
+     * @hide Exposed for unit testing only.
+     */
+    @TestApi
+    public static int computeMinSdkVersion(@IntRange(from = 1) int minVers,
+            @Nullable String minCode, @IntRange(from = 1) int platformSdkVersion,
+            @NonNull String[] platformSdkCodenames, @NonNull String[] outError) {
+        // If it's a release SDK, make sure we meet the minimum SDK requirement.
+        if (minCode == null) {
+            if (minVers <= platformSdkVersion) {
+                return minVers;
+            }
+
+            // We don't meet the minimum SDK requirement.
+            outError[0] = "Requires newer sdk version #" + minVers
+                    + " (current version is #" + platformSdkVersion + ")";
+            return -1;
+        }
+
+        // If it's a pre-release SDK and the codename matches this platform, we
+        // definitely meet the minimum SDK requirement.
+        if (ArrayUtils.contains(platformSdkCodenames, minCode)) {
+            return Build.VERSION_CODES.CUR_DEVELOPMENT;
+        }
+
+        // Otherwise, we're looking at an incompatible pre-release SDK.
+        if (platformSdkCodenames.length > 0) {
+            outError[0] = "Requires development platform " + minCode
+                    + " (current platform is any of "
+                    + Arrays.toString(platformSdkCodenames) + ")";
+        } else {
+            outError[0] = "Requires development platform " + minCode
+                    + " but this is a release platform.";
+        }
+        return -1;
     }
 
     private FeatureInfo parseUsesFeature(Resources res, AttributeSet attrs) {
