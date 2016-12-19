@@ -26,7 +26,7 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_PRIVILEGED_MODULE := true
 
 LOCAL_JAVA_LIBRARIES := \
-    junit4-target \
+    junit \
     platform-robolectric-prebuilt
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
@@ -55,7 +55,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     truth-prebuilt
 
 LOCAL_JAVA_LIBRARIES := \
-    junit4-target \
+    junit \
     platform-robolectric-prebuilt
 
 LOCAL_INSTRUMENTATION_FOR := SettingsLibShell
