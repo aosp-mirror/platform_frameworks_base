@@ -142,7 +142,7 @@ public class NetworkNotificationManager {
 
         if (DBG) {
             Slog.d(TAG, String.format(
-                    "showNotification tag=%s event=%s transport=%s extraInfo=%d highPrioriy=%s",
+                    "showNotification tag=%s event=%s transport=%s extraInfo=%s highPrioriy=%s",
                     tag, nameOf(eventId), getTransportName(transportType), extraInfo, highPriority));
         }
 
