@@ -18,7 +18,10 @@ package com.android.systemui.recents.views.grid;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Point;
 import android.graphics.Rect;
+import android.view.WindowManager;
+
 import com.android.systemui.R;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.views.TaskStackLayoutAlgorithm;
@@ -26,14 +29,28 @@ import com.android.systemui.recents.views.TaskViewTransform;
 
 public class TaskGridLayoutAlgorithm  {
 
+    private final String TAG = "TaskGridLayoutAlgorithm";
+    private final int MAX_LAYOUT_TASK_COUNT = 8;
+
+    /** The horizontal padding around the whole recents view. */
     private int mPaddingLeftRight;
+    /** The vertical padding around the whole recents view. */
     private int mPaddingTopBottom;
+    /** The padding between task views. */
     private int mPaddingTaskView;
 
     private Rect mDisplayRect;
     private Rect mWindowRect;
+    private Point mScreenSize = new Point();
 
     private Rect mTaskGridRect;
+
+    /** The height, in pixels, of each task view's title bar. */
+    private int mTitleBarHeight;
+
+    /** The aspect ratio of each task thumbnail, without the title bar. */
+    private float mAppAspectRatio;
+    private Rect mSystemInsets = new Rect();
 
     public TaskGridLayoutAlgorithm(Context context) {
         reloadOnConfigurationChange(context);
@@ -46,43 +63,87 @@ public class TaskGridLayoutAlgorithm  {
         mPaddingTaskView = res.getDimensionPixelSize(R.dimen.recents_grid_padding_task_view);
 
         mTaskGridRect = new Rect();
+        mTitleBarHeight = res.getDimensionPixelSize(R.dimen.recents_task_view_header_height);
+
+        WindowManager windowManager = (WindowManager) context
+                .getSystemService(Context.WINDOW_SERVICE);
+        windowManager.getDefaultDisplay().getRealSize(mScreenSize);
+
+        updateAppAspectRatio();
     }
 
-    public TaskViewTransform getTransform(int taskIndex, int taskAmount,
+    public TaskViewTransform getTransform(int taskIndex, int taskCount,
         TaskViewTransform transformOut, TaskStackLayoutAlgorithm stackLayout) {
 
-        int taskPerLine = taskAmount < 2 ? 1 : (
-            taskAmount < 5 ? 2 : 3);
+        int layoutTaskCount = Math.min(MAX_LAYOUT_TASK_COUNT, taskCount);
 
-        int taskWidth = (mDisplayRect.width() - mPaddingLeftRight * 2
-            - mPaddingTaskView * (taskPerLine - 1)) / taskPerLine;
-        int taskHeight = taskWidth * mDisplayRect.height() / mDisplayRect.width();
+        // We also need to invert the index in order to display the most recent tasks first.
+        int taskLayoutIndex = taskCount - taskIndex - 1;
+
+        int tasksPerLine = layoutTaskCount < 2 ? 1 : (
+                layoutTaskCount < 5 ? 2 : (
+                        layoutTaskCount < 7 ? 3 : 4));
+        int lines = layoutTaskCount < 3 ? 1 : 2;
+
+        int taskWidth, taskHeight;
+        int maxTaskWidth = (mDisplayRect.width() - 2 * mPaddingLeftRight
+                - (tasksPerLine - 1) * mPaddingTaskView) / tasksPerLine;
+        int maxTaskHeight = (mDisplayRect.height() - 2 * mPaddingTopBottom
+                - (lines - 1) * mPaddingTaskView) / lines;
+
+        if (maxTaskHeight >= maxTaskWidth / mAppAspectRatio + mTitleBarHeight) {
+            // Width bound.
+            taskWidth = maxTaskWidth;
+            taskHeight = (int) (maxTaskWidth / mAppAspectRatio + mTitleBarHeight);
+        } else {
+            // Height bound.
+            taskHeight = maxTaskHeight;
+            taskWidth = (int) ((taskHeight - mTitleBarHeight) * mAppAspectRatio);
+        }
+        int emptySpaceX = mDisplayRect.width() - 2 * mPaddingLeftRight
+                - (tasksPerLine * taskWidth) - (tasksPerLine - 1) * mPaddingTaskView;
+        int emptySpaceY = mDisplayRect.height() - 2 * mPaddingTopBottom
+                - (lines * taskHeight) - (lines - 1) * mPaddingTaskView;
+
         mTaskGridRect.set(0, 0, taskWidth, taskHeight);
 
-        int xIndex = taskIndex % taskPerLine;
-        int yIndex = taskIndex / taskPerLine;
-        int x = mPaddingLeftRight + (taskWidth + mPaddingTaskView) * xIndex;
-        int y = mPaddingTopBottom + (taskHeight + mPaddingTaskView) * yIndex;
+        int xIndex = taskLayoutIndex % tasksPerLine;
+        int yIndex = taskLayoutIndex / tasksPerLine;
+        int x = emptySpaceX / 2 + mPaddingLeftRight + (taskWidth + mPaddingTaskView) * xIndex;
+        int y = emptySpaceY / 2 + mPaddingTopBottom + (taskHeight + mPaddingTaskView) * yIndex;
         float z = stackLayout.mMaxTranslationZ;
 
         float dimAlpha = 0f;
         float viewOutlineAlpha = 0f;
+        boolean isTaskViewVisible = (taskLayoutIndex < MAX_LAYOUT_TASK_COUNT);
 
         // Fill out the transform
         transformOut.scale = 1f;
-        transformOut.alpha = 1f;
+        transformOut.alpha = isTaskViewVisible ? 1f : 0f;
         transformOut.translationZ = z;
         transformOut.dimAlpha = dimAlpha;
         transformOut.viewOutlineAlpha = viewOutlineAlpha;
         transformOut.rect.set(mTaskGridRect);
         transformOut.rect.offset(x, y);
         Utilities.scaleRectAboutCenter(transformOut.rect, transformOut.scale);
-        transformOut.visible = true;
+        // We only show the 8 most recent tasks.
+        transformOut.visible = isTaskViewVisible;
         return transformOut;
     }
 
     public void initialize(Rect displayRect, Rect windowRect) {
         mDisplayRect = displayRect;
         mWindowRect = windowRect;
+    }
+
+    public void setSystemInsets(Rect systemInsets) {
+        mSystemInsets = systemInsets;
+        updateAppAspectRatio();
+    }
+
+    private void updateAppAspectRatio() {
+        int usableWidth = mScreenSize.x - mSystemInsets.left - mSystemInsets.right;
+        int usableHeight = mScreenSize.y - mSystemInsets.top - mSystemInsets.bottom;
+        mAppAspectRatio = (float) usableWidth / (float) usableHeight;
     }
 }
