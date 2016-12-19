@@ -168,7 +168,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     /** Touch preprocessing for handling below */
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         // Pass through to swipe helper if we are swiping
-        mInterceptedBySwipeHelper = mSwipeHelper.onInterceptTouchEvent(ev);
+        mInterceptedBySwipeHelper = isSwipingEnabled() && mSwipeHelper.onInterceptTouchEvent(ev);
         if (mInterceptedBySwipeHelper) {
             return true;
         }
@@ -679,5 +679,12 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
      */
     public float getScaledDismissSize() {
         return 1.5f * Math.max(mSv.getWidth(), mSv.getHeight());
+    }
+
+    /**
+     * Returns whether swiping is enabled.
+     */
+    private boolean isSwipingEnabled() {
+        return !mSv.useGridLayout();
     }
 }
