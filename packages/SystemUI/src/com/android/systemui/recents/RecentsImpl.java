@@ -576,7 +576,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 R.dimen.recents_task_view_header_height,
                 R.dimen.recents_task_view_header_height_tablet_land,
                 R.dimen.recents_task_view_header_height,
-                R.dimen.recents_task_view_header_height_tablet_land);
+                R.dimen.recents_task_view_header_height_tablet_land,
+                R.dimen.recents_grid_task_view_header_height);
 
         LayoutInflater inflater = LayoutInflater.from(mContext);
         mHeaderBar = (TaskViewHeader) inflater.inflate(R.layout.recents_task_view_header,

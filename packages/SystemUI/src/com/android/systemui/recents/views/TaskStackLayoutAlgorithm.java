@@ -370,10 +370,12 @@ public class TaskStackLayoutAlgorithm {
                 R.dimen.recents_layout_initial_top_offset_tablet,
                 R.dimen.recents_layout_initial_top_offset_tablet,
                 R.dimen.recents_layout_initial_top_offset_tablet,
+                R.dimen.recents_layout_initial_top_offset_tablet,
                 R.dimen.recents_layout_initial_top_offset_tablet);
         mBaseInitialBottomOffset = getDimensionForDevice(context,
                 R.dimen.recents_layout_initial_bottom_offset_phone_port,
                 R.dimen.recents_layout_initial_bottom_offset_phone_land,
+                R.dimen.recents_layout_initial_bottom_offset_tablet,
                 R.dimen.recents_layout_initial_bottom_offset_tablet,
                 R.dimen.recents_layout_initial_bottom_offset_tablet,
                 R.dimen.recents_layout_initial_bottom_offset_tablet,
@@ -384,11 +386,13 @@ public class TaskStackLayoutAlgorithm {
         mBaseTopMargin = getDimensionForDevice(context,
                 R.dimen.recents_layout_top_margin_phone,
                 R.dimen.recents_layout_top_margin_tablet,
-                R.dimen.recents_layout_top_margin_tablet_xlarge);
+                R.dimen.recents_layout_top_margin_tablet_xlarge,
+                R.dimen.recents_layout_top_margin_tablet);
         mBaseSideMargin = getDimensionForDevice(context,
                 R.dimen.recents_layout_side_margin_phone,
                 R.dimen.recents_layout_side_margin_tablet,
-                R.dimen.recents_layout_side_margin_tablet_xlarge);
+                R.dimen.recents_layout_side_margin_tablet_xlarge,
+                R.dimen.recents_layout_side_margin_tablet);
         mBaseBottomMargin = res.getDimensionPixelSize(R.dimen.recents_layout_bottom_margin);
         mFreeformStackGap =
                 res.getDimensionPixelSize(R.dimen.recents_freeform_layout_bottom_margin);
@@ -1100,9 +1104,9 @@ public class TaskStackLayoutAlgorithm {
      * Retrieves resources that are constant regardless of the current configuration of the device.
      */
     public static int getDimensionForDevice(Context ctx, int phoneResId,
-            int tabletResId, int xlargeTabletResId) {
+            int tabletResId, int xlargeTabletResId, int gridLayoutResId) {
         return getDimensionForDevice(ctx, phoneResId, phoneResId, tabletResId, tabletResId,
-                xlargeTabletResId, xlargeTabletResId);
+                xlargeTabletResId, xlargeTabletResId, gridLayoutResId);
     }
 
     /**
@@ -1110,12 +1114,14 @@ public class TaskStackLayoutAlgorithm {
      */
     public static int getDimensionForDevice(Context ctx, int phonePortResId, int phoneLandResId,
             int tabletPortResId, int tabletLandResId, int xlargeTabletPortResId,
-            int xlargeTabletLandResId) {
+            int xlargeTabletLandResId, int gridLayoutResId) {
         RecentsConfiguration config = Recents.getConfiguration();
         Resources res = ctx.getResources();
         boolean isLandscape = Utilities.getAppConfiguration(ctx).orientation ==
                 Configuration.ORIENTATION_LANDSCAPE;
-        if (config.isXLargeScreen) {
+        if (config.isGridEnabled) {
+            return res.getDimensionPixelSize(gridLayoutResId);
+        } else if (config.isXLargeScreen) {
             return res.getDimensionPixelSize(isLandscape
                     ? xlargeTabletLandResId
                     : xlargeTabletPortResId);
