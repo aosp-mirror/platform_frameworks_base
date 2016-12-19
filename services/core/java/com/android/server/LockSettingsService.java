@@ -16,12 +16,14 @@
 
 package com.android.server;
 
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.PasswordMetrics;
 import android.app.backup.BackupManager;
 import android.app.trust.IStrongAuthTracker;
 import android.app.trust.TrustManager;
@@ -931,6 +933,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         synchronized (mSeparateChallengeLock) {
             setLockPatternInternal(pattern, savedCredential, userId);
             setSeparateProfileChallengeEnabled(userId, true, null);
+            notifyPasswordChanged(userId);
         }
     }
 
@@ -945,6 +948,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             setKeystorePassword(null, userId);
             fixateNewestUserKeyAuth(userId);
             onUserLockChanged(userId);
+            notifyActivePasswordMetricsAvailable(null, userId);
             return;
         }
 
@@ -994,6 +998,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         synchronized (mSeparateChallengeLock) {
             setLockPasswordInternal(password, savedCredential, userId);
             setSeparateProfileChallengeEnabled(userId, true, null);
+            notifyPasswordChanged(userId);
         }
     }
 
@@ -1007,6 +1012,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             setKeystorePassword(null, userId);
             fixateNewestUserKeyAuth(userId);
             onUserLockChanged(userId);
+            notifyActivePasswordMetricsAvailable(null, userId);
             return;
         }
 
@@ -1420,6 +1426,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 // migrate credential to GateKeeper
                 credentialUtil.setCredential(credential, null, userId);
                 if (!hasChallenge) {
+                    notifyActivePasswordMetricsAvailable(credential, userId);
                     return VerifyCredentialResponse.OK;
                 }
                 // Fall through to get the auth token. Technically this should never happen,
@@ -1459,6 +1466,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             if (progressCallback != null) {
                 progressCallback.onCredentialVerified();
             }
+            notifyActivePasswordMetricsAvailable(credential, userId);
             unlockKeystore(credential, userId);
 
             Slog.i(TAG, "Unlocking user " + userId +
@@ -1480,6 +1488,36 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         return response;
+    }
+
+    private void notifyActivePasswordMetricsAvailable(String password, @UserIdInt int userId) {
+        final PasswordMetrics metrics;
+        if (password == null) {
+            metrics = new PasswordMetrics();
+        } else {
+            metrics = PasswordMetrics.computeForPassword(password);
+            metrics.quality = mLockPatternUtils.getKeyguardStoredPasswordQuality(userId);
+        }
+
+        // Asynchronous to avoid dead lock
+        mHandler.post(() -> {
+            DevicePolicyManager dpm = (DevicePolicyManager)
+                    mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+            dpm.setActivePasswordState(metrics, userId);
+        });
+    }
+
+    /**
+     * Call after {@link #notifyActivePasswordMetricsAvailable} so metrics are updated before
+     * reporting the password changed.
+     */
+    private void notifyPasswordChanged(@UserIdInt int userId) {
+        // Same handler as notifyActivePasswordMetricsAvailable to ensure correct ordering
+        mHandler.post(() -> {
+            DevicePolicyManager dpm = (DevicePolicyManager)
+                    mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+            dpm.reportPasswordChanged(userId);
+        });
     }
 
     @Override

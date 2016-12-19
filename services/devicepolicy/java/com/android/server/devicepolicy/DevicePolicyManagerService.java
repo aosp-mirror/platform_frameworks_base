@@ -253,7 +253,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private static final String ATTR_DEVICE_PROVISIONING_CONFIG_APPLIED =
             "device-provisioning-config-applied";
     private static final String ATTR_DEVICE_PAIRED = "device-paired";
-
     private static final String ATTR_DELEGATED_CERT_INSTALLER = "delegated-cert-installer";
     private static final String ATTR_APPLICATION_RESTRICTIONS_MANAGER
             = "application-restrictions-manager";
@@ -2342,20 +2341,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.endTag(null, "failed-password-attempts");
             }
 
-            final PasswordMetrics metrics = policy.mActivePasswordMetrics;
-            if (!metrics.isDefault()) {
-                out.startTag(null, "active-password");
-                out.attribute(null, "quality", Integer.toString(metrics.quality));
-                out.attribute(null, "length", Integer.toString(metrics.length));
-                out.attribute(null, "uppercase", Integer.toString(metrics.upperCase));
-                out.attribute(null, "lowercase", Integer.toString(metrics.lowerCase));
-                out.attribute(null, "letters", Integer.toString(metrics.letters));
-                out.attribute(null, "numeric", Integer.toString(metrics.numeric));
-                out.attribute(null, "symbols", Integer.toString(metrics.symbols));
-                out.attribute(null, "nonletter", Integer.toString(metrics.nonLetter));
-                out.endTag(null, "active-password");
-            }
-
             for (int i = 0; i < policy.mAcceptedCaCertificates.size(); i++) {
                 out.startTag(null, TAG_ACCEPTED_CA_CERTIFICATES);
                 out.attribute(null, ATTR_NAME, policy.mAcceptedCaCertificates.valueAt(i));
@@ -2456,6 +2441,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         JournaledFile journal = makeJournaledFile(userHandle);
         FileInputStream stream = null;
         File file = journal.chooseForRead();
+        boolean needsRewrite = false;
         try {
             stream = new FileInputStream(file);
             XmlPullParser parser = Xml.newPullParser();
@@ -2542,16 +2528,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 } else if ("password-owner".equals(tag)) {
                     policy.mPasswordOwner = Integer.parseInt(
                             parser.getAttributeValue(null, "value"));
-                } else if ("active-password".equals(tag)) {
-                    final PasswordMetrics m = policy.mActivePasswordMetrics;
-                    m.quality = Integer.parseInt(parser.getAttributeValue(null, "quality"));
-                    m.length = Integer.parseInt(parser.getAttributeValue(null, "length"));
-                    m.upperCase = Integer.parseInt(parser.getAttributeValue(null, "uppercase"));
-                    m.lowerCase = Integer.parseInt(parser.getAttributeValue(null, "lowercase"));
-                    m.letters = Integer.parseInt(parser.getAttributeValue(null, "letters"));
-                    m.numeric = Integer.parseInt(parser.getAttributeValue(null, "numeric"));
-                    m.symbols = Integer.parseInt(parser.getAttributeValue(null, "symbols"));
-                    m.nonLetter = Integer.parseInt(parser.getAttributeValue(null, "nonletter"));
                 } else if (TAG_ACCEPTED_CA_CERTIFICATES.equals(tag)) {
                     policy.mAcceptedCaCertificates.add(parser.getAttributeValue(null, ATTR_NAME));
                 } else if (TAG_LOCK_TASK_COMPONENTS.equals(tag)) {
@@ -2577,6 +2553,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     policy.mAdminBroadcastPending = Boolean.toString(true).equals(pending);
                 } else if (TAG_INITIALIZATION_BUNDLE.equals(tag)) {
                     policy.mInitBundle = PersistableBundle.restoreFromXml(parser);
+                } else if ("active-password".equals(tag)) {
+                    needsRewrite = true;
                 } else {
                     Slog.w(LOG_TAG, "Unknown tag: " + tag);
                     XmlUtils.skipCurrentTag(parser);
@@ -2596,26 +2574,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Ignore
         }
 
+        // Might need to upgrade the file by rewriting it
+        if (needsRewrite) {
+            saveSettingsLocked(userHandle);
+        }
+
         // Generate a list of admins from the admin map
         policy.mAdminList.addAll(policy.mAdminMap.values());
-
-        // Validate that what we stored for the password quality matches
-        // sufficiently what is currently set.  Note that this is only
-        // a sanity check in case the two get out of sync; this should
-        // never normally happen.
-        final long identity = mInjector.binderClearCallingIdentity();
-        try {
-            int actualPasswordQuality = mLockPatternUtils.getActivePasswordQuality(userHandle);
-            if (actualPasswordQuality < policy.mActivePasswordMetrics.quality) {
-                Slog.w(LOG_TAG, "Active password quality 0x"
-                        + Integer.toHexString(policy.mActivePasswordMetrics.quality)
-                        + " does not match actual quality 0x"
-                        + Integer.toHexString(actualPasswordQuality));
-                policy.mActivePasswordMetrics = new PasswordMetrics();
-            }
-        } finally {
-            mInjector.binderRestoreCallingIdentity(identity);
-        }
 
         validatePasswordOwnerLocked(policy);
         updateMaximumTimeToLockLocked(userHandle);
@@ -3850,6 +3815,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private boolean isActivePasswordSufficientForUserLocked(
             DevicePolicyData policy, int userHandle, boolean parent) {
+        enforceUserUnlocked(userHandle, parent);
+
         final int requiredPasswordQuality = getPasswordQuality(null, userHandle, parent);
         if (policy.mActivePasswordMetrics.quality < requiredPasswordQuality) {
             return false;
@@ -4924,33 +4891,52 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
         enforceFullCrossUsersPermission(userHandle);
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BIND_DEVICE_ADMIN, null);
+
+        // If the managed profile doesn't have a separate password, set the metrics to default
+        if (isManagedProfile(userHandle) && !isSeparateProfileChallengeEnabled(userHandle)) {
+            metrics = new PasswordMetrics();
+        }
+
+        validateQualityConstant(metrics.quality);
+        DevicePolicyData policy = getUserData(userHandle);
+        synchronized (this) {
+            policy.mActivePasswordMetrics = metrics;
+        }
+    }
+
+    @Override
+    public void reportPasswordChanged(@UserIdInt int userId) {
+        if (!mHasFeature) {
+            return;
+        }
+        enforceFullCrossUsersPermission(userId);
 
         // Managed Profile password can only be changed when it has a separate challenge.
-        if (!isSeparateProfileChallengeEnabled(userHandle)) {
-            enforceNotManagedProfile(userHandle, "set the active password");
+        if (!isSeparateProfileChallengeEnabled(userId)) {
+            enforceNotManagedProfile(userId, "set the active password");
         }
 
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BIND_DEVICE_ADMIN, null);
-        validateQualityConstant(metrics.quality);
 
-        DevicePolicyData policy = getUserData(userHandle);
+        DevicePolicyData policy = getUserData(userId);
 
         long ident = mInjector.binderClearCallingIdentity();
         try {
             synchronized (this) {
-                policy.mActivePasswordMetrics = metrics;
                 policy.mFailedPasswordAttempts = 0;
-                saveSettingsLocked(userHandle);
-                updatePasswordExpirationsLocked(userHandle);
-                setExpirationAlarmCheckLocked(mContext, userHandle, /* parent */ false);
+                saveSettingsLocked(userId);
+                updatePasswordExpirationsLocked(userId);
+                setExpirationAlarmCheckLocked(mContext, userId, /* parent */ false);
 
                 // Send a broadcast to each profile using this password as its primary unlock.
                 sendAdminCommandForLockscreenPoliciesLocked(
                         DeviceAdminReceiver.ACTION_PASSWORD_CHANGED,
-                        DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, userHandle);
+                        DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, userId);
             }
-            removeCaApprovalsIfNeeded(userHandle);
+            removeCaApprovalsIfNeeded(userId);
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
         }
@@ -6596,6 +6582,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // want to use the actual "unlocked" state.
         Preconditions.checkState(mUserManager.isUserUnlocked(userId),
                 "User must be running and unlocked");
+    }
+
+    private void enforceUserUnlocked(@UserIdInt int userId, boolean parent) {
+        if (parent) {
+            enforceUserUnlocked(getProfileParentId(userId));
+        } else {
+            enforceUserUnlocked(userId);
+        }
     }
 
     private void enforceManageUsers() {
