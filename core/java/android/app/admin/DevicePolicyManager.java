@@ -1224,6 +1224,12 @@ public class DevicePolicyManager {
     public static final String DELEGATION_APP_RESTRICTIONS = "delegation-app-restrictions";
 
     /**
+     * Delegation of application uninstall block. This scope grants access to the
+     * {@link #setUninstallBlocked} API.
+     */
+    public static final String DELEGATION_BLOCK_UNINSTALL = "delegation-block-uninstall";
+
+    /**
      * No management for current user in-effect. This is the default.
      * @hide
      */
@@ -6127,19 +6133,25 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by profile or device owners to change whether a user can uninstall a package.
+     * Change whether a user can uninstall a package. This function can be called by a device owner,
+     * profile owner, or by a delegate given the {@link #DELEGATION_BLOCK_UNINSTALL} scope via
+     * {@link #setDelegatedScopes}.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
+     *             {@code null} if the caller is a block uninstall delegate.
      * @param packageName package to change.
      * @param uninstallBlocked true if the user shouldn't be able to uninstall the package.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @see #setDelegatedScopes
+     * @see #DELEGATION_BLOCK_UNINSTALL
      */
-    public void setUninstallBlocked(@NonNull ComponentName admin, String packageName,
+    public void setUninstallBlocked(@Nullable ComponentName admin, String packageName,
             boolean uninstallBlocked) {
         throwIfParentInstance("setUninstallBlocked");
         if (mService != null) {
             try {
-                mService.setUninstallBlocked(admin, packageName, uninstallBlocked);
+                mService.setUninstallBlocked(admin, mContext.getPackageName(), packageName,
+                    uninstallBlocked);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
