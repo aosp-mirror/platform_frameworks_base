@@ -876,10 +876,10 @@ public class TaskStackLayoutAlgorithm {
      */
     public TaskViewTransform getStackTransformScreenCoordinates(Task task, float stackScroll,
             TaskViewTransform transformOut, TaskViewTransform frontTransform,
-            Rect windowOverrideRect) {
+            Rect windowOverrideRect, boolean useGridLayout) {
         TaskViewTransform transform = getStackTransform(task, stackScroll, mFocusState,
                 transformOut, frontTransform, true /* forceUpdate */,
-                false /* ignoreTaskOverrides */, false /* useGridLayout */);
+                false /* ignoreTaskOverrides */, useGridLayout);
         return transformToScreenCoordinates(transform, windowOverrideRect);
     }
 
