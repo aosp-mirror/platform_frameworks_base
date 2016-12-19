@@ -433,6 +433,8 @@ public class NetworkMonitor extends StateMachine {
                             }));
                     intent.putExtra(ConnectivityManager.EXTRA_CAPTIVE_PORTAL_URL,
                             mLastPortalProbeResult.detectUrl);
+                    intent.putExtra(ConnectivityManager.EXTRA_CAPTIVE_PORTAL_USER_AGENT,
+                            getCaptivePortalUserAgent(mContext));
                     intent.setFlags(
                             Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
                     mContext.startActivityAsUser(intent, UserHandle.CURRENT);
