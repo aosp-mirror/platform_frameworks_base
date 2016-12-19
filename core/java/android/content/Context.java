@@ -2499,9 +2499,8 @@ public abstract class Context {
      * for high frequency calls.
      * </p>
      *
-     * @param service Identifies the service to be started.  The Intent must be either
-     *      fully explicit (supplying a component name) or specify a specific package
-     *      name it is targetted to.  Additional values
+     * @param service Identifies the service to be started.  The Intent must be
+     *      fully explicit (supplying a component name).  Additional values
      *      may be included in the Intent extras to supply arguments along with
      *      this specific start call.
      *
@@ -2579,10 +2578,8 @@ public abstract class Context {
      * {@link #registerReceiver}, since the lifetime of this BroadcastReceiver
      * is tied to another object (the one that registered it).</p>
      *
-     * @param service Identifies the service to connect to.  The Intent may
-     *      specify either an explicit component name, or a logical
-     *      description (action, category, etc) to match an
-     *      {@link IntentFilter} published by a service.
+     * @param service Identifies the service to connect to.  The Intent must
+     *      specify an explicit component name.
      * @param conn Receives information as the service is started and stopped.
      *      This must be a valid ServiceConnection object; it must not be null.
      * @param flags Operation options for the binding.  May be 0,
