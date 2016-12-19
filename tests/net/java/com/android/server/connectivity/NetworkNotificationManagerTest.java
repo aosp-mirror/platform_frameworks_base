@@ -48,8 +48,6 @@ import static org.mockito.Mockito.when;
 
 public class NetworkNotificationManagerTest extends TestCase {
 
-    static final String NOTIFICATION_ID = NetworkNotificationManager.NOTIFICATION_ID;
-
     static final NetworkCapabilities CELL_CAPABILITIES = new NetworkCapabilities();
     static final NetworkCapabilities WIFI_CAPABILITIES = new NetworkCapabilities();
     static {
@@ -108,11 +106,11 @@ public class NetworkNotificationManagerTest extends TestCase {
         }
 
         for (int i = 0; i < ids.size(); i++) {
-            final int expectedId = NETWORK_ID_BASE + i;
-            verify(mNotificationManager, times(1))
-                    .notifyAsUser(eq(NOTIFICATION_ID), eq(expectedId), any(), any());
-            verify(mNotificationManager, times(1))
-                    .cancelAsUser(eq(NOTIFICATION_ID), eq(expectedId), any());
+            final int id = ids.get(i);
+            final int eventId = types.get(i).eventId;
+            final String tag = NetworkNotificationManager.tagFor(id);
+            verify(mNotificationManager, times(1)).notifyAsUser(eq(tag), eq(eventId), any(), any());
+            verify(mNotificationManager, times(1)).cancelAsUser(eq(tag), eq(eventId), any());
         }
     }
 
@@ -125,8 +123,9 @@ public class NetworkNotificationManagerTest extends TestCase {
 
         mManager.showNotification(102, NO_INTERNET, mWifiNai, mCellNai, null, false);
 
-        verify(mNotificationManager, times(1))
-                .notifyAsUser(eq(NOTIFICATION_ID), eq(102), any(), any());
+        final int eventId = NO_INTERNET.eventId;
+        final String tag = NetworkNotificationManager.tagFor(102);
+        verify(mNotificationManager, times(1)).notifyAsUser(eq(tag), eq(eventId), any(), any());
     }
 
     @SmallTest
