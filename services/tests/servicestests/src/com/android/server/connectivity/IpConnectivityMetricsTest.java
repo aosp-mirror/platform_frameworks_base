@@ -16,6 +16,9 @@
 
 package com.android.server.connectivity;
 
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
+
 import android.content.Context;
 import android.net.ConnectivityMetricsEvent;
 import android.net.IIpConnectivityMetrics;
@@ -29,9 +32,9 @@ import android.net.metrics.IpReachabilityEvent;
 import android.net.metrics.RaEvent;
 import android.net.metrics.ValidationProbeEvent;
 import android.os.Parcelable;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Base64;
 import com.android.server.connectivity.metrics.IpConnectivityLogClass;
-import com.google.protobuf.nano.MessageNano;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Collections;
@@ -42,10 +45,6 @@ import junit.framework.TestCase;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 public class IpConnectivityMetricsTest extends TestCase {
     static final IpReachabilityEvent FAKE_EV =
@@ -61,6 +60,7 @@ public class IpConnectivityMetricsTest extends TestCase {
         mService = new IpConnectivityMetrics(mCtx, (ctx) -> 2000);
     }
 
+    @SmallTest
     public void testLoggingEvents() throws Exception {
         IpConnectivityLog logger = new IpConnectivityLog(mMockService);
 
@@ -74,6 +74,7 @@ public class IpConnectivityMetricsTest extends TestCase {
         assertEventsEqual(expectedEvent(3), got.get(2));
     }
 
+    @SmallTest
     public void testLoggingEventsWithMultipleCallers() throws Exception {
         IpConnectivityLog logger = new IpConnectivityLog(mMockService);
 
@@ -101,6 +102,7 @@ public class IpConnectivityMetricsTest extends TestCase {
         }
     }
 
+    @SmallTest
     public void testBufferFlushing() {
         String output1 = getdump("flush");
         assertEquals("", output1);
@@ -113,6 +115,7 @@ public class IpConnectivityMetricsTest extends TestCase {
         assertEquals("", output3);
     }
 
+    @SmallTest
     public void testRateLimiting() {
         final IpConnectivityLog logger = new IpConnectivityLog(mService.impl);
         final ApfProgramEvent ev = new ApfProgramEvent(0, 0, 0, 0, 0);
@@ -134,6 +137,7 @@ public class IpConnectivityMetricsTest extends TestCase {
         assertEquals("", output2);
     }
 
+    @SmallTest
     public void testEndToEndLogging() {
         IpConnectivityLog logger = new IpConnectivityLog(mService.impl);
 
@@ -154,22 +158,25 @@ public class IpConnectivityMetricsTest extends TestCase {
         String want = joinLines(
                 "dropped_events: 0",
                 "events <",
+                "  time_ms: 100",
+                "  transport: 0",
                 "  ip_reachability_event <",
                 "    event_type: 512",
                 "    if_name: \"wlan0\"",
                 "  >",
-                "  time_ms: 100",
                 ">",
                 "events <",
+                "  time_ms: 200",
+                "  transport: 0",
                 "  dhcp_event <",
                 "    duration_ms: 192",
-                "    error_code: 0",
                 "    if_name: \"wlan0\"",
                 "    state_transition: \"SomeState\"",
                 "  >",
-                "  time_ms: 200",
                 ">",
                 "events <",
+                "  time_ms: 300",
+                "  transport: 0",
                 "  default_network_event <",
                 "    network_id <",
                 "      network_id: 102",
@@ -182,18 +189,19 @@ public class IpConnectivityMetricsTest extends TestCase {
                 "    transport_types: 2",
                 "    transport_types: 3",
                 "  >",
-                "  time_ms: 300",
                 ">",
                 "events <",
+                "  time_ms: 400",
+                "  transport: 0",
                 "  ip_provisioning_event <",
                 "    event_type: 1",
                 "    if_name: \"wlan0\"",
                 "    latency_ms: 5678",
                 "  >",
-                "  time_ms: 400",
                 ">",
                 "events <",
                 "  time_ms: 500",
+                "  transport: 0",
                 "  validation_probe_event <",
                 "    latency_ms: 40730",
                 "    network_id <",
@@ -204,6 +212,8 @@ public class IpConnectivityMetricsTest extends TestCase {
                 "  >",
                 ">",
                 "events <",
+                "  time_ms: 600",
+                "  transport: 0",
                 "  apf_statistics <",
                 "    dropped_ras: 2",
                 "    duration_ms: 45000",
@@ -214,9 +224,10 @@ public class IpConnectivityMetricsTest extends TestCase {
                 "    received_ras: 10",
                 "    zero_lifetime_ras: 1",
                 "  >",
-                "  time_ms: 600",
                 ">",
                 "events <",
+                "  time_ms: 700",
+                "  transport: 0",
                 "  ra_event <",
                 "    dnssl_lifetime: -1",
                 "    prefix_preferred_lifetime: 300",
@@ -225,7 +236,6 @@ public class IpConnectivityMetricsTest extends TestCase {
                 "    route_info_lifetime: -1",
                 "    router_lifetime: 2000",
                 "  >",
-                "  time_ms: 700",
                 ">",
                 "version: 2");
 
@@ -254,8 +264,7 @@ public class IpConnectivityMetricsTest extends TestCase {
         try {
             byte[] got = Base64.decode(output, Base64.DEFAULT);
             IpConnectivityLogClass.IpConnectivityLog log =
-                    new IpConnectivityLogClass.IpConnectivityLog();
-            MessageNano.mergeFrom(log, got);
+                    IpConnectivityLogClass.IpConnectivityLog.parseFrom(got);
             assertEquals(want, log.toString());
         } catch (Exception e) {
             fail(e.toString());
@@ -283,10 +292,5 @@ public class IpConnectivityMetricsTest extends TestCase {
     }
 
     static final Comparator<ConnectivityMetricsEvent> EVENT_COMPARATOR =
-        new Comparator<ConnectivityMetricsEvent>() {
-            @Override
-            public int compare(ConnectivityMetricsEvent ev1, ConnectivityMetricsEvent ev2) {
-                return (int) (ev1.timestamp - ev2.timestamp);
-            }
-        };
+        Comparator.comparingLong((ev) -> ev.timestamp);
 }

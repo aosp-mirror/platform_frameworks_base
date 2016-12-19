@@ -43,10 +43,10 @@ final public class IpConnectivityEventBuilder {
     private IpConnectivityEventBuilder() {
     }
 
-    public static byte[] serialize(int dropped, List<ConnectivityMetricsEvent> events)
+    public static byte[] serialize(int dropped, List<IpConnectivityEvent> events)
             throws IOException {
         final IpConnectivityLog log = new IpConnectivityLog();
-        log.events = toProto(events);
+        log.events = events.toArray(new IpConnectivityEvent[events.size()]);
         log.droppedEvents = dropped;
         if ((log.events.length > 0) || (dropped > 0)) {
             // Only write version number if log has some information at all.
@@ -55,7 +55,7 @@ final public class IpConnectivityEventBuilder {
         return IpConnectivityLog.toByteArray(log);
     }
 
-    public static IpConnectivityEvent[] toProto(List<ConnectivityMetricsEvent> eventsIn) {
+    public static List<IpConnectivityEvent> toProto(List<ConnectivityMetricsEvent> eventsIn) {
         final ArrayList<IpConnectivityEvent> eventsOut = new ArrayList<>(eventsIn.size());
         for (ConnectivityMetricsEvent in : eventsIn) {
             final IpConnectivityEvent out = toProto(in);
@@ -64,7 +64,7 @@ final public class IpConnectivityEventBuilder {
             }
             eventsOut.add(out);
         }
-        return eventsOut.toArray(new IpConnectivityEvent[eventsOut.size()]);
+        return eventsOut;
     }
 
     public static IpConnectivityEvent toProto(ConnectivityMetricsEvent ev) {
