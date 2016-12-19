@@ -787,8 +787,10 @@ public class NetworkControllerImpl extends BroadcastReceiver
                             datatype.equals("h") ? TelephonyIcons.H :
                             datatype.equals("lte") ? TelephonyIcons.LTE :
                             datatype.equals("lte+") ? TelephonyIcons.LTE_PLUS :
-                            datatype.equals("roam") ? TelephonyIcons.ROAMING :
                             TelephonyIcons.UNKNOWN;
+                }
+                if (args.containsKey("roam")) {
+                    controller.getState().roaming = "show".equals(args.getString("roam"));
                 }
                 int[][] icons = TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH;
                 String level = args.getString("level");
@@ -796,6 +798,10 @@ public class NetworkControllerImpl extends BroadcastReceiver
                     controller.getState().level = level.equals("null") ? -1
                             : Math.min(Integer.parseInt(level), icons[0].length - 1);
                     controller.getState().connected = controller.getState().level >= 0;
+                }
+                String activity = args.getString("activity");
+                if (activity != null) {
+                    controller.setActivity(Integer.parseInt(activity));
                 }
                 controller.getState().enabled = show;
                 controller.notifyListeners();
