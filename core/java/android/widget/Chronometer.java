@@ -361,7 +361,7 @@ public class Chronometer extends TextView {
         measures.add(new Measure(s, MeasureUnit.SECOND));
 
         return MeasureFormat.getInstance(Locale.getDefault(), FormatWidth.WIDE)
-                    .formatMeasures((Measure[]) measures.toArray());
+                    .formatMeasures(measures.toArray(new Measure[measures.size()]));
     }
 
     @Override
