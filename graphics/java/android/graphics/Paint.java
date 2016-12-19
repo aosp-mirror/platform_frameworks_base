@@ -1404,7 +1404,7 @@ public class Paint {
     /**
      * Return the paint's text size.
      *
-     * @return the paint's text size.
+     * @return the paint's text size in pixel units.
      */
     public float getTextSize() {
         return nGetTextSize(mNativePaint);
@@ -1415,7 +1415,7 @@ public class Paint {
     /**
      * Set the paint's text size. This value must be > 0
      *
-     * @param textSize set the paint's text size.
+     * @param textSize set the paint's text size in pixel units.
      */
     public void setTextSize(float textSize) {
         nSetTextSize(mNativePaint, textSize);
