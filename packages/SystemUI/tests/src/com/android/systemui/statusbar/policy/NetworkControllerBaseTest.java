@@ -55,6 +55,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -297,7 +298,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                     iconArg.capture(),
                     anyInt(),
                     typeIconArg.capture(), dataInArg.capture(), dataOutArg.capture(),
-                    anyString(), anyString(), anyBoolean(), anyInt());
+                    anyString(), anyString(), anyBoolean(), anyInt(), anyBoolean());
         IconState iconState = iconArg.getValue();
         assertEquals("Visibility in, quick settings", visible, iconState.visible);
         assertEquals("Signal icon in, quick settings", icon, iconState.icon);
@@ -309,6 +310,11 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     }
 
     protected void verifyLastMobileDataIndicators(boolean visible, int icon, int typeIcon) {
+        verifyLastMobileDataIndicators(visible, icon, typeIcon, false);
+    }
+
+    protected void verifyLastMobileDataIndicators(boolean visible, int icon, int typeIcon,
+            boolean roaming) {
         ArgumentCaptor<IconState> iconArg = ArgumentCaptor.forClass(IconState.class);
         ArgumentCaptor<Integer> typeIconArg = ArgumentCaptor.forClass(Integer.class);
 
@@ -318,9 +324,10 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 any(),
                 typeIconArg.capture(),
                 anyInt(), anyBoolean(), anyBoolean(), anyString(), anyString(), anyBoolean(),
-                anyInt());
+                anyInt(), eq(roaming));
         IconState iconState = iconArg.getValue();
 
+        assertEquals("Signal icon in status bar", icon, iconState.icon);
         assertEquals("Data icon in status bar", typeIcon, (int) typeIconArg.getValue());
         assertEquals("Visibility in status bar", visible, iconState.visible);
     }
@@ -341,7 +348,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 qsTypeIconArg.capture(),
                 dataInArg.capture(),
                 dataOutArg.capture(),
-                anyString(), anyString(), anyBoolean(), anyInt());
+                anyString(), anyString(), anyBoolean(), anyInt(), anyBoolean());
 
         IconState iconState = iconArg.getValue();
 

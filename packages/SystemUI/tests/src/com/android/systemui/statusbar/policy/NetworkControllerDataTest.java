@@ -25,19 +25,6 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    public void testRoamingDataIcon() {
-        setupDefaultSignal();
-        setGsmRoaming(true);
-
-        verifyLastMobileDataIndicators(true,
-                TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH_ROAMING[1][DEFAULT_LEVEL],
-                TelephonyIcons.ROAMING_ICON,
-                true,
-                TelephonyIcons.QS_TELEPHONY_SIGNAL_STRENGTH[1][DEFAULT_LEVEL],
-                TelephonyIcons.QS_DATA_R, false, false);
-    }
-
-    @Test
     public void test2gDataIcon() {
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
