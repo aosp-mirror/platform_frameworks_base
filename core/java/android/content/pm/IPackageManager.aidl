@@ -458,6 +458,15 @@ interface IPackageManager {
     void notifyPackageUse(String packageName, int reason);
 
     /**
+     * Notify the package manager that a list of dex files have been loaded.
+     *
+     * @param loadingPackageName the name of the package who performs the load
+     * @param dexPats the list of the dex files paths that have been loaded
+     * @param loaderIsa the ISA of the loader process
+     */
+    void notifyDexLoad(String loadingPackageName, in List<String> dexPaths, String loaderIsa);
+
+    /**
      * Ask the package manager to perform dex-opt (if needed) on the given
      * package if it already hasn't done so.
      *

@@ -7639,6 +7639,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    @Override
+    public void notifyDexLoad(String loadingPackageName, List<String> dexPaths, String loaderIsa) {
+      // TODO(calin): b/32871170
+    }
+
     // TODO: this is not used nor needed. Delete it.
     @Override
     public boolean performDexOptIfNeeded(String packageName) {
