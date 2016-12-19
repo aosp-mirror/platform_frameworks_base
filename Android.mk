@@ -37,6 +37,9 @@ ifneq ($(ANDROID_BUILD_EMBEDDED),true)
 
 include $(CLEAR_VARS)
 
+# Load framework-specific path mappings used later in the build.
+include $(LOCAL_PATH)/pathmap.mk
+
 # FRAMEWORKS_BASE_SUBDIRS comes from build/core/pathmap.mk
 LOCAL_SRC_FILES := \
         $(call find-other-java-files,$(FRAMEWORKS_BASE_SUBDIRS)) \
