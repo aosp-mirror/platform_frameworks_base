@@ -784,11 +784,6 @@ public class RankingHelper implements RankingConfig {
         }
     }
 
-    private static boolean isUidSystem(int uid) {
-        final int appid = UserHandle.getAppId(uid);
-        return (appid == Process.SYSTEM_UID || appid == Process.PHONE_UID || uid == 0);
-    }
-
     private static class Record {
         static int UNKNOWN_UID = UserHandle.USER_NULL;
 
