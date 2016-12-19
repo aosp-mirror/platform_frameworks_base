@@ -2990,6 +2990,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         swipeDismiss.setOnDismissedListener(new SwipeDismissLayout.OnDismissedListener() {
             @Override
             public void onDismissed(SwipeDismissLayout layout) {
+                dispatchOnWindowSwipeDismissed();
                 dispatchOnWindowDismissed(false /*finishTask*/, true /*suppressWindowTransition*/);
             }
         });
