@@ -144,6 +144,19 @@ public class TileUtils {
      */
     public static List<DashboardCategory> getCategories(Context context,
             Map<Pair<String, String>, Tile> cache, boolean categoryDefinedInManifest) {
+        return getCategories(context, cache, categoryDefinedInManifest, null);
+    }
+
+    /**
+     * Build a list of DashboardCategory.
+     * @param categoryDefinedInManifest If true, an dummy activity must exists in manifest to
+     * represent this category (eg: .Settings$DeviceSettings)
+     * @param extraAction additional intent filter action to be used to build the dashboard
+     * categories
+     */
+    public static List<DashboardCategory> getCategories(Context context,
+            Map<Pair<String, String>, Tile> cache, boolean categoryDefinedInManifest,
+            String extraAction) {
         final long startTime = System.currentTimeMillis();
         boolean setup = Global.getInt(context.getContentResolver(), Global.DEVICE_PROVISIONED, 0)
                 != 0;
@@ -162,6 +175,9 @@ public class TileUtils {
             if (setup) {
                 getTilesForAction(context, user, EXTRA_SETTINGS_ACTION, cache, null, tiles, false);
                 getTilesForAction(context, user, IA_SETTINGS_ACTION, cache, null, tiles, false);
+                if (extraAction != null) {
+                    getTilesForAction(context, user, extraAction, cache, null, tiles, false);
+                }
             }
         }
 
