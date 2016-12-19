@@ -81,11 +81,23 @@ public class LayoutInflaterBuilder {
      * @return Builder object post-modification.
      */
     public LayoutInflaterBuilder replace(@NonNull Class from, @NonNull Class to) {
+        return replace(from.getName(), to);
+    }
+
+    /**
+     * Instructs the Builder to configure the LayoutInflater such that all instances
+     * of one {@link View} will be replaced with instances of another during inflation.
+     *
+     * @param tag Instances of this tag will be replaced during inflation.
+     * @param to Instances of this class will be inflated as replacements.
+     * @return Builder object post-modification.
+     */
+    public LayoutInflaterBuilder replace(@NonNull String tag, @NonNull Class to) {
         assertIfAlreadyBuilt();
         if (mReplaceMap == null) {
             mReplaceMap = new ArrayMap<String, String>();
         }
-        mReplaceMap.put(from.getName(), to.getName());
+        mReplaceMap.put(tag, to.getName());
         return this;
     }
 

@@ -16,25 +16,23 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
-import android.content.pm.UserInfo;
 import android.net.ConnectivityManager;
-import android.os.UserManager;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 
 @SmallTest
@@ -45,16 +43,9 @@ public class SecurityControllerTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        final Context context = mock(Context.class);
-        when(context.getSystemService(Context.DEVICE_POLICY_SERVICE))
-                .thenReturn(mDevicePolicyManager);
-        when(context.getSystemService(Context.CONNECTIVITY_SERVICE))
-                .thenReturn(mock(ConnectivityManager.class));
-        final UserManager userManager = mock(UserManager.class);
-        when(userManager.getUserInfo(anyInt())).thenReturn(mock(UserInfo.class));
-        when(context.getSystemService(Context.USER_SERVICE))
-                .thenReturn(userManager);
-        mSecurityController = new SecurityControllerImpl(context);
+        mContext.addMockSystemService(Context.DEVICE_POLICY_SERVICE, mDevicePolicyManager);
+        mContext.addMockSystemService(Context.CONNECTIVITY_SERVICE, mock(ConnectivityManager.class));
+        mSecurityController = new SecurityControllerImpl(mContext);
     }
 
     @Test

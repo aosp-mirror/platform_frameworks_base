@@ -60,8 +60,6 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
 
     private final QSDetailClipper mClipper;
 
-    private PhoneStatusBar mPhoneStatusBar;
-
     private boolean isShown;
     private QSTileHost mHost;
     private RecyclerView mRecyclerView;
@@ -119,7 +117,6 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
 
     public void setHost(QSTileHost host) {
         mHost = host;
-        mPhoneStatusBar = host.getPhoneStatusBar();
         mTileAdapter.setHost(host);
     }
 
