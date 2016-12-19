@@ -24,6 +24,6 @@ Copyright (C) 2016 The Android Open Source Project
   android:tint="#4DFFFFFF" >
     <path
       android:fillColor="#FFFFFFFF"
-      android:pathData="M7,18v-2h6v2H7z M7,14v-2h10v2H7z M8.5,9 12,5.5 15.5,9 13,9 13,13 11,13 11,9z"/>
+      android:pathData="M2,24v-4h12v4H2z M2,16v-4h20v4H2z M5,7 12,0 19,7 14,7 14,15 10,15 10,7z"/>
 
 </vector>
