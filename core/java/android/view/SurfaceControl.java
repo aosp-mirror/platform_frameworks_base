@@ -95,6 +95,11 @@ public class SurfaceControl {
             IBinder displayToken, int mode);
     private static native void nativeDeferTransactionUntil(long nativeObject,
             IBinder handle, long frame);
+    private static native void nativeDeferTransactionUntilSurface(long nativeObject,
+            long surfaceObject, long frame);
+    private static native void nativeReparentChildren(long nativeObject,
+            IBinder handle);
+    private static native void nativeSeverChildren(long nativeObject);
     private static native void nativeSetOverrideScalingMode(long nativeObject,
             int scalingMode);
     private static native IBinder nativeGetHandle(long nativeObject);
@@ -419,6 +424,18 @@ public class SurfaceControl {
 
     public void deferTransactionUntil(IBinder handle, long frame) {
         nativeDeferTransactionUntil(mNativeObject, handle, frame);
+    }
+
+    public void deferTransactionUntil(Surface barrier, long frame) {
+        nativeDeferTransactionUntilSurface(mNativeObject, barrier.mNativeObject, frame);
+    }
+
+    public void reparentChildren(IBinder newParentHandle) {
+        nativeReparentChildren(mNativeObject, newParentHandle);
+    }
+
+    public void detachChildren() {
+        nativeSeverChildren(mNativeObject);
     }
 
     public void setOverrideScalingMode(int scalingMode) {
