@@ -1563,6 +1563,19 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 throw new IllegalStateException("Wallpaper not yet initialized for user " + userId);
             }
             final long ident = Binder.clearCallingIdentity();
+
+            // Live wallpapers can't be specified for keyguard.  If we're using a static
+            // system+lock image currently, migrate the system wallpaper to be a lock-only
+            // image as part of making a different live component active as the system
+            // wallpaper.
+            if (mImageWallpaper.equals(wallpaper.wallpaperComponent)) {
+                if (mLockWallpaperMap.get(userId) == null) {
+                    // We're using the static imagery and there is no lock-specific image in place,
+                    // therefore it's a shared system+lock image that we need to migrate.
+                    migrateSystemToLockWallpaperLocked(userId);
+                }
+            }
+
             try {
                 wallpaper.imageWallpaperPending = false;
                 if (bindWallpaperComponentLocked(name, false, true, wallpaper, null)) {
