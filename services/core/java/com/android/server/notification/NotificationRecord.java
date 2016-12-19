@@ -25,6 +25,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -136,15 +137,9 @@ public final class NotificationRecord {
     private boolean isPreChannelsNotification() {
         try {
             if (NotificationChannel.DEFAULT_CHANNEL_ID.equals(getChannel().getId())) {
-                final boolean isSystemNotification =
-                        NotificationManagerService.isUidSystem(sbn.getUid())
-                                || ("android".equals(sbn.getPackageName()));
-                if (isSystemNotification) {
-                    return false;
-                }
-                final ApplicationInfo applicationInfo =
+                  final ApplicationInfo applicationInfo =
                         mContext.getPackageManager().getApplicationInfoAsUser(sbn.getPackageName(),
-                                0, sbn.getUserId());
+                                0, UserHandle.getUserId(sbn.getUid()));
                 if (applicationInfo.targetSdkVersion <= Build.VERSION_CODES.N_MR1) {
                     return true;
                 }

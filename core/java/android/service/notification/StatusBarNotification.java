@@ -246,7 +246,7 @@ public class StatusBarNotification implements Parcelable {
     }
 
     /**
-     * Returns a userHandle for the instance of the app that posted this notification.
+     * Returns a userid for whom this notification is intended.
      *
      * @deprecated Use {@link #getUser()} instead.
      */
