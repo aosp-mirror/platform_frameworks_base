@@ -243,23 +243,29 @@ public class PowerUI extends SystemUI {
     }
 
     private void updateTemperatureWarning() {
-        // TODO: Add VR mode check
-        float[] temps = mHardwarePropertiesManager.getDeviceTemperatures(
-                HardwarePropertiesManager.DEVICE_TEMPERATURE_SKIN,
-                HardwarePropertiesManager.TEMPERATURE_CURRENT);
-        boolean shouldShowTempWarning = false;
-        for (float temp : temps) {
-            if (temp >= mThrottlingTemp) {
-                shouldShowTempWarning = true;
-                break;
+        PhoneStatusBar phoneStatusBar = getComponent(PhoneStatusBar.class);
+        if (phoneStatusBar != null && phoneStatusBar.isDeviceInVrMode()) {
+            // ensure the warning isn't showing, since VR shows its own warning
+            mWarnings.dismissTemperatureWarning();
+        } else {
+            float[] temps = mHardwarePropertiesManager.getDeviceTemperatures(
+                    HardwarePropertiesManager.DEVICE_TEMPERATURE_SKIN,
+                    HardwarePropertiesManager.TEMPERATURE_CURRENT);
+            boolean shouldShowTempWarning = false;
+            for (float temp : temps) {
+                if (temp >= mThrottlingTemp) {
+                    shouldShowTempWarning = true;
+                    break;
+                }
+            }
+            if (shouldShowTempWarning) {
+                mWarnings.showTemperatureWarning();
+            } else {
+                mWarnings.dismissTemperatureWarning();
             }
         }
-        if (shouldShowTempWarning) {
-            mWarnings.showTemperatureWarning();
-        } else {
-            mWarnings.dismissTemperatureWarning();
-        }
 
+        // TODO: skip this when in VR mode since we already get a callback
         mHandler.postDelayed(this::updateTemperatureWarning, TEMPERATURE_INTERVAL);
     }
 
