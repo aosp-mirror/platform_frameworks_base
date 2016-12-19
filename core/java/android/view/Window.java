@@ -274,6 +274,7 @@ public abstract class Window {
     private TypedArray mWindowStyle;
     private Callback mCallback;
     private OnWindowDismissedCallback mOnWindowDismissedCallback;
+    private OnWindowSwipeDismissedCallback mOnWindowSwipeDismissedCallback;
     private WindowControllerCallback mWindowControllerCallback;
     private OnRestrictedCaptionAreaChangedListener mOnRestrictedCaptionAreaChangedListener;
     private Rect mRestrictedCaptionAreaRect;
@@ -587,6 +588,18 @@ public abstract class Window {
     }
 
     /** @hide */
+    public interface OnWindowSwipeDismissedCallback {
+        /**
+         * Called when a window is swipe dismissed. This informs the callback that the
+         * window is gone, and it should finish itself.
+         * @param finishTask True if the task should also be finished.
+         * @param suppressWindowTransition True if the resulting exit and enter window transition
+         * animations should be suppressed.
+         */
+        void onWindowSwipeDismissed();
+    }
+
+    /** @hide */
     public interface WindowControllerCallback {
         /**
          * Moves the activity from
@@ -876,6 +889,18 @@ public abstract class Window {
             boolean finishTask, boolean suppressWindowTransition) {
         if (mOnWindowDismissedCallback != null) {
             mOnWindowDismissedCallback.onWindowDismissed(finishTask, suppressWindowTransition);
+        }
+    }
+
+    /** @hide */
+    public final void setOnWindowSwipeDismissedCallback(OnWindowSwipeDismissedCallback sdcb) {
+        mOnWindowSwipeDismissedCallback = sdcb;
+    }
+
+    /** @hide */
+    public final void dispatchOnWindowSwipeDismissed() {
+        if (mOnWindowSwipeDismissedCallback != null) {
+            mOnWindowSwipeDismissedCallback.onWindowSwipeDismissed();
         }
     }
 
