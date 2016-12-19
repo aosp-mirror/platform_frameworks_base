@@ -31,6 +31,7 @@ import android.annotation.StyleableRes;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.Resources.NotFoundException;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.icu.text.PluralRules;
@@ -47,6 +48,7 @@ import android.util.Xml;
 import android.view.Display;
 import android.view.DisplayAdjustments;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Locale;
@@ -737,6 +739,36 @@ public class ResourcesImpl {
         Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
 
         return dr;
+    }
+
+    /**
+     * Loads a font from XML or resources stream.
+     */
+    @Nullable
+    public Typeface loadFont(TypedValue value, int id) {
+        if (value.string == null) {
+            throw new NotFoundException("Resource \"" + getResourceName(id) + "\" ("
+                    + Integer.toHexString(id) + ") is not a Font: " + value);
+        }
+
+        final String file = value.string.toString();
+
+        if (DEBUG_LOAD) {
+            Log.v(TAG, "Loading font for cookie " + value.assetCookie + ": " + file);
+        }
+
+        Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, file);
+        try {
+            if (file.endsWith(".xml")) {
+                // TODO handle xml type font definitions
+            } else {
+                return Typeface.createFromResources(
+                        mAssets, value.string.toString(), value.assetCookie);
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
+        }
+        return null;
     }
 
     /**
