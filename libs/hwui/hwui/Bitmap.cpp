@@ -98,8 +98,6 @@ static sk_sp<Bitmap> allocateHeapBitmap(size_t size, const SkImageInfo& info, si
 // TODO: handle SRGB sanely
 static PixelFormat internalFormatToPixelFormat(GLint internalFormat) {
     switch (internalFormat) {
-    case GL_ALPHA:
-        return PIXEL_FORMAT_TRANSPARENT;
     case GL_LUMINANCE:
         return PIXEL_FORMAT_RGBA_8888;
     case GL_SRGB8_ALPHA8:
@@ -217,8 +215,8 @@ sk_sp<Bitmap> Bitmap::allocateHardwareBitmap(uirenderer::renderthread::RenderThr
     }
 
     const SkImageInfo& info = skBitmap.info();
-    if (info.colorType() == kUnknown_SkColorType) {
-        ALOGW("unable to create hardware bitmap of configuration");
+    if (info.colorType() == kUnknown_SkColorType || info.colorType() == kAlpha_8_SkColorType) {
+        ALOGW("unable to create hardware bitmap of colortype: %d", info.colorType());
         return nullptr;
     }
 
@@ -251,7 +249,7 @@ sk_sp<Bitmap> Bitmap::allocateHardwareBitmap(uirenderer::renderthread::RenderThr
     if (!uploadBitmapToGraphicBuffer(caches, bitmap, *buffer, format, type)) {
         return nullptr;
     }
-    return sk_sp<Bitmap>(new Bitmap(buffer.get(), info));
+    return sk_sp<Bitmap>(new Bitmap(buffer.get(), bitmap.info()));
 }
 
 sk_sp<Bitmap> Bitmap::allocateHardwareBitmap(SkBitmap& bitmap) {
@@ -313,7 +311,8 @@ sk_sp<Bitmap> Bitmap::createFrom(sp<GraphicBuffer> graphicBuffer) {
         return nullptr;
     }
     SkImageInfo info = SkImageInfo::Make(graphicBuffer->getWidth(), graphicBuffer->getHeight(),
-            kRGBA_8888_SkColorType, kPremul_SkAlphaType);
+            kRGBA_8888_SkColorType, kPremul_SkAlphaType,
+            SkColorSpace::MakeNamed(SkColorSpace::kSRGB_Named));
     return sk_sp<Bitmap>(new Bitmap(graphicBuffer.get(), info));
 }
 

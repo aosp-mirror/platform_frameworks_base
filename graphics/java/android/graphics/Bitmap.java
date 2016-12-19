@@ -592,9 +592,13 @@ public final class Bitmap implements Parcelable {
      * @param isMutable True if the resulting bitmap should be mutable (i.e.
      *                  its pixels can be modified)
      * @return the new bitmap, or null if the copy could not be made.
+     * @throws IllegalArgumentException if config is {@link Config#HARDWARE} and isMutable is true
      */
     public Bitmap copy(Config config, boolean isMutable) {
         checkRecycled("Can't copy a recycled bitmap");
+        if (config == Config.HARDWARE && isMutable) {
+            throw new IllegalArgumentException("Hardware bitmaps are always immutable");
+        }
         Bitmap b = nativeCopy(mNativePtr, config.nativeInt, isMutable);
         if (b != null) {
             b.setPremultiplied(mRequestPremultiplied);
