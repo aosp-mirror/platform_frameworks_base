@@ -721,7 +721,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 if (task.isFreeformTask()) {
                     mTmpTransform = stackLayout.getStackTransformScreenCoordinates(task,
                             stackScroller.getStackScroll(), mTmpTransform, null,
-                            windowOverrideRect);
+                            windowOverrideRect, false /* useGridLayout */);
                     Bitmap thumbnail = drawThumbnailTransitionBitmap(task, mTmpTransform,
                             mThumbTransitionBitmapCache);
                     Rect toTaskRect = new Rect();
@@ -771,7 +771,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         stackView.updateLayoutAlgorithm(true /* boundScroll */);
         stackView.updateToInitialState();
         stackView.getStackAlgorithm().getStackTransformScreenCoordinates(launchTask,
-                stackView.getScroller().getStackScroll(), mTmpTransform, null, windowOverrideRect);
+                stackView.getScroller().getStackScroll(), mTmpTransform, null, windowOverrideRect,
+                Recents.getConfiguration().isGridEnabled);
         return mTmpTransform;
     }
 
