@@ -17,6 +17,16 @@ message NetworkId {
   optional int32 network_id = 1;
 };
 
+// Transport describes a physical technology used by a network. It is a subset
+// of the TRANSPORT_* constants defined in android.net.NetworkCapabilities.
+enum Transport {
+  UNKNOWN   = 0;
+  BLUETOOTH = 1;
+  CELLULAR  = 2;
+  ETHERNET  = 3;
+  WIFI      = 4;
+};
+
 // Logs changes in the system default network. Changes can be 1) acquiring a
 // default network with no previous default, 2) a switch of the system default
 // network to a new default network, 3) a loss of the system default network.
@@ -49,7 +59,8 @@ message DefaultNetworkEvent {
 // This message is associated to android.net.metrics.IpReachabilityEvent.
 message IpReachabilityEvent {
   // The interface name (wlan, rmnet, lo, ...) on which the probe was sent.
-  optional string if_name = 1;
+  // Deprecated since version 2, replaced by transport field.
+  optional string if_name = 1 [deprecated = true];
 
   // The event type code of the probe, represented by constants defined in
   // android.net.metrics.IpReachabilityEvent.
@@ -113,7 +124,8 @@ message DNSLookupBatch {
 // android.net.metrics.DhcpErrorEvent.
 message DHCPEvent {
   // The interface name (wlan, rmnet, lo, ...) on which the event happened.
-  optional string if_name = 1;
+  // Deprecated since version 2, replaced by transport field.
+  optional string if_name = 1 [deprecated = true];
 
   oneof value {
     // The name of a state in the DhcpClient state machine, represented by
@@ -217,7 +229,8 @@ message RaEvent {
 // This message is associated to android.net.metrics.IpManagerEvent.
 message IpProvisioningEvent {
   // The interface name (wlan, rmnet, lo, ...) on which the probe was sent.
-  optional string if_name = 1;
+  // Deprecated since version 2, replaced by transport field.
+  optional string if_name = 1 [deprecated = true];
 
   // The code of the IP provisioning event, represented by constants defined in
   // android.net.metrics.IpManagerEvent.
@@ -228,10 +241,14 @@ message IpProvisioningEvent {
 }
 
 // Represents one of the IP connectivity event defined in this file.
-// Next tag: 12
+// Next tag: 13
 message IpConnectivityEvent {
   // Time in ms when the event was recorded.
   optional int64 time_ms = 1;
+
+  // Physical transport of the network on which the event happened.
+  // Since version 2.
+  optional Transport transport = 12;
 
   // Event type.
   oneof event {
@@ -277,9 +294,9 @@ message IpConnectivityLog {
   optional int32 dropped_events = 2;
 
   // The version number of the metrics events being collected.
-  //  nyc-dev: not populated, implicitly 0
-  //  nyc-dr1: not populated, implicitly 1 (sailfish and marlin only)
-  //  nyc-mr1: not populated, implicitly 1
-  //  nyc-mr2: 2
+  //  nyc-dev: not populated, implicitly 0.
+  //  nyc-dr1: not populated, implicitly 1 (sailfish and marlin only).
+  //  nyc-mr1: not populated, implicitly 1.
+  //  nyc-mr2: 2.
   optional int32 version = 3;
 };
