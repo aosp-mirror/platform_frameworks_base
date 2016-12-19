@@ -2897,8 +2897,22 @@ public class BatteryStatsImpl extends BatteryStats {
             mHistoryLastWritten.setTo(mHistoryLastLastWritten);
         }
 
+        boolean recordResetDueToOverflow = false;
         final int dataSize = mHistoryBuffer.dataSize();
-        if (dataSize >= MAX_HISTORY_BUFFER) {
+        if (dataSize >= MAX_MAX_HISTORY_BUFFER*3) {
+            // Clients can't deal with history buffers this large. This only
+            // really happens when the device is on charger and interacted with
+            // for long periods of time, like in retail mode. Since the device is
+            // most likely charged, when unplugged, stats would have reset anyways.
+            // Reset the stats and mark that we overflowed.
+            // b/32540341
+            resetAllStatsLocked();
+
+            // Mark that we want to set *OVERFLOW* event and the RESET:START
+            // events.
+            recordResetDueToOverflow = true;
+
+        } else if (dataSize >= MAX_HISTORY_BUFFER) {
             if (!mHistoryOverflow) {
                 mHistoryOverflow = true;
                 addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_UPDATE, cur);
@@ -2944,9 +2958,12 @@ public class BatteryStatsImpl extends BatteryStats {
             return;
         }
 
-        if (dataSize == 0) {
+        if (dataSize == 0 || recordResetDueToOverflow) {
             // The history is currently empty; we need it to start with a time stamp.
             cur.currentTime = System.currentTimeMillis();
+            if (recordResetDueToOverflow) {
+                addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_OVERFLOW, cur);
+            }
             addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_RESET, cur);
         }
         addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_UPDATE, cur);
