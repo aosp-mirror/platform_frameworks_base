@@ -3119,6 +3119,12 @@
     <permission android:name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME"
                 android:protectionLevel="signature|privileged" />
 
+    <!-- Allows an application to make calls to OverlayManagerService.-->
+    <permission android:name="android.permission.MODIFY_OVERLAYS"
+        android:label="@string/permlab_modifyOverlays"
+        android:description="@string/permdesc_modifyOverlays"
+        android:protectionLevel="normal" />
+
     <application android:process="system"
                  android:persistent="true"
                  android:hasCode="false"
