@@ -136,7 +136,7 @@ public class TaskViewThumbnail extends View {
         int thumbnailHeight = Math.min(viewHeight,
                 (int) (mThumbnailRect.height() * mThumbnailScale));
 
-        if (mTask.isLocked) {
+        if (mTask != null && mTask.isLocked) {
             canvas.drawRoundRect(0, 0, viewWidth, viewHeight, mCornerRadius, mCornerRadius,
                     mLockedPaint);
         } else if (mBitmapShader != null && thumbnailWidth > 0 && thumbnailHeight > 0) {
