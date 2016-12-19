@@ -26,6 +26,8 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.UserHandle;
+import android.os.UserManager;
+import android.provider.Settings.Global;
 import android.util.ArrayMap;
 import android.util.Pair;
 
@@ -34,6 +36,7 @@ import com.android.settingslib.TestConfig;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
@@ -46,6 +49,7 @@ import java.util.Map;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -59,6 +63,8 @@ public class TileUtilsTest {
     private PackageManager mPackageManager;
     @Mock
     private Resources mResources;
+    @Mock
+    private UserManager mUserManager;
 
     @Before
     public void setUp() throws NameNotFoundException {
@@ -127,6 +133,30 @@ public class TileUtilsTest {
         assertThat(outTiles.isEmpty()).isTrue();
     }
 
+    @Test
+    public void getCategories_shouldHandleExtraIntentAction() {
+        final String testCategory = "category1";
+        final String testAction = "action1";
+        Map<Pair<String, String>, Tile> cache = new ArrayMap<>();
+        List<ResolveInfo> info = new ArrayList<>();
+        info.add(newInfo(true, testCategory));
+        Global.putInt(mContext.getContentResolver(), Global.DEVICE_PROVISIONED, 1);
+        when(mContext.getSystemService(Context.USER_SERVICE)).thenReturn(mUserManager);
+        List<UserHandle> userHandleList = new ArrayList<>();
+        userHandleList.add(UserHandle.CURRENT);
+        when(mUserManager.getUserProfiles()).thenReturn(userHandleList);
+
+        when(mPackageManager.queryIntentActivitiesAsUser(argThat(new ArgumentMatcher<Intent>() {
+            public boolean matches(Object event) {
+                return testAction.equals(((Intent) event).getAction());
+            }
+        }), anyInt(), anyInt())).thenReturn(info);
+
+        List<DashboardCategory> categoryList = TileUtils.getCategories(
+            mContext, cache, false /* categoryDefinedInManifest */, testAction);
+
+        assertThat(categoryList.get(0).tiles.get(0).category).isEqualTo(testCategory);
+    }
 
     private ResolveInfo newInfo(boolean systemApp, String category) {
         return newInfo(systemApp, category, null);

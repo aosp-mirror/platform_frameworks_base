@@ -50,19 +50,25 @@ public class CategoryManager {
     private final Map<String, DashboardCategory> mCategoryByKeyMap;
 
     private List<DashboardCategory> mCategories;
+    private String mExtraAction;
 
     public static CategoryManager get(Context context) {
+        return get(context, null);
+    }
+
+    public static CategoryManager get(Context context, String action) {
         if (sInstance == null) {
-            sInstance = new CategoryManager(context);
+            sInstance = new CategoryManager(context, action);
         }
         return sInstance;
     }
 
-    CategoryManager(Context context) {
+    CategoryManager(Context context, String action) {
         mTileByComponentCache = new ArrayMap<>();
         mCategoryByKeyMap = new ArrayMap<>();
         mInterestingConfigChanges = new InterestingConfigChanges();
         mInterestingConfigChanges.applyNewConfig(context.getResources());
+        mExtraAction = action;
     }
 
     public synchronized DashboardCategory getTilesByCategory(Context context, String categoryKey) {
@@ -111,7 +117,7 @@ public class CategoryManager {
             }
             mCategoryByKeyMap.clear();
             mCategories = TileUtils.getCategories(context, mTileByComponentCache,
-                    false /* categoryDefinedInManifest */);
+                    false /* categoryDefinedInManifest */, mExtraAction);
             for (DashboardCategory category : mCategories) {
                 mCategoryByKeyMap.put(category.key, category);
             }
