@@ -3998,8 +3998,10 @@ public class AccessibilityNodeInfo implements Parcelable {
          * Obtains a pooled instance.
          *
          * @param type The type of the range.
-         * @param min The min value.
-         * @param max The max value.
+         * @param min The minimum value. Use {@code Float.NEGATIVE_INFINITY} if the range has no
+         *            minimum.
+         * @param max The maximum value. Use {@code Float.POSITIVE_INFINITY} if the range has no
+         *            maximum.
          * @param current The current value.
          */
         public static RangeInfo obtain(int type, float min, float max, float current) {
@@ -4019,8 +4021,10 @@ public class AccessibilityNodeInfo implements Parcelable {
          * Creates a new range.
          *
          * @param type The type of the range.
-         * @param min The min value.
-         * @param max The max value.
+         * @param min The minimum value. Use {@code Float.NEGATIVE_INFINITY} if the range has no
+         *            minimum.
+         * @param max The maximum value. Use {@code Float.POSITIVE_INFINITY} if the range has no
+         *            maximum.
          * @param current The current value.
          */
         private RangeInfo(int type, float min, float max, float current) {
@@ -4044,18 +4048,18 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
 
         /**
-         * Gets the min value.
+         * Gets the minimum value.
          *
-         * @return The min value.
+         * @return The minimum value, or {@code Float.NEGATIVE_INFINITY} if no minimum exists.
          */
         public float getMin() {
             return mMin;
         }
 
         /**
-         * Gets the max value.
+         * Gets the maximum value.
          *
-         * @return The max value.
+         * @return The maximum value, or {@code Float.POSITIVE_INFINITY} if no maximum exists.
          */
         public float getMax() {
             return mMax;
