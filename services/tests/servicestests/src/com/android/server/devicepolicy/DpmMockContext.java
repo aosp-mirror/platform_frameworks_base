@@ -18,6 +18,7 @@ package com.android.server.devicepolicy;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.app.AlarmManager;
 import android.app.IActivityManager;
 import android.app.NotificationManager;
 import android.app.backup.IBackupManager;
@@ -276,6 +277,7 @@ public class DpmMockContext extends MockContext {
     public final MockContentResolver contentResolver;
     public final TelephonyManager telephonyManager;
     public final AccountManager accountManager;
+    public final AlarmManager alarmManager;
 
     /** Note this is a partial mock, not a real mock. */
     public final PackageManager packageManager;
@@ -319,6 +321,7 @@ public class DpmMockContext extends MockContext {
         settings = mock(SettingsForMock.class);
         telephonyManager = mock(TelephonyManager.class);
         accountManager = mock(AccountManager.class);
+        alarmManager = mock(AlarmManager.class);
 
         // Package manager is huge, so we use a partial mock instead.
         packageManager = spy(context.getPackageManager());
@@ -327,7 +330,8 @@ public class DpmMockContext extends MockContext {
 
         contentResolver = new MockContentResolver();
 
-        // Add the system user
+        // Add the system user with a fake profile group already set up (this can happen in the real
+        // world if a managed profile is added and then removed).
         systemUserDataDir =
                 addUser(UserHandle.USER_SYSTEM, UserInfo.FLAG_PRIMARY, UserHandle.USER_SYSTEM);
 
@@ -410,9 +414,9 @@ public class DpmMockContext extends MockContext {
         if (parent == null) {
             return ret;
         }
-        ret.add(parent);
         for (UserInfo ui : mUserInfos) {
-            if (ui.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID
+            if (ui == parent
+                    || ui.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID
                     && ui.profileGroupId == parent.profileGroupId) {
                 ret.add(ui);
             }
@@ -463,6 +467,8 @@ public class DpmMockContext extends MockContext {
     @Override
     public Object getSystemService(String name) {
         switch (name) {
+            case Context.ALARM_SERVICE:
+                return alarmManager;
             case Context.USER_SERVICE:
                 return userManager;
             case Context.POWER_SERVICE:
