@@ -385,7 +385,7 @@ public class DevicePolicyManager {
             "com.android.server.action.BUGREPORT_SHARING_DECLINED";
 
     /**
-     * Action: Bugreport has been collected and is dispatched to {@link DevicePolicyManagerService}.
+     * Action: Bugreport has been collected and is dispatched to {@code DevicePolicyManagerService}.
      *
      * @hide
      */
@@ -1165,7 +1165,7 @@ public class DevicePolicyManager {
     public @interface UserProvisioningState {}
 
     /**
-     * Result code for {@link checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPreCondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE},
      * {@link #ACTION_PROVISION_MANAGED_PROFILE}, {@link #ACTION_PROVISION_MANAGED_USER} and
@@ -1176,7 +1176,7 @@ public class DevicePolicyManager {
     public static final int CODE_OK = 0;
 
     /**
-     * Result code for {@link checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPreCondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE} and
      * {@link #ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE} when the device already has a device
@@ -1187,7 +1187,7 @@ public class DevicePolicyManager {
     public static final int CODE_HAS_DEVICE_OWNER = 1;
 
     /**
-     * Result code for {@link checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPreCondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE},
      * {@link #ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE} when the user has a profile owner and for
@@ -1198,7 +1198,7 @@ public class DevicePolicyManager {
     public static final int CODE_USER_HAS_PROFILE_OWNER = 2;
 
     /**
-     * Result code for {@link checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPreCondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE} and
      * {@link #ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE} when the user isn't running.
@@ -1208,7 +1208,7 @@ public class DevicePolicyManager {
     public static final int CODE_USER_NOT_RUNNING = 3;
 
     /**
-     * Result code for {@link checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPreCondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE},
      * {@link #ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE} if the device has already been setup and
@@ -1233,7 +1233,7 @@ public class DevicePolicyManager {
     public static final int CODE_ACCOUNTS_NOT_EMPTY = 6;
 
     /**
-     * Result code for {@link checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPreCondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE} and
      * {@link #ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE} if the user is not a system user.
@@ -1243,7 +1243,7 @@ public class DevicePolicyManager {
     public static final int CODE_NOT_SYSTEM_USER = 7;
 
     /**
-     * Result code for {@link checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPreCondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE},
      * {@link #ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE} and {@link #ACTION_PROVISION_MANAGED_USER}
@@ -1254,7 +1254,7 @@ public class DevicePolicyManager {
     public static final int CODE_HAS_PAIRED = 8;
 
     /**
-     * Result code for {@link checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPreCondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_PROFILE} and
      * {@link #ACTION_PROVISION_MANAGED_USER} on devices which do not support managed users.
@@ -1265,7 +1265,7 @@ public class DevicePolicyManager {
     public static final int CODE_MANAGED_USERS_NOT_SUPPORTED = 9;
 
     /**
-     * Result code for {@link checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPreCondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_USER} if the user is a system user.
      *
@@ -1274,7 +1274,7 @@ public class DevicePolicyManager {
     public static final int CODE_SYSTEM_USER = 10;
 
     /**
-     * Result code for {@link checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPreCondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_PROFILE} when the user cannot have more
      * managed profiles.
@@ -1284,7 +1284,7 @@ public class DevicePolicyManager {
     public static final int CODE_CANNOT_ADD_MANAGED_PROFILE = 11;
 
     /**
-     * Result code for {@link checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPreCondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_USER} and
      * {@link #ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE} on devices not running with split system
@@ -1295,7 +1295,7 @@ public class DevicePolicyManager {
     public static final int CODE_NOT_SYSTEM_USER_SPLIT = 12;
 
     /**
-     * Result code for {@link checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPreCondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE},
      * {@link #ACTION_PROVISION_MANAGED_PROFILE}, {@link #ACTION_PROVISION_MANAGED_USER} and
@@ -1307,7 +1307,7 @@ public class DevicePolicyManager {
     public static final int CODE_DEVICE_ADMIN_NOT_SUPPORTED = 13;
 
     /**
-     * Result code for {@link checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPreCondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_PROFILE} when the device the user is a
      * system user on a split system user device.
@@ -1317,7 +1317,17 @@ public class DevicePolicyManager {
     public static final int CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER = 14;
 
     /**
-     * Result codes for {@link checkProvisioningPreCondition} indicating all the provisioning pre
+     * Result code for {@link #checkProvisioningPreCondition}.
+     *
+     * <p>Returned for {@link #ACTION_PROVISION_MANAGED_PROFILE} when adding a managed profile is
+     * disallowed by {@link UserManager#DISALLOW_ADD_MANAGED_PROFILE}.
+     *
+     * @hide
+     */
+    public static final int CODE_ADD_MANAGED_PROFILE_DISALLOWED = 15;
+
+    /**
+     * Result codes for {@link #checkProvisioningPreCondition} indicating all the provisioning pre
      * conditions.
      *
      * @hide
@@ -1327,7 +1337,7 @@ public class DevicePolicyManager {
             CODE_USER_SETUP_COMPLETED, CODE_NOT_SYSTEM_USER, CODE_HAS_PAIRED,
             CODE_MANAGED_USERS_NOT_SUPPORTED, CODE_SYSTEM_USER, CODE_CANNOT_ADD_MANAGED_PROFILE,
             CODE_NOT_SYSTEM_USER_SPLIT, CODE_DEVICE_ADMIN_NOT_SUPPORTED,
-            CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER})
+            CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER, CODE_ADD_MANAGED_PROFILE_DISALLOWED})
     public @interface ProvisioningPreCondition {}
 
     /**
@@ -6184,34 +6194,40 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns if provisioning a managed profile or device is possible or not.
+     * Returns whether it is possible for the caller to initiate provisioning of a managed profile
+     * or device, setting itself as the device or profile owner.
+     *
      * @param action One of {@link #ACTION_PROVISION_MANAGED_DEVICE},
      * {@link #ACTION_PROVISION_MANAGED_PROFILE}.
-     * @return if provisioning a managed profile or device is possible or not.
+     * @return whether provisioning a managed profile or device is possible.
      * @throws IllegalArgumentException if the supplied action is not valid.
      */
-    public boolean isProvisioningAllowed(String action) {
+    public boolean isProvisioningAllowed(@NonNull String action) {
         throwIfParentInstance("isProvisioningAllowed");
         try {
-            return mService.isProvisioningAllowed(action);
+            return mService.isProvisioningAllowed(action, mContext.getPackageName());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Checks if provisioning a managed profile or device is possible and returns one of the
-     * {@link ProvisioningPreCondition}.
+     * Checks whether it is possible to initiate provisioning a managed device,
+     * profile or user, setting the given package as owner.
      *
      * @param action One of {@link #ACTION_PROVISION_MANAGED_DEVICE},
      *        {@link #ACTION_PROVISION_MANAGED_PROFILE},
      *        {@link #ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE},
      *        {@link #ACTION_PROVISION_MANAGED_USER}
+     * @param packageName The package of the component that would be set as device, user, or profile
+     *        owner.
+     * @return A {@link ProvisioningPreCondition} value indicating whether provisioning is allowed.
      * @hide
      */
-    public @ProvisioningPreCondition int checkProvisioningPreCondition(String action) {
+    public @ProvisioningPreCondition int checkProvisioningPreCondition(
+            String action, @NonNull String packageName) {
         try {
-            return mService.checkProvisioningPreCondition(action);
+            return mService.checkProvisioningPreCondition(action, packageName);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -6940,8 +6956,8 @@ public class DevicePolicyManager {
      * @hide
      * Force update user setup completed status. This API has no effect on user build.
      * @throws {@link SecurityException} if the caller has no
-     *         {@link android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS} or the caller is
-     *         not {@link UserHandle.SYSTEM_USER}
+     *         {@code android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS} or the caller is
+     *         not {@link UserHandle#SYSTEM_USER}
      */
     public void forceUpdateUserSetupComplete() {
         try {

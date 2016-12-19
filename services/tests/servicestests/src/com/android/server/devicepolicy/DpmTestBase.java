@@ -82,6 +82,10 @@ public abstract class DpmTestBase extends AndroidTestCase {
                 eq(packageName),
                 eq(0),
                 eq(userId));
+
+        doReturn(ai.uid).when(mMockContext.packageManager).getPackageUidAsUser(
+                eq(packageName),
+                eq(userId));
     }
 
     protected void setUpPackageManagerForAdmin(ComponentName admin, int packageUid)

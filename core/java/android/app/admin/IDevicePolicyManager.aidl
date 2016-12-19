@@ -269,8 +269,8 @@ interface IDevicePolicyManager {
     boolean setPermissionGrantState(in ComponentName admin, String packageName,
             String permission, int grantState);
     int getPermissionGrantState(in ComponentName admin, String packageName, String permission);
-    boolean isProvisioningAllowed(String action);
-    int checkProvisioningPreCondition(String action);
+    boolean isProvisioningAllowed(String action, String packageName);
+    int checkProvisioningPreCondition(String action, String packageName);
     void setKeepUninstalledPackages(in ComponentName admin,in List<String> packageList);
     List<String> getKeepUninstalledPackages(in ComponentName admin);
     boolean isManagedProfile(in ComponentName admin);
