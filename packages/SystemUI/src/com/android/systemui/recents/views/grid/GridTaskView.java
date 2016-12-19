@@ -42,7 +42,7 @@ public class GridTaskView extends TaskView {
     public GridTaskView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mHeaderHeight = context.getResources().getDimensionPixelSize(
-                R.dimen.recents_task_view_header_height);
+                R.dimen.recents_grid_task_view_header_height);
     }
 
     @Override
@@ -65,7 +65,7 @@ public class GridTaskView extends TaskView {
     protected void onConfigurationChanged() {
         super.onConfigurationChanged();
         mHeaderHeight = mContext.getResources().getDimensionPixelSize(
-                R.dimen.recents_task_view_header_height);
+                R.dimen.recents_grid_task_view_header_height);
         mThumbnailView.setTranslationY(mHeaderHeight);
     }
 }
