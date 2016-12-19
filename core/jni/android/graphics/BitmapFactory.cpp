@@ -395,7 +395,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     SkAlphaType alphaType = codec->computeOutputAlphaType(requireUnpremultiplied);
 
     const SkImageInfo decodeInfo = SkImageInfo::Make(size.width(), size.height(),
-            decodeColorType, alphaType, codec->computeOutputColorSpace(decodeColorType));
+            decodeColorType, alphaType);
 
     // We always decode to sRGB, but only mark the bitmap with a color space if linear
     // blending is enabled.
