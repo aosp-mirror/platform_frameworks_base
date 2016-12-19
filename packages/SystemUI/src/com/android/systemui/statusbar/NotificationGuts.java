@@ -242,9 +242,9 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
                 return Ranking.IMPORTANCE_UNSPECIFIED;
             }
         } else {
-            if (mBlock.isChecked()) {
+            if (mBlock != null && mBlock.isChecked()) {
                 return Ranking.IMPORTANCE_NONE;
-            } else if (mSilent.isChecked()) {
+            } else if (mSilent != null && mSilent.isChecked()) {
                 return Ranking.IMPORTANCE_LOW;
             } else {
                 return Ranking.IMPORTANCE_UNSPECIFIED;
