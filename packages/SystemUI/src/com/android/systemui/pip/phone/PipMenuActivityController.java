@@ -77,7 +77,7 @@ public class PipMenuActivityController {
         void onPipMinimize();
 
         /**
-         * Called when the PIP requested to be expanded.
+         * Called when the PIP requested to be dismissed.
          */
         void onPipDismiss();
     }

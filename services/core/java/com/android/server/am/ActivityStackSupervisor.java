@@ -163,6 +163,8 @@ import android.view.InputEvent;
 import android.view.Surface;
 
 import com.android.internal.content.ReferrerIntent;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ArrayUtils;
@@ -2278,6 +2280,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         // pinned stack is recreated. See moveActivityToPinnedStackLocked().
                         task.setTaskToReturnTo(isFullscreenStackVisible && onTop ?
                                 APPLICATION_ACTIVITY_TYPE : HOME_ACTIVITY_TYPE);
+                        MetricsLogger.action(mService.mContext,
+                                MetricsEvent.ACTION_PICTURE_IN_PICTURE_EXPANDED_TO_FULLSCREEN);
                     }
                     moveTaskToStackLocked(tasks.get(i).taskId,
                             FULLSCREEN_WORKSPACE_STACK_ID, onTop, onTop /*forceFocus*/,
