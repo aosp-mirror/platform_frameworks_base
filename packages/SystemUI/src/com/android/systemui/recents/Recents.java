@@ -207,8 +207,6 @@ public class Recents extends SystemUI
                 getSystemService(Context.UI_MODE_SERVICE);
         if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
             mImpl = new RecentsTvImpl(mContext);
-        } else if (SystemProperties.getBoolean("ro.recents.grid", false) == true) {
-            mImpl = new RecentsGridImpl(mContext);
         } else {
             mImpl = new RecentsImpl(mContext);
         }
