@@ -3179,6 +3179,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             }
             updateNotificationAnimationStates();
             updateChronometers();
+            requestChildrenUpdate();
         }
     }
 
