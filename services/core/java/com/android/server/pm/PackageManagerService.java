@@ -20459,8 +20459,9 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
 
         Preconditions.checkNotNull(app.seinfo);
 
+        long ceDataInode = -1;
         try {
-            mInstaller.createAppData(volumeUuid, packageName, userId, flags,
+            ceDataInode = mInstaller.createAppData(volumeUuid, packageName, userId, flags,
                     appId, app.seinfo, app.targetSdkVersion);
         } catch (InstallerException e) {
             if (app.isSystemApp()) {
@@ -20468,7 +20469,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                         + ", but trying to recover: " + e);
                 destroyAppDataLeafLIF(pkg, userId, flags);
                 try {
-                    mInstaller.createAppData(volumeUuid, packageName, userId, flags,
+                    ceDataInode = mInstaller.createAppData(volumeUuid, packageName, userId, flags,
                             appId, app.seinfo, app.targetSdkVersion);
                     logCriticalInfo(Log.DEBUG, "Recovery succeeded!");
                 } catch (InstallerException e2) {
@@ -20479,21 +20480,13 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             }
         }
 
-        if ((flags & StorageManager.FLAG_STORAGE_CE) != 0) {
-            try {
-                // CE storage is unlocked right now, so read out the inode and
-                // remember for use later when it's locked
-                // TODO: mark this structure as dirty so we persist it!
-                final long ceDataInode = mInstaller.getAppDataInode(volumeUuid, packageName, userId,
-                        StorageManager.FLAG_STORAGE_CE);
-                synchronized (mPackages) {
-                    final PackageSetting ps = mSettings.mPackages.get(packageName);
-                    if (ps != null) {
-                        ps.setCeDataInode(ceDataInode, userId);
-                    }
+        if ((flags & StorageManager.FLAG_STORAGE_CE) != 0 && ceDataInode != -1) {
+            // TODO: mark this structure as dirty so we persist it!
+            synchronized (mPackages) {
+                final PackageSetting ps = mSettings.mPackages.get(packageName);
+                if (ps != null) {
+                    ps.setCeDataInode(ceDataInode, userId);
                 }
-            } catch (InstallerException e) {
-                Slog.e(TAG, "Failed to find inode for " + packageName + ": " + e);
             }
         }
 

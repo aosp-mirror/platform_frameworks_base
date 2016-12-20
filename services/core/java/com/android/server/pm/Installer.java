@@ -105,11 +105,11 @@ public class Installer extends SystemService {
         }
     }
 
-    public void createAppData(String uuid, String packageName, int userId, int flags, int appId,
+    public long createAppData(String uuid, String packageName, int userId, int flags, int appId,
             String seInfo, int targetSdkVersion) throws InstallerException {
-        if (!checkBeforeRemote()) return;
+        if (!checkBeforeRemote()) return -1;
         try {
-            mInstalld.createAppData(uuid, packageName, userId, flags, appId, seInfo,
+            return mInstalld.createAppData(uuid, packageName, userId, flags, appId, seInfo,
                     targetSdkVersion);
         } catch (Exception e) {
             throw InstallerException.from(e);
@@ -177,16 +177,6 @@ public class Installer extends SystemService {
             stats.codeSize += res[0];
             stats.dataSize += res[1];
             stats.cacheSize += res[2];
-        } catch (Exception e) {
-            throw InstallerException.from(e);
-        }
-    }
-
-    public long getAppDataInode(String uuid, String packageName, int userId, int flags)
-            throws InstallerException {
-        if (!checkBeforeRemote()) return -1;
-        try {
-            return mInstalld.getAppDataInode(uuid, packageName, userId, flags);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
