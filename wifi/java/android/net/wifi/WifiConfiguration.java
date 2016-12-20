@@ -701,6 +701,7 @@ public class WifiConfiguration implements Parcelable {
      * {@link com.android.server.wifi.WifiStateMachine}, or via a network score in
      * {@link com.android.server.wifi.ExternalScoreEvaluator}.
      */
+    @SystemApi
     public boolean meteredHint;
 
     /**
