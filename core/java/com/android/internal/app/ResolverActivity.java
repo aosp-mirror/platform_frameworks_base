@@ -109,10 +109,10 @@ public class ResolverActivity extends Activity {
     private boolean mResolvingHome = false;
     private int mProfileSwitchMessageId = -1;
     private final ArrayList<Intent> mIntents = new ArrayList<>();
-    private ResolverComparator mResolverComparator;
     private PickTargetOptionRequest mPickOptionRequest;
     private ComponentName[] mFilteredComponents;
 
+    protected ResolverComparator mResolverComparator;
     protected ResolverDrawerLayout mResolverDrawerLayout;
     protected String mContentType;
 
