@@ -16,32 +16,33 @@
 
 package android.net;
 
+import static org.mockito.Mockito.when;
+
 import android.Manifest.permission;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.res.Resources;
 import android.net.NetworkScorerAppManager.NetworkScorerAppData;
-import android.os.UserHandle;
+import android.provider.Settings;
 import android.test.InstrumentationTestCase;
-
+import com.android.internal.R;
+import java.util.List;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
 public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
     @Mock private Context mMockContext;
     @Mock private PackageManager mMockPm;
-
+    @Mock private Resources mResources;
+    @Mock private ContentResolver mContentResolver;
+    private Context mTargetContext;
     private NetworkScorerAppManager mNetworkScorerAppManager;
 
     @Override
@@ -49,154 +50,161 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
         super.setUp();
 
         // Configuration needed to make mockito/dexcache work.
-        System.setProperty("dexmaker.dexcache",
-                getInstrumentation().getTargetContext().getCacheDir().getPath());
+        mTargetContext = getInstrumentation().getTargetContext();
+        System.setProperty("dexmaker.dexcache", mTargetContext.getCacheDir().getPath());
         ClassLoader newClassLoader = getInstrumentation().getClass().getClassLoader();
         Thread.currentThread().setContextClassLoader(newClassLoader);
 
         MockitoAnnotations.initMocks(this);
-        Mockito.when(mMockContext.getPackageManager()).thenReturn(mMockPm);
+        when(mMockContext.getPackageManager()).thenReturn(mMockPm);
+        when(mMockContext.getResources()).thenReturn(mResources);
+        when(mMockContext.getContentResolver()).thenReturn(mTargetContext.getContentResolver());
         mNetworkScorerAppManager = new NetworkScorerAppManager(mMockContext);
     }
 
-    public void testGetAllValidScorers() throws Exception {
-        // Package 1 - Valid scorer.
-        ResolveInfoHolder package1 = buildResolveInfo("package1", 1, true, true, false, false);
-
-        // Package 2 - Receiver does not have BROADCAST_NETWORK_PRIVILEGED permission.
-        ResolveInfoHolder package2 = buildResolveInfo("package2", 2, false, true, false, false);
-
-        // Package 3 - App does not have SCORE_NETWORKS permission.
-        ResolveInfoHolder package3 = buildResolveInfo("package3", 3, true, false, false, false);
-
-        // Package 4 - Valid scorer w/ optional config activity.
-        ResolveInfoHolder package4 = buildResolveInfo("package4", 4, true, true, true, false);
-
-        // Package 5 - Valid scorer w/ optional service to bind to.
-        ResolveInfoHolder package5 = buildResolveInfo("package5", 5, true, true, false, true);
-
-        List<ResolveInfoHolder> scorers = new ArrayList<>();
-        scorers.add(package1);
-        scorers.add(package2);
-        scorers.add(package3);
-        scorers.add(package4);
-        scorers.add(package5);
-        setScorers(scorers);
-
-        Iterator<NetworkScorerAppData> result =
-                mNetworkScorerAppManager.getAllValidScorers().iterator();
-
-        assertTrue(result.hasNext());
-        NetworkScorerAppData next = result.next();
-        assertEquals("package1", next.mPackageName);
-        assertEquals(1, next.mPackageUid);
-        assertNull(next.mConfigurationActivityClassName);
-
-        assertTrue(result.hasNext());
-        next = result.next();
-        assertEquals("package4", next.mPackageName);
-        assertEquals(4, next.mPackageUid);
-        assertEquals(".ConfigActivity", next.mConfigurationActivityClassName);
-
-        assertTrue(result.hasNext());
-        next = result.next();
-        assertEquals("package5", next.mPackageName);
-        assertEquals(5, next.mPackageUid);
-        assertEquals(".ScoringService", next.mScoringServiceClassName);
-
-        assertFalse(result.hasNext());
+    public void testGetPotentialRecommendationProviderPackages_emptyConfig() throws Exception {
+        setNetworkRecommendationPackageNames(/*no configured packages*/);
+        assertTrue(mNetworkScorerAppManager.getPotentialRecommendationProviderPackages().isEmpty());
     }
 
-    private void setScorers(List<ResolveInfoHolder> scorers) {
-        List<ResolveInfo> receivers = new ArrayList<>();
-        for (final ResolveInfoHolder scorer : scorers) {
-            receivers.add(scorer.scorerResolveInfo);
-            if (scorer.configActivityResolveInfo != null) {
-                // This scorer has a config activity.
-                Mockito.when(mMockPm.queryIntentActivities(
-                        Mockito.argThat(new ArgumentMatcher<Intent>() {
-                            @Override
-                            public boolean matches(Object object) {
-                                Intent intent = (Intent) object;
-                                return NetworkScoreManager.ACTION_CUSTOM_ENABLE.equals(
-                                        intent.getAction())
-                                        && scorer.scorerResolveInfo.activityInfo.packageName.equals(
-                                                intent.getPackage());
-                            }
-                        }), Mockito.eq(0))).thenReturn(
-                                Collections.singletonList(scorer.configActivityResolveInfo));
-            }
+    public void testGetPotentialRecommendationProviderPackages_permissionNotGranted()
+            throws Exception {
+        setNetworkRecommendationPackageNames("package1");
+        mockScoreNetworksDenied("package1");
 
-            if (scorer.serviceResolveInfo != null) {
-                // This scorer has a service to bind to
-                Mockito.when(mMockPm.resolveService(
-                        Mockito.argThat(new ArgumentMatcher<Intent>() {
-                            @Override
-                            public boolean matches(Object object) {
-                                Intent intent = (Intent) object;
-                                return NetworkScoreManager.ACTION_SCORE_NETWORKS.equals(
-                                        intent.getAction())
-                                        && scorer.scorerResolveInfo.activityInfo.packageName.equals(
-                                        intent.getPackage());
-                            }
-                        }), Mockito.eq(0))).thenReturn(scorer.serviceResolveInfo);
-            }
+        assertTrue(mNetworkScorerAppManager.getPotentialRecommendationProviderPackages().isEmpty());
+    }
+
+    public void testGetPotentialRecommendationProviderPackages_permissionGranted()
+            throws Exception {
+        setNetworkRecommendationPackageNames("package1");
+        mockScoreNetworksGranted("package1");
+
+        List<String> potentialProviderPackages =
+                mNetworkScorerAppManager.getPotentialRecommendationProviderPackages();
+
+        assertFalse(potentialProviderPackages.isEmpty());
+        assertEquals("package1", potentialProviderPackages.get(0));
+    }
+
+    public void testGetPotentialRecommendationProviderPackages_multipleConfigured()
+            throws Exception {
+        setNetworkRecommendationPackageNames("package1", "package2");
+        mockScoreNetworksDenied("package1");
+        mockScoreNetworksGranted("package2");
+
+        List<String> potentialProviderPackages =
+                mNetworkScorerAppManager.getPotentialRecommendationProviderPackages();
+
+        assertEquals(1, potentialProviderPackages.size());
+        assertEquals("package2", potentialProviderPackages.get(0));
+    }
+
+    public void testGetNetworkRecommendationProviderData_noPotentialPackages() throws Exception {
+        setNetworkRecommendationPackageNames(/*no configured packages*/);
+        assertNull(mNetworkScorerAppManager.getNetworkRecommendationProviderData());
+    }
+
+    public void testGetNetworkRecommendationProviderData_serviceMissing() throws Exception {
+        setNetworkRecommendationPackageNames("package1");
+        mockScoreNetworksGranted("package1");
+
+        assertNull(mNetworkScorerAppManager.getNetworkRecommendationProviderData());
+    }
+
+    public void testGetNetworkRecommendationProviderData_scoreNetworksNotGranted()
+            throws Exception {
+        setNetworkRecommendationPackageNames("package1");
+        mockScoreNetworksDenied("package1");
+        mockRecommendationServiceAvailable("package1", 924 /* packageUid */);
+
+        assertNull(mNetworkScorerAppManager.getNetworkRecommendationProviderData());
+    }
+
+    public void testGetNetworkRecommendationProviderData_available() throws Exception {
+        setNetworkRecommendationPackageNames("package1");
+        mockScoreNetworksGranted("package1");
+        mockRecommendationServiceAvailable("package1", 924 /* packageUid */);
+
+        NetworkScorerAppData appData =
+                mNetworkScorerAppManager.getNetworkRecommendationProviderData();
+        assertNotNull(appData);
+        assertEquals("package1", appData.packageName);
+        assertEquals(924, appData.packageUid);
+        assertEquals(".RecommendationService", appData.recommendationServiceClassName);
+    }
+
+    public void testGetActiveScorer_providerAvailable() throws Exception {
+        setNetworkRecommendationPackageNames("package1");
+        mockScoreNetworksGranted("package1");
+        mockRecommendationServiceAvailable("package1", 924 /* packageUid */);
+
+        ContentResolver cr = mTargetContext.getContentResolver();
+        Settings.Global.putInt(cr, Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED, 1);
+
+        final NetworkScorerAppData activeScorer = mNetworkScorerAppManager.getActiveScorer();
+        assertNotNull(activeScorer);
+        assertEquals("package1", activeScorer.packageName);
+        assertEquals(924, activeScorer.packageUid);
+        assertEquals(".RecommendationService", activeScorer.recommendationServiceClassName);
+    }
+
+    public void testGetActiveScorer_providerNotAvailable()
+            throws Exception {
+        ContentResolver cr = mTargetContext.getContentResolver();
+        Settings.Global.putInt(cr, Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED, 1);
+
+        final NetworkScorerAppData activeScorer = mNetworkScorerAppManager.getActiveScorer();
+        assertNull(activeScorer);
+    }
+
+    public void testGetActiveScorer_recommendationsDisabled() throws Exception {
+        setNetworkRecommendationPackageNames("package1");
+        mockScoreNetworksGranted("package1");
+        mockRecommendationServiceAvailable("package1", 924 /* packageUid */);
+        ContentResolver cr = mTargetContext.getContentResolver();
+        Settings.Global.putInt(cr, Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED, 0);
+
+        final NetworkScorerAppData activeScorer = mNetworkScorerAppManager.getActiveScorer();
+        assertNull(activeScorer);
+    }
+
+    private void setNetworkRecommendationPackageNames(String... names) {
+        if (names == null) {
+            names = new String[0];
         }
+        when(mResources.getStringArray(R.array.config_networkRecommendationPackageNames))
+                .thenReturn(names);
+    }
 
-        Mockito.when(mMockPm.queryBroadcastReceiversAsUser(
+    private void mockScoreNetworksGranted(String packageName) {
+        when(mMockPm.checkPermission(permission.SCORE_NETWORKS, packageName))
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
+    }
+
+    private void mockScoreNetworksDenied(String packageName) {
+        when(mMockPm.checkPermission(permission.SCORE_NETWORKS, packageName))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
+    }
+
+    private void mockRecommendationServiceAvailable(final String packageName, int packageUid) {
+        final ResolveInfo serviceInfo = new ResolveInfo();
+        serviceInfo.serviceInfo = new ServiceInfo();
+        serviceInfo.serviceInfo.name = ".RecommendationService";
+        serviceInfo.serviceInfo.packageName = packageName;
+        serviceInfo.serviceInfo.applicationInfo = new ApplicationInfo();
+        serviceInfo.serviceInfo.applicationInfo.uid = packageUid;
+
+        final int flags = 0;
+        when(mMockPm.resolveService(
                 Mockito.argThat(new ArgumentMatcher<Intent>() {
                     @Override
                     public boolean matches(Object object) {
                         Intent intent = (Intent) object;
-                        return NetworkScoreManager.ACTION_SCORE_NETWORKS.equals(intent.getAction());
+                        return NetworkScoreManager.ACTION_RECOMMEND_NETWORKS
+                                .equals(intent.getAction())
+                                && packageName.equals(intent.getPackage());
                     }
-                }), Mockito.eq(0), Mockito.eq(UserHandle.USER_SYSTEM)))
-                .thenReturn(receivers);
-    }
-
-    private ResolveInfoHolder buildResolveInfo(String packageName, int packageUid,
-            boolean hasReceiverPermission, boolean hasScorePermission, boolean hasConfigActivity,
-            boolean hasServiceInfo) throws Exception {
-        Mockito.when(mMockPm.checkPermission(permission.SCORE_NETWORKS, packageName))
-                .thenReturn(hasScorePermission ?
-                        PackageManager.PERMISSION_GRANTED : PackageManager.PERMISSION_DENIED);
-
-        ResolveInfo resolveInfo = new ResolveInfo();
-        resolveInfo.activityInfo = new ActivityInfo();
-        resolveInfo.activityInfo.packageName = packageName;
-        resolveInfo.activityInfo.applicationInfo = new ApplicationInfo();
-        resolveInfo.activityInfo.applicationInfo.uid = packageUid;
-        if (hasReceiverPermission) {
-            resolveInfo.activityInfo.permission = permission.BROADCAST_NETWORK_PRIVILEGED;
-        }
-
-        ResolveInfo configActivityInfo = null;
-        if (hasConfigActivity) {
-            configActivityInfo = new ResolveInfo();
-            configActivityInfo.activityInfo = new ActivityInfo();
-            configActivityInfo.activityInfo.name = ".ConfigActivity";
-        }
-
-        ResolveInfo serviceInfo = null;
-        if (hasServiceInfo) {
-            serviceInfo = new ResolveInfo();
-            serviceInfo.serviceInfo = new ServiceInfo();
-            serviceInfo.serviceInfo.name = ".ScoringService";
-        }
-
-        return new ResolveInfoHolder(resolveInfo, configActivityInfo, serviceInfo);
-    }
-
-    private static class ResolveInfoHolder {
-        final ResolveInfo scorerResolveInfo;
-        final ResolveInfo configActivityResolveInfo;
-        final ResolveInfo serviceResolveInfo;
-
-        public ResolveInfoHolder(ResolveInfo scorerResolveInfo,
-                ResolveInfo configActivityResolveInfo, ResolveInfo serviceResolveInfo) {
-            this.scorerResolveInfo = scorerResolveInfo;
-            this.configActivityResolveInfo = configActivityResolveInfo;
-            this.serviceResolveInfo = serviceResolveInfo;
-        }
+                }), Mockito.eq(flags))).thenReturn(serviceInfo);
     }
 }

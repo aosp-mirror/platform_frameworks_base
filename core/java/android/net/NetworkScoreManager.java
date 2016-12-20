@@ -183,7 +183,7 @@ public class NetworkScoreManager {
         if (app == null) {
             return null;
         }
-        return app.mPackageName;
+        return app.packageName;
     }
 
     /**
