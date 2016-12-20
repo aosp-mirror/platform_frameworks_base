@@ -68,6 +68,7 @@ import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.reset;
@@ -1193,7 +1194,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Check that the user restrictions that are enabled by default are set. Then unset them.
         String[] defaultRestrictions = UserRestrictionsUtils
-                        .getDefaultEnabledForDeviceOwner().toArray(new String[0]);
+                .getDefaultEnabledForDeviceOwner().toArray(new String[0]);
         DpmTestUtils.assertRestrictions(
                 DpmTestUtils.newRestrictions(defaultRestrictions),
                 dpms.getDeviceOwnerAdminLocked().ensureUserRestrictions()
@@ -1202,21 +1203,18 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 DpmTestUtils.newRestrictions(defaultRestrictions),
                 dpm.getUserRestrictions(admin1)
         );
+        verify(mContext.userManagerInternal).setDevicePolicyUserRestrictions(
+                eq(UserHandle.USER_SYSTEM),
+                MockUtils.checkUserRestrictions(),
+                MockUtils.checkUserRestrictions(defaultRestrictions)
+        );
+        reset(mContext.userManagerInternal);
 
         for (String restriction : defaultRestrictions) {
             dpm.clearUserRestriction(admin1, restriction);
         }
 
-        DpmTestUtils.assertRestrictions(
-                DpmTestUtils.newRestrictions(),
-                dpms.getDeviceOwnerAdminLocked().ensureUserRestrictions()
-        );
-        DpmTestUtils.assertRestrictions(
-                DpmTestUtils.newRestrictions(),
-                dpm.getUserRestrictions(admin1)
-        );
-
-        reset(mContext.userManagerInternal);
+        assertNoDeviceOwnerRestrictions();
 
         dpm.addUserRestriction(admin1, UserManager.DISALLOW_ADD_USER);
         verify(mContext.userManagerInternal).setDevicePolicyUserRestrictions(
@@ -1270,14 +1268,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         );
         reset(mContext.userManagerInternal);
 
-        DpmTestUtils.assertRestrictions(
-                DpmTestUtils.newRestrictions(),
-                dpms.getDeviceOwnerAdminLocked().ensureUserRestrictions()
-        );
-        DpmTestUtils.assertRestrictions(
-                DpmTestUtils.newRestrictions(),
-                dpm.getUserRestrictions(admin1)
-        );
+        assertNoDeviceOwnerRestrictions();
 
         // DISALLOW_ADJUST_VOLUME and DISALLOW_UNMUTE_MICROPHONE are PO restrictions, but when
         // DO sets them, the scope is global.
@@ -1450,6 +1441,111 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         reset(mContext.userManagerInternal);
 
         // TODO Make sure restrictions are written to the file.
+    }
+
+
+    public void testDefaultEnabledUserRestrictions() throws Exception {
+        mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
+        mContext.callerPermissions.add(permission.MANAGE_USERS);
+        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+        mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS_FULL);
+
+        // First, set DO.
+
+        // Call from a process on the system user.
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+
+        // Make sure admin1 is installed on system user.
+        setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
+
+        dpm.setActiveAdmin(admin1, /* replace =*/ false, UserHandle.USER_SYSTEM);
+        assertTrue(dpm.setDeviceOwner(admin1, "owner-name",
+                UserHandle.USER_SYSTEM));
+
+        // Check that the user restrictions that are enabled by default are set. Then unset them.
+        String[] defaultRestrictions = UserRestrictionsUtils
+                .getDefaultEnabledForDeviceOwner().toArray(new String[0]);
+        assertTrue(defaultRestrictions.length > 0);
+        DpmTestUtils.assertRestrictions(
+                DpmTestUtils.newRestrictions(defaultRestrictions),
+                dpms.getDeviceOwnerAdminLocked().ensureUserRestrictions()
+        );
+        DpmTestUtils.assertRestrictions(
+                DpmTestUtils.newRestrictions(defaultRestrictions),
+                dpm.getUserRestrictions(admin1)
+        );
+        verify(mContext.userManagerInternal).setDevicePolicyUserRestrictions(
+                eq(UserHandle.USER_SYSTEM),
+                MockUtils.checkUserRestrictions(),
+                MockUtils.checkUserRestrictions(defaultRestrictions)
+        );
+        reset(mContext.userManagerInternal);
+
+        for (String restriction : defaultRestrictions) {
+            dpm.clearUserRestriction(admin1, restriction);
+        }
+
+        assertNoDeviceOwnerRestrictions();
+
+        // Initialize DPMS again and check that the user restriction wasn't enabled again.
+        reset(mContext.userManagerInternal);
+        initializeDpms();
+        assertTrue(dpm.isDeviceOwnerApp(admin1.getPackageName()));
+        assertNotNull(dpms.getDeviceOwnerAdminLocked());
+
+        assertNoDeviceOwnerRestrictions();
+
+        // Add a new restriction to the default set, initialize DPMS, and check that the restriction
+        // is set as it wasn't enabled during setDeviceOwner.
+        final String newDefaultEnabledRestriction = UserManager.DISALLOW_REMOVE_MANAGED_PROFILE;
+        assertFalse(UserRestrictionsUtils
+                .getDefaultEnabledForDeviceOwner().contains(newDefaultEnabledRestriction));
+        UserRestrictionsUtils
+                .getDefaultEnabledForDeviceOwner().add(newDefaultEnabledRestriction);
+        try {
+            reset(mContext.userManagerInternal);
+            initializeDpms();
+            assertTrue(dpm.isDeviceOwnerApp(admin1.getPackageName()));
+            assertNotNull(dpms.getDeviceOwnerAdminLocked());
+
+            DpmTestUtils.assertRestrictions(
+                DpmTestUtils.newRestrictions(newDefaultEnabledRestriction),
+                dpms.getDeviceOwnerAdminLocked().ensureUserRestrictions()
+            );
+            DpmTestUtils.assertRestrictions(
+                DpmTestUtils.newRestrictions(newDefaultEnabledRestriction),
+                dpm.getUserRestrictions(admin1)
+            );
+            verify(mContext.userManagerInternal, atLeast(1)).setDevicePolicyUserRestrictions(
+                eq(UserHandle.USER_SYSTEM),
+                MockUtils.checkUserRestrictions(),
+                MockUtils.checkUserRestrictions(newDefaultEnabledRestriction)
+            );
+            reset(mContext.userManagerInternal);
+
+            // Remove the restriction.
+            dpm.clearUserRestriction(admin1, newDefaultEnabledRestriction);
+
+            // Initialize DPMS again. The restriction shouldn't be enabled for a second time.
+            initializeDpms();
+            assertTrue(dpm.isDeviceOwnerApp(admin1.getPackageName()));
+            assertNotNull(dpms.getDeviceOwnerAdminLocked());
+            assertNoDeviceOwnerRestrictions();
+        } finally {
+            UserRestrictionsUtils
+                .getDefaultEnabledForDeviceOwner().remove(newDefaultEnabledRestriction);
+        }
+    }
+
+    private void assertNoDeviceOwnerRestrictions() {
+        DpmTestUtils.assertRestrictions(
+                DpmTestUtils.newRestrictions(),
+                dpms.getDeviceOwnerAdminLocked().ensureUserRestrictions()
+        );
+        DpmTestUtils.assertRestrictions(
+                DpmTestUtils.newRestrictions(),
+                dpm.getUserRestrictions(admin1)
+        );
     }
 
     public void testGetMacAddress() throws Exception {

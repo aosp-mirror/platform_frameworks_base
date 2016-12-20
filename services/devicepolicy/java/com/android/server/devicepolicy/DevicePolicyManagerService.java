@@ -186,6 +186,7 @@ import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -630,6 +631,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         private static final String TAG_PACKAGE_LIST_ITEM  = "item";
         private static final String TAG_KEEP_UNINSTALLED_PACKAGES  = "keep-uninstalled-packages";
         private static final String TAG_USER_RESTRICTIONS = "user-restrictions";
+        private static final String TAG_DEFAULT_ENABLED_USER_RESTRICTIONS =
+                "default-enabled-user-restrictions";
+        private static final String TAG_RESTRICTION = "restriction";
         private static final String TAG_SHORT_SUPPORT_MESSAGE = "short-support-message";
         private static final String TAG_LONG_SUPPORT_MESSAGE = "long-support-message";
         private static final String TAG_PARENT_ADMIN = "parent-admin";
@@ -695,7 +699,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
 
-        Set<String> accountTypesWithManagementDisabled = new ArraySet<>();
+        final Set<String> accountTypesWithManagementDisabled = new ArraySet<>();
 
         // The list of permitted accessibility services package namesas set by a profile
         // or device owner. Null means all accessibility services are allowed, empty means
@@ -720,6 +724,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         List<String> crossProfileWidgetProviders;
 
         Bundle userRestrictions;
+
+        // User restrictions that have already been enabled by default for this admin (either when
+        // setting the device or profile owner, or during a system update if one of those "enabled
+        // by default" restrictions is newly added).
+        final Set<String> defaultEnabledRestrictionsAlreadySet = new ArraySet<>();
 
         // Support text provided by the admin to display to the user.
         CharSequence shortSupportMessage = null;
@@ -912,11 +921,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             if (!accountTypesWithManagementDisabled.isEmpty()) {
                 out.startTag(null, TAG_DISABLE_ACCOUNT_MANAGEMENT);
-                for (String ac : accountTypesWithManagementDisabled) {
-                    out.startTag(null, TAG_ACCOUNT_TYPE);
-                    out.attribute(null, ATTR_VALUE, ac);
-                    out.endTag(null, TAG_ACCOUNT_TYPE);
-                }
+                writeAttributeValuesToXml(
+                        out, TAG_ACCOUNT_TYPE, accountTypesWithManagementDisabled);
                 out.endTag(null,  TAG_DISABLE_ACCOUNT_MANAGEMENT);
             }
             if (!trustAgentInfos.isEmpty()) {
@@ -941,13 +947,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             if (crossProfileWidgetProviders != null && !crossProfileWidgetProviders.isEmpty()) {
                 out.startTag(null, TAG_CROSS_PROFILE_WIDGET_PROVIDERS);
-                final int providerCount = crossProfileWidgetProviders.size();
-                for (int i = 0; i < providerCount; i++) {
-                    String provider = crossProfileWidgetProviders.get(i);
-                    out.startTag(null, TAG_PROVIDER);
-                    out.attribute(null, ATTR_VALUE, provider);
-                    out.endTag(null, TAG_PROVIDER);
-                }
+                writeAttributeValuesToXml(out, TAG_PROVIDER, crossProfileWidgetProviders);
                 out.endTag(null, TAG_CROSS_PROFILE_WIDGET_PROVIDERS);
             }
             writePackageListToXml(out, TAG_PERMITTED_ACCESSIBILITY_SERVICES,
@@ -957,6 +957,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (hasUserRestrictions()) {
                 UserRestrictionsUtils.writeRestrictions(
                         out, userRestrictions, TAG_USER_RESTRICTIONS);
+            }
+            if (!defaultEnabledRestrictionsAlreadySet.isEmpty()) {
+                out.startTag(null, TAG_DEFAULT_ENABLED_USER_RESTRICTIONS);
+                writeAttributeValuesToXml(
+                        out, TAG_RESTRICTION, defaultEnabledRestrictionsAlreadySet);
+                out.endTag(null, TAG_DEFAULT_ENABLED_USER_RESTRICTIONS);
             }
             if (!TextUtils.isEmpty(shortSupportMessage)) {
                 out.startTag(null, TAG_SHORT_SUPPORT_MESSAGE);
@@ -993,12 +999,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
 
             out.startTag(null, outerTag);
-            for (String packageName : packageList) {
-                out.startTag(null, TAG_PACKAGE_LIST_ITEM);
-                out.attribute(null, ATTR_VALUE, packageName);
-                out.endTag(null, TAG_PACKAGE_LIST_ITEM);
-            }
+            writeAttributeValuesToXml(out, TAG_PACKAGE_LIST_ITEM, packageList);
             out.endTag(null, outerTag);
+        }
+
+        void writeAttributeValuesToXml(XmlSerializer out, String tag,
+                @NonNull Collection<String> values) throws IOException {
+            for (String value : values) {
+                out.startTag(null, tag);
+                out.attribute(null, ATTR_VALUE, value);
+                out.endTag(null, tag);
+            }
         }
 
         void readFromXml(XmlPullParser parser)
@@ -1098,11 +1109,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     disabledKeyguardFeatures = Integer.parseInt(
                             parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_DISABLE_ACCOUNT_MANAGEMENT.equals(tag)) {
-                    accountTypesWithManagementDisabled = readDisableAccountInfo(parser, tag);
+                    readAttributeValues(
+                            parser, TAG_ACCOUNT_TYPE, accountTypesWithManagementDisabled);
                 } else if (TAG_MANAGE_TRUST_AGENT_FEATURES.equals(tag)) {
                     trustAgentInfos = getAllTrustAgentInfos(parser, tag);
                 } else if (TAG_CROSS_PROFILE_WIDGET_PROVIDERS.equals(tag)) {
-                    crossProfileWidgetProviders = getCrossProfileWidgetProviders(parser, tag);
+                    crossProfileWidgetProviders = new ArrayList<>();
+                    readAttributeValues(parser, TAG_PROVIDER, crossProfileWidgetProviders);
                 } else if (TAG_PERMITTED_ACCESSIBILITY_SERVICES.equals(tag)) {
                     permittedAccessiblityServices = readPackageList(parser, tag);
                 } else if (TAG_PERMITTED_IMES.equals(tag)) {
@@ -1111,6 +1124,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     keepUninstalledPackages = readPackageList(parser, tag);
                 } else if (TAG_USER_RESTRICTIONS.equals(tag)) {
                     UserRestrictionsUtils.readRestrictions(parser, ensureUserRestrictions());
+                } else if (TAG_DEFAULT_ENABLED_USER_RESTRICTIONS.equals(tag)) {
+                    readAttributeValues(
+                            parser, TAG_RESTRICTION, defaultEnabledRestrictionsAlreadySet);
                 } else if (TAG_SHORT_SUPPORT_MESSAGE.equals(tag)) {
                     type = parser.next();
                     if (type == XmlPullParser.TEXT) {
@@ -1172,24 +1188,24 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return result;
         }
 
-        private Set<String> readDisableAccountInfo(XmlPullParser parser, String tag)
+        private void readAttributeValues(
+                XmlPullParser parser, String tag, Collection<String> result)
                 throws XmlPullParserException, IOException {
+            result.clear();
             int outerDepthDAM = parser.getDepth();
             int typeDAM;
-            Set<String> result = new ArraySet<>();
             while ((typeDAM=parser.next()) != END_DOCUMENT
                     && (typeDAM != END_TAG || parser.getDepth() > outerDepthDAM)) {
                 if (typeDAM == END_TAG || typeDAM == TEXT) {
                     continue;
                 }
                 String tagDAM = parser.getName();
-                if (TAG_ACCOUNT_TYPE.equals(tagDAM)) {
+                if (tag.equals(tagDAM)) {
                     result.add(parser.getAttributeValue(null, ATTR_VALUE));
                 } else {
-                    Slog.w(LOG_TAG, "Unknown tag under " + tag +  ": " + tagDAM);
+                    Slog.e(LOG_TAG, "Expected tag " + tag +  " but found " + tagDAM);
                 }
             }
-            return result;
         }
 
         private ArrayMap<String, TrustAgentInfo> getAllTrustAgentInfos(
@@ -1227,30 +1243,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 String tagDAM = parser.getName();
                 if (TAG_TRUST_AGENT_COMPONENT_OPTIONS.equals(tagDAM)) {
                     result.options = PersistableBundle.restoreFromXml(parser);
-                } else {
-                    Slog.w(LOG_TAG, "Unknown tag under " + tag +  ": " + tagDAM);
-                }
-            }
-            return result;
-        }
-
-        private List<String> getCrossProfileWidgetProviders(XmlPullParser parser, String tag)
-                throws XmlPullParserException, IOException  {
-            int outerDepthDAM = parser.getDepth();
-            int typeDAM;
-            ArrayList<String> result = null;
-            while ((typeDAM=parser.next()) != END_DOCUMENT
-                    && (typeDAM != END_TAG || parser.getDepth() > outerDepthDAM)) {
-                if (typeDAM == END_TAG || typeDAM == TEXT) {
-                    continue;
-                }
-                String tagDAM = parser.getName();
-                if (TAG_PROVIDER.equals(tagDAM)) {
-                    final String provider = parser.getAttributeValue(null, ATTR_VALUE);
-                    if (result == null) {
-                        result = new ArrayList<>();
-                    }
-                    result.add(provider);
                 } else {
                     Slog.w(LOG_TAG, "Unknown tag under " + tag +  ": " + tagDAM);
                 }
@@ -1360,6 +1352,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             pw.print(prefix); pw.println("userRestrictions:");
             UserRestrictionsUtils.dumpRestrictions(pw, prefix + "  ", userRestrictions);
+            pw.print(prefix); pw.print("defaultEnabledRestrictionsAlreadySet=");
+                    pw.println(defaultEnabledRestrictionsAlreadySet);
             pw.print(prefix); pw.print("isParent=");
                     pw.println(isParent);
             if (parentAdmin != null) {
@@ -1785,10 +1779,41 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             setDeviceOwnerSystemPropertyLocked();
             findOwnerComponentIfNecessaryLocked();
             migrateUserRestrictionsIfNecessaryLocked();
+            setDefaultEnabledUserRestrictionsIfNecessaryLocked();
 
             // TODO PO may not have a class name either due to b/17652534.  Address that too.
 
             updateDeviceOwnerLocked();
+        }
+    }
+
+    private void setDefaultEnabledUserRestrictionsIfNecessaryLocked() {
+        final ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
+        if (deviceOwner != null
+                && !UserRestrictionsUtils.getDefaultEnabledForDeviceOwner().equals(
+                        deviceOwner.defaultEnabledRestrictionsAlreadySet)) {
+            Slog.i(LOG_TAG,"New user restrictions need to be set by default for the device owner");
+
+            if (VERBOSE_LOG) {
+                Slog.d(LOG_TAG,"Default enabled restrictions for DO: "
+                        + UserRestrictionsUtils.getDefaultEnabledForDeviceOwner()
+                        + ". Restrictions already enabled: "
+                        + deviceOwner.defaultEnabledRestrictionsAlreadySet);
+            }
+
+            Set<String> restrictionsToSet = new ArraySet<>(
+                    UserRestrictionsUtils.getDefaultEnabledForDeviceOwner());
+            restrictionsToSet.removeAll(deviceOwner.defaultEnabledRestrictionsAlreadySet);
+            if (!restrictionsToSet.isEmpty()) {
+                for (String restriction : restrictionsToSet) {
+                    deviceOwner.ensureUserRestrictions().putBoolean(restriction, true);
+                }
+                deviceOwner.defaultEnabledRestrictionsAlreadySet.addAll(restrictionsToSet);
+                Slog.i(LOG_TAG,
+                        "Enabled the following restrictions by default: " + restrictionsToSet);
+
+                saveUserRestrictionsLocked(mOwners.getDeviceOwnerUserId());
+            }
         }
     }
 
@@ -3472,7 +3497,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             ActiveAdmin activeAdmin = getActiveAdminForCallerLocked(admin,
                     DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            if (activeAdmin.crossProfileWidgetProviders == null) {
+            if (activeAdmin.crossProfileWidgetProviders == null
+                    || activeAdmin.crossProfileWidgetProviders.isEmpty()) {
                 return false;
             }
             List<String> providers = activeAdmin.crossProfileWidgetProviders;
@@ -5979,13 +6005,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             updateDeviceOwnerLocked();
             setDeviceOwnerSystemPropertyLocked();
 
-            // STOPSHIP(b/31952368) Also set this restriction for existing DOs on OTA to Android OC.
             final Set<String> restrictions =
                     UserRestrictionsUtils.getDefaultEnabledForDeviceOwner();
             if (!restrictions.isEmpty()) {
                 for (String restriction : restrictions) {
                     activeAdmin.ensureUserRestrictions().putBoolean(restriction, true);
                 }
+                activeAdmin.defaultEnabledRestrictionsAlreadySet.addAll(restrictions);
+                Slog.i(LOG_TAG, "Enabled the following restrictions by default: " + restrictions);
+
                 saveUserRestrictionsLocked(userId);
             }
 
@@ -6078,7 +6106,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    // Returns the active device owner or null if there is no device owner.
+    /** Returns the active device owner or {@code null} if there is no device owner. */
     @VisibleForTesting
     ActiveAdmin getDeviceOwnerAdminLocked() {
         ComponentName component = mOwners.getDeviceOwnerComponent();
@@ -6140,6 +6168,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (admin != null) {
             admin.disableCamera = false;
             admin.userRestrictions = null;
+            admin.defaultEnabledRestrictionsAlreadySet.clear();
             admin.forceEphemeralUsers = false;
             mUserManagerInternal.setForceEphemeralUsers(admin.forceEphemeralUsers);
             final DevicePolicyData policyData = getUserData(UserHandle.USER_SYSTEM);
@@ -6223,6 +6252,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (admin != null) {
             admin.disableCamera = false;
             admin.userRestrictions = null;
+            admin.defaultEnabledRestrictionsAlreadySet.clear();
         }
         clearUserPoliciesLocked(userId);
         mOwners.removeProfileOwner(userId);
