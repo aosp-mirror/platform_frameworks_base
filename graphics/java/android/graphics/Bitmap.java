@@ -1612,6 +1612,10 @@ public final class Bitmap implements Parcelable {
     /**
      * Write the bitmap and its pixels to the parcel. The bitmap can be
      * rebuilt from the parcel by calling CREATOR.createFromParcel().
+     *
+     * If this bitmap is {@link Config#HARDWARE}, it may be unparceled with a different pixel
+     * format (e.g. 565, 8888), but the content will be preserved to the best quality permitted
+     * by the final pixel format
      * @param p    Parcel object to write the bitmap data into
      */
     public void writeToParcel(Parcel p, int flags) {
