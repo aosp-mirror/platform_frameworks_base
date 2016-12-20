@@ -1135,7 +1135,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         // Chosen to be much less than the linger timeout. This ensures that we can distinguish
         // between a LOST callback that arrives immediately and a LOST callback that arrives after
         // the linger timeout.
-        private final static int TIMEOUT_MS = 50;
+        private final static int TIMEOUT_MS = 100;
 
         private final LinkedBlockingQueue<CallbackInfo> mCallbacks = new LinkedBlockingQueue<>();
 
@@ -1487,8 +1487,8 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
         // Let linger run its course.
         callback.assertNoCallback();
-        callback.expectCallback(CallbackState.LOST, mCellNetworkAgent,
-                TEST_LINGER_DELAY_MS /* timeoutMs */);
+        final int lingerTimeoutMs = TEST_LINGER_DELAY_MS + TEST_LINGER_DELAY_MS / 4;
+        callback.expectCallback(CallbackState.LOST, mCellNetworkAgent, lingerTimeoutMs);
 
         // Clean up.
         mWiFiNetworkAgent.disconnect();
@@ -1977,7 +1977,9 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         assertTrue(isForegroundNetwork(mWiFiNetworkAgent));
 
         // When lingering is complete, cell is still there but is now in the background.
-        fgCallback.expectCallback(CallbackState.LOST, mCellNetworkAgent, TEST_LINGER_DELAY_MS);
+        mService.waitForIdle();
+        int timeoutMs = TEST_LINGER_DELAY_MS + TEST_LINGER_DELAY_MS / 4;
+        fgCallback.expectCallback(CallbackState.LOST, mCellNetworkAgent, timeoutMs);
         callback.assertNoCallback();
         assertFalse(isForegroundNetwork(mCellNetworkAgent));
         assertTrue(isForegroundNetwork(mWiFiNetworkAgent));
@@ -2003,6 +2005,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
         // Disconnect wifi and check that cell is foreground again.
         mWiFiNetworkAgent.disconnect();
+        mService.waitForIdle();
         callback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
         fgCallback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
         fgCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
@@ -2339,14 +2342,14 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         NetworkRequest nr = new NetworkRequest.Builder().addTransportType(
                 NetworkCapabilities.TRANSPORT_WIFI).build();
         final TestNetworkCallback networkCallback = new TestNetworkCallback();
-        mCm.requestNetwork(nr, networkCallback, 10);
+        final int timeoutMs = 150;
+        mCm.requestNetwork(nr, networkCallback, timeoutMs);
 
         mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
         mWiFiNetworkAgent.connect(false);
-        networkCallback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
+        networkCallback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent, timeoutMs);
 
         // pass timeout and validate that UNAVAILABLE is not called
-        sleepFor(15);
         networkCallback.assertNoCallback();
     }
 
@@ -2359,17 +2362,19 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         NetworkRequest nr = new NetworkRequest.Builder().addTransportType(
                 NetworkCapabilities.TRANSPORT_WIFI).build();
         final TestNetworkCallback networkCallback = new TestNetworkCallback();
-        mCm.requestNetwork(nr, networkCallback, 500);
+        final int requestTimeoutMs = 100;
+        mCm.requestNetwork(nr, networkCallback, requestTimeoutMs);
 
         mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
         mWiFiNetworkAgent.connect(false);
-        networkCallback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
+        final int assertTimeoutMs = 150;
+        networkCallback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent, assertTimeoutMs);
         sleepFor(20);
         mWiFiNetworkAgent.disconnect();
         networkCallback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
 
         // pass timeout and validate that UNAVAILABLE is not called
-        sleepFor(600);
+        sleepFor(100);
         networkCallback.assertNoCallback();
     }
 
@@ -2383,7 +2388,8 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         NetworkRequest nr = new NetworkRequest.Builder().addTransportType(
                 NetworkCapabilities.TRANSPORT_WIFI).build();
         final TestNetworkCallback networkCallback = new TestNetworkCallback();
-        mCm.requestNetwork(nr, networkCallback, 10);
+        final int timeoutMs = 10;
+        mCm.requestNetwork(nr, networkCallback, timeoutMs);
 
         // pass timeout and validate that UNAVAILABLE is called
         networkCallback.expectCallback(CallbackState.UNAVAILABLE, null);
@@ -2403,7 +2409,8 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         NetworkRequest nr = new NetworkRequest.Builder().addTransportType(
                 NetworkCapabilities.TRANSPORT_WIFI).build();
         final TestNetworkCallback networkCallback = new TestNetworkCallback();
-        mCm.requestNetwork(nr, networkCallback, 10);
+        final int timeoutMs = 10;
+        mCm.requestNetwork(nr, networkCallback, timeoutMs);
 
         // remove request
         mCm.unregisterNetworkCallback(networkCallback);
@@ -2420,13 +2427,13 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         networkCallback.assertNoCallback();
     }
 
-    public void assertEventuallyTrue(BooleanSupplier fn, long maxWaitingTimeMs) throws Exception {
+    public void assertEventuallyTrue(BooleanSupplier fn, long maxWaitingTimeMs) {
         long start = SystemClock.elapsedRealtime();
         while (SystemClock.elapsedRealtime() <= start + maxWaitingTimeMs) {
             if (fn.getAsBoolean()) {
                 return;
             }
-            Thread.sleep(10);
+            sleepFor(15);
         }
         assertTrue(fn.getAsBoolean());
     }
@@ -2594,7 +2601,9 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         callback.expectError(PacketKeepalive.ERROR_INVALID_NETWORK);
 
         // ... and that stopping it after that has no adverse effects.
-        assertNull(mCm.getNetworkCapabilities(myNet));
+        // TODO: investigate assertEventuallyTrue is needed and waitForIdle() is not enough
+        final Network myNetAlias = myNet;
+        assertEventuallyTrue(() -> mCm.getNetworkCapabilities(myNetAlias) == null, 100);
         ka.stop();
 
         // Reconnect.
@@ -2838,11 +2847,11 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     }
 
     /* test utilities */
+    // TODO: eliminate all usages of sleepFor and replace by proper timeouts/waitForIdle.
     static private void sleepFor(int ms) {
         try {
             Thread.sleep(ms);
         } catch (InterruptedException e) {
         }
-
     }
 }
