@@ -40,20 +40,24 @@ public class VolumeCtrl {
 
     private final static String TAG = "VolumeCtrl";
 
+    // --stream affects --index, --adj or --get options.
+    // --show affects --index and --adj options.
     public final static String USAGE = new String(
             "the options are as follows: \n" +
             "\t\t--stream STREAM selects the stream to control, see AudioManager.STREAM_*\n" +
             "\t\t                controls AudioManager.STREAM_MUSIC if no stream is specified\n"+
             "\t\t--index INDEX   sets the volume index value\n" +
             "\t\t--adj DIRECTION adjusts the volume, use raise|same|lower for the direction\n" +
-            "\t\t--show          shows the UI during the volume change \n" +
+            "\t\t--get           outputs the current volume\n" +
+            "\t\t--show          shows the UI during the volume change\n" +
             "\texamples:\n" +
-            "\t\tadb shell media volume --show --stream 3 --index 11 \n" +
-            "\t\tadb shell media volume --stream 0 --adj lower \n"
+            "\t\tadb shell media volume --show --stream 3 --index 11\n" +
+            "\t\tadb shell media volume --stream 0 --adj lower\n"
             );
 
     private final static int VOLUME_CONTROL_MODE_SET = 0;
     private final static int VOLUME_CONTROL_MODE_ADJUST = 1;
+    private final static int VOLUME_CONTROL_MODE_GET = 2;
 
     private final static String ADJUST_LOWER = "lower";
     private final static String ADJUST_SAME = "same";
@@ -81,9 +85,9 @@ public class VolumeCtrl {
                     mode = VOLUME_CONTROL_MODE_SET;
                     log(LOG_V, "will set volume");
                     break;
-                case "--adjust":
-                    mode = VOLUME_CONTROL_MODE_ADJUST;
-                    log(LOG_V, "will adjust volume");
+                case "--get":
+                    mode = VOLUME_CONTROL_MODE_GET;
+                    log(LOG_V, "will get volume");
                     break;
                 case "--stream":
                     stream = Integer.decode(cmd.nextArgRequired()).intValue();
@@ -149,7 +153,11 @@ public class VolumeCtrl {
         // Non-interactive test
         final int flag = showUi? AudioManager.FLAG_SHOW_UI : 0;
         final String pack = cmd.getClass().getPackage().getName();
-        if (mode == VOLUME_CONTROL_MODE_SET) {
+        if (mode == VOLUME_CONTROL_MODE_GET) {
+            log(LOG_V, "volume is " + audioService.getStreamVolume(stream) +
+                       " in range [" + audioService.getStreamMinVolume(stream) +
+                       ".." + audioService.getStreamMaxVolume(stream) + "]");
+        } else if (mode == VOLUME_CONTROL_MODE_SET) {
             audioService.setStreamVolume(stream, volIndex, flag, pack/*callingPackage*/);
         } else if (mode == VOLUME_CONTROL_MODE_ADJUST) {
             audioService.adjustStreamVolume(stream, adjDir, flag, pack);
