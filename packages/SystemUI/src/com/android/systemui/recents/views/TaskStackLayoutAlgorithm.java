@@ -240,14 +240,14 @@ public class TaskStackLayoutAlgorithm {
     // This is the current system insets
     @ViewDebug.ExportedProperty(category="recents")
     public Rect mSystemInsets = new Rect();
-    // This is the bounds of the stack action above the stack rect
-    @ViewDebug.ExportedProperty(category="recents")
-    public Rect mStackActionButtonRect = new Rect();
 
     // The visible ranges when the stack is focused and unfocused
     private Range mUnfocusedRange;
     private Range mFocusedRange;
 
+    // This is the bounds of the stack action above the stack rect
+    @ViewDebug.ExportedProperty(category="recents")
+    private Rect mStackActionButtonRect = new Rect();
     // The base top margin for the stack from the system insets
     @ViewDebug.ExportedProperty(category="recents")
     private int mBaseTopMargin;
@@ -730,6 +730,11 @@ public class TaskStackLayoutAlgorithm {
         } else {
             return STATE_UNFOCUSED;
         }
+    }
+
+    public Rect getStackActionButtonRect(boolean useGridLayout) {
+        return useGridLayout
+                ? mTaskGridLayoutAlgorithm.getStackActionButtonRect() : mStackActionButtonRect;
     }
 
     /**
