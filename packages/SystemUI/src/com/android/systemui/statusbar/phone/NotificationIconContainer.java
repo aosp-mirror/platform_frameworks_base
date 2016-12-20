@@ -22,13 +22,17 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.util.Property;
 import android.view.View;
+import android.view.animation.Interpolator;
 
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.AlphaOptimizedFrameLayout;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.stack.AnimationFilter;
 import com.android.systemui.statusbar.stack.AnimationProperties;
+import com.android.systemui.statusbar.stack.HeadsUpAppearInterpolator;
 import com.android.systemui.statusbar.stack.ViewState;
 
 import java.util.HashMap;
@@ -65,7 +69,9 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         public AnimationFilter getAnimationFilter() {
             return mAnimationFilter;
         }
-    }.setDuration(CANNED_ANIMATION_DURATION);
+
+    }.setDuration(CANNED_ANIMATION_DURATION)
+            .setCustomInterpolator(View.TRANSLATION_Y, Interpolators.ICON_OVERSHOT);
 
     private static final AnimationProperties mTempProperties = new AnimationProperties() {
         private AnimationFilter mAnimationFilter = new AnimationFilter();
@@ -440,8 +446,11 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                     AnimationFilter animationFilter = mTempProperties.getAnimationFilter();
                     animationFilter.reset();
                     animationFilter.combineFilter(ICON_ANIMATION_PROPERTIES.getAnimationFilter());
+                    mTempProperties.resetCustomInterpolators();
+                    mTempProperties.combineCustomInterpolators(ICON_ANIMATION_PROPERTIES);
                     if (animationProperties != null) {
                         animationFilter.combineFilter(animationProperties.getAnimationFilter());
+                        mTempProperties.combineCustomInterpolators(animationProperties);
                     }
                     animationProperties = mTempProperties;
                     animationProperties.setDuration(CANNED_ANIMATION_DURATION);
@@ -455,6 +464,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                     AnimationFilter animationFilter = mTempProperties.getAnimationFilter();
                     animationFilter.reset();
                     animationFilter.animateX();
+                    mTempProperties.resetCustomInterpolators();
                     animationProperties = mTempProperties;
                     animationProperties.setDuration(CANNED_ANIMATION_DURATION);
                     animate = true;
