@@ -102,11 +102,11 @@ public class HelpUtilsTest {
 
     @Test
     public void addIntentParameters_configFalse_argumentTrue() {
-        when(mContext.getResources().getBoolean(R.bool.config_sendPackageName)).thenReturn(true);
+        when(mContext.getResources().getBoolean(R.bool.config_sendPackageName)).thenReturn(false);
         Intent intent = new Intent();
 
         HelpUtils.addIntentParameters(
-                mContext, intent, null /* backupContext */, false /* sendPackageName */);
+                mContext, intent, null /* backupContext */, true /* sendPackageName */);
 
         assertThat(intent.hasExtra(HELP_INTENT_EXTRA_KEY)).isFalse();
         assertThat(intent.hasExtra(HELP_INTENT_NAME_KEY)).isFalse();
