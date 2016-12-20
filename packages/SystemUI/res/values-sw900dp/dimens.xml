@@ -17,7 +17,6 @@
 -->
 <resources>
 
-    <!-- All ryu nav buttons are th same size -->
     <dimen name="button_size">80dp</dimen>
     <dimen name="navigation_side_padding">@dimen/button_size</dimen>
     <dimen name="navigation_key_width">@dimen/button_size</dimen>
@@ -27,14 +26,6 @@
     <dimen name="key_button_ripple_max_width">76dp</dimen>
 
     <!-- The padding around the navigation buttons -->
-    <dimen name="navigation_key_padding">5dp</dimen>
+    <dimen name="navigation_key_padding">0dp</dimen>
 
-    <!-- The inner radius of the halo. -->
-    <dimen name="halo_inner_radius">12dp</dimen>
-
-    <!-- The thickness of the halo. -->
-    <dimen name="halo_thickness">1dp</dimen>
-
-    <!-- The diameter of the halo. This is 2*(halo_inner_radius + halo_thickness). -->
-    <dimen name="halo_diameter">26dp</dimen>
 </resources>
