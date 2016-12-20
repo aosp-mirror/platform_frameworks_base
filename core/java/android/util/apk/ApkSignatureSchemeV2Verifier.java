@@ -579,7 +579,7 @@ public class ApkSignatureSchemeV2Verifier {
             throws SignatureNotFoundException {
         // Look up the offset of ZIP Central Directory.
         long centralDirOffset = ZipUtils.getZipEocdCentralDirectoryOffset(eocd);
-        if (centralDirOffset >= eocdOffset) {
+        if (centralDirOffset > eocdOffset) {
             throw new SignatureNotFoundException(
                     "ZIP Central Directory offset out of range: " + centralDirOffset
                     + ". ZIP End of Central Directory offset: " + eocdOffset);
