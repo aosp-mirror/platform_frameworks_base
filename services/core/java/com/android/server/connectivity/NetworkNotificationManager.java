@@ -182,7 +182,7 @@ public class NetworkNotificationManager {
             details = r.getString(R.string.network_switch_metered_detail, toTransport,
                     fromTransport);
         } else {
-            Slog.wtf(TAG, "Unknown notification type " + notifyType + "on network transport "
+            Slog.wtf(TAG, "Unknown notification type " + notifyType + " on network transport "
                     + getTransportName(transportType));
             return;
         }
