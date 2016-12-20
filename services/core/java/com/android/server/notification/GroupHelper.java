@@ -95,21 +95,19 @@ public class GroupHelper {
     }
 
     /**
-     * Un-autogroups notifications that are now grouped by the app. Additionally cancels
-     * autogrouping if the status change of this notification resulted in the loose notification
-     * count being under the limit.
+     * Un-autogroups notifications that are now grouped by the app.
      */
     private void maybeUngroup(StatusBarNotification sbn, boolean notificationGone, int userId) {
         List<String> notificationsToUnAutogroup = new ArrayList<>();
         boolean removeSummary = false;
         synchronized (mUngroupedNotifications) {
-            Map<String, LinkedHashSet<String>> ungroupdNotificationsByUser
+            Map<String, LinkedHashSet<String>> ungroupedNotificationsByUser
                     = mUngroupedNotifications.get(sbn.getUserId());
-            if (ungroupdNotificationsByUser == null || ungroupdNotificationsByUser.size() == 0) {
+            if (ungroupedNotificationsByUser == null || ungroupedNotificationsByUser.size() == 0) {
                 return;
             }
             LinkedHashSet<String> notificationsForPackage
-                    = ungroupdNotificationsByUser.get(sbn.getPackageName());
+                    = ungroupedNotificationsByUser.get(sbn.getPackageName());
             if (notificationsForPackage == null || notificationsForPackage.size() == 0) {
                 return;
             }
@@ -118,20 +116,17 @@ public class GroupHelper {
                     // Add the current notification to the ungrouping list if it still exists.
                     notificationsToUnAutogroup.add(sbn.getKey());
                 }
-                // If the status change of this notification has brought the number of loose
-                // notifications back below the limit, remove the summary and un-autogroup.
-                if (notificationsForPackage.size() == AUTOGROUP_AT_COUNT - 1) {
-                    removeSummary = true;
-                    for (String key : notificationsForPackage) {
-                        notificationsToUnAutogroup.add(key);
-                    }
-                }
+            }
+            // If the status change of this notification has brought the number of loose
+            // notifications to zero, remove the summary and un-autogroup.
+            if (notificationsForPackage.size() == 0) {
+                removeSummary = true;
             }
         }
+        if (removeSummary) {
+            adjustAutogroupingSummary(userId, sbn.getPackageName(), null, false);
+        }
         if (notificationsToUnAutogroup.size() > 0) {
-            if (removeSummary) {
-                adjustAutogroupingSummary(userId, sbn.getPackageName(), null, false);
-            }
             adjustNotificationBundling(notificationsToUnAutogroup, false);
         }
     }
