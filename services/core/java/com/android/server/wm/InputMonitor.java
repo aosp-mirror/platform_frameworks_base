@@ -619,7 +619,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             final InputChannel inputChannel = w.mInputChannel;
             final InputWindowHandle inputWindowHandle = w.mInputWindowHandle;
             if (inputChannel == null || inputWindowHandle == null || w.mRemoved
-                    || w.isAdjustedForMinimizedDock()) {
+                    || w.canReceiveTouchInput()) {
                 // Skip this window because it cannot possibly receive input.
                 return;
             }

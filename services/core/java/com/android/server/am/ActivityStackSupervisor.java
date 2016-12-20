@@ -418,8 +418,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     final ActivityMetricsLogger mActivityMetricsLogger;
 
-    private final ResizeDockedStackTimeout mResizeDockedStackTimeout;
-
     @Override
     protected int getChildCount() {
         return mActivityDisplays.size();
@@ -529,7 +527,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         mService = service;
         mHandler = new ActivityStackSupervisorHandler(mService.mHandler.getLooper());
         mActivityMetricsLogger = new ActivityMetricsLogger(this, mService.mContext);
-        mResizeDockedStackTimeout = new ResizeDockedStackTimeout(service, this, mHandler);
         mKeyguardController = new KeyguardController(service, this);
     }
 
@@ -2346,13 +2343,19 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 // static stacks need to be adjusted so they don't overlap with the docked stack.
                 // We get the bounds to use from window manager which has been adjusted for any
                 // screen controls and is also the same for all stacks.
+                final Rect tempOtherTaskRect = new Rect();
+                final Rect tempOtherTaskInsetRect = new Rect();
                 for (int i = FIRST_STATIC_STACK_ID; i <= LAST_STATIC_STACK_ID; i++) {
                     final ActivityStack current = getStack(i);
                     if (current != null && StackId.isResizeableByDockedStack(i)) {
-                        current.getStackDockedModeBounds(tempRect, true /* ignoreVisibility */);
-                        resizeStackLocked(i, tempRect, tempOtherTaskBounds,
-                                tempOtherTaskInsetBounds, preserveWindows,
-                                true /* allowResizeInDockedMode */, deferResume);
+                        current.getStackDockedModeBounds(tempRect, tempOtherTaskRect,
+                                tempOtherTaskInsetRect, true /* ignoreVisibility */);
+                        resizeStackLocked(i, tempRect,
+                                !tempOtherTaskRect.isEmpty() ? tempOtherTaskRect :
+                                        tempOtherTaskBounds,
+                                !tempOtherTaskInsetRect.isEmpty() ? tempOtherTaskInsetRect :
+                                        tempOtherTaskInsetBounds,
+                                preserveWindows, true /* allowResizeInDockedMode */, deferResume);
                     }
                 }
             }
@@ -2364,12 +2367,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             mWindowManager.continueSurfaceLayout();
             Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
         }
-
-        mResizeDockedStackTimeout.notifyResizing(dockedBounds,
-                tempDockedTaskBounds != null
-                || tempDockedTaskInsetBounds != null
-                || tempOtherTaskBounds != null
-                || tempOtherTaskInsetBounds != null);
     }
 
     void resizePinnedStackLocked(Rect pinnedBounds, Rect tempPinnedTaskBounds) {

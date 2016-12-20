@@ -40,8 +40,11 @@ oneway interface IDockedStackListener {
      *
      * @param minimized Whether the docked stack is currently minimized.
      * @param animDuration The duration of the animation for changing the minimized state.
+     * @param isHomeStackResizable If the home stack is resizable, a portion of the docked stack
+     *        will be shown with the divider
      */
-    void onDockedStackMinimizedChanged(boolean minimized, long animDuration);
+    void onDockedStackMinimizedChanged(boolean minimized, long animDuration,
+            boolean isHomeStackResizable);
 
     /**
      * Called when window manager decides to adjust the divider for IME. Like the minimized state,

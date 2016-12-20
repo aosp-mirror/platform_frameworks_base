@@ -220,13 +220,17 @@ public class StackWindowController
         }
     }
 
-    public void getStackDockedModeBounds(Rect outBounds, boolean ignoreVisibility) {
+    public void getStackDockedModeBounds(Rect outBounds, Rect outTempBounds,
+            Rect outTempInsetBounds, boolean ignoreVisibility) {
         synchronized (mWindowMap) {
             if (mContainer != null) {
-                mContainer.getStackDockedModeBoundsLocked(outBounds, ignoreVisibility);
+                mContainer.getStackDockedModeBoundsLocked(outBounds, outTempBounds,
+                        outTempInsetBounds, ignoreVisibility);
                 return;
             }
             outBounds.setEmpty();
+            outTempBounds.setEmpty();
+            outTempInsetBounds.setEmpty();
         }
     }
 
@@ -269,11 +273,9 @@ public class StackWindowController
         }
     }
 
-    public Rect getBoundsForNewConfiguration() {
+    public void getBoundsForNewConfiguration(Rect outBounds, Rect outTempBounds) {
         synchronized(mWindowMap) {
-            final Rect outBounds = new Rect();
-            mContainer.getBoundsForNewConfiguration(outBounds);
-            return outBounds;
+            mContainer.getBoundsForNewConfiguration(outBounds, outTempBounds);
         }
     }
 
