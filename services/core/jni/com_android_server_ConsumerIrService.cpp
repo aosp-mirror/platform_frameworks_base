@@ -49,7 +49,7 @@ static jint halTransmit(JNIEnv *env, jobject /* obj */, jint carrierFrequency,
     hidl_vec<int32_t> patternVec;
     patternVec.setToExternal(const_cast<int32_t*>(cPattern.get()), cPattern.size());
 
-    bool success = mHal->transmit(carrierFrequency, patternVec, cPattern.size());
+    bool success = mHal->transmit(carrierFrequency, patternVec);
     return success ? 0 : -1;
 }
 
