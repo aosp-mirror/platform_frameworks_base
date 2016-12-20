@@ -62,8 +62,8 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     }.setDuration(200);
 
     private static final AnimationProperties ICON_ANIMATION_PROPERTIES = new AnimationProperties() {
-        private AnimationFilter mAnimationFilter = new AnimationFilter().animateY().animateAlpha();
-        // TODO: add scale
+        private AnimationFilter mAnimationFilter = new AnimationFilter().animateY().animateAlpha()
+                .animateScale();
 
         @Override
         public AnimationFilter getAnimationFilter() {
@@ -75,13 +75,12 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
 
     private static final AnimationProperties mTempProperties = new AnimationProperties() {
         private AnimationFilter mAnimationFilter = new AnimationFilter();
-        // TODO: add scale
 
         @Override
         public AnimationFilter getAnimationFilter() {
             return mAnimationFilter;
         }
-    }.setDuration(CANNED_ANIMATION_DURATION);
+    };
 
     private static final AnimationProperties ADD_ICON_PROPERTIES = new AnimationProperties() {
         private AnimationFilter mAnimationFilter = new AnimationFilter().animateAlpha();

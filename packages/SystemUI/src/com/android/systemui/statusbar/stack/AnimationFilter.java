@@ -16,7 +16,12 @@
 
 package com.android.systemui.statusbar.stack;
 
+import android.support.v4.util.ArraySet;
+import android.util.Property;
+import android.view.View;
+
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Filters the animations for only a certain type of properties.
@@ -37,9 +42,16 @@ public class AnimationFilter {
     boolean hasDarkEvent;
     boolean hasHeadsUpDisappearClickEvent;
     int darkAnimationOriginIndex;
+    private ArraySet<Property> mAnimatedProperties = new ArraySet<>();
 
     public AnimationFilter animateAlpha() {
         animateAlpha = true;
+        return this;
+    }
+
+    public AnimationFilter animateScale() {
+        animate(View.SCALE_X);
+        animate(View.SCALE_Y);
         return this;
     }
 
@@ -132,6 +144,7 @@ public class AnimationFilter {
         animateHideSensitive |= filter.animateHideSensitive;
         animateShadowAlpha |= filter.animateShadowAlpha;
         hasDelays |= filter.hasDelays;
+        mAnimatedProperties.addAll(filter.mAnimatedProperties);
     }
 
     public void reset() {
@@ -151,5 +164,16 @@ public class AnimationFilter {
         hasHeadsUpDisappearClickEvent = false;
         darkAnimationOriginIndex =
                 NotificationStackScrollLayout.AnimationEvent.DARK_ANIMATION_ORIGIN_INDEX_ABOVE;
+        mAnimatedProperties.clear();
+    }
+
+    public AnimationFilter animate(Property property) {
+        mAnimatedProperties.add(property);
+        return this;
+    }
+
+    public boolean shouldAnimateProperty(Property property) {
+        // TODO: migrate all existing animators to properties
+        return mAnimatedProperties.contains(property);
     }
 }
