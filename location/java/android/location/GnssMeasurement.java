@@ -63,7 +63,7 @@ public final class GnssMeasurement implements Parcelable {
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({MULTIPATH_INDICATOR_UNKNOWN, MULTIPATH_INDICATOR_DETECTED,
-        MULTIPATH_INDICATOR_NOT_USED})
+            MULTIPATH_INDICATOR_NOT_DETECTED})
     public @interface MultipathIndicator {}
 
     /**
@@ -80,9 +80,6 @@ public final class GnssMeasurement implements Parcelable {
      * The measurement shows no signs of multi-path.
      */
     public static final int MULTIPATH_INDICATOR_NOT_DETECTED = 2;
-
-    /** @removed */
-    public static final int MULTIPATH_INDICATOR_NOT_USED = 2;
 
     /** This GNSS measurement's tracking state is invalid or unknown. */
     public static final int STATE_UNKNOWN = 0;
@@ -803,8 +800,8 @@ public final class GnssMeasurement implements Parcelable {
                 return "Unknown";
             case MULTIPATH_INDICATOR_DETECTED:
                 return "Detected";
-            case MULTIPATH_INDICATOR_NOT_USED:
-                return "NotUsed";
+            case MULTIPATH_INDICATOR_NOT_DETECTED:
+                return "NotDetected";
             default:
                 return "<Invalid:" + mMultipathIndicator + ">";
         }
