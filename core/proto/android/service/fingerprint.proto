@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-syntax = "proto2";
+syntax = "proto3";
 
 package android.service.fingerprint;
 
 option java_multiple_files = true;
+option java_outer_classname = "FingerprintServiceProto";
 
 message FingerprintServiceDumpProto {
     // Each log may include multiple tuples of (user_id, num_fingerprints).
@@ -27,30 +28,30 @@ message FingerprintServiceDumpProto {
 
 message FingerprintUserStatsProto {
     // Should be 0, 10, 11, 12, etc. where 0 is the owner.
-    optional int32 user_id = 1;
+    int32 user_id = 1;
 
     // The number of fingerprints registered to this user.
-    optional int32 num_fingerprints = 2;
+    int32 num_fingerprints = 2;
 
     // Normal fingerprint authentications (e.g. lockscreen).
-    optional FingerprintActionStatsProto normal = 3;
+    FingerprintActionStatsProto normal = 3;
 
     // Crypto authentications (e.g. to unlock password storage, make secure
     // purchases, etc).
-    optional FingerprintActionStatsProto crypto = 4;
+    FingerprintActionStatsProto crypto = 4;
 }
 
 message FingerprintActionStatsProto {
     // Number of accepted fingerprints.
-    optional int32 accept = 1;
+    int32 accept = 1;
 
     // Number of rejected fingerprints.
-    optional int32 reject = 2;
+    int32 reject = 2;
 
     // Total number of acquisitions. Should be >= accept+reject due to poor
     // image acquisition in some cases (too fast, too slow, dirty sensor, etc.)
-    optional int32 acquire = 3;
+    int32 acquire = 3;
 
     // Total number of lockouts.
-    optional int32 lockout = 4;
+    int32 lockout = 4;
 }

@@ -15,7 +15,7 @@
  */
 
 
-#include <frameworks/base/core/proto/android/os/incident_proto.pb.h>
+#include <frameworks/base/core/proto/android/os/incident.pb.h>
 
 
 #include <map>

@@ -17,7 +17,7 @@
 #include "generic_message.h"
 #include "printer.h"
 
-#include <frameworks/base/core/proto/android/os/incident_proto.pb.h>
+#include <frameworks/base/core/proto/android/os/incident.pb.h>
 #include <google/protobuf/wire_format.h>
 #include <google/protobuf/io/coded_stream.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>

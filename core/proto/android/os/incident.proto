@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-syntax = "proto2";
+syntax = "proto3";
 
-option java_package = "android.os";
 option java_multiple_files = true;
+option java_outer_classname = "IncidentProtoMetadata";
 
 import "frameworks/base/libs/incident/proto/android/privacy.proto";
-import "frameworks/base/core/proto/android/service/fingerprint_proto.proto";
+import "frameworks/base/core/proto/android/service/fingerprint.proto";
 
 package android.os;
 
@@ -32,7 +32,7 @@ message IncidentHeaderProto {
         CAUSE_CRASH = 3;
     }
 
-    optional Cause cause = 1;
+    Cause cause = 1;
 }
 
 message IncidentProto {
@@ -40,13 +40,13 @@ message IncidentProto {
     repeated IncidentHeaderProto header = 1;
 
     // Device information
-    //optional SystemProperties system_properties = 1000;
+    //SystemProperties system_properties = 1000;
 
     // Linux services
-    //optional Procrank procrank = 2000;
-    //optional PageTypeInfo page_type_info = 2001;
-    //optional KernelWakeSources kernel_wake_sources = 2002;
+    //Procrank procrank = 2000;
+    //PageTypeInfo page_type_info = 2001;
+    //KernelWakeSources kernel_wake_sources = 2002;
 
     // System Services
-    optional android.service.fingerprint.FingerprintServiceDumpProto fingerprint = 3000;
+    android.service.fingerprint.FingerprintServiceDumpProto fingerprint = 3000;
 }

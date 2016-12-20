@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-syntax = "proto2";
+syntax = "proto3";
 
 option java_package = "android.content";
 option java_multiple_files = true;
@@ -22,8 +22,8 @@ option java_multiple_files = true;
 package android.content;
 
 message LocaleProto {
-  optional string language = 1;
-  optional string country = 2;
-  optional string variant = 3;
+  string language = 1;
+  string country = 2;
+  string variant = 3;
 }
 
