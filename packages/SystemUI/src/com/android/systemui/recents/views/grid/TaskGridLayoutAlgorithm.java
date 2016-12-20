@@ -63,7 +63,7 @@ public class TaskGridLayoutAlgorithm  {
         mPaddingTaskView = res.getDimensionPixelSize(R.dimen.recents_grid_padding_task_view);
 
         mTaskGridRect = new Rect();
-        mTitleBarHeight = res.getDimensionPixelSize(R.dimen.recents_task_view_header_height);
+        mTitleBarHeight = res.getDimensionPixelSize(R.dimen.recents_grid_task_view_header_height);
 
         WindowManager windowManager = (WindowManager) context
                 .getSystemService(Context.WINDOW_SERVICE);
