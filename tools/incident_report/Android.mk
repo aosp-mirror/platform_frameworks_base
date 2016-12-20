@@ -34,6 +34,8 @@ LOCAL_SHARED_LIBRARIES := \
     libplatformprotos \
     libprotobuf-cpp-full
 
+LOCAL_C_FLAGS := \
+    -Wno-unused-parameter
 include $(BUILD_HOST_EXECUTABLE)
 
 
