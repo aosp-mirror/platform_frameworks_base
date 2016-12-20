@@ -5407,15 +5407,23 @@ public class PackageManagerService extends IPackageManager.Stub {
                             result.remove(xpResolveInfo);
                         }
                         if (result.size() == 0 && !addEphemeral) {
+                            // No result in current profile, but found candidate in parent user.
+                            // And we are not going to add emphemeral app, so we can return the
+                            // result straight away.
                             result.add(xpDomainInfo.resolveInfo);
                             return result;
                         }
+                    } else if (result.size() <= 1 && !addEphemeral) {
+                        // No result in parent user and <= 1 result in current profile, and we
+                        // are not going to add emphemeral app, so we can return the result without
+                        // further processing.
+                        return result;
                     }
-                    if (result.size() > 1 || addEphemeral) {
-                        result = filterCandidatesWithDomainPreferredActivitiesLPr(
-                                intent, flags, result, xpDomainInfo, userId);
-                        sortResult = true;
-                    }
+                    // We have more than one candidate (combining results from current and parent
+                    // profile), so we need filtering and sorting.
+                    result = filterCandidatesWithDomainPreferredActivitiesLPr(
+                            intent, flags, result, xpDomainInfo, userId);
+                    sortResult = true;
                 }
             } else {
                 final PackageParser.Package pkg = mPackages.get(pkgName);
