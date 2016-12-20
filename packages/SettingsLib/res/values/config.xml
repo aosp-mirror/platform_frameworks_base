@@ -38,6 +38,12 @@
     <!-- Intent key for package name values -->
     <string name="config_helpIntentNameKey" translatable="false"></string>
 
+    <!-- Intent key for the package name keys -->
+    <string name="config_feedbackIntentExtraKey" translatable="false"></string>
+
+    <!-- Intent key for package name values -->
+    <string name="config_feedbackIntentNameKey" translatable="false"></string>
+
     <!-- The apps that need to be hided when they are disabled -->
     <string-array name="config_hideWhenDisabled_packageNames"></string-array>
 </resources>
