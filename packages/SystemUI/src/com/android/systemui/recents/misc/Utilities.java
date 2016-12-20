@@ -79,14 +79,15 @@ public class Utilities {
     public static final Rect EMPTY_RECT = new Rect();
 
     /**
-     * @return the first parent walking up the view hierarchy that has the given class type.
+     * @return the first parent walking up the view hierarchy that has the given class type (or
+     * a subclass).
      *
      * @param parentClass must be a class derived from {@link View}
      */
     public static <T extends View> T findParent(View v, Class<T> parentClass) {
         ViewParent parent = v.getParent();
         while (parent != null) {
-            if (parent.getClass().equals(parentClass)) {
+            if (parentClass.isAssignableFrom(parent.getClass())) {
                 return (T) parent;
             }
             parent = parent.getParent();

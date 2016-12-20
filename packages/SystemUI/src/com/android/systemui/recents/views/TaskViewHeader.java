@@ -290,14 +290,16 @@ public class TaskViewHeader extends FrameLayout
                 R.dimen.recents_task_view_header_height,
                 R.dimen.recents_task_view_header_height_tablet_land,
                 R.dimen.recents_task_view_header_height,
-                R.dimen.recents_task_view_header_height_tablet_land);
+                R.dimen.recents_task_view_header_height_tablet_land,
+                R.dimen.recents_grid_task_view_header_height);
         int headerButtonPadding = TaskStackLayoutAlgorithm.getDimensionForDevice(getContext(),
                 R.dimen.recents_task_view_header_button_padding,
                 R.dimen.recents_task_view_header_button_padding,
                 R.dimen.recents_task_view_header_button_padding,
                 R.dimen.recents_task_view_header_button_padding_tablet_land,
                 R.dimen.recents_task_view_header_button_padding,
-                R.dimen.recents_task_view_header_button_padding_tablet_land);
+                R.dimen.recents_task_view_header_button_padding_tablet_land,
+                R.dimen.recents_grid_task_view_header_button_padding);
         if (headerBarHeight != mHeaderBarHeight || headerButtonPadding != mHeaderButtonPadding) {
             mHeaderBarHeight = headerBarHeight;
             mHeaderButtonPadding = headerButtonPadding;
@@ -603,10 +605,7 @@ public class TaskViewHeader extends FrameLayout
                     Constants.Metrics.DismissSourceHeaderButton);
         } else if (v == mMoveTaskButton) {
             TaskView tv = Utilities.findParent(this, TaskView.class);
-            Rect bounds = mMoveTaskTargetStackId == FREEFORM_WORKSPACE_STACK_ID
-                    ? new Rect(mTaskViewRect)
-                    : new Rect();
-            EventBus.getDefault().send(new LaunchTaskEvent(tv, mTask, bounds,
+            EventBus.getDefault().send(new LaunchTaskEvent(tv, mTask, null,
                     mMoveTaskTargetStackId, false));
         } else if (v == mAppInfoView) {
             EventBus.getDefault().send(new ShowApplicationInfoEvent(mTask));

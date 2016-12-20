@@ -95,7 +95,6 @@ public class RecentsView extends FrameLayout {
     private static final int SHOW_STACK_ACTION_BUTTON_DURATION = 134;
     private static final int HIDE_STACK_ACTION_BUTTON_DURATION = 100;
 
-    private TaskStack mStack;
     private TaskStackView mTaskStackView;
     private TextView mStackActionButton;
     private TextView mEmptyView;
@@ -195,7 +194,6 @@ public class RecentsView extends FrameLayout {
      * Called from RecentsActivity when the task stack is updated.
      */
     public void updateStack(TaskStack stack, boolean setStackViewTasks) {
-        mStack = stack;
         if (setStackViewTasks) {
             mTaskStackView.setTasks(stack, true /* allowNotifyStackChanges */);
         }
@@ -212,7 +210,7 @@ public class RecentsView extends FrameLayout {
      * Returns the current TaskStack.
      */
     public TaskStack getStack() {
-        return mStack;
+        return mTaskStackView.getStack();
     }
 
     /*
@@ -251,8 +249,7 @@ public class RecentsView extends FrameLayout {
     /** Launches the task that recents was launched from if possible */
     public boolean launchPreviousTask() {
         if (mTaskStackView != null) {
-            TaskStack stack = mTaskStackView.getStack();
-            Task task = stack.getLaunchTarget();
+            Task task = getStack().getLaunchTarget();
             if (task != null) {
                 TaskView taskView = mTaskStackView.getChildViewForTask(task);
                 EventBus.getDefault().send(new LaunchTaskEvent(taskView, task, null,
@@ -340,7 +337,8 @@ public class RecentsView extends FrameLayout {
 
         if (RecentsDebugFlags.Static.EnableStackActionButton) {
             // Measure the stack action button within the constraints of the space above the stack
-            Rect buttonBounds = mTaskStackView.mLayoutAlgorithm.mStackActionButtonRect;
+            Rect buttonBounds = mTaskStackView.mLayoutAlgorithm.getStackActionButtonRect(
+                    mTaskStackView.useGridLayout());
             measureChild(mStackActionButton,
                     MeasureSpec.makeMeasureSpec(buttonBounds.width(), MeasureSpec.AT_MOST),
                     MeasureSpec.makeMeasureSpec(buttonBounds.height(), MeasureSpec.AT_MOST));
@@ -437,8 +435,9 @@ public class RecentsView extends FrameLayout {
 
     public final void onBusEvent(LaunchTaskEvent event) {
         mLastTaskLaunchedWasFreeform = event.task.isFreeformTask();
-        mTransitionHelper.launchTaskFromRecents(mStack, event.task, mTaskStackView, event.taskView,
-                event.screenPinningRequested, event.targetTaskBounds, event.targetTaskStack);
+        mTransitionHelper.launchTaskFromRecents(getStack(), event.task, mTaskStackView,
+                event.taskView, event.screenPinningRequested, event.targetTaskBounds,
+                event.targetTaskStack);
     }
 
     public final void onBusEvent(DismissRecentsToHomeAnimationStarted event) {
@@ -514,8 +513,7 @@ public class RecentsView extends FrameLayout {
                         EventBus.getDefault().send(new DockedFirstAnimationFrameEvent());
                         // Remove the task and don't bother relaying out, as all the tasks will be
                         // relaid out when the stack changes on the multiwindow change event
-                        mTaskStackView.getStack().removeTask(event.task, null,
-                                true /* fromDockGesture */);
+                        getStack().removeTask(event.task, null, true /* fromDockGesture */);
                     }
                 };
 
@@ -536,7 +534,7 @@ public class RecentsView extends FrameLayout {
                 MetricsLogger.action(mContext, MetricsEvent.ACTION_WINDOW_DOCK_DRAG_DROP,
                         event.task.getTopComponent().flattenToShortString());
             } else {
-                EventBus.getDefault().send(new DragEndCancelledEvent(mStack, event.task,
+                EventBus.getDefault().send(new DragEndCancelledEvent(getStack(), event.task,
                         event.taskView));
             }
         } else {
@@ -598,7 +596,7 @@ public class RecentsView extends FrameLayout {
     public final void onBusEvent(EnterRecentsWindowAnimationCompletedEvent event) {
         RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
         if (!launchState.launchedViaDockGesture && !launchState.launchedFromApp
-                && mStack.getTaskCount() > 0) {
+                && getStack().getTaskCount() > 0) {
             animateBackgroundScrim(1f,
                     TaskStackAnimationHelper.ENTER_FROM_HOME_TRANSLATION_DURATION);
         }
@@ -775,7 +773,8 @@ public class RecentsView extends FrameLayout {
      * @return the bounds of the stack action button.
      */
     private Rect getStackActionButtonBoundsFromStackLayout() {
-        Rect actionButtonRect = new Rect(mTaskStackView.mLayoutAlgorithm.mStackActionButtonRect);
+        Rect actionButtonRect = new Rect(mTaskStackView.mLayoutAlgorithm.getStackActionButtonRect(
+                mTaskStackView.useGridLayout()));
         int left = isLayoutRtl()
                 ? actionButtonRect.left - mStackActionButton.getPaddingLeft()
                 : actionButtonRect.right + mStackActionButton.getPaddingRight()
@@ -797,8 +796,8 @@ public class RecentsView extends FrameLayout {
         writer.print(" [0x"); writer.print(id); writer.print("]");
         writer.println();
 
-        if (mStack != null) {
-            mStack.dump(innerPrefix, writer);
+        if (getStack() != null) {
+            getStack().dump(innerPrefix, writer);
         }
         if (mTaskStackView != null) {
             mTaskStackView.dump(innerPrefix, writer);
