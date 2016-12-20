@@ -62,6 +62,7 @@ public class NotificationShelf extends ActivatableNotificationView {
     private boolean mHasItemsInStableShelf;
     private NotificationIconContainer mCollapsedIcons;
     private int mScrollFastThreshold;
+    private int mStatusBarState;
 
     public NotificationShelf(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -523,7 +524,10 @@ public class NotificationShelf extends ActivatableNotificationView {
     }
 
     private void setHasItemsInStableShelf(boolean hasItemsInStableShelf) {
-        mHasItemsInStableShelf = hasItemsInStableShelf;
+        if (mHasItemsInStableShelf != hasItemsInStableShelf) {
+            mHasItemsInStableShelf = hasItemsInStableShelf;
+            updateInteractiveness();
+        }
     }
 
     /**
@@ -536,6 +540,21 @@ public class NotificationShelf extends ActivatableNotificationView {
 
     public void setCollapsedIcons(NotificationIconContainer collapsedIcons) {
         mCollapsedIcons = collapsedIcons;
+    }
+
+    public void setStatusBarState(int statusBarState) {
+        if (mStatusBarState != statusBarState) {
+            mStatusBarState = statusBarState;
+            updateInteractiveness();
+        }
+    }
+
+    private void updateInteractiveness() {
+        boolean interactive = mStatusBarState == StatusBarState.KEYGUARD && mHasItemsInStableShelf;
+        setClickable(interactive);
+        setFocusable(interactive);
+        setImportantForAccessibility(interactive ? View.IMPORTANT_FOR_ACCESSIBILITY_YES
+                : View.IMPORTANT_FOR_ACCESSIBILITY_NO);
     }
 
     private class ShelfState extends ExpandableViewState {
