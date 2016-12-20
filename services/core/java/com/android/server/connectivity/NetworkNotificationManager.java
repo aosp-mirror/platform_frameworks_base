@@ -142,8 +142,9 @@ public class NetworkNotificationManager {
 
         if (DBG) {
             Slog.d(TAG, String.format(
-                    "showNotification tag=%s event=%s transport=%s extraInfo=%d highPrioriy=%s",
-                    tag, nameOf(eventId), getTransportName(transportType), extraInfo, highPriority));
+                    "showNotification tag=%s event=%s transport=%s extraInfo=%s highPrioriy=%s",
+                    tag, nameOf(eventId), getTransportName(transportType), extraInfo,
+                    highPriority));
         }
 
         Resources r = Resources.getSystem();
@@ -227,13 +228,14 @@ public class NetworkNotificationManager {
         }
         final int eventId = mNotificationTypeMap.get(id);
         if (DBG) {
-            Slog.d(TAG, String.format("clearing notification tag=%s event=", tag, nameOf(eventId)));
+            Slog.d(TAG, String.format("clearing notification tag=%s event=%s", tag,
+                   nameOf(eventId)));
         }
         try {
             mNotificationManager.cancelAsUser(tag, eventId, UserHandle.ALL);
         } catch (NullPointerException npe) {
             Slog.d(TAG, String.format(
-                    "failed to clear notification tag=%s event=", tag, nameOf(eventId)), npe);
+                    "failed to clear notification tag=%s event=%s", tag, nameOf(eventId)), npe);
         }
         mNotificationTypeMap.delete(id);
     }
