@@ -67,6 +67,10 @@ public class Divider extends SystemUI {
         return mView;
     }
 
+    public boolean isMinimized() {
+        return mMinimized;
+    }
+
     private void addDivider(Configuration configuration) {
         mView = (DividerView)
                 LayoutInflater.from(mContext).inflate(R.layout.docked_stack_divider, null);
