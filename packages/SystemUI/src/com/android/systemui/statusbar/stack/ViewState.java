@@ -21,12 +21,14 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
+import android.util.Property;
 import android.view.View;
 import android.view.animation.Interpolator;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableView;
+import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 /**
@@ -59,6 +61,54 @@ public class ViewState {
     private static final int TAG_START_TRANSLATION_Y = R.id.translation_y_animator_start_value_tag;
     private static final int TAG_START_TRANSLATION_Z = R.id.translation_z_animator_start_value_tag;
     private static final int TAG_START_ALPHA = R.id.alpha_animator_start_value_tag;
+
+    private static final PropertyAnimator.AnimatableProperty SCALE_X_PROPERTY
+            = new PropertyAnimator.AnimatableProperty() {
+
+        @Override
+        public int getAnimationStartTag() {
+            return R.id.scale_x_animator_start_value_tag;
+        }
+
+        @Override
+        public int getAnimationEndTag() {
+            return R.id.scale_x_animator_end_value_tag;
+        }
+
+        @Override
+        public int getAnimatorTag() {
+            return R.id.scale_x_animator_tag;
+        }
+
+        @Override
+        public Property getProperty() {
+            return View.SCALE_X;
+        }
+    };
+
+    private static final PropertyAnimator.AnimatableProperty SCALE_Y_PROPERTY
+            = new PropertyAnimator.AnimatableProperty() {
+
+        @Override
+        public int getAnimationStartTag() {
+            return R.id.scale_y_animator_start_value_tag;
+        }
+
+        @Override
+        public int getAnimationEndTag() {
+            return R.id.scale_y_animator_end_value_tag;
+        }
+
+        @Override
+        public int getAnimatorTag() {
+            return R.id.scale_y_animator_tag;
+        }
+
+        @Override
+        public Property getProperty() {
+            return View.SCALE_Y;
+        }
+    };
 
     public float alpha;
     public float xTranslation;
@@ -125,13 +175,19 @@ public class ViewState {
         }
 
         // apply scaleX
-        if (view.getScaleX() != this.scaleX) {
-            view.setScaleX(this.scaleX);
+        boolean animatingScaleX = isAnimating(view, SCALE_X_PROPERTY);
+        if (animatingScaleX) {
+            updateAnimation(view, SCALE_X_PROPERTY, scaleX);
+        } else if (view.getScaleX() != scaleX) {
+            view.setScaleX(scaleX);
         }
 
         // apply scaleY
-        if (view.getScaleY() != this.scaleY) {
-            view.setScaleY(this.scaleY);
+        boolean animatingScaleY = isAnimating(view, SCALE_Y_PROPERTY);
+        if (animatingScaleY) {
+            updateAnimation(view, SCALE_Y_PROPERTY, scaleY);
+        } else if (view.getScaleY() != scaleY) {
+            view.setScaleY(scaleY);
         }
 
         boolean becomesInvisible = this.alpha == 0.0f || (this.hidden && !isAnimating(view));
@@ -179,11 +235,21 @@ public class ViewState {
         if (isAnimating(view, TAG_ANIMATOR_ALPHA)) {
             return true;
         }
+        if (isAnimating(view, SCALE_X_PROPERTY)) {
+            return true;
+        }
+        if (isAnimating(view, SCALE_Y_PROPERTY)) {
+            return true;
+        }
         return false;
     }
 
-    private boolean isAnimating(View view, int tag) {
+    private static boolean isAnimating(View view, int tag) {
         return getChildTag(view, tag) != null;
+    }
+
+    public static boolean isAnimating(View view, PropertyAnimator.AnimatableProperty property) {
+        return getChildTag(view, property.getAnimatorTag()) != null;
     }
 
     /**
@@ -224,6 +290,20 @@ public class ViewState {
             startZTranslationAnimation(child, animationProperties);
         } else {
             abortAnimation(child, TAG_ANIMATOR_TRANSLATION_Z);
+        }
+
+        // start scaleX animation
+        if (child.getScaleX() != scaleX) {
+            PropertyAnimator.startAnimation(child, SCALE_X_PROPERTY, scaleX, animationProperties);
+        } else {
+            abortAnimation(child, SCALE_X_PROPERTY.getAnimatorTag());
+        }
+
+        // start scaleX animation
+        if (child.getScaleY() != scaleY) {
+            PropertyAnimator.startAnimation(child, SCALE_Y_PROPERTY, scaleY, animationProperties);
+        } else {
+            abortAnimation(child, SCALE_Y_PROPERTY.getAnimatorTag());
         }
 
         // start alpha animation
@@ -318,6 +398,11 @@ public class ViewState {
 
     private void updateAnimationZ(View view) {
         startZTranslationAnimation(view, NO_NEW_ANIMATIONS);
+    }
+
+    private void updateAnimation(View view, PropertyAnimator.AnimatableProperty property,
+            float endValue) {
+        PropertyAnimator.startAnimation(view, property, endValue, NO_NEW_ANIMATIONS);
     }
 
     private void startZTranslationAnimation(final View child, AnimationProperties properties) {
@@ -514,7 +599,7 @@ public class ViewState {
         }
     }
 
-    protected void startAnimator(Animator animator, AnimatorListenerAdapter listener) {
+    public static void startAnimator(Animator animator, AnimatorListenerAdapter listener) {
         if (listener != null) {
             // Even if there's a delay we'd want to notify it of the start immediately.
             listener.onAnimationStart(animator);
@@ -540,7 +625,8 @@ public class ViewState {
      * @param previousAnimator the animator which was running before
      * @return the new duration
      */
-    protected long cancelAnimatorAndGetNewDuration(long duration, ValueAnimator previousAnimator) {
+    public static long cancelAnimatorAndGetNewDuration(long duration,
+            ValueAnimator previousAnimator) {
         long newDuration = duration;
         if (previousAnimator != null) {
             // We take either the desired length of the new animation or the remaining time of
