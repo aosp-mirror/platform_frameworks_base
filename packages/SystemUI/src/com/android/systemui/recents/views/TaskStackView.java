@@ -1345,14 +1345,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             setFocusedTask(focusedTaskIndex, false /* scrollToTask */,
                     false /* requestViewFocus */);
         }
-
-        // Update the stack action button visibility
-        if (mStackScroller.getStackScroll() < SHOW_STACK_ACTION_BUTTON_SCROLL_THRESHOLD &&
-                mStack.getTaskCount() > 0) {
-            EventBus.getDefault().send(new ShowStackActionButtonEvent(false /* translate */));
-        } else {
-            EventBus.getDefault().send(new HideStackActionButtonEvent());
-        }
+        updateStackActionButtonVisibility();
     }
 
     public boolean isTouchPointInView(float x, float y, TaskView tv) {
@@ -1647,7 +1640,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             relayoutTaskViewsOnNextFrame(animation);
         }
 
-        if (mEnterAnimationComplete) {
+        // In grid layout, the stack action button always remains visible.
+        if (mEnterAnimationComplete && !useGridLayout()) {
             if (prevScroll > SHOW_STACK_ACTION_BUTTON_SCROLL_THRESHOLD &&
                     curScroll <= SHOW_STACK_ACTION_BUTTON_SCROLL_THRESHOLD &&
                     mStack.getTaskCount() > 0) {
@@ -2063,6 +2057,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             }
         }
 
+        // Update the Clear All button in case we're switching in or out of grid layout.
+        updateStackActionButtonVisibility();
+
         // Trigger a new layout and update to the initial state if necessary
         if (event.fromMultiWindow) {
             mInitialState = INITIAL_STATE_UPDATE_LAYOUT_ONLY;
@@ -2154,6 +2151,17 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mTouchExplorationEnabled = ssp.isTouchExplorationEnabled();
         mScreenPinningEnabled = ssp.getSystemSetting(getContext(),
                 Settings.System.LOCK_TO_APP_ENABLED) != 0;
+    }
+
+    private void updateStackActionButtonVisibility() {
+        // Always show the button in grid layout.
+        if (useGridLayout() ||
+                (mStackScroller.getStackScroll() < SHOW_STACK_ACTION_BUTTON_SCROLL_THRESHOLD &&
+                        mStack.getTaskCount() > 0)) {
+            EventBus.getDefault().send(new ShowStackActionButtonEvent(false /* translate */));
+        } else {
+            EventBus.getDefault().send(new HideStackActionButtonEvent());
+        }
     }
 
     public void dump(String prefix, PrintWriter writer) {

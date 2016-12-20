@@ -146,4 +146,12 @@ public class TaskGridLayoutAlgorithm  {
         int usableHeight = mScreenSize.y - mSystemInsets.top - mSystemInsets.bottom;
         mAppAspectRatio = (float) usableWidth / (float) usableHeight;
     }
+
+    public Rect getStackActionButtonRect() {
+        Rect buttonRect = new Rect(mDisplayRect);
+        buttonRect.right -= mPaddingLeftRight;
+        buttonRect.left += mPaddingLeftRight;
+        buttonRect.bottom = buttonRect.top + mPaddingTopBottom;
+        return buttonRect;
+    }
 }

@@ -337,7 +337,8 @@ public class RecentsView extends FrameLayout {
 
         if (RecentsDebugFlags.Static.EnableStackActionButton) {
             // Measure the stack action button within the constraints of the space above the stack
-            Rect buttonBounds = mTaskStackView.mLayoutAlgorithm.mStackActionButtonRect;
+            Rect buttonBounds = mTaskStackView.mLayoutAlgorithm.getStackActionButtonRect(
+                    mTaskStackView.useGridLayout());
             measureChild(mStackActionButton,
                     MeasureSpec.makeMeasureSpec(buttonBounds.width(), MeasureSpec.AT_MOST),
                     MeasureSpec.makeMeasureSpec(buttonBounds.height(), MeasureSpec.AT_MOST));
@@ -772,7 +773,8 @@ public class RecentsView extends FrameLayout {
      * @return the bounds of the stack action button.
      */
     private Rect getStackActionButtonBoundsFromStackLayout() {
-        Rect actionButtonRect = new Rect(mTaskStackView.mLayoutAlgorithm.mStackActionButtonRect);
+        Rect actionButtonRect = new Rect(mTaskStackView.mLayoutAlgorithm.getStackActionButtonRect(
+                mTaskStackView.useGridLayout()));
         int left = isLayoutRtl()
                 ? actionButtonRect.left - mStackActionButton.getPaddingLeft()
                 : actionButtonRect.right + mStackActionButton.getPaddingRight()
