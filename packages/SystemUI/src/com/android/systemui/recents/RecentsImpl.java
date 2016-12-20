@@ -180,10 +180,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         ssp.registerTaskStackListener(mTaskStackListener);
 
         // Initialize the static configuration resources
-        LayoutInflater inflater = LayoutInflater.from(mContext);
         mDummyStackView = new TaskStackView(mContext);
-        mHeaderBar = (TaskViewHeader) inflater.inflate(R.layout.recents_task_view_header,
-                null, false);
         reloadResources();
     }
 
@@ -204,14 +201,6 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         Resources res = mContext.getResources();
         reloadResources();
         mDummyStackView.reloadOnConfigurationChange();
-        // Update the header bar direction directly as it is not attached to anything and does not
-        // layout except in updateHeaderBarLayout()
-        mHeaderBar.setLayoutDirection(res.getConfiguration().getLayoutDirection());
-        mHeaderBar.onConfigurationChanged();
-        mHeaderBar.forceLayout();
-        mHeaderBar.measure(
-                MeasureSpec.makeMeasureSpec(mHeaderBar.getMeasuredWidth(), MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(mHeaderBar.getMeasuredHeight(), MeasureSpec.EXACTLY));
     }
 
     /**
@@ -582,7 +571,13 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 R.dimen.recents_task_view_header_height,
                 R.dimen.recents_task_view_header_height_tablet_land,
                 R.dimen.recents_task_view_header_height,
-                R.dimen.recents_task_view_header_height_tablet_land);
+                R.dimen.recents_task_view_header_height_tablet_land,
+                R.dimen.recents_grid_task_view_header_height);
+
+        LayoutInflater inflater = LayoutInflater.from(mContext);
+        mHeaderBar = (TaskViewHeader) inflater.inflate(R.layout.recents_task_view_header,
+                null, false);
+        mHeaderBar.setLayoutDirection(res.getConfiguration().getLayoutDirection());
     }
 
     /**
@@ -721,7 +716,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 if (task.isFreeformTask()) {
                     mTmpTransform = stackLayout.getStackTransformScreenCoordinates(task,
                             stackScroller.getStackScroll(), mTmpTransform, null,
-                            windowOverrideRect);
+                            windowOverrideRect, false /* useGridLayout */);
                     Bitmap thumbnail = drawThumbnailTransitionBitmap(task, mTmpTransform,
                             mThumbTransitionBitmapCache);
                     Rect toTaskRect = new Rect();
@@ -771,7 +766,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         stackView.updateLayoutAlgorithm(true /* boundScroll */);
         stackView.updateToInitialState();
         stackView.getStackAlgorithm().getStackTransformScreenCoordinates(launchTask,
-                stackView.getScroller().getStackScroll(), mTmpTransform, null, windowOverrideRect);
+                stackView.getScroller().getStackScroll(), mTmpTransform, null, windowOverrideRect,
+                Recents.getConfiguration().isGridEnabled);
         return mTmpTransform;
     }
 

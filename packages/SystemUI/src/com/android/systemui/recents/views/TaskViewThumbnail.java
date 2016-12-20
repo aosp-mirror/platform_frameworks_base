@@ -60,6 +60,8 @@ public class TaskViewThumbnail extends View {
     @ViewDebug.ExportedProperty(category="recents")
     private float mThumbnailScale;
     private float mFullscreenThumbnailScale;
+    private boolean mSizeToFit = false;
+    private boolean mOverlayHeaderOnThumbnailActionBar = true;
     private ActivityManager.TaskThumbnailInfo mThumbnailInfo;
 
     private int mCornerRadius;
@@ -133,10 +135,12 @@ public class TaskViewThumbnail extends View {
                 (int) (mThumbnailRect.width() * mThumbnailScale));
         int thumbnailHeight = Math.min(viewHeight,
                 (int) (mThumbnailRect.height() * mThumbnailScale));
+
         if (mBitmapShader != null && thumbnailWidth > 0 && thumbnailHeight > 0) {
-            int topOffset = mTaskBar != null
-                    ? mTaskBar.getHeight() - mCornerRadius
-                    : 0;
+            int topOffset = 0;
+            if (mTaskBar != null && mOverlayHeaderOnThumbnailActionBar) {
+                topOffset = mTaskBar.getHeight() - mCornerRadius;
+            }
 
             // Draw the background, there will be some small overdraw with the thumbnail
             if (thumbnailWidth < viewWidth) {
@@ -230,7 +234,7 @@ public class TaskViewThumbnail extends View {
                 // If we haven't measured or the thumbnail is invalid, skip the thumbnail drawing
                 // and only draw the background color
                 mThumbnailScale = 0f;
-            } else if (isStackTask) {
+            } else if (isStackTask && !mSizeToFit) {
                 float invThumbnailScale = 1f / mFullscreenThumbnailScale;
                 if (mDisplayOrientation == Configuration.ORIENTATION_PORTRAIT) {
                     if (mThumbnailInfo.screenOrientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -260,6 +264,19 @@ public class TaskViewThumbnail extends View {
         if (!mInvisible) {
             invalidate();
         }
+    }
+
+    /** Sets whether the thumbnail should be resized to fit the task view in all orientations. */
+    public void setSizeToFit(boolean flag) {
+        mSizeToFit = flag;
+    }
+
+    /**
+     * Sets whether the header should overlap (and hide) the action bar in the thumbnail, or
+     * be stacked just above it.
+     */
+    public void setOverlayHeaderOnThumbnailActionBar(boolean flag) {
+        mOverlayHeaderOnThumbnailActionBar = flag;
     }
 
     /** Updates the clip rect based on the given task bar. */
