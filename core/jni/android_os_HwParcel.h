@@ -67,7 +67,7 @@ private:
     DISALLOW_COPY_AND_ASSIGN(JHwParcel);
 };
 
-void signalExceptionForError(JNIEnv *env, status_t err);
+void signalExceptionForError(JNIEnv *env, status_t err, bool canThrowRemoteException = false);
 int register_android_os_HwParcel(JNIEnv *env);
 
 }  // namespace android
