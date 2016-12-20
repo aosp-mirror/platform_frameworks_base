@@ -116,6 +116,10 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
     }
 
     private void handleClick() {
+        showDeviceMonitoringDialog();
+    }
+
+    public void showDeviceMonitoringDialog() {
         mHost.collapsePanels();
         // TODO: Delay dialog creation until after panels are collapsed.
         createDialog();

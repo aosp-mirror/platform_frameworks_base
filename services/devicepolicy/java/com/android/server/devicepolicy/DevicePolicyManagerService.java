@@ -17,6 +17,7 @@
 package com.android.server.devicepolicy;
 
 import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
+import static android.app.admin.DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG;
 import static android.app.admin.DevicePolicyManager.CODE_ACCOUNTS_NOT_EMPTY;
 import static android.app.admin.DevicePolicyManager.CODE_ADD_MANAGED_PROFILE_DISALLOWED;
 import static android.app.admin.DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE;
@@ -245,6 +246,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private static final int MONITORING_CERT_NOTIFICATION_ID = R.plurals.ssl_ca_cert_warning;
     private static final int PROFILE_WIPED_NOTIFICATION_ID = 1001;
+    private static final int NETWORK_LOGGING_NOTIFICATION_ID = 1002;
 
     private static final String ATTR_PERMISSION_PROVIDER = "permission-provider";
     private static final String ATTR_SETUP_COMPLETE = "setup-complete";
@@ -635,6 +637,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         private static final String TAG_PARENT_ADMIN = "parent-admin";
         private static final String TAG_ORGANIZATION_COLOR = "organization-color";
         private static final String TAG_ORGANIZATION_NAME = "organization-name";
+        private static final String ATTR_LAST_NETWORK_LOGGING_NOTIFICATION = "last-notification";
+        private static final String ATTR_NUM_NETWORK_LOGGING_NOTIFICATIONS = "num-notifications";
 
         final DeviceAdminInfo info;
 
@@ -684,6 +688,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         boolean requireAutoTime = false; // Can only be set by a device owner.
         boolean forceEphemeralUsers = false; // Can only be set by a device owner.
         boolean isNetworkLoggingEnabled = false; // Can only be set by a device owner.
+
+        // one notification after enabling + 3 more after reboots
+        static final int DEF_MAXIMUM_NETWORK_LOGGING_NOTIFICATIONS_SHOWN = 4;
+        int numNetworkLoggingNotifications = 0;
+        long lastNetworkLoggingNotificationTimeMs = 0; // Time in milliseconds since epoch
 
         ActiveAdmin parentAdmin;
         final boolean isParent;
@@ -903,6 +912,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (isNetworkLoggingEnabled) {
                 out.startTag(null, TAG_IS_NETWORK_LOGGING_ENABLED);
                 out.attribute(null, ATTR_VALUE, Boolean.toString(isNetworkLoggingEnabled));
+                out.attribute(null, ATTR_NUM_NETWORK_LOGGING_NOTIFICATIONS,
+                        Integer.toString(numNetworkLoggingNotifications));
+                out.attribute(null, ATTR_LAST_NETWORK_LOGGING_NOTIFICATION,
+                        Long.toString(lastNetworkLoggingNotificationTimeMs));
                 out.endTag(null, TAG_IS_NETWORK_LOGGING_ENABLED);
             }
             if (disabledKeyguardFeatures != DEF_KEYGUARD_FEATURES_DISABLED) {
@@ -1094,6 +1107,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 } else if (TAG_IS_NETWORK_LOGGING_ENABLED.equals(tag)) {
                     isNetworkLoggingEnabled = Boolean.parseBoolean(
                             parser.getAttributeValue(null, ATTR_VALUE));
+                    lastNetworkLoggingNotificationTimeMs = Long.parseLong(
+                            parser.getAttributeValue(null, ATTR_LAST_NETWORK_LOGGING_NOTIFICATION));
+                    numNetworkLoggingNotifications = Integer.parseInt(
+                            parser.getAttributeValue(null, ATTR_NUM_NETWORK_LOGGING_NOTIFICATIONS));
                 } else if (TAG_DISABLE_KEYGUARD_FEATURES.equals(tag)) {
                     disabledKeyguardFeatures = Integer.parseInt(
                             parser.getAttributeValue(null, ATTR_VALUE));
@@ -9887,7 +9904,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // already in the requested state
             return;
         }
-        getDeviceOwnerAdminLocked().isNetworkLoggingEnabled = enabled;
+        ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
+        deviceOwner.isNetworkLoggingEnabled = enabled;
+        if (!enabled) {
+            deviceOwner.numNetworkLoggingNotifications = 0;
+            deviceOwner.lastNetworkLoggingNotificationTimeMs = 0;
+        }
         saveSettingsLocked(mInjector.userHandleGetCallingUserId());
 
         setNetworkLoggingActiveInternal(enabled);
@@ -9903,6 +9925,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     Slog.wtf(LOG_TAG, "Network logging could not be started due to the logging"
                             + " service not being available yet.");
                 }
+                sendNetworkLoggingNotificationLocked();
             } else {
                 if (mNetworkLogger != null && !mNetworkLogger.stopNetworkLogging()) {
                     mNetworkLogger = null;
@@ -9966,6 +9989,41 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         return mNetworkLogger.retrieveLogs(batchToken);
+    }
+
+    private void sendNetworkLoggingNotificationLocked() {
+        final ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
+        if (deviceOwner == null || !deviceOwner.isNetworkLoggingEnabled) {
+            return;
+        }
+        if (deviceOwner.numNetworkLoggingNotifications >=
+                ActiveAdmin.DEF_MAXIMUM_NETWORK_LOGGING_NOTIFICATIONS_SHOWN) {
+            return;
+        }
+        final long now = System.currentTimeMillis();
+        if (now - deviceOwner.lastNetworkLoggingNotificationTimeMs < MS_PER_DAY) {
+            return;
+        }
+        deviceOwner.numNetworkLoggingNotifications++;
+        if (deviceOwner.numNetworkLoggingNotifications
+                >= ActiveAdmin.DEF_MAXIMUM_NETWORK_LOGGING_NOTIFICATIONS_SHOWN) {
+            deviceOwner.lastNetworkLoggingNotificationTimeMs = 0;
+        } else {
+            deviceOwner.lastNetworkLoggingNotificationTimeMs = now;
+        }
+        final Intent intent = new Intent(DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG);
+        intent.setPackage("com.android.systemui");
+        final PendingIntent pendingIntent = PendingIntent.getBroadcastAsUser(mContext, 0, intent, 0,
+                UserHandle.CURRENT);
+        Notification notification = new Notification.Builder(mContext)
+                .setSmallIcon(R.drawable.ic_qs_network_logging)
+                .setContentTitle(mContext.getString(R.string.network_logging_notification_title))
+                .setContentText(mContext.getString(R.string.network_logging_notification_text))
+                .setShowWhen(true)
+                .setContentIntent(pendingIntent)
+                .build();
+        mInjector.getNotificationManager().notify(NETWORK_LOGGING_NOTIFICATION_ID, notification);
+        saveSettingsLocked(mOwners.getDeviceOwnerUserId());
     }
 
     /**

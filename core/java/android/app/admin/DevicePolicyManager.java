@@ -1060,6 +1060,15 @@ public class DevicePolicyManager {
             = "android.app.action.SET_NEW_PARENT_PROFILE_PASSWORD";
 
     /**
+     * Broadcast action: Tell the status bar to open the device monitoring dialog, e.g. when
+     * Network logging was enabled and the user tapped the notification.
+     * <p class="note">This is a protected intent that can only be sent by the system.</p>
+     * @hide
+     */
+    public static final String ACTION_SHOW_DEVICE_MONITORING_DIALOG
+            = "android.app.action.SHOW_DEVICE_MONITORING_DIALOG";
+
+    /**
      * Flag used by {@link #addCrossProfileIntentFilter} to allow activities in
      * the parent profile to access intents sent from the managed profile.
      * That is, when an app in the managed profile calls
