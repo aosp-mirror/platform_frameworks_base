@@ -80,6 +80,7 @@ public class NetworkNotificationManagerTest extends TestCase {
         when(mCtx.getResources()).thenReturn(mResources);
         when(mCtx.getPackageManager()).thenReturn(mPm);
         when(mCtx.getApplicationInfo()).thenReturn(new ApplicationInfo());
+        when(mNetworkInfo.getExtraInfo()).thenReturn("extra");
         when(mResources.getColor(anyInt(), any())).thenReturn(0xFF607D8B);
 
         mManager = new NetworkNotificationManager(mCtx, mTelephonyManager, mNotificationManager);
