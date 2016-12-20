@@ -1131,6 +1131,12 @@ public class Intent implements Parcelable, Cloneable {
      * for compatibility with old applications.  If you don't set a ClipData,
      * it will be copied there for you when calling {@link Context#startActivity(Intent)}.
      * <p>
+     * Starting from {@link android.os.Build.VERSION_CODES#O}, if
+     * {@link #CATEGORY_TYPED_OPENABLE} is passed, then the Uris passed in
+     * either {@link #EXTRA_STREAM} or via {@link #setClipData(ClipData)} may
+     * be openable only as asset typed files using
+     * {@link ContentResolver#openTypedAssetFileDescriptor(Uri, String, Bundle)}.
+     * <p>
      * Optional standard extras, which may be interpreted by some recipients as
      * appropriate, are: {@link #EXTRA_EMAIL}, {@link #EXTRA_CC},
      * {@link #EXTRA_BCC}, {@link #EXTRA_SUBJECT}.
@@ -1168,6 +1174,12 @@ public class Intent implements Parcelable, Cloneable {
      * {@link #EXTRA_TEXT} or {@link #EXTRA_STREAM} fields described below
      * for compatibility with old applications.  If you don't set a ClipData,
      * it will be copied there for you when calling {@link Context#startActivity(Intent)}.
+     * <p>
+     * Starting from {@link android.os.Build.VERSION_CODES#O}, if
+     * {@link #CATEGORY_TYPED_OPENABLE} is passed, then the Uris passed in
+     * either {@link #EXTRA_STREAM} or via {@link #setClipData(ClipData)} may
+     * be openable only as asset typed files using
+     * {@link ContentResolver#openTypedAssetFileDescriptor(Uri, String, Bundle)}.
      * <p>
      * Optional standard extras, which may be interpreted by some recipients as
      * appropriate, are: {@link #EXTRA_EMAIL}, {@link #EXTRA_CC},
