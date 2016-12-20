@@ -1365,35 +1365,33 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 return false;
             }
 
-            ActivityManager.RunningTaskInfo runningTask =
-                    Recents.getSystemServices().getRunningTask();
-            boolean isRunningTaskInHomeOrRecentsStack = runningTask != null &&
-                    ActivityManager.StackId.isHomeOrRecentsStack(runningTask.stackId);
-            if (isRunningTaskInHomeOrRecentsStack) {
-                return false;
-            }
-
-            toggleSplitScreenMode(MetricsEvent.ACTION_WINDOW_DOCK_LONGPRESS,
+            return toggleSplitScreenMode(MetricsEvent.ACTION_WINDOW_DOCK_LONGPRESS,
                     MetricsEvent.ACTION_WINDOW_UNDOCK_LONGPRESS);
-            return true;
         }
     };
 
     @Override
-    protected void toggleSplitScreenMode(int metricsDockAction, int metricsUndockAction) {
+    protected boolean toggleSplitScreenMode(int metricsDockAction, int metricsUndockAction) {
         if (mRecents == null) {
-            return;
+            return false;
         }
         int dockSide = WindowManagerProxy.getInstance().getDockSide();
         if (dockSide == WindowManager.DOCKED_INVALID) {
-            mRecents.dockTopTask(NavigationBarGestureHelper.DRAG_MODE_NONE,
+            return mRecents.dockTopTask(NavigationBarGestureHelper.DRAG_MODE_NONE,
                     ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, null, metricsDockAction);
         } else {
-            EventBus.getDefault().send(new UndockingTaskEvent());
-            if (metricsUndockAction != -1) {
-                MetricsLogger.action(mContext, metricsUndockAction);
+            Divider divider = getComponent(Divider.class);
+            if (divider != null && divider.isMinimized()) {
+                // Undocking from the minimized state is not supported
+                return false;
+            } else {
+                EventBus.getDefault().send(new UndockingTaskEvent());
+                if (metricsUndockAction != -1) {
+                    MetricsLogger.action(mContext, metricsUndockAction);
+                }
             }
         }
+        return true;
     }
 
     private final View.OnLongClickListener mLongPressHomeListener

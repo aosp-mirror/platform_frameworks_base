@@ -1351,8 +1351,9 @@ public abstract class BaseStatusBar extends SystemUI implements
      *                          anything on successful docking
      * @param metricsUndockAction the action to log when undocking, or -1 to not log anything when
      *                            undocking
+     * @return true if toggle split screen was successful
      */
-    protected abstract void toggleSplitScreenMode(int metricsDockAction, int metricsUndockAction);
+    protected abstract boolean toggleSplitScreenMode(int metricsDockAction, int metricsUndockAction);
 
     /** Proxy for RecentsComponent */
 
