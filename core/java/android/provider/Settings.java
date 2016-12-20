@@ -1065,8 +1065,6 @@ public final class Settings {
 
     /**
      * Activity Action: Show Zen Mode priority configuration settings.
-     *
-     * @hide
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_ZEN_MODE_PRIORITY_SETTINGS
