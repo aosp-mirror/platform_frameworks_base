@@ -17,6 +17,8 @@
 package android.text.method;
 
 import android.annotation.NonNull;
+import android.icu.lang.UCharacter;
+import android.icu.lang.UProperty;
 import android.icu.text.BreakIterator;
 import android.text.CharSequenceCharacterIterator;
 import android.text.Selection;
@@ -321,6 +323,27 @@ public class WordIterator implements Selection.PositionIterator {
         return false;
     }
 
+    /**
+     * Indicates if the codepoint is a mid-word-only punctuation.
+     *
+     * At the moment, this is locale-independent, and includes all the characters in
+     * the MidLetter, MidNumLet, and Single_Quote class of Unicode word breaking algorithm (see
+     * UAX #29 "Unicode Text Segmentation" at http://unicode.org/reports/tr29/). These are all the
+     * characters that according to the rules WB6 and WB7 of UAX #29 prevent word breaks if they are
+     * in the middle of a word, but they become word breaks if they happen at the end of a word
+     * (accroding to rule WB999 that breaks word in any place that is not prohibited otherwise).
+     *
+     * @param locale the locale to consider the codepoint in. Presently ignored.
+     * @param codePoint the codepoint to check.
+     * @return True if the codepoint is a mid-word punctuation.
+     */
+    public static boolean isMidWordPunctuation(Locale locale, int codePoint) {
+        final int wb = UCharacter.getIntPropertyValue(codePoint, UProperty.WORD_BREAK);
+        return (wb == UCharacter.WordBreak.MIDLETTER
+                || wb == UCharacter.WordBreak.MIDNUMLET
+                || wb == UCharacter.WordBreak.SINGLE_QUOTE);
+    }
+
     private boolean isPunctuationStartBoundary(int offset) {
         return isOnPunctuation(offset) && !isAfterPunctuation(offset);
     }
@@ -331,13 +354,13 @@ public class WordIterator implements Selection.PositionIterator {
 
     private static boolean isPunctuation(int cp) {
         final int type = Character.getType(cp);
-        return (type == Character.CONNECTOR_PUNCTUATION ||
-                type == Character.DASH_PUNCTUATION ||
-                type == Character.END_PUNCTUATION ||
-                type == Character.FINAL_QUOTE_PUNCTUATION ||
-                type == Character.INITIAL_QUOTE_PUNCTUATION ||
-                type == Character.OTHER_PUNCTUATION ||
-                type == Character.START_PUNCTUATION);
+        return (type == Character.CONNECTOR_PUNCTUATION
+                || type == Character.DASH_PUNCTUATION
+                || type == Character.END_PUNCTUATION
+                || type == Character.FINAL_QUOTE_PUNCTUATION
+                || type == Character.INITIAL_QUOTE_PUNCTUATION
+                || type == Character.OTHER_PUNCTUATION
+                || type == Character.START_PUNCTUATION);
     }
 
     private boolean isAfterLetterOrDigit(int offset) {
