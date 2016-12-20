@@ -1165,6 +1165,18 @@ public class CarrierConfigManager {
     public static final String KEY_EDITABLE_TETHER_APN_BOOL =
             "editable_tether_apn_bool";
 
+    /**
+     * An array containing custom call forwarding number prefixes that will be blocked while the
+     * device is reporting that it is roaming. By default, there are no custom call
+     * forwarding prefixes and none of these numbers will be filtered. If one or more entries are
+     * present, the system will not complete the call and display an error message.
+     *
+     * To display a message to the user when call forwarding fails for 3gpp MMI codes while roaming,
+     * use the {@link #KEY_SUPPORT_3GPP_CALL_FORWARDING_WHILE_ROAMING_BOOL} option instead.
+     */
+    public static final String KEY_CALL_FORWARDING_BLOCKS_WHILE_ROAMING_STRING_ARRAY =
+            "call_forwarding_blocks_while_roaming_string_array";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -1370,6 +1382,8 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_PREF_NETWORK_NOTIFICATION_DELAY_INT, -1);
         sDefaults.putBoolean(KEY_SUPPORT_3GPP_CALL_FORWARDING_WHILE_ROAMING_BOOL, true);
         sDefaults.putBoolean(KEY_EDITABLE_TETHER_APN_BOOL, false);
+        sDefaults.putStringArray(KEY_CALL_FORWARDING_BLOCKS_WHILE_ROAMING_STRING_ARRAY,
+                null);
     }
 
     /**
