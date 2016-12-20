@@ -42,6 +42,7 @@ import android.transition.TransitionSet;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.KeyboardShortcutGroup;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
@@ -57,6 +58,7 @@ import android.view.WindowManager.LayoutParams;
 import com.android.internal.R;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 
 /**
  * <p>
@@ -138,6 +140,12 @@ public class PopupWindow {
 
     private Context mContext;
     private WindowManager mWindowManager;
+
+    /**
+     * Keeps track of popup's parent's decor view. This is needed to dispatch
+     * requestKeyboardShortcuts to the owning Activity.
+     */
+    private WeakReference<View> mParentRootView;
 
     private boolean mIsShowing;
     private boolean mIsTransitioningToDismiss;
@@ -1119,6 +1127,7 @@ public class PopupWindow {
      * @param y the popup's y location offset
      */
     public void showAtLocation(View parent, int gravity, int x, int y) {
+        mParentRootView = new WeakReference<>(parent.getRootView());
         showAtLocation(parent.getWindowToken(), gravity, x, y);
     }
 
@@ -2225,6 +2234,7 @@ public class PopupWindow {
         mAnchor = new WeakReference<>(anchor);
         mAnchorRoot = new WeakReference<>(anchorRoot);
         mIsAnchorRootAttached = anchorRoot.isAttachedToWindow();
+        mParentRootView = mAnchorRoot;
 
         mAnchorXoff = xoff;
         mAnchorYoff = yoff;
@@ -2422,6 +2432,16 @@ public class PopupWindow {
                         TransitionManager.endTransitions(PopupDecorView.this);
                     }
                 };
+
+        @Override
+        public void requestKeyboardShortcuts(List<KeyboardShortcutGroup> list, int deviceId) {
+            if (mParentRootView != null) {
+                View parentRoot = mParentRootView.get();
+                if (parentRoot != null) {
+                    parentRoot.requestKeyboardShortcuts(list, deviceId);
+                }
+            }
+        }
     }
 
     private class PopupBackgroundView extends FrameLayout {
