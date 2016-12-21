@@ -1531,8 +1531,9 @@ public abstract class AccessibilityService extends Service {
             mCaller.sendMessage(message);
         }
 
-        public void onAccessibilityEvent(AccessibilityEvent event) {
-            Message message = mCaller.obtainMessageO(DO_ON_ACCESSIBILITY_EVENT, event);
+        public void onAccessibilityEvent(AccessibilityEvent event, boolean serviceWantsEvent) {
+            Message message = mCaller.obtainMessageBO(
+                    DO_ON_ACCESSIBILITY_EVENT, serviceWantsEvent, event);
             mCaller.sendMessage(message);
         }
 
@@ -1581,9 +1582,14 @@ public abstract class AccessibilityService extends Service {
             switch (message.what) {
                 case DO_ON_ACCESSIBILITY_EVENT: {
                     AccessibilityEvent event = (AccessibilityEvent) message.obj;
+                    boolean serviceWantsEvent = message.arg1 != 0;
                     if (event != null) {
+                        // Send the event to AccessibilityCache via AccessibilityInteractionClient
                         AccessibilityInteractionClient.getInstance().onAccessibilityEvent(event);
-                        mCallback.onAccessibilityEvent(event);
+                        if (serviceWantsEvent) {
+                            // Send the event to AccessibilityService
+                            mCallback.onAccessibilityEvent(event);
+                        }
                         // Make sure the event is recycled.
                         try {
                             event.recycle();
