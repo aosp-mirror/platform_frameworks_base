@@ -48,7 +48,8 @@ class InputConsumerImpl {
         mApplicationHandle.dispatchingTimeoutNanos =
                 WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
 
-        mWindowHandle = new InputWindowHandle(mApplicationHandle, null, Display.DEFAULT_DISPLAY);
+        mWindowHandle = new InputWindowHandle(mApplicationHandle, null, null,
+                Display.DEFAULT_DISPLAY);
         mWindowHandle.name = name;
         mWindowHandle.inputChannel = mServerChannel;
         mWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;

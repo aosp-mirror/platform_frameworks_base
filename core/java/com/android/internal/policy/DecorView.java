@@ -2243,6 +2243,14 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     }
 
     @Override
+    public void dispatchPointerCaptureChanged(boolean hasCapture) {
+        super.dispatchPointerCaptureChanged(hasCapture);
+        if (!mWindow.isDestroyed() && mWindow.getCallback() != null) {
+            mWindow.getCallback().onPointerCaptureChanged(hasCapture);
+        }
+    }
+
+    @Override
     public String toString() {
         return "DecorView@" + Integer.toHexString(this.hashCode()) + "["
                 + getTitleSuffix(mWindow.getAttributes()) + "]";

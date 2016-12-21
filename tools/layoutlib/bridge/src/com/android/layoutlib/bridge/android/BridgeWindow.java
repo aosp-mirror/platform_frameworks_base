@@ -108,6 +108,10 @@ public final class BridgeWindow implements IWindow {
     }
 
     @Override
+    public void dispatchPointerCaptureChanged(boolean hasCapture) {
+    }
+
+    @Override
     public IBinder asBinder() {
         // pass for now.
         return null;

@@ -158,5 +158,10 @@ public class WindowCallbackWrapper implements Window.Callback {
             List<KeyboardShortcutGroup> data, Menu menu, int deviceId) {
         mWrapped.onProvideKeyboardShortcuts(data, menu, deviceId);
     }
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+        mWrapped.onPointerCaptureChanged(hasCapture);
+    }
 }
 

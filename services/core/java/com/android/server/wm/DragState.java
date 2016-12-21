@@ -148,7 +148,7 @@ class DragState {
             mDragApplicationHandle.dispatchingTimeoutNanos =
                     WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
 
-            mDragWindowHandle = new InputWindowHandle(mDragApplicationHandle, null,
+            mDragWindowHandle = new InputWindowHandle(mDragApplicationHandle, null, null,
                     display.getDisplayId());
             mDragWindowHandle.name = "drag";
             mDragWindowHandle.inputChannel = mServerChannel;

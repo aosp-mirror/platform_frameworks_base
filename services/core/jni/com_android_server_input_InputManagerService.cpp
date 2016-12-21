@@ -207,6 +207,7 @@ public:
     void setPointerIconType(int32_t iconId);
     void reloadPointerIcons();
     void setCustomPointerIcon(const SpriteIcon& icon);
+    void setPointerCapture(bool enabled);
 
     /* --- InputReaderPolicyInterface implementation --- */
 
@@ -276,6 +277,9 @@ private:
         // Show touches feature enable/disable.
         bool showTouches;
 
+        // Pointer capture feature enable/disable.
+        bool pointerCapture;
+
         // Sprite controller singleton, created on first use.
         sp<SpriteController> spriteController;
 
@@ -312,6 +316,7 @@ NativeInputManager::NativeInputManager(jobject contextObj,
         mLocked.pointerSpeed = 0;
         mLocked.pointerGesturesEnabled = true;
         mLocked.showTouches = false;
+        mLocked.pointerCapture = false;
     }
     mInteractive = true;
 
@@ -339,6 +344,7 @@ void NativeInputManager::dump(String8& dump) {
         dump.appendFormat(INDENT "Pointer Gestures Enabled: %s\n",
                 toString(mLocked.pointerGesturesEnabled));
         dump.appendFormat(INDENT "Show Touches: %s\n", toString(mLocked.showTouches));
+        dump.appendFormat(INDENT "Pointer Capture Enabled: %s\n", toString(mLocked.pointerCapture));
     }
     dump.append("\n");
 
@@ -459,6 +465,8 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
         outConfig->pointerGesturesEnabled = mLocked.pointerGesturesEnabled;
 
         outConfig->showTouches = mLocked.showTouches;
+
+        outConfig->pointerCapture = mLocked.pointerCapture;
 
         outConfig->setDisplayInfo(false /*external*/, mLocked.internalViewport);
         outConfig->setDisplayInfo(true /*external*/, mLocked.externalViewport);
@@ -765,6 +773,22 @@ void NativeInputManager::setShowTouches(bool enabled) {
 
     mInputManager->getReader()->requestRefreshConfiguration(
             InputReaderConfiguration::CHANGE_SHOW_TOUCHES);
+}
+
+void NativeInputManager::setPointerCapture(bool enabled) {
+    { // acquire lock
+        AutoMutex _l(mLock);
+
+        if (mLocked.pointerCapture == enabled) {
+            return;
+        }
+
+        ALOGI("Setting pointer capture to %s.", enabled ? "enabled" : "disabled");
+        mLocked.pointerCapture = enabled;
+    } // release lock
+
+    mInputManager->getReader()->requestRefreshConfiguration(
+            InputReaderConfiguration::CHANGE_POINTER_CAPTURE);
 }
 
 void NativeInputManager::setInteractive(bool interactive) {
@@ -1323,6 +1347,12 @@ static void nativeSetFocusedApplication(JNIEnv* env, jclass /* clazz */,
     im->setFocusedApplication(env, applicationHandleObj);
 }
 
+static void nativeSetPointerCapture(JNIEnv* env, jclass /* clazz */, jlong ptr,
+        jboolean enabled) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+    im->setPointerCapture(enabled);
+}
+
 static void nativeSetInputDispatchMode(JNIEnv* /* env */,
         jclass /* clazz */, jlong ptr, jboolean enabled, jboolean frozen) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
@@ -1509,6 +1539,8 @@ static const JNINativeMethod gInputManagerMethods[] = {
             (void*) nativeSetInputWindows },
     { "nativeSetFocusedApplication", "(JLcom/android/server/input/InputApplicationHandle;)V",
             (void*) nativeSetFocusedApplication },
+    { "nativeSetPointerCapture", "(JZ)V",
+            (void*) nativeSetPointerCapture },
     { "nativeSetInputDispatchMode", "(JZZ)V",
             (void*) nativeSetInputDispatchMode },
     { "nativeSetSystemUiVisibility", "(JI)V",

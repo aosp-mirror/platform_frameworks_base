@@ -3704,6 +3704,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         private OnSystemUiVisibilityChangeListener mOnSystemUiVisibilityChangeListener;
 
         OnApplyWindowInsetsListener mOnApplyWindowInsetsListener;
+
+        OnCapturedPointerListener mOnCapturedPointerListener;
     }
 
     ListenerInfo mListenerInfo;
@@ -10658,6 +10660,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         return onTrackballEvent(event);
+    }
+
+    /**
+     * Pass a captured pointer event down to the focused view.
+     *
+     * @param event The motion event to be dispatched.
+     * @return True if the event was handled by the view, false otherwise.
+     */
+    public boolean dispatchCapturedPointerEvent(MotionEvent event) {
+        if (!hasPointerCapture()) {
+            return false;
+        }
+        //noinspection SimplifiableIfStatement
+        ListenerInfo li = mListenerInfo;
+        if (li != null && li.mOnCapturedPointerListener != null
+                && li.mOnCapturedPointerListener.onCapturedPointer(this, event)) {
+            return true;
+        }
+        return onCapturedPointerEvent(event);
     }
 
     /**
@@ -22688,7 +22709,110 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return mPointerIcon;
     }
 
-    //
+    /**
+     * Checks pointer capture status.
+     *
+     * @return true if the view has pointer capture.
+     * @see #requestPointerCapture()
+     * @see #hasPointerCapture()
+     */
+    public boolean hasPointerCapture() {
+        final ViewRootImpl viewRootImpl = getViewRootImpl();
+        if (viewRootImpl == null) {
+            return false;
+        }
+        return viewRootImpl.hasPointerCapture();
+    }
+
+    /**
+     * Requests pointer capture mode.
+     * <p>
+     * When the window has pointer capture, the mouse pointer icon will disappear and will not
+     * change its position. Further mouse will be dispatched with the source
+     * {@link InputDevice#SOURCE_MOUSE_RELATIVE}, and relative position changes will be available
+     * through {@link MotionEvent#getX} and {@link MotionEvent#getY}. Non-mouse events
+     * (touchscreens, or stylus) will not be affected.
+     * <p>
+     * If the window already has pointer capture, this call does nothing.
+     * <p>
+     * The capture may be released through {@link #releasePointerCapture()}, or will be lost
+     * automatically when the window loses focus.
+     *
+     * @see #releasePointerCapture()
+     * @see #hasPointerCapture()
+     */
+    public void requestPointerCapture() {
+        final ViewRootImpl viewRootImpl = getViewRootImpl();
+        if (viewRootImpl != null) {
+            viewRootImpl.requestPointerCapture(true);
+        }
+    }
+
+
+    /**
+     * Releases the pointer capture.
+     * <p>
+     * If the window does not have pointer capture, this call will do nothing.
+     * @see #requestPointerCapture()
+     * @see #hasPointerCapture()
+     */
+    public void releasePointerCapture() {
+        final ViewRootImpl viewRootImpl = getViewRootImpl();
+        if (viewRootImpl != null) {
+            viewRootImpl.requestPointerCapture(false);
+        }
+    }
+
+    /**
+     * Called when the window has just acquired or lost pointer capture.
+     *
+     * @param hasCapture True if the view now has pointerCapture, false otherwise.
+     */
+    @CallSuper
+    public void onPointerCaptureChange(boolean hasCapture) {
+    }
+
+    /**
+     * @see #onPointerCaptureChange
+     */
+    public void dispatchPointerCaptureChanged(boolean hasCapture) {
+        onPointerCaptureChange(hasCapture);
+    }
+
+    /**
+     * Implement this method to handle captured pointer events
+     *
+     * @param event The captured pointer event.
+     * @return True if the event was handled, false otherwise.
+     * @see #requestPointerCapture()
+     */
+    public boolean onCapturedPointerEvent(MotionEvent event) {
+        return false;
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when a captured pointer event
+     * is being dispatched this view. The callback will be invoked before the event is
+     * given to the view.
+     */
+    public interface OnCapturedPointerListener {
+        /**
+         * Called when a captured pointer event is dispatched to a view.
+         * @param view The view this event has been dispatched to.
+         * @param event The captured event.
+         * @return True if the listener has consumed the event, false otherwise.
+         */
+        boolean onCapturedPointer(View view, MotionEvent event);
+    }
+
+    /**
+     * Set a listener to receive callbacks when the pointer capture state of a view changes.
+     * @param l  The {@link OnCapturedPointerListener} to receive callbacks.
+     */
+    public void setOnCapturedPointerListener(OnCapturedPointerListener l) {
+        getListenerInfo().mOnCapturedPointerListener = l;
+    }
+
     // Properties
     //
     /**

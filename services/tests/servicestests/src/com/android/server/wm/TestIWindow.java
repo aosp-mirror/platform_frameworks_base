@@ -107,4 +107,8 @@ public class TestIWindow extends IWindow.Stub {
             throws RemoteException {
 
     }
+
+    @Override
+    public void dispatchPointerCaptureChanged(boolean hasCapture) {
+    }
 }

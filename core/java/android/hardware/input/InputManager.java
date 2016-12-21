@@ -40,6 +40,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.InputDevice;
 import android.view.InputEvent;
+import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
@@ -893,6 +894,25 @@ public final class InputManager {
     public void setCustomPointerIcon(PointerIcon icon) {
         try {
             mIm.setCustomPointerIcon(icon);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Request or release pointer capture.
+     * <p>
+     * When in capturing mode, the pointer icon disappears and all mouse events are dispatched to
+     * the window which has requested the capture. Relative position changes are available through
+     * {@link MotionEvent#getX} and {@link MotionEvent#getY}.
+     *
+     * @param enable true when requesting pointer capture, false when releasing.
+     *
+     * @hide
+     */
+    public void requestPointerCapture(IBinder windowToken, boolean enable) {
+        try {
+            mIm.requestPointerCapture(windowToken, enable);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
