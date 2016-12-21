@@ -237,7 +237,7 @@ public class ContentProviderClient implements AutoCloseable {
         }
     }
 
-    /** @hide */
+    /** See {@link ContentProvider#refresh} */
     public boolean refresh(Uri url, @Nullable Bundle args,
             @Nullable CancellationSignal cancellationSignal) throws RemoteException {
         Preconditions.checkNotNull(url, "url");

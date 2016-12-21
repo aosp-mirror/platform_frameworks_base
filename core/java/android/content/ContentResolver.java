@@ -198,7 +198,6 @@ public abstract class ContentResolver {
      * or not. If a provider supports refresh, it should include this key in its
      * returned Cursor as part of its query call.
      *
-     * @hide
      */
     public static final String EXTRA_REFRESH_SUPPORTED = "android.content.extra.REFRESH_SUPPORTED";
 
