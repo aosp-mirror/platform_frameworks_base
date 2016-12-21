@@ -1567,7 +1567,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void handleShortPressOnHome() {
         // Turn on the connected TV and switch HDMI input if we're a HDMI playback device.
-        getHdmiControl().turnOnTv();
+        final HdmiControl hdmiControl = getHdmiControl();
+        if (hdmiControl != null) {
+            hdmiControl.turnOnTv();
+        }
 
         // If there's a dream running then use home to escape the dream
         // but don't actually go home.
@@ -1584,9 +1587,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * Creates an accessor to HDMI control service that performs the operation of
      * turning on TV (optional) and switching input to us. If HDMI control service
      * is not available or we're not a HDMI playback device, the operation is no-op.
+     * @return {@link HdmiControl} instance if available, null otherwise.
      */
     private HdmiControl getHdmiControl() {
         if (null == mHdmiControl) {
+            if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_HDMI_CEC)) {
+                return null;
+            }
             HdmiControlManager manager = (HdmiControlManager) mContext.getSystemService(
                         Context.HDMI_CONTROL_SERVICE);
             HdmiPlaybackClient client = null;
