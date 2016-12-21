@@ -240,11 +240,16 @@ public final class StrictMode {
      */
     private static final int DETECT_VM_CLEARTEXT_NETWORK = 0x40 << 8;  // for VmPolicy
 
+    /**
+     * @hide
+     */
+    private static final int DETECT_VM_CONTENT_URI_WITHOUT_PERMISSION = 0x80 << 8;  // for VmPolicy
+
     private static final int ALL_VM_DETECT_BITS =
             DETECT_VM_CURSOR_LEAKS | DETECT_VM_CLOSABLE_LEAKS |
             DETECT_VM_ACTIVITY_LEAKS | DETECT_VM_INSTANCE_LEAKS |
             DETECT_VM_REGISTRATION_LEAKS | DETECT_VM_FILE_URI_EXPOSURE |
-            DETECT_VM_CLEARTEXT_NETWORK;
+            DETECT_VM_CLEARTEXT_NETWORK | DETECT_VM_CONTENT_URI_WITHOUT_PERMISSION;
 
     // Byte 3: Penalty
 
@@ -710,7 +715,7 @@ public final class StrictMode {
             public Builder detectAll() {
                 int flags = DETECT_VM_ACTIVITY_LEAKS | DETECT_VM_CURSOR_LEAKS
                         | DETECT_VM_CLOSABLE_LEAKS | DETECT_VM_REGISTRATION_LEAKS
-                        | DETECT_VM_FILE_URI_EXPOSURE;
+                        | DETECT_VM_FILE_URI_EXPOSURE | DETECT_VM_CONTENT_URI_WITHOUT_PERMISSION;
 
                 // TODO: always add DETECT_VM_CLEARTEXT_NETWORK once we have facility
                 // for apps to mark sockets that should be ignored
@@ -756,7 +761,7 @@ public final class StrictMode {
             }
 
             /**
-             * Detect when this application exposes a {@code file://}
+             * Detect when the calling application exposes a {@code file://}
              * {@link android.net.Uri} to another app.
              * <p>
              * This exposure is discouraged since the receiving app may not have
@@ -796,6 +801,22 @@ public final class StrictMode {
              */
             public Builder detectCleartextNetwork() {
                 return enable(DETECT_VM_CLEARTEXT_NETWORK);
+            }
+
+            /**
+             * Detect when the calling application sends a {@code content://}
+             * {@link android.net.Uri} to another app without setting
+             * {@link Intent#FLAG_GRANT_READ_URI_PERMISSION} or
+             * {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION}.
+             * <p>
+             * Forgetting to include one or more of these flags when sending an
+             * intent is typically an app bug.
+             *
+             * @see Intent#FLAG_GRANT_READ_URI_PERMISSION
+             * @see Intent#FLAG_GRANT_WRITE_URI_PERMISSION
+             */
+            public Builder detectContentUriWithoutPermission() {
+                return enable(DETECT_VM_CONTENT_URI_WITHOUT_PERMISSION);
             }
 
             /**
@@ -1797,15 +1818,15 @@ public final class StrictMode {
     /**
      * @hide
      */
-    public static boolean vmContentUriWithoutPermissionEnabled() {
-        return (sVmPolicyMask & DETECT_VM_FILE_URI_EXPOSURE) != 0;
+    public static boolean vmCleartextNetworkEnabled() {
+        return (sVmPolicyMask & DETECT_VM_CLEARTEXT_NETWORK) != 0;
     }
 
     /**
      * @hide
      */
-    public static boolean vmCleartextNetworkEnabled() {
-        return (sVmPolicyMask & DETECT_VM_CLEARTEXT_NETWORK) != 0;
+    public static boolean vmContentUriWithoutPermissionEnabled() {
+        return (sVmPolicyMask & DETECT_VM_CONTENT_URI_WITHOUT_PERMISSION) != 0;
     }
 
     /**
