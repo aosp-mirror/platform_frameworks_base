@@ -221,9 +221,4 @@ public abstract class PackageManagerInternal {
     public abstract void requestEphemeralResolutionPhaseTwo(EphemeralResponse responseObj,
             Intent origIntent, String resolvedType, Intent launchIntent, String callingPackage,
             int userId);
-
-    /**
-     * @return The SetupWizard package name.
-     */
-    public abstract String getSetupWizardPackageName();
 }

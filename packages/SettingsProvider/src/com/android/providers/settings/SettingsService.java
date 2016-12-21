@@ -97,7 +97,6 @@ final public class SettingsService extends Binder {
             PUT,
             DELETE,
             LIST,
-            RESET,
         }
 
         int mUser = -1;     // unspecified
@@ -105,10 +104,7 @@ final public class SettingsService extends Binder {
         String mTable = null;
         String mKey = null;
         String mValue = null;
-        String mPackageName = null;
-        String mToken = null;
-        int mResetMode = -1;
-        boolean mMakeDefault;
+
 
         MyShellCommand(SettingsProvider provider, boolean dumping) {
             mProvider = provider;
@@ -146,8 +142,6 @@ final public class SettingsService extends Binder {
                         mVerb = CommandVerb.DELETE;
                     } else if ("list".equalsIgnoreCase(arg)) {
                         mVerb = CommandVerb.LIST;
-                    } else if ("reset".equalsIgnoreCase(arg)) {
-                        mVerb = CommandVerb.RESET;
                     } else {
                         // invalid
                         perr.println("Invalid command: " + arg);
@@ -165,35 +159,6 @@ final public class SettingsService extends Binder {
                         valid = true;
                         break;
                     }
-                } else if (mVerb == CommandVerb.RESET) {
-                    if ("untrusted_defaults".equalsIgnoreCase(arg)) {
-                        mResetMode = Settings.RESET_MODE_UNTRUSTED_DEFAULTS;
-                    } else if ("untrusted_clear".equalsIgnoreCase(arg)) {
-                        mResetMode = Settings.RESET_MODE_UNTRUSTED_CHANGES;
-                    } else if ("trusted_defaults".equalsIgnoreCase(arg)) {
-                        mResetMode = Settings.RESET_MODE_TRUSTED_DEFAULTS;
-                    } else {
-                        mPackageName = arg;
-                        mResetMode = Settings.RESET_MODE_PACKAGE_DEFAULTS;
-                        if (peekNextArg() == null) {
-                            valid = true;
-                        } else {
-                            mToken = getNextArg();
-                            if (peekNextArg() == null) {
-                                valid = true;
-                            } else {
-                                perr.println("Too many arguments");
-                                return -1;
-                            }
-                        }
-                        break;
-                    }
-                    if (peekNextArg() == null) {
-                        valid = true;
-                    } else {
-                        perr.println("Too many arguments");
-                        return -1;
-                    }
                 } else if (mVerb == CommandVerb.GET || mVerb == CommandVerb.DELETE) {
                     mKey = arg;
                     if (peekNextArg() == null) {
@@ -206,32 +171,8 @@ final public class SettingsService extends Binder {
                 } else if (mKey == null) {
                     mKey = arg;
                     // keep going; there's another PUT arg
-                } else if (mValue == null) {
+                } else {    // PUT, final arg
                     mValue = arg;
-                    // keep going; there may be another PUT arg
-                } else if (mToken == null) {
-                    mToken = arg;
-                    if ("default".equalsIgnoreCase(mToken)) {
-                        mToken = null;
-                        mMakeDefault = true;
-                        if (peekNextArg() == null) {
-                            valid = true;
-                        } else {
-                            perr.println("Too many arguments");
-                            return -1;
-                        }
-                        break;
-                    }
-                    if (peekNextArg() == null) {
-                        valid = true;
-                        break;
-                    }
-                } else { // PUT, final arg
-                    if (!"default".equalsIgnoreCase(arg)) {
-                        perr.println("Argument expected to be 'default'");
-                        return -1;
-                    }
-                    mMakeDefault = true;
                     if (peekNextArg() == null) {
                         valid = true;
                     } else {
@@ -273,7 +214,7 @@ final public class SettingsService extends Binder {
                     pout.println(getForUser(iprovider, mUser, mTable, mKey));
                     break;
                 case PUT:
-                    putForUser(iprovider, mUser, mTable, mKey, mValue, mToken, mMakeDefault);
+                    putForUser(iprovider, mUser, mTable, mKey, mValue);
                     break;
                 case DELETE:
                     pout.println("Deleted "
@@ -283,9 +224,6 @@ final public class SettingsService extends Binder {
                     for (String line : listForUser(iprovider, mUser, mTable)) {
                         pout.println(line);
                     }
-                    break;
-                case RESET:
-                    resetForUser(iprovider, mUser, mTable, mToken);
                     break;
                 default:
                     perr.println("Unspecified command");
@@ -348,15 +286,11 @@ final public class SettingsService extends Binder {
             return result;
         }
 
-        void putForUser(IContentProvider provider, int userHandle, final String table,
-                final String key, final String value, String token, boolean makeDefault) {
+        void putForUser(IContentProvider provider, int userHandle,
+                final String table, final String key, final String value) {
             final String callPutCommand;
-            if ("system".equals(table)) {
-                callPutCommand = Settings.CALL_METHOD_PUT_SYSTEM;
-                makeDefault = false;
-                getOutPrintWriter().println("Ignored makeDefault - "
-                        + "doesn't apply to system settings");
-            } else if ("secure".equals(table)) callPutCommand = Settings.CALL_METHOD_PUT_SECURE;
+            if ("system".equals(table)) callPutCommand = Settings.CALL_METHOD_PUT_SYSTEM;
+            else if ("secure".equals(table)) callPutCommand = Settings.CALL_METHOD_PUT_SECURE;
             else if ("global".equals(table)) callPutCommand = Settings.CALL_METHOD_PUT_GLOBAL;
             else {
                 getErrPrintWriter().println("Invalid table; no put performed");
@@ -367,10 +301,6 @@ final public class SettingsService extends Binder {
                 Bundle arg = new Bundle();
                 arg.putString(Settings.NameValueTable.VALUE, value);
                 arg.putInt(Settings.CALL_METHOD_USER_KEY, userHandle);
-                arg.putString(Settings.CALL_METHOD_TAG_KEY, token);
-                if (makeDefault) {
-                    arg.putBoolean(Settings.CALL_METHOD_MAKE_DEFAULT_KEY, true);
-                }
                 provider.call(resolveCallingPackage(), callPutCommand, key, arg);
             } catch (RemoteException e) {
                 throw new RuntimeException("Failed in IPC", e);
@@ -395,29 +325,6 @@ final public class SettingsService extends Binder {
                 throw new RuntimeException("Failed in IPC", e);
             }
             return num;
-        }
-
-        void resetForUser(IContentProvider provider, int userHandle,
-                String table, String token) {
-            final String callResetCommand;
-            if ("secure".equals(table)) callResetCommand = Settings.CALL_METHOD_RESET_SECURE;
-            else if ("global".equals(table)) callResetCommand = Settings.CALL_METHOD_RESET_GLOBAL;
-            else {
-                getErrPrintWriter().println("Invalid table; no reset performed");
-                return;
-            }
-
-            try {
-                Bundle arg = new Bundle();
-                arg.putInt(Settings.CALL_METHOD_USER_KEY, userHandle);
-                arg.putInt(Settings.CALL_METHOD_RESET_MODE_KEY, mResetMode);
-                arg.putString(Settings.CALL_METHOD_TAG_KEY, token);
-                String packageName = mPackageName != null ? mPackageName : resolveCallingPackage();
-                arg.putInt(Settings.CALL_METHOD_USER_KEY, userHandle);
-                provider.call(packageName, callResetCommand, null, arg);
-            } catch (RemoteException e) {
-                throw new RuntimeException("Failed in IPC", e);
-            }
         }
 
         public static String resolveCallingPackage() {
@@ -453,18 +360,14 @@ final public class SettingsService extends Binder {
                 pw.println("      Print this help text.");
                 pw.println("  get [--user <USER_ID> | current] NAMESPACE KEY");
                 pw.println("      Retrieve the current value of KEY.");
-                pw.println("  put [--user <USER_ID> | current] NAMESPACE KEY VALUE [TOKEN] [default]");
+                pw.println("  put [--user <USER_ID> | current] NAMESPACE KEY VALUE");
                 pw.println("      Change the contents of KEY to VALUE.");
-                pw.println("      TOKEN to associate with the setting.");
-                pw.println("      {default} to set as the default, case-insensitive only for global/secure namespace");
                 pw.println("  delete NAMESPACE KEY");
                 pw.println("      Delete the entry for KEY.");
-                pw.println("  reset [--user <USER_ID> | current] NAMESPACE {PACKAGE_NAME | RESET_MODE}");
-                pw.println("      Reset the global/secure table for a package with mode.");
-                pw.println("      RESET_MODE is one of {untrusted_defaults, untrusted_clear, trusted_defaults}, case-insensitive");
                 pw.println("  list NAMESPACE");
                 pw.println("      Print all defined keys.");
-                pw.println("      NAMESPACE is one of {system, secure, global}, case-insensitive");
+                pw.println();
+                pw.println("  NAMESPACE is one of {system, secure, global}, case-insensitive");
             }
         }
     }
