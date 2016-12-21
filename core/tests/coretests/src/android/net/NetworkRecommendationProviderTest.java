@@ -77,7 +77,7 @@ public class NetworkRecommendationProviderTest extends InstrumentationTestCase {
         final NetworkRecommendationProvider.ResultCallback callback =
                 new NetworkRecommendationProvider.ResultCallback(mMockRemoteCallback, sequence);
 
-        final RecommendationResult result = new RecommendationResult(null);
+        final RecommendationResult result = RecommendationResult.createDoNotConnectRecommendation();
         callback.onResult(result);
 
         final ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
@@ -93,7 +93,7 @@ public class NetworkRecommendationProviderTest extends InstrumentationTestCase {
         final NetworkRecommendationProvider.ResultCallback callback =
                 new NetworkRecommendationProvider.ResultCallback(mMockRemoteCallback, sequence);
 
-        final RecommendationResult result = new RecommendationResult(null);
+        final RecommendationResult result = RecommendationResult.createDoNotConnectRecommendation();
         callback.onResult(result);
 
         try {
