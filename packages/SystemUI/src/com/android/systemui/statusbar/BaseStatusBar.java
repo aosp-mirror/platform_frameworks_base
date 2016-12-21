@@ -2219,7 +2219,9 @@ public abstract class BaseStatusBar extends SystemUI implements
                 entry.row.setVisibility(View.GONE);
             } else {
                 boolean wasGone = entry.row.getVisibility() == View.GONE;
-                entry.row.setVisibility(View.VISIBLE);
+                if (wasGone) {
+                    entry.row.setVisibility(View.VISIBLE);
+                }
                 if (!childNotification && !entry.row.isRemoved()) {
                     if (wasGone) {
                         // notify the scroller of a child addition
@@ -2450,9 +2452,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             return false;
         }
 
-        boolean inUse = mPowerManager.isScreenOn()
-                && (!mStatusBarKeyguardViewManager.isShowing()
-                || mStatusBarKeyguardViewManager.isOccluded());
+        boolean inUse = mPowerManager.isScreenOn();
         try {
             inUse = inUse && !mDreamManager.isDreaming();
         } catch (RemoteException e) {
@@ -2491,7 +2491,9 @@ public abstract class BaseStatusBar extends SystemUI implements
                 if (DEBUG) Log.d(TAG, "No peeking: accessible fullscreen: " + sbn.getKey());
                 return false;
             } else {
-                return true;
+                // we only allow head-up on the lockscreen if it doesn't have a fullscreen intent
+                return !mStatusBarKeyguardViewManager.isShowing()
+                        || mStatusBarKeyguardViewManager.isOccluded();
             }
         }
 
