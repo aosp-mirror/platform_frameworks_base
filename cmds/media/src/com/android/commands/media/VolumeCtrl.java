@@ -40,19 +40,20 @@ public class VolumeCtrl {
 
     private final static String TAG = "VolumeCtrl";
 
-    // --stream affects --index, --adj or --get options.
-    // --show affects --index and --adj options.
+    // --stream affects --set, --adj or --get options.
+    // --show affects --set and --adj options.
     public final static String USAGE = new String(
             "the options are as follows: \n" +
             "\t\t--stream STREAM selects the stream to control, see AudioManager.STREAM_*\n" +
             "\t\t                controls AudioManager.STREAM_MUSIC if no stream is specified\n"+
-            "\t\t--index INDEX   sets the volume index value\n" +
+            "\t\t--set INDEX     sets the volume index value\n" +
             "\t\t--adj DIRECTION adjusts the volume, use raise|same|lower for the direction\n" +
             "\t\t--get           outputs the current volume\n" +
             "\t\t--show          shows the UI during the volume change\n" +
             "\texamples:\n" +
-            "\t\tadb shell media volume --show --stream 3 --index 11\n" +
-            "\t\tadb shell media volume --stream 0 --adj lower\n"
+            "\t\tadb shell media volume --show --stream 3 --set 11\n" +
+            "\t\tadb shell media volume --stream 0 --adj lower\n" +
+            "\t\tadb shell media volume --stream 3 --get\n"
             );
 
     private final static int VOLUME_CONTROL_MODE_SET = 0;
@@ -81,10 +82,6 @@ public class VolumeCtrl {
                 case "--show":
                     showUi = true;
                     break;
-                case "--set":
-                    mode = VOLUME_CONTROL_MODE_SET;
-                    log(LOG_V, "will set volume");
-                    break;
                 case "--get":
                     mode = VOLUME_CONTROL_MODE_GET;
                     log(LOG_V, "will get volume");
@@ -93,7 +90,7 @@ public class VolumeCtrl {
                     stream = Integer.decode(cmd.nextArgRequired()).intValue();
                     log(LOG_V, "will control stream=" + stream + " (" + streamName(stream) + ")");
                     break;
-                case "--index":
+                case "--set":
                     volIndex = Integer.decode(cmd.nextArgRequired()).intValue();
                     mode = VOLUME_CONTROL_MODE_SET;
                     log(LOG_V, "will set volume to index=" + volIndex);
