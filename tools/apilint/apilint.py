@@ -990,6 +990,14 @@ def verify_manager_list(clazz):
             warn(clazz, m, None, "Methods should return List<? extends Parcelable> instead of Parcelable[] to support ParceledListSlice under the hood")
 
 
+def verify_abstract_inner(clazz):
+    """Verifies that abstract inner classes are static."""
+
+    if re.match(".+?\.[A-Z][^\.]+\.[A-Z]", clazz.fullname):
+        if " abstract " in clazz.raw and " static " not in clazz.raw:
+            warn(clazz, None, None, "Abstract inner classes should be static to improve testability")
+
+
 def examine_clazz(clazz):
     """Find all style issues in the given class."""
     if clazz.pkg.name.startswith("java"): return
@@ -1036,6 +1044,7 @@ def examine_clazz(clazz):
     verify_resource_names(clazz)
     verify_files(clazz)
     verify_manager_list(clazz)
+    verify_abstract_inner(clazz)
 
 
 def examine_stream(stream):
