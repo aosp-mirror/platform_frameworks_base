@@ -853,7 +853,8 @@ public class ClipData implements Parcelable {
      * @hide
      */
     public void prepareToLeaveProcess(boolean leavingPackage) {
-        prepareToLeaveProcess(leavingPackage, 0);
+        // Assume that callers are going to be granting permissions
+        prepareToLeaveProcess(leavingPackage, Intent.FLAG_GRANT_READ_URI_PERMISSION);
     }
 
     /**
