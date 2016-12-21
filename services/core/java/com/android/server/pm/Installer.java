@@ -20,10 +20,15 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageStats;
 import android.os.Build;
+import android.os.IBinder;
+import android.os.IBinder.DeathRecipient;
 import android.os.IInstalld;
+import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.text.format.DateUtils;
 import android.util.Slog;
 
+import com.android.internal.os.BackgroundThread;
 import com.android.server.SystemService;
 
 import dalvik.system.VMRuntime;
@@ -52,7 +57,6 @@ public class Installer extends SystemService {
 
     private final boolean mIsolated;
 
-    // TODO: reconnect if installd restarts
     private volatile IInstalld mInstalld;
     private volatile Object mWarnIfHeld;
 
@@ -83,7 +87,33 @@ public class Installer extends SystemService {
         if (mIsolated) {
             mInstalld = null;
         } else {
-            mInstalld = IInstalld.Stub.asInterface(ServiceManager.getService("installd"));
+            connect();
+        }
+    }
+
+    private void connect() {
+        IBinder binder = ServiceManager.getService("installd");
+        if (binder != null) {
+            try {
+                binder.linkToDeath(new DeathRecipient() {
+                    @Override
+                    public void binderDied() {
+                        Slog.w(TAG, "installd died; reconnecting");
+                        connect();
+                    }
+                }, 0);
+            } catch (RemoteException e) {
+                binder = null;
+            }
+        }
+
+        if (binder != null) {
+            mInstalld = IInstalld.Stub.asInterface(binder);
+        } else {
+            Slog.w(TAG, "installd not found; trying again");
+            BackgroundThread.getHandler().postDelayed(() -> {
+                connect();
+            }, DateUtils.SECOND_IN_MILLIS);
         }
     }
 
