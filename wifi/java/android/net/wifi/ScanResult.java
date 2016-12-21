@@ -16,6 +16,7 @@
 
 package android.net.wifi;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -259,10 +260,10 @@ public class ScanResult implements Parcelable {
     public long blackListTimestamp;
 
     /**
-     * Status: indicating the scan result is not a result
-     * that is part of user's saved configurations
+     * Status indicating the scan result does not correspond to a user's saved configuration
      * @hide
      */
+    @SystemApi
     public boolean untrusted;
 
     /**
