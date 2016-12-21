@@ -65,7 +65,7 @@ static void nativeInit(JNIEnv* env, jobject obj) {
     }
 
     if (gThermalModule == nullptr) {
-        ALOGE("Undable to get Thermal service.");
+        ALOGE("Unable to get Thermal service.");
     }
 }
 
