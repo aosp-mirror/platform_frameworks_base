@@ -24,11 +24,13 @@ import android.app.AppGlobals;
 import android.content.Intent;
 import android.content.pm.PackageParser;
 import android.content.pm.ResolveInfo;
+import android.os.Build;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.system.ErrnoException;
 import android.util.ArraySet;
 import android.util.Log;
+import dalvik.system.VMRuntime;
 import libcore.io.Libcore;
 
 import java.io.File;
@@ -196,5 +198,18 @@ public class PackageManagerServiceUtils {
             sb.append(pkg.packageName);
         }
         return sb.toString();
+    }
+
+    /**
+     * Verifies that the given string {@code isa} is a valid supported isa on
+     * the running device.
+     */
+    public static boolean checkISA(String isa) {
+        for (String abi : Build.SUPPORTED_ABIS) {
+            if (VMRuntime.getInstructionSet(abi).equals(isa)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
