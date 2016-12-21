@@ -3171,6 +3171,9 @@ message MetricsEvent {
     RESERVED_FOR_LOGBUILDER_CATEGORY = 758;
     RESERVED_FOR_LOGBUILDER_TYPE = 759;
 
+    // ACTION: "Do not show again" was enabled in the support disclaimer and the
+    // user accepted
+    ACTION_SKIP_DISCLAIMER_SELECTED = 760;
 
     // ---- End O Constants, all O constants go above this line ----
 
