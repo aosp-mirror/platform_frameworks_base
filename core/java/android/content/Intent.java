@@ -4785,6 +4785,11 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     public static final int FLAG_RECEIVER_EXCLUDE_BACKGROUND = 0x00800000;
+    /**
+     * If set, this broadcast is being sent from the shell.
+     * @hide
+     */
+    public static final int FLAG_RECEIVER_FROM_SHELL = 0x00400000;
 
     /**
      * @hide Flags that can't be changed with PendingIntent.
@@ -7969,6 +7974,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #getFlags
      * @see #addFlags
+     * @see #removeFlags
      *
      * @see #FLAG_GRANT_READ_URI_PERMISSION
      * @see #FLAG_GRANT_WRITE_URI_PERMISSION
@@ -8002,19 +8008,28 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     /**
-     * Add additional flags to the intent (or with existing flags
-     * value).
+     * Add additional flags to the intent (or with existing flags value).
      *
      * @param flags The new flags to set.
-     *
-     * @return Returns the same Intent object, for chaining multiple calls
-     * into a single statement.
-     *
-     * @see #setFlags
+     * @return Returns the same Intent object, for chaining multiple calls into
+     *         a single statement.
+     * @see #setFlags(int)
+     * @see #removeFlags(int)
      */
     public Intent addFlags(int flags) {
         mFlags |= flags;
         return this;
+    }
+
+    /**
+     * Remove these flags from the intent.
+     *
+     * @param flags The flags to remove.
+     * @see #setFlags(int)
+     * @see #addFlags(int)
+     */
+    public void removeFlags(int flags) {
+        mFlags &= ~flags;
     }
 
     /**
