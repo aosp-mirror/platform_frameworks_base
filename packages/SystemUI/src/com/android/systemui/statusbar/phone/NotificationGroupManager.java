@@ -23,6 +23,7 @@ import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -35,7 +36,7 @@ import java.util.Map;
 /**
  * A class to handle notifications and their corresponding groups.
  */
-public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChangedListener {
+public class NotificationGroupManager implements OnHeadsUpChangedListener {
 
     private final HashMap<String, NotificationGroup> mGroupMap = new HashMap<>();
     private OnGroupChangeListener mListener;
@@ -415,6 +416,10 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
                 child = getIsolatedChild(sbn.getGroupKey());
             }
             if (child != null) {
+                if (child.row.keepInParent() || child.row.isRemoved() || child.row.isDismissed()) {
+                    // the notification is actually already removed, no need to do heads-up on it.
+                    return;
+                }
                 if (mHeadsUpManager.isHeadsUp(child.key)) {
                     mHeadsUpManager.updateNotification(child, true);
                 } else {

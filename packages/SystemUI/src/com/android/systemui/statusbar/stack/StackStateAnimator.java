@@ -53,7 +53,6 @@ public class StackStateAnimator {
     public static final int DELAY_EFFECT_MAX_INDEX_DIFFERENCE = 2;
     public static final int ANIMATION_DELAY_HEADS_UP = 120;
 
-    private final Interpolator mHeadsUpAppearInterpolator;
     private final int mGoToFullShadeAppearingTranslation;
     private final ExpandableViewState mTmpState = new ExpandableViewState();
     private final AnimationProperties mAnimationProperties;
@@ -83,7 +82,6 @@ public class StackStateAnimator {
         mGoToFullShadeAppearingTranslation =
                 hostLayout.getContext().getResources().getDimensionPixelSize(
                         R.dimen.go_to_full_shade_appearing_translation);
-        mHeadsUpAppearInterpolator = new HeadsUpAppearInterpolator();
         mAnimationProperties = new AnimationProperties() {
             @Override
             public AnimationFilter getAnimationFilter() {
@@ -103,7 +101,7 @@ public class StackStateAnimator {
             @Override
             public Interpolator getCustomInterpolator(View child, Property property) {
                 if (mHeadsUpAppearChildren.contains(child) && View.TRANSLATION_Y.equals(property)) {
-                    return mHeadsUpAppearInterpolator;
+                    return Interpolators.HEADS_UP_APPEAR;
                 }
                 return null;
             }
@@ -253,7 +251,13 @@ public class StackStateAnimator {
                     View viewAfterChangingView = noNextView
                             ? mHostLayout.getLastChildNotGone()
                             : event.viewAfterChangingView;
-
+                    if (viewAfterChangingView == null) {
+                        // This can happen when the last view in the list is removed.
+                        // Since the shelf is still around and the only view, the code still goes
+                        // in here and tries to calculate the delay for it when case its properties
+                        // have changed.
+                        continue;
+                    }
                     int nextIndex = finalState
                             .getViewStateForView(viewAfterChangingView).notGoneIndex;
                     if (ownIndex >= nextIndex) {

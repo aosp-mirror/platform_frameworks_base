@@ -17,9 +17,12 @@
 package com.android.systemui.statusbar.stack;
 
 import android.animation.AnimatorListenerAdapter;
+import android.util.ArrayMap;
 import android.util.Property;
 import android.view.View;
 import android.view.animation.Interpolator;
+
+import java.util.HashMap;
 
 /**
  * Properties for a View animation
@@ -27,6 +30,7 @@ import android.view.animation.Interpolator;
 public class AnimationProperties {
     public long duration;
     public long delay;
+    private ArrayMap<Property, Interpolator> mInterpolatorMap;
 
     /**
      * @return an animation filter for this animation.
@@ -50,7 +54,29 @@ public class AnimationProperties {
      * Get a custom interpolator for a property instead of the normal one.
      */
     public Interpolator getCustomInterpolator(View child, Property property) {
-        return null;
+        return mInterpolatorMap != null ? mInterpolatorMap.get(property) : null;
+    }
+
+
+    public void combineCustomInterpolators(AnimationProperties iconAnimationProperties) {
+        ArrayMap<Property, Interpolator> map = iconAnimationProperties.mInterpolatorMap;
+        if (map != null) {
+            if (mInterpolatorMap == null) {
+                mInterpolatorMap = new ArrayMap<>();
+            }
+            mInterpolatorMap.putAll(map);
+        }
+    }
+
+    /**
+     * Set a custom interpolator to use for all views for a property.
+     */
+    public AnimationProperties setCustomInterpolator(Property property, Interpolator interpolator) {
+        if (mInterpolatorMap == null) {
+            mInterpolatorMap = new ArrayMap<>();
+        }
+        mInterpolatorMap.put(property, interpolator);
+        return this;
     }
 
     public AnimationProperties setDuration(long duration) {
@@ -60,6 +86,11 @@ public class AnimationProperties {
 
     public AnimationProperties setDelay(long delay) {
         this.delay = delay;
+        return this;
+    }
+
+    public AnimationProperties resetCustomInterpolators() {
+        mInterpolatorMap = null;
         return this;
     }
 }

@@ -51,6 +51,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.notification.HybridNotificationView;
+import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.stack.AnimationProperties;
@@ -112,7 +113,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private NotificationContentView mPrivateLayout;
     private int mMaxExpandHeight;
     private int mHeadsUpHeight;
-    private View mVetoButton;
     private int mNotificationColor;
     private ExpansionLogger mLogger;
     private String mLoggingKey;
@@ -197,6 +197,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private boolean mIconsVisible = true;
     private boolean mAboveShelf;
     private boolean mIsLastChild;
+    private Runnable mOnDismissRunnable;
 
     public boolean isGroupExpansionChanging() {
         if (isChildInGroup()) {
@@ -469,10 +470,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      * Apply the order given in the list to the children.
      *
      * @param childOrder the new list order
+     * @param visualStabilityManager
+     * @param callback the callback to invoked in case it is not allowed
      * @return whether the list order has changed
      */
-    public boolean applyChildOrder(List<ExpandableNotificationRow> childOrder) {
-        return mChildrenContainer != null && mChildrenContainer.applyChildOrder(childOrder);
+    public boolean applyChildOrder(List<ExpandableNotificationRow> childOrder,
+            VisualStabilityManager visualStabilityManager,
+            VisualStabilityManager.Callback callback) {
+        return mChildrenContainer != null && mChildrenContainer.applyChildOrder(childOrder,
+                visualStabilityManager, callback);
     }
 
     public void getChildrenStates(StackScrollState resultState) {
@@ -807,11 +813,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     public void performDismiss() {
-        mVetoButton.performClick();
+        if (mOnDismissRunnable != null) {
+            mOnDismissRunnable.run();
+        }
     }
 
-    public void setOnDismissListener(OnClickListener listener) {
-        mVetoButton.setOnClickListener(listener);
+    public void setOnDismissRunnable(Runnable onDismissRunnable) {
+        mOnDismissRunnable = onDismissRunnable;
     }
 
     public View getNotificationIcon() {
@@ -921,6 +929,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         return topPadding;
     }
 
+    public float getContentTranslation() {
+        return mPrivateLayout.getTranslationY();
+    }
+
     public interface ExpansionLogger {
         public void logNotificationExpansion(String key, boolean userAction, boolean expanded);
     }
@@ -1021,10 +1033,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                 mTranslateableViews.add(mChildrenContainer);
             }
         });
-        mVetoButton = findViewById(R.id.veto);
-        mVetoButton.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-        mVetoButton.setContentDescription(mContext.getString(
-                R.string.accessibility_remove_notification));
 
         // Add the views that we translate to reveal the gear
         mTranslateableViews = new ArrayList<View>();
@@ -1032,14 +1040,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             mTranslateableViews.add(getChildAt(i));
         }
         // Remove views that don't translate
-        mTranslateableViews.remove(mVetoButton);
         mTranslateableViews.remove(mSettingsIconRowStub);
         mTranslateableViews.remove(mChildrenContainerStub);
         mTranslateableViews.remove(mGutsStub);
-    }
-
-    public View getVetoButton() {
-        return mVetoButton;
     }
 
     public void resetTranslation() {

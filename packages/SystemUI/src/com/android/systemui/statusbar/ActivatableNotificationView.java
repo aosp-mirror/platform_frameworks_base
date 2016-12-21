@@ -29,6 +29,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewConfiguration;
+import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
@@ -37,6 +38,7 @@ import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
+import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
@@ -99,6 +101,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private final int mTintedRippleColor;
     private final int mLowPriorityRippleColor;
     protected final int mNormalRippleColor;
+    private final AccessibilityManager mAccessibilityManager;
 
     private boolean mDimmed;
     private boolean mDark;
@@ -199,6 +202,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mNormalRippleColor = context.getColor(
                 R.color.notification_ripple_untinted_color);
         mFalsingManager = FalsingManager.getInstance(context);
+        mAccessibilityManager = AccessibilityManager.getInstance(mContext);
     }
 
     @Override
@@ -223,11 +227,15 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (mDimmed && !mActivated
-                && ev.getActionMasked() == MotionEvent.ACTION_DOWN && disallowSingleClick(ev)) {
+        if (mDimmed && !mActivated && ev.getActionMasked() == MotionEvent.ACTION_DOWN
+                && disallowSingleClick(ev) && !isTouchExplorationEnabled()) {
             return true;
         }
         return super.onInterceptTouchEvent(ev);
+    }
+
+    private boolean isTouchExplorationEnabled() {
+        return mAccessibilityManager.isTouchExplorationEnabled();
     }
 
     protected boolean disallowSingleClick(MotionEvent ev) {
@@ -241,7 +249,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         boolean result;
-        if (mDimmed) {
+        if (mDimmed && !isTouchExplorationEnabled()) {
             boolean wasActivated = mActivated;
             result = handleTouchEventDimmed(event);
             if (wasActivated && result && event.getAction() == MotionEvent.ACTION_UP) {
