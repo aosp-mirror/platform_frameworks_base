@@ -937,7 +937,7 @@ static int init_jni(JNIEnv *env, jobject instance) {
             env->FindClass("android/hardware/location/ContextHubInfo");
 
     db.jniInfo.contextHubServiceClass =
-            env->FindClass("android/hardware/location/ContextHubService");
+            env->FindClass("com/android/server/location/ContextHubService");
 
     db.jniInfo.memoryRegionsClass =
             env->FindClass("android/hardware/location/MemoryRegion");
@@ -1216,14 +1216,12 @@ static const JNINativeMethod gContextHubServiceMethods[] = {
             (void*)nativeSendMessage }
 };
 
-}//namespace android
-
-using namespace android;
-
-int register_android_hardware_location_ContextHubService(JNIEnv *env)
+int register_android_server_location_ContextHubService(JNIEnv *env)
 {
-    RegisterMethodsOrDie(env, "android/hardware/location/ContextHubService",
+    RegisterMethodsOrDie(env, "com/android/server/location/ContextHubService",
             gContextHubServiceMethods, NELEM(gContextHubServiceMethods));
 
     return 0;
 }
+
+}//namespace android

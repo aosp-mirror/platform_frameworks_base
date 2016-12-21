@@ -16,7 +16,7 @@
 
 package com.android.server;
 
-import android.hardware.location.ContextHubService;
+import com.android.server.location.ContextHubService;
 import android.content.Context;
 import android.util.Log;
 
@@ -37,7 +37,7 @@ class ContextHubSystemService extends SystemService {
     public void onBootPhase(int phase) {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
             Log.d(TAG, "onBootPhase: PHASE_SYSTEM_SERVICES_READY");
-            publishBinderService(ContextHubService.CONTEXTHUB_SERVICE, mContextHubService);
+            publishBinderService(Context.CONTEXTHUB_SERVICE, mContextHubService);
         }
     }
 }
