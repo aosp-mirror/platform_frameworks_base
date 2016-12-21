@@ -5311,96 +5311,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
-     * HW-only, Rect-ignoring invalidation path.
-     *
-     * Returns false if this path was unable to complete successfully. This means
-     * it hit a ViewParent it doesn't recognize and needs to fall back to calculating
-     * damage area.
-     *
-     * Hardware acceleration ignores damage rectangles, since native computes damage for everything
-     * drawn by HWUI (and SW layer / drawing cache doesn't keep track of damage area).
-     *
-     * Ignores opaque dirty optimizations, always using the full PFLAG_DIRTY flag.
-     *
-     * Ignores FLAG_OPTIMIZE_INVALIDATE, since we're not computing a rect,
-     *         so no point in optimizing that.
-     * @hide
-     */
-    public boolean tryInvalidateChildHardware(View child) {
-        final AttachInfo attachInfo = mAttachInfo;
-        if (attachInfo == null || !attachInfo.mHardwareAccelerated) {
-            return false;
-        }
-
-        // verify it's ViewGroups up to a ViewRootImpl
-        ViewRootImpl viewRoot = null;
-        ViewParent parent = getParent();
-        while (parent != null) {
-            if (parent instanceof ViewGroup) {
-                parent = parent.getParent();
-            } else if (parent instanceof ViewRootImpl) {
-                viewRoot = (ViewRootImpl) parent;
-                break;
-            } else {
-                // unknown parent type, abort
-                return false;
-            }
-        }
-        if (viewRoot == null) {
-            // unable to find ViewRoot
-            return false;
-        }
-
-        final boolean drawAnimation = (child.mPrivateFlags & PFLAG_DRAW_ANIMATION) != 0;
-
-        if (child.mLayerType != LAYER_TYPE_NONE) {
-            mPrivateFlags |= PFLAG_INVALIDATED;
-        }
-
-        parent = this;
-        do {
-            if (parent != viewRoot) {
-                // Note: we cast here without checking isinstance, to avoid cost of isinstance again
-                ViewGroup viewGroup = (ViewGroup) parent;
-                if (drawAnimation) {
-                    viewGroup.mPrivateFlags |= PFLAG_DRAW_ANIMATION;
-                }
-
-                // We lazily use PFLAG_DIRTY, since computing opaque isn't worth the potential
-                // optimization in provides in a DisplayList world.
-                viewGroup.mPrivateFlags =
-                        (viewGroup.mPrivateFlags & ~PFLAG_DIRTY_MASK) | PFLAG_DIRTY;
-
-                // simplified invalidateChildInParent behavior: clear cache validity to be safe,
-                // and mark inval if in layer
-                viewGroup.mPrivateFlags &= ~PFLAG_DRAWING_CACHE_VALID;
-                if (viewGroup.mLayerType != LAYER_TYPE_NONE) {
-                    viewGroup.mPrivateFlags |= PFLAG_INVALIDATED;
-                }
-            } else {
-                if (drawAnimation) {
-                    viewRoot.mIsAnimating = true;
-                }
-                ((ViewRootImpl) parent).invalidate();
-                return true;
-            }
-
-            parent = parent.getParent();
-        } while (parent != null);
-        return true;
-    }
-
-
-    /**
      * Don't call or override this method. It is used for the implementation of
      * the view hierarchy.
      */
     @Override
     public final void invalidateChild(View child, final Rect dirty) {
-        if (tryInvalidateChildHardware(child)) {
-            return;
-        }
-
         ViewParent parent = this;
 
         final AttachInfo attachInfo = mAttachInfo;
@@ -5408,7 +5323,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             // If the child is drawing an animation, we want to copy this flag onto
             // ourselves and the parent to make sure the invalidate request goes
             // through
-            final boolean drawAnimation = (child.mPrivateFlags & PFLAG_DRAW_ANIMATION) != 0;
+            final boolean drawAnimation = (child.mPrivateFlags & PFLAG_DRAW_ANIMATION)
+                    == PFLAG_DRAW_ANIMATION;
 
             // Check whether the child that requests the invalidate is fully opaque
             // Views being animated or transformed are not considered opaque because we may
@@ -5509,10 +5425,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     @Override
     public ViewParent invalidateChildInParent(final int[] location, final Rect dirty) {
-        if ((mPrivateFlags & (PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID)) != 0) {
-            // either DRAWN, or DRAWING_CACHE_VALID
-            if ((mGroupFlags & (FLAG_OPTIMIZE_INVALIDATE | FLAG_ANIMATION_DONE))
-                    != FLAG_OPTIMIZE_INVALIDATE) {
+        if ((mPrivateFlags & PFLAG_DRAWN) == PFLAG_DRAWN ||
+                (mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == PFLAG_DRAWING_CACHE_VALID) {
+            if ((mGroupFlags & (FLAG_OPTIMIZE_INVALIDATE | FLAG_ANIMATION_DONE)) !=
+                        FLAG_OPTIMIZE_INVALIDATE) {
                 dirty.offset(location[CHILD_LEFT_INDEX] - mScrollX,
                         location[CHILD_TOP_INDEX] - mScrollY);
                 if ((mGroupFlags & FLAG_CLIP_CHILDREN) == 0) {
@@ -5527,28 +5443,35 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         dirty.setEmpty();
                     }
                 }
+                mPrivateFlags &= ~PFLAG_DRAWING_CACHE_VALID;
 
                 location[CHILD_LEFT_INDEX] = left;
                 location[CHILD_TOP_INDEX] = top;
-            } else {
 
+                if (mLayerType != LAYER_TYPE_NONE) {
+                    mPrivateFlags |= PFLAG_INVALIDATED;
+                }
+
+                return mParent;
+
+            } else {
+                mPrivateFlags &= ~PFLAG_DRAWN & ~PFLAG_DRAWING_CACHE_VALID;
+
+                location[CHILD_LEFT_INDEX] = mLeft;
+                location[CHILD_TOP_INDEX] = mTop;
                 if ((mGroupFlags & FLAG_CLIP_CHILDREN) == FLAG_CLIP_CHILDREN) {
                     dirty.set(0, 0, mRight - mLeft, mBottom - mTop);
                 } else {
                     // in case the dirty rect extends outside the bounds of this container
                     dirty.union(0, 0, mRight - mLeft, mBottom - mTop);
                 }
-                location[CHILD_LEFT_INDEX] = mLeft;
-                location[CHILD_TOP_INDEX] = mTop;
 
-                mPrivateFlags &= ~PFLAG_DRAWN;
-            }
-            mPrivateFlags &= ~PFLAG_DRAWING_CACHE_VALID;
-            if (mLayerType != LAYER_TYPE_NONE) {
-                mPrivateFlags |= PFLAG_INVALIDATED;
-            }
+                if (mLayerType != LAYER_TYPE_NONE) {
+                    mPrivateFlags |= PFLAG_INVALIDATED;
+                }
 
-            return mParent;
+                return mParent;
+            }
         }
 
         return null;
@@ -5561,7 +5484,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * damage area
      * @hide
      */
-    public boolean damageChildDeferred() {
+    public boolean damageChildDeferred(View child) {
         ViewParent parent = getParent();
         while (parent != null) {
             if (parent instanceof ViewGroup) {
@@ -5584,7 +5507,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @hide
      */
     public void damageChild(View child, final Rect dirty) {
-        if (damageChildDeferred()) {
+        if (damageChildDeferred(child)) {
             return;
         }
 
