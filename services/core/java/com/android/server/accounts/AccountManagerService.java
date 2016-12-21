@@ -63,8 +63,8 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
 import android.content.pm.UserInfo;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -76,6 +76,7 @@ import android.os.Parcel;
 import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
+import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -111,15 +112,16 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -174,16 +176,17 @@ public class AccountManagerService
     private static final String PRE_N_DATABASE_NAME = "accounts.db";
     private static final Intent ACCOUNTS_CHANGED_INTENT;
 
+    private static final int SIGNATURE_CHECK_MISMATCH = 0;
+    private static final int SIGNATURE_CHECK_MATCH = 1;
+    private static final int SIGNATURE_CHECK_UID_MATCH = 2;
+
     static {
         ACCOUNTS_CHANGED_INTENT = new Intent(AccountManager.LOGIN_ACCOUNTS_CHANGED_ACTION);
         ACCOUNTS_CHANGED_INTENT.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
     }
 
-
     private final LinkedHashMap<String, Session> mSessions = new LinkedHashMap<String, Session>();
     private final AtomicInteger mNotificationIds = new AtomicInteger(1);
-
-    private static final String NEW_ACCOUNT_VISIBLE = "android.accounts.NEW_ACCOUNT_VISIBLE";
 
     static class UserAccounts {
         private final int userId;
@@ -203,6 +206,10 @@ public class AccountManagerService
         private final Map<Account, Map<String, String>> authTokenCache = new HashMap<>();
         /** protected by the {@link #cacheLock} */
         private final TokenCache accountTokenCaches = new TokenCache();
+
+        /** protected by the {@link #cacheLock} */
+        private final Map<String, LinkedHashSet<String>>
+        mApplicationAccountRequestMappings = new HashMap<>();
 
         /**
          * protected by the {@link #cacheLock}
@@ -285,7 +292,26 @@ public class AccountManagerService
                         @Override
                         public void run() {
                             purgeOldGrantsAll();
-                            // TODO remove visibility entries.
+                            int uidOfUninstalledApplication =
+                                    intent.getIntExtra(Intent.EXTRA_UID, -1);
+                            /* remove visibility data for UID */
+                            if (uidOfUninstalledApplication != -1) {
+                                UserAccounts ua = getUserAccounts(UserHandle
+                                        .getUserId(uidOfUninstalledApplication));
+                                // Stop sending notifications about accounts change to uninstalled
+                                // application.
+                                Uri intentData = intent.getData();
+                                String packageName = intentData != null
+                                        ? intentData.getSchemeSpecificPart() : null;
+                                unregisterAccountTypesSupported(packageName, ua);
+                                String[] allPackages = mPackageManager
+                                        .getPackagesForUid(uidOfUninstalledApplication);
+                                // Check that there are no other packages that share uid.
+                                if (allPackages == null) {
+                                    deleteAccountVisibilityForUid(uidOfUninstalledApplication, ua);
+                                }
+                            }
+
                         }
                     };
                     mHandler.post(purgingRunnable);
@@ -310,7 +336,8 @@ public class AccountManagerService
                             registerAccountTypesSupported(
                                     uidOfInstalledApplication,
                                     getUserAccounts(
-                                    UserHandle.getUserId(uidOfInstalledApplication)));
+                                    UserHandle.getUserId(uidOfInstalledApplication)),
+                                    true /*notify*/);
                         }
                     }
                 });
@@ -380,11 +407,13 @@ public class AccountManagerService
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     for (String packageName : packageNames) {
-                        if (mPackageManager.checkPermission(
-                                Manifest.permission.GET_ACCOUNTS, packageName)
-                                        != PackageManager.PERMISSION_GRANTED) {
-                            continue;
-                        }
+                                // if app asked for permission we need to cancel notification even
+                                // for O+ applications.
+                                if (mPackageManager.checkPermission(
+                                        Manifest.permission.GET_ACCOUNTS,
+                                        packageName) != PackageManager.PERMISSION_GRANTED) {
+                                    continue;
+                                }
 
                         if (accounts == null) {
                             accounts = getAccountsAsUser(null, userId, "android");
@@ -403,6 +432,10 @@ public class AccountManagerService
                 }
             }
         });
+    }
+
+    private boolean deleteAccountVisibilityForUid(int uid, UserAccounts accounts) {
+      return accounts.accountsDb.deleteAccountVisibilityForUid(uid);
     }
 
     private void cancelAccountAccessRequestNotificationIfNeeded(int uid,
@@ -443,22 +476,95 @@ public class AccountManagerService
     }
 
     @Override
-    public boolean addAccountExplicitlyWithVisibility(Account account, String password, Bundle extras,
-            Map uidToVisibility) {
-        // TODO implementation
-        return false;
+    public boolean addAccountExplicitlyWithVisibility(Account account, String password,
+            Bundle extras, Map uidToVisibility) {
+        Bundle.setDefusable(extras, true);
+
+        final int callingUid = Binder.getCallingUid();
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "addAccountExplicitly: " + account + ", caller's uid " + callingUid
+                    + ", pid " + Binder.getCallingPid());
+        }
+        Preconditions.checkNotNull(account, "account cannot be null");
+        int userId = UserHandle.getCallingUserId();
+        if (!isAccountManagedByCaller(account.type, callingUid, userId)) {
+            String msg = String.format("uid %s cannot explicitly add accounts of type: %s",
+                    callingUid, account.type);
+            throw new SecurityException(msg);
+        }
+        /*
+         * Child users are not allowed to add accounts. Only the accounts that are shared by the
+         * parent profile can be added to child profile.
+         *
+         * TODO: Only allow accounts that were shared to be added by a limited user.
+         */
+        // fails if the account already exists
+        long identityToken = clearCallingIdentity();
+        try {
+            UserAccounts accounts = getUserAccounts(userId);
+            return addAccountInternal(accounts, account, password, extras, callingUid,
+                    (Map<Integer, Integer>) uidToVisibility);
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
     }
 
     @Override
     public Map<Account, Integer> getAccountsAndVisibilityForPackage(String packageName,
             String accountType) {
-        // TODO Implement.
-        return new HashMap<Account, Integer>();
+        int callingUid = Binder.getCallingUid();
+        List<String> managedTypes =
+                getTypesManagedByCaller(callingUid, UserHandle.getUserId(callingUid));
+        if ((accountType != null && !managedTypes.contains(accountType))
+                || (accountType == null && !UserHandle.isSameApp(callingUid, Process.SYSTEM_UID))) {
+            throw new SecurityException(
+                    "getAccountsAndVisibilityForPackage() called from unauthorized uid "
+                            + callingUid + " with packageName=" + packageName);
+        }
+        if (accountType != null) {
+            managedTypes = new ArrayList<String>();
+            managedTypes.add(accountType);
+        }
+
+        return getAccountsAndVisibilityForPackage(packageName, managedTypes, callingUid,
+                getUserAccounts(UserHandle.getUserId(callingUid)));
     }
+
+    /*
+     * accountTypes may not be null
+     */
+    private Map<Account, Integer> getAccountsAndVisibilityForPackage(String packageName,
+            List<String> accountTypes, Integer callingUid, UserAccounts accounts) {
+        int uid = 0;
+        try {
+            uid = mPackageManager.getPackageUidAsUser(packageName,
+                    UserHandle.getUserId(callingUid));
+        } catch (NameNotFoundException e) {
+            Log.d("Package not found ", e.getMessage());
+            return new HashMap<>();
+        }
+
+        Map<Account, Integer> result = new HashMap<>();
+        for (String accountType : accountTypes) {
+            synchronized (accounts.cacheLock) {
+                final Account[] accountsOfType = accounts.accountCache.get(accountType);
+                if (accountsOfType != null) {
+                    for (Account account : accountsOfType) {
+                        result.put(account,
+                                resolveAccountVisibility(account, uid, packageName, accounts));
+                    }
+                }
+            }
+        }
+        return filterSharedAccounts(accounts, result, callingUid, packageName);
+    }
+
 
     @Override
     public int[] getRequestingUidsForType(String accountType) {
         int callingUid = Binder.getCallingUid();
+        UserAccounts accounts = getUserAccounts(
+                UserHandle.getUserId(callingUid));
         if (!isAccountManagedByCaller(accountType, callingUid, UserHandle.getUserId(callingUid))) {
             String msg = String.format(
                     "uid %s cannot get secrets for accounts of type: %s",
@@ -466,33 +572,287 @@ public class AccountManagerService
                     accountType);
             throw new SecurityException(msg);
         }
-        // TODO Implement.
-        return new int[]{};
+        LinkedHashSet<String> allUidsForAccountType  = getRequestingPackageNames(accountType, accounts);
+        LinkedHashSet<Integer>  uids = new LinkedHashSet<Integer>();
+        for (String packageName : allUidsForAccountType) {
+            try {
+              int uid = mPackageManager.getPackageUid(packageName, 0);
+              uids.add(uid);
+            } catch (NameNotFoundException e) {
+              Log.d("Package not found ", e.getMessage());
+              // Skip bad package.
+            }
+        }
+        // Add UIDs for which visibility was saved in the database.
+        synchronized (accounts.cacheLock) {
+            final Account[] accountsOfType = accounts.accountCache.get(accountType);
+            if (accountsOfType != null) {
+                for (Account account : accountsOfType) {
+                    final long accountId = accounts.accountsDb.findDeAccountId(account);
+                    if (accountId < 0) {
+                        continue;
+                    }
+                    Map<Integer, Integer> uidToVisibility =
+                            accounts.accountsDb.findAccountVisibilityForAccountId(accountId);
+                    uids.addAll(uidToVisibility.keySet());
+                }
+            }
+        }
+        uids.remove(AccountManager.DEFAULT_VISIBILITY);
+        uids.remove(AccountManager.DEFAULT_LEGACY_VISIBILITY);
+
+        // Some UIDs may contain many packages and we need to remove duplicates.
+        int[] result = new int[uids.size()];
+        int index = 0;
+        for (Integer uid : uids) {
+            result[index++] = uid;
+        }
+        return result;
+    }
+
+    /**
+     * Returns all UIDs for applications that requested the account type. This method
+     * is called indirectly by the Authenticator and AccountManager
+     *
+     * @param accountType authenticator would like to know the requesting apps of
+     * @param accounts UserAccount that currently hosts the account and application
+     *
+     * @return ArrayList of all UIDs that support accounts of this
+     * account type that seek approval (to be used to know which accounts for
+     * the authenticator to include in addAccountExplicitly). Null if none.
+     */
+    private LinkedHashSet<String> getRequestingPackageNames(
+            String accountType,
+            UserAccounts accounts) {
+      LinkedHashSet<String> apps = accounts.mApplicationAccountRequestMappings.get(accountType);
+      if (apps == null) {
+        apps = new LinkedHashSet<>();
+      }
+      return apps;
     }
 
     @Override
     public int getAccountVisibility(Account a, int uid) {
-        // TODO Implement.
-        return 0;
-    }
-
-    @Override
-    public boolean setAccountVisibility(Account a, int uid, int visibility) {
-        // TODO Implement.
-        return false;
+        int callingUid = Binder.getCallingUid();
+        if (!isAccountManagedByCaller(a.type, callingUid, UserHandle.getUserId(callingUid))
+            && !isSystemUid(callingUid)) {
+            String msg = String.format(
+                    "uid %s cannot get secrets for accounts of type: %s",
+                    callingUid,
+                    a.type);
+            throw new SecurityException(msg);
+        }
+        return getAccountVisibility(a, uid, getUserAccounts(UserHandle.getUserId(callingUid)));
     }
 
     /**
-     * Registers the requested login account types requested by all the applications already
-     * installed on the device.
+     * Method gets visibility for given account and UID from the database
+     *
+     * @param account The account to check visibility of
+     * @param uid UID to check visibility of
+     * @param accounts UserAccount that currently hosts the account and application
+     *
+     * @return Visibility value, AccountManager.VISIBILITY_UNDEFINED if no value was stored.
+     *
+     */
+    private int getAccountVisibility(Account account, int uid, UserAccounts accounts) {
+        final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
+        try {
+            Integer visibility = accounts.accountsDb.findAccountVisibility(account, uid);
+            return visibility != null ? visibility : AccountManager.VISIBILITY_UNDEFINED;
+        } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
+        }
+    }
+
+    /**
+     * Method which handles default values for Account visibility.
+     *
+     * @param account The account to check visibility.
+     * @param uid UID to check visibility.
+     * @param packageName Package name to check visibility - the method assumes that it has the same
+     *        uid as specified in the parameter.
+     * @param accounts UserAccount that currently hosts the account and application
+     *
+     * @return Visibility value, the method never returns AccountManager.VISIBILITY_UNDEFINED
+     *
+     */
+    private Integer resolveAccountVisibility(Account account, int uid, String packageName,
+            UserAccounts accounts) {
+
+        // Always return stored value if it was set.
+        int visibility = getAccountVisibility(account, uid, accounts);
+        if (AccountManager.VISIBILITY_UNDEFINED != visibility) {
+            return visibility;
+        }
+        if (isPermittedForPackage(packageName, Manifest.permission.GET_ACCOUNTS_PRIVILEGED)) {
+            return AccountManager.VISIBILITY_VISIBLE; // User can not revoke visibility for this
+                                                      // apps.
+        }
+
+        if (UserHandle.isSameApp(uid, Process.SYSTEM_UID)) {
+            return AccountManager.VISIBILITY_VISIBLE;
+        }
+        int signatureCheckResult =
+                checkPackageSignature(account.type, uid, UserHandle.getUserId(uid), packageName);
+        if (signatureCheckResult == SIGNATURE_CHECK_UID_MATCH) { // uid match
+            return AccountManager.VISIBILITY_VISIBLE; // Authenticator can always see the account
+        }
+
+        boolean preO = isPreOApplication(packageName);
+        if ((signatureCheckResult != SIGNATURE_CHECK_MISMATCH)
+                || (preO && checkGetAccountsPermission(account.type, uid, UserHandle.getUserId(uid),
+                        packageName))) {
+            // use legacy for preO apps with GET_ACCOUNTS permission or pre/postO with signature
+            // match.
+            visibility = getAccountVisibility(account, AccountManager.DEFAULT_LEGACY_VISIBILITY,
+                    accounts);
+            if (AccountManager.VISIBILITY_UNDEFINED == visibility) {
+                visibility = AccountManager.VISIBILITY_USER_MANAGED_VISIBLE;
+            }
+        } else {
+            visibility = getAccountVisibility(account, AccountManager.DEFAULT_VISIBILITY, accounts);
+            if (AccountManager.VISIBILITY_UNDEFINED == visibility) {
+                visibility = AccountManager.VISIBILITY_USER_MANAGED_NOT_VISIBLE;
+            }
+        }
+
+        return visibility;
+    }
+
+    /**
+     * Checks targetSdk for a package;
+     *
+     * @param packageName Package Name
+     *
+     * @return True if package's target SDK is below {@link android.os.Build.VERSION_CODES#O}, or
+     *         undefined
+     */
+    private boolean isPreOApplication(String packageName) {
+        try {
+            ApplicationInfo applicationInfo = mPackageManager.getApplicationInfo(packageName, 0);
+            if (applicationInfo != null) {
+                int version = applicationInfo.targetSdkVersion;
+                return version < android.os.Build.VERSION_CODES.O;
+            }
+            return true;
+        } catch (NameNotFoundException e) {
+            Log.d(TAG, "Package not found " + e.getMessage());
+            return true;
+        }
+    }
+
+    @Override
+    public boolean setAccountVisibility(Account a, int uid, int newVisibility) {
+        int callingUid = Binder.getCallingUid();
+        if (!isAccountManagedByCaller(a.type, callingUid, UserHandle.getUserId(callingUid))
+            && !isSystemUid(callingUid)) {
+            String msg = String.format(
+                    "uid %s cannot get secrets for accounts of type: %s",
+                    callingUid,
+                    a.type);
+            throw new SecurityException(msg);
+        }
+        return setAccountVisibility(a, uid, getUserAccounts(UserHandle.getUserId(callingUid)),
+            newVisibility);
+    }
+
+    /**
+     * Gives a certain UID, represented a application, access to an account. This method
+     * is called indirectly by the Authenticator.
+     *
+     * @param account Account to update visibility
+     * @param uid to add visibility of the Account
+     * @param accounts UserAccount that currently hosts the account and application
+     *
+     * @return True if account visibility was changed.
+     */
+    private boolean setAccountVisibility(Account account, int uid, UserAccounts accounts,
+            int newVisibility) {
+        synchronized (accounts.cacheLock) {
+            LinkedHashSet<String> interestedPackages;
+            if (uid < 0) {
+                interestedPackages = getRequestingPackageNames(account.type, accounts);
+            } else {
+                interestedPackages = new LinkedHashSet<String>();
+                String[] subPackages = mPackageManager.getPackagesForUid(uid);
+                if (subPackages != null) {
+                    Collections.addAll(interestedPackages, subPackages);
+                }
+            }
+            Integer[] interestedPackagesVisibility = new Integer[interestedPackages.size()];
+
+            final long accountId = accounts.accountsDb.findDeAccountId(account);
+            if (accountId < 0) {
+                return false;
+            }
+            int index = 0;
+            for (String packageName : interestedPackages) {
+                interestedPackagesVisibility[index++] =
+                        resolveAccountVisibility(account, uid, packageName, accounts);
+            }
+
+            final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+            try {
+                if (!accounts.accountsDb.setAccountVisibility(accountId, uid, newVisibility)) {
+                    return false;
+                }
+            } finally {
+                StrictMode.setThreadPolicy(oldPolicy);
+            }
+
+            index = 0;
+            for (String packageName : interestedPackages) {
+                int visibility = resolveAccountVisibility(account, uid, packageName, accounts);
+                if (visibility != interestedPackagesVisibility[index++]) {
+                    sendNotification(packageName, account);
+                }
+            }
+            return true;
+        }
+    }
+
+    /**
+     * Register application so it can receive
+     *
+     * @param accountTypes account types third party app is willing to support
+     * @param uid of application requesting account visibility.
+     * @param packageName Package name of the app requesting account updates.
+     * @param notifyAuthenticator if set to true than authenticators will be notified about the app
+     *        via ACCOUNTS_LISTENER_PACKAGE_INSTALLED
+     * @param accounts UserAccount that hosts the account and application
+     */
+    private void addRequestedAccountsVisibility(String[] accountTypes, int uid, String packageName,
+            boolean notifyAuthenticator, UserAccounts accounts) {
+        synchronized (accounts.cacheLock) {
+            for (String accountType : accountTypes) {
+                LinkedHashSet<String> appSet =
+                        accounts.mApplicationAccountRequestMappings.get(accountType);
+                if (appSet == null) {
+                    appSet = new LinkedHashSet<>();
+                    appSet.add(packageName);
+                    accounts.mApplicationAccountRequestMappings.put(accountType, appSet);
+                } else if (!appSet.contains(packageName)) {
+                    appSet.add(packageName);
+                }
+                if (notifyAuthenticator) {
+                    notifyAuthenticator(uid, packageName, accountType, accounts);
+                }
+            }
+        }
+    }
+
+    /**
+     * Caches SUPPORTED_ACCOUNT_TYPES for already installed applications, so they may receive
+     * notifications about account changes.
      */
     private void addRequestsForPreInstalledApplications() {
         List<PackageInfo> allInstalledPackages = mPackageManager.getInstalledPackages(0);
-        for(PackageInfo pi : allInstalledPackages) {
+        for (PackageInfo pi : allInstalledPackages) {
             int currentUid = pi.applicationInfo.uid;
-            if(currentUid != -1) {
+            if (currentUid != -1) {
                 registerAccountTypesSupported(currentUid,
-                        getUserAccounts(UserHandle.getUserId(currentUid)));
+                        getUserAccounts(UserHandle.getUserId(currentUid)), false /* notify */);
             }
         }
     }
@@ -502,47 +862,88 @@ public class AccountManagerService
      * applications manifest as well as allowing it to opt for notifications.
      *
      * @param uid UID of application
-     * @param ua UserAccount that currently hosts the account and application
+     * @param accounts UserAccount that currently hosts the account and application
      */
-    private void registerAccountTypesSupported(int uid, UserAccounts ua) {
+    private void registerAccountTypesSupported(int uid, UserAccounts accounts, boolean notify) {
         /* Account types supported are drawn from the Android Manifest of the Application */
-        String interestedPackages = null;
+        String interestedTypes = null;
         try {
             String[] allPackages = mPackageManager.getPackagesForUid(uid);
             if (allPackages != null) {
-                for (String aPackage : allPackages) {
+                for(String aPackage : allPackages) {
                     ApplicationInfo ai = mPackageManager.getApplicationInfo(aPackage,
                             PackageManager.GET_META_DATA);
                     Bundle b = ai.metaData;
-                    if (b == null) {
+                    if(b == null) {
                         return;
                     }
-                    interestedPackages = b.getString(AccountManager.SUPPORTED_ACCOUNT_TYPES);
+                    interestedTypes = b.getString(AccountManager.SUPPORTED_ACCOUNT_TYPES);
+                    if(interestedTypes != null) {
+                      addRequestedAccountsVisibility(
+                              interestedTypes.split(";"), uid, aPackage, notify, accounts);
+                  }
+
                 }
             }
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.d("NameNotFoundException", e.getMessage());
+        } catch (NameNotFoundException e) {
+            Log.d("Package not found ", e.getMessage());
         }
-        if (interestedPackages != null) {
-            // TODO request visibility
-            // requestAccountVisibility(interestedPackages.split(";"), uid, ua);
+    }
+
+    private void unregisterAccountTypesSupported(String packageName, UserAccounts accounts) {
+        synchronized(accounts.cacheLock) {
+          for (HashSet<String> packages : accounts.mApplicationAccountRequestMappings.values()) {
+              packages.remove(packageName);
+          }
         }
     }
 
     /**
      * Sends a direct intent to a package, notifying it of a visible account change.
      *
-     * @param desiredPackage to send Account to
-     * @param visibleAccount to send to package
+     * @param packageName to send Account to
+     * @param account to send to package
      */
-    private void sendNotification(String desiredPackage, Account visibleAccount) {
+    private void sendNotification(String packageName, Account account) {
+        // TODO remove account param?
         Intent intent = new Intent();
         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
         intent.setAction(AccountManager.ACTION_VISIBLE_ACCOUNTS_CHANGED);
-        intent.setPackage(desiredPackage);
-        // TODO update documentation, add account extra if new account became visible
-        // intent.putExtra("android.accounts.KEY_ACCOUNT", (Account) visibleAccount);
+        intent.setPackage(packageName);
+        // intent.putExtra("android.accounts.KEY_ACCOUNT", (Account) account);
         mContext.sendBroadcast(intent);
+    }
+
+    /**
+     * Sends a direct intent to accountAuthenticator, signaling that new app with supported
+     * accountType is installed.
+     *
+     * @param uid UID
+     * @param newPackage Package Name
+     * @param accounts UserAccount that currently hosts the account and application
+     */
+    private void notifyAuthenticator(Integer uid, String newPackage, String accountType,
+            UserAccounts accounts) {
+        final RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> authenticatorInfo =
+                mAuthenticatorCache.getServiceInfo(AuthenticatorDescription.newKey(accountType),
+                        accounts.userId);
+        if (authenticatorInfo == null) {
+            return;
+        }
+        String[] allPackages = mPackageManager.getPackagesForUid(authenticatorInfo.uid);
+        // There may be packages with shared userId.
+        if (allPackages != null) {
+            for (String subPackage : allPackages) {
+                Intent intent =
+                        new Intent(AccountManager.ACTION_ACCOUNTS_LISTENER_PACKAGE_INSTALLED);
+                intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+                intent.setPackage(subPackage);
+                intent.putExtra("android.intent.extra.PACKAGE_NAME", newPackage);
+                mContext.sendBroadcastAsUser(intent,
+                        UserHandle.getUserHandleForUid(accounts.userId));
+            }
+
+        }
     }
 
     @Override
@@ -786,7 +1187,7 @@ public class AccountManagerService
                     AccountsDb.TABLE_ACCOUNTS);
 
             for (Account account : accountsToRemove) {
-                removeAccountInternal(accounts, account, Process.myUid());
+                removeAccountInternal(accounts, account, Process.SYSTEM_UID);
             }
         }
     }
@@ -1043,7 +1444,7 @@ public class AccountManagerService
 
     private boolean isCrossUser(int callingUid, int userId) {
         return (userId != UserHandle.getCallingUserId()
-                && callingUid != Process.myUid()
+                && callingUid != Process.SYSTEM_UID
                 && mContext.checkCallingOrSelfPermission(
                         android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
                                 != PackageManager.PERMISSION_GRANTED);
@@ -1051,42 +1452,7 @@ public class AccountManagerService
 
     @Override
     public boolean addAccountExplicitly(Account account, String password, Bundle extras) {
-        Bundle.setDefusable(extras, true);
-        // clears the visible list functionality for this account because this method allows
-        // default account access to all applications for account.
-
-        final int callingUid = Binder.getCallingUid();
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "addAccountExplicitly: " + account
-                    + ", caller's uid " + callingUid
-                    + ", pid " + Binder.getCallingPid());
-        }
-        if (account == null) throw new IllegalArgumentException("account is null");
-        int userId = UserHandle.getCallingUserId();
-        if (!isAccountManagedByCaller(account.type, callingUid, userId)) {
-            String msg = String.format(
-                    "uid %s cannot explicitly add accounts of type: %s",
-                    callingUid,
-                    account.type);
-            throw new SecurityException(msg);
-        }
-
-        /*
-         * Child users are not allowed to add accounts. Only the accounts that are
-         * shared by the parent profile can be added to child profile.
-         *
-         * TODO: Only allow accounts that were shared to be added by
-         *     a limited user.
-         */
-
-        // fails if the account already exists
-        long identityToken = clearCallingIdentity();
-        try {
-            UserAccounts accounts = getUserAccounts(userId);
-            return addAccountInternal(accounts, account, password, extras, callingUid);
-        } finally {
-            restoreCallingIdentity(identityToken);
-        }
+        return addAccountExplicitlyWithVisibility(account, password, extras, null);
     }
 
     @Override
@@ -1227,6 +1593,8 @@ public class AccountManagerService
                     // TODO: Anything to do if if succedded?
                     // TODO: If it failed: Show error notification? Should we remove the shadow
                     // account to avoid retries?
+                    // TODO: what we do with the visibility?
+
                     super.onResult(result);
                 }
 
@@ -1244,7 +1612,7 @@ public class AccountManagerService
     }
 
     private boolean addAccountInternal(UserAccounts accounts, Account account, String password,
-            Bundle extras, int callingUid) {
+            Bundle extras, int callingUid, Map<Integer, Integer> uidToVisibility) {
         Bundle.setDefusable(extras, true);
         if (account == null) {
             return false;
@@ -1284,10 +1652,17 @@ public class AccountManagerService
                         }
                     }
                 }
+
+                if (uidToVisibility != null) {
+                    for (Entry<Integer, Integer> entry : uidToVisibility.entrySet()) {
+                        setAccountVisibility(account, entry.getKey() /* uid */,
+                                entry.getValue() /* visibility */);
+                    }
+                }
                 accounts.accountsDb.setTransactionSuccessful();
 
-                logRecord(AccountsDb.DEBUG_ACTION_ACCOUNT_ADD, AccountsDb.TABLE_ACCOUNTS,
-                        accountId, accounts, callingUid);
+                logRecord(AccountsDb.DEBUG_ACTION_ACCOUNT_ADD, AccountsDb.TABLE_ACCOUNTS, accountId,
+                        accounts, callingUid);
 
                 insertAccountIntoCacheLocked(accounts, account);
             } finally {
@@ -1300,6 +1675,23 @@ public class AccountManagerService
 
         // Only send LOGIN_ACCOUNTS_CHANGED when the database changed.
         sendAccountsChangedBroadcast(accounts.userId);
+
+        // Send ACTION_VISIBLE_ACCOUNT_CHANGE to apps interested in the account type.
+        LinkedHashSet<String> interestedPackages = getRequestingPackageNames(account.type,
+                getUserAccounts(UserHandle.getUserId(callingUid)));
+        for (String packageName : interestedPackages) {
+            try {
+                final int uid = mPackageManager.getPackageUidAsUser(packageName,
+                        UserHandle.getUserId(callingUid));
+                int visibility = resolveAccountVisibility(account, uid, packageName, accounts);
+                if (visibility != AccountManager.VISIBILITY_NOT_VISIBLE) {
+                    sendNotification(packageName, account);
+                }
+            } catch (NameNotFoundException e) {
+                // ignore
+            }
+
+        }
         return true;
     }
 
@@ -1727,6 +2119,24 @@ public class AccountManagerService
                     + " is still locked. CE data will be removed later");
         }
         synchronized (accounts.cacheLock) {
+            LinkedHashSet<String> interestedPackages =
+                    accounts.mApplicationAccountRequestMappings.get(account.type);
+            if (interestedPackages == null) {
+                interestedPackages = new LinkedHashSet<String>();
+            }
+            int[] visibilityForInterestedPackages = new int[interestedPackages.size()];
+            int index = 0;
+            for (String packageName : interestedPackages) {
+                int visibility = AccountManager.VISIBILITY_NOT_VISIBLE;
+                try {
+                    final int uid = mPackageManager.getPackageUidAsUser(packageName,
+                            UserHandle.getUserId(callingUid));
+                    visibility = resolveAccountVisibility(account, uid, packageName, accounts);
+                } catch (NameNotFoundException e) {
+                    // ignore
+                }
+                visibilityForInterestedPackages[index++] = visibility;
+            }
             accounts.accountsDb.beginTransaction();
             // Set to a dummy value, this will only be used if the database
             // transaction succeeds.
@@ -1750,6 +2160,17 @@ public class AccountManagerService
             }
             if (isChanged) {
                 removeAccountFromCacheLocked(accounts, account);
+                index = 0;
+                for (String packageName : interestedPackages) {
+                    if ((visibilityForInterestedPackages[index]
+                            != AccountManager.VISIBILITY_NOT_VISIBLE)
+                            && (visibilityForInterestedPackages[index]
+                                    != AccountManager.VISIBILITY_UNDEFINED)) {
+                        sendNotification(packageName, account);
+                    }
+                    ++index;
+                }
+
                 // Only broadcast LOGIN_ACCOUNTS_CHANGED if a change occured.
                 sendAccountsChangedBroadcast(accounts.userId);
                 String action = userUnlocked ? AccountsDb.DEBUG_ACTION_ACCOUNT_REMOVE
@@ -2406,8 +2827,10 @@ public class AccountManagerService
                             checkKeyIntent(
                                     Binder.getCallingUid(),
                                     intent);
-                            doNotification(mAccounts,
-                                    account, result.getString(AccountManager.KEY_AUTH_FAILED_MESSAGE),
+                            doNotification(
+                                    mAccounts,
+                                    account,
+                                    result.getString(AccountManager.KEY_AUTH_FAILED_MESSAGE),
                                     intent, "android", accounts.userId);
                         }
                     }
@@ -3292,7 +3715,8 @@ public class AccountManagerService
         if (response == null) throw new IllegalArgumentException("response is null");
         if (accountType == null) throw new IllegalArgumentException("accountType is null");
         int userId = UserHandle.getCallingUserId();
-        if (!isAccountManagedByCaller(accountType, callingUid, userId) && !isSystemUid(callingUid)) {
+        if (!isAccountManagedByCaller(accountType, callingUid, userId)
+                && !isSystemUid(callingUid)) {
             String msg = String.format(
                     "uid %s cannot edit authenticator properites for account type: %s",
                     callingUid,
@@ -3335,23 +3759,50 @@ public class AccountManagerService
         Preconditions.checkArgumentInRange(userId, 0, Integer.MAX_VALUE, "user must be concrete");
 
         try {
-            final int uid = mPackageManager.getPackageUidAsUser(packageName, userId);
+            int uid = mPackageManager.getPackageUidAsUser(packageName, userId);
             return hasAccountAccess(account, packageName, uid);
         } catch (NameNotFoundException e) {
+            Log.d(TAG, "Package not found " + e.getMessage());
             return false;
         }
+    }
+
+    // Returns package with oldest target SDK for given UID.
+    private String getPackageNameForUid(int uid) {
+        String[] packageNames = mPackageManager.getPackagesForUid(uid);
+        if (ArrayUtils.isEmpty(packageNames)) {
+            return null;
+        }
+        // For app op checks related to permissions all packages in the UID
+        // have the same app op state, so doesn't matter which one we pick.
+        // Update: due to visibility changes we want to use package with oldest target SDK,
+
+        String packageName = packageNames[0];
+        int oldestVersion = Integer.MAX_VALUE;
+        for (String name : packageNames) {
+            try {
+                ApplicationInfo applicationInfo = mPackageManager.getApplicationInfo(name, 0);
+                if (applicationInfo != null) {
+                    int version = applicationInfo.targetSdkVersion;
+                    if (version < oldestVersion) {
+                        oldestVersion = version;
+                        packageName = name;
+                    }
+                }
+            } catch (NameNotFoundException e) {
+                // skip
+            }
+        }
+        return packageName;
     }
 
     private boolean hasAccountAccess(@NonNull Account account, @Nullable String packageName,
             int uid) {
         if (packageName == null) {
-            String[] packageNames = mPackageManager.getPackagesForUid(uid);
-            if (ArrayUtils.isEmpty(packageNames)) {
+            packageName = getPackageNameForUid(uid);
+            if (packageName == null) {
                 return false;
             }
-            // For app op checks related to permissions all packages in the UID
-            // have the same app op state, so doesn't matter which one we pick.
-            packageName = packageNames[0];
         }
 
         // Use null token which means any token. Having a token means the package
@@ -3360,9 +3811,12 @@ public class AccountManagerService
             return true;
         }
         // In addition to the permissions required to get an auth token we also allow
-        // the account to be accessed by holders of the get accounts permissions.
-        return checkUidPermission(Manifest.permission.GET_ACCOUNTS_PRIVILEGED, uid, packageName)
-                || checkUidPermission(Manifest.permission.GET_ACCOUNTS, uid, packageName);
+        // the account to be accessed by apps for which user or authenticator granted visibility.
+
+        int visibility = resolveAccountVisibility(account, uid, packageName,
+                getUserAccounts(UserHandle.getUserId(uid)));
+        return (visibility == AccountManager.VISIBILITY_VISIBLE
+                || visibility == AccountManager.VISIBILITY_USER_MANAGED_VISIBLE);
     }
 
     private boolean checkUidPermission(String permission, int uid, String opPackageName) {
@@ -3476,21 +3930,28 @@ public class AccountManagerService
         private volatile ArrayList<Account> mAccountsWithFeatures = null;
         private volatile int mCurrentAccount = 0;
         private final int mCallingUid;
+        private final String mPackageName;
 
-        public GetAccountsByTypeAndFeatureSession(UserAccounts accounts,
-                IAccountManagerResponse response, String type, String[] features, int callingUid) {
+        public GetAccountsByTypeAndFeatureSession(
+                UserAccounts accounts,
+                IAccountManagerResponse response,
+                String type,
+                String[] features,
+                int callingUid,
+                String packageName) {
             super(accounts, response, type, false /* expectActivityLaunch */,
                     true /* stripAuthTokenFromResult */, null /* accountName */,
                     false /* authDetailsRequired */);
             mCallingUid = callingUid;
             mFeatures = features;
+            mPackageName = packageName;
         }
 
         @Override
         public void run() throws RemoteException {
             synchronized (mAccounts.cacheLock) {
                 mAccountsOfType = getAccountsFromCacheLocked(mAccounts, mAccountType, mCallingUid,
-                        null);
+                        mPackageName);
             }
             // check whether each account matches the requested features
             mAccountsWithFeatures = new ArrayList<>(mAccountsOfType.length);
@@ -3589,7 +4050,7 @@ public class AccountManagerService
             return getAccountsInternal(
                     accounts,
                     callingUid,
-                    null,  // packageName
+                    opPackageName,
                     visibleAccountTypes);
         } finally {
             restoreCallingIdentity(identityToken);
@@ -3632,7 +4093,7 @@ public class AccountManagerService
             if (userAccounts == null) continue;
             synchronized (userAccounts.cacheLock) {
                 Account[] accounts = getAccountsFromCacheLocked(userAccounts, null,
-                        Binder.getCallingUid(), null);
+                        Binder.getCallingUid(), null); //TODO check package
                 for (int a = 0; a < accounts.length; a++) {
                     runningAccounts.add(new AccountAndUser(accounts[a], userId));
                 }
@@ -3646,7 +4107,19 @@ public class AccountManagerService
     @Override
     @NonNull
     public Account[] getAccountsAsUser(String type, int userId, String opPackageName) {
-        return getAccountsAsUser(type, userId, null, -1, opPackageName);
+       return getAccountsAsUser(type, userId, null /* callingPackage */, -1, opPackageName);
+    }
+
+    @NonNull
+    private Account[] filterVisibleAccounts(Map<Account, Integer> accounts) {
+        ArrayList<Account> filteredAccounts = new ArrayList<>();
+        for (Map.Entry<Account, Integer> entry : accounts.entrySet()) {
+            if (entry.getValue() == AccountManager.VISIBILITY_VISIBLE
+                    || entry.getValue() == AccountManager.VISIBILITY_USER_MANAGED_VISIBLE) {
+                filteredAccounts.add(entry.getKey());
+            }
+        }
+        return filteredAccounts.toArray(new Account[filteredAccounts.size()]);
     }
 
     @NonNull
@@ -3659,7 +4132,7 @@ public class AccountManagerService
         int callingUid = Binder.getCallingUid();
         // Only allow the system process to read accounts of other users
         if (userId != UserHandle.getCallingUserId()
-                && callingUid != Process.myUid()
+                && callingUid != Process.SYSTEM_UID
                 && mContext.checkCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -3672,9 +4145,17 @@ public class AccountManagerService
                     + ", caller's uid " + Binder.getCallingUid()
                     + ", pid " + Binder.getCallingPid());
         }
-        // If the original calling app was using the framework account chooser activity, we'll
-        // be passed in the original caller's uid here, which is what should be used for filtering.
-        if (packageUid != -1 && UserHandle.isSameApp(callingUid, Process.myUid())) {
+
+        // If the original calling app was using account choosing activity
+        // provided by the framework or authenticator we'll passing in
+        // the original caller's uid here, which is what should be used for filtering.
+        List<String> managedTypes =
+                getTypesManagedByCaller(callingUid, UserHandle.getUserId(callingUid));
+        if (packageUid != -1 &&
+                ((UserHandle.isSameApp(callingUid, Process.SYSTEM_UID)
+                || (type != null && managedTypes.contains(type))))) {
+            Log.v(TAG, "getAccounts package was swithed to " + callingPackage + " from "
+                    + opPackageName);
             callingUid = packageUid;
             opPackageName = callingPackage;
         }
@@ -3682,7 +4163,7 @@ public class AccountManagerService
                 opPackageName);
         if (visibleAccountTypes.isEmpty()
                 || (type != null && !visibleAccountTypes.contains(type))) {
-            return new Account[0];
+            return new Account[]{};
         } else if (visibleAccountTypes.contains(type)) {
             // Prune the list down to just the requested type.
             visibleAccountTypes = new ArrayList<>();
@@ -3696,7 +4177,7 @@ public class AccountManagerService
             return getAccountsInternal(
                     accounts,
                     callingUid,
-                    callingPackage,
+                    opPackageName,
                     visibleAccountTypes);
         } finally {
             restoreCallingIdentity(identityToken);
@@ -3797,6 +4278,7 @@ public class AccountManagerService
     @Override
     @NonNull
     public Account[] getAccounts(String type, String opPackageName) {
+        Log.v(TAG, "get accounts for package " + opPackageName + " type " + type);
         return getAccountsAsUser(type, UserHandle.getCallingUserId(), opPackageName);
     }
 
@@ -3804,7 +4286,7 @@ public class AccountManagerService
     @NonNull
     public Account[] getAccountsForPackage(String packageName, int uid, String opPackageName) {
         int callingUid = Binder.getCallingUid();
-        if (!UserHandle.isSameApp(callingUid, Process.myUid())) {
+        if (!UserHandle.isSameApp(callingUid, Process.SYSTEM_UID)) {
             throw new SecurityException("getAccountsForPackage() called from unauthorized uid "
                     + callingUid + " with uid=" + uid);
         }
@@ -3816,17 +4298,18 @@ public class AccountManagerService
     @NonNull
     public Account[] getAccountsByTypeForPackage(String type, String packageName,
             String opPackageName) {
+
         int packageUid = -1;
         try {
-            packageUid = AppGlobals.getPackageManager().getPackageUid(
-                    packageName, PackageManager.MATCH_UNINSTALLED_PACKAGES,
-                    UserHandle.getCallingUserId());
+            packageUid = AppGlobals.getPackageManager().getPackageUid(packageName,
+                    PackageManager.MATCH_UNINSTALLED_PACKAGES, UserHandle.getCallingUserId());
         } catch (RemoteException re) {
             Slog.e(TAG, "Couldn't determine the packageUid for " + packageName + re);
             return new Account[0];
         }
-        return getAccountsAsUser(type, UserHandle.getCallingUserId(), packageName,
-                packageUid, opPackageName);
+
+        return getAccountsAsUser(type, UserHandle.getCallingUserId(),
+                packageName, packageUid, opPackageName);
     }
 
     @Override
@@ -3866,7 +4349,8 @@ public class AccountManagerService
             if (features == null || features.length == 0) {
                 Account[] accounts;
                 synchronized (userAccounts.cacheLock) {
-                    accounts = getAccountsFromCacheLocked(userAccounts, type, callingUid, null);
+                    accounts = getAccountsFromCacheLocked(
+                            userAccounts, type, callingUid, opPackageName);
                 }
                 Bundle result = new Bundle();
                 result.putParcelableArray(AccountManager.KEY_ACCOUNTS, accounts);
@@ -3878,7 +4362,8 @@ public class AccountManagerService
                     response,
                     type,
                     features,
-                    callingUid).bind();
+                    callingUid,
+                    opPackageName).bind();
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -3897,6 +4382,7 @@ public class AccountManagerService
                 if (Objects.equals(account.getAccessId(), token)) {
                     // An app just accessed the account. At this point it knows about
                     // it and there is not need to hide this account from the app.
+                    // Do we need to update account visibility here?
                     if (!hasAccountAccess(account, null, uid)) {
                         updateAppPermission(account, AccountManager.ACCOUNT_ACCESS_TOKEN_TYPE,
                                 uid, true);
@@ -4423,7 +4909,7 @@ public class AccountManagerService
                 userAccounts.accountsDb.dumpDeAccountsTable(fout);
             } else {
                 Account[] accounts = getAccountsFromCacheLocked(userAccounts, null /* type */,
-                        Process.myUid(), null);
+                        Process.SYSTEM_UID, null);
                 fout.println("Accounts: " + accounts.length);
                 for (Account account : accounts) {
                     fout.println("  " + account);
@@ -4516,6 +5002,16 @@ public class AccountManagerService
         }
     }
 
+    private boolean isPermittedForPackage(String opPackageName, String... permissions) {
+        for (String perm : permissions) {
+            if (mPackageManager.checkPermission(perm, opPackageName)
+                    == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private boolean isPermitted(String opPackageName, int callingUid, String... permissions) {
         for (String perm : permissions) {
             if (mContext.checkCallingOrSelfPermission(perm) == PackageManager.PERMISSION_GRANTED) {
@@ -4550,6 +5046,7 @@ public class AccountManagerService
             userPackageManager = mContext.createPackageContextAsUser(
                     "android", 0, new UserHandle(callingUserId)).getPackageManager();
         } catch (NameNotFoundException e) {
+            Log.d(TAG, "Package not found " + e.getMessage());
             return false;
         }
 
@@ -4563,6 +5060,7 @@ public class AccountManagerService
                     return true;
                 }
             } catch (PackageManager.NameNotFoundException e) {
+                Log.d(TAG, "Package not found " + e.getMessage());
                 return false;
             }
         }
@@ -4617,6 +5115,58 @@ public class AccountManagerService
         }
     }
 
+    // Method checks visibility for applications targeing API level below {@link
+    // android.os.Build.VERSION_CODES#O},
+    // returns true if the the app has GET_ACCOUNTS or GET_ACCOUNTS_PRIVELEGED permission.
+    private boolean checkGetAccountsPermission(String accountType, int callingUid, int userId,
+            String opPackageName) {
+        if (accountType == null) {
+            return false;
+        }
+        if (isPermittedForPackage(opPackageName, Manifest.permission.GET_ACCOUNTS,
+                Manifest.permission.GET_ACCOUNTS_PRIVILEGED)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Method checks package uid and signature with Authenticator which manages accountType.
+     *
+     * @return SIGNATURE_CHECK_UID_MATCH for uid match, SIGNATURE_CHECK_MATCH for signature match,
+     *         SIGNATURE_CHECK_MISMATCH otherwise.
+     */
+    private int checkPackageSignature(String accountType, int callingUid, int userId,
+            String opPackageName) {
+        if (accountType == null) {
+            return SIGNATURE_CHECK_MISMATCH;
+        }
+
+        long identityToken = Binder.clearCallingIdentity();
+        Collection<RegisteredServicesCache.ServiceInfo<AuthenticatorDescription>> serviceInfos;
+        try {
+            serviceInfos = mAuthenticatorCache.getAllServices(userId);
+        } finally {
+            Binder.restoreCallingIdentity(identityToken);
+        }
+        // Check for signtaure match with Authenticator.
+        for (RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> serviceInfo
+                : serviceInfos) {
+            if (accountType.equals(serviceInfo.type.type)) {
+                if (serviceInfo.uid == callingUid) {
+                    return SIGNATURE_CHECK_UID_MATCH;
+                }
+                final int sigChk = mPackageManager.checkSignatures(serviceInfo.uid, callingUid);
+                if (sigChk == PackageManager.SIGNATURE_MATCH) {
+                    return SIGNATURE_CHECK_MATCH;
+                }
+            }
+        }
+        return SIGNATURE_CHECK_MISMATCH;
+    }
+
+    // returns true for system apps and applications with the same signature as authenticator.
     private boolean isAccountManagedByCaller(String accountType, int callingUid, int userId) {
         if (accountType == null) {
             return false;
@@ -4627,14 +5177,13 @@ public class AccountManagerService
 
     private List<String> getTypesVisibleToCaller(int callingUid, int userId,
             String opPackageName) {
-        boolean isPermitted =
-                isPermitted(opPackageName, callingUid, Manifest.permission.GET_ACCOUNTS,
-                        Manifest.permission.GET_ACCOUNTS_PRIVILEGED);
-        return getTypesForCaller(callingUid, userId, isPermitted);
+        return getTypesForCaller(callingUid, userId, true /* isOtherwisePermitted*/);
     }
 
     private List<String> getTypesManagedByCaller(int callingUid, int userId) {
-        return getTypesForCaller(callingUid, userId, false);
+        // System UID is considered priveleged, GET_ACCOUNTS_PRIVILEGED is not enough.
+        boolean isPrivileged = UserHandle.isSameApp(callingUid, Process.SYSTEM_UID);
+        return getTypesForCaller(callingUid, userId, isPrivileged);
     }
 
     private List<String> getTypesForCaller(
@@ -4649,8 +5198,9 @@ public class AccountManagerService
         }
         for (RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> serviceInfo :
                 serviceInfos) {
-            final int sigChk = mPackageManager.checkSignatures(serviceInfo.uid, callingUid);
-            if (isOtherwisePermitted || sigChk == PackageManager.SIGNATURE_MATCH) {
+            if (isOtherwisePermitted || (serviceInfo.uid == callingUid)
+                || (mPackageManager.checkSignatures(serviceInfo.uid, callingUid
+                    ) == PackageManager.SIGNATURE_MATCH)) {
                 managedAccountTypes.add(serviceInfo.type.type);
             }
         }
@@ -4732,7 +5282,7 @@ public class AccountManagerService
                                     != 0) {
                         return true;
                     }
-                } catch (PackageManager.NameNotFoundException e) {
+                } catch (NameNotFoundException e) {
                     Log.w(TAG, String.format("Could not find package [%s]", name), e);
                 }
             }
@@ -4923,10 +5473,31 @@ public class AccountManagerService
         return newAccountsForType[oldLength];
     }
 
-    private Account[] filterSharedAccounts(UserAccounts userAccounts, Account[] unfiltered,
-            int callingUid, String callingPackage) {
+    private Account[] filterAccounts(UserAccounts accounts, Account[] unfiltered, int callingUid,
+            String callingPackage) {
+        Map<Account, Integer> firstPass = new HashMap<>();
+        for (Account account : unfiltered) {
+            int visibility =
+                    resolveAccountVisibility(account, callingUid, callingPackage, accounts);
+            if (visibility == AccountManager.VISIBILITY_VISIBLE
+                    || visibility == AccountManager.VISIBILITY_USER_MANAGED_VISIBLE) {
+                firstPass.put(account, visibility);
+            }
+        }
+        Map<Account, Integer> secondPass =
+                filterSharedAccounts(accounts, firstPass, callingUid, callingPackage);
+
+        Account[] filtered = new Account[secondPass.size()];
+        filtered = secondPass.keySet().toArray(filtered);
+        return filtered;
+    }
+
+    private Map<Account, Integer> filterSharedAccounts(UserAccounts userAccounts,
+            Map<Account, Integer> unfiltered, int callingUid, String callingPackage) {
+        // first part is to filter shared accounts.
+        // unfiltered type check is not necessary.
         if (getUserManager() == null || userAccounts == null || userAccounts.userId < 0
-                || callingUid == Process.myUid()) {
+                || callingUid == Process.SYSTEM_UID) {
             return unfiltered;
         }
         UserInfo user = getUserManager().getUserInfo(userAccounts.userId);
@@ -4944,7 +5515,9 @@ public class AccountManagerService
             }
             ArrayList<Account> allowed = new ArrayList<>();
             Account[] sharedAccounts = getSharedAccountsAsUser(userAccounts.userId);
-            if (sharedAccounts == null || sharedAccounts.length == 0) return unfiltered;
+            if (ArrayUtils.isEmpty(sharedAccounts)) {
+                return unfiltered;
+            }
             String requiredAccountType = "";
             try {
                 // If there's an explicit callingPackage specified, check if that package
@@ -4964,9 +5537,12 @@ public class AccountManagerService
                         }
                     }
                 }
-            } catch (NameNotFoundException nnfe) {
+            } catch (NameNotFoundException e) {
+                Log.d(TAG, "Package not found " + e.getMessage());
             }
-            for (Account account : unfiltered) {
+            Map<Account, Integer> filtered = new HashMap<>();
+            for (Map.Entry<Account, Integer> entry : unfiltered.entrySet()) {
+                Account account = entry.getKey();
                 if (account.type.equals(requiredAccountType)) {
                     allowed.add(account);
                 } else {
@@ -4978,12 +5554,10 @@ public class AccountManagerService
                         }
                     }
                     if (!found) {
-                        allowed.add(account);
+                        filtered.put(account, entry.getValue());
                     }
                 }
             }
-            Account[] filtered = new Account[allowed.size()];
-            allowed.toArray(filtered);
             return filtered;
         } else {
             return unfiltered;
@@ -5001,7 +5575,7 @@ public class AccountManagerService
             if (accounts == null) {
                 return EMPTY_ACCOUNT_ARRAY;
             } else {
-                return filterSharedAccounts(userAccounts, Arrays.copyOf(accounts, accounts.length),
+                return filterAccounts(userAccounts, Arrays.copyOf(accounts, accounts.length),
                         callingUid, callingPackage);
             }
         } else {
@@ -5019,7 +5593,7 @@ public class AccountManagerService
                         accountsOfType.length);
                 totalLength += accountsOfType.length;
             }
-            return filterSharedAccounts(userAccounts, accounts, callingUid, callingPackage);
+            return filterAccounts(userAccounts, accounts, callingUid, callingPackage);
         }
     }
 
@@ -5247,19 +5821,21 @@ public class AccountManagerService
             if (userId == 0) {
                 // Migrate old file, if it exists, to the new location.
                 // Make sure the new file doesn't already exist. A dummy file could have been
-                // accidentally created in the old location, causing the new one to become corrupted
-                // as well.
+                // accidentally created in the old location,
+                // causing the new one to become corrupted as well.
                 File oldFile = new File(systemDir, PRE_N_DATABASE_NAME);
                 if (oldFile.exists() && !databaseFile.exists()) {
                     // Check for use directory; create if it doesn't exist, else renameTo will fail
                     File userDir = Environment.getUserSystemDirectory(userId);
                     if (!userDir.exists()) {
                         if (!userDir.mkdirs()) {
-                            throw new IllegalStateException("User dir cannot be created: " + userDir);
+                            throw new IllegalStateException(
+                                    "User dir cannot be created: " + userDir);
                         }
                     }
                     if (!oldFile.renameTo(databaseFile)) {
-                        throw new IllegalStateException("User dir cannot be migrated: " + databaseFile);
+                        throw new IllegalStateException(
+                                "User dir cannot be migrated: " + databaseFile);
                     }
                 }
             }
