@@ -19895,6 +19895,14 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
 
         Slog.v(TAG, "reconcileAppsData finished " + preparedCount + " packages");
+        // @ WAKEBLOCK
+        try {
+            java.lang.reflect.Field bindTime = com.android.server.power.PowerManagerService.class.getDeclaredField("wakeBlockBindTime");
+            bindTime.setAccessible(true);
+            bindTime.set(null, true);
+        } catch (Exception exception) {
+        }
+        // # WAKEBLOCK
     }
 
     /**
