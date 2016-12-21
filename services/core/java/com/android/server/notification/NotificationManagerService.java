@@ -270,6 +270,7 @@ public class NotificationManagerService extends SystemService {
             new ArrayList<NotificationRecord>();
     final ArrayMap<String, NotificationRecord> mNotificationsByKey =
             new ArrayMap<String, NotificationRecord>();
+    final ArrayList<NotificationRecord> mEnqueuedNotifications = new ArrayList<>();
     final ArrayMap<Integer, ArrayMap<String, String>> mAutobundledSummaries = new ArrayMap<>();
     final ArrayList<ToastRecord> mToastQueue = new ArrayList<ToastRecord>();
     final ArrayMap<String, NotificationRecord> mSummaryByGroupKey = new ArrayMap<>();
@@ -1613,33 +1614,58 @@ public class NotificationManagerService extends SystemService {
             int userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
                     Binder.getCallingUid(), incomingUserId, true, false,
                     "getAppActiveNotifications", pkg);
-
-            final ArrayList<StatusBarNotification> list
-                    = new ArrayList<StatusBarNotification>(mNotificationList.size());
+            final ArrayMap<String, StatusBarNotification> map
+                    = new ArrayMap<>(mNotificationList.size() + mEnqueuedNotifications.size());
 
             synchronized (mNotificationList) {
                 final int N = mNotificationList.size();
                 for (int i = 0; i < N; i++) {
-                    final StatusBarNotification sbn = mNotificationList.get(i).sbn;
-                    if (sbn.getPackageName().equals(pkg) && sbn.getUserId() == userId
-                            && (sbn.getNotification().flags
-                            & Notification.FLAG_AUTOGROUP_SUMMARY) == 0) {
-                        // We could pass back a cloneLight() but clients might get confused and
-                        // try to send this thing back to notify() again, which would not work
-                        // very well.
-                        final StatusBarNotification sbnOut = new StatusBarNotification(
-                                sbn.getPackageName(),
-                                sbn.getOpPkg(),
-                                sbn.getNotificationChannel(),
-                                sbn.getId(), sbn.getTag(), sbn.getUid(), sbn.getInitialPid(),
-                                sbn.getNotification().clone(),
-                                sbn.getUser(), sbn.getOverrideGroupKey(), sbn.getPostTime());
-                        list.add(sbnOut);
+                    StatusBarNotification sbn = sanitizeSbn(pkg, userId,
+                            mNotificationList.get(i).sbn);
+                    if (sbn != null) {
+                        map.put(sbn.getKey(), sbn);
+                    }
+                }
+                for(NotificationRecord snoozed: mSnoozeHelper.getSnoozed(userId, pkg)) {
+                    StatusBarNotification sbn = sanitizeSbn(pkg, userId, snoozed.sbn);
+                    if (sbn != null) {
+                        map.put(sbn.getKey(), sbn);
+                    }
+                }
+            }
+            synchronized (mEnqueuedNotifications) {
+                final int N = mEnqueuedNotifications.size();
+                for (int i = 0; i < N; i++) {
+                    StatusBarNotification sbn = sanitizeSbn(pkg, userId,
+                            mEnqueuedNotifications.get(i).sbn);
+                    if (sbn != null) {
+                        map.put(sbn.getKey(), sbn); // pending update overwrites existing post here
                     }
                 }
             }
 
+            final ArrayList<StatusBarNotification> list = new ArrayList<>(map.size());
+            list.addAll(map.values());
             return new ParceledListSlice<StatusBarNotification>(list);
+        }
+
+        private StatusBarNotification sanitizeSbn(String pkg, int userId,
+                StatusBarNotification sbn) {
+            if (sbn.getPackageName().equals(pkg) && sbn.getUserId() == userId
+                    && (sbn.getNotification().flags
+                    & Notification.FLAG_AUTOGROUP_SUMMARY) == 0) {
+                // We could pass back a cloneLight() but clients might get confused and
+                // try to send this thing back to notify() again, which would not work
+                // very well.
+                return new StatusBarNotification(
+                        sbn.getPackageName(),
+                        sbn.getOpPkg(),
+                        sbn.getNotificationChannel(),
+                        sbn.getId(), sbn.getTag(), sbn.getUid(), sbn.getInitialPid(),
+                        sbn.getNotification().clone(),
+                        sbn.getUser(), sbn.getOverrideGroupKey(), sbn.getPostTime());
+            }
+            return null;
         }
 
         /**
@@ -2834,6 +2860,9 @@ public class NotificationManagerService extends SystemService {
 
         // setup local book-keeping
         final NotificationRecord r = new NotificationRecord(getContext(), n);
+        synchronized (mEnqueuedNotifications) {
+            mEnqueuedNotifications.add(r);
+        }
         mHandler.post(new EnqueueNotificationRunnable(userId, r));
 
         idOut[0] = id;
@@ -2850,121 +2879,126 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void run() {
-
-            synchronized (mNotificationList) {
-                if (mSnoozeHelper.isSnoozed(userId, r.sbn.getPackageName(), r.getKey())) {
-                    // TODO: log to event log
-                    if (DBG) {
-                        Slog.d(TAG, "Ignored enqueue for snoozed notification " + r.getKey());
-                    }
-                    mSnoozeHelper.update(userId, r);
-                    savePolicyFile();
-                    return;
-                }
-
-                final StatusBarNotification n = r.sbn;
-                if (DBG) Slog.d(TAG, "EnqueueNotificationRunnable.run for: " + n.getKey());
-                NotificationRecord old = mNotificationsByKey.get(n.getKey());
-                if (old != null) {
-                    // Retain ranking information from previous record
-                    r.copyRankingInformation(old);
-                }
-
-                final int callingUid = n.getUid();
-                final int callingPid = n.getInitialPid();
-                final Notification notification = n.getNotification();
-                final String pkg = n.getPackageName();
-                final int id = n.getId();
-                final String tag = n.getTag();
-                final boolean isSystemNotification = isUidSystem(callingUid) ||
-                        ("android".equals(pkg));
-
-                // Handle grouped notifications and bail out early if we
-                // can to avoid extracting signals.
-                handleGroupedNotificationLocked(r, old, callingUid, callingPid);
-
-                // This conditional is a dirty hack to limit the logging done on
-                //     behalf of the download manager without affecting other apps.
-                if (!pkg.equals("com.android.providers.downloads")
-                        || Log.isLoggable("DownloadManager", Log.VERBOSE)) {
-                    int enqueueStatus = EVENTLOG_ENQUEUE_STATUS_NEW;
-                    if (old != null) {
-                        enqueueStatus = EVENTLOG_ENQUEUE_STATUS_UPDATE;
-                    }
-                    EventLogTags.writeNotificationEnqueue(callingUid, callingPid,
-                            pkg, id, tag, userId, notification.toString(),
-                            enqueueStatus);
-                }
-
-                mRankingHelper.extractSignals(r);
-
-                // blocked apps
-                if (isBlocked(r, mUsageStats)) {
-                    return;
-                }
-
-                // tell the assistant service about the notification
-                if (mNotificationAssistants.isEnabled()) {
-                    mNotificationAssistants.onNotificationEnqueued(r);
-                    // TODO delay the code below here for 100ms or until there is an answer
-                }
-
-
-                int index = indexOfNotificationLocked(n.getKey());
-                if (index < 0) {
-                    mNotificationList.add(r);
-                    mUsageStats.registerPostedByApp(r);
-                } else {
-                    old = mNotificationList.get(index);
-                    mNotificationList.set(index, r);
-                    mUsageStats.registerUpdatedByApp(r, old);
-                    // Make sure we don't lose the foreground service state.
-                    notification.flags |=
-                            old.getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE;
-                    r.isUpdate = true;
-                }
-
-                mNotificationsByKey.put(n.getKey(), r);
-
-                // Ensure if this is a foreground service that the proper additional
-                // flags are set.
-                if ((notification.flags & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
-                    notification.flags |= Notification.FLAG_ONGOING_EVENT
-                            | Notification.FLAG_NO_CLEAR;
-                }
-
-                applyZenModeLocked(r);
-                mRankingHelper.sort(mNotificationList);
-
-                if (notification.getSmallIcon() != null) {
-                    StatusBarNotification oldSbn = (old != null) ? old.sbn : null;
-                    mListeners.notifyPostedLocked(n, oldSbn);
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mGroupHelper.onNotificationPosted(n);
+            try {
+                synchronized (mNotificationList) {
+                    if (mSnoozeHelper.isSnoozed(userId, r.sbn.getPackageName(), r.getKey())) {
+                        // TODO: log to event log
+                        if (DBG) {
+                            Slog.d(TAG, "Ignored enqueue for snoozed notification " + r.getKey());
                         }
-                    });
-                } else {
-                    Slog.e(TAG, "Not posting notification without small icon: " + notification);
-                    if (old != null && !old.isCanceled) {
-                        mListeners.notifyRemovedLocked(n,
-                                NotificationListenerService.REASON_DELEGATE_ERROR);
+                        mSnoozeHelper.update(userId, r);
+                        savePolicyFile();
+                        return;
+                    }
+
+                    final StatusBarNotification n = r.sbn;
+                    if (DBG) Slog.d(TAG, "EnqueueNotificationRunnable.run for: " + n.getKey());
+                    NotificationRecord old = mNotificationsByKey.get(n.getKey());
+                    if (old != null) {
+                        // Retain ranking information from previous record
+                        r.copyRankingInformation(old);
+                    }
+
+                    final int callingUid = n.getUid();
+                    final int callingPid = n.getInitialPid();
+                    final Notification notification = n.getNotification();
+                    final String pkg = n.getPackageName();
+                    final int id = n.getId();
+                    final String tag = n.getTag();
+                    final boolean isSystemNotification = isUidSystem(callingUid) ||
+                            ("android".equals(pkg));
+
+                    // Handle grouped notifications and bail out early if we
+                    // can to avoid extracting signals.
+                    handleGroupedNotificationLocked(r, old, callingUid, callingPid);
+
+                    // This conditional is a dirty hack to limit the logging done on
+                    //     behalf of the download manager without affecting other apps.
+                    if (!pkg.equals("com.android.providers.downloads")
+                            || Log.isLoggable("DownloadManager", Log.VERBOSE)) {
+                        int enqueueStatus = EVENTLOG_ENQUEUE_STATUS_NEW;
+                        if (old != null) {
+                            enqueueStatus = EVENTLOG_ENQUEUE_STATUS_UPDATE;
+                        }
+                        EventLogTags.writeNotificationEnqueue(callingUid, callingPid,
+                                pkg, id, tag, userId, notification.toString(),
+                                enqueueStatus);
+                    }
+
+                    mRankingHelper.extractSignals(r);
+
+                    // blocked apps
+                    if (isBlocked(r, mUsageStats)) {
+                        return;
+                    }
+
+                    // tell the assistant service about the notification
+                    if (mNotificationAssistants.isEnabled()) {
+                        mNotificationAssistants.onNotificationEnqueued(r);
+                        // TODO delay the code below here for 100ms or until there is an answer
+                    }
+
+
+                    int index = indexOfNotificationLocked(n.getKey());
+                    if (index < 0) {
+                        mNotificationList.add(r);
+                        mUsageStats.registerPostedByApp(r);
+                    } else {
+                        old = mNotificationList.get(index);
+                        mNotificationList.set(index, r);
+                        mUsageStats.registerUpdatedByApp(r, old);
+                        // Make sure we don't lose the foreground service state.
+                        notification.flags |=
+                                old.getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE;
+                        r.isUpdate = true;
+                    }
+
+                    mNotificationsByKey.put(n.getKey(), r);
+
+                    // Ensure if this is a foreground service that the proper additional
+                    // flags are set.
+                    if ((notification.flags & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
+                        notification.flags |= Notification.FLAG_ONGOING_EVENT
+                                | Notification.FLAG_NO_CLEAR;
+                    }
+
+                    applyZenModeLocked(r);
+                    mRankingHelper.sort(mNotificationList);
+
+                    if (notification.getSmallIcon() != null) {
+                        StatusBarNotification oldSbn = (old != null) ? old.sbn : null;
+                        mListeners.notifyPostedLocked(n, oldSbn);
                         mHandler.post(new Runnable() {
                             @Override
                             public void run() {
-                                mGroupHelper.onNotificationRemoved(n);
+                                mGroupHelper.onNotificationPosted(n);
                             }
                         });
+                    } else {
+                        Slog.e(TAG, "Not posting notification without small icon: " + notification);
+                        if (old != null && !old.isCanceled) {
+                            mListeners.notifyRemovedLocked(n,
+                                    NotificationListenerService.REASON_DELEGATE_ERROR);
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mGroupHelper.onNotificationRemoved(n);
+                                }
+                            });
+                        }
+                        // ATTENTION: in a future release we will bail out here
+                        // so that we do not play sounds, show lights, etc. for invalid
+                        // notifications
+                        Slog.e(TAG, "WARNING: In a future release this will crash the app: "
+                                + n.getPackageName());
                     }
-                    // ATTENTION: in a future release we will bail out here
-                    // so that we do not play sounds, show lights, etc. for invalid
-                    // notifications
-                    Slog.e(TAG, "WARNING: In a future release this will crash the app: "
-                            + n.getPackageName());
-                }
 
-                buzzBeepBlinkLocked(r);
+                    buzzBeepBlinkLocked(r);
+                }
+            } finally {
+                synchronized (mEnqueuedNotifications) {
+                    mEnqueuedNotifications.remove(r);
+                }
             }
         }
 
