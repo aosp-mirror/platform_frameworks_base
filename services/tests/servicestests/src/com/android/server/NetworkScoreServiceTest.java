@@ -232,9 +232,10 @@ public class NetworkScoreServiceTest {
         injectProvider();
         when(mContext.getMainLooper()).thenReturn(Looper.getMainLooper());
         final WifiConfiguration wifiConfiguration = new WifiConfiguration();
-        wifiConfiguration.SSID = "testRequestRecommendation_resultReturned";
-        final RecommendationResult providerResult =
-                new RecommendationResult(wifiConfiguration);
+        wifiConfiguration.SSID = "testRequestRecommendation_resultReturned_SSID";
+        wifiConfiguration.BSSID = "testRequestRecommendation_resultReturned_BSSID";
+        final RecommendationResult providerResult = RecommendationResult
+                .createConnectRecommendation(wifiConfiguration);
         final Bundle bundle = new Bundle();
         bundle.putParcelable(EXTRA_RECOMMENDATION_RESULT, providerResult);
         doAnswer(invocation -> {
@@ -250,6 +251,8 @@ public class NetworkScoreServiceTest {
         assertNotNull(result);
         assertEquals(providerResult.getWifiConfiguration().SSID,
                 result.getWifiConfiguration().SSID);
+        assertEquals(providerResult.getWifiConfiguration().BSSID,
+                result.getWifiConfiguration().BSSID);
     }
 
     @Test

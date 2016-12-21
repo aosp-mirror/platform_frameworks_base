@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.wifi.WifiConfiguration;
@@ -23,6 +24,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 
 /**
  * The result of a network recommendation.
@@ -34,7 +36,32 @@ import com.android.internal.annotations.VisibleForTesting;
 public final class RecommendationResult implements Parcelable {
     private final WifiConfiguration mWifiConfiguration;
 
-    public RecommendationResult(@Nullable WifiConfiguration wifiConfiguration) {
+    /**
+     * Create a {@link RecommendationResult} that indicates that no network connection should be
+     * attempted at this time.
+     *
+     * @return a {@link RecommendationResult}
+     */
+    public static RecommendationResult createDoNotConnectRecommendation() {
+        return new RecommendationResult((WifiConfiguration) null);
+    }
+
+    /**
+     * Create a {@link RecommendationResult} that indicates that a connection attempt should be
+     * made for the given Wi-Fi network.
+     *
+     * @param wifiConfiguration {@link WifiConfiguration} with at least SSID and BSSID set.
+     * @return a {@link RecommendationResult}
+     */
+    public static RecommendationResult createConnectRecommendation(
+            @NonNull WifiConfiguration wifiConfiguration) {
+        Preconditions.checkNotNull(wifiConfiguration, "wifiConfiguration must not be null");
+        Preconditions.checkNotNull(wifiConfiguration.SSID, "SSID must not be null");
+        Preconditions.checkNotNull(wifiConfiguration.BSSID, "BSSID must not be null");
+        return new RecommendationResult(wifiConfiguration);
+    }
+
+    private RecommendationResult(@Nullable WifiConfiguration wifiConfiguration) {
         mWifiConfiguration = wifiConfiguration;
     }
 
@@ -43,11 +70,26 @@ public final class RecommendationResult implements Parcelable {
     }
 
     /**
-     * @return The recommended {@link WifiConfiguration} to connect to. A {@code null} value
-     *         indicates that no WiFi connection should be attempted at this time.
+     * @return {@code true} if a network recommendation exists. {@code false} indicates that
+     *         no connection should be attempted at this time.
      */
-    public WifiConfiguration getWifiConfiguration() {
+    public boolean hasRecommendation() {
+        return mWifiConfiguration != null;
+    }
+
+    /**
+     * @return The recommended {@link WifiConfiguration} to connect to. A {@code null} value
+     *         is returned if {@link #hasRecommendation} returns {@code false}.
+     */
+    @Nullable public WifiConfiguration getWifiConfiguration() {
         return mWifiConfiguration;
+    }
+
+    @Override
+    public String toString() {
+      return "RecommendationResult{" +
+          "mWifiConfiguration=" + mWifiConfiguration +
+          "}";
     }
 
     @Override
