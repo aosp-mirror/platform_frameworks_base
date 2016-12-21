@@ -79,6 +79,8 @@ public class PowerUI extends SystemUI {
     // For filtering ACTION_POWER_DISCONNECTED on boot
     boolean mIgnoreFirstPowerEvent = true;
 
+    private static final String POWER_NOTIFICATIONS_SILENT_URI = "silent";
+
     public void start() {
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mHardwarePropertiesManager = (HardwarePropertiesManager)
@@ -359,7 +361,7 @@ public class PowerUI extends SystemUI {
         final String soundPath =
                 Settings.Global.getString(cr, Settings.Global.POWER_NOTIFICATIONS_RINGTONE);
 
-        if (soundPath != null) {
+        if (soundPath != null && !soundPath.equals(POWER_NOTIFICATIONS_SILENT_URI) ) {
             Ringtone powerRingtone = RingtoneManager.getRingtone(mContext, Uri.parse(soundPath));
             if (powerRingtone != null) {
                 powerRingtone.play();
