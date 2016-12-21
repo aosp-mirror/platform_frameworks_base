@@ -411,40 +411,6 @@ public class RankingHelper implements RankingConfig {
     }
 
     /**
-     * Gets priority.
-     */
-    @Override
-    public int getPriority(String packageName, int uid) {
-        return getOrCreateRecord(packageName, uid).priority;
-    }
-
-    /**
-     * Sets priority.
-     */
-    @Override
-    public void setPriority(String packageName, int uid, int priority) {
-        getOrCreateRecord(packageName, uid).priority = priority;
-        updateConfig();
-    }
-
-    /**
-     * Gets visual override.
-     */
-    @Override
-    public int getVisibilityOverride(String packageName, int uid) {
-        return getOrCreateRecord(packageName, uid).visibility;
-    }
-
-    /**
-     * Sets visibility override.
-     */
-    @Override
-    public void setVisibilityOverride(String pkgName, int uid, int visibility) {
-        getOrCreateRecord(pkgName, uid).visibility = visibility;
-        updateConfig();
-    }
-
-    /**
      * Gets importance.
      */
     @Override
@@ -453,7 +419,8 @@ public class RankingHelper implements RankingConfig {
     }
 
     @Override
-    public void createNotificationChannel(String pkg, int uid, NotificationChannel channel) {
+    public void createNotificationChannel(String pkg, int uid, NotificationChannel channel,
+            boolean fromTargetApp) {
         Preconditions.checkNotNull(pkg);
         Preconditions.checkNotNull(channel);
         Preconditions.checkNotNull(channel.getId());
@@ -473,11 +440,27 @@ public class RankingHelper implements RankingConfig {
                 || channel.getImportance() > NotificationManager.IMPORTANCE_MAX) {
             throw new IllegalArgumentException("Invalid importance level");
         }
+        // Reset fields that apps aren't allowed to set.
+        if (fromTargetApp) {
+            channel.setShowBadge(false);
+            channel.setBypassDnd(r.priority == Notification.PRIORITY_MAX);
+            channel.setLockscreenVisibility(r.visibility);
+        }
+        channel.setAllowed(true);
+        clearLockedFields(channel);
         if (channel.getLockscreenVisibility() == Notification.VISIBILITY_PUBLIC) {
             channel.setLockscreenVisibility(Ranking.VISIBILITY_NO_OVERRIDE);
         }
         r.channels.put(channel.getId(), channel);
         updateConfig();
+    }
+
+    private void clearLockedFields(NotificationChannel channel) {
+        int clearMask = 0;
+        for (int i = 0; i < NotificationChannel.LOCKABLE_FIELDS.length; i++) {
+            clearMask |= NotificationChannel.LOCKABLE_FIELDS[i];
+        }
+        channel.lockFields(~clearMask);
     }
 
     @Override
@@ -533,6 +516,12 @@ public class RankingHelper implements RankingConfig {
             } else {
                 channel.setLockscreenVisibility(updatedChannel.getLockscreenVisibility());
             }
+        }
+        if ((channel.getUserLockedFields() & NotificationChannel.USER_LOCKED_ALLOWED) == 0) {
+            channel.setAllowed(updatedChannel.isAllowed());
+        }
+        if ((channel.getUserLockedFields() & NotificationChannel.USER_LOCKED_SHOW_BADGE) == 0) {
+            channel.setShowBadge(updatedChannel.canShowBadge());
         }
 
         r.channels.put(channel.getId(), channel);

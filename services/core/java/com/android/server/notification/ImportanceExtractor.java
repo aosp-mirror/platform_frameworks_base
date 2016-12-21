@@ -15,7 +15,6 @@
 */
 package com.android.server.notification;
 
-import android.app.NotificationManager;
 import android.content.Context;
 import android.util.Slog;
 
@@ -42,17 +41,8 @@ public class ImportanceExtractor implements NotificationSignalExtractor {
             if (DBG) Slog.d(TAG, "missing config");
             return null;
         }
-        int importance = NotificationManager.IMPORTANCE_UNSPECIFIED;
-        int appImportance = mConfig.getImportance(
-                record.sbn.getPackageName(), record.sbn.getUid());
-        int channelImportance = record.getChannel().getImportance();
-        if (appImportance == NotificationManager.IMPORTANCE_UNSPECIFIED) {
-            record.setUserImportance(channelImportance);
-        } else if (channelImportance == NotificationManager.IMPORTANCE_UNSPECIFIED) {
-            record.setUserImportance(appImportance);
-        } else {
-            record.setUserImportance(Math.min(appImportance, channelImportance));
-        }
+        record.setUserImportance(record.getChannel().getImportance());
+
         return null;
     }
 

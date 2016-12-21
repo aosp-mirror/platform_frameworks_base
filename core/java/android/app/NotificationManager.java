@@ -202,7 +202,7 @@ public class NotificationManager
     public static final int IMPORTANCE_UNSPECIFIED = -1000;
 
     /**
-     * A notification with no importance: shows nowhere, is blocked.
+     * A notification with no importance: does not show in the shade.
      */
     public static final int IMPORTANCE_NONE = 0;
 

@@ -20,19 +20,11 @@ import android.content.pm.ParceledListSlice;
 
 public interface RankingConfig {
 
-    int getPriority(String packageName, int uid);
-
-    void setPriority(String packageName, int uid, int priority);
-
-    int getVisibilityOverride(String packageName, int uid);
-
-    void setVisibilityOverride(String packageName, int uid, int visibility);
-
     void setImportance(String packageName, int uid, int importance);
-
     int getImportance(String packageName, int uid);
 
-    void createNotificationChannel(String pkg, int uid, NotificationChannel channel);
+    void createNotificationChannel(String pkg, int uid, NotificationChannel channel,
+            boolean fromTargetApp);
     void updateNotificationChannel(String pkg, int uid, NotificationChannel channel);
     void updateNotificationChannelFromAssistant(String pkg, int uid, NotificationChannel channel);
     NotificationChannel getNotificationChannel(String pkg, int uid, String channelId);

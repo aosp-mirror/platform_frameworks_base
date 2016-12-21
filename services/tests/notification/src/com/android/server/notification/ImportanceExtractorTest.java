@@ -97,11 +97,11 @@ public class ImportanceExtractorTest {
 
         extractor.process(r);
 
-        assertEquals(r.getUserImportance(), NotificationManager.IMPORTANCE_MIN);
+        assertEquals(r.getUserImportance(), NotificationManager.IMPORTANCE_UNSPECIFIED);
     }
 
     @Test
-    public void testAppPreferenceChannelPermissive() throws Exception {
+    public void testAppPreferenceChannelPreference() throws Exception {
         ImportanceExtractor extractor = new ImportanceExtractor();
         extractor.setConfig(mConfig);
 
@@ -114,58 +114,6 @@ public class ImportanceExtractorTest {
 
         extractor.process(r);
 
-        assertEquals(r.getUserImportance(), NotificationManager.IMPORTANCE_MIN);
-    }
-
-    @Test
-    public void testAppPreferenceChannelStrict() throws Exception {
-        ImportanceExtractor extractor = new ImportanceExtractor();
-        extractor.setConfig(mConfig);
-
-        when(mConfig.getImportance(anyString(), anyInt())).thenReturn(
-          NotificationManager.IMPORTANCE_HIGH);
-        NotificationChannel channel =
-                new NotificationChannel("a", "a", NotificationManager.IMPORTANCE_MIN);
-
-        NotificationRecord r = getNotificationRecord(channel);
-
-        extractor.process(r);
-
-        assertEquals(r.getUserImportance(), NotificationManager.IMPORTANCE_MIN);
-    }
-
-    @Test
-    public void testNoAppPreferenceChannelPreference() throws Exception {
-        ImportanceExtractor extractor = new ImportanceExtractor();
-        extractor.setConfig(mConfig);
-
-        when(mConfig.getImportance(anyString(), anyInt())).thenReturn(
-          NotificationManager.IMPORTANCE_UNSPECIFIED);
-        NotificationChannel channel =
-                new NotificationChannel("a", "a", NotificationManager.IMPORTANCE_MIN);
-
-        NotificationRecord r = getNotificationRecord(channel);
-
-        extractor.process(r);
-
-        assertEquals(r.getUserImportance(), NotificationManager.IMPORTANCE_MIN);
-    }
-
-    @Test
-    public void testNoPreferences() throws Exception {
-        ImportanceExtractor extractor = new ImportanceExtractor();
-        extractor.setConfig(mConfig);
-
-        when(mConfig.getImportance(anyString(), anyInt())).thenReturn(
-          NotificationManager.IMPORTANCE_UNSPECIFIED);
-        NotificationChannel channel =
-                new NotificationChannel("a", "a", NotificationManager.IMPORTANCE_UNSPECIFIED);
-
-        NotificationRecord r = getNotificationRecord(channel);
-
-        extractor.process(r);
-
-        assertEquals(r.getUserImportance(), 
-             NotificationManager.IMPORTANCE_UNSPECIFIED);
+        assertEquals(r.getUserImportance(), NotificationManager.IMPORTANCE_HIGH);
     }
 }

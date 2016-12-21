@@ -1504,56 +1504,17 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void setPriority(String pkg, int uid, int priority) {
-            checkCallerIsSystem();
-            mRankingHelper.setPriority(pkg, uid, priority);
-            savePolicyFile();
-        }
-
-        @Override
-        public int getPriority(String pkg, int uid) {
-            checkCallerIsSystem();
-            return mRankingHelper.getPriority(pkg, uid);
-        }
-
-        @Override
-        public void setVisibilityOverride(String pkg, int uid, int visibility) {
-            checkCallerIsSystem();
-            mRankingHelper.setVisibilityOverride(pkg, uid, visibility);
-            savePolicyFile();
-        }
-
-        @Override
-        public int getVisibilityOverride(String pkg, int uid) {
-            checkCallerIsSystem();
-            return mRankingHelper.getVisibilityOverride(pkg, uid);
-        }
-
-        @Override
-        public void setImportance(String pkg, int uid, int importance) {
-            enforceSystemOrSystemUI("Caller not system or systemui");
-            setNotificationsEnabledForPackageImpl(pkg, uid, importance != IMPORTANCE_NONE);
-            mRankingHelper.setImportance(pkg, uid, importance);
-            savePolicyFile();
-        }
-
-        @Override
         public int getPackageImportance(String pkg) {
             checkCallerIsSystemOrSameApp(pkg);
             return mRankingHelper.getImportance(pkg, Binder.getCallingUid());
         }
 
         @Override
-        public int getImportance(String pkg, int uid) {
-            enforceSystemOrSystemUI("Caller not system or systemui");
-            return mRankingHelper.getImportance(pkg, uid);
-        }
-
-        @Override
         public void createNotificationChannel(String pkg, NotificationChannel channel,
                 IOnNotificationChannelCreatedListener listener) throws RemoteException {
             checkCallerIsSystemOrSameApp(pkg);
-            mRankingHelper.createNotificationChannel(pkg, Binder.getCallingUid(), channel);
+            mRankingHelper.createNotificationChannel(pkg, Binder.getCallingUid(), channel,
+                    true /* fromTargetApp */);
             savePolicyFile();
             listener.onNotificationChannelCreated(channel);
         }
@@ -1587,12 +1548,13 @@ public class NotificationManagerService extends SystemService {
         public void updateNotificationChannelForPackage(String pkg, int uid,
                 NotificationChannel channel) {
             checkCallerIsSystem();
-            if (channel.getImportance() == NotificationManager.IMPORTANCE_NONE) {
-                // cancel
+            if (!channel.isAllowed()) {
                 cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channel.getId(), 0, 0, true,
-                        UserHandle.getUserId(Binder.getCallingUid()), REASON_CHANNEL_BANNED, null);
+                        UserHandle.getUserId(Binder.getCallingUid()), REASON_CHANNEL_BANNED,
+                        null);
             }
             mRankingHelper.updateNotificationChannel(pkg, uid, channel);
+            mRankingHandler.requestSort(true);
             savePolicyFile();
         }
 
@@ -2412,7 +2374,7 @@ public class NotificationManagerService extends SystemService {
                 NotificationChannel channel) throws RemoteException {
             ManagedServiceInfo info = mNotificationAssistants.checkServiceTokenLocked(token);
             int uid = mPackageManager.getPackageUid(pkg, 0, info.userid);
-            mRankingHelper.createNotificationChannel(pkg, uid, channel);
+            mRankingHelper.createNotificationChannel(pkg, uid, channel, false /* fromTargetApp */);
             savePolicyFile();
         }
 
@@ -2435,13 +2397,14 @@ public class NotificationManagerService extends SystemService {
         public void updateNotificationChannelFromAssistant(INotificationListener token, String pkg,
                 NotificationChannel channel) throws RemoteException {
             ManagedServiceInfo info = mNotificationAssistants.checkServiceTokenLocked(token);
-            if (channel.getImportance() == NotificationManager.IMPORTANCE_NONE) {
+            if (!channel.isAllowed()) {
                 // cancel
                 cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channel.getId(), 0, 0, true,
                         info.userid, REASON_CHANNEL_BANNED, null);
             }
             int uid = mPackageManager.getPackageUid(pkg, 0, info.userid);
             mRankingHelper.updateNotificationChannelFromAssistant(pkg, uid, channel);
+            mRankingHandler.requestSort(true);
             savePolicyFile();
         }
 
@@ -2876,7 +2839,7 @@ public class NotificationManagerService extends SystemService {
         idOut[0] = id;
     }
 
-    private class EnqueueNotificationRunnable implements Runnable {
+    protected class EnqueueNotificationRunnable implements Runnable {
         private final NotificationRecord r;
         private final int userId;
 
@@ -2935,23 +2898,9 @@ public class NotificationManagerService extends SystemService {
 
                 mRankingHelper.extractSignals(r);
 
-                final boolean isPackageSuspended = isPackageSuspendedForUser(pkg, callingUid);
-
                 // blocked apps
-                if (r.getImportance() == NotificationManager.IMPORTANCE_NONE
-                        || r.getChannel().getImportance() == NotificationManager.IMPORTANCE_NONE
-                        || !noteNotificationOp(pkg, callingUid) || isPackageSuspended) {
-                    if (!isSystemNotification) {
-                        if (isPackageSuspended) {
-                            Slog.e(TAG, "Suppressing notification from package due to package "
-                                    + "suspended by administrator.");
-                            mUsageStats.registerSuspendedByAdmin(r);
-                        } else {
-                            Slog.e(TAG, "Suppressing notification from package by user request.");
-                            mUsageStats.registerBlocked(r);
-                        }
-                        return;
-                    }
+                if (isBlocked(r, mUsageStats)) {
+                    return;
                 }
 
                 // tell the assistant service about the notification
@@ -3017,6 +2966,28 @@ public class NotificationManagerService extends SystemService {
 
                 buzzBeepBlinkLocked(r);
             }
+        }
+
+        protected boolean isBlocked(NotificationRecord r, NotificationUsageStats usageStats) {
+            final String pkg = r.sbn.getPackageName();
+            final int callingUid = r.sbn.getUid();
+
+            final boolean isPackageSuspended = isPackageSuspendedForUser(pkg, callingUid);
+            if (isPackageSuspended) {
+                Slog.e(TAG, "Suppressing notification from package due to package "
+                        + "suspended by administrator.");
+                usageStats.registerSuspendedByAdmin(r);
+                return isPackageSuspended;
+            }
+
+            final boolean isBlocked = r.getImportance() == NotificationManager.IMPORTANCE_NONE
+                    || !r.getChannel().isAllowed()
+                    || !noteNotificationOp(pkg, callingUid);
+            if (isBlocked) {
+                Slog.e(TAG, "Suppressing notification from package by user request.");
+                    usageStats.registerBlocked(r);
+            }
+            return isBlocked;
         }
     }
 
