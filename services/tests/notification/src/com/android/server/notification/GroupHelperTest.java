@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import android.app.AlarmManager;
@@ -152,7 +153,7 @@ public class GroupHelperTest {
     }
 
     @Test
-    public void testDropBelowLimitRemoveGroup() throws Exception {
+    public void testDropToZeroRemoveGroup() throws Exception {
         final String pkg = "package";
         List<StatusBarNotification> posted = new ArrayList<>();
         for (int i = 0; i < GroupHelper.AUTOGROUP_AT_COUNT; i++) {
@@ -160,10 +161,55 @@ public class GroupHelperTest {
             posted.add(sbn);
             mGroupHelper.onNotificationPosted(sbn);
         }
-        mGroupHelper.onNotificationRemoved(posted.remove(0));
         verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString());
         verify(mCallback, times(GroupHelper.AUTOGROUP_AT_COUNT)).addAutoGroup(anyString());
-        verify(mCallback, times(GroupHelper.AUTOGROUP_AT_COUNT - 1)).removeAutoGroup(anyString());
+        verify(mCallback, never()).removeAutoGroup(anyString());
+        verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString());
+        Mockito.reset(mCallback);
+
+        for (int i = 0; i < GroupHelper.AUTOGROUP_AT_COUNT - 1; i++) {
+            mGroupHelper.onNotificationRemoved(posted.remove(0));
+        }
+        verify(mCallback, never()).removeAutoGroup(anyString());
+        verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString());
+        Mockito.reset(mCallback);
+
+        mGroupHelper.onNotificationRemoved(posted.remove(0));
+        verify(mCallback, never()).removeAutoGroup(anyString());
+        verify(mCallback, times(1)).removeAutoGroupSummary(anyInt(), anyString());
+    }
+
+    @Test
+    public void testAppStartsGrouping() throws Exception {
+        final String pkg = "package";
+        List<StatusBarNotification> posted = new ArrayList<>();
+        for (int i = 0; i < GroupHelper.AUTOGROUP_AT_COUNT; i++) {
+            final StatusBarNotification sbn = getSbn(pkg, i, String.valueOf(i), UserHandle.SYSTEM);
+            posted.add(sbn);
+            mGroupHelper.onNotificationPosted(sbn);
+        }
+        verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString());
+        verify(mCallback, times(GroupHelper.AUTOGROUP_AT_COUNT)).addAutoGroup(anyString());
+        verify(mCallback, never()).removeAutoGroup(anyString());
+        verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString());
+        Mockito.reset(mCallback);
+
+        int i = 0;
+        for (i = 0; i < GroupHelper.AUTOGROUP_AT_COUNT - 2; i++) {
+            final StatusBarNotification sbn =
+                    getSbn(pkg, i, String.valueOf(i), UserHandle.SYSTEM, "app group");
+            mGroupHelper.onNotificationPosted(sbn);
+        }
+        verify(mCallback, times(GroupHelper.AUTOGROUP_AT_COUNT - 2)).removeAutoGroup(anyString());
+        verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString());
+        Mockito.reset(mCallback);
+
+        for (; i < GroupHelper.AUTOGROUP_AT_COUNT; i++) {
+            final StatusBarNotification sbn =
+                    getSbn(pkg, i, String.valueOf(i), UserHandle.SYSTEM, "app group");
+            mGroupHelper.onNotificationPosted(sbn);
+        }
+        verify(mCallback, times(2)).removeAutoGroup(anyString());
         verify(mCallback, times(1)).removeAutoGroupSummary(anyInt(), anyString());
     }
 }
