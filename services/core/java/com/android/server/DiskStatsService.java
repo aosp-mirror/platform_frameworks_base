@@ -22,6 +22,15 @@ import android.os.Environment;
 import android.os.StatFs;
 import android.os.SystemClock;
 import android.os.storage.StorageManager;
+import android.util.Log;
+
+import com.android.server.storage.DiskStatsFileLogger;
+import com.android.server.storage.DiskStatsLoggingService;
+
+import libcore.io.IoUtils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -35,11 +44,13 @@ import java.io.PrintWriter;
  */
 public class DiskStatsService extends Binder {
     private static final String TAG = "DiskStatsService";
+    private static final String DISKSTATS_DUMP_FILE = "/data/system/diskstats_cache.json";
 
     private final Context mContext;
 
     public DiskStatsService(Context context) {
         mContext = context;
+        DiskStatsLoggingService.schedule(context);
     }
 
     @Override
@@ -84,6 +95,10 @@ public class DiskStatsService extends Binder {
             pw.println("File-based Encryption: true");
         }
 
+        if (isCheckin(args)) {
+            reportCachedValues(pw);
+        }
+
         // TODO: Read /proc/yaffs and report interesting values;
         // add configurable (through args) performance test parameters.
     }
@@ -114,4 +129,45 @@ public class DiskStatsService extends Binder {
             return;
         }
     }
+
+    private boolean isCheckin(String[] args) {
+        for (String opt : args) {
+            if ("--checkin".equals(opt)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void reportCachedValues(PrintWriter pw) {
+        try {
+            String jsonString = IoUtils.readFileAsString(DISKSTATS_DUMP_FILE);
+            JSONObject json = new JSONObject(jsonString);
+            pw.print("App Size: ");
+            pw.println(json.getLong(DiskStatsFileLogger.APP_SIZE_AGG_KEY));
+            pw.print("App Cache Size: ");
+            pw.println(json.getLong(DiskStatsFileLogger.APP_CACHE_AGG_KEY));
+            pw.print("Photos Size: ");
+            pw.println(json.getLong(DiskStatsFileLogger.PHOTOS_KEY));
+            pw.print("Videos Size: ");
+            pw.println(json.getLong(DiskStatsFileLogger.VIDEOS_KEY));
+            pw.print("Audio Size: ");
+            pw.println(json.getLong(DiskStatsFileLogger.AUDIO_KEY));
+            pw.print("Downloads Size: ");
+            pw.println(json.getLong(DiskStatsFileLogger.DOWNLOADS_KEY));
+            pw.print("System Size: ");
+            pw.println(json.getLong(DiskStatsFileLogger.SYSTEM_KEY));
+            pw.print("Other Size: ");
+            pw.println(json.getLong(DiskStatsFileLogger.MISC_KEY));
+            pw.print("Package Names: ");
+            pw.println(json.getJSONArray(DiskStatsFileLogger.PACKAGE_NAMES_KEY));
+            pw.print("App Sizes: ");
+            pw.println(json.getJSONArray(DiskStatsFileLogger.APP_SIZES_KEY));
+            pw.print("Cache Sizes: ");
+            pw.println(json.getJSONArray(DiskStatsFileLogger.APP_CACHES_KEY));
+        } catch (IOException | JSONException e) {
+            Log.w(TAG, "exception reading diskstats cache file", e);
+        }
+    }
+
 }
