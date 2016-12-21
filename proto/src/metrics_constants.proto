@@ -3125,6 +3125,42 @@ message MetricsEvent {
     // OS: N-MR2
     NOTIFICATION_NETWORK_SWITCH = 743;
 
+    // OPEN: Settings > System
+    SETTINGS_SYSTEM_CATEGORY = 744;
+
+    // OPEN: Settings > Storage
+    SETTINGS_STORAGE_CATEGORY = 745;
+
+    // OPEN: Settings > Network & Internet
+    SETTINGS_NETWORK_CATEGORY = 746;
+
+    // OPEN: Settings > Connected Device
+    SETTINGS_CONNECTED_DEVICE_CATEGORY = 747;
+
+    // OPEN: Settings > App & Notification
+    SETTINGS_APP_NOTIF_CATEGORY = 748;
+
+    // OPEN: Settings > System > Input & Gesture
+    SETTINGS_INPUT_CATEGORY = 749;
+
+    // OPEN: Settings > System > Language & Region
+    SETTINGS_LANGUAGE_CATEGORY = 750;
+
+    // OPEN: Settings > System > Input & Gesture > Swipe to notification gesture
+    SETTINGS_GESTURE_SWIPE_TO_NOTIFICATION = 751;
+
+    // OPEN: Settings > System > Input & Gesture > Double tap power button gesture
+    SETTINGS_GESTURE_DOUBLE_TAP_POWER = 752;
+
+    // OPEN: Settings > System > Input & Gesture > Pick up gesture
+    SETTINGS_GESTURE_PICKUP = 753;
+
+    // OPEN: Settings > System > Input & Gesture > Double tap screen gesture
+    SETTINGS_GESTURE_DOUBLE_TAP_SCREEN = 754;
+
+    // OPEN: Settings > System > Input & Gesture > Double twist gesture
+    SETTINGS_GESTURE_DOUBLE_TWIST = 755;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
