@@ -24,6 +24,8 @@ import android.os.Bundle;
 import android.os.RemoteCallback;
 import android.os.UserHandle;
 
+import java.util.Map;
+
 /**
  * Central application service that provides account management.
  * @hide
@@ -106,18 +108,17 @@ interface IAccountManager {
     void isCredentialsUpdateSuggested(in IAccountManagerResponse response, in Account account,
         String statusToken);
 
-    /* Allows Authenticator to view what packages or UIDs on phone have requested it. */
+    /* Allows Authenticator to get UIDs of packages which registered to receive updates about given account type.*/
     int[] getRequestingUidsForType(String accountType);
 
-    /* Allows authenticator to add an account explicitly that is only visible to
-     certain uids; the authenticator learns of these UIDs */
-    boolean addAccountExplicitlyWithUid(in Account account, String password, in Bundle extras,
-            in int[] selectedUids);
+    boolean addAccountExplicitlyWithVisibility(in Account account, String password, in Bundle extras,
+            in Map visibility);
 
-    /* Controls visibility of UIDs of applications to Accounts */
-    boolean removeAccountVisibility(in Account a, in int uid);
-    boolean makeAccountVisible(in Account a, in int uid);
-    boolean isAccountVisible(in Account a, in int uid);
+    boolean setAccountVisibility(in Account a, int uid, int newVisibility);
+    int getAccountVisibility(in Account a, int uid);
+
+    /* Type may be null  returns Map <Account, Integer>*/
+    Map getAccountsAndVisibilityForPackage(in String packageName, in String accountType);
 
     /* Check if the package in a user can access an account */
     boolean hasAccountAccess(in Account account, String packageName, in UserHandle userHandle);
