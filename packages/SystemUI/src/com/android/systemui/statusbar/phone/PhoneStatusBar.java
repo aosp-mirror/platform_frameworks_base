@@ -746,6 +746,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 checkUserAutohide(v, event);
+                checkRemoteInputOutside(event);
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     if (mExpandedVisible) {
                         animateCollapsePanels();
@@ -3202,6 +3203,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 && event.getX() == 0 && event.getY() == 0  // a touch outside both bars
                 && !mRemoteInputController.isRemoteInputActive()) { // not due to typing in IME
             userAutohide();
+        }
+    }
+
+    private void checkRemoteInputOutside(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_OUTSIDE // touch outside the source bar
+                && event.getX() == 0 && event.getY() == 0  // a touch outside both bars
+                && mRemoteInputController.isRemoteInputActive()) {
+            mRemoteInputController.closeRemoteInputs();
         }
     }
 
