@@ -17947,7 +17947,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             case Process.PHONE_UID:
             case Process.BLUETOOTH_UID:
             case Process.NFC_UID:
-                isCallerSystem = true;
+                if ((intent.getFlags() & Intent.FLAG_RECEIVER_FROM_SHELL) != 0) {
+                    isCallerSystem = false;
+                } else {
+                    isCallerSystem = true;
+                }
                 break;
             default:
                 isCallerSystem = (callerApp != null) && callerApp.persistent;
@@ -18518,6 +18522,19 @@ public class ActivityManagerService extends IActivityManager.Stub
         if ((flags&Intent.FLAG_RECEIVER_BOOT_UPGRADE) != 0) {
             throw new IllegalArgumentException(
                     "Can't use FLAG_RECEIVER_BOOT_UPGRADE here");
+        }
+
+        if ((flags & Intent.FLAG_RECEIVER_FROM_SHELL) != 0) {
+            switch (Binder.getCallingUid()) {
+                case Process.ROOT_UID:
+                case Process.SHELL_UID:
+                    break;
+                default:
+                    Slog.w(TAG, "Removing FLAG_RECEIVER_FROM_SHELL because caller is UID "
+                            + Binder.getCallingUid());
+                    intent.removeFlags(Intent.FLAG_RECEIVER_FROM_SHELL);
+                    break;
+            }
         }
 
         return intent;

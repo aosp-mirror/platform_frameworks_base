@@ -570,6 +570,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
+        intent.addFlags(Intent.FLAG_RECEIVER_FROM_SHELL);
         IntentReceiver receiver = new IntentReceiver(pw);
         String[] requiredPermissions = mReceiverPermission == null ? null
                 : new String[] {mReceiverPermission};
