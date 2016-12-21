@@ -543,6 +543,8 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private static final int BOOLEAN_PROPERTY_IMPORTANCE = 0x0040000;
 
+    private static final int BOOLEAN_PROPERTY_IS_SHOWING_HINT = 0x0100000;
+
     /**
      * Bits that provide the id of a virtual descendant of a view.
      */
@@ -629,6 +631,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private CharSequence mPackageName;
     private CharSequence mClassName;
     private CharSequence mText;
+    private CharSequence mHintText;
     private CharSequence mError;
     private CharSequence mContentDescription;
     private String mViewIdResourceName;
@@ -2160,6 +2163,33 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Returns whether the node's text represents a hint for the user to enter text. It should only
+     * be {@code true} if the node has editable text.
+     *
+     * @return {@code true} if the text in the node represents a hint to the user, {@code false}
+     * otherwise.
+     */
+    public boolean isShowingHintText() {
+        return getBooleanProperty(BOOLEAN_PROPERTY_IS_SHOWING_HINT);
+    }
+
+    /**
+     * Sets whether the node's text represents a hint for the user to enter text. It should only
+     * be {@code true} if the node has editable text.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param showingHintText {@code true} if the text in the node represents a hint to the user,
+     * {@code false} otherwise.
+     */
+    public void setShowingHintText(boolean showingHintText) {
+        setBooleanProperty(BOOLEAN_PROPERTY_IS_SHOWING_HINT, showingHintText);
+    }
+
+    /**
      * Gets the package this node comes from.
      *
      * @return The package name.
@@ -2235,6 +2265,32 @@ public class AccessibilityNodeInfo implements Parcelable {
     public void setText(CharSequence text) {
         enforceNotSealed();
         mText = (text == null) ? null : text.subSequence(0, text.length());
+    }
+
+    /**
+     * Gets the hint text of this node. Only applies to nodes where text can be entered.
+     *
+     * @return The hint text.
+     */
+    public CharSequence getHintText() {
+        return mHintText;
+    }
+
+    /**
+     * Sets the hint text of this node. Only applies to nodes where text can be entered.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param hintText The hint text for this mode.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setHintText(CharSequence hintText) {
+        enforceNotSealed();
+        mHintText = (hintText == null) ? null : hintText.subSequence(0, hintText.length());
     }
 
     /**
@@ -2810,6 +2866,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         parcel.writeCharSequence(mPackageName);
         parcel.writeCharSequence(mClassName);
         parcel.writeCharSequence(mText);
+        parcel.writeCharSequence(mHintText);
         parcel.writeCharSequence(mError);
         parcel.writeCharSequence(mContentDescription);
         parcel.writeString(mViewIdResourceName);
@@ -2884,6 +2941,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mPackageName = other.mPackageName;
         mClassName = other.mClassName;
         mText = other.mText;
+        mHintText = other.mHintText;
         mError = other.mError;
         mContentDescription = other.mContentDescription;
         mViewIdResourceName = other.mViewIdResourceName;
@@ -2987,6 +3045,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mPackageName = parcel.readCharSequence();
         mClassName = parcel.readCharSequence();
         mText = parcel.readCharSequence();
+        mHintText = parcel.readCharSequence();
         mError = parcel.readCharSequence();
         mContentDescription = parcel.readCharSequence();
         mViewIdResourceName = parcel.readString();
@@ -3058,6 +3117,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mPackageName = null;
         mClassName = null;
         mText = null;
+        mHintText = null;
         mError = null;
         mContentDescription = null;
         mViewIdResourceName = null;
