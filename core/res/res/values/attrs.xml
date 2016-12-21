@@ -131,6 +131,9 @@
         <!-- Color of list item text in alert dialogs. -->
         <attr name="textColorAlertDialogListItem" format="reference|color" />
 
+        <!-- Text color for errors. -->
+        <attr name="textColorError" format="reference|color" />
+
         <!-- Search widget more corpus result item background. -->
         <attr name="searchWidgetCorpusItemBackground" format="reference|color" />
 

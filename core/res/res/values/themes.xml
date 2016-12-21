@@ -93,6 +93,7 @@ please see themes_device_defaults.xml.
         <item name="textColorLink">@color/link_text_dark</item>
         <item name="textColorLinkInverse">@color/link_text_light</item>
         <item name="textColorAlertDialogListItem">@color/primary_text_light_disable_only</item>
+        <item name="textColorError">@color/red</item>
 
         <item name="textAppearanceLarge">@style/TextAppearance.Large</item>
         <item name="textAppearanceMedium">@style/TextAppearance.Medium</item>

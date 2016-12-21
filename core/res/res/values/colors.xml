@@ -35,6 +35,7 @@
     <color name="safe_mode_text">#80ffffff</color>
     <color name="white">#ffffffff</color>
     <color name="black">#ff000000</color>
+    <color name="red">#ffff0000</color>
     <color name="transparent">#00000000</color>
     <color name="background_dark">#ff000000</color>
     <color name="background_light">#ffffffff</color>
