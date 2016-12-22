@@ -42,12 +42,18 @@ import java.util.concurrent.TimeUnit;
  * {@hide}
  */
 public class BackgroundDexOptService extends JobService {
-    static final String TAG = "BackgroundDexOptService";
+    private static final String TAG = "BackgroundDexOptService";
 
-    static final long RETRY_LATENCY = 4 * AlarmManager.INTERVAL_HOUR;
+    private static final boolean DEBUG = false;
 
-    static final int JOB_IDLE_OPTIMIZE = 800;
-    static final int JOB_POST_BOOT_UPDATE = 801;
+    private static final long RETRY_LATENCY = 4 * AlarmManager.INTERVAL_HOUR;
+
+    private static final int JOB_IDLE_OPTIMIZE = 800;
+    private static final int JOB_POST_BOOT_UPDATE = 801;
+
+    private static final long IDLE_OPTIMIZATION_PERIOD = DEBUG
+            ? TimeUnit.MINUTES.toMillis(1)
+            : TimeUnit.DAYS.toMillis(1);
 
     private static ComponentName sDexoptServiceName = new ComponentName(
             "android",
@@ -86,7 +92,7 @@ public class BackgroundDexOptService extends JobService {
         js.schedule(new JobInfo.Builder(JOB_IDLE_OPTIMIZE, sDexoptServiceName)
                     .setRequiresDeviceIdle(true)
                     .setRequiresCharging(true)
-                    .setPeriodic(TimeUnit.DAYS.toMillis(1))
+                    .setPeriodic(IDLE_OPTIMIZATION_PERIOD)
                     .build());
 
         if (DEBUG_DEXOPT) {
@@ -208,6 +214,7 @@ public class BackgroundDexOptService extends JobService {
 
     private void idleOptimization(JobParameters jobParams, PackageManagerService pm,
             ArraySet<String> pkgs) {
+        Log.i(TAG, "Performing idle optimizations");
         // If post-boot update is still running, request that it exits early.
         mExitPostBootUpdate.set(true);
 
