@@ -362,8 +362,7 @@ public final class ContextHubManager {
     public ContextHubManager(Context context, Looper mainLooper) throws ServiceNotFoundException {
         mMainLooper = mainLooper;
         mService = IContextHubService.Stub.asInterface(
-                ServiceManager.getServiceOrThrow(ContextHubService.CONTEXTHUB_SERVICE));
-
+                ServiceManager.getServiceOrThrow(Context.CONTEXTHUB_SERVICE));
         try {
             mService.registerCallback(mClientCallback);
         } catch (RemoteException e) {

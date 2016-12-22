@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.hardware.location;
+package com.android.server.location;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -26,6 +26,14 @@ import java.util.HashMap;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.location.ContextHubInfo;
+import android.hardware.location.ContextHubManager;
+import android.hardware.location.ContextHubMessage;
+import android.hardware.location.IContextHubService;
+import android.hardware.location.IContextHubCallback;
+import android.hardware.location.NanoAppFilter;
+import android.hardware.location.NanoApp;
+import android.hardware.location.NanoAppInstanceInfo;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -42,8 +50,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * @hide
  */
 public class ContextHubService extends IContextHubService.Stub {
-    public static final String CONTEXTHUB_SERVICE = "contexthub_service";
-
     private static final String TAG = "ContextHubService";
     private static final String HARDWARE_PERMISSION = Manifest.permission.LOCATION_HARDWARE;
     private static final String ENFORCE_HW_PERMISSION_MESSAGE = "Permission '"
@@ -302,7 +308,7 @@ public class ContextHubService extends IContextHubService.Stub {
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (mContext.checkCallingOrSelfPermission("android.permission.DUMP")
             != PackageManager.PERMISSION_GRANTED) {
-            pw.println("Permission Denial: can't dump contexthub_service");
+            pw.println("Permission Denial: can't dump contexthub service");
             return;
         }
 

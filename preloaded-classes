@@ -1006,7 +1006,6 @@ android.hardware.input.InputManager$InputDevicesChangedListener
 # android.hardware.location.IActivityRecognitionHardware
 # android.hardware.location.IActivityRecognitionHardware$Stub
 android.hardware.location.ContextHubManager
-android.hardware.location.ContextHubService
 android.hardware.location.IContextHubService
 android.hardware.location.IContextHubService$Stub
 android.hardware.radio.RadioManager
