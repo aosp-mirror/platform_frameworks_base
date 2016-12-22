@@ -403,9 +403,12 @@ def verify_extras(clazz):
 
 def verify_equals(clazz):
     """Verify that equals() and hashCode() must be overridden together."""
-    methods = [ m.name for m in clazz.methods ]
-    eq = "equals" in methods
-    hc = "hashCode" in methods
+    eq = False
+    hc = False
+    for m in clazz.methods:
+        if " static " in m.raw: continue
+        if "boolean equals(java.lang.Object)" in m.raw: eq = True
+        if "int hashCode()" in m.raw: hc = True
     if eq != hc:
         error(clazz, None, "M8", "Must override both equals and hashCode; missing one")
 
