@@ -242,9 +242,19 @@ static void JHwBinder_native_registerService(
     using android::hidl::manager::V1_0::IServiceManager;
 
     sp<hardware::IBinder> binder = JHwBinder::GetNativeContext(env, thiz);
+
     /* TODO(b/33440494) this is not right */
     sp<hidl::base::V1_0::IBase> base = new hidl::base::V1_0::BpBase(binder);
-    bool ok = hardware::defaultServiceManager()->add(
+
+    auto manager = hardware::defaultServiceManager();
+
+    if (manager == nullptr) {
+        LOG(ERROR) << "Could not get hwservicemanager.";
+        signalExceptionForError(env, UNKNOWN_ERROR);
+        return;
+    }
+
+    bool ok = manager->add(
                 interfaceChain,
                 serviceName,
                 base);
@@ -289,8 +299,16 @@ static jobject JHwBinder_native_getService(
               << serviceName
               << "'";
 
+    auto manager = hardware::defaultServiceManager();
+
+    if (manager == nullptr) {
+        LOG(ERROR) << "Could not get hwservicemanager.";
+        signalExceptionForError(env, UNKNOWN_ERROR);
+        return NULL;
+    }
+
     sp<hardware::IBinder> service;
-    hardware::defaultServiceManager()->get(
+    manager->get(
             ifaceName,
             serviceName,
             [&service](sp<hidl::base::V1_0::IBase> out) {
