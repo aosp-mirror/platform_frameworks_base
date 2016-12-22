@@ -168,7 +168,6 @@ public class CarrierConfigManager {
     /**
      * Control whether users receive a simplified network settings UI and improved network
      * selection.
-     * @hide
      */
     public static final String
             KEY_SIMPLIFIED_NETWORK_SETTINGS_BOOL = "simplified_network_settings_bool";
