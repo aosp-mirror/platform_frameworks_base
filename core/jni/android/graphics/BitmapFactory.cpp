@@ -395,12 +395,9 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     SkAlphaType alphaType = codec->computeOutputAlphaType(requireUnpremultiplied);
 
     const SkImageInfo decodeInfo = SkImageInfo::Make(size.width(), size.height(),
-            decodeColorType, alphaType);
+            decodeColorType, alphaType, GraphicsJNI::colorSpaceForType(decodeColorType));
 
-    // We always decode to sRGB, but only mark the bitmap with a color space if linear
-    // blending is enabled.
-    SkImageInfo bitmapInfo = decodeInfo.makeColorSpace(
-            GraphicsJNI::colorSpaceForType(decodeColorType));
+    SkImageInfo bitmapInfo = decodeInfo;
     if (decodeColorType == kGray_8_SkColorType) {
         // The legacy implementation of BitmapFactory used kAlpha8 for
         // grayscale images (before kGray8 existed).  While the codec
