@@ -285,13 +285,10 @@ public class StatusBarWindowView extends FrameLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        if (mService.isDozing() && !mService.isPulsing()) {
-            // Discard all touch events in always-on.
-            return true;
-        }
-
-        boolean handled = false;
-        if (mService.getBarState() == StatusBarState.KEYGUARD) {
+        boolean handled = mService.isDozing() && !mService.isPulsing();
+        if (mService.getBarState() == StatusBarState.KEYGUARD
+                && (!handled || mDragDownHelper.isDraggingDown())) {
+            // we still want to finish our drag down gesture when locking the screen
             handled = mDragDownHelper.onTouchEvent(ev);
         }
         if (!handled) {
