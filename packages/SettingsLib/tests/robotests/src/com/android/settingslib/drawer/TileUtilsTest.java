@@ -16,6 +16,8 @@
 
 package com.android.settingslib.drawer;
 
+import android.content.IContentProvider;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -24,7 +26,9 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings.Global;
@@ -40,6 +44,7 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
@@ -47,10 +52,12 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
@@ -65,12 +72,21 @@ public class TileUtilsTest {
     private Resources mResources;
     @Mock
     private UserManager mUserManager;
+    @Mock
+    private IContentProvider mIContentProvider;
+    @Mock
+    private ContentResolver mContentResolver;
+
+    private static final String URI_GET_SUMMARY = "content://authority/text/summary";
+    private static final String URI_GET_ICON = "content://authority/icon/my_icon";
 
     @Before
     public void setUp() throws NameNotFoundException {
         MockitoAnnotations.initMocks(this);
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
         when(mPackageManager.getResourcesForApplication(anyString())).thenReturn(mResources);
+        mContentResolver = spy(RuntimeEnvironment.application.getContentResolver());
+        when(mContext.getContentResolver()).thenReturn(mContentResolver);
     }
 
     @Test
@@ -158,11 +174,89 @@ public class TileUtilsTest {
         assertThat(categoryList.get(0).tiles.get(0).category).isEqualTo(testCategory);
     }
 
+    @Test
+    public void getTilesForIntent_shouldNotProcessInvalidUriContentSystemApp()
+            throws RemoteException {
+        Intent intent = new Intent();
+        Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
+        List<Tile> outTiles = new ArrayList<>();
+        List<ResolveInfo> info = new ArrayList<>();
+        ResolveInfo resolveInfo = newInfo(true, null /* category */, null, null, URI_GET_SUMMARY);
+        info.add(resolveInfo);
+
+        when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
+                .thenReturn(info);
+
+        // Case 1: No provider associated with the uri specified.
+        TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
+                null /* defaultCategory */, outTiles, false /* usePriority */,
+                false /* checkCategory */);
+
+        assertThat(outTiles.size()).isEqualTo(1);
+        assertThat(outTiles.get(0).icon.getResId()).isEqualTo(314159);
+        assertThat(outTiles.get(0).summary).isEqualTo("static-summary");
+
+        // Case 2: Empty bundle.
+        Bundle bundle = new Bundle();
+        when(mIContentProvider.call(anyString(),
+                eq(TileUtils.getMethodFromUri(Uri.parse(URI_GET_SUMMARY))), eq(URI_GET_SUMMARY),
+                any())).thenReturn(bundle);
+        when(mContentResolver.acquireProvider(anyString())).thenReturn(mIContentProvider);
+        when(mContentResolver.acquireProvider(any(Uri.class))).thenReturn(mIContentProvider);
+
+        TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
+                null /* defaultCategory */, outTiles, false /* usePriority */,
+                false /* checkCategory */);
+
+        assertThat(outTiles.size()).isEqualTo(1);
+        assertThat(outTiles.get(0).icon.getResId()).isEqualTo(314159);
+        assertThat(outTiles.get(0).summary).isEqualTo("static-summary");
+    }
+
+    @Test
+    public void getTilesForIntent_shouldProcessUriContentForSystemApp() throws RemoteException {
+        Intent intent = new Intent();
+        Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
+        List<Tile> outTiles = new ArrayList<>();
+        List<ResolveInfo> info = new ArrayList<>();
+        ResolveInfo resolveInfo = newInfo(true, null /* category */, null, URI_GET_ICON,
+                URI_GET_SUMMARY);
+        info.add(resolveInfo);
+
+        when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
+                .thenReturn(info);
+
+        Bundle bundle = new Bundle();
+        bundle.putInt("com.android.settings.icon", 161803);
+        bundle.putString("com.android.settings.summary", "dynamic-summary");
+        when(mIContentProvider.call(anyString(),
+                eq(TileUtils.getMethodFromUri(Uri.parse(URI_GET_ICON))), eq(URI_GET_ICON), any()))
+                .thenReturn(bundle);
+        when(mIContentProvider.call(anyString(),
+                eq(TileUtils.getMethodFromUri(Uri.parse(URI_GET_SUMMARY))), eq(URI_GET_SUMMARY),
+                any())).thenReturn(bundle);
+        when(mContentResolver.acquireProvider(anyString())).thenReturn(mIContentProvider);
+        when(mContentResolver.acquireProvider(any(Uri.class))).thenReturn(mIContentProvider);
+
+        TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
+                null /* defaultCategory */, outTiles, false /* usePriority */,
+                false /* checkCategory */);
+
+        assertThat(outTiles.size()).isEqualTo(1);
+        assertThat(outTiles.get(0).icon.getResId()).isEqualTo(161803);
+        assertThat(outTiles.get(0).summary).isEqualTo("dynamic-summary");
+    }
+
     private ResolveInfo newInfo(boolean systemApp, String category) {
         return newInfo(systemApp, category, null);
     }
 
     private ResolveInfo newInfo(boolean systemApp, String category, String keyHint) {
+        return newInfo(systemApp, category, keyHint, null, null);
+    }
+
+    private ResolveInfo newInfo(boolean systemApp, String category, String keyHint, String iconUri,
+            String summaryUri) {
         ResolveInfo info = new ResolveInfo();
         info.system = systemApp;
         info.activityInfo = new ActivityInfo();
@@ -170,8 +264,16 @@ public class TileUtilsTest {
         info.activityInfo.name = "123";
         info.activityInfo.metaData = new Bundle();
         info.activityInfo.metaData.putString("com.android.settings.category", category);
+        info.activityInfo.metaData.putInt("com.android.settings.icon", 314159);
+        info.activityInfo.metaData.putString("com.android.settings.summary", "static-summary");
         if (keyHint != null) {
             info.activityInfo.metaData.putString("com.android.settings.keyhint", keyHint);
+        }
+        if (iconUri != null) {
+            info.activityInfo.metaData.putString("com.android.settings.icon_uri", iconUri);
+        }
+        if (summaryUri != null) {
+            info.activityInfo.metaData.putString("com.android.settings.summary_uri", summaryUri);
         }
         info.activityInfo.applicationInfo = new ApplicationInfo();
         if (systemApp) {
