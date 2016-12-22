@@ -18,6 +18,7 @@ package android.view;
 
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.view.View.FocusGroupType;
 import android.view.accessibility.AccessibilityEvent;
 
 /**
@@ -150,6 +151,7 @@ public interface ViewParent {
      * Find the nearest keyboard navigation cluster in the specified direction.
      * This does not actually give focus to that cluster.
      *
+     * @param focusGroupType Type of the focus group
      * @param currentCluster The starting point of the search. Null means the current cluster is not
      *                       found yet
      * @param direction Direction to look
@@ -157,7 +159,8 @@ public interface ViewParent {
      * @return The nearest keyboard navigation cluster in the specified direction, or null if none
      *         can be found
      */
-    View keyboardNavigationClusterSearch(View currentCluster, int direction);
+    View keyboardNavigationClusterSearch(
+            @FocusGroupType int focusGroupType, View currentCluster, int direction);
 
     /**
      * Change the z order of the child so it's on top of all other children.

@@ -1248,6 +1248,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @Retention(RetentionPolicy.SOURCE)
     public @interface FocusRealDirection {} // Like @FocusDirection, but without forward/backward
 
+    /** @hide */
+    @IntDef({
+            FOCUS_GROUP_CLUSTER,
+            FOCUS_GROUP_SECTION
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FocusGroupType {}
+
     /**
      * Use with {@link #focusSearch(int)}. Move focus to the previous selectable
      * item.
@@ -1279,6 +1287,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Use with {@link #focusSearch(int)}. Move focus down.
      */
     public static final int FOCUS_DOWN = 0x00000082;
+
+    /**
+     * Use with {@link #keyboardNavigationClusterSearch(int, View, int)}. Search for a keyboard
+     * navigation cluster.
+     */
+    public static final int FOCUS_GROUP_CLUSTER = 1;
+
+    /**
+     * Use with {@link #keyboardNavigationClusterSearch(int, View, int)}. Search for a keyboard
+     * navigation section.
+     */
+    public static final int FOCUS_GROUP_SECTION = 2;
 
     /**
      * Bits of {@link #getMeasuredWidthAndState()} and
@@ -9096,22 +9116,47 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
+    final boolean isFocusGroupOfType(@FocusGroupType int focusGroupType) {
+        switch (focusGroupType) {
+            case FOCUS_GROUP_CLUSTER:
+                return isKeyboardNavigationCluster();
+            case FOCUS_GROUP_SECTION:
+                return isKeyboardNavigationSection();
+            default:
+                throw new IllegalArgumentException("Unknown focus group type: " + focusGroupType);
+        }
+    }
+
     /**
      * Find the nearest keyboard navigation cluster in the specified direction.
      * This does not actually give focus to that cluster.
      *
+     * @param focusGroupType Type of the focus group
+     * @param currentCluster The starting point of the search. Null means the current cluster is not
+     *                       found yet
      * @param direction Direction to look
      *
      * @return The nearest keyboard navigation cluster in the specified direction, or null if none
      *         can be found
      */
-    public View keyboardNavigationClusterSearch(int direction) {
-        if (mParent != null) {
-            final View currentCluster = isKeyboardNavigationCluster() ? this : null;
-            return mParent.keyboardNavigationClusterSearch(currentCluster, direction);
-        } else {
-            return null;
+    public View keyboardNavigationClusterSearch(
+            @FocusGroupType int focusGroupType, View currentCluster, int direction) {
+        if (isFocusGroupOfType(focusGroupType)) {
+            currentCluster = this;
         }
+        if (isRootNamespace()
+                || focusGroupType == FOCUS_GROUP_SECTION && isKeyboardNavigationCluster()) {
+            // Root namespace means we should consider ourselves the top of the
+            // tree for cluster searching; otherwise we could be focus searching
+            // into other tabs.  see LocalActivityManager and TabHost for more info.
+            // In addition, a cluster node works as a root for section searches.
+            return FocusFinder.getInstance().findNextKeyboardNavigationCluster(
+                    focusGroupType, this, currentCluster, direction);
+        } else if (mParent != null) {
+            return mParent.keyboardNavigationClusterSearch(
+                    focusGroupType, currentCluster, direction);
+        }
+        return null;
     }
 
     /**
@@ -9240,11 +9285,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Adds any keyboard navigation cluster roots that are descendants of this view (possibly
      * including this view if it is a cluster root itself) to views.
      *
+     * @param focusGroupType Type of the focus group
      * @param views Cluster roots found so far
      * @param direction Direction to look
      */
-    public void addKeyboardNavigationClusters(@NonNull Collection<View> views, int direction) {
-        if (!isKeyboardNavigationCluster()) {
+    public void addKeyboardNavigationClusters(
+            @FocusGroupType int focusGroupType,
+            @NonNull Collection<View> views,
+            int direction) {
+        if (!(isFocusGroupOfType(focusGroupType))) {
             return;
         }
         views.add(this);
