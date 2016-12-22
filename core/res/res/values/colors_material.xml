@@ -62,6 +62,9 @@
     <!-- 70% white -->
     <color name="secondary_text_default_material_dark">#b3ffffff</color>
 
+    <color name="error_text_material_light">@color/material_red_A700</color>
+    <color name="error_text_material_dark">@color/material_red_A100</color>
+
     <item name="hint_alpha_material_dark" format="float" type="dimen">0.50</item>
     <item name="hint_alpha_material_light" format="float" type="dimen">0.38</item>
 
@@ -98,6 +101,9 @@
     <color name="material_blue_grey_800">#ff37474f</color>
     <color name="material_blue_grey_900">#ff263238</color>
     <color name="material_blue_grey_950">#ff21272b</color>
+
+    <color name="material_red_A100">#ff8a80</color>
+    <color name="material_red_A700">#d50000</color>
 
     <!-- Time picker defaults when no theme is set -->
     <eat-comment />

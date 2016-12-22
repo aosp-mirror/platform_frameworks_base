@@ -71,6 +71,7 @@ please see themes_device_defaults.xml.
         <item name="textColorLinkInverse">?attr/colorAccent</item>
         <item name="textColorSearchUrl">@color/search_url_text_material_dark</item>
         <item name="textColorAlertDialogListItem">@color/primary_text_material_dark</item>
+        <item name="textColorError">@color/error_text_material_dark</item>
 
         <item name="textAppearanceLarge">@style/TextAppearance.Material.Large</item>
         <item name="textAppearanceLargeInverse">@style/TextAppearance.Material.Large.Inverse</item>
@@ -436,6 +437,7 @@ please see themes_device_defaults.xml.
         <item name="textColorLinkInverse">?attr/colorAccent</item>
         <item name="textColorSearchUrl">@color/search_url_text_material_light</item>
         <item name="textColorAlertDialogListItem">@color/primary_text_material_light</item>
+        <item name="textColorError">@color/error_text_material_light</item>
 
         <item name="textAppearanceLarge">@style/TextAppearance.Material.Large</item>
         <item name="textAppearanceLargeInverse">@style/TextAppearance.Material.Large.Inverse</item>
@@ -817,6 +819,7 @@ please see themes_device_defaults.xml.
         <item name="textColorHighlightInverse">@color/highlighted_text_material</item>
         <item name="textColorSearchUrl">@color/search_url_text_material_light</item>
         <item name="textColorAlertDialogListItem">@color/primary_text_material_light</item>
+        <item name="textColorError">@color/error_text_material_light</item>
 
         <item name="textCheckMark">@drawable/indicator_check_mark_light</item>
         <item name="textCheckMarkInverse">@drawable/indicator_check_mark_dark</item>
@@ -849,6 +852,7 @@ please see themes_device_defaults.xml.
         <item name="textColorHighlightInverse">@color/highlighted_text_material</item>
         <item name="textColorSearchUrl">@color/search_url_text_material_dark</item>
         <item name="textColorAlertDialogListItem">@color/primary_text_material_dark</item>
+        <item name="textColorError">@color/error_text_material_dark</item>
 
         <item name="textCheckMark">@drawable/indicator_check_mark_dark</item>
         <item name="textCheckMarkInverse">@drawable/indicator_check_mark_light</item>
