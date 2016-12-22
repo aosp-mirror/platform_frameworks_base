@@ -544,6 +544,16 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         assertTimeEquals(expectedCycle, actualCycle);
     }
 
+    public void testLastCycleBoundaryJanuaryDST() throws Exception {
+        final long currentTime = parseTime("1989-01-26T21:00:00.000Z");
+        final long expectedCycle = parseTime("1989-01-01T01:59:59.000Z");
+
+        final NetworkPolicy policy = new NetworkPolicy(
+                sTemplateWifi, 32, "America/Argentina/Buenos_Aires", 1024L, 1024L, false);
+        final long actualCycle = computeLastCycleBoundary(currentTime, policy);
+        assertTimeEquals(expectedCycle, actualCycle);
+    }
+
     @Suppress
     public void testNetworkPolicyAppliedCycleLastMonth() throws Exception {
         NetworkState[] state = null;
