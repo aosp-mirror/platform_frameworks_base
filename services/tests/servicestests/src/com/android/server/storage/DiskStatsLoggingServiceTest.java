@@ -18,9 +18,15 @@ package com.android.server.storage;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.job.JobService;
+import android.app.job.JobParameters;
 import android.content.pm.PackageStats;
 import android.test.AndroidTestCase;
 
@@ -128,6 +134,21 @@ public class DiskStatsLoggingServiceTest extends AndroidTestCase {
                 json.getJSONArray(DiskStatsFileLogger.PACKAGE_NAMES_KEY).length()).isEqualTo(1L);
         assertThat(json.getJSONArray(DiskStatsFileLogger.APP_SIZES_KEY).length()).isEqualTo(1L);
         assertThat(json.getJSONArray(DiskStatsFileLogger.APP_CACHES_KEY).length()).isEqualTo(1L);
+    }
+
+    @Test
+    public void testDontCrashOnPackageStatsTimeout() throws Exception {
+        when(mCollector.getPackageStats(anyInt())).thenReturn(null);
+
+        LogRunnable task = new LogRunnable();
+        task.setAppCollector(mCollector);
+        task.setDownloadsDirectory(mDownloads.getRoot());
+        task.setRootDirectory(mRootDirectory.getRoot());
+        task.setLogOutputFile(mInputFile);
+        task.setSystemSize(10L);
+        task.run();
+
+        // No exception should be thrown.
     }
 
     private void writeDataToFile(File f, String data) throws Exception{
