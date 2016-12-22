@@ -128,12 +128,12 @@ static void setLight_native(JNIEnv* /* env */, jobject /* clazz */, jlong ptr,
         }
     } else {
         // Only set non-brightness settings when not in low-persistence mode
-        state.color = colorARGB;
         state.flashMode = flashMode;
         state.flashOnMS = onMS;
         state.flashOffMS = offMS;
     }
 
+    state.color = colorARGB;
     state.brightnessMode = brightnessMode;
 
     {

@@ -49,23 +49,23 @@ import android.util.Log;
  * <i>These levels are mutually exclusive - you may only specify one of them.</i>
  *
  * <table>
- *     <tr><th>Flag Value</th> 
+ *     <tr><th>Flag Value</th>
  *     <th>CPU</th> <th>Screen</th> <th>Keyboard</th></tr>
  *
  *     <tr><td>{@link #PARTIAL_WAKE_LOCK}</td>
- *         <td>On*</td> <td>Off</td> <td>Off</td> 
+ *         <td>On*</td> <td>Off</td> <td>Off</td>
  *     </tr>
- *     
+ *
  *     <tr><td>{@link #SCREEN_DIM_WAKE_LOCK}</td>
- *         <td>On</td> <td>Dim</td> <td>Off</td> 
+ *         <td>On</td> <td>Dim</td> <td>Off</td>
  *     </tr>
  *
  *     <tr><td>{@link #SCREEN_BRIGHT_WAKE_LOCK}</td>
- *         <td>On</td> <td>Bright</td> <td>Off</td> 
+ *         <td>On</td> <td>Bright</td> <td>Off</td>
  *     </tr>
- *     
+ *
  *     <tr><td>{@link #FULL_WAKE_LOCK}</td>
- *         <td>On</td> <td>Bright</td> <td>Bright</td> 
+ *         <td>On</td> <td>Bright</td> <td>Bright</td>
  *     </tr>
  * </table>
  * </p><p>
@@ -85,13 +85,13 @@ import android.util.Log;
  *         the illumination to remain on once it turns on (e.g. from user activity).  This flag
  *         will force the screen and/or keyboard to turn on immediately, when the WakeLock is
  *         acquired.  A typical use would be for notifications which are important for the user to
- *         see immediately.</td> 
+ *         see immediately.</td>
  *     </tr>
- *     
+ *
  *     <tr><td>{@link #ON_AFTER_RELEASE}</td>
  *         <td>If this flag is set, the user activity timer will be reset when the WakeLock is
- *         released, causing the illumination to remain on a bit longer.  This can be used to 
- *         reduce flicker if you are cycling between wake lock conditions.</td> 
+ *         released, causing the illumination to remain on a bit longer.  This can be used to
+ *         reduce flicker if you are cycling between wake lock conditions.</td>
  *     </tr>
  * </table>
  * <p>
@@ -470,6 +470,35 @@ public final class PowerManager {
     public int getDefaultScreenBrightnessSetting() {
         return mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_screenBrightnessSettingDefault);
+    }
+
+    /**
+     * Gets the minimum supported screen brightness setting for VR Mode.
+     * @hide
+     */
+    public int getMinimumScreenBrightnessForVrSetting() {
+        return mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_screenBrightnessForVrSettingMinimum);
+    }
+
+    /**
+     * Gets the maximum supported screen brightness setting for VR Mode.
+     * The screen may be allowed to become dimmer than this value but
+     * this is the maximum value that can be set by the user.
+     * @hide
+     */
+    public int getMaximumScreenBrightnessForVrSetting() {
+        return mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_screenBrightnessForVrSettingMaximum);
+    }
+
+    /**
+     * Gets the default screen brightness for VR setting.
+     * @hide
+     */
+    public int getDefaultScreenBrightnessForVrSetting() {
+        return mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_screenBrightnessForVrSettingDefault);
     }
 
     /**
