@@ -122,6 +122,8 @@ public class NetworkScoreServiceTest {
         when(mContext.getResources()).thenReturn(mResources);
         mNetworkScoreService = new NetworkScoreService(mContext, mNetworkScorerAppManager);
         WifiConfiguration configuration = new WifiConfiguration();
+        configuration.SSID = "NetworkScoreServiceTest_SSID";
+        configuration.BSSID = "NetworkScoreServiceTest_BSSID";
         mRecommendationRequest = new RecommendationRequest.Builder()
             .setCurrentRecommendedWifiConfig(configuration).build();
     }

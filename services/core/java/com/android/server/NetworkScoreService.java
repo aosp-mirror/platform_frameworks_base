@@ -40,7 +40,7 @@ import android.net.RecommendationRequest;
 import android.net.RecommendationResult;
 import android.net.ScoredNetwork;
 import android.net.Uri;
-import android.net.wifi.WifiConfiguration;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
@@ -319,47 +319,54 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                     " is not the active scorer.");
         }
 
-        // Separate networks by type.
-        Map<Integer, List<ScoredNetwork>> networksByType = new ArrayMap<>();
-        for (ScoredNetwork network : networks) {
-            List<ScoredNetwork> networkList = networksByType.get(network.networkKey.type);
-            if (networkList == null) {
-                networkList = new ArrayList<>();
-                networksByType.put(network.networkKey.type, networkList);
-            }
-            networkList.add(network);
-        }
-
-        // Pass the scores of each type down to the appropriate network scorer.
-        for (final Map.Entry<Integer, List<ScoredNetwork>> entry : networksByType.entrySet()) {
-            final RemoteCallbackList<INetworkScoreCache> callbackList;
-            final boolean isEmpty;
-            synchronized (mScoreCaches) {
-                callbackList = mScoreCaches.get(entry.getKey());
-                isEmpty = callbackList == null || callbackList.getRegisteredCallbackCount() == 0;
-            }
-            if (isEmpty) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "No scorer registered for type " + entry.getKey() + ", discarding");
+        final long token = Binder.clearCallingIdentity();
+        try {
+            // Separate networks by type.
+            Map<Integer, List<ScoredNetwork>> networksByType = new ArrayMap<>();
+            for (ScoredNetwork network : networks) {
+                List<ScoredNetwork> networkList = networksByType.get(network.networkKey.type);
+                if (networkList == null) {
+                    networkList = new ArrayList<>();
+                    networksByType.put(network.networkKey.type, networkList);
                 }
-                continue;
+                networkList.add(network);
             }
 
-            sendCallback(new Consumer<INetworkScoreCache>() {
-                @Override
-                public void accept(INetworkScoreCache networkScoreCache) {
-                    try {
-                        networkScoreCache.updateScores(entry.getValue());
-                    } catch (RemoteException e) {
-                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                            Log.v(TAG, "Unable to update scores of type " + entry.getKey(), e);
+            // Pass the scores of each type down to the appropriate network scorer.
+            for (final Map.Entry<Integer, List<ScoredNetwork>> entry : networksByType.entrySet()) {
+                final RemoteCallbackList<INetworkScoreCache> callbackList;
+                final boolean isEmpty;
+                synchronized (mScoreCaches) {
+                    callbackList = mScoreCaches.get(entry.getKey());
+                    isEmpty = callbackList == null
+                            || callbackList.getRegisteredCallbackCount() == 0;
+                }
+                if (isEmpty) {
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, "No scorer registered for type " + entry.getKey()
+                                + ", discarding");
+                    }
+                    continue;
+                }
+
+                sendCallback(new Consumer<INetworkScoreCache>() {
+                    @Override
+                    public void accept(INetworkScoreCache networkScoreCache) {
+                        try {
+                            networkScoreCache.updateScores(entry.getValue());
+                        } catch (RemoteException e) {
+                            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                                Log.v(TAG, "Unable to update scores of type " + entry.getKey(), e);
+                            }
                         }
                     }
-                }
-            }, Collections.singleton(callbackList));
-        }
+                }, Collections.singleton(callbackList));
+            }
 
-        return true;
+            return true;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     @Override
@@ -369,8 +376,13 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         if (mNetworkScorerAppManager.isCallerActiveScorer(getCallingUid()) ||
                 mContext.checkCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED) ==
                         PackageManager.PERMISSION_GRANTED) {
-            clearInternal();
-            return true;
+            final long token = Binder.clearCallingIdentity();
+            try {
+                clearInternal();
+                return true;
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         } else {
             throw new SecurityException(
                     "Caller is neither the active scorer nor the scorer manager.");
@@ -428,35 +440,46 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                                           INetworkScoreCache scoreCache,
                                           int filterType) {
         mContext.enforceCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED, TAG);
-        synchronized (mScoreCaches) {
-            RemoteCallbackList<INetworkScoreCache> callbackList = mScoreCaches.get(networkType);
-            if (callbackList == null) {
-                callbackList = new RemoteCallbackList<>();
-                mScoreCaches.put(networkType, callbackList);
-            }
-            if (!callbackList.register(scoreCache, filterType)) {
-                if (callbackList.getRegisteredCallbackCount() == 0) {
-                    mScoreCaches.remove(networkType);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mScoreCaches) {
+                RemoteCallbackList<INetworkScoreCache> callbackList = mScoreCaches.get(networkType);
+                if (callbackList == null) {
+                    callbackList = new RemoteCallbackList<>();
+                    mScoreCaches.put(networkType, callbackList);
                 }
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "Unable to register NetworkScoreCache for type " + networkType);
+                if (!callbackList.register(scoreCache, filterType)) {
+                    if (callbackList.getRegisteredCallbackCount() == 0) {
+                        mScoreCaches.remove(networkType);
+                    }
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, "Unable to register NetworkScoreCache for type " + networkType);
+                    }
                 }
             }
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
     @Override
     public void unregisterNetworkScoreCache(int networkType, INetworkScoreCache scoreCache) {
         mContext.enforceCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED, TAG);
-        synchronized (mScoreCaches) {
-            RemoteCallbackList<INetworkScoreCache> callbackList = mScoreCaches.get(networkType);
-            if (callbackList == null || !callbackList.unregister(scoreCache)) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "Unable to unregister NetworkScoreCache for type " + networkType);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mScoreCaches) {
+                RemoteCallbackList<INetworkScoreCache> callbackList = mScoreCaches.get(networkType);
+                if (callbackList == null || !callbackList.unregister(scoreCache)) {
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, "Unable to unregister NetworkScoreCache for type "
+                                + networkType);
+                    }
+                } else if (callbackList.getRegisteredCallbackCount() == 0) {
+                    mScoreCaches.remove(networkType);
                 }
-            } else if (callbackList.getRegisteredCallbackCount() == 0) {
-                mScoreCaches.remove(networkType);
             }
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
@@ -464,43 +487,53 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     public RecommendationResult requestRecommendation(RecommendationRequest request) {
         mContext.enforceCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED, TAG);
         throwIfCalledOnMainThread();
-        final INetworkRecommendationProvider provider = getRecommendationProvider();
-        if (provider != null) {
-            try {
-                return mRequestRecommendationCaller.getRecommendationResult(provider, request);
-            } catch (RemoteException | TimeoutException e) {
-                Log.w(TAG, "Failed to request a recommendation.", e);
-                // TODO(jjoslin): 12/15/16 - Keep track of failures.
+        final long token = Binder.clearCallingIdentity();
+        try {
+            final INetworkRecommendationProvider provider = getRecommendationProvider();
+            if (provider != null) {
+                try {
+                    return mRequestRecommendationCaller.getRecommendationResult(provider, request);
+                } catch (RemoteException | TimeoutException e) {
+                    Log.w(TAG, "Failed to request a recommendation.", e);
+                    // TODO(jjoslin): 12/15/16 - Keep track of failures.
+                }
             }
-        }
 
-        if (DBG) {
-            Log.d(TAG, "Returning the default network recommendation.");
-        }
+            if (DBG) {
+                Log.d(TAG, "Returning the default network recommendation.");
+            }
 
-        if (request != null && request.getCurrentSelectedConfig() != null) {
-            return RecommendationResult.createConnectRecommendation(
-                request.getCurrentSelectedConfig());
+            if (request != null && request.getCurrentSelectedConfig() != null) {
+                return RecommendationResult.createConnectRecommendation(
+                        request.getCurrentSelectedConfig());
+            }
+            return RecommendationResult.createDoNotConnectRecommendation();
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
-        return RecommendationResult.createDoNotConnectRecommendation();
     }
 
     @Override
     public boolean requestScores(NetworkKey[] networks) {
         mContext.enforceCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED, TAG);
-        final INetworkRecommendationProvider provider = getRecommendationProvider();
-        if (provider != null) {
-            try {
-                provider.requestScores(networks);
-                // TODO(jjoslin): 12/15/16 - Consider pushing null scores into the cache to prevent
-                // repeated requests for the same scores.
-                return true;
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed to request scores.", e);
-                // TODO(jjoslin): 12/15/16 - Keep track of failures.
+        final long token = Binder.clearCallingIdentity();
+        try {
+            final INetworkRecommendationProvider provider = getRecommendationProvider();
+            if (provider != null) {
+                try {
+                    provider.requestScores(networks);
+                    // TODO(jjoslin): 12/15/16 - Consider pushing null scores into the cache to
+                    // prevent repeated requests for the same scores.
+                    return true;
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Failed to request scores.", e);
+                    // TODO(jjoslin): 12/15/16 - Keep track of failures.
+                }
             }
+            return false;
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
-        return false;
     }
 
     @Override
