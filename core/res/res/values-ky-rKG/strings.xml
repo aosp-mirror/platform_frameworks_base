@@ -46,6 +46,8 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Туташууда көйгөй чыкты же MMI коду жараксыз."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Иш-аракет туруктуу терүү номерлери менен гана чектелет."</string>
+    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
+    <skip />
     <string name="serviceEnabled" msgid="8147278346414714315">"Кызмат иштетилди."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Кызмат төмөнкү үчүн иштетилди:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Кызмат өчүрүлдү."</string>
@@ -96,6 +98,10 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Үн/берилиштер кызматтары бөгөттөлдү."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Үн/SMS кызматтары бөгөттөлгөн."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Бардык үн/берилиштер/SMS кызматтары бөгөттөлдү."</string>
+    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
+    <skip />
+    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Peer TTY режимин FULL кылууну суранды"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Peer TTY режимин HCO кылууну суранды"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Peer TTY режимин VCO кылууну суранды"</string>
@@ -179,6 +185,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Администратордун колдонмосу жок болгондуктан, жумуш профили жок кылынды."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Жумуш профилинин администратор колдонмосу жок же бузулгандыктан, жумуш профилиңиз жана ага байланыштуу дайындар жок кылынган. Жардам алуу үчүн администраторуңузга кайрылыңыз."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Жумуш профилиңиз бул түзмөктө жеткиликтүү болбой калды."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Түзмөгүңүз тазаланат"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Администратор колдонмосунун курамдары жок же бузулгандыктан, аны колдонуу мүмкүн эмес. Түзмөгүңүз азыр тазаланат. Жардам алуу үчүн администраторуңузга кайрылыңыз."</string>
     <string name="me" msgid="6545696007631404292">"Мен"</string>
@@ -997,7 +1007,7 @@
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосу иштебей калып жатат"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> колдонмосу иштебей калып жатат"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"Колдонмону кайра ачуу"</string>
-    <string name="aerr_report" msgid="5371800241488400617">"Жооп пикир жөнөтүү"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"Пикир билдирүү"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Жабуу"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Түзмөк өчүрүлүп-күйгүзүлгүчө үнүн өчүрүү"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Күтүү"</string>

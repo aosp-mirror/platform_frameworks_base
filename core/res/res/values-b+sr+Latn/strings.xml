@@ -46,6 +46,8 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problemi sa vezom ili nevažeći MMI kôd."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Rad je ograničen samo na brojeve fiksnog biranja."</string>
+    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
+    <skip />
     <string name="serviceEnabled" msgid="8147278346414714315">"Usluga je omogućena."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Usluga je omogućena za:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Usluga je onemogućena."</string>
@@ -97,6 +99,10 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Glasovna usluga/usluga prenosa podataka su blokirane."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Glasovna usluga i SMS usluga su blokirane."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Sve glasovne i SMS usluge, kao i usluge prenosa podataka su blokirane."</string>
+    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
+    <skip />
+    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Korisnik zahteva POTPUN režim TTY"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Korisnik zahteva PRENOS ZVUKA za režim TTY"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Korisnik zahteva PRENOS GLASA za režim TTY"</string>
@@ -181,6 +187,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Poslovni profil je izbrisan jer nedostaje administratorska aplikacija."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Administratorska aplikacija poslovnog profila nedostaje ili je oštećena. Zbog toga su vaš poslovni profil i povezani podaci izbrisani. Obratite se administratoru za pomoć."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Profil za Work više nije dostupan na ovom uređaju."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Uređaj će biti obrisan"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Administratorskoj aplikaciji nedostaju neke komponente ili je oštećena i ne može da se koristi. Uređaj će sada biti obrisan. Obratite se administratoru za pomoć."</string>
     <string name="me" msgid="6545696007631404292">"Ja"</string>
@@ -371,7 +381,7 @@
     <string name="permlab_sim_communication" msgid="2935852302216852065">"slanje komandi na SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Omogućava aplikaciji da šalje komande SIM kartici. To je veoma opasno."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"snimanje fotografija i video snimaka"</string>
-    <string name="permdesc_camera" msgid="8497216524735535009">"Dozvoljava aplikaciji da snima slike i video snimke kamerom. Ova dozvola omogućava aplikaciji da u bilo kom trenutku koristi kameru bez vaše potvrde."</string>
+    <string name="permdesc_camera" msgid="8497216524735535009">"Dozvoljava aplikaciji da snima slike i video kamerom. Ova dozvola omogućava aplikaciji da u bilo kom trenutku koristi kameru bez vaše potvrde."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"kontrola vibracije"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Dozvoljava aplikaciji da kontroliše vibraciju."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"direktno pozivanje brojeva telefona"</string>

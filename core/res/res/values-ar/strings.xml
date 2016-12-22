@@ -46,6 +46,8 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"‏حدثت مشكلة في الاتصال أو أن كود MMI غير صحيح."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"تم تقييد التشغيل لأرقام الاتصال الثابت فقط."</string>
+    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
+    <skip />
     <string name="serviceEnabled" msgid="8147278346414714315">"تم تمكين الخدمة."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"تم تمكين الخدمة لـ:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"تم تعطيل الخدمة."</string>
@@ -100,6 +102,10 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"خدمات الصوت/البيانات محظورة."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"‏خدمات الصوت/الرسائل القصيرة SMS محظورة."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"‏جميع خدمات الصوت/البيانات/الرسائل القصيرة SMS محظورة."</string>
+    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
+    <skip />
+    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"‏طلب النظير وضع TTY الكامل"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"‏طلب النظير وضع TTY على HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"‏طلب النظير وضع TTY على VCO"</string>
@@ -187,6 +193,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"تم حذف الملف الشخصي للعمل نتيجة فقد تطبيق المشرف."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"تطبيق المشرف للملف الشخصي للعمل مفقود أو تالف لذا تم حذف الملف والبيانات ذات الصلة. اتصل بالمشرف للحصول على المساعدة."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"لم يعد ملفك الشخصي للعمل متاحًا على هذا الجهاز."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"سيتم محو بيانات جهازك."</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"تطبيق المشرف فاقد لمكونات أو تالف ويتعذر استخدامه. سيتم محو بيانات جهازك الآن. اتصل بالمشرف للحصول على المساعدة."</string>
     <string name="me" msgid="6545696007631404292">"أنا"</string>

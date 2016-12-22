@@ -46,6 +46,8 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Masalah sambungan atau kod MMI tidak sah"</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Pengendalian dihadkan kepada nombor dailan tetap sahaja."</string>
+    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
+    <skip />
     <string name="serviceEnabled" msgid="8147278346414714315">"Perkhidmatan telah didayakan."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Perkhidmatan didayakan untuk:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Perkhidmatan telah dilumpuhkan."</string>
@@ -96,6 +98,10 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Perkhidmatan suara/data disekat."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Perkhidmatan suara/SMS disekat."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Semua perkhidmatan suara/data/SMS disekat."</string>
+    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
+    <skip />
+    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Rakan meminta Mod TTY PENUH"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Rakan meminta Mod TTY HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Rakan meminta Mod TTY VCO"</string>
@@ -179,6 +185,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Profil kerja dipadam kerana apl pentadbir hilang."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Apl admin profil kerja hilang atau pun rosak. Akibatnya, profil kerja anda dan data yang berkaitan telah dipadam. Hubungi pentadbir anda untuk mendapatkan bantuan."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Profil kerja anda tidak tersedia pada peranti ini lagi."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Peranti anda akan dipadam"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Apl pentadbir kehilangan komponen atau rosak dan tidak boleh digunakan. Sekarang peranti anda akan dipadam. Hubungi pentadbir anda untuk mendapatkan bantuan."</string>
     <string name="me" msgid="6545696007631404292">"Saya"</string>

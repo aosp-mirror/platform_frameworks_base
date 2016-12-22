@@ -46,6 +46,8 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"कनेक्शन समस्या किंवा अवैध MMI कोड."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"कार्य फक्त निश्चित डायलिंग नंबरसाठी प्रतिबंधित आहे."</string>
+    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
+    <skip />
     <string name="serviceEnabled" msgid="8147278346414714315">"सेवा सक्षम केली."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"सेवा यासाठी सक्षम केली:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"सेवा अक्षम केली गेली आहे."</string>
@@ -96,6 +98,10 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"व्हॉइस/डेटा सेवा अवरोधित केल्या आहेत."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"व्हॉइस/SMS सेवा अवरोधित केल्या आहेत."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"सर्व व्हॉइस/डेटा/SMS सेवा अवरोधित केल्या आहेत."</string>
+    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
+    <skip />
+    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"समवयस्क व्यक्तीने TTY मोड पूर्ण ची विनंती केली"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"समवयस्क व्यक्तीने TTY मोड HCO ची विनंती केली"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"समवयस्क व्यक्तीने TTY मोड VCO ची विनंती केली"</string>
@@ -179,6 +185,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"गहाळ प्रशासन अॅपमुळे कार्य प्रोफाईल हटविले."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"कार्य प्रोफाईल प्रशासन अॅप गहाळ आहे किंवा दुषित आहे. यामुळे, आपले कार्य प्रोफाईल आणि संबंधित डेटा हटविला गेला आहे. सहाय्यासाठी आपल्या प्रशासकाशी संपर्क साधा."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"आपले कार्य प्रोफाईल या डिव्‍डाइसवर यापुढे उपलब्‍ध नाही."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"आपले डिव्हाइस मिटविले जाईल"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"प्रशासन अॅपमध्ये घटक गहाळ किंवा दूषित आहेत आणि वापरला जाऊ शकत नाही. आपले डिव्हाइस आता मिटविले जाईल. सहाय्यासाठी आपल्या प्रशासकाशी संपर्क साधा."</string>
     <string name="me" msgid="6545696007631404292">"मी"</string>

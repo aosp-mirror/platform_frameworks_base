@@ -46,6 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Sự cố kết nối hoặc mã MMI không hợp lệ."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Chỉ hạn chế thao tác đối với số quay số định sẵn."</string>
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Không thể thay đổi cài đặt chuyển tiếp cuộc gọi từ điện thoại của bạn khi bạn đang chuyển vùng."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Dịch vụ đã được bật."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Dịch vụ đã được bật cho:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Dịch vụ đã bị vô hiệu hóa."</string>
@@ -96,6 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Dịch vụ thoại/dữ liệu đã bị chặn."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Dịch vụ Thoại/SMS đã bị chặn."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Tất cả các dịch vụ thoại/dữ liệu/SMS đã bị chặn."</string>
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Không thể kết nối mạng"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Để cải thiện khả năng thu tín hiệu, hãy thử thay đổi loại được chọn tại Cài đặt &gt; Mạng di động &gt; Loại mạng ưa thích."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"TTY theo yêu cầu của thiết bị ngang hàng ở chế độ ĐẦY ĐỦ"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"TTY theo yêu cầu của thiết bị ngang hàng ở chế độ HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"TTY theo yêu cầu của thiết bị ngang hàng ở chế độ VCO"</string>
@@ -179,6 +182,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Đã xóa hồ sơ công việc do thiếu ứng dụng quản trị."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Ứng dụng quản trị hồ sơ công việc bị thiếu hoặc hỏng. Do vậy, hồ sơ công việc của bạn và dữ liệu liên quan đã bị xóa. Hãy liên hệ với quản trị viên để được trợ giúp."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Hồ sơ công việc của bạn không có sẵn trên thiết bị này nữa."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Thiết bị của bạn sẽ bị xóa"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Ứng dụng quản trị đang bị thiếu thành phần hoặc bị hỏng và không thể sử dụng được. Bây giờ, thiết bị của bạn sẽ bị xóa. Hãy liên hệ với quản trị viên của bạn để được trợ giúp."</string>
     <string name="me" msgid="6545696007631404292">"Tôi"</string>

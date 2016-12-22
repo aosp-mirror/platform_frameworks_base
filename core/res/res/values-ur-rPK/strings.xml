@@ -46,6 +46,8 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"‏کنکشن مسئلہ یا غلط MMI کوڈ۔"</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"آپریشن صرف متعین ڈائلنگ نمبرز تک محدود ہے۔"</string>
+    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
+    <skip />
     <string name="serviceEnabled" msgid="8147278346414714315">"سروس فعال کی گئی۔"</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"سروس فعال کی گئی برائے:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"سروس غیر فعال کر دی گئی ہے۔"</string>
@@ -96,6 +98,10 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"صوتی/ڈیٹا سروسز مسدود کر دی گئی ہیں۔"</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"‏وائس/SMS سروسز مسدود ہیں۔"</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"‏سبھی صوتی/ڈیٹا/SMS سروسز مسدود کر دی گئی ہیں۔"</string>
+    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
+    <skip />
+    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"‏ہمسر نے TTY وضع مکمل کی درخواست کی"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"‏ہمسر نے TTY وضع HCO کی درخواست کی"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"‏ہمسر نے TTY وضع VCO کی درخواست کی"</string>
@@ -179,6 +185,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"گمشدہ منتظم ایپ کی وجہ سے دفتری پروفائل حذف کر دیا گیا۔"</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"دفتری پروفائل کی منتظم ایپ یا تو غائب ہے یا خراب ہے۔ اس کی وجہ سے، آپ کا دفتری پروفائل اور متعلقہ ڈیٹا حذف کر دیے گئے ہیں۔ مدد کیلئے اپنے منتظم سے رابطہ کریں۔"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"آپ کا دفتری پروفائل اس آلہ پر مزید دستیاب نہیں ہے۔"</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"آپ کا آلہ صاف کر دیا جائے گا"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"منتظم کی ایپ میں گمشدہ اجزاء ہیں یا وہ خراب ہے اور اسے استعمال نہیں کیا جا سکتا ہے۔ آپ کے آلہ کو اب صاف کر دیا جائے گا۔ مدد کیلئے اپنے منتظم سے رابطہ کریں۔"</string>
     <string name="me" msgid="6545696007631404292">"میں"</string>

@@ -46,6 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN१"</string>
     <string name="mmiError" msgid="5154499457739052907">"जडान समस्या वा अमान्य MMI कोड।"</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"अपरेशन निश्चित डायल नम्बरहरूको लागि मात्र प्रतिबन्धित छ।"</string>
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"तपाईं रोमिङमा हुनुहुँदा तपाईंको फोनबाट कल फर्वार्ड गर्ने सम्बन्धी सेटिङहरू परिवर्तन गर्न सकिँदैन।"</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"सेवा सक्षम पारियो।"</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"निम्न उल्लेखितको लागि सेवा सक्षम पारियो:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"सेवा असक्षम पारिएको छ।"</string>
@@ -96,6 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"भ्वाइस/डेटा सेवाहरू रोकिएका छन्।"</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"आवाज/SMS सेवाहरू बन्द छन्।"</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"सबै भ्वाइस/डेटा/SMS सेवाहरू ब्लक भएका छन्।"</string>
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"नेटवर्कमाथि पहुँच राख्न सकिँदैन"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"सेलुलरको रिसेप्सनलाई सुधार्न सेटिङहरू &gt; सेलुलर नेटवर्कहरू &gt; नेटवर्कको रुचाइएको प्रकारमा गई चयन गरिएको प्रकार परिवर्तन गरी हेर्नुहोस्।"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"सहकर्मी अनुरोध गरियो। TTY मोड पूर्ण"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"सहकर्मी अनुरोध गरियो। TTY मोड HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"सहकर्मी अनुरोध गरियो। TTY मोड VCO"</string>
@@ -179,6 +182,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"प्रशासन अनुप्रयोग हराएको कारण कार्य प्रोफाइल मेटियो।"</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"कार्य प्रोफाइल व्यवस्थापक अनुप्रयोग या त हराएको या त बिग्रेको छ। फलस्वरूप, तपाईँको कार्य प्रोफाइल र सम्बन्धित डेटा मेटिएको छ। सहयोगको लागि तपाईँको व्यवस्थापकसँग सम्पर्क गर्नुहोस्।"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"यस यन्त्रमा तपाईँको कार्य प्रोफाइल अब उपलब्ध छैन।"</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"तपाईंको यन्त्र मेटिनेछ"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"व्यवस्थापक अनुप्रयोगमा कम्पोनेन्टहरू या त हराएको वा भ्रष्ट छन्, र यसैले प्रयोग गर्न सकिँदैन। तपाईंको यन्त्र अब मेटिनेछ। सहयोगको लागि आफ्नो व्यवस्थापकलाई सम्पर्क गर्नुहोस्।"</string>
     <string name="me" msgid="6545696007631404292">"मलाई"</string>

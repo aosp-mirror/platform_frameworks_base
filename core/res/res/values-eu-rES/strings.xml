@@ -46,6 +46,8 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Konexio-arazoren bat gertatu da edo MMI kodea baliogabea da."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Eragiketa markatze finkoko zenbakietara murriztua dago."</string>
+    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
+    <skip />
     <string name="serviceEnabled" msgid="8147278346414714315">"Zerbitzua gaitu da."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Zerbitzua honetarako gaitu da:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Zerbitzua desgaitu da."</string>
@@ -96,6 +98,10 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Ahots- eta datu-zerbitzuak blokeatuta daude."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Ahots eta SMS zerbitzuak blokeatuta daude."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Ahotsaren, datuen eta SMSen zerbitzuak blokeatuta daude."</string>
+    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
+    <skip />
+    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Beste gailuak TTY osagarria FULL moduan erabiltzea eskatu du"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Beste gailuak TTY osagarria HCO moduan erabiltzea eskatu du"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Beste gailuak TTY osagarria VCO moduan erabiltzea eskatu du"</string>
@@ -179,6 +185,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Laneko profila ezabatu egin da hura administratzeko aplikazioa falta delako."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Laneko profila administratzeko aplikazioa falta da edo hondatuta dago. Ondorioz, laneko profila eta horrekin erlazionatutako datuak ezabatu egin dira. Laguntza lortzeko, jarri administratzailearekin harremanetan."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Work profila ez dago erabilgarri gailu honetan."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Gailuko datuak ezabatu egingo dira"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Administrazio-aplikazioaren osagai batzuk falta dira edo aplikazioa hondatuta dago eta ezin da erabili. Gailuko datuak ezabatu egingo dira. Laguntza lortzeko, jarri administratzailearekin harremanetan."</string>
     <string name="me" msgid="6545696007631404292">"Ni"</string>
