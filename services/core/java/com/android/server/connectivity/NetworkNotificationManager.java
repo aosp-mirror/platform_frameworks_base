@@ -221,11 +221,10 @@ public class NetworkNotificationManager {
     }
 
     public void clearNotification(int id) {
-        final String tag = tagFor(id);
         if (mNotificationTypeMap.indexOfKey(id) < 0) {
-            Slog.e(TAG, "cannot clear unknown notification with tag=" + tag);
             return;
         }
+        final String tag = tagFor(id);
         final int eventId = mNotificationTypeMap.get(id);
         if (DBG) {
             Slog.d(TAG, String.format("clearing notification tag=%s event=%s", tag,
