@@ -4418,6 +4418,22 @@ public final class Settings {
         public static final String STATUSBAR_BATTERY_BAR_COLOR = "statusbar_battery_bar_color";
 
         /**
+  	     * @hide
+         */
+        public static final String STATUSBAR_BATTERY_BAR_ENABLE_CHARGING_COLOR = "battery_bar_enable_charging_color";
+
+        /**
+         * @hide
+         */
+        public static final String STATUSBAR_BATTERY_BAR_BLEND_COLORS = "battery_bar_blend_color";
+
+        /**
+         * @hide
+         */
+        public static final String STATUSBAR_BATTERY_BAR_BLEND_COLORS_REVERSE = "battery_bar_blend_color_reverse";
+
+        /**
+         * Settings for clock font style
          * @hide
          */
         public static final String STATUSBAR_BATTERY_BAR_CHARGING_COLOR = "statusbar_battery_bar_charging_color";

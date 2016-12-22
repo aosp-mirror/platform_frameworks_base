@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
+import android.graphics.Color;
 import android.graphics.drawable.Animatable;
 import android.os.BatteryManager;
 import android.os.Handler;
@@ -56,6 +57,9 @@ public class BatteryBar extends RelativeLayout implements Animatable {
     private int mColor = 0xFFFFFFFF;
     private int mChargingColor = 0xFFFFFFFF;
     private int mBatteryLowColor = 0xFFFFFFFF;
+    private boolean mUseChargingColor = true;
+    private boolean mBlendColors = false;
+    private boolean mBlendColorsReversed = false;
 
     private Handler mHandler = new Handler();
 
@@ -92,6 +96,17 @@ public class BatteryBar extends RelativeLayout implements Animatable {
             resolver.registerContentObserver(
                     Settings.System.getUriFor(Settings.System.STATUSBAR_BATTERY_BAR_ANIMATE),
                     false, this);
+            resolver.registerContentObserver(
+                    Settings.System.getUriFor(
+                            Settings.System.STATUSBAR_BATTERY_BAR_ENABLE_CHARGING_COLOR), false,
+                    this);
+            resolver.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.STATUSBAR_BATTERY_BAR_BLEND_COLORS),
+                    false, this);
+            resolver.registerContentObserver(
+                    Settings.System.getUriFor(
+                            Settings.System.STATUSBAR_BATTERY_BAR_BLEND_COLORS_REVERSE), false,
+                    this);
         }
 
         @Override
@@ -208,15 +223,22 @@ public class BatteryBar extends RelativeLayout implements Animatable {
     private void updateSettings() {
         ContentResolver resolver = getContext().getContentResolver();
 
-        mColor = Settings.System.getInt(resolver, Settings.System.STATUSBAR_BATTERY_BAR_COLOR,
-                0xFFFFFFFF);
-        mChargingColor = Settings.System.getInt(resolver, Settings.System.STATUSBAR_BATTERY_BAR_CHARGING_COLOR,
-                0xFFFFFFFF);
-        mBatteryLowColor = Settings.System.getInt(resolver, Settings.System.STATUSBAR_BATTERY_BAR_BATTERY_LOW_COLOR,
-                0xFFFFFFFF);
+        mColor = Settings.System.getInt(resolver,
+                Settings.System.STATUSBAR_BATTERY_BAR_COLOR, 0xFFFFFFFF);
+        mChargingColor = Settings.System.getInt(resolver,
+                Settings.System.STATUSBAR_BATTERY_BAR_CHARGING_COLOR, 0xFFFFFFFF);
+        mBatteryLowColor = Settings.System.getInt(resolver,
+                Settings.System.STATUSBAR_BATTERY_BAR_BATTERY_LOW_COLOR, 0xFFFFFFFF);
 
         shouldAnimateCharging = Settings.System.getInt(resolver,
                 Settings.System.STATUSBAR_BATTERY_BAR_ANIMATE, 0) == 1;
+
+        mUseChargingColor = Settings.System.getInt(resolver,
+                Settings.System.STATUSBAR_BATTERY_BAR_ENABLE_CHARGING_COLOR, 1) == 1;
+        mBlendColors = Settings.System.getInt(resolver,
+                Settings.System.STATUSBAR_BATTERY_BAR_BLEND_COLORS, 0) == 1;
+        mBlendColorsReversed = Settings.System.getInt(resolver,
+                Settings.System.STATUSBAR_BATTERY_BAR_BLEND_COLORS_REVERSE, 0) == 1;
 
         if (mBatteryCharging && mBatteryLevel < 100 && shouldAnimateCharging) {
             start();
@@ -224,8 +246,6 @@ public class BatteryBar extends RelativeLayout implements Animatable {
             stop();
         }
         setProgress(mBatteryLevel);
-
-        mCharger.setBackgroundColor(mChargingColor);
     }
 
     private void setProgress(int n) {
@@ -245,8 +265,9 @@ public class BatteryBar extends RelativeLayout implements Animatable {
         }
 
         // Update color
-        mBatteryBar.setBackgroundColor(mBatteryCharging ? mChargingColor :
-                (n > BATTERY_LOW_VALUE ? mColor : mBatteryLowColor));
+        int color = getColorForPercent(n);
+        mBatteryBar.setBackgroundColor(color);
+        mCharger.setBackgroundColor(color);
 
     }
 
@@ -285,6 +306,43 @@ public class BatteryBar extends RelativeLayout implements Animatable {
     @Override
     public boolean isRunning() {
         return isAnimating;
+    }
+
+    private int getColorForPercent(int percentage) {
+        if (mBatteryCharging && mUseChargingColor) {
+            return mChargingColor;
+        } else if (mBlendColors) {
+            float[] newColor = new float[3];
+            float[] empty = new float[3];
+            float[] full = new float[3];
+            Color.colorToHSV(mColor, full);
+            int fullAlpha = Color.alpha(mColor);
+            Color.colorToHSV(mBatteryLowColor, empty);
+            int emptyAlpha = Color.alpha(mBatteryLowColor);
+            float blendFactor = percentage/100f;
+            if (mBlendColorsReversed) {
+                if (empty[0] < full[0]) {
+                    empty[0] += 360f;
+                }
+                newColor[0] = empty[0] - (empty[0]-full[0])*blendFactor;
+            } else {
+                if (empty[0] > full[0]) {
+                    full[0] += 360f;
+                }
+                newColor[0] = empty[0] + (full[0]-empty[0])*blendFactor;
+            }
+            if (newColor[0] > 360f) {
+                newColor[0] -= 360f;
+            } else if (newColor[0] < 0) {
+                newColor[0] += 360f;
+            }
+            newColor[1] = empty[1] + ((full[1]-empty[1])*blendFactor);
+            newColor[2] = empty[2] + ((full[2]-empty[2])*blendFactor);
+            int newAlpha = (int) (emptyAlpha + ((fullAlpha-emptyAlpha)*blendFactor));
+            return Color.HSVToColor(newAlpha, newColor);
+        } else {
+            return percentage > BATTERY_LOW_VALUE ? mColor : mBatteryLowColor;
+        }
     }
 
 }
