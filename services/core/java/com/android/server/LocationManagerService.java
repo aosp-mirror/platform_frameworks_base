@@ -87,6 +87,8 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
 import android.provider.Settings;
+import android.text.TextUtils;
+import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 
@@ -2552,9 +2554,22 @@ public class LocationManagerService extends ILocationManager.Stub {
             if (mockProvider == null) {
                 throw new IllegalArgumentException("Provider \"" + provider + "\" unknown");
             }
+
+            // Ensure that the location is marked as being mock. There's some logic to do this in
+            // handleLocationChanged(), but it fails if loc has the wrong provider (bug 33091107).
+            Location mock = new Location(loc);
+            mock.setIsFromMockProvider(true);
+
+            if (!TextUtils.isEmpty(loc.getProvider()) && !provider.equals(loc.getProvider())) {
+                // The location has an explicit provider that is different from the mock provider
+                // name. The caller may be trying to fool us via bug 33091107.
+                EventLog.writeEvent(0x534e4554, "33091107", Binder.getCallingUid(),
+                        provider + "!=" + loc.getProvider());
+            }
+
             // clear calling identity so INSTALL_LOCATION_PROVIDER permission is not required
             long identity = Binder.clearCallingIdentity();
-            mockProvider.setLocation(loc);
+            mockProvider.setLocation(mock);
             Binder.restoreCallingIdentity(identity);
         }
     }
