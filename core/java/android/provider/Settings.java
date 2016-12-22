@@ -7594,6 +7594,13 @@ public final class Settings {
                "wimax_networks_available_notification_on";
 
        /**
+        * Whether we support connecting to Carrier Networks.
+        * @hide
+        **/
+        public static final String WIFI_CONNECT_CARRIER_NETWORKS =
+               "wifi_connect_carrier_networks";
+
+       /**
         * Delay (in seconds) before repeating the Wi-Fi networks available notification.
         * Connecting to a network will reset the timer.
         */
