@@ -159,13 +159,21 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                     if (DBG) Log.d(TAG, "No active scorers available.");
                     unbindFromScoringServiceIfNeeded();
                 } else if (activeScorer.packageName.equals(scorerPackageName)) {
+                    // The active scoring service changed in some way.
                     if (DBG) {
                         Log.d(TAG, "Possible change to the active scorer: "
                             + activeScorer.packageName);
                     }
-                    // The scoring service changed in some way.
                     if (forceUnbind) {
                         unbindFromScoringServiceIfNeeded();
+                    }
+                    bindToScoringServiceIfNeeded(activeScorer);
+                } else {
+                    // One of the scoring apps on the device has changed and we may no longer be
+                    // bound to the correct scoring app. The logic in bindToScoringServiceIfNeeded()
+                    // will sort that out to leave us bound to the most recent active scorer.
+                    if (DBG) {
+                        Log.d(TAG, "Binding to " + activeScorer.packageName + " if needed.");
                     }
                     bindToScoringServiceIfNeeded(activeScorer);
                 }
