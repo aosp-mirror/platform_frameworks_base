@@ -29,9 +29,21 @@ public class MtpServer implements Runnable {
         System.loadLibrary("media_jni");
     }
 
-    public MtpServer(MtpDatabase database, boolean usePtp) {
+    public MtpServer(
+            MtpDatabase database,
+            boolean usePtp,
+            String deviceInfoManufacturer,
+            String deviceInfoModel,
+            String deviceInfoDeviceVersion,
+            String deviceInfoSerialNumber) {
         mDatabase = database;
-        native_setup(database, usePtp);
+        native_setup(
+                database,
+                usePtp,
+                deviceInfoManufacturer,
+                deviceInfoModel,
+                deviceInfoDeviceVersion,
+                deviceInfoSerialNumber);
         database.setServer(this);
     }
 
@@ -72,7 +84,13 @@ public class MtpServer implements Runnable {
     }
 
     public static native final void native_configure(boolean usePtp);
-    private native final void native_setup(MtpDatabase database, boolean usePtp);
+    private native final void native_setup(
+            MtpDatabase database,
+            boolean usePtp,
+            String deviceInfoManufacturer,
+            String deviceInfoModel,
+            String deviceInfoDeviceVersion,
+            String deviceInfoSerialNumber);
     private native final void native_run();
     private native final void native_cleanup();
     private native final void native_send_object_added(int handle);
