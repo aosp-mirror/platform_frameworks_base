@@ -345,7 +345,7 @@
     <string name="description_target_search" msgid="3091587249776033139">"खोजें"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> के लिए ऊपर स्‍लाइड करें."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> के लिए बाएं स्‍लाइड करें."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"आपको आपके द्वारा निर्दिष्ट किए गए अलार्म, रिमाइंडर्स, ईवेंट और कॉलर को छोड़कर अन्य ध्वनियों और कंपनों के द्वारा परेशान नहीं किया जाएगा."</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"आपको आपके द्वारा निर्दिष्ट किए गए अलार्म, रिमाइंडर्स, इवेंट और कॉलर को छोड़कर अन्य ध्वनियों और कंपनों के द्वारा परेशान नहीं किया जाएगा."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"कस्टमाइज़ करें"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"इससे अलार्म, संगीत, वीडियो और गेम सहित सभी ध्‍वनियां और कंपन अवरुद्ध हो जाते हैं. आप अभी भी फ़ोन काॅल कर सकेंगे."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"इससे अलार्म, संगीत, वीडियो और गेम सहित सभी ध्वनियां और कंपन अवरुद्ध हो जाते हैं."</string>
@@ -408,9 +408,20 @@
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"डिवाइस को मॉनीटर करना"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"प्रोफ़ाइल को मॉनीटर करना"</string>
     <string name="monitoring_title" msgid="169206259253048106">"नेटवर्क को मॉनीटर करना"</string>
+    <!-- no translation found for monitoring_subtitle_vpn (876537538087857300) -->
+    <skip />
+    <!-- no translation found for monitoring_subtitle_network_logging (5569072711320784030) -->
+    <skip />
     <string name="disable_vpn" msgid="4435534311510272506">"VPN अक्षम करें"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN डिस्‍कनेक्‍ट करें"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"आपका डिवाइस <xliff:g id="ORGANIZATION">%1$s</xliff:g> के द्वारा प्रबंधित है.\n\nआपका नियंत्रक सेटिंग, कॉर्पोरेट ऐक्‍सेस, ऐप्स, आपके डिवाइस से संबद्ध डेटा और आपके डिवाइस की स्‍थान जानकारी की निगरानी और उसका प्रबंधन कर सकता है. अधिक जानकारी के लिए, अपने नियंत्रक से संपर्क करें."</string>
+    <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"आप <xliff:g id="VPN_APP">%1$s</xliff:g> से कनेक्‍ट हैं, जो ईमेल, ऐप्लिकेशन और वेबसाइट सहित आपकी नेटवर्क गतिविधि को मॉनिटर कर सकता है."</string>
+    <!-- no translation found for monitoring_description_vpn_settings_separator (1933186756733474388) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_settings (8869300202410505143) -->
+    <skip />
+    <!-- no translation found for monitoring_description_network_logging (3901006351911787915) -->
+    <skip />
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"आपने किसी ऐप को VPN कनेक्‍शन सेट करने की अनुमति दी है.\n\nयह ऐप ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपके डिवाइस और नेटवर्क की गतिविधि की निगरानी कर सकता है."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"आपका डिवाइस <xliff:g id="ORGANIZATION">%1$s</xliff:g> के द्वारा प्रबंधित है.\n\nआपका नियंत्रक सेटिंग, कॉर्पोरेट ऐक्‍सेस, ऐप्स, आपके डिवाइस से संबद्ध डेटा और आपके डिवाइस की स्‍थान जानकारी की निगरानी और उसका प्रबंधन कर सकता है.\n\nआप एक VPN से कनेक्‍ट हैं, जो ईमेल, ऐप्‍स और वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी कर सकता है.\n\nअधिक जानकारी के लिए, अपने नियंत्रक से संपर्क करें."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"आपकी कार्य प्रोफ़ाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> के द्वारा प्रबंधित है.\n\nआपका नियंत्रक ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी करने में सक्षम है.\n\nअधिक जानकारी के लिए, अपने नियंत्रक से संपर्क करें.\n\nआप एक ऐसे VPN से भी कनेक्‍ट हैं, जो आपकी नेटवर्क गतिविधि की निगरानी कर सकता है."</string>

@@ -64,7 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"Համակարգչի RSA-ի բանալի մատնահետքն է`\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Միշտ թույլատրել այս համակարգչից"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB վրիպազերծումը արգելված է"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Սարքի վրա այս պահին մուտք գործած օգտվողը չի կարող միացնել USB վրիպազերծումը: Այս գործառույթից օգտվելու համար մուտք գործեք ադմինիստրատորի հաշվով:"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Սարքի վրա այս պահին մուտք գործած օգտատերը չի կարող միացնել USB վրիպազերծումը: Այս գործառույթից օգտվելու համար մուտք գործեք ադմինիստրատորի հաշվով:"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Խոշորացնել` էկրանը լցնելու համար"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Ձգել` էկրանը լցնելու համար"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Պահում է էկրանի հանույթը…"</string>
@@ -185,7 +185,7 @@
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Կարգավորումներ"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Համատեսք"</string>
     <string name="accessibility_desc_close" msgid="7479755364962766729">"Փակել"</string>
-    <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Օգտվող <xliff:g id="USER">%s</xliff:g>:"</string>
+    <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Օտատեր <xliff:g id="USER">%s</xliff:g>:"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>:"</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wifi-ն անջատվեց:"</string>
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"Wifi-ը միացավ:"</string>
@@ -286,8 +286,8 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Կարգավորումներ"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"Ժամանակը"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Ես"</string>
-    <string name="quick_settings_user_title" msgid="4467690427642392403">"Օգտվող"</string>
-    <string name="quick_settings_user_new_user" msgid="9030521362023479778">"Նոր օգտվող"</string>
+    <string name="quick_settings_user_title" msgid="4467690427642392403">"Օտատեր"</string>
+    <string name="quick_settings_user_new_user" msgid="9030521362023479778">"Նոր օգտատեր"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Միացված չէ"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Ցանց չկա"</string>
@@ -367,11 +367,11 @@
     <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Արագ լիցքավորում (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>՝ մինչև ավարտ)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Դանդաղ լիցքավորում (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>՝ մինչև ավարտ)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Անջատել օգտվողին"</string>
-    <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Փոխել օգտվողին. ներկայիս օգտվողն է՝ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
-    <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Ընթացիկ օգտվողը՝ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
+    <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Փոխել օգտատիրոջը. ներկայիս օգտատերն է՝ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
+    <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Ընթացիկ օգտատերը՝ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Ցույց տալ դիտարկումը"</string>
-    <string name="user_add_user" msgid="5110251524486079492">"Ավելացնել օգտվող"</string>
-    <string name="user_new_user_name" msgid="426540612051178753">"Նոր օգտվող"</string>
+    <string name="user_add_user" msgid="5110251524486079492">"Ավելացնել օգտատեր"</string>
+    <string name="user_new_user_name" msgid="426540612051178753">"Նոր օգտատեր"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Հյուր"</string>
     <string name="guest_new_guest" msgid="600537543078847803">"Հյուր ավելացնել"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"Հեռացնել հյուրին"</string>
@@ -385,13 +385,13 @@
     <string name="guest_notification_title" msgid="1585278533840603063">"Հյուր"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"Հավելվածները և տվյալները ջնջելու համար հեռացրեք հյուրին"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"ՀԵՌԱՑՆԵԼ ՀՅՈՒՐԻՆ"</string>
-    <string name="user_logout_notification_title" msgid="1453960926437240727">"Ընթացիկ օգտվողի դուրս գրում"</string>
-    <string name="user_logout_notification_text" msgid="3350262809611876284">"Ընթացիկ օգտվողի դուրս գրում"</string>
+    <string name="user_logout_notification_title" msgid="1453960926437240727">"Ընթացիկ օգտատիրոջ դուրս գրում"</string>
+    <string name="user_logout_notification_text" msgid="3350262809611876284">"Ընթացիկ օգտատիրոջ դուրս գրում"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ԸՆԹԱՑԻԿ ՕԳՏՎՈՂԻ ԴՈՒՐՍ ԳՐՈՒՄ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Ավելացնե՞լ նոր պրոֆիլ:"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"Երբ նոր օգտվող եք ավելացնում, նա պետք է կարգավորի իր պրոֆիլը:\n\nՑանկացած օգտվող կարող է թարմացնել հավելվածները մյուս բոլոր հաշիվների համար:"</string>
-    <string name="user_remove_user_title" msgid="4681256956076895559">"Հեռացնե՞լ օգտվողին:"</string>
-    <string name="user_remove_user_message" msgid="1453218013959498039">"Այս օգտվողի բոլոր հավելվածներն ու տվյալները կջնջվեն:"</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"Երբ նոր օգտատեր եք ավելացնում, նա պետք է կարգավորի իր պրոֆիլը:\n\nՑանկացած օգտատեր կարող է թարմացնել հավելվածները մյուս բոլոր հաշիվների համար:"</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"Հեռացնե՞լ օգտատիրոջը:"</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"Այս օգտատիրոջ բոլոր հավելվածներն ու տվյալները կջնջվեն:"</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Հեռացնել"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Մարտկոցի տնտեսումը միացված է"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Նվազեցնում է ծանրաբեռնվածությունը և ֆոնային տվյալները"</string>
@@ -408,9 +408,20 @@
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Սարքի մշտադիտարկում"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Պրոֆիլի վերահսկում"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Ցանցի մշտադիտարկում"</string>
+    <!-- no translation found for monitoring_subtitle_vpn (876537538087857300) -->
+    <skip />
+    <!-- no translation found for monitoring_subtitle_network_logging (5569072711320784030) -->
+    <skip />
     <string name="disable_vpn" msgid="4435534311510272506">"Անջատել VPN-ը"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Անջատել VPN-ը"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Սարքի կառավարիչն է՝ <xliff:g id="ORGANIZATION">%1$s</xliff:g>:\n\nԱդմինիստրատորը կարող է վերահսկել և կառավարել կարգավորումները, կորպորատիվ հաշիվը, հավելվածները, սարքի հետ առնչվող և սարքի տեղադրության տվյալները: Լրացուցիչ տեղեկությունների համար դիմեք ադմինիստրատորին:"</string>
+    <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Դուք կապակցված եք <xliff:g id="VPN_APP">%1$s</xliff:g> հավելվածին, որը կարող է վերահսկել ձեր ցանցային գործողությունը, այդ թվում նաև էլփոստը, հավելվածները և կայքերը:"</string>
+    <!-- no translation found for monitoring_description_vpn_settings_separator (1933186756733474388) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_settings (8869300202410505143) -->
+    <skip />
+    <!-- no translation found for monitoring_description_network_logging (3901006351911787915) -->
+    <skip />
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Ինչ-որ հավելվածի թույլ եք տվել հաստատել VPN կապակցում:\n\nԱյդ հավելվածը կարող է վերահսկել ձեր սարքի և ցանցի գործունեությունը, այդ թվում նաև էլփոստի հաշիվները, հավելվածները և կայքերը:"</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Սարքի կառավարիչն է՝ <xliff:g id="ORGANIZATION">%1$s</xliff:g>:\n\nԱդմինիստրատորը կարող է վերահսկել և կառավարել կարգավորումները, կորպորատիվ հաշիվը, հավելվածները, սարքի հետ առնչվող և սարքի տեղադրության տվյալները:\n\nՆաև ունեք VPN կապակցում, ինչը կարող է վերահսկել ձեր ցանցի գործունեությունը, այդ թվում նաև՝ էլեկտրոնային նամակները, հավելվածները և կայքերը:\n\nԼրացուցիչ տեղեկությունների համար դիմեք ադմինիստրատորին:"</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Աշխատանքային պրոֆիլի կառավարիչն է՝ <xliff:g id="ORGANIZATION">%1$s</xliff:g>:\n\nԱդմինիստրատորը կարող է վերահսկել ցանցում ունեցած գործունեությունը, այդ թվում նաև էլփոստի հաշիվները, հավելվածները և կայքերը:\n\nԼրացուցիչ տեղեկությունների համար դիմեք ադմինիստրատորին:\n\nՆաև ունեք VPN կապակցում, ինչը կարող է վերահսկել ձեր ցանցում կատարած գործողությունները:"</string>
@@ -424,7 +435,7 @@
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Սարքը կմնա արգելափակված՝ մինչև ձեռքով չբացեք"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Ավելի արագ ստացեք ծանուցումները"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Տեսեք դրանք մինչև ապակողպելը"</string>
-    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Ոչ, շնորհակալություն"</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Ոչ"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Կարգավորել"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"Ավարտել"</string>
@@ -433,7 +444,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Էկրանն ամրացված է"</string>
     <string name="screen_pinning_description" msgid="7238941806855968768">"Էկրանը կմնա տեսադաշտում, մինչև այն ապամրացնեք: Ապամրացնելու համար հպեք և պահեք Հետ կոճակը:"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Եղավ"</string>
-    <string name="screen_pinning_negative" msgid="3741602308343880268">"Ոչ, շնորհակալություն"</string>
+    <string name="screen_pinning_negative" msgid="3741602308343880268">"Ոչ"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Թաքցնե՞լ <xliff:g id="TILE_LABEL">%1$s</xliff:g>-ը:"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Այն դարձյալ կհայտնվի, երբ նորից միացնեք կարգավորումներում:"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Թաքցնել"</string>
@@ -483,7 +494,7 @@
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Թեժ կետ"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Աշխատանքային պրոֆիլ"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Զվարճանք մեկ՝ որոշակի մարդու համար"</string>
-    <string name="tuner_warning" msgid="8730648121973575701">"Համակարգի ՕՄ-ի ընդունիչը հնարավորություն է տալիս հարմարեցնել Android-ի օգտվողի միջերեսը: Այս փորձնական գործառույթները կարող են հետագա թողարկումների մեջ փոփոխվել, խափանվել կամ ընդհանրապես չհայտնվել: Եթե շարունակում եք, զգուշացեք:"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Համակարգի ՕՄ-ի ընդունիչը հնարավորություն է տալիս հարմարեցնել Android-ի օգտատիրոջ միջերեսը: Այս փորձնական գործառույթները կարող են հետագա թողարկումների մեջ փոփոխվել, խափանվել կամ ընդհանրապես չհայտնվել: Եթե շարունակում եք, զգուշացեք:"</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"Այս փորձնական գործառույթները կարող են հետագա թողարկումների մեջ փոփոխվել, խափանվել կամ ընդհանրապես չհայտնվել: Եթե շարունակում եք, զգուշացեք:"</string>
     <string name="got_it" msgid="2239653834387972602">"Եղավ"</string>
     <string name="tuner_toast" msgid="603429811084428439">"Համակարգի ՕՄ-ի ընդունիչը ավելացվել է կարգավորումներին"</string>

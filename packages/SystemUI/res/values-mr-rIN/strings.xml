@@ -408,9 +408,20 @@
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"डिव्हाइस परीक्षण"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"प्रोफाईल परीक्षण"</string>
     <string name="monitoring_title" msgid="169206259253048106">"नेटवर्क परीक्षण"</string>
+    <!-- no translation found for monitoring_subtitle_vpn (876537538087857300) -->
+    <skip />
+    <!-- no translation found for monitoring_subtitle_network_logging (5569072711320784030) -->
+    <skip />
     <string name="disable_vpn" msgid="4435534311510272506">"VPN अक्षम करा"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN डिस्कनेक्ट करा"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"आपले डिव्हाइस <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारे व्यवस्थापित केलेले आहे.\n\nआपला प्रशासक आपल्या डिव्हाइसशी संबंधित सेटिंग्ज, कॉर्पोरेट प्रवेश, अॅप्स, डेटा आणि आपल्या डिव्हाइसच्या स्थान माहितीचे परीक्षण करू शकतो. अधिक माहितीसाठी, आपल्या प्रशासकाशी संपर्क साधा."</string>
+    <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"आपण <xliff:g id="VPN_APP">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जो ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या नेटवर्क क्रियाकलापाचे परीक्षण करू शकतो."</string>
+    <!-- no translation found for monitoring_description_vpn_settings_separator (1933186756733474388) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_settings (8869300202410505143) -->
+    <skip />
+    <!-- no translation found for monitoring_description_network_logging (3901006351911787915) -->
+    <skip />
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"आपण VPN कनेक्शन सेट करण्यासाठी अ‍ॅपला परवानगी दिली.\n\nहा अ‍ॅप ईमेल, अ‍ॅप्स आणि वेबसाइटसह, आपल्या डिव्हाइस आणि नेटवर्क क्रियाकलापाचे परीक्षण करू शकतो."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"आपले डिव्हाइस <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारे व्यवस्थापित केलेले आहे.\n\nआपला प्रशासक आपल्या डिव्हाइसशी संबंधित सेटिंग्ज, कॉर्पोरेट प्रवेश, अॅप्स, डेटा आणि आपल्या डिव्हाइसच्या स्थान माहितीचे परीक्षण करू शकतो. अधिक माहितीसाठी, आपल्या प्रशासकाशी संपर्क साधा.\n\nआपण एका VPN शी देखील कनेक्ट केलेले आहे जो आपल्या ईमेल, अॅप्स आणि वेबसाइटसह आपल्या वैयक्तिक नेटवर्क क्रियाकलापाचे देखील परीक्षण करू शकतो.\n\nअधिक माहितीसाठी, आपल्या प्रशासकाशी संपर्क साधा."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"आपले कार्य प्रोफाईल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारे व्यवस्थापित केले आहे.\n\nआपला प्रशासक ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्या नेटवर्क क्रियाकलापाचे परीक्षण करण्यास सक्षम आहे.\n\nअधिक माहितीसाठी, आपल्या प्रशासकाशी संपर्क साधा.\n\nआपण एका VPN शी देखील कनेक्ट केले आहे, जो आपल्या नेटवर्क क्रियाकलापाचे परीक्षण करू शकतो."</string>
@@ -483,8 +494,8 @@
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"हॉटस्पॉट"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"कार्य प्रोफाईल"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"सर्वांसाठी नाही तर काहींसाठी मजेदार असू शकते"</string>
-    <string name="tuner_warning" msgid="8730648121973575701">"सिस्टीम UI ट्यूनर आपल्‍याला Android वापरकर्ता इंटरफेस ट्विक आणि सानुकूल करण्‍याचे अनेक प्रकार देते. ही प्रयोगात्मक वैशिष्‍ट्ये बदलू शकतात, खंडित होऊ शकतात किंवा भविष्‍यातील रिलीझ मध्‍ये कदाचित दिसणार नाहीत. सावधगिरी बाळगून पुढे सुरु ठेवा."</string>
-    <string name="tuner_persistent_warning" msgid="8597333795565621795">"ही प्रयोगात्मक वैशिष्‍ट्ये बदलू शकतात, खंडित होऊ शकतात किंवा भविष्‍यातील रिलीझ मध्‍ये कदाचित दिसणार नाहीत."</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"सिस्टीम UI ट्यूनर आपल्‍याला Android वापरकर्ता इंटरफेस ट्विक आणि सानुकूल करण्‍याचे अनेक प्रकार देते. ही प्रयोगात्मक वैशिष्‍ट्ये बदलू शकतात, खंडित होऊ शकतात किंवा भविष्‍यातील रिलीज मध्‍ये कदाचित दिसणार नाहीत. सावधगिरी बाळगून पुढे सुरु ठेवा."</string>
+    <string name="tuner_persistent_warning" msgid="8597333795565621795">"ही प्रयोगात्मक वैशिष्‍ट्ये बदलू शकतात, खंडित होऊ शकतात किंवा भविष्‍यातील रिलीज मध्‍ये कदाचित दिसणार नाहीत."</string>
     <string name="got_it" msgid="2239653834387972602">"समजले"</string>
     <string name="tuner_toast" msgid="603429811084428439">"अभिनंदन! सिस्टीम UI ट्यूनर सेटिंग्जमध्‍ये जोडले गेले आहे"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"सेटिंग्ज मधून काढा"</string>
