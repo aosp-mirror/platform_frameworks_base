@@ -304,8 +304,11 @@ public class NetworkPolicyManager {
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         if (cycleDay > cal.getActualMaximum(Calendar.DAY_OF_MONTH)) {
-            cal.set(Calendar.DAY_OF_MONTH, 1);
             cal.add(Calendar.MONTH, 1);
+            cal.set(Calendar.DAY_OF_MONTH, 1);
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
             cal.add(Calendar.SECOND, -1);
         } else {
             cal.set(Calendar.DAY_OF_MONTH, cycleDay);
