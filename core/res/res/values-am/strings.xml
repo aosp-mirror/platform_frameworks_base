@@ -46,6 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"የተያያዥ ችግር ወይም  ትክከል ያልሆነየMMI ኮድ ባህሪ።"</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"ክዋኔ ለቋሚ መደወያ ቁጥሮች ብቻ ተገድቧል።"</string>
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Can not change call forwarding settings from your phone while you are roaming."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"አገልግሎት ነቅቶ ነበር።"</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"ለ፡ አገልግሎት ነቅቶ ነበር"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"አገልግሎቱ ቦዝኗል።"</string>
@@ -96,6 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"ድምፅ/ውሂብ አገልግሎቶች ታግደዋል።"</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"ድምፅ/SMS አገልግሎቶች ታግደዋል።"</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"ሁሉም ድምጽ/ውሂብ/ኤስ ኤም ኤስ  አገልግሎቶች ታግደዋል።"</string>
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"አውታረ መረብ ላይ መድረስ አይቻልም"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"ቅበላን ለማሻሻል የተመረጠውን ዓይነት በቅንብሮች &gt; ተንቀሳቃሽ አውታረ መረቦች &gt; ተመራጭ የአውታረ መረብ ዓይነት ላይ ለመለወጥ ይሞክሩ።"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"ቢጤ መልዕክት መጻጻፊያ ስልክ ሁነታ FULL ጠይቋል"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"ቢጤ መልዕክት መጻጻፊያ ስልክ ሁነታ HCO ጠይቋል"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"ቢጤ መልዕክት መጻጻፊያ ስልክ ሁነታ VCO ጠይቋል"</string>
@@ -179,6 +182,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"በጎደለ የአስተዳዳሪ መተግበሪያ ምክንያት የስራ መገለጫ ተሰርዟል።"</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"የስራ መገለጫ አስተዳዳሪ መተግበሪያው ወይም ይጎድላል ወይም ተበላሽቷል። በዚህ ምክንያት የስራ መገለጫዎ እና ተዛማጅ ውሂብ ተሰርዘዋል። እርዳታን ለማግኘት አስተዳዳሪዎን ያነጋግሩ።"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"የስራ መገለጫዎ ከዚህ በኋላ በዚህ መሳሪያ ላይ አይገኝም።"</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"የእርስዎ መሣሪያ ይደመሰሳል"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"የአስተዳዳሪ መተግበሪያው ክፍሎች ይጎድሉታል ወይም ተበላሽቷል፣ እና ስራ ላይ መዋል አይችልም። የእርስዎ መሣሪያ አሁን ይደመሰሳል። እርዳታ ለማግኘት አስተዳዳሪዎን ያነጋግሩ።"</string>
     <string name="me" msgid="6545696007631404292">"እኔ"</string>
@@ -296,9 +303,9 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"የኤስኤምኤስ መልዕክቶችን ይላኩና ይመልከቱ"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"መተግበሪያው የኤስ.ኤም.ኤስ. መልዕክቶችን እንዲልክ ይፈቅድለታል። ይህ ያልተጠበቁ ወጪዎችን ሊያስከትል ይችላል። ተንኮል አዘል መተግበሪያዎች ያላንተ ማረጋገጫ መልዕክቶችን በመላክ ገንዘብ ሊያስወጡህ ይችላሉ።"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"የጽሑፍ መልዕክቶችዎን ያንብቡ (ኤስ.ኤም.ኤስ. ወይም ኤም.ኤም.ኤስ.)"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"መገለጫው በጡባዊ ተኮዎ ወይም በSIM ካርድዎ የተከማቹ የኤስኤምኤስ. መልዕክቶችን እንዲያነብ ይፈቅድለታል። ይህ መተግበሪያው ይዘት ወይም ሚስጥራዊነትን ከግምት ሳያስገባ ሁሉንም የኤስኤምኤስ መልዕክቶች እንዲያነብ ይፈቅድለታል።"</string>
-    <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"መተግበሪያው በእርስዎ ቴሌቪዥን ወይም ሲም ካርድ ላይ የተከማቹ የኤስኤምኤስ መልዕክቶችን እንዲነብ ያስችለዋል። ይሄ መተግበሪያው ይዘትንም ሆነ ሚስጥራዊነት ከግምት ውስጥ ሳያስገባ ሁሉንም የኤስኤምኤስ መልዕክቶችን እንዲያነብ ያስችለዋል።"</string>
-    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"መገለጫው በስልክዎ ወይም በSIM ካርድዎ የተከማቹ የኤስ.ኤም.ኤስ. መልዕክቶችን እንዲያነብ ይፈቅድለታል። ይህ መተግበሪያው ይዘት ወይም ሚስጥራዊነትን ከግምት ሳያስገባ ሁሉንም የኤስ.ኤም.ኤስ. መልዕክቶች እንዲያነብ ይፈቅድለታል።"</string>
+    <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"ይህ መተግበሪያ በእርስዎ ጡባዊ ላይ የተከማቹ ሁሉንም አጭር የስልክ መልእክት (ጽሑፍ) መልእክቶን ማንበብ ይችላል።"</string>
+    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"ይህ መተግበሪያ በእርስዎ ቴሌቪዥን ላይ የተከማቹ ሁሉንም አጭር የስልክ መልእክት (ጽሑፍ) መልእክቶን ማንበብ ይችላል።"</string>
+    <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"ይህ መተግበሪያ በእርስዎ ስልክ ላይ የተከማቹ ሁሉንም አጭር የስልክ መልእክት (ጽሑፍ) መልእክቶን ማንበብ ይችላል።"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"የፅሁፍ መልዕክቶችን ተቀበል (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"መተግበሪያው የWAP መልዕክቶችን እንዲያነብ እና እንዲያካሂድ ይፈቅዳል። ይህ ፈቃድ የተላኩልዎን መልዕክቶች ለእርስዎ ሳያሳይዎ የመቆጣጠር ወይም የመሰረዝ ብቃትን ያጠቃልላል።"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"አሂድ መተግበሪያዎችን ሰርስረው ያውጡ"</string>
@@ -311,8 +318,8 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"የመኪና ሁኔታ ለማንቃት ለመተግበሪያው ይፈቅዳሉ።"</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"ሌሎች መተግበሪያዎችን ዝጋ"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"መተግበሪያው የሌሎች መተግበሪያዎችን የጀርባ ሂደት እንዲያቆም ይፈቅድለታል። ይህ ሌሎች መተግበሪያዎች መሄድ እንዲያቆሙ ሊያደርግ ይችላል።"</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"በሌሎች መተግበሪያዎች ላይ ሳል"</string>
-    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"መተግበሪያው በሌሎች መተግበሪያዎች ወይም አንዳንድ የበይነገጽ ክፍሎች ላይ እንዲስል ያስችለዋል። በማንኛውም የመተግበሪያ በይነገጽ ላይ በሚሰሩት ስራ ላይ ጣልቃ ሊገቡ ወይም በሌሎች መተግበሪያዎች ላይ ምን እንደሚያዩ የሚመስልዎት ነገር ሊቀይሩ ይችላሉ።"</string>
+    <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"ይህ መተግበሪያ በሌሎች መተግበሪያዎች ላይ ከላይ ወጣ ብሎ ሊታይ ይችላል"</string>
+    <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"ይህ መተግበሪያ ከሌሎች መተግበሪያዎች ወይም ሌሎች የማያ ገጹ ክፍሎች በላይ ወጣ ብሎ ሊታይ ይችላል። ይህ በመደበኛው የመተግበሪያ አጠቃቀም ላይ ጣልቃ ሊገባ እና ሌሎች መተግበሪያዎች የሚታዩበትን መንገድ ሊለውጥ ይችላል።"</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"ትግበራ ሁልጊዜ አሂድ ላይ አድርግ"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"መተግበሪያው የራሱን ክፍሎች በማህደረ ትውስታ ውስጥ በቋሚነት የሚቀጥሉ እንዲያደርግ ይፈቅድለታል። ይህ ለሌላ መተግበሪያዎች ያለውን ማህደረ ትውስታ በመገደብ ጡባዊ ተኮውን ሊያንቀራፍፈው ይችላል።"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"መተግበሪያው የእራሱ ክፍሎች በማህደረትውስታ ውስጥ ዘላቂ እንዲያደርግ ያስችለዋል። ይሄ ሌሎች መተግበሪያዎች የሚገኘውን ማህደረትውስታ በመገደብ ቴሌቪዥኑን ሊያንቀራፍፈው ይችላል።"</string>
@@ -338,37 +345,37 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"መተግበሪያው ከተወሰኑ እውቂያዎች ጋር የሚደዋወሉበት፣ ኢሜይል የሚላላኩበት ወይም የሚገናኙበት ተደጋጋሚነትም ጨምሮ በቴሌቪዥንዎ ላይ ስለተከማቹ ዕውቂያዎችዎ ያለ ውሂብ እንዲቀይር ያስችለዋል። ይህ ፈቃድ መተግበሪያዎች የእውቂያ ውሂብ እንዲሰርዙ ያስችላቸዋል።"</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"መተግበሪያው በስልክዎ ስለተከማቹ የዕውቂያዎችዎ ውሂብ በሙሉ፤ ጥሪ ያደረጉበትን፣ ኢሜይል የላኩበትን ወይም ከተወሰኑ እውቂያዎች ጋር በሌላ መንገድ የተገናኙበትን ድግምግሞሽ ጨምሮ፣ እንዲያስተካክል ይፈቅድለታል። ይህ ፈቃድ መተግበሪያዎች የእውቂያ ውሂብ እንዲሰርዙ ይፈቅድላቸዋል።"</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"የጥሪ ምዝግብ ማስታወሻን ያንብቡ"</string>
-    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"መተግበሪያው ስለገቢና ወጪ ጥሪዎች ያለ ውሂብን ጨምሮ የጡባዊ ተኮህን የጥሪ ምዝግብ ማስታወሻ እንዲያነብ ይፈቅድለታል። ይህ ፈቃድ መተግበሪያው የጥሪ ምዝግብ ማስታወሻ ውሂብህን እንዲያስቀምጥ የሚፈቅድለት ሲሆን ተንኮል አዘል መተግበሪያዎች ሳታውቀው የጥሪ ምዝግብ ማስታወሻ ውሂብህን ሊያጋሩት ይችላሉ።"</string>
-    <string name="permdesc_readCallLog" product="tv" msgid="5611770887047387926">"መተግበሪያው ስለገቢ እና ወጪ ጥሪዎች ያእ ውሂብም ጨምሮ የእርስዎ ቴሌቪዥን የጥሪ ምዝግብ ማስታወሻ እንዲያነብ ያስችለዋል። ይህ ፍቃድ መተግበሪያዎች የጥሪ ምዝግብ ማስታወሻ ውሂብዎን እንዲያስቀምጡት ያስችላቸዋል፣ እና ተንኮል-አዘል መተግበሪያዎች የጥሪ ምዝግብ ማስታወሻ ውሂብ ያለእርስዎ እውቀት ሊያጋሩት ይችላል።"</string>
-    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"መተግበሪያው ስለገቢና ወጪ ጥሪዎች ያለ ውሂብን ጨምሮ የስልክህን የጥሪ ምዝግብ ማስታወሻ እንዲያነብ ይፈቅድለታል። ይህ ፈቃድ መተግበሪያው የጥሪ ምዝግብ ማስታወሻ ውሂብህን እንዲያስቀምጥ የሚፈቅድለት ሲሆን ተንኮል አዘል መተግበሪያዎች ሳታውቀው የጥሪ ምዝግብ ማስታወሻ ውሂብህን ሊያጋሩት ይችላሉ።"</string>
+    <string name="permdesc_readCallLog" msgid="3204122446463552146">"ይህ መተግበሪያ የእርስዎን የጥሪ ታሪክ ማንበብ ይችላል።"</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"የጥሪ ምዝግብ ማስታወሻን ፃፍ"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"ስለ ገቢ እና ወጪ ጥሪዎችን ውሂብ ጨምሮ፣ የጡባዊተኮህን ምዝግብ ማስታወሻ ለመቀየር ለመተግበሪያው ይፈቅዳል። ይሄንን ተንኮል አዘል መተግበሪያዎች የስልክህን ምዝግብ ማስታወሻ ለመሰረዝ ወይም ለመለወጥ ሊጠቀሙበት ይችላሉ።"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"መተግበሪያው ስለገቢ እና ወጪ ጥሪዎች ያለ ውሂብም ጨምሮ የቴሌቪዥንዎ ምዝግብ ማስታወሻ እንዲይቀርይ ያስችለዋል። ተንኮል-አዘል መተግበሪያዎች ይህን ተጠቅመው የስልክዎን ምዝግብ ማስታወሻ ሊደመስሱ ወይም ሊቀይሩ ይችላሉ።"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"ስለ ገቢ እና ወጪ ጥሪዎችን ውሂብ ጨምሮ፣ የስልክህን ምዝግብ ማስታወሻ ለመቀየር ለመተግበሪያው ይፈቅዳል። ይሄንን ተንኮል አዘል መተግበሪያዎች የስልክህን ምዝግብ ማስታወሻ ለመሰረዝ ወይም ለመለወጥ ሊጠቀሙበት ይችላሉ።"</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"የሰውነት ዳሳሾችን መድረስ (እንደ የልብ ምት መከታተያዎች ያሉ)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"እንደ የእርስዎ የልብ ምት የመሳሰሉ ያሉበትን አካላዊ ሁኔታ ከሚቆጣጠሩ ሰውነት ዳሳሾች ውሂብ ላይ እንዲደርስ ለመተግበሪያው ይፈቅደለታል።"</string>
-    <string name="permlab_readCalendar" msgid="5972727560257612398">"የቀን መቁጠሪያ ክስተቶች ተጨማሪ ሚስጥራዊ መረጃ አንብብ"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"መተግበሪያው የጓደኞችን ወይም የስራ ባልደረቦችን ጨምሮ ሁሉንም በጡባዊ ቱኮህ ላይ የተከማቹ የቀን መቁጠሪያ ክስተቶች እንዲያነብ ይፈቅድለታል። ይህ መተግበሪያው የቀን መቁጠሪያ ውሂብህን ሚስጥራዊቱን ከግምት ሳያስገባ እንዲያጋራ ወይም እንዲያስቀምጥ ሊፈቅድለት ይችላል።"</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"መተግበሪያው የጓደኛዎች ወይም የስራ ባልደረባዎችም ጨምሮ በእርስዎ ቴሌቪዥን ላይ የተከማቹ ሁሉንም የቀን መቁጠሪያ ክስተቶች እንዲያነብ ያስችለዋል። ይሄ ሚስጥራዊነት ወይም ጥንቃቄ ፈላጊነት ከግምት ውስጥ ሳይገባ መተግበሪያው የቀን መቁጠሪያዎ ውሂብ እንዲያጋራ ወይም እንዲያስቀምጥ ሊፈቅድለት ይችላል።"</string>
-    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"መተግበሪያው የጓደኞችን ወይም የስራ ባልደረቦችን ጨምሮ ሁሉንም በስልክዎ ላይ የተከማቹ የቀን መቁጠሪያ ክስተቶች እንዲያነብ ይፈቅድለታል። ይህ መተግበሪያው የቀን መቁጠሪያ ውሂብዎን ሚስጥራዊነቱን ከግምት ሳያስገባ እንዲያጋራ ወይም እንዲያስቀምጥ ሊፈቅድለት ይችላል።"</string>
+    <string name="permlab_readCalendar" msgid="6716116972752441641">"የቀን መቁጠሪያ ክስተቶችን እና ዝርዝሮችን አንብብ"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"ይህ መተግበሪያ ሁሉንም በእርስዎ ጡባዊ ላይ የተከማቹ የቀን መቁጠሪያ ክስተቶችን ማንበብ ወይም የእርስዎን የቀን መቁጠሪያ ውሂብ ማስቀመጥ ይችላል።"</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"ይህ መተግበሪያ ሁሉንም በእርስዎ ቴሌቪዥን ላይ የተከማቹ የቀን መቁጠሪያ ክስተቶችን ማንበብ ወይም የእርስዎን የቀን መቁጠሪያ ውሂብ ማስቀመጥ ይችላል።"</string>
+    <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"ይህ መተግበሪያ ሁሉንም በእርስዎ ስልክ ላይ የተከማቹ የቀን መቁጠሪያ ክስተቶችን ማንበብ ወይም የእርስዎን የቀን መቁጠሪያ ውሂብ ማስቀመጥ ይችላል።"</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"የቀን መቁጠሪያ ክስተቶችን ቀይር ወይም አክል እና ለእንግዶች ከባለቤቱ ዕውቅና ውጪ ላክ።"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"መተግበሪያው የጓደኞችህን እና የስራ ባልደረቦችህን ጨምሮ በጡባዊ ተኮህ ላይ ልታስተካክላቸው የምትችላቸውን ክስተቶች እንዲያክል፣ እንዲያስወግድ፣ እንዲለውጥ ይፈቅድለታል። ይህ መተግበሪያው ከቀን መቁጠሪያ ባለቤቶች የመጡ የሚመስሉ መልዕክቶችን እንዲልክ ወይም ያለባለቤቱ እውቀት ክስተቶችን እንዲያስተካክል ሊፈቅድለት ይችላል።"</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"መተግበሪያው የጓደኛዎችን እና የስራ ባልደረባዎችን ጨምሮ በቴሌቪዥንዎ ላይ እርስዎ ሊቀይሯቸው የሚችሏቸው ክስተቶችን እንዲያክል፣ እንዲያስወግድ ወይም እንዲቀይር ያስችለዋል። ይሄ መተግበሪያው ያለባለቤቱ እውቀት ከቀን መቁጠሪያ ባለቤቶች የመጡ የሚመስሉ መልዕክቶችን እንዲልክ፣ ወይም ክስተቶችን እንዲቀይር ሊፈቅድለት ይችላል።"</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"መተግበሪያው የጓደኞችዎን እና የስራ ባልደረቦችዎን ጨምሮ በስልክዎ ላይ ሊያስተካክሏቸው የሚችሏቸውን ክስተቶች እንዲያክል፣ እንዲያስወግድ፣ እንዲለውጥ ይፈቅድለታል። ይህ መተግበሪያው ከቀን መቁጠሪያ ባለቤቶች የመጡ የሚመስሉ መልዕክቶችን እንዲልክ ወይም ያለባለቤቱ እውቀት ክስተቶችን እንዲያስተካክል ሊፈቅድለት ይችላል።"</string>
+    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"ይህ መተግበሪያ በእርስዎ ጡባዊ ላይ የቀን መቁጠሪያ ክስተቶችን ሊያክል፣ ሊያስወግድ ወይም ሊለውጥ ይችላል። ይህ መተግበሪያ ከቀን መቁጠሪያ የመጡ መስለው የሚታዩ መልእክቶችን ሊልክ ወይም ባለቤቶቹን ሳያሳውቅ ክስተቶችን ሊለውጥ ይችላል።"</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"ይህ መተግበሪያ በእርስዎ ቴሌቪዥን ላይ የቀን መቁጠሪያ ክስተቶችን ሊያክል፣ ሊያስወግድ ወይም ሊለውጥ ይችላል። ይህ መተግበሪያ ከቀን መቁጠሪያ የመጡ መስለው የሚታዩ መልእክቶችን ሊልክ ወይም ባለቤቶቹን ሳያሳውቅ ክስተቶችን ሊለውጥ ይችላል።"</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"ይህ መተግበሪያ በእርስዎ ስልክ ላይ የቀን መቁጠሪያ ክስተቶችን ሊያክል፣ ሊያስወግድ ወይም ሊለውጥ ይችላል። ይህ መተግበሪያ ከቀን መቁጠሪያ የመጡ መስለው የሚታዩ መልእክቶችን ሊልክ ወይም ባለቤቶቹን ሳያሳውቅ ክስተቶችን ሊለውጥ ይችላል።"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"ተጨማሪ ሥፍራ አቅራቢ ትዕዛዞችን ድረስ።"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"መተግበሪያው ተጨማሪ የአካባቢ አቅራቢ ትእዛዞችን እንዲደርስ ይፈቅድለታል። ይሄ መተግበሪያው በጂፒኤስ ወይም ሌላ የአካባቢ ምንጮች ስራ ላይ ጣልቃ እንዲገባ ሊፈቅድለት ይችላል።"</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"ትክክለኛውን አካባቢ መድረስ (በጂፒኤስ እና አውታረ መረብ ላይ የተመሠረተ)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"መተግበሪያው የእርስዎን አለምአቀፍ የመሬት አቀማመጥ ስርዓትን (ጂ ፒ ኤስ) ወይም እንደ የተንቀሳቃሽ ስልክ ማማዎች እና Wi-Fi ያሉ የአውታረ መረብ አካባቢ ምንጮችን ተጠቅሞ ትክክለኛ አካባቢዎትን እንዲያውቅ ያስችለዋል። መተግበሪያው እነዚህ የአካባቢ አገልግሎቶችን እንዲጠቀምባቸው እነሱ ሊበሩ እና ለመሣሪያዎ የሚገኙ መሆን አለባቸው። መተግበሪያዎች እርስዎ የት እንዳሉ ለማወቅ ይህንን ሊጠቀሙበት ይችላሉ፣ እና ተጨማሪ ባትሪ ሊፈጁ ይችላሉ።"</string>
+    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"ይህ መተግበሪያ እንደ የሕዋስ ማማዎች እና የWi-Fi አውታረ መረቦች ከመሳሰሉ የአውታረ መረብ ምንጮች ላይ በመመርኮዝ የእርስዎን መገኛ አካባቢ ማግኘት ይችላል። እነዚህ የመገኛ አካባቢ አገልግሎቶች መተግበሪያው መጠቀም እንዲችል ሊበሩ እና በእርስዎ ስልክ ላይ ሊገኙ የሚችሉ መሆን አለባቸው። ይህ የባትሪ ፍጆታን ሊጨምር ይችላል።"</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"ግምታዊ አካባቢን መድረስ (በአውታረ መረብ ላይ የተመሰረተ)"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"መተግበሪያው ግምታዊ አካባቢዎትን እንዲያገኝ ያሽችለዋል። ይህ አካባቢ እንደ የተንቀሳቃሽ ስልክ ማማዎች እና Wi-Fi ያሉ የአውታረ መረብ አካባቢ ምንጮችን በመጠቀም የሚገኝ ነው። መተግበሪያው እነዚህ የአካባቢ አገልግሎቶችን እንዲጠቀምባቸው እነሱ ሊበሩ እና ለመሣሪያዎ የሚገኙ መሆን አለባቸው። መተግበሪያዎች እርስዎ የት እንዳሉ ለማወቅ ይህንን ሊጠቀሙበት ይችላሉ።"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"ይህ መተግበሪያ እንደ የሕዋስ ማማዎች እና የWi-Fi አውታረ መረቦች ከመሳሰሉ የአውታረ መረብ ምንጮች ላይ በመመርኮዝ የእርስዎን መገኛ አካባቢ ማግኘት ይችላል። እነዚህ የመገኛ አካባቢ አገልግሎቶች መተግበሪያው መጠቀም እንዲችል ሊበሩ እና በእርስዎ ጡባዊ ላይ ሊገኙ የሚችሉ መሆን አለባቸው።"</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"ይህ መተግበሪያ እንደ የሕዋስ ማማዎች እና የWi-Fi አውታረ መረቦች ከመሳሰሉ የአውታረ መረብ ምንጮች ላይ በመመርኮዝ የእርስዎን መገኛ አካባቢ ማግኘት ይችላል። እነዚህ የመገኛ አካባቢ አገልግሎቶች እርስዎ መጠቀም እንዲችሉ ሊበሩ እና በእርስዎ ቴሌቪዥን ላይ ሊገኙ የሚችሉ መሆን አለባቸው።"</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"ይህ መተግበሪያ እንደ የሕዋስ ማማዎች እና የWi-Fi አውታረ መረቦች ከመሳሰሉ የአውታረ መረብ ምንጮች ላይ በመመርኮዝ የእርስዎን መገኛ አካባቢ ማግኘት ይችላል። እነዚህ የመገኛ አካባቢ አገልግሎቶች መተግበሪያው መጠቀም እንዲችል ሊበሩ እና በእርስዎ ስልክ ላይ ሊገኙ የሚችሉ መሆን አለባቸው።"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"የድምፅ ቅንብሮችን ለውጥ"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"መተግበሪያው አንደ የድምጽ መጠን እና ለውጽአት የትኛውን የድምጽ ማጉያ ጥቅም ላይ እንደዋለ የመሳሰሉ ሁለንተናዊ የድምጽ ቅንብሮችን እንዲያስተካክል ይፈቅድለታል።"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ኦዲዮ ይቅዱ"</string>
-    <string name="permdesc_recordAudio" msgid="4906839301087980680">"መተግበሪያው ድምጽን በማይክሮፎን እንዲቀዳ ይፈቅድለታል። ይህ ፈቃድ መተግበሪያው ያላንተ ማረጋገጫ በማንኛውም ጊዜ ድምጽ እንዲቀዳ ይፈቅድለታል።"</string>
+    <string name="permdesc_recordAudio" msgid="4245930455135321433">"ይህ መተግበሪያ በማናቸውም ጊዜ ማይክራፎኑን በመጠቀም ኦዲዮን መቅዳት ይችላል።"</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"ወደ ሲሙ ትዕዛዞችን መላክ"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"መተግበሪያው ትዕዛዞችን ወደ ሲሙ እንዲልክ ያስችለዋል። ይሄ በጣማ አደገኛ ነው።"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ፎቶዎች እና ቪዲዮዎች ያንሱ"</string>
-    <string name="permdesc_camera" msgid="8497216524735535009">"መተግበሪያው በካሜራው ፎቶዎችንና ቪዲዮዎችን እንዲያነሳ ይፈቅድለታል። ይህ ፈቃድ መተግበሪያው ካሜራውን በማንኛውም ጊዜ ያላንተ ማረጋገጫ እንዲጠቀም ይፈቅድለታል።"</string>
+    <string name="permdesc_camera" msgid="5392231870049240670">"ይህ መተግበሪያ በማናቸውም ጊዜ ካሜራውን በመጠቀም ፎቶ ሊያነሳ እና ቪዲዮዎችን ሊቀርጽ ይችላል።"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"ነዛሪ ተቆጣጠር"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"ነዛሪውን ለመቆጣጠር ለመተግበሪያው ይፈቅዳሉ።"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"በቀጥታ ስልክ ቁጥሮች ደውል"</string>
@@ -850,18 +857,6 @@
     <string name="weeks" msgid="6509623834583944518">"ሳምንቶች"</string>
     <string name="year" msgid="4001118221013892076">"ዓመት"</string>
     <string name="years" msgid="6881577717993213522">"ዓመታት"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> ሰከንዶች</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ሰከንዶች</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> ደቂቃዎች</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ደቂቃዎች</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> ሰዓቶች</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ሰዓቶች</item>
-    </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"አሁን"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
       <item quantity="one"> በ<xliff:g id="COUNT_1">%d</xliff:g> ደ  ውስጥ </item>
@@ -1614,8 +1609,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"እስከ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> ድረስ"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"እስከ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (ቀጣይ ማንቂያ)"</string>
-    <!-- no translation found for zen_mode_forever (1916263162129197274) -->
-    <skip />
+    <string name="zen_mode_forever" msgid="1916263162129197274">"አትረብሽን እስኪያጠፉ ድረስ"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"አትረብሽን እስኪያጠፉ ድረስ"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ሰብስብ"</string>

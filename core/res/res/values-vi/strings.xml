@@ -46,6 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Sự cố kết nối hoặc mã MMI không hợp lệ."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Chỉ hạn chế thao tác đối với số quay số định sẵn."</string>
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Không thể thay đổi cài đặt chuyển tiếp cuộc gọi từ điện thoại của bạn khi bạn đang chuyển vùng."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Dịch vụ đã được bật."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Dịch vụ đã được bật cho:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Dịch vụ đã bị vô hiệu hóa."</string>
@@ -96,6 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Dịch vụ thoại/dữ liệu đã bị chặn."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Dịch vụ Thoại/SMS đã bị chặn."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Tất cả các dịch vụ thoại/dữ liệu/SMS đã bị chặn."</string>
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Không thể kết nối mạng"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Để cải thiện khả năng thu tín hiệu, hãy thử thay đổi loại được chọn tại Cài đặt &gt; Mạng di động &gt; Loại mạng ưa thích."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"TTY theo yêu cầu của thiết bị ngang hàng ở chế độ ĐẦY ĐỦ"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"TTY theo yêu cầu của thiết bị ngang hàng ở chế độ HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"TTY theo yêu cầu của thiết bị ngang hàng ở chế độ VCO"</string>
@@ -179,6 +182,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Đã xóa hồ sơ công việc do thiếu ứng dụng quản trị."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Ứng dụng quản trị hồ sơ công việc bị thiếu hoặc hỏng. Do vậy, hồ sơ công việc của bạn và dữ liệu liên quan đã bị xóa. Hãy liên hệ với quản trị viên để được trợ giúp."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Hồ sơ công việc của bạn không có sẵn trên thiết bị này nữa."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Thiết bị của bạn sẽ bị xóa"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Ứng dụng quản trị đang bị thiếu thành phần hoặc bị hỏng và không thể sử dụng được. Bây giờ, thiết bị của bạn sẽ bị xóa. Hãy liên hệ với quản trị viên của bạn để được trợ giúp."</string>
     <string name="me" msgid="6545696007631404292">"Tôi"</string>
@@ -296,9 +303,9 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"gửi và xem tin nhắn SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Cho phép ứng dụng gửi tin nhắn SMS. Việc này có thể dẫn đến các khoản phí không mong muốn. Các ứng dụng độc hai có thể khiến bạn tốn tiền bằng cách gửi tin nhắn mà không cần sự xác nhận của bạn."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"đọc tin nhắn văn bản của bạn (SMS hoặc MMS)"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Cho phép ứng dụng đọc tin nhắn SMS được lưu trữ trên máy tính bảng hoặc thẻ SIM của bạn. Việc này cho phép ứng dụng đọc tất cả tin nhắn SMS, bất kể nội dung hay tính bí mật là gì."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Cho phép ứng dụng đọc tin nhắn SMS được lưu trữ trên TV hoặc thẻ SIM của bạn. Quyền này cho phép ứng dụng đọc tất cả tin nhắn SMS, bất kể nội dung hay mức độ bảo mật."</string>
-    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Cho phép ứng dụng đọc tin nhắn SMS được lưu trữ trên điện thoại hoặc thẻ SIM của bạn. Việc này cho phép ứng dụng đọc tất cả tin nhắn SMS, bất kể nội dung hay tính bí mật là gì."</string>
+    <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"Ứng dụng này có thể đọc tất cả các tin nhắn SMS (văn bản) được lưu trữ trên máy tính bảng của bạn."</string>
+    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"Ứng dụng này có thể đọc tất của các tin nhắn SMS (văn bản) được lưu trữ trên TV của bạn."</string>
+    <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"Ứng dụng này có thể đọc tất cả các tin nhắn SMS (văn bản) được lưu trữ trên điện thoại của bạn."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"nhận tin nhắn văn bản (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Cho phép ứng dụng nhận và xử lý tin nhắn WAP. Quyền này bao gồm khả năng giám sát hoặc xóa tin nhắn được gửi cho bạn mà không hiển thị chúng cho bạn."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"truy xuất các ứng dụng đang chạy"</string>
@@ -311,8 +318,8 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Cho phép ứng dụng bật chế độ trên ô tô."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"đóng ứng dụng khác"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Cho phép ứng dụng kết thúc các quá trình nền của các ứng dụng khác. Việc này có thể khiến các ứng dụng khác dừng chạy."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"vẽ trên ứng dụng khác"</string>
-    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Cho phép ứng dụng vẽ trên đầu các ứng dụng khác hoặc các phần của giao diện người dùng. Chúng có thể ảnh hưởng đến việc bạn sử dụng giao diện trong bất kỳ ứng dụng nào hoặc thay đổi suy nghĩ của bạn về những gì bạn đang thấy trong các ứng dụng khác."</string>
+    <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Ứng dụng này có thể xuất hiện ở phía trên cùng của các ứng dụng khác"</string>
+    <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Ứng dụng này có thể xuất hiện ở phía trên cùng của các ứng dụng khác hoặc các phần khác của màn hình. Điều này có thể cản trở hoạt động sử dụng ứng dụng thông thường và thay đổi cách các ứng dụng khác xuất hiện."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"đặt ứng dụng luôn chạy"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Cho phép ứng dụng tạo sự đồng nhất cho các phần của mình trong bộ nhớ. Việc này có thể hạn chế bộ nhớ đối với các ứng dụng khác đang làm chậm máy tính bảng."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Cho phép ứng dụng làm cho các phần của ứng dụng trở nên ổn định trong bộ nhớ. Việc này có thể hạn chế bộ nhớ đối với các ứng dụng khác đang làm chậm TV."</string>
@@ -338,37 +345,37 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Cho phép ứng dụng sửa đổi dữ liệu về các địa chỉ liên hệ được lưu trữ trên TV của bạn, bao gồm tần suất mà bạn đã gọi, gửi email hoặc liên lạc theo các cách khác với những địa chỉ liên hệ cụ thể. Quyền này cho phép ứng dụng xóa dữ liệu liên lạc."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Cho phép ứng dụng sửa đổi dữ liệu về các địa chỉ liên hệ được lưu trữ trên điện thoại của bạn, bao gồm tần suất mà bạn đã gọi, gửi email hoặc liên lạc theo các cách khác với những địa chỉ liên hệ cụ thể. Quyền này cho phép ứng dụng xóa dữ liệu liên lạc."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"đọc nhật ký cuộc gọi"</string>
-    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Cho phép ứng dụng đọc nhật ký cuộc gọi của máy tính bảng của bạn, bao gồm dữ liệu về các cuộc gọi đến và gọi đi. Quyền này cho phép ứng dụng lưu dữ liệu nhật ký cuộc gọi cả bạn và các ứng dụng độc hại có thể chia sẻ dữ liệu nhật ký cuộc gọi mà bạn không biết."</string>
-    <string name="permdesc_readCallLog" product="tv" msgid="5611770887047387926">"Cho phép ứng dụng đọc nhật ký cuộc gọi của TV của bạn, bao gồm dữ liệu về các cuộc gọi đến và gọi đi. Quyền này cho phép ứng dụng lưu dữ liệu nhật ký cuộc gọi của bạn và các ứng dụng độc hại có thể chia sẻ dữ liệu nhật ký cuộc gọi mà bạn không biết."</string>
-    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Cho phép ứng dụng đọc nhật ký cuộc gọi của điện thoại của bạn, bao gồm dữ liệu về các cuộc gọi đến và gọi đi. Quyền này cho phép ứng dụng lưu dữ liệu nhật ký cuộc gọi cả bạn và các ứng dụng độc hại có thể chia sẻ dữ liệu nhật ký cuộc gọi mà bạn không biết."</string>
+    <string name="permdesc_readCallLog" msgid="3204122446463552146">"Ứng dụng này có thể đọc nhật ký cuộc gọi của bạn."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"ghi nhật ký cuộc gọi"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Cho phép ứng dụng sửa đổi nhật ký cuộc gọi trên máy tính bảng của bạn, bao gồm dữ liệu về các cuộc gọi đến và gọi đi. Các ứng dụng độc hại có thể sử dụng quyền này để xóa hoặc sửa đổi nhật ký cuộc gọi của bạn."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Cho phép ứng dụng sửa đổi nhật ký cuộc gọi trên TV của bạn, bao gồm dữ liệu về các cuộc gọi đến và gọi đi. Các ứng dụng độc hại có thể sử dụng quyền này để xóa hoặc sửa đổi nhật ký cuộc gọi của bạn."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Cho phép ứng dụng sửa đổi nhật ký cuộc gọi trên điện thoại của bạn, bao gồm dữ liệu về các cuộc gọi đến và gọi đi. Các ứng dụng độc hại có thể sử dụng quyền này để xóa hoặc sửa đổi nhật ký cuộc gọi của bạn."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"truy cập cảm biến cơ thể (như máy đo nhịp tim)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Cho phép ứng dụng truy cập dữ liệu từ bộ cảm biến giám sát tình trạng sức khỏe của bạn, ví dụ như nhịp tim."</string>
-    <string name="permlab_readCalendar" msgid="5972727560257612398">"đọc các sự kiện lịch và thông tin bí mật"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Cho phép ứng dụng đọc tất cả các sự kiện trên lịch được lưu trữ trên máy tính bảng của bạn, bao gồm các sự kiện trên lịch của bạn bè hoặc đồng nghiệp. Việc này có thể cho phép ứng dụng chia sẻ hoặc lưu dữ liệu lịch của bạn, bất kể tính bí mật hay tính nhạy cảm là gì."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Cho phép ứng dụng đọc tất cả các sự kiện trên lịch được lưu trữ trên TV của bạn, bao gồm các sự kiện trên lịch của bạn bè hoặc đồng nghiệp. Việc này có thể cho phép ứng dụng chia sẻ hoặc lưu dữ liệu lịch của bạn, bất kể mức độ bảo mật hay mức độ nhạy cảm."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Cho phép ứng dụng đọc tất cả các sự kiện trên lịch được lưu trữ trên điện thoại của bạn, bao gồm các sự kiện trên lịch của bạn bè hoặc đồng nghiệp. Việc này có thể cho phép ứng dụng chia sẻ hoặc lưu dữ liệu lịch của bạn, bất kể tính bí mật hay tính nhạy cảm là gì."</string>
+    <string name="permlab_readCalendar" msgid="6716116972752441641">"Đọc chi tiết và sự kiện lịch"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Ứng dụng này có thể đọc tất cả các sự kiện lịch được lưu trữ trên máy tính bảng của bạn và chia sẻ hoặc lưu dữ liệu lịch của bạn."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Ứng dụng này có thể đọc tất cả các sự kiện lịch được lưu trữ trên TV của bạn và chia sẻ hoặc lưu dữ liệu lịch của bạn."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Ứng dụng này có thể đọc tất cả các sự kiện lịch được lưu trữ trên điện thoại của bạn và chia sẻ hoặc lưu dữ liệu lịch của bạn."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"thêm hoặc sửa đổi các sự kiện lịch và gửi email cho khách mà chủ sở hữu không hề biết"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Cho phép ứng dụng thêm, xóa, thay đổi các sự kiện mà bạn có thể sửa đổi trên máy tính bảng của mình, bao gồm những sự kiện của bạn bè hoặc đồng nghiệp. Việc này có thể cho phép ứng dụng gửi tin nhắn dường như đến từ chủ sở hữu lịch hoặc sửa đổi các sự kiện mà chủ sở hữu không biết."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Cho phép ứng dụng thêm, xóa, thay đổi các sự kiện mà bạn có thể sửa đổi trên TV của mình, bao gồm những sự kiện của bạn bè hoặc đồng nghiệp. Việc này có thể cho phép ứng dụng gửi tin nhắn mà dường như đến từ chủ sở hữu lịch hoặc sửa đổi các sự kiện mà chủ sở hữu không biết."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Cho phép ứng dụng thêm, xóa, thay đổi các sự kiện mà bạn có thể sửa đổi trên điện thoại của mình, bao gồm những sự kiện của bạn bè hoặc đồng nghiệp. Việc này có thể cho phép ứng dụng gửi tin nhắn dường như đến từ chủ sở hữu lịch hoặc sửa đổi các sự kiện mà chủ sở hữu không biết."</string>
+    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Ứng dụng này có thể thêm, xóa hoặc thay đổi sự kiện lịch trên máy tính bảng của bạn. Ứng dụng này có thể gửi các tin nhắn trông có vẻ như được gửi từ các chủ sở hữu lịch hoặc thay đổi sự kiện mà không thông báo cho chủ sở hữu."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Ứng dụng này có thể thêm, xóa hoặc thay đổi sự kiện lịch trên TV của bạn. Ứng dụng này có thể gửi các tin nhắn trông có vẻ như được gửi từ các chủ sở hữu lịch hoặc thay đổi sự kiện mà không thông báo cho chủ sở hữu."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Ứng dụng này có thể thêm, xóa hoặc thay đổi sự kiện lịch trên điện thoại của bạn. Ứng dụng này có thể gửi các tin nhắn trông có vẻ như được gửi từ các chủ sở hữu lịch hoặc thay đổi sự kiện mà không thông báo cho chủ sở hữu."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"truy cập vào các lệnh của nhà cung cấp vị trí bổ sung"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Cho phép ứng dụng truy cập vào các lệnh của nhà cung cấp vị trí bổ sung. Điều này có thể cho phép ứng dụng can thiệp vào hoạt động của Hệ thống định vị toàn cầu (GPS) hoặc các nguồn vị trí khác."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"truy cập vị trí chính xác (dựa vào mạng và GPS)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Cho phép ứng dụng nhận vị trí chính xác của bạn bằng cách sử dụng Hệ thống định vị toàn cầu (GPS) hoặc các nguồn vị trí mạng chẳng hạn như tháp điện thoại di động và Wi-Fi. Các dịch vụ vị trí này phải được bật và có sẵn cho thiết bị của bạn để ứng dụng sử dụng chúng. Ứng dụng có thể sử dụng dịch vụ vị trí này để xác định vị trí của bạn và có thể tiêu hao thêm nguồn pin."</string>
+    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"Ứng dụng này có thể nhận thông tin vị trí của bạn dựa trên GPS hoặc các nguồn vị trí mạng như tháp phát sóng di động và mạng Wi-Fi. Các dịch vụ vị trí này phải được bật và khả dụng trên điện thoại của bạn để ứng dụng có thể sử dụng chúng. Điều này có thể làm tăng mức tiêu thụ pin."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"truy cập vị trí gần đúng (dựa vào mạng)"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Cho phép ứng dụng nhận vị trí gần đúng của bạn. Vị trí này có được là do dịch vụ vị trí sử dụng các nguồn vị trí mạng chẳng hạn như tháp điện thoại di động và Wi-Fi. Các dịch vụ vị trí này phải được bật và có sẵn cho thiết bị của bạn để ứng dụng sử dụng chúng. Ứng dụng có thể sử dụng dịch vụ vị trí này để xác định vị trí gần đúng của bạn."</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Ứng dụng này có thể nhận thông tin vị trí của bạn dựa trên các nguồn mạng như tháp phát sóng di động và mạng Wi-Fi. Các dịch vụ vị trí này phải được bật và khả dụng trên máy tính bảng của bạn để ứng dụng có thể sử dụng chúng."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Ứng dụng này có thể nhận thông tin vị trí của bạn dựa trên các nguồn mạng như tháp phát sóng di động và mạng Wi-Fi. Các dịch vụ vị trí này phải được bật và khả dụng trên TV của bạn để ứng dụng có thể sử dụng chúng."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Ứng dụng này có thể nhận thông tin vị trí của bạn dựa trên các nguồn mạng như tháp phát sóng di động và mạng Wi-Fi. Các dịch vụ vị trí này phải được bật và khả dụng trên điện thoại của bạn để ứng dụng có thể sử dụng chúng."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"thay đổi cài đặt âm thanh của bạn"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Cho phép ứng dụng sửa đổi cài đặt âm thanh chung chẳng hạn như âm lượng và loa nào được sử dụng cho thiết bị ra."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ghi âm"</string>
-    <string name="permdesc_recordAudio" msgid="4906839301087980680">"Cho phép ứng dụng ghi âm bằng micrô. Quyền này cho phép ứng dụng ghi âm bất kỳ lúc nào mà không cần sự xác nhận của bạn."</string>
+    <string name="permdesc_recordAudio" msgid="4245930455135321433">"Ứng dụng này có thể ghi âm bằng micrô bất kỳ lúc nào."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"gửi lệnh đến SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Cho phép ứng dụng gửi lệnh đến SIM. Việc này rất nguy hiểm."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"chụp ảnh và quay video"</string>
-    <string name="permdesc_camera" msgid="8497216524735535009">"Cho phép ứng dụng chụp ảnh và quay video bằng máy ảnh. Quyền này cho phép ứng dụng sử dụng máy ảnh bất kỳ lúc nào mà không cần sự xác nhận của bạn."</string>
+    <string name="permdesc_camera" msgid="5392231870049240670">"Ứng dụng này có thể chụp ảnh và quay video bằng máy ảnh bất cứ lúc nào."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"kiểm soát rung"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Cho phép ứng dụng kiểm soát bộ rung."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"gọi trực tiếp số điện thoại"</string>
@@ -850,18 +857,6 @@
     <string name="weeks" msgid="6509623834583944518">"tuần"</string>
     <string name="year" msgid="4001118221013892076">"năm"</string>
     <string name="years" msgid="6881577717993213522">"năm"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> giây</item>
-      <item quantity="one">1 giây</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> phút</item>
-      <item quantity="one">1 phút</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> giờ</item>
-      <item quantity="one">1 giờ</item>
-    </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"bây giờ"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ph</item>
@@ -1614,8 +1609,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Cho đến <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Cho tới <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (cảnh báo tiếp theo)"</string>
-    <!-- no translation found for zen_mode_forever (1916263162129197274) -->
-    <skip />
+    <string name="zen_mode_forever" msgid="1916263162129197274">"Cho đến khi bạn tắt Không làm phiền"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Cho đến khi bạn tắt Đừng làm phiền"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Thu gọn"</string>

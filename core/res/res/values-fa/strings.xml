@@ -46,6 +46,8 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"‏مشکل در اتصال یا کد MMI نامعتبر."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"عملکرد فقط به شماره‌های شماره‌گیری ثابت محدود است."</string>
+    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
+    <skip />
     <string name="serviceEnabled" msgid="8147278346414714315">"سرویس فعال شد."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"سرویس فعال شد برای:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"سرویس غیرفعال شده است."</string>
@@ -96,6 +98,10 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"‏سرویس‎‎های صدا/داده مسدود شدند."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"سرویس‌های صوتی/پیامک مسدود شده‌اند"</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"تمام سرویس‌های صدا/داده/ پیامک مسدود هستند."</string>
+    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
+    <skip />
+    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"‏دستگاه مرتبط درخواست TTY حالت FULL کرد"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"‏دستگاه مرتبط درخواست TTY حالت HCO کرد"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"‏دستگاه مرتبط درخواست TTY حالت VCO کرد"</string>
@@ -179,6 +185,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"به دلیل نداشتن برنامه سرپرست، نمایه کار حذف شده است."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"برنامه سرپرست نمایه کار وجود ندارد یا خراب است. در نتیجه، نمایه کاریتان و اطلاعات مرتبط حذف شده است. برای دریافت راهنمایی با سرپرستتان تماس بگیرید."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"نمایه کاری شما دیگر در این دستگاه در دسترس نیست."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"دستگاهتان پاک خواهد شد"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"برنامه سرپرست بخش‌هایی را ندارد یا خراب است، و نمی‌تواند استفاده شود. دستگاهتان اکنون پاک می‌شود. برای این که راهنمایی شوید، با سرپرستتان تماس بگیرید."</string>
     <string name="me" msgid="6545696007631404292">"من"</string>
@@ -296,9 +306,12 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"ارسال و نمایش پیام‌های پیامک"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"به برنامه اجازه می‌دهد پیامک‌ها را ارسال کند. این باعث ایجاد هزینه‌های پیش‌بینی نشده می‌شود. برنامه‌های مخرب ممکن است با ارسال پیام بدون تأیید شما هزینه‌هایی را برای شما ایجاد کنند."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"خواندن پیام‌های نوشتاری شما (پیامک یا فراپیام)"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"به برنامه اجازه می‌دهد پیامک‌های ذخیره شده در رایانهٔ لوحی یا سیم کارت شما را بخواند. این ویژگی به برنامه امکان می‌دهد همه پیامک‌ها را صرفنظر از محتوا یا محرمانه بودن آن‌ها بخواند."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"به برنامه اجازه می‌دهد تا پیامهای کوتاه ذخیره شده در تلویزیون یا سیم‌کارت شما را بخواند. به برنامه اجازه می‌دهد تا همه پیامهای کوتاه را صرفنظر از محتوا یا محرمانه بودن آنها بخواند."</string>
-    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"به برنامه اجازه می‌دهد پیامک‌های ذخیره شده در تلفن یا سیم کارت شما را بخواند. این ویژگی به برنامه امکان می‌دهد همه پیامک‌ها را صرفنظر از محتوا یا محرمانه بودن آن‌ها بخواند."</string>
+    <!-- no translation found for permdesc_readSms (4741697454888074891) -->
+    <skip />
+    <!-- no translation found for permdesc_readSms (5796670395641116592) -->
+    <skip />
+    <!-- no translation found for permdesc_readSms (6826832415656437652) -->
+    <skip />
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"‏دریافت پیام‌های نوشتاری (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"‏به برنامه اجازه می‌دهد پیام‌های WAP را دریافت و پردازش کند. این مجوز می‌تواند پیام‌های ارسالی به شما را بدون نمایش آن‌ها به شما حذف یا کنترل کند."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"‏بازیابی برنامه‎های در حال اجرا"</string>
@@ -311,8 +324,10 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"‏به برنامه اجازه می‎دهد تا حالت خودرو را فعال کند."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"بستن سایر برنامه‌ها"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"به برنامه امکان می‌دهد به فرآیندهای پس‌زمینه سایر برنامه‌ها پایان دهد. این ممکن است باعث شود سایر برنامه‌ها متوقف شوند."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"نمایش روی برنامه‌های دیگر"</string>
-    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"به برنامه اجازه می‌دهد که در بالا یا بخش‌هایی از رابط کاربری دیگر برنامه‌های کاربردی متصل شود. این کار می‌تواند در استفاده شما از رابط هر برنامه کاربردی تداخل ایجاد کند یا آنچه را که به نظر خود در دیگر برنامه‌های کاربردی می‌بینید، تغییر دهد."</string>
+    <!-- no translation found for permlab_systemAlertWindow (7238805243128138690) -->
+    <skip />
+    <!-- no translation found for permdesc_systemAlertWindow (2393776099672266188) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"همیشه برنامه اجرا شود"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"به برنامه امکان می‌دهد قسمت‌هایی از خود را در حافظه دائمی کند. این کار حافظه موجود را برای سایر برنامه‌ها محدود کرده و باعث کندی رایانهٔ لوحی می‌شود."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"به برنامه اجازه می‌دهد تا بخش‌هایی از خودش را در حافظه پایدار کند. ممکن است حافظه در دسترس سایر برنامه‌ها را محدود کند که باعث کند شدن تلویزیون می‌شود."</string>
@@ -338,37 +353,51 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"به برنامه اجازه می‌دهد داده‌های مربوط به مخاطبین ذخیره شده در تلویزیون شما را از جمله تعداد تماس‌‌هایی که برقرار کرده‌اید، ایمیل‌هایی که ارسال کرده‌اید یا ارتباطاتی را که به هر شکل با مخاطبین خاصی برقرار کردید تغییر دهد. این مجوز به برنامه اجازه می‌دهد داده‌های مخاطب را حذف نماید."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"به برنامه اجازه می‌دهد داده‌های مربوط به مخاطبین ذخیره شده در تلفن شما را از جمله تعداد تماس‌‌هایی که برقرار کرده‌اید، ایمیل‌هایی که ارسال کرده‌اید یا ارتباطاتی را که به هر شکل با مخاطبین خاصی برقرار کردید تغییر دهد. این مجوز به برنامه اجازه می‌دهد داده‌های مخاطب را حذف نماید."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"خواندن گزارش تماس"</string>
-    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"به برنامه اجازه می‌دهد گزارش تماس رایانهٔ لوحی شما را بخواند از جمله داده‌های مربوط به تماس‌های ورودی و خروجی. این مجوز به برنامه‌ها اجازه می‌دهد داده‌های گزارش تماس شما را ذخیره کنند و برنامه‌های مخرب ممکن است داده‌های گزارش تماس شما را بدون اطلاع شما به اشتراک بگذارند."</string>
-    <string name="permdesc_readCallLog" product="tv" msgid="5611770887047387926">"به برنامه اجازه می‌دهد تا گزارش تماس تلویزیون‌تان از جمله اطلاعات پیرامون تماس‌های ورودی و خروجی را بخواند. این مجوز به برنامه‌ها اجازه می‌دهد تا داده‌های گزارش تماس شما را ذخیره کند و شاید برنامه‌های مخرب داده‌های گزارش تماس را بدون اطلاع شما به اشتراک بگذارند."</string>
-    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"به برنامه اجازه می‌دهد گزارش تماس تلفنی شما را بخواند از جمله داده‌های مربوط به تماس‌های ورودی و خروجی. این مجوز به برنامه‌ها اجازه می‌دهد داده‌های گزارش تماس شما را ذخیره کنند و برنامه‌های مخرب ممکن است داده‌های گزارش تماس شما را بدون اطلاع شما به اشتراک بگذارند."</string>
+    <!-- no translation found for permdesc_readCallLog (3204122446463552146) -->
+    <skip />
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"نوشتن گزارش تماس"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"‏به برنامه اجازه می‌دهد گزارشات تماس رایانهٔ لوحی شما، از جمله داده‌هایی درمورد تماس‎های ورودی و خروجی را تغییر دهد. برنامه‌های مخرب ممکن است از این ویژگی برای پاک کردن یا تغییر گزارش تماس شما استفاده کنند."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"‏به برنامه اجازه می‌دهد گزارشات تماس تلویزیون شما، از جمله داده‌هایی درمورد تماس‎های ورودی و خروجی را تغییر دهد. برنامه‌های مخرب شاید از این ویژگی برای پاک کردن یا تغییر گزارش تماس شما استفاده کنند."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"‏به برنامه اجازه می‌دهد گزارشات تماس تلفنی شما، از جمله داده‌هایی درمورد تماس‎های ورودی و خروجی را تغییر دهد. برنامه‌های مخرب ممکن است از این ویژگی برای پاک کردن یا تغییر گزارش تماس شما استفاده کنند."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"دسترسی به حسگرهای بدن (مانند پایشگرهای ضربان قلب)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"به برنامه امکان می‌دهد به اطلاعات حسگرهایی که بر شرایط فیزیکی شما مانند ضربان قلبتان، نظارت دارند، دسترسی داشته باشد."</string>
-    <string name="permlab_readCalendar" msgid="5972727560257612398">"خواندن رویدادهای تقویم به همراه اطلاعات محرمانه"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"به برنامه امکان می‌دهد همه رویدادهای تقویم ذخیره شده در رایانهٔ لوحی شما را بخواند، از جمله رویدادهای دوستان یا همکاران. این ممکن است به برنامه امکان دهد داده‌های تقویم شما را صرفنظر از محرمانه یا حساس بودن آن‌ها به اشتراک گذاشته یا ذخیره کند."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"به برنامه اجازه می‌دهد تا همه رویدادهای تقویم ذخیره‌شده روی تلویزیون از جمله رویدادهای دوستان یا همکاران را بخواند. شاید به برنامه اجازه دهد تا اطلاعات تقویم را صرفنظر از محرمانه بودن یا حساسیت، به اشتراک بگذارد یا ذخیره کند."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"به برنامه امکان می‌دهد همه رویدادهای تقویم ذخیره شده در تلفن شما را بخواند، از جمله رویدادهای دوستان یا همکاران. این ممکن است به برنامه امکان دهد داده‌های تقویم شما را صرفنظر از محرمانه یا حساس بودن آن‌ها به اشتراک گذاشته یا ذخیره کند."</string>
+    <!-- no translation found for permlab_readCalendar (6716116972752441641) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (4993979255403945892) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (8837931557573064315) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (4373978642145196715) -->
+    <skip />
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"افزودن یا تغییر رویدادهای تقویم و ارسال رایانامه به مهمانان بدون دخالت مالک"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"به برنامه اجازه می‌دهد رویدادهایی را که می‌توانید در رایانهٔ لوحی خود اصلاح نمایید، از جمله رویدادهای دوستان یا همکاران خود را، اضافه یا حذف کرده یا تغییر دهد. این ویژگی ممکن است به برنامه اجازه دهد پیام‌هایی را که به نظر می‌رسد از مالکین تقویم رسیده است ارسال نموده یا رویدادها را بدون اطلاع مالک اصلاح کنند."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"به برنامه اجازه می‌دهد به افزودن، حذف یا تغییر رویدادهایی بپردازد که می‌توانید در تلویزیون‌تان تغییر دهید، از جمله رویدادهای دوستان یا همکاران خود. این ویژگی شاید به برنامه اجازه دهد پیامهایی را ارسال کند که به نظر می‌رسد از جانب مالکین تقویم است یا رویدادها را بدون اطلاع مالک تغییر دهد."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"به برنامه اجازه می‌دهد رویدادهایی را که می‌توانید در تلفن خود اصلاح نمایید، از جمله رویدادهای دوستان یا همکاران خود را، اضافه یا حذف کرده یا تغییر دهد. این ویژگی ممکن است به برنامه اجازه دهد پیام‌هایی را که به نظر می‌رسد از مالکین تقویم رسیده است ارسال نموده یا رویدادها را بدون اطلاع مالک اصلاح کنند."</string>
+    <!-- no translation found for permdesc_writeCalendar (1675270619903625982) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCalendar (9017809326268135866) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCalendar (7592791790516943173) -->
+    <skip />
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"دسترسی به فرمان‌های بیشتر ارائه دهنده مکان"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"‏به برنامه اجازه می‌دهد به دستورات ارائه‌دهنده مکان تکمیلی دسترسی داشته باشد. این کار ممکن است به برنامه امکان دهد با کارکرد GPS یا منابع دیگر مکان تداخل داشته باشد."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"‏دسترسی به مکان دقیق (مبتنی بر GPS و شبکه)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"‏به برنامه اجازه می‌دهد که موقعیت مکانی دقیق شما را با استفاده از سیستم موقعیت‌یاب جهانی (GPS) یا منابع موقعیت مکانی شبکه‌ای مانند برج‌های سلولی یا Wi-Fi دریافت کند. این سرویس‌های موقعیت مکانی باید در دستگاه شما برای برنامه‌ای که از آنها استفاده می‌کند، فعال و در دسترس باشد. برنامه‌ها ممکن است از آن برای تعیین جایی که هستید، استفاده کنند و ممکن است نیروی باتری بیشتری مصرف کنند."</string>
+    <!-- no translation found for permdesc_accessFineLocation (5821994817969957884) -->
+    <skip />
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"دسترسی به مکان تقریبی (مبتنی بر شبکه)"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"‏به برنامه اجازه می‌دهد که موقعیت مکانی تقریبی شما را بدست آورد. این موقعیت مکانی از سرویس‌های موقعیت مکانی که از منابع موقعیت مکانی شبکه‌ای مانند برج‌های سلولی و Wi-Fi استفاده می‌کنند، بدست می‌آید. این سرویس‌های موقعیت مکانی باید در دستگاه شما برای برنامه‌ای که از آنها استفاده می‌کند، فعال و در دسترس باشد. برنامه‌ها ممکن است از آن برای تعیین تقریبی جایی که هستید، استفاده کنند."</string>
+    <!-- no translation found for permdesc_accessCoarseLocation (3373266766487862426) -->
+    <skip />
+    <!-- no translation found for permdesc_accessCoarseLocation (1884022719818788511) -->
+    <skip />
+    <!-- no translation found for permdesc_accessCoarseLocation (7788009094906196995) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"تغییر تنظیمات صوتی"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"به برنامه امکان می‌دهد تنظیمات صوتی کلی مانند میزان صدا و بلندگوی مورد استفاده برای پخش صدا را اصلاح کند."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ضبط صدا"</string>
-    <string name="permdesc_recordAudio" msgid="4906839301087980680">"به برنامه اجازه می‌دهد صدا را با میکروفن ضبط کند. این مجوز به برنامه اجازه می‌دهد صدا را در هر زمان که بخواهید بدون تأیید شما ضبط کند."</string>
+    <!-- no translation found for permdesc_recordAudio (4245930455135321433) -->
+    <skip />
     <string name="permlab_sim_communication" msgid="2935852302216852065">"ارسال فرمان به سیم کارت"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"به برنامه اجازه ارسال دستورات به سیم کارت را می‌دهد. این بسیار خطرناک است."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"عکسبرداری و فیلمبرداری"</string>
-    <string name="permdesc_camera" msgid="8497216524735535009">"به برنامه اجازه می‌دهد با دوربین به عکسبرداری و فیلمبرداری بپردازد. این مجوز به برنامه اجازه می‌‌دهد از دوربین در هر زمانی بدون تأیید شما استفاده کند."</string>
+    <!-- no translation found for permdesc_camera (5392231870049240670) -->
+    <skip />
     <string name="permlab_vibrate" msgid="7696427026057705834">"کنترل لرزش"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"‏به برنامه اجازه می‎دهد تا لرزاننده را کنترل کند."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"تماس مستقیم با شماره تلفن‌ها"</string>
@@ -850,18 +879,6 @@
     <string name="weeks" msgid="6509623834583944518">"هفته"</string>
     <string name="year" msgid="4001118221013892076">"سال"</string>
     <string name="years" msgid="6881577717993213522">"سال"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> ثانیه</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ثانیه</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> دقیقه</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> دقیقه</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> ساعت</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ساعت</item>
-    </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"اکنون"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
       <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>دقیقه</item>
@@ -1614,8 +1631,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"تا <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"تا <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (هشدار بعدی)"</string>
-    <!-- no translation found for zen_mode_forever (1916263162129197274) -->
-    <skip />
+    <string name="zen_mode_forever" msgid="1916263162129197274">"تا زمانی که «مزاحم نشوید» را خاموش کنید"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"تا زمانی که «مزاحم نشوید» را خاموش کنید"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> /‏ <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"کوچک کردن"</string>

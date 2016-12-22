@@ -46,6 +46,8 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problém s připojením nebo neplatný kód MMI."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Operace je omezena pouze na povolená telefonní čísla."</string>
+    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
+    <skip />
     <string name="serviceEnabled" msgid="8147278346414714315">"Služba byla zapnuta."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Služba byla zapnuta pro:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Služba byla vypnuta."</string>
@@ -98,6 +100,10 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Hlasové a datové služby jsou zablokovány."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Hlasové služby a služby SMS jsou zablokovány."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Veškeré hlasové a datové služby a služby SMS jsou zablokovány."</string>
+    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
+    <skip />
+    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Partner požádal o přechod na režim TTY FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Partner požádal o přechod na režim TTY HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Partner požádal o přechod na režim TTY VCO"</string>
@@ -183,6 +189,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Pracovní profil byl smazán, protože není k dispozici aplikace pro správu."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Aplikace pro správu pracovního profilu chybí nebo je poškozena. Váš pracovní profil a související data proto byla smazána. Kontaktujte svého administrátora a požádejte jej o pomoc."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Váš pracovní profil v tomto zařízení již není k dispozici."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Zařízení bude vymazáno"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"V aplikaci pro správu chybí některé součásti nebo je poškozená, a proto ji nelze použít. Zařízení nyní bude vymazáno. Kontaktujte svého administrátora a požádejte jej o pomoc."</string>
     <string name="me" msgid="6545696007631404292">"Já"</string>
@@ -256,9 +266,9 @@
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendář"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"přístup ke kalendáři"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"odesílání a zobrazení zpráv SMS"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"odesílání a zobrazování zpráv SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Úložiště"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"přístup k fotkám, médiím a souborům na zařízení"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"přístup k fotkám, médiím a souborům v zařízení"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"nahrávání zvuku"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotoaparát"</string>
@@ -299,12 +309,15 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Umožňuje aplikaci číst zprávy informačních služeb přijaté ve vašem zařízení. Výstražná upozornění informačních služeb jsou v některých oblastech odesílána za účelem varování před výjimečnými událostmi. Škodlivé aplikace mohou narušit výkon či provoz vašeho zařízení během přijímání zpráv informačních služeb."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"čtení zdrojů přihlášených k odběru"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Umožňuje aplikaci získat podrobnosti o aktuálně synchronizovaných zdrojích."</string>
-    <string name="permlab_sendSms" msgid="7544599214260982981">"odesílání a zobrazení zpráv SMS"</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"odesílání a zobrazování zpráv SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Umožňuje aplikaci odesílat zprávy SMS. Může to mít za následek účtování neočekávaných poplatků. Škodlivé aplikace vás mohou připravit o peníze odesíláním zpráv bez vašeho svolení."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"čtení textových zpráv (SMS nebo MMS)"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Umožňuje aplikaci číst zprávy SMS uložené v tabletu nebo na SIM kartě.Toto oprávnění umožňuje aplikaci číst zprávy SMS bez ohledu na jejich obsah nebo důvěrnost."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Umožňuje aplikaci číst zprávy SMS uložené v televizi nebo na SIM kartě. Aplikaci to umožní číst veškeré zprávy SMS bez ohledu na obsah či důvěrnost."</string>
-    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Umožňuje aplikaci číst zprávy SMS uložené v telefonu nebo na SIM kartě. Toto oprávnění umožňuje aplikaci číst zprávy SMS bez ohledu na jejich obsah nebo důvěrnost."</string>
+    <!-- no translation found for permdesc_readSms (4741697454888074891) -->
+    <skip />
+    <!-- no translation found for permdesc_readSms (5796670395641116592) -->
+    <skip />
+    <!-- no translation found for permdesc_readSms (6826832415656437652) -->
+    <skip />
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"příjem textových zpráv (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Umožňuje aplikaci přijmout a zpracovat zprávy WAP. Toto oprávnění umožňuje sledovat přijaté zprávy nebo je smazat, aniž by se vám zobrazily."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"načtení spuštěných aplikací"</string>
@@ -317,8 +330,10 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Umožňuje aplikaci aktivovat režim V autě."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"zavření ostatních aplikací"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Umožňuje aplikaci ukončit procesy na pozadí ostatních aplikací. Mohlo by dojít k zastavení ostatních aplikací."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"vykreslení přes další aplikace"</string>
-    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Umožňuje aplikaci vykreslování nad jinými aplikacemi nebo částmi uživatelského rozhraní. Tato funkce může zasahovat do vašeho používání rozhraní jiné aplikace nebo měnit zobrazovaný obsah v jiných aplikacích."</string>
+    <!-- no translation found for permlab_systemAlertWindow (7238805243128138690) -->
+    <skip />
+    <!-- no translation found for permdesc_systemAlertWindow (2393776099672266188) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"trvalé spuštění aplikace"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Umožňuje aplikaci uložit některé své části trvale do paměti. Může to omezit paměť dostupnou pro ostatní aplikace a zpomalit tak tablet."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Umožňuje aplikaci zapsat své jednotlivé části natrvalo do paměti. To může omezit paměť dostupnou pro ostatní aplikace a zpomalit tak televizi."</string>
@@ -344,37 +359,51 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Umožňuje aplikaci upravit údaje o kontaktech uložených v televizi včetně toho, jak často voláte, posíláte e-maily nebo jinými způsoby komunikujete s konkrétními kontakty. Toto oprávnění aplikacím umožňuje mazat údaje o kontaktech."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Umožňuje aplikaci upravit údaje o kontaktech uložených v telefonu včetně toho, jak často voláte, posíláte e-maily nebo komunikujete jinými způsoby s konkrétními kontakty. Toto oprávnění aplikacím umožňuje mazat údaje o kontaktech."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"čtení seznamu hovorů"</string>
-    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Umožňuje aplikaci číst seznam hovorů v tabletu, včetně dat o příchozích a odchozích hovorech. Toto oprávnění umožňuje aplikaci ukládat údaje ze seznamu hovorů. Škodlivé aplikace mohou tyto údaje bez vašeho vědomí sdílet."</string>
-    <string name="permdesc_readCallLog" product="tv" msgid="5611770887047387926">"Umožňuje aplikaci číst seznam hovorů vaší televize, a to včetně údajů o příchozích a odchozích hovorech. Toto oprávnění umožňuje aplikacím ukládat údaje z vašeho seznamu hovorů a škodlivé aplikace mohou sdílet údaje ze seznamu hovorů bez vašeho vědomí."</string>
-    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Umožňuje aplikaci číst seznam hovorů v telefonu, včetně dat o příchozích a odchozích hovorech. Toto oprávnění umožňuje aplikaci ukládat údaje ze seznamu hovorů. Škodlivé aplikace mohou tyto údaje bez vašeho vědomí sdílet."</string>
+    <!-- no translation found for permdesc_readCallLog (3204122446463552146) -->
+    <skip />
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"zápis do seznamu hovorů"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Umožňuje aplikaci upravovat seznam hovorů vašeho tabletu, včetně dat o příchozích a odchozích hovorech. Škodlivé aplikace to mohou zneužít k vymazání nebo změnám seznamu hovorů."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Umožňuje aplikaci upravovat seznam hovorů vaší televize včetně dat o příchozích a odchozích hovorech. Škodlivé aplikace to mohou zneužít k vymazání nebo změnám seznamu hovorů."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Umožňuje aplikaci upravovat seznam hovorů vašeho telefonu, včetně dat o příchozích a odchozích hovorech. Škodlivé aplikace to mohou zneužít k vymazání nebo změnám seznamu hovorů."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"přístup k tělesným senzorům (např. snímače tepu)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Umožňuje aplikaci používat data ze senzorů, které sledují vaši fyzickou kondici, například tepovou frekvenci."</string>
-    <string name="permlab_readCalendar" msgid="5972727560257612398">"čtení událostí kalendáře a důvěrné informace"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Umožňuje aplikaci číst všechny události kalendáře uložené v tabletu, včetně událostí přátel nebo spolupracovníků. Aplikace s tímto oprávněním může sdílet nebo ukládat údaje v kalendáři bez ohledu na důvěrnost nebo citlivost těchto údajů."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Umožňuje aplikaci číst veškeré události v kalendáři uložené v televizi, a to včetně událostí přátel a spolupracovníků. Aplikaci to může umožnit sdílet nebo ukládat data kalendáře bez ohledu na jejich důvěrnost či citlivost."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Umožňuje aplikaci číst všechny události kalendáře uložené v telefonu, včetně událostí přátel nebo spolupracovníků. Aplikace s tímto oprávněním může sdílet nebo ukládat údaje v kalendáři bez ohledu na důvěrnost nebo citlivost těchto údajů."</string>
+    <!-- no translation found for permlab_readCalendar (6716116972752441641) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (4993979255403945892) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (8837931557573064315) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (4373978642145196715) -->
+    <skip />
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"přidávání a upravování událostí kalendářů a odesílání e-mailů bez vědomí vlastníka"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Umožňuje aplikaci přidat, odebrat nebo změnit události, které můžete v tabletu upravovat, a to včetně událostí přátel a spolupracovníků. Toto oprávnění umožňuje aplikaci odesílat zprávy, které budou zdánlivě přicházet od vlastníka kalendáře, nebo upravovat události bez vědomí vlastníka."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Umožňuje aplikaci přidávat, odstraňovat a měnit události, které můžete v televizi upravovat, a to včetně událostí přátel a spolupracovníků. Toto oprávnění umožňuje aplikaci odesílat zprávy, které budou zdánlivě přicházet od vlastníka kalendáře, nebo upravovat události bez vědomí vlastníka."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Umožňuje aplikaci přidat, odebrat nebo změnit události, které můžete v telefonu upravovat, a to včetně událostí přátel a spolupracovníků. Toto oprávnění umožňuje aplikaci odesílat zprávy, které budou zdánlivě přicházet od vlastníků kalendářů, nebo upravovat události bez vědomí vlastníků."</string>
+    <!-- no translation found for permdesc_writeCalendar (1675270619903625982) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCalendar (9017809326268135866) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCalendar (7592791790516943173) -->
+    <skip />
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"přístup k dalším příkazům poskytovatele polohy"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Umožňuje aplikaci přístup k dalším příkazům poskytovatele polohy. To aplikaci umožní zasahovat do fungování systému GPS a dalších zdrojů polohy."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"přístup k přesné poloze (pomocí GPS a sítě)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Umožňuje aplikaci zjistit vaši přesnou polohu pomocí systému GPS nebo síťových lokalizačních zdrojů, jako jsou vysílače mobilní sítě a sítě Wi-Fi. Aby aplikace mohla služby určování polohy použít, musejí být zapnuté a musejí být v zařízení k dispozici. Aplikace pomocí těchto informací mohou určit vaši přesnou polohu a mohou spotřebovávat více energie z baterie."</string>
+    <!-- no translation found for permdesc_accessFineLocation (5821994817969957884) -->
+    <skip />
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"přístup k přibližné poloze (pomocí sítě)"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Umožňuje aplikaci získat vaši přibližnou polohu. Polohu stanovují služby určování polohy pomocí síťových zdrojů, jako jsou vysílače mobilních sítí a sítě Wi-Fi. Aby aplikace mohla služby určování polohy použít, musejí být zapnuté a musejí být ve vašem zařízení k dispozici. Aplikace na základě těchto informací mohou zjistit vaši přibližnou polohu."</string>
+    <!-- no translation found for permdesc_accessCoarseLocation (3373266766487862426) -->
+    <skip />
+    <!-- no translation found for permdesc_accessCoarseLocation (1884022719818788511) -->
+    <skip />
+    <!-- no translation found for permdesc_accessCoarseLocation (7788009094906196995) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"změna nastavení zvuku"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Umožňuje aplikaci změnit globální nastavení zvuku, například hlasitost či reproduktor pro výstup zvuku."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"nahrávání zvuku"</string>
-    <string name="permdesc_recordAudio" msgid="4906839301087980680">"Umožňuje aplikaci zaznamenat zvuk pomocí mikrofonu. Toto oprávnění umožňuje aplikaci kdykoliv zaznamenat zvuk bez vašeho svolení."</string>
+    <!-- no translation found for permdesc_recordAudio (4245930455135321433) -->
+    <skip />
     <string name="permlab_sim_communication" msgid="2935852302216852065">"odesílání příkazů do SIM karty"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Umožňuje aplikaci odesílat příkazy na kartu SIM. Toto oprávnění je velmi nebezpečné."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"pořizování fotografií a videí"</string>
-    <string name="permdesc_camera" msgid="8497216524735535009">"Umožňuje aplikaci pořizovat fotografie a videa pomocí fotoaparátu. Toto oprávnění umožňuje aplikaci používat fotoaparát kdykoliv i bez vašeho svolení."</string>
+    <!-- no translation found for permdesc_camera (5392231870049240670) -->
+    <skip />
     <string name="permlab_vibrate" msgid="7696427026057705834">"ovládání vibrací"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Umožňuje aplikaci ovládat vibrace."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"přímé volání na telefonní čísla"</string>
@@ -858,24 +887,6 @@
     <string name="weeks" msgid="6509623834583944518">"týd."</string>
     <string name="year" msgid="4001118221013892076">"rokem"</string>
     <string name="years" msgid="6881577717993213522">"lety"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> sekundy</item>
-      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> sekundy</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> sekund</item>
-      <item quantity="one">1 sekunda</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> minuty</item>
-      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> minuty</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> minut</item>
-      <item quantity="one">1 minuta</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="few">[<xliff:g id="COUNT">%d</xliff:g>] hodiny</item>
-      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> hodiny</item>
-      <item quantity="other">[<xliff:g id="COUNT">%d</xliff:g>] hodin</item>
-      <item quantity="one">1 hodina</item>
-    </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"nyní"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
       <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> min</item>
@@ -1684,8 +1695,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (příští budík)"</string>
-    <!-- no translation found for zen_mode_forever (1916263162129197274) -->
-    <skip />
+    <string name="zen_mode_forever" msgid="1916263162129197274">"Dokud nevypnete režim Nerušit"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Dokud nevypnete režim Nerušit"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Sbalit"</string>

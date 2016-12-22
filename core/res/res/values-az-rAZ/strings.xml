@@ -46,6 +46,8 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Bağlantı problemi və ya yalnış MM kodu."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Əməliyyat yalnız sabit nömrələrə yığımla məhdudlaşıb."</string>
+    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
+    <skip />
     <string name="serviceEnabled" msgid="8147278346414714315">"Servis işə salındı."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Xidmət aktiv edilmişdir:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Xidmət deaktiv edilib."</string>
@@ -96,6 +98,10 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Səs/data xidmətləri bloklanıb."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Səs/SMS xidmətləri bloklanıb."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Bütün səs/data/SMS xidmətləri bağlıdır."</string>
+    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
+    <skip />
+    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Eskpert TTY Rejimi FULL-u sorğuladı"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Ekspert TTY Rejimi HCO-nu sorğuladı"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Ekspert TTY Rejimi VCO-nu sorğuladı"</string>
@@ -179,6 +185,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"İnzibatçı proqramı olmadığından iş profili silindi."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"İnzibatçı proqramın iş profili ya yoxdur, ya da korlanıb. Nəticədə iş profiliniz və onunla bağlı məlumatlar silinib. Yardım üçün inzibatçınızla əlaqə saxlayın."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"İş profiliniz daha bu cihazda əlçatan deyil."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Cihazınız təmizlənəcəkdir"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"İnzibatçı proqramında komponentlər yoxdur və ya korlanıb və istifadə oluna bilməz. Cihazınız indi təmizlənəcəkdir. Yardım üçün inzibatçınızla əlaqə saxlayın."</string>
     <string name="me" msgid="6545696007631404292">"Mən"</string>
@@ -296,9 +306,12 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"göndərin və SMS mesajlarına baxın"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Tətbiqə SMS mesajı göndərmə icazəsi verir. Bu gözlənilməyən ödənişlərə səbəb ola bilər. Zərərli tətbiqlər sizin təsdiqiniz olmadan mesaj göndərməklə sizə ödənişə səbəb ola bilərlər."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"tekst mesajlarınızı oxuyur (SMS və ya MMS)"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Tətbiqə planşetinizdə və ya SIM kartınızda saxlanan SMS mesajları oxumağa imkan verir. Bu bütün SMS mesajların, onların məzmunundan və konfidensiallığından asılı olmadan oxunması imkanı deməkdir."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Proqrama TV və ya SIM kartınızda saxlanan SMS mesajlarını oxumaq imkanı verir. Bu, proqrama məzmun və ya məxfiliyindən asılı olmayaraq, bütün SMS mesajlarını oxumaq imkanı verir."</string>
-    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Tətbiqə telefonunuzda və ya SIM kartınızda saxlanan SMS mesajları oxumağa imkan verir. Bu bütün SMS mesajların, onların məzmunundan və konfidensiallığından asılı olmadan oxunması imkanı deməkdir."</string>
+    <!-- no translation found for permdesc_readSms (4741697454888074891) -->
+    <skip />
+    <!-- no translation found for permdesc_readSms (5796670395641116592) -->
+    <skip />
+    <!-- no translation found for permdesc_readSms (6826832415656437652) -->
+    <skip />
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"mətn mesajları qəbul etmək (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Tətbiqə WAP mesajlar göndərmək və ya qəbul etmək imkanı verir. Buna mesajları izləmək və Sizə xəbər vermədən silmək imkanları da daxildir."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"işlənən tətbiqlər əldə etmək"</string>
@@ -311,8 +324,10 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Tətbiqə avtomobil rejimini aktivləşdirməyə imkan verir."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"digər tətbiqləri qapatmaq"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Tətbiqə başqa tətbiqlərin arxafon proseslərini dayandırmaq icazəsi verir. Bu digər tətbiqlərin dayanmasına səbəb ola bilər."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"digər tətbiqlər üzərində çəkmək"</string>
-    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Tətbiqə digər tətbiqlərin və ya onların hissələrinin yuxarısında şəkil çəkməyə imkan verir. Onlar istənilən tətbiqin interfeysinin istifadəsinə müdaxilə edə və ya digər tətbiqlərdə axtardıqlarınızı dəyişə bilər."</string>
+    <!-- no translation found for permlab_systemAlertWindow (7238805243128138690) -->
+    <skip />
+    <!-- no translation found for permdesc_systemAlertWindow (2393776099672266188) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"təbiqi həmişə çalışdır"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Tətbiqə öz komponentlərini yaddaşda saxlama icazəsi verir. Bu planşetin sürətini zəiflətməklə, digər tətbiqlər üçün mövcud olan yaddaşı limitləyə bilər."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Proqrama öz hissələrini yaddaşda davamlı etmək imkanı verir. Bu TV-ni zəiflədərək başqa proqramlar üçün mövcud olan yaddaşı məhdudlaşdıra bilər."</string>
@@ -338,37 +353,51 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Proqrama TV-nizdə saxlanan əlaqələr haqqında məlumatları, o cümlədən zəng etdiyiniz, e-poçt məktubu göndərdiyiniz və ya konkret şəxslərlə başqa şəkildə ünsiyyət qurduğunuz tezliyi dəyişdirmək imkanı verir. Bu icazə proqramlara əlaqə məlumatlarınızı silmək imkanı verir."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Tətbiqə Sizin zəng etmək tezliyiniz, elektron poçtlarınız, ünsiyyətləriniz haqqında məlumatları dəyişməyə imkan verir. Buna kontaktların silinməsi imkanı də daxildir."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"zəng qeydiyyatını oxu"</string>
-    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Tətbiqə gələn və gedən zənglər haqqında olan data daxil olmaqla bərabər planşetinizin zəng qeydiyyatını oxumağa imkan verir. Bu icazə tətbiqlərə zəng qeydiyyatınızı saxlamağa imkan verir və zərərli tətbiqlər zəng qeydiyyat datasını sizdən xəbərsiz paylaşa bilər."</string>
-    <string name="permdesc_readCallLog" product="tv" msgid="5611770887047387926">"Proqrama TV-nizin zəng jurnalını, o cümlədən daxil olan və çıxan zənglərlə bağlı məlumatları oxumaq imkanı verir. Bu icazə proqramlara zəng jurnalı ilə bağlı məlumatları saxlamaq icazəsi verir və zərərli proqramlar sizin xəbəriniz olmadan zəng jurnalında verilən məlumatları paylaşa bilər."</string>
-    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Tətbiqə telefon jurnalınızı oxumağa imkan verir, buna gələn və gedən zənglər haqqında məlumatlar da daxildir. Bu icazə tətbiqə zəng jurnalı datasını saxlamağa imkan verir ki, Zərərli tətbiqlər bundan istifadə edərək Sizdən xəbərsiz bütün məlumatlarnızı paylaşa bilər."</string>
+    <!-- no translation found for permdesc_readCallLog (3204122446463552146) -->
+    <skip />
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"zəng loqu yazır"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Tətbiqə planşetinizdəki zəng jurnalını, həmçinin gedən və gələn zənglərin siyahısını dəyişməyə imkan verir. Zərərli tətbiqlər bundan istifadə edərək, zəng jurnalınıza dəyişiklik edə bilər."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Proqrama TV-nizin zəng jurnalını, o cümlədən daxil olan və çıxan zənglərlə bağlı məlumatları dəyişdirmək imkanı verə bilər. Zərərli proqramlar zəng jurnalınızı silmək və ya dəyişdirmək üçün bundan istifadə edə bilər."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Tətbiqə sizin daxil olan və gedən zənglər daxil olmaqla telefon zəngi loqlarınızı redaktə etmək icazəsi verir. Zərərli tətbiqlər bundan telefon loqlarınızı silmək və ya redaktə etmək üçün istifadə edə bilər."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"bədən sensorlarına (ürək döyüntüsü monitorları kimi) giriş"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Tətbiqə ürək döyüntüsü kimi fiziki durumunuzu izləməyən sensorların datasına daxil olmağa icazə verir."</string>
-    <string name="permlab_readCalendar" msgid="5972727560257612398">"təqvim tədbirlərini və konfidensial məlumatları oxuyur"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Tətbiqə dostlarınızın və əməkdaşlarınızın planşetinizdə yerləşən kalendar tədbirlərini oxumağa icazə verir. Bu tətbiqə konfidensiallıq və ya həssaslıqdan asılı olmayaraq sizin kalendar məlumatlarınızı paylaşmaq və ya saxlamağa imkan yaradır."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Proqrama TV-də saxlanan, o cümlədən dostlar və həmkarların bütün təqvim hadisələrini oxumaq imkanı verir. Bu, proqrama məxfilik və ya həssaslıqdan asılı olmayaraq təqvim məlumatlarınızı paylaşmaq və ya saxlamaq icazəsi verə bilər."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Tətbiqə dost və əməkdaşlara məxsus olanlar daxil olmaqla planşetdə yerləşən bütün kalendar tətbiqlərini oxumaq icazəsi verir. Bu tətbiqə konfidensiallıq və ya həssaslıqdan asılı olmayaraq, Sizin kalendar məlumatlarınızı paylaşmaq və ya saxlamaq imkanı yaradır."</string>
+    <!-- no translation found for permlab_readCalendar (6716116972752441641) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (4993979255403945892) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (8837931557573064315) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (4373978642145196715) -->
+    <skip />
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"cihaz sahibinin icazəsi olmadan təqvim tədbirləri əlavə etmək və ya dəyişmək, bunun haqqında bildirişlər göndərmək"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Tətbiqə planşetinizdəki tədbirləri dəyişməyə, tədbir əlavə etməyə və ya silməyə imkan verir. Buna Sizin dostlarınızla və həmkarlarınızla birlikdə hazırladığınız tədbirlər də daxildir. Bu, tədbirə Sizin adınızdan və Sizdən xəbərsiz, təqvim sahibi kimi mesaj göndərmək imkanını verir."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Proqrama TV-də dəyişdirə bildiyiniz, o cümlədən dostlar və həmkarların hadisələrini əlavə etmək, silmək, dəyişdirmək imkanı verir. Bu, proqrama təqvim sahiblərindən gələn mesajları göndərmək və ya sahiblərin xəbəri olmadan hadisələri dəyişdirmək imkanı verə bilər."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Dostlarınız və həmkarlarınıza məxsus olanlar da daxil olmaqla, tətbiqə telefonunuzdakı tədbirləri dəyişməyə, tədbir əlavə etməyə və ya silməyə imkan verir. Bu, tədbirə Sizin adınızdan və Sizdən xəbərsiz, təqvim sahibi kimi mesaj göndərmək imkanı verir."</string>
+    <!-- no translation found for permdesc_writeCalendar (1675270619903625982) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCalendar (9017809326268135866) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCalendar (7592791790516943173) -->
+    <skip />
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"əlavə məkan provayderi əmrlərinə çıxış"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Tətbiqə ekstra məkan provayder əmrlərinə girişə imkan verir. Bu, tətbiqə GPS və ya digər lokal mənbələrlə əməliyyata müdaxiləyə imkan verə bilər."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"dəqiq məkana (GPS və şəbəkə əsasında) giriş"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Qlobal Pozisiya Sistemini və ya şəbəkə qüllələri və Wi-Fi kimi şəbəkə məkanını istifadə edərək tətbiqə Sizin dəqiq yerinizi təyin etməyə imkan verir. Bu məkan xidmətləri aktivləşdirilməlidirlər ki, Siz tətbiqi istifadə edən zaman tətbiq onları istifadə edə bilsin. Tətbiqlər Sizin harada olmağınızı bunun vasitəsilə təyin edəcək, eyni zamanda, bu xidmət əlavə batareya enerjisi apara bilər."</string>
+    <!-- no translation found for permdesc_accessFineLocation (5821994817969957884) -->
+    <skip />
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"təxmini məkana (şəbəkə əsaslı) giriş"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Tətbiqə təxmini yerinizi almaq üçün imkan verir. Bu yer, yerləşmə xidmətləri tərəfindən mobil qüllələr və Wi-Fi kimi şəbəkə yerləşmə mənbələrdən istifadə etməklə əldə edilir. Bu yerləşmə xidmətləri tətbiqin onlardan istifadəsi üçün açıq və cihazınızın onları istifadəsi üçün mövcud olmalıdır. Tətbiqlər bundan sizin təxminən harada olduğunuzu müəyyənləşdirmək üçün istifadə edə bilər."</string>
+    <!-- no translation found for permdesc_accessCoarseLocation (3373266766487862426) -->
+    <skip />
+    <!-- no translation found for permdesc_accessCoarseLocation (1884022719818788511) -->
+    <skip />
+    <!-- no translation found for permdesc_accessCoarseLocation (7788009094906196995) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"audio ayarlarınızı dəyişir"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Tətbiqə səs və hansı spikerin çıxış üçün istifadə olunduğu kimi qlobal səs ayarlarını dəyişdirməyə imkan verir."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"səs yaz"</string>
-    <string name="permdesc_recordAudio" msgid="4906839301087980680">"Tətbiqə mikrofonla audio yazmaq icazəsi verir. İcazə tətbiqə sizin təsdiqiniz olmadan istənilən zaman səs yazma izni verir."</string>
+    <!-- no translation found for permdesc_recordAudio (4245930455135321433) -->
+    <skip />
     <string name="permlab_sim_communication" msgid="2935852302216852065">"əmrləri SIM\'ə göndərin"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Tətbiqə SIM-ə əmrlər göndərməyə imkan verir. Bu, çox təhlükəlidir."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"şəkil və video çəkmək"</string>
-    <string name="permdesc_camera" msgid="8497216524735535009">"Tətbiqə kamera ilə şəkil və video çəkməyə imkan yaradır. Bu icazə tətbiqə sizin təsdiqiniz olmadan kameradan istifadə icazəsi verir."</string>
+    <!-- no translation found for permdesc_camera (5392231870049240670) -->
+    <skip />
     <string name="permlab_vibrate" msgid="7696427026057705834">"vibrasiyaya nəzarət edir"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Tətbiqə vibratoru idarə etmə icazəsi verir."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefon nömrələrinə birbaşa zəng edir"</string>
@@ -850,18 +879,6 @@
     <string name="weeks" msgid="6509623834583944518">"həftə"</string>
     <string name="year" msgid="4001118221013892076">"il"</string>
     <string name="years" msgid="6881577717993213522">"il"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> saniyə</item>
-      <item quantity="one">1 saniyə</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> dəqiqə</item>
-      <item quantity="one">1 dəqiqə</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> saat</item>
-      <item quantity="one">1 saat</item>
-    </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"indi"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>d</item>
@@ -1614,8 +1631,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Saat <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> qədər"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> radəsinə qədər (növbəti siqnal)"</string>
-    <!-- no translation found for zen_mode_forever (1916263162129197274) -->
-    <skip />
+    <string name="zen_mode_forever" msgid="1916263162129197274">"\"Narahat etməyin\" seçiminini deaktiv edənə kimi"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"\"Narahat etməyin\" seçiminini deaktiv edənə kimi"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Dağıt"</string>

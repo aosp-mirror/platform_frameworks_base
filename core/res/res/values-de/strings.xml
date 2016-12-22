@@ -46,6 +46,8 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Verbindungsproblem oder ungültiger MMI-Code."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Der Vorgang ist nur für deine zugelassenen Rufnummern möglich."</string>
+    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
+    <skip />
     <string name="serviceEnabled" msgid="8147278346414714315">"Dienst wurde aktiviert."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Dienst wurde aktiviert für:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Dienst wurde deaktiviert."</string>
@@ -96,6 +98,10 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Sprach-/Datendienste sind gesperrt."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Sprach-/SMS-Dienste sind gesperrt."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Alle Sprach-/Daten-/SMS-Dienste sind gesperrt."</string>
+    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
+    <skip />
+    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Peer hat TTY-Modus \"Vollständig\" angefordert."</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Peer hat TTY-Modus \"HCO\" angefordert."</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Peer hat TTY-Modus \"VC\" angefordert."</string>
@@ -179,6 +185,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Arbeitsprofil aufgrund fehlender Admin-App gelöscht"</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Die Admin-App für das Arbeitsprofil fehlt oder ist beschädigt. Daher wurden dein Arbeitsprofil und alle zugehörigen Daten gelöscht. Wende dich für weitere Hilfe an deinen Administrator."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Dein Arbeitsprofil ist auf diesem Gerät nicht mehr verfügbar."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Die Daten auf deinem Gerät werden gelöscht."</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Die Admin-App kann nicht verwendet werden, da sie beschädigt wurde oder Komponenten fehlen. Die Daten auf deinem Gerät werden nun gelöscht. Wende dich für weitere Hilfe an deinen Administrator."</string>
     <string name="me" msgid="6545696007631404292">"Eigene"</string>
@@ -296,9 +306,12 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"SMS senden und abrufen"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Ermöglicht der App, SMS zu senden. Dies kann zu unerwarteten Kosten führen. Schädliche Apps können Kosten verursachen, indem sie Nachrichten ohne deine Bestätigung senden."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"SMS oder MMS lesen"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Ermöglicht der App, auf deinem Tablet oder deiner SIM-Karte gespeicherte SMS zu lesen. Die App kann alle SMS lesen, unabhängig von Inhalt und Vertraulichkeit."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Ermöglicht der App, auf deinem Fernseher oder deiner SIM-Karte gespeicherte SMS zu lesen. Die App kann alle SMS lesen, unabhängig von Inhalt und Vertraulichkeit."</string>
-    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Ermöglicht der App, auf deinem Telefon oder deiner SIM-Karte gespeicherte SMS zu lesen. Die App kann alle SMS lesen, unabhängig von Inhalt und Vertraulichkeit."</string>
+    <!-- no translation found for permdesc_readSms (4741697454888074891) -->
+    <skip />
+    <!-- no translation found for permdesc_readSms (5796670395641116592) -->
+    <skip />
+    <!-- no translation found for permdesc_readSms (6826832415656437652) -->
+    <skip />
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"Textnachrichten (WAP) empfangen"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Ermöglicht der App, WAP-Nachrichten zu empfangen und zu verarbeiten. Mit der Berechtigung können Nachrichten, die an dich gesendet wurden, überwacht und gelöscht werden, bevor sie dir angezeigt werden."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"Aktive Apps abrufen"</string>
@@ -311,8 +324,10 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Ermöglicht der App, den Automodus zu aktivieren"</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"Andere Apps schließen"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Ermöglicht der App, Hintergrundprozesse anderer Apps zu beenden. Das kann dazu führen, dass andere Apps nicht mehr ausgeführt werden."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"Über anderen Apps einblenden"</string>
-    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Ermöglicht der App, über andere Apps oder Teile der Benutzeroberfläche zu zeichnen. Dies kann sich auf die Oberfläche in jeder App auswirken oder die erwartete Darstellung in anderen Apps verändern."</string>
+    <!-- no translation found for permlab_systemAlertWindow (7238805243128138690) -->
+    <skip />
+    <!-- no translation found for permdesc_systemAlertWindow (2393776099672266188) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"App permanent ausführen"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Ermöglicht der App, Teile der eigenen App dauerhaft im Speicher abzulegen. Dies kann dazu führen, dass anderen Apps weniger Arbeitsspeicher zur Verfügung steht und das Tablet langsamer wird."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Ermöglicht der App, Teile der eigenen App dauerhaft im Speicher abzulegen. Dies kann dazu führen, dass anderen Apps weniger Arbeitsspeicher zur Verfügung steht und der Fernseher langsamer wird."</string>
@@ -338,37 +353,51 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Ermöglicht der App, Daten zu den auf deinem Fernseher gespeicherten Kontakten zu ändern, einschließlich der Häufigkeit, mit der du bestimmte Kontakte angerufen, diesen E-Mails gesendet oder anderweitig mit ihnen kommuniziert hast. Die Berechtigung erlaubt Apps, Kontaktdaten zu löschen."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Ermöglicht der App, Daten zu Kontakten, die auf deinem Telefon gespeichert sind, zu ändern, einschließlich der Häufigkeit, mit der du bestimmte Kontakte angerufen, diesen E-Mails gesendet oder anderweitig mit ihnen kommuniziert hast. Die Berechtigung erlaubt Apps, Kontaktdaten zu löschen."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"Anrufliste lesen"</string>
-    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Ermöglicht der App, die Anrufliste deines Tablets zu lesen, einschließlich der Daten über ein- und ausgehende Anrufe. Die Berechtigung erlaubt Apps, deine Anruflistendaten zu speichern, und schädliche Apps können diese Daten ohne dein Wissen weiterleiten."</string>
-    <string name="permdesc_readCallLog" product="tv" msgid="5611770887047387926">"Ermöglicht der App, die Anrufliste deines Fernsehers zu lesen, einschließlich der Daten über ein- und ausgehende Anrufe. Diese Berechtigung ermöglicht es Apps, Daten aus deiner Anrufliste zu speichern. Schädliche Apps können so deine Anrufliste ohne dein Wissen weitergeben."</string>
-    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Ermöglicht der App, die Anrufliste deines Telefons zu lesen, einschließlich der Daten über ein- und ausgehende Anrufe. Die Berechtigung erlaubt Apps, deine Anruflistendaten zu speichern, und schädliche Apps können diese Daten ohne dein Wissen weiterleiten."</string>
+    <!-- no translation found for permdesc_readCallLog (3204122446463552146) -->
+    <skip />
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"Anrufliste bearbeiten"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Ermöglicht der App, die Anrufliste deines Tablets zu ändern, einschließlich der Daten über ein- und ausgehende Anrufe. Schädliche Apps können so deine Anrufliste löschen oder ändern."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Ermöglicht der App, die Anrufliste deines Fernsehers zu ändern, einschließlich der Daten über ein- und ausgehende Anrufe. Schädliche Apps können so deine Anrufliste löschen oder ändern."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Ermöglicht der App, die Anrufliste deines Telefons zu ändern, einschließlich der Daten über ein- und ausgehende Anrufe. Schädliche Apps können so deine Anrufliste löschen oder ändern."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"Auf Körpersensoren wie z. B. Herzfrequenzmesser zugreifen"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Ermöglicht der App, auf Daten von Sensoren zuzugreifen, die deine körperliche Verfassung überwachen, beispielsweise deinen Puls"</string>
-    <string name="permlab_readCalendar" msgid="5972727560257612398">"Kalendertermine sowie vertrauliche Informationen lesen"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Ermöglicht der App, alle auf deinem Tablet gespeicherten Kalendertermine zu lesen, einschließlich der von Freunden und Kollegen. Damit kann die App möglicherweise deine Kalenderdaten unabhängig von der Vertraulichkeit weiterleiten oder speichern."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Ermöglicht der App, alle auf deinem Fernseher gespeicherten Kalendertermine zu lesen, einschließlich der von Freunden und Kollegen. Damit kann die App möglicherweise deine Kalenderdaten unabhängig von der Vertraulichkeit teilen oder speichern."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Ermöglicht der App, alle auf deinem Telefon gespeicherten Kalendertermine zu lesen, einschließlich der von Freunden und Kollegen. Damit kann die App möglicherweise deine Kalenderdaten unabhängig von der Vertraulichkeit weiterleiten oder speichern."</string>
+    <!-- no translation found for permlab_readCalendar (6716116972752441641) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (4993979255403945892) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (8837931557573064315) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (4373978642145196715) -->
+    <skip />
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"Ohne das Wissen der Eigentümer Kalendertermine hinzufügen oder ändern und E-Mails an Gäste senden"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Ermöglicht der App, Termine, die du auf deinem Tablet ändern kannst, hinzuzufügen, zu entfernen und zu ändern, einschließlich derjenigen von Freunden und Kollegen. Damit kann die App Nachrichten senden, die so erscheinen, als stammten sie vom jeweiligen Kalenderinhaber, oder Termine ohne Wissen des Inhabers ändern."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Ermöglicht der App, Termine, die du auf deinem Fernseher bearbeiten kannst ‒ einschließlich der von Freunden und Kollegen ‒, hinzuzufügen, zu entfernen und zu ändern. Dadurch kann die App möglicherweise Nachrichten senden, die scheinbar von Kalendereigentümern stammen, oder Termine ohne Wissen der Eigentümer ändern."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Ermöglicht der App, Termine, die du auf deinem Telefon ändern kannst, hinzuzufügen, zu entfernen und zu ändern, einschließlich derjenigen von Freunden und Kollegen. Damit kann die App Nachrichten senden, die so erscheinen, als stammten sie vom jeweiligen Kalenderinhaber, oder kann Termine ohne Wissen des Inhabers ändern."</string>
+    <!-- no translation found for permdesc_writeCalendar (1675270619903625982) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCalendar (9017809326268135866) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCalendar (7592791790516943173) -->
+    <skip />
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"Auf zusätzliche Dienstanbieterbefehle für Standort zugreifen"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Ermöglicht der App, auf zusätzliche Standortanbieterbefehle zuzugreifen. Damit könnte die App die Funktionsweise von GPS oder anderen Standortquellen beeinträchtigen."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"Auf genauen Standort zugreifen (GPS- und netzwerkbasiert)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Ermöglicht der App, deine genaue Position anhand von GPS-Daten (Global Positioning System) oder über Netzwerkstandortquellen wie Sendemasten oder WLAN zu ermitteln. Diese Standortdienste müssen auf deinem Gerät verfügbar und aktiviert sein, damit die App sie verwenden kann. Apps können deinen Standort anhand dieser Daten ermitteln und verbrauchen eventuell zusätzliche Akkuleistung."</string>
+    <!-- no translation found for permdesc_accessFineLocation (5821994817969957884) -->
+    <skip />
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"Auf den ungefähren Standort zugreifen (netzwerkbasiert)"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Ermöglicht der App, deinen ungefähren Standort zu ermitteln. Diese Standortangabe stammt von Standortdiensten, die Netzwerkstandortquellen wie etwa Sendemasten oder WLAN verwenden. Diese Standortdienste müssen auf deinem Gerät verfügbar und aktiviert sein, damit die App sie verwenden kann. Apps können deinen ungefähren Standort anhand dieser Daten ermitteln."</string>
+    <!-- no translation found for permdesc_accessCoarseLocation (3373266766487862426) -->
+    <skip />
+    <!-- no translation found for permdesc_accessCoarseLocation (1884022719818788511) -->
+    <skip />
+    <!-- no translation found for permdesc_accessCoarseLocation (7788009094906196995) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"Audio-Einstellungen ändern"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Ermöglicht der App, globale Audio-Einstellungen zu ändern, etwa die Lautstärke und den Lautsprecher für die Ausgabe."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"Audio aufnehmen"</string>
-    <string name="permdesc_recordAudio" msgid="4906839301087980680">"Ermöglicht der App, Ton mithilfe des Mikrofons aufzunehmen. Die Berechtigung erlaubt der App, Tonaufnahmen jederzeit und ohne deine Bestätigung durchzuführen."</string>
+    <!-- no translation found for permdesc_recordAudio (4245930455135321433) -->
+    <skip />
     <string name="permlab_sim_communication" msgid="2935852302216852065">"Befehle an die SIM senden"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Ermöglicht der App das Senden von Befehlen an die SIM-Karte. Dies ist äußerst risikoreich."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"Bilder und Videos aufnehmen"</string>
-    <string name="permdesc_camera" msgid="8497216524735535009">"Ermöglicht der App, Bilder und Videos mit der Kamera aufzunehmen. Die Berechtigung erlaubt der App, die Kamera jederzeit und ohne deine Bestätigung zu nutzen."</string>
+    <!-- no translation found for permdesc_camera (5392231870049240670) -->
+    <skip />
     <string name="permlab_vibrate" msgid="7696427026057705834">"Vibrationsalarm steuern"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Ermöglicht der App, den Vibrationsalarm zu steuern"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"Telefonnummern direkt anrufen"</string>
@@ -850,18 +879,6 @@
     <string name="weeks" msgid="6509623834583944518">"Wochen"</string>
     <string name="year" msgid="4001118221013892076">"Jahr"</string>
     <string name="years" msgid="6881577717993213522">"Jahre"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> Sekunden</item>
-      <item quantity="one">1 Sekunde</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> Minuten</item>
-      <item quantity="one">1 Minute</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> Stunden</item>
-      <item quantity="one">1 Stunde</item>
-    </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"jetzt"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> min</item>
@@ -1614,8 +1631,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Bis <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Bis <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (nächste Weckzeit)"</string>
-    <!-- no translation found for zen_mode_forever (1916263162129197274) -->
-    <skip />
+    <string name="zen_mode_forever" msgid="1916263162129197274">"Bis zur Deaktivierung von \"Bitte nicht stören\""</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Bis zur Deaktivierung von \"Nicht stören\""</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Minimieren"</string>

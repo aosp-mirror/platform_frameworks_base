@@ -46,6 +46,8 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Vandamál með tengingu eða ógild MMI-kóðaskipun."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Aðgerð takmarkast við fast númeraval."</string>
+    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
+    <skip />
     <string name="serviceEnabled" msgid="8147278346414714315">"Þjónustan var virkjuð."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Þjónustan var virkjuð fyrir:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Þjónustan hefur verið gerð óvirk."</string>
@@ -96,6 +98,10 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Lokað er á radd-/gagnaþjónustu."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Lokað er fyrir raddþjónustu/SMS-þjónustu."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Lokað á alla radd-, gagna- og SMS-þjónustu."</string>
+    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
+    <skip />
+    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Jafningi bað um FULLA stillingu fjarrita"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Jafningi bað um HCO-stillingu fjarrita"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Jafningi bað um VCO-stillingu fjarrita"</string>
@@ -179,6 +185,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Vinnusniði eytt vegna þess að stjórnunarforrit vantar."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Stjórnunarforrit vinnusniðsins vantar eða er skemmt. Vinnusniðinu og gögnum því tengdu hefur því verið eytt. Hafðu samband við kerfisstjórann til að fá frekari aðstoð."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Vinnusniðið þitt er ekki lengur í boði á þessu tæki."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Tækið verður hreinsað"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Stjórnunarforritið vantar íhluti eða er skemmt og ekki er hægt að nota það. Þurrkað verður út af tækinu. Hafðu samband við kerfisstjórann til að fá aðstoð."</string>
     <string name="me" msgid="6545696007631404292">"Ég"</string>
@@ -296,9 +306,12 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"senda og skoða SMS-skilaboð"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Leyfir forriti að senda SMS-skilaboð. Þetta getur valdið óvæntri gjaldtöku. Spilliforrit geta kostað þig peninga með því að senda skilaboð án staðfestingar frá þér."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lesa textaskilaboð (SMS eða MMS)"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Leyfir forriti að lesa SMS-skilaboð sem vistuð eru í spjaldtölvunni eða á SIM-kortinu. Þetta gerir forritinu kleift að lesa öll SMS-skilaboð burtséð frá innihaldi eða trúnaðarstigi."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Leyfir forriti að lesa SMS-skilaboð sem vistuð eru í sjónvarpinu eða á SIM-kortinu. Þetta gerir forritinu kleift að lesa öll SMS-skilaboð burtséð frá innihaldi eða trúnaðarstigi."</string>
-    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Leyfir forriti að lesa SMS-skilaboð sem vistuð eru í símanum eða á SIM-kortinu. Þetta gerir forritinu kleift að lesa öll SMS-skilaboð burtséð frá innihaldi eða trúnaðarstigi."</string>
+    <!-- no translation found for permdesc_readSms (4741697454888074891) -->
+    <skip />
+    <!-- no translation found for permdesc_readSms (5796670395641116592) -->
+    <skip />
+    <!-- no translation found for permdesc_readSms (6826832415656437652) -->
+    <skip />
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"taka á móti textaskilaboðum (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Leyfir forriti að taka á móti og vinna úr WAP-skilaboðum. Þessi heimild felur í sér möguleikann á að fylgjast með eða eyða skilaboðum sem þér eru send án þess að birta þér þau."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"sækja forrit í gangi"</string>
@@ -311,8 +324,10 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Leyfir forriti að kveikja á bílastillingu."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"loka öðrum forritum"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Leyfir forriti að loka bakgrunnsferlum annarra forrita. Þetta getur valdið því að önnur forrit lokist."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"teikna yfir önnur forrit"</string>
-    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Leyfir forriti að teikna yfir önnur forrit eða hluta viðmótsins. Þetta getur truflað notkun þína á viðmóti hvaða forrits sem er eða breytt því sem þú telur þig sjá í öðrum forritum."</string>
+    <!-- no translation found for permlab_systemAlertWindow (7238805243128138690) -->
+    <skip />
+    <!-- no translation found for permdesc_systemAlertWindow (2393776099672266188) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"láta forrit keyra stöðugt"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Leyfir forriti að gera hluta sjálfs sín varanlega í minni. Þetta getur takmarkað það minni sem býðst öðrum forritum og þannig hægt á spjaldtölvunni."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Leyfir forriti að gera hluta sjálfs sín varanlega í minni. Þetta getur takmarkað það minni sem býðst öðrum forritum og þannig hægt á sjónvarpinu."</string>
@@ -338,37 +353,51 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Leyfir forriti að breyta gögnum um tengiliði sem vistuð eru í sjónvarpinu, þ. á m. um tíðni samskipta þinna við tiltekna tengiliði með símtölum, tölvupósti eða öðrum hætti. Þessi heimild gerir forritum kleift að eyða tengiliðagögnum."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Leyfir forriti að breyta gögnum um tengiliði sem vistuð eru í símanum, þ. á m. tíðni samskipta þinna við tiltekna tengiliði með símtölum, tölvupósti eða öðrum hætti. Þessi heimild gerir forritum kleift að eyða tengiliðagögnum."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"lesa símtalaskrá"</string>
-    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Leyfir forriti að lesa símtalaskrá spjaldtölvunnar, þ. á m. gögn um hringd og móttekin símtöl. Þessi heimild gerir forritum kleift að vista gögn símtalskráarinnar og spilliforrit kunna að deila þeim gögnum án þinnar vitundar."</string>
-    <string name="permdesc_readCallLog" product="tv" msgid="5611770887047387926">"Leyfir forriti að lesa símtalaskrá sjónvarpsins, þ. á m. gögn um hringd og móttekin símtöl. Þessi heimild gerir forritum kleift að vista gögn símtalaskráarinnar og spilliforrit kunna að deila þeim gögnum án þinnar vitundar."</string>
-    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Leyfir forriti að lesa símtalaskrá símans, þ. á m. gögn um hringd og móttekin símtöl. Þessi heimild gerir forritum kleift að vista gögn símtalskráarinnar og spilliforrit kunna að deila þeim gögnum án þinnar vitundar."</string>
+    <!-- no translation found for permdesc_readCallLog (3204122446463552146) -->
+    <skip />
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"skrifa símtalaskrá"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Leyfir forriti að breyta símtalaskrá spjaldtölvunnar, þ. á m. gögnum um hringd og móttekin símtöl. Spilliforrit geta notað þetta til að eyða eða breyta símtalaskránni."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Leyfir forriti að breyta símtalaskrá sjónvarpsins, þ. á m. gögnum um hringd og móttekin símtöl. Spilliforrit geta notað þetta til að eyða eða breyta símtalaskránni."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Leyfir forriti að breyta símtalaskrá símans, þ. á m. gögnum um hringd og móttekin símtöl. Spilliforrit geta notað þetta til að eyða eða breyta símtalaskránni."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"fá aðgang að líkamsskynjurum (s.s. hjartsláttarmælum)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Veitir forritinu aðgang að gögnum frá skynjurum sem fylgjast með líkamsstarfsemi þinni, svo sem hjartslætti."</string>
-    <string name="permlab_readCalendar" msgid="5972727560257612398">"lesa dagatalsviðburði og trúnaðarupplýsingar"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Leyfir forriti að lesa alla dagatalsviðburði sem vistaðir eru í spjaldtölvunni, þ. á m. þá sem vinir eða samstarfsmenn eiga. Þetta getur gert forritinu kleift að deila dagatalsgögnunum þínum burtséð frá því hvort þau innihalda trúnaðargögn eða viðkvæmar upplýsingar."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Leyfir forriti að lesa alla dagatalsviðburði sem vistaðir eru í sjónvarpinu, þ. á m. þá sem vinir eða samstarfsmenn eiga. Þetta getur gert forritinu kleift að deila dagatalsgögnunum þínum burtséð frá því hvort þau innihalda trúnaðargögn eða viðkvæmar upplýsingar."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Leyfir forriti að lesa alla dagatalsviðburði sem vistaðir eru í símanum, þ. á m. þá sem vinir eða samstarfsmenn eiga. Þetta getur gert forritinu kleift að deila dagatalsgögnunum þínum burtséð frá því hvort þau innihalda trúnaðargögn eða viðkvæmar upplýsingar."</string>
+    <!-- no translation found for permlab_readCalendar (6716116972752441641) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (4993979255403945892) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (8837931557573064315) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (4373978642145196715) -->
+    <skip />
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"bæta við eða breyta dagatalsviðburðum og senda gestum tölvupóst að eigendum forspurðum"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Leyfir forriti að bæta við, fjarlægja og breyta viðburðum sem hægt er að vinna með í spjaldtölvunni, þ. á m. viðburðum sem vinir eða samstarfsmenn eiga. Þetta getur gert forritinu kleift að senda skilaboð sem virðast koma frá eigendum viðburðarins eða breyta viðburðum án vitundar eigenda þeirra."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Leyfir forriti að bæta við, fjarlægja og breyta viðburðum sem hægt er að breyta í sjónvarpinu, þ. á m. viðburðum sem vinir eða samstarfsmenn eiga. Þetta getur gert forritinu kleift að senda skilaboð sem virðast koma frá eigendum viðburðarins eða breyta viðburðum án vitundar eigenda þeirra."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Leyfir forriti að bæta við, fjarlægja og breyta viðburðum sem hægt er að breyta í símanum, þ. á m. viðburðum sem vinir eða samstarfsmenn eiga. Þetta getur gert forritinu kleift að senda skilaboð sem virðast koma frá eigendum viðburðarins eða breyta viðburðum án vitundar eigenda þeirra."</string>
+    <!-- no translation found for permdesc_writeCalendar (1675270619903625982) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCalendar (9017809326268135866) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCalendar (7592791790516943173) -->
+    <skip />
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"aðgangur að viðbótarskipunum staðsetningarveitu"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Leyfir forriti að fá aðgang að fleiri skipunum staðsetningarveitu. Þetta getur gert forritinu kleift að hafa áhrif á virkni GPS og annars staðsetningarbúnaðar."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"fá aðgang að nákvæmri staðsetningu (frá GPS og símkerfi)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Leyfir forriti að sjá nákvæma staðsetningu þína með hjálp GPS-kerfis eða staðsetningarbúnaðar sem byggir á netkerfum á borð við farsímasenda og Wi-Fi. Það verður að vera kveikt á slíkri staðsetningarþjónustu og hún þarf að vera aðgengileg tækinu til að forritið geti notað hana. Forrit geta notað þjónustuna til að áætla staðsetningu þína og kunna að ganga hraðar á rafhlöðuna."</string>
+    <!-- no translation found for permdesc_accessFineLocation (5821994817969957884) -->
+    <skip />
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"fá aðgang að áætlaðri staðsetningu (frá símkerfi)"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Leyfir forriti að sjá gróflega áætlaða staðsetningu þína. Sú staðsetning er sótt í staðsetningarbúnað sem byggir á netkerfum á borð við farsímasenda og Wi-Fi. Það verður að vera kveikt á slíkri staðsetningarþjónustu og hún þarf að vera aðgengileg tækinu til að forritið geti notað hana. Forrit geta notað þjónustuna til að áætla staðsetningu þína gróflega."</string>
+    <!-- no translation found for permdesc_accessCoarseLocation (3373266766487862426) -->
+    <skip />
+    <!-- no translation found for permdesc_accessCoarseLocation (1884022719818788511) -->
+    <skip />
+    <!-- no translation found for permdesc_accessCoarseLocation (7788009094906196995) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"breyta hljóðstillingum"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Leyfir forriti að breyta altækum hljóðstillingum, s.s. hljóðstyrk og hvaða hátalari er notaður sem úttak."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"taka upp hljóð"</string>
-    <string name="permdesc_recordAudio" msgid="4906839301087980680">"Leyfir forriti að taka upp hljóð með hljóðnemanum. Þessi heimild leyfir forritinu að taka upp hljóð hvenær sem er án þinnar heimildar."</string>
+    <!-- no translation found for permdesc_recordAudio (4245930455135321433) -->
+    <skip />
     <string name="permlab_sim_communication" msgid="2935852302216852065">"senda skipanir til SIM-kortsins"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Leyfir forriti að senda SIM-kortinu skipanir. Þetta er mjög hættulegt."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"taka myndir og myndskeið"</string>
-    <string name="permdesc_camera" msgid="8497216524735535009">"Leyfir forriti að taka myndir og myndskeið með myndavélinni. Þessi heimild leyfir forritinu að nota myndavélina hvenær sem er án þinnar heimildar."</string>
+    <!-- no translation found for permdesc_camera (5392231870049240670) -->
+    <skip />
     <string name="permlab_vibrate" msgid="7696427026057705834">"stjórna titringi"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Leyfir forriti að stjórna titraranum."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"hringja beint í símanúmer"</string>
@@ -850,18 +879,6 @@
     <string name="weeks" msgid="6509623834583944518">"vikur"</string>
     <string name="year" msgid="4001118221013892076">"ár"</string>
     <string name="years" msgid="6881577717993213522">"ár"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> sekúnda</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> sekúndur</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> mínúta</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> mínútur</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> klukkustund</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> klukkustundir</item>
-    </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"nú"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
       <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> m.</item>
@@ -1614,8 +1631,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Til <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Þangað til <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (næsta viðvörun)"</string>
-    <!-- no translation found for zen_mode_forever (1916263162129197274) -->
-    <skip />
+    <string name="zen_mode_forever" msgid="1916263162129197274">"Þar til þú slekkur á „Ónáðið ekki“"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Þar til þú slekkur á „Ónáðið ekki“"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Minnka"</string>

@@ -46,6 +46,8 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"ມີບັນຫາໃນການເຊື່ອມຕໍ່ ຫຼືລະຫັດ MMI ບໍ່ຖືກຕ້ອງ."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"ການດຳເນີນການຖືກຈຳກັດເປັນ ຈຳກັດໝາຍເລກໂທອອກເທົ່ານັ້ນ."</string>
+    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
+    <skip />
     <string name="serviceEnabled" msgid="8147278346414714315">"ບໍລິການຖືກເປີດໄວ້ແລ້ວ."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"ບໍລິການຖືກເປີດໃຊ້ສຳລັບ:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"ບໍ​ລິ​ການ​ໄດ້​ຖືກ​ປິດແລ້ວ."</string>
@@ -96,6 +98,10 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"ບໍລິການ ຂໍ້ມູນ/ສຽງ ຖືກບລັອກ."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"ບໍລິການ ສຽງ/SMS ຖືກບລັອກ."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"ບໍລິການ ການໂທ/ອິນເຕີເນັດ/SMS ຖືກປິດກັ້ນໄວ້."</string>
+    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
+    <skip />
+    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"ໂໝດ TTY ທີ່​ເພື່ອນ​ຂໍ​ນັ້ນ​ເຕັມ​ແລ້ວ"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"ໂໝດ TTY ທີ່​ເພື່ອນ​ຂໍ HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"ໂໝດ TTY ທີ່​ເພື່ອນ​ຂໍ VCO"</string>
@@ -179,6 +185,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"ລຶບ​ໂປ​ຣ​ໄຟ​ລ໌​ບ່ອນ​ເຮັດ​ວຽກ​ແລ້ວ ເນື່ອງ​ຈາກຂາດ​ແອັບ​ບໍ​ລິ​ຫານ​ໄປ."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"ແອັບ​ບໍ​ລິ​ຫານ​ໂປ​ຣ​ໄຟ​ລ໌​ວຽກ​ຂາດ​ໄປ ຫຼື​ຖືກ​​ເສຍ​ຫາຍ. ດ້ວຍ​ເຫດ​ຜົນ​ນັ້ນ, ໂປ​ຣ​ໄຟ​ລ໌​ບ່ອນ​ເຮັດວຽກ​ຂອງ​ທ່ານ ແລະ​ຂໍ້​ມູນ​ທີ່​ກ່ຽວ​ຂ້ອງ​ຈິ່ງ​ຖືກ​ລຶບ​ໄປ. ຕິດ​ຕໍ່​ຜູ້​ຄວບ​ຄຸ​ມ​ຂອງ​ທ່ານ ເພື່ອ​ຂໍ​ຄວາມ​ຊ່ວຍ​ເຫຼືອ."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກບໍ່ມີໃຫ້ໃຊ້ງານເທິງອຸປະກອນນີ້ອີກຕໍ່ໄປ."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ຈະ​ຖືກ​ລຶບ"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"ແອັບ​ບໍ​ລິ​ຫານ​ຂາດ​ອົງ​ປະ​ກອບ​ ຫ​ຼື​ຖືກ​ຂັດ​ຈັງ​ຫວະ, ແລະ​ບໍ່​ສາ​ມາດ​ໃຊ​ໄດ້. ດຽວ​ນີ້​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ຈະ​ຖືກ​ລຶບ. ຕິດ​ຕໍ່​ຜູ້​ຄວບ​ຄຸມ​ຂອງ​ທ່ານ ເພື່ອ​ຂໍ​ຄວາມ​ຊ່ວຍ​ເຫຼືອ."</string>
     <string name="me" msgid="6545696007631404292">"ຂ້າພະເຈົ້າ"</string>
@@ -296,9 +306,12 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"ສົ່ງ ແລະ​ເບິ່ງ​ຂໍ້​ຄວາມ SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"ອະນຸຍາດໃຫ້ແອັບຯສົ່ງຂໍ້ຄວາມ SMS ໄດ້. ນີ້ອາດເຮັດໃຫ້ທ່ານເກີດການຄິດຄ່າບໍລິການທີ່ບໍ່ຄາດຄິດໄດ້. ແອັບຯທີ່ເປັນອັນຕະລາຍ ອາດເຮັດໃຫ້ທ່ານເສຍເງິນຍ້ອນການສົ່ງຂໍ້ຄວາມໂດຍທີ່ທ່ານບໍ່ຮູ້ໂຕໄດ້."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"ອ່ານຂໍ້ຄວາມຂອງທ່ານ (SMS ຫຼື MMS)"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"ອະນຸຍາດໃຫ້ແອັບຯອ່ານ SMS ທີ່ບັນທຶກໄວ້ໃນແທັບເລັດ ຫຼື SIM card ຂອງທ່ານ. ຄຸນສົມບັດນີ້ຈະເຮັດໃຫ້ແອັບຯສາມາດອ່ານຂໍ້ຄວາມ SMS ທັງໝົດໄດ້ ບໍ່ເນື້ອຫາຂອງມັນຈະແມ່ນຫຍັງກໍຕາມ."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ອ່ານຂໍ້​ຄວາມ SMS ທີ່​ເກັບ​ໄວ້​ຢູ່​ໃນໂທລະພາບ ຫຼື​ແຜ່ນ SIM ຂອງ​ທ່ານ. ອັນ​ນີ້​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ອ່ານ​ທຸກ​ຂໍ້​ຄວາມ SMS ໂດຍ​ບໍ່​ຄຳ​ນຶງ​ເຖິງ​ເນື້ອ​ໃນ ຫຼື​ຄວາມ​ລັບ."</string>
-    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"ອະນຸຍາດໃຫ້ແອັບຯ ອ່ານຂໍ້ຄວາມ SMS ທີ່ເກັບໄວ້ໃນໂທລະສັບຂອງທ່ານ ຫຼືຊິມກາດ. ນີ້ອະນຸຍາດໃຫ້ແອັບຯ ອ່ານຂໍ້ຄວາມ SMS ທັງໝົດ, ໂດຍບໍ່ຄຳນຶງເຖິງເນື້ອຫາ ຫຼືຄວາມລັບ."</string>
+    <!-- no translation found for permdesc_readSms (4741697454888074891) -->
+    <skip />
+    <!-- no translation found for permdesc_readSms (5796670395641116592) -->
+    <skip />
+    <!-- no translation found for permdesc_readSms (6826832415656437652) -->
+    <skip />
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"ຮັບຂໍ້ຄວາມສັ້ນ (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"ອະນຸຍາດໃຫ້ແອັບຯຮັບ ແລະປະມວນຜົນຂໍ້ຄວາມ WAP. ການອະນຸຍາດນີ້ຮວມເຖິງຄວາມສາມາດໃນການກວດເບິ່ງ ແລະລຶບຂໍ້ຄວາມທີ່ສົ່ງແລ້ວ ໂດຍບໍ່ຕ້ອງສະແດງໃຫ້ທ່ານເຫັນ."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ດຶງແອັບຯທີ່ເຮັດວຽກຢູ່ມາ"</string>
@@ -311,8 +324,10 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"ອະນຸຍາດໃຫ້ແອັບຯເປີດໃຊ້ໂໝດໃນລົດ."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"ປິດແອັບຯອື່ນໆ"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"ອະນຸຍາດໃຫ້ແອັບຯປິດໂປຣເຊສພື້ນຫຼັງຂອງແອັບຯອື່ນໄດ້. ນີ້ອາດເຮັດໃຫ້ແອັບຯອື່ນນັ້ນຢຸດການເຮັດວຽກໄປນຳ."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"ບັງແອັບຯອື່ນໆ"</string>
-    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"ອະນຸຍາດໃຫ້ແອັບຯເຮັດວຽກເທິງແອັບຯ ຫຼືບ່ອນອື່ນໆຂອງສ່ວນຕິດຕໍ່ຜູ່ໃຊ້ ເຊິ່ງອາດລົບກວນການເຮັດວຽກຂອງສ່ວນຕິດຕໍ່ ໃນແອັບພລິເຄຊັນຕ່າງໆ ຫຼືປ່ຽນສິ່ງທີ່ທ່ານຄິດວ່າທ່ານເຫັນໃນແອັບພລິເຄຊັນອື່ນໆໄດ້."</string>
+    <!-- no translation found for permlab_systemAlertWindow (7238805243128138690) -->
+    <skip />
+    <!-- no translation found for permdesc_systemAlertWindow (2393776099672266188) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"ເຮັດໃຫ້ແອັບຯເຮັດວຽກຕະຫຼອດເວລາ"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"ອະນຸຍາດໃຫ້ແອັບຯ ສາມາດເຮັດໃຫ້ບາງພາກສ່ວນຂອງມັນເອັງ ຄົງໂຕໃນໜ່ວຍຄວາມຈຳ. ສິ່ງນີ້ສາມາດຈຳກັດໜ່ວຍຄວາມຈຳທີ່ສາມາດໃຊ້ໄດ້ໂດຍແອັບຯອື່ນ ເຮັດໃຫ້ແທັບເລັດຊ້າລົງ."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ເຮັດ​ສ່ວນ​ຕ່າງໆ​ຂອງ​ມັນ​ເອງ​ໃຫ້ຕໍ່ເນື່ອງຢູ່​ໃນ​ຄວາມ​ຈຳ. ອັນ​ນີ້​ສາ​ມາດ​ຈຳ​ກັດ​ຄວາມ​ຈຳ​ທີ່​ມີ​ຢູ່​ໃຫ້​ກັບ​ແອັບ​ອື່ນ​ທີ​ເຮັດ​ໃຫ້ໂທລະພາບຊ້າ​ລົງ."</string>
@@ -338,37 +353,51 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"ອະນຸຍາດໃຫ້ແອັບແກ້ໄຂຂໍ້ມູນກ່ຽວກັບລາຍຊື່ຕິດຕໍ່ ທີ່ບັນທຶກຢູ່ໃນໂທລະພາບຂອງທ່ານ ລວມທັງຄວາມຖີ່ ທີ່​ທ່ານໂທ, ອີເມວ ຫຼືສື່​ສານ​ກັບ​ລາຍ​ຊື່ຕິດ​ຕໍ່​ສະ​ເພາະ​ໃນ​ຮູບ​ແບບ​ອື່ນນຳອີກ. ການອະນຸຍາດນີ້ຈະເຮັດໃຫ້ແອັບ ສາມາດລຶບຂໍ້ມູນລາຍຊື່ຕິດຕໍ່ໄດ້."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"ອະນຸຍາດໃຫ້ແອັບຯແກ້ໄຂຂໍ້ມູນກ່ຽວກັບລາຍຊື່ຜູ່ຕິດຕໍ່ ທີ່ບັນທຶກໃນໂທລະສັບຂອງທ່ານ ຮວມທັງຄວາມຖີ່ຂອງການໂທ, ການອີເມວ ຫຼືການຕິດຕໍ່ໃນຮູບແບບອື່ນກັບລາຍຊື່ຜູ່ຕິດຕໍ່ໃດນຶ່ງນຳ. ການອະນຸຍາດນີ້ຈະເຮັດໃຫ້ແອັບຯ ສາມາດລຶບຂໍ້ມູນລາຍຊື່ຜູ່ຕິດຕໍ່ໄດ້."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"ອ່ານບັນທຶກການໂທ"</string>
-    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"ອະນຸຍາດໃຫ້ແອັບຯ ອ່ານບັນທຶກການໂທຂອງແທັບເລັດທ່ານ ຮວມທັງຂໍ້ມູນການໂທເຂົ້າ ແລະການໂທອອກ. ການກຳນົດສິດນີ້ເຮັດໃຫ້ແອັບຯສາມາດ ບັນທຶກຂໍ້ມູນການໂທຂອງທ່ານ ແລະແອັບຯທີ່ເປັນອັນຕະລາຍ ອາດຈະເຜີຍແຜ່ຂໍ້ມູນການໂທໂດຍທີ່ທ່ານບໍ່ຮັບຮູ້."</string>
-    <string name="permdesc_readCallLog" product="tv" msgid="5611770887047387926">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ອ່ານ​ບັນ​ທຶກ​ການ​ໂທ​ຂອງໂທລະພາບຂອງ​ທ່ານ, ລວມ​ທັງ​ຂໍ້​ມູນ​ກ່ຽວ​ກັບ​ສາຍ​ໂທ​ເຂົ້າ ແລະ​ໂທ​ອອກ. ການ​ອະ​ນຸ​ຍາດ​ນີ້ ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ບັນ​ທຶກ​ຂໍ້​ມູນ​ບັນ​ທຶກ​ການ​ໂທ​ຂອງ​ທ່ານ, ແລະ​ແອັບ​ທີ່​​​ເປັນ​ອັນ​ຕະ​ລາຍ​ອາດ​ຈະ​ແຊ​ຣ໌​ຂໍ້​ມູນ​ບັນ​ທຶກ​ການ​ໂທ​ໂດຍ​ທີ່​ທ່ານ​ບໍ່​ຮູ້​ໄດ້."</string>
-    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"ອະນຸຍາດໃຫ້ແອັບຯອ່ານບັນທຶກການໂທຂອງໂທລະສັບທ່ານ ຮວມທັງຂໍ້ມູນກ່ຽວກັບສາຍໂທເຂົ້າ ແລະໂທອອກ. ການອະນຸຍາດນີ້ຈະເຮັດໃຫ້ແອັບຯ ສາມາດບັນທຶກຂໍ້ມູນການໂທ ແລະເຮັດໃຫ້ແອັບຯທີ່ເປັນອັນຕະລາຍສາມາດ ສົ່ງຕໍ່ຂໍ້ມູນບັນທຶກການໂທໂດຍບໍ່ໃຫ້ທ່ານຮູ້ໄດ້."</string>
+    <!-- no translation found for permdesc_readCallLog (3204122446463552146) -->
+    <skip />
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"ຂຽນຂໍ້ມູນການໂທ"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"ອະນຸຍາດໃຫ້ແອັບຯແກ້ໄຂບັນທຶກການໂທຂອງແທັບເລັດ ຮວມທັງຂໍ້ມູນກ່ຽວກັບການໂທອອກ ແລະໂທເຂົ້ານຳ. ແອັບຯທີ່ເປັນອັນຕະລາຍອາດໃຊ້ຄຸນສົມບັດນີ້ເພື່ອລຶບ ຫຼືແກ້ໄຂບັນທຶກການໂທຂອງທ່ານໄດ້."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"ອະນຸຍາດໃຫ້ແອັບແກ້ໄຂບັນທຶກການໂທຂອງໂທລະພາບຂອງ​ທ່ານ ລວມທັງຂໍ້ມູນກ່ຽວກັບການໂທອອກ ແລະໂທເຂົ້ານຳ. ແອັບທີ່ເປັນອັນຕະລາຍອາດໃຊ້ຄຸນສົມບັດນີ້ເພື່ອລຶບ ຫຼືແກ້ໄຂບັນທຶກການໂທຂອງທ່ານໄດ້."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"ອະນຸຍາດໃຫ້ແອັບຯ ແກ້ໄຂລາຍການການໂທໃນໂທລະສັບຂອງທ່ານ, ຮວມທັງຂໍ້ມູນກ່ຽວກັບສາຍໂທເຂົ້າ ແລະການໂທອອກ. ແອັບຯທີ່ເປັນອັນຕະລາຍ ອາດໃຊ້ຄວາມສາມາດນີ້ ເພື່ອລຶບ ຫຼືແກ້ໄຂລາຍການການໂທຂອງທ່ານໄດ້."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"ເຂົ້າ​ຫາເຊັນ​ເຊີ​​ກວດຮ່າງ​ກາຍ (ເຊັ່ນ: ​ຈໍຕິດ​ຕາມ​ອັດ​ຕາ​ການ​ເຕັ້ນ​ຂອງຫົວ​ໃຈ)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ເຂົ້າ​ເຖິງ​ຂໍ້​ມູນ​ຈາກ​ເຊັນ​ເຊີ​ທີ່​ຕິດ​ຕາມ​ສະ​ພາບ​ຮ່າງ​ການ​ຂອງ​ທ່ານ, ເຊັ່ນ: ອັດ​ຕາ​ການ​ເຕັ້ນ​ຂອງ​ຫົວ​ໃຈຂອງ​ທ່ານ."</string>
-    <string name="permlab_readCalendar" msgid="5972727560257612398">"ອ່ານກຳນົດການໃນປະຕິທິນຮວມທັງຂໍ້ມູນຄວາມລັບ"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"ອະນຸຍາດໃຫ້ແອັບຯ ອ່ານການນັດໝາຍທັງໝົດທີ່ມີບັນທຶກໃນແທັບເລັດຂອງທ່ານ, ຮວມທັງຂອງໝູ່ ຫຼືໝູ່ທີ່ເຮັດວຽກນຳກັນໄດ້ ເຊິ່ງອາດເຮັດໃຫ້ແອັບຯສາມາດສົ່ງຕໍ່ ຫຼືບັນທຶກຂໍ້ມູນປະຕິທິນຂອງທ່ານ ບໍ່ວ່າຈະເປັນເລື່ອງຄວາມລັບ ຫຼືເລື່ອງລະອຽດອ່ອນແບບໃດກໍຕາມ."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ອ່ານ​ທຸກ​ເຫດ​ການ​ປະ​ຕິ​ທິນ​ທີ່​ເກັບ​ໄວ້​ຢູ່​ໃນໂທລະພາບຂອງ​ທ່ານ, ລວມ​ທັງ​ເຫດ​ການ​ຂອງ​ໝູ່ ຫຼື​ເພື່ອນ​ຮ່ວມ​ງານ​. ອັນ​ນີ້​ອາດ​ຈະ​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ແຊ​ຣ໌ ແລະ​ບັນ​ທຶກ​ຂໍ້​ມູນ​ປະ​ຕິ​ທິນ​ຂອງ​ທ່ານ, ໂດຍ​ບໍ່​ຄຳ​ນຶງ​ເຖິງ​ຄວາມ​ລັບ ຫຼື​ຄວາມ​ອ່ອນ​ໄຫວ."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"ອະນຸຍາດໃຫ້ແອັບຯ ອ່ານກຳນົດການໃນປະຕິທິນທັງໝົດ ທີ່ເກັບໄວ້ໃນໂທລະສັບຂອງທ່ານ, ຮວມເຖິງຂອງໝູ່ຄູ່ ຫຼືເພື່ອນຮ່ວມວຽກ. ນີ້ອາດຈະເຮັດໃຫ້ແອັບຯສາມາດເຜີຍແຜ່ ຫຼືບັນທຶກຂໍ້ມູນປະຕິທິນຂອງທ່ານ, ໂດຍບໍ່ຄຳນຶງເຖິງ ຄວາມລະອຽດອ່ອນ ຫຼືຄວາມລັບໃດໆໄດ້."</string>
+    <!-- no translation found for permlab_readCalendar (6716116972752441641) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (4993979255403945892) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (8837931557573064315) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (4373978642145196715) -->
+    <skip />
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"ເພີ່ມ ຫຼືແກ້ໄຂນັດໝາຍໃນປະຕິທິນ ແລະສົ່ງອີເມວຫາຜູ່ເຂົ້າຮ່ວມໂດຍບໍ່ຕ້ອງໃຫ້ເຈົ້າຂອງຮັບຮູ້"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"ອະນຸຍາດໃຫ້ແອັບຯເພີ່ມ, ລຶບ ແລະປ່ຽນກິດຈະກຳທີ່ທ່ານສາມາດແກ້ໄຂ ໃນແທັບເລັດຂອງທ່ານໄດ້ ຮວມທັງກິດຈະກຳຂອງໝູ່ ຫຼືໝູ່ຮ່ວມເຮັດວຽກ ເຊິ່ງອາດອະນຸຍາດໃຫ້ແອັບຯສົ່ງຂໍ້ຄວາມທີ່ຄືກັບວ່າ ມາຈາກເຈົ້າຂອງປະຕິທິນ ຫຼືແກ້ໄຂການນັດໝາຍໄດ້ ໂດຍບໍ່ໃຫ້ເຈົ້າຂອງຮັບຮູ້."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"ອະນຸຍາດໃຫ້ແອັບເພີ່ມ, ລຶບ, ປ່ຽນແປງເຫດການທີ່ທ່ານສາມາດແກ້ໄຂໃນໂທລະພາບຂອງທ່ານໄດ້, ລວມທັງອັນ​ທີ່​ເປັນ​ຂອງໝູ່ ແລະຂອງເພື່ອນຮ່ວມງານ. ອັນນີ້ອາດຈະອະນຸຍາດໃຫ້ແອັບສົ່ງຂໍ້ຄວາມໃນຖານະເຈົ້າຂອງປະຕິທິນ ຫຼືປ່ຽນແປງເຫດການໂດຍທີ່ເຈົ້າຂອງບໍ່ຮູ້ໄດ້."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"ອະນຸຍາດໃຫ້ແອັບຯ ເພີ່ມ, ລຶບ, ປ່ຽນແປງນັດໝາຍທີ່ທ່ານສາມາດແກ້ໄຂໄດ້ໃນໂທລະສັບຂອງທ່ານ, ຮວມທັງຂອງໝູ່ຄູ່ ຫຼືເພື່ອນຮ່ວມວຽກ. ນີ້ອາດເຮັດໃຫ້ແອັບຯສາມາດສົ່ງຂໍ້ຄວາມ ທີ່ເບິ່ງຄືວ່າມາຈາກເຈົ້າຂອງປະຕິທິນ ຫຼືແກ້ໄຂນັດໝາຍໂດຍທີ່ທ່ານບໍ່ໄດ້ຮັບຮູ້ໄດ້."</string>
+    <!-- no translation found for permdesc_writeCalendar (1675270619903625982) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCalendar (9017809326268135866) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCalendar (7592791790516943173) -->
+    <skip />
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"ເຂົ້າເຖິງຄຳສັ່ງຜູ່ໃຫ້ບໍລິການພິກັດສະຖານທີ່"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ອະນຸຍາດ​ໃຫ້​ແອັບຯ​ເຂົ້າເຖິງ​ຄຳສັ່ງ​ເພີ່ມເຕີມ​ຂອງ​ຜູ່​ໃຫ້​ບໍລິການ​ສະຖານທີ່. ນີ້​ອາດ​ຈະ​ເປັນ​ການ​ເຮັດ​ໃຫ້​ແອັບຯ ລົບກວນ​ການ​ເຮັດ​ວຽກ​ຂອງ GPS ຫຼື​ແຫລ່ງ​ຂໍ້ມູນ​ສະຖານທີ່​ອື່ນໆ​ໄດ້."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"ເຂົ້າ​ຫາທີ່ຕັ້ງທີ່ແນ່ນອນ (ອີງໃສ່ GPS ແລະ ເຄືອຂ່າຍ)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"ອະນຸຍາດໃຫ້ແອັບຯ ຮັບຕຳແໜ່ງສະຖານທີ່ລະອຽດຂອງທ່ານໂດຍໃຊ້ GPS ຫຼືແຫລ່ງຂໍ້ມູນເຄືອຂ່າຍສະຖານທີ່ເຊັ່ນ: ເສົາສັນຍານມືຖື ແລະ Wi-Fi. ບໍລິການສະຖານທີ່ເຫຼົ່ານີ້ຕ້ອງຖືກເປີດນຳໃຊ້ ແລະແລະມີຂໍ້ມູນໃຫ້ກັບອຸປະກອນຂອງທ່ານ ເພື່ອໃຫ້ແອັບຯໃຊ້ໄດ້. ແອັບຯຕ່າງໆອາດໃຊ້ຂໍ້ມູນນີ້ເພື່ອລະບຸສະຖານທີ່ຢູ່ຂອງທ່ານ ແລະອາດນຳໃຊ້ແບັດເຕີຣີເພີ່ມເຕີມໄດ້."</string>
+    <!-- no translation found for permdesc_accessFineLocation (5821994817969957884) -->
+    <skip />
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"ເຂົ້າ​ຫາທີ່ຕັ້ງໂດຍປະມານ (ອີງໃສ່ເຄືອຂ່າຍ)"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"ອະນຸຍາດໃຫ້ແອັບຯ ລະບຸສະຖານທີ່ໂດຍປະມານຂອງທ່ານ. ສະຖານທີ່ນີ້ໄດ້ຮັບມາຈາກບໍລິການສະຖານທີ່ ໂດຍອາໃສສະຖານທີ່ເຄືອຂ່າຍເຊັ່ນ: ເສົາສັນຍານ ແລະ Wi-Fi. ບໍລິການສະຖານທີ່ເຫຼົ່ານີ້ຕ້ອງຖືກເປີດໃຊ້ ແລະ ມີໃນອຸປະກອນຂອງທ່ານເພື່ອທີ່ແອັບຯຈະສາມາດໃຊ້ພວກມັນໄດ້. ແອັບຯອາດຈະໃຊ້ຄຸນສົມບັດນີ້ ເພື່ອກວດສອບສະຖານທີ່ໂດຍປະມານຂອງທ່ານ."</string>
+    <!-- no translation found for permdesc_accessCoarseLocation (3373266766487862426) -->
+    <skip />
+    <!-- no translation found for permdesc_accessCoarseLocation (1884022719818788511) -->
+    <skip />
+    <!-- no translation found for permdesc_accessCoarseLocation (7788009094906196995) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ປ່ຽນການຕັ້ງຄ່າສຽງຂອງທ່ານ"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ອະນຸຍາດໃຫ້ແອັບຯແກ້ໄຂການຕັ້ງຄ່າສຽງສ່ວນກາງ ເຊັ່ນ: ລະດັບສຽງ ແລະລຳໂພງໃດທີ່ຖືກໃຊ້ສົ່ງສຽງອອກ."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ບັນທຶກສຽງ"</string>
-    <string name="permdesc_recordAudio" msgid="4906839301087980680">"ອະນຸຍາດໃຫ້ແອັບຯບັນທຶກສຽງດ້ວຍໄມໂຄຣໂຟນໄດ້. ການອະນຸຍາດນີ້ຈະເຮັດໃຫ້ແອັບຯ ສາມາດບັນທຶກສຽງໄດ້ຕະຫລອດເວລາ ໂດຍບໍ່ຕ້ອງຖ້າການຢືນຢັນຈາກທ່ານ."</string>
+    <!-- no translation found for permdesc_recordAudio (4245930455135321433) -->
+    <skip />
     <string name="permlab_sim_communication" msgid="2935852302216852065">"ສົ່ງ​ຄຳ​ສັ່ງ​ຫາ SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"ອະນຸຍາດໃຫ້ແອັບຯສົ່ງຄຳສັ່ງຫາ SIM. ສິ່ງນີ້ອັນຕະລາຍຫຼາຍ."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ຖ່າຍຮູບ ແລະວິດີໂອ"</string>
-    <string name="permdesc_camera" msgid="8497216524735535009">"ອະນຸຍາດໃຫ້ແອັບຯຖ່າຍຮູບ ແລະວິດີໂອດ້ວຍກ້ອງຖ່າຍຮູບ. ການອະນຸຍາດນີ້ຈະອານຸຍາດໃຫ້ແອັບຯ ສາມາດໃຊ້ກ້ອງຖ່າຍຮູບໄດ້ຕະຫລອດເວລາ ໂດຍບໍ່ຕ້ອງຖ້າການຢືນຢັນຈາກທ່ານ."</string>
+    <!-- no translation found for permdesc_camera (5392231870049240670) -->
+    <skip />
     <string name="permlab_vibrate" msgid="7696427026057705834">"ຄວບຄຸມການສັ່ນ"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"ອະນຸຍາດໃຫ້ແອັບຯຄວບຄຸມໂຕສັ່ນ."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ໂທຫາເບີໂທລະສັບໂດຍກົງ"</string>
@@ -850,18 +879,6 @@
     <string name="weeks" msgid="6509623834583944518">"ອາທິດ"</string>
     <string name="year" msgid="4001118221013892076">"ປີ"</string>
     <string name="years" msgid="6881577717993213522">"ປິ"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ວິ​ນາ​ທີ</item>
-      <item quantity="one">1ວິ​ນາ​ທີ</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ນາທີ</item>
-      <item quantity="one">1 ນາທີ</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ຊົ່ວໂມງ</item>
-      <item quantity="one">1 ຊົ່ວໂມງ</item>
-    </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"ຕອນນີ້"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ນທ</item>
@@ -1614,8 +1631,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"ຈົນ​ກ​່​ວາ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (ສັນ​ຍານ​ເຕືອນ​ຕໍ່ໄປ​)"</string>
-    <!-- no translation found for zen_mode_forever (1916263162129197274) -->
-    <skip />
+    <string name="zen_mode_forever" msgid="1916263162129197274">"ຈົນກວ່າທ່ານຈະປິດການຫ້າມລົບກວນ"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"ຈົນ​ກ່​ວາ​ທ່ານ​ປິດ​ຫ້າມ​ລົບ​ກວນ"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ຫຍໍ້"</string>

@@ -46,6 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Yhteysongelma tai virheellinen MMI-koodi."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Voit suorittaa toiminnon vain sallitut puhelut -numeroihin."</string>
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Soitonsiirtoasetuksia ei voi muuttaa puhelimella roaming-tilassa."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Palvelu otettiin käyttöön."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Palvelu käytössä luokalle:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Palvelu on poistettu käytöstä."</string>
@@ -96,6 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Ääni/tiedonsiirtopalvelut on estetty."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Ääni/tekstiviestipalvelut on estetty."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Kaikki ääni-/tiedonsiirto-/tekstiviestipalvelut on estetty."</string>
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Ei yhteyttä verkkoon"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Voit yrittää parantaa kuuluvuutta vaihtamalla tyypin asetusta. Valitse Asetukset &gt; Matkapuhelinverkot &gt; Ensisijainen verkko."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Toinen käyttäjä vaihtoi TTY-tilaksi TÄYSI"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Toinen käyttäjä vaihtoi TTY-tilaksi HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Toinen käyttäjä vaihtoi TTY-tilaksi VCO"</string>
@@ -179,6 +182,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Työprofiili poistettiin, koska laitteelta puuttuu järjestelmänvalvojasovellus."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Työprofiilin järjestelmänvalvojasovellus puuttuu tai se on vioittunut. Tästä syystä työprofiilisi ja siihen liittyvät tiedot on poistettu. Pyydä ohjeita järjestelmänvalvojaltasi."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Työprofiilisi ei ole enää käytettävissä tällä laitteella."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Laitteen tiedot poistetaan"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Järjestelmänvalvojasovelluksesta puuttuu osia tai se on vioittunut, eikä sitä voi käyttää. Laitteen tiedot poistetaan. Pyydä ohjeita järjestelmänvalvojaltasi."</string>
     <string name="me" msgid="6545696007631404292">"Minä"</string>
@@ -296,9 +303,9 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"lähettää ja tarkastella tekstiviestejä"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Antaa sovelluksen lähettää tekstiviestejä. Tästä voi aiheutua odottamattomia kuluja. Haitalliset sovellukset voivat aiheuttaa kuluja lähettämällä viestejä ilman lupaasi."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lue tekstiviestejä (teksti tai multimedia)"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Antaa sovelluksen lukea tablet-laitteeseen tai SIM-kortille tallennettuja tekstiviestejä. Sovellus voi lukea kaikki tekstiviestit huolimatta niiden arkaluonteisuudesta."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Antaa sovelluksen lukea televisioon tai SIM-kortille tallennettuja tekstiviestejä. Sovellus voi lukea kaikki tekstiviestit huolimatta niiden sisällöstä tai arkaluonteisuudesta."</string>
-    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Antaa sovelluksen lukea puhelimeen tai SIM-kortille tallennettuja tekstiviestejä. Sovellus voi lukea kaikki tekstiviestit huolimatta niiden arkaluonteisuudesta."</string>
+    <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"Tämä sovellus voi lukea kaikkia tabletillesi tallennettuja tekstiviestejä."</string>
+    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"Tämä sovellus voi lukea kaikkia TV:llesi tallennettuja tekstiviestejä."</string>
+    <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"Tämä sovellus voi lukea kaikkia puhelimellesi tallennettuja tekstiviestejä."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"vastaanota tekstiviestejä (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Antaa sovelluksen vastaanottaa ja käsitellä WAP-viestejä. Sovellus voi valvoa tai poistaa laitteeseesi lähetettyjä viestejä näyttämättä niitä sinulle."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"käynnissä olevien sovellusten noutaminen"</string>
@@ -311,8 +318,8 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Antaa sovelluksen ottaa autotilan käyttöön."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"sulje muita sovelluksia"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Antaa sovelluksen sulkea muiden sovelluksien taustaprosesseja. Tämä voi sulkea muita sovelluksia."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"piirrä muihin sovelluksiin"</string>
-    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Antaa sovelluksen piirtää muiden sovelluksien tai niiden käyttöliittymän osien päälle. Luvan saaneet sovellukset voivat häiritä muiden sovelluksien käyttöliittymien käyttöä tai muuttaa muiden sovelluksien osiksi luulemiasi näkymiä."</string>
+    <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Tämä sovellus voi näkyä muiden sovellusten päällä"</string>
+    <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Tämä sovellus voi näkyä muiden sovellusten tai näytön muiden osien päällä. Tämä voi häiritä sovellusten tavallista käyttöä ja muuttaa tapaa, jolla muut sovellukset näkyvät."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"sovelluksen asettaminen aina käynnissä olevaksi"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Antaa sovelluksen lisätä omia osiaan muistiin pysyvästi. Tämä voi rajoittaa muiden sovellusten käytettävissä olevaa muistia ja hidastaa tablet-laitteen toimintaa."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Antaa sovelluksen lisätä omia osiaan pysyvästi muistiin. Tämä voi rajoittaa muiden sovellusten käytettävissä olevaa muistia ja hidastaa television toimintaa."</string>
@@ -338,37 +345,37 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Antaa sovelluksen muokata televisioosi tallennettuja kontaktitietoja sekä tarkastella sitä, kuinka usein olet soitellut, lähettänyt sähköpostia tai muuten viestinyt tiettyjen kontaktien kanssa. Tämän luvan saaneet sovellukset voivat poistaa kontaktitietoja."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Antaa sovelluksen muokata puhelimeesi tallennettuja kontaktitietoja sekä tarkastella, kuinka usein olet soittanut, lähettänyt sähköpostia tai muuten viestinyt tiettyjen kontaktien kanssa. Tämän luvan saaneet sovellukset voivat poistaa kontaktitietoja."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"lue puhelulokia"</string>
-    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Antaa sovelluksen lukea tablet-laitteen puhelulokia sekä soitettujen ja vastaanotettujen puheluiden tietoja. Sovellus voi myös tallentaa puhelulokitietoja. Haitalliset sovellukset voivat jakaa puhelulokitietoja ilman lupaasi."</string>
-    <string name="permdesc_readCallLog" product="tv" msgid="5611770887047387926">"Antaa sovelluksen lukea television puhelulokia sekä soitettujen ja vastaanotettujen puheluiden tietoja. Tämän luvan saaneet sovellukset voivat myös tallentaa puhelulokitietoja. Haitalliset sovellukset voivat jakaa puhelulokitietoja ilman lupaasi."</string>
-    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Antaa sovelluksen lukea puhelimen puhelulokia sekä soitettujen ja vastaanotettujen puheluiden tietoja. Sovellus voi myös tallentaa puhelulokitietoja. Haitalliset sovellukset voivat jakaa puhelulokitietoja ilman lupaasi."</string>
+    <string name="permdesc_readCallLog" msgid="3204122446463552146">"Tämä sovellus voi lukea puheluhistoriaasi."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"kirjoita puhelulokiin"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Antaa sovelluksen muokata tablet-laitteesi puhelulokia, kuten tietoja vastatuista ja soitetuista puheluista. Haitalliset sovellukset voivat poistaa puhelulokisi tai muokata sitä."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Antaa sovelluksen muokata television puhelulokia, kuten tietoja vastatuista ja soitetuista puheluista. Haitalliset sovellukset voivat poistaa puhelulokisi tai muokata sitä."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Antaa sovelluksen muokata puhelimesi puhelulokia, kuten tietoja vastatuista ja soitetuista puheluista. Haitalliset sovellukset voivat poistaa puhelulokisi tai muokata sitä."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"käyttää kehon antureita (kuten sykemittareita)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Antaa sovelluksen käyttää kehosi tilaa seuraavien anturien tietoja, esimerkiksi sykettä."</string>
-    <string name="permlab_readCalendar" msgid="5972727560257612398">"lue kalenteritapahtumia ja luottamuksellisia tietoja"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Antaa sovelluksen lukea tablet-laitteelle tallennettuja kalenteritapahtumia, myös kavereiden tai työkavereiden tapahtumia. Sovellus voi jakaa tai tallentaa kalenteritietojasi niiden arkaluonteisuudesta huolimatta."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Antaa sovelluksen lukea kaikkia televisioon tallennettuja kalenteritapahtumia, myös kavereiden ja työkavereiden tapahtumia. Sovellus voi jakaa tai tallentaa kalenteritietoja niiden arkaluonteisuudesta huolimatta."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Antaa sovelluksen lukea puhelimeen tallennettuja kalenteritapahtumia, myös kavereiden tai työkavereiden tapahtumia. Sovellus voi jakaa tai tallentaa kalenteritietojasi niiden arkaluonteisuudesta huolimatta."</string>
+    <string name="permlab_readCalendar" msgid="6716116972752441641">"Lue kalenterin tapahtumia ja tietoja"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Tämä sovellus voi lukea kaikkia tabletille tallennettuja kalenteritapahtumia sekä jakaa tai tallentaa kalenteritietoja."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Tämä sovellus voi lukea kaikkia TV:lle tallennettuja kalenteritapahtumia sekä jakaa tai tallentaa kalenteritietoja."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Tämä sovellus voi lukea kaikkia puhelimelle tallennettuja kalenteritapahtumia sekä jakaa tai tallentaa kalenteritietoja."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"lisää tai muokkaa kalenteritapahtumia ja lähetä sähköpostia vieraille ilman omistajien lupaa"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Antaa sovelluksen lisätä, poistaa ja muuttaa tapahtumia, joita voit muokata tablet-laitteellasi. Näihin kuuluvat myös kavereidesi tai työkavereidesi tapahtumat. Sovellus voi lähettää viestejä, jotka vaikuttavat kalenterin omistajien lähettämiltä, tai muokata tapahtumia ilman niiden omistajien lupaa."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Antaa sovelluksen lisätä, poistaa ja muuttaa tapahtumia, joita on mahdollista muokata televisiolla. Tällaiset tapahtumat voivat olla kavereiden tai työkavereiden kutsuja. Sovellus voi lähettää viestejä, jotka näyttävät tulevan kalenterin omistajalta, tai muokata tapahtumia omistajan tietämättä."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Antaa sovelluksen lisätä, poistaa ja muuttaa tapahtumia, joita voit muokata puhelimellasi. Näihin kuuluvat myös kavereidesi tai työkavereidesi tapahtumat. Sovellus voi lähettää viestejä, jotka vaikuttavat kalenterin omistajien lähettämiltä, tai muokata tapahtumia ilman niiden omistajien lupaa."</string>
+    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Tämä sovellus voi lisätä, poistaa tai muuttaa tabletin kalenteritapahtumia. Sovellus voi lähettää viestejä, jotka näyttävät tulevan kalenterin omistajilta, tai muuttaa kalenteritapahtumia ilmoittamatta omistajille."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Tämä sovellus voi lisätä, poistaa tai muuttaa TV:n kalenteritapahtumia. Sovellus voi lähettää viestejä, jotka näyttävät tulevan kalenterin omistajilta, tai muuttaa kalenteritapahtumia ilmoittamatta omistajille."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Tämä sovellus voi lisätä, poistaa tai muuttaa puhelimen kalenteritapahtumia. Sovellus voi lähettää viestejä, jotka näyttävät tulevan kalenterin omistajilta, tai muuttaa kalenteritapahtumia ilmoittamatta omistajille."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"käytä lisää sijainnintarjoajakomentoja"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Antaa sovelluksen käyttää ylimääräisiä sijaintipalvelukomentoja. Sovellus saattaa tällöin häiritä GPS:n tai muiden sijaintilähteiden toimintaa."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"käyttää tarkkaa sijaintia (GPS- ja verkkopohjainen)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Antaa sovelluksen käyttää tarkkaa sijaintiasi, joka määritetään GPS:n tai verkon sijaintilähteiden kuten radiomastojen ja Wi-Fi-verkkojen avulla. Sijaintipalveluiden täytyy olla käytössä ja laitteesi saatavilla, jotta sovellus voi käyttää niitä. Sovellus voi määrittää tämän luvan avulla sijaintisi ja lisätä akun käyttöä."</string>
+    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"Tämä sovellus voi määrittää sijaintisi matkapuhelinverkon tukiasemien, Wi-Fi-verkkojen ja muiden verkkolähteiden tai GPS-paikannuksen perusteella. Näiden sijaintipalveluiden tulee olla käytössä ja käytettävissä puhelimellasi, jotta sovellus voi käyttää niitä. Tämä voi lisätä akun kulutusta."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"käyttää likimääräistä sijaintia (verkkopohjainen)"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Antaa sovelluksen käyttää likimääräistä sijaintiasi. Sijainnin määrittävät sijaintipalvelut verkon sijaintilähteiden kuten radiomastojen ja Wi-Fi-verkkojen avulla. Sijaintipalveluiden täytyy olla käytössä ja laitteesi saatavilla, jotta sovellus voi käyttää niitä. Sovellus voi määrittää tämän luvan avulla likimääräisen sijaintisi."</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Tämä sovellus voi määrittää sijaintisi matkapuhelinverkon tukiasemien, Wi-Fi-verkkojen ja muiden verkkolähteiden perusteella. Näiden sijaintipalveluiden tulee olla käytössä ja käytettävissä tabletillasi, jotta sovellus voi käyttää niitä."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Tämä sovellus voi määrittää sijaintisi matkapuhelinverkon tukiasemien, Wi-Fi-verkkojen ja muiden verkkolähteiden perusteella. Näiden sijaintipalveluiden tulee olla käytössä ja käytettävissä TV:lläsi, jotta sovellus voi käyttää niitä."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Tämä sovellus voi määrittää sijaintisi matkapuhelinverkon tukiasemien, Wi-Fi-verkkojen ja muiden verkkolähteiden perusteella. Näiden sijaintipalveluiden tulee olla käytössä ja käytettävissä puhelimellasi, jotta sovellus voi käyttää niitä."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"muuta ääniasetuksia"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Antaa sovelluksen muokata yleisiä ääniasetuksia, kuten äänenvoimakkuutta ja käytettävää kaiutinta."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"tallentaa ääntä"</string>
-    <string name="permdesc_recordAudio" msgid="4906839301087980680">"Antaa sovelluksen tallentaa ääntä mikrofonin avulla. Sovellus voi tallentaa ääntä milloin tahansa pyytämättä sinulta lupaa."</string>
+    <string name="permdesc_recordAudio" msgid="4245930455135321433">"Tämä sovellus voi tallentaa mikrofonilla ääntä koska tahansa."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"lähettää komentoja SIM-kortille"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Antaa sovelluksen lähettää komentoja SIM-kortille. Tämä ei ole turvallista."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ota kuvia ja videoita"</string>
-    <string name="permdesc_camera" msgid="8497216524735535009">"Antaa sovelluksen ottaa kuvia ja kuvata videoita kameralla. Sovellus voi käyttää kameraa milloin tahansa ilman lupaasi."</string>
+    <string name="permdesc_camera" msgid="5392231870049240670">"Tämä sovellus voi ottaa kameralla kuvia ja videoita koska tahansa."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"hallitse värinää"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Antaa sovelluksen hallita värinää."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"soittaa puhelinnumeroihin suoraan"</string>
@@ -850,18 +857,6 @@
     <string name="weeks" msgid="6509623834583944518">"viikkoa"</string>
     <string name="year" msgid="4001118221013892076">"vuosi"</string>
     <string name="years" msgid="6881577717993213522">"vuotta"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> sekuntia</item>
-      <item quantity="one">1 sekunti</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> minuuttia</item>
-      <item quantity="one">1 minuutti</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> tuntia</item>
-      <item quantity="one">1 tunti</item>
-    </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"nyt"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> min</item>
@@ -1614,8 +1609,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Kunnes kello on <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> asti (seuraava hälytys)"</string>
-    <!-- no translation found for zen_mode_forever (1916263162129197274) -->
-    <skip />
+    <string name="zen_mode_forever" msgid="1916263162129197274">"Kunnes poistat Älä häiritse ‑tilan käytöstä"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Kunnes poistat Varattu-tilan käytöstä."</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Kutista"</string>

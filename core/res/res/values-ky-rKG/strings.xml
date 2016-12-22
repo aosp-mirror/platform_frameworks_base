@@ -46,6 +46,8 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Туташууда көйгөй чыкты же MMI коду жараксыз."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Иш-аракет туруктуу терүү номерлери менен гана чектелет."</string>
+    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
+    <skip />
     <string name="serviceEnabled" msgid="8147278346414714315">"Кызмат иштетилди."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Кызмат төмөнкү үчүн иштетилди:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Кызмат өчүрүлдү."</string>
@@ -96,6 +98,10 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Үн/берилиштер кызматтары бөгөттөлдү."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Үн/SMS кызматтары бөгөттөлгөн."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Бардык үн/берилиштер/SMS кызматтары бөгөттөлдү."</string>
+    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
+    <skip />
+    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Peer TTY режимин FULL кылууну суранды"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Peer TTY режимин HCO кылууну суранды"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Peer TTY режимин VCO кылууну суранды"</string>
@@ -179,6 +185,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Администратордун колдонмосу жок болгондуктан, жумуш профили жок кылынды."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Жумуш профилинин администратор колдонмосу жок же бузулгандыктан, жумуш профилиңиз жана ага байланыштуу дайындар жок кылынган. Жардам алуу үчүн администраторуңузга кайрылыңыз."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Жумуш профилиңиз бул түзмөктө жеткиликтүү болбой калды."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Түзмөгүңүз тазаланат"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Администратор колдонмосунун курамдары жок же бузулгандыктан, аны колдонуу мүмкүн эмес. Түзмөгүңүз азыр тазаланат. Жардам алуу үчүн администраторуңузга кайрылыңыз."</string>
     <string name="me" msgid="6545696007631404292">"Мен"</string>
@@ -296,9 +306,12 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"SMS билдирүүлөрдү жиберүү жана көрсөтүү"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Колдонмого SMS билдирүүлөрүн жөнөтүү уруксатын берет. Бул сиз күтпөгөн чыгымдарга алып келиши мүмкүн. Зыяндуу колдонмолор сиздин ырастооңузсуз билдирүүлөрдү жөнөтүп, көп чыгымдарга себепкер болушу мүмкүн."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"билдирүүлөрүңүздү (SMS же MMS) окуу"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Колдонмого планшетиңизде же SIM-картаңызда сакталган SMS билдирүүлөрүңүздү окуганга уруксат берет. Бул колдонмого SMS билдирүүлөрүңүздү, алардын мазмунуна же конфиденциалдуулугуна карабастан, окууга уруксат берет."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Колдонмого сыналгыңызда же SIM картаңызда сакталган SMS билдирүүлөрүн окуу мүмкүнчүлүгүн берет. Ушуну менен колдонмо бардык SMS билдирүүлөрүн, алардын мазмунуна же купуялуулугуна карабастан окуй алат."</string>
-    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Колдонмого телефонуңузда же SIM-картаңызда сакталган SMS билдирүүлөрүңүздү окуганга уруксат берет. Бул колдонмого SMS билдирүүлөрүңүздү, алардын мазмунуна же конфиденциалдуулугуна карабастан, окуганга уруксат берет."</string>
+    <!-- no translation found for permdesc_readSms (4741697454888074891) -->
+    <skip />
+    <!-- no translation found for permdesc_readSms (5796670395641116592) -->
+    <skip />
+    <!-- no translation found for permdesc_readSms (6826832415656437652) -->
+    <skip />
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"билдирүүлөрдү (WAP) кабыл алуу"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Колдонмого WAP билдирүүлөрүн кабыл алууга жана аларды иштетип чыгууга уруксат берет. Бул, колдонмо сизге билгизбестен түзмөгүңүзгө жөнөтүлгөн билдирүүлөрдү мониторлой же жок кыла алат дегенди билдирет."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"иштеп жаткан колдонмолорду түшүрүп алуу"</string>
@@ -311,8 +324,10 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Колдонмого унаа режимин иштетүү мүмкүнчүлүгүн берет."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"башка колдонмолорду жабуу"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Колдонмого башка колдонмолордун фондо иштеп жаткан процесстерин токтотуу уруксатын берет. Бул башка колдонмолордун иштебей калышына алып келиши мүмкүн."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"башка колдонмолордон алып өтүү"</string>
-    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Колдонмого башка колдонмолордун же колдонуучу интерфейсинин бөлүктөрүнүн үстүнө графика жайгаштыруу уруксатын берет. Бул колдонмолорду пайдаланганга тоскоол кылышы же сиз көрүп жаткан нерселердин көрүнүшүн өзгөртүшү мүмкүн."</string>
+    <!-- no translation found for permlab_systemAlertWindow (7238805243128138690) -->
+    <skip />
+    <!-- no translation found for permdesc_systemAlertWindow (2393776099672266188) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"колдонмону үзгүлтүксүз иштетүү"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Колдонмого өзүнүн бөлүктөрүн эстутумда туруктуу кармоого уруксат берет.Бул эстутумдун башка колдонмолорго жетиштүүлүгүн чектеши жана телефондун иштешин жайлатышы мүмкүн."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Колдонмого эстутумдагы өз бөлүктөрүн туруктуу кылуу мүмкүнчүлүгүн берет. Ушуну менен сыналгы жай иштеп, башка колдонмолорго жеткиликтүү эстутум чектелиши мүмкүн."</string>
@@ -338,37 +353,51 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Колдонмого сыналгыңызда сакталган байланыштарыңыз тууралуу дайындарды, ошондой эле белгилүү байланыштарга кандай убакыт аралыгында чалып, электрондук билдирүү жөнөтүп же башка жолдор менен байланышканыңызды өзгөртүү мүмкүнчүлүгүн берет. Мындай уруксат менен колдонмолор байланыш дайындарын жок кыла алат."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Колдонмого телефонуңузда сакталган байланыштарыңыздын берилиштерин, анын ичинде, көп терилген, көп эмейл алмашкан же башка жолдор менен көп баарлашкан байланыштар тууралуу берилиштерди өзгөртүүгө уруксат берет. Бул уруксат, колдонмолорго сиздин байланыштарыңыздын берилиштерин өчүрүү уруксатын берет."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"чалуулар тизмегин окуу"</string>
-    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Колдонмого планшетиңиздин чалуулар тизмесин, кириш жана чыгыш чалууларын  окууганга уруксат берет. Бул уруксат колдонмолорго сиздин чалууларыңыздын тизмелерин сактоого жол берет жана зыяндуу колдонмолор сизди маалымдабай туруп бөлүшүшү мүмкүн."</string>
-    <string name="permdesc_readCallLog" product="tv" msgid="5611770887047387926">"Колдонмого сыналгыздын чалуулар таржымалын, ошондой эле келүүчү жана чыгуучу чалуулар жөнүндө дайындарды окуу мүмкүнчүлүгүн берет. Мындай уруксат менен колдонмолор чалуулар таржымалыңыздын дайындарын сактап, зыянкеч колдонмолор сизге билгизбестен чалуулар таржымалындагы дайындарды бөлүшө алышат."</string>
-    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Колдонмого телефонуңуздун чалуулар тизмесин, кириш жана чыгыш чалууларын  окууганга уруксат берет. Бул уруксат колдонмолорго сиздин чалууларыңыздын тизмелерин сактоого жол берет жана зыяндуу колдонмолор сизди маалымдабай туруп бөлүшүшү мүмкүн."</string>
+    <!-- no translation found for permdesc_readCallLog (3204122446463552146) -->
+    <skip />
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"чалуулар тизмегин жаздыруу"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Колдонмого планшетиңиздин чалуулар тизмегин, анын ичинде, чыгыш жана кириш чалууларына тиешелүү берилиштерди өзгөртүү уруксатын берет. Зыяндуу колдонмолор муну колдонуп чалуулар тизмегин өзгөртө же жок кыла алышат."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Колдонмого сыналгыңыздын чалуулар таржымалын, ошондой эле келүүчү жана чыгуучу чалуулар тууралуу дайындарды өзгөртүү мүмкүнчүлүгү берилет. Зыянкеч колдонмолор ушуну менен чалуулар таржымалыңызды жок кылып же өзгөртүп коюшу мүмкүн."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Колдонмого телефонуңуздун чалуулар тизмегин, анын ичинде, чыгыш жана кириш чалууларына тиешелүү берилиштерди өзгөртүү уруксатын берет. Зыяндуу колдонмолор муну колдонуп чалуулар тизмегин өзгөртө же жок кыла алышат."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"дене-бой сенсорлоруна (жүрөктүн кагышын өлчөгүчтөр сыяктуу) уруксат"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Колдонмого жүрөгүңүздүн согушу сыяктуу дене-бой абалыңызды көзөмөлдөгөн сенсорлордогу дайындарды көрүп туруу мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_readCalendar" msgid="5972727560257612398">"күнбарак иш-аракеттерин жана купуя маалыматтарды окуу"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Колдонмого планшетиңизде сакталган сиздин, досторуңуздун жана кесиптештериңиздин күнбарак окуяларын окуганга уруксат берет. Бул колдонмого күнбарак берилиштерин, алардын купуялуулугана жана маанилүүлүгөн карабастан бөлүшүү же сактоо уруксатын берет."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Колдонмого сыналгыңызда сакталган бардык жылнаама окуяларын, ошондой эле досторуңуз же кесиптештериңиздин окуяларын окуу мүмкүнчүлүгүн берет. Ушуну менен, колдонмо купуялуулук же астейдил мамилени талап кылуу шартына карабастан, жылнаама дайындарыңызды бөлүшүп же сактай алышы мүмкүн."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Колдонмого телефонуңузда сакталган сиздин, досторуңуздун жана кесиптештериңиздин күнбарак окуяларын окуганга уруксат берет. Бул колдонмого күнбарак берилиштерин, алардын купуялуулугана жана маанилүүлүгөн карабастан бөлүшүү же сактоо уруксатын берет."</string>
+    <!-- no translation found for permlab_readCalendar (6716116972752441641) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (4993979255403945892) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (8837931557573064315) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (4373978642145196715) -->
+    <skip />
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"ээсинен уруксат албай, күнбаракка иш-аракеттерди кошуу же өзгөртүү жана конокторго чакыруу жөнөтүү"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Колдонмого сиз планшетиңизден өзгөртө ала турган, сиздин, досторуңуздун же кесиптештериңиздин күнбарак окуяларын кошуу, жок кылуу, өзгөртүү уруксатын берет. Бул, колдонмого күнбарак ээлеринен келген сыяктуу көрүнгөн билдирүүлөрдү жөнөтүү, же ээсине билгизбей окуяларды өзгөртүү уруксатын берет."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Колдонмого сыналгыңызда өзгөрүлө турган окуяларды, ошондой эле досторуңуз же кесиптештериңиздин окуяларын кошуу, алып салуу жана өзгөртүү мүмкүнчүлүгүн берет. Ушуну менен колдонмо жылнаама ээлеринен келген билдирүүлөрдү жөнөтүп же окуяларды ээсине билгизбестен өзгөртө алат."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Колдонмого сиз телефонуңуздан өзгөртө ала турган, сиздин, досторуңуздун же кесиптештериңиздин күнбарак окуяларын кошуу, жок кылуу, өзгөртүү уруксатын берет. Бул, колдонмого күнбарак ээлеринен келген сыяктуу көрүнгөн билдирүүлөрдү жөнөтүү, же ээсине билгизбей окуяларды өзгөртүү уруксатын берет."</string>
+    <!-- no translation found for permdesc_writeCalendar (1675270619903625982) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCalendar (9017809326268135866) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCalendar (7592791790516943173) -->
+    <skip />
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"жайгашкан жерди аныктагычтын кошумча буйруктарын пайдалануу"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Колдонмого жайгашкан жерди табуучу кошумча жабдуучулардын буйруктарын колдонуу мүмкүнчүлүгүн берет. Ушуну менен колдонмо GPS\'тин ишине жана башка жайгашкан жерлерди аныктоо кызматтарына кийлигише алат."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"так аныкталган жайгашкан жерге (GPS жана тармактын негизинде) уруксат"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Колдонмого Глобалдык Позициялоо Системасын (GPS), же базалык станциялар жана Wi-Fi сыяктуу түйүндүк булактардын жайгашуусунун пайдалануу аркылуу сиздин так жайгашууңузду аныктоого уруксат берет. Колдонмолор муну пайдалана алышы үчүн, жайгаштыруу кызматтары жандырылган жана түзмөгүңүзгө жеткиликтүү болушу керек. Колдонмолор муну сиздин жайгашкан жериңизди аныкташ үчүн пайдаланышы жана кошумча батарей кубаты сарпталышы мүмкүн."</string>
+    <!-- no translation found for permdesc_accessFineLocation (5821994817969957884) -->
+    <skip />
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"болжолдуу жайгашкан жерге (тармактын негизинде) уруксат"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Колдонмого сиздин болжолдуу жайгашууңузду аныктоо уруксаты берет. Мындай жайгаштыруу базалык станциялар жана Wi-Fi сыяктуу түйүндүк булактардын жайгашуусу аркылуу аныкталат. Колдонмоңуз буларды пайдалана алышы үчүн, мындай  жайгаштыруу кызматтары жандырылган жана түзмөгүңүзгө жеткиликтүү болушу керек. Колдонмолор муну сиздин жайгашкан жериңизди болжолдош үчүн пайдаланышы мүмкүн."</string>
+    <!-- no translation found for permdesc_accessCoarseLocation (3373266766487862426) -->
+    <skip />
+    <!-- no translation found for permdesc_accessCoarseLocation (1884022719818788511) -->
+    <skip />
+    <!-- no translation found for permdesc_accessCoarseLocation (7788009094906196995) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"аудио жөндөөлөрүңүздү өзгөртүңүз"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Колдонмого үн деңгээли жана кайсы динамик аркылуу үн чыгарылышы керек сыяктуу түзмөктүн аудио тууралоолорун өзгөртүүгө уруксат берет."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"аудио жаздыруу"</string>
-    <string name="permdesc_recordAudio" msgid="4906839301087980680">"Колдонмого микрофон аркылуу аудио жаздыруу уруксатын берет. Бул уруксат колдонмого сиздин ырастооңузсуз, каалаган убакта аудио жаздыруу уруксатын берет."</string>
+    <!-- no translation found for permdesc_recordAudio (4245930455135321433) -->
+    <skip />
     <string name="permlab_sim_communication" msgid="2935852302216852065">"SIM-картага буйруктарды жөнөтүү"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Колдонмого SIM-картага буйруктарды жөнөтүү мүмкүнчүлүгүн берет. Бул абдан кооптуу."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"сүрөт жана видео тартуу"</string>
-    <string name="permdesc_camera" msgid="8497216524735535009">"Колдонмого камера аркылуу видео жана сүрөт тартуу уруксатын берет. Бул уруксат, камераны каалаган убакта, сиздин ырастооңузсуз колдонуу уруксатын берет."</string>
+    <!-- no translation found for permdesc_camera (5392231870049240670) -->
+    <skip />
     <string name="permlab_vibrate" msgid="7696427026057705834">"титирөөнү башкаруу"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Колдонмого дирилдегичти көзөмөлдөө мүмкүнчүлүгүн берет."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"телефон номерлерине түз чалуу"</string>
@@ -850,18 +879,6 @@
     <string name="weeks" msgid="6509623834583944518">"апталар"</string>
     <string name="year" msgid="4001118221013892076">"жыл"</string>
     <string name="years" msgid="6881577717993213522">"жылдар"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> секунд</item>
-      <item quantity="one">1 секунд</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> мүнөт</item>
-      <item quantity="one">1 мүнөт</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> саат</item>
-      <item quantity="one">1 саат</item>
-    </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"азыр"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>мүн.</item>
@@ -999,7 +1016,7 @@
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосу иштебей калып жатат"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> колдонмосу иштебей калып жатат"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"Колдонмону кайра ачуу"</string>
-    <string name="aerr_report" msgid="5371800241488400617">"Жооп пикир жөнөтүү"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"Пикир билдирүү"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Жабуу"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Түзмөк өчүрүлүп-күйгүзүлгүчө үнүн өчүрүү"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Күтүү"</string>
@@ -1614,8 +1631,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> чейин"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> чейин (кийинки ойготкуч)"</string>
-    <!-- no translation found for zen_mode_forever (1916263162129197274) -->
-    <skip />
+    <string name="zen_mode_forever" msgid="1916263162129197274">"\"Тынчымды алба\" режими өчүрүлгөнгө чейин"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"\"Тынчымды алба\" режими өчүрүлгөнгө чейин"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Жыйнап коюу"</string>

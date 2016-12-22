@@ -46,6 +46,8 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problema de connexió o codi MMI no vàlid."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"L\'operació està restringida a números de marcatge fixos."</string>
+    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
+    <skip />
     <string name="serviceEnabled" msgid="8147278346414714315">"El servei s\'ha activat."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"S\'ha activat el servei per a:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"El servei s\'ha desactivat."</string>
@@ -96,6 +98,10 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Els serveis de veu/dades estan bloquejats."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Els serveis de veu/SMS estan bloquejats."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Tots els serveis de veu/dades/SMS estan bloquejats."</string>
+    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
+    <skip />
+    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"L\'altre dispositiu ha sol·licitat el mode TTY COMPLET."</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"L\'altre dispositiu ha sol·licitat el mode TTY HCO."</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"L\'altre dispositiu ha sol·licitat el mode TTY VCO."</string>
@@ -179,6 +185,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"S\'ha suprimit el perfil professional perquè no s\'ha detectat cap aplicació d\'administració."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"L\'aplicació d\'administració del perfil professional està malmesa o no es detecta. Com a conseqüència, el perfil professional i les dades relacionades s\'han suprimit. Contacta amb l\'administrador per obtenir ajuda."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"El perfil professional ja no està disponible en aquest dispositiu."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"El contingut del dispositiu s\'esborrarà"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"L\'aplicació d\'administració està malmesa o hi falten components, i no es pot fer servir. El contingut del dispositiu s\'esborrarà. Contacta amb l\'administrador per obtenir ajuda."</string>
     <string name="me" msgid="6545696007631404292">"Mi"</string>
@@ -296,9 +306,12 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"envia i llegeix missatges SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Permet que l\'aplicació enviï missatges SMS. Aquesta acció pot provocar càrrecs inesperats. Les aplicacions malicioses poden enviar missatges sense la teva confirmació, cosa que et pot fer gastar diners."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lectura dels missatges de text (SMS o MMS)"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Permet que l\'aplicació llegeixi missatges SMS emmagatzemats a la tauleta o a la targeta SIM. Això permet que l\'aplicació llegeixi tots els missatges SMS, independentment del contingut o de la confidencialitat."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Permet que l\'aplicació llegeixi missatges SMS desats al televisor o a la targeta SIM. Això permet que l\'aplicació llegeixi tots els missatges SMS, independentment del contingut o de la confidencialitat."</string>
-    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Permet que l\'aplicació llegeixi missatges SMS emmagatzemats al telèfon o a la targeta SIM. Això permet que l\'aplicació llegeixi tots els missatges SMS, independentment del contingut o de la confidencialitat."</string>
+    <!-- no translation found for permdesc_readSms (4741697454888074891) -->
+    <skip />
+    <!-- no translation found for permdesc_readSms (5796670395641116592) -->
+    <skip />
+    <!-- no translation found for permdesc_readSms (6826832415656437652) -->
+    <skip />
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"recepció de missatges de text (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Permet que l\'aplicació rebi i processi missatges WAP. Aquest permís inclou la capacitat de controlar o de suprimir missatges que s\'han enviat al teu dispositiu sense mostrar-te\'ls."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"recupera les aplicacions en execució"</string>
@@ -311,8 +324,10 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Permet que l\'aplicació activi el mode de cotxe."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"tancament d\'altres aplicacions"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Permet que l\'aplicació finalitzi processos d\'altres aplicacions en segon pla. Aquesta acció pot fer que altres aplicacions deixin d\'executar-se."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"mostra sobre altres aplicacions"</string>
-    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Permet que l\'aplicació dibuixi sobre les altres aplicacions o parts de la interfície d\'usuari. Pot interferir amb l\'ús de la interfície a qualsevol aplicació o canviar el que et sembla que estàs veient en altres aplicacions."</string>
+    <!-- no translation found for permlab_systemAlertWindow (7238805243128138690) -->
+    <skip />
+    <!-- no translation found for permdesc_systemAlertWindow (2393776099672266188) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"fes que l\'aplicació s\'executi sempre"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Permet que l\'aplicació faci que parts de la seva memòria siguin persistents. Aquesta acció pot limitar la memòria disponible per a altres aplicacions i alentir la tauleta."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Permet que l\'aplicació faci que parts de la seva memòria siguin persistents. Aquesta acció pot limitar la memòria disponible per a altres aplicacions i alentir el televisor."</string>
@@ -338,37 +353,51 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Permet que l\'aplicació modifiqui les dades sobre els contactes que tinguis desats al televisor, com ara la freqüència amb què has trucat, has enviat correus electrònics o t\'has comunicat d\'altres maneres amb contactes concrets. Amb aquest permís, les aplicacions poden suprimir les dades dels contactes."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Permet que l\'aplicació modifiqui les dades sobre contactes emmagatzemades al telèfon, inclosa la freqüència amb què has trucat, has enviat correus electrònics o t\'has comunicat d\'altres maneres amb contactes concrets. Aquest permís permet que les aplicacions suprimeixin dades de contactes."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"lectura del registre de trucades"</string>
-    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Permet que l\'aplicació llegeixi el registre de trucades de la teva tauleta, incloses les dades sobre les trucades entrants i sortints. Aquest permís permet que les aplicacions desin les dades del registre de trucades, i és possible que les aplicacions malicioses comparteixin dades del registre de trucades sense el teu coneixement."</string>
-    <string name="permdesc_readCallLog" product="tv" msgid="5611770887047387926">"Permet que l\'aplicació llegeixi el registre de trucades del televisor, com ara les dades sobre les trucades entrants i sortints. Aquest permís permet que les aplicacions desin les dades del registre de trucades, i és possible que les aplicacions malicioses comparteixin dades del registre de trucades sense que ho sàpigues."</string>
-    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Permet que l\'aplicació llegeixi el registre de trucades del teu telèfon, incloses les dades sobre les trucades entrants i sortints. Aquest permís permet que les aplicacions desin les dades del registre de trucades, i és possible que les aplicacions malicioses comparteixin dades del registre de trucades sense el teu coneixement."</string>
+    <!-- no translation found for permdesc_readCallLog (3204122446463552146) -->
+    <skip />
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"escriptura del registre de trucades"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Permet que l\'aplicació modifiqui el registre de trucades de la teva tauleta, incloses les dades de les trucades entrants i sortints. És possible que les aplicacions malicioses ho utilitzin per eliminar o per modificar el teu registre de trucades."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Permet que l\'aplicació modifiqui el registre de trucades del televisor, com ara les dades de les trucades entrants i sortints. És possible que les aplicacions malicioses l\'utilitzin per esborrar o modificar les dades del registre de trucades."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Permet que l\'aplicació modifiqui el registre de trucades del teu telèfon, incloses les dades de les trucades entrants i sortints. És possible que les aplicacions malicioses ho utilitzin per eliminar o per modificar el teu registre de trucades."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"accedir a sensors corporals (p. ex., monitors de freqüència cardíaca)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Permet que l\'aplicació accedeixi a les dades dels sensors que supervisen el teu estat físic, com ara la freqüència cardíaca."</string>
-    <string name="permlab_readCalendar" msgid="5972727560257612398">"llegeix els esdeveniments del calendari més informació confidencial"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Permet que l\'aplicació llegeixi tots els esdeveniments del calendari emmagatzemats a la tauleta, inclosos els dels amics o dels companys de feina. Aquesta acció pot permetre que l\'aplicació comparteixi o desi les dades del teu calendari, sense tenir en compte la confidencialitat."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Permet que l\'aplicació llegeixi tots els esdeveniments del calendari emmagatzemats al televisor, com ara els dels amics o els dels companys de feina. Amb aquesta acció, l\'aplicació pot compartir o desar les dades del teu calendari sense tenir en compte la confidencialitat o la sensibilitat."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Permet que l\'aplicació llegeixi tots els esdeveniments del calendari emmagatzemats al telèfon, inclosos els dels amics o dels companys de feina. Aquesta acció pot permetre que l\'aplicació comparteixi o desi les dades del teu calendari, sense tenir en compte la confidencialitat."</string>
+    <!-- no translation found for permlab_readCalendar (6716116972752441641) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (4993979255403945892) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (8837931557573064315) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (4373978642145196715) -->
+    <skip />
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"afegeix o modifica els esdeveniments del calendari i envia correus electrònics als clients sense el coneixement dels propietaris"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Permet que l\'aplicació afegeixi, elimini o canviï esdeveniments que pots modificar a la tauleta, inclosos els d\'amics o de companys de feina. Aquesta acció pot permetre que l\'aplicació enviï missatges que sembli que provinguin dels propietaris del calendari o que modifiqui esdeveniments sense el coneixement dels propietaris."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Permet que l\'aplicació afegeixi, suprimeixi o canviï esdeveniments que pots modificar al televisor, com ara els d\'amics o de companys de feina. És possible que l\'aplicació enviï missatges que sembli que provenen dels propietaris del calendari o bé que modifiqui esdeveniments sense que el propietari ho sàpiga."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Permet que l\'aplicació afegeixi, elimini o canviï esdeveniments que pots modificar al telèfon, inclosos els d\'amics o de companys de feina. Aquesta acció pot permetre que l\'aplicació enviï missatges que sembli que provinguin dels propietaris del calendari o que modifiqui esdeveniments sense el coneixement dels propietaris."</string>
+    <!-- no translation found for permdesc_writeCalendar (1675270619903625982) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCalendar (9017809326268135866) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCalendar (7592791790516943173) -->
+    <skip />
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"accedir a ordres del proveïdor d\'ubicació addicionals"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Permet que l\'aplicació accedeixi a ordres addicionals del proveïdor d\'ubicacions; per tant, és possible que l\'aplicació pugui interferir en el funcionament del GPS o d\'altres fonts d\'ubicacions."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"accedir a la ubicació precisa (basada en el GPS i en la xarxa)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Permet que l\'aplicació obtingui la teva ubicació precisa mitjançant un sistema de posicionament global (GPS) o fonts d\'ubicació de xarxa, com ara torres de telefonia mòbil i Wi-Fi. Aquests serveis d\'ubicació s\'han d\'activar i han d\'estar disponibles al dispositiu perquè l\'aplicació els pugui fer servir. Les aplicacions poden utilitzar aquestes dades per determinar aproximadament on et trobes i pot ser que consumeixin més bateria."</string>
+    <!-- no translation found for permdesc_accessFineLocation (5821994817969957884) -->
+    <skip />
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"accedir a la ubicació aproximada (basada en la xarxa)"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Permet que l\'aplicació obtingui la teva ubicació aproximada. Aquesta ubicació prové dels serveis d\'ubicació que utilitzen fonts d\'ubicació de la xarxa, com ara torres de telefonia mòbil i Wi-Fi. Aquests serveis d\'ubicació s\'han d\'activar i han d\'estar disponibles al dispositiu perquè l\'aplicació els pugui fer servir. Les aplicacions poden utilitzar aquestes dades per determinar aproximadament on et trobes."</string>
+    <!-- no translation found for permdesc_accessCoarseLocation (3373266766487862426) -->
+    <skip />
+    <!-- no translation found for permdesc_accessCoarseLocation (1884022719818788511) -->
+    <skip />
+    <!-- no translation found for permdesc_accessCoarseLocation (7788009094906196995) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"canviar la configuració d\'àudio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permet que l\'aplicació modifiqui la configuració d\'àudio general, com ara el volum i l\'altaveu de sortida que es fa servir."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"enregistrar àudio"</string>
-    <string name="permdesc_recordAudio" msgid="4906839301087980680">"Permet que l\'aplicació enregistri àudio amb el micròfon. Aquest permís permet que l\'aplicació enregistri àudio en qualsevol moment sense la teva confirmació."</string>
+    <!-- no translation found for permdesc_recordAudio (4245930455135321433) -->
+    <skip />
     <string name="permlab_sim_communication" msgid="2935852302216852065">"enviar ordres a la SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Permet que l\'aplicació enviï ordres a la SIM. Això és molt perillós."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"fer fotos i vídeos"</string>
-    <string name="permdesc_camera" msgid="8497216524735535009">"Permet que l\'aplicació faci fotos i vídeos amb la càmera. Aquest permís permet que l\'aplicació utilitzi la càmera en qualsevol moment sense la teva confirmació."</string>
+    <!-- no translation found for permdesc_camera (5392231870049240670) -->
+    <skip />
     <string name="permlab_vibrate" msgid="7696427026057705834">"controlar la vibració"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Permet que l\'aplicació controli el vibrador."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"trucar directament a números de telèfon"</string>
@@ -505,7 +534,7 @@
     <string name="permlab_setInputCalibration" msgid="4902620118878467615">"canviar el calibratge del dispositiu d\'entrada"</string>
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Permet que l\'aplicació modifiqui els paràmetres de calibratge de la pantalla tàctil. No ha de ser mai necessari per a aplicacions normals."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"accedir als certificats de DRM"</string>
-    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Permet que una aplicació proporcioni i utilitzi certificats de gestió de drets digitals (DRM, Digital Rights Management). No ha de ser mai necessari per a aplicacions normals."</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Permet que una aplicació proporcioni i utilitzi certificats DRM. No ha de ser mai necessari per a aplicacions normals."</string>
     <string name="permlab_handoverStatus" msgid="7820353257219300883">"rebre l\'estat de la transferència d\'Android Beam"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Permet que aquesta aplicació rebi informació sobre les transferències d\'Android Beam actuals."</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"suprimir els certificats DRM"</string>
@@ -850,18 +879,6 @@
     <string name="weeks" msgid="6509623834583944518">"setmanes"</string>
     <string name="year" msgid="4001118221013892076">"any"</string>
     <string name="years" msgid="6881577717993213522">"anys"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> segons</item>
-      <item quantity="one">1 segon</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> minuts</item>
-      <item quantity="one">1 minut</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> hores</item>
-      <item quantity="one">1 hora</item>
-    </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"ara"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> min</item>
@@ -1614,8 +1631,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Fins a les <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Fins a les <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (propera alarma)"</string>
-    <!-- no translation found for zen_mode_forever (1916263162129197274) -->
-    <skip />
+    <string name="zen_mode_forever" msgid="1916263162129197274">"Fins que desactivis el mode No molesteu"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Fins que desactivis el mode No molesteu"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Replega"</string>

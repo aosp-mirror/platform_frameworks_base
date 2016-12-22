@@ -46,6 +46,8 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problema sa koneksyon o di-wastong MMI code."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Pinaghihigpitan ang pagpapatakbo sa mga fixed dialing number lang."</string>
+    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
+    <skip />
     <string name="serviceEnabled" msgid="8147278346414714315">"Pinagana ang serbisyo."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Pinagana ang serbisyo para sa:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Hindi pinagana ang serbisyo."</string>
@@ -96,6 +98,10 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Naka-block ang mga serbisyo sa boses/data."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Naka-block ang mga serbisyo ng Voice/SMS."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Naka-block ang lahat ng serbisyo sa boses/data/SMS."</string>
+    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
+    <skip />
+    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Hiniling ng peer ang TTY Mode FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Hiniling ng peer ang TTY Mode HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Hiniling ng peer ang TTY Mode VCO"</string>
@@ -179,6 +185,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Na-delete ang profile sa trabaho dahil wala itong admin app."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Ang admin app ng profile sa trabaho ay nawawala o sira. Bilang resulta, na-delete na ang iyong profile sa trabaho at nauugnay na data. Makipag-ugnayan sa iyong administrator para sa tulong."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Hindi na available ang iyong profile sa trabaho sa device na ito."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Buburahin ang iyong device"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Ang admin app ay may mga kulang na bahagi o sira, at hindi ito magagamit. Buburahin na ngayon ang iyong device. Makipag-ugnayan sa iyong administrator para sa tulong."</string>
     <string name="me" msgid="6545696007631404292">"Ako"</string>
@@ -244,23 +254,23 @@
     <string name="user_owner_label" msgid="1119010402169916617">"Lumipat sa Personal"</string>
     <string name="managed_profile_label" msgid="5289992269827577857">"Lumipat sa para sa Trabaho"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Mga Contact"</string>
-    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ina-access ang iyong mga contact"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"i-access ang iyong mga contact"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokasyon"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"i-access ang lokasyon ng device na ito"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendaryo"</string>
-    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ina-access ang iyong kalendaryo"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"i-access ang iyong kalendaryo"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"magpadala at tumingin ng mga mensaheng SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Imbakan"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"mag-access ng mga larawan, media at file sa iyong device"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"i-access ang mga larawan, media at file sa iyong device"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikropono"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"mag-record ng audio"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"kumuha ng mga larawan at mag-record ng video"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telepono"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"tumatawag sa telepono at namamahala sa mga tawag sa telepono"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"tumawag at mamahala ng mga tawag sa telepono"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Mga Sensor ng Katawan"</string>
-    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"i-access ang data ng sensor tungkol sa iyong mahahalagang senyales"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"i-access ang data ng sensor tungkol sa iyong vital signs"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Kunin ang content ng window"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Siyasatin ang nilalaman ng isang window kung saan ka nakikipag-ugnayan."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"I-on ang Explore by Touch"</string>
@@ -296,9 +306,12 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"magpadala at tumingin ng mga mensaheng SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Pinapayagan ang app na magpadala ng mga mensaheng SMS. Maaari itong magresulta sa mga hindi inaasahang pagsingil. Maaaring magpagastos sa iyo ng pera ang nakakahamak na apps sa pamamagitan ng pagpapadala ng mga mensahe nang wala ng iyong kumpirmasyon."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"basahin ang iyong mga text message (SMS o MMS)"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Pinapayagan ang app na magbasa ng mga mensaheng SMS na naka-imbak sa iyong tablet o SIM card. Pinapayagan nito ang app na basahin ang lahat ng mensaheng SMS, ano pa man ang nilalaman at katayuan sa pagiging kumpedensyal ng mga ito."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Pinapayagan ang app na mabasa ang mga mensaheng SMS na nakaimbak sa iyong TV o SIM card. Nagbibigay-daan ito sa app na mabasa ang lahat ng mensaheng SMS, kahit ano pang content nito o kung kumpidensyal ito."</string>
-    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Pinapayagan ang app na magbasa ng mga mensaheng SMS na naka-imbak sa iyong telepono o SIM card. Pinapayagan nito ang app na basahin ang lahat ng mensaheng SMS, ano pa man ang nilalaman at katayuan sa pagiging kumpedensyal ng mga ito."</string>
+    <!-- no translation found for permdesc_readSms (4741697454888074891) -->
+    <skip />
+    <!-- no translation found for permdesc_readSms (5796670395641116592) -->
+    <skip />
+    <!-- no translation found for permdesc_readSms (6826832415656437652) -->
+    <skip />
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"tumanggap ng mga text message (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Pinapayagan ang app na tumanggap at magproseso ng mga mensaheng WAP. Kabilang sa pahintulot na ito ang kakayahang sumubaybay o magtanggal ang app ng mga mensaheng ipinapadala sa iyo nang hindi ipinapakita ang mga ito sa iyo."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"bawiin ang tumatakbong apps"</string>
@@ -311,8 +324,10 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Pinapayagan ang app na paganahin ang car mode."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"isara ang iba pang mga app"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Pinapayagan ang app na tapusin ang mga proseso sa background ng iba pang apps. Maaari itong maging sanhi ng paghinto sa paggana ng iba pang apps."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"gumuhit sa ibabaw ng ibang mga app"</string>
-    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Binibigyang-daan ang app na gumuhit sa ibabaw ng iba pang mga application o mga bahagi ng interface ng user. Maaaring manghimasok ang mga ito sa iyong paggamit sa interface sa anumang application, o baguhin ang sa palagay mo ay nakikita mo sa iba pang mga application."</string>
+    <!-- no translation found for permlab_systemAlertWindow (7238805243128138690) -->
+    <skip />
+    <!-- no translation found for permdesc_systemAlertWindow (2393776099672266188) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"palaging patakbuhin ang app"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Pinapayagan ang app na panatilihin ang ilang bahagi nito sa memory. Maaari nitong limitahan ang memory na available sa iba pang apps na nagpapabagal sa tablet."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Nagbibigay-daan sa app na iimbak sa memory ang mga bahagi nito. Maaari nitong malimitahan ang memory na available sa iba pang mga app na nagpapabagal sa TV."</string>
@@ -338,37 +353,51 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Nagbibigay-daan sa app na baguhin ang data tungkol sa iyong mga contact na naka-imbak sa iyong TV, kabilang ang dalas kung kailan ka tumawag, nag-email, o nakipag-ugnayan sa iba pang mga paraan sa mga partikular na contact. Nagbibigay-daan ang pahintulot na ito sa mga app na mag-delete ng data sa pakikipag-ugnayan."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Pinapayagan ang app na baguhin ang data tungkol sa iyong mga contact na naka-imbak sa iyong telepono, kabilang ang dalas kung kailan ka tumawag, nag-email, o nakipag-ugnayan sa iba pang mga paraan sa mga tukoy na contact. Pinapayagan ng pahintulot na ito ang apps na magtanggal ng data ng contact."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"basahin ang log ng tawag"</string>
-    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Pinapayagan ang app na basahin ang log ng tawag ng iyong tablet, kabilang ang data tungkol sa mga papasok o papalabas na tawag. Pinapayagan ng pahintulot na ito ang apps na i-save ang iyong data ng log ng tawag, at maaaring magbahagi ang nakakahamak na apps ng data ng log ng tawag nang hindi mo nalalaman."</string>
-    <string name="permdesc_readCallLog" product="tv" msgid="5611770887047387926">"Nagbibigay-daan sa app na mabasa ang log ng tawag ng iyong TV, kabilang ang data tungkol sa paparating at papalabas na mga tawag. Nagbibigay-daan sa mga app ang pahintulot na ito na i-save ang iyong data ng log ng tawag at maaaring magbahagi ang mga nakakahamak na app ng data ng log ng tawag nang hindi mo nalalaman."</string>
-    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Pinapayagan ang app na basahin ang log ng tawag ng iyong telepono, kabilang ang data tungkol sa mga papasok o papalabas na tawag. Pinapayagan ng pahintulot na ito ang apps na i-save ang iyong data ng log ng tawag, at maaaring magbahagi ang nakakahamak na apps ng data ng log ng tawag nang hindi mo nalalaman."</string>
+    <!-- no translation found for permdesc_readCallLog (3204122446463552146) -->
+    <skip />
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"isulat ang log ng tawag"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Binibigyan-daan ang app na baguhin ang log ng tawag ng iyong tablet, kabilang ang data tungkol sa mga paparating at papalabas na tawag. Maaari itong gamitin ng nakakahamak na apps upang burahin o baguhin ang iyong log ng tawag."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Binibigyan-daan ang app na baguhin ang log ng tawag ng iyong TV, kabilang ang data tungkol sa mga paparating at papalabas na tawag. Maaari itong gamitin ng mga nakakahamak na app upang burahin o baguhin ang iyong log ng tawag."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Binibigyan-daan ang app na baguhin ang log ng tawag ng iyong telepono, kabilang ang data tungkol sa mga paparating at papalabas na tawag. Maaari itong gamitin ng nakakahamak na apps upang burahin o baguhin ang iyong log ng tawag."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"i-access ang mga sensor sa katawan (tulad ng mga monitor ng bilis ng tibok ng puso)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Pinapayagan ang app na i-access ang data mula sa mga sensor na sumusubaybay sa iyong pisikal na kondisyon, tulad ng iyong heart rate."</string>
-    <string name="permlab_readCalendar" msgid="5972727560257612398">"magbasa ng mga kaganapan sa kalendaryo kasama ang kumpedensyal na impormasyon"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Pinapayagan ang app na basahin ang lahat ng kaganapan sa kalendaryo na naka-imbak sa iyong tablet, kabilang iyong sa mga kaibigan o katrabaho. Maaari nitong payagan ang app na ibahagi o i-save ang data ng iyong kalendaryo, ano pa man ang katayuan ng pagiging kumpedensyal o sensitibo nito."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Nagbibigay-daan sa app na mabasa ang lahat ng mga kaganapan sa kalendaryo na nakaimbak sa iyong TV, kabilang ang mga kaganapan mula sa iyong mga kaibigan o katrabaho. Maaaring payagan nito ang app na magbahagi o mag-save ng iyong data ng kalendaryo kahit na kumpidensyal o sensitibo ito."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Pinapayagan ang app na basahin ang lahat ng kaganapan sa kalendaryo na naka-imbak sa iyong telepono, kabilang iyong sa mga kaibigan o katrabaho. Maaari nitong payagan ang app na ibahagi o i-save ang data ng iyong kalendaryo, ano pa man ang katayuan ng pagiging kumpedensyal o sensitibo nito."</string>
+    <!-- no translation found for permlab_readCalendar (6716116972752441641) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (4993979255403945892) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (8837931557573064315) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (4373978642145196715) -->
+    <skip />
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"magdagdag o magbago ng mga kaganapan sa kalendaryo at magpadala ng email sa mga bisita nang hindi nalalaman ng mga may-ari"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Pinapayagan ang app na magdagdag, mag-alis, magbago ng mga kaganapang maaari mong baguhin sa iyong tablet, kabilang iyong sa mga kaibigan o katrabaho. Maaari nitong payagan ang app na magpadala ng mga mensaheng lumililitaw na mula sa mga may-ari ng kalendaryo, o magbago ng mga kaganapan nang hindi nalalaman ng mga may-ari."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Nagbibigay-daan sa app na magdagdag, mag-alis o magbago ng mga kaganapan na maaari mong baguhin sa iyong TV, kabilang ang mga kaganapan ng iyong mga kaibigan o katrabaho. Maaari nitong bigyang-daan ang app na magpadala ng mga mensahe na mukhang nagmumula sa mga may-ari ng kalendaryo, o magbago ng mga kaganapan nang hindi alam ng may-ari."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Pinapayagan ang app na magdagdag, mag-alis, magbago ng mga kaganapang maaari mong baguhin sa iyong telepono, kabilang iyong sa mga kaibigan o katrabaho. Maaari nitong payagan ang app na magpadala ng mga mensaheng lumililitaw na mula sa mga may-ari ng kalendaryo, o magbago ng mga kaganapan nang hindi nalalaman ng mga may-ari."</string>
+    <!-- no translation found for permdesc_writeCalendar (1675270619903625982) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCalendar (9017809326268135866) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCalendar (7592791790516943173) -->
+    <skip />
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"i-access ang mga dagdag na command ng provider ng lokasyon"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Nagbibigay-daan sa app na mag-access ng mga karagdagang command ng provider ng lokasyon. Maaari nitong bigyang-daan ang app na gambalain ang pagpapatakbo ng GPS o ng iba pang mga pinagmulan ng lokasyon."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"i-access ang tumpak na lokasyon (batay sa GPS at network)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Binibigyang-daan ang app na makuha ang iyong tumpak na lokasyon gamit ang Global Positioning System (GPS) o network ng mga pinagmulan ng lokasyon gaya ng mga cell tower at Wi-Fi. Dapat ay naka-on ang mga serbisyo ng lokasyon na ito at available sa iyong device upang magamit ng app ang mga ito. Maaaring gamitin ito ng apps upang matukoy kung nasaan ka, at maaaring gumamit ng karagdagang power ng baterya."</string>
+    <!-- no translation found for permdesc_accessFineLocation (5821994817969957884) -->
+    <skip />
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"i-access ang tinatantyang lokasyon (batay sa network)"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Binibigyang-daan ang app na makuha ang iyong tinatayang lokasyon. Ang lokasyong ito ay nagmula ng mga serbisyo ng lokasyon na gumagamit ng network ng mga pinagmulan ng lokasyon gaya ng mga cell tower at Wi-Fi. Dapat ay naka-on ang mga serbisyo ng lokasyon na ito at available sa iyong device upang magamit ng app ang mga ito. Maaaring gamitin ito ng apps upang matukoy ang tinatayang lokasyon na kinaroroonan mo."</string>
+    <!-- no translation found for permdesc_accessCoarseLocation (3373266766487862426) -->
+    <skip />
+    <!-- no translation found for permdesc_accessCoarseLocation (1884022719818788511) -->
+    <skip />
+    <!-- no translation found for permdesc_accessCoarseLocation (7788009094906196995) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"baguhin ang mga setting ng iyong audio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Pinapayagan ang app na baguhin ang mga pandaigdigang setting ng audio gaya ng volume at kung aling speaker ang ginagamit para sa output."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"mag-record ng audio"</string>
-    <string name="permdesc_recordAudio" msgid="4906839301087980680">"Pinapayagan ang app na mag-record ng audio gamit ang mikropono. Pinapayagan ng pahintulot na ito ang app na mag-record ng audio anumang oras nang wala ng iyong kumpirmasyon."</string>
+    <!-- no translation found for permdesc_recordAudio (4245930455135321433) -->
+    <skip />
     <string name="permlab_sim_communication" msgid="2935852302216852065">"magpadala ng mga command sa SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Pinapahintulutang magpadala ang app ng mga command sa SIM. Napakapanganib nito."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"kumuha ng mga larawan at video"</string>
-    <string name="permdesc_camera" msgid="8497216524735535009">"Pinapayagan ang app na kumuha ng mga larawan at video gamit ang camera. Pinapayagan ng pahintulot na ito ang app na gamitin ang camera anumang oras nang wala ng iyong kumpirmasyon."</string>
+    <!-- no translation found for permdesc_camera (5392231870049240670) -->
+    <skip />
     <string name="permlab_vibrate" msgid="7696427026057705834">"kontrolin ang pag-vibrate"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Pinapayagan ang app na kontrolin ang vibrator."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"direktang tawagan ang mga numero ng telepono"</string>
@@ -850,18 +879,6 @@
     <string name="weeks" msgid="6509623834583944518">"mga linggo"</string>
     <string name="year" msgid="4001118221013892076">"taon"</string>
     <string name="years" msgid="6881577717993213522">"mga taon"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> segundo</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> na segundo</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> minuto</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> na minuto</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> oras</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> na oras</item>
-    </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"ngayon"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
       <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>m</item>
@@ -1614,8 +1631,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Hanggang <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Hanggang <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (susunod na alarm)"</string>
-    <!-- no translation found for zen_mode_forever (1916263162129197274) -->
-    <skip />
+    <string name="zen_mode_forever" msgid="1916263162129197274">"Hanggang sa i-off mo ang Huwag Istorbohin"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Hanggang sa i-off mo ang Huwag Istorbohin"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"I-collapse"</string>

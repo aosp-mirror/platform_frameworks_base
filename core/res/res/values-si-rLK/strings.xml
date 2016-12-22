@@ -46,6 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"සම්බන්ධතා ගැටළුවක් හෝ අවලංගු MMI කේතයකි."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"ස්ථාවර ඇමතීම් අංක වලට පමණක් මෙහෙයුම සීමාකර ඇත."</string>
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"ඔබ රෝමිං තුළ සිටින අතරතුර ඔබේ දුරකථනයෙන් ඇමතුම් ප්‍රතියොමු සැකසීම් වෙනස් කළ නොහැකිය."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"සේවාව සබල කරන ලදි."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"සේවාව සබලයි, සඳහා:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"සේවාව අබල කරන ලදි."</string>
@@ -96,6 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"හඬ/දත්ත සේවා අවහිර කර ඇත."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"හඬ/SMS සේවා අවහිර කර ඇත."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"සියලුම හඬ/දත්ත/SMS සේවාවන් බාධා කර ඇත."</string>
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"ජාලය වෙත ළඟා විය නොහැකිය"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"ලැබීම වැඩි දියුණු කිරීමට, සැකසීම් &gt; සෙලියුලර් ජාල &gt; වඩා කැමති ජාල වර්ගය තුළ තෝරන ලද වර්ගය වෙනස් කිරීම උත්සාහ කරන්න."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"සම ඉල්ලීම් කළ TTY ප්‍රකාරය පූර්ණයි"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"සම ඉල්ලීම් කළ TTY ප්‍රකාරය HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"සම ඉල්ලීම් කළ TTY ප්‍රකාරය VCO"</string>
@@ -179,6 +182,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"පරිපාලක යෙදුමක් නොමැති වීමෙන් කාර්යාල පැතිකඩ මකා දමන ලදි."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"කාර්යාල පැතිකඩ පාලක යෙදුම නොමැති හෝ දූෂණය වී ඇත. ප්‍රතිඵලයක් ලෙස ඔබගේ කාර්යාල පැතිකඩ සහ අදාළ දත්ත මකා දමා ඇත. සහය සඳහා ඔබගේ පරිපාලකයා සම්බන්ධ කර ගන්න."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"ඔබේ කාර්යාල පැතිකඩ මෙම උපාංගය මත තවදුරටත් ලබා ගැනීමට නොහැකිය."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"ඔබගේ උපාංගය මකා දැමෙනු ඇත"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"යෙදුමේ කොටස් නොමැති හෝ දූෂණය වී ඇති නිසා, භාවිතා කළ නොහැක. ඔබගේ උපාංගය දැන් මකා දැමෙනු ඇත. සහය සඳහා ඔබගේ පරිපාලකයා සම්බන්ධ කරගන්න."</string>
     <string name="me" msgid="6545696007631404292">"මම"</string>
@@ -296,9 +303,9 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"SMS පණිවිඩ යැවීම සහ බැලීම"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"SMS පණිවිඩ යැවීමට යෙදුමට අවසර දෙන්න. මෙමඟින් බලාපොරොත්තු නොවූ ප්‍රතිඵල අත් විය හැක. අනිෂ්ට යෙදුම් ඔබගේ තහවුරුවකින් තොරව පණිවිඩ යැවීම මඟින් ඔබගේ මුදල් වැය කල හැක."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"ඔබගේ පෙළ පණිවුඩ කියවන්න (SMS හෝ MMS)"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"ඔබගේ ටැබ්ලටයේ හෝ SIM පතේ ආචයනය කර ඇති SMS පණිවිඩ කියවීමට යෙදුමට අවසර දෙන්න. අන්තර්ගතය හෝ විශවාසදයි බවින් තොරවම සියලු SMS පණිවිඩ කියවීමට මෙමගින් යෙදුමට අවසර දෙයි."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"ඔබගේ රූපවාහිනියේ හෝ SIM කාඩ්පතේ ගබඩා කර ඇති SMS පණිවිඩ කියවීමට යෙදුම ඉඩ දෙන්න. නොසලකන හෝ රහසිගත සියළුම SMS පණිවිඩ, කියවීමට යෙදුමට මෙයින් අවසර ලැබේ."</string>
-    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"ඔබගේ දුරකථනයේ හෝ SIM පතේ ආචයනය කරන ලද SMS පණිවිඩ කියවීමට යෙදුමට අවසර දෙන්න. අන්තර්ගතය හෝ විශ්වාසදායී බවින් තොරවම සියලු SMS පණිවිඩ කියවීමට මෙමගින් යෙදුමට අවසර දෙයි."</string>
+    <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"මෙම යෙදුමට ඔබගේ ටැබ්ලට් පරිගණකය මත ගබඩා වී ඇති සියලු SMS (පෙළ) පණිවිඩ කියවීමට හැකිය."</string>
+    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"මෙම යෙදුමට ඔබගේ TV මත ගබඩා වී ඇති සියලු SMS (පෙළ) පණිවිඩ කියවීමට හැකිය."</string>
+    <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"මෙම යෙදුමට ඔබගේ TV මත ගබඩා වී ඇති සියලු SMS (පෙළ) පණිවිඩ කියවීමට හැකිය."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"පෙළ පණිවිඩ ලබාගැනීම (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP පණිවිඩ ලැබීමට සහ ක්‍රියාවලි කිරීමට යෙදුමට අවසර දෙන්න. මෙම අවසරයෙහි ඔබව ඒවාට පෙන්වීමකින් තොරව ඔබට පණිවිඩ නිරීක්ෂණයට හෝ මැකීමට හැකියාව ඇතුළත් වේ."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ධාවනය වන යෙදුම් ලබාගැනීම"</string>
@@ -311,8 +318,8 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"කාර් ආකාරය සබල කිරීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"වෙනත් යෙදුම් වැසීම"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"අනෙක් යෙදුම්වල පසුබිම් ක්‍රියාවලි අවසන් කිරීමට යෙදුමට අවසර දෙන්න. අනෙක් යෙදුම් ධාවනය නැවතීමට මෙය හේතුවක් වේ."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"වෙනත් යෙදුම් උඩින් අඳින්න"</string>
-    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"අනෙක් යෙදුම් මත හෝ පරිශීලක අතුරු මුහුණත් කොටස්වල ඇඳීමට යෙදුමට ඉඩ දෙන්න. එය ඔබේ භාවිතයේ ඇති ඕනෑම යෙදුමක මුහුණත සමග සම්බන්ධ වීමට හෝ අනෙක් යෙදුම් ගැන ඔබට පෙනෙන ආකාරය වෙනස් කිරීමට ඉඩ ඇත."</string>
+    <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"මෙම යෙදුම වෙනත් යෙදුම්වලට ඉහළින් දිස් විය හැකිය"</string>
+    <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"මෙම යෙදුම වෙනත් යෙදුම්වල හෝ තිරයේ වෙනත් කොටස්වලට ඉහළින් දිස් විය හැකිය. මෙය සාමාන්‍ය යෙදුම් භාවිතයට බාධා කළ හැකි අතර වෙනත් යෙදුම් දිස් වන ආකාරය වෙනස් කළ හැකිය."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"යෙදුම සැමවිටම ධාවනය කරන්න"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"මතකයේ පවතින එහි කොටස් නොනැසී පැවතීමට යෙදුමට අවසර දෙන්න. වෙනත් යෙදුම් වලට මතකය සීමා කිරීමෙන් ටැබ්ලටය පමා කිරීම මගින්  මෙමගින් කළ හැක."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"යෙදුමේ කොටසක් මතකය තුළ එයට ස්ථාවර තබාගැනීමට යෙදුමට ඉඩ දෙන්න. මෙය වෙනත් යෙදුම් වලට තිබෙන මතකය සීමා කරයි සහ රූපවාහිනිය මන්දගාමී කරයි."</string>
@@ -338,37 +345,37 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"සඳහන් පුද්ගලයන්ට ඔබ ඇමතූ, ඊ-තැපැල් කළ හෝ ඇමතුම් කළ සංඛ්‍යාන ඇතුලත් ඔබගේ දුරකථනයේ ආචයනය කරන ලද සම්බන්ධතා (ලිපින) දත්ත වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. මෙම අවසරයෙන් යෙදුමට සම්බන්ධතා දත්ත මැකීමට අවසර දෙයි."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"සඳහන් පුද්ගලයන්ට ඔබ ඇමතූ, ඊ-තැපැල් කළ හෝ ඇමතුම් කළ සංඛ්‍යාන ඇතුලත් ඔබගේ දුරකථනයේ ආචයනය කරන ලද සම්බන්ධතා (ලිපින) දත්ත වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. මෙම අවසරයෙන් යෙදුමට සම්බන්ධතා දත්ත මැකීමට අවසර දෙයි."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"ඇමතුම් ලොගය කියවන්න"</string>
-    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"පැමිණෙන සහ පිටවන ඇමතුම් ගැන දත්ත ඇතුළත්, ඔබගේ ටැබ්ලටයේ ඇමතුම් ලොග කියවීමට යෙදුමට අවසර දෙන්න. ඔබගේ ඇමතුම් ලොග දත්ත සුරක්ෂිත කිරීමට මෙම අවසරය යෙදුම්වලට අවසර දෙයි සහ ඔබගේ දැනුමකින් තොරව ඇමතුම් ලොග දත්ත අනිෂ්ට යෙදුම් බෙදා ගැනීම කළ හැක."</string>
-    <string name="permdesc_readCallLog" product="tv" msgid="5611770887047387926">"එන ඇමතුම් සහ යන ඇමතුම් පිළිබඳ දත්ත ඇතුළුව ඔබගේ රූපවාහිනියේ ඇමතුම් ලොගය කියවීමට යෙදුමට ඉඩ ලැබේ. ඔබගේ ඇමතුම් ලොගයේ දත්ත සුරැකීමට මෙයින් යෙදුමට අවසර ලැබේ, සහ ඔබගේ දැනුමකින් තොරව ඇමතුම් ලොගයේ දත්ත අනිෂ්ට යෙදුම් බෙදාගනී."</string>
-    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"ලැබෙන සහ පිටවන ඇමතුම් පිළිබඳ දත්ත ඇතුළත්ව ඔබගේ දුරකථනයේ ඇමතුම් ලොග් කියවීමට යෙදුමට අවසර දෙන්න. මෙම අවසරය ඔබගේ ඇමතුම් ලොග් දත්ත උපස්ථ කිරීමට යෙදුමට ඉඩදෙන අතර ඔබගේ අනුදැනුමකින් තොරව අනිෂ්ට යෙදුම් විසින් ඇමතුම් ලොග් දත්ත බෙදාගැනීම කළ හැක."</string>
+    <string name="permdesc_readCallLog" msgid="3204122446463552146">"මෙම යෙදුමට ඔබේ ඇමතුම් ඉතිහාසය කියවීමට හැකිය."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"ඇමතුම් ලොගය ලිවීම"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"ලැබෙන ඇමතුම් සහ පිටවන ඇමතුම් දත්ත ඇතුළත්ව ඔබගේ ටැබ්ලටයේ ඇමතුම් ලොගය වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. ඔබගේ ඇමතුම් ලොගය මැකීමට හෝ වෙනස් කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිතා කෙරේ."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"ලැබෙන ඇමතුම් සහ පිටවන ඇමතුම් දත්ත ඇතුළත්ව ඔබගේ ටැබ්ලටයේ ඇමතුම් ලොගය වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. ඔබගේ ඇමතුම් ලොගය මැකීමට හෝ වෙනස් කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිතා කෙරේ."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"පැමිණෙන සහ පිටවෙන ඇමතුම් දත්ත ඇතුළුව ඔබගේ දුරකථනයේ ඇමතුම් ලොගය වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. ඔබගේ ඇමතුම් ලොගය මැකීමට හෝ වෙනස් කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිත කල හැක."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"දේහ සංවේදකවලට (හෘද ස්පන්දන වේග මොනිටර වැනි) පිවිසීම"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"හෘද ස්පන්දන වේගය වැනි ඔබගේ ශාරීරික තත්ත්වය නිරීක්ෂණය කරන සංවේදක වලින් දත්ත ලබාගැනීමට යෙදුමට ඉඩ දෙන්න."</string>
-    <string name="permlab_readCalendar" msgid="5972727560257612398">"දින දර්ශනයේ සිදුවීම් සහ රහසිගත තොරතුරු කියවීම"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"ඔබගේ ටැබ්ලටය තුල ගබඩා  කර ඇති මිතුරන්ගේ සහ එක්ව ක්‍රියාකරන්නන්ගේ ද ඇතුළුව සියලුම දින දර්ශන සිද්ධි කියවීමට යෙදුමට අවසර දෙන්න. මෙය රහස්‍යභාවය හෝ සංවේදීතාවය නොසලකා ඔබගේ දින දර්ශන දත්ත බෙදා ගැනීමට හෝ සුරැකීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"ඔබගේ රූපවාහිනියේ ගබඩා කර ඇති මිතුරන්ගේ සහ එකට වැඩ කරන්නන්ගේ  සියළුම දින දර්ශනය සිදුවීම් කියවීමට යෙදුම ඉඩ දෙන්න. නොසලකන හෝ රහසිගත සියළුම දින දර්ශන දත්ත බෙදාගැනීමට හෝ සුරැකීමට යෙදුමට මෙයින් අවසර ලැබේ."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"යහළුවන් සහ සමකාලිනයන් ඇතුලත් ඔබගේ දුරකථනයේ ආචයනය කරන ලද සියලු දින දර්ශන සිදුවීම් කියවීමට යෙදුමට අවසර දෙන්න. විශ්වාසයකින් හෝ සංවේදීතාවකින් තොරව ඔබගේ දින දර්ශන දත්ත බෙදා ගැනීමට හෝ උපස්ථ කිරීමට මෙමගින් යෙදුමට අවසර දෙයි."</string>
+    <string name="permlab_readCalendar" msgid="6716116972752441641">"දින දර්ශන සිදුවීම් හා විස්තර කියවන්න"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"මෙම යෙදුමට ඔබගේ ටැබ්ලට් පරිගණකය මත ගබඩා වී ඇති සියලු දින දර්ශන කියවීමට සහ සහ ඔබගේ දින දර්ශන දත්ත බෙදා ගැනීමට සහ සුරැකීමට හැකිය."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"මෙම යෙදුමට ඔබගේ TV මත ගබඩා වී ඇති සියලු දින දර්ශන කියවීමට සහ සහ ඔබගේ දින දර්ශන දත්ත බෙදා ගැනීමට සහ සුරැකීමට හැකිය."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"මෙම යෙදුමට ඔබගේ දුරකථනය මත ගබඩා වී ඇති සියලු දින දර්ශන කියවීමට සහ සහ ඔබගේ දින දර්ශන දත්ත බෙදා ගැනීමට සහ සුරැකීමට හැකිය."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"දින දර්ශන සිද්ධි එකතු කිරීම හෝ වෙනස් කිරීමක් සිදුකර හිමිකරුගේ දැනීමකින් තොරව අමුත්තන්ට ඊ-තැපෑලක් යවීම"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"යහළුවන් හෝ එකට-වැඩකරන්නන් ඇතුළත්ව ඔබට ටැබ්ලටයේ වෙනස් කළ හැකි සිද්ධි එකතු කිරීමට, ඉවත් කිරීමට, වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. මෙමඟින් දින දර්ශන හිමිකරුවන්ගෙන් පණිවිඩ යවන පරිදි මෙන් මවාපෑමට හෝ හිමිකරුගේ අනුදැනුමකින් තොරව සිද්ධි වෙනස් කිරීමට යෙදුමට අවසර ලැබේ."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"මිතුරන්ගේ හෝ එක්ව කටයුතු කරන්නන්ගේද ඇතුළුව උපාංගය මත ඔබට වෙනස් කිරීමට හැකි සිද්ධි එකතු කිරීමට, ඉවත් කිරීමට සහ වෙනස් කිරීමට යෙදුමට අවසර දේ. මෙමඟින් යෙදුම හට දින දසුන් හිමිකරු ලෙස පෙනී සිටිමින් පණිවිඩ යැවීම, හිමිකරුගේ අනුදැනුම නොමැතිව සිද්ධි වෙනස් කිරීම කළ හැක."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"ඔබගේ යහළුවන් හෝ සමකාලීනයන් ඇතුළත් ඔබගේ දුරකථනයේ ඔබට වෙනස් කළ හැකි සිදු වීම් එකතු කිරීමට, ඉවත් කිරීමට, වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. මෙමගින් දින දර්ශන හිමිකරුවන්ගෙන් පැමිණෙන සේ පෙනෙන පණිවිඩ යැවීමට හෝ හිමිකරුගේ දැනුමකින් තොරව සිදුවීම් වෙනස් කිරීමට යෙදුමට අවසර දෙයි."</string>
+    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"මෙම යෙදුමට ඔබේ ටැබ්ලට් පරිගණකය මත දින දර්ශන සිදුවීම් එක් කිරීමට, ඉවත් කිරීමට, හෝ වෙනස් කිරීමට හැකිය. මෙම යෙදුමට දින දර්ශන හිමිකරුවන් වෙතින් වන ඒවා ලෙස දිස් විය හැකි පණිවිඩ එවීමට, හෝ සිදුවීම්වල හිමිකරුවන්ට දැනුම් දීමෙන් තොරව ඒවා වෙනස් කිරීමට හැකිය."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"මෙම යෙදුමට ඔබේ TV මත දින දර්ශන සිදුවීම් එක් කිරීමට, ඉවත් කිරීමට, හෝ වෙනස් කිරීමට හැකිය. මෙම යෙදුමට දින දර්ශන හිමිකරුවන් වෙතින් වන ඒවා ලෙස දිස් විය හැකි පණිවිඩ එවීමට, හෝ සිදුවීම්වල හිමිකරුවන්ට දැනුම් දීමෙන් තොරව ඒවා වෙනස් කිරීමට හැකිය."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"මෙම යෙදුමට ඔබේ දුරකථනය මත දින දර්ශන සිදුවීම් එක් කිරීමට, ඉවත් කිරීමට, හෝ වෙනස් කිරීමට හැකිය. මෙම යෙදුමට දින දර්ශන හිමිකරුවන් වෙතින් වන ඒවා ලෙස දිස් විය හැකි පණිවිඩ එවීමට, හෝ සිදුවීම්වල හිමිකරුවන්ට දැනුම් දීමෙන් තොරව ඒවා වෙනස් කිරීමට හැකිය."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"අමතර ස්ථාන සැපයුම්කරු විධාන වෙත ප්‍රවේශ වීම"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ස්ථානය සපයන අමතර අණ වලට ප්‍රවේශය කිරීමට යෙදුමට අවසර දෙන්න. GPS ක්‍රියාවන් හෝ වෙනත් ස්ථාන මූලාශ්‍ර සමඟ මැදිහත් වීමට මෙයින් යෙදුමට ඉඩ ලැබේ."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"නිවැරදි ස්ථානයට (GPS සහ ජාලය පදනම් කරගත්) පිවිසීම"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"ගෝලීය ස්ථානීය පද්ධතිය (GPS) හෝ සෙල් කුළුණු සහ Wi-Fi වැනි ජාල ස්ථානීය ප්‍රභව භාවිතයෙන් ඔබගේ නිවැරදි ස්ථානය ලබාගැනීමට යෙදුම අවසර දෙන්න. යෙදුම් වලට ස්ථානීය සේවා භාවිතා කිරීමට  ඒවා සක්‍රිය විය යුතු වේ. ඔබව සොයා ගැනීමට යෙදුම් මෙය භාවිතා කරන අතර අමතර බැටරි බලයක්ද පරිභෝජනය කරයි."</string>
+    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"මෙම යෙදුමට GPS හෝ ජංගම දුරකථන කුළුණු සහ Wi-Fi ජාල වැනි ජාල ස්ථාන මූලාශ්‍ර පදනම්ව ඔබගේ ස්ථානය ලබා ගත හැකිය. යෙදුමට ඒවා භාවිත කිරීමට හැකි වීමට මෙම ස්ථාන සේවා ක්‍රියාත්මක කර සහ ඔබේ දුරකථනය මත ලබා ගත හැකිව තිබිය යුතුය. මෙය බැටරි පාරිභෝජනය වැඩි කළ හැකිය."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"ආසන්නතම ස්ථානයට (ජාලය-පාදක වූ) පිවිසීම"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"ඔබගේ දළ ස්ථානය ලබාගැනීමට යෙදුමට අවසර දෙන්න. සන්නේවේදන කුළුණු සහ Wi-Fi ආදී ජාල ස්ථාන මූලාශ්‍ර භාවිත කරන ස්ථාන සේවා විසින් මෙම ස්ථානය ව්‍යුත්පන්න කර ඇත. යෙදුමට භාවිතය සඳහා මෙම ස්ථාන සේවා සක්‍රිය කළ යුතු අතර ඔබගේ උපාංගය සඳහා පැවතිය යුතුය. ඔබ සිටින තැන දළව හඳුනා ගැනීමට යෙදුම් වලට මෙය භාවිත කළ හැකිය."</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"මෙම යෙදුමට ජංගම දුරකථන කුළුණු සහ Wi-Fi ජාල වැනි ජාල මූලාශ්‍ර පදනම්ව ඔබගේ ස්ථානය ලබා ගත හැකිය. යෙදුමට ඒවා භාවිත කිරීමට හැකි වීමට මෙම ස්ථාන සේවා ක්‍රියාත්මක කර සහ ඔබේ ටැබ්ලට් පරිගණකය මත ලබා ගත හැකිව තිබිය යුතුය."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"මෙම යෙදුමට ජංගම දුරකථන කුළුණු සහ Wi-Fi ජාල වැනි ජාල මූලාශ්‍ර පදනම්ව ඔබගේ ස්ථානය ලබා ගත හැකිය. යෙදුමට ඒවා භාවිත කිරීමට හැකි වීමට මෙම ස්ථාන සේවා ක්‍රියාත්මක කර සහ ඔබේ TV මත ලබා ගත හැකිව තිබිය යුතුය."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"මෙම යෙදුමට ජංගම දුරකථන කුළුණු සහ Wi-Fi ජාල වැනි ජාල මූලාශ්‍ර පදනම්ව ඔබගේ ස්ථානය ලබා ගත හැකිය. යෙදුමට ඒවා භාවිත කිරීමට හැකි වීමට මෙම ස්ථාන සේවා ක්‍රියාත්මක කර සහ ඔබේ දුරකථනය මත ලබා ගත හැකිව තිබිය යුතුය."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ඔබගේ ශ්‍රව්‍ය සැකසීම් වෙනස් කරන්න"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ශබ්දය ආදී ගෝලීය ශබ්ද සැකසීම් වෙනස් කිරීමට සහ ප්‍රතිදානය සඳහා භාවිත කරන්නේ කුමන නාදකය දැයි තේරීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ශබ්ද පටිගත කරන්න"</string>
-    <string name="permdesc_recordAudio" msgid="4906839301087980680">"මයික්‍රොෆෝනය මඟින් ශබ්ද පටිගත කිරීමට යෙදුමට අවසර දෙන්න. මෙම අවසරය මඟින් යෙදුමට ඕනෑම වේලාවක ඔබගේ අනුදැනුමකින් තොරව ශබ්ද පටිගත කිරීමට ඉඩ ලබා දේ."</string>
+    <string name="permdesc_recordAudio" msgid="4245930455135321433">"මෙම යෙදුමට ඕනෑම වේලාවක මයික්‍රෆෝනය භාවිතයෙන් ශ්‍රව්‍ය පටිගත කිරීමට හැකිය."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"SIM වෙත විධාන යැවීම"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"SIM වෙත විධාන ගෙන යාමට යෙදුමට අවසර දෙයි. මෙය ඉතා භයානක වේ."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"පින්තූර සහ වීඩියෝ ගන්න"</string>
-    <string name="permdesc_camera" msgid="8497216524735535009">"කැමරාවෙන් පින්තූර ගැනීමට සහ වීඩියෝ කිරීමට යෙදුමට අවසර දෙන්න. මෙම අවසරය මඟින් ඔබගේ අනුදැනුමකින් තොරව ඕනෑම වේලාවකදී කැමරාව භාවිතා කිරීමට යෙදුමට අවසර දෙන්න."</string>
+    <string name="permdesc_camera" msgid="5392231870049240670">"මෙම යෙදුමට ඕනෑම වේලාවක කැමරාව භාවිත කර පින්තූර ගැනීමට සහ වීඩියෝ පටිගත කිරීමට හැකිය."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"කම්පනය පාලනය කිරීම"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"කම්පකය පාලනයට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"දුරකථන අංක වෙත ඍජුවම අමතන්න"</string>
@@ -852,18 +859,6 @@
     <string name="weeks" msgid="6509623834583944518">"සති"</string>
     <string name="year" msgid="4001118221013892076">"අවුරුද්ද"</string>
     <string name="years" msgid="6881577717993213522">"අවුරුදු"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="one">තත්පර <xliff:g id="COUNT">%d</xliff:g> යි</item>
-      <item quantity="other">තත්පර <xliff:g id="COUNT">%d</xliff:g> යි</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="one">මිනිත්තු <xliff:g id="COUNT">%d</xliff:g> යි</item>
-      <item quantity="other">මිනිත්තු <xliff:g id="COUNT">%d</xliff:g> යි</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="one">පැය <xliff:g id="COUNT">%d</xliff:g></item>
-      <item quantity="other">පැය <xliff:g id="COUNT">%d</xliff:g></item>
-    </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"දැන්"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
       <item quantity="one">මි<xliff:g id="COUNT_1">%d</xliff:g></item>
@@ -1616,8 +1611,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> තෙක්"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> තෙක් (ඊළඟ එලාමය)"</string>
-    <!-- no translation found for zen_mode_forever (1916263162129197274) -->
-    <skip />
+    <string name="zen_mode_forever" msgid="1916263162129197274">"බාධා නොකරන්න ඔබ අක්‍රිය කරන තුරු"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"බාධා නොකරන්න ඔබ අක්‍රිය කරන තුරු"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"හකුළන්න"</string>
