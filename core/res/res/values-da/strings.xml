@@ -46,6 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Forbindelsesproblemer eller ugyldigt MMI-nummer."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Du kan kun foretage handlinger med dine numre til begrænset opkald."</string>
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Det er ikke muligt at ændre indstillingerne for viderestilling af opkald fra din telefon, mens du bruger roaming."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Tjenesten blev aktiveret."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Tjenesten blev aktiveret for:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Tjenesten er deaktiveret."</string>
@@ -96,6 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Stemme-/datatjenester er blokeret."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Stemme-/sms-tjenester er blokerede."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Alle stemme-/data-/sms-tjenester er blokeret."</string>
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Der er ingen forbindelse til netværket"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"For at forbedre signalet kan du prøve at ændre den valgte netværkstype i Indstillinger &gt; Mobilnetværk &gt; Foretrukken netværkstype."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Den anden enhed har skiftet til FULD TTY-tilstand"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Den anden enhed har skiftet til TTY-tilstanden HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Den anden enhed har skiftet til TTY-tilstanden VCO"</string>
@@ -179,6 +182,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Arbejdsprofilen blev slettet, fordi der mangler en administrationsapp."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Administrationsappen til arbejdsprofilen mangler eller er beskadiget. Derfor er din arbejdsprofil og dine relaterede data blevet slettet. Kontakt din administrator for at få hjælp."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Din arbejdsprofil er ikke længere tilgængelig på denne enhed."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Enheden slettes"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Administrationsappen mangler komponenter eller er beskadiget og kan ikke bruges. Enheden vil nu blive slettet. Kontakt din administrator for at få hjælp."</string>
     <string name="me" msgid="6545696007631404292">"Mig"</string>
@@ -296,9 +303,9 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"Send og se sms-beskeder"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Tillader, at appen kan sende sms-beskeder. Dette kan resultere i uventede opkrævninger. Skadelige apps kan koste dig penge ved at sende beskeder uden din bekræftelse."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"læse dine tekstbeskeder (sms eller mms)"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Tillader, at appen kan læse de sms-beskeder, der er gemt på din tablet eller dit SIM-kort. Med denne tilladelse kan appen læse alle sms-beskeder, uanset indhold eller fortrolighed."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Giver appen lov til at læse sms-beskeder, der er gemt på dit tv eller SIM-kort. Dette gør det muligt for appen at læse alle sms-beskeder uanset indhold eller fortrolighed."</string>
-    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Tillader, at appen kan læse de sms-beskeder, der er gemt på din telefon eller dit SIM-kort. Med denne tilladelse kan appen læse alle sms-beskeder, uanset indhold eller fortrolighed."</string>
+    <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"Denne app kan læse alle sms-beskeder, der er gemt på din tablet."</string>
+    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"Denne app kan læse alle sms-beskeder, der er gemt på dit fjernsyn."</string>
+    <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"Denne app kan læse alle sms-beskeder, der er gemt på din telefon."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"modtage tekstbeskeder (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Tillader, at appen kan modtage og behandle WAP-beskeder. Denne tilladelse omfatter muligheden for at overvåge eller slette de beskeder, der sendes til dig, uden at vise dem til dig."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"hente kørende apps"</string>
@@ -311,8 +318,8 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Tillader, at appen kan aktivere biltilstand."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"lukke andre apps"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Tillader, at appen kan afslutte baggrundsprocesser for andre apps. Dette kan forårsage, at andre apps holder op med at virke."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"ignorere andre apps"</string>
-    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Tillader, at appen trækkes oven på andre applikationer eller dele af brugergrænsefladen. De kan forstyrre din brug af grænsefladen i en applikation eller ændre det, du tror, du ser i andre applikationer."</string>
+    <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Denne app kan vises oven på andre apps"</string>
+    <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Denne app kan vises oven på andre apps eller andre dele af skærmen. Dette kan forstyrre den normale brug af appen og ændre visningen af andre apps."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"sørge for, at appen altid kører"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Tillader, at appen gør dele af sig selv vedholdende i hukommelsen. Dette kan begrænse den tilgængelige hukommelse for andre apps, hvilket gør tabletten langsommere."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Giver appen lov til at gøre dele af sig selv vedholdende i hukommelsen. Dette kan begrænse den tilgængelige hukommelse for andre apps og derved gøre fjernsynet langsommere."</string>
@@ -338,37 +345,37 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Giver appen lov til at ændre data om dine kontaktpersoner, der er gemt på dit tv, herunder hvor ofte du har ringet, e-mailet eller på anden måde kommunikeret med bestemte kontaktpersoner. Denne tilladelse gør det muligt for apps at slette kontaktoplysninger."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Tillader, at appen kan ændre data om de kontaktpersoner, der er gemt på din telefon, f.eks. hvor ofte du har ringet til dem, sendt en e-mail til dem eller på anden måde kommunikeret med bestemte kontaktpersoner. Med denne tilladelse kan apps slette kontaktoplysninger."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"læse opkaldsliste"</string>
-    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Tillader, at appen kan læse din tablets opkaldsliste, f.eks. data om indgående og udgående opkald. Med denne tilladelse kan apps gemme dine opkaldslistedata, og skadelige apps kan dele opkaldslistedata uden din viden."</string>
-    <string name="permdesc_readCallLog" product="tv" msgid="5611770887047387926">"Giver appen lov til at læse tv\'ets opkaldsliste, herunder data om ind- og udgående opkald. Denne tilladelse gør det muligt for apps at gemme data fra din opkaldslog, og ondsindede apps kan dele data fra din opkaldslog uden din viden."</string>
-    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Tillader, at appen kan læse telefonens opkaldsliste, f.eks. data om indgående og udgående opkald. Med denne tilladelse kan apps gemme dine opkaldslistedata, og skadelige apps kan dele disse opkaldslistedata uden din viden."</string>
+    <string name="permdesc_readCallLog" msgid="3204122446463552146">"Denne app kan læse din opkaldshistorik."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"skriv opkaldsliste"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Tillader, at appen ændrer din tablets opkaldsliste, f.eks. data om indgående og udgående opkald. Ondsindede apps kan bruge dette til at slette eller ændre din opkaldsliste."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Giver appen lov til at ændre opkaldslisten på dit tv, herunder data om indgående og udgående opkald. Ondsindede apps kan bruge dette til at slette eller ændre din opkaldsliste."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Tillader, at appen ændrer telefonens opkaldsliste, f.eks. data om indgående og udgående opkald. Ondsindede apps kan bruge dette til at slette eller ændre din opkaldsliste."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"få adgang til kropssensorer (f.eks. pulsmålere)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Giver appen adgang til data fra sensorer, der overvåger din fysiske tilstand, f.eks. din puls."</string>
-    <string name="permlab_readCalendar" msgid="5972727560257612398">"læse kalenderbegivenheder og fortrolige oplysninger"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Tillader, at appen kan læse alle de kalenderbegivenheder, der er gemt på din tablet, f.eks. venners eller kollegers. Med denne tilladelse kan appen dele eller gemme dine kalenderdata, uanset fortrolighed eller følsomhed."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Giver appen lov til at læse alle kalenderbegivenheder, der er gemt på dit tv, herunder begivenheder tilhørende venner og kolleger. Dette kan give appen lov til at dele eller gemme dine kalenderdata, uanset om de er fortrolige eller følsomme."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Tillader, at appen kan læse alle de kalenderbegivenheder, der er gemt på din telefon, f.eks. venners eller kollegers. Med denne tilladelse kan appen dele eller gemme dine kalenderdata, uanset fortrolighed eller følsomhed."</string>
+    <string name="permlab_readCalendar" msgid="6716116972752441641">"Læs kalenderbegivenheder og -info"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Denne app kan læse alle kalenderbegivenheder, der er gemt på din tablet, og dele eller gemme dine kalenderdata."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Denne app kan læse alle kalenderbegivenheder, der er gemt på dit fjernsyn, og dele eller gemme dine kalenderdata."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Denne app kan læse alle kalenderbegivenheder, der er gemt på din telefon, og dele eller gemme dine kalenderdata."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"tilføje eller ændre kalenderbegivenheder og sende e-mail til gæster uden ejerens viden"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Tillader, at appen kan tilføje, fjerne, ændre begivenheder, som du kan redigere på din tablet, f.eks. venners eller kollegers. Med denne tilladelelse kan appen sende meddelelser, der synes at komme fra ejere af kalendere, eller ændre begivenheder uden ejernes viden."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Giver appen lov til at tilføje, fjerne eller ændre begivenheder, som du kan redigere på dit tv, herunder venners og kollegers begivenheder. Dette kan give appen mulighed for at sende meddelelser, der ser ud, som om de kommer fra ejere af kalendere, eller for at ændre begivenheder uden ejernes viden."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Tillader, at appen kan tilføje, fjerne og ændre begivenheder, som du kan redigere på din telefon, f.eks. venners eller kollegers. Med denne tilladelse kan appen sende meddelelser, der synes at komme fra ejere af kalendere, eller ændre begivenheder uden ejernes viden."</string>
+    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Denne app kan tilføje, fjerne eller ændre kalenderbegivenheder på din tablet. Denne app kan sende meddelelser, der kan se ud, som om de kommer fra kalenderejere, eller ændre begivenheder uden at give ejeren besked."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Denne app kan tilføje, fjerne eller ændre kalenderbegivenheder på dit fjernsyn. Denne app kan sende meddelelser, der kan se ud, som om de kommer fra kalenderejere, eller ændre begivenheder uden at give ejeren besked."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Denne app kan tilføje, fjerne eller ændre kalenderbegivenheder på din telefon. Denne app kan sende meddelelser, der kan se ud, som om de kommer fra kalenderejere, eller ændre begivenheder uden at give ejeren besked."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"få adgang til yderligere kommandoer for placeringsudbyder"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Tillader, at appen kan få adgang til yderligere kommandoer for placeringsudbydere. Dette kan gøre det muligt for appen at forstyrre GPS-funktionen eller andre placeringskilder."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"få adgang til nøjagtig placering (baseret på GPS og netværk)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Tillader, at appen henter din præcise placering ved hjælp af GPS (Global Positioning System) eller netværksplaceringskilder, såsom mobilmaster og Wi-Fi. Disse placeringstjenester skal være aktiverede og tilgængelige på din enhed, for at appen kan bruge dem. Apps kan bruge dette til at fastslå, hvor du er, og kan eventuelt bruge ekstra batterikapacitet."</string>
+    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"Denne app kan bestemme din placering ved hjælp af netværkskilder, som f.eks. mobilmaster og Wi-Fi-netværk. Disse placeringstjenester skal være aktiverede og tilgængelige på din telefon, før appen kan bruge dem. Dette kan øge batteriforbruget."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"få adgang til omtrentlig placering (netværksbaseret)"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Tillader, at appen henter din omtrentlige placering. Denne placering er udledt via placeringstjenester, der bruger netværksplaceringskilder, som f.eks. mobilmaster og Wi-Fi. Disse placeringstjenester skal være aktiverede og tilgængelige på din enhed, for at appen kan bruge dem. Apps kan bruge dette til at fastslå, hvor du omtrent er."</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Denne app kan bestemme din placering ved hjælp af netværkskilder, som f.eks. mobilmaster og Wi-Fi-netværk. Disse placeringstjenester skal være aktiverede og tilgængelige på din tablet, før appen kan bruge dem."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Denne app kan bestemme din placering ved hjælp af netværkskilder, som f.eks. mobilmaster og Wi-Fi-netværk. Disse placeringstjenester skal være aktiverede og tilgængelige på dit fjernsyn, før appen kan bruge dem."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Denne app kan bestemme din placering ved hjælp af netværkskilder, som f.eks. mobilmaster og Wi-Fi-netværk. Disse placeringstjenester skal være aktiverede og tilgængelige på din telefon, før appen kan bruge dem."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"skifte dine lydindstillinger"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Tillader, at appen kan ændre globale lydindstillinger, som f.eks. lydstyrke og hvilken højttaler der bruges til output."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"optage lyd"</string>
-    <string name="permdesc_recordAudio" msgid="4906839301087980680">"Tillader, at appen kan optage lyd med mikrofonen. Med denne tilladelse kan appen til enhver tid optage lyd uden din bekræftelse."</string>
+    <string name="permdesc_recordAudio" msgid="4245930455135321433">"Denne app kan til enhver tid optage lyd via mikrofonen."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"send kommandoer til SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Tillader, at appen sender kommandoer til SIM-kortet. Dette er meget farligt."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"tage billeder og optage video"</string>
-    <string name="permdesc_camera" msgid="8497216524735535009">"Tillader, at appen kan tage billeder og videoer med kameraet. Med denne tilladelse kan appen til enhver tid bruge kameraet uden din bekræftelse."</string>
+    <string name="permdesc_camera" msgid="5392231870049240670">"Med denne app kan du tage billeder og optage video med kameraet når som helst."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"kontrollere vibration"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Tillader, at appen kan kontrollere vibratoren."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ringe direkte op til telefonnumre"</string>
@@ -850,18 +857,6 @@
     <string name="weeks" msgid="6509623834583944518">"uger"</string>
     <string name="year" msgid="4001118221013892076">"år"</string>
     <string name="years" msgid="6881577717993213522">"år"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> sekunder</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> sekunder</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> minutter</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> minutter</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> timer</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> timer</item>
-    </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"nu"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
       <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>m</item>
@@ -1614,8 +1609,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Indtil <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Indtil <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (næste alarm)"</string>
-    <!-- no translation found for zen_mode_forever (1916263162129197274) -->
-    <skip />
+    <string name="zen_mode_forever" msgid="1916263162129197274">"Indtil du deaktiverer \"Forstyr ikke\""</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Indtil du slår \"Forstyr ikke\" fra"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Skjul"</string>

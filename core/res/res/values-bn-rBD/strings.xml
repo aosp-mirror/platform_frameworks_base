@@ -46,6 +46,8 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"সংযোগ সমস্যা বা অবৈধ MMI কোড৷"</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"নির্দিষ্ট নম্বরে ডায়ালযোগ্য হিসাবে প্রক্রিয়াটি সীমিত করা হয়েছে৷"</string>
+    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
+    <skip />
     <string name="serviceEnabled" msgid="8147278346414714315">"পরিষেবা সক্ষম করা ছিল৷"</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"এর জন্য পরিষেবার সক্ষম করা ছিল:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"পরিষেবা অক্ষম করা হয়েছে৷"</string>
@@ -96,6 +98,10 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"ভয়েস/ডেটা পরিষেবাগুলি অবরুদ্ধ করা হয়েছে৷"</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"ভয়েস/SMS পরিষেবা অবরুদ্ধ করা আছে৷"</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"সমস্ত ভয়েস/ডেটা/SMS পরিষেবা অবরুদ্ধ করা হয়েছে৷"</string>
+    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
+    <skip />
+    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"পির TTY মোড FULL অনুরোধ করেছে"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"পির TTY মোড HCO অনুরোধ করেছে"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"পির TTY মোড VCO অনুরোধ করেছে"</string>
@@ -179,6 +185,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"প্রশাসক অ্যাপ্লিকেশান অনুপস্থিত থাকায় কাজের প্রোফাইল মুছে ফেলা হয়েছে৷"</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"কাজের প্রোফাইলের প্রশাসক অ্যাপ্লিকেশান হয় অনুপস্থিত বা ক্ষতিগ্রস্ত হয়েছে৷ এর ফলস্বরূপ আপনার কাজের প্রোফাইল এবং সম্পর্কিত ডেটা মুছে দেওয়া হয়েছে৷ সহায়তার জন্য আপনার প্রশাসকের সাথে যোগাযোগ করুন৷"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"আপনার কাজের প্রোফাইল এই ডিভাইসে আর উপলব্ধ নেই।"</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"আপনার ডিভাইসটি মুছে ফেলা হবে"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"প্রশাসক অ্যাপকেশানটিতে উপাদান অনুপস্থিত বা ক্ষতিগ্রস্ত হয়েছে এবং ব্যবহার করা যাবে না৷ আপনার ডিভাইস এখন মুছে ফেলা হবে৷ সহায়তার জন্য আপনার প্রশাসকের সাথে যোগাযোগ করুন৷"</string>
     <string name="me" msgid="6545696007631404292">"আমাকে"</string>
@@ -296,9 +306,12 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"SMS পাঠানো ও দেখা,আপনি কি পরিচিতি কে এগুলি করার অনুমতি দেবেন?"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"অ্যাপ্লিকেশানটিকে SMS বার্তাগুলি পাঠাতে অনুমতি দেয়৷ এর জন্য অপ্রত্যাশিত চার্জ কাটা হতে পারে৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি আপনার নিশ্চিতকরণ ছাড়া বার্তা পাঠানোর মাধ্যমে আপনাকে অর্থ চার্জ করতে পারে৷"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"আপনার পাঠ্য বার্তা পড়ুন (SMS বা MMS)"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"অ্যাপ্লিকেশানটিকে আপনার ট্যাবলেটে বা আপনার সিম কার্ডে সংরক্ষিত SMS বার্তাগুলি পড়ার অনুমতি দেয়৷ এটি অ্যাপ্লিকেশানটিকে সামগ্রী বা গোপনীয়তার সমস্ত SMS বার্তা নির্বিশেষে পড়ার অনুমতি দেয়৷"</string>
-    <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"অ্যাপ্লিকেশানটিকে আপনার টিভি বা SIM কার্ডে সংরক্ষিত SMS বার্তাগুলি পড়ার অনুমতি দেয়৷ এটি অ্যাপ্লিকেশানটিকে সামগ্রী বা গোপনীয়তা নির্বিশেষে সমস্ত SMS বার্তাগুলি পড়ার অনুমতি দেয়৷"</string>
-    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"অ্যাপ্লিকেশানটিকে আপনার ফোনে বা আপনার সিম কার্ডে সংরক্ষিত SMS বার্তাগুলি পড়ার অনুমতি দেয়৷ এটি অ্যাপ্লিকেশানটিকে সামগ্রী বা গোপনীয়তার সমস্ত SMS বার্তা নির্বিশেষে পড়ার অনুমতি দেয়৷"</string>
+    <!-- no translation found for permdesc_readSms (4741697454888074891) -->
+    <skip />
+    <!-- no translation found for permdesc_readSms (5796670395641116592) -->
+    <skip />
+    <!-- no translation found for permdesc_readSms (6826832415656437652) -->
+    <skip />
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"পাঠ্য বার্তা পান (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"অ্যাপ্লিকেশানটিকে WAP বার্তা প্রাপ্ত করার এবং প্রক্রিয়া করার অনুমতি দেয়৷ এর মানে হল অ্যাপ্লিকেশানটি আপনার ডিভাইস থেকে পাঠানো বার্তাগুলিকে পর্যবেক্ষণ করতে পারে এবং মুছতে পারে সেগুলিকে আপনাকে না দেখিয়ে৷"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"চলমান অ্যাপ্লিকেশান উদ্ধার করে"</string>
@@ -311,8 +324,10 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"অ্যাপ্লিকেশানকে গাড়ি কোড সক্ষম করতে দেয়৷"</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"অন্যান্য অ্যাপ্লিকেশানগুলিকে বন্ধ করুন"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"অন্যান্য অ্যাপ্লিকেশানগুলির নেপথ্যে চলা প্রক্রিয়াগুলির সমাপ্তি ঘটাতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷ এর ফলে অন্যান্য অ্যাপ্লিকেশানগুলি বন্ধ হয়ে যেতে পারে৷"</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"অন্যান্য অ্যাপ্লিকেশানের জায়গায় বসান"</string>
-    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"অ্যাপ্লিকেশানটিকে অন্যান্য অ্যাপ্লিকেশানগুলির ব্যবহারকারী ইন্টারফেসে অথবা অংশের উপরে অঙ্কনের অনুমতি দেয়৷ সেগুলি যে কোনো অ্যাপ্লিকেশানে আপনার ইন্টারফেস ব্যবহারের ক্ষেত্রে হস্তক্ষেপ করতে পারে, অথবা আপনি অন্যান্য অ্যাপ্লিকেশানগুলিতে আপনি যা দেখে যা ভাবেন তার পরিবর্তন করতে পারে৷"</string>
+    <!-- no translation found for permlab_systemAlertWindow (7238805243128138690) -->
+    <skip />
+    <!-- no translation found for permdesc_systemAlertWindow (2393776099672266188) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"অ্যাপ্লিকেশানকে সবসময় চালিত রাখে"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"মেমরিতে নিজের জন্য প্রয়োজনীয় জায়গা আলাদা করে রাখতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷ এর ফলে অন্যান্য অ্যাপ্লিকেশানগুলির জায়গা সীমিত হয়ে পড়তে পারে ও ট্যাবলেটটি অপেক্ষাকৃত ধীরগতির হয়ে পড়তে পারে৷"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"অ্যাপ্লিকেশানটিকে মেমোরিতে থাকা সেটির নিজস্ব অধিকৃত স্থানের অংশগুলিকে অবিরত রাখতে করার অনুমতি দেয়৷ এটি টিভিকে ধীর করে এমন অন্য অ্যাপ্লিকেশানগুলির জন্য উপলব্ধ মেমোরি সীমিত করতে পারে৷"</string>
@@ -338,37 +353,51 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"অ্যাপ্লিকেশানটিকে কোনো বিশেষ পরিচিতির সাথে আপনি কত ঘন ঘন কল, ইমেল বা অন্যভাবে যোগাযোগ করেন সেইরূপ তথ্য সমেত আপনার টিভিতে সংরক্ষিত পরিচিতিগুলির সম্পর্কে ডেটা পড়ার অনুমতি দেয়৷ এই অনুমতিটি অ্যাপ্লিকেশানগুলিকে পরিচিতির ডেটা মোছার অনুমতি দেয়৷"</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"অ্যাপ্লিকেশানটিকে আপনি নির্দিষ্ট একজন পরিচিতির সঙ্গে যে ফ্রিকোয়েন্সিতে কল, ইমেল বা যোগাযোগ করেছেন তা সহ আপনার ফোনে সঞ্চিত পরিচিতিগুলি সম্পর্কে ডেটা পরিবর্তন করতে অনুমতি দেয়৷ এই অনুমতি অ্যাপ্লিকেশানগুলিকে আপনার পরিচিতি ডেটা মুছতে দেয়৷"</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"কল লগ পড়ুন"</string>
-    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"অ্যাপ্লিকেশানটিকে ইনকামিং এবং আউটগোয়িং কলগুলির সম্পর্কিত ডেটা সহ আপনার ট্যাবলেটের কল লগ পড়তে অনুমতি দেয়৷ এই অনুমতিটি অ্যাপ্লিকেশানটিকে আপনার কল লগের ডেটা সংরক্ষণ করার অনুমতি দেয়, এবং ক্ষতিকারক অ্যাপ্লিকেশানগুলি আপনাকে না জানিয়ে আপনার কল লগের ডেটা শেয়ার করতে পারে৷"</string>
-    <string name="permdesc_readCallLog" product="tv" msgid="5611770887047387926">"অ্যাপ্লিকেশানটিকে ইনকামিং এবং আউটগোয়িং কলগুলির সম্পর্কে তথ্য সমেত আপনার টিভির কল লগ পড়ার অনুমতি দেয়৷ এই অনুমতিটি অ্যাপ্লিকেশানগুলিকে আপনার কল লগের ডেটা সংরক্ষণ করার অনুমতি দেয়, এবং ক্ষতিকারক অ্যাপ্লিকেশানগুলি আপনার অজান্তে কল লগের ডেটা শেয়ার করতে পারে৷"</string>
-    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"অ্যাপ্লিকেশানটিকে ইনকামিং এবং আউটগোয়িং কলগুলির সম্পর্কিত ডেটা সহ আপনার ফোনের কল লগ পড়তে অনুমতি দেয়৷ এই অনুমতিটি অ্যাপ্লিকেশানটিকে আপনার কল লগের ডেটা সংরক্ষণ করার অনুমতি দেয়, এবং ক্ষতিকারক অ্যাপ্লিকেশানগুলি আপনাকে না জানিয়ে আপনার কল লগের ডেটা শেয়ার করতে পারে৷"</string>
+    <!-- no translation found for permdesc_readCallLog (3204122446463552146) -->
+    <skip />
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"কল লগ লিখুন"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"ইনকামিং ও আউটগোয়িং কলগুলি সম্পর্কিত ডেটা সহ আপনার ট্যাবলেটের কল লগ পরিবর্তন করতে দেয়৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি এটিকে আপনার কল লগ মুছে দিতে বা পরিবর্তন করতে ব্যবহার করতে পারে৷"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"ইনকামিং ও আউটগোয়িং কলগুলি সম্পর্কিত ডেটা সহ আপনার টিভির কল লগ পরিবর্তন করতে দেয়৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি এটিকে আপনার কল লগ মুছে দিতে বা পরিবর্তন করতে ব্যবহার করতে পারে৷"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"ইনকামিং ও আউটগোয়িং কলগুলি সম্পর্কিত ডেটা সহ আপনার ফোনের কল লগ পরিবর্তন করতে দেয়৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি এটিকে আপনার কল লগ মুছে দিতে বা পরিবর্তন করতে ব্যবহার করতে পারে৷"</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"শরীরের সেন্সর (হার্ট রেট মনিটারের মত) অ্যাক্সেস করুন"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"অ্যাপ্লিকেশানটিকে আপনার শারীরিক অবস্থা যেমন, আপনার হৃৎস্পন্দন পর্যবেক্ষণ করে এমন সেন্সরগুলি অ্যাক্সেস করতে মঞ্জুরি দেয়।"</string>
-    <string name="permlab_readCalendar" msgid="5972727560257612398">"ক্যালেন্ডার ইভেন্ট, তার সাথে গোপন তথ্যও পড়ে"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"আপনার ট্যাবলেটে সঞ্চিত সমস্ত ক্যালেন্ডার ইভেন্ট পড়তে অ্যাপ্লিকেশানটিকে মঞ্জুর করে, এর মধ্যে বন্ধু ও সহকর্মীদেরগুলিও অন্তর্ভুক্ত৷ এটি গোপনীয়তা বা সংবেদনশীলতা নির্বিশেষে আপনার ক্যালেন্ডার ডেটা ভাগ ও সংরক্ষণ করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করতে পারে৷"</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"অ্যাপ্লিকেশানটিকে আপনার টিভিতে সংরক্ষিত সমস্ত ক্যালেন্ডার ইভেন্টগুলি পড়তে দেয়, যার মধ্যে বন্ধুদের বা সহকর্মীদের ক্যালেন্ডার ইভেন্টগুলিও অন্তর্ভুক্ত থাকে৷ গোপনীয়তা বা সংবেদনশীলতা নির্বিশেষে এটি অ্যাপ্লিকেশানটিকে আপনার ক্যালেন্ডার ডেটা শেয়ার করতে বা সংরক্ষণ করার অনুমতি দিতে পারে৷"</string>
-    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"আপনার ফোনে সঞ্চিত সমস্ত ক্যালেন্ডার ইভেন্ট পড়তে অ্যাপ্লিকেশানটিকে মঞ্জুর করে, এর মধ্যে বন্ধু ও সহকর্মীদেরগুলিও অন্তর্ভুক্ত৷ এটি গোপনীয়তা বা সংবেদনশীলতা নির্বিশেষে আপনার ক্যালেন্ডার ডেটা ভাগ ও সংরক্ষণ করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করতে পারে৷"</string>
+    <!-- no translation found for permlab_readCalendar (6716116972752441641) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (4993979255403945892) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (8837931557573064315) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (4373978642145196715) -->
+    <skip />
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"ক্যালেন্ডারে ইভেন্ট যোগ বা পরিবর্তন করে এবং মালিকদের অজ্ঞাতেই অতিথিদের ইমেল পাঠায়"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"সেইসকল বন্ধু বা সহকর্মী সহ আপনি আপনার ট্যাবলেটে যে ইভেন্টগুলি সংশোধন করতে পারেন তা যুক্ত করাতে, সরাতে, পরিবর্তন করতে এই অ্যাপ্লিকেশানটিকে অনুমতি দেয়৷ এটি যেগুলি ক্যালেন্ডার মালিকদের থেকে এসে প্রদর্শিত হবে সেগুলিতে বার্তা পাঠাতে অথবা মালিককে না জানিয়ে ইভেন্টগুলি পরিবর্তন করতে দিতে পারে৷"</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"অ্যাপ্লিকেশানকে ইভেন্টগুলি যোগ করার, সরানোর, পরিবর্তন করার অনুমতি দেয় যা আপনি আপনার টিভিতে বন্ধু বা সহকর্মীদের থেকে আসা ইভেন্টগুলি সমেত সেগুলি সংশোধন করতে পারবেন৷ এটি অ্যাপ্লিকেশানকে ক্যালেন্ডারের মালিকের থেকে এসেছে বলে মনে হয় এমন বার্তাগুলিকে পাঠানোর বা আপনার অজান্তে ইভেন্টগুলি সংশোধন করার অনুমতি দিতে পারে৷"</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"সেইসকল বন্ধু বা সহকর্মী সহ আপনি আপনার ফোনে যে ইভেন্টগুলি সংশোধন করতে পারেন তা যুক্ত করাতে, সরাতে, পরিবর্তন করতে এই অ্যাপ্লিকেশানটিকে অনুমতি দেয়৷ এটি অ্যাপ্লিকেশানটিকে বার্তা পাঠাতে দেয় যা দেখে মনে হবে যে এটি ক্যালেন্ডার মালিকদের থেকে এসেছে অথবা মালিককে না জানিয়ে ইভেন্টগুলি পরিবর্তন করতে দিতে পারে৷"</string>
+    <!-- no translation found for permdesc_writeCalendar (1675270619903625982) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCalendar (9017809326268135866) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCalendar (7592791790516943173) -->
+    <skip />
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"অতিরিক্ত অবস্থান প্রদানকারী কমান্ডগুলি অ্যাক্সেস করে"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"অবস্থানের সাথে সম্পর্কিত তথ্য প্রদানকারীর অতিরিক্ত কম্যান্ডগুলিকে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷ এটি অ্যাপ্লিকেশানটিকে GPS অথবা অন্যান্য অবস্থান নির্ণয়ের সাথে সম্পর্কিত উৎসগুলির ক্রিয়াপ্রণালীর নিয়ন্ত্রণকে মঞ্জুর করতে পারে৷"</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"সুনির্দিষ্ট অবস্থান (GPS এবং নেটওয়ার্ক-ভিত্তিক) অ্যাক্সেস করুন"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"গ্লোবাল পজিশনিং সিস্টেম (GPS) অথবা সেল টাওয়ার ও ওয়াই-ফাই এর মতো নেটওয়ার্কের অবস্থান উৎসগুলি ব্যবহার করে আপনার যথাযথ অবস্থান নির্ণয় করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷ এই অবস্থান নির্ণয়ের সাথে সম্পর্কিত পরিষেবাগুলিকে চালু করে রাখতে হবে এবং অ্যাপ্লিকেশানটি যাতে সেগুলি ব্যবহার করতে পারে সেজন্য সেগুলিকে আপনার ডিভাইসে উপলব্ধ করে রাখতে হবে৷ অ্যাপ্লিকেশানগুলি আপনার অবস্থান নির্ণয়ের কাজে এগুলির ব্যবহার করতে পারে, এবং এর জন্য অতিরিক্ত ব্যাটারি পাওয়ার লাগতে পারে৷"</string>
+    <!-- no translation found for permdesc_accessFineLocation (5821994817969957884) -->
+    <skip />
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"আনুমানিক অবস্থান (নেটওয়ার্ক-ভিত্তিক) অ্যাক্সেস করুন"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"আপনার আনুমানিক অবস্থান নির্ণয় করতে অ্যাপ্লিকেশানটিকে অনুমোদিত করে৷ এই অবস্থান নির্ণয় সেল টাওয়ার ও ওয়াই-ফাই এর মতো নেটওয়ার্কের অবস্থান উৎসগুলি ব্যবহার করে অবস্থান নির্ধারণের সাথে সম্পর্কিত পরিষেবাগুলি থেকে নেওয়া হয়ে থাকে৷ এই অবস্থান নির্ণয়ের সাথে সম্পর্কিত পরিষেবাগুলিকে চালু করে রাখতে হবে এবং অ্যাপ্লিকেশানটি যাতে সেগুলি ব্যবহার করতে পারে সেজন্য সেগুলিকে আপনার ডিভাইসে উপলব্ধ করে রাখতে হবে৷ অ্যাপ্লিকেশানগুলি আপনার আনুমানিক অবস্থান নির্ণয়ের কাজে এগুলির ব্যবহার করতে পারে৷"</string>
+    <!-- no translation found for permdesc_accessCoarseLocation (3373266766487862426) -->
+    <skip />
+    <!-- no translation found for permdesc_accessCoarseLocation (1884022719818788511) -->
+    <skip />
+    <!-- no translation found for permdesc_accessCoarseLocation (7788009094906196995) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"আপনার অডিও সেটিংস পরিবর্তন করে"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ভলিউম এবং যেখানে স্পিকার আউটপুট সামগ্রী হিসাবে ব্যবহৃত হয় সেই সব ক্ষেত্রে গ্লোবাল অডিও সেটিংসের সংশোধন করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"অডিও রেকর্ড"</string>
-    <string name="permdesc_recordAudio" msgid="4906839301087980680">"অ্যাপ্লিকেশানটিকে মাইক্রোফোনের দ্বারা অডিও রেকর্ড করার অনুমতি দেয়৷ এই অনুমতিটি অ্যাপ্লিকেশানটিকে আপনার অনুমোদন ছাড়া যেকোনো সময় অডিও রেকর্ড করার অনুমতি দেয়৷"</string>
+    <!-- no translation found for permdesc_recordAudio (4245930455135321433) -->
+    <skip />
     <string name="permlab_sim_communication" msgid="2935852302216852065">"SIM এ আদেশগুলি পাঠান"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"অ্যাপ্লিকেশানটিকে সিম কার্ডে কমান্ডগুলি পাঠানোর অনুমতি দেয়৷ এটি খুবই বিপজ্জনক৷"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ছবি এবং ভিডিও তোলে"</string>
-    <string name="permdesc_camera" msgid="8497216524735535009">"ক্যামেরার সাহায্যে ছবি তুলতে ও ভিডিও তৈরি করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷ এই অনুমতিটি অ্যাপ্লিকেশানটিকে আপনার নিশ্চয়তা ছাড়াই যেকোনো সময় ক্যামেরা ব্যবহার করতে মঞ্জুর করে৷"</string>
+    <!-- no translation found for permdesc_camera (5392231870049240670) -->
+    <skip />
     <string name="permlab_vibrate" msgid="7696427026057705834">"কম্পন নিয়ন্ত্রণ করুন"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"অ্যাপ্লিকেশানকে কম্পক নিয়ন্ত্রণ করতে দেয়৷"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"সরাসরি ফোন নম্বরগুলিতে কল করে"</string>
@@ -850,18 +879,6 @@
     <string name="weeks" msgid="6509623834583944518">"সপ্তাহ"</string>
     <string name="year" msgid="4001118221013892076">"বছর"</string>
     <string name="years" msgid="6881577717993213522">"বছর"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> সেকেন্ড</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> সেকেন্ড</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> মিনিট</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> মিনিট</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> ঘণ্টা</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ঘণ্টা</item>
-    </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"এখন"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
       <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>মি</item>
@@ -1614,8 +1631,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> পর্যন্ত"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> পর্যন্ত (পরবর্তী অ্যালার্ম)"</string>
-    <!-- no translation found for zen_mode_forever (1916263162129197274) -->
-    <skip />
+    <string name="zen_mode_forever" msgid="1916263162129197274">"যতক্ষণ না পর্যন্ত আপনি \'বিরক্ত করবেন না\' বন্ধ করছেন"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"যতক্ষণ না পর্যন্ত আপনি বিরক্ত করবেন না বন্ধ করছেন"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"সঙ্কুচিত করুন"</string>

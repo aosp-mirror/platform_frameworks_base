@@ -46,6 +46,8 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"‏کنکشن مسئلہ یا غلط MMI کوڈ۔"</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"آپریشن صرف متعین ڈائلنگ نمبرز تک محدود ہے۔"</string>
+    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
+    <skip />
     <string name="serviceEnabled" msgid="8147278346414714315">"سروس فعال کی گئی۔"</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"سروس فعال کی گئی برائے:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"سروس غیر فعال کر دی گئی ہے۔"</string>
@@ -96,6 +98,10 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"صوتی/ڈیٹا سروسز مسدود کر دی گئی ہیں۔"</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"‏وائس/SMS سروسز مسدود ہیں۔"</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"‏سبھی صوتی/ڈیٹا/SMS سروسز مسدود کر دی گئی ہیں۔"</string>
+    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
+    <skip />
+    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"‏ہمسر نے TTY وضع مکمل کی درخواست کی"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"‏ہمسر نے TTY وضع HCO کی درخواست کی"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"‏ہمسر نے TTY وضع VCO کی درخواست کی"</string>
@@ -179,6 +185,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"گمشدہ منتظم ایپ کی وجہ سے دفتری پروفائل حذف کر دیا گیا۔"</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"دفتری پروفائل کی منتظم ایپ یا تو غائب ہے یا خراب ہے۔ اس کی وجہ سے، آپ کا دفتری پروفائل اور متعلقہ ڈیٹا حذف کر دیے گئے ہیں۔ مدد کیلئے اپنے منتظم سے رابطہ کریں۔"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"آپ کا دفتری پروفائل اس آلہ پر مزید دستیاب نہیں ہے۔"</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"آپ کا آلہ صاف کر دیا جائے گا"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"منتظم کی ایپ میں گمشدہ اجزاء ہیں یا وہ خراب ہے اور اسے استعمال نہیں کیا جا سکتا ہے۔ آپ کے آلہ کو اب صاف کر دیا جائے گا۔ مدد کیلئے اپنے منتظم سے رابطہ کریں۔"</string>
     <string name="me" msgid="6545696007631404292">"میں"</string>
@@ -296,9 +306,12 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"‏SMS پیغامات بھیجیں اور دیکھیں"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"‏ایپ کو SMS پیغامات بھیجنے کی اجازت دیتا ہے۔ اس کے نتیجے میں غیر متوقع چارجز لگ سکتے ہیں۔ نقصان دہ ایپس آپ کی تصدیق کے بغیر پیغامات بھیج کر آپ کی رقم خرچ کروا سکتی ہیں۔"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"‏اپنے متنی پیغامات (SMS یا MMS) کو پڑھیں"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"‏ایپ کو آپ کے ٹیبلٹ یا SIM کارڈ میں اسٹور کردہ SMS پیغامات کو پڑھنے کی اجازت دیتا ہے۔ یہ ایپ کو مواد اور رازداری سے قطع نظر سبھی SMS پیغامات پڑھنے کی اجازت دیتا ہے۔"</string>
-    <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"‏ایپ کو آپ کے TV یا SIM کارڈ میں اسٹور کردہ SMS پیغامات پڑھنے کی اجازت دیتا ہے۔ یہ ایپ کو مواد یا رازداری سے قطع نظر سبھی SMS پیغامات پڑھنے کی اجازت دیتا ہے۔"</string>
-    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"‏ایپ کو آپ کے فون یا SIM کارڈ میں اسٹور کردہ SMS پیغامات کو پڑھنے کی اجازت دیتا ہے۔ یہ ایپ کو مواد اور رازداری سے قطع نظر سبھی SMS پیغامات پڑھنے کی اجازت دیتا ہے۔"</string>
+    <!-- no translation found for permdesc_readSms (4741697454888074891) -->
+    <skip />
+    <!-- no translation found for permdesc_readSms (5796670395641116592) -->
+    <skip />
+    <!-- no translation found for permdesc_readSms (6826832415656437652) -->
+    <skip />
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"‏متنی پیغامات (WAP) حاصل کریں"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"‏ایپ کو WAP پیغامات حاصل اور ان پر کارروائی کرنے کی اجازت دیتا ہے۔ اس اجازت میں آپ کو مرسلہ پیغامات آپ کو دکھائے بغیر ان پر نگاہ رکھنے یا انہیں حذف کرنے کی اہلیت شامل ہے۔"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"چل رہی ایپس کی بازیافت کریں"</string>
@@ -311,8 +324,10 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"ایپ کو کار وضع فعال کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"دیگر ایپس بند کریں"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"ایپ کو دوسرے ایپس کے پس منظر کی کارروائیوں کو ختم کرنے کی اجازت دیتا ہے۔ اس کی وجہ سے دوسرے ایپس کا چلنا بند ہوسکتا ہے۔"</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"دیگر ایپس پر ڈرا کریں"</string>
-    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"ایپ کو دوسری ایپلیکیشنز یا صارف انٹرفیس کے حصوں کے اوپر ڈرا کرنے کی اجازت دیتا ہے۔ وہ کسی بھی ایپلیکیشن میں انٹرفیس کے آپ کے استعمال میں خلل ڈال سکتے ہیں یا آپ کے خیال میں آپ دوسری ایپلیکیشنز  میں جو کچھ دیکھ رہے ہیں اسے تبدیل کرسکتے ہیں۔"</string>
+    <!-- no translation found for permlab_systemAlertWindow (7238805243128138690) -->
+    <skip />
+    <!-- no translation found for permdesc_systemAlertWindow (2393776099672266188) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"ایپ کو ہمیشہ چلاتے رہیں"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"ایپ کو خود اپنے ہی حصوں کو میموری میں استقلال پذیر بنانے کی اجازت دیتا ہے۔ یہ ٹیبلٹ کو سست بناکر دوسری ایپس کیلئے دستیاب میموری کو محدود کرسکتا ہے۔"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"‏ایپ کو خود اپنے ہی حصوں کو میموری میں استقلال پذیر بنانے کی اجازت دیتا ہے۔ یہ TV کو سُست بناکر دوسری ایپس کیلئے دستیاب میموری کو محدود کرسکتا ہے۔"</string>
@@ -338,37 +353,51 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"‏ایپ کو آپ کے TV پر اسٹور کردہ آپ کے رابطوں، بشمول مخصوص رابطوں کو جس تعدد سے آپ نے کال، ای میل کیا ہے یا دوسرے طریقوں سے ان کے ساتھ مواصلت کی ہے ان کے بارے میں ڈیٹا میں ترمیم کی اجازت دیتا ہے۔ یہ اجازت ایپس کو رابطے کا ڈیٹا حذف کرنے کی اجازت دیتی ہے۔"</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"ایپ کو آپ کے فون پر اسٹور کردہ آپ کے رابطوں، بشمول مخصوص رابطوں کو جس تعدد سے آپ نے کال، ای میل کیا ہے یا دوسرے طریقوں سے ان کے ساتھ مواصلت کی ہے اس کے بارے میں ڈیٹا میں ترمیم کی اجازت دیتا ہے۔ یہ اجازت ایپس کو رابطے کا ڈیٹا حذف کرنے کی اجازت دیتی ہے۔"</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"کال لاگ پڑھیں"</string>
-    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"ایپ کو آپ کے ٹیبلیٹ کی کال لاگ، بشمول آنے اور باہر جانے والی کالوں کے بارے میں ڈیٹا کو پڑھنے کی اجازت دیتا ہے۔ یہ اجازت ایپس کو آپ کی کال لاگ کا ڈیٹا محفوظ کرنے دیتی ہے اور نقصان دہ ایپس آپ کی انکاری کے بغیر کال لاگ کے ڈیٹا کا اشتراک کرسکتی ہیں۔"</string>
-    <string name="permdesc_readCallLog" product="tv" msgid="5611770887047387926">"‏انکمنگ اور آؤٹ گوئنگ کالز کے بارے میں ڈیٹا سمیت، ایپ کو آپ کے TV کے کال لاگ پڑھنے کی اجازت دیتا ہے۔ یہ اجازت ایپس کو آپ کا کال لاگ محفوظ کرنے کی اجازت دیتی ہے اور نقصان دہ ایپس آپ کی جانکاری کے بغیر کال لاگ کے ڈیٹا کا اشتراک کرسکتی ہیں۔"</string>
-    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"ایپ کو آپ کے فون کی کال لاگ، بشمول آنے اور باہر جانے والی کالوں کے بارے میں ڈیٹا کو پڑھنے کی اجازت دیتا ہے۔ یہ اجازت ایپس کو آپ کی کال لاگ کا ڈیٹا محفوظ کرنے دیتی ہے اور نقصان دہ ایپس آپ کی جانکاری کے بغیر کال لاگ کے ڈیٹا کا اشتراک کرسکتی ہیں۔"</string>
+    <!-- no translation found for permdesc_readCallLog (3204122446463552146) -->
+    <skip />
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"کال لاگ لکھیں"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"ایپ کو آپ کے ٹیبلٹ کی کال لاگ، بشمول آنے والی اور باہر جانے والی کالوں کے بارے میں ڈیٹا میں ترمیم کرنے کی اجازت دیتا ہے۔ نقصان دہ ایپس آپ کی کال لاگ مٹانے یا اس میں ترمیم کرنے کیلئے اسے استعمال کرسکتی ہیں۔"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"‏انکمنگ اور آؤٹ گوئنگ کالز کے بارے میں ڈیٹا سمیت، ایپ کو آپ کے TV کے کال لاگ میں ترمیم کرنے کی اجازت دیتا ہے۔ نقصان دہ ایپس آپ کی کال لاگ مٹانے یا اس میں ترمیم کرنے کیلئے اسے استعمال کرسکتی ہیں۔"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"ایپ کو آپ کے فون کی کال لاگ، بشمول آنے والی اور باہر جانے والی کالوں کے بارے میں ڈیٹا میں ترمیم کرنے کی اجازت دیتا ہے۔ نقصان دہ ایپس آپ کی کال لاگ مٹانے یا اس میں ترمیم کرنے کیلئے اسے استعمال کرسکتی ہیں۔"</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"باڈی سینسرز تک رسائی حاصل کریں (جیسے حرکت قلب شرح مانیٹرز)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"ان سینسرز سے ڈیٹا تک رسائی حاصل کرنے کی اجازت دیتی ہے جو آپ کی حرکت قلب کی شرح جیسی آپ کی فزیکل صورتحال کو مانیٹر کرتے ہیں۔"</string>
-    <string name="permlab_readCalendar" msgid="5972727560257612398">"کیلنڈر ایونٹس کے ساتھ رازداری کی معلومات پڑھیں"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"ایپ کو آپ کے، بشمول آپ کے دوستوں یا ساتھی کارکنان کے ٹیبلٹ پر اسٹور کردہ سبھی کیلنڈر ایونٹس کو پڑھنے کی اجازت دیتا ہے۔ یہ ایپ کو رازداری یا حساسیت سے قطع نظر آپ کے کیلنڈر ڈیٹا کا اشتراک یا اسے محفوظ کرنے کی اجازت دیتا ہے۔"</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"‏ایپ کو آپ کے TV پر اسٹور کردہ دوستوں اور ساتھی کارکنوں کے کیلنڈر ایونٹس سمیت، سبھی کیلنڈر ایونٹس کو پڑھنے کی اجازت دیتا ہے۔ رازداری یا حساسیت سے قطع نظر، یہ ایپ کو آپ کے کیلنڈر ڈیٹا کا اشتراک یا اسے محفوظ کرنے کی اجازت دے سکتا ہے۔"</string>
-    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"ایپ کو آپ کے، بشمول آپ کے دوستوں یا ساتھی کارکنان کے فون پر اسٹور کردہ سبھی کیلنڈر ایونٹس کو پڑھنے کی اجازت دیتا ہے۔ یہ ایپ کو رازداری یا حساسیت سے قطع نظر آپ کے کیلنڈر ڈیٹا کا اشتراک یا اسے محفوظ کرنے کی اجازت دیتا ہے۔"</string>
+    <!-- no translation found for permlab_readCalendar (6716116972752441641) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (4993979255403945892) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (8837931557573064315) -->
+    <skip />
+    <!-- no translation found for permdesc_readCalendar (4373978642145196715) -->
+    <skip />
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"کیلنڈر ایونٹس شامل یا ان میں ترمیم کریں اور مالک کو بتائے بغیر مہمانوں کو ای میل بھیجیں"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"ایپ کو وہ ایونٹس جن میں آپ اپنے ٹیبلٹ پر ترمیم کرسکتے ہیں، بشمول دوسروں یا ساتھی کارکنوں کے ایونٹس شامل کرنے، ہٹانے، تبدیل کرنے کی اجازت دیتا ہے۔ یہ ایپ کو ایسے پیغامات بھیجنے کی جو کیلنڈر مالکان کی جانب سے آنے والے معلوم پڑتے ہیں یا مالکان کی جانکاری کے بغیر ایونٹس میں ترمیم کرنے کی اجازت دے سکتا ہے۔"</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"‏ایپ کو وہ ایونٹس جن میں آپ TV پر ترمیم کر سکتے ہیں بشمول دوستوں یا ساتھی کارکنان کے ایونٹس شامل کرنے، ہٹانے، تبدیل کرنے کی اجازت دیتا ہے۔ یہ ایپ کو ایسے پیغامات بھیجنے کی جو کیلنڈر مالکان کی جانب سے آئے ہوئے معلوم پڑتے ہیں، یا مالکان کی جانکاری کے بغیر ایونٹس میں ترمیم کرنے کی اجازت دے سکتا ہے۔"</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"ایپ کو وہ ایونٹس جن میں آپ اپنے فون پر ترمیم کرسکتے ہیں، بشمول دوسروں یا ساتھی کارکنوں کے ایونٹس شامل کرنے، ہٹانے، تبدیل کرنے کی اجازت دیتا ہے۔ یہ ایپ کو ایسے پیغامات بھیجنے کی جو کیلنڈر مالکان کی جانب سے آئے ہوئے معلوم پڑتے ہیں یا مالکان کی جانکاری کے بغیر ایونٹس میں ترمیم کرنے کی اجازت دے سکتا ہے۔"</string>
+    <!-- no translation found for permdesc_writeCalendar (1675270619903625982) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCalendar (9017809326268135866) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCalendar (7592791790516943173) -->
+    <skip />
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"اضافی مقام فراہم کنندہ کی کمانڈز تک رسائی حاصل کریں"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"‏ایپ کو اضافی مقام فراہم کنندہ کی کمانڈز تک رسائی حاصل کرنے کی اجازت دیتی ہے۔ یہ ایپ کو GPS یا دوسرے مقام کے مآخذ کے عمل کے ساتھ مداخلت کرنے کی اجازت دے سکتی ہے۔"</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"‏قطعی مقام تک رسائی حاصل کریں (GPS اور نیٹ ورک پر مبنی)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"‏ایپ کو گلوبل پوزیشننگ سسٹم (GPS) یا نیٹ ورک کے مقام کے مآخذ جیسے سیل ٹاورز اور Wi-Fi کا استعمال کرکے آپ کا درست مقام حاصل کرنے کی اجازت دیتا ہے۔ ان مقام کی سروسز کا آن ہونا اور ایپ کو انہیں استعمال کرنے کیلئے آپ کے آلے پر دستیاب ہونا ضروری ہے۔ ایپس تخمینی طور پر آپ کے محل وقوع کا تعین کرنے کیلئے اسے استعمال کرسکتی ہیں اور بیٹری کی اضافی قوت صرف کرسکتی ہیں۔"</string>
+    <!-- no translation found for permdesc_accessFineLocation (5821994817969957884) -->
+    <skip />
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"تخمینی مقام تک رسائی حاصل کریں (نیٹ ورک پر مبنی)"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"‏ایپ کو آپ کا تخمینی مقام حاصل کرنے کی اجازت دیتا ہے۔ یہ مقام نیٹ ورک کے مقام کے مآخذ جیسے سیل ٹاورز اور Wi-Fi کا استعمال کرکے مقام کی سروسز کے ذریعہ اخذ کیا جاتا ہے۔ ان مقام کی سروسز کا آن ہونا اور آپ کے آلے پر دستیاب ہونا ضروری ہے تاکہ ایپ انہیں استعمال کرسکے۔ ایپس تخمینی طور پر آپ کے محل وقوع کا تعین کرنے کیلئے اسے استعمال کر سکتی ہیں۔"</string>
+    <!-- no translation found for permdesc_accessCoarseLocation (3373266766487862426) -->
+    <skip />
+    <!-- no translation found for permdesc_accessCoarseLocation (1884022719818788511) -->
+    <skip />
+    <!-- no translation found for permdesc_accessCoarseLocation (7788009094906196995) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"اپنے آڈیو کی ترتیبات کو تبدیل کریں"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ایپ کو مجموعی آڈیو ترتیبات جیسے والیوم اور آؤٹ پٹ کیلئے جو اسپیکر استعمال ہوتا ہے اس میں ترمیم کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"آڈیو ریکارڈ کریں"</string>
-    <string name="permdesc_recordAudio" msgid="4906839301087980680">"ایپ کو مائکرو فون سے آڈیو ریکارڈ کرنے کی اجازت دیتا ہے۔ یہ اجازت ایپ کو کسی بھی وقت آپ کی تصدیق کے بغیر آڈیو ریکارڈ کرنے کی اجازت دیتی ہے۔"</string>
+    <!-- no translation found for permdesc_recordAudio (4245930455135321433) -->
+    <skip />
     <string name="permlab_sim_communication" msgid="2935852302216852065">"‏SIM کو ہدایات بھیجیں"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"‏ایپ کو SIM کو کمانڈز بھیجنے کی اجازت دیتا ہے۔ یہ بہت خطرناک ہے۔"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"تصاویر لیں اور ویڈیوز بنائیں"</string>
-    <string name="permdesc_camera" msgid="8497216524735535009">"ایپ کو کیمرے سے تصویریں لینے اور ویڈیوز بنانے کی اجازت دیتا ہے۔ یہ اجازت ایپ کو آپ کی تصدیق کے بغیر کسی بھی وقت کیمرا استعمال کرنے کی اجازت دیتی ہے۔"</string>
+    <!-- no translation found for permdesc_camera (5392231870049240670) -->
+    <skip />
     <string name="permlab_vibrate" msgid="7696427026057705834">"ارتعاش کو کنٹرول کریں"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"ایپ کو وائبریٹر کنٹرول کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"براہ راست فون نمبرز پر کال کریں"</string>
@@ -850,18 +879,6 @@
     <string name="weeks" msgid="6509623834583944518">"ہفتے"</string>
     <string name="year" msgid="4001118221013892076">"سال"</string>
     <string name="years" msgid="6881577717993213522">"سال"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> سیکنڈ</item>
-      <item quantity="one">1 سیکنڈ</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> منٹ</item>
-      <item quantity="one">1 منٹ</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> گھنٹے</item>
-      <item quantity="one">1 گھنٹہ</item>
-    </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"ابھی"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>m</item>
@@ -1614,8 +1631,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> تک"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> تک (اگلا الارم)"</string>
-    <!-- no translation found for zen_mode_forever (1916263162129197274) -->
-    <skip />
+    <string name="zen_mode_forever" msgid="1916263162129197274">"جب تک آپ \'ڈسڑب نہ کریں\' کو آف نہیں کر دیتے"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"جب تک آپ ڈسڑب نہ کریں کو آف نہیں کر دیتے"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"سکیڑیں"</string>

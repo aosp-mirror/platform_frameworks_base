@@ -46,6 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problem në lidhje ose kod i pavlefshëm MMI-je."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Veprimi është i kufizuar vetëm kundrejt numrave me telefonim të përzgjedhur"</string>
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Cilësimet e transferimit të telefonatave nuk mund të ndryshohen nga telefoni yt kur je në roaming."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Shërbimi u aktivizua."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Shërbimi u aktivizua për:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Shërbimi është çaktivizuar."</string>
@@ -96,6 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Shërbimet zanore/të të dhënave janë bllokuar."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Shërbimet me zë/SMS-të janë të bllokuara."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Të gjitha shërbimet me zë/të të dhënave/SMS-të janë bllokuar."</string>
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Rrjeti i paarritshëm"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Për të përmirësuar marrjen e sinjalit, provo të ndryshosh llojin e zgjedhur te Cilësimet &gt; Rrjetet celulare &gt; Lloji i preferuar i rrjetit."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Homologu yt kërkoi modalitet \"TTY\" të plotë"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Homologu kërkoi modalitet \"TTY\" të llojit \"HCO\""</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Homologu yt kërkoi modalitet \"TTY\" të llojit \"VCO\""</string>
@@ -179,6 +182,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Profili i punës u fshi për shkak të mungesës së aplikacionit të administratorit."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Aplikacioni i administratorit të profilit të punës mungon ose është dëmtuar. Si rezultat i kësaj, profili yt i punës dhe të dhënat përkatëse janë fshirë. Kontakto administratorin tënd për ndihmë."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Profili yt i punës nuk është më i disponueshëm në këtë pajisje."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Pajisja do të spastrohet"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Aplikacionit të administratorit i mungojnë përbërësit ose është dëmtuar dhe nuk mund të përdoret. Pajisja jote tani do të fshihet. Kontakto administratorin tënd për ndihmë."</string>
     <string name="me" msgid="6545696007631404292">"Unë"</string>
@@ -296,9 +303,9 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"dërgo dhe shiko mesazhet SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Lejon aplikacionin të dërgojë mesazhe SMS. Kjo mund të rezultojë me tarifa të papritura. Aplikacionet keqdashëse mund të të kushtojnë të holla duke dërguar mesazhe pa konfirmimin tënd."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lexo mesazhet e tua në tekst (SMS ose MMS)"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Lejon aplikacionin të lexojë mesazhet SMS të ruajtura në tablet ose kartën SIM. Kjo i mundëson aplikacionit të lexojë të gjitha mesazhet SMS, pavarësisht përmbajtjes apo privatësisë."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Lejon aplikacionin të lexojë mesazhet SMS të ruajtura në televizor ose kartën SIM. Kjo i mundëson aplikacionit të lexojë të gjitha mesazhet SMS, pavarësisht përmbajtjes apo privatësisë."</string>
-    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Lejon aplikacionin të lexojë mesazhe SMS të ruajtur në telefonin tënd apo në kartën SIM. Kjo e lejon aplikacionin të lexojë të gjitha mesazhet SMS, pavarësisht përmbajtjes ose privatësisë së tyre."</string>
+    <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"Ky aplikacion mund të lexojë të gjitha mesazhet SMS (me tekst) të ruajtura në tabletin tënd."</string>
+    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"Ky aplikacion mund të lexojë të gjitha mesazhet SMS (me tekst) të ruajtura në televizorin tënd."</string>
+    <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"Ky aplikacion mund të lexojë të gjitha mesazhet SMS (me tekst) të ruajtura në telefonin tënd."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"merr mesazhe me tekst (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Lejon aplikacionin të marrë dhe përpunojë mesazhe WAP. Kjo do të thotë se aplikacioni mund të monitorojë ose fshijë mesazhe të dërguara në pajisjen tënde, pa t\'i treguar ato."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"gjej aplikacionet në punë"</string>
@@ -311,8 +318,8 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Lejon aplikacionin të aktivizojë modalitetin e makinës."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"mbylli aplikacionet e tjera"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Lejon aplikacionin t\'u japë fund proceseve në sfond të aplikacioneve të tjera. Kjo mund të shkaktojë mosfunksionimin e aplikacioneve të tjera."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"mbulo aplikacionet e tjera"</string>
-    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Lejon aplikacionin të dalë mbi aplikacionet e tjera ose pjesët e ndërfaqes përdoruese. Ato mund të ndërhyjnë në përdorimin tënd të ndërfaqes së çdo aplikacioni, ose të ndryshojnë atë që mendon se po sheh në aplikacionet e tjera."</string>
+    <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Ky aplikacion mund të shfaqet mbi aplikacionet e tjera"</string>
+    <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Ky aplikacion mund të shfaqet mbi aplikacionet e tjera ose në pjesë të tjera të ekranit. Kjo mund të shkaktojë ndërhyrje në përdorimin normal të aplikacionit dhe në mënyrën se si shfaqen aplikacionet e tjera."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"bëje aplikacionin të qëndrojë gjithmonë në punë"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Lejon aplikacionin të zaptojë një pjesë të qëndrueshme në kujtesë. Kjo mund të kufizojë kujtesën e disponueshme për aplikacionet e tjera duke e ngadalësuar tabletin."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Lejon aplikacionin të zaptojë një pjesë të qëndrueshme në kujtesë. Kjo mund të kufizojë kujtesën e disponueshme për aplikacionet e tjera duke e ngadalësuar televizorin."</string>
@@ -338,37 +345,37 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Lejon aplikacionin të modifikojë të dhënat rreth kontakteve të tua të ruajtura në televizorin tënd, përfshi shpeshtësinë me të cilën ke telefonuar, ke dërguar mail-a apo komunikuar në rrugë të tjera me kontakte të veçanta. Kjo leje u mundëson aplikacioneve të fshijnë të dhënat e kontaktit."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Lejon aplikacionin të modifikojë të dhënat e kontakteve të tua të ruajtura në telefon, përfshirë shpeshtësinë me të cilën ke telefonuar, ke dërguar mail-a apo ke komunikuar në rrugë të tjera me kontakte të veçanta. Kjo leje iu mundëson aplikacioneve të fshijnë të dhënat e kontakteve."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"lexo ditarin e telefonatave"</string>
-    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Lejon aplikacionin të lexojë ditarin e telefonatave të kryera nga tableti yt, përfshirë të dhëna rreth telefonatave hyrëse dhe dalëse. Kjo leje u mundëson aplikacioneve të ruajnë të dhënat e ditarit tënd të telefonatave ndërkohë që aplikacionet keqdashëse mund të ndajnë të dhënat e ditarit të telefonatave pa dijeninë tënde."</string>
-    <string name="permdesc_readCallLog" product="tv" msgid="5611770887047387926">"Lejon aplikacionin të lexojë ditarin e telefonatave të kryera nga televizori yt, përfshirë të dhëna rreth telefonatave hyrëse dhe dalëse. Kjo leje u mundëson aplikacioneve të ruajnë të dhënat e ditarit tënd të telefonatave ndërkohë që aplikacionet keqdashëse mund të ndajnë të dhënat e ditarit të telefonatave pa dijeninë tënde."</string>
-    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Lejon aplikacionin të lexojë ditarin e telefonatave të telefonit tënd, përfshirë të dhëna rreth telefonatave hyrëse dhe dalëse. Kjo leje u mundëson aplikacioneve të ruajnë të dhënat e ditarit tënd të telefonatave ndërkohë që aplikacionet keqdashëse mund të ndajnë të dhënat e ditarit të telefonatave pa dijeninë tënde."</string>
+    <string name="permdesc_readCallLog" msgid="3204122446463552146">"Ky aplikacion mund të lexojë të gjithë historikun e telefonatave."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"shkruaj ditarin e telefonatave"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Lejon aplikacionin të modifikojë ditarin e telefonatave të tabletit tënd, përfshirë të dhëna rreth telefonatave hyrëse dhe dalëse. Aplikacione keqdashëse mund ta përdorin këtë leje për të fshirë ose modifikuar ditarin tënd të telefonatave."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Lejon aplikacionin të modifikojë ditarin e telefonatave të televizorit tënd, përfshirë të dhëna rreth telefonatave hyrëse dhe dalëse. Aplikacione keqdashëse mund ta përdorin këtë leje për të fshirë ose modifikuar ditarin tënd të telefonatave."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Lejon aplikacionin të modifikojë ditarin e telefonatave të telefonit tënd, përfshirë të dhënat rreth telefonatave hyrëse dhe dalëse. Aplikacionet keqdashëse mund ta përdorin këtë për të fshirë ose modifikuar ditarin tënd të telefonatave."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"qasu te sensorët e trupit (si monitorimet e rrahjeve të zemrës)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Lejon aplikacionin të ketë qasje në të dhënat nga ndjesorë që monitorojnë gjendjen tënde fizike, siç janë rrahjet e zemrës."</string>
-    <string name="permlab_readCalendar" msgid="5972727560257612398">"lexo ngjarjet kalendarike si dhe informacionin e privatësisë së tyre"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Lejon aplikacionin të lexojë të gjitha ngjarjet kalendarike të ruajtura në tabletin tënd, përfshirë ato të miqve ose kolegëve. Kjo mund ta lejojë aplikacionin të ndajë ose ruajë të dhënat e tua të kalendarit, pavarësisht privatësisë ose ndjeshmërisë së tyre."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Lejon aplikacionin të lexojë të gjitha ngjarjet kalendarike të ruajtura në televizorin tënd, përfshi ato të miqve apo kolegëve të tu. Kjo mund ta lejojë aplikacionin të ndajë ose ruajë të dhënat kalendarike, pavarësisht privatësisë ose ndjeshmërisë së tyre."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Lejon aplikacionin të lexojë të gjitha ngjarjet kalendarike të ruajtura në telefonin tënd, përfshi ato të miqve apo kolegëve të tu. Kjo mund ta lejojë aplikacionin të ndajë ose ruajë të dhënat kalendarike, pavarësisht privatësisë ose ndjeshmërisë së tyre."</string>
+    <string name="permlab_readCalendar" msgid="6716116972752441641">"Lexo ngjarjet e kalendarit dhe detajet"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Ky aplikacion mund të lexojë të gjitha ngjarjet e kalendarit të ruajtura në tabletin tënd dhe të ndajë ose të ruajë të dhënat e kalendarit."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Ky aplikacion mund të lexojë të gjitha ngjarjet e kalendarit të ruajtura në televizorin tënd dhe të ndajë ose të ruajë të dhënat e kalendarit."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Ky aplikacion mund të lexojë të gjitha ngjarjet e kalendarit të ruajtura në telefonin tënd dhe të ndajë ose të ruajë të dhënat e kalendarit."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"shto ose modifiko ngjarjet e kalendarit dhe dërgoju mail të ftuarve, pa dijeninë e zotëruesve"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Lejon aplikacionin të shtojë, të heqë ose të ndryshojë ngjarje që mund t\'i modifikosh në tabletin tënd, përfshirë ato të miqve apo kolegëve të punës. Kjo mund ta lejojë aplikacionin të dërgojë mesazhe që duket se vijnë nga zotëruesit e kalendarëve, ose të modifikojë ngjarje pa dijeninë e zotëruesve."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Lejon aplikacionin të shtojë, të heqë ose të ndryshojë ngjarje që mund t\'i modifikosh në televizorin tënd, përfshirë ato të miqve apo kolegëve të punës. Kjo mund ta lejojë aplikacionin të dërgojë mesazhe që duket se vijnë nga zotëruesit e kalendarëve, ose të modifikojë ngjarje pa dijeninë e zotëruesve."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Lejon aplikacionin të shtojë, heqë, ndryshojë ngjarje që mund t\'i modifikosh në telefonin tënd, përfshi ato të miqve ose kolegëve. Kjo mund ta lejojë aplikacionin të dërgojë mesazhe që duken se vijnë nga zotëruesit e kalendarëve, ose të modifikojë ngjarje pa dijeninë e zotëruesve."</string>
+    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Ky aplikacion mund të shtojë, të heqë ose të ndryshojë ngjarjet e kalendarit në tabletin tënd. Ky aplikacion mund të dërgojë mesazhe që mund të duket se vijnë nga zotëruesit e kalendarit ose të ndryshojë ngjarjet pa i njoftuar zotëruesit e tyre."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Ky aplikacion mund të shtojë, të heqë ose të ndryshojë ngjarjet e kalendarit në televizorin tënd. Ky aplikacion mund të dërgojë mesazhe që mund të duket se vijnë nga zotëruesit e kalendarit ose të ndryshojë ngjarjet pa i njoftuar zotëruesit e tyre."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Ky aplikacion mund të shtojë, të heqë ose të ndryshojë ngjarjet e kalendarit në telefonin tënd. Ky aplikacion mund të dërgojë mesazhe që mund të duket se vijnë nga zotëruesit e kalendarit ose të ndryshojë ngjarjet pa i njoftuar zotëruesit e tyre."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"qasje në komandat shtesë të ofruesit të vendndodhjes"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Lejon aplikacionin të ketë qasje në komandat shtesë të ofruesit për vendndodhjen. Kjo mund ta lejojë aplikacionin të ndërhyjë në operacionin e GPS-së apo të burimeve të tjera për vendndodhjen."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"qasu te vendndodhja e përpiktë (në bazë të GPS-së dhe rrjetit)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Lejon aplikacionin të gjejë vendndodhjen tënde të saktë duke përdorur \"Sistemin global të pozicionimit\" (GPS) ose burime të vendndodhjes së rrjetit sikurse antena të operatorëve celularë apo lidhje Wi-Fi. Këto shërbime vendndodhjeje duhet të aktivizohen dhe të ofrohen për pajisjen tënde, në mënyrë që të përdoren nga aplikacioni. Aplikacionet mund ta përdorin këtë për të përcaktuar vendndodhjen momentale, edhe pse ky funksion mund të kërkojë energji shtesë të baterisë."</string>
+    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"Ky aplikacion mund të marrë vendndodhjen tënde bazuar në burimet e rrjetit si antenat e operatorëve celulare dhe rrjetet Wi-Fi. Këto shërbime të vendndodhjes duhet të jenë të aktivizuara dhe në dispozicion në telefonin tënd që aplikacioni të mund t\'i përdorë. Kjo mund të rritë konsumin e baterisë."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"qasu te vendndodhja e përafërt (bazuar në rrjet)"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Lejon aplikacionin të gjejë vendndodhjen tënde të përafërt. Përcaktimi i saj rrjedh nga shërbimet që përdorin burimet e vendndodhjes së rrjetit siç janë antenat e operatorëve celularë apo lidhje Wi-Fi. Këto shërbime vendndodhjeje duhet të aktivizohen dhe të ofrohen për pajisjen tënde, në mënyrë që të përdoren nga aplikacioni. Aplikacionet mund ta përdorin këtë për të përcaktuar afërsisht se ku ndodhesh."</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Ky aplikacion mund të marrë vendndodhjen tënde bazuar në burimet e rrjetit si antenat e operatorëve celulare dhe rrjetet Wi-Fi. Këto shërbime të vendndodhjes duhet të jenë të aktivizuara dhe në dispozicion në tabletin tënd që aplikacioni të mund t\'i përdorë."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Ky aplikacion mund të marrë vendndodhjen tënde bazuar në burimet e rrjetit si antenat e operatorëve celulare dhe rrjetet Wi-Fi. Këto shërbime të vendndodhjes duhet të jenë të aktivizuara dhe në dispozicion në televizorin tënd që aplikacioni të mund t\'i përdorë."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Ky aplikacion mund të marrë vendndodhjen tënde bazuar në burimet e rrjetit si antenat e operatorëve celulare dhe rrjetet Wi-Fi. Këto shërbime të vendndodhjes duhet të jenë të aktivizuara dhe në dispozicion në telefonin tënd që aplikacioni të mund t\'i përdorë."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ndrysho cilësimet e audios"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Lejon aplikacionin të modifikojë cilësimet globale të audios siç është volumi dhe se cili altoparlant përdoret për daljen."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"regjistro audio"</string>
-    <string name="permdesc_recordAudio" msgid="4906839301087980680">"Lejon aplikacionin të regjistrojë klipe audio me mikrofon. Kjo leje i mundëson aplikacionit të regjistrojë në çdo kohë pa konfirmimin tënd."</string>
+    <string name="permdesc_recordAudio" msgid="4245930455135321433">"Ky aplikacion mund të regjistrojë audio me mikrofonin në çdo kohë."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"dërgo komanda te karta SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Lejon aplikacionin t\'i dërgojë komanda kartës SIM. Kjo është shumë e rrezikshme."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"bëj fotografi dhe video"</string>
-    <string name="permdesc_camera" msgid="8497216524735535009">"Lejon aplikacion të krijojë fotografi dhe video me kamerën. Kjo leje mundëson përdorimin e kamerës në çdo kohë pa konfirmimin tënd."</string>
+    <string name="permdesc_camera" msgid="5392231870049240670">"Ky aplikacion mund të nxjerrë fotografi dhe të regjistrojë video me kamerën tënde në çdo kohë."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"kontrollo dridhjen"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Lejon aplikacionin të kontrollojë dridhësin."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefono drejtpërdrejt numrat e telefonit"</string>
@@ -850,18 +857,6 @@
     <string name="weeks" msgid="6509623834583944518">"javë"</string>
     <string name="year" msgid="4001118221013892076">"vit"</string>
     <string name="years" msgid="6881577717993213522">"vite"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> sekonda</item>
-      <item quantity="one">1 sekondë</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> minuta</item>
-      <item quantity="one">1 minutë</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> orë</item>
-      <item quantity="one">1 orë</item>
-    </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"tani"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>m</item>
@@ -1614,8 +1609,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Deri në <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Deri në <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (alarmi tjetër)"</string>
-    <!-- no translation found for zen_mode_forever (1916263162129197274) -->
-    <skip />
+    <string name="zen_mode_forever" msgid="1916263162129197274">"Deri sa të çaktivizosh \"Mos shqetëso\""</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Deri sa të çaktivizosh gjendjen \"Mos shqetëso\""</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Shpalos"</string>

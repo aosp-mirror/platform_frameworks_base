@@ -46,6 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Verbindingsprobleem of ongeldige MMI-code."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Bewerking is beperkt tot vaste nummers."</string>
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Kan instellingen voor doorschakelen van oproepen niet wijzigen vanaf je telefoon tijdens roaming."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Service is ingeschakeld."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Service is ingeschakeld voor:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Service is uitgeschakeld."</string>
@@ -96,6 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Spraak-/gegevensservices zijn geblokkeerd."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Spraak-/SMS-services zijn geblokkeerd."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Alle spraak-/gegevens-/SMS-services zijn geblokkeerd."</string>
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Kan netwerk niet bereiken"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Als je de ontvangst wilt verbeteren, kun je het netwerktype wijzigen dat is geselecteerd bij Instellingen &gt; Mobiele netwerken &gt; Voorkeursnetwerktype."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Door peer aangevraagde TTY-modus VOL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Door peer aangevraagde TTY-modus HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Door peer aangevraagde TTY-modus VCO"</string>
@@ -179,6 +182,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Werkprofiel verwijderd wegens ontbrekende beheerapp."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"De beheerapp van het werkprofiel ontbreekt of is beschadigd. Als gevolg hiervan zijn je werkprofiel en alle gerelateerde gegevens verwijderd. Neem voor hulp contact op met je beheerder."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Je werkprofiel is niet meer beschikbaar op dit apparaat."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Je apparaat wordt gewist"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Er ontbreken onderdelen van de beheerapp of de app is beschadigd, waardoor de app niet kan worden gebruikt. Je apparaat wordt nu gewist. Neem voor hulp contact op met je beheerder."</string>
     <string name="me" msgid="6545696007631404292">"Ik"</string>
@@ -258,7 +265,7 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"foto\'s maken en video opnemen"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefoon"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"bellen en telefoontjes beheren"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"telefoneren en oproepen beheren"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Lichaamssensoren"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"toegang krijgen tot sensorgegevens over je vitale functies"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Content van vensters ophalen"</string>
@@ -296,9 +303,9 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"sms\'jes verzenden en bekijken"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Hiermee kan de app sms-berichten verzenden. Dit kan tot onverwachte kosten leiden. Schadelijke apps kunnen u geld kosten doordat ze zonder je bevestiging berichten kunnen verzenden."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"je tekstberichten (SMS of MMS) lezen"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Hiermee kan de app sms-berichten lezen die zijn opgeslagen op je tablet of simkaart. De app kan alle sms-berichten lezen, ongeacht content of vertrouwelijkheid."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Hiermee kan de app sms-berichten lezen die zijn opgeslagen op je tv of simkaart. De app kan alle sms-berichten lezen, ongeacht content of vertrouwelijkheid."</string>
-    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Hiermee kan de app sms-berichten lezen die zijn opgeslagen op je telefoon of simkaart. De app kan alle sms-berichten lezen, ongeacht content of vertrouwelijkheid."</string>
+    <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"Deze app kan alle sms-berichten lezen die zijn opgeslagen op je tablet."</string>
+    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"Deze app kan alle sms-berichten lezen die zijn opgeslagen op je tv."</string>
+    <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"Deze app kan alle sms-berichten lezen die zijn opgeslagen op je telefoon."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"tekstberichten (WAP) ontvangen"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Hiermee kan de app WAP-berichten ontvangen en verwerken. Dit betekent dat de app berichten die naar je apparaat zijn verzonden, kan bijhouden of verwijderen zonder deze aan u weer te geven."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"actieve apps ophalen"</string>
@@ -311,8 +318,8 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Hiermee kan de app de automodus inschakelen."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"andere apps sluiten"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Hiermee kan de app achtergrondprocessen van andere apps beëindigen. Hierdoor kunnen andere apps worden gestopt."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"Weergeven over andere apps"</string>
-    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Hiermee kan de app tekenen op andere apps of de gebruikersinterface. De app kan je gebruik van de interface in alle apps verstoren, of wijzigen wat u in andere apps denkt te zien."</string>
+    <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Deze app kan op de voorgrond vóór andere apps worden weergegeven"</string>
+    <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Deze app kan op de voorgrond worden weergegeven vóór andere apps of andere gedeelten van het scherm. Dit kan het normale app-gebruik verstoren en de manier wijzigen waarop andere apps worden weergegeven."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"app altijd laten uitvoeren"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Hiermee kan de app gedeelten van zichzelf persistent maken in het geheugen. Dit kan de hoeveelheid geheugen beperken die beschikbaar is voor andere apps, waardoor de tablet trager kan worden."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Hiermee kan de app gedeelten van zichzelf persistent maken in het geheugen. Dit kan de hoeveelheid geheugen beperken die beschikbaar is voor andere apps, waardoor de tv trager kan worden."</string>
@@ -338,37 +345,37 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op je tv, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke contacten. Met deze toestemming kunnen apps contactgegevens verwijderen."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op je telefoon, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke contacten. Met deze toestemming kunnen apps contactgegevens verwijderen."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"gesprekkenlijst lezen"</string>
-    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Hiermee kan de app het gesprekkenlijst van je tablet lezen, inclusief gegevens over inkomende en uitgaande oproepen. Met deze toestemming kunnen apps je oproeploggegevens opslaan, en schadelijke apps kunnen logoproepgegevens zonder je medeweten delen."</string>
-    <string name="permdesc_readCallLog" product="tv" msgid="5611770887047387926">"Hiermee kan de app het gesprekkenlijst van je tv lezen, inclusief gegevens over inkomende en uitgaande oproepen. Met deze toestemming kunnen apps je oproeploggegevens opslaan, en schadelijke apps kunnen oproeploggegevens zonder je medeweten delen."</string>
-    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Hiermee kan de app het gesprekkenlijst van je telefoon lezen, inclusief gegevens over inkomende en uitgaande oproepen. Met deze toestemming kunnen apps je oproeploggegevens opslaan, en schadelijke apps kunnen logoproepgegevens zonder je medeweten delen."</string>
+    <string name="permdesc_readCallLog" msgid="3204122446463552146">"Deze app kan je oproepgeschiedenis lezen."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"gesprekkenlijst schrijven"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Toestaan dat de app het gesprekkenlijst van je tablet aanpast, waaronder gegevens over inkomende en uitgaande oproepen. Schadelijke apps kunnen hiermee je gesprekkenlijst wissen of aanpassen."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Toestaan dat de app het gesprekkenlijst van je tv aanpast, waaronder gegevens over inkomende en uitgaande oproepen. Schadelijke apps kunnen hiermee je gesprekkenlijst wissen of aanpassen."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Toestaan dat de app het gesprekkenlijst van je telefoon aanpast, waaronder gegevens over inkomende en uitgaande oproepen. Schadelijke apps kunnen hiermee je gesprekkenlijst wissen of aanpassen."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"toegang tot lichaamssensoren (zoals hartslagmeters)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Hiermee kan de app toegang krijgen tot gegevens van sensoren die je lichamelijke conditie controleren, zoals je hartslag."</string>
-    <string name="permlab_readCalendar" msgid="5972727560257612398">"agenda-afspraken en vertrouwelijke informatie lezen"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Hiermee kan de app alle agenda-afspraken lezen die zijn opgeslagen op je tablet, inclusief die van vrienden of collega\'s. De app kan je agenda delen of je agendagegevens opslaan, ongeacht vertrouwelijkheid of gevoeligheid."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Hiermee kan de app alle agenda-afspraken lezen die zijn opgeslagen op je tv, inclusief die van vrienden of collega\'s. De app kan je agenda delen of je agendagegevens opslaan, ongeacht vertrouwelijkheid of gevoeligheid."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Hiermee kan de app alle agenda-afspraken lezen die zijn opgeslagen op je telefoon, inclusief die van vrienden of collega\'s. De app kan je agenda delen of je agendagegevens opslaan, ongeacht vertrouwelijkheid of gevoeligheid."</string>
+    <string name="permlab_readCalendar" msgid="6716116972752441641">"Agenda-afspraken en -gegevens lezen"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Deze app kan alle agenda-afspraken lezen die zijn opgeslagen op je tablet en je agendagegevens delen of opslaan."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Deze app kan alle agenda-afspraken lezen die zijn opgeslagen op je tv en je agendagegevens delen of opslaan."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Deze app kan alle agenda-afspraken lezen die zijn opgeslagen op je telefoon en je agendagegevens delen of opslaan."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"agenda-afspraken toevoegen of wijzigen en e-mails verzenden aan gasten zonder medeweten van de eigenaren"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Hiermee kan de app afspraken toevoegen, verwijderen en wijzigen die u kunt bewerken op je tablet, inclusief afspraken van vrienden of collega\'s. Zo kan de app berichten verzenden die afkomstig lijken te zijn van agenda-eigenaren, of afspraken aanpassen zonder medeweten van de eigenaar."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Hiermee kan de app afspraken toevoegen, verwijderen en wijzigen die u op je tv kunt aanpassen, inclusief afspraken van vrienden of collega\'s. Met deze toestemming zou de app berichten kunnen verzenden die afkomstig lijken te zijn van agenda-eigenaren of afspraken kunnen aanpassen zonder medeweten van de eigenaar."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Hiermee kan de app afspraken toevoegen, verwijderen en wijzigen die u kunt bewerken op je telefoon, inclusief afspraken van vrienden of collega\'s. Zo kan de app berichten verzenden die afkomstig lijken te zijn van agenda-eigenaren, of afspraken aanpassen zonder medeweten van de eigenaar."</string>
+    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Deze app kan agenda-afspraken toevoegen, verwijderen of wijzigen op je tablet. Deze app kan berichten verzenden die afkomstig lijken te zijn van agenda-eigenaren of afspraken aanpassen zonder dit aan de eigenaar te melden."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Deze app kan agenda-afspraken toevoegen, verwijderen of wijzigen op je tv. Deze app kan berichten verzenden die afkomstig lijken te zijn van agenda-eigenaren of afspraken aanpassen zonder dit aan de eigenaar te melden."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Deze app kan agenda-afspraken toevoegen, verwijderen of wijzigen op je telefoon. Deze app kan berichten verzenden die afkomstig lijken te zijn van agenda-eigenaren of afspraken aanpassen zonder dit aan de eigenaar te melden."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"toegang tot extra opdrachten van locatieaanbieder"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Hiermee kan de app toegang krijgen tot extra opdrachten voor de locatieprovider. De app kan hiermee de werking van gps of andere locatiebronnen te verstoren."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"toegang tot precieze locatie (gps- en netwerkgebaseerd)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Hiermee kan de app je precieze locatie bepalen via gps (Global Positioning System) of netwerklocatiebronnen zoals zendmasten en wifi. Deze locatieservices moeten zijn ingeschakeld en beschikbaar zijn op je apparaat voordat de app ze kan gebruiken. Apps kunnen dit gebruiken om te bepalen waar u bent en verbruiken mogelijk extra acculading."</string>
+    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"Deze app kan je locatie ophalen op basis van gps- of netwerklocatiebronnen zoals zendmasten en wifi-netwerken. De app kan alleen gebruikmaken van deze locatieservices als ze zijn ingeschakeld en beschikbaar zijn op je telefoon. Het batterijverbruik kan hierdoor toenemen."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"toegang tot geschatte locatie (netwerkgebaseerd)"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Hiermee kan de app beschikken over je geschatte locatie. Deze locatie wordt afgeleid van locatieservices die netwerklocatiebronnen zoals zendmasten en wifi gebruiken. Deze locatieservices moeten zijn ingeschakeld en beschikbaar zijn op je apparaat voordat de app ze kan gebruiken. Apps kunnen dit gebruiken om ongeveer te bepalen waar u zich bevindt."</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Deze app kan je locatie ophalen op basis van netwerkbronnen zoals zendmasten en wifi-netwerken. De app kan alleen gebruikmaken van deze locatieservices als ze zijn ingeschakeld en beschikbaar zijn op je tablet."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Deze app kan je locatie ophalen op basis van netwerkbronnen zoals zendmasten en wifi-netwerken. De app kan alleen gebruikmaken van deze locatieservices als ze zijn ingeschakeld en beschikbaar zijn op je tv."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Deze app kan je locatie ophalen op basis van netwerkbronnen zoals zendmasten en wifi-netwerken. De app kan alleen gebruikmaken van deze locatieservices als ze zijn ingeschakeld en beschikbaar zijn op je telefoon."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"je audio-instellingen wijzigen"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Hiermee kan de app algemene audio-instellingen wijzigen zoals het volume en welke luidspreker wordt gebruikt voor de uitvoer."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"audio opnemen"</string>
-    <string name="permdesc_recordAudio" msgid="4906839301087980680">"Hiermee kan de app audio opnemen met de microfoon. Met deze toestemming kan de app op elk moment audio opnemen, zonder om je bevestiging te vragen."</string>
+    <string name="permdesc_recordAudio" msgid="4245930455135321433">"Deze app kan op elk moment audio opnemen met de microfoon."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"opdrachten verzenden naar de simkaart"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Hiermee kan de app opdrachten verzenden naar de simkaart. Dit is erg gevaarlijk."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"foto\'s en video\'s maken"</string>
-    <string name="permdesc_camera" msgid="8497216524735535009">"Hiermee kan de app foto\'s en video\'s maken met de camera. Met deze toestemming kan de app de camera altijd gebruiken, zonder je bevestiging."</string>
+    <string name="permdesc_camera" msgid="5392231870049240670">"Deze app kan op elk moment foto\'s maken en video\'s opnemen met de camera."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"trilling beheren"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Hiermee kan de app de trilstand beheren."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefoonnummers rechtstreeks bellen"</string>
@@ -850,18 +857,6 @@
     <string name="weeks" msgid="6509623834583944518">"weken"</string>
     <string name="year" msgid="4001118221013892076">"jaar"</string>
     <string name="years" msgid="6881577717993213522">"jaren"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> seconden</item>
-      <item quantity="one">1 seconde</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> minuten</item>
-      <item quantity="one">1 minuut</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> uur</item>
-      <item quantity="one">1 uur</item>
-    </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"nu"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>m</item>
@@ -1614,8 +1609,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Tot <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Tot <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (volgend alarm)"</string>
-    <!-- no translation found for zen_mode_forever (1916263162129197274) -->
-    <skip />
+    <string name="zen_mode_forever" msgid="1916263162129197274">"Totdat je \'Niet storen\' uitschakelt"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Totdat u \'Niet storen\' uitschakelt"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Samenvouwen"</string>
