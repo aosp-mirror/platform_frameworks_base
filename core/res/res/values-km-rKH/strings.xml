@@ -46,6 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"បញ្ហា​ក្នុង​ការ​តភ្ជាប់​ ឬ​កូដ MMI មិន​ត្រឹមត្រូវ។"</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"ប្រតិបត្តិការ​ត្រូវ​បាន​ដាក់​កម្រិត​​​ចំពោះ​លេខ​ហៅ​ថេរ​តែ​ប៉ុណ្ណោះ។"</string>
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"មិន​អាច​ប្តូរ​ការ​កំណត់​នៃ​ការ​បញ្ជូន​ការ​ហៅ​បន្ត​ពី​ទូរសព្ទ​របស់​អ្នក​បាន​ទេ​ ខណៈ​ពេល​ដែល​អ្នក​កំពុង​ប្រើ​សេវា​រ៉ូមីង។"</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"បាន​បើក​សេវាកម្ម។"</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"បាន​បើក​សេវាកម្ម​សម្រាប់៖"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"បាន​បិទ​សេវាកម្ម។"</string>
@@ -96,6 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"បាន​ទប់​ស្កាត់​សេវាកម្ម​សំឡេង/ទិន្នន័យ។"</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"បាន​ទប់ស្កាត់​សេវាកម្ម​សំឡេង/សារ SMS ។"</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"សំឡេង/ទិន្នន័យ/សេវាកម្ម SMS ទាំងអស់​ត្រូវ​បាន​ទប់​ស្កាត់។"</string>
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"មិន​អាច​ភ្ជាប់​ទៅ​បណ្តាញ​បានទេ​"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"ដើម្បី​ធ្វើ​ឲ្យ​ការ​ទទួល​​រលក​សញ្ញា​​ប្រសើរ​ជាងមុន​ សូម​សាកល្បង​ប្តូរ​ប្រភេទ​ដែល​បាន​ជ្រើសរើស​នៅ​ក្នុង ការកំណត់​ &gt;​ បណ្តាញ​ចល័ត​ &gt;​ ប្រភេទ​បណ្តាញ​ដែល​ពេញចិត្ត​។"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"ម៉ាស៊ីនកូនបានស្នើ TTY Mode FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"ម៉ាស៊ីនកូនបានស្នើ TTY Mode HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"ម៉ាស៊ីនកូនបានស្នើ TTY Mode VCO"</string>
@@ -179,6 +182,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"ប្រវត្តិរូបការងារត្រូវបានលុបដោយសារបាត់បង់កម្មវិធីគ្រប់គ្រង។"</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"ប្រវត្តិរូបការងាររបស់អ្នកអាចបាត់បង់ ឬមានបញ្ហា។ ជាលទ្ធផល ប្រវត្តិរូបការងាររបស់អ្នក និងទិន្នន័យដែលពាក់ព័ន្ធត្រូវបានលុប។ ទំនាក់ទំនងអ្នកគ្រប់គ្រងរបស់អ្នកសម្រាប់ជំនួយ។"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"ប្រវត្តិរូបការងាររបស់អ្នកមិនមាននៅលើឧបករណ៍នេះទៀតទេ។"</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"ឧបករណ៍របស់អ្នកនឹងត្រូវបានលុប"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"កម្មវិធីគ្រប់គ្រងបាត់បង់សមាសធាតុ ឬមានបញ្ហា ហើយមិនអាចប្រើបានទេ។ ឧបករណ៍របស់អ្នកនឹងត្រូវបានលុបឥឡូវនេះ។ ទំនាក់ទំនងអ្នកគ្រប់គ្រងរបស់អ្នកសម្រាប់ជំនួយ។"</string>
     <string name="me" msgid="6545696007631404292">"ខ្ញុំ"</string>

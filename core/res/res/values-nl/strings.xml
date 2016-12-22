@@ -46,6 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Verbindingsprobleem of ongeldige MMI-code."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Bewerking is beperkt tot vaste nummers."</string>
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Kan instellingen voor doorschakelen van oproepen niet wijzigen vanaf je telefoon tijdens roaming."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Service is ingeschakeld."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Service is ingeschakeld voor:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Service is uitgeschakeld."</string>
@@ -96,6 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Spraak-/gegevensservices zijn geblokkeerd."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Spraak-/SMS-services zijn geblokkeerd."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Alle spraak-/gegevens-/SMS-services zijn geblokkeerd."</string>
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Kan netwerk niet bereiken"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Als je de ontvangst wilt verbeteren, kun je het netwerktype wijzigen dat is geselecteerd bij Instellingen &gt; Mobiele netwerken &gt; Voorkeursnetwerktype."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Door peer aangevraagde TTY-modus VOL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Door peer aangevraagde TTY-modus HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Door peer aangevraagde TTY-modus VCO"</string>
@@ -179,6 +182,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Werkprofiel verwijderd wegens ontbrekende beheerapp."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"De beheerapp van het werkprofiel ontbreekt of is beschadigd. Als gevolg hiervan zijn je werkprofiel en alle gerelateerde gegevens verwijderd. Neem voor hulp contact op met je beheerder."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Je werkprofiel is niet meer beschikbaar op dit apparaat."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Je apparaat wordt gewist"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Er ontbreken onderdelen van de beheerapp of de app is beschadigd, waardoor de app niet kan worden gebruikt. Je apparaat wordt nu gewist. Neem voor hulp contact op met je beheerder."</string>
     <string name="me" msgid="6545696007631404292">"Ik"</string>
@@ -258,7 +265,7 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"foto\'s maken en video opnemen"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefoon"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"bellen en telefoontjes beheren"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"telefoneren en oproepen beheren"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Lichaamssensoren"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"toegang krijgen tot sensorgegevens over je vitale functies"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Content van vensters ophalen"</string>

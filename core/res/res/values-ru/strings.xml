@@ -46,6 +46,8 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Неполадки подключения или неверный код MMI."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Операция возможна только для разрешенных номеров."</string>
+    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
+    <skip />
     <string name="serviceEnabled" msgid="8147278346414714315">"Служба включена."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Служба подключена для:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Служба отключена."</string>
@@ -98,6 +100,10 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Службы передачи данных/голосовых сообщений заблокированы."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Службы передачи голосовых сообщений/SMS заблокированы."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Все службы передачи данных/голосовых сообщений/SMS заблокированы."</string>
+    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
+    <skip />
+    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"На устройстве абонента выбран режим телетайпа \"ВСЕ\""</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"На устройстве абонента выбран режим телетайпа HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"На устройстве абонента выбран режим телетайпа VCO"</string>
@@ -183,6 +189,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Рабочий профиль удален из-за отсутствия приложения Admin."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Приложение Admin в рабочем профиле отсутствует или повреждено. Из-за этого рабочий профиль и связанные с ним данные были удалены. Если у вас возникли вопросы, обратитесь к администратору."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Ваш рабочий профиль больше не доступен на этом устройстве."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Все данные с устройства будут удалены"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Приложение Admin нельзя использовать, так как оно отсутствует или повреждено. С устройства будут удалены все данные. Если у вас возникли вопросы, обратитесь к администратору."</string>
     <string name="me" msgid="6545696007631404292">"Я"</string>

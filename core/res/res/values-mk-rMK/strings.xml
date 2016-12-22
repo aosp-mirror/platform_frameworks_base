@@ -46,6 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Проблем со поврзување или неважечки MMI код."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Операцијата е ограничена на бирање само фиксни броеви."</string>
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Не може да се сменат поставките за проследување повик од телефонот додека сте во роаминг."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Услугата беше овозможена."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Услугата беше овозможена за:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Услугата е оневозможена."</string>
@@ -96,6 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Услугите со говор/податоци се блокирани."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Услугите за гласовно бирање/SMS пораки се блокирани."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Сите услугите со говор/податоци/SMS пораки се блокирани."</string>
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Не може да се дојде до мрежата"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"За да се подобри приемот, обидете се да го смените избраниот тип во „Поставки“ &gt; „Мобилни мрежи“ &gt; „Претпочитан тип мрежа“."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Рамноправен уред го побара режимот на TTY „FULL“"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Рамноправен уред го побара режимот на TTY „HCO“"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Рамноправен уред го побара режимот на TTY „VCO“"</string>
@@ -179,6 +182,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Работниот профил е избришан заради отсуството на апликација на администратор."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Апликацијата на администраторот за работниот профил недостасува или е оштетена. Како резултат на тоа, работниот профил и поврзаните податоци ќе се избришат. Контактирајте со администраторот за помош."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Работниот профил веќе не е достапен на уредов."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Уредот ќе се избрише"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"На апликацијата на администраторот ѝ недостасуваат компоненти или е оштетена, па не може да се користи. Уредот ќе се избрише сега. Контактирајте со администраторот за помош."</string>
     <string name="me" msgid="6545696007631404292">"Јас"</string>

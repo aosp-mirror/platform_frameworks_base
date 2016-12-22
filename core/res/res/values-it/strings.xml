@@ -46,6 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problema di connessione o codice MMI non valido."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Operazione limitata solo ai numeri di selezione fissa."</string>
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Impossibile modificare le impostazioni di deviazione chiamate dal telefono durante il roaming."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Il servizio è stato attivato."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Il servizio è stato attivato per:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Il servizio è stato disattivato."</string>
@@ -96,6 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"I servizi vocali/dati sono bloccati."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"I servizi vocali/SMS sono bloccati."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Tutti i servizi vocali/dati/SMS sono bloccati."</string>
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Impossibile raggiungere la rete"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Per migliorare la ricezione, prova a modificare il tipo selezionato in Impostazioni &gt; Reti cellulari &gt; Tipo di rete preferito."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Peer ha richiesto la modalità TTY FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Peer ha richiesto la modalità TTY HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Peer ha richiesto la modalità TTY VCO"</string>
@@ -179,6 +182,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Profilo di lavoro eliminato per app di amministrazione mancante."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"L\'app di amministrazione dei profili di lavoro manca o è danneggiata. Di conseguenza, il tuo profilo di lavoro e i relativi dati sono stati eliminati. Contatta l\'amministratore per ricevere assistenza."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Il tuo profilo di lavoro non è più disponibile sul dispositivo."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Il dispositivo verrà resettato"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"L\'app di amministrazione è danneggiata o mancano componenti, pertanto non è possibile utilizzarla. Il dispositivo verrà resettato. Contatta l\'amministratore per ricevere assistenza."</string>
     <string name="me" msgid="6545696007631404292">"Io"</string>

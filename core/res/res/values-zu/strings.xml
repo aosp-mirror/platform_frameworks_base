@@ -46,6 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Inkinga yoxhumano noma ikhadi ye-MMI engalungile."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Umsebenzi uvinjelwe ekudayeleni izinombolo ezingaguquki kuphela."</string>
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Ayikwazi ukushintsha izilungiselelo zokudluliselwa kwekholi kusuka efonini yakho ngenkathi uzula."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Isevisi ivaliwe."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Isevisi ivulelwe:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Isevisi ivaliwe."</string>
@@ -96,6 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Amasevisi Wezwi/Idatha avimbelwe."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Amasevisi Wezwi/SMS avimbelwe."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Wonke amasevisi Wezwi/Idatha/SMS avimbelwe."</string>
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Ayikwazi ukufinyelela inethiwekhi"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Ukuze uthuthukise ukwamukela, zama ukushintsha uhlobo olukhethiwe kuzilungiselelo &gt; amanethiwekhi eselula &gt; uhlobo lwenethiwekhi olukhethayo."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Umngani ucele imodi ye-TTY ephelele"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Umngani ucele imodi ye-TTY HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Umngani ucele imodi ye-TTY VCO"</string>
@@ -179,6 +182,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Iphrofayela yomsebenzi isusiwe ngenxa yohlelo lokusebenza lomlawuli elingekho."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Uhlelo lokusebenza lomlawuli lephrofayela yomsebenzi kungenzeka alukho noma lumoshekile. Njengomphumela walokho, iphrofayela yakho yomsebenzi nedatha ehlobene kususiwe. Xhumana nomlawuli wakho ukuze uthole usizo."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Iphrofayela yakho yomsebenzi ayisatholakali kule divayisi."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Idivayisi yakho izosulwa"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Uhlelo lokusebenza lomlawuli lushoda ngezingxenye noma lumoshekile, futhi alikwazi ukusetshenziswa. Idivayisi yakho manje izosulwa. Xhumana nomlawuli wakho ukuze uthole usizo."</string>
     <string name="me" msgid="6545696007631404292">"Mina"</string>

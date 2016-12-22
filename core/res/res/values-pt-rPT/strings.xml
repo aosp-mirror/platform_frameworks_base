@@ -46,6 +46,8 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problema de ligação ou código MMI inválido."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"A operação está restringida a números fixos autorizados."</string>
+    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
+    <skip />
     <string name="serviceEnabled" msgid="8147278346414714315">"O serviço foi ativado."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"O serviço foi ativado para:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"O serviço foi desativado."</string>
@@ -96,6 +98,10 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Os serviços de voz/dados estão bloqueados."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Os serviços de Voz/SMS estão bloqueados."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Todos os serviços de voz/dados/SMS estão bloqueados."</string>
+    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
+    <skip />
+    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"O par solicitou o modo COMPLETO de teletipo"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"O par solicitou o modo HCO de teletipo"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"O par solicitou o modo VCO de teletipo"</string>
@@ -179,6 +185,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Perfil de trabalho eliminado devido a aplicação de administração em falta."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"A aplicação de administração do perfil de trabalho está em falta ou corrompida. Consequentemente, o seu perfil de trabalho e os dados relacionados foram eliminados. Contacte o seu administrador para obter assistência."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"O seu perfil de trabalho já não está disponível neste dispositivo."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"O seu dispositivo será apagado"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"A aplicação de administração tem componentes em falta ou corrompidos e não podem ser utilizados. O seu dispositivo será agora apagado. Contacte o seu administrador para obter assistência."</string>
     <string name="me" msgid="6545696007631404292">"Eu"</string>

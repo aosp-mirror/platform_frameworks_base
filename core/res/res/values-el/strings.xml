@@ -46,6 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Πρόβλημα σύνδεσης ή μη έγκυρος κώδικας MMI."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Η λειτουργία περιορίζεται μόνο σε προκαθορισμένους αριθμούς κλήσης."</string>
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Δεν είναι δυνατή η αλλαγή των ρυθμίσεων προώθησης κλήσεων από το τηλέφωνό σας κατά τη διάρκεια της περιαγωγής."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Η υπηρεσία ενεργοποιήθηκε."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Η υπηρεσία ενεργοποιήθηκε για:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Η υπηρεσία έχει απενεργοποιηθεί."</string>
@@ -96,6 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Οι υπηρεσίες φωνής/δεδομένων έχουν αποκλειστεί."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Όλες οι υπηρεσίες φωνής/SMS έχουν αποκλειστεί."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Όλες οι υπηρεσίες φωνής/δεδομένων/SMS έχουν αποκλειστεί."</string>
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Δεν είναι δυνατή η σύνδεση στο δίκτυο"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Για να βελτιώσετε τη λήψη, δοκιμάστε να αλλάξετε τον επιλεγμένο τύπο από τις Ρυθμίσεις &gt; Δίκτυα κινητής τηλεφωνίας &gt; Προτιμώμενος τύπος δικτύου."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Αίτημα peer για TTY ΠΛΗΡΗΣ Λειτουργία"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Αίτημα peer για TTY Λειτουργία HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Αίτημα peer για TTY Λειτουργία VCO"</string>
@@ -179,6 +182,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Το προφίλ εργασίας διαγράφηκε επειδή λείπει η εφαρμογή διαχείρισης."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Η εφαρμογή διαχείρισης προφίλ εργασίας είτε λείπει είτε είναι κατεστραμμένη. Ως αποτέλεσμα, το προφίλ εργασίας και σχετικά δεδομένα διαγράφηκαν. Επικοινωνήστε με το διαχειριστή για βοήθεια."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Το προφίλ σας εργασίας δεν είναι πια διαθέσιμο σε αυτήν τη συσκευή."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Η συσκευή σας θα διαγραφεί"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Λείπουν στοιχεία από την εφαρμογή διαχείρισης ή είναι κατεστραμμένη, και δεν μπορεί να χρησιμοποιηθεί. Η συσκευή σας θα διαγραφεί. Επικοινωνήστε με το διαχειριστή για βοήθεια."</string>
     <string name="me" msgid="6545696007631404292">"Για εμένα"</string>

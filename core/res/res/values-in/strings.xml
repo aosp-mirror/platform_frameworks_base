@@ -46,6 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Masalah sambungan atau kode MMI tidak valid."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Operasi dibatasi untuk nomor panggilan tetap saja."</string>
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Tidak dapat mengubah setelan penerusan panggilan dari ponsel saat roaming"</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Layanan telah diaktifkan."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Layanan diaktifkan untuk:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Layanan telah dinonaktifkan."</string>
@@ -96,6 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Layanan suara/data dicekal."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Layanan suara/SMS dicekal."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Semua layanan suara/data/SMS dicekal."</string>
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Tidak dapat menjangkau jaringan"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Untuk meningkatkan penerimaan sinyal, coba ubah jenis yang dipilih di Setelan &gt; Data seluler &gt; Jenis jaringan pilihan."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Rekan meminta Mode TTY PENUH"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Rekan meminta Mode TTY HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Rekan meminta Mode TTY VCO"</string>
@@ -179,6 +182,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Profil kerja dihapus karena tidak ada aplikasi admin."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Aplikasi admin profil kerja tidak ada atau rusak. Akibatnya, profil kerja dan data terkait telah dihapus. Hubungi administrator untuk meminta bantuan."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Profil kerja tidak tersedia lagi di perangkat ini."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Perangkat akan dihapus"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Aplikasi admin kehilangan komponen atau rusak, dan tidak dapat digunakan. Perangkat sekarang akan dihapus. Hubungi administrator untuk meminta bantuan."</string>
     <string name="me" msgid="6545696007631404292">"Saya"</string>

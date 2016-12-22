@@ -46,6 +46,8 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"ມີບັນຫາໃນການເຊື່ອມຕໍ່ ຫຼືລະຫັດ MMI ບໍ່ຖືກຕ້ອງ."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"ການດຳເນີນການຖືກຈຳກັດເປັນ ຈຳກັດໝາຍເລກໂທອອກເທົ່ານັ້ນ."</string>
+    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
+    <skip />
     <string name="serviceEnabled" msgid="8147278346414714315">"ບໍລິການຖືກເປີດໄວ້ແລ້ວ."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"ບໍລິການຖືກເປີດໃຊ້ສຳລັບ:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"ບໍ​ລິ​ການ​ໄດ້​ຖືກ​ປິດແລ້ວ."</string>
@@ -96,6 +98,10 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"ບໍລິການ ຂໍ້ມູນ/ສຽງ ຖືກບລັອກ."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"ບໍລິການ ສຽງ/SMS ຖືກບລັອກ."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"ບໍລິການ ການໂທ/ອິນເຕີເນັດ/SMS ຖືກປິດກັ້ນໄວ້."</string>
+    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
+    <skip />
+    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
+    <skip />
     <string name="peerTtyModeFull" msgid="6165351790010341421">"ໂໝດ TTY ທີ່​ເພື່ອນ​ຂໍ​ນັ້ນ​ເຕັມ​ແລ້ວ"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"ໂໝດ TTY ທີ່​ເພື່ອນ​ຂໍ HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"ໂໝດ TTY ທີ່​ເພື່ອນ​ຂໍ VCO"</string>
@@ -179,6 +185,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"ລຶບ​ໂປ​ຣ​ໄຟ​ລ໌​ບ່ອນ​ເຮັດ​ວຽກ​ແລ້ວ ເນື່ອງ​ຈາກຂາດ​ແອັບ​ບໍ​ລິ​ຫານ​ໄປ."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"ແອັບ​ບໍ​ລິ​ຫານ​ໂປ​ຣ​ໄຟ​ລ໌​ວຽກ​ຂາດ​ໄປ ຫຼື​ຖືກ​​ເສຍ​ຫາຍ. ດ້ວຍ​ເຫດ​ຜົນ​ນັ້ນ, ໂປ​ຣ​ໄຟ​ລ໌​ບ່ອນ​ເຮັດວຽກ​ຂອງ​ທ່ານ ແລະ​ຂໍ້​ມູນ​ທີ່​ກ່ຽວ​ຂ້ອງ​ຈິ່ງ​ຖືກ​ລຶບ​ໄປ. ຕິດ​ຕໍ່​ຜູ້​ຄວບ​ຄຸ​ມ​ຂອງ​ທ່ານ ເພື່ອ​ຂໍ​ຄວາມ​ຊ່ວຍ​ເຫຼືອ."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກບໍ່ມີໃຫ້ໃຊ້ງານເທິງອຸປະກອນນີ້ອີກຕໍ່ໄປ."</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ຈະ​ຖືກ​ລຶບ"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"ແອັບ​ບໍ​ລິ​ຫານ​ຂາດ​ອົງ​ປະ​ກອບ​ ຫ​ຼື​ຖືກ​ຂັດ​ຈັງ​ຫວະ, ແລະ​ບໍ່​ສາ​ມາດ​ໃຊ​ໄດ້. ດຽວ​ນີ້​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ຈະ​ຖືກ​ລຶບ. ຕິດ​ຕໍ່​ຜູ້​ຄວບ​ຄຸມ​ຂອງ​ທ່ານ ເພື່ອ​ຂໍ​ຄວາມ​ຊ່ວຍ​ເຫຼືອ."</string>
     <string name="me" msgid="6545696007631404292">"ຂ້າພະເຈົ້າ"</string>

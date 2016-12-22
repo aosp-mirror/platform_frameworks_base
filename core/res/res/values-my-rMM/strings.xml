@@ -46,6 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"ဆက်သွယ်မှုဆိုင်ရာပြသနာ သို့မဟုတ် မမှန်ကန်သောMMIကုတ်"</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"သတ်မှတ်ခေါ်ဆိုနိုင်သောနံပါတ်များထံသာ ကန့်သတ်ထားသည်"</string>
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"ကွန်ရက်ပြင်ပဒေတာအသုံးပြုခြင်းကို ဖွင့်ထားသည့်အခါ သင့်ဖုန်းမှနေ၍ ခေါ်ဆိုမှုထပ်ဆင့်ပို့ခြင်းဆက်တင်အား ပြောင်း၍မရပါ။"</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"ဝန်ဆောင်မှု လုပ်ဆောင်နိုင်မည်"</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"ဝန်ဆောင်မှု ရရှိမည်"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"ဝန်ဆောင်မှုအား ရပ်ဆိုင်းသည်"</string>
@@ -96,6 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"အသံ၊ဒေတာ ဆားဗစ်များအားလုံး ပိတ်ထားပါသည်"</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"အသံ/SMSဝန်ဆောင်မှုများအားပိတ်ထားသည်။"</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"အသံ၊အချက်အလက်၊စာတိုဆားဗစ်များအားလုံး ပိတ်ထားပါသည်"</string>
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"ကွန်ရက်ကို ချိတ်ဆက်၍မရပါ"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"လိုင်းကောင်းစေရန်အတွက် ဆက်တင် &gt; ဆယ်လူလာကွန်ရက်များ &gt; ပိုနှစ်သက်သည့် ကွန်ရက်အမျိုးအစားထဲတွင် ရွေးချယ်ထားသည့် အမျိုးအစားကို ပြောင်းကြည့်ပါ။"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"အခြားစက်မှ TTY မုဒ် FULL ပြုရန် တောင်းဆို၏"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"အခြားစက်မှ TTY မုဒ် HCO ပြုရန် တောင်းဆို၏"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"TTY မုဒ် VCO ပြုရန် အခြားစက်မှ တောင်းဆို၏"</string>
@@ -179,6 +182,10 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"အက်ဒမင် အက်ပ်ပျောက်နေသောကြောင့် အလုပ်ပရိုဖိုင် ပျက်သွားသည်။"</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"အလုပ်ပရိုဖိုင် အက်ဒမင် အပလီကေးရှင်းပျောက်နေသည် သို့မဟုတ် ပျက်စီးနေသည်။ ထို့ကြောင့် သင့်အလုပ်ပရိုဖိုင်နှင့် ဆက်စပ်နေသော ဒေတာများအား ပယ်ဖျက်ခြင်းခံရမည်။ အကူအညီတောင်းခံရန် သင့်အက်ဒမင်အား ဆက်သွယ်ပါ။"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"ဤစက်ကိရိယာတွင် သင့်အလုပ်ပရိုဖိုင် မရှိတော့ပါ။"</string>
+    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
+    <skip />
+    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"သင့်ကိရိယာအား ပယ်ဖျက်လိမ့်မည်"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"အက်ဒမင် အက်ပ်၏ အစိတ်အပိုင်းများ ပျောက်နေသည် သို့မဟုတ် ပျက်စီးနေသည်။ သင့်ကိရိယာအား ပယ်ဖျက်လိမ့်မည်။ အကူအညီတောင်းခံရန် သင့်အက်ဒမင်အား ဆက်သွယ်ပါ။"</string>
     <string name="me" msgid="6545696007631404292">"ကျွန်ုပ်"</string>
