@@ -52,6 +52,8 @@ interface IWifiManager
 
     List<WifiConfiguration> getConfiguredNetworks();
 
+    boolean hasCarrierConfiguredNetworks();
+
     List<WifiConfiguration> getPrivilegedConfiguredNetworks();
 
     WifiConfiguration getMatchingWifiConfig(in ScanResult scanResult);
