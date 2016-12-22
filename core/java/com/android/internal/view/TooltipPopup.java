@@ -55,14 +55,15 @@ public class TooltipPopup {
                 | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
     }
 
-    public void show(View anchorView, int anchorX, int anchorY, CharSequence tooltipText) {
+    public void show(View anchorView, int anchorX, int anchorY, boolean fromTouch,
+            CharSequence tooltipText) {
         if (isShowing()) {
             hide();
         }
 
         mMessageView.setText(tooltipText);
 
-        computePosition(anchorView, anchorX, anchorY, mLayoutParams);
+        computePosition(anchorView, anchorX, anchorY, fromTouch, mLayoutParams);
 
         WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
         wm.addView(mContentView, mLayoutParams);
@@ -89,7 +90,7 @@ public class TooltipPopup {
         mMessageView.setText(tooltipText);
     }
 
-    private void computePosition(View anchorView, int anchorX, int anchorY,
+    private void computePosition(View anchorView, int anchorX, int anchorY, boolean fromTouch,
             WindowManager.LayoutParams outParams) {
         final int tooltipPreciseAnchorThreshold = mContext.getResources().getDimensionPixelOffset(
                 com.android.internal.R.dimen.tooltip_precise_anchor_threshold);
@@ -107,8 +108,10 @@ public class TooltipPopup {
         final int offsetAbove;
         if (anchorView.getHeight() >= tooltipPreciseAnchorThreshold) {
             // Tall view. Align the tooltip vertically to the precise Y position.
-            offsetBelow = anchorY;
-            offsetAbove = anchorY;
+            final int offsetExtra = mContext.getResources().getDimensionPixelOffset(
+                    com.android.internal.R.dimen.tooltip_precise_anchor_extra_offset);
+            offsetBelow = anchorY + offsetExtra;
+            offsetAbove = anchorY - offsetExtra;
         } else {
             // Otherwise anchor the tooltip to the view center.
             offsetBelow = anchorView.getHeight();  // Place below the view in most cases.
@@ -118,20 +121,31 @@ public class TooltipPopup {
         outParams.gravity = Gravity.CENTER_HORIZONTAL | Gravity.TOP;
 
         final int tooltipOffset = mContext.getResources().getDimensionPixelOffset(
-                com.android.internal.R.dimen.tooltip_y_offset);
+                fromTouch ? com.android.internal.R.dimen.tooltip_y_offset_touch
+                        : com.android.internal.R.dimen.tooltip_y_offset_non_touch);
 
         anchorView.getWindowVisibleDisplayFrame(mTmpDisplayFrame);
         anchorView.getLocationInWindow(mTmpAnchorPos);
         outParams.x = mTmpAnchorPos[0] + offsetX - mTmpDisplayFrame.width() / 2;
-        outParams.y = mTmpAnchorPos[1] + offsetBelow + tooltipOffset;
 
         final int spec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
         mContentView.measure(spec, spec);
         final int tooltipHeight = mContentView.getMeasuredHeight();
 
-        if (outParams.y + tooltipHeight > mTmpDisplayFrame.height()) {
-            // The tooltip does not fit below the anchor point, show above instead.
-            outParams.y = mTmpAnchorPos[1] + offsetAbove - (tooltipOffset + tooltipHeight);
+        final int yAbove = mTmpAnchorPos[1] + offsetAbove - tooltipOffset - tooltipHeight;
+        final int yBelow = mTmpAnchorPos[1] + offsetBelow + tooltipOffset;
+        if (fromTouch) {
+            if (yAbove >= 0) {
+                outParams.y = yAbove;
+            } else {
+                outParams.y = yBelow;
+            }
+        } else {
+            if (yBelow + tooltipHeight <= mTmpDisplayFrame.height()) {
+                outParams.y = yBelow;
+            } else {
+                outParams.y = yAbove;
+            }
         }
     }
 }
