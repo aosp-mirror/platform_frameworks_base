@@ -265,19 +265,6 @@ public class DexManager {
         public void mergeAppDataDirs(ApplicationInfo ai, int userId) {
             Set<String> dataDirs = putIfAbsent(mAppDataDirs, userId, new HashSet<>());
             dataDirs.add(ai.dataDir);
-
-            // Compute and cache the real path as well since data dir may be a symlink.
-            // e.g. /data/data/ -> /data/user/0/
-            try {
-                dataDirs.add(PackageManagerServiceUtils.realpath(new File(ai.dataDir)));
-            } catch (IOException e) {
-                if (DEBUG) {
-                    // Verify why we're getting spam at boot for some devices.
-                    // b/33807524
-                    Slog.w(TAG, "Error to get realpath of " + ai.dataDir, e);
-                }
-            }
-
         }
 
         public int searchDex(String dexPath, int userId) {
@@ -300,6 +287,20 @@ public class DexManager {
             for (String dataDir : userDataDirs) {
                 if (dexPath.startsWith(dataDir)) {
                     return DEX_SEARCH_FOUND_SECONDARY;
+                }
+            }
+
+            // TODO(calin): What if we get a symlink? e.g. data dir may be a symlink,
+            // /data/data/ -> /data/user/0/.
+            if (DEBUG) {
+                try {
+                    String dexPathReal = PackageManagerServiceUtils.realpath(new File(dexPath));
+                    if (dexPathReal != dexPath) {
+                        Slog.d(TAG, "Dex loaded with symlink. dexPath=" +
+                                dexPath + " dexPathReal=" + dexPathReal);
+                    }
+                } catch (IOException e) {
+                    // Ignore
                 }
             }
             return DEX_SEARCH_NOT_FOUND;
