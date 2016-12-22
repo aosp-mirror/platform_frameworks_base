@@ -23,9 +23,11 @@ import android.view.ViewGroup;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.DismissView;
+import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.NotificationShelf;
+import com.android.systemui.statusbar.StackScrollerDecorView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 
 import java.util.ArrayList;
@@ -324,11 +326,15 @@ public class StackScrollAlgorithm {
         int childHeight = getMaxAllowedChildHeight(child);
         childViewState.yTranslation = currentYPosition;
         boolean isDismissView = child instanceof DismissView;
+        boolean isEmptyShadeView = child instanceof EmptyShadeView;
 
         childViewState.location = ExpandableViewState.LOCATION_MAIN_AREA;
         if (isDismissView) {
             childViewState.yTranslation = Math.min(childViewState.yTranslation,
                     ambientState.getInnerHeight() - childHeight);
+        } else if (isEmptyShadeView) {
+            childViewState.yTranslation = ambientState.getInnerHeight() - childHeight
+                    + ambientState.getStackTranslation() * 0.25f;
         } else {
             clampPositionToShelf(childViewState, ambientState);
         }
