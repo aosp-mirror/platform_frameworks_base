@@ -626,7 +626,8 @@ public class MediaPlayer extends PlayerBase
      * result in an exception.</p>
      */
     public MediaPlayer() {
-        super(new AudioAttributes.Builder().build());
+        super(new AudioAttributes.Builder().build(),
+                AudioPlaybackConfiguration.PLAYER_TYPE_JAM_MEDIAPLAYER);
 
         Looper looper;
         if ((looper = Looper.myLooper()) != null) {
@@ -1241,6 +1242,7 @@ public class MediaPlayer extends PlayerBase
     public void stop() throws IllegalStateException {
         stayAwake(false);
         _stop();
+        baseStop();
     }
 
     private native void _stop() throws IllegalStateException;
@@ -1254,6 +1256,7 @@ public class MediaPlayer extends PlayerBase
     public void pause() throws IllegalStateException {
         stayAwake(false);
         _pause();
+        basePause();
     }
 
     private native void _pause() throws IllegalStateException;
@@ -2973,6 +2976,7 @@ public class MediaPlayer extends PlayerBase
 
             case MEDIA_PLAYBACK_COMPLETE:
                 {
+                    mOnCompletionInternalListener.onCompletion(mMediaPlayer);
                     OnCompletionListener onCompletionListener = mOnCompletionListener;
                     if (onCompletionListener != null)
                         onCompletionListener.onCompletion(mMediaPlayer);
@@ -3037,6 +3041,7 @@ public class MediaPlayer extends PlayerBase
                     error_was_handled = onErrorListener.onError(mMediaPlayer, msg.arg1, msg.arg2);
                 }
                 {
+                    mOnCompletionInternalListener.onCompletion(mMediaPlayer);
                     OnCompletionListener onCompletionListener = mOnCompletionListener;
                     if (onCompletionListener != null && ! error_was_handled) {
                         onCompletionListener.onCompletion(mMediaPlayer);
@@ -3213,6 +3218,17 @@ public class MediaPlayer extends PlayerBase
     }
 
     private OnCompletionListener mOnCompletionListener;
+
+    /**
+     * @hide
+     * Internal completion listener to update PlayerBase of the play state. Always "registered".
+     */
+    private final OnCompletionListener mOnCompletionInternalListener = new OnCompletionListener() {
+        @Override
+        public void onCompletion(MediaPlayer mp) {
+            baseStop();
+        }
+    };
 
     /**
      * Interface definition of a callback to be invoked indicating buffering

@@ -151,7 +151,7 @@ public class SoundPool extends PlayerBase {
     }
 
     private SoundPool(int maxStreams, AudioAttributes attributes) {
-        super(attributes);
+        super(attributes, AudioPlaybackConfiguration.PLAYER_TYPE_JAM_SOUNDPOOL);
 
         // do native setup
         if (native_setup(new WeakReference<SoundPool>(this), maxStreams, attributes) != 0) {
