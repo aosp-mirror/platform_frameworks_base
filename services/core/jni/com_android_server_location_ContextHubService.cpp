@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include "context_hub.h"
 
 #undef LOG_NDEBUG
 #undef LOG_TAG
@@ -28,50 +27,88 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <android-base/macros.h>
-#include <cutils/log.h>
-
 #include <chrono>
 #include <mutex>
 #include <queue>
 #include <unordered_map>
 
-#include "JNIHelp.h"
+#include <android-base/macros.h>
+#include <android/hardware/contexthub/1.0/IContexthub.h>
+#include <cutils/log.h>
+
 #include "core_jni_helpers.h"
+#include "JNIHelp.h"
 
-static constexpr jint OS_APP_ID = -1;
-static constexpr jint INVALID_APP_ID = -2;
-static constexpr uint64_t ALL_APPS = UINT64_C(0xFFFFFFFFFFFFFFFF);
+using IContexthub = android::hardware::contexthub::V1_0::IContexthub;
 
-static constexpr jint MIN_APP_ID = 1;
-static constexpr jint MAX_APP_ID = 128;
+using Result = android::hardware::contexthub::V1_0::Result;
+using NanoAppBinary = android::hardware::contexthub::V1_0::NanoAppBinary;
+using ContextHubMsg = android::hardware::contexthub::V1_0::ContextHubMsg;
+using IContexthubCallback = android::hardware::contexthub::V1_0::IContexthubCallback;
+using AsyncEventType = android::hardware::contexthub::V1_0::AsyncEventType;
+using TransactionResult = android::hardware::contexthub::V1_0::TransactionResult;
+using ContextHub = android::hardware::contexthub::V1_0::ContextHub;
+using HubAppInfo = android::hardware::contexthub::V1_0::HubAppInfo;
 
-static constexpr size_t MSG_HEADER_SIZE = 4;
-static constexpr size_t HEADER_FIELD_MSG_TYPE = 0;
-static constexpr size_t HEADER_FIELD_MSG_VERSION = 1;
-static constexpr size_t HEADER_FIELD_HUB_HANDLE = 2;
-static constexpr size_t HEADER_FIELD_APP_INSTANCE = 3;
+template<typename T>
+using Return = android::hardware::Return<T>;
 
-static constexpr size_t HEADER_FIELD_LOAD_APP_ID_LO = MSG_HEADER_SIZE;
-static constexpr size_t HEADER_FIELD_LOAD_APP_ID_HI = MSG_HEADER_SIZE + 1;
-static constexpr size_t MSG_HEADER_SIZE_LOAD_APP = MSG_HEADER_SIZE + 2;
-
-// Monotonically increasing clock we use to determine if we can cancel
-// a transaction.
 using std::chrono::steady_clock;
+// If a transaction takes longer than this, we'll allow it to be
+// canceled by a new transaction.  Note we do _not_ automatically
+// cancel a transaction after this much time.  We can have a
+// legal transaction which takes longer than this amount of time,
+// as long as no other new transactions are attempted after this
+// time has expired.
+constexpr auto kMinTransactionCancelTime = std::chrono::seconds(29);
 
 namespace android {
 
-namespace {
+enum HubMessageType {
+    CONTEXT_HUB_APPS_ENABLE  = 1, // Enables loaded nano-app(s)
+    CONTEXT_HUB_APPS_DISABLE = 2, // Disables loaded nano-app(s)
+    CONTEXT_HUB_LOAD_APP     = 3, // Load a supplied app
+    CONTEXT_HUB_UNLOAD_APP   = 4, // Unload a specified app
+    CONTEXT_HUB_QUERY_APPS   = 5, // Query for app(s) info on hub
+    CONTEXT_HUB_QUERY_MEMORY = 6, // Query for memory info
+    CONTEXT_HUB_OS_REBOOT    = 7, // Request to reboot context HUB OS
+};
 
-/*
- * Finds the length of a statically-sized array using template trickery that
- * also prevents it from being applied to the wrong type.
- */
-template <typename T, size_t N>
-constexpr size_t array_length(T (&)[N]) { return N; }
+constexpr jint OS_APP_ID = -1;
+constexpr jint INVALID_APP_ID = -2;
 
-struct jniInfo_s {
+constexpr jint MIN_APP_ID = 1;
+constexpr jint MAX_APP_ID = 128;
+
+constexpr size_t MSG_HEADER_SIZE = 4;
+constexpr size_t HEADER_FIELD_MSG_TYPE = 0;
+constexpr size_t HEADER_FIELD_MSG_VERSION = 1;
+constexpr size_t HEADER_FIELD_HUB_HANDLE = 2;
+constexpr size_t HEADER_FIELD_APP_INSTANCE = 3;
+
+constexpr size_t HEADER_FIELD_LOAD_APP_ID_LO = MSG_HEADER_SIZE;
+constexpr size_t HEADER_FIELD_LOAD_APP_ID_HI = MSG_HEADER_SIZE + 1;
+constexpr size_t MSG_HEADER_SIZE_LOAD_APP = MSG_HEADER_SIZE + 2;
+
+jint getAppInstanceForAppId(uint64_t app_id);
+int onMessageReceipt(const uint32_t *header,
+                     size_t headerLen,
+                     const char *msg,
+                     size_t msgLen);
+void onHubReset(uint32_t hubId);
+void queryHubForApps(uint32_t hubId);
+void passOnOsResponse(uint32_t hubHandle,
+                      uint32_t msgType,
+                      TransactionResult result,
+                      const int8_t *additionalData,
+                      size_t additionalDataLen);
+
+bool closeLoadTxn(bool success, jint *appInstanceHandle);
+void closeUnloadTxn(bool success);
+int handleQueryAppsResponse(const std::vector<HubAppInfo> apps,
+                               uint32_t hubHandle);
+
+struct JniInfo {
     JavaVM *vm;
     jclass contextHubInfoClass;
     jclass contextHubServiceClass;
@@ -102,270 +139,280 @@ struct jniInfo_s {
     jmethodID contextHubServiceDeleteAppInstance;
 };
 
-struct context_hub_info_s {
-    uint32_t *cookies;
-    int numHubs;
-    const struct context_hub_t *hubs;
-    struct context_hub_module_t *contextHubModule;
-};
-
-struct app_instance_info_s {
-    uint64_t truncName;          // Possibly truncated name for logging
-    uint32_t hubHandle;          // Id of the hub this app is on
-    jint instanceId;             // system wide unique instance id - assigned
-    struct hub_app_info appInfo; // returned from the HAL
-};
 
 
-// If a transaction takes longer than this, we'll allow it to be
-// canceled by a new transaction.  Note we do _not_ automatically
-// cancel a transaction after this much time.  We can have a
-// legal transaction which takes longer than this amount of time,
-// as long as no other new transactions are attempted after this
-// time has expired.
-// TODO(b/31105001): Establish a clean timing approach for all
-// of our HAL interactions.
-constexpr auto kMinTransactionCancelTime = std::chrono::seconds(29);
+class TxnManager {
+public:
+    TxnManager() {
+        mData = nullptr;
+        mIsPending = false;
+    }
 
-/*
- * TODO(ashutoshj): From original code review:
- *
- * So, I feel like we could possible do a better job of organizing this code,
- * and being more C++-y.  Consider something like this:
- * class TxnManager {
- *  public:
- *   TxnManager();
- *   ~TxnManager();
- *   int add(hub_message_e identifier, void *data);
- *   int close();
- *   bool isPending() const;
- *   int fetchData(hub_message_e *identifier, void **data) const;
- *
- *  private:
- *   bool mPending;
- *   mutable std::mutex mLock;
- *   hub_message_e mIdentifier;
- *   void *mData;
- * };
- *
- * And then, for example, we'd have things like:
- * TxnManager::TxnManager() : mPending(false), mLock(), mIdentifier(), mData(nullptr) {}
- * int TxnManager::add(hub_message_e identifier, void *data) {
- *    std::lock_guard<std::mutex> lock(mLock);
- *    mPending = true;
- *    mData = txnData;
- *    mIdentifier = txnIdentifier;
- *    return 0;
- *  }
- * And then calling code would look like:
- *    if (!db.txnManager.add(CONTEXT_HUB_LOAD_APP, txnInfo)) {
- *
- * This would make it clearer the nothing is manipulating any state within TxnManager
- * unsafely and outside of these couple of calls.
- */
-struct txnManager_s {
-    bool txnPending;              // Is a transaction pending
-    std::mutex m;                 // mutex for manager
-    hub_messages_e txnIdentifier; // What are we doing
-    void *txnData;                // Details
-    steady_clock::time_point firstTimeTxnCanBeCanceled;
-};
+    ~TxnManager() {
+        closeTxn();
+    }
 
-struct contextHubServiceDb_s {
-    int initialized;
-    context_hub_info_s hubInfo;
-    jniInfo_s jniInfo;
-    std::queue<jint> freeIds;
-    std::unordered_map<jint, app_instance_info_s> appInstances;
-    txnManager_s txnManager;
-};
+    int addTxn(HubMessageType txnIdentifier, void *txnData) {
+        std::lock_guard<std::mutex>lock(mLock);
+        if (mIsPending) {
+            ALOGW("Transaction already found pending when trying to add a new one.");
+            return -1;
+        }
+        mIsPending = true;
+        mFirstTimeTxnCanBeCanceled = steady_clock::now() + kMinTransactionCancelTime;
+        mData = txnData;
+        mIdentifier = txnIdentifier;
 
-}  // unnamed namespace
+        return 0;
+    }
 
-static contextHubServiceDb_s db;
+    int closeTxn() {
+        std::lock_guard<std::mutex>lock(mLock);
+        closeTxnUnlocked();
+        return 0;
+    }
 
-static bool initTxnManager() {
-    txnManager_s *mgr = &db.txnManager;
+    bool isTxnPending() {
+        std::lock_guard<std::mutex>lock(mLock);
+        return mIsPending;
+    }
 
-    mgr->txnData = nullptr;
-    mgr->txnPending = false;
-    return true;
-}
-
-static int addTxn(hub_messages_e txnIdentifier, void *txnData) {
-    txnManager_s *mgr = &db.txnManager;
-
-    std::lock_guard<std::mutex>lock(mgr->m);
-
-    mgr->txnPending = true;
-    mgr->firstTimeTxnCanBeCanceled = steady_clock::now() +
-        kMinTransactionCancelTime;
-    mgr->txnData = txnData;
-    mgr->txnIdentifier = txnIdentifier;
-
-    return 0;
-}
-
-// Only call this if you hold the db.txnManager.m lock.
-static void closeTxnUnlocked() {
-    txnManager_s *mgr = &db.txnManager;
-    mgr->txnPending = false;
-    free(mgr->txnData);
-    mgr->txnData = nullptr;
-}
-
-static int closeTxn() {
-    std::lock_guard<std::mutex>lock(db.txnManager.m);
-    closeTxnUnlocked();
-    return 0;
-}
-
-// If a transaction has been pending for longer than
-// kMinTransactionCancelTime, this call will "cancel" that
-// transaction and return that there are none pending.
-static bool isTxnPending() {
-    txnManager_s *mgr = &db.txnManager;
-    std::lock_guard<std::mutex>lock(mgr->m);
-    if (mgr->txnPending) {
-        if (steady_clock::now() >= mgr->firstTimeTxnCanBeCanceled) {
-            ALOGW("Transaction canceled");
+    void closeAnyStaleTxns() {
+        std::lock_guard<std::mutex>lock(mLock);
+        if (mIsPending && steady_clock::now() >= mFirstTimeTxnCanBeCanceled) {
+            ALOGW("Stale transaction canceled");
             closeTxnUnlocked();
         }
     }
-    return mgr->txnPending;
-}
 
-static int fetchTxnData(hub_messages_e *id, void **data) {
-    txnManager_s *mgr = &db.txnManager;
+    int fetchTxnData(HubMessageType *id, void **data) {
+        if (id == nullptr || data == nullptr) {
+            ALOGW("Null Params isNull{id, data} {%d, %d}",
+                  id == nullptr ? 1 : 0,
+                  data == nullptr ? 1 : 0);
+            return -1;
+        }
 
-    if (!id || !data) {
-        ALOGW("Null params id %p, data %p", id, data);
-        return -1;
-    }
+        std::lock_guard<std::mutex>lock(mLock);
+        if (!mIsPending) {
+            ALOGW("No Transactions pending");
+            return -1;
+        }
 
-    std::lock_guard<std::mutex>lock(mgr->m);
-    if (!mgr->txnPending) {
-        ALOGW("No Transactions pending");
-        return -1;
-    }
-
-    // else
-    *id = mgr->txnIdentifier;
-    *data = mgr->txnData;
-    return 0;
-}
-
-int context_hub_callback(uint32_t hubId, const struct hub_message_t *msg,
-                         void *cookie);
-
-const context_hub_t *get_hub_info(int hubHandle) {
-    if (hubHandle >= 0 && hubHandle < db.hubInfo.numHubs) {
-        return &db.hubInfo.hubs[hubHandle];
-    }
-    return nullptr;
-}
-
-static int send_msg_to_hub(const hub_message_t *msg, int hubHandle) {
-    const context_hub_t *info = get_hub_info(hubHandle);
-
-    if (info) {
-        return db.hubInfo.contextHubModule->send_message(info->hub_id, msg);
-    } else {
-        ALOGD("%s: Hub information is null for hubHandle %d", __FUNCTION__, hubHandle);
-        return -1;
-    }
-}
-
-static int set_os_app_as_destination(hub_message_t *msg, int hubHandle) {
-    const context_hub_t *info = get_hub_info(hubHandle);
-
-    if (info) {
-        msg->app_name = info->os_app_name;
+        *id = mIdentifier;
+        *data = mData;
         return 0;
-    } else {
-        ALOGD("%s: Hub information is null for hubHandle %d", __FUNCTION__, hubHandle);
-        return -1;
     }
-}
 
-static int get_hub_id_for_hub_handle(int hubHandle) {
+ private:
+    bool mIsPending;            // Is a transaction pending
+    std::mutex mLock;           // mutex for manager
+    HubMessageType mIdentifier; // What are we doing
+    void *mData;                // Details
+    steady_clock::time_point mFirstTimeTxnCanBeCanceled;
+
+    // Only call this if you hold the lock.
+    void closeTxnUnlocked() {
+        mIsPending = false;
+        free(mData);
+        mData = nullptr;
+    }
+};
+
+
+struct ContextHubServiceCallback : IContexthubCallback {
+    uint32_t mContextHubId;
+
+    ContextHubServiceCallback(uint32_t hubId) {
+        mContextHubId = hubId;
+    }
+
+    virtual Return<void> handleClientMsg(const ContextHubMsg &msg) {
+        jint appHandle = getAppInstanceForAppId(msg.appName);
+        if (appHandle < 0) {
+            ALOGE("Filtering out message due to invalid App Instance.");
+        } else {
+            uint32_t msgHeader[MSG_HEADER_SIZE] = {};
+            msgHeader[HEADER_FIELD_MSG_TYPE] = msg.msgType;
+            msgHeader[HEADER_FIELD_HUB_HANDLE] = mContextHubId;
+            msgHeader[HEADER_FIELD_APP_INSTANCE] = appHandle;
+            onMessageReceipt(msgHeader,
+                             MSG_HEADER_SIZE,
+                             reinterpret_cast<const char *>(msg.msg.data()),
+                             msg.msg.size());
+        }
+
+        return android::hardware::Void();
+    }
+
+    virtual Return<void> handleHubEvent(AsyncEventType evt) {
+        if (evt == AsyncEventType::RESTARTED) {
+            ALOGW("Context Hub handle %d restarted", mContextHubId);
+            onHubReset(mContextHubId);
+        } else {
+            ALOGW("Cannot handle event %u from hub %d", evt, mContextHubId);
+        }
+
+        return android::hardware::Void();
+    }
+
+    virtual Return<void> handleTxnResult(uint32_t txnId,
+                                         TransactionResult result) {
+        ALOGI("Handle transaction result , hubId %" PRIu32 ", txnId %" PRIu32 ", result %" PRIu32,
+              mContextHubId,
+              txnId,
+              result);
+
+        switch(txnId) {
+            case CONTEXT_HUB_APPS_ENABLE:
+            case CONTEXT_HUB_APPS_DISABLE:
+                passOnOsResponse(mContextHubId, txnId, result, nullptr, 0);
+                break;
+
+            case CONTEXT_HUB_UNLOAD_APP:
+                closeUnloadTxn(result == TransactionResult::SUCCESS);
+                passOnOsResponse(mContextHubId, txnId, result, nullptr, 0);
+                break;
+
+            case CONTEXT_HUB_LOAD_APP:
+                {
+                    jint appInstanceHandle = INVALID_APP_ID;
+                    bool appRunningOnHub = (result == TransactionResult::SUCCESS);
+                    if (!(closeLoadTxn(appRunningOnHub, &appInstanceHandle))) {
+                        if (appRunningOnHub) {
+                            // Now we're in an odd situation.  Our nanoapp
+                            // is up and running on the Context Hub.  However,
+                            // something went wrong in our Service code so that
+                            // we're not able to properly track this nanoapp
+                            // in our Service code.  If we tell the Java layer
+                            // things are good, it's a lie because the handle
+                            // we give them will fail when used with the Service.
+                            // If we tell the Java layer this failed, it's kind
+                            // of a lie as well, since this nanoapp is running.
+                            //
+                            // We leave a more robust fix for later, and for
+                            // now just tell the user things have failed.
+                            //
+                            // TODO(b/30835981): Make this situation better.
+                            result = TransactionResult::FAILURE;
+                        }
+                    }
+
+                    passOnOsResponse(mContextHubId,
+                                     txnId,
+                                     result,
+                                     reinterpret_cast<int8_t *>(&appInstanceHandle),
+                                     sizeof(appInstanceHandle));
+                    break;
+                }
+
+            default:
+                ALOGI("unrecognized transction id %" PRIu32, txnId);
+                break;
+        }
+        return android::hardware::Void();
+    }
+
+    virtual Return<void> handleAppsInfo(
+            const android::hardware::hidl_vec<HubAppInfo>& apps) {
+        handleQueryAppsResponse(apps,mContextHubId);
+        return android::hardware::Void();
+    }
+
+    void setContextHubId(uint32_t id) {
+        mContextHubId = id;
+    }
+
+    uint32_t getContextHubId() {
+        return(mContextHubId);
+    }
+};
+
+struct AppInstanceInfo {
+    HubAppInfo appInfo;          // returned from the HAL
+    uint64_t truncName;          // Possibly truncated name for logging
+    uint32_t hubHandle;          // Id of the hub this app is on
+    jint instanceId;             // system wide unique instance id - assigned
+};
+
+struct ContextHubInfo {
+    int numHubs;
+    Vector<ContextHub> hubs;
+    sp<IContexthub> contextHub;
+};
+
+struct ContextHubServiceDb {
+    int initialized;
+    ContextHubInfo hubInfo;
+    JniInfo jniInfo;
+    std::queue<jint> freeIds;
+    std::unordered_map<jint, AppInstanceInfo> appInstances;
+    TxnManager txnManager;
+    std::vector<ContextHubServiceCallback *> regCallBacks;
+};
+
+ContextHubServiceDb db;
+
+int getHubIdForHubHandle(int hubHandle) {
     if (hubHandle < 0 || hubHandle >= db.hubInfo.numHubs) {
       return -1;
     } else {
-      return db.hubInfo.hubs[hubHandle].hub_id;
+      return db.hubInfo.hubs[hubHandle].hubId;
     }
 }
 
-static int get_hub_handle_for_app_instance(jint id) {
+int getHubHandleForAppInstance(jint id) {
     if (!db.appInstances.count(id)) {
         ALOGD("%s: Cannot find app for app instance %" PRId32,
-              __FUNCTION__, id);
+              __FUNCTION__,
+              id);
         return -1;
     }
 
     return db.appInstances[id].hubHandle;
 }
 
-static int get_hub_id_for_app_instance(jint id) {
-    int hubHandle = get_hub_handle_for_app_instance(id);
+int getHubIdForAppInstance(jint id) {
+    int hubHandle = getHubHandleForAppInstance(id);
 
     if (hubHandle < 0) {
+        ALOGD("Cannot find hub instance for app instance %d", id);
         return -1;
     }
 
-    return db.hubInfo.hubs[hubHandle].hub_id;
+    return db.hubInfo.hubs[hubHandle].hubId;
 }
 
-static jint get_app_instance_for_app_id(uint64_t app_id) {
+jint getAppInstanceForAppId(uint64_t app_id) {
     auto end = db.appInstances.end();
     for (auto current = db.appInstances.begin(); current != end; ++current) {
-        if (current->second.appInfo.app_name.id == app_id) {
+        if (current->second.appInfo.appId == app_id) {
             return current->first;
         }
     }
-    ALOGD("Cannot find app for app instance %" PRIu64 ".", app_id);
+    ALOGD("Cannot find app for app id %" PRIu64 ".", app_id);
     return -1;
 }
 
-static int set_dest_app(hub_message_t *msg, jint id) {
+uint64_t getAppIdForAppInstance(jint id) {
     if (!db.appInstances.count(id)) {
-        ALOGD("%s: Cannot find app for app instance %" PRId32,
-              __FUNCTION__, id);
-        return -1;
+        return INVALID_APP_ID;
     }
-
-    msg->app_name = db.appInstances[id].appInfo.app_name;
-    return 0;
+    return db.appInstances[id].appInfo.appId;
 }
 
-static void query_hub_for_apps(uint32_t hubHandle) {
-    hub_message_t msg;
-    query_apps_request_t queryMsg;
-
-    // TODO(b/30835598): When we're able to tell which request our
-    //     response matches, then we should allow this to be more
-    //     targetted, instead of always being every app in the
-    //     system.
-    queryMsg.app_name.id = ALL_APPS;
-
-    msg.message_type = CONTEXT_HUB_QUERY_APPS;
-    msg.message_len  = sizeof(queryMsg);
-    msg.message = &queryMsg;
-
-    ALOGD("Sending query for apps to hub %" PRIu32, hubHandle);
-    set_os_app_as_destination(&msg, hubHandle);
-    if (send_msg_to_hub(&msg, hubHandle) != 0) {
-        ALOGW("Could not query hub %" PRIu32 " for apps", hubHandle);
-    }
+void queryHubForApps(uint32_t hubId) {
+    Result r = db.hubInfo.contextHub->queryApps(hubId);
+    ALOGD("Sent query for apps to hub %" PRIu32 " with result %" PRIu32, hubId, r);
 }
 
-static void sendQueryForApps() {
+void sendQueryForApps() {
     for (int i = 0; i < db.hubInfo.numHubs; i++ ) {
-        query_hub_for_apps(i);
+        queryHubForApps(db.hubInfo.hubs[i].hubId);
     }
 }
 
-static int return_id(jint id) {
+int returnId(jint id) {
     // Note : This method is not thread safe.
     // id returned is guaranteed to be in use
     if (id >= 0) {
@@ -376,7 +423,7 @@ static int return_id(jint id) {
     return -1;
 }
 
-static jint generate_id() {
+jint generateId() {
     // Note : This method is not thread safe.
     jint retVal = -1;
 
@@ -388,31 +435,28 @@ static jint generate_id() {
     return retVal;
 }
 
-
-static jint add_app_instance(const hub_app_info *appInfo, uint32_t hubHandle,
+jint addAppInstance(const HubAppInfo *appInfo, uint32_t hubHandle,
         jint appInstanceHandle, JNIEnv *env) {
     // Not checking if the apps are indeed distinct
-    app_instance_info_s entry;
+    AppInstanceInfo entry;
     assert(appInfo);
 
-    const char *action =
-        (db.appInstances.count(appInstanceHandle) == 0) ? "Added" : "Updated";
 
     entry.appInfo = *appInfo;
 
     entry.instanceId = appInstanceHandle;
-    entry.truncName = appInfo->app_name.id;
+    entry.truncName = appInfo->appId;
     entry.hubHandle = hubHandle;
-
     db.appInstances[appInstanceHandle] = entry;
-
     // Finally - let the service know of this app instance, to populate
     // the Java cache.
     env->CallIntMethod(db.jniInfo.jContextHubService,
                        db.jniInfo.contextHubServiceAddAppInstance,
-                       hubHandle, entry.instanceId, entry.truncName,
+                       hubHandle, entry.instanceId,
+                       entry.truncName,
                        entry.appInfo.version);
 
+    const char *action = (db.appInstances.count(appInstanceHandle) == 0) ? "Added" : "Updated";
     ALOGI("%s App 0x%" PRIx64 " on hub Handle %" PRId32
           " as appInstance %" PRId32, action, entry.truncName,
           entry.hubHandle, appInstanceHandle);
@@ -420,7 +464,7 @@ static jint add_app_instance(const hub_app_info *appInfo, uint32_t hubHandle,
     return appInstanceHandle;
 }
 
-int delete_app_instance(jint id, JNIEnv *env) {
+int deleteAppInstance(jint id, JNIEnv *env) {
     bool fullyDeleted = true;
 
     if (db.appInstances.count(id)) {
@@ -429,7 +473,7 @@ int delete_app_instance(jint id, JNIEnv *env) {
         ALOGW("Cannot delete App id (%" PRId32 ") from the JNI C++ cache", id);
         fullyDeleted = false;
     }
-    return_id(id);
+    returnId(id);
 
     if ((env == nullptr) ||
         (env->CallIntMethod(db.jniInfo.jContextHubService,
@@ -446,12 +490,12 @@ int delete_app_instance(jint id, JNIEnv *env) {
     return -1;
 }
 
-static int startLoadAppTxn(uint64_t appId, int hubHandle) {
-    app_instance_info_s *txnInfo = (app_instance_info_s *)malloc(sizeof(app_instance_info_s));
-    jint instanceId = generate_id();
+int startLoadAppTxn(uint64_t appId, int hubHandle) {
+    AppInstanceInfo *txnInfo = new AppInstanceInfo();
+    jint instanceId = generateId();
 
     if (!txnInfo || instanceId < 0) {
-        return_id(instanceId);
+        returnId(instanceId);
         free(txnInfo);
         return -1;
     }
@@ -460,12 +504,11 @@ static int startLoadAppTxn(uint64_t appId, int hubHandle) {
     txnInfo->hubHandle = hubHandle;
     txnInfo->instanceId = instanceId;
 
-    txnInfo->appInfo.app_name.id = appId;
-    txnInfo->appInfo.num_mem_ranges = 0;
+    txnInfo->appInfo.appId = appId;
     txnInfo->appInfo.version = -1; // Awaited
 
-    if (addTxn(CONTEXT_HUB_LOAD_APP, txnInfo) != 0) {
-        return_id(instanceId);
+    if (db.txnManager.addTxn(CONTEXT_HUB_LOAD_APP, txnInfo) != 0) {
+        returnId(instanceId);
         free(txnInfo);
         return -1;
     }
@@ -473,8 +516,8 @@ static int startLoadAppTxn(uint64_t appId, int hubHandle) {
     return 0;
 }
 
-static int startUnloadAppTxn(jint appInstanceHandle) {
-    jint *txnData = (jint *) malloc(sizeof(jint));
+int startUnloadAppTxn(jint appInstanceHandle) {
+    jint *txnData = new(jint);
     if (!txnData) {
         ALOGW("Cannot allocate memory to start unload transaction");
         return -1;
@@ -482,7 +525,7 @@ static int startUnloadAppTxn(jint appInstanceHandle) {
 
     *txnData = appInstanceHandle;
 
-    if (addTxn(CONTEXT_HUB_UNLOAD_APP, txnData) != 0) {
+    if (db.txnManager.addTxn(CONTEXT_HUB_UNLOAD_APP, txnData) != 0) {
         free(txnData);
         ALOGW("Cannot start transaction to unload app");
         return -1;
@@ -491,17 +534,21 @@ static int startUnloadAppTxn(jint appInstanceHandle) {
     return 0;
 }
 
-static void initContextHubService() {
-    int err = 0;
-    db.hubInfo.hubs = nullptr;
+void getHubsCb(const ::android::hardware::hidl_vec<ContextHub>& hubs)  {
+    for (size_t i = 0; i < hubs.size(); i++) {
+        db.hubInfo.hubs.push_back(hubs[i]);
+    }
+}
+
+void initContextHubService() {
     db.hubInfo.numHubs = 0;
 
-    err = hw_get_module(CONTEXT_HUB_MODULE_ID,
-                        (hw_module_t const**)(&db.hubInfo.contextHubModule));
+    db.hubInfo.contextHub = IContexthub::getService("context_hub_hal");
 
-    if (err) {
-      ALOGE("** Could not load %s module : err %s", CONTEXT_HUB_MODULE_ID,
-            strerror(-err));
+    if (db.hubInfo.contextHub == nullptr) {
+        ALOGE("Could not load context hub hal");
+    } else {
+        ALOGI("Loaded context hub hal");
     }
 
     // Prep for storing app info
@@ -509,39 +556,46 @@ static void initContextHubService() {
         db.freeIds.push(i);
     }
 
-    initTxnManager();
-    if (db.hubInfo.contextHubModule) {
-        int retNumHubs = db.hubInfo.contextHubModule->get_hubs(db.hubInfo.contextHubModule,
-                                                                 &db.hubInfo.hubs);
+    if (db.hubInfo.contextHub != nullptr) {
+        std::function<void(const ::android::hardware::hidl_vec<ContextHub>& hubs)> f = getHubsCb;
+        if(!db.hubInfo.contextHub->getHubs(f).isOk()) {
+            ALOGW("GetHubs Failed! transport error.");
+            return;
+        };
+
+        int retNumHubs = db.hubInfo.hubs.size();
         ALOGD("ContextHubModule returned %d hubs ", retNumHubs);
         db.hubInfo.numHubs = retNumHubs;
 
-        if (db.hubInfo.numHubs > 0) {
-            db.hubInfo.numHubs = retNumHubs;
-            db.hubInfo.cookies = (uint32_t *)malloc(sizeof(uint32_t) * db.hubInfo.numHubs);
+        for (int i = 0; i < db.hubInfo.numHubs; i++) {
+            ALOGI("Subscribing to hubHandle %d", i);
 
-            if (!db.hubInfo.cookies) {
-                ALOGW("Ran out of memory allocating cookies, bailing");
-                return;
-            }
-
-            for (int i = 0; i < db.hubInfo.numHubs; i++) {
-                db.hubInfo.cookies[i] = db.hubInfo.hubs[i].hub_id;
-                ALOGI("Subscribing to hubHandle %d with OS App name %" PRIu64, i, db.hubInfo.hubs[i].os_app_name.id);
-                if (db.hubInfo.contextHubModule->subscribe_messages(db.hubInfo.hubs[i].hub_id,
-                                                                    context_hub_callback,
-                                                                    &db.hubInfo.cookies[i]) == 0) {
-                }
-            }
+            ContextHubServiceCallback *callBackPtr =
+                new ContextHubServiceCallback(db.hubInfo.hubs[i].hubId);
+            db.hubInfo.contextHub->registerCallback(db.hubInfo.hubs[i].hubId,
+                                                    callBackPtr);
+            db.regCallBacks.push_back(callBackPtr);
         }
 
         sendQueryForApps();
+
     } else {
         ALOGW("No Context Hub Module present");
     }
 }
 
-static int onMessageReceipt(uint32_t *header, size_t headerLen, char *msg, size_t msgLen) {
+void onHubReset(uint32_t hubId) {
+    TransactionResult result = TransactionResult::SUCCESS;
+    db.txnManager.closeTxn();
+    // TODO : Expose this through an api
+    passOnOsResponse(hubId, CONTEXT_HUB_OS_REBOOT, result, nullptr, 0);
+    queryHubForApps(hubId);
+}
+
+int onMessageReceipt(const uint32_t *header,
+                     size_t headerLen,
+                     const char *msg,
+                     size_t msgLen) {
     JNIEnv *env;
 
     if ((db.jniInfo.vm)->AttachCurrentThread(&env, nullptr) != JNI_OK) {
@@ -560,27 +614,27 @@ static int onMessageReceipt(uint32_t *header, size_t headerLen, char *msg, size_
         return -1;
     }
 
-    env->SetByteArrayRegion(jmsg, 0, msgLen, (jbyte *)msg);
-    env->SetIntArrayRegion(jheader, 0, headerLen, (jint *)header);
+    env->SetByteArrayRegion(jmsg, 0, msgLen, reinterpret_cast<const jbyte *>(msg));
+    env->SetIntArrayRegion(jheader, 0, headerLen, reinterpret_cast<const jint *>(header));
 
     int ret = (env->CallIntMethod(db.jniInfo.jContextHubService,
-                          db.jniInfo.contextHubServiceMsgReceiptCallback,
-                          jheader, jmsg) != 0);
+                                  db.jniInfo.contextHubServiceMsgReceiptCallback,
+                                  jheader,
+                                  jmsg) != 0);
     env->DeleteLocalRef(jmsg);
     env->DeleteLocalRef(jheader);
 
     return ret;
 }
 
-int handle_query_apps_response(const uint8_t *msg, int msgLen,
+int handleQueryAppsResponse(const std::vector<HubAppInfo> apps,
                                uint32_t hubHandle) {
     JNIEnv *env;
     if ((db.jniInfo.vm)->AttachCurrentThread(&env, nullptr) != JNI_OK) {
             return -1;
     }
 
-    int numApps = msgLen / sizeof(hub_app_info);
-    const hub_app_info *unalignedInfoAddr = (const hub_app_info*)msg;
+    int numApps = apps.size();
 
     // We use this information to sync our JNI and Java caches of nanoapp info.
     // We want to accomplish two things here:
@@ -604,52 +658,50 @@ int handle_query_apps_response(const uint8_t *msg, int msgLen,
     // over just the JNI cache.
     auto end = db.appInstances.end();
     for (auto current = db.appInstances.begin(); current != end; ) {
-        app_instance_info_s cache_entry = current->second;
+        AppInstanceInfo cacheEntry = current->second;
         // We perform our iteration here because if we call
         // delete_app_instance() below, it will erase() this entry.
         current++;
         bool entryIsStale = true;
         for (int i = 0; i < numApps; i++) {
-            // We use memcmp since this could be unaligned.
-            if (memcmp(&unalignedInfoAddr[i].app_name.id,
-                       &cache_entry.appInfo.app_name.id,
-                       sizeof(cache_entry.appInfo.app_name.id)) == 0) {
+            if (apps[i].appId == cacheEntry.appInfo.appId) {
                 // We found a match; this entry is current.
                 entryIsStale = false;
                 break;
             }
         }
+
         if (entryIsStale) {
-            delete_app_instance(cache_entry.instanceId, env);
+            deleteAppInstance(cacheEntry.instanceId, env);
         }
     }
 
     // (2).  Update our caches with the latest.
     for (int i = 0; i < numApps; i++) {
-        hub_app_info query_info;
-        memcpy(&query_info, &unalignedInfoAddr[i], sizeof(query_info));
         // We will only have one instance of the app
         // TODO : Change this logic once we support multiple instances of the same app
-        jint appInstance = get_app_instance_for_app_id(query_info.app_name.id);
+        jint appInstance = getAppInstanceForAppId(apps[i].appId);
         if (appInstance == -1) {
             // This is a previously unknown app, let's allocate an "id" for it.
-            appInstance = generate_id();
+            appInstance = generateId();
         }
-        add_app_instance(&query_info, hubHandle, appInstance, env);
+        addAppInstance(&apps[i], hubHandle, appInstance, env);
     }
-
     return 0;
 }
 
 // TODO(b/30807327): Do not use raw bytes for additional data.  Use the
 //     JNI interfaces for the appropriate types.
-static void passOnOsResponse(uint32_t hubHandle, uint32_t msgType,
-                             status_response_t *rsp, int8_t *additionalData,
-                             size_t additionalDataLen) {
+void passOnOsResponse(uint32_t hubHandle,
+                      uint32_t msgType,
+                      TransactionResult result,
+                      const int8_t *additionalData,
+                      size_t additionalDataLen) {
     JNIEnv *env;
 
     if ((db.jniInfo.vm)->AttachCurrentThread(&env, nullptr) != JNI_OK) {
-        ALOGW("Cannot latch to JNI env, dropping OS response %" PRIu32, msgType);
+        ALOGW("Cannot latch to JNI env, dropping OS response %" PRIu32,
+              msgType);
         return;
     }
 
@@ -679,25 +731,7 @@ static void passOnOsResponse(uint32_t hubHandle, uint32_t msgType,
     // a naive cast.  Further, we can log when we're losing part of the value.
     // TODO(b/30918279): Don't truncate this result.
     int8_t truncatedResult;
-    bool neededToTruncate;
-    if (rsp->result < INT8_MIN) {
-        neededToTruncate = true;
-        truncatedResult = INT8_MIN;
-    } else if (rsp->result > INT8_MAX) {
-        neededToTruncate = true;
-        truncatedResult = INT8_MAX;
-    } else {
-        neededToTruncate = false;
-        // Since this value fits within an int8_t, this is a safe cast which
-        // won't change the value or sign.
-        truncatedResult = static_cast<int8_t>(rsp->result);
-    }
-    if (neededToTruncate) {
-        ALOGW("Response from Context Hub truncated.  Value was %" PRId32
-              ", but giving Java layer %" PRId8,
-              rsp->result, (int)truncatedResult);
-    }
-
+    truncatedResult = static_cast<int8_t>(result);
     msg[0] = truncatedResult;
 
     if (additionalData) {
@@ -707,16 +741,19 @@ static void passOnOsResponse(uint32_t hubHandle, uint32_t msgType,
     jbyteArray jmsg = env->NewByteArray(msgLen);
     jintArray jheader = env->NewIntArray(arraysize(header));
 
-    env->SetByteArrayRegion(jmsg, 0, msgLen, (jbyte *)msg);
-    env->SetIntArrayRegion(jheader, 0, arraysize(header), (jint *)header);
+    env->SetByteArrayRegion(jmsg, 0, msgLen, reinterpret_cast<jbyte *>(msg));
+    env->SetIntArrayRegion(jheader, 0, arraysize(header), reinterpret_cast<jint *>(header));
 
     ALOGI("Passing msg type %" PRIu32 " from app %" PRIu32 " from hub %" PRIu32,
-          header[HEADER_FIELD_MSG_TYPE], header[HEADER_FIELD_APP_INSTANCE],
+          header[HEADER_FIELD_MSG_TYPE],
+          header[HEADER_FIELD_APP_INSTANCE],
           header[HEADER_FIELD_HUB_HANDLE]);
 
     env->CallIntMethod(db.jniInfo.jContextHubService,
                        db.jniInfo.contextHubServiceMsgReceiptCallback,
-                       jheader, jmsg);
+                       jheader,
+                       jmsg);
+
     env->DeleteLocalRef(jmsg);
     env->DeleteLocalRef(jheader);
 
@@ -725,9 +762,9 @@ static void passOnOsResponse(uint32_t hubHandle, uint32_t msgType,
 
 void closeUnloadTxn(bool success) {
     void *txnData = nullptr;
-    hub_messages_e txnId;
+    HubMessageType txnId;
 
-    if (success && fetchTxnData(&txnId, &txnData) == 0 &&
+    if (success && db.txnManager.fetchTxnData(&txnId, &txnData) == 0 &&
         txnId == CONTEXT_HUB_UNLOAD_APP) {
         JNIEnv *env;
         if ((db.jniInfo.vm)->AttachCurrentThread(&env, nullptr) != JNI_OK) {
@@ -735,31 +772,33 @@ void closeUnloadTxn(bool success) {
             env = nullptr;
         }
         jint handle = *reinterpret_cast<jint *>(txnData);
-        delete_app_instance(handle, env);
+        deleteAppInstance(handle, env);
     } else {
-        ALOGW("Could not unload the app successfully ! success %d, txnData %p", success, txnData);
+        ALOGW("Could not unload the app successfully ! success %d, txnData %p",
+              success,
+              txnData);
     }
 
-    closeTxn();
+    db.txnManager.closeTxn();
 }
 
-static bool closeLoadTxn(bool success, jint *appInstanceHandle) {
+bool closeLoadTxn(bool success, jint *appInstanceHandle) {
     void *txnData;
-    hub_messages_e txnId;
+    HubMessageType txnId;
 
-    if (success && fetchTxnData(&txnId, &txnData) == 0 &&
+    if (success && db.txnManager.fetchTxnData(&txnId, &txnData) == 0 &&
         txnId == CONTEXT_HUB_LOAD_APP) {
-        app_instance_info_s *info = (app_instance_info_s *)txnData;
+        AppInstanceInfo *info = static_cast<AppInstanceInfo *>(txnData);
         *appInstanceHandle = info->instanceId;
 
         JNIEnv *env;
         if ((db.jniInfo.vm)->AttachCurrentThread(&env, nullptr) == JNI_OK) {
-            add_app_instance(&info->appInfo, info->hubHandle, info->instanceId, env);
+            addAppInstance(&info->appInfo, info->hubHandle, info->instanceId, env);
         } else {
             ALOGW("Could not attach to JVM !");
             success = false;
         }
-        // While we just called add_app_instance above, our info->appInfo was
+        // While we just called addAppInstance above, our info->appInfo was
         // incomplete (for example, the 'version' is hardcoded to -1).  So we
         // trigger an additional query to the CHRE, so we'll be able to get
         // all the app "info", and have our JNI and Java caches with the
@@ -771,162 +810,11 @@ static bool closeLoadTxn(bool success, jint *appInstanceHandle) {
         success = false;
     }
 
-    closeTxn();
+    db.txnManager.closeTxn();
     return success;
 }
 
-static bool isValidOsStatus(const uint8_t *msg, size_t msgLen,
-                            status_response_t *rsp) {
-    // Workaround a bug in some HALs
-    if (msgLen == 1) {
-        rsp->result = msg[0];
-        return true;
-    }
-
-    if (!msg || msgLen != sizeof(*rsp)) {
-        ALOGW("Received invalid response %p of size %zu", msg, msgLen);
-        return false;
-    }
-
-    memcpy(rsp, msg, sizeof(*rsp));
-
-    // No sanity checks on return values
-    return true;
-}
-
-static int handle_os_message(uint32_t msgType, uint32_t hubHandle,
-                             const uint8_t *msg, int msgLen) {
-    int retVal = -1;
-
-    ALOGD("Rcd OS message from hubHandle %" PRIu32 " type %" PRIu32 " length %d",
-          hubHandle, msgType, msgLen);
-
-    struct status_response_t rsp;
-
-    switch(msgType) {
-
-      case CONTEXT_HUB_APPS_ENABLE:
-      case CONTEXT_HUB_APPS_DISABLE:
-      case CONTEXT_HUB_LOAD_APP:
-      case CONTEXT_HUB_UNLOAD_APP:
-          if (isValidOsStatus(msg, msgLen, &rsp)) {
-              if (msgType == CONTEXT_HUB_LOAD_APP) {
-                  jint appInstanceHandle = INVALID_APP_ID;
-                  bool appRunningOnHub = (rsp.result == 0);
-                  if (!(closeLoadTxn(appRunningOnHub, &appInstanceHandle))) {
-                      if (appRunningOnHub) {
-                          // Now we're in an odd situation.  Our nanoapp
-                          // is up and running on the Context Hub.  However,
-                          // something went wrong in our Service code so that
-                          // we're not able to properly track this nanoapp
-                          // in our Service code.  If we tell the Java layer
-                          // things are good, it's a lie because the handle
-                          // we give them will fail when used with the Service.
-                          // If we tell the Java layer this failed, it's kind
-                          // of a lie as well, since this nanoapp is running.
-                          //
-                          // We leave a more robust fix for later, and for
-                          // now just tell the user things have failed.
-                          //
-                          // TODO(b/30835981): Make this situation better.
-                          rsp.result = -1;
-                      }
-                  }
-                  passOnOsResponse(hubHandle, msgType, &rsp, (int8_t *)(&appInstanceHandle),
-                                   sizeof(appInstanceHandle));
-              } else if (msgType == CONTEXT_HUB_UNLOAD_APP) {
-                  closeUnloadTxn(rsp.result == 0);
-                  passOnOsResponse(hubHandle, msgType, &rsp, nullptr, 0);
-              } else {
-                  passOnOsResponse(hubHandle, msgType, &rsp, nullptr, 0);
-              }
-              retVal = 0;
-          }
-          break;
-
-      case CONTEXT_HUB_QUERY_APPS:
-          rsp.result = 0;
-          retVal = handle_query_apps_response(msg, msgLen, hubHandle);
-          passOnOsResponse(hubHandle, msgType, &rsp, nullptr, 0);
-          break;
-
-      case CONTEXT_HUB_QUERY_MEMORY:
-          // Deferring this use
-          retVal = 0;
-          break;
-
-      case CONTEXT_HUB_OS_REBOOT:
-          if (isValidOsStatus(msg, msgLen, &rsp)) {
-              rsp.result = 0;
-              ALOGW("Context Hub handle %d restarted", hubHandle);
-              closeTxn();
-              passOnOsResponse(hubHandle, msgType, &rsp, nullptr, 0);
-              query_hub_for_apps(hubHandle);
-              retVal = 0;
-          }
-          break;
-
-      default:
-          retVal = -1;
-          break;
-    }
-
-    return retVal;
-}
-
-static bool sanity_check_cookie(void *cookie, uint32_t hub_id) {
-    int *ptr = (int *)cookie;
-
-    if (!ptr || *ptr >= db.hubInfo.numHubs) {
-        return false;
-    }
-
-    if (db.hubInfo.hubs[*ptr].hub_id != hub_id) {
-        return false;
-    } else {
-        return true;
-    }
-}
-
-
-int context_hub_callback(uint32_t hubId,
-                         const struct hub_message_t *msg,
-                         void *cookie) {
-    if (!msg) {
-        ALOGW("NULL message");
-        return -1;
-    }
-    if (!sanity_check_cookie(cookie, hubId)) {
-        ALOGW("Incorrect cookie %" PRId32 " for cookie %p! Bailing",
-              hubId, cookie);
-
-        return -1;
-    }
-
-
-    uint32_t messageType = msg->message_type;
-    uint32_t hubHandle = *(uint32_t*) cookie;
-
-    if (messageType < CONTEXT_HUB_TYPE_PRIVATE_MSG_BASE) {
-        handle_os_message(messageType, hubHandle, (uint8_t*) msg->message, msg->message_len);
-    } else {
-        jint appHandle = get_app_instance_for_app_id(msg->app_name.id);
-        if (appHandle < 0) {
-            ALOGE("Filtering out message due to invalid App Instance.");
-        } else {
-            uint32_t msgHeader[MSG_HEADER_SIZE] = {};
-            msgHeader[HEADER_FIELD_MSG_TYPE] = messageType;
-            msgHeader[HEADER_FIELD_HUB_HANDLE] = hubHandle;
-            msgHeader[HEADER_FIELD_APP_INSTANCE] = appHandle;
-            onMessageReceipt(msgHeader, MSG_HEADER_SIZE, (char*) msg->message, msg->message_len);
-        }
-    }
-
-    return 0;
-}
-
-static int init_jni(JNIEnv *env, jobject instance) {
-
+int initJni(JNIEnv *env, jobject instance) {
     if (env->GetJavaVM(&db.jniInfo.vm) != JNI_OK) {
         return -1;
     }
@@ -935,7 +823,6 @@ static int init_jni(JNIEnv *env, jobject instance) {
 
     db.jniInfo.contextHubInfoClass =
             env->FindClass("android/hardware/location/ContextHubInfo");
-
     db.jniInfo.contextHubServiceClass =
             env->FindClass("com/android/server/location/ContextHubService");
 
@@ -947,112 +834,124 @@ static int init_jni(JNIEnv *env, jobject instance) {
     db.jniInfo.contextHubInfoSetId =
             env->GetMethodID(db.jniInfo.contextHubInfoClass, "setId", "(I)V");
     db.jniInfo.contextHubInfoSetName =
-            env->GetMethodID(db.jniInfo.contextHubInfoClass, "setName",
-                                "(Ljava/lang/String;)V");
-
+            env->GetMethodID(db.jniInfo.contextHubInfoClass, "setName", "(Ljava/lang/String;)V");
     db.jniInfo.contextHubInfoSetVendor =
             env->GetMethodID(db.jniInfo.contextHubInfoClass,
-                                "setVendor", "(Ljava/lang/String;)V");
+                             "setVendor",
+                             "(Ljava/lang/String;)V");
     db.jniInfo.contextHubInfoSetToolchain =
             env->GetMethodID(db.jniInfo.contextHubInfoClass,
-                                "setToolchain", "(Ljava/lang/String;)V");
+                             "setToolchain",
+                             "(Ljava/lang/String;)V");
     db.jniInfo.contextHubInfoSetPlatformVersion =
             env->GetMethodID(db.jniInfo.contextHubInfoClass,
-                                "setPlatformVersion", "(I)V");
+                             "setPlatformVersion",
+                             "(I)V");
     db.jniInfo.contextHubInfoSetStaticSwVersion =
             env->GetMethodID(db.jniInfo.contextHubInfoClass,
-                                "setStaticSwVersion", "(I)V");
+                             "setStaticSwVersion",
+                             "(I)V");
     db.jniInfo.contextHubInfoSetToolchainVersion =
             env->GetMethodID(db.jniInfo.contextHubInfoClass,
-                                "setToolchainVersion", "(I)V");
+                             "setToolchainVersion",
+                             "(I)V");
     db.jniInfo.contextHubInfoSetPeakMips =
             env->GetMethodID(db.jniInfo.contextHubInfoClass,
-                                "setPeakMips", "(F)V");
+                             "setPeakMips",
+                             "(F)V");
     db.jniInfo.contextHubInfoSetStoppedPowerDrawMw =
             env->GetMethodID(db.jniInfo.contextHubInfoClass,
-                                "setStoppedPowerDrawMw", "(F)V");
+                             "setStoppedPowerDrawMw",
+                             "(F)V");
     db.jniInfo.contextHubInfoSetSleepPowerDrawMw =
             env->GetMethodID(db.jniInfo.contextHubInfoClass,
-                                "setSleepPowerDrawMw", "(F)V");
+                             "setSleepPowerDrawMw",
+                             "(F)V");
     db.jniInfo.contextHubInfoSetPeakPowerDrawMw =
             env->GetMethodID(db.jniInfo.contextHubInfoClass,
-                                "setPeakPowerDrawMw", "(F)V");
+                             "setPeakPowerDrawMw",
+                             "(F)V");
     db.jniInfo.contextHubInfoSetSupportedSensors =
             env->GetMethodID(db.jniInfo.contextHubInfoClass,
-                                "setSupportedSensors", "([I)V");
+                             "setSupportedSensors",
+                             "([I)V");
     db.jniInfo.contextHubInfoSetMemoryRegions =
             env->GetMethodID(db.jniInfo.contextHubInfoClass,
-                                "setMemoryRegions", "([Landroid/hardware/location/MemoryRegion;)V");
+                             "setMemoryRegions",
+                             "([Landroid/hardware/location/MemoryRegion;)V");
     db.jniInfo.contextHubInfoSetMaxPacketLenBytes =
              env->GetMethodID(db.jniInfo.contextHubInfoClass,
-                                "setMaxPacketLenBytes", "(I)V");
-
-
+                              "setMaxPacketLenBytes",
+                              "(I)V");
     db.jniInfo.contextHubServiceMsgReceiptCallback =
-            env->GetMethodID(db.jniInfo.contextHubServiceClass, "onMessageReceipt",
-                               "([I[B)I");
+            env->GetMethodID(db.jniInfo.contextHubServiceClass,
+                             "onMessageReceipt",
+                             "([I[B)I");
     db.jniInfo.contextHubInfoSetName =
-            env->GetMethodID(db.jniInfo.contextHubInfoClass, "setName",
-            "(Ljava/lang/String;)V");
-
+            env->GetMethodID(db.jniInfo.contextHubInfoClass,
+                             "setName",
+                             "(Ljava/lang/String;)V");
     db.jniInfo.contextHubServiceAddAppInstance =
                  env->GetMethodID(db.jniInfo.contextHubServiceClass,
-                                    "addAppInstance", "(IIJI)I");
-
+                                  "addAppInstance",
+                                  "(IIJI)I");
     db.jniInfo.contextHubServiceDeleteAppInstance =
                  env->GetMethodID(db.jniInfo.contextHubServiceClass,
-                                    "deleteAppInstance", "(I)I");
+                                  "deleteAppInstance",
+                                  "(I)I");
 
     return 0;
 }
 
-static jobject constructJContextHubInfo(JNIEnv *env, const struct context_hub_t *hub) {
+jobject constructJContextHubInfo(JNIEnv *env, const ContextHub &hub) {
     jstring jstrBuf;
     jintArray jintBuf;
     jobjectArray jmemBuf;
 
     jobject jHub = env->NewObject(db.jniInfo.contextHubInfoClass,
                                   db.jniInfo.contextHubInfoCtor);
-    env->CallVoidMethod(jHub, db.jniInfo.contextHubInfoSetId, hub->hub_id);
+    env->CallVoidMethod(jHub, db.jniInfo.contextHubInfoSetId, hub.hubId);
 
-    jstrBuf = env->NewStringUTF(hub->name);
+    jstrBuf = env->NewStringUTF(hub.name);
     env->CallVoidMethod(jHub, db.jniInfo.contextHubInfoSetName, jstrBuf);
     env->DeleteLocalRef(jstrBuf);
 
-    jstrBuf = env->NewStringUTF(hub->vendor);
+    jstrBuf = env->NewStringUTF(hub.vendor);
     env->CallVoidMethod(jHub, db.jniInfo.contextHubInfoSetVendor, jstrBuf);
     env->DeleteLocalRef(jstrBuf);
 
-    jstrBuf = env->NewStringUTF(hub->toolchain);
+    jstrBuf = env->NewStringUTF(hub.toolchain);
     env->CallVoidMethod(jHub, db.jniInfo.contextHubInfoSetToolchain, jstrBuf);
     env->DeleteLocalRef(jstrBuf);
 
-    env->CallVoidMethod(jHub, db.jniInfo.contextHubInfoSetPlatformVersion, hub->platform_version);
-    env->CallVoidMethod(jHub, db.jniInfo.contextHubInfoSetToolchainVersion, hub->toolchain_version);
-    env->CallVoidMethod(jHub, db.jniInfo.contextHubInfoSetPeakMips, hub->peak_mips);
+    env->CallVoidMethod(jHub, db.jniInfo.contextHubInfoSetPlatformVersion, hub.platformVersion);
+    env->CallVoidMethod(jHub, db.jniInfo.contextHubInfoSetToolchainVersion, hub.toolchainVersion);
+    env->CallVoidMethod(jHub, db.jniInfo.contextHubInfoSetPeakMips, hub.peakMips);
     env->CallVoidMethod(jHub, db.jniInfo.contextHubInfoSetStoppedPowerDrawMw,
-                        hub->stopped_power_draw_mw);
+                        hub.stoppedPowerDrawMw);
     env->CallVoidMethod(jHub, db.jniInfo.contextHubInfoSetSleepPowerDrawMw,
-                        hub->sleep_power_draw_mw);
+                        hub.sleepPowerDrawMw);
     env->CallVoidMethod(jHub, db.jniInfo.contextHubInfoSetPeakPowerDrawMw,
-                        hub->peak_power_draw_mw);
+                        hub.peakPowerDrawMw);
     env->CallVoidMethod(jHub, db.jniInfo.contextHubInfoSetMaxPacketLenBytes,
-                        hub->max_supported_msg_len);
+                        hub.maxSupportedMsgLen);
 
 
-    jintBuf = env->NewIntArray(hub->num_connected_sensors);
-    int *connectedSensors = new int[hub->num_connected_sensors];
+    jintBuf = env->NewIntArray(hub.connectedSensors.size());
+    int *connectedSensors = new int[hub.connectedSensors.size()];
 
     if (!connectedSensors) {
       ALOGW("Cannot allocate memory! Unexpected");
       assert(false);
     } else {
-      for (unsigned int i = 0; i < hub->num_connected_sensors; i++) {
-        connectedSensors[i] = hub->connected_sensors[i].sensor_id;
+      for (unsigned int i = 0; i < hub.connectedSensors.size(); i++) {
+        // TODO :: Populate connected sensors.
+        //connectedSensors[i] = hub.connectedSensors[i].sensorType;
+        connectedSensors[i] = 0;
       }
     }
 
-    env->SetIntArrayRegion(jintBuf, 0, hub->num_connected_sensors,
+    env->SetIntArrayRegion(jintBuf, 0, hub.connectedSensors.size(),
                            connectedSensors);
 
     env->CallVoidMethod(jHub, db.jniInfo.contextHubInfoSetSupportedSensors, jintBuf);
@@ -1069,34 +968,39 @@ static jobject constructJContextHubInfo(JNIEnv *env, const struct context_hub_t 
     return jHub;
 }
 
-static jobjectArray nativeInitialize(JNIEnv *env, jobject instance)
-{
+jobjectArray nativeInitialize(JNIEnv *env, jobject instance) {
     jobject hub;
     jobjectArray retArray;
 
-    if (init_jni(env, instance) < 0) {
+    if (initJni(env, instance) < 0) {
         return nullptr;
     }
 
     initContextHubService();
 
     if (db.hubInfo.numHubs > 1) {
-      ALOGW("Clamping the number of hubs to 1");
-      db.hubInfo.numHubs = 1;
+        ALOGW("Clamping the number of hubs to 1");
+        db.hubInfo.numHubs = 1;
     }
 
     retArray = env->NewObjectArray(db.hubInfo.numHubs, db.jniInfo.contextHubInfoClass, nullptr);
 
     for(int i = 0; i < db.hubInfo.numHubs; i++) {
-        hub = constructJContextHubInfo(env, &db.hubInfo.hubs[i]);
+        hub = constructJContextHubInfo(env, db.hubInfo.hubs[i]);
         env->SetObjectArrayElement(retArray, i, hub);
     }
 
     return retArray;
 }
 
-static jint nativeSendMessage(JNIEnv *env, jobject instance, jintArray header_,
-                              jbyteArray data_) {
+jint nativeSendMessage(JNIEnv *env,
+                       jobject instance,
+                       jintArray header_,
+                       jbyteArray data_) {
+    // With the new binderized HAL definition, this function can be made much simpler.
+    // All the magic can be removed. This is not however needed for the default implementation
+    // TODO :: Change the JNI interface to conform to the new HAL interface and clean up this
+    // function
     jint retVal = -1; // Default to failure
 
     jint *header = env->GetIntArrayElements(header_, 0);
@@ -1116,7 +1020,7 @@ static jint nativeSendMessage(JNIEnv *env, jobject instance, jintArray header_,
     uint64_t appId;
 
     if (msgType == CONTEXT_HUB_UNLOAD_APP) {
-        hubHandle = get_hub_handle_for_app_instance(appInstanceHandle);
+        hubHandle = getHubHandleForAppInstance(appInstanceHandle);
     } else if (msgType == CONTEXT_HUB_LOAD_APP) {
         if (numHeaderElements < MSG_HEADER_SIZE_LOAD_APP) {
             return -1;
@@ -1138,12 +1042,13 @@ static jint nativeSendMessage(JNIEnv *env, jobject instance, jintArray header_,
     if (msgType == CONTEXT_HUB_LOAD_APP ||
         msgType == CONTEXT_HUB_UNLOAD_APP) {
 
-        if (isTxnPending()) {
+        db.txnManager.closeAnyStaleTxns();
+
+        if (db.txnManager.isTxnPending()) {
+            // TODO : There is a race conditio
             ALOGW("Cannot load or unload app while a transaction is pending !");
             return -1;
-        }
-
-        if (msgType == CONTEXT_HUB_LOAD_APP) {
+        } else if (msgType == CONTEXT_HUB_LOAD_APP) {
             if (startLoadAppTxn(appId, hubHandle) != 0) {
                 ALOGW("Cannot Start Load Transaction");
                 return -1;
@@ -1156,40 +1061,54 @@ static jint nativeSendMessage(JNIEnv *env, jobject instance, jintArray header_,
         }
     }
 
-    bool setAddressSuccess = false;
-    hub_message_t msg;
-
-    msg.message_type = msgType;
+    Result result;
 
     if (msgType == CONTEXT_HUB_UNLOAD_APP) {
-        msg.message_len = sizeof(db.appInstances[appInstanceHandle].appInfo.app_name);
-        msg.message = &db.appInstances[appInstanceHandle].appInfo.app_name;
-        setAddressSuccess = (set_os_app_as_destination(&msg, hubHandle) == 0);
-        hubId = get_hub_id_for_hub_handle(hubHandle);
+        hubId = getHubIdForHubHandle(hubHandle);
+        ALOGW("Calling UnLoad NanoApp for app %" PRIx64 " on hub %d",
+              db.appInstances[appInstanceHandle].appInfo.appId,
+              hubId);
+        result = db.hubInfo.contextHub->unloadNanoApp(
+                hubId, db.appInstances[appInstanceHandle].appInfo.appId, CONTEXT_HUB_UNLOAD_APP);
     } else {
-        msg.message_len = dataBufferLength;
-        msg.message = data;
-
         if (header[HEADER_FIELD_APP_INSTANCE] == OS_APP_ID) {
-            setAddressSuccess = (set_os_app_as_destination(&msg, hubHandle) == 0);
-            hubId = get_hub_id_for_hub_handle(hubHandle);
+            if (msgType == CONTEXT_HUB_LOAD_APP) {
+                std::vector<uint8_t> dataVector(reinterpret_cast<uint8_t *>(data),
+                                                reinterpret_cast<uint8_t *>(data + dataBufferLength));
+                hubId = getHubIdForHubHandle(hubHandle);
+                ALOGW("Calling Load NanoApp on hub %d", hubId);
+                result = db.hubInfo.contextHub->loadNanoApp(hubId,
+                                                            dataVector,
+                                                            CONTEXT_HUB_LOAD_APP);
+            } else {
+                ALOGD("Dropping OS addresses message of type - %" PRIu32, msgType);
+                result = Result::BAD_PARAMS;
+            }
         } else {
-            setAddressSuccess = (set_dest_app(&msg, header[HEADER_FIELD_APP_INSTANCE]) == 0);
-            hubId = get_hub_id_for_app_instance(header[HEADER_FIELD_APP_INSTANCE]);
+
+            appId = getAppIdForAppInstance(header[HEADER_FIELD_APP_INSTANCE]);
+            hubId = getHubIdForAppInstance(header[HEADER_FIELD_APP_INSTANCE]);
+
+            if (appId != static_cast<uint64_t>(INVALID_APP_ID) && hubId >= 0) {
+                ContextHubMsg msg;
+                msg.appName = appId;
+                msg.msgType = msgType;
+                msg.msg.setToExternal((unsigned char *)data, dataBufferLength);
+
+                ALOGW("Sending msg of type %" PRIu32 " len %u to app %" PRIx64 " on hub %d",
+                       msgType,
+                       dataBufferLength,
+                       appId,
+                       hubId);
+                result = db.hubInfo.contextHub->sendMessageToHub(hubId, msg);
+            } else {
+                ALOGD("Cannot find application instance %u", header[HEADER_FIELD_APP_INSTANCE]);
+                result = Result::BAD_PARAMS;
+            }
         }
     }
 
-    if (setAddressSuccess && hubId >= 0) {
-        retVal = db.hubInfo.contextHubModule->send_message(hubId, &msg);
-    } else {
-      ALOGD("Could not find app instance %" PRId32 " on hubHandle %" PRId32
-            ", setAddress %d",
-            header[HEADER_FIELD_APP_INSTANCE],
-            header[HEADER_FIELD_HUB_HANDLE],
-            (int)setAddressSuccess);
-    }
-
-    if (retVal != 0) {
+    if (result != Result::OK) {
         ALOGD("Send Message failure - %d", retVal);
         if (msgType == CONTEXT_HUB_LOAD_APP) {
             jint ignored;
@@ -1197,6 +1116,8 @@ static jint nativeSendMessage(JNIEnv *env, jobject instance, jintArray header_,
         } else if (msgType == CONTEXT_HUB_UNLOAD_APP) {
             closeUnloadTxn(false);
         }
+    } else {
+        retVal = 0;
     }
 
     env->ReleaseIntArrayElements(header_, header, 0);
@@ -1207,13 +1128,13 @@ static jint nativeSendMessage(JNIEnv *env, jobject instance, jintArray header_,
 
 //--------------------------------------------------------------------------------------------------
 //
-static const JNINativeMethod gContextHubServiceMethods[] = {
+const JNINativeMethod gContextHubServiceMethods[] = {
     {"nativeInitialize",
-             "()[Landroid/hardware/location/ContextHubInfo;",
-             (void*)nativeInitialize },
+            "()[Landroid/hardware/location/ContextHubInfo;",
+            reinterpret_cast<void*>(nativeInitialize)},
     {"nativeSendMessage",
             "([I[B)I",
-            (void*)nativeSendMessage }
+            reinterpret_cast<void*>(nativeSendMessage)}
 };
 
 int register_android_server_location_ContextHubService(JNIEnv *env)
