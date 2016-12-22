@@ -319,9 +319,9 @@ static status_t makeFileResources(Bundle* bundle, const sp<AaptAssets>& assets,
                     || (*str >= 'A' && *str <= 'Z')
                     || (*str >= '0' && *str <= '9')
                     || *str == '_' || *str == '.')) {
-                fprintf(stderr, "%s: Invalid file name: must contain only [a-zA-Z0-9_.]\n",
+                fprintf(stderr, "%s: Invalid file name: must contain only [a-zA-Z0-9_.]. Ignoring...\n",
                         it.getPath().string());
-                hasErrors = true;
+                //hasErrors = true;
             }
             str++;
         }
@@ -550,10 +550,10 @@ static int validateAttr(const String8& path, const ResTable& table,
                     p++;
                 }
                 if (!okay) {
-                    fprintf(stderr, "%s:%d: Tag <%s> attribute %s has invalid character '%c'.\n",
+                    fprintf(stderr, "%s:%d: Tag <%s> attribute %s has invalid character '%c'. Ignoring...\n",
                             path.string(), parser.getLineNumber(),
                             String8(parser.getElementName(&len)).string(), attr, (char)str[i]);
-                    return (int)i;
+                    return ATTR_OKAY;
                 }
             }
         }
