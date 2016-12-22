@@ -4398,7 +4398,7 @@ public final class ViewRootImpl implements ViewParent,
                     ? focused.keyboardNavigationClusterSearch(direction)
                     : keyboardNavigationClusterSearch(null, direction);
 
-            if (cluster != null && cluster.requestFocus()) {
+            if (cluster != null && cluster.restoreLastFocus()) {
                 return true;
             }
 

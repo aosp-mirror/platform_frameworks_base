@@ -6106,6 +6106,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             if (mParent != null) {
                 mParent.requestChildFocus(this, this);
+                if (!isKeyboardNavigationCluster() && mParent instanceof ViewGroup) {
+                    ((ViewGroup) mParent).saveFocus();
+                }
             }
 
             if (mAttachInfo != null) {
@@ -9438,6 +9441,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public final boolean requestFocus() {
         return requestFocus(View.FOCUS_DOWN);
+    }
+
+    /**
+     * Gives focus to the last focused view in the view hierarchy that has this view as a root.
+     * If the last focused view cannot be found, fall back to calling {@link #requestFocus()}.
+     * Nested keyboard navigation clusters are excluded from the hierarchy considered for saving the
+     * last focus.
+     *
+     * @return Whether this view or one of its descendants actually took focus.
+     */
+    public boolean restoreLastFocus() {
+        return requestFocus();
     }
 
     /**
