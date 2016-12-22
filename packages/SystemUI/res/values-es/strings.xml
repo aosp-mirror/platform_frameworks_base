@@ -410,9 +410,20 @@
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Supervisión de dispositivo"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Supervisión del perfil"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Supervisión de red"</string>
+    <!-- no translation found for monitoring_subtitle_vpn (876537538087857300) -->
+    <skip />
+    <!-- no translation found for monitoring_subtitle_network_logging (5569072711320784030) -->
+    <skip />
     <string name="disable_vpn" msgid="4435534311510272506">"Inhabilitar VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Desconectar VPN"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Administrador de tu dispositivo: <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nEl administrador puede controlar y administrar los ajustes, el acceso corporativo, las aplicaciones, los datos asociados al dispositivo e información de su ubicación. Para obtener más información, ponte en contacto con el administrador."</string>
+    <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Te has conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>, que puede controlar tu actividad de red, como los correos electrónicos, las aplicaciones y los sitios web."</string>
+    <!-- no translation found for monitoring_description_vpn_settings_separator (1933186756733474388) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_settings (8869300202410505143) -->
+    <skip />
+    <!-- no translation found for monitoring_description_network_logging (3901006351911787915) -->
+    <skip />
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Has concedido permiso a una aplicación para configurar una conexión VPN.\n\nEsta aplicación puede controlar tu dispositivo y tu actividad de red, como correos electrónicos, aplicaciones y sitios web."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Administrador del dispositivo: <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nEl administrador puede controlar y administrar los ajustes, el acceso corporativo, las aplicaciones, los datos asociados al dispositivo e información de su ubicación.\n\nEstás conectado a una red VPN que puede controlar tu actividad de red, como correos electrónicos, aplicaciones y sitios web.\n\nPara obtener más información, ponte en contacto con el administrador."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"El administrador de tu perfil de trabajo es <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nTu administrador puede supervisar tu actividad de red, como correos electrónicos, aplicaciones y sitios web.\n\nPara obtener más información, ponte en contacto con tu administrador.\n\nTambién estás conectado a una red VPN que puede supervisar tu actividad de red."</string>
@@ -494,8 +505,8 @@
     <string name="activity_not_found" msgid="348423244327799974">"La aplicación no está instalada en tu dispositivo"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Mostrar los segundos del reloj"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Muestra los segundos del reloj en la barra de estado. Puede afectar a la duración de la batería."</string>
-    <string name="qs_rearrange" msgid="8060918697551068765">"Reorganizar Ajustes rápidos"</string>
-    <string name="show_brightness" msgid="6613930842805942519">"Mostrar brillo en Ajustes rápidos"</string>
+    <string name="qs_rearrange" msgid="8060918697551068765">"Reorganizar ajustes rápidos"</string>
+    <string name="show_brightness" msgid="6613930842805942519">"Mostrar brillo en ajustes rápidos"</string>
     <string name="experimental" msgid="6198182315536726162">"Experimental"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"¿Activar Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Para poder conectar tu teclado a tu tablet, debes activar el Bluetooth."</string>

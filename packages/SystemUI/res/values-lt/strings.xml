@@ -412,9 +412,20 @@
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Įrenginio stebėjimas"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Profilio stebėjimas"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Tinklo stebėjimas"</string>
+    <!-- no translation found for monitoring_subtitle_vpn (876537538087857300) -->
+    <skip />
+    <!-- no translation found for monitoring_subtitle_network_logging (5569072711320784030) -->
+    <skip />
     <string name="disable_vpn" msgid="4435534311510272506">"Išjungti VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Atjungti VPN"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Jūsų įrenginį tvarko „<xliff:g id="ORGANIZATION">%1$s</xliff:g>“.\n\nAdministratorius gali stebėti ir tvarkyti nustatymus, įmonės informacijos pasiekiamumo nustatymus, programas, su įrenginiu susietus duomenis ir įrenginio vietovės informaciją. Daugiau informacijos galite gauti susisiekę su administratoriumi."</string>
+    <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Esate prisijungę prie programos „<xliff:g id="VPN_APP">%1$s</xliff:g>“, kuri gali stebėti tinklo veiklą, įskaitant el. laiškus, programas ir svetaines."</string>
+    <!-- no translation found for monitoring_description_vpn_settings_separator (1933186756733474388) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_settings (8869300202410505143) -->
+    <skip />
+    <!-- no translation found for monitoring_description_network_logging (3901006351911787915) -->
+    <skip />
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Suteikėte programai leidimą nustatyti VPN ryšį.\n\nŠi programa gali stebėti įrenginio ir tinklo veiklą, įskaitant el. laiškus, programas ir svetaines."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Jūsų įrenginį tvarko „<xliff:g id="ORGANIZATION">%1$s</xliff:g>“.\n\nAdministratorius gali stebėti ir tvarkyti nustatymus, įmonės informacijos pasiekiamumo nustatymus, programas, su įrenginiu susietus duomenis ir įrenginio vietos informaciją.\n\nEsate prisijungę prie VPN, kuris gali stebėti tinklo veiklą, įskaitant el. laiškus, programas ir svetaines.\n\nDaugiau informacijos galite gauti susisiekę su administratoriumi."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Jūsų darbo profilį tvarko „<xliff:g id="ORGANIZATION">%1$s</xliff:g>“.\n\nAdministratorius gali stebėti tinklo veiklą, įskaitant el. laiškus, programas ir svetaines.\n\nDaugiau informacijos galite gauti susisiekę su administratoriumi.\n\nBe to, esate prisijungę prie VPN, kuris gali stebėti tinklo veiklą."</string>

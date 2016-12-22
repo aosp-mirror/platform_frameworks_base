@@ -408,9 +408,20 @@
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"ການກວດ​ສອບ​ຕິດ​ຕາມ​ອຸ​ປະ​ກອນ"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"ການ​ຕິດ​ຕາມ​ໂປຣ​ໄຟລ໌"</string>
     <string name="monitoring_title" msgid="169206259253048106">"ການກວດ​ສອບ​ຕິດ​ຕາມ​ເຄືອ​ຂ່າຍ"</string>
+    <!-- no translation found for monitoring_subtitle_vpn (876537538087857300) -->
+    <skip />
+    <!-- no translation found for monitoring_subtitle_network_logging (5569072711320784030) -->
+    <skip />
     <string name="disable_vpn" msgid="4435534311510272506">"ປິດ​ການ​ໃຊ້ VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"ຕັດ​ການ​ເຊື່ອມ​ຕໍ່ VPN"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​​ຖືກ​ຄຸ້ມ​ຄອງ​ໂດຍ <xliff:g id="ORGANIZATION">%1$s</xliff:g> . \n\n ຜູ້​ຄວບ​ຄຸມຂອງ​ທ່ານ​ສາ​ມາດ​ຕິດ​ຕາມ​ກວດ​ກາ ​ແລະ​ການ​ຄຸ້ມ​ຄອງ​ການຕັ້ງ​ຄ່າ, ແອັບ​ການ​ເຂົ້າ​ຫາ​ບໍ​ລິ​ສັດ, ຂໍ້​ມູນ​ທີ່​ກ່ຽວ​ຂ້ອງ​ກັບ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ, ແລະ​ຂໍ້​ມູນທີ່​ຕັ້ງ​ຂອງອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​. ສໍາ​ລັບ​ຂໍ້​ມູນ​ເພີ່ມ​ເຕີມ​, ຕິດ​ຕໍ່​ຜູ້ຄວບ​ຄຸມຂອງ​ທ່ານ​."</string>
+    <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"ທ່ານເຊື່ອມຕໍ່ກັບ <xliff:g id="VPN_APP">%1$s</xliff:g> ແລ້ວ, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍ, ຮວມທັງອີເມວ, ແອັບ ແລະ ເວັບໄຊຕ່າງໆໄດ້."</string>
+    <!-- no translation found for monitoring_description_vpn_settings_separator (1933186756733474388) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_settings (8869300202410505143) -->
+    <skip />
+    <!-- no translation found for monitoring_description_network_logging (3901006351911787915) -->
+    <skip />
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"ທ່ານໄດ້ອະນຸຍາດໃຫ້ແອັບຕັ້ງການເຊື່ອມຕໍ່ VPN.\n\nແອັບນີ້ສາມາດຕິດຕາມການເຄື່ອນໄຫວຂອງອຸປະກອນ ແລະເຄືອຂ່າຍຂອງທ່ານ ເຊິ່ງລວມທັງອີເມວ, ແອັບ ແລະເວັບໄຊທ໌."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ຖືກ​ຄຸ້ມ​ຄອງ​ໂດຍ <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nຜູ້​ຄວບ​ຄຸມຂອງ​ທ່ານ​ສາ​ມາດ​ຕິດ​ຕາມ​ກວດ​ກາ ​ແລະ​ການ​ຄຸ້ມ​ຄອງ​ການຕັ້ງ​ຄ່າ, ແອັບ​ການ​ເຂົ້າ​ຫາ​ບໍ​ລິ​ສັດ, ຂໍ້​ມູນ​ທີ່​ກ່ຽວ​ຂ້ອງ​ກັບ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ, ແລະ​ຂໍ້​ມູນທີ່​ຕັ້ງ​ຂອງອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​.\n\nທ່ານ​ຍັງ​ເຊື່ອມ​ຕໍ່​ກັບ VPN, ເຊິ່ງ​ສາ​ມາດ​ຕິດ​ຕາມ​ກິດ​ຈະ​ກຳ​ເຄືອ​ຂ່າຍ​ຂອງ​ທ່ານ, ລວມ​ທັງ​ອີ​ເມວ, ແອັບ, ແລະ​ເວັບ​ໄຊ​ທ໌.\n\nສໍາ​ລັບ​ຂໍ້​ມູນ​ເພີ່ມ​ເຕີມ​, ຕິດ​ຕໍ່​ຜູ້​ຄວບ​ຄຸມ​ຂອງ​ທ່ານ​."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"ໂປ​ຣ​ໄຟ​ລ໌​ວຽກ​ຂອງ​ທ່ານ​ຖືກ​ຄຸ້ມ​ຄອງ​ໂດຍ <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nຜູ້​ຄວບ​ຄຸມ​ຂອງ​ທ່ານ​ສາ​ມາດ​ຕິດ​ຕາມການ​ເຄື່ອນ​ໄຫວ​ເຄືອ​ຂ່າຍ​ຂອງ​ທ່ານ​ໄດ້​ ລວມ​ທັງ​ອີ​ເມວ, ແອັບ, ແລະ​ເວັບ​ໄຊ​ທ໌​.\n\nສຳ​ລັບ​ຂໍ້​ມູນ​ເພີ່ມ​ເຕີມ, ຕິດ​ຕໍ່​ຜູ້​ຄວບ​ຄຸມ​ຂອງ​ທ່ານ.\n\nທ່ານ​ຍັງ​ເຊື່ອມ​ຕໍ່​ກັບ VPN, ເຊິ່ງ​ສາ​ມາດ​ຕິດ​ຕາມ​ກິດ​ຈະ​ກຳ​ເຄືອ​ຂ່າຍ​​ຂອງ​ທ່ານ."</string>
