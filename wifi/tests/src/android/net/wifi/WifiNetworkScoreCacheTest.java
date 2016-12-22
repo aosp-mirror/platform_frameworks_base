@@ -71,8 +71,7 @@ public class WifiNetworkScoreCacheTest {
     private Handler mHandler;
     private List<ScoredNetwork> mUpdatedNetworksCaptor;
     private ScoredNetwork mValidScoredNetwork;
-    private WifiNetworkScoreCache mScoreCache =
-                new WifiNetworkScoreCache(mockContext);
+    private WifiNetworkScoreCache mScoreCache;
 
     private static ScanResult buildScanResult(String ssid, String bssid) {
         return new ScanResult(
