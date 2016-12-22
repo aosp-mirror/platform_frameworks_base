@@ -103,16 +103,15 @@ static void setLight_native(
         state.flashMode = Flash::NONE;
     } else {
         // Only set non-brightness settings when not in low-persistence mode
-        state.color = colorARGB;
         state.flashMode = flash;
         state.flashOnMs = onMS;
         state.flashOffMs = offMS;
     }
 
+    state.color = colorARGB;
     state.brightnessMode = brightness;
 
     Status status;
-
     {
         ALOGD_IF_SLOW(50, "Excessive delay setting light");
         Return<Status> ret = gLight->setLight(type, state);
