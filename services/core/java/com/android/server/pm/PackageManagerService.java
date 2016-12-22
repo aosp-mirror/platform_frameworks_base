@@ -21642,6 +21642,10 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             PackageManagerService.this.requestEphemeralResolutionPhaseTwo(
                     responseObj, origIntent, resolvedType, launchIntent, callingPackage, userId);
         }
+
+        public String getSetupWizardPackageName() {
+            return mSetupWizardPackage;
+        }
     }
 
     @Override
