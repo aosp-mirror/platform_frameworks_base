@@ -42,6 +42,7 @@ public class VolumeCtrl {
 
     // --stream affects --set, --adj or --get options.
     // --show affects --set and --adj options.
+    // --get can be used with --set, --adj or by itself.
     public final static String USAGE = new String(
             "the options are as follows: \n" +
             "\t\t--stream STREAM selects the stream to control, see AudioManager.STREAM_*\n" +
@@ -56,9 +57,8 @@ public class VolumeCtrl {
             "\t\tadb shell media volume --stream 3 --get\n"
             );
 
-    private final static int VOLUME_CONTROL_MODE_SET = 0;
-    private final static int VOLUME_CONTROL_MODE_ADJUST = 1;
-    private final static int VOLUME_CONTROL_MODE_GET = 2;
+    private final static int VOLUME_CONTROL_MODE_SET = 1;
+    private final static int VOLUME_CONTROL_MODE_ADJUST = 2;
 
     private final static String ADJUST_LOWER = "lower";
     private final static String ADJUST_SAME = "same";
@@ -69,9 +69,10 @@ public class VolumeCtrl {
         // Default parameters
         int stream = AudioManager.STREAM_MUSIC;
         int volIndex = 5;
-        int mode = VOLUME_CONTROL_MODE_SET;
+        int mode = 0;
         int adjDir = AudioManager.ADJUST_RAISE;
         boolean showUi = false;
+        boolean doGet = false;
 
         //----------------------------------------
         // read options
@@ -83,7 +84,7 @@ public class VolumeCtrl {
                     showUi = true;
                     break;
                 case "--get":
-                    mode = VOLUME_CONTROL_MODE_GET;
+                    doGet = true;
                     log(LOG_V, "will get volume");
                     break;
                 case "--stream":
@@ -150,14 +151,15 @@ public class VolumeCtrl {
         // Non-interactive test
         final int flag = showUi? AudioManager.FLAG_SHOW_UI : 0;
         final String pack = cmd.getClass().getPackage().getName();
-        if (mode == VOLUME_CONTROL_MODE_GET) {
-            log(LOG_V, "volume is " + audioService.getStreamVolume(stream) +
-                       " in range [" + audioService.getStreamMinVolume(stream) +
-                       ".." + audioService.getStreamMaxVolume(stream) + "]");
-        } else if (mode == VOLUME_CONTROL_MODE_SET) {
+        if (mode == VOLUME_CONTROL_MODE_SET) {
             audioService.setStreamVolume(stream, volIndex, flag, pack/*callingPackage*/);
         } else if (mode == VOLUME_CONTROL_MODE_ADJUST) {
             audioService.adjustStreamVolume(stream, adjDir, flag, pack);
+        }
+        if (doGet) {
+            log(LOG_V, "volume is " + audioService.getStreamVolume(stream) +
+                       " in range [" + audioService.getStreamMinVolume(stream) +
+                       ".." + audioService.getStreamMaxVolume(stream) + "]");
         }
     }
 
