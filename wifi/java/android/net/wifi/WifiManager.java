@@ -748,15 +748,6 @@ public class WifiManager {
     }
 
     /** @hide */
-    public boolean hasCarrierConfiguredNetworks() {
-        try {
-            return mService.hasCarrierConfiguredNetworks();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /** @hide */
     @SystemApi
     public List<WifiConfiguration> getPrivilegedConfiguredNetworks() {
         try {
