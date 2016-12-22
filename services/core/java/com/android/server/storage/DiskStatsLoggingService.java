@@ -106,7 +106,7 @@ public class DiskStatsLoggingService extends JobService {
 
     @VisibleForTesting
     static class LogRunnable implements Runnable {
-        private static final long TIMEOUT_MILLIS = TimeUnit.MINUTES.toMillis(5);
+        private static final long TIMEOUT_MILLIS = TimeUnit.MINUTES.toMillis(10);
 
         private JobService mJobService;
         private JobParameters mParams;
@@ -147,11 +147,17 @@ public class DiskStatsLoggingService extends JobService {
             FileCollector.MeasurementResult downloads =
                     FileCollector.getMeasurementResult(mDownloadsDirectory);
 
-            logToFile(mainCategories, downloads, mCollector.getPackageStats(TIMEOUT_MILLIS),
-                    mSystemSize);
+            boolean needsReschedule = true;
+            List<PackageStats> stats = mCollector.getPackageStats(TIMEOUT_MILLIS);
+            if (stats != null) {
+                needsReschedule = false;
+                logToFile(mainCategories, downloads, stats, mSystemSize);
+            } else {
+                Log.w("TAG", "Timed out while fetching package stats.");
+            }
 
             if (mJobService != null) {
-                mJobService.jobFinished(mParams, false);
+                mJobService.jobFinished(mParams, needsReschedule);
             }
         }
 
