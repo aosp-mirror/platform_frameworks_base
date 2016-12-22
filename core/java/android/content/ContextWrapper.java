@@ -885,4 +885,12 @@ public class ContextWrapper extends Context {
     public IApplicationThread getIApplicationThread() {
         return mBase.getIApplicationThread();
     }
+
+    /**
+     * @hide
+     */
+    @Override
+    public Handler getMainThreadHandler() {
+        return mBase.getMainThreadHandler();
+    }
 }

@@ -7111,8 +7111,8 @@ public class DevicePolicyManager {
      * @param serviceIntent Identifies the service to connect to.  The Intent must specify either an
      *        explicit component name or a package name to match an
      *        {@link IntentFilter} published by a service.
-     * @param conn Receives information as the service is started and stopped. This must be a
-     *        valid {@link ServiceConnection} object; it must not be {@code null}.
+     * @param conn Receives information as the service is started and stopped in main thread. This
+     *        must be a valid {@link ServiceConnection} object; it must not be {@code null}.
      * @param flags Operation options for the binding operation. See
      *        {@link Context#bindService(Intent, ServiceConnection, int)}.
      * @param targetUser Which user to bind to. Must be one of the users returned by
@@ -7131,7 +7131,8 @@ public class DevicePolicyManager {
         throwIfParentInstance("bindDeviceAdminServiceAsUser");
         // Keep this in sync with ContextImpl.bindServiceCommon.
         try {
-            final IServiceConnection sd = mContext.getServiceDispatcher(conn, null, flags);
+            final IServiceConnection sd = mContext.getServiceDispatcher(
+                    conn, mContext.getMainThreadHandler(), flags);
             serviceIntent.prepareToLeaveProcess(mContext);
             return mService.bindDeviceAdminServiceAsUser(admin,
                     mContext.getIApplicationThread(), mContext.getActivityToken(), serviceIntent,

@@ -1470,6 +1470,12 @@ class ContextImpl extends Context {
         return mMainThread.getApplicationThread();
     }
 
+    /** @hide */
+    @Override
+    public Handler getMainThreadHandler() {
+        return mMainThread.getHandler();
+    }
+
     private boolean bindServiceCommon(Intent service, ServiceConnection conn, int flags, Handler
             handler, UserHandle user) {
         // Keep this in sync with DevicePolicyManager.bindDeviceAdminServiceAsUser.

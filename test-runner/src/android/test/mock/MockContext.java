@@ -780,4 +780,10 @@ public class MockContext extends Context {
     public IApplicationThread getIApplicationThread() {
         throw new UnsupportedOperationException();
     }
+
+    /** {@hide} */
+    @Override
+    public Handler getMainThreadHandler() {
+        throw new UnsupportedOperationException();
+    }
 }

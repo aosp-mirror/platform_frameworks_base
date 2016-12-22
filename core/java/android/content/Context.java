@@ -4403,4 +4403,11 @@ public abstract class Context {
     public IApplicationThread getIApplicationThread() {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
+
+    /**
+     * @hide
+     */
+    public Handler getMainThreadHandler() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 }
