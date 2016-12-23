@@ -135,6 +135,30 @@ public class ConnectivityPacketSummaryTest extends TestCase {
         assertEquals(expected, getSummary(packet));
     }
 
+    public void testInvalidICMPv6NDLength() {
+        final String packet =
+                // Ethernet
+                "807ABF6F48F3 100E7E263FC1 86DD" +
+                // IPv6
+                "600000000068 3A FF" +
+                "FE80000000000000FA000004FD000001" +
+                "FE80000000000000827ABFFFFE6F48F3" +
+                // ICMPv6 RA
+                "86 00 8141" +
+                "40 00 0E10" +
+                "00000000" +
+                "00000000" +
+                "01 01 00005E000265" +
+                "00 00 0102030405D6";
+
+        final String expected =
+                "RX 10:0e:7e:26:3f:c1 > 80:7a:bf:6f:48:f3 ipv6" +
+                " fe80::fa00:4:fd00:1 > fe80::827a:bfff:fe6f:48f3 icmp6" +
+                " ra slla 00:00:5e:00:02:65 <malformed>";
+
+        assertEquals(expected, getSummary(packet));
+    }
+
     public void testParseICMPv6NA() {
         final String packet =
                 // Ethernet
