@@ -191,7 +191,7 @@ public class TextToSpeech {
          *
          * @param status {@link TextToSpeech#SUCCESS} or {@link TextToSpeech#ERROR}.
          */
-        public void onInit(int status);
+        void onInit(int status);
     }
 
     /**
@@ -208,7 +208,7 @@ public class TextToSpeech {
          *
          * @param utteranceId the identifier of the utterance.
          */
-        public void onUtteranceCompleted(String utteranceId);
+        void onUtteranceCompleted(String utteranceId);
     }
 
     /**

@@ -655,12 +655,17 @@ public abstract class TextToSpeechService extends Service {
     }
 
     interface UtteranceProgressDispatcher {
-        public void dispatchOnStop();
-        public void dispatchOnSuccess();
-        public void dispatchOnStart();
-        public void dispatchOnError(int errorCode);
-        public void dispatchOnBeginSynthesis(int sampleRateInHz, int audioFormat, int channelCount);
-        public void dispatchOnAudioAvailable(byte[] audio);
+        void dispatchOnStop();
+
+        void dispatchOnSuccess();
+
+        void dispatchOnStart();
+
+        void dispatchOnError(int errorCode);
+
+        void dispatchOnBeginSynthesis(int sampleRateInHz, int audioFormat, int channelCount);
+
+        void dispatchOnAudioAvailable(byte[] audio);
     }
 
     /** Set of parameters affecting audio output. */
