@@ -16,6 +16,8 @@
 
 package android.bluetooth;
 
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -30,12 +32,31 @@ import java.util.List;
 /**
  * @hide
  */
-public final class BluetoothHidDevice implements BluetoothProfile {
+public final class BluetoothInputHost implements BluetoothProfile {
 
-    private static final String TAG = BluetoothHidDevice.class.getSimpleName();
+    private static final String TAG = BluetoothInputHost.class.getSimpleName();
 
+    /**
+     * Intent used to broadcast the change in connection state of the Input
+     * Host profile.
+     *
+     * <p>This intent will have 3 extras:
+     * <ul>
+     *   <li> {@link #EXTRA_STATE} - The current state of the profile. </li>
+     *   <li> {@link #EXTRA_PREVIOUS_STATE}- The previous state of the profile.</li>
+     *   <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device. </li>
+     * </ul>
+     *
+     * <p>{@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} can be any of
+     * {@link #STATE_DISCONNECTED}, {@link #STATE_CONNECTING},
+     * {@link #STATE_CONNECTED}, {@link #STATE_DISCONNECTING}.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission to
+     * receive.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CONNECTION_STATE_CHANGED =
-        "android.bluetooth.hid.profile.action.CONNECTION_STATE_CHANGED";
+        "android.bluetooth.inputhost.profile.action.CONNECTION_STATE_CHANGED";
 
     /**
      * Constants representing device subclass.
@@ -92,7 +113,7 @@ public final class BluetoothHidDevice implements BluetoothProfile {
 
     private ServiceListener mServiceListener;
 
-    private IBluetoothHidDevice mService;
+    private IBluetoothInputHost mService;
 
     private BluetoothAdapter mAdapter;
 
@@ -178,11 +199,11 @@ public final class BluetoothHidDevice implements BluetoothProfile {
         public void onServiceConnected(ComponentName className, IBinder service) {
             Log.d(TAG, "onServiceConnected()");
 
-            mService = IBluetoothHidDevice.Stub.asInterface(service);
+            mService = IBluetoothInputHost.Stub.asInterface(service);
 
             if (mServiceListener != null) {
-                mServiceListener.onServiceConnected(BluetoothProfile.HID_DEVICE,
-                    BluetoothHidDevice.this);
+                mServiceListener.onServiceConnected(BluetoothProfile.INPUT_HOST,
+                    BluetoothInputHost.this);
             }
         }
 
@@ -192,13 +213,13 @@ public final class BluetoothHidDevice implements BluetoothProfile {
             mService = null;
 
             if (mServiceListener != null) {
-                mServiceListener.onServiceDisconnected(BluetoothProfile.HID_DEVICE);
+                mServiceListener.onServiceDisconnected(BluetoothProfile.INPUT_HOST);
             }
         }
     };
 
-    BluetoothHidDevice(Context context, ServiceListener listener) {
-        Log.v(TAG, "BluetoothHidDevice");
+    BluetoothInputHost(Context context, ServiceListener listener) {
+        Log.v(TAG, "BluetoothInputHost");
 
         mContext = context;
         mServiceListener = listener;
@@ -217,7 +238,7 @@ public final class BluetoothHidDevice implements BluetoothProfile {
     }
 
     boolean doBind() {
-        Intent intent = new Intent(IBluetoothHidDevice.class.getName());
+        Intent intent = new Intent(IBluetoothInputHost.class.getName());
         ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
         intent.setComponent(comp);
         if (comp == null || !mContext.bindServiceAsUser(intent, mConnection, 0,
