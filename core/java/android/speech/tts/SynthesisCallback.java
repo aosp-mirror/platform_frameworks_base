@@ -142,4 +142,26 @@ public interface SynthesisCallback {
      * <p>Useful for checking if a fallback from network request is possible.
      */
     boolean hasFinished();
+
+    /**
+     * The service may call this method to provide timing information about the spoken text.
+     *
+     * <p>Calling this method means that at the given audio frame, the given range of the input is
+     * about to be spoken. If this method is called the client will receive a callback on the
+     * listener ({@link UtteranceProgressListener#onUtteranceRangeStart}) at the moment that frame
+     * has been reached by the playback head.
+     *
+     * <p>The markerInFrames is a frame index into the audio for this synthesis request, i.e. into
+     * the concatenation of the audio bytes sent to audioAvailable for this synthesis request. The
+     * definition of a frame depends on the format given by {@link #start}. See {@link AudioFormat}
+     * for more information.
+     *
+     * <p>This method should only be called on the synthesis thread, while in {@link
+     * TextToSpeechService#onSynthesizeText}.
+     *
+     * @param markerInFrames The position in frames in the audio where this range is spoken.
+     * @param start The start index of the range in the input text.
+     * @param end The end index (exclusive) of the range in the input text.
+     */
+    default void rangeStart(int markerInFrames, int start, int end) {}
 }

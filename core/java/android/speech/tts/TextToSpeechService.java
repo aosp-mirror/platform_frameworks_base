@@ -663,6 +663,8 @@ public abstract class TextToSpeechService extends Service {
         void dispatchOnBeginSynthesis(int sampleRateInHz, int audioFormat, int channelCount);
 
         void dispatchOnAudioAvailable(byte[] audio);
+
+        public void dispatchOnUtteranceRangeStart(int start, int end);
     }
 
     /** Set of parameters affecting audio output. */
@@ -879,6 +881,15 @@ public abstract class TextToSpeechService extends Service {
             final String utteranceId = getUtteranceId();
             if (utteranceId != null) {
                 mCallbacks.dispatchOnAudioAvailable(getCallerIdentity(), utteranceId, audio);
+            }
+        }
+
+        @Override
+        public void dispatchOnUtteranceRangeStart(int start, int end) {
+            final String utteranceId = getUtteranceId();
+            if (utteranceId != null) {
+                mCallbacks.dispatchOnUtteranceRangeStart(
+                        getCallerIdentity(), utteranceId, start, end);
             }
         }
 
@@ -1556,6 +1567,17 @@ public abstract class TextToSpeechService extends Service {
                 cb.onAudioAvailable(utteranceId, buffer);
             } catch (RemoteException e) {
                 Log.e(TAG, "Callback dispatchOnAudioAvailable(String, byte[]) failed: " + e);
+            }
+        }
+
+        public void dispatchOnUtteranceRangeStart(
+                Object callerIdentity, String utteranceId, int start, int end) {
+            ITextToSpeechCallback cb = getCallbackFor(callerIdentity);
+            if (cb == null) return;
+            try {
+                cb.onUtteranceRangeStart(utteranceId, start, end);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Callback dispatchOnUtteranceRangeStart(String, int, int) failed: " + e);
             }
         }
 

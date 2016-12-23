@@ -271,4 +271,12 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
             mStatusCode = errorCode;
         }
     }
+
+    public void rangeStart(int markerInFrames, int start, int end) {
+        if (mItem == null) {
+            Log.e(TAG, "mItem is null");
+            return;
+        }
+        mItem.rangeStart(markerInFrames, start, end);
+    }
 }
