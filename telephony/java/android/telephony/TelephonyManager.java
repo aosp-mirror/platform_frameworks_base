@@ -8846,6 +8846,12 @@ public class TelephonyManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void setBasebandVersionForPhone(int phoneId, String version) {
         setTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_BASEBAND_VERSION, version);
+            if (version != null && version.length() > SystemProperties.PROP_VALUE_MAX) {
+                Log.e(TAG, "setBasebandVersionForPhone(): version string '" + version +
+                        "' too long! (" + version.length() +
+                        " > " + SystemProperties.PROP_VALUE_MAX + ")");
+                version = version.substring(0, SystemProperties.PROP_VALUE_MAX);
+            }
     }
 
     /**
