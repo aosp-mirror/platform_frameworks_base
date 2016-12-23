@@ -967,6 +967,9 @@ public final class HdmiControlService extends SystemService {
     }
 
     void setAudioStatus(boolean mute, int volume) {
+        if (!isTvDeviceEnabled() || !tv().isSystemAudioActivated()) {
+            return;
+        }
         AudioManager audioManager = getAudioManager();
         boolean muted = audioManager.isStreamMute(AudioManager.STREAM_MUSIC);
         if (mute) {
