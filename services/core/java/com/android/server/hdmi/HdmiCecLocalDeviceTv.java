@@ -796,7 +796,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     void onNewAvrAdded(HdmiDeviceInfo avr) {
         assertRunOnServiceThread();
         addAndStartAction(new SystemAudioAutoInitiationAction(this, avr.getLogicalAddress()));
-        if (isArcFeatureEnabled(avr.getPortId())
+        if (isConnected(avr.getPortId()) && isArcFeatureEnabled(avr.getPortId())
                 && !hasAction(SetArcTransmissionStateAction.class)) {
             startArcAction(true);
         }
@@ -900,29 +900,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     @ServiceThreadOnly
-    private void updateArcFeatureStatus(int portId, boolean isConnected) {
-        assertRunOnServiceThread();
-        HdmiPortInfo portInfo = mService.getPortInfo(portId);
-        if (!portInfo.isArcSupported()) {
-            return;
-        }
-        HdmiDeviceInfo avr = getAvrDeviceInfo();
-        if (avr == null) {
-            if (isConnected) {
-                // Update the status (since TV may not have seen AVR yet) so
-                // that ARC can be initiated after discovery.
-                mArcFeatureEnabled.put(portId, isConnected);
-            }
-            return;
-        }
-        // HEAC 2.4, HEACT 5-15
-        // Should not activate ARC if +5V status is false.
-        if (avr.getPortId() == portId) {
-            changeArcFeatureEnabled(portId, isConnected);
-        }
-    }
-
-    @ServiceThreadOnly
     boolean isConnected(int portId) {
         assertRunOnServiceThread();
         return mService.isConnected(portId);
@@ -952,18 +929,18 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void changeArcFeatureEnabled(int portId, boolean enabled) {
         assertRunOnServiceThread();
-
-        if (mArcFeatureEnabled.get(portId) != enabled) {
-            mArcFeatureEnabled.put(portId, enabled);
-            if (enabled) {
-                if (!mArcEstablished) {
-                    startArcAction(true);
-                }
-            } else {
-                if (mArcEstablished) {
-                    startArcAction(false);
-                }
-            }
+        if (mArcFeatureEnabled.get(portId) == enabled) {
+            return;
+        }
+        mArcFeatureEnabled.put(portId, enabled);
+        HdmiDeviceInfo avr = getAvrDeviceInfo();
+        if (avr == null || avr.getPortId() != portId) {
+            return;
+        }
+        if (enabled && !mArcEstablished) {
+            startArcAction(true);
+        } else if (!enabled && mArcEstablished) {
+            startArcAction(false);
         }
     }
 
@@ -1097,14 +1074,14 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         return true;
     }
 
-    private boolean canStartArcUpdateAction(int avrAddress, boolean shouldCheckArcFeatureEnabled) {
+    private boolean canStartArcUpdateAction(int avrAddress, boolean enabled) {
         HdmiDeviceInfo avr = getAvrDeviceInfo();
         if (avr != null
                 && (avrAddress == avr.getLogicalAddress())
                 && isConnectedToArcPort(avr.getPhysicalAddress())
                 && isDirectConnectAddress(avr.getPhysicalAddress())) {
-            if (shouldCheckArcFeatureEnabled) {
-                return isArcFeatureEnabled(avr.getPortId());
+            if (enabled) {
+                return isConnected(avr.getPortId()) && isArcFeatureEnabled(avr.getPortId());
             } else {
                 return true;
             }
@@ -1566,7 +1543,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             // It covers seq #40, #43.
             hotplugActions.get(0).pollAllDevicesNow();
         }
-        updateArcFeatureStatus(portId, connected);
     }
 
     private void removeCecSwitches(int portId) {
