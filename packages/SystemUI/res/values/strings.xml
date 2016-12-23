@@ -1149,9 +1149,9 @@
     <string name="stream_alarm">Alarm</string> <!-- STREAM_ALARM -->
     <string name="stream_notification">Notification</string> <!-- STREAM_NOTIFICATION -->
     <string name="stream_bluetooth_sco">Bluetooth</string> <!-- STREAM_BLUETOOTH_SCO -->
-    <string name="stream_system_enforced">System enforced</string> <!-- STREAM_SYSTEM_ENFORCED -->
+    <string name="stream_system_enforced" translatable="false">System enforced</string> <!-- STREAM_SYSTEM_ENFORCED -->
     <string name="stream_dtmf">Dual multi tone frequency</string> <!-- STREAM_DTMF -->
-    <string name="stream_tts">Text to speech</string> <!-- STREAM_TTS -->
+    <string name="stream_tts" translatable="false">Transmitted Through Speaker</string> <!-- STREAM_TTS -->
     <string name="stream_accessibility">Accessibility</string> <!-- STREAM_ACCESSIBILITY -->
 
     <string name="volume_stream_muted" translatable="false">%s silent</string>
