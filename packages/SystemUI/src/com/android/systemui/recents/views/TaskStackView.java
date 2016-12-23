@@ -2133,13 +2133,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      * Check whether we should use the grid layout.
      * We use the grid layout for Recents iff all the following is true:
      *  1. Grid-mode is enabled.
-     *  2. The activity is not in multi-window mode.
+     *  2. The activity is not in split screen mode (there's no docked task).
      *  3. The user is not dragging a task view over the dock state.
      * @return True if we should use the grid layout.
      */
     public boolean useGridLayout() {
         return Recents.getConfiguration().isGridEnabled
-            && !((RecentsActivity) mContext).isInMultiWindowMode()
+            && !Recents.getSystemServices().hasDockedTask()
             && !mDraggingOverDockState;
     }
 

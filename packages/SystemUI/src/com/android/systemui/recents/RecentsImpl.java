@@ -765,9 +765,10 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         // Get the transform for the running task
         stackView.updateLayoutAlgorithm(true /* boundScroll */);
         stackView.updateToInitialState();
+        boolean isInSplitScreen = Recents.getSystemServices().hasDockedTask();
         stackView.getStackAlgorithm().getStackTransformScreenCoordinates(launchTask,
                 stackView.getScroller().getStackScroll(), mTmpTransform, null, windowOverrideRect,
-                Recents.getConfiguration().isGridEnabled);
+                Recents.getConfiguration().isGridEnabled && !isInSplitScreen);
         return mTmpTransform;
     }
 
