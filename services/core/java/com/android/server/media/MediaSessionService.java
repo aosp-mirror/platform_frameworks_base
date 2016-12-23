@@ -17,6 +17,7 @@
 package com.android.server.media;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
@@ -36,6 +37,7 @@ import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.IRemoteVolumeController;
 import android.media.session.IActiveSessionsListener;
+import android.media.session.IOnVolumeKeyLongPressListener;
 import android.media.session.ISession;
 import android.media.session.ISessionCallback;
 import android.media.session.ISessionManager;
@@ -78,8 +80,8 @@ import java.util.List;
 public class MediaSessionService extends SystemService implements Monitor {
     private static final String TAG = "MediaSessionService";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-    // Leave log for media key event always.
-    private static final boolean DEBUG_MEDIA_KEY_EVENT = DEBUG || true;
+    // Leave log for key event always.
+    private static final boolean DEBUG_KEY_EVENT = true;
 
     private static final int WAKELOCK_TIMEOUT = 5000;
 
@@ -523,6 +525,14 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
     }
 
+    private String getCallingPackageName(int uid) {
+        String[] packages = getContext().getPackageManager().getPackagesForUid(uid);
+        if (packages != null && packages.length > 0) {
+            return packages[0];
+        }
+        return "";
+    }
+
     /**
      * Information about a particular user. The contents of this object is
      * guarded by mLock.
@@ -533,6 +543,12 @@ public class MediaSessionService extends SystemService implements Monitor {
         private final Context mContext;
         private PendingIntent mLastMediaButtonReceiver;
         private ComponentName mRestoredMediaButtonReceiver;
+
+        private IOnVolumeKeyLongPressListener mOnVolumeKeyLongPressListener;
+        private int mOnVolumeKeyLongPressListenerUid;
+        private KeyEvent mInitialDownVolumeKeyEvent;
+        private int mInitialDownVolumeStream;
+        private boolean mInitialDownMusicOnly;
 
         public UserRecord(Context context, int userId) {
             mContext = context;
@@ -564,6 +580,9 @@ public class MediaSessionService extends SystemService implements Monitor {
             String indent = prefix + "  ";
             pw.println(indent + "MediaButtonReceiver:" + mLastMediaButtonReceiver);
             pw.println(indent + "Restored ButtonReceiver:" + mRestoredMediaButtonReceiver);
+            pw.println(indent + "Volume key long-press listener:" + mOnVolumeKeyLongPressListener);
+            pw.println(indent + "Volume key long-press listener package:" +
+                    getCallingPackageName(mOnVolumeKeyLongPressListenerUid));
             int size = mSessions.size();
             pw.println(indent + size + " Sessions:");
             for (int i = 0; i < size; i++) {
@@ -799,13 +818,195 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         @Override
+        public void setOnVolumeKeyLongPressListener(IOnVolumeKeyLongPressListener listener) {
+            final int pid = Binder.getCallingPid();
+            final int uid = Binder.getCallingUid();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                // Enforce SET_VOLUME_KEY_LONG_PRESS_LISTENER permission.
+                if (getContext().checkPermission(
+                        android.Manifest.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER, pid, uid)
+                            != PackageManager.PERMISSION_GRANTED) {
+                    throw new SecurityException("Must hold the SET_VOLUME_KEY_LONG_PRESS_LISTENER" +
+                            " permission.");
+                }
+
+                synchronized (mLock) {
+                    UserRecord user = mUserRecords.get(UserHandle.getUserId(uid));
+                    if (user.mOnVolumeKeyLongPressListener != null &&
+                            user.mOnVolumeKeyLongPressListenerUid != uid) {
+                        Log.w(TAG, "Volume key long-press listener cannot be reset by another app");
+                        return;
+                    }
+
+                    user.mOnVolumeKeyLongPressListener = listener;
+                    user.mOnVolumeKeyLongPressListenerUid = uid;
+
+                    Log.d(TAG, "Volume key long-press listener "
+                            + listener + " is set by " + getCallingPackageName(uid));
+
+                    if (user.mOnVolumeKeyLongPressListener != null) {
+                        try {
+                            user.mOnVolumeKeyLongPressListener.asBinder().linkToDeath(
+                                    new IBinder.DeathRecipient() {
+                                        @Override
+                                        public void binderDied() {
+                                            synchronized (mLock) {
+                                                user.mOnVolumeKeyLongPressListener = null;
+                                            }
+                                        }
+                                    }, 0);
+                        } catch (RemoteException e) {
+                            Log.w(TAG, "Failed to set death recipient "
+                                    + user.mOnVolumeKeyLongPressListener);
+                            user.mOnVolumeKeyLongPressListener = null;
+                        }
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        /**
+         * Handles the dispatching of the volume button events to one of the
+         * registered listeners. If there's a volume key long-press listener and
+         * there's no active global priority session, long-pressess will be sent to the
+         * long-press listener instead of adjusting volume.
+         *
+         * @param keyEvent a non-null KeyEvent whose key code is one of the
+         *            {@link KeyEvent#KEYCODE_VOLUME_UP},
+         *            {@link KeyEvent#KEYCODE_VOLUME_DOWN},
+         *            or {@link KeyEvent#KEYCODE_VOLUME_MUTE}.
+         * @param stream stream type to adjust volume.
+         * @param musicOnly true if both UI nor haptic feedback aren't needed when adjust volume.
+         */
+        @Override
+        public void dispatchVolumeKeyEvent(KeyEvent keyEvent, int stream, boolean musicOnly) {
+            if (keyEvent == null ||
+                    (keyEvent.getKeyCode() != KeyEvent.KEYCODE_VOLUME_UP
+                             && keyEvent.getKeyCode() != KeyEvent.KEYCODE_VOLUME_DOWN
+                             && keyEvent.getKeyCode() != KeyEvent.KEYCODE_VOLUME_MUTE)) {
+                Log.w(TAG, "Attempted to dispatch null or non-volume key event.");
+                return;
+            }
+
+            final int pid = Binder.getCallingPid();
+            final int uid = Binder.getCallingUid();
+            final long token = Binder.clearCallingIdentity();
+
+            if (DEBUG) {
+                Log.d(TAG, "dispatchVolumeKeyEvent, pid=" + pid + ", uid=" + uid + ", event="
+                        + keyEvent);
+            }
+
+            try {
+                synchronized (mLock) {
+                    // Only consider full user.
+                    UserRecord user = mUserRecords.get(mCurrentUserIdList.get(0));
+
+                    if (mPriorityStack.isGlobalPriorityActive()
+                            || user.mOnVolumeKeyLongPressListener == null) {
+                        dispatchVolumeKeyEventLocked(keyEvent, stream, musicOnly);
+                    } else {
+                        // TODO: Consider the case when both volume up and down keys are pressed
+                        //       at the same time.
+                        if (keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
+                            if (keyEvent.getRepeatCount() == 0) {
+                                user.mInitialDownVolumeKeyEvent = keyEvent;
+                                user.mInitialDownVolumeStream = stream;
+                                user.mInitialDownMusicOnly = musicOnly;
+                            }
+                            if (keyEvent.getRepeatCount() > 0 || keyEvent.isLongPress()) {
+                                if (user.mInitialDownVolumeKeyEvent != null) {
+                                    dispatchVolumeKeyLongPressLocked(
+                                            user.mInitialDownVolumeKeyEvent);
+                                    // Mark that the key is already handled.
+                                    user.mInitialDownVolumeKeyEvent = null;
+                                }
+                                dispatchVolumeKeyLongPressLocked(keyEvent);
+                            }
+                        } else { // if up
+                            if (user.mInitialDownVolumeKeyEvent != null
+                                    && user.mInitialDownVolumeKeyEvent.getDownTime()
+                                            == keyEvent.getDownTime()) {
+                                // Short-press. Should change volume.
+                                dispatchVolumeKeyEventLocked(
+                                        user.mInitialDownVolumeKeyEvent,
+                                        user.mInitialDownVolumeStream,
+                                        user.mInitialDownMusicOnly);
+                                dispatchVolumeKeyEventLocked(keyEvent, stream, musicOnly);
+                            } else {
+                                dispatchVolumeKeyLongPressLocked(keyEvent);
+                            }
+                        }
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        private void dispatchVolumeKeyLongPressLocked(KeyEvent keyEvent) {
+            // Only consider full user.
+            UserRecord user = mUserRecords.get(mCurrentUserIdList.get(0));
+            try {
+                user.mOnVolumeKeyLongPressListener.onVolumeKeyLongPress(keyEvent);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed to send " + keyEvent + " to volume key long-press listener");
+            }
+        }
+
+        private void dispatchVolumeKeyEventLocked(
+                KeyEvent keyEvent, int stream, boolean musicOnly) {
+            boolean down = keyEvent.getAction() == KeyEvent.ACTION_DOWN;
+            boolean up = keyEvent.getAction() == KeyEvent.ACTION_UP;
+            int direction = 0;
+            boolean isMute = false;
+            switch (keyEvent.getKeyCode()) {
+                case KeyEvent.KEYCODE_VOLUME_UP:
+                    direction = AudioManager.ADJUST_RAISE;
+                    break;
+                case KeyEvent.KEYCODE_VOLUME_DOWN:
+                    direction = AudioManager.ADJUST_LOWER;
+                    break;
+                case KeyEvent.KEYCODE_VOLUME_MUTE:
+                    isMute = true;
+                    break;
+            }
+            if (down || up) {
+                int flags = AudioManager.FLAG_FROM_KEY;
+                if (musicOnly) {
+                    // This flag is used when the screen is off to only affect active media.
+                    flags |= AudioManager.FLAG_ACTIVE_MEDIA_ONLY;
+                } else {
+                    // These flags are consistent with the home screen
+                    if (up) {
+                        flags |= AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_VIBRATE;
+                    } else {
+                        flags |= AudioManager.FLAG_SHOW_UI | AudioManager.FLAG_VIBRATE;
+                    }
+                }
+                if (direction != 0) {
+                    // If this is action up we want to send a beep for non-music events
+                    if (up) {
+                        direction = 0;
+                    }
+                    dispatchAdjustVolumeLocked(stream, direction, flags);
+                } else if (isMute) {
+                    if (down && keyEvent.getRepeatCount() == 0) {
+                        dispatchAdjustVolumeLocked(stream, AudioManager.ADJUST_TOGGLE_MUTE, flags);
+                    }
+                }
+            }
+        }
+
+        @Override
         public void dispatchAdjustVolume(int suggestedStream, int delta, int flags) {
             final long token = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    MediaSessionRecord session = mPriorityStack
-                            .getDefaultVolumeSession(mCurrentUserIdList);
-                    dispatchAdjustVolumeLocked(suggestedStream, delta, flags, session);
+                    dispatchAdjustVolumeLocked(suggestedStream, delta, flags);
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -881,8 +1082,9 @@ public class MediaSessionService extends SystemService implements Monitor {
             return resolvedUserId;
         }
 
-        private void dispatchAdjustVolumeLocked(int suggestedStream, int direction, int flags,
-                MediaSessionRecord session) {
+        private void dispatchAdjustVolumeLocked(int suggestedStream, int direction, int flags) {
+            MediaSessionRecord session = mPriorityStack.getDefaultVolumeSession(mCurrentUserIdList);
+
             boolean preferSuggestedStream = false;
             if (isValidLocalStreamType(suggestedStream)
                     && AudioSystem.isStreamActive(suggestedStream, 0)) {
@@ -958,14 +1160,13 @@ public class MediaSessionService extends SystemService implements Monitor {
         private void dispatchMediaKeyEventLocked(KeyEvent keyEvent, boolean needWakeLock,
                 MediaSessionRecord session) {
             if (session != null) {
-                if (DEBUG_MEDIA_KEY_EVENT) {
+                if (DEBUG_KEY_EVENT) {
                     Log.d(TAG, "Sending " + keyEvent + " to " + session);
                 }
                 if (needWakeLock) {
                     mKeyEventReceiver.aquireWakeLockLocked();
                 }
-                // If we don't need a wakelock use -1 as the id so we
-                // won't release it later
+                // If we don't need a wakelock use -1 as the id so we won't release it later.
                 session.sendMediaButton(keyEvent,
                         needWakeLock ? mKeyEventReceiver.mLastTimeoutId : -1,
                         mKeyEventReceiver, Process.SYSTEM_UID,
@@ -986,7 +1187,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                     mediaButtonIntent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
                     try {
                         if (user.mLastMediaButtonReceiver != null) {
-                            if (DEBUG_MEDIA_KEY_EVENT) {
+                            if (DEBUG_KEY_EVENT) {
                                 Log.d(TAG, "Sending " + keyEvent
                                         + " to the last known pendingIntent "
                                         + user.mLastMediaButtonReceiver);
@@ -995,7 +1196,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                                     needWakeLock ? mKeyEventReceiver.mLastTimeoutId : -1,
                                     mediaButtonIntent, mKeyEventReceiver, mHandler);
                         } else {
-                            if (DEBUG_MEDIA_KEY_EVENT) {
+                            if (DEBUG_KEY_EVENT) {
                                 Log.d(TAG, "Sending " + keyEvent + " to the restored intent "
                                         + user.mRestoredMediaButtonReceiver);
                             }

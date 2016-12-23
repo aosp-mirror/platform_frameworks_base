@@ -84,7 +84,8 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
-                MediaSessionLegacyHelper.getHelper(mContext).sendVolumeKeyEvent(event, false);
+                MediaSessionLegacyHelper.getHelper(mContext).sendVolumeKeyEvent(
+                        event, AudioManager.USE_DEFAULT_STREAM_TYPE, false);
                 return true;
             }
 
@@ -215,7 +216,8 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
                 if (!event.isCanceled()) {
-                    MediaSessionLegacyHelper.getHelper(mContext).sendVolumeKeyEvent(event, false);
+                    MediaSessionLegacyHelper.getHelper(mContext).sendVolumeKeyEvent(
+                            event, AudioManager.USE_DEFAULT_STREAM_TYPE, false);
                 }
                 return true;
             }

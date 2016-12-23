@@ -18,6 +18,7 @@ package android.media.session;
 import android.content.ComponentName;
 import android.media.IRemoteVolumeController;
 import android.media.session.IActiveSessionsListener;
+import android.media.session.IOnVolumeKeyLongPressListener;
 import android.media.session.ISession;
 import android.media.session.ISessionCallback;
 import android.os.Bundle;
@@ -31,6 +32,7 @@ interface ISessionManager {
     ISession createSession(String packageName, in ISessionCallback cb, String tag, int userId);
     List<IBinder> getSessions(in ComponentName compName, int userId);
     void dispatchMediaKeyEvent(in KeyEvent keyEvent, boolean needWakeLock);
+    void dispatchVolumeKeyEvent(in KeyEvent keyEvent, int stream, boolean musicOnly);
     void dispatchAdjustVolume(int suggestedStream, int delta, int flags);
     void addSessionsListener(in IActiveSessionsListener listener, in ComponentName compName,
             int userId);
@@ -41,4 +43,7 @@ interface ISessionManager {
 
     // For PhoneWindowManager to precheck media keys
     boolean isGlobalPriorityActive();
+
+    void setOnVolumeKeyLongPressListener(in IOnVolumeKeyLongPressListener listener);
 }
+

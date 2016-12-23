@@ -1856,27 +1856,25 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
-                int direction = 0;
-                switch (keyCode) {
-                    case KeyEvent.KEYCODE_VOLUME_UP:
-                        direction = AudioManager.ADJUST_RAISE;
-                        break;
-                    case KeyEvent.KEYCODE_VOLUME_DOWN:
-                        direction = AudioManager.ADJUST_LOWER;
-                        break;
-                    case KeyEvent.KEYCODE_VOLUME_MUTE:
-                        direction = AudioManager.ADJUST_TOGGLE_MUTE;
-                        break;
-                }
                 // If we have a session send it the volume command, otherwise
                 // use the suggested stream.
                 if (mMediaController != null) {
+                    int direction = 0;
+                    switch (keyCode) {
+                        case KeyEvent.KEYCODE_VOLUME_UP:
+                            direction = AudioManager.ADJUST_RAISE;
+                            break;
+                        case KeyEvent.KEYCODE_VOLUME_DOWN:
+                            direction = AudioManager.ADJUST_LOWER;
+                            break;
+                        case KeyEvent.KEYCODE_VOLUME_MUTE:
+                            direction = AudioManager.ADJUST_TOGGLE_MUTE;
+                            break;
+                    }
                     mMediaController.adjustVolume(direction, AudioManager.FLAG_SHOW_UI);
                 } else {
-                    MediaSessionLegacyHelper.getHelper(getContext()).sendAdjustVolumeBy(
-                            mVolumeControlStreamType, direction,
-                            AudioManager.FLAG_SHOW_UI | AudioManager.FLAG_VIBRATE
-                                    | AudioManager.FLAG_FROM_KEY);
+                    MediaSessionLegacyHelper.getHelper(getContext()).sendVolumeKeyEvent(
+                            event, mVolumeControlStreamType, false);
                 }
                 return true;
             }
@@ -1954,15 +1952,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN: {
-                final int flags = AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_VIBRATE
-                        | AudioManager.FLAG_FROM_KEY;
                 // If we have a session send it the volume command, otherwise
                 // use the suggested stream.
                 if (mMediaController != null) {
+                    final int flags = AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_VIBRATE
+                            | AudioManager.FLAG_FROM_KEY;
                     mMediaController.adjustVolume(0, flags);
                 } else {
-                    MediaSessionLegacyHelper.getHelper(getContext()).sendAdjustVolumeBy(
-                            mVolumeControlStreamType, 0, flags);
+                    MediaSessionLegacyHelper.getHelper(getContext()).sendVolumeKeyEvent(
+                            event, mVolumeControlStreamType, false);
                 }
                 return true;
             }
@@ -1971,7 +1969,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 // doesn't have one of these.  In this case, we execute it here and
                 // eat the event instead, because we have mVolumeControlStreamType
                 // and they don't.
-                getAudioManager().handleKeyUp(event, mVolumeControlStreamType);
+                MediaSessionLegacyHelper.getHelper(getContext()).sendVolumeKeyEvent(
+                        event, AudioManager.USE_DEFAULT_STREAM_TYPE, false);
                 return true;
             }
             // These are all the recognized media key codes in

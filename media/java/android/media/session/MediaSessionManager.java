@@ -18,6 +18,7 @@ package android.media.session;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.media.AudioManager;
@@ -56,6 +57,8 @@ public final class MediaSessionManager {
     private final ISessionManager mService;
 
     private Context mContext;
+
+    private OnVolumeKeyLongPressListenerImpl mOnVolumeKeyLongPressListener;
 
     /**
      * @hide
@@ -278,6 +281,21 @@ public final class MediaSessionManager {
     }
 
     /**
+     * Send a volume key event. The receiver will be selected automatically.
+     *
+     * @param keyEvent The volume KeyEvent to send.
+     * @param needWakeLock True if a wake lock should be held while sending the key.
+     * @hide
+     */
+    public void dispatchVolumeKeyEvent(@NonNull KeyEvent keyEvent, int stream, boolean musicOnly) {
+        try {
+            mService.dispatchVolumeKeyEvent(keyEvent, stream, musicOnly);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to send volume key event.", e);
+        }
+    }
+
+    /**
      * Dispatch an adjust volume request to the system. It will be sent to the
      * most relevant audio stream or media session. The direction must be one of
      * {@link AudioManager#ADJUST_LOWER}, {@link AudioManager#ADJUST_RAISE},
@@ -313,11 +331,57 @@ public final class MediaSessionManager {
     }
 
     /**
+     * Set the volume key long-press listener. While the listener is set, the listener
+     * gets the volume key long-presses instead of changing volume.
+     *
+     * <p>System can only have a single volume key long-press listener.
+     *
+     * @param listener The volume key long-press listener. {@code null} to reset.
+     * @param handler The handler on which the listener should be invoked, or {@code null}
+     *            if the listener should be invoked on the calling thread's looper.
+     * @hide
+     */
+    @SystemApi
+    public void setOnVolumeKeyLongPressListener(
+            OnVolumeKeyLongPressListener listener, @Nullable Handler handler) {
+        synchronized (mLock) {
+            try {
+                if (listener == null) {
+                    mOnVolumeKeyLongPressListener = null;
+                    mService.setOnVolumeKeyLongPressListener(null);
+                } else {
+                    if (handler == null) {
+                        handler = new Handler();
+                    }
+                    mOnVolumeKeyLongPressListener =
+                            new OnVolumeKeyLongPressListenerImpl(listener, handler);
+                    mService.setOnVolumeKeyLongPressListener(mOnVolumeKeyLongPressListener);
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to set volume key long press listener", e);
+            }
+        }
+    }
+
+    /**
      * Listens for changes to the list of active sessions. This can be added
      * using {@link #addOnActiveSessionsChangedListener}.
      */
     public interface OnActiveSessionsChangedListener {
         public void onActiveSessionsChanged(@Nullable List<MediaController> controllers);
+    }
+
+    /**
+     * Listens the volume key long-presses.
+     * @hide
+     */
+    @SystemApi
+    public interface OnVolumeKeyLongPressListener {
+        /**
+         * Called when the volume key is long-pressed.
+         * <p>This will be called for both down and up events.
+         */
+        void onVolumeKeyLongPress(KeyEvent event);
     }
 
     private static final class SessionsChangedWrapper {
@@ -358,6 +422,33 @@ public final class MediaSessionManager {
             mContext = null;
             mListener = null;
             mHandler = null;
+        }
+    }
+
+    private static final class OnVolumeKeyLongPressListenerImpl
+            extends IOnVolumeKeyLongPressListener.Stub {
+        private OnVolumeKeyLongPressListener mListener;
+        private Handler mHandler;
+
+        public OnVolumeKeyLongPressListenerImpl(
+                OnVolumeKeyLongPressListener listener, Handler handler) {
+            mListener = listener;
+            mHandler = handler;
+        }
+
+        @Override
+        public void onVolumeKeyLongPress(KeyEvent event) {
+            if (mListener == null || mHandler == null) {
+                Log.w(TAG, "Failed to call volume key long-press listener." +
+                        " Either mListener or mHandler is null");
+                return;
+            }
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mListener.onVolumeKeyLongPress(event);
+                }
+            });
         }
     }
 }

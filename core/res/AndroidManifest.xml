@@ -2625,6 +2625,13 @@
     <permission android:name="android.permission.MEDIA_CONTENT_CONTROL"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi @hide Allows an application to set the volume key long-press listener.
+         <p>When it's set, the application will receive the volume key long-press event
+         instead of changing volume.</p>
+         <p>Not for use by third-party applications</p> -->
+    <permission android:name="android.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER"
+        android:protectionLevel="signature|privileged|development" />
+
     <!-- @SystemApi Required to be able to disable the device (very dangerous!).
          <p>Not for use by third-party applications.
          @hide
