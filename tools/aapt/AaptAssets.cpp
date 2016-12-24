@@ -36,6 +36,8 @@ static const String8 kResString(kResourceDir);
  */
 static bool validateFileName(const char* fileName)
 {
+    return true;
+
     const char* cp = fileName;
     size_t len = 0;
 
