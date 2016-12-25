@@ -406,7 +406,8 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable, ThemedSp
         if (item instanceof CharSequence) {
             text.setText((CharSequence) item);
         } else {
-            text.setText(item.toString());
+            
+            text.setText(item != null ? item.toString() : null);
         }
 
         return view;
