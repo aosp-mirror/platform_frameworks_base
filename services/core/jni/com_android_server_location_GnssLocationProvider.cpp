@@ -16,7 +16,7 @@
 
 #define LOG_TAG "GnssLocationProvider"
 
-#define LOG_NDEBUG 0
+//#define LOG_NDEBUG 0
 
 #include "JNIHelp.h"
 #include "jni.h"
@@ -133,7 +133,7 @@ static void sv_status_callback(GpsSvStatus* sv_status)
     // Some drives doesn't set the size field correctly. Assume GpsSvStatus_v1
     // if it doesn't provide a valid size.
     if (status_size == 0) {
-        ALOGW("Invalid size of GpsSvStatus found: %zd.", status_size);
+        ALOGV("Invalid size of GpsSvStatus found: %zd.", status_size);
     }
     sGnssSvListSize = sv_status->num_svs;
     // Clamp the list size. Legacy GpsSvStatus has only 32 elements in sv_list.
