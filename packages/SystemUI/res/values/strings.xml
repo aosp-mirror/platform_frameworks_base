@@ -1146,7 +1146,7 @@
         <item>Ring</item> <!-- STREAM_RING -->
         <item>Media</item> <!-- STREAM_MUSIC -->
         <item>Alarm</item> <!-- STREAM_ALARM -->
-        <item></item> <!-- STREAM_NOTIFICATION -->
+        <item>Notification</item> <!-- STREAM_NOTIFICATION -->
         <item>Bluetooth</item> <!-- STREAM_BLUETOOTH_SCO -->
         <item></item> <!-- STREAM_SYSTEM_ENFORCED -->
         <item></item> <!-- STREAM_DTMF -->
