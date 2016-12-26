@@ -36,6 +36,9 @@ import java.util.Objects;
 public final class AudioPlaybackConfiguration implements Parcelable {
     private final static String TAG = new String("AudioPlaybackConfiguration");
 
+    /** @hide */
+    public final static int PLAYER_PIID_INVALID = -1;
+
     // information about the implementation
     /**
      * @hide
@@ -63,10 +66,16 @@ public final class AudioPlaybackConfiguration implements Parcelable {
     public final static int PLAYER_TYPE_JAM_SOUNDPOOL = 3;
     /**
      * @hide
-     * Player backed by a C OpenSL ES AudioPlayer player
+     * Player backed by a C OpenSL ES AudioPlayer player with a BufferQueue source
      */
     @SystemApi
-    public final static int PLAYER_TYPE_SLES_AUDIOPLAYER = 11;
+    public final static int PLAYER_TYPE_SLES_AUDIOPLAYER_BUFFERQUEUE = 11;
+    /**
+     * @hide
+     * Player backed by a C OpenSL ES AudioPlayer player with a URI or FD source
+     */
+    @SystemApi
+    public final static int PLAYER_TYPE_SLES_AUDIOPLAYER_URI_FD = 12;
 
     /** @hide */
     @IntDef({
@@ -74,7 +83,8 @@ public final class AudioPlaybackConfiguration implements Parcelable {
         PLAYER_TYPE_JAM_AUDIOTRACK,
         PLAYER_TYPE_JAM_MEDIAPLAYER,
         PLAYER_TYPE_JAM_SOUNDPOOL,
-        PLAYER_TYPE_SLES_AUDIOPLAYER
+        PLAYER_TYPE_SLES_AUDIOPLAYER_BUFFERQUEUE,
+        PLAYER_TYPE_SLES_AUDIOPLAYER_URI_FD,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PlayerType {}
@@ -214,8 +224,8 @@ public final class AudioPlaybackConfiguration implements Parcelable {
      * @hide
      * Return the type of player linked to this configuration. The return value is one of
      * {@link #PLAYER_TYPE_JAM_AUDIOTRACK}, {@link #PLAYER_TYPE_JAM_MEDIAPLAYER},
-     * {@link #PLAYER_TYPE_JAM_SOUNDPOOL}, {@link #PLAYER_TYPE_SLES_AUDIOPLAYER},
-     * or {@link #PLAYER_TYPE_UNKNOWN}.
+     * {@link #PLAYER_TYPE_JAM_SOUNDPOOL}, {@link #PLAYER_TYPE_SLES_AUDIOPLAYER_BUFFERQUEUE},
+     * {@link #PLAYER_TYPE_SLES_AUDIOPLAYER_URI_FD}, or {@link #PLAYER_TYPE_UNKNOWN}.
      * @return the type of the player.
      */
     @SystemApi
@@ -360,7 +370,10 @@ public final class AudioPlaybackConfiguration implements Parcelable {
             case PLAYER_TYPE_JAM_AUDIOTRACK: return "android.media.AudioTrack";
             case PLAYER_TYPE_JAM_MEDIAPLAYER: return "android.media.MediaPlayer";
             case PLAYER_TYPE_JAM_SOUNDPOOL:   return "android.media.SoundPool";
-            case PLAYER_TYPE_SLES_AUDIOPLAYER: return "OpenSL ES AudioPlayer";
+            case PLAYER_TYPE_SLES_AUDIOPLAYER_BUFFERQUEUE:
+                return "OpenSL ES AudioPlayer (Buffer Queue)";
+            case PLAYER_TYPE_SLES_AUDIOPLAYER_URI_FD:
+                return "OpenSL ES AudioPlayer (URI/FD)";
             default:
                 return "unknown player type - FIXME";
         }

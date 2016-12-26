@@ -42,6 +42,13 @@ import android.view.KeyEvent;
  */
 interface IAudioService {
 
+    // WARNING: When methods are inserted or deleted, the transaction IDs in
+    // frameworks/native/include/audiomanager/IAudioManager.h must be updated to match the order
+    // in this file.
+    //
+    // When a method's argument list is changed, BnAudioManager's corresponding serialization code
+    // (if any) in frameworks/native/services/audiomanager/IAudioManager.cpp must be updated.
+
     oneway void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
             String callingPackage, String caller);
 
@@ -182,4 +189,6 @@ interface IAudioService {
     oneway void playerEvent(in int piid, in int event);
 
     oneway void releasePlayer(in int piid);
+
+    // WARNING: read warning at top of file, it is recommended to add new methods at the end
 }
