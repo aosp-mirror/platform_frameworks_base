@@ -4012,6 +4012,18 @@ public class NotificationStackScrollLayout extends ViewGroup
         mAmbientState.setExpandingVelocity(expandingVelocity);
     }
 
+    public float getOpeningHeight() {
+        if (mEmptyShadeView.getVisibility() == GONE) {
+            return getMinExpansionHeight();
+        } else {
+            return getAppearEndPosition();
+        }
+    }
+
+    public void setIsFullWidth(boolean isFullWidth) {
+        mAmbientState.setPanelFullWidth(isFullWidth);
+    }
+
     /**
      * A listener that is notified when some child locations might have changed.
      */
