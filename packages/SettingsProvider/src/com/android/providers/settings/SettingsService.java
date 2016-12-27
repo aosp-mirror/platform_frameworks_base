@@ -208,6 +208,8 @@ final public class SettingsService extends Binder {
                     // keep going; there's another PUT arg
                 } else if (mValue == null) {
                     mValue = arg;
+                    // what we have so far is a valid command
+                    valid = true;
                     // keep going; there may be another PUT arg
                 } else if (mToken == null) {
                     mToken = arg;
