@@ -42,7 +42,7 @@ import java.util.List;
  * functionality that can be performed on the device (connect, pair, disconnect,
  * etc.).
  */
-public final class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> {
+public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> {
     private static final String TAG = "CachedBluetoothDevice";
     private static final boolean DEBUG = Utils.V;
 

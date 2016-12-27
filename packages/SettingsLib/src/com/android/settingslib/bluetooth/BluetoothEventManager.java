@@ -38,7 +38,7 @@ import java.util.Set;
  * API and dispatches the event on the UI thread to the right class in the
  * Settings.
  */
-public final class BluetoothEventManager {
+public class BluetoothEventManager {
     private static final String TAG = "BluetoothEventManager";
 
     private final LocalBluetoothAdapter mLocalAdapter;
