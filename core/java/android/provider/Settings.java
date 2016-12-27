@@ -7654,12 +7654,14 @@ public final class Settings {
        public static final String HDMI_CONTROL_ENABLED = "hdmi_control_enabled";
 
        /**
-        * Whether HDMI system audio is enabled. If enabled, TV internal speaker is muted,
-        * and the output is redirected to AV Receiver connected via
-        * {@Global#HDMI_SYSTEM_AUDIO_OUTPUT}.
+        * Whether HDMI System Audio Control feature is enabled. If enabled, TV will try to turn on
+        * system audio mode if there's a connected CEC-enabled AV Receiver. Then audio stream will
+        * be played on AVR instead of TV spaeker. If disabled, the system audio mode will never be
+        * activated.
         * @hide
         */
-       public static final String HDMI_SYSTEM_AUDIO_ENABLED = "hdmi_system_audio_enabled";
+        public static final String HDMI_SYSTEM_AUDIO_CONTROL_ENABLED =
+                "hdmi_system_audio_control_enabled";
 
        /**
         * Whether TV will automatically turn on upon reception of the CEC command

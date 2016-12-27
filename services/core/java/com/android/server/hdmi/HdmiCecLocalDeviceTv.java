@@ -72,13 +72,18 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     private boolean mArcEstablished = false;
 
-    // Stores whether ARC feature is enabled per port. True by default for all the ARC-enabled ports.
+    // Stores whether ARC feature is enabled per port.
+    // True by default for all the ARC-enabled ports.
     private final SparseBooleanArray mArcFeatureEnabled = new SparseBooleanArray();
 
     // Whether System audio mode is activated or not.
     // This becomes true only when all system audio sequences are finished.
     @GuardedBy("mLock")
     private boolean mSystemAudioActivated = false;
+
+    // Whether the System Audio Control feature is enabled or not. True by default.
+    @GuardedBy("mLock")
+    private boolean mSystemAudioControlFeatureEnabled;
 
     // The previous port id (input) before switching to the new one. This is remembered in order to
     // be able to switch to it upon receiving <Inactive Source> from currently active source.
@@ -186,6 +191,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         mAutoDeviceOff = mService.readBooleanSetting(Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
                 true);
         mAutoWakeup = mService.readBooleanSetting(Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED, true);
+        mSystemAudioControlFeatureEnabled =
+                mService.readBooleanSetting(Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED, true);
         mStandbyHandler = new HdmiCecStandbyModeHandler(service, this);
     }
 
@@ -778,14 +785,11 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                         addAndStartAction(new HotplugDetectionAction(HdmiCecLocalDeviceTv.this));
                         addAndStartAction(new PowerStatusMonitorAction(HdmiCecLocalDeviceTv.this));
 
-                        // If there is AVR, initiate System Audio Auto initiation action,
-                        // which turns on and off system audio according to last system
-                        // audio setting.
                         HdmiDeviceInfo avr = getAvrDeviceInfo();
                         if (avr != null) {
                             onNewAvrAdded(avr);
                         } else {
-                            setSystemAudioMode(false, true);
+                            setSystemAudioMode(false);
                         }
                     }
                 });
@@ -818,13 +822,13 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     void changeSystemAudioMode(boolean enabled, IHdmiControlCallback callback) {
         assertRunOnServiceThread();
         if (!mService.isControlEnabled() || hasAction(DeviceDiscoveryAction.class)) {
-            setSystemAudioMode(false, true);
+            setSystemAudioMode(false);
             invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
             return;
         }
         HdmiDeviceInfo avr = getAvrDeviceInfo();
         if (avr == null) {
-            setSystemAudioMode(false, true);
+            setSystemAudioMode(false);
             invokeCallback(callback, HdmiControlManager.RESULT_TARGET_NOT_AVAILABLE);
             return;
         }
@@ -834,12 +838,13 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     // # Seq 25
-    void setSystemAudioMode(boolean on, boolean updateSetting) {
-        HdmiLogger.debug("System Audio Mode change[old:%b new:%b]", mSystemAudioActivated, on);
-
-        if (updateSetting) {
-            mService.writeBooleanSetting(Global.HDMI_SYSTEM_AUDIO_ENABLED, on);
+    void setSystemAudioMode(boolean on) {
+        if (!isSystemAudioControlFeatureEnabled() && on) {
+            HdmiLogger.debug("Cannot turn on system audio mode "
+                    + "because the System Audio Control feature is disabled.");
+            return;
         }
+        HdmiLogger.debug("System Audio Mode change[old:%b new:%b]", mSystemAudioActivated, on);
         updateAudioManagerForSystemAudio(on);
         synchronized (mLock) {
             if (mSystemAudioActivated != on) {
@@ -863,8 +868,21 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         }
     }
 
-    boolean getSystemAudioModeSetting() {
-        return mService.readBooleanSetting(Global.HDMI_SYSTEM_AUDIO_ENABLED, false);
+    @ServiceThreadOnly
+    void setSystemAudioControlFeatureEnabled(boolean enabled) {
+        assertRunOnServiceThread();
+        synchronized (mLock) {
+            mSystemAudioControlFeatureEnabled = enabled;
+        }
+        if (hasSystemAudioDevice()) {
+            changeSystemAudioMode(enabled, null);
+        }
+    }
+
+    boolean isSystemAudioControlFeatureEnabled() {
+        synchronized (mLock) {
+            return mSystemAudioControlFeatureEnabled;
+        }
     }
 
     /**
@@ -1112,6 +1130,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected boolean handleSetSystemAudioMode(HdmiCecMessage message) {
         assertRunOnServiceThread();
+        boolean systemAudioStatus = HdmiUtils.parseCommandParamSystemAudioStatus(message);
         if (!isMessageForSystemAudio(message)) {
             if (getAvrDeviceInfo() == null) {
                 // AVR may not have been discovered yet. Delay the message processing.
@@ -1121,10 +1140,15 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
             }
             return true;
+        } else if (systemAudioStatus && !isSystemAudioControlFeatureEnabled()) {
+            HdmiLogger.debug("Ignoring <Set System Audio Mode> message "
+                    + "because the System Audio Control feature is disabled: %s", message);
+            mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
+            return true;
         }
         removeAction(SystemAudioAutoInitiationAction.class);
         SystemAudioActionFromAvr action = new SystemAudioActionFromAvr(this,
-                message.getSource(), HdmiUtils.parseCommandParamSystemAudioStatus(message), null);
+                message.getSource(), systemAudioStatus, null);
         addAndStartAction(action);
         return true;
     }
@@ -1138,7 +1162,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             // Ignore this message.
             return true;
         }
-        setSystemAudioMode(HdmiUtils.parseCommandParamSystemAudioStatus(message), true);
+        setSystemAudioMode(HdmiUtils.parseCommandParamSystemAudioStatus(message));
         return true;
     }
 
@@ -1882,6 +1906,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         pw.println("mArcFeatureEnabled: " + mArcFeatureEnabled);
         pw.println("mSystemAudioActivated: " + mSystemAudioActivated);
         pw.println("mSystemAudioMute: " + mSystemAudioMute);
+        pw.println("mSystemAudioControlFeatureEnabled: " + mSystemAudioControlFeatureEnabled);
         pw.println("mAutoDeviceOff: " + mAutoDeviceOff);
         pw.println("mAutoWakeup: " + mAutoWakeup);
         pw.println("mSkipRoutingControl: " + mSkipRoutingControl);
