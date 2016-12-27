@@ -17,6 +17,7 @@
 package com.android.providers.settings;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.backup.BackupManager;
@@ -65,6 +66,7 @@ import android.util.ByteStringUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
@@ -90,8 +92,9 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import static android.os.Process.ROOT_UID;
-import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.SHELL_UID;
+import static android.os.Process.SYSTEM_UID;
+
 
 /**
  * <p>
@@ -601,6 +604,22 @@ public class SettingsProvider extends ContentProvider {
         return cacheDir;
     }
 
+    /**
+     * Dump all settings as a proto buf.
+     *
+     * @param fd The file to dump to
+     */
+    void dumpProto(@NonNull FileDescriptor fd) {
+        ProtoOutputStream proto = new ProtoOutputStream(fd);
+
+        synchronized (mLock) {
+            SettingsProtoDumpUtil.dumpProtoLocked(mSettingsRegistry, proto);
+
+        }
+
+        proto.flush();
+    }
+
     public void dumpInternal(FileDescriptor fd, PrintWriter pw, String[] args) {
         synchronized (mLock) {
             final long identity = Binder.clearCallingIdentity();
@@ -663,7 +682,7 @@ public class SettingsProvider extends ContentProvider {
             pw.print(" value:"); pw.print(toDumpString(setting.getValue()));
             if (setting.getDefaultValue() != null) {
                 pw.print(" default:"); pw.print(setting.getDefaultValue());
-                pw.print(" defaultSystemSet:"); pw.print(setting.isDefaultSystemSet());
+                pw.print(" defaultSystemSet:"); pw.print(setting.isDefaultFromSystem());
             }
             if (setting.getTag() != null) {
                 pw.print(" tag:"); pw.print(setting.getTag());
@@ -2296,7 +2315,7 @@ public class SettingsProvider extends ContentProvider {
                         Setting setting = settingsState.getSettingLocked(name);
                         if (!SettingsState.isSystemPackage(getContext(),
                                 setting.getPackageName())) {
-                            if (setting.isDefaultSystemSet()) {
+                            if (setting.isDefaultFromSystem()) {
                                 if (settingsState.resetSettingLocked(name, packageName)) {
                                     notifyForSettingsChange(key, name);
                                 }
@@ -2310,7 +2329,7 @@ public class SettingsProvider extends ContentProvider {
                 case Settings.RESET_MODE_TRUSTED_DEFAULTS: {
                     for (String name : settingsState.getSettingNamesLocked()) {
                         Setting setting = settingsState.getSettingLocked(name);
-                        if (setting.isDefaultSystemSet()) {
+                        if (setting.isDefaultFromSystem()) {
                             if (settingsState.resetSettingLocked(name, packageName)) {
                                 notifyForSettingsChange(key, name);
                             }

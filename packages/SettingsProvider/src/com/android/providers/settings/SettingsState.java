@@ -16,6 +16,9 @@
 
 package com.android.providers.settings;
 
+import static android.os.Process.FIRST_APPLICATION_UID;
+
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -30,6 +33,8 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.providers.settings.GlobalSettingsProto;
+import android.providers.settings.SettingsOperationProto;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
@@ -38,10 +43,14 @@ import android.util.Slog;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.Xml;
+import android.util.proto.ProtoOutputStream;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalServices;
+
 import libcore.io.IoUtils;
 import libcore.util.Objects;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -55,8 +64,6 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-
-import static android.os.Process.FIRST_APPLICATION_UID;
 
 /**
  * This class contains the state for one type of settings. It is responsible
@@ -404,6 +411,38 @@ final class SettingsState {
         }
     }
 
+    /**
+     * Dump historical operations as a proto buf.
+     *
+     * @param proto The proto buf stream to dump to
+     */
+    void dumpProtoHistoricalOperations(@NonNull ProtoOutputStream proto) {
+        synchronized (mLock) {
+            if (mHistoricalOperations == null) {
+                return;
+            }
+
+            final int operationCount = mHistoricalOperations.size();
+            for (int i = 0; i < operationCount; i++) {
+                int index = mNextHistoricalOpIdx - 1 - i;
+                if (index < 0) {
+                    index = operationCount + index;
+                }
+                HistoricalOperation operation = mHistoricalOperations.get(index);
+                long settingsOperationToken = proto.start(GlobalSettingsProto.HISTORICAL_OP);
+                proto.write(SettingsOperationProto.TIMESTAMP, operation.mTimestamp);
+                proto.write(SettingsOperationProto.OPERATION, operation.mOperation);
+                if (operation.mSetting != null) {
+                    // Only add the name of the setting, since we don't know the historical package
+                    // and values for it so they would be misleading to add here (all we could
+                    // add is what the current data is).
+                    proto.write(SettingsOperationProto.SETTING, operation.mSetting.getName());
+                }
+                proto.end(settingsOperationToken);
+            }
+        }
+    }
+
     public void dumpHistoricalOperations(PrintWriter pw) {
         synchronized (mLock) {
             if (mHistoricalOperations == null) {
@@ -544,7 +583,7 @@ final class SettingsState {
 
                 writeSingleSetting(mVersion, serializer, setting.getId(), setting.getName(),
                         setting.getValue(), setting.getDefaultValue(), setting.getPackageName(),
-                        setting.getTag(), setting.isDefaultSystemSet());
+                        setting.getTag(), setting.isDefaultFromSystem());
 
                 if (DEBUG_PERSISTENCE) {
                     Slog.i(LOG_TAG, "[PERSISTED]" + setting.getName() + "=" + setting.getValue());
@@ -763,7 +802,7 @@ final class SettingsState {
         private String id;
         private String tag;
         // Whether the default is set by the system
-        private boolean defaultSystemSet;
+        private boolean defaultFromSystem;
 
         public Setting(Setting other) {
             name = other.name;
@@ -771,7 +810,7 @@ final class SettingsState {
             defaultValue = other.defaultValue;
             packageName = other.packageName;
             id = other.id;
-            defaultSystemSet = other.defaultSystemSet;
+            defaultFromSystem = other.defaultFromSystem;
             tag = other.tag;
         }
 
@@ -798,7 +837,7 @@ final class SettingsState {
             this.defaultValue = defaultValue;
             this.packageName = packageName;
             this.id = id;
-            this.defaultSystemSet = fromSystem;
+            this.defaultFromSystem = fromSystem;
         }
 
         public String getName() {
@@ -825,8 +864,8 @@ final class SettingsState {
             return packageName;
         }
 
-        public boolean isDefaultSystemSet() {
-            return defaultSystemSet;
+        public boolean isDefaultFromSystem() {
+            return defaultFromSystem;
         }
 
         public String getId() {
@@ -854,22 +893,22 @@ final class SettingsState {
             }
 
             String defaultValue = this.defaultValue;
-            boolean defaultSystemSet = this.defaultSystemSet;
+            boolean defaultFromSystem = this.defaultFromSystem;
             if (setDefault) {
                 if (!Objects.equal(value, this.defaultValue)
-                        && (!defaultSystemSet || callerSystem)) {
+                        && (!defaultFromSystem || callerSystem)) {
                     defaultValue = value;
                     // Default null means no default, so the tag is irrelevant
                     // since it is used to reset a settings subset their defaults.
                     // Also it is irrelevant if the system set the canonical default.
                     if (defaultValue == null) {
                         tag = null;
-                        defaultSystemSet = false;
+                        defaultFromSystem = false;
                     }
                 }
-                if (!defaultSystemSet && value != null) {
+                if (!defaultFromSystem && value != null) {
                     if (callerSystem) {
-                        defaultSystemSet = true;
+                        defaultFromSystem = true;
                     }
                 }
             }
@@ -879,11 +918,11 @@ final class SettingsState {
                     && Objects.equal(defaultValue, this.defaultValue)
                     && Objects.equal(packageName, this.packageName)
                     && Objects.equal(tag, this.tag)
-                    && defaultSystemSet == this.defaultSystemSet) {
+                    && defaultFromSystem == this.defaultFromSystem) {
                 return false;
             }
 
-            init(name, value, tag, defaultValue, packageName, defaultSystemSet,
+            init(name, value, tag, defaultValue, packageName, defaultFromSystem,
                     String.valueOf(mNextId++));
             return true;
         }
@@ -892,7 +931,7 @@ final class SettingsState {
             return "Setting{name=" + name + " value=" + value
                     + (defaultValue != null ? " default=" + defaultValue : "")
                     + " packageName=" + packageName + " tag=" + tag
-                    + " defaultSystemSet=" + defaultSystemSet + "}";
+                    + " defaultFromSystem=" + defaultFromSystem + "}";
         }
     }
 
