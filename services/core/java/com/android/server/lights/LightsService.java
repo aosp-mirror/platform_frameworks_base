@@ -1,4 +1,5 @@
-/* * Copyright (C) 2008 The Android Open Source Project
+/*
+ * Copyright (C) 2008 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +17,18 @@
 package com.android.server.lights;
 
 import com.android.server.SystemService;
+import com.android.server.vr.VrManagerService;
 
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.os.RemoteException;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.provider.Settings;
+import android.service.vr.IVrManager;
+import android.service.vr.IVrStateCallbacks;
 import android.util.Slog;
 
 public class LightsService extends SystemService {
@@ -30,6 +36,7 @@ public class LightsService extends SystemService {
     static final boolean DEBUG = false;
 
     final LightImpl mLights[] = new LightImpl[LightsManager.LIGHT_ID_COUNT];
+    private boolean mVrModeEnabled;
 
     private final class LightImpl extends Light {
 
@@ -45,13 +52,6 @@ public class LightsService extends SystemService {
         @Override
         public void setBrightness(int brightness, int brightnessMode) {
             synchronized (this) {
-                // LOW_PERSISTENCE cannot be manually set
-                if (brightnessMode == BRIGHTNESS_MODE_LOW_PERSISTENCE) {
-                    Slog.w(TAG, "setBrightness with LOW_PERSISTENCE unexpected #" + mId +
-                            ": brightness=0x" + Integer.toHexString(brightness));
-                    return;
-                }
-
                 int color = brightness & 0x000000ff;
                 color = 0xff000000 | (color << 16) | (color << 8) | color;
                 setLightLocked(color, LIGHT_FLASH_NONE, 0, 0, brightnessMode);
@@ -80,9 +80,11 @@ public class LightsService extends SystemService {
         @Override
         public void pulse(int color, int onMS) {
             synchronized (this) {
+                if (mBrightnessMode == BRIGHTNESS_MODE_LOW_PERSISTENCE) {
+                    return;
+                }
                 if (mColor == 0 && !mFlashing) {
-                    setLightLocked(color, LIGHT_FLASH_HARDWARE, onMS, 1000,
-                            BRIGHTNESS_MODE_USER);
+                    setLightLocked(color, LIGHT_FLASH_HARDWARE, onMS, 1000, BRIGHTNESS_MODE_USER);
                     mColor = 0;
                     mH.sendMessageDelayed(Message.obtain(mH, 1, this), onMS);
                 }
@@ -96,23 +98,17 @@ public class LightsService extends SystemService {
             }
         }
 
-        @Override
-        public void setVrMode(boolean enabled) {
-            synchronized (this) {
-                if (mVrModeEnabled != enabled) {
-                    mVrModeEnabled = enabled;
+        void enableLowPersistence() {
+            synchronized(this) {
+                setLightLocked(0, LIGHT_FLASH_NONE, 0, 0, BRIGHTNESS_MODE_LOW_PERSISTENCE);
+                mLocked = true;
+            }
+        }
 
-                    mUseLowPersistenceForVR =
-                            (getVrDisplayMode() == Settings.Secure.VR_DISPLAY_MODE_LOW_PERSISTENCE);
-                    if (shouldBeInLowPersistenceMode()) {
-                        mLastBrightnessMode = mBrightnessMode;
-                    }
-
-                    // NOTE: We do not trigger a call to setLightLocked here.  We do not know the
-                    // current brightness or other values when leaving VR so we avoid any incorrect
-                    // jumps. The code that calls this method will immediately issue a brightness
-                    // update which is when the change will occur.
-                }
+        void disableLowPersistence() {
+            synchronized(this) {
+                mLocked = false;
+                setLightLocked(mLastColor, LIGHT_FLASH_NONE, 0, 0, mLastBrightnessMode);
             }
         }
 
@@ -123,13 +119,7 @@ public class LightsService extends SystemService {
         }
 
         private void setLightLocked(int color, int mode, int onMS, int offMS, int brightnessMode) {
-            if (shouldBeInLowPersistenceMode()) {
-                brightnessMode = BRIGHTNESS_MODE_LOW_PERSISTENCE;
-            } else if (brightnessMode == BRIGHTNESS_MODE_LOW_PERSISTENCE) {
-                brightnessMode = mLastBrightnessMode;
-            }
-
-            if ((color != mColor || mode != mMode || onMS != mOnMS || offMS != mOffMS ||
+            if (!mLocked && (color != mColor || mode != mMode || onMS != mOnMS || offMS != mOffMS ||
                     mBrightnessMode != brightnessMode)) {
                 if (DEBUG) Slog.v(TAG, "setLight #" + mId + ": color=#"
                         + Integer.toHexString(color) + ": brightnessMode=" + brightnessMode);
@@ -138,6 +128,7 @@ public class LightsService extends SystemService {
                 mMode = mode;
                 mOnMS = onMS;
                 mOffMS = offMS;
+                mLastBrightnessMode = mBrightnessMode;
                 mBrightnessMode = brightnessMode;
                 Trace.traceBegin(Trace.TRACE_TAG_POWER, "setLight(" + mId + ", 0x"
                         + Integer.toHexString(color) + ")");
@@ -149,10 +140,6 @@ public class LightsService extends SystemService {
             }
         }
 
-        private boolean shouldBeInLowPersistenceMode() {
-            return mVrModeEnabled && mUseLowPersistenceForVR;
-        }
-
         private int mId;
         private int mColor;
         private int mMode;
@@ -162,8 +149,7 @@ public class LightsService extends SystemService {
         private int mBrightnessMode;
         private int mLastBrightnessMode;
         private int mLastColor;
-        private boolean mVrModeEnabled;
-        private boolean mUseLowPersistenceForVR;
+        private boolean mLocked;
     }
 
     public LightsService(Context context) {
@@ -181,6 +167,17 @@ public class LightsService extends SystemService {
 
     @Override
     public void onBootPhase(int phase) {
+        if (phase == PHASE_SYSTEM_SERVICES_READY) {
+            IVrManager vrManager =
+                    (IVrManager) getBinderService(VrManagerService.VR_MANAGER_BINDER_SERVICE);
+            if (vrManager != null) {
+                try {
+                    vrManager.registerListener(mVrStateCallbacks);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to register VR mode state listener: " + e);
+                }
+            }
+        }
     }
 
     private int getVrDisplayMode() {
@@ -190,6 +187,30 @@ public class LightsService extends SystemService {
                 /*default*/Settings.Secure.VR_DISPLAY_MODE_LOW_PERSISTENCE,
                 currentUser);
     }
+
+    private final IVrStateCallbacks mVrStateCallbacks = new IVrStateCallbacks.Stub() {
+        @Override
+        public void onVrStateChanged(boolean enabled) throws RemoteException {
+            LightImpl l = mLights[LightsManager.LIGHT_ID_BACKLIGHT];
+            int vrDisplayMode = getVrDisplayMode();
+
+            // User leaves VR mode before altering display settings.
+            if (enabled && vrDisplayMode == Settings.Secure.VR_DISPLAY_MODE_LOW_PERSISTENCE) {
+                if (!mVrModeEnabled) {
+                    if (DEBUG)
+                        Slog.v(TAG, "VR mode enabled, setting brightness to low persistence");
+                    l.enableLowPersistence();
+                    mVrModeEnabled = true;
+                }
+            } else {
+                if (mVrModeEnabled) {
+                    if (DEBUG) Slog.v(TAG, "VR mode disabled, resetting brightnes");
+                    l.disableLowPersistence();
+                    mVrModeEnabled = false;
+                }
+            }
+        }
+    };
 
     private final LightsManager mService = new LightsManager() {
         @Override
