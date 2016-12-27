@@ -195,4 +195,8 @@ public class TaskGridLayoutAlgorithm  {
         buttonRect.bottom = buttonRect.top + mPaddingTopBottom;
         return buttonRect;
     }
+
+    public Rect getTaskGridRect() {
+        return mTaskGridRect;
+    }
 }
