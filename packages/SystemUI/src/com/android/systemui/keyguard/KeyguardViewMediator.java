@@ -198,6 +198,7 @@ public class KeyguardViewMediator extends SystemUI {
     private boolean mSystemReady;
     private boolean mBootCompleted;
     private boolean mBootSendUserPresent;
+    private boolean mShuttingDown;
 
     /** High level access to the power manager for WakeLocks */
     private PowerManager mPM;
@@ -483,7 +484,7 @@ public class KeyguardViewMediator extends SystemUI {
         }
 
         private void onSimAbsentLocked() {
-            if (isSecure() && mLockWhenSimRemoved) {
+            if (isSecure() && mLockWhenSimRemoved && !mShuttingDown) {
                 mLockWhenSimRemoved = false;
                 MetricsLogger.action(mContext,
                         MetricsProto.MetricsEvent.ACTION_LOCK_BECAUSE_SIM_REMOVED, mShowing);
@@ -652,9 +653,11 @@ public class KeyguardViewMediator extends SystemUI {
         mShowKeyguardWakeLock = mPM.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "show keyguard");
         mShowKeyguardWakeLock.setReferenceCounted(false);
 
-        mContext.registerReceiver(mBroadcastReceiver, new IntentFilter(DELAYED_KEYGUARD_ACTION));
-        mContext.registerReceiver(
-                mBroadcastReceiver, new IntentFilter(DELAYED_LOCK_PROFILE_ACTION));
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(DELAYED_KEYGUARD_ACTION);
+        filter.addAction(DELAYED_LOCK_PROFILE_ACTION);
+        filter.addAction(Intent.ACTION_SHUTDOWN);
+        mContext.registerReceiver(mBroadcastReceiver, filter);
 
         mKeyguardDisplayManager = new KeyguardDisplayManager(mContext);
 
@@ -1418,6 +1421,10 @@ public class KeyguardViewMediator extends SystemUI {
                         }
                     }
                 }
+            } else if (Intent.ACTION_SHUTDOWN.equals(intent.getAction())) {
+                synchronized (KeyguardViewMediator.this){
+                    mShuttingDown = true;
+                }
             }
         }
     };
@@ -1972,6 +1979,7 @@ public class KeyguardViewMediator extends SystemUI {
         pw.print("  mBootCompleted: "); pw.println(mBootCompleted);
         pw.print("  mBootSendUserPresent: "); pw.println(mBootSendUserPresent);
         pw.print("  mExternallyEnabled: "); pw.println(mExternallyEnabled);
+        pw.print("  mShuttingDown: "); pw.println(mShuttingDown);
         pw.print("  mNeedToReshowWhenReenabled: "); pw.println(mNeedToReshowWhenReenabled);
         pw.print("  mShowing: "); pw.println(mShowing);
         pw.print("  mInputRestricted: "); pw.println(mInputRestricted);
