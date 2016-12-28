@@ -209,6 +209,8 @@ import static com.android.server.wm.AppWindowAnimator.PROLONG_ANIMATION_AT_END;
 import static com.android.server.wm.AppWindowAnimator.PROLONG_ANIMATION_AT_START;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
+import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
+import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
@@ -3311,26 +3313,17 @@ public class WindowManagerService extends IWindowManager.Stub
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized(mWindowMap) {
-                Task task = mTaskIdToTask.get(taskId);
+                final Task task = mTaskIdToTask.get(taskId);
                 if (task == null) {
                     // Normal behavior, addAppToken will be called next and task will be created.
                     return;
                 }
-                final TaskStack stack = task.mStack;
-                final DisplayContent displayContent = task.getDisplayContent();
-                displayContent.moveStack(stack, true);
-                if (displayContent.isDefaultDisplay) {
-                    final TaskStack homeStack = displayContent.getHomeStack();
-                    if (homeStack != stack) {
-                        // When a non-home stack moves to the top, the home stack moves to the
-                        // bottom.
-                        displayContent.moveStack(homeStack, false);
-                    }
-                }
-                stack.moveTaskToTop(task);
+                task.mStack.positionChildAt(POSITION_TOP, task, true /* includingParents */);
+
                 if (mAppTransition.isTransitionSet()) {
                     task.setSendingToBottom(false);
                 }
+                final DisplayContent displayContent = task.getDisplayContent();
                 displayContent.layoutAndAssignWindowLayersIfNeeded();
             }
         } finally {
@@ -3342,14 +3335,14 @@ public class WindowManagerService extends IWindowManager.Stub
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized(mWindowMap) {
-                Task task = mTaskIdToTask.get(taskId);
+                final Task task = mTaskIdToTask.get(taskId);
                 if (task == null) {
                     Slog.e(TAG_WM, "moveTaskToBottom: taskId=" + taskId
                             + " not found in mTaskIdToTask");
                     return;
                 }
                 final TaskStack stack = task.mStack;
-                stack.moveTaskToBottom(task);
+                stack.positionChildAt(POSITION_BOTTOM, task, false /* includingParents */);
                 if (mAppTransition.isTransitionSet()) {
                     task.setSendingToBottom(true);
                 }
@@ -3656,6 +3649,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    /** @see com.android.server.am.ActivityManagerService#positionTaskInStack(int, int, int). */
     public void positionTaskInStack(int taskId, int stackId, int position, Rect bounds,
             Configuration overrideConfig) {
         synchronized (mWindowMap) {

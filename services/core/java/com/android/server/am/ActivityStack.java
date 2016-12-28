@@ -2547,6 +2547,10 @@ final class ActivityStack extends ConfigurationContainer {
         return null;
     }
 
+    /**
+     * Used from {@link ActivityStack#positionTask(TaskRecord, int)}.
+     * @see ActivityManagerService#positionTaskInStack(int, int, int).
+     */
     private void insertTaskAtPosition(TaskRecord task, int position) {
         if (position >= mTaskHistory.size()) {
             insertTaskAtTop(task, null);
@@ -4935,6 +4939,7 @@ final class ActivityStack extends ConfigurationContainer {
         postAddTask(task, prevStack);
     }
 
+    /** @see ActivityManagerService#positionTaskInStack(int, int, int). */
     void positionTask(final TaskRecord task, int position) {
         final ActivityRecord topRunningActivity = task.topRunningActivityLocked();
         final boolean wasResumed = topRunningActivity == task.getStack().mResumedActivity;

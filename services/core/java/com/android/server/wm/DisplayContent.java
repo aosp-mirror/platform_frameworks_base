@@ -712,19 +712,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (prevDc == this) {
             return;
         }
-        if (prevDc != null && prevDc.mTokenMap.remove(token.token) != null) {
-            switch (token.windowType) {
-                case TYPE_WALLPAPER:
-                    prevDc.mBelowAppWindowsContainers.removeChild(token);
-                    break;
-                case TYPE_INPUT_METHOD:
-                case TYPE_INPUT_METHOD_DIALOG:
-                    prevDc.mImeWindowsContainers.removeChild(token);
-                    break;
-                default:
-                    prevDc.mAboveAppWindowsContainers.removeChild(token);
-                    break;
-            }
+        if (prevDc != null && prevDc.mTokenMap.remove(token.token) != null
+                && token.asAppWindowToken() == null) {
+            // Removed the token from the map, but made sure it's not an app token before removing
+            // from parent.
+            token.getParent().removeChild(token);
         }
 
         addWindowToken(token.token, token);
@@ -979,7 +971,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 // It's already attached to the display...clear mDeferRemoval and move stack to
                 // appropriate z-order on display as needed.
                 stack.mDeferRemoval = false;
-                moveStack(stack, onTop);
+                // We're not moving the display to front when we're adding stacks, only when
+                // requested to change the position of stack explicitly.
+                mTaskStackContainers.positionChildAt(onTop ? POSITION_TOP : POSITION_BOTTOM, stack,
+                        false /* includingParents */);
                 attachedToDisplay = true;
             } else {
                 stack = new TaskStack(mService, stackId);
@@ -1031,10 +1026,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return addStackToDisplay(stack.mStackId, true /* onTop */);
     }
 
-    void moveStack(TaskStack stack, boolean toTop) {
-        mTaskStackContainers.moveStack(stack, toTop);
-    }
-
     @Override
     protected void addChild(DisplayChildWindowContainer child,
             Comparator<DisplayChildWindowContainer> comparator) {
@@ -1055,6 +1046,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             return;
         }
         throw new UnsupportedOperationException("See DisplayChildWindowContainer");
+    }
+
+    @Override
+    void positionChildAt(int position, DisplayChildWindowContainer child, boolean includingParents) {
+        // Children of the display are statically ordered, so the real intention here is to perform
+        // the operation on the display and not the static direct children.
+        getParent().positionChildAt(position, this, includingParents);
     }
 
     int taskIdFromPoint(int x, int y) {
@@ -2499,20 +2497,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             stack.onRemovedFromDisplay();
         }
 
-        void moveStack(TaskStack stack, boolean toTop) {
-            if (StackId.isAlwaysOnTop(stack.mStackId) && !toTop) {
-                // This stack is always-on-top silly...
-                Slog.w(TAG_WM, "Ignoring move of always-on-top stack=" + stack + " to bottom");
-                return;
-            }
-
-            if (!mChildren.contains(stack)) {
-                Slog.wtf(TAG_WM, "moving stack that was not added: " + stack, new Throwable());
-            }
-            removeChild(stack);
-            addChild(stack, toTop);
-        }
-
         private void addChild(TaskStack stack, boolean toTop) {
             int addIndex = toTop ? mChildren.size() : 0;
 
@@ -2529,6 +2513,22 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
             addChild(stack, addIndex);
             setLayoutNeeded();
+        }
+
+        @Override
+        void positionChildAt(int position, TaskStack child, boolean includingParents) {
+            if (StackId.isAlwaysOnTop(child.mStackId) && position != POSITION_TOP) {
+                // This stack is always-on-top, override the default behavior.
+                Slog.w(TAG_WM, "Ignoring move of always-on-top stack=" + this + " to bottom");
+
+                // Moving to its current position, as we must call super but we don't want to
+                // perform any meaningful action.
+                final int currentPosition = mChildren.indexOf(child);
+                super.positionChildAt(currentPosition, child, false /* includingParents */);
+                return;
+            }
+
+            super.positionChildAt(position, child, includingParents);
         }
 
         @Override

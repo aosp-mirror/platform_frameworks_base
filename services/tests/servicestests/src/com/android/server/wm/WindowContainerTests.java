@@ -33,6 +33,10 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCA
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+
+import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
+import static com.android.server.wm.WindowContainer.POSITION_TOP;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -87,6 +91,14 @@ public class WindowContainerTests {
         assertEquals(layer1, root.getChildAt(4));
         assertEquals(secondLayer1, root.getChildAt(5));
         assertEquals(layer2, root.getChildAt(6));
+
+        assertTrue(layer1.mOnParentSetCalled);
+        assertTrue(secondLayer1.mOnParentSetCalled);
+        assertTrue(layer2.mOnParentSetCalled);
+        assertTrue(layerNeg1.mOnParentSetCalled);
+        assertTrue(layerNeg2.mOnParentSetCalled);
+        assertTrue(secondLayerNeg1.mOnParentSetCalled);
+        assertTrue(layer0.mOnParentSetCalled);
     }
 
     @Test
@@ -177,6 +189,99 @@ public class WindowContainerTests {
 
         root.removeImmediately();
         assertEquals(0, root.getChildrenCount());
+    }
+
+    @Test
+    public void testPositionChildAt() throws Exception {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+        final TestWindowContainer root = builder.setLayer(0).build();
+
+        final TestWindowContainer child1 = root.addChildWindow();
+        final TestWindowContainer child2 = root.addChildWindow();
+        final TestWindowContainer child3 = root.addChildWindow();
+
+        // Test position at top.
+        root.positionChildAt(POSITION_TOP, child1, false /* includingParents */);
+        assertEquals(child1, root.getChildAt(root.getChildrenCount() - 1));
+
+        // Test position at bottom.
+        root.positionChildAt(POSITION_BOTTOM, child1, false /* includingParents */);
+        assertEquals(child1, root.getChildAt(0));
+
+        // Test position in the middle.
+        root.positionChildAt(1, child3, false /* includingParents */);
+        assertEquals(child1, root.getChildAt(0));
+        assertEquals(child3, root.getChildAt(1));
+        assertEquals(child2, root.getChildAt(2));
+    }
+
+    @Test
+    public void testPositionChildAtIncludeParents() throws Exception {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+        final TestWindowContainer root = builder.setLayer(0).build();
+
+        final TestWindowContainer child1 = root.addChildWindow();
+        final TestWindowContainer child2 = root.addChildWindow();
+        final TestWindowContainer child11 = child1.addChildWindow();
+        final TestWindowContainer child12 = child1.addChildWindow();
+        final TestWindowContainer child13 = child1.addChildWindow();
+        final TestWindowContainer child21 = child2.addChildWindow();
+        final TestWindowContainer child22 = child2.addChildWindow();
+        final TestWindowContainer child23 = child2.addChildWindow();
+
+        // Test moving to top.
+        child1.positionChildAt(POSITION_TOP, child11, true /* includingParents */);
+        assertEquals(child12, child1.getChildAt(0));
+        assertEquals(child13, child1.getChildAt(1));
+        assertEquals(child11, child1.getChildAt(2));
+        assertEquals(child2, root.getChildAt(0));
+        assertEquals(child1, root.getChildAt(1));
+
+        // Test moving to bottom.
+        child1.positionChildAt(POSITION_BOTTOM, child11, true /* includingParents */);
+        assertEquals(child11, child1.getChildAt(0));
+        assertEquals(child12, child1.getChildAt(1));
+        assertEquals(child13, child1.getChildAt(2));
+        assertEquals(child1, root.getChildAt(0));
+        assertEquals(child2, root.getChildAt(1));
+
+        // Test moving to middle, includeParents shouldn't do anything.
+        child2.positionChildAt(1, child21, true /* includingParents */);
+        assertEquals(child11, child1.getChildAt(0));
+        assertEquals(child12, child1.getChildAt(1));
+        assertEquals(child13, child1.getChildAt(2));
+        assertEquals(child22, child2.getChildAt(0));
+        assertEquals(child21, child2.getChildAt(1));
+        assertEquals(child23, child2.getChildAt(2));
+        assertEquals(child1, root.getChildAt(0));
+        assertEquals(child2, root.getChildAt(1));
+    }
+
+    @Test
+    public void testPositionChildAtInvalid() throws Exception {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+        final TestWindowContainer root = builder.setLayer(0).build();
+
+        final TestWindowContainer child1 = root.addChildWindow();
+        final TestWindowContainer child2 = root.addChildWindow();
+
+        boolean gotException = false;
+        try {
+            // Check response to negative position.
+            root.positionChildAt(-1, child1, false /* includingParents */);
+        } catch (IllegalArgumentException e) {
+            gotException = true;
+        }
+        assertTrue(gotException);
+
+        gotException = false;
+        try {
+            // Check response to position that's bigger than child number.
+            root.positionChildAt(2, child1, false /* includingParents */);
+        } catch (IllegalArgumentException e) {
+            gotException = true;
+        }
+        assertTrue(gotException);
     }
 
     @Test
@@ -548,6 +653,8 @@ public class WindowContainerTests {
         private boolean mIsVisible;
         private boolean mFillsParent;
 
+        private boolean mOnParentSetCalled;
+
         /**
          * Compares 2 window layers and returns -1 if the first is lesser than the second in terms
          * of z-order and 1 otherwise.
@@ -595,6 +702,11 @@ public class WindowContainerTests {
 
         TestWindowContainer getChildAt(int index) {
             return mChildren.get(index);
+        }
+
+        @Override
+        void onParentSet() {
+            mOnParentSetCalled = true;
         }
 
         @Override
