@@ -393,10 +393,14 @@ static void printUsesPermissionSdk23(const String8& name, int maxSdkVersion=-1) 
     printf("\n");
 }
 
-static void printUsesImpliedPermission(const String8& name, const String8& reason) {
-    printf("uses-implied-permission: name='%s' reason='%s'\n",
-            ResTable::normalizeForOutput(name.string()).string(),
-            ResTable::normalizeForOutput(reason.string()).string());
+static void printUsesImpliedPermission(const String8& name, const String8& reason,
+        const int32_t maxSdkVersion = -1) {
+    printf("uses-implied-permission: name='%s'",
+            ResTable::normalizeForOutput(name.string()).string());
+    if (maxSdkVersion != -1) {
+        printf(" maxSdkVersion='%d'", maxSdkVersion);
+    }
+    printf(" reason='%s'\n", ResTable::normalizeForOutput(reason.string()).string());
 }
 
 Vector<String8> getNfcAidCategories(AssetManager& assets, const String8& xmlPath, bool offHost,
@@ -1027,6 +1031,7 @@ int doDump(Bundle* bundle)
             // These two implement the implicit permissions that are granted
             // to pre-1.6 applications.
             bool hasWriteExternalStoragePermission = false;
+            int32_t writeExternalStoragePermissionMaxSdkVersion = -1;
             bool hasReadPhoneStatePermission = false;
 
             // If an app requests write storage, they will also get read storage.
@@ -1538,8 +1543,12 @@ int doDump(Bundle* bundle)
 
                         addImpliedFeaturesForPermission(targetSdk, name, &impliedFeatures, false);
 
+                        const int32_t maxSdkVersion =
+                                AaptXml::getIntegerAttribute(tree, MAX_SDK_VERSION_ATTR, -1);
+
                         if (name == "android.permission.WRITE_EXTERNAL_STORAGE") {
                             hasWriteExternalStoragePermission = true;
+                            writeExternalStoragePermissionMaxSdkVersion = maxSdkVersion;
                         } else if (name == "android.permission.READ_EXTERNAL_STORAGE") {
                             hasReadExternalStoragePermission = true;
                         } else if (name == "android.permission.READ_PHONE_STATE") {
@@ -1556,7 +1565,7 @@ int doDump(Bundle* bundle)
 
                         printUsesPermission(name,
                                 AaptXml::getIntegerAttribute(tree, REQUIRED_ATTR, 1) == 0,
-                                AaptXml::getIntegerAttribute(tree, MAX_SDK_VERSION_ATTR));
+                                maxSdkVersion);
 
                     } else if (tag == "uses-permission-sdk-23" || tag == "uses-permission-sdk-m") {
                         String8 name = AaptXml::getAttribute(tree, NAME_ATTR, &error);
@@ -2039,9 +2048,11 @@ int doDump(Bundle* bundle)
             // do this (regardless of target API version) because we can't have
             // an app with write permission but not read permission.
             if (!hasReadExternalStoragePermission && hasWriteExternalStoragePermission) {
-                printUsesPermission(String8("android.permission.READ_EXTERNAL_STORAGE"));
+                printUsesPermission(String8("android.permission.READ_EXTERNAL_STORAGE"),
+                        false /* optional */, writeExternalStoragePermissionMaxSdkVersion);
                 printUsesImpliedPermission(String8("android.permission.READ_EXTERNAL_STORAGE"),
-                        String8("requested WRITE_EXTERNAL_STORAGE"));
+                        String8("requested WRITE_EXTERNAL_STORAGE"),
+                        writeExternalStoragePermissionMaxSdkVersion);
             }
 
             // Pre-JellyBean call log permission compatibility.
