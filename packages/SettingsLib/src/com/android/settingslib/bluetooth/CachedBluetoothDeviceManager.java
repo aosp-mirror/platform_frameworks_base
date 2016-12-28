@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * CachedBluetoothDeviceManager manages the set of remote Bluetooth devices.
  */
-public final class CachedBluetoothDeviceManager {
+public class CachedBluetoothDeviceManager {
     private static final String TAG = "CachedBluetoothDeviceManager";
     private static final boolean DEBUG = Utils.D;
 
