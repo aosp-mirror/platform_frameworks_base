@@ -23,63 +23,52 @@ namespace aapt {
 class XmlReferenceLinkerTest : public ::testing::Test {
  public:
   void SetUp() override {
-    context_ =
-        test::ContextBuilder()
-            .SetCompilationPackage("com.app.test")
-            .SetNameManglerPolicy(
-                NameManglerPolicy{"com.app.test", {"com.android.support"}})
-            .AddSymbolSource(
-                test::StaticSymbolSourceBuilder()
-                    .AddPublicSymbol(
-                        "android:attr/layout_width", ResourceId(0x01010000),
-                        test::AttributeBuilder()
-                            .SetTypeMask(android::ResTable_map::TYPE_ENUM |
-                                         android::ResTable_map::TYPE_DIMENSION)
-                            .AddItem("match_parent", 0xffffffff)
-                            .Build())
-                    .AddPublicSymbol(
-                        "android:attr/background", ResourceId(0x01010001),
-                        test::AttributeBuilder()
-                            .SetTypeMask(android::ResTable_map::TYPE_COLOR)
-                            .Build())
-                    .AddPublicSymbol("android:attr/attr",
-                                     ResourceId(0x01010002),
-                                     test::AttributeBuilder().Build())
-                    .AddPublicSymbol(
-                        "android:attr/text", ResourceId(0x01010003),
-                        test::AttributeBuilder()
-                            .SetTypeMask(android::ResTable_map::TYPE_STRING)
-                            .Build())
+    context_ = test::ContextBuilder()
+                   .SetCompilationPackage("com.app.test")
+                   .SetNameManglerPolicy(NameManglerPolicy{"com.app.test", {"com.android.support"}})
+                   .AddSymbolSource(
+                       test::StaticSymbolSourceBuilder()
+                           .AddPublicSymbol("android:attr/layout_width", ResourceId(0x01010000),
+                                            test::AttributeBuilder()
+                                                .SetTypeMask(android::ResTable_map::TYPE_ENUM |
+                                                             android::ResTable_map::TYPE_DIMENSION)
+                                                .AddItem("match_parent", 0xffffffff)
+                                                .Build())
+                           .AddPublicSymbol("android:attr/background", ResourceId(0x01010001),
+                                            test::AttributeBuilder()
+                                                .SetTypeMask(android::ResTable_map::TYPE_COLOR)
+                                                .Build())
+                           .AddPublicSymbol("android:attr/attr", ResourceId(0x01010002),
+                                            test::AttributeBuilder().Build())
+                           .AddPublicSymbol("android:attr/text", ResourceId(0x01010003),
+                                            test::AttributeBuilder()
+                                                .SetTypeMask(android::ResTable_map::TYPE_STRING)
+                                                .Build())
 
-                    // Add one real symbol that was introduces in v21
-                    .AddPublicSymbol("android:attr/colorAccent",
-                                     ResourceId(0x01010435),
-                                     test::AttributeBuilder().Build())
+                           // Add one real symbol that was introduces in v21
+                           .AddPublicSymbol("android:attr/colorAccent", ResourceId(0x01010435),
+                                            test::AttributeBuilder().Build())
 
-                    // Private symbol.
-                    .AddSymbol("android:color/hidden", ResourceId(0x01020001))
+                           // Private symbol.
+                           .AddSymbol("android:color/hidden", ResourceId(0x01020001))
 
-                    .AddPublicSymbol("android:id/id", ResourceId(0x01030000))
-                    .AddSymbol("com.app.test:id/id", ResourceId(0x7f030000))
-                    .AddSymbol("com.app.test:color/green",
-                               ResourceId(0x7f020000))
-                    .AddSymbol("com.app.test:color/red", ResourceId(0x7f020001))
-                    .AddSymbol(
-                        "com.app.test:attr/colorAccent", ResourceId(0x7f010000),
-                        test::AttributeBuilder()
-                            .SetTypeMask(android::ResTable_map::TYPE_COLOR)
-                            .Build())
-                    .AddPublicSymbol(
-                        "com.app.test:attr/com.android.support$colorAccent",
-                        ResourceId(0x7f010001),
-                        test::AttributeBuilder()
-                            .SetTypeMask(android::ResTable_map::TYPE_COLOR)
-                            .Build())
-                    .AddPublicSymbol("com.app.test:attr/attr",
-                                     ResourceId(0x7f010002),
-                                     test::AttributeBuilder().Build())
-                    .Build())
-            .Build();
+                           .AddPublicSymbol("android:id/id", ResourceId(0x01030000))
+                           .AddSymbol("com.app.test:id/id", ResourceId(0x7f030000))
+                           .AddSymbol("com.app.test:color/green", ResourceId(0x7f020000))
+                           .AddSymbol("com.app.test:color/red", ResourceId(0x7f020001))
+                           .AddSymbol("com.app.test:attr/colorAccent", ResourceId(0x7f010000),
+                                      test::AttributeBuilder()
+                                          .SetTypeMask(android::ResTable_map::TYPE_COLOR)
+                                          .Build())
+                           .AddPublicSymbol("com.app.test:attr/com.android.support$colorAccent",
+                                            ResourceId(0x7f010001),
+                                            test::AttributeBuilder()
+                                                .SetTypeMask(android::ResTable_map::TYPE_COLOR)
+                                                .Build())
+                           .AddPublicSymbol("com.app.test:attr/attr", ResourceId(0x7f010002),
+                                            test::AttributeBuilder().Build())
+                           .Build())
+                   .Build();
   }
 
  protected:
@@ -87,12 +76,13 @@ class XmlReferenceLinkerTest : public ::testing::Test {
 };
 
 TEST_F(XmlReferenceLinkerTest, LinkBasicAttributes) {
-  std::unique_ptr<xml::XmlResource> doc =
-      test::BuildXmlDomForPackageName(context_.get(), R"EOF(
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"EOF(
         <View xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:background="@color/green"
               android:text="hello"
+              nonAaptAttr="1"
+              nonAaptAttrRef="@id/id"
               class="hello" />)EOF");
 
   XmlReferenceLinker linker;
@@ -101,38 +91,44 @@ TEST_F(XmlReferenceLinkerTest, LinkBasicAttributes) {
   xml::Element* view_el = xml::FindRootElement(doc.get());
   ASSERT_NE(view_el, nullptr);
 
-  xml::Attribute* xml_attr =
-      view_el->FindAttribute(xml::kSchemaAndroid, "layout_width");
+  xml::Attribute* xml_attr = view_el->FindAttribute(xml::kSchemaAndroid, "layout_width");
   ASSERT_NE(xml_attr, nullptr);
   AAPT_ASSERT_TRUE(xml_attr->compiled_attribute);
   AAPT_ASSERT_TRUE(xml_attr->compiled_attribute.value().id);
-  EXPECT_EQ(xml_attr->compiled_attribute.value().id.value(),
-            ResourceId(0x01010000));
+  EXPECT_EQ(xml_attr->compiled_attribute.value().id.value(), ResourceId(0x01010000));
   ASSERT_NE(xml_attr->compiled_value, nullptr);
-  ASSERT_NE(ValueCast<BinaryPrimitive>(xml_attr->compiled_value.get()),
-            nullptr);
+  ASSERT_NE(ValueCast<BinaryPrimitive>(xml_attr->compiled_value.get()), nullptr);
 
   xml_attr = view_el->FindAttribute(xml::kSchemaAndroid, "background");
   ASSERT_NE(xml_attr, nullptr);
   AAPT_ASSERT_TRUE(xml_attr->compiled_attribute);
   AAPT_ASSERT_TRUE(xml_attr->compiled_attribute.value().id);
-  EXPECT_EQ(xml_attr->compiled_attribute.value().id.value(),
-            ResourceId(0x01010001));
+  EXPECT_EQ(xml_attr->compiled_attribute.value().id.value(), ResourceId(0x01010001));
   ASSERT_NE(xml_attr->compiled_value, nullptr);
   Reference* ref = ValueCast<Reference>(xml_attr->compiled_value.get());
   ASSERT_NE(ref, nullptr);
   AAPT_ASSERT_TRUE(ref->name);
-  EXPECT_EQ(ref->name.value(),
-            test::ParseNameOrDie("color/green"));  // Make sure the name
-                                                   // didn't change.
+  EXPECT_EQ(ref->name.value(), test::ParseNameOrDie("color/green"));  // Make sure the name
+                                                                      // didn't change.
   AAPT_ASSERT_TRUE(ref->id);
   EXPECT_EQ(ref->id.value(), ResourceId(0x7f020000));
 
   xml_attr = view_el->FindAttribute(xml::kSchemaAndroid, "text");
   ASSERT_NE(xml_attr, nullptr);
   AAPT_ASSERT_TRUE(xml_attr->compiled_attribute);
-  ASSERT_FALSE(
-      xml_attr->compiled_value);  // Strings don't get compiled for memory sake.
+  ASSERT_FALSE(xml_attr->compiled_value);  // Strings don't get compiled for memory sake.
+
+  xml_attr = view_el->FindAttribute("", "nonAaptAttr");
+  ASSERT_NE(nullptr, xml_attr);
+  AAPT_ASSERT_FALSE(xml_attr->compiled_attribute);
+  ASSERT_NE(nullptr, xml_attr->compiled_value);
+  ASSERT_NE(nullptr, ValueCast<BinaryPrimitive>(xml_attr->compiled_value.get()));
+
+  xml_attr = view_el->FindAttribute("", "nonAaptAttrRef");
+  ASSERT_NE(nullptr, xml_attr);
+  AAPT_ASSERT_FALSE(xml_attr->compiled_attribute);
+  ASSERT_NE(nullptr, xml_attr->compiled_value);
+  ASSERT_NE(nullptr, ValueCast<Reference>(xml_attr->compiled_value.get()));
 
   xml_attr = view_el->FindAttribute("", "class");
   ASSERT_NE(xml_attr, nullptr);
@@ -141,8 +137,7 @@ TEST_F(XmlReferenceLinkerTest, LinkBasicAttributes) {
 }
 
 TEST_F(XmlReferenceLinkerTest, PrivateSymbolsAreNotLinked) {
-  std::unique_ptr<xml::XmlResource> doc =
-      test::BuildXmlDomForPackageName(context_.get(), R"EOF(
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"EOF(
         <View xmlns:android="http://schemas.android.com/apk/res/android"
               android:colorAccent="@android:color/hidden" />)EOF");
 
@@ -150,10 +145,8 @@ TEST_F(XmlReferenceLinkerTest, PrivateSymbolsAreNotLinked) {
   ASSERT_FALSE(linker.Consume(context_.get(), doc.get()));
 }
 
-TEST_F(XmlReferenceLinkerTest,
-       PrivateSymbolsAreLinkedWhenReferenceHasStarPrefix) {
-  std::unique_ptr<xml::XmlResource> doc =
-      test::BuildXmlDomForPackageName(context_.get(), R"EOF(
+TEST_F(XmlReferenceLinkerTest, PrivateSymbolsAreLinkedWhenReferenceHasStarPrefix) {
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"EOF(
     <View xmlns:android="http://schemas.android.com/apk/res/android"
           android:colorAccent="@*android:color/hidden" />)EOF");
 
@@ -162,8 +155,7 @@ TEST_F(XmlReferenceLinkerTest,
 }
 
 TEST_F(XmlReferenceLinkerTest, SdkLevelsAreRecorded) {
-  std::unique_ptr<xml::XmlResource> doc =
-      test::BuildXmlDomForPackageName(context_.get(), R"EOF(
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"EOF(
         <View xmlns:android="http://schemas.android.com/apk/res/android"
               android:colorAccent="#ffffff" />)EOF");
 
@@ -173,8 +165,7 @@ TEST_F(XmlReferenceLinkerTest, SdkLevelsAreRecorded) {
 }
 
 TEST_F(XmlReferenceLinkerTest, LinkMangledAttributes) {
-  std::unique_ptr<xml::XmlResource> doc =
-      test::BuildXmlDomForPackageName(context_.get(), R"EOF(
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"EOF(
             <View xmlns:support="http://schemas.android.com/apk/res/com.android.support"
                   support:colorAccent="#ff0000" />)EOF");
 
@@ -184,20 +175,17 @@ TEST_F(XmlReferenceLinkerTest, LinkMangledAttributes) {
   xml::Element* view_el = xml::FindRootElement(doc.get());
   ASSERT_NE(view_el, nullptr);
 
-  xml::Attribute* xml_attr = view_el->FindAttribute(
-      xml::BuildPackageNamespace("com.android.support"), "colorAccent");
+  xml::Attribute* xml_attr =
+      view_el->FindAttribute(xml::BuildPackageNamespace("com.android.support"), "colorAccent");
   ASSERT_NE(xml_attr, nullptr);
   AAPT_ASSERT_TRUE(xml_attr->compiled_attribute);
   AAPT_ASSERT_TRUE(xml_attr->compiled_attribute.value().id);
-  EXPECT_EQ(xml_attr->compiled_attribute.value().id.value(),
-            ResourceId(0x7f010001));
-  ASSERT_NE(ValueCast<BinaryPrimitive>(xml_attr->compiled_value.get()),
-            nullptr);
+  EXPECT_EQ(xml_attr->compiled_attribute.value().id.value(), ResourceId(0x7f010001));
+  ASSERT_NE(ValueCast<BinaryPrimitive>(xml_attr->compiled_value.get()), nullptr);
 }
 
 TEST_F(XmlReferenceLinkerTest, LinkAutoResReference) {
-  std::unique_ptr<xml::XmlResource> doc =
-      test::BuildXmlDomForPackageName(context_.get(), R"EOF(
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"EOF(
             <View xmlns:app="http://schemas.android.com/apk/res-auto"
                   app:colorAccent="@app:color/red" />)EOF");
 
@@ -207,13 +195,11 @@ TEST_F(XmlReferenceLinkerTest, LinkAutoResReference) {
   xml::Element* view_el = xml::FindRootElement(doc.get());
   ASSERT_NE(view_el, nullptr);
 
-  xml::Attribute* xml_attr =
-      view_el->FindAttribute(xml::kSchemaAuto, "colorAccent");
+  xml::Attribute* xml_attr = view_el->FindAttribute(xml::kSchemaAuto, "colorAccent");
   ASSERT_NE(xml_attr, nullptr);
   AAPT_ASSERT_TRUE(xml_attr->compiled_attribute);
   AAPT_ASSERT_TRUE(xml_attr->compiled_attribute.value().id);
-  EXPECT_EQ(xml_attr->compiled_attribute.value().id.value(),
-            ResourceId(0x7f010000));
+  EXPECT_EQ(xml_attr->compiled_attribute.value().id.value(), ResourceId(0x7f010000));
   Reference* ref = ValueCast<Reference>(xml_attr->compiled_value.get());
   ASSERT_NE(ref, nullptr);
   AAPT_ASSERT_TRUE(ref->name);
@@ -222,8 +208,7 @@ TEST_F(XmlReferenceLinkerTest, LinkAutoResReference) {
 }
 
 TEST_F(XmlReferenceLinkerTest, LinkViewWithShadowedPackageAlias) {
-  std::unique_ptr<xml::XmlResource> doc =
-      test::BuildXmlDomForPackageName(context_.get(), R"EOF(
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"EOF(
             <View xmlns:app="http://schemas.android.com/apk/res/android"
                   app:attr="@app:id/id">
               <View xmlns:app="http://schemas.android.com/apk/res/com.app.test"
@@ -238,13 +223,11 @@ TEST_F(XmlReferenceLinkerTest, LinkViewWithShadowedPackageAlias) {
 
   // All attributes and references in this element should be referring to
   // "android" (0x01).
-  xml::Attribute* xml_attr =
-      view_el->FindAttribute(xml::kSchemaAndroid, "attr");
+  xml::Attribute* xml_attr = view_el->FindAttribute(xml::kSchemaAndroid, "attr");
   ASSERT_NE(xml_attr, nullptr);
   AAPT_ASSERT_TRUE(xml_attr->compiled_attribute);
   AAPT_ASSERT_TRUE(xml_attr->compiled_attribute.value().id);
-  EXPECT_EQ(xml_attr->compiled_attribute.value().id.value(),
-            ResourceId(0x01010002));
+  EXPECT_EQ(xml_attr->compiled_attribute.value().id.value(), ResourceId(0x01010002));
   Reference* ref = ValueCast<Reference>(xml_attr->compiled_value.get());
   ASSERT_NE(ref, nullptr);
   AAPT_ASSERT_TRUE(ref->id);
@@ -256,13 +239,11 @@ TEST_F(XmlReferenceLinkerTest, LinkViewWithShadowedPackageAlias) {
 
   // All attributes and references in this element should be referring to
   // "com.app.test" (0x7f).
-  xml_attr = view_el->FindAttribute(xml::BuildPackageNamespace("com.app.test"),
-                                    "attr");
+  xml_attr = view_el->FindAttribute(xml::BuildPackageNamespace("com.app.test"), "attr");
   ASSERT_NE(xml_attr, nullptr);
   AAPT_ASSERT_TRUE(xml_attr->compiled_attribute);
   AAPT_ASSERT_TRUE(xml_attr->compiled_attribute.value().id);
-  EXPECT_EQ(xml_attr->compiled_attribute.value().id.value(),
-            ResourceId(0x7f010002));
+  EXPECT_EQ(xml_attr->compiled_attribute.value().id.value(), ResourceId(0x7f010002));
   ref = ValueCast<Reference>(xml_attr->compiled_value.get());
   ASSERT_NE(ref, nullptr);
   AAPT_ASSERT_TRUE(ref->id);
@@ -270,8 +251,7 @@ TEST_F(XmlReferenceLinkerTest, LinkViewWithShadowedPackageAlias) {
 }
 
 TEST_F(XmlReferenceLinkerTest, LinkViewWithLocalPackageAndAliasOfTheSameName) {
-  std::unique_ptr<xml::XmlResource> doc =
-      test::BuildXmlDomForPackageName(context_.get(), R"EOF(
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"EOF(
             <View xmlns:android="http://schemas.android.com/apk/res/com.app.test"
                   android:attr="@id/id"/>)EOF");
 
@@ -283,13 +263,12 @@ TEST_F(XmlReferenceLinkerTest, LinkViewWithLocalPackageAndAliasOfTheSameName) {
 
   // All attributes and references in this element should be referring to
   // "com.app.test" (0x7f).
-  xml::Attribute* xml_attr = view_el->FindAttribute(
-      xml::BuildPackageNamespace("com.app.test"), "attr");
+  xml::Attribute* xml_attr =
+      view_el->FindAttribute(xml::BuildPackageNamespace("com.app.test"), "attr");
   ASSERT_NE(xml_attr, nullptr);
   AAPT_ASSERT_TRUE(xml_attr->compiled_attribute);
   AAPT_ASSERT_TRUE(xml_attr->compiled_attribute.value().id);
-  EXPECT_EQ(xml_attr->compiled_attribute.value().id.value(),
-            ResourceId(0x7f010002));
+  EXPECT_EQ(xml_attr->compiled_attribute.value().id.value(), ResourceId(0x7f010002));
   Reference* ref = ValueCast<Reference>(xml_attr->compiled_value.get());
   ASSERT_NE(ref, nullptr);
   AAPT_ASSERT_TRUE(ref->id);

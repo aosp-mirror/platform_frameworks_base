@@ -16,6 +16,8 @@
 
 #include "link/Linkers.h"
 
+#include "androidfw/ResourceTypes.h"
+
 #include "Diagnostics.h"
 #include "ResourceUtils.h"
 #include "SdkConstants.h"
@@ -40,17 +42,12 @@ class ReferenceVisitor : public ValueVisitor {
  public:
   using ValueVisitor::Visit;
 
-  ReferenceVisitor(IAaptContext* context, SymbolTable* symbols,
-                   xml::IPackageDeclStack* decls, CallSite* callsite)
-      : context_(context),
-        symbols_(symbols),
-        decls_(decls),
-        callsite_(callsite),
-        error_(false) {}
+  ReferenceVisitor(IAaptContext* context, SymbolTable* symbols, xml::IPackageDeclStack* decls,
+                   CallSite* callsite)
+      : context_(context), symbols_(symbols), decls_(decls), callsite_(callsite), error_(false) {}
 
   void Visit(Reference* ref) override {
-    if (!ReferenceLinker::LinkReference(ref, context_, symbols_, decls_,
-                                        callsite_)) {
+    if (!ReferenceLinker::LinkReference(ref, context_, symbols_, decls_, callsite_)) {
       error_ = true;
     }
   }
@@ -84,73 +81,72 @@ class XmlVisitor : public xml::PackageAwareVisitor {
         reference_visitor_(context, symbols, this, callsite) {}
 
   void Visit(xml::Element* el) override {
+    // The default Attribute allows everything except enums or flags.
+    constexpr const static uint32_t kDefaultTypeMask =
+        0xffffffffu & ~(android::ResTable_map::TYPE_ENUM | android::ResTable_map::TYPE_FLAGS);
+    const static Attribute kDefaultAttribute(true /* weak */, kDefaultTypeMask);
+
     const Source source = source_.WithLine(el->line_number);
     for (xml::Attribute& attr : el->attributes) {
-      Maybe<xml::ExtractedPackage> maybe_package =
-          xml::ExtractPackageFromNamespace(attr.namespace_uri);
-      if (maybe_package) {
-        // There is a valid package name for this attribute. We will look this
-        // up.
-        StringPiece package = maybe_package.value().package;
-        if (package.empty()) {
+      // If the attribute has no namespace, interpret values as if
+      // they were assigned to the default Attribute.
+
+      const Attribute* attribute = &kDefaultAttribute;
+      std::string attribute_package;
+
+      if (Maybe<xml::ExtractedPackage> maybe_package =
+              xml::ExtractPackageFromNamespace(attr.namespace_uri)) {
+        // There is a valid package name for this attribute. We will look this up.
+        attribute_package = maybe_package.value().package;
+        if (attribute_package.empty()) {
           // Empty package means the 'current' or 'local' package.
-          package = context_->GetCompilationPackage();
+          attribute_package = context_->GetCompilationPackage();
         }
 
-        Reference attr_ref(
-            ResourceNameRef(package, ResourceType::kAttr, attr.name));
+        Reference attr_ref(ResourceNameRef(attribute_package, ResourceType::kAttr, attr.name));
         attr_ref.private_reference = maybe_package.value().private_namespace;
 
         std::string err_str;
         attr.compiled_attribute = ReferenceLinker::CompileXmlAttribute(
-            attr_ref, context_->GetNameMangler(), symbols_, callsite_,
-            &err_str);
+            attr_ref, context_->GetNameMangler(), symbols_, callsite_, &err_str);
 
-        // Convert the string value into a compiled Value if this is a valid
-        // attribute.
-        if (attr.compiled_attribute) {
-          if (attr.compiled_attribute.value().id) {
-            // Record all SDK levels from which the attributes were defined.
-            const size_t sdk_level = FindAttributeSdkLevel(
-                attr.compiled_attribute.value().id.value());
-            if (sdk_level > 1) {
-              sdk_levels_found_->insert(sdk_level);
-            }
-          }
-
-          const Attribute* attribute =
-              &attr.compiled_attribute.value().attribute;
-          attr.compiled_value =
-              ResourceUtils::TryParseItemForAttribute(attr.value, attribute);
-          if (!attr.compiled_value &&
-              !(attribute->type_mask & android::ResTable_map::TYPE_STRING)) {
-            // We won't be able to encode this as a string.
-            context_->GetDiagnostics()->Error(
-                DiagMessage(source) << "'" << attr.value << "' "
-                                    << "is incompatible with attribute "
-                                    << package << ":" << attr.name << " "
-                                    << *attribute);
-            error_ = true;
-          }
-
-        } else {
-          context_->GetDiagnostics()->Error(DiagMessage(source)
-                                            << "attribute '" << package << ":"
-                                            << attr.name << "' " << err_str);
+        if (!attr.compiled_attribute) {
+          context_->GetDiagnostics()->Error(DiagMessage(source) << "attribute '"
+                                                                << attribute_package << ":"
+                                                                << attr.name << "' " << err_str);
           error_ = true;
+          continue;
         }
-      } else if (!attr.compiled_value) {
-        // We still encode references, but only if we haven't manually set this
-        // to
-        // another compiled value.
-        attr.compiled_value = ResourceUtils::TryParseReference(attr.value);
+
+        // Find this compiled attribute's SDK level.
+        const xml::AaptAttribute& aapt_attr = attr.compiled_attribute.value();
+        if (aapt_attr.id) {
+          // Record all SDK levels from which the attributes were defined.
+          const size_t sdk_level = FindAttributeSdkLevel(aapt_attr.id.value());
+          if (sdk_level > 1) {
+            sdk_levels_found_->insert(sdk_level);
+          }
+        }
+        attribute = &aapt_attr.attribute;
       }
 
+      attr.compiled_value = ResourceUtils::TryParseItemForAttribute(attr.value, attribute);
       if (attr.compiled_value) {
         // With a compiledValue, we must resolve the reference and assign it an
         // ID.
         attr.compiled_value->SetSource(source);
         attr.compiled_value->Accept(&reference_visitor_);
+      } else if ((attribute->type_mask & android::ResTable_map::TYPE_STRING) == 0) {
+        // We won't be able to encode this as a string.
+        DiagMessage msg(source);
+        msg << "'" << attr.value << "' "
+            << "is incompatible with attribute ";
+        if (!attribute_package.empty()) {
+          msg << attribute_package << ":";
+        }
+        msg << attr.name << " " << *attribute;
+        context_->GetDiagnostics()->Error(msg);
+        error_ = true;
       }
     }
 
@@ -174,12 +170,11 @@ class XmlVisitor : public xml::PackageAwareVisitor {
 
 }  // namespace
 
-bool XmlReferenceLinker::Consume(IAaptContext* context,
-                                 xml::XmlResource* resource) {
+bool XmlReferenceLinker::Consume(IAaptContext* context, xml::XmlResource* resource) {
   sdk_levels_found_.clear();
   CallSite callsite = {resource->file.name};
-  XmlVisitor visitor(context, context->GetExternalSymbols(),
-                     resource->file.source, &sdk_levels_found_, &callsite);
+  XmlVisitor visitor(context, context->GetExternalSymbols(), resource->file.source,
+                     &sdk_levels_found_, &callsite);
   if (resource->root) {
     resource->root->Accept(&visitor);
     return !visitor.HasError();
