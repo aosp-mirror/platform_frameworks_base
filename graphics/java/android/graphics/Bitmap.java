@@ -753,6 +753,11 @@ public final class Bitmap implements Parcelable {
             return source;
         }
 
+        boolean isHardware = source.getConfig() == Config.HARDWARE;
+        if (isHardware) {
+            source = nativeCopyPreserveInternalConfig(source.mNativePtr);
+        }
+
         int neww = width;
         int newh = height;
         Canvas canvas = new Canvas();
@@ -824,7 +829,9 @@ public final class Bitmap implements Parcelable {
         canvas.setBitmap(bitmap);
         canvas.drawBitmap(source, srcR, dstR, paint);
         canvas.setBitmap(null);
-
+        if (isHardware) {
+            return bitmap.copy(Config.HARDWARE, false);
+        }
         return bitmap;
     }
 
@@ -1773,4 +1780,5 @@ public final class Bitmap implements Parcelable {
     private static native boolean nativeSameAs(long nativeBitmap0, long nativeBitmap1);
     private static native void nativePrepareToDraw(long nativeBitmap);
     private static native int nativeGetAllocationByteCount(long nativeBitmap);
+    private static native Bitmap nativeCopyPreserveInternalConfig(long nativeBitmap);
 }

@@ -1291,6 +1291,23 @@ static jint Bitmap_getAllocationByteCount(JNIEnv* env, jobject, jlong bitmapPtr)
     return static_cast<jint>(bitmapHandle->getAllocationByteCount());
 }
 
+static jobject Bitmap_nativeCopyPreserveInternalConfig(JNIEnv* env, jobject, jlong bitmapPtr) {
+    LocalScopedBitmap bitmapHandle(bitmapPtr);
+    LOG_ALWAYS_FATAL_IF(!bitmapHandle->isHardware(),
+            "Hardware config is only supported config in Bitmap_nativeCopyPreserveInternalConfig");
+    Bitmap& hwuiBitmap = bitmapHandle->bitmap();
+    SkBitmap src;
+    hwuiBitmap.getSkBitmap(&src);
+
+    SkBitmap result;
+    HeapAllocator allocator;
+    if (!src.copyTo(&result, hwuiBitmap.info().colorType(), &allocator)) {
+        doThrowRE(env, "Could not copy a hardware bitmap.");
+        return NULL;
+    }
+    return createBitmap(env, allocator.getStorageObjAndReset(), kBitmapCreateFlag_None);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 static jclass make_globalref(JNIEnv* env, const char classname[])
 {
@@ -1349,6 +1366,8 @@ static const JNINativeMethod gBitmapMethods[] = {
     {   "nativeSameAs",             "(JJ)Z", (void*)Bitmap_sameAs },
     {   "nativePrepareToDraw",      "(J)V", (void*)Bitmap_prepareToDraw },
     {   "nativeGetAllocationByteCount", "(J)I", (void*)Bitmap_getAllocationByteCount },
+    {   "nativeCopyPreserveInternalConfig", "(J)Landroid/graphics/Bitmap;",
+        (void*)Bitmap_nativeCopyPreserveInternalConfig },
 };
 
 int register_android_graphics_Bitmap(JNIEnv* env)
