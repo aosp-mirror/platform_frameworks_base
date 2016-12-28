@@ -180,8 +180,10 @@ public abstract class PanelView extends FrameLayout {
 
     public PanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mFlingAnimationUtils = new FlingAnimationUtils(context, 0.6f);
-        mFlingAnimationUtilsClosing = new FlingAnimationUtils(context, 0.4f);
+        mFlingAnimationUtils = new FlingAnimationUtils(context, 0.6f /* maxLengthSeconds */,
+                0.6f /* speedUpFactor */);
+        mFlingAnimationUtilsClosing = new FlingAnimationUtils(context, 0.5f /* maxLengthSeconds */,
+                0.6f /* speedUpFactor */);
         mBounceInterpolator = new BounceInterpolator();
         mFalsingManager = FalsingManager.getInstance(context);
     }
@@ -704,9 +706,7 @@ public abstract class PanelView extends FrameLayout {
 
             // Make it shorter if we run a canned animation
             if (vel == 0) {
-                animator.setDuration((long)
-                        (animator.getDuration() * getCannedFlingDurationFactor()
-                                / collapseSpeedUpFactor));
+                animator.setDuration((long) (animator.getDuration() / collapseSpeedUpFactor));
             }
         }
         animator.addListener(new AnimatorListenerAdapter() {
@@ -1114,9 +1114,6 @@ public abstract class PanelView extends FrameLayout {
     public abstract void resetViews();
 
     protected abstract float getPeekHeight();
-
-    protected abstract float getCannedFlingDurationFactor();
-
     /**
      * @return whether "Clear all" button will be visible when the panel is fully expanded
      */

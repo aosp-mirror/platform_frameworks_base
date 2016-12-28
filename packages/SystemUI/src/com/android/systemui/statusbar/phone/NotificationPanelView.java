@@ -2007,15 +2007,6 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
-    protected float getCannedFlingDurationFactor() {
-        if (mQsExpanded) {
-            return 0.9f;
-        } else {
-            return 0.8f;
-        }
-    }
-
-    @Override
     protected boolean fullyExpandedClearAllVisible() {
         return mNotificationStackScroller.isDismissViewNotGone()
                 && mNotificationStackScroller.isScrolledToBottom() && !mQsExpandImmediate;
