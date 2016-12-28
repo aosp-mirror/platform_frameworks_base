@@ -36,6 +36,7 @@ import android.net.INetworkScoreService;
 import android.net.NetworkKey;
 import android.net.NetworkScorerAppManager;
 import android.net.NetworkScorerAppManager.NetworkScorerAppData;
+import android.net.NetworkScoreManager;
 import android.net.RecommendationRequest;
 import android.net.RecommendationResult;
 import android.net.ScoredNetwork;
@@ -633,7 +634,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
         void connect(Context context) {
             if (!mBound) {
-                Intent service = new Intent();
+                Intent service = new Intent(NetworkScoreManager.ACTION_RECOMMEND_NETWORKS);
                 service.setComponent(mComponentName);
                 mBound = context.bindServiceAsUser(service, this,
                         Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
