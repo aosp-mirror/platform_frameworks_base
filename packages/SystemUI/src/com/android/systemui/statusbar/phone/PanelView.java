@@ -94,6 +94,7 @@ public abstract class PanelView extends FrameLayout {
     private VelocityTrackerInterface mVelocityTracker;
     private FlingAnimationUtils mFlingAnimationUtils;
     private FlingAnimationUtils mFlingAnimationUtilsClosing;
+    private FlingAnimationUtils mFlingAnimationUtilsDismissing;
     private FalsingManager mFalsingManager;
 
     /**
@@ -184,6 +185,9 @@ public abstract class PanelView extends FrameLayout {
                 0.6f /* speedUpFactor */);
         mFlingAnimationUtilsClosing = new FlingAnimationUtils(context, 0.5f /* maxLengthSeconds */,
                 0.6f /* speedUpFactor */);
+        mFlingAnimationUtilsDismissing = new FlingAnimationUtils(context,
+                0.5f /* maxLengthSeconds */, 0.2f /* speedUpFactor */, 0.6f /* x2 */,
+                0.84f /* y2 */);
         mBounceInterpolator = new BounceInterpolator();
         mFalsingManager = FalsingManager.getInstance(context);
     }
@@ -702,7 +706,13 @@ public abstract class PanelView extends FrameLayout {
                 animator.setDuration(350);
             }
         } else {
-            mFlingAnimationUtilsClosing.apply(animator, mExpandedHeight, target, vel, getHeight());
+            if (shouldUseDismissingAnimation()) {
+                mFlingAnimationUtilsDismissing.apply(animator, mExpandedHeight, target, vel,
+                        getHeight());
+            } else {
+                mFlingAnimationUtilsClosing
+                        .apply(animator, mExpandedHeight, target, vel, getHeight());
+            }
 
             // Make it shorter if we run a canned animation
             if (vel == 0) {
@@ -732,6 +742,8 @@ public abstract class PanelView extends FrameLayout {
         mHeightAnimator = animator;
         animator.start();
     }
+
+    protected abstract boolean shouldUseDismissingAnimation();
 
     @Override
     protected void onAttachedToWindow() {
