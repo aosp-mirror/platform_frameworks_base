@@ -370,6 +370,9 @@ public final class AccessibilityCache {
         mIsAllWindowsCached = false;
     }
 
+    /**
+     * Clears nodes for the window with the given id
+     */
     private void clearNodesForWindowLocked(int windowId) {
         if (DEBUG) {
             Log.i(LOG_TAG, "clearNodesForWindowLocked(" + windowId + ")");

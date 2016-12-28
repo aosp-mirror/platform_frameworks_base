@@ -17,12 +17,14 @@
 package com.android.server.accessibility;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 
 import android.support.test.runner.AndroidJUnit4;
@@ -479,6 +481,25 @@ public class AccessibilityCacheTest {
                 AccessibilityEvent.CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION);
     }
 
+    @Test
+    public void testCacheCriticalEventList_doesntLackEvents() {
+        for (int i = 0; i < 32; i++) {
+            int eventType = 1 << i;
+            if ((eventType & AccessibilityCache.CACHE_CRITICAL_EVENTS_MASK) == 0) {
+                try {
+                    assertEventTypeClearsNode(eventType, false);
+                    verify(mAccessibilityNodeRefresher, never())
+                            .refreshNode(anyObject(), anyBoolean());
+                } catch (Throwable e) {
+                    throw new AssertionError(
+                            "Failed for eventType: " + AccessibilityEvent.eventTypeToString(
+                                    eventType),
+                            e);
+                }
+            }
+        }
+    }
+
     private void assertNodeIsRefreshedWithEventType(int eventType, int contentChangeTypes) {
         AccessibilityNodeInfo nodeInfo = getNodeWithA11yAndWindowId(SINGLE_VIEW_ID, WINDOW_ID_1);
         mAccessibilityCache.add(nodeInfo);
@@ -521,13 +542,28 @@ public class AccessibilityCacheTest {
     }
 
     private void assertEventTypeClearsNode(int eventType) {
+        assertEventTypeClearsNode(eventType, true);
+    }
+
+    private void assertEventTypeClearsNode(int eventType, boolean clears) {
         final int nodeId = 0xBEEF;
         AccessibilityNodeInfo nodeInfo = getNodeWithA11yAndWindowId(nodeId, WINDOW_ID_1);
         long id = nodeInfo.getSourceNodeId();
         mAccessibilityCache.add(nodeInfo);
         nodeInfo.recycle();
         mAccessibilityCache.onAccessibilityEvent(AccessibilityEvent.obtain(eventType));
-        assertNull(mAccessibilityCache.getNode(WINDOW_ID_1, id));
+        AccessibilityNodeInfo cachedNode = mAccessibilityCache.getNode(WINDOW_ID_1, id);
+        try {
+            if (clears) {
+                assertNull(cachedNode);
+            } else {
+                assertNotNull(cachedNode);
+            }
+        } finally {
+            if (cachedNode != null) {
+                cachedNode.recycle();
+            }
+        }
     }
 
     private AccessibilityNodeInfo getParentNode() {
