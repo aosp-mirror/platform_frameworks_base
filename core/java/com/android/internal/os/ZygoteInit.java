@@ -112,6 +112,8 @@ public class ZygoteInit {
     private static final int ROOT_UID = 0;
     private static final int ROOT_GID = 0;
 
+    private static boolean sPreloadComplete;
+
     static void preload(BootTimingsTraceLog bootTimingsTraceLog) {
         Log.d(TAG, "begin preload");
         bootTimingsTraceLog.traceBegin("BeginIcuCachePinning");
@@ -134,6 +136,15 @@ public class ZygoteInit {
         endIcuCachePinning();
         warmUpJcaProviders();
         Log.d(TAG, "end preload");
+
+        sPreloadComplete = true;
+    }
+
+    public static void maybePreload() {
+        if (!sPreloadComplete) {
+            Log.i(TAG, "Lazily preloading resources.");
+            preload(new BootTimingsTraceLog("ZygoteInitTiming_lazy", Trace.TRACE_TAG_DALVIK));
+        }
     }
 
     private static void beginIcuCachePinning() {
@@ -660,9 +671,12 @@ public class ZygoteInit {
             boolean startSystemServer = false;
             String socketName = "zygote";
             String abiList = null;
+            boolean enableLazyPreload = false;
             for (int i = 1; i < argv.length; i++) {
                 if ("start-system-server".equals(argv[i])) {
                     startSystemServer = true;
+                } else if ("--enable-lazy-preload".equals(argv[i])) {
+                    enableLazyPreload = true;
                 } else if (argv[i].startsWith(ABI_LIST_ARG)) {
                     abiList = argv[i].substring(ABI_LIST_ARG.length());
                 } else if (argv[i].startsWith(SOCKET_NAME_ARG)) {
@@ -677,13 +691,17 @@ public class ZygoteInit {
             }
 
             zygoteServer.registerServerSocket(socketName);
-            bootTimingsTraceLog.traceBegin("ZygotePreload");
-            EventLog.writeEvent(LOG_BOOT_PROGRESS_PRELOAD_START,
-                SystemClock.uptimeMillis());
-            preload(bootTimingsTraceLog);
-            EventLog.writeEvent(LOG_BOOT_PROGRESS_PRELOAD_END,
-                SystemClock.uptimeMillis());
-            bootTimingsTraceLog.traceEnd(); // ZygotePreload
+            // In some configurations, we avoid preloading resources and classes eagerly.
+            // In such cases, we will preload things prior to our first fork.
+            if (!enableLazyPreload) {
+                bootTimingsTraceLog.traceBegin("ZygotePreload");
+                EventLog.writeEvent(LOG_BOOT_PROGRESS_PRELOAD_START,
+                    SystemClock.uptimeMillis());
+                preload(bootTimingsTraceLog);
+                EventLog.writeEvent(LOG_BOOT_PROGRESS_PRELOAD_END,
+                    SystemClock.uptimeMillis());
+                bootTimingsTraceLog.traceEnd(); // ZygotePreload
+            }
 
             // Finish profiling the zygote initialization.
             SamplingProfilerIntegration.writeZygoteSnapshot();
