@@ -1153,8 +1153,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 if (service.mIsDefault == isDefault) {
                     if (doesServiceWantEventLocked(service, event)) {
                         service.notifyAccessibilityEvent(event, true);
-                    } else if ((AccessibilityCache.CACHE_CRITICAL_EVENTS_MASK
-                            & event.getEventType()) != 0) {
+                    } else if (service.mUsesAccessibilityCache
+                            && (AccessibilityCache.CACHE_CRITICAL_EVENTS_MASK
+                                & event.getEventType()) != 0) {
                         service.notifyAccessibilityEvent(event, false);
                     }
                 }
@@ -2281,6 +2282,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         boolean mWasConnectedAndDied;
 
+        /** Whether this service relies on its {@link AccessibilityCache} being up to date */
+        boolean mUsesAccessibilityCache = false;
+
         // Handler only for dispatching accessibility events since we use event
         // types as message types allowing us to remove messages per event type.
         public Handler mEventDispatchHandler = new Handler(mMainHandler.getLooper()) {
@@ -2593,6 +2597,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             IAccessibilityInteractionConnection connection = null;
             Region partialInteractiveRegion = Region.obtain();
             synchronized (mLock) {
+                mUsesAccessibilityCache = true;
                 if (!isCalledForCurrentUserLocked()) {
                     return false;
                 }
@@ -2644,6 +2649,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             IAccessibilityInteractionConnection connection = null;
             Region partialInteractiveRegion = Region.obtain();
             synchronized (mLock) {
+                mUsesAccessibilityCache = true;
                 if (!isCalledForCurrentUserLocked()) {
                     return false;
                 }
@@ -2695,6 +2701,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             IAccessibilityInteractionConnection connection = null;
             Region partialInteractiveRegion = Region.obtain();
             synchronized (mLock) {
+                mUsesAccessibilityCache = true;
                 if (!isCalledForCurrentUserLocked()) {
                     return false;
                 }
