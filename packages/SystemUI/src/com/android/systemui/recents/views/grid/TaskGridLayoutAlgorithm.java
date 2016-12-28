@@ -52,6 +52,69 @@ public class TaskGridLayoutAlgorithm  {
     private float mAppAspectRatio;
     private Rect mSystemInsets = new Rect();
 
+    /**
+     * When the amount of tasks is determined, the size and position of every task view can be
+     * decided. Each instance of TaskGridRectInfo store the task view information for a certain
+     * amount of tasks.
+     */
+    class TaskGridRectInfo {
+        Rect size;
+        int[] xOffsets;
+        int[] yOffsets;
+
+        public TaskGridRectInfo(int taskCount) {
+            size = new Rect();
+            xOffsets = new int[taskCount];
+            yOffsets = new int[taskCount];
+
+            int layoutTaskCount = Math.min(MAX_LAYOUT_TASK_COUNT, taskCount);
+
+            int tasksPerLine = layoutTaskCount < 2 ? 1 : (
+                layoutTaskCount < 5 ? 2 : (
+                    layoutTaskCount < 7 ? 3 : 4));
+            int lines = layoutTaskCount < 3 ? 1 : 2;
+
+            int taskWidth, taskHeight;
+            int maxTaskWidth = (mDisplayRect.width() - 2 * mPaddingLeftRight
+                - (tasksPerLine - 1) * mPaddingTaskView) / tasksPerLine;
+            int maxTaskHeight = (mDisplayRect.height() - 2 * mPaddingTopBottom
+                - (lines - 1) * mPaddingTaskView) / lines;
+
+            if (maxTaskHeight >= maxTaskWidth / mAppAspectRatio + mTitleBarHeight) {
+                // Width bound.
+                taskWidth = maxTaskWidth;
+                taskHeight = (int) (maxTaskWidth / mAppAspectRatio + mTitleBarHeight);
+            } else {
+                // Height bound.
+                taskHeight = maxTaskHeight;
+                taskWidth = (int) ((taskHeight - mTitleBarHeight) * mAppAspectRatio);
+            }
+            size.set(0, 0, taskWidth, taskHeight);
+
+            int emptySpaceX = mDisplayRect.width() - 2 * mPaddingLeftRight
+                - (tasksPerLine * taskWidth) - (tasksPerLine - 1) * mPaddingTaskView;
+            int emptySpaceY = mDisplayRect.height() - 2 * mPaddingTopBottom
+                - (lines * taskHeight) - (lines - 1) * mPaddingTaskView;
+            for (int taskIndex = 0; taskIndex < taskCount; taskIndex++) {
+                // We also need to invert the index in order to display the most recent tasks first.
+                int taskLayoutIndex = taskCount - taskIndex - 1;
+
+                int xIndex = taskLayoutIndex % tasksPerLine;
+                int yIndex = taskLayoutIndex / tasksPerLine;
+                xOffsets[taskIndex] =
+                    emptySpaceX / 2 + mPaddingLeftRight + (taskWidth + mPaddingTaskView) * xIndex;
+                yOffsets[taskIndex] =
+                    emptySpaceY / 2 + mPaddingTopBottom + (taskHeight + mPaddingTaskView) * yIndex;
+            }
+        }
+    }
+
+    /**
+     * We can find task view sizes and positions from mTaskGridRectInfoList[k - 1] when there
+     * are k tasks.
+     */
+    TaskGridRectInfo[] mTaskGridRectInfoList;
+
     public TaskGridLayoutAlgorithm(Context context) {
         reloadOnConfigurationChange(context);
     }
@@ -75,46 +138,17 @@ public class TaskGridLayoutAlgorithm  {
     public TaskViewTransform getTransform(int taskIndex, int taskCount,
         TaskViewTransform transformOut, TaskStackLayoutAlgorithm stackLayout) {
 
-        int layoutTaskCount = Math.min(MAX_LAYOUT_TASK_COUNT, taskCount);
+        TaskGridRectInfo gridInfo = mTaskGridRectInfoList[taskCount - 1];
+        mTaskGridRect.set(gridInfo.size);
 
-        // We also need to invert the index in order to display the most recent tasks first.
-        int taskLayoutIndex = taskCount - taskIndex - 1;
-
-        int tasksPerLine = layoutTaskCount < 2 ? 1 : (
-                layoutTaskCount < 5 ? 2 : (
-                        layoutTaskCount < 7 ? 3 : 4));
-        int lines = layoutTaskCount < 3 ? 1 : 2;
-
-        int taskWidth, taskHeight;
-        int maxTaskWidth = (mDisplayRect.width() - 2 * mPaddingLeftRight
-                - (tasksPerLine - 1) * mPaddingTaskView) / tasksPerLine;
-        int maxTaskHeight = (mDisplayRect.height() - 2 * mPaddingTopBottom
-                - (lines - 1) * mPaddingTaskView) / lines;
-
-        if (maxTaskHeight >= maxTaskWidth / mAppAspectRatio + mTitleBarHeight) {
-            // Width bound.
-            taskWidth = maxTaskWidth;
-            taskHeight = (int) (maxTaskWidth / mAppAspectRatio + mTitleBarHeight);
-        } else {
-            // Height bound.
-            taskHeight = maxTaskHeight;
-            taskWidth = (int) ((taskHeight - mTitleBarHeight) * mAppAspectRatio);
-        }
-        int emptySpaceX = mDisplayRect.width() - 2 * mPaddingLeftRight
-                - (tasksPerLine * taskWidth) - (tasksPerLine - 1) * mPaddingTaskView;
-        int emptySpaceY = mDisplayRect.height() - 2 * mPaddingTopBottom
-                - (lines * taskHeight) - (lines - 1) * mPaddingTaskView;
-
-        mTaskGridRect.set(0, 0, taskWidth, taskHeight);
-
-        int xIndex = taskLayoutIndex % tasksPerLine;
-        int yIndex = taskLayoutIndex / tasksPerLine;
-        int x = emptySpaceX / 2 + mPaddingLeftRight + (taskWidth + mPaddingTaskView) * xIndex;
-        int y = emptySpaceY / 2 + mPaddingTopBottom + (taskHeight + mPaddingTaskView) * yIndex;
+        int x = gridInfo.xOffsets[taskIndex];
+        int y = gridInfo.yOffsets[taskIndex];
         float z = stackLayout.mMaxTranslationZ;
 
         float dimAlpha = 0f;
         float viewOutlineAlpha = 0f;
+        // We also need to invert the index in order to display the most recent tasks first.
+        int taskLayoutIndex = taskCount - taskIndex - 1;
         boolean isTaskViewVisible = (taskLayoutIndex < MAX_LAYOUT_TASK_COUNT);
 
         // Fill out the transform
@@ -134,6 +168,13 @@ public class TaskGridLayoutAlgorithm  {
     public void initialize(Rect displayRect, Rect windowRect) {
         mDisplayRect = displayRect;
         mWindowRect = windowRect;
+
+        // Pre-calculate the positions and offsets of task views so that we can reuse them directly
+        // in the future.
+        mTaskGridRectInfoList = new TaskGridRectInfo[MAX_LAYOUT_TASK_COUNT];
+        for (int i = 0; i < MAX_LAYOUT_TASK_COUNT; i++) {
+            mTaskGridRectInfoList[i] = new TaskGridRectInfo(i + 1);
+        }
     }
 
     public void setSystemInsets(Rect systemInsets) {
