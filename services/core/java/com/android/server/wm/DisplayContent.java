@@ -712,19 +712,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (prevDc == this) {
             return;
         }
-        if (prevDc != null && prevDc.mTokenMap.remove(token.token) != null) {
-            switch (token.windowType) {
-                case TYPE_WALLPAPER:
-                    prevDc.mBelowAppWindowsContainers.removeChild(token);
-                    break;
-                case TYPE_INPUT_METHOD:
-                case TYPE_INPUT_METHOD_DIALOG:
-                    prevDc.mImeWindowsContainers.removeChild(token);
-                    break;
-                default:
-                    prevDc.mAboveAppWindowsContainers.removeChild(token);
-                    break;
-            }
+        if (prevDc != null && prevDc.mTokenMap.remove(token.token) != null
+                && token.asAppWindowToken() == null) {
+            // Removed the token from the map, but made sure it's not an app token before removing
+            // from parent.
+            token.getParent().removeChild(token);
         }
 
         addWindowToken(token.token, token);

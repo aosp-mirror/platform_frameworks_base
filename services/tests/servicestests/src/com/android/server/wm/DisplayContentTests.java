@@ -19,12 +19,16 @@ package com.android.server.wm;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import android.hardware.display.DisplayManagerGlobal;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.view.Display;
+import android.view.DisplayInfo;
 
 import java.util.ArrayList;
 
+import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 import static org.junit.Assert.assertEquals;
@@ -202,5 +206,36 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(sImeDialogWindow, windows.get(0));
 
         voiceInteractionWindow.removeImmediately();
+    }
+
+    @Test
+    public void testMoveStackBetweenDisplays() throws Exception {
+        // Create second display.
+        final Display display = new Display(DisplayManagerGlobal.getInstance(),
+                sDisplayContent.getDisplayId() + 1, new DisplayInfo(),
+                DEFAULT_DISPLAY_ADJUSTMENTS);
+        final DisplayContent dc = new DisplayContent(display, sWm, sLayersController,
+                new WallpaperController(sWm));
+        sWm.mRoot.addChild(dc, 1);
+
+        // Add stack with activity.
+        final TaskStack stack = createTaskStackOnDisplay(dc);
+        assertEquals(dc.getDisplayId(), stack.getDisplayContent().getDisplayId());
+        assertEquals(dc, stack.getParent().getParent());
+        assertEquals(dc, stack.getDisplayContent());
+
+        final Task task = createTaskInStack(stack, 0 /* userId */);
+        final TestAppWindowToken token = new TestAppWindowToken(dc);
+        task.addChild(token, 0);
+        assertEquals(dc, task.getDisplayContent());
+        assertEquals(dc, token.getDisplayContent());
+
+        // Move stack to first display.
+        sWm.moveStackToDisplay(stack.mStackId, sDisplayContent.getDisplayId());
+        assertEquals(sDisplayContent.getDisplayId(), stack.getDisplayContent().getDisplayId());
+        assertEquals(sDisplayContent, stack.getParent().getParent());
+        assertEquals(sDisplayContent, stack.getDisplayContent());
+        assertEquals(sDisplayContent, task.getDisplayContent());
+        assertEquals(sDisplayContent, token.getDisplayContent());
     }
 }
