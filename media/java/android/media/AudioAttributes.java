@@ -169,6 +169,11 @@ public final class AudioAttributes implements Parcelable {
      * source, such as audio capture devices.
      */
     public final static int USAGE_VIRTUAL_SOURCE = 15;
+    /**
+     * Usage value to use for audio responses to user queries, audio instructions or help
+     * utterances.
+     */
+    public final static int USAGE_ASSISTANT = 16;
 
     /**
      * IMPORTANT: when adding new usage types, add them to SDK_USAGES and update SUPPRESSIBLE_USAGES
@@ -227,7 +232,8 @@ public final class AudioAttributes implements Parcelable {
             USAGE_ASSISTANCE_ACCESSIBILITY,
             USAGE_ASSISTANCE_NAVIGATION_GUIDANCE,
             USAGE_ASSISTANCE_SONIFICATION,
-            USAGE_GAME
+            USAGE_GAME,
+            USAGE_ASSISTANT,
     };
 
     /**
@@ -473,6 +479,7 @@ public final class AudioAttributes implements Parcelable {
          *     {@link AudioAttributes#USAGE_NOTIFICATION_COMMUNICATION_INSTANT},
          *     {@link AudioAttributes#USAGE_NOTIFICATION_COMMUNICATION_DELAYED},
          *     {@link AudioAttributes#USAGE_NOTIFICATION_EVENT},
+         *     {@link AudioAttributes#USAGE_ASSISTANT},
          *     {@link AudioAttributes#USAGE_ASSISTANCE_ACCESSIBILITY},
          *     {@link AudioAttributes#USAGE_ASSISTANCE_NAVIGATION_GUIDANCE},
          *     {@link AudioAttributes#USAGE_ASSISTANCE_SONIFICATION},
@@ -497,6 +504,7 @@ public final class AudioAttributes implements Parcelable {
                 case USAGE_ASSISTANCE_SONIFICATION:
                 case USAGE_GAME:
                 case USAGE_VIRTUAL_SOURCE:
+                case USAGE_ASSISTANT:
                      mUsage = usage;
                      break;
                 default:
@@ -844,6 +852,8 @@ public final class AudioAttributes implements Parcelable {
                 return new String("USAGE_ASSISTANCE_SONIFICATION");
             case USAGE_GAME:
                 return new String("USAGE_GAME");
+            case USAGE_ASSISTANT:
+                return new String("USAGE_ASSISTANT");
             default:
                 return new String("unknown usage " + usage);
         }
@@ -923,6 +933,7 @@ public final class AudioAttributes implements Parcelable {
             case USAGE_MEDIA:
             case USAGE_GAME:
             case USAGE_ASSISTANCE_NAVIGATION_GUIDANCE:
+            case USAGE_ASSISTANT:
                 return AudioSystem.STREAM_MUSIC;
             case USAGE_ASSISTANCE_SONIFICATION:
                 return AudioSystem.STREAM_SYSTEM;
@@ -972,7 +983,8 @@ public final class AudioAttributes implements Parcelable {
         USAGE_ASSISTANCE_ACCESSIBILITY,
         USAGE_ASSISTANCE_NAVIGATION_GUIDANCE,
         USAGE_ASSISTANCE_SONIFICATION,
-        USAGE_GAME
+        USAGE_GAME,
+        USAGE_ASSISTANT,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AttributeUsage {}
