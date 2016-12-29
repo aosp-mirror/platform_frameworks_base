@@ -48,6 +48,7 @@ import android.view.InputDevice;
 import android.view.IInputFilter;
 import android.view.AppTransitionAnimationSpec;
 import android.view.WindowContentFrameStats;
+import android.view.WindowManager;
 
 /**
  * System private interface to the window manager.

@@ -22,6 +22,7 @@ import android.app.KeyguardManager;
 import android.app.Presentation;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.IBinder;

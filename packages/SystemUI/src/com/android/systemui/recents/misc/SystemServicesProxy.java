@@ -22,11 +22,9 @@ import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 
 import android.app.ActivityManager;
-import android.app.ActivityManager.TaskThumbnailInfo;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
@@ -47,7 +45,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.GraphicBuffer;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
@@ -83,7 +80,6 @@ import com.android.internal.os.BackgroundThread;
 import com.android.systemui.R;
 import com.android.systemui.pip.tv.PipMenuActivity;
 import com.android.systemui.pip.tv.PipOnboardingActivity;
-import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.RecentsImpl;
@@ -631,21 +627,19 @@ public class SystemServicesProxy {
         }
 
         if (ActivityManager.ENABLE_TASK_SNAPSHOTS) {
-            GraphicBuffer graphicBuffer = null;
+            ActivityManager.TaskSnapshot snapshot = null;
             try {
-                graphicBuffer = ActivityManager.getService().getTaskSnapshot(taskId);
+                snapshot = ActivityManager.getService().getTaskSnapshot(taskId);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed to retrieve snapshot", e);
             }
-            if (graphicBuffer != null) {
-                thumbnailDataOut.thumbnail = Bitmap.createHardwareBitmap(graphicBuffer);
+            if (snapshot != null) {
+                thumbnailDataOut.thumbnail = Bitmap.createHardwareBitmap(snapshot.getSnapshot());
+                thumbnailDataOut.orientation = snapshot.getOrientation();
+                thumbnailDataOut.insets.set(snapshot.getContentInsets());
             } else {
                 thumbnailDataOut.thumbnail = null;
             }
-
-            // TODO: Retrieve screen orientation.
-            thumbnailDataOut.thumbnailInfo = new TaskThumbnailInfo();
-            thumbnailDataOut.thumbnailInfo.screenOrientation = ORIENTATION_PORTRAIT;
         } else {
             ActivityManager.TaskThumbnail taskThumbnail = mAm.getTaskThumbnail(taskId);
             if (taskThumbnail == null) {
@@ -665,7 +659,8 @@ public class SystemServicesProxy {
                 }
             }
             thumbnailDataOut.thumbnail = thumbnail;
-            thumbnailDataOut.thumbnailInfo = taskThumbnail.thumbnailInfo;
+            thumbnailDataOut.orientation = taskThumbnail.thumbnailInfo.screenOrientation;
+            thumbnailDataOut.insets.setEmpty();
         }
     }
 

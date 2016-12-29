@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import android.app.ActivityManager.TaskSnapshot;
 import android.content.res.Configuration;
 import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
@@ -242,7 +243,7 @@ public class TaskWindowContainerController
     /**
      * @return a graphic buffer representing a screenshot of a task
      */
-    public GraphicBuffer getSnapshot() {
+    public TaskSnapshot getSnapshot() {
         synchronized (mWindowMap) {
             if (mContainer == null) {
                 Slog.w(TAG_WM, "getSnapshot: taskId " + mTaskId + " not found.");

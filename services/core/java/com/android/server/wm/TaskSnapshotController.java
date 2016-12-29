@@ -25,6 +25,7 @@ import static android.graphics.PixelFormat.RGBA_8888;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager.StackId;
+import android.app.ActivityManager.TaskSnapshot;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.GraphicBuffer;
@@ -70,14 +71,14 @@ class TaskSnapshotController {
             if (!canSnapshotTask(task)) {
                 continue;
             }
-            final GraphicBuffer graphicBuffer = snapshotTask(task);
-            if (graphicBuffer != null) {
-                mCache.putSnapshot(task, graphicBuffer);
+            final TaskSnapshot snapshot = snapshotTask(task);
+            if (snapshot != null) {
+                mCache.putSnapshot(task, snapshot);
             }
         }
     }
 
-    @Nullable GraphicBuffer getSnapshot(Task task) {
+    @Nullable TaskSnapshot getSnapshot(Task task) {
         return mCache.getSnapshot(task);
     }
 
@@ -90,7 +91,7 @@ class TaskSnapshotController {
         return TaskSnapshotSurface.create(mService, token, snapshot);
     }
 
-    private GraphicBuffer snapshotTask(Task task) {
+    private TaskSnapshot snapshotTask(Task task) {
         final AppWindowToken top = (AppWindowToken) task.getTop();
         if (top == null) {
             return null;
@@ -106,7 +107,8 @@ class TaskSnapshotController {
         final Canvas c = buffer.lockCanvas();
         c.drawBitmap(bmp, 0, 0, null);
         buffer.unlockCanvasAndPost(c);
-        return buffer;
+        return new TaskSnapshot(buffer, top.getConfiguration().orientation,
+                top.findMainWindow().mStableInsets);
     }
 
     /**

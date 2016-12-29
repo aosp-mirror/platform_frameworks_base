@@ -17,7 +17,7 @@
 package com.android.server.wm;
 
 import android.annotation.Nullable;
-import android.graphics.GraphicBuffer;
+import android.app.ActivityManager.TaskSnapshot;
 import android.util.ArrayMap;
 
 /**
@@ -27,13 +27,13 @@ import android.util.ArrayMap;
  */
 class TaskSnapshotCache {
 
-    private final ArrayMap<Task, GraphicBuffer> mCache = new ArrayMap<>();
+    private final ArrayMap<Task, TaskSnapshot> mCache = new ArrayMap<>();
 
-    void putSnapshot(Task task, GraphicBuffer snapshot) {
+    void putSnapshot(Task task, TaskSnapshot snapshot) {
         mCache.put(task, snapshot);
     }
 
-    @Nullable GraphicBuffer getSnapshot(Task task) {
+    @Nullable TaskSnapshot getSnapshot(Task task) {
         return mCache.get(task);
     }
 }

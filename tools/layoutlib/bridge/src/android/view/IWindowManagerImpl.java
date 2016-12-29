@@ -16,19 +16,10 @@
 
 package android.view;
 
-import android.graphics.GraphicBuffer;
-import android.graphics.Point;
-import android.graphics.Rect;
-import com.android.internal.app.IAssistScreenshotReceiver;
-import com.android.internal.os.IResultReceiver;
-import com.android.internal.policy.IKeyguardDismissCallback;
-import com.android.internal.policy.IShortcutService;
-import com.android.internal.view.IInputContext;
-import com.android.internal.view.IInputMethodClient;
-
-import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
@@ -36,7 +27,12 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
 
-import java.lang.Override;
+import com.android.internal.app.IAssistScreenshotReceiver;
+import com.android.internal.os.IResultReceiver;
+import com.android.internal.policy.IKeyguardDismissCallback;
+import com.android.internal.policy.IShortcutService;
+import com.android.internal.view.IInputContext;
+import com.android.internal.view.IInputMethodClient;
 
 /**
  * Basic implementation of {@link IWindowManager} so that {@link Display} (and

@@ -600,7 +600,7 @@ interface IActivityManager {
     /**
      * @return a graphic buffer representing a screenshot of a task
      */
-    GraphicBuffer getTaskSnapshot(int taskId);
+    ActivityManager.TaskSnapshot getTaskSnapshot(int taskId);
 
     // WARNING: when these transactions are updated, check if they are any callers on the native
     // side. If so, make sure they are using the correct transaction ids and arguments.

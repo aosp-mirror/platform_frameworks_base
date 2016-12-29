@@ -28,10 +28,10 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TOKEN_MOVEMEN
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.app.ActivityManager.TaskSnapshot;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.GraphicBuffer;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
@@ -489,14 +489,15 @@ public class AppWindowContainerController
     }
 
     private boolean createSnapshot() {
-        final GraphicBuffer snapshot = mService.mTaskSnapshotController.getSnapshot(
+        final TaskSnapshot snapshot = mService.mTaskSnapshotController.getSnapshot(
                 mContainer.mTask);
 
         if (snapshot == null) {
             return false;
         }
 
-        mContainer.startingData = new SnapshotStartingData(mService, mContainer, snapshot);
+        mContainer.startingData = new SnapshotStartingData(mService, mContainer,
+                snapshot.getSnapshot());
         scheduleAddStartingWindow();
         return true;
     }

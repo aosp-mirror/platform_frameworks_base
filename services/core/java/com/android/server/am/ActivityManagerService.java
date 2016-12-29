@@ -148,6 +148,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.StackInfo;
+import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityManager.TaskThumbnailInfo;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerInternal.PictureInPictureArguments;
@@ -9654,7 +9655,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public GraphicBuffer getTaskSnapshot(int taskId) {
+    public TaskSnapshot getTaskSnapshot(int taskId) {
         enforceCallingPermission(READ_FRAME_BUFFER, "getTaskSnapshot()");
         final long ident = Binder.clearCallingIdentity();
         try {
