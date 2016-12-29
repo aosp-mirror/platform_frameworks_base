@@ -37,7 +37,7 @@ class ContextHubSystemService extends SystemService {
     public void onBootPhase(int phase) {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
             Log.d(TAG, "onBootPhase: PHASE_SYSTEM_SERVICES_READY");
-            publishBinderService(ContextHubService.CONTEXTHUB_SERVICE, mContextHubService);
+            publishBinderService(Context.CONTEXTHUB_SERVICE, mContextHubService);
         }
     }
 }
