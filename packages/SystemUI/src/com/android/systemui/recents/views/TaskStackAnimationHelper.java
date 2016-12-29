@@ -157,7 +157,7 @@ public class TaskStackAnimationHelper {
 
             // Get the current transform for the task, which will be used to position it offscreen
             stackLayout.getStackTransform(task, stackScroller.getStackScroll(), mTmpTransform,
-                    null, mStackView.useGridLayout());
+                    null);
 
             if (hideTask) {
                 tv.setVisibility(View.INVISIBLE);
@@ -230,7 +230,7 @@ public class TaskStackAnimationHelper {
             // Get the current transform for the task, which will be updated to the final transform
             // to animate to depending on how recents was invoked
             stackLayout.getStackTransform(task, stackScroller.getStackScroll(), mTmpTransform,
-                    null, mStackView.useGridLayout());
+                    null);
 
             if (launchState.launchedFromApp && !launchState.launchedViaDockGesture) {
                 if (task.isLaunchTarget) {

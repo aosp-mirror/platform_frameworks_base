@@ -213,6 +213,41 @@ public class TaskStackLayoutAlgorithm {
         }
     }
 
+    /**
+     * The state telling the algorithm whether to use grid layout or not.
+     */
+    public static class GridState {
+        private boolean mDraggingOverDockedState;
+        private boolean mHasDockedTask;
+
+        private GridState() {
+            mDraggingOverDockedState = false;
+            mHasDockedTask = false;
+        }
+
+        /**
+         * Check whether we should use the grid layout.
+         * We use the grid layout for Recents iff all the following is true:
+         *  1. Grid-mode is enabled.
+         *  2. The activity is not in split screen mode (there's no docked task).
+         *  3. The user is not dragging a task view over the dock state.
+         * @return True if we should use the grid layout.
+         */
+        boolean useGridLayout() {
+            return Recents.getConfiguration().isGridEnabled &&
+                !mDraggingOverDockedState &&
+                !mHasDockedTask;
+        }
+
+        public void setDragging(boolean draggingOverDockedState) {
+            mDraggingOverDockedState = draggingOverDockedState;
+        }
+
+        public void setHasDockedTasks(boolean hasDockedTask) {
+            mHasDockedTask = hasDockedTask;
+        }
+    }
+
     // A report of the visibility state of the stack
     public class VisibilityReport {
         public int numVisibleTasks;
@@ -227,6 +262,7 @@ public class TaskStackLayoutAlgorithm {
 
     Context mContext;
     private StackState mState = StackState.SPLIT;
+    private GridState mGridState = new GridState();
     private TaskStackLayoutAlgorithmCallbacks mCb;
 
     // The task bounds (untransformed) for layout.  This rect is anchored at mTaskRoot.
@@ -733,8 +769,8 @@ public class TaskStackLayoutAlgorithm {
         }
     }
 
-    public Rect getStackActionButtonRect(boolean useGridLayout) {
-        return useGridLayout
+    public Rect getStackActionButtonRect() {
+        return mGridState.useGridLayout()
                 ? mTaskGridLayoutAlgorithm.getStackActionButtonRect() : mStackActionButtonRect;
     }
 
@@ -757,6 +793,13 @@ public class TaskStackLayoutAlgorithm {
      */
     public StackState getStackState() {
         return mState;
+    }
+
+    /**
+     * Returns the current grid layout state.
+     */
+    public GridState getGridState() {
+        return mGridState;
     }
 
     /**
@@ -842,26 +885,25 @@ public class TaskStackLayoutAlgorithm {
      * is what the view is measured and laid out with.
      */
     public TaskViewTransform getStackTransform(Task task, float stackScroll,
-            TaskViewTransform transformOut, TaskViewTransform frontTransform,
-            boolean useGridLayout) {
+            TaskViewTransform transformOut, TaskViewTransform frontTransform) {
         return getStackTransform(task, stackScroll, mFocusState, transformOut, frontTransform,
-                false /* forceUpdate */, false /* ignoreTaskOverrides */, useGridLayout);
+                false /* forceUpdate */, false /* ignoreTaskOverrides */);
     }
 
     public TaskViewTransform getStackTransform(Task task, float stackScroll,
             TaskViewTransform transformOut, TaskViewTransform frontTransform,
-            boolean ignoreTaskOverrides, boolean useGridLayout) {
+            boolean ignoreTaskOverrides) {
         return getStackTransform(task, stackScroll, mFocusState, transformOut, frontTransform,
-                false /* forceUpdate */, ignoreTaskOverrides, useGridLayout);
+                false /* forceUpdate */, ignoreTaskOverrides);
     }
 
     public TaskViewTransform getStackTransform(Task task, float stackScroll, int focusState,
             TaskViewTransform transformOut, TaskViewTransform frontTransform, boolean forceUpdate,
-            boolean ignoreTaskOverrides, boolean useGridLayout) {
+            boolean ignoreTaskOverrides) {
         if (mFreeformLayoutAlgorithm.isTransformAvailable(task, this)) {
             mFreeformLayoutAlgorithm.getTransform(task, transformOut, this);
             return transformOut;
-        } else if (useGridLayout) {
+        } else if (mGridState.useGridLayout()) {
             int taskIndex = mTaskIndexMap.get(task.key.id);
             int taskCount = mTaskIndexMap.size();
             mTaskGridLayoutAlgorithm.getTransform(taskIndex, taskCount, transformOut, this);
@@ -887,10 +929,10 @@ public class TaskStackLayoutAlgorithm {
      */
     public TaskViewTransform getStackTransformScreenCoordinates(Task task, float stackScroll,
             TaskViewTransform transformOut, TaskViewTransform frontTransform,
-            Rect windowOverrideRect, boolean useGridLayout) {
+            Rect windowOverrideRect) {
         TaskViewTransform transform = getStackTransform(task, stackScroll, mFocusState,
                 transformOut, frontTransform, true /* forceUpdate */,
-                false /* ignoreTaskOverrides */, useGridLayout);
+                false /* ignoreTaskOverrides */);
         return transformToScreenCoordinates(transform, windowOverrideRect);
     }
 
