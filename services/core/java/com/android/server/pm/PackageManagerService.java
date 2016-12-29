@@ -15611,27 +15611,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                         return;
                     }
 
-                    // Prevent apps to change permission protection level to dangerous
-                    // from any other type as this would allow a privilege escalation
-                    // where an app adds a normal/signature permission in other app's
-                    // group and later redefines it as dangerous leading to the group
-                    // auto-grant.
-                    final int permissionCount = pkg.permissions.size();
-                    for (int i = 0; i < permissionCount; i++) {
-                        PackageParser.Permission permission = pkg.permissions.get(i);
-                        if ((permission.info.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE)
-                                == PermissionInfo.PROTECTION_DANGEROUS) {
-                            BasePermission bp = mSettings.mPermissions.get(permission.info.name);
-                            if (bp != null && !bp.isRuntime()) {
-                                res.setError(PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST,
-                                        "Package " + pkg.packageName + " trying to change a "
-                                                + "non-runtime permission " + permission.info.name
-                                                + " to runtime.");
-                                return;
-                            }
-                        }
-                    }
-
                     // Prevent installing of child packages
                     if (oldPackage.parentPackage != null) {
                         res.setError(PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME,
