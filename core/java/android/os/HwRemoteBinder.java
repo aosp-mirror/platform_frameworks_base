@@ -39,6 +39,9 @@ public class HwRemoteBinder implements IHwBinder {
     public native final void transact(
             int code, HwParcel request, HwParcel reply, int flags);
 
+    public native boolean linkToDeath(DeathRecipient recipient, long cookie);
+    public native boolean unlinkToDeath(DeathRecipient recipient);
+
     private static native final long native_init();
 
     private native final void native_setup_empty();
@@ -50,6 +53,10 @@ public class HwRemoteBinder implements IHwBinder {
                 HwRemoteBinder.class.getClassLoader(),
                 freeFunction,
                 128 /* size */);
+    }
+
+    private static final void sendDeathNotice(DeathRecipient recipient, long cookie) {
+        recipient.serviceDied(cookie);
     }
 
     private long mNativeContext;
