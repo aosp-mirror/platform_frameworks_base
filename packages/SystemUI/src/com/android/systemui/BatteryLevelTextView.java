@@ -61,7 +61,7 @@ public class BatteryLevelTextView extends TextView implements
         mBatteryCharging = charging;
         if (changed) {
             mForceBatteryText = Settings.Secure.getInt(getContext().getContentResolver(),
-                    STATUS_BAR_BATTERY_STYLE, 0) == 6 ? true : false;
+                    STATUS_BAR_BATTERY_STYLE, 2) == 6 ? true : false;
             mForceChargeBatteryText = Settings.Secure.getInt(getContext().getContentResolver(),
                     FORCE_CHARGE_BATTERY_TEXT, 1) == 1 ? true : false;
             setVisibility((mBatteryCharging && mForceChargeBatteryText) || mRequestedVisibility || mForceBatteryText ? View.VISIBLE : View.GONE);
@@ -96,7 +96,7 @@ public class BatteryLevelTextView extends TextView implements
             case STATUS_BAR_SHOW_BATTERY_PERCENT:
                 mRequestedVisibility = newValue != null && Integer.parseInt(newValue) == 2;
                 mForceBatteryText = Settings.Secure.getInt(getContext().getContentResolver(),
-                        STATUS_BAR_BATTERY_STYLE, 0) == 6 ? true : false;
+                        STATUS_BAR_BATTERY_STYLE, 2) == 6 ? true : false;
                 mForceChargeBatteryText = Settings.Secure.getInt(getContext().getContentResolver(),
                         FORCE_CHARGE_BATTERY_TEXT, 1) == 1 ? true : false;
                 setVisibility((mBatteryCharging && mForceChargeBatteryText) || mRequestedVisibility || mForceBatteryText ? View.VISIBLE : View.GONE);
@@ -105,7 +105,7 @@ public class BatteryLevelTextView extends TextView implements
                 final int value = newValue == null ?
                         BatteryMeterDrawable.BATTERY_STYLE_PORTRAIT : Integer.parseInt(newValue);
                 mForceBatteryText = Settings.Secure.getInt(getContext().getContentResolver(),
-                        STATUS_BAR_BATTERY_STYLE, 0) == 6 ? true : false;
+                        STATUS_BAR_BATTERY_STYLE, 2) == 6 ? true : false;
                 mForceChargeBatteryText = Settings.Secure.getInt(getContext().getContentResolver(),
                         FORCE_CHARGE_BATTERY_TEXT, 1) == 1 ? true : false;
                 switch (value) {

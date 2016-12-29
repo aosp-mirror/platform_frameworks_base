@@ -67,7 +67,7 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
         super(host);
         mBatteryController = host.getBatteryController();
         mBatteryStyle = Settings.Secure.getInt(host.getContext().getContentResolver(),
-                Settings.Secure.STATUS_BAR_BATTERY_STYLE, 0);
+                Settings.Secure.STATUS_BAR_BATTERY_STYLE, 2);
         mBatteryStyleTile = Settings.Secure.getInt(host.getContext().getContentResolver(),
                 Settings.Secure.STATUS_BAR_BATTERY_STYLE_TILE, 1);
         if (mBatteryStyle == BATTERY_STYLE_HIDDEN || mBatteryStyle == BATTERY_STYLE_TEXT || mBatteryStyleTile == 0) {
@@ -140,7 +140,7 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
             @Override
             public Drawable getDrawable(Context context) {
                 mBatteryStyle = Settings.Secure.getInt(context.getContentResolver(),
-                        Settings.Secure.STATUS_BAR_BATTERY_STYLE, 0);
+                        Settings.Secure.STATUS_BAR_BATTERY_STYLE, 2);
                 mBatteryStyleTile = Settings.Secure.getInt(context.getContentResolver(),
                         Settings.Secure.STATUS_BAR_BATTERY_STYLE_TILE, 1);
                 if (mBatteryStyle == BATTERY_STYLE_HIDDEN || mBatteryStyle == BATTERY_STYLE_TEXT || mBatteryStyleTile == 0) {
