@@ -228,6 +228,10 @@ public class DragDownHelper implements Gefingerpoken {
         return mCallback.getChildAtRawPosition(x, y);
     }
 
+    public boolean isDraggingDown() {
+        return mDraggingDown;
+    }
+
     public interface DragDownCallback {
 
         /**

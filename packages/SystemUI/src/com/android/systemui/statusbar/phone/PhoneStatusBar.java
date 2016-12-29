@@ -4692,7 +4692,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     /* Only ever called as a consequence of a lockscreen expansion gesture. */
     @Override
     public boolean onDraggedDown(View startingChild, int dragLengthY) {
-        if (hasActiveNotifications()) {
+        if (hasActiveNotifications() && (!isDozing() || isPulsing())) {
             EventLogTags.writeSysuiLockscreenGesture(
                     EventLogConstants.SYSUI_LOCKSCREEN_GESTURE_SWIPE_DOWN_FULL_SHADE,
                     (int) (dragLengthY / mDisplayMetrics.density),
@@ -4706,8 +4706,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
             return true;
         } else {
-
-            // No notifications - abort gesture.
+            // abort gesture.
             return false;
         }
     }
