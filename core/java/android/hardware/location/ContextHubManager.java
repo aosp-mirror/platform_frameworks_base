@@ -391,7 +391,7 @@ public final class ContextHubManager {
     public ContextHubManager(Context context, Looper mainLooper) {
         mMainLooper = mainLooper;
 
-        IBinder b = ServiceManager.getService(ContextHubService.CONTEXTHUB_SERVICE);
+        IBinder b = ServiceManager.getService(Context.CONTEXTHUB_SERVICE);
         if (b != null) {
             mContextHubService = IContextHubService.Stub.asInterface(b);
 
