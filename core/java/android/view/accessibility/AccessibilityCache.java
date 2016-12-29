@@ -42,6 +42,26 @@ public final class AccessibilityCache {
 
     private static final boolean CHECK_INTEGRITY = "eng".equals(Build.TYPE);
 
+    /**
+     * {@link AccessibilityEvent} types that are critical for the cache to stay up to date
+     *
+     * When adding new event types in {@link #onAccessibilityEvent}, please add it here also, to
+     * make sure that the events are delivered to cache regardless of
+     * {@link android.accessibilityservice.AccessibilityServiceInfo#eventTypes}
+     */
+    public static final int CACHE_CRITICAL_EVENTS_MASK =
+            AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED
+                    | AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED
+                    | AccessibilityEvent.TYPE_VIEW_FOCUSED
+                    | AccessibilityEvent.TYPE_VIEW_SELECTED
+                    | AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED
+                    | AccessibilityEvent.TYPE_VIEW_CLICKED
+                    | AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED
+                    | AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
+                    | AccessibilityEvent.TYPE_VIEW_SCROLLED
+                    | AccessibilityEvent.TYPE_WINDOWS_CHANGED
+                    | AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED;
+
     private final Object mLock = new Object();
 
     private final AccessibilityNodeRefresher mAccessibilityNodeRefresher;
@@ -99,6 +119,9 @@ public final class AccessibilityCache {
     /**
      * Notifies the cache that the something in the UI changed. As a result
      * the cache will either refresh some nodes or evict some nodes.
+     *
+     * Note: any event that ends up affecting the cache should also be present in
+     * {@link #CACHE_CRITICAL_EVENTS_MASK}
      *
      * @param event An event.
      */

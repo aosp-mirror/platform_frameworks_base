@@ -78,10 +78,10 @@ import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
-import android.view.MotionEvent;
 import android.view.WindowInfo;
 import android.view.WindowManager;
 import android.view.WindowManagerInternal;
+import android.view.accessibility.AccessibilityCache;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityManager;
@@ -1151,8 +1151,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 Service service = state.mBoundServices.get(i);
 
                 if (service.mIsDefault == isDefault) {
-                    if (canDispatchEventToServiceLocked(service, event)) {
-                        service.notifyAccessibilityEvent(event);
+                    if (doesServiceWantEventLocked(service, event)) {
+                        service.notifyAccessibilityEvent(event, true);
+                    } else if ((AccessibilityCache.CACHE_CRITICAL_EVENTS_MASK
+                            & event.getEventType()) != 0) {
+                        service.notifyAccessibilityEvent(event, false);
                     }
                 }
             }
@@ -1201,7 +1204,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
      * @param event The event.
      * @return True if the listener should be notified, false otherwise.
      */
-    private boolean canDispatchEventToServiceLocked(Service service, AccessibilityEvent event) {
+    private boolean doesServiceWantEventLocked(Service service, AccessibilityEvent event) {
 
         if (!service.canReceiveEventsLocked()) {
             return false;
@@ -2285,7 +2288,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             public void handleMessage(Message message) {
                 final int eventType =  message.what;
                 AccessibilityEvent event = (AccessibilityEvent) message.obj;
-                notifyAccessibilityEventInternal(eventType, event);
+                boolean serviceWantsEvent = message.arg1 != 0;
+                notifyAccessibilityEventInternal(eventType, event, serviceWantsEvent);
             }
         };
 
@@ -3200,8 +3204,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
          * Performs a notification for an {@link AccessibilityEvent}.
          *
          * @param event The event.
+         * @param serviceWantsEvent whether the event should be received by
+         *  {@link AccessibilityService#onAccessibilityEvent} (true),
+         *  as opposed to just {@link AccessibilityInteractionClient#onAccessibilityEvent} (false)
          */
-        public void notifyAccessibilityEvent(AccessibilityEvent event) {
+        public void notifyAccessibilityEvent(AccessibilityEvent event, boolean serviceWantsEvent) {
             synchronized (mLock) {
                 final int eventType = event.getEventType();
                 // Make a copy since during dispatch it is possible the event to
@@ -3223,6 +3230,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     // Send all messages, bypassing mPendingEvents
                     message = mEventDispatchHandler.obtainMessage(eventType, newEvent);
                 }
+                message.arg1 = serviceWantsEvent ? 1 : 0;
 
                 mEventDispatchHandler.sendMessageDelayed(message, mNotificationTimeout);
             }
@@ -3233,7 +3241,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
          *
          * @param eventType The type of the event to dispatch.
          */
-        private void notifyAccessibilityEventInternal(int eventType, AccessibilityEvent event) {
+        private void notifyAccessibilityEventInternal(
+                int eventType,
+                AccessibilityEvent event,
+                boolean serviceWantsEvent) {
             IAccessibilityServiceClient listener;
 
             synchronized (mLock) {
@@ -3280,7 +3291,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             }
 
             try {
-                listener.onAccessibilityEvent(event);
+                listener.onAccessibilityEvent(event, serviceWantsEvent);
                 if (DEBUG) {
                     Slog.i(LOG_TAG, "Event " + event + " sent to " + listener);
                 }
