@@ -138,15 +138,14 @@ public class NotificationChildrenContainer extends ViewGroup {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int ownMaxHeight = mMaxNotificationHeight;
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         boolean hasFixedHeight = heightMode == MeasureSpec.EXACTLY;
         boolean isHeightLimited = heightMode == MeasureSpec.AT_MOST;
         int size = MeasureSpec.getSize(heightMeasureSpec);
+        int newHeightSpec = heightMeasureSpec;
         if (hasFixedHeight || isHeightLimited) {
-            ownMaxHeight = Math.min(ownMaxHeight, size);
+            newHeightSpec = MeasureSpec.makeMeasureSpec(size, MeasureSpec.AT_MOST);
         }
-        int newHeightSpec = MeasureSpec.makeMeasureSpec(ownMaxHeight, MeasureSpec.AT_MOST);
         int width = MeasureSpec.getSize(widthMeasureSpec);
         if (mOverflowNumber != null) {
             mOverflowNumber.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.AT_MOST),

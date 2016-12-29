@@ -1338,7 +1338,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         if (isUserLocked()) {
             return getActualHeight();
         }
-        if (mGuts != null && mGuts.areGutsExposed()) {
+        if (mGuts != null && mGuts.isExposed()) {
             return mGuts.getHeight();
         } else if ((isChildInGroup() && !isGroupExpanded())) {
             return mPrivateLayout.getMinHeight();
@@ -1589,7 +1589,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     public boolean areGutsExposed() {
-        return (mGuts != null && mGuts.areGutsExposed());
+        return (mGuts != null && mGuts.isExposed());
     }
 
     @Override
@@ -1634,7 +1634,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     @Override
     public void setActualHeight(int height, boolean notifyListeners) {
         super.setActualHeight(height, notifyListeners);
-        if (mGuts != null && mGuts.areGutsExposed()) {
+        if (mGuts != null && mGuts.isExposed()) {
             mGuts.setActualHeight(height);
             return;
         }

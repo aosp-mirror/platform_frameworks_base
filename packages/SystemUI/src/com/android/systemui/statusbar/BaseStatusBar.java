@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityOptions;
+import android.app.INotificationManager;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -1058,74 +1059,43 @@ public abstract class BaseStatusBar extends SystemUI implements
         row.setTag(sbn.getPackageName());
         final NotificationGuts guts = row.getGuts();
         guts.setClosedListener(this);
+
+        final INotificationManager iNotificationManager = INotificationManager.Stub.asInterface(
+                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+
         final String pkg = sbn.getPackageName();
-        String appname = pkg;
-        Drawable pkgicon = null;
-        int appUid = -1;
-        try {
-            final ApplicationInfo info = pmUser.getApplicationInfo(pkg,
-                    PackageManager.MATCH_UNINSTALLED_PACKAGES
-                            | PackageManager.MATCH_DISABLED_COMPONENTS);
-            if (info != null) {
-                appname = String.valueOf(pmUser.getApplicationLabel(info));
-                pkgicon = pmUser.getApplicationIcon(info);
-                appUid = info.uid;
-            }
-        } catch (NameNotFoundException e) {
-            // app is gone, just show package name and generic icon
-            pkgicon = pmUser.getDefaultActivityIcon();
-        }
-
-        ((ImageView) guts.findViewById(R.id.app_icon)).setImageDrawable(pkgicon);
-        ((TextView) guts.findViewById(R.id.pkgname)).setText(appname);
-
-        final TextView settingsButton = (TextView) guts.findViewById(R.id.more_settings);
-        if (appUid >= 0) {
-            final int appUidF = appUid;
-            settingsButton.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
+        final NotificationGuts.OnSettingsClickListener onSettingsClick =
+                (View v, int appUid) -> {
                     MetricsLogger.action(mContext, MetricsEvent.ACTION_NOTE_INFO);
                     guts.resetFalsingCheck();
-                    startAppNotificationSettingsActivity(pkg, appUidF);
-                }
-            });
-            settingsButton.setText(R.string.notification_more_settings);
-        } else {
-            settingsButton.setVisibility(View.GONE);
-        }
-
-        guts.bindImportance(pmUser, sbn, mNonBlockablePkgs,
-                mNotificationData.getImportance(sbn.getKey()));
-
-        final TextView doneButton = (TextView) guts.findViewById(R.id.done);
-        doneButton.setText(R.string.notification_done);
-        doneButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // If the user has security enabled, show challenge if the setting is changed.
-                if (guts.hasImportanceChanged()
-                            && isLockscreenPublicMode(sbn.getUser().getIdentifier())
-                            && (mState == StatusBarState.KEYGUARD
-                                    || mState == StatusBarState.SHADE_LOCKED)) {
-                    OnDismissAction dismissAction = new OnDismissAction() {
-                        @Override
-                        public boolean onDismiss() {
-                            saveImportanceCloseControls(sbn, row, guts, v);
-                            return true;
-                        }
-                    };
-                    onLockedNotificationImportanceChange(dismissAction);
-                } else {
-                    saveImportanceCloseControls(sbn, row, guts, v);
-                }
-            }
-        });
+                    startAppNotificationSettingsActivity(pkg, appUid);
+                };
+        final View.OnClickListener onDoneClick =
+                (View v) -> {
+                    // If the user has security enabled, show challenge if the setting is changed.
+                    if (guts.hasImportanceChanged()
+                                && isLockscreenPublicMode(sbn.getUser().getIdentifier())
+                                && (mState == StatusBarState.KEYGUARD
+                                        || mState == StatusBarState.SHADE_LOCKED)) {
+                        OnDismissAction dismissAction = new OnDismissAction() {
+                            @Override
+                            public boolean onDismiss() {
+                                closeControls(row, guts, v);
+                                return true;
+                            }
+                        };
+                        onLockedNotificationImportanceChange(dismissAction);
+                    } else {
+                        closeControls(row, guts, v);
+                    }
+                };
+        guts.bindNotification(pmUser, iNotificationManager, sbn, onSettingsClick, onDoneClick,
+                mNonBlockablePkgs);
     }
 
-    private void saveImportanceCloseControls(StatusBarNotification sbn,
+    private void closeControls(
             ExpandableNotificationRow row, NotificationGuts guts, View done) {
         guts.resetFalsingCheck();
-        guts.saveImportance(sbn);
 
         int[] rowLocation = new int[2];
         int[] doneLocation = new int[2];
@@ -1222,7 +1192,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     public void dismissPopups(int x, int y, boolean resetGear, boolean animate) {
         if (mNotificationGutsExposed != null) {
-            mNotificationGutsExposed.closeControls(x, y, true /* notify */);
+            mNotificationGutsExposed.closeControls(x, y, true /* save */);
         }
         if (resetGear) {
             mStackScroller.resetExposedGearView(animate, true /* force */);
@@ -1722,13 +1692,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
         entry.autoRedacted = entry.notification.getNotification().publicVersion == null;
 
-        if (MULTIUSER_DEBUG) {
-            TextView debug = (TextView) row.findViewById(R.id.debug_info);
-            if (debug != null) {
-                debug.setVisibility(View.VISIBLE);
-                debug.setText("CU " + mCurrentUserId +" NU " + entry.notification.getUserId());
-            }
-        }
         entry.row = row;
         entry.row.setOnActivatedListener(this);
         entry.row.setExpandable(bigContentViewLocal != null);
