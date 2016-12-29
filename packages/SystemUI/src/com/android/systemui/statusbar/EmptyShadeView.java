@@ -28,6 +28,8 @@ import com.android.systemui.statusbar.stack.StackScrollState;
 
 public class EmptyShadeView extends StackScrollerDecorView {
 
+    private TextView mEmptyText;
+
     public EmptyShadeView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -35,7 +37,7 @@ public class EmptyShadeView extends StackScrollerDecorView {
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        ((TextView) findViewById(R.id.no_notifications)).setText(R.string.empty_shade_text);
+        mEmptyText.setText(R.string.empty_shade_text);
     }
 
     @Override
@@ -44,17 +46,23 @@ public class EmptyShadeView extends StackScrollerDecorView {
     }
 
     @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        mEmptyText = (TextView) findContentView();
+    }
+
+    @Override
     public ExpandableViewState createNewViewState(StackScrollState stackScrollState) {
         return new EmptyShadeViewState();
     }
 
-    public static class EmptyShadeViewState extends ExpandableViewState {
+    public class EmptyShadeViewState extends ExpandableViewState {
         @Override
         public void applyToView(View view) {
             super.applyToView(view);
             if (view instanceof EmptyShadeView) {
                 EmptyShadeView emptyShadeView = (EmptyShadeView) view;
-                boolean visible = this.clipTopAmount <= 0;
+                boolean visible = this.clipTopAmount <= mEmptyText.getPaddingTop() * 0.6f;
                 emptyShadeView.performVisibilityAnimation(
                         visible && !emptyShadeView.willBeGone());
             }

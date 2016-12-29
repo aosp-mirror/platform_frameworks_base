@@ -768,15 +768,19 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     private float getAppearEndPosition() {
         int appearPosition;
-        int minNotificationsForShelf = 1;
-        if (mTrackingHeadsUp || mHeadsUpManager.hasPinnedHeadsUp()) {
-            appearPosition = mHeadsUpManager.getTopHeadsUpPinnedHeight();
-            minNotificationsForShelf = 2;
+        if (mEmptyShadeView.getVisibility() == GONE) {
+            int minNotificationsForShelf = 1;
+            if (mTrackingHeadsUp || mHeadsUpManager.hasPinnedHeadsUp()) {
+                appearPosition = mHeadsUpManager.getTopHeadsUpPinnedHeight();
+                minNotificationsForShelf = 2;
+            } else {
+                appearPosition = 0;
+            }
+            if (getNotGoneChildCount() >= minNotificationsForShelf) {
+                appearPosition += mShelf.getIntrinsicHeight();
+            }
         } else {
-            appearPosition = 0;
-        }
-        if (getNotGoneChildCount() >= minNotificationsForShelf) {
-            appearPosition += mShelf.getIntrinsicHeight();
+            appearPosition = mEmptyShadeView.getHeight();
         }
         return appearPosition + (onKeyguard() ? mTopPadding : mIntrinsicPadding);
     }
