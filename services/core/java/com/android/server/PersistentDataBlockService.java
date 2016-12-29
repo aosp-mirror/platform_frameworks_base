@@ -86,6 +86,8 @@ public class PersistentDataBlockService extends SystemService {
 
     private int mAllowedUid = -1;
     private long mBlockDeviceSize;
+
+    @GuardedBy("mLock")
     private boolean mIsWritable = true;
 
     @GuardedBy("mLock")
