@@ -372,6 +372,16 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
+     * This is called by methods that want to throw an exception if the bitmap
+     * is {@link Config#HARDWARE}.
+     */
+    private void checkHardware(String errorMessage) {
+        if (getConfig() == Config.HARDWARE) {
+            throw new IllegalStateException(errorMessage);
+        }
+    }
+
+    /**
      * Common code for checking that x and y are >= 0
      *
      * @param x x coordinate to ensure is >= 0
@@ -512,8 +522,11 @@ public final class Bitmap implements Parcelable {
      * <p>After this method returns, the current position of the buffer is
      * updated: the position is incremented by the number of elements written
      * in the buffer.</p>
+     * @throws IllegalStateException if the bitmap's config is {@link Config#HARDWARE}
      */
     public void copyPixelsToBuffer(Buffer dst) {
+        checkHardware("unable to copyPixelsToBuffer, "
+                + "pixel access is not supported on Config#HARDWARE bitmaps");
         int elements = dst.remaining();
         int shift;
         if (dst instanceof ByteBuffer) {
@@ -550,9 +563,11 @@ public final class Bitmap implements Parcelable {
      * updated: the position is incremented by the number of elements read from
      * the buffer. If you need to read the bitmap from the buffer again you must
      * first rewind the buffer.</p>
+     * @throws IllegalStateException if the bitmap's config is {@link Config#HARDWARE}
      */
     public void copyPixelsFromBuffer(Buffer src) {
         checkRecycled("copyPixelsFromBuffer called on recycled bitmap");
+        checkHardware("unable to copyPixelsFromBuffer, Config#HARDWARE bitmaps are immutable");
 
         int elements = src.remaining();
         int shift;
@@ -1435,9 +1450,8 @@ public final class Bitmap implements Parcelable {
     @ColorInt
     public int getPixel(int x, int y) {
         checkRecycled("Can't call getPixel() on a recycled bitmap");
-        if (getConfig() == Config.HARDWARE) {
-            throw new IllegalStateException("Can't access pixels in hardware Bitmaps");
-        }
+        checkHardware("unable to getPixel(), "
+                + "pixel access is not supported on Config#HARDWARE bitmaps");
         checkPixelAccess(x, y);
         return nativeGetPixel(mNativePtr, x, y);
     }
@@ -1469,9 +1483,8 @@ public final class Bitmap implements Parcelable {
     public void getPixels(@ColorInt int[] pixels, int offset, int stride,
                           int x, int y, int width, int height) {
         checkRecycled("Can't call getPixels() on a recycled bitmap");
-        if (getConfig() == Config.HARDWARE) {
-            throw new IllegalStateException("Can't access pixels in hardware Bitmaps");
-        }
+        checkHardware("unable to getPixels(), "
+                + "pixel access is not supported on Config#HARDWARE bitmaps");
         if (width == 0 || height == 0) {
             return; // nothing to do
         }
