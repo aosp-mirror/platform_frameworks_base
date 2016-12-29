@@ -3715,6 +3715,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         logPerformShow("performShow on ");
 
+        final int drawState = mWinAnimator.mDrawState;
+        if ((drawState == HAS_DRAWN || drawState == READY_TO_SHOW)
+                && mAttrs.type != TYPE_APPLICATION_STARTING && mAppToken != null) {
+            mAppToken.onFirstWindowDrawn(this, mWinAnimator);
+        }
+
         if (mWinAnimator.mDrawState != READY_TO_SHOW || !isReadyForDisplay()) {
             return false;
         }
@@ -3747,10 +3753,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     }
                 }
             }
-        }
-
-        if (mAttrs.type != TYPE_APPLICATION_STARTING && mAppToken != null) {
-            mAppToken.onFirstWindowDrawn(this, mWinAnimator);
         }
 
         if (mAttrs.type == TYPE_INPUT_METHOD) {
