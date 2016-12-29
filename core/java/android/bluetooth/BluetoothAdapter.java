@@ -1916,6 +1916,9 @@ public final class BluetoothAdapter {
         } else if (profile == BluetoothProfile.MAP_CLIENT) {
             BluetoothMapClient mapClient = new BluetoothMapClient(context, listener);
             return true;
+        } else if (profile == BluetoothProfile.HID_DEVICE) {
+            BluetoothHidDevice hidd = new BluetoothHidDevice(context, listener);
+            return true;
         } else {
             return false;
         }
@@ -1991,6 +1994,10 @@ public final class BluetoothAdapter {
             case BluetoothProfile.MAP_CLIENT:
                 BluetoothMapClient mapClient = (BluetoothMapClient)proxy;
                 mapClient.close();
+                break;
+            case BluetoothProfile.HID_DEVICE:
+                BluetoothHidDevice hidd = (BluetoothHidDevice) proxy;
+                hidd.close();
                 break;
         }
     }
