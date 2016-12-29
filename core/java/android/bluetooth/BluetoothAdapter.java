@@ -1940,8 +1940,8 @@ public final class BluetoothAdapter {
         } else if (profile == BluetoothProfile.MAP_CLIENT) {
             BluetoothMapClient mapClient = new BluetoothMapClient(context, listener);
             return true;
-        } else if (profile == BluetoothProfile.HID_DEVICE) {
-            BluetoothHidDevice hidd = new BluetoothHidDevice(context, listener);
+        } else if (profile == BluetoothProfile.INPUT_HOST) {
+            BluetoothInputHost iHost = new BluetoothInputHost(context, listener);
             return true;
         } else {
             return false;
@@ -2019,9 +2019,9 @@ public final class BluetoothAdapter {
                 BluetoothMapClient mapClient = (BluetoothMapClient)proxy;
                 mapClient.close();
                 break;
-            case BluetoothProfile.HID_DEVICE:
-                BluetoothHidDevice hidd = (BluetoothHidDevice) proxy;
-                hidd.close();
+            case BluetoothProfile.INPUT_HOST:
+                BluetoothInputHost iHost = (BluetoothInputHost) proxy;
+                iHost.close();
                 break;
         }
     }

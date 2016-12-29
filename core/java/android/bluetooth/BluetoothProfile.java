@@ -143,10 +143,10 @@ public interface BluetoothProfile {
     public static final int MAP_CLIENT = 18;
 
     /**
-     * HID device
+     * Input Host
      * @hide
      */
-    static public final int HID_DEVICE = 19;
+    static public final int INPUT_HOST = 19;
 
     /**
      * Max profile ID. This value should be updated whenever a new profile is added to match
