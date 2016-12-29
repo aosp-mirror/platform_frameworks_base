@@ -182,6 +182,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private int mStartTint;
     private int mOverrideTint;
     private float mOverrideAmount;
+    private boolean mShadowHidden;
 
     public ActivatableNotificationView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -210,6 +211,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         super.onFinishInflate();
         mBackgroundNormal = (NotificationBackgroundView) findViewById(R.id.backgroundNormal);
         mFakeShadow = (FakeShadowView) findViewById(R.id.fake_shadow);
+        mShadowHidden = mFakeShadow.getVisibility() != VISIBLE;
         mBackgroundDimmed = (NotificationBackgroundView) findViewById(R.id.backgroundDimmed);
         mBackgroundNormal.setCustomBackground(R.drawable.notification_material_bg);
         mBackgroundDimmed.setCustomBackground(R.drawable.notification_material_bg_dim);
@@ -1020,9 +1022,13 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     @Override
     public void setFakeShadowIntensity(float shadowIntensity, float outlineAlpha, int shadowYEnd,
             int outlineTranslation) {
-        mFakeShadow.setFakeShadowTranslationZ(shadowIntensity * (getTranslationZ()
-                + FakeShadowView.SHADOW_SIBLING_TRESHOLD), outlineAlpha, shadowYEnd,
-                outlineTranslation);
+        boolean hiddenBefore = mShadowHidden;
+        mShadowHidden = shadowIntensity == 0.0f;
+        if (!mShadowHidden || !hiddenBefore) {
+            mFakeShadow.setFakeShadowTranslationZ(shadowIntensity * (getTranslationZ()
+                            + FakeShadowView.SHADOW_SIBLING_TRESHOLD), outlineAlpha, shadowYEnd,
+                    outlineTranslation);
+        }
     }
 
     public int getBackgroundColorWithoutTint() {

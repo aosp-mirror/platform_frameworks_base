@@ -338,13 +338,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private void setCurrentScrimAlpha(View scrim, float alpha) {
         if (scrim == mScrimBehind) {
             mCurrentBehindAlpha = alpha;
+            mLightBarController.setScrimAlpha(mCurrentBehindAlpha);
         } else if (scrim == mScrimInFront) {
             mCurrentInFrontAlpha = alpha;
         } else {
             alpha = Math.max(0.0f, Math.min(1.0f, alpha));
             mCurrentHeadsUpAlpha = alpha;
         }
-        mLightBarController.setScrimAlpha(mCurrentBehindAlpha);
     }
 
     protected void updateScrimColor(View scrim) {
