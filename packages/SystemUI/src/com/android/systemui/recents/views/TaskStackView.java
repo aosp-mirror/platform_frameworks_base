@@ -159,7 +159,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     private int mTaskCornerRadiusPx;
     private int mDividerSize;
     private int mStartTimerIndicatorDuration;
-    private boolean mDraggingOverDockState;
 
     @ViewDebug.ExportedProperty(category="recents")
     private boolean mTaskViewsClipDirty = true;
@@ -501,13 +500,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
             // Calculate the current and (if necessary) the target transform for the task
             transform = mLayoutAlgorithm.getStackTransform(task, curStackScroll,
-                    taskTransforms.get(i), frontTransform, ignoreTaskOverrides, useGridLayout());
+                    taskTransforms.get(i), frontTransform, ignoreTaskOverrides);
             if (useTargetStackScroll && !transform.visible) {
                 // If we have a target stack scroll and the task is not currently visible, then we
                 // just update the transform at the new scroll
                 // TODO: Optimize this
                 transformAtTarget = mLayoutAlgorithm.getStackTransform(task, targetStackScroll,
-                    new TaskViewTransform(), frontTransformAtTarget, useGridLayout());
+                    new TaskViewTransform(), frontTransformAtTarget);
                 if (transformAtTarget.visible) {
                     transform.copyFrom(transformAtTarget);
                 }
@@ -738,7 +737,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             } else {
                 mLayoutAlgorithm.getStackTransform(task, mStackScroller.getStackScroll(),
                         focusState, transform, null, true /* forceUpdate */,
-                        false /* ignoreTaskOverrides */, useGridLayout());
+                        false /* ignoreTaskOverrides */);
             }
             transform.visible = true;
         }
@@ -755,7 +754,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             Task task = tasks.get(i);
             TaskViewTransform transform = transformsOut.get(i);
             mLayoutAlgorithm.getStackTransform(task, stackScroll, focusState, transform, null,
-                    true /* forceUpdate */, ignoreTaskOverrides, useGridLayout());
+                    true /* forceUpdate */, ignoreTaskOverrides);
             transform.visible = true;
         }
     }
@@ -1836,7 +1835,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Enlarge the dragged view slightly
         float finalScale = event.taskView.getScaleX() * DRAG_SCALE_FACTOR;
         mLayoutAlgorithm.getStackTransform(event.task, getScroller().getStackScroll(),
-                mTmpTransform, null, useGridLayout());
+                mTmpTransform, null);
         mTmpTransform.scale = finalScale;
         mTmpTransform.translationZ = mLayoutAlgorithm.mMaxTranslationZ + 1;
         mTmpTransform.dimAlpha = 0f;
@@ -1857,7 +1856,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 Interpolators.FAST_OUT_SLOW_IN);
         boolean ignoreTaskOverrides = false;
         if (event.dropTarget instanceof TaskStack.DockState) {
-            mDraggingOverDockState = true;
+            mLayoutAlgorithm.getGridState().setDragging(true);
             // Calculate the new task stack bounds that matches the window size that Recents will
             // have after the drop
             final TaskStack.DockState dockState = (TaskStack.DockState) event.dropTarget;
@@ -1877,7 +1876,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             updateLayoutAlgorithm(true /* boundScroll */);
             ignoreTaskOverrides = true;
         } else {
-            mDraggingOverDockState = false;
+            mLayoutAlgorithm.getGridState().setDragging(false);
             // Restore the pre-drag task stack bounds, but ensure that we don't layout the dragging
             // task view, so add it back to the ignore set after updating the layout
             removeIgnoreTask(event.task);
@@ -1888,7 +1887,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     public final void onBusEvent(final DragEndEvent event) {
-        mDraggingOverDockState = false;
+        mLayoutAlgorithm.getGridState().setDragging(false);
         // We don't handle drops on the dock regions
         if (event.dropTarget instanceof TaskStack.DockState) {
             // However, we do need to reset the overrides, since the last state of this task stack
@@ -2078,6 +2077,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     public void reloadOnConfigurationChange() {
         mStableLayoutAlgorithm.reloadOnConfigurationChange(getContext());
         mLayoutAlgorithm.reloadOnConfigurationChange(getContext());
+
+        boolean hasDockedTask = Recents.getSystemServices().hasDockedTask();
+        mStableLayoutAlgorithm.getGridState().setHasDockedTasks(hasDockedTask);
+        mLayoutAlgorithm.getGridState().setHasDockedTasks(hasDockedTask);
     }
 
     /**
@@ -2132,16 +2135,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     /**
      * Check whether we should use the grid layout.
-     * We use the grid layout for Recents iff all the following is true:
-     *  1. Grid-mode is enabled.
-     *  2. The activity is not in split screen mode (there's no docked task).
-     *  3. The user is not dragging a task view over the dock state.
-     * @return True if we should use the grid layout.
      */
     public boolean useGridLayout() {
-        return Recents.getConfiguration().isGridEnabled
-            && !Recents.getSystemServices().hasDockedTask()
-            && !mDraggingOverDockState;
+        return mLayoutAlgorithm.getGridState().useGridLayout();
     }
 
     /**
