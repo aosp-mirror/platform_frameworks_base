@@ -2052,6 +2052,7 @@
          @SystemApi @hide -->
     <permission android:name="android.permission.BIND_NETWORK_RECOMMENDATION_SERVICE"
         android:protectionLevel="signature" />
+    <uses-permission android:name="android.permission.BIND_NETWORK_RECOMMENDATION_SERVICE"/>
 
     <!-- ========================================= -->
     <!-- Permissions for special development tools -->
