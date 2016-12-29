@@ -204,6 +204,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         Resources res = mContext.getResources();
         reloadResources();
         mDummyStackView.reloadOnConfigurationChange();
+        mDummyStackView.getStackAlgorithm().getGridState().setHasDockedTasks(
+            Recents.getSystemServices().hasDockedTask());
     }
 
     /**
@@ -721,7 +723,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 if (task.isFreeformTask()) {
                     mTmpTransform = stackLayout.getStackTransformScreenCoordinates(task,
                             stackScroller.getStackScroll(), mTmpTransform, null,
-                            windowOverrideRect, false /* useGridLayout */);
+                            windowOverrideRect);
                     Bitmap thumbnail = drawThumbnailTransitionBitmap(task, mTmpTransform,
                             mThumbTransitionBitmapCache);
                     Rect toTaskRect = new Rect();
@@ -772,8 +774,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         stackView.updateToInitialState();
         boolean isInSplitScreen = Recents.getSystemServices().hasDockedTask();
         stackView.getStackAlgorithm().getStackTransformScreenCoordinates(launchTask,
-                stackView.getScroller().getStackScroll(), mTmpTransform, null, windowOverrideRect,
-                Recents.getConfiguration().isGridEnabled && !isInSplitScreen);
+                stackView.getScroller().getStackScroll(), mTmpTransform, null, windowOverrideRect);
         return mTmpTransform;
     }
 
