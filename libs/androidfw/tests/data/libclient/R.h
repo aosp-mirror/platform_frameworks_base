@@ -21,24 +21,31 @@
 
 namespace com {
 namespace android {
-namespace lib {
+namespace libclient {
 
 struct R {
   struct attr {
     enum : uint32_t {
-      attr1 = 0x02010000,  // default
-      attr2 = 0x02010001,  // default
+      foo = 0x7f010000,  // default
+      bar = 0x7f010001,  // default
     };
   };
 
   struct style {
     enum : uint32_t {
-      Theme = 0x02020000,  // default
+      Theme = 0x7f020000,  // default
+    };
+  };
+
+  struct string {
+    enum : uint32_t {
+      foo_one = 0x7f030000,  // default
+      foo_two = 0x7f030001,  // default
     };
   };
 };
 
-}  // namespace lib
+}  // namespace libclient
 }  // namespace android
 }  // namespace com
 

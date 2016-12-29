@@ -38,6 +38,7 @@ cc_library {
         "ResourceTypes.cpp",
         "StreamingZipInflater.cpp",
         "TypeWrappers.cpp",
+        "Util.cpp",
         "ZipFileRO.cpp",
         "ZipUtils.cpp",
     ],
@@ -82,6 +83,9 @@ cc_library {
         },
         windows: {
             enabled: true,
+            cppflags: ["-Wno-missing-field-initializers"],  // The Windows compiler warns
+                                                            // incorrectly for value
+                                                            // initialization with {}.
         },
     },
 }

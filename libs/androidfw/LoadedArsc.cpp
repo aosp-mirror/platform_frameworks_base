@@ -32,15 +32,15 @@
 #endif
 #endif
 
-#include "Chunk.h"
 #include "androidfw/ByteBucketArray.h"
+#include "androidfw/Chunk.h"
 #include "androidfw/Util.h"
 
 using android::base::StringPrintf;
 
 namespace android {
 
-namespace {
+constexpr const static int kAppPackageId = 0x7f;
 
 // Element of a TypeSpec array. See TypeSpec.
 struct Type {
@@ -76,6 +76,8 @@ struct TypeSpec {
 // itself.
 using TypeSpecPtr = util::unique_cptr<TypeSpec>;
 
+namespace {
+
 // Builder that helps accumulate Type structs and then create a single
 // contiguous block of memory to store both the TypeSpec struct and
 // the Type structs.
@@ -110,37 +112,18 @@ class TypeSpecPtrBuilder {
 
 }  // namespace
 
-class LoadedPackage {
- public:
-  LoadedPackage() = default;
-
-  bool FindEntry(uint8_t type_id, uint16_t entry_id, const ResTable_config& config,
-                 LoadedArsc::Entry* out_entry, ResTable_config* out_selected_config,
-                 uint32_t* out_flags) const;
-
-  ResStringPool type_string_pool_;
-  ResStringPool key_string_pool_;
-  std::string package_name_;
-  int package_id_ = -1;
-
-  ByteBucketArray<TypeSpecPtr> type_specs_;
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(LoadedPackage);
-};
-
-bool LoadedPackage::FindEntry(uint8_t type_id, uint16_t entry_id, const ResTable_config& config,
-                              LoadedArsc::Entry* out_entry, ResTable_config* out_selected_config,
+bool LoadedPackage::FindEntry(uint8_t type_idx, uint16_t entry_idx, const ResTable_config& config,
+                              LoadedArscEntry* out_entry, ResTable_config* out_selected_config,
                               uint32_t* out_flags) const {
-  ATRACE_NAME("LoadedPackage::FindEntry");
-  const TypeSpecPtr& ptr = type_specs_[type_id];
+  ATRACE_CALL();
+  const TypeSpecPtr& ptr = type_specs_[type_idx];
   if (ptr == nullptr) {
     return false;
   }
 
   // Don't bother checking if the entry ID is larger than
   // the number of entries.
-  if (entry_id >= dtohl(ptr->type_spec->entryCount)) {
+  if (entry_idx >= dtohl(ptr->type_spec->entryCount)) {
     return false;
   }
 
@@ -156,10 +139,10 @@ bool LoadedPackage::FindEntry(uint8_t type_id, uint16_t entry_id, const ResTable
       // The configuration matches and is better than the previous selection.
       // Find the entry value if it exists for this configuration.
       size_t entry_count = dtohl(type->type->entryCount);
-      if (entry_id < entry_count) {
+      if (entry_idx < entry_count) {
         const uint32_t* entry_offsets = reinterpret_cast<const uint32_t*>(
             reinterpret_cast<const uint8_t*>(type->type) + dtohs(type->type->header.headerSize));
-        const uint32_t offset = dtohl(entry_offsets[entry_id]);
+        const uint32_t offset = dtohl(entry_offsets[entry_idx]);
         if (offset != ResTable_type::NO_ENTRY) {
           // There is an entry for this resource, record it.
           best_config = &type->configuration;
@@ -175,7 +158,7 @@ bool LoadedPackage::FindEntry(uint8_t type_id, uint16_t entry_id, const ResTable
   }
 
   const uint32_t* flags = reinterpret_cast<const uint32_t*>(ptr->type_spec + 1);
-  *out_flags = dtohl(flags[entry_id]);
+  *out_flags = dtohl(flags[entry_idx]);
   *out_selected_config = *best_config;
 
   const ResTable_entry* best_entry = reinterpret_cast<const ResTable_entry*>(
@@ -191,9 +174,10 @@ bool LoadedPackage::FindEntry(uint8_t type_id, uint16_t entry_id, const ResTable
 // forward declarations and incomplete types.
 LoadedArsc::~LoadedArsc() {}
 
-bool LoadedArsc::FindEntry(uint32_t resid, const ResTable_config& config, Entry* out_entry,
-                           ResTable_config* out_selected_config, uint32_t* out_flags) const {
-  ATRACE_NAME("LoadedArsc::FindEntry");
+bool LoadedArsc::FindEntry(uint32_t resid, const ResTable_config& config,
+                           LoadedArscEntry* out_entry, ResTable_config* out_selected_config,
+                           uint32_t* out_flags) const {
+  ATRACE_CALL();
   const uint8_t package_id = util::get_package_id(resid);
   const uint8_t type_id = util::get_type_id(resid);
   const uint16_t entry_id = util::get_entry_id(resid);
@@ -212,11 +196,11 @@ bool LoadedArsc::FindEntry(uint32_t resid, const ResTable_config& config, Entry*
   return false;
 }
 
-const std::string* LoadedArsc::GetPackageNameForId(uint32_t resid) const {
+const LoadedPackage* LoadedArsc::GetPackageForId(uint32_t resid) const {
   const uint8_t package_id = util::get_package_id(resid);
   for (const auto& loaded_package : packages_) {
     if (loaded_package->package_id_ == package_id) {
-      return &loaded_package->package_name_;
+      return loaded_package.get();
     }
   }
   return nullptr;
@@ -334,15 +318,24 @@ static bool VerifyType(const Chunk& chunk) {
   return true;
 }
 
-static bool LoadPackage(const Chunk& chunk, LoadedPackage* loaded_package) {
+std::unique_ptr<LoadedPackage> LoadedPackage::Load(const Chunk& chunk) {
   ATRACE_CALL();
+  std::unique_ptr<LoadedPackage> loaded_package{new LoadedPackage()};
+
   const ResTable_package* header = chunk.header<ResTable_package>();
   if (header == nullptr) {
     LOG(ERROR) << "Chunk RES_TABLE_PACKAGE_TYPE is too small.";
-    return false;
+    return {};
   }
 
   loaded_package->package_id_ = dtohl(header->id);
+  if (loaded_package->package_id_ == 0) {
+    // Package ID of 0 means this is a shared library.
+    loaded_package->dynamic_ = true;
+  }
+
+  util::ReadUtf16StringFromDevice(header->name, arraysize(header->name),
+                                  &loaded_package->package_name_);
 
   // A TypeSpec builder. We use this to accumulate the set of Types
   // available for a TypeSpec, and later build a single, contiguous block
@@ -367,7 +360,7 @@ static bool LoadPackage(const Chunk& chunk, LoadedPackage* loaded_package) {
               child_chunk.header<ResStringPool_header>(), child_chunk.size());
           if (err != NO_ERROR) {
             LOG(ERROR) << "Corrupt package type string pool.";
-            return false;
+            return {};
           }
         } else if (pool_address == header_address + dtohl(header->keyStrings)) {
           // This string pool is the key string pool.
@@ -375,7 +368,7 @@ static bool LoadPackage(const Chunk& chunk, LoadedPackage* loaded_package) {
               child_chunk.header<ResStringPool_header>(), child_chunk.size());
           if (err != NO_ERROR) {
             LOG(ERROR) << "Corrupt package key string pool.";
-            return false;
+            return {};
           }
         } else {
           LOG(WARNING) << "Too many string pool chunks found in package.";
@@ -390,7 +383,7 @@ static bool LoadPackage(const Chunk& chunk, LoadedPackage* loaded_package) {
           TypeSpecPtr type_spec_ptr = types_builder->Build();
           if (type_spec_ptr == nullptr) {
             LOG(ERROR) << "Too many type configurations, overflow detected.";
-            return false;
+            return {};
           }
 
           loaded_package->type_specs_.editItemAt(last_type_idx) = std::move(type_spec_ptr);
@@ -402,12 +395,12 @@ static bool LoadPackage(const Chunk& chunk, LoadedPackage* loaded_package) {
         const ResTable_typeSpec* type_spec = child_chunk.header<ResTable_typeSpec>();
         if (type_spec == nullptr) {
           LOG(ERROR) << "Chunk RES_TABLE_TYPE_SPEC_TYPE is too small.";
-          return false;
+          return {};
         }
 
         if (type_spec->id == 0) {
           LOG(ERROR) << "Chunk RES_TABLE_TYPE_SPEC_TYPE has invalid ID 0.";
-          return false;
+          return {};
         }
 
         // The data portion of this chunk contains entry_count 32bit entries,
@@ -419,12 +412,12 @@ static bool LoadPackage(const Chunk& chunk, LoadedPackage* loaded_package) {
         // space for entries (EEEE) in the resource ID 0xPPTTEEEE.
         if (entry_count > std::numeric_limits<uint16_t>::max()) {
           LOG(ERROR) << "Too many entries in RES_TABLE_TYPE_SPEC_TYPE: " << entry_count << ".";
-          return false;
+          return {};
         }
 
         if (entry_count * sizeof(uint32_t) > chunk.data_size()) {
           LOG(ERROR) << "Chunk too small to hold entries in RES_TABLE_TYPE_SPEC_TYPE.";
-          return false;
+          return {};
         }
 
         last_type_idx = type_spec->id - 1;
@@ -435,26 +428,61 @@ static bool LoadPackage(const Chunk& chunk, LoadedPackage* loaded_package) {
         const ResTable_type* type = child_chunk.header<ResTable_type>();
         if (type == nullptr) {
           LOG(ERROR) << "Chunk RES_TABLE_TYPE_TYPE is too small.";
-          return false;
+          return {};
         }
 
         if (type->id == 0) {
           LOG(ERROR) << "Chunk RES_TABLE_TYPE_TYPE has invalid ID 0.";
-          return false;
+          return {};
         }
 
         // Type chunks must be preceded by their TypeSpec chunks.
         if (!types_builder || type->id - 1 != last_type_idx) {
           LOG(ERROR) << "Found RES_TABLE_TYPE_TYPE chunk without "
                         "RES_TABLE_TYPE_SPEC_TYPE.";
-          return false;
+          return {};
         }
 
         if (!VerifyType(child_chunk)) {
-          return false;
+          return {};
         }
 
         types_builder->AddType(type);
+      } break;
+
+      case RES_TABLE_LIBRARY_TYPE: {
+        const ResTable_lib_header* lib = child_chunk.header<ResTable_lib_header>();
+        if (lib == nullptr) {
+          LOG(ERROR) << "Chunk RES_TABLE_LIBRARY_TYPE is too small.";
+          return {};
+        }
+
+        if (child_chunk.data_size() / sizeof(ResTable_lib_entry) < dtohl(lib->count)) {
+          LOG(ERROR) << "Chunk too small to hold entries in RES_TABLE_LIBRARY_TYPE.";
+          return {};
+        }
+
+        loaded_package->dynamic_package_map_.reserve(dtohl(lib->count));
+
+        const ResTable_lib_entry* const entry_begin =
+            reinterpret_cast<const ResTable_lib_entry*>(child_chunk.data_ptr());
+        const ResTable_lib_entry* const entry_end = entry_begin + dtohl(lib->count);
+        for (auto entry_iter = entry_begin; entry_iter != entry_end; ++entry_iter) {
+          std::string package_name;
+          util::ReadUtf16StringFromDevice(entry_iter->packageName,
+                                          arraysize(entry_iter->packageName), &package_name);
+
+          if (dtohl(entry_iter->packageId) >= std::numeric_limits<uint8_t>::max()) {
+            LOG(ERROR) << base::StringPrintf(
+                "Package ID %02x in RES_TABLE_LIBRARY_TYPE too large for package '%s'.",
+                dtohl(entry_iter->packageId), package_name.c_str());
+            return {};
+          }
+
+          loaded_package->dynamic_package_map_.emplace_back(std::move(package_name),
+                                                            dtohl(entry_iter->packageId));
+        }
+
       } break;
 
       default:
@@ -468,19 +496,19 @@ static bool LoadPackage(const Chunk& chunk, LoadedPackage* loaded_package) {
     TypeSpecPtr type_spec_ptr = types_builder->Build();
     if (type_spec_ptr == nullptr) {
       LOG(ERROR) << "Too many type configurations, overflow detected.";
-      return false;
+      return {};
     }
     loaded_package->type_specs_.editItemAt(last_type_idx) = std::move(type_spec_ptr);
   }
 
   if (iter.HadError()) {
     LOG(ERROR) << iter.GetLastError();
-    return false;
+    return {};
   }
-  return true;
+  return loaded_package;
 }
 
-bool LoadedArsc::LoadTable(const Chunk& chunk) {
+bool LoadedArsc::LoadTable(const Chunk& chunk, bool load_as_shared_library) {
   ATRACE_CALL();
   const ResTable_header* header = chunk.header<ResTable_header>();
   if (header == nullptr) {
@@ -520,9 +548,14 @@ bool LoadedArsc::LoadTable(const Chunk& chunk) {
         }
         packages_seen++;
 
-        std::unique_ptr<LoadedPackage> loaded_package = util::make_unique<LoadedPackage>();
-        if (!LoadPackage(child_chunk, loaded_package.get())) {
+        std::unique_ptr<LoadedPackage> loaded_package = LoadedPackage::Load(child_chunk);
+        if (!loaded_package) {
           return false;
+        }
+
+        // Mark the package as dynamic if we are forcefully loading the Apk as a shared library.
+        if (loaded_package->package_id_ == kAppPackageId) {
+          loaded_package->dynamic_ = load_as_shared_library;
         }
         packages_.push_back(std::move(loaded_package));
       } break;
@@ -540,7 +573,8 @@ bool LoadedArsc::LoadTable(const Chunk& chunk) {
   return true;
 }
 
-std::unique_ptr<LoadedArsc> LoadedArsc::Load(const void* data, size_t len) {
+std::unique_ptr<LoadedArsc> LoadedArsc::Load(const void* data, size_t len,
+                                             bool load_as_shared_library) {
   ATRACE_CALL();
 
   // Not using make_unique because the constructor is private.
@@ -551,7 +585,7 @@ std::unique_ptr<LoadedArsc> LoadedArsc::Load(const void* data, size_t len) {
     const Chunk chunk = iter.Next();
     switch (chunk.type()) {
       case RES_TABLE_TYPE:
-        if (!loaded_arsc->LoadTable(chunk)) {
+        if (!loaded_arsc->LoadTable(chunk, load_as_shared_library)) {
           return {};
         }
         break;

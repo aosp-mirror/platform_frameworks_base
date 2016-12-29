@@ -15,11 +15,18 @@
 -->
 
 <resources>
+    <public type="attr" name="attr1" id="0x00010000" />
     <attr name="attr1" format="integer" />
+
+    <public type="attr" name="attr2" id="0x00010001" />
     <attr name="attr2" format="integer" />
 
+    <public type="style" name="Theme" id="0x00020000" />
     <style name="Theme">
-        <item name="com.android.lib:attr1">700</item>
-        <item name="com.android.lib:attr2">?com.android.lib:attr1</item>
+        <item name="com.android.lib_one:attr1">700</item>
+        <item name="com.android.lib_one:attr2">?com.android.lib_one:attr1</item>
     </style>
+
+    <public type="string" name="foo" id="0x00030000" />
+    <string name="foo">Foo from lib_one</string>
 </resources>

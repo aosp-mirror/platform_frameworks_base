@@ -102,6 +102,10 @@ class unique_cptr {
   pointer ptr_;
 };
 
+inline uint32_t fix_package_id(uint32_t resid, uint8_t package_id) {
+  return resid | (static_cast<uint32_t>(package_id) << 24);
+}
+
 inline uint8_t get_package_id(uint32_t resid) {
   return static_cast<uint8_t>((resid >> 24) & 0x000000ffu);
 }
@@ -113,13 +117,15 @@ inline uint8_t get_type_id(uint32_t resid) {
 
 inline uint16_t get_entry_id(uint32_t resid) { return static_cast<uint16_t>(resid & 0x0000ffffu); }
 
-inline bool is_internal_id(uint32_t resid) {
+inline bool is_internal_resid(uint32_t resid) {
   return (resid & 0xffff0000u) != 0 && (resid & 0x00ff0000u) == 0;
 }
 
 inline bool is_valid_resid(uint32_t resid) {
   return (resid & 0x00ff0000u) != 0 && (resid & 0xff000000u) != 0;
 }
+
+void ReadUtf16StringFromDevice(const uint16_t* src, size_t len, std::string* out);
 
 }  // namespace util
 }  // namespace android
