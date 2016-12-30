@@ -424,7 +424,7 @@ public class TaskStackAnimationHelper {
                                              final ReferenceCountedTrigger postAnimationTrigger) {
         TaskStackLayoutAlgorithm stackLayout = mStackView.getStackAlgorithm();
 
-        int offscreenXOffset = mStackView.getMeasuredWidth() - stackLayout.mTaskRect.left;
+        int offscreenXOffset = mStackView.getMeasuredWidth() - stackLayout.getTaskRect().left;
 
         int taskViewCount = taskViews.size();
         for (int i = taskViewCount - 1; i >= 0; i--) {
