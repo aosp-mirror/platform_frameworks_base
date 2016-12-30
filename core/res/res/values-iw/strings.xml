@@ -46,8 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"‏בעיה בחיבור או קוד MMI לא חוקי."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"הפעולה מוגבלת למספרי חיוג קבועים בלבד."</string>
-    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
-    <skip />
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"לא ניתן לשנות את הגדרות העברת השיחות מהטלפון שלך כשאתה במצב נדידה."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"השירות הופעל."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"השירות הופעל עבור:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"השירות הושבת."</string>
@@ -100,10 +99,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"שירותי הקול/נתונים חסומים."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"‏שירותי קול/SMS חסומים."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"‏כל השירותים של קול/נתונים/SMS חסומים."</string>
-    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
-    <skip />
-    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"לא ניתן להתחבר לרשת"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"כדי לשפר את הקליטה, נסה לשנות את סוג הרשת באפשרות \'הגדרות\' &gt; \'רשתות סלולריות\' &gt; \'סוג רשת מועדף\'."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"‏העמית ביקש TTY במצב FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"‏העמית ביקש TTY במצב HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"‏העמית ביקש TTY במצב VCO"</string>
@@ -189,10 +186,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"פרופיל העבודה נמחק מפני שחסרה אפליקציית ניהול."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"אפליקציית הניהול של פרופיל העבודה חסרה או פגומה. כתוצאה מכך פרופיל העבודה שלך נמחק, כולל כל הנתונים הקשורים אליו. לקבלת סיוע, פנה למנהל המערכת שלך."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"פרופיל העבודה שלך אינו זמין עוד במכשיר הזה."</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"התנועה ברשת מנוטרת"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"הקש לקבלת פרטים נוספים"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"תתבצע מחיקה של המכשיר"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"באפליקציית הניהול חסרים מרכיבים או שהיא פגומה ולא ניתן להשתמש בה. תתבצע כעת מחיקה של המכשיר. לקבלת סיוע, פנה למנהל המערכת שלך."</string>
     <string name="me" msgid="6545696007631404292">"אני"</string>
@@ -312,12 +307,9 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"‏שליחה והצגה של הודעות SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"‏מאפשר לאפליקציה לשלוח הודעות SMS. הדבר עשוי לגרום לחיובים בלתי צפויים. אפליקציות זדוניות עלולות לגרום לעלויות על ידי שליחת הודעות ללא אישורך."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"‏קריאת הודעות הטקסט שלך (SMS או MMS)"</string>
-    <!-- no translation found for permdesc_readSms (4741697454888074891) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (5796670395641116592) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (6826832415656437652) -->
-    <skip />
+    <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"‏אפליקציה זו יכולה לקרוא את כל הודעות הטקסט (SMS) המאוחסנות בטאבלט."</string>
+    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"‏אפליקציה זו יכולה לקרוא את כל הודעות הטקסט (SMS) המאוחסנות בטלוויזיה."</string>
+    <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"‏אפליקציה זו יכולה לקרוא את כל הודעות הטקסט (SMS) המאוחסנות בטלפון."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"‏קבלת הודעות טקסט (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"‏מאפשר לאפליקציה לקבל ולעבד הודעות WAP. אישור זה כולל את היכולת לעקוב אחר הודעות שנשלחו אליך ולמחוק אותן מבלי להציג לך אותן."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"אחזור אפליקציות פעילות"</string>
@@ -330,10 +322,8 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"מאפשר לאפליקציה לאפשר את מצב מכונית."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"סגירת אפליקציות אחרות"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"מאפשר לאפליקציה להפסיק תהליכים ברקע המבוצעים על ידי אפליקציות אחרות. הדבר עשוי לגרום להפסקת פעולתם של אפליקציות אחרות."</string>
-    <!-- no translation found for permlab_systemAlertWindow (7238805243128138690) -->
-    <skip />
-    <!-- no translation found for permdesc_systemAlertWindow (2393776099672266188) -->
-    <skip />
+    <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"אפליקציה זו יכולה להופיע מעל אפליקציות אחרות."</string>
+    <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"אפליקציה זו יכולה להופיע מעל אפליקציות אחרות או בחלקים אחרים של המסך. ייתכן שהדבר יפריע לך להשתמש באפליקציות וישנה את הופעתן."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"הגדרת האפליקציה לפעול תמיד"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"מאפשר לאפליקציה להפוך חלקים ממנו לקבועים בזיכרון. פעולה זו עשויה להגביל את הזיכרון הזמין לאפליקציות אחרים ולהאט את פעולת הטאבלט."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"מאפשרת לאפליקציה ליצור חלקים ממנה השמורים בזיכרון באופן עקבי. הדבר עלול להגביל את הזיכרון הזמין לאפליקציות אחרות וכתוצאה מכך להאט את פעולת הטלוויזיה."</string>
@@ -359,51 +349,37 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"מאפשרת לאפליקציה לשנות נתונים לגבי אנשי הקשר שלך השמורים בטלוויזיה, כולל התדירות שבה התקשרת, שלחת אימייל או יצרת קשר בדרכים אחרות עם אנשי קשר ספציפיים. הרשאה זו מאפשרת לאפליקציות למחוק נתונים של אנשי קשר."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"מאפשר לאפליקציה לשנות את הנתונים לגבי אנשי הקשר שלך המאוחסנים בטלפון, כולל התדירות שבה התקשרת, שלחת אימייל או יצרת קשר בדרכים אחרות עם אנשי קשר ספציפיים. אישור זה מתיר לאפליקציות למחוק נתוני אנשי קשר."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"קריאת יומן שיחות"</string>
-    <!-- no translation found for permdesc_readCallLog (3204122446463552146) -->
-    <skip />
+    <string name="permdesc_readCallLog" msgid="3204122446463552146">"אפליקציה זו יכולה לקרוא את היסטוריית השיחות שלך."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"כתיבת יומן שיחות"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"מאפשר לאפליקציה לשנות את יומן השיחות של הטאבלט, כולל נתונים על שיחות נכנסות ויוצאות. אפליקציות זדוניות עלולות לעשות בכך שימוש כדי למחוק או לשנות את יומן השיחות שלך."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"מאפשרת לאפליקציה לשנות את יומן השיחות של הטלוויזיה, כולל נתונים על שיחות נכנסות ויוצאות. אפליקציות זדוניות עלולות להשתמש בהרשאה זו כדי למחוק או לשנות את יומן השיחות שלך."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"מאפשר לאפליקציה לשנות את יומן השיחות של הטלפון, כולל נתונים על שיחות נכנסות ויוצאות. אפליקציות זדוניות עלולות לעשות בכך שימוש כדי למחוק או לשנות את יומן השיחות שלך."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"גישה אל חיישני גוף (כמו מוניטורים לקצב לב)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"מאפשר לאפליקציה לגשת אל נתוני חיישנים העוקבים אחר מצבך הגופני, כמו קצב הלב."</string>
-    <!-- no translation found for permlab_readCalendar (6716116972752441641) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (4993979255403945892) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (8837931557573064315) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (4373978642145196715) -->
-    <skip />
+    <string name="permlab_readCalendar" msgid="6716116972752441641">"קריאה של אירועי יומן ופרטיהם"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"אפליקציה זו יכולה לקרוא את כל אירועי היומן המאוחסנים בטאבלט, ולשתף או לשמור את נתוני היומן."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"אפליקציה זו יכולה לקרוא את כל אירועי היומן המאוחסנים בטלוויזיה, ולשתף או לשמור את נתוני היומן."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"אפליקציה זו יכולה לקרוא את כל אירועי היומן המאוחסנים בטלפון, ולשתף או לשמור את נתוני היומן."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"הוספה ושינוי של אירועי יומן ושליחת אימייל לאורחים ללא ידיעת הבעלים"</string>
-    <!-- no translation found for permdesc_writeCalendar (1675270619903625982) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (9017809326268135866) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (7592791790516943173) -->
-    <skip />
+    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"אפליקציה זו יכולה להוסיף, להסיר ולשנות אירועי יומן בטאבלט. האפליקציה יכולה לשנות אירועים בלי להודיע לבעליהם ולשלוח הודעות שעשויות להיראות כאילו נשלחו מבעלי יומנים."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"אפליקציה זו יכולה להוסיף, להסיר ולשנות אירועי יומן בטלוויזיה. האפליקציה יכולה לשנות אירועים בלי להודיע לבעליהם ולשלוח הודעות שעשויות להיראות כאילו נשלחו מבעלי יומנים."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"אפליקציה זו יכולה להוסיף, להסיר ולשנות אירועי יומן בטלפון. האפליקציה יכולה לשנות אירועים בלי להודיע לבעליהם ולשלוח הודעות שעשויות להיראות כאילו נשלחו מבעלי יומנים."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"גישה לפקודות ספק מיקום נוספות"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"‏מאפשרת לאפליקציה לגשת לפקודות נוספות של ספק המיקום. הרשאה זו עשויה לאפשר לאפליקציה לשבש את פעולת ה-GPS או מקורות מיקום אחרים."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"‏גישה אל מיקום מדויק (מבוסס GPS ורשת)"</string>
-    <!-- no translation found for permdesc_accessFineLocation (5821994817969957884) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"‏אפליקציה זו יכולה לזהות את המיקום שלך על סמך GPS או מקורות מיקום ברשת, כגון אנטנות סלולריות ורשתות Wi-Fi. שירותי מיקום אלה חייבים להיות מופעלים וזמינים בטלפון שלך כדי שהאפליקציה תוכל להשתמש בהם. ייתכן שהדבר יגביר את צריכת הסוללה."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"גישה אל מיקום משוער (מבוסס רשת)"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (3373266766487862426) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (1884022719818788511) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (7788009094906196995) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"‏אפליקציה זו יכולה לזהות את המיקום שלך על סמך מקורות מיקום ברשת, כגון אנטנות סלולריות ורשתות Wi-Fi. שירותי מיקום אלה חייבים להיות מופעלים וזמינים בטאבלט שלך כדי שהאפליקציה תוכל להשתמש בהם."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"‏אפליקציה זו יכולה לזהות את המיקום שלך על סמך מקורות מיקום ברשת, כגון אנטנות סלולריות ורשתות Wi-Fi. שירותי מיקום אלה חייבים להיות מופעלים וזמינים בטלוויזיה שלך כדי שהאפליקציה תוכל להשתמש בהם."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"‏אפליקציה זו יכולה לזהות את המיקום שלך על סמך מקורות מיקום ברשת, כגון אנטנות סלולריות ורשתות Wi-Fi. שירותי מיקום אלה חייבים להיות מופעלים וזמינים בטלפון שלך כדי שהאפליקציה תוכל להשתמש בהם."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"שנה את הגדרות האודיו שלך"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"מאפשר לאפליקציה לשנות הגדרות אודיו גלובליות כמו עוצמת קול ובחירת הרמקול המשמש לפלט."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"הקלט אודיו"</string>
-    <!-- no translation found for permdesc_recordAudio (4245930455135321433) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="4245930455135321433">"אפליקציה זו יכולה להשתמש במיקרופון כדי להקליט אודיו בכל עת."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"‏שליחת פקודות אל ה-SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"‏מאפשרת ליישום לשלוח פקודות ל-SIM. זוהי הרשאה מסוכנת מאוד."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"צלם תמונות וסרטונים"</string>
-    <!-- no translation found for permdesc_camera (5392231870049240670) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5392231870049240670">"אפליקציה זו יכולה להשתמש במצלמה כדי לצלם תמונות ולהקליט סרטונים בכל עת."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"שליטה ברטט"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"מאפשר לאפליקציה לשלוט ברטט."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"התקשר ישירות למספרי טלפון"</string>

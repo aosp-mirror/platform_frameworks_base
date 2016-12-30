@@ -46,8 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Tilkoblingsproblem eller ugyldig MMI-kode."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Handlingen kan kun utføres på numre med anropsbegrensning."</string>
-    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
-    <skip />
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Får ikke endret innstillinger for viderekobling fra telefonen din når du bruker roaming."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Tjenesten ble aktivert."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Tjenesten ble aktivert for:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Tjenesten ble deaktivert."</string>
@@ -98,10 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Alle tjenester for tale og data er blokkert."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Tjenester for tale og tekstmeldinger er blokkert."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Alle tjenester for tale, data og tekstmeldinger er blokkert."</string>
-    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
-    <skip />
-    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Får ikke kontakt med nettverket"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"For å forbedre signalet, prøv å endre valgt nettverkstype i Innstillinger &gt; Mobilnettverk &gt; Foretrukket nettverkstype."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Motpart ba om TTY-modus FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Motpart ba om TTY-modus HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Motpart ba om TTY-modus VCO"</string>
@@ -185,10 +182,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Arbeidsprofilen er slettet på grunn av manglende admin-app."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Arbeidsprofilens admin-app mangler eller er ødelagt. Dette har ført til at arbeidsprofilen og alle data knyttet til den er blitt slettet. Kontakt administratoren for å få hjelp."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Arbeidsprofilen din er ikke lenger tilgjengelig på denne enheten."</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"Nettverkstrafikken blir overvåket"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"Trykk for å få flere detaljer"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Enheten blir slettet"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Admin-appen mangler komponenter eller er ødelagt, og kan ikke brukes. Enheten din blir nå slettet. Kontakt administratoren for å få hjelp."</string>
     <string name="me" msgid="6545696007631404292">"Meg"</string>
@@ -306,12 +301,9 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"sende og lese SMS-meldinger"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Lar appen sende tekstmeldinger. Dette kan resultere i uventede kostnader. Merk at skadelige apper kan påføre deg kostnader ved å sende meldinger uten bekreftelse fra deg."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lese tekstmeldinger (SMS eller MMS)"</string>
-    <!-- no translation found for permdesc_readSms (4741697454888074891) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (5796670395641116592) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (6826832415656437652) -->
-    <skip />
+    <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"Denne appen kan lese alle tekstmeldingene (SMS) som er lagret på nettbrettet ditt."</string>
+    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"Denne appen kan lese alle tekstmeldingene (SMS) som er lagret på TV-en din."</string>
+    <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"Denne appen kan lese alle tekstmeldingene (SMS) som er lagret på telefonen din."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"motta tekstmeldinger (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Lar appen motta og behandle WAP-meldinger. Dette betyr at appen kan overvåke eller slette meldinger som er sendt til deg uten at du har sett dem."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"hente apper som kjører"</string>
@@ -324,10 +316,8 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Lar appen aktivere bilmodus."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"lukke andre apper"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Lar appen avslutte andre appers bakgrunnsprosesser. Dette kan føre til at andre apper slutter å kjøre."</string>
-    <!-- no translation found for permlab_systemAlertWindow (7238805243128138690) -->
-    <skip />
-    <!-- no translation found for permdesc_systemAlertWindow (2393776099672266188) -->
-    <skip />
+    <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Denne appen kan ligge over andre apper"</string>
+    <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Denne appen kan vises over andre apper eller andre deler av skjermen. Dette kan påvirke normal bruk av apper og endre måten andre apper vises på."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"angi at appen alltid skal kjøre"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Lar appen gjøre deler av seg selv vedvarende i minnet. Dette kan begrense minnet for andre apper og gjøre nettbrettet tregt."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Gjør at deler av appen kan legge seg vedvarende i minnet. Dette kan begrense minnets tilgjengelighet for andre apper, noe som gjør at TV-en går langsommere."</string>
@@ -353,51 +343,37 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Gjør at appen kan endre data om kontaktene du har lagret på TV-en, inkludert hvor ofte du har ringt, sendt e-post til eller på andre måter kommunisert med bestemte kontakter. Denne tillatelsen gjør at apper kan slette kontaktdata."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Lar appen endre informasjon om kontaktene lagret på telefonen din, inkludert hvor ofte du har ringt, sendt e-post til eller på andre måter kommunisert med bestemte kontakter. Denne tillatelsen lar apper slette kontaktdata."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"lese anropsloggen"</string>
-    <!-- no translation found for permdesc_readCallLog (3204122446463552146) -->
-    <skip />
+    <string name="permdesc_readCallLog" msgid="3204122446463552146">"Denne appen kan lese anropsloggen din."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"endre anropsloggen"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Lar appen endre nettbrettets samtalelogg, inkludert data om innkommende og utgående anrop. Skadelige apper kan utnytte denne tillatelsen til å slette eller endre samtaleloggen din."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Gjør at appen kan endre TV-ens samtalelogg, herunder data om innkommende eller utgående samtaler. Skadelige apper kan bruke dette til å slette eller endre samtaleloggen."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Lar appen endre telefonens samtalelogg, inkludert data om innkommende og utgående anrop. Skadelige apper kan utnytte denne tillatelsen til å slette eller endre samtaleloggen din."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"få tilgang til kroppssensorer (f.eks. pulsmålere)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Gir appen tilgang til data fra sensorer som overvåker den fysiske tilstanden din, for eksempel hjertefrekvensen din."</string>
-    <!-- no translation found for permlab_readCalendar (6716116972752441641) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (4993979255403945892) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (8837931557573064315) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (4373978642145196715) -->
-    <skip />
+    <string name="permlab_readCalendar" msgid="6716116972752441641">"Les kalenderaktivitet og detaljer"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Denne appen kan lese all kalenderaktivitet som er lagret på nettbrettet ditt, og dele eller lagre kalenderdataene."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Denne appen kan lese all kalenderaktivitet som er lagret på TV-en din, og dele eller lagre kalenderdataene."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Denne appen kan lese all kalenderaktivitet som er lagret på telefonen din, og dele eller lagre kalenderdataene."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"legge til eller endre kalenderhendelser og sende e-post til gjester uten eiernes viten"</string>
-    <!-- no translation found for permdesc_writeCalendar (1675270619903625982) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (9017809326268135866) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (7592791790516943173) -->
-    <skip />
+    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Denne appen kan legge til, fjerne eller endre kalenderaktiviteter på nettbrettet ditt. Denne appen kan sende meldinger som kan virke som om kommer fra kalendereiere, eller endre aktiviteter uten at eierne blir varslet."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Denne appen kan legge til, fjerne eller endre kalenderaktiviteter på TV-en din. Denne appen kan sende meldinger som kan virke som om kommer fra kalendereiere, eller endre aktiviteter uten at eierne blir varslet."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Denne appen kan legge til, fjerne eller endre kalenderaktiviteter på telefonen din. Denne appen kan sende meldinger som kan virke som om kommer fra kalendereiere, eller endre aktiviteter uten at eierne blir varslet."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"bruke ekstra posisjonskommandoer"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Appen gis tillatelse til å bruke ekstra kommandoer fra posisjonsleverandører. Dette kan gi appen tillatelse til å påvirke bruken av GPS eller andre posisjonskilder."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"få tilgang til nøyaktig posisjon (GPS- og nettverksbasert)"</string>
-    <!-- no translation found for permdesc_accessFineLocation (5821994817969957884) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"Denne appen kan få posisjonen din fra GPS eller nettverksplasseringskilder som mobilmaster og Wi-Fi-nettverk. Disse posisjonstjenestene må være slått på og tilgjengelige på telefonen din for at appen skal kunne bruke dem. Dette kan øke batteriforbruket."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"få tilgang til omtrentlig posisjon (nettverksbasert)"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (3373266766487862426) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (1884022719818788511) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (7788009094906196995) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Denne appen kan få posisjonen din fra nettverkskilder som mobilmaster og Wi-Fi-nettverk. Disse posisjonstjenestene må være slått på og tilgjengelige på nettbrettet ditt for at appen skal kunne bruke dem."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Denne appen kan få posisjonen din fra nettverkskilder som mobilmaster og Wi-Fi-nettverk. Disse posisjonstjenestene må være slått på og tilgjengelige på TV-en din for at appen skal kunne bruke dem."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Denne appen kan få posisjonen din fra nettverkskilder som mobilmaster og Wi-Fi-nettverk. Disse posisjonstjenestene må være slått på og tilgjengelige på telefonen din for at appen skal kunne bruke dem."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"endre lydinnstillinger"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Lar appen endre globale lydinnstillinger slik som volum og hvilken høyttaler som brukes for lydavspilling."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ta opp lyd"</string>
-    <!-- no translation found for permdesc_recordAudio (4245930455135321433) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="4245930455135321433">"Denne appen kan når som helst ta opp lyd med mikrofonen."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"sende kommandoer til SIM-kortet"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Lar appen sende kommandoer til SIM-kortet. Dette er veldig farlig."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ta bilder og videoer"</string>
-    <!-- no translation found for permdesc_camera (5392231870049240670) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5392231870049240670">"Denne appen kan når som helst ta bilder og spille inn videoer ved hjelp av kameraet."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"kontrollere vibreringen"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Lar appen kontrollere vibreringsfunksjonen."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ringe telefonnummer direkte"</string>

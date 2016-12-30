@@ -46,8 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Има проблем с връзката или MMI кодът е невалиден."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Операцията е ограничена само до фиксираните номера за набиране."</string>
-    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
-    <skip />
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Докато сте в режим на роуминг, настройките за пренасочване на обажданията не могат да се променят от телефона ви."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Услугата бе активирана."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Услугата бе активирана за:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Услугата бе деактивирана."</string>
@@ -98,10 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Услугите за глас или данни са блокирани."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Услугите за глас и SMS са блокирани."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Всички услуги за глас/данни/SMS са блокирани."</string>
-    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
-    <skip />
-    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Не може да се установи връзка с мрежата"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"За да подобрите сигнала, променете избрания тип от „Настройки“ &gt; „Клетъчни мрежи“ &gt; „Предпочитан тип мрежа“."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Отсрещният потребител заяви пълен TTY режим (FULL)"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Отсрещният потребител заяви TTY режим с пренос на слух (HCO)"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Отсрещният потребител заяви TTY режим с пренос на глас (VCО)"</string>
@@ -185,10 +182,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Служебният потребителски профил е изтрит поради липса на администраторско приложение."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Администраторското приложение на служебния потребителски профил липсва или е повредено. В резултат на това той и свързаните с него данни са изтрити. За съдействие се свържете с администратора си."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Служебният ви потребителски профил вече не е налице на това устройство."</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"Трафикът в мрежата се следи"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"Докоснете за още подробности"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Данните на устройството ви ще бъдат изтрити"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"В администраторското приложение липсват компоненти или то е невалидно и не може да се използва. Сега данните на устройството ви ще бъдат изтрити. Свържете се с администратора си за съдействие."</string>
     <string name="me" msgid="6545696007631404292">"Аз"</string>
@@ -306,12 +301,9 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"изпращане и преглед на SMS съобщения"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Разрешава на приложението да изпраща SMS съобщения. Това може да доведе до неочаквано таксуване. Злонамерените приложения могат да ви въвлекат в разходи, като изпращат съобщения без потвърждение от ваша страна."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"четене на текстовите ви съобщения (SMS или MMS)"</string>
-    <!-- no translation found for permdesc_readSms (4741697454888074891) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (5796670395641116592) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (6826832415656437652) -->
-    <skip />
+    <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"Това приложение може да чете всички съхранявани на таблета ви текстови съобщения (SMS)."</string>
+    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"Това приложение може да чете всички съхранявани на телевизора ви текстови съобщения (SMS)."</string>
+    <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"Това приложение може да чете всички съхранявани на телефона ви текстови съобщения (SMS)."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"получаване на текстови съобщения (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Разрешава на приложението да получава и обработва WAP съобщения. Това разрешение включва възможността да наблюдава или изтрива изпратените до вас, без да ви ги покаже."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"извличане на изпълняваните приложения"</string>
@@ -324,10 +316,8 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Разрешава на приложението да активира моторежима."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"затваряне на другите приложения"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Разрешава на приложението да прекратява намиращи се на заден план процеси на други приложения. Това може да доведе до спиране на тяхното изпълняване."</string>
-    <!-- no translation found for permlab_systemAlertWindow (7238805243128138690) -->
-    <skip />
-    <!-- no translation found for permdesc_systemAlertWindow (2393776099672266188) -->
-    <skip />
+    <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Това приложение може да се показва върху други приложения"</string>
+    <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Това приложение може да се показва върху други приложения или други части от екрана. Така може да се попречи на нормалната употреба на приложенията и да се промени начинът, по който се показват други приложения."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"задаване на постоянно изпълнение на приложението"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Разрешава на приложението да прави части от себе си постоянни в паметта. Това може да ограничи наличната за другите приложения, забавяйки таблета."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Разрешава на приложението да прави части от себе си постоянни в паметта. Това може да ограничи наличната памет за останалите приложения и да забави телевизора."</string>
@@ -353,51 +343,37 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Разрешава на приложението да променя данните за съхраняваните в телевизора ви контакти, включително колко често сте се обаждали на конкретни хора, изпращали сте им имейли или сте общували с тях по други начини. Това позволява на приложенията да изтриват данните за контактите."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Разрешава на приложението да променя данните за съхранените на телефона ви контакти, включително честотата на обаждане, изпращане на имейли или общуване по друг начин с конкретни контакти. Това разрешение му позволява да изтрива информацията за тях."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"четене на списъка с обаждания"</string>
-    <!-- no translation found for permdesc_readCallLog (3204122446463552146) -->
-    <skip />
+    <string name="permdesc_readCallLog" msgid="3204122446463552146">"Това приложение може да чете историята на обажданията ви."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"запис на списъка с обаждания"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Разрешава на приложението да променя списъка с обаждания на таблета ви, включително данните за входящите и изходящите обаждания. Злонамерените приложения могат да използват това, за да изтрият или променят този списък."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Разрешава на приложението да променя списъка с обажданията на телевизора ви, включително данните за входящите и изходящите повиквания. Злонамерените приложения може да използват това, за да изтрият или променят списъка с обажданията ви."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Разрешава на приложението да променя списъка с обаждания на телефона ви, включително данните за входящите и изходящите обаждания. Злонамерените приложения могат да използват това, за да изтрият или променят този списък."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"достъп до телесните сензори (напр. пулсомери)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Разрешава на приложението да осъществява достъп до данните от сензорите, които следят физическото ви състояние, като например сърдечния ви ритъм."</string>
-    <!-- no translation found for permlab_readCalendar (6716116972752441641) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (4993979255403945892) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (8837931557573064315) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (4373978642145196715) -->
-    <skip />
+    <string name="permlab_readCalendar" msgid="6716116972752441641">"Четене на събития и подробности от календара"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Това приложение може да чете всички съхранявани на таблета ви събития в календара и да споделя или запазва данни в календара ви."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Това приложение може да чете всички съхранявани на телевизора ви събития в календара и да споделя или запазва данни в календара ви."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Това приложение може да чете всички съхранявани на телефона ви събития в календара и да споделя или запазва данни в календара ви."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"добавяне или промяна на събития от календари и изпращане на имейл до гости без знанието на собствениците"</string>
-    <!-- no translation found for permdesc_writeCalendar (1675270619903625982) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (9017809326268135866) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (7592791790516943173) -->
-    <skip />
+    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Това приложение може да добавя, премахва или променя събития в календара на таблета ви. То е в състояние да изпраща съобщения от името на собственици на календари или да променя събития, без да уведомява собствениците."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Това приложение може да добавя, премахва или променя събития в календара на телевизора ви. То е в състояние да изпраща съобщения от името на собственици на календари или да променя събития, без да уведомява собствениците."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Това приложение може да добавя, премахва или променя събития в календара на телефона ви. То е в състояние да изпраща съобщения от името на собственици на календари или да променя събития, без да уведомява собствениците."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"достъп до допълнителни команди на доставчика на местоположение"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Разрешава на приложението достъп до допълнителни команди на доставчика на местоположение. Това може да позволи на приложението да смущава работата на GPS или на другите източници на местоположение."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"достъп до точното местоположение (въз основа на GPS и мрежата)"</string>
-    <!-- no translation found for permdesc_accessFineLocation (5821994817969957884) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"Приложението може да получава данни за местоположението ви въз основа на GPS или съответните мрежови източници, като клетъчни кули и Wi-Fi. Тези услуги за местоположение трябва да са включени и налице на телефона ви, за да могат да се използват от приложението. Това може да увеличи потреблението на батерията."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"достъп до приблизителното местоположение (въз основа на мрежата)"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (3373266766487862426) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (1884022719818788511) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (7788009094906196995) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Приложението може да получава данни за местоположението ви въз основа на мрежови източници, като клетъчни кули и Wi-Fi. Тези услуги за местоположение трябва да са включени и налице на таблета ви, за да могат да се използват от приложението."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Приложението може да получава данни за местоположението ви въз основа на мрежови източници, като клетъчни кули и Wi-Fi. Тези услуги за местоположение трябва да са включени и налице на телевизора ви, за да могат да се използват от приложението."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Приложението може да получава данни за местоположението ви въз основа на мрежови източници, като клетъчни кули и Wi-Fi. Тези услуги за местоположение трябва да са включени и налице на телефона ви, за да могат да се използват от приложението."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"промяна на настройките ви за звука"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Разрешава на приложението да променя глобалните настройки за звука, като например силата и това, кой високоговорител се използва за изход."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"записва звук"</string>
-    <!-- no translation found for permdesc_recordAudio (4245930455135321433) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="4245930455135321433">"Това приложение може по всяко време да записва звук посредством микрофона."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"изпращане на команди до SIM картата"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Разрешава на приложението да изпраща команди до SIM картата. Това е много опасно."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"правене на снимки и видеоклипове"</string>
-    <!-- no translation found for permdesc_camera (5392231870049240670) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5392231870049240670">"Това приложение може по всяко време да прави снимки и да записва видеоклипове посредством камерата."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"контролиране на вибрирането"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Разрешава на приложението да контролира устройството за вибрация."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"директно обаждане до телефонни номера"</string>

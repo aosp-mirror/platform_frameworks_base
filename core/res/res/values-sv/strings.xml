@@ -46,8 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Anslutningsproblem eller ogiltig MMI-kod."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Endast fasta nummer kan användas."</string>
-    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
-    <skip />
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Det går inte att ändra inställningarna för vidarebefordran av samtal medan mobilen är i roaming-läge."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Tjänsten har aktiverats."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Tjänsten har aktiverats för:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Tjänsten har inaktiverats."</string>
@@ -98,10 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Röst- och datatjänster är blockerade."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Röst- och SMS-tjänster är blockerade."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Alla röst-, data- och SMS-tjänster är blockerade."</string>
-    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
-    <skip />
-    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Det går inte att nå nätverket"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Testa om du får bättre mottagning genom att ändra till en annan typ under Inställningar &gt; Mobilnät &gt; Önskad nätverkstyp."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Peer-enheten begärde texttelefonläget FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Peer-enheten begärde texttelefonläget HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Peer-enheten begärde texttelefonläget VCO"</string>
@@ -185,10 +182,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Jobbprofilen har raderats eftersom det saknas en administratörsapp."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Administratörsappen för jobbprofilen saknas eller är skadad. Det innebär att jobbprofilen och all relaterad data har raderats. Kontakta administratören om du vill ha hjälp."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Din jobbprofil är inte längre tillgänglig på den här enheten."</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"Nätverkstrafiken övervakas"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"Tryck om du vill ha mer information"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Enheten kommer att rensas"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Administratörsappen saknar delar eller är skadad och kan inte användas. Enheten kommer nu att rensas. Kontakta administratören om du behöver hjälp."</string>
     <string name="me" msgid="6545696007631404292">"Jag"</string>
@@ -306,12 +301,9 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"skicka och visa sms"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Tillåter att appen skickar SMS. Detta kan leda till oväntade avgifter. Skadliga appar kan skicka meddelanden utan ditt godkännande vilket kan kosta pengar."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"läsa dina textmeddelanden (SMS eller MMS)"</string>
-    <!-- no translation found for permdesc_readSms (4741697454888074891) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (5796670395641116592) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (6826832415656437652) -->
-    <skip />
+    <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"Appen kan läsa alla sms som sparats på surfplattan."</string>
+    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"Appen kan läsa alla sms som sparats på TV:n."</string>
+    <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"Appen kan läsa alla sms som sparats på mobilen."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"ta emot textmeddelanden (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Tillåter att appen tar emot och hanterar WAP-meddelanden. Med den här behörigheten kan appen övervaka eller ta bort meddelanden som skickats till dig utan att visa dem för dig."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"hämta appar som körs"</string>
@@ -324,10 +316,8 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Tillåter att appen aktiverar billäge."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"stänga andra appar"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Tillåter att appen avslutar andra appars bakgrundsprocesser. Detta kan göra så att andra appar avslutas."</string>
-    <!-- no translation found for permlab_systemAlertWindow (7238805243128138690) -->
-    <skip />
-    <!-- no translation found for permdesc_systemAlertWindow (2393776099672266188) -->
-    <skip />
+    <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Appen kan visas ovanpå andra appar"</string>
+    <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Appen kan visas ovanpå andra appar eller andra delar av skärmen. Detta kan störa den vanliga användningen av appar och påverka hur andra appar visas."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"se till att appen alltid körs"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Tillåter att delar av appen läggs beständigt i minnet. Detta kan innebära att det tillgängliga minnet för andra appar begränsas, vilket gör surfplattan långsam."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Tillåter att en app gör vissa delar beständiga i minnet. Det kan begränsa mängden minne som är tillgänglig för andra appar och gör TV:n långsammare."</string>
@@ -353,51 +343,37 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Tillåter att appen ändrar uppgifterna om dina kontakter som har sparats på TV:n, bland annat hur ofta du har ringt, skickat e-post eller kommunicerat på andra sätt med särskilda kontakter. Med den här behörigheten kan appar ta bort kontaktuppgifter."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Tillåter att appen ändrar kontaktuppgifter som sparats på mobilen, inklusive information om hur ofta du har ringt, skickat e-post till eller på andra sätt kommunicerat med specifika personer. Med den här behörigheten tillåts appar att ta bort kontaktuppgifter."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"läs samtalslogg"</string>
-    <!-- no translation found for permdesc_readCallLog (3204122446463552146) -->
-    <skip />
+    <string name="permdesc_readCallLog" msgid="3204122446463552146">"Appen kan läsa din samtalshistorik."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"skriv samtalslogg"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Tillåter att appen gör ändringar i pekdatorns samtalslista, inklusive i uppgifter om inkommande och utgående samtal. Skadliga program kan använda detta för att radera eller ändra din samtalslista."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Tillåter att appen gör ändringar i TV:ns samtalslista, inklusive i uppgifter om inkommande och utgående samtal. Skadliga appar kan använda detta för att rensa eller ändra din samtalslista."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Tillåter att appen gör ändringar i mobilens samtalslista, inklusive i uppgifter om inkommande och utgående samtal. Skadliga program kan använda detta för att radera eller ändra din samtalslista."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"få åtkomst till kroppssensorer (till exempel pulsmätare)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Ger appen åtkomst till information från sensorer om ditt fysiska tillstånd, till exempel din puls."</string>
-    <!-- no translation found for permlab_readCalendar (6716116972752441641) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (4993979255403945892) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (8837931557573064315) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (4373978642145196715) -->
-    <skip />
+    <string name="permlab_readCalendar" msgid="6716116972752441641">"Läsa kalenderhändelser och kalenderuppgifter"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Appen kan läsa alla kalenderhändelser som sparats på surfplattan och dela eller spara uppgifter i din kalender."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Appen kan läsa alla kalenderhändelser som sparats på TV:n och dela eller spara uppgifter i din kalender."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Appen kan läsa alla kalenderhändelser som sparats på mobilen och dela eller spara uppgifter i din kalender."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"lägga till eller ändra kalenderuppgifter och skicka e-post till gäster utan ägarens vetskap"</string>
-    <!-- no translation found for permdesc_writeCalendar (1675270619903625982) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (9017809326268135866) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (7592791790516943173) -->
-    <skip />
+    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Appen kan lägga till, ta bort eller ändra kalenderhändelser på surfplattan. Appen kan skicka meddelanden som ser ut att komma från kalenderns ägare eller ändra uppgifter utan ägarens vetskap."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Appen kan lägga till, ta bort eller ändra kalenderhändelser på TV:n. Appen kan skicka meddelanden som ser ut att komma från kalenderns ägare eller ändra uppgifter utan ägarens vetskap."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Appen kan lägga till, ta bort eller ändra kalenderhändelser på mobilen. Appen kan skicka meddelanden som ser ut att komma från kalenderns ägare eller ändra uppgifter utan ägarens vetskap."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"få åtkomst till extra kommandon för platsleverantör"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Tillåter att appen får åtkomst till extra kommandon för platsleverantör. Detta kan innebära att appen tillåts störa funktionen för GPS eller andra platskällor."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"få åtkomst till din exakta position (GPS- och nätverksbaserad)"</string>
-    <!-- no translation found for permdesc_accessFineLocation (5821994817969957884) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"Appen kan få information om din plats från GPS eller platskällor i nätverket, som mobilmaster och Wi-Fi-nätverk. De platstjänsterna måste ha aktiverats och finnas på mobilen om appen ska kunna använda dem. Detta kan leda till ökad batteriförbrukning."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"få åtkomst till din ungefärliga position (nätverksbaserad)"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (3373266766487862426) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (1884022719818788511) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (7788009094906196995) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Appen kan få information om din plats från källor i nätverket, som mobilmaster och Wi-Fi-nätverk. De platstjänsterna måste ha aktiverats och finnas på surfplattan om appen ska kunna använda dem."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Appen kan få information om din plats från källor i nätverket, som mobilmaster och Wi-Fi-nätverk. De platstjänsterna måste ha aktiverats och fungera på TV:n om appen ska kunna använda dem."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Appen kan få information om din plats från källor i nätverket, som mobilmaster och Wi-Fi-nätverk. De platstjänsterna måste ha aktiverats och finnas på mobilen om appen ska kunna använda dem."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ändra dina ljudinställningar"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Tillåter att appen ändrar globala ljudinställningar som volym och vilken högtalarutgång som används."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"spela in ljud"</string>
-    <!-- no translation found for permdesc_recordAudio (4245930455135321433) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="4245930455135321433">"Appen kan spela in ljud med mikrofonen när som helst."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"skicka kommandon till SIM-kortet"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Tillåter att appen skickar kommandon till SIM-kortet. Detta är mycket farligt."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ta bilder och spela in videoklipp"</string>
-    <!-- no translation found for permdesc_camera (5392231870049240670) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5392231870049240670">"Appen kan ta kort och spela in video med kameran när som helst."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"styra vibration"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Tillåter att appen styr vibrationen."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ringa telefonnummer direkt"</string>

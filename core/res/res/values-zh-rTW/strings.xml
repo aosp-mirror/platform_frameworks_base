@@ -46,8 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"連線發生問題或錯誤的 MMI 碼。"</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"僅限對固定撥號號碼執行此作業。"</string>
-    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
-    <skip />
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"漫遊時無法透過你的手機變更來電轉接設定。"</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"服務已啟用。"</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"已啟用服務："</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"服務已停用。"</string>
@@ -98,10 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"已封鎖語音/數據傳輸服務。"</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"已封鎖語音/SMS 服務。"</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"已封鎖所有語音/數據傳輸/簡訊服務。"</string>
-    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
-    <skip />
-    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"無法連上網路"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"如要改善收訊狀況，請依序開啟 [設定] &gt; [行動網路] &gt; [偏好的網路類型]，然後選取其他網路類型。"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"通訊對象要求使用 TTY 的 FULL 模式"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"通訊對象要求使用 TTY 的 HCO 模式"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"通訊對象要求使用 TTY 的 VCO 模式"</string>
@@ -185,10 +182,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Work 設定檔因管理員應用程式遺失而遭到刪除。"</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Work 設定檔管理員應用程式遺失或已毀損，因此系統刪除了您的 Work 設定檔和相關資料。如需協助，請與您的管理員聯絡。"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"您的 Work 設定檔已不在這台裝置上。"</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"網路流量目前受到監控"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"輕觸即可查看更多詳細資料"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"您的裝置資料將遭到清除"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"管理員應用程式因遺失元件或已毀損而無法使用，您的裝置資料將隨即遭到清除。如需相關協助，請與您的管理員聯絡。"</string>
     <string name="me" msgid="6545696007631404292">"我"</string>
@@ -306,12 +301,9 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"傳送及查看簡訊"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"允許應用程式傳送簡訊，但可能產生非預期的費用。惡意應用程式可能利用此功能擅自傳送簡訊，增加您不必要的額外支出。"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"讀取您的簡訊 (SMS 或 MMS)"</string>
-    <!-- no translation found for permdesc_readSms (4741697454888074891) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (5796670395641116592) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (6826832415656437652) -->
-    <skip />
+    <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"這個應用程式可讀取所有儲存在平板電腦上的簡訊。"</string>
+    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"這個應用程式可讀取所有儲存在電視上的簡訊。"</string>
+    <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"這個應用程式可讀取所有儲存在手機上的簡訊。"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"接收簡訊 (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"允許應用程式接收和處理 WAP 訊息。這項權限也能讓應用程式監控訊息，或在您閱讀訊息前擅自刪除訊息。"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"擷取執行中的應用程式"</string>
@@ -324,10 +316,8 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"允許應用程式啟用車用模式。"</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"關閉其他應用程式"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"允許應用程式終止其他應用程式的背景處理程序。這項設定可能會導致其他應用程式停止執行。"</string>
-    <!-- no translation found for permlab_systemAlertWindow (7238805243128138690) -->
-    <skip />
-    <!-- no translation found for permdesc_systemAlertWindow (2393776099672266188) -->
-    <skip />
+    <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"這個應用程式可顯示在其他應用程式上方"</string>
+    <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"這個應用程式可顯示在其他應用程式上方或畫面中的其他位置。你可能會無法照常使用應用程式，且其他應用程式的顯示方式可能會受到影響。"</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"一律執行應用程式"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"允許應用程式的部分內容常駐在記憶體中。這項設定可能會限制其他應用程式可用的記憶體，並拖慢平板電腦運作速度。"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"允許應用程式的部分內容常駐在記憶體中。這項設定可能會限制其他應用程式可用的記憶體，造成電視的運作速度變慢。"</string>
@@ -353,51 +343,37 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"允許應用程式修改電視上儲存的聯絡人資料，包括您與特定聯絡人通話、傳送電子郵件或使用其他通訊方式的互動頻率。這項權限可讓應用程式刪除聯絡人資料。"</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"允許應用程式讀取手機上儲存的聯絡人資料，包括您與特定聯絡人通話、傳送電子郵件或使用其他通訊方式的互動頻率。這項權限可讓應用程式刪除聯絡人資料。"</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"讀取通話紀錄"</string>
-    <!-- no translation found for permdesc_readCallLog (3204122446463552146) -->
-    <skip />
+    <string name="permdesc_readCallLog" msgid="3204122446463552146">"這個應用程式可讀取通話紀錄。"</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"寫入通話紀錄"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"允許應用程式修改平板電腦的通話紀錄，包括來電和已撥電話相關資料。請注意，惡意應用程式可能濫用此功能刪除或修改您的通話紀錄。"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"允許應用程式修改電視的通話紀錄，包括來電和已撥電話相關資料。惡意應用程式可能會藉此清除或修改您的通話紀錄。"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"允許應用程式修改手機的通話紀錄，包括來電和已撥電話相關資料。請注意，惡意應用程式可能濫用此功能刪除或修改您的通話紀錄。"</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"存取身體感應器 (例如心跳速率監測器)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"允許應用程式存取感測器所收集的資料 (這類感測器可監測您的體能狀態，例如您的心跳速率)。"</string>
-    <!-- no translation found for permlab_readCalendar (6716116972752441641) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (4993979255403945892) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (8837931557573064315) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (4373978642145196715) -->
-    <skip />
+    <string name="permlab_readCalendar" msgid="6716116972752441641">"讀取日曆活動和詳細資訊"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"這個應用程式可讀取所有儲存在平板電腦上的日曆活動資訊，以及共用或儲存日曆資料。"</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"這個應用程式可讀取所有儲存在電視上的日曆活動資訊，以及共用或儲存日曆資料。"</string>
+    <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"這個應用程式可讀取所有儲存在手機上的日曆活動資訊，以及共用或儲存日曆資料。"</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"在未經擁有者同意的情況下新增或修改日曆活動，以及傳送電子郵件給邀請對象"</string>
-    <!-- no translation found for permdesc_writeCalendar (1675270619903625982) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (9017809326268135866) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (7592791790516943173) -->
-    <skip />
+    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"這個應用程式可在平板電腦上新增、移除或變更日曆活動。提醒您，這個應用程式可能會以日曆擁有者的名義傳送訊息，或是在不通知日曆擁有者的情況下變更活動內容。"</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"這個應用程式可在電視上新增、移除或變更日曆活動。提醒您，這個應用程式可能會以日曆擁有者的名義傳送訊息，或是在不通知日曆擁有者的情況下變更活動內容。"</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"這個應用程式可在手機上新增、移除或變更日曆活動。提醒您，這個應用程式可能會以日曆擁有者的名義傳送訊息，或是在不通知日曆擁有者的情況下變更活動內容。"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"接收額外的位置提供者指令"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"允許應用程式存取額外位置資訊提供者指令。這項設定可能會造成應用程式干擾 GPS 或其他位置資訊來源的運作。"</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"存取精確位置 (以 GPS 和網路為依據)"</string>
-    <!-- no translation found for permdesc_accessFineLocation (5821994817969957884) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"這個應用程式可根據 GPS 或網路位置來源 (例如基地台和 Wi-Fi 網路) 取得你的位置資訊。你必須在手機上開啟這類定位服務，才能讓這個應用程式取得位置資訊。不過這可能會增加耗電量。"</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"存取概略位置 (以網路為依據)"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (3373266766487862426) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (1884022719818788511) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (7788009094906196995) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"這個應用程式可根據網路來源 (例如基地台和 Wi-Fi 網路) 取得你的位置資訊。你必須在平板電腦上開啟這類定位服務，才能讓這個應用程式取得位置資訊。"</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"這個應用程式可根據網路來源 (例如基地台和 Wi-Fi 網路) 取得你的位置資訊。你必須在電視上開啟這類定位服務，才能讓這個應用程式取得位置資訊。"</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"這個應用程式可根據網路來源 (例如基地台和 Wi-Fi 網路) 取得你的位置資訊。你必須在手機上開啟這類定位服務，才能讓這個應用程式取得位置資訊。"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"變更音訊設定"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"允許應用程式修改全域音訊設定，例如音量和用來輸出的喇叭。"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"錄製音訊"</string>
-    <!-- no translation found for permdesc_recordAudio (4245930455135321433) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="4245930455135321433">"這個應用程式隨時可使用麥克風錄音。"</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"傳送指令到 SIM 卡"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"允許應用程式傳送指令到 SIM 卡。這麼做非常危險。"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"拍攝相片和影片"</string>
-    <!-- no translation found for permdesc_camera (5392231870049240670) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5392231870049240670">"這個應用程式隨時可使用相機拍照及錄影。"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"控制震動"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"允許應用程式控制震動。"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"直接撥打電話號碼"</string>
