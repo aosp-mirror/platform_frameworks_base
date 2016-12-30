@@ -20,9 +20,6 @@
 
 #include <android/hardware/gnss/1.0/IGnss.h>
 
-#include <hwbinder/IPCThreadState.h>
-#include <hwbinder/ProcessState.h>
-
 #include "JNIHelp.h"
 #include "jni.h"
 #include "hardware_legacy/power.h"
@@ -67,8 +64,6 @@ using android::sp;
 using android::status_t;
 using android::String16;
 
-using android::hardware::IPCThreadState;
-using android::hardware::ProcessState;
 using android::hardware::Return;
 using android::hardware::Void;
 using android::hardware::hidl_vec;
@@ -965,8 +960,6 @@ static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env,
     } else {
       ALOGE("Unable to get GPS service\n");
     }
-    ProcessState::self()->setThreadPoolMaxThreadCount(0);
-    ProcessState::self()->startThreadPool();
 }
 
 static jboolean android_location_GnssLocationProvider_is_supported(
