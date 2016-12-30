@@ -408,20 +408,15 @@
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Pemantauan perangkat"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Pemantauan profil"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Pemantauan jaringan"</string>
-    <!-- no translation found for monitoring_subtitle_vpn (876537538087857300) -->
-    <skip />
-    <!-- no translation found for monitoring_subtitle_network_logging (5569072711320784030) -->
-    <skip />
+    <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
+    <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"Pencatatan Log Jaringan"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"Nonaktifkan VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Putuskan sambungan VPN"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Perangkat dikelola oleh <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrator dapat memantau dan mengelola setelan, akses perusahaan, aplikasi, data terkait perangkat, dan informasi lokasi perangkat. Untuk informasi selengkapnya, hubungi administrator."</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Anda tersambung ke <xliff:g id="VPN_APP">%1$s</xliff:g>, yang dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs web."</string>
-    <!-- no translation found for monitoring_description_vpn_settings_separator (1933186756733474388) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_settings (8869300202410505143) -->
-    <skip />
-    <!-- no translation found for monitoring_description_network_logging (3901006351911787915) -->
-    <skip />
+    <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
+    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Buka Setelan VPN"</string>
+    <string name="monitoring_description_network_logging" msgid="3901006351911787915">"Admin telah mengaktifkan pencatatan log jaringan, yang memantau traffic di perangkat.\n\nUntuk informasi selengkapnya, hubungi admin."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Anda memberikan izin kepada aplikasi untuk menyiapkan sambungan VPN.\n\nAplikasi ini ini dapat memantau aktivitas perangkat dan jaringan, termasuk email, aplikasi, dan situs web."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Perangkat dikelola oleh <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrator dapat memantau dan mengelola setelan, akses perusahaan, aplikasi, data terkait perangkat, dan informasi lokasi perangkat.\n\nAnda tersambung ke VPN yang dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs web.\n\nUntuk informasi selengkapnya, hubungi administrator."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Profil kerja dikelola oleh <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrator dapat memantau aktivitas jaringan, termasuk email, aplikasi, dan situs web.\n\nUntuk informasi selengkapnya, hubungi administrator.\n\nAnda juga tersambung ke VPN yang dapat memantau aktivitas jaringan."</string>
@@ -442,7 +437,10 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Luaskan"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Ciutkan"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Layar dipasangi pin"</string>
-    <string name="screen_pinning_description" msgid="7238941806855968768">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh dan tahan tombol Kembali untuk melepas pin."</string>
+    <!-- no translation found for screen_pinning_description (8909878447196419623) -->
+    <skip />
+    <!-- no translation found for screen_pinning_description_accessible (426190689254018656) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Mengerti"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Lain kali"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Sembunyikan <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>

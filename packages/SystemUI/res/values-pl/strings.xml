@@ -412,20 +412,15 @@
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Monitorowanie urządzeń"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Monitorowanie profilu"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Monitorowanie sieci"</string>
-    <!-- no translation found for monitoring_subtitle_vpn (876537538087857300) -->
-    <skip />
-    <!-- no translation found for monitoring_subtitle_network_logging (5569072711320784030) -->
-    <skip />
+    <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
+    <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"Rejestrowanie sieciowe"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"Wyłącz VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Rozłącz z VPN"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Urządzeniem zarządza <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrator może monitorować ustawienia, firmowe uprawnienia dostępu, aplikacje, dane powiązane z tym urządzeniem i informacje o lokalizacji urządzenia oraz nimi zarządzać. Skontaktuj się z nim, by dowiedzieć się więcej."</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Łączysz się z aplikacją <xliff:g id="VPN_APP">%1$s</xliff:g>, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
-    <!-- no translation found for monitoring_description_vpn_settings_separator (1933186756733474388) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_settings (8869300202410505143) -->
-    <skip />
-    <!-- no translation found for monitoring_description_network_logging (3901006351911787915) -->
-    <skip />
+    <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">"  "</string>
+    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Otwórz ustawienia VPN"</string>
+    <string name="monitoring_description_network_logging" msgid="3901006351911787915">"Administrator włączył rejestrowanie sieciowe, które pozwala monitorować ruch na Twoim urządzeniu.\n\nAby uzyskać więcej informacji, skontaktuj się z administratorem."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Aplikacja otrzymała od Ciebie uprawnienia do konfigurowania połączenia VPN.\n\nMoże ona monitorować Twoją aktywność na urządzeniu i w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Urządzeniem zarządza <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrator może monitorować ustawienia, firmowe uprawnienia dostępu, aplikacje, dane powiązane z tym urządzeniem i informacje o lokalizacji urządzenia oraz nimi zarządzać.\n\nMasz połączenie z siecią VPN, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe.\n\nAby uzyskać więcej informacji, skontaktuj się z administratorem."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Twoim profilem do pracy zarządza <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrator może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe.\n\nSkontaktuj się z nim, by dowiedzieć się więcej.\n\nMasz też połączenie z siecią VPN, która może monitorować Twoją aktywność w sieci."</string>
@@ -446,7 +441,10 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Rozwiń"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Zwiń"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekran jest przypięty"</string>
-    <string name="screen_pinning_description" msgid="7238941806855968768">"Ekran będzie widoczny, dopóki go nie odepniesz. Aby to zrobić, kliknij i przytrzymaj Wstecz."</string>
+    <!-- no translation found for screen_pinning_description (8909878447196419623) -->
+    <skip />
+    <!-- no translation found for screen_pinning_description_accessible (426190689254018656) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3783985798366751226">"OK"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Nie, dziękuję"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Ukryć <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>

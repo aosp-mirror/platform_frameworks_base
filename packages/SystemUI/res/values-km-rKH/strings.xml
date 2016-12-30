@@ -408,20 +408,15 @@
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"ការ​ត្រួតពិនិត្យ​ឧបករណ៍"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"តាមដានប្រវត្ថិរូប"</string>
     <string name="monitoring_title" msgid="169206259253048106">"ការ​ត្រួតពិនិត្យ​បណ្ដាញ"</string>
-    <!-- no translation found for monitoring_subtitle_vpn (876537538087857300) -->
-    <skip />
-    <!-- no translation found for monitoring_subtitle_network_logging (5569072711320784030) -->
-    <skip />
+    <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
+    <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"ការ​ធ្វើ​កំណត់ហេតុ​បណ្តាញ"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"បិទ VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"ផ្ដាច់ VPN"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"ឧបករណ៍របស់អ្នកត្រូវបានគ្រប់គ្រងដោយ៖ <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nអ្នកគ្រប់គ្រងរបស់អ្នកអាចឃ្លាំមើល និងគ្រប់គ្រងការកំណត់ ការចូលដំណើរការជាក្រុម កម្មវិធី ទិន្នន័យដែលជាប់ទាក់ទងនឹងឧបករណ៍របស់អ្នក និងព័ត៌មានទីតាំងនៃឧបករណ៍របស់អ្នក។ សម្រាប់ព័ត៌មានបន្ថែម សូមទាក់ទងអ្នកគ្រប់គ្រងរបស់អ្នក។"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"អ្នកបានភ្ជាប់ទៅ <xliff:g id="VPN_APP">%1$s</xliff:g> ដែលអាចតាមដានសកម្មភាពក្នុងបណ្តាញរបស់អ្នក រួមទាំងអ៊ីមែល កម្មវិធី និងគេហទំព័រផងដែរ។"</string>
-    <!-- no translation found for monitoring_description_vpn_settings_separator (1933186756733474388) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_settings (8869300202410505143) -->
-    <skip />
-    <!-- no translation found for monitoring_description_network_logging (3901006351911787915) -->
-    <skip />
+    <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
+    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"បើក​ការ​កំណត់​ VPN"</string>
+    <string name="monitoring_description_network_logging" msgid="3901006351911787915">"អ្នក​គ្រប់គ្រង​របស់អ្នក​បាន​បើក​ការ​ធ្វើ​កំណត់ហេតុ​បណ្តាញ​ ដែល​វា​នឹង​តាមដាន​ចរាចរណ៍​បណ្តាញ​នៅលើ​ឧបករណ៍​របស់អ្នក។\n\nសម្រាប់​ព័ត៌មាន​បន្ថែម​ សូម​ទាក់ទង​អ្នក​គ្រប់គ្រង​របស់អ្នក។"</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"អ្នកបានអនុញ្ញាតឲ្យកម្មវិធីដំឡើងការតភ្ជាប់ VPN។\n\nកម្មវិធីនេះអាចឃ្លាំមើលឧបករណ៍ និងសកម្មភាពបណ្តាញរបស់អ្នក រាប់បញ្ចូលទាំងអ៊ីមែល កម្មវិធី និងគេហទំព័រ។"</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"ឧបករណ៍របស់អ្នកត្រូវបានគ្រប់គ្រងដោយ <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nអ្នកគ្រប់គ្រងរបស់អ្នកអាចឃ្លាំមើល និងគ្រប់គ្រងការកំណត់ ការចូលដំណើរការជាក្រុម កម្មវិធី ទិន្នន័យដែលជាប់ទាក់ទងនឹងឧបករណ៍របស់អ្នក និងព័ត៌មានទីតាំងនៃឧបករណ៍របស់អ្នក។\n\nអ្នកត្រូវបានភ្ជាប់ជាមួយ VPN ដែលវាអាចឃ្លាំមើលសកម្មភាពបណ្តាញរបស់អ្នក រួមបញ្ចូលទាំងអ៊ីមែល កម្មវិធី និងគេហទំព័រ។\n\nសម្រាប់ព័ត៌មានបន្ថែម សូមទាក់ទងអ្នកគ្រប់គ្រងរបស់អ្នក។"</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"ប្រវត្តិការងាររបស់អ្នកត្រូវបានគ្រប់គ្រងដោយ <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nអ្នកគ្រប់គ្រងរបស់អ្នកមានលទ្ធភាពអាចឃ្លាំមើលសកម្មភាពបណ្តាញរបស់អ្នក រួមបញ្ចូលទាំងអ៊ីមែល កម្មវិធី គេហទំព័រ។\n\nសម្រាប់ព័ត៌មានបន្ថែម សូមទាក់ទងអ្នកគ្រប់គ្រងរបស់អ្នក។\n\nអ្នកក៏ត្រូវបានភ្ជាប់ជាមួួយ VPN ផងដែរ ដែលវាអាចឃ្លាំមើលសកម្មភាពបណ្តាញរបស់អ្នក។"</string>
@@ -442,7 +437,10 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"ពង្រីក"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"បង្រួម"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"អេក្រង់​ត្រូវ​បាន​ភ្ជាប់"</string>
-    <string name="screen_pinning_description" msgid="7238941806855968768">"វានឹងផ្អាករហូតដល់អ្នកផ្តាច់។ ប៉ះ និងសង្កត់គ្រាប់ចុចថយក្រោយដើម្បីផ្តាច់។"</string>
+    <!-- no translation found for screen_pinning_description (8909878447196419623) -->
+    <skip />
+    <!-- no translation found for screen_pinning_description_accessible (426190689254018656) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3783985798366751226">"យល់​ហើយ"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"ទេ អរគុណ"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"លាក់ <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>

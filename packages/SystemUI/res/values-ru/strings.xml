@@ -414,20 +414,15 @@
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Отслеживание устройств"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Мониторинг профиля"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Отслеживание сетей"</string>
-    <!-- no translation found for monitoring_subtitle_vpn (876537538087857300) -->
-    <skip />
-    <!-- no translation found for monitoring_subtitle_network_logging (5569072711320784030) -->
-    <skip />
+    <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"Настройки VPN"</string>
+    <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"Сетевой журнал"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"Отключить VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Отключить VPN"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Этим устройством управляет <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдминистратор может управлять настройками, корпоративным доступом, приложениями, данными на вашем устройстве, в том числе геоданными, а также просматривать соответствующие сведения. За дополнительной информацией обратитесь к администратору."</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Запущено приложение \"<xliff:g id="VPN_APP">%1$s</xliff:g>\". Оно может отслеживать ваши действия в сети, включая работу с электронной почтой, приложениями и сайтами."</string>
-    <!-- no translation found for monitoring_description_vpn_settings_separator (1933186756733474388) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_settings (8869300202410505143) -->
-    <skip />
-    <!-- no translation found for monitoring_description_network_logging (3901006351911787915) -->
-    <skip />
+    <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
+    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Открыть настройки VPN"</string>
+    <string name="monitoring_description_network_logging" msgid="3901006351911787915">"Администратор включил ведение сетевого журнала, чтобы отслеживать трафик на вашем устройстве.\n\nДля получения подробной информации обращайтесь к администратору."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Вы разрешили приложению подключаться к сети VPN.\n\nОно может отслеживать ваши действия на устройстве и в Интернете, включая работу с электронной почтой, приложениями и веб-сайтами."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Этим устройством управляет <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдминистратор может управлять настройками, корпоративным доступом, приложениями, данными на вашем устройстве, в том числе геоданными, а также просматривать соответствующие сведения.\n\nВы подключены к сети VPN, поэтому возможно отслеживание ваших действий в Интернете, включая работу с электронной почтой, приложениями и защищенными веб-сайтами.\n\nЗа дополнительной информацией обратитесь к администратору."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Вашим корпоративным профилем управляет <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдминистратор может отслеживать ваши действия в Интернете, включая работу с электронной почтой, приложениями и веб-сайтами.\n\nЗа подробностями обратитесь к нему.\n\nУстройство также подключено к сети VPN, в которой возможно отслеживание ваших действий."</string>
@@ -448,7 +443,10 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Развернуть"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Свернуть"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Блокировка в приложении включена"</string>
-    <string name="screen_pinning_description" msgid="7238941806855968768">"Приложение останется активным, пока вы не отмените блокировку, нажав и удерживая кнопку \"Назад\"."</string>
+    <!-- no translation found for screen_pinning_description (8909878447196419623) -->
+    <skip />
+    <!-- no translation found for screen_pinning_description_accessible (426190689254018656) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3783985798366751226">"ОК"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Нет, спасибо"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Скрыть параметр \"<xliff:g id="TILE_LABEL">%1$s</xliff:g>\"?"</string>
