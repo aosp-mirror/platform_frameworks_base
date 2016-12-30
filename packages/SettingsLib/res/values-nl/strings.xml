@@ -325,7 +325,7 @@
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Ingesteld door beheerder"</string>
     <string name="enabled_by_admin" msgid="2386503803463071894">"Ingeschakeld door beheerder"</string>
     <string name="disabled_by_admin" msgid="3669999613095206948">"Uitgeschakeld door beheerder"</string>
-    <string name="home" msgid="3256884684164448244">"Startpagina voor instellingen"</string>
+    <string name="home" msgid="3256884684164448244">"Homepage voor instellingen"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
     <item msgid="8934126114226089439">"50%"</item>
