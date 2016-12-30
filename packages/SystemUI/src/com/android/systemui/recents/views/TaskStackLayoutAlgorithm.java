@@ -1319,6 +1319,13 @@ public class TaskStackLayoutAlgorithm {
         mFrontOfStackTransform.visible = true;
     }
 
+    /**
+     * Returns the proper task rectangle according to the current grid state.
+     */
+    public Rect getTaskRect() {
+        return mGridState.useGridLayout() ? mTaskGridLayoutAlgorithm.getTaskGridRect() : mTaskRect;
+    }
+
     public void dump(String prefix, PrintWriter writer) {
         String innerPrefix = prefix + "  ";
 

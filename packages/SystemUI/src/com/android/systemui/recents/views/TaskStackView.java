@@ -1268,8 +1268,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         if (tv.getBackground() != null) {
             tv.getBackground().getPadding(padding);
         }
-        mTmpRect.set(mStableLayoutAlgorithm.mTaskRect);
-        mTmpRect.union(mLayoutAlgorithm.mTaskRect);
+        mTmpRect.set(mStableLayoutAlgorithm.getTaskRect());
+        mTmpRect.union(mLayoutAlgorithm.getTaskRect());
         tv.measure(
                 MeasureSpec.makeMeasureSpec(mTmpRect.width() + padding.left + padding.right,
                         MeasureSpec.EXACTLY),
@@ -1314,8 +1314,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             if (tv.getBackground() != null) {
                 tv.getBackground().getPadding(padding);
             }
-            mTmpRect.set(mStableLayoutAlgorithm.mTaskRect);
-            mTmpRect.union(mLayoutAlgorithm.mTaskRect);
+            mTmpRect.set(mStableLayoutAlgorithm.getTaskRect());
+            mTmpRect.union(mLayoutAlgorithm.getTaskRect());
             tv.cancelTransformAnimation();
             tv.layout(mTmpRect.left - padding.left, mTmpRect.top - padding.top,
                     mTmpRect.right + padding.right, mTmpRect.bottom + padding.bottom);
