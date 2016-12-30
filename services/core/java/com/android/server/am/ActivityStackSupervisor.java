@@ -4093,18 +4093,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     void setDockedStackMinimized(boolean minimized) {
         mIsDockMinimized = minimized;
-        if (minimized) {
-            // Docked stack is not visible, no need to confirm credentials for its top activity.
-            return;
-        }
-        final ActivityStack dockedStack = getStack(StackId.DOCKED_STACK_ID);
-        if (dockedStack == null) {
-            return;
-        }
-        final ActivityRecord top = dockedStack.topRunningActivityLocked();
-        if (top != null && mService.mUserController.shouldConfirmCredentials(top.userId)) {
-            mService.mActivityStarter.showConfirmDeviceCredential(top.userId);
-        }
     }
 
     private final class ActivityStackSupervisorHandler extends Handler {
