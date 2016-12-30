@@ -46,8 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"കണക്ഷൻ പ്രശ്‌നം അല്ലെങ്കിൽ MMI കോഡ് അസാധുവാണ്."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"നിശ്ചയിച്ചുറപ്പിച്ച ഡയൽ ചെയ്യൽ നമ്പറുകൾക്ക് മാത്രമായി പ്രവർത്തനം പരിമിതപ്പെടുത്തിയിരിക്കുന്നു."</string>
-    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
-    <skip />
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"റോമിംഗിൽ ആയിരിക്കുമ്പോൾ നിങ്ങളുടെ ഫോണിൽ നിന്ന് കോൾ കൈമാറൽ ക്രമീകരണം മാറ്റാൻ കഴിയില്ല."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"സേവനം പ്രവർത്തനക്ഷമമാക്കി."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"സേവനം ഇവയ്‌ക്കായി പ്രവർത്തനക്ഷമമാക്കി:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"സേവനം പ്രവർത്തനരഹിതമാക്കി."</string>
@@ -98,10 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"വോയ്‌സ്/ഡാറ്റ സേവനങ്ങൾ തടഞ്ഞു."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"വോയ്‌സ്/SMS സേവനങ്ങൾ തടഞ്ഞു."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"എല്ലാ വോയ്‌സ്/ഡാറ്റ/SMS സേവനങ്ങളും തടഞ്ഞു."</string>
-    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
-    <skip />
-    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"നെറ്റ്‌വർക്കിലേക്ക് കണക്റ്റുചെയ്യാനാവുന്നില്ല"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"സ്വീകരണം മെച്ചപ്പെടുത്തുന്നതിന് ക്രമീകരണം &gt; സെല്ലുലാർ നെറ്റ്‌വർക്കുകൾ &gt; തിരഞ്ഞെടുത്ത നെറ്റ്‌വർക്ക് തരം എന്നതിൽ തിരഞ്ഞെടുത്തിരിക്കുന്ന തരം മാറ്റിക്കൊണ്ട് ശ്രമിച്ചുനോക്കുക."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് \'ഫുൾ\'"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് VCO"</string>
@@ -185,10 +182,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"അഡ്‌മിൻ അപ്ലിക്കേഷൻ നഷ്‌ടപ്പെട്ടതിനാൽ ഔദ്യോഗിക പ്രൊഫൈൽ ഇല്ലാതാക്കി."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"ഔദ്യോഗിക പ്രൊഫൈൽ അഡ്‌മിൻ അപ്ലിക്കേഷൻ നഷ്‌ടപ്പെട്ടതോ കേടായതോ ആണ്. അക്കാരണത്താൽ നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈലും ബന്ധപ്പെട്ട വിവരവും ഇല്ലാതാക്കിയിരിക്കുന്നു. സഹായത്തിന് അഡ്‌മിനിസ്‌ട്രേറ്ററുമായി ബന്ധപ്പെടുക."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"ഈ ഉപകരണത്തിൽ തുടർന്നങ്ങോട്ട് നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ ലഭ്യമല്ല."</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"നെറ്റ്‌വർക്ക് ട്രാഫിക്ക് നിരീക്ഷിക്കപ്പെടുന്നു"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"കൂടുതൽ വിശദാംശങ്ങൾക്ക് ടാപ്പുചെയ്യുക"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"നിങ്ങളുടെ ഉപകരണം മായ്‌ക്കും"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"അഡ്‌മിൻ അപ്ലിക്കേഷൻ, ഘടകഭാഗങ്ങൾ നഷ്‌ടപ്പെട്ടതോ കേടായതോ ആണെങ്കിൽ ഉപയോഗിക്കാനാവില്ല. നിങ്ങളുടെ ഉപകരണം ഇപ്പോൾ ഇല്ലാതാക്കും. സഹായത്തിന് നിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്ററെ ബന്ധപ്പെടുക."</string>
     <string name="me" msgid="6545696007631404292">"ഞാന്‍"</string>

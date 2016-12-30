@@ -46,8 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problème de connexion ou code IHM non valide."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Opération réservée aux numéros autorisés"</string>
-    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
-    <skip />
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Impossible de modifier les paramètres de transfert d\'appel depuis votre téléphone lorsque vous êtes en itinérance."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Le service a été activé."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Ce service a été activé pour :"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Ce service a été désactivé."</string>
@@ -98,10 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Les services vocaux/de données sont bloqués."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Les services voix/SMS sont bloqués."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Tous les services vocaux/de données/SMS sont bloqués."</string>
-    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
-    <skip />
-    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Impossible d\'accéder au réseau"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Pour améliorer la réception, essayez de modifier le type sélectionné sous Paramètres &gt; Réseaux mobiles &gt; Type de réseau préféré."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Mode TTY demandé par l\'interlocuteur : COMPLET"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Mode TTY demandé par l\'interlocuteur : HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Mode TTY demandé par l\'interlocuteur : VCO"</string>
@@ -185,10 +182,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Le profil professionnel a été supprimé, car une application d\'administration est manquante."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"L\'application d\'administration du profil professionnel est manquante ou endommagée. Par conséquent, votre profil professionnel et toutes les données associées ont été supprimés. Pour obtenir de l\'aide, contactez l\'administrateur."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Votre profil professionnel n\'est plus disponible sur cet appareil."</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"Le trafic réseau est surveillé"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"Appuyez ici pour en savoir plus"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Les données de votre appareil vont être effacées"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Certains composants de l\'application d\'administration sont manquants ou endommagés, et l\'application est donc inutilisable. Les données de votre appareil vont maintenant être effacées. Pour obtenir de l\'aide, contactez l\'administrateur."</string>
     <string name="me" msgid="6545696007631404292">"Moi"</string>

@@ -46,8 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problem s vezom ili nevažeći MMI kôd."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Operacija je ograničena samo na brojeve s fiksnim biranjem."</string>
-    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
-    <skip />
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Nije moguće promijeniti postavke preusmjeravanja poziva na telefonu dok ste u roamingu."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Usluga nije omogućena."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Usluga je omogućena za korisnika:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Usluga je onemogućena."</string>
@@ -99,10 +98,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Glasovne/podatkovne usluge blokirane su."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Glasovne/SMS usluge su blokirane."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Sve su glasovne/podatkovne/SMS usluge blokirane."</string>
-    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
-    <skip />
-    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Pristup mreži nije moguć"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Za bolji prijem pokušajte odabrati drugu vrstu mreže u odjeljku Postavke &gt; Mobilne mreže &gt; Željena vrsta mreže."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Način TTY FULL koji zahtijeva paralelni uređaj"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Način TTY HCO koji zahtijeva paralelni uređaj"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Način TTY VCO koji zahtijeva paralelni uređaj"</string>
@@ -187,10 +184,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Radni je profil izbrisan jer nedostaje administratorska aplikacija."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Administratorska aplikacija radnog profila nedostaje ili je oštećena. Zbog toga su radni profil i povezani podaci izbrisani. Za pomoć se obratite svom administratoru."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Vaš poslovni profil više nije dostupan na ovom uređaju."</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"Mrežni se promet prati"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"Dodirnite za više pojedinosti"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Uređaj će se izbrisati"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Nije moguće upotrijebiti administratorsku aplikaciju jer joj nedostaju komponente ili je oštećena. Vaš će se uređaj sada izbrisati. Za pomoć se obratite svom administratoru."</string>
     <string name="me" msgid="6545696007631404292">"Ja"</string>

@@ -46,8 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problema de connexió o codi MMI no vàlid."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"L\'operació està restringida a números de marcatge fixos."</string>
-    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
-    <skip />
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"No es pot canviar la configuració de desviació de trucades del telèfon quan estàs en itinerància."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"El servei s\'ha activat."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"S\'ha activat el servei per a:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"El servei s\'ha desactivat."</string>
@@ -98,10 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Els serveis de veu/dades estan bloquejats."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Els serveis de veu/SMS estan bloquejats."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Tots els serveis de veu/dades/SMS estan bloquejats."</string>
-    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
-    <skip />
-    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"No es pot accedir a la xarxa"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Per millorar la recepció, prova de canviar-ne el tipus a Configuració &gt; Xarxes mòbils &gt; Tipus de xarxa preferit."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"L\'altre dispositiu ha sol·licitat el mode TTY COMPLET."</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"L\'altre dispositiu ha sol·licitat el mode TTY HCO."</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"L\'altre dispositiu ha sol·licitat el mode TTY VCO."</string>
@@ -185,10 +182,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"S\'ha suprimit el perfil professional perquè no s\'ha detectat cap aplicació d\'administració."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"L\'aplicació d\'administració del perfil professional està malmesa o no es detecta. Com a conseqüència, el perfil professional i les dades relacionades s\'han suprimit. Contacta amb l\'administrador per obtenir ajuda."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"El perfil professional ja no està disponible en aquest dispositiu."</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"El trànsit de xarxa s\'està supervisant"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"Toca per obtenir més informació"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"El contingut del dispositiu s\'esborrarà"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"L\'aplicació d\'administració està malmesa o hi falten components, i no es pot fer servir. El contingut del dispositiu s\'esborrarà. Contacta amb l\'administrador per obtenir ajuda."</string>
     <string name="me" msgid="6545696007631404292">"Mi"</string>

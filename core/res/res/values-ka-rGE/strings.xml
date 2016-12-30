@@ -46,8 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"კავშირის პრობლემა ან არასწორი MMI კოდი."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"ოპერაცია შეზღუდულია მხოლოდ დაშვებულ ნომრებზე."</string>
-    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
-    <skip />
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"ზარის გადამისამართების პარამეტრების თქვენი ტელეფონიდან შეცვლა როუმინგისას ვერ მოხერხდება."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"სერვისი ჩართულია."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"სერვისი ჩართულია შემდეგისთვის:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"სერვისი გამორთულია."</string>
@@ -98,10 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"ხმის/მონაცემების სერვისები დაბლოკილია."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"ყველა ხმოვანი/SMS-ის სერვისი დაბლოკილია."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"ხმის/მონაცემების/SMS-ის ყველა სერვისი დაბლოკილია."</string>
-    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
-    <skip />
-    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"ქსელთან დაკავშირება ვერ ხერხდება"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"მიღების გასაუმჯობესებლად ცადეთ არჩეული ტიპის შეცვლა აქ: პარამეტრები &gt; ფიჭური ქსელები &gt; ქსელის სასურველი ტიპი."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"მოთხოვნილია კვანძი TTY რეჟიმი FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"მოთხოვნილია კვანძი TTY რეჟიმი HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"მოთხოვნილია კვანძი TTY რეჟიმი VCO"</string>
@@ -185,10 +182,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"სამუშაო პროფილი წაშლილია ადმინისტრატორის აპლიკაციის არ ქონის გამო."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"სამუშაო პროფილის ადმინისტრატორის აპლიკაცია გამოტოვებული ან დაზიანებულია. შედეგად, თქვენი სამუშაო პროფილი და მასთან დაკავშირებული მონაცემები წაიშალა. დახმარებისათვის დაუკავშირდით თქვენს ადმინისტრატორს."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"თქვენი სამუშაო პროფილი აღარ არის ხელმისაწვდომი ამ მოწყობილობაზე."</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"ქსელის ტრაფიკი მონიტორინგს გადის"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"შეეხეთ დამატებითი დეტალების სანახავად"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"თქვენი მოწყობილობა წაიშლება"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"ადმინისტრატორის აპლიკაციას კომპონენტები აკლია ან დაზიანებულია, შესაბამისად, მისი გამოყენება ვერ მოხერხდება. თქვენი მოწყობილობა წაიშლება. დახმარებისათვის დაუკავშირდით თქვენს ადმინისტრატორს."</string>
     <string name="me" msgid="6545696007631404292">"მე"</string>

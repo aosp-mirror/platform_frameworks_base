@@ -46,8 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"연결에 문제가 있거나 MMI 코드가 잘못되었습니다."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"발신 허용 번호에서만 수행할 수 있는 작업입니다."</string>
-    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
-    <skip />
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"로밍 중에는 착신 전환 설정을 변경할 수 없습니다."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"서비스를 사용하도록 설정했습니다."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"사용 설정된 서비스 목록:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"서비스가 사용 중지되었습니다."</string>
@@ -98,10 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"음성/데이터 서비스가 차단되었습니다."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"음성/SMS 서비스가 차단되었습니다."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"모든 음성/데이터/SMS 서비스가 차단되었습니다."</string>
-    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
-    <skip />
-    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"네트워크에 연결할 수 없습니다."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"수신 상태를 개선하려면 설정 &gt; 이동통신망 &gt; 기본 네트워크 유형에서 선택된 유형을 변경해 보세요."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"피어가 TTY 모드 FULL을 요청했습니다."</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"피어가 TTY 모드 HCO를 요청했습니다."</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"피어가 TTY 모드 VCO를 요청했습니다."</string>
@@ -185,10 +182,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"관리 앱이 누락되어 직장 프로필이 삭제되었습니다."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"직장 프로필 관리 앱이 없거나 손상되어 직장 프로필 및 관련 데이터가 삭제되었습니다. 도움이 필요한 경우 관리자에게 문의하세요."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"직장 프로필을 이 기기에서 더 이상 사용할 수 없습니다."</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"네트워크 트래픽이 모니터링되고 있음"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"탭하여 세부정보 더보기"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"기기가 삭제됩니다."</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"관리 앱이 손상되었거나 구성요소가 없어서 사용할 수 없습니다. 이제 기기가 삭제됩니다. 도움이 필요한 경우 관리자에게 문의하세요."</string>
     <string name="me" msgid="6545696007631404292">"나"</string>

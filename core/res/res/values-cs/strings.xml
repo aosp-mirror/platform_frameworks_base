@@ -46,8 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problém s připojením nebo neplatný kód MMI."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Operace je omezena pouze na povolená telefonní čísla."</string>
-    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
-    <skip />
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Když je aktivní roaming, nastavení přesměrování hovorů z telefonu nelze změnit."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Služba byla zapnuta."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Služba byla zapnuta pro:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Služba byla vypnuta."</string>
@@ -100,10 +99,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Hlasové a datové služby jsou zablokovány."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Hlasové služby a služby SMS jsou zablokovány."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Veškeré hlasové a datové služby a služby SMS jsou zablokovány."</string>
-    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
-    <skip />
-    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"K síti se nelze připojit"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Chcete-li zlepšit příjem, zkuste v Nastavení &gt; Mobilní sítě &gt; Preferovaný typ sítě změnit vybraný typ."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Partner požádal o přechod na režim TTY FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Partner požádal o přechod na režim TTY HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Partner požádal o přechod na režim TTY VCO"</string>
@@ -189,10 +186,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Pracovní profil byl smazán, protože není k dispozici aplikace pro správu."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Aplikace pro správu pracovního profilu chybí nebo je poškozena. Váš pracovní profil a související data proto byla smazána. Kontaktujte svého administrátora a požádejte jej o pomoc."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Váš pracovní profil v tomto zařízení již není k dispozici."</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"Síťový provoz je monitorován"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"Klepnutím zobrazíte další podrobnosti"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Zařízení bude vymazáno"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"V aplikaci pro správu chybí některé součásti nebo je poškozená, a proto ji nelze použít. Zařízení nyní bude vymazáno. Kontaktujte svého administrátora a požádejte jej o pomoc."</string>
     <string name="me" msgid="6545696007631404292">"Já"</string>

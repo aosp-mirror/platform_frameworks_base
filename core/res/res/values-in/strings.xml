@@ -182,10 +182,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Profil kerja dihapus karena tidak ada aplikasi admin."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Aplikasi admin profil kerja tidak ada atau rusak. Akibatnya, profil kerja dan data terkait telah dihapus. Hubungi administrator untuk meminta bantuan."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Profil kerja tidak tersedia lagi di perangkat ini."</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"Traffic jaringan sedang dipantau"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"Tap untuk detail selengkapnya"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Perangkat akan dihapus"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Aplikasi admin kehilangan komponen atau rusak, dan tidak dapat digunakan. Perangkat sekarang akan dihapus. Hubungi administrator untuk meminta bantuan."</string>
     <string name="me" msgid="6545696007631404292">"Saya"</string>

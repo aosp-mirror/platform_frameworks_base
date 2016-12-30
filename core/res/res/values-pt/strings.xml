@@ -46,8 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problema de conexão ou código MMI inválido."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"A operação é limitada somente a números de chamadas fixas."</string>
-    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
-    <skip />
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Não é possível alterar as configurações de encaminhamento de chamada do seu smartphone em roaming."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"O serviço foi ativado."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"O serviço foi ativado para:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"O serviço foi desativado."</string>
@@ -98,10 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Os serviços de voz/dados estão bloqueados."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Os serviços de voz/SMS estão bloqueados."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Todos os serviços de voz/dados/SMS estão bloqueados."</string>
-    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
-    <skip />
-    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Não foi possível acessar a rede"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Para melhorar a recepção, tente alterar o tipo selecionado em Configurações &gt; Redes celulares &gt; Tipo de rede preferencial."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"TTD modo COMPLETO solicitado"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"TTD modo HCO solicitado"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"TTD modo VCO solicitado"</string>
@@ -185,10 +182,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Perfil de trabalho excluído devido à ausência de um app para administrador."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"O app para administrador do perfil de trabalho não foi encontrado ou está corrompido. Consequentemente, seu perfil de trabalho e os dados relacionados foram excluídos. Entre em contato com seu administrador para receber assistência."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Seu perfil de trabalho não está mais disponível neste dispositivo."</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"O tráfego de rede está sendo monitorado"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"Toque para ver mais detalhes"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Seu dispositivo será limpo"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"O app para administrador está sem alguns componentes ou foi corrompido e não pode ser usado. Seu dispositivo será limpo agora. Entre em contato com seu administrador para receber assistência."</string>
     <string name="me" msgid="6545696007631404292">"Eu"</string>

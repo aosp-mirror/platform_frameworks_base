@@ -46,8 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Anslutningsproblem eller ogiltig MMI-kod."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Endast fasta nummer kan användas."</string>
-    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
-    <skip />
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Det går inte att ändra inställningarna för vidarebefordran av samtal medan mobilen är i roaming-läge."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Tjänsten har aktiverats."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Tjänsten har aktiverats för:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Tjänsten har inaktiverats."</string>
@@ -98,10 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Röst- och datatjänster är blockerade."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Röst- och SMS-tjänster är blockerade."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Alla röst-, data- och SMS-tjänster är blockerade."</string>
-    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
-    <skip />
-    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Det går inte att nå nätverket"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Testa om du får bättre mottagning genom att ändra till en annan typ under Inställningar &gt; Mobilnät &gt; Önskad nätverkstyp."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Peer-enheten begärde texttelefonläget FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Peer-enheten begärde texttelefonläget HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Peer-enheten begärde texttelefonläget VCO"</string>
@@ -185,10 +182,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Jobbprofilen har raderats eftersom det saknas en administratörsapp."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Administratörsappen för jobbprofilen saknas eller är skadad. Det innebär att jobbprofilen och all relaterad data har raderats. Kontakta administratören om du vill ha hjälp."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Din jobbprofil är inte längre tillgänglig på den här enheten."</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"Nätverkstrafiken övervakas"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"Tryck om du vill ha mer information"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Enheten kommer att rensas"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Administratörsappen saknar delar eller är skadad och kan inte användas. Enheten kommer nu att rensas. Kontakta administratören om du behöver hjälp."</string>
     <string name="me" msgid="6545696007631404292">"Jag"</string>
