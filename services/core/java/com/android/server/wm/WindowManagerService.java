@@ -4831,6 +4831,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 + (altOrientation ? " (alt)" : "") + " from " + mRotation
                 + (mAltOrientation ? " (alt)" : "") + ", lastOrientation=" + mLastOrientation);
 
+        if (DisplayContent.deltaRotation(rotation, mRotation) != 2) {
+            mWaitingForConfig = true;
+        }
+
         mRotation = rotation;
         mAltOrientation = altOrientation;
         mPolicy.setRotationLw(mRotation);
@@ -4838,7 +4842,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_ACTIVE;
         mH.removeMessages(H.WINDOW_FREEZE_TIMEOUT);
         mH.sendEmptyMessageDelayed(H.WINDOW_FREEZE_TIMEOUT, WINDOW_FREEZE_TIMEOUT_DURATION);
-        mWaitingForConfig = true;
+
         dc.setLayoutNeeded();
         final int[] anim = new int[2];
         if (dc.isDimming()) {
