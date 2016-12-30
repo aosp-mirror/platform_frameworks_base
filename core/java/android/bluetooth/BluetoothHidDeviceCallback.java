@@ -45,9 +45,9 @@ public abstract class BluetoothHidDeviceCallback {
      *            <code>false</code> otherwise.
      */
     public void onAppStatusChanged(BluetoothDevice pluggedDevice,
-                                    BluetoothHidDeviceAppConfiguration config, boolean registered) {
-        Log.d(TAG, "onAppStatusChanged: pluggedDevice=" + (pluggedDevice == null ?
-            null : pluggedDevice.toString()) + " registered=" + registered);
+            BluetoothHidDeviceAppConfiguration config, boolean registered) {
+        Log.d(TAG, "onAppStatusChanged: pluggedDevice=" + pluggedDevice + " registered="
+                + registered);
     }
 
     /**
@@ -60,13 +60,13 @@ public abstract class BluetoothHidDeviceCallback {
      * @param state Connection state as defined in {@link BluetoothProfile}.
      */
     public void onConnectionStateChanged(BluetoothDevice device, int state) {
-        Log.d(TAG, "onConnectionStateChanged: device=" + device.toString() + " state=" + state);
+        Log.d(TAG, "onConnectionStateChanged: device=" + device + " state=" + state);
     }
 
     /**
      * Callback called when GET_REPORT is received from remote host. Should be
      * replied by application using
-     * {@link BluetoothHidDevice#replyReport(byte, byte, byte[])}.
+     * {@link BluetoothHidDevice#replyReport(BluetoothDevice, byte, byte, byte[])}.
      *
      * @param type Requested Report Type.
      * @param id Requested Report Id, can be 0 if no Report Id are defined in
@@ -74,21 +74,22 @@ public abstract class BluetoothHidDeviceCallback {
      * @param bufferSize Requested buffer size, application shall respond with
      *            at least given number of bytes.
      */
-    public void onGetReport(byte type, byte id, int bufferSize) {
-        Log.d(TAG, "onGetReport: type=" + type + " id=" + id + " bufferSize=" + bufferSize);
+    public void onGetReport(BluetoothDevice device, byte type, byte id, int bufferSize) {
+        Log.d(TAG, "onGetReport: device=" + device + " type=" + type + " id=" + id + " bufferSize="
+                + bufferSize);
     }
 
     /**
      * Callback called when SET_REPORT is received from remote host. In case
      * received data are invalid, application shall respond with
-     * {@link BluetoothHidDevice#reportError()}.
+     * {@link BluetoothHidDevice#reportError(BluetoothDevice)}.
      *
      * @param type Report Type.
      * @param id Report Id.
      * @param data Report data.
      */
-    public void onSetReport(byte type, byte id, byte[] data) {
-        Log.d(TAG, "onSetReport: type=" + type + " id=" + id);
+    public void onSetReport(BluetoothDevice device, byte type, byte id, byte[] data) {
+        Log.d(TAG, "onSetReport: device=" + device + " type=" + type + " id=" + id);
     }
 
     /**
@@ -99,8 +100,8 @@ public abstract class BluetoothHidDeviceCallback {
      *
      * @param protocol Protocol Mode.
      */
-    public void onSetProtocol(byte protocol) {
-        Log.d(TAG, "onSetProtocol: protocol=" + protocol);
+    public void onSetProtocol(BluetoothDevice device, byte protocol) {
+        Log.d(TAG, "onSetProtocol: device=" + device + " protocol=" + protocol);
     }
 
     /**
@@ -111,16 +112,17 @@ public abstract class BluetoothHidDeviceCallback {
      * @param reportId Report Id.
      * @param data Report data.
      */
-    public void onIntrData(byte reportId, byte[] data) {
-        Log.d(TAG, "onIntrData: reportId=" + reportId);
+    public void onIntrData(BluetoothDevice device, byte reportId, byte[] data) {
+        Log.d(TAG, "onIntrData: device=" + device + " reportId=" + reportId);
     }
 
     /**
      * Callback called when Virtual Cable is removed. This can be either due to
-     * {@link BluetoothHidDevice#unplug()} or request from remote side. After
-     * this callback is received connection will be disconnected automatically.
+     * {@link BluetoothHidDevice#unplug(BluetoothDevice)} or request from remote
+     * side. After this callback is received connection will be disconnected
+     * automatically.
      */
-    public void onVirtualCableUnplug() {
-        Log.d(TAG, "onVirtualCableUnplug");
+    public void onVirtualCableUnplug(BluetoothDevice device) {
+        Log.d(TAG, "onVirtualCableUnplug: device=" + device);
     }
 }
