@@ -412,20 +412,15 @@
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Monitorizarea dispozitivului"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Monitorizarea profilului"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Monitorizarea rețelei"</string>
-    <!-- no translation found for monitoring_subtitle_vpn (876537538087857300) -->
-    <skip />
-    <!-- no translation found for monitoring_subtitle_network_logging (5569072711320784030) -->
-    <skip />
+    <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
+    <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"Înregistrarea în jurnal pentru rețea"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"Dezactivați conexiunea prin VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Deconectați rețeaua VPN"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Dispozitivul este gestionat de <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministratorul poate monitoriza și gestiona setările, accesul la rețeaua companiei, aplicațiile, datele asociate cu dispozitivul și informațiile privind locația dispozitivului. Pentru mai multe informații, contactați administratorul."</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"V-ați conectat la aplicația <xliff:g id="VPN_APP">%1$s</xliff:g>, care vă poate monitoriza activitatea în rețea, inclusiv e-mailurile, aplicațiile și site-urile accesate."</string>
-    <!-- no translation found for monitoring_description_vpn_settings_separator (1933186756733474388) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_settings (8869300202410505143) -->
-    <skip />
-    <!-- no translation found for monitoring_description_network_logging (3901006351911787915) -->
-    <skip />
+    <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
+    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Deschideți Setări VPN"</string>
+    <string name="monitoring_description_network_logging" msgid="3901006351911787915">"Administratorul dvs. a activat înregistrarea în jurnal pentru rețea, funcție ce monitorizează traficul de pe dispozitivul dvs.\n\nPentru mai multe informații, contactați administratorul."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Ați acordat unei aplicații permisiunea de a configura o conexiune VPN.\n\nAceastă aplicație poate monitoriza activitatea de pe dispozitiv și în rețea, inclusiv e-mailurile, aplicațiile și site-urile."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Dispozitivul este gestionat de <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministratorul poate monitoriza și gestiona setările, accesul la rețeaua companiei, aplicațiile, datele asociate cu dispozitivul și informațiile privind locația dispozitivului.\n\nSunteți conectat(ă) la o rețea VPN, care vă poate monitoriza activitatea în rețea, inclusiv e-mailurile, aplicațiile și site-urile.\n\nPentru mai multe informații, contactați administratorul."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Profilul de serviciu este gestionat de <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministratorul poate monitoriza activitatea în rețea, inclusiv e-mailurile, aplicațiile și site-urile.\n\nPentru mai multe informații, contactați administratorul.\n\nDe asemenea, sunteți conectat(ă) la o rețea VPN, care vă poate monitoriza activitatea în rețea."</string>
@@ -446,7 +441,10 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Extindeți"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Restrângeți"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ecranul este fixat"</string>
-    <string name="screen_pinning_description" msgid="7238941806855968768">"Ecranul este afișat până anulați fixarea. Atingeți lung opțiunea Înapoi pentru a anula fixarea."</string>
+    <!-- no translation found for screen_pinning_description (8909878447196419623) -->
+    <skip />
+    <!-- no translation found for screen_pinning_description_accessible (426190689254018656) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Am înțeles"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Nu, mulțumesc"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Ascundeți <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>

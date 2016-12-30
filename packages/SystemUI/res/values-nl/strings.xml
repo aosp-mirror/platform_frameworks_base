@@ -81,7 +81,7 @@
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Koppelen als camera (PTP)"</string>
     <string name="installer_cd_button_title" msgid="2312667578562201583">"AFT-app voor Mac installeren"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Terug"</string>
-    <string name="accessibility_home" msgid="8217216074895377641">"Startpagina"</string>
+    <string name="accessibility_home" msgid="8217216074895377641">"Homepage"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menu"</string>
     <string name="accessibility_recent" msgid="5208608566793607626">"Overzicht"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"Zoeken"</string>
@@ -408,20 +408,15 @@
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Apparaatcontrole"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Profielcontrole"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Netwerkcontrole"</string>
-    <!-- no translation found for monitoring_subtitle_vpn (876537538087857300) -->
-    <skip />
-    <!-- no translation found for monitoring_subtitle_network_logging (5569072711320784030) -->
-    <skip />
+    <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
+    <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"Netwerkregistratie"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"VPN uitschakelen"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Verbinding met VPN verbreken"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Je apparaat wordt beheerd door <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nJe beheerder kan instellingen, bedrijfstoegang, apps, gegevens voor je apparaat en locatiegegevens voor je apparaat controleren en beheren. Neem voor meer informatie contact op met je beheerder."</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Je bent verbonden met <xliff:g id="VPN_APP">%1$s</xliff:g>, waarmee je netwerkactiviteit (waaronder e-mails, apps en websites) kan worden gecontroleerd."</string>
-    <!-- no translation found for monitoring_description_vpn_settings_separator (1933186756733474388) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_settings (8869300202410505143) -->
-    <skip />
-    <!-- no translation found for monitoring_description_network_logging (3901006351911787915) -->
-    <skip />
+    <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
+    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"VPN-instellingen openen"</string>
+    <string name="monitoring_description_network_logging" msgid="3901006351911787915">"Je beheerder heeft netwerkregistratie ingeschakeld, waarmee verkeer op je apparaat wordt bijgehouden.\n\nNeem voor meer informatie contact op met je beheerder."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Je hebt een app toestemming gegeven voor het instellen van een VPN-verbinding.\n\nMet deze app kan je apparaat- en netwerkactiviteit worden gecontroleerd, inclusief e-mails, apps en websites."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Je apparaat wordt beheerd door <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nJe beheerder kan instellingen, bedrijfstoegang, apps, gegevens voor je apparaat en locatiegegevens voor je apparaat controleren en beheren.\n\nU bent verbonden met een VPN, die je netwerkactiviteit kan controleren, waaronder e-mails, apps en websites.\n\nNeem voor meer informatie contact op met je beheerder."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Je werkprofiel wordt beheerd door <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nJe beheerder kan je netwerkactiviteit controleren, inclusief e-mails, apps en websites.\n\nNeem contact op met je beheerder voor meer informatie.\n\nU bent ook verbonden met een VPN waarmee je netwerkactiviteit kan worden gecontroleerd."</string>
@@ -442,7 +437,10 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Uitvouwen"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Samenvouwen"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Scherm is vastgezet"</string>
-    <string name="screen_pinning_description" msgid="7238941806855968768">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Terug en houd vast om het scherm los te maken."</string>
+    <!-- no translation found for screen_pinning_description (8909878447196419623) -->
+    <skip />
+    <!-- no translation found for screen_pinning_description_accessible (426190689254018656) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Ik snap het"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Nee, bedankt"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> verbergen?"</string>
@@ -565,7 +563,7 @@
     <string name="keyboard_key_num_lock" msgid="5052537581246772117">"Num Lock"</string>
     <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"<xliff:g id="NAME">%1$s</xliff:g> op numeriek toetsenblok"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"Systeem"</string>
-    <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Startpagina"</string>
+    <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Homepage"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Recent"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Terug"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Meldingen"</string>

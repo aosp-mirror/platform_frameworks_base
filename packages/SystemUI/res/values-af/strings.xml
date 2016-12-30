@@ -408,20 +408,15 @@
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Toestelmonitering"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Profielmonitering"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Netwerkmonitering"</string>
-    <!-- no translation found for monitoring_subtitle_vpn (876537538087857300) -->
-    <skip />
-    <!-- no translation found for monitoring_subtitle_network_logging (5569072711320784030) -->
-    <skip />
+    <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
+    <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"Netwerkloglêers"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"Deaktiveer VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Ontkoppel VPN"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Jou toestel word bestuur deur <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nJou administrateur kan instellings, korporatiewe toegang, programme, data wat met jou toestel geassosieer word, en jou toestel se ligginginligting monitor en bestuur. Kontak jou administrateur vir meer inligting."</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Jy is gekoppel aan <xliff:g id="VPN_APP">%1$s</xliff:g>, wat jou netwerkaktiwiteit, insluitend e-posse, programme en webwerwe, kan monitor."</string>
-    <!-- no translation found for monitoring_description_vpn_settings_separator (1933186756733474388) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_settings (8869300202410505143) -->
-    <skip />
-    <!-- no translation found for monitoring_description_network_logging (3901006351911787915) -->
-    <skip />
+    <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
+    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Maak VPN-instellings oop"</string>
+    <string name="monitoring_description_network_logging" msgid="3901006351911787915">"Jou administrateur het netwerkloglêers aangeskakel wat verkeer op jou toestel monitor.\n\nKontak jou administrateur vir meer inligting."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Jy het \'n program toestemming gegee om \'n VPN-verbinding op te stel.\n\nHierdie program kan jou toestel- en netwerkaktiwiteit monitor, insluitend e-posse, programme en webwerwe."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Jou toestel word bestuur deur <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nJou administrateur kan instellings, korporatiewe toegang, programme, data wat met jou toestel geassosieer word, en jou toestel se ligginginligting monitor en bestuur.\n\nJy is aan \'n VPN gekoppel wat jou netwerkaktiwiteit, insluitend e-posse, programme en webwerwe, kan monitor.\n\nKontak jou administrateur vir meer inligting."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Jou werkprofiel word deur <xliff:g id="ORGANIZATION">%1$s</xliff:g> bestuur.\n\nJou administrateur is in staat om jou netwerkaktiwiteit, insluitend e-posse, programme en webwerwe, te monitor.\n\nKontak jou administrateur vir meer inligting.\n\nJy is ook aan \'n VPN gekoppel wat jou netwerkaktiwiteit kan monitor."</string>
@@ -442,7 +437,10 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Vou uit"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Vou in"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Skerm is vasgespeld"</string>
-    <string name="screen_pinning_description" msgid="7238941806855968768">"Dit hou dit in sig totdat jy dit ontspeld. Raak en hou Terug om dit te ontspeld."</string>
+    <!-- no translation found for screen_pinning_description (8909878447196419623) -->
+    <skip />
+    <!-- no translation found for screen_pinning_description_accessible (426190689254018656) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Het dit"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Nee, dankie"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Versteek <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>

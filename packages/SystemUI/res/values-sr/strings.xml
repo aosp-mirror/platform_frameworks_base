@@ -410,20 +410,15 @@
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Надгледање уређаја"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Надгледање профила"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Надгледање мреже"</string>
-    <!-- no translation found for monitoring_subtitle_vpn (876537538087857300) -->
-    <skip />
-    <!-- no translation found for monitoring_subtitle_network_logging (5569072711320784030) -->
-    <skip />
+    <string name="monitoring_subtitle_vpn" msgid="876537538087857300">"VPN"</string>
+    <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"Евидентирање мреже"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"Онемогући VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Прекини везу са VPN-ом"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Уређајем управља <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдминистратор може да надгледа подешавања, корпоративни приступ, апликације, податке повезане са уређајем и информације о локацији уређаја, као и да управља њима. Више информација потражите од администратора."</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Повезани сте са апликацијом <xliff:g id="VPN_APP">%1$s</xliff:g>, која може да надгледа активности на мрежи, укључујући имејлове, апликације и веб-сајтове."</string>
-    <!-- no translation found for monitoring_description_vpn_settings_separator (1933186756733474388) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_settings (8869300202410505143) -->
-    <skip />
-    <!-- no translation found for monitoring_description_network_logging (3901006351911787915) -->
-    <skip />
+    <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
+    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Отворите подешавања VPN-а"</string>
+    <string name="monitoring_description_network_logging" msgid="3901006351911787915">"Администратор је укључио евидентирање мреже, које прати саобраћај на уређају.\n\nКонтактирајте администратора за више информација."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Дали сте дозволу апликацији да подешава VPN везу.\n\nТа апликација може да надгледа активности на уређају и мрежи, укључујући имејлове, апликације и веб-сајтове."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Уређајем управља <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдминистратор може да надгледа подешавања, корпоративни приступ, апликације, податке повезане са уређајем и информације о локацији уређаја, као и да управља њима.\n\nПовезани сте на VPN, који може да надгледа активности на мрежи, укључујући имејлове, апликације и безбедне веб-сајтове.\n\nВише информација потражите од администратора."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Профилом за Work управља <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдминистратор може да надгледа активности на мрежи, укључујући имејлове, апликације и веб-сајтове.\n\nВише информација потражите од администратора.\n\nПовезани сте и на VPN, који може да надгледа активности на личној мрежи."</string>
@@ -444,7 +439,10 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Прошири"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Скупи"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Екран је закачен"</string>
-    <string name="screen_pinning_description" msgid="7238941806855968768">"На овај начин се ово стално приказује док га не откачите. Додирните и задржите Назад да бисте га откачили."</string>
+    <!-- no translation found for screen_pinning_description (8909878447196419623) -->
+    <skip />
+    <!-- no translation found for screen_pinning_description_accessible (426190689254018656) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Важи"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Не, хвала"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Желите ли да сакријете <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
