@@ -46,8 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"இணைப்பு சிக்கல் அல்லது தவறான MMI குறியீடு."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"நிலையான அழைப்பு எண்களுக்கு மட்டுமே எனச் செயல்பாடு வரையறுக்கப்பட்டுள்ளது."</string>
-    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
-    <skip />
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"ரோமிங்கில் இருக்கும் போது, உங்கள் மொபைலிலிருந்து அழைப்புப் பகிர்வு அமைப்புகளை மாற்ற முடியாது."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"சேவை இயக்கப்பட்டுள்ளது."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"சேவை பின்வருவதற்கு இயக்கப்பட்டுள்ளது:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"சேவை முடக்கப்பட்டுள்ளது."</string>
@@ -98,10 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"குரல்/தரவு சேவைகள் தடைசெய்யப்பட்டுள்ளன."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"குரல்/SMS சேவைகள் தடைசெய்யப்பட்டுள்ளன."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"எல்லா குரல்/தரவு/SMS சேவைகள் தடைசெய்யப்பட்டுள்ளன."</string>
-    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
-    <skip />
-    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"நெட்வொர்க்குடன் இணைக்க முடியவில்லை"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"பெறுதலை மேம்படுத்த, அமைப்புகள் &gt; செல்லுலார் நெட்வொர்க்குகள் &gt; விரும்பும் நெட்வொர்க் வகை என்பதில் தேர்ந்தெடுத்த நெட்வொர்க் வகையை மாற்றவும்."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"TTY Mode FULLஐ இணைச் செயல்பாடு கோரியது"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"TTY Mode HCOஐ இணைச் செயல்பாடு கோரியது"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"TTY Mode VCOஐ இணைச் செயல்பாடு கோரியது"</string>
@@ -185,10 +182,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"நிர்வாகி பயன்பாடு இல்லாததனால், பணி சுயவிவரம் நீக்கப்பட்டது."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"பணி சுயவிவர நிர்வாகி பயன்பாடு இல்லை அல்லது சேதமடைந்துள்ளது. இதன் விளைவாக, உங்கள் பணி சுயவிவரமும், அதனுடன் தொடர்புடைய தரவும் நீக்கப்பட்டன. உதவிக்கு, உங்கள் நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"சாதனத்தில் இனி பணி சுயவிவரம் கிடைக்காது."</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"நெட்வொர்க் ட்ராஃபிக் கண்காணிக்கப்படுகிறது"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"மேலும் விவரங்களுக்கு, தட்டவும்"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"சாதனத் தரவு அழிக்கப்படும்"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"நிர்வாகி பயன்பாடு இல்லை அல்லது சேதமடைந்துள்ளது மற்றும் பயன்படுத்த முடியாது. இப்போது சாதனத் தரவு அழிக்கப்படும். உதவிக்கு, நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="me" msgid="6545696007631404292">"நான்"</string>
@@ -306,12 +301,9 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"SMS செய்திகளை அனுப்புதல் மற்றும் பார்த்தல்"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"SMS செய்திகளை அனுப்ப பயன்பாட்டை அனுமதிக்கிறது. இதற்கு எதிர்பாராத கட்டணங்கள் விதிக்கப்படலாம். தீங்கு விளைவிக்கும் பயன்பாடுகள் உங்களின் உறுதிப்படுத்தல் எதுவுமின்றி செய்திகளை அனுப்பி உங்களுக்குக் கட்டணம் விதிக்கலாம்."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"உங்கள் உரைச் செய்திகளை (SMS அல்லது MMS) படித்தல்"</string>
-    <!-- no translation found for permdesc_readSms (4741697454888074891) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (5796670395641116592) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (6826832415656437652) -->
-    <skip />
+    <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"இந்தப் பயன்பாடு உங்கள் டேப்லெட்டில் சேமிக்கப்பட்டுள்ள எல்லா SMS (உரை) செய்திகளையும் படிக்கலாம்."</string>
+    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"இந்தப் பயன்பாடு உங்கள் டிவியில் சேமிக்கப்பட்டுள்ள எல்லா SMS (உரை) செய்திகளையும் படிக்கலாம்."</string>
+    <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"இந்தப் பயன்பாடு உங்கள் மொபைலில் சேமிக்கப்பட்டுள்ள எல்லா SMS (உரை) செய்திகளையும் படிக்கலாம்."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"உரைச் செய்திகளைப் (WAP) பெறுதல்"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP செய்திகளைப் பெற, செயற்படுத்தப் பயன்பாட்டை அனுமதிக்கிறது. உங்களுக்கு அனுப்பப்படும் செய்திகளை உங்களுக்குக் காட்டாமல் கண்காணிக்க அல்லது நீக்குவதற்கான திறன் இந்த அனுமதியில் உள்ளடங்கும்."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"இயங்கும் பயன்பாடுகளை மீட்டெடுத்தல்"</string>
@@ -324,10 +316,8 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"கார் முறையை இயக்க, பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"பிற பயன்பாடுகளை மூடுதல்"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"பிற பயன்பாடுகளின் பின்புலச் செயல்முறைகளை நிறுத்த பயன்பாட்டை அனுமதிக்கிறது. இதனால் பிற பயன்பாடுகள் இயங்குவதை நிறுத்தலாம்."</string>
-    <!-- no translation found for permlab_systemAlertWindow (7238805243128138690) -->
-    <skip />
-    <!-- no translation found for permdesc_systemAlertWindow (2393776099672266188) -->
-    <skip />
+    <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"இந்தப் பயன்பாடு பிற பயன்பாடுகளின் மேலே தோன்றலாம்"</string>
+    <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"இந்தப் பயன்பாடு பிற பயன்பாடுகளின் மேலே அல்லது திரையின் பிற பகுதிகளில் தோன்றலாம். இது வழக்கமான பயன்பாட்டு உபயோகத்தில் குறுக்கிட்டு, பிற பயன்பாடுகள் தோன்றும் விதத்தை மாற்றக்கூடும்."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"பயன்பாட்டை எப்போதும் இயங்குமாறு செய்தல்"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"நினைவகத்தில் நிலையாக இருக்கும் தன்னுடைய பகுதிகளை உருவாக்கப் பயன்பாட்டை அனுமதிக்கிறது. இதனால பிற பயன்பாடுகளுக்குக் கிடைக்கும் நினைவகம் வரையறுக்கப்பட்டு, டேப்லெட்டின் வேகத்தைக் குறைக்கலாம்."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"பயன்பாடு தனது உள்ளடக்கத்தை நினைவகத்தில் தொடர்ந்து வைத்திருக்க, அனுமதிக்கிறது. பிற பயன்பாடுகளுக்கென இருக்கும் நினைவகத்தை இது கட்டுப்படுத்தி, டிவியின் செயல்திறனைக் குறைக்கலாம்."</string>
@@ -353,51 +343,37 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"உங்கள் டிவியில் சேமிக்கப்பட்ட தொடர்புகள் பற்றிய தரவை மாற்ற, பயன்பாட்டை அனுமதிக்கிறது, இதில் குறிப்பிட்ட தொடர்பை எத்தனைமுறை அழைத்தீர்கள், மின்னஞ்சல் செய்தீர்கள் அல்லது பிறவழிகளில் தொடர்புகொண்டீர்கள் என்பதும் அடங்கும். இது தொடர்புத் தரவை நீக்க, பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"குறிப்பிட்ட தொடர்புகளுடன் நீங்கள் அழைத்த, மின்னஞ்சல் அனுப்பிய அல்லது வேறு வழியில் தொடர்புகொண்டதின் எண்ணிக்கை உள்பட, உங்கள் மொபைலில் சேமிக்கப்பட்ட உங்கள் தொடர்புகள் குறித்த தரவைத் திருத்த பயன்பாட்டை அனுமதிக்கிறது. இந்த அனுமதியானது தொடர்புத் தரவை நீக்கப் பயன்பாடுகளை அனுமதிக்கிறது."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"அழைப்புப் பதிவைப் படித்தல்"</string>
-    <!-- no translation found for permdesc_readCallLog (3204122446463552146) -->
-    <skip />
+    <string name="permdesc_readCallLog" msgid="3204122446463552146">"இந்தப் பயன்பாடு உங்கள் அழைப்பு வரலாற்றைப் படிக்கலாம்."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"அழைப்புப் பதிவை எழுதுதல்"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"உள்வரும் மற்றும் வெளிச்செல்லும் அழைப்புகள் குறித்த தகவல் உள்பட உங்கள் டேப்லெட்டின் அழைப்புப் பதிவைத் திருத்துவதற்குப் பயன்பாட்டை அனுமதிக்கிறது. உங்கள் அழைப்பின் பதிவை அழிக்க அல்லது திருத்த தீங்கு விளைவிக்கும் பயன்பாடுகள் இதைப் பயன்படுத்தலாம்."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"உள்வரும் மற்றும் வெளிச்செல்லும் அழைப்புகள் குறித்த தகவல் உள்ளிட்ட உங்கள் டிவியின் அழைப்பு பதிவைத் திருத்த, பயன்பாட்டை அனுமதிக்கிறது. உங்கள் அழைப்பு பதிவை அழிக்க அல்லது திருத்த தீங்கு விளைவிக்கும் பயன்பாடுகள் இதைப் பயன்படுத்தலாம்."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"உள்வரும் மற்றும் வெளிச்செல்லும் அழைப்புகள் குறித்த தகவல் உள்பட உங்கள் மொபைல் அழைப்புப் பதிவைத் திருத்துவதற்குப் பயன்பாட்டை அனுமதிக்கிறது. உங்கள் அழைப்பின் பதிவை அழிக்க அல்லது திருத்த தீங்கு விளைவிக்கும் பயன்பாடுகள் இதைப் பயன்படுத்தலாம்."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"உடல் உணர்விகளை (இதயத் துடிப்பு மானிட்டர்கள் போன்றவை) அணுகுதல்"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"உங்கள் இதயத்துடிப்பு விகிதம் போன்ற உங்கள் உடல்நிலையைக் கண்காணிக்கும் உணர்விகளில் இருந்து தரவை அணுக பயன்பாடுகளை அனுமதிக்கும்."</string>
-    <!-- no translation found for permlab_readCalendar (6716116972752441641) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (4993979255403945892) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (8837931557573064315) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (4373978642145196715) -->
-    <skip />
+    <string name="permlab_readCalendar" msgid="6716116972752441641">"கேலெண்டர் நிகழ்வுகளையும் விவரங்களையும் படிக்கலாம்"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"இந்தப் பயன்பாடு உங்கள் டேப்லெட்டில் சேமிக்கப்பட்டுள்ள கேலெண்டர் நிகழ்வுகள் அனைத்தையும் படிக்கலாம், உங்கள் கேலெண்டர் தரவைப் பகிரலாம் அல்லது சேமிக்கலாம்."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"இந்தப் பயன்பாடு உங்கள் டிவியில் சேமிக்கப்பட்டுள்ள எல்லா கேலெண்டர் நிகழ்வுகளையும் படிக்கலாம், உங்கள் கேலெண்டர் தரவைப் பகிரலாம் அல்லது சேமிக்கலாம்."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"இந்தப் பயன்பாடு உங்கள் மொபைலில் சேமிக்கப்பட்டுள்ள கேலெண்டர் நிகழ்வுகள் அனைத்தையும் படிக்கலாம், உங்கள் கேலெண்டர் தரவைப் பகிரலாம் அல்லது சேமிக்கலாம்."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"உரிமையாளருக்குத் தெரியாமல் கேலெண்டர் நிகழ்வுகளைச் சேர்த்தல் அல்லது மாற்றுதல் மற்றும் விருந்தினர்களுக்கு மின்னஞ்சல் அனுப்புதல்"</string>
-    <!-- no translation found for permdesc_writeCalendar (1675270619903625982) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (9017809326268135866) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (7592791790516943173) -->
-    <skip />
+    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"இந்தப் பயன்பாடு உங்கள் டேப்லெட்டில் கேலெண்டர் நிகழ்வுகளைச் சேர்க்கலாம், அகற்றலாம் அல்லது மாற்றலாம். இந்தப் பயன்பாடு கேலெண்டர் உரிமையாளர்கள் அனுப்பியது போல் தோன்றும் செய்திகளை அனுப்பலாம் அல்லது உரிமையாளர்களிடம் தெரிவிக்காமலே கேலெண்டரில் நிகழ்வுகளை மாற்றலாம்."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"இந்தப் பயன்பாடு உங்கள் டிவியில் கேலெண்டர் நிகழ்வுகளைச் சேர்க்கலாம், அகற்றலாம் அல்லது மாற்றலாம். இந்தப் பயன்பாடு கேலெண்டர் உரிமையாளர்கள் அனுப்பியது போல் தோன்றும் செய்திகளை அனுப்பலாம் அல்லது உரிமையாளர்களிடம் தெரிவிக்காமலே கேலெண்டரில் நிகழ்வுகளை மாற்றலாம்."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"இந்தப் பயன்பாடு உங்கள் மொபைலில் கேலெண்டர் நிகழ்வுகளைச் சேர்க்கலாம், அகற்றலாம் அல்லது மாற்றலாம். இந்தப் பயன்பாடு கேலெண்டர் உரிமையாளர்கள் அனுப்பியது போல் தோன்றும் செய்திகளை அனுப்பலாம் அல்லது உரிமையாளர்களிடம் தெரிவிக்காமலே கேலெண்டரில் நிகழ்வுகளை மாற்றலாம்."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"கூடுதல் இட வழங்குநரின் கட்டளைகளின் அணுகல்"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"கூடுதல் இட வழங்குநர் கட்டளைகளை அணுகப் பயன்பாட்டை அனுமதிக்கிறது. இது, GPS அல்லது பிற இருப்பிட மூலங்களின் செயல்பாட்டை இடைமறிக்க பயன்பாட்டை அனுமதிக்கலாம்."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"துல்லியமான இருப்பிடத்தை அணுகுதல் (GPS மற்றும் நெட்வொர்க் அடிப்படையில்)"</string>
-    <!-- no translation found for permdesc_accessFineLocation (5821994817969957884) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"இந்தப் பயன்பாடு GPS அல்லது நெட்வொர்க் மூலங்களின் (செல் கோபுரங்கள், வைஃபை நெட்வொர்க்குகள் போன்றவை) அடிப்படையில் உங்கள் இருப்பிடத்தைப் பெறலாம். பயன்பாடு பயன்படுத்தும் வகையில், உங்கள் மொபைலில் இந்த இருப்பிடச் சேவைகள் இயக்கப்பட்டு, கிடைக்கும்படி இருக்க வேண்டும். இதனால் பேட்டரி அதிகம் பயன்படுத்தப்படலாம்."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"தோராயமான இருப்பிடத்தை அணுகுதல் (நெட்வொர்க் அடிப்படையில்)"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (3373266766487862426) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (1884022719818788511) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (7788009094906196995) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"இந்தப் பயன்பாடு நெட்வொர்க் மூலங்களின் (செல் கோபுரங்கள், வைஃபை நெட்வொர்க்குகள் போன்றவை) அடிப்படையில் உங்கள் இருப்பிடத்தைப் பெறலாம். பயன்பாடு பயன்படுத்தும் வகையில், உங்கள் டேப்லெட்டில் இந்த இருப்பிடச் சேவைகள் இயக்கப்பட்டு, கிடைக்கும்படி இருக்க வேண்டும்."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"இந்தப் பயன்பாடு நெட்வொர்க் மூலங்களின் (செல் கோபுரங்கள், வைஃபை நெட்வொர்க்குகள் போன்றவை) அடிப்படையில் உங்கள் இருப்பிடத்தைப் பெறலாம். பயன்பாடு பயன்படுத்தும் வகையில், உங்கள் டிவியில் இந்த இருப்பிடச் சேவைகள் இயக்கப்பட்டு, கிடைக்கும்படி இருக்க வேண்டும்."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"இந்தப் பயன்பாடு நெட்வொர்க் மூலங்களின் (செல் கோபுரங்கள், வைஃபை நெட்வொர்க்குகள் போன்றவை) அடிப்படையில் உங்கள் இருப்பிடத்தைப் பெறலாம். பயன்பாடு பயன்படுத்தும் வகையில், உங்கள் மொபைலில் இந்த இருப்பிடச் சேவைகள் இயக்கப்பட்டு, கிடைக்கும்படி இருக்க வேண்டும்."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"எனது ஆடியோ அமைப்புகளை மாற்றுதல்"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ஒலியளவு மற்றும் வெளியீட்டிற்கு ஸ்பீக்கர்கள் பயன்படுத்தப்படுவது போன்ற ஒட்டுமொத்த ஆடியோ அமைப்புகளைக் கட்டுப்படுத்தப் பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ஆடியோவைப் பதிவுசெய்தல்"</string>
-    <!-- no translation found for permdesc_recordAudio (4245930455135321433) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="4245930455135321433">"இந்தப் பயன்பாடு எப்போது வேண்டுமானாலும் மைக்ரோஃபோனைப் பயன்படுத்தி ஆடியோவை ரெக்கார்டு செய்யலாம்."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"கட்டளைகளை சிம்மிற்கு அனுப்புதல்"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"சிம் க்குக் கட்டளைகளை அனுப்ப பயன்பாட்டை அனுமதிக்கிறது. இது மிகவும் ஆபத்தானதாகும்."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"படங்கள் மற்றும் வீடியோக்களை எடுத்தல்"</string>
-    <!-- no translation found for permdesc_camera (5392231870049240670) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5392231870049240670">"இந்தப் பயன்பாடு எப்போது வேண்டுமானாலும் கேமராவைப் பயன்படுத்தி படங்களை எடுக்கலாம், வீடியோக்களை ரெக்கார்டு செய்யலாம்."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"அதிர்வைக் கட்டுப்படுத்துதல்"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"அதிர்வைக் கட்டுப்படுத்தப் பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"தொலைபேசி எண்களை நேரடியாக அழைத்தல்"</string>

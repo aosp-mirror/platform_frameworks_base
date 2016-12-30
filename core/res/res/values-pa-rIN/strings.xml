@@ -46,8 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"ਕਨੈਕਸ਼ਨ ਸਮੱਸਿਆ ਜਾਂ ਅਪ੍ਰਮਾਣਿਕ MMI ਕੋਡ।"</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"ਓਪਰੇਸ਼ਨ ਕੇਵਲ ਫਿਕਸਡ ਡਾਇਲਿੰਗ ਨੰਬਰਾਂ ਤੱਕ ਸੀਮਿਤ ਹੈ।"</string>
-    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
-    <skip />
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"ਤੁਹਾਡੇ ਰੋਮਿੰਗ ਵਿੱਚ ਹੋਣ ਦੌਰਾਨ ਤੁਹਾਡੇ ਫ਼ੋਨ ਤੋਂ ਕਾਲ ਫਾਰਵਰਡਿੰਗ ਸੈਟਿੰਗਾਂ ਨੂੰ ਬਦਲਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ।"</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"ਸੇਵਾ ਅਸਮਰੱਥ ਬਣਾਈ ਗਈ ਸੀ।"</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"ਸੇਵਾ ਇਸ ਲਈ ਸਮਰੱਥ ਬਣਾਈ ਗਈ ਸੀ:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"ਸੇਵਾ ਅਸਮਰੱਥ ਬਣਾਈ ਗਈ ਹੈ।"</string>
@@ -98,10 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"ਵੌਇਸ/ਡੈਟਾ ਸੇਵਾਵਾਂ ਬਲੌਕ ਕੀਤੀਆਂ ਹੋਈਆਂ ਹਨ।"</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"ਵੌਇਸ/SMS ਸੇਵਾਵਾਂ ਬਲੌਕ ਕੀਤੀਆਂ ਗਈਆਂ ਹਨ।"</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"ਸਾਰੀਆਂ ਵੌਇਸ/ਡੈਟਾ/SMS ਸੇਵਾਵਾਂ ਬਲੌਕ ਕੀਤੀਆਂ ਗਈਆਂ ਹਨ।"</string>
-    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
-    <skip />
-    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"ਨੈੱਟਵਰਕ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"ਪ੍ਰਾਪਤੀ ਨੂੰ ਬਿਹਤਰ ਬਣਾਉਣ ਲਈ, ਸੈਟਿੰਗਾਂ &gt; ਸੈਲਿਊਲਰ ਨੈੱਟਵਰਕ &gt; ਤਰਜੀਹੀ ਨੈੱਟਵਰਕ ਕਿਸਮ \'ਤੇ ਚੁਣੀ ਗਈ ਕਿਸਮ ਨੂੰ ਬਦਲਣ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"ਪੀਅਰ ਨੇ TTY Mode FULL ਦੀ ਬੇਨਤੀ ਕੀਤੀ"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"ਪੀਅਰ ਨੇ TTY Mode HCO ਦੀ ਬੇਨਤੀ ਕੀਤੀ"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"ਪੀਅਰ ਨੇ TTY Mode VCO ਦੀ ਬੇਨਤੀ ਕੀਤੀ"</string>
@@ -185,10 +182,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"ਕੰਮ ਪ੍ਰੋਫਾਈਲ ਐਡਮਿਨ ਐਪ ਦੇ ਕਾਰਨ ਮਿਟਾਈ ਗਈ।"</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"ਕੰਮ ਪ੍ਰੋਫਾਈਲ ਐਡਮਿਨ ਐਪ ਜਾਂ ਤਾਂ ਲੁਪਤ ਹੈ ਜਾਂ ਕਰਪਟ ਹੈ। ਇੱਕ ਸਿੱਟੇ ਦੇ ਤੌਰ ਤੇ, ਤੁਹਾਡੀ ਕੰਮ ਪ੍ਰੋਫਾਈਲ ਅਤੇ ਸੰਬੰਧਿਤ ਡੈਟਾ ਮਿਟਾਇਆ ਗਿਆ ਹੈ। ਸਹਾਇਤਾ ਲਈ ਆਪਣੇ ਪ੍ਰਬੰਧਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"ਤੁਹਾਡੀ ਕੰਮ ਪ੍ਰੋਫਾਈਲ ਹੁਣ ਇਸ ਡੀਵਾਈਸ ਤੇ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।"</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"ਨੈੱਟਵਰਕ ਟਰੈਫਿਕ ਦੀ ਨਿਗਰਾਨੀ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"ਹੋਰ ਵੇਰਵਿਆਂ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਮਿਟਾਈ ਜਾਏਗੀ"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"ਐਡਮਿਨ ਐਪ ਲੁਪਤ ਕੰਪੋਨੈਂਟ ਜਾਂ ਕਰਪਟ ਹੈ ਅਤੇ ਇਸਦੀ ਵਰਤੋਂ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਹੁਣ ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਮਿਟਾ ਦਿੱਤੀ ਜਾਏਗੀ। ਸਹਾਇਤਾ ਲਈ ਆਪਣੇ ਪ੍ਰਬੰਧਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="me" msgid="6545696007631404292">"ਮੈਂ"</string>
@@ -306,12 +301,9 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"SMS ਸੁਨੇਹੇ ਭੇਜਣ ਅਤੇ ਦੇਖਣ"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"ਐਪ ਨੂੰ SMS ਸੁਨੇਹੇ ਭੇਜਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਸਦੇ ਸਿੱਟੇ ਵਜੋਂ ਅਕਲਪਿਤ ਖ਼ਰਚੇ ਪੈ ਸਕਦੇ ਹਨ। ਖ਼ਰਾਬ ਐਪਸ ਤੁਹਾਡੀ ਪੁਸ਼ਟੀ ਤੋਂ ਬਿਨਾਂ ਸੁਨੇਹੇ ਭੇਜ ਕੇ ਤੁਹਾਨੂੰ ਖ਼ਰਚੇ ਪਾ ਸਕਦੇ ਹਨ।"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"ਤੁਹਾਡੇ ਟੈਕਸਟ ਸੁਨੇਹੇ (SMS ਜਾਂ MMS) ਪੜ੍ਹੋ"</string>
-    <!-- no translation found for permdesc_readSms (4741697454888074891) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (5796670395641116592) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (6826832415656437652) -->
-    <skip />
+    <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"ਇਹ ਐਪ ਤੁਹਾਡੇ ਟੈਬਲੈੱਟ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਸਾਰੇ SMS (ਲਿਖਤ) ਸੁਨੇਹਿਆਂ ਨੂੰ ਪੜ੍ਹ ਸਕਦੀ ਹੈ।"</string>
+    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"ਇਹ ਐਪ ਤੁਹਾਡੇ ਟੀਵੀ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਸਾਰੇ SMS (ਲਿਖਤ) ਸੁਨੇਹਿਆਂ ਨੂੰ ਪੜ੍ਹ ਸਕਦੀ ਹੈ।"</string>
+    <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"ਇਹ ਐਪ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਸਾਰੇ SMS (ਲਿਖਤ) ਸੁਨੇਹਿਆਂ ਨੂੰ ਪੜ੍ਹ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"ਟੈਕਸਟ ਸੁਨੇਹੇ (WAP) ਪ੍ਰਾਪਤ ਕਰੋ"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"ਐਪ ਨੂੰ WAP ਸੁਨੇਹੇ ਪ੍ਰਾਪਤ ਕਰਨ ਅਤੇ ਉਹਨਾਂ ਦੀ ਪ੍ਰਕਿਰਿਆ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਸ ਅਨੁਮਤੀ ਵਿੱਚ ਸ਼ਾਮਲ ਹੈ ਐਪ ਦੀ ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਤੇ ਭੇਜੇ ਗਏ ਸੁਨੇਹਿਆਂ ਨੂੰ ਤੁਹਾਨੂੰ ਦਿਖਾਏ ਬਿਨਾਂ ਨਿਰੀਖਣ ਕਰਨ ਅਤੇ ਮਿਟਾਉਣ ਦੀ ਸਮਰੱਥਾ।"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ਚੱਲ ਰਹੇ ਐਪਸ ਮੁੜ ਪ੍ਰਾਪਤ ਕਰੋ"</string>
@@ -324,10 +316,8 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"ਐਪ ਨੂੰ ਕਾਰ ਮੋਡ ਸਮਰੱਥ ਬਣਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"ਹੋਰ ਐਪਸ ਬੰਦ ਕਰੋ"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"ਐਪ ਨੂੰ ਹੋਰਾਂ ਐਪਸ ਦੀਆਂ ਪਿਛੋਕੜ ਪ੍ਰਕਿਰਿਆਵਾਂ ਖ਼ਤਮ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਸ ਨਾਲ ਹੋਰ ਚੱਲ ਰਹੇ ਐਪਸ ਰੁਕ ਸਕਦੇ ਹਨ।"</string>
-    <!-- no translation found for permlab_systemAlertWindow (7238805243128138690) -->
-    <skip />
-    <!-- no translation found for permdesc_systemAlertWindow (2393776099672266188) -->
-    <skip />
+    <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"ਇਹ ਐਪ ਹੋਰ ਐਪਾਂ ਦੇ ਸਿਖਰ \'ਤੇ ਵਿਖਾਈ ਦੇ ਸਕਦੀ ਹੈ"</string>
+    <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"ਇਹ ਐਪ ਹੋਰ ਐਪਾਂ ਦੇ ਸਿਖਰ \'ਤੇ ਜਾਂ ਸਕ੍ਰੀਨ ਦੇ ਹੋਰ ਭਾਗਾਂ \'ਤੇ ਵਿਖਾਈ ਦੇ ਸਕਦੀ ਹੈ। ਇਹ ਸਧਾਰਨ ਐਪ ਵਰਤੋਂ ਵਿੱਚ ਵਿਘਨ ਪਾ ਸਕਦੀ ਹੈ ਅਤੇ ਹੋਰ ਐਪਾਂ ਦੇ ਵਿਖਾਈ ਦੇਣ ਦੇ ਤਰੀਕੇ ਨੂੰ ਬਦਲ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"ਐਪ ਨੂੰ ਹਮੇਸ਼ਾਂ ਰਨ ਕਰੋ"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"ਐਪ ਨੂੰ ਮੈਮਰੀ ਵਿੱਚ ਖੁਦ ਦੇ ਭਾਗਾਂ ਨੂੰ ਸਥਾਈ ਬਣਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਟੈਬਲੇਟ ਨੂੰ ਹੌਲੀ ਕਰਦੇ ਹੋਏ ਹੋਰਾਂ ਐਪਸ ਤੇ ਉਪਲਬਧ ਮੈਮਰੀ ਨੂੰ ਸੀਮਿਤ ਕਰ ਸਕਦਾ ਹੈ।"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"ਐਪ ਨੂੰ ਮੈਮਰੀ ਵਿੱਚ ਖੁਦ ਦੇ ਭਾਗਾਂ ਨੂੰ ਸਥਾਈ ਬਣਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ TV ਨੂੰ ਹੌਲੀ ਕਰਦੇ ਹੋਏ ਹੋਰਾਂ ਐਪਸ ਤੇ ਉਪਲਬਧ ਮੈਮਰੀ ਨੂੰ ਸੀਮਿਤ ਕਰ ਸਕਦਾ ਹੈ।"</string>
@@ -353,51 +343,37 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ TV ਤੇ ਸਟੋਰ ਕੀਤੇ ਤੁਹਾਡੇ ਸੰਪਰਕਾਂ ਬਾਰੇ ਡੈਟਾ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਉਸ ਬਾਰੰਬਾਰਤਾ ਸਮੇਤ ਜਿਸ ਨਾਲ ਤੁਸੀਂ ਕਾਲ ਕੀਤੀ ਹੈ, ਈਮੇਲ ਕੀਤੀ ਹੈ ਜਾਂ ਖ਼ਾਸ ਵਿਅਕਤੀਆਂ ਨਾਲ ਹੋਰ ਤਰੀਕਿਆਂ ਨਾਲ ਸੰਚਾਰ ਕੀਤਾ। ਇਹ ਅਨੁਮਤੀ ਐਪਸ ਨੂੰ ਸੰਪਰਕ ਡੈਟਾ ਮਿਟਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਫੋਨ ਤੇ ਸਟੋਰ ਕੀਤੇ ਤੁਹਾਡੇ ਸੰਪਰਕਾਂ ਬਾਰੇ ਡੈਟਾ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਉਸ ਬਾਰੰਬਾਰਤਾ ਸਮੇਤ ਜਿਸ ਨਾਲ ਤੁਸੀਂ ਕਾਲ ਕੀਤੀ ਹੈ, ਈਮੇਲ ਕੀਤੀ ਹੈ ਜਾਂ ਖ਼ਾਸ ਵਿਅਕਤੀਆਂ ਨਾਲ ਹੋਰ ਤਰੀਕਿਆਂ ਨਾਲ ਸੰਚਾਰ ਕੀਤਾ। ਇਹ ਅਨੁਮਤੀ ਐਪਸ ਨੂੰ ਤੁਹਾਡਾ ਸੰਪਰਕ ਡੈਟਾ ਮਿਟਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"ਕਾਲ ਲੌਗ ਪੜ੍ਹੋ"</string>
-    <!-- no translation found for permdesc_readCallLog (3204122446463552146) -->
-    <skip />
+    <string name="permdesc_readCallLog" msgid="3204122446463552146">"ਇਹ ਐਪ ਤੁਹਾਡਾ ਕਾਲ ਇਤਿਹਾਸ ਪੜ੍ਹ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"ਕਾਲ ਲੌਗ ਲਿਖੋ"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"ਐਪ ਨੂੰ ਤੁਹਾਡੀ ਟੈਬਲੇਟ ਦਾ ਕਾਲ ਲੌਗ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਇਨਕਮਿੰਗ ਅਤੇ ਆਊਟਗੋਇੰਗ ਕਾਲਾਂ ਬਾਰੇ ਡੈਟਾ ਸਮੇਤ। ਖ਼ਰਾਬ ਐਪਸ ਇਸਦੀ ਵਰਤੋਂ ਤੁਹਾਡੇ ਕਾਲ ਲੌਗ ਨੂੰ ਮਿਟਾਉਣ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਲਈ ਕਰ ਸਕਦੇ ਹਨ।"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ TV ਦਾ ਕਾਲ ਲੌਗ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਇਨਕਮਿੰਗ ਅਤੇ ਆਊਟਗੋਇੰਗ ਕਾਲਾਂ ਬਾਰੇ ਡੈਟਾ ਸਮੇਤ। ਖ਼ਰਾਬ ਐਪਸ ਇਸਦੀ ਵਰਤੋਂ ਤੁਹਾਡੇ ਕਾਲ ਲੌਗ ਨੂੰ ਮਿਟਾਉਣ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਲਈ ਕਰ ਸਕਦੇ ਹਨ।"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਫੋਨ ਦਾ ਕਾਲ ਲੌਗ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਇਨਕਮਿੰਗ ਅਤੇ ਆਊਟਗੋਇੰਗ ਕਾਲਾਂ ਬਾਰੇ ਡੈਟਾ ਸਮੇਤ। ਖ਼ਰਾਬ ਐਪਸ ਇਸਦੀ ਵਰਤੋਂ ਤੁਹਾਡੇ ਕਾਲ ਲੌਗ ਨੂੰ ਮਿਟਾਉਣ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਲਈ ਕਰ ਸਕਦੇ ਹਨ।"</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"ਸਰੀਰ ਸੰਵੇਦਕਾਂ \'ਤੇ ਪਹੁੰਚ ਕਰੋ (ਜਿਵੇਂ ਦਿਲ ਦੀ ਧੜਕਣ ਦੇ ਨਿਰੀਖਕ)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"ਐਪ ਨੂੰ ਉਹਨਾਂ ਸੰਵੇਦਕਾਂ ਦੇ ਡੈਟਾ ਤੱਕ ਪਹੁੰਚ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ ਜੋ ਤੁਹਾਡੀ ਸਰੀਰਕ ਸਥਿਤੀ ਦਾ ਨਿਰੀਖਣ ਕਰ ਸਕਦੇ ਹਨ, ਜਿਵੇਂ ਤੁਹਾਡੇ ਦਿਲ ਦੀ ਧੜਕਣ।"</string>
-    <!-- no translation found for permlab_readCalendar (6716116972752441641) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (4993979255403945892) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (8837931557573064315) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (4373978642145196715) -->
-    <skip />
+    <string name="permlab_readCalendar" msgid="6716116972752441641">"ਕੈਲੰਡਰ ਵਰਤਾਰਿਆਂ ਅਤੇ ਵੇਰਵਿਆਂ ਨੂੰ ਪੜ੍ਹੋ"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"ਇਹ ਐਪ ਤੁਹਾਡੇ ਟੈਬਲੈੱਟ ਉੱਤੇ ਸਟੋਰ ਕੀਤੇ ਸਾਰੇ ਕੈਲੰਡਰ ਵਰਤਾਰਿਆਂ ਨੂੰ ਪੜ੍ਹ ਸਕਦੀ ਹੈ ਅਤੇ ਤੁਹਾਡੇ ਕੈਲੰਡਰ ਡੈਟੇ ਨੂੰ ਸਾਂਝਾ ਜਾਂ ਰੱਖਿਅਤ ਕਰ ਸਕਦੀ ਹੈ।"</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"ਇਹ ਐਪ ਤੁਹਾਡੇ ਟੀਵੀ ਉੱਤੇ ਸਟੋਰ ਕੀਤੇ ਸਾਰੇ ਕੈਲੰਡਰ ਵਰਤਾਰਿਆਂ ਨੂੰ ਪੜ੍ਹ ਸਕਦੀ ਹੈ ਅਤੇ ਤੁਹਾਡੇ ਕੈਲੰਡਰ ਡੈਟੇ ਨੂੰ ਸਾਂਝਾ ਜਾਂ ਰੱਖਿਅਤ ਕਰ ਸਕਦੀ ਹੈ।"</string>
+    <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"ਇਹ ਐਪ ਤੁਹਾਡੇ ਫ਼ੋਨ ਉੱਤੇ ਸਟੋਰ ਕੀਤੇ ਸਾਰੇ ਕੈਲੰਡਰ ਵਰਤਾਰਿਆਂ ਨੂੰ ਪੜ੍ਹ ਸਕਦੀ ਹੈ ਅਤੇ ਤੁਹਾਡੇ ਕੈਲੰਡਰ ਡੈਟੇ ਨੂੰ ਸਾਂਝਾ ਜਾਂ ਰੱਖਿਅਤ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"ਕੈਲੰਡਰ ਇਵੈਂਟਾਂ ਜੋੜੋ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰੋ ਅਤੇ ਮਾਲਕ ਦੀ ਜਾਣਕਾਰੀ ਤੋਂ ਬਿਨਾਂ ਮਹਿਮਾਨਾਂ ਨੂੰ ਈਮੇਲ ਭੇਜੋ"</string>
-    <!-- no translation found for permdesc_writeCalendar (1675270619903625982) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (9017809326268135866) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (7592791790516943173) -->
-    <skip />
+    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"ਇਹ ਐਪ ਤੁਹਾਡੇ ਟੈਬਲੈੱਟ \'ਤੇ ਕੈਲੰਡਰ ਵਰਤਾਰਿਆਂ ਨੂੰ ਸ਼ਾਮਲ ਕਰ ਸਕਦੀ ਹੈ, ਹਟਾ ਸਕਦੀ ਹੈ, ਜਾਂ ਬਦਲ ਸਕਦੀ ਹੈ। ਇਹ ਐਪ ਉਹਨਾਂ ਸੁਨੇਹਿਆਂ ਨੂੰ ਭੇਜ ਸਕਦੀ ਹੈ ਜੋ ਕਿ ਕੈਲੰਡਰ ਮਾਲਕਾਂ ਤੋਂ ਆਉਂਦੇ ਜਾਪ ਸਕਦੇ ਹਨ, ਜਾਂ ਉਹਨਾਂ ਦੇ ਮਾਲਕਾਂ ਨੂੰ ਸੂਚਿਤ ਕੀਤੇ ਬਿਨਾਂ ਵਰਤਾਰਿਆਂ ਨੂੰ ਬਦਲ ਸਕਦੀ ਹੈ।"</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"ਇਹ ਐਪ ਤੁਹਾਡੇ ਟੀਵੀ \'ਤੇ ਕੈਲੰਡਰ ਵਰਤਾਰਿਆਂ ਨੂੰ ਸ਼ਾਮਲ ਕਰ ਸਕਦੀ ਹੈ, ਹਟਾ ਸਕਦੀ ਹੈ, ਜਾਂ ਬਦਲ ਸਕਦੀ ਹੈ। ਇਹ ਐਪ ਉਹਨਾਂ ਸੁਨੇਹਿਆਂ ਨੂੰ ਭੇਜ ਸਕਦੀ ਹੈ ਜੋ ਕੈਲੰਡਰ ਮਾਲਕਾਂ ਤੋਂ ਆਉਂਦੇ ਜਾਪ ਸਕਦੇ ਹਨ, ਜਾਂ ਉਹਨਾਂ ਦੇ ਮਾਲਕਾਂ ਨੂੰ ਸੂਚਿਤ ਕੀਤੇ ਬਿਨਾਂ ਵਰਤਾਰਿਆਂ ਨੂੰ ਬਦਲ ਸਕਦੀ ਹੈ।"</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"ਇਹ ਐਪ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਕੈਲੰਡਰ ਵਰਤਾਰਿਆਂ ਨੂੰ ਸ਼ਾਮਲ ਕਰ ਸਕਦੀ ਹੈ, ਹਟਾ ਸਕਦੀ ਹੈ, ਜਾਂ ਬਦਲ ਸਕਦੀ ਹੈ। ਇਹ ਐਪ ਉਹਨਾਂ ਸੁਨੇਹਿਆਂ ਨੂੰ ਭੇਜ ਸਕਦੀ ਹੈ ਜੋ ਕੈਲੰਡਰ ਮਾਲਕਾਂ ਤੋਂ ਆਉਂਦੇ ਜਾਪ ਸਕਦੇ ਹਨ, ਜਾਂ ਉਹਨਾਂ ਦੇ ਮਾਲਕਾਂ ਨੂੰ ਸੂਚਿਤ ਕੀਤੇ ਬਿਨਾਂ ਵਰਤਾਰਿਆਂ ਨੂੰ ਬਦਲ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"ਵਾਧੂ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਪ੍ਰਦਾਤਾ ਕਮਾਂਡਾਂ ਤੱਕ ਪਹੁੰਚ"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ਐਪ ਨੂੰ ਵਾਧੂ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਪ੍ਰਦਾਤਾ ਕਮਾਂਡਾਂ ਤੱਕ ਪਹੁੰਚ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਐਪ ਨੂੰ GPS ਜਾਂ ਹੋਰ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਸਰੋਤਾਂ ਦੇ ਓਪਰੇਸ਼ਨ ਵਿੱਚ ਵਿਘਨ ਪਾਉਣ ਦੀ ਆਗਿਆ ਦੇ ਸਕਦਾ ਹੈ।"</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"ਸਟੀਕ ਟਿਕਾਣੇ \'ਤੇ ਪਹੁੰਚ ਕਰੋ (GPS ਅਤੇ ਨੈੱਟਵਰਕ-ਆਧਾਰਿਤ)"</string>
-    <!-- no translation found for permdesc_accessFineLocation (5821994817969957884) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"ਇਹ ਐਪ GPS ਜਾਂ ਨੈੱਟਵਰਕ ਸਰੋਤਾਂ ਜਿਵੇਂ ਕਿ ਸੈੱਲ ਟਾਵਰਾਂ ਅਤੇ Wi-Fi ਨੈੱਟਵਰਕਾਂ \'ਤੇ ਆਧਾਰਿਤ ਤੁਹਾਡਾ ਟਿਕਾਣਾ ਪਤਾ ਕਰ ਸਕਦੀ ਹੈ। ਐਪ ਦੁਆਰਾ ਟਿਕਾਣਾ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕੀਤੇ ਜਾਣ ਦੇ ਯੋਗ ਹੋਣ ਲਈ ਇਹ ਸੇਵਾਵਾਂ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਉਪਲਬਧ ਹੋਣੀਆਂ ਅਤੇ ਚਾਲੂ ਕੀਤੀਆਂ ਹੋਣੀਆਂ ਲਾਜ਼ਮੀ ਹਨ। ਇਸ ਨਾਲ ਬੈਟਰੀ ਦੀ ਖਪਤ ਵਧ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"ਅੰਦਾਜ਼ਨ ਟਿਕਾਣੇ \'ਤੇ ਪਹੁੰਚ ਕਰੋ (ਨੈੱਟਵਰਕ-ਆਧਾਰਿਤ)"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (3373266766487862426) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (1884022719818788511) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (7788009094906196995) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"ਇਹ ਐਪ ਨੈੱਟਵਰਕ ਸਰੋਤਾਂ ਜਿਵੇਂ ਕਿ ਸੈੱਲ ਟਾਵਰਾਂ ਅਤੇ Wi-Fi ਨੈੱਟਵਰਕਾਂ \'ਤੇ ਆਧਾਰਿਤ ਤੁਹਾਡਾ ਟਿਕਾਣਾ ਪਤਾ ਕਰ ਸਕਦੀ ਹੈ। ਐਪ ਦੁਆਰਾ ਟਿਕਾਣਾ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕੀਤੇ ਜਾਣ ਦੇ ਯੋਗ ਹੋਣ ਲਈ ਇਹ ਸੇਵਾਵਾਂ ਤੁਹਾਡੇ ਟੈਬਲੈੱਟ \'ਤੇ ਉਪਲਬਧ ਹੋਣੀਆਂ ਅਤੇ ਚਾਲੂ ਕੀਤੀਆਂ ਹੋਣੀਆਂ ਲਾਜ਼ਮੀ ਹਨ।"</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"ਇਹ ਐਪ ਨੈੱਟਵਰਕ ਸਰੋਤਾਂ ਜਿਵੇਂ ਕਿ ਸੈੱਲ ਟਾਵਰਾਂ ਅਤੇ Wi-Fi ਨੈੱਟਵਰਕਾਂ \'ਤੇ ਆਧਾਰਿਤ ਤੁਹਾਡਾ ਟਿਕਾਣਾ ਪਤਾ ਕਰ ਸਕਦੀ ਹੈ। ਐਪ ਦੁਆਰਾ ਟਿਕਾਣਾ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕੀਤੇ ਜਾਣ ਦੇ ਯੋਗ ਹੋਣ ਲਈ ਇਹ ਸੇਵਾਵਾਂ ਤੁਹਾਡੇ ਟੀਵੀ \'ਤੇ ਉਪਲਬਧ ਹੋਣੀਆਂ ਅਤੇ ਚਾਲੂ ਕੀਤੀਆਂ ਹੋਣੀਆਂ ਲਾਜ਼ਮੀ ਹਨ।"</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"ਇਹ ਐਪ ਨੈੱਟਵਰਕ ਸਰੋਤਾਂ ਜਿਵੇਂ ਕਿ ਸੈੱਲ ਟਾਵਰਾਂ ਅਤੇ Wi-Fi ਨੈੱਟਵਰਕਾਂ \'ਤੇ ਆਧਾਰਿਤ ਤੁਹਾਡਾ ਟਿਕਾਣਾ ਪਤਾ ਕਰ ਸਕਦੀ ਹੈ। ਐਪ ਦੁਆਰਾ ਟਿਕਾਣਾ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕੀਤੇ ਜਾਣ ਦੇ ਯੋਗ ਹੋਣ ਲਈ ਇਹ ਸੇਵਾਵਾਂ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਉਪਲਬਧ ਹੋਣੀਆਂ ਅਤੇ ਚਾਲੂ ਕੀਤੀਆਂ ਹੋਣੀਆਂ ਲਾਜ਼ਮੀ ਹਨ।"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ਆਪਣੀਆਂ ਔਡੀਓ ਸੈਟਿੰਗਾਂ ਬਦਲੋ"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ਔਪ ਨੂੰ ਗਲੋਬਲ ਔਡੀਓ ਸੈਟਿੰਗਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ ਜਿਵੇਂ ਵੌਲਿਊਮ ਅਤੇ ਆਊਟਪੁਟ ਲਈ ਕਿਹੜਾ ਸਪੀਕਰ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ।"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ਔਡੀਓ ਰਿਕਾਰਡ ਕਰਨ"</string>
-    <!-- no translation found for permdesc_recordAudio (4245930455135321433) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="4245930455135321433">"ਇਹ ਐਪ ਕਿਸੇ ਵੀ ਸਮੇਂ ਮਾਈਕ੍ਰੋਫ਼ੋਨ ਦੀ ਵਰਤੋਂ ਕਰਕੇ ਔਡੀਓ ਫ਼ਾਈਲ ਰਿਕਾਰਡ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"SIM ਨੂੰ ਕਮਾਂਡਾਂ ਭੇਜੋ"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"ਐਪ ਨੂੰ SIM ਨੂੰ ਕਮਾਂਡਾਂ ਭੇਜਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਬਹੁਤ ਘਾਤਕ ਹੈ।"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ਤਸਵੀਰਾਂ ਅਤੇ ਵੀਡੀਓ ਬਣਾਓ"</string>
-    <!-- no translation found for permdesc_camera (5392231870049240670) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5392231870049240670">"ਇਹ ਐਪ ਕਿਸੇ ਵੀ ਸਮੇਂ ਕੈਮਰੇ ਨੂੰ ਵਰਤ ਕੇ ਤਸਵੀਰਾਂ ਖਿੱਚ ਸਕਦੀ ਹੈ ਅਤੇ ਵੀਡੀਓ ਫ਼ਾਈਲਾਂ ਰਿਕਾਰਡ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"ਵਾਈਬ੍ਰੇਸ਼ਨ ਤੇ ਨਿਯੰਤਰਣ ਪਾਓ"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"ਐਪ ਨੂੰ ਵਾਈਬ੍ਰੇਟਰ ਤੇ ਨਿਯੰਤਰਣ ਪਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ਫੋਨ ਨੰਬਰਾਂ ਤੇ ਸਿੱਧੇ ਕਾਲ ਕਰੋ"</string>

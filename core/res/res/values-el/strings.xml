@@ -182,10 +182,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Το προφίλ εργασίας διαγράφηκε επειδή λείπει η εφαρμογή διαχείρισης."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Η εφαρμογή διαχείρισης προφίλ εργασίας είτε λείπει είτε είναι κατεστραμμένη. Ως αποτέλεσμα, το προφίλ εργασίας και σχετικά δεδομένα διαγράφηκαν. Επικοινωνήστε με το διαχειριστή για βοήθεια."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Το προφίλ σας εργασίας δεν είναι πια διαθέσιμο σε αυτήν τη συσκευή."</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"Η επισκεψιμότητα δικτύου παρακολουθείται"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"Πατήστε για να δείτε περισσότερες λεπτομέρειες"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Η συσκευή σας θα διαγραφεί"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Λείπουν στοιχεία από την εφαρμογή διαχείρισης ή είναι κατεστραμμένη, και δεν μπορεί να χρησιμοποιηθεί. Η συσκευή σας θα διαγραφεί. Επικοινωνήστε με το διαχειριστή για βοήθεια."</string>
     <string name="me" msgid="6545696007631404292">"Για εμένα"</string>

@@ -46,8 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Connection problem or invalid MMI code."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Operation is restricted to fixed dialling numbers only."</string>
-    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
-    <skip />
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Cannot change call forwarding settings from your phone while you are roaming."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Service was enabled."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Service was enabled for:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Service has been disabled."</string>
@@ -98,10 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Voice/Data services are blocked."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Voice/SMS services are blocked."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"All voice/data/SMS services are blocked."</string>
-    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
-    <skip />
-    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Can’t find network"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"To improve signal, try changing the type selected at Settings &gt; Mobile networks &gt; Preferred network type."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Peer requested TTY Mode FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Peer requested TTY Mode HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Peer requested TTY Mode VCO"</string>
@@ -185,10 +182,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Work profile deleted due to missing admin app."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"The work profile admin app is either missing or corrupted. As a result, your work profile and related data have been deleted. Contact your administrator for assistance."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Your work profile is no longer available on this device."</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"Network traffic is being monitored"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"Tap for more details"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Your device will be erased"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"The admin app is missing components or corrupted, and can\'t be used. Your device will now be erased. Contact your administrator for assistance."</string>
     <string name="me" msgid="6545696007631404292">"Me"</string>
@@ -306,12 +301,9 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"send and view SMS messages"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Allows the app to send SMS messages. This may result in unexpected charges. Malicious apps may cost you money by sending messages without your confirmation."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"read your text messages (SMS or MMS)"</string>
-    <!-- no translation found for permdesc_readSms (4741697454888074891) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (5796670395641116592) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (6826832415656437652) -->
-    <skip />
+    <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"This app can read all SMS (text) messages stored on your tablet."</string>
+    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"This app can read all SMS (text) messages stored on your TV."</string>
+    <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"This app can read all SMS (text) messages stored on your phone."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"receive text messages (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Allows the app to receive and process WAP messages. This permission includes the ability to monitor or delete messages sent to you without showing them to you."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"retrieve running apps"</string>
@@ -324,10 +316,8 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Allows the app to enable the car mode."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"close other apps"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Allows the app to end background processes of other apps. This may cause other apps to stop running."</string>
-    <!-- no translation found for permlab_systemAlertWindow (7238805243128138690) -->
-    <skip />
-    <!-- no translation found for permdesc_systemAlertWindow (2393776099672266188) -->
-    <skip />
+    <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"This app can appear on top of other apps"</string>
+    <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"This app can appear on top of other apps or other parts of the screen. This may interfere with normal app usage and change the way that other apps appear."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"make app always run"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Allows the app to make parts of itself persistent in memory. This can limit the memory available to other apps, slowing down the tablet."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Allows the app to make parts of itself persistent in memory. This can limit memory available to other apps slowing down the TV."</string>
@@ -353,51 +343,37 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Allows the app to modify the data about your contacts stored on your TV, including the frequency with which you\'ve called, emailed or communicated in other ways with specific contacts. This permission allows apps to delete contact data."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Allows the app to modify the data about your contacts stored on your phone, including the frequency with which you\'ve called, emailed or communicated in other ways with specific contacts. This permission allows apps to delete contact data."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"read call log"</string>
-    <!-- no translation found for permdesc_readCallLog (3204122446463552146) -->
-    <skip />
+    <string name="permdesc_readCallLog" msgid="3204122446463552146">"This app can read your call history."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"write call log"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Allows the app to modify your tablet\'s call log, including data about incoming and outgoing calls. Malicious apps may use this to erase or modify your call log."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Allows the app to modify your TV\'s call log, including data about incoming and outgoing calls. Malicious apps may use this to erase or modify your call log."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Allows the app to modify your phone\'s call log, including data about incoming and outgoing calls. Malicious apps may use this to erase or modify your call log."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"access body sensors (like heart rate monitors)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Allows the app to access data from sensors that monitor your physical condition, such as your heart rate."</string>
-    <!-- no translation found for permlab_readCalendar (6716116972752441641) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (4993979255403945892) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (8837931557573064315) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (4373978642145196715) -->
-    <skip />
+    <string name="permlab_readCalendar" msgid="6716116972752441641">"Read calendar events and details"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"This app can read all calendar events stored on your tablet and share or save your calendar data."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"This app can read all calendar events stored on your TV and share or save your calendar data."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"This app can read all calendar events stored on your phone and share or save your calendar data."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"add or modify calendar events and send emails to guests without owners\' knowledge"</string>
-    <!-- no translation found for permdesc_writeCalendar (1675270619903625982) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (9017809326268135866) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (7592791790516943173) -->
-    <skip />
+    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"This app can add, remove or change calendar events on your tablet. This app can send messages that may appear to come from calendar owners or change events without notifying their owners."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"This app can add, remove or change calendar events on your TV. This app can send messages that may appear to come from calendar owners or change events without notifying their owners."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"This app can add, remove or change calendar events on your phone. This app can send messages that may appear to come from calendar owners or change events without notifying their owners."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"access extra location provider commands"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Allows the app to access extra location provider commands. This may allow the app to interfere with the operation of the GPS or other location sources."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"access precise location (GPS and network-based)"</string>
-    <!-- no translation found for permdesc_accessFineLocation (5821994817969957884) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"This app can get your location based on GPS or network location sources such as phone masts and Wi-Fi networks. These location services must be turned on and available on your phone for the app to be able to use them. This may increase battery consumption."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"access approximate location (network-based)"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (3373266766487862426) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (1884022719818788511) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (7788009094906196995) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"This app can pick up your location based on network sources such as phone masts and Wi-Fi networks. These location services must be turned on and available on your tablet for the app to be able to use them."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"This app can pick up your location based on network sources such as mobile towers and Wi-Fi networks. These location services must be turned on and available on your TV for the app to be able to use them."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"This app can get your location based on network sources such as phone masts and Wi-Fi networks. These location services must be turned on and available on your phone for the app to be able to use them."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"change your audio settings"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Allows the app to modify global audio settings such as volume and which speaker is used for output."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"record audio"</string>
-    <!-- no translation found for permdesc_recordAudio (4245930455135321433) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="4245930455135321433">"This app can record audio using the microphone at any time."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"send commands to the SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Allows the app to send commands to the SIM. This is very dangerous."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"take pictures and videos"</string>
-    <!-- no translation found for permdesc_camera (5392231870049240670) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5392231870049240670">"This app can take pictures and record videos using the camera at any time."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"control vibration"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Allows the app to control the vibrator."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"directly call phone numbers"</string>

@@ -46,8 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Пробл. підключення чи недійсний код MMI."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Операція лише для номерів фіксованого набору."</string>
-    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
-    <skip />
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"У роумінгу на телефоні не можна змінити налаштування переадресації викликів."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Послугу ввімкнено."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Службу ввімкнено для:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Службу вимкнено."</string>
@@ -100,10 +99,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Голосові служби чи служби даних заблоковано."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Голос.служ. чи служ. даних заблок."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Усі голосові служби, служби даних і SMS заблоковано."</string>
-    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
-    <skip />
-    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Не вдається під’єднатися до мережі"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Щоб покращити якість сигналу, змініть тип у меню \"Налаштування &gt; Мобільні мережі &gt; Тип мережі\"."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Пристрій змінив режим TTY на FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Пристрій змінив режим TTY на HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Пристрій змінив режим TTY на VCO"</string>
@@ -189,10 +186,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Робочий профіль видалено через відсутність додатка адміністратора."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Додаток адміністратора в робочому профілі відсутній або пошкоджений. У результаті ваш робочий профіль і пов’язані з ним дані видалено. Зверніться до свого адміністратора по допомогу."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Робочий профіль більше не доступний на цьому пристрої."</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"Відстежується мережевий трафік"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"Торкніться, щоб дізнатися більше"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"З вашого пристрою буде стерто всі дані"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Неможливо скористатися додатком адміністратора, оскільки в ньому немає певних компонентів або його пошкоджено. З вашого пристрою буде стерто всі дані. Зверніться до свого адміністратора по допомогу."</string>
     <string name="me" msgid="6545696007631404292">"Я"</string>
@@ -312,12 +307,9 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"надсилати та переглядати SMS-повідомлення"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Дозволяє програмі надсилати SMS-повідомлення. Це може спричинити неочікуване стягнення плати. Шкідливі програми можуть надсилати повідомлення без вашого підтвердження, за що з вас стягуватимуться кошти."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"читати текстові повідомлення (SMS або MMS)"</string>
-    <!-- no translation found for permdesc_readSms (4741697454888074891) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (5796670395641116592) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (6826832415656437652) -->
-    <skip />
+    <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"Цей додаток може переглядати всі SMS-повідомлення, збережені на планшеті."</string>
+    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"Цей додаток може переглядати всі SMS-повідомлення, збережені на телевізорі."</string>
+    <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"Цей додаток може переглядати всі SMS-повідомлення, збережені на телефоні."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"отримувати текстові повідомлення (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Дозволяє програмі отримувати й обробляти WAP-повідомлення. Це означає, що програма може відстежувати чи видаляти повідомлення, надіслані на ваш пристрій, навіть не показуючи їх вам."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"отримувати запущені програми"</string>
@@ -330,10 +322,8 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Дозволяє програмі вмикати режим автомобіля."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"закривати інші програми"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Дозволяє програмі припиняти фонові процеси інших програм. Це може зупиняти запущені програми."</string>
-    <!-- no translation found for permlab_systemAlertWindow (7238805243128138690) -->
-    <skip />
-    <!-- no translation found for permdesc_systemAlertWindow (2393776099672266188) -->
-    <skip />
+    <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Цей додаток може відображатися поверх інших додатків"</string>
+    <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Цей додаток може відображатися поверх інших додатків або частин екрана. Це може заважати нормальній взаємодії з додатком або змінити відображення інших додатків."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"заставляти програму постійно функціонувати"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Дозволяє програмі робити свої частини сталими в пам’яті. Це може зменшувати обсяг пам’яті, доступної для інших програм, і сповільнювати роботу планшетного ПК."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Додаток може робити свої частини сталими в пам’яті. Це може зменшувати обсяг пам’яті, доступної для інших додатків, і сповільнювати роботу телевізора."</string>
@@ -359,51 +349,37 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Додаток може змінювати дані про контакти, які зберігаються в телевізорі, зокрема частоту здійснення дзвінків, надсилання електронних листів або інші способи спілкування з окремими особами. Такий дозвіл дає додаткам змогу видаляти контактні дані."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Дозволяє програмі змінювати дані про контакти, які зберігаються у вашому телефоні, зокрема частоту здійснення дзвінків, надсилання електронних листів або інших способів спілкування з окремими особами. Такий дозвіл дає програмам змогу видаляти контактні дані."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"читати журнал викликів"</string>
-    <!-- no translation found for permdesc_readCallLog (3204122446463552146) -->
-    <skip />
+    <string name="permdesc_readCallLog" msgid="3204122446463552146">"Цей додаток може переглядати історію викликів."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"записувати в журнал викликів"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Дозволяє програмі змінювати журнал викликів вашого планшетного ПК, включно з даними про вхідні та вихідні дзвінки. Шкідливі програми можуть використовувати це для стирання або зміни вашого журналу викликів."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Додаток може змінювати журнал викликів телевізора, зокрема дані про вхідні та вихідні дзвінки. Шкідливі додатки можуть використовувати це, щоб стирати чи змінювати ваш журнал викликів."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Дозволяє програмі змінювати журнал викликів вашого телефону, включно з даними про вхідні та вихідні дзвінки. Шкідливі програми можуть використовувати це для стирання або зміни вашого журналу викликів."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"отримувати дані з датчиків на тілі (наприклад, з пульсометра)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Додаток має доступ до даних із датчиків, які відстежують фізичний стан, зокрема пульс."</string>
-    <!-- no translation found for permlab_readCalendar (6716116972752441641) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (4993979255403945892) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (8837931557573064315) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (4373978642145196715) -->
-    <skip />
+    <string name="permlab_readCalendar" msgid="6716116972752441641">"Переглядати події календаря й додаткову інформацію"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Цей додаток може переглядати всі події календаря, збережені на вашому планшеті, а також надсилати та зберігати дані календаря."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Цей додаток може переглядати всі події календаря, збережені на вашому телевізорі, а також надсилати та зберігати дані календаря."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Цей додаток може переглядати всі події календаря, збережені на вашому телефоні, а також надсилати та зберігати дані календаря."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"додавати та змінювати події календаря, а також надсилати гостям електронні листи без відома власників"</string>
-    <!-- no translation found for permdesc_writeCalendar (1675270619903625982) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (9017809326268135866) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (7592791790516943173) -->
-    <skip />
+    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Цей додаток може додавати, вилучати та змінювати події календаря на вашому планшеті. Він також може надсилати повідомлення від імені власників календаря або редагувати події без відома власників."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Цей додаток може додавати, вилучати та змінювати події календаря на вашому телевізорі. Він також може надсилати повідомлення від імені власників календаря або редагувати події без відома власників."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Цей додаток може додавати, вилучати та змінювати події календаря на вашому телефоні. Він також може надсилати повідомлення від імені власників календаря або редагувати події без відома власників."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"отр. дост. до додат. команд пров. місцезн."</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Додаток отримуватиме доступ до додаткових команд постачальника геоданих. Можливе втручання додатка в роботу GPS чи інших джерел геоданих."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"отримувати дані про точне місцезнаходження (на основі GPS і мережі)"</string>
-    <!-- no translation found for permdesc_accessFineLocation (5821994817969957884) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"Цей додаток може отримувати дані про ваше місцезнаходження на основі даних GPS або джерел мережі, як-от антен мобільного зв’язку та мереж Wi-Fi. Щоб додаток міг користуватися цими службами локації, вони мають бути доступними й увімкненими на вашому телефоні. Це може пришвидшити розряджання акумулятора."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"отримувати дані про приблизне місцезнаходження (на основі мережі)"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (3373266766487862426) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (1884022719818788511) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (7788009094906196995) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Цей додаток може отримувати дані про ваше місцезнаходження на основі джерел мережі, як-от антен мобільного зв’язку та мереж Wi-Fi. Щоб додаток міг користуватися цими службами локації, вони мають бути доступними й увімкненими на вашому планшеті."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Цей додаток може отримувати дані про ваше місцезнаходження на основі джерел мережі, як-от антен мобільного зв’язку та мереж Wi-Fi. Щоб додаток міг користуватися цими службами локації, вони мають бути доступними й увімкненими на вашому телевізорі."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Цей додаток може отримувати дані про ваше місцезнаходження на основі джерел мережі, як-от антен мобільного зв’язку та мереж Wi-Fi. Щоб додаток міг користуватися цими службами локації, вони мають бути доступними й увімкненими на вашому телефоні."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"змінювати налаштув-ня звуку"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Дозволяє програмі змінювати загальні налаштування звуку, як-от гучність і динамік, який використовується для виводу сигналу."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"запис-ти аудіо"</string>
-    <!-- no translation found for permdesc_recordAudio (4245930455135321433) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="4245930455135321433">"Цей додаток може будь-коли записувати звук за допомогою мікрофона."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"надсилати команди на SIM-карту"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Дозволяє програмі надсилати команди на SIM-карту. Це дуже небезпечно."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"фотограф. та знімати відео"</string>
-    <!-- no translation found for permdesc_camera (5392231870049240670) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5392231870049240670">"Цей додаток може будь-коли робити фотографії та записувати відео за допомогою камери."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"контролювати вібросигнал"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Дозволяє програмі контролювати вібросигнал."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"прямо набирати номери тел."</string>

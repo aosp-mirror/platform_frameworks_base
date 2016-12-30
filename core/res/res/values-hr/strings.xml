@@ -46,8 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problem s vezom ili nevažeći MMI kôd."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Operacija je ograničena samo na brojeve s fiksnim biranjem."</string>
-    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
-    <skip />
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Nije moguće promijeniti postavke preusmjeravanja poziva na telefonu dok ste u roamingu."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Usluga nije omogućena."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Usluga je omogućena za korisnika:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Usluga je onemogućena."</string>
@@ -99,10 +98,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Glasovne/podatkovne usluge blokirane su."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Glasovne/SMS usluge su blokirane."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Sve su glasovne/podatkovne/SMS usluge blokirane."</string>
-    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
-    <skip />
-    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Pristup mreži nije moguć"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Za bolji prijem pokušajte odabrati drugu vrstu mreže u odjeljku Postavke &gt; Mobilne mreže &gt; Željena vrsta mreže."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Način TTY FULL koji zahtijeva paralelni uređaj"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Način TTY HCO koji zahtijeva paralelni uređaj"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Način TTY VCO koji zahtijeva paralelni uređaj"</string>
@@ -187,10 +184,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Radni je profil izbrisan jer nedostaje administratorska aplikacija."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Administratorska aplikacija radnog profila nedostaje ili je oštećena. Zbog toga su radni profil i povezani podaci izbrisani. Za pomoć se obratite svom administratoru."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Vaš poslovni profil više nije dostupan na ovom uređaju."</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"Mrežni se promet prati"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"Dodirnite za više pojedinosti"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Uređaj će se izbrisati"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Nije moguće upotrijebiti administratorsku aplikaciju jer joj nedostaju komponente ili je oštećena. Vaš će se uređaj sada izbrisati. Za pomoć se obratite svom administratoru."</string>
     <string name="me" msgid="6545696007631404292">"Ja"</string>
@@ -309,12 +304,9 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"slati i pregledavati SMS poruke"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Aplikaciji omogućuje slanje SMS poruka. To može dovesti do neočekivanih troškova. Zlonamjerne aplikacije mogu vam uzrokovati dodatne troškove slanjem poruka bez vašeg odobrenja."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"čitanje tekstnih poruka (SMS ili MMS)"</string>
-    <!-- no translation found for permdesc_readSms (4741697454888074891) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (5796670395641116592) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (6826832415656437652) -->
-    <skip />
+    <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"Aplikacija može čitati sve SMS-ove (tekstne poruke) pohranjene na tabletu."</string>
+    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"Aplikacija može čitati sve SMS-ove (tekstne poruke) pohranjene na televizoru."</string>
+    <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"Aplikacija može čitati sve SMS-ove (tekstne poruke) pohranjene na telefonu."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"primanje tekstnih poruka (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Aplikaciji omogućuje primanje i obradu WAP poruka. Ta dozvola uključuje mogućnost nadziranja ili brisanja vama poslanih poruka, a da vam ih ne prikaže."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"dohvaćanje pokrenutih aplikacija"</string>
@@ -327,10 +319,8 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Aplikaciji omogućuje uključivanje načina rada u vožnji."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"zatvaranje ostalih aplikacija"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Aplikaciji omogućuje završavanje pozadinskih procesa drugih aplikacija. To može dovesti do prekida rada drugih aplikacija."</string>
-    <!-- no translation found for permlab_systemAlertWindow (7238805243128138690) -->
-    <skip />
-    <!-- no translation found for permdesc_systemAlertWindow (2393776099672266188) -->
-    <skip />
+    <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Aplikacija se može prikazivati povrh drugih aplikacija"</string>
+    <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Aplikacija se može prikazivati povrh drugih aplikacija ili drugih dijelova zaslona. To može omesti uobičajenu upotrebu aplikacija i promijeniti način prikaza drugih aplikacija."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"trajni rad aplikacije"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Aplikaciji omogućuje trajnu prisutnost nekih njenih dijelova u memoriji. To može ograničiti dostupnost memorije drugim aplikacijama i usporiti tabletno računalo."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Aplikaciji omogućuje trajnu ugradnju nekih svojih dijelova u memoriju. To može ograničiti memoriju raspoloživu drugim aplikacijama i usporiti televizor."</string>
@@ -356,51 +346,37 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Aplikaciji omogućuje izmjenu podataka o vašim kontaktima pohranjenim na televizoru, uključujući učestalost poziva, e-poruka ili drugih načina komunikacije s određenim kontaktima. To dopuštenje aplikacijama omogućuje brisanje kontaktnih podataka."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Aplikaciji omogućuje izmjenu podataka o vašim kontaktima pohranjenim na telefonu, uključujući učestalost poziva, e-poruka ili drugih načina komunikacije s određenim kontaktima. Ta dozvola aplikacijama omogućuje brisanje kontaktnih podataka."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"čitanje dnevnika poziva"</string>
-    <!-- no translation found for permdesc_readCallLog (3204122446463552146) -->
-    <skip />
+    <string name="permdesc_readCallLog" msgid="3204122446463552146">"Aplikacija može čitati vašu povijest poziva."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"pisanje u dnevnik poziva"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Aplikaciji omogućuje izmjenu dnevnika poziva vašeg tabletnog računala zajedno s podacima o dolaznim i odlaznim pozivima. Zlonamjerne aplikacije to mogu upotrebljavati za brisanje ili izmjenu vašeg dnevnika poziva."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Aplikaciji omogućuje izmjenu zapisnika poziva vašeg televizora zajedno s podacima o dolaznim i odlaznim pozivima. Zlonamjerne aplikacije to mogu upotrebljavati za brisanje ili izmjenu vašeg zapisnika poziva."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Aplikaciji omogućuje izmjenu dnevnika poziva vašeg telefona zajedno s podacima o dolaznim i odlaznim pozivima. Zlonamjerne aplikacije to mogu upotrebljavati za brisanje ili izmjenu vašeg dnevnika poziva."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"pristupati biometrijskim senzorima (kao što su monitori otkucaja srca)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Omogućuje aplikaciji pristup podacima sa senzora koji nadziru vaše fizičko stanje, na primjer, broj otkucaja srca."</string>
-    <!-- no translation found for permlab_readCalendar (6716116972752441641) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (4993979255403945892) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (8837931557573064315) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (4373978642145196715) -->
-    <skip />
+    <string name="permlab_readCalendar" msgid="6716116972752441641">"Čitanje događaja i pojedinosti kalendara"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Aplikacija može čitati sve kalendarske događaje pohranjene na tabletu i dijeliti ili spremati podatke iz vašeg kalendara."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Aplikacija može čitati sve kalendarske događaje pohranjene na televizoru i dijeliti ili spremati podatke iz vašeg kalendara."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Aplikacija može čitati sve kalendarske događaje pohranjene na telefonu i dijeliti ili spremati podatke iz vašeg kalendara."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"dodajte ili izmijenite kalendarske događaje i pošaljite e-poštu gostima bez znanja vlasnika"</string>
-    <!-- no translation found for permdesc_writeCalendar (1675270619903625982) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (9017809326268135866) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (7592791790516943173) -->
-    <skip />
+    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Aplikacija može dodavati, uklanjati ili mijenjati kalendarske događaje na tabletu. Može slati poruke koje izgledaju kao da ih je poslao vlasnik kalendara ili mijenjati događaje bez znanja vlasnika."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Aplikacija može dodavati, uklanjati ili mijenjati kalendarske događaje na televizoru. Može slati poruke koje izgledaju kao da ih je poslao vlasnik kalendara ili mijenjati događaje bez znanja vlasnika."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Aplikacija može dodavati, uklanjati ili mijenjati kalendarske događaje na telefonu. Može slati poruke koje izgledaju kao da ih je poslao vlasnik kalendara ili mijenjati događaje bez znanja vlasnika."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"pristup dodatnim naredbama davatelja lokacije"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Omogućuje aplikaciji pristup dodatnim naredbama davatelja usluga lokacije. To može omogućiti aplikaciji ometanje rada GPS-a ili drugih izvora lokacije."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"pristupati preciznoj lokaciji (na temelju GPS-a i mreža)"</string>
-    <!-- no translation found for permdesc_accessFineLocation (5821994817969957884) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"Aplikacija može dohvatiti vašu lokaciju putem GPS-a ili mrežnih izvora lokacije poput baznih stanica i Wi-Fi mreža. Te usluge lokacije moraju biti uključene i dostupne na telefonu da bi ih aplikacija mogla upotrebljavati. To može povećati potrošnju baterije."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"pristupati približnoj lokaciji (na temelju mreža)"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (3373266766487862426) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (1884022719818788511) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (7788009094906196995) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Aplikacija može dohvatiti vašu lokaciju putem mrežnih izvora poput baznih stanica i Wi-Fi mreža. Te usluge lokacije moraju biti uključene i dostupne na tabletu da bi ih aplikacija mogla upotrebljavati."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Aplikacija može dohvatiti vašu lokaciju putem mrežnih izvora poput baznih stanica i Wi-Fi mreža. Te usluge lokacije moraju biti uključene i dostupne na televizoru da bi ih aplikacija mogla upotrebljavati."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Aplikacija može dohvatiti vašu lokaciju putem mrežnih izvora poput baznih stanica i Wi-Fi mreža. Te usluge lokacije moraju biti uključene i dostupne na telefonu da bi ih aplikacija mogla upotrebljavati."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"promjena postavki zvuka"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Aplikaciji omogućuje izmjenu globalnih postavki zvuka, primjerice glasnoće i zvučnika koji se upotrebljava za izlaz."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"snimanje zvuka"</string>
-    <!-- no translation found for permdesc_recordAudio (4245930455135321433) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="4245930455135321433">"Aplikacija u svakom trenutku može snimati zvuk mikrofonom."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"slati naredbe SIM-u"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Omogućuje aplikaciji slanje naredbi SIM-u. To je vrlo opasno."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"snimi fotografije i videozapise"</string>
-    <!-- no translation found for permdesc_camera (5392231870049240670) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5392231870049240670">"Aplikacija u svakom trenutku može snimati fotografije i videozapise fotoaparatom."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"upravljanje vibracijom"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Aplikaciji omogućuje nadzor nad vibratorom."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"izravno pozivanje telefonskog broja"</string>

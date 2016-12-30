@@ -46,8 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"ปัญหาการเชื่อมต่อหรือรหัส MMI ไม่ถูกต้อง"</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"การดำเนินการถูกจำกัดไว้ที่การจำกัดหมายเลขโทรออกเท่านั้น"</string>
-    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
-    <skip />
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"ไม่สามารถเปลี่ยนการตั้งค่าการโอนสายจากโทรศัพท์ในขณะที่โรมมิ่ง"</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"เปิดใช้งานบริการแล้ว"</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"เปิดการใช้งานบริการสำหรับ:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"ปิดใช้บริการไว้"</string>
@@ -98,10 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"บริการเสียง/ข้อมูลถูกบล็อก"</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"บริการเสียง/SMS ถูกปิดกั้น"</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"บริการเสียง/ข้อมูล/SMS ทั้งหมดถูกบล็อก"</string>
-    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
-    <skip />
-    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"เข้าถึงเครือข่ายไม่ได้"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"เพื่อให้การรับสัญญาณดีขึ้น ลองเปลี่ยนประเภทที่เลือกที่ \"การตั้งค่า\" &gt; \"เครือข่ายมือถือ\" &gt; \"ประเภทเครือข่ายที่ต้องการ\""</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"อีกฝั่งหนึ่งขอโหมด TTY เป็น \"เต็ม\""</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"อีกฝั่งหนึ่งขอโหมด TTY เป็น \"HCO\""</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"อีกฝั่งหนึ่งขอโหมด TTY เป็น \"VCO\""</string>
@@ -185,10 +182,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"ลบโปรไฟล์งานแล้วเนื่องจากไม่มีแอปผู้ดูแลระบบ"</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"แอปผู้ดูแลระบบโปรไฟล์งานไม่มีอยู่หรือเสียหาย ระบบจึงทำการลบโปรไฟล์งานและข้อมูลที่เกี่ยวข้องของคุณออก โปรดติดต่อผู้ดูแลระบบเพื่อรับความช่วยเหลือ"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"โปรไฟล์งานของคุณไม่สามารถใช้บนอุปกรณ์นี้ได้อีกต่อไป"</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"มีการติดตามดูการจราจรของข้อมูลในเครือข่าย"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"แตะเพื่อดูรายละเอียดเพิ่มเติม"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"ระบบจะลบข้อมูลในอุปกรณ์ของคุณ"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"แอปผู้ดูแลระบบมีองค์ประกอบไม่ครบหรือเสียหาย และใช้งานไม่ได้ ระบบจะลบข้อมูลอุปกรณ์ของคุณ โปรดติดต่อผู้ดูแลระบบเพื่อรับความช่วยเหลือ"</string>
     <string name="me" msgid="6545696007631404292">"ฉัน"</string>
@@ -306,12 +301,9 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"ส่งและดูข้อความ SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"อนุญาตให้แอปพลิเคชันส่งข้อความ SMS ซึ่งอาจทำให้มีการเรียกเก็บเงินที่ไม่คาดคิด แอปพลิเคชันที่เป็นอันตรายอาจทำให้คุณเสียค่าใช้จ่ายด้วยการส่งข้อความโดยไม่รอการยืนยันจากคุณ"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"อ่านข้อความของคุณ (SMS หรือ MMS)"</string>
-    <!-- no translation found for permdesc_readSms (4741697454888074891) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (5796670395641116592) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (6826832415656437652) -->
-    <skip />
+    <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"แอปนี้สามารถอ่านข้อความ SMS (ที่เป็นตัวหนังสือ) ที่จัดเก็บไว้ในแท็บเล็ต"</string>
+    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"แอปนี้สามารถอ่านข้อความ SMS (ที่เป็นตัวหนังสือ) ที่จัดเก็บไว้ในทีวี"</string>
+    <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"แอปนี้สามารถอ่านข้อความ SMS (ที่เป็นตัวหนังสือ) ที่จัดเก็บไว้ในโทรศัพท์"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"รับข้อความ (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"อนุญาตให้แอปพลิเคชันรับและประมวลผลข้อความ WAP การอนุญาตนี้รวมถึงความสามารถในการตรวจสอบหรือลบข้อความที่ส่งมาให้คุณโดยไม่ต้องแสดงให้คุณเห็น"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"เรียกแอปพลิเคชันที่ทำงานอยู่"</string>
@@ -324,10 +316,8 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"อนุญาตให้แอปพลิเคชันเปิดใช้งานโหมดรถยนต์"</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"ปิดแอปอื่นๆ"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"อนุญาตให้แอปพลิเคชันหยุดการทำงานในพื้นหลังของแอปพลิเคชันอื่นๆ ซึ่งอาจทำให้แอปพลิเคชันอื่นๆ หยุดการทำงาน"</string>
-    <!-- no translation found for permlab_systemAlertWindow (7238805243128138690) -->
-    <skip />
-    <!-- no translation found for permdesc_systemAlertWindow (2393776099672266188) -->
-    <skip />
+    <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"แอปนี้สามารถแสดงทับแอปอื่นๆ"</string>
+    <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"แอปนี้สามารถปรากฏเหนือแอปอื่นๆ หรือส่วนอื่นของหน้าจอ ซึ่งอาจรบกวนการใช้งานตามปกติของแอปและทำให้ลักษณะการแสดงแอปอื่นๆ เปลี่ยนไป"</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"ทำให้แอปพลิเคชันทำงานเสมอ"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"อนุญาตให้แอปพลิเคชันทำให้ส่วนหนึ่งของตัวเองคงอยู่ถาวรในหน่วยความจำ ซึ่งจะจำกัดพื้นที่หน่วยความจำที่ใช้งานได้ของแอปพลิเคชันอื่นๆ และทำให้แท็บเล็ตทำงานช้าลง"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"อนุญาตให้แอปทำให้บางส่วนของแอปนั้นอยู่ในหน่วยความจำเสมอ ซึ่งอาจจำกัดพื้นที่หน่วยความจำสำหรับแอปอื่นและทำให้ทีวีช้าลง"</string>
@@ -353,51 +343,37 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"อนุญาตให้แอปแก้ไขข้อมูลเกี่ยวกับรายชื่อติดต่อที่เก็บไว้ในทีวี รวมถึงความถี่ในการโทร การส่งอีเมล หรือการสื่อสารแบบอื่นกับรายชื่อติดต่อคนใดคนหนึ่ง สิทธิ์นี้ทำให้แอปสามารถลบข้อมูลรายชื่อติดต่อได้"</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงข้อมูลผู้ติดต่อที่จัดเก็บไว้ในโทรศัพท์ ซึ่งรวมถึงความถี่ในการโทร ส่งอีเมล หรือการติดต่อด้วยวิธีอื่นๆ กับบุคคลใดบุคคลหนึ่ง การอนุญาตนี้ทำให้แอปพลิเคชันสามารถลบข้อมูลผู้ติดต่อได้"</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"อ่านประวัติการโทร"</string>
-    <!-- no translation found for permdesc_readCallLog (3204122446463552146) -->
-    <skip />
+    <string name="permdesc_readCallLog" msgid="3204122446463552146">"แอปนี้สามารถอ่านประวัติการโทรของคุณได้"</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"เขียนประวัติการโทร"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"อนุญาตให้แอปแก้ไขประวัติการโทรจากแท็บเล็ตของคุณ รวมถึงข้อมูลเกี่ยวกับสายเรียกเข้าและการโทรออก แอปที่เป็นอันตรายอาจใช้สิ่งนี้เพื่อลบหรือแก้ไขประวัติการโทรของคุณ"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"อนุญาตให้แอปแก้ไขประวัติการโทรของทีวี รวมถึงข้อมูลเกี่ยวกับสายเรียกเข้าและโทรออก แอปที่เป็นอันตรายอาจใช้สิทธิ์นี้เพื่อลบหรือแก้ไขประวัติการโทรได้"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"อนุญาตให้แอปแก้ไขประวัติการโทรจากโทรศัพท์ของคุณ รวมถึงข้อมูลเกี่ยวกับสายเรียกเข้าและการโทรออก แอปที่เป็นอันตรายอาจใช้สิ่งนี้เพื่อลบหรือแก้ไขประวัติการโทรของคุณ"</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"เข้าถึงเซ็นเซอร์ร่างกาย (เช่น ตัววัดอัตราการเต้นของหัวใจ)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"อนุญาตให้แอปเข้าถึงข้อมูลจากเซ็นเซอร์ที่ตรวจสอบสภาพทางกายภาพ เช่น อัตราการเต้นของหัวใจ"</string>
-    <!-- no translation found for permlab_readCalendar (6716116972752441641) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (4993979255403945892) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (8837931557573064315) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (4373978642145196715) -->
-    <skip />
+    <string name="permlab_readCalendar" msgid="6716116972752441641">"อ่านกิจกรรมในปฏิทินและรายละเอียด"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"แอปนี้สามารถอ่านกิจกรรมทั้งหมดในปฏิทินที่เก็บไว้ในแท็บเล็ต รวมถึงแชร์หรือบันทึกข้อมูลในปฏิทินของคุณ"</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"แอปนี้สามารถอ่านกิจกรรมทั้งหมดในปฏิทินที่เก็บไว้ในทีวี รวมถึงแชร์หรือบันทึกข้อมูลในปฏิทินของคุณ"</string>
+    <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"แอปนี้สามารถอ่านกิจกรรมทั้งหมดในปฏิทินที่เก็บไว้ในโทรศัพท์ รวมถึงแชร์หรือบันทึกข้อมูลในปฏิทินของคุณ"</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"เพิ่มหรือแก้ไขกิจกรรมบนปฏิทินและส่งอีเมลให้ผู้เข้าร่วมโดยที่เจ้าของไม่ทราบ"</string>
-    <!-- no translation found for permdesc_writeCalendar (1675270619903625982) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (9017809326268135866) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (7592791790516943173) -->
-    <skip />
+    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"แอปนี้สามารถเพิ่ม นำออก หรือเปลี่ยนกิจกรรมในปฏิทินบนแท็บเล็ตของคุณ แอปนี้สามารถส่งข้อความที่ดูเหมือนว่ามาจากเจ้าของปฏิทิน หรือเปลี่ยนแปลงกิจกรรมโดยไม่แจ้งให้เจ้าของทราบ"</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"แอปนี้สามารถเพิ่ม นำออก หรือเปลี่ยนกิจกรรมในปฏิทินบนทีวีของคุณ แอปนี้สามารถส่งข้อความที่ดูเหมือนว่ามาจากเจ้าของปฏิทิน หรือเปลี่ยนแปลงกิจกรรมโดยไม่แจ้งให้เจ้าของทราบ"</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"แอปนี้สามารถเพิ่ม นำออก หรือเปลี่ยนกิจกรรมในปฏิทินบนโทรศัพท์ของคุณ แอปนี้สามารถส่งข้อความที่ดูเหมือนว่ามาจากเจ้าของปฏิทิน หรือเปลี่ยนแปลงกิจกรรมโดยไม่แจ้งให้เจ้าของทราบ"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"เข้าถึงคำสั่งของโปรแกรมแจ้งตำแหน่งพิเศษ"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"อนุญาตให้แอปเข้าถึงคำสั่งของผู้ให้บริการตำแหน่งเพิ่มเติม ซึ่งอาจทำให้แอปสามารถแทรกแซงการทำงานของ GPS หรือต้นทางของตำแหน่งอื่นๆ ได้"</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"เข้าถึงตำแหน่งที่แม่นยำ (อิงจาก GPS และเครือข่าย)"</string>
-    <!-- no translation found for permdesc_accessFineLocation (5821994817969957884) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"แอปนี้สามารถรับตำแหน่งของคุณโดยอิงจากแหล่งข้อมูลเครือข่าย เช่น เสาสัญญาณมือถือและเครือข่าย Wi-Fi แอปจะใช้บริการตำแหน่งเหล่านี้ได้ต่อเมื่อคุณเปิดบริการและบริการพร้อมใช้งานในโทรศัพท์ของคุณ การเปิดบริการนี้อาจเพิ่มการใช้แบตเตอรี่"</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"เข้าถึงตำแหน่งโดยประมาณ (อิงจากเครือข่าย)"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (3373266766487862426) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (1884022719818788511) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (7788009094906196995) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"แอปนี้สามารถรับตำแหน่งของคุณโดยอิงจากแหล่งข้อมูลเครือข่าย เช่น เสาสัญญาณมือถือและเครือข่าย Wi-Fi แอปจะใช้บริการตำแหน่งเหล่านี้ได้ต่อเมื่อคุณเปิดบริการและบริการพร้อมใช้งานในแท็บเล็ตของคุณ"</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"แอปนี้สามารถรับตำแหน่งของคุณโดยอิงจากแหล่งข้อมูลเครือข่าย เช่น เสาสัญญาณมือถือและเครือข่าย Wi-Fi แอปจะใช้บริการตำแหน่งเหล่านี้ได้ต่อเมื่อคุณเปิดบริการและบริการพร้อมใช้งานในทีวีของคุณ"</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"แอปนี้สามารถรับตำแหน่งของคุณโดยอิงจากแหล่งข้อมูลเครือข่าย เช่น เสาสัญญาณมือถือและเครือข่าย Wi-Fi แอปจะใช้บริการตำแหน่งเหล่านี้ได้ต่อเมื่อคุณเปิดบริการและบริการพร้อมใช้งานในโทรศัพท์ของคุณ"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"เปลี่ยนการตั้งค่าเสียงของคุณ"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"อนุญาตให้แอปพลิเคชันปรับเปลี่ยนการตั้งค่าเสียงทั้งหมดได้ เช่น ระดับเสียงและลำโพงที่จะใช้งาน"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"บันทึกเสียง"</string>
-    <!-- no translation found for permdesc_recordAudio (4245930455135321433) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="4245930455135321433">"แอปนี้สามารถบันทึกเสียงด้วยไมโครโฟนได้ทุกเมื่อ"</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"ส่งคำสั่งไปยังซิม"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"อนุญาตให้แอปส่งคำสั่งไปยัง SIM ซึ่งอันตรายมาก"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ถ่ายภาพและวิดีโอ"</string>
-    <!-- no translation found for permdesc_camera (5392231870049240670) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5392231870049240670">"แอปนี้สามารถถ่ายภาพและวิดีโอด้วยกล้องได้ทุกเมื่อ"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"ควบคุมการสั่นเตือน"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"อนุญาตให้แอปพลิเคชันควบคุมการสั่นเตือน"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"โทรติดต่อหมายเลขโทรศัพท์โดยตรง"</string>

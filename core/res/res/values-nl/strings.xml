@@ -21,7 +21,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
-    <string name="kilobyteShort" msgid="7542884022844556968">"kB"</string>
+    <string name="kilobyteShort" msgid="7542884022844556968">" KB"</string>
     <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
@@ -55,11 +55,11 @@
     <string name="passwordIncorrect" msgid="7612208839450128715">"Onjuist wachtwoord."</string>
     <string name="mmiComplete" msgid="8232527495411698359">"MMI voltooid."</string>
     <string name="badPin" msgid="9015277645546710014">"De oude pincode die je hebt ingevoerd, is onjuist."</string>
-    <string name="badPuk" msgid="5487257647081132201">"De PUK-code die je hebt ingevoerd, is onjuist."</string>
+    <string name="badPuk" msgid="5487257647081132201">"De pukcode die je hebt ingevoerd, is onjuist."</string>
     <string name="mismatchPin" msgid="609379054496863419">"De pincodes die je hebt ingevoerd, komen niet overeen."</string>
     <string name="invalidPin" msgid="3850018445187475377">"Voer een pincode van 4 tot 8 cijfers in."</string>
-    <string name="invalidPuk" msgid="8761456210898036513">"Typ een PUK-code die 8 cijfers of langer is."</string>
-    <string name="needPuk" msgid="919668385956251611">"Je SIM-kaart is vergrendeld met de PUK-code. Typ de PUK-code om te ontgrendelen."</string>
+    <string name="invalidPuk" msgid="8761456210898036513">"Typ een pukcode die 8 cijfers of langer is."</string>
+    <string name="needPuk" msgid="919668385956251611">"Je SIM-kaart is vergrendeld met de pukcode. Typ de pukcode om te ontgrendelen."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Voer de PUK2-code in om de SIM-kaart te ontgrendelen."</string>
     <string name="enablePin" msgid="209412020907207950">"Mislukt. Schakel SIM/RUIM-vergrendeling in."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
@@ -182,10 +182,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Werkprofiel verwijderd wegens ontbrekende beheerapp."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"De beheerapp van het werkprofiel ontbreekt of is beschadigd. Als gevolg hiervan zijn je werkprofiel en alle gerelateerde gegevens verwijderd. Neem voor hulp contact op met je beheerder."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Je werkprofiel is niet meer beschikbaar op dit apparaat."</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"Netwerkverkeer wordt bijgehouden"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"Tik voor meer informatie"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Je apparaat wordt gewist"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Er ontbreken onderdelen van de beheerapp of de app is beschadigd, waardoor de app niet kan worden gebruikt. Je apparaat wordt nu gewist. Neem voor hulp contact op met je beheerder."</string>
     <string name="me" msgid="6545696007631404292">"Ik"</string>
@@ -664,13 +662,13 @@
     <string name="relationTypeSister" msgid="1735983554479076481">"Zus"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Huwelijkspartner"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Aangepast"</string>
-    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Startpagina"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Homepage"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Werk"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Overig"</string>
     <string name="quick_contacts_not_available" msgid="746098007828579688">"Er is geen app gevonden om dit contact te bekijken."</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Pincode typen"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Geef de PUK-code en de nieuwe pincode op"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK-code"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Geef de pukcode en de nieuwe pincode op"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"pukcode"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Nieuwe pincode"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="2644215452200037944"><font size="17">"Tik om het wachtwoord te typen"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Typ het wachtwoord om te ontgrendelen"</string>
@@ -707,7 +705,7 @@
     <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"Vooruitspoelen"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Alleen noodoproepen"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Netwerk vergrendeld"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM-kaart is vergrendeld met PUK-code."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM-kaart is vergrendeld met pukcode."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Raadpleeg de gebruikershandleiding of neem contact op met de klantenservice."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM-kaart is vergrendeld."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"SIM-kaart ontgrendelen..."</string>
@@ -1401,14 +1399,14 @@
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Geef de pincode van de simkaart op"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Pincode opgeven"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Wachtwoord invoeren"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"De simkaart is nu uitgeschakeld. Geef de PUK-code op om door te gaan. Neem contact op met de provider voor informatie."</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"De simkaart is nu uitgeschakeld. Geef de pukcode op om door te gaan. Neem contact op met de provider voor informatie."</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Gewenste pincode opgeven"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Gewenste pincode bevestigen"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Simkaart ontgrendelen..."</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Onjuiste pincode."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Voer een pincode van 4 tot 8 cijfers in."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"De PUK-code is acht cijfers lang."</string>
-    <string name="kg_invalid_puk" msgid="3638289409676051243">"Geef de juiste PUK-code opnieuw op. Bij herhaalde pogingen wordt de simkaart permanent uitgeschakeld."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"De pukcode is acht cijfers lang."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Geef de juiste pukcode opnieuw op. Bij herhaalde pogingen wordt de simkaart permanent uitgeschakeld."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Pincodes komen niet overeen"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Te veel patroonpogingen"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Als u wilt ontgrendelen, moet u inloggen op je Google-account."</string>

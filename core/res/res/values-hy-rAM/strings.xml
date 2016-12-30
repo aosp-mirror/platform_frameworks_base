@@ -46,8 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Միացման խնդիր կամ անվավեր MMI ծածակագիր:"</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Գործողությունը սահմանափակված է միայն ամրակայված հեռախոսահամարների համար:"</string>
-    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
-    <skip />
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Ռոումինգում չեք կարող փոխել զանգի վերահասցեավորման կարգավորումները ձեր հեռախոսից։"</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Ծառայությունը միացված է:"</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Ծառայությունը միացված է`"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Ծառայությունն անջատվել է:"</string>
@@ -98,10 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Ձայնային կամ տվյալների ծառայություններն արգելափակված են:"</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Ձայնային/SMS ծառայությունները արգելափակված են:"</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Բոլոր ձայնային/տվյալների/SMS ծառայությունները արգելափակված են:"</string>
-    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
-    <skip />
-    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Ցանցն անհասանելի է"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Ազդանշանի ընդունման որակը բարելավելու համար փոխեք ցանցի տեսակը՝ անցնելով Կարգավորումներ &gt; Բջջային ցանցեր &gt; Ցանկալի ցանցի տեսակը։"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Բաժանորդի սարքում ընտրված է հեռատիպի ԲՈԼՈՐԸ ռեժիմը"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Բաժանորդի սարքում ընտրված է հեռատիպի HCO ռեժիմը"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Բաժանորդի սարքում ընտրված է հեռատիպի VCO ռեժիմը"</string>
@@ -185,10 +182,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Աշխատանքային պրոֆիլը ջնջվել է ադմինիստրատորի հավելվածի բացակայության պատճառով:"</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Աշխատանքային պրոֆիլի ադմինիստրատորի հավելվածը բացակայում է կամ վնասված է: Արդյունքում ձեր աշխատանքային պրոֆիլը և առնչվող տվյալները ջնջվել են: Օգնության համար դիմեք ձեր ադմինիստրատորին:"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Ձեր աշխատանքային պրոֆիլն այս սարքում այլևս հասանելի չէ:"</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"Ցանցային թրաֆիկը վերահսկվում է"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"Հպեք՝ լրացուցիչ տեղեկություններ ստանալու համար"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Ձեր սարքը ջնջվելու է"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Ադմինիստրատորի հավելվածում բացակայում են բաղադրիչներ կամ այն վնասված է և չի կարող օգտագործվել: Ձեր սարքն այժմ ջնջվելու է: Օգնություն համար դիմեք ձեր ադմինիստրատորին:"</string>
     <string name="me" msgid="6545696007631404292">"Իմ"</string>
@@ -306,12 +301,9 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"SMS հաղորդագրությունների ուղարկում և ընթերցում"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Թույլ է տալիս հավելվածին ուղարկել SMS հաղորդագրություններ: Այն կարող է անսպասելի ծախսերի պատճառ դառնալ: Վնասարար հավելվածները կարող են ձեր հաշվից գումար ծախսել` ուղարկելով հաղորդագրություններ`  առանց ձեր հաստատման:"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"կարդալ ձեր տեքստային հաղորդագրությունները (SMS կամ MMS)"</string>
-    <!-- no translation found for permdesc_readSms (4741697454888074891) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (5796670395641116592) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (6826832415656437652) -->
-    <skip />
+    <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"Այս հավելվածը կարող է կարդալ ձեր պլանշետում պահված բոլոր SMS (տեքստային) հաղորդագրությունները:"</string>
+    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"Այս հավելվածը կարող է կարդալ ձեր հեռուստացույցում պահված բոլոր SMS (տեքստային) հաղորդագրությունները:"</string>
+    <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"Այս հավելվածը կարող է կարդալ ձեր հեռախոսում պահված բոլոր SMS (տեքստային) հաղորդագրությունները:"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"ստանալ տեքստային հաղորդագրություններ (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Թույլ է տալիս հավելվածին ստանալ և գործարկել WAP հաղորդագրությունները: Այս թույլտվությունը ներառում է ձեզ ուղարկված հաղորդագրությունները հետևելու կամ ջնջելու կարողությունը` առանց ձեր տեսնելու:"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"առբերել աշխատող հավելվածները"</string>
@@ -324,10 +316,8 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Թույլ է տալիս հավելվածին միացնել մեքենայի ռեժիմը:"</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"փակել այլ հավելվածները"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Թույլ է տալիս հավելվածին վերջ տալ այլ հավելվածների հետնաշերտի գործընթացները: Սա կարող է պատճառ դառնալ, որ այլ հավելվածները դադարեն աշխատել:"</string>
-    <!-- no translation found for permlab_systemAlertWindow (7238805243128138690) -->
-    <skip />
-    <!-- no translation found for permdesc_systemAlertWindow (2393776099672266188) -->
-    <skip />
+    <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Այս հավելվածը կարող է ցուցադրվել այլ հավելվածների վերևում"</string>
+    <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Այս հավելվածը կարող է ցուցադրվել այլ հավելվածների կամ էկրանի այլ հատվածների վերևում: Դա կարող է խոչընդոտել հավելվածի նորմալ օգտագործմանը և փոխել այլ հավելվածների տեսքը:"</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"միշտ աշխատեցնել հավելվածը"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Թույլ է տալիս հավելվածին մնայուն դարձնել իր մասերը հիշողության մեջ: Սա կարող է սահմանափակել այլ հավելվածներին հասանելի հիշողությունը` դանդաղեցնելով պլանշետի աշխատանքը:"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Թույլ է տալիս հավելվածին պահել իր տարրերը հիշողության մեջ: Սա կարող է սահմանափակել այլ հավելվածների համար հատկացված հիշողությունը և դանդաղեցնել հեռուստացույցի աշխատանքը:"</string>
@@ -353,51 +343,37 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Թույլ է տալիս հավելվածին փոփոխել հեռուստացույցի մեջ պահված կոնտակտների տվյալները, այդ թվում նաև՝ թե ինչ հաճախականությամբ եք զանգեր կատարել, օգտվել էլփոստից կամ այլ կերպ հաղորդակցվել որոշակի մարդկանց հետ: Այս թույլտվությունը հնարավորություն է տալիս հավելվածներին ջնջել կոնտակտային տվյալները:"</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Թույլ է տալիս հավելվածին փոփոխել ձեր պլանշետում պահված կոնտակտների տվյալները, այդ թվում` ձեր կատարած զանգերի, գրած նամակների կամ որոշակի անհատների հետ այլ եղանակով շփման հաճախականությունը: Այս թույլտվությունը հնարավորություն է տալիս հավելվածներին ջնջել կոնտակտային տվյալները:"</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"կարդալ զանգերի մատյանը"</string>
-    <!-- no translation found for permdesc_readCallLog (3204122446463552146) -->
-    <skip />
+    <string name="permdesc_readCallLog" msgid="3204122446463552146">"Այս հավելվածը կարող է կարդալ ձեր զանգերի պատմությունը:"</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"տեսնել զանգերի գրանցամատյանը"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Թույլ է տալիս հավելվածին փոփոխել ձեր պլանշետի զանգերի մատյանը, այդ թվում` մուտքային և ելքային զանգերի մասին տվյալները: Վնասարար հավելվածները կարող են սա օգտագործել` ձեր զանգերի մատյանը ջնջելու կամ փոփոխելու համար:"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Թույլ է տալիս հավելվածին փոփոխել հեռուստացույցի զանգերի մատյանը, այդ թվում` մուտքային և ելքային զանգերի մասին տվյալները: Վնասարար հավելվածները կարող են սա օգտագործել` ձեր զանգերի մատյանը ջնջելու կամ փոփոխելու համար:"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Թույլ է տալիս հավելվածին փոփոխել ձեր հեռախոսի զանգերի մատյանը, այդ թվում` մուտքային և ելքային զանգերի մասին տվյալները: Վնասարար հավելվածները կարող են սա օգտագործել` ձեր զանգերի մատյանը ջնջելու կամ փոփոխելու համար:"</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"օգտագործել մարմնի սենսորները (օրինակ` սրտի կծկումների հաճախականության չափիչ)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Հավելվածին թույլ է տալիս մուտք ունենալ սենսորների տվյալներին, որոնք վերահսկում են ձեր ֆիզիկական վիճակը, օրինակ՝ ձեր սրտի զարկերը:"</string>
-    <!-- no translation found for permlab_readCalendar (6716116972752441641) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (4993979255403945892) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (8837931557573064315) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (4373978642145196715) -->
-    <skip />
+    <string name="permlab_readCalendar" msgid="6716116972752441641">"Կարդալ օրացույցի միջոցառումները և տվյալները"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Այս հավելվածը կարող է կարդալ օրացույցի՝ ձեր պլանշետում պահված բոլոր միջոցառումները, ինչպես նաև հրապարակել կամ պահել ձեր օրացույցի տվյալները:"</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Այս հավելվածը կարող է կարդալ օրացույցի՝ ձեր հեռուստացույցում պահված բոլոր միջոցառումները, ինչպես նաև հրապարակել կամ պահել ձեր օրացույցի տվյալները:"</string>
+    <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Այս հավելվածը կարող է կարդալ օրացույցի՝ ձեր հեռախոսում պահված բոլոր միջոցառումները, ինչպես նաև հրապարակել կամ պահել ձեր օրացույցի տվյալները:"</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"ավելացնել կամ փոփոխել օրացուցային միջոցառումները և ուղարկել նամակ հյուրերին` առանց սեփականատերերի իմացության"</string>
-    <!-- no translation found for permdesc_writeCalendar (1675270619903625982) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (9017809326268135866) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (7592791790516943173) -->
-    <skip />
+    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Այս հավելվածը կարող է ավելացնել, հեռացնել կամ փոխել օրացույցի միջոցառումները ձեր պլանշետում: Այս հավելվածը կարող է ուղարկել հաղորդագրություններ օրացույցի սեփականատերերի անունից կամ փոխել միջոցառումները առանց դրանց սեփականատերերին ծանուցելու:"</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Այս հավելվածը կարող է ավելացնել, հեռացնել կամ փոխել օրացույցի միջոցառումները ձեր հեռուստացույցում: Այս հավելվածը կարող է ուղարկել հաղորդագրություններ օրացույցի սեփականատերերի անունից կամ փոխել միջոցառումները առանց դրանց սեփականատերերին ծանուցելու:"</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Այս հավելվածը կարող է ավելացնել, հեռացնել կամ փոխել օրացույցի միջոցառումները ձեր հեռախոսում: Այս հավելվածը կարող է ուղարկել հաղորդագրություններ օրացույցի սեփականատերերի անունից կամ փոխել միջոցառումները առանց դրանց սեփականատերերին ծանուցելու:"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"օգտագործել տեղադրություն տրամադրող հավելվյալ հրամաններ"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Ծրագրին թույլ է տալիս օգտագործել տեղադրության մասին տվյալների աղբյուրների կառավարման լրացուցիչ հրահանգներ: Սա կարող է ծրագրին թույլ տալ միջամտել GPS-ի կամ տեղադրության մասին տվյալների այլ աղբյուրների գործառույթներին:"</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"օգտագործել ճշգրիտ տեղադրությունը (GPS և ցանցային)"</string>
-    <!-- no translation found for permdesc_accessFineLocation (5821994817969957884) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"Այս հավելվածը կարող է ստանալ ձեր տեղադրության տվյալները GPS-ի միջոցով կամ տեղորոշման ցանցային աղբյուրներից, օրինակ՝ բջջային աշտարակներից և Wi-Fi ցանցերից: Այս տեղորոշման ծառայությունները պետք է միացված և հասանելի լինեն ձեր հեռախոսում, որպեսզի հավելվածը կարողանա օգտագործել դրանք: Դա կարող է արագացնել մարտկոցի լիցքի սպառումը:"</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"օգտագործել մոտավոր տեղադրությունը (ցանցային)"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (3373266766487862426) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (1884022719818788511) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (7788009094906196995) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Այս հավելվածը կարող է ստանալ ձեր տեղադրության տվյալները ցանցային տարբեր աղբյուրներից, օրինակ՝ բջջային աշտարակներից և Wi-Fi ցանցերից: Այս տեղորոշման ծառայությունները պետք է միացված և հասանելի լինեն ձեր պլանշետում, որպեսզի հավելվածը կարողանա օգտագործել դրանք:"</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Այս հավելվածը կարող է ստանալ ձեր տեղադրության տվյալները ցանցային տարբեր աղբյուրներից, օրինակ՝ բջջային աշտարակներից և Wi-Fi ցանցերից: Այս տեղորոշման ծառայությունները պետք է միացված և հասանելի լինեն ձեր հեռուստացույցում, որպեսզի հավելվածը կարողանա օգտագործել դրանք:"</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Այս հավելվածը կարող է ստանալ ձեր տեղադրության տվյալները ցանցային տարբեր աղբյուրներից, օրինակ՝ բջջային աշտարակներից և Wi-Fi ցանցերից: Այս տեղորոշման ծառայությունները պետք է միացված և հասանելի լինեն ձեր հեռախոսում, որպեսզի հավելվածը կարողանա օգտագործել դրանք:"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"փոխել ձեր աուդիո կարգավորումները"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Թույլ է տալիս հավելվածին փոփոխել ձայնանյութի գլոբալ կարգավորումները, ինչպես օրինակ` ձայնը և թե որ խոսափողն է օգտագործված արտածման համար:"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ձայնագրել ձայնանյութ"</string>
-    <!-- no translation found for permdesc_recordAudio (4245930455135321433) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="4245930455135321433">"Այս հավելվածը ցանկացած պահի կարող է ձայնագրել խոսափողի օգնությամբ:"</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"ուղարկել հրամաններ SIM քարտին"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Թույլ է տալիս հավելվածին հրամաններ ուղարկել SIM-ին: Սա շատ վտանգավոր է:"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"լուսանկարել և տեսանկարել"</string>
-    <!-- no translation found for permdesc_camera (5392231870049240670) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5392231870049240670">"Այս հավելվածը կարող է ցանկացած պահի լուսանկարել և տեսագրել՝ օգտագործելով տեսախցիկը:"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"կառավարել թրթռումը"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Թույլ է տալիս հավելվածին կառավարել թրթռոցը:"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ուղղակիորեն զանգել հեռախոսահամարներին"</string>

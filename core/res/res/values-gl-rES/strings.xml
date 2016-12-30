@@ -46,8 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problema de conexión ou código MMI non válido."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"A operación está restrinxida a números de marcación fixa."</string>
-    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
-    <skip />
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Non se pode cambiar a configuración do desvío de chamadas desde o teléfono mentres estás en itinerancia."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Activouse o servizo."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Activouse o servizo para:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Desactivouse o servizo."</string>
@@ -98,10 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Os servizos de voz/datos están bloqueados."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Os servizos de voz/SMS están bloqueados."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Todos os servizos de voz/datos/SMS están bloqueados."</string>
-    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
-    <skip />
-    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Non se pode conectar coa rede"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Para mellorar a recepción, proba a cambiar o tipo seleccionado en Configuración &gt; Redes móbiles &gt; Tipo de rede preferido."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Outro dispositivo solicitou o modo TTY COMPLETO"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Outro dispositivo solicitou o modo TTY HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Outro dispositivo solicitou o modo TTY VCO"</string>
@@ -185,10 +182,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Eliminouse o perfil de traballo porque falta a aplicación de administración."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Falta a aplicación de administración no perfil de traballo ou ben está danada. Como resultado, eliminouse o teu perfil de traballo e os datos relacionados. Ponte en contacto co teu administrador para obter asistencia."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"O teu perfil de traballo xa non está dispoñible neste dispositivo."</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"Estase controlando o tráfico da rede"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"Toca para obter máis información"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Borrarase o teu dispositivo"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Non se pode utilizar a aplicación de administración porque lle faltan compoñentes ou están danados. Agora borrarase o teu dispositivo. Ponte en contacto co teu administrador para obter asistencia."</string>
     <string name="me" msgid="6545696007631404292">"Eu"</string>
@@ -306,12 +301,9 @@
     <string name="permlab_sendSms" msgid="7544599214260982981">"enviar e consultar mensaxes de SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Permite á aplicación enviar mensaxes SMS. É posible que esta acción implique custos inesperados. É posible que as aplicacións maliciosas che custen diñeiro debido ao envío de mensaxes sen a túa confirmación."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"ler as túas mensaxes de texto (SMS ou MMS)"</string>
-    <!-- no translation found for permdesc_readSms (4741697454888074891) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (5796670395641116592) -->
-    <skip />
-    <!-- no translation found for permdesc_readSms (6826832415656437652) -->
-    <skip />
+    <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"Esta aplicación pode ler todas as mensaxes SMS (texto) almacenadas na túa tableta."</string>
+    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"Esta aplicación pode ler todas as mensaxes SMS (texto) almacenadas na túa televisión."</string>
+    <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"Esta aplicación pode ler todas as mensaxes SMS (texto) almacenadas no teu teléfono."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"recibir mensaxes de texto (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Permite á aplicación recibir e procesar mensaxes WAP. Este permiso inclúe a capacidade de supervisar ou eliminar mensaxes enviadas a ti sen mostrarchas."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"recuperar aplicacións en execución"</string>
@@ -324,10 +316,8 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Permite á aplicación activar o modo coche."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"pechar outras aplicacións"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Permite á aplicación finalizar procesos en segundo plano doutras aplicacións. É posible que esta acción provoque que outras aplicacións deixen de funcionar."</string>
-    <!-- no translation found for permlab_systemAlertWindow (7238805243128138690) -->
-    <skip />
-    <!-- no translation found for permdesc_systemAlertWindow (2393776099672266188) -->
-    <skip />
+    <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Esta aplicación pode aparecer sobre outras"</string>
+    <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Esta aplicación pode aparecer sobre outras aplicacións ou outras partes da pantalla, polo que é posible que interfira no uso normal das aplicacións e modifique a forma en que se mostran."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"facer que a aplicación se execute sempre"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Permite á aplicación converter partes súas como persistentes na memoria. Esta acción pode limitar a cantidade memoria dispoñible para outras aplicacións e reducir a velocidade de funcionamento da tableta."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Permite que a aplicación faga que algunhas das súas partes se manteñan na memoria. Esta acción pode limitar a cantidade de memoria dispoñible para outras aplicacións e reducir a velocidade da televisión."</string>
@@ -353,51 +343,37 @@
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Permite que a aplicación modifique datos sobre contactos almacenados na televisión, incluída a frecuencia coa que os chamaches, lles enviaches un correo electrónico ou te comunicaches con eles doutra forma. Con este permiso a aplicación pode eliminar os datos de contactos."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Permite á aplicación modificar os datos acerca dos teus contactos almacenados no teléfono, incluída a frecuencia coa que chamaches, enviaches correos electrónicos ou te comunicaches doutras maneiras con contactos específicos. Con este permiso as aplicacións poden eliminar datos de contactos."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"ler rexistro de chamadas"</string>
-    <!-- no translation found for permdesc_readCallLog (3204122446463552146) -->
-    <skip />
+    <string name="permdesc_readCallLog" msgid="3204122446463552146">"Esta aplicación pode ler o teu historial de chamadas."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"escribir no rexistro de chamadas"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Permite á aplicación modificar o rexistro de chamadas da tableta, incluídos os datos acerca de chamadas entrantes e saíntes. É posible que aplicacións maliciosas utilicen esta acción para borrar ou modificar o teu rexistro de chamadas."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Permite que a aplicación modifique o rexistro de chamadas da televisión, incluídos os datos sobre chamadas entrantes e saíntes. As aplicacións maliciosas poden utilizar este permiso para borrar ou modificar o rexistro de chamadas."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Permite á aplicación modificar o rexistro de chamadas do teléfono, incluídos os datos acerca de chamadas entrantes e saíntes. É posible que aplicacións maliciosas utilicen esta acción para borrar ou modificar o teu rexistro de chamadas."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"acceder a sensores do corpo (como monitores de ritmo cardíaco)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Permite que a aplicación acceda aos datos dos sensores que controlan o teu estado físico, como o ritmo cardíaco."</string>
-    <!-- no translation found for permlab_readCalendar (6716116972752441641) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (4993979255403945892) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (8837931557573064315) -->
-    <skip />
-    <!-- no translation found for permdesc_readCalendar (4373978642145196715) -->
-    <skip />
+    <string name="permlab_readCalendar" msgid="6716116972752441641">"Ler os detalles e os eventos do calendario"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Esta aplicación pode ler todos os eventos do calendario almacenados na túa tableta e compartir ou gardar os datos do calendario."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Esta aplicación pode ler todos os eventos do calendario almacenados na túa televisión e compartir ou gardar os datos do calendario."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Esta aplicación pode ler todos os eventos do calendario almacenados no teu teléfono e compartir ou gardar os datos do calendario."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"engadir ou modificar eventos do calendario e enviar correo electrónico aos invitados sen que o saiban os propietarios"</string>
-    <!-- no translation found for permdesc_writeCalendar (1675270619903625982) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (9017809326268135866) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCalendar (7592791790516943173) -->
-    <skip />
+    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Esta aplicación pode engadir, quitar ou cambiar eventos do calendario almacenados na túa tableta. Tamén pode enviar mensaxes que parezan dos propietarios do calendario e cambiar eventos sen comunicárllelo aos propietarios."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Esta aplicación pode engadir, quitar ou cambiar eventos do calendario almacenados na túa televisión. Tamén pode enviar mensaxes que parezan dos propietarios do calendario e cambiar eventos sen comunicárllelo aos propietarios."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Esta aplicación pode engadir, quitar ou cambiar eventos do calendario almacenados no teu teléfono. Tamén pode enviar mensaxes que parezan dos propietarios do calendario e cambiar eventos sen comunicárllelo aos propietarios."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"acceder a comandos adicionais do provedor de situación"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Permite á aplicación acceder a comandos adicionais de fornecedor de localizacións. É posible que isto provoque que a aplicación interfira co funcionamento do GPS ou doutras fontes da localización."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"acceder á localización precisa (baseada no GPS e na rede)"</string>
-    <!-- no translation found for permdesc_accessFineLocation (5821994817969957884) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"Esta aplicación pode obter a túa localización a partir do GPS ou de fontes de localización de rede como torres de telecomunicacións e redes wifi. Para que a aplicación poida utilizar os servizos de localización, deben estar activados e dispoñibles no teu teléfono. Ten en conta que con esta acción pode aumentar o consumo de batería."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"acceder á localización aproximada (baseada na rede)"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (3373266766487862426) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (1884022719818788511) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCoarseLocation (7788009094906196995) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Esta aplicación pode obter a túa localización a partir de fontes de rede como torres de telecomunicacións e redes wifi. Para que a aplicación poida utilizar os servizos de localización, deben estar activados e dispoñibles na túa tableta."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Esta aplicación pode obter a túa localización a partir de fontes de rede como torres de telecomunicacións e redes wifi. Para que a aplicación poida utilizar os servizos de localización, deben estar activados e dispoñibles na túa televisión."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Esta aplicación pode obter a túa localización a partir de fontes de rede como torres de telecomunicacións e redes wifi. Para que a aplicación poida utilizar os servizos de localización, deben estar activados e dispoñibles no teu teléfono."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"cambiar a configuración de son"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permite á aplicación modificar a configuración de audio global, como o volume e que altofalante se utiliza para a saída."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"gravar audio"</string>
-    <!-- no translation found for permdesc_recordAudio (4245930455135321433) -->
-    <skip />
+    <string name="permdesc_recordAudio" msgid="4245930455135321433">"Esta aplicación pode utilizar o micrófono en calquera momento para gravar audio."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"enviar comandos á SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Permite á aplicación enviar comandos á SIM. Isto é moi perigoso."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"facer fotos e vídeos"</string>
-    <!-- no translation found for permdesc_camera (5392231870049240670) -->
-    <skip />
+    <string name="permdesc_camera" msgid="5392231870049240670">"Esta aplicación pode utilizar a cámara en calquera momento para sacar fotos e gravar vídeos."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"controlar a vibración"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Permite á aplicación controlar o vibrador."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"chamar directamente aos números de teléfono"</string>
