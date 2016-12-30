@@ -46,8 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"接続に問題があるか、MMIコードが正しくありません。"</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"発信番号制限で指定された番号に対してのみ操作できます。"</string>
-    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
-    <skip />
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"ローミング中はスマートフォンから着信転送設定の変更はできません。"</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"サービスが有効になりました。"</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"次のサービスが有効になりました:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"サービスが無効になりました。"</string>
@@ -98,10 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"音声/データサービスがブロックされています。"</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"音声/SMSサービスがブロックされています。"</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"すべての音声/データ/SMSサービスがブロックされています。"</string>
-    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
-    <skip />
-    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"ネットワークにアクセスできません"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"受信状態を改善するには、[設定] &gt; [モバイル ネットワーク] &gt; [優先ネットワーク タイプ] で選択したタイプを変更してみてください。"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"ピアから、TTYモードをFULLにするようリクエストされました"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"ピアから、TTYモードをHCOにするようリクエストされました"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"ピアから、TTYモードをVCOにするようリクエストされました"</string>
@@ -185,10 +182,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"管理アプリがないため仕事用プロファイルが削除されました。"</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"仕事用プロファイルの管理アプリがないか、破損しています。そのため仕事用プロファイルと関連データが削除されました。管理者にサポートをご依頼ください。"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"お使いの仕事用プロファイルはこの端末で使用できなくなりました"</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"ネットワーク トラフィックの監視中"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"タップして詳細を表示します"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"端末のデータが消去されます"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"管理アプリの構成要素が不足しているか、アプリが破損しているため、ご利用になれません。端末のデータはこれから消去されます。管理者にサポートをご依頼ください。"</string>
     <string name="me" msgid="6545696007631404292">"自分"</string>

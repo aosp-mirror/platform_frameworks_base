@@ -46,8 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Connection problem or invalid MMI code."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Operation is restricted to fixed dialling numbers only."</string>
-    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
-    <skip />
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Cannot change call forwarding settings from your phone while you are roaming."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Service was enabled."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Service was enabled for:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Service has been disabled."</string>
@@ -98,10 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Voice/Data services are blocked."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Voice/SMS services are blocked."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"All voice/data/SMS services are blocked."</string>
-    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
-    <skip />
-    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Can’t find network"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"To improve signal, try changing the type selected at Settings &gt; Mobile networks &gt; Preferred network type."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Peer requested TTY Mode FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Peer requested TTY Mode HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Peer requested TTY Mode VCO"</string>
@@ -185,10 +182,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Work profile deleted due to missing admin app."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"The work profile admin app is either missing or corrupted. As a result, your work profile and related data have been deleted. Contact your administrator for assistance."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Your work profile is no longer available on this device."</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"Network traffic is being monitored"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"Tap for more details"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Your device will be erased"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"The admin app is missing components or corrupted, and can\'t be used. Your device will now be erased. Contact your administrator for assistance."</string>
     <string name="me" msgid="6545696007631404292">"Me"</string>

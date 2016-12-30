@@ -46,8 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"இணைப்பு சிக்கல் அல்லது தவறான MMI குறியீடு."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"நிலையான அழைப்பு எண்களுக்கு மட்டுமே எனச் செயல்பாடு வரையறுக்கப்பட்டுள்ளது."</string>
-    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
-    <skip />
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"ரோமிங்கில் இருக்கும் போது, உங்கள் மொபைலிலிருந்து அழைப்புப் பகிர்வு அமைப்புகளை மாற்ற முடியாது."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"சேவை இயக்கப்பட்டுள்ளது."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"சேவை பின்வருவதற்கு இயக்கப்பட்டுள்ளது:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"சேவை முடக்கப்பட்டுள்ளது."</string>
@@ -98,10 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"குரல்/தரவு சேவைகள் தடைசெய்யப்பட்டுள்ளன."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"குரல்/SMS சேவைகள் தடைசெய்யப்பட்டுள்ளன."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"எல்லா குரல்/தரவு/SMS சேவைகள் தடைசெய்யப்பட்டுள்ளன."</string>
-    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
-    <skip />
-    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"நெட்வொர்க்குடன் இணைக்க முடியவில்லை"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"பெறுதலை மேம்படுத்த, அமைப்புகள் &gt; செல்லுலார் நெட்வொர்க்குகள் &gt; விரும்பும் நெட்வொர்க் வகை என்பதில் தேர்ந்தெடுத்த நெட்வொர்க் வகையை மாற்றவும்."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"TTY Mode FULLஐ இணைச் செயல்பாடு கோரியது"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"TTY Mode HCOஐ இணைச் செயல்பாடு கோரியது"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"TTY Mode VCOஐ இணைச் செயல்பாடு கோரியது"</string>
@@ -185,10 +182,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"நிர்வாகி பயன்பாடு இல்லாததனால், பணி சுயவிவரம் நீக்கப்பட்டது."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"பணி சுயவிவர நிர்வாகி பயன்பாடு இல்லை அல்லது சேதமடைந்துள்ளது. இதன் விளைவாக, உங்கள் பணி சுயவிவரமும், அதனுடன் தொடர்புடைய தரவும் நீக்கப்பட்டன. உதவிக்கு, உங்கள் நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"சாதனத்தில் இனி பணி சுயவிவரம் கிடைக்காது."</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"நெட்வொர்க் ட்ராஃபிக் கண்காணிக்கப்படுகிறது"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"மேலும் விவரங்களுக்கு, தட்டவும்"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"சாதனத் தரவு அழிக்கப்படும்"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"நிர்வாகி பயன்பாடு இல்லை அல்லது சேதமடைந்துள்ளது மற்றும் பயன்படுத்த முடியாது. இப்போது சாதனத் தரவு அழிக்கப்படும். உதவிக்கு, நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="me" msgid="6545696007631404292">"நான்"</string>

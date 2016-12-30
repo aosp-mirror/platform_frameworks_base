@@ -46,8 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"連線發生問題或 MMI 碼無效。"</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"僅限對固定撥號號碼執行這項運作。"</string>
-    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
-    <skip />
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"使用漫遊服務時，不可從手機變更來電轉駁設定。"</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"服務已啟用。"</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"已啟用服務："</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"已停用服務。"</string>
@@ -98,10 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"已封鎖語音/數據服務。"</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"已封鎖語音/SMS 服務。"</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"已封鎖所有語音/數據傳輸/SMS 服務。"</string>
-    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
-    <skip />
-    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"無法連接網絡"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"如要改善接收品質，請嘗試前往「設定」&gt;「流動網絡」&gt;「偏好網絡類型」以變更所選類型。"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"對方曾要求 TTY 模式 (FULL)"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"對方曾要求 TTY 模式 (HCO)"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"對方曾要求 TTY 模式 (VCO)"</string>
@@ -185,10 +182,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"由於沒有管理員應用程式，工作設定檔已被刪除。"</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"找不到工作設定檔應用程式，或工作設定檔應用程式已受損。因此，您的工作設定檔現在將被清除。請聯絡您的管理員以取得協助。"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"無法在此裝置上再使用您的工作設定檔。"</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"網絡流量現正受監控"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"輕按以瞭解詳情"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"您的裝置將被清除"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"找不到管理員應用程式的元件，或管理員應用程式已受損並不能使用。您的裝置現在將被清除。請聯絡您的管理員以取得協助。"</string>
     <string name="me" msgid="6545696007631404292">"我本人"</string>

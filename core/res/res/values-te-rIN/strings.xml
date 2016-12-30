@@ -46,8 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"కనెక్షన్ సమస్య లేదా చెల్లని MMI కోడ్."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"చర్య స్థిరమైన డయలింగ్ నంబర్‌లకు మాత్రమే పరిమితం చేయబడింది."</string>
-    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
-    <skip />
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"మీరు రోమింగ్‌లో ఉన్నప్పుడు మీ ఫోన్‌ నుండి కాల్ ఫార్వార్డింగ్ సెట్టింగ్‌లను మార్చలేరు."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"సేవ ప్రారంభించబడింది."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"వీటి కోసం సేవ ప్రారంభించబడింది:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"సేవ నిలిపివేయబడింది."</string>
@@ -98,10 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"వాయిస్/డేటా సేవలు బ్లాక్ చేయబడ్డాయి."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"వాయిస్/SMS సేవలు బ్లాక్ చేయబడ్డాయి."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"అన్ని వాయిస్/డేటా/SMS సేవలు బ్లాక్ చేయబడ్డాయి."</string>
-    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
-    <skip />
-    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"నెట్‌వర్క్‌ను చేరుకోలేరు"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"స్వీకరణను మెరుగుపరచడానికి, సెట్టింగ్‌లు &gt; సెల్యులార్ నెట్‌వర్క్‌లు &gt; ప్రాధాన్య నెట్‌వర్క్ రకం ఎంపికలో ఎంచుకున్న రకాన్ని మార్చడానికి ప్రయత్నించండి."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"అవతలి వారు FULL TTY మోడ్‌ని అభ్యర్థించారు"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"అవతలి వారు HCO TTY మోడ్‌ని అభ్యర్థించారు"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"అవతలి వారు VCO TTY మోడ్‌ని అభ్యర్థించారు"</string>
@@ -185,10 +182,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"నిర్వాహక అనువర్తనం లేనందున కార్యాలయ ప్రొఫైల్ తొలగించబడింది."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"కార్యాలయ ప్రొఫైల్ నిర్వాహక అనువర్తనం లేదు లేదా పాడైంది. తత్ఫలితంగా, మీ కార్యాలయ ప్రొఫైల్ మరియు సంబంధిత డేటా తొలగించబడ్డాయి. సహాయం కోసం మీ నిర్వాహకుడిని సంప్రదించండి."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"ఈ పరికరంలో మీ కార్యాలయ ప్రొఫైల్ ఇప్పుడు అందుబాటులో లేదు."</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"నెట్‌వర్క్ ట్రాఫిక్ పర్యవేక్షించబడుతోంది"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"మరిన్ని వివరాల కోసం నొక్కండి"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"మీ పరికరంలోని డేటా తొలగించబడుతుంది"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"నిర్వాహక అనువర్తనంలో కొన్ని అంతర్భాగాలు లేవు లేదా అది పాడైపోయి, నిరుపయోగంగా మారింది. మీ పరికరంలోని డేటా ఇప్పుడు తొలగించబడుతుంది. సహాయం కోసం మీ నిర్వాహకుడిని సంప్రదించండి."</string>
     <string name="me" msgid="6545696007631404292">"నేను"</string>

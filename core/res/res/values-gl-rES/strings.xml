@@ -46,8 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problema de conexión ou código MMI non válido."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"A operación está restrinxida a números de marcación fixa."</string>
-    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
-    <skip />
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Non se pode cambiar a configuración do desvío de chamadas desde o teléfono mentres estás en itinerancia."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Activouse o servizo."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Activouse o servizo para:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Desactivouse o servizo."</string>
@@ -98,10 +97,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Os servizos de voz/datos están bloqueados."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Os servizos de voz/SMS están bloqueados."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Todos os servizos de voz/datos/SMS están bloqueados."</string>
-    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
-    <skip />
-    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Non se pode conectar coa rede"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Para mellorar a recepción, proba a cambiar o tipo seleccionado en Configuración &gt; Redes móbiles &gt; Tipo de rede preferido."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Outro dispositivo solicitou o modo TTY COMPLETO"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Outro dispositivo solicitou o modo TTY HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Outro dispositivo solicitou o modo TTY VCO"</string>
@@ -185,10 +182,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Eliminouse o perfil de traballo porque falta a aplicación de administración."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Falta a aplicación de administración no perfil de traballo ou ben está danada. Como resultado, eliminouse o teu perfil de traballo e os datos relacionados. Ponte en contacto co teu administrador para obter asistencia."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"O teu perfil de traballo xa non está dispoñible neste dispositivo."</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"Estase controlando o tráfico da rede"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"Toca para obter máis información"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Borrarase o teu dispositivo"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Non se pode utilizar a aplicación de administración porque lle faltan compoñentes ou están danados. Agora borrarase o teu dispositivo. Ponte en contacto co teu administrador para obter asistencia."</string>
     <string name="me" msgid="6545696007631404292">"Eu"</string>

@@ -46,8 +46,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Проблеми са везом или неважећи MMI кôд."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Рад је ограничен само на бројеве фиксног бирања."</string>
-    <!-- no translation found for mmiErrorWhileRoaming (762488890299284230) -->
-    <skip />
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"Не можете да промените подешавања преусмеравања позива са телефона док сте у ромингу."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Услуга је омогућена."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Услуга је омогућена за:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Услуга је онемогућена."</string>
@@ -99,10 +98,8 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Гласовна услуга/услуга преноса података су блокиране."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Гласовна услуга и SMS услуга су блокиране."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Све гласовне и SMS услуге, као и услуге преноса података су блокиране."</string>
-    <!-- no translation found for NetworkPreferenceSwitchTitle (4008877505368566980) -->
-    <skip />
-    <!-- no translation found for NetworkPreferenceSwitchSummary (7335915397439759249) -->
-    <skip />
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Повезивање са мрежом није успело"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7335915397439759249">"Да бисте побољшали пријем, пробајте да промените изабрани тип у одељку Подешавања &gt; Мобилне мреже &gt; Жељени тип мреже."</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Корисник захтева ПОТПУН режим TTY"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Корисник захтева ПРЕНОС ЗВУКА за режим TTY"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Корисник захтева ПРЕНОС ГЛАСА за режим TTY"</string>
@@ -187,10 +184,8 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Пословни профил је избрисан јер недостаје администраторска апликација."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Администраторска апликација пословног профила недостаје или је оштећена. Због тога су ваш пословни профил и повезани подаци избрисани. Обратите се администратору за помоћ."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Профил за Work више није доступан на овом уређају."</string>
-    <!-- no translation found for network_logging_notification_title (1805392571290161924) -->
-    <skip />
-    <!-- no translation found for network_logging_notification_text (4448072433371155729) -->
-    <skip />
+    <string name="network_logging_notification_title" msgid="1805392571290161924">"Мрежни саобраћај се прати"</string>
+    <string name="network_logging_notification_text" msgid="4448072433371155729">"Додирните за више детаља"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Уређај ће бити обрисан"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Администраторској апликацији недостају неке компоненте или је оштећена и не може да се користи. Уређај ће сада бити обрисан. Обратите се администратору за помоћ."</string>
     <string name="me" msgid="6545696007631404292">"Ја"</string>
