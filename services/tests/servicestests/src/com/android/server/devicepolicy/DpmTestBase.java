@@ -174,6 +174,8 @@ public abstract class DpmTestBase extends AndroidTestCase {
                 anyInt(),
                 eq(UserHandle.getUserId(packageUid)));
 
+        doReturn(new String[] {admin.getPackageName()}).when(mMockContext.ipackageManager)
+            .getPackagesForUid(eq(packageUid));
         // Set up getPackageInfo().
         markPackageAsInstalled(admin.getPackageName(), ai, UserHandle.getUserId(packageUid));
     }

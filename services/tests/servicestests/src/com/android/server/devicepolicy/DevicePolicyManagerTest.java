@@ -56,6 +56,7 @@ import android.util.Pair;
 
 import com.android.internal.R;
 import com.android.internal.util.ParcelableString;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.UserRestrictionsUtils;
@@ -3733,6 +3734,41 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 dpm.getPermissionGrantState(admin1, app1, permission));
         assertEquals(DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT,
                 dpm.getPermissionGrantState(admin1, app2, permission));
+    }
+
+    public void testResetPasswordWithToken() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+        // test token validation
+        try {
+            dpm.setResetPasswordToken(admin1, new byte[31]);
+            fail("should not have accepted tokens too short");
+        } catch (IllegalArgumentException expected) {
+        }
+        // test adding a token
+        final byte[] token = new byte[32];
+        final long handle = 123456;
+        final String password = "password";
+        when(mContext.lockPatternUtils.addEscrowToken(eq(token), eq(UserHandle.USER_SYSTEM)))
+            .thenReturn(handle);
+        assertTrue(dpm.setResetPasswordToken(admin1, token));
+
+        // test password activation
+        when(mContext.lockPatternUtils.isEscrowTokenActive(eq(handle), eq(UserHandle.USER_SYSTEM)))
+            .thenReturn(true);
+        assertTrue(dpm.isResetPasswordTokenActive(admin1));
+
+        // test reset password with token
+        when(mContext.lockPatternUtils.setLockCredentialWithToken(eq(password),
+                eq(LockPatternUtils.CREDENTIAL_TYPE_PASSWORD), eq(handle), eq(token),
+                eq(UserHandle.USER_SYSTEM)))
+                .thenReturn(true);
+        assertTrue(dpm.resetPasswordWithToken(admin1, password, token, 0));
+
+        // test removing a token
+        when(mContext.lockPatternUtils.removeEscrowToken(eq(handle), eq(UserHandle.USER_SYSTEM)))
+                .thenReturn(true);
+        assertTrue(dpm.clearResetPasswordToken(admin1));
     }
 
     private void setUserSetupCompleteForUser(boolean isUserSetupComplete, int userhandle) {
