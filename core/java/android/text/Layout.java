@@ -1092,8 +1092,10 @@ public abstract class Layout {
         int dir = getParagraphDirection(line);
 
         TextLine tl = TextLine.obtain();
+        mPaint.setHyphenEdit(getHyphen(line));
         tl.set(mPaint, mText, start, end, dir, directions, hasTabs, tabStops);
         float width = tl.metrics(null);
+        mPaint.setHyphenEdit(0);
         TextLine.recycle(tl);
         return width;
     }
@@ -1114,8 +1116,10 @@ public abstract class Layout {
         int dir = getParagraphDirection(line);
 
         TextLine tl = TextLine.obtain();
+        mPaint.setHyphenEdit(getHyphen(line));
         tl.set(mPaint, mText, start, end, dir, directions, hasTabs, tabStops);
         float width = tl.metrics(null);
+        mPaint.setHyphenEdit(0);
         TextLine.recycle(tl);
         return width;
     }
