@@ -202,9 +202,7 @@ static ssize_t socket_read_all(JNIEnv *env, jobject thisJ, int fd,
     msg.msg_control = cmsgbuf;
     msg.msg_controllen = sizeof(cmsgbuf);
 
-    do {
-        ret = recvmsg(fd, &msg, MSG_NOSIGNAL);
-    } while (ret < 0 && errno == EINTR);
+    ret = TEMP_FAILURE_RETRY(recvmsg(fd, &msg, MSG_NOSIGNAL | MSG_CMSG_CLOEXEC));
 
     if (ret < 0 && errno == EPIPE) {
         // Treat this as an end of stream
