@@ -33,8 +33,7 @@
         android:paddingStart="48dp"
         android:maxLines="2"
         android:ellipsize="end"
-        android:textAppearance="@android:style/TextAppearance.Material.Title"
-        android:textColor="?android:attr/textColorPrimaryInverse"
+        android:textAppearance="@style/TextAppearance.SwitchBar"
         android:textAlignment="viewStart"
         android:text="@string/switch_bar_on" />
 
