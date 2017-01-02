@@ -325,15 +325,9 @@ static jobject JHwBinder_native_getService(
         return NULL;
     }
 
-    sp<hardware::IBinder> service;
-    manager->get(
-            ifaceName,
-            serviceName,
-            [&service](sp<hidl::base::V1_0::IBase> out) {
-                service = hardware::toBinder<
-                        hidl::base::V1_0::IBase, hidl::base::V1_0::BpBase
-                    >(out);
-            });
+    sp<hidl::base::V1_0::IBase> base = manager->get(ifaceName, serviceName);
+    sp<hardware::IBinder> service = hardware::toBinder<
+            hidl::base::V1_0::IBase, hidl::base::V1_0::BpBase>(base);
 
     env->ReleaseStringUTFChars(ifaceNameObj, ifaceName);
     ifaceName = NULL;
