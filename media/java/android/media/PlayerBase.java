@@ -78,7 +78,7 @@ public abstract class PlayerBase {
         }
         mAttributes = attr;
         mImplType = implType;
-        mPlayerIId = AudioSystem.newAudioPlayerId();
+        int newPiid = AudioPlaybackConfiguration.PLAYER_PIID_INVALID;
         IBinder b = ServiceManager.getService(Context.APP_OPS_SERVICE);
         mAppOps = IAppOpsService.Stub.asInterface(b);
         // initialize mHasAppOpsPlayAudio
@@ -100,10 +100,11 @@ public abstract class PlayerBase {
             mHasAppOpsPlayAudio = false;
         }
         try {
-            getService().trackPlayer(new PlayerIdCard(mPlayerIId, mImplType, mAttributes));
+            newPiid = getService().trackPlayer(new PlayerIdCard(mImplType, mAttributes));
         } catch (RemoteException e) {
             Log.e(TAG, "Error talking to audio service, player will not be tracked", e);
         }
+        mPlayerIId = newPiid;
     }
 
 
@@ -311,26 +312,20 @@ public abstract class PlayerBase {
      * Class holding all the information about a player that needs to be known at registration time
      */
     public static class PlayerIdCard implements Parcelable {
-        public final int mPIId;
         public final int mPlayerType;
-        public final int mClientUid;
-        public final int mClientPid;
 
         public final static int AUDIO_ATTRIBUTES_NONE = 0;
         public final static int AUDIO_ATTRIBUTES_DEFINED = 1;
         public final AudioAttributes mAttributes;
 
-        PlayerIdCard(int piid, int type, @NonNull AudioAttributes attr) {
-            mPIId = piid;
+        PlayerIdCard(int type, @NonNull AudioAttributes attr) {
             mPlayerType = type;
-            mClientUid = Binder.getCallingUid();
-            mClientPid = Binder.getCallingPid();
             mAttributes = attr;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(mPIId, mPlayerType);
+            return Objects.hash(mPlayerType);
         }
 
         @Override
@@ -340,10 +335,7 @@ public abstract class PlayerBase {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(mPIId);
             dest.writeInt(mPlayerType);
-            dest.writeInt(mClientUid);
-            dest.writeInt(mClientPid);
             mAttributes.writeToParcel(dest, 0);
         }
 
@@ -363,10 +355,7 @@ public abstract class PlayerBase {
         };
 
         private PlayerIdCard(Parcel in) {
-            mPIId = in.readInt();
             mPlayerType = in.readInt();
-            mClientUid = in.readInt();
-            mClientPid = in.readInt();
             mAttributes = AudioAttributes.CREATOR.createFromParcel(in);
         }
 
@@ -377,7 +366,8 @@ public abstract class PlayerBase {
 
             PlayerIdCard that = (PlayerIdCard) o;
 
-            return (mPIId == that.mPIId);
+            // FIXME change to the binder player interface once supported as a member
+            return ((mPlayerType == that.mPlayerType) && mAttributes.equals(that.mAttributes));
         }
     }
 
