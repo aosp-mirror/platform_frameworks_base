@@ -28,4 +28,8 @@
         android:id="@+id/battery_charge_indicator"
         android:drawable="@drawable/ic_battery_bolt" />
 
+    <item
+        android:id="@+id/battery_powersave_indicator"
+        android:drawable="@drawable/ic_battery_plus" />
+
 </layer-list>

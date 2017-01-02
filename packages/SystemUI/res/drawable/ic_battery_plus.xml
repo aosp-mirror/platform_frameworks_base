@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2016 The CyanogenMod Project
+    Copyright (C) 2017 The ABC Project
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -14,21 +14,14 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="@color/batterymeter_bolt_color">
 
-    <item
-        android:id="@+id/battery_frame"
-        android:drawable="@drawable/ic_battery_portrait_frame" />
-
-    <item
-        android:id="@+id/battery_fill"
-        android:drawable="@drawable/ic_battery_portrait_avd" />
-
-    <item
-        android:id="@+id/battery_charge_indicator"
-        android:drawable="@drawable/ic_battery_bolt" />
-
-    <item
-        android:id="@+id/battery_powersave_indicator"
-        android:drawable="@drawable/ic_battery_plus" />
-</layer-list>
+    <path
+        android:fillColor="#000000"
+        android:pathData="m 11.417767,7.934195 0,3.049373 -3.0493721,0 0,2.032862 3.0493721,0 0,3.049375 2.032862,0 0,-3.049375 3.049371,0 0,-2.032862 -3.049372,0 0,-3.0493729 -2.032861,0 z" />
+</vector>

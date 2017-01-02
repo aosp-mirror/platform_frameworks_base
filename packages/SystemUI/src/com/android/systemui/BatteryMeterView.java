@@ -39,7 +39,6 @@ public class BatteryMeterView extends ImageView implements
     private BatteryController mBatteryController;
 
     private final Context mContext;
-    private final int mFrameColor;
 
     public BatteryMeterView(Context context) {
         this(context, null, 0);
@@ -51,13 +50,7 @@ public class BatteryMeterView extends ImageView implements
 
     public BatteryMeterView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-
-        TypedArray atts = context.obtainStyledAttributes(attrs, R.styleable.BatteryMeterView,
-                defStyle, 0);
-        final int frameColor = atts.getColor(R.styleable.BatteryMeterView_frameColor,
-                context.getColor(R.color.batterymeter_frame_color));
-        mDrawable = new BatteryMeterDrawable(context, new Handler(), frameColor);
-        atts.recycle();
+        mDrawable = new BatteryMeterDrawable(context, new Handler());
 
         mSlotBattery = context.getString(
                 com.android.internal.R.string.status_bar_battery);
@@ -68,7 +61,6 @@ public class BatteryMeterView extends ImageView implements
         setLayerType(View.LAYER_TYPE_HARDWARE, null);
 
         mContext = context;
-        mFrameColor = frameColor;
     }
 
     @Override
@@ -134,7 +126,7 @@ public class BatteryMeterView extends ImageView implements
                 setImageDrawable(null);
                 break;
             default:
-                mDrawable = new BatteryMeterDrawable(mContext, new Handler(), mFrameColor, style);
+                mDrawable = new BatteryMeterDrawable(mContext, new Handler(), style);
                 setImageDrawable(mDrawable);
                 setVisibility(View.VISIBLE);
                 break;
@@ -148,7 +140,7 @@ public class BatteryMeterView extends ImageView implements
         if (style == BatteryMeterDrawable.BATTERY_STYLE_TEXT || style == BatteryMeterDrawable.BATTERY_STYLE_HIDDEN) {
             return;
         } else {
-            mDrawable = new BatteryMeterDrawable(mContext, new Handler(), mFrameColor, style);
+            mDrawable = new BatteryMeterDrawable(mContext, new Handler(), style);
             setImageDrawable(mDrawable);
             setVisibility(View.VISIBLE);
             restoreDrawableAttributes();

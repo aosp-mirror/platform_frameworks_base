@@ -34,4 +34,13 @@
             android:drawable="@drawable/ic_battery_bolt" />
     </item>
 
+    <item
+        android:id="@+id/battery_powersave_indicator">
+        <rotate
+            android:pivotX="50%"
+            android:pivotY="50%"
+            android:fromDegrees="90"
+            android:toDegrees="90"
+            android:drawable="@drawable/ic_battery_plus" />
+    </item>
 </layer-list>
