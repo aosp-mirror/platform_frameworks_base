@@ -250,7 +250,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     boolean dispatchMessage(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        if (mService.isPowerStandby() && mStandbyHandler.handleCommand(message)) {
+        if (mService.isPowerStandby() && !mService.isWakeUpMessageReceived()
+                && mStandbyHandler.handleCommand(message)) {
             return true;
         }
         return super.onMessage(message);
