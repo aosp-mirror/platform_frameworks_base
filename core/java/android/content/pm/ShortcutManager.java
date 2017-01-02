@@ -867,7 +867,7 @@ public class ShortcutManager {
      *
      * @throws IllegalArgumentException if a shortcut with the same ID exists and is disabled.
      * @throws IllegalStateException The caller doesn't have a foreground activity or a foreground
-     * service.
+     * service or when the user is locked.
      */
     public boolean requestPinShortcut(@NonNull ShortcutInfo shortcut,
             @Nullable IntentSender resultIntent) {

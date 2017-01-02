@@ -441,7 +441,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
-        void injectSendIntentSender(IntentSender intent) {
+        void injectSendIntentSender(IntentSender intent, Intent extras) {
             mContext.sendIntentSender(intent);
         }
 

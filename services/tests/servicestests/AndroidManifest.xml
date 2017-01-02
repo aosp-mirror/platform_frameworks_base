@@ -164,6 +164,13 @@
         <activity android:name="com.android.server.am.TaskStackChangedListenerTest$ActivityTaskChangeCallbacks" />
         <activity android:name="com.android.server.am.TaskStackChangedListenerTest$ActivityTaskDescriptionChange" />
 
+        <receiver android:name="com.android.server.appwidget.DummyAppWidget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+              android:resource="@xml/dummy_appwidget_info" />
+        </receiver>
     </application>
 
     <instrumentation

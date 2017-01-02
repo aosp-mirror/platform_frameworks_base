@@ -16,6 +16,8 @@
 package com.android.server.pm;
 
 import android.annotation.Nullable;
+import android.app.PendingIntent;
+import android.appwidget.AppWidgetProviderInfo;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -46,37 +48,17 @@ class ShortcutRequestPinProcessor {
     /**
      * Internal for {@link android.content.pm.LauncherApps.PinItemRequest} which receives callbacks.
      */
-    private static class PinShortcutRequestInner extends IPinItemRequest.Stub {
-        private final ShortcutRequestPinProcessor mProcessor;
-        /** Original shortcut passed by the app. */
-        public final ShortcutInfo shortcutOriginal;
-
-        /**
-         * Cloned shortcut that's passed to the launcher.  The notable difference from
-         * {@link #shortcutOriginal} is it must not have the intent.
-         */
-        public final ShortcutInfo shortcutForLauncher;
-
+    private static class PinItemRequestInner extends IPinItemRequest.Stub {
+        protected final ShortcutRequestPinProcessor mProcessor;
         private final IntentSender mResultIntent;
-
-        public final String launcherPackage;
-        public final int launcherUserId;
-        public final boolean preExisting;
 
         @GuardedBy("this")
         private boolean mAccepted;
 
-        private PinShortcutRequestInner(ShortcutRequestPinProcessor processor,
-                ShortcutInfo shortcutOriginal, ShortcutInfo shortcutForLauncher,
-                IntentSender resultIntent,
-                String launcherPackage, int launcherUserId, boolean preExisting) {
+        private PinItemRequestInner(ShortcutRequestPinProcessor processor,
+                IntentSender resultIntent) {
             mProcessor = processor;
-            this.shortcutOriginal = shortcutOriginal;
-            this.shortcutForLauncher = shortcutForLauncher;
             mResultIntent = resultIntent;
-            this.launcherPackage = launcherPackage;
-            this.launcherUserId = launcherUserId;
-            this.preExisting = preExisting;
         }
 
         @Override
@@ -95,9 +77,11 @@ class ShortcutRequestPinProcessor {
         public boolean accept(Bundle options) {
             // Make sure the options are unparcellable by the FW. (e.g. not containing unknown
             // classes.)
+            Intent extras = null;
             if (options != null) {
                 try {
                     options.size();
+                    extras = new Intent().putExtras(options);
                 } catch (RuntimeException e) {
                     throw new IllegalArgumentException("options cannot be unparceled", e);
                 }
@@ -108,19 +92,57 @@ class ShortcutRequestPinProcessor {
                 }
                 mAccepted = true;
             }
-            if (DEBUG) {
-                Slog.d(TAG, "Launcher accepted shortcut. ID=" + shortcutOriginal.getId()
-                        + " package=" + shortcutOriginal.getPackage()
-                        + " options=" + options);
-            }
 
             // Pin it and send the result intent.
-            if (mProcessor.directPinShortcut(this)) {
-                mProcessor.sendResultIntent(mResultIntent);
+            if (tryAccept()) {
+                mProcessor.sendResultIntent(mResultIntent, extras);
                 return true;
             } else {
                 return false;
             }
+        }
+
+        protected boolean tryAccept() {
+            return true;
+        }
+    }
+
+    /**
+     * Internal for {@link android.content.pm.LauncherApps.PinItemRequest} which receives callbacks.
+     */
+    private static class PinShortcutRequestInner extends PinItemRequestInner {
+        /** Original shortcut passed by the app. */
+        public final ShortcutInfo shortcutOriginal;
+
+        /**
+         * Cloned shortcut that's passed to the launcher.  The notable difference from
+         * {@link #shortcutOriginal} is it must not have the intent.
+         */
+        public final ShortcutInfo shortcutForLauncher;
+
+        public final String launcherPackage;
+        public final int launcherUserId;
+        public final boolean preExisting;
+
+        private PinShortcutRequestInner(ShortcutRequestPinProcessor processor,
+                ShortcutInfo shortcutOriginal, ShortcutInfo shortcutForLauncher,
+                IntentSender resultIntent,
+                String launcherPackage, int launcherUserId, boolean preExisting) {
+            super(processor, resultIntent);
+            this.shortcutOriginal = shortcutOriginal;
+            this.shortcutForLauncher = shortcutForLauncher;
+            this.launcherPackage = launcherPackage;
+            this.launcherUserId = launcherUserId;
+            this.preExisting = preExisting;
+        }
+
+        @Override
+        protected boolean tryAccept() {
+            if (DEBUG) {
+                Slog.d(TAG, "Launcher accepted shortcut. ID=" + shortcutOriginal.getId()
+                    + " package=" + shortcutOriginal.getPackage());
+            }
+            return mProcessor.directPinShortcut(this);
         }
     }
 
@@ -134,15 +156,19 @@ class ShortcutRequestPinProcessor {
     }
 
     /**
-     * Handle {@link android.content.pm.ShortcutManager#requestPinShortcut)}.
+     * Handle {@link android.content.pm.ShortcutManager#requestPinShortcut)} and
+     * {@link android.appwidget.AppWidgetManager#requestPinAppWidget}.
+     * One of {@param inShortcut} and {@param inAppWidget} is always non-null and the other is
+     * always null.
      */
-    public boolean requestPinShortcutLocked(ShortcutInfo inShortcut, IntentSender resultIntent) {
+    public boolean requestPinItemLocked(ShortcutInfo inShortcut, AppWidgetProviderInfo inAppWidget,
+        int userId, IntentSender resultIntent) {
 
         // First, make sure the launcher supports it.
 
         // Find the confirmation activity in the default launcher.
         final Pair<ComponentName, Integer> confirmActivity =
-                getRequestPinShortcutConfirmationActivity(inShortcut.getUserId());
+                getRequestPinShortcutConfirmationActivity(userId);
 
         // If the launcher doesn't support it, just return a rejected result and finish.
         if (confirmActivity == null) {
@@ -150,8 +176,6 @@ class ShortcutRequestPinProcessor {
             return false;
         }
 
-        final ComponentName launcherComponent = confirmActivity.first;
-        final String launcherPackage = confirmActivity.first.getPackageName();
         final int launcherUserId = confirmActivity.second;
 
         // Make sure the launcher user is unlocked. (it's always the parent profile, so should
@@ -159,7 +183,25 @@ class ShortcutRequestPinProcessor {
         mService.throwIfUserLockedL(launcherUserId);
 
         // Next, validate the incoming shortcut, etc.
+        final PinItemRequest request;
+        if (inShortcut != null) {
+            request = requestPinShortcutLocked(inShortcut, resultIntent, confirmActivity);
+        } else {
+            request = new PinItemRequest(inAppWidget, new PinItemRequestInner(this, resultIntent));
+        }
 
+        if (request == null) {
+            sendResultIntent(resultIntent, null);
+            return true;
+        }
+        return startRequestConfirmActivity(confirmActivity.first, launcherUserId, request);
+    }
+
+    /**
+     * Handle {@link android.content.pm.ShortcutManager#requestPinShortcut)}.
+     */
+    private PinItemRequest requestPinShortcutLocked(ShortcutInfo inShortcut,
+            IntentSender resultIntent, Pair<ComponentName, Integer> confirmActivity) {
         final ShortcutPackage ps = mService.getPackageShortcutsForPublisherLocked(
                 inShortcut.getPackage(), inShortcut.getUserId());
 
@@ -174,6 +216,8 @@ class ShortcutRequestPinProcessor {
 
         // This is the shortcut that'll be sent to the launcher.
         final ShortcutInfo shortcutForLauncher;
+        final String launcherPackage = confirmActivity.first.getPackageName();
+        final int launcherUserId = confirmActivity.second;
 
         if (existsAlready) {
             validateExistingShortcut(existing);
@@ -183,8 +227,7 @@ class ShortcutRequestPinProcessor {
                     launcherPackage, existing.getUserId(), launcherUserId).hasPinned(existing)) {
                 Log.i(TAG, "Launcher's already pinning shortcut " + existing.getId()
                         + " for package " + existing.getPackage());
-                sendResultIntent(resultIntent);
-                return true;
+                return null;
             }
 
             // Pass a clone, not the original.
@@ -213,10 +256,7 @@ class ShortcutRequestPinProcessor {
                 new PinShortcutRequestInner(this, inShortcut, shortcutForLauncher, resultIntent,
                         launcherPackage, launcherUserId, existsAlready);
 
-        final PinItemRequest outer = new PinItemRequest(PinItemRequest.REQUEST_TYPE_SHORTCUT,
-                shortcutForLauncher, inner);
-
-        return startRequestConfirmActivity(launcherComponent, launcherUserId, outer);
+        return new PinItemRequest(shortcutForLauncher, inner);
     }
 
     private void validateExistingShortcut(ShortcutInfo shortcutInfo) {
@@ -270,11 +310,11 @@ class ShortcutRequestPinProcessor {
         return (activity == null) ? null : Pair.create(activity, launcherUserId);
     }
 
-    public void sendResultIntent(@Nullable IntentSender intent) {
+    public void sendResultIntent(@Nullable IntentSender intent, @Nullable Intent extras) {
         if (DEBUG) {
             Slog.d(TAG, "Sending result intent.");
         }
-        mService.injectSendIntentSender(intent);
+        mService.injectSendIntentSender(intent, extras);
     }
 
     /**
