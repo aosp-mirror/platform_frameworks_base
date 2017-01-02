@@ -164,7 +164,7 @@
     <integer name="def_lock_screen_show_notifications">1</integer>
 
     <!-- Default for Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS -->
-    <bool name="def_lock_screen_allow_private_notifications">true</bool>
+    <bool name="def_lock_screen_allow_private_notifications">false</bool>
 
     <!-- Default for Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED, 1==on -->
     <integer name="def_heads_up_enabled">1</integer>
