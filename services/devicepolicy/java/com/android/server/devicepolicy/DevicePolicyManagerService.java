@@ -544,8 +544,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (Intent.ACTION_USER_UNLOCKED.equals(action)
                     || Intent.ACTION_USER_STARTED.equals(action)
                     || KeyChain.ACTION_TRUST_STORE_CHANGED.equals(action)) {
-                int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_ALL);
-                new MonitoringCertNotificationTask().execute(userId);
+                if (!StorageManager.inCryptKeeperBounce()) {
+                    new MonitoringCertNotificationTask().execute(
+                            intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_ALL));
+                }
             }
             if (Intent.ACTION_USER_ADDED.equals(action)) {
                 sendUserAddedOrRemovedCommand(DeviceAdminReceiver.ACTION_USER_ADDED, userHandle);
