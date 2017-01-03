@@ -121,7 +121,7 @@ static void copyLine(uint32_t* dst, const unsigned char* src, const ColorMapObje
                      int transparent, int width)
 {
     for (; width > 0; width--, src++, dst++) {
-        if (*src != transparent) {
+        if (*src != transparent && *src < cmap->ColorCount) {
             const GifColorType& col = cmap->Colors[*src];
             *dst = SkPackARGB32(0xFF, col.Red, col.Green, col.Blue);
         }
