@@ -491,6 +491,12 @@ public class BatteryMeterDrawable extends Drawable implements
 
     @Override
     public void setColorFilter(@Nullable ColorFilter colorFilter) {
+        mFramePaint.setColorFilter(colorFilter);
+        mBatteryPaint.setColorFilter(colorFilter);
+        mWarningTextPaint.setColorFilter(colorFilter);
+        mTextPaint.setColorFilter(colorFilter);
+        mBoltPaint.setColorFilter(colorFilter);
+        mPlusPaint.setColorFilter(colorFilter);
     }
 
     @Override

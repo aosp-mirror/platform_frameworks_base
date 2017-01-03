@@ -22,6 +22,7 @@ import android.os.UserManager;
 
 import android.provider.Settings;
 import android.provider.Settings.Global;
+import android.service.quicksettings.Tile;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 import android.widget.Switch;
@@ -31,6 +32,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.qs.GlobalSetting;
 import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.external.TileColorPicker;
 import com.android.systemui.statusbar.policy.HotspotController;
 
 /** Quick settings tile: Hotspot **/
@@ -124,7 +126,8 @@ public class HotspotTile extends QSTile<QSTile.AirplaneBooleanState> {
         boolean wasAirplane = state.isAirplaneMode;
         state.isAirplaneMode = mAirplaneMode.getValue() != 0;
         if (state.isAirplaneMode) {
-            final int disabledColor = mHost.getContext().getColor(R.color.qs_tile_tint_unavailable);
+            final int disabledColor = TileColorPicker.getInstance(mContext)
+                    .getColor(Tile.STATE_UNAVAILABLE);
             state.label = new SpannableStringBuilder().append(state.label,
                     new ForegroundColorSpan(disabledColor),
                     SpannableStringBuilder.SPAN_INCLUSIVE_INCLUSIVE);

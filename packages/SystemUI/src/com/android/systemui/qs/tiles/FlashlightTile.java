@@ -20,6 +20,7 @@ import android.app.ActivityManager;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.provider.MediaStore;
+import android.service.quicksettings.Tile;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 import android.widget.Switch;
@@ -28,6 +29,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.external.TileColorPicker;
 import com.android.systemui.statusbar.policy.FlashlightController;
 
 /** Quick settings tile: Control flashlight **/
@@ -104,7 +106,8 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
         if (!mFlashlightController.isAvailable()) {
             Drawable icon = mHost.getContext().getDrawable(R.drawable.ic_signal_flashlight_disable)
                     .mutate();
-            final int disabledColor = mHost.getContext().getColor(R.color.qs_tile_tint_unavailable);
+            final int disabledColor = TileColorPicker.getInstance(mContext)
+                    .getColor(Tile.STATE_UNAVAILABLE);
             icon.setTint(disabledColor);
             state.icon = new DrawableIcon(icon);
             state.label = new SpannableStringBuilder().append(state.label,

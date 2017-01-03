@@ -19,7 +19,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
+import android.service.quicksettings.Tile;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.RelativeSizeSpan;
@@ -40,6 +43,7 @@ import com.android.systemui.BatteryMeterDrawable;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QS.DetailAdapter;
 import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.external.TileColorPicker;
 import com.android.systemui.statusbar.policy.BatteryController;
 
 import java.text.NumberFormat;
@@ -120,6 +124,8 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
                         context.getColor(R.color.batterymeter_frame_color));
                 drawable.onBatteryLevelChanged(mLevel, mPluggedIn, mCharging);
                 drawable.onPowerSaveChanged(mPowerSave);
+                final int color = TileColorPicker.getInstance(context).getColor(Tile.STATE_ACTIVE);
+                drawable.setColorFilter(new PorterDuffColorFilter(color, Mode.SRC_IN));
                 return drawable;
             }
 
@@ -205,6 +211,11 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
             mDrawable.onBatteryLevelChanged(100, false, false);
             mDrawable.onPowerSaveChanged(true);
             mDrawable.disableShowPercent();
+
+            final int color = TileColorPicker.getInstance(mCurrentView.getContext())
+                    .getColor(Tile.STATE_ACTIVE);
+            mDrawable.setColorFilter(new PorterDuffColorFilter(color, Mode.SRC_IN));
+
             ((ImageView) mCurrentView.findViewById(android.R.id.icon)).setImageDrawable(mDrawable);
             Checkable checkbox = (Checkable) mCurrentView.findViewById(android.R.id.toggle);
             checkbox.setChecked(mPowerSave);
