@@ -37,6 +37,7 @@
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/NuMediaExtractor.h>
+#include <android/media/ICas.h>
 
 #include <nativehelper/ScopedLocalRef.h>
 
@@ -86,6 +87,10 @@ status_t JMediaExtractor::setDataSource(int fd, off64_t offset, off64_t size) {
 
 status_t JMediaExtractor::setDataSource(const sp<DataSource> &datasource) {
     return mImpl->setDataSource(datasource);
+}
+
+status_t JMediaExtractor::setMediaCas(const sp<ICas> &cas) {
+    return mImpl->setMediaCas(cas);
 }
 
 size_t JMediaExtractor::countTracks() const {
@@ -734,6 +739,36 @@ static void android_media_MediaExtractor_setDataSourceCallback(
     }
 }
 
+static void android_media_MediaExtractor_setMediaCas(
+        JNIEnv *env, jobject thiz, jobject casBinderObj) {
+    sp<JMediaExtractor> extractor = getMediaExtractor(env, thiz);
+
+    if (extractor == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+
+    if (casBinderObj == NULL) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return;
+    }
+
+    sp<ICas> cas;
+    if (casBinderObj != NULL) {
+        sp<IBinder> binder = ibinderForJavaObject(env, casBinderObj);
+        cas = interface_cast<ICas>(binder);
+    }
+    status_t err = extractor->setMediaCas(cas);
+
+    if (err != OK) {
+        cas.clear();
+        jniThrowException(
+                env,
+                "java/io/IllegalArgumentException",
+                "Failed to set MediaCas on extractor.");
+    }
+}
+
 static jlong android_media_MediaExtractor_getCachedDurationUs(
         JNIEnv *env, jobject thiz) {
     sp<JMediaExtractor> extractor = getMediaExtractor(env, thiz);
@@ -860,6 +895,9 @@ static const JNINativeMethod gMethods[] = {
 
     { "setDataSource", "(Landroid/media/MediaDataSource;)V",
       (void *)android_media_MediaExtractor_setDataSourceCallback },
+
+    { "nativeSetMediaCas", "(Landroid/os/IBinder;)V",
+      (void *)android_media_MediaExtractor_setMediaCas },
 
     { "getCachedDuration", "()J",
       (void *)android_media_MediaExtractor_getCachedDurationUs },

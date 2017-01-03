@@ -35,6 +35,10 @@ class IGraphicBufferProducer;
 struct MediaCodec;
 struct PersistentSurface;
 class Surface;
+namespace media {
+class IDescrambler;
+};
+using namespace media;
 
 struct JMediaCodec : public AHandler {
     JMediaCodec(
@@ -54,6 +58,7 @@ struct JMediaCodec : public AHandler {
             const sp<AMessage> &format,
             const sp<IGraphicBufferProducer> &bufferProducer,
             const sp<ICrypto> &crypto,
+            const sp<IDescrambler> &descrambler,
             int flags);
 
     status_t setSurface(

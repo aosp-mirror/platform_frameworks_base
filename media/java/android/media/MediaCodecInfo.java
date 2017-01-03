@@ -460,6 +460,11 @@ public final class MediaCodecInfo {
         public static final String FEATURE_TunneledPlayback       = "tunneled-playback";
 
         /**
+         * <b>video decoder only</b>: codec supports queuing partial frames.
+         */
+        public static final String FEATURE_PartialFrame = "partial-frame";
+
+        /**
          * <b>video encoder only</b>: codec supports intra refresh.
          */
         public static final String FEATURE_IntraRefresh = "intra-refresh";
@@ -489,6 +494,7 @@ public final class MediaCodecInfo {
             new Feature(FEATURE_AdaptivePlayback, (1 << 0), true),
             new Feature(FEATURE_SecurePlayback,   (1 << 1), false),
             new Feature(FEATURE_TunneledPlayback, (1 << 2), false),
+            new Feature(FEATURE_PartialFrame,     (1 << 3), false),
         };
 
         private static final Feature[] encoderFeatures = {
