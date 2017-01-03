@@ -1156,6 +1156,7 @@
         </activity>
         <activity android:name="android.app.EmptyActivity">
         </activity>
+        <activity android:name="com.android.internal.app.ChooserWrapperActivity"/>
 
         <receiver android:name="android.app.activity.AbortReceiver">
             <intent-filter android:priority="1">
