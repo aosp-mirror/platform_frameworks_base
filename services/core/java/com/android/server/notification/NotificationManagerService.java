@@ -3097,8 +3097,17 @@ public class NotificationManagerService extends SystemService {
         if (mIsTelevision && (new Notification.TvExtender(notification)).getChannel() != null) {
             channelId = (new Notification.TvExtender(notification)).getChannel();
         }
-        final NotificationChannel channel =  mRankingHelper.getNotificationChannelWithFallback(pkg,
+        final NotificationChannel channel = mRankingHelper.getNotificationChannel(pkg,
                 notificationUid, channelId, false /* includeDeleted */);
+        if (channel == null) {
+            // STOPSHIP TODO: remove before release - should always throw without a valid channel.
+            if (channelId == null) {
+                Log.e(TAG, "Cannot post notification without channel ID when targeting O "
+                        + " - notification=" + notification);
+                return;
+            }
+            throw new IllegalArgumentException("No Channel found for notification=" + notification);
+        }
         final StatusBarNotification n = new StatusBarNotification(
                 pkg, opPkg, id, tag, notificationUid, callingPid, notification,
                 user, null, System.currentTimeMillis());
