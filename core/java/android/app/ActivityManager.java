@@ -3336,6 +3336,8 @@ public class ActivityManager {
      * @see #forceStopPackageAsUser(String, int)
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.FORCE_STOP_PACKAGES)
     public void forceStopPackage(String packageName) {
         forceStopPackageAsUser(packageName, UserHandle.myUserId());
     }
