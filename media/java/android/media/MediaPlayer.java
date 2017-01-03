@@ -2291,7 +2291,7 @@ public class MediaPlayer extends PlayerBase
      * {@link #setSubtitleAnchor(SubtitleController, Anchor)} (e.g. {@link VideoView} provides one).
      */
     private synchronized void setSubtitleAnchor() {
-        if (mSubtitleController == null) {
+        if ((mSubtitleController == null) && (ActivityThread.currentApplication() != null)) {
             final HandlerThread thread = new HandlerThread("SetSubtitleAnchorThread");
             thread.start();
             Handler handler = new Handler(thread.getLooper());
