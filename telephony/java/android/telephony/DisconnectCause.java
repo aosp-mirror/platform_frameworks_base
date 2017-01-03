@@ -240,6 +240,13 @@ public class DisconnectCause {
      */
     public static final int DIALED_CALL_FORWARDING_WHILE_ROAMING = 57;
 
+    /**
+     * The network does not accept the emergency call request because IMEI was used as
+     * identification and this cability is not supported by the network.
+     * {@hide}
+     */
+    public static final int IMEI_NOT_ACCEPTED = 58;
+
     //*********************************************************************************************
     // When adding a disconnect type:
     // 1) Please assign the new type the next id value below.
@@ -248,14 +255,14 @@ public class DisconnectCause {
     // 4) Update toString() with the newly added disconnect type.
     // 5) Update android.telecom.DisconnectCauseUtil with any mappings to a telecom.DisconnectCause.
     //
-    // NextId: 58
+    // NextId: 59
     //*********************************************************************************************
 
     /** Smallest valid value for call disconnect codes. */
     public static final int MINIMUM_VALID_VALUE = NOT_DISCONNECTED;
 
     /** Largest valid value for call disconnect codes. */
-    public static final int MAXIMUM_VALID_VALUE = DIALED_CALL_FORWARDING_WHILE_ROAMING;
+    public static final int MAXIMUM_VALID_VALUE = IMEI_NOT_ACCEPTED;
 
     /** Private constructor to avoid class instantiation. */
     private DisconnectCause() {
@@ -379,6 +386,8 @@ public class DisconnectCause {
             return "DIALED_ON_WRONG_SLOT";
         case DIALED_CALL_FORWARDING_WHILE_ROAMING:
             return "DIALED_CALL_FORWARDING_WHILE_ROAMING";
+        case IMEI_NOT_ACCEPTED:
+            return "IMEI_NOT_ACCEPTED";
         default:
             return "INVALID: " + cause;
         }
