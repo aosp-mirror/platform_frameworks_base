@@ -16,6 +16,8 @@
 
 package com.android.server.devicepolicy;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.IActivityManager;
 import android.app.NotificationManager;
 import android.app.backup.IBackupManager;
@@ -273,6 +275,7 @@ public class DpmMockContext extends MockContext {
     public final SettingsForMock settings;
     public final MockContentResolver contentResolver;
     public final TelephonyManager telephonyManager;
+    public final AccountManager accountManager;
 
     /** Note this is a partial mock, not a real mock. */
     public final PackageManager packageManager;
@@ -315,6 +318,7 @@ public class DpmMockContext extends MockContext {
         wifiManager = mock(WifiManager.class);
         settings = mock(SettingsForMock.class);
         telephonyManager = mock(TelephonyManager.class);
+        accountManager = mock(AccountManager.class);
 
         // Package manager is huge, so we use a partial mock instead.
         packageManager = spy(context.getPackageManager());
@@ -375,6 +379,7 @@ public class DpmMockContext extends MockContext {
                     }
                 }
         );
+        when(accountManager.getAccountsAsUser(anyInt())).thenReturn(new Account[0]);
 
         // Create a data directory.
         final File dir = new File(dataDir, "user" + userId);
@@ -464,6 +469,8 @@ public class DpmMockContext extends MockContext {
                 return powerManager;
             case Context.WIFI_SERVICE:
                 return wifiManager;
+            case Context.ACCOUNT_SERVICE:
+                return accountManager;
         }
         throw new UnsupportedOperationException();
     }
