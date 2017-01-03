@@ -184,6 +184,11 @@ public class Process {
      */
     public static final int LAST_SHARED_APPLICATION_GID = 59999;
 
+    /** {@hide} */
+    public static final int FIRST_APPLICATION_CACHE_GID = 20000;
+    /** {@hide} */
+    public static final int LAST_APPLICATION_CACHE_GID = 29999;
+
     /**
      * Standard priority of application threads.
      * Use with {@link #setThreadPriority(int)} and
