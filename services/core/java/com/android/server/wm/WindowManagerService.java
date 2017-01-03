@@ -7146,6 +7146,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mInputMonitor.dump(pw, "  ");
         mUnknownAppVisibilityController.dump(pw, "  ");
+        mTaskSnapshotController.dump(pw, "  ");
 
         if (dumpAll) {
             pw.print("  mSystemDecorLayer="); pw.print(mSystemDecorLayer);

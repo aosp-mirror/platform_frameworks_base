@@ -34,6 +34,8 @@ import android.view.WindowManagerPolicy.StartingSurface;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.io.PrintWriter;
+
 /**
  * When an app token becomes invisible, we take a snapshot (bitmap) of the corresponding task and
  * put it into our cache. Internally we use gralloc buffers to be able to draw them wherever we
@@ -92,7 +94,7 @@ class TaskSnapshotController {
     }
 
     private TaskSnapshot snapshotTask(Task task) {
-        final AppWindowToken top = (AppWindowToken) task.getTop();
+        final AppWindowToken top = task.getTopChild();
         if (top == null) {
             return null;
         }
@@ -130,5 +132,26 @@ class TaskSnapshotController {
 
     private boolean canSnapshotTask(Task task) {
         return !StackId.isHomeOrRecentsStack(task.mStack.mStackId);
+    }
+
+    /**
+     * Called when an {@link AppWindowToken} has been removed.
+     */
+    void onAppRemoved(AppWindowToken wtoken) {
+        // TODO: Clean from both recents and running cache.
+        mCache.cleanCache(wtoken);
+    }
+
+    /**
+     * Called when the process of an {@link AppWindowToken} has died.
+     */
+    void onAppDied(AppWindowToken wtoken) {
+
+        // TODO: Only clean from running cache.
+        mCache.cleanCache(wtoken);
+    }
+
+    void dump(PrintWriter pw, String prefix) {
+        mCache.dump(pw, prefix);
     }
 }

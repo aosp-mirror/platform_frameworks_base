@@ -451,9 +451,9 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
         return false;
     }
 
-    /** Returns the top child container or this container if there are no children. */
-    WindowContainer getTop() {
-        return mChildren.isEmpty() ? this : mChildren.peekLast();
+    /** Returns the top child container. */
+    E getTopChild() {
+        return mChildren.peekLast();
     }
 
     /** Returns true if there is still a removal being deferred */
