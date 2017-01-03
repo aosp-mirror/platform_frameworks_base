@@ -747,9 +747,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                     "Need BLUETOOTH ADMIN permission");
 
-            if (!isEnabled() && mPermissionReviewRequired
-                    && startConsentUiIfNeeded(packageName, callingUid,
-                            BluetoothAdapter.ACTION_REQUEST_ENABLE)) {
+            if (!isEnabled() && mPermissionReviewRequired) {
+                startConsentUi(packageName, callingUid, BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 return false;
             }
         }
@@ -783,9 +782,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                     "Need BLUETOOTH ADMIN permission");
 
-            if (isEnabled() && mPermissionReviewRequired
-                    && startConsentUiIfNeeded(packageName, callingUid,
-                            BluetoothAdapter.ACTION_REQUEST_DISABLE)) {
+            if (isEnabled() && mPermissionReviewRequired) {
+                startConsentUi(packageName, callingUid, BluetoothAdapter.ACTION_REQUEST_DISABLE);
                 return false;
             }
         }
@@ -808,8 +806,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         return true;
     }
 
-    private boolean startConsentUiIfNeeded(String packageName,
-            int callingUid, String intentAction) throws RemoteException {
+    private void startConsentUi(String packageName, int callingUid, String intentAction)
+            throws RemoteException {
         try {
             // Validate the package only if we are going to use it
             ApplicationInfo applicationInfo = mContext.getPackageManager()
@@ -821,16 +819,12 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         + " not in uid " + callingUid);
             }
 
-            // Legacy apps in permission review mode trigger a user prompt
-            if (applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
-                Intent intent = new Intent(intentAction);
-                mContext.startActivity(intent);
-                return true;
-            }
+            // Permission review mode, trigger a user prompt
+            Intent intent = new Intent(intentAction);
+            mContext.startActivity(intent);
         } catch (PackageManager.NameNotFoundException e) {
             throw new RemoteException(e.getMessage());
         }
-        return false;
     }
 
     public void unbindAndFinish() {
