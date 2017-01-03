@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Bundle;
@@ -24,6 +25,8 @@ import android.os.Parcelable;
 
 import java.lang.Math;
 import java.lang.UnsupportedOperationException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
@@ -33,6 +36,15 @@ import java.util.Objects;
  */
 @SystemApi
 public class ScoredNetwork implements Parcelable {
+
+  /**
+     * Key used with the {@link #attributes} bundle to define the badging curve.
+     *
+     * <p>The badging curve is a {@link RssiCurve} used to map different RSSI values to {@link
+     * Badging} enums.
+     */
+    public static final String ATTRIBUTES_KEY_BADGING_CURVE =
+            "android.net.attributes.key.BADGING_CURVE";
     /**
      * Extra used with {@link #attributes} to specify whether the
      * network is believed to have a captive portal.
@@ -57,6 +69,15 @@ public class ScoredNetwork implements Parcelable {
      */
     public static final String ATTRIBUTES_KEY_RANKING_SCORE_OFFSET =
             "android.net.attributes.key.RANKING_SCORE_OFFSET";
+
+    @IntDef({BADGING_NONE, BADGING_SD, BADGING_HD, BADGING_4K})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Badging {}
+
+    public static final int BADGING_NONE = 0;
+    public static final int BADGING_SD = 10;
+    public static final int BADGING_HD = 20;
+    public static final int BADGING_4K = 30;
 
     /** A {@link NetworkKey} uniquely identifying this network. */
     public final NetworkKey networkKey;
@@ -247,6 +268,25 @@ public class ScoredNetwork implements Parcelable {
         } catch (ArithmeticException e) {
             return (score < 0) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         }
+    }
+
+    /**
+     * Return the {@link Badging} enum for this network for the given RSSI, derived from the
+     * badging curve.
+     *
+     * <p>If no badging curve is present, {@link #BADGE_NONE} will be returned.
+     *
+     * @param rssi The rssi level for which the badge should be calculated
+     */
+    @Badging
+    public int calculateBadge(int rssi) {
+        if (attributes != null && attributes.containsKey(ATTRIBUTES_KEY_BADGING_CURVE)) {
+            RssiCurve badgingCurve =
+                    attributes.getParcelable(ATTRIBUTES_KEY_BADGING_CURVE);
+            return badgingCurve.lookupScore(rssi);
+        }
+
+        return BADGING_NONE;
     }
 
     public static final Parcelable.Creator<ScoredNetwork> CREATOR =

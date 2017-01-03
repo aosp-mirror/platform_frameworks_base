@@ -166,4 +166,52 @@ public class ScoredNetworkTest {
         assertTrue(newNetwork.meteredHint);
         assertNull(newNetwork.attributes);
     }
+
+    @Test
+    public void calculateBadgeShouldReturnNoBadgeWhenNoAttributesBundle() {
+        ScoredNetwork network = new ScoredNetwork(KEY, CURVE);
+        assertEquals(ScoredNetwork.BADGING_NONE, network.calculateBadge(TEST_RSSI));
+    }
+
+    @Test
+    public void calculateBadgeShouldReturnNoBadgeWhenNoBadgingCurveInBundle() {
+        ScoredNetwork network = new ScoredNetwork(KEY, CURVE, false /* meteredHint */, ATTRIBUTES);
+        assertEquals(ScoredNetwork.BADGING_NONE, network.calculateBadge(TEST_RSSI));
+    }
+
+    @Test
+    public void calculateBadgeShouldReturn4kBadge() {
+        ScoredNetwork network =
+            buildScoredNetworkWithGivenBadgeForTestRssi(ScoredNetwork.BADGING_4K);
+        assertEquals(ScoredNetwork.BADGING_4K, network.calculateBadge(TEST_RSSI));
+    }
+
+    @Test
+    public void calculateBadgeShouldReturnHdBadge() {
+        ScoredNetwork network =
+            buildScoredNetworkWithGivenBadgeForTestRssi(ScoredNetwork.BADGING_HD);
+        assertEquals(ScoredNetwork.BADGING_HD, network.calculateBadge(TEST_RSSI));
+    }
+
+    @Test
+    public void calculateBadgeShouldReturnSdBadge() {
+        ScoredNetwork network =
+            buildScoredNetworkWithGivenBadgeForTestRssi(ScoredNetwork.BADGING_SD);
+        assertEquals(ScoredNetwork.BADGING_SD, network.calculateBadge(TEST_RSSI));
+    }
+
+    @Test
+    public void calculateBadgeShouldReturnNoBadge() {
+        ScoredNetwork network =
+            buildScoredNetworkWithGivenBadgeForTestRssi(ScoredNetwork.BADGING_NONE);
+        assertEquals(ScoredNetwork.BADGING_NONE, network.calculateBadge(TEST_RSSI));
+    }
+
+    private ScoredNetwork buildScoredNetworkWithGivenBadgeForTestRssi(int badge) {
+        RssiCurve badgingCurve =
+               new RssiCurve(RSSI_START, 10, new byte[] {0, 0, 0, 0, 0, 0, (byte) badge});
+        Bundle attr = new Bundle();
+        attr.putParcelable(ScoredNetwork.ATTRIBUTES_KEY_BADGING_CURVE, badgingCurve);
+        return new ScoredNetwork(KEY, CURVE, false /* meteredHint */, attr);
+    }
 }
