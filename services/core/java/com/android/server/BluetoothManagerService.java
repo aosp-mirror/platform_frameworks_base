@@ -826,25 +826,21 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         + " not in uid " + callingUid);
             }
 
-            // Legacy apps in permission review mode trigger a user prompt
-            if (applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
-                Intent intent = new Intent(intentAction);
-                intent.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-                try {
-                    mContext.startActivity(intent);
-                } catch (ActivityNotFoundException e) {
-                    // Shouldn't happen
-                    Slog.e(TAG, "Intent to handle action " + intentAction + " missing");
-                    return false;
-                }
-                return true;
+            Intent intent = new Intent(intentAction);
+            intent.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+            try {
+                mContext.startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                // Shouldn't happen
+                Slog.e(TAG, "Intent to handle action " + intentAction + " missing");
+                return false;
             }
+            return true;
         } catch (PackageManager.NameNotFoundException e) {
             throw new RemoteException(e.getMessage());
         }
-        return false;
     }
 
     public void unbindAndFinish() {
