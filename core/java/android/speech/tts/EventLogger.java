@@ -18,14 +18,14 @@ package android.speech.tts;
 import android.text.TextUtils;
 
 /**
- * Writes data about a given speech synthesis request for V1 API to the event
- * logs. The data that is logged includes the calling app, length of the
- * utterance, speech rate / pitch, the latency, and overall time taken.
+ * Writes data about a given speech synthesis request to the event logs. The data that is logged
+ * includes the calling app, length of the utterance, speech rate / pitch, the latency, and overall
+ * time taken.
  */
-class EventLoggerV1 extends AbstractEventLogger {
+class EventLogger extends AbstractEventLogger {
     private final SynthesisRequest mRequest;
 
-    EventLoggerV1(SynthesisRequest request, int callerUid, int callerPid, String serviceApp) {
+    EventLogger(SynthesisRequest request, int callerUid, int callerPid, String serviceApp) {
         super(callerUid, callerPid, serviceApp);
         mRequest = request;
     }

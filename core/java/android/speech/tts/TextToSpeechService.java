@@ -226,17 +226,14 @@ public abstract class TextToSpeechService extends Service {
     protected abstract void onStop();
 
     /**
-     * Tells the service to synthesize speech from the given text. This method
-     * should block until the synthesis is finished. Used for requests from V1
-     * clients ({@link android.speech.tts.TextToSpeech}). Called on the synthesis
-     * thread.
+     * Tells the service to synthesize speech from the given text. This method should block until
+     * the synthesis is finished. Called on the synthesis thread.
      *
      * @param request The synthesis request.
-     * @param callback The callback that the engine must use to make data
-     *            available for playback or for writing to a file.
+     * @param callback The callback that the engine must use to make data available for playback or
+     *     for writing to a file.
      */
-    protected abstract void onSynthesizeText(SynthesisRequest request,
-            SynthesisCallback callback);
+    protected abstract void onSynthesizeText(SynthesisRequest request, SynthesisCallback callback);
 
     /**
      * Queries the service for a set of features supported for a given language.
@@ -713,8 +710,7 @@ public abstract class TextToSpeechService extends Service {
         }
 
         /** Create AudioOutputParams from A {@link SynthesisRequest#getParams()} bundle */
-        static AudioOutputParams createFromV1ParamsBundle(Bundle paramsBundle,
-                boolean isSpeech) {
+        static AudioOutputParams createFromParamsBundle(Bundle paramsBundle, boolean isSpeech) {
             if (paramsBundle == null) {
                 return new AudioOutputParams();
             }
@@ -902,16 +898,19 @@ public abstract class TextToSpeechService extends Service {
     }
 
     /**
-     * UtteranceSpeechItem for V1 API speech items. V1 API speech items keep
-     * synthesis parameters in a single Bundle passed as parameter. This class
-     * allow subclasses to access them conveniently.
+     * Synthesis parameters are kept in a single Bundle passed as parameter. This class allow
+     * subclasses to access them conveniently.
      */
-    private abstract class SpeechItemV1 extends UtteranceSpeechItem {
+    private abstract class UtteranceSpeechItemWithParams extends UtteranceSpeechItem {
         protected final Bundle mParams;
         protected final String mUtteranceId;
 
-        SpeechItemV1(Object callerIdentity, int callerUid, int callerPid,
-                Bundle params, String utteranceId) {
+        UtteranceSpeechItemWithParams(
+                Object callerIdentity,
+                int callerUid,
+                int callerPid,
+                Bundle params,
+                String utteranceId) {
             super(callerIdentity, callerUid, callerPid);
             mParams = params;
             mUtteranceId = utteranceId;
@@ -935,11 +934,11 @@ public abstract class TextToSpeechService extends Service {
         }
 
         AudioOutputParams getAudioParams() {
-            return AudioOutputParams.createFromV1ParamsBundle(mParams, true);
+            return AudioOutputParams.createFromParamsBundle(mParams, true);
         }
     }
 
-    class SynthesisSpeechItemV1 extends SpeechItemV1 {
+    class SynthesisSpeechItem extends UtteranceSpeechItemWithParams {
         // Never null.
         private final CharSequence mText;
         private final SynthesisRequest mSynthesisRequest;
@@ -947,19 +946,23 @@ public abstract class TextToSpeechService extends Service {
         // Non null after synthesis has started, and all accesses
         // guarded by 'this'.
         private AbstractSynthesisCallback mSynthesisCallback;
-        private final EventLoggerV1 mEventLogger;
+        private final EventLogger mEventLogger;
         private final int mCallerUid;
 
-        public SynthesisSpeechItemV1(Object callerIdentity, int callerUid, int callerPid,
-                Bundle params, String utteranceId, CharSequence text) {
+        public SynthesisSpeechItem(
+                Object callerIdentity,
+                int callerUid,
+                int callerPid,
+                Bundle params,
+                String utteranceId,
+                CharSequence text) {
             super(callerIdentity, callerUid, callerPid, params, utteranceId);
             mText = text;
             mCallerUid = callerUid;
             mSynthesisRequest = new SynthesisRequest(mText, mParams);
             mDefaultLocale = getSettingsLocale();
             setRequestParams(mSynthesisRequest);
-            mEventLogger = new EventLoggerV1(mSynthesisRequest, callerUid, callerPid,
-                    mPackageName);
+            mEventLogger = new EventLogger(mSynthesisRequest, callerUid, callerPid, mPackageName);
         }
 
         public CharSequence getText() {
@@ -1053,11 +1056,16 @@ public abstract class TextToSpeechService extends Service {
         }
     }
 
-    private class SynthesisToFileOutputStreamSpeechItemV1 extends SynthesisSpeechItemV1 {
+    private class SynthesisToFileOutputStreamSpeechItem extends SynthesisSpeechItem {
         private final FileOutputStream mFileOutputStream;
 
-        public SynthesisToFileOutputStreamSpeechItemV1(Object callerIdentity, int callerUid,
-                int callerPid, Bundle params, String utteranceId, CharSequence text,
+        public SynthesisToFileOutputStreamSpeechItem(
+                Object callerIdentity,
+                int callerUid,
+                int callerPid,
+                Bundle params,
+                String utteranceId,
+                CharSequence text,
                 FileOutputStream fileOutputStream) {
             super(callerIdentity, callerUid, callerPid, params, utteranceId, text);
             mFileOutputStream = fileOutputStream;
@@ -1080,11 +1088,16 @@ public abstract class TextToSpeechService extends Service {
         }
     }
 
-    private class AudioSpeechItemV1 extends SpeechItemV1 {
+    private class AudioSpeechItem extends UtteranceSpeechItemWithParams {
         private final AudioPlaybackQueueItem mItem;
 
-        public AudioSpeechItemV1(Object callerIdentity, int callerUid, int callerPid,
-                Bundle params, String utteranceId, Uri uri) {
+        public AudioSpeechItem(
+                Object callerIdentity,
+                int callerUid,
+                int callerPid,
+                Bundle params,
+                String utteranceId,
+                Uri uri) {
             super(callerIdentity, callerUid, callerPid, params, utteranceId);
             mItem = new AudioPlaybackQueueItem(this, getCallerIdentity(),
                     TextToSpeechService.this, uri, getAudioParams());
@@ -1112,7 +1125,7 @@ public abstract class TextToSpeechService extends Service {
 
         @Override
         AudioOutputParams getAudioParams() {
-            return AudioOutputParams.createFromV1ParamsBundle(mParams, false);
+            return AudioOutputParams.createFromParamsBundle(mParams, false);
         }
     }
 
@@ -1219,202 +1232,252 @@ public abstract class TextToSpeechService extends Service {
     }
 
     /**
-     * Binder returned from {@code #onBind(Intent)}. The methods in this class can be
-     * called called from several different threads.
+     * Binder returned from {@code #onBind(Intent)}. The methods in this class can be called called
+     * from several different threads.
      */
     // NOTE: All calls that are passed in a calling app are interned so that
     // they can be used as message objects (which are tested for equality using ==).
-    private final ITextToSpeechService.Stub mBinder = new ITextToSpeechService.Stub() {
-        @Override
-        public int speak(IBinder caller, CharSequence text, int queueMode, Bundle params,
-                String utteranceId) {
-            if (!checkNonNull(caller, text, params)) {
-                return TextToSpeech.ERROR;
-            }
+    private final ITextToSpeechService.Stub mBinder =
+            new ITextToSpeechService.Stub() {
+                @Override
+                public int speak(
+                        IBinder caller,
+                        CharSequence text,
+                        int queueMode,
+                        Bundle params,
+                        String utteranceId) {
+                    if (!checkNonNull(caller, text, params)) {
+                        return TextToSpeech.ERROR;
+                    }
 
-            SpeechItem item = new SynthesisSpeechItemV1(caller,
-                    Binder.getCallingUid(), Binder.getCallingPid(), params, utteranceId, text);
-            return mSynthHandler.enqueueSpeechItem(queueMode, item);
-        }
-
-        @Override
-        public int synthesizeToFileDescriptor(IBinder caller, CharSequence text, ParcelFileDescriptor
-                fileDescriptor, Bundle params, String utteranceId) {
-            if (!checkNonNull(caller, text, fileDescriptor, params)) {
-                return TextToSpeech.ERROR;
-            }
-
-            // In test env, ParcelFileDescriptor instance may be EXACTLY the same
-            // one that is used by client. And it will be closed by a client, thus
-            // preventing us from writing anything to it.
-            final ParcelFileDescriptor sameFileDescriptor = ParcelFileDescriptor.adoptFd(
-                    fileDescriptor.detachFd());
-
-            SpeechItem item = new SynthesisToFileOutputStreamSpeechItemV1(caller,
-                    Binder.getCallingUid(), Binder.getCallingPid(), params, utteranceId, text,
-                    new ParcelFileDescriptor.AutoCloseOutputStream(sameFileDescriptor));
-            return mSynthHandler.enqueueSpeechItem(TextToSpeech.QUEUE_ADD, item);
-        }
-
-        @Override
-        public int playAudio(IBinder caller, Uri audioUri, int queueMode, Bundle params,
-                String utteranceId) {
-            if (!checkNonNull(caller, audioUri, params)) {
-                return TextToSpeech.ERROR;
-            }
-
-            SpeechItem item = new AudioSpeechItemV1(caller,
-                    Binder.getCallingUid(), Binder.getCallingPid(), params, utteranceId, audioUri);
-            return mSynthHandler.enqueueSpeechItem(queueMode, item);
-        }
-
-        @Override
-        public int playSilence(IBinder caller, long duration, int queueMode, String utteranceId) {
-            if (!checkNonNull(caller)) {
-                return TextToSpeech.ERROR;
-            }
-
-            SpeechItem item = new SilenceSpeechItem(caller,
-                    Binder.getCallingUid(), Binder.getCallingPid(), utteranceId, duration);
-            return mSynthHandler.enqueueSpeechItem(queueMode, item);
-        }
-
-        @Override
-        public boolean isSpeaking() {
-            return mSynthHandler.isSpeaking() || mAudioPlaybackHandler.isSpeaking();
-        }
-
-        @Override
-        public int stop(IBinder caller) {
-            if (!checkNonNull(caller)) {
-                return TextToSpeech.ERROR;
-            }
-
-            return mSynthHandler.stopForApp(caller);
-        }
-
-        @Override
-        public String[] getLanguage() {
-            return onGetLanguage();
-        }
-
-        @Override
-        public String[] getClientDefaultLanguage() {
-            return getSettingsLocale();
-        }
-
-        /*
-         * If defaults are enforced, then no language is "available" except
-         * perhaps the default language selected by the user.
-         */
-        @Override
-        public int isLanguageAvailable(String lang, String country, String variant) {
-            if (!checkNonNull(lang)) {
-                return TextToSpeech.ERROR;
-            }
-
-            return onIsLanguageAvailable(lang, country, variant);
-        }
-
-        @Override
-        public String[] getFeaturesForLanguage(String lang, String country, String variant) {
-            Set<String> features = onGetFeaturesForLanguage(lang, country, variant);
-            String[] featuresArray = null;
-            if (features != null) {
-                featuresArray = new String[features.size()];
-                features.toArray(featuresArray);
-            } else {
-                featuresArray = new String[0];
-            }
-            return featuresArray;
-        }
-
-        /*
-         * There is no point loading a non default language if defaults
-         * are enforced.
-         */
-        @Override
-        public int loadLanguage(IBinder caller, String lang, String country, String variant) {
-            if (!checkNonNull(lang)) {
-                return TextToSpeech.ERROR;
-            }
-            int retVal = onIsLanguageAvailable(lang, country, variant);
-
-            if (retVal == TextToSpeech.LANG_AVAILABLE ||
-                    retVal == TextToSpeech.LANG_COUNTRY_AVAILABLE ||
-                    retVal == TextToSpeech.LANG_COUNTRY_VAR_AVAILABLE) {
-
-                SpeechItem item = new LoadLanguageItem(caller, Binder.getCallingUid(),
-                        Binder.getCallingPid(), lang, country, variant);
-
-                if (mSynthHandler.enqueueSpeechItem(TextToSpeech.QUEUE_ADD, item) !=
-                        TextToSpeech.SUCCESS) {
-                    return TextToSpeech.ERROR;
+                    SpeechItem item =
+                            new SynthesisSpeechItem(
+                                    caller,
+                                    Binder.getCallingUid(),
+                                    Binder.getCallingPid(),
+                                    params,
+                                    utteranceId,
+                                    text);
+                    return mSynthHandler.enqueueSpeechItem(queueMode, item);
                 }
-            }
-            return retVal;
-        }
 
-        @Override
-        public List<Voice> getVoices() {
-            return onGetVoices();
-        }
+                @Override
+                public int synthesizeToFileDescriptor(
+                        IBinder caller,
+                        CharSequence text,
+                        ParcelFileDescriptor fileDescriptor,
+                        Bundle params,
+                        String utteranceId) {
+                    if (!checkNonNull(caller, text, fileDescriptor, params)) {
+                        return TextToSpeech.ERROR;
+                    }
 
-        @Override
-        public int loadVoice(IBinder caller, String voiceName) {
-            if (!checkNonNull(voiceName)) {
-                return TextToSpeech.ERROR;
-            }
-            int retVal = onIsValidVoiceName(voiceName);
+                    // In test env, ParcelFileDescriptor instance may be EXACTLY the same
+                    // one that is used by client. And it will be closed by a client, thus
+                    // preventing us from writing anything to it.
+                    final ParcelFileDescriptor sameFileDescriptor =
+                            ParcelFileDescriptor.adoptFd(fileDescriptor.detachFd());
 
-            if (retVal == TextToSpeech.SUCCESS) {
-                SpeechItem item = new LoadVoiceItem(caller, Binder.getCallingUid(),
-                        Binder.getCallingPid(), voiceName);
-                if (mSynthHandler.enqueueSpeechItem(TextToSpeech.QUEUE_ADD, item) !=
-                        TextToSpeech.SUCCESS) {
-                    return TextToSpeech.ERROR;
+                    SpeechItem item =
+                            new SynthesisToFileOutputStreamSpeechItem(
+                                    caller,
+                                    Binder.getCallingUid(),
+                                    Binder.getCallingPid(),
+                                    params,
+                                    utteranceId,
+                                    text,
+                                    new ParcelFileDescriptor.AutoCloseOutputStream(
+                                            sameFileDescriptor));
+                    return mSynthHandler.enqueueSpeechItem(TextToSpeech.QUEUE_ADD, item);
                 }
-            }
-            return retVal;
-        }
 
-        public String getDefaultVoiceNameFor(String lang, String country, String variant) {
-            if (!checkNonNull(lang)) {
-                return null;
-            }
-            int retVal = onIsLanguageAvailable(lang, country, variant);
+                @Override
+                public int playAudio(
+                        IBinder caller,
+                        Uri audioUri,
+                        int queueMode,
+                        Bundle params,
+                        String utteranceId) {
+                    if (!checkNonNull(caller, audioUri, params)) {
+                        return TextToSpeech.ERROR;
+                    }
 
-            if (retVal == TextToSpeech.LANG_AVAILABLE ||
-                    retVal == TextToSpeech.LANG_COUNTRY_AVAILABLE ||
-                    retVal == TextToSpeech.LANG_COUNTRY_VAR_AVAILABLE) {
-                return onGetDefaultVoiceNameFor(lang, country, variant);
-            } else {
-                return null;
-            }
-        }
+                    SpeechItem item =
+                            new AudioSpeechItem(
+                                    caller,
+                                    Binder.getCallingUid(),
+                                    Binder.getCallingPid(),
+                                    params,
+                                    utteranceId,
+                                    audioUri);
+                    return mSynthHandler.enqueueSpeechItem(queueMode, item);
+                }
 
-        @Override
-        public void setCallback(IBinder caller, ITextToSpeechCallback cb) {
-            // Note that passing in a null callback is a valid use case.
-            if (!checkNonNull(caller)) {
-                return;
-            }
+                @Override
+                public int playSilence(
+                        IBinder caller, long duration, int queueMode, String utteranceId) {
+                    if (!checkNonNull(caller)) {
+                        return TextToSpeech.ERROR;
+                    }
 
-            mCallbacks.setCallback(caller, cb);
-        }
+                    SpeechItem item =
+                            new SilenceSpeechItem(
+                                    caller,
+                                    Binder.getCallingUid(),
+                                    Binder.getCallingPid(),
+                                    utteranceId,
+                                    duration);
+                    return mSynthHandler.enqueueSpeechItem(queueMode, item);
+                }
 
-        private String intern(String in) {
-            // The input parameter will be non null.
-            return in.intern();
-        }
+                @Override
+                public boolean isSpeaking() {
+                    return mSynthHandler.isSpeaking() || mAudioPlaybackHandler.isSpeaking();
+                }
 
-        private boolean checkNonNull(Object... args) {
-            for (Object o : args) {
-                if (o == null) return false;
-            }
-            return true;
-        }
-    };
+                @Override
+                public int stop(IBinder caller) {
+                    if (!checkNonNull(caller)) {
+                        return TextToSpeech.ERROR;
+                    }
+
+                    return mSynthHandler.stopForApp(caller);
+                }
+
+                @Override
+                public String[] getLanguage() {
+                    return onGetLanguage();
+                }
+
+                @Override
+                public String[] getClientDefaultLanguage() {
+                    return getSettingsLocale();
+                }
+
+                /*
+                 * If defaults are enforced, then no language is "available" except
+                 * perhaps the default language selected by the user.
+                 */
+                @Override
+                public int isLanguageAvailable(String lang, String country, String variant) {
+                    if (!checkNonNull(lang)) {
+                        return TextToSpeech.ERROR;
+                    }
+
+                    return onIsLanguageAvailable(lang, country, variant);
+                }
+
+                @Override
+                public String[] getFeaturesForLanguage(
+                        String lang, String country, String variant) {
+                    Set<String> features = onGetFeaturesForLanguage(lang, country, variant);
+                    String[] featuresArray = null;
+                    if (features != null) {
+                        featuresArray = new String[features.size()];
+                        features.toArray(featuresArray);
+                    } else {
+                        featuresArray = new String[0];
+                    }
+                    return featuresArray;
+                }
+
+                /*
+                 * There is no point loading a non default language if defaults
+                 * are enforced.
+                 */
+                @Override
+                public int loadLanguage(
+                        IBinder caller, String lang, String country, String variant) {
+                    if (!checkNonNull(lang)) {
+                        return TextToSpeech.ERROR;
+                    }
+                    int retVal = onIsLanguageAvailable(lang, country, variant);
+
+                    if (retVal == TextToSpeech.LANG_AVAILABLE
+                            || retVal == TextToSpeech.LANG_COUNTRY_AVAILABLE
+                            || retVal == TextToSpeech.LANG_COUNTRY_VAR_AVAILABLE) {
+
+                        SpeechItem item =
+                                new LoadLanguageItem(
+                                        caller,
+                                        Binder.getCallingUid(),
+                                        Binder.getCallingPid(),
+                                        lang,
+                                        country,
+                                        variant);
+
+                        if (mSynthHandler.enqueueSpeechItem(TextToSpeech.QUEUE_ADD, item)
+                                != TextToSpeech.SUCCESS) {
+                            return TextToSpeech.ERROR;
+                        }
+                    }
+                    return retVal;
+                }
+
+                @Override
+                public List<Voice> getVoices() {
+                    return onGetVoices();
+                }
+
+                @Override
+                public int loadVoice(IBinder caller, String voiceName) {
+                    if (!checkNonNull(voiceName)) {
+                        return TextToSpeech.ERROR;
+                    }
+                    int retVal = onIsValidVoiceName(voiceName);
+
+                    if (retVal == TextToSpeech.SUCCESS) {
+                        SpeechItem item =
+                                new LoadVoiceItem(
+                                        caller,
+                                        Binder.getCallingUid(),
+                                        Binder.getCallingPid(),
+                                        voiceName);
+                        if (mSynthHandler.enqueueSpeechItem(TextToSpeech.QUEUE_ADD, item)
+                                != TextToSpeech.SUCCESS) {
+                            return TextToSpeech.ERROR;
+                        }
+                    }
+                    return retVal;
+                }
+
+                public String getDefaultVoiceNameFor(String lang, String country, String variant) {
+                    if (!checkNonNull(lang)) {
+                        return null;
+                    }
+                    int retVal = onIsLanguageAvailable(lang, country, variant);
+
+                    if (retVal == TextToSpeech.LANG_AVAILABLE
+                            || retVal == TextToSpeech.LANG_COUNTRY_AVAILABLE
+                            || retVal == TextToSpeech.LANG_COUNTRY_VAR_AVAILABLE) {
+                        return onGetDefaultVoiceNameFor(lang, country, variant);
+                    } else {
+                        return null;
+                    }
+                }
+
+                @Override
+                public void setCallback(IBinder caller, ITextToSpeechCallback cb) {
+                    // Note that passing in a null callback is a valid use case.
+                    if (!checkNonNull(caller)) {
+                        return;
+                    }
+
+                    mCallbacks.setCallback(caller, cb);
+                }
+
+                private String intern(String in) {
+                    // The input parameter will be non null.
+                    return in.intern();
+                }
+
+                private boolean checkNonNull(Object... args) {
+                    for (Object o : args) {
+                        if (o == null) return false;
+                    }
+                    return true;
+                }
+            };
 
     private class CallbackMap extends RemoteCallbackList<ITextToSpeechCallback> {
         private final HashMap<IBinder, ITextToSpeechCallback> mCallerToCallback
