@@ -2177,6 +2177,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer
                 // display because it no longer contains any tasks.
                 mAllowDockedStackResize = false;
             }
+            final ActivityStack fullscreenStack = getStack(FULLSCREEN_WORKSPACE_STACK_ID);
+            final boolean isFullscreenStackVisible = fullscreenStack != null &&
+                    fullscreenStack.getStackVisibilityLocked(null) == STACK_VISIBLE;
             final ArrayList<TaskRecord> tasks = stack.getAllTasks();
             final int size = tasks.size();
             if (onTop) {
@@ -2186,9 +2189,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer
                         // Update the return-to to reflect where the pinned stack task was moved
                         // from so that we retain the stack that was previously visible if the
                         // pinned stack is recreated. See moveActivityToPinnedStackLocked().
-                        final int focusedStackId = getFocusedStack().getStackId();
-                        task.setTaskToReturnTo(focusedStackId == HOME_STACK_ID || !onTop
-                                ? HOME_ACTIVITY_TYPE : APPLICATION_ACTIVITY_TYPE);
+                        task.setTaskToReturnTo(isFullscreenStackVisible && onTop ?
+                                APPLICATION_ACTIVITY_TYPE : HOME_ACTIVITY_TYPE);
                     }
                     moveTaskToStackLocked(tasks.get(i).taskId,
                             FULLSCREEN_WORKSPACE_STACK_ID, onTop, onTop /*forceFocus*/,
