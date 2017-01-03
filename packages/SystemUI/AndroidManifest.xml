@@ -427,6 +427,7 @@
             android:supportsPictureInPicture="true"
             android:stateNotNeeded="true"
             android:taskAffinity=""
+            android:launchMode="singleTop"
             androidprv:alwaysFocusable="true" />
 
         <!-- platform logo easter egg activity -->
