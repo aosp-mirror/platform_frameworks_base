@@ -42,6 +42,11 @@ public class DozeService extends DreamService implements DozeMachine.Service {
 
         setWindowless(true);
 
+        if (DozeFactory.getHost(this) == null) {
+            finish();
+            return;
+        }
+
         DozeProvider provider = PluginManager.getInstance(this)
                 .getOneShotPlugin(DozeProvider.ACTION, DozeProvider.VERSION);
         mDozeMachine = new DozeFactory(provider).assembleMachine(this);
@@ -62,6 +67,8 @@ public class DozeService extends DreamService implements DozeMachine.Service {
 
     @Override
     protected void dumpOnHandler(FileDescriptor fd, PrintWriter pw, String[] args) {
-        mDozeMachine.dump(pw);
+        if (mDozeMachine != null) {
+            mDozeMachine.dump(pw);
+        }
     }
 }
