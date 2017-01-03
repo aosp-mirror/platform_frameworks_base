@@ -28,7 +28,6 @@ import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.UserManager;
 import android.provider.Settings;
 import android.support.v4.widget.DrawerLayout;
 import android.util.ArraySet;
@@ -72,7 +71,6 @@ public class SettingsDrawerActivity extends Activity {
     private FrameLayout mContentHeaderContainer;
     private DrawerLayout mDrawerLayout;
     private boolean mShowingMenu;
-    private UserManager mUserManager;
 
     // Remove below after new IA
     @Deprecated
@@ -108,6 +106,9 @@ public class SettingsDrawerActivity extends Activity {
             mDrawerLayout = null;
             return;
         }
+        if (!isNavDrawerEnabled()) {
+            setIsDrawerPresent(false);
+        }
         if (!isDashboardFeatureEnabled()) {
             getDashboardCategories();
         }
@@ -122,7 +123,6 @@ public class SettingsDrawerActivity extends Activity {
             }
         });
 
-        mUserManager = UserManager.get(this);
         if (DEBUG_TIMING) Log.d(TAG, "onCreate took " + (System.currentTimeMillis() - startTime)
                 + " ms");
     }
@@ -135,6 +135,15 @@ public class SettingsDrawerActivity extends Activity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onNavigateUp() {
+        if (!isNavDrawerEnabled()) {
+            finish();
+            return true;
+        }
+        return super.onNavigateUp();
     }
 
     @Override
@@ -277,10 +286,13 @@ public class SettingsDrawerActivity extends Activity {
     }
 
     public void showMenuIcon() {
-        mShowingMenu = true;
-        getActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
-        getActionBar().setHomeActionContentDescription(R.string.content_description_menu_button);
         getActionBar().setDisplayHomeAsUpEnabled(true);
+        if (isNavDrawerEnabled()) {
+            mShowingMenu = true;
+            getActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
+            getActionBar().setHomeActionContentDescription(
+                    R.string.content_description_menu_button);
+        }
     }
 
     public List<DashboardCategory> getDashboardCategories() {
@@ -427,6 +439,11 @@ public class SettingsDrawerActivity extends Activity {
 
     protected boolean isDashboardFeatureEnabled() {
         return false;
+    }
+
+    boolean isNavDrawerEnabled() {
+        return !isDashboardFeatureEnabled()
+                || getResources().getBoolean(R.bool.config_enable_nav_drawer);
     }
 
     private class PackageReceiver extends BroadcastReceiver {
