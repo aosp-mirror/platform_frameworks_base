@@ -358,6 +358,11 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private final TouchAnimator.Listener mNonFirstPageListener =
             new TouchAnimator.ListenerAdapter() {
                 @Override
+                public void onAnimationAtEnd() {
+                    mQuickQsPanel.setVisibility(View.INVISIBLE);
+                }
+
+                @Override
                 public void onAnimationStarted() {
                     mQuickQsPanel.setVisibility(View.VISIBLE);
                 }
