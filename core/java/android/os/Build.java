@@ -818,7 +818,7 @@ public class Build {
      */
     public static boolean isBuildConsistent() {
         // Don't care on eng builds.  Incremental build may trigger false negative.
-        if ("eng".equals(TYPE)) return true;
+        if (IS_ENG) return true;
 
         final String system = SystemProperties.get("ro.build.fingerprint");
         final String vendor = SystemProperties.get("ro.vendor.build.fingerprint");
@@ -881,6 +881,10 @@ public class Build {
      */
     public static final boolean IS_DEBUGGABLE =
             SystemProperties.getInt("ro.debuggable", 0) == 1;
+
+    /** {@hide} */
+    public static final boolean IS_ENG =
+            "eng".equals(getString("ro.build.type"));
 
     /**
      * Specifies whether the permissions needed by a legacy app should be

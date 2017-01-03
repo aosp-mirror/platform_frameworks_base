@@ -54,6 +54,7 @@ public class Installer extends SystemService {
     // NOTE: keep in sync with installd
     public static final int FLAG_CLEAR_CACHE_ONLY = 1 << 8;
     public static final int FLAG_CLEAR_CODE_CACHE_ONLY = 1 << 9;
+    public static final int FLAG_USE_QUOTA = 1 << 12;
 
     private final boolean mIsolated;
 
@@ -198,12 +199,13 @@ public class Installer extends SystemService {
         }
     }
 
-    public void getAppSize(String uuid, String packageName, int userId, int flags, long ceDataInode,
-            String codePath, PackageStats stats) throws InstallerException {
+    public void getAppSize(String uuid, String packageName, int userId, int flags, int appId,
+            long ceDataInode, String codePath, String externalUuid, PackageStats stats)
+            throws InstallerException {
         if (!checkBeforeRemote()) return;
         try {
-            final long[] res = mInstalld.getAppSize(uuid, packageName, userId, flags, ceDataInode,
-                    codePath);
+            final long[] res = mInstalld.getAppSize(uuid, packageName, userId, flags, appId,
+                    ceDataInode, codePath, externalUuid);
             stats.codeSize += res[0];
             stats.dataSize += res[1];
             stats.cacheSize += res[2];
