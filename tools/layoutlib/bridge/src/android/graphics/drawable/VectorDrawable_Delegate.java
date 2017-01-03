@@ -1197,7 +1197,7 @@ public class VectorDrawable_Delegate {
                     assert fillPaintDelegate != null;
                     fillPaintDelegate.setColorFilter(filterPtr);
                     fillPaintDelegate.setShader(fullPath.mFillGradient);
-                    Path_Delegate.native_setFillType(mRenderPath.mNativePath, fullPath.mFillType);
+                    Path_Delegate.nSetFillType(mRenderPath.mNativePath, fullPath.mFillType);
                     BaseCanvas_Delegate.nDrawPath(canvasPtr, mRenderPath.mNativePath, fillPaint
                             .getNativeInstance());
                 }
