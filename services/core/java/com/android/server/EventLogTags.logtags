@@ -154,7 +154,8 @@ option java_package com.android.server
 3110 unknown_sources_enabled (value|1)
 # Package Manager critical info
 3120 pm_critical_info (msg|3)
-
+# Disk usage stats for verifying quota correctness
+3121 pm_package_stats (manual_time|2|3),(quota_time|2|3),(manual_data|2|2),(quota_data|2|2),(manual_cache|2|2),(quota_cache|2|2)
 
 # ---------------------------
 # WindowManagerService.java

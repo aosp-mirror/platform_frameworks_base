@@ -213,6 +213,15 @@ public final class UserHandle implements Parcelable {
     }
 
     /**
+     * Returns the cache GID for a given UID or appId.
+     * @hide
+     */
+    public static int getCacheAppGid(int id) {
+        return Process.FIRST_APPLICATION_CACHE_GID + (id % PER_USER_RANGE)
+                - Process.FIRST_APPLICATION_UID;
+    }
+
+    /**
      * Generate a text representation of the uid, breaking out its individual
      * components -- user, app, isolated, etc.
      * @hide
