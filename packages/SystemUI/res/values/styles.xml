@@ -123,7 +123,7 @@
     <style name="TextAppearance.StatusBar.Expanded.AboveDateTime">
         <item name="android:textSize">@dimen/qs_emergency_calls_only_text_size</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#66ffffff</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Expanded.EmergencyCallsOnly"
