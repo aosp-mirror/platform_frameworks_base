@@ -1344,6 +1344,11 @@ public class PackageParser {
                 verified = true;
             } catch (ApkSignatureSchemeV2Verifier.SignatureNotFoundException e) {
                 // No APK Signature Scheme v2 signature found
+                if ((parseFlags & PARSE_IS_EPHEMERAL) != 0) {
+                    throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
+                        "No APK Signature Scheme v2 signature in ephemeral package " + apkPath,
+                        e);
+                }
             } catch (Exception e) {
                 // APK Signature Scheme v2 signature was found but did not verify
                 throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
@@ -1519,7 +1524,7 @@ public class PackageParser {
                 final Package tempPkg = new Package(null);
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "collectCertificates");
                 try {
-                    collectCertificates(tempPkg, apkFile, 0 /*parseFlags*/);
+                    collectCertificates(tempPkg, apkFile, flags);
                 } finally {
                     Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                 }
