@@ -17,11 +17,15 @@ package com.android.systemui.plugins;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Activity;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -34,6 +38,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.HandlerThread;
+import android.os.UserHandle;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -72,7 +77,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         mMockPm = mock(PackageManager.class);
         mMockListener = mock(PluginListener.class);
         mMockManager = mock(PluginManager.class);
-        when(mMockManager.getClassLoader(Mockito.any(), Mockito.any()))
+        when(mMockManager.getClassLoader(any(), any()))
                 .thenReturn(getClass().getClassLoader());
         mPluginInstanceManager = new PluginInstanceManager(mContextWrapper, mMockPm, "myAction",
                 mMockListener, true, mHandlerThread.getLooper(), 1, mMockManager, true);
@@ -87,8 +92,8 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testNoPlugins() {
-        when(mMockPm.queryIntentServices(Mockito.any(), Mockito.anyInt())).thenReturn(
+    public void testNoPlugins() throws Exception {
+        when(mMockPm.queryIntentServices(any(), anyInt())).thenReturn(
                 Collections.emptyList());
         mPluginInstanceManager.loadAll();
 
@@ -100,7 +105,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testPluginCreate() {
+    public void testPluginCreate() throws Exception {
         createPlugin();
 
         // Verify startup lifecycle
@@ -110,7 +115,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testPluginDestroy() {
+    public void testPluginDestroy() throws Exception {
         createPlugin(); // Get into valid created state.
 
         mPluginInstanceManager.destroy();
@@ -124,7 +129,9 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testIncorrectVersion() {
+    public void testIncorrectVersion() throws Exception {
+        NotificationManager nm = mock(NotificationManager.class);
+        mContext.addMockSystemService(Context.NOTIFICATION_SERVICE, nm);
         setupFakePmQuery();
         when(sMockPlugin.getVersion()).thenReturn(2);
 
@@ -136,10 +143,12 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         // Plugin shouldn't be connected because it is the wrong version.
         verify(mMockListener, Mockito.never()).onPluginConnected(
                 ArgumentCaptor.forClass(Plugin.class).capture());
+        verify(nm).notifyAsUser(eq(TestPlugin.class.getName()), eq(R.id.notification_plugin), any(),
+                eq(UserHandle.ALL));
     }
 
     @Test
-    public void testReloadOnChange() {
+    public void testReloadOnChange() throws Exception {
         createPlugin(); // Get into valid created state.
 
         mPluginInstanceManager.onPackageChange("com.android.systemui");
@@ -159,7 +168,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testNonDebuggable() {
+    public void testNonDebuggable() throws Exception {
         // Create a version that thinks the build is not debuggable.
         mPluginInstanceManager = new PluginInstanceManager(mContextWrapper, mMockPm, "myAction",
                 mMockListener, true, mHandlerThread.getLooper(), 1, mMockManager, false);
@@ -176,7 +185,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testCheckAndDisable() {
+    public void testCheckAndDisable() throws Exception {
         createPlugin(); // Get into valid created state.
 
         // Start with an unrelated class.
@@ -197,7 +206,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testDisableAll() {
+    public void testDisableAll() throws Exception {
         createPlugin(); // Get into valid created state.
 
         mPluginInstanceManager.disableAll();
@@ -208,29 +217,26 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
                 ArgumentCaptor.forClass(int.class).capture());
     }
 
-    private void setupFakePmQuery() {
+    private void setupFakePmQuery() throws Exception {
         List<ResolveInfo> list = new ArrayList<>();
         ResolveInfo info = new ResolveInfo();
-        info.serviceInfo = new ServiceInfo();
+        info.serviceInfo = mock(ServiceInfo.class);
         info.serviceInfo.packageName = "com.android.systemui";
         info.serviceInfo.name = TestPlugin.class.getName();
+        when(info.serviceInfo.loadLabel(any())).thenReturn("Test Plugin");
         list.add(info);
-        when(mMockPm.queryIntentServices(Mockito.any(), Mockito.anyInt())).thenReturn(list);
+        when(mMockPm.queryIntentServices(any(), Mockito.anyInt())).thenReturn(list);
+        when(mMockPm.getServiceInfo(any(), anyInt())).thenReturn(info.serviceInfo);
 
         when(mMockPm.checkPermission(Mockito.anyString(), Mockito.anyString())).thenReturn(
                 PackageManager.PERMISSION_GRANTED);
 
-        try {
-            ApplicationInfo appInfo = getContext().getApplicationInfo();
-            when(mMockPm.getApplicationInfo(Mockito.anyString(), Mockito.anyInt())).thenReturn(
-                    appInfo);
-        } catch (NameNotFoundException e) {
-            // Shouldn't be possible, but if it is, we want to fail.
-            throw new RuntimeException(e);
-        }
+        ApplicationInfo appInfo = getContext().getApplicationInfo();
+        when(mMockPm.getApplicationInfo(Mockito.anyString(), Mockito.anyInt())).thenReturn(
+                appInfo);
     }
 
-    private void createPlugin() {
+    private void createPlugin() throws Exception {
         setupFakePmQuery();
 
         mPluginInstanceManager.loadAll();

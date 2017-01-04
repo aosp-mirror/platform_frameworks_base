@@ -14,11 +14,14 @@
 
 package com.android.systemui.plugins;
 
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.Build;
@@ -41,6 +44,8 @@ import java.util.Map;
 public class PluginManager extends BroadcastReceiver {
 
     public static final String PLUGIN_CHANGED = "com.android.systemui.action.PLUGIN_CHANGED";
+
+    static final String DISABLE_PLUGIN = "com.android.systemui.action.DISABLE_PLUGIN";
 
     private static PluginManager sInstance;
 
@@ -112,6 +117,7 @@ public class PluginManager extends BroadcastReceiver {
         filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addAction(PLUGIN_CHANGED);
+        filter.addAction(DISABLE_PLUGIN);
         filter.addDataScheme("package");
         mContext.registerReceiver(this, filter);
         filter = new IntentFilter(Intent.ACTION_USER_UNLOCKED);
@@ -128,6 +134,17 @@ public class PluginManager extends BroadcastReceiver {
             for (PluginInstanceManager manager : mPluginMap.values()) {
                 manager.loadAll();
             }
+        } else if (DISABLE_PLUGIN.equals(intent.getAction())) {
+            Uri uri = intent.getData();
+            ComponentName component = ComponentName.unflattenFromString(
+                    uri.toString().substring(10));
+            mContext.getPackageManager().setComponentEnabledSetting(component,
+                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                    PackageManager.DONT_KILL_APP);
+            int id = mContext.getResources().getIdentifier("notification_plugin", "id",
+                    mContext.getPackageName());
+            mContext.getSystemService(NotificationManager.class).cancel(component.getClassName(),
+                    id);
         } else {
             Uri data = intent.getData();
             String pkg = data.getEncodedSchemeSpecificPart();

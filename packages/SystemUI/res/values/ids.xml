@@ -54,6 +54,7 @@
     <item type="id" name="notification_hidden"/>
     <item type="id" name="notification_volumeui"/>
     <item type="id" name="notification_temperature"/>
+    <item type="id" name="notification_plugin"/>
     <item type="id" name="transformation_start_x_tag"/>
     <item type="id" name="transformation_start_y_tag"/>
     <item type="id" name="transformation_start_scale_x_tag"/>
