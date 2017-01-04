@@ -19,8 +19,10 @@ package android.content.pm;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.appwidget.AppWidgetProviderInfo;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.LauncherApps.ShortcutQuery;
 import android.os.ParcelFileDescriptor;
 
@@ -68,4 +70,8 @@ public abstract class ShortcutServiceInternal {
 
     public abstract boolean hasShortcutHostPermission(int launcherUserId,
             @NonNull String callingPackage);
+
+    public abstract boolean requestPinAppWidget(@NonNull String callingPackage,
+            @NonNull AppWidgetProviderInfo appWidget, @Nullable IntentSender resultIntent,
+            int userId);
 }

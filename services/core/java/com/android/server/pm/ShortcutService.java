@@ -24,6 +24,7 @@ import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.IUidObserver;
 import android.app.usage.UsageStatsManagerInternal;
+import android.appwidget.AppWidgetProviderInfo;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -1857,21 +1858,32 @@ public class ShortcutService extends IShortcutService.Stub {
     @Override
     public boolean requestPinShortcut(String packageName, ShortcutInfo shortcut,
             IntentSender resultIntent, int userId) {
-        verifyCaller(packageName, userId);
         Preconditions.checkNotNull(shortcut);
         Preconditions.checkArgument(shortcut.isEnabled(), "Shortcut must be enabled");
+        return requestPinItem(packageName, userId, shortcut, null, resultIntent);
+    }
+
+    /**
+     * Handles {@link #requestPinShortcut} and {@link ShortcutServiceInternal#requestPinAppWidget}.
+     * After validating the caller, it passes the request to {@link #mShortcutRequestPinProcessor}.
+     * Either {@param shortcut} or {@param appWidget} should be non-null.
+     */
+    private boolean requestPinItem(String packageName, int userId,
+            ShortcutInfo shortcut, AppWidgetProviderInfo appWidget, IntentSender resultIntent) {
+        verifyCaller(packageName, userId);
 
         final boolean ret;
         synchronized (mLock) {
             throwIfUserLockedL(userId);
 
             Preconditions.checkState(isUidForegroundLocked(injectBinderCallingUid()),
-                    "Calling application must have a foreground activity or a foreground service");
+                "Calling application must have a foreground activity or a foreground service");
 
             // TODO Cancel all pending requests from the caller.
 
             // Send request to the launcher, if supported.
-            ret = mShortcutRequestPinProcessor.requestPinShortcutLocked(shortcut, resultIntent);
+            ret = mShortcutRequestPinProcessor.requestPinItemLocked(shortcut, appWidget, userId,
+                    resultIntent);
         }
 
         verifyStates();
@@ -2591,6 +2603,14 @@ public class ShortcutService extends IShortcutService.Stub {
                 @NonNull String callingPackage) {
             return ShortcutService.this.hasShortcutHostPermission(callingPackage, launcherUserId);
         }
+
+        @Override
+        public boolean requestPinAppWidget(@NonNull String callingPackage,
+                @NonNull AppWidgetProviderInfo appWidget, @Nullable IntentSender resultIntent,
+                int userId) {
+            Preconditions.checkNotNull(appWidget);
+            return requestPinItem(callingPackage, userId, null, appWidget, resultIntent);
+        }
     }
 
     final BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -3253,12 +3273,12 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
-    void injectSendIntentSender(IntentSender intentSender) {
+    void injectSendIntentSender(IntentSender intentSender, Intent extras) {
         if (intentSender == null) {
             return;
         }
         try {
-            intentSender.sendIntent(mContext, /* code= */ 0, /* intent= */ null,
+            intentSender.sendIntent(mContext, /* code= */ 0, extras,
                     /* onFinished=*/ null, /* handler= */ null);
         } catch (SendIntentException e) {
             Slog.w(TAG, "sendIntent failed().", e);

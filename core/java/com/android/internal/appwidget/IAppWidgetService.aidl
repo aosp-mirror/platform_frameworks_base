@@ -67,5 +67,7 @@ interface IAppWidgetService {
     void unbindRemoteViewsService(String callingPackage, int appWidgetId, in Intent intent);
     int[] getAppWidgetIds(in ComponentName providerComponent);
     boolean isBoundWidgetPackage(String packageName, int userId);
+    boolean requestPinAppWidget(String packageName, in ComponentName providerComponent,
+            in IntentSender resultIntent);
 }
 

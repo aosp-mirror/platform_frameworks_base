@@ -48,6 +48,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -1539,6 +1540,36 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 updateAppWidgetInstanceLocked(widget, views, false);
             }
         }
+    }
+
+    @Override
+    public boolean requestPinAppWidget(String callingPackage, ComponentName componentName,
+            IntentSender resultSender) {
+        final int callingUid = Binder.getCallingUid();
+        final int userId = UserHandle.getUserId(callingUid);
+
+        if (DEBUG) {
+            Slog.i(TAG, "requestPinAppWidget() " + userId);
+        }
+
+        final AppWidgetProviderInfo info;
+
+        synchronized (mLock) {
+            ensureGroupStateLoadedLocked(userId);
+
+            // Look for the widget associated with the caller.
+            Provider provider = lookupProviderLocked(new ProviderId(callingUid, componentName));
+            if (provider == null || provider.zombie) {
+                return false;
+            }
+            info = provider.info;
+            if ((info.widgetCategory & AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN) == 0) {
+                return false;
+            }
+        }
+
+        return LocalServices.getService(ShortcutServiceInternal.class)
+                .requestPinAppWidget(callingPackage, info, resultSender, userId);
     }
 
     @Override

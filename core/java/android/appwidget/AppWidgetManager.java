@@ -16,11 +16,15 @@
 
 package android.appwidget;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.ParceledListSlice;
+import android.content.pm.ShortcutInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
@@ -1078,5 +1082,42 @@ public class AppWidgetManager {
                 mDisplayMetrics);
         info.minResizeHeight = TypedValue.complexToDimensionPixelSize(info.minResizeHeight,
                 mDisplayMetrics);
+    }
+
+    /**
+     * Request to pin an app widget on the current launcher. It's up to the launcher to accept this
+     * request (optionally showing a user confirmation). If the request is accepted, the caller will
+     * get a confirmation with extra {@link #EXTRA_APPWIDGET_ID}.
+     *
+     * <p>When a request is denied by the user, the caller app will not get any response.
+     *
+     * <p>Only apps with a foreground activity or a foreground service can call it.  Otherwise
+     * it'll throw {@link IllegalStateException}.
+     *
+     * <p>When an app calls this API when a previous request is still waiting for a response,
+     * the previous request will be canceled.
+     *
+     * @param provider The {@link ComponentName} for the {@link
+     *    android.content.BroadcastReceiver BroadcastReceiver} provider for your AppWidget.
+     * @param successCallback If not null, this intent will be sent when the widget is created.
+     *
+     * @return {@code TRUE} if the launcher supports this feature. Note the API will return without
+     *    waiting for the user to respond, so getting {@code TRUE} from this API does *not* mean
+     *    the shortcut is pinned. {@code FALSE} if the launcher doesn't support this feature.
+     *
+     * @see android.content.pm.ShortcutManager#isRequestPinShortcutSupported()
+     * @see android.content.pm.ShortcutManager#requestPinShortcut(ShortcutInfo, IntentSender)
+     *
+     * @throws IllegalStateException The caller doesn't have a foreground activity or a foreground
+     * service or when the user is locked.
+     */
+    public boolean requestPinAppWidget(@NonNull ComponentName provider,
+            @Nullable PendingIntent successCallback) {
+        try {
+            return mService.requestPinAppWidget(mPackageName, provider,
+                successCallback == null ? null : successCallback.getIntentSender());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 }
