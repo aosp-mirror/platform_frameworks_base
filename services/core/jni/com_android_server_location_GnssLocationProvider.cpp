@@ -892,7 +892,7 @@ static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env,
             gnssXtraIface = xtraIface;
         });
 
-        if (!result.getStatus().isOk()) {
+        if (!result.isOk()) {
             ALOGD("Unable to get a handle to Xtra");
         }
 
@@ -900,7 +900,7 @@ static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env,
             agnssRilIface = rilIface;
         });
 
-        if (!result.getStatus().isOk()) {
+        if (!result.isOk()) {
             ALOGD("Unable to get a handle to AGnssRil");
         }
 
@@ -908,7 +908,7 @@ static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env,
             agnssIface = assistedGnssIface;
         });
 
-        if (!result.getStatus().isOk()) {
+        if (!result.isOk()) {
             ALOGD("Unable to get a handle to AGnss");
         }
 
@@ -917,7 +917,7 @@ static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env,
             gnssNavigationMessageIface = navigationMessageIface;
         });
 
-        if (!result.getStatus().isOk()) {
+        if (!result.isOk()) {
             ALOGD("Unable to get a handle to GnssNavigationMessage");
         }
 
@@ -925,35 +925,35 @@ static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env,
                 const sp<IGnssMeasurement>& measurementIface) {
             gnssMeasurementIface = measurementIface;
         });
-        if (!result.getStatus().isOk()) {
+        if (!result.isOk()) {
             ALOGD("Unable to get a handle to GnssMeasurement");
         }
 
         result = gnssHal->getExtensionGnssDebug([](const sp<IGnssDebug>& debugIface) {
             gnssDebugIface = debugIface;
         });
-        if (!result.getStatus().isOk()) {
+        if (!result.isOk()) {
             ALOGD("Unable to get a handle to GnssDebug");
         }
 
         result = gnssHal->getExtensionGnssNi([](const sp<IGnssNi>& niIface) {
             gnssNiIface = niIface;
         });
-        if (!result.getStatus().isOk()) {
+        if (!result.isOk()) {
             ALOGD("Unable to get a handle to GnssNi");
         }
 
         result = gnssHal->getExtensionGnssConfiguration([](const sp<IGnssConfiguration>& configIface) {
             gnssConfigurationIface = configIface;
         });
-        if (!result.getStatus().isOk()) {
+        if (!result.isOk()) {
             ALOGD("Unable to get a handle to GnssConfiguration");
         }
 
         result = gnssHal->getExtensionGnssGeofencing([](const sp<IGnssGeofencing>& geofenceIface) {
             gnssGeofencingIface = geofenceIface;
         });
-        if (!result.getStatus().isOk()) {
+        if (!result.isOk()) {
             ALOGD("Unable to get a handle to GnssGeofencing");
         }
 
@@ -994,7 +994,7 @@ static jboolean android_location_GnssLocationProvider_init(JNIEnv* env, jobject 
     }
 
     auto result = gnssHal->setCallback(gnssCbIface);
-    if ((!result) || (!result.getStatus().isOk())) {
+    if ((!result) || (!result.isOk())) {
         ALOGE("SetCallback for Gnss Interface fails\n");
         return JNI_FALSE;
     }
@@ -1004,7 +1004,7 @@ static jboolean android_location_GnssLocationProvider_init(JNIEnv* env, jobject 
         ALOGE("Unable to initialize GNSS Xtra interface\n");
     } else {
         result = gnssXtraIface->setCallback(gnssXtraCbIface);
-        if ((!result) || (!result.getStatus().isOk())) {
+        if ((!result) || (!result.isOk())) {
             gnssXtraIface = nullptr;
             ALOGE("SetCallback for Gnss Xtra Interface fails\n");
         }
@@ -1049,7 +1049,7 @@ static jboolean android_location_GnssLocationProvider_set_position_mode(JNIEnv* 
                                      min_interval,
                                      preferred_accuracy,
                                      preferred_time);
-        if (!result.getStatus().isOk()) {
+        if (!result.isOk()) {
             ALOGE("%s: GNSS setPositionMode failed\n", __func__);
             return JNI_FALSE;
         } else {
@@ -1063,7 +1063,7 @@ static jboolean android_location_GnssLocationProvider_set_position_mode(JNIEnv* 
 static jboolean android_location_GnssLocationProvider_start(JNIEnv* /* env */, jobject /* obj */) {
     if (gnssHal != nullptr) {
         auto result = gnssHal->start();
-        if (!result.getStatus().isOk()) {
+        if (!result.isOk()) {
             return JNI_FALSE;
         } else {
             return result;
@@ -1076,7 +1076,7 @@ static jboolean android_location_GnssLocationProvider_start(JNIEnv* /* env */, j
 static jboolean android_location_GnssLocationProvider_stop(JNIEnv* /* env */, jobject /* obj */) {
     if (gnssHal != nullptr) {
         auto result = gnssHal->stop();
-        if (!result.getStatus().isOk()) {
+        if (!result.isOk()) {
             return JNI_FALSE;
         } else {
             return result;
@@ -1090,7 +1090,7 @@ static void android_location_GnssLocationProvider_delete_aiding_data(JNIEnv* /* 
                                                                     jint flags) {
     if (gnssHal != nullptr) {
         auto result = gnssHal->deleteAidingData(static_cast<IGnss::GnssAidingData>(flags));
-        if (!result.getStatus().isOk()) {
+        if (!result.isOk()) {
             ALOGE("Error in deleting aiding data");
         }
     }
@@ -1191,7 +1191,7 @@ static void android_location_GnssLocationProvider_inject_time(JNIEnv* /* env */,
         jlong time, jlong timeReference, jint uncertainty) {
     if (gnssHal != nullptr) {
         auto result = gnssHal->injectTime(time, timeReference, uncertainty);
-        if (!result || !result.getStatus().isOk()) {
+        if (!result || !result.isOk()) {
             ALOGE("%s: Gnss injectTime() failed", __func__);
         }
     }
@@ -1201,7 +1201,7 @@ static void android_location_GnssLocationProvider_inject_location(JNIEnv* /* env
         jobject /* obj */, jdouble latitude, jdouble longitude, jfloat accuracy) {
     if (gnssHal != nullptr) {
         auto result = gnssHal->injectLocation(latitude, longitude, accuracy);
-        if (!result || !result.getStatus().isOk()) {
+        if (!result || !result.isOk()) {
             ALOGE("%s: Gnss injectLocation() failed", __func__);
         }
     }
@@ -1238,7 +1238,7 @@ static void android_location_GnssLocationProvider_agps_data_conn_open(
     const char *apnStr = env->GetStringUTFChars(apn, NULL);
 
     auto result = agnssIface->dataConnOpen(apnStr, static_cast<IAGnss::ApnIpType>(apnIpType));
-    if ((!result) || (!result.getStatus().isOk())) {
+    if ((!result) || (!result.isOk())) {
         ALOGE("%s: Failed to set APN and its IP type", __func__);
     }
     env->ReleaseStringUTFChars(apn, apnStr);
@@ -1252,7 +1252,7 @@ static void android_location_GnssLocationProvider_agps_data_conn_closed(JNIEnv* 
     }
 
     auto result = agnssIface->dataConnClosed();
-    if ((!result) || (!result.getStatus().isOk())) {
+    if ((!result) || (!result.isOk())) {
         ALOGE("%s: Failed to close AGnss data connection", __func__);
     }
 }
@@ -1265,7 +1265,7 @@ static void android_location_GnssLocationProvider_agps_data_conn_failed(JNIEnv* 
     }
 
     auto result = agnssIface->dataConnFailed();
-    if ((!result) || (!result.getStatus().isOk())) {
+    if ((!result) || (!result.isOk())) {
         ALOGE("%s: Failed to notify unavailability of AGnss data connection", __func__);
     }
 }
@@ -1281,7 +1281,7 @@ static void android_location_GnssLocationProvider_set_agps_server(JNIEnv* env, j
     auto result = agnssIface->setServer(static_cast<IAGnssCallback::AGnssType>(type),
                                        c_hostname,
                                        port);
-    if ((!result) || (!result.getStatus().isOk())) {
+    if ((!result) || (!result.isOk())) {
         ALOGE("%s: Failed to set AGnss host name and port", __func__);
     }
 
@@ -1354,13 +1354,13 @@ static void android_location_GnssLocationProvider_update_network_state(JNIEnv* e
         auto result = agnssRilIface->updateNetworkState(connected,
                                                        static_cast<IAGnssRil::NetworkType>(type),
                                                        roaming);
-        if ((!result) || (!result.getStatus().isOk())) {
+        if ((!result) || (!result.isOk())) {
             ALOGE("updateNetworkState failed");
         }
 
         const char *c_apn = env->GetStringUTFChars(apn, NULL);
         result = agnssRilIface->updateNetworkAvailability(available, c_apn);
-        if ((!result) || (!result.getStatus().isOk())) {
+        if ((!result) || (!result.isOk())) {
             ALOGE("updateNetworkAvailability failed");
         }
 
@@ -1384,7 +1384,7 @@ static jboolean android_location_GnssLocationProvider_add_geofence(JNIEnv* /* en
                 geofenceId, latitude, longitude, radius,
                 static_cast<IGnssGeofenceCallback::GeofenceTransition>(last_transition),
                 monitor_transition, notification_responsiveness, unknown_timer);
-        return boolToJbool(result.getStatus().isOk());
+        return boolToJbool(result.isOk());
     } else {
         ALOGE("Geofence Interface not available");
     }
@@ -1395,7 +1395,7 @@ static jboolean android_location_GnssLocationProvider_remove_geofence(JNIEnv* /*
         jobject /* obj */, jint geofenceId) {
     if (gnssGeofencingIface != nullptr) {
         auto result = gnssGeofencingIface->removeGeofence(geofenceId);
-        return boolToJbool(result.getStatus().isOk());
+        return boolToJbool(result.isOk());
     } else {
         ALOGE("Geofence interface not available");
     }
@@ -1406,7 +1406,7 @@ static jboolean android_location_GnssLocationProvider_pause_geofence(JNIEnv* /* 
         jobject /* obj */, jint geofenceId) {
     if (gnssGeofencingIface != nullptr) {
         auto result = gnssGeofencingIface->pauseGeofence(geofenceId);
-        return boolToJbool(result.getStatus().isOk());
+        return boolToJbool(result.isOk());
     } else {
         ALOGE("Geofence interface not available");
     }
@@ -1417,7 +1417,7 @@ static jboolean android_location_GnssLocationProvider_resume_geofence(JNIEnv* /*
         jobject /* obj */, jint geofenceId, jint monitor_transition) {
     if (gnssGeofencingIface != nullptr) {
         auto result = gnssGeofencingIface->resumeGeofence(geofenceId, monitor_transition);
-        return boolToJbool(result.getStatus().isOk());
+        return boolToJbool(result.isOk());
     } else {
         ALOGE("Geofence interface not available");
     }
@@ -1463,7 +1463,7 @@ static jboolean android_location_GnssLocationProvider_stop_measurement_collectio
     }
 
     auto result = gnssMeasurementIface->close();
-    return boolToJbool(result.getStatus().isOk());
+    return boolToJbool(result.isOk());
 }
 
 static jboolean android_location_GnssLocationProvider_is_navigation_message_supported(
@@ -1505,7 +1505,7 @@ static jboolean android_location_GnssLocationProvider_stop_navigation_message_co
     }
 
     auto result = gnssNavigationMessageIface->close();
-    return boolToJbool(result.getStatus().isOk());
+    return boolToJbool(result.isOk());
 }
 
 static jboolean android_location_GnssLocationProvider_set_emergency_supl_pdn(JNIEnv*,
@@ -1517,7 +1517,7 @@ static jboolean android_location_GnssLocationProvider_set_emergency_supl_pdn(JNI
     }
 
     auto result = gnssConfigurationIface->setEmergencySuplPdn(emergencySuplPdn);
-    if (result.getStatus().isOk()) {
+    if (result.isOk()) {
         return result;
     } else {
         return JNI_FALSE;
@@ -1532,7 +1532,7 @@ static jboolean android_location_GnssLocationProvider_set_supl_version(JNIEnv*,
         return JNI_FALSE;
     }
     auto result = gnssConfigurationIface->setSuplVersion(version);
-    if (result.getStatus().isOk()) {
+    if (result.isOk()) {
         return result;
     } else {
         return JNI_FALSE;
@@ -1548,7 +1548,7 @@ static jboolean android_location_GnssLocationProvider_set_supl_es(JNIEnv*,
     }
 
     auto result = gnssConfigurationIface->setSuplEs(suplEs);
-    if (result.getStatus().isOk()) {
+    if (result.isOk()) {
         return result;
     } else {
         return JNI_FALSE;
@@ -1564,7 +1564,7 @@ static jboolean android_location_GnssLocationProvider_set_supl_mode(JNIEnv*,
     }
 
     auto result = gnssConfigurationIface->setSuplMode(mode);
-    if (result.getStatus().isOk()) {
+    if (result.isOk()) {
         return result;
     } else {
         return JNI_FALSE;
@@ -1580,7 +1580,7 @@ static jboolean android_location_GnssLocationProvider_set_gps_lock(JNIEnv*,
     }
 
     auto result = gnssConfigurationIface->setGpsLock(gpsLock);
-    if (result.getStatus().isOk()) {
+    if (result.isOk()) {
         return result;
     } else {
         return JNI_FALSE;
@@ -1597,7 +1597,7 @@ static jboolean android_location_GnssLocationProvider_set_lpp_profile(JNIEnv*,
 
     auto result = gnssConfigurationIface->setLppProfile(lppProfile);
 
-    if (result.getStatus().isOk()) {
+    if (result.isOk()) {
         return result;
     } else {
         return JNI_FALSE;
@@ -1613,7 +1613,7 @@ static jboolean android_location_GnssLocationProvider_set_gnss_pos_protocol_sele
     }
 
     auto result = gnssConfigurationIface->setGlonassPositioningProtocol(gnssPosProtocol);
-    if (result.getStatus().isOk()) {
+    if (result.isOk()) {
         return result;
     } else {
         return JNI_FALSE;

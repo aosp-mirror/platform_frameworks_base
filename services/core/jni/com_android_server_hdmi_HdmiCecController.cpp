@@ -185,14 +185,14 @@ HdmiCecController::HdmiCecController(sp<IHdmiCec> hdmiCec,
           mLooper(looper) {
     mHdmiCecCallback = new HdmiCecCallback(this);
     Return<void> ret = mHdmiCec->setCallback(mHdmiCecCallback);
-    if (!ret.getStatus().isOk()) {
+    if (!ret.isOk()) {
         ALOGE("Failed to set a cec callback.");
     }
 }
 
 HdmiCecController::~HdmiCecController() {
     Return<void> ret = mHdmiCec->setCallback(nullptr);
-    if (!ret.getStatus().isOk()) {
+    if (!ret.isOk()) {
         ALOGE("Failed to set a cec callback.");
     }
 }
@@ -200,7 +200,7 @@ HdmiCecController::~HdmiCecController() {
 int HdmiCecController::sendMessage(const CecMessage& message) {
     // TODO: propagate send_message's return value.
     Return<SendMessageResult> ret = mHdmiCec->sendMessage(message);
-    if (!ret.getStatus().isOk()) {
+    if (!ret.isOk()) {
         ALOGE("Failed to send CEC message.");
         return static_cast<int>(SendMessageResult::FAIL);
     }
@@ -209,7 +209,7 @@ int HdmiCecController::sendMessage(const CecMessage& message) {
 
 int HdmiCecController::addLogicalAddress(CecLogicalAddress address) {
     Return<Result> ret = mHdmiCec->addLogicalAddress(address);
-    if (!ret.getStatus().isOk()) {
+    if (!ret.isOk()) {
         ALOGE("Failed to add a logical address.");
         return static_cast<int>(Result::FAILURE_UNKNOWN);
     }
@@ -218,7 +218,7 @@ int HdmiCecController::addLogicalAddress(CecLogicalAddress address) {
 
 void HdmiCecController::clearLogicaladdress() {
     Return<void> ret = mHdmiCec->clearLogicalAddress();
-    if (!ret.getStatus().isOk()) {
+    if (!ret.isOk()) {
         ALOGE("Failed to clear logical address.");
     }
 }
@@ -230,7 +230,7 @@ int HdmiCecController::getPhysicalAddress() {
             result = res;
             addr = paddr;
         });
-    if (!ret.getStatus().isOk()) {
+    if (!ret.isOk()) {
         ALOGE("Failed to get physical address.");
         return INVALID_PHYSICAL_ADDRESS;
     }
@@ -239,7 +239,7 @@ int HdmiCecController::getPhysicalAddress() {
 
 int HdmiCecController::getVersion() {
     Return<int32_t> ret = mHdmiCec->getCecVersion();
-    if (!ret.getStatus().isOk()) {
+    if (!ret.isOk()) {
         ALOGE("Failed to get cec version.");
     }
     return ret;
@@ -247,7 +247,7 @@ int HdmiCecController::getVersion() {
 
 uint32_t HdmiCecController::getVendorId() {
     Return<uint32_t> ret = mHdmiCec->getVendorId();
-    if (!ret.getStatus().isOk()) {
+    if (!ret.isOk()) {
         ALOGE("Failed to get vendor id.");
     }
     return ret;
@@ -267,7 +267,7 @@ jobjectArray HdmiCecController::getPortInfos() {
     Return<void> ret = mHdmiCec->getPortInfo([&ports](hidl_vec<HdmiPortInfo> list) {
             ports = list;
         });
-    if (!ret.getStatus().isOk()) {
+    if (!ret.isOk()) {
         ALOGE("Failed to get port information.");
         return NULL;
     }
@@ -287,14 +287,14 @@ jobjectArray HdmiCecController::getPortInfos() {
 
 void HdmiCecController::setOption(OptionKey key, bool enabled) {
     Return<void> ret = mHdmiCec->setOption(key, enabled);
-    if (!ret.getStatus().isOk()) {
+    if (!ret.isOk()) {
         ALOGE("Failed to set option.");
     }
 }
 
 void HdmiCecController::setLanguage(hidl_string language) {
     Return<void> ret = mHdmiCec->setLanguage(language);
-    if (!ret.getStatus().isOk()) {
+    if (!ret.isOk()) {
         ALOGE("Failed to set language.");
     }
 }
@@ -302,7 +302,7 @@ void HdmiCecController::setLanguage(hidl_string language) {
 // Enable audio return channel.
 void HdmiCecController::enableAudioReturnChannel(int port, bool enabled) {
     Return<void> ret = mHdmiCec->enableAudioReturnChannel(port, enabled);
-    if (!ret.getStatus().isOk()) {
+    if (!ret.isOk()) {
         ALOGE("Failed to enable/disable ARC.");
     }
 }
@@ -310,7 +310,7 @@ void HdmiCecController::enableAudioReturnChannel(int port, bool enabled) {
 // Whether to hdmi device is connected to the given port.
 bool HdmiCecController::isConnected(int port) {
     Return<bool> ret = mHdmiCec->isConnected(port);
-    if (!ret.getStatus().isOk()) {
+    if (!ret.isOk()) {
         ALOGE("Failed to get connection info.");
     }
     return ret;

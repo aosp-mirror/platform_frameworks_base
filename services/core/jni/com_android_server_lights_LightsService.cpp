@@ -117,8 +117,7 @@ static void setLight_native(
         ALOGD_IF_SLOW(50, "Excessive delay setting light");
         Return<Status> ret = gLight->setLight(type, state);
 
-        // TODO(b/31348667): this is transport specific status
-        if (!ret.getStatus().isOk()) {
+        if (!ret.isOk()) {
             ALOGE("Failed to issue set light command.");
             return;
         }
