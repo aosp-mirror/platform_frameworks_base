@@ -213,7 +213,7 @@ public class BaseBundle {
      * If the underlying data are stored as a Parcel, unparcel them
      * using the currently assigned class loader.
      */
-    /* package */ synchronized void unparcel() {
+    /* package */ void unparcel() {
         synchronized (this) {
             final Parcel parcelledData = mParcelledData;
             if (parcelledData == null) {
@@ -319,34 +319,37 @@ public class BaseBundle {
     }
 
     void copyInternal(BaseBundle from, boolean deep) {
-        if (from.mParcelledData != null) {
-            if (from.isEmptyParcel()) {
-                mParcelledData = NoImagePreloadHolder.EMPTY_PARCEL;
-            } else {
-                mParcelledData = Parcel.obtain();
-                mParcelledData.appendFrom(from.mParcelledData, 0, from.mParcelledData.dataSize());
-                mParcelledData.setDataPosition(0);
-            }
-        } else {
-            mParcelledData = null;
-        }
-
-        if (from.mMap != null) {
-            if (!deep) {
-                mMap = new ArrayMap<>(from.mMap);
-            } else {
-                final ArrayMap<String, Object> fromMap = from.mMap;
-                final int N = fromMap.size();
-                mMap = new ArrayMap<>(N);
-                for (int i=0; i<N; i++) {
-                    mMap.append(fromMap.keyAt(i), deepcopyValue(fromMap.valueAt(i)));
+        synchronized (from) {
+            if (from.mParcelledData != null) {
+                if (from.isEmptyParcel()) {
+                    mParcelledData = NoImagePreloadHolder.EMPTY_PARCEL;
+                } else {
+                    mParcelledData = Parcel.obtain();
+                    mParcelledData.appendFrom(from.mParcelledData, 0,
+                            from.mParcelledData.dataSize());
+                    mParcelledData.setDataPosition(0);
                 }
+            } else {
+                mParcelledData = null;
             }
-        } else {
-            mMap = null;
-        }
 
-        mClassLoader = from.mClassLoader;
+            if (from.mMap != null) {
+                if (!deep) {
+                    mMap = new ArrayMap<>(from.mMap);
+                } else {
+                    final ArrayMap<String, Object> fromMap = from.mMap;
+                    final int N = fromMap.size();
+                    mMap = new ArrayMap<>(N);
+                    for (int i = 0; i < N; i++) {
+                        mMap.append(fromMap.keyAt(i), deepcopyValue(fromMap.valueAt(i)));
+                    }
+                }
+            } else {
+                mMap = null;
+            }
+
+            mClassLoader = from.mClassLoader;
+        }
     }
 
     Object deepcopyValue(Object value) {
@@ -1441,39 +1444,42 @@ public class BaseBundle {
     void writeToParcelInner(Parcel parcel, int flags) {
         // Keep implementation in sync with writeToParcel() in
         // frameworks/native/libs/binder/PersistableBundle.cpp.
-        final Parcel parcelledData;
+        final ArrayMap<String, Object> map;
         synchronized (this) {
-            parcelledData = mParcelledData;
-        }
-        if (parcelledData != null) {
-            if (isEmptyParcel()) {
-                parcel.writeInt(0);
-            } else {
-                int length = parcelledData.dataSize();
-                parcel.writeInt(length);
-                parcel.writeInt(BUNDLE_MAGIC);
-                parcel.appendFrom(parcelledData, 0, length);
-            }
-        } else {
-            // Special case for empty bundles.
-            if (mMap == null || mMap.size() <= 0) {
-                parcel.writeInt(0);
+            // unparcel() can race with this method and cause the parcel to recycle
+            // at the wrong time. So synchronize access the mParcelledData's content.
+            if (mParcelledData != null) {
+                if (mParcelledData == NoImagePreloadHolder.EMPTY_PARCEL) {
+                    parcel.writeInt(0);
+                } else {
+                    int length = mParcelledData.dataSize();
+                    parcel.writeInt(length);
+                    parcel.writeInt(BUNDLE_MAGIC);
+                    parcel.appendFrom(mParcelledData, 0, length);
+                }
                 return;
             }
-            int lengthPos = parcel.dataPosition();
-            parcel.writeInt(-1); // dummy, will hold length
-            parcel.writeInt(BUNDLE_MAGIC);
-
-            int startPos = parcel.dataPosition();
-            parcel.writeArrayMapInternal(mMap);
-            int endPos = parcel.dataPosition();
-
-            // Backpatch length
-            parcel.setDataPosition(lengthPos);
-            int length = endPos - startPos;
-            parcel.writeInt(length);
-            parcel.setDataPosition(endPos);
+            map = mMap;
         }
+
+        // Special case for empty bundles.
+        if (map == null || map.size() <= 0) {
+            parcel.writeInt(0);
+            return;
+        }
+        int lengthPos = parcel.dataPosition();
+        parcel.writeInt(-1); // dummy, will hold length
+        parcel.writeInt(BUNDLE_MAGIC);
+
+        int startPos = parcel.dataPosition();
+        parcel.writeArrayMapInternal(map);
+        int endPos = parcel.dataPosition();
+
+        // Backpatch length
+        parcel.setDataPosition(lengthPos);
+        int length = endPos - startPos;
+        parcel.writeInt(length);
+        parcel.setDataPosition(endPos);
     }
 
     /**
