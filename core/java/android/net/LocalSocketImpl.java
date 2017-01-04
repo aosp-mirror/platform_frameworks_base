@@ -235,29 +235,29 @@ class LocalSocketImpl
      * @throws IOException
      */
     public void create(int sockType) throws IOException {
-        // no error if socket already created
-        // need this for LocalServerSocket.accept()
-        if (fd == null) {
-            int osType;
-            switch (sockType) {
-                case LocalSocket.SOCKET_DGRAM:
-                    osType = OsConstants.SOCK_DGRAM;
-                    break;
-                case LocalSocket.SOCKET_STREAM:
-                    osType = OsConstants.SOCK_STREAM;
-                    break;
-                case LocalSocket.SOCKET_SEQPACKET:
-                    osType = OsConstants.SOCK_SEQPACKET;
-                    break;
-                default:
-                    throw new IllegalStateException("unknown sockType");
-            }
-            try {
-                fd = Os.socket(OsConstants.AF_UNIX, osType, 0);
-                mFdCreatedInternally = true;
-            } catch (ErrnoException e) {
-                e.rethrowAsIOException();
-            }
+        if (fd != null) {
+            throw new IOException("LocalSocketImpl already has an fd");
+        }
+
+        int osType;
+        switch (sockType) {
+            case LocalSocket.SOCKET_DGRAM:
+                osType = OsConstants.SOCK_DGRAM;
+                break;
+            case LocalSocket.SOCKET_STREAM:
+                osType = OsConstants.SOCK_STREAM;
+                break;
+            case LocalSocket.SOCKET_SEQPACKET:
+                osType = OsConstants.SOCK_SEQPACKET;
+                break;
+            default:
+                throw new IllegalStateException("unknown sockType");
+        }
+        try {
+            fd = Os.socket(OsConstants.AF_UNIX, osType, 0);
+            mFdCreatedInternally = true;
+        } catch (ErrnoException e) {
+            e.rethrowAsIOException();
         }
     }
 
