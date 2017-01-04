@@ -1,6 +1,7 @@
 #define LOG_TAG "Bitmap"
 #include "Bitmap.h"
 
+#include "GraphicBuffer.h"
 #include "SkBitmap.h"
 #include "SkPixelRef.h"
 #include "SkImageEncoder.h"
@@ -1308,6 +1309,16 @@ static jobject Bitmap_nativeCopyPreserveInternalConfig(JNIEnv* env, jobject, jlo
     return createBitmap(env, allocator.getStorageObjAndReset(), kBitmapCreateFlag_None);
 }
 
+static jobject Bitmap_createHardwareBitmap(JNIEnv* env, jobject, jobject graphicBuffer) {
+    sp<GraphicBuffer> buffer(graphicBufferForJavaObject(env, graphicBuffer));
+    sk_sp<Bitmap> bitmap = Bitmap::createFrom(buffer);
+    if (!bitmap.get()) {
+        ALOGW("failed to create hardware bitmap from graphic buffer");
+        return NULL;
+    }
+    return bitmap::createBitmap(env, bitmap.release(), android::bitmap::kBitmapCreateFlag_None);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 static jclass make_globalref(JNIEnv* env, const char classname[])
 {
@@ -1368,6 +1379,8 @@ static const JNINativeMethod gBitmapMethods[] = {
     {   "nativeGetAllocationByteCount", "(J)I", (void*)Bitmap_getAllocationByteCount },
     {   "nativeCopyPreserveInternalConfig", "(J)Landroid/graphics/Bitmap;",
         (void*)Bitmap_nativeCopyPreserveInternalConfig },
+    {   "nativeCreateHardwareBitmap", "(Landroid/graphics/GraphicBuffer;)Landroid/graphics/Bitmap;",
+        (void*) Bitmap_createHardwareBitmap }
 };
 
 int register_android_graphics_Bitmap(JNIEnv* env)

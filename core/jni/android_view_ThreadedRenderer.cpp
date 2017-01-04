@@ -36,7 +36,6 @@
 #include <android_runtime/android_view_Surface.h>
 #include <system/window.h>
 
-#include "android_view_GraphicBuffer.h"
 #include "android_os_MessageQueue.h"
 
 #include <Animator.h>

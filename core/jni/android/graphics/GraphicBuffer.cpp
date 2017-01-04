@@ -20,9 +20,8 @@
 #include "JNIHelp.h"
 
 #include "android_os_Parcel.h"
-#include "android_view_GraphicBuffer.h"
-#include "android/graphics/GraphicsJNI.h"
-#include "Bitmap.h"
+#include "GraphicBuffer.h"
+#include "GraphicsJNI.h"
 
 #include <android_runtime/AndroidRuntime.h>
 
@@ -100,7 +99,7 @@ public:
 // GraphicBuffer lifecycle
 // ----------------------------------------------------------------------------
 
-static jlong android_view_GraphiceBuffer_create(JNIEnv* env, jobject clazz,
+static jlong android_graphics_GraphicBuffer_create(JNIEnv* env, jobject clazz,
         jint width, jint height, jint format, jint usage) {
 
     sp<ISurfaceComposer> composer(ComposerService::getComposerService());
@@ -125,7 +124,7 @@ static jlong android_view_GraphiceBuffer_create(JNIEnv* env, jobject clazz,
     return reinterpret_cast<jlong>(wrapper);
 }
 
-static void android_view_GraphiceBuffer_destroy(JNIEnv* env, jobject clazz,
+static void android_graphics_GraphicBuffer_destroy(JNIEnv* env, jobject clazz,
         jlong wrapperHandle) {
     GraphicBufferWrapper* wrapper =
                 reinterpret_cast<GraphicBufferWrapper*>(wrapperHandle);
@@ -151,7 +150,7 @@ static inline SkColorType convertPixelFormat(int32_t format) {
     }
 }
 
-static jboolean android_view_GraphicBuffer_lockCanvas(JNIEnv* env, jobject,
+static jboolean android_graphics_GraphicBuffer_lockCanvas(JNIEnv* env, jobject,
         jlong wrapperHandle, jobject canvas, jobject dirtyRect) {
 
     GraphicBufferWrapper* wrapper =
@@ -209,7 +208,7 @@ static jboolean android_view_GraphicBuffer_lockCanvas(JNIEnv* env, jobject,
     return JNI_TRUE;
 }
 
-static jboolean android_view_GraphicBuffer_unlockCanvasAndPost(JNIEnv* env, jobject,
+static jboolean android_graphics_GraphicBuffer_unlockCanvasAndPost(JNIEnv* env, jobject,
         jlong wrapperHandle, jobject canvas) {
 
     GraphicBufferWrapper* wrapper =
@@ -229,7 +228,7 @@ static jboolean android_view_GraphicBuffer_unlockCanvasAndPost(JNIEnv* env, jobj
 // Serialization
 // ----------------------------------------------------------------------------
 
-static void android_view_GraphiceBuffer_write(JNIEnv* env, jobject clazz,
+static void android_graphics_GraphicBuffer_write(JNIEnv* env, jobject clazz,
         jlong wrapperHandle, jobject dest) {
     GraphicBufferWrapper* wrapper =
                 reinterpret_cast<GraphicBufferWrapper*>(wrapperHandle);
@@ -239,7 +238,7 @@ static void android_view_GraphiceBuffer_write(JNIEnv* env, jobject clazz,
     }
 }
 
-static jlong android_view_GraphiceBuffer_read(JNIEnv* env, jobject clazz,
+static jlong android_graphics_GraphicBuffer_read(JNIEnv* env, jobject clazz,
         jobject in) {
 
     Parcel* parcel = parcelForJavaObject(env, in);
@@ -250,17 +249,6 @@ static jlong android_view_GraphiceBuffer_read(JNIEnv* env, jobject clazz,
     }
 
     return NULL;
-}
-
-static jobject android_view_GraphicBuffer_createHardwareBitmap(JNIEnv* env, jobject,
-        jlong wrapperHandle) {
-    GraphicBufferWrapper* wrapper = reinterpret_cast<GraphicBufferWrapper*>(wrapperHandle);
-    sk_sp<Bitmap> bitmap = Bitmap::createFrom(wrapper->buffer);
-    if (!bitmap.get()) {
-        ALOGW("failed to create hardware bitmap from graphic buffer");
-        return NULL;
-    }
-    return bitmap::createBitmap(env, bitmap.release(), android::bitmap::kBitmapCreateFlag_None);
 }
 
 // ----------------------------------------------------------------------------
@@ -278,33 +266,32 @@ sp<GraphicBuffer> graphicBufferForJavaObject(JNIEnv* env, jobject obj) {
     }
     return NULL;
 }
+};
 
+using namespace android;
 // ----------------------------------------------------------------------------
 // JNI Glue
 // ----------------------------------------------------------------------------
 
-const char* const kClassPathName = "android/view/GraphicBuffer";
+const char* const kClassPathName = "android/graphics/GraphicBuffer";
 
 static const JNINativeMethod gMethods[] = {
-    { "nCreateGraphicBuffer",  "(IIII)J", (void*) android_view_GraphiceBuffer_create },
-    { "nDestroyGraphicBuffer", "(J)V",    (void*) android_view_GraphiceBuffer_destroy },
+    { "nCreateGraphicBuffer",  "(IIII)J", (void*) android_graphics_GraphicBuffer_create },
+    { "nDestroyGraphicBuffer", "(J)V",    (void*) android_graphics_GraphicBuffer_destroy },
 
     { "nWriteGraphicBufferToParcel",  "(JLandroid/os/Parcel;)V",
-            (void*) android_view_GraphiceBuffer_write },
+            (void*) android_graphics_GraphicBuffer_write },
     { "nReadGraphicBufferFromParcel", "(Landroid/os/Parcel;)J",
-            (void*) android_view_GraphiceBuffer_read },
+            (void*) android_graphics_GraphicBuffer_read },
 
     { "nLockCanvas", "(JLandroid/graphics/Canvas;Landroid/graphics/Rect;)Z",
-            (void*) android_view_GraphicBuffer_lockCanvas },
+            (void*) android_graphics_GraphicBuffer_lockCanvas },
     { "nUnlockCanvasAndPost", "(JLandroid/graphics/Canvas;)Z",
-            (void*) android_view_GraphicBuffer_unlockCanvasAndPost },
-    { "nCreateHardwareBitmap", "(J)Landroid/graphics/Bitmap;",
-        (void*) android_view_GraphicBuffer_createHardwareBitmap
-    }
+            (void*) android_graphics_GraphicBuffer_unlockCanvasAndPost }
 };
 
-int register_android_view_GraphicBuffer(JNIEnv* env) {
-    jclass clazz = FindClassOrDie(env, "android/view/GraphicBuffer");
+int register_android_graphics_GraphicBuffer(JNIEnv* env) {
+    jclass clazz = FindClassOrDie(env, "android/graphics/GraphicBuffer");
     gGraphicBufferClassInfo.mNativeObject = GetFieldIDOrDie(env, clazz, "mNativeObject", "J");
 
     clazz = FindClassOrDie(env, "android/graphics/Rect");
@@ -316,5 +303,3 @@ int register_android_view_GraphicBuffer(JNIEnv* env) {
 
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
-
-};

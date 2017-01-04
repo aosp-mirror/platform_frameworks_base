@@ -60,7 +60,6 @@ LOCAL_SRC_FILES:= \
     android_graphics_drawable_VectorDrawable.cpp \
     android_view_DisplayEventReceiver.cpp \
     android_view_DisplayListCanvas.cpp \
-    android_view_GraphicBuffer.cpp \
     android_view_HardwareLayer.cpp \
     android_view_InputChannel.cpp \
     android_view_InputDevice.cpp \
@@ -120,6 +119,7 @@ LOCAL_SRC_FILES:= \
     android/graphics/FontFamily.cpp \
     android/graphics/CreateJavaOutputStreamAdaptor.cpp \
     android/graphics/GIFMovie.cpp \
+    android/graphics/GraphicBuffer.cpp \
     android/graphics/Graphics.cpp \
     android/graphics/HarfBuzzNGFaceSkia.cpp \
     android/graphics/Interpolator.cpp \
