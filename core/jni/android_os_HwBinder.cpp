@@ -52,6 +52,8 @@ static struct {
     jmethodID get;
 } gArrayListMethods;
 
+static jclass gErrorClass;
+
 static struct fields_t {
     jfieldID contextID;
     jmethodID onTransactID;
@@ -143,6 +145,22 @@ status_t JHwBinder::onTransact(
             requestObj.get(),
             replyObj.get(),
             flags);
+
+    if (env->ExceptionCheck()) {
+        jthrowable excep = env->ExceptionOccurred();
+        env->ExceptionDescribe();
+
+        if (env->IsInstanceOf(excep, gErrorClass)) {
+            /* It's an error */
+            LOG(ERROR) << "Forcefully exiting";
+            exit(1);
+        } else {
+            env->ExceptionClear();
+            LOG(ERROR) << "Uncaught exception!";
+        }
+
+        env->DeleteLocalRef(excep);
+    }
 
     status_t err = OK;
 
@@ -355,6 +373,9 @@ int register_android_os_HwBinder(JNIEnv *env) {
     gArrayListClass = MakeGlobalRefOrDie(env, arrayListClass);
     gArrayListMethods.size = GetMethodIDOrDie(env, arrayListClass, "size", "()I");
     gArrayListMethods.get = GetMethodIDOrDie(env, arrayListClass, "get", "(I)Ljava/lang/Object;");
+
+    jclass errorClass = FindClassOrDie(env, "java/lang/Error");
+    gErrorClass = MakeGlobalRefOrDie(env, errorClass);
 
     return RegisterMethodsOrDie(env, CLASS_PATH, gMethods, NELEM(gMethods));
 }

@@ -49,7 +49,7 @@ static struct fields_t {
 
 } gFields;
 
-void signalExceptionForError(JNIEnv *env, status_t err) {
+void signalExceptionForError(JNIEnv *env, status_t err, bool canThrowRemoteException) {
     switch (err) {
         case OK:
             break;
@@ -114,8 +114,13 @@ void signalExceptionForError(JNIEnv *env, status_t err) {
 
         default:
         {
+            std::stringstream ss;
+            ss << "HwBinder Error: (" << err << ")";
+
             jniThrowException(
-                    env, "java/lang/RuntimeException", "Unknown error");
+                    env,
+                    canThrowRemoteException ? "android/os/RemoteException" : "java/lang/RuntimeException",
+                    ss.str().c_str());
 
             break;
         }
