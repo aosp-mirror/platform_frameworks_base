@@ -249,6 +249,19 @@ public final class WindowManagerGlobal {
         return views;
     }
 
+    public View getWindowView(IBinder windowToken) {
+        synchronized (mLock) {
+            final int numViews = mViews.size();
+            for (int i = 0; i < numViews; ++i) {
+                final View view = mViews.get(i);
+                if (view.getWindowToken() == windowToken) {
+                    return view;
+                }
+            }
+        }
+        return null;
+    }
+
     public View getRootView(String name) {
         synchronized (mLock) {
             for (int i = mRoots.size() - 1; i >= 0; --i) {

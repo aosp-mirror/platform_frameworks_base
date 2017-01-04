@@ -1585,7 +1585,13 @@ public final class FloatingToolbar {
                 }
                 if (menuItem != null) {
                     menuButton.setText(menuItem.getTitle());
-                    menuButton.setContentDescription(menuItem.getTitle());
+                    final CharSequence contentDescription = menuItem.getContentDescription();
+                    if (TextUtils.isEmpty(contentDescription)) {
+                        menuButton.setContentDescription(menuItem.getTitle());
+                    } else {
+                        menuButton.setContentDescription(contentDescription);
+                    }
+                    menuButton.setTooltip(menuItem.getTooltip());
                     menuButton.setMinimumWidth(minimumWidth);
                 }
                 return menuButton;
@@ -1629,19 +1635,31 @@ public final class FloatingToolbar {
      * Creates and returns a menu button for the specified menu item.
      */
     private static View createMenuItemButton(Context context, MenuItem menuItem) {
+        final View menuItemButton;
         if (isIconOnlyMenuItem(menuItem)) {
-            View imageMenuItemButton = LayoutInflater.from(context)
+            menuItemButton = LayoutInflater.from(context)
                     .inflate(R.layout.floating_popup_menu_image_button, null);
-            ((ImageButton) imageMenuItemButton
+            ((ImageButton) menuItemButton
                     .findViewById(R.id.floating_toolbar_menu_item_image_button))
                     .setImageDrawable(menuItem.getIcon());
-            return imageMenuItemButton;
+            final CharSequence tooltip = menuItem.getTooltip();
+            if (TextUtils.isEmpty(tooltip)) {
+                menuItemButton.setTooltip(menuItem.getTitle());
+            } else {
+                menuItemButton.setTooltip(tooltip);
+            }
+        } else {
+            menuItemButton = LayoutInflater.from(context)
+                    .inflate(R.layout.floating_popup_menu_button, null);
+            ((Button) menuItemButton).setText(menuItem.getTitle());
+            menuItemButton.setTooltip(menuItem.getTooltip());
         }
-
-        Button menuItemButton = (Button) LayoutInflater.from(context)
-                .inflate(R.layout.floating_popup_menu_button, null);
-        menuItemButton.setText(menuItem.getTitle());
-        menuItemButton.setContentDescription(menuItem.getTitle());
+        final CharSequence contentDescription = menuItem.getContentDescription();
+        if (TextUtils.isEmpty(contentDescription)) {
+            menuItemButton.setContentDescription(menuItem.getTitle());
+        } else {
+            menuItemButton.setContentDescription(contentDescription);
+        }
         return menuItemButton;
     }
 

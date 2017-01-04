@@ -39,23 +39,26 @@ public class ActionMenuItem implements MenuItem {
     private Intent mIntent;
     private char mShortcutNumericChar;
     private char mShortcutAlphabeticChar;
-    
+
     private Drawable mIconDrawable;
     private int mIconResId = NO_ICON;
-    
+
     private Context mContext;
-    
+
     private MenuItem.OnMenuItemClickListener mClickListener;
-    
+
+    private CharSequence mContentDescription;
+    private CharSequence mTooltip;
+
     private static final int NO_ICON = 0;
-    
+
     private int mFlags = ENABLED;
     private static final int CHECKABLE      = 0x00000001;
     private static final int CHECKED        = 0x00000002;
     private static final int EXCLUSIVE      = 0x00000004;
     private static final int HIDDEN         = 0x00000008;
     private static final int ENABLED        = 0x00000010;
-    
+
     public ActionMenuItem(Context context, int group, int id, int categoryOrder, int ordering,
             CharSequence title) {
         mContext = context;
@@ -65,7 +68,7 @@ public class ActionMenuItem implements MenuItem {
         mOrdering = ordering;
         mTitle = title;
     }
-    
+
     public char getAlphabeticShortcut() {
         return mShortcutAlphabeticChar;
     }
@@ -273,5 +276,27 @@ public class ActionMenuItem implements MenuItem {
     public MenuItem setOnActionExpandListener(OnActionExpandListener listener) {
         // No need to save the listener; ActionMenuItem does not support collapsing items.
         return this;
+    }
+
+    @Override
+    public MenuItem setContentDescription(CharSequence contentDescription) {
+        mContentDescription = contentDescription;
+        return this;
+    }
+
+    @Override
+    public CharSequence getContentDescription() {
+        return mContentDescription;
+    }
+
+    @Override
+    public MenuItem setTooltip(CharSequence tooltip) {
+        mTooltip = tooltip;
+        return this;
+    }
+
+    @Override
+    public CharSequence getTooltip() {
+        return mTooltip;
     }
 }

@@ -19,13 +19,17 @@ package com.android.internal.view;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.util.Slog;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 import android.widget.TextView;
 
 public class TooltipPopup {
+    private static final String TAG = "TooltipPopup";
+
     private final Context mContext;
 
     private final View mContentView;
@@ -34,6 +38,7 @@ public class TooltipPopup {
     private final WindowManager.LayoutParams mLayoutParams = new WindowManager.LayoutParams();
     private final Rect mTmpDisplayFrame = new Rect();
     private final int[] mTmpAnchorPos = new int[2];
+    private final int[] mTmpAppPos = new int[2];
 
     public TooltipPopup(Context context) {
         mContext = context;
@@ -124,8 +129,21 @@ public class TooltipPopup {
                 fromTouch ? com.android.internal.R.dimen.tooltip_y_offset_touch
                         : com.android.internal.R.dimen.tooltip_y_offset_non_touch);
 
-        anchorView.getWindowVisibleDisplayFrame(mTmpDisplayFrame);
-        anchorView.getLocationInWindow(mTmpAnchorPos);
+        // Find the main app window. The popup window will be positioned relative to it.
+        final View appView = WindowManagerGlobal.getInstance().getWindowView(
+                anchorView.getApplicationWindowToken());
+        if (appView == null) {
+            Slog.e(TAG, "Cannot find app view");
+            return;
+        }
+        appView.getWindowVisibleDisplayFrame(mTmpDisplayFrame);
+        appView.getLocationOnScreen(mTmpAppPos);
+
+        anchorView.getLocationOnScreen(mTmpAnchorPos);
+        mTmpAnchorPos[0] -= mTmpAppPos[0];
+        mTmpAnchorPos[1] -= mTmpAppPos[1];
+        // mTmpAnchorPos is now relative to the main app window.
+
         outParams.x = mTmpAnchorPos[0] + offsetX - mTmpDisplayFrame.width() / 2;
 
         final int spec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
