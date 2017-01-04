@@ -178,8 +178,13 @@ class AutomaticBrightnessController {
     // Are we going to adjust brightness while dozing.
     private boolean mDozing;
 
-    // True if we are collecting one last light sample when dozing to set the screen brightness
-    private boolean mActiveDozeLightSensor = false;
+    // True if we are collecting light samples when dozing to set the screen brightness. A single
+    // light sample is collected when entering doze mode. If autobrightness is enabled, calls to
+    // DisplayPowerController#updatePowerState in doze mode will also collect light samples.
+    private final boolean mUseActiveDozeLightSensorConfig;
+
+    // True if the ambient light sensor ring buffer should be cleared when entering doze mode.
+    private final boolean mUseNewSensorSamplesForDoze;
 
     // True if we are collecting a brightness adjustment sample, along with some data
     // for the initial state of the sample.
@@ -197,6 +202,7 @@ class AutomaticBrightnessController {
             int lightSensorRate, int initialLightSensorRate, long brighteningLightDebounceConfig,
             long darkeningLightDebounceConfig, boolean resetAmbientLuxAfterWarmUpConfig,
             int ambientLightHorizon, float autoBrightnessAdjustmentMaxGamma,
+            boolean activeDozeLightSensor, boolean useNewSensorSamplesForDoze,
             LuxLevels luxLevels) {
         mCallbacks = callbacks;
         mTwilight = LocalServices.getService(TwilightManager.class);
@@ -215,6 +221,8 @@ class AutomaticBrightnessController {
         mAmbientLightHorizon = ambientLightHorizon;
         mWeightingIntercept = ambientLightHorizon;
         mScreenAutoBrightnessAdjustmentMaxGamma = autoBrightnessAdjustmentMaxGamma;
+        mUseNewSensorSamplesForDoze = useNewSensorSamplesForDoze;
+        mUseActiveDozeLightSensorConfig = activeDozeLightSensor;
         mLuxLevels = luxLevels;
 
         mHandler = new AutomaticBrightnessHandler(looper);
@@ -242,20 +250,18 @@ class AutomaticBrightnessController {
         // switch to a wake-up light sensor instead but for now we will simply disable the sensor
         // and hold onto the last computed screen auto brightness.  We save the dozing flag for
         // debugging purposes.
-        mDozing = dozing;
-        boolean enableSensor = enable && !dozing;
-        if (enableSensor && !mLightSensorEnabled && mActiveDozeLightSensor) {
-            mActiveDozeLightSensor = false;
-        } else if (!enableSensor && mLightSensorEnabled && mLuxLevels.hasDynamicDozeBrightness()) {
-            // keep the light sensor active until another light sample is taken in doze mode
-            mActiveDozeLightSensor = true;
-            if (mLuxLevels.useNewSensorSamplesForDoze()) {
-                mAmbientLightRingBuffer.clear();
-                mInitialHorizonAmbientLightRingBuffer.clear();
-                mAmbientLuxValid = false;
-                return;
+        boolean enableSensor = enable && (dozing ? mUseActiveDozeLightSensorConfig : true);
+        if (enableSensor && dozing && !mDozing && mLightSensorEnabled
+                && mUseNewSensorSamplesForDoze) {
+            mAmbientLightRingBuffer.clear();
+            mInitialHorizonAmbientLightRingBuffer.clear();
+            if (DEBUG) {
+                Slog.d(TAG, "configure: Clearing ambient light ring buffers when entering doze.");
             }
+            mAmbientLuxValid = false;
+            adjustLightSensorRate(mInitialLightSensorRate);
         }
+        mDozing = dozing;
         boolean changed = setLightSensorEnabled(enableSensor);
         changed |= setScreenAutoBrightnessAdjustment(adjustment);
         changed |= setUseTwilight(useTwilight);
@@ -315,6 +321,9 @@ class AutomaticBrightnessController {
     private boolean setLightSensorEnabled(boolean enable) {
         if (enable) {
             if (!mLightSensorEnabled) {
+                if (DEBUG) {
+                    Slog.d(TAG, "setLightSensorEnabled: sensor enabled");
+                }
                 mLightSensorEnabled = true;
                 mAmbientLightRingBuffer.clear();
                 mInitialHorizonAmbientLightRingBuffer.clear();
@@ -327,6 +336,9 @@ class AutomaticBrightnessController {
             }
         } else {
             if (mLightSensorEnabled) {
+                if (DEBUG) {
+                    Slog.d(TAG, "setLightSensorEnabled: sensor disabled");
+                }
                 mLightSensorEnabled = false;
                 mRecentLightSamples = 0;
                 mCurrentLightSensorRate = -1;
@@ -346,8 +358,11 @@ class AutomaticBrightnessController {
         }
         applyLightSensorMeasurement(time, lux);
         updateAmbientLux(time);
-        if (mActiveDozeLightSensor) {
+        if (mUseActiveDozeLightSensorConfig && mDozing) {
             // disable the ambient light sensor and update the screen brightness
+            if (DEBUG) {
+                Slog.d(TAG, "handleLightSensorEvent: doze ambient light sensor reading: " + lux);
+            }
             setLightSensorEnabled(false);
             updateAutoBrightness(true /*sendUpdate*/);
         }
@@ -566,7 +581,7 @@ class AutomaticBrightnessController {
         }
 
         int newScreenAutoBrightness;
-        if (mActiveDozeLightSensor) {
+        if (mUseActiveDozeLightSensorConfig && mDozing) {
             newScreenAutoBrightness = mLuxLevels.getDozeBrightness(mAmbientLux);
         } else {
             newScreenAutoBrightness =
