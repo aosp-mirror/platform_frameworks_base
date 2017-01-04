@@ -27,6 +27,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -137,28 +138,28 @@ public final class BluetoothInputHost implements BluetoothProfile {
         }
 
         @Override
-        public void onGetReport(byte type, byte id, int bufferSize) {
-            mCallback.onGetReport(type, id, bufferSize);
+        public void onGetReport(BluetoothDevice device, byte type, byte id, int bufferSize) {
+            mCallback.onGetReport(device, type, id, bufferSize);
         }
 
         @Override
-        public void onSetReport(byte type, byte id, byte[] data) {
-            mCallback.onSetReport(type, id, data);
+        public void onSetReport(BluetoothDevice device, byte type, byte id, byte[] data) {
+            mCallback.onSetReport(device, type, id, data);
         }
 
         @Override
-        public void onSetProtocol(byte protocol) {
-            mCallback.onSetProtocol(protocol);
+        public void onSetProtocol(BluetoothDevice device, byte protocol) {
+            mCallback.onSetProtocol(device, protocol);
         }
 
         @Override
-        public void onIntrData(byte reportId, byte[] data) {
-            mCallback.onIntrData(reportId, data);
+        public void onIntrData(BluetoothDevice device, byte reportId, byte[] data) {
+            mCallback.onIntrData(device, reportId, data);
         }
 
         @Override
-        public void onVirtualCableUnplug() {
-            mCallback.onVirtualCableUnplug();
+        public void onVirtualCableUnplug(BluetoothDevice device) {
+            mCallback.onVirtualCableUnplug(device);
         }
     }
 
@@ -276,21 +277,59 @@ public final class BluetoothInputHost implements BluetoothProfile {
         mServiceListener = null;
     }
 
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public List<BluetoothDevice> getConnectedDevices() {
         Log.v(TAG, "getConnectedDevices()");
-        return null;
+
+        if (mService != null) {
+            try {
+                return mService.getConnectedDevices();
+            } catch (RemoteException e) {
+                Log.e(TAG, e.toString());
+            }
+        } else {
+            Log.w(TAG, "Proxy not attached to service");
+        }
+
+        return new ArrayList<BluetoothDevice>();
     }
 
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         Log.v(TAG, "getDevicesMatchingConnectionStates(): states=" + Arrays.toString(states));
-        return null;
+
+        if (mService != null) {
+            try {
+                return mService.getDevicesMatchingConnectionStates(states);
+            } catch (RemoteException e) {
+                Log.e(TAG, e.toString());
+            }
+        } else {
+            Log.w(TAG, "Proxy not attached to service");
+        }
+
+        return new ArrayList<BluetoothDevice>();
     }
 
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public int getConnectionState(BluetoothDevice device) {
-        Log.v(TAG, "getConnectionState(): device=" + device.getAddress());
+        Log.v(TAG, "getConnectionState(): device=" + device);
+
+        if (mService != null) {
+            try {
+                return mService.getConnectionState(device);
+            } catch (RemoteException e) {
+                Log.e(TAG, e.toString());
+            }
+        } else {
+            Log.w(TAG, "Proxy not attached to service");
+        }
 
         return STATE_DISCONNECTED;
     }
@@ -379,14 +418,12 @@ public final class BluetoothInputHost implements BluetoothProfile {
      * @param data Report data, not including Report Id.
      * @return
      */
-    public boolean sendReport(int id, byte[] data) {
-        Log.v(TAG, "sendReport(): id=" + id);
-
+    public boolean sendReport(BluetoothDevice device, int id, byte[] data) {
         boolean result = false;
 
         if (mService != null) {
             try {
-                result = mService.sendReport(id, data);
+                result = mService.sendReport(device, id, data);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -399,21 +436,21 @@ public final class BluetoothInputHost implements BluetoothProfile {
 
     /**
      * Sends report to remote host as reply for GET_REPORT request from
-     * {@link BluetoothHidDeviceCallback#onGetReport(byte, byte, int)}.
+     * {@link BluetoothHidDeviceCallback#onGetReport(BluetoothDevice, byte, byte, int)}.
      *
      * @param type Report Type, as in request.
      * @param id Report Id, as in request.
      * @param data Report data, not including Report Id.
      * @return
      */
-    public boolean replyReport(byte type, byte id, byte[] data) {
-        Log.v(TAG, "replyReport(): type=" + type + " id=" + id);
+    public boolean replyReport(BluetoothDevice device, byte type, byte id, byte[] data) {
+        Log.v(TAG, "replyReport(): device=" + device + " type=" + type + " id=" + id);
 
         boolean result = false;
 
         if (mService != null) {
             try {
-                result = mService.replyReport(type, id, data);
+                result = mService.replyReport(device, type, id, data);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -426,19 +463,19 @@ public final class BluetoothInputHost implements BluetoothProfile {
 
     /**
      * Sends error handshake message as reply for invalid SET_REPORT request
-     * from {@link BluetoothHidDeviceCallback#onSetReport(byte, byte, byte[])}.
+     * from {@link BluetoothHidDeviceCallback#onSetReport(BluetoothDevice, byte, byte, byte[])}.
      *
      * @param error Error to be sent for SET_REPORT via HANDSHAKE.
      * @return
      */
-    public boolean reportError(byte error) {
-        Log.v(TAG, "reportError(): error = " + error);
+    public boolean reportError(BluetoothDevice device, byte error) {
+        Log.v(TAG, "reportError(): device=" + device + " error=" + error);
 
         boolean result = false;
 
         if (mService != null) {
             try {
-                result = mService.reportError(error);
+                result = mService.reportError(device, error);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -454,14 +491,14 @@ public final class BluetoothInputHost implements BluetoothProfile {
      *
      * @return
      */
-    public boolean unplug() {
-        Log.v(TAG, "unplug()");
+    public boolean unplug(BluetoothDevice device) {
+        Log.v(TAG, "unplug(): device=" + device);
 
         boolean result = false;
 
         if (mService != null) {
             try {
-                result = mService.unplug();
+                result = mService.unplug(device);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -478,14 +515,14 @@ public final class BluetoothInputHost implements BluetoothProfile {
      *
      * @return
      */
-    public boolean connect() {
-        Log.v(TAG, "connect()");
+    public boolean connect(BluetoothDevice device) {
+        Log.v(TAG, "connect(): device=" + device);
 
         boolean result = false;
 
         if (mService != null) {
             try {
-                result = mService.connect();
+                result = mService.connect(device);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -501,14 +538,14 @@ public final class BluetoothInputHost implements BluetoothProfile {
      *
      * @return
      */
-    public boolean disconnect() {
-        Log.v(TAG, "disconnect()");
+    public boolean disconnect(BluetoothDevice device) {
+        Log.v(TAG, "disconnect(): device=" + device);
 
         boolean result = false;
 
         if (mService != null) {
             try {
-                result = mService.disconnect();
+                result = mService.disconnect(device);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
