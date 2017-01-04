@@ -2498,19 +2498,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         private void addChild(TaskStack stack, boolean toTop) {
-            int addIndex = toTop ? mChildren.size() : 0;
-
-            if (toTop
-                    && mService.isStackVisibleLocked(PINNED_STACK_ID)
-                    && stack.mStackId != PINNED_STACK_ID) {
-                // The pinned stack is always the top most stack (always-on-top) when it is visible.
-                // So, stack is moved just below the pinned stack.
-                addIndex--;
-                TaskStack topStack = mChildren.get(addIndex);
-                if (topStack.mStackId != PINNED_STACK_ID) {
-                    throw new IllegalStateException("Pinned stack isn't top stack??? " + mChildren);
-                }
-            }
+            final int addIndex = findPositionForStack(toTop ? mChildren.size() : 0, stack,
+                    true /* adding */);
             addChild(stack, addIndex);
             setLayoutNeeded();
         }
@@ -2528,7 +2517,45 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 return;
             }
 
-            super.positionChildAt(position, child, includingParents);
+            final int targetPosition = findPositionForStack(position, child, false /* adding */);
+            super.positionChildAt(targetPosition, child, includingParents);
+
+            setLayoutNeeded();
+        }
+
+        /**
+         * When stack is added or repositioned, find a proper position for it.
+         * This will make sure that pinned stack always stays on top.
+         * @param requestedPosition Position requested by caller.
+         * @param stack Stack to be added or positioned.
+         * @param adding Flag indicates whether we're adding a new stack or positioning an existing.
+         * @return The proper position for the stack.
+         */
+        private int findPositionForStack(int requestedPosition, TaskStack stack, boolean adding) {
+            final int topChildPosition = mChildren.size() - 1;
+            boolean toTop = requestedPosition == POSITION_TOP;
+            toTop |= adding ? requestedPosition >= topChildPosition + 1
+                    : requestedPosition >= topChildPosition;
+            int targetPosition = requestedPosition;
+
+            if (toTop
+                    && mService.isStackVisibleLocked(PINNED_STACK_ID)
+                    && stack.mStackId != PINNED_STACK_ID) {
+                // The pinned stack is always the top most stack (always-on-top) when it is visible.
+                TaskStack topStack = mChildren.get(topChildPosition);
+                if (topStack.mStackId != PINNED_STACK_ID) {
+                    throw new IllegalStateException("Pinned stack isn't top stack??? " + mChildren);
+                }
+
+                // So, stack is moved just below the pinned stack.
+                // When we're adding a new stack the target is the current pinned stack position.
+                // When we're positioning an existing stack the target is the position below pinned
+                // stack, because WindowContainer#positionAt() first removes element and then adds it
+                // to specified place.
+                targetPosition = adding ? topChildPosition : topChildPosition - 1;
+            }
+
+            return targetPosition;
         }
 
         @Override
