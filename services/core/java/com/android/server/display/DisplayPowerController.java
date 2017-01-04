@@ -153,8 +153,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // True if should use light sensor to automatically determine doze screen brightness.
     private final boolean mAllowAutoBrightnessWhileDozingConfig;
 
-    // True if using only new sensor samples to automatically determine doze screen brightness.
-    private boolean mUseNewSensorSamplesForDoze;
+    // True if collecting light sensor samples in doze mode.
+    private boolean mUseActiveDozeLightSensorConfig;
 
     // True if we should fade the screen while turning it off, false if we should play
     // a stylish color fade animation instead.
@@ -357,11 +357,12 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     com.android.internal.R.array.config_dozeSensorLuxLevels);
             int[] dozeBrightnessBacklightValues = resources.getIntArray(
                     com.android.internal.R.array.config_dozeBrightnessBacklightValues);
-            mUseNewSensorSamplesForDoze = resources.getBoolean(
+            boolean useNewSensorSamplesForDoze = resources.getBoolean(
                     com.android.internal.R.bool.config_useNewSensorSamplesForDoze);
+            mUseActiveDozeLightSensorConfig = resources.getBoolean(
+                    com.android.internal.R.bool.config_allowAutoBrightnessActiveDozeLightSensor);
             LuxLevels luxLevels = new LuxLevels(brightHysteresisLevels, darkHysteresisLevels,
-                    luxHysteresisLevels, mUseNewSensorSamplesForDoze, dozeSensorLuxLevels,
-                    dozeBrightnessBacklightValues);
+                    luxHysteresisLevels, dozeSensorLuxLevels, dozeBrightnessBacklightValues);
 
             Spline screenAutoBrightnessSpline = createAutoBrightnessSpline(lux, screenBrightness);
             if (screenAutoBrightnessSpline == null) {
@@ -389,7 +390,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                         mScreenBrightnessRangeMaximum, dozeScaleFactor, lightSensorRate,
                         initialLightSensorRate, brighteningLightDebounce, darkeningLightDebounce,
                         autoBrightnessResetAmbientLuxAfterWarmUp, ambientLightHorizon,
-                        autoBrightnessAdjustmentMaxGamma, luxLevels);
+                        autoBrightnessAdjustmentMaxGamma, mUseActiveDozeLightSensorConfig,
+                        useNewSensorSamplesForDoze, luxLevels);
             }
         }
 
@@ -643,8 +645,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (mAutomaticBrightnessController != null) {
             final boolean autoBrightnessEnabledInDoze = mAllowAutoBrightnessWhileDozingConfig
                     && (state == Display.STATE_DOZE || state == Display.STATE_DOZE_SUSPEND);
-            autoBrightnessEnabled = mPowerRequest.useAutoBrightness
+            autoBrightnessEnabled = (mPowerRequest.useAutoBrightness
                     && (state == Display.STATE_ON || autoBrightnessEnabledInDoze)
+                    || mUseActiveDozeLightSensorConfig && autoBrightnessEnabledInDoze)
                     && brightness < 0;
             final boolean userInitiatedChange = autoBrightnessAdjustmentChanged
                     && mPowerRequest.brightnessSetByUser;
@@ -687,8 +690,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (state == Display.STATE_DOZE || state == Display.STATE_DOZE_SUSPEND) {
             if (brightness < 0) {
                 brightness = mScreenBrightnessDozeConfig;
-            } else if (mUseNewSensorSamplesForDoze) {
+            } else if (mUseActiveDozeLightSensorConfig) {
                 brightness = Math.min(brightness, mScreenBrightnessDozeConfig);
+                if (DEBUG) {
+                    Slog.d(TAG, "updatePowerState: ALS-based doze brightness: " + brightness);
+                }
             }
         }
 
