@@ -52,6 +52,7 @@ public:
         mAllocationSize = mBitmap->getAllocationByteCount();
         mRowBytes = mBitmap->rowBytes();
         mGenerationId = mBitmap->getGenerationID();
+        mIsHardware = mBitmap->isHardware();
         mBitmap.reset();
     }
 
@@ -118,6 +119,13 @@ public:
         return mGenerationId;
     }
 
+    bool isHardware() {
+        if (mBitmap) {
+            return mBitmap->isHardware();
+        }
+        return mIsHardware;
+    }
+
     ~BitmapWrapper() { }
 
 private:
@@ -127,6 +135,7 @@ private:
     size_t mAllocationSize;
     size_t mRowBytes;
     uint32_t mGenerationId;
+    bool mIsHardware;
 };
 
 // Convenience class that does not take a global ref on the pixels, relying
@@ -775,7 +784,7 @@ static jint Bitmap_rowBytes(JNIEnv* env, jobject, jlong bitmapHandle) {
 
 static jint Bitmap_config(JNIEnv* env, jobject, jlong bitmapHandle) {
     LocalScopedBitmap bitmap(bitmapHandle);
-    if (bitmap->bitmap().isHardware()) {
+    if (bitmap->isHardware()) {
         return GraphicsJNI::hardwareLegacyBitmapConfig();
     }
     return GraphicsJNI::colorTypeToLegacyBitmapConfig(bitmap->info().colorType());
@@ -1208,7 +1217,7 @@ static jboolean Bitmap_sameAs(JNIEnv* env, jobject, jlong bm0Handle, jlong bm1Ha
     // Paying the price for making Hardware Bitmap as Config:
     // later check for colorType will pass successfully,
     // because Hardware Config internally may be RGBA8888 or smth like that.
-    if (bitmap0->bitmap().isHardware() != bitmap1->bitmap().isHardware()) {
+    if (bitmap0->isHardware() != bitmap1->isHardware()) {
         return JNI_FALSE;
     }
 
@@ -1282,6 +1291,23 @@ static jint Bitmap_getAllocationByteCount(JNIEnv* env, jobject, jlong bitmapPtr)
     return static_cast<jint>(bitmapHandle->getAllocationByteCount());
 }
 
+static jobject Bitmap_nativeCopyPreserveInternalConfig(JNIEnv* env, jobject, jlong bitmapPtr) {
+    LocalScopedBitmap bitmapHandle(bitmapPtr);
+    LOG_ALWAYS_FATAL_IF(!bitmapHandle->isHardware(),
+            "Hardware config is only supported config in Bitmap_nativeCopyPreserveInternalConfig");
+    Bitmap& hwuiBitmap = bitmapHandle->bitmap();
+    SkBitmap src;
+    hwuiBitmap.getSkBitmap(&src);
+
+    SkBitmap result;
+    HeapAllocator allocator;
+    if (!src.copyTo(&result, hwuiBitmap.info().colorType(), &allocator)) {
+        doThrowRE(env, "Could not copy a hardware bitmap.");
+        return NULL;
+    }
+    return createBitmap(env, allocator.getStorageObjAndReset(), kBitmapCreateFlag_None);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 static jclass make_globalref(JNIEnv* env, const char classname[])
 {
@@ -1340,6 +1366,8 @@ static const JNINativeMethod gBitmapMethods[] = {
     {   "nativeSameAs",             "(JJ)Z", (void*)Bitmap_sameAs },
     {   "nativePrepareToDraw",      "(J)V", (void*)Bitmap_prepareToDraw },
     {   "nativeGetAllocationByteCount", "(J)I", (void*)Bitmap_getAllocationByteCount },
+    {   "nativeCopyPreserveInternalConfig", "(J)Landroid/graphics/Bitmap;",
+        (void*)Bitmap_nativeCopyPreserveInternalConfig },
 };
 
 int register_android_graphics_Bitmap(JNIEnv* env)
