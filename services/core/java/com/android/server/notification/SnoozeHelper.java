@@ -36,6 +36,9 @@ import android.util.Slog;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
@@ -82,6 +85,14 @@ public class SnoozeHelper {
         return mSnoozedNotifications.containsKey(userId)
                 && mSnoozedNotifications.get(userId).containsKey(pkg)
                 && mSnoozedNotifications.get(userId).get(pkg).containsKey(key);
+    }
+
+    protected Collection<NotificationRecord> getSnoozed(int userId, String pkg) {
+        if (mSnoozedNotifications.containsKey(userId)
+                && mSnoozedNotifications.get(userId).containsKey(pkg)) {
+            mSnoozedNotifications.get(userId).get(pkg).values();
+        }
+        return Collections.EMPTY_LIST;
     }
 
     /**
