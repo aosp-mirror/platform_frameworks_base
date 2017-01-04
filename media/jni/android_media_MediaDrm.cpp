@@ -335,9 +335,10 @@ static sp<IDrm> GetDrm(JNIEnv *env, jobject thiz) {
 }
 
 JDrm::JDrm(
-        JNIEnv *env, jobject thiz, const uint8_t uuid[16]) {
+        JNIEnv *env, jobject thiz, const uint8_t uuid[16],
+        const String8 &appPackageName) {
     mObject = env->NewWeakGlobalRef(thiz);
-    mDrm = MakeDrm(uuid);
+    mDrm = MakeDrm(uuid, appPackageName);
     if (mDrm != NULL) {
         mDrm->setListener(this);
     }
@@ -369,14 +370,14 @@ sp<IDrm> JDrm::MakeDrm() {
 }
 
 // static
-sp<IDrm> JDrm::MakeDrm(const uint8_t uuid[16]) {
+sp<IDrm> JDrm::MakeDrm(const uint8_t uuid[16], const String8 &appPackageName) {
     sp<IDrm> drm = MakeDrm();
 
     if (drm == NULL) {
         return NULL;
     }
 
-    status_t err = drm->createPlugin(uuid);
+    status_t err = drm->createPlugin(uuid, appPackageName);
 
     if (err != OK) {
         return NULL;
@@ -683,7 +684,7 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
 
 static void android_media_MediaDrm_native_setup(
         JNIEnv *env, jobject thiz,
-        jobject weak_this, jbyteArray uuidObj) {
+        jobject weak_this, jbyteArray uuidObj, jstring jappPackageName) {
 
     if (uuidObj == NULL) {
         jniThrowException(env, "java/lang/IllegalArgumentException", "uuid is null");
@@ -698,7 +699,15 @@ static void android_media_MediaDrm_native_setup(
         return;
     }
 
-    sp<JDrm> drm = new JDrm(env, thiz, uuid.array());
+    String8 packageName;
+    if (jappPackageName == NULL) {
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                          "application package name cannot be null");
+        return;
+    }
+
+    packageName = JStringToString8(env, jappPackageName);
+    sp<JDrm> drm = new JDrm(env, thiz, uuid.array(), packageName);
 
     status_t err = drm->initCheck();
 
@@ -1439,7 +1448,7 @@ static const JNINativeMethod gMethods[] = {
     { "release", "()V", (void *)android_media_MediaDrm_release },
     { "native_init", "()V", (void *)android_media_MediaDrm_native_init },
 
-    { "native_setup", "(Ljava/lang/Object;[B)V",
+    { "native_setup", "(Ljava/lang/Object;[BLjava/lang/String;)V",
       (void *)android_media_MediaDrm_native_setup },
 
     { "native_finalize", "()V",
