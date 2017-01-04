@@ -215,6 +215,7 @@ import android.text.style.SuggestionSpan;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.BootTimingsTraceLog;
 import android.util.DebugUtils;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -13206,7 +13207,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    public void systemReady(final Runnable goingCallback) {
+    public void systemReady(final Runnable goingCallback, BootTimingsTraceLog traceLog) {
+        traceLog.traceBegin("PhaseActivityManagerReady");
         synchronized(this) {
             if (mSystemReady) {
                 // If we're done calling all the receivers, run the next "boot phase" passed in
@@ -13303,7 +13305,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         if (goingCallback != null) goingCallback.run();
-
+        traceLog.traceBegin("ActivityManagerStartApps");
         mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_RUNNING_START,
                 Integer.toString(currentUserId), currentUserId);
         mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_FOREGROUND_START,
@@ -13378,6 +13380,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             mStackSupervisor.resumeFocusedStackTopActivityLocked();
             mUserController.sendUserSwitchBroadcastsLocked(-1, currentUserId);
+            traceLog.traceEnd(); // ActivityManagerStartApps
+            traceLog.traceEnd(); // PhaseActivityManagerReady
         }
     }
 
