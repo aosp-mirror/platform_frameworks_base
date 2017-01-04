@@ -211,7 +211,7 @@ public final class Parcel {
     private static final Parcel[] sOwnedPool = new Parcel[POOL_SIZE];
     private static final Parcel[] sHolderPool = new Parcel[POOL_SIZE];
 
-    // Keep in sync with frameworks/native/libs/binder/PersistableBundle.cpp.
+    // Keep in sync with frameworks/native/include/private/binder/ParcelValTypes.h.
     private static final int VAL_NULL = -1;
     private static final int VAL_STRING = 0;
     private static final int VAL_INTEGER = 1;

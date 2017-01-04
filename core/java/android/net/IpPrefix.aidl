@@ -17,4 +17,4 @@
 
 package android.net;
 
-parcelable IpPrefix;
+parcelable IpPrefix cpp_header "binder/IpPrefix.h";
