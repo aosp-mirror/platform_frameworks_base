@@ -23,9 +23,9 @@ import android.bluetooth.BluetoothHidDeviceAppConfiguration;
 interface IBluetoothHidDeviceCallback {
    void onAppStatusChanged(in BluetoothDevice device, in BluetoothHidDeviceAppConfiguration config, boolean registered);
    void onConnectionStateChanged(in BluetoothDevice device, in int state);
-   void onGetReport(in byte type, in byte id, in int bufferSize);
-   void onSetReport(in byte type, in byte id, in byte[] data);
-   void onSetProtocol(in byte protocol);
-   void onIntrData(in byte reportId, in byte[] data);
-   void onVirtualCableUnplug();
+   void onGetReport(in BluetoothDevice device, in byte type, in byte id, in int bufferSize);
+   void onSetReport(in BluetoothDevice device, in byte type, in byte id, in byte[] data);
+   void onSetProtocol(in BluetoothDevice device, in byte protocol);
+   void onIntrData(in BluetoothDevice device, in byte reportId, in byte[] data);
+   void onVirtualCableUnplug(in BluetoothDevice device);
 }
