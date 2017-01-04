@@ -53,6 +53,7 @@ import android.content.res.Resources;
 import android.net.INetworkRecommendationProvider;
 import android.net.INetworkScoreCache;
 import android.net.NetworkKey;
+import android.net.NetworkScoreManager;
 import android.net.NetworkScorerAppManager;
 import android.net.NetworkScorerAppManager.NetworkScorerAppData;
 import android.net.RecommendationRequest;
@@ -134,9 +135,10 @@ public class NetworkScoreServiceTest {
 
         mNetworkScoreService.systemRunning();
 
-        verify(mContext).bindServiceAsUser(MockUtils.checkIntent(new Intent().setComponent(
-                new ComponentName(NEW_SCORER.packageName,
-                    NEW_SCORER.recommendationServiceClassName))),
+        verify(mContext).bindServiceAsUser(MockUtils.checkIntent(
+                new Intent(NetworkScoreManager.ACTION_RECOMMEND_NETWORKS)
+                        .setComponent(new ComponentName(NEW_SCORER.packageName,
+                                NEW_SCORER.recommendationServiceClassName))),
                 any(ServiceConnection.class),
                 eq(Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE),
                 eq(UserHandle.SYSTEM));
