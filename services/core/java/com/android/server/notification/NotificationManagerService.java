@@ -170,6 +170,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /** {@hide} */
@@ -224,6 +225,8 @@ public class NotificationManagerService extends SystemService {
     /** notification_enqueue status value for an ignored notification. */
     private static final int EVENTLOG_ENQUEUE_STATUS_IGNORED = 2;
     private static final long MIN_PACKAGE_OVERRATE_LOG_INTERVAL = 5000; // milliseconds
+
+    private static final long DELAY_FOR_ASSISTANT_TIME = 100;
 
     private IActivityManager mAm;
     private IPackageManager mPackageManager;
@@ -2364,13 +2367,36 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public void applyEnqueuedAdjustmentFromAssistant(INotificationListener token,
+                Adjustment adjustment) throws RemoteException {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mEnqueuedNotifications) {
+                    mNotificationAssistants.checkServiceTokenLocked(token);
+                    int N = mEnqueuedNotifications.size();
+                    for (int i = 0; i < N; i++) {
+                        final NotificationRecord n = mEnqueuedNotifications.get(i);
+                        if (Objects.equals(adjustment.getKey(), n.getKey())
+                                && Objects.equals(adjustment.getUser(), n.getUserId())) {
+                            applyAdjustment(n, adjustment);
+                            break;
+                        }
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void applyAdjustmentFromAssistant(INotificationListener token,
                 Adjustment adjustment) throws RemoteException {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mNotificationList) {
                     mNotificationAssistants.checkServiceTokenLocked(token);
-                    applyAdjustmentLocked(adjustment);
+                    NotificationRecord n = mNotificationsByKey.get(adjustment.getKey());
+                    applyAdjustment(n, adjustment);
                 }
                 mRankingHandler.requestSort(true);
             } finally {
@@ -2387,7 +2413,8 @@ public class NotificationManagerService extends SystemService {
                 synchronized (mNotificationList) {
                     mNotificationAssistants.checkServiceTokenLocked(token);
                     for (Adjustment adjustment : adjustments) {
-                        applyAdjustmentLocked(adjustment);
+                        NotificationRecord n = mNotificationsByKey.get(adjustment.getKey());
+                        applyAdjustment(n, adjustment);
                     }
                 }
                 mRankingHandler.requestSort(true);
@@ -2444,8 +2471,7 @@ public class NotificationManagerService extends SystemService {
         }
     };
 
-    private void applyAdjustmentLocked(Adjustment adjustment) {
-        NotificationRecord n = mNotificationsByKey.get(adjustment.getKey());
+    private void applyAdjustment(NotificationRecord n, Adjustment adjustment) {
         if (n == null) {
             return;
         }
@@ -2649,6 +2675,21 @@ public class NotificationManagerService extends SystemService {
                     if (++i >= 5) {
                         if (iter.hasNext()) pw.println("    ...");
                         break;
+                    }
+                }
+            }
+
+            synchronized (mEnqueuedNotifications) {
+                if (!zenOnly) {
+                    N = mEnqueuedNotifications.size();
+                    if (N > 0) {
+                        pw.println("  Enqueued Notification List:");
+                        for (int i = 0; i < N; i++) {
+                            final NotificationRecord nr = mEnqueuedNotifications.get(i);
+                            if (filter.filtered && !filter.matches(nr.sbn)) continue;
+                            nr.dump(pw, "    ", getContext(), filter.redact);
+                        }
+                        pw.println("  ");
                     }
                 }
             }
@@ -2880,66 +2921,121 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void run() {
-            try {
-                synchronized (mNotificationList) {
-                    if (mSnoozeHelper.isSnoozed(userId, r.sbn.getPackageName(), r.getKey())) {
-                        // TODO: log to event log
-                        if (DBG) {
-                            Slog.d(TAG, "Ignored enqueue for snoozed notification " + r.getKey());
-                        }
-                        mSnoozeHelper.update(userId, r);
-                        savePolicyFile();
-                        return;
+            synchronized (mNotificationList) {
+                if (mSnoozeHelper.isSnoozed(userId, r.sbn.getPackageName(), r.getKey())) {
+                    // TODO: log to event log
+                    if (DBG) {
+                        Slog.d(TAG, "Ignored enqueue for snoozed notification " + r.getKey());
                     }
+                    mSnoozeHelper.update(userId, r);
+                    savePolicyFile();
+                    return;
+                }
 
-                    final StatusBarNotification n = r.sbn;
-                    if (DBG) Slog.d(TAG, "EnqueueNotificationRunnable.run for: " + n.getKey());
-                    NotificationRecord old = mNotificationsByKey.get(n.getKey());
+                final StatusBarNotification n = r.sbn;
+                if (DBG) Slog.d(TAG, "EnqueueNotificationRunnable.run for: " + n.getKey());
+                NotificationRecord old = mNotificationsByKey.get(n.getKey());
+                if (old != null) {
+                    // Retain ranking information from previous record
+                    r.copyRankingInformation(old);
+                }
+
+                final int callingUid = n.getUid();
+                final int callingPid = n.getInitialPid();
+                final Notification notification = n.getNotification();
+                final String pkg = n.getPackageName();
+                final int id = n.getId();
+                final String tag = n.getTag();
+
+                // Handle grouped notifications and bail out early if we
+                // can to avoid extracting signals.
+                handleGroupedNotificationLocked(r, old, callingUid, callingPid);
+
+                // This conditional is a dirty hack to limit the logging done on
+                //     behalf of the download manager without affecting other apps.
+                if (!pkg.equals("com.android.providers.downloads")
+                        || Log.isLoggable("DownloadManager", Log.VERBOSE)) {
+                    int enqueueStatus = EVENTLOG_ENQUEUE_STATUS_NEW;
                     if (old != null) {
-                        // Retain ranking information from previous record
-                        r.copyRankingInformation(old);
+                        enqueueStatus = EVENTLOG_ENQUEUE_STATUS_UPDATE;
                     }
+                    EventLogTags.writeNotificationEnqueue(callingUid, callingPid,
+                            pkg, id, tag, userId, notification.toString(),
+                            enqueueStatus);
+                }
 
-                    final int callingUid = n.getUid();
-                    final int callingPid = n.getInitialPid();
-                    final Notification notification = n.getNotification();
-                    final String pkg = n.getPackageName();
-                    final int id = n.getId();
-                    final String tag = n.getTag();
-                    final boolean isSystemNotification = isUidSystem(callingUid) ||
-                            ("android".equals(pkg));
+                mRankingHelper.extractSignals(r);
 
-                    // Handle grouped notifications and bail out early if we
-                    // can to avoid extracting signals.
-                    handleGroupedNotificationLocked(r, old, callingUid, callingPid);
+                // blocked apps
+                if (isBlocked(r, mUsageStats)) {
+                    return;
+                }
 
-                    // This conditional is a dirty hack to limit the logging done on
-                    //     behalf of the download manager without affecting other apps.
-                    if (!pkg.equals("com.android.providers.downloads")
-                            || Log.isLoggable("DownloadManager", Log.VERBOSE)) {
-                        int enqueueStatus = EVENTLOG_ENQUEUE_STATUS_NEW;
-                        if (old != null) {
-                            enqueueStatus = EVENTLOG_ENQUEUE_STATUS_UPDATE;
+                // tell the assistant service about the notification
+                if (mNotificationAssistants.isEnabled()) {
+                    mNotificationAssistants.onNotificationEnqueued(r);
+                    mHandler.postDelayed(new PostNotificationRunnable(userId, r.getKey()),
+                            DELAY_FOR_ASSISTANT_TIME);
+                } else {
+                    mHandler.post(new PostNotificationRunnable(userId, r.getKey()));
+                }
+            }
+        }
+
+        protected boolean isBlocked(NotificationRecord r, NotificationUsageStats usageStats) {
+            final String pkg = r.sbn.getPackageName();
+            final int callingUid = r.sbn.getUid();
+
+            final boolean isPackageSuspended = isPackageSuspendedForUser(pkg, callingUid);
+            if (isPackageSuspended) {
+                Slog.e(TAG, "Suppressing notification from package due to package "
+                        + "suspended by administrator.");
+                usageStats.registerSuspendedByAdmin(r);
+                return isPackageSuspended;
+            }
+
+            final boolean isBlocked = r.getImportance() == NotificationManager.IMPORTANCE_NONE
+                    || !r.getChannel().isAllowed()
+                    || !noteNotificationOp(pkg, callingUid);
+            if (isBlocked) {
+                Slog.e(TAG, "Suppressing notification from package by user request.");
+                    usageStats.registerBlocked(r);
+            }
+            return isBlocked;
+        }
+    }
+
+    protected class PostNotificationRunnable implements Runnable {
+        private final String key;
+        private final int userId;
+
+        PostNotificationRunnable(int userId, String key) {
+            this.userId = userId;
+            this.key = key;
+        }
+
+        @Override
+        public void run() {
+            try {
+                NotificationRecord r = null;
+                synchronized (mEnqueuedNotifications) {
+                    int N = mEnqueuedNotifications.size();
+                    for (int i = 0; i < N; i++) {
+                        final NotificationRecord enqueued = mEnqueuedNotifications.get(i);
+                        if (Objects.equals(key, enqueued.getKey())) {
+                            r = enqueued;
+                            break;
                         }
-                        EventLogTags.writeNotificationEnqueue(callingUid, callingPid,
-                                pkg, id, tag, userId, notification.toString(),
-                                enqueueStatus);
                     }
-
-                    mRankingHelper.extractSignals(r);
-
-                    // blocked apps
-                    if (isBlocked(r, mUsageStats)) {
-                        return;
-                    }
-
-                    // tell the assistant service about the notification
-                    if (mNotificationAssistants.isEnabled()) {
-                        mNotificationAssistants.onNotificationEnqueued(r);
-                        // TODO delay the code below here for 100ms or until there is an answer
-                    }
-
-
+                }
+                if (r == null) {
+                    Slog.e(TAG, "Cannot find enqueued record for key: " + key);
+                    return;
+                }
+                synchronized (mNotificationList) {
+                    NotificationRecord old = mNotificationsByKey.get(key);
+                    final StatusBarNotification n = r.sbn;
+                    final Notification notification = n.getNotification();
                     int index = indexOfNotificationLocked(n.getKey());
                     if (index < 0) {
                         mNotificationList.add(r);
@@ -2998,31 +3094,16 @@ public class NotificationManagerService extends SystemService {
                 }
             } finally {
                 synchronized (mEnqueuedNotifications) {
-                    mEnqueuedNotifications.remove(r);
+                    int N = mEnqueuedNotifications.size();
+                    for (int i = 0; i < N; i++) {
+                        final NotificationRecord enqueued = mEnqueuedNotifications.get(i);
+                        if (Objects.equals(key, enqueued.getKey())) {
+                            mEnqueuedNotifications.remove(i);
+                            break;
+                        }
+                    }
                 }
             }
-        }
-
-        protected boolean isBlocked(NotificationRecord r, NotificationUsageStats usageStats) {
-            final String pkg = r.sbn.getPackageName();
-            final int callingUid = r.sbn.getUid();
-
-            final boolean isPackageSuspended = isPackageSuspendedForUser(pkg, callingUid);
-            if (isPackageSuspended) {
-                Slog.e(TAG, "Suppressing notification from package due to package "
-                        + "suspended by administrator.");
-                usageStats.registerSuspendedByAdmin(r);
-                return isPackageSuspended;
-            }
-
-            final boolean isBlocked = r.getImportance() == NotificationManager.IMPORTANCE_NONE
-                    || !r.getChannel().isAllowed()
-                    || !noteNotificationOp(pkg, callingUid);
-            if (isBlocked) {
-                Slog.e(TAG, "Suppressing notification from package by user request.");
-                    usageStats.registerBlocked(r);
-            }
-            return isBlocked;
         }
     }
 

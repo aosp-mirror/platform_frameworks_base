@@ -39,6 +39,7 @@ import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 
@@ -318,7 +319,7 @@ public final class NotificationRecord {
         if (notification.actions != null && notification.actions.length > 0) {
             pw.println(prefix + "  actions={");
             final int N = notification.actions.length;
-            for (int i=0; i<N; i++) {
+            for (int i = 0; i < N; i++) {
                 final Notification.Action action = notification.actions[i];
                 if (action != null) {
                     pw.println(String.format("%s    [%d] \"%s\" -> %s",
@@ -350,7 +351,7 @@ public final class NotificationRecord {
                         final int N = Array.getLength(val);
                         pw.print(" (" + N + ")");
                         if (!redact) {
-                            for (int j=0; j<N; j++) {
+                            for (int j = 0; j < N; j++) {
                                 pw.println();
                                 pw.print(String.format("%s      [%d] %s",
                                         prefix, j, String.valueOf(Array.get(val, j))));
@@ -385,6 +386,13 @@ public final class NotificationRecord {
         pw.println(prefix + "  mSound= " + mSound);
         pw.println(prefix + "  mVibration= " + mVibration);
         pw.println(prefix + "  mAttributes= " + mAttributes);
+        pw.println(prefix + "  overrideChannel=" + getChannel());
+        if (getPeopleOverride() != null) {
+            pw.println(prefix + "  overridePeople= " + TextUtils.join(",", getPeopleOverride()));
+        }
+        if (getSnoozeCriteria() != null) {
+            pw.println(prefix + "  snoozeCriteria=" + TextUtils.join(",", getSnoozeCriteria()));
+        }
     }
 
 

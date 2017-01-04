@@ -92,6 +92,7 @@ interface INotificationManager
     void setOnNotificationPostedTrimFromListener(in INotificationListener token, int trim);
     void setInterruptionFilter(String pkg, int interruptionFilter);
 
+    void applyEnqueuedAdjustmentFromAssistant(in INotificationListener token, in Adjustment adjustment);
     void applyAdjustmentFromAssistant(in INotificationListener token, in Adjustment adjustment);
     void applyAdjustmentsFromAssistant(in INotificationListener token, in List<Adjustment> adjustments);
     void createNotificationChannelFromAssistant(in INotificationListener token, String pkg, in NotificationChannel channel);
