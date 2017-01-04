@@ -31,15 +31,11 @@
     <color name="batterymeter_bolt_color">#FFFFFFFF</color>
     <color name="qs_batterymeter_frame_color">#FF404040</color>
     <color name="system_warning_color">@*android:color/system_error</color>
-    <color name="qs_text">#FFFFFFFF</color>
     <color name="qs_tile_divider">#29ffffff</color><!-- 16% white -->
     <color name="qs_subhead">#99FFFFFF</color><!-- 60% white -->
     <color name="qs_detail_button">@*android:color/quaternary_device_default_settings</color>
     <color name="qs_detail_button_white">#B3FFFFFF</color><!-- 70% white -->
     <color name="qs_detail_transition">#66FFFFFF</color>
-    <color name="data_usage_secondary">#99FFFFFF</color><!-- 60% white -->
-    <color name="data_usage_graph_track">#33FFFFFF</color><!-- 20% white -->
-    <color name="data_usage_graph_warning">#FFFFFFFF</color>
     <color name="status_bar_clock_color">#FFFFFFFF</color>
     <color name="qs_user_detail_icon_muted">#FFFFFFFF</color> <!-- not so muted after all -->
     <color name="qs_tile_disabled_color">#9E9E9E</color> <!-- 38% black -->

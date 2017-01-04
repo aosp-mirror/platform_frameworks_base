@@ -207,7 +207,7 @@
     </style>
 
     <style name="TextAppearance.QS.DataUsage.Secondary">
-        <item name="android:textColor">@color/data_usage_secondary</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
     <style name="TextAppearance.QS.TileLabel">

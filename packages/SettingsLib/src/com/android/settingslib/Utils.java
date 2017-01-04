@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.content.pm.Signature;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -163,6 +164,22 @@ public class Utils {
         @ColorInt int colorAccent = ta.getColor(0, 0);
         ta.recycle();
         return colorAccent;
+    }
+
+    @ColorInt
+    public static int getColorError(Context context) {
+        TypedArray ta = context.obtainStyledAttributes(new int[]{android.R.attr.textColorError});
+        @ColorInt int colorError = ta.getColor(0, 0);
+        ta.recycle();
+        return colorError;
+    }
+
+    @ColorInt
+    public static int getDefaultColor(Context context, int resId) {
+        final ColorStateList list =
+                context.getResources().getColorStateList(resId, context.getTheme());
+
+        return list.getDefaultColor();
     }
 
     /**
