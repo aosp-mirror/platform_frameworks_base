@@ -131,7 +131,7 @@ void DeferredLayerUpdater::doUpdateVkTexImage() {
                         mLayer->getApi(), Layer::Api::OpenGL, Layer::Api::Vulkan);
 
     static const mat4 identityMatrix;
-    updateLayer(false, identityMatrix.data);
+    updateLayer(false, GL_NONE, identityMatrix.data);
 
     VkLayer* vkLayer = static_cast<VkLayer*>(mLayer);
     vkLayer->updateTexture();
@@ -139,26 +139,20 @@ void DeferredLayerUpdater::doUpdateVkTexImage() {
 
 void DeferredLayerUpdater::updateLayer(bool forceFilter, GLenum renderTarget,
         const float* textureTransform) {
-    LOG_ALWAYS_FATAL_IF(mLayer->getApi() != Layer::Api::OpenGL,
-                        "updateLayer non GL backend %x, GL %x, VK %x",
-                        mLayer->getApi(), Layer::Api::OpenGL, Layer::Api::Vulkan);
-
-    updateLayer(forceFilter, textureTransform);
-
-    GlLayer* glLayer = static_cast<GlLayer*>(mLayer);
-    if (renderTarget != glLayer->getRenderTarget()) {
-        glLayer->setRenderTarget(renderTarget);
-        glLayer->bindTexture();
-        glLayer->setFilter(GL_NEAREST, false, true);
-        glLayer->setWrap(GL_CLAMP_TO_EDGE, false, true);
-    }
-}
-
-void DeferredLayerUpdater::updateLayer(bool forceFilter, const float* textureTransform) {
     mLayer->setBlend(mBlend);
     mLayer->setForceFilter(forceFilter);
     mLayer->setSize(mWidth, mHeight);
     mLayer->getTexTransform().load(textureTransform);
+
+    if (mLayer->getApi() == Layer::Api::OpenGL) {
+        GlLayer* glLayer = static_cast<GlLayer*>(mLayer);
+        if (renderTarget != glLayer->getRenderTarget()) {
+            glLayer->setRenderTarget(renderTarget);
+            glLayer->bindTexture();
+            glLayer->setFilter(GL_NEAREST, false, true);
+            glLayer->setWrap(GL_CLAMP_TO_EDGE, false, true);
+        }
+    }
 }
 
 void DeferredLayerUpdater::detachSurfaceTexture() {

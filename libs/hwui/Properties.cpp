@@ -222,6 +222,12 @@ RenderPipelineType Properties::getRenderPipelineType() {
     return sRenderPipelineType;
 }
 
+#ifdef HWUI_GLES_WRAP_ENABLED
+void Properties::overrideRenderPipelineType(RenderPipelineType type) {
+    sRenderPipelineType = type;
+}
+#endif
+
 bool Properties::isSkiaEnabled() {
     auto renderType = getRenderPipelineType();
     return RenderPipelineType::SkiaGL == renderType

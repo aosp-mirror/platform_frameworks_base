@@ -19,6 +19,7 @@
 #include <DeviceInfo.h>
 #include <DisplayList.h>
 #include <Matrix.h>
+#include <Properties.h>
 #include <Rect.h>
 #include <RenderNode.h>
 #include <hwui/Bitmap.h>
@@ -51,6 +52,31 @@ namespace uirenderer {
         } else { \
             ADD_FAILURE() << "ClipState not a rect"; \
         }
+
+#define INNER_PIPELINE_TEST(test_case_name, test_name, pipeline, functionCall) \
+    TEST(test_case_name, test_name##_##pipeline) { \
+        RenderPipelineType oldType = Properties::getRenderPipelineType(); \
+        Properties::overrideRenderPipelineType(RenderPipelineType::pipeline); \
+        functionCall; \
+        Properties::overrideRenderPipelineType(oldType); \
+    };
+
+/**
+ * Like gtests' TEST, but only runs with the OpenGL RenderPipelineType
+ */
+#define OPENGL_PIPELINE_TEST(test_case_name, test_name) \
+    class test_case_name##_##test_name##_HwuiTest { \
+    public: \
+        static void doTheThing(); \
+    }; \
+    INNER_PIPELINE_TEST(test_case_name, test_name, OpenGL, \
+            test_case_name##_##test_name##_HwuiTest::doTheThing()) \
+    void test_case_name##_##test_name##_HwuiTest::doTheThing()
+
+#define INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, pipeline) \
+    INNER_PIPELINE_TEST(test_case_name, test_name, pipeline, \
+            TestUtils::runOnRenderThread(test_case_name##_##test_name##_RenderThreadTest::doTheThing))
+
 /**
  * Like gtest's TEST, but runs on the RenderThread, and 'renderThread' is passed, in top level scope
  * (for e.g. accessing its RenderState)
@@ -60,9 +86,32 @@ namespace uirenderer {
     public: \
         static void doTheThing(renderthread::RenderThread& renderThread); \
     }; \
-    TEST(test_case_name, test_name) { \
-        TestUtils::runOnRenderThread(test_case_name##_##test_name##_RenderThreadTest::doTheThing); \
+    INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, OpenGL); \
+    INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaGL); \
+    INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaVulkan); \
+    void test_case_name##_##test_name##_RenderThreadTest::doTheThing(renderthread::RenderThread& renderThread)
+
+/**
+ * Like RENDERTHREAD_TEST, but only runs with the OpenGL RenderPipelineType
+ */
+#define RENDERTHREAD_OPENGL_PIPELINE_TEST(test_case_name, test_name) \
+    class test_case_name##_##test_name##_RenderThreadTest { \
+    public: \
+        static void doTheThing(renderthread::RenderThread& renderThread); \
     }; \
+    INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, OpenGL); \
+    void test_case_name##_##test_name##_RenderThreadTest::doTheThing(renderthread::RenderThread& renderThread)
+
+/**
+ * Like RENDERTHREAD_TEST, but only runs with the Skia RenderPipelineTypes
+ */
+#define RENDERTHREAD_SKIA_PIPELINE_TEST(test_case_name, test_name) \
+    class test_case_name##_##test_name##_RenderThreadTest { \
+    public: \
+        static void doTheThing(renderthread::RenderThread& renderThread); \
+    }; \
+    INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaGL); \
+    INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaVulkan); \
     void test_case_name##_##test_name##_RenderThreadTest::doTheThing(renderthread::RenderThread& renderThread)
 
 /**
@@ -135,6 +184,9 @@ public:
         outBitmap->setInfo(info);
         return Bitmap::allocateHeapBitmap(outBitmap, nullptr);
     }
+
+    static sp<DeferredLayerUpdater> createTextureLayerUpdater(
+            renderthread::RenderThread& renderThread);
 
     static sp<DeferredLayerUpdater> createTextureLayerUpdater(
             renderthread::RenderThread& renderThread, uint32_t width, uint32_t height,

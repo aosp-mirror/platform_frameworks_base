@@ -137,10 +137,11 @@ RENDERTHREAD_TEST(RenderNode, prepareTree_nullableDisplayList) {
 RENDERTHREAD_TEST(RenderNode, prepareTree_HwLayer_AVD_enqueueDamage) {
 
     VectorDrawable::Group* group = new VectorDrawable::Group();
-    VectorDrawableRoot* vectorDrawable = new VectorDrawableRoot(group);
+    sp<VectorDrawableRoot> vectorDrawable(new VectorDrawableRoot(group));
+
     auto rootNode = TestUtils::createNode(0, 0, 200, 400,
             [&](RenderProperties& props, Canvas& canvas) {
-        canvas.drawVectorDrawable(vectorDrawable);
+        canvas.drawVectorDrawable(vectorDrawable.get());
     });
     ContextFactory contextFactory;
     std::unique_ptr<CanvasContext> canvasContext(CanvasContext::create(
@@ -164,7 +165,5 @@ RENDERTHREAD_TEST(RenderNode, prepareTree_HwLayer_AVD_enqueueDamage) {
     EXPECT_FALSE(info.layerUpdateQueue->entries().empty());
     EXPECT_EQ(rootNode.get(), info.layerUpdateQueue->entries().at(0).renderNode);
     EXPECT_EQ(uirenderer::Rect(0, 0, 200, 400), info.layerUpdateQueue->entries().at(0).damage);
-
-    delete vectorDrawable;
     canvasContext->destroy(nullptr);
 }

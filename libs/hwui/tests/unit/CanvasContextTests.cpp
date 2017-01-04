@@ -46,5 +46,10 @@ RENDERTHREAD_TEST(CanvasContext, create) {
 RENDERTHREAD_TEST(CanvasContext, invokeFunctor) {
     TestUtils::MockFunctor functor;
     CanvasContext::invokeFunctor(renderThread, &functor);
-    ASSERT_EQ(functor.getLastMode(), DrawGlInfo::kModeProcess);
+    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
+        // we currently don't support OpenGL WebViews on the Vulkan backend
+        ASSERT_EQ(functor.getLastMode(), DrawGlInfo::kModeProcessNoContext);
+    } else {
+        ASSERT_EQ(functor.getLastMode(), DrawGlInfo::kModeProcess);
+    }
 }

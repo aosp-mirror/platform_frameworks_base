@@ -21,6 +21,9 @@
 
 #include <renderthread/EglManager.h>
 #include <renderthread/OpenGLPipeline.h>
+#include <pipeline/skia/SkiaOpenGLPipeline.h>
+#include <pipeline/skia/SkiaVulkanPipeline.h>
+#include <renderthread/VulkanManager.h>
 #include <utils/Unicode.h>
 #include <SkClipStack.h>
 
@@ -47,10 +50,24 @@ SkColor TestUtils::interpolateColor(float fraction, SkColor start, SkColor end) 
 }
 
 sp<DeferredLayerUpdater> TestUtils::createTextureLayerUpdater(
+        renderthread::RenderThread& renderThread) {
+    android::uirenderer::renderthread::IRenderPipeline* pipeline;
+    if (Properties::getRenderPipelineType() == RenderPipelineType::OpenGL) {
+        pipeline = new renderthread::OpenGLPipeline(renderThread);
+    } else if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
+        pipeline = new skiapipeline::SkiaOpenGLPipeline(renderThread);
+    } else {
+        pipeline = new skiapipeline::SkiaVulkanPipeline(renderThread);
+    }
+    sp<DeferredLayerUpdater> layerUpdater = pipeline->createTextureLayer();
+    delete pipeline;
+    return layerUpdater;
+}
+
+sp<DeferredLayerUpdater> TestUtils::createTextureLayerUpdater(
         renderthread::RenderThread& renderThread, uint32_t width, uint32_t height,
         const SkMatrix& transform) {
-    renderthread::OpenGLPipeline pipeline(renderThread);
-    sp<DeferredLayerUpdater> layerUpdater = pipeline.createTextureLayer();
+    sp<DeferredLayerUpdater> layerUpdater = createTextureLayerUpdater(renderThread);
     layerUpdater->backingLayer()->getTransform().load(transform);
     layerUpdater->setSize(width, height);
     layerUpdater->setTransform(&transform);
@@ -111,12 +128,20 @@ void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text,
 void TestUtils::TestTask::run() {
     // RenderState only valid once RenderThread is running, so queried here
     renderthread::RenderThread& renderThread = renderthread::RenderThread::getInstance();
-    renderThread.eglManager().initialize();
+    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
+        renderThread.vulkanManager().initialize();
+    } else {
+        renderThread.eglManager().initialize();
+    }
 
     rtCallback(renderThread);
 
-    renderThread.renderState().flush(Caches::FlushMode::Full);
-    renderThread.eglManager().destroy();
+    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
+        renderThread.vulkanManager().destroy();
+    } else {
+        renderThread.renderState().flush(Caches::FlushMode::Full);
+        renderThread.eglManager().destroy();
+    }
 }
 
 std::unique_ptr<uint16_t[]> TestUtils::asciiToUtf16(const char* str) {

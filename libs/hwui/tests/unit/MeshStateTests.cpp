@@ -24,7 +24,7 @@
 using namespace android::uirenderer;
 using namespace testing;
 
-RENDERTHREAD_TEST(MeshState, genOrUpdate) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(MeshState, genOrUpdate) {
     debug::ScopedReplaceDriver<debug::MockGlesDriver> driverRef;
     auto& mockGlDriver = driverRef.get();
     EXPECT_CALL(mockGlDriver, glGenBuffers_(_, _)).WillOnce(SetArgPointee<1>(35));

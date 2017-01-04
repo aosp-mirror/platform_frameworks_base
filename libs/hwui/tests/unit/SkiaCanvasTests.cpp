@@ -28,7 +28,7 @@ using namespace android::uirenderer;
  * Verify that we get the same culling bounds for text for (1) drawing glyphs
  * directly to a Canvas or (2) going through a SkPicture as an intermediate step.
  */
-TEST(SkiaCanvasProxy, drawGlyphsViaPicture) {
+OPENGL_PIPELINE_TEST(SkiaCanvasProxy, drawGlyphsViaPicture) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         // setup test variables
         SkPaint paint;
