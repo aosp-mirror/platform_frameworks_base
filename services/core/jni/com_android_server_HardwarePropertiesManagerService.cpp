@@ -37,6 +37,8 @@ using hardware::thermal::V1_0::IThermal;
 using hardware::thermal::V1_0::Temperature;
 using hardware::thermal::V1_0::ThermalStatus;
 using hardware::thermal::V1_0::ThermalStatusCode;
+template<typename T>
+using Return = hardware::Return<T>;
 
 // ---------------------------------------------------------------------------
 
@@ -76,7 +78,7 @@ static jfloatArray nativeGetFanSpeeds(JNIEnv *env, jclass /* clazz */) {
     }
 
     hidl_vec<CoolingDevice> list;
-    Status status = gThermalModule->getCoolingDevices(
+    Return<void> ret = gThermalModule->getCoolingDevices(
             [&list](ThermalStatus status, hidl_vec<CoolingDevice> devices) {
                 if (status.code == ThermalStatusCode::SUCCESS) {
                     list = std::move(devices);
@@ -84,10 +86,10 @@ static jfloatArray nativeGetFanSpeeds(JNIEnv *env, jclass /* clazz */) {
                     ALOGE("Couldn't get fan speeds because of HAL error: %s",
                           status.debugMessage.c_str());
                 }
-            }).getStatus();
+            });
 
-    if (!status.isOk()) {
-        ALOGE("getCoolingDevices failed status: %d", status.exceptionCode());
+    if (!ret.isOk()) {
+        ALOGE("getCoolingDevices failed status: %s", ret.description().c_str());
     }
 
     float values[list.size()];
@@ -106,7 +108,7 @@ static jfloatArray nativeGetDeviceTemperatures(JNIEnv *env, jclass /* clazz */, 
         return env->NewFloatArray(0);
     }
     hidl_vec<Temperature> list;
-    Status status = gThermalModule->getTemperatures(
+    Return<void> ret = gThermalModule->getTemperatures(
             [&list](ThermalStatus status, hidl_vec<Temperature> temperatures) {
                 if (status.code == ThermalStatusCode::SUCCESS) {
                     list = std::move(temperatures);
@@ -114,10 +116,10 @@ static jfloatArray nativeGetDeviceTemperatures(JNIEnv *env, jclass /* clazz */, 
                     ALOGE("Couldn't get temperatures because of HAL error: %s",
                           status.debugMessage.c_str());
                 }
-            }).getStatus();
+            });
 
-    if (!status.isOk()) {
-        ALOGE("getDeviceTemperatures failed status: %d", status.exceptionCode());
+    if (!ret.isOk()) {
+        ALOGE("getDeviceTemperatures failed status: %s", ret.description().c_str());
     }
 
     jfloat values[list.size()];
@@ -151,7 +153,7 @@ static jobjectArray nativeGetCpuUsages(JNIEnv *env, jclass /* clazz */) {
         return env->NewObjectArray(0, gCpuUsageInfoClassInfo.clazz, nullptr);
     }
     hidl_vec<CpuUsage> list;
-    Status status = gThermalModule->getCpuUsages(
+    Return<void> ret = gThermalModule->getCpuUsages(
             [&list](ThermalStatus status, hidl_vec<CpuUsage> cpuUsages) {
                 if (status.code == ThermalStatusCode::SUCCESS) {
                     list = std::move(cpuUsages);
@@ -159,10 +161,10 @@ static jobjectArray nativeGetCpuUsages(JNIEnv *env, jclass /* clazz */) {
                     ALOGE("Couldn't get CPU usages because of HAL error: %s",
                           status.debugMessage.c_str());
                 }
-            }).getStatus();
+            });
 
-    if (!status.isOk()) {
-        ALOGE("getCpuUsages failed status: %d", status.exceptionCode());
+    if (!ret.isOk()) {
+        ALOGE("getCpuUsages failed status: %s", ret.description().c_str());
     }
 
     jobjectArray cpuUsages = env->NewObjectArray(list.size(), gCpuUsageInfoClassInfo.clazz,
