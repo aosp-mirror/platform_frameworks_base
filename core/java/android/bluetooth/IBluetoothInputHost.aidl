@@ -28,10 +28,13 @@ interface IBluetoothInputHost {
             in BluetoothHidDeviceAppSdpSettings sdp, in BluetoothHidDeviceAppQosSettings inQos,
             in BluetoothHidDeviceAppQosSettings outQos, in IBluetoothHidDeviceCallback callback);
     boolean unregisterApp(in BluetoothHidDeviceAppConfiguration config);
-    boolean sendReport(in int id, in byte[] data);
-    boolean replyReport(in byte type, in byte id, in byte[] data);
-    boolean reportError(byte error);
-    boolean unplug();
-    boolean connect();
-    boolean disconnect();
+    boolean sendReport(in BluetoothDevice device, in int id, in byte[] data);
+    boolean replyReport(in BluetoothDevice device, in byte type, in byte id, in byte[] data);
+    boolean reportError(in BluetoothDevice device, byte error);
+    boolean unplug(in BluetoothDevice device);
+    boolean connect(in BluetoothDevice device);
+    boolean disconnect(in BluetoothDevice device);
+    List<BluetoothDevice> getConnectedDevices();
+    List<BluetoothDevice> getDevicesMatchingConnectionStates(in int[] states);
+    int getConnectionState(in BluetoothDevice device);
 }
