@@ -565,6 +565,7 @@ public class ChooserActivity extends ResolverActivity {
             if (ri != null && ri.activityInfo != null) {
                 usageStatsManager.reportChooserSelection(ri.activityInfo.packageName, getUserId(),
                         annotation, null, info.getResolvedIntent().getAction());
+                mResolverComparator.updateModel(info.getResolvedComponentName());
                 if (DEBUG) {
                     Log.d(TAG, "ResolveInfo Package is" + ri.activityInfo.packageName);
                 }

@@ -107,6 +107,7 @@ public class ResolverActivity extends Activity {
     private PickTargetOptionRequest mPickOptionRequest;
     private String mReferrerPackage;
 
+    protected ResolverComparator mResolverComparator;
     protected ResolverDrawerLayout mResolverDrawerLayout;
     protected String mContentType;
     protected PackageManager mPm;
