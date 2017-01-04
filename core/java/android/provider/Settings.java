@@ -7672,6 +7672,16 @@ public final class Settings {
         public static final String NETWORK_RECOMMENDATIONS_ENABLED =
                 "network_recommendations_enabled";
 
+        /**
+         * The number of milliseconds the {@link com.android.server.NetworkScoreService}
+         * will give a recommendation request to complete before returning a default response.
+         *
+         * Type: long
+         * @hide
+         */
+        public static final String NETWORK_RECOMMENDATION_REQUEST_TIMEOUT_MS =
+                "network_recommendation_request_timeout_ms";
+
        /**
         * Settings to allow BLE scans to be enabled even when Bluetooth is turned off for
         * connectivity.
