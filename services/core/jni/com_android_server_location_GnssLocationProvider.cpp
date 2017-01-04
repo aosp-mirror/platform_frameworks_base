@@ -888,75 +888,68 @@ static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env,
     // TODO(b/31632518)
     gnssHal = IGnss::getService("gnss");
     if (gnssHal != nullptr) {
-        auto result = gnssHal->getExtensionXtra([](const sp<IGnssXtra>& xtraIface) {
-            gnssXtraIface = xtraIface;
-        });
-
-        if (!result.isOk()) {
+        auto gnssXtra = gnssHal->getExtensionXtra();
+        if (!gnssXtra.isOk()) {
             ALOGD("Unable to get a handle to Xtra");
+        } else {
+            gnssXtraIface = gnssXtra;
         }
 
-        result = gnssHal->getExtensionAGnssRil([](const sp<IAGnssRil>& rilIface) {
-            agnssRilIface = rilIface;
-        });
-
-        if (!result.isOk()) {
+        auto gnssRil = gnssHal->getExtensionAGnssRil();
+        if (!gnssRil.isOk()) {
             ALOGD("Unable to get a handle to AGnssRil");
+        } else {
+            agnssRilIface = gnssRil;
         }
 
-        result = gnssHal->getExtensionAGnss([](const sp<IAGnss>& assistedGnssIface) {
-            agnssIface = assistedGnssIface;
-        });
-
-        if (!result.isOk()) {
+        auto gnssAgnss = gnssHal->getExtensionAGnss();
+        if (!gnssAgnss.isOk()) {
             ALOGD("Unable to get a handle to AGnss");
+        } else {
+            agnssIface = gnssAgnss;
         }
 
-        result = gnssHal->getExtensionGnssNavigationMessage(
-                [](const sp<IGnssNavigationMessage>& navigationMessageIface) {
-            gnssNavigationMessageIface = navigationMessageIface;
-        });
-
-        if (!result.isOk()) {
+        auto gnssNavigationMessage = gnssHal->getExtensionGnssNavigationMessage();
+        if (!gnssNavigationMessage.isOk()) {
             ALOGD("Unable to get a handle to GnssNavigationMessage");
+        } else {
+            gnssNavigationMessageIface = gnssNavigationMessage;
         }
 
-        result = gnssHal->getExtensionGnssMeasurement([](
-                const sp<IGnssMeasurement>& measurementIface) {
-            gnssMeasurementIface = measurementIface;
-        });
-        if (!result.isOk()) {
+        auto gnssMeasurement = gnssHal->getExtensionGnssMeasurement();
+        if (!gnssMeasurement.isOk()) {
             ALOGD("Unable to get a handle to GnssMeasurement");
+        } else {
+            gnssMeasurementIface = gnssMeasurement;
         }
 
-        result = gnssHal->getExtensionGnssDebug([](const sp<IGnssDebug>& debugIface) {
-            gnssDebugIface = debugIface;
-        });
-        if (!result.isOk()) {
+        auto gnssDebug = gnssHal->getExtensionGnssDebug();
+        if (!gnssDebug.isOk()) {
             ALOGD("Unable to get a handle to GnssDebug");
+        } else {
+            gnssDebugIface = gnssDebug;
         }
 
-        result = gnssHal->getExtensionGnssNi([](const sp<IGnssNi>& niIface) {
-            gnssNiIface = niIface;
-        });
-        if (!result.isOk()) {
+        auto gnssNi = gnssHal->getExtensionGnssNi();
+        if (!gnssNi.isOk()) {
             ALOGD("Unable to get a handle to GnssNi");
+        } else {
+            gnssNiIface = gnssNi;
         }
 
-        result = gnssHal->getExtensionGnssConfiguration([](const sp<IGnssConfiguration>& configIface) {
-            gnssConfigurationIface = configIface;
-        });
-        if (!result.isOk()) {
+        auto gnssConfiguration = gnssHal->getExtensionGnssConfiguration();
+        if (!gnssConfiguration.isOk()) {
             ALOGD("Unable to get a handle to GnssConfiguration");
+        } else {
+            gnssConfigurationIface = gnssConfiguration;
         }
 
-        result = gnssHal->getExtensionGnssGeofencing([](const sp<IGnssGeofencing>& geofenceIface) {
-            gnssGeofencingIface = geofenceIface;
-        });
-        if (!result.isOk()) {
+        auto gnssGeofencing = gnssHal->getExtensionGnssGeofencing();
+        if (!gnssGeofencing.isOk()) {
             ALOGD("Unable to get a handle to GnssGeofencing");
+        } else {
+            gnssGeofencingIface = gnssGeofencing;
         }
-
     } else {
       ALOGE("Unable to get GPS service\n");
     }
