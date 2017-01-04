@@ -416,23 +416,6 @@ bool SkiaCanvas::clipPath(const SkPath* path, SkClipOp op) {
     return !mCanvas->isClipEmpty();
 }
 
-bool SkiaCanvas::clipRegion(const SkRegion* region, SkClipOp op) {
-    SkPath rgnPath;
-    if (region->getBoundaryPath(&rgnPath)) {
-        // The region is specified in device space.
-        SkMatrix savedMatrix = mCanvas->getTotalMatrix();
-        mCanvas->resetMatrix();
-        this->recordClip(rgnPath, op);
-        mCanvas->clipPath(rgnPath, op);
-        mCanvas->setMatrix(savedMatrix);
-    } else {
-        const auto emptyClip = SkRect::MakeEmpty();
-        this->recordClip(emptyClip, op);
-        mCanvas->clipRect(emptyClip, op);
-    }
-    return !mCanvas->isClipEmpty();
-}
-
 // ----------------------------------------------------------------------------
 // Canvas state operations: Filters
 // ----------------------------------------------------------------------------

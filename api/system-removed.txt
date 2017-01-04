@@ -76,6 +76,11 @@ package android.graphics {
     enum_constant public static final android.graphics.AvoidXfermode.Mode TARGET;
   }
 
+  public class Canvas {
+    method public deprecated boolean clipRegion(android.graphics.Region, android.graphics.Region.Op);
+    method public deprecated boolean clipRegion(android.graphics.Region);
+  }
+
   public deprecated class LayerRasterizer extends android.graphics.Rasterizer {
     ctor public LayerRasterizer();
     method public void addLayer(android.graphics.Paint, float, float);

@@ -22,6 +22,7 @@
 #include "Caches.h"
 #include "Debug.h"
 #include "Extensions.h"
+#include "font/Font.h"
 #include "Glop.h"
 #include "GlopBuilder.h"
 #include "PixelBuffer.h"
