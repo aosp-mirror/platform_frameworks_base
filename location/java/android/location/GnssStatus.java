@@ -111,11 +111,6 @@ public final class GnssStatus {
         mAzimuths = azimuths;
     }
 
-    /** @removed */
-    public int getNumSatellites() {
-        return getSatelliteCount();
-    }
-
     /**
      * Gets the total number of satellites in satellite list.
      */
@@ -191,11 +186,6 @@ public final class GnssStatus {
         return mAzimuths[satIndex];
     }
 
-    /** @removed */
-    public boolean hasEphemeris(int satIndex) {
-        return hasEphemerisData(satIndex);
-    }
-
     /**
      * Reports whether the satellite at the specified index has ephemeris data.
      *
@@ -203,11 +193,6 @@ public final class GnssStatus {
      */
     public boolean hasEphemerisData(int satIndex) {
         return (mSvidWithFlags[satIndex] & GNSS_SV_FLAGS_HAS_EPHEMERIS_DATA) != 0;
-    }
-
-    /** @removed */
-    public boolean hasAlmanac(int satIndex) {
-        return hasAlmanacData(satIndex);
     }
 
     /**
