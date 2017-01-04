@@ -63,6 +63,7 @@ import com.android.server.camera.CameraService;
 import com.android.server.clipboard.ClipboardService;
 import com.android.server.connectivity.IpConnectivityMetrics;
 import com.android.server.connectivity.MetricsLoggerService;
+import com.android.server.coverage.CoverageService;
 import com.android.server.devicepolicy.DevicePolicyManagerService;
 import com.android.server.display.DisplayManagerService;
 import com.android.server.display.NightDisplayService;
@@ -1257,6 +1258,12 @@ public final class SystemServer {
                 traceBeginAndSlog("AddGraphicsStatsService");
                 ServiceManager.addService(GraphicsStatsService.GRAPHICS_STATS_SERVICE,
                         new GraphicsStatsService(context));
+                traceEnd();
+            }
+
+            if (!disableNonCoreServices && CoverageService.ENABLED) {
+                traceBeginAndSlog("AddCoverageService");
+                ServiceManager.addService(CoverageService.COVERAGE_SERVICE, new CoverageService());
                 traceEnd();
             }
 
