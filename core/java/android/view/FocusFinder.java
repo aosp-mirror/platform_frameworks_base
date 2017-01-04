@@ -16,12 +16,16 @@
 
 package android.view;
 
+import static android.view.View.FOCUS_GROUP_CLUSTER;
+import static android.view.View.FOCUS_GROUP_SECTION;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.util.ArrayMap;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.view.View.FocusGroupType;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -107,21 +111,26 @@ public class FocusFinder {
 
     /**
      * Find the root of the next keyboard navigation cluster after the current one.
-     * @param root Thew view tree to look inside. Cannot be null
+     * @param focusGroupType Type of the focus group
+     * @param root The view tree to look inside. Cannot be null
      * @param currentCluster The starting point of the search. Null means the default cluster
      * @param direction Direction to look
      * @return The next cluster, or null if none exists
      */
     public View findNextKeyboardNavigationCluster(
-            @NonNull ViewGroup root, @Nullable View currentCluster, int direction) {
+            @FocusGroupType int focusGroupType,
+            @NonNull View root,
+            @Nullable View currentCluster,
+            int direction) {
         View next = null;
 
         final ArrayList<View> clusters = mTempList;
         try {
             clusters.clear();
-            root.addKeyboardNavigationClusters(clusters, direction);
+            root.addKeyboardNavigationClusters(focusGroupType, clusters, direction);
             if (!clusters.isEmpty()) {
-                next = findNextKeyboardNavigationCluster(root, currentCluster, clusters, direction);
+                next = findNextKeyboardNavigationCluster(
+                        focusGroupType, root, currentCluster, clusters, direction);
             }
         } finally {
             clusters.clear();
@@ -197,19 +206,25 @@ public class FocusFinder {
         }
     }
 
-    private View findNextKeyboardNavigationCluster(ViewGroup root, View currentCluster,
-            List<View> clusters, int direction) {
+    private View findNextKeyboardNavigationCluster(
+            @FocusGroupType int focusGroupType,
+            View root,
+            View currentCluster,
+            List<View> clusters,
+            int direction) {
         final int count = clusters.size();
 
         switch (direction) {
             case View.FOCUS_FORWARD:
             case View.FOCUS_DOWN:
             case View.FOCUS_RIGHT:
-                return getNextKeyboardNavigationCluster(root, currentCluster, clusters, count);
+                return getNextKeyboardNavigationCluster(
+                        focusGroupType, root, currentCluster, clusters, count);
             case View.FOCUS_BACKWARD:
             case View.FOCUS_UP:
             case View.FOCUS_LEFT:
-                return getPreviousKeyboardNavigationCluster(root, currentCluster, clusters, count);
+                return getPreviousKeyboardNavigationCluster(
+                        focusGroupType, root, currentCluster, clusters, count);
             default:
                 throw new IllegalArgumentException("Unknown direction: " + direction);
         }
@@ -315,8 +330,12 @@ public class FocusFinder {
         return null;
     }
 
-    private static View getNextKeyboardNavigationCluster(ViewGroup root, View currentCluster,
-            List<View> clusters, int count) {
+    private static View getNextKeyboardNavigationCluster(
+            @FocusGroupType int focusGroupType,
+            View root,
+            View currentCluster,
+            List<View> clusters,
+            int count) {
         if (currentCluster == null) {
             // The current cluster is the default one.
             // The next cluster after the default one is the first one.
@@ -330,12 +349,25 @@ public class FocusFinder {
             return clusters.get(position + 1);
         }
 
-        // The current cluster is the last one. The next one is the default one, i.e. the root.
-        return root;
+        switch (focusGroupType) {
+            case FOCUS_GROUP_CLUSTER:
+                // The current cluster is the last one. The next one is the default one, i.e. the
+                // root.
+                return root;
+            case FOCUS_GROUP_SECTION:
+                // There is no "default section", hence returning the first one.
+                return clusters.get(0);
+            default:
+                throw new IllegalArgumentException("Unknown focus group type: " + focusGroupType);
+        }
     }
 
-    private static View getPreviousKeyboardNavigationCluster(ViewGroup root, View currentCluster,
-            List<View> clusters, int count) {
+    private static View getPreviousKeyboardNavigationCluster(
+            @FocusGroupType int focusGroupType,
+            View root,
+            View currentCluster,
+            List<View> clusters,
+            int count) {
         if (currentCluster == null) {
             // The current cluster is the default one.
             // The previous cluster before the default one is the last one.
@@ -349,9 +381,17 @@ public class FocusFinder {
             return clusters.get(position - 1);
         }
 
-        // The current cluster is the first one. The previous one is the default one, i.e. the
-        // root.
-        return root;
+        switch (focusGroupType) {
+            case FOCUS_GROUP_CLUSTER:
+                // The current cluster is the first one. The previous one is the default one, i.e.
+                // the root.
+                return root;
+            case FOCUS_GROUP_SECTION:
+                // There is no "default section", hence returning the last one.
+                return clusters.get(count - 1);
+            default:
+                throw new IllegalArgumentException("Unknown focus group type: " + focusGroupType);
+        }
     }
 
     /**
