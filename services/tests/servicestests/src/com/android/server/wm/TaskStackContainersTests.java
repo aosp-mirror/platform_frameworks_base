@@ -47,14 +47,15 @@ public class TaskStackContainersTests extends WindowTestsBase {
         // Test that always-on-top stack can't be moved to position other than top.
         final TaskStack stack1 = createTaskStackOnDisplay(sDisplayContent);
         final TaskStack stack2 = createTaskStackOnDisplay(sDisplayContent);
-        sDisplayContent.addStackToDisplay(PINNED_STACK_ID, true);
-        final TaskStack pinnedStack = sWm.mStackIdToStack.get(PINNED_STACK_ID);
+        final TaskStack pinnedStack = addPinnedStack();
 
         final WindowContainer taskStackContainer = stack1.getParent();
 
         final int stack1Pos = taskStackContainer.mChildren.indexOf(stack1);
         final int stack2Pos = taskStackContainer.mChildren.indexOf(stack2);
         final int pinnedStackPos = taskStackContainer.mChildren.indexOf(pinnedStack);
+        assertGreaterThan(pinnedStackPos, stack2Pos);
+        assertGreaterThan(stack2Pos, stack1Pos);
 
         taskStackContainer.positionChildAt(WindowContainer.POSITION_BOTTOM, pinnedStack, false);
         assertEquals(taskStackContainer.mChildren.get(stack1Pos), stack1);
@@ -65,5 +66,44 @@ public class TaskStackContainersTests extends WindowTestsBase {
         assertEquals(taskStackContainer.mChildren.get(stack1Pos), stack1);
         assertEquals(taskStackContainer.mChildren.get(stack2Pos), stack2);
         assertEquals(taskStackContainer.mChildren.get(pinnedStackPos), pinnedStack);
+    }
+    @Test
+    public void testStackPositionBelowPinnedStack() throws Exception {
+        // Test that no stack can be above pinned stack.
+        final TaskStack pinnedStack = addPinnedStack();
+        final TaskStack stack1 = createTaskStackOnDisplay(sDisplayContent);
+
+        final WindowContainer taskStackContainer = stack1.getParent();
+
+        final int stackPos = taskStackContainer.mChildren.indexOf(stack1);
+        final int pinnedStackPos = taskStackContainer.mChildren.indexOf(pinnedStack);
+        assertGreaterThan(pinnedStackPos, stackPos);
+
+        taskStackContainer.positionChildAt(WindowContainer.POSITION_TOP, stack1, false);
+        assertEquals(taskStackContainer.mChildren.get(stackPos), stack1);
+        assertEquals(taskStackContainer.mChildren.get(pinnedStackPos), pinnedStack);
+
+        taskStackContainer.positionChildAt(taskStackContainer.mChildren.size() - 1, stack1, false);
+        assertEquals(taskStackContainer.mChildren.get(stackPos), stack1);
+        assertEquals(taskStackContainer.mChildren.get(pinnedStackPos), pinnedStack);
+    }
+
+    private TaskStack addPinnedStack() {
+        TaskStack pinnedStack = sWm.mStackIdToStack.get(PINNED_STACK_ID);
+        if (pinnedStack == null) {
+            sDisplayContent.addStackToDisplay(PINNED_STACK_ID, true);
+            pinnedStack = sWm.mStackIdToStack.get(PINNED_STACK_ID);
+        }
+
+        if (!pinnedStack.isVisible()) {
+            // Stack should contain visible app window to be considered visible.
+            final Task pinnedTask = createTaskInStack(pinnedStack, 0 /* userId */);
+            assertFalse(pinnedStack.isVisible());
+            final TestAppWindowToken pinnedApp = new TestAppWindowToken(sDisplayContent);
+            pinnedTask.addChild(pinnedApp, 0 /* addPos */);
+            assertTrue(pinnedStack.isVisible());
+        }
+
+        return pinnedStack;
     }
 }

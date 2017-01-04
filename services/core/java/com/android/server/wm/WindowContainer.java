@@ -434,7 +434,7 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
         // TODO: Will this be more correct if it checks the visibility of its parents?
         // It depends...For example, Tasks and Stacks are only visible if there children are visible
         // but, WindowState are not visible if there parent are not visible. Maybe have the
-        // container specify which direction to treverse for for visibility?
+        // container specify which direction to traverse for visibility?
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
             if (wc.isVisible()) {
