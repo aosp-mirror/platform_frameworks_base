@@ -221,6 +221,15 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".SysuiRestartReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.android.systemui.action.RESTART" />
+
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
+
         <service android:name=".ImageWallpaper"
                 android:permission="android.permission.BIND_WALLPAPER"
                 android:exported="true" />

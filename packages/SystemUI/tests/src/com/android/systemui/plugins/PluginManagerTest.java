@@ -13,6 +13,8 @@
  */
 package com.android.systemui.plugins;
 
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -24,11 +26,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.support.test.annotation.UiThreadTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.PluginInstanceManager.PluginInfo;
 import com.android.systemui.plugins.PluginManager.PluginInstanceManagerFactory;
 
 import org.junit.Before;
@@ -66,6 +70,16 @@ public class PluginManagerTest extends SysuiTestCase {
         mMockListener = mock(PluginListener.class);
     }
 
+    @UiThreadTest
+    @Test
+    public void testOneShot() {
+        Plugin mockPlugin = mock(Plugin.class);
+        when(mMockPluginInstance.getPlugin()).thenReturn(new PluginInfo(null, null, mockPlugin,
+                null));
+        Plugin result = mPluginManager.getOneShotPlugin("myAction", 1);
+        assertTrue(result == mockPlugin);
+    }
+
     @Test
     public void testAddListener() {
         mPluginManager.addPluginListener("myAction", mMockListener, 1);
@@ -86,9 +100,12 @@ public class PluginManagerTest extends SysuiTestCase {
         mPluginManager = new PluginManager(getContext(), mMockFactory, false,
                 mMockExceptionHandler);
         resetExceptionHandler();
-        mPluginManager.addPluginListener("myAction", mMockListener, 1);
 
+        mPluginManager.addPluginListener("myAction", mMockListener, 1);
         verify(mMockPluginInstance, Mockito.never()).loadAll();
+
+        assertNull(mPluginManager.getOneShotPlugin("myPlugin", 1));
+        verify(mMockPluginInstance, Mockito.never()).getPlugin();
     }
 
     @Test

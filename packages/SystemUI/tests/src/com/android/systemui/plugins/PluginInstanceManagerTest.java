@@ -15,6 +15,7 @@
 package com.android.systemui.plugins;
 
 import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.Matchers.any;
@@ -39,11 +40,13 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.HandlerThread;
 import android.os.UserHandle;
+import android.support.test.annotation.UiThreadTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.PluginInstanceManager.PluginInfo;
 
 import org.junit.After;
 import org.junit.Before;
@@ -90,6 +93,15 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
     public void tearDown() throws Exception {
         mHandlerThread.quit();
         sMockPlugin = null;
+    }
+
+    @UiThreadTest
+    @Test
+    public void testGetPlugin() throws Exception {
+        setupFakePmQuery();
+        PluginInfo p = mPluginInstanceManager.getPlugin();
+        assertNotNull(p.mPlugin);
+        verify(sMockPlugin).onCreate(any(), any());
     }
 
     @Test
