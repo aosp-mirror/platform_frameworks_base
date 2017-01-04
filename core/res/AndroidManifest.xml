@@ -2051,6 +2051,11 @@
     <permission android:name="android.permission.RESET_SHORTCUT_MANAGER_THROTTLING"
         android:protectionLevel="signature" />
 
+    <!-- Allows the system to bind to the discovered Network Recommendation Service.
+         @SystemApi @hide -->
+    <permission android:name="android.permission.BIND_NETWORK_RECOMMENDATION_SERVICE"
+        android:protectionLevel="signature" />
+
     <!-- ========================================= -->
     <!-- Permissions for special development tools -->
     <!-- ========================================= -->
