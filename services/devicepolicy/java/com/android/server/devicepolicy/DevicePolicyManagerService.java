@@ -5980,9 +5980,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             throw new IllegalArgumentException("Invalid component " + admin
                     + " for device owner");
         }
-        final boolean hasIncompatibleAccounts = hasIncompatibleAccountsNoLock(userId, admin);
+        final boolean hasIncompatibleAccountsOrNonAdb =
+                hasIncompatibleAccountsOrNonAdbNoLock(userId, admin);
         synchronized (this) {
-            enforceCanSetDeviceOwnerLocked(admin, userId, hasIncompatibleAccounts);
+            enforceCanSetDeviceOwnerLocked(admin, userId, hasIncompatibleAccountsOrNonAdb);
             final ActiveAdmin activeAdmin = getActiveAdminUncheckedLocked(admin, userId);
             if (activeAdmin == null
                     || getUserData(userId).mRemovingAdmins.contains(admin)) {
@@ -6218,9 +6219,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             throw new IllegalArgumentException("Component " + who
                     + " not installed for userId:" + userHandle);
         }
-        final boolean hasIncompatibleAccounts = hasIncompatibleAccountsNoLock(userHandle, who);
+        final boolean hasIncompatibleAccountsOrNonAdb =
+                hasIncompatibleAccountsOrNonAdbNoLock(userHandle, who);
         synchronized (this) {
-            enforceCanSetProfileOwnerLocked(who, userHandle, hasIncompatibleAccounts);
+            enforceCanSetProfileOwnerLocked(who, userHandle, hasIncompatibleAccountsOrNonAdb);
 
             if (getActiveAdminUncheckedLocked(who, userHandle) == null
                     || getUserData(userHandle).mRemovingAdmins.contains(who)) {
@@ -6553,10 +6555,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * The profile owner can only be set before the user setup phase has completed,
      * except for:
      * - SYSTEM_UID
-     * - adb unless hasIncompatibleAccounts is true.
+     * - adb unless hasIncompatibleAccountsOrNonAdb is true.
      */
     private void enforceCanSetProfileOwnerLocked(@Nullable ComponentName owner, int userHandle,
-            boolean hasIncompatibleAccounts) {
+            boolean hasIncompatibleAccountsOrNonAdb) {
         UserInfo info = getUserInfo(userHandle);
         if (info == null) {
             // User doesn't exist.
@@ -6576,7 +6578,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         if (isAdb()) {
             if ((mIsWatch || hasUserSetupCompleted(userHandle))
-                    && hasIncompatibleAccounts) {
+                    && hasIncompatibleAccountsOrNonAdb) {
                 throw new IllegalStateException("Not allowed to set the profile owner because "
                         + "there are already some accounts on the profile");
             }
@@ -6594,13 +6596,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * permission.
      */
     private void enforceCanSetDeviceOwnerLocked(@Nullable ComponentName owner, int userId,
-            boolean hasIncompatibleAccounts) {
+            boolean hasIncompatibleAccountsOrNonAdb) {
         if (!isAdb()) {
             enforceCanManageProfileAndDeviceOwners();
         }
 
         final int code = checkDeviceOwnerProvisioningPreConditionLocked(
-                owner, userId, isAdb(), hasIncompatibleAccounts);
+                owner, userId, isAdb(), hasIncompatibleAccountsOrNonAdb);
         switch (code) {
             case CODE_OK:
                 return;
@@ -8909,7 +8911,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * except for adb command if no accounts or additional users are present on the device.
      */
     private int checkDeviceOwnerProvisioningPreConditionLocked(@Nullable ComponentName owner,
-            int deviceOwnerUserId, boolean isAdb, boolean hasIncompatibleAccounts) {
+            int deviceOwnerUserId, boolean isAdb, boolean hasIncompatibleAccountsOrNonAdb) {
         if (mOwners.hasDeviceOwner()) {
             return CODE_HAS_DEVICE_OWNER;
         }
@@ -8929,7 +8931,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     if (mUserManager.getUserCount() > 1) {
                         return CODE_NONSYSTEM_USER_EXISTS;
                     }
-                    if (hasIncompatibleAccounts) {
+                    if (hasIncompatibleAccountsOrNonAdb) {
                         return CODE_ACCOUNTS_NOT_EMPTY;
                     }
                 } else {
@@ -8956,9 +8958,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private int checkDeviceOwnerProvisioningPreCondition(int deviceOwnerUserId) {
         synchronized (this) {
-            // hasIncompatibleAccounts doesn't matter since the caller is not adb.
+            // hasIncompatibleAccountsOrNonAdb doesn't matter since the caller is not adb.
             return checkDeviceOwnerProvisioningPreConditionLocked(/* owner unknown */ null,
-                    deviceOwnerUserId, /* isAdb= */ false, /* hasIncompatibleAccounts=*/ true);
+                    deviceOwnerUserId, /* isAdb= */ false,
+                    /* hasIncompatibleAccountsOrNonAdb=*/ true);
         }
     }
 
@@ -9857,9 +9860,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      *   ..._DISALLOWED, return true.
      * - Otherwise return false.
      *
+     * If the caller is *not* ADB, it also returns true.  The returned value shouldn't be used
+     * when the caller is not ADB.
+     *
      * DO NOT CALL IT WITH THE DPMS LOCK HELD.
      */
-    private boolean hasIncompatibleAccountsNoLock(int userId, @Nullable ComponentName owner) {
+    private boolean hasIncompatibleAccountsOrNonAdbNoLock(
+            int userId, @Nullable ComponentName owner) {
+        if (!isAdb()) {
+            return true;
+        }
         if (Thread.holdsLock(this)) {
             Slog.wtf(LOG_TAG, "hasIncompatibleAccountsNoLock() called with the DPMS lock held.");
             return true;
