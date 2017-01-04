@@ -2336,10 +2336,7 @@ public class MediaPlayer extends PlayerBase
     }
 
     private void scanInternalSubtitleTracks() {
-        if (mSubtitleController == null) {
-            Log.d(TAG, "setSubtitleAnchor in MediaPlayer");
-            setSubtitleAnchor();
-        }
+        setSubtitleAnchor();
 
         populateInbandTracks();
 
