@@ -98,6 +98,9 @@ public class ChooserActivity extends ResolverActivity {
 
     private Intent mReferrerFillInIntent;
 
+    private long mChooserShownTime;
+    private boolean mIsSuccessfullySelected;
+
     private ChooserListAdapter mChooserListAdapter;
     private ChooserRowAdapter mChooserRowAdapter;
 
@@ -157,6 +160,8 @@ public class ChooserActivity extends ResolverActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        final long intentReceivedTime = System.currentTimeMillis();
+        mIsSuccessfullySelected = false;
         Intent intent = getIntent();
         Parcelable targetParcelable = intent.getParcelableExtra(Intent.EXTRA_INTENT);
         if (!(targetParcelable instanceof Intent)) {
@@ -259,6 +264,13 @@ public class ChooserActivity extends ResolverActivity {
                 null, false);
 
         MetricsLogger.action(this, MetricsEvent.ACTION_ACTIVITY_CHOOSER_SHOWN);
+
+        mChooserShownTime = System.currentTimeMillis();
+        final long systemCost = mChooserShownTime - intentReceivedTime;
+        MetricsLogger.histogram(null, "system_cost_for_smart_sharing", (int) systemCost);
+        if (DEBUG) {
+            Log.d(TAG, "System Time Cost is " + systemCost);
+        }
     }
 
     static SharedPreferences getPinnedSharedPrefs(Context context) {
@@ -412,6 +424,7 @@ public class ChooserActivity extends ResolverActivity {
 
     @Override
     public void startSelected(int which, boolean always, boolean filtered) {
+        final long selectionCost = System.currentTimeMillis() - mChooserShownTime;
         super.startSelected(which, always, filtered);
 
         if (mChooserListAdapter != null) {
@@ -436,6 +449,17 @@ public class ChooserActivity extends ResolverActivity {
 
             if (cat != 0) {
                 MetricsLogger.action(this, cat, value);
+            }
+
+            if (mIsSuccessfullySelected) {
+                if (DEBUG) {
+                    Log.d(TAG, "User Selection Time Cost is " + selectionCost);
+                    Log.d(TAG, "position of selected app/service/caller is " +
+                            Integer.toString(value));
+                }
+                MetricsLogger.histogram(null, "user_selection_cost_for_smart_sharing",
+                        (int) selectionCost);
+                MetricsLogger.histogram(null, "app_position_for_smart_sharing", value);
             }
         }
     }
@@ -573,6 +597,7 @@ public class ChooserActivity extends ResolverActivity {
                 Log.d(TAG, "Can not log Chooser Counts of null ResovleInfo");
             }
         }
+        mIsSuccessfullySelected = true;
     }
 
     void onRefinementResult(TargetInfo selectedTarget, Intent matchingIntent) {
