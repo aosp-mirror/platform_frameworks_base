@@ -39,6 +39,8 @@
 using android::AndroidRuntime;
 using android::hardware::hidl_vec;
 using android::hardware::hidl_string;
+template<typename T>
+using Return = android::hardware::Return<T>;
 
 #define PACKAGE_PATH    "android/os"
 #define CLASS_NAME      "HwBinder"
@@ -257,8 +259,6 @@ static void JHwBinder_native_registerService(
     hidl_vec<hidl_string> interfaceChain;
     interfaceChain.setToExternal(strings, numInterfaces, true /* shouldOwn */);
 
-    using android::hidl::manager::V1_0::IServiceManager;
-
     sp<hardware::IBinder> binder = JHwBinder::GetNativeContext(env, thiz);
 
     /* TODO(b/33440494) this is not right */
@@ -268,24 +268,23 @@ static void JHwBinder_native_registerService(
 
     if (manager == nullptr) {
         LOG(ERROR) << "Could not get hwservicemanager.";
-        signalExceptionForError(env, UNKNOWN_ERROR);
+        signalExceptionForError(env, UNKNOWN_ERROR, true /* canThrowRemoteException */);
         return;
     }
 
-    bool ok = manager->add(
-                interfaceChain,
-                serviceName,
-                base);
+    Return<bool> ret = manager->add(interfaceChain, serviceName, base);
 
     env->ReleaseStringUTFChars(serviceNameObj, serviceName);
     serviceName = NULL;
+
+    bool ok = ret.isOk() && ret;
 
     if (ok) {
         LOG(INFO) << "Starting thread pool.";
         ::android::hardware::ProcessState::self()->startThreadPool();
     }
 
-    signalExceptionForError(env, (ok ? OK : UNKNOWN_ERROR));
+    signalExceptionForError(env, (ok ? OK : UNKNOWN_ERROR), true /* canThrowRemoteException */);
 }
 
 static jobject JHwBinder_native_getService(
@@ -321,13 +320,18 @@ static jobject JHwBinder_native_getService(
 
     if (manager == nullptr) {
         LOG(ERROR) << "Could not get hwservicemanager.";
-        signalExceptionForError(env, UNKNOWN_ERROR);
+        signalExceptionForError(env, UNKNOWN_ERROR, true /* canThrowRemoteException */);
         return NULL;
     }
 
-    sp<hidl::base::V1_0::IBase> base = manager->get(ifaceName, serviceName);
+    Return<sp<hidl::base::V1_0::IBase>> ret = manager->get(ifaceName, serviceName);
+
+    if (!ret.isOk()) {
+        signalExceptionForError(env, UNKNOWN_ERROR, true /* canThrowRemoteException */);
+    }
+
     sp<hardware::IBinder> service = hardware::toBinder<
-            hidl::base::V1_0::IBase, hidl::base::V1_0::BpBase>(base);
+            hidl::base::V1_0::IBase, hidl::base::V1_0::BpBase>(ret);
 
     env->ReleaseStringUTFChars(ifaceNameObj, ifaceName);
     ifaceName = NULL;
