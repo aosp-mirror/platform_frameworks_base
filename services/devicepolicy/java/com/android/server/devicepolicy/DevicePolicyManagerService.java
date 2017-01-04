@@ -4788,7 +4788,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private void wipeDataLocked(boolean wipeExtRequested, String reason, boolean force) {
+    private void wipeDataNoLock(boolean wipeExtRequested, String reason, boolean force) {
+        wtfIfInLock();
+
         if (wipeExtRequested) {
             StorageManager sm = (StorageManager) mContext.getSystemService(
                     Context.STORAGE_SERVICE);
@@ -4808,13 +4810,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         final int userHandle = mInjector.userHandleGetCallingUserId();
         enforceFullCrossUsersPermission(userHandle);
+
+        final String source;
         synchronized (this) {
             // This API can only be called by an active device admin,
             // so try to retrieve it to check that the caller is one.
             final ActiveAdmin admin = getActiveAdminForCallerLocked(null,
                     DeviceAdminInfo.USES_POLICY_WIPE_DATA);
-
-            final String source = admin.info.getComponent().flattenToShortString();
+            source = admin.info.getComponent().flattenToShortString();
 
             long ident = mInjector.binderClearCallingIdentity();
             try {
@@ -4844,45 +4847,47 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     }
                 }
 
-                boolean wipeExtRequested = (flags & WIPE_EXTERNAL_STORAGE) != 0;
-                wipeDeviceOrUserLocked(wipeExtRequested, userHandle,
-                        "DevicePolicyManager.wipeData() from " + source, /*force=*/ true);
             } finally {
                 mInjector.binderRestoreCallingIdentity(ident);
             }
         }
+        final boolean wipeExtRequested = (flags & WIPE_EXTERNAL_STORAGE) != 0;
+        wipeDeviceNoLock(wipeExtRequested, userHandle,
+                "DevicePolicyManager.wipeData() from " + source, /*force=*/ true);
     }
 
-    private void wipeDeviceOrUserLocked(
+    private void wipeDeviceNoLock(
             boolean wipeExtRequested, final int userHandle, String reason, boolean force) {
-        // TODO If split user is enabled and the device owner is set in the primary user (rather
-        // than system), we should probably trigger factory reset. Current code just remove
-        // that user (but still clears FRP...)
-        if (userHandle == UserHandle.USER_SYSTEM) {
-            wipeDataLocked(wipeExtRequested, reason, force);
-        } else {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        IActivityManager am = mInjector.getIActivityManager();
-                        if (am.getCurrentUser().id == userHandle) {
-                            am.switchUser(UserHandle.USER_SYSTEM);
-                        }
+        wtfIfInLock();
 
-                        boolean userRemoved = force
-                                ? mUserManagerInternal.removeUserEvenWhenDisallowed(userHandle)
-                                : mUserManager.removeUser(userHandle);
-                        if (!userRemoved) {
-                            Slog.w(LOG_TAG, "Couldn't remove user " + userHandle);
-                        } else if (isManagedProfile(userHandle)) {
-                            sendWipeProfileNotification();
-                        }
-                    } catch (RemoteException re) {
-                        // Shouldn't happen
+        long ident = mInjector.binderClearCallingIdentity();
+        try {
+            // TODO If split user is enabled and the device owner is set in the primary user (rather
+            // than system), we should probably trigger factory reset. Current code just remove
+            // that user (but still clears FRP...)
+            if (userHandle == UserHandle.USER_SYSTEM) {
+                wipeDataNoLock(wipeExtRequested, reason, force);
+            } else {
+                try {
+                    IActivityManager am = mInjector.getIActivityManager();
+                    if (am.getCurrentUser().id == userHandle) {
+                        am.switchUser(UserHandle.USER_SYSTEM);
                     }
+
+                    boolean userRemoved = force
+                            ? mUserManagerInternal.removeUserEvenWhenDisallowed(userHandle)
+                            : mUserManager.removeUser(userHandle);
+                    if (!userRemoved) {
+                        Slog.w(LOG_TAG, "Couldn't remove user " + userHandle);
+                    } else if (isManagedProfile(userHandle)) {
+                        sendWipeProfileNotification();
+                    }
+                } catch (RemoteException re) {
+                    // Shouldn't happen
                 }
-            });
+            }
+        } finally {
+            mInjector.binderRestoreCallingIdentity(ident);
         }
     }
 
@@ -5047,8 +5052,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             if (wipeData) {
                 // Call without holding lock.
-                wipeDeviceOrUserLocked(false, identifier,
-                        "reportFailedPasswordAttempt()", false);
+                wipeDeviceNoLock(false, identifier, "reportFailedPasswordAttempt()", false);
             }
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
@@ -6546,6 +6550,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return result != null ? result.toString() : null;
         } finally {
             mInjector.binderRestoreCallingIdentity(token);
+        }
+    }
+
+    /**
+     * Calls wtfStack() if called with the DPMS lock held.
+     */
+    private void wtfIfInLock() {
+        if (Thread.holdsLock(this)) {
+            Slog.wtfStack(LOG_TAG, "Shouldn't be called with DPMS lock held");
         }
     }
 
@@ -9870,10 +9883,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!isAdb()) {
             return true;
         }
-        if (Thread.holdsLock(this)) {
-            Slog.wtf(LOG_TAG, "hasIncompatibleAccountsNoLock() called with the DPMS lock held.");
-            return true;
-        }
+        wtfIfInLock();
 
         final long token = mInjector.binderClearCallingIdentity();
         try {
