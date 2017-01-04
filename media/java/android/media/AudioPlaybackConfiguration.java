@@ -38,6 +38,8 @@ public final class AudioPlaybackConfiguration implements Parcelable {
 
     /** @hide */
     public final static int PLAYER_PIID_INVALID = -1;
+    /** @hide */
+    public final static int PLAYER_UPID_INVALID = -1;
 
     // information about the implementation
     /**
@@ -159,11 +161,11 @@ public final class AudioPlaybackConfiguration implements Parcelable {
     /**
      * @hide
      */
-    public AudioPlaybackConfiguration(PlayerBase.PlayerIdCard pic) {
-        mPlayerIId = pic.mPIId;
+    public AudioPlaybackConfiguration(PlayerBase.PlayerIdCard pic, int piid, int uid, int pid) {
+        mPlayerIId = piid;
         mPlayerType = pic.mPlayerType;
-        mClientUid = pic.mClientUid;
-        mClientPid = pic.mClientPid;
+        mClientUid = uid;
+        mClientPid = pid;
         mPlayerState = PLAYER_STATE_IDLE;
         mPlayerAttr = pic.mAttributes;
     }
@@ -187,8 +189,8 @@ public final class AudioPlaybackConfiguration implements Parcelable {
                 .build();
         // anonymized data
         anonymCopy.mPlayerType = PLAYER_TYPE_UNKNOWN;
-        anonymCopy.mClientUid = 0;
-        anonymCopy.mClientPid = 0;
+        anonymCopy.mClientUid = PLAYER_UPID_INVALID;
+        anonymCopy.mClientPid = PLAYER_UPID_INVALID;
         return anonymCopy;
     }
 

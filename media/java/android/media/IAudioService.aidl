@@ -184,7 +184,7 @@ interface IAudioService {
 
     List<AudioPlaybackConfiguration> getActivePlaybackConfigurations();
 
-    oneway void trackPlayer(in PlayerBase.PlayerIdCard pic);
+    int trackPlayer(in PlayerBase.PlayerIdCard pic);
 
     oneway void playerAttributes(in int piid, in AudioAttributes attr);
 

@@ -6496,7 +6496,7 @@ public class AudioService extends IAudioService.Stub
     private final PlaybackActivityMonitor mPlaybackMonitor = new PlaybackActivityMonitor();
 
     public void registerPlaybackCallback(IPlaybackConfigDispatcher pcdb) {
-        final boolean isPrivileged = 
+        final boolean isPrivileged =
                 (PackageManager.PERMISSION_GRANTED == mContext.checkCallingPermission(
                         android.Manifest.permission.MODIFY_AUDIO_ROUTING));
         mPlaybackMonitor.registerPlaybackCallback(pcdb, isPrivileged);
@@ -6507,11 +6507,14 @@ public class AudioService extends IAudioService.Stub
     }
 
     public List<AudioPlaybackConfiguration> getActivePlaybackConfigurations() {
-        return mPlaybackMonitor.getActivePlaybackConfigurations();
+        final boolean isPrivileged =
+                (PackageManager.PERMISSION_GRANTED == mContext.checkCallingPermission(
+                        android.Manifest.permission.MODIFY_AUDIO_ROUTING));
+        return mPlaybackMonitor.getActivePlaybackConfigurations(isPrivileged);
     }
 
-    public void trackPlayer(PlayerBase.PlayerIdCard pic) {
-        mPlaybackMonitor.trackPlayer(pic);
+    public int trackPlayer(PlayerBase.PlayerIdCard pic) {
+        return mPlaybackMonitor.trackPlayer(pic);
     }
 
     public void playerAttributes(int piid, AudioAttributes attr) {

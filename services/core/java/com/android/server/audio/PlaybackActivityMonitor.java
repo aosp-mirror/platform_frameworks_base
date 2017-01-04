@@ -25,6 +25,7 @@ import android.media.AudioSystem;
 import android.media.IPlaybackConfigDispatcher;
 import android.media.MediaRecorder;
 import android.media.PlayerBase;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -61,16 +62,20 @@ public final class PlaybackActivityMonitor {
 
     //=================================================================
     // Track players and their states
-    // methods trackPlayer, playerAttributes, playerEvent, releasePlayer are all oneway calls
+    // methods playerAttributes, playerEvent, releasePlayer are all oneway calls
     //  into AudioService. They trigger synchronous dispatchPlaybackChange() which updates
     //  all listeners as oneway calls.
 
-    public void trackPlayer(PlayerBase.PlayerIdCard pic) {
-        if (DEBUG) { Log.v(TAG, "trackPlayer() for piid=" + pic.mPIId); }
-        final AudioPlaybackConfiguration apc = new AudioPlaybackConfiguration(pic);
+    public int trackPlayer(PlayerBase.PlayerIdCard pic) {
+        final int newPiid = AudioSystem.newAudioPlayerId();
+        if (DEBUG) { Log.v(TAG, "trackPlayer() new piid=" + newPiid); }
+        final AudioPlaybackConfiguration apc =
+                new AudioPlaybackConfiguration(pic, newPiid,
+                        Binder.getCallingUid(), Binder.getCallingPid());
         synchronized(mPlayerLock) {
-            mPlayers.put(pic.mPIId, apc);
+            mPlayers.put(newPiid, apc);
         }
+        return newPiid;
     }
 
     public void playerAttributes(int piid, @NonNull AudioAttributes attr) {
@@ -90,7 +95,7 @@ public final class PlaybackActivityMonitor {
     }
 
     public void playerEvent(int piid, int event) {
-        if (DEBUG) { Log.v(TAG, String.format("trackPlayer(piid=%d, event=%d)", piid, event)); }
+        if (DEBUG) { Log.v(TAG, String.format("playerEvent(piid=%d, event=%d)", piid, event)); }
         final boolean change;
         synchronized(mPlayerLock) {
             final AudioPlaybackConfiguration apc = mPlayers.get(new Integer(piid));
@@ -228,9 +233,18 @@ public final class PlaybackActivityMonitor {
         }
     }
 
-    List<AudioPlaybackConfiguration> getActivePlaybackConfigurations() {
+    List<AudioPlaybackConfiguration> getActivePlaybackConfigurations(boolean isPrivileged) {
         synchronized(mPlayers) {
-            return new ArrayList<AudioPlaybackConfiguration>(mPlayers.values());
+            if (isPrivileged) {
+                return new ArrayList<AudioPlaybackConfiguration>(mPlayers.values());
+            } else {
+                final List<AudioPlaybackConfiguration> configsPublic;
+                synchronized (mPlayerLock) {
+                    configsPublic = anonymizeForPublicConsumption(
+                            new ArrayList<AudioPlaybackConfiguration>(mPlayers.values()));
+                }
+                return configsPublic;
+            }
         }
     }
 
