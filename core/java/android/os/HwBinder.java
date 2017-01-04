@@ -33,11 +33,14 @@ public abstract class HwBinder implements IHwBinder {
                 mNativeContext);
     }
 
+    @Override
     public final native void transact(
-            int code, HwParcel request, HwParcel reply, int flags);
+            int code, HwParcel request, HwParcel reply, int flags)
+        throws RemoteException;
 
     public abstract void onTransact(
-            int code, HwParcel request, HwParcel reply, int flags);
+            int code, HwParcel request, HwParcel reply, int flags)
+        throws RemoteException;
 
     public native final void registerService(
             ArrayList<String> interfaceChain,
