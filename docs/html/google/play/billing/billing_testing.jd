@@ -199,6 +199,15 @@ reserved product IDs. Also, you cannot specify the form of payment when you make
 with a reserved product ID. Figure 1 shows the checkout flow for the reserved item that has the
 product ID android.test.purchased.</p>
 
+<p class="note">
+  <strong>Note:</strong> If you're testing subscription purchases, you must use
+  the product ID of an actual subscription, not a reserved product ID. To verify
+  that Google Play is processing the test subscription purchases correctly, you
+  should
+  <a href="/google/play/billing/billing/billing_admin.html#billing-testing-setup">set
+  up test accounts</a> for your app.
+</p>
+
 <img src="{@docRoot}images/billing_test_flow.png" height="381" id="figure1" />
 <p class="img-caption">
   <strong>Figure 1.</strong>Purchase flow for the special reserved item android.test.purchased.
