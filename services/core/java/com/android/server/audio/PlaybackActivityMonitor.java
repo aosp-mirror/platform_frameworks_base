@@ -78,15 +78,15 @@ public final class PlaybackActivityMonitor {
         return newPiid;
     }
 
-    public void playerAttributes(int piid, @NonNull AudioAttributes attr) {
+    public void playerAttributes(int piid, @NonNull AudioAttributes attr, int binderUid) {
         final boolean change;
         synchronized(mPlayerLock) {
             final AudioPlaybackConfiguration apc = mPlayers.get(new Integer(piid));
-            if (apc == null) {
-                Log.e(TAG, "Unknown player " + piid + " for audio attributes change");
-                change = false;
-            } else {
+            if (checkConfigurationCaller(piid, apc, binderUid)) {
                 change = apc.handleAudioAttributesEvent(attr);
+            } else {
+                Log.e(TAG, "Error updating audio attributes");
+                change = false;
             }
         }
         if (change) {
@@ -94,17 +94,17 @@ public final class PlaybackActivityMonitor {
         }
     }
 
-    public void playerEvent(int piid, int event) {
+    public void playerEvent(int piid, int event, int binderUid) {
         if (DEBUG) { Log.v(TAG, String.format("playerEvent(piid=%d, event=%d)", piid, event)); }
         final boolean change;
         synchronized(mPlayerLock) {
             final AudioPlaybackConfiguration apc = mPlayers.get(new Integer(piid));
-            if (apc == null) {
-                Log.e(TAG, "Unknown player " + piid + " for event " + event);
-                change = false;
-            } else {
+            if (checkConfigurationCaller(piid, apc, binderUid)) {
                 //TODO add generation counter to only update to the latest state
                 change = apc.handleStateEvent(event);
+            } else {
+                Log.e(TAG, "Error handling event " + event);
+                change = false;
             }
         }
         if (change) {
@@ -112,13 +112,14 @@ public final class PlaybackActivityMonitor {
         }
     }
 
-    public void releasePlayer(int piid) {
+    public void releasePlayer(int piid, int binderUid) {
         if (DEBUG) { Log.v(TAG, "releasePlayer() for piid=" + piid); }
         synchronized(mPlayerLock) {
-            if (!mPlayers.containsKey(new Integer(piid))) {
-                Log.e(TAG, "Unknown player " + piid + " for release");
-            } else {
+            final AudioPlaybackConfiguration apc = mPlayers.get(new Integer(piid));
+            if (checkConfigurationCaller(piid, apc, binderUid)) {
                 mPlayers.remove(new Integer(piid));
+            } else {
+                Log.e(TAG, "Error releasing player " + piid);
             }
         }
     }
@@ -131,6 +132,25 @@ public final class PlaybackActivityMonitor {
                 conf.dump(pw);
             }
         }
+    }
+
+    /**
+     * Check that piid and uid are valid for the given configuration.
+     * @param piid the piid of the player.
+     * @param apc the configuration found for this piid.
+     * @param binderUid actual uid of client trying to signal a player state/event/attributes.
+     * @return true if the call is valid and the change should proceed, false otherwise.
+     */
+    private static boolean checkConfigurationCaller(int piid,
+            final AudioPlaybackConfiguration apc, int binderUid) {
+        if (apc == null) {
+            Log.e(TAG, "Invalid operation: unknown player " + piid);
+            return false;
+        } else if ((binderUid != 0) && (apc.getClientUid() != binderUid)) {
+            Log.e(TAG, "Forbidden operation from uid " + binderUid + " for player " + piid);
+            return false;
+        }
+        return true;
     }
 
     private void dispatchPlaybackChange() {

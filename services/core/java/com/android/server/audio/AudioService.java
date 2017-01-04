@@ -6491,7 +6491,7 @@ public class AudioService extends IAudioService.Stub
     }
 
     //======================
-    // Audio policy callbacks from players for playback configuration updates
+    // Audio playback notification
     //======================
     private final PlaybackActivityMonitor mPlaybackMonitor = new PlaybackActivityMonitor();
 
@@ -6518,15 +6518,15 @@ public class AudioService extends IAudioService.Stub
     }
 
     public void playerAttributes(int piid, AudioAttributes attr) {
-        mPlaybackMonitor.playerAttributes(piid, attr);
+        mPlaybackMonitor.playerAttributes(piid, attr, Binder.getCallingUid());
     }
 
     public void playerEvent(int piid, int event) {
-        mPlaybackMonitor.playerEvent(piid, event);
+        mPlaybackMonitor.playerEvent(piid, event, Binder.getCallingUid());
     }
 
     public void releasePlayer(int piid) {
-        mPlaybackMonitor.releasePlayer(piid);
+        mPlaybackMonitor.releasePlayer(piid, Binder.getCallingUid());
     }
 
     //======================
