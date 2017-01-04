@@ -143,6 +143,8 @@ interface IAudioService {
 
     int setBluetoothA2dpDeviceConnectionState(in BluetoothDevice device, int state, int profile);
 
+    void handleBluetoothA2dpDeviceConfigChange(in BluetoothDevice device);
+
     AudioRoutesInfo startWatchingRoutes(in IAudioRoutesObserver observer);
 
     boolean isCameraSoundForced();

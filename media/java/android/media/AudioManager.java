@@ -3482,6 +3482,20 @@ public class AudioManager {
         return delay;
     }
 
+     /**
+     * Indicate A2DP device configuration has changed.
+     * @param device Bluetooth device whose configuration has changed.
+     * {@hide}
+     */
+    public void handleBluetoothA2dpDeviceConfigChange(BluetoothDevice device) {
+        IAudioService service = getService();
+        try {
+            service.handleBluetoothA2dpDeviceConfigChange(device);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /** {@hide} */
     public IRingtonePlayer getRingtonePlayer() {
         try {

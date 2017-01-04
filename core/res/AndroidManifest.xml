@@ -168,6 +168,8 @@
     <protected-broadcast
         android:name="android.bluetooth.a2dp.profile.action.PLAYING_STATE_CHANGED" />
     <protected-broadcast
+        android:name="android.bluetooth.a2dp.profile.action.CODEC_CONFIG_CHANGED" />
+    <protected-broadcast
         android:name="android.bluetooth.a2dp-sink.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast
         android:name="android.bluetooth.a2dp-sink.profile.action.PLAYING_STATE_CHANGED" />
