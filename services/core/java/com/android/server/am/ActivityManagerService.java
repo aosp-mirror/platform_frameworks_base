@@ -12058,6 +12058,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    /**
+     * @deprecated This method is only used by a few internal components and it will soon be
+     * replaced by a proper bug report API (which will be restricted to a few, pre-defined apps).
+     * No new code should be calling it.
+     */
+    @Deprecated
     public void requestBugReport(int bugreportType) {
         String extraOptions = null;
         switch (bugreportType) {
