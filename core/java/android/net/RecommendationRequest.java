@@ -41,6 +41,7 @@ public final class RecommendationRequest implements Parcelable {
      * Builder class for constructing {@link RecommendationRequest} instances.
      * @hide
      */
+    @SystemApi
     public static final class Builder {
         private ScanResult[] mScanResults;
         private WifiConfiguration mCurrentConfig;
