@@ -16,8 +16,15 @@
 
 package com.android.server.devicepolicy;
 
-import com.android.internal.widget.LockPatternUtils;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.IActivityManager;
 import android.app.NotificationManager;
 import android.app.backup.IBackupManager;
@@ -44,6 +51,8 @@ import android.test.mock.MockContentResolver;
 import android.test.mock.MockContext;
 import android.view.IWindowManager;
 
+import com.android.internal.widget.LockPatternUtils;
+
 import org.junit.Assert;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -51,13 +60,6 @@ import org.mockito.stubbing.Answer;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 /**
  * Context used throughout DPMS tests.
@@ -264,6 +266,7 @@ public class DpmMockContext extends MockContext {
     public final SettingsForMock settings;
     public final MockContentResolver contentResolver;
     public final TelephonyManager telephonyManager;
+    public final AccountManager accountManager;
 
     /** Note this is a partial mock, not a real mock. */
     public final PackageManager packageManager;
@@ -298,6 +301,7 @@ public class DpmMockContext extends MockContext {
         wifiManager = mock(WifiManager.class);
         settings = mock(SettingsForMock.class);
         telephonyManager = mock(TelephonyManager.class);
+        accountManager = mock(AccountManager.class);
 
         // Package manager is huge, so we use a partial mock instead.
         packageManager = spy(context.getPackageManager());
@@ -360,6 +364,7 @@ public class DpmMockContext extends MockContext {
                     }
                 }
         );
+        when(accountManager.getAccountsAsUser(anyInt())).thenReturn(new Account[0]);
 
 
         // Create a data directory.
@@ -418,6 +423,8 @@ public class DpmMockContext extends MockContext {
                 return powerManager;
             case Context.WIFI_SERVICE:
                 return wifiManager;
+            case Context.ACCOUNT_SERVICE:
+                return accountManager;
         }
         throw new UnsupportedOperationException();
     }

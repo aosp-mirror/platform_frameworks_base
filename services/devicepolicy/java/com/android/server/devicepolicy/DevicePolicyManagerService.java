@@ -5906,8 +5906,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             throw new IllegalArgumentException("Invalid component " + admin
                     + " for device owner");
         }
+        final boolean hasIncompatibleAccountsOrNonAdb =
+                hasIncompatibleAccountsOrNonAdbNoLock(userId, admin);
         synchronized (this) {
-            enforceCanSetDeviceOwnerLocked(admin, userId);
+            enforceCanSetDeviceOwnerLocked(admin, userId, hasIncompatibleAccountsOrNonAdb);
             if (getActiveAdminUncheckedLocked(admin, userId) == null
                     || getUserData(userId).mRemovingAdmins.contains(admin)) {
                 throw new IllegalArgumentException("Not active admin: " + admin);
@@ -6098,8 +6100,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             throw new IllegalArgumentException("Component " + who
                     + " not installed for userId:" + userHandle);
         }
+        final boolean hasIncompatibleAccountsOrNonAdb =
+                hasIncompatibleAccountsOrNonAdbNoLock(userHandle, who);
         synchronized (this) {
-            enforceCanSetProfileOwnerLocked(who, userHandle);
+            enforceCanSetProfileOwnerLocked(who, userHandle, hasIncompatibleAccountsOrNonAdb);
 
             if (getActiveAdminUncheckedLocked(who, userHandle) == null
                     || getUserData(userHandle).mRemovingAdmins.contains(who)) {
@@ -6420,9 +6424,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * The profile owner can only be set before the user setup phase has completed,
      * except for:
      * - SYSTEM_UID
-     * - adb if there are no accounts. (But see {@link #hasIncompatibleAccountsLocked})
+     * - adb unless hasIncompatibleAccountsOrNonAdb is true.
      */
-    private void enforceCanSetProfileOwnerLocked(@Nullable ComponentName owner, int userHandle) {
+    private void enforceCanSetProfileOwnerLocked(@Nullable ComponentName owner, int userHandle,
+            boolean hasIncompatibleAccountsOrNonAdb) {
         UserInfo info = getUserInfo(userHandle);
         if (info == null) {
             // User doesn't exist.
@@ -6443,7 +6448,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         int callingUid = mInjector.binderGetCallingUid();
         if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
             if ((mIsWatch || hasUserSetupCompleted(userHandle))
-                    && hasIncompatibleAccountsLocked(userHandle, owner)) {
+                    && hasIncompatibleAccountsOrNonAdb) {
                 throw new IllegalStateException("Not allowed to set the profile owner because "
                         + "there are already some accounts on the profile");
             }
@@ -6460,14 +6465,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * The Device owner can only be set by adb or an app with the MANAGE_PROFILE_AND_DEVICE_OWNERS
      * permission.
      */
-    private void enforceCanSetDeviceOwnerLocked(@Nullable ComponentName owner, int userId) {
+    private void enforceCanSetDeviceOwnerLocked(@Nullable ComponentName owner, int userId,
+            boolean hasIncompatibleAccountsOrNonAdb) {
         int callingUid = mInjector.binderGetCallingUid();
         boolean isAdb = callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID;
         if (!isAdb) {
             enforceCanManageProfileAndDeviceOwners();
         }
 
-        final int code = checkSetDeviceOwnerPreConditionLocked(owner, userId, isAdb);
+        final int code = checkSetDeviceOwnerPreConditionLocked(owner, userId, isAdb,
+                hasIncompatibleAccountsOrNonAdb);
         switch (code) {
             case CODE_OK:
                 return;
@@ -8716,7 +8723,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * except for adb command if no accounts or additional users are present on the device.
      */
     private synchronized @DeviceOwnerPreConditionCode int checkSetDeviceOwnerPreConditionLocked(
-            @Nullable ComponentName owner, int deviceOwnerUserId, boolean isAdb) {
+            @Nullable ComponentName owner, int deviceOwnerUserId, boolean isAdb,
+            boolean hasIncompatibleAccountsOrNonAdb) {
         if (mOwners.hasDeviceOwner()) {
             return CODE_HAS_DEVICE_OWNER;
         }
@@ -8736,7 +8744,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     if (mUserManager.getUserCount() > 1) {
                         return CODE_NONSYSTEM_USER_EXISTS;
                     }
-                    if (hasIncompatibleAccountsLocked(UserHandle.USER_SYSTEM, owner)) {
+                    if (hasIncompatibleAccountsOrNonAdb) {
                         return CODE_ACCOUNTS_NOT_EMPTY;
                     }
                 } else {
@@ -8764,7 +8772,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private boolean isDeviceOwnerProvisioningAllowed(int deviceOwnerUserId) {
         synchronized (this) {
             return CODE_OK == checkSetDeviceOwnerPreConditionLocked(
-                    /* owner unknown */ null, deviceOwnerUserId, /* isAdb */ false);
+                    /* owner unknown */ null, deviceOwnerUserId, /* isAdb */ false,
+                    /* hasIncompatibleAccountsOrNonAdb=*/ true);
         }
     }
 
@@ -9358,8 +9367,25 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * - Otherwise, if there's any account that does not have ..._ALLOWED, or does have
      *   ..._DISALLOWED, return true.
      * - Otherwise return false.
+     *
+     * If the caller is *not* ADB, it also returns true.  The returned value shouldn't be used
+     * when the caller is not ADB.
+     *
+     * DO NOT CALL IT WITH THE DPMS LOCK HELD.
      */
-    private boolean hasIncompatibleAccountsLocked(int userId, @Nullable ComponentName owner) {
+    private boolean hasIncompatibleAccountsOrNonAdbNoLock(
+            int userId, @Nullable ComponentName owner) {
+        final boolean isAdb = (mInjector.binderGetCallingUid() == Process.SHELL_UID)
+                || (mInjector.binderGetCallingUid() == Process.ROOT_UID);
+        if (!isAdb) {
+            return true;
+        }
+
+        if (Thread.holdsLock(this)) {
+            Slog.wtf(LOG_TAG, "hasIncompatibleAccountsNoLock() called with the DPMS lock held.");
+            return true;
+        }
+
         final long token = mInjector.binderClearCallingIdentity();
         try {
             final AccountManager am = AccountManager.get(mContext);
@@ -9367,50 +9393,36 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (accounts.length == 0) {
                 return false;
             }
+            synchronized (this) {
+                if (owner == null || !isAdminTestOnlyLocked(owner, userId)) {
+                    Log.w(LOG_TAG,
+                            "Non test-only owner can't be installed with existing accounts.");
+                    return true;
+                }
+            }
+
             final String[] feature_allow =
                     { DevicePolicyManager.ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_ALLOWED };
             final String[] feature_disallow =
                     { DevicePolicyManager.ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_DISALLOWED };
 
-            // Even if we find incompatible accounts along the way, we still check all accounts
-            // for logging.
             boolean compatible = true;
             for (Account account : accounts) {
                 if (hasAccountFeatures(am, account, feature_disallow)) {
                     Log.e(LOG_TAG, account + " has " + feature_disallow[0]);
                     compatible = false;
+                    break;
                 }
                 if (!hasAccountFeatures(am, account, feature_allow)) {
                     Log.e(LOG_TAG, account + " doesn't have " + feature_allow[0]);
                     compatible = false;
+                    break;
                 }
             }
             if (compatible) {
                 Log.w(LOG_TAG, "All accounts are compatible");
             } else {
                 Log.e(LOG_TAG, "Found incompatible accounts");
-            }
-
-            // Then check if the owner is test-only.
-            String log;
-            if (owner == null) {
-                // Owner is unknown.  Suppose it's not test-only
-                compatible = false;
-                log = "Only test-only device/profile owner can be installed with accounts";
-            } else if (isAdminTestOnlyLocked(owner, userId)) {
-                if (compatible) {
-                    log = "Installing test-only owner " + owner;
-                } else {
-                    log = "Can't install test-only owner " + owner + " with incompatible accounts";
-                }
-            } else {
-                compatible = false;
-                log = "Can't install non test-only owner " + owner + " with accounts";
-            }
-            if (compatible) {
-                Log.w(LOG_TAG, log);
-            } else {
-                Log.e(LOG_TAG, log);
             }
             return !compatible;
         } finally {
