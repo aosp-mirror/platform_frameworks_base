@@ -1766,4 +1766,12 @@
     <!-- Tuner string -->
     <string name="default_theme" translatable="false">Default</string>
 
+    <!-- Title for notification (and dialog) that user's phone has reached a certain temperature and may start to slow down in order to cool down. [CHAR LIMIT=30] -->
+    <string name="high_temp_title">Phone is getting warm</string>
+    <!-- Message body for notification that user's phone has reached a certain temperature and may start to slow down in order to cool down. [CHAR LIMIT=70] -->
+    <string name="high_temp_notif_message">Some features limited while phone cools down</string>
+    <!-- Text body for dialog alerting user that their phone has reached a certain temperature and may start to slow down in order to cool down. [CHAR LIMIT=300] -->
+    <string name="high_temp_dialog_message">Your phone will automatically try to cool down. You can still use your phone, but it may run slower.\n\nOnce your phone has cooled down, it will run normally.</string>
+
+
 </resources>

@@ -290,4 +290,6 @@
 
     <bool name="quick_settings_show_full_alarm">false</bool>
 
+    <bool name="config_showTemperatureWarning">false</bool>
+
 </resources>
