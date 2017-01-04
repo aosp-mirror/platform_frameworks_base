@@ -102,6 +102,27 @@ public final class BluetoothA2dp implements BluetoothProfile {
         "android.bluetooth.a2dp.profile.action.AVRCP_CONNECTION_STATE_CHANGED";
 
     /**
+     * Intent used to broadcast the change in the Audio Codec state of the
+     * A2DP Source profile.
+     *
+     * <p>This intent will have 3 extras:
+     * <ul>
+     *   <li> {@link #EXTRA_CODEC_CONFIG} - The current codec configuration. </li>
+     *   <li> {@link #EXTRA_PREVIOUS_CODEC_CONFIG} - The previous codec configuration. </li>
+     *   <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device if the device is currently
+     *   connected, otherwise it is not included.</li>
+     * </ul>
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission to
+     * receive.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_CODEC_CONFIG_CHANGED =
+        "android.bluetooth.a2dp.profile.action.CODEC_CONFIG_CHANGED";
+
+    /**
      * A2DP sink device is streaming music. This state can be one of
      * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} of
      * {@link #ACTION_PLAYING_STATE_CHANGED} intent.
@@ -540,6 +561,54 @@ public final class BluetoothA2dp implements BluetoothProfile {
             }
         }
         return false;
+    }
+
+    /**
+     * Gets the current codec configuration.
+     *
+     * @return the current codec configuration
+     * @hide
+     */
+    public BluetoothCodecConfig getCodecConfig() {
+        if (DBG) Log.d(TAG, "getCodecConfig");
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null && isEnabled()) {
+                return mService.getCodecConfig();
+            }
+            if (mService == null) {
+                Log.w(TAG, "Proxy not attached to service");
+            }
+            return null;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error talking to BT service in getCodecConfig()", e);
+            return null;
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+    }
+
+    /**
+     * Sets the codec configuration preference.
+     *
+     * @param codecConfig the codec configuration preference
+     * @hide
+     */
+    public void setCodecConfigPreference(BluetoothCodecConfig codecConfig) {
+        if (DBG) Log.d(TAG, "setCodecConfigPreference");
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null && isEnabled()) {
+                mService.setCodecConfigPreference(codecConfig);
+            }
+            if (mService == null) Log.w(TAG, "Proxy not attached to service");
+            return;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error talking to BT service in setCodecConfigPreference()", e);
+            return;
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
     }
 
     /**
