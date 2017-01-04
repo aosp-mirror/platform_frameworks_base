@@ -97,6 +97,7 @@
   <item type="id" name="redo" />
   <item type="id" name="replaceText" />
   <item type="id" name="shareText" />
+  <item type="id" name="textAssist" />
   <item type="id" name="selection_start_handle" />
   <item type="id" name="selection_end_handle" />
   <item type="id" name="insertion_handle" />

@@ -77,8 +77,6 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.SpannedString;
 import android.text.StaticLayout;
-import android.text.TextAssistant;
-import android.text.TextClassificationManager;
 import android.text.TextDirectionHeuristic;
 import android.text.TextDirectionHeuristics;
 import android.text.TextPaint;
@@ -146,6 +144,8 @@ import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+import android.view.textclassifier.TextClassificationManager;
+import android.view.textclassifier.TextClassifier;
 import android.view.textservice.SpellCheckerSubtype;
 import android.view.textservice.TextServicesManager;
 import android.widget.RemoteViews.RemoteView;
@@ -351,6 +351,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private boolean mPreDrawRegistered;
     private boolean mPreDrawListenerDetached;
+
+    private TextClassifier mTextClassifier;
 
     // A flag to prevent repeated movements from escaping the enclosing text view. The idea here is
     // that if a user is holding down a movement key to traverse text, we shouldn't also traverse
@@ -9890,7 +9892,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         Selection.setSelection((Spannable) text, start, end);
                         // Make sure selection mode is engaged.
                         if (mEditor != null) {
-                            mEditor.startSelectionActionMode();
+                            mEditor.startSelectionActionMode(null);
                         }
                         return true;
                     }
@@ -10034,6 +10036,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     static final int ID_SHARE = android.R.id.shareText;
     static final int ID_PASTE_AS_PLAIN_TEXT = android.R.id.pasteAsPlainText;
     static final int ID_REPLACE = android.R.id.replaceText;
+    static final int ID_ASSIST = android.R.id.textAssist;
 
     /**
      * Called when a context menu option for the text view is selected.  Currently
@@ -10258,33 +10261,30 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return mEditor == null ? null : mEditor.mCustomInsertionActionModeCallback;
     }
 
-    private TextAssistant mTextAssistant;
-
     /**
-     * Sets the {@link TextAssistant} for this TextView.
-     * If null, this TextView uses the default TextAssistant which comes from the Activity.
+     * Sets the {@link TextClassifier} for this TextView.
      */
-    public void setTextAssistant(TextAssistant textAssistant) {
-        mTextAssistant = textAssistant;
+    public void setTextClassifier(@Nullable TextClassifier textClassifier) {
+        mTextClassifier = textClassifier;
     }
 
     /**
-     * Returns the {@link TextAssistant} used by this TextView.
-     * If no TextAssistant is set, it'll use the one from this TextView's {@link Activity} or
-     * {@link Context}. If no TextAssistant is found, it'll use a no-op TextAssistant.
+     * Returns the {@link TextClassifier} used by this TextView.
+     * If no TextClassifier has been set, this TextView uses the default set by the
+     * {@link TextClassificationManager}.
      */
-    public TextAssistant getTextAssistant() {
-        if (mTextAssistant != null) {
-            return mTextAssistant;
+    @NonNull
+    public TextClassifier getTextClassifier() {
+        if (mTextClassifier == null) {
+            TextClassificationManager tcm =
+                    mContext.getSystemService(TextClassificationManager.class);
+            if (tcm != null) {
+                mTextClassifier = tcm.getDefaultTextClassifier();
+            } else {
+                mTextClassifier = TextClassifier.NO_OP;
+            }
         }
-        if (mContext instanceof Activity) {
-            mTextAssistant = ((Activity) mContext).getTextAssistant();
-        } else {
-            // The context of this TextView should be an Activity. If it is not and no
-            // text assistant has been set, return the TextClassificationManager.
-            mTextAssistant = mContext.getSystemService(TextClassificationManager.class);
-        }
-        return  mTextAssistant;
+        return mTextClassifier;
     }
 
     /**

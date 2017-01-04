@@ -34,9 +34,7 @@ import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
-import android.app.LoadedApk;
 import android.app.Notification;
-import android.app.admin.DevicePolicyManager;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -64,6 +62,7 @@ import android.view.Display;
 import android.view.DisplayAdjustments;
 import android.view.ViewDebug;
 import android.view.WindowManager;
+import android.view.textclassifier.TextClassificationManager;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -3348,10 +3347,10 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a
-     * {@link android.text.TextClassificationManager} for text classification services.
+     * {@link TextClassificationManager} for text classification services.
      *
      * @see #getSystemService
-     * @see android.text.TextClassificationManager
+     * @see TextClassificationManager
      */
     public static final String TEXT_CLASSIFICATION_SERVICE = "textclassification";
 

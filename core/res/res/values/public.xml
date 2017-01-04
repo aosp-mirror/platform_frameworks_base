@@ -2793,6 +2793,7 @@
     </public-group>
 
     <public-group type="id" first-id="0x01020041">
+        <public name="textAssist" />
     </public-group>
 
     <public type="attr" name="primaryContentAlpha" />
