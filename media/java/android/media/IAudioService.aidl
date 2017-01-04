@@ -46,7 +46,7 @@ interface IAudioService {
     // frameworks/native/include/audiomanager/IAudioManager.h must be updated to match the order
     // in this file.
     //
-    // When a method's argument list is changed, BnAudioManager's corresponding serialization code
+    // When a method's argument list is changed, BpAudioManager's corresponding serialization code
     // (if any) in frameworks/native/services/audiomanager/IAudioManager.cpp must be updated.
 
     oneway void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
