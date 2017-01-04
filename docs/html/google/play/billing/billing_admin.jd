@@ -125,7 +125,10 @@ number of in-app items.</p>
       </dd>
     </dl>
   </li>
-  <li><p>Enter additional information about the item, then click <strong>Save</strong>.</p>
+  <li><p>Enter additional information about the item. If you're adding a
+    subscription, also include
+    <a href="#billing-form-add-subscription">subscription-specific details</a>.
+    After you've provided this information, click <strong>Save</strong>.</p>
     <dl>
       <dt>Publishing State</dt>
       <dd>
@@ -184,6 +187,73 @@ number of in-app items.</p>
     <b>Figure 1. </b>Specifying additional currencies for an in-app product.
   </figcaption>
 </figure>
+
+<h4 id="billing-form-add-subscription">
+  Adding subscription details
+</h4>
+
+<p>
+  When you add a subscription to a product list, you must define its billing
+  period. All other settings related to subscriptions are optional. The
+  following list shows each property that you can set:
+</p>
+
+<dl>
+  <dt>Billing period</dt>
+  <dd>
+    <p>
+      Sets the frequency at which a user is charged while their subscription
+      is active.
+    </p>
+
+    <p>
+      If the billing period for the new subscription is Seasonal, you must
+      specify when the season starts and ends using the <strong>Start
+      date</strong> and <strong>End date</strong> options. The subscription is
+      active only between these two dates.
+    </p>
+
+    <p>
+      To allow users to activate a seasonal subscription for a discounted price
+      after the season begins, you can provide prorated pricing by selecting
+      <strong>Add Prorated Price</strong>. In the text boxes that appear after
+      you select this option, specify a discounted price for your subscription,
+      as well as the first date during the season when users can activate the
+      subscription for the discounted price. You can set multiple prorated
+      prices for a single subscription, with each price point taking effect on
+      a different start date.
+    </p>
+
+    <p class="note">
+      <strong>Note:</strong> After you activate a subscription, you cannot
+      change the subscription's billing period. For a seasonal subscription,
+      this restriction means that you also cannot change the season's start and
+      end dates. However, you can still add, change, and remove the prorated
+      prices that you've associated with a seasonal subscription.
+    </p>
+  </dd>
+
+  <dt>Free trial period</dt>
+  <dd>
+    Sets the number of days that users can access the subscription for free
+    after they first activate it. The trial period must be at least 7 days.
+  </dd>
+
+  <dt>Grace period</dt>
+  <dd>
+    Determines the amount of time that the user can continue accessing the
+    subscription after their payment is declined. If the user doesn't fix their
+    payment issue after the grace period has ended, their access to the
+    subscription is revoked.
+  </dd>
+</dl>
+
+<p>
+  To learn more about how you can manage subscriptions using the In-app Billing
+  service, see the
+  <a href="/google/play/billing/billing_subscriptions.html">In-app
+  Subscriptions</a> guide.
+</p>
 
 <h3 id="billing-bulk-add">Adding a batch of items to a product list</h3>
 
