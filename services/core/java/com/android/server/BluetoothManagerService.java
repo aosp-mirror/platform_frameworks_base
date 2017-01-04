@@ -2029,6 +2029,11 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             }
 
             writer.flush();
+            if (args.length == 0) {
+              // Add arg to produce output
+              args = new String[1];
+              args[0] = "--print";
+            }
         }
 
         if (mBluetoothBinder == null) {
