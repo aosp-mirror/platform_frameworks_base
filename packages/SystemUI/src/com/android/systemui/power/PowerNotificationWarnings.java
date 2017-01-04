@@ -245,6 +245,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private void showTemperatureDialog() {
         if (mHighTempDialog != null) return;
         final SystemUIDialog d = new SystemUIDialog(mContext);
+        d.setIconAttribute(android.R.attr.alertDialogIcon);
         d.setTitle(R.string.high_temp_title);
         d.setMessage(R.string.high_temp_dialog_message);
         d.setPositiveButton(com.android.internal.R.string.ok, null);
