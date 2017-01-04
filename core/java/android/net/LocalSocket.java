@@ -75,15 +75,22 @@ public class LocalSocket implements Closeable {
         isConnected = true;
     }
 
-    /**
-     * for use with AndroidServerSocket
-     * @param impl a SocketImpl
-     */
-    /*package*/ LocalSocket(LocalSocketImpl impl, int sockType) {
+    private LocalSocket(LocalSocketImpl impl, int sockType) {
         this.impl = impl;
         this.sockType = sockType;
         this.isConnected = false;
         this.isBound = false;
+    }
+
+    /**
+     * for use with LocalServerSocket.accept()
+     */
+    static LocalSocket createLocalSocketForAccept(LocalSocketImpl impl, int sockType) {
+        LocalSocket socket = new LocalSocket(impl, sockType);
+        socket.isConnected = true;
+        socket.isBound = true;
+        socket.implCreated = true;
+        return socket;
     }
 
     /** {@inheritDoc} */
