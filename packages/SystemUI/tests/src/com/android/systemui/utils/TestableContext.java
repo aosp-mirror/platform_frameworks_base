@@ -23,6 +23,7 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.IBinder;
@@ -42,6 +43,7 @@ public class TestableContext extends ContextWrapper {
     private ArrayMap<ComponentName, IBinder> mMockServices;
     private ArrayMap<ServiceConnection, ComponentName> mActiveServices;
 
+    private PackageManager mMockPackageManager;
     private Tracker mReceiver;
     private Tracker mService;
     private Tracker mComponent;
@@ -57,6 +59,18 @@ public class TestableContext extends ContextWrapper {
         mReceiver = test.getTracker("receiver");
         mService = test.getTracker("service");
         mComponent = test.getTracker("component");
+    }
+
+    public void setMockPackageManager(PackageManager mock) {
+        mMockPackageManager = mock;
+    }
+
+    @Override
+    public PackageManager getPackageManager() {
+        if (mMockPackageManager != null) {
+            return mMockPackageManager;
+        }
+        return super.getPackageManager();
     }
 
     @Override

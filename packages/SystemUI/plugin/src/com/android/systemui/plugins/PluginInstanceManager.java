@@ -14,18 +14,27 @@
 
 package com.android.systemui.plugins;
 
+import android.app.Notification;
+import android.app.Notification.Action;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.UserHandle;
 import android.util.Log;
 import android.view.LayoutInflater;
 
@@ -260,10 +269,9 @@ public class PluginInstanceManager<T extends Plugin> {
             String pkg = component.getPackageName();
             String cls = component.getClassName();
             try {
-                PackageManager pm = mPm;
-                ApplicationInfo info = pm.getApplicationInfo(pkg, 0);
+                ApplicationInfo info = mPm.getApplicationInfo(pkg, 0);
                 // TODO: This probably isn't needed given that we don't have IGNORE_SECURITY on
-                if (pm.checkPermission(PLUGIN_PERMISSION, pkg)
+                if (mPm.checkPermission(PLUGIN_PERMISSION, pkg)
                         != PackageManager.PERMISSION_GRANTED) {
                     Log.d(TAG, "Plugin doesn't have permission: " + pkg);
                     return null;
@@ -275,6 +283,44 @@ public class PluginInstanceManager<T extends Plugin> {
                 Class<?> pluginClass = Class.forName(cls, true, classLoader);
                 T plugin = (T) pluginClass.newInstance();
                 if (plugin.getVersion() != mVersion) {
+                    final int id = mContext.getResources().getIdentifier("notification_plugin",
+                            "id", mContext.getPackageName());
+                    final int icon = mContext.getResources().getIdentifier("tuner", "drawable",
+                            mContext.getPackageName());
+                    final int color = Resources.getSystem().getIdentifier(
+                            "system_notification_accent_color", "color", "android");
+                    final Notification.Builder nb = new Notification.Builder(mContext)
+                            .setStyle(new Notification.BigTextStyle())
+                            .setSmallIcon(icon)
+                            .setWhen(0)
+                            .setShowWhen(false)
+                            .setPriority(Notification.PRIORITY_MAX)
+                            .setVisibility(Notification.VISIBILITY_PUBLIC)
+                            .setColor(mContext.getColor(color));
+                    String label = cls;
+                    try {
+                        label = mPm.getServiceInfo(component, 0).loadLabel(mPm).toString();
+                    } catch (NameNotFoundException e) {
+                    }
+                    if (plugin.getVersion() < mVersion) {
+                        // Localization not required as this will never ever appear in a user build.
+                        nb.setContentTitle("Plugin \"" + label + "\" is too old")
+                                .setContentText("Contact plugin developer to get an updated"
+                                        + " version.\nPlugin version: " + plugin.getVersion()
+                                        + "\nSystem version: " + mVersion);
+                    } else {
+                        // Localization not required as this will never ever appear in a user build.
+                        nb.setContentTitle("Plugin \"" + label + "\" is too new")
+                                .setContentText("Check to see if an OTA is available.\n"
+                                        + "Plugin version: " + plugin.getVersion()
+                                        + "\nSystem version: " + mVersion);
+                    }
+                    Intent i = new Intent(PluginManager.DISABLE_PLUGIN).setData(
+                            Uri.parse("package://" + component.flattenToString()));
+                    PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, i, 0);
+                    nb.addAction(new Action.Builder(null, "Disable plugin", pi).build());
+                    mContext.getSystemService(NotificationManager.class)
+                            .notifyAsUser(cls, id, nb.build(), UserHandle.ALL);
                     // TODO: Warn user.
                     Log.w(TAG, "Plugin has invalid interface version " + plugin.getVersion()
                             + ", expected " + mVersion);
