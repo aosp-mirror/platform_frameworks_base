@@ -16,7 +16,10 @@
 
 #include "GlLayer.h"
 #include "LayerDrawable.h"
+#include "VkLayer.h"
+
 #include "SkColorFilter.h"
+#include "SkSurface.h"
 #include "gl/GrGLTypes.h"
 
 namespace android {
@@ -37,17 +40,26 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
         canvas->concat(transform);
     }
 
-    GlLayer* glLayer = static_cast<GlLayer*>(layer);
-    GrGLTextureInfo externalTexture;
-    externalTexture.fTarget = glLayer->getRenderTarget();
-    externalTexture.fID = glLayer->getTextureId();
-    GrBackendTextureDesc textureDescription;
-    textureDescription.fWidth = glLayer->getWidth();
-    textureDescription.fHeight = glLayer->getHeight();
-    textureDescription.fConfig = kRGBA_8888_GrPixelConfig;
-    textureDescription.fOrigin = kTopLeft_GrSurfaceOrigin;
-    textureDescription.fTextureHandle = reinterpret_cast<GrBackendObject>(&externalTexture);
-    sk_sp<SkImage> layerImage = SkImage::MakeFromTexture(context, textureDescription);
+    sk_sp<SkImage> layerImage;
+    if (layer->getApi() == Layer::Api::OpenGL) {
+        GlLayer* glLayer = static_cast<GlLayer*>(layer);
+        GrGLTextureInfo externalTexture;
+        externalTexture.fTarget = glLayer->getRenderTarget();
+        externalTexture.fID = glLayer->getTextureId();
+        GrBackendTextureDesc textureDescription;
+        textureDescription.fWidth = glLayer->getWidth();
+        textureDescription.fHeight = glLayer->getHeight();
+        textureDescription.fConfig = kRGBA_8888_GrPixelConfig;
+        textureDescription.fOrigin = kTopLeft_GrSurfaceOrigin;
+        textureDescription.fTextureHandle = reinterpret_cast<GrBackendObject>(&externalTexture);
+        layerImage = SkImage::MakeFromTexture(context, textureDescription);
+    } else {
+        SkASSERT(layer->getApi() == Layer::Api::Vulkan);
+        VkLayer* vkLayer = static_cast<VkLayer*>(layer);
+        canvas->clear(SK_ColorGREEN);
+        layerImage = vkLayer->getImage();
+    }
+
     if (layerImage) {
         SkPaint paint;
         paint.setAlpha(layer->getAlpha());

@@ -35,6 +35,8 @@
 #include <utils/RefBase.h>
 #include <private/hwui/DrawGlInfo.h>
 
+class GrContext;
+
 namespace android {
 namespace uirenderer {
 
@@ -55,6 +57,9 @@ class RenderState {
 public:
     void onGLContextCreated();
     void onGLContextDestroyed();
+
+    void onVkContextCreated();
+    void onVkContextDestroyed();
 
     void flush(Caches::FlushMode flushMode);
 
@@ -97,6 +102,8 @@ public:
     Stencil& stencil() { return *mStencil; }
 
     OffscreenBufferPool& layerPool() { return mLayerPool; }
+
+    GrContext* getGrContext() const;
 
     void dump();
 

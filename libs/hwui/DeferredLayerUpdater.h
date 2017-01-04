@@ -63,8 +63,8 @@ public:
 
     ANDROID_API void setSurfaceTexture(const sp<GLConsumer>& texture, bool needsAttach) {
         if (texture.get() != mSurfaceTexture.get()) {
-            mSurfaceTexture = texture;
             mNeedsGLContextAttach = needsAttach;
+            mSurfaceTexture = texture;
 
             GLenum target = texture->getCurrentTextureTarget();
             LOG_ALWAYS_FATAL_IF(target != GL_TEXTURE_2D && target != GL_TEXTURE_EXTERNAL_OES,
@@ -113,6 +113,8 @@ private:
     Layer* mLayer;
 
     void doUpdateTexImage();
+    void doUpdateVkTexImage();
+    void updateLayer(bool forceFilter, const float* textureTransform);
 };
 
 } /* namespace uirenderer */
