@@ -2369,7 +2369,25 @@ public class PackageParser {
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES;
         }
 
+        // At this point we can check if an application is not supporting densities and hence
+        // cannot be windowed / resized. Note that an SDK version of 0 is common for
+        // pre-Doughnut applications.
+        if (pkg.applicationInfo.usesCompatibilityMode()) {
+            adjustPackageToBeUnresizeable(pkg);
+        }
         return pkg;
+    }
+
+    /**
+     * This is a pre-density application which will get scaled - instead of being pixel perfect.
+     * This type of application is not resizable.
+     *
+     * @param pkg The package which needs to be marked as unresizable.
+     */
+    private void adjustPackageToBeUnresizeable(Package pkg) {
+        for (Activity a : pkg.activities) {
+            a.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
+        }
     }
 
     /**
