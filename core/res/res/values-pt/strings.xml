@@ -1275,7 +1275,7 @@
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Apagando cartão SD..."</string>
     <string name="share" msgid="1778686618230011964">"Compartilhar"</string>
     <string name="find" msgid="4808270900322985960">"Localizar"</string>
-    <string name="websearch" msgid="4337157977400211589">"Pesquisa na web do Google"</string>
+    <string name="websearch" msgid="4337157977400211589">"Pesquisa Google na Web"</string>
     <string name="find_next" msgid="5742124618942193978">"Localizar próximo"</string>
     <string name="find_previous" msgid="2196723669388360506">"Localizar anterior"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Solicitação de local de <xliff:g id="NAME">%s</xliff:g>"</string>
