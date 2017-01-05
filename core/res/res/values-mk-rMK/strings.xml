@@ -201,9 +201,9 @@
     <string name="reboot_to_update_title" msgid="6212636802536823850">"Системско ажурирање на Android"</string>
     <string name="reboot_to_update_prepare" msgid="6305853831955310890">"Се подготвува ажурирањето…"</string>
     <string name="reboot_to_update_package" msgid="3871302324500927291">"Пакетот за ажурирање се обработува..."</string>
-    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"Се престартува…"</string>
+    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"Се рестартира…"</string>
     <string name="reboot_to_reset_title" msgid="4142355915340627490">"Ресетирање фабрички податоци"</string>
-    <string name="reboot_to_reset_message" msgid="2432077491101416345">"Се престартува…"</string>
+    <string name="reboot_to_reset_message" msgid="2432077491101416345">"Се рестартира…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Се исклучува..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Вашиот таблет ќе се исклучи."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Вашиот телевизор ќе се исклучи."</string>
