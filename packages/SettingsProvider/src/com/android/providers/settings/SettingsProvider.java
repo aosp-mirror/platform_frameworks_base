@@ -262,6 +262,7 @@ public class SettingsProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
+        Settings.setInSystemServer();
         synchronized (mLock) {
             mUserManager = UserManager.get(getContext());
             mPackageManager = AppGlobals.getPackageManager();
@@ -813,7 +814,8 @@ public class SettingsProvider extends ContentProvider {
             SettingsState settingsState = mSettingsRegistry.getSettingsLocked(
                     SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM);
 
-            List<String> names = settingsState.getSettingNamesLocked();
+            List<String> names = getSettingsNamesLocked(SETTINGS_TYPE_GLOBAL,
+                    UserHandle.USER_SYSTEM);
 
             final int nameCount = names.size();
 
@@ -835,6 +837,9 @@ public class SettingsProvider extends ContentProvider {
         if (DEBUG) {
             Slog.v(LOG_TAG, "getGlobalSetting(" + name + ")");
         }
+
+        // Ensure the caller can access the setting.
+        enforceSettingReadable(name, SETTINGS_TYPE_GLOBAL, UserHandle.getCallingUserId());
 
         // Get the value.
         synchronized (mLock) {
@@ -938,8 +943,7 @@ public class SettingsProvider extends ContentProvider {
         final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(userId);
 
         synchronized (mLock) {
-            List<String> names = mSettingsRegistry.getSettingsNamesLocked(
-                    SETTINGS_TYPE_SECURE, callingUserId);
+            List<String> names = getSettingsNamesLocked(SETTINGS_TYPE_SECURE, callingUserId);
 
             final int nameCount = names.size();
 
@@ -973,6 +977,9 @@ public class SettingsProvider extends ContentProvider {
 
         // Resolve the userId on whose behalf the call is made.
         final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(requestingUserId);
+
+        // Ensure the caller can access the setting.
+        enforceSettingReadable(name, SETTINGS_TYPE_SECURE, callingUserId);
 
         // Determine the owning user as some profile settings are cloned from the parent.
         final int owningUserId = resolveOwningUserIdForSecureSettingLocked(callingUserId, name);
@@ -1104,8 +1111,7 @@ public class SettingsProvider extends ContentProvider {
         final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(userId);
 
         synchronized (mLock) {
-            List<String> names = mSettingsRegistry.getSettingsNamesLocked(
-                    SETTINGS_TYPE_SYSTEM, callingUserId);
+            List<String> names = getSettingsNamesLocked(SETTINGS_TYPE_SYSTEM, callingUserId);
 
             final int nameCount = names.size();
 
@@ -1135,6 +1141,9 @@ public class SettingsProvider extends ContentProvider {
 
         // Resolve the userId on whose behalf the call is made.
         final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(requestingUserId);
+
+        // Ensure the caller can access the setting.
+        enforceSettingReadable(name, SETTINGS_TYPE_SYSTEM, callingUserId);
 
         // Determine the owning user as some profile settings are cloned from the parent.
         final int owningUserId = resolveOwningUserIdForSystemSettingLocked(callingUserId, name);
@@ -1354,9 +1363,15 @@ public class SettingsProvider extends ContentProvider {
                 && (parentId = getGroupParentLocked(userId)) != userId) {
             // The setting has a dependency and the profile has a parent
             String dependency = sSystemCloneFromParentOnDependency.get(setting);
-            Setting settingObj = getSecureSetting(dependency, userId);
-            if (settingObj != null && settingObj.getValue().equals("1")) {
-                return parentId;
+            // Lookup the dependency setting as ourselves, some callers may not have access to it.
+            final long token = Binder.clearCallingIdentity();
+            try {
+                Setting settingObj = getSecureSetting(dependency, userId);
+                if (settingObj != null && settingObj.getValue().equals("1")) {
+                    return parentId;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         }
         return resolveOwningUserIdLocked(userId, sSystemCloneToManagedSettings, setting);
@@ -1422,6 +1437,55 @@ public class SettingsProvider extends ContentProvider {
                         packageInfo.applicationInfo.targetSdkVersion, name);
             } break;
         }
+    }
+
+    private Set<String> getEphemeralAccessibleSettings(int settingsType) {
+        switch (settingsType) {
+            case SETTINGS_TYPE_GLOBAL:
+                return Settings.Global.EPHEMERAL_SETTINGS;
+            case SETTINGS_TYPE_SECURE:
+                return Settings.Secure.EPHEMERAL_SETTINGS;
+            case SETTINGS_TYPE_SYSTEM:
+                return Settings.System.EPHEMERAL_SETTINGS;
+            default:
+                throw new IllegalArgumentException("Invalid settings type: " + settingsType);
+        }
+    }
+
+    private List<String> getSettingsNamesLocked(int settingsType, int userId) {
+        ApplicationInfo ai = getCallingApplicationInfoOrThrow(userId);
+        if (ai.isEphemeralApp()) {
+            return new ArrayList<String>(getEphemeralAccessibleSettings(settingsType));
+        } else {
+            return mSettingsRegistry.getSettingsNamesLocked(settingsType, userId);
+        }
+    }
+
+    private void enforceSettingReadable(String settingName, int settingsType, int userId) {
+        if (UserHandle.getAppId(Binder.getCallingUid()) < Process.FIRST_APPLICATION_UID) {
+            return;
+        }
+        ApplicationInfo ai = getCallingApplicationInfoOrThrow(userId);
+        if (!ai.isEphemeralApp()) {
+            return;
+        }
+        if (!getEphemeralAccessibleSettings(settingsType).contains(settingName)) {
+            throw new SecurityException("Setting " + settingName + " is not accessible from"
+                    + " ephemeral package " + getCallingPackage());
+        }
+    }
+
+    private ApplicationInfo getCallingApplicationInfoOrThrow(int userId) {
+        ApplicationInfo ai = null;
+        try {
+            ai = mPackageManager.getApplicationInfo(getCallingPackage(), 0 , userId);
+        } catch (RemoteException ignored) {
+        }
+        if (ai == null) {
+            throw new IllegalStateException("Failed to lookup info for package "
+                    + getCallingPackage());
+        }
+        return ai;
     }
 
     private PackageInfo getCallingPackageInfoOrThrow(int userId) {
@@ -1493,7 +1557,7 @@ public class SettingsProvider extends ContentProvider {
         value = value.substring(1);
 
         Setting settingValue = getSecureSetting(
-                Settings.Secure.LOCATION_PROVIDERS_ALLOWED, owningUserId);
+                    Settings.Secure.LOCATION_PROVIDERS_ALLOWED, owningUserId);
         if (settingValue == null) {
             return false;
         }

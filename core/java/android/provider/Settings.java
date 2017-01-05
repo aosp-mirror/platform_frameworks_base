@@ -50,6 +50,7 @@ import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
+import android.os.Binder;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.DropBoxManager;
@@ -1581,6 +1582,24 @@ public final class Settings {
     // with a partial enable/disable state in multi-threaded situations.
     private static final Object mLocationSettingsLock = new Object();
 
+    // Used in system server calling uid workaround in call()
+    private static boolean sInSystemServer = false;
+    private static final Object sInSystemServerLock = new Object();
+
+    /** @hide */
+    public static void setInSystemServer() {
+        synchronized (sInSystemServerLock) {
+            sInSystemServer = true;
+        }
+    }
+
+    /** @hide */
+    public static boolean isInSystemServer() {
+        synchronized (sInSystemServerLock) {
+            return sInSystemServer;
+        }
+    }
+
     public static class SettingNotFoundException extends AndroidException {
         public SettingNotFoundException(String msg) {
             super(msg);
@@ -1789,7 +1808,23 @@ public final class Settings {
                             }
                         }
                     }
-                    Bundle b = cp.call(cr.getPackageName(), mCallGetCommand, name, args);
+                    Bundle b;
+                    // If we're in system server and in a binder transaction we need to clear the
+                    // calling uid. This works around code in system server that did not call
+                    // clearCallingIdentity, previously this wasn't needed because reading settings
+                    // did not do permission checking but thats no longer the case.
+                    // Long term this should be removed and callers should properly call
+                    // clearCallingIdentity or use a ContentResolver from the caller as needed.
+                    if (Settings.isInSystemServer() && Binder.getCallingUid() != Process.myUid()) {
+                        final long token = Binder.clearCallingIdentity();
+                        try {
+                            b = cp.call(cr.getPackageName(), mCallGetCommand, name, args);
+                        } finally {
+                            Binder.restoreCallingIdentity(token);
+                        }
+                    } else {
+                        b = cp.call(cr.getPackageName(), mCallGetCommand, name, args);
+                    }
                     if (b != null) {
                         String value = b.getString(Settings.NameValueTable.VALUE);
                         // Don't update our cache for reads of other users' data
@@ -1849,7 +1884,19 @@ public final class Settings {
             try {
                 Bundle queryArgs = ContentResolver.createSqlQueryBundle(
                         NAME_EQ_PLACEHOLDER, new String[]{name}, null);
-                c = cp.query(cr.getPackageName(), mUri, SELECT_VALUE_PROJECTION, queryArgs, null);
+                // Same workaround as above.
+                if (Settings.isInSystemServer() && Binder.getCallingUid() != Process.myUid()) {
+                    final long token = Binder.clearCallingIdentity();
+                    try {
+                        c = cp.query(cr.getPackageName(), mUri, SELECT_VALUE_PROJECTION, queryArgs,
+                                null);
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
+                } else {
+                    c = cp.query(cr.getPackageName(), mUri, SELECT_VALUE_PROJECTION, queryArgs,
+                            null);
+                }
                 if (c == null) {
                     Log.w(TAG, "Can't get key " + name + " from " + mUri);
                     return null;
@@ -4003,6 +4050,22 @@ public final class Settings {
         /** @hide */
         public static void getCloneFromParentOnValueSettings(Map<String, String> outMap) {
             outMap.putAll(CLONE_FROM_PARENT_ON_VALUE);
+        }
+
+        /**
+         * System settings which can be accessed by ephemeral apps.
+         * @hide
+         */
+        public static final Set<String> EPHEMERAL_SETTINGS = new ArraySet<>();
+        static {
+            EPHEMERAL_SETTINGS.add(TEXT_AUTO_REPLACE);
+            EPHEMERAL_SETTINGS.add(TEXT_AUTO_CAPS);
+            EPHEMERAL_SETTINGS.add(TEXT_AUTO_PUNCTUATE);
+            EPHEMERAL_SETTINGS.add(TEXT_SHOW_PASSWORD);
+            EPHEMERAL_SETTINGS.add(DATE_FORMAT);
+            EPHEMERAL_SETTINGS.add(FONT_SCALE);
+            EPHEMERAL_SETTINGS.add(HAPTIC_FEEDBACK_ENABLED);
+            EPHEMERAL_SETTINGS.add(TIME_12_24);
         }
 
         /**
@@ -6864,6 +6927,20 @@ public final class Settings {
         /** @hide */
         public static void getCloneToManagedProfileSettings(Set<String> outKeySet) {
             outKeySet.addAll(CLONE_TO_MANAGED_PROFILE);
+        }
+
+        /**
+         * Secure settings which can be accessed by ephemeral apps.
+         * @hide
+         */
+        public static final Set<String> EPHEMERAL_SETTINGS = new ArraySet<>();
+        static {
+            EPHEMERAL_SETTINGS.add(ENABLED_ACCESSIBILITY_SERVICES);
+            EPHEMERAL_SETTINGS.add(ACCESSIBILITY_SPEAK_PASSWORD);
+            EPHEMERAL_SETTINGS.add(ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
+
+            EPHEMERAL_SETTINGS.add(DEFAULT_INPUT_METHOD);
+            EPHEMERAL_SETTINGS.add(ENABLED_INPUT_METHODS);
         }
 
         /**
@@ -9863,6 +9940,20 @@ public final class Settings {
          * @hide
          */
         public static final String CELL_ON = "cell_on";
+
+        /**
+         * Global settings which can be accessed by ephemeral apps.
+         * @hide
+         */
+        public static final Set<String> EPHEMERAL_SETTINGS = new ArraySet<>();
+        static {
+            EPHEMERAL_SETTINGS.add(WAIT_FOR_DEBUGGER);
+            EPHEMERAL_SETTINGS.add(DEVICE_PROVISIONED);
+            EPHEMERAL_SETTINGS.add(DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES);
+            EPHEMERAL_SETTINGS.add(DEVELOPMENT_FORCE_RTL);
+            EPHEMERAL_SETTINGS.add(EPHEMERAL_COOKIE_MAX_SIZE_BYTES);
+        }
+
     }
 
     /**
