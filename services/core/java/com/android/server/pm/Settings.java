@@ -2927,18 +2927,15 @@ final class Settings {
                     XmlUtils.skipCurrentTag(parser);
                 }
             }
-
-            str.close();
-
-        } catch (XmlPullParserException e) {
+        } catch (XmlPullParserException | IOException | NumberFormatException e) {
+            mSettingsFilename.delete();
             mReadMessages.append("Error reading: " + e.toString());
             PackageManagerService.reportSettingsProblem(Log.ERROR, "Error reading settings: " + e);
             Slog.wtf(PackageManagerService.TAG, "Error reading package manager settings", e);
-
-        } catch (java.io.IOException e) {
-            mReadMessages.append("Error reading: " + e.toString());
-            PackageManagerService.reportSettingsProblem(Log.ERROR, "Error reading settings: " + e);
-            Slog.wtf(PackageManagerService.TAG, "Error reading package manager settings", e);
+            throw new IllegalStateException("Failed parsing settings file: "
+                    + mSettingsFilename , e);
+        } finally {
+            IoUtils.closeQuietly(str);
         }
 
         // If the build is setup to drop runtime permissions
