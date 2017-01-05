@@ -55,7 +55,6 @@ import android.app.AppOpsManager;
 import android.app.AutomaticZenRule;
 import android.app.backup.BackupManager;
 import android.app.IActivityManager;
-import android.app.IOnNotificationChannelCreatedListener;
 import android.app.INotificationManager;
 import android.app.ITransientNotification;
 import android.app.Notification;
@@ -944,22 +943,16 @@ public class NotificationManagerService extends SystemService {
         mPackageManager = packageManager;
     }
 
-    // TODO: This probably should not be mocked, it's an implementation detail.
+    // TODO: Tests should call onStart instead once the methods above are removed.
     @VisibleForTesting
-    void setRankingHelper(RankingHelper rankingHelper) {
-        mRankingHelper = rankingHelper;
-    }
-
-    @Override
-    public void onStart() {
+    void init(IPackageManager packageManager, LightsManager lightsManager) {
         Resources resources = getContext().getResources();
-
         mMaxPackageEnqueueRate = Settings.Global.getFloat(getContext().getContentResolver(),
                 Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE,
                 DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE);
 
         mAm = ActivityManager.getService();
-        mPackageManager = AppGlobals.getPackageManager();
+        mPackageManager = packageManager;
         mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
         mVibrator = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
         mAppUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
@@ -1065,9 +1058,8 @@ public class NotificationManagerService extends SystemService {
             mStatusBar.setNotificationDelegate(mNotificationDelegate);
         }
 
-        final LightsManager lights = getLocalService(LightsManager.class);
-        mNotificationLight = lights.getLight(LightsManager.LIGHT_ID_NOTIFICATIONS);
-        mAttentionLight = lights.getLight(LightsManager.LIGHT_ID_ATTENTION);
+        mNotificationLight = lightsManager.getLight(LightsManager.LIGHT_ID_NOTIFICATIONS);
+        mAttentionLight = lightsManager.getLight(LightsManager.LIGHT_ID_ATTENTION);
 
         mDefaultNotificationColor = resources.getColor(
                 R.color.config_defaultNotificationColor);
@@ -1134,7 +1126,11 @@ public class NotificationManagerService extends SystemService {
 
         mArchive = new Archive(resources.getInteger(
                 R.integer.config_notificationServiceArchiveSize));
+    }
 
+    @Override
+    public void onStart() {
+        init(AppGlobals.getPackageManager(), getLocalService(LightsManager.class));
         publishBinderService(Context.NOTIFICATION_SERVICE, mService);
         publishLocalService(NotificationManagerInternal.class, mInternalService);
     }
@@ -1514,13 +1510,18 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void createNotificationChannel(String pkg, NotificationChannel channel,
-                IOnNotificationChannelCreatedListener listener) throws RemoteException {
+        public void createNotificationChannels(String pkg,
+                ParceledListSlice channelsList) throws RemoteException {
             checkCallerIsSystemOrSameApp(pkg);
-            mRankingHelper.createNotificationChannel(pkg, Binder.getCallingUid(), channel,
-                    true /* fromTargetApp */);
+            List<NotificationChannel> channels = channelsList.getList();
+            final int channelsSize = channels.size();
+            for (int i = 0; i < channelsSize; i++) {
+                final NotificationChannel channel = channels.get(i);
+                Preconditions.checkNotNull(channel, "channel in list is null");
+                mRankingHelper.createNotificationChannel(pkg, Binder.getCallingUid(), channel,
+                        true /* fromTargetApp */);
+            }
             savePolicyFile();
-            listener.onNotificationChannelCreated(channel);
         }
 
         @Override
