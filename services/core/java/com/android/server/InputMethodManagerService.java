@@ -1666,6 +1666,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @Override
     public void onServiceDisconnected(ComponentName name) {
+        // Note that mContext.unbindService(this) does not trigger this.  Hence if we are here the
+        // disconnection is not intended by IMMS (e.g. triggered because the current IMS crashed),
+        // which is irregular but can eventually happen for everyone just by continuing using the
+        // device.  Thus it is important to make sure that all the internal states are properly
+        // refreshed when this method is called back.  Running
+        //    adb install -r <APK that implements the current IME>
+        // would be a good way to trigger such a situation.
         synchronized (mMethodMap) {
             if (DEBUG) Slog.v(TAG, "Service disconnected: " + name
                     + " mCurIntent=" + mCurIntent);
@@ -1677,11 +1684,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mLastBindTime = SystemClock.uptimeMillis();
                 mShowRequested = mInputShown;
                 mInputShown = false;
-                if (mCurClient != null) {
-                    executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIIO(
-                            MSG_UNBIND_CLIENT, InputMethodClient.UNBIND_REASON_DISCONNECT_IME,
-                            mCurSeq, mCurClient.client));
-                }
+                unbindCurrentClientLocked(InputMethodClient.UNBIND_REASON_DISCONNECT_IME);
             }
         }
     }
