@@ -42,6 +42,7 @@ import android.os.UserHandle;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.After;
@@ -143,8 +144,8 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         // Plugin shouldn't be connected because it is the wrong version.
         verify(mMockListener, Mockito.never()).onPluginConnected(
                 ArgumentCaptor.forClass(Plugin.class).capture());
-        verify(nm).notifyAsUser(eq(TestPlugin.class.getName()), eq(R.id.notification_plugin), any(),
-                eq(UserHandle.ALL));
+        verify(nm).notifyAsUser(eq(TestPlugin.class.getName()), eq(SystemMessage.NOTE_PLUGIN),
+                any(), eq(UserHandle.ALL));
     }
 
     @Test

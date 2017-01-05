@@ -22,6 +22,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
@@ -34,6 +35,7 @@ import android.app.NotificationManager;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Before;
@@ -76,28 +78,34 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
     public void testShowInvalidChargerNotification_NotifyAsUser() {
         mPowerNotificationWarnings.showInvalidChargerWarning();
         verify(mMockNotificationManager, times(1))
-                .notifyAsUser(anyString(), anyInt(), any(), any());
+                .notifyAsUser(anyString(), eq(SystemMessage.NOTE_BAD_CHARGER), any(), any());
+        verify(mMockNotificationManager, times(1)).cancelAsUser(anyString(),
+                eq(SystemMessage.NOTE_POWER_LOW), any());
     }
 
     @Test
     public void testDismissInvalidChargerNotification_CancelAsUser() {
         mPowerNotificationWarnings.showInvalidChargerWarning();
         mPowerNotificationWarnings.dismissInvalidChargerWarning();
-        verify(mMockNotificationManager, times(1)).cancelAsUser(anyString(), anyInt(), any());
+        verify(mMockNotificationManager, times(1)).cancelAsUser(anyString(),
+                eq(SystemMessage.NOTE_BAD_CHARGER), any());
     }
 
     @Test
     public void testShowLowBatteryNotification_NotifyAsUser() {
         mPowerNotificationWarnings.showLowBatteryWarning(false);
         verify(mMockNotificationManager, times(1))
-                .notifyAsUser(anyString(), anyInt(), any(), any());
+                .notifyAsUser(anyString(), eq(SystemMessage.NOTE_POWER_LOW), any(), any());
+        verify(mMockNotificationManager, times(1)).cancelAsUser(anyString(),
+                eq(SystemMessage.NOTE_BAD_CHARGER), any());
     }
 
     @Test
     public void testDismissLowBatteryNotification_CancelAsUser() {
         mPowerNotificationWarnings.showLowBatteryWarning(false);
         mPowerNotificationWarnings.dismissLowBatteryWarning();
-        verify(mMockNotificationManager, times(1)).cancelAsUser(anyString(), anyInt(), any());
+        verify(mMockNotificationManager, times(1)).cancelAsUser(anyString(),
+                eq(SystemMessage.NOTE_POWER_LOW), any());
     }
 
     @Test
@@ -105,7 +113,8 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
         mPowerNotificationWarnings.showLowBatteryWarning(false);
         ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
         verify(mMockNotificationManager)
-                .notifyAsUser(anyString(), anyInt(), captor.capture(), any());
+                .notifyAsUser(anyString(), eq(SystemMessage.NOTE_POWER_LOW),
+                        captor.capture(), any());
         assertEquals(null, captor.getValue().sound);
     }
 
@@ -114,7 +123,8 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
         mPowerNotificationWarnings.showLowBatteryWarning(true);
         ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
         verify(mMockNotificationManager)
-                .notifyAsUser(anyString(), anyInt(), captor.capture(), any());
+                .notifyAsUser(anyString(), eq(SystemMessage.NOTE_POWER_LOW),
+                        captor.capture(), any());
         assertNotEqual(null, captor.getValue().sound);
     }
 
@@ -122,13 +132,14 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
     public void testShowTemperatureWarning_NotifyAsUser() {
         mPowerNotificationWarnings.showTemperatureWarning();
         verify(mMockNotificationManager, times(1))
-                .notifyAsUser(anyString(), anyInt(), any(), any());
+                .notifyAsUser(anyString(), eq(SystemMessage.NOTE_HIGH_TEMP), any(), any());
     }
 
     @Test
     public void testDismissTemperatureWarning_CancelAsUser() {
         mPowerNotificationWarnings.showTemperatureWarning();
         mPowerNotificationWarnings.dismissTemperatureWarning();
-        verify(mMockNotificationManager, times(1)).cancelAsUser(anyString(), anyInt(), any());
+        verify(mMockNotificationManager, times(1)).cancelAsUser(anyString(),
+                eq(SystemMessage.NOTE_HIGH_TEMP), any());
     }
 }

@@ -31,6 +31,7 @@ import android.os.SystemProperties;
 import android.util.ArrayMap;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.plugins.PluginInstanceManager.PluginContextWrapper;
 
 import dalvik.system.PathClassLoader;
@@ -141,10 +142,8 @@ public class PluginManager extends BroadcastReceiver {
             mContext.getPackageManager().setComponentEnabledSetting(component,
                     PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                     PackageManager.DONT_KILL_APP);
-            int id = mContext.getResources().getIdentifier("notification_plugin", "id",
-                    mContext.getPackageName());
             mContext.getSystemService(NotificationManager.class).cancel(component.getClassName(),
-                    id);
+                    SystemMessage.NOTE_PLUGIN);
         } else {
             Uri data = intent.getData();
             String pkg = data.getEncodedSchemeSpecificPart();
