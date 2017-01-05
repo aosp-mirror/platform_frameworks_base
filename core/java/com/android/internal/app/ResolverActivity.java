@@ -107,7 +107,6 @@ public class ResolverActivity extends Activity {
     private PickTargetOptionRequest mPickOptionRequest;
     private String mReferrerPackage;
 
-    protected ResolverComparator mResolverComparator;
     protected ResolverDrawerLayout mResolverDrawerLayout;
     protected String mContentType;
     protected PackageManager mPm;
@@ -1288,6 +1287,10 @@ public class ResolverActivity extends Activity {
 
         public float getScore(DisplayResolveInfo target) {
             return mResolverListController.getScore(target);
+        }
+
+        public void updateModel(ComponentName componentName) {
+            mResolverListController.updateModel(componentName);
         }
 
         /**
