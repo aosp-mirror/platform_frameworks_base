@@ -52,34 +52,34 @@ public class SettingsDrawerActivityTest {
     }
 
     @Test
-    public void startActivityWithNoExtra_showNoHamburgerMenu() {
+    public void startActivityWithNoExtra_showNoNavUp() {
         Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
         instrumentation.startActivitySync(new Intent(instrumentation.getTargetContext(),
                 TestActivity.class));
 
-        onView(withContentDescription(R.string.content_description_menu_button))
+        onView(withContentDescription(com.android.internal.R.string.action_bar_up_description))
                 .check(doesNotExist());
     }
 
     @Test
-    public void startActivityWithExtraToHideMenu_showNoHamburgerMenu() {
+    public void startActivityWithExtraToHideMenu_showNavUp() {
         Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
         Intent intent = new Intent(instrumentation.getTargetContext(), TestActivity.class)
                 .putExtra(TestActivity.EXTRA_SHOW_MENU, false);
         instrumentation.startActivitySync(intent);
 
-        onView(withContentDescription(R.string.content_description_menu_button))
+        onView(withContentDescription(com.android.internal.R.string.action_bar_up_description))
                 .check(doesNotExist());
     }
 
     @Test
-    public void startActivityWithExtraToShowMenu_showHamburgerMenu() {
+    public void startActivityWithExtraToShowMenu_showNavUp() {
         Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
         Intent intent = new Intent(instrumentation.getTargetContext(), TestActivity.class)
                 .putExtra(TestActivity.EXTRA_SHOW_MENU, true);
         instrumentation.startActivitySync(intent);
 
-        onView(withContentDescription(R.string.content_description_menu_button))
+        onView(withContentDescription(com.android.internal.R.string.action_bar_up_description))
                 .check(matches(isDisplayed()));
     }
 
