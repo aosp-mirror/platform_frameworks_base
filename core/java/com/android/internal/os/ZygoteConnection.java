@@ -171,7 +171,7 @@ class ZygoteConnection {
                 return handleAbiListQuery();
             }
 
-            ZygoteInit.maybePreload();
+            maybePreload();
 
             if (parsedArgs.preloadPackage != null) {
                 return handlePreloadPackage(parsedArgs.preloadPackage,
@@ -277,6 +277,10 @@ class ZygoteConnection {
             Log.e(TAG, "Error writing to command socket", ioe);
             return true;
         }
+    }
+
+    protected void maybePreload() {
+        ZygoteInit.maybePreload();
     }
 
     protected boolean handlePreloadPackage(String packagePath, String libsPath) {
