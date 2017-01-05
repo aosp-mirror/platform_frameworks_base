@@ -256,7 +256,7 @@ public class UserManager {
      * Specifies if managed profiles of this user can be removed, other than by its profile owner.
      * The default value is <code>false</code>.
      * <p>
-     * This restriction can only be set by device owners.
+     * This restriction has no effect on managed profiles.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -353,8 +353,8 @@ public class UserManager {
     /**
      * Specifies if a user is disallowed from adding managed profiles.
      * <p>The default value for an unmanaged user is <code>false</code>.
-     * For users with a device owner set, the default is <code>true</code>
-     * <p>This restriction can only be set by device owners.
+     * For users with a device owner set, the default is <code>true</code>.
+     * <p>This restriction has no effect on managed profiles.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean

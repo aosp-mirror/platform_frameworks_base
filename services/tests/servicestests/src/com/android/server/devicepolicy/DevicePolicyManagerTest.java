@@ -1208,8 +1208,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         );
         verify(mContext.userManagerInternal).setDevicePolicyUserRestrictions(
                 eq(UserHandle.USER_SYSTEM),
-                MockUtils.checkUserRestrictions(),
-                MockUtils.checkUserRestrictions(defaultRestrictions)
+                MockUtils.checkUserRestrictions(defaultRestrictions),
+                MockUtils.checkUserRestrictions()
         );
         reset(mContext.userManagerInternal);
 
@@ -1479,8 +1479,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         );
         verify(mContext.userManagerInternal).setDevicePolicyUserRestrictions(
                 eq(UserHandle.USER_SYSTEM),
-                MockUtils.checkUserRestrictions(),
-                MockUtils.checkUserRestrictions(defaultRestrictions)
+                MockUtils.checkUserRestrictions(defaultRestrictions),
+                MockUtils.checkUserRestrictions()
         );
         reset(mContext.userManagerInternal);
 
@@ -1521,8 +1521,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             );
             verify(mContext.userManagerInternal, atLeast(1)).setDevicePolicyUserRestrictions(
                 eq(UserHandle.USER_SYSTEM),
-                MockUtils.checkUserRestrictions(),
-                MockUtils.checkUserRestrictions(newDefaultEnabledRestriction)
+                MockUtils.checkUserRestrictions(newDefaultEnabledRestriction),
+                MockUtils.checkUserRestrictions()
             );
             reset(mContext.userManagerInternal);
 
