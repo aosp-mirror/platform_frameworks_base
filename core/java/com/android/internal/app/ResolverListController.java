@@ -218,4 +218,10 @@ public class ResolverListController {
         }
         return mResolverComparator.getScore(target.getResolvedComponentName());
     }
+
+    public void updateModel(ComponentName componentName) {
+        if (mResolverComparator != null) {
+            mResolverComparator.updateModel(componentName);
+        }
+    }
 }
