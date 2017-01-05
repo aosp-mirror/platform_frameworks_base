@@ -334,6 +334,9 @@ public class MenuInflater {
 
         private ActionProvider itemActionProvider;
 
+        private CharSequence itemContentDescription;
+        private CharSequence itemTooltip;
+
         private static final int defaultGroupId = NO_ID;
         private static final int defaultItemId = NO_ID;
         private static final int defaultItemCategory = 0;
@@ -424,6 +427,10 @@ public class MenuInflater {
                 itemActionProvider = null;
             }
 
+            itemContentDescription =
+                    a.getText(com.android.internal.R.styleable.MenuItem_contentDescription);
+            itemTooltip = a.getText(com.android.internal.R.styleable.MenuItem_tooltip);
+
             a.recycle();
 
             itemAdded = false;
@@ -486,6 +493,9 @@ public class MenuInflater {
             if (itemActionProvider != null) {
                 item.setActionProvider(itemActionProvider);
             }
+
+            item.setContentDescription(itemContentDescription);
+            item.setTooltip(itemTooltip);
         }
 
         public MenuItem addItem() {

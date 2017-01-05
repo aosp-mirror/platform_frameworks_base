@@ -599,4 +599,40 @@ public interface MenuItem {
      * @return This menu item instance for call chaining
      */
     public MenuItem setOnActionExpandListener(OnActionExpandListener listener);
+
+    /**
+     * Change the content description associated with this menu item.
+     *
+     * @param contentDescription The new content description.
+     */
+    default MenuItem setContentDescription(CharSequence contentDescription) {
+        return this;
+    }
+
+    /**
+     * Retrieve the content description associated with this menu item.
+     *
+     * @return The content description.
+     */
+    default CharSequence getContentDescription() {
+        return null;
+    }
+
+    /**
+     * Change the tooltip text associated with this menu item.
+     *
+     * @param tooltip The new tooltip text.
+     */
+    default MenuItem setTooltip(CharSequence tooltip) {
+        return this;
+    }
+
+    /**
+     * Retrieve the tooltip text associated with this menu item.
+     *
+     * @return The tooltip text.
+     */
+    default CharSequence getTooltip() {
+        return null;
+    }
 }

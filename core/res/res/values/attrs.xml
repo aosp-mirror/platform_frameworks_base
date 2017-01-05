@@ -7009,6 +7009,12 @@
              for more info. -->
         <attr name="actionProviderClass" format="string" />
 
+        <!-- The content description associated with the item. -->
+        <attr name="contentDescription" format="string" />
+
+        <!-- The tooltip text associated with the item. -->
+        <attr name="tooltip" format="string" />
+
     </declare-styleable>
 
     <!-- Attrbitutes for a ActvityChooserView. -->

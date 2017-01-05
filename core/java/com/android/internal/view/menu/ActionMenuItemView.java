@@ -119,7 +119,7 @@ public class ActionMenuItemView extends TextView
         mItemData = itemData;
 
         setIcon(itemData.getIcon());
-        setTitle(itemData.getTitleForItemView(this)); // Title only takes effect if there is no icon
+        setTitle(itemData.getTitleForItemView(this)); // Title is only displayed if there is no icon
         setId(itemData.getItemId());
 
         setVisibility(itemData.isVisible() ? View.VISIBLE : View.GONE);
@@ -184,8 +184,22 @@ public class ActionMenuItemView extends TextView
 
         setText(visible ? mTitle : null);
 
-        // Show the tooltip for items that do not already show text.
-        setTooltip(visible ? null : mTitle);
+        final CharSequence contentDescription = mItemData.getContentDescription();
+        if (TextUtils.isEmpty(contentDescription)) {
+            // Use the uncondensed title for content description, but only if the title is not
+            // shown already.
+            setContentDescription(visible ? null : mItemData.getTitle());
+        } else {
+            setContentDescription(contentDescription);
+        }
+
+        final CharSequence tooltip = mItemData.getTooltip();
+        if (TextUtils.isEmpty(tooltip)) {
+            // Use the uncondensed title for tooltip, but only if the title is not shown already.
+            setTooltip(visible ? null : mItemData.getTitle());
+        } else {
+            setTooltip(tooltip);
+        }
     }
 
     public void setIcon(Drawable icon) {
@@ -221,7 +235,6 @@ public class ActionMenuItemView extends TextView
     public void setTitle(CharSequence title) {
         mTitle = title;
 
-        setContentDescription(mTitle);
         updateTextButtonVisibility();
     }
 

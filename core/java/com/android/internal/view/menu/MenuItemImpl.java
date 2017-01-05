@@ -90,16 +90,19 @@ public final class MenuItemImpl implements MenuItem {
     /**
      * Current use case is for context menu: Extra information linked to the
      * View that added this item to the context menu.
-     */ 
+     */
     private ContextMenuInfo mMenuInfo;
-    
+
+    private CharSequence mContentDescription;
+    private CharSequence mTooltip;
+
     private static String sLanguage;
     private static String sPrependShortcutLabel;
     private static String sEnterShortcutLabel;
     private static String sDeleteShortcutLabel;
     private static String sSpaceShortcutLabel;
-    
-    
+
+
     /**
      * Instantiates this menu item.
      *
@@ -669,5 +672,33 @@ public final class MenuItemImpl implements MenuItem {
 
     public boolean isActionViewExpanded() {
         return mIsActionViewExpanded;
+    }
+
+    @Override
+    public MenuItem setContentDescription(CharSequence contentDescription) {
+        mContentDescription = contentDescription;
+
+        mMenu.onItemsChanged(false);
+
+        return this;
+    }
+
+    @Override
+    public CharSequence getContentDescription() {
+        return mContentDescription;
+    }
+
+    @Override
+    public MenuItem setTooltip(CharSequence tooltip) {
+        mTooltip = tooltip;
+
+        mMenu.onItemsChanged(false);
+
+        return this;
+    }
+
+    @Override
+    public CharSequence getTooltip() {
+        return mTooltip;
     }
 }
