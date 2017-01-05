@@ -117,7 +117,7 @@
     <style name="TextAppearance.StatusBar.Expanded.Date">
         <item name="android:textSize">@dimen/qs_date_collapsed_size</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#b2ffffff</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Expanded.AboveDateTime">
