@@ -355,9 +355,11 @@ final public class SettingsService extends Binder {
             final String callPutCommand;
             if ("system".equals(table)) {
                 callPutCommand = Settings.CALL_METHOD_PUT_SYSTEM;
-                makeDefault = false;
-                getOutPrintWriter().println("Ignored makeDefault - "
-                        + "doesn't apply to system settings");
+                if (makeDefault) {
+                    getOutPrintWriter().print("Ignored makeDefault - "
+                            + "doesn't apply to system settings");
+                    makeDefault = false;
+                }
             } else if ("secure".equals(table)) callPutCommand = Settings.CALL_METHOD_PUT_SECURE;
             else if ("global".equals(table)) callPutCommand = Settings.CALL_METHOD_PUT_GLOBAL;
             else {
