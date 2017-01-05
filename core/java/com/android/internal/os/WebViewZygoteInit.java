@@ -54,6 +54,11 @@ class WebViewZygoteInit {
         }
 
         @Override
+        protected void maybePreload() {
+            // Do nothing, we don't need to call ZygoteInit.maybePreload() for the WebView zygote.
+        }
+
+        @Override
         protected boolean handlePreloadPackage(String packagePath, String libsPath) {
             // Ask ApplicationLoaders to create and cache a classloader for the WebView APK so that
             // our children will reuse the same classloader instead of creating their own.
