@@ -126,8 +126,6 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_NETWORK_RESET,
             UserManager.DISALLOW_FACTORY_RESET,
             UserManager.DISALLOW_ADD_USER,
-            UserManager.DISALLOW_ADD_MANAGED_PROFILE,
-            UserManager.DISALLOW_REMOVE_MANAGED_PROFILE,
             UserManager.DISALLOW_CONFIG_CELL_BROADCASTS,
             UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS,
             UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA,
@@ -261,6 +259,7 @@ public class UserRestrictionsUtils {
 
     /**
      * Returns the user restrictions that default to {@code true} for device owners.
+     * These user restrictions are local, though. ie only for the device owner's user id.
      */
     public static @NonNull Set<String> getDefaultEnabledForDeviceOwner() {
         return DEFAULT_ENABLED_FOR_DEVICE_OWNERS;
