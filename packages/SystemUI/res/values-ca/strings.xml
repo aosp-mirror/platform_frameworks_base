@@ -367,7 +367,7 @@
     <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Càrrega ràpida (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> per completar-se)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Càrrega lenta (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> per completar-se)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Canvia d\'usuari"</string>
-    <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Canvia l\'usuari. Usuari actual: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
+    <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Canvia d\'usuari. Usuari actual: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Usuari actual: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Mostra el perfil"</string>
     <string name="user_add_user" msgid="5110251524486079492">"Afegeix un usuari"</string>
