@@ -79,7 +79,7 @@ public class TypedArray {
         final int dataLen = len * AssetManager.STYLE_NUM_ENTRIES;
         final int indicesLen = len + 1;
         final VMRuntime runtime = VMRuntime.getRuntime();
-        if (mData == null || mData.length < dataLen) {
+        if (mDataAddress == 0 || mData.length < dataLen) {
             mData = (int[]) runtime.newNonMovableArray(int.class, dataLen);
             mDataAddress = runtime.addressOf(mData);
             mIndices = (int[]) runtime.newNonMovableArray(int.class, indicesLen);
