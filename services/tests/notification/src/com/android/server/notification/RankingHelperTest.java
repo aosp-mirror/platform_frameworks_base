@@ -583,7 +583,7 @@ public class RankingHelperTest {
         assertEquals(channel.shouldShowLights(), savedChannel.shouldShowLights());
         assertFalse(savedChannel.canBypassDnd());
         assertFalse(Notification.VISIBILITY_SECRET == savedChannel.getLockscreenVisibility());
-        assertFalse(savedChannel.canShowBadge());
+        assertEquals(channel.canShowBadge(), savedChannel.canShowBadge());
     }
 
     @Test
@@ -611,6 +611,6 @@ public class RankingHelperTest {
         assertEquals(channel.shouldShowLights(), savedChannel.shouldShowLights());
         assertFalse(savedChannel.canBypassDnd());
         assertFalse(Notification.VISIBILITY_SECRET == savedChannel.getLockscreenVisibility());
-        assertFalse(savedChannel.canShowBadge());
+        assertEquals(channel.canShowBadge(), savedChannel.canShowBadge());
     }
 }

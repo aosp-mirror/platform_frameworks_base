@@ -442,7 +442,6 @@ public class RankingHelper implements RankingConfig {
         }
         // Reset fields that apps aren't allowed to set.
         if (fromTargetApp) {
-            channel.setShowBadge(false);
             channel.setBypassDnd(r.priority == Notification.PRIORITY_MAX);
             channel.setLockscreenVisibility(r.visibility);
         }

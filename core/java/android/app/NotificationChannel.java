@@ -244,18 +244,6 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
-     * Sets whether notifications posted to this channel can appear as application icon badges
-     * in a Launcher.
-     *
-     * Only modifiable by the system and notification ranker.
-     *
-     * @param showBadge true if badges should be allowed to be shown.
-     */
-    public void setShowBadge(boolean showBadge) {
-        this.mShowBadge = showBadge;
-    }
-
-    /**
      * Sets whether notifications are allowed to be posted to this channel.
      *
      * Only modifiable by the system and notification ranker.
@@ -268,6 +256,16 @@ public final class NotificationChannel implements Parcelable {
 
 
     // Modifiable by apps on channel creation.
+
+    /**
+     * Sets whether notifications posted to this channel can appear as application icon badges
+     * in a Launcher.
+     *
+     * @param showBadge true if badges should be allowed to be shown.
+     */
+    public void setShowBadge(boolean showBadge) {
+        this.mShowBadge = showBadge;
+    }
 
     /**
      * Sets the sound that should be played for notifications posted to this channel if
