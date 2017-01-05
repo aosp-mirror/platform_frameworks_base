@@ -82,11 +82,14 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.Vibrator;
 import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Patterns;
 import android.util.SparseArray;
 import android.view.View;
@@ -861,9 +864,16 @@ public class BugreportProgressService extends Service {
         intent.setClipData(clipData);
         intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, attachments);
 
-        final Account sendToAccount = findSendToAccount(context);
+        final Pair<UserHandle, Account> sendToAccount = findSendToAccount(context,
+                SystemProperties.get("sendbug.preferred.domain"));
         if (sendToAccount != null) {
-            intent.putExtra(Intent.EXTRA_EMAIL, new String[] { sendToAccount.name });
+            intent.putExtra(Intent.EXTRA_EMAIL, new String[] { sendToAccount.second.name });
+
+            // TODO Open the chooser activity on work profile by default.
+            // If we just use startActivityAsUser(), then the launched app couldn't read
+            // attachments.
+            // We probably need to change ChooserActivity to take an extra argument for the
+            // default profile.
         }
 
         return intent;
@@ -1109,44 +1119,52 @@ public class BugreportProgressService extends Service {
     }
 
     /**
-     * Find the best matching {@link Account} based on build properties.
+     * Find the best matching {@link Account} based on build properties.  If none found, returns
+     * the first account that looks like an email address.
      */
-    private static Account findSendToAccount(Context context) {
-        final AccountManager am = (AccountManager) context.getSystemService(
-                Context.ACCOUNT_SERVICE);
+    @VisibleForTesting
+    static Pair<UserHandle, Account> findSendToAccount(Context context, String preferredDomain) {
+        final UserManager um = context.getSystemService(UserManager.class);
+        final AccountManager am = context.getSystemService(AccountManager.class);
 
-        String preferredDomain = SystemProperties.get("sendbug.preferred.domain");
-        if (!preferredDomain.startsWith("@")) {
+        if (preferredDomain != null && !preferredDomain.startsWith("@")) {
             preferredDomain = "@" + preferredDomain;
         }
 
-        final Account[] accounts;
-        try {
-            accounts = am.getAccounts();
-        } catch (RuntimeException e) {
-            Log.e(TAG, "Could not get accounts for preferred domain " + preferredDomain, e);
-            return null;
-        }
-        if (DEBUG) Log.d(TAG, "Number of accounts: " + accounts.length);
-        Account foundAccount = null;
-        for (Account account : accounts) {
-            if (Patterns.EMAIL_ADDRESS.matcher(account.name).matches()) {
-                if (!preferredDomain.isEmpty()) {
-                    // if we have a preferred domain and it matches, return; otherwise keep
-                    // looking
-                    if (account.name.endsWith(preferredDomain)) {
-                        return account;
+        Pair<UserHandle, Account> first = null;
+
+        for (UserHandle user : um.getUserProfiles()) {
+            final Account[] accounts;
+            try {
+                accounts = am.getAccountsAsUser(user.getIdentifier());
+            } catch (RuntimeException e) {
+                Log.e(TAG, "Could not get accounts for preferred domain " + preferredDomain
+                        + " for user " + user, e);
+                continue;
+            }
+            if (DEBUG) Log.d(TAG, "User: " + user + "  Number of accounts: " + accounts.length);
+            for (Account account : accounts) {
+                if (Patterns.EMAIL_ADDRESS.matcher(account.name).matches()) {
+                    final Pair<UserHandle, Account> candidate = Pair.create(user, account);
+
+                    if (!TextUtils.isEmpty(preferredDomain)) {
+                        // if we have a preferred domain and it matches, return; otherwise keep
+                        // looking
+                        if (account.name.endsWith(preferredDomain)) {
+                            return candidate;
+                        }
+                        // if we don't have a preferred domain, just return since it looks like
+                        // an email address
                     } else {
-                        foundAccount = account;
+                        return candidate;
                     }
-                    // if we don't have a preferred domain, just return since it looks like
-                    // an email address
-                } else {
-                    return account;
+                    if (first == null) {
+                        first = candidate;
+                    }
                 }
             }
         }
-        return foundAccount;
+        return first;
     }
 
     static Uri getUri(Context context, File file) {
