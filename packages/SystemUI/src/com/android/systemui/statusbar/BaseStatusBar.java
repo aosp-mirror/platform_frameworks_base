@@ -42,7 +42,6 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -80,7 +79,6 @@ import android.view.ViewParent;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
-import android.widget.ImageView;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -754,7 +752,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         mLockPatternUtils = new LockPatternUtils(mContext);
 
         // Connect in to the status bar manager service
-        mCommandQueue = new CommandQueue(this);
+        mCommandQueue = getComponent(CommandQueue.class);
+        mCommandQueue.addCallbacks(this);
 
         int[] switches = new int[9];
         ArrayList<IBinder> binders = new ArrayList<IBinder>();
