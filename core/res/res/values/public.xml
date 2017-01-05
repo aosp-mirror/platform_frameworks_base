@@ -2793,6 +2793,8 @@
     <public-group type="id" first-id="0x01020041">
     </public-group>
 
+    <public type="attr" name="primaryContentAlpha" />
+
   <!-- ===============================================================
        DO NOT ADD UN-GROUPED ITEMS HERE
 

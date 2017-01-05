@@ -62,6 +62,8 @@
 
         <!-- Default disabled alpha for widgets that set enabled/disabled alpha programmatically. -->
         <attr name="disabledAlpha" format="float" />
+        <!-- The alpha applied to the foreground color to create the primary text color. -->
+        <attr name="primaryContentAlpha" format="float" />
         <!-- Default background dim amount when a menu, dialog, or something similar pops up. -->
         <attr name="backgroundDimAmount" format="float" />
         <!-- Control whether dimming behind the window is enabled.  The default
