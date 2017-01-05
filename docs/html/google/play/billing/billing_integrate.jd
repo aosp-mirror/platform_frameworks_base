@@ -294,7 +294,7 @@ ArrayList&lt;String&gt; skuList = new ArrayList&lt;String&gt; ();
 skuList.add("premiumUpgrade");
 skuList.add("gas");
 Bundle querySkus = new Bundle();
-querySkus.putStringArrayList(“ITEM_ID_LIST”, skuList);
+querySkus.putStringArrayList("ITEM_ID_LIST", skuList);
 </pre>
 
 <p>
