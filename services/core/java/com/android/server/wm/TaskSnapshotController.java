@@ -17,17 +17,10 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.ENABLE_TASK_SNAPSHOTS;
-import static android.graphics.Bitmap.Config.ARGB_8888;
-import static android.graphics.GraphicBuffer.USAGE_HW_TEXTURE;
-import static android.graphics.GraphicBuffer.USAGE_SW_READ_NEVER;
-import static android.graphics.GraphicBuffer.USAGE_SW_WRITE_NEVER;
-import static android.graphics.PixelFormat.RGBA_8888;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.TaskSnapshot;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.GraphicBuffer;
 import android.util.ArraySet;
 import android.view.WindowManagerPolicy.StartingSurface;
@@ -76,6 +69,9 @@ class TaskSnapshotController {
             final TaskSnapshot snapshot = snapshotTask(task);
             if (snapshot != null) {
                 mCache.putSnapshot(task, snapshot);
+                if (task.getController() != null) {
+                    task.getController().reportSnapshotChanged(snapshot);
+                }
             }
         }
     }

@@ -24,7 +24,9 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
+import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
@@ -148,6 +150,7 @@ public class SystemServicesProxy {
      */
     public abstract static class TaskStackListener {
         public void onTaskStackChanged() { }
+        public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) { }
         public void onActivityPinned() { }
         public void onPinnedActivityRestartAttempt() { }
         public void onPinnedStackAnimationEnded() { }
@@ -201,6 +204,12 @@ public class SystemServicesProxy {
         @Override
         public void onTaskProfileLocked(int taskId, int userId) {
             mHandler.obtainMessage(H.ON_TASK_PROFILE_LOCKED, taskId, userId).sendToTarget();
+        }
+
+        @Override
+        public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot)
+                throws RemoteException {
+            mHandler.obtainMessage(H.ON_TASK_SNAPSHOT_CHANGED, taskId, 0, snapshot).sendToTarget();
         }
     };
 
@@ -591,17 +600,17 @@ public class SystemServicesProxy {
     /** Returns the top task thumbnail for the given task id */
     public ThumbnailData getTaskThumbnail(int taskId) {
         if (mAm == null) return null;
-        ThumbnailData thumbnailData = new ThumbnailData();
 
         // If we are mocking, then just return a dummy thumbnail
         if (RecentsDebugFlags.Static.EnableMockTasks) {
+            ThumbnailData thumbnailData = new ThumbnailData();
             thumbnailData.thumbnail = Bitmap.createBitmap(mDummyThumbnailWidth,
                     mDummyThumbnailHeight, Bitmap.Config.ARGB_8888);
             thumbnailData.thumbnail.eraseColor(0xff333333);
             return thumbnailData;
         }
 
-        getThumbnail(taskId, thumbnailData);
+        ThumbnailData thumbnailData = getThumbnail(taskId);
         if (thumbnailData.thumbnail != null && !ActivityManager.ENABLE_TASK_SNAPSHOTS) {
             thumbnailData.thumbnail.setHasAlpha(false);
             // We use a dumb heuristic for now, if the thumbnail is purely transparent in the top
@@ -621,11 +630,12 @@ public class SystemServicesProxy {
     /**
      * Returns a task thumbnail from the activity manager
      */
-    public void getThumbnail(int taskId, ThumbnailData thumbnailDataOut) {
+    public @NonNull ThumbnailData getThumbnail(int taskId) {
         if (mAm == null) {
-            return;
+            return new ThumbnailData();
         }
 
+        final ThumbnailData thumbnailData;
         if (ActivityManager.ENABLE_TASK_SNAPSHOTS) {
             ActivityManager.TaskSnapshot snapshot = null;
             try {
@@ -634,16 +644,14 @@ public class SystemServicesProxy {
                 Log.w(TAG, "Failed to retrieve snapshot", e);
             }
             if (snapshot != null) {
-                thumbnailDataOut.thumbnail = Bitmap.createHardwareBitmap(snapshot.getSnapshot());
-                thumbnailDataOut.orientation = snapshot.getOrientation();
-                thumbnailDataOut.insets.set(snapshot.getContentInsets());
+                thumbnailData = ThumbnailData.createFromTaskSnapshot(snapshot);
             } else {
-                thumbnailDataOut.thumbnail = null;
+                return new ThumbnailData();
             }
         } else {
             ActivityManager.TaskThumbnail taskThumbnail = mAm.getTaskThumbnail(taskId);
             if (taskThumbnail == null) {
-                return;
+                return new ThumbnailData();
             }
 
             Bitmap thumbnail = taskThumbnail.mainThumbnail;
@@ -658,10 +666,12 @@ public class SystemServicesProxy {
                 } catch (IOException e) {
                 }
             }
-            thumbnailDataOut.thumbnail = thumbnail;
-            thumbnailDataOut.orientation = taskThumbnail.thumbnailInfo.screenOrientation;
-            thumbnailDataOut.insets.setEmpty();
+            thumbnailData = new ThumbnailData();
+            thumbnailData.thumbnail = thumbnail;
+            thumbnailData.orientation = taskThumbnail.thumbnailInfo.screenOrientation;
+            thumbnailData.insets.setEmpty();
         }
+        return thumbnailData;
     }
 
     /**
@@ -1172,12 +1182,13 @@ public class SystemServicesProxy {
 
     private final class H extends Handler {
         private static final int ON_TASK_STACK_CHANGED = 1;
-        private static final int ON_ACTIVITY_PINNED = 2;
-        private static final int ON_PINNED_ACTIVITY_RESTART_ATTEMPT = 3;
-        private static final int ON_PINNED_STACK_ANIMATION_ENDED = 4;
-        private static final int ON_ACTIVITY_FORCED_RESIZABLE = 5;
-        private static final int ON_ACTIVITY_DISMISSING_DOCKED_STACK = 6;
-        private static final int ON_TASK_PROFILE_LOCKED = 7;
+        private static final int ON_TASK_SNAPSHOT_CHANGED = 2;
+        private static final int ON_ACTIVITY_PINNED = 3;
+        private static final int ON_PINNED_ACTIVITY_RESTART_ATTEMPT = 4;
+        private static final int ON_PINNED_STACK_ANIMATION_ENDED = 5;
+        private static final int ON_ACTIVITY_FORCED_RESIZABLE = 6;
+        private static final int ON_ACTIVITY_DISMISSING_DOCKED_STACK = 7;
+        private static final int ON_TASK_PROFILE_LOCKED = 8;
 
         @Override
         public void handleMessage(Message msg) {
@@ -1185,6 +1196,13 @@ public class SystemServicesProxy {
                 case ON_TASK_STACK_CHANGED: {
                     for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                         mTaskStackListeners.get(i).onTaskStackChanged();
+                    }
+                    break;
+                }
+                case ON_TASK_SNAPSHOT_CHANGED: {
+                    for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                        mTaskStackListeners.get(i).onTaskSnapshotChanged(msg.arg1,
+                                (TaskSnapshot) msg.obj);
                     }
                     break;
                 }

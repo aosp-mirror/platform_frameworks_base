@@ -102,4 +102,9 @@ oneway interface ITaskStackListener {
      * been locked.
      */
     void onTaskProfileLocked(int taskId, int userId);
+
+    /**
+     * Called when a task snapshot got updated.
+     */
+    void onTaskSnapshotChanged(int taskId, in ActivityManager.TaskSnapshot snapshot);
 }

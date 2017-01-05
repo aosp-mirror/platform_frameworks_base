@@ -18,8 +18,10 @@ package com.android.server.wm;
 
 import android.app.ActivityManager.TaskSnapshot;
 import android.content.res.Configuration;
-import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.EventLog;
 import android.util.Slog;
 
@@ -37,14 +39,28 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
  * Test class: {@link TaskWindowContainerControllerTests}
  */
 public class TaskWindowContainerController
-        extends WindowContainerController<Task, WindowContainerListener> {
+        extends WindowContainerController<Task, TaskWindowContainerListener> {
+
+    private static final int REPORT_SNAPSHOT_CHANGED = 0;
 
     private final int mTaskId;
 
-    public TaskWindowContainerController(int taskId, int stackId, int userId, Rect bounds,
-            Configuration overrideConfig, int resizeMode, boolean homeTask, boolean isOnTopLauncher,
-            boolean toTop, boolean showForAllUsers) {
-        super(null, WindowManagerService.getInstance());
+    private final Handler mHandler = new Handler(Looper.getMainLooper()) {
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case REPORT_SNAPSHOT_CHANGED:
+                    mListener.onSnapshotChanged((TaskSnapshot) msg.obj);
+                    break;
+            }
+        }
+    };
+
+    public TaskWindowContainerController(int taskId, TaskWindowContainerListener listener,
+            int stackId, int userId, Rect bounds, Configuration overrideConfig, int resizeMode,
+            boolean homeTask, boolean isOnTopLauncher, boolean toTop, boolean showForAllUsers) {
+        super(listener, WindowManagerService.getInstance());
         mTaskId = taskId;
 
         synchronized(mWindowMap) {
@@ -251,6 +267,10 @@ public class TaskWindowContainerController
             }
             return mService.mTaskSnapshotController.getSnapshot(mContainer);
         }
+    }
+
+    void reportSnapshotChanged(TaskSnapshot snapshot) {
+        mHandler.obtainMessage(REPORT_SNAPSHOT_CHANGED, snapshot).sendToTarget();
     }
 
     @Override

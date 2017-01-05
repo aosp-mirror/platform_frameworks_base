@@ -235,6 +235,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
+import static android.Manifest.permission.READ_FRAME_BUFFER;
 /** {@hide} */
 public class WindowManagerService extends IWindowManager.Stub
         implements Watchdog.Monitor, WindowManagerPolicy.WindowManagerFuncs {
@@ -3854,7 +3856,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public Bitmap screenshotWallpaper() {
-        if (!checkCallingPermission(Manifest.permission.READ_FRAME_BUFFER,
+        if (!checkCallingPermission(READ_FRAME_BUFFER,
                 "screenshotWallpaper()")) {
             throw new SecurityException("Requires READ_FRAME_BUFFER permission");
         }
@@ -3876,7 +3878,7 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     @Override
     public boolean requestAssistScreenshot(final IAssistScreenshotReceiver receiver) {
-        if (!checkCallingPermission(Manifest.permission.READ_FRAME_BUFFER,
+        if (!checkCallingPermission(READ_FRAME_BUFFER,
                 "requestAssistScreenshot()")) {
             throw new SecurityException("Requires READ_FRAME_BUFFER permission");
         }
