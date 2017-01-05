@@ -231,13 +231,7 @@ public class NetworkScorerAppManager {
         if (defaultApp == null) {
             return false;
         }
-        if (callingUid != defaultApp.packageUid) {
-            return false;
-        }
-        // To be extra safe, ensure the caller holds the SCORE_NETWORKS permission. It always
-        // should, since it couldn't become the active scorer otherwise, but this can't hurt.
-        return mContext.checkCallingPermission(Manifest.permission.SCORE_NETWORKS) ==
-                PackageManager.PERMISSION_GRANTED;
+        return callingUid == defaultApp.packageUid;
     }
 
     private boolean isNetworkRecommendationsDisabled() {
