@@ -58,6 +58,7 @@ import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
@@ -714,5 +715,15 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         event.addPostAnimationCallback(() -> {
             setClipViewInStack(true);
         });
+    }
+
+    public void dump(String prefix, PrintWriter writer) {
+        String innerPrefix = prefix + "  ";
+
+        writer.print(prefix); writer.print("TaskView");
+        writer.print(" mTask="); writer.print(mTask.key.id);
+        writer.println();
+
+        mThumbnailView.dump(innerPrefix, writer);
     }
 }

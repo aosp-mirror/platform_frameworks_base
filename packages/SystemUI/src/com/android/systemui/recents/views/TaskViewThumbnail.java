@@ -35,7 +35,10 @@ import android.view.View;
 import android.view.ViewDebug;
 
 import com.android.systemui.R;
+import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
+
+import java.io.PrintWriter;
 
 
 /**
@@ -342,5 +345,16 @@ public class TaskViewThumbnail extends View {
     void unbindFromTask() {
         mTask = null;
         setThumbnail(null, null);
+    }
+
+    public void dump(String prefix, PrintWriter writer) {
+        String innerPrefix = prefix + "  ";
+
+        writer.print(prefix); writer.print("TaskViewThumbnail");
+        writer.print(" mTaskViewRect="); writer.print(Utilities.dumpRect(mTaskViewRect));
+        writer.print(" mThumbnailRect="); writer.print(Utilities.dumpRect(mThumbnailRect));
+        writer.print(" mThumbnailScale="); writer.print(mThumbnailScale);
+        writer.print(" mDimAlpha="); writer.print(mDimAlpha);
+        writer.println();
     }
 }
