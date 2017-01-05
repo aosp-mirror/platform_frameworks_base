@@ -6912,6 +6912,8 @@ public class BatteryStatsImpl extends BatteryStats {
             final int mHandle;
             StopwatchTimer mTimer;
 
+            Counter mBgCounter;
+
             public Sensor(BatteryStatsImpl bsi, Uid uid, int handle) {
                 mBsi = bsi;
                 mUid = uid;
@@ -6931,7 +6933,17 @@ public class BatteryStatsImpl extends BatteryStats {
                 return new StopwatchTimer(mBsi.mClocks, mUid, 0, pool, timeBase, in);
             }
 
+            private Counter readCounterFromParcel(TimeBase timeBase, Parcel in) {
+                if (in.readInt() == 0) {
+                    return null;
+                }
+                return new Counter(timeBase, in);
+            }
+
             boolean reset() {
+                if (mBgCounter != null) {
+                    mBgCounter.reset(true);
+                }
                 if (mTimer.reset(true)) {
                     mTimer = null;
                     return true;
@@ -6941,15 +6953,22 @@ public class BatteryStatsImpl extends BatteryStats {
 
             void readFromParcelLocked(TimeBase timeBase, Parcel in) {
                 mTimer = readTimerFromParcel(timeBase, in);
+                mBgCounter = readCounterFromParcel(timeBase, in);
             }
 
             void writeToParcelLocked(Parcel out, long elapsedRealtimeUs) {
                 Timer.writeTimerToParcel(out, mTimer, elapsedRealtimeUs);
+                Counter.writeCounterToParcel(out, mBgCounter);
             }
 
             @Override
             public Timer getSensorTime() {
                 return mTimer;
+            }
+
+            @Override
+            public Counter getSensorBgCount() {
+                return mBgCounter;
             }
 
             @Override
@@ -7795,6 +7814,22 @@ public class BatteryStatsImpl extends BatteryStats {
             return t;
         }
 
+        public Counter getSensorBgCounterLocked(int sensor, boolean create) {
+            Sensor se = mSensorStats.get(sensor);
+            if (se == null) {
+                if (!create) {
+                    return null;
+                }
+                se = new Sensor(mBsi, this, sensor);
+                mSensorStats.put(sensor, se);
+            }
+            Counter c = se.mBgCounter;
+            if (c != null) return c;
+            c = new Counter(mBsi.mOnBatteryTimeBase);
+            se.mBgCounter = c;
+            return c;
+        }
+
         public void noteStartSyncLocked(String name, long elapsedRealtimeMs) {
             StopwatchTimer t = mSyncStats.startObject(name);
             if (t != null) {
@@ -7871,6 +7906,10 @@ public class BatteryStatsImpl extends BatteryStats {
             if (t != null) {
                 t.startRunningLocked(elapsedRealtimeMs);
             }
+            Counter c = getSensorBgCounterLocked(sensor, true);
+            if (c != null && mProcessState >= PROCESS_STATE_BACKGROUND) {
+                c.stepAtomic();
+            }
         }
 
         public void noteStopSensor(int sensor, long elapsedRealtimeMs) {
@@ -7885,6 +7924,10 @@ public class BatteryStatsImpl extends BatteryStats {
             StopwatchTimer t = getSensorTimerLocked(Sensor.GPS, true);
             if (t != null) {
                 t.startRunningLocked(elapsedRealtimeMs);
+            }
+            Counter c = getSensorBgCounterLocked(Sensor.GPS, true);
+            if (c != null && mProcessState >= PROCESS_STATE_BACKGROUND) {
+                c.stepAtomic();
             }
         }
 

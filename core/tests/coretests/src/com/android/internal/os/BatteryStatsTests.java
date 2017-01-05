@@ -11,6 +11,7 @@ import org.junit.runners.Suite;
         BatteryStatsTimeBaseTest.class,
         BatteryStatsTimerTest.class,
         BatteryStatsUidTest.class,
+        BatteryStatsSensorTest.class,
     })
 public class BatteryStatsTests {
 }

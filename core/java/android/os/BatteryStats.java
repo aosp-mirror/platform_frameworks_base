@@ -39,6 +39,7 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.view.Display;
+
 import com.android.internal.os.BatterySipper;
 import com.android.internal.os.BatteryStatsHelper;
 
@@ -181,6 +182,8 @@ public abstract class BatteryStats implements Parcelable {
      *
      * New in version 19:
      *   - Wakelock data (wl) gets current and max times.
+     * New in version 20:
+     *   - Sensor gets a background counter.
      */
     static final String CHECKIN_VERSION = "20";
 
@@ -600,10 +603,13 @@ public abstract class BatteryStats implements Parcelable {
              */
             // Magic sensor number for the GPS.
             public static final int GPS = -10000;
-            
+
             public abstract int getHandle();
-            
+
             public abstract Timer getSensorTime();
+
+            /** Returns a counter for usage count when in the background. */
+            public abstract Counter getSensorBgCount();
         }
 
         public class Pid {
@@ -3318,13 +3324,16 @@ public abstract class BatteryStats implements Parcelable {
                 final Uid.Sensor se = sensors.valueAt(ise);
                 final int sensorNumber = sensors.keyAt(ise);
                 final Timer timer = se.getSensorTime();
+                final Counter bgCounter = se.getSensorBgCount();
                 if (timer != null) {
                     // Convert from microseconds to milliseconds with rounding
                     final long totalTime = (timer.getTotalTimeLocked(rawRealtime, which) + 500)
                             / 1000;
                     final int count = timer.getCountLocked(which);
+                    final int bgCount = bgCounter != null ? bgCounter.getCountLocked(which) : 0;
                     if (totalTime != 0) {
-                        dumpLine(pw, uid, category, SENSOR_DATA, sensorNumber, totalTime, count);
+                        dumpLine(pw, uid, category, SENSOR_DATA, sensorNumber, totalTime, count,
+                                bgCount);
                     }
                 }
             }
@@ -4493,17 +4502,25 @@ public abstract class BatteryStats implements Parcelable {
                 sb.append(": ");
 
                 final Timer timer = se.getSensorTime();
+                final Counter bgCounter = se.getSensorBgCount();
                 if (timer != null) {
                     // Convert from microseconds to milliseconds with rounding
                     final long totalTime = (timer.getTotalTimeLocked(
                             rawRealtime, which) + 500) / 1000;
                     final int count = timer.getCountLocked(which);
+                    final int bgCount = bgCounter != null ? bgCounter.getCountLocked(which) : 0;
                     //timer.logState();
                     if (totalTime != 0) {
                         formatTimeMs(sb, totalTime);
                         sb.append("realtime (");
                         sb.append(count);
-                        sb.append(" times)");
+                        sb.append(" times");
+                        if (bgCount > 0) {
+                            sb.append(", ");
+                            sb.append(bgCount);
+                            sb.append(" bg");
+                        }
+                        sb.append(")");
                     } else {
                         sb.append("(not used)");
                     }
