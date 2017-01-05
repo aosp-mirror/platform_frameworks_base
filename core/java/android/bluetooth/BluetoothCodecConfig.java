@@ -47,7 +47,13 @@ public final class BluetoothCodecConfig implements Parcelable {
     public static final String EXTRA_PREVIOUS_CODEC_CONFIG =
         "android.bluetooth.codec.extra.PREVIOUS_CODEC_CONFIG";
 
+    // Add an entry for each source codec here.
+    // NOTE: The values should be same as those listed in the following file:
+    //   hardware/libhardware/include/hardware/bt_av.h
     public static final int SOURCE_CODEC_TYPE_SBC     = 0;
+    public static final int SOURCE_CODEC_TYPE_APTX    = 1;
+    public static final int SOURCE_CODEC_TYPE_APTX_HD = 2;
+
     public static final int SOURCE_CODEC_TYPE_INVALID = 1000 * 1000;
 
     public static final int CODEC_PRIORITY_DEFAULT = 0;
