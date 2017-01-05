@@ -2192,6 +2192,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             mFocusedTask.dump("", writer);
         }
 
+        int numTaskViews = mTaskViews.size();
+        for (int i = 0; i < numTaskViews; i++) {
+            mTaskViews.get(i).dump(innerPrefix, writer);
+        }
+
         mLayoutAlgorithm.dump(innerPrefix, writer);
         mStackScroller.dump(innerPrefix, writer);
     }
