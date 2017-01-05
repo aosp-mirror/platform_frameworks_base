@@ -344,7 +344,7 @@
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"নেটওয়ার্ক নিরীক্ষণ\nকরা হতে পারে"</string>
     <string name="description_target_search" msgid="3091587249776033139">"অনুসন্ধান করুন"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> এর জন্য উপরের দিকে স্লাইড করুন৷"</string>
-    <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> এর জন্য বাম দিকে স্লাইড করুন৷"</string>
+    <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> এর জন্য বাঁ দিকে স্লাইড করুন৷"</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"আপনার নির্দিষ্ট অ্যালার্ম, অনুস্মারক, ইভেন্ট, এবং কলারগুলি ব্যতীত আপনাকে শব্দ এবং কম্পনগুলির দ্বারা বিরক্ত করা হবে না৷"</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"কাস্টমাইজ করুন"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"এটি অ্যালার্ম, সংগীত, ভিডিও এবং গেমগুলি থেকে আসা সমস্ত রকমের ধ্বনি এবং কম্পনগুলিকে বন্ধ করে৷ আপনি এখনও ফোন কলগুলি করতে পারবেন৷"</string>
@@ -541,7 +541,7 @@
     <string name="keyboard_key_back" msgid="2337450286042721351">"ফিরুন"</string>
     <string name="keyboard_key_dpad_up" msgid="5584144111755734686">"উপরে"</string>
     <string name="keyboard_key_dpad_down" msgid="7331518671788337815">"নিচে"</string>
-    <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"বাম"</string>
+    <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"বাঁ"</string>
     <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"ডান"</string>
     <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"কেন্দ্র"</string>
     <string name="keyboard_key_tab" msgid="3871485650463164476">"ট্যাব"</string>
@@ -628,7 +628,7 @@
   </string-array>
     <string name="other" msgid="4060683095962566764">"অন্যান্য"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"বিভক্ত-স্ক্রীন বিভাজক"</string>
-    <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"বাম দিকের অংশ নিয়ে পূর্ণ স্ক্রীন"</string>
+    <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"বাঁ দিকের অংশ নিয়ে পূর্ণ স্ক্রীন"</string>
     <string name="accessibility_action_divider_left_70" msgid="3612060638991687254">"৭০% বাকি আছে"</string>
     <string name="accessibility_action_divider_left_50" msgid="1248083470322193075">"৫০% বাকি আছে"</string>
     <string name="accessibility_action_divider_left_30" msgid="543324403127069386">"৩০% বাকি আছে"</string>
