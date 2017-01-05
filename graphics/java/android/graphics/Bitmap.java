@@ -1746,6 +1746,15 @@ public final class Bitmap implements Parcelable {
         nativePrepareToDraw(mNativePtr);
     }
 
+    /**
+     *
+     * @return {@link GraphicBuffer} which is internally used by hardware bitmap
+     * @hide
+     */
+    public GraphicBuffer createGraphicBufferHandle() {
+        return nativeCreateGraphicBufferHandle(mNativePtr);
+    }
+
     //////////// native methods
 
     private static native Bitmap nativeCreate(int[] colors, int offset,
@@ -1806,4 +1815,5 @@ public final class Bitmap implements Parcelable {
     private static native int nativeGetAllocationByteCount(long nativeBitmap);
     private static native Bitmap nativeCopyPreserveInternalConfig(long nativeBitmap);
     private static native Bitmap nativeCreateHardwareBitmap(GraphicBuffer buffer);
+    private static native GraphicBuffer nativeCreateGraphicBufferHandle(long nativeBitmap);
 }

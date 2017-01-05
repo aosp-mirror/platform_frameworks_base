@@ -1292,7 +1292,7 @@ static jint Bitmap_getAllocationByteCount(JNIEnv* env, jobject, jlong bitmapPtr)
     return static_cast<jint>(bitmapHandle->getAllocationByteCount());
 }
 
-static jobject Bitmap_nativeCopyPreserveInternalConfig(JNIEnv* env, jobject, jlong bitmapPtr) {
+static jobject Bitmap_copyPreserveInternalConfig(JNIEnv* env, jobject, jlong bitmapPtr) {
     LocalScopedBitmap bitmapHandle(bitmapPtr);
     LOG_ALWAYS_FATAL_IF(!bitmapHandle->isHardware(),
             "Hardware config is only supported config in Bitmap_nativeCopyPreserveInternalConfig");
@@ -1317,6 +1317,16 @@ static jobject Bitmap_createHardwareBitmap(JNIEnv* env, jobject, jobject graphic
         return NULL;
     }
     return bitmap::createBitmap(env, bitmap.release(), android::bitmap::kBitmapCreateFlag_None);
+}
+
+static jobject Bitmap_createGraphicBufferHandle(JNIEnv* env, jobject, jlong bitmapPtr) {
+    LocalScopedBitmap bitmapHandle(bitmapPtr);
+    LOG_ALWAYS_FATAL_IF(!bitmapHandle->isHardware(),
+            "Hardware config is only supported config in Bitmap_getGraphicBuffer");
+
+    Bitmap& hwuiBitmap = bitmapHandle->bitmap();
+    sp<GraphicBuffer> buffer(hwuiBitmap.graphicBuffer());
+    return createJavaGraphicBuffer(env, buffer);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1378,9 +1388,11 @@ static const JNINativeMethod gBitmapMethods[] = {
     {   "nativePrepareToDraw",      "(J)V", (void*)Bitmap_prepareToDraw },
     {   "nativeGetAllocationByteCount", "(J)I", (void*)Bitmap_getAllocationByteCount },
     {   "nativeCopyPreserveInternalConfig", "(J)Landroid/graphics/Bitmap;",
-        (void*)Bitmap_nativeCopyPreserveInternalConfig },
+        (void*)Bitmap_copyPreserveInternalConfig },
     {   "nativeCreateHardwareBitmap", "(Landroid/graphics/GraphicBuffer;)Landroid/graphics/Bitmap;",
-        (void*) Bitmap_createHardwareBitmap }
+        (void*) Bitmap_createHardwareBitmap },
+    {   "nativeCreateGraphicBufferHandle", "(J)Landroid/graphics/GraphicBuffer;",
+        (void*) Bitmap_createGraphicBufferHandle }
 };
 
 int register_android_graphics_Bitmap(JNIEnv* env)

@@ -58,6 +58,8 @@ static const bool kDebugGraphicBuffer = false;
 
 static struct {
     jfieldID mNativeObject;
+    jclass mClass;
+    jmethodID mConstructorMethodID;
 } gGraphicBufferClassInfo;
 
 static struct {
@@ -266,6 +268,15 @@ sp<GraphicBuffer> graphicBufferForJavaObject(JNIEnv* env, jobject obj) {
     }
     return NULL;
 }
+
+jobject createJavaGraphicBuffer(JNIEnv* env, const sp<GraphicBuffer>& buffer) {
+    GraphicBufferWrapper* wrapper = new GraphicBufferWrapper(buffer);
+    jobject obj = env->NewObject(gGraphicBufferClassInfo.mClass,
+            gGraphicBufferClassInfo.mConstructorMethodID, buffer->getWidth(), buffer->getHeight(),
+            buffer->getPixelFormat(), buffer->getUsage(), reinterpret_cast<jlong>(wrapper));
+    return obj;
+}
+
 };
 
 using namespace android;
@@ -291,10 +302,13 @@ static const JNINativeMethod gMethods[] = {
 };
 
 int register_android_graphics_GraphicBuffer(JNIEnv* env) {
-    jclass clazz = FindClassOrDie(env, "android/graphics/GraphicBuffer");
-    gGraphicBufferClassInfo.mNativeObject = GetFieldIDOrDie(env, clazz, "mNativeObject", "J");
+    gGraphicBufferClassInfo.mClass = MakeGlobalRefOrDie(env, FindClassOrDie(env, kClassPathName));
+    gGraphicBufferClassInfo.mNativeObject = GetFieldIDOrDie(env, gGraphicBufferClassInfo.mClass,
+            "mNativeObject", "J");
+    gGraphicBufferClassInfo.mConstructorMethodID = env->GetMethodID(gGraphicBufferClassInfo.mClass,
+            "<init>", "(IIIIJ)V");
 
-    clazz = FindClassOrDie(env, "android/graphics/Rect");
+    jclass clazz = FindClassOrDie(env, "android/graphics/Rect");
     gRectClassInfo.set = GetMethodIDOrDie(env, clazz, "set", "(IIII)V");
     gRectClassInfo.left = GetFieldIDOrDie(env, clazz, "left", "I");
     gRectClassInfo.top = GetFieldIDOrDie(env, clazz, "top", "I");
