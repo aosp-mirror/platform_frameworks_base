@@ -22,15 +22,13 @@ import android.os.Trace;
 import android.util.DisplayMetrics;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ConcurrentUtils;
 
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
@@ -51,21 +49,8 @@ class ParallelPackageParser implements AutoCloseable {
 
     private final BlockingQueue<ParseResult> mQueue = new ArrayBlockingQueue<>(QUEUE_CAPACITY);
 
-    private final ExecutorService mService = Executors.newFixedThreadPool(MAX_THREADS,
-            new ThreadFactory() {
-                private final AtomicInteger threadNum = new AtomicInteger(0);
-
-                @Override
-                public Thread newThread(final Runnable r) {
-                    return new Thread("package-parsing-thread" + threadNum.incrementAndGet()) {
-                        @Override
-                        public void run() {
-                            Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
-                            r.run();
-                        }
-                    };
-                }
-            });
+    private final ExecutorService mService = ConcurrentUtils.newFixedThreadPool(MAX_THREADS,
+            "package-parsing-thread", Process.THREAD_PRIORITY_FOREGROUND);
 
     ParallelPackageParser(String[] separateProcesses, boolean onlyCoreApps,
             DisplayMetrics metrics) {

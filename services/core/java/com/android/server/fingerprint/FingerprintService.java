@@ -54,7 +54,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
-import com.android.server.FgThread;
+import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
 
 import org.json.JSONArray;
@@ -1077,7 +1077,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     @Override
     public void onStart() {
         publishBinderService(Context.FINGERPRINT_SERVICE, new FingerprintServiceWrapper());
-        FgThread.getHandler().post(() -> getFingerprintDaemon());
+        SystemServerInitThreadPool.get().submit(this::getFingerprintDaemon, TAG + ".onStart");
         listenForUserSwitches();
     }
 

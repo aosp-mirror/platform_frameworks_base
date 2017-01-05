@@ -208,11 +208,13 @@ final class UiModeManagerService extends SystemService {
                 Settings.Secure.UI_NIGHT_MODE, defaultNightMode);
 
         // Update the initial, static configurations.
-        synchronized (this) {
-            updateConfigurationLocked();
-            sendConfigurationLocked();
-        }
+        SystemServerInitThreadPool.get().submit(() -> {
+            synchronized (mLock) {
+                updateConfigurationLocked();
+                sendConfigurationLocked();
+            }
 
+        }, TAG + ".onStart");
         publishBinderService(Context.UI_MODE_SERVICE, mService);
     }
 
