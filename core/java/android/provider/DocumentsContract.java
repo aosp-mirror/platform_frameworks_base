@@ -393,6 +393,9 @@ public final class DocumentsContract {
          * Flag indicating that a document is virtual, and doesn't have byte
          * representation in the MIME type specified as {@link #COLUMN_MIME_TYPE}.
          *
+         * <p><em>Virtual documents must have at least one alternative streamable
+         * format via {@link DocumentsProvider#openTypedDocument}</em>
+         *
          * @see #COLUMN_FLAGS
          * @see #COLUMN_MIME_TYPE
          * @see DocumentsProvider#openTypedDocument(String, String, Bundle,
