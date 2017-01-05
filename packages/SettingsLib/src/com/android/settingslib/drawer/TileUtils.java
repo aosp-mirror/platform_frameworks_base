@@ -147,7 +147,7 @@ public class TileUtils {
     public static final String META_DATA_PREFERENCE_SUMMARY_URI =
             "com.android.settings.summary_uri";
 
-    private static final String SETTING_PKG = "com.android.settings";
+    public static final String SETTING_PKG = "com.android.settings";
 
     /**
      * Build a list of DashboardCategory. Each category must be defined in manifest.
@@ -167,39 +167,43 @@ public class TileUtils {
      */
     public static List<DashboardCategory> getCategories(Context context,
             Map<Pair<String, String>, Tile> cache, boolean categoryDefinedInManifest) {
-        return getCategories(context, cache, categoryDefinedInManifest, null);
+        return getCategories(context, cache, categoryDefinedInManifest, null, SETTING_PKG);
     }
 
     /**
      * Build a list of DashboardCategory.
      * @param categoryDefinedInManifest If true, an dummy activity must exists in manifest to
      * represent this category (eg: .Settings$DeviceSettings)
-     * @param extraAction additional intent filter action to be used to build the dashboard
+     * @param extraAction additional intent filter action to be usetileutild to build the dashboard
      * categories
      */
     public static List<DashboardCategory> getCategories(Context context,
             Map<Pair<String, String>, Tile> cache, boolean categoryDefinedInManifest,
-            String extraAction) {
+            String extraAction, String settingPkg) {
         final long startTime = System.currentTimeMillis();
         boolean setup = Global.getInt(context.getContentResolver(), Global.DEVICE_PROVISIONED, 0)
                 != 0;
         ArrayList<Tile> tiles = new ArrayList<>();
-        UserManager userManager = UserManager.get(context);
+        UserManager userManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
         for (UserHandle user : userManager.getUserProfiles()) {
             // TODO: Needs much optimization, too many PM queries going on here.
             if (user.getIdentifier() == ActivityManager.getCurrentUser()) {
                 // Only add Settings for this user.
-                getTilesForAction(context, user, SETTINGS_ACTION, cache, null, tiles, true);
+                getTilesForAction(context, user, SETTINGS_ACTION, cache, null, tiles, true,
+                        settingPkg);
                 getTilesForAction(context, user, OPERATOR_SETTINGS, cache,
-                        OPERATOR_DEFAULT_CATEGORY, tiles, false, true);
+                        OPERATOR_DEFAULT_CATEGORY, tiles, false, true, settingPkg);
                 getTilesForAction(context, user, MANUFACTURER_SETTINGS, cache,
-                        MANUFACTURER_DEFAULT_CATEGORY, tiles, false, true);
+                        MANUFACTURER_DEFAULT_CATEGORY, tiles, false, true, settingPkg);
             }
             if (setup) {
-                getTilesForAction(context, user, EXTRA_SETTINGS_ACTION, cache, null, tiles, false);
-                getTilesForAction(context, user, IA_SETTINGS_ACTION, cache, null, tiles, false);
+                getTilesForAction(context, user, EXTRA_SETTINGS_ACTION, cache, null, tiles, false,
+                        settingPkg);
+                getTilesForAction(context, user, IA_SETTINGS_ACTION, cache, null, tiles, false,
+                        settingPkg);
                 if (extraAction != null) {
-                    getTilesForAction(context, user, extraAction, cache, null, tiles, false);
+                    getTilesForAction(context, user, extraAction, cache, null, tiles, false,
+                            settingPkg);
                 }
             }
         }
@@ -263,18 +267,19 @@ public class TileUtils {
 
     private static void getTilesForAction(Context context,
             UserHandle user, String action, Map<Pair<String, String>, Tile> addedCache,
-            String defaultCategory, ArrayList<Tile> outTiles, boolean requireSettings) {
+            String defaultCategory, ArrayList<Tile> outTiles, boolean requireSettings,
+            String settingPkg) {
         getTilesForAction(context, user, action, addedCache, defaultCategory, outTiles,
-                requireSettings, requireSettings);
+                requireSettings, requireSettings, settingPkg);
     }
 
     private static void getTilesForAction(Context context,
             UserHandle user, String action, Map<Pair<String, String>, Tile> addedCache,
             String defaultCategory, ArrayList<Tile> outTiles, boolean requireSettings,
-            boolean usePriority) {
+            boolean usePriority, String settingPkg) {
         Intent intent = new Intent(action);
         if (requireSettings) {
-            intent.setPackage(SETTING_PKG);
+            intent.setPackage(settingPkg);
         }
         getTilesForIntent(context, user, intent, addedCache, defaultCategory, outTiles,
                 usePriority, true);

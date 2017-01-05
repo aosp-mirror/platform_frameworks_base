@@ -16,6 +16,8 @@
 
 package com.android.settingslib.drawer;
 
+import android.app.ActivityManager;
+import static org.mockito.Mockito.verify;
 import android.content.IContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -36,6 +38,7 @@ import android.util.ArrayMap;
 import android.util.Pair;
 
 import com.android.settingslib.TestConfig;
+import static org.mockito.Mockito.atLeastOnce;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -43,6 +46,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.shadows.ShadowApplication;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
@@ -59,6 +63,8 @@ import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
+import org.mockito.ArgumentCaptor;
+
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
@@ -97,7 +103,7 @@ public class TileUtilsTest {
         List<Tile> outTiles = new ArrayList<>();
         List<ResolveInfo> info = new ArrayList<>();
         info.add(newInfo(true, testCategory));
-
+        Map<Pair<String, String>, Tile> cache = new ArrayMap<>();
         when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
                 .thenReturn(info);
 
@@ -169,9 +175,30 @@ public class TileUtilsTest {
         }), anyInt(), anyInt())).thenReturn(info);
 
         List<DashboardCategory> categoryList = TileUtils.getCategories(
-            mContext, cache, false /* categoryDefinedInManifest */, testAction);
-
+            mContext, cache, false /* categoryDefinedInManifest */, testAction,
+            TileUtils.SETTING_PKG);
         assertThat(categoryList.get(0).tiles.get(0).category).isEqualTo(testCategory);
+    }
+
+    @Test
+    public void getCategories_withPackageName() throws Exception {
+        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+        Map<Pair<String, String>, Tile> cache = new ArrayMap<>();
+        Global.putInt(mContext.getContentResolver(), Global.DEVICE_PROVISIONED, 1);
+        when(mContext.getSystemService(Context.USER_SERVICE)).thenReturn(mUserManager);
+        List<UserHandle> userHandleList = new ArrayList<>();
+
+        userHandleList.add(new UserHandle(ActivityManager.getCurrentUser()));
+        when(mUserManager.getUserProfiles()).thenReturn(userHandleList);
+
+        TileUtils.getCategories(
+            mContext, cache, false /* categoryDefinedInManifest */, null /* action */,
+            TileUtils.SETTING_PKG);
+        verify(mPackageManager, atLeastOnce()).queryIntentActivitiesAsUser(
+            intentCaptor.capture(), anyInt(), anyInt());
+
+        assertThat(intentCaptor.getAllValues().get(0).getPackage())
+            .isEqualTo(TileUtils.SETTING_PKG);
     }
 
     @Test
