@@ -122,9 +122,9 @@ class FileDescriptorTable {
   // Creates a new FileDescriptorTable. This function scans
   // /proc/self/fd for the list of open file descriptors and collects
   // information about them. Returns NULL if an error occurs.
-  static FileDescriptorTable* Create();
+  static FileDescriptorTable* Create(const std::vector<int>& fds_to_ignore);
 
-  bool Restat();
+  bool Restat(const std::vector<int>& fds_to_ignore);
 
   // Reopens all file descriptors that are contained in the table. Returns true
   // if all descriptors were successfully re-opened or detached, and false if an
