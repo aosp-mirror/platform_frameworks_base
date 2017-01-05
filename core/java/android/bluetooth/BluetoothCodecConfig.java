@@ -53,6 +53,7 @@ public final class BluetoothCodecConfig implements Parcelable {
     public static final int SOURCE_CODEC_TYPE_SBC     = 0;
     public static final int SOURCE_CODEC_TYPE_APTX    = 1;
     public static final int SOURCE_CODEC_TYPE_APTX_HD = 2;
+    public static final int SOURCE_CODEC_TYPE_LDAC    = 3;
 
     public static final int SOURCE_CODEC_TYPE_INVALID = 1000 * 1000;
 
