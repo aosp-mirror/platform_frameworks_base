@@ -147,8 +147,6 @@ public class PowerUI extends SystemUI {
             filter.addAction(Intent.ACTION_SCREEN_OFF);
             filter.addAction(Intent.ACTION_SCREEN_ON);
             filter.addAction(Intent.ACTION_USER_SWITCHED);
-            filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGING);
-            filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
             mContext.registerReceiver(this, filter, null, mHandler);
         }
 
