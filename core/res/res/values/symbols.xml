@@ -2739,7 +2739,9 @@
   <!-- Screen-size-dependent modes for picker dialogs. -->
   <java-symbol type="integer" name="time_picker_mode" />
   <java-symbol type="integer" name="date_picker_mode" />
-
   <java-symbol type="bool" name="config_permissionReviewRequired" />
 
+  <java-symbol type="bool" name="use_lock_pattern_drawable" />
+  <java-symbol type="drawable" name="lockscreen_notselected" />
+  <java-symbol type="drawable" name="lockscreen_selected" />
 </resources>
