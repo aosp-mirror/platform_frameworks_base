@@ -608,6 +608,7 @@ public class WifiConfiguration implements Parcelable {
      * if there has been a report of it having no internet access, and, it never have had
      * internet access in the past.
      */
+    @SystemApi
     public boolean hasNoInternetAccess() {
         return numNoInternetAccessReports > 0 && !validatedInternetAccess;
     }
@@ -619,6 +620,17 @@ public class WifiConfiguration implements Parcelable {
      * @hide
      */
     public boolean noInternetAccessExpected;
+
+    /**
+     * The WiFi configuration is expected not to have Internet access (e.g., a wireless printer, a
+     * Chromecast hotspot, etc.). This will be set if the user explicitly confirms a connection to
+     * this configuration and selects "don't ask again".
+     * @hide
+     */
+    @SystemApi
+    public boolean isNoInternetAccessExpected() {
+        return noInternetAccessExpected;
+    }
 
     /**
      * @hide
