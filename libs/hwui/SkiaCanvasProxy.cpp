@@ -19,6 +19,7 @@
 #include "hwui/Bitmap.h"
 
 #include <cutils/log.h>
+#include <SkLatticeIter.h>
 #include <SkPatchUtils.h>
 #include <SkPaint.h>
 #include <SkPath.h>
@@ -138,6 +139,39 @@ void SkiaCanvasProxy::onDrawBitmapNine(const SkBitmap& bitmap, const SkIRect& ce
         const SkRect& dst, const SkPaint*) {
     //TODO make nine-patch drawing a method on Canvas.h
     SkDEBUGFAIL("SkiaCanvasProxy::onDrawBitmapNine is not yet supported");
+}
+
+void SkiaCanvasProxy::onDrawImage(const SkImage* image, SkScalar left, SkScalar top,
+        const SkPaint* paint) {
+    SkBitmap skiaBitmap;
+    if (image->asLegacyBitmap(&skiaBitmap, SkImage::kRO_LegacyBitmapMode)) {
+        onDrawBitmap(skiaBitmap, left, top, paint);
+    }
+}
+
+void SkiaCanvasProxy::onDrawImageRect(const SkImage* image, const SkRect* srcPtr, const SkRect& dst,
+        const SkPaint* paint, SrcRectConstraint constraint) {
+    SkBitmap skiaBitmap;
+    if (image->asLegacyBitmap(&skiaBitmap, SkImage::kRO_LegacyBitmapMode)) {
+        sk_sp<Bitmap> bitmap = Bitmap::createFrom(skiaBitmap.info(), *skiaBitmap.pixelRef());
+        SkRect src = (srcPtr) ? *srcPtr : SkRect::MakeWH(image->width(), image->height());
+        mCanvas->drawBitmap(*bitmap, src.fLeft, src.fTop, src.fRight, src.fBottom,
+                dst.fLeft, dst.fTop, dst.fRight, dst.fBottom, paint);
+    }
+}
+
+void SkiaCanvasProxy::onDrawImageNine(const SkImage*, const SkIRect& center, const SkRect& dst,
+        const SkPaint*) {
+    SkDEBUGFAIL("SkiaCanvasProxy::onDrawImageNine is not yet supported");
+}
+
+void SkiaCanvasProxy::onDrawImageLattice(const SkImage* image, const Lattice& lattice,
+        const SkRect& dst, const SkPaint* paint) {
+    SkLatticeIter iter(lattice, dst);
+    SkRect srcR, dstR;
+    while (iter.next(&srcR, &dstR)) {
+        onDrawImageRect(image, &srcR, dstR, paint, SkCanvas::kStrict_SrcRectConstraint);
+    }
 }
 
 void SkiaCanvasProxy::onDrawVertices(VertexMode mode, int vertexCount, const SkPoint vertices[],
