@@ -655,6 +655,17 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
+     * Create hardware bitmap backed GraphicBuffer.
+     *
+     * @return Bitmap or null if this GraphicBuffer has unsupported PixelFormat.
+     *         currently PIXEL_FORMAT_RGBA_8888 is the only supported format
+     * @hide
+     */
+    public static Bitmap createHardwareBitmap(GraphicBuffer graphicBuffer) {
+        return nativeCreateHardwareBitmap(graphicBuffer);
+    }
+
+    /**
      * Creates a new bitmap, scaled from an existing bitmap, when possible. If the
      * specified width and height are the same as the current width and height of
      * the source bitmap, the source bitmap is returned and no new bitmap is
@@ -1735,6 +1746,15 @@ public final class Bitmap implements Parcelable {
         nativePrepareToDraw(mNativePtr);
     }
 
+    /**
+     *
+     * @return {@link GraphicBuffer} which is internally used by hardware bitmap
+     * @hide
+     */
+    public GraphicBuffer createGraphicBufferHandle() {
+        return nativeCreateGraphicBufferHandle(mNativePtr);
+    }
+
     //////////// native methods
 
     private static native Bitmap nativeCreate(int[] colors, int offset,
@@ -1794,4 +1814,6 @@ public final class Bitmap implements Parcelable {
     private static native void nativePrepareToDraw(long nativeBitmap);
     private static native int nativeGetAllocationByteCount(long nativeBitmap);
     private static native Bitmap nativeCopyPreserveInternalConfig(long nativeBitmap);
+    private static native Bitmap nativeCreateHardwareBitmap(GraphicBuffer buffer);
+    private static native GraphicBuffer nativeCreateGraphicBufferHandle(long nativeBitmap);
 }
