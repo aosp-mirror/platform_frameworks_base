@@ -24,4 +24,5 @@ interface IPlayer {
     oneway void start();
     oneway void pause();
     oneway void stop();
+    oneway void setVolume(float vol);
 }

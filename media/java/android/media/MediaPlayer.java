@@ -645,6 +645,8 @@ public class MediaPlayer extends PlayerBase
          * It's easier to create it here than in C++.
          */
         native_setup(new WeakReference<MediaPlayer>(this));
+
+        baseRegisterPlayer();
     }
 
     /*
@@ -1260,6 +1262,21 @@ public class MediaPlayer extends PlayerBase
     }
 
     private native void _pause() throws IllegalStateException;
+
+    @Override
+    void playerStart() {
+        start();
+    }
+
+    @Override
+    void playerPause() {
+        pause();
+    }
+
+    @Override
+    void playerStop() {
+        stop();
+    }
 
     /**
      * Set the low-level power management behavior for this MediaPlayer.  This

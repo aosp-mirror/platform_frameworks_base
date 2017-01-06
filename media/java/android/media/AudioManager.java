@@ -633,6 +633,15 @@ public class AudioManager {
 
     /**
      * @hide
+     * For test purposes only, will throw NPE with some methods that require a Context.
+     */
+    public AudioManager() {
+        mUseVolumeKeySounds = true;
+        mUseFixedVolume = false;
+    }
+
+    /**
+     * @hide
      */
     public AudioManager(Context context) {
         setContext(context);
