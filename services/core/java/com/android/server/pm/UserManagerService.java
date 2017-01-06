@@ -1523,7 +1523,7 @@ public class UserManagerService extends IUserManager.Stub {
             return false;
         }
         // Limit number of managed profiles that can be created
-        final int managedProfilesCount = getProfiles(userId, true).size() - 1;
+        final int managedProfilesCount = getProfiles(userId, false).size() - 1;
         final int profilesRemovedCount = managedProfilesCount > 0 && allowedToRemoveOne ? 1 : 0;
         if (managedProfilesCount - profilesRemovedCount >= getMaxManagedProfiles()) {
             return false;

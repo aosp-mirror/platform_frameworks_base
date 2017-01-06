@@ -16,26 +16,26 @@
 
 package com.android.server.pm;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import android.app.ApplicationPackageManager;
 import android.content.pm.UserInfo;
 import android.os.Looper;
-import android.os.UserManagerInternal;
 import android.os.UserHandle;
+import android.os.UserManagerInternal;
 import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
 import android.support.test.filters.MediumTest;
+import android.support.test.runner.AndroidJUnit4;
 
 import com.android.server.LocalServices;
 
+import java.util.List;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * <p>Run with:<pre>
@@ -64,101 +64,90 @@ public class UserManagerServiceCreateProfileTest {
                 UserHandle.USER_SYSTEM, users.get(0).id);
     }
 
+    @After
+    public void tearDown() {
+        removeUsers();
+    }
+
     @Test
     public void testGetProfiles() {
-        try {
-            // Pretend we have a secondary user with a profile.
-            UserInfo secondaryUser = addUser();
-            UserInfo profile = addProfile(secondaryUser);
+        // Pretend we have a secondary user with a profile.
+        UserInfo secondaryUser = addUser();
+        UserInfo profile = addProfile(secondaryUser);
 
-            // System user should still have no profile so getProfiles should just return 1 user.
-            List<UserInfo> users =
-                    mUserManagerService.getProfiles(UserHandle.USER_SYSTEM, /*excludeDying*/ false);
-            assertEquals("Profiles returned where none should exist", 1, users.size());
-            assertEquals("Missing system user from profile list of system user",
-                    UserHandle.USER_SYSTEM, users.get(0).id);
+        // System user should still have no profile so getProfiles should just return 1 user.
+        List<UserInfo> users =
+                mUserManagerService.getProfiles(UserHandle.USER_SYSTEM, /*excludeDying*/ false);
+        assertEquals("Profiles returned where none should exist", 1, users.size());
+        assertEquals("Missing system user from profile list of system user",
+                UserHandle.USER_SYSTEM, users.get(0).id);
 
-            // Secondary user should have 1 profile, so return that and itself.
-            users = mUserManagerService.getProfiles(secondaryUser.id, /*excludeDying*/ false);
-            assertEquals("Profiles returned where none should exist", 2, users.size());
-            assertTrue("Missing secondary user id", users.get(0).id == secondaryUser.id
-                    || users.get(1).id == secondaryUser.id);
-            assertTrue("Missing profile user id", users.get(0).id == profile.id
-                    || users.get(1).id == profile.id);
-        } finally {
-            removeUsers();
-        }
+        // Secondary user should have 1 profile, so return that and itself.
+        users = mUserManagerService.getProfiles(secondaryUser.id, /*excludeDying*/ false);
+        assertEquals("Profiles returned where none should exist", 2, users.size());
+        assertTrue("Missing secondary user id", users.get(0).id == secondaryUser.id
+                || users.get(1).id == secondaryUser.id);
+        assertTrue("Missing profile user id", users.get(0).id == profile.id
+                || users.get(1).id == profile.id);
     }
 
     @Test
     public void testProfileBadge() {
-        try {
-            // First profile for system user should get badge 0
-            assertEquals("First profile isn't given badge index 0", 0,
-                    mUserManagerService.getFreeProfileBadgeLU(UserHandle.USER_SYSTEM));
+        // First profile for system user should get badge 0
+        assertEquals("First profile isn't given badge index 0", 0,
+                mUserManagerService.getFreeProfileBadgeLU(UserHandle.USER_SYSTEM));
 
-            // Pretend we have a secondary user.
-            UserInfo secondaryUser = addUser();
+        // Pretend we have a secondary user.
+        UserInfo secondaryUser = addUser();
 
-            // Check first profile badge for secondary user is also 0.
-            assertEquals("First profile for secondary user isn't given badge index 0", 0,
-                    mUserManagerService.getFreeProfileBadgeLU(secondaryUser.id));
+        // Check first profile badge for secondary user is also 0.
+        assertEquals("First profile for secondary user isn't given badge index 0", 0,
+                mUserManagerService.getFreeProfileBadgeLU(secondaryUser.id));
 
-            // Shouldn't impact the badge for profile in system user
-            assertEquals("First profile isn't given badge index 0 with secondary user", 0,
-                    mUserManagerService.getFreeProfileBadgeLU(UserHandle.USER_SYSTEM));
+        // Shouldn't impact the badge for profile in system user
+        assertEquals("First profile isn't given badge index 0 with secondary user", 0,
+                mUserManagerService.getFreeProfileBadgeLU(UserHandle.USER_SYSTEM));
 
-            // Pretend a secondary user has a profile.
-            addProfile(secondaryUser);
+        // Pretend a secondary user has a profile.
+        addProfile(secondaryUser);
 
-            // Shouldn't have impacted the badge for the system user
-            assertEquals("First profile isn't given badge index 0 in secondary user", 0,
-                    mUserManagerService.getFreeProfileBadgeLU(UserHandle.USER_SYSTEM));
-        } finally {
-            removeUsers();
-        }
+        // Shouldn't have impacted the badge for the system user
+        assertEquals("First profile isn't given badge index 0 in secondary user", 0,
+                mUserManagerService.getFreeProfileBadgeLU(UserHandle.USER_SYSTEM));
     }
 
     @Test
     public void testProfileBadgeUnique() {
-        try {
-            List<UserInfo> users = mUserManagerService.getUsers(/* excludeDying */ false);
-            UserInfo system = users.get(0);
-            // Badges should get allocated 0 -> max
-            for (int i = 0; i < UserManagerService.getMaxManagedProfiles(); ++i) {
-                int nextBadge = mUserManagerService.getFreeProfileBadgeLU(UserHandle.USER_SYSTEM);
-                assertEquals("Wrong badge allocated", i, nextBadge);
-                UserInfo profile = addProfile(system);
-                profile.profileBadge = nextBadge;
-            }
-        } finally {
-            removeUsers();
+        List<UserInfo> users = mUserManagerService.getUsers(/* excludeDying */ false);
+        UserInfo system = users.get(0);
+        // Badges should get allocated 0 -> max
+        for (int i = 0; i < UserManagerService.getMaxManagedProfiles(); ++i) {
+            int nextBadge = mUserManagerService.getFreeProfileBadgeLU(UserHandle.USER_SYSTEM);
+            assertEquals("Wrong badge allocated", i, nextBadge);
+            UserInfo profile = addProfile(system);
+            profile.profileBadge = nextBadge;
         }
     }
 
     @Test
     public void testProfileBadgeReuse() {
-        try {
-            // Pretend we have a secondary user with a profile.
-            UserInfo secondaryUser = addUser();
-            UserInfo profile = addProfile(secondaryUser);
-            // Add the profile it to the users being removed.
-            mUserManagerService.addRemovingUserIdLocked(profile.id);
-            // We should reuse the badge from the profile being removed.
-            assertEquals("Badge index not reused while removing a user", 0,
-                    mUserManagerService.getFreeProfileBadgeLU(secondaryUser.id));
+        // Pretend we have a secondary user with a profile.
+        UserInfo secondaryUser = addUser();
+        UserInfo profile = addProfile(secondaryUser);
+        // Add the profile it to the users being removed.
+        mUserManagerService.addRemovingUserIdLocked(profile.id);
+        // We should reuse the badge from the profile being removed.
+        assertEquals("Badge index not reused while removing a user", 0,
+                mUserManagerService.getFreeProfileBadgeLU(secondaryUser.id));
 
-            // Edge case of reuse that only applies if we ever support 3 managed profiles
-            // We should prioritise using lower badge indexes
-            if (UserManagerService.getMaxManagedProfiles() > 2) {
-                UserInfo profileBadgeOne = addProfile(secondaryUser);
-                profileBadgeOne.profileBadge = 1;
-                // 0 and 2 are free, we should reuse 0 rather than 2.
-                assertEquals("Lower index not used", 0,
-                        mUserManagerService.getFreeProfileBadgeLU(secondaryUser.id));
-            }
-        } finally {
-            removeUsers();
+        // Edge case of reuse that only applies if we ever support 3 managed profiles
+        // We should prioritise using lower badge indexes
+        if (UserManagerService.getMaxManagedProfiles() > 2) {
+            UserInfo profileBadgeOne = addProfile(secondaryUser);
+            profileBadgeOne.profileBadge = 1;
+            // 0 and 2 are free, we should reuse 0 rather than 2.
+            assertEquals("Lower index not used", 0,
+                    mUserManagerService.getFreeProfileBadgeLU(secondaryUser.id));
         }
     }
 
@@ -172,6 +161,49 @@ public class UserManagerServiceCreateProfileTest {
                 ApplicationPackageManager.CORP_BADGE_LABEL_RES_ID.length);
     }
 
+    @Test
+    public void testCanAddMoreManagedProfiles_removeProfile() {
+        // if device is low-ram or doesn't support managed profiles for some other reason, just
+        // skip the test
+        if (!mUserManagerService.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM,
+                false /* disallow remove */)) {
+            return;
+        }
+
+        // GIVEN we've reached the limit of managed profiles possible on the system user
+        while (mUserManagerService.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM,
+                false /* disallow remove */)) {
+            addProfile(mUserManagerService.getPrimaryUser());
+        }
+
+        // THEN you should be able to add a new profile if you remove an existing one
+        assertTrue("Cannot add a managed profile by removing another one",
+                mUserManagerService.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM,
+                        true /* allow remove */));
+    }
+
+    @Test
+    public void testCanAddMoreManagedProfiles_removeDisabledProfile() {
+        // if device is low-ram or doesn't support managed profiles for some other reason, just
+        // skip the test
+        if (!mUserManagerService.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM,
+                false /* disallow remove */)) {
+            return;
+        }
+
+        // GIVEN we've reached the limit of managed profiles possible on the system user
+        // GIVEN that the profiles are not enabled yet
+        while (mUserManagerService.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM,
+                false /* disallow remove */)) {
+            addProfile(mUserManagerService.getPrimaryUser(), true /* disabled */);
+        }
+
+        // THEN you should be able to add a new profile if you remove an existing one
+        assertTrue("Cannot add a managed profile by removing another one",
+                mUserManagerService.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM,
+                        true /* allow remove */));
+    }
+
     private void removeUsers() {
         List<UserInfo> users = mUserManagerService.getUsers(/* excludeDying */ false);
         for (UserInfo user: users) {
@@ -182,10 +214,17 @@ public class UserManagerServiceCreateProfileTest {
     }
 
     private UserInfo addProfile(UserInfo user) {
+        return addProfile(user, false);
+    }
+
+    private UserInfo addProfile(UserInfo user, boolean disabled) {
         user.profileGroupId = user.id;
+        int flags = UserInfo.FLAG_MANAGED_PROFILE;
+        if (disabled) {
+            flags |= UserInfo.FLAG_DISABLED;
+        }
         UserInfo profile = new UserInfo(
-                mUserManagerService.getNextAvailableId(), "profile",
-                UserInfo.FLAG_MANAGED_PROFILE);
+                mUserManagerService.getNextAvailableId(), "profile", flags);
         profile.profileGroupId = user.id;
         mUserManagerService.putUserInfo(profile);
         return profile;
