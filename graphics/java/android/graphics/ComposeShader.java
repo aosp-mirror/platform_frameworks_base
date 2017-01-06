@@ -22,8 +22,8 @@ package android.graphics;
 public class ComposeShader extends Shader {
 
     private int mPorterDuffMode;
-    private final Shader mShaderA;
-    private final Shader mShaderB;
+    final Shader mShaderA;
+    final Shader mShaderB;
 
     /** Create a new compose shader, given shaders A, B, and a combining mode.
         When the mode is applied, it will be given the result from shader A as its
