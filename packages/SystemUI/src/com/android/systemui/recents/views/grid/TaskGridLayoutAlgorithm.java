@@ -30,7 +30,7 @@ import com.android.systemui.recents.views.TaskViewTransform;
 public class TaskGridLayoutAlgorithm  {
 
     private final String TAG = "TaskGridLayoutAlgorithm";
-    private final int MAX_LAYOUT_TASK_COUNT = 8;
+    public static final int MAX_LAYOUT_TASK_COUNT = 8;
 
     /** The horizontal padding around the whole recents view. */
     private int mPaddingLeftRight;
@@ -135,6 +135,16 @@ public class TaskGridLayoutAlgorithm  {
         updateAppAspectRatio();
     }
 
+    /**
+     * Returns the proper task view transform of a certain task view, according to its index and the
+     * amount of task views.
+     * @param taskIndex     The index of the task view whose transform we want. It's never greater
+     *                      than {@link MAX_LAYOUT_TASK_COUNT}.
+     * @param taskCount     The current amount of task views.
+     * @param transformOut  The result transform that this method returns.
+     * @param stackLayout   The base stack layout algorithm.
+     * @return  The expected transform of the (taskIndex)th task view.
+     */
     public TaskViewTransform getTransform(int taskIndex, int taskCount,
         TaskViewTransform transformOut, TaskStackLayoutAlgorithm stackLayout) {
 
