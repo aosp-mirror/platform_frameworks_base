@@ -3850,9 +3850,9 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
-        // If this isn't coming from the current user, ignore it.
-        if (Binder.getCallingUserHandle().getIdentifier() != mCurrentUserId) {
-            Log.d(TAG_WM, "non-current user, ignore disableKeyguard");
+        // If this isn't coming from the current profiles, ignore it.
+        if (!isCurrentProfileLocked(UserHandle.getCallingUserId())) {
+            Log.d(TAG_WM, "non-current profiles, ignore disableKeyguard");
             return;
         }
 
