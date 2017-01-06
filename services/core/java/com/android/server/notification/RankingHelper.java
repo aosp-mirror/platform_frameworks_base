@@ -445,7 +445,6 @@ public class RankingHelper implements RankingConfig {
             channel.setBypassDnd(r.priority == Notification.PRIORITY_MAX);
             channel.setLockscreenVisibility(r.visibility);
         }
-        channel.setAllowed(true);
         clearLockedFields(channel);
         if (channel.getLockscreenVisibility() == Notification.VISIBILITY_PUBLIC) {
             channel.setLockscreenVisibility(Ranking.VISIBILITY_NO_OVERRIDE);
@@ -515,9 +514,6 @@ public class RankingHelper implements RankingConfig {
             } else {
                 channel.setLockscreenVisibility(updatedChannel.getLockscreenVisibility());
             }
-        }
-        if ((channel.getUserLockedFields() & NotificationChannel.USER_LOCKED_ALLOWED) == 0) {
-            channel.setAllowed(updatedChannel.isAllowed());
         }
         if ((channel.getUserLockedFields() & NotificationChannel.USER_LOCKED_SHOW_BADGE) == 0) {
             channel.setShowBadge(updatedChannel.canShowBadge());

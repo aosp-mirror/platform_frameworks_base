@@ -1552,7 +1552,7 @@ public class NotificationManagerService extends SystemService {
         public void updateNotificationChannelForPackage(String pkg, int uid,
                 NotificationChannel channel) {
             enforceSystemOrSystemUI("Caller not system or systemui");
-            if (!channel.isAllowed()) {
+            if (channel.getImportance() == NotificationManager.IMPORTANCE_NONE) {
                 // cancel
                 cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channel.getId(), 0, 0, true,
                         UserHandle.getUserId(Binder.getCallingUid()), REASON_CHANNEL_BANNED,
@@ -2441,7 +2441,7 @@ public class NotificationManagerService extends SystemService {
         public void updateNotificationChannelFromAssistant(INotificationListener token, String pkg,
                 NotificationChannel channel) throws RemoteException {
             ManagedServiceInfo info = mNotificationAssistants.checkServiceTokenLocked(token);
-            if (!channel.isAllowed()) {
+            if (channel.getImportance() == NotificationManager.IMPORTANCE_NONE) {
                 // cancel
                 cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channel.getId(), 0, 0, true,
                         info.userid, REASON_CHANNEL_BANNED, null);
@@ -2985,7 +2985,7 @@ public class NotificationManagerService extends SystemService {
             }
 
             final boolean isBlocked = r.getImportance() == NotificationManager.IMPORTANCE_NONE
-                    || !r.getChannel().isAllowed()
+                    || r.getChannel().getImportance() == NotificationManager.IMPORTANCE_NONE
                     || !noteNotificationOp(pkg, callingUid);
             if (isBlocked) {
                 Slog.e(TAG, "Suppressing notification from package by user request.");
