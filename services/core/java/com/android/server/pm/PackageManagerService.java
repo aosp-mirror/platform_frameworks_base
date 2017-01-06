@@ -102,7 +102,6 @@ import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_SUCCES
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
@@ -566,6 +565,18 @@ public class PackageManagerService extends IPackageManager.Stub {
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_PHONE_NUMBER);
 
+
+    /**
+     * Version number for the package parser cache. Increment this whenever the format or
+     * extent of cached data changes. See {@code PackageParser#setCacheDir}.
+     */
+    private static final String PACKAGE_PARSER_CACHE_VERSION = "1";
+
+    /**
+     * Whether the package parser cache is enabled.
+     */
+    private static final boolean DEFAULT_PACKAGE_PARSER_CACHE_ENABLED = false;
+
     final ServiceThread mHandlerThread;
 
     final PackageHandler mHandler;
@@ -803,6 +814,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     private List<String> mKeepUninstalledPackages;
 
     private UserManagerInternal mUserManagerInternal;
+
+    private File mCacheDir;
 
     private static class IFVerificationParams {
         PackageParser.Package pkg;
@@ -2353,6 +2366,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
 
+            mCacheDir = preparePackageParserCache(mIsUpgrade);
+
             // Set flag to monitor and not change apk file paths when
             // scanning install directories.
             int scanFlags = SCAN_BOOTING | SCAN_INITIAL;
@@ -2813,6 +2828,35 @@ public class PackageManagerService extends IPackageManager.Stub {
         // Expose private service for system components to use.
         LocalServices.addService(PackageManagerInternal.class, new PackageManagerInternalImpl());
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+    }
+
+    private static File preparePackageParserCache(boolean isUpgrade) {
+        if (!DEFAULT_PACKAGE_PARSER_CACHE_ENABLED) {
+            return null;
+        }
+
+        if (SystemProperties.getBoolean("ro.boot.disable_package_cache", false)) {
+            Slog.i(TAG, "Disabling package parser cache due to system property.");
+            return null;
+        }
+
+        // The base directory for the package parser cache lives under /data/system/.
+        final File cacheBaseDir = FileUtils.createDir(Environment.getDataSystemDirectory(),
+                "package_cache");
+        if (cacheBaseDir == null) {
+            return null;
+        }
+
+        // If this is a system upgrade scenario, delete the contents of the package cache dir.
+        // This also serves to "GC" unused entries when the package cache version changes (which
+        // can only happen during upgrades).
+        if (isUpgrade) {
+            FileUtils.deleteContents(cacheBaseDir);
+        }
+
+        // Return the versioned package cache directory. This is something like
+        // "/data/system/package_cache/1"
+        return FileUtils.createDir(cacheBaseDir, PACKAGE_PARSER_CACHE_VERSION);
     }
 
     @Override
@@ -6938,7 +6982,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     + " flags=0x" + Integer.toHexString(parseFlags));
         }
         ParallelPackageParser parallelPackageParser = new ParallelPackageParser(
-                mSeparateProcesses, mOnlyCore, mMetrics);
+                mSeparateProcesses, mOnlyCore, mMetrics, mCacheDir);
 
         // Submit files for parsing in parallel
         int fileCount = 0;
