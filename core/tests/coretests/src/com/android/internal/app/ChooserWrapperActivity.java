@@ -16,6 +16,8 @@
 
 package com.android.internal.app;
 
+import android.app.usage.UsageStatsManager;
+import android.content.Context;
 import android.content.pm.PackageManager;
 
 import java.util.function.Function;
@@ -28,9 +30,19 @@ import static org.mockito.Mockito.mock;
  */
 public class ChooserWrapperActivity extends ChooserActivity {
     static final OverrideData sOverrides = new OverrideData();
+    private UsageStatsManager mUsm;
 
     ResolveListAdapter getAdapter() {
         return mAdapter;
+    }
+
+    boolean getIsSelected() { return mIsSuccessfullySelected; }
+
+    UsageStatsManager getUsageStatsManager() {
+        if (mUsm == null) {
+            mUsm = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
+        }
+        return mUsm;
     }
 
     @Override
