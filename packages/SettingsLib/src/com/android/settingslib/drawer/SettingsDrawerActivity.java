@@ -377,11 +377,17 @@ public class SettingsDrawerActivity extends Activity {
                     ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
                     : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                     PackageManager.DONT_KILL_APP);
-            if (isDashboardFeatureEnabled()) {
-                new CategoriesUpdateTask().execute();
-            } else {
-                new CategoriesUpdater().execute();
-            }
+        }
+    }
+
+    /**
+     * Updates dashboard categories. Only necessary to call this after setTileEnabled
+     */
+    public void updateCategories() {
+        if (isDashboardFeatureEnabled()) {
+            new CategoriesUpdateTask().execute();
+        } else {
+            new CategoriesUpdater().execute();
         }
     }
 
