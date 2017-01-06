@@ -24,6 +24,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.CanvasProperty;
+import android.graphics.drawable.Drawable;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
@@ -142,6 +143,10 @@ public class LockPatternView extends View {
     private final Interpolator mLinearOutSlowInInterpolator;
     private PatternExploreByTouchHelper mExploreByTouchHelper;
     private AudioManager mAudioManager;
+
+    private Drawable mSelectedDrawable;
+    private Drawable mNotSelectedDrawable;
+    private boolean mUseLockPatternDrawable;
 
     /**
      * Represents a cell in the 3 X 3 matrix of the unlock pattern view.
@@ -313,6 +318,12 @@ public class LockPatternView extends View {
         mDotSize = getResources().getDimensionPixelSize(R.dimen.lock_pattern_dot_size);
         mDotSizeActivated = getResources().getDimensionPixelSize(
                 R.dimen.lock_pattern_dot_size_activated);
+
+        mUseLockPatternDrawable = getResources().getBoolean(R.bool.use_lock_pattern_drawable);
+        if (mUseLockPatternDrawable) {
+            mSelectedDrawable = getResources().getDrawable(R.drawable.lockscreen_selected);
+            mNotSelectedDrawable = getResources().getDrawable(R.drawable.lockscreen_notselected);
+        }
 
         mPaint.setAntiAlias(true);
         mPaint.setDither(true);
@@ -621,6 +632,11 @@ public class LockPatternView extends View {
         final int height = h - mPaddingTop - mPaddingBottom;
         mSquareHeight = height / 3.0f;
         mExploreByTouchHelper.invalidateRoot();
+
+        if (mUseLockPatternDrawable) {
+            mNotSelectedDrawable.setBounds(mPaddingLeft, mPaddingTop, width, height);
+            mSelectedDrawable.setBounds(mPaddingLeft, mPaddingTop, width, height);
+        }
     }
 
     private int resolveMeasured(int measureSpec, int desired)
@@ -1095,14 +1111,18 @@ public class LockPatternView extends View {
                 CellState cellState = mCellStates[i][j];
                 float centerX = getCenterXForColumn(j);
                 float translationY = cellState.translationY;
-                if (isHardwareAccelerated() && cellState.hwAnimating) {
-                    DisplayListCanvas displayListCanvas = (DisplayListCanvas) canvas;
-                    displayListCanvas.drawCircle(cellState.hwCenterX, cellState.hwCenterY,
-                            cellState.hwRadius, cellState.hwPaint);
-                } else {
-                    drawCircle(canvas, (int) centerX, (int) centerY + translationY,
-                            cellState.radius, drawLookup[i][j], cellState.alpha);
 
+                if (mUseLockPatternDrawable) {
+                    drawCellDrawable(canvas, i, j, cellState.radius, drawLookup[i][j]);
+                } else {
+                    if (isHardwareAccelerated() && cellState.hwAnimating) {
+                        DisplayListCanvas displayListCanvas = (DisplayListCanvas) canvas;
+                        displayListCanvas.drawCircle(cellState.hwCenterX, cellState.hwCenterY,
+                                cellState.hwRadius, cellState.hwPaint);
+                    } else {
+                        drawCircle(canvas, (int) centerX, (int) centerY + translationY,
+                                cellState.radius, drawLookup[i][j], cellState.alpha);
+                    }
                 }
             }
         }
@@ -1191,6 +1211,30 @@ public class LockPatternView extends View {
         mPaint.setColor(getCurrentColor(partOfPattern));
         mPaint.setAlpha((int) (alpha * 255));
         canvas.drawCircle(centerX, centerY, radius, mPaint);
+    }
+
+    /**
+     * @param partOfPattern Whether this circle is part of the pattern.
+     */
+    private void drawCellDrawable(Canvas canvas, int i, int j, float radius,
+            boolean partOfPattern) {
+        Rect dst = new Rect(
+            (int) (mPaddingLeft + j * mSquareWidth),
+            (int) (mPaddingTop + i * mSquareHeight),
+            (int) (mPaddingLeft + (j + 1) * mSquareWidth),
+            (int) (mPaddingTop + (i + 1) * mSquareHeight));
+        float scale = radius / (mDotSize / 2);
+
+        // Only draw on this square with the appropriate scale.
+        canvas.save();
+        canvas.clipRect(dst);
+        canvas.scale(scale, scale, dst.centerX(), dst.centerY());
+        if (!partOfPattern || scale > 1) {
+            mNotSelectedDrawable.draw(canvas);
+        } else {
+            mSelectedDrawable.draw(canvas);
+        }
+        canvas.restore();
     }
 
     @Override
