@@ -27,6 +27,7 @@ import android.net.Uri;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.PluginManager.PluginInstanceManagerFactory;
 
@@ -132,7 +133,7 @@ public class PluginManagerTest extends SysuiTestCase {
         Intent intent = new Intent(PluginManager.DISABLE_PLUGIN);
         intent.setData(Uri.parse("package://" + testComponent.flattenToString()));
         mPluginManager.onReceive(mContext, intent);
-        verify(nm).cancel(eq(testComponent.getClassName()), eq(R.id.notification_plugin));
+        verify(nm).cancel(eq(testComponent.getClassName()), eq(SystemMessage.NOTE_PLUGIN));
         verify(pm).setComponentEnabledSetting(eq(testComponent),
                 eq(PackageManager.COMPONENT_ENABLED_STATE_DISABLED),
                 eq(PackageManager.DONT_KILL_APP));
