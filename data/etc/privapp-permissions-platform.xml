@@ -110,11 +110,21 @@ applications that come with the platform
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
     </privapp-permissions>
 
+    <privapp-permissions package="com.android.omadm.service">
+        <permission name="android.permission.CHANGE_CONFIGURATION"/>
+        <permission name="android.permission.CONNECTIVITY_INTERNAL"/>
+        <permission name="android.permission.MODIFY_PHONE_STATE"/>
+        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
+        <permission name="android.permission.WRITE_APN_SETTINGS"/>
+        <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
+    </privapp-permissions>
+
     <privapp-permissions package="com.android.packageinstaller">
         <permission name="android.permission.CLEAR_APP_CACHE"/>
         <permission name="android.permission.DELETE_PACKAGES"/>
         <permission name="android.permission.INSTALL_PACKAGES"/>
         <permission name="android.permission.MANAGE_USERS"/>
+        <permission name="android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS"/>
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
     </privapp-permissions>
 
@@ -122,6 +132,7 @@ applications that come with the platform
         <permission name="android.permission.ACCESS_IMS_CALL_SERVICE"/>
         <permission name="android.permission.BIND_CARRIER_MESSAGING_SERVICE"/>
         <permission name="android.permission.BIND_CARRIER_SERVICES"/>
+        <permission name="android.permission.BIND_VISUAL_VOICEMAIL_SERVICE"/>
         <permission name="android.permission.CALL_PRIVILEGED"/>
         <permission name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"/>
         <permission name="android.permission.CHANGE_CONFIGURATION"/>
