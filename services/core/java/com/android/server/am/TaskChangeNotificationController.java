@@ -90,6 +90,7 @@ class TaskChangeNotificationController {
                 case NOTIFY_ACTIVITY_REQUESTED_ORIENTATION_CHANGED_LISTENERS:
                     forAllListeners((listener) -> listener.onActivityRequestedOrientationChanged(
                             msg.arg1, msg.arg2));
+                    break;
                 case NOTIFY_TASK_REMOVAL_STARTED_LISTENERS:
                     forAllListeners((listener) -> listener.onTaskRemovalStarted(msg.arg1));
                     break;
