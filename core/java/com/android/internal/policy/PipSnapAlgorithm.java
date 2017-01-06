@@ -21,7 +21,6 @@ import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
-import android.hardware.display.DisplayManager;
 import android.view.Gravity;
 import android.view.ViewConfiguration;
 import android.widget.Scroller;
@@ -44,9 +43,6 @@ public class PipSnapAlgorithm {
     // The friction multiplier to control how slippery the PIP is when flung
     private static final float SCROLL_FRICTION_MULTIPLIER = 8f;
 
-    // The fraction of the stack width to show when minimized
-    private static final float MINIMIZED_VISIBLE_FRACTION = 0.25f;
-
     private final Context mContext;
 
     private final ArrayList<Integer> mSnapGravities = new ArrayList<>();
@@ -56,8 +52,12 @@ public class PipSnapAlgorithm {
     private Scroller mScroller;
     private int mOrientation = Configuration.ORIENTATION_UNDEFINED;
 
+    private final int mMinimizedVisibleSize;
+
     public PipSnapAlgorithm(Context context) {
         mContext = context;
+        mMinimizedVisibleSize = context.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.pip_minimized_visible_size);
         onConfigurationChanged();
     }
 
@@ -129,11 +129,10 @@ public class PipSnapAlgorithm {
      * Applies the offset to the {@param stackBounds} to adjust it to a minimized state.
      */
     public void applyMinimizedOffset(Rect stackBounds, Rect movementBounds, Point displaySize) {
-        int visibleWidth = (int) (MINIMIZED_VISIBLE_FRACTION * stackBounds.width());
         if (stackBounds.left <= movementBounds.centerX()) {
-            stackBounds.offsetTo(-stackBounds.width() + visibleWidth, stackBounds.top);
+            stackBounds.offsetTo(-stackBounds.width() + mMinimizedVisibleSize, stackBounds.top);
         } else {
-            stackBounds.offsetTo(displaySize.x - visibleWidth, stackBounds.top);
+            stackBounds.offsetTo(displaySize.x - mMinimizedVisibleSize, stackBounds.top);
         }
     }
 
@@ -220,15 +219,23 @@ public class PipSnapAlgorithm {
      * the new bounds out to {@param boundsOut}.
      */
     private void snapRectToClosestEdge(Rect stackBounds, Rect movementBounds, Rect boundsOut) {
-        final int fromLeft = Math.abs(stackBounds.left - movementBounds.left);
-        final int fromTop = Math.abs(stackBounds.top - movementBounds.top);
-        final int fromRight = Math.abs(movementBounds.right - stackBounds.left);
-        final int fromBottom = Math.abs(movementBounds.bottom - stackBounds.top);
+        // If the stackBounds are minimized, then it should only be snapped back horizontally
         final int boundedLeft = Math.max(movementBounds.left, Math.min(movementBounds.right,
                 stackBounds.left));
         final int boundedTop = Math.max(movementBounds.top, Math.min(movementBounds.bottom,
                 stackBounds.top));
         boundsOut.set(stackBounds);
+        if (stackBounds.left < movementBounds.left ||
+                stackBounds.left > movementBounds.right) {
+            boundsOut.offsetTo(boundedLeft, boundsOut.top);
+            return;
+        }
+
+        // Otherwise, just find the closest edge
+        final int fromLeft = Math.abs(stackBounds.left - movementBounds.left);
+        final int fromTop = Math.abs(stackBounds.top - movementBounds.top);
+        final int fromRight = Math.abs(movementBounds.right - stackBounds.left);
+        final int fromBottom = Math.abs(movementBounds.bottom - stackBounds.top);
         if (fromLeft <= fromTop && fromLeft <= fromRight && fromLeft <= fromBottom) {
             boundsOut.offsetTo(movementBounds.left, boundedTop);
         } else if (fromTop <= fromLeft && fromTop <= fromRight && fromTop <= fromBottom) {

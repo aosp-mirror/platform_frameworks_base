@@ -126,34 +126,16 @@
       android:title="@string/picture_in_picture">
 
         <com.android.systemui.tuner.TunerSwitch
-          android:key="pip_swipe_to_dismiss"
-          android:title="@string/pip_swipe_to_dismiss_title"
-          android:summary="@string/pip_swipe_to_dismiss_summary"
-          sysui:defValue="true" />
-
-        <com.android.systemui.tuner.TunerSwitch
           android:key="pip_drag_to_dismiss"
           android:title="@string/pip_drag_to_dismiss_title"
           android:summary="@string/pip_drag_to_dismiss_summary"
-          sysui:defValue="true" />
-
-        <com.android.systemui.tuner.TunerSwitch
-            android:key="pip_tap_through"
-            android:title="@string/pip_tap_through_title"
-            android:summary="@string/pip_tap_through_summary"
-            sysui:defValue="false" />
-
-        <com.android.systemui.tuner.TunerSwitch
-            android:key="pip_snap_mode_edge"
-            android:title="@string/pip_snap_mode_edge_title"
-            android:summary="@string/pip_snap_mode_edge_summary"
-            sysui:defValue="false" />
+          sysui:defValue="false" />
 
         <com.android.systemui.tuner.TunerSwitch
             android:key="pip_allow_minimize"
             android:title="@string/pip_allow_minimize_title"
             android:summary="@string/pip_allow_minimize_summary"
-            sysui:defValue="false" />
+            sysui:defValue="true" />
 
     </PreferenceScreen>
 

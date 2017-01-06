@@ -724,10 +724,7 @@
     <!-- The alpha to apply to the recents row when it doesn't have focus -->
     <item name="recents_recents_row_dim_alpha" format="float" type="dimen">0.5</item>
 
-    <!-- The size of the PIP dismiss target. -->
+    <!-- The size of the PIP drag-to-dismiss target. -->
     <dimen name="pip_dismiss_target_size">48dp</dimen>
-
-    <!-- The size of a PIP menu action icon. -->
-    <dimen name="pip_menu_action_icon_size">32dp</dimen>
 
 </resources>

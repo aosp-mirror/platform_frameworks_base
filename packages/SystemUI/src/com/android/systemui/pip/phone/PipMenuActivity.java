@@ -66,7 +66,6 @@ public class PipMenuActivity extends Activity {
     private final List<RemoteAction> mActions = new ArrayList<>();
     private View mMenuContainer;
     private View mDismissButton;
-    private View mExpandButton;
 
     private ObjectAnimator mMenuContainerAnimator;
 
@@ -125,10 +124,6 @@ public class PipMenuActivity extends Activity {
         mDismissButton = findViewById(R.id.dismiss);
         mDismissButton.setOnClickListener((v) -> {
             dismissPip();
-        });
-        mExpandButton = findViewById(R.id.expand);
-        mExpandButton.setOnClickListener((v) -> {
-            expandPip();
         });
 
         notifyActivityCallback(mMessenger);
@@ -245,29 +240,35 @@ public class PipMenuActivity extends Activity {
     }
 
     private void updateActionViews() {
-        ViewGroup actionsContainer = (ViewGroup) findViewById(R.id.actions);
-        if (actionsContainer != null) {
-            actionsContainer.removeAllViews();
+        ViewGroup actionsContainer = (ViewGroup) findViewById(R.id.actions_container);
+        actionsContainer.setOnTouchListener((v, ev) -> {
+            // Do nothing, prevent click through to parent
+            return true;
+        });
 
-            // Recreate the layout
-            final LayoutInflater inflater = LayoutInflater.from(this);
-            for (int i = 0; i < mActions.size(); i++) {
-                final RemoteAction action = mActions.get(i);
-                final ViewGroup actionContainer = (ViewGroup) inflater.inflate(
-                        R.layout.pip_menu_action, actionsContainer, false);
-                actionContainer.setOnClickListener((v) -> {
-                    action.sendActionInvoked();
-                });
+        if (mActions.isEmpty()) {
+            actionsContainer.setVisibility(View.INVISIBLE);
+        } else {
+            actionsContainer.setVisibility(View.VISIBLE);
+            ViewGroup actionsGroup = (ViewGroup) findViewById(R.id.actions);
+            if (actionsGroup != null) {
+                actionsGroup.removeAllViews();
 
-                final TextView title = (TextView) actionContainer.findViewById(R.id.title);
-                title.setText(action.getTitle());
-                title.setContentDescription(action.getContentDescription());
-
-                final ImageView icon = (ImageView) actionContainer.findViewById(R.id.icon);
-                action.getIcon().loadDrawableAsync(this, (d) -> {
-                    icon.setImageDrawable(d);
-                }, mHandler);
-                actionsContainer.addView(actionContainer);
+                // Recreate the layout
+                final LayoutInflater inflater = LayoutInflater.from(this);
+                for (int i = 0; i < mActions.size(); i++) {
+                    final RemoteAction action = mActions.get(i);
+                    final ImageView actionView = (ImageView) inflater.inflate(
+                            R.layout.pip_menu_action, actionsGroup, false);
+                    action.getIcon().loadDrawableAsync(this, d -> {
+                        actionView.setImageDrawable(d);
+                    }, mHandler);
+                    actionView.setContentDescription(action.getContentDescription());
+                    actionView.setOnClickListener(v -> {
+                        action.sendActionInvoked();
+                    });
+                    actionsGroup.addView(actionView);
+                }
             }
         }
     }

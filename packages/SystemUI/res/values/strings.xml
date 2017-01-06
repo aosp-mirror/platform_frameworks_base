@@ -1719,14 +1719,6 @@
         not appear on production builds ever. -->
     <string name="picture_in_picture" translatable="false">Picture-in-Picture</string>
 
-    <!-- PIP swipe to dismiss title. Non-translatable since it should
-        not appear on production builds ever. -->
-    <string name="pip_swipe_to_dismiss_title" translatable="false">Swipe to dismiss</string>
-
-    <!-- PIP swipe to dismiss description. Non-translatable since it should
-        not appear on production builds ever. -->
-    <string name="pip_swipe_to_dismiss_summary" translatable="false">Swipe left or right off screen to close the PIP</string>
-
     <!-- PIP drag to dismiss title. Non-translatable since it should
         not appear on production builds ever. -->
     <string name="pip_drag_to_dismiss_title" translatable="false">Drag to dismiss</string>
@@ -1734,22 +1726,6 @@
     <!-- PIP drag to dismiss description. Non-translatable since it should
         not appear on production builds ever. -->
     <string name="pip_drag_to_dismiss_summary" translatable="false">Drag to the dismiss target at the bottom of the screen to close the PIP</string>
-
-    <!-- PIP tap once to break through to the activity title. Non-translatable since it should
-        not appear on production builds ever. -->
-    <string name="pip_tap_through_title" translatable="false">Tap to interact</string>
-
-    <!-- PIP tap once to break through to the activity description. Non-translatable since it should
-        not appear on production builds ever. -->
-    <string name="pip_tap_through_summary" translatable="false">Tap once to interact with the activity</string>
-
-    <!-- PIP snap to closest edge title. Non-translatable since it should
-        not appear on production builds ever. -->
-    <string name="pip_snap_mode_edge_title" translatable="false">Snap to closest edge</string>
-
-    <!-- PIP snap to closest edge description. Non-translatable since it should
-        not appear on production builds ever. -->
-    <string name="pip_snap_mode_edge_summary" translatable="false">Snap to the closest edge</string>
 
     <!-- PIP allow minimize title. Non-translatable since it should
         not appear on production builds ever. -->
