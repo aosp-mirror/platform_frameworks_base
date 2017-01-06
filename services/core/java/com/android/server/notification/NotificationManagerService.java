@@ -2021,13 +2021,13 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public ZenModeConfig getZenModeConfig() {
-            enforceSystemOrSystemUIOrVolume("INotificationManager.getZenModeConfig");
+            enforceSystemOrSystemUI("INotificationManager.getZenModeConfig");
             return mZenModeHelper.getConfig();
         }
 
         @Override
         public void setZenMode(int mode, Uri conditionId, String reason) throws RemoteException {
-            enforceSystemOrSystemUIOrVolume("INotificationManager.setZenMode");
+            enforceSystemOrSystemUI("INotificationManager.setZenMode");
             final long identity = Binder.clearCallingIdentity();
             try {
                 mZenModeHelper.setManualZenMode(mode, conditionId, null, reason);
@@ -2149,16 +2149,6 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        private void enforceSystemOrSystemUIOrVolume(String message) {
-            if (mAudioManagerInternal != null) {
-                final int vcuid = mAudioManagerInternal.getVolumeControllerUid();
-                if (vcuid > 0 && Binder.getCallingUid() == vcuid) {
-                    return;
-                }
-            }
-            enforceSystemOrSystemUI(message);
-        }
-
         private void enforceSystemOrSystemUI(String message) {
             if (isCallerSystem()) return;
             getContext().enforceCallingPermission(android.Manifest.permission.STATUS_BAR_SERVICE,
@@ -2261,7 +2251,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public boolean isSystemConditionProviderEnabled(String path) {
-            enforceSystemOrSystemUIOrVolume("INotificationManager.isSystemConditionProviderEnabled");
+            enforceSystemOrSystemUI("INotificationManager.isSystemConditionProviderEnabled");
             return mConditionProviders.isSystemProviderEnabled(path);
         }
 

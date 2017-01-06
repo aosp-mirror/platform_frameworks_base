@@ -99,7 +99,6 @@ public class VolumeDialogController {
     private final Vibrator mVibrator;
     private final boolean mHasVibrator;
 
-    private boolean mEnabled;
     private boolean mDestroyed;
     private VolumePolicy mVolumePolicy;
     private boolean mShowDndTile = true;
@@ -198,7 +197,6 @@ public class VolumeDialogController {
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println(VolumeDialogController.class.getSimpleName() + " state:");
-        pw.print("  mEnabled: "); pw.println(mEnabled);
         pw.print("  mDestroyed: "); pw.println(mDestroyed);
         pw.print("  mVolumePolicy: "); pw.println(mVolumePolicy);
         pw.print("  mState: "); pw.println(mState.toString(4));
@@ -749,8 +747,6 @@ public class VolumeDialogController {
 
 
     private final class SettingObserver extends ContentObserver {
-        private final Uri SERVICE_URI = Settings.Secure.getUriFor(
-                Settings.Secure.VOLUME_CONTROLLER_SERVICE_COMPONENT);
         private final Uri ZEN_MODE_URI =
                 Settings.Global.getUriFor(Settings.Global.ZEN_MODE);
         private final Uri ZEN_MODE_CONFIG_URI =
@@ -761,10 +757,8 @@ public class VolumeDialogController {
         }
 
         public void init() {
-            mContext.getContentResolver().registerContentObserver(SERVICE_URI, false, this);
             mContext.getContentResolver().registerContentObserver(ZEN_MODE_URI, false, this);
             mContext.getContentResolver().registerContentObserver(ZEN_MODE_CONFIG_URI, false, this);
-            onChange(true, SERVICE_URI);
         }
 
         public void destroy() {
@@ -774,17 +768,6 @@ public class VolumeDialogController {
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             boolean changed = false;
-            if (SERVICE_URI.equals(uri)) {
-                final String setting = Settings.Secure.getString(mContext.getContentResolver(),
-                        Settings.Secure.VOLUME_CONTROLLER_SERVICE_COMPONENT);
-                final boolean enabled = setting != null && mComponent != null
-                        && mComponent.equals(ComponentName.unflattenFromString(setting));
-                if (enabled == mEnabled) return;
-                if (enabled) {
-                    register();
-                }
-                mEnabled = enabled;
-            }
             if (ZEN_MODE_URI.equals(uri)) {
                 changed = updateZenModeW();
             }
