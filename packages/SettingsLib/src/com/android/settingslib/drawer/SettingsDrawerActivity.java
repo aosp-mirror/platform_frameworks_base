@@ -170,7 +170,7 @@ public class SettingsDrawerActivity extends Activity {
                     // Intent explicitly set to show menu.
                     showMenuIcon();
                 }
-            } else if (isTopLevelTile(intent)) {
+            } else if (isNavDrawerEnabled() && isTopLevelTile(intent)) {
                 showMenuIcon();
             }
         }

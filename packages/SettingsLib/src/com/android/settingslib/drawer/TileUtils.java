@@ -199,11 +199,13 @@ public class TileUtils {
             if (setup) {
                 getTilesForAction(context, user, EXTRA_SETTINGS_ACTION, cache, null, tiles, false,
                         settingPkg);
-                getTilesForAction(context, user, IA_SETTINGS_ACTION, cache, null, tiles, false,
-                        settingPkg);
-                if (extraAction != null) {
-                    getTilesForAction(context, user, extraAction, cache, null, tiles, false,
+                if (!categoryDefinedInManifest) {
+                    getTilesForAction(context, user, IA_SETTINGS_ACTION, cache, null, tiles, false,
                             settingPkg);
+                    if (extraAction != null) {
+                        getTilesForAction(context, user, extraAction, cache, null, tiles, false,
+                                settingPkg);
+                    }
                 }
             }
         }
