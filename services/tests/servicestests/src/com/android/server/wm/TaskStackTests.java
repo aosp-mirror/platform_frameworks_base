@@ -56,4 +56,20 @@ public class TaskStackTests extends WindowTestsBase {
         assertEquals(stack.mChildren.get(0), task2);
         assertEquals(stack.mChildren.get(1), task1);
     }
+
+    @Test
+    public void testStackRemoveImmediately() throws Exception {
+        final TaskStack stack = createTaskStackOnDisplay(sDisplayContent);
+        final Task task = createTaskInStack(stack, 0 /* userId */);
+        assertEquals(stack, task.mStack);
+        assertTrue(sDisplayContent.mDimLayerController.hasDimLayerUser(stack));
+        assertTrue(sDisplayContent.mDimLayerController.hasDimLayerUser(task));
+
+        // Remove stack and check if its child is also removed.
+        stack.removeImmediately();
+        assertNull(stack.getDisplayContent());
+        assertNull(task.mStack);
+        assertFalse(sDisplayContent.mDimLayerController.hasDimLayerUser(stack));
+        assertFalse(sDisplayContent.mDimLayerController.hasDimLayerUser(task));
+    }
 }
