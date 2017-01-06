@@ -17,4 +17,5 @@ ndk_library {
     name: "libandroid.ndk",
     symbol_file: "libandroid.map.txt",
     first_version: "9",
+    unversioned_until: "current",
 }

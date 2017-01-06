@@ -17,4 +17,5 @@ ndk_library {
     name: "libjnigraphics.ndk",
     symbol_file: "libjnigraphics.map.txt",
     first_version: "9",
+    unversioned_until: "current",
 }
