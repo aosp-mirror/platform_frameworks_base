@@ -404,7 +404,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
         @Override
         boolean injectIsActivityEnabledAndExported(ComponentName activity, @UserIdInt int userId) {
-            assertNotNull(activity);
             return mEnabledActivityChecker.test(activity, userId);
         }
 
@@ -449,11 +448,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         void wtf(String message, Throwable th) {
             // During tests, WTF is fatal.
             fail(message + "  exception: " + th + "\n" + Log.getStackTraceString(th));
-        }
-
-        @Override
-        void verifyError() {
-            fail("Verify error");
         }
     }
 

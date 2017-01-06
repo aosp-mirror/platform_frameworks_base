@@ -1061,11 +1061,6 @@ public final class ShortcutInfo implements Parcelable {
      * Launcher apps should show the launcher icon for the returned activity alongside
      * this shortcut.
      *
-     * <p>When a shortcut is dynamic or manifest
-     * (i.e. either {@link #isDynamic()} or {@link #isDeclaredInManifest()} returns {@code TRUE}),
-     * then it should always have a non-null target activity.
-     * Otherwise it will return null.
-     *
      * @see Builder#setActivity
      */
     @Nullable
@@ -1372,7 +1367,7 @@ public final class ShortcutInfo implements Parcelable {
     }
 
     /**
-     * Return {@code TRUE} if a shortcut is pinned but neither manifest nor dynamic.
+     * @return true if pinned but neither static nor dynamic.
      * @hide
      */
     public boolean isFloating() {
