@@ -11,6 +11,7 @@ import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.TypedValue;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.DimLayer.DimLayerUser;
 
 import java.io.PrintWriter;
@@ -308,6 +309,11 @@ class DimLayerController {
             }
             mState.remove(dimLayerUser);
         }
+    }
+
+    @VisibleForTesting
+    boolean hasDimLayerUser(DimLayer.DimLayerUser dimLayerUser) {
+        return mState.containsKey(dimLayerUser);
     }
 
     void applyDimBehind(DimLayer.DimLayerUser dimLayerUser, WindowStateAnimator animator) {

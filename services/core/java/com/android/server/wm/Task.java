@@ -144,14 +144,22 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
             mDeferRemoval = true;
             return;
         }
+        removeImmediately();
+    }
+
+    @Override
+    void removeImmediately() {
         if (DEBUG_STACK) Slog.i(TAG, "removeTask: removing taskId=" + mTaskId);
         EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, mTaskId, "removeTask");
         mDeferRemoval = false;
+
+        // Make sure to remove dim layer user first before removing task its from parent.
         DisplayContent content = getDisplayContent();
         if (content != null) {
             content.mDimLayerController.removeDimLayerUser(this);
         }
-        removeImmediately();
+
+        super.removeImmediately();
         mService.mTaskIdToTask.delete(mTaskId);
     }
 
@@ -170,7 +178,12 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     /** @see com.android.server.am.ActivityManagerService#positionTaskInStack(int, int, int). */
     void positionTaskInStack(TaskStack stack, int position, Rect bounds,
             Configuration overrideConfig) {
-        if (mStack != null && stack != mStack) {
+        if (mStack == null) {
+            // There is an assumption that task already has a stack at this point, so lets make
+            // sure we comply with it.
+            throw new IllegalStateException("Trying to position task that has no parent.");
+        }
+        if (stack != mStack) {
             // Task is already attached to a different stack. First we need to remove it from there
             // and add to top of the target stack. We will move it proper position afterwards.
             if (DEBUG_STACK) Slog.i(TAG, "positionTaskInStack: removing taskId=" + mTaskId
