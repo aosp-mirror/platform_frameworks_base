@@ -52,6 +52,8 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
 
     private static final boolean DEBUG = false;
 
+    private static final int NUM_OF_TOP_ANNOTATIONS_TO_USE = 3;
+
     // One week
     private static final long USAGE_STATS_PERIOD = 1000 * 60 * 60 * 24 * 7;
 
@@ -74,7 +76,8 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
     private final long mSinceTime;
     private final LinkedHashMap<ComponentName, ScoredTarget> mScoredTargets = new LinkedHashMap<>();
     private final String mReferrerPackage;
-    public String mContentType;
+    private String mContentType;
+    private String[] mAnnotations;
     private String mAction;
     private LogisticRegressionAppRanker mRanker;
 
@@ -91,8 +94,24 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
         mSinceTime = mCurrentTime - USAGE_STATS_PERIOD;
         mStats = mUsm.queryAndAggregateUsageStats(mSinceTime, mCurrentTime);
         mContentType = intent.getType();
+        getContentAnnotations(intent);
         mAction = intent.getAction();
         mRanker = new LogisticRegressionAppRanker(context);
+    }
+
+    public void getContentAnnotations(Intent intent) {
+        ArrayList<String> annotations = intent.getStringArrayListExtra(
+                Intent.EXTRA_CONTENT_ANNOTATIONS);
+        if (annotations != null) {
+            int size = annotations.size();
+            if (size > NUM_OF_TOP_ANNOTATIONS_TO_USE) {
+                size = NUM_OF_TOP_ANNOTATIONS_TO_USE;
+            }
+            mAnnotations = new String[size];
+            for (int i = 0; i < size; i++) {
+                mAnnotations[i] = annotations.get(i);
+            }
+        }
     }
 
     public void compute(List<ResolvedComponentInfo> targets) {
@@ -132,12 +151,18 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
                 if (launched > mostLaunched) {
                     mostLaunched = launched;
                 }
-                // TODO(kanlig): get and combine counts of categories.
 
                 int selected = 0;
                 if (pkStats.mChooserCounts != null && mAction != null
                         && pkStats.mChooserCounts.get(mAction) != null) {
                     selected = pkStats.mChooserCounts.get(mAction).getOrDefault(mContentType, 0);
+                    if (mAnnotations != null) {
+                        final int size = mAnnotations.length;
+                        for (int i = 0; i < size; i++) {
+                            selected += pkStats.mChooserCounts.get(mAction)
+                                    .getOrDefault(mAnnotations[i], 0);
+                        }
+                    }
                 }
                 if (DEBUG) {
                     if (mAction == null) {
@@ -285,6 +310,12 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
 
         public ArrayMap<String, Float> getFeatures() {
             return features;
+        }
+    }
+
+    public void updateChooserCounts(String packageName, int userId, String action) {
+        if (mUsm != null) {
+            mUsm.reportChooserSelection(packageName, userId, mContentType, mAnnotations, action);
         }
     }
 

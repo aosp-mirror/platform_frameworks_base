@@ -224,4 +224,10 @@ public class ResolverListController {
             mResolverComparator.updateModel(componentName);
         }
     }
+
+    public void updateChooserCounts(String packageName, int userId, String action) {
+        if (mResolverComparator != null) {
+            mResolverComparator.updateChooserCounts(packageName, userId, action);
+        }
+    }
 }

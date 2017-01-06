@@ -418,7 +418,7 @@ public class ChooserActivity extends ResolverActivity {
                 }
             }
         }
-        updateChooserCounts(target);
+        updateModelAndChooserCounts(target);
         return super.onTargetSelected(target, alwaysCheck);
     }
 
@@ -575,27 +575,18 @@ public class ChooserActivity extends ResolverActivity {
         // Do nothing. We'll send the voice stuff ourselves.
     }
 
-    void updateChooserCounts(TargetInfo info) {
+    void updateModelAndChooserCounts(TargetInfo info) {
         if (info != null) {
-            UsageStatsManager usageStatsManager =
-                    (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
-            if (usageStatsManager == null) {
-                if (DEBUG) {
-                    Log.d(TAG, "Can not start UsageStatsManager");
-                }
-                return;
-            }
             final ResolveInfo ri = info.getResolveInfo();
             Intent targetIntent = getTargetIntent();
             if (ri != null && ri.activityInfo != null && targetIntent != null) {
-                usageStatsManager.reportChooserSelection(ri.activityInfo.packageName, getUserId(),
-                        targetIntent.getType(), null, targetIntent.getAction());
                 if (mAdapter != null) {
                     mAdapter.updateModel(info.getResolvedComponentName());
+                    mAdapter.updateChooserCounts(ri.activityInfo.packageName, getUserId(),
+                            targetIntent.getAction());
                 }
                 if (DEBUG) {
                     Log.d(TAG, "ResolveInfo Package is " + ri.activityInfo.packageName);
-                    Log.d(TAG, "Annotation to be updated is " + targetIntent.getType());
                     Log.d(TAG, "Action to be updated is " + targetIntent.getAction());
                 }
             } else if(DEBUG) {
@@ -618,7 +609,7 @@ public class ChooserActivity extends ResolverActivity {
         } else {
             TargetInfo clonedTarget = selectedTarget.cloneFilledIn(matchingIntent, 0);
             if (super.onTargetSelected(clonedTarget, false)) {
-                updateChooserCounts(clonedTarget);
+                updateModelAndChooserCounts(clonedTarget);
                 finish();
                 return;
             }
