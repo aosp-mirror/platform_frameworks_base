@@ -27,19 +27,13 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
- * Ensure a single status bar service implementation is running at all times.
- *
- * <p>The implementation either comes from a service component running in a remote process (defined
- * using a secure setting), else falls back to using the in-process implementation according
- * to the product config.
+ * Ensure a single status bar service implementation is running at all times, using the in-process
+ * implementation according to the product config.
  */
-public class SystemBars extends SystemUI implements ServiceMonitor.Callbacks {
+public class SystemBars extends SystemUI {
     private static final String TAG = "SystemBars";
     private static final boolean DEBUG = false;
     private static final int WAIT_FOR_BARS_TO_DIE = 500;
-
-    // manages the implementation coming from the remote process
-    private ServiceMonitor mServiceMonitor;
 
     // in-process fallback implementation, per the product config
     private BaseStatusBar mStatusBar;
@@ -47,27 +41,7 @@ public class SystemBars extends SystemUI implements ServiceMonitor.Callbacks {
     @Override
     public void start() {
         if (DEBUG) Log.d(TAG, "start");
-        mServiceMonitor = new ServiceMonitor(TAG, DEBUG,
-                mContext, Settings.Secure.BAR_SERVICE_COMPONENT, this);
-        mServiceMonitor.start();  // will call onNoService if no remote service is found
-    }
-
-    @Override
-    public void onNoService() {
-        if (DEBUG) Log.d(TAG, "onNoService");
-        createStatusBarFromConfig();  // fallback to using an in-process implementation
-    }
-
-    @Override
-    public long onServiceStartAttempt() {
-        if (DEBUG) Log.d(TAG, "onServiceStartAttempt mStatusBar="+mStatusBar);
-        if (mStatusBar != null) {
-            // tear down the in-process version, we'll recreate it again if needed
-            mStatusBar.destroy();
-            mStatusBar = null;
-            return WAIT_FOR_BARS_TO_DIE;
-        }
-        return 0;
+        createStatusBarFromConfig();
     }
 
     @Override

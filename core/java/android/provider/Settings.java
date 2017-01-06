@@ -6394,13 +6394,6 @@ public final class Settings {
         public static final String ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES =
                 "enabled_notification_policy_access_packages";
 
-        /** @hide */
-        public static final String BAR_SERVICE_COMPONENT = "bar_service_component";
-
-        /** @hide */
-        public static final String VOLUME_CONTROLLER_SERVICE_COMPONENT
-                = "volume_controller_service_component";
-
         /**
          * Defines whether managed profile ringtones should be synced from it's parent profile
          * <p>

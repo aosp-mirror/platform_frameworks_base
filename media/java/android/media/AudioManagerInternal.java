@@ -41,8 +41,6 @@ public abstract class AudioManagerInternal {
 
     public abstract void setRingerModeInternal(int ringerMode, String caller);
 
-    public abstract int getVolumeControllerUid();
-
     public abstract void updateRingerModeAffectedStreamsInternal();
 
     public interface RingerModeDelegate {
