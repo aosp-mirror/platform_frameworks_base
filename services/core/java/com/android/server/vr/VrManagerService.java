@@ -320,7 +320,6 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     public void onEnabledComponentChanged() {
         synchronized (mLock) {
             int currentUser = ActivityManager.getCurrentUser();
-
             // Update listeners
             ArraySet<ComponentName> enabledListeners = mComponentObserver.getEnabled(currentUser);
 
@@ -338,7 +337,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
             }
 
             // If there is a pending state change, we'd better deal with that first
-            consumeAndApplyPendingStateLocked();
+            consumeAndApplyPendingStateLocked(false);
 
             if (mCurrentVrService == null) {
                 return; // No active services
@@ -606,8 +605,9 @@ public class VrManagerService extends SystemService implements EnabledComponentC
             if (!goingIntoVrMode) {
                 // Not going into VR mode, unbind whatever is running
                 if (mCurrentVrService != null) {
-                    Slog.i(TAG, "Disconnecting " + mCurrentVrService.getComponent() + " for user " +
-                            mCurrentVrService.getUserId());
+                    Slog.i(TAG, "Leaving VR mode, disconnecting "
+                        + mCurrentVrService.getComponent() + " for user "
+                        + mCurrentVrService.getUserId());
                     mCurrentVrService.disconnect();
                     mCurrentVrService = null;
                 } else {
@@ -619,8 +619,9 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                     // Unbind any running service that doesn't match the latest component/user
                     // selection.
                     if (mCurrentVrService.disconnectIfNotMatching(component, userId)) {
-                        Slog.i(TAG, "Disconnecting " + mCurrentVrService.getComponent() +
-                                " for user " + mCurrentVrService.getUserId());
+                        Slog.i(TAG, "VR mode component changed to " + component
+                            + ", disconnecting " + mCurrentVrService.getComponent()
+                            + " for user " + mCurrentVrService.getUserId());
                         createAndConnectService(component, userId);
                         sendUpdatedCaller = true;
                     } else {
@@ -868,16 +869,30 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                 sBinderChecker);
     }
 
+    /**
+     * Apply the pending VR state. If no state is pending, disconnect any currently bound
+     * VR listener service.
+     */
     private void consumeAndApplyPendingStateLocked() {
+        consumeAndApplyPendingStateLocked(true);
+    }
+
+    /**
+     * Apply the pending VR state.
+     *
+     * @param disconnectIfNoPendingState if {@code true}, then any currently bound VR listener
+     *     service will be disconnected if no state is pending. If this is {@code false} then the
+     *     nothing will be changed when there is no pending state.
+     */
+    private void consumeAndApplyPendingStateLocked(boolean disconnectIfNoPendingState) {
         if (mPendingState != null) {
             updateCurrentVrServiceLocked(mPendingState.enabled,
                     mPendingState.targetPackageName, mPendingState.userId,
                     mPendingState.callingPackage);
             mPendingState = null;
-        } else {
+        } else if (disconnectIfNoPendingState) {
             updateCurrentVrServiceLocked(false, null, 0, null);
         }
-
     }
 
     private void logStateLocked() {
