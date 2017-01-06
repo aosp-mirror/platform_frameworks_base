@@ -37,6 +37,5 @@ public interface IHwBinder {
     }
 
     public boolean linkToDeath(DeathRecipient recipient, long cookie);
-
     public boolean unlinkToDeath(DeathRecipient recipient);
 }
