@@ -4749,7 +4749,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (r == null) {
                 return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
             }
-            return mWindowManager.getAppOrientation(r.appToken);
+            return r.getRequestedOrientation();
         }
     }
 

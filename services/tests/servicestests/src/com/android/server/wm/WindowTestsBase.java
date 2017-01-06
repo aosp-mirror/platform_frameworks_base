@@ -44,7 +44,7 @@ import static org.mockito.Mockito.mock;
 /**
  * Common base class for window manager unit test classes.
  */
-public class WindowTestsBase {
+class WindowTestsBase {
     static WindowManagerService sWm = null;
     private final IWindow mIWindow = new TestIWindow();
     private final Session mMockSession = mock(Session.class);
@@ -52,17 +52,17 @@ public class WindowTestsBase {
     private static int sNextTaskId = 0;
 
     private static boolean sOneTimeSetupDone = false;
-    protected static DisplayContent sDisplayContent;
-    protected static WindowLayersController sLayersController;
-    protected static WindowState sWallpaperWindow;
-    protected static WindowState sImeWindow;
-    protected static WindowState sImeDialogWindow;
-    protected static WindowState sStatusBarWindow;
-    protected static WindowState sDockedDividerWindow;
-    protected static WindowState sNavBarWindow;
-    protected static WindowState sAppWindow;
-    protected static WindowState sChildAppWindowAbove;
-    protected static WindowState sChildAppWindowBelow;
+    static DisplayContent sDisplayContent;
+    static WindowLayersController sLayersController;
+    static WindowState sWallpaperWindow;
+    static WindowState sImeWindow;
+    static WindowState sImeDialogWindow;
+    static WindowState sStatusBarWindow;
+    static WindowState sDockedDividerWindow;
+    static WindowState sNavBarWindow;
+    static WindowState sAppWindow;
+    static WindowState sChildAppWindowAbove;
+    static WindowState sChildAppWindowBelow;
 
     @Before
     public void setUp() throws Exception {

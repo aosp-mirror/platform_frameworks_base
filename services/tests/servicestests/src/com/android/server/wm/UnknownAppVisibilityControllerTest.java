@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 
 import android.app.ActivityManagerInternal;
 import android.content.Context;
@@ -27,7 +26,6 @@ import android.platform.test.annotations.Presubmit;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.view.IApplicationToken;
 
 import com.android.server.LocalServices;
 
@@ -114,7 +112,6 @@ public class UnknownAppVisibilityControllerTest {
     }
 
     private AppWindowToken createAppToken() {
-        return new AppWindowToken(mWm, mock(IApplicationToken.class), false,
-                mWm.getDefaultDisplayContentLocked());
+        return new AppWindowToken(mWm, null, false, mWm.getDefaultDisplayContentLocked());
     }
 }

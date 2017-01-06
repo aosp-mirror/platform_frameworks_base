@@ -21,17 +21,26 @@ import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE;
 import static android.content.pm.ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
+import static android.content.pm.ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS;
+import static android.content.pm.ActivityInfo.FLAG_IMMERSIVE;
+import static android.content.pm.ActivityInfo.FLAG_MULTIPROCESS;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
+import static android.content.pm.ActivityInfo.FLAG_STATE_NOT_NEEDED;
+import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
+import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+import static android.os.Build.VERSION_CODES.HONEYCOMB;
+import static android.os.Process.SYSTEM_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SAVED_STATE;
@@ -92,6 +101,8 @@ import com.android.internal.util.XmlUtils;
 import com.android.server.AttributeCache;
 import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.am.ActivityStackSupervisor.ActivityContainer;
+import com.android.server.wm.AppWindowContainerController;
+import com.android.server.wm.AppWindowContainerListener;
 
 import java.io.File;
 import java.io.IOException;
@@ -110,7 +121,7 @@ import org.xmlpull.v1.XmlSerializer;
 /**
  * An entry in the history stack, representing an activity.
  */
-final class ActivityRecord {
+final class ActivityRecord implements AppWindowContainerListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityRecord" : TAG_AM;
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
     private static final String TAG_SAVED_STATE = TAG + POSTFIX_SAVED_STATE;
@@ -135,6 +146,7 @@ final class ActivityRecord {
 
     final ActivityManagerService service; // owner
     final IApplicationToken.Stub appToken; // window manager token
+    AppWindowContainerController mWindowContainerController;
     final ActivityInfo info; // all about me
     final ApplicationInfo appInfo; // information about activity's app
     final int launchedFromUid; // always the uid who started the activity.
@@ -150,7 +162,7 @@ final class ActivityRecord {
     final boolean stateNotNeeded; // As per ActivityInfo.flags
     boolean fullscreen; // covers the full screen?
     final boolean noDisplay;  // activity is not displayed?
-    final boolean componentSpecified;  // did caller specify an explicit component?
+    private final boolean componentSpecified;  // did caller specify an explicit component?
     final boolean rootVoiceInteraction;  // was this the root activity of a voice interaction?
 
     static final int APPLICATION_ACTIVITY_TYPE = 0;
@@ -158,18 +170,18 @@ final class ActivityRecord {
     static final int RECENTS_ACTIVITY_TYPE = 2;
     int mActivityType;
 
-    CharSequence nonLocalizedLabel;  // the label information from the package mgr.
-    int labelRes;           // the label information from the package mgr.
-    int icon;               // resource identifier of activity's icon.
-    int logo;               // resource identifier of activity's logo.
-    int theme;              // resource identifier of activity's theme.
-    int realTheme;          // actual theme resource we will use, never 0.
-    int windowFlags;        // custom window flags for preview window.
+    private CharSequence nonLocalizedLabel;  // the label information from the package mgr.
+    private int labelRes;           // the label information from the package mgr.
+    private int icon;               // resource identifier of activity's icon.
+    private int logo;               // resource identifier of activity's logo.
+    private int theme;              // resource identifier of activity's theme.
+    private int realTheme;          // actual theme resource we will use, never 0.
+    private int windowFlags;        // custom window flags for preview window.
     TaskRecord task;        // the task this is in.
-    long createTime = System.currentTimeMillis();
+    private long createTime = System.currentTimeMillis();
     long displayStartTime;  // when we started launching this activity
     long fullyDrawnStartTime; // when we started launching this activity
-    long startTime;         // last time this activity was started
+    private long startTime;         // last time this activity was started
     long lastVisibleTime;   // last time this activity became visible
     long cpuTimeAtResume;   // the cpu time of host process at the time of resuming activity
     long pauseTime;         // last time we started pausing the activity
@@ -542,70 +554,9 @@ final class ActivityRecord {
 
     static class Token extends IApplicationToken.Stub {
         private final WeakReference<ActivityRecord> weakActivity;
-        private final ActivityManagerService mService;
 
-        Token(ActivityRecord activity, ActivityManagerService service) {
+        Token(ActivityRecord activity) {
             weakActivity = new WeakReference<>(activity);
-            mService = service;
-        }
-
-        @Override
-        public void windowsDrawn() {
-            synchronized (mService) {
-                ActivityRecord r = tokenToActivityRecordLocked(this);
-                if (r != null) {
-                    r.windowsDrawnLocked();
-                }
-            }
-        }
-
-        @Override
-        public void windowsVisible() {
-            synchronized (mService) {
-                ActivityRecord r = tokenToActivityRecordLocked(this);
-                if (r != null) {
-                    r.windowsVisibleLocked();
-                }
-            }
-        }
-
-        @Override
-        public void windowsGone() {
-            synchronized (mService) {
-                ActivityRecord r = tokenToActivityRecordLocked(this);
-                if (r != null) {
-                    if (DEBUG_SWITCH) Log.v(TAG_SWITCH, "windowsGone(): " + r);
-                    r.nowVisible = false;
-                }
-            }
-        }
-
-        @Override
-        public boolean keyDispatchingTimedOut(String reason) {
-            ActivityRecord r;
-            ActivityRecord anrActivity;
-            ProcessRecord anrApp;
-            synchronized (mService) {
-                r = tokenToActivityRecordLocked(this);
-                if (r == null) {
-                    return false;
-                }
-                anrActivity = r.getWaitingHistoryRecordLocked();
-                anrApp = r.app;
-            }
-            return mService.inputDispatchingTimedOut(anrApp, anrActivity, r, false, reason);
-        }
-
-        @Override
-        public long getKeyDispatchingTimeout() {
-            synchronized (mService) {
-                ActivityRecord r = tokenToActivityRecordLocked(this);
-                if (r == null) {
-                    return 0;
-                }
-                r = r.getWaitingHistoryRecordLocked();
-                return ActivityManagerService.getInputDispatchingTimeoutLocked(r);
-            }
         }
 
         private static ActivityRecord tokenToActivityRecordLocked(Token token) {
@@ -652,7 +603,7 @@ final class ActivityRecord {
             ActivityStackSupervisor supervisor,
             ActivityContainer container, ActivityOptions options, ActivityRecord sourceRecord) {
         service = _service;
-        appToken = new Token(this, service);
+        appToken = new Token(this);
         info = aInfo;
         launchedFromUid = _launchedFromUid;
         launchedFromPackage = _launchedFromPackage;
@@ -700,97 +651,110 @@ final class ActivityRecord {
             }
         }
 
-        // This starts out true, since the initial state of an activity
-        // is that we have everything, and we shouldn't never consider it
-        // lacking in state to be removed if it dies.
+        // This starts out true, since the initial state of an activity is that we have everything,
+        // and we shouldn't never consider it lacking in state to be removed if it dies.
         haveState = true;
 
-        if (aInfo != null) {
-            // If the class name in the intent doesn't match that of the target, this is
-            // probably an alias. We have to create a new ComponentName object to keep track
-            // of the real activity name, so that FLAG_ACTIVITY_CLEAR_TOP is handled properly.
-            if (aInfo.targetActivity == null
-                    || (aInfo.targetActivity.equals(_intent.getComponent().getClassName())
-                    && (aInfo.launchMode == ActivityInfo.LAUNCH_MULTIPLE
-                    || aInfo.launchMode == ActivityInfo.LAUNCH_SINGLE_TOP))) {
-                realActivity = _intent.getComponent();
-            } else {
-                realActivity = new ComponentName(aInfo.packageName, aInfo.targetActivity);
-            }
-            taskAffinity = aInfo.taskAffinity;
-            stateNotNeeded = (aInfo.flags&
-                    ActivityInfo.FLAG_STATE_NOT_NEEDED) != 0;
-            appInfo = aInfo.applicationInfo;
-            nonLocalizedLabel = aInfo.nonLocalizedLabel;
-            labelRes = aInfo.labelRes;
-            if (nonLocalizedLabel == null && labelRes == 0) {
-                ApplicationInfo app = aInfo.applicationInfo;
-                nonLocalizedLabel = app.nonLocalizedLabel;
-                labelRes = app.labelRes;
-            }
-            icon = aInfo.getIconResource();
-            logo = aInfo.getLogoResource();
-            theme = aInfo.getThemeResource();
-            realTheme = theme;
-            if (realTheme == 0) {
-                realTheme = aInfo.applicationInfo.targetSdkVersion
-                        < Build.VERSION_CODES.HONEYCOMB
-                        ? android.R.style.Theme
-                        : android.R.style.Theme_Holo;
-            }
-            if ((aInfo.flags&ActivityInfo.FLAG_HARDWARE_ACCELERATED) != 0) {
-                windowFlags |= LayoutParams.FLAG_HARDWARE_ACCELERATED;
-            }
-            if ((aInfo.flags&ActivityInfo.FLAG_MULTIPROCESS) != 0
-                    && _caller != null
-                    && (aInfo.applicationInfo.uid == Process.SYSTEM_UID
-                            || aInfo.applicationInfo.uid == _caller.info.uid)) {
-                processName = _caller.processName;
-            } else {
-                processName = aInfo.processName;
-            }
-
-            if (intent != null && (aInfo.flags & ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS) != 0) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-            }
-
-            packageName = aInfo.applicationInfo.packageName;
-            launchMode = aInfo.launchMode;
-
-            AttributeCache.Entry ent = AttributeCache.instance().get(packageName,
-                    realTheme, com.android.internal.R.styleable.Window, userId);
-            final boolean translucent = ent != null && (ent.array.getBoolean(
-                    com.android.internal.R.styleable.Window_windowIsTranslucent, false)
-                    || (!ent.array.hasValue(
-                            com.android.internal.R.styleable.Window_windowIsTranslucent)
-                            && ent.array.getBoolean(
-                                    com.android.internal.R.styleable.Window_windowSwipeToDismiss,
-                                            false)));
-            fullscreen = ent != null && !ent.array.getBoolean(
-                    com.android.internal.R.styleable.Window_windowIsFloating, false)
-                    && !translucent;
-            noDisplay = ent != null && ent.array.getBoolean(
-                    com.android.internal.R.styleable.Window_windowNoDisplay, false);
-
-            setActivityType(_componentSpecified, _launchedFromUid, _intent, sourceRecord);
-
-            immersive = (aInfo.flags & ActivityInfo.FLAG_IMMERSIVE) != 0;
-
-            requestedVrComponent = (aInfo.requestedVrComponent == null) ?
-                    null : ComponentName.unflattenFromString(aInfo.requestedVrComponent);
+        // If the class name in the intent doesn't match that of the target, this is
+        // probably an alias. We have to create a new ComponentName object to keep track
+        // of the real activity name, so that FLAG_ACTIVITY_CLEAR_TOP is handled properly.
+        if (aInfo.targetActivity == null
+                || (aInfo.targetActivity.equals(_intent.getComponent().getClassName())
+                && (aInfo.launchMode == LAUNCH_MULTIPLE
+                || aInfo.launchMode == LAUNCH_SINGLE_TOP))) {
+            realActivity = _intent.getComponent();
         } else {
-            realActivity = null;
-            taskAffinity = null;
-            stateNotNeeded = false;
-            appInfo = null;
-            processName = null;
-            packageName = null;
-            fullscreen = true;
-            noDisplay = false;
-            mActivityType = APPLICATION_ACTIVITY_TYPE;
-            immersive = false;
-            requestedVrComponent  = null;
+            realActivity = new ComponentName(aInfo.packageName, aInfo.targetActivity);
         }
+        taskAffinity = aInfo.taskAffinity;
+        stateNotNeeded = (aInfo.flags & FLAG_STATE_NOT_NEEDED) != 0;
+        appInfo = aInfo.applicationInfo;
+        nonLocalizedLabel = aInfo.nonLocalizedLabel;
+        labelRes = aInfo.labelRes;
+        if (nonLocalizedLabel == null && labelRes == 0) {
+            ApplicationInfo app = aInfo.applicationInfo;
+            nonLocalizedLabel = app.nonLocalizedLabel;
+            labelRes = app.labelRes;
+        }
+        icon = aInfo.getIconResource();
+        logo = aInfo.getLogoResource();
+        theme = aInfo.getThemeResource();
+        realTheme = theme;
+        if (realTheme == 0) {
+            realTheme = aInfo.applicationInfo.targetSdkVersion < HONEYCOMB
+                    ? android.R.style.Theme : android.R.style.Theme_Holo;
+        }
+        if ((aInfo.flags & ActivityInfo.FLAG_HARDWARE_ACCELERATED) != 0) {
+            windowFlags |= LayoutParams.FLAG_HARDWARE_ACCELERATED;
+        }
+        if ((aInfo.flags & FLAG_MULTIPROCESS) != 0 && _caller != null
+                && (aInfo.applicationInfo.uid == SYSTEM_UID
+                    || aInfo.applicationInfo.uid == _caller.info.uid)) {
+            processName = _caller.processName;
+        } else {
+            processName = aInfo.processName;
+        }
+
+        if ((aInfo.flags & FLAG_EXCLUDE_FROM_RECENTS) != 0) {
+            intent.addFlags(FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+        }
+
+        packageName = aInfo.applicationInfo.packageName;
+        launchMode = aInfo.launchMode;
+
+        AttributeCache.Entry ent = AttributeCache.instance().get(packageName,
+                realTheme, com.android.internal.R.styleable.Window, userId);
+        final boolean translucent = ent != null && (ent.array.getBoolean(
+                com.android.internal.R.styleable.Window_windowIsTranslucent, false)
+                || (!ent.array.hasValue(
+                        com.android.internal.R.styleable.Window_windowIsTranslucent)
+                        && ent.array.getBoolean(
+                                com.android.internal.R.styleable.Window_windowSwipeToDismiss,
+                                        false)));
+        fullscreen = ent != null && !ent.array.getBoolean(
+                com.android.internal.R.styleable.Window_windowIsFloating, false) && !translucent;
+        noDisplay = ent != null && ent.array.getBoolean(
+                com.android.internal.R.styleable.Window_windowNoDisplay, false);
+
+        setActivityType(_componentSpecified, _launchedFromUid, _intent, sourceRecord);
+
+        immersive = (aInfo.flags & FLAG_IMMERSIVE) != 0;
+
+        requestedVrComponent = (aInfo.requestedVrComponent == null) ?
+                null : ComponentName.unflattenFromString(aInfo.requestedVrComponent);
+    }
+
+    void createWindowContainer() {
+        if (mWindowContainerController != null) {
+            throw new IllegalArgumentException("Window container=" + mWindowContainerController
+                    + " already created for r=" + this);
+
+        }
+
+        inHistory = true;
+
+        task.updateOverrideConfigurationFromLaunchBounds();
+
+        mWindowContainerController = new AppWindowContainerController(appToken, this, task.taskId,
+                Integer.MAX_VALUE /* add on top */, info.screenOrientation, fullscreen,
+                (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0, info.configChanges,
+                task.voiceSession != null, mLaunchTaskBehind, isAlwaysFocusable(),
+                appInfo.targetSdkVersion, mRotationAnimationHint,
+                ActivityManagerService.getInputDispatchingTimeoutLocked(this) * 1000000L);
+
+        task.addActivityToTop(this);
+
+        onOverrideConfigurationSent();
+    }
+
+    void removeWindowContainer() {
+        mWindowContainerController.removeContainer(getDisplayId());
+    }
+
+    // TODO: Remove once task record is converted to use controller in which case we can use
+    // positionChildAt()
+    void positionWindowContainerAt(int index) {
+        mWindowContainerController.positionAt(task.taskId, index);
     }
 
     private boolean isHomeIntent(Intent intent) {
@@ -890,12 +854,6 @@ final class ActivityRecord {
         return true;
     }
 
-    void putInHistory() {
-        if (!inHistory) {
-            inHistory = true;
-        }
-    }
-
     void takeFromHistory() {
         if (inHistory) {
             inHistory = false;
@@ -931,7 +889,7 @@ final class ActivityRecord {
         return (info.persistableMode == ActivityInfo.PERSIST_ROOT_ONLY ||
                 info.persistableMode == ActivityInfo.PERSIST_ACROSS_REBOOTS) &&
                 (intent == null ||
-                        (intent.getFlags() & Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) == 0);
+                        (intent.getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) == 0);
     }
 
     boolean isFocusable() {
@@ -1222,14 +1180,14 @@ final class ActivityRecord {
     void pauseKeyDispatchingLocked() {
         if (!keysPaused) {
             keysPaused = true;
-            service.mWindowManager.pauseKeyDispatching(appToken);
+            mWindowContainerController.pauseKeyDispatching();
         }
     }
 
     void resumeKeyDispatchingLocked() {
         if (keysPaused) {
             keysPaused = false;
-            service.mWindowManager.resumeKeyDispatching(appToken);
+            mWindowContainerController.resumeKeyDispatching();
         }
     }
 
@@ -1277,7 +1235,7 @@ final class ActivityRecord {
             return null;
         }
 
-        final float scale;
+        float scale = 0;
         if (DEBUG_SCREENSHOTS) Slog.d(TAG_SCREENSHOTS, "\tTaking screenshot");
 
         // When this flag is set, we currently take the fullscreen screenshot of the activity but
@@ -1288,23 +1246,35 @@ final class ActivityRecord {
             scale = service.mFullscreenThumbnailScale;
         }
 
-        return service.mWindowManager.screenshotApplications(appToken, DEFAULT_DISPLAY, w, h,
-                scale);
+        return mWindowContainerController.screenshotApplications(getDisplayId(), w, h, scale);
     }
 
+    void setVisibility(boolean visible) {
+        mWindowContainerController.setVisibility(visible);
+    }
+
+    // TODO: Look into merging with #setVisibility()
     void setVisible(boolean newVisible) {
         visible = newVisible;
         if (!visible && mUpdateTaskThumbnailWhenHidden) {
             updateThumbnailLocked(screenshotActivityLocked(), null /* description */);
             mUpdateTaskThumbnailWhenHidden = false;
         }
-        service.mWindowManager.setAppVisibility(appToken, visible);
+        mWindowContainerController.setVisibility(visible);
         final ArrayList<ActivityContainer> containers = mChildContainers;
         for (int containerNdx = containers.size() - 1; containerNdx >= 0; --containerNdx) {
             final ActivityContainer container = containers.get(containerNdx);
             container.setVisible(visible);
         }
         mStackSupervisor.mAppVisibilitiesChangedSinceLastPause = true;
+    }
+
+    void notifyAppResumed(boolean wasStopped, boolean allowSavedSurface) {
+        mWindowContainerController.notifyAppResumed(wasStopped, allowSavedSurface);
+    }
+
+    void notifyUnknownVisibilityLaunched() {
+        mWindowContainerController.notifyUnknownVisibilityLaunched();
     }
 
     /**
@@ -1458,6 +1428,7 @@ final class ActivityRecord {
             service.notifyTaskPersisterLocked(task, false);
         }
         if (DEBUG_SAVED_STATE) Slog.i(TAG_SAVED_STATE, "Saving icicle of " + this + ": " + icicle);
+
         if (newIcicle != null) {
             // If icicle is null, this is happening due to a timeout, so we haven't really saved
             // the state.
@@ -1472,7 +1443,7 @@ final class ActivityRecord {
             stopped = true;
             state = ActivityState.STOPPED;
 
-            service.mWindowManager.notifyAppStopped(appToken);
+            mWindowContainerController.notifyAppStopped();
 
             if (stack.getVisibleBehindActivity() == this) {
                 mStackSupervisor.requestVisibleBehindLocked(this, false /* visible */);
@@ -1536,14 +1507,14 @@ final class ActivityRecord {
 
     public void startFreezingScreenLocked(ProcessRecord app, int configChanges) {
         if (mayFreezeScreenLocked(app)) {
-            service.mWindowManager.startAppFreezingScreen(appToken, configChanges);
+            mWindowContainerController.startFreezingScreen(configChanges);
         }
     }
 
     public void stopFreezingScreenLocked(boolean force) {
         if (force || frozenBeforeDestroy) {
             frozenBeforeDestroy = false;
-            service.mWindowManager.stopAppFreezingScreen(appToken, force);
+            mWindowContainerController.stopFreezingScreen(force);
         }
     }
 
@@ -1617,48 +1588,73 @@ final class ActivityRecord {
         stack.mLaunchStartTime = 0;
     }
 
-    void windowsDrawnLocked() {
-        mStackSupervisor.mActivityMetricsLogger.notifyWindowsDrawn();
-        if (displayStartTime != 0) {
-            reportLaunchTimeLocked(SystemClock.uptimeMillis());
-        }
-        mStackSupervisor.sendWaitingVisibleReportLocked(this);
-        startTime = 0;
-        finishLaunchTickingLocked();
-        if (task != null) {
-            task.hasBeenVisible = true;
-        }
-    }
-
-    void windowsVisibleLocked() {
-        mStackSupervisor.reportActivityVisibleLocked(this);
-        if (DEBUG_SWITCH) Log.v(TAG_SWITCH, "windowsVisibleLocked(): " + this);
-        if (!nowVisible) {
-            nowVisible = true;
-            lastVisibleTime = SystemClock.uptimeMillis();
-            if (!idle) {
-                // Instead of doing the full stop routine here, let's just hide any activities
-                // we now can, and let them stop when the normal idle happens.
-                mStackSupervisor.processStoppingActivitiesLocked(false);
-            } else {
-                // If this activity was already idle, then we now need to make sure we perform
-                // the full stop of any activities that are waiting to do so. This is because
-                // we won't do that while they are still waiting for this one to become visible.
-                final int size = mStackSupervisor.mWaitingVisibleActivities.size();
-                if (size > 0) {
-                    for (int i = 0; i < size; i++) {
-                        ActivityRecord r = mStackSupervisor.mWaitingVisibleActivities.get(i);
-                        if (DEBUG_SWITCH) Log.v(TAG_SWITCH, "Was waiting for visible: " + r);
-                    }
-                    mStackSupervisor.mWaitingVisibleActivities.clear();
-                    mStackSupervisor.scheduleIdleLocked();
-                }
+    @Override
+    public void onWindowsDrawn() {
+        synchronized (service) {
+            mStackSupervisor.mActivityMetricsLogger.notifyWindowsDrawn();
+            if (displayStartTime != 0) {
+                reportLaunchTimeLocked(SystemClock.uptimeMillis());
             }
-            service.scheduleAppGcsLocked();
+            mStackSupervisor.sendWaitingVisibleReportLocked(this);
+            startTime = 0;
+            finishLaunchTickingLocked();
+            if (task != null) {
+                task.hasBeenVisible = true;
+            }
         }
     }
 
-    ActivityRecord getWaitingHistoryRecordLocked() {
+    @Override
+    public void onWindowsVisible() {
+        synchronized (service) {
+            mStackSupervisor.reportActivityVisibleLocked(this);
+            if (DEBUG_SWITCH) Log.v(TAG_SWITCH, "windowsVisibleLocked(): " + this);
+            if (!nowVisible) {
+                nowVisible = true;
+                lastVisibleTime = SystemClock.uptimeMillis();
+                if (!idle) {
+                    // Instead of doing the full stop routine here, let's just hide any activities
+                    // we now can, and let them stop when the normal idle happens.
+                    mStackSupervisor.processStoppingActivitiesLocked(false);
+                } else {
+                    // If this activity was already idle, then we now need to make sure we perform
+                    // the full stop of any activities that are waiting to do so. This is because
+                    // we won't do that while they are still waiting for this one to become visible.
+                    final int size = mStackSupervisor.mWaitingVisibleActivities.size();
+                    if (size > 0) {
+                        for (int i = 0; i < size; i++) {
+                            ActivityRecord r = mStackSupervisor.mWaitingVisibleActivities.get(i);
+                            if (DEBUG_SWITCH) Log.v(TAG_SWITCH, "Was waiting for visible: " + r);
+                        }
+                        mStackSupervisor.mWaitingVisibleActivities.clear();
+                        mStackSupervisor.scheduleIdleLocked();
+                    }
+                }
+                service.scheduleAppGcsLocked();
+            }
+        }
+    }
+
+    @Override
+    public void onWindowsGone() {
+        synchronized (service) {
+            if (DEBUG_SWITCH) Log.v(TAG_SWITCH, "windowsGone(): " + this);
+            nowVisible = false;
+        }
+    }
+
+    @Override
+    public boolean keyDispatchingTimedOut(String reason) {
+        ActivityRecord anrActivity;
+        ProcessRecord anrApp;
+        synchronized (service) {
+            anrActivity = getWaitingHistoryRecordLocked();
+            anrApp = app;
+        }
+        return service.inputDispatchingTimedOut(anrApp, anrActivity, this, false, reason);
+    }
+
+    private ActivityRecord getWaitingHistoryRecordLocked() {
         // First find the real culprit...  if this activity is waiting for
         // another activity to start or has stopped, then the key dispatching
         // timeout should not be caused by this.
@@ -1800,12 +1796,26 @@ final class ActivityRecord {
     void showStartingWindow(ActivityRecord prev, boolean createIfNeeded) {
         final CompatibilityInfo compatInfo =
                 service.compatibilityInfoForPackageLocked(info.applicationInfo);
-        final boolean shown = service.mWindowManager.setAppStartingWindow(
-                appToken, packageName, theme, compatInfo, nonLocalizedLabel, labelRes, icon,
-                logo, windowFlags, prev != null ? prev.appToken : null, createIfNeeded);
+        final boolean shown = mWindowContainerController.addStartingWindow(packageName, theme,
+                compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
+                prev != null ? prev.appToken : null, createIfNeeded);
         if (shown) {
             mStartingWindowState = STARTING_WINDOW_SHOWN;
         }
+    }
+
+    void removeOrphanedStartingWindow(boolean behindFullscreenActivity) {
+        if (state == ActivityState.INITIALIZING
+                && mStartingWindowState == STARTING_WINDOW_SHOWN
+                && behindFullscreenActivity) {
+            if (DEBUG_VISIBILITY) Slog.w(TAG_VISIBILITY, "Found orphaned starting window " + this);
+            mStartingWindowState = STARTING_WINDOW_REMOVED;
+            mWindowContainerController.removeStartingWindow();
+        }
+    }
+
+    int getRequestedOrientation() {
+        return mWindowContainerController.getOrientation();
     }
 
     void setRequestedOrientation(int requestedOrientation) {
@@ -1814,11 +1824,12 @@ final class ActivityRecord {
             return;
         }
 
-        service.mWindowManager.setAppOrientation(appToken, requestedOrientation);
         final int displayId = getDisplayId();
-        final Configuration config = service.mWindowManager.updateOrientationFromAppTokens(
-                mStackSupervisor.getDisplayOverrideConfiguration(displayId),
-                mayFreezeScreenLocked(app) ? appToken : null, displayId);
+        final Configuration displayConfig =
+                mStackSupervisor.getDisplayOverrideConfiguration(displayId);
+
+        final Configuration config = mWindowContainerController.setOrientation(requestedOrientation,
+                displayId, displayConfig, mayFreezeScreenLocked(app));
         if (config != null) {
             frozenBeforeDestroy = true;
             if (!service.updateDisplayOverrideConfigurationLocked(config, this,

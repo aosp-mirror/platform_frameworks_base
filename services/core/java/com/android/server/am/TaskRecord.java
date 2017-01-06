@@ -849,6 +849,11 @@ final class TaskRecord extends ConfigurationContainer {
         if (r.isPersistable()) {
             mService.notifyTaskPersisterLocked(this, false);
         }
+
+        // Sync. with window manager
+        updateOverrideConfigurationFromLaunchBounds();
+        r.positionWindowContainerAt(index);
+        r.onOverrideConfigurationSent();
     }
 
     /** @return true if this was the last activity in the task */

@@ -251,16 +251,14 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         }
 
         if (appWindowToken != null && appWindowToken.appToken != null) {
-            try {
-                // Notify the activity manager about the timeout and let it decide whether
-                // to abort dispatching or keep waiting.
-                boolean abort = appWindowToken.appToken.keyDispatchingTimedOut(reason);
-                if (! abort) {
-                    // The activity manager declined to abort dispatching.
-                    // Wait a bit longer and timeout again later.
-                    return appWindowToken.mInputDispatchingTimeoutNanos;
-                }
-            } catch (RemoteException ex) {
+            // Notify the activity manager about the timeout and let it decide whether
+            // to abort dispatching or keep waiting.
+            final AppWindowContainerController controller = appWindowToken.getController();
+            final boolean abort = controller != null && controller.keyDispatchingTimedOut(reason);
+            if (!abort) {
+                // The activity manager declined to abort dispatching.
+                // Wait a bit longer and timeout again later.
+                return appWindowToken.mInputDispatchingTimeoutNanos;
             }
         } else if (windowState != null) {
             try {

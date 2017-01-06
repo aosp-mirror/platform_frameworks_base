@@ -83,41 +83,9 @@ interface IWindowManager
     void setOverscan(int displayId, int left, int top, int right, int bottom);
 
     // These can only be called when holding the MANAGE_APP_TOKENS permission.
-    void pauseKeyDispatching(IBinder token);
-    void resumeKeyDispatching(IBinder token);
     void setEventDispatching(boolean enabled);
     void addWindowToken(IBinder token, int type, int displayId);
     void removeWindowToken(IBinder token, int displayId);
-    /**
-     * Creates the object representation for the application token in the window manager and adds it
-     * to the specified task Id.
-     *
-     * @param addPos The position to add the token to in the task.
-     * @param token The token to add.
-     * @param taskId The Id of the task we are adding the token to.
-     * @param requestedOrientation Orientation to use.
-     * @param fullscreen True if the application token is fullscreen.
-     * @param showWhenLocked True if the application token should be shown when locked.
-     * @param configChanges Input configuration changes.
-     * @param voiceInteraction True if the token is in voice interaction mode.
-     * @param launchTaskBehind True if the token is been launched from behind.
-     * @param alwaysFocusable True if the app windows are always focusable regardless of the stack
-     *                        they are in.
-     * @param targetSdkVersion The application's target SDK version
-     */
-    void addAppToken(int addPos, IApplicationToken token, int taskId, int requestedOrientation,
-            boolean fullscreen, boolean showWhenLocked, int configChanges, boolean voiceInteraction,
-            boolean launchTaskBehind, boolean alwaysFocusable, int targetSdkVersion,
-            int rotationAnimationHint);
-    /**
-     * Adds an already existing application token on the window manager side to the input task id.
-     *
-     * @param token The token we are adding to the input task Id.
-     * @param taskId The Id of the task we are adding the token to.
-     */
-    void addAppToTask(IBinder token, int taskId);
-    void setAppOrientation(IApplicationToken token, int requestedOrientation);
-    int getAppOrientation(IApplicationToken token);
     void setFocusedApp(IBinder token, boolean moveFocusNow);
     void prepareAppTransition(int transit, boolean alwaysKeepCurrent);
     int getPendingAppTransition();
@@ -153,20 +121,6 @@ interface IWindowManager
             IAppTransitionAnimationSpecsFuture specsFuture, IRemoteCallback startedCallback,
             boolean scaleUp);
     void executeAppTransition();
-
-    /**
-     * Called to set the starting window for the input token and returns true if the starting
-     * window was set for the token.
-     */
-    boolean setAppStartingWindow(IBinder token, String pkg, int theme,
-            in CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes,
-            int icon, int logo, int windowFlags, IBinder transferFrom, boolean createIfNeeded);
-    void setAppVisibility(IBinder token, boolean visible);
-    void notifyAppResumed(IBinder token, boolean wasStopped, boolean allowSavedSurface);
-    void notifyAppStopped(IBinder token);
-    void startAppFreezingScreen(IBinder token, int configChanges);
-    void stopAppFreezingScreen(IBinder token, boolean force);
-    void removeAppToken(IBinder token, int displayId);
 
     /** Used by system ui to report that recents has shown itself. */
     void endProlongedAnimations();
@@ -313,15 +267,6 @@ interface IWindowManager
      * Used only for assist -- request a screenshot of the current application.
      */
     boolean requestAssistScreenshot(IAssistScreenshotReceiver receiver);
-
-    /**
-     * Create a screenshot of the applications currently displayed.
-     *
-     * @param frameScale the scale to apply to the frame, only used when width = -1 and
-     *                   height = -1
-     */
-    Bitmap screenshotApplications(IBinder appToken, int displayId, int maxWidth, int maxHeight,
-            float frameScale);
 
     /**
      * Called by the status bar to notify Views of changes to System UI visiblity.
