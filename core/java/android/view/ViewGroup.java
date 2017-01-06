@@ -1147,14 +1147,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
-    public void addKeyboardNavigationClusters(
-            @FocusGroupType int focusGroupType, Collection<View> views, int direction) {
+    public void addKeyboardNavigationGroups(
+            @KeyboardNavigationGroupType int groupType, Collection<View> views, int direction) {
         final int focusableCount = views.size();
 
-        super.addKeyboardNavigationClusters(focusGroupType, views, direction);
+        super.addKeyboardNavigationGroups(groupType, views, direction);
 
         if (focusableCount != views.size()) {
-            // No need to look for clusters inside a cluster.
+            // No need to look for groups inside a group.
             return;
         }
 
@@ -1167,13 +1167,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         for (int i = 0; i < count; i++) {
             final View child = children[i];
-            if (focusGroupType == FOCUS_GROUP_SECTION && child.isKeyboardNavigationCluster()) {
+            if (groupType == KEYBOARD_NAVIGATION_GROUP_SECTION
+                    && child.isKeyboardNavigationCluster()) {
                 // When the current cluster is the default cluster, and we are searching for
                 // sections, ignore sections inside non-default clusters.
                 continue;
             }
             if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE) {
-                child.addKeyboardNavigationClusters(focusGroupType, views, direction);
+                child.addKeyboardNavigationGroups(groupType, views, direction);
             }
         }
     }
