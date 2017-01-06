@@ -224,16 +224,20 @@ public class PowerUI extends SystemUI {
             return;
         }
 
-        // Get the throttling temperature. No need to check if we're not throttling.
-        float[] throttlingTemps = mHardwarePropertiesManager.getDeviceTemperatures(
-                HardwarePropertiesManager.DEVICE_TEMPERATURE_SKIN,
-                HardwarePropertiesManager.TEMPERATURE_THROTTLING);
-        if (throttlingTemps == null
-                || throttlingTemps.length == 0
-                || throttlingTemps[0] == HardwarePropertiesManager.UNDEFINED_TEMPERATURE) {
-            return;
+        mThrottlingTemp = mContext.getResources().getInteger(R.integer.config_warningTemperature);
+
+        if (mThrottlingTemp < 0f) {
+            // Get the throttling temperature. No need to check if we're not throttling.
+            float[] throttlingTemps = mHardwarePropertiesManager.getDeviceTemperatures(
+                    HardwarePropertiesManager.DEVICE_TEMPERATURE_SKIN,
+                    HardwarePropertiesManager.TEMPERATURE_THROTTLING);
+            if (throttlingTemps == null
+                    || throttlingTemps.length == 0
+                    || throttlingTemps[0] == HardwarePropertiesManager.UNDEFINED_TEMPERATURE) {
+                return;
+            }
+            mThrottlingTemp = throttlingTemps[0];
         }
-        mThrottlingTemp = throttlingTemps[0];
 
         // We have passed all of the checks, start checking the temp
         updateTemperatureWarning();
