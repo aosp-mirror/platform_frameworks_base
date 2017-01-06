@@ -60,16 +60,16 @@ class ResourceParser {
  private:
   DISALLOW_COPY_AND_ASSIGN(ResourceParser);
 
-  /*
-   * Parses the XML subtree as a StyleString (flattened XML representation for
-   * strings
-   * with formatting). If successful, `out_style_string`
-   * contains the escaped and whitespace trimmed text, while `out_raw_string`
-   * contains the unescaped text. Returns true on success.
-   */
-  bool FlattenXmlSubtree(xml::XmlPullParser* parser,
-                         std::string* out_raw_string,
-                         StyleString* out_style_string);
+  // Parses the XML subtree as a StyleString (flattened XML representation for strings with
+  // formatting). If parsing fails, false is returned and the out parameters are left in an
+  // unspecified state. Otherwise,
+  // `out_style_string` contains the escaped and whitespace trimmed text.
+  // `out_raw_string` contains the un-escaped text.
+  // `out_untranslatable_sections` contains the sections of the string that should not be
+  // translated.
+  bool FlattenXmlSubtree(xml::XmlPullParser* parser, std::string* out_raw_string,
+                         StyleString* out_style_string,
+                         std::vector<UntranslatableSection>* out_untranslatable_sections);
 
   /*
    * Parses the XML subtree and returns an Item.

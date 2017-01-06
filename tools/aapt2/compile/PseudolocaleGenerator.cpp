@@ -43,16 +43,16 @@ std::unique_ptr<StyledString> PseudolocalizeStyledString(
   }
 
   // The ranges are all represented with a single value. This is the start of
-  // one range and
-  // end of another.
+  // one range and end of another.
   struct Range {
     size_t start;
 
-    // Once the new string is localized, these are the pointers to the spans to
-    // adjust.
+    // If set to true, toggles the state of translatability.
+    bool toggle_translatability;
+
+    // Once the new string is localized, these are the pointers to the spans to adjust.
     // Since this struct represents the start of one range and end of another,
-    // we have
-    // the two pointers respectively.
+    // we have the two pointers respectively.
     uint32_t* update_start;
     uint32_t* update_end;
   };
@@ -63,12 +63,11 @@ std::unique_ptr<StyledString> PseudolocalizeStyledString(
 
   // Construct the ranges. The ranges are represented like so: [0, 2, 5, 7]
   // The ranges are the spaces in between. In this example, with a total string
-  // length of 9,
-  // the vector represents: (0,1], (2,4], (5,6], (7,9]
+  // length of 9, the vector represents: (0,1], (2,4], (5,6], (7,9]
   //
   std::vector<Range> ranges;
-  ranges.push_back(Range{0});
-  ranges.push_back(Range{original_text.size() - 1});
+  ranges.push_back(Range{0, false, nullptr, nullptr});
+  ranges.push_back(Range{original_text.size() - 1, false, nullptr, nullptr});
   for (size_t i = 0; i < string->value->spans.size(); i++) {
     const StringPool::Span& span = string->value->spans[i];
 
@@ -78,8 +77,7 @@ std::unique_ptr<StyledString> PseudolocalizeStyledString(
     if (iter != ranges.end() && iter->start == span.first_char) {
       iter->update_start = &localized.spans[i].first_char;
     } else {
-      ranges.insert(iter, Range{span.first_char, &localized.spans[i].first_char,
-                                nullptr});
+      ranges.insert(iter, Range{span.first_char, false, &localized.spans[i].first_char, nullptr});
     }
 
     // Insert or update the Range marker for the end of this span.
@@ -87,14 +85,45 @@ std::unique_ptr<StyledString> PseudolocalizeStyledString(
     if (iter != ranges.end() && iter->start == span.last_char) {
       iter->update_end = &localized.spans[i].last_char;
     } else {
-      ranges.insert(
-          iter, Range{span.last_char, nullptr, &localized.spans[i].last_char});
+      ranges.insert(iter, Range{span.last_char, false, nullptr, &localized.spans[i].last_char});
+    }
+  }
+
+  // Parts of the string may be untranslatable. Merge those ranges
+  // in as well, so that we have continuous sections of text to
+  // feed into the pseudolocalizer.
+  // We do this by marking the beginning of a range as either toggling
+  // the translatability state or not.
+  for (const UntranslatableSection& section : string->untranslatable_sections) {
+    auto iter = std::lower_bound(ranges.begin(), ranges.end(), section.start, cmp);
+    if (iter != ranges.end() && iter->start == section.start) {
+      // An existing span starts (or ends) here. We just need to mark that
+      // the translatability should toggle here. If translatability was
+      // already being toggled, then that means we have two adjacent ranges of untranslatable
+      // text, so remove the toggle and only toggle at the end of this range,
+      // effectively merging these ranges.
+      iter->toggle_translatability = !iter->toggle_translatability;
+    } else {
+      // Insert a new range that specifies to toggle the translatability.
+      iter = ranges.insert(iter, Range{section.start, true, nullptr, nullptr});
+    }
+
+    // Update/create an end to the untranslatable section.
+    iter = std::lower_bound(iter, ranges.end(), section.end, cmp);
+    if (iter != ranges.end() && iter->start == section.end) {
+      iter->toggle_translatability = true;
+    } else {
+      iter = ranges.insert(iter, Range{section.end, true, nullptr, nullptr});
     }
   }
 
   localized.str += localizer.Start();
 
   // Iterate over the ranges and localize each section.
+  // The text starts as translatable, and each time a range has toggle_translatability
+  // set to true, we toggle whether to translate or not.
+  // This assumes no untranslatable ranges overlap.
+  bool translatable = true;
   for (size_t i = 0; i < ranges.size(); i++) {
     const size_t start = ranges[i].start;
     size_t len = original_text.size() - start;
@@ -110,15 +139,20 @@ std::unique_ptr<StyledString> PseudolocalizeStyledString(
       *ranges[i].update_end = localized.str.size();
     }
 
-    localized.str += localizer.Text(original_text.substr(start, len));
+    if (ranges[i].toggle_translatability) {
+      translatable = !translatable;
+    }
+
+    if (translatable) {
+      localized.str += localizer.Text(original_text.substr(start, len));
+    } else {
+      localized.str += original_text.substr(start, len);
+    }
   }
 
   localized.str += localizer.End();
 
-  std::unique_ptr<StyledString> localized_string =
-      util::make_unique<StyledString>(pool->MakeRef(localized));
-  localized_string->SetSource(string->GetSource());
-  return localized_string;
+  return util::make_unique<StyledString>(pool->MakeRef(localized));
 }
 
 namespace {
@@ -152,8 +186,30 @@ class Visitor : public RawValueVisitor {
   }
 
   void Visit(String* string) override {
-    std::string result =
-        localizer_.Start() + localizer_.Text(*string->value) + localizer_.End();
+    const StringPiece original_string = *string->value;
+    std::string result = localizer_.Start();
+
+    // Pseudolocalize only the translatable sections.
+    size_t start = 0u;
+    for (const UntranslatableSection& section : string->untranslatable_sections) {
+      // Pseudolocalize the content before the untranslatable section.
+      const size_t len = section.start - start;
+      if (len > 0u) {
+        result += localizer_.Text(original_string.substr(start, len));
+      }
+
+      // Copy the untranslatable content.
+      result += original_string.substr(section.start, section.end - section.start);
+      start = section.end;
+    }
+
+    // Pseudolocalize the content after the last untranslatable section.
+    if (start != original_string.size()) {
+      const size_t len = original_string.size() - start;
+      result += localizer_.Text(original_string.substr(start, len));
+    }
+    result += localizer_.End();
+
     std::unique_ptr<String> localized =
         util::make_unique<String>(pool_->MakeRef(result));
     localized->SetSource(string->GetSource());
@@ -163,6 +219,7 @@ class Visitor : public RawValueVisitor {
 
   void Visit(StyledString* string) override {
     item = PseudolocalizeStyledString(string, method_, pool_);
+    item->SetSource(string->GetSource());
     item->SetWeak(true);
   }
 
@@ -228,7 +285,7 @@ void PseudolocalizeIfNeeded(const Pseudolocalizer::Method method,
 /**
  * A value is pseudolocalizable if it does not define a locale (or is the
  * default locale)
- * and is translateable.
+ * and is translatable.
  */
 static bool IsPseudolocalizable(ResourceConfigValue* config_value) {
   const int diff =
@@ -236,7 +293,7 @@ static bool IsPseudolocalizable(ResourceConfigValue* config_value) {
   if (diff & ConfigDescription::CONFIG_LOCALE) {
     return false;
   }
-  return config_value->value->IsTranslateable();
+  return config_value->value->IsTranslatable();
 }
 
 }  // namespace

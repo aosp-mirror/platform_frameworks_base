@@ -63,6 +63,14 @@ StringPool::Ref& StringPool::Ref::operator=(const StringPool::Ref& rhs) {
   return *this;
 }
 
+bool StringPool::Ref::operator==(const Ref& rhs) const {
+  return entry_->value == rhs.entry_->value;
+}
+
+bool StringPool::Ref::operator!=(const Ref& rhs) const {
+  return entry_->value != rhs.entry_->value;
+}
+
 const std::string* StringPool::Ref::operator->() const {
   return &entry_->value;
 }
@@ -108,6 +116,28 @@ StringPool::StyleRef& StringPool::StyleRef::operator=(
   entry_ = rhs.entry_;
   return *this;
 }
+
+bool StringPool::StyleRef::operator==(const StyleRef& rhs) const {
+  if (entry_->str != rhs.entry_->str) {
+    return false;
+  }
+
+  if (entry_->spans.size() != rhs.entry_->spans.size()) {
+    return false;
+  }
+
+  auto rhs_iter = rhs.entry_->spans.begin();
+  for (const Span& span : entry_->spans) {
+    const Span& rhs_span = *rhs_iter;
+    if (span.first_char != rhs_span.first_char || span.last_char != rhs_span.last_char ||
+        span.name != rhs_span.name) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool StringPool::StyleRef::operator!=(const StyleRef& rhs) const { return !operator==(rhs); }
 
 const StringPool::StyleEntry* StringPool::StyleRef::operator->() const {
   return entry_;

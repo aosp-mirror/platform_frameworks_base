@@ -1,5 +1,9 @@
 # Android Asset Packaging Tool 2.0 (AAPT2) release notes
 
+## Version 2.7
+### `aapt2 compile`
+- Fixes bug where psuedolocalization auto-translated strings marked 'translateable="false"'.
+
 ## Version 2.6
 ### `aapt2`
 - Support legacy `configVarying` resource type.

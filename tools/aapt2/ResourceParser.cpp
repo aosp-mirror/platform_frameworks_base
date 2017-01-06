@@ -26,6 +26,7 @@
 #include "ResourceValues.h"
 #include "ValueVisitor.h"
 #include "util/ImmutableMap.h"
+#include "util/Maybe.h"
 #include "util/Util.h"
 #include "xml/XmlPullParser.h"
 
@@ -150,82 +151,108 @@ ResourceParser::ResourceParser(IDiagnostics* diag, ResourceTable* table,
 /**
  * Build a string from XML that converts nested elements into Span objects.
  */
-bool ResourceParser::FlattenXmlSubtree(xml::XmlPullParser* parser,
-                                       std::string* out_raw_string,
-                                       StyleString* out_style_string) {
+bool ResourceParser::FlattenXmlSubtree(
+    xml::XmlPullParser* parser, std::string* out_raw_string, StyleString* out_style_string,
+    std::vector<UntranslatableSection>* out_untranslatable_sections) {
+  // Keeps track of formatting tags (<b>, <i>) and the range of characters for which they apply.
   std::vector<Span> span_stack;
 
-  bool error = false;
+  // Clear the output variables.
   out_raw_string->clear();
   out_style_string->spans.clear();
+  out_untranslatable_sections->clear();
+
+  // The StringBuilder will concatenate the various segments of text which are initially
+  // separated by tags. It also handles unicode escape codes and quotations.
   util::StringBuilder builder;
+
+  // The first occurrence of a <xliff:g> tag. Nested <xliff:g> tags are illegal.
+  Maybe<size_t> untranslatable_start_depth;
+
   size_t depth = 1;
   while (xml::XmlPullParser::IsGoodEvent(parser->Next())) {
     const xml::XmlPullParser::Event event = parser->event();
-    if (event == xml::XmlPullParser::Event::kEndElement) {
-      if (!parser->element_namespace().empty()) {
-        // We already warned and skipped the start element, so just skip here
-        // too
-        continue;
+
+    if (event == xml::XmlPullParser::Event::kStartElement) {
+      if (parser->element_namespace().empty()) {
+        // This is an HTML tag which we encode as a span. Add it to the span stack.
+        std::string span_name = parser->element_name();
+        const auto end_attr_iter = parser->end_attributes();
+        for (auto attr_iter = parser->begin_attributes(); attr_iter != end_attr_iter; ++attr_iter) {
+          span_name += ";";
+          span_name += attr_iter->name;
+          span_name += "=";
+          span_name += attr_iter->value;
+        }
+
+        // Make sure the string is representable in our binary format.
+        if (builder.Utf16Len() > std::numeric_limits<uint32_t>::max()) {
+          diag_->Error(DiagMessage(source_.WithLine(parser->line_number()))
+                       << "style string '" << builder.ToString() << "' is too long");
+          return false;
+        }
+
+        span_stack.push_back(Span{std::move(span_name), static_cast<uint32_t>(builder.Utf16Len())});
+      } else if (parser->element_namespace() == sXliffNamespaceUri) {
+        if (parser->element_name() == "g") {
+          if (untranslatable_start_depth) {
+            // We've already encountered an <xliff:g> tag, and nested <xliff:g> tags are illegal.
+            diag_->Error(DiagMessage(source_.WithLine(parser->line_number()))
+                         << "illegal nested XLIFF 'g' tag");
+            return false;
+          } else {
+            // Mark the start of an untranslatable section. Use UTF8 indices/lengths.
+            untranslatable_start_depth = depth;
+            const size_t current_idx = builder.ToString().size();
+            out_untranslatable_sections->push_back(UntranslatableSection{current_idx, current_idx});
+          }
+        }
+        // Ignore other xliff tags, they get handled by other tools.
+
+      } else {
+        // Besides XLIFF, any other namespaced tag is unsupported and ignored.
+        diag_->Warn(DiagMessage(source_.WithLine(parser->line_number()))
+                    << "ignoring element '" << parser->element_name()
+                    << "' with unknown namespace '" << parser->element_namespace() << "'");
       }
 
+      // Enter one level inside the element.
+      depth++;
+    } else if (event == xml::XmlPullParser::Event::kText) {
+      // Record both the raw text and append to the builder to deal with escape sequences
+      // and quotations.
+      out_raw_string->append(parser->text());
+      builder.Append(parser->text());
+    } else if (event == xml::XmlPullParser::Event::kEndElement) {
+      // Return one level from within the element.
       depth--;
       if (depth == 0) {
         break;
       }
 
-      span_stack.back().last_char = builder.Utf16Len() - 1;
-      out_style_string->spans.push_back(span_stack.back());
-      span_stack.pop_back();
-
-    } else if (event == xml::XmlPullParser::Event::kText) {
-      out_raw_string->append(parser->text());
-      builder.Append(parser->text());
-
-    } else if (event == xml::XmlPullParser::Event::kStartElement) {
-      if (!parser->element_namespace().empty()) {
-        if (parser->element_namespace() != sXliffNamespaceUri) {
-          // Only warn if this isn't an xliff namespace.
-          diag_->Warn(DiagMessage(source_.WithLine(parser->line_number()))
-                      << "skipping element '" << parser->element_name()
-                      << "' with unknown namespace '"
-                      << parser->element_namespace() << "'");
-        }
-        continue;
+      if (parser->element_namespace().empty()) {
+        // This is an HTML tag which we encode as a span. Update the span
+        // stack and pop the top entry.
+        Span& top_span = span_stack.back();
+        top_span.last_char = builder.Utf16Len() - 1;
+        out_style_string->spans.push_back(std::move(top_span));
+        span_stack.pop_back();
+      } else if (untranslatable_start_depth == make_value(depth)) {
+        // This is the end of an untranslatable section. Use UTF8 indices/lengths.
+        UntranslatableSection& untranslatable_section = out_untranslatable_sections->back();
+        untranslatable_section.end = builder.ToString().size();
+        untranslatable_start_depth = {};
       }
-      depth++;
-
-      // Build a span object out of the nested element.
-      std::string span_name = parser->element_name();
-      const auto end_attr_iter = parser->end_attributes();
-      for (auto attr_iter = parser->begin_attributes();
-           attr_iter != end_attr_iter; ++attr_iter) {
-        span_name += ";";
-        span_name += attr_iter->name;
-        span_name += "=";
-        span_name += attr_iter->value;
-      }
-
-      if (builder.Utf16Len() > std::numeric_limits<uint32_t>::max()) {
-        diag_->Error(DiagMessage(source_.WithLine(parser->line_number()))
-                     << "style string '" << builder.ToString()
-                     << "' is too long");
-        error = true;
-      } else {
-        span_stack.push_back(
-            Span{span_name, static_cast<uint32_t>(builder.Utf16Len())});
-      }
-
     } else if (event == xml::XmlPullParser::Event::kComment) {
-      // Skip
+      // Ignore.
     } else {
       LOG(FATAL) << "unhandled XML event";
     }
   }
-  CHECK(span_stack.empty()) << "spans haven't been fully processed";
 
+  CHECK(span_stack.empty()) << "spans haven't been fully processed";
   out_style_string->str = builder.ToString();
-  return !error;
+  return true;
 }
 
 bool ResourceParser::Parse(xml::XmlPullParser* parser) {
@@ -548,15 +575,18 @@ std::unique_ptr<Item> ResourceParser::ParseXml(xml::XmlPullParser* parser,
 
   std::string raw_value;
   StyleString style_string;
-  if (!FlattenXmlSubtree(parser, &raw_value, &style_string)) {
+  std::vector<UntranslatableSection> untranslatable_sections;
+  if (!FlattenXmlSubtree(parser, &raw_value, &style_string, &untranslatable_sections)) {
     return {};
   }
 
   if (!style_string.spans.empty()) {
     // This can only be a StyledString.
-    return util::make_unique<StyledString>(table_->string_pool.MakeRef(
-        style_string,
-        StringPool::Context(StringPool::Context::kStylePriority, config_)));
+    std::unique_ptr<StyledString> styled_string =
+        util::make_unique<StyledString>(table_->string_pool.MakeRef(
+            style_string, StringPool::Context(StringPool::Context::kStylePriority, config_)));
+    styled_string->untranslatable_sections = std::move(untranslatable_sections);
+    return std::move(styled_string);
   }
 
   auto on_create_reference = [&](const ResourceName& name) {
@@ -582,8 +612,10 @@ std::unique_ptr<Item> ResourceParser::ParseXml(xml::XmlPullParser* parser,
   // Try making a regular string.
   if (type_mask & android::ResTable_map::TYPE_STRING) {
     // Use the trimmed, escaped string.
-    return util::make_unique<String>(table_->string_pool.MakeRef(
-        style_string.str, StringPool::Context(config_)));
+    std::unique_ptr<String> string = util::make_unique<String>(
+        table_->string_pool.MakeRef(style_string.str, StringPool::Context(config_)));
+    string->untranslatable_sections = std::move(untranslatable_sections);
+    return std::move(string);
   }
 
   if (allow_raw_value) {
@@ -609,17 +641,15 @@ bool ResourceParser::ParseString(xml::XmlPullParser* parser,
     formatted = maybe_formatted.value();
   }
 
-  bool translateable = options_.translatable;
-  if (Maybe<StringPiece> translateable_attr =
-          xml::FindAttribute(parser, "translatable")) {
-    Maybe<bool> maybe_translateable =
-        ResourceUtils::ParseBool(translateable_attr.value());
-    if (!maybe_translateable) {
+  bool translatable = options_.translatable;
+  if (Maybe<StringPiece> translatable_attr = xml::FindAttribute(parser, "translatable")) {
+    Maybe<bool> maybe_translatable = ResourceUtils::ParseBool(translatable_attr.value());
+    if (!maybe_translatable) {
       diag_->Error(DiagMessage(out_resource->source)
                    << "invalid value for 'translatable'. Must be a boolean");
       return false;
     }
-    translateable = maybe_translateable.value();
+    translatable = maybe_translatable.value();
   }
 
   out_resource->value =
@@ -630,9 +660,9 @@ bool ResourceParser::ParseString(xml::XmlPullParser* parser,
   }
 
   if (String* string_value = ValueCast<String>(out_resource->value.get())) {
-    string_value->SetTranslateable(translateable);
+    string_value->SetTranslatable(translatable);
 
-    if (formatted && translateable) {
+    if (formatted && translatable) {
       if (!util::VerifyJavaStringFormat(*string_value->value)) {
         DiagMessage msg(out_resource->source);
         msg << "multiple substitutions specified in non-positional format; "
@@ -646,9 +676,8 @@ bool ResourceParser::ParseString(xml::XmlPullParser* parser,
       }
     }
 
-  } else if (StyledString* string_value =
-                 ValueCast<StyledString>(out_resource->value.get())) {
-    string_value->SetTranslateable(translateable);
+  } else if (StyledString* string_value = ValueCast<StyledString>(out_resource->value.get())) {
+    string_value->SetTranslatable(translatable);
   }
   return true;
 }
@@ -1151,19 +1180,17 @@ bool ResourceParser::ParseArrayImpl(xml::XmlPullParser* parser,
 
   std::unique_ptr<Array> array = util::make_unique<Array>();
 
-  bool translateable = options_.translatable;
-  if (Maybe<StringPiece> translateable_attr =
-          xml::FindAttribute(parser, "translatable")) {
-    Maybe<bool> maybe_translateable =
-        ResourceUtils::ParseBool(translateable_attr.value());
-    if (!maybe_translateable) {
+  bool translatable = options_.translatable;
+  if (Maybe<StringPiece> translatable_attr = xml::FindAttribute(parser, "translatable")) {
+    Maybe<bool> maybe_translatable = ResourceUtils::ParseBool(translatable_attr.value());
+    if (!maybe_translatable) {
       diag_->Error(DiagMessage(out_resource->source)
                    << "invalid value for 'translatable'. Must be a boolean");
       return false;
     }
-    translateable = maybe_translateable.value();
+    translatable = maybe_translatable.value();
   }
-  array->SetTranslateable(translateable);
+  array->SetTranslatable(translatable);
 
   bool error = false;
   const size_t depth = parser->depth();
