@@ -313,12 +313,14 @@ static jint convertProgramInfoFromNative(JNIEnv *env,
     ALOGV("%s", __FUNCTION__);
     int jStatus;
     jobject jMetadata = NULL;
-    if (nProgramInfo->metadata != NULL) {
-        ALOGV("%s metadata %p", __FUNCTION__, nProgramInfo->metadata);
-        jStatus = convertMetadataFromNative(env, &jMetadata, nProgramInfo->metadata);
-        if (jStatus < 0) {
-            return jStatus;
-        }
+
+    if (nProgramInfo == nullptr || nProgramInfo->metadata == nullptr) {
+        return (jint)RADIO_STATUS_BAD_VALUE;
+    }
+
+    jStatus = convertMetadataFromNative(env, &jMetadata, nProgramInfo->metadata);
+    if (jStatus < 0) {
+        return jStatus;
     }
 
     ALOGV("%s channel %d tuned %d", __FUNCTION__, nProgramInfo->channel, nProgramInfo->tuned);
