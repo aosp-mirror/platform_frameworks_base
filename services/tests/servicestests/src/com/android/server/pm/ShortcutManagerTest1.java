@@ -1292,43 +1292,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     /* activity =*/ null, /* flags */ 0), getCallingUser());
                 });
 
-        // Make sure floating shortcuts don't match with an activity.
-        // At this point, s1 is dynamic and pinned, so it still has a target activity.
-        runWithCaller(LAUNCHER_1, USER_0, () -> {
-            assertWith(mLauncherApps.getShortcuts(buildQuery(
-                    /* time =*/ 0,
-                    CALLING_PACKAGE_2,
-                    /* activity =*/ new ComponentName(CALLING_PACKAGE_2,
-                            ShortcutActivity2.class.getName()),
-                    ShortcutQuery.FLAG_GET_PINNED),
-                    getCallingUser()))
-                    .haveIds("s3")
-                    .areAllPinned()
-                    .areAllDynamic()
-                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_2,
-                            ShortcutActivity2.class.getName()));
-        });
-
-        // Now remove as a dynamic, making it floating.
-        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
-            mManager.removeDynamicShortcuts(list("s3"));
-            assertWith(mManager.getPinnedShortcuts())
-                    .selectFloating()
-                    .areAllWithNoActivity();
-        });
-
-        runWithCaller(LAUNCHER_1, USER_0, () -> {
-            // This shouldn't match now.
-            assertWith(mLauncherApps.getShortcuts(buildQuery(
-                    /* time =*/ 0,
-                    CALLING_PACKAGE_2,
-                    /* activity =*/ new ComponentName(CALLING_PACKAGE_2,
-                            ShortcutActivity2.class.getName()),
-                    ShortcutQuery.FLAG_GET_PINNED),
-                    getCallingUser()))
-                    .isEmpty();
-        });
-
+        // TODO More tests: pinned but dynamic.
     }
 
     public void testGetShortcuts_shortcutKinds() throws Exception {
