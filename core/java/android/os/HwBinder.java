@@ -17,6 +17,7 @@
 package android.os;
 
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 import libcore.util.NativeAllocationRegistry;
 
 /** @hide */
@@ -44,11 +45,13 @@ public abstract class HwBinder implements IHwBinder {
 
     public native final void registerService(
             ArrayList<String> interfaceChain,
-            String serviceName);
+            String serviceName)
+        throws RemoteException;
 
     public static native final IHwBinder getService(
             String iface,
-            String serviceName);
+            String serviceName)
+        throws RemoteException, NoSuchElementException;
 
     // Returns address of the "freeFunction".
     private static native final long native_init();
