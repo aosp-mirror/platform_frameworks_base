@@ -204,7 +204,13 @@ def parse_fonts_xml(fonts_xml_path):
     _script_to_font_map = collections.defaultdict(set)
     _fallback_chain = []
     tree = ElementTree.parse(fonts_xml_path)
-    for family in tree.findall('family'):
+    families = tree.findall('family')
+    # Minikin supports up to 254 but users can place their own font at the first
+    # place. Thus, 253 is the maximum allowed number of font families in the
+    # default collection.
+    assert len(families) < 254, (
+        'System font collection can contains up to 253 font families.')
+    for family in families:
         name = family.get('name')
         variant = family.get('variant')
         langs = family.get('lang')
