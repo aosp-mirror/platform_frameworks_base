@@ -322,9 +322,8 @@ public final class PublishConfig implements Parcelable {
          * Sets the number of times an unsolicited (configured using
          * {@link PublishConfig.Builder#setPublishType(int)}) publish session
          * will be broadcast. When the count is reached an event will be
-         * generated for {@link DiscoverySessionCallback#onSessionTerminated(int)}
-         * with {@link DiscoverySessionCallback#TERMINATE_REASON_DONE} [unless
-         * {@link #setTerminateNotificationEnabled(boolean)} disables the callback].
+         * generated for {@link DiscoverySessionCallback#onSessionTerminated()}
+         * [unless {@link #setTerminateNotificationEnabled(boolean)} disables the callback].
          * <p>
          *     Optional. 0 by default - indicating the session doesn't terminate on its own.
          *     Session will be terminated when {@link DiscoverySession#destroy()} is
@@ -348,8 +347,7 @@ public final class PublishConfig implements Parcelable {
          * {@link PublishConfig.Builder#setPublishType(int)}) publish session
          * will be alive - broadcasting a packet. When the TTL is reached
          * an event will be generated for
-         * {@link DiscoverySessionCallback#onSessionTerminated(int)} with
-         * {@link DiscoverySessionCallback#TERMINATE_REASON_DONE}  [unless
+         * {@link DiscoverySessionCallback#onSessionTerminated()} [unless
          * {@link #setTerminateNotificationEnabled(boolean)} disables the callback].
          * <p>
          *     Optional. 0 by default - indicating the session doesn't terminate on its own.
@@ -371,7 +369,7 @@ public final class PublishConfig implements Parcelable {
 
         /**
          * Configure whether a publish terminate notification
-         * {@link DiscoverySessionCallback#onSessionTerminated(int)} is reported
+         * {@link DiscoverySessionCallback#onSessionTerminated()} is reported
          * back to the callback.
          *
          * @param enable If true the terminate callback will be called when the
