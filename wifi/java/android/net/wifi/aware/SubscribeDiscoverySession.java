@@ -22,35 +22,35 @@ import android.util.Log;
 /**
  * A class representing a Aware subscribe session. Created when
  * {@link WifiAwareSession#subscribe(SubscribeConfig,
- * WifiAwareDiscoverySessionCallback, android.os.Handler)}
+ * DiscoverySessionCallback, android.os.Handler)}
  * is called and a discovery session is created and returned in
- * {@link WifiAwareDiscoverySessionCallback#onSubscribeStarted(WifiAwareSubscribeDiscoverySession)}.
- * See baseline functionality of all discovery sessions in {@link WifiAwareDiscoveryBaseSession}.
+ * {@link DiscoverySessionCallback#onSubscribeStarted(SubscribeDiscoverySession)}.
+ * See baseline functionality of all discovery sessions in {@link DiscoverySession}.
  * This object allows updating an existing/running subscribe discovery session using
  * {@link #updateSubscribe(SubscribeConfig)}.
  *
  * @hide PROPOSED_AWARE_API
  */
-public class WifiAwareSubscribeDiscoverySession extends WifiAwareDiscoveryBaseSession {
-    private static final String TAG = "WifiAwareSubsDiscSsn";
+public class SubscribeDiscoverySession extends DiscoverySession {
+    private static final String TAG = "SubscribeDiscoverySession";
 
     /**
      * {@hide}
      */
-    public WifiAwareSubscribeDiscoverySession(WifiAwareManager manager, int clientId,
+    public SubscribeDiscoverySession(WifiAwareManager manager, int clientId,
             int sessionId) {
         super(manager, clientId, sessionId);
     }
 
     /**
      * Re-configure the currently active subscribe session. The
-     * {@link WifiAwareDiscoverySessionCallback} is not replaced - the same listener used
+     * {@link DiscoverySessionCallback} is not replaced - the same listener used
      * at creation is still used. The results of the configuration are returned using
-     * {@link WifiAwareDiscoverySessionCallback}:
+     * {@link DiscoverySessionCallback}:
      * <ul>
-     *     <li>{@link WifiAwareDiscoverySessionCallback#onSessionConfigUpdated()}: configuration
+     *     <li>{@link DiscoverySessionCallback#onSessionConfigUpdated()}: configuration
      *     update succeeded.
-     *     <li>{@link WifiAwareDiscoverySessionCallback#onSessionConfigFailed()}: configuration
+     *     <li>{@link DiscoverySessionCallback#onSessionConfigFailed()}: configuration
      *     update failed. The subscribe discovery session is still running using its previous
      *     configuration (i.e. update failure does not terminate the session).
      * </ul>
