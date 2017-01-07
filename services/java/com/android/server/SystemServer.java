@@ -219,6 +219,7 @@ public final class SystemServer {
 
     private boolean mOnlyCore;
     private boolean mFirstBoot;
+    private final boolean mRuntimeRestart;
 
     /**
      * Start the sensor service.
@@ -235,6 +236,8 @@ public final class SystemServer {
     public SystemServer() {
         // Check for factory test mode.
         mFactoryTestMode = FactoryTest.getMode();
+        // Remember if it's runtime restart(when sys.boot_completed is already set) or reboot
+        mRuntimeRestart = "1".equals(SystemProperties.get("sys.boot_completed"));
     }
 
     private void run() {
@@ -271,13 +274,16 @@ public final class SystemServer {
 
             // Here we go!
             Slog.i(TAG, "Entered the Android system server!");
-            int uptimeMillis = (int) SystemClock.uptimeMillis();
+            int uptimeMillis = (int) SystemClock.elapsedRealtime();
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_SYSTEM_RUN, uptimeMillis);
-            MetricsLogger.histogram(null, "boot_system_server_init", uptimeMillis);
-            // Also report when first stage of init has started
-            long initStartNs = SystemProperties.getLong("ro.boottime.init", -1);
-            if (initStartNs >= 0) {
-                MetricsLogger.histogram(null, "boot_android_init", (int)(initStartNs / 1000000));
+            if (!mRuntimeRestart) {
+                MetricsLogger.histogram(null, "boot_system_server_init", uptimeMillis);
+                // Also report when first stage of init has started
+                long initStartNs = SystemProperties.getLong("ro.boottime.init", -1);
+                if (initStartNs >= 0) {
+                    MetricsLogger.histogram(null, "boot_android_init",
+                            (int)(initStartNs / 1000000));
+                }
             }
 
             // In case the runtime switched since last boot (such as when
@@ -370,7 +376,10 @@ public final class SystemServer {
         if (StrictMode.conditionallyEnableDebugLogging()) {
             Slog.i(TAG, "Enabled StrictMode for system server main thread.");
         }
-        MetricsLogger.histogram(null, "boot_system_server_ready", (int) SystemClock.uptimeMillis());
+        if (!mRuntimeRestart) {
+            MetricsLogger.histogram(null, "boot_system_server_ready",
+                    (int) SystemClock.elapsedRealtime());
+        }
 
         // Loop forever.
         Looper.loop();
@@ -499,16 +508,20 @@ public final class SystemServer {
         }
 
         // Start the package manager.
-        MetricsLogger.histogram(null, "boot_package_manager_init_start",
-                (int) SystemClock.uptimeMillis());
+        if (!mRuntimeRestart) {
+            MetricsLogger.histogram(null, "boot_package_manager_init_start",
+                    (int) SystemClock.elapsedRealtime());
+        }
         traceBeginAndSlog("StartPackageManagerService");
         mPackageManagerService = PackageManagerService.main(mSystemContext, installer,
                 mFactoryTestMode != FactoryTest.FACTORY_TEST_OFF, mOnlyCore);
         mFirstBoot = mPackageManagerService.isFirstBoot();
         mPackageManager = mSystemContext.getPackageManager();
         traceEnd();
-        MetricsLogger.histogram(null, "boot_package_manager_init_ready",
-                (int) SystemClock.uptimeMillis());
+        if (!mRuntimeRestart) {
+            MetricsLogger.histogram(null, "boot_package_manager_init_ready",
+                    (int) SystemClock.elapsedRealtime());
+        }
         // Manages A/B OTA dexopting. This is a bootstrap service as we need it to rename
         // A/B artifacts after boot, before anything else might touch/need them.
         // Note: this isn't needed during decryption (we don't have /data anyways).

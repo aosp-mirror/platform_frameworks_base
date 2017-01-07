@@ -657,8 +657,11 @@ public class ZygoteInit {
         }
 
         try {
-            // Report Zygote start time to tron
-            MetricsLogger.histogram(null, "boot_zygote_init", (int) SystemClock.uptimeMillis());
+            // Report Zygote start time to tron unless it is a runtime restart
+            if (!"1".equals(SystemProperties.get("sys.boot_completed"))) {
+                MetricsLogger.histogram(null, "boot_zygote_init",
+                        (int) SystemClock.elapsedRealtime());
+            }
 
             String bootTimeTag = Process.is64Bit() ? "Zygote64Timing" : "Zygote32Timing";
             BootTimingsTraceLog bootTimingsTraceLog = new BootTimingsTraceLog(bootTimeTag,
