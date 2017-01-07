@@ -455,6 +455,13 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     private final FindTaskResult mTmpFindTaskResult = new FindTaskResult();
 
     /**
+     * Temp storage for display ids sorted in focus order.
+     * Maps position to id. Using {@link SparseIntArray} instead of {@link ArrayList} because
+     * it's more efficient, as the number of displays is usually small.
+     */
+    private SparseIntArray mTmpOrderedDisplayIds = new SparseIntArray();
+
+    /**
      * Used to keep track whether app visibilities got changed since the last pause. Useful to
      * determine whether to invoke the task stack change listener after pausing.
      */
@@ -637,7 +644,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     void setFocusStackUnchecked(String reason, ActivityStack focusCandidate) {
         if (!focusCandidate.isFocusable()) {
             // The focus candidate isn't focusable. Move focus to the top stack that is focusable.
-            focusCandidate = focusCandidate.getNextFocusableStackLocked();
+            focusCandidate = getNextFocusableStackLocked(focusCandidate);
         }
 
         if (focusCandidate != mFocusedStack) {
@@ -2017,6 +2024,35 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     ArrayList<ActivityStack> getStacksOnDefaultDisplay() {
         return mActivityDisplays.valueAt(DEFAULT_DISPLAY).mStacks;
+    }
+
+    /**
+     * Get next focusable stack in the system. This will search across displays and stacks
+     * in last-focused order for a focusable and visible stack, different from the target stack.
+     *
+     * @param currentFocus The stack that previously had focus and thus needs to be ignored when
+     *                     searching for next candidate.
+     * @return Next focusable {@link ActivityStack}, null if not found.
+     */
+    ActivityStack getNextFocusableStackLocked(ActivityStack currentFocus) {
+        mWindowManager.getDisplaysInFocusOrder(mTmpOrderedDisplayIds);
+
+        for (int i = mTmpOrderedDisplayIds.size() - 1; i >= 0; --i) {
+            final int displayId = mTmpOrderedDisplayIds.get(i);
+            final List<ActivityStack> stacks = mActivityDisplays.get(displayId).mStacks;
+            if (stacks == null) {
+                continue;
+            }
+            for (int j = stacks.size() - 1; j >= 0; --j) {
+                final ActivityStack stack = stacks.get(j);
+                if (stack != currentFocus && stack.isFocusable()
+                        && stack.getStackVisibilityLocked(null) != STACK_INVISIBLE) {
+                    return stack;
+                }
+            }
+        }
+
+        return null;
     }
 
     ActivityRecord getHomeActivity() {

@@ -1390,24 +1390,6 @@ final class ActivityStack extends ConfigurationContainer {
         return null;
     }
 
-    ActivityStack getNextFocusableStackLocked() {
-        ArrayList<ActivityStack> stacks = mStacks;
-        final ActivityRecord parent = mActivityContainer.mParentActivity;
-        if (parent != null) {
-            stacks = parent.getStack().mStacks;
-        }
-        if (stacks != null) {
-            for (int i = stacks.size() - 1; i >= 0; --i) {
-                ActivityStack stack = stacks.get(i);
-                if (stack != this && stack.isFocusable()
-                        && stack.getStackVisibilityLocked(null) != STACK_INVISIBLE) {
-                    return stack;
-                }
-            }
-        }
-        return null;
-    }
-
     /** Returns true if the stack contains a fullscreen task. */
     private boolean hasFullscreenTask() {
         for (int i = mTaskHistory.size() - 1; i >= 0; --i) {
@@ -2098,9 +2080,15 @@ final class ActivityStack extends ConfigurationContainer {
             return false;
         }
 
-        ActivityRecord parent = mActivityContainer.mParentActivity;
-        if ((parent != null && parent.state != ActivityState.RESUMED) ||
-                !mActivityContainer.isAttachedLocked()) {
+        // Find the topmost activity in this stack that is not finishing.
+        final ActivityRecord next = topRunningActivityLocked();
+
+        final boolean hasRunningActivity = next != null;
+
+        final ActivityRecord parent = mActivityContainer.mParentActivity;
+        final boolean isParentNotResumed = parent != null && parent.state != ActivityState.RESUMED;
+        if (hasRunningActivity
+                && (isParentNotResumed || !mActivityContainer.isAttachedLocked())) {
             // Do not resume this stack if its parent is not resumed.
             // TODO: If in a loop, make sure that parent stack resumeTopActivity is called 1st.
             return false;
@@ -2108,33 +2096,14 @@ final class ActivityStack extends ConfigurationContainer {
 
         mStackSupervisor.cancelInitializingActivities();
 
-        // Find the first activity that is not finishing.
-        final ActivityRecord next = topRunningActivityLocked();
-
         // Remember how we'll process this pause/resume situation, and ensure
         // that the state is reset however we wind up proceeding.
         final boolean userLeaving = mStackSupervisor.mUserLeaving;
         mStackSupervisor.mUserLeaving = false;
 
-        final TaskRecord prevTask = prev != null ? prev.task : null;
-        if (next == null) {
-            // There are no more activities!
-            final String reason = "noMoreActivities";
-            if (!mFullscreen && adjustFocusToNextFocusableStackLocked(reason)) {
-                // Try to move focus to the next visible stack with a running activity if this
-                // stack is not covering the entire screen.
-                return mStackSupervisor.resumeFocusedStackTopActivityLocked(
-                        mStackSupervisor.getFocusedStack(), prev, null);
-            }
-
-            // Let's just start up the Launcher...
-            ActivityOptions.abort(options);
-            if (DEBUG_STATES) Slog.d(TAG_STATES,
-                    "resumeTopActivityLocked: No more activities go home");
-            if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
-            // Only resume home if on home display
-            return isOnHomeDisplay() &&
-                    mStackSupervisor.resumeHomeStackTask(prev, reason);
+        if (!hasRunningActivity) {
+            // There are no activities left in the stack, let's look somewhere else.
+            return resumeTopActivityInNextFocusableStack(prev, options, "noMoreActivities");
         }
 
         next.delayedResume = false;
@@ -2152,6 +2121,7 @@ final class ActivityStack extends ConfigurationContainer {
         }
 
         final TaskRecord nextTask = next.task;
+        final TaskRecord prevTask = prev != null ? prev.task : null;
         if (prevTask != null && prevTask.getStack() == this &&
                 prevTask.isOverHomeStack() && prev.finishing && prev.frontOfTask) {
             if (DEBUG_STACK)  mStackSupervisor.validateTopActivitiesLocked();
@@ -2525,6 +2495,27 @@ final class ActivityStack extends ConfigurationContainer {
 
         if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
         return true;
+    }
+
+    private boolean resumeTopActivityInNextFocusableStack(ActivityRecord prev,
+            ActivityOptions options, String reason) {
+        if ((!mFullscreen || !isOnHomeDisplay())
+                && adjustFocusToNextFocusableStackLocked(reason)) {
+            // Try to move focus to the next visible stack with a running activity if this
+            // stack is not covering the entire screen or is on a secondary display (with no home
+            // stack).
+            return mStackSupervisor.resumeFocusedStackTopActivityLocked(
+                    mStackSupervisor.getFocusedStack(), prev, null);
+        }
+
+        // Let's just start up the Launcher...
+        ActivityOptions.abort(options);
+        if (DEBUG_STATES) Slog.d(TAG_STATES,
+                "resumeTopActivityInNextFocusableStack: " + reason + ", go home");
+        if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
+        // Only resume home if on home display
+        return isOnHomeDisplay() &&
+                mStackSupervisor.resumeHomeStackTask(prev, reason);
     }
 
     private TaskRecord getNextTask(TaskRecord targetTask) {
@@ -3151,7 +3142,7 @@ final class ActivityStack extends ConfigurationContainer {
     }
 
     private boolean adjustFocusToNextFocusableStackLocked(String reason) {
-        final ActivityStack stack = getNextFocusableStackLocked();
+        final ActivityStack stack = mStackSupervisor.getNextFocusableStackLocked(this);
         final String myReason = reason + " adjustFocusToNextFocusableStack";
         if (stack == null) {
             return false;

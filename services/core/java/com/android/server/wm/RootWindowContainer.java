@@ -166,6 +166,19 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     }
 
     /**
+     * Get an array with display ids ordered by focus priority - last items should be given
+     * focus first. Sparse array just maps position to displayId.
+     */
+    void getDisplaysInFocusOrder(SparseIntArray displaysInFocusOrder) {
+        displaysInFocusOrder.clear();
+
+        final int size = mChildren.size();
+        for (int i = 0; i < size; ++i) {
+            displaysInFocusOrder.put(i, mChildren.get(i).getDisplayId());
+        }
+    }
+
+    /**
      * Retrieve the DisplayContent for the specified displayId. Will create a new DisplayContent if
      * there is a Display for the displayId.
      *

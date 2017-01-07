@@ -6638,6 +6638,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 displayInfo.overscanRight, displayInfo.overscanBottom);
     }
 
+    /**
+     * Get an array with display ids ordered by focus priority - last items should be given
+     * focus first. Sparse array just maps position to displayId.
+     */
+    public void getDisplaysInFocusOrder(SparseIntArray displaysInFocusOrder) {
+        synchronized(mWindowMap) {
+            mRoot.getDisplaysInFocusOrder(displaysInFocusOrder);
+        }
+    }
+
     @Override
     public void setOverscan(int displayId, int left, int top, int right, int bottom) {
         if (mContext.checkCallingOrSelfPermission(
