@@ -65,7 +65,7 @@ public class WifiAwareSession {
      * session-wide destroy.
      * <p>
      * An application may re-attach after a destroy using
-     * {@link WifiAwareManager#attach(WifiAwareAttachCallback, Handler)} .
+     * {@link WifiAwareManager#attach(AttachCallback, Handler)} .
      */
     public void destroy() {
         WifiAwareManager mgr = mMgr.get();
@@ -95,22 +95,22 @@ public class WifiAwareSession {
     /**
      * Issue a request to the Aware service to create a new Aware publish discovery session, using
      * the specified {@code publishConfig} configuration. The results of the publish operation
-     * are routed to the callbacks of {@link WifiAwareDiscoverySessionCallback}:
+     * are routed to the callbacks of {@link DiscoverySessionCallback}:
      * <ul>
      *     <li>
-     *     {@link WifiAwareDiscoverySessionCallback#onPublishStarted(
-     *     WifiAwarePublishDiscoverySession)}
+     *     {@link DiscoverySessionCallback#onPublishStarted(
+     *PublishDiscoverySession)}
      *     is called when the publish session is created and provides a handle to the session.
      *     Further operations on the publish session can be executed on that object.
-     *     <li>{@link WifiAwareDiscoverySessionCallback#onSessionConfigFailed()} is called if the
+     *     <li>{@link DiscoverySessionCallback#onSessionConfigFailed()} is called if the
      *     publish operation failed.
      * </ul>
      * <p>
      * Other results of the publish session operations will also be routed to callbacks
      * on the {@code callback} object. The resulting publish session can be modified using
-     * {@link WifiAwarePublishDiscoverySession#updatePublish(PublishConfig)}.
+     * {@link PublishDiscoverySession#updatePublish(PublishConfig)}.
      * <p>
-     *      An application must use the {@link WifiAwareDiscoveryBaseSession#destroy()} to
+     *      An application must use the {@link DiscoverySession#destroy()} to
      *      terminate the publish discovery session once it isn't needed. This will free
      *      resources as well terminate any on-air transmissions.
      * <p>The application must have the {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}
@@ -118,13 +118,13 @@ public class WifiAwareSession {
      *
      * @param publishConfig The {@link PublishConfig} specifying the
      *            configuration of the requested publish session.
-     * @param callback A {@link WifiAwareDiscoverySessionCallback} derived object to be used for
+     * @param callback A {@link DiscoverySessionCallback} derived object to be used for
      *                 session event callbacks.
      * @param handler The Handler on whose thread to execute the callbacks of the {@code
      * callback} object. If a null is provided then the application's main thread will be used.
      */
     public void publish(@NonNull PublishConfig publishConfig,
-            @NonNull WifiAwareDiscoverySessionCallback callback, @Nullable Handler handler) {
+            @NonNull DiscoverySessionCallback callback, @Nullable Handler handler) {
         WifiAwareManager mgr = mMgr.get();
         if (mgr == null) {
             Log.e(TAG, "publish: called post GC on WifiAwareManager");
@@ -141,22 +141,22 @@ public class WifiAwareSession {
     /**
      * Issue a request to the Aware service to create a new Aware subscribe discovery session, using
      * the specified {@code subscribeConfig} configuration. The results of the subscribe
-     * operation are routed to the callbacks of {@link WifiAwareDiscoverySessionCallback}:
+     * operation are routed to the callbacks of {@link DiscoverySessionCallback}:
      * <ul>
      *     <li>
-     *  {@link WifiAwareDiscoverySessionCallback#onSubscribeStarted(
-     *  WifiAwareSubscribeDiscoverySession)}
+     *  {@link DiscoverySessionCallback#onSubscribeStarted(
+     *SubscribeDiscoverySession)}
      *     is called when the subscribe session is created and provides a handle to the session.
      *     Further operations on the subscribe session can be executed on that object.
-     *     <li>{@link WifiAwareDiscoverySessionCallback#onSessionConfigFailed()} is called if the
+     *     <li>{@link DiscoverySessionCallback#onSessionConfigFailed()} is called if the
      *     subscribe operation failed.
      * </ul>
      * <p>
      * Other results of the subscribe session operations will also be routed to callbacks
      * on the {@code callback} object. The resulting subscribe session can be modified using
-     * {@link WifiAwareSubscribeDiscoverySession#updateSubscribe(SubscribeConfig)}.
+     * {@link SubscribeDiscoverySession#updateSubscribe(SubscribeConfig)}.
      * <p>
-     *      An application must use the {@link WifiAwareDiscoveryBaseSession#destroy()} to
+     *      An application must use the {@link DiscoverySession#destroy()} to
      *      terminate the subscribe discovery session once it isn't needed. This will free
      *      resources as well terminate any on-air transmissions.
      * <p>The application must have the {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}
@@ -164,13 +164,13 @@ public class WifiAwareSession {
      *
      * @param subscribeConfig The {@link SubscribeConfig} specifying the
      *            configuration of the requested subscribe session.
-     * @param callback A {@link WifiAwareDiscoverySessionCallback} derived object to be used for
+     * @param callback A {@link DiscoverySessionCallback} derived object to be used for
      *                 session event callbacks.
      * @param handler The Handler on whose thread to execute the callbacks of the {@code
      * callback} object. If a null is provided then the application's main thread will be used.
      */
     public void subscribe(@NonNull SubscribeConfig subscribeConfig,
-            @NonNull WifiAwareDiscoverySessionCallback callback, @Nullable Handler handler) {
+            @NonNull DiscoverySessionCallback callback, @Nullable Handler handler) {
         WifiAwareManager mgr = mMgr.get();
         if (mgr == null) {
             Log.e(TAG, "publish: called post GC on WifiAwareManager");
@@ -193,7 +193,7 @@ public class WifiAwareSession {
      *     This API is targeted for applications which can obtain the peer MAC address using OOB
      *     (out-of-band) discovery. Aware discovery does not provide the MAC address of the peer -
      *     when using Aware discovery use the alternative network specifier method -
-     *     {@link WifiAwareDiscoveryBaseSession#createNetworkSpecifier(WifiAwareManager.PeerHandle,
+     *     {@link DiscoverySession#createNetworkSpecifier(PeerHandle,
      *     byte[])}.
      *
      * @param role  The role of this device:

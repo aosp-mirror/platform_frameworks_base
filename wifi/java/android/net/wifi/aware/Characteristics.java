@@ -25,7 +25,7 @@ import android.os.Parcelable;
  *
  * @hide PROPOSED_AWARE_API
  */
-public class WifiAwareCharacteristics implements Parcelable {
+public class Characteristics implements Parcelable {
     /** @hide */
     public static final String KEY_MAX_SERVICE_NAME_LENGTH = "key_max_service_name_length";
     /** @hide */
@@ -37,7 +37,7 @@ public class WifiAwareCharacteristics implements Parcelable {
     private Bundle mCharacteristics = new Bundle();
 
     /** @hide : should not be created by apps */
-    public WifiAwareCharacteristics(Bundle characteristics) {
+    public Characteristics(Bundle characteristics) {
         mCharacteristics = characteristics;
     }
 
@@ -58,7 +58,7 @@ public class WifiAwareCharacteristics implements Parcelable {
      * message exchange. Restricts the parameters of the
      * {@link PublishConfig.Builder#setServiceSpecificInfo(byte[])},
      * {@link SubscribeConfig.Builder#setServiceSpecificInfo(byte[])}, and
-     * {@link WifiAwareDiscoveryBaseSession#sendMessage(WifiAwareManager.PeerHandle, int, byte[])}
+     * {@link DiscoverySession#sendMessage(PeerHandle, int, byte[])}
      * variants.
      *
      * @return A positive integer, maximum length of byte array for Aware messaging.
@@ -89,17 +89,17 @@ public class WifiAwareCharacteristics implements Parcelable {
         return 0;
     }
 
-    public static final Creator<WifiAwareCharacteristics> CREATOR =
-            new Creator<WifiAwareCharacteristics>() {
+    public static final Creator<Characteristics> CREATOR =
+            new Creator<Characteristics>() {
                 @Override
-                public WifiAwareCharacteristics createFromParcel(Parcel in) {
-                    WifiAwareCharacteristics c = new WifiAwareCharacteristics(in.readBundle());
+                public Characteristics createFromParcel(Parcel in) {
+                    Characteristics c = new Characteristics(in.readBundle());
                     return c;
                 }
 
                 @Override
-                public WifiAwareCharacteristics[] newArray(int size) {
-                    return new WifiAwareCharacteristics[size];
+                public Characteristics[] newArray(int size) {
+                    return new Characteristics[size];
                 }
             };
 }

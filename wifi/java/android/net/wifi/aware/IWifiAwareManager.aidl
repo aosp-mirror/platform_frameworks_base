@@ -23,7 +23,7 @@ import android.net.wifi.aware.IWifiAwareDiscoverySessionCallback;
 import android.net.wifi.aware.IWifiAwareEventCallback;
 import android.net.wifi.aware.PublishConfig;
 import android.net.wifi.aware.SubscribeConfig;
-import android.net.wifi.aware.WifiAwareCharacteristics;
+import android.net.wifi.aware.Characteristics;
 import android.net.wifi.RttManager;
 
 /**
@@ -37,7 +37,7 @@ interface IWifiAwareManager
     void enableUsage();
     void disableUsage();
     boolean isUsageEnabled();
-    WifiAwareCharacteristics getCharacteristics();
+    Characteristics getCharacteristics();
 
     // client API
     void connect(in IBinder binder, in String callingPackage, in IWifiAwareEventCallback callback,
