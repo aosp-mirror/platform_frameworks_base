@@ -32,7 +32,7 @@ import android.util.Log;
  * @hide PROPOSED_AWARE_API
  */
 public class SubscribeDiscoverySession extends DiscoverySession {
-    private static final String TAG = "SubscribeDiscoverySession";
+    private static final String TAG = "SubscribeDiscSession";
 
     /**
      * {@hide}

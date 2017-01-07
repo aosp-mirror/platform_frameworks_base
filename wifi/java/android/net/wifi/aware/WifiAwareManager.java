@@ -1027,7 +1027,7 @@ public class WifiAwareManager {
                 Log.w(TAG, "Proxy: onSessionTerminated called but mSession is null!?");
             }
             mAwareManager.clear();
-            mOriginalCallback.onSessionTerminated(reason);
+            mOriginalCallback.onSessionTerminated();
         }
     }
 }
