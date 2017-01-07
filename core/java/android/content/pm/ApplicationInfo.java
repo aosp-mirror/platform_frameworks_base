@@ -36,6 +36,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
 
+import static android.os.Build.VERSION_CODES.DONUT;
+
 /**
  * Information you can retrieve about a particular application.  This
  * corresponds to information collected from the AndroidManifest.xml's
@@ -1083,6 +1085,18 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         flags |= (FLAG_SUPPORTS_LARGE_SCREENS | FLAG_SUPPORTS_NORMAL_SCREENS |
                 FLAG_SUPPORTS_SMALL_SCREENS | FLAG_RESIZEABLE_FOR_SCREENS |
                 FLAG_SUPPORTS_SCREEN_DENSITIES | FLAG_SUPPORTS_XLARGE_SCREENS);
+    }
+
+    /**
+     * Is using compatibility mode for non densty aware legacy applications.
+     *
+     * @hide
+     */
+    public boolean usesCompatibilityMode() {
+        return targetSdkVersion < DONUT ||
+                (flags & (FLAG_SUPPORTS_LARGE_SCREENS | FLAG_SUPPORTS_NORMAL_SCREENS |
+                 FLAG_SUPPORTS_SMALL_SCREENS | FLAG_RESIZEABLE_FOR_SCREENS |
+                 FLAG_SUPPORTS_SCREEN_DENSITIES | FLAG_SUPPORTS_XLARGE_SCREENS)) == 0;
     }
 
     /** {@hide} */
