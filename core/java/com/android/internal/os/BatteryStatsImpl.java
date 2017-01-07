@@ -559,6 +559,10 @@ public class BatteryStatsImpl extends BatteryStats {
 
     private int mEstimatedBatteryCapacity = -1;
 
+    // Last learned capacity reported by BatteryService in
+    // setBatteryState().
+    private int mLastChargeFullUAh = 0;
+
     private final NetworkStats.Entry mTmpNetworkStatsEntry = new NetworkStats.Entry();
 
     private PowerProfile mPowerProfile;
@@ -9818,7 +9822,7 @@ public class BatteryStatsImpl extends BatteryStats {
     public static final int BATTERY_PLUGGED_NONE = 0;
 
     public void setBatteryStateLocked(int status, int health, int plugType, int level,
-            int temp, int volt, int chargeUAh) {
+            int temp, int volt, int chargeUAh, int chargeFullUAh) {
         final boolean onBattery = plugType == BATTERY_PLUGGED_NONE;
         final long uptime = mClocks.uptimeMillis();
         final long elapsedRealtime = mClocks.elapsedRealtime();
@@ -9980,6 +9984,16 @@ public class BatteryStatsImpl extends BatteryStats {
             // The next time we are unplugged, history will be cleared.
             mRecordingHistory = DEBUG;
         }
+
+        if (differsByMoreThan(chargeFullUAh, mLastChargeFullUAh, 100)) {
+            mLastChargeFullUAh = chargeFullUAh;
+            addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_ESTIMATED_BATTERY_CAP,
+                    "", chargeFullUAh / 1000);
+        }
+    }
+
+    private static boolean differsByMoreThan(int left, int right, int diff) {
+        return Math.abs(left - right) > diff;
     }
 
     public long getAwakeTimeBattery() {
