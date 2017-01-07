@@ -34,9 +34,9 @@ import android.net.INetworkRecommendationProvider;
 import android.net.INetworkScoreCache;
 import android.net.INetworkScoreService;
 import android.net.NetworkKey;
+import android.net.NetworkScoreManager;
 import android.net.NetworkScorerAppManager;
 import android.net.NetworkScorerAppManager.NetworkScorerAppData;
-import android.net.NetworkScoreManager;
 import android.net.RecommendationRequest;
 import android.net.RecommendationResult;
 import android.net.ScoredNetwork;
@@ -380,13 +380,16 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         }
     }
 
+    private boolean isCallerSystemUid() {
+        // REQUEST_NETWORK_SCORES is a signature only permission.
+        return mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES) ==
+                 PackageManager.PERMISSION_GRANTED;
+    }
+
     @Override
     public boolean clearScores() {
-        // Only the active scorer or the system (who can broadcast BROADCAST_NETWORK_PRIVILEGED)
-        // should be allowed to flush all scores.
-        if (mNetworkScorerAppManager.isCallerActiveScorer(getCallingUid()) ||
-                mContext.checkCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED) ==
-                        PackageManager.PERMISSION_GRANTED) {
+        // Only the active scorer or the system should be allowed to flush all scores.
+        if (mNetworkScorerAppManager.isCallerActiveScorer(getCallingUid()) || isCallerSystemUid()) {
             final long token = Binder.clearCallingIdentity();
             try {
                 clearInternal();
@@ -409,7 +412,6 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         // In the future, should this API be opened to 3p apps, we will need to lock this down and
         // figure out another way to streamline the UX.
 
-        // mContext.enforceCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED, TAG);
         mContext.enforceCallingOrSelfPermission(permission.SCORE_NETWORKS, TAG);
 
         // Scorers (recommendation providers) are selected and no longer set.
@@ -418,11 +420,8 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
     @Override
     public void disableScoring() {
-        // Only the active scorer or the system (who can broadcast BROADCAST_NETWORK_PRIVILEGED)
-        // should be allowed to disable scoring.
-        if (mNetworkScorerAppManager.isCallerActiveScorer(getCallingUid()) ||
-                mContext.checkCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED) ==
-                        PackageManager.PERMISSION_GRANTED) {
+        // Only the active scorer or the system should be allowed to disable scoring.
+        if (mNetworkScorerAppManager.isCallerActiveScorer(getCallingUid()) || isCallerSystemUid()) {
             // no-op for now but we could write to the setting if needed.
         } else {
             throw new SecurityException(
@@ -450,7 +449,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     public void registerNetworkScoreCache(int networkType,
                                           INetworkScoreCache scoreCache,
                                           int filterType) {
-        mContext.enforceCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED, TAG);
+        mContext.enforceCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES, TAG);
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mScoreCaches) {
@@ -475,7 +474,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
     @Override
     public void unregisterNetworkScoreCache(int networkType, INetworkScoreCache scoreCache) {
-        mContext.enforceCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED, TAG);
+        mContext.enforceCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES, TAG);
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mScoreCaches) {
@@ -496,7 +495,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
     @Override
     public RecommendationResult requestRecommendation(RecommendationRequest request) {
-        mContext.enforceCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED, TAG);
+        mContext.enforceCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES, TAG);
         throwIfCalledOnMainThread();
         final long token = Binder.clearCallingIdentity();
         try {
@@ -526,7 +525,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
     @Override
     public boolean requestScores(NetworkKey[] networks) {
-        mContext.enforceCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED, TAG);
+        mContext.enforceCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES, TAG);
         final long token = Binder.clearCallingIdentity();
         try {
             final INetworkRecommendationProvider provider = getRecommendationProvider();
