@@ -93,7 +93,7 @@ public class DiscoverySession {
      *     This operation must be done on a session which is no longer needed. Otherwise system
      *     resources will continue to be utilized until the application exits. The only
      *     exception is a session for which we received a termination callback,
-     *     {@link DiscoverySessionCallback#onSessionTerminated(int)}.
+     *     {@link DiscoverySessionCallback#onSessionTerminated()}.
      */
     public void destroy() {
         WifiAwareManager mgr = mMgr.get();
