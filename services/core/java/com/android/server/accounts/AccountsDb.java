@@ -355,7 +355,7 @@ class AccountsDb implements AutoCloseable {
     boolean deleteAuthtokensByAccountIdAndType(long accountId, String authtokenType) {
         SQLiteDatabase db = mDeDatabase.getWritableDatabaseUserIsUnlocked();
         return db.delete(CE_TABLE_AUTHTOKENS,
-                AUTHTOKENS_ACCOUNTS_ID + "=?" + accountId + " AND " + AUTHTOKENS_TYPE + "=?",
+                AUTHTOKENS_ACCOUNTS_ID + "=?" + " AND " + AUTHTOKENS_TYPE + "=?",
                 new String[]{String.valueOf(accountId), authtokenType}) > 0;
     }
 
