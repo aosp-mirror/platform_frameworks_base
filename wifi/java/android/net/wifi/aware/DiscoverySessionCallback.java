@@ -16,11 +16,8 @@
 
 package android.net.wifi.aware;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
@@ -37,29 +34,6 @@ import java.util.List;
  * @hide PROPOSED_AWARE_API
  */
 public class DiscoverySessionCallback {
-    /** @hide */
-    @IntDef({
-            TERMINATE_REASON_DONE, TERMINATE_REASON_FAIL })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface SessionTerminateCodes {
-    }
-
-    /**
-     * Indicates that publish or subscribe session is done - all the
-     * requested operations (per {@link PublishConfig} or
-     * {@link SubscribeConfig}) have been executed. Failure reason flag for
-     * {@link DiscoverySessionCallback#onSessionTerminated(int)} callback.
-     */
-    public static final int TERMINATE_REASON_DONE = 100;
-
-    /**
-     * Indicates that publish or subscribe session is terminated due to a
-     * failure.
-     * Failure reason flag for
-     * {@link DiscoverySessionCallback#onSessionTerminated(int)} callback.
-     */
-    public static final int TERMINATE_REASON_FAIL = 101;
-
     /**
      * Called when a publish operation is started successfully in response to a
      * {@link WifiAwareSession#publish(PublishConfig, DiscoverySessionCallback,
@@ -114,12 +88,9 @@ public class DiscoverySessionCallback {
      * Called when a discovery session (publish or subscribe) terminates. Termination may be due
      * to user-request (either directly through {@link DiscoverySession#destroy()} or
      * application-specified expiration, e.g. {@link PublishConfig.Builder#setPublishCount(int)}
-     * or {@link SubscribeConfig.Builder#setTtlSec(int)}) or due to a failure.
-     *
-     * @param reason The termination reason using
-     *            {@code DiscoverySessionCallback.TERMINATE_*} codes.
+     * or {@link SubscribeConfig.Builder#setTtlSec(int)}).
      */
-    public void onSessionTerminated(@SessionTerminateCodes int reason) {
+    public void onSessionTerminated() {
         /* empty */
     }
 

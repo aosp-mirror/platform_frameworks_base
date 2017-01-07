@@ -355,8 +355,7 @@ public final class SubscribeConfig implements Parcelable {
          * Sets the number of times an active (
          * {@link SubscribeConfig.Builder#setSubscribeType(int)}) subscribe session
          * will broadcast. When the count is reached an event will be
-         * generated for {@link DiscoverySessionCallback#onSessionTerminated(int)}
-         * with {@link DiscoverySessionCallback#TERMINATE_REASON_DONE}.
+         * generated for {@link DiscoverySessionCallback#onSessionTerminated()}.
          * <p>
          *     Optional. 0 by default - indicating the session doesn't terminate on its own.
          *     Session will be terminated when {@link DiscoverySession#destroy()} is
@@ -380,8 +379,7 @@ public final class SubscribeConfig implements Parcelable {
          * {@link SubscribeConfig.Builder#setSubscribeType(int)}) subscribe session
          * will be alive - i.e. broadcasting a packet. When the TTL is reached
          * an event will be generated for
-         * {@link DiscoverySessionCallback#onSessionTerminated(int)} with
-         * {@link DiscoverySessionCallback#TERMINATE_REASON_DONE}.
+         * {@link DiscoverySessionCallback#onSessionTerminated()}.
          * <p>
          *     Optional. 0 by default - indicating the session doesn't terminate on its own.
          *     Session will be terminated when {@link DiscoverySession#destroy()} is
@@ -424,7 +422,7 @@ public final class SubscribeConfig implements Parcelable {
 
         /**
          * Configure whether a subscribe terminate notification
-         * {@link DiscoverySessionCallback#onSessionTerminated(int)} is reported
+         * {@link DiscoverySessionCallback#onSessionTerminated()} is reported
          * back to the callback.
          *
          * @param enable If true the terminate callback will be called when the
