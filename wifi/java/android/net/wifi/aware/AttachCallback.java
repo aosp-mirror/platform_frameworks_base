@@ -18,16 +18,16 @@ package android.net.wifi.aware;
 
 /**
  * Base class for Aware attach callbacks. Should be extended by applications and set when calling
- * {@link WifiAwareManager#attach(WifiAwareAttachCallback, android.os.Handler)}. These are callbacks
+ * {@link WifiAwareManager#attach(AttachCallback, android.os.Handler)}. These are callbacks
  * applying to the Aware connection as a whole - not to specific publish or subscribe sessions -
- * for that see {@link WifiAwareDiscoverySessionCallback}.
+ * for that see {@link DiscoverySessionCallback}.
  *
  * @hide PROPOSED_AWARE_API
  */
-public class WifiAwareAttachCallback {
+public class AttachCallback {
     /**
      * Called when Aware attach operation
-     * {@link WifiAwareManager#attach(WifiAwareAttachCallback, android.os.Handler)}
+     * {@link WifiAwareManager#attach(AttachCallback, android.os.Handler)}
      * is completed and that we can now start discovery sessions or connections.
      *
      * @param session The Aware object on which we can execute further Aware operations - e.g.
@@ -39,7 +39,7 @@ public class WifiAwareAttachCallback {
 
     /**
      * Called when Aware attach operation
-     * {@link WifiAwareManager#attach(WifiAwareAttachCallback, android.os.Handler)} failed.
+     * {@link WifiAwareManager#attach(AttachCallback, android.os.Handler)} failed.
      */
     public void onAttachFailed() {
         /* empty */
