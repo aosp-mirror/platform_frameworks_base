@@ -955,6 +955,21 @@ public final class SystemServer {
                 }
                 traceEnd();
 
+                // Wifi Service must be started first for wifi-related services.
+                traceBeginAndSlog("StartWifi");
+                mSystemServiceManager.startService(WIFI_SERVICE_CLASS);
+                traceEnd();
+                traceBeginAndSlog("StartWifiScanning");
+                mSystemServiceManager.startService(
+                        "com.android.server.wifi.scanner.WifiScanningService");
+                traceEnd();
+
+                if (!disableRtt) {
+                    traceBeginAndSlog("StartWifiRtt");
+                    mSystemServiceManager.startService("com.android.server.wifi.RttService");
+                    traceEnd();
+                }
+
                 if (context.getPackageManager().hasSystemFeature(
                         PackageManager.FEATURE_WIFI_AWARE)) {
                     traceBeginAndSlog("StartWifiAware");
@@ -968,19 +983,6 @@ public final class SystemServer {
                         PackageManager.FEATURE_WIFI_DIRECT)) {
                     traceBeginAndSlog("StartWifiP2P");
                     mSystemServiceManager.startService(WIFI_P2P_SERVICE_CLASS);
-                    traceEnd();
-                }
-                traceBeginAndSlog("StartWifi");
-                mSystemServiceManager.startService(WIFI_SERVICE_CLASS);
-                traceEnd();
-                traceBeginAndSlog("StartWifiScanning");
-                mSystemServiceManager.startService(
-                            "com.android.server.wifi.scanner.WifiScanningService");
-                traceEnd();
-
-                if (!disableRtt) {
-                    traceBeginAndSlog("StartWifiRtt");
-                    mSystemServiceManager.startService("com.android.server.wifi.RttService");
                     traceEnd();
                 }
 
