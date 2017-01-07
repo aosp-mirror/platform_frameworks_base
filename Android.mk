@@ -108,6 +108,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/backup/IFullBackupRestoreObserver.aidl \
 	core/java/android/app/backup/IRestoreObserver.aidl \
 	core/java/android/app/backup/IRestoreSession.aidl \
+	core/java/android/app/usage/IStorageStatsManager.aidl \
 	core/java/android/app/usage/IUsageStatsManager.aidl \
 	core/java/android/bluetooth/IBluetooth.aidl \
 	core/java/android/bluetooth/IBluetoothA2dp.aidl \
@@ -689,6 +690,8 @@ aidl_files := \
 	frameworks/base/core/java/android/service/notification/StatusBarNotification.aidl \
 	frameworks/base/core/java/android/service/chooser/ChooserTarget.aidl \
 	frameworks/base/core/java/android/speech/tts/Voice.aidl \
+	frameworks/base/core/java/android/app/usage/StorageStats.aidl \
+	frameworks/base/core/java/android/app/usage/StorageSummary.aidl \
 	frameworks/base/core/java/android/app/usage/UsageEvents.aidl \
 	frameworks/base/core/java/android/app/Notification.aidl \
 	frameworks/base/core/java/android/app/NotificationManager.aidl \

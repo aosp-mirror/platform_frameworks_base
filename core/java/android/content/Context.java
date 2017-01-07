@@ -2680,6 +2680,7 @@ public abstract class Context {
             SEARCH_SERVICE,
             SENSOR_SERVICE,
             STORAGE_SERVICE,
+            STORAGE_STATS_SERVICE,
             WALLPAPER_SERVICE,
             VIBRATOR_SERVICE,
             //@hide: STATUS_BAR_SERVICE,
@@ -3075,6 +3076,16 @@ public abstract class Context {
      * @see android.os.storage.StorageManager
      */
     public static final String STORAGE_SERVICE = "storage";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a {@link
+     * android.app.usage.StorageStatsManager} for accessing system storage
+     * statistics.
+     *
+     * @see #getSystemService
+     * @see android.app.usage.StorageStatsManager
+     */
+    public static final String STORAGE_STATS_SERVICE = "storagestats";
 
     /**
      * Use with {@link #getSystemService} to retrieve a

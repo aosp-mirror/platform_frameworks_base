@@ -165,6 +165,8 @@ public final class SystemServer {
             "com.android.server.LockSettingsService$Lifecycle";
     private static final String STORAGE_MANAGER_SERVICE_CLASS =
             "com.android.server.StorageManagerService$Lifecycle";
+    private static final String STORAGE_STATS_SERVICE_CLASS =
+            "com.android.server.usage.StorageStatsService$Lifecycle";
     private static final String SEARCH_MANAGER_SERVICE_CLASS =
             "com.android.server.search.SearchManagerService$Lifecycle";
     private static final String THERMAL_OBSERVER_CLASS =
@@ -795,7 +797,7 @@ public final class SystemServer {
 
         if (mFactoryTestMode != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
             if (!disableStorage &&
-                !"0".equals(SystemProperties.get("system_init.startmountservice"))) {
+                    !"0".equals(SystemProperties.get("system_init.startmountservice"))) {
                 traceBeginAndSlog("StartStorageManagerService");
                 try {
                     /*
@@ -806,7 +808,15 @@ public final class SystemServer {
                     storageManager = IStorageManager.Stub.asInterface(
                             ServiceManager.getService("mount"));
                 } catch (Throwable e) {
-                    reportWtf("starting StorageManager Service", e);
+                    reportWtf("starting StorageManagerService", e);
+                }
+                traceEnd();
+
+                traceBeginAndSlog("StartStorageStatsService");
+                try {
+                    mSystemServiceManager.startService(STORAGE_STATS_SERVICE_CLASS);
+                } catch (Throwable e) {
+                    reportWtf("starting StorageStatsService", e);
                 }
                 traceEnd();
             }

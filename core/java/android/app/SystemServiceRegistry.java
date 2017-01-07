@@ -23,8 +23,10 @@ import android.app.admin.IDevicePolicyManager;
 import android.app.job.IJobScheduler;
 import android.app.job.JobScheduler;
 import android.app.trust.TrustManager;
+import android.app.usage.IStorageStatsManager;
 import android.app.usage.IUsageStatsManager;
 import android.app.usage.NetworkStatsManager;
+import android.app.usage.StorageStatsManager;
 import android.app.usage.UsageStatsManager;
 import android.appwidget.AppWidgetManager;
 import android.bluetooth.BluetoothManager;
@@ -432,6 +434,15 @@ final class SystemServiceRegistry {
             @Override
             public StorageManager createService(ContextImpl ctx) throws ServiceNotFoundException {
                 return new StorageManager(ctx, ctx.mMainThread.getHandler().getLooper());
+            }});
+
+        registerService(Context.STORAGE_STATS_SERVICE, StorageStatsManager.class,
+                new CachedServiceFetcher<StorageStatsManager>() {
+            @Override
+            public StorageStatsManager createService(ContextImpl ctx) throws ServiceNotFoundException {
+                IStorageStatsManager service = IStorageStatsManager.Stub.asInterface(
+                        ServiceManager.getServiceOrThrow(Context.STORAGE_STATS_SERVICE));
+                return new StorageStatsManager(ctx, service);
             }});
 
         registerService(Context.TELEPHONY_SERVICE, TelephonyManager.class,
