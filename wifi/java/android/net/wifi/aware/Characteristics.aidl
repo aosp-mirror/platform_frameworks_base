@@ -16,4 +16,4 @@
 
 package android.net.wifi.aware;
 
-parcelable WifiAwareCharacteristics;
+parcelable Characteristics;

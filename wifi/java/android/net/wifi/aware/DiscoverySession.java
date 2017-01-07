@@ -29,21 +29,21 @@ import java.lang.ref.WeakReference;
 /**
  * A class representing a single publish or subscribe Aware session. This object
  * will not be created directly - only its child classes are available:
- * {@link WifiAwarePublishDiscoverySession} and {@link WifiAwareSubscribeDiscoverySession}. This
+ * {@link PublishDiscoverySession} and {@link SubscribeDiscoverySession}. This
  * class provides functionality common to both publish and subscribe discovery sessions:
  * <ul>
- *     <li>Sending messages: {@link #sendMessage(WifiAwareManager.PeerHandle, int, byte[])} or
- *     {@link #sendMessage(WifiAwareManager.PeerHandle, int, byte[], int)} methods.
+ *     <li>Sending messages: {@link #sendMessage(PeerHandle, int, byte[])} or
+ *     {@link #sendMessage(PeerHandle, int, byte[], int)} methods.
  *     <li>Creating a network-specifier when requesting a Aware connection:
- *     {@link #createNetworkSpecifier(WifiAwareManager.PeerHandle, byte[])}.
+ *     {@link #createNetworkSpecifier(PeerHandle, byte[])}.
  * </ul>
  * The {@link #destroy()} method must be called to destroy discovery sessions once they are
  * no longer needed.
  *
  * @hide PROPOSED_AWARE_API
  */
-public class WifiAwareDiscoveryBaseSession {
-    private static final String TAG = "WifiAwareDiscBaseSsn";
+public class DiscoverySession {
+    private static final String TAG = "DiscoverySession";
     private static final boolean DBG = false;
     private static final boolean VDBG = false; // STOPSHIP if true
 
@@ -62,7 +62,7 @@ public class WifiAwareDiscoveryBaseSession {
 
     /**
      * Return the maximum permitted retry count when sending messages using
-     * {@link #sendMessage(WifiAwareManager.PeerHandle, int, byte[], int)}.
+     * {@link #sendMessage(PeerHandle, int, byte[], int)}.
      *
      * @return Maximum retry count when sending messages.
      */
@@ -71,7 +71,7 @@ public class WifiAwareDiscoveryBaseSession {
     }
 
     /** @hide */
-    public WifiAwareDiscoveryBaseSession(WifiAwareManager manager, int clientId, int sessionId) {
+    public DiscoverySession(WifiAwareManager manager, int clientId, int sessionId) {
         if (VDBG) {
             Log.v(TAG, "New discovery session created: manager=" + manager + ", clientId="
                     + clientId + ", sessionId=" + sessionId);
@@ -93,7 +93,7 @@ public class WifiAwareDiscoveryBaseSession {
      *     This operation must be done on a session which is no longer needed. Otherwise system
      *     resources will continue to be utilized until the application exits. The only
      *     exception is a session for which we received a termination callback,
-     *     {@link WifiAwareDiscoverySessionCallback#onSessionTerminated(int)}.
+     *     {@link DiscoverySessionCallback#onSessionTerminated(int)}.
      */
     public void destroy() {
         WifiAwareManager mgr = mMgr.get();
@@ -139,23 +139,23 @@ public class WifiAwareDiscoveryBaseSession {
     /**
      * Sends a message to the specified destination. Aware messages are transmitted in the context
      * of a discovery session - executed subsequent to a publish/subscribe
-     * {@link WifiAwareDiscoverySessionCallback#onServiceDiscovered(WifiAwareManager.PeerHandle,
+     * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle,
      * byte[], java.util.List)} event.
      * <p>
      *     Aware messages are not guaranteed delivery. Callbacks on
-     *     {@link WifiAwareDiscoverySessionCallback} indicate message was transmitted successfully,
-     *     {@link WifiAwareDiscoverySessionCallback#onMessageSendSucceeded(int)}, or transmission
+     *     {@link DiscoverySessionCallback} indicate message was transmitted successfully,
+     *     {@link DiscoverySessionCallback#onMessageSendSucceeded(int)}, or transmission
      *     failed (possibly after several retries) -
-     *     {@link WifiAwareDiscoverySessionCallback#onMessageSendFailed(int)}.
+     *     {@link DiscoverySessionCallback#onMessageSendFailed(int)}.
      * <p>
      *     The peer will get a callback indicating a message was received using
-     *     {@link WifiAwareDiscoverySessionCallback#onMessageReceived(WifiAwareManager.PeerHandle,
+     *     {@link DiscoverySessionCallback#onMessageReceived(PeerHandle,
      *     byte[])}.
      *
      * @param peerHandle The peer's handle for the message. Must be a result of an
-     * {@link WifiAwareDiscoverySessionCallback#onServiceDiscovered(WifiAwareManager.PeerHandle,
+     * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle,
      * byte[], java.util.List)} or
-     * {@link WifiAwareDiscoverySessionCallback#onMessageReceived(WifiAwareManager.PeerHandle,
+     * {@link DiscoverySessionCallback#onMessageReceived(PeerHandle,
      * byte[])} events.
      * @param messageId An arbitrary integer used by the caller to identify the message. The same
      *            integer ID will be returned in the callbacks indicating message send success or
@@ -167,7 +167,7 @@ public class WifiAwareDiscoveryBaseSession {
      *            (note: no retransmissions are attempted in other failure cases). A value of 0
      *            indicates no retries. Max permitted value is {@link #getMaxSendRetryCount()}.
      */
-    public void sendMessage(@NonNull WifiAwareManager.PeerHandle peerHandle, int messageId,
+    public void sendMessage(@NonNull PeerHandle peerHandle, int messageId,
             @Nullable byte[] message, int retryCount) {
         if (mTerminated) {
             Log.w(TAG, "sendMessage: called on terminated session");
@@ -186,25 +186,25 @@ public class WifiAwareDiscoveryBaseSession {
     /**
      * Sends a message to the specified destination. Aware messages are transmitted in the context
      * of a discovery session - executed subsequent to a publish/subscribe
-     * {@link WifiAwareDiscoverySessionCallback#onServiceDiscovered(WifiAwareManager.PeerHandle,
+     * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle,
      * byte[], java.util.List)} event.
      * <p>
      *     Aware messages are not guaranteed delivery. Callbacks on
-     *     {@link WifiAwareDiscoverySessionCallback} indicate message was transmitted successfully,
-     *     {@link WifiAwareDiscoverySessionCallback#onMessageSendSucceeded(int)}, or transmission
+     *     {@link DiscoverySessionCallback} indicate message was transmitted successfully,
+     *     {@link DiscoverySessionCallback#onMessageSendSucceeded(int)}, or transmission
      *     failed (possibly after several retries) -
-     *     {@link WifiAwareDiscoverySessionCallback#onMessageSendFailed(int)}.
+     *     {@link DiscoverySessionCallback#onMessageSendFailed(int)}.
      * <p>
      * The peer will get a callback indicating a message was received using
-     * {@link WifiAwareDiscoverySessionCallback#onMessageReceived(WifiAwareManager.PeerHandle,
+     * {@link DiscoverySessionCallback#onMessageReceived(PeerHandle,
      * byte[])}.
-     * Equivalent to {@link #sendMessage(WifiAwareManager.PeerHandle, int, byte[], int)}
+     * Equivalent to {@link #sendMessage(PeerHandle, int, byte[], int)}
      * with a {@code retryCount} of 0.
      *
      * @param peerHandle The peer's handle for the message. Must be a result of an
-     * {@link WifiAwareDiscoverySessionCallback#onServiceDiscovered(WifiAwareManager.PeerHandle,
+     * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle,
      * byte[], java.util.List)} or
-     * {@link WifiAwareDiscoverySessionCallback#onMessageReceived(WifiAwareManager.PeerHandle,
+     * {@link DiscoverySessionCallback#onMessageReceived(PeerHandle,
      * byte[])} events.
      * @param messageId An arbitrary integer used by the caller to identify the message. The same
      *            integer ID will be returned in the callbacks indicating message send success or
@@ -212,16 +212,16 @@ public class WifiAwareDiscoveryBaseSession {
      *                  can be arbitrary and non-unique.
      * @param message The message to be transmitted.
      */
-    public void sendMessage(@NonNull WifiAwareManager.PeerHandle peerHandle, int messageId,
+    public void sendMessage(@NonNull PeerHandle peerHandle, int messageId,
             @Nullable byte[] message) {
         sendMessage(peerHandle, messageId, message, 0);
     }
 
     /**
      * Start a ranging operation with the specified peers. The peer IDs are obtained from an
-     * {@link WifiAwareDiscoverySessionCallback#onServiceDiscovered(WifiAwareManager.PeerHandle,
+     * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle,
      * byte[], java.util.List)} or
-     * {@link WifiAwareDiscoverySessionCallback#onMessageReceived(WifiAwareManager.PeerHandle,
+     * {@link DiscoverySessionCallback#onMessageReceived(PeerHandle,
      * byte[])} operation - can
      * only range devices which are part of an ongoing discovery session.
      *
@@ -265,9 +265,9 @@ public class WifiAwareDiscoveryBaseSession {
      * and a Publisher is a RESPONDER.
      *
      * @param peerHandle The peer's handle obtained through
-     * {@link WifiAwareDiscoverySessionCallback#onServiceDiscovered(WifiAwareManager.PeerHandle,
+     * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle,
      * byte[], java.util.List)} or
-     * {@link WifiAwareDiscoverySessionCallback#onMessageReceived(WifiAwareManager.PeerHandle,
+     * {@link DiscoverySessionCallback#onMessageReceived(PeerHandle,
      * byte[])}. On a RESPONDER this value is used to gate the acceptance of a connection request
      *                   from only that peer. A RESPONDER may specified a null - indicating that
      *                   it will accept connection requests from any device.
@@ -283,7 +283,7 @@ public class WifiAwareDiscoveryBaseSession {
      * android.net.ConnectivityManager.NetworkCallback)}
      * [or other varieties of that API].
      */
-    public String createNetworkSpecifier(@Nullable WifiAwareManager.PeerHandle peerHandle,
+    public String createNetworkSpecifier(@Nullable PeerHandle peerHandle,
             @Nullable byte[] token) {
         if (mTerminated) {
             Log.w(TAG, "createNetworkSpecifier: called on terminated session");
@@ -295,7 +295,7 @@ public class WifiAwareDiscoveryBaseSession {
                 return null;
             }
 
-            int role = this instanceof WifiAwareSubscribeDiscoverySession
+            int role = this instanceof SubscribeDiscoverySession
                     ? WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_INITIATOR
                     : WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_RESPONDER;
 

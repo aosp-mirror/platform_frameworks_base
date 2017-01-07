@@ -67,19 +67,19 @@ public class WifiAwareManagerTest {
     public Context mockContext;
 
     @Mock
-    public WifiAwareAttachCallback mockCallback;
+    public AttachCallback mockCallback;
 
     @Mock
-    public WifiAwareDiscoverySessionCallback mockSessionCallback;
+    public DiscoverySessionCallback mockSessionCallback;
 
     @Mock
     public IWifiAwareManager mockAwareService;
 
     @Mock
-    public WifiAwarePublishDiscoverySession mockPublishSession;
+    public PublishDiscoverySession mockPublishSession;
 
     @Mock
-    public WifiAwareSubscribeDiscoverySession mockSubscribeSession;
+    public SubscribeDiscoverySession mockSubscribeSession;
 
     @Mock
     public RttManager.RttListener mockRttListener;
@@ -276,7 +276,7 @@ public class WifiAwareManagerTest {
         final int sessionId = 123;
         final ConfigRequest configRequest = new ConfigRequest.Builder().build();
         final PublishConfig publishConfig = new PublishConfig.Builder().build();
-        final WifiAwareManager.PeerHandle peerHandle = new WifiAwareManager.PeerHandle(873);
+        final PeerHandle peerHandle = new PeerHandle(873);
         final String string1 = "hey from here...";
         final byte[] matchFilter = { 1, 12, 2, 31, 32 };
         final int messageId = 2123;
@@ -290,10 +290,9 @@ public class WifiAwareManagerTest {
                 .forClass(IWifiAwareEventCallback.class);
         ArgumentCaptor<IWifiAwareDiscoverySessionCallback> sessionProxyCallback = ArgumentCaptor
                 .forClass(IWifiAwareDiscoverySessionCallback.class);
-        ArgumentCaptor<WifiAwarePublishDiscoverySession> publishSession = ArgumentCaptor
-                .forClass(WifiAwarePublishDiscoverySession.class);
-        ArgumentCaptor<WifiAwareManager.PeerHandle> peerIdCaptor = ArgumentCaptor.forClass(
-                WifiAwareManager.PeerHandle.class);
+        ArgumentCaptor<PublishDiscoverySession> publishSession = ArgumentCaptor
+                .forClass(PublishDiscoverySession.class);
+        ArgumentCaptor<PeerHandle> peerIdCaptor = ArgumentCaptor.forClass(PeerHandle.class);
         ArgumentCaptor<List<byte[]>> matchFilterCaptor = ArgumentCaptor.forClass(
                 (Class) List.class);
 
@@ -377,7 +376,7 @@ public class WifiAwareManagerTest {
         final int sessionId = 123;
         final ConfigRequest configRequest = new ConfigRequest.Builder().build();
         final PublishConfig publishConfig = new PublishConfig.Builder().build();
-        final int reason = WifiAwareDiscoverySessionCallback.TERMINATE_REASON_DONE;
+        final int reason = DiscoverySessionCallback.TERMINATE_REASON_DONE;
 
         InOrder inOrder = inOrder(mockCallback, mockSessionCallback, mockAwareService,
                 mockPublishSession);
@@ -387,8 +386,8 @@ public class WifiAwareManagerTest {
                 .forClass(IWifiAwareEventCallback.class);
         ArgumentCaptor<IWifiAwareDiscoverySessionCallback> sessionProxyCallback = ArgumentCaptor
                 .forClass(IWifiAwareDiscoverySessionCallback.class);
-        ArgumentCaptor<WifiAwarePublishDiscoverySession> publishSession = ArgumentCaptor
-                .forClass(WifiAwarePublishDiscoverySession.class);
+        ArgumentCaptor<PublishDiscoverySession> publishSession = ArgumentCaptor
+                .forClass(PublishDiscoverySession.class);
 
         // (1) connect successfully
         mDut.attach(mMockLooperHandler, configRequest, mockCallback, null);
@@ -428,7 +427,7 @@ public class WifiAwareManagerTest {
         final int sessionId = 123;
         final ConfigRequest configRequest = new ConfigRequest.Builder().build();
         final SubscribeConfig subscribeConfig = new SubscribeConfig.Builder().build();
-        final WifiAwareManager.PeerHandle peerHandle = new WifiAwareManager.PeerHandle(873);
+        final PeerHandle peerHandle = new PeerHandle(873);
         final String string1 = "hey from here...";
         final byte[] matchFilter = { 1, 12, 3, 31, 32 }; // bad data!
         final int messageId = 2123;
@@ -442,10 +441,9 @@ public class WifiAwareManagerTest {
                 .forClass(IWifiAwareEventCallback.class);
         ArgumentCaptor<IWifiAwareDiscoverySessionCallback> sessionProxyCallback = ArgumentCaptor
                 .forClass(IWifiAwareDiscoverySessionCallback.class);
-        ArgumentCaptor<WifiAwareSubscribeDiscoverySession> subscribeSession = ArgumentCaptor
-                .forClass(WifiAwareSubscribeDiscoverySession.class);
-        ArgumentCaptor<WifiAwareManager.PeerHandle> peerIdCaptor = ArgumentCaptor.forClass(
-                WifiAwareManager.PeerHandle.class);
+        ArgumentCaptor<SubscribeDiscoverySession> subscribeSession = ArgumentCaptor
+                .forClass(SubscribeDiscoverySession.class);
+        ArgumentCaptor<PeerHandle> peerIdCaptor = ArgumentCaptor.forClass(PeerHandle.class);
 
         // (0) connect + success
         mDut.attach(mMockLooperHandler, configRequest, mockCallback, null);
@@ -516,7 +514,7 @@ public class WifiAwareManagerTest {
         final int sessionId = 123;
         final ConfigRequest configRequest = new ConfigRequest.Builder().build();
         final SubscribeConfig subscribeConfig = new SubscribeConfig.Builder().build();
-        final int reason = WifiAwareDiscoverySessionCallback.TERMINATE_REASON_DONE;
+        final int reason = DiscoverySessionCallback.TERMINATE_REASON_DONE;
 
         InOrder inOrder = inOrder(mockCallback, mockSessionCallback, mockAwareService,
                 mockSubscribeSession);
@@ -526,8 +524,8 @@ public class WifiAwareManagerTest {
                 .forClass(IWifiAwareEventCallback.class);
         ArgumentCaptor<IWifiAwareDiscoverySessionCallback> sessionProxyCallback = ArgumentCaptor
                 .forClass(IWifiAwareDiscoverySessionCallback.class);
-        ArgumentCaptor<WifiAwareSubscribeDiscoverySession> subscribeSession = ArgumentCaptor
-                .forClass(WifiAwareSubscribeDiscoverySession.class);
+        ArgumentCaptor<SubscribeDiscoverySession> subscribeSession = ArgumentCaptor
+                .forClass(SubscribeDiscoverySession.class);
 
         // (1) connect successfully
         mDut.attach(mMockLooperHandler, configRequest, mockCallback, null);
@@ -892,8 +890,8 @@ public class WifiAwareManagerTest {
                 .forClass(IWifiAwareEventCallback.class);
         ArgumentCaptor<IWifiAwareDiscoverySessionCallback> sessionProxyCallback = ArgumentCaptor
                 .forClass(IWifiAwareDiscoverySessionCallback.class);
-        ArgumentCaptor<WifiAwarePublishDiscoverySession> publishSession = ArgumentCaptor
-                .forClass(WifiAwarePublishDiscoverySession.class);
+        ArgumentCaptor<PublishDiscoverySession> publishSession = ArgumentCaptor
+                .forClass(PublishDiscoverySession.class);
         ArgumentCaptor<RttManager.ParcelableRttParams> rttParamCaptor = ArgumentCaptor
                 .forClass(RttManager.ParcelableRttParams.class);
         ArgumentCaptor<RttManager.RttResult[]> rttResultsCaptor = ArgumentCaptor
@@ -953,7 +951,7 @@ public class WifiAwareManagerTest {
     public void testNetworkSpecifierWithClient() throws Exception {
         final int clientId = 4565;
         final int sessionId = 123;
-        final WifiAwareManager.PeerHandle peerHandle = new WifiAwareManager.PeerHandle(123412);
+        final PeerHandle peerHandle = new PeerHandle(123412);
         final int role = WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_RESPONDER;
         final String token = "Some arbitrary token string - can really be anything";
         final ConfigRequest configRequest = new ConfigRequest.Builder().build();
@@ -967,8 +965,8 @@ public class WifiAwareManagerTest {
                 .forClass(IWifiAwareEventCallback.class);
         ArgumentCaptor<IWifiAwareDiscoverySessionCallback> sessionProxyCallback = ArgumentCaptor
                 .forClass(IWifiAwareDiscoverySessionCallback.class);
-        ArgumentCaptor<WifiAwarePublishDiscoverySession> publishSession = ArgumentCaptor
-                .forClass(WifiAwarePublishDiscoverySession.class);
+        ArgumentCaptor<PublishDiscoverySession> publishSession = ArgumentCaptor
+                .forClass(PublishDiscoverySession.class);
 
         InOrder inOrder = inOrder(mockCallback, mockSessionCallback, mockAwareService,
                 mockPublishSession, mockRttListener);
