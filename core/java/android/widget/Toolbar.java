@@ -42,6 +42,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 
 import com.android.internal.R;
 import com.android.internal.view.menu.MenuBuilder;
@@ -329,6 +330,23 @@ public class Toolbar extends ViewGroup {
             setSubtitleTextColor(a.getColor(R.styleable.Toolbar_subtitleTextColor, 0xffffffff));
         }
         a.recycle();
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+
+        // If the container is a cluster, unmark itself as a cluster to avoid having nested
+        // clusters.
+        ViewParent parent = getParent();
+        while (parent != null && parent instanceof ViewGroup) {
+            final ViewGroup vgParent = (ViewGroup) parent;
+            if (vgParent.isKeyboardNavigationCluster()) {
+                setKeyboardNavigationCluster(false);
+                break;
+            }
+            parent = vgParent.getParent();
+        }
     }
 
     /**
