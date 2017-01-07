@@ -40,14 +40,20 @@ enum {
 // TODO(adamlesinski): Run performance tests against these methods and a new, single method
 // that uses all the sources and branches to the right ones within the inner loop.
 
+// `out_values` must NOT be nullptr.
+// `out_indices` may be nullptr.
 bool ResolveAttrs(ResTable::Theme* theme, uint32_t def_style_attr, uint32_t def_style_res,
                   uint32_t* src_values, size_t src_values_length, uint32_t* attrs,
                   size_t attrs_length, uint32_t* out_values, uint32_t* out_indices);
 
+// `out_values` must NOT be nullptr.
+// `out_indices` is NOT optional and must NOT be nullptr.
 void ApplyStyle(ResTable::Theme* theme, ResXMLParser* xml_parser, uint32_t def_style_attr,
                 uint32_t def_style_res, const uint32_t* attrs, size_t attrs_length,
                 uint32_t* out_values, uint32_t* out_indices);
 
+// `out_values` must NOT be nullptr.
+// `out_indices` may be nullptr.
 bool RetrieveAttributes(const ResTable* res, ResXMLParser* xml_parser, uint32_t* attrs,
                         size_t attrs_length, uint32_t* out_values, uint32_t* out_indices);
 

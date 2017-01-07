@@ -418,8 +418,10 @@ void ApplyStyle(ResTable::Theme* theme, ResXMLParser* xml_parser, uint32_t def_s
     out_values[STYLE_CHANGING_CONFIGURATIONS] = type_set_flags;
     out_values[STYLE_DENSITY] = config.density;
 
-    if (out_indices != nullptr && value.dataType != Res_value::TYPE_NULL) {
+    if (value.dataType != Res_value::TYPE_NULL) {
       indices_idx++;
+
+      // out_indices must NOT be nullptr.
       out_indices[indices_idx] = ii;
     }
 
@@ -428,9 +430,8 @@ void ApplyStyle(ResTable::Theme* theme, ResXMLParser* xml_parser, uint32_t def_s
 
   res.unlock();
 
-  if (out_indices != nullptr) {
-    out_indices[0] = indices_idx;
-  }
+  // out_indices must NOT be nullptr.
+  out_indices[0] = indices_idx;
 }
 
 bool RetrieveAttributes(const ResTable* res, ResXMLParser* xml_parser,

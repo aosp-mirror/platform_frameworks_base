@@ -16,6 +16,8 @@
 
 #include "androidfw/AttributeResolution.h"
 
+#include <array>
+
 #include "android-base/file.h"
 #include "android-base/logging.h"
 #include "android-base/macros.h"
@@ -67,15 +69,13 @@ TEST_F(AttributeResolutionTest, Theme) {
   ResTable::Theme theme(table_);
   ASSERT_EQ(NO_ERROR, theme.applyStyle(R::style::StyleTwo));
 
-  uint32_t attrs[] = {R::attr::attr_one, R::attr::attr_two, R::attr::attr_three,
-                      R::attr::attr_four};
-  std::vector<uint32_t> values;
-  values.resize(arraysize(attrs) * 6);
+  std::array<uint32_t, 4> attrs{
+      {R::attr::attr_one, R::attr::attr_two, R::attr::attr_three, R::attr::attr_four}};
+  std::array<uint32_t, attrs.size() * STYLE_NUM_ENTRIES> values;
 
   ASSERT_TRUE(ResolveAttrs(&theme, 0 /*def_style_attr*/, 0 /*def_style_res*/,
-                           nullptr /*src_values*/, 0 /*src_values_length*/,
-                           attrs, arraysize(attrs), values.data(),
-                           nullptr /*out_indices*/));
+                           nullptr /*src_values*/, 0 /*src_values_length*/, attrs.data(),
+                           attrs.size(), values.data(), nullptr /*out_indices*/));
 
   const uint32_t public_flag = ResTable_typeSpec::SPEC_PUBLIC;
 
@@ -112,13 +112,12 @@ TEST_F(AttributeResolutionTest, Theme) {
 }
 
 TEST_F(AttributeResolutionXmlTest, XmlParser) {
-  uint32_t attrs[] = {R::attr::attr_one, R::attr::attr_two, R::attr::attr_three,
-                      R::attr::attr_four};
-  std::vector<uint32_t> values;
-  values.resize(arraysize(attrs) * 6);
+  std::array<uint32_t, 4> attrs{
+      {R::attr::attr_one, R::attr::attr_two, R::attr::attr_three, R::attr::attr_four}};
+  std::array<uint32_t, attrs.size() * STYLE_NUM_ENTRIES> values;
 
-  ASSERT_TRUE(RetrieveAttributes(&table_, &xml_parser_, attrs, arraysize(attrs),
-                                 values.data(), nullptr /*out_indices*/));
+  ASSERT_TRUE(RetrieveAttributes(&table_, &xml_parser_, attrs.data(), attrs.size(), values.data(),
+                                 nullptr /*out_indices*/));
 
   uint32_t* values_cursor = values.data();
   EXPECT_EQ(Res_value::TYPE_NULL, values_cursor[STYLE_TYPE]);
@@ -157,14 +156,13 @@ TEST_F(AttributeResolutionXmlTest, ThemeAndXmlParser) {
   ResTable::Theme theme(table_);
   ASSERT_EQ(NO_ERROR, theme.applyStyle(R::style::StyleTwo));
 
-  uint32_t attrs[] = {R::attr::attr_one, R::attr::attr_two, R::attr::attr_three,
-                      R::attr::attr_four, R::attr::attr_five};
-  std::vector<uint32_t> values;
-  values.resize(arraysize(attrs) * 6);
+  std::array<uint32_t, 5> attrs{{R::attr::attr_one, R::attr::attr_two, R::attr::attr_three,
+                                 R::attr::attr_four, R::attr::attr_five}};
+  std::array<uint32_t, attrs.size() * STYLE_NUM_ENTRIES> values;
+  std::array<uint32_t, attrs.size()> indices;
 
-  ApplyStyle(&theme, &xml_parser_, 0 /*def_style_attr*/,
-             0 /*def_style_res*/, attrs, arraysize(attrs),
-             values.data(), nullptr /*out_indices*/);
+  ApplyStyle(&theme, &xml_parser_, 0 /*def_style_attr*/, 0 /*def_style_res*/, attrs.data(),
+             attrs.size(), values.data(), indices.data());
 
   const uint32_t public_flag = ResTable_typeSpec::SPEC_PUBLIC;
 
