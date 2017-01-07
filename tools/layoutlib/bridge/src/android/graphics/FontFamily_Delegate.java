@@ -249,14 +249,17 @@ public class FontFamily_Delegate {
     // ---- delegate methods ----
     @LayoutlibDelegate
     /*package*/ static boolean addFont(FontFamily thisFontFamily, String path, int ttcIndex) {
-        final FontFamily_Delegate delegate = getDelegate(thisFontFamily.mNativePtr);
+        if (thisFontFamily.mBuilderPtr == 0) {
+            throw new IllegalStateException("Unable to call addFont after freezing.");
+        }
+        final FontFamily_Delegate delegate = getDelegate(thisFontFamily.mBuilderPtr);
         return delegate != null && delegate.addFont(path, ttcIndex);
     }
 
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static long nCreateFamily(String lang, int variant) {
+    /*package*/ static long nInitBuilder(String lang, int variant) {
         // TODO: support lang. This is required for japanese locale.
         FontFamily_Delegate delegate = new FontFamily_Delegate();
         // variant can be 0, 1 or 2.
@@ -271,6 +274,11 @@ public class FontFamily_Delegate {
     }
 
     @LayoutlibDelegate
+    /*package*/ static long nCreateFamily(long builderPtr) {
+        return builderPtr;
+    }
+
+    @LayoutlibDelegate
     /*package*/ static void nUnrefFamily(long nativePtr) {
         // Removing the java reference for the object doesn't mean that it's freed for garbage
         // collection. Typeface_Delegate may still hold a reference for it.
@@ -278,22 +286,22 @@ public class FontFamily_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean nAddFont(long nativeFamily, ByteBuffer font, int ttcIndex) {
+    /*package*/ static boolean nAddFont(long builderPtr, ByteBuffer font, int ttcIndex) {
         assert false : "The only client of this method has been overriden.";
         return false;
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean nAddFontWeightStyle(long nativeFamily, ByteBuffer font,
+    /*package*/ static boolean nAddFontWeightStyle(long builderPtr, ByteBuffer font,
             int ttcIndex, List<FontConfig.Axis> listOfAxis,
             int weight, boolean isItalic) {
         assert false : "The only client of this method has been overriden.";
         return false;
     }
 
-    static boolean addFont(long nativeFamily, final String path, final int weight,
+    static boolean addFont(long builderPtr, final String path, final int weight,
             final boolean isItalic) {
-        final FontFamily_Delegate delegate = getDelegate(nativeFamily);
+        final FontFamily_Delegate delegate = getDelegate(builderPtr);
         if (delegate != null) {
             if (sFontLocation == null) {
                 delegate.mPostInitRunnables.add(() -> delegate.addFont(path, weight, isItalic));
@@ -305,8 +313,8 @@ public class FontFamily_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean nAddFontFromAsset(long nativeFamily, AssetManager mgr, String path) {
-        FontFamily_Delegate ffd = sManager.getDelegate(nativeFamily);
+    /*package*/ static boolean nAddFontFromAsset(long builderPtr, AssetManager mgr, String path) {
+        FontFamily_Delegate ffd = sManager.getDelegate(builderPtr);
         if (ffd == null) {
             return false;
         }

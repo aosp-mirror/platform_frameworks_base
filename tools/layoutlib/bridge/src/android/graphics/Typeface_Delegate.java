@@ -213,9 +213,10 @@ public final class Typeface_Delegate {
             Map<String, ByteBuffer> bufferForPath) {
         FontFamily fontFamily = new FontFamily(family.getLanguage(), family.getVariant());
         for (FontConfig.Font font : family.getFonts()) {
-            FontFamily_Delegate.addFont(fontFamily.mNativePtr, font.getFontName(),
+            FontFamily_Delegate.addFont(fontFamily.mBuilderPtr, font.getFontName(),
                     font.getWeight(), font.isItalic());
         }
+        fontFamily.freeze();
         return fontFamily;
     }
 
