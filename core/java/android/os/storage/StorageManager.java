@@ -40,6 +40,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -930,22 +931,29 @@ public class StorageManager {
     }
 
     /** {@hide} */
-    public long getPrimaryStorageSize() {
+    public static Pair<String, Long> getPrimaryStoragePathAndSize() {
         for (String path : INTERNAL_STORAGE_SIZE_PATHS) {
             final long numberBlocks = readLong(path);
             if (numberBlocks > 0) {
-                return numberBlocks * INTERNAL_STORAGE_SECTOR_SIZE;
+                return new Pair<>(path, Long.valueOf(numberBlocks * INTERNAL_STORAGE_SECTOR_SIZE));
             }
         }
-        return 0;
+        return null;
     }
 
-    private long readLong(String path) {
+
+    /** {@hide} */
+    public long getPrimaryStorageSize() {
+        final Pair<String, Long> pair = getPrimaryStoragePathAndSize();
+        return pair == null ? 0 : pair.second.longValue();
+    }
+
+    private static long readLong(String path) {
         try (final FileInputStream fis = new FileInputStream(path);
                 final BufferedReader reader = new BufferedReader(new InputStreamReader(fis));) {
             return Long.parseLong(reader.readLine());
         } catch (Exception e) {
-            Slog.w(TAG, "Could not read " + path, e);
+            Slog.w(TAG, "readLong(): could not read " + path + ": " + e);
             return 0;
         }
     }
