@@ -46,6 +46,7 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.ObbInfo;
+import android.net.TrafficStats;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.DropBoxManager;
@@ -86,6 +87,7 @@ import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.Xml;
@@ -3738,6 +3740,18 @@ class MountService extends IMountService.Stub
 
             pw.println();
             pw.println("Primary storage UUID: " + mPrimaryStorageUuid);
+            final Pair<String, Long> pair = StorageManager.getPrimaryStoragePathAndSize();
+            if (pair == null) {
+                pw.println("Internal storage total size: N/A");
+            } else {
+                pw.print("Internal storage (");
+                pw.print(pair.first);
+                pw.print(") total size: ");
+                pw.print(pair.second);
+                pw.print(" (");
+                pw.print((float) pair.second / TrafficStats.GB_IN_BYTES);
+                pw.println(" GB)");
+            }
             pw.println("Force adoptable: " + mForceAdoptable);
             pw.println();
             pw.println("Local unlocked users: " + Arrays.toString(mLocalUnlockedUsers));
