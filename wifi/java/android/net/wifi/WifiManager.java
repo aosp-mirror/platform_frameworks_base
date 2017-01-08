@@ -842,31 +842,31 @@ public class WifiManager {
     }
 
     /**
-     * Add a Passpoint configuration.  The configuration provides a credential
+     * Add or update a Passpoint configuration.  The configuration provides a credential
      * for connecting to Passpoint networks that are operated by the Passpoint
      * service provider specified in the configuration.
      *
      * Each configuration is uniquely identified by its FQDN (Fully Qualified Domain
-     * Name).  In the case when there is an existing configuration with the same base
-     * domain, the new configuration will replace the existing configuration.
+     * Name).  In the case when there is an existing configuration with the same
+     * FQDN, the new configuration will replace the existing configuration.
      *
      * @param config The Passpoint configuration to be added
-     * @return true on success or false on failure
+     * @return true on success
      * @hide
      */
-    public boolean addPasspointConfiguration(PasspointConfiguration config) {
+    public boolean addOrUpdatePasspointConfiguration(PasspointConfiguration config) {
         try {
-            return mService.addPasspointConfiguration(config);
+            return mService.addOrUpdatePasspointConfiguration(config);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Remove a Passpoint configuration identified by its FQDN (Fully Qualified Domain Name).
+     * Remove the Passpoint configuration identified by its FQDN (Fully Qualified Domain Name).
      *
      * @param fqdn The FQDN of the passpoint configuration to be removed
-     * @return true on success or false on failure
+     * @return true on success
      * @hide
      */
     public boolean removePasspointConfiguration(String fqdn) {
@@ -880,7 +880,9 @@ public class WifiManager {
     /**
      * Return the list of installed Passpoint configurations.
      *
-     * @return A list of PasspointConfiguration or null
+     * An empty list will be returned when no configurations are installed.
+     *
+     * @return A list of {@link PasspointConfiguration}
      * @hide
      */
     public List<PasspointConfiguration> getPasspointConfigurations() {

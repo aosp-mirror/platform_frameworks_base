@@ -59,7 +59,7 @@ interface IWifiManager
 
     int addOrUpdateNetwork(in WifiConfiguration config);
 
-    boolean addPasspointConfiguration(in PasspointConfiguration config);
+    boolean addOrUpdatePasspointConfiguration(in PasspointConfiguration config);
 
     boolean removePasspointConfiguration(in String fqdn);
 
