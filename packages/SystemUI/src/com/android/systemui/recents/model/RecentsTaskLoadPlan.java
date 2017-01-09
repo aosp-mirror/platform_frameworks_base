@@ -37,6 +37,7 @@ import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 
+import com.android.systemui.recents.views.grid.TaskGridLayoutAlgorithm;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -148,11 +149,19 @@ public class RecentsTaskLoadPlan {
             Task.TaskKey taskKey = new Task.TaskKey(t.persistentId, t.stackId, t.baseIntent,
                     t.userId, t.firstActiveTime, t.lastActiveTime);
 
-            // This task is only shown in the stack if it statisfies the historical time or min
+            // This task is only shown in the stack if it satisfies the historical time or min
             // number of tasks constraints. Freeform tasks are also always shown.
             boolean isFreeformTask = SystemServicesProxy.isFreeformStack(t.stackId);
-            boolean isStackTask = isFreeformTask || !isHistoricalTask(t) ||
+            boolean isStackTask;
+            if (Recents.getConfiguration().isGridEnabled) {
+                // When grid layout is enabled, we only show the first
+                // TaskGridLayoutAlgorithm.MAX_LAYOUT_TASK_COUNT} tasks.
+                isStackTask = t.lastActiveTime >= lastStackActiveTime &&
+                    i >= taskCount - TaskGridLayoutAlgorithm.MAX_LAYOUT_TASK_COUNT;
+            } else {
+                isStackTask = isFreeformTask || !isHistoricalTask(t) ||
                     (t.lastActiveTime >= lastStackActiveTime && i >= (taskCount - MIN_NUM_TASKS));
+            }
             boolean isLaunchTarget = taskKey.id == runningTaskId;
 
             // The last stack active time is the baseline for which we show visible tasks.  Since
