@@ -1295,9 +1295,8 @@
     <!-- A list of potential packages, in priority order, that may contain a
          network recommendation provider. A network recommendation provider must:
              * Be granted the SCORE_NETWORKS permission.
-             * Include a Receiver for the android.net.scoring.SCORE_NETWORKS action guarded by the
-               BROADCAST_NETWORK_PRIVILEGED permission.
-             * Include a Service for the android.net.scoring.RECOMMEND_NETWORKS action.
+             * Include a Service for the android.net.scoring.RECOMMEND_NETWORKS action
+               protected by the BIND_NETWORK_RECOMMENDATION_SERVICE permission.
 
          This may be empty if network scoring and recommending isn't supported.
          -->
