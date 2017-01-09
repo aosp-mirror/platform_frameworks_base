@@ -102,15 +102,19 @@ final class FragmentState implements Parcelable {
         mSavedFragmentState = in.readBundle();
     }
 
-    public Fragment instantiate(FragmentHostCallback host, Fragment parent,
-            FragmentManagerNonConfig childNonConfig) {
+    public Fragment instantiate(FragmentHostCallback host, FragmentContainer container,
+            Fragment parent, FragmentManagerNonConfig childNonConfig) {
         if (mInstance == null) {
             final Context context = host.getContext();
             if (mArguments != null) {
                 mArguments.setClassLoader(context.getClassLoader());
             }
 
-            mInstance = Fragment.instantiate(context, mClassName, mArguments);
+            if (container != null) {
+                mInstance = container.instantiate(context, mClassName, mArguments);
+            } else {
+                mInstance = Fragment.instantiate(context, mClassName, mArguments);
+            }
 
             if (mSavedFragmentState != null) {
                 mSavedFragmentState.setClassLoader(context.getClassLoader());
