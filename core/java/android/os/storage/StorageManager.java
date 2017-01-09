@@ -50,6 +50,7 @@ import com.android.internal.util.Preconditions;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
@@ -952,10 +953,17 @@ public class StorageManager {
         try (final FileInputStream fis = new FileInputStream(path);
                 final BufferedReader reader = new BufferedReader(new InputStreamReader(fis));) {
             return Long.parseLong(reader.readLine());
-        } catch (Exception e) {
-            Slog.w(TAG, "readLong(): could not read " + path + ": " + e);
+        } catch (FileNotFoundException e) {
+            // This is expected since we are trying to parse multiple paths.
+            Slog.i(TAG, "readLong(): Path doesn't exist: " + path + ": " + e);
             return 0;
-        }
+        } catch (NumberFormatException e) {
+            Slog.e(TAG, "readLong(): Could not parse " + path + ": " + e);
+            return 0;
+        } catch (Exception e) {
+            Slog.e(TAG, "readLong(): Unknown exception while opening " + path + ": " + e);
+            return 0;
+       }
     }
 
     /** @removed */
