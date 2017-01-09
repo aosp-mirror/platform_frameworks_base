@@ -16,8 +16,8 @@
 
 package android.view;
 
-import static android.view.View.FOCUS_GROUP_CLUSTER;
-import static android.view.View.FOCUS_GROUP_SECTION;
+import static android.view.View.KEYBOARD_NAVIGATION_GROUP_CLUSTER;
+import static android.view.View.KEYBOARD_NAVIGATION_GROUP_SECTION;
 import static android.view.WindowCallbacks.RESIZE_MODE_DOCKED_DIVIDER;
 import static android.view.WindowCallbacks.RESIZE_MODE_FREEFORM;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
@@ -73,7 +73,7 @@ import android.util.TimeUtils;
 import android.util.TypedValue;
 import android.view.Surface.OutOfResourcesException;
 import android.view.View.AttachInfo;
-import android.view.View.FocusGroupType;
+import android.view.View.KeyboardNavigationGroupType;
 import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -4395,14 +4395,14 @@ public final class ViewRootImpl implements ViewParent,
             return false;
         }
 
-        private boolean performClusterNavigation(
-                @FocusGroupType int focusGroupType, int direction) {
+        private boolean performKeyboardGroupNavigation(
+                @KeyboardNavigationGroupType int groupType, int direction) {
             final View focused = mView.findFocus();
-            final View cluster = focused != null
-                    ? focused.keyboardNavigationClusterSearch(focusGroupType, null, direction)
-                    : keyboardNavigationClusterSearch(focusGroupType, null, direction);
+            final View group = focused != null
+                    ? focused.keyboardNavigationGroupSearch(groupType, null, direction)
+                    : keyboardNavigationGroupSearch(groupType, null, direction);
 
-            if (cluster != null && cluster.restoreLastFocus()) {
+            if (group != null && group.restoreLastFocus()) {
                 return true;
             }
 
@@ -4421,20 +4421,20 @@ public final class ViewRootImpl implements ViewParent,
                 return FINISH_NOT_HANDLED;
             }
 
-            int clusterNavigationDirection = 0;
-            @FocusGroupType int focusGroupType = 0;
+            int groupNavigationDirection = 0;
+            @KeyboardNavigationGroupType int groupType = 0;
 
             if (event.getAction() == KeyEvent.ACTION_DOWN && event.isCtrlPressed()) {
                 final int character =
                         event.getUnicodeChar(event.getMetaState() & ~KeyEvent.META_CTRL_MASK);
                 if (character == '+') {
-                    focusGroupType = FOCUS_GROUP_CLUSTER;
-                    clusterNavigationDirection = View.FOCUS_FORWARD;
+                    groupType = KEYBOARD_NAVIGATION_GROUP_CLUSTER;
+                    groupNavigationDirection = View.FOCUS_FORWARD;
                 }
 
                 if (character == '_') {
-                    focusGroupType = FOCUS_GROUP_CLUSTER;
-                    clusterNavigationDirection = View.FOCUS_BACKWARD;
+                    groupType = KEYBOARD_NAVIGATION_GROUP_CLUSTER;
+                    groupNavigationDirection = View.FOCUS_BACKWARD;
                 }
             }
 
@@ -4442,13 +4442,13 @@ public final class ViewRootImpl implements ViewParent,
                 final int character =
                         event.getUnicodeChar(event.getMetaState() & ~KeyEvent.META_ALT_MASK);
                 if (character == '+') {
-                    focusGroupType = FOCUS_GROUP_SECTION;
-                    clusterNavigationDirection = View.FOCUS_FORWARD;
+                    groupType = KEYBOARD_NAVIGATION_GROUP_SECTION;
+                    groupNavigationDirection = View.FOCUS_FORWARD;
                 }
 
                 if (character == '_') {
-                    focusGroupType = FOCUS_GROUP_SECTION;
-                    clusterNavigationDirection = View.FOCUS_BACKWARD;
+                    groupType = KEYBOARD_NAVIGATION_GROUP_SECTION;
+                    groupNavigationDirection = View.FOCUS_BACKWARD;
                 }
             }
 
@@ -4457,7 +4457,7 @@ public final class ViewRootImpl implements ViewParent,
                     && event.isCtrlPressed()
                     && event.getRepeatCount() == 0
                     && !KeyEvent.isModifierKey(event.getKeyCode())
-                    && clusterNavigationDirection == 0) {
+                    && groupNavigationDirection == 0) {
                 if (mView.dispatchKeyShortcutEvent(event)) {
                     return FINISH_HANDLED;
                 }
@@ -4476,8 +4476,8 @@ public final class ViewRootImpl implements ViewParent,
 
             // Handle automatic focus changes.
             if (event.getAction() == KeyEvent.ACTION_DOWN) {
-                if (clusterNavigationDirection != 0) {
-                    if (performClusterNavigation(focusGroupType, clusterNavigationDirection)) {
+                if (groupNavigationDirection != 0) {
+                    if (performKeyboardGroupNavigation(groupType, groupNavigationDirection)) {
                         return FINISH_HANDLED;
                     }
                 } else {
@@ -5908,11 +5908,11 @@ public final class ViewRootImpl implements ViewParent,
      * {@inheritDoc}
      */
     @Override
-    public View keyboardNavigationClusterSearch(
-            @FocusGroupType int focusGroupType, View currentCluster, int direction) {
+    public View keyboardNavigationGroupSearch(
+            @KeyboardNavigationGroupType int groupType, View currentGroup, int direction) {
         checkThread();
-        return FocusFinder.getInstance().findNextKeyboardNavigationCluster(focusGroupType,
-                mView, currentCluster, direction);
+        return FocusFinder.getInstance().findNextKeyboardNavigationGroup(groupType,
+                mView, currentGroup, direction);
     }
 
     public void debug() {
