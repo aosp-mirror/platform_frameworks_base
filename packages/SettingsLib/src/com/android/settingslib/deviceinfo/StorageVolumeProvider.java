@@ -34,4 +34,9 @@ public interface StorageVolumeProvider {
      * Returns a list of VolumeInfos for the device.
      */
     List<VolumeInfo> getVolumes();
+
+    /**
+     * Returns the emulated volume for a given private volume.
+     */
+    VolumeInfo findEmulatedForPrivate(VolumeInfo privateVolume);
 }

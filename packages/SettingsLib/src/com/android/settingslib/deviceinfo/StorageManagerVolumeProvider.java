@@ -41,4 +41,9 @@ public class StorageManagerVolumeProvider implements StorageVolumeProvider {
     public List<VolumeInfo> getVolumes() {
         return mStorageManager.getVolumes();
     }
+
+    @Override
+    public VolumeInfo findEmulatedForPrivate(VolumeInfo privateVolume) {
+        return mStorageManager.findEmulatedForPrivate(privateVolume);
+    }
 }
