@@ -76,6 +76,14 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".ResizeHWLayerActivity"
+            android:label="General/Resize HW Layer" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".TrivialAnimationActivity"
             android:label="General/Trivial Animation" >
             <intent-filter>
