@@ -328,6 +328,7 @@ public class AccountManager {
     /**
      * Token type for the special case where a UID has access only to an account
      * but no authenticator specific auth token types.
+     *
      * @hide
      */
     public static final String ACCOUNT_ACCESS_TOKEN_TYPE =
@@ -353,9 +354,9 @@ public class AccountManager {
      * the applications are added, accounts are removed, or an account's credentials (saved
      * password, etc) are changed. List of supported account types shoud be specified in the
      * Manifest file using {@link #SUPPORTED_ACCOUNT_TYPES}
-     * @hide
-     * @see #addOnAccountsUpdatedListener
      *
+     * @see #addOnAccountsUpdatedListener
+     * @hide
      */
     public static final String ACTION_VISIBLE_ACCOUNTS_CHANGED =
             "android.accounts.action.VISIBLE_ACCOUNTS_CHANGED";
@@ -363,7 +364,6 @@ public class AccountManager {
     /**
      * Authenticators may subscribe to get notifications about apps interested in their managed account
      * types using {@link #SUPPORTED_ACCOUNT_TYPES}.
-     * Package name will be specified using {@link Intent.EXTRA_PACKAGE_NAME}
      * @hide
      */
     public static final String ACTION_ACCOUNTS_LISTENER_PACKAGE_INSTALLED =
@@ -1024,7 +1024,7 @@ public class AccountManager {
     public boolean isAccountVisible(Account account, int uid) {
         try {
             Integer visibility = mService.getAccountVisibility(account, uid);
-            return visibility == VISIBILITY_USER_MANAGED_VISIBLE
+            return visibility == VISIBILITY_USER_MANAGED_NOT_VISIBLE
                     || visibility == VISIBILITY_VISIBLE;
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
@@ -1058,7 +1058,6 @@ public class AccountManager {
     /**
      * Gets visibility of certain account for given UID. Possible returned values are:
      * <ul>
-     * <li>{@link #VISIBILITY_UNDEFINED}</li>
      * <li>{@link #VISIBILITY_VISIBLE}</li>
      * <li>{@link #VISIBILITY_USER_MANAGED_VISIBLE}</li>
      * <li>{@link #VISIBILITY_NOT_VISIBLE}
