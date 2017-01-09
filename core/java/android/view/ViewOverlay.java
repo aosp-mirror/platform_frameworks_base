@@ -283,8 +283,9 @@ public class ViewOverlay {
             }
         }
 
+        /** @hide */
         @Override
-        void invalidate(boolean invalidateCache) {
+        public void invalidate(boolean invalidateCache) {
             super.invalidate(invalidateCache);
             if (mHostView != null) {
                 mHostView.invalidate(invalidateCache);

@@ -240,7 +240,7 @@ public final class ViewRootImpl implements ViewParent,
     int mWidth;
     int mHeight;
     Rect mDirty;
-    boolean mIsAnimating;
+    public boolean mIsAnimating;
 
     private boolean mDragResizing;
     private boolean mInvalidateRootRequested;
@@ -261,7 +261,7 @@ public final class ViewRootImpl implements ViewParent,
     final Rect mTempRect; // used in the transaction to not thrash the heap.
     final Rect mVisRect; // used to retrieve visible rect of focused view.
 
-    boolean mTraversalScheduled;
+    public boolean mTraversalScheduled;
     int mTraversalBarrier;
     boolean mWillDrawSoon;
     /** Set to true while in performTraversals for detecting when die(true) is called from internal
