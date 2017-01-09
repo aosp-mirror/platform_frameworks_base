@@ -17,6 +17,7 @@ import android.content.Context;
 import android.os.SystemClock;
 import android.util.Slog;
 
+import com.android.internal.logging.LogBuilder;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
@@ -170,6 +171,13 @@ class ActivityMetricsLogger {
                 processRunning);
         MetricsLogger.action(mContext, MetricsEvent.APP_TRANSITION_DEVICE_UPTIME_SECONDS,
                 (int) (SystemClock.uptimeMillis() / 1000));
+
+        LogBuilder builder = new LogBuilder();
+        builder.addTaggedData(MetricsEvent.APP_TRANSITION_COMPONENT_NAME, componentName);
+        builder.addTaggedData(MetricsEvent.APP_TRANSITION_PROCESS_RUNNING, processRunning ? 1 : 0);
+        builder.addTaggedData(MetricsEvent.APP_TRANSITION_DEVICE_UPTIME_SECONDS,
+                SystemClock.uptimeMillis() / 1000);
+        MetricsLogger.action(builder);
     }
 
     /**

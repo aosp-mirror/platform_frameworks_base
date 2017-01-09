@@ -17,9 +17,11 @@ package com.android.internal.logging;
 
 import android.content.Context;
 import android.os.Build;
+import android.util.EventLog;
 import android.view.View;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+
 
 /**
  * Log all the things.
@@ -70,6 +72,14 @@ public class MetricsLogger {
     public static void action(Context context, int category, boolean value) {
         action(context, category, Boolean.toString(value));
     }
+
+    public static void action(LogBuilder content) {
+        //EventLog.writeEvent(524292, content.serialize());
+        // Below would be the *right* way to do this, using the generated
+        // EventLogTags method, but that doesn't work.
+        EventLogTags.writeSysuiMultiAction(content.serialize());
+    }
+
 
     public static void action(Context context, int category, String pkg) {
         if (Build.IS_DEBUGGABLE && category == VIEW_UNKNOWN) {
