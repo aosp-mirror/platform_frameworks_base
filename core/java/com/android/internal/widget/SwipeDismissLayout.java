@@ -79,6 +79,7 @@ public class SwipeDismissLayout extends FrameLayout {
     private VelocityTracker mVelocityTracker;
     private float mTranslationX;
     private boolean mBlockGesture = false;
+    private boolean mActivityTranslucencyConverted = false;
 
     private final DismissAnimator mDismissAnimator = new DismissAnimator();
 
@@ -277,8 +278,9 @@ public class SwipeDismissLayout extends FrameLayout {
     protected void cancel() {
         if (!mIsWindowNativelyTranslucent) {
             Activity activity = findActivity();
-            if (activity != null) {
+            if (activity != null && mActivityTranslucencyConverted) {
                 activity.convertFromTranslucent();
+                mActivityTranslucencyConverted = false;
             }
         }
         if (mProgressListener != null) {
@@ -319,7 +321,7 @@ public class SwipeDismissLayout extends FrameLayout {
             if (!mIsWindowNativelyTranslucent) {
                 Activity activity = findActivity();
                 if (activity != null) {
-                    activity.convertToTranslucent(null, null);
+                    mActivityTranslucencyConverted = activity.convertToTranslucent(null, null);
                 }
             }
         }
