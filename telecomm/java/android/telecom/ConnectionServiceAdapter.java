@@ -515,6 +515,23 @@ final class ConnectionServiceAdapter implements DeathRecipient {
     }
 
     /**
+     * Sets the audio route associated with a {@link Connection}.
+     *
+     * @param callId The unique ID of the call.
+     * @param audioRoute The new audio route (see {@code CallAudioState#ROUTE_*}).
+     */
+    void setAudioRoute(String callId, int audioRoute) {
+        Log.v(this, "setAudioRoute: %s %s", callId, CallAudioState.audioRouteToString(audioRoute));
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.setAudioRoute(callId, audioRoute, Log.getExternalSession());
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+
+    /**
      * Informs Telecom of a connection level event.
      *
      * @param callId The unique ID of the call.
