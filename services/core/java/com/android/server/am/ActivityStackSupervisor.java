@@ -3335,6 +3335,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         final int focusStackId = mFocusedStack.getStackId();
         // We dismiss the docked stack whenever we switch users.
         moveTasksToFullscreenStackLocked(DOCKED_STACK_ID, focusStackId == DOCKED_STACK_ID);
+        // Also dismiss the pinned stack whenever we switch users. Removing the pinned stack will
+        // also cause all tasks to be moved to the fullscreen stack at a position that is
+        // appropriate.
+        removeStackLocked(PINNED_STACK_ID);
 
         mUserStackInFront.put(mCurrentUser, focusStackId);
         final int restoreStackId = mUserStackInFront.get(userId, HOME_STACK_ID);
