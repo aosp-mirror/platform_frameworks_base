@@ -124,7 +124,6 @@ public:
 
     bool clipRect(float left, float top, float right, float bottom, SkClipOp op);
     bool clipPath(const SkPath* path, SkClipOp op);
-    bool clipRegion(const SkRegion* region, SkClipOp op);
 
     /**
      * Sets a "clipping outline", which is independent from the regular clip.

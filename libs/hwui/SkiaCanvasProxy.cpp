@@ -478,9 +478,5 @@ void SkiaCanvasProxy::onClipPath(const SkPath& path, SkClipOp op, ClipEdgeStyle)
     mCanvas->clipPath(&path, op);
 }
 
-void SkiaCanvasProxy::onClipRegion(const SkRegion& region, SkClipOp op) {
-    mCanvas->clipRegion(&region, op);
-}
-
 }; // namespace uirenderer
 }; // namespace android

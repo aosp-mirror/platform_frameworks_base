@@ -184,7 +184,6 @@ public:
     virtual bool clipRect(float left, float top, float right, float bottom,
             SkClipOp op) = 0;
     virtual bool clipPath(const SkPath* path, SkClipOp op) = 0;
-    virtual bool clipRegion(const SkRegion* region, SkClipOp op) = 0;
 
     // filters
     virtual SkDrawFilter* getDrawFilter() = 0;

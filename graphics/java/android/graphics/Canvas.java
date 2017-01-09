@@ -801,12 +801,13 @@ public class Canvas extends BaseCanvas {
      * @param op How the clip is modified
      * @return true if the resulting is non-empty
      *
+     * @removed
      * @deprecated Unlike all other clip calls this API does not respect the
      *             current matrix. Use {@link #clipRect(Rect)} as an alternative.
      */
     @Deprecated
     public boolean clipRegion(@NonNull Region region, @NonNull Region.Op op) {
-        return nClipRegion(mNativeCanvasWrapper, region.ni(), op.nativeInt);
+        return false;
     }
 
     /**
@@ -819,12 +820,13 @@ public class Canvas extends BaseCanvas {
      * @param region The region to operate on the current clip, based on op
      * @return true if the resulting is non-empty
      *
+     * @removed
      * @deprecated Unlike all other clip calls this API does not respect the
      *             current matrix. Use {@link #clipRect(Rect)} as an alternative.
      */
     @Deprecated
     public boolean clipRegion(@NonNull Region region) {
-        return clipRegion(region, Region.Op.INTERSECT);
+        return false;
     }
 
     public @Nullable DrawFilter getDrawFilter() {
@@ -1114,10 +1116,6 @@ public class Canvas extends BaseCanvas {
     private static native boolean nClipPath(long nativeCanvas,
                                                   long nativePath,
                                                   int regionOp);
-    @FastNative
-    private static native boolean nClipRegion(long nativeCanvas,
-                                                    long nativeRegion,
-                                                    int regionOp);
     @FastNative
     private static native void nSetDrawFilter(long nativeCanvas,
                                                    long nativeFilter);

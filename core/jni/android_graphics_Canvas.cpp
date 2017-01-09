@@ -219,13 +219,6 @@ static jboolean clipPath(JNIEnv* env, jobject, jlong canvasHandle, jlong pathHan
     return nonEmptyClip ? JNI_TRUE : JNI_FALSE;
 }
 
-static jboolean clipRegion(JNIEnv* env, jobject, jlong canvasHandle, jlong deviceRgnHandle,
-                           jint opHandle) {
-    SkRegion* deviceRgn = reinterpret_cast<SkRegion*>(deviceRgnHandle);
-    bool nonEmptyClip = get_canvas(canvasHandle)->clipRegion(deviceRgn, opHandleToClipOp(opHandle));
-    return nonEmptyClip ? JNI_TRUE : JNI_FALSE;
-}
-
 static void drawColor(JNIEnv* env, jobject, jlong canvasHandle, jint color, jint modeHandle) {
     SkBlendMode mode = static_cast<SkBlendMode>(modeHandle);
     get_canvas(canvasHandle)->drawColor(color, mode);
@@ -616,7 +609,6 @@ static const JNINativeMethod gMethods[] = {
     {"nQuickReject","(JFFFF)Z", (void*)CanvasJNI::quickRejectRect},
     {"nClipRect","(JFFFFI)Z", (void*) CanvasJNI::clipRect},
     {"nClipPath","(JJI)Z", (void*) CanvasJNI::clipPath},
-    {"nClipRegion","(JJI)Z", (void*) CanvasJNI::clipRegion},
     {"nSetDrawFilter", "(JJ)V", (void*) CanvasJNI::setDrawFilter},
 };
 

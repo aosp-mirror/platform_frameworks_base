@@ -94,7 +94,6 @@ public:
     virtual bool clipRect(float left, float top, float right, float bottom,
             SkClipOp op) override;
     virtual bool clipPath(const SkPath* path, SkClipOp op) override;
-    virtual bool clipRegion(const SkRegion* region, SkClipOp op) override;
 
     virtual SkDrawFilter* getDrawFilter() override;
     virtual void setDrawFilter(SkDrawFilter* drawFilter) override;

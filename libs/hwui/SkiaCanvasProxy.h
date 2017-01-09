@@ -100,7 +100,6 @@ protected:
     virtual void onClipRect(const SkRect&, SkClipOp, ClipEdgeStyle) override;
     virtual void onClipRRect(const SkRRect&, SkClipOp, ClipEdgeStyle) override;
     virtual void onClipPath(const SkPath&, SkClipOp, ClipEdgeStyle) override;
-    virtual void onClipRegion(const SkRegion&, SkClipOp) override;
 
 private:
     Canvas* mCanvas;

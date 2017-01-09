@@ -212,11 +212,6 @@ bool CanvasState::clipPath(const SkPath* path, SkClipOp op) {
     return !mSnapshot->clipIsEmpty();
 }
 
-bool CanvasState::clipRegion(const SkRegion* region, SkClipOp op) {
-    mSnapshot->clipRegionTransformed(*region, op);
-    return !mSnapshot->clipIsEmpty();
-}
-
 void CanvasState::setClippingOutline(LinearAllocator& allocator, const Outline* outline) {
     Rect bounds;
     float radius;

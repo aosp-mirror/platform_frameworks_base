@@ -118,12 +118,6 @@ public:
     void clipTransformed(const Rect& r, SkClipOp op = SkClipOp::kIntersect);
 
     /**
-     * Modifies the current clip with the specified region and operation.
-     * The specified region is considered already transformed.
-     */
-    void clipRegionTransformed(const SkRegion& region, SkClipOp op);
-
-    /**
      * Modifies the current clip with the specified path and operation.
      */
     void clipPath(const SkPath& path, SkClipOp op);
