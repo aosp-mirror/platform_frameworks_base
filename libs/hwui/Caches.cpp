@@ -17,7 +17,7 @@
 #include "Caches.h"
 
 #include "GammaFontRenderer.h"
-#include "Layer.h"
+#include "GlLayer.h"
 #include "Properties.h"
 #include "renderstate/RenderState.h"
 #include "ShadowTessellator.h"
@@ -170,9 +170,11 @@ void Caches::dumpMemoryUsage(String8 &log) {
         for (std::set<Layer*>::iterator it = mRenderState->mActiveLayers.begin();
                 it != mRenderState->mActiveLayers.end(); it++) {
             const Layer* layer = *it;
-            log.appendFormat("    Layer size %dx%d; texid=%u refs=%d\n",
+            LOG_ALWAYS_FATAL_IF(layer->getApi() != Layer::Api::OpenGL);
+            const GlLayer* glLayer = static_cast<const GlLayer*>(layer);
+            log.appendFormat("    GlLayer size %dx%d; texid=%u refs=%d\n",
                     layer->getWidth(), layer->getHeight(),
-                    layer->getTextureId(),
+                    glLayer->getTextureId(),
                     layer->getStrongCount());
             memused += layer->getWidth() * layer->getHeight() * 4;
         }

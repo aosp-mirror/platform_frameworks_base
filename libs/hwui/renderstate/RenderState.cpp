@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "GlLayer.h"
 #include <GpuMemoryTracker.h>
 #include "renderstate/RenderState.h"
 
@@ -55,7 +56,9 @@ void RenderState::onGLContextCreated() {
 }
 
 static void layerLostGlContext(Layer* layer) {
-    layer->onGlContextLost();
+    LOG_ALWAYS_FATAL_IF(layer->getApi() != Layer::Api::OpenGL,
+            "layerLostGlContext on non GL layer");
+    static_cast<GlLayer*>(layer)->onGlContextLost();
 }
 
 void RenderState::onGLContextDestroyed() {

@@ -22,7 +22,7 @@ namespace android {
 namespace uirenderer {
 
 class Matrix4;
-class Layer;
+class GlLayer;
 
 class OpenGLReadback : public Readback {
 public:
@@ -49,7 +49,7 @@ public:
     /**
      * Copies the layer's contents into the provided bitmap.
      */
-    static bool copyLayerInto(renderthread::RenderThread& renderThread, Layer& layer,
+    static bool copyLayerInto(renderthread::RenderThread& renderThread, GlLayer& layer,
             SkBitmap* bitmap);
 
 protected:

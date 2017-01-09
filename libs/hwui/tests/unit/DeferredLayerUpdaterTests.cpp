@@ -15,6 +15,7 @@
  */
 
 #include "DeferredLayerUpdater.h"
+#include "GlLayer.h"
 
 #include "renderthread/OpenGLPipeline.h"
 #include "tests/common/TestUtils.h"
@@ -32,7 +33,10 @@ RENDERTHREAD_TEST(DeferredLayerUpdater, updateLayer) {
 
 
     // updates are deferred so the backing layer should still be in its default state
-    EXPECT_EQ((uint32_t)GL_NONE, layerUpdater->backingLayer()->getRenderTarget());
+    if (layerUpdater->backingLayer()->getApi() == Layer::Api::OpenGL) {
+        GlLayer* glLayer = static_cast<GlLayer*>(layerUpdater->backingLayer());
+        EXPECT_EQ((uint32_t)GL_NONE, glLayer->getRenderTarget());
+    }
     EXPECT_EQ(0u, layerUpdater->backingLayer()->getWidth());
     EXPECT_EQ(0u, layerUpdater->backingLayer()->getHeight());
     EXPECT_FALSE(layerUpdater->backingLayer()->getForceFilter());
@@ -45,7 +49,10 @@ RENDERTHREAD_TEST(DeferredLayerUpdater, updateLayer) {
     layerUpdater->updateLayer(true, GL_TEXTURE_EXTERNAL_OES, scaledMatrix.data);
 
     // the backing layer should now have all the properties applied.
-    EXPECT_EQ((uint32_t)GL_TEXTURE_EXTERNAL_OES, layerUpdater->backingLayer()->getRenderTarget());
+    if (layerUpdater->backingLayer()->getApi() == Layer::Api::OpenGL) {
+        GlLayer* glLayer = static_cast<GlLayer*>(layerUpdater->backingLayer());
+        EXPECT_EQ((uint32_t)GL_TEXTURE_EXTERNAL_OES, glLayer->getRenderTarget());
+    }
     EXPECT_EQ(100u, layerUpdater->backingLayer()->getWidth());
     EXPECT_EQ(100u, layerUpdater->backingLayer()->getHeight());
     EXPECT_TRUE(layerUpdater->backingLayer()->getForceFilter());

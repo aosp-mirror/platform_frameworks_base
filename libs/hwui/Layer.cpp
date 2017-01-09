@@ -16,77 +16,36 @@
 
 #include "Layer.h"
 
-#include "Caches.h"
-#include "RenderNode.h"
 #include "renderstate/RenderState.h"
-#include "utils/TraceUtils.h"
 
-#include <utils/Log.h>
-
-#define ATRACE_LAYER_WORK(label) \
-    ATRACE_FORMAT("%s HW Layer DisplayList %s %ux%u", \
-            label, \
-            (renderNode.get() != NULL) ? renderNode->getName() : "", \
-            getWidth(), getHeight())
+#include <SkColorFilter.h>
 
 namespace android {
 namespace uirenderer {
 
-Layer::Layer(RenderState& renderState, uint32_t layerWidth, uint32_t layerHeight)
+Layer::Layer(RenderState& renderState, Api api)
         : GpuMemoryTracker(GpuObjectType::Layer)
-        , state(State::Uncached)
-        , caches(Caches::getInstance())
-        , renderState(renderState)
-        , texture(caches) {
+        , mRenderState(renderState)
+        , mApi(api) {
     // TODO: This is a violation of Android's typical ref counting, but it
     // preserves the old inc/dec ref locations. This should be changed...
     incStrong(nullptr);
-    texture.mWidth = layerWidth;
-    texture.mHeight = layerHeight;
+
     renderState.registerLayer(this);
 }
 
 Layer::~Layer() {
-    renderState.unregisterLayer(this);
     SkSafeUnref(colorFilter);
 
-    if (texture.mId) {
-        texture.deleteTexture();
-    }
-}
-
-void Layer::onGlContextLost() {
-    texture.deleteTexture();
+    mRenderState.unregisterLayer(this);
 }
 
 void Layer::setColorFilter(SkColorFilter* filter) {
     SkRefCnt_SafeAssign(colorFilter, filter);
 }
 
-void Layer::bindTexture() const {
-    if (texture.mId) {
-        caches.textureState().bindTexture(texture.target(), texture.mId);
-    }
-}
-
-void Layer::generateTexture() {
-    if (!texture.mId) {
-        glGenTextures(1, &texture.mId);
-    }
-}
-
-void Layer::clearTexture() {
-    // There's a rare possibility that Caches could have been destroyed already
-    // since this method is queued up as a task.
-    // Since this is a reset method, treat this as non-fatal.
-    if (caches.isInitialized()) {
-        caches.textureState().unbindTexture(texture.mId);
-    }
-    texture.mId = 0;
-}
-
 void Layer::postDecStrong() {
-    renderState.postDecStrong(this);
+    mRenderState.postDecStrong(this);
 }
 
 }; // namespace uirenderer

@@ -15,6 +15,7 @@
  */
 #include "DeferredLayerUpdater.h"
 
+#include "GlLayer.h"
 #include "renderthread/EglManager.h"
 #include "renderthread/RenderTask.h"
 #include "utils/PaintUtils.h"
@@ -55,9 +56,12 @@ void DeferredLayerUpdater::apply() {
     mLayer->setAlpha(mAlpha, mMode);
 
     if (mSurfaceTexture.get()) {
+        LOG_ALWAYS_FATAL_IF(mLayer->getApi() != Layer::Api::OpenGL,
+                            "apply surfaceTexture with non GL backend %x, GL %x, VK %x",
+                            mLayer->getApi(), Layer::Api::OpenGL, Layer::Api::Vulkan);
         if (mNeedsGLContextAttach) {
             mNeedsGLContextAttach = false;
-            mSurfaceTexture->attachToContext(mLayer->getTextureId());
+            mSurfaceTexture->attachToContext(static_cast<GlLayer*>(mLayer)->getTextureId());
         }
         if (mUpdateTexImage) {
             mUpdateTexImage = false;
@@ -71,6 +75,9 @@ void DeferredLayerUpdater::apply() {
 }
 
 void DeferredLayerUpdater::doUpdateTexImage() {
+    LOG_ALWAYS_FATAL_IF(mLayer->getApi() != Layer::Api::OpenGL,
+                        "doUpdateTexImage non GL backend %x, GL %x, VK %x",
+                        mLayer->getApi(), Layer::Api::OpenGL, Layer::Api::Vulkan);
     if (mSurfaceTexture->updateTexImage() == NO_ERROR) {
         float transform[16];
 
@@ -112,28 +119,36 @@ void DeferredLayerUpdater::doUpdateTexImage() {
 
 void DeferredLayerUpdater::updateLayer(bool forceFilter, GLenum renderTarget,
         const float* textureTransform) {
+    LOG_ALWAYS_FATAL_IF(mLayer->getApi() != Layer::Api::OpenGL,
+                        "updateLayer non GL backend %x, GL %x, VK %x",
+                        mLayer->getApi(), Layer::Api::OpenGL, Layer::Api::Vulkan);
+
     mLayer->setBlend(mBlend);
     mLayer->setForceFilter(forceFilter);
     mLayer->setSize(mWidth, mHeight);
     mLayer->getTexTransform().load(textureTransform);
 
-    if (renderTarget != mLayer->getRenderTarget()) {
-        mLayer->setRenderTarget(renderTarget);
-        mLayer->bindTexture();
-        mLayer->setFilter(GL_NEAREST, false, true);
-        mLayer->setWrap(GL_CLAMP_TO_EDGE, false, true);
+    GlLayer* glLayer = static_cast<GlLayer*>(mLayer);
+    if (renderTarget != glLayer->getRenderTarget()) {
+        glLayer->setRenderTarget(renderTarget);
+        glLayer->bindTexture();
+        glLayer->setFilter(GL_NEAREST, false, true);
+        glLayer->setWrap(GL_CLAMP_TO_EDGE, false, true);
     }
 }
 
 void DeferredLayerUpdater::detachSurfaceTexture() {
     if (mSurfaceTexture.get()) {
+        LOG_ALWAYS_FATAL_IF(mLayer->getApi() != Layer::Api::OpenGL,
+                            "detachSurfaceTexture with non GL backend %x, GL %x, VK %x",
+                            mLayer->getApi(), Layer::Api::OpenGL, Layer::Api::Vulkan);
         status_t err = mSurfaceTexture->detachFromContext();
         if (err != 0) {
             // TODO: Elevate to fatal exception
             ALOGE("Failed to detach SurfaceTexture from context %d", err);
         }
         mSurfaceTexture = nullptr;
-        mLayer->clearTexture();
+        static_cast<GlLayer*>(mLayer)->clearTexture();
     }
 }
 

@@ -22,6 +22,7 @@
 #include "renderstate/RenderState.h"
 #include "SkiaPipeline.h"
 #include "SkiaProfileRenderer.h"
+#include "VkLayer.h"
 
 #include <SkSurface.h>
 #include <SkTypes.h>
@@ -119,7 +120,8 @@ bool SkiaVulkanPipeline::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bi
 
 DeferredLayerUpdater* SkiaVulkanPipeline::createTextureLayer() {
     mVkManager.initialize();
-    Layer* layer = new Layer(mRenderThread.renderState(), 0, 0);
+
+    VkLayer* layer = new VkLayer(mRenderThread.renderState(), 0, 0);
     return new DeferredLayerUpdater(layer);
 }
 

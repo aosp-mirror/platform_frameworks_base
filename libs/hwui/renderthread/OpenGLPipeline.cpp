@@ -19,6 +19,7 @@
 #include "DeferredLayerUpdater.h"
 #include "EglManager.h"
 #include "Frame.h"
+#include "GlLayer.h"
 #include "ProfileRenderer.h"
 #include "renderstate/RenderState.h"
 #include "OpenGLReadback.h"
@@ -120,12 +121,13 @@ bool OpenGLPipeline::swapBuffers(const Frame& frame, bool drew, const SkRect& sc
 bool OpenGLPipeline::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) {
     ATRACE_CALL();
     layer->apply();
-    return OpenGLReadbackImpl::copyLayerInto(mRenderThread, *(layer->backingLayer()), bitmap);
+    return OpenGLReadbackImpl::copyLayerInto(mRenderThread,
+            static_cast<GlLayer&>(*layer->backingLayer()), bitmap);
 }
 
 DeferredLayerUpdater* OpenGLPipeline::createTextureLayer() {
     mEglManager.initialize();
-    Layer* layer = new Layer(mRenderThread.renderState(), 0, 0);
+    GlLayer* layer = new GlLayer(mRenderThread.renderState(), 0, 0);
     Caches::getInstance().textureState().activateTexture(0);
     layer->generateTexture();
 

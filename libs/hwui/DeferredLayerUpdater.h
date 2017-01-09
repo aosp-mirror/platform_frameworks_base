@@ -22,6 +22,9 @@
 #include <SkMatrix.h>
 #include <utils/StrongPointer.h>
 
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+
 #include "Layer.h"
 #include "Rect.h"
 #include "renderthread/RenderThread.h"
@@ -60,8 +63,8 @@ public:
 
     ANDROID_API void setSurfaceTexture(const sp<GLConsumer>& texture, bool needsAttach) {
         if (texture.get() != mSurfaceTexture.get()) {
-            mNeedsGLContextAttach = needsAttach;
             mSurfaceTexture = texture;
+            mNeedsGLContextAttach = needsAttach;
 
             GLenum target = texture->getCurrentTextureTarget();
             LOG_ALWAYS_FATAL_IF(target != GL_TEXTURE_2D && target != GL_TEXTURE_EXTERNAL_OES,

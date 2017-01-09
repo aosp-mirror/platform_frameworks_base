@@ -18,7 +18,6 @@
 
 #include "Caches.h"
 #include "Extensions.h"
-#include "Layer.h"
 #include "Matrix.h"
 #include "Texture.h"
 #include "hwui/Bitmap.h"
@@ -317,42 +316,6 @@ bool tryStoreCompose(Caches& caches, const SkShader& shader, const Matrix4& mode
     return true;
 }
 
-bool tryStoreLayer(Caches& caches, const SkShader& shader, const Matrix4& modelViewMatrix,
-        GLuint* textureUnit, ProgramDescription* description,
-        SkiaShaderData::LayerShaderData* outData) {
-    Layer* layer;
-    if (!shader.asACustomShader(reinterpret_cast<void**>(&layer))) {
-        return false;
-    }
-
-    description->hasBitmap = true;
-    outData->layer = layer;
-    outData->bitmapSampler = (*textureUnit)++;
-
-    const float width = layer->getWidth();
-    const float height = layer->getHeight();
-
-    computeScreenSpaceMatrix(outData->textureTransform, SkMatrix::I(), shader.getLocalMatrix(),
-            modelViewMatrix);
-
-    outData->textureDimension[0] = 1.0f / width;
-    outData->textureDimension[1] = 1.0f / height;
-    return true;
-}
-
-void applyLayer(Caches& caches, const SkiaShaderData::LayerShaderData& data) {
-    caches.textureState().activateTexture(data.bitmapSampler);
-
-    data.layer->bindTexture();
-    data.layer->setWrap(GL_CLAMP_TO_EDGE);
-    data.layer->setFilter(GL_LINEAR);
-
-    glUniform1i(caches.program().getUniform("bitmapSampler"), data.bitmapSampler);
-    glUniformMatrix4fv(caches.program().getUniform("textureTransform"), 1,
-            GL_FALSE, &data.textureTransform.data[0]);
-    glUniform2fv(caches.program().getUniform("textureDimension"), 1, &data.textureDimension[0]);
-}
-
 void SkiaShader::store(Caches& caches, const SkShader& shader, const Matrix4& modelViewMatrix,
         GLuint* textureUnit, ProgramDescription* description,
         SkiaShaderData* outData) {
@@ -374,12 +337,6 @@ void SkiaShader::store(Caches& caches, const SkShader& shader, const Matrix4& mo
         return;
     }
 
-    if (tryStoreLayer(caches, shader, modelViewMatrix,
-            textureUnit, description, &outData->layerData)) {
-        outData->skiaShaderType = kLayer_SkiaShaderType;
-        return;
-    }
-
     // Unknown/unsupported type, so explicitly ignore shader
     outData->skiaShaderType = kNone_SkiaShaderType;
 }
@@ -393,10 +350,6 @@ void SkiaShader::apply(Caches& caches, const SkiaShaderData& data,
     }
     if (data.skiaShaderType & kBitmap_SkiaShaderType) {
         applyBitmap(caches, data.bitmapData);
-    }
-
-    if (data.skiaShaderType == kLayer_SkiaShaderType) {
-        applyLayer(caches, data.layerData);
     }
 }
 
