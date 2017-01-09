@@ -779,7 +779,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private final PluginListener<IntentButtonProvider> mRightListener =
             new PluginListener<IntentButtonProvider>() {
         @Override
-        public void onPluginConnected(IntentButtonProvider plugin) {
+        public void onPluginConnected(IntentButtonProvider plugin, Context pluginContext) {
             setRightButton(plugin.getIntentButton());
         }
 
@@ -792,7 +792,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private final PluginListener<IntentButtonProvider> mLeftListener =
             new PluginListener<IntentButtonProvider>() {
         @Override
-        public void onPluginConnected(IntentButtonProvider plugin) {
+        public void onPluginConnected(IntentButtonProvider plugin, Context pluginContext) {
             setLeftButton(plugin.getIntentButton());
         }
 

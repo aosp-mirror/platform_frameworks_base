@@ -14,17 +14,13 @@
 
 package com.android.systemui.plugins;
 
-import android.annotation.Nullable;
 import android.app.Fragment;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 
 public abstract class PluginFragment extends Fragment implements Plugin {
 
-    private static final String KEY_PLUGIN_PACKAGE = "plugin_package_name";
     private Context mPluginContext;
 
     @Override
@@ -33,45 +29,17 @@ public abstract class PluginFragment extends Fragment implements Plugin {
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (savedInstanceState != null) {
-            Context sysuiContext = getContext();
-            Context pluginContext = recreatePluginContext(sysuiContext, savedInstanceState);
-            onCreate(sysuiContext, pluginContext);
-        }
-        if (mPluginContext == null) {
-            throw new RuntimeException("PluginFragments must call super.onCreate("
-                    + "Context sysuiContext, Context pluginContext)");
-        }
+    public LayoutInflater getLayoutInflater(Bundle savedInstanceState) {
+        return super.getLayoutInflater(savedInstanceState).cloneInContext(getContext());
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(KEY_PLUGIN_PACKAGE, getContext().getPackageName());
     }
 
-    private Context recreatePluginContext(Context sysuiContext, Bundle savedInstanceState) {
-        final String pkg = savedInstanceState.getString(KEY_PLUGIN_PACKAGE);
-        try {
-            ApplicationInfo appInfo = sysuiContext.getPackageManager().getApplicationInfo(pkg, 0);
-            return PluginManager.getInstance(sysuiContext).getContext(appInfo, pkg);
-        } catch (NameNotFoundException e) {
-            throw new RuntimeException("Plugin with invalid package? " + pkg, e);
-        }
-    }
-
-    @Override
-    public LayoutInflater getLayoutInflater(Bundle savedInstanceState) {
-        return super.getLayoutInflater(savedInstanceState).cloneInContext(mPluginContext);
-    }
-
-    /**
-     * Should only be called after {@link Plugin#onCreate(Context, Context)}.
-     */
     @Override
     public Context getContext() {
-        return mPluginContext != null ? mPluginContext : super.getContext();
+        return mPluginContext;
     }
 }

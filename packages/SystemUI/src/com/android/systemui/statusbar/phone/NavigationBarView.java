@@ -765,7 +765,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     }
 
     @Override
-    public void onPluginConnected(NavGesture plugin) {
+    public void onPluginConnected(NavGesture plugin, Context context) {
         mGestureHelper = plugin.getGestureHelper();
         updateTaskSwitchHelper();
     }

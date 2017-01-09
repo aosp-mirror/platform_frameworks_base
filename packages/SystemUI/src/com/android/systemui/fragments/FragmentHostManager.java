@@ -27,11 +27,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcelable;
+import android.util.ArrayMap;
 import android.view.LayoutInflater;
 import android.view.View;
 
 import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.SystemUIApplication;
+import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginManager;
 
 import java.io.FileDescriptor;
@@ -47,6 +49,7 @@ public class FragmentHostManager {
     private final View mRootView;
     private final InterestingConfigChanges mConfigChanges = new InterestingConfigChanges();
     private final FragmentService mManager;
+    private final PluginFragmentManager mPlugins = new PluginFragmentManager();
 
     private FragmentController mFragments;
     private FragmentLifecycleCallbacks mLifecycleCallbacks;
@@ -163,6 +166,10 @@ public class FragmentHostManager {
         return mFragments.getFragmentManager();
     }
 
+    PluginFragmentManager getPluginManager() {
+        return mPlugins;
+    }
+
     public interface FragmentListener {
         void onFragmentViewCreated(String tag, Fragment fragment);
 
@@ -195,6 +202,11 @@ public class FragmentHostManager {
         @Override
         public void onDump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
             FragmentHostManager.this.dump(prefix, fd, writer, args);
+        }
+
+        @Override
+        public Fragment instantiate(Context context, String className, Bundle arguments) {
+            return mPlugins.instantiate(context, className, arguments);
         }
 
         @Override
@@ -235,6 +247,59 @@ public class FragmentHostManager {
         @Override
         public boolean onHasView() {
             return true;
+        }
+    }
+
+    class PluginFragmentManager {
+        private final ArrayMap<String, Context> mPluginLookup = new ArrayMap<>();
+
+        public void removePlugin(String tag, String currentClass, String defaultClass) {
+            Fragment fragment = getFragmentManager().findFragmentByTag(tag);
+            mPluginLookup.remove(currentClass);
+            getFragmentManager().beginTransaction()
+                    .replace(((View) fragment.getView().getParent()).getId(),
+                            instantiate(mContext, defaultClass, null), tag)
+                    .commit();
+            reloadFragments();
+        }
+
+        public void setCurrentPlugin(String tag, String currentClass, Context context) {
+            Fragment fragment = getFragmentManager().findFragmentByTag(tag);
+            mPluginLookup.put(currentClass, context);
+            getFragmentManager().beginTransaction()
+                    .replace(((View) fragment.getView().getParent()).getId(),
+                            instantiate(context, currentClass, null), tag)
+                    .commit();
+            reloadFragments();
+        }
+
+        private void reloadFragments() {
+            // Save the old state.
+            Parcelable p = destroyFragmentHost();
+            // Generate a new fragment host and restore its state.
+            createFragmentHost(p);
+        }
+
+        Fragment instantiate(Context context, String className, Bundle arguments) {
+            Context pluginContext = mPluginLookup.get(className);
+            if (pluginContext != null) {
+                Fragment f = Fragment.instantiate(pluginContext, className, arguments);
+                if (f instanceof Plugin) {
+                    ((Plugin) f).onCreate(mContext, pluginContext);
+                }
+                return f;
+            }
+            return Fragment.instantiate(context, className, arguments);
+        }
+    }
+
+    private static class PluginState {
+        Context mContext;
+        String mCls;
+
+        private PluginState(String cls, Context context) {
+            mCls = cls;
+            mContext = context;
         }
     }
 }

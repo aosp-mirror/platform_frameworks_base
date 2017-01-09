@@ -98,7 +98,7 @@ public class PluginInflateContainer extends AutoReinflateContainer
     }
 
     @Override
-    public void onPluginConnected(ViewProvider plugin) {
+    public void onPluginConnected(ViewProvider plugin, Context context) {
         mPluginView = plugin.getView();
         inflateLayout();
     }

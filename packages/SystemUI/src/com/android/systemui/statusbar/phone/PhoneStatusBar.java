@@ -870,7 +870,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         View container = mStatusBarWindow.findViewById(R.id.qs_frame);
         if (container != null) {
             FragmentHostManager fragmentHostManager = FragmentHostManager.get(container);
-            new PluginFragmentListener(container, QS.TAG, R.id.qs_frame, QSFragment.class, QS.class)
+            fragmentHostManager.getFragmentManager().beginTransaction()
+                    .replace(R.id.qs_frame, new QSFragment(), QS.TAG)
+                    .commit();
+            new PluginFragmentListener(container, QS.TAG, QSFragment.class, QS.class)
                     .startListening(QS.ACTION, QS.VERSION);
             final QSTileHost qsh = SystemUIFactory.getInstance().createQSTileHost(mContext, this,
                     mIconController);

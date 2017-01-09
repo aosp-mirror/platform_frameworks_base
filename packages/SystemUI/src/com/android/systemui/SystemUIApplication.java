@@ -207,7 +207,7 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
         PluginManager.getInstance(this).addPluginListener(OverlayPlugin.ACTION,
                 new PluginListener<OverlayPlugin>() {
             @Override
-            public void onPluginConnected(OverlayPlugin plugin) {
+            public void onPluginConnected(OverlayPlugin plugin, Context pluginContext) {
                 PhoneStatusBar phoneStatusBar = getComponent(PhoneStatusBar.class);
                 if (phoneStatusBar != null) {
                     plugin.setup(phoneStatusBar.getStatusBarWindow(),
