@@ -1238,7 +1238,7 @@ class ActivityStarter {
             r.mTaskOverlay = true;
             final TaskRecord task = mSupervisor.anyTaskForIdLocked(mOptions.getLaunchTaskId());
             final ActivityRecord top = task != null ? task.getTopActivity() : null;
-            if (top != null && !top.visible) {
+            if (top != null && top.state != RESUMED) {
 
                 // The caller specifies that we'd like to be avoided to be moved to the front, so be
                 // it!
