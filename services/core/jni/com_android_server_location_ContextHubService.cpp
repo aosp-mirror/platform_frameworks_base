@@ -42,7 +42,6 @@
 using IContexthub = android::hardware::contexthub::V1_0::IContexthub;
 
 using Result = android::hardware::contexthub::V1_0::Result;
-using NanoAppBinary = android::hardware::contexthub::V1_0::NanoAppBinary;
 using ContextHubMsg = android::hardware::contexthub::V1_0::ContextHubMsg;
 using IContexthubCallback = android::hardware::contexthub::V1_0::IContexthubCallback;
 using AsyncEventType = android::hardware::contexthub::V1_0::AsyncEventType;
