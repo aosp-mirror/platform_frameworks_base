@@ -3394,7 +3394,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         float mTransitionAlpha = 1f;
     }
 
-    TransformationInfo mTransformationInfo;
+    /** @hide */
+    public TransformationInfo mTransformationInfo;
 
     /**
      * Current clip bounds. to which all drawing of this view are constrained.
