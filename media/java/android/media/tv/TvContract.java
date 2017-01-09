@@ -543,6 +543,17 @@ public final class TvContract {
          */
         public static final String TYPE_S_DMB = "TYPE_S_DMB";
 
+        /**
+         * The channel type for preview videos.
+         *
+         * <P>Unlike other broadcast TV channel types, the programs in the preview channel usually
+         * are promotional videos. The UI may treat the preview channels differently from the other
+         * broadcast channels.
+         *
+         * @see #COLUMN_TYPE
+         */
+        public static final String TYPE_PREVIEW = "TYPE_PREVIEW";
+
         /** A generic service type. */
         public static final String SERVICE_TYPE_OTHER = "SERVICE_TYPE_OTHER";
 
@@ -1001,6 +1012,20 @@ public final class TvContract {
          */
         public static final String COLUMN_VERSION_NUMBER = "version_number";
 
+        /**
+         * The flag indicating whether this TV channel is transient or not.
+         *
+         * <p>A value of 1 indicates that the channel will be automatically removed by the system on
+         * reboot, and a value of 0 indicates that the channel is persistent across reboot. If not
+         * specified, this value is set to 0 (not transient) by default.
+         *
+         * <p>Type: INTEGER (boolean)
+         * @see Programs#COLUMN_TRANSIENT
+         * @hide
+         */
+        @SystemApi
+        public static final String COLUMN_TRANSIENT = "transient";
+
         private Channels() {}
 
         /**
@@ -1165,6 +1190,8 @@ public final class TvContract {
          * previous program in the same channel. In practice, start time will usually be the end
          * time of the previous program.
          *
+         * <p>Can be empty if this program belongs to a {@link Channels#TYPE_PREVIEW} channel.
+         *
          * <p>Type: INTEGER (long)
          */
         public static final String COLUMN_START_TIME_UTC_MILLIS = "start_time_utc_millis";
@@ -1175,6 +1202,8 @@ public final class TvContract {
          * <p>The value should be equal to or less than {@link #COLUMN_START_TIME_UTC_MILLIS} of the
          * next program in the same channel. In practice, end time will usually be the start time of
          * the next program.
+         *
+         * <p>Can be empty if this program belongs to a {@link Channels#TYPE_PREVIEW} channel.
          *
          * <p>Type: INTEGER (long)
          */
@@ -1409,6 +1438,102 @@ public final class TvContract {
          * <p>Type: INTEGER
          */
         public static final String COLUMN_VERSION_NUMBER = "version_number";
+
+        /**
+         * The internal ID used by individual TV input services.
+         *
+         * <p>This is internal to the provider that inserted it, and should not be decoded by other
+         * apps.
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: TEXT
+         */
+        public static final String COLUMN_INTERNAL_PROVIDER_ID = "internal_provider_id";
+
+        /**
+         * The URI for the preview video.
+         *
+         * <p>This is only relevant to {@link Channels#TYPE_PREVIEW}. The data in the column must be
+         * a URL, or a URI in one of the following formats:
+         *
+         * <ul>
+         * <li>content ({@link android.content.ContentResolver#SCHEME_CONTENT})</li>
+         * <li>android.resource ({@link android.content.ContentResolver#SCHEME_ANDROID_RESOURCE})
+         * </li>
+         * <li>file ({@link android.content.ContentResolver#SCHEME_FILE})</li>
+         * </ul>
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: TEXT
+         */
+        public static final String COLUMN_PREVIEW_VIDEO_URI = "preview_video_uri";
+
+        /**
+         * The last playback position (in milliseconds) of the preview video.
+         *
+         * <p>This is only relevant to {@link Channels#TYPE_PREVIEW}.
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: INTEGER
+         */
+        public static final String COLUMN_PREVIEW_LAST_PLAYBACK_POSITION =
+                "preview_last_playback_position";
+
+        /**
+         * The duration (in milliseconds) of the preview video.
+         *
+         * <p>This is only relevant to {@link Channels#TYPE_PREVIEW}.
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: INTEGER
+         */
+        public static final String COLUMN_PREVIEW_DURATION = "preview_duration";
+
+        /**
+         * The intent URI which is launched when the preview video is selected.
+         *
+         * <p>The URI is created using {@link Intent#toUri} with {@link Intent#URI_INTENT_SCHEME}
+         * and converted back to the original intent with {@link Intent#parseUri}. The intent is
+         * launched when the user selects the preview video item.
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: TEXT
+         */
+        public static final String COLUMN_PREVIEW_INTENT_URI =
+                "preview_intent_uri";
+
+        /**
+         * The weight of the preview program within the channel.
+         *
+         * <p>The UI may choose to show this item in a different position in the channel row.
+         * A larger weight value means the program is more important than other programs having
+         * smaller weight values. The value is relevant for the preview programs in the same
+         * channel. This is only relevant to {@link Channels#TYPE_PREVIEW}.
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: INTEGER
+         */
+        public static final String COLUMN_PREVIEW_WEIGHT = "preview_weight";
+
+        /**
+         * The flag indicating whether this program is transient or not.
+         *
+         * <p>A value of 1 indicates that the channel will be automatically removed by the system on
+         * reboot, and a value of 0 indicates that the channel is persistent across reboot. If not
+         * specified, this value is set to 0 (not transient) by default.
+         *
+         * <p>Type: INTEGER (boolean)
+         * @see Channels#COLUMN_TRANSIENT
+         * @hide
+         */
+        @SystemApi
+        public static final String COLUMN_TRANSIENT = "transient";
 
         private Programs() {}
 
