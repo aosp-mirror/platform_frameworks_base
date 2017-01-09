@@ -99,7 +99,6 @@ public class Paint_Delegate {
     private Shader_Delegate mShader;
     private PathEffect_Delegate mPathEffect;
     private MaskFilter_Delegate mMaskFilter;
-    private Rasterizer_Delegate mRasterizer;
 
     private Locale mLocale = Locale.getDefault();
 
@@ -246,15 +245,6 @@ public class Paint_Delegate {
      */
     public MaskFilter_Delegate getMaskFilter() {
         return mMaskFilter;
-    }
-
-    /**
-     * Returns the {@link Rasterizer} delegate or null if none have been set
-     *
-     * @return the delegate or null.
-     */
-    public Rasterizer_Delegate getRasterizer() {
-        return mRasterizer;
     }
 
     // ---- native methods ----
@@ -898,25 +888,6 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static long nSetRasterizer(long native_object, long rasterizer) {
-        // get the delegate from the native int.
-        Paint_Delegate delegate = sManager.getDelegate(native_object);
-        if (delegate == null) {
-            return rasterizer;
-        }
-
-        delegate.mRasterizer = Rasterizer_Delegate.getDelegate(rasterizer);
-
-        // since none of those are supported, display a fidelity warning right away
-        if (delegate.mRasterizer != null && !delegate.mRasterizer.isSupported()) {
-            Bridge.getLog().fidelityWarning(LayoutLog.TAG_RASTERIZER,
-                    delegate.mRasterizer.getSupportMessage(), null, null /*data*/);
-        }
-
-        return rasterizer;
-    }
-
-    @LayoutlibDelegate
     /*package*/ static int nGetTextAlign(long native_object) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(native_object);
@@ -1235,7 +1206,6 @@ public class Paint_Delegate {
         mShader = paint.mShader;
         mPathEffect = paint.mPathEffect;
         mMaskFilter = paint.mMaskFilter;
-        mRasterizer = paint.mRasterizer;
         mHintingMode = paint.mHintingMode;
 
         if (needsFontUpdate) {
@@ -1262,7 +1232,6 @@ public class Paint_Delegate {
         mShader = null;
         mPathEffect = null;
         mMaskFilter = null;
-        mRasterizer = null;
         updateFontObject();
         mHintingMode = Paint.HINTING_ON;
     }
