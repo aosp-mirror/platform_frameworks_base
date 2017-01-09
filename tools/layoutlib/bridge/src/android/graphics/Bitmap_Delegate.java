@@ -62,7 +62,7 @@ public final class Bitmap_Delegate {
 
 
     public enum BitmapCreateFlags {
-        PREMULTIPLIED, MUTABLE
+        NONE, PREMULTIPLIED, MUTABLE
     }
 
     // ---- delegate manager ----
@@ -614,6 +614,26 @@ public final class Bitmap_Delegate {
     @LayoutlibDelegate
     /*package*/ static void nativePrepareToDraw(long nativeBitmap) {
         // do nothing as Bitmap_Delegate does not have caches
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static Bitmap nativeCopyPreserveInternalConfig(long nativeBitmap) {
+        Bitmap_Delegate srcBmpDelegate = sManager.getDelegate(nativeBitmap);
+        if (srcBmpDelegate == null) {
+            return null;
+        }
+
+        BufferedImage srcImage = srcBmpDelegate.getImage();
+
+        // create the image
+        BufferedImage image = new BufferedImage(srcImage.getColorModel(), srcImage.copyData(null),
+                srcImage.isAlphaPremultiplied(), null);
+
+        // create a delegate with the content of the stream.
+        Bitmap_Delegate delegate = new Bitmap_Delegate(image, srcBmpDelegate.getConfig());
+
+        return createBitmap(delegate, EnumSet.of(BitmapCreateFlags.NONE),
+                Bitmap.getDefaultDensity());
     }
 
     // ---- Private delegate/helper methods ----
