@@ -21,13 +21,16 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
+import android.support.annotation.VisibleForTesting;
 import android.util.Pair;
 import android.view.KeyEvent;
 
 import com.android.internal.os.SomeArgs;
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.systemui.SystemUI;
 
 /**
  * This class takes the functions from IStatusBar that come in on
@@ -88,55 +91,68 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final String SHOW_IME_SWITCHER_KEY = "showImeSwitcherKey";
 
     private final Object mLock = new Object();
-    private Callbacks mCallbacks;
-    private Handler mHandler = new H();
+    private Callbacks[] mCallbacks = new Callbacks[0];
+    private Handler mHandler = new H(Looper.getMainLooper());
 
     /**
      * These methods are called back on the main thread.
      */
     public interface Callbacks {
-        void setIcon(String slot, StatusBarIcon icon);
-        void removeIcon(String slot);
-        void disable(int state1, int state2, boolean animate);
-        void animateExpandNotificationsPanel();
-        void animateCollapsePanels(int flags);
-        void animateExpandSettingsPanel(String obj);
-        void setSystemUiVisibility(int vis, int fullscreenStackVis,
-                int dockedStackVis, int mask, Rect fullscreenStackBounds, Rect dockedStackBounds);
-        void topAppWindowChanged(boolean visible);
-        void setImeWindowStatus(IBinder token, int vis, int backDisposition,
-                boolean showImeSwitcher);
-        void showRecentApps(boolean triggeredFromAltTab, boolean fromHome);
-        void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
-        void toggleRecentApps();
-        void toggleSplitScreen();
-        void preloadRecentApps();
-        void dismissKeyboardShortcutsMenu();
-        void toggleKeyboardShortcutsMenu(int deviceId);
-        void cancelPreloadRecentApps();
-        void setWindowState(int window, int state);
-        void buzzBeepBlinked();
-        void notificationLightOff();
-        void notificationLightPulse(int argb, int onMillis, int offMillis);
-        void showScreenPinningRequest(int taskId);
-        void appTransitionPending();
-        void appTransitionCancelled();
-        void appTransitionStarting(long startTime, long duration);
-        void appTransitionFinished();
-        void showAssistDisclosure();
-        void startAssist(Bundle args);
-        void onCameraLaunchGestureDetected(int source);
-        void showTvPictureInPictureMenu();
+        default void setIcon(String slot, StatusBarIcon icon) { }
+        default void removeIcon(String slot) { }
+        default void disable(int state1, int state2, boolean animate) { }
+        default void animateExpandNotificationsPanel() { }
+        default void animateCollapsePanels(int flags) { }
+        default void animateExpandSettingsPanel(String obj) { }
+        default void setSystemUiVisibility(int vis, int fullscreenStackVis,
+                int dockedStackVis, int mask, Rect fullscreenStackBounds, Rect dockedStackBounds) {
+        }
+        default void topAppWindowChanged(boolean visible) { }
+        default void setImeWindowStatus(IBinder token, int vis, int backDisposition,
+                boolean showImeSwitcher) { }
+        default void showRecentApps(boolean triggeredFromAltTab, boolean fromHome) { }
+        default void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) { }
+        default void toggleRecentApps() { }
+        default void toggleSplitScreen() { }
+        default void preloadRecentApps() { }
+        default void dismissKeyboardShortcutsMenu() { }
+        default void toggleKeyboardShortcutsMenu(int deviceId) { }
+        default void cancelPreloadRecentApps() { }
+        default void setWindowState(int window, int state) { }
+        default void buzzBeepBlinked() { }
+        default void notificationLightOff() { }
+        default void notificationLightPulse(int argb, int onMillis, int offMillis) { }
+        default void showScreenPinningRequest(int taskId) { }
+        default void appTransitionPending() { }
+        default void appTransitionCancelled() { }
+        default void appTransitionStarting(long startTime, long duration) { }
+        default void appTransitionFinished() { }
+        default void showAssistDisclosure() { }
+        default void startAssist(Bundle args) { }
+        default void onCameraLaunchGestureDetected(int source) { }
+        default void showTvPictureInPictureMenu() { }
 
-        void addQsTile(ComponentName tile);
-        void remQsTile(ComponentName tile);
-        void clickTile(ComponentName tile);
+        default void addQsTile(ComponentName tile) { }
+        default void remQsTile(ComponentName tile) { }
+        default void clickTile(ComponentName tile) { }
 
-        void handleSystemNavigationKey(int arg1);
+        default void handleSystemNavigationKey(int arg1) { }
     }
 
-    public CommandQueue(Callbacks callbacks) {
-        mCallbacks = callbacks;
+    @VisibleForTesting
+    protected CommandQueue() {
+    }
+
+    public void addCallbacks(Callbacks callbacks) {
+        Callbacks[] newArray = new Callbacks[mCallbacks.length + 1];
+        for (int i = 0; i < newArray.length - 1; i++) {
+            newArray[i] = mCallbacks[i];
+            if (newArray[i] == callbacks) {
+                throw new IllegalArgumentException("Callback was already added");
+            }
+        }
+        newArray[newArray.length - 1] = callbacks;
+        mCallbacks = newArray;
     }
 
     public void setIcon(String slot, StatusBarIcon icon) {
@@ -328,8 +344,8 @@ public class CommandQueue extends IStatusBar.Stub {
 
     public void appTransitionCancelled() {
         synchronized (mLock) {
-            mHandler.removeMessages(MSG_APP_TRANSITION_PENDING);
-            mHandler.sendEmptyMessage(MSG_APP_TRANSITION_PENDING);
+            mHandler.removeMessages(MSG_APP_TRANSITION_CANCELLED);
+            mHandler.sendEmptyMessage(MSG_APP_TRANSITION_CANCELLED);
         }
     }
 
@@ -400,6 +416,10 @@ public class CommandQueue extends IStatusBar.Stub {
     }
 
     private final class H extends Handler {
+        private H(Looper l) {
+            super(l);
+        }
+
         public void handleMessage(Message msg) {
             final int what = msg.what & MSG_MASK;
             switch (what) {
@@ -407,117 +427,194 @@ public class CommandQueue extends IStatusBar.Stub {
                     switch (msg.arg1) {
                         case OP_SET_ICON: {
                             Pair<String, StatusBarIcon> p = (Pair<String, StatusBarIcon>) msg.obj;
-                            mCallbacks.setIcon(p.first, p.second);
+                            for (int i = 0; i < mCallbacks.length; i++) {
+                                mCallbacks[i].setIcon(p.first, p.second);
+                            }
                             break;
                         }
                         case OP_REMOVE_ICON:
-                            mCallbacks.removeIcon((String) msg.obj);
+                            for (int i = 0; i < mCallbacks.length; i++) {
+                                mCallbacks[i].removeIcon((String) msg.obj);
+                            }
                             break;
                     }
                     break;
                 }
                 case MSG_DISABLE:
-                    mCallbacks.disable(msg.arg1, msg.arg2, true /* animate */);
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].disable(msg.arg1, msg.arg2, true /* animate */);
+                    }
                     break;
                 case MSG_EXPAND_NOTIFICATIONS:
-                    mCallbacks.animateExpandNotificationsPanel();
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].animateExpandNotificationsPanel();
+                    }
                     break;
                 case MSG_COLLAPSE_PANELS:
-                    mCallbacks.animateCollapsePanels(0);
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].animateCollapsePanels(0);
+                    }
                     break;
                 case MSG_EXPAND_SETTINGS:
-                    mCallbacks.animateExpandSettingsPanel((String) msg.obj);
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].animateExpandSettingsPanel((String) msg.obj);
+                    }
                     break;
                 case MSG_SET_SYSTEMUI_VISIBILITY:
                     SomeArgs args = (SomeArgs) msg.obj;
-                    mCallbacks.setSystemUiVisibility(args.argi1, args.argi2, args.argi3,
-                            args.argi4, (Rect) args.arg1, (Rect) args.arg2);
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].setSystemUiVisibility(args.argi1, args.argi2, args.argi3,
+                                args.argi4, (Rect) args.arg1, (Rect) args.arg2);
+                    }
                     args.recycle();
                     break;
                 case MSG_TOP_APP_WINDOW_CHANGED:
-                    mCallbacks.topAppWindowChanged(msg.arg1 != 0);
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].topAppWindowChanged(msg.arg1 != 0);
+                    }
                     break;
                 case MSG_SHOW_IME_BUTTON:
-                    mCallbacks.setImeWindowStatus((IBinder) msg.obj, msg.arg1, msg.arg2,
-                            msg.getData().getBoolean(SHOW_IME_SWITCHER_KEY, false));
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].setImeWindowStatus((IBinder) msg.obj, msg.arg1, msg.arg2,
+                                msg.getData().getBoolean(SHOW_IME_SWITCHER_KEY, false));
+                    }
                     break;
                 case MSG_SHOW_RECENT_APPS:
-                    mCallbacks.showRecentApps(msg.arg1 != 0, msg.arg2 != 0);
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].showRecentApps(msg.arg1 != 0, msg.arg2 != 0);
+                    }
                     break;
                 case MSG_HIDE_RECENT_APPS:
-                    mCallbacks.hideRecentApps(msg.arg1 != 0, msg.arg2 != 0);
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].hideRecentApps(msg.arg1 != 0, msg.arg2 != 0);
+                    }
                     break;
                 case MSG_TOGGLE_RECENT_APPS:
-                    mCallbacks.toggleRecentApps();
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].toggleRecentApps();
+                    }
                     break;
                 case MSG_PRELOAD_RECENT_APPS:
-                    mCallbacks.preloadRecentApps();
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].preloadRecentApps();
+                    }
                     break;
                 case MSG_CANCEL_PRELOAD_RECENT_APPS:
-                    mCallbacks.cancelPreloadRecentApps();
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].cancelPreloadRecentApps();
+                    }
                     break;
                 case MSG_DISMISS_KEYBOARD_SHORTCUTS:
-                    mCallbacks.dismissKeyboardShortcutsMenu();
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].dismissKeyboardShortcutsMenu();
+                    }
                     break;
                 case MSG_TOGGLE_KEYBOARD_SHORTCUTS:
-                    mCallbacks.toggleKeyboardShortcutsMenu(msg.arg1);
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].toggleKeyboardShortcutsMenu(msg.arg1);
+                    }
                     break;
                 case MSG_SET_WINDOW_STATE:
-                    mCallbacks.setWindowState(msg.arg1, msg.arg2);
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].setWindowState(msg.arg1, msg.arg2);
+                    }
                     break;
                 case MSG_BUZZ_BEEP_BLINKED:
-                    mCallbacks.buzzBeepBlinked();
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].buzzBeepBlinked();
+                    }
                     break;
                 case MSG_NOTIFICATION_LIGHT_OFF:
-                    mCallbacks.notificationLightOff();
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].notificationLightOff();
+                    }
                     break;
                 case MSG_NOTIFICATION_LIGHT_PULSE:
-                    mCallbacks.notificationLightPulse((Integer) msg.obj, msg.arg1, msg.arg2);
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].notificationLightPulse((Integer) msg.obj, msg.arg1, msg.arg2);
+                    }
                     break;
                 case MSG_SHOW_SCREEN_PIN_REQUEST:
-                    mCallbacks.showScreenPinningRequest(msg.arg1);
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].showScreenPinningRequest(msg.arg1);
+                    }
                     break;
                 case MSG_APP_TRANSITION_PENDING:
-                    mCallbacks.appTransitionPending();
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].appTransitionPending();
+                    }
                     break;
                 case MSG_APP_TRANSITION_CANCELLED:
-                    mCallbacks.appTransitionCancelled();
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].appTransitionCancelled();
+                    }
                     break;
                 case MSG_APP_TRANSITION_STARTING:
-                    Pair<Long, Long> data = (Pair<Long, Long>) msg.obj;
-                    mCallbacks.appTransitionStarting(data.first, data.second);
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        Pair<Long, Long> data = (Pair<Long, Long>) msg.obj;
+                        mCallbacks[i].appTransitionStarting(data.first, data.second);
+                    }
                     break;
                 case MSG_APP_TRANSITION_FINISHED:
-                    mCallbacks.appTransitionFinished();
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].appTransitionFinished();
+                    }
                     break;
                 case MSG_ASSIST_DISCLOSURE:
-                    mCallbacks.showAssistDisclosure();
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].showAssistDisclosure();
+                    }
                     break;
                 case MSG_START_ASSIST:
-                    mCallbacks.startAssist((Bundle) msg.obj);
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].startAssist((Bundle) msg.obj);
+                    }
                     break;
                 case MSG_CAMERA_LAUNCH_GESTURE:
-                    mCallbacks.onCameraLaunchGestureDetected(msg.arg1);
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].onCameraLaunchGestureDetected(msg.arg1);
+                    }
                     break;
                 case MSG_SHOW_TV_PICTURE_IN_PICTURE_MENU:
-                    mCallbacks.showTvPictureInPictureMenu();
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].showTvPictureInPictureMenu();
+                    }
                     break;
                 case MSG_ADD_QS_TILE:
-                    mCallbacks.addQsTile((ComponentName) msg.obj);
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].addQsTile((ComponentName) msg.obj);
+                    }
                     break;
                 case MSG_REMOVE_QS_TILE:
-                    mCallbacks.remQsTile((ComponentName) msg.obj);
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].remQsTile((ComponentName) msg.obj);
+                    }
                     break;
                 case MSG_CLICK_QS_TILE:
-                    mCallbacks.clickTile((ComponentName) msg.obj);
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].clickTile((ComponentName) msg.obj);
+                    }
                     break;
                 case MSG_TOGGLE_APP_SPLIT_SCREEN:
-                    mCallbacks.toggleSplitScreen();
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].toggleSplitScreen();
+                    }
                     break;
                 case MSG_HANDLE_SYSNAV_KEY:
-                    mCallbacks.handleSystemNavigationKey(msg.arg1);
+                    for (int i = 0; i < mCallbacks.length; i++) {
+                        mCallbacks[i].handleSystemNavigationKey(msg.arg1);
+                    }
                     break;
             }
+        }
+    }
+
+    // Need this class since CommandQueue already extends IStatusBar.Stub, so CommandQueueStart
+    // is needed so it can extend SystemUI.
+    public static class CommandQueueStart extends SystemUI {
+        @Override
+        public void start() {
+            putComponent(CommandQueue.class, new CommandQueue());
         }
     }
 }

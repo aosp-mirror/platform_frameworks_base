@@ -42,6 +42,7 @@ import com.android.systemui.power.PowerUI;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.shortcut.ShortcutKeyDispatcher;
 import com.android.systemui.stackdivider.Divider;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.SystemBars;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.tuner.TunerService;
@@ -65,6 +66,7 @@ public class SystemUIApplication extends Application {
     private final Class<?>[] SERVICES = new Class[] {
             FragmentService.class,
             TunerService.class,
+            CommandQueue.CommandQueueStart.class,
             KeyguardViewMediator.class,
             Recents.class,
             VolumeUI.class,
