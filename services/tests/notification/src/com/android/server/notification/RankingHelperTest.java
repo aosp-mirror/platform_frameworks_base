@@ -488,25 +488,6 @@ public class RankingHelperTest {
     }
 
     @Test
-    public void testUpdate_userLockedAllowed() throws Exception {
-        final NotificationChannel channel =
-                new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_LOW);
-        channel.setAllowed(true);
-        channel.lockFields(NotificationChannel.USER_LOCKED_ALLOWED);
-
-        mHelper.createNotificationChannel(pkg, uid, channel, false);
-
-        final NotificationChannel channel2 =
-                new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_HIGH);
-        channel2.setAllowed(false);
-
-        mHelper.updateNotificationChannelFromAssistant(pkg, uid, channel2);
-
-        // no fields should be changed
-        assertEquals(channel, mHelper.getNotificationChannel(pkg, uid, channel.getId()));
-    }
-
-    @Test
     public void testUpdate_userLockedBadge() throws Exception {
         final NotificationChannel channel =
                 new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_LOW);
@@ -567,7 +548,6 @@ public class RankingHelperTest {
         channel.setBypassDnd(true);
         channel.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
         channel.setShowBadge(true);
-        channel.setAllowed(false);
         int lockMask = 0;
         for (int i = 0; i < NotificationChannel.LOCKABLE_FIELDS.length; i++) {
             lockMask |= NotificationChannel.LOCKABLE_FIELDS[i];
@@ -595,7 +575,6 @@ public class RankingHelperTest {
         channel.setBypassDnd(true);
         channel.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
         channel.setShowBadge(true);
-        channel.setAllowed(false);
         int lockMask = 0;
         for (int i = 0; i < NotificationChannel.LOCKABLE_FIELDS.length; i++) {
             lockMask |= NotificationChannel.LOCKABLE_FIELDS[i];

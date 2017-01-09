@@ -126,7 +126,7 @@ public class NotificationManagerServiceTest {
 
         NotificationChannel channel = new NotificationChannel("id", "name",
                 NotificationManager.IMPORTANCE_HIGH);
-        channel.setAllowed(false);
+        channel.setImportance(NotificationManager.IMPORTANCE_NONE);
         NotificationRecord r = generateNotificationRecord(channel);
         NotificationManagerService.EnqueueNotificationRunnable enqueue =
                 mNotificationManagerService.new EnqueueNotificationRunnable(UserHandle.USER_SYSTEM,

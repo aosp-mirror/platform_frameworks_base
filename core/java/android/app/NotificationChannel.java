@@ -55,7 +55,6 @@ public final class NotificationChannel implements Parcelable {
     private static final String ATT_AUDIO_ATTRIBUTES = "audio_attributes";
     private static final String ATT_SHOW_BADGE = "show_badge";
     private static final String ATT_USER_LOCKED = "locked";
-    private static final String ATT_ALLOWED = "allowed";
     private static final String DELIMITER = ",";
 
     /**
@@ -243,18 +242,6 @@ public final class NotificationChannel implements Parcelable {
         this.mImportance = importance;
     }
 
-    /**
-     * Sets whether notifications are allowed to be posted to this channel.
-     *
-     * Only modifiable by the system and notification ranker.
-     *
-     * @param allowed true if notifications are not allowed from this channel.
-     */
-    public void setAllowed(boolean allowed) {
-        this.mAllowed = allowed;
-    }
-
-
     // Modifiable by apps on channel creation.
 
     /**
@@ -406,7 +393,6 @@ public final class NotificationChannel implements Parcelable {
         enableVibration(safeBool(parser, ATT_VIBRATION_ENABLED, false));
         setVibrationPattern(safeLongArray(parser, ATT_VIBRATION, null));
         setShowBadge(safeBool(parser, ATT_SHOW_BADGE, false));
-        setAllowed(safeBool(parser, ATT_ALLOWED, true));
         lockFields(safeInt(parser, ATT_USER_LOCKED, 0));
     }
 
@@ -448,9 +434,6 @@ public final class NotificationChannel implements Parcelable {
         if (canShowBadge()) {
             out.attribute(null, ATT_SHOW_BADGE, Boolean.toString(canShowBadge()));
         }
-        if (!isAllowed()) {
-            out.attribute(null, ATT_ALLOWED, Boolean.toString(isAllowed()));
-        }
 
         out.endTag(null, TAG_CHANNEL);
     }
@@ -481,8 +464,6 @@ public final class NotificationChannel implements Parcelable {
         record.put(ATT_USER_LOCKED, Integer.toString(getUserLockedFields()));
         record.put(ATT_VIBRATION, longArrayToString(getVibrationPattern()));
         record.put(ATT_SHOW_BADGE, Boolean.toString(canShowBadge()));
-        record.put(ATT_ALLOWED, Boolean.toString(isAllowed()));
-
         return record;
     }
 
