@@ -381,7 +381,12 @@ public final class KeyboardShortcuts {
                         if (appShortcuts != null) {
                             result.add(appShortcuts);
                         }
-                        showKeyboardShortcutsDialog(result);
+                        synchronized (sLock) {
+                            // showKeyboardShortcutsDialog only if it has not been dismissed already
+                            if (sInstance != null) {
+                                showKeyboardShortcutsDialog(result);
+                            }
+                        }
                     }
                 }, deviceId);
     }
