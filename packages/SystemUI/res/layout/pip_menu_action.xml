@@ -13,32 +13,9 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<FrameLayout
+<ImageView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="0dp"
-    android:layout_height="match_parent"
-    android:layout_weight="1"
-    android:background="?android:selectableItemBackground">
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:orientation="vertical">
-        <ImageView
-            android:id="@+id/icon"
-            android:layout_width="@dimen/pip_menu_action_icon_size"
-            android:layout_height="@dimen/pip_menu_action_icon_size"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="4dp" />
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:includeFontPadding="false"
-            android:gravity="center"
-            android:textSize="12sp"
-            android:textColor="#ffffffff"
-            android:textAllCaps="true"
-            android:fontFamily="sans-serif" />
-    </LinearLayout>
-</FrameLayout>
+    android:layout_width="48dp"
+    android:layout_height="48dp"
+    android:padding="10dp"
+    android:background="?android:selectableItemBackgroundBorderless" />
