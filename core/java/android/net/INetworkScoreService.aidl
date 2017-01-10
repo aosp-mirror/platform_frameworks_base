@@ -109,4 +109,12 @@ interface INetworkScoreService
      * @hide
      */
     boolean isCallerActiveScorer(int callingUid);
+
+    /**
+     * Obtain the package name of the current active network scorer.
+     *
+     * @return the full package name of the current active scorer, or null if there is no active
+     *         scorer.
+     */
+    String getActiveScorerPackage();
 }
