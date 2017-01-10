@@ -26,7 +26,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 class PreNTestDatabaseHelper extends SQLiteOpenHelper {
 
     public static final String TOKEN_STRING = "token-string-123";
-    public static final String ACCOUNT_TYPE = "type1";
+    public static final String ACCOUNT_TYPE = AccountManagerServiceTestFixtures.ACCOUNT_TYPE_2;
     public static final String ACCOUNT_NAME = "account@" + ACCOUNT_TYPE;
     public static final String ACCOUNT_PASSWORD = "Password";
     public static final String TOKEN_TYPE = "SID";

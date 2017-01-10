@@ -18,6 +18,7 @@
         package="com.android.frameworks.servicestests">
 
     <uses-permission android:name="android.permission.READ_LOGS" />
+    <uses-permission android:name="android.permission.ACCOUNT_MANAGER" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
@@ -63,6 +64,24 @@
           <intent-filter>
             <action android:name="android.accessibilityservice.AccessibilityService"/>
           </intent-filter>
+        </service>
+
+        <service android:name="com.android.server.accounts.TestAccountType1AuthenticatorService"
+            android:exported="false">
+          <intent-filter>
+            <action android:name="android.accounts.AccountAuthenticator" />
+          </intent-filter>
+          <meta-data android:name="android.accounts.AccountAuthenticator"
+              android:resource="@xml/test_account_type1_authenticator" />
+        </service>
+
+        <service android:name="com.android.server.accounts.TestAccountType2AuthenticatorService"
+            android:exported="false">
+          <intent-filter>
+            <action android:name="android.accounts.AccountAuthenticator" />
+          </intent-filter>
+          <meta-data android:name="android.accounts.AccountAuthenticator"
+              android:resource="@xml/test_account_type2_authenticator" />
         </service>
 
         <receiver android:name="com.android.server.devicepolicy.ApplicationRestrictionsTest$AdminReceiver"
@@ -117,7 +136,9 @@
         <activity android:name="com.android.server.pm.BaseShortcutManagerTest$ShortcutActivity3" />
 
         <activity android:name="com.android.server.pm.ShortcutTestActivity"
-            android:enabled="true" android:exported="true" />
+                 android:enabled="true" android:exported="true" />
+
+        <activity android:name="com.android.server.accounts.AccountAuthenticatorDummyActivity" />
 
         <activity-alias android:name="a.ShortcutEnabled"
             android:targetActivity="com.android.server.pm.ShortcutTestActivity"
