@@ -3313,7 +3313,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         @ViewDebug.FlagToString(mask = PFLAG_DIRTY_MASK, equals = PFLAG_DIRTY_OPAQUE, name = "DIRTY_OPAQUE"),
         @ViewDebug.FlagToString(mask = PFLAG_DIRTY_MASK, equals = PFLAG_DIRTY, name = "DIRTY")
     }, formatToHexString = true)
-    int mPrivateFlags;
+
+    /* @hide */
+    public int mPrivateFlags;
     int mPrivateFlags2;
     int mPrivateFlags3;
 
@@ -14110,8 +14112,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *            invalidated as well. This is usually true for a full
      *            invalidate, but may be set to false if the View's contents or
      *            dimensions have not changed.
+     * @hide
      */
-    void invalidate(boolean invalidateCache) {
+    public void invalidate(boolean invalidateCache) {
         invalidateInternal(0, 0, mRight - mLeft, mBottom - mTop, invalidateCache, true);
     }
 

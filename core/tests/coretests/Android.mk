@@ -33,7 +33,9 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     mockito-target-minus-junit4 \
     espresso-core \
     ub-uiautomator \
-    platform-test-annotations
+    platform-test-annotations \
+    compatibility-device-util
+
 LOCAL_JAVA_LIBRARIES := android.test.runner conscrypt telephony-common org.apache.http.legacy
 LOCAL_PACKAGE_NAME := FrameworksCoreTests
 
