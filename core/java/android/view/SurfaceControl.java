@@ -17,6 +17,7 @@
 package android.view;
 
 import android.graphics.Bitmap;
+import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.IBinder;
@@ -40,6 +41,9 @@ public class SurfaceControl {
     private static native void nativeDisconnect(long nativeObject);
 
     private static native Bitmap nativeScreenshot(IBinder displayToken,
+            Rect sourceCrop, int width, int height, int minLayer, int maxLayer,
+            boolean allLayers, boolean useIdentityTransform, int rotation);
+    private static native GraphicBuffer nativeScreenshotToBuffer(IBinder displayToken,
             Rect sourceCrop, int width, int height, int minLayer, int maxLayer,
             boolean allLayers, boolean useIdentityTransform, int rotation);
     private static native void nativeScreenshot(IBinder displayToken, Surface consumer,
@@ -824,6 +828,19 @@ public class SurfaceControl {
         IBinder displayToken = SurfaceControl.getBuiltInDisplay(
                 SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN);
         return nativeScreenshot(displayToken, sourceCrop, width, height,
+                minLayer, maxLayer, false, useIdentityTransform, rotation);
+    }
+
+    /**
+     * Like {@link SurfaceControl#screenshot(Rect, int, int, int, int, boolean, int)}
+     * but returns a GraphicBuffer.
+     */
+    public static GraphicBuffer screenshotToBuffer(Rect sourceCrop, int width, int height,
+            int minLayer, int maxLayer, boolean useIdentityTransform,
+            int rotation) {
+        IBinder displayToken = SurfaceControl.getBuiltInDisplay(
+                SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN);
+        return nativeScreenshotToBuffer(displayToken, sourceCrop, width, height,
                 minLayer, maxLayer, false, useIdentityTransform, rotation);
     }
 
