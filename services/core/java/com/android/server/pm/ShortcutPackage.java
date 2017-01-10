@@ -361,6 +361,11 @@ class ShortcutPackage extends ShortcutPackageItem {
             }
             oldShortcut.setTimestamp(mShortcutUser.mService.injectCurrentTimeMillis());
 
+            // See ShortcutRequestPinProcessor.directPinShortcut().
+            if (mShortcutUser.mService.isDummyMainActivity(oldShortcut.getActivity())) {
+                oldShortcut.setActivity(null);
+            }
+
             return oldShortcut;
         } else {
             deleteShortcutInner(shortcutId);
@@ -1515,6 +1520,8 @@ class ShortcutPackage extends ShortcutPackageItem {
 
         boolean failed = false;
 
+        final ShortcutService s = mShortcutUser.mService;
+
         final ArrayMap<ComponentName, ArrayList<ShortcutInfo>> all =
                 sortShortcutsToActivities();
 
@@ -1554,10 +1561,10 @@ class ShortcutPackage extends ShortcutPackageItem {
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
                         + " is both dynamic and manifest at the same time.");
             }
-            if (si.getActivity() == null) {
+            if (si.getActivity() == null && !si.isFloating()) {
                 failed = true;
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
-                        + " has null activity.");
+                        + " has null activity, but not floating.");
             }
             if ((si.isDynamic() || si.isManifestShortcut()) && !si.isEnabled()) {
                 failed = true;
@@ -1578,6 +1585,11 @@ class ShortcutPackage extends ShortcutPackageItem {
                 failed = true;
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
                         + " has both resource and bitmap icons");
+            }
+            if (s.isDummyMainActivity(si.getActivity())) {
+                failed = true;
+                Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
+                        + " has a dummy target activity");
             }
         }
 

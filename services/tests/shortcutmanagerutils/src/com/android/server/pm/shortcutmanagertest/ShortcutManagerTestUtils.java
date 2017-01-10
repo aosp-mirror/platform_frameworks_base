@@ -925,7 +925,7 @@ public class ShortcutManagerTestUtils {
         }
 
         public ShortcutListAsserter areAllWithActivity(ComponentName activity) {
-            forAllShortcuts(s -> assertTrue("id=" + s.getId(), s.getActivity().equals(activity)));
+            forAllShortcuts(s -> assertEquals("id=" + s.getId(), activity, s.getActivity()));
             return this;
         }
 

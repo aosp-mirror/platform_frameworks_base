@@ -1604,7 +1604,7 @@ public class ShortcutService extends IShortcutService.Stub {
     private void fixUpIncomingShortcutInfo(@NonNull ShortcutInfo shortcut, boolean forUpdate,
             boolean forPinRequest) {
         Preconditions.checkNotNull(shortcut, "Null shortcut detected");
-        if (!forPinRequest && shortcut.getActivity() != null) {
+        if (shortcut.getActivity() != null) {
             Preconditions.checkState(
                     shortcut.getPackage().equals(shortcut.getActivity().getPackageName()),
                     "Cannot publish shortcut: activity " + shortcut.getActivity() + " does not"
@@ -1618,10 +1618,8 @@ public class ShortcutService extends IShortcutService.Stub {
         if (!forUpdate) {
             shortcut.enforceMandatoryFields(/* forPinned= */ forPinRequest);
             if (!forPinRequest) {
-                Preconditions.checkArgument(
-                        injectIsMainActivity(shortcut.getActivity(), shortcut.getUserId()),
-                        "Cannot publish shortcut: " + shortcut.getActivity()
-                                + " is not main activity");
+                Preconditions.checkState(shortcut.getActivity() != null,
+                        "Cannot publish shortcut: target activity is not set");
             }
         }
         if (shortcut.getIcon() != null) {
@@ -1870,9 +1868,7 @@ public class ShortcutService extends IShortcutService.Stub {
             throwIfUserLockedL(userId);
 
             Preconditions.checkState(isUidForegroundLocked(injectBinderCallingUid()),
-                "Calling application must have a foreground activity or a foreground service");
-
-            // TODO Cancel all pending requests from the caller.
+                    "Calling application must have a foreground activity or a foreground service");
 
             // Send request to the launcher, if supported.
             ret = mShortcutRequestPinProcessor.requestPinItemLocked(shortcut, appWidget, userId,
@@ -3191,6 +3187,10 @@ public class ShortcutService extends IShortcutService.Stub {
     @NonNull
     ComponentName getDummyMainActivity(@NonNull String packageName) {
         return new ComponentName(packageName, DUMMY_MAIN_ACTIVITY);
+    }
+
+    boolean isDummyMainActivity(@Nullable ComponentName name) {
+        return name != null && DUMMY_MAIN_ACTIVITY.equals(name.getClassName());
     }
 
     /**
