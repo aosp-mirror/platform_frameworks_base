@@ -9984,6 +9984,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             + " service not being available yet.");
                 }
                 mNetworkLogger = null;
+                mInjector.getNotificationManager().cancel(NETWORK_LOGGING_NOTIFICATION_ID);
             }
         } finally {
             mInjector.binderRestoreCallingIdentity(callingIdentity);
