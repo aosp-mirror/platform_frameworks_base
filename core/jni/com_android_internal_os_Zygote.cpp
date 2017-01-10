@@ -709,6 +709,16 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
   return pid;
 }
 
+static void com_android_internal_os_Zygote_nativeAllowFileAcrossFork(
+        JNIEnv* env, jclass, jstring path) {
+    ScopedUtfChars path_native(env, path);
+    const char* path_cstr = path_native.c_str();
+    if (!path_cstr) {
+        RuntimeAbort(env, __LINE__, "path_cstr == NULL");
+    }
+    FileDescriptorWhitelist::Get()->Allow(path_cstr);
+}
+
 static void com_android_internal_os_Zygote_nativeUnmountStorageOnInit(JNIEnv* env, jclass) {
     // Zygote process unmount root storage space initially before every child processes are forked.
     // Every forked child processes (include SystemServer) only mount their own root storage space
@@ -753,6 +763,8 @@ static const JNINativeMethod gMethods[] = {
       (void *) com_android_internal_os_Zygote_nativeForkAndSpecialize },
     { "nativeForkSystemServer", "(II[II[[IJJ)I",
       (void *) com_android_internal_os_Zygote_nativeForkSystemServer },
+    { "nativeAllowFileAcrossFork", "(Ljava/lang/String;)V",
+      (void *) com_android_internal_os_Zygote_nativeAllowFileAcrossFork },
     { "nativeUnmountStorageOnInit", "()V",
       (void *) com_android_internal_os_Zygote_nativeUnmountStorageOnInit }
 };
