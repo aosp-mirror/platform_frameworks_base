@@ -142,7 +142,7 @@ void AnimatorManager::animateNoDamage(TreeInfo& info) {
 }
 
 uint32_t AnimatorManager::animateCommon(TreeInfo& info) {
-    uint32_t dirtyMask;
+    uint32_t dirtyMask = 0;
     AnimateFunctor functor(info, mAnimationHandle->context(), &dirtyMask);
     auto newEnd = std::remove_if(mAnimators.begin(), mAnimators.end(), functor);
     mAnimators.erase(newEnd, mAnimators.end());
