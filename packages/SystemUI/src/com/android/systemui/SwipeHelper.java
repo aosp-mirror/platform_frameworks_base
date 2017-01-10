@@ -34,7 +34,7 @@ import android.view.accessibility.AccessibilityEvent;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.MenuItem;
 import com.android.systemui.statusbar.FlingAnimationUtils;
-import com.android.systemui.statusbar.NotificationSettingsIconRow;
+import com.android.systemui.statusbar.NotificationMenuRow;
 
 import java.util.HashMap;
 
@@ -286,8 +286,7 @@ public class SwipeHelper implements Gefingerpoken {
                                         final int x = (int) ev.getRawX() - mTmpPos[0];
                                         final int y = (int) ev.getRawY() - mTmpPos[1];
                                         mLongPressListener.onLongPress(mCurrView, x, y,
-                                                NotificationSettingsIconRow
-                                                        .getSettingsMenuItem(mContext));
+                                                NotificationMenuRow.getSettingsMenuItem(mContext));
                                     }
                                 }
                             };

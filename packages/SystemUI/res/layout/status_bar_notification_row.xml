@@ -24,9 +24,9 @@
     >
 
     <ViewStub
-        android:layout="@layout/notification_settings_icon_row"
-        android:id="@+id/settings_icon_row_stub"
-        android:inflatedId="@+id/notification_settings_icon_row"
+        android:layout="@layout/notification_menu_row"
+        android:id="@+id/menu_row_stub"
+        android:inflatedId="@+id/notification_menu_row"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         />

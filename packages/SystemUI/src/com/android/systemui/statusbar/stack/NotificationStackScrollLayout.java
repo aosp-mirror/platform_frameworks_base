@@ -71,7 +71,7 @@ import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.NotificationGuts;
-import com.android.systemui.statusbar.NotificationSettingsIconRow;
+import com.android.systemui.statusbar.NotificationMenuRow;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StackScrollerDecorView;
 import com.android.systemui.statusbar.StatusBarState;
@@ -226,7 +226,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private int mMaxScrollAfterExpand;
     private SwipeHelper.LongPressListener mLongPressListener;
 
-    private NotificationSettingsIconRow mCurrIconRow;
+    private NotificationMenuRow mCurrIconRow;
     private View mTranslatingParentView;
     private View mGearExposedView;
 
@@ -4127,7 +4127,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             if (currView instanceof ExpandableNotificationRow) {
                 // Set the listener for the current row's gear
                 mCurrIconRow = ((ExpandableNotificationRow) currView).getSettingsRow();
-                mCurrIconRow.setGearListener(NotificationStackScrollLayout.this);
+                mCurrIconRow.setMenuClickListener(NotificationStackScrollLayout.this);
             }
         }
 
@@ -4139,9 +4139,9 @@ public class NotificationStackScrollLayout extends ViewGroup
                 mCurrIconRow.setSnapping(false); // If we're moving, we're not snapping.
 
                 // If the gear is visible and the movement is towards it it's not a location change.
-                boolean onLeft = mGearSnappedTo ? mGearSnappedOnLeft : mCurrIconRow.isIconOnLeft();
+                boolean onLeft = mGearSnappedTo ? mGearSnappedOnLeft : mCurrIconRow.isMenuOnLeft();
                 boolean locationChange = isTowardsGear(translation, onLeft)
-                        ? false : mCurrIconRow.isIconLocationChange(translation);
+                        ? false : mCurrIconRow.isMenuLocationChange(translation);
                 if (locationChange) {
                     // Don't consider it "snapped" if location has changed.
                     setSnappedToGear(false);
@@ -4152,8 +4152,8 @@ public class NotificationStackScrollLayout extends ViewGroup
                         mCheckForDrag = null;
                     } else {
                         // Check scheduled, reset alpha and update location; check will fade it in
-                        mCurrIconRow.setGearAlpha(0f);
-                        mCurrIconRow.setIconLocation((int) translation);
+                        mCurrIconRow.setMenuAlpha(0f);
+                        mCurrIconRow.setMenuLocation((int) translation);
                     }
                 }
             }
@@ -4204,14 +4204,14 @@ public class NotificationStackScrollLayout extends ViewGroup
                 return false; // Let SwipeHelper handle it.
             }
 
-            boolean gestureTowardsGear = isTowardsGear(velocity, mCurrIconRow.isIconOnLeft());
+            boolean gestureTowardsGear = isTowardsGear(velocity, mCurrIconRow.isMenuOnLeft());
             boolean gestureFastEnough = Math.abs(velocity) > getEscapeVelocity();
             final double timeForGesture = ev.getEventTime() - ev.getDownTime();
             final boolean showGearForSlowOnGoing = !canChildBeDismissed(animView)
                 && timeForGesture >= SWIPE_GEAR_TIMING;
 
             if (mGearSnappedTo && mCurrIconRow.isVisible()) {
-                if (mGearSnappedOnLeft == mCurrIconRow.isIconOnLeft()) {
+                if (mGearSnappedOnLeft == mCurrIconRow.isMenuOnLeft()) {
                     boolean coveringGear =
                             Math.abs(getTranslation(animView)) <= getSpaceForGear(animView) * 0.6f;
                     if (gestureTowardsGear || coveringGear) {
@@ -4255,7 +4255,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
         private void snapToGear(View animView, float velocity) {
             final float snapBackThreshold = getSpaceForGear(animView);
-            final float target = mCurrIconRow.isIconOnLeft() ? snapBackThreshold
+            final float target = mCurrIconRow.isMenuOnLeft() ? snapBackThreshold
                     : -snapBackThreshold;
             mGearExposedView = mTranslatingParentView;
             if (animView instanceof ExpandableNotificationRow) {
@@ -4286,7 +4286,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             final float multiplier = canChildBeDismissed(animView) ? 0.4f : 0.2f;
             final float snapBackThreshold = getSpaceForGear(animView) * multiplier;
             final float translation = getTranslation(animView);
-            return !swipedFarEnough() && mCurrIconRow.isVisible() && (mCurrIconRow.isIconOnLeft()
+            return !swipedFarEnough() && mCurrIconRow.isVisible() && (mCurrIconRow.isMenuOnLeft()
                     ? translation > snapBackThreshold
                     : translation < -snapBackThreshold);
         }
@@ -4355,7 +4355,7 @@ public class NotificationStackScrollLayout extends ViewGroup
          * Indicates the the gear has been snapped to.
          */
         private void setSnappedToGear(boolean snapped) {
-            mGearSnappedOnLeft = (mCurrIconRow != null) ? mCurrIconRow.isIconOnLeft() : false;
+            mGearSnappedOnLeft = (mCurrIconRow != null) ? mCurrIconRow.isMenuOnLeft() : false;
             mGearSnappedTo = snapped && mCurrIconRow != null;
         }
 
@@ -4395,11 +4395,11 @@ public class NotificationStackScrollLayout extends ViewGroup
                 final float bounceBackToGearWidth = getSpaceForGear(mTranslatingParentView);
                 final float notiThreshold = getSize(mTranslatingParentView) * 0.4f;
                 if ((mCurrIconRow != null && (!mCurrIconRow.isVisible()
-                        || mCurrIconRow.isIconLocationChange(translation)))
+                        || mCurrIconRow.isMenuLocationChange(translation)))
                         && absTransX >= bounceBackToGearWidth * 0.4
                         && absTransX < notiThreshold) {
                     // Fade in the gear
-                    mCurrIconRow.fadeInSettings(translation > 0 /* fromLeft */, translation,
+                    mCurrIconRow.fadeInMenu(translation > 0 /* fromLeft */, translation,
                             notiThreshold);
                 }
             }

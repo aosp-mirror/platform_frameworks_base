@@ -38,7 +38,7 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.MenuItem;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.OnMenuClickListener;
 
-public class NotificationSettingsIconRow extends FrameLayout
+public class NotificationMenuRow extends FrameLayout
         implements PluginListener<NotificationMenuRowProvider>, View.OnClickListener {
 
     private static final int ICON_ALPHA_ANIM_DURATION = 200;
@@ -49,14 +49,14 @@ public class NotificationSettingsIconRow extends FrameLayout
     private ArrayList<MenuItem> mMenuItems = new ArrayList<>();
 
     private ValueAnimator mFadeAnimator;
-    private boolean mSettingsFadedIn = false;
+    private boolean mMenuFadedIn = false;
     private boolean mAnimating = false;
     private boolean mOnLeft = true;
     private boolean mDismissing = false;
     private boolean mSnapping = false;
-    private boolean mIconPlaced = false;
+    private boolean mIconsPlaced = false;
 
-    private int[] mGearLocation = new int[2];
+    private int[] mIconLocation = new int[2];
     private int[] mParentLocation = new int[2];
 
     private float mHorizSpaceForIcon;
@@ -67,19 +67,19 @@ public class NotificationSettingsIconRow extends FrameLayout
 
     private float mAlpha = 0f;
 
-    public NotificationSettingsIconRow(Context context) {
+    public NotificationMenuRow(Context context) {
         this(context, null);
     }
 
-    public NotificationSettingsIconRow(Context context, AttributeSet attrs) {
+    public NotificationMenuRow(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public NotificationSettingsIconRow(Context context, AttributeSet attrs, int defStyleAttr) {
+    public NotificationMenuRow(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public NotificationSettingsIconRow(Context context, AttributeSet attrs, int defStyleAttr,
+    public NotificationMenuRow(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs);
         PluginManager.getInstance(getContext()).addPluginListener(
@@ -91,11 +91,11 @@ public class NotificationSettingsIconRow extends FrameLayout
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mHorizSpaceForIcon =
-                getResources().getDimensionPixelSize(R.dimen.notification_gear_width);
-        mVertSpaceForIcons = getResources().getDimensionPixelSize(R.dimen.notification_min_height);
-        mIconPadding = getResources().getDimensionPixelSize(R.dimen.notification_gear_padding);
-        mIconTint = getResources().getColor(R.color.notification_gear_color);
+        final Resources res = getResources();
+        mHorizSpaceForIcon = res.getDimensionPixelSize(R.dimen.notification_menu_icon_size);
+        mVertSpaceForIcons = res.getDimensionPixelSize(R.dimen.notification_min_height);
+        mIconPadding = res.getDimensionPixelSize(R.dimen.notification_menu_icon_padding);
+        mIconTint = res.getColor(R.color.notification_gear_color);
         updateMenu(false /* notify */);
     }
 
@@ -135,25 +135,25 @@ public class NotificationSettingsIconRow extends FrameLayout
     }
 
     public void resetState(boolean notify) {
-        setGearAlpha(0f);
-        mIconPlaced = false;
-        mSettingsFadedIn = false;
+        setMenuAlpha(0f);
+        mIconsPlaced = false;
+        mMenuFadedIn = false;
         mAnimating = false;
         mSnapping = false;
         mDismissing = false;
-        setIconLocation(mOnLeft ? 1 : -1 /* on left */);
+        setMenuLocation(mOnLeft ? 1 : -1 /* on left */);
         if (mListener != null && notify) {
             mListener.onMenuReset(mParent);
         }
     }
 
-    public void setGearListener(OnMenuClickListener listener) {
+    public void setMenuClickListener(OnMenuClickListener listener) {
         mListener = listener;
     }
 
     public void setNotificationRowParent(ExpandableNotificationRow parent) {
         mParent = parent;
-        setIconLocation(mOnLeft ? 1 : -1);
+        setMenuLocation(mOnLeft ? 1 : -1);
     }
 
     public void setAppName(String appName) {
@@ -172,10 +172,10 @@ public class NotificationSettingsIconRow extends FrameLayout
         return mParent;
     }
 
-    public void setGearAlpha(float alpha) {
+    public void setMenuAlpha(float alpha) {
         mAlpha = alpha;
         if (alpha == 0) {
-            mSettingsFadedIn = false; // Can fade in again once it's gone.
+            mMenuFadedIn = false; // Can fade in again once it's gone.
             setVisibility(View.INVISIBLE);
         } else {
             setVisibility(View.VISIBLE);
@@ -187,22 +187,22 @@ public class NotificationSettingsIconRow extends FrameLayout
     }
 
     /**
-     * Returns whether the icons are on the left side of the view or not.
+     * Returns whether the menu is displayed on the left side of the view or not.
      */
-    public boolean isIconOnLeft() {
+    public boolean isMenuOnLeft() {
         return mOnLeft;
     }
 
     /**
-     * Returns the horizontal space in pixels required to display the icons behind a notification.
+     * Returns the horizontal space in pixels required to display the menu.
      */
-    public float getSpaceForGear() {
+    public float getSpaceForMenu() {
         return mHorizSpaceForIcon * getChildCount();
     }
 
     /**
-     * Indicates whether the gear is visible at 1 alpha. Does not indicate
-     * if entire view is visible.
+     * Indicates whether the menu is visible at 1 alpha. Does not indicate if entire view is
+     * visible.
      */
     public boolean isVisible() {
         return mAlpha > 0;
@@ -214,9 +214,9 @@ public class NotificationSettingsIconRow extends FrameLayout
         }
     }
 
-    public void updateSettingsIcons(final float transX, final float size) {
-        if (mAnimating || !mSettingsFadedIn) {
-            // Don't adjust when animating, or if the gear hasn't been shown yet.
+    public void updateMenuAlpha(final float transX, final float size) {
+        if (mAnimating || !mMenuFadedIn) {
+            // Don't adjust when animating, or if the menu hasn't been shown yet.
             return;
         }
 
@@ -231,18 +231,18 @@ public class NotificationSettingsIconRow extends FrameLayout
         } else {
             desiredAlpha = 1 - ((absTrans - fadeThreshold) / (size - fadeThreshold));
         }
-        setGearAlpha(desiredAlpha);
+        setMenuAlpha(desiredAlpha);
     }
 
-    public void fadeInSettings(final boolean fromLeft, final float transX,
+    public void fadeInMenu(final boolean fromLeft, final float transX,
             final float notiThreshold) {
         if (mDismissing || mAnimating) {
             return;
         }
-        if (isIconLocationChange(transX)) {
-            setGearAlpha(0f);
+        if (isMenuLocationChange(transX)) {
+            setMenuAlpha(0f);
         }
-        setIconLocation((int) transX);
+        setMenuLocation((int) transX);
         mFadeAnimator = ValueAnimator.ofFloat(mAlpha, 1);
         mFadeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -251,8 +251,8 @@ public class NotificationSettingsIconRow extends FrameLayout
 
                 boolean pastGear = (fromLeft && transX <= notiThreshold)
                         || (!fromLeft && absTrans <= notiThreshold);
-                if (pastGear && !mSettingsFadedIn) {
-                    setGearAlpha((float) animation.getAnimatedValue());
+                if (pastGear && !mMenuFadedIn) {
+                    setMenuAlpha((float) animation.getAnimatedValue());
                 }
             }
         });
@@ -265,13 +265,13 @@ public class NotificationSettingsIconRow extends FrameLayout
             @Override
             public void onAnimationCancel(Animator animation) {
                 // TODO should animate back to 0f from current alpha
-                setGearAlpha(0f);
+                setMenuAlpha(0f);
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
                 mAnimating = false;
-                mSettingsFadedIn = mAlpha == 1;
+                mMenuFadedIn = mAlpha == 1;
             }
         });
         mFadeAnimator.setInterpolator(Interpolators.ALPHA_IN);
@@ -283,28 +283,28 @@ public class NotificationSettingsIconRow extends FrameLayout
         if (mParent == null || mMenuItems.size() == 0) {
             return;
         }
-        final int iconHeight = getChildAt(0).getHeight();
         int parentHeight = mParent.getCollapsedHeight();
-        int translationY;
+        float translationY;
         if (parentHeight < mVertSpaceForIcons) {
-            translationY = (parentHeight / 2) - (iconHeight / 2);
+            translationY = (parentHeight / 2) - (mHorizSpaceForIcon / 2);
         } else {
-            translationY = (mVertSpaceForIcons - iconHeight) / 2;
+            translationY = (mVertSpaceForIcons - mHorizSpaceForIcon) / 2;
         }
         setTranslationY(translationY);
     }
 
     @Override
     public void onRtlPropertiesChanged(int layoutDirection) {
-        setIconLocation(mOnLeft ? 1 : -1);
+        mIconsPlaced = false;
+        setMenuLocation(mOnLeft ? 1 : -1);
     }
 
-    public void setIconLocation(int translation) {
+    public void setMenuLocation(int translation) {
         boolean onLeft = translation > 0;
-        if ((mIconPlaced && onLeft == mOnLeft) || mSnapping || mParent == null) {
+        if ((mIconsPlaced && onLeft == mOnLeft) || mSnapping || mParent == null) {
+            // Do nothing
             return;
         }
-
         final boolean isRtl = mParent.isLayoutRtl();
         final int count = getChildCount();
         final int width = getWidth();
@@ -319,10 +319,10 @@ public class NotificationSettingsIconRow extends FrameLayout
             v.setTranslationX(onLeft ? left : right);
         }
         mOnLeft = onLeft;
-        mIconPlaced = true;
+        mIconsPlaced = true;
     }
 
-    public boolean isIconLocationChange(float translation) {
+    public boolean isMenuLocationChange(float translation) {
         boolean onLeft = translation > mIconPadding;
         boolean onRight = translation < -mIconPadding;
         if ((mOnLeft && onRight) || (!mOnLeft && onLeft)) {
@@ -345,12 +345,12 @@ public class NotificationSettingsIconRow extends FrameLayout
             // Nothing to do
             return;
         }
-        v.getLocationOnScreen(mGearLocation);
+        v.getLocationOnScreen(mIconLocation);
         mParent.getLocationOnScreen(mParentLocation);
         final int centerX = (int) (mHorizSpaceForIcon / 2);
         final int centerY = (int) (v.getTranslationY() * 2 + v.getHeight()) / 2;
-        final int x = mGearLocation[0] - mParentLocation[0] + centerX;
-        final int y = mGearLocation[1] - mParentLocation[1] + centerY;
+        final int x = mIconLocation[0] - mParentLocation[0] + centerX;
+        final int y = mIconLocation[1] - mParentLocation[1] + centerY;
         final int index = indexOfChild(v);
         mListener.onMenuClicked(mParent, x, y, mMenuItems.get(index));
     }
