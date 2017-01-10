@@ -1641,6 +1641,19 @@ public class UserManager {
     }
 
     /**
+     * Evicts the user's credential encryption key from memory by stopping and restarting the user.
+     *
+     * @hide
+     */
+    public void evictCredentialEncryptionKey(@UserIdInt int userHandle) {
+        try {
+            mService.evictCredentialEncryptionKey(userHandle);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Return the number of users currently created on the device.
      */
     public int getUserCount() {

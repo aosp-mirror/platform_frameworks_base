@@ -2715,6 +2715,43 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Flag for {@link #lockNow(int)}: also evict the user's credential encryption key from the
+     * keyring. The user's credential will need to be entered again in order to derive the
+     * credential encryption key that will be stored back in the keyring for future use.
+     * <p>
+     * This flag can only be used by a profile owner when locking a managed profile on an FBE
+     * device.
+     * <p>
+     * In order to secure user data, the user will be stopped and restarted so apps should wait
+     * until they are next run to perform further actions.
+     */
+    public static final int FLAG_EVICT_CE_KEY = 1;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag=true, value={FLAG_EVICT_CE_KEY})
+    public @interface LockNowFlag {}
+
+    /**
+     * Make the device lock immediately, as if the lock screen timeout has expired at the point of
+     * this call.
+     * <p>
+     * The calling device admin must have requested {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK}
+     * to be able to call this method; if it has not, a security exception will be thrown.
+     * <p>
+     * This method can be called on the {@link DevicePolicyManager} instance returned by
+     * {@link #getParentProfileInstance(ComponentName)} in order to lock the parent profile.
+     * <p>
+     * Equivalent to calling {@link #lockNow(int)} with no flags.
+     *
+     * @throws SecurityException if the calling application does not own an active administrator
+     *             that uses {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK}
+     */
+    public void lockNow() {
+        lockNow(0);
+    }
+
+    /**
      * Make the device lock immediately, as if the lock screen timeout has expired at the point of
      * this call.
      * <p>
@@ -2724,13 +2761,20 @@ public class DevicePolicyManager {
      * This method can be called on the {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to lock the parent profile.
      *
+     * @param flags May be 0 or {@link #FLAG_EVICT_CE_KEY}.
      * @throws SecurityException if the calling application does not own an active administrator
-     *             that uses {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK}
+     *             that uses {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK} or the
+     *             {@link #FLAG_EVICT_CE_KEY} flag is passed by an application that is not a profile
+     *             owner of a managed profile.
+     * @throws IllegalArgumentException if the {@link #FLAG_EVICT_CE_KEY} flag is passed when
+     *             locking the parent profile.
+     * @throws UnsupportedOperationException if the {@link #FLAG_EVICT_CE_KEY} flag is passed on a
+     *             non-FBE device.
      */
-    public void lockNow() {
+    public void lockNow(@LockNowFlag int flags) {
         if (mService != null) {
             try {
-                mService.lockNow(mParentInstance);
+                mService.lockNow(flags, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

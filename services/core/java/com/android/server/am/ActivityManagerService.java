@@ -22661,6 +22661,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @Override
+    public int restartUserInBackground(final int userId) {
+        return mUserController.restartUser(userId, /* foreground */ false);
+    }
+
     /**
      * Attach an agent to the specified process (proces name or PID)
      */
