@@ -179,6 +179,7 @@ LOCAL_SRC_FILES:= \
     com_android_internal_util_VirtualRefBasePtr.cpp \
     com_android_internal_view_animation_NativeInterpolatorFactoryHelper.cpp \
     hwbinder/EphemeralStorage.cpp \
+    fd_utils.cpp \
 
 LOCAL_C_INCLUDES += \
     $(LOCAL_PATH)/include \
