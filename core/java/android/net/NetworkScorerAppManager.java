@@ -16,7 +16,6 @@
 
 package android.net;
 
-import android.Manifest;
 import android.Manifest.permission;
 import android.annotation.Nullable;
 import android.content.ContentResolver;
@@ -28,7 +27,9 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+
 import com.android.internal.R;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -226,6 +227,7 @@ public class NetworkScorerAppManager {
     }
 
     /** Determine whether the application with the given UID is the enabled scorer. */
+    @Deprecated // Use NetworkScoreManager.isCallerActiveScorer()
     public boolean isCallerActiveScorer(int callingUid) {
         NetworkScorerAppData defaultApp = getActiveScorer();
         if (defaultApp == null) {

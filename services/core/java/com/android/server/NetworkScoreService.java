@@ -301,7 +301,8 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
                 // If we're not connected at all then create a new connection.
                 if (mServiceConnection == null) {
-                    mServiceConnection = new ScoringServiceConnection(componentName);
+                    mServiceConnection = new ScoringServiceConnection(componentName,
+                            scorerData.packageUid);
                 }
 
                 // Make sure the connection is connected (idempotent)
@@ -325,7 +326,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
     @Override
     public boolean updateScores(ScoredNetwork[] networks) {
-        if (!mNetworkScorerAppManager.isCallerActiveScorer(getCallingUid())) {
+        if (!isCallerActiveScorer(getCallingUid())) {
             throw new SecurityException("Caller with UID " + getCallingUid() +
                     " is not the active scorer.");
         }
@@ -389,7 +390,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     @Override
     public boolean clearScores() {
         // Only the active scorer or the system should be allowed to flush all scores.
-        if (mNetworkScorerAppManager.isCallerActiveScorer(getCallingUid()) || isCallerSystemUid()) {
+        if (isCallerActiveScorer(getCallingUid()) || isCallerSystemUid()) {
             final long token = Binder.clearCallingIdentity();
             try {
                 clearInternal();
@@ -418,10 +419,23 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         return false;
     }
 
+    /**
+     * Determine whether the application with the given UID is the enabled scorer.
+     *
+     * @param callingUid the UID to check
+     * @return true if the provided UID is the active scorer, false otherwise.
+     */
+    @Override
+    public boolean isCallerActiveScorer(int callingUid) {
+        synchronized (mServiceConnectionLock) {
+            return mServiceConnection != null && mServiceConnection.mScoringAppUid == callingUid;
+        }
+    }
+
     @Override
     public void disableScoring() {
         // Only the active scorer or the system should be allowed to disable scoring.
-        if (mNetworkScorerAppManager.isCallerActiveScorer(getCallingUid()) || isCallerSystemUid()) {
+        if (isCallerActiveScorer(getCallingUid()) || isCallerSystemUid()) {
             // no-op for now but we could write to the setting if needed.
         } else {
             throw new SecurityException(
@@ -623,12 +637,14 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
     private static class ScoringServiceConnection implements ServiceConnection {
         private final ComponentName mComponentName;
+        private final int mScoringAppUid;
         private volatile boolean mBound = false;
         private volatile boolean mConnected = false;
         private volatile INetworkRecommendationProvider mRecommendationProvider;
 
-        ScoringServiceConnection(ComponentName componentName) {
+        ScoringServiceConnection(ComponentName componentName, int scoringAppUid) {
             mComponentName = componentName;
+            mScoringAppUid = scoringAppUid;
         }
 
         void connect(Context context) {
