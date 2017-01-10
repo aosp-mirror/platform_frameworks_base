@@ -52,7 +52,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-v7-appcompat \
     android-support-v14-preference \
     android-support-v17-leanback \
-    SystemUI-proto-tags
+    SystemUI-proto-tags \
+    legacy-android-test
 
 # sign this with platform cert, so this test is allowed to inject key events into
 # UI it doesn't own. This is necessary to allow screenshots to be taken
