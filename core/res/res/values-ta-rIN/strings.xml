@@ -1565,7 +1565,8 @@
     <string name="select_year" msgid="7952052866994196170">"ஆண்டைத் தேர்ந்தெடுக்கவும்"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> நீக்கப்பட்டது"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"பணியிடம் <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="1420543809500606964">"இந்தத் திரையை விலக்க, \"முந்தையது\" பொத்தானைத் தொட்டுப் பிடிக்கவும்."</string>
+    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
+    <skip />
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"பயன்பாடு பொருத்தப்பட்டது: பொருத்தியதை நீக்குவதற்கு இந்தச் சாதனத்தில் அனுமதியில்லை."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"திரை பின் செய்யப்பட்டது"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"திரையின் பின் அகற்றப்பட்டது"</string>
