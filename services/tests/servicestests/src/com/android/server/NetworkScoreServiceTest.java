@@ -322,7 +322,7 @@ public class NetworkScoreServiceTest {
     }
 
     @Test
-    public void testClearScores_notActiveScorer_noBroadcastNetworkPermission() {
+    public void testClearScores_notActiveScorer_noRequestNetworkScoresPermission() {
         when(mNetworkScorerAppManager.isCallerActiveScorer(anyInt())).thenReturn(false);
         when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
             .thenReturn(PackageManager.PERMISSION_DENIED);
@@ -335,7 +335,7 @@ public class NetworkScoreServiceTest {
     }
 
     @Test
-    public void testClearScores_activeScorer_noBroadcastNetworkPermission() {
+    public void testClearScores_activeScorer_noRequestNetworkScoresPermission() {
         when(mNetworkScorerAppManager.isCallerActiveScorer(anyInt())).thenReturn(true);
         when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
             .thenReturn(PackageManager.PERMISSION_DENIED);
@@ -355,7 +355,7 @@ public class NetworkScoreServiceTest {
     }
 
     @Test
-    public void testClearScores_notActiveScorer_hasBroadcastNetworkPermission()
+    public void testClearScores_notActiveScorer_hasRequestNetworkScoresPermission()
             throws RemoteException {
         when(mNetworkScorerAppManager.isCallerActiveScorer(anyInt())).thenReturn(false);
         when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
@@ -382,7 +382,7 @@ public class NetworkScoreServiceTest {
     }
 
     @Test
-    public void testDisableScoring_notActiveScorer_noBroadcastNetworkPermission() {
+    public void testDisableScoring_notActiveScorer_noRequestNetworkScoresPermission() {
         when(mNetworkScorerAppManager.isCallerActiveScorer(anyInt())).thenReturn(false);
         when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
                 .thenReturn(PackageManager.PERMISSION_DENIED);
@@ -396,7 +396,7 @@ public class NetworkScoreServiceTest {
     }
 
     @Test
-    public void testRegisterNetworkScoreCache_noBroadcastNetworkPermission() {
+    public void testRegisterNetworkScoreCache_noRequestNetworkScoresPermission() {
         doThrow(new SecurityException()).when(mContext).enforceCallingOrSelfPermission(
                 eq(permission.REQUEST_NETWORK_SCORES), anyString());
 
@@ -410,7 +410,7 @@ public class NetworkScoreServiceTest {
     }
 
     @Test
-    public void testUnregisterNetworkScoreCache_noBroadcastNetworkPermission() {
+    public void testUnregisterNetworkScoreCache_noRequestNetworkScoresPermission() {
         doThrow(new SecurityException()).when(mContext).enforceCallingOrSelfPermission(
                 eq(permission.REQUEST_NETWORK_SCORES), anyString());
 
