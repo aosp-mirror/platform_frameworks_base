@@ -153,6 +153,15 @@ public final class AlarmClock {
     public static final String ACTION_SET_TIMER = "android.intent.action.SET_TIMER";
 
     /**
+     * Activity Action: Show the timers.
+     * <p>
+     * This action opens the timers page.
+     * </p>
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SHOW_TIMERS = "android.intent.action.SHOW_TIMERS";
+
+    /**
      * Activity Action: Show the alarms.
      * <p>
      * This action opens the alarms page.
