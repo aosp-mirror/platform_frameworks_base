@@ -20,6 +20,8 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.AdvertiseData;
+import android.bluetooth.le.AdvertisingSetParameters;
+import android.bluetooth.le.PeriodicAdvertisingParameters;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
@@ -30,6 +32,7 @@ import android.os.WorkSource;
 import android.bluetooth.IBluetoothGattCallbackExt;
 import android.bluetooth.IBluetoothGattServerCallbackExt;
 import android.bluetooth.le.IAdvertiserCallback;
+import android.bluetooth.le.IAdvertisingSetCallback;
 import android.bluetooth.le.IPeriodicAdvertisingCallback;
 import android.bluetooth.le.IScannerCallback;
 
@@ -55,10 +58,24 @@ interface IBluetoothGatt {
                                in AdvertiseSettings settings);
     void stopMultiAdvertising(in int advertiserId);
 
+    void startAdvertisingSet(in AdvertisingSetParameters parameters, in AdvertiseData advertiseData,
+                                in AdvertiseData scanResponse, in PeriodicAdvertisingParameters periodicParameters,
+                                in AdvertiseData periodicData, in IAdvertisingSetCallback callback);
+    void stopAdvertisingSet(in IAdvertisingSetCallback callback);
+
+    void enableAdverisingSet(in int advertiserId, in boolean enable);
+    void setAdvertisingData(in int advertiserId, in AdvertiseData data);
+    void setScanResponseData(in int advertiserId, in AdvertiseData data);
+    void setAdvertisingParameters(in int advertiserId, in AdvertisingSetParameters parameters);
+    void setPeriodicAdvertisingParameters(in int advertiserId, in PeriodicAdvertisingParameters parameters);
+    void setPeriodicAdvertisingData(in int advertiserId, in AdvertiseData data);
+    void periodicAdvertisingEnable(in int advertiserId, in boolean enable);
+
     void registerSync(in ScanResult scanResult, in int skip, in int timeout, in IPeriodicAdvertisingCallback callback);
     void unregisterSync(in IPeriodicAdvertisingCallback callback);
 
     void registerClient(in ParcelUuid appId, in IBluetoothGattCallbackExt callback);
+
     void unregisterClient(in int clientIf);
     void clientConnect(in int clientIf, in String address, in boolean isDirect, in int transport, in int phy);
     void clientDisconnect(in int clientIf, in String address);
