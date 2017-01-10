@@ -24,6 +24,7 @@ import android.system.Os;
 import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.WebViewFactory;
+import android.webkit.WebViewFactoryProvider;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -74,8 +75,8 @@ class WebViewZygoteInit {
             // call preloadInZygote() on it to give it the opportunity to preload the native library
             // and perform any other initialisation work that should be shared among the children.
             try {
-                Class providerClass = Class.forName(WebViewFactory.CHROMIUM_WEBVIEW_FACTORY, true,
-                                                    loader);
+                Class<WebViewFactoryProvider> providerClass =
+                        WebViewFactory.getWebViewProviderClass(loader);
                 Object result = providerClass.getMethod("preloadInZygote").invoke(null);
                 if (!((Boolean)result).booleanValue()) {
                     Log.e(TAG, "preloadInZygote returned false");
