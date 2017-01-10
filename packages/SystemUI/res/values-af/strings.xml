@@ -661,4 +661,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Wysig volgorde van instellings."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Bladsy <xliff:g id="ID_1">%1$d</xliff:g> van <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Kennisgewings kan nie stilgemaak of geblokkeer word nie"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"Foon raak warm"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"Sommige kenmerke is beperk terwyl foon afkoel"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"Jou foon sal outomaties probeer om af te koel. Jy kan steeds jou foon gebruik, maar dit sal dalk stadiger wees.\n\nJou foon sal normaalweg werk nadat dit afgekoel het."</string>
 </resources>

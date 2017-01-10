@@ -663,4 +663,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Izmeni redosled podešavanja."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_1">%1$d</xliff:g>. strana od <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Zvuk obaveštenja ne može da se isključi niti ona mogu da se blokiraju"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"Telefon se zagrejao"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"Neke funkcije su ograničene dok se telefon ne ohladi"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefon će automatski pokušati da se ohladi. I dalje ćete moći da koristite telefon, ali će sporije reagovati.\n\nKada se telefon ohladi, normalno će raditi."</string>
 </resources>

@@ -661,4 +661,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Жөндөөлөрдүн иретин өзгөртүү."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g> ичинен <xliff:g id="ID_1">%1$d</xliff:g>-бет"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Эскертмелердин үнүн басууга же бөгөттөөгө болбойт"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"Телефонуңуз ысып баратат"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"Телефон сууганча айрым элементтердин иши чектелген"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"Телефонуңуз автоматтык түрдө сууйт. Аны колдоно берсеңиз болот, бирок ал жайыраак иштеп калат.\n\nТелефонуңуз суугандан кийин адаттагыдай эле иштеп баштайт."</string>
 </resources>

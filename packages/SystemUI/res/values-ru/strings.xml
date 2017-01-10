@@ -667,4 +667,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Изменить порядок быстрых настроек."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Страница <xliff:g id="ID_1">%1$d</xliff:g> из <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Уведомления нельзя блокировать и показывать без звука"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"Телефон нагревается"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"Пока телефон не остынет, некоторые функции могут быть недоступны."</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"Ваш телефон остынет автоматически.\n\nОбратите внимание, что до тех пор он может работать медленнее, чем обычно."</string>
 </resources>

@@ -665,4 +665,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Editați ordinea setărilor."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Pagina <xliff:g id="ID_1">%1$d</xliff:g> din <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Notificările nu pot fi dezactivate sau blocate"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"Telefonul se încălzește"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"Anumite funcții sunt limitate în timp ce telefonul se răcește"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefonul va încerca automat să se răcească. Puteți folosi telefonul în continuare, dar este posibil să funcționeze mai lent.\n\nDupă ce se răcește, telefonul va funcționa normal."</string>
 </resources>

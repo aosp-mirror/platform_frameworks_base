@@ -663,4 +663,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Rediģēt iestatījumu secību."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_1">%1$d</xliff:g>. lpp. no <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Nevar izslēgt paziņojumu signālu vai tos bloķēt"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"Tālrunis kļūst silts"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"Dažas funkcijas ir ierobežotas, kamēr tālrunis mēģina atdzist"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"Jūsu tālrunis automātiski mēģinās atdzist. Jūs joprojām varat izmantot tālruni, taču tas, iespējams, darbosies lēnāk.\n\nTiklīdz tālrunis būs atdzisis, tas darbosies normāli."</string>
 </resources>

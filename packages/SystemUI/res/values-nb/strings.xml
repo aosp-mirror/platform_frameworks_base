@@ -661,4 +661,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Endre rekkefølgen på innstillingene."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Side <xliff:g id="ID_1">%1$d</xliff:g> av <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Varslinger kan ikke ignoreres eller blokkeres"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"Telefonen begynner å bli varm"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"Enkelte funksjoner er begrenset mens telefonen kjøles ned"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefonen din kommer til å prøve å kjøle seg ned automatisk. Du kan fremdeles bruke telefonen, men den kjører muligens saktere.\n\nTelefonen kommer til å kjøre som normalt, når den har kjølt seg ned."</string>
 </resources>

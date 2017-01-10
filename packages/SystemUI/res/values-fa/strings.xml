@@ -661,4 +661,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ویرایش ترتیب تنظیمات."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"صفحه <xliff:g id="ID_1">%1$d</xliff:g> از <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"نمی‌توان اعلان‌ها را بی‌صدا یا مسدود کرد"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"تلفن درحال گرم شدن است"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"وقتی تلفن درحال خنک شدن است، بعضی از قابلیت‌ها محدود می‌شوند"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"تلفنتان به‌طور خودکار سعی می‌کند خنک شود. همچنان می‌توانید از تلفنتان استفاده کنید، اما ممکن است کندتر عمل کند.\n\nوقتی تلفن خنک شد، عملکرد عادی‌اش از سرگرفته می‌شود."</string>
 </resources>

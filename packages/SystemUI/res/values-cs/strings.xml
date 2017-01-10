@@ -667,4 +667,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Upravit pořadí nastavení."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Stránka <xliff:g id="ID_1">%1$d</xliff:g> z <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Oznámení nelze ztlumit ani blokovat"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"Telefon se zahřívá"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"Některé funkce jsou při chladnutí omezeny"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefon se automaticky pokusí vychladnout. Lze jej nadále používat, ale může být pomalejší.\n\nAž telefon vychladne, bude fungovat normálně."</string>
 </resources>

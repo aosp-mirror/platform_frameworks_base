@@ -663,4 +663,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Editar a orde das opcións de configuración."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Páxina <xliff:g id="ID_1">%1$d</xliff:g> de <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"As notificacións non se poden silenciar nin bloquear"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"O teléfono está quentando"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"O uso dalgunhas funcións é limitado mentres o teléfono arrefría"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"O teléfono tentará arrefriar automaticamente. Podes utilizalo, pero é probable que funcione máis lento.\n\nUnha vez que arrefríe, funcionará con normalidade."</string>
 </resources>

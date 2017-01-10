@@ -661,4 +661,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Volgorde van instellingen bewerken."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Pagina <xliff:g id="ID_1">%1$d</xliff:g> van <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Meldingen kunnen niet op stil worden gezet of worden geblokkeerd"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"De telefoon wordt warm"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"Bepaalde functies zijn beperkt terwijl de telefoon afkoelt"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"Je telefoon probeert automatisch af te koelen. Je kunt je telefoon nog steeds gebruiken, maar deze kan langzamer werken.\n\nZodra de telefoon is afgekoeld, werkt deze weer normaal."</string>
 </resources>

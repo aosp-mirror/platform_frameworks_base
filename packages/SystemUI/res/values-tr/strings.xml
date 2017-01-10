@@ -661,4 +661,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Ayarların sırasını düzenle."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Sayfa <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Bildirimler engellenemez veya sesi kapatılamaz"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"Telefon ısınıyor"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"Telefon soğurken bazı özellikler sınırlı olarak kullanılabilir"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefonunuz otomatik olarak soğumaya çalışacak. Bu sırada telefonunuzu kullanmaya devam edebilirsiniz ancak uygulamalar daha yavaş çalışabilir.\n\nTelefonunuz soğuduktan sonra normal şekilde çalışacaktır."</string>
 </resources>

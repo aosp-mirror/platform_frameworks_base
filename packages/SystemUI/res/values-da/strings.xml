@@ -67,11 +67,11 @@
     <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Den bruger, der i øjeblikket er logget ind på denne enhed, kan ikke aktivere USB-fejlretning. Skift til en administratorbruger for at bruge denne funktion."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom til fuld skærm"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Stræk til fuld skærm"</string>
-    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Gemmer skærmbillede..."</string>
-    <string name="screenshot_saving_title" msgid="8242282144535555697">"Gemmer skærmbillede..."</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Gemmer screenshot..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"Gemmer screenshot..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Skærmbilledet gemmes."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Skærmbilledet er gemt."</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"Tryk for at se dit skærmbillede."</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"Tryk for at se dit screenshot."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Skærmbilledet kunne ikke tages."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Der opstod et problem ved lagringen af skærmbilledet."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Skærmbilledet kan ikke gemmes pga. begrænset lagerplads."</string>
@@ -661,4 +661,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Rediger rækkefølgen af indstillinger."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Side <xliff:g id="ID_1">%1$d</xliff:g> af <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Underretninger kan ikke ignoreres eller blokeres"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"Telefonen er ved at blive varm"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"Nogle funktioner er begrænsede, mens telefonen køler ned"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"Din telefon forsøger automatisk at køle ned. Du kan stadig bruge telefonen, men den kører muligvis langsommere.\n\nNår din telefon er kølet ned, fungerer den normalt igen."</string>
 </resources>

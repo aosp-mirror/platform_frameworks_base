@@ -663,4 +663,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"設定の順序を編集します。"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"ページ <xliff:g id="ID_1">%1$d</xliff:g>/<xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"通知のサイレント設定やブロックはできません"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"スマートフォンの温度が上昇中"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"スマートフォンのクールダウン中は一部の機能が制限されます"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"スマートフォンは自動的にクールダウンを行います。その間もスマートフォンを使用できますが、動作が遅くなる可能性があります。\n\nクールダウンが完了すると、通常どおり動作します。"</string>
 </resources>

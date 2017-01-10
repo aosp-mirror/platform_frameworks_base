@@ -665,4 +665,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Redaguoti nustatymų tvarką."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_1">%1$d</xliff:g> psl. iš <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Pranešimų negalima nutildyti arba užblokuoti"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"Telefonas kaista"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"Kai kurios funkcijos gali neveikti, kol telefonas vėsta"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefonas automatiškai bandys atvėsti. Telefoną vis tiek galėsite naudoti, tačiau jis gali veikti lėčiau.\n\nKai telefonas atvės, jis veiks įprastai."</string>
 </resources>

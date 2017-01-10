@@ -661,4 +661,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Edita l\'ordre de la configuració."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Pàgina <xliff:g id="ID_1">%1$d</xliff:g> (<xliff:g id="ID_2">%2$d</xliff:g> en total)"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Les notificacions no es poden silenciar ni bloquejar"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"El telèfon s\'està escalfant"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"Algunes funcions estaran limitades mentre el telèfon es refreda"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"El telèfon provarà de refredar-se automàticament. Podràs continuar utilitzant-lo, però és possible que funcioni més lentament.\n\nUn cop s\'hagi refredat, funcionarà amb normalitat."</string>
 </resources>

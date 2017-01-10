@@ -661,4 +661,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Modifiko rendin e cilësimeve."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Faqja <xliff:g id="ID_1">%1$d</xliff:g> nga <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Njoftimet nuk mund të vendosen në heshtje ose të bllokohen"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"Telefoni po bëhet i ngrohtë"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"Disa funksione janë të kufizuara kur telefoni është duke u ftohur"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefoni yt do të përpiqet automatikisht që të ftohet. Mund ta përdorësh përsëri telefonin, por ai mund të punojë më ngadalë.\n\nPasi telefoni të jetë ftohur, ai do të punojë si normalisht."</string>
 </resources>

@@ -661,4 +661,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"I-edit ang pagkakasunud-sunod ng mga setting."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Page <xliff:g id="ID_1">%1$d</xliff:g> ng <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Hindi maaaring i-silent o i-block ang mga notification"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"Umiinit ang telepono"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"Limitado ang ilang feature habang nagku-cool down ang telepono"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"Awtomatikong susubukan ng iyong telepono na mag-cool down. Magagamit mo pa rin ang iyong telepono, ngunit maaaring mas mabagal ang paggana nito.\n\nKapag nakapag-cool down na ang iyong telepono, gagana na ito nang normal."</string>
 </resources>

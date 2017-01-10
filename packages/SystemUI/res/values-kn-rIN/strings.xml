@@ -661,4 +661,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ಸೆಟ್ಟಿಂಗ್‌ಗಳ ಕ್ರಮವನ್ನು ಎಡಿಟ್ ಮಾಡಿ."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g> ರಲ್ಲಿ <xliff:g id="ID_1">%1$d</xliff:g> ಪುಟ"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"ಸೂಚನೆಗಳನ್ನು ಮೌನವಾಗಿಸಲಾಗುವುದಿಲ್ಲ ಅಥವಾ ತಡೆಹಿಡಿಯಲಾಗುವುದಿಲ್ಲ"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"ಫೋನ್ ಬಿಸಿಯಾಗುತ್ತಿದೆ"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"ಫೋನ್ ತಣ್ಣಗಾಗುವವರೆಗೂ ಕೆಲವು ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಸೀಮಿತಗೊಳಿಸುತ್ತದೆ"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"ನಿಮ್ಮ ಫೋನ್ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ತಣ್ಣಗಾಗಲು ಪ್ರಯತ್ನಿಸುತ್ತದೆ. ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ನೀವು ಈಗಲೂ ಬಳಸಬಹುದಾಗಿರುತ್ತದೆ, ಆದರೆ ಇದು ನಿಧಾನವಾಗಿರಬಹುದು.\n\nಒಮ್ಮೆ ನಿಮ್ಮ ಫೋನ್ ತಣ್ಣಗಾದ ನಂತರ ಇದು ಸಾಮಾನ್ಯ ರೀತಿಯಲ್ಲಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ."</string>
 </resources>
