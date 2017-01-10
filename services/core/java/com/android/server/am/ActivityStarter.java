@@ -949,14 +949,18 @@ class ActivityStarter {
     }
 
     void sendPowerHintForLaunchStartIfNeeded(boolean forceSend) {
-        // Trigger launch power hint if activity being launched is not in the current task
-        final ActivityStack focusStack = mSupervisor.getFocusedStack();
-        final ActivityRecord curTop = (focusStack == null)
-            ? null : focusStack.topRunningNonDelayedActivityLocked(mNotTop);
-        if ((forceSend || (!mPowerHintSent && curTop != null &&
-                curTop.task != null && mStartActivity != null &&
-                curTop.task != mStartActivity.task )) &&
-                mService.mLocalPowerManager != null) {
+        boolean sendHint = forceSend;
+
+        if (!sendHint) {
+            // If not forced, send power hint when the activity's process is different than the
+            // current resumed activity.
+            final ActivityRecord resumedActivity = mSupervisor.getResumedActivityLocked();
+            sendHint = resumedActivity == null
+                || resumedActivity.app == null
+                || !resumedActivity.app.equals(mStartActivity.app);
+        }
+
+        if (sendHint && mService.mLocalPowerManager != null) {
             mService.mLocalPowerManager.powerHint(PowerHint.LAUNCH, 1);
             mPowerHintSent = true;
         }
