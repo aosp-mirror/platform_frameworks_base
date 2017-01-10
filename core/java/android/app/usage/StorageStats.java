@@ -17,13 +17,13 @@
 package android.app.usage;
 
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 
 /**
- * Storage statistics for a single UID on a single storage volume.
+ * Storage statistics for a UID or {@link UserHandle} on a single storage
+ * volume.
  * <p class="note">
  * Note: multiple packages using the same {@code sharedUserId} in their manifest
  * will be merged into a single UID.
@@ -32,40 +32,13 @@ import android.os.Parcelable;
  * @see StorageStatsManager
  */
 public final class StorageStats implements Parcelable {
-    /** {@hide} */ public final String volumeUuid;
-    /** {@hide} */ public final int uid;
-
     /** {@hide} */ public long codeBytes;
     /** {@hide} */ public long dataBytes;
-    /** {@hide} */ public long cacheQuotaBytes;
     /** {@hide} */ public long cacheBytes;
 
     /**
-     * Return the UUID of the storage volume that these statistics refer to. The
-     * value {@code null} indicates the default internal storage.
-     */
-    public String getVolumeUuid() {
-        return volumeUuid;
-    }
-
-    /**
-     * Return the UID that these statistics refer to.
-     *
-     * @see ApplicationInfo#uid
-     * @see PackageManager#getPackagesForUid(int)
-     */
-    public int getUid() {
-        return uid;
-    }
-
-    /**
-     * Return the size of all code associated with {@link #getUid()} on
-     * {@link #getVolumeUuid()}. This includes {@code APK} files and optimized
-     * compiler output.
-     * <p>
-     * If the primary shared storage location is also hosted on
-     * {@link #getVolumeUuid()} then this includes files stored under
-     * {@link Context#getObbDir()}.
+     * Return the size of all code. This includes {@code APK} files and
+     * optimized compiler output.
      * <p>
      * Code is shared between all users on a multiuser device.
      */
@@ -74,15 +47,9 @@ public final class StorageStats implements Parcelable {
     }
 
     /**
-     * Return the size of all data associated with {@link #getUid()} on
-     * {@link #getVolumeUuid()}. This includes files stored under
+     * Return the size of all data. This includes files stored under
      * {@link Context#getDataDir()}, {@link Context#getCacheDir()},
      * {@link Context#getCodeCacheDir()}.
-     * <p>
-     * If the primary shared storage location is also hosted on
-     * {@link #getVolumeUuid()} then this includes files stored under
-     * {@link Context#getExternalFilesDir(String)} and
-     * {@link Context#getExternalCacheDir()}.
      * <p>
      * Data is isolated for each user on a multiuser device.
      */
@@ -91,25 +58,8 @@ public final class StorageStats implements Parcelable {
     }
 
     /**
-     * Return the quota for cached data associated with {@link #getUid()} on
-     * {@link #getVolumeUuid()}. This quota value is calculated based on how
-     * frequently the user has interacted with the UID.
-     * <p>
-     * When clearing cached data, the system will first focus on packages whose
-     * cached data is larger than their allocated quota.
-     */
-    public long getCacheQuotaBytes() {
-        return cacheQuotaBytes;
-    }
-
-    /**
-     * Return the size of all cached data associated with {@link #getUid()} on
-     * {@link #getVolumeUuid()}. This includes files stored under
+     * Return the size of all cached data. This includes files stored under
      * {@link Context#getCacheDir()} and {@link Context#getCodeCacheDir()}.
-     * <p>
-     * If the primary shared storage location is also hosted on
-     * {@link #getVolumeUuid()} then this includes files stored under
-     * {@link Context#getExternalCacheDir()}.
      * <p>
      * Cached data is isolated for each user on a multiuser device.
      */
@@ -118,18 +68,13 @@ public final class StorageStats implements Parcelable {
     }
 
     /** {@hide} */
-    public StorageStats(String uuid, int uid) {
-        this.volumeUuid = uuid;
-        this.uid = uid;
+    public StorageStats() {
     }
 
     /** {@hide} */
     public StorageStats(Parcel in) {
-        this.volumeUuid = in.readString();
-        this.uid = in.readInt();
         this.codeBytes = in.readLong();
         this.dataBytes = in.readLong();
-        this.cacheQuotaBytes = in.readLong();
         this.cacheBytes = in.readLong();
     }
 
@@ -140,11 +85,8 @@ public final class StorageStats implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(volumeUuid);
-        dest.writeInt(uid);
         dest.writeLong(codeBytes);
         dest.writeLong(dataBytes);
-        dest.writeLong(cacheQuotaBytes);
         dest.writeLong(cacheBytes);
     }
 

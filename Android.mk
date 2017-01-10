@@ -690,8 +690,8 @@ aidl_files := \
 	frameworks/base/core/java/android/service/notification/StatusBarNotification.aidl \
 	frameworks/base/core/java/android/service/chooser/ChooserTarget.aidl \
 	frameworks/base/core/java/android/speech/tts/Voice.aidl \
+	frameworks/base/core/java/android/app/usage/ExternalStorageStats.aidl \
 	frameworks/base/core/java/android/app/usage/StorageStats.aidl \
-	frameworks/base/core/java/android/app/usage/StorageSummary.aidl \
 	frameworks/base/core/java/android/app/usage/UsageEvents.aidl \
 	frameworks/base/core/java/android/app/Notification.aidl \
 	frameworks/base/core/java/android/app/NotificationManager.aidl \

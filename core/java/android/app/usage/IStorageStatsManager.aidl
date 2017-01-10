@@ -17,10 +17,13 @@
 package android.app.usage;
 
 import android.app.usage.StorageStats;
-import android.app.usage.StorageSummary;
+import android.app.usage.ExternalStorageStats;
 
 /** {@hide} */
 interface IStorageStatsManager {
-    StorageStats queryStats(String volumeUuid, int uid, String callingPackage);
-    StorageSummary querySummary(String volumeUuid, String callingPackage);
+    long getTotalBytes(String volumeUuid, String callingPackage);
+    long getFreeBytes(String volumeUuid, String callingPackage);
+    StorageStats queryStatsForUid(String volumeUuid, int uid, String callingPackage);
+    StorageStats queryStatsForUser(String volumeUuid, int userId, String callingPackage);
+    ExternalStorageStats queryExternalStatsForUser(String volumeUuid, int userId, String callingPackage);
 }

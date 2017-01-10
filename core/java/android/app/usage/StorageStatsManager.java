@@ -19,8 +19,11 @@ package android.app.usage;
 import android.annotation.WorkerThread;
 import android.content.Context;
 import android.os.RemoteException;
+import android.os.UserHandle;
 
 import com.android.internal.util.Preconditions;
+
+import java.io.File;
 
 /**
  * Provides access to detailed storage statistics.
@@ -43,8 +46,52 @@ public class StorageStatsManager {
     }
 
     /**
-     * Return detailed statistics for the a specific UID on the requested
-     * storage volume.
+     * Return the total space on the requested storage volume.
+     * <p>
+     * To reduce end user confusion, this value is the total storage size
+     * advertised in a retail environment, which is typically larger than the
+     * actual writable partition total size.
+     * <p>
+     * This method may take several seconds to calculate the requested values,
+     * so it should only be called from a worker thread.
+     *
+     * @param volumeUuid the UUID of the storage volume you're interested in, or
+     *            {@code null} to specify the default internal storage.
+     */
+    @WorkerThread
+    public long getTotalBytes(String volumeUuid) {
+        try {
+            return mService.getTotalBytes(volumeUuid, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Return the free space on the requested storage volume.
+     * <p>
+     * The free space is equivalent to {@link File#getFreeSpace()} plus the size
+     * of any cached data that can be automatically deleted by the system as
+     * additional space is needed.
+     * <p>
+     * This method may take several seconds to calculate the requested values,
+     * so it should only be called from a worker thread.
+     *
+     * @param volumeUuid the UUID of the storage volume you're interested in, or
+     *            {@code null} to specify the default internal storage.
+     */
+    @WorkerThread
+    public long getFreeBytes(String volumeUuid) {
+        try {
+            return mService.getFreeBytes(volumeUuid, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Return storage statistics for a specific UID on the requested storage
+     * volume.
      * <p>
      * This method may take several seconds to calculate the requested values,
      * so it should only be called from a worker thread.
@@ -56,25 +103,50 @@ public class StorageStatsManager {
     @WorkerThread
     public StorageStats queryStatsForUid(String volumeUuid, int uid) {
         try {
-            return mService.queryStats(volumeUuid, uid, mContext.getOpPackageName());
+            return mService.queryStatsForUid(volumeUuid, uid, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Return summary statistics for the requested storage volume.
+     * Return storage statistics for a specific {@link UserHandle} on the
+     * requested storage volume.
      * <p>
      * This method may take several seconds to calculate the requested values,
      * so it should only be called from a worker thread.
      *
      * @param volumeUuid the UUID of the storage volume you're interested in, or
      *            {@code null} to specify the default internal storage.
+     * @param user the user you're interested in.
+     * @see android.os.Process#myUserHandle()
      */
     @WorkerThread
-    public StorageSummary querySummary(String volumeUuid) {
+    public StorageStats queryStatsForUser(String volumeUuid, UserHandle user) {
         try {
-            return mService.querySummary(volumeUuid, mContext.getOpPackageName());
+            return mService.queryStatsForUser(volumeUuid, user.getIdentifier(),
+                    mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Return shared/external storage statistics for a specific
+     * {@link UserHandle} on the requested storage volume.
+     * <p>
+     * This method may take several seconds to calculate the requested values,
+     * so it should only be called from a worker thread.
+     *
+     * @param volumeUuid the UUID of the storage volume you're interested in, or
+     *            {@code null} to specify the default internal storage.
+     * @see android.os.Process#myUserHandle()
+     */
+    @WorkerThread
+    public ExternalStorageStats queryExternalStatsForUser(String volumeUuid, UserHandle user) {
+        try {
+            return mService.queryExternalStatsForUser(volumeUuid, user.getIdentifier(),
+                    mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
