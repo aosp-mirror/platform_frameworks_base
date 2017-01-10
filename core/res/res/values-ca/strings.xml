@@ -1559,7 +1559,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> de la feina"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2n <xliff:g id="LABEL">%1$s</xliff:g> de la feina"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3r <xliff:g id="LABEL">%1$s</xliff:g> de la feina"</string>
-    <string name="lock_to_app_toast" msgid="1420543809500606964">"Toca i mantén premuda l\'opció Enrere per deixar de fixar aquesta pantalla."</string>
+    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
+    <skip />
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"S\'ha fixat l\'aplicació. En aquest dispositiu no es permet anul·lar-ne la fixació."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Pantalla fixada"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Fixació de la pantalla anul·lada"</string>

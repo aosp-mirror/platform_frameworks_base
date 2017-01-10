@@ -1583,7 +1583,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> de serviciu"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"<xliff:g id="LABEL">%1$s</xliff:g> pentru serviciu (2)"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"<xliff:g id="LABEL">%1$s</xliff:g> pentru serviciu (3)"</string>
-    <string name="lock_to_app_toast" msgid="1420543809500606964">"Pentru a anula fixarea acestui ecran, atingeți lung opțiunea Înapoi."</string>
+    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
+    <skip />
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Aplicația este fixată: Anularea fixării nu este permisă pe acest dispozitiv."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ecran fixat"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Fixarea ecranului anulată"</string>
