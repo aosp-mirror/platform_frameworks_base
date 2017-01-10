@@ -17,8 +17,9 @@ public class LogBuilder {
 
     private SparseArray<Object> entries = new SparseArray();
 
-    public LogBuilder() {}
-
+    public LogBuilder(int mainCategory) {
+        setCategory(mainCategory);
+    }
 
     public LogBuilder setView(View view) {
         entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_VIEW, view.getId());

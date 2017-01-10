@@ -5,7 +5,7 @@ import junit.framework.TestCase;
 public class LogBuilderTest extends TestCase {
 
     public void testSerialize() {
-        LogBuilder builder = new LogBuilder();
+        LogBuilder builder = new LogBuilder(0);
         builder.addTaggedData(1, "one");
         builder.addTaggedData(2, "two");
         Object[] out = builder.serialize();
@@ -16,7 +16,7 @@ public class LogBuilderTest extends TestCase {
     }
 
     public void testInvalidInputThrows() {
-        LogBuilder builder = new LogBuilder();
+        LogBuilder builder = new LogBuilder(0);
         boolean threw = false;
         try {
             builder.addTaggedData(0, new Object());
@@ -28,7 +28,7 @@ public class LogBuilderTest extends TestCase {
     }
 
     public void testValidInputTypes() {
-        LogBuilder builder = new LogBuilder();
+        LogBuilder builder = new LogBuilder(0);
         builder.addTaggedData(1, "onetwothree");
         builder.addTaggedData(2, 123);
         builder.addTaggedData(3, 123L);
