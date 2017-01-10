@@ -10,7 +10,8 @@ LOCAL_JAVA_LIBRARIES := android.test.runner
 LOCAL_STATIC_JAVA_LIBRARIES := \
     mockito-target-minus-junit4 \
     android-support-test \
-    android-ex-camera2
+    android-ex-camera2 \
+    legacy-android-test
 
 LOCAL_PACKAGE_NAME := mediaframeworktest
 

@@ -7,6 +7,7 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src) \
     src/com/android/providers/settings/EventLogTags.logtags
 
 LOCAL_JAVA_LIBRARIES := telephony-common ims-common
+LOCAL_STATIC_JAVA_LIBRARIES := junit legacy-android-test
 
 LOCAL_PACKAGE_NAME := SettingsProvider
 LOCAL_CERTIFICATE := platform
