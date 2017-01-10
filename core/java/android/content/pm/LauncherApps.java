@@ -1200,7 +1200,7 @@ public class LauncherApps {
 
         /**
          * Return {@code TRUE} if a request is valid -- i.e. {@link #accept(Bundle)} has not been
-         * called, and it has not been canceled.
+         * called yet.
          */
         public boolean isValid() {
             try {
