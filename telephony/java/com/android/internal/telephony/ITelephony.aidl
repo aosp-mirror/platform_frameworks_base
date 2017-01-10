@@ -1256,4 +1256,12 @@ interface ITelephony {
      * @param appType the icc application type, like {@link #APPTYPE_USIM}
      */
     String[] getForbiddenPlmns(int subId, int appType);
+
+    /**
+     * Check if phone is in emergency callback mode
+     * @return true if phone is in emergency callback mode
+     * @param subId the subscription ID that this action applies to.
+     * @hide
+     */
+    boolean getEmergencyCallbackMode(int subId);
 }
