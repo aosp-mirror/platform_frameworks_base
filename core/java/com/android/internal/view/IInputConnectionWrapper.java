@@ -562,8 +562,6 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
             }
             case DO_COMMIT_CONTENT: {
                 final int flags = msg.arg1;
-                final boolean grantUriPermission =
-                        (flags & InputConnection.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0;
                 SomeArgs args = (SomeArgs) msg.obj;
                 try {
                     InputConnection ic = getInputConnection();
@@ -579,22 +577,8 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                         args.callback.setCommitContentResult(false, args.seq);
                         return;
                     }
-                    if (grantUriPermission) {
-                        try {
-                            inputContentInfo.requestPermission();
-                        } catch (Exception e) {
-                            Log.e(TAG, "InputConnectionInfo.requestPermission() failed", e);
-                            args.callback.setCommitContentResult(false, args.seq);
-                            return;
-                        }
-                    }
                     final boolean result =
                             ic.commitContent(inputContentInfo, flags, (Bundle) args.arg2);
-                    // If this request is not handled, then there is no reason to keep the URI
-                    // permission.
-                    if (grantUriPermission && !result) {
-                        inputContentInfo.releasePermission();
-                    }
                     args.callback.setCommitContentResult(result, args.seq);
                 } catch (RemoteException e) {
                     Log.w(TAG, "Got RemoteException calling commitContent", e);
