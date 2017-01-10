@@ -32,9 +32,10 @@ import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.systemui.classifier.FalsingManager;
-import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.MenuItem;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
+import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.FlingAnimationUtils;
-import com.android.systemui.statusbar.NotificationMenuRow;
 
 import java.util.HashMap;
 
@@ -267,7 +268,7 @@ public class SwipeHelper implements Gefingerpoken {
                 mCurrView = mCallback.getChildAtPosition(ev);
 
                 if (mCurrView != null) {
-                    onDownUpdate(mCurrView);
+                    onDownUpdate(mCurrView, ev);
                     mCanCurrViewBeDimissed = mCallback.canChildBeDismissed(mCurrView);
                     mVelocityTracker.addMovement(ev);
                     mInitialTouchPos = getPos(ev);
@@ -285,8 +286,12 @@ public class SwipeHelper implements Gefingerpoken {
                                         mCurrView.getLocationOnScreen(mTmpPos);
                                         final int x = (int) ev.getRawX() - mTmpPos[0];
                                         final int y = (int) ev.getRawY() - mTmpPos[1];
-                                        mLongPressListener.onLongPress(mCurrView, x, y,
-                                                NotificationMenuRow.getLongpressMenuItem(mContext));
+                                        MenuItem menuItem = null;
+                                        if (mCurrView instanceof ExpandableNotificationRow) {
+                                            menuItem = ((ExpandableNotificationRow) mCurrView)
+                                                    .getProvider().getLongpressMenuItem(mContext);
+                                        }
+                                        mLongPressListener.onLongPress(mCurrView, x, y, menuItem);
                                     }
                                 }
                             };
@@ -479,14 +484,14 @@ public class SwipeHelper implements Gefingerpoken {
     /**
      * Called when there's a down event.
      */
-    public void onDownUpdate(View currView) {
+    public void onDownUpdate(View currView, MotionEvent ev) {
         // Do nothing
     }
 
     /**
      * Called on a move event.
      */
-    protected void onMoveUpdate(View view, float totalTranslation, float delta) {
+    protected void onMoveUpdate(View view, MotionEvent ev, float totalTranslation, float delta) {
         // Do nothing
     }
 
@@ -580,7 +585,7 @@ public class SwipeHelper implements Gefingerpoken {
 
                     setTranslation(mCurrView, mTranslation + delta);
                     updateSwipeProgressFromOffset(mCurrView, mCanCurrViewBeDimissed);
-                    onMoveUpdate(mCurrView, mTranslation + delta, delta);
+                    onMoveUpdate(mCurrView, ev, mTranslation + delta, delta);
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -635,7 +640,7 @@ public class SwipeHelper implements Gefingerpoken {
         return DISMISS_IF_SWIPED_FAR_ENOUGH && Math.abs(translation) > 0.4 * getSize(mCurrView);
     }
 
-    protected boolean isDismissGesture(MotionEvent ev) {
+    public boolean isDismissGesture(MotionEvent ev) {
         boolean falsingDetected = mCallback.isAntiFalsingNeeded();
         if (mFalsingManager.isClassiferEnabled()) {
             falsingDetected = falsingDetected && mFalsingManager.isFalseTouch();

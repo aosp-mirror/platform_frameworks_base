@@ -23,13 +23,7 @@
     android:clickable="true"
     >
 
-    <ViewStub
-        android:layout="@layout/notification_menu_row"
-        android:id="@+id/menu_row_stub"
-        android:inflatedId="@+id/notification_menu_row"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
+    <!-- Menu displayed behind notification added here programmatically -->
 
     <com.android.systemui.statusbar.NotificationBackgroundView
         android:id="@+id/backgroundNormal"

@@ -16,276 +16,449 @@
 
 package com.android.systemui.statusbar;
 
+import java.util.ArrayList;
+
+import com.android.systemui.Interpolators;
+import com.android.systemui.R;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEventListener;
+import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
+import com.android.systemui.statusbar.NotificationGuts.GutsContent;
+import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.util.AttributeSet;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.FrameLayout.LayoutParams;
 
-import java.util.ArrayList;
-
-import com.android.systemui.Dependency;
-import com.android.systemui.Interpolators;
-import com.android.systemui.R;
-import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.plugins.PluginManager;
-import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider;
-import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.MenuItem;
-import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.OnMenuClickListener;
-
-public class NotificationMenuRow extends FrameLayout
-        implements PluginListener<NotificationMenuRowProvider>, View.OnClickListener {
+public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnClickListener {
 
     private static final int ICON_ALPHA_ANIM_DURATION = 200;
+    private static final long SHOW_MENU_DELAY = 60;
+    private static final long SWIPE_MENU_TIMING = 200;
+
+    private static final int NOTIFICATION_INFO_INDEX = 1;
 
     private ExpandableNotificationRow mParent;
-    private OnMenuClickListener mListener;
-    private NotificationMenuRowProvider mMenuProvider;
-    private ArrayList<MenuItem> mMenuItems = new ArrayList<>();
+
+    private Context mContext;
+    private FrameLayout mMenuContainer;
+    private ArrayList<MenuItem> mMenuItems;
+    private OnMenuEventListener mMenuListener;
 
     private ValueAnimator mFadeAnimator;
-    private boolean mMenuFadedIn = false;
-    private boolean mAnimating = false;
-    private boolean mOnLeft = true;
-    private boolean mDismissing = false;
-    private boolean mSnapping = false;
-    private boolean mIconsPlaced = false;
+    private boolean mAnimating;
+    private boolean mMenuFadedIn;
+
+    private boolean mOnLeft;
+    private boolean mIconsPlaced;
+
+    private boolean mDismissing;
+    private boolean mSnapping;
+    private float mTranslation;
 
     private int[] mIconLocation = new int[2];
     private int[] mParentLocation = new int[2];
 
     private float mHorizSpaceForIcon;
     private int mVertSpaceForIcons;
-
     private int mIconPadding;
-    private int mIconTint;
 
     private float mAlpha = 0f;
 
+    private CheckForDrag mCheckForDrag;
+    private Handler mHandler;
+
+    private boolean mMenuSnappedTo;
+    private boolean mMenuSnappedOnLeft;
+    private boolean mShouldShowMenu;
+
+    private NotificationSwipeActionHelper mSwipeHelper;
+
     public NotificationMenuRow(Context context) {
-        this(context, null);
-    }
-
-    public NotificationMenuRow(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
-
-    public NotificationMenuRow(Context context, AttributeSet attrs, int defStyleAttr) {
-        this(context, attrs, defStyleAttr, 0);
-    }
-
-    public NotificationMenuRow(Context context, AttributeSet attrs, int defStyleAttr,
-            int defStyleRes) {
-        super(context, attrs);
-        mMenuItems.addAll(getDefaultNotificationMenuItems());
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        Dependency.get(PluginManager.class).addPluginListener(
-                this, NotificationMenuRowProvider.class, false /* Allow multiple */);
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        Dependency.get(PluginManager.class).removePluginListener(this);
-    }
-
-    @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
-        final Resources res = getResources();
+        mContext = context;
+        final Resources res = context.getResources();
+        mShouldShowMenu = res.getBoolean(R.bool.config_showNotificationGear);
         mHorizSpaceForIcon = res.getDimensionPixelSize(R.dimen.notification_menu_icon_size);
         mVertSpaceForIcons = res.getDimensionPixelSize(R.dimen.notification_min_height);
         mIconPadding = res.getDimensionPixelSize(R.dimen.notification_menu_icon_padding);
-        mIconTint = res.getColor(R.color.notification_gear_color);
-        updateMenu(false /* notify */);
+        mHandler = new Handler();
+        mMenuItems = getDefaultMenuItems(context);
     }
 
-    public static MenuItem getLongpressMenuItem(Context context) {
-        Resources res = context.getResources();
-        Drawable settingsIcon = res.getDrawable(R.drawable.ic_settings);
-        String settingsDescription = res.getString(R.string.notification_menu_gear_description);
-        NotificationInfo settingsContent = (NotificationInfo) LayoutInflater.from(context).inflate(
-                R.layout.notification_info, null, false);
-        MenuItem settings = new MenuItem(settingsIcon, settingsDescription, settingsContent);
-        return settings;
+    @Override
+    public ArrayList<MenuItem> getMenuItems(Context context) {
+        return mMenuItems;
     }
 
-    public ArrayList<MenuItem> getDefaultNotificationMenuItems() {
-        ArrayList<MenuItem> items = new ArrayList<MenuItem>();
-        Resources res = getResources();
-
-        Drawable snoozeIcon = res.getDrawable(R.drawable.ic_snooze);
-        NotificationSnooze content = (NotificationSnooze) LayoutInflater.from(mContext)
-                .inflate(R.layout.notification_snooze, null, false);
-        String snoozeDescription = res.getString(R.string.notification_menu_snooze_description);
-        MenuItem snooze = new MenuItem(snoozeIcon, snoozeDescription, content);
-        items.add(snooze);
-
-        Drawable settingsIcon = res.getDrawable(R.drawable.ic_settings);
-        String settingsDescription = res.getString(R.string.notification_menu_gear_description);
-        NotificationInfo settingsContent = (NotificationInfo) LayoutInflater.from(mContext).inflate(
-                R.layout.notification_info, null, false);
-        MenuItem settings = new MenuItem(settingsIcon, settingsDescription, settingsContent);
-        items.add(settings);
-        return items;
+    @Override
+    public MenuItem getLongpressMenuItem(Context context) {
+        return mMenuItems.get(NOTIFICATION_INFO_INDEX);
     }
 
-    private void updateMenu(boolean notify) {
-        removeAllViews();
-        mMenuItems.clear();
-        if (mMenuProvider != null) {
-            mMenuItems.addAll(mMenuProvider.getMenuItems(getContext()));
-        }
-        mMenuItems.addAll(getDefaultNotificationMenuItems());
+    @Override
+    public void setSwipeActionHelper(NotificationSwipeActionHelper helper) {
+        mSwipeHelper = helper;
+    }
+
+    @Override
+    public void setMenuClickListener(OnMenuEventListener listener) {
+        mMenuListener = listener;
+    }
+
+    @Override
+    public void createMenu(ViewGroup parent) {
+        mParent = (ExpandableNotificationRow) parent;
+        mMenuContainer = new FrameLayout(mContext);
         for (int i = 0; i < mMenuItems.size(); i++) {
-            final View v = createMenuView(mMenuItems.get(i));
-            mMenuItems.get(i).menuView = v;
+            addMenuView(mMenuItems.get(i), mMenuContainer);
         }
-        resetState(notify);
+        resetState(false);
     }
 
-    private View createMenuView(MenuItem item) {
-        AlphaOptimizedImageView iv = new AlphaOptimizedImageView(getContext());
-        addView(iv);
-        iv.setPadding(mIconPadding, mIconPadding, mIconPadding, mIconPadding);
-        iv.setImageDrawable(item.icon);
-        iv.setOnClickListener(this);
-        iv.setColorFilter(mIconTint);
-        iv.setAlpha(mAlpha);
-        FrameLayout.LayoutParams lp = (LayoutParams) iv.getLayoutParams();
-        lp.width = (int) mHorizSpaceForIcon;
-        lp.height = (int) mHorizSpaceForIcon;
-        return iv;
+    @Override
+    public boolean isMenuVisible() {
+        return mAlpha > 0;
     }
 
-    public void resetState(boolean notify) {
+    @Override
+    public View getMenuView() {
+        return mMenuContainer;
+    }
+
+    @Override
+    public void resetMenu() {
+        resetState(true);
+    }
+
+    private void resetState(boolean notify) {
         setMenuAlpha(0f);
         mIconsPlaced = false;
         mMenuFadedIn = false;
         mAnimating = false;
         mSnapping = false;
         mDismissing = false;
-        setMenuLocation(mOnLeft ? 1 : -1 /* on left */);
-        if (mListener != null && notify) {
-            mListener.onMenuReset(mParent);
+        mMenuSnappedTo = false;
+        setMenuLocation();
+        if (mMenuListener != null && notify) {
+            mMenuListener.onMenuReset(mParent);
         }
     }
 
-    public void setMenuClickListener(OnMenuClickListener listener) {
-        mListener = listener;
+    @Override
+    public boolean onTouchEvent(View view, MotionEvent ev, float velocity) {
+        final int action = ev.getActionMasked();
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                mSnapping = false;
+                if (mFadeAnimator != null) {
+                    mFadeAnimator.cancel();
+                }
+                mHandler.removeCallbacks(mCheckForDrag);
+                mCheckForDrag = null;
+                break;
+
+            case MotionEvent.ACTION_MOVE:
+                mSnapping = false;
+                // If the menu is visible and the movement is towards it it's not a location change.
+                boolean locationChange = isTowardsMenu(mTranslation)
+                        ? false : isMenuLocationChange();
+                if (locationChange) {
+                    // Don't consider it "snapped" if location has changed.
+                    mMenuSnappedTo = false;
+
+                    // Changed directions, make sure we check to fade in icon again.
+                    if (!mHandler.hasCallbacks(mCheckForDrag)) {
+                        // No check scheduled, set null to schedule a new one.
+                        mCheckForDrag = null;
+                    } else {
+                        // Check scheduled, reset alpha and update location; check will fade it in
+                        setMenuAlpha(0f);
+                        setMenuLocation();
+                    }
+                }
+                if (mShouldShowMenu
+                        && !NotificationStackScrollLayout.isPinnedHeadsUp(view)
+                        && !mParent.areGutsExposed()
+                        && (mCheckForDrag == null || !mHandler.hasCallbacks(mCheckForDrag))) {
+                    // Only show the menu if we're not a heads up view and guts aren't exposed.
+                    mCheckForDrag = new CheckForDrag();
+                    mHandler.postDelayed(mCheckForDrag, SHOW_MENU_DELAY);
+                }
+                break;
+
+            case MotionEvent.ACTION_UP:
+                return handleUpEvent(ev, view, velocity);
+        }
+        return false;
     }
 
-    public void setNotificationRowParent(ExpandableNotificationRow parent) {
-        mParent = parent;
-        setMenuLocation(mOnLeft ? 1 : -1);
+    private boolean handleUpEvent(MotionEvent ev, View animView, float velocity) {
+        // If the menu should not be shown, then there is no need to check if the a swipe
+        // should result in a snapping to the menu. As a result, just check if the swipe
+        // was enough to dismiss the notification.
+        if (!mShouldShowMenu) {
+            if (mSwipeHelper.isDismissGesture(ev)) {
+                dismiss(animView, velocity);
+            } else {
+                snapBack(animView, velocity);
+            }
+            return true;
+        }
+
+        final boolean gestureTowardsMenu = isTowardsMenu(velocity);
+        final boolean gestureFastEnough =
+                mSwipeHelper.getMinDismissVelocity() <= Math.abs(velocity);
+        final boolean gestureFarEnough =
+                mSwipeHelper.swipedFarEnough(mTranslation, mParent.getWidth());
+        final double timeForGesture = ev.getEventTime() - ev.getDownTime();
+        final boolean showMenuForSlowOnGoing = !mParent.canViewBeDismissed()
+                && timeForGesture >= SWIPE_MENU_TIMING;
+
+        final float targetLeft = mOnLeft ? getSpaceForMenu() : -getSpaceForMenu();
+        if (mMenuSnappedTo && isMenuVisible()) {
+            if (mMenuSnappedOnLeft == mOnLeft) {
+                boolean coveringMenu = Math.abs(mTranslation) <= getSpaceForMenu() * 0.6f;
+                if (gestureTowardsMenu || coveringMenu) {
+                    // Gesture is towards or covering the menu or a dismiss
+                    snapBack(animView, 0);
+                } else if (mSwipeHelper.isDismissGesture(ev)) {
+                    dismiss(animView, velocity);
+                } else {
+                    // Didn't move enough to dismiss or cover, snap to the menu
+                    showMenu(animView, targetLeft, velocity);
+                }
+            } else if ((!gestureFastEnough && swipedEnoughToShowMenu())
+                    || (gestureTowardsMenu && !gestureFarEnough)) {
+                // The menu has been snapped to previously, however, the menu is now on the
+                // other side. If gesture is towards menu and not too far snap to the menu.
+                showMenu(animView, targetLeft, velocity);
+            } else if (mSwipeHelper.isDismissGesture(ev)) {
+                dismiss(animView, velocity);
+            } else {
+                snapBack(animView, velocity);
+            }
+        } else if (((!gestureFastEnough || showMenuForSlowOnGoing)
+                && swipedEnoughToShowMenu())
+                || gestureTowardsMenu) {
+            // Menu has not been snapped to previously and this is menu revealing gesture
+            showMenu(animView, targetLeft, velocity);
+        } else if (mSwipeHelper.isDismissGesture(ev)) {
+            dismiss(animView, velocity);
+        } else {
+            snapBack(animView, velocity);
+        }
+        return true;
     }
 
+    private void showMenu(View animView, float targetLeft, float velocity) {
+        mMenuSnappedTo = true;
+        mMenuSnappedOnLeft = mOnLeft;
+        mMenuListener.onMenuShown(animView);
+        mSwipeHelper.snap(animView, targetLeft, velocity);
+    }
+
+    private void snapBack(View animView, float velocity) {
+        mMenuSnappedTo = false;
+        mSnapping = true;
+        mSwipeHelper.snap(animView, 0 /* leftTarget */, velocity);
+    }
+
+    private void dismiss(View animView, float velocity) {
+        mMenuSnappedTo = false;
+        mDismissing = true;
+        mSwipeHelper.dismiss(animView, velocity);
+    }
+
+    private boolean swipedEnoughToShowMenu() {
+        // If the notification can't be dismissed then how far it can move is
+        // restricted -- reduce the distance it needs to move in this case.
+        final float multiplier = mParent.canViewBeDismissed() ? 0.4f : 0.2f;
+        final float snapBackThreshold = getSpaceForMenu() * multiplier;
+        return !mSwipeHelper.swipedFarEnough(0, 0) && isMenuVisible() && (mOnLeft
+                ? mTranslation > snapBackThreshold
+                : mTranslation < -snapBackThreshold);
+    }
+
+    /**
+     * Returns whether the gesture is towards the menu location or not.
+     */
+    private boolean isTowardsMenu(float movement) {
+        return isMenuVisible()
+                && ((mOnLeft && movement <= 0)
+                        || (!mOnLeft && movement >= 0));
+    }
+
+    @Override
     public void setAppName(String appName) {
-        Resources res = getResources();
+        if (appName == null) {
+            return;
+        }
+        Resources res = mContext.getResources();
         final int count = mMenuItems.size();
         for (int i = 0; i < count; i++) {
             MenuItem item = mMenuItems.get(i);
             String description = String.format(
                     res.getString(R.string.notification_menu_accessibility),
-                    appName, item.menuDescription);
-            item.menuView.setContentDescription(description);
+                    appName, item.getContentDescription());
+            View menuView = item.getMenuView();
+            if (menuView != null) {
+                menuView.setContentDescription(description);
+            }
         }
     }
 
-    public ExpandableNotificationRow getNotificationParent() {
-        return mParent;
-    }
-
-    public void setMenuAlpha(float alpha) {
-        mAlpha = alpha;
-        if (alpha == 0) {
-            mMenuFadedIn = false; // Can fade in again once it's gone.
-            setVisibility(View.INVISIBLE);
+    @Override
+    public void onHeightUpdate() {
+        if (mParent == null || mMenuItems.size() == 0) {
+            return;
+        }
+        int parentHeight = mParent.getCollapsedHeight();
+        float translationY;
+        if (parentHeight < mVertSpaceForIcons) {
+            translationY = (parentHeight / 2) - (mHorizSpaceForIcon / 2);
         } else {
-            setVisibility(View.VISIBLE);
+            translationY = (mVertSpaceForIcons - mHorizSpaceForIcon) / 2;
         }
-        final int count = getChildCount();
-        for (int i = 0; i < count; i++) {
-            getChildAt(i).setAlpha(mAlpha);
-        }
+        mMenuContainer.setTranslationY(translationY);
     }
 
-    /**
-     * Returns whether the menu is displayed on the left side of the view or not.
-     */
-    public boolean isMenuOnLeft() {
-        return mOnLeft;
-    }
-
-    /**
-     * Returns the horizontal space in pixels required to display the menu.
-     */
-    public float getSpaceForMenu() {
-        return mHorizSpaceForIcon * getChildCount();
-    }
-
-    /**
-     * Indicates whether the menu is visible at 1 alpha. Does not indicate if entire view is
-     * visible.
-     */
-    public boolean isVisible() {
-        return mAlpha > 0;
-    }
-
-    public void cancelFadeAnimator() {
-        if (mFadeAnimator != null) {
-            mFadeAnimator.cancel();
-        }
-    }
-
-    public void updateMenuAlpha(final float transX, final float size) {
+    @Override
+    public void onTranslationUpdate(float translation) {
+        mTranslation = translation;
         if (mAnimating || !mMenuFadedIn) {
             // Don't adjust when animating, or if the menu hasn't been shown yet.
             return;
         }
-
-        final float fadeThreshold = size * 0.3f;
-        final float absTrans = Math.abs(transX);
+        final float fadeThreshold = mParent.getWidth() * 0.3f;
+        final float absTrans = Math.abs(translation);
         float desiredAlpha = 0;
-
         if (absTrans == 0) {
             desiredAlpha = 0;
         } else if (absTrans <= fadeThreshold) {
             desiredAlpha = 1;
         } else {
-            desiredAlpha = 1 - ((absTrans - fadeThreshold) / (size - fadeThreshold));
+            desiredAlpha = 1 - ((absTrans - fadeThreshold) / (mParent.getWidth() - fadeThreshold));
         }
         setMenuAlpha(desiredAlpha);
     }
 
-    public void fadeInMenu(final boolean fromLeft, final float transX,
-            final float notiThreshold) {
+    @Override
+    public void onClick(View v) {
+        if (mMenuListener == null) {
+            // Nothing to do
+            return;
+        }
+        v.getLocationOnScreen(mIconLocation);
+        mParent.getLocationOnScreen(mParentLocation);
+        final int centerX = (int) (mHorizSpaceForIcon / 2);
+        final int centerY = v.getHeight() / 2;
+        final int x = mIconLocation[0] - mParentLocation[0] + centerX;
+        final int y = mIconLocation[1] - mParentLocation[1] + centerY;
+        final int index = mMenuContainer.indexOfChild(v);
+        mMenuListener.onMenuClicked(mParent, x, y, mMenuItems.get(index));
+    }
+
+    private boolean isMenuLocationChange() {
+        boolean onLeft = mTranslation > mIconPadding;
+        boolean onRight = mTranslation < -mIconPadding;
+        if ((mOnLeft && onRight) || (!mOnLeft && onLeft)) {
+            return true;
+        }
+        return false;
+    }
+
+    private void setMenuLocation() {
+        boolean showOnLeft = mTranslation > 0;
+        if ((mIconsPlaced && showOnLeft == mOnLeft) || mSnapping || mParent == null) {
+            // Do nothing
+            return;
+        }
+        final boolean isRtl = mParent.isLayoutRtl();
+        final int count = mMenuContainer.getChildCount();
+        final int width = mParent.getWidth();
+        for (int i = 0; i < count; i++) {
+            final View v = mMenuContainer.getChildAt(i);
+            final float left = isRtl
+                    ? -(width - mHorizSpaceForIcon * (i + 1))
+                    : i * mHorizSpaceForIcon;
+            final float right = isRtl
+                    ? -i * mHorizSpaceForIcon
+                    : width - (mHorizSpaceForIcon * (i + 1));
+            v.setTranslationX(showOnLeft ? left : right);
+        }
+        mOnLeft = showOnLeft;
+        mIconsPlaced = true;
+    }
+
+    private void setMenuAlpha(float alpha) {
+        mAlpha = alpha;
+        if (mMenuContainer == null) {
+            return;
+        }
+        if (alpha == 0) {
+            mMenuFadedIn = false; // Can fade in again once it's gone.
+            mMenuContainer.setVisibility(View.INVISIBLE);
+        } else {
+            mMenuContainer.setVisibility(View.VISIBLE);
+        }
+        final int count = mMenuContainer.getChildCount();
+        for (int i = 0; i < count; i++) {
+            mMenuContainer.getChildAt(i).setAlpha(mAlpha);
+        }
+    }
+
+    /**
+     * Returns the horizontal space in pixels required to display the menu.
+     */
+    private float getSpaceForMenu() {
+        return mHorizSpaceForIcon * mMenuContainer.getChildCount();
+    }
+
+    private final class CheckForDrag implements Runnable {
+        @Override
+        public void run() {
+            final float absTransX = Math.abs(mTranslation);
+            final float bounceBackToMenuWidth = getSpaceForMenu();
+            final float notiThreshold = mParent.getWidth() * 0.4f;
+            if ((!isMenuVisible() || isMenuLocationChange())
+                    && absTransX >= bounceBackToMenuWidth * 0.4
+                    && absTransX < notiThreshold) {
+                fadeInMenu(notiThreshold);
+            }
+        }
+    }
+
+    private void fadeInMenu(final float notiThreshold) {
         if (mDismissing || mAnimating) {
             return;
         }
-        if (isMenuLocationChange(transX)) {
+        if (isMenuLocationChange()) {
             setMenuAlpha(0f);
         }
-        setMenuLocation((int) transX);
+        final float transX = mTranslation;
+        final boolean fromLeft = mTranslation > 0;
+        setMenuLocation();
         mFadeAnimator = ValueAnimator.ofFloat(mAlpha, 1);
         mFadeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 final float absTrans = Math.abs(transX);
 
-                boolean pastGear = (fromLeft && transX <= notiThreshold)
+                boolean pastMenu = (fromLeft && transX <= notiThreshold)
                         || (!fromLeft && absTrans <= notiThreshold);
-                if (pastGear && !mMenuFadedIn) {
+                if (pastMenu && !mMenuFadedIn) {
                     setMenuAlpha((float) animation.getAnimatedValue());
                 }
             }
@@ -313,91 +486,77 @@ public class NotificationMenuRow extends FrameLayout
         mFadeAnimator.start();
     }
 
-    public void updateVerticalLocation() {
-        if (mParent == null || mMenuItems.size() == 0) {
-            return;
-        }
-        int parentHeight = mParent.getCollapsedHeight();
-        float translationY;
-        if (parentHeight < mVertSpaceForIcons) {
-            translationY = (parentHeight / 2) - (mHorizSpaceForIcon / 2);
-        } else {
-            translationY = (mVertSpaceForIcons - mHorizSpaceForIcon) / 2;
-        }
-        setTranslationY(translationY);
-    }
-
     @Override
-    public void onRtlPropertiesChanged(int layoutDirection) {
-        mIconsPlaced = false;
-        setMenuLocation(mOnLeft ? 1 : -1);
+    public void setMenuItems(ArrayList<MenuItem> items) {
+        // Do nothing we use our own for now.
+        // TODO -- handle / allow custom menu items!
     }
 
-    public void setMenuLocation(int translation) {
-        boolean onLeft = translation > 0;
-        if ((mIconsPlaced && onLeft == mOnLeft) || mSnapping || mParent == null) {
-            // Do nothing
-            return;
+    public static ArrayList<MenuItem> getDefaultMenuItems(Context context) {
+        ArrayList<MenuItem> items = new ArrayList<MenuItem>();
+        Resources res = context.getResources();
+
+        NotificationSnooze content = (NotificationSnooze) LayoutInflater.from(context)
+                .inflate(R.layout.notification_snooze, null, false);
+        String snoozeDescription = res.getString(R.string.notification_menu_snooze_description);
+        MenuItem snooze = new NotificationMenuItem(context, snoozeDescription, content,
+                R.drawable.ic_snooze);
+        items.add(snooze);
+
+        String settingsDescription = res.getString(R.string.notification_menu_gear_description);
+        NotificationInfo settingsContent = (NotificationInfo) LayoutInflater.from(context).inflate(
+                R.layout.notification_info, null, false);
+        MenuItem settings = new NotificationMenuItem(context, settingsDescription, settingsContent,
+                R.drawable.ic_settings);
+        items.add(settings);
+        return items;
+    }
+
+    private void addMenuView(MenuItem item, ViewGroup parent) {
+        View menuView = item.getMenuView();
+        if (menuView != null) {
+            parent.addView(menuView);
+            menuView.setOnClickListener(this);
+            FrameLayout.LayoutParams lp = (LayoutParams) menuView.getLayoutParams();
+            lp.width = (int) mHorizSpaceForIcon;
+            lp.height = (int) mHorizSpaceForIcon;
+            menuView.setLayoutParams(lp);
         }
-        final boolean isRtl = mParent.isLayoutRtl();
-        final int count = getChildCount();
-        final int width = getWidth();
-        for (int i = 0; i < count; i++) {
-            final View v = getChildAt(i);
-            final float left = isRtl
-                    ? -(width - mHorizSpaceForIcon * (i + 1))
-                    : i * mHorizSpaceForIcon;
-            final float right = isRtl
-                    ? -i * mHorizSpaceForIcon
-                    : width - (mHorizSpaceForIcon * (i + 1));
-            v.setTranslationX(onLeft ? left : right);
+    }
+
+    public static class NotificationMenuItem implements MenuItem {
+        View mMenuView;
+        GutsContent mGutsContent;
+        String mContentDescription;
+
+        public NotificationMenuItem(Context context, String s, GutsContent content, int iconResId) {
+            Resources res = context.getResources();
+            int padding = res.getDimensionPixelSize(R.dimen.notification_menu_icon_padding);
+            int tint = res.getColor(R.color.notification_gear_color);
+            AlphaOptimizedImageView iv = new AlphaOptimizedImageView(context);
+            iv.setPadding(padding, padding, padding, padding);
+            Drawable icon = context.getResources().getDrawable(iconResId);
+            iv.setImageDrawable(icon);
+            iv.setColorFilter(tint);
+            iv.setAlpha(1f);
+            mMenuView = iv;
+            mContentDescription = s;
+            mGutsContent = content;
         }
-        mOnLeft = onLeft;
-        mIconsPlaced = true;
-    }
 
-    public boolean isMenuLocationChange(float translation) {
-        boolean onLeft = translation > mIconPadding;
-        boolean onRight = translation < -mIconPadding;
-        if ((mOnLeft && onRight) || (!mOnLeft && onLeft)) {
-            return true;
+        @Override
+        public View getMenuView() {
+            return mMenuView;
         }
-        return false;
-    }
 
-    public void setDismissing() {
-        mDismissing = true;
-    }
-
-    public void setSnapping(boolean snapping) {
-        mSnapping = snapping;
-    }
-
-    @Override
-    public void onClick(View v) {
-        if (mListener == null) {
-            // Nothing to do
-            return;
+        @Override
+        public View getGutsView() {
+            return mGutsContent.getContentView();
         }
-        v.getLocationOnScreen(mIconLocation);
-        mParent.getLocationOnScreen(mParentLocation);
-        final int centerX = (int) (mHorizSpaceForIcon / 2);
-        final int centerY = (int) (v.getTranslationY() * 2 + v.getHeight()) / 2;
-        final int x = mIconLocation[0] - mParentLocation[0] + centerX;
-        final int y = mIconLocation[1] - mParentLocation[1] + centerY;
-        final int index = indexOfChild(v);
-        mListener.onMenuClicked(mParent, x, y, mMenuItems.get(index));
-    }
 
-    @Override
-    public void onPluginConnected(NotificationMenuRowProvider plugin, Context pluginContext) {
-        mMenuProvider = plugin;
-        updateMenu(false /* notify */);
-    }
-
-    @Override
-    public void onPluginDisconnected(NotificationMenuRowProvider plugin) {
-        mMenuProvider = null;
-        updateMenu(false /* notify */);
+        @Override
+        public String getContentDescription() {
+            return mContentDescription;
+        }
     }
 }

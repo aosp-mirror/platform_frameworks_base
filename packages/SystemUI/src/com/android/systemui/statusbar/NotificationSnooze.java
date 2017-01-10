@@ -16,14 +16,10 @@ package com.android.systemui.statusbar;
  */
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider;
-import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.GutsInteractionListener;
-import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.SnoozeListener;
-import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.SnoozeOption;
+import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
+import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -33,23 +29,18 @@ import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RadioGroup;
-import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.TextView;
-import android.widget.Toast;
 import com.android.systemui.R;
 
 public class NotificationSnooze extends LinearLayout
-        implements NotificationMenuRowProvider.SnoozeGutsContent, View.OnClickListener {
+        implements NotificationGuts.GutsContent, View.OnClickListener {
 
     private static final int MAX_ASSISTANT_SUGGESTIONS = 2;
-    private GutsInteractionListener mGutsInteractionListener;
-    private SnoozeListener mSnoozeListener;
+    private NotificationGuts mGutsContainer;
+    private NotificationSwipeActionHelper mSnoozeListener;
     private StatusBarNotification mSbn;
 
     private TextView mSelectedOptionText;
@@ -155,8 +146,8 @@ public class NotificationSnooze extends LinearLayout
 
     @Override
     public void onClick(View v) {
-        if (mGutsInteractionListener != null) {
-            mGutsInteractionListener.onInteraction(this);
+        if (mGutsContainer != null) {
+            mGutsContainer.resetFalsingCheck();
         }
         final int id = v.getId();
         final SnoozeOption tag = (SnoozeOption) v.getTag();
@@ -172,7 +163,7 @@ public class NotificationSnooze extends LinearLayout
 
     private void undoSnooze() {
         mSelectedOption = null;
-        mGutsInteractionListener.closeGuts(this);
+        mGutsContainer.closeControls(-1 /* x */, -1 /* y */, true /* notify */);
     }
 
     @Override
@@ -185,18 +176,16 @@ public class NotificationSnooze extends LinearLayout
         return this;
     }
 
-    @Override
     public void setStatusBarNotification(StatusBarNotification sbn) {
         mSbn = sbn;
     }
 
     @Override
-    public void setInteractionListener(GutsInteractionListener listener) {
-        mGutsInteractionListener = listener;
+    public void setGutsParent(NotificationGuts guts) {
+        mGutsContainer = guts;
     }
 
-    @Override
-    public void setSnoozeListener(SnoozeListener listener) {
+    public void setSnoozeListener(NotificationSwipeActionHelper listener) {
         mSnoozeListener = listener;
     }
 
@@ -206,7 +195,7 @@ public class NotificationSnooze extends LinearLayout
         // then we commit the snooze action.
         if (mSnoozeListener != null && mSelectedOption != null) {
             mSnoozing = true;
-            mSnoozeListener.snoozeNotification(mSbn, mSelectedOption);
+            mSnoozeListener.snooze(mSbn, mSelectedOption);
             return true;
         } else {
             // Reset the view once it's closed

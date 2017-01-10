@@ -53,8 +53,6 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.Utils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.GutsContent;
-import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.GutsInteractionListener;
 import com.android.systemui.statusbar.NotificationGuts.OnSettingsClickListener;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
@@ -65,7 +63,7 @@ import java.util.Set;
 /**
  * The guts of a notification revealed when performing a long press.
  */
-public class NotificationInfo extends LinearLayout implements GutsContent {
+public class NotificationInfo extends LinearLayout implements NotificationGuts.GutsContent {
     private static final String TAG = "InfoGuts";
 
     private INotificationManager mINotificationManager;
@@ -79,7 +77,7 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
     private View mChannelDisabledView;
     private Switch mChannelEnabledSwitch;
 
-    private GutsInteractionListener mGutsInteractionListener;
+    private NotificationGuts mGutsContainer;
 
     public NotificationInfo(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -274,8 +272,8 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
 
         // Callback when checked.
         mChannelEnabledSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (mGutsInteractionListener != null) {
-                mGutsInteractionListener.onInteraction(NotificationInfo.this);
+            if (mGutsContainer != null) {
+                mGutsContainer.resetFalsingCheck();
             }
             updateSecondaryText();
         });
@@ -300,8 +298,8 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
     }
 
     @Override
-    public void setInteractionListener(GutsInteractionListener listener) {
-        mGutsInteractionListener = listener;
+    public void setGutsParent(NotificationGuts guts) {
+        mGutsContainer = guts;
     }
 
     @Override
