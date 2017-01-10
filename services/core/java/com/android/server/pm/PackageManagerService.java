@@ -17441,11 +17441,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         mHandler.sendMessage(msg);
     }
 
-    private boolean equals(PackageStats a, PackageStats b) {
-        return (a.codeSize == b.codeSize) && (a.dataSize == b.dataSize)
-                && (a.cacheSize == b.cacheSize);
-    }
-
     private boolean getPackageSizeInfoLI(String packageName, int userId, PackageStats stats) {
         final PackageSetting ps;
         synchronized (mPackages) {
@@ -17456,44 +17451,21 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        final long ceDataInode = ps.getCeDataInode(userId);
-        final PackageStats quotaStats = new PackageStats(stats.packageName, stats.userHandle);
+        final String[] packageNames = { packageName };
+        final long[] ceDataInodes = { ps.getCeDataInode(userId) };
+        final String[] codePaths = { ps.codePathString };
 
-        final StorageManager storage = mContext.getSystemService(StorageManager.class);
-        final String externalUuid = storage.getPrimaryStorageUuid();
         try {
-            final long start = SystemClock.elapsedRealtimeNanos();
-            mInstaller.getAppSize(ps.volumeUuid, packageName, userId, 0,
-                    ps.appId, ceDataInode, ps.codePathString, externalUuid, stats);
-            final long stopManual = SystemClock.elapsedRealtimeNanos();
-            if (ENABLE_QUOTA) {
-                mInstaller.getAppSize(ps.volumeUuid, packageName, userId, Installer.FLAG_USE_QUOTA,
-                        ps.appId, ceDataInode, ps.codePathString, externalUuid, quotaStats);
-            }
-            final long stopQuota = SystemClock.elapsedRealtimeNanos();
+            mInstaller.getAppSize(ps.volumeUuid, packageNames, userId, 0,
+                    ps.appId, ceDataInodes, codePaths, stats);
 
             // For now, ignore code size of packages on system partition
             if (isSystemApp(ps) && !isUpdatedSystemApp(ps)) {
                 stats.codeSize = 0;
-                quotaStats.codeSize = 0;
-            }
-
-            if (ENABLE_QUOTA && Build.IS_ENG && !ps.isSharedUser()) {
-                if (!equals(stats, quotaStats)) {
-                    Log.w(TAG, "Found discrepancy between statistics:");
-                    Log.w(TAG, "Manual: " + stats);
-                    Log.w(TAG, "Quota:  " + quotaStats);
-                }
-                final long manualTime = stopManual - start;
-                final long quotaTime = stopQuota - stopManual;
-                EventLogTags.writePmPackageStats(manualTime, quotaTime,
-                        stats.dataSize, quotaStats.dataSize,
-                        stats.cacheSize, quotaStats.cacheSize);
             }
 
             // External clients expect these to be tracked separately
             stats.dataSize -= stats.cacheSize;
-            quotaStats.dataSize -= quotaStats.cacheSize;
 
         } catch (InstallerException e) {
             Slog.w(TAG, String.valueOf(e));
