@@ -660,27 +660,6 @@ class ActivityStarter {
                 UserHandle.CURRENT);
     }
 
-    void startTaskLockedActivity(final TaskRecord task) {
-        final ActivityRecord activityRecord = task.topRunningActivityLocked();
-        if (activityRecord == null) {
-            Slog.w(TAG, "Unable to find activity record to start lock activity for task: " + task);
-            return;
-        }
-
-        final KeyguardManager km = (KeyguardManager) mService.mContext
-                .getSystemService(Context.KEYGUARD_SERVICE);
-        Intent intent = new Intent(KeyguardManager.ACTION_CONFIRM_DEVICE_CREDENTIAL_WITH_USER);
-        intent.setPackage("com.android.systemui");
-        intent.putExtra(Intent.EXTRA_TASK_ID, task.lastTaskDescription);
-        intent.putExtra(Intent.EXTRA_USER_ID, task.userId);
-        intent.addFlags(FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS | FLAG_ACTIVITY_REORDER_TO_FRONT
-                | FLAG_ACTIVITY_SINGLE_TOP);
-        final ActivityOptions options = ActivityOptions.makeBasic();
-        options.setLaunchTaskId(task.taskId);
-        options.setTaskOverlay(true);
-        mService.mContext.startActivityAsUser(intent, options.toBundle(), UserHandle.CURRENT);
-    }
-
     final int startActivityMayWait(IApplicationThread caller, int callingUid,
             String callingPackage, Intent intent, String resolvedType,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,

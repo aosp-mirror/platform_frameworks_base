@@ -801,7 +801,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     // to an activity belonging to userId. Example case: a document picker for
                     // personal files, opened by a work app, should still get locked.
                     if (taskTopActivityIsUser(task, userId)) {
-                        mService.mActivityStarter.startTaskLockedActivity(task);
+                        mService.mTaskChangeNotificationController.notifyTaskProfileLocked(
+                                task.taskId, userId);
                     }
                 }
             }
