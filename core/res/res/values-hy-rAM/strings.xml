@@ -1272,7 +1272,7 @@
     <string name="find_previous" msgid="2196723669388360506">"Գտնել նախորդը"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Տեղադրության հարցում <xliff:g id="NAME">%s</xliff:g>-ից"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"Տեղադրության հարցում"</string>
-    <string name="gpsNotifMessage" msgid="1374718023224000702">"<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)-ի հարցմամբ"</string>
+    <string name="gpsNotifMessage" msgid="1374718023224000702">"<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)-ի հարցումով"</string>
     <string name="gpsVerifYes" msgid="2346566072867213563">"Այո"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"Ոչ"</string>
     <string name="sync_too_many_deletes" msgid="5296321850662746890">"Ջնջելու սահմանը գերազանցվել է"</string>
@@ -1559,7 +1559,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Աշխատանքային <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2-րդ աշխատանք <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3-րդ աշխատանք <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="1420543809500606964">"Այս էկրանն ապամրացնելու համար հպեք և պահեք Հետ կոճակը:"</string>
+    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
+    <skip />
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Հավելվածն ամրացված է: Ապամրացումն այս սարքում չի թույլատրվում:"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Էկրանն ամրացված է"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Էկրանն ապամրացված է"</string>

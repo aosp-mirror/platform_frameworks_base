@@ -703,7 +703,7 @@
     <string name="lockscreen_transport_stop_description" msgid="5907083260651210034">"To‘xtatish"</string>
     <string name="lockscreen_transport_rew_description" msgid="6944412838651990410">"Orqaga o‘tkazish"</string>
     <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"Oldinga o‘tkazish"</string>
-    <string name="emergency_calls_only" msgid="6733978304386365407">"Faqat favqulodda qo‘ng‘iroqlar"</string>
+    <string name="emergency_calls_only" msgid="6733978304386365407">"Faqat favqulodda chaqiruvlar"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Tarmoq qulflangan"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM karta PUK kod bilan qulflangan."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Foydalanuvchi qo‘llanmasiga qarang yoki Abonentlarni qo‘llab-quvvatlash markaziga murojaat qiling."</string>
@@ -1559,7 +1559,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Ish <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2-ishxona <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3-ishxona <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="1420543809500606964">"Bu ekrandan chiqish uchun “Orqaga” tugmasini bosib turing."</string>
+    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
+    <skip />
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Ilova qadab qo‘yilgan. Uni ekrandan yechish ushbu qurilmada ta’qiqlangan."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekran qadab qo‘yildi"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Ekran bo‘shatildi"</string>
