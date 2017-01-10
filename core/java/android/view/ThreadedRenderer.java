@@ -75,17 +75,6 @@ public final class ThreadedRenderer {
     private static final String CACHE_PATH_SHADERS = "com.android.opengl.shaders_cache";
 
     /**
-     * System property used to enable or disable dirty regions invalidation.
-     * This property is only queried if {@link #RENDER_DIRTY_REGIONS} is true.
-     * The default value of this property is assumed to be true.
-     *
-     * Possible values:
-     * "true", to enable partial invalidates
-     * "false", to disable partial invalidates
-     */
-    static final String RENDER_DIRTY_REGIONS_PROPERTY = "debug.hwui.render_dirty_regions";
-
-    /**
      * System property used to enable or disable hardware rendering profiling.
      * The default value of this property is assumed to be false.
      *
