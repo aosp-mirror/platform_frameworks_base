@@ -187,6 +187,7 @@ public class CachingIconView extends ImageView {
     }
 
     @Override
+    @RemotableViewMethod
     public void setVisibility(int visibility) {
         mDesiredVisibility = visibility;
         updateVisibility();
