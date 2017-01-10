@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <array>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -121,6 +122,16 @@ inline bool isRepresentative(uint32_t language_and_region, const char* script) {
     return (REPRESENTATIVE_LOCALES.count(packed_locale) != 0);
 }
 
+const uint32_t US_SPANISH = 0x65735553lu; // es-US
+const uint32_t MEXICAN_SPANISH = 0x65734D58lu; // es-MX
+const uint32_t LATIN_AMERICAN_SPANISH = 0x6573A424lu; // es-419
+
+// The two locales es-US and es-MX are treated as special fallbacks for es-419.
+// If there is no es-419, they are considered its equivalent.
+inline bool isSpecialSpanish(uint32_t language_and_region) {
+    return (language_and_region == US_SPANISH || language_and_region == MEXICAN_SPANISH);
+}
+
 int localeDataCompareRegions(
         const char* left_region, const char* right_region,
         const char* requested_language, const char* requested_script,
@@ -129,18 +140,30 @@ int localeDataCompareRegions(
     if (left_region[0] == right_region[0] && left_region[1] == right_region[1]) {
         return 0;
     }
-    const uint32_t left = packLocale(requested_language, left_region);
-    const uint32_t right = packLocale(requested_language, right_region);
+    uint32_t left = packLocale(requested_language, left_region);
+    uint32_t right = packLocale(requested_language, right_region);
     const uint32_t request = packLocale(requested_language, requested_region);
+
+    // If one and only one of the two locales is a special Spanish locale, we
+    // replace it with es-419. We don't do the replacement if the other locale
+    // is already es-419, or both locales are special Spanish locales (when
+    // es-US is being compared to es-MX).
+    const bool leftIsSpecialSpanish = isSpecialSpanish(left);
+    const bool rightIsSpecialSpanish = isSpecialSpanish(right);
+    if (leftIsSpecialSpanish && !rightIsSpecialSpanish && right != LATIN_AMERICAN_SPANISH) {
+        left = LATIN_AMERICAN_SPANISH;
+    } else if (rightIsSpecialSpanish && !leftIsSpecialSpanish && left != LATIN_AMERICAN_SPANISH) {
+        right = LATIN_AMERICAN_SPANISH;
+    }
 
     uint32_t request_ancestors[MAX_PARENT_DEPTH+1];
     ssize_t left_right_index;
     // Find the parents of the request, but stop as soon as we saw left or right
-    const uint32_t left_and_right[] = {left, right};
+    const std::array<uint32_t, 2> left_and_right = {{left, right}};
     const size_t ancestor_count = findAncestors(
             request_ancestors, &left_right_index,
             request, requested_script,
-            left_and_right, sizeof(left_and_right)/sizeof(left_and_right[0]));
+            left_and_right.data(), left_and_right.size());
     if (left_right_index == 0) { // We saw left earlier
         return 1;
     }
