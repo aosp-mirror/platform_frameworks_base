@@ -153,6 +153,11 @@ public final class Zygote {
             int[][] rlimits, long permittedCapabilities, long effectiveCapabilities);
 
     /**
+     * Lets children of the zygote inherit open file descriptors to this path.
+     */
+    native protected static void nativeAllowFileAcrossFork(String path);
+
+    /**
      * Zygote unmount storage space on initializing.
      * This method is called once.
      */
