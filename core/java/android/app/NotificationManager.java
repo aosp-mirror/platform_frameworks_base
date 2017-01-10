@@ -47,6 +47,7 @@ import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -381,42 +382,26 @@ public class NotificationManager
     }
 
     /**
-     * Listener passed to {@link NotificationManager#createNotificationChannel} to notify
-     * caller of result.
+     * Creates a notification channel that notifications can be posted to.
+     *
+     * @param channel  the channel to create.  Note that the created channel may differ from this
+     *                 value.  If the channel already exists, it will not be modified.
      */
-    public interface OnNotificationChannelCreatedListener {
-        /**
-         * @param createdChannel NotificationChannel created by the system.  Value is null iff an
-         *   exception was thrown during channel creation.
-         */
-        public void onNotificationChannelCreated(NotificationChannel createdChannel);
+    public void createNotificationChannel(@NonNull NotificationChannel channel) {
+        createNotificationChannels(Arrays.asList(channel));
     }
 
     /**
-     * Creates a notification channel that notifications can be posted to.
+     * Creates multiple notification channels that different notifications can be posted to.
      *
-     * @param channel  the channel to attempt to create.  Note that the created channel may differ
-     *                 from this value.
-     * @param listener Called when operation is finished.
-     * @param handler  The handler to invoke the listener on, or {@code null} to use the main
-     *                 handler.
+     * @param channels the list of channels to attempt to create.  If any of these channels already
+     *                 exist, they will not be modified.
      */
-    public void createNotificationChannel(
-            @NonNull NotificationChannel channel,
-            @NonNull OnNotificationChannelCreatedListener listener,
-            @Nullable Handler handler) {
+    public void createNotificationChannels(@NonNull List<NotificationChannel> channels) {
         INotificationManager service = getService();
         try {
-            final Handler actualHandler =
-                    handler != null ? handler : new Handler(Looper.getMainLooper());
-            service.createNotificationChannel(mContext.getPackageName(), channel,
-                    new IOnNotificationChannelCreatedListener.Stub() {
-                        @Override public void onNotificationChannelCreated(
-                                NotificationChannel channel) {
-                            actualHandler.post(
-                                    () -> { listener.onNotificationChannelCreated(channel); });
-                        }
-                    });
+            service.createNotificationChannels(mContext.getPackageName(),
+                    new ParceledListSlice(channels));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

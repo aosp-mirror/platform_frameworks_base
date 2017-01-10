@@ -82,7 +82,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/IBackupAgent.aidl \
 	core/java/android/app/IEphemeralResolver.aidl \
 	core/java/android/app/IInstrumentationWatcher.aidl \
-	core/java/android/app/IOnNotificationChannelCreatedListener.aidl \
 	core/java/android/app/INotificationManager.aidl \
 	core/java/android/app/IProcessObserver.aidl \
 	core/java/android/app/ISearchManager.aidl \

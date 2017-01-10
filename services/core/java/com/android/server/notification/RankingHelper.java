@@ -434,7 +434,8 @@ public class RankingHelper implements RankingConfig {
         }
         if (r.channels.containsKey(channel.getId()) || channel.getName().equals(
                 mContext.getString(R.string.default_notification_channel_label))) {
-            throw new IllegalArgumentException("Channel already exists");
+            // Channel already exists, no-op.
+            return;
         }
         if (channel.getImportance() < NotificationManager.IMPORTANCE_NONE
                 || channel.getImportance() > NotificationManager.IMPORTANCE_MAX) {
