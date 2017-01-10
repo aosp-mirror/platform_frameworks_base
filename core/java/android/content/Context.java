@@ -3744,6 +3744,11 @@ public abstract class Context {
     public static final String DEVICE_IDENTIFIERS_SERVICE = "device_identifiers";
 
     /**
+     * Service that provides System font data.
+     */
+    public static final String FONT_SERVICE = "font";
+
+    /**
      * Service to report a system health "incident"
      * @hide
      */

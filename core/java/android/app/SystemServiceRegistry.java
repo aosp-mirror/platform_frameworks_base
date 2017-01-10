@@ -118,6 +118,7 @@ import android.telecom.TelecomManager;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.text.FontManager;
 import android.text.TextClassificationManager;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
@@ -133,6 +134,7 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.app.ISoundTriggerService;
 import com.android.internal.appwidget.IAppWidgetService;
+import com.android.internal.font.IFontManager;
 import com.android.internal.os.IDropBoxManagerService;
 import com.android.internal.policy.PhoneLayoutInflater;
 
@@ -793,6 +795,15 @@ final class SystemServiceRegistry {
             public IncidentManager createService(ContextImpl ctx) throws ServiceNotFoundException {
                 return new IncidentManager(ctx);
             }});
+
+        registerService(Context.FONT_SERVICE, FontManager.class,
+                new CachedServiceFetcher<FontManager>() {
+                    @Override
+                    public FontManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getServiceOrThrow(Context.FONT_SERVICE);
+                        return new FontManager(IFontManager.Stub.asInterface(b));
+                    }});
     }
 
     /**

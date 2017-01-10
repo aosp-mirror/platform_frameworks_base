@@ -17,6 +17,7 @@
 package android.graphics;
 
 import android.content.res.AssetManager;
+import android.text.FontConfig;
 import android.util.Log;
 
 import java.io.FileInputStream;
@@ -80,7 +81,7 @@ public class FontFamily {
         }
     }
 
-    public boolean addFontWeightStyle(ByteBuffer font, int ttcIndex, List<FontListParser.Axis> axes,
+    public boolean addFontWeightStyle(ByteBuffer font, int ttcIndex, List<FontConfig.Axis> axes,
             int weight, boolean style) {
         return nAddFontWeightStyle(mNativePtr, font, ttcIndex, axes, weight, style);
     }
@@ -93,7 +94,7 @@ public class FontFamily {
     private static native void nUnrefFamily(long nativePtr);
     private static native boolean nAddFont(long nativeFamily, ByteBuffer font, int ttcIndex);
     private static native boolean nAddFontWeightStyle(long nativeFamily, ByteBuffer font,
-            int ttcIndex, List<FontListParser.Axis> listOfAxis,
+            int ttcIndex, List<FontConfig.Axis> listOfAxis,
             int weight, boolean isItalic);
     private static native boolean nAddFontFromAsset(long nativeFamily, AssetManager mgr,
             String path);
