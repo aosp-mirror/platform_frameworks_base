@@ -100,4 +100,13 @@ interface INetworkScoreService
      * @hide
      */
     boolean requestScores(in NetworkKey[] networks);
+
+    /**
+     * Determine whether the application with the given UID is the enabled scorer.
+     *
+     * @param callingUid the UID to check
+     * @return true if the provided UID is the active scorer, false otherwise.
+     * @hide
+     */
+    boolean isCallerActiveScorer(int callingUid);
 }
