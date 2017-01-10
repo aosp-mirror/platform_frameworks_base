@@ -78,4 +78,14 @@ interface IWebViewUpdateService {
      * Enable or disable the WebView package fallback mechanism.
      */
     void enableFallbackLogic(boolean enable);
+
+    /**
+     * Used by Settings to determine whether multiprocess is enabled.
+     */
+    boolean isMultiProcessEnabled();
+
+    /**
+     * Used by Settings to enable/disable multiprocess.
+     */
+    void enableMultiProcess(boolean enable);
 }

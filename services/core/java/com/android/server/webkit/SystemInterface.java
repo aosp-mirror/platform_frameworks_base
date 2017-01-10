@@ -50,6 +50,7 @@ public interface SystemInterface {
     public PackageInfo getPackageInfoForProvider(WebViewProviderInfo configInfo)
             throws NameNotFoundException;
 
-    public void setMultiProcessEnabledFromContext(Context context);
-    public void registerContentObserver(Context context, ContentObserver contentObserver);
+    public int getMultiProcessSetting(Context context);
+    public void setMultiProcessSetting(Context context, int value);
+    public void notifyZygote(boolean enableMultiProcess);
 }

@@ -261,6 +261,32 @@ public class WebViewUpdateService extends SystemService {
             }
         }
 
+        @Override // Binder call
+        public boolean isMultiProcessEnabled() {
+            return WebViewUpdateService.this.mImpl.isMultiProcessEnabled();
+        }
+
+        @Override // Binder call
+        public void enableMultiProcess(boolean enable) {
+            if (getContext().checkCallingPermission(
+                        android.Manifest.permission.WRITE_SECURE_SETTINGS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                String msg = "Permission Denial: enableMultiProcess() from pid="
+                        + Binder.getCallingPid()
+                        + ", uid=" + Binder.getCallingUid()
+                        + " requires " + android.Manifest.permission.WRITE_SECURE_SETTINGS;
+                Slog.w(TAG, msg);
+                throw new SecurityException(msg);
+            }
+
+            long callingId = Binder.clearCallingIdentity();
+            try {
+                WebViewUpdateService.this.mImpl.enableMultiProcess(enable);
+            } finally {
+                Binder.restoreCallingIdentity(callingId);
+            }
+        }
+
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (getContext().checkCallingOrSelfPermission(android.Manifest.permission.DUMP)

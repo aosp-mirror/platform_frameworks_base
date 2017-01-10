@@ -271,21 +271,20 @@ public class SystemImpl implements SystemInterface {
     }
 
     @Override
-    public void setMultiProcessEnabledFromContext(Context context) {
-        boolean enableMultiProcess = false;
-        try {
-            enableMultiProcess = Settings.Global.getInt(context.getContentResolver(),
-                    Settings.Global.WEBVIEW_MULTIPROCESS) == 1;
-        } catch (Settings.SettingNotFoundException ex) {
-        }
-        WebViewZygote.setMultiprocessEnabled(enableMultiProcess);
+    public int getMultiProcessSetting(Context context) {
+        return Settings.Global.getInt(context.getContentResolver(),
+                                      Settings.Global.WEBVIEW_MULTIPROCESS, 0);
     }
 
     @Override
-    public void registerContentObserver(Context context, ContentObserver contentObserver) {
-        context.getContentResolver().registerContentObserver(
-                Settings.Global.getUriFor(Settings.Global.WEBVIEW_MULTIPROCESS),
-                false, contentObserver);
+    public void setMultiProcessSetting(Context context, int value) {
+        Settings.Global.putInt(context.getContentResolver(),
+                               Settings.Global.WEBVIEW_MULTIPROCESS, value);
+    }
+
+    @Override
+    public void notifyZygote(boolean enableMultiProcess) {
+        WebViewZygote.setMultiprocessEnabled(enableMultiProcess);
     }
 
     // flags declaring we want extra info from the package manager for webview providers

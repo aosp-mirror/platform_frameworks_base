@@ -20,8 +20,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.Signature;
-import android.database.ContentObserver;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.util.Base64;
@@ -77,7 +75,6 @@ public class WebViewUpdateServiceImpl {
 
     private SystemInterface mSystemInterface;
     private WebViewUpdater mWebViewUpdater;
-    private SettingsObserver mSettingsObserver;
     final private Context mContext;
 
     public WebViewUpdateServiceImpl(Context context, SystemInterface systemInterface) {
@@ -97,10 +94,7 @@ public class WebViewUpdateServiceImpl {
     void prepareWebViewInSystemServer() {
         updateFallbackStateOnBoot();
         mWebViewUpdater.prepareWebViewInSystemServer();
-
-        // Register for changes in the multiprocess developer option. This has to be done
-        // here, since the update service gets created before the ContentResolver service.
-        mSettingsObserver = new SettingsObserver();
+        mSystemInterface.notifyZygote(isMultiProcessEnabled());
     }
 
     private boolean existsValidNonFallbackProvider(WebViewProviderInfo[] providers) {
@@ -245,6 +239,19 @@ public class WebViewUpdateServiceImpl {
         WebViewProviderInfo fallbackProvider = getFallbackProvider(webviewPackages);
         return (fallbackProvider != null
                 && packageName.equals(fallbackProvider.packageName));
+    }
+
+    boolean isMultiProcessEnabled() {
+        return mSystemInterface.getMultiProcessSetting(mContext) != 0;
+    }
+
+    void enableMultiProcess(boolean enable) {
+        PackageInfo current = getCurrentWebViewPackage();
+        mSystemInterface.setMultiProcessSetting(mContext, enable ? 1 : 0);
+        mSystemInterface.notifyZygote(enable);
+        if (current != null) {
+            mSystemInterface.killPackageDependents(current.packageName);
+        }
     }
 
     /**
@@ -737,31 +744,6 @@ public class WebViewUpdateServiceImpl {
         return (((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED) != 0)
             && ((packageInfo.applicationInfo.privateFlags
                         & ApplicationInfo.PRIVATE_FLAG_HIDDEN) == 0));
-    }
-
-    /**
-     * Watches for changes in the WEBVIEW_MULTIPROCESS setting and lets
-     * the WebViewZygote know, so it can start or stop the zygote process
-     * appropriately.
-     */
-    private class SettingsObserver extends ContentObserver {
-        SettingsObserver() {
-            super(new Handler());
-
-            mSystemInterface.registerContentObserver(mContext, this);
-
-            // Push the current value of the setting immediately.
-            notifyZygote();
-        }
-
-        @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            notifyZygote();
-        }
-
-        private void notifyZygote() {
-            mSystemInterface.setMultiProcessEnabledFromContext(mContext);
-        }
     }
 
     /**

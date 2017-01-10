@@ -19,7 +19,6 @@ package com.android.server.webkit;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.database.ContentObserver;
 import android.webkit.WebViewProviderInfo;
 
 import java.util.HashMap;
@@ -31,6 +30,7 @@ public class TestSystemImpl implements SystemInterface {
     private boolean mFallbackLogicEnabled;
     private final int mNumRelros;
     private final boolean mIsDebuggable;
+    private int mMultiProcessSetting;
 
     public TestSystemImpl(WebViewProviderInfo[] packageConfigs, boolean fallbackLogicEnabled,
             int numRelros, boolean isDebuggable) {
@@ -121,8 +121,15 @@ public class TestSystemImpl implements SystemInterface {
     }
 
     @Override
-    public void setMultiProcessEnabledFromContext(Context context) {}
+    public int getMultiProcessSetting(Context context) {
+        return mMultiProcessSetting;
+    }
 
     @Override
-    public void registerContentObserver(Context context, ContentObserver contentObserver) {}
+    public void setMultiProcessSetting(Context context, int value) {
+        mMultiProcessSetting = value;
+    }
+
+    @Override
+    public void notifyZygote(boolean enableMultiProcess) {}
 }
