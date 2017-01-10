@@ -1403,7 +1403,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected ShortcutInfo makeShortcut(String id, String title, ComponentName activity,
             Icon icon, Intent intent, int rank) {
         final ShortcutInfo.Builder  b = new ShortcutInfo.Builder(mClientContext, id)
-                .setActivity(new ComponentName(mClientContext.getPackageName(), "dummy"))
+                .setActivity(new ComponentName(mClientContext.getPackageName(), "main"))
                 .setShortLabel(title)
                 .setRank(rank)
                 .setIntent(intent);
@@ -1432,7 +1432,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected ShortcutInfo makeShortcut(String id, String title, ComponentName activity,
             Icon icon, Intent[] intents, int rank) {
         final ShortcutInfo.Builder  b = new ShortcutInfo.Builder(mClientContext, id)
-                .setActivity(new ComponentName(mClientContext.getPackageName(), "dummy"))
+                .setActivity(new ComponentName(mClientContext.getPackageName(), "main"))
                 .setShortLabel(title)
                 .setRank(rank)
                 .setIntents(intents);
@@ -1455,7 +1455,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected ShortcutInfo makeShortcutWithExtras(String id, Intent intent,
             PersistableBundle extras) {
         final ShortcutInfo.Builder  b = new ShortcutInfo.Builder(mClientContext, id)
-                .setActivity(new ComponentName(mClientContext.getPackageName(), "dummy"))
+                .setActivity(new ComponentName(mClientContext.getPackageName(), "main"))
                 .setShortLabel("title-" + id)
                 .setExtras(extras)
                 .setIntent(intent);

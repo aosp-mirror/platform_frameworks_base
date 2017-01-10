@@ -38,6 +38,7 @@ import android.graphics.drawable.Icon;
 import android.os.UserHandle;
 import android.test.MoreAsserts;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.util.Log;
 import android.util.Pair;
 
 import com.android.frameworks.servicestests.R;
@@ -227,8 +228,9 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
 
     private void assertPinItemRequest(PinItemRequest actualRequest) {
         assertNotNull(actualRequest);
-
         assertEquals(PinItemRequest.REQUEST_TYPE_SHORTCUT, actualRequest.getRequestType());
+
+        Log.i(TAG, "Requested shortcut: " + actualRequest.getShortcutInfo().toInsecureString());
     }
 
     /**
@@ -243,9 +245,16 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
         final Icon res32x32 = Icon.createWithResource(getTestContext(), R.drawable.black_32x32);
 
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
-            ShortcutInfo s1 = makeShortcutWithIcon("s1", res32x32);
+            /// Create a shortcut with no target activity.
+            final ShortcutInfo.Builder  b = new ShortcutInfo.Builder(mClientContext, "s1")
+                    .setShortLabel("Title-" + "s1")
+                    .setIcon(res32x32)
+                    .setIntent(makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class));
+            final ShortcutInfo s = b.build();
 
-            assertTrue(mManager.requestPinShortcut(s1,
+            assertNull(s.getActivity());
+
+            assertTrue(mManager.requestPinShortcut(s,
                     resultIntent == null ? null : resultIntent.getIntentSender()));
 
             verify(mServiceContext, times(0)).sendIntentSender(any(IntentSender.class));
@@ -271,6 +280,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
             assertWith(request.getShortcutInfo())
                     .haveIds("s1")
                     .areAllOrphan()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1, MAIN_ACTIVITY_CLASS))
                     .areAllWithNoIntent();
 
             assertAllHaveIcon(list(request.getShortcutInfo()));
@@ -295,6 +305,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                     .areAllNotDynamic()
                     .areAllEnabled()
                     .areAllPinned()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1, MAIN_ACTIVITY_CLASS))
                     .areAllWithIntent();
         });
     }
@@ -308,6 +319,145 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                 PendingIntent.getActivity(getTestContext(), 0, new Intent(), 0);
 
         checkRequestPinShortcut(resultIntent);
+    }
+
+    public void testRequestPinShortcut_explicitTargetActivity() {
+        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_10, mMainActivityFetcher.apply(LAUNCHER_2, USER_10));
+
+        runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
+            ShortcutInfo s1 = makeShortcutWithActivity("s1",
+                    new ComponentName(CALLING_PACKAGE_1, "different_activity"));
+
+            assertTrue(mManager.requestPinShortcut(s1, null));
+
+            verify(mServiceContext, times(0)).sendIntentSender(any(IntentSender.class));
+
+            // Shortcut shouldn't be registered yet.
+            assertWith(getCallerShortcuts())
+                    .isEmpty();
+        });
+
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            // Check the intent passed to startActivityAsUser().
+            final ArgumentCaptor<Intent> intent = ArgumentCaptor.forClass(Intent.class);
+
+            verify(mServiceContext).startActivityAsUser(intent.capture(), eq(HANDLE_USER_0));
+
+            assertPinItemRequestIntent(intent.getValue(), mInjectedClientPackage);
+
+            // Check the request object.
+            final PinItemRequest request = mLauncherApps.getPinItemRequest(intent.getValue());
+
+            assertPinItemRequest(request);
+
+            assertWith(request.getShortcutInfo())
+                    .haveIds("s1")
+                    .areAllOrphan()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1, "different_activity"))
+                    .areAllWithNoIntent();
+
+            // Accept the request.
+            assertForLauncherCallbackNoThrow(mLauncherApps,
+                    () -> assertTrue(request.accept()))
+                    .assertCallbackCalledForPackageAndUser(CALLING_PACKAGE_1, HANDLE_USER_P0)
+                    .haveIds("s1");
+        });
+
+        verify(mServiceContext, times(1)).sendIntentSender(eq(null));
+
+        runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
+            assertWith(getCallerShortcuts())
+                    .haveIds("s1")
+                    .areAllNotDynamic()
+                    .areAllEnabled()
+                    .areAllPinned()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1, "different_activity"))
+                    .areAllWithIntent();
+        });
+    }
+
+    public void testRequestPinShortcut_wrongTargetActivity() {
+        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+
+        runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
+            // Create dynamic shortcut
+            ShortcutInfo s1 = makeShortcutWithActivity("s1",
+                    new ComponentName("wrong_package", "different_activity"));
+
+            assertExpectException(IllegalStateException.class, "not belong to package", () -> {
+                assertTrue(mManager.requestPinShortcut(s1, /* resultIntent=*/ null));
+            });
+
+            verify(mServiceContext, times(0)).sendIntentSender(any(IntentSender.class));
+            verify(mServiceContext, times(0)).startActivityAsUser(
+                    any(Intent.class), any(UserHandle.class));
+        });
+    }
+
+    public void testRequestPinShortcut_noTargetActivity_noMainActivity() {
+        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+        setDefaultLauncher(USER_10, mMainActivityFetcher.apply(LAUNCHER_2, USER_10));
+
+        runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
+            /// Create a shortcut with no target activity.
+            final ShortcutInfo.Builder  b = new ShortcutInfo.Builder(mClientContext, "s1")
+                    .setShortLabel("Title-" + "s1")
+                    .setIntent(makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class));
+            final ShortcutInfo s = b.build();
+
+            assertNull(s.getActivity());
+
+            // Caller has no main activity.
+            mMainActivityFetcher = (packageName, userId) -> null;
+
+            assertTrue(mManager.requestPinShortcut(s, null));
+
+            verify(mServiceContext, times(0)).sendIntentSender(any(IntentSender.class));
+
+            // Shortcut shouldn't be registered yet.
+            assertWith(getCallerShortcuts())
+                    .isEmpty();
+        });
+
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            // Check the intent passed to startActivityAsUser().
+            final ArgumentCaptor<Intent> intent = ArgumentCaptor.forClass(Intent.class);
+
+            verify(mServiceContext).startActivityAsUser(intent.capture(), eq(HANDLE_USER_0));
+
+            assertPinItemRequestIntent(intent.getValue(), mInjectedClientPackage);
+
+            // Check the request object.
+            final PinItemRequest request = mLauncherApps.getPinItemRequest(intent.getValue());
+
+            assertPinItemRequest(request);
+
+            assertWith(request.getShortcutInfo())
+                    .haveIds("s1")
+                    .areAllOrphan()
+                    .areAllWithNoActivity() // Activity is not set; expected.
+                    .areAllWithNoIntent();
+
+            // Accept the request.
+            assertForLauncherCallbackNoThrow(mLauncherApps,
+                    () -> assertTrue(request.accept()))
+                    .assertCallbackCalledForPackageAndUser(CALLING_PACKAGE_1, HANDLE_USER_P0)
+                    .haveIds("s1");
+        });
+
+        verify(mServiceContext, times(1)).sendIntentSender(eq(null));
+
+        runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
+            assertWith(getCallerShortcuts())
+                    .haveIds("s1")
+                    .areAllNotDynamic()
+                    .areAllEnabled()
+                    .areAllPinned()
+                    .areAllWithNoActivity() // Activity is not set; expected.
+                    .areAllWithIntent();
+        });
+
     }
 
     public void testRequestPinShortcut_dynamicExists() {
@@ -328,6 +478,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
             assertWith(getCallerShortcuts())
                     .haveIds("s1")
                     .areAllDynamic()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1, "main"))
                     .areAllNotPinned();
         });
 
@@ -348,6 +499,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                     .haveIds("s1")
                     .areAllDynamic()
                     .areAllNotPinned()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1, "main"))
                     .areAllWithNoIntent();
 
             assertAllHaveIcon(list(request.getShortcutInfo()));
@@ -361,6 +513,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                     .haveIds("s1")
                     .areAllDynamic()
                     .areAllEnabled()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1, "main"))
                     .areAllPinned();
         });
     }
@@ -379,6 +532,8 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
             assertWith(getCallerShortcuts())
                     .haveIds("ms1")
                     .areAllManifest()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1,
+                            ShortcutActivity.class.getName()))
                     .areAllNotPinned();
         });
 
@@ -399,6 +554,8 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                     .haveIds("ms1")
                     .areAllManifest()
                     .areAllNotPinned()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1,
+                            ShortcutActivity.class.getName()))
                     .areAllWithNoIntent();
 
             assertAllHaveIcon(list(request.getShortcutInfo()));
@@ -412,6 +569,8 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                     .haveIds("ms1")
                     .areAllManifest()
                     .areAllEnabled()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1,
+                            ShortcutActivity.class.getName()))
                     .areAllPinned();
         });
     }
@@ -431,6 +590,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
             assertWith(getCallerShortcuts())
                     .haveIds("s1")
                     .areAllDynamic()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1, "main"))
                     .areAllPinned();
 
             assertTrue(mManager.requestPinShortcut(makeShortcutIdOnly("s1"),
@@ -456,6 +616,8 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
             assertWith(getCallerShortcuts())
                     .haveIds("ms1")
                     .areAllManifest()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1,
+                            ShortcutActivity.class.getName()))
                     .areAllPinned();
 
             assertTrue(mManager.requestPinShortcut(makeShortcutIdOnly("ms1"),
@@ -483,6 +645,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                     .haveIds("s1")
                     .areAllNotDynamic()
                     .areAllEnabled()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1, "main"))
                     .areAllPinned();
 
             assertTrue(mManager.requestPinShortcut(makeShortcutIdOnly("s1"),
@@ -511,6 +674,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                     .haveIds("s1")
                     .areAllNotDynamic()
                     .areAllDisabled()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1, "main"))
                     .areAllPinned();
 
             assertExpectException(IllegalArgumentException.class, "exists but disabled", () -> {
@@ -541,6 +705,8 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                     .haveIds("ms1")
                     .areAllNotManifest()
                     .areAllDisabled()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1,
+                            ShortcutActivity.class.getName()))
                     .areAllPinned();
 
             assertExpectException(IllegalArgumentException.class, "exists but disabled", () -> {
@@ -570,6 +736,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
             assertWith(getCallerShortcuts())
                     .haveIds("s1")
                     .areAllDynamic()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1, "main"))
                     .areAllPinned();
 
             // The shortcut is already pinned, but not by the current launcher, so it'll still
@@ -597,6 +764,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                     .haveIds("s1")
                     .areAllDynamic()
                     .areAllNotPinned() // Note it's not pinned by this launcher.
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1, "main"))
                     .areAllWithNoIntent();
 
             // Accept the request.
@@ -608,6 +776,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                     .haveIds("s1")
                     .areAllDynamic()
                     .areAllEnabled()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1, "main"))
                     .areAllPinned();
         });
     }
@@ -629,6 +798,8 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
             assertWith(getCallerShortcuts())
                     .haveIds("ms1")
                     .areAllManifest()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1,
+                            ShortcutActivity.class.getName()))
                     .areAllPinned();
 
             // The shortcut is already pinned, but not by the current launcher, so it'll still
@@ -656,6 +827,8 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                     .haveIds("ms1")
                     .areAllManifest()
                     .areAllNotPinned() // Note it's not pinned by this launcher.
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1,
+                            ShortcutActivity.class.getName()))
                     .areAllWithNoIntent();
 
             // Accept the request.
@@ -667,6 +840,8 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                     .haveIds("ms1")
                     .areAllManifest()
                     .areAllEnabled()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1,
+                            ShortcutActivity.class.getName()))
                     .areAllPinned();
         });
     }
@@ -710,6 +885,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                     .haveIds("s1")
                     .areAllDynamic()
                     .areAllNotPinned()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1, "main"))
                     .areAllWithNoIntent();
 
             // Accept the request.
@@ -719,6 +895,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                     .haveIds("s1", "s2")
                     .areAllDynamic()
                     .areAllEnabled()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1, "main"))
                     .areAllPinned();
         });
 
@@ -727,6 +904,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                     .haveIds("s1", "s2")
                     .areAllDynamic()
                     .areAllEnabled()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1, "main"))
                     .areAllPinned();
         });
     }
@@ -752,6 +930,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
             assertWith(getCallerShortcuts())
                     .haveIds("s1")
                     .areAllDynamic()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1, "main"))
                     .areAllNotPinned();
         });
 
@@ -772,6 +951,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                     .haveIds("s1")
                     .areAllDynamic()
                     .areAllNotPinned()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1, "main"))
                     .areAllWithNoIntent();
 
             assertAllHaveIcon(list(request.getShortcutInfo()));
@@ -786,6 +966,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                     .areAllDynamic()
                     .areAllEnabled()
                     .areAllPinned()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1, "main"))
                     .forShortcutWithId("s1", (si) -> {
                         // Still the original title.
                         assertEquals("Title-s1", si.getShortLabel());
@@ -810,6 +991,8 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
             assertWith(getCallerShortcuts())
                     .haveIds("ms1")
                     .areAllManifest()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1,
+                            ShortcutActivity.class.getName()))
                     .areAllNotPinned();
         });
 
@@ -830,6 +1013,8 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                     .haveIds("ms1")
                     .areAllManifest()
                     .areAllNotPinned()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1,
+                            ShortcutActivity.class.getName()))
                     .areAllWithNoIntent();
 
             assertAllHaveIcon(list(request.getShortcutInfo()));
@@ -844,6 +1029,8 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                     .areAllManifest()
                     .areAllEnabled()
                     .areAllPinned()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1,
+                            ShortcutActivity.class.getName()))
                     .forShortcutWithId("ms1", (si) -> {
                         // Still the original title.
                         // Title should be something like:
@@ -893,6 +1080,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                     .haveIds("s1")
                     .areAllDynamic()
                     .areAllNotPinned()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1, "main"))
                     .areAllWithNoIntent();
 
             // Accept the request -> should fail.
@@ -950,9 +1138,9 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                     .haveIds("s1")
                     .areAllDynamic()
                     .areAllNotPinned()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1, "main"))
                     .areAllWithNoIntent();
 
-            // Accept the request -> should fail.
             assertTrue(request.accept());
         });
 
@@ -1004,6 +1192,8 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                     .haveIds("ms1")
                     .areAllManifest()
                     .areAllNotPinned()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1,
+                            ShortcutActivity.class.getName()))
                     .areAllWithNoIntent();
 
             // Accept the request -> should fail.
@@ -1059,10 +1249,11 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                     .haveIds("ms1")
                     .areAllManifest()
                     .areAllNotPinned()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1,
+                            ShortcutActivity.class.getName()))
                     .areAllWithNoIntent();
 
 
-            // Accept the request -> should fail.
             assertTrue(request.accept());
         });
 
@@ -1071,6 +1262,9 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                     .haveIds("ms1")
                     .areAllMutable() // Note it's no longer immutable.
                     .areAllFloating()
+
+                    // Note it's the activity from makeShortcutWithShortLabel().
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1, "main"))
                     .forShortcutWithId("ms1", si -> {
                         assertEquals("new", si.getShortLabel());
                     });
@@ -1104,6 +1298,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
             mManager.disableShortcuts(list("s1"));
             assertWith(getCallerShortcuts())
                     .haveIds("s1")
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1, "main"))
                     .areAllDisabled();
         });
 
@@ -1125,6 +1320,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                     .haveIds("s1")
                     .areAllDynamic()
                     .areAllNotPinned()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1, "main"))
                     .areAllWithNoIntent();
 
             // Accept the request -> should fail.
@@ -1144,6 +1340,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             assertWith(getCallerShortcuts())
                     .haveIds("s1")
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1, "main"))
                     .areAllDisabled();
         });
     }
@@ -1174,6 +1371,8 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
             publishManifestShortcutsAsCaller(R.xml.shortcut_0);
             assertWith(getCallerShortcuts())
                     .haveIds("ms1")
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1,
+                            ShortcutActivity.class.getName()))
                     .areAllDisabled();
         });
 
@@ -1195,6 +1394,8 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                     .haveIds("ms1")
                     .areAllManifest()
                     .areAllNotPinned()
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1,
+                            ShortcutActivity.class.getName()))
                     .areAllWithNoIntent();
 
             // Accept the request -> should fail.
@@ -1214,6 +1415,8 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             assertWith(getCallerShortcuts())
                     .haveIds("ms1")
+                    .areAllWithActivity(new ComponentName(CALLING_PACKAGE_1,
+                            ShortcutActivity.class.getName()))
                     .areAllDisabled();
         });
     }

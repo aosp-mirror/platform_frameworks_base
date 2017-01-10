@@ -16,7 +16,6 @@
 package com.android.server.pm;
 
 import android.annotation.Nullable;
-import android.app.PendingIntent;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -209,7 +208,7 @@ class ShortcutRequestPinProcessor {
         final boolean existsAlready = existing != null;
 
         if (DEBUG) {
-            Slog.d(TAG, "requestPinnedShortcut package=" + inShortcut.getPackage()
+            Slog.d(TAG, "requestPinnedShortcut: package=" + inShortcut.getPackage()
                     + " existsAlready=" + existsAlready
                     + " shortcut=" + inShortcut.toInsecureString());
         }
@@ -237,6 +236,14 @@ class ShortcutRequestPinProcessor {
             // FLAG_PINNED is still set, if it's pinned by other launchers.
             shortcutForLauncher.clearFlags(ShortcutInfo.FLAG_PINNED);
         } else {
+            // If the shortcut has no default activity, try to set the main activity.
+            // But in the request-pin case, it's optional, so it's okay even if the caller
+            // has no default activity.
+            if (inShortcut.getActivity() == null) {
+                inShortcut.setActivity(mService.injectGetDefaultMainActivity(
+                        inShortcut.getPackage(), inShortcut.getUserId()));
+            }
+
             // It doesn't exist, so it must have all mandatory fields.
             mService.validateShortcutForPinRequest(inShortcut);
 
@@ -244,11 +251,14 @@ class ShortcutRequestPinProcessor {
             inShortcut.resolveResourceStrings(mService.injectGetResourcesForApplicationAsUser(
                     inShortcut.getPackage(), inShortcut.getUserId()));
             if (DEBUG) {
-                Slog.d(TAG, "resolved shortcut=" + inShortcut.toInsecureString());
+                Slog.d(TAG, "Resolved shortcut=" + inShortcut.toInsecureString());
             }
             // We should strip out the intent, but should preserve the icon.
             shortcutForLauncher = inShortcut.clone(
                     ShortcutInfo.CLONE_REMOVE_FOR_LAUNCHER_APPROVAL);
+        }
+        if (DEBUG) {
+            Slog.d(TAG, "Sending to launcher=" + shortcutForLauncher.toInsecureString());
         }
 
         // Create a request object.
@@ -360,7 +370,9 @@ class ShortcutRequestPinProcessor {
                 if (DEBUG) {
                     Slog.d(TAG, "Temporarily adding " + shortcutId + " as dynamic");
                 }
-                // Add as a dynamic shortcut.
+                // Add as a dynamic shortcut.  In order for a shortcut to be dynamic, it must
+                // have a target activity, so we set a dummy here.  It's later removed
+                // in deleteDynamicWithId().
                 if (original.getActivity() == null) {
                     original.setActivity(mService.getDummyMainActivity(appPackageName));
                 }
