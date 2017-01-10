@@ -199,16 +199,44 @@ public class Installer extends SystemService {
         }
     }
 
-    public void getAppSize(String uuid, String packageName, int userId, int flags, int appId,
-            long ceDataInode, String codePath, String externalUuid, PackageStats stats)
+    public void getAppSize(String uuid, String[] packageNames, int userId, int flags, int appId,
+            long[] ceDataInodes, String[] codePaths, PackageStats stats)
             throws InstallerException {
         if (!checkBeforeRemote()) return;
         try {
-            final long[] res = mInstalld.getAppSize(uuid, packageName, userId, flags, appId,
-                    ceDataInode, codePath, externalUuid);
+            final long[] res = mInstalld.getAppSize(uuid, packageNames, userId, flags,
+                    appId, ceDataInodes, codePaths);
             stats.codeSize += res[0];
             stats.dataSize += res[1];
             stats.cacheSize += res[2];
+            stats.externalCodeSize += res[3];
+            stats.externalDataSize += res[4];
+            stats.externalCacheSize += res[5];
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    public void getUserSize(String uuid, int userId, int flags, int[] appIds, PackageStats stats)
+            throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        try {
+            final long[] res = mInstalld.getUserSize(uuid, userId, flags, appIds);
+            stats.codeSize += res[0];
+            stats.dataSize += res[1];
+            stats.cacheSize += res[2];
+            stats.externalCodeSize += res[3];
+            stats.externalDataSize += res[4];
+            stats.externalCacheSize += res[5];
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    public long[] getExternalSize(String uuid, int userId, int flags) throws InstallerException {
+        if (!checkBeforeRemote()) return new long[4];
+        try {
+            return mInstalld.getExternalSize(uuid, userId, flags);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
