@@ -168,11 +168,11 @@ public class NetworkScoreManager {
      *         scorer.
      */
     public String getActiveScorerPackage() {
-        NetworkScorerAppData app = new NetworkScorerAppManager(mContext).getActiveScorer();
-        if (app == null) {
-            return null;
+        try {
+            return mService.getActiveScorerPackage();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return app.packageName;
     }
 
     /**
