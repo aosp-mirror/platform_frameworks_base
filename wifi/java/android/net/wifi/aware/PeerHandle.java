@@ -22,8 +22,6 @@ package android.net.wifi.aware;
  * when sending messages e,g, {@link PublishDiscoverySession#sendMessage(PeerHandle, int, byte[])},
  * or when configuring a network link to a peer, e.g.
  * {@link PublishDiscoverySession#createNetworkSpecifier(PeerHandle, byte[])}.
- *
- * @hide PROPOSED_AWARE_API
  */
 public class PeerHandle {
     /** @hide */
