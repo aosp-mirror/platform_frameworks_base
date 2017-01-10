@@ -339,4 +339,19 @@ public class NetworkScoreManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Determine whether the application with the given UID is the enabled scorer.
+     *
+     * @param callingUid the UID to check
+     * @return true if the provided UID is the active scorer, false otherwise.
+     * @hide
+     */
+    public boolean isCallerActiveScorer(int callingUid) {
+        try {
+            return mService.isCallerActiveScorer(callingUid);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

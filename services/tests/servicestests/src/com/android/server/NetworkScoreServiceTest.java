@@ -61,6 +61,7 @@ import android.net.RecommendationResult;
 import android.net.ScoredNetwork;
 import android.net.WifiKey;
 import android.net.wifi.WifiConfiguration;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
@@ -261,7 +262,7 @@ public class NetworkScoreServiceTest {
 
     @Test
     public void testUpdateScores_notActiveScorer() {
-        when(mNetworkScorerAppManager.isCallerActiveScorer(anyInt())).thenReturn(false);
+        bindToScorer(false /*callerIsScorer*/);
 
         try {
             mNetworkScoreService.updateScores(new ScoredNetwork[0]);
@@ -273,7 +274,7 @@ public class NetworkScoreServiceTest {
 
     @Test
     public void testUpdateScores_oneRegisteredCache() throws RemoteException {
-        when(mNetworkScorerAppManager.isCallerActiveScorer(anyInt())).thenReturn(true);
+        bindToScorer(true /*callerIsScorer*/);
 
         mNetworkScoreService.registerNetworkScoreCache(NetworkKey.TYPE_WIFI,
                 mNetworkScoreCache, CACHE_FILTER_NONE);
@@ -288,7 +289,7 @@ public class NetworkScoreServiceTest {
 
     @Test
     public void testUpdateScores_twoRegisteredCaches() throws RemoteException {
-        when(mNetworkScorerAppManager.isCallerActiveScorer(anyInt())).thenReturn(true);
+        bindToScorer(true /*callerIsScorer*/);
 
         mNetworkScoreService.registerNetworkScoreCache(NetworkKey.TYPE_WIFI,
                 mNetworkScoreCache, CACHE_FILTER_NONE);
@@ -323,7 +324,7 @@ public class NetworkScoreServiceTest {
 
     @Test
     public void testClearScores_notActiveScorer_noRequestNetworkScoresPermission() {
-        when(mNetworkScorerAppManager.isCallerActiveScorer(anyInt())).thenReturn(false);
+        bindToScorer(false /*callerIsScorer*/);
         when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
             .thenReturn(PackageManager.PERMISSION_DENIED);
         try {
@@ -336,7 +337,7 @@ public class NetworkScoreServiceTest {
 
     @Test
     public void testClearScores_activeScorer_noRequestNetworkScoresPermission() {
-        when(mNetworkScorerAppManager.isCallerActiveScorer(anyInt())).thenReturn(true);
+        bindToScorer(true /*callerIsScorer*/);
         when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
             .thenReturn(PackageManager.PERMISSION_DENIED);
 
@@ -345,7 +346,7 @@ public class NetworkScoreServiceTest {
 
     @Test
     public void testClearScores_activeScorer() throws RemoteException {
-        when(mNetworkScorerAppManager.isCallerActiveScorer(anyInt())).thenReturn(true);
+        bindToScorer(true /*callerIsScorer*/);
 
         mNetworkScoreService.registerNetworkScoreCache(NetworkKey.TYPE_WIFI, mNetworkScoreCache,
                 CACHE_FILTER_NONE);
@@ -357,7 +358,7 @@ public class NetworkScoreServiceTest {
     @Test
     public void testClearScores_notActiveScorer_hasRequestNetworkScoresPermission()
             throws RemoteException {
-        when(mNetworkScorerAppManager.isCallerActiveScorer(anyInt())).thenReturn(false);
+        bindToScorer(false /*callerIsScorer*/);
         when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
                 .thenReturn(PackageManager.PERMISSION_GRANTED);
 
@@ -383,7 +384,7 @@ public class NetworkScoreServiceTest {
 
     @Test
     public void testDisableScoring_notActiveScorer_noRequestNetworkScoresPermission() {
-        when(mNetworkScorerAppManager.isCallerActiveScorer(anyInt())).thenReturn(false);
+        bindToScorer(false /*callerIsScorer*/);
         when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
                 .thenReturn(PackageManager.PERMISSION_DENIED);
 
@@ -448,6 +449,27 @@ public class NetworkScoreServiceTest {
         assertFalse(stringWriter.toString().isEmpty());
     }
 
+    @Test
+    public void testIsCallerActiveScorer_noBoundService() throws Exception {
+        mNetworkScoreService.systemRunning();
+
+        assertFalse(mNetworkScoreService.isCallerActiveScorer(Binder.getCallingUid()));
+    }
+
+    @Test
+    public void testIsCallerActiveScorer_boundServiceIsNotCaller() throws Exception {
+        bindToScorer(false /*callerIsScorer*/);
+
+        assertFalse(mNetworkScoreService.isCallerActiveScorer(Binder.getCallingUid()));
+    }
+
+    @Test
+    public void testIsCallerActiveScorer_boundServiceIsCaller() throws Exception {
+        bindToScorer(true /*callerIsScorer*/);
+
+        assertTrue(mNetworkScoreService.isCallerActiveScorer(Binder.getCallingUid()));
+    }
+
     // "injects" the mock INetworkRecommendationProvider into the NetworkScoreService.
     private void injectProvider() {
         final ComponentName componentName = new ComponentName(NEW_SCORER.packageName,
@@ -465,6 +487,16 @@ public class NetworkScoreServiceTest {
                 return true;
             }
         });
+        mNetworkScoreService.systemRunning();
+    }
+
+    private void bindToScorer(boolean callerIsScorer) {
+        final int callingUid = callerIsScorer ? Binder.getCallingUid() : 0;
+        NetworkScorerAppData appData = new NetworkScorerAppData(NEW_SCORER.packageName,
+                callingUid, NEW_SCORER.recommendationServiceClassName);
+        when(mNetworkScorerAppManager.getActiveScorer()).thenReturn(appData);
+        when(mContext.bindServiceAsUser(isA(Intent.class), isA(ServiceConnection.class), anyInt(),
+                isA(UserHandle.class))).thenReturn(true);
         mNetworkScoreService.systemRunning();
     }
 }
