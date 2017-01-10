@@ -1610,23 +1610,28 @@ final class TaskRecord extends ConfigurationContainer {
             boolean overrideWidth, boolean overrideHeight) {
         mTmpNonDecorBounds.set(bounds);
         mTmpStableBounds.set(bounds);
-        subtractNonDecorInsets(
-                mTmpNonDecorBounds, insetBounds != null ? insetBounds : bounds,
-                overrideWidth, overrideHeight);
-        subtractStableInsets(
-                mTmpStableBounds, insetBounds != null ? insetBounds : bounds,
-                overrideWidth, overrideHeight);
 
-        // For calculating screenWidthDp, screenHeightDp, we use the stable inset screen area,
-        // i.e. the screen area without the system bars.
-        // Additionally task dimensions should not be bigger than its parents dimensions.
         final Configuration parentConfig = getParent().getConfiguration();
         config.unset();
         final float density = parentConfig.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
-        config.screenWidthDp =
-                Math.min((int)(mTmpStableBounds.width() / density), parentConfig.screenWidthDp);
-        config.screenHeightDp =
-                Math.min((int)(mTmpStableBounds.height() / density), parentConfig.screenHeightDp);
+        final boolean isFloatingTask = mStack != null && StackId.tasksAreFloating(mStack.mStackId);
+        if (isFloatingTask) {
+            // Floating tasks should not be resized to the screen's bounds.
+            config.screenWidthDp = (int) (mTmpStableBounds.width() / density);
+            config.screenHeightDp = (int) (mTmpStableBounds.height() / density);
+        } else {
+            // For calculating screenWidthDp, screenWidthDp, we use the stable inset screen area,
+            // i.e. the screen area without the system bars.
+            // Additionally task dimensions should not be bigger than its parents dimensions.
+            subtractNonDecorInsets(mTmpNonDecorBounds, insetBounds != null ? insetBounds : bounds,
+                    overrideWidth, overrideHeight);
+            subtractStableInsets(mTmpStableBounds, insetBounds != null ? insetBounds : bounds,
+                    overrideWidth, overrideHeight);
+            config.screenWidthDp = Math.min(
+                    (int) (mTmpStableBounds.width() / density), parentConfig.screenWidthDp);
+            config.screenHeightDp = Math.min(
+                    (int) (mTmpStableBounds.height() / density), parentConfig.screenHeightDp);
+        }
 
         // TODO: Orientation?
         config.orientation = (config.screenWidthDp <= config.screenHeightDp)
