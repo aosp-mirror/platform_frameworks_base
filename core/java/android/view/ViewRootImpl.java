@@ -96,6 +96,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.policy.PhoneFallbackEventHandler;
 import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.RootViewSurfaceTaker;
+import com.android.internal.view.SurfaceCallbackHelper;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -528,11 +529,17 @@ public final class ViewRootImpl implements ViewParent,
      */
     public void notifyChildRebuilt() {
         if (mView instanceof RootViewSurfaceTaker) {
+            if (mSurfaceHolderCallback != null) {
+                mSurfaceHolder.removeCallback(mSurfaceHolderCallback);
+            }
+
             mSurfaceHolderCallback =
                 ((RootViewSurfaceTaker)mView).willYouTakeTheSurface();
+
             if (mSurfaceHolderCallback != null) {
                 mSurfaceHolder = new TakenSurfaceHolder();
                 mSurfaceHolder.setFormat(PixelFormat.UNKNOWN);
+                mSurfaceHolder.addCallback(mSurfaceHolderCallback);
             } else {
                 mSurfaceHolder = null;
             }
@@ -581,6 +588,7 @@ public final class ViewRootImpl implements ViewParent,
                     if (mSurfaceHolderCallback != null) {
                         mSurfaceHolder = new TakenSurfaceHolder();
                         mSurfaceHolder.setFormat(PixelFormat.UNKNOWN);
+                        mSurfaceHolder.addCallback(mSurfaceHolderCallback);
                     }
                 }
 
@@ -1957,7 +1965,6 @@ public final class ViewRootImpl implements ViewParent,
                         mSurfaceHolder.ungetCallbacks();
 
                         mIsCreating = true;
-                        mSurfaceHolderCallback.surfaceCreated(mSurfaceHolder);
                         SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
                         if (callbacks != null) {
                             for (SurfaceHolder.Callback c : callbacks) {
@@ -1967,8 +1974,6 @@ public final class ViewRootImpl implements ViewParent,
                         surfaceChanged = true;
                     }
                     if (surfaceChanged || surfaceGenerationId != mSurface.getGenerationId()) {
-                        mSurfaceHolderCallback.surfaceChanged(mSurfaceHolder,
-                                lp.format, mWidth, mHeight);
                         SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
                         if (callbacks != null) {
                             for (SurfaceHolder.Callback c : callbacks) {
@@ -1981,7 +1986,6 @@ public final class ViewRootImpl implements ViewParent,
                 } else if (hadSurface) {
                     mSurfaceHolder.ungetCallbacks();
                     SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
-                    mSurfaceHolderCallback.surfaceDestroyed(mSurfaceHolder);
                     if (callbacks != null) {
                         for (SurfaceHolder.Callback c : callbacks) {
                             c.surfaceDestroyed(mSurfaceHolder);
@@ -2646,20 +2650,17 @@ public final class ViewRootImpl implements ViewParent,
             if (LOCAL_LOGV) {
                 Log.v(mTag, "FINISHED DRAWING: " + mWindowAttributes.getTitle());
             }
+
             if (mSurfaceHolder != null && mSurface.isValid()) {
-                mSurfaceHolderCallback.surfaceRedrawNeeded(mSurfaceHolder);
+                SurfaceCallbackHelper sch = new SurfaceCallbackHelper(mWindowSession, mWindow);
                 SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
-                if (callbacks != null) {
-                    for (SurfaceHolder.Callback c : callbacks) {
-                        if (c instanceof SurfaceHolder.Callback2) {
-                            ((SurfaceHolder.Callback2)c).surfaceRedrawNeeded(mSurfaceHolder);
-                        }
-                    }
+
+                sch.dispatchSurfaceRedrawNeededAsync(mSurfaceHolder, callbacks);
+            } else {
+                try {
+                    mWindowSession.finishDrawing(mWindow);
+                } catch (RemoteException e) {
                 }
-            }
-            try {
-                mWindowSession.finishDrawing(mWindow);
-            } catch (RemoteException e) {
             }
         }
     }
