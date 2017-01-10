@@ -214,7 +214,7 @@ public final class ScanResult implements Parcelable {
     }
 
     /**
-     * Returns the received signal strength in dBm. The valid range is [-127, 127].
+     * Returns the received signal strength in dBm. The valid range is [-127, 126].
      */
     public int getRssi() {
         return mRssi;
