@@ -661,4 +661,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"सेटिङहरूको क्रमलाई सम्पादन गर्नुहोस्।"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g> मध्ये पृष्ठ <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"सूचनाहरूलाई मौन गर्न वा यसमाथि रोक लगाउन मिल्दैन"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"फोन तातो भइरहेको छ"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"फोन चिसो हुँदै गर्दा केही विशेषताहरूलाई सीमित गरिन्छ"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"तपाईंको फोन स्वतः चिसो हुने प्रयास गर्नेछ। तपाईं अझै पनि आफ्नो फोनको प्रयोग गर्न सक्नुहुन्छ तर त्यो अझ ढिलो चल्न सक्छ।\n\nचिसो भएपछि तपाईंको फोन सामान्य गतिमा चल्नेछ।"</string>
 </resources>

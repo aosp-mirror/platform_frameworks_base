@@ -661,4 +661,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"సెట్టింగ్‌ల క్రమాన్ని సవరించండి."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g>లో <xliff:g id="ID_1">%1$d</xliff:g>వ పేజీ"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"నోటిఫికేషన్‌లను నిశ్శబ్దంగా ఉంచలేరు లేదా బ్లాక్ చేయలేరు"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"ఫోన్ వేడెక్కుతోంది"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"ఫోన్‌ను చల్లబరిచే క్రమంలో కొన్ని లక్షణాలు పరిమితం చేయబడ్డాయి"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"మీ ఫోన్ స్వయంచాలకంగా చల్లబడటానికి ప్రయత్నిస్తుంది. మీరు ఇప్పటికీ మీ ఫోన్‌ను ఉపయోగించవచ్చు, కానీ దాని పనితీరు నెమ్మదిగా ఉండవచ్చు.\n\nమీ ఫోన్ చల్లబడిన తర్వాత, అది సాధారణ రీతిలో పని చేస్తుంది."</string>
 </resources>

@@ -663,4 +663,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Reihenfolge der Einstellungen bearbeiten."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Seite <xliff:g id="ID_1">%1$d</xliff:g> von <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Benachrichtigungen können nicht stummgeschaltet oder blockiert werden"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"Smartphone wird warm"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"Einige Funktionen sind während der Abkühlphase des Smartphones eingeschränkt"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"Dein Smartphone kühlt sich automatisch ab. Du kannst dein Smartphone weiterhin nutzen, aber es reagiert möglicherweise langsamer.\n\nSobald dein Smartphone abgekühlt ist, funktioniert es wieder normal."</string>
 </resources>

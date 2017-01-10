@@ -663,4 +663,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Editatu ezarpenen ordena."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_1">%1$d</xliff:g>/<xliff:g id="ID_2">%2$d</xliff:g> orria"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Jakinarazpenak ezin dira ezkutatu edo blokeatu"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"Berotzen ari da telefonoa"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"Eginbide batzuk ezingo dira erabili telefonoa hoztu arte"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefonoa automatikoki saiatuko da hozten. Hoztu bitartean, telefonoa erabiltzen jarrai dezakezu, baina mantsoago funtziona lezake.\n\nTelefonoaren tenperatura jaitsi bezain laster, ohi bezala funtzionatzen jarraituko du."</string>
 </resources>

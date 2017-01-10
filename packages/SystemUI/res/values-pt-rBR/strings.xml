@@ -663,4 +663,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Editar ordem das configurações."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Página <xliff:g id="ID_1">%1$d</xliff:g> de <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Não é possível silenciar ou bloquear as notificações"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"O smartphone está esquentando"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"Alguns recursos ficam limitados enquanto o smartphone é resfriado"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"Seu smartphone tentará se resfriar automaticamente. Você ainda poderá usá-lo, mas talvez ele fique mais lento.\n\nQuando o smartphone estiver resfriado, ele voltará ao normal."</string>
 </resources>

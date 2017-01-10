@@ -661,4 +661,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Параметрлер тәртібін өзгерту."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g> ішінен <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Хабарландыруды үнсіз режимге қою не бөгеу мүмкін емес"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"Телефон қызуда"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"Телефон толық суығанға дейін, кейбір функциялардың жұмысы шектеледі"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"Телефон автоматты түрде суи бастайды. Оны пайдалана бере аласыз, бірақ ол баяуырақ жұмыс істеуі мүмкін.\n\nТелефон суығаннан кейін, оның жұмысы қалпына келеді."</string>
 </resources>

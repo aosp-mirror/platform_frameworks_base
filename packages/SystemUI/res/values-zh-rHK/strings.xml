@@ -663,4 +663,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"編輯設定次序。"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"第 <xliff:g id="ID_1">%1$d</xliff:g> 頁 (共 <xliff:g id="ID_2">%2$d</xliff:g> 頁)"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"通知無法設為靜音或封鎖"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"手機溫度正在上升"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"手機降溫時，部分功能會受限制"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"手機會自動嘗試降溫。您仍可以使用手機，但手機的運作速度可能較慢。\n\n手機降溫後便會恢復正常。"</string>
 </resources>

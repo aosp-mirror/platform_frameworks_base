@@ -661,4 +661,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Уредете го редоследот на поставките."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Страница <xliff:g id="ID_1">%1$d</xliff:g> од <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Известувања не може да се стишат или блокираат"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"Телефонот се загрева"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"Некои функции се ограничени додека телефонот се лади"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"Телефонот автоматски ќе се обиде да се олади. Вие сепак ќе може да го користите, но тој може да работи побавно.\n\nОткако ќе се олади, ќе работи нормално."</string>
 </resources>

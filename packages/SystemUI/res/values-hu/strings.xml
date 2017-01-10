@@ -661,4 +661,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Beállítások sorrendjének szerkesztése."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_1">%1$d</xliff:g>. oldal, összesen: <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Az értesítéseket nem lehet elnémítani vagy letiltani"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"A telefon melegszik"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"Bizonyos funkciók korlátozottan működnek a telefon hűlése közben"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"A telefon automatikusan megpróbál lehűlni. Továbbra is tudja használni a telefont, de elképzelhető, hogy működése lelassul.\n\nAmint a telefon lehűl, újra a szokásos módon működik majd."</string>
 </resources>

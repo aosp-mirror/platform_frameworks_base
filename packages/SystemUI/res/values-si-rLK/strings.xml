@@ -661,4 +661,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"සැකසීම්වල අනුපිළිවෙළ සංංස්කරණය කරන්න."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g> න් <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"දැනුම්දීම් නිහඬ හෝ අවහිර කළ නොහැකිය"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"දුරකථනය උණුසුම් වෙමින්"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"දුරකථනය සිසිල් වන අතරතුර සමහර විශේෂාංග සීමිත විය හැකිය"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"ඔබගේ දුරකථනය ස්වයංක්‍රියව සිසිල් වීමට උත්සාහ කරනු ඇත. ඔබට තවම ඔබේ දුරකථනය භාවිත කළ හැකිය, නමුත් එය සෙමින් ධාවනය විය හැකිය.\n\nඔබේ දුරකථනය සිසිල් වූ පසු, එය සාමාන්‍ය ලෙස ධාවනය වනු ඇත."</string>
 </resources>

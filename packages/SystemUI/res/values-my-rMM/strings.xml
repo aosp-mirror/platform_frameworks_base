@@ -661,4 +661,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ဆက်တင်များ၏ အစီအစဉ်ကို တည်းဖြတ်ပါ။"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"စာမျက်နှာ <xliff:g id="ID_2">%2$d</xliff:g> အနက်မှ စာမျက်နှာ <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"အကြောင်းကြားချက်များကို အသံတိတ်ခြင်း သို့မဟုတ် ပိတ်ဆို့ခြင်းများ ပြုလုပ်၍ မရပါ"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"ဖုန်း ပူနွေးလာပါပြီ"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"ဖုန်းကို အေးအောင်ပြုလုပ်နေစဉ်တွင် အချို့ဝန်ဆောင်မှုများကို ကန့်သတ်ထားပါသည်"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"သင့်ဖုန်းသည် အလိုအလျောက် ပြန်အေးသွားပါလိမ့်မည်။ ဖုန်းကို အသုံးပြုနိုင်ပါသေးသည် သို့သော် ပိုနှေးနိုင်ပါသည်။\n\nသင့်ဖုန်း အေးသွားသည်နှင့် ပုံမှန်အတိုင်း ပြန်အလုပ်လုပ်ပါလိမ့်မည်။"</string>
 </resources>

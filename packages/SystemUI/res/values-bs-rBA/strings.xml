@@ -665,4 +665,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Urediti raspored postavki."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Stranica <xliff:g id="ID_1">%1$d</xliff:g> od <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Obavještenja nije moguće prigušiti ili blokirati"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"Telefon se pregrijava"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"Neke funkcije su ograničene dok se telefon hladi"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"Vaš telefon će se automatski pokušati ohladiti. I dalje možete koristi telefon, ali će možda raditi sporije.\n\nNakon što se ohladi, telefon će normalno raditi."</string>
 </resources>

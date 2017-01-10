@@ -661,4 +661,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Badilisha orodha ya mipangilio."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Ukurasa wa <xliff:g id="ID_1">%1$d</xliff:g> kati ya <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Huwezi kuzima wala kuzuia arifa"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"Joto la simu linaongezeka"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"Baadhi ya vipengele havitatumika kwenye simu wakati inapoa"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"Simu yako itajaribu kupoa kiotomatiki. Bado unaweza kutumia simu yako, lakini huenda ikafanya kazi polepole. \n\nPindi simu yako itakapopoa, itaendelea kufanya kazi kama kawaida."</string>
 </resources>

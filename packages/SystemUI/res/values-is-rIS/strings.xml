@@ -661,4 +661,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Breyta röð stillinga."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Blaðsíða <xliff:g id="ID_1">%1$d</xliff:g> af <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"Ekki er hægt að þagga eða loka á tilkynningar"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"Síminn er að hitna"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"Sumir eiginleikar eru takmarkaðir þegar síminn kælir sig"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"Síminn reynir sjálfkrafa að kæla sig. Þú getur enn notað símann en hann gæti verið hægvirkari.\n\nEftir að síminn hefur kælt sig niður virkar hann eðlilega."</string>
 </resources>
