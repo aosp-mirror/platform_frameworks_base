@@ -3,6 +3,7 @@ package com.android.systemui.plugins.statusbar;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.service.notification.StatusBarNotification;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -26,14 +27,34 @@ public interface NotificationMenuRowProvider extends Plugin {
         public void onMenuReset(View row);
     }
 
+    public interface GutsInteractionListener {
+        public void onInteraction(View view);
+
+        public void closeGuts(View view);
+    }
+
+    public interface GutsContent {
+        public void setInteractionListener(GutsInteractionListener listener);
+
+        public View getContentView();
+
+        public boolean handleCloseControls();
+    }
+
     public static class MenuItem {
         public Drawable icon;
         public String menuDescription;
         public View menuView;
+        public GutsContent gutsContent;
 
-        public MenuItem(Drawable i, String s) {
+        public MenuItem(Drawable i, String s, GutsContent content) {
             icon = i;
             menuDescription = s;
+            gutsContent = content;
+        }
+
+        public View getGutsView() {
+            return gutsContent.getContentView();
         }
 
         public boolean onTouch(View v, int x, int y) {

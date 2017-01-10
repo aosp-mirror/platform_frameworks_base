@@ -50,6 +50,7 @@ import com.android.internal.widget.CachingIconView;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.MenuItem;
 import com.android.systemui.statusbar.notification.HybridNotificationView;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
@@ -664,6 +665,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     public void setHeadsUpManager(HeadsUpManager headsUpManager) {
         mHeadsUpManager = headsUpManager;
+    }
+
+    public void setGutsView(MenuItem item) {
+        if (mGuts != null) {
+            item.gutsContent.setInteractionListener(mGuts);
+            mGuts.setGutsContent(item.gutsContent);
+        }
     }
 
     public void reInflateViews() {

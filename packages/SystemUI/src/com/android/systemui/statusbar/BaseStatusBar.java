@@ -101,6 +101,8 @@ import com.android.systemui.RecentsComponent;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.SystemUI;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.MenuItem;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
@@ -247,6 +249,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     // which notification is currently being longpress-examined by the user
     private NotificationGuts mNotificationGutsExposed;
+    private MenuItem mGutsMenuItem;
 
     private KeyboardShortcuts mKeyboardShortcuts;
 
@@ -702,6 +705,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
+    @Override
     public void start() {
         mWindowManager = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
         mWindowManagerService = WindowManagerGlobal.getWindowManagerService();
@@ -967,7 +971,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             entry.row.reInflateViews();
             if (exposedGuts) {
                 mNotificationGutsExposed = entry.row.getGuts();
-                bindGuts(entry.row);
+                bindGuts(entry.row, mGutsMenuItem);
             }
             inflateViews(entry, mStackScroller);
         }
@@ -1032,6 +1036,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             @Override
             public boolean onDismiss() {
                 AsyncTask.execute(new Runnable() {
+                    @Override
                     public void run() {
                         TaskStackBuilder.create(mContext)
                                 .addNextIntentWithParentStack(intent)
@@ -1045,11 +1050,10 @@ public abstract class BaseStatusBar extends SystemUI implements
         }, false /* afterKeyguardGone */);
     }
 
-    private void bindGuts(final ExpandableNotificationRow row) {
+    private void bindGuts(final ExpandableNotificationRow row, MenuItem item) {
         row.inflateGuts();
+        row.setGutsView(item);
         final StatusBarNotification sbn = row.getStatusBarNotification();
-        final NotificationChannel channel = row.getEntry().channel;
-        PackageManager pmUser = getPackageManagerForUser(mContext, sbn.getUser().getIdentifier());
         row.setTag(sbn.getPackageName());
         final NotificationGuts guts = row.getGuts();
         guts.setClosedListener((NotificationGuts g) -> {
@@ -1059,43 +1063,48 @@ public abstract class BaseStatusBar extends SystemUI implements
             mNotificationGutsExposed = null;
         });
 
-        final INotificationManager iNotificationManager = INotificationManager.Stub.asInterface(
-                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
-
-        final String pkg = sbn.getPackageName();
-        final NotificationGuts.OnSettingsClickListener onSettingsClick =
-                (View v, int appUid) -> {
-                    MetricsLogger.action(mContext, MetricsEvent.ACTION_NOTE_INFO);
-                    guts.resetFalsingCheck();
-                    startAppNotificationSettingsActivity(pkg, appUid);
-                };
-        final View.OnClickListener onDoneClick =
-                (View v) -> {
-                    // If the user has security enabled, show challenge if the setting is changed.
-                    if (guts.hasImportanceChanged()
-                                && isLockscreenPublicMode(sbn.getUser().getIdentifier())
-                                && (mState == StatusBarState.KEYGUARD
-                                        || mState == StatusBarState.SHADE_LOCKED)) {
-                        OnDismissAction dismissAction = new OnDismissAction() {
-                            @Override
-                            public boolean onDismiss() {
-                                closeControls(row, guts, v);
-                                return true;
-                            }
-                        };
-                        onLockedNotificationImportanceChange(dismissAction);
-                    } else {
-                        closeControls(row, guts, v);
-                    }
-                };
-        guts.bindNotification(pmUser, iNotificationManager, sbn, channel,
-                onSettingsClick, onDoneClick, mNonBlockablePkgs);
+        if (item.gutsContent instanceof NotificationInfo) {
+            final NotificationChannel channel = row.getEntry().channel;
+            PackageManager pmUser = getPackageManagerForUser(mContext,
+                    sbn.getUser().getIdentifier());
+            final INotificationManager iNotificationManager = INotificationManager.Stub.asInterface(
+                    ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+            final String pkg = sbn.getPackageName();
+            NotificationInfo info = (NotificationInfo) item.gutsContent;
+            final NotificationInfo.OnSettingsClickListener onSettingsClick = (View v,
+                    int appUid) -> {
+                MetricsLogger.action(mContext, MetricsEvent.ACTION_NOTE_INFO);
+                guts.resetFalsingCheck();
+                startAppNotificationSettingsActivity(pkg, appUid);
+            };
+            final View.OnClickListener onDoneClick = (View v) -> {
+                // If the user has security enabled, show challenge if the setting is changed.
+                if (info.hasImportanceChanged()
+                        && isLockscreenPublicMode(sbn.getUser().getIdentifier())
+                        && (mState == StatusBarState.KEYGUARD
+                                || mState == StatusBarState.SHADE_LOCKED)) {
+                    OnDismissAction dismissAction = new OnDismissAction() {
+                        @Override
+                        public boolean onDismiss() {
+                            saveAndCloseNotificationMenu(info, row, guts, v);
+                            return true;
+                        }
+                    };
+                    onLockedNotificationImportanceChange(dismissAction);
+                } else {
+                    saveAndCloseNotificationMenu(info, row, guts, v);
+                }
+            };
+            info.bindNotification(pmUser, iNotificationManager, sbn, channel, onSettingsClick,
+                    onDoneClick,
+                    mNonBlockablePkgs);
+        }
     }
 
-    private void closeControls(
+    private void saveAndCloseNotificationMenu(NotificationInfo info,
             ExpandableNotificationRow row, NotificationGuts guts, View done) {
         guts.resetFalsingCheck();
-
+        info.saveImportance();
         int[] rowLocation = new int[2];
         int[] doneLocation = new int[2];
         row.getLocationOnScreen(rowLocation);
@@ -1111,7 +1120,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected SwipeHelper.LongPressListener getNotificationLongClicker() {
         return new SwipeHelper.LongPressListener() {
             @Override
-            public boolean onLongPress(View v, final int x, final int y) {
+            public boolean onLongPress(View v, final int x, final int y,
+                    MenuItem item) {
                 if (!(v instanceof ExpandableNotificationRow)) {
                     return false;
                 }
@@ -1121,10 +1131,10 @@ public abstract class BaseStatusBar extends SystemUI implements
                 }
 
                 final ExpandableNotificationRow row = (ExpandableNotificationRow) v;
-                bindGuts(row);
+                bindGuts(row, item);
+                NotificationGuts guts = row.getGuts();
 
                 // Assume we are a status_bar_notification_row
-                final NotificationGuts guts = row.getGuts();
                 if (guts == null) {
                     // This view has no guts. Examples are the more card or the dismiss all view
                     return false;
@@ -1142,6 +1152,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 guts.setVisibility(View.INVISIBLE);
                 // Post to ensure the the guts are properly laid out.
                 guts.post(new Runnable() {
+                    @Override
                     public void run() {
                         if (row.getWindowToken() == null) {
                             Log.e(TAG, "Trying to show notification guts, but not attached to "
@@ -1172,6 +1183,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                         row.closeRemoteInput();
                         mStackScroller.onHeightChanged(row, true /* needsAnimation */);
                         mNotificationGutsExposed = guts;
+                        mGutsMenuItem = item;
                     }
                 });
                 return true;
@@ -1483,6 +1495,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     protected class H extends Handler {
+        @Override
         public void handleMessage(Message m) {
             switch (m.what) {
              case MSG_SHOW_RECENT_APPS:
@@ -1752,6 +1765,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 && PreviewInflater.wouldLaunchResolverActivity(mContext, intent.getIntent(),
                 mCurrentUserId);
         dismissKeyguardThenExecute(new OnDismissAction() {
+            @Override
             public boolean onDismiss() {
                 new Thread() {
                     @Override
@@ -1802,6 +1816,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     private final class NotificationClicker implements View.OnClickListener {
         private final int[] mTmpInt2 = new int[2];
 
+        @Override
         public void onClick(final View v) {
             if (!(v instanceof ExpandableNotificationRow)) {
                 Log.e(TAG, "NotificationClicker called on a view that is not a notification row.");
@@ -1845,6 +1860,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     && PreviewInflater.wouldLaunchResolverActivity(mContext, intent.getIntent(),
                             mCurrentUserId);
             dismissKeyguardThenExecute(new OnDismissAction() {
+                @Override
                 public boolean onDismiss() {
                     if (mHeadsUpManager != null && mHeadsUpManager.isHeadsUp(notificationKey)) {
                         // Release the HUN notification to the shade.

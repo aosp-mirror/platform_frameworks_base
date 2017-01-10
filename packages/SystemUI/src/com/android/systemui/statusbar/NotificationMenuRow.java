@@ -102,7 +102,9 @@ public class NotificationMenuRow extends FrameLayout
     public static MenuItem getSettingsMenuItem(Context context) {
         Drawable d = context.getResources().getDrawable(R.drawable.ic_settings);
         String s = context.getResources().getString(R.string.notification_menu_gear_description);
-        MenuItem settings = new MenuItem(d, s);
+        NotificationInfo content = (NotificationInfo) LayoutInflater.from(context).inflate(
+                R.layout.notification_info, null, false);
+        MenuItem settings = new MenuItem(d, s, content);
         return settings;
     }
 
