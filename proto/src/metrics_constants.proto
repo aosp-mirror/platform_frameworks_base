@@ -3181,6 +3181,11 @@ message MetricsEvent {
     // user accepted
     ACTION_SKIP_DISCLAIMER_SELECTED = 760;
 
+    // Enclosing category for group of APP_TRANSITION_FOO events,
+    // logged when we execute an app transition.
+    APP_TRANSITION = 761;
+
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
