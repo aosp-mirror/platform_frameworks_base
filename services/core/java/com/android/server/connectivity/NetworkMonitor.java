@@ -80,7 +80,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class NetworkMonitor extends StateMachine {
     private static final String TAG = NetworkMonitor.class.getSimpleName();
-    private static final boolean DBG = false;
+    private static final boolean DBG  = true;
+    private static final boolean VDBG = false;
 
     // Default configuration values for captive portal detection probes.
     // TODO: append a random length parameter to the default HTTPS url.
@@ -954,7 +955,7 @@ public class NetworkMonitor extends StateMachine {
                     latencyBroadcast.putExtra(EXTRA_SSID, currentWifiInfo.getSSID());
                     latencyBroadcast.putExtra(EXTRA_BSSID, currentWifiInfo.getBSSID());
                 } else {
-                    if (DBG) logw("network info is TYPE_WIFI but no ConnectionInfo found");
+                    if (VDBG) logw("network info is TYPE_WIFI but no ConnectionInfo found");
                     return;
                 }
                 break;
@@ -967,8 +968,8 @@ public class NetworkMonitor extends StateMachine {
                     if (cellInfo.isRegistered()) {
                         numRegisteredCellInfo++;
                         if (numRegisteredCellInfo > 1) {
-                            log("more than one registered CellInfo.  Can't " +
-                                    "tell which is active.  Bailing.");
+                            if (VDBG) logw("more than one registered CellInfo." +
+                                    " Can't tell which is active.  Bailing.");
                             return;
                         }
                         if (cellInfo instanceof CellInfoCdma) {
@@ -984,7 +985,7 @@ public class NetworkMonitor extends StateMachine {
                             CellIdentityWcdma cellId = ((CellInfoWcdma) cellInfo).getCellIdentity();
                             latencyBroadcast.putExtra(EXTRA_CELL_ID, cellId);
                         } else {
-                            if (DBG) logw("Registered cellinfo is unrecognized");
+                            if (VDBG) logw("Registered cellinfo is unrecognized");
                             return;
                         }
                     }
