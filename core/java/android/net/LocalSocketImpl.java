@@ -218,7 +218,7 @@ class LocalSocketImpl
      *
      * @param fd non-null; bound file descriptor
      */
-    /*package*/ LocalSocketImpl(FileDescriptor fd) throws IOException
+    /*package*/ LocalSocketImpl(FileDescriptor fd)
     {
         this.fd = fd;
     }
