@@ -886,6 +886,12 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
+    @Override
+    public void setApplicationCategoryHint(String packageName, int categoryHint) {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * @hide
      */

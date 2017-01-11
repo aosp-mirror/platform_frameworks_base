@@ -4394,4 +4394,22 @@
 
     <!-- Window title for a tooltip [CHAR LIMIT=NONE] -->
     <string name="tooltip_popup_title">Tooltip</string>
+
+    <!-- Category title for apps which are primarily games. [CHAR LIMIT=32] -->
+    <string name="app_category_game">Games</string>
+    <!-- Category title for apps which primarily work with audio or music, such as music players. [CHAR LIMIT=32] -->
+    <string name="app_category_audio">Music &amp; Audio</string>
+    <!-- Category title for apps which primarily work with video or movies, such as streaming video apps. [CHAR LIMIT=32] -->
+    <string name="app_category_video">Movies &amp; Video</string>
+    <!-- Category title for apps which primarily work with images or photos, such as camera or gallery apps. [CHAR LIMIT=32] -->
+    <string name="app_category_image">Photos &amp; Images</string>
+    <!-- Category title for apps which are primarily social apps, such as messaging, communication, or social network apps. [CHAR LIMIT=32] -->
+    <string name="app_category_social">Social &amp; Communication</string>
+    <!-- Category title for apps which are primarily news apps, such as newspapers, magazines, or sports apps. [CHAR LIMIT=32] -->
+    <string name="app_category_news">News &amp; Magazines</string>
+    <!-- Category title for apps which are primarily maps apps, such as navigation apps. [CHAR LIMIT=32] -->
+    <string name="app_category_maps">Maps &amp; Navigation</string>
+    <!-- Category title for apps which are primarily productivity apps, such as cloud storage or workplace apps. [CHAR LIMIT=32] -->
+    <string name="app_category_productivity">Productivity</string>
+
 </resources>

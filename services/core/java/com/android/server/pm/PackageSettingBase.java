@@ -20,6 +20,7 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 
+import android.content.pm.ApplicationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageUserState;
@@ -129,6 +130,8 @@ abstract class PackageSettingBase extends SettingBase {
     boolean isOrphaned;
     /** UUID of {@link VolumeInfo} hosting this app */
     String volumeUuid;
+    /** The category of this app, as hinted by the installer */
+    int categoryHint = ApplicationInfo.CATEGORY_UNDEFINED;
 
     IntentFilterVerificationInfo verificationInfo;
 
@@ -246,6 +249,7 @@ abstract class PackageSettingBase extends SettingBase {
         verificationInfo = orig.verificationInfo;
         versionCode = orig.versionCode;
         volumeUuid = orig.volumeUuid;
+        categoryHint = orig.categoryHint;
     }
 
     private PackageUserState modifyUserState(int userId) {
@@ -259,10 +263,11 @@ abstract class PackageSettingBase extends SettingBase {
 
     public PackageUserState readUserState(int userId) {
         PackageUserState state = userState.get(userId);
-        if (state != null) {
-            return state;
+        if (state == null) {
+            return DEFAULT_USER_STATE;
         }
-        return DEFAULT_USER_STATE;
+        state.categoryHint = categoryHint;
+        return state;
     }
 
     void setEnabled(int state, int userId, String callingPackage) {

@@ -16,15 +16,30 @@
 
 package android.content.pm;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-import com.android.internal.R;
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.XmlUtils;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
+import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
+import static android.content.pm.ActivityInfo.FLAG_ON_TOP_LAUNCHER;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
+import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_RESIZEABLE_ACTIVITIES_EXPLICITLY_SET;
+import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_RESIZEABLE_ACTIVITIES_VIA_SDK_VERSION;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NOT_APK;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION;
+import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
+import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -42,6 +57,8 @@ import android.content.res.XmlResourceParser;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.FileUtils;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.PatternMatcher;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -61,6 +78,16 @@ import android.util.TypedValue;
 import android.util.apk.ApkSignatureSchemeV2Verifier;
 import android.util.jar.StrictJarFile;
 import android.view.Gravity;
+
+import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.XmlUtils;
+
+import libcore.io.IoUtils;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -83,37 +110,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipEntry;
-
-import libcore.io.IoUtils;
-
-import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
-import static android.content.pm.ActivityInfo.FLAG_ON_TOP_LAUNCHER;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
-import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_RESIZEABLE_ACTIVITIES_EXPLICITLY_SET;
-import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_RESIZEABLE_ACTIVITIES_VIA_SDK_VERSION;
-import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST;
-import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
-import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING;
-import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
-import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
-import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NOT_APK;
-import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
-import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION;
-import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
-import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
 
 /**
  * Parser for package files (APKs) on disk. This supports apps packaged either
@@ -3274,6 +3273,9 @@ public class PackageParser {
         ai.networkSecurityConfigRes = sa.getResourceId(
                 com.android.internal.R.styleable.AndroidManifestApplication_networkSecurityConfig,
                 0);
+        ai.category = sa.getInt(
+                com.android.internal.R.styleable.AndroidManifestApplication_appCategory,
+                ApplicationInfo.CATEGORY_UNDEFINED);
 
         String str;
         str = sa.getNonConfigurationString(
@@ -6255,6 +6257,9 @@ public class PackageParser {
             ai.enabled = false;
         }
         ai.enabledSetting = state.enabled;
+        if (ai.category == ApplicationInfo.CATEGORY_UNDEFINED) {
+            ai.category = state.categoryHint;
+        }
     }
 
     public static ApplicationInfo generateApplicationInfo(Package p, int flags,

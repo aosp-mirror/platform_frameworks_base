@@ -2673,6 +2673,10 @@ final class Settings {
         if (pkg.volumeUuid != null) {
             serializer.attribute(null, "volumeUuid", pkg.volumeUuid);
         }
+        if (pkg.categoryHint != ApplicationInfo.CATEGORY_UNDEFINED) {
+            serializer.attribute(null, "categoryHint",
+                    Integer.toString(pkg.categoryHint));
+        }
         if (pkg.parentPackageName != null) {
             serializer.attribute(null, "parentPackageName", pkg.parentPackageName);
         }
@@ -3538,6 +3542,8 @@ final class Settings {
         String installerPackageName = null;
         String isOrphaned = null;
         String volumeUuid = null;
+        String categoryHintString = null;
+        int categoryHint = ApplicationInfo.CATEGORY_UNDEFINED;
         String uidError = null;
         int pkgFlags = 0;
         int pkgPrivateFlags = 0;
@@ -3580,6 +3586,13 @@ final class Settings {
             installerPackageName = parser.getAttributeValue(null, "installer");
             isOrphaned = parser.getAttributeValue(null, "isOrphaned");
             volumeUuid = parser.getAttributeValue(null, "volumeUuid");
+            categoryHintString = parser.getAttributeValue(null, "categoryHint");
+            if (categoryHintString != null) {
+                try {
+                    categoryHint = Integer.parseInt(categoryHintString);
+                } catch (NumberFormatException e) {
+                }
+            }
 
             systemStr = parser.getAttributeValue(null, "publicFlags");
             if (systemStr != null) {
@@ -3731,6 +3744,7 @@ final class Settings {
             packageSetting.installerPackageName = installerPackageName;
             packageSetting.isOrphaned = "true".equals(isOrphaned);
             packageSetting.volumeUuid = volumeUuid;
+            packageSetting.categoryHint = categoryHint;
             packageSetting.legacyNativeLibraryPathString = legacyNativeLibraryPathStr;
             packageSetting.primaryCpuAbiString = primaryCpuAbiString;
             packageSetting.secondaryCpuAbiString = secondaryCpuAbiString;

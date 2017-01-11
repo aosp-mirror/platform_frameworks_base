@@ -47,6 +47,7 @@ public class PackageUserState {
     public String lastDisableAppCaller;
     public int domainVerificationStatus;
     public int appLinkGeneration;
+    public int categoryHint = ApplicationInfo.CATEGORY_UNDEFINED;
 
     public ArraySet<String> disabledComponents;
     public ArraySet<String> enabledComponents;
@@ -72,6 +73,7 @@ public class PackageUserState {
         lastDisableAppCaller = o.lastDisableAppCaller;
         domainVerificationStatus = o.domainVerificationStatus;
         appLinkGeneration = o.appLinkGeneration;
+        categoryHint = o.categoryHint;
         disabledComponents = ArrayUtils.cloneOrNull(o.disabledComponents);
         enabledComponents = ArrayUtils.cloneOrNull(o.enabledComponents);
     }
@@ -195,6 +197,9 @@ public class PackageUserState {
             return false;
         }
         if (appLinkGeneration != oldState.appLinkGeneration) {
+            return false;
+        }
+        if (categoryHint != oldState.categoryHint) {
             return false;
         }
         if ((disabledComponents == null && oldState.disabledComponents != null)

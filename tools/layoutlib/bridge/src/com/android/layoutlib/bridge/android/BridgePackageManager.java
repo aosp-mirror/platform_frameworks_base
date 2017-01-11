@@ -784,6 +784,10 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
+    public void setApplicationCategoryHint(String packageName, int categoryHint) {
+    }
+
+    @Override
     public int getMoveStatus(int moveId) {
         return 0;
     }

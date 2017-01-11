@@ -2027,6 +2027,17 @@ public class ApplicationPackageManager extends PackageManager {
         }
     }
 
+    /** @hide */
+    @Override
+    public void setApplicationCategoryHint(String packageName, int categoryHint) {
+        try {
+            mPM.setApplicationCategoryHint(packageName, categoryHint,
+                    mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     @Override
     public void getPackageSizeInfoAsUser(String packageName, int userHandle,
             IPackageStatsObserver observer) {

@@ -2783,4 +2783,14 @@
   <java-symbol type="drawable" name="lockscreen_selected" />
 
   <java-symbol type="string" name="config_defaultCellBroadcastReceiverComponent" />
+
+  <java-symbol type="string" name="app_category_game" />
+  <java-symbol type="string" name="app_category_audio" />
+  <java-symbol type="string" name="app_category_video" />
+  <java-symbol type="string" name="app_category_image" />
+  <java-symbol type="string" name="app_category_social" />
+  <java-symbol type="string" name="app_category_news" />
+  <java-symbol type="string" name="app_category_maps" />
+  <java-symbol type="string" name="app_category_productivity" />
+
 </resources>

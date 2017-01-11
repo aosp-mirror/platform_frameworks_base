@@ -16,6 +16,9 @@
 
 package android.content.pm;
 
+import static android.os.Build.VERSION_CODES.DONUT;
+
+import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.content.Context;
@@ -31,12 +34,12 @@ import android.util.Printer;
 
 import com.android.internal.util.ArrayUtils;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.text.Collator;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
-
-import static android.os.Build.VERSION_CODES.DONUT;
 
 /**
  * Information you can retrieve about a particular application.  This
@@ -344,9 +347,12 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_IS_DATA_ONLY = 1<<24;
 
     /**
-     * Value for {@link #flags}: true if the application was declared to be a game, or
-     * false if it is a non-game application.
+     * Value for {@link #flags}: true if the application was declared to be a
+     * game, or false if it is a non-game application.
+     *
+     * @deprecated use {@link #CATEGORY_GAME} instead.
      */
+    @Deprecated
     public static final int FLAG_IS_GAME = 1<<25;
 
     /**
@@ -779,6 +785,134 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public int networkSecurityConfigRes;
 
+    /**
+     * The category of this app. Categories are used to cluster multiple apps
+     * together into meaningful groups, such as when summarizing battery,
+     * network, or disk usage. Apps should only define this value when they fit
+     * well into one of the specific categories.
+     * <p>
+     * Set from the {@link android.R.attr#appCategory} attribute in the
+     * manifest. If the manifest doesn't define a category, this value may have
+     * been provided by the installer via
+     * {@link PackageManager#setApplicationCategoryHint(String, int)}.
+     */
+    public @Category int category = CATEGORY_UNDEFINED;
+
+    /** {@hide} */
+    @IntDef({
+            CATEGORY_UNDEFINED,
+            CATEGORY_GAME,
+            CATEGORY_AUDIO,
+            CATEGORY_VIDEO,
+            CATEGORY_IMAGE,
+            CATEGORY_SOCIAL,
+            CATEGORY_NEWS,
+            CATEGORY_MAPS,
+            CATEGORY_PRODUCTIVITY
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Category {
+    }
+
+    /**
+     * Value when category is undefined.
+     *
+     * @see #category
+     */
+    public static final int CATEGORY_UNDEFINED = -1;
+
+    /**
+     * Category for apps which are primarily games.
+     *
+     * @see #category
+     */
+    public static final int CATEGORY_GAME = 0;
+
+    /**
+     * Category for apps which primarily work with audio or music, such as music
+     * players.
+     *
+     * @see #category
+     */
+    public static final int CATEGORY_AUDIO = 1;
+
+    /**
+     * Category for apps which primarily work with video or movies, such as
+     * streaming video apps.
+     *
+     * @see #category
+     */
+    public static final int CATEGORY_VIDEO = 2;
+
+    /**
+     * Category for apps which primarily work with images or photos, such as
+     * camera or gallery apps.
+     *
+     * @see #category
+     */
+    public static final int CATEGORY_IMAGE = 3;
+
+    /**
+     * Category for apps which are primarily social apps, such as messaging,
+     * communication, or social network apps.
+     *
+     * @see #category
+     */
+    public static final int CATEGORY_SOCIAL = 4;
+
+    /**
+     * Category for apps which are primarily news apps, such as newspapers,
+     * magazines, or sports apps.
+     *
+     * @see #category
+     */
+    public static final int CATEGORY_NEWS = 5;
+
+    /**
+     * Category for apps which are primarily maps apps, such as navigation apps.
+     *
+     * @see #category
+     */
+    public static final int CATEGORY_MAPS = 6;
+
+    /**
+     * Category for apps which are primarily productivity apps, such as cloud
+     * storage or workplace apps.
+     *
+     * @see #category
+     */
+    public static final int CATEGORY_PRODUCTIVITY = 7;
+
+    /**
+     * Return a concise, localized title for the given
+     * {@link ApplicationInfo#category} value, or {@code null} for unknown
+     * values such as {@link #CATEGORY_UNDEFINED}.
+     *
+     * @see #category
+     */
+    public static CharSequence getCategoryTitle(Context context, @Category int category) {
+        switch (category) {
+            case ApplicationInfo.CATEGORY_GAME:
+                return context.getText(com.android.internal.R.string.app_category_game);
+            case ApplicationInfo.CATEGORY_AUDIO:
+                return context.getText(com.android.internal.R.string.app_category_audio);
+            case ApplicationInfo.CATEGORY_VIDEO:
+                return context.getText(com.android.internal.R.string.app_category_video);
+            case ApplicationInfo.CATEGORY_IMAGE:
+                return context.getText(com.android.internal.R.string.app_category_image);
+            case ApplicationInfo.CATEGORY_SOCIAL:
+                return context.getText(com.android.internal.R.string.app_category_social);
+            case ApplicationInfo.CATEGORY_NEWS:
+                return context.getText(com.android.internal.R.string.app_category_news);
+            case ApplicationInfo.CATEGORY_MAPS:
+                return context.getText(com.android.internal.R.string.app_category_maps);
+            case ApplicationInfo.CATEGORY_PRODUCTIVITY:
+                return context.getText(com.android.internal.R.string.app_category_productivity);
+            default:
+                return null;
+        }
+    }
+
     public void dump(Printer pw, String prefix) {
         dump(pw, prefix, DUMP_FLAG_ALL);
     }
@@ -853,6 +987,9 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             if (networkSecurityConfigRes != 0) {
                 pw.println(prefix + "networkSecurityConfigRes=0x"
                         + Integer.toHexString(networkSecurityConfigRes));
+            }
+            if (category != CATEGORY_UNDEFINED) {
+                pw.println(prefix + "category=" + category);
             }
         }
         super.dumpBack(pw, prefix);
@@ -941,6 +1078,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         backupAgentName = orig.backupAgentName;
         fullBackupContent = orig.fullBackupContent;
         networkSecurityConfigRes = orig.networkSecurityConfigRes;
+        category = orig.category;
     }
 
     public String toString() {
@@ -997,6 +1135,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(uiOptions);
         dest.writeInt(fullBackupContent);
         dest.writeInt(networkSecurityConfigRes);
+        dest.writeInt(category);
     }
 
     public static final Parcelable.Creator<ApplicationInfo> CREATOR
@@ -1053,6 +1192,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         uiOptions = source.readInt();
         fullBackupContent = source.readInt();
         networkSecurityConfigRes = source.readInt();
+        category = source.readInt();
     }
 
     /**

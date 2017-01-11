@@ -5585,6 +5585,16 @@ public abstract class PackageManager {
      */
     public abstract boolean isPackageSuspendedForUser(String packageName, int userId);
 
+    /**
+     * Provide a hint of what the {@link ApplicationInfo#category} value should
+     * be for the given package.
+     * <p>
+     * This hint can only be set by the app which installed this package, as
+     * determined by {@link #getInstallerPackageName(String)}.
+     */
+    public abstract void setApplicationCategoryHint(String packageName,
+            @ApplicationInfo.Category int categoryHint);
+
     /** {@hide} */
     public static boolean isMoveStatusFinished(int status) {
         return (status < 0 || status > 100);

@@ -1338,6 +1338,7 @@
              any accounts. The type should correspond to the account authenticator type, such as
              "com.google". -->
         <attr name="requiredAccountType" format="string"/>
+        <!-- @deprecated replaced by setting appCategory attribute to "game" -->
         <attr name="isGame" />
         <!-- Declare that this application may use cleartext traffic, such as HTTP rather than
              HTTPS; WebSockets rather than WebSockets Secure; XMPP, IMAP, STMP without STARTTLS or
@@ -1353,6 +1354,29 @@
         <attr name="directBootAware" />
         <attr name="resizeableActivity" />
         <attr name="networkSecurityConfig" />
+        <!-- Declare the category of this app. Categories are used to cluster multiple apps
+             together into meaningful groups, such as when summarizing battery, network, or
+             disk usage. Apps should only define this value when they fit well into one of
+             the specific categories. -->
+        <attr name="appCategory">
+            <!-- Apps which are primarily games. -->
+            <enum name="game" value="0" />
+            <!-- Apps which primarily work with audio or music, such as music players. -->
+            <enum name="audio" value="1" />
+            <!-- Apps which primarily work with video or movies, such as streaming video apps. -->
+            <enum name="video" value="2" />
+            <!-- Apps which primarily work with images or photos, such as camera or gallery apps. -->
+            <enum name="image" value="3" />
+            <!-- Apps which are primarily social apps, such as messaging, communication, or social network apps. -->
+            <enum name="social" value="4" />
+            <!-- Apps which are primarily news apps, such as newspapers, magazines, or sports apps. -->
+            <enum name="news" value="5" />
+            <!-- Apps which are primarily maps apps, such as navigation apps. -->
+            <enum name="maps" value="6" />
+            <!-- Apps which are primarily productivity apps, such as cloud storage or workplace apps. -->
+            <enum name="productivity" value="7" />
+        </attr>
+
     </declare-styleable>
     <!-- The <code>permission</code> tag declares a security permission that can be
          used to control access from other packages to specific components or

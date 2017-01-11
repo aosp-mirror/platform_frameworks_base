@@ -12956,6 +12956,27 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    @Override
+    public void setApplicationCategoryHint(String packageName, int categoryHint,
+            String callerPackageName) {
+        mContext.getSystemService(AppOpsManager.class).checkPackage(Binder.getCallingUid(),
+                callerPackageName);
+        synchronized (mPackages) {
+            PackageSetting ps = mSettings.mPackages.get(packageName);
+            if (ps == null) {
+                throw new IllegalArgumentException("Unknown target package " + packageName);
+            }
+
+            if (!Objects.equals(callerPackageName, ps.installerPackageName)) {
+                throw new IllegalArgumentException("Calling package " + callerPackageName
+                        + " is not installer for " + packageName);
+            }
+
+            ps.categoryHint = categoryHint;
+            scheduleWriteSettingsLocked();
+        }
+    }
+
     private void processPendingInstall(final InstallArgs args, final int currentStatus) {
         // Queue up an async operation since the package installation may take a little while.
         mHandler.post(new Runnable() {
