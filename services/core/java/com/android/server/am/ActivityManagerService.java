@@ -17890,6 +17890,11 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private void checkBroadcastFromSystem(Intent intent, ProcessRecord callerApp,
             String callerPackage, int callingUid, boolean isProtectedBroadcast, List receivers) {
+        if ((intent.getFlags() & Intent.FLAG_RECEIVER_FROM_SHELL) != 0) {
+            // Don't yell about broadcasts sent via shell
+            return;
+        }
+
         final String action = intent.getAction();
         if (isProtectedBroadcast
                 || Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)
@@ -18033,11 +18038,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             case Process.PHONE_UID:
             case Process.BLUETOOTH_UID:
             case Process.NFC_UID:
-                if ((intent.getFlags() & Intent.FLAG_RECEIVER_FROM_SHELL) != 0) {
-                    isCallerSystem = false;
-                } else {
-                    isCallerSystem = true;
-                }
+                isCallerSystem = true;
                 break;
             default:
                 isCallerSystem = (callerApp != null) && callerApp.persistent;
