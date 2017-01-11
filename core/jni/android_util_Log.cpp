@@ -21,7 +21,7 @@
 #include <android-base/macros.h>
 #include <assert.h>
 #include <cutils/properties.h>
-#include <log/logger.h>               // For LOGGER_ENTRY_MAX_PAYLOAD.
+#include <log/log.h>               // For LOGGER_ENTRY_MAX_PAYLOAD.
 #include <utils/Log.h>
 #include <utils/String8.h>
 

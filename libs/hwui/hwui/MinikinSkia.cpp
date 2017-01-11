@@ -16,9 +16,10 @@
 
 #include "MinikinSkia.h"
 
+#include <log/log.h>
+
 #include <SkPaint.h>
 #include <SkTypeface.h>
-#include <cutils/log.h>
 
 namespace android {
 
