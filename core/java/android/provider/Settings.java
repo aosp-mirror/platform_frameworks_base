@@ -2773,6 +2773,15 @@ public final class Settings {
                 new InclusiveIntegerRangeValidator(0, 255);
 
         /**
+         * The screen backlight brightness between 0 and 255.
+         * @hide
+         */
+        public static final String SCREEN_BRIGHTNESS_FOR_VR = "screen_brightness_for_vr";
+
+        private static final Validator SCREEN_BRIGHTNESS_FOR_VR_VALIDATOR =
+                new InclusiveIntegerRangeValidator(0, 255);
+
+        /**
          * Control whether to enable automatic brightness mode.
          */
         public static final String SCREEN_BRIGHTNESS_MODE = "screen_brightness_mode";
@@ -3766,6 +3775,7 @@ public final class Settings {
             VALIDATORS.put(DIM_SCREEN, DIM_SCREEN_VALIDATOR);
             VALIDATORS.put(SCREEN_OFF_TIMEOUT, SCREEN_OFF_TIMEOUT_VALIDATOR);
             VALIDATORS.put(SCREEN_BRIGHTNESS, SCREEN_BRIGHTNESS_VALIDATOR);
+            VALIDATORS.put(SCREEN_BRIGHTNESS_FOR_VR, SCREEN_BRIGHTNESS_FOR_VR_VALIDATOR);
             VALIDATORS.put(SCREEN_BRIGHTNESS_MODE, SCREEN_BRIGHTNESS_MODE_VALIDATOR);
             VALIDATORS.put(MODE_RINGER_STREAMS_AFFECTED, MODE_RINGER_STREAMS_AFFECTED_VALIDATOR);
             VALIDATORS.put(MUTE_STREAMS_AFFECTED, MUTE_STREAMS_AFFECTED_VALIDATOR);
