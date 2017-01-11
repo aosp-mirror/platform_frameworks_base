@@ -237,7 +237,7 @@ public class AnimationSet extends Animation {
                 mDuration = a.getStartOffset() + a.getDuration();
                 mLastEnd = mStartOffset + mDuration;
             } else {
-                mLastEnd = Math.max(mLastEnd, a.getStartOffset() + a.getDuration());
+                mLastEnd = Math.max(mLastEnd, mStartOffset + a.getStartOffset() + a.getDuration());
                 mDuration = mLastEnd - mStartOffset;
             }
         }
