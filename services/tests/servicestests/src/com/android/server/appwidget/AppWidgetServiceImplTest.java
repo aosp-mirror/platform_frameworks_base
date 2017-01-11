@@ -21,6 +21,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,6 +29,7 @@ import static org.mockito.Mockito.when;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
+import android.appwidget.PendingHostUpdate;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContextWrapper;
@@ -39,10 +41,16 @@ import android.os.Handler;
 import android.os.UserHandle;
 import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.widget.RemoteViews;
 
+import com.android.internal.appwidget.IAppWidgetHost;
 import com.android.server.LocalServices;
 
 import org.mockito.ArgumentCaptor;
+
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.CountDownLatch;
 
 
 /**
@@ -57,11 +65,15 @@ import org.mockito.ArgumentCaptor;
 @SmallTest
 public class AppWidgetServiceImplTest extends InstrumentationTestCase {
 
+    private static final int HOST_ID = 42;
+
     private TestContext mTestContext;
+    private String mPkgName;
     private AppWidgetServiceImpl mService;
     private AppWidgetManager mManager;
 
     private ShortcutServiceInternal mMockShortcutService;
+    private IAppWidgetHost mMockHost;
 
     @Override
     protected void setUp() throws Exception {
@@ -70,12 +82,13 @@ public class AppWidgetServiceImplTest extends InstrumentationTestCase {
         LocalServices.removeServiceForTest(ShortcutServiceInternal.class);
 
         mTestContext = new TestContext();
+        mPkgName = mTestContext.getOpPackageName();
         mService = new AppWidgetServiceImpl(mTestContext);
         mManager = new AppWidgetManager(mTestContext, mService);
 
         mMockShortcutService = mock(ShortcutServiceInternal.class);
+        mMockHost = mock(IAppWidgetHost.class);
         LocalServices.addService(ShortcutServiceInternal.class, mMockShortcutService);
-
         mService.onStart();
     }
 
@@ -108,6 +121,142 @@ public class AppWidgetServiceImplTest extends InstrumentationTestCase {
         assertEquals(provider, providerCaptor.getValue().provider);
     }
 
+    public void testProviderUpdatesReceived() throws Exception {
+        int widgetId = setupHostAndWidget();
+        RemoteViews view = new RemoteViews(mPkgName, android.R.layout.simple_list_item_1);
+        mManager.updateAppWidget(widgetId, view);
+        mManager.updateAppWidget(widgetId, view);
+        mManager.updateAppWidget(widgetId, view);
+        mManager.updateAppWidget(widgetId, view);
+
+        flushMainThread();
+        verify(mMockHost, times(4)).updateAppWidget(eq(widgetId), any(RemoteViews.class));
+
+        reset(mMockHost);
+        mManager.notifyAppWidgetViewDataChanged(widgetId, 22);
+        flushMainThread();
+        verify(mMockHost, times(1)).viewDataChanged(eq(widgetId), eq(22));
+    }
+
+    public void testProviderUpdatesNotReceived() throws Exception {
+        int widgetId = setupHostAndWidget();
+        mService.stopListening(mPkgName, HOST_ID);
+        RemoteViews view = new RemoteViews(mPkgName, android.R.layout.simple_list_item_1);
+        mManager.updateAppWidget(widgetId, view);
+        mManager.notifyAppWidgetViewDataChanged(widgetId, 22);
+
+        flushMainThread();
+        verify(mMockHost, times(0)).updateAppWidget(anyInt(), any(RemoteViews.class));
+        verify(mMockHost, times(0)).viewDataChanged(anyInt(), eq(22));
+    }
+
+    public void testNoUpdatesReceived_queueEmpty() {
+        int widgetId = setupHostAndWidget();
+        RemoteViews view = new RemoteViews(mPkgName, android.R.layout.simple_list_item_1);
+        mManager.updateAppWidget(widgetId, view);
+        mManager.notifyAppWidgetViewDataChanged(widgetId, 22);
+        mService.stopListening(mPkgName, HOST_ID);
+
+        List<PendingHostUpdate> updates = mService.startListening(
+                mMockHost, mPkgName, HOST_ID, new int[0]).getList();
+        assertTrue(updates.isEmpty());
+    }
+
+    /**
+     * Sends dummy widget updates to {@link #mManager}.
+     * @param widgetId widget to update
+     * @param viewIds a list of view ids for which
+     *                {@link AppWidgetManager#notifyAppWidgetViewDataChanged} will be called
+     */
+    private void sendDummyUpdates(int widgetId, int... viewIds) {
+        Random r = new Random();
+        RemoteViews view = new RemoteViews(mPkgName, android.R.layout.simple_list_item_1);
+        for (int i = r.nextInt(10) + 2; i >= 0; i--) {
+            mManager.updateAppWidget(widgetId, view);
+        }
+
+        for (int viewId : viewIds) {
+            mManager.notifyAppWidgetViewDataChanged(widgetId, viewId);
+            for (int i = r.nextInt(3); i >= 0; i--) {
+                mManager.updateAppWidget(widgetId, view);
+            }
+        }
+    }
+
+    public void testNoUpdatesReceived_queueNonEmpty_noWidgetId() {
+        int widgetId = setupHostAndWidget();
+        mService.stopListening(mPkgName, HOST_ID);
+
+        sendDummyUpdates(widgetId, 22, 23);
+        List<PendingHostUpdate> updates = mService.startListening(
+                mMockHost, mPkgName, HOST_ID, new int[0]).getList();
+        assertTrue(updates.isEmpty());
+    }
+
+    public void testUpdatesReceived_queueNotEmpty_widgetIdProvided() {
+        int widgetId = setupHostAndWidget();
+        int widgetId2 = bindNewWidget();
+        mService.stopListening(mPkgName, HOST_ID);
+
+        sendDummyUpdates(widgetId, 22, 23);
+        sendDummyUpdates(widgetId2, 100, 101, 102);
+
+        List<PendingHostUpdate> updates = mService.startListening(
+                mMockHost, mPkgName, HOST_ID, new int[]{widgetId}).getList();
+        // 3 updates corresponding to the first widget
+        assertEquals(3, updates.size());
+    }
+
+    public void testUpdatesReceived_queueNotEmpty_widgetIdProvided2() {
+        int widgetId = setupHostAndWidget();
+        int widgetId2 = bindNewWidget();
+        mService.stopListening(mPkgName, HOST_ID);
+
+        sendDummyUpdates(widgetId, 22, 23);
+        sendDummyUpdates(widgetId2, 100, 101, 102);
+
+        List<PendingHostUpdate> updates = mService.startListening(
+                mMockHost, mPkgName, HOST_ID, new int[]{widgetId2}).getList();
+        // 4 updates corresponding to the second widget
+        assertEquals(4, updates.size());
+    }
+
+    public void testUpdatesReceived_queueNotEmpty_multipleWidgetIdProvided() {
+        int widgetId = setupHostAndWidget();
+        int widgetId2 = bindNewWidget();
+        mService.stopListening(mPkgName, HOST_ID);
+
+        sendDummyUpdates(widgetId, 22, 23);
+        sendDummyUpdates(widgetId2, 100, 101, 102);
+
+        List<PendingHostUpdate> updates = mService.startListening(
+                mMockHost, mPkgName, HOST_ID, new int[]{widgetId, widgetId2}).getList();
+        // 3 updates for first widget and 4 for second
+        assertEquals(7, updates.size());
+    }
+
+    private int setupHostAndWidget() {
+        List<PendingHostUpdate> updates = mService.startListening(
+                mMockHost, mPkgName, HOST_ID, new int[0]).getList();
+        assertTrue(updates.isEmpty());
+        return bindNewWidget();
+    }
+
+    private int bindNewWidget() {
+        ComponentName provider = new ComponentName(mTestContext, DummyAppWidget.class);
+        int widgetId = mService.allocateAppWidgetId(mPkgName, HOST_ID);
+        assertTrue(mManager.bindAppWidgetIdIfAllowed(widgetId, provider));
+        assertEquals(provider, mManager.getAppWidgetInfo(widgetId).provider);
+
+        return widgetId;
+    }
+
+    private void flushMainThread() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+        new Handler(mTestContext.getMainLooper()).post(latch::countDown);
+        latch.await();
+    }
+
     private class TestContext extends ContextWrapper {
 
         public TestContext() {
@@ -123,6 +272,16 @@ public class AppWidgetServiceImplTest extends InstrumentationTestCase {
 
         @Override
         public void unregisterReceiver(BroadcastReceiver receiver) {
+            // ignore.
+        }
+
+        @Override
+        public void enforceCallingOrSelfPermission(String permission, String message) {
+            // ignore.
+        }
+
+        @Override
+        public void sendBroadcastAsUser(Intent intent, UserHandle user) {
             // ignore.
         }
     }
