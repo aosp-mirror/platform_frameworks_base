@@ -1049,6 +1049,16 @@
          Must be in the range specified by minimum and maximum. -->
     <integer name="config_screenBrightnessSettingDefault">102</integer>
 
+    <!-- Default screen brightness for VR setting. -->
+    <integer name="config_screenBrightnessForVrSettingDefault">86</integer>
+
+    <!-- Minimum screen brightness setting allowed for VR. Device panels start increasing pulse
+         width as brightness decreases below this theshold. -->
+    <integer name="config_screenBrightnessForVrSettingMinimum">79</integer>
+
+    <!-- Maximum screen brightness setting allowed for VR. -->
+    <integer name="config_screenBrightnessForVrSettingMaximum">255</integer>
+
     <!-- Screen brightness used to dim the screen while dozing in a very low power state.
          May be less than the minimum allowed brightness setting
          that can be set by the user. -->

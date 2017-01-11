@@ -3105,6 +3105,12 @@ message MetricsEvent {
     // PACKAGE: The package name of the app the permission was revoked for
     ACTION_PERMISSION_REVOKE_READ_PHONE_NUMBER = 739;
 
+    // ACTION: QS Brightness Slider (with auto brightness disabled, and VR enabled)
+    //   SUBTYPE: slider value
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    ACTION_BRIGHTNESS_FOR_VR = 498;
+
     // ACTION: A captive portal was detected during network validation
     // CATEGORY: NOTIFICATION
     // OS: N-MR2
