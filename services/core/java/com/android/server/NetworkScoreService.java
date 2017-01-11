@@ -432,6 +432,22 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         }
     }
 
+    /**
+     * Obtain the package name of the current active network scorer.
+     *
+     * @return the full package name of the current active scorer, or null if there is no active
+     *         scorer.
+     */
+    @Override
+    public String getActiveScorerPackage() {
+        synchronized (mServiceConnectionLock) {
+            if (mServiceConnection != null) {
+                return mServiceConnection.mComponentName.getPackageName();
+            }
+        }
+        return null;
+    }
+
     @Override
     public void disableScoring() {
         // Only the active scorer or the system should be allowed to disable scoring.
