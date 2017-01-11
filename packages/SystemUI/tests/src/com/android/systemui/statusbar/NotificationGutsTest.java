@@ -210,6 +210,18 @@ public class NotificationGutsTest {
 
     @Test
     @UiThreadTest
+    public void testCloseControls_DoesNotUpdateNotificationChannelIfUnspecified() throws Exception {
+        mNotificationChannel.setImportance(NotificationManager.IMPORTANCE_UNSPECIFIED);
+        mNotificationGuts.bindNotification(mMockPackageManager, mMockINotificationManager,
+                mMockStatusBarNotification, null, null, null);
+
+        mNotificationGuts.closeControls(-1, -1, true);
+        verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
+                anyString(), anyInt(), any());
+    }
+
+    @Test
+    @UiThreadTest
     public void testCloseControls_CallsUpdateNotificationChannelIfChanged() throws Exception {
         mNotificationChannel.setImportance(NotificationManager.IMPORTANCE_LOW);
         mNotificationGuts.bindNotification(mMockPackageManager, mMockINotificationManager,

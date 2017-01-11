@@ -313,7 +313,7 @@ public class NotificationGuts extends LinearLayout {
         } else if (mHighImportanceButton.isChecked()) {
             return NotificationManager.IMPORTANCE_HIGH;
         } else {
-            return NotificationManager.IMPORTANCE_NONE;
+            return NotificationManager.IMPORTANCE_UNSPECIFIED;
         }
     }
 
@@ -333,10 +333,10 @@ public class NotificationGuts extends LinearLayout {
 
         // Set to current importance setting
         switch (importance) {
+            case NotificationManager.IMPORTANCE_UNSPECIFIED:
             case NotificationManager.IMPORTANCE_NONE:
                 break;
             case NotificationManager.IMPORTANCE_MIN:
-            case NotificationManager.IMPORTANCE_UNSPECIFIED:
                 mMinImportanceButton.setChecked(true);
                 break;
             case NotificationManager.IMPORTANCE_LOW:
