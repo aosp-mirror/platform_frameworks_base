@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * Unit tests for {@link android.net.wifi.hotspot2.omadm.PPSMOParser}.
@@ -85,6 +86,13 @@ public class PPSMOParserTest {
         config.homeSp.friendlyName = "Century House";
         config.homeSp.fqdn = "mi6.co.uk";
         config.homeSp.roamingConsortiumOIs = new long[] {0x112233L, 0x445566L};
+        config.homeSp.iconUrl = "icon.test.com";
+        config.homeSp.homeNetworkIds = new HashMap<>();
+        config.homeSp.homeNetworkIds.put("TestSSID", 0x12345678L);
+        config.homeSp.homeNetworkIds.put("NullHESSID", null);
+        config.homeSp.matchAllOIs = new long[] {0x11223344};
+        config.homeSp.matchAnyOIs = new long[] {0x55667788};
+        config.homeSp.otherHomePartners = new String[] {"other.fqdn.com"};
 
         // Credential configuration.
         config.credential = new Credential();

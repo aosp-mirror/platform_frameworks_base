@@ -21,11 +21,14 @@ import android.net.wifi.hotspot2.pps.Credential;
 import android.net.wifi.hotspot2.pps.HomeSP;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.xml.sax.SAXException;
@@ -131,6 +134,14 @@ public final class PPSMOParser {
     private static final String NODE_FQDN = "FQDN";
     private static final String NODE_FRIENDLY_NAME = "FriendlyName";
     private static final String NODE_ROAMING_CONSORTIUM_OI = "RoamingConsortiumOI";
+    private static final String NODE_NETWORK_ID = "NetworkID";
+    private static final String NODE_SSID = "SSID";
+    private static final String NODE_HESSID = "HESSID";
+    private static final String NODE_ICON_URL = "IconURL";
+    private static final String NODE_HOME_OI_LIST = "HomeOIList";
+    private static final String NODE_HOME_OI = "HomeOI";
+    private static final String NODE_HOME_OI_REQUIRED = "HomeOIRequired";
+    private static final String NODE_OTHER_HOME_PARTNERS = "OtherHomePartners";
 
     /**
      * Fields under Credential subtree.
@@ -558,6 +569,20 @@ public final class PPSMOParser {
                     homeSp.roamingConsortiumOIs =
                             parseRoamingConsortiumOI(getPpsNodeValue(child));
                     break;
+                case NODE_ICON_URL:
+                    homeSp.iconUrl = getPpsNodeValue(child);
+                    break;
+                case NODE_NETWORK_ID:
+                    homeSp.homeNetworkIds = parseNetworkIds(child);
+                    break;
+                case NODE_HOME_OI_LIST:
+                    Pair<List<Long>, List<Long>> homeOIs = parseHomeOIList(child);
+                    homeSp.matchAllOIs = convertFromLongList(homeOIs.first);
+                    homeSp.matchAnyOIs = convertFromLongList(homeOIs.second);
+                    break;
+                case NODE_OTHER_HOME_PARTNERS:
+                    homeSp.otherHomePartners = parseOtherHomePartners(child);
+                    break;
                 default:
                     throw new ParsingException("Unknown node under HomeSP: " + child.getName());
             }
@@ -584,6 +609,192 @@ public final class PPSMOParser {
             }
         }
         return oiArray;
+    }
+
+    /**
+     * Parse configurations under PerProviderSubscription/HomeSP/NetworkID subtree.
+     *
+     * @param node PPSNode representing the root of the PerProviderSubscription/HomeSP/NetworkID
+     *             subtree
+     * @return HashMap<String, Long> representing list of <SSID, HESSID> pair.
+     * @throws ParsingException
+     */
+    static private Map<String, Long> parseNetworkIds(PPSNode node)
+            throws ParsingException {
+        if (node.isLeaf()) {
+            throw new ParsingException("Leaf node not expected for NetworkID");
+        }
+
+        Map<String, Long> networkIds = new HashMap<>();
+        for (PPSNode child : node.getChildren()) {
+            Pair<String, Long> networkId = parseNetworkIdInstance(child);
+            networkIds.put(networkId.first, networkId.second);
+        }
+        return networkIds;
+    }
+
+    /**
+     * Parse configurations under PerProviderSubscription/HomeSP/NetworkID/<X+> subtree.
+     * The instance name (<X+>) is irrelevant and must be unique for each instance, which
+     * is verified when the PPS tree is constructed {@link #buildPpsNode}.
+     *
+     * @param node PPSNode representing the root of the
+     *             PerProviderSubscription/HomeSP/NetworkID/<X+> subtree
+     * @return Pair<String, Long> representing <SSID, HESSID> pair.
+     * @throws ParsingException
+     */
+    static private Pair<String, Long> parseNetworkIdInstance(PPSNode node)
+            throws ParsingException {
+        if (node.isLeaf()) {
+            throw new ParsingException("Leaf node not expected for NetworkID instance");
+        }
+
+        String ssid = null;
+        Long hessid = null;
+        for (PPSNode child : node.getChildren()) {
+            switch (child.getName()) {
+                case NODE_SSID:
+                    ssid = getPpsNodeValue(child);
+                    break;
+                case NODE_HESSID:
+                    try {
+                        hessid = Long.parseLong(getPpsNodeValue(child), 16);
+                    } catch (NumberFormatException e) {
+                        throw new ParsingException("Invalid HESSID: " + getPpsNodeValue(child));
+                    }
+                    break;
+                default:
+                    throw new ParsingException("Unknown node under NetworkID instance: " +
+                            child.getName());
+            }
+        }
+        if (ssid == null)
+            throw new ParsingException("NetworkID instance missing SSID");
+
+        return new Pair<String, Long>(ssid, hessid);
+    }
+
+    /**
+     * Parse configurations under PerProviderSubscription/HomeSP/HomeOIList subtree.
+     *
+     * @param node PPSNode representing the root of the PerProviderSubscription/HomeSP/HomeOIList
+     *             subtree
+     * @return Pair<List<Long>, List<Long>> containing both MatchAllOIs and MatchAnyOIs list.
+     * @throws ParsingException
+     */
+    private static Pair<List<Long>, List<Long>> parseHomeOIList(PPSNode node)
+            throws ParsingException {
+        if (node.isLeaf()) {
+            throw new ParsingException("Leaf node not expected for HomeOIList");
+        }
+
+        List<Long> matchAllOIs = new ArrayList<Long>();
+        List<Long> matchAnyOIs = new ArrayList<Long>();
+        for (PPSNode child : node.getChildren()) {
+            Pair<Long, Boolean> homeOI = parseHomeOIInstance(child);
+            if (homeOI.second.booleanValue()) {
+                matchAllOIs.add(homeOI.first);
+            } else {
+                matchAnyOIs.add(homeOI.first);
+            }
+        }
+        return new Pair<List<Long>, List<Long>>(matchAllOIs, matchAnyOIs);
+    }
+
+    /**
+     * Parse configurations under PerProviderSubscription/HomeSP/HomeOIList/<X+> subtree.
+     * The instance name (<X+>) is irrelevant and must be unique for each instance, which
+     * is verified when the PPS tree is constructed {@link #buildPpsNode}.
+     *
+     * @param node PPSNode representing the root of the
+     *             PerProviderSubscription/HomeSP/HomeOIList/<X+> subtree
+     * @return Pair<Long, Boolean> containing a HomeOI and a HomeOIRequired flag
+     * @throws ParsingException
+     */
+    private static Pair<Long, Boolean> parseHomeOIInstance(PPSNode node) throws ParsingException {
+        if (node.isLeaf()) {
+            throw new ParsingException("Leaf node not expected for HomeOI instance");
+        }
+
+        Long oi = null;
+        Boolean required = null;
+        for (PPSNode child : node.getChildren()) {
+            switch (child.getName()) {
+                case NODE_HOME_OI:
+                    try {
+                        oi = Long.valueOf(getPpsNodeValue(child), 16);
+                    } catch (NumberFormatException e) {
+                        throw new ParsingException("Invalid HomeOI: " + getPpsNodeValue(child));
+                    }
+                    break;
+                case NODE_HOME_OI_REQUIRED:
+                    required = Boolean.valueOf(getPpsNodeValue(child));
+                    break;
+                default:
+                    throw new ParsingException("Unknown node under NetworkID instance: " +
+                            child.getName());
+            }
+        }
+        if (oi == null) {
+            throw new ParsingException("HomeOI instance missing OI field");
+        }
+        if (required == null) {
+            throw new ParsingException("HomeOI instance missing required field");
+        }
+        return new Pair<Long, Boolean>(oi, required);
+    }
+
+    /**
+     * Parse configurations under PerProviderSubscription/HomeSP/OtherHomePartners subtree.
+     * This contains a list of FQDN (Fully Qualified Domain Name) that are considered
+     * home partners.
+     *
+     * @param node PPSNode representing the root of the
+     *             PerProviderSubscription/HomeSP/OtherHomePartners subtree
+     * @return String[] list of partner's FQDN
+     * @throws ParsingException
+     */
+    private static String[] parseOtherHomePartners(PPSNode node) throws ParsingException {
+        if (node.isLeaf()) {
+            throw new ParsingException("Leaf node not expected for OtherHomePartners");
+        }
+        List<String> otherHomePartners = new ArrayList<String>();
+        for (PPSNode child : node.getChildren()) {
+            String fqdn = parseOtherHomePartnerInstance(child);
+            otherHomePartners.add(fqdn);
+        }
+        return otherHomePartners.toArray(new String[otherHomePartners.size()]);
+    }
+
+    /**
+     * Parse configurations under PerProviderSubscription/HomeSP/OtherHomePartners/<X+> subtree.
+     * The instance name (<X+>) is irrelevant and must be unique for each instance, which
+     * is verified when the PPS tree is constructed {@link #buildPpsNode}.
+     *
+     * @param node PPSNode representing the root of the
+     *             PerProviderSubscription/HomeSP/OtherHomePartners/<X+> subtree
+     * @return String FQDN of the partner
+     * @throws ParsingException
+     */
+    private static String parseOtherHomePartnerInstance(PPSNode node) throws ParsingException {
+        if (node.isLeaf()) {
+            throw new ParsingException("Leaf node not expected for OtherHomePartner instance");
+        }
+        String fqdn = null;
+        for (PPSNode child : node.getChildren()) {
+            switch (child.getName()) {
+                case NODE_FQDN:
+                    fqdn = getPpsNodeValue(child);
+                    break;
+                default:
+                    throw new ParsingException(
+                            "Unknown node under OtherHomePartner instance: " + child.getName());
+            }
+        }
+        if (fqdn == null) {
+            throw new ParsingException("OtherHomePartner instance missing FQDN field");
+        }
+        return fqdn;
     }
 
     /**
@@ -782,5 +993,20 @@ public final class PPSMOParser {
         } catch (NumberFormatException e) {
             throw new ParsingException("Invalid integer value: " + value);
         }
+    }
+
+    /**
+     * Convert a List<Long> to a primitive long array long[].
+     *
+     * @param list List to be converted
+     * @return long[]
+     */
+    private static long[] convertFromLongList(List<Long> list) {
+        Long[] objectArray = list.toArray(new Long[list.size()]);
+        long[] primitiveArray = new long[objectArray.length];
+        for (int i = 0; i < objectArray.length; i++) {
+            primitiveArray[i] = objectArray[i].longValue();
+        }
+        return primitiveArray;
     }
 }
