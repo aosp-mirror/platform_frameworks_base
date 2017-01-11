@@ -59,6 +59,12 @@ static jmethodID method_reportGeofenceResumeStatus;
 static jmethodID method_reportMeasurementData;
 static jmethodID method_reportNavigationMessages;
 
+/*
+ * Save a pointer to JavaVm to attach/detach threads executing
+ * callback methods that need to make JNI calls.
+ */
+static JavaVM* sJvm;
+
 using android::OK;
 using android::sp;
 using android::status_t;
@@ -216,6 +222,62 @@ static void checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodNa
     }
 }
 
+class ScopedJniThreadAttach {
+public:
+    ScopedJniThreadAttach() {
+        /*
+         * attachResult will also be JNI_OK if the thead was already attached to
+         * JNI before the call to AttachCurrentThread().
+         */
+        jint attachResult = sJvm->AttachCurrentThread(&mEnv, nullptr);
+        LOG_ALWAYS_FATAL_IF(attachResult != JNI_OK, "Unable to attach thread. Error %d",
+                            attachResult);
+    }
+
+    ~ScopedJniThreadAttach() {
+        jint detachResult = sJvm->DetachCurrentThread();
+        /*
+         * Return if the thread was already detached. Log error for any other
+         * failure.
+         */
+        if (detachResult == JNI_EDETACHED) {
+            return;
+        }
+
+        LOG_ALWAYS_FATAL_IF(detachResult != JNI_OK, "Unable to detach thread. Error %d",
+                            detachResult);
+    }
+
+    JNIEnv* getEnv() {
+        /*
+         * Checking validity of mEnv in case the thread was detached elsewhere.
+         */
+        LOG_ALWAYS_FATAL_IF(AndroidRuntime::getJNIEnv() != mEnv);
+        return mEnv;
+    }
+
+private:
+    JNIEnv* mEnv = nullptr;
+};
+
+thread_local std::unique_ptr<ScopedJniThreadAttach> tJniThreadAttacher;
+
+static JNIEnv* getJniEnv() {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+
+    /*
+     * If env is nullptr, the thread is not already attached to
+     * JNI. It is attached below and the destructor for ScopedJniThreadAttach
+     * will detach it on thread exit.
+     */
+    if (env == nullptr) {
+        tJniThreadAttacher.reset(new ScopedJniThreadAttach());
+        env = tJniThreadAttacher->getEnv();
+    }
+
+    return env;
+}
+
 /*
  * GnssCallback class implements the callback methods for IGnss interface.
  */
@@ -247,7 +309,7 @@ size_t GnssCallback::sGnssSvListSize = 0;
 
 Return<void> GnssCallback::gnssLocationCb(
         const ::android::hardware::gnss::V1_0::GnssLocation& location) {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = getJniEnv();
     env->CallVoidMethod(mCallbacksObj,
                         method_reportLocation,
                         location.gnssLocationFlags,
@@ -263,14 +325,14 @@ Return<void> GnssCallback::gnssLocationCb(
 }
 
 Return<void> GnssCallback::gnssStatusCb(const IGnssCallback::GnssStatusValue status) {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = getJniEnv();
     env->CallVoidMethod(mCallbacksObj, method_reportStatus, status);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return Void();
 }
 
 Return<void> GnssCallback::gnssSvStatusCb(const IGnssCallback::GnssSvStatus& svStatus) {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = getJniEnv();
 
     sGnssSvListSize = svStatus.numSvs;
     if (sGnssSvListSize > static_cast<uint32_t>(
@@ -292,7 +354,7 @@ Return<void> GnssCallback::gnssSvStatusCb(const IGnssCallback::GnssSvStatus& svS
 
 Return<void> GnssCallback::gnssNmeaCb(
     int64_t timestamp, const ::android::hardware::hidl_string& nmea) {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = getJniEnv();
     /*
      * The Java code will call back to read these values.
      * We do this to avoid creating unnecessary String objects.
@@ -308,7 +370,7 @@ Return<void> GnssCallback::gnssNmeaCb(
 Return<void> GnssCallback::gnssSetCapabilitesCb(uint32_t capabilities) {
     ALOGD("%s: %du\n", __func__, capabilities);
 
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = getJniEnv();
     env->CallVoidMethod(mCallbacksObj, method_setEngineCapabilities, capabilities);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return Void();
@@ -325,7 +387,7 @@ Return<void> GnssCallback::gnssReleaseWakelockCb() {
 }
 
 Return<void> GnssCallback::gnssRequestTimeCb() {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = getJniEnv();
     env->CallVoidMethod(mCallbacksObj, method_requestUtcTime);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return Void();
@@ -334,7 +396,7 @@ Return<void> GnssCallback::gnssRequestTimeCb() {
 Return<void> GnssCallback::gnssSetSystemInfoCb(const IGnssCallback::GnssSystemInfo& info) {
     ALOGD("%s: yearOfHw=%d\n", __func__, info.yearOfHw);
 
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = getJniEnv();
     env->CallVoidMethod(mCallbacksObj, method_setGnssYearOfHardware,
                         info.yearOfHw);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
@@ -350,7 +412,7 @@ class GnssXtraCallback : public IGnssXtraCallback {
  * interface.
  */
 Return<void> GnssXtraCallback::downloadRequestCb() {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = getJniEnv();
     env->CallVoidMethod(mCallbacksObj, method_xtraDownloadRequest);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return Void();
@@ -385,7 +447,7 @@ Return<void> GnssGeofenceCallback::gnssGeofenceTransitionCb(
         const android::hardware::gnss::V1_0::GnssLocation& location,
         GeofenceTransition transition,
         hardware::gnss::V1_0::GnssUtcTime timestamp) {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = getJniEnv();
 
     env->CallVoidMethod(mCallbacksObj,
                         method_reportGeofenceTransition,
@@ -408,7 +470,7 @@ Return<void> GnssGeofenceCallback::gnssGeofenceTransitionCb(
 Return<void> GnssGeofenceCallback::gnssGeofenceStatusCb(
         GeofenceAvailability status,
         const android::hardware::gnss::V1_0::GnssLocation& location) {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = getJniEnv();
     env->CallVoidMethod(mCallbacksObj,
                         method_reportGeofenceStatus,
                         status,
@@ -426,7 +488,7 @@ Return<void> GnssGeofenceCallback::gnssGeofenceStatusCb(
 
 Return<void> GnssGeofenceCallback::gnssGeofenceAddCb(int32_t geofenceId,
                                                     GeofenceStatus status) {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = getJniEnv();
     if (status != IGnssGeofenceCallback::GeofenceStatus::OPERATION_SUCCESS) {
         ALOGE("%s: Error in adding a Geofence: %d\n", __func__, status);
     }
@@ -441,7 +503,7 @@ Return<void> GnssGeofenceCallback::gnssGeofenceAddCb(int32_t geofenceId,
 
 Return<void> GnssGeofenceCallback::gnssGeofenceRemoveCb(int32_t geofenceId,
                                                        GeofenceStatus status) {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = getJniEnv();
     if (status != IGnssGeofenceCallback::GeofenceStatus::OPERATION_SUCCESS) {
         ALOGE("%s: Error in removing a Geofence: %d\n", __func__, status);
     }
@@ -455,7 +517,7 @@ Return<void> GnssGeofenceCallback::gnssGeofenceRemoveCb(int32_t geofenceId,
 
 Return<void> GnssGeofenceCallback::gnssGeofencePauseCb(int32_t geofenceId,
                                                       GeofenceStatus status) {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = getJniEnv();
     if (status != IGnssGeofenceCallback::GeofenceStatus::OPERATION_SUCCESS) {
         ALOGE("%s: Error in pausing Geofence: %d\n", __func__, status);
     }
@@ -469,7 +531,7 @@ Return<void> GnssGeofenceCallback::gnssGeofencePauseCb(int32_t geofenceId,
 
 Return<void> GnssGeofenceCallback::gnssGeofenceResumeCb(int32_t geofenceId,
                                                        GeofenceStatus status) {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = getJniEnv();
     if (status != IGnssGeofenceCallback::GeofenceStatus::OPERATION_SUCCESS) {
         ALOGE("%s: Error in resuming Geofence: %d\n", __func__, status);
     }
@@ -496,7 +558,7 @@ struct GnssNavigationMessageCallback : public IGnssNavigationMessageCallback {
 
 Return<void> GnssNavigationMessageCallback::gnssNavigationMessageCb(
         const IGnssNavigationMessageCallback::GnssNavigationMessage& message) {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = getJniEnv();
 
     size_t dataLength = message.data.size();
 
@@ -545,7 +607,7 @@ struct GnssMeasurementCallback : public IGnssMeasurementCallback {
 
 Return<void> GnssMeasurementCallback::GnssMeasurementCb(
         const IGnssMeasurementCallback::GnssData& data) {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = getJniEnv();
 
     jobject clock;
     jobjectArray measurementArray;
@@ -700,7 +762,7 @@ struct GnssNiCallback : public IGnssNiCallback {
 
 Return<void> GnssNiCallback::niNotifyCb(
         const IGnssNiCallback::GnssNiNotification& notification) {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = getJniEnv();
     jstring requestorId = env->NewStringUTF(notification.requestorId.c_str());
     jstring text = env->NewStringUTF(notification.notificationMessage.c_str());
 
@@ -742,7 +804,7 @@ struct AGnssCallback : public IAGnssCallback {
 
 Return<void> AGnssCallback::agnssStatusIpV6Cb(
         const IAGnssCallback::AGnssStatusIpV6& agps_status) {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = getJniEnv();
     jbyteArray byteArray = NULL;
     bool isSupported = false;
 
@@ -778,7 +840,7 @@ Return<void> AGnssCallback::agnssStatusIpV6Cb(
 
 Return<void> AGnssCallback::agnssStatusIpV4Cb(
         const IAGnssCallback::AGnssStatusIpV4& agps_status) {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = getJniEnv();
     jbyteArray byteArray = NULL;
 
     uint32_t ipAddr = agps_status.ipV4Addr;
@@ -813,7 +875,7 @@ jbyteArray AGnssCallback::convertToIpV4(uint32_t ip) {
         return NULL;
     }
 
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = getJniEnv();
     jbyteArray byteArray = env->NewByteArray(4);
     if (byteArray == NULL) {
         ALOGE("Unable to allocate byte array for IPv4 address");
@@ -837,14 +899,14 @@ struct AGnssRilCallback : IAGnssRilCallback {
 };
 
 Return<void> AGnssRilCallback::requestSetIdCb(IAGnssRilCallback::ID setIdFlag) {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = getJniEnv();
     env->CallVoidMethod(mCallbacksObj, method_requestSetID, setIdFlag);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return Void();
 }
 
 Return<void> AGnssRilCallback::requestRefLocCb() {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = getJniEnv();
     env->CallVoidMethod(mCallbacksObj, method_requestRefLocation);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return Void();
@@ -884,6 +946,14 @@ static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env,
             clazz,
             "reportNavigationMessage",
             "(Landroid/location/GnssNavigationMessage;)V");
+
+    /*
+     * Save a pointer to JVM.
+     */
+    jint jvmStatus = env->GetJavaVM(&sJvm);
+    if (jvmStatus != JNI_OK) {
+        LOG_ALWAYS_FATAL("Unable to get Java VM. Error: %d", jvmStatus);
+    }
 
     // TODO(b/31632518)
     gnssHal = IGnss::getService("gnss");
