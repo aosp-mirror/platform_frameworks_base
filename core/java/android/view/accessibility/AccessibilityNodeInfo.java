@@ -25,7 +25,13 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.InputType;
+import android.text.Spannable;
+import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.style.AccessibilityClickableSpan;
+import android.text.style.AccessibilityURLSpan;
+import android.text.style.ClickableSpan;
+import android.text.style.URLSpan;
 import android.util.ArraySet;
 import android.util.LongArray;
 import android.util.Pools.SynchronizedPool;
@@ -464,6 +470,14 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final String ACTION_ARGUMENT_PROGRESS_VALUE =
             "android.view.accessibility.action.ARGUMENT_PROGRESS_VALUE";
 
+    /**
+     * Argument to pass the {@link AccessibilityClickableSpan}.
+     * For use with R.id.accessibilityActionClickOnClickableSpan
+     * @hide
+     */
+    public static final String ACTION_ARGUMENT_ACCESSIBLE_CLICKABLE_SPAN =
+            "android.view.accessibility.action.ACTION_ARGUMENT_ACCESSIBLE_CLICKABLE_SPAN";
+
     // Focus types
 
     /**
@@ -628,6 +642,8 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private CharSequence mPackageName;
     private CharSequence mClassName;
+    // Hidden, unparceled value used to hold the original value passed to setText
+    private CharSequence mOriginalText;
     private CharSequence mText;
     private CharSequence mError;
     private CharSequence mContentDescription;
@@ -2213,11 +2229,46 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Gets the text of this node.
+     * <p>
+     *   <strong>Note:</strong> If the text contains {@link ClickableSpan}s or {@link URLSpan}s,
+     *   these spans will have been replaced with ones whose {@link ClickableSpan#onClick(View)}
+     *   can be called from an {@link AccessibilityService}. When called from a service, the
+     *   {@link View} argument is ignored and the corresponding span will be found on the view that
+     *   this {@code AccessibilityNodeInfo} represents and called with that view as its argument.
+     *   <p>
+     *   This treatment of {@link ClickableSpan}s means that the text returned from this method may
+     *   different slightly one passed to {@link #setText(CharSequence)}, although they will be
+     *   equivalent according to {@link TextUtils#equals(CharSequence, CharSequence)}. The
+     *   {@link ClickableSpan#onClick(View)} of any spans, however, will generally not work outside
+     *   of an accessibility service.
+     * </p>
      *
      * @return The text.
      */
     public CharSequence getText() {
+        // Attach this node to any spans that need it
+        if (mText instanceof Spanned) {
+            Spanned spanned = (Spanned) mText;
+            AccessibilityClickableSpan[] clickableSpans =
+                    spanned.getSpans(0, mText.length(), AccessibilityClickableSpan.class);
+            for (int i = 0; i < clickableSpans.length; i++) {
+                clickableSpans[i].setAccessibilityNodeInfo(this);
+            }
+            AccessibilityURLSpan[] urlSpans =
+                    spanned.getSpans(0, mText.length(), AccessibilityURLSpan.class);
+            for (int i = 0; i < urlSpans.length; i++) {
+                urlSpans[i].setAccessibilityNodeInfo(this);
+            }
+        }
         return mText;
+    }
+
+    /**
+     * Get the text passed to setText before any changes to the spans.
+     * @hide
+     */
+    public CharSequence getOriginalText() {
+        return mOriginalText;
     }
 
     /**
@@ -2234,6 +2285,34 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public void setText(CharSequence text) {
         enforceNotSealed();
+        mOriginalText = text;
+        // Replace any ClickableSpans in mText with placeholders
+        if (text instanceof Spanned) {
+            ClickableSpan[] spans =
+                    ((Spanned) text).getSpans(0, text.length(), ClickableSpan.class);
+            if (spans.length > 0) {
+                Spannable spannable = Spannable.Factory.getInstance().newSpannable(text);
+                for (int i = 0; i < spans.length; i++) {
+                    ClickableSpan span = spans[i];
+                    if ((span instanceof AccessibilityClickableSpan)
+                            || (span instanceof AccessibilityURLSpan)) {
+                        // We've already done enough
+                        break;
+                    }
+                    int spanToReplaceStart = spannable.getSpanStart(span);
+                    int spanToReplaceEnd = spannable.getSpanEnd(span);
+                    int spanToReplaceFlags = spannable.getSpanFlags(span);
+                    spannable.removeSpan(span);
+                    ClickableSpan replacementSpan = (span instanceof URLSpan)
+                            ? new AccessibilityURLSpan((URLSpan) span)
+                            : new AccessibilityClickableSpan(span.getId());
+                    spannable.setSpan(replacementSpan, spanToReplaceStart, spanToReplaceEnd,
+                            spanToReplaceFlags);
+                }
+                mText = spannable;
+                return;
+            }
+        }
         mText = (text == null) ? null : text.subSequence(0, text.length());
     }
 

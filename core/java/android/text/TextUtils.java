@@ -29,6 +29,8 @@ import android.os.Parcelable;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.text.style.AbsoluteSizeSpan;
+import android.text.style.AccessibilityClickableSpan;
+import android.text.style.AccessibilityURLSpan;
 import android.text.style.AlignmentSpan;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.BulletSpan;
@@ -621,7 +623,11 @@ public class TextUtils {
     /** @hide */
     public static final int TTS_SPAN = 24;
     /** @hide */
-    public static final int LAST_SPAN = TTS_SPAN;
+    public static final int ACCESSIBILITY_CLICKABLE_SPAN = 25;
+    /** @hide */
+    public static final int ACCESSIBILITY_URL_SPAN = 26;
+    /** @hide */
+    public static final int LAST_SPAN = ACCESSIBILITY_URL_SPAN;
 
     /**
      * Flatten a CharSequence and whatever styles can be copied across processes
@@ -801,6 +807,14 @@ public class TextUtils {
 
                 case TTS_SPAN:
                     readSpan(p, sp, new TtsSpan(p));
+                    break;
+
+                case ACCESSIBILITY_CLICKABLE_SPAN:
+                    readSpan(p, sp, new AccessibilityClickableSpan(p));
+                    break;
+
+                case ACCESSIBILITY_URL_SPAN:
+                    readSpan(p, sp, new AccessibilityURLSpan(p));
                     break;
 
                 default:

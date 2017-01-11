@@ -26,12 +26,15 @@ import android.view.View;
  * be called.
  */
 public abstract class ClickableSpan extends CharacterStyle implements UpdateAppearance {
+    private static int sIdCounter = 0;
+
+    private int mId = sIdCounter++;
 
     /**
      * Performs the click action associated with this span.
      */
     public abstract void onClick(View widget);
-   
+
     /**
      * Makes the text underlined and in the link color.
      */
@@ -39,5 +42,15 @@ public abstract class ClickableSpan extends CharacterStyle implements UpdateAppe
     public void updateDrawState(TextPaint ds) {
         ds.setColor(ds.linkColor);
         ds.setUnderlineText(true);
+    }
+
+    /**
+     * Get the unique ID for this span.
+     *
+     * @return The unique ID.
+     * @hide
+     */
+    public int getId() {
+        return mId;
     }
 }

@@ -129,4 +129,6 @@
   <item type="id" name="remote_input_tag" />
 
   <item type="id" name="cross_task_transition" />
+
+  <item type="id" name="accessibilityActionClickOnClickableSpan" />
 </resources>
