@@ -1094,8 +1094,9 @@ public class AppWidgetManager {
      * <p>Only apps with a foreground activity or a foreground service can call it.  Otherwise
      * it'll throw {@link IllegalStateException}.
      *
-     * <p>When an app calls this API when a previous request is still waiting for a response,
-     * the previous request will be canceled.
+     * <p>It's up to the launcher how to handle previous pending requests when the same package
+     * calls this API multiple times in a row.  It may ignore the previous requests,
+     * for example.
      *
      * @param provider The {@link ComponentName} for the {@link
      *    android.content.BroadcastReceiver BroadcastReceiver} provider for your AppWidget.
