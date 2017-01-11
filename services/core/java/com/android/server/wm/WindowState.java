@@ -429,6 +429,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     int mLastVisibleLayoutRotation = -1;
 
     /**
+     * Set when we need to report the orientation change to client to trigger a relayout.
+     */
+    boolean mReportOrientationChanged;
+
+    /**
      * How long we last kept the screen frozen.
      */
     int mLastFreezeDuration;
@@ -1093,7 +1098,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 || mFrameSizeChanged
                 || configChanged
                 || dragResizingChanged
-                || !isResizedWhileNotDragResizingReported()) {
+                || !isResizedWhileNotDragResizingReported()
+                || mReportOrientationChanged) {
             if (DEBUG_RESIZE || DEBUG_ORIENTATION) {
                 Slog.v(TAG_WM, "Resize reasons for w=" + this + ": "
                         + " contentInsetsChanged=" + mContentInsetsChanged
@@ -1108,7 +1114,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         + " configChanged=" + configChanged
                         + " dragResizingChanged=" + dragResizingChanged
                         + " resizedWhileNotDragResizingReported="
-                        + isResizedWhileNotDragResizingReported());
+                        + isResizedWhileNotDragResizingReported()
+                        + " reportOrientationChanged=" + mReportOrientationChanged);
             }
 
             // If it's a dead window left on screen, and the configuration changed, there is nothing
@@ -3004,6 +3011,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             final Rect stableInsets = mLastStableInsets;
             final Rect outsets = mLastOutsets;
             final boolean reportDraw = mWinAnimator.mDrawState == DRAW_PENDING;
+            final boolean reportOrientation = mReportOrientationChanged;
             if (mAttrs.type != WindowManager.LayoutParams.TYPE_APPLICATION_STARTING
                     && mClient instanceof IWindow.Stub) {
                 // To prevent deadlock simulate one-way call if win.mClient is a local object.
@@ -3012,7 +3020,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     public void run() {
                         try {
                             dispatchResized(frame, overscanInsets, contentInsets, visibleInsets,
-                                    stableInsets, outsets, reportDraw, newConfig);
+                                    stableInsets, outsets, reportDraw, newConfig,
+                                    reportOrientation);
                         } catch (RemoteException e) {
                             // Not a remote call, RemoteException won't be raised.
                         }
@@ -3020,7 +3029,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 });
             } else {
                 dispatchResized(frame, overscanInsets, contentInsets, visibleInsets, stableInsets,
-                        outsets, reportDraw, newConfig);
+                        outsets, reportDraw, newConfig, reportOrientation);
             }
 
             //TODO (multidisplay): Accessibility supported only for the default display.
@@ -3036,6 +3045,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mFrameSizeChanged = false;
             mResizedWhileNotDragResizingReported = true;
             mWinAnimator.mSurfaceResized = false;
+            mReportOrientationChanged = false;
         } catch (RemoteException e) {
             mOrientationChanging = false;
             mLastFreezeDuration = (int)(SystemClock.elapsedRealtime()
@@ -3076,8 +3086,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     private void dispatchResized(Rect frame, Rect overscanInsets, Rect contentInsets,
             Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
-            Configuration newConfig) throws RemoteException {
-        final boolean forceRelayout = isDragResizeChanged() || mResizedWhileNotDragResizing;
+            Configuration newConfig, boolean reportOrientation) throws RemoteException {
+        final boolean forceRelayout = isDragResizeChanged() || mResizedWhileNotDragResizing
+                || reportOrientation;
 
         mClient.resized(frame, overscanInsets, contentInsets, visibleInsets, stableInsets, outsets,
                 reportDraw, newConfig, getBackdropFrame(frame),
@@ -3370,11 +3381,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     pw.print(" mDestroying="); pw.print(mDestroying);
                     pw.print(" mRemoved="); pw.println(mRemoved);
         }
-        if (mOrientationChanging || mAppFreezing || mTurnOnScreen) {
+        if (mOrientationChanging || mAppFreezing || mTurnOnScreen
+                || mReportOrientationChanged) {
             pw.print(prefix); pw.print("mOrientationChanging=");
                     pw.print(mOrientationChanging);
                     pw.print(" mAppFreezing="); pw.print(mAppFreezing);
                     pw.print(" mTurnOnScreen="); pw.println(mTurnOnScreen);
+                    pw.print(" mReportOrientationChanged="); pw.println(mReportOrientationChanged);
         }
         if (mLastFreezeDuration != 0) {
             pw.print(prefix); pw.print("mLastFreezeDuration=");

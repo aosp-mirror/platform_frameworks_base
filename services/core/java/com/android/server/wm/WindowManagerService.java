@@ -4465,7 +4465,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 mRoot.mOrientationChangeComplete = false;
                 w.mLastFreezeDuration = 0;
             }
-
+            w.mReportOrientationChanged = true;
         }, true /* traverseTopToBottom */);
 
         if (rotateSeamlessly) {
