@@ -126,7 +126,8 @@ public class ActivityManager {
             BUGREPORT_OPTION_FULL,
             BUGREPORT_OPTION_INTERACTIVE,
             BUGREPORT_OPTION_REMOTE,
-            BUGREPORT_OPTION_WEAR
+            BUGREPORT_OPTION_WEAR,
+            BUGREPORT_OPTION_TELEPHONY
     })
     public @interface BugreportMode {}
     /**
@@ -152,6 +153,13 @@ public class ActivityManager {
      * @hide
      */
     public static final int BUGREPORT_OPTION_WEAR = 3;
+
+    /**
+     * Takes a lightweight version of bugreport that only includes a few, urgent sections
+     * used to report telephony bugs.
+     * @hide
+     */
+    public static final int BUGREPORT_OPTION_TELEPHONY = 4;
 
     /**
      * <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code
