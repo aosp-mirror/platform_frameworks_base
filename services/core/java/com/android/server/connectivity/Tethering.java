@@ -198,7 +198,8 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         mTetherMasterSM = new TetherMasterSM("TetherMaster", mLooper);
         mTetherMasterSM.start();
 
-        mUpstreamNetworkMonitor = new UpstreamNetworkMonitor();
+        mUpstreamNetworkMonitor = new UpstreamNetworkMonitor(
+                mContext, mTetherMasterSM, TetherMasterSM.EVENT_UPSTREAM_CALLBACK);
 
         mStateReceiver = new StateReceiver();
         IntentFilter filter = new IntentFilter();
@@ -1026,38 +1027,6 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     }
 
     /**
-     * A NetworkCallback class that relays information of interest to the
-     * tethering master state machine thread for subsequent processing.
-     */
-    class UpstreamNetworkCallback extends NetworkCallback {
-        @Override
-        public void onAvailable(Network network) {
-            mTetherMasterSM.sendMessage(TetherMasterSM.EVENT_UPSTREAM_CALLBACK,
-                    UpstreamNetworkMonitor.EVENT_ON_AVAILABLE, 0, network);
-        }
-
-        @Override
-        public void onCapabilitiesChanged(Network network, NetworkCapabilities newNc) {
-            mTetherMasterSM.sendMessage(TetherMasterSM.EVENT_UPSTREAM_CALLBACK,
-                    UpstreamNetworkMonitor.EVENT_ON_CAPABILITIES, 0,
-                    new NetworkState(null, null, newNc, network, null, null));
-        }
-
-        @Override
-        public void onLinkPropertiesChanged(Network network, LinkProperties newLp) {
-            mTetherMasterSM.sendMessage(TetherMasterSM.EVENT_UPSTREAM_CALLBACK,
-                    UpstreamNetworkMonitor.EVENT_ON_LINKPROPERTIES, 0,
-                    new NetworkState(null, newLp, null, network, null, null));
-        }
-
-        @Override
-        public void onLost(Network network) {
-            mTetherMasterSM.sendMessage(TetherMasterSM.EVENT_UPSTREAM_CALLBACK,
-                    UpstreamNetworkMonitor.EVENT_ON_LOST, 0, network);
-        }
-    }
-
-    /**
      * A class to centralize all the network and link properties information
      * pertaining to the current and any potential upstream network.
      *
@@ -1071,21 +1040,31 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
      * TODO: Investigate whether more "upstream-specific" logic/functionality
      * could/should be moved here.
      */
-    class UpstreamNetworkMonitor {
-        static final int EVENT_ON_AVAILABLE      = 1;
-        static final int EVENT_ON_CAPABILITIES   = 2;
-        static final int EVENT_ON_LINKPROPERTIES = 3;
-        static final int EVENT_ON_LOST           = 4;
+    public class UpstreamNetworkMonitor {
+        public static final int EVENT_ON_AVAILABLE      = 1;
+        public static final int EVENT_ON_CAPABILITIES   = 2;
+        public static final int EVENT_ON_LINKPROPERTIES = 3;
+        public static final int EVENT_ON_LOST           = 4;
 
-        final HashMap<Network, NetworkState> mNetworkMap = new HashMap<>();
-        NetworkCallback mDefaultNetworkCallback;
-        NetworkCallback mDunTetheringCallback;
+        private final Context mContext;
+        private final StateMachine mTarget;
+        private final int mWhat;
+        private final HashMap<Network, NetworkState> mNetworkMap = new HashMap<>();
+        private ConnectivityManager mCM;
+        private NetworkCallback mDefaultNetworkCallback;
+        private NetworkCallback mDunTetheringCallback;
 
-        void start() {
+        public UpstreamNetworkMonitor(Context ctx, StateMachine tgt, int what) {
+            mContext = ctx;
+            mTarget = tgt;
+            mWhat = what;
+        }
+
+        public void start() {
             stop();
 
             mDefaultNetworkCallback = new UpstreamNetworkCallback();
-            getConnectivityManager().registerDefaultNetworkCallback(mDefaultNetworkCallback);
+            cm().registerDefaultNetworkCallback(mDefaultNetworkCallback);
 
             final NetworkRequest dunTetheringRequest = new NetworkRequest.Builder()
                     .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
@@ -1093,29 +1072,28 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                     .addCapability(NetworkCapabilities.NET_CAPABILITY_DUN)
                     .build();
             mDunTetheringCallback = new UpstreamNetworkCallback();
-            getConnectivityManager().registerNetworkCallback(
-                    dunTetheringRequest, mDunTetheringCallback);
+            cm().registerNetworkCallback(dunTetheringRequest, mDunTetheringCallback);
         }
 
-        void stop() {
+        public void stop() {
             if (mDefaultNetworkCallback != null) {
-                getConnectivityManager().unregisterNetworkCallback(mDefaultNetworkCallback);
+                cm().unregisterNetworkCallback(mDefaultNetworkCallback);
                 mDefaultNetworkCallback = null;
             }
 
             if (mDunTetheringCallback != null) {
-                getConnectivityManager().unregisterNetworkCallback(mDunTetheringCallback);
+                cm().unregisterNetworkCallback(mDunTetheringCallback);
                 mDunTetheringCallback = null;
             }
 
             mNetworkMap.clear();
         }
 
-        NetworkState lookup(Network network) {
+        public NetworkState lookup(Network network) {
             return (network != null) ? mNetworkMap.get(network) : null;
         }
 
-        NetworkState processCallback(int arg1, Object obj) {
+        public NetworkState processCallback(int arg1, Object obj) {
             switch (arg1) {
                 case EVENT_ON_AVAILABLE: {
                     final Network network = (Network) obj;
@@ -1127,7 +1105,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                                 new NetworkState(null, null, null, network, null, null));
                     }
 
-                    final ConnectivityManager cm = getConnectivityManager();
+                    final ConnectivityManager cm = cm();
 
                     if (mDefaultNetworkCallback != null) {
                         cm.requestNetworkCapabilities(mDefaultNetworkCallback);
@@ -1196,6 +1174,42 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 }
                 default:
                     return null;
+            }
+        }
+
+        // Fetch (and cache) a ConnectivityManager only if and when we need one.
+        private ConnectivityManager cm() {
+            if (mCM == null) {
+                mCM = mContext.getSystemService(ConnectivityManager.class);
+            }
+            return mCM;
+        }
+
+        /**
+         * A NetworkCallback class that relays information of interest to the
+         * tethering master state machine thread for subsequent processing.
+         */
+        private class UpstreamNetworkCallback extends NetworkCallback {
+            @Override
+            public void onAvailable(Network network) {
+                mTarget.sendMessage(mWhat, EVENT_ON_AVAILABLE, 0, network);
+            }
+
+            @Override
+            public void onCapabilitiesChanged(Network network, NetworkCapabilities newNc) {
+                mTarget.sendMessage(mWhat, EVENT_ON_CAPABILITIES, 0,
+                        new NetworkState(null, null, newNc, network, null, null));
+            }
+
+            @Override
+            public void onLinkPropertiesChanged(Network network, LinkProperties newLp) {
+                mTarget.sendMessage(mWhat, EVENT_ON_LINKPROPERTIES, 0,
+                        new NetworkState(null, newLp, null, network, null, null));
+            }
+
+            @Override
+            public void onLost(Network network) {
+                mTarget.sendMessage(mWhat, EVENT_ON_LOST, 0, network);
             }
         }
     }
