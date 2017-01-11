@@ -47,13 +47,11 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
     public FlashlightTile(Host host) {
         super(host);
         mFlashlightController = host.getFlashlightController();
-        mFlashlightController.addCallback(this);
     }
 
     @Override
     protected void handleDestroy() {
         super.handleDestroy();
-        mFlashlightController.removeCallback(this);
     }
 
     @Override
@@ -63,6 +61,11 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
 
     @Override
     public void setListening(boolean listening) {
+        if (listening) {
+            mFlashlightController.addCallback(this);
+        } else {
+            mFlashlightController.removeCallback(this);
+        }
     }
 
     @Override

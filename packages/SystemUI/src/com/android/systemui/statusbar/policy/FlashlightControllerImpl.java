@@ -121,6 +121,8 @@ public class FlashlightControllerImpl implements FlashlightController {
             }
             cleanUpListenersLocked(l);
             mListeners.add(new WeakReference<>(l));
+            l.onFlashlightAvailabilityChanged(mTorchAvailable);
+            l.onFlashlightChanged(mFlashlightEnabled);
         }
     }
 
