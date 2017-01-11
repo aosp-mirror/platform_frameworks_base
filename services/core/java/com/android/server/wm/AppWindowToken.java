@@ -29,9 +29,9 @@ import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.AppTransition.TRANSIT_UNSET;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
@@ -47,22 +47,21 @@ import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowManagerService.logWithStack;
 
-import android.os.Debug;
-import com.android.internal.util.ToBooleanFunction;
-import com.android.server.input.InputApplicationHandle;
-import com.android.server.wm.WindowManagerService.H;
-
 import android.annotation.NonNull;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
+import android.os.Debug;
 import android.os.IBinder;
-import android.os.Message;
 import android.os.SystemClock;
 import android.util.Slog;
 import android.view.IApplicationToken;
-import android.view.View;
 import android.view.WindowManager;
+import android.view.WindowManagerPolicy.StartingSurface;
+
+import com.android.internal.util.ToBooleanFunction;
+import com.android.server.input.InputApplicationHandle;
+import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
@@ -138,7 +137,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     // Information about an application starting window if displayed.
     StartingData startingData;
     WindowState startingWindow;
-    View startingView;
+    StartingSurface startingSurface;
     boolean startingDisplayed;
     boolean startingMoved;
     boolean firstWindowDrawn;
@@ -213,8 +212,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             // it from behind the starting window, so there is no need for it to also be doing its
             // own stuff.
             winAnimator.clearAnimation();
-            winAnimator.mService.mFinishedStarting.add(this);
-            winAnimator.mService.mH.sendEmptyMessage(H.FINISHED_STARTING);
+            if (getController() != null) {
+                getController().removeStartingWindow();
+            }
         }
         updateReportedVisibilityLocked();
     }
@@ -439,8 +439,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     void onRemovedFromDisplay() {
-        AppWindowToken startingToken = null;
-
         if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM, "Removing app token: " + this);
 
         boolean delayed = setVisibility(null, false, TRANSIT_UNSET, true, mVoiceInteraction);
@@ -461,6 +459,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG_WM, "removeAppToken: "
                 + this + " delayed=" + delayed + " Callers=" + Debug.getCallers(4));
 
+        if (startingData != null && getController() != null) {
+            getController().removeStartingWindow();
+        }
+
         final TaskStack stack = mTask.mStack;
         if (delayed && !isEmpty()) {
             // set the token aside because it has an active animation to be finished
@@ -477,9 +479,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
 
         removed = true;
-        if (startingData != null) {
-            startingToken = this;
-        }
         stopFreezingScreen(true, true);
         if (mService.mFocusedApp == this) {
             if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "Removing focused app token:" + this);
@@ -491,9 +490,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (!delayed) {
             updateReportedVisibilityLocked();
         }
-
-        // Will only remove if startingToken non null.
-        mService.scheduleRemoveStartingWindowLocked(startingToken);
     }
 
     void clearAnimatingFlags() {
@@ -557,7 +553,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         mAppStopped = true;
         destroySurfaces();
         // Remove any starting window that was added for this app if they are still around.
-        mTask.mService.scheduleRemoveStartingWindowLocked(this);
+        if (getController() != null) {
+            getController().removeStartingWindow();
+        }
     }
 
     /**
@@ -667,16 +665,20 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         // TODO: Something smells about the code below...Is there a better way?
         if (startingWindow == win) {
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Notify removed startingWindow " + win);
-            mService.scheduleRemoveStartingWindowLocked(this);
+            if (getController() != null) {
+                getController().removeStartingWindow();
+            }
         } else if (mChildren.size() == 0 && startingData != null) {
             // If this is the last window and we had requested a starting transition window,
             // well there is no point now.
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Nulling last startingWindow");
             startingData = null;
-        } else if (mChildren.size() == 1 && startingView != null) {
+        } else if (mChildren.size() == 1 && startingSurface != null) {
             // If this is the last window except for a starting transition window,
             // we need to get rid of the starting transition.
-            mService.scheduleRemoveStartingWindowLocked(this);
+            if (getController() != null) {
+                getController().removeStartingWindow();
+            }
         }
     }
 
@@ -1015,7 +1017,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
 
         final WindowState tStartingWindow = fromToken.startingWindow;
-        if (tStartingWindow != null && fromToken.startingView != null) {
+        if (tStartingWindow != null && fromToken.startingSurface != null) {
             // In this case, the starting icon has already been displayed, so start
             // letting windows get shown immediately without any more transitions.
             mService.mSkipAppTransitionAnimation = true;
@@ -1027,13 +1029,13 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
             // Transfer the starting window over to the new token.
             startingData = fromToken.startingData;
-            startingView = fromToken.startingView;
+            startingSurface = fromToken.startingSurface;
             startingDisplayed = fromToken.startingDisplayed;
             fromToken.startingDisplayed = false;
             startingWindow = tStartingWindow;
             reportedVisible = fromToken.reportedVisible;
             fromToken.startingData = null;
-            fromToken.startingView = null;
+            fromToken.startingSurface = null;
             fromToken.startingWindow = null;
             fromToken.startingMoved = true;
             tStartingWindow.mToken = this;
@@ -1080,10 +1082,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             startingData = fromToken.startingData;
             fromToken.startingData = null;
             fromToken.startingMoved = true;
-            final Message m = mService.mH.obtainMessage(H.ADD_STARTING, this);
-            // Note: we really want to do sendMessageAtFrontOfQueue() because we want to process the
-            // message ASAP, before any other queued messages.
-            mService.mH.sendMessageAtFrontOfQueue(m);
+            if (getController() != null) {
+                getController().scheduleAddStartingWindow();
+            }
             return true;
         }
 
@@ -1421,10 +1422,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                     pw.print(" firstWindowDrawn="); pw.print(firstWindowDrawn);
                     pw.print(" mIsExiting="); pw.println(mIsExiting);
         }
-        if (startingWindow != null || startingView != null
+        if (startingWindow != null || startingSurface != null
                 || startingDisplayed || startingMoved) {
             pw.print(prefix); pw.print("startingWindow="); pw.print(startingWindow);
-                    pw.print(" startingView="); pw.print(startingView);
+                    pw.print(" startingSurface="); pw.print(startingSurface);
                     pw.print(" startingDisplayed="); pw.print(startingDisplayed);
                     pw.print(" startingMoved="); pw.println(startingMoved);
         }

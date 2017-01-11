@@ -461,16 +461,7 @@ class WindowStateAnimator {
         mStackClip = STACK_CLIP_BEFORE_ANIM;
         mWin.checkPolicyVisibilityChange();
         mTransformation.clear();
-        if (mDrawState == HAS_DRAWN
-                && mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING
-                && mWin.mAppToken != null
-                && mWin.mAppToken.firstWindowDrawn
-                && mWin.mAppToken.startingData != null) {
-            if (DEBUG_STARTING_WINDOW) Slog.v(TAG, "Finish starting "
-                    + mWin.mToken + ": first real window done animating");
-            mService.mFinishedStarting.add(mWin.mAppToken);
-            mService.mH.sendEmptyMessage(H.FINISHED_STARTING);
-        } else if (mAttrType == LayoutParams.TYPE_STATUS_BAR && mWin.mPolicyVisibility) {
+        if (mAttrType == LayoutParams.TYPE_STATUS_BAR && mWin.mPolicyVisibility) {
             // Upon completion of a not-visible to visible status bar animation a relayout is
             // required.
             if (displayContent != null) {

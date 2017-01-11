@@ -16,29 +16,6 @@
 
 package com.android.server.wm;
 
-import com.android.internal.policy.IKeyguardDismissCallback;
-import com.android.internal.policy.IShortcutService;
-import com.android.server.input.InputManagerService;
-
-import android.annotation.Nullable;
-import android.content.Context;
-import android.content.res.CompatibilityInfo;
-import android.content.res.Configuration;
-import android.graphics.Rect;
-import android.os.Bundle;
-import android.os.IBinder;
-import android.os.RemoteException;
-import android.util.Log;
-import android.view.Display;
-import android.view.IWindowManager;
-import android.view.KeyEvent;
-import android.view.View;
-import android.view.WindowManager;
-import android.view.WindowManagerPolicy;
-import android.view.animation.Animation;
-
-import java.io.PrintWriter;
-
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
@@ -62,8 +39,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_PHONE;
 import static android.view.WindowManager.LayoutParams.TYPE_POINTER;
-import static android.view.WindowManager.LayoutParams.TYPE_PRIORITY_PHONE;
 import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
+import static android.view.WindowManager.LayoutParams.TYPE_PRIORITY_PHONE;
 import static android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
@@ -81,8 +58,29 @@ import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
-
 import static org.mockito.Mockito.mock;
+
+import android.annotation.Nullable;
+import android.content.Context;
+import android.content.res.CompatibilityInfo;
+import android.content.res.Configuration;
+import android.graphics.Rect;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
+import android.util.Log;
+import android.view.Display;
+import android.view.IWindowManager;
+import android.view.KeyEvent;
+import android.view.WindowManager;
+import android.view.WindowManagerPolicy;
+import android.view.animation.Animation;
+
+import com.android.internal.policy.IKeyguardDismissCallback;
+import com.android.internal.policy.IShortcutService;
+import com.android.server.input.InputManagerService;
+
+import java.io.PrintWriter;
 
 class TestWindowManagerPolicy implements WindowManagerPolicy {
     private static final String TAG = "TestWindowManagerPolicy";
@@ -308,14 +306,14 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public View addStartingWindow(IBinder appToken, String packageName, int theme,
+    public StartingSurface addSplashScreen(IBinder appToken, String packageName, int theme,
             CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes, int icon,
             int logo, int windowFlags, Configuration overrideConfig) {
         return null;
     }
 
     @Override
-    public void removeStartingWindow(IBinder appToken, View window) {
+    public void removeSplashScreen(IBinder appToken, StartingSurface surface) {
 
     }
 
