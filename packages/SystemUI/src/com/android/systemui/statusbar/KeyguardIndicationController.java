@@ -45,6 +45,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.statusbar.phone.LockIcon;
+import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 
 /**
@@ -107,7 +108,8 @@ public class KeyguardIndicationController {
 
         KeyguardUpdateMonitor.getInstance(context).registerCallback(mUpdateMonitor);
         context.registerReceiverAsUser(mTickReceiver, UserHandle.SYSTEM,
-                new IntentFilter(Intent.ACTION_TIME_TICK), null, null);
+                new IntentFilter(Intent.ACTION_TIME_TICK), null,
+                PhoneStatusBar.getTimeTickHandler(mContext));
 
         updateDisclosure();
     }
@@ -374,9 +376,11 @@ public class KeyguardIndicationController {
     BroadcastReceiver mTickReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (mVisible) {
-                updateIndication();
-            }
+            mHandler.post(() -> {
+                if (mVisible) {
+                    updateIndication();
+                }
+            });
         }
     };
 

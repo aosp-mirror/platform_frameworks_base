@@ -22,6 +22,7 @@ import android.content.IntentFilter;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.service.quicksettings.Tile;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -44,6 +45,7 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QS.DetailAdapter;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.external.TileColorPicker;
+import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.policy.BatteryController;
 
 import java.text.NumberFormat;
@@ -290,7 +292,8 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
             if (!mDetailShown) {
                 mDetailShown = true;
                 v.getContext().registerReceiver(mReceiver,
-                        new IntentFilter(Intent.ACTION_TIME_TICK));
+                        new IntentFilter(Intent.ACTION_TIME_TICK), null,
+                        PhoneStatusBar.getTimeTickHandler(v.getContext()));
             }
         }
 

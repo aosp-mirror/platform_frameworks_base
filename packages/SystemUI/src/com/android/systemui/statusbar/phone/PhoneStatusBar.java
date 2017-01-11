@@ -80,6 +80,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
@@ -116,6 +117,7 @@ import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Interpolator;
+import android.widget.DateTimeView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -136,6 +138,7 @@ import com.android.systemui.EventLogTags;
 import com.android.systemui.Interpolators;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
+import com.android.systemui.SystemUIApplication;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.classifier.FalsingManager;
@@ -426,6 +429,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     private int mNavigationIconHints = 0;
     private HandlerThread mHandlerThread;
+    private HandlerThread mTimeTickThread;
+    private Handler mTimeTickHandler;
 
     // ensure quick settings is disabled until the current user makes it through the setup wizard
     private boolean mUserSetup = false;
@@ -689,6 +694,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mScrimSrcModeEnabled = mContext.getResources().getBoolean(
                 R.bool.config_status_bar_scrim_behind_use_src);
 
+        // Background thread for any controllers that need it.
+        mHandlerThread = new HandlerThread(TAG, Process.THREAD_PRIORITY_BACKGROUND);
+        mHandlerThread.start();
+        mTimeTickThread = new HandlerThread("TimeTick");
+        mTimeTickThread.start();
+        mTimeTickHandler = new Handler(mTimeTickThread.getLooper());
+        DateTimeView.setReceiverHandler(mTimeTickHandler);
+        putComponent(PhoneStatusBar.class, this);
+
         super.start(); // calls createAndAddWindows()
 
         mMediaSessionManager
@@ -721,7 +735,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateCallback);
         mDozeServiceHost = new DozeServiceHost();
         putComponent(DozeHost.class, mDozeServiceHost);
-        putComponent(PhoneStatusBar.class, this);
 
         setControllerUsers();
 
@@ -741,7 +754,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     // ================================================================================
     protected PhoneStatusBarView makeStatusBarView() {
         final Context context = mContext;
-
         updateDisplaySize(); // populates mDisplayMetrics
         updateResources();
 
@@ -887,10 +899,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStatusBarView.setScrimController(mScrimController);
         mDozeScrimController = new DozeScrimController(mScrimController, context, mStackScroller);
 
-        // Background thread for any controllers that need it.
-        mHandlerThread = new HandlerThread(TAG, Process.THREAD_PRIORITY_BACKGROUND);
-        mHandlerThread.start();
-
         // Other icons
         mLocationController = new LocationControllerImpl(mContext,
                 mHandlerThread.getLooper()); // will post a notification
@@ -1032,6 +1040,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         ThreadedRenderer.overrideProperty("ambientRatio", String.valueOf(1.5f));
 
         return mStatusBarView;
+    }
+
+    public Handler getTimeTickHandler() {
+        return mTimeTickHandler;
+    }
+
+    public static Handler getTimeTickHandler(Context context) {
+        return ((SystemUIApplication) context.getApplicationContext())
+                .getComponent(PhoneStatusBar.class).getTimeTickHandler();
     }
 
     private void initEmergencyCryptkeeperText() {
