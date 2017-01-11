@@ -19,6 +19,10 @@ package com.android.systemui.doze;
 import android.service.dreams.DreamService;
 import android.util.Log;
 
+import com.android.systemui.plugins.Plugin;
+import com.android.systemui.plugins.PluginManager;
+import com.android.systemui.plugins.doze.DozeProvider;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
@@ -38,7 +42,9 @@ public class DozeService extends DreamService implements DozeMachine.Service {
 
         setWindowless(true);
 
-        mDozeMachine = DozeFactory.getInstance(getApplication()).assembleMachine(this);
+        DozeProvider provider = PluginManager.getInstance(this)
+                .getOneShotPlugin(DozeProvider.ACTION, DozeProvider.VERSION);
+        mDozeMachine = new DozeFactory(provider).assembleMachine(this);
     }
 
     @Override

@@ -80,7 +80,6 @@ public class SystemUIApplication extends Application {
             ShortcutKeyDispatcher.class,
             VendorServices.class,
             LatencyTester.class,
-            DozeFactory.Initializer.class,
     };
 
     /**

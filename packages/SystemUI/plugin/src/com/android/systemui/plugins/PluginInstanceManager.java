@@ -87,6 +87,21 @@ public class PluginInstanceManager<T extends Plugin> {
         isDebuggable = debuggable;
     }
 
+    public PluginInfo<T> getPlugin() {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            throw new RuntimeException("Must be called from UI thread");
+        }
+        mPluginHandler.handleQueryPlugins(null /* All packages */);
+        if (mPluginHandler.mPlugins.size() > 0) {
+            mMainHandler.removeMessages(MainHandler.PLUGIN_CONNECTED);
+            PluginInfo<T> info = mPluginHandler.mPlugins.get(0);
+            PluginPrefs.setHasPlugins(mContext);
+            info.mPlugin.onCreate(mContext, info.mPluginContext);
+            return info;
+        }
+        return null;
+    }
+
     public void loadAll() {
         if (DEBUG) Log.d(TAG, "startListening");
         mPluginHandler.sendEmptyMessage(PluginHandler.QUERY_ALL);
@@ -366,11 +381,11 @@ public class PluginInstanceManager<T extends Plugin> {
         }
     }
 
-    private static class PluginInfo<T> {
+    static class PluginInfo<T> {
         private final Context mPluginContext;
-        private T mPlugin;
         private String mClass;
-        private String mPackage;
+        T mPlugin;
+        String mPackage;
 
         public PluginInfo(String pkg, String cls, T plugin, Context pluginContext) {
             mPlugin = plugin;

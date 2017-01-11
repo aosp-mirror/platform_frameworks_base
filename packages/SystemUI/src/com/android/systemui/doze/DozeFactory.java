@@ -34,31 +34,10 @@ import com.android.systemui.statusbar.phone.DozeParameters;
 
 public class DozeFactory {
 
-    private static DozeFactory sInstance;
+    private final DozeProvider mDozePlugin;
 
-    private DozeProvider mDozePlugin;
-
-    /** Returns the singleton instance. */
-    public static DozeFactory getInstance(Context context) {
-        if (sInstance == null) {
-            sInstance = new DozeFactory();
-            PluginManager.getInstance(context).addPluginListener(DozeProvider.ACTION,
-                    new PluginListener<DozeProvider>() {
-                        @Override
-                        public void onPluginConnected(DozeProvider plugin) {
-                            sInstance.mDozePlugin = plugin;
-                        }
-
-                        @Override
-                        public void onPluginDisconnected(DozeProvider plugin) {
-                            if (sInstance.mDozePlugin == plugin) {
-                                sInstance.mDozePlugin = null;
-                            }
-                        }
-                    },
-                    DozeProvider.VERSION, false /* Only one */);
-        }
-        return sInstance;
+    public DozeFactory(DozeProvider plugin) {
+        mDozePlugin = plugin;
     }
 
     /** Creates a DozeMachine with its parts for {@code dozeService}. */
@@ -200,15 +179,6 @@ public class DozeFactory {
         /** @see PowerManager.WakeLock#wrap(Runnable) */
         public Runnable wrap(Runnable runnable) {
             return mInner.wrap(runnable);
-        }
-    }
-
-    /** Hack: We need to initialize the plugin listener before doze actually starts.
-     * This will be unnecessary once we have proper one-shot support */
-    public static class Initializer extends SystemUI {
-        @Override
-        public void start() {
-            getInstance(mContext);
         }
     }
 }
