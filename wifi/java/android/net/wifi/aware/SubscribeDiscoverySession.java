@@ -28,8 +28,6 @@ import android.util.Log;
  * See baseline functionality of all discovery sessions in {@link DiscoverySession}.
  * This object allows updating an existing/running subscribe discovery session using
  * {@link #updateSubscribe(SubscribeConfig)}.
- *
- * @hide PROPOSED_AWARE_API
  */
 public class SubscribeDiscoverySession extends DiscoverySession {
     private static final String TAG = "SubscribeDiscSession";

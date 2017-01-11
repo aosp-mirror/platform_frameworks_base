@@ -27,8 +27,6 @@ import android.util.Log;
  * baseline functionality of all discovery sessions in {@link DiscoverySession}. This
  * object allows updating an existing/running publish discovery session using
  * {@link #updatePublish(PublishConfig)}.
- *
- * @hide PROPOSED_AWARE_API
  */
 public class PublishDiscoverySession extends DiscoverySession {
     private static final String TAG = "PublishDiscoverySession";

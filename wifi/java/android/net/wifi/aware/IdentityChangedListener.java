@@ -25,8 +25,6 @@ package android.net.wifi.aware;
  * interface may also be useful if the application uses alternative (non-Aware) discovery but needs
  * to set up a Aware connection. The provided Aware discovery interface MAC address can then be used
  * in {@link WifiAwareSession#createNetworkSpecifier(int, byte[], byte[])}.
- *
- * @hide PROPOSED_AWARE_API
  */
 public class IdentityChangedListener {
     /**
