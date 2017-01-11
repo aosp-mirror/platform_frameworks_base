@@ -59,8 +59,8 @@ public final class WebViewFactory {
 
     // visible for WebViewZygoteInit to look up the class by reflection and call preloadInZygote.
     /** @hide */
-    public static final String CHROMIUM_WEBVIEW_FACTORY =
-            "com.android.webview.chromium.WebViewChromiumFactoryProvider";
+    private static final String CHROMIUM_WEBVIEW_FACTORY =
+            "com.android.webview.chromium.WebViewChromiumFactoryProviderForO";
 
     private static final String CHROMIUM_WEBVIEW_FACTORY_METHOD = "create";
 
@@ -139,6 +139,23 @@ public final class WebViewFactory {
     public static PackageInfo getLoadedPackageInfo() {
         synchronized (sProviderLock) {
             return sPackageInfo;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public static Class<WebViewFactoryProvider> getWebViewProviderClass(  ClassLoader clazzLoader)
+            throws ClassNotFoundException{
+        try {
+            return (Class<WebViewFactoryProvider>) Class.forName(CHROMIUM_WEBVIEW_FACTORY,
+                    true, clazzLoader);
+        } catch (ClassNotFoundException e) {
+            // TODO: This loads the provider which is not built for O, should be removed
+            // before the release.
+            return (Class<WebViewFactoryProvider>) Class.forName(
+                    "com.android.webview.chromium.WebViewChromiumFactoryProvider",
+                    true, clazzLoader);
         }
     }
 
@@ -366,9 +383,9 @@ public final class WebViewFactory {
 
                 Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "Class.forName()");
                 try {
-                    return (Class<WebViewFactoryProvider>) Class.forName(CHROMIUM_WEBVIEW_FACTORY,
-                            true, clazzLoader);
-                } finally {
+                    return getWebViewProviderClass(clazzLoader);
+                }
+                finally {
                     Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
                 }
             } catch (ClassNotFoundException e) {
