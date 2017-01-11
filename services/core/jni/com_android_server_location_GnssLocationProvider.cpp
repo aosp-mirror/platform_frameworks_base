@@ -894,11 +894,11 @@ jbyteArray AGnssCallback::convertToIpV4(uint32_t ip) {
  * interface.
  */
 struct AGnssRilCallback : IAGnssRilCallback {
-    Return<void> requestSetIdCb(IAGnssRilCallback::ID setIdFlag) override;
+    Return<void> requestSetIdCb(uint32_t setIdFlag) override;
     Return<void> requestRefLocCb() override;
 };
 
-Return<void> AGnssRilCallback::requestSetIdCb(IAGnssRilCallback::ID setIdFlag) {
+Return<void> AGnssRilCallback::requestSetIdCb(uint32_t setIdFlag) {
     JNIEnv* env = getJniEnv();
     env->CallVoidMethod(mCallbacksObj, method_requestSetID, setIdFlag);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
