@@ -17,14 +17,26 @@ message NetworkId {
   optional int32 network_id = 1;
 };
 
-// Transport describes a physical technology used by a network. It is a subset
-// of the TRANSPORT_* constants defined in android.net.NetworkCapabilities.
-enum Transport {
+// LinkLayer describes a physical link layer technology used by a network.
+// It is not intended to map one to one to the TRANSPORT_* constants defined in
+// android.net.NetworkCapabilities. Instead it is intended to be used as
+// a dimension field for metrics events and aggregated metrics.
+// Next tag: 7
+enum LinkLayer {
+  // An unknown link layer technology.
   UNKNOWN   = 0;
+
   BLUETOOTH = 1;
   CELLULAR  = 2;
   ETHERNET  = 3;
   WIFI      = 4;
+
+  // Indicates that the link layer dimension is not relevant for the metrics or
+  // event considered.
+  NONE      = 5;
+
+  // Indicates that the metrics or event considered may involve several links.
+  MULTIPLE  = 6;
 };
 
 // A pair of (key, value) integers for describing histogram-like statistics.
@@ -65,7 +77,7 @@ message DefaultNetworkEvent {
 // This message is associated to android.net.metrics.IpReachabilityEvent.
 message IpReachabilityEvent {
   // The interface name (wlan, rmnet, lo, ...) on which the probe was sent.
-  // Deprecated since version 2, replaced by transport field.
+  // Deprecated since version 2, to be replaced by link_layer field.
   optional string if_name = 1 [deprecated = true];
 
   // The event type code of the probe, represented by constants defined in
@@ -179,7 +191,7 @@ message ConnectStatistics {
 // android.net.metrics.DhcpErrorEvent.
 message DHCPEvent {
   // The interface name (wlan, rmnet, lo, ...) on which the event happened.
-  // Deprecated since version 2, replaced by transport field.
+  // Deprecated since version 2, to be replaced by link_layer field.
   optional string if_name = 1 [deprecated = true];
 
   oneof value {
@@ -284,7 +296,7 @@ message RaEvent {
 // This message is associated to android.net.metrics.IpManagerEvent.
 message IpProvisioningEvent {
   // The interface name (wlan, rmnet, lo, ...) on which the probe was sent.
-  // Deprecated since version 2, replaced by transport field.
+  // Deprecated since version 2, to be replaced by link_layer field.
   optional string if_name = 1 [deprecated = true];
 
   // The code of the IP provisioning event, represented by constants defined in
@@ -296,19 +308,21 @@ message IpProvisioningEvent {
 }
 
 // Represents one of the IP connectivity event defined in this file.
-// Next tag: 15
+// Next tag: 16
 message IpConnectivityEvent {
   // Time in ms when the event was recorded.
   optional int64 time_ms = 1;
 
-  // Physical transport of the network on which the event happened.
+  // Physical link layer of the network on which the event happened.
+  // Acts as a dimension key.
   // Since version 2.
-  optional Transport transport = 12;
+  optional LinkLayer link_layer = 15;
 
   // Event type.
   oneof event {
 
     // An event about the system default network.
+    // The link_layer field is not relevant for this event and set to NONE.
     DefaultNetworkEvent default_network_event = 2;
 
     // An IP reachability probe event.
@@ -318,7 +332,8 @@ message IpConnectivityEvent {
     NetworkEvent network_event = 4;
 
     // A batch of DNS lookups.
-    // Deprecated in the nyc-mr2 release since version 2, and replaced by dns_latencies.
+    // Deprecated in the nyc-mr2 release since version 2,and replaced by
+    // dns_latencies.
     DNSLookupBatch dns_lookup_batch = 5 [deprecated = true];
 
     // DNS lookup latency statistics.
