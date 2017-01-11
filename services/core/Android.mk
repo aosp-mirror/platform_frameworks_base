@@ -24,7 +24,7 @@ LOCAL_JAVA_LIBRARIES := \
     android.hardware.power@1.0-java \
     android.hardware.tv.cec@1.0-java
 
-LOCAL_STATIC_JAVA_LIBRARIES := tzdata_update
+LOCAL_STATIC_JAVA_LIBRARIES := tzdata_update2
 
 ifneq ($(INCREMENTAL_BUILDS),)
     LOCAL_PROGUARD_ENABLED := disabled
