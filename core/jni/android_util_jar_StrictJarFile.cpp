@@ -20,13 +20,14 @@
 #include <memory>
 #include <string>
 
+#include <log/log.h>
+
 #include "JNIHelp.h"
 #include "JniConstants.h"
 #include "ScopedLocalRef.h"
 #include "ScopedUtfChars.h"
 #include "jni.h"
 #include "ziparchive/zip_archive.h"
-#include "cutils/log.h"
 
 namespace android {
 

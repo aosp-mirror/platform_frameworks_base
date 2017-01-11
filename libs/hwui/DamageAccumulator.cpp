@@ -16,7 +16,7 @@
 
 #include "DamageAccumulator.h"
 
-#include <cutils/log.h>
+#include <log/log.h>
 
 #include "RenderNode.h"
 #include "utils/MathUtils.h"

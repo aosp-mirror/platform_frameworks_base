@@ -18,7 +18,7 @@
 
 #include "Debug.h"
 
-#include <cutils/log.h>
+#include <log/log.h>
 
 namespace android {
 namespace uirenderer {

@@ -33,7 +33,9 @@
 #include "HarfBuzzNGFaceSkia.h"
 
 #include <stdlib.h>
-#include <cutils/log.h>
+
+#include <log/log.h>
+
 #include <SkPaint.h>
 #include <SkPath.h>
 #include <SkPoint.h>

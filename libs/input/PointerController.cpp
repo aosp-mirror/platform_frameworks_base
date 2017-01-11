@@ -15,7 +15,6 @@
  */
 
 #define LOG_TAG "PointerController"
-
 //#define LOG_NDEBUG 0
 
 // Log debug messages about pointer updates
@@ -23,8 +22,9 @@
 
 #include "PointerController.h"
 
-#include <cutils/log.h>
+#include <log/log.h>
 
+// ToDo: Fix code to be warning free
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <SkBitmap.h>
