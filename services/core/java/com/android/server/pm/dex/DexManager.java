@@ -271,7 +271,11 @@ public class DexManager {
             try {
                 dataDirs.add(PackageManagerServiceUtils.realpath(new File(ai.dataDir)));
             } catch (IOException e) {
-                Slog.w(TAG, "Error to get realpath of " + ai.dataDir, e);
+                if (DEBUG) {
+                    // Verify why we're getting spam at boot for some devices.
+                    // b/33807524
+                    Slog.w(TAG, "Error to get realpath of " + ai.dataDir, e);
+                }
             }
 
         }
