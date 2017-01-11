@@ -16,12 +16,16 @@
 
 package android.widget;
 
+
 import android.annotation.IdRes;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.autofill.AutoFillType;
+import android.view.autofill.AutoFillValue;
 
 import com.android.internal.R;
 
@@ -51,6 +55,7 @@ import com.android.internal.R;
  *
  */
 public class RadioGroup extends LinearLayout {
+
     // holds the checked id; the selection is empty by default
     private int mCheckedId = -1;
     // tracks children radio buttons checked state
@@ -335,6 +340,7 @@ public class RadioGroup extends LinearLayout {
     }
 
     private class CheckedStateTracker implements CompoundButton.OnCheckedChangeListener {
+        @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             // prevents from infinite recursion
             if (mProtectFromCheckedChange) {
@@ -364,6 +370,7 @@ public class RadioGroup extends LinearLayout {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void onChildViewAdded(View parent, View child) {
             if (parent == RadioGroup.this && child instanceof RadioButton) {
                 int id = child.getId();
@@ -384,6 +391,7 @@ public class RadioGroup extends LinearLayout {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void onChildViewRemoved(View parent, View child) {
             if (parent == RadioGroup.this && child instanceof RadioButton) {
                 ((RadioButton) child).setOnCheckedChangeWidgetListener(null);
@@ -393,5 +401,23 @@ public class RadioGroup extends LinearLayout {
                 mOnHierarchyChangeListener.onChildViewRemoved(parent, child);
             }
         }
+    }
+
+    // TODO(b/33197203): add unit/CTS tests for auto-fill methods
+
+    @Override
+    public void autoFill(AutoFillValue value) {
+        final int index = value.getListValue();
+        final View child = getChildAt(index);
+        if (child == null) {
+            Log.w(VIEW_LOG_TAG, "RadioGroup.autoFill(): no child with index " + index);
+            return;
+        }
+        check(child.getId());
+    }
+
+    @Override
+    public AutoFillType getAutoFillType() {
+        return AutoFillType.forList();
     }
 }

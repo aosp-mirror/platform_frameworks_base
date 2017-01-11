@@ -3156,18 +3156,34 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
+     * Dispatch creation of {@link ViewStructure} down the hierarchy.  This implementation
+     * adds in all child views of the view group, in addition to calling the default View
+     * implementation.
+     */
+    @Override
+    public void dispatchProvideStructure(ViewStructure structure) {
+        super.dispatchProvideStructure(structure);
+        dispatchProvideStructureForAssistOrAutoFill(structure, 0);
+    }
+
+    /**
      * {@inheritDoc}
      *
      * <p>This implementation adds in all child views of the view group, in addition to calling the
      * default {@link View} implementation.
      */
     @Override
-    public void dispatchProvideStructure(ViewStructure structure, int flags) {
-        super.dispatchProvideStructure(structure, flags);
+    public void dispatchProvideAutoFillStructure(ViewStructure structure, int flags) {
+        super.dispatchProvideAutoFillStructure(structure, flags);
+        dispatchProvideStructureForAssistOrAutoFill(structure, flags);
+    }
 
+    private void dispatchProvideStructureForAssistOrAutoFill(ViewStructure structure, int flags) {
+        // NOTE: currently flags are only used for AutoFill; if they're used for Assist as well,
+        // this method should take a boolean with the type of request.
         boolean forAutoFill = (flags
-                & (View.ASSIST_FLAG_SANITIZED_TEXT
-                        | View.ASSIST_FLAG_NON_SANITIZED_TEXT)) != 0;
+                & (View.AUTO_FILL_FLAG_TYPE_FILL
+                        | View.AUTO_FILL_FLAG_TYPE_SAVE)) != 0;
 
         boolean blocked = forAutoFill ? isAutoFillBlocked() : isAssistBlocked();
 
@@ -3233,12 +3249,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                                 preorderedList, children, childIndex);
                         final ViewStructure cstructure = structure.newChild(i);
 
-                        // Must explicitly check which recursive method to call because child might
-                        // not be overriding the new, flags-based version
-                        if (flags == 0) {
-                            child.dispatchProvideStructure(cstructure);
+                        // Must explicitly check which recursive method to call.
+                        if (forAutoFill) {
+                            child.dispatchProvideAutoFillStructure(cstructure, flags);
                         } else {
-                            child.dispatchProvideStructure(cstructure, flags);
+                            child.dispatchProvideStructure(cstructure);
                         }
                     }
                     if (preorderedList != null) preorderedList.clear();

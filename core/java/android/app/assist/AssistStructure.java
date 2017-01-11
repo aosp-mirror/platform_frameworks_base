@@ -21,6 +21,8 @@ import android.view.ViewStructure;
 import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.view.autofill.AutoFillType;
+import android.view.autofill.AutoFillId;
 
 import java.util.ArrayList;
 
@@ -411,25 +413,30 @@ public class AssistStructure implements Parcelable {
             mTitle = root.getTitle();
             mDisplayId = root.getDisplayId();
             mRoot = new ViewNode();
+
+            // Must explicitly call the proper method based on flags since we don't know which
+            // method (if any) was overridden by the View subclass.
+            boolean forAutoFill = (flags
+                    & (View.AUTO_FILL_FLAG_TYPE_FILL
+                            | View.AUTO_FILL_FLAG_TYPE_SAVE)) != 0;
+
             ViewNodeBuilder builder = new ViewNodeBuilder(assist, mRoot, false);
             if ((root.getWindowFlags()& WindowManager.LayoutParams.FLAG_SECURE) != 0) {
                 // This is a secure window, so it doesn't want a screenshot, and that
                 // means we should also not copy out its view hierarchy.
 
-                // Must explicitly set which method to calls since View subclasses might
-                // have implemented the deprecated method.
-                if (flags == 0) {
-                    view.onProvideStructure(builder);
+                if (forAutoFill) {
+                    view.onProvideAutoFillStructure(builder, flags);
                 } else {
-                    view.onProvideStructure(builder, flags);
+                    view.onProvideStructure(builder);
                 }
                 builder.setAssistBlocked(true);
                 return;
             }
-            if (flags == 0) {
-                view.dispatchProvideStructure(builder);
+            if (forAutoFill) {
+                view.dispatchProvideAutoFillStructure(builder, flags);
             } else {
-                view.dispatchProvideStructure(builder, flags);
+                view.dispatchProvideStructure(builder);
             }
         }
 
@@ -526,7 +533,10 @@ public class AssistStructure implements Parcelable {
         String mIdPackage;
         String mIdType;
         String mIdEntry;
-        int mAutoFillId = View.NO_ID;
+        // TODO(b/33197203): once we have more flags, it might be better to store the individual
+        // fields (viewId and childId) of the field.
+        AutoFillId mAutoFillId;
+        AutoFillType mAutoFillType;
         int mX;
         int mY;
         int mScrollX;
@@ -551,7 +561,11 @@ public class AssistStructure implements Parcelable {
         static final int FLAGS_ACTIVATED = 0x00002000;
         static final int FLAGS_CONTEXT_CLICKABLE = 0x00004000;
 
-        static final int FLAGS_HAS_AUTO_FILL_ID = 0x80000000;
+        // TODO(b/33197203): auto-fill data is made of many fields and ideally we should verify
+        // one-by-one to optimize what's sent over, but there isn't enough flag bits for that, we'd
+        // need to create a 'flags2' or 'autoFillFlags' field and add these flags there.
+        // So, to keep thinkg simpler for now, let's just use on flag for all of them...
+        static final int FLAGS_HAS_AUTO_FILL_DATA = 0x80000000;
         static final int FLAGS_HAS_MATRIX = 0x40000000;
         static final int FLAGS_HAS_ALPHA = 0x20000000;
         static final int FLAGS_HAS_ELEVATION = 0x10000000;
@@ -595,8 +609,9 @@ public class AssistStructure implements Parcelable {
                     }
                 }
             }
-            if ((flags&FLAGS_HAS_AUTO_FILL_ID) != 0) {
-                mAutoFillId = in.readInt();
+            if ((flags&FLAGS_HAS_AUTO_FILL_DATA) != 0) {
+                mAutoFillId = in.readParcelable(null);
+                mAutoFillType = in.readParcelable(null);
             }
             if ((flags&FLAGS_HAS_LARGE_COORDS) != 0) {
                 mX = in.readInt();
@@ -653,8 +668,8 @@ public class AssistStructure implements Parcelable {
             if (mId != View.NO_ID) {
                 flags |= FLAGS_HAS_ID;
             }
-            if (mAutoFillId != View.NO_ID) {
-                flags |= FLAGS_HAS_AUTO_FILL_ID;
+            if (mAutoFillId != null) {
+                flags |= FLAGS_HAS_AUTO_FILL_DATA;
             }
             if ((mX&~0x7fff) != 0 || (mY&~0x7fff) != 0
                     || (mWidth&~0x7fff) != 0 | (mHeight&~0x7fff) != 0) {
@@ -700,8 +715,9 @@ public class AssistStructure implements Parcelable {
                     }
                 }
             }
-            if ((flags&FLAGS_HAS_AUTO_FILL_ID) != 0) {
-                out.writeInt(mAutoFillId);
+            if ((flags&FLAGS_HAS_AUTO_FILL_DATA) != 0) {
+                out.writeParcelable(mAutoFillId, 0);
+                out.writeParcelable(mAutoFillType,  0);
             }
             if ((flags&FLAGS_HAS_LARGE_COORDS) != 0) {
                 out.writeInt(mX);
@@ -773,13 +789,23 @@ public class AssistStructure implements Parcelable {
         }
 
         /**
-         * Returns the id that can be used to auto-fill the view.
+         * Gets the id that can be used to auto-fill the view contents.
          *
          * <p>It's only set when the {@link AssistStructure} is used for auto-filling purposes, not
          * for assist.
          */
-        public int getAutoFillId() {
+        public AutoFillId getAutoFillId() {
             return mAutoFillId;
+        }
+
+        /**
+         * Gets the the type of value that can be used to auto-fill the view contents.
+         *
+         * <p>It's only set when the {@link AssistStructure} is used for auto-filling purposes, not
+         * for assist.
+         */
+        public AutoFillType getAutoFillType() {
+            return mAutoFillType;
         }
 
         /**
@@ -1318,22 +1344,48 @@ public class AssistStructure implements Parcelable {
             return mNode.mChildren != null ? mNode.mChildren.length : 0;
         }
 
-        @Override
-        public ViewStructure newChild(int index) {
+        private void setAutoFillId(ViewNode child, boolean forAutoFill, int virtualId) {
+            if (forAutoFill) {
+                child.mAutoFillId = new AutoFillId(mNode.mAutoFillId, virtualId);
+            }
+        }
+
+        private ViewStructure newChild(int index, boolean forAutoFill, int virtualId) {
             ViewNode node = new ViewNode();
+            setAutoFillId(node, forAutoFill, virtualId);
             mNode.mChildren[index] = node;
             return new ViewNodeBuilder(mAssist, node, false);
         }
 
-        @Override
-        public ViewStructure asyncNewChild(int index) {
+        private ViewStructure asyncNewChild(int index, boolean forAutoFill, int virtualId) {
             synchronized (mAssist) {
                 ViewNode node = new ViewNode();
+                setAutoFillId(node, forAutoFill, virtualId);
                 mNode.mChildren[index] = node;
                 ViewNodeBuilder builder = new ViewNodeBuilder(mAssist, node, true);
                 mAssist.mPendingAsyncChildren.add(builder);
                 return builder;
             }
+        }
+
+        @Override
+        public ViewStructure newChild(int index) {
+            return newChild(index, false, 0);
+        }
+
+        @Override
+        public ViewStructure newChild(int index, int virtualId) {
+            return newChild(index, true, virtualId);
+        }
+
+        @Override
+        public ViewStructure asyncNewChild(int index) {
+            return asyncNewChild(index, false, 0);
+        }
+
+        @Override
+        public ViewStructure asyncNewChild(int index, int virtualId) {
+            return asyncNewChild(index, true, virtualId);
         }
 
         @Override
@@ -1356,9 +1408,20 @@ public class AssistStructure implements Parcelable {
         }
 
         @Override
-        public void setAutoFillId(int autoFillId) {
-            mNode.mAutoFillId = autoFillId;
+        public void setAutoFillId(int viewId) {
+            mNode.mAutoFillId = new AutoFillId(viewId);
         }
+
+        @Override
+        public AutoFillId getAutoFillId() {
+            return mNode.mAutoFillId;
+        }
+
+        @Override
+        public void setAutoFillType(AutoFillType type) {
+           mNode.mAutoFillType = type;
+        }
+
     }
 
     /** @hide */

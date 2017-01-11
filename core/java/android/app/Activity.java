@@ -70,9 +70,8 @@ import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.StrictMode;
 import android.os.SystemProperties;
 import android.os.UserHandle;
-import android.service.autofill.FillableInputField;
 import android.service.autofill.AutoFillService;
-import android.service.autofill.IAutoFillCallback;
+import android.service.autofill.IAutoFillAppCallback;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
 import android.text.TextAssistant;
@@ -115,6 +114,11 @@ import android.view.Window.WindowControllerCallback;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.autofill.VirtualViewDelegate;
+import android.view.autofill.Dataset;
+import android.view.autofill.DatasetField;
+import android.view.autofill.AutoFillId;
+import android.view.autofill.FillResponse;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -130,6 +134,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -697,6 +702,9 @@ public class Activity extends ContextThemeWrapper
     private static final String TAG = "Activity";
     private static final boolean DEBUG_LIFECYCLE = false;
 
+    // TODO(b/33197203): set to false once stable
+    private static final boolean DEBUG_AUTO_FILL = true;
+
     /** Standard activity result: operation canceled. */
     public static final int RESULT_CANCELED    = 0;
     /** Standard activity result: operation succeeded. */
@@ -847,7 +855,10 @@ public class Activity extends ContextThemeWrapper
     private boolean mEatKeyUpEvent;
 
     @GuardedBy("this")
-    private IAutoFillCallback mAutoFillCallback;
+    private WeakReference<IAutoFillAppCallback> mAutoFillCallback;
+
+    @GuardedBy("this")
+    private VirtualViewDelegate.Callback mAutoFillDelegateCallback;
 
     private static native String getDlWarning();
 
@@ -1718,47 +1729,73 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Lazily gets the {@code IAutoFillCallback} for this activitity.
+     * Lazily sets the {@link #mAutoFillDelegateCallback}.
+     */
+    private void setAutoFillDelegateCallback() {
+        synchronized (this) {
+            if (mAutoFillDelegateCallback == null) {
+                mAutoFillDelegateCallback = new VirtualViewDelegate.Callback() {
+                    // TODO(b/33197203): implement
+                };
+            }
+        }
+    }
+
+    /**
+     * Lazily gets the {@link IAutoFillAppCallback} for this activitity.
      *
      * <p>This callback is used by the {@link AutoFillService} app to auto-fill the activity fields.
      */
-    IAutoFillCallback getAutoFillCallback() {
+    WeakReference<IAutoFillAppCallback> getAutoFillCallback() {
         synchronized (this) {
             if (mAutoFillCallback == null) {
-                mAutoFillCallback = new IAutoFillCallback.Stub() {
+                final IAutoFillAppCallback cb = new IAutoFillAppCallback.Stub() {
                     @Override
-                    public void autofill(@SuppressWarnings("rawtypes") List fields)
-                            throws RemoteException {
+                    public void autoFill(Dataset dataset) throws RemoteException {
+                        // TODO(b/33197203): must keep the dataset so subsequent calls pass the same
+                        // dataset.extras to service
                         runOnUiThread(() -> {
                             final View root = getWindow().getDecorView().getRootView();
-                            for (Object field : fields) {
-                                if (!(field instanceof FillableInputField)) {
-                                    Slog.w(TAG,  "autofill(): invalid type " + field.getClass());
+                            for (DatasetField field : dataset.getFields()) {
+                                final AutoFillId id = field.getId();
+                                if (id == null) {
+                                    Log.w(TAG, "autoFill(): null id on " + field);
                                     continue;
                                 }
-                                FillableInputField autoFillField = (FillableInputField) field;
-                                final int viewId = autoFillField.getId();
+                                final int viewId = id.getViewId();
                                 final View view = root.findViewByAccessibilityIdTraversal(viewId);
-                                // TODO(b/33197203): should handle other types of view as well, but
-                                // that will require:
-                                // - a new interface like AutoFillable
-                                // - a way for the views to define the type of the autofield value
-                                if ((view instanceof EditText)) {
-                                    ((EditText) view).setText(autoFillField.getValue());
+                                if (view == null) {
+                                    Log.w(TAG, "autoFill(): no View with id " + viewId);
+                                    continue;
+                                }
+
+                                // TODO(b/33197203): handle protected value (like credit card)
+                                if (id.isVirtual()) {
+                                    // Delegate virtual fields to provider.
+                                    setAutoFillDelegateCallback();
+                                    final VirtualViewDelegate mgr = view
+                                            .getAutoFillVirtualViewDelegate(
+                                                    mAutoFillDelegateCallback);
+                                    if (mgr == null) {
+                                        Log.w(TAG, "autoFill(): cannot fill virtual " + id
+                                                + "; no auto-fill provider for view "
+                                                + view.getClass());
+                                        continue;
+                                    }
+                                    if (DEBUG_AUTO_FILL) {
+                                        Log.d(TAG, "autoFill(): delegating " + id
+                                                + " to virtual manager  " + mgr);
+                                    }
+                                    mgr.autoFill(id.getVirtualChildId(), field.getValue());
+                                } else {
+                                    // Handle non-virtual fields itself.
+                                    view.autoFill(field.getValue());
                                 }
                             }
                         });
                     }
-
-                    @Override
-                    public void showError(String message) {
-                        runOnUiThread(() -> {
-                            // TODO(b/33197203): temporary show a toast until it uses the Snack bar.
-                            Toast.makeText(Activity.this, "Auto-fill request failed: " + message,
-                                    Toast.LENGTH_LONG).show();
-                        });
-                    }
                 };
+                mAutoFillCallback = new WeakReference<IAutoFillAppCallback>(cb);
             }
         }
         return mAutoFillCallback;
@@ -6096,7 +6133,7 @@ public class Activity extends ContextThemeWrapper
 
         if (mAutoFillCallback != null) {
             writer.print(prefix); writer.print("mAutoFillCallback: " );
-                    writer.println(mAutoFillCallback);
+                    writer.println(mAutoFillCallback.get());
         }
 
         mHandler.getLooper().dump(new PrintWriterPrinter(writer), prefix);

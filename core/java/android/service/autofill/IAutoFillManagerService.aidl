@@ -24,6 +24,5 @@ import android.os.Bundle;
  * {@hide}
  */
 oneway interface IAutoFillManagerService {
-
-    void requestAutoFill(IBinder activityToken, int userId, int flags);
+    void requestAutoFill(IBinder activityToken, int userId, in Bundle extras, int flags);
 }

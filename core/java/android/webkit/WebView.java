@@ -2515,8 +2515,8 @@ public class WebView extends AbsoluteLayout
     }
 
     @Override
-    public void onProvideVirtualStructure(ViewStructure structure, int flags) {
-        mProvider.getViewDelegate().onProvideVirtualStructure(structure, flags);
+    public void onProvideAutoFillVirtualStructure(ViewStructure structure, int flags) {
+        mProvider.getViewDelegate().onProvideAutoFillVirtualStructure(structure, flags);
     }
 
     /** @hide */

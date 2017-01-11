@@ -18,28 +18,23 @@ package com.android.server.autofill;
 
 import static android.Manifest.permission.MANAGE_AUTO_FILL;
 import static android.content.Context.AUTO_FILL_MANAGER_SERVICE;
-import static android.view.View.ASSIST_FLAG_SANITIZED_TEXT;
-import static android.view.View.ASSIST_FLAG_NON_SANITIZED_TEXT;
+import static android.view.View.AUTO_FILL_FLAG_TYPE_FILL;
+import static android.view.View.AUTO_FILL_FLAG_TYPE_SAVE;
+
+import static com.android.server.autofill.AutoFillUI.MSG_SHOW_ALL_NOTIFICATIONS;
+import static com.android.server.autofill.AutoFillUI.SHOW_ALL_NOTIFICATIONS_DELAY_MS;
 
 import android.Manifest;
 import android.app.AppGlobals;
-import android.app.Notification;
-import android.app.Notification.Action;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
-import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -48,7 +43,6 @@ import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.provider.Settings;
 import android.service.autofill.IAutoFillManagerService;
 import android.text.TextUtils;
@@ -65,7 +59,6 @@ import com.android.server.SystemService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.List;
 
 /**
  * Entry point service for auto-fill management.
@@ -86,6 +79,7 @@ public final class AutoFillManagerService extends SystemService {
     protected static final int MSG_UNBIND = 1;
 
     private final AutoFillManagerServiceStub mServiceStub;
+    private final AutoFillUI mUi;
     private final Context mContext;
     private final ContentResolver mResolver;
 
@@ -99,7 +93,7 @@ public final class AutoFillManagerService extends SystemService {
                     removeStaleServiceForUser(msg.arg1);
                     return;
                 case MSG_SHOW_ALL_NOTIFICATIONS:
-                    showAllNotifications();
+                    mUi.showAllNotifications();
                     return;
                 default:
                     Slog.w(TAG, "Invalid message: " + msg);
@@ -129,6 +123,7 @@ public final class AutoFillManagerService extends SystemService {
         super(context);
 
         mContext = context;
+        mUi = new AutoFillUI(context, this, mLock);
         mResolver = context.getContentResolver();
         mServiceStub = new AutoFillManagerServiceStub();
     }
@@ -176,8 +171,9 @@ public final class AutoFillManagerService extends SystemService {
             Slog.w(TAG, "no service info for " + serviceComponent);
             return null;
         }
-        return new AutoFillManagerServiceImpl(this, mContext, mLock, FgThread.getHandler(), userId,
-                serviceInfo.applicationInfo.uid, serviceComponent, SERVICE_BINDING_LIFETIME_MS);
+        return new AutoFillManagerServiceImpl(this, mUi, mContext, mLock, FgThread.getHandler(),
+                userId, serviceInfo.applicationInfo.uid, serviceComponent,
+                SERVICE_BINDING_LIFETIME_MS);
     }
 
     /**
@@ -186,7 +182,8 @@ public final class AutoFillManagerService extends SystemService {
      * <p>First it tries to return the existing instance from the cache; if it's not cached, it
      * creates a new instance and caches it.
      */
-    private AutoFillManagerServiceImpl getServiceForUserLocked(int userId) {
+    // TODO(b/33197203): make private once AutoFillUi does not uses notifications
+    AutoFillManagerServiceImpl getServiceForUserLocked(int userId) {
         AutoFillManagerServiceImpl service = mServicesCache.get(userId);
         if (service != null) {
             if (DEBUG) Log.d(TAG, "reusing cached service for userId " + userId);
@@ -251,14 +248,14 @@ public final class AutoFillManagerService extends SystemService {
     final class AutoFillManagerServiceStub extends IAutoFillManagerService.Stub {
 
         @Override
-        public void requestAutoFill(IBinder activityToken, int userId, int flags) {
+        public void requestAutoFill(IBinder activityToken, int userId, Bundle extras, int flags) {
             if (DEBUG) Slog.d(TAG, "requestAutoFill: flags=" + flags + ", userId=" + userId);
             mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
 
             synchronized (mLock) {
                 final AutoFillManagerServiceImpl service = getServiceForUserLocked(userId);
                 if (service != null) {
-                    service.requestAutoFill(activityToken, flags);
+                    service.requestAutoFill(activityToken, extras, flags);
                 }
             }
         }
@@ -310,147 +307,8 @@ public final class AutoFillManagerService extends SystemService {
             if (DEBUG) Slog.d(TAG, "settings (" + uri + " changed for " + userId);
             synchronized (mLock) {
                 removeCachedServiceForUserLocked(userId);
-                final ComponentName serviceComponent = getProviderForUser(userId);
-                if (serviceComponent == null) {
-                    cancelNotificationLocked(userId);
-                } else {
-                    showNotification(serviceComponent, userId);
-                }
+                mUi.updateNotification(userId);
             }
         }
     }
-
-    ////////////////////////////////////////////////////////////////////////////
-    // TODO: temporary code using a notification to request auto-fill.        //
-    // Will be removed once UX decide the right way to present it to the user //
-    ////////////////////////////////////////////////////////////////////////////
-
-    // TODO: remove from frameworks/base/core/res/AndroidManifest.xml once it's not used anymore
-    private static final String NOTIFICATION_AUTO_FILL_INTENT =
-            "com.android.internal.autofill.action.REQUEST_AUTOFILL";
-    private static final String EXTRA_USER_ID = "user_id";
-    private static final String EXTRA_FLAGS = "flags";
-
-    private static final int MSG_SHOW_ALL_NOTIFICATIONS = 42;
-    private static final int SHOW_ALL_NOTIFICATIONS_DELAY_MS = 5000;
-
-    private BroadcastReceiver mNotificationReceiver;
-
-    final class NotificationReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final int userId = intent.getIntExtra(EXTRA_USER_ID, -1);
-            final int flags = intent.getIntExtra(EXTRA_FLAGS, 0);
-            if (DEBUG) Slog.d(TAG, "Requesting autofill by notification for user " + userId);
-            synchronized (mLock) {
-                final AutoFillManagerServiceImpl service = getServiceForUserLocked(userId);
-                if (service == null) {
-                    Slog.w(TAG, "no auto-fill service for user " + userId);
-                } else {
-                    service.requestAutoFill(null, flags);
-                }
-            }
-        }
-    }
-
-    private ComponentName getProviderForUser(int userId) {
-        ComponentName serviceComponent = null;
-        ServiceInfo serviceInfo = null;
-        final String componentName = Settings.Secure.getStringForUser(
-                mResolver, Settings.Secure.AUTO_FILL_SERVICE, userId);
-        if (!TextUtils.isEmpty(componentName)) {
-            try {
-                serviceComponent = ComponentName.unflattenFromString(componentName);
-                serviceInfo =
-                        AppGlobals.getPackageManager().getServiceInfo(serviceComponent, 0, userId);
-            } catch (RuntimeException | RemoteException e) {
-                Slog.wtf(TAG, "Bad auto-fill service name " + componentName, e);
-                return null;
-            }
-        }
-
-        if (DEBUG) Slog.d(TAG, "getServiceComponentForUser(" + userId + "): component="
-                + serviceComponent + ", info: " + serviceInfo);
-        if (serviceInfo == null) {
-            Slog.w(TAG, "no service info for " + serviceComponent);
-            return null;
-        }
-        return serviceComponent;
-    }
-
-    private void showAllNotifications() {
-        final UserManager userManager =
-                (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-
-        final List<UserInfo> allUsers = userManager.getUsers(true);
-
-        for (UserInfo user : allUsers) {
-            final ComponentName serviceComponent = getProviderForUser(user.id);
-            if (serviceComponent != null) {
-                showNotification(serviceComponent, user.id);
-            }
-        }
-    }
-
-    private void showNotification(ComponentName serviceComponent, int userId) {
-        if (DEBUG) Log.d(TAG, "showNotification() for " + userId + ": " + serviceComponent);
-
-        synchronized (mLock) {
-            if (mNotificationReceiver == null) {
-                mNotificationReceiver = new NotificationReceiver();
-                mContext.registerReceiver(mNotificationReceiver,
-                        new IntentFilter(NOTIFICATION_AUTO_FILL_INTENT));
-            }
-        }
-
-        final Intent fillIntent = new Intent(NOTIFICATION_AUTO_FILL_INTENT);
-        fillIntent.putExtra(EXTRA_USER_ID, userId);
-        fillIntent.putExtra(EXTRA_FLAGS, ASSIST_FLAG_SANITIZED_TEXT);
-        final PendingIntent fillPendingIntent = PendingIntent.getBroadcast(mContext,
-                ASSIST_FLAG_SANITIZED_TEXT, fillIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        final Action fillAction = new Action.Builder(null, "FILL", fillPendingIntent).build();
-
-        final Intent saveIntent = new Intent(NOTIFICATION_AUTO_FILL_INTENT);
-        saveIntent.putExtra(EXTRA_USER_ID, userId);
-        saveIntent.putExtra(EXTRA_FLAGS, ASSIST_FLAG_NON_SANITIZED_TEXT);
-        final PendingIntent savePendingIntent = PendingIntent.getBroadcast(mContext,
-                ASSIST_FLAG_NON_SANITIZED_TEXT, saveIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        final Action saveAction = new Action.Builder(null, "SAVE", savePendingIntent).build();
-
-        final String packageName = serviceComponent.getPackageName();
-        String providerName = null;
-        final PackageManager pm = mContext.getPackageManager();
-        try {
-            final ApplicationInfo info = pm.getApplicationInfoAsUser(packageName, 0, userId);
-            if (info != null) {
-                providerName = pm.getApplicationLabel(info).toString();
-            }
-        } catch (Exception e) {
-            providerName = packageName;
-        }
-        final String title = "AutoFill actions";
-        final String subTitle = "Provider: " + providerName + "\n" + "User: " + userId;
-
-        final Notification notification = new Notification.Builder(mContext)
-                .setCategory(Notification.CATEGORY_SYSTEM)
-                .setOngoing(true)
-                .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
-                .setLocalOnly(true)
-                .setColor(mContext.getColor(
-                        com.android.internal.R.color.system_notification_accent_color))
-                .setContentTitle(title)
-                .setStyle(new Notification.BigTextStyle().bigText(subTitle))
-                .setActions(fillAction, saveAction)
-                .build();
-        NotificationManager.from(mContext).notify(userId, notification);
-    }
-
-    private void cancelNotificationLocked(int userId) {
-        if (DEBUG) Log.d(TAG, "cancelNotificationLocked(): " + userId);
-        NotificationManager.from(mContext).cancel(userId);
-    }
-
-    /////////////////////////////////////////
-    // End of temporary notification code. //
-    /////////////////////////////////////////
 }
