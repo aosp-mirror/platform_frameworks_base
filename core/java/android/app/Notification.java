@@ -2343,6 +2343,12 @@ public class Notification implements Parcelable
         private int mCachedContrastColorIsFor = COLOR_INVALID;
 
         /**
+         * Caches an instance of StandardTemplateParams. Note that this may have been used before,
+         * so make sure to call {@link StandardTemplateParams#reset()} before using it.
+         */
+        StandardTemplateParams mParams = new StandardTemplateParams();
+
+        /**
          * Constructs a new Builder with the defaults:
          *
 
@@ -3305,25 +3311,18 @@ public class Notification implements Parcelable
         }
 
         private RemoteViews applyStandardTemplate(int resId) {
-            return applyStandardTemplate(resId, true /* hasProgress */);
+            return applyStandardTemplate(resId, mParams.reset().fillTextsFrom(this));
         }
 
         /**
          * @param hasProgress whether the progress bar should be shown and set
          */
         private RemoteViews applyStandardTemplate(int resId, boolean hasProgress) {
-            final Bundle ex = mN.extras;
-
-            CharSequence title = processLegacyText(ex.getCharSequence(EXTRA_TITLE));
-            CharSequence text = processLegacyText(ex.getCharSequence(EXTRA_TEXT));
-            return applyStandardTemplate(resId, hasProgress, title, text);
+            return applyStandardTemplate(resId, mParams.reset().hasProgress(hasProgress)
+                    .fillTextsFrom(this));
         }
 
-        /**
-         * @param hasProgress whether the progress bar should be shown and set
-         */
-        private RemoteViews applyStandardTemplate(int resId, boolean hasProgress,
-                CharSequence title, CharSequence text) {
+        private RemoteViews applyStandardTemplate(int resId, StandardTemplateParams p) {
             RemoteViews contentView = new BuilderRemoteViews(mContext.getApplicationInfo(), resId);
 
             resetStandardTemplate(contentView);
@@ -3332,18 +3331,18 @@ public class Notification implements Parcelable
 
             bindNotificationHeader(contentView);
             bindLargeIcon(contentView);
-            boolean showProgress = handleProgressBar(hasProgress, contentView, ex);
-            if (title != null) {
+            boolean showProgress = handleProgressBar(p.hasProgress, contentView, ex);
+            if (p.title != null) {
                 contentView.setViewVisibility(R.id.title, View.VISIBLE);
-                contentView.setTextViewText(R.id.title, title);
+                contentView.setTextViewText(R.id.title, p.title);
                 contentView.setViewLayoutWidth(R.id.title, showProgress
                         ? ViewGroup.LayoutParams.WRAP_CONTENT
                         : ViewGroup.LayoutParams.MATCH_PARENT);
             }
-            if (text != null) {
+            if (p.text != null) {
                 int textId = showProgress ? com.android.internal.R.id.text_line_1
                         : com.android.internal.R.id.text;
-                contentView.setTextViewText(textId, text);
+                contentView.setTextViewText(textId, p.text);
                 contentView.setViewVisibility(textId, View.VISIBLE);
             }
 
@@ -3535,16 +3534,12 @@ public class Notification implements Parcelable
         }
 
         private RemoteViews applyStandardTemplateWithActions(int layoutId) {
-            final Bundle ex = mN.extras;
-
-            CharSequence title = processLegacyText(ex.getCharSequence(EXTRA_TITLE));
-            CharSequence text = processLegacyText(ex.getCharSequence(EXTRA_TEXT));
-            return applyStandardTemplateWithActions(layoutId, true /* hasProgress */, title, text);
+            return applyStandardTemplateWithActions(layoutId, mParams.reset().fillTextsFrom(this));
         }
 
-        private RemoteViews applyStandardTemplateWithActions(int layoutId, boolean hasProgress,
-                CharSequence title, CharSequence text) {
-            RemoteViews big = applyStandardTemplate(layoutId, hasProgress, title, text);
+        private RemoteViews applyStandardTemplateWithActions(int layoutId,
+            StandardTemplateParams p) {
+            RemoteViews big = applyStandardTemplate(layoutId, p);
 
             resetStandardTemplateWithActions(big);
 
@@ -4835,10 +4830,8 @@ public class Notification implements Parcelable
                     ? null
                     : mConversationTitle != null ? makeMessageLine(m) : m.mText;
 
-            return mBuilder.applyStandardTemplate(mBuilder.getBaseLayoutResource(),
-                    false /* hasProgress */,
-                    title,
-                    text);
+            return mBuilder.applyStandardTemplateWithActions(mBuilder.getBaseLayoutResource(),
+                    mBuilder.mParams.reset().hasProgress(false).title(title).text(text));
         }
 
         private Message findLatestIncomingMessage() {
@@ -4880,16 +4873,14 @@ public class Notification implements Parcelable
                 }
                 RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(
                         mBuilder.getBigTextLayoutResource(),
-                        false /* progress */, bigTitle, null /* text */);
+                        mBuilder.mParams.reset().hasProgress(false).title(bigTitle).text(null));
                 BigTextStyle.applyBigTextContentView(mBuilder, contentView, text);
                 return contentView;
             }
 
             RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(
                     mBuilder.getMessagingLayoutResource(),
-                    false /* hasProgress */,
-                    title,
-                    null /* text */);
+                    mBuilder.mParams.reset().hasProgress(false).title(title).text(null));
 
             int[] rowIds = {R.id.inbox_text0, R.id.inbox_text1, R.id.inbox_text2, R.id.inbox_text3,
                     R.id.inbox_text4, R.id.inbox_text5, R.id.inbox_text6};
@@ -4959,9 +4950,7 @@ public class Notification implements Parcelable
                     : mConversationTitle != null ? makeMessageLine(m) : m.mText;
 
             return mBuilder.applyStandardTemplateWithActions(mBuilder.getBigBaseLayoutResource(),
-                    false /* hasProgress */,
-                    title,
-                    text);
+                    mBuilder.mParams.reset().hasProgress(false).title(title).text(text));
         }
 
         private static TextAppearanceSpan makeFontColorSpan(int color) {
@@ -6980,6 +6969,48 @@ public class Notification implements Parcelable
             BuilderRemoteViews brv = new BuilderRemoteViews(p);
             p.recycle();
             return brv;
+        }
+    }
+
+    private static class StandardTemplateParams {
+        boolean hasProgress = true;
+        boolean ambient = false;
+        CharSequence title;
+        CharSequence text;
+
+        final StandardTemplateParams reset() {
+            hasProgress = true;
+            ambient = false;
+            title = null;
+            text = null;
+            return this;
+        }
+
+        final StandardTemplateParams hasProgress(boolean hasProgress) {
+            this.hasProgress = hasProgress;
+            return this;
+        }
+
+        final StandardTemplateParams title(CharSequence title) {
+            this.title = title;
+            return this;
+        }
+
+        final StandardTemplateParams text(CharSequence text) {
+            this.text = text;
+            return this;
+        }
+
+        final StandardTemplateParams ambient(boolean ambient) {
+            this.ambient = ambient;
+            return this;
+        }
+
+        final StandardTemplateParams fillTextsFrom(Builder b) {
+            Bundle extras = b.mN.extras;
+            title = b.processLegacyText(extras.getCharSequence(EXTRA_TITLE));
+            text = b.processLegacyText(extras.getCharSequence(EXTRA_TEXT));
+            return this;
         }
     }
 }
