@@ -818,6 +818,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
         while ((opt=getNextOption()) != null) {
             if (opt.equals("--progress")) {
                 bugreportType = ActivityManager.BUGREPORT_OPTION_INTERACTIVE;
+            } else if (opt.equals("--telephony")) {
+                bugreportType = ActivityManager.BUGREPORT_OPTION_TELEPHONY;
             } else {
                 getErrPrintWriter().println("Error: Unknown option: " + opt);
                 return -1;
@@ -2453,10 +2455,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      above <HEAP-LIMIT> then a heap dump is collected for the user to report.");
             pw.println("  clear-watch-heap");
             pw.println("      Clear the previously set-watch-heap.");
-            pw.println("  bug-report [--progress]");
+            pw.println("  bug-report [--progress | --telephony]");
             pw.println("      Request bug report generation; will launch a notification");
             pw.println("        when done to select where it should be delivered. Options are:");
             pw.println("     --progress: will launch a notification right away to show its progress.");
+            pw.println("     --telephony: will dump only telephony sections.");
             pw.println("  force-stop [--user <USER_ID> | all | current] <PACKAGE>");
             pw.println("      Completely stop the given application package.");
             pw.println("  kill [--user <USER_ID> | all | current] <PACKAGE>");

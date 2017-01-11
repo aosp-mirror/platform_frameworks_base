@@ -12129,6 +12129,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             case ActivityManager.BUGREPORT_OPTION_WEAR:
                 extraOptions = "bugreportwear";
                 break;
+            case ActivityManager.BUGREPORT_OPTION_TELEPHONY:
+                extraOptions = "bugreporttelephony";
+                break;
             default:
                 throw new IllegalArgumentException("Provided bugreport type is not correct, value: "
                         + bugreportType);
