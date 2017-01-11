@@ -18,7 +18,6 @@ package android.net.wifi.aware;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.net.wifi.RttManager;
 import android.util.Log;
 
@@ -39,8 +38,6 @@ import java.lang.ref.WeakReference;
  * </ul>
  * The {@link #destroy()} method must be called to destroy discovery sessions once they are
  * no longer needed.
- *
- * @hide PROPOSED_AWARE_API
  */
 public class DiscoverySession {
     private static final String TAG = "DiscoverySession";
@@ -230,7 +227,7 @@ public class DiscoverySession {
      *                 {@link android.net.wifi.RttManager.RttParams#bssid} member must be set to
      *                 a peer ID - not to a MAC address.
      * @param listener The listener to receive the results of the ranging session.
-     * @hide PROPOSED_AWARE_SYSTEM_API
+     * @hide
      * [TODO: b/28847998 - track RTT API & visilibity]
      */
     public void startRanging(RttManager.RttParams[] params, RttManager.RttListener listener) {
