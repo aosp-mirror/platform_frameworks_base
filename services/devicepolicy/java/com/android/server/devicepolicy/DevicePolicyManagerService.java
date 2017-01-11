@@ -9597,6 +9597,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 .setSmallIcon(R.drawable.ic_qs_network_logging)
                 .setContentTitle(mContext.getString(R.string.network_logging_notification_title))
                 .setContentText(mContext.getString(R.string.network_logging_notification_text))
+                .setTicker(mContext.getString(R.string.network_logging_notification_title))
                 .setShowWhen(true)
                 .setContentIntent(pendingIntent)
                 .build();
