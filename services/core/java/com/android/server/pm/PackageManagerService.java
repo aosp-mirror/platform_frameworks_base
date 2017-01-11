@@ -2561,19 +2561,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             mPackageUsage.read(mPackages);
             mCompilerStats.read();
 
-            // Read and update the usage of dex files.
-            // At this point we know the code paths  of the packages, so we can validate
-            // the disk file and build the internal cache.
-            // The usage file is expected to be small so loading and verifying it
-            // should take a fairly small time compare to the other activities (e.g. package
-            // scanning).
-            final Map<Integer, List<PackageInfo>> userPackages = new HashMap<>();
-            final int[] currentUserIds = UserManagerService.getInstance().getUserIds();
-            for (int userId : currentUserIds) {
-                userPackages.put(userId, getInstalledPackages(/*flags*/ 0, userId).getList());
-            }
-            mDexManager.load(userPackages);
-
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_SCAN_END,
                     SystemClock.uptimeMillis());
             Slog.i(TAG, "Time to scan packages: "
@@ -2739,6 +2726,21 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             mEphemeralApplicationRegistry = new EphemeralApplicationRegistry(this);
+
+            // Read and update the usage of dex files.
+            // Do this at the end of PM init so that all the packages have their
+            // data directory reconciled.
+            // At this point we know the code paths of the packages, so we can validate
+            // the disk file and build the internal cache.
+            // The usage file is expected to be small so loading and verifying it
+            // should take a fairly small time compare to the other activities (e.g. package
+            // scanning).
+            final Map<Integer, List<PackageInfo>> userPackages = new HashMap<>();
+            final int[] currentUserIds = UserManagerService.getInstance().getUserIds();
+            for (int userId : currentUserIds) {
+                userPackages.put(userId, getInstalledPackages(/*flags*/ 0, userId).getList());
+            }
+            mDexManager.load(userPackages);
         } // synchronized (mPackages)
         } // synchronized (mInstallLock)
 
