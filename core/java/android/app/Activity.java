@@ -2029,78 +2029,53 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Puts the activity in picture-in-picture mode.
+     * Puts the activity in picture-in-picture mode if possible in the current system state. Any
+     * prior calls to {@link #setPictureInPictureArgs(PictureInPictureArgs)} will still apply when
+     * entering picture-in-picture through this call.
+     *
+     * @see #enterPictureInPictureMode(PictureInPictureArgs)
      * @see android.R.attr#supportsPictureInPicture
      */
     public void enterPictureInPictureMode() {
-        try {
-            ActivityManager.getService().enterPictureInPictureMode(mToken);
-        } catch (RemoteException e) {
-        }
+        enterPictureInPictureMode(new PictureInPictureArgs());
     }
 
     /**
-     * Puts the activity in picture-in-picture mode with a given aspect ratio.
+     * Puts the activity in picture-in-picture mode if possible in the current system state with
+     * explicit given arguments. Only the set parameters in {@param args} will override prior calls
+     * {@link #setPictureInPictureArgs(PictureInPictureArgs)}.
+     *
+     * The system may disallow entering picture-in-picture in various cases, including when the
+     * activity is not visible.
+     *
      * @see android.R.attr#supportsPictureInPicture
      *
-     * @param aspectRatio the new aspect ratio of the picture-in-picture.
+     * @param args the explicit non-null arguments to use when entering picture-in-picture.
+     * @return whether the system successfully entered picture-in-picture.
      */
-    public void enterPictureInPictureMode(float aspectRatio) {
+    public boolean enterPictureInPictureMode(@NonNull PictureInPictureArgs args) {
         try {
-            ActivityManagerNative.getDefault().enterPictureInPictureModeWithAspectRatio(mToken,
-                    aspectRatio);
-        } catch (RemoteException e) {
-        }
-    }
-
-    /**
-     * Requests to the system that the activity can be automatically put into picture-in-picture
-     * mode when the user leaves the activity causing it normally to be hidden.  Generally, this
-     * happens when another task is brought to the forground or the task containing this activity
-     * is moved to the background.  This is a *not* a guarantee that the activity will actually be
-     * put in picture-in-picture mode, and depends on a number of factors, including whether there
-     * is already something in picture-in-picture.
-     *
-     * @param enterPictureInPictureOnMoveToBg whether or not this activity can automatically enter
-     *                                        picture-in-picture
-     */
-    public void enterPictureInPictureModeOnMoveToBackground(
-            boolean enterPictureInPictureOnMoveToBg) {
-        try {
-            ActivityManagerNative.getDefault().enterPictureInPictureModeOnMoveToBackground(mToken,
-                    enterPictureInPictureOnMoveToBg);
-        } catch (RemoteException e) {
-        }
-    }
-
-    /**
-     * Updates the aspect ratio of the current picture-in-picture activity if this activity is
-     * already in picture-in-picture mode, or sets it to be used later if
-     * {@link #enterPictureInPictureModeOnMoveToBackground(boolean)} is requested.
-     *
-     * @param aspectRatio the new aspect ratio of the picture-in-picture.
-     */
-    public void setPictureInPictureAspectRatio(float aspectRatio) {
-        try {
-            ActivityManagerNative.getDefault().setPictureInPictureAspectRatio(mToken, aspectRatio);
-        } catch (RemoteException e) {
-        }
-    }
-
-    /**
-     * Updates the set of user actions associated with the picture-in-picture activity.
-     *
-     * @param actions the new actions for picture-in-picture (can be null to reset the set of
-     *                actions).  The maximum number of actions that will be displayed on this device
-     *                is defined by {@link ActivityManager#getMaxNumPictureInPictureActions()}.
-     */
-    public void setPictureInPictureActions(List<RemoteAction> actions) {
-        try {
-            if (actions == null) {
-                actions = new ArrayList<>();
+            if (args == null) {
+                throw new IllegalArgumentException("Expected non-null picture-in-picture args");
             }
-            ActivityManagerNative.getDefault().setPictureInPictureActions(mToken,
-                    new ParceledListSlice<RemoteAction>(actions));
+            return ActivityManagerNative.getDefault().enterPictureInPictureMode(mToken, args);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Updates the properties of the picture-in-picture activity, or sets it to be used later when
+     * {@link #enterPictureInPictureMode()} is called.
+     *
+     * @param args the new properties of the picture-in-picture.
+     */
+    public void setPictureInPictureArgs(@NonNull PictureInPictureArgs args) {
+        try {
+            if (args == null) {
+                throw new IllegalArgumentException("Expected non-null picture-in-picture args");
+            }
+            ActivityManagerNative.getDefault().setPictureInPictureArgs(mToken, args);
         } catch (RemoteException e) {
         }
     }

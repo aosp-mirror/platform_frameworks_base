@@ -2617,6 +2617,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         final ActivityStack prevStack = task.getStack();
         final boolean wasFocused = isFocusedStack(prevStack) && (topRunningActivityLocked() == r);
         final boolean wasResumed = prevStack.mResumedActivity == r;
+        final boolean wasPaused = prevStack.mPausingActivity == r;
         // In some cases the focused stack isn't the front stack. E.g. pinned stack.
         // Whenever we are moving the top activity from the front stack we want to make sure to move
         // the stack to the front.
@@ -2641,10 +2642,19 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         task.mTemporarilyUnresizable = false;
         task.reparent(stack.mStackId, toTop ? MAX_VALUE : 0, reason);
 
+        // Reset the resumed activity on the previous stack
+        if (wasResumed) {
+            prevStack.mResumedActivity = null;
+        }
+        // Reset the paused activity on the previous stack
+        if (wasPaused) {
+            prevStack.mPausingActivity = null;
+        }
+
         // If the task had focus before (or we're requested to move focus),
         // move focus to the new stack by moving the stack to the front.
-        stack.moveToFrontAndResumeStateIfNeeded(
-                r, forceFocus || wasFocused || wasFront, wasResumed, reason);
+        stack.moveToFrontAndResumeStateIfNeeded(r, forceFocus || wasFocused || wasFront, wasResumed,
+                wasPaused, reason);
 
         return stack;
     }
@@ -2795,8 +2805,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
             if (task.mActivities.size() == 1) {
                 // There is only one activity in the task. So, we can just move the task over to
-                // the stack without re-parenting the activity in a different task.
-                if (moveHomeStackToFront && task.getTaskToReturnTo() == HOME_ACTIVITY_TYPE) {
+                // the stack without re-parenting the activity in a different task.  We don't
+                // move the home stack forward if we are currently entering picture-in-picture
+                // while pausing because that changes the focused stack and may prevent the new
+                // starting activity from resuming.
+                if (moveHomeStackToFront && task.getTaskToReturnTo() == HOME_ACTIVITY_TYPE
+                        && !r.supportsPictureInPictureWhilePausing) {
                     // Move the home stack forward if the task we just moved to the pinned stack
                     // was launched from home so home should be visible behind it.
                     moveHomeStackToFront(reason);
@@ -2808,6 +2822,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 // reveal/leave the other activities in their original task
                 stack.moveActivityToStack(r);
             }
+
+            // Reset the state that indicates it can enter PiP while pausing after we've moved it
+            // to the pinned stack
+            r.supportsPictureInPictureWhilePausing = false;
         } finally {
             mWindowManager.continueSurfaceLayout();
         }

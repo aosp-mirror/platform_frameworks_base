@@ -63,9 +63,9 @@ import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager.TaskDescription;
-import android.app.ActivityManagerInternal.PictureInPictureArguments;
 import android.app.ActivityOptions;
 import android.app.PendingIntent;
+import android.app.PictureInPictureArgs;
 import android.app.ResultInfo;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -229,13 +229,10 @@ final class ActivityRecord implements AppWindowContainerListener {
     boolean frozenBeforeDestroy;// has been frozen but not yet destroyed.
     boolean immersive;      // immersive mode (don't interrupt if possible)
     boolean forceNewConfig; // force re-create with new config next time
-    boolean supportsPipOnMoveToBackground;   // Supports automatically entering picture-in-picture
-        // when this activity is hidden. This flag is requested by the activity.
-    private boolean enterPipOnMoveToBackground; // Flag to enter picture in picture when this
-        // activity is made invisible. This flag is set specifically when another task is being
-        // launched or moved to the front which may cause this activity to try and enter PiP
-        // when it is next made invisible.
-    PictureInPictureArguments pictureInPictureArgs = new PictureInPictureArguments();  // The PiP
+    boolean supportsPictureInPictureWhilePausing;  // This flag is set by the system to indicate
+        // that the activity can enter picture in picture while pausing (ie. only when another
+        // task is brought to front or started)
+    PictureInPictureArgs pictureInPictureArgs = new PictureInPictureArgs();  // The PiP
         // arguments used when deferring the entering of picture-in-picture.
     int launchCount;        // count of launches since last state
     long lastLaunchTime;    // time of last launch of this activity
@@ -453,12 +450,8 @@ final class ActivityRecord implements AppWindowContainerListener {
         if (info != null) {
             pw.println(prefix + "resizeMode=" + ActivityInfo.resizeModeToString(info.resizeMode));
         }
-        if (supportsPipOnMoveToBackground) {
-            pw.println(prefix + "supportsPipOnMoveToBackground=1");
-            pw.println(prefix + "enterPipOnMoveToBackground=" +
-                    (enterPipOnMoveToBackground ? 1 : 0));
-            pictureInPictureArgs.dump(pw, prefix);
-        }
+        pw.println(prefix + "supportsPictureInPictureWhilePausing: "
+                + supportsPictureInPictureWhilePausing);
     }
 
     private boolean crossesHorizontalSizeThreshold(int firstDp, int secondDp) {
@@ -819,23 +812,6 @@ final class ActivityRecord implements AppWindowContainerListener {
     }
 
     /**
-     * If this activity has requested that it auto-enter picture-in-picture and we can actually do
-     * this, then mark it to enter picture in picture at that point.
-     */
-    void setEnterPipOnMoveToBackground(boolean enterPipOnInvisible) {
-        if (supportsPipOnMoveToBackground) {
-            enterPipOnMoveToBackground = enterPipOnInvisible;
-        }
-    }
-
-    /**
-     * @return whether to enter PiP when this activity is made invisible.
-     */
-    public boolean shouldEnterPictureInPictureOnInvisible() {
-        return enterPipOnMoveToBackground;
-    }
-
-    /**
      * @return Stack value from current task, null if there is no task.
      */
     ActivityStack getStack() {
@@ -918,24 +894,34 @@ final class ActivityRecord implements AppWindowContainerListener {
     }
 
     /**
-     * @return whether this activity is currently allowed to enter PIP, if
-     * {@param checkActivityVisibility} is set, then the current activity visibility is taken into
-     * account.
+     * @return whether this activity is currently allowed to enter PIP, throwing an exception if
+     *         the activity is not currently visible.
      */
-    boolean canEnterPictureInPicture(boolean checkActivityVisibility) {
-        if (!checkActivityVisibility) {
-            return supportsPictureInPicture();
+    boolean checkEnterPictureInPictureState(String caller) {
+        boolean isKeyguardLocked = service.isKeyguardLocked();
+        boolean hasPinnedStack = mStackSupervisor.getStack(PINNED_STACK_ID) != null;
+        switch (state) {
+            case RESUMED:
+                // When visible, allow entering PiP if not on the lockscreen.  If there is another
+                // PiP activity, the logic to handle that comes later in enterPictureInPictureMode()
+                return !isKeyguardLocked;
+            case PAUSING:
+            case PAUSED:
+                // When pausing, only allow enter PiP if not on the lockscreen and there is not
+                // already an existing PiP activity
+                return !isKeyguardLocked && !hasPinnedStack && supportsPictureInPictureWhilePausing;
+            case STOPPING:
+                // When stopping in a valid state, then only allow enter PiP as in the pause state.
+                // Otherwise, fall through to throw an exception if the caller is trying to enter
+                // PiP in an invalid stopping state.
+                if (supportsPictureInPictureWhilePausing) {
+                    return !isKeyguardLocked && !hasPinnedStack;
+                }
+            default:
+                throw new IllegalStateException(caller
+                        + ": Current activity is not visible (state=" + state.name() + ") "
+                        + "r=" + this);
         }
-
-        if (supportsPictureInPicture()) {
-            switch (state) {
-                case RESUMED:
-                case PAUSING:
-                case PAUSED:
-                    return true;
-            }
-        }
-        return false;
     }
 
     boolean canGoInDockedStack() {
