@@ -8170,9 +8170,27 @@ public final class ContactsContract {
         /**
          * The content:// style URI for this table.  Requests to this URI can be
          * performed on the UI thread because they are always unblocking.
+         *
+         * <p>Note when you listen on this URI (or any other sub-URIs), you'll be notified for
+         * regular contact change notifications too, which will be sent on the root URI.
+         * If you only want to be notified for provider status change notifications, listen on
+         * {@link #STATUS_CHANGE_NOTIFICATION_CONTENT_URI} instead.
          */
         public static final Uri CONTENT_URI =
                 Uri.withAppendedPath(AUTHORITY_URI, "provider_status");
+
+        /**
+         * URI to listen to provider status changes without listening to regular
+         * contact changes.  If a client only wants to monitor {@link ProviderStatus} with
+         * {@link android.app.job.JobScheduler}, then this URI should be used instead of
+         * {@link #CONTENT_URI}, because a job on {@link #CONTENT_URI} will also be invoked
+         * when contacts are changed.
+         *
+         * <p>Note this URI cannot be queried.  A query should be always made on
+         * {@link #CONTENT_URI}.
+         */
+        public static final Uri STATUS_CHANGE_NOTIFICATION_CONTENT_URI =
+                Uri.parse("content://com.android.contacts.provider_status");
 
         /**
          * The MIME-type of {@link #CONTENT_URI} providing a directory of
@@ -8201,6 +8219,13 @@ public final class ContactsContract {
          * on the device.
          */
         public static final int STATUS_EMPTY = 2;
+
+        /**
+         * Timestamp (milliseconds since epoch) of when the provider's database was created.
+         *
+         * <P>Type: long
+         */
+        public static final String DATABASE_CREATION_TIMESTAMP = "database_creation_timestamp";
     }
 
     /**
@@ -8768,7 +8793,14 @@ public final class ContactsContract {
         /**
          * This is the intent that is fired when the contacts database is created. <p> The
          * READ_CONTACT permission is required to receive these broadcasts.
+         *
+         * <p>As of O, this broadcast will no longer be sent.  Applications can use
+         * use {@link android.app.job.JobScheduler} to monitor
+         * {@link ProviderStatus#STATUS_CHANGE_NOTIFICATION_CONTENT_URI}, and read
+         * {@link ProviderStatus#DATABASE_CREATION_TIMESTAMP} to get when
+         * the contacts database was initialized.
          */
+        @Deprecated
         public static final String CONTACTS_DATABASE_CREATED =
                 "android.provider.Contacts.DATABASE_CREATED";
 
