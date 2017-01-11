@@ -16,9 +16,11 @@
 
 #include "SkiaCanvasProxy.h"
 
-#include "hwui/Bitmap.h"
+#include <memory>
 
-#include <cutils/log.h>
+#include <log/log.h>
+
+#include "hwui/Bitmap.h"
 #include <SkLatticeIter.h>
 #include <SkPatchUtils.h>
 #include <SkPaint.h>
@@ -29,8 +31,6 @@
 #include <SkRSXform.h>
 #include <SkSurface.h>
 #include <SkTextBlobRunIterator.h>
-
-#include <memory>
 
 namespace android {
 namespace uirenderer {

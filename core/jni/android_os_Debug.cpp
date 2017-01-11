@@ -16,32 +16,32 @@
 
 #define LOG_TAG "android.os.Debug"
 
+#include <assert.h>
+#include <ctype.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
+#include <malloc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <time.h>
 #include <sys/time.h>
-#include <errno.h>
-#include <assert.h>
-#include <ctype.h>
-#include <malloc.h>
+#include <time.h>
+#include <unistd.h>
 
 #include <iomanip>
 #include <string>
 
-#include "jni.h"
+#include <android-base/stringprintf.h>
+#include <cutils/debugger.h>
+#include <log/log.h>
+#include <utils/misc.h>
+#include <utils/String8.h>
 
-#include "android-base/stringprintf.h"
-#include "cutils/debugger.h"
-#include "cutils/log.h"
 #include "JNIHelp.h"
-#include "memtrack/memtrack.h"
-#include "memunreachable/memunreachable.h"
-#include "utils/misc.h"
-#include "utils/String8.h"
+#include "jni.h"
+#include <memtrack/memtrack.h>
+#include <memunreachable/memunreachable.h>
 
 namespace android
 {

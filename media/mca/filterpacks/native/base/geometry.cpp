@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define LOG_TAG "geometry"
 
-#include <cutils/log.h>
 #include <cmath>
+
+#include <log/log.h>
 
 #include "geometry.h"
 

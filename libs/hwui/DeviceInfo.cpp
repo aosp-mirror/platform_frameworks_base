@@ -13,15 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include <DeviceInfo.h>
 
 #include "Extensions.h"
 
-#include <GLES2/gl2.h>
-#include <log/log.h>
-
 #include <thread>
 #include <mutex>
+
+#include <log/log.h>
+
+#include <GLES2/gl2.h>
 
 namespace android {
 namespace uirenderer {
