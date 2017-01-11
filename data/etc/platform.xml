@@ -179,6 +179,9 @@
     <!-- These are the packages that are white-listed to be able to run as system user -->
     <system-user-whitelisted-app package="com.android.settings" />
 
+    <!-- These are the transport services that are white-listed to be able to run -->
+    <backup-transport-whitelisted-service service="android/com.android.internal.backup.LocalTransportService" />
+
     <!-- These are the packages that shouldn't run as system user -->
     <system-user-blacklisted-app package="com.android.wallpaper.livepicker" />
 </permissions>
