@@ -141,6 +141,7 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.ActivityStarter;
 import com.android.systemui.plugins.qs.QS.BaseStatusBarHeader;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.SnoozeListener;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.recents.ScreenPinningRequest;
@@ -205,7 +206,7 @@ import java.util.Map;
 
 public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         DragDownHelper.DragDownCallback, ActivityStarter, OnUnlockMethodChangedListener,
-        OnHeadsUpChangedListener, VisualStabilityManager.Callback {
+        OnHeadsUpChangedListener, VisualStabilityManager.Callback, SnoozeListener {
     static final String TAG = "PhoneStatusBar";
     public static final boolean DEBUG = BaseStatusBar.DEBUG;
     public static final boolean SPEW = false;
@@ -4857,5 +4858,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             PhoneStatusBar.this.startPendingIntentDismissingKeyguard(intent);
         }
 
+    }
+
+    @Override
+    public SnoozeListener getSnoozeListener() {
+        return this;
+    }
+
+    @Override
+    public void snoozeNotification(StatusBarNotification sbn, long snoozeUntil) {
+        setNotificationSnoozed(sbn, snoozeUntil);
     }
 }

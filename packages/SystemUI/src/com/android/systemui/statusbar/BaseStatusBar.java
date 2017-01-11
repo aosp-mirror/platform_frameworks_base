@@ -103,6 +103,8 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.MenuItem;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.SnoozeGutsContent;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.SnoozeListener;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
@@ -1050,6 +1052,14 @@ public abstract class BaseStatusBar extends SystemUI implements
         }, false /* afterKeyguardGone */);
     }
 
+    protected void setNotificationSnoozed(StatusBarNotification sbn, long snoozeUntil) {
+        mNotificationListener.snoozeNotification(sbn.getKey(), snoozeUntil);
+    }
+
+    public SnoozeListener getSnoozeListener() {
+        return null;
+    }
+
     private void bindGuts(final ExpandableNotificationRow row, MenuItem item) {
         row.inflateGuts();
         row.setGutsView(item);
@@ -1062,6 +1072,11 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
             mNotificationGutsExposed = null;
         });
+
+        if (item.gutsContent instanceof SnoozeGutsContent) {
+            ((SnoozeGutsContent) item.gutsContent).setSnoozeListener(getSnoozeListener());
+            ((SnoozeGutsContent) item.gutsContent).setStatusBarNotification(sbn);
+        }
 
         if (item.gutsContent instanceof NotificationInfo) {
             final NotificationChannel channel = row.getEntry().channel;

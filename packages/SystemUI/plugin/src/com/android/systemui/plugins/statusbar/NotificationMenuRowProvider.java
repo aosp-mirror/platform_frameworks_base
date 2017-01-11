@@ -41,6 +41,16 @@ public interface NotificationMenuRowProvider extends Plugin {
         public boolean handleCloseControls();
     }
 
+    public interface SnoozeGutsContent extends GutsContent {
+        public void setSnoozeListener(SnoozeListener listener);
+
+        public void setStatusBarNotification(StatusBarNotification sbn);
+    }
+
+    public interface SnoozeListener {
+        public void snoozeNotification(StatusBarNotification sbn, long snoozeUntil);
+    }
+
     public static class MenuItem {
         public Drawable icon;
         public String menuDescription;
