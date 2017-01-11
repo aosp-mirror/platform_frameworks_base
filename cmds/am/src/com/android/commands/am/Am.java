@@ -148,7 +148,7 @@ public class Am extends BaseCommand {
                 "       am clear-debug-app\n" +
                 "       am set-watch-heap <PROCESS> <MEM-LIMIT>\n" +
                 "       am clear-watch-heap\n" +
-                "       am bug-report [--progress]\n" +
+                "       am bug-report [--progress | --telephony]\n" +
                 "       am monitor [--gdb <port>]\n" +
                 "       am hang [--allow-restart]\n" +
                 "       am restart\n" +
@@ -274,6 +274,7 @@ public class Am extends BaseCommand {
                 "am bug-report: request bug report generation; will launch a notification\n" +
                 "    when done to select where it should be delivered. Options are: \n" +
                 "   --progress: will launch a notification right away to show its progress.\n" +
+                "   --telephony: will dump only telephony sections.\n" +
                 "\n" +
                 "am monitor: start monitoring for crashes or ANRs.\n" +
                 "    --gdb: start gdbserv on the given port at crash/ANR\n" +
@@ -1151,6 +1152,8 @@ public class Am extends BaseCommand {
         while ((opt=nextOption()) != null) {
             if (opt.equals("--progress")) {
                 bugreportType = ActivityManager.BUGREPORT_OPTION_INTERACTIVE;
+            } else if (opt.equals("--telephony")) {
+                bugreportType = ActivityManager.BUGREPORT_OPTION_TELEPHONY;
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 return;
