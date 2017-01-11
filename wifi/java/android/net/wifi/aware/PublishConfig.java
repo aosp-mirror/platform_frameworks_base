@@ -36,8 +36,6 @@ import java.util.List;
  * {@link WifiAwareSession#publish(PublishConfig, DiscoverySessionCallback,
  * android.os.Handler)} or updated using
  * {@link PublishDiscoverySession#updatePublish(PublishConfig)}.
- *
- * @hide PROPOSED_AWARE_API
  */
 public final class PublishConfig implements Parcelable {
     /** @hide */

@@ -30,8 +30,6 @@ import java.util.List;
  * android.os.Handler)}.
  * <p>
  * A single callback is set at session creation - it cannot be replaced.
- *
- * @hide PROPOSED_AWARE_API
  */
 public class DiscoverySessionCallback {
     /**

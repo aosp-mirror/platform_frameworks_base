@@ -30,8 +30,6 @@ import java.lang.ref.WeakReference;
 /**
  * This class represents a Wi-Fi Aware session - an attachment to the Wi-Fi Aware service through
  * which the app can execute discovery operations.
- *
- * @hide PROPOSED_AWARE_API
  */
 public class WifiAwareSession {
     private static final String TAG = "WifiAwareSession";

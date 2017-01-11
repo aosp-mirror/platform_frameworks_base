@@ -22,10 +22,8 @@ import android.os.Parcelable;
 
 /**
  * The characteristics of the Wi-Fi Aware implementation.
- *
- * @hide PROPOSED_AWARE_API
  */
-public class Characteristics implements Parcelable {
+public final class Characteristics implements Parcelable {
     /** @hide */
     public static final String KEY_MAX_SERVICE_NAME_LENGTH = "key_max_service_name_length";
     /** @hide */

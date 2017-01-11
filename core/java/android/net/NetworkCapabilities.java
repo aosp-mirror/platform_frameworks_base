@@ -420,8 +420,6 @@ public final class NetworkCapabilities implements Parcelable {
 
     /**
      * Indicates this network uses a Wi-Fi Aware transport.
-     *
-     * @hide PROPOSED_AWARE_API
      */
     public static final int TRANSPORT_WIFI_AWARE = 5;
 
