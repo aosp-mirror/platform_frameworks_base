@@ -136,6 +136,27 @@ public class BackupManager {
      */
     public static final String EXTRA_BACKUP_SERVICES_AVAILABLE = "backup_services_available";
 
+    /**
+     * If this flag is passed to {@link #requestBackup(String[], BackupObserver, int)},
+     * BackupManager will pass a blank old state to BackupAgents of requested packages.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int FLAG_NON_INCREMENTAL_BACKUP = 1;
+
+    /**
+     * Use with {@link #requestBackup} to force backup of
+     * package meta data. Typically you do not need to explicitly request this be backed up as it is
+     * handled internally by the BackupManager. If you are requesting backups with
+     * FLAG_NON_INCREMENTAL, this package won't automatically be backed up and you have to
+     * explicitly request for its backup.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String PACKAGE_MANAGER_SENTINEL = "@pm@";
+
     private Context mContext;
     private static IBackupManager sService;
 
@@ -484,13 +505,34 @@ public class BackupManager {
      */
     @SystemApi
     public int requestBackup(String[] packages, BackupObserver observer) {
+        return requestBackup(packages, observer, 0);
+    }
+
+    /**
+     * Request an immediate backup, providing an observer to which results of the backup operation
+     * will be published. The Android backup system will decide for each package whether it will
+     * be full app data backup or key/value-pair-based backup.
+     *
+     * <p>If this method returns {@link BackupManager#SUCCESS}, the OS will attempt to backup all
+     * provided packages using the remote transport.
+     *
+     * @param packages List of package names to backup.
+     * @param observer The {@link BackupObserver} to receive callbacks during the backup
+     *                 operation. Could be {@code null}.
+     * @param flags    {@link #FLAG_NON_INCREMENTAL_BACKUP}.
+     * @return {@link BackupManager#SUCCESS} on success; nonzero on error.
+     * @throws IllegalArgumentException on null or empty {@code packages} param.
+     * @hide
+     */
+    @SystemApi
+    public int requestBackup(String[] packages, BackupObserver observer, int flags) {
         checkServiceBinder();
         if (sService != null) {
             try {
                 BackupObserverWrapper observerWrapper = observer == null
                         ? null
                         : new BackupObserverWrapper(mContext, observer);
-                return sService.requestBackup(packages, observerWrapper);
+                return sService.requestBackup(packages, observerWrapper, flags);
             } catch (RemoteException e) {
                 Log.e(TAG, "requestBackup() couldn't connect");
             }
