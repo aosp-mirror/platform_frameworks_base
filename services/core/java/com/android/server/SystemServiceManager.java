@@ -35,13 +35,15 @@ public class SystemServiceManager {
 
     private final Context mContext;
     private boolean mSafeMode;
+    private boolean mRuntimeRestarted;
+    private boolean mFirstBoot;
 
     // Services that should receive lifecycle events.
     private final ArrayList<SystemService> mServices = new ArrayList<SystemService>();
 
     private int mCurrentPhase = -1;
 
-    public SystemServiceManager(Context context) {
+    SystemServiceManager(Context context) {
         mContext = context;
     }
 
@@ -235,7 +237,7 @@ public class SystemServiceManager {
     }
 
     /** Sets the safe mode flag for services to query. */
-    public void setSafeMode(boolean safeMode) {
+    void setSafeMode(boolean safeMode) {
         mSafeMode = safeMode;
     }
 
@@ -245,6 +247,28 @@ public class SystemServiceManager {
      */
     public boolean isSafeMode() {
         return mSafeMode;
+    }
+
+    /**
+     * @return true if runtime was restarted, false if it's normal boot
+     */
+    public boolean isRuntimeRestarted() {
+        return mRuntimeRestarted;
+    }
+
+    void setRuntimeRestarted(boolean runtimeRestarted) {
+        mRuntimeRestarted = runtimeRestarted;
+    }
+
+    /**
+     * @return true if it's first boot after OTA
+     */
+    public boolean isFirstBoot() {
+        return mFirstBoot;
+    }
+
+    void setFirstBoot(boolean firstBoot) {
+        mFirstBoot = firstBoot;
     }
 
     /**
