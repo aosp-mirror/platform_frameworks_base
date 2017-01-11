@@ -201,16 +201,16 @@ namespace {
 template <typename T>
 class DeferLayer : public SkSurface_Base {
 public:
-    DeferLayer()
-        : SkSurface_Base(T().imageInfo(), nullptr) {
-    }
+    DeferLayer() : SkSurface_Base(T().imageInfo(), nullptr) {}
+    virtual ~DeferLayer() {}
+
     SkCanvas* onNewCanvas() override {
         return new T();
     }
     sk_sp<SkSurface> onNewSurface(const SkImageInfo&) override {
         return sk_sp<SkSurface>();
     }
-    sk_sp<SkImage> onNewImageSnapshot(SkBudgeted, SkCopyPixelsMode) override {
+    sk_sp<SkImage> onNewImageSnapshot(SkBudgeted) override {
         return sk_sp<SkImage>();
     }
     T* canvas() { return static_cast<T*>(getCanvas()); }
