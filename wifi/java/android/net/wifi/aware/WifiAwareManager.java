@@ -118,8 +118,6 @@ import java.util.List;
  *        {@link WifiAwareSession#createNetworkSpecifier(int, byte[], byte[])} or
  *        {@link DiscoverySession#createNetworkSpecifier(PeerHandle, byte[])}.
  *    </ul>
- *
- * @hide PROPOSED_AWARE_API
  */
 public class WifiAwareManager {
     private static final String TAG = "WifiAwareManager";
@@ -305,7 +303,6 @@ public class WifiAwareManager {
      * limitations on configurations, e.g. the maximum service name length.
      *
      * @return An object specifying configuration limitations of Aware.
-     * @hide PROPOSED_AWARE_API
      */
     public Characteristics getCharacteristics() {
         try {

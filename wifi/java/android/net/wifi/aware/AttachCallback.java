@@ -21,8 +21,6 @@ package android.net.wifi.aware;
  * {@link WifiAwareManager#attach(AttachCallback, android.os.Handler)}. These are callbacks
  * applying to the Aware connection as a whole - not to specific publish or subscribe sessions -
  * for that see {@link DiscoverySessionCallback}.
- *
- * @hide PROPOSED_AWARE_API
  */
 public class AttachCallback {
     /**

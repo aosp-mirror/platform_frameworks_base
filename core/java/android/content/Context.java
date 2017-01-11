@@ -2768,6 +2768,9 @@ public abstract class Context {
      *  connectivity.  On releases before NYC, it should only be obtained from an application
      *  context, and not from any other derived context to avoid memory leaks within the calling
      *  process.
+     *  <dt> {@link #WIFI_AWARE_SERVICE} ("wifiaware")
+     *  <dd> A {@link android.net.wifi.aware.WifiAwareManager WifiAwareManager} for management of
+     * Wi-Fi Aware discovery and connectivity.
      *  <dt> {@link #WIFI_P2P_SERVICE} ("wifip2p")
      *  <dd> A {@link android.net.wifi.p2p.WifiP2pManager WifiP2pManager} for management of
      * Wi-Fi Direct connectivity.
@@ -3144,7 +3147,6 @@ public abstract class Context {
      *
      * @see #getSystemService
      * @see android.net.wifi.aware.WifiAwareManager
-     * @hide PROPOSED_AWARE_API
      */
     public static final String WIFI_AWARE_SERVICE = "wifiaware";
 

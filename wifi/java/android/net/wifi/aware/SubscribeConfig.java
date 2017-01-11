@@ -36,8 +36,6 @@ import java.util.List;
  * {@link WifiAwareSession#subscribe(SubscribeConfig, DiscoverySessionCallback,
  * android.os.Handler)} or
  * {@link SubscribeDiscoverySession#updateSubscribe(SubscribeConfig)}.
- *
- * @hide PROPOSED_AWARE_API
  */
 public final class SubscribeConfig implements Parcelable {
     /** @hide */
