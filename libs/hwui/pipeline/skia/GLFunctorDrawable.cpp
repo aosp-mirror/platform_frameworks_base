@@ -52,6 +52,11 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
 
     canvas->flush();
 
+    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
+        canvas->clear(SK_ColorRED);
+        return;
+    }
+
     SkImageInfo canvasInfo = canvas->imageInfo();
     SkMatrix44 mat4(canvas->getTotalMatrix());
 

@@ -18,7 +18,7 @@
 
 #include "Layer.h"
 
-#include <SkSurface.h>
+#include <SkImage.h>
 
 namespace android {
 namespace uirenderer {
@@ -53,16 +53,22 @@ public:
         return mBlend;
     }
 
-    sk_sp<SkSurface> getSurface() {
-        return mSurface;
+    sk_sp<SkImage> getImage() {
+        return mImage;
     }
+
+    void updateTexture();
+
+    // If we've destroyed the vulkan context (VkInstance, VkDevice, etc.), we must make sure to
+    // destroy any VkImages that were made with that context.
+    void onVkContextDestroyed();
 
 private:
     int mWidth;
     int mHeight;
     bool mBlend;
 
-   sk_sp<SkSurface> mSurface;
+   sk_sp<SkImage> mImage;
 
 }; // struct VkLayer
 

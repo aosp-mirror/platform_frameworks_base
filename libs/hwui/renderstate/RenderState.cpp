@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "GlLayer.h"
+#include "VkLayer.h"
 #include <GpuMemoryTracker.h>
 #include "renderstate/RenderState.h"
 
@@ -41,7 +42,7 @@ RenderState::~RenderState() {
 void RenderState::onGLContextCreated() {
     LOG_ALWAYS_FATAL_IF(mBlend || mMeshState || mScissor || mStencil,
             "State object lifecycle not managed correctly");
-    GpuMemoryTracker::onGLContextCreated();
+    GpuMemoryTracker::onGpuContextCreated();
 
     mBlend = new Blend();
     mMeshState = new MeshState();
@@ -78,7 +79,29 @@ void RenderState::onGLContextDestroyed() {
     delete mStencil;
     mStencil = nullptr;
 
-    GpuMemoryTracker::onGLContextDestroyed();
+    GpuMemoryTracker::onGpuContextDestroyed();
+}
+
+void RenderState::onVkContextCreated() {
+    LOG_ALWAYS_FATAL_IF(mBlend || mMeshState || mScissor || mStencil,
+            "State object lifecycle not managed correctly");
+    GpuMemoryTracker::onGpuContextCreated();
+}
+
+static void layerDestroyedVkContext(Layer* layer) {
+    LOG_ALWAYS_FATAL_IF(layer->getApi() != Layer::Api::Vulkan,
+                        "layerLostVkContext on non Vulkan layer");
+    static_cast<VkLayer*>(layer)->onVkContextDestroyed();
+}
+
+void RenderState::onVkContextDestroyed() {
+    mLayerPool.clear();
+    std::for_each(mActiveLayers.begin(), mActiveLayers.end(), layerDestroyedVkContext);
+    GpuMemoryTracker::onGpuContextDestroyed();
+}
+
+GrContext* RenderState::getGrContext() const {
+    return mRenderThread.getGrContext();
 }
 
 void RenderState::flush(Caches::FlushMode mode) {

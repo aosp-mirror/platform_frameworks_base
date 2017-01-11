@@ -116,6 +116,7 @@ hwui_src_files := \
     Texture.cpp \
     TextureCache.cpp \
     VectorDrawable.cpp \
+    VkLayer.cpp \
     protos/hwui.proto
 
 hwui_test_common_src_files := \
