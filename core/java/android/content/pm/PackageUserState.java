@@ -48,6 +48,7 @@ public class PackageUserState {
     public int domainVerificationStatus;
     public int appLinkGeneration;
     public int categoryHint = ApplicationInfo.CATEGORY_UNDEFINED;
+    public int installReason;
 
     public ArraySet<String> disabledComponents;
     public ArraySet<String> enabledComponents;
@@ -59,6 +60,7 @@ public class PackageUserState {
         enabled = COMPONENT_ENABLED_STATE_DEFAULT;
         domainVerificationStatus =
                 PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
+        installReason = PackageManager.INSTALL_REASON_UNKNOWN;
     }
 
     public PackageUserState(PackageUserState o) {
@@ -74,6 +76,7 @@ public class PackageUserState {
         domainVerificationStatus = o.domainVerificationStatus;
         appLinkGeneration = o.appLinkGeneration;
         categoryHint = o.categoryHint;
+        installReason = o.installReason;
         disabledComponents = ArrayUtils.cloneOrNull(o.disabledComponents);
         enabledComponents = ArrayUtils.cloneOrNull(o.enabledComponents);
     }
@@ -200,6 +203,9 @@ public class PackageUserState {
             return false;
         }
         if (categoryHint != oldState.categoryHint) {
+            return false;
+        }
+        if (installReason != oldState.installReason) {
             return false;
         }
         if ((disabledComponents == null && oldState.disabledComponents != null)

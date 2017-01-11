@@ -881,6 +881,8 @@ public class PackageInstaller {
         /** {@hide} */
         public int installLocation = PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY;
         /** {@hide} */
+        public int installReason = PackageManager.INSTALL_REASON_UNKNOWN;
+        /** {@hide} */
         public long sizeBytes = -1;
         /** {@hide} */
         public String appPackageName;
@@ -919,6 +921,7 @@ public class PackageInstaller {
             mode = source.readInt();
             installFlags = source.readInt();
             installLocation = source.readInt();
+            installReason = source.readInt();
             sizeBytes = source.readLong();
             appPackageName = source.readString();
             appIcon = source.readParcelable(null);
@@ -1076,6 +1079,10 @@ public class PackageInstaller {
             }
         }
 
+        public void setInstallReason(int installReason) {
+            this.installReason = installReason;
+        }
+
         /** {@hide} */
         public void dump(IndentingPrintWriter pw) {
             pw.printPair("mode", mode);
@@ -1104,6 +1111,7 @@ public class PackageInstaller {
             dest.writeInt(mode);
             dest.writeInt(installFlags);
             dest.writeInt(installLocation);
+            dest.writeInt(installReason);
             dest.writeLong(sizeBytes);
             dest.writeString(appPackageName);
             dest.writeParcelable(appIcon, flags);

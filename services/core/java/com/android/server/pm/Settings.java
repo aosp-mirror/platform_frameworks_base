@@ -216,6 +216,7 @@ final class Settings {
     private static final String ATTR_ENABLED_CALLER = "enabledCaller";
     private static final String ATTR_DOMAIN_VERIFICATON_STATE = "domainVerificationStatus";
     private static final String ATTR_APP_LINK_GENERATION = "app-link-generation";
+    private static final String ATTR_INSTALL_REASON = "install-reason";
 
     private static final String ATTR_PACKAGE_NAME = "packageName";
     private static final String ATTR_FINGERPRINT = "fingerprint";
@@ -736,7 +737,8 @@ final class Settings {
                                 false, // suspended
                                 null, null, null,
                                 false, // blockUninstall
-                                INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED, 0);
+                                INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED, 0,
+                                PackageManager.INSTALL_REASON_UNKNOWN);
                     }
                 }
             }
@@ -1615,7 +1617,8 @@ final class Settings {
                                 false,  // suspended
                                 null, null, null,
                                 false, // blockUninstall
-                                INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED, 0);
+                                INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED, 0,
+                                PackageManager.INSTALL_REASON_UNKNOWN);
                     }
                     return;
                 }
@@ -1695,6 +1698,8 @@ final class Settings {
                     if (linkGeneration > maxAppLinkGeneration) {
                         maxAppLinkGeneration = linkGeneration;
                     }
+                    final int installReason = XmlUtils.readIntAttribute(parser,
+                            ATTR_INSTALL_REASON, PackageManager.INSTALL_REASON_UNKNOWN);
 
                     ArraySet<String> enabledComponents = null;
                     ArraySet<String> disabledComponents = null;
@@ -1717,7 +1722,7 @@ final class Settings {
 
                     ps.setUserState(userId, ceDataInode, enabled, installed, stopped, notLaunched,
                             hidden, suspended, enabledCaller, enabledComponents, disabledComponents,
-                            blockUninstall, verifState, linkGeneration);
+                            blockUninstall, verifState, linkGeneration, installReason);
                 } else if (tagName.equals("preferred-activities")) {
                     readPreferredActivitiesLPw(parser, userId);
                 } else if (tagName.equals(TAG_PERSISTENT_PREFERRED_ACTIVITIES)) {
@@ -2003,6 +2008,10 @@ final class Settings {
                 if (ustate.appLinkGeneration != 0) {
                     XmlUtils.writeIntAttribute(serializer, ATTR_APP_LINK_GENERATION,
                             ustate.appLinkGeneration);
+                }
+                if (ustate.installReason != PackageManager.INSTALL_REASON_UNKNOWN) {
+                    serializer.attribute(null, ATTR_INSTALL_REASON,
+                            Integer.toString(ustate.installReason));
                 }
                 if (!ArrayUtils.isEmpty(ustate.enabledComponents)) {
                     serializer.startTag(null, TAG_ENABLED_COMPONENTS);

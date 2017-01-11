@@ -103,7 +103,8 @@ public class PreloadAppsInstallerTest {
             observer.getValue().onPackageInstalled(path, PackageManager.INSTALL_SUCCEEDED,
                     null, null);
             // Verify that we try to install the package in system user.
-            verify(mIpm).installExistingPackageAsUser(path, UserHandle.USER_SYSTEM);
+            verify(mIpm).installExistingPackageAsUser(path, UserHandle.USER_SYSTEM,
+                    PackageManager.INSTALL_REASON_UNKNOWN);
         }
         assertEquals("DEMO_USER_SETUP should be set to 1 after preloaded apps are installed",
                 "1",
@@ -139,7 +140,8 @@ public class PreloadAppsInstallerTest {
             observer.getValue().onPackageInstalled(path, PackageManager.INSTALL_SUCCEEDED,
                     null, null);
             // Verify that we try to install the package in system user.
-            verify(mIpm).installExistingPackageAsUser(path, UserHandle.USER_SYSTEM);
+            verify(mIpm).installExistingPackageAsUser(path, UserHandle.USER_SYSTEM,
+                    PackageManager.INSTALL_REASON_UNKNOWN);
         }
         assertEquals("DEMO_USER_SETUP should be set to 1 after preloaded apps are installed",
                 "1",

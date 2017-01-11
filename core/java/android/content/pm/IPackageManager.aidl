@@ -523,7 +523,7 @@ interface IPackageManager {
     boolean setInstallLocation(int loc);
     int getInstallLocation();
 
-    int installExistingPackageAsUser(String packageName, int userId);
+    int installExistingPackageAsUser(String packageName, int userId, int installReason);
 
     void verifyPendingInstall(int id, int verificationCode);
     void extendVerificationTimeout(int id, int verificationCodeAtTimeout, long millisecondsToDelay);
@@ -584,4 +584,6 @@ interface IPackageManager {
     boolean isPackageDeviceAdminOnAnyUser(String packageName);
 
     List<String> getPreviousCodePaths(in String packageName);
+
+    int getInstallReason(String packageName, int userId);
 }

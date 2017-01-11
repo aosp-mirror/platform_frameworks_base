@@ -292,6 +292,14 @@ abstract class PackageSettingBase extends SettingBase {
         return readUserState(userId).installed;
     }
 
+    int getInstallReason(int userId) {
+        return readUserState(userId).installReason;
+    }
+
+    void setInstallReason(int installReason, int userId) {
+        modifyUserState(userId).installReason = installReason;
+    }
+
     /** Only use for testing. Do NOT use in production code. */
     @VisibleForTesting
     SparseArray<PackageUserState> getUserState() {
@@ -377,7 +385,7 @@ abstract class PackageSettingBase extends SettingBase {
             boolean notLaunched, boolean hidden, boolean suspended,
             String lastDisableAppCaller, ArraySet<String> enabledComponents,
             ArraySet<String> disabledComponents, boolean blockUninstall, int domainVerifState,
-            int linkGeneration) {
+            int linkGeneration, int installReason) {
         PackageUserState state = modifyUserState(userId);
         state.ceDataInode = ceDataInode;
         state.enabled = enabled;
@@ -392,6 +400,7 @@ abstract class PackageSettingBase extends SettingBase {
         state.blockUninstall = blockUninstall;
         state.domainVerificationStatus = domainVerifState;
         state.appLinkGeneration = linkGeneration;
+        state.installReason = installReason;
     }
 
     ArraySet<String> getEnabledComponents(int userId) {
