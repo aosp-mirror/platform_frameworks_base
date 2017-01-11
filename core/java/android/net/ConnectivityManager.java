@@ -1163,6 +1163,7 @@ public class ConnectivityManager {
      *             {@link #requestNetwork(NetworkRequest, NetworkCallback)} API.
      *             In {@link VERSION_CODES#M}, and above, this method is unsupported and will
      *             throw {@code UnsupportedOperationException} if called.
+     * @removed
      */
     @Deprecated
     public int startUsingNetworkFeature(int networkType, String feature) {
@@ -1219,6 +1220,7 @@ public class ConnectivityManager {
      *             {@link #unregisterNetworkCallback(NetworkCallback)} API.
      *             In {@link VERSION_CODES#M}, and above, this method is unsupported and will
      *             throw {@code UnsupportedOperationException} if called.
+     * @removed
      */
     @Deprecated
     public int stopUsingNetworkFeature(int networkType, String feature) {
@@ -1633,6 +1635,7 @@ public class ConnectivityManager {
      *             {@link #bindProcessToNetwork} and {@link Network#getSocketFactory} API.
      *             In {@link VERSION_CODES#M}, and above, this method is unsupported and will
      *             throw {@code UnsupportedOperationException} if called.
+     * @removed
      */
     @Deprecated
     public boolean requestRouteToHost(int networkType, int hostAddress) {

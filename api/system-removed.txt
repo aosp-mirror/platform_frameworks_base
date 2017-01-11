@@ -124,6 +124,12 @@ package android.media.tv {
 
 package android.net {
 
+  public class ConnectivityManager {
+    method public deprecated boolean requestRouteToHost(int, int);
+    method public deprecated int startUsingNetworkFeature(int, java.lang.String);
+    method public deprecated int stopUsingNetworkFeature(int, java.lang.String);
+  }
+
   public abstract class PskKeyManager {
     ctor public PskKeyManager();
     field public static final int MAX_IDENTITY_HINT_LENGTH_BYTES = 128; // 0x80
