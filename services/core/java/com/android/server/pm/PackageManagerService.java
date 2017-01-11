@@ -253,6 +253,7 @@ import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.PermissionsState.PermissionState;
 import com.android.server.pm.Settings.DatabaseVersion;
 import com.android.server.pm.Settings.VersionInfo;
+import com.android.server.pm.dex.DexManager;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 
 import dalvik.system.CloseGuard;
@@ -295,6 +296,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -712,6 +714,9 @@ public class PackageManagerService extends IPackageManager.Stub {
     final PackageInstallerService mInstallerService;
 
     private final PackageDexOptimizer mPackageDexOptimizer;
+    // DexManager handles the usage of dex files (e.g. secondary files, whether or not a package
+    // is used by other apps).
+    private final DexManager mDexManager;
 
     private AtomicInteger mNextMoveId = new AtomicInteger();
     private final MoveCallbacks mMoveCallbacks;
@@ -2116,6 +2121,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         mInstaller = installer;
         mPackageDexOptimizer = new PackageDexOptimizer(installer, mInstallLock, context,
                 "*dexopt*");
+        mDexManager = new DexManager();
         mMoveCallbacks = new MoveCallbacks(FgThread.get().getLooper());
 
         mOnPermissionChangeListeners = new OnPermissionChangeListeners(
@@ -2554,6 +2560,19 @@ public class PackageManagerService extends IPackageManager.Stub {
             // read and update their last usage times.
             mPackageUsage.read(mPackages);
             mCompilerStats.read();
+
+            // Read and update the usage of dex files.
+            // At this point we know the code paths  of the packages, so we can validate
+            // the disk file and build the internal cache.
+            // The usage file is expected to be small so loading and verifying it
+            // should take a fairly small time compare to the other activities (e.g. package
+            // scanning).
+            final Map<Integer, List<PackageInfo>> userPackages = new HashMap<>();
+            final int[] currentUserIds = UserManagerService.getInstance().getUserIds();
+            for (int userId : currentUserIds) {
+                userPackages.put(userId, getInstalledPackages(/*flags*/ 0, userId).getList());
+            }
+            mDexManager.load(userPackages);
 
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_SCAN_END,
                     SystemClock.uptimeMillis());
@@ -7397,7 +7416,14 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public void notifyDexLoad(String loadingPackageName, List<String> dexPaths, String loaderIsa) {
-      // TODO(calin): b/32871170
+        int userId = UserHandle.getCallingUserId();
+        ApplicationInfo ai = getApplicationInfo(loadingPackageName, /*flags*/ 0, userId);
+        if (ai == null) {
+            Slog.w(TAG, "Loading a package that does not exist for the calling user. package="
+                + loadingPackageName + ", user=" + userId);
+            return;
+        }
+        mDexManager.notifyDexLoad(ai, dexPaths, loaderIsa, userId);
     }
 
     // TODO: this is not used nor needed. Delete it.
