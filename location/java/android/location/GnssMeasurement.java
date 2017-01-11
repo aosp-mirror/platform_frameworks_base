@@ -47,6 +47,7 @@ public final class GnssMeasurement implements Parcelable {
     private double mCarrierPhaseUncertainty;
     private int mMultipathIndicator;
     private double mSnrInDb;
+    private double mAgcLevelDb;
 
     // The following enumerations must be in sync with the values declared in gps.h
 
@@ -56,6 +57,7 @@ public final class GnssMeasurement implements Parcelable {
     private static final int HAS_CARRIER_CYCLES = (1<<10);
     private static final int HAS_CARRIER_PHASE = (1<<11);
     private static final int HAS_CARRIER_PHASE_UNCERTAINTY = (1<<12);
+    private static final int HAS_AUTOMATIC_GAIN_CONTROL = (1<<13);
 
     /**
      * The status of the multipath indicator.
@@ -111,6 +113,20 @@ public final class GnssMeasurement implements Parcelable {
     public static final int STATE_GAL_E1B_PAGE_SYNC = (1<<12);
     /** This SBAS measurement's tracking state has whole second level sync. */
     public static final int STATE_SBAS_SYNC = (1<<13);
+    /**
+     * This GNSS measurement's tracking state has time-of-week known, possibly not decoded
+     * over the air but has been determined from other sources. If TOW decoded is set then TOW Known
+     * will also be set.
+     * @hide
+     */
+    public static final int STATE_TOW_KNOWN = (1<<14);
+    /**
+     * This Glonass measurement's tracking state has time-of-day known, possibly not decoded
+     * over the air but has been determined from other sources. If TOD decoded is set then TOD Known
+     * will also be set.
+     * @hide
+     */
+    public static final int STATE_GLO_TOD_KNOWN = (1<<15);
 
     /**
      * All the GNSS receiver state flags, for bit masking purposes (not a sensible state for any
@@ -180,6 +196,7 @@ public final class GnssMeasurement implements Parcelable {
         mCarrierPhaseUncertainty = measurement.mCarrierPhaseUncertainty;
         mMultipathIndicator = measurement.mMultipathIndicator;
         mSnrInDb = measurement.mSnrInDb;
+        mAgcLevelDb = measurement.mAgcLevelDb;
     }
 
     /**
@@ -299,6 +316,9 @@ public final class GnssMeasurement implements Parcelable {
         if ((mState & STATE_TOW_DECODED) != 0) {
             builder.append("TowDecoded|");
         }
+        if ((mState & STATE_TOW_KNOWN) != 0) {
+          builder.append("TowKnown|");
+        }
         if ((mState & STATE_MSEC_AMBIGUOUS) != 0) {
             builder.append("MsecAmbiguous|");
         }
@@ -310,6 +330,9 @@ public final class GnssMeasurement implements Parcelable {
         }
         if ((mState & STATE_GLO_TOD_DECODED) != 0) {
             builder.append("GloTodDecoded|");
+        }
+        if ((mState & STATE_GLO_TOD_KNOWN) != 0) {
+          builder.append("GloTodKnown|");
         }
         if ((mState & STATE_BDS_D2_BIT_SYNC) != 0) {
             builder.append("BdsD2BitSync|");
@@ -356,10 +379,14 @@ public final class GnssMeasurement implements Parcelable {
      *     C/A code lock   : [ 0   1ms ]   : STATE_CODE_LOCK is set
      *     Bit sync        : [ 0  20ms ]   : STATE_BIT_SYNC is set
      *     Subframe sync   : [ 0    6s ]   : STATE_SUBFRAME_SYNC is set
-     *     TOW decoded     : [ 0 1week ]   : STATE_TOW_DECODED is set</pre>
+     *     TOW decoded     : [ 0 1week ]   : STATE_TOW_DECODED is set
+     *     TOW Known       : [ 0 1week ]   : STATE_TOW_KNOWN set</pre>
+     *
+     * Note: TOW Known refers to the case where TOW is possibly not decoded over the air but has
+     * been determined from other sources. If TOW decoded is set then TOW Known must also be set.
      *
      * <p>Note well: if there is any ambiguity in integer millisecond, {@code STATE_MSEC_AMBIGUOUS}
-     * should be set accordingly, in the 'state' field.
+     * must be set accordingly, in the 'state' field.
      *
      * <p>This value must be populated if 'state' != {@code STATE_UNKNOWN}.
      *
@@ -371,12 +398,17 @@ public final class GnssMeasurement implements Parcelable {
      * <p>Given the highest sync state that can be achieved, per each satellite, valid range for
      * this field can be:
      * <pre>
-     *     Searching       : [ 0       ]   : STATE_UNKNOWN
-     *     C/A code lock   : [ 0   1ms ]   : STATE_CODE_LOCK is set
-     *     Symbol sync     : [ 0  10ms ]   : STATE_SYMBOL_SYNC is set
-     *     Bit sync        : [ 0  20ms ]   : STATE_BIT_SYNC is set
-     *     String sync     : [ 0    2s ]   : STATE_GLO_STRING_SYNC is set
-     *     Time of day     : [ 0  1day ]   : STATE_GLO_TOD_DECODED is set</pre>
+     *     Searching           : [ 0       ]   : STATE_UNKNOWN
+     *     C/A code lock       : [ 0   1ms ]   : STATE_CODE_LOCK is set
+     *     Symbol sync         : [ 0  10ms ]   : STATE_SYMBOL_SYNC is set
+     *     Bit sync            : [ 0  20ms ]   : STATE_BIT_SYNC is set
+     *     String sync         : [ 0    2s ]   : STATE_GLO_STRING_SYNC is set
+     *     Time of day decoded : [ 0  1day ]   : STATE_GLO_TOD_DECODED is set
+     *     Time of day known   : [ 0  1day ]   : STATE_GLO_TOD_KNOWN set</pre>
+     *
+     * Note: Time of day known refers to the case where it is possibly not decoded over the air but
+     * has been determined from other sources. If Time of day decoded is set then Time of day known
+     * must also be set.
      *
      * <p>For Beidou, this is:
      * <ul>
@@ -386,23 +418,31 @@ public final class GnssMeasurement implements Parcelable {
      * <p>Given the highest sync state that can be achieved, per each satellite, valid range for
      * this field can be:
      * <pre>
-     *     Searching       : [ 0       ]   : STATE_UNKNOWN
-     *     C/A code lock   : [ 0   1ms ]   : STATE_CODE_LOCK is set
-     *     Bit sync (D2)   : [ 0   2ms ]   : STATE_BDS_D2_BIT_SYNC is set
-     *     Bit sync (D1)   : [ 0  20ms ]   : STATE_BIT_SYNC is set
-     *     Subframe (D2)   : [ 0  0.6s ]   : STATE_BDS_D2_SUBFRAME_SYNC is set
-     *     Subframe (D1)   : [ 0    6s ]   : STATE_SUBFRAME_SYNC is set
-     *     Time of week    : [ 0 1week ]   : STATE_TOW_DECODED is set</pre>
+     *     Searching              : [ 0       ]   : STATE_UNKNOWN
+     *     C/A code lock          : [ 0   1ms ]   : STATE_CODE_LOCK is set
+     *     Bit sync (D2)          : [ 0   2ms ]   : STATE_BDS_D2_BIT_SYNC is set
+     *     Bit sync (D1)          : [ 0  20ms ]   : STATE_BIT_SYNC is set
+     *     Subframe (D2)          : [ 0  0.6s ]   : STATE_BDS_D2_SUBFRAME_SYNC is set
+     *     Subframe (D1)          : [ 0    6s ]   : STATE_SUBFRAME_SYNC is set
+     *     Time of week decoded   : [ 0 1week ]   : STATE_TOW_DECODED is set
+     *     Time of week known     : [ 0 1week ]   : STATE_TOW_KNOWN set</pre>
+     *
+     * Note: TOW Known refers to the case where TOW is possibly not decoded over the air but has
+     * been determined from other sources. If TOW decoded is set then TOW Known must also be set.
      *
      * <p>For Galileo, this is:
      * <ul>
      * <li>Received Galileo time of week, at the measurement time in nanoseconds.</li>
      * </ul>
      * <pre>
-     *     E1BC code lock   : [ 0   4ms ]  : STATE_GAL_E1BC_CODE_LOCK is set
-     *     E1C 2nd code lock: [ 0 100ms ]  : STATE_GAL_E1C_2ND_CODE_LOCK is set
-     *     E1B page         : [ 0    2s ]  : STATE_GAL_E1B_PAGE_SYNC is set
-     *     Time of week     : [ 0 1week ]  : STATE_GAL_TOW_DECODED is set</pre>
+     *     E1BC code lock       : [ 0   4ms ]  : STATE_GAL_E1BC_CODE_LOCK is set
+     *     E1C 2nd code lock    : [ 0 100ms ]  : STATE_GAL_E1C_2ND_CODE_LOCK is set
+     *     E1B page             : [ 0    2s ]  : STATE_GAL_E1B_PAGE_SYNC is set
+     *     Time of week decoded : [ 0 1week ]  : STATE_GAL_TOW_DECODED is set
+     *     Time of week known   : [ 0 1week ]  : STATE_GAL_TOW_KNOWN set</pre>
+     *
+     * Note: TOW Known refers to the case where TOW is possibly not decoded over the air but has
+     * been determined from other sources. If TOW decoded is set then TOW Known must also be set.
      *
      * <p>For SBAS, this is:
      * <ul>
@@ -620,10 +660,10 @@ public final class GnssMeasurement implements Parcelable {
     }
 
     /**
-     * Gets the carrier frequency at which codes and messages are modulated.
+     * Gets the carrier frequency of the tracked signal.
      *
-     * <p>For GPS, e.g., it can be L1 or L2.  If the field is not set, it is the primary common use
-     * frequency, e.g. L1 for GPS.
+     * <p>For example it can be the GPS L1 = 1.57542e9 Hz, or L2, L5, varying GLO channels, etc. If
+     * the field is not set, it is the primary common use frequency, e.g. L1 for GPS.
      *
      * <p>The value is only available if {@link #hasCarrierFrequencyHz()} is {@code true}.
      */
@@ -632,7 +672,7 @@ public final class GnssMeasurement implements Parcelable {
     }
 
     /**
-     * Sets the Carrier frequency (L1 or L2) in Hz.
+     * Sets the Carrier frequency in Hz.
      * @hide
      */
     @TestApi
@@ -642,7 +682,7 @@ public final class GnssMeasurement implements Parcelable {
     }
 
     /**
-     * Resets the Carrier frequency (L1 or L2) in Hz.
+     * Resets the Carrier frequency in Hz.
      * @hide
      */
     @TestApi
@@ -843,6 +883,51 @@ public final class GnssMeasurement implements Parcelable {
         mSnrInDb = Double.NaN;
     }
 
+    /**
+     * Returns {@code true} if {@link #getAgcLevelDb()} is available, {@code false} otherwise.
+     * @hide
+     */
+    public boolean hasAgcLevelDb() {
+        return isFlagSet(HAS_AUTOMATIC_GAIN_CONTROL);
+    }
+
+    /**
+     * Gets the Automatic Gain Control level in dB.
+     *
+     * <p> AGC acts as a variable gain amplifier adjusting the power of the incoming signal to
+     * minimize the quantization losses. The AGC level may be used to indicate potential
+     * interference. When AGC is at a nominal level, this value must be set as 0.  Higher gain
+     * (and/or lower input power) shall be output as a positive number. Hence in cases of strong
+     * jamming, in the band of this signal, this value will go more negative.
+     * <p>Note: Different hardware designs (e.g. antenna, pre-amplification, or other RF HW
+     * components) may also affect the typical output of of this value on any given hardware design
+     * in an open sky test - the important aspect of this output is that changes in this value are
+     * indicative of changes on input signal power in the frequency band for this measurement.
+     * <p>The value is only available if {@link #hasAgcLevelDb()} is {@code true}.
+     * @hide
+     */
+    public double getAgcLevelDb() {
+        return mAgcLevelDb;
+    }
+
+    /**
+     * Sets the Automatic Gain Control level in dB.
+     * @hide
+     */
+    public void setAgcLevelDb(double agcLevelDb) {
+        setFlag(HAS_AUTOMATIC_GAIN_CONTROL);
+        mAgcLevelDb = agcLevelDb;
+    }
+
+    /**
+     * Resets the Automatic Gain Control level.
+     * @hide
+     */
+    public void resetAgcLevel() {
+        resetFlag(HAS_AUTOMATIC_GAIN_CONTROL);
+        mAgcLevelDb = Double.NaN;
+    }
+
     public static final Creator<GnssMeasurement> CREATOR = new Creator<GnssMeasurement>() {
         @Override
         public GnssMeasurement createFromParcel(Parcel parcel) {
@@ -867,6 +952,7 @@ public final class GnssMeasurement implements Parcelable {
             gnssMeasurement.mCarrierPhaseUncertainty = parcel.readDouble();
             gnssMeasurement.mMultipathIndicator = parcel.readInt();
             gnssMeasurement.mSnrInDb = parcel.readDouble();
+            gnssMeasurement.mAgcLevelDb = parcel.readDouble();
 
             return gnssMeasurement;
         }
@@ -898,6 +984,7 @@ public final class GnssMeasurement implements Parcelable {
         parcel.writeDouble(mCarrierPhaseUncertainty);
         parcel.writeInt(mMultipathIndicator);
         parcel.writeDouble(mSnrInDb);
+        parcel.writeDouble(mAgcLevelDb);
     }
 
     @Override
@@ -968,6 +1055,10 @@ public final class GnssMeasurement implements Parcelable {
                 format,
                 "SnrInDb",
                 hasSnrInDb() ? mSnrInDb : null));
+        builder.append(String.format(
+            format,
+            "AgcLevelDb",
+            hasAgcLevelDb() ? mAgcLevelDb : null));
 
         return builder.toString();
     }
@@ -991,6 +1082,7 @@ public final class GnssMeasurement implements Parcelable {
         resetCarrierPhaseUncertainty();
         setMultipathIndicator(MULTIPATH_INDICATOR_UNKNOWN);
         resetSnrInDb();
+        resetAgcLevel();
     }
 
     private void setFlag(int flag) {
