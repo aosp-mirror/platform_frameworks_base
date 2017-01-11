@@ -127,6 +127,7 @@ import android.content.pm.EphemeralApplicationInfo;
 import android.content.pm.EphemeralRequest;
 import android.content.pm.EphemeralResolveInfo;
 import android.content.pm.EphemeralResponse;
+import android.content.pm.FallbackCategoryProvider;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IOnPermissionsChangeListener;
 import android.content.pm.IPackageDataObserver;
@@ -2820,6 +2821,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         // tidy.
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "GC");
         Runtime.getRuntime().gc();
+        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "loadFallbacks");
+        FallbackCategoryProvider.loadFallbacks();
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
         // The initial scanning above does many calls into installd while

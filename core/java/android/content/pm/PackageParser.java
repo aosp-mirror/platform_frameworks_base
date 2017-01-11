@@ -6260,6 +6260,9 @@ public class PackageParser {
         if (ai.category == ApplicationInfo.CATEGORY_UNDEFINED) {
             ai.category = state.categoryHint;
         }
+        if (ai.category == ApplicationInfo.CATEGORY_UNDEFINED) {
+            ai.category = FallbackCategoryProvider.getFallbackCategory(ai.packageName);
+        }
     }
 
     public static ApplicationInfo generateApplicationInfo(Package p, int flags,

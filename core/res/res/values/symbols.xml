@@ -2793,4 +2793,6 @@
   <java-symbol type="string" name="app_category_maps" />
   <java-symbol type="string" name="app_category_productivity" />
 
+  <java-symbol type="raw" name="fallback_categories" />
+
 </resources>
