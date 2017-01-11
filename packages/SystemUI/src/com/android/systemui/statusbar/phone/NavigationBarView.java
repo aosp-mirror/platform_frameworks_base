@@ -434,7 +434,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                         || ((disabledFlags & View.STATUS_BAR_DISABLE_RECENT) != 0);
         final boolean disableBack = ((disabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0)
                 && ((mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) == 0);
-        final boolean disableSearch = ((disabledFlags & View.STATUS_BAR_DISABLE_SEARCH) != 0);
 
         ViewGroup navButtons = (ViewGroup) getCurrentView().findViewById(R.id.nav_buttons);
         if (navButtons != null) {
@@ -495,7 +494,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     }
 
     private void setUseFadingAnimations(boolean useFadingAnimations) {
-        WindowManager.LayoutParams lp = (WindowManager.LayoutParams) getLayoutParams();
+        WindowManager.LayoutParams lp = (WindowManager.LayoutParams) ((ViewGroup) getParent())
+                .getLayoutParams();
         if (lp != null) {
             boolean old = lp.windowAnimations != 0;
             if (!old && useFadingAnimations) {
@@ -506,7 +506,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 return;
             }
             WindowManager wm = (WindowManager)getContext().getSystemService(Context.WINDOW_SERVICE);
-            wm.updateViewLayout(this, lp);
+            wm.updateViewLayout((View) getParent(), lp);
         }
     }
 

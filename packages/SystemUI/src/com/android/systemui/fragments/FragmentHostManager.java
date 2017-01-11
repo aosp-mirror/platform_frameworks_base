@@ -52,7 +52,7 @@ public class FragmentHostManager {
     private FragmentLifecycleCallbacks mLifecycleCallbacks;
 
     FragmentHostManager(Context context, FragmentService manager, View rootView) {
-        mContext = PluginManager.getInstance(context).getAllPluginContext(context);
+        mContext = context;
         mManager = manager;
         mRootView = rootView;
         mConfigChanges.applyNewConfig(context.getResources());

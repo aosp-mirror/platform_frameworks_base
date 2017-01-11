@@ -55,7 +55,7 @@ import java.util.Map;
 /**
  * Application class for SystemUI.
  */
-public class SystemUIApplication extends Application {
+public class SystemUIApplication extends Application implements SysUiServiceProvider {
 
     private static final String TAG = "SystemUIService";
     private static final boolean DEBUG = false;
@@ -238,5 +238,9 @@ public class SystemUIApplication extends Application {
 
     public SystemUI[] getServices() {
         return mServices;
+    }
+
+    public static <T> T getComponent(Context context, Class<T> interfaceType) {
+        return ((SysUiServiceProvider) context.getApplicationContext()).getComponent(interfaceType);
     }
 }

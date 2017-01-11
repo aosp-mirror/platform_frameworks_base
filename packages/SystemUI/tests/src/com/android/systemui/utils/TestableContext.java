@@ -31,10 +31,11 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.ArrayMap;
 
+import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.utils.leaks.Tracker;
 import com.android.systemui.SysuiTestCase;
 
-public class TestableContext extends ContextWrapper {
+public class TestableContext extends ContextWrapper implements SysUiServiceProvider {
 
     private final FakeContentResolver mFakeContentResolver;
     private final FakeSettingsProvider mSettingsProvider;
@@ -42,6 +43,7 @@ public class TestableContext extends ContextWrapper {
     private ArrayMap<String, Object> mMockSystemServices;
     private ArrayMap<ComponentName, IBinder> mMockServices;
     private ArrayMap<ServiceConnection, ComponentName> mActiveServices;
+    private ArrayMap<Class<?>, Object> mComponents;
 
     private PackageManager mMockPackageManager;
     private Tracker mReceiver;
@@ -200,5 +202,15 @@ public class TestableContext extends ContextWrapper {
     public void unregisterComponentCallbacks(ComponentCallbacks callback) {
         if (mComponent != null) mComponent.getLeakInfo(callback).clearAllocations();
         super.unregisterComponentCallbacks(callback);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T getComponent(Class<T> interfaceType) {
+        return (T) (mComponents != null ? mComponents.get(interfaceType) : null);
+    }
+
+    public <T, C extends T> void putComponent(Class<T> interfaceType, C component) {
+        mComponents = lazyInit(mComponents);
+        mComponents.put(interfaceType, component);
     }
 }

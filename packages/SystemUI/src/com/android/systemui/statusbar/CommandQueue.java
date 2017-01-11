@@ -32,6 +32,8 @@ import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.SystemUI;
 
+import java.util.ArrayList;
+
 /**
  * This class takes the functions from IStatusBar that come in on
  * binder pool threads and posts messages to get them onto the main
@@ -91,7 +93,7 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final String SHOW_IME_SWITCHER_KEY = "showImeSwitcherKey";
 
     private final Object mLock = new Object();
-    private Callbacks[] mCallbacks = new Callbacks[0];
+    private ArrayList<Callbacks> mCallbacks = new ArrayList<>();
     private Handler mHandler = new H(Looper.getMainLooper());
 
     /**
@@ -144,15 +146,11 @@ public class CommandQueue extends IStatusBar.Stub {
     }
 
     public void addCallbacks(Callbacks callbacks) {
-        Callbacks[] newArray = new Callbacks[mCallbacks.length + 1];
-        for (int i = 0; i < newArray.length - 1; i++) {
-            newArray[i] = mCallbacks[i];
-            if (newArray[i] == callbacks) {
-                throw new IllegalArgumentException("Callback was already added");
-            }
-        }
-        newArray[newArray.length - 1] = callbacks;
-        mCallbacks = newArray;
+        mCallbacks.add(callbacks);
+    }
+
+    public void removeCallbacks(Callbacks callbacks) {
+        mCallbacks.remove(callbacks);
     }
 
     public void setIcon(String slot, StatusBarIcon icon) {
@@ -427,182 +425,182 @@ public class CommandQueue extends IStatusBar.Stub {
                     switch (msg.arg1) {
                         case OP_SET_ICON: {
                             Pair<String, StatusBarIcon> p = (Pair<String, StatusBarIcon>) msg.obj;
-                            for (int i = 0; i < mCallbacks.length; i++) {
-                                mCallbacks[i].setIcon(p.first, p.second);
+                            for (int i = 0; i < mCallbacks.size(); i++) {
+                                mCallbacks.get(i).setIcon(p.first, p.second);
                             }
                             break;
                         }
                         case OP_REMOVE_ICON:
-                            for (int i = 0; i < mCallbacks.length; i++) {
-                                mCallbacks[i].removeIcon((String) msg.obj);
+                            for (int i = 0; i < mCallbacks.size(); i++) {
+                                mCallbacks.get(i).removeIcon((String) msg.obj);
                             }
                             break;
                     }
                     break;
                 }
                 case MSG_DISABLE:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].disable(msg.arg1, msg.arg2, true /* animate */);
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).disable(msg.arg1, msg.arg2, true /* animate */);
                     }
                     break;
                 case MSG_EXPAND_NOTIFICATIONS:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].animateExpandNotificationsPanel();
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).animateExpandNotificationsPanel();
                     }
                     break;
                 case MSG_COLLAPSE_PANELS:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].animateCollapsePanels(0);
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).animateCollapsePanels(0);
                     }
                     break;
                 case MSG_EXPAND_SETTINGS:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].animateExpandSettingsPanel((String) msg.obj);
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).animateExpandSettingsPanel((String) msg.obj);
                     }
                     break;
                 case MSG_SET_SYSTEMUI_VISIBILITY:
                     SomeArgs args = (SomeArgs) msg.obj;
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].setSystemUiVisibility(args.argi1, args.argi2, args.argi3,
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).setSystemUiVisibility(args.argi1, args.argi2, args.argi3,
                                 args.argi4, (Rect) args.arg1, (Rect) args.arg2);
                     }
                     args.recycle();
                     break;
                 case MSG_TOP_APP_WINDOW_CHANGED:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].topAppWindowChanged(msg.arg1 != 0);
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).topAppWindowChanged(msg.arg1 != 0);
                     }
                     break;
                 case MSG_SHOW_IME_BUTTON:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].setImeWindowStatus((IBinder) msg.obj, msg.arg1, msg.arg2,
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).setImeWindowStatus((IBinder) msg.obj, msg.arg1, msg.arg2,
                                 msg.getData().getBoolean(SHOW_IME_SWITCHER_KEY, false));
                     }
                     break;
                 case MSG_SHOW_RECENT_APPS:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].showRecentApps(msg.arg1 != 0, msg.arg2 != 0);
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).showRecentApps(msg.arg1 != 0, msg.arg2 != 0);
                     }
                     break;
                 case MSG_HIDE_RECENT_APPS:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].hideRecentApps(msg.arg1 != 0, msg.arg2 != 0);
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).hideRecentApps(msg.arg1 != 0, msg.arg2 != 0);
                     }
                     break;
                 case MSG_TOGGLE_RECENT_APPS:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].toggleRecentApps();
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).toggleRecentApps();
                     }
                     break;
                 case MSG_PRELOAD_RECENT_APPS:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].preloadRecentApps();
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).preloadRecentApps();
                     }
                     break;
                 case MSG_CANCEL_PRELOAD_RECENT_APPS:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].cancelPreloadRecentApps();
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).cancelPreloadRecentApps();
                     }
                     break;
                 case MSG_DISMISS_KEYBOARD_SHORTCUTS:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].dismissKeyboardShortcutsMenu();
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).dismissKeyboardShortcutsMenu();
                     }
                     break;
                 case MSG_TOGGLE_KEYBOARD_SHORTCUTS:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].toggleKeyboardShortcutsMenu(msg.arg1);
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).toggleKeyboardShortcutsMenu(msg.arg1);
                     }
                     break;
                 case MSG_SET_WINDOW_STATE:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].setWindowState(msg.arg1, msg.arg2);
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).setWindowState(msg.arg1, msg.arg2);
                     }
                     break;
                 case MSG_BUZZ_BEEP_BLINKED:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].buzzBeepBlinked();
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).buzzBeepBlinked();
                     }
                     break;
                 case MSG_NOTIFICATION_LIGHT_OFF:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].notificationLightOff();
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).notificationLightOff();
                     }
                     break;
                 case MSG_NOTIFICATION_LIGHT_PULSE:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].notificationLightPulse((Integer) msg.obj, msg.arg1, msg.arg2);
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).notificationLightPulse((Integer) msg.obj, msg.arg1, msg.arg2);
                     }
                     break;
                 case MSG_SHOW_SCREEN_PIN_REQUEST:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].showScreenPinningRequest(msg.arg1);
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).showScreenPinningRequest(msg.arg1);
                     }
                     break;
                 case MSG_APP_TRANSITION_PENDING:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].appTransitionPending();
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).appTransitionPending();
                     }
                     break;
                 case MSG_APP_TRANSITION_CANCELLED:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].appTransitionCancelled();
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).appTransitionCancelled();
                     }
                     break;
                 case MSG_APP_TRANSITION_STARTING:
-                    for (int i = 0; i < mCallbacks.length; i++) {
+                    for (int i = 0; i < mCallbacks.size(); i++) {
                         Pair<Long, Long> data = (Pair<Long, Long>) msg.obj;
-                        mCallbacks[i].appTransitionStarting(data.first, data.second);
+                        mCallbacks.get(i).appTransitionStarting(data.first, data.second);
                     }
                     break;
                 case MSG_APP_TRANSITION_FINISHED:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].appTransitionFinished();
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).appTransitionFinished();
                     }
                     break;
                 case MSG_ASSIST_DISCLOSURE:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].showAssistDisclosure();
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).showAssistDisclosure();
                     }
                     break;
                 case MSG_START_ASSIST:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].startAssist((Bundle) msg.obj);
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).startAssist((Bundle) msg.obj);
                     }
                     break;
                 case MSG_CAMERA_LAUNCH_GESTURE:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].onCameraLaunchGestureDetected(msg.arg1);
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).onCameraLaunchGestureDetected(msg.arg1);
                     }
                     break;
                 case MSG_SHOW_TV_PICTURE_IN_PICTURE_MENU:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].showTvPictureInPictureMenu();
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).showTvPictureInPictureMenu();
                     }
                     break;
                 case MSG_ADD_QS_TILE:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].addQsTile((ComponentName) msg.obj);
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).addQsTile((ComponentName) msg.obj);
                     }
                     break;
                 case MSG_REMOVE_QS_TILE:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].remQsTile((ComponentName) msg.obj);
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).remQsTile((ComponentName) msg.obj);
                     }
                     break;
                 case MSG_CLICK_QS_TILE:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].clickTile((ComponentName) msg.obj);
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).clickTile((ComponentName) msg.obj);
                     }
                     break;
                 case MSG_TOGGLE_APP_SPLIT_SCREEN:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].toggleSplitScreen();
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).toggleSplitScreen();
                     }
                     break;
                 case MSG_HANDLE_SYSNAV_KEY:
-                    for (int i = 0; i < mCallbacks.length; i++) {
-                        mCallbacks[i].handleSystemNavigationKey(msg.arg1);
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).handleSystemNavigationKey(msg.arg1);
                     }
                     break;
             }
