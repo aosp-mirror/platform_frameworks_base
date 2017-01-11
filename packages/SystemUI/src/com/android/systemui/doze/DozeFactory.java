@@ -152,7 +152,7 @@ public class DozeFactory {
         }
     }
 
-    private static DozeHost getHost(DozeService service) {
+    public static DozeHost getHost(DozeService service) {
         Application appCandidate = service.getApplication();
         final SystemUIApplication app = (SystemUIApplication) appCandidate;
         return app.getComponent(DozeHost.class);
