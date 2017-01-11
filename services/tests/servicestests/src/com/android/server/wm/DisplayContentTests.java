@@ -19,6 +19,7 @@ package com.android.server.wm;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import android.content.res.Configuration;
 import android.hardware.display.DisplayManagerGlobal;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
@@ -208,6 +209,10 @@ public class DisplayContentTests extends WindowTestsBase {
         voiceInteractionWindow.removeImmediately();
     }
 
+    /**
+     * This tests stack movement between displays and proper stack's, task's and app token's display
+     * container references updates.
+     */
     @Test
     public void testMoveStackBetweenDisplays() throws Exception {
         // Create second display.
@@ -237,5 +242,29 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(sDisplayContent, stack.getDisplayContent());
         assertEquals(sDisplayContent, task.getDisplayContent());
         assertEquals(sDisplayContent, token.getDisplayContent());
+    }
+
+    /**
+     * This tests override configuration updates for display content.
+     */
+    @Test
+    public void testDisplayOverrideConfigUpdate() throws Exception {
+        final int displayId = sDisplayContent.getDisplayId();
+        final Configuration currentOverrideConfig = sDisplayContent.getOverrideConfiguration();
+
+        // Create new, slightly changed override configuration and apply it to the display.
+        final Configuration newOverrideConfig = new Configuration(currentOverrideConfig);
+        newOverrideConfig.densityDpi += 120;
+        newOverrideConfig.fontScale += 0.3;
+
+        sWm.setNewDisplayOverrideConfiguration(newOverrideConfig, displayId);
+
+        // Check that override config is applied.
+        assertEquals(newOverrideConfig, sDisplayContent.getOverrideConfiguration());
+
+        // Check that global configuration is updated, as we've updated default display's config.
+        final Configuration globalConfig = sWm.mRoot.getConfiguration();
+        assertEquals(newOverrideConfig.densityDpi, globalConfig.densityDpi);
+        assertEquals(newOverrideConfig.fontScale, globalConfig.fontScale, 0.1 /* delta */);
     }
 }
