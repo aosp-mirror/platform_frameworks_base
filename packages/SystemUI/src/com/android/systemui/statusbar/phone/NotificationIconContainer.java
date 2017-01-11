@@ -98,6 +98,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     private int mActualLayoutWidth = NO_VALUE;
     private float mActualPaddingEnd = NO_VALUE;
     private float mActualPaddingStart = NO_VALUE;
+    private boolean mCentered;
     private boolean mChangingViewPositions;
     private int mAddAnimationStartIndex = -1;
     private int mCannedAnimationStartIndex = -1;
@@ -310,6 +311,15 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                 numDots++;
             }
         }
+        if (mCentered && translationX < getLayoutEnd()) {
+            float delta = (getLayoutEnd() - translationX) / 2;
+            for (int i = 0; i < childCount; i++) {
+                View view = getChildAt(i);
+                IconState iconState = mIconStates.get(view);
+                iconState.xTranslation += delta;
+            }
+        }
+
         if (isLayoutRtl()) {
             for (int i = 0; i < childCount; i++) {
                 View view = getChildAt(i);
@@ -377,6 +387,10 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
 
     public void setChangingViewPositions(boolean changingViewPositions) {
         mChangingViewPositions = changingViewPositions;
+    }
+
+    public void setCentered(boolean centered) {
+        mCentered = centered;
     }
 
     public IconState getIconState(StatusBarIconView icon) {
