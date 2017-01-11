@@ -58,6 +58,7 @@ import android.os.UserManager;
 import android.provider.CallLog;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.KeyValueListParser;
 import android.util.Slog;
 import com.android.internal.os.BackgroundThread;
@@ -105,7 +106,8 @@ public class RetailDemoModeService extends SystemService {
     private static final String DEMO_SESSION_COUNT = "retail_demo_session_count";
     private static final String DEMO_SESSION_DURATION = "retail_demo_session_duration";
 
-    boolean mDeviceInDemoMode = false;
+    boolean mDeviceInDemoMode;
+    boolean mIsCarrierDemoMode;
     int mCurrentUserId = UserHandle.USER_SYSTEM;
     long mUserInactivityTimeout;
     long mWarningDialogTimeout;
@@ -135,7 +137,8 @@ public class RetailDemoModeService extends SystemService {
             if (!mDeviceInDemoMode) {
                 return;
             }
-            switch (intent.getAction()) {
+            final String action = intent.getAction();
+            switch (action) {
                 case Intent.ACTION_SCREEN_OFF:
                     mHandler.removeMessages(MSG_TURN_SCREEN_ON);
                     mHandler.sendEmptyMessageDelayed(MSG_TURN_SCREEN_ON, SCREEN_WAKEUP_DELAY);
@@ -166,7 +169,7 @@ public class RetailDemoModeService extends SystemService {
                     mInjector.acquireWakeLock();
                     break;
                 case MSG_INACTIVITY_TIME_OUT:
-                    if (isDemoLauncherDisabled()) {
+                    if (!mIsCarrierDemoMode && isDemoLauncherDisabled()) {
                         Slog.i(TAG, "User inactivity timeout reached");
                         showInactivityCountdownDialog();
                     }
@@ -177,12 +180,30 @@ public class RetailDemoModeService extends SystemService {
                     }
                     removeMessages(MSG_START_NEW_SESSION);
                     removeMessages(MSG_INACTIVITY_TIME_OUT);
-                    if (mCurrentUserId != UserHandle.USER_SYSTEM) {
+                    if (!mIsCarrierDemoMode && mCurrentUserId != UserHandle.USER_SYSTEM) {
                         logSessionDuration();
                     }
-                    final UserInfo demoUser = mInjector.getUserManager().createUser(DEMO_USER_NAME,
-                            UserInfo.FLAG_DEMO | UserInfo.FLAG_EPHEMERAL);
-                    if (demoUser != null) {
+
+                    final UserManager um = mInjector.getUserManager();
+                    UserInfo demoUser = null;
+                    if (mIsCarrierDemoMode) {
+                        // Re-use the existing demo user in carrier demo mode.
+                        for (UserInfo user : um.getUsers()) {
+                            if (user.isDemo()) {
+                                demoUser = user;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (demoUser == null) {
+                        // User in carrier demo mode should survive reboots.
+                        final int flags = UserInfo.FLAG_DEMO
+                                | (mIsCarrierDemoMode ? 0 : UserInfo.FLAG_EPHEMERAL);
+                        demoUser = um.createUser(DEMO_USER_NAME, flags);
+                    }
+
+                    if (demoUser != null && mCurrentUserId != demoUser.id) {
                         setupDemoUser(demoUser);
                         mInjector.switchUser(demoUser.id);
                     }
@@ -211,7 +232,7 @@ public class RetailDemoModeService extends SystemService {
         }
 
         public void register() {
-            ContentResolver cr = mInjector.getContentResolver();
+            final ContentResolver cr = mInjector.getContentResolver();
             cr.registerContentObserver(mDeviceDemoModeUri, false, this, UserHandle.USER_SYSTEM);
             cr.registerContentObserver(mDeviceProvisionedUri, false, this, UserHandle.USER_SYSTEM);
             cr.registerContentObserver(mRetailDemoConstantsUri, false, this,
@@ -224,29 +245,30 @@ public class RetailDemoModeService extends SystemService {
                 refreshTimeoutConstants();
                 return;
             }
-            if (mDeviceDemoModeUri.equals(uri)) {
-                mDeviceInDemoMode = UserManager.isDeviceInDemoMode(getContext());
-                if (mDeviceInDemoMode) {
+
+            // If device is provisioned and left demo mode - run the cleanup in demo folder
+            if (isDeviceProvisioned()) {
+                if (UserManager.isDeviceInDemoMode(getContext())) {
                     startDemoMode();
                 } else {
                     mInjector.systemPropertiesSet(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED, "0");
+
+                    // Run on the bg thread to not block the fg thread
+                    BackgroundThread.getHandler().post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (!deletePreloadsFolderContents()) {
+                                Slog.w(TAG, "Failed to delete preloads folder contents");
+                            }
+                        }
+                    });
+
+                    stopDemoMode();
+
                     if (mInjector.isWakeLockHeld()) {
                         mInjector.releaseWakeLock();
                     }
                 }
-            }
-            // If device is provisioned and left demo mode - run the cleanup in demo folder
-            if (!mDeviceInDemoMode && isDeviceProvisioned()) {
-                // Run on the bg thread to not block the fg thread
-                BackgroundThread.getHandler().post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (!deletePreloadsFolderContents()) {
-                            Slog.w(TAG, "Failed to delete preloads folder contents");
-                        }
-                    }
-                });
-                stopDemoMode();
             }
         }
 
@@ -300,23 +322,22 @@ public class RetailDemoModeService extends SystemService {
     }
 
     boolean isDemoLauncherDisabled() {
-        IPackageManager pm = mInjector.getIPackageManager();
         int enabledState = PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
-        String demoLauncherComponent = getContext().getResources()
-                .getString(R.string.config_demoModeLauncherComponent);
         try {
-            enabledState = pm.getComponentEnabledSetting(
-                    ComponentName.unflattenFromString(demoLauncherComponent),
-                    mCurrentUserId);
-        } catch (RemoteException exc) {
-            Slog.e(TAG, "Unable to talk to Package Manager", exc);
+            final IPackageManager iPm = mInjector.getIPackageManager();
+            final String demoLauncherComponent =
+                    getContext().getString(R.string.config_demoModeLauncherComponent);
+            enabledState = iPm.getComponentEnabledSetting(
+                    ComponentName.unflattenFromString(demoLauncherComponent), mCurrentUserId);
+        } catch (RemoteException re) {
+            Slog.e(TAG, "Error retrieving demo launcher enabled setting", re);
         }
         return enabledState == PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
     }
 
     private void setupDemoUser(UserInfo userInfo) {
-        UserManager um = mInjector.getUserManager();
-        UserHandle user = UserHandle.of(userInfo.id);
+        final UserManager um = mInjector.getUserManager();
+        final UserHandle user = UserHandle.of(userInfo.id);
         um.setUserRestriction(UserManager.DISALLOW_CONFIG_WIFI, true, user);
         um.setUserRestriction(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, true, user);
         um.setUserRestriction(UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS, true, user);
@@ -327,6 +348,7 @@ public class RetailDemoModeService extends SystemService {
         um.setUserRestriction(UserManager.DISALLOW_OUTGOING_CALLS, false, user);
         // Disallow rebooting in safe mode - controlled by user 0
         um.setUserRestriction(UserManager.DISALLOW_SAFE_BOOT, true, UserHandle.SYSTEM);
+
         Settings.Secure.putIntForUser(mInjector.getContentResolver(),
                 Settings.Secure.SKIP_FIRST_USE_HINTS, 1, userInfo.id);
         Settings.Global.putInt(mInjector.getContentResolver(),
@@ -334,6 +356,47 @@ public class RetailDemoModeService extends SystemService {
 
         grantRuntimePermissionToCamera(user);
         clearPrimaryCallLog();
+
+        if (!mIsCarrierDemoMode) {
+            // Enable demo launcher.
+            final String demoLauncher = getContext().getString(
+                    R.string.config_demoModeLauncherComponent);
+            if (!TextUtils.isEmpty(demoLauncher)) {
+                final ComponentName componentToEnable =
+                        ComponentName.unflattenFromString(demoLauncher);
+                final String packageName = componentToEnable.getPackageName();
+                try {
+                    final IPackageManager iPm = AppGlobals.getPackageManager();
+                    iPm.setComponentEnabledSetting(componentToEnable,
+                            PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0, userInfo.id);
+                    iPm.setApplicationEnabledSetting(packageName,
+                            PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0, userInfo.id, null);
+                } catch (RemoteException re) {
+                    // Internal, shouldn't happen
+                }
+            }
+        } else {
+            // Set the carrier demo mode setting for the demo user.
+            final String carrierDemoModeSetting = getContext().getString(
+                    R.string.config_carrierDemoModeSetting);
+            Settings.Secure.putIntForUser(getContext().getContentResolver(),
+                    carrierDemoModeSetting, 1, userInfo.id);
+
+            // Enable packages for carrier demo mode.
+            final String packageList = getContext().getString(
+                    R.string.config_carrierDemoModePackages);
+            final String[] packageNames = packageList == null ? new String[0]
+                    : TextUtils.split(packageList, ",");
+            final IPackageManager iPm = AppGlobals.getPackageManager();
+            for (String packageName : packageNames) {
+                try {
+                    iPm.setApplicationEnabledSetting(packageName,
+                            PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0, userInfo.id, null);
+                } catch (RemoteException re) {
+                    Slog.e(TAG, "Error enabling application: " + packageName, re);
+                }
+            }
+        }
     }
 
     private void grantRuntimePermissionToCamera(UserHandle user) {
@@ -385,13 +448,17 @@ public class RetailDemoModeService extends SystemService {
     }
 
     private void registerBroadcastReceiver() {
-        if (mBroadcastReceiver == null) {
-            final IntentFilter filter = new IntentFilter();
-            filter.addAction(Intent.ACTION_SCREEN_OFF);
-            filter.addAction(ACTION_RESET_DEMO);
-            mBroadcastReceiver = new IntentReceiver();
-            getContext().registerReceiver(mBroadcastReceiver, filter);
+        if (mBroadcastReceiver != null) {
+            return;
         }
+
+        final IntentFilter filter = new IntentFilter();
+        if (!mIsCarrierDemoMode) {
+            filter.addAction(Intent.ACTION_SCREEN_OFF);
+        }
+        filter.addAction(ACTION_RESET_DEMO);
+        mBroadcastReceiver = new IntentReceiver();
+        getContext().registerReceiver(mBroadcastReceiver, filter);
     }
 
     private void unregisterBroadcastReceiver() {
@@ -427,12 +494,20 @@ public class RetailDemoModeService extends SystemService {
     }
 
     private void startDemoMode() {
+        mDeviceInDemoMode = true;
+
         mPreloadAppsInstaller = mInjector.getPreloadAppsInstaller();
         mInjector.initializeWakeLock();
         if (mCameraIdsWithFlash == null) {
             mCameraIdsWithFlash = getCameraIdsWithFlash();
         }
         registerBroadcastReceiver();
+
+        final String carrierDemoModeSetting =
+                getContext().getString(R.string.config_carrierDemoModeSetting);
+        mIsCarrierDemoMode = !TextUtils.isEmpty(carrierDemoModeSetting)
+                && (Settings.Secure.getInt(getContext().getContentResolver(),
+                        carrierDemoModeSetting, 0) == 1);
 
         mInjector.systemPropertiesSet(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED, "1");
         mHandler.sendEmptyMessage(MSG_START_NEW_SESSION);
@@ -471,13 +546,12 @@ public class RetailDemoModeService extends SystemService {
     public void onBootPhase(int bootPhase) {
         switch (bootPhase) {
             case PHASE_THIRD_PARTY_APPS_CAN_START:
-                SettingsObserver settingsObserver = new SettingsObserver(mHandler);
+                final SettingsObserver settingsObserver = new SettingsObserver(mHandler);
                 settingsObserver.register();
                 settingsObserver.refreshTimeoutConstants();
                 break;
             case PHASE_BOOT_COMPLETED:
                 if (UserManager.isDeviceInDemoMode(getContext())) {
-                    mDeviceInDemoMode = true;
                     startDemoMode();
                 }
                 break;
@@ -497,33 +571,39 @@ public class RetailDemoModeService extends SystemService {
             Slog.wtf(TAG, "Should not allow switch to non-demo user in demo mode");
             return;
         }
-        if (!mInjector.isWakeLockHeld()) {
+        if (!mIsCarrierDemoMode && !mInjector.isWakeLockHeld()) {
             mInjector.acquireWakeLock();
         }
         mCurrentUserId = userId;
         mInjector.getActivityManagerInternal().updatePersistentConfigurationForUser(
                 mInjector.getSystemUsersConfiguration(), userId);
+
         mInjector.turnOffAllFlashLights(mCameraIdsWithFlash);
         muteVolumeStreams();
         if (!mInjector.getWifiManager().isWifiEnabled()) {
             mInjector.getWifiManager().setWifiEnabled(true);
         }
+
         // Disable lock screen for demo users.
         mInjector.getLockPatternUtils().setLockScreenDisabled(true, userId);
-        mInjector.getNotificationManager().notifyAsUser(TAG,
-                1, mInjector.createResetNotification(), UserHandle.of(userId));
 
-        synchronized (mActivityLock) {
-            mUserUntouched = true;
-        }
-        mInjector.logSessionCount(1);
-        mHandler.removeMessages(MSG_INACTIVITY_TIME_OUT);
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                mPreloadAppsInstaller.installApps(userId);
+        if (!mIsCarrierDemoMode) {
+            // Show reset notification (except in carrier demo mode).
+            mInjector.getNotificationManager().notifyAsUser(TAG,
+                    1, mInjector.createResetNotification(), UserHandle.of(userId));
+
+            synchronized (mActivityLock) {
+                mUserUntouched = true;
             }
-        });
+            mInjector.logSessionCount(1);
+            mHandler.removeMessages(MSG_INACTIVITY_TIME_OUT);
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mPreloadAppsInstaller.installApps(userId);
+                }
+            });
+        }
     }
 
     private RetailDemoModeServiceInternal mLocalService = new RetailDemoModeServiceInternal() {
@@ -531,7 +611,7 @@ public class RetailDemoModeService extends SystemService {
 
         @Override
         public void onUserActivity() {
-            if (!mDeviceInDemoMode) {
+            if (!mDeviceInDemoMode || mIsCarrierDemoMode) {
                 return;
             }
             long timeOfActivity = SystemClock.uptimeMillis();
@@ -682,7 +762,7 @@ public class RetailDemoModeService extends SystemService {
         }
 
         boolean isWakeLockHeld() {
-            return mWakeLock.isHeld();
+            return mWakeLock != null && mWakeLock.isHeld();
         }
 
         void acquireWakeLock() {
