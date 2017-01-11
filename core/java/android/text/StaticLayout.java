@@ -94,6 +94,7 @@ public class StaticLayout extends Layout {
             b.mMaxLines = Integer.MAX_VALUE;
             b.mBreakStrategy = Layout.BREAK_STRATEGY_SIMPLE;
             b.mHyphenationFrequency = Layout.HYPHENATION_FREQUENCY_NONE;
+            b.mJustify = false;
 
             b.mMeasuredText = MeasuredText.obtain();
             return b;
@@ -320,6 +321,17 @@ public class StaticLayout extends Layout {
         }
 
         /**
+         * Enables or disables paragraph justification. The default value is disabled (false).
+         *
+         * @param justify true for enabling and false for disabling paragraph justification.
+         * @return this builder, useful for chaining.
+         */
+        public Builder setJustify(boolean justify) {
+            mJustify = justify;
+            return this;
+        }
+
+        /**
          * Measurement and break iteration is done in native code. The protocol for using
          * the native code is as follows.
          *
@@ -404,6 +416,7 @@ public class StaticLayout extends Layout {
         int mHyphenationFrequency;
         int[] mLeftIndents;
         int[] mRightIndents;
+        boolean mJustify;
 
         Paint.FontMetricsInt mFontMetricsInt = new Paint.FontMetricsInt();
 
@@ -557,6 +570,7 @@ public class StaticLayout extends Layout {
 
         mLeftIndents = b.mLeftIndents;
         mRightIndents = b.mRightIndents;
+        setJustify(b.mJustify);
 
         generate(b, b.mIncludePad, b.mIncludePad);
     }
@@ -676,7 +690,8 @@ public class StaticLayout extends Layout {
 
             nSetupParagraph(b.mNativePtr, chs, paraEnd - paraStart,
                     firstWidth, firstWidthLineCount, restWidth,
-                    variableTabStops, TAB_INCREMENT, b.mBreakStrategy, b.mHyphenationFrequency);
+                    variableTabStops, TAB_INCREMENT, b.mBreakStrategy, b.mHyphenationFrequency,
+                    b.mJustify);
             if (mLeftIndents != null || mRightIndents != null) {
                 // TODO(raph) performance: it would be better to do this once per layout rather
                 // than once per paragraph, but that would require a change to the native
@@ -1284,7 +1299,8 @@ public class StaticLayout extends Layout {
     // Set up paragraph text and settings; done as one big method to minimize jni crossings
     private static native void nSetupParagraph(long nativePtr, char[] text, int length,
             float firstWidth, int firstWidthLineCount, float restWidth,
-            int[] variableTabStops, int defaultTabStop, int breakStrategy, int hyphenationFrequency);
+            int[] variableTabStops, int defaultTabStop, int breakStrategy, int hyphenationFrequency,
+            boolean isJustified);
 
     private static native float nAddStyleRun(long nativePtr, long nativePaint,
             long nativeTypeface, int start, int end, boolean isRtl);

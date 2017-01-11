@@ -596,6 +596,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private int mBreakStrategy;
     private int mHyphenationFrequency;
+    private boolean mJustify;
 
     private int mMaximum = Integer.MAX_VALUE;
     private int mMaxMode = LINES;
@@ -769,6 +770,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         String fontFeatureSettings = null;
         mBreakStrategy = Layout.BREAK_STRATEGY_SIMPLE;
         mHyphenationFrequency = Layout.HYPHENATION_FREQUENCY_NONE;
+        mJustify = false;
 
         final Resources.Theme theme = context.getTheme();
 
@@ -3295,6 +3297,29 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Layout.HyphenationFrequency
     public int getHyphenationFrequency() {
         return mHyphenationFrequency;
+    }
+
+    /**
+     * Enables or disables full justification. The default value is false.
+     *
+     * @see #getJustify()
+     */
+    public void setJustify(boolean justify) {
+        mJustify = justify;
+        if (mLayout != null) {
+            nullLayouts();
+            requestLayout();
+            invalidate();
+        }
+    }
+
+    /**
+     * @return true if currently paragraph justification is enabled.
+     *
+     * @see #setJustify(boolean)
+     */
+    public boolean getJustify() {
+        return mJustify;
     }
 
     /**
@@ -7170,6 +7195,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         .setIncludePad(mIncludePad)
                         .setBreakStrategy(mBreakStrategy)
                         .setHyphenationFrequency(mHyphenationFrequency)
+                        .setJustify(mJustify)
                         .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
                 if (shouldEllipsize) {
                     builder.setEllipsize(mEllipsize)
@@ -7211,7 +7237,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mText instanceof Spannable) {
             result = new DynamicLayout(mText, mTransformed, mTextPaint, wantWidth,
                     alignment, mTextDir, mSpacingMult, mSpacingAdd, mIncludePad,
-                    mBreakStrategy, mHyphenationFrequency,
+                    mBreakStrategy, mHyphenationFrequency, mJustify,
                     getKeyListener() == null ? effectiveEllipsize : null, ellipsisWidth);
         } else {
             if (boring == UNKNOWN_BORING) {
@@ -7261,6 +7287,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     .setIncludePad(mIncludePad)
                     .setBreakStrategy(mBreakStrategy)
                     .setHyphenationFrequency(mHyphenationFrequency)
+                    .setJustify(mJustify)
                     .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
             if (shouldEllipsize) {
                 builder.setEllipsize(effectiveEllipsize)
