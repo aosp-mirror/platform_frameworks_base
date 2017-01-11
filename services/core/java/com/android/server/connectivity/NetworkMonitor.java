@@ -809,19 +809,26 @@ public class NetworkMonitor extends StateMachine {
             // portal.  If it is considered a captive portal, a different sign-in URL
             // is needed (i.e. can't browse a 204).  This could be the result of an HTTP
             // proxy server.
-
-            // Consider 200 response with "Content-length=0" to not be a captive portal.
-            // There's no point in considering this a captive portal as the user cannot
-            // sign-in to an empty page.  Probably the result of a broken transparent proxy.
-            // See http://b/9972012.
-            if (httpResponseCode == 200 && urlConnection.getContentLength() == 0) {
-                validationLog("Empty 200 response interpreted as 204 response.");
-                httpResponseCode = 204;
-            }
-
-            if (httpResponseCode == 200 && probeType == ValidationProbeEvent.PROBE_PAC) {
-                validationLog("PAC fetch 200 response interpreted as 204 response.");
-                httpResponseCode = 204;
+            if (httpResponseCode == 200) {
+                if (probeType == ValidationProbeEvent.PROBE_PAC) {
+                    validationLog("PAC fetch 200 response interpreted as 204 response.");
+                    httpResponseCode = 204;
+                } else if (urlConnection.getContentLengthLong() == 0) {
+                    // Consider 200 response with "Content-length=0" to not be a captive portal.
+                    // There's no point in considering this a captive portal as the user cannot
+                    // sign-in to an empty page. Probably the result of a broken transparent proxy.
+                    // See http://b/9972012.
+                    validationLog(
+                        "200 response with Content-length=0 interpreted as 204 response.");
+                    httpResponseCode = 204;
+                } else if (urlConnection.getContentLengthLong() == -1) {
+                    // When no Content-length (default value == -1), attempt to read a byte from the
+                    // response. Do not use available() as it is unreliable. See http://b/33498325.
+                    if (urlConnection.getInputStream().read() == -1) {
+                        validationLog("Empty 200 response interpreted as 204 response.");
+                        httpResponseCode = 204;
+                    }
+                }
             }
         } catch (IOException e) {
             validationLog("Probably not a portal: exception " + e);
