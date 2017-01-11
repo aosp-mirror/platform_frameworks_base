@@ -20,6 +20,7 @@
 #include "Properties.h"
 #include "RenderThread.h"
 #include "renderstate/RenderState.h"
+#include "utils/FatVector.h"
 
 #include <GrContext.h>
 #include <GrTypes.h>
@@ -381,10 +382,9 @@ bool VulkanManager::createSwapchain(VulkanSurface* surface) {
         return false;
     }
 
-    SkAutoMalloc surfaceFormatAlloc(surfaceFormatCount * sizeof(VkSurfaceFormatKHR));
-    VkSurfaceFormatKHR* surfaceFormats = (VkSurfaceFormatKHR*)surfaceFormatAlloc.get();
+    FatVector<VkSurfaceFormatKHR, 4> surfaceFormats(surfaceFormatCount);
     res = mGetPhysicalDeviceSurfaceFormatsKHR(mBackendContext->fPhysicalDevice, surface->mVkSurface,
-            &surfaceFormatCount, surfaceFormats);
+            &surfaceFormatCount, surfaceFormats.data());
     if (VK_SUCCESS != res) {
         return false;
     }
@@ -396,10 +396,9 @@ bool VulkanManager::createSwapchain(VulkanSurface* surface) {
         return false;
     }
 
-    SkAutoMalloc presentModeAlloc(presentModeCount * sizeof(VkPresentModeKHR));
-    VkPresentModeKHR* presentModes = (VkPresentModeKHR*)presentModeAlloc.get();
+    FatVector<VkPresentModeKHR, VK_PRESENT_MODE_RANGE_SIZE_KHR> presentModes(presentModeCount);
     res = mGetPhysicalDeviceSurfacePresentModesKHR(mBackendContext->fPhysicalDevice,
-            surface->mVkSurface, &presentModeCount, presentModes);
+            surface->mVkSurface, &presentModeCount, presentModes.data());
     if (VK_SUCCESS != res) {
         return false;
     }
