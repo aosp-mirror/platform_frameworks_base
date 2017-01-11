@@ -278,7 +278,7 @@ public final class SystemServer {
             Slog.i(TAG, "Entered the Android system server!");
             int uptimeMillis = (int) SystemClock.elapsedRealtime();
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_SYSTEM_RUN, uptimeMillis);
-            if (!mRuntimeRestart) {
+            if (!mRuntimeRestart && !mFirstBoot) {
                 MetricsLogger.histogram(null, "boot_system_server_init", uptimeMillis);
                 // Also report when first stage of init has started
                 long initStartNs = SystemProperties.getLong("ro.boottime.init", -1);
@@ -352,6 +352,8 @@ public final class SystemServer {
 
             // Create the system service manager.
             mSystemServiceManager = new SystemServiceManager(mSystemContext);
+            mSystemServiceManager.setRuntimeRestarted(mRuntimeRestart);
+            mSystemServiceManager.setFirstBoot(mFirstBoot);
             LocalServices.addService(SystemServiceManager.class, mSystemServiceManager);
             // Prepare the thread pool for init tasks that can be parallelized
             SystemServerInitThreadPool.get();
@@ -378,7 +380,7 @@ public final class SystemServer {
         if (StrictMode.conditionallyEnableDebugLogging()) {
             Slog.i(TAG, "Enabled StrictMode for system server main thread.");
         }
-        if (!mRuntimeRestart) {
+        if (!mRuntimeRestart && !mFirstBoot) {
             MetricsLogger.histogram(null, "boot_system_server_ready",
                     (int) SystemClock.elapsedRealtime());
         }
@@ -520,7 +522,7 @@ public final class SystemServer {
         mFirstBoot = mPackageManagerService.isFirstBoot();
         mPackageManager = mSystemContext.getPackageManager();
         traceEnd();
-        if (!mRuntimeRestart) {
+        if (!mRuntimeRestart && !mFirstBoot) {
             MetricsLogger.histogram(null, "boot_package_manager_init_ready",
                     (int) SystemClock.elapsedRealtime());
         }
