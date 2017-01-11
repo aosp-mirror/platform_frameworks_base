@@ -18,23 +18,22 @@
 
 #include <androidfw/BackupHelpers.h>
 
-#include <utils/KeyedVector.h>
-#include <utils/ByteOrder.h>
-#include <utils/String8.h>
-
 #include <errno.h>
-#include <sys/types.h>
-#include <sys/uio.h>
-#include <sys/stat.h>
-#include <sys/time.h>  // for utimes
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/time.h>  // for utimes
+#include <sys/uio.h>
 #include <unistd.h>
 #include <utime.h>
-#include <fcntl.h>
 #include <zlib.h>
 
-#include <cutils/log.h>
+#include <log/log.h>
+#include <utils/ByteOrder.h>
+#include <utils/KeyedVector.h>
+#include <utils/String8.h>
 
 namespace android {
 

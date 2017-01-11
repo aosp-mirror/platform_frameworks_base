@@ -16,10 +16,11 @@
 
 #include "Interpolator.h"
 
-#include "utils/MathUtils.h"
-
 #include <algorithm>
-#include <cutils/log.h>
+
+#include <log/log.h>
+
+#include "utils/MathUtils.h"
 
 namespace android {
 namespace uirenderer {

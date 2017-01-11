@@ -15,9 +15,10 @@
  */
 #pragma once
 
-#include <cutils/log.h>
 #include <pthread.h>
 #include <ostream>
+
+#include <log/log.h>
 
 namespace android {
 namespace uirenderer {

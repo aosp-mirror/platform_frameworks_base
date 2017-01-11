@@ -58,7 +58,7 @@ public class EventLog {
         private final ByteBuffer mBuffer;
 
         // Layout of event log entry received from Android logger.
-        //  see system/core/include/log/logger.h
+        //  see system/core/include/log/log.h
         private static final int LENGTH_OFFSET = 0;
         private static final int HEADER_SIZE_OFFSET = 2;
         private static final int PROCESS_OFFSET = 4;

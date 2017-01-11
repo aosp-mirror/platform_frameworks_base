@@ -15,15 +15,15 @@
  */
 
 #define LOG_TAG "Sprites"
-
 //#define LOG_NDEBUG 0
 
 #include "SpriteController.h"
 
-#include <cutils/log.h>
+#include <log/log.h>
 #include <utils/String8.h>
 #include <gui/Surface.h>
 
+// ToDo: Fix code to be warning free
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <SkBitmap.h>

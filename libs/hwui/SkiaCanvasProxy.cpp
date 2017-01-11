@@ -16,15 +16,16 @@
 
 #include "SkiaCanvasProxy.h"
 
-#include <cutils/log.h>
+#include <memory>
+
+#include <log/log.h>
+
 #include <SkPatchUtils.h>
 #include <SkPaint.h>
 #include <SkPath.h>
 #include <SkPixelRef.h>
 #include <SkRect.h>
 #include <SkRRect.h>
-
-#include <memory>
 
 namespace android {
 namespace uirenderer {
