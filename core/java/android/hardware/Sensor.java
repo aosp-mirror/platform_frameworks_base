@@ -644,6 +644,31 @@ public final class Sensor {
     public static final String STRING_TYPE_DYNAMIC_SENSOR_META =
             "android.sensor.dynamic_sensor_meta";
 
+    /* TYPE_ADDITIONAL_INFO - defined as type 33 in the HAL is not exposed to
+     * applications. There are parts of the framework that require the sensors
+     * to be in the same order as the HAL. Skipping this sensor
+     */
+
+    /* TYPE_LOW_LATENCY_OFF_BODY_SENSOR - defined as type 34 in the HAL needs to
+     * be defined in this space.
+     */
+
+    /**
+     * A constant describing an uncalibrated accelerometer sensor.
+     *
+     * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
+     *
+     */
+    public static final int TYPE_ACCELEROMETER_UNCALIBRATED = 35;
+
+    /**
+     * A constant string describing an uncalibrated accelerometer sensor.
+     *
+     * @see #TYPE_ACCELEROMETER_UNCALIBRATED
+     *
+     */
+    public static final String STRING_TYPE_ACCELEROMETER_UNCALIBRATED =
+            "android.sensor.accelerometer_uncalibrated";
     /**
      * A constant describing all sensor types.
      */
@@ -752,6 +777,9 @@ public final class Sensor {
             1, // SENSOR_TYPE_MOTION_DETECT
             1, // SENSOR_TYPE_HEART_BEAT
             2, // SENSOR_TYPE_DYNAMIC_SENSOR_META
+            16,// skip over additional sensor info type
+            1, // reserving for LLOB sensor type
+            6, // SENSOR_TYPE_ACCELEROMETER_UNCALIBRATED
     };
 
     /**
@@ -1122,6 +1150,9 @@ public final class Sensor {
                 return true;
             case TYPE_DYNAMIC_SENSOR_META:
                 mStringType = STRING_TYPE_DYNAMIC_SENSOR_META;
+                return true;
+            case TYPE_ACCELEROMETER_UNCALIBRATED:
+                mStringType = STRING_TYPE_ACCELEROMETER_UNCALIBRATED;
                 return true;
             default:
                 return false;
