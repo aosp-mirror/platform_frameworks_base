@@ -111,7 +111,7 @@ public final class NightDisplayService extends SystemService
                             getLocalService(DisplayTransformManager.class);
                     if (enabled) {
                         dtm.setColorMatrix(LEVEL_COLOR_MATRIX_NIGHT_DISPLAY, MATRIX_IDENTITY);
-                    } else if (mController.isActivated()) {
+                    } else if (mController != null && mController.isActivated()) {
                         dtm.setColorMatrix(LEVEL_COLOR_MATRIX_NIGHT_DISPLAY, MATRIX_NIGHT);
                     }
                 }
