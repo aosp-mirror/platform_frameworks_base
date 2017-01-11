@@ -51,4 +51,8 @@ public class AttachInfo_Accessor {
             view.dispatchDetachedFromWindow();
         }
     }
+
+    public static ViewRootImpl getRootView(View view) {
+        return view.mAttachInfo != null ? view.mAttachInfo.mViewRootImpl : null;
+    }
 }

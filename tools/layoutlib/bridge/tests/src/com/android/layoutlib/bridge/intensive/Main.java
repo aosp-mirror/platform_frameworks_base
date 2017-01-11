@@ -63,6 +63,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -87,6 +88,7 @@ import java.util.zip.ZipFile;
 import com.google.android.collect.Lists;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -432,6 +434,37 @@ public class Main {
                 RenderingMode.V_SCROLL, 22);
         params.setFlag(RenderParamsFlags.FLAG_KEY_ROOT_TAG, "menu");
         renderAndVerify(params, "simple_activity.png");
+    }
+
+    @Test
+    public void testOnApplyInsetsCall()
+            throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+        // We get the widget via reflection to avoid IntelliJ complaining about the class being
+        // located in the wrong package. (From the Bridge tests point of view, it is)
+        Class insetsWidgetClass = Class.forName("com.android.layoutlib.test.myapplication.widgets" +
+                ".InsetsWidget");
+        Field field = insetsWidgetClass.getDeclaredField("sApplyInsetsCalled");
+        assertFalse((Boolean)field.get(null));
+
+        LayoutPullParser parser = createLayoutPullParser("insets.xml");
+        LayoutLibTestCallback layoutLibCallback =
+                new LayoutLibTestCallback(getLogger(), mDefaultClassLoader);
+        layoutLibCallback.initResources();
+        SessionParams params = getSessionParams(parser, ConfigGenerator.NEXUS_5,
+                layoutLibCallback, "Theme.Material.Light.NoActionBar", false,
+                RenderingMode.NORMAL, 22);
+        try {
+            renderAndVerify(params, "scrolled.png");
+        } catch(AssertionError e) {
+            // In this particular test we do not care about the image similarity.
+            // TODO: Create new render method that allows to not compare images.
+            if (!e.getLocalizedMessage().startsWith("Images differ")) {
+                throw e;
+            }
+        }
+
+        assertTrue((Boolean)field.get(null));
+        field.set(null, false);
     }
 
     @AfterClass

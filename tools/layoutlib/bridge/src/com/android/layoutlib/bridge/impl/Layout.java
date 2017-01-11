@@ -38,7 +38,10 @@ import android.annotation.NonNull;
 import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.AttachInfo_Accessor;
 import android.view.View;
+import android.view.ViewRootImpl;
+import android.view.ViewRootImpl_Accessor;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -300,6 +303,17 @@ class Layout extends RelativeLayout {
 
     private int getId(String name) {
         return Bridge.getResourceId(ResourceType.ID, ID_PREFIX + name);
+    }
+
+    @Override
+    public void requestFitSystemWindows() {
+        // The framework call would usually bubble up to ViewRootImpl but, in layoutlib, Layout will
+        // act as view root for most purposes. That way, we can also save going through the Handler
+        // to dispatch the new applied insets.
+        ViewRootImpl root = AttachInfo_Accessor.getRootView(this);
+        if (root != null) {
+            ViewRootImpl_Accessor.dispatchApplyInsets(root, this);
+        }
     }
 
     /**
