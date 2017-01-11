@@ -18,6 +18,7 @@ package com.android.server.webkit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -84,8 +85,15 @@ public class WebViewUpdateServiceTest {
 
     private void setupWithPackages(WebViewProviderInfo[] packages,
             boolean fallbackLogicEnabled, int numRelros, boolean isDebuggable) {
+        setupWithPackages(packages, fallbackLogicEnabled, numRelros, isDebuggable,
+                false /* multiProcessDefault */);
+    }
+
+    private void setupWithPackages(WebViewProviderInfo[] packages,
+            boolean fallbackLogicEnabled, int numRelros, boolean isDebuggable,
+            boolean multiProcessDefault) {
         TestSystemImpl testing = new TestSystemImpl(packages, fallbackLogicEnabled, numRelros,
-                isDebuggable);
+                isDebuggable, multiProcessDefault);
         mTestSystemImpl = Mockito.spy(testing);
         mWebViewUpdateServiceImpl =
             new WebViewUpdateServiceImpl(null /*Context*/, mTestSystemImpl);
@@ -1520,5 +1528,90 @@ public class WebViewUpdateServiceTest {
                 mWebViewUpdateServiceImpl.getCurrentWebViewPackage().versionCode);
         assertEquals(firstPackage.versionName,
                 mWebViewUpdateServiceImpl.getCurrentWebViewPackage().versionName);
+    }
+
+    @Test
+    public void testMultiProcessEnabledByDefault() {
+        String primaryPackage = "primary";
+        WebViewProviderInfo[] packages = new WebViewProviderInfo[] {
+            new WebViewProviderInfo(
+                    primaryPackage, "", true /* default available */, false /* fallback */, null)};
+        setupWithPackages(packages, true /* fallback logic enabled */, 1 /* numRelros */,
+                          true /* debuggable */, true /* multiprocess by default */);
+        mTestSystemImpl.setPackageInfo(createPackageInfo(primaryPackage, true /* enabled */,
+                    true /* valid */, true /* installed */, null /* signatures */,
+                    10 /* lastUpdateTime*/, false /* not hidden */, 1000 /* versionCode */,
+                    false /* isSystemApp */));
+
+        runWebViewBootPreparationOnMainSync();
+        checkPreparationPhasesForPackage(primaryPackage, 1 /* first preparation phase */);
+
+        // Check it's on by default
+        assertTrue(mWebViewUpdateServiceImpl.isMultiProcessEnabled());
+
+        // Test toggling it
+        mWebViewUpdateServiceImpl.enableMultiProcess(false);
+        assertFalse(mWebViewUpdateServiceImpl.isMultiProcessEnabled());
+        mWebViewUpdateServiceImpl.enableMultiProcess(true);
+        assertTrue(mWebViewUpdateServiceImpl.isMultiProcessEnabled());
+
+        // Disable, then upgrade provider, which should re-enable it
+        mWebViewUpdateServiceImpl.enableMultiProcess(false);
+        mTestSystemImpl.setPackageInfo(createPackageInfo(primaryPackage, true /* enabled */,
+                    true /* valid */, true /* installed */, null /* signatures */,
+                    20 /* lastUpdateTime*/, false /* not hidden */, 2000 /* versionCode */,
+                    false /* isSystemApp */));
+        mWebViewUpdateServiceImpl.packageStateChanged(primaryPackage,
+                WebViewUpdateService.PACKAGE_ADDED_REPLACED, 0);
+        checkPreparationPhasesForPackage(primaryPackage, 2);
+        assertTrue(mWebViewUpdateServiceImpl.isMultiProcessEnabled());
+    }
+
+    @Test
+    public void testMultiProcessDisabledByDefault() {
+        String primaryPackage = "primary";
+        WebViewProviderInfo[] packages = new WebViewProviderInfo[] {
+            new WebViewProviderInfo(
+                    primaryPackage, "", true /* default available */, false /* fallback */, null)};
+        setupWithPackages(packages, true /* fallback logic enabled */, 1 /* numRelros */,
+                          true /* debuggable */, false /* not multiprocess by default */);
+        mTestSystemImpl.setPackageInfo(createPackageInfo(primaryPackage, true /* enabled */,
+                    true /* valid */, true /* installed */, null /* signatures */,
+                    10 /* lastUpdateTime*/, false /* not hidden */, 1000 /* versionCode */,
+                    false /* isSystemApp */));
+
+        runWebViewBootPreparationOnMainSync();
+        checkPreparationPhasesForPackage(primaryPackage, 1 /* first preparation phase */);
+
+        // Check it's off by default
+        assertFalse(mWebViewUpdateServiceImpl.isMultiProcessEnabled());
+
+        // Test toggling it
+        mWebViewUpdateServiceImpl.enableMultiProcess(true);
+        assertTrue(mWebViewUpdateServiceImpl.isMultiProcessEnabled());
+        mWebViewUpdateServiceImpl.enableMultiProcess(false);
+        assertFalse(mWebViewUpdateServiceImpl.isMultiProcessEnabled());
+
+        // Disable, then upgrade provider, which should not re-enable it
+        mWebViewUpdateServiceImpl.enableMultiProcess(false);
+        mTestSystemImpl.setPackageInfo(createPackageInfo(primaryPackage, true /* enabled */,
+                    true /* valid */, true /* installed */, null /* signatures */,
+                    20 /* lastUpdateTime*/, false /* not hidden */, 2000 /* versionCode */,
+                    false /* isSystemApp */));
+        mWebViewUpdateServiceImpl.packageStateChanged(primaryPackage,
+                WebViewUpdateService.PACKAGE_ADDED_REPLACED, 0);
+        checkPreparationPhasesForPackage(primaryPackage, 2);
+        assertFalse(mWebViewUpdateServiceImpl.isMultiProcessEnabled());
+
+        // Enable, then upgrade provider, which should leave it on
+        mWebViewUpdateServiceImpl.enableMultiProcess(true);
+        mTestSystemImpl.setPackageInfo(createPackageInfo(primaryPackage, true /* enabled */,
+                    true /* valid */, true /* installed */, null /* signatures */,
+                    30 /* lastUpdateTime*/, false /* not hidden */, 3000 /* versionCode */,
+                    false /* isSystemApp */));
+        mWebViewUpdateServiceImpl.packageStateChanged(primaryPackage,
+                WebViewUpdateService.PACKAGE_ADDED_REPLACED, 0);
+        checkPreparationPhasesForPackage(primaryPackage, 3);
+        assertTrue(mWebViewUpdateServiceImpl.isMultiProcessEnabled());
     }
 }

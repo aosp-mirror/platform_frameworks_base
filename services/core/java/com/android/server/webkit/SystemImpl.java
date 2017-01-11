@@ -294,6 +294,11 @@ public class SystemImpl implements SystemInterface {
         WebViewZygote.setMultiprocessEnabled(enableMultiProcess);
     }
 
+    @Override
+    public boolean isMultiProcessDefaultEnabled() {
+        return false;
+    }
+
     // flags declaring we want extra info from the package manager for webview providers
     private final static int PACKAGE_FLAGS = PackageManager.GET_META_DATA
             | PackageManager.GET_SIGNATURES | PackageManager.MATCH_DEBUG_TRIAGED_MISSING
