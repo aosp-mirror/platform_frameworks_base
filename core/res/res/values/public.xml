@@ -2784,6 +2784,7 @@
         <public name="focusedByDefault" />
         <public name="appCategory" />
         <public name="autoSizeMaxTextSize" />
+        <public name="supportsDismissingWindow" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">
