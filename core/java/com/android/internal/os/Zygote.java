@@ -85,6 +85,9 @@ public final class Zygote {
      * file descriptor numbers that are to be closed by the child
      * (and replaced by /dev/null) after forking.  An integer value
      * of -1 in any entry in the array means "ignore this one".
+     * @param fdsToIgnore null-ok an array of ints, either null or holding
+     * one or more POSIX file descriptor numbers that are to be ignored
+     * in the file descriptor table check.
      * @param instructionSet null-ok the instruction set to use.
      * @param appDataDir null-ok the data directory of the app.
      *
@@ -93,11 +96,11 @@ public final class Zygote {
      */
     public static int forkAndSpecialize(int uid, int gid, int[] gids, int debugFlags,
           int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
-          String instructionSet, String appDataDir) {
+          int[] fdsToIgnore, String instructionSet, String appDataDir) {
         VM_HOOKS.preFork();
         int pid = nativeForkAndSpecialize(
                   uid, gid, gids, debugFlags, rlimits, mountExternal, seInfo, niceName, fdsToClose,
-                  instructionSet, appDataDir);
+                  fdsToIgnore, instructionSet, appDataDir);
         // Enable tracing as soon as possible for the child process.
         if (pid == 0) {
             Trace.setTracingEnabled(true);
@@ -111,7 +114,7 @@ public final class Zygote {
 
     native private static int nativeForkAndSpecialize(int uid, int gid, int[] gids,int debugFlags,
           int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
-          String instructionSet, String appDataDir);
+          int[] fdsToIgnore, String instructionSet, String appDataDir);
 
     /**
      * Special method to start the system server process. In addition to the
