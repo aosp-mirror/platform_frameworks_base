@@ -23,6 +23,7 @@ import static android.net.NetworkScoreManager.CACHE_FILTER_NONE;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
@@ -468,6 +469,21 @@ public class NetworkScoreServiceTest {
         bindToScorer(true /*callerIsScorer*/);
 
         assertTrue(mNetworkScoreService.isCallerActiveScorer(Binder.getCallingUid()));
+    }
+
+    @Test
+    public void testGetActiveScorerPackage_notActive() throws Exception {
+        mNetworkScoreService.systemRunning();
+
+        assertNull(mNetworkScoreService.getActiveScorerPackage());
+    }
+
+    @Test
+    public void testGetActiveScorerPackage_active() throws Exception {
+        when(mNetworkScorerAppManager.getActiveScorer()).thenReturn(NEW_SCORER);
+        mNetworkScoreService.systemRunning();
+
+        assertEquals(NEW_SCORER.packageName, mNetworkScoreService.getActiveScorerPackage());
     }
 
     // "injects" the mock INetworkRecommendationProvider into the NetworkScoreService.
