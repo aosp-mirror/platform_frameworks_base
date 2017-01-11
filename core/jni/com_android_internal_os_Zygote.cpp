@@ -43,6 +43,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "android-base/logging.h"
 #include <cutils/fs.h>
 #include <cutils/multiuser.h>
 #include <cutils/sched_policy.h>
@@ -440,6 +441,22 @@ void SetThreadName(const char* thread_name) {
 // The list of open zygote file descriptors.
 static FileDescriptorTable* gOpenFdTable = NULL;
 
+static void FillFileDescriptorVector(JNIEnv* env,
+                                     jintArray java_fds,
+                                     std::vector<int>* fds) {
+  CHECK(fds != nullptr);
+  if (java_fds != nullptr) {
+    ScopedIntArrayRO ar(env, java_fds);
+    if (ar.get() == nullptr) {
+      RuntimeAbort(env, __LINE__, "Bad fd array");
+    }
+    fds->reserve(ar.size());
+    for (size_t i = 0; i < ar.size(); ++i) {
+      fds->push_back(ar[i]);
+    }
+  }
+}
+
 // Utility routine to fork zygote and specialize the child process.
 static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray javaGids,
                                      jint debug_flags, jobjectArray javaRlimits,
@@ -447,6 +464,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
                                      jint mount_external,
                                      jstring java_se_info, jstring java_se_name,
                                      bool is_system_server, jintArray fdsToClose,
+                                     jintArray fdsToIgnore,
                                      jstring instructionSet, jstring dataDir) {
   SetSigChldHandler();
 
@@ -471,12 +489,14 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
   // If this is the first fork for this zygote, create the open FD table.
   // If it isn't, we just need to check whether the list of open files has
   // changed (and it shouldn't in the normal case).
+  std::vector<int> fds_to_ignore;
+  FillFileDescriptorVector(env, fdsToIgnore, &fds_to_ignore);
   if (gOpenFdTable == NULL) {
-    gOpenFdTable = FileDescriptorTable::Create();
+    gOpenFdTable = FileDescriptorTable::Create(fds_to_ignore);
     if (gOpenFdTable == NULL) {
       RuntimeAbort(env, __LINE__, "Unable to construct file descriptor table.");
     }
-  } else if (!gOpenFdTable->Restat()) {
+  } else if (!gOpenFdTable->Restat(fds_to_ignore)) {
     RuntimeAbort(env, __LINE__, "Unable to restat file descriptor table.");
   }
 
@@ -646,7 +666,9 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
         JNIEnv* env, jclass, jint uid, jint gid, jintArray gids,
         jint debug_flags, jobjectArray rlimits,
         jint mount_external, jstring se_info, jstring se_name,
-        jintArray fdsToClose, jstring instructionSet, jstring appDataDir) {
+        jintArray fdsToClose,
+        jintArray fdsToIgnore,
+        jstring instructionSet, jstring appDataDir) {
     jlong capabilities = 0;
 
     // Grant CAP_WAKE_ALARM to the Bluetooth process.
@@ -681,7 +703,7 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
 
     return ForkAndSpecializeCommon(env, uid, gid, gids, debug_flags,
             rlimits, capabilities, capabilities, mount_external, se_info,
-            se_name, false, fdsToClose, instructionSet, appDataDir);
+            se_name, false, fdsToClose, fdsToIgnore, instructionSet, appDataDir);
 }
 
 static jint com_android_internal_os_Zygote_nativeForkSystemServer(
@@ -692,7 +714,7 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
                                       debug_flags, rlimits,
                                       permittedCapabilities, effectiveCapabilities,
                                       MOUNT_EXTERNAL_DEFAULT, NULL, NULL, true, NULL,
-                                      NULL, NULL);
+                                      NULL, NULL, NULL);
   if (pid > 0) {
       // The zygote process checks whether the child process has died or not.
       ALOGI("System server process %d has been created", pid);
@@ -759,7 +781,7 @@ static void com_android_internal_os_Zygote_nativeUnmountStorageOnInit(JNIEnv* en
 
 static const JNINativeMethod gMethods[] = {
     { "nativeForkAndSpecialize",
-      "(II[II[[IILjava/lang/String;Ljava/lang/String;[ILjava/lang/String;Ljava/lang/String;)I",
+      "(II[II[[IILjava/lang/String;Ljava/lang/String;[I[ILjava/lang/String;Ljava/lang/String;)I",
       (void *) com_android_internal_os_Zygote_nativeForkAndSpecialize },
     { "nativeForkSystemServer", "(II[II[[IJJ)I",
       (void *) com_android_internal_os_Zygote_nativeForkSystemServer },

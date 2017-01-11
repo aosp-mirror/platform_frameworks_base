@@ -381,7 +381,7 @@ bool FileDescriptorInfo::DetachSocket() const {
 }
 
 // static
-FileDescriptorTable* FileDescriptorTable::Create() {
+FileDescriptorTable* FileDescriptorTable::Create(const std::vector<int>& fds_to_ignore) {
   DIR* d = opendir(kFdPath);
   if (d == NULL) {
     ALOGE("Unable to open directory %s: %s", kFdPath, strerror(errno));
@@ -394,6 +394,10 @@ FileDescriptorTable* FileDescriptorTable::Create() {
   while ((e = readdir(d)) != NULL) {
     const int fd = ParseFd(e, dir_fd);
     if (fd == -1) {
+      continue;
+    }
+    if (std::find(fds_to_ignore.begin(), fds_to_ignore.end(), fd) != fds_to_ignore.end()) {
+      ALOGI("Ignoring open file descriptor %d", fd);
       continue;
     }
 
@@ -414,7 +418,7 @@ FileDescriptorTable* FileDescriptorTable::Create() {
   return new FileDescriptorTable(open_fd_map);
 }
 
-bool FileDescriptorTable::Restat() {
+bool FileDescriptorTable::Restat(const std::vector<int>& fds_to_ignore) {
   std::set<int> open_fds;
 
   // First get the list of open descriptors.
@@ -429,6 +433,10 @@ bool FileDescriptorTable::Restat() {
   while ((e = readdir(d)) != NULL) {
     const int fd = ParseFd(e, dir_fd);
     if (fd == -1) {
+      continue;
+    }
+    if (std::find(fds_to_ignore.begin(), fds_to_ignore.end(), fd) != fds_to_ignore.end()) {
+      ALOGI("Ignoring open file descriptor %d", fd);
       continue;
     }
 

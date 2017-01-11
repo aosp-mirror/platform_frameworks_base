@@ -196,11 +196,14 @@ class ZygoteConnection {
                 rlimits = parsedArgs.rlimits.toArray(intArray2d);
             }
 
+            int[] fdsToIgnore = null;
+
             if (parsedArgs.invokeWith != null) {
                 FileDescriptor[] pipeFds = Os.pipe2(O_CLOEXEC);
                 childPipeFd = pipeFds[1];
                 serverPipeFd = pipeFds[0];
                 Os.fcntlInt(childPipeFd, F_SETFD, 0);
+                fdsToIgnore = new int[] { childPipeFd.getInt$(), serverPipeFd.getInt$() };
             }
 
             /**
@@ -233,7 +236,7 @@ class ZygoteConnection {
 
             pid = Zygote.forkAndSpecialize(parsedArgs.uid, parsedArgs.gid, parsedArgs.gids,
                     parsedArgs.debugFlags, rlimits, parsedArgs.mountExternal, parsedArgs.seInfo,
-                    parsedArgs.niceName, fdsToClose, parsedArgs.instructionSet,
+                    parsedArgs.niceName, fdsToClose, fdsToIgnore, parsedArgs.instructionSet,
                     parsedArgs.appDataDir);
         } catch (ErrnoException ex) {
             logAndPrintError(newStderr, "Exception creating pipe", ex);
