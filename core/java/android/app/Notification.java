@@ -70,6 +70,7 @@ import android.widget.RemoteViews;
 import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.NotificationColorUtil;
+import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -2341,6 +2342,11 @@ public class Notification implements Parcelable
          */
         private int mCachedContrastColor = COLOR_INVALID;
         private int mCachedContrastColorIsFor = COLOR_INVALID;
+        /**
+         * Caches a ambient version of {@link #mCachedContrastColorIsFor}.
+         */
+        private int mCachedAmbientColor = COLOR_INVALID;
+        private int mCachedAmbientColorIsFor = COLOR_INVALID;
 
         /**
          * Caches an instance of StandardTemplateParams. Note that this may have been used before,
@@ -3329,7 +3335,7 @@ public class Notification implements Parcelable
 
             final Bundle ex = mN.extras;
 
-            bindNotificationHeader(contentView);
+            bindNotificationHeader(contentView, p.ambient);
             bindLargeIcon(contentView);
             boolean showProgress = handleProgressBar(p.hasProgress, contentView, ex);
             if (p.title != null) {
@@ -3404,13 +3410,16 @@ public class Notification implements Parcelable
             }
         }
 
-        private void bindNotificationHeader(RemoteViews contentView) {
-            bindSmallIcon(contentView);
-            bindHeaderAppName(contentView);
-            bindHeaderText(contentView);
-            bindHeaderChronometerAndTime(contentView);
-            bindExpandButton(contentView);
-            bindProfileBadge(contentView);
+        private void bindNotificationHeader(RemoteViews contentView, boolean ambient) {
+            bindSmallIcon(contentView, ambient);
+            bindHeaderAppName(contentView, ambient);
+            if (!ambient) {
+                // Ambient view does not have these
+                bindHeaderText(contentView);
+                bindHeaderChronometerAndTime(contentView);
+                bindExpandButton(contentView);
+                bindProfileBadge(contentView);
+            }
         }
 
         private void bindExpandButton(RemoteViews contentView) {
@@ -3493,19 +3502,20 @@ public class Notification implements Parcelable
 
             return String.valueOf(name);
         }
-        private void bindHeaderAppName(RemoteViews contentView) {
+        private void bindHeaderAppName(RemoteViews contentView, boolean ambient) {
             contentView.setTextViewText(R.id.app_name_text, loadHeaderAppName());
-            contentView.setTextColor(R.id.app_name_text, resolveContrastColor());
+            contentView.setTextColor(R.id.app_name_text,
+                    ambient ? resolveAmbientColor() : resolveContrastColor());
         }
 
-        private void bindSmallIcon(RemoteViews contentView) {
+        private void bindSmallIcon(RemoteViews contentView, boolean ambient) {
             if (mN.mSmallIcon == null && mN.icon != 0) {
                 mN.mSmallIcon = Icon.createWithResource(mContext, mN.icon);
             }
             contentView.setImageViewIcon(R.id.icon, mN.mSmallIcon);
             contentView.setDrawableParameters(R.id.icon, false /* targetBackground */,
                     -1 /* alpha */, -1 /* colorFilter */, null /* mode */, mN.iconLevel);
-            processSmallIconColor(mN.mSmallIcon, contentView);
+            processSmallIconColor(mN.mSmallIcon, contentView, ambient);
         }
 
         /**
@@ -3546,11 +3556,14 @@ public class Notification implements Parcelable
             boolean validRemoteInput = false;
 
             int N = mActions.size();
-            boolean emphazisedMode = mN.fullScreenIntent != null;
+            boolean emphazisedMode = mN.fullScreenIntent != null && !p.ambient;
             big.setBoolean(R.id.actions, "setEmphasizedMode", emphazisedMode);
             if (N > 0) {
                 big.setViewVisibility(R.id.actions_container, View.VISIBLE);
                 big.setViewVisibility(R.id.actions, View.VISIBLE);
+                if (p.ambient) {
+                    big.setInt(R.id.actions, "setBackgroundColor", Color.TRANSPARENT);
+                }
                 big.setViewLayoutMarginBottomDimen(R.id.notification_action_list_margin_target,
                         R.dimen.notification_action_list_height);
                 if (N>MAX_ACTION_BUTTONS) N=MAX_ACTION_BUTTONS;
@@ -3559,7 +3572,7 @@ public class Notification implements Parcelable
                     validRemoteInput |= hasValidRemoteInput(action);
 
                     final RemoteViews button = generateActionButton(action, emphazisedMode,
-                            i % 2 != 0);
+                            i % 2 != 0, p.ambient);
                     big.addView(R.id.actions, button);
                 }
             } else {
@@ -3567,7 +3580,7 @@ public class Notification implements Parcelable
             }
 
             CharSequence[] replyText = mN.extras.getCharSequenceArray(EXTRA_REMOTE_INPUT_HISTORY);
-            if (validRemoteInput && replyText != null
+            if (!p.ambient && validRemoteInput && replyText != null
                     && replyText.length > 0 && !TextUtils.isEmpty(replyText[0])) {
                 big.setViewVisibility(R.id.notification_material_reply_container, View.VISIBLE);
                 big.setTextViewText(R.id.notification_material_reply_text_1, replyText[0]);
@@ -3652,8 +3665,20 @@ public class Notification implements Parcelable
             RemoteViews header = new BuilderRemoteViews(mContext.getApplicationInfo(),
                     R.layout.notification_template_header);
             resetNotificationHeader(header);
-            bindNotificationHeader(header);
+            bindNotificationHeader(header, false /* ambient */);
             return header;
+        }
+
+        /**
+         * Construct a RemoteViews for the ambient version of the notification.
+         *
+         * @hide
+         */
+        public RemoteViews makeAmbientNotification() {
+            RemoteViews ambient = applyStandardTemplateWithActions(
+                    R.layout.notification_template_material_ambient,
+                    mParams.reset().fillTextsFrom(this).hasProgress(false).ambient(true));
+            return ambient;
         }
 
         private void hideLine1Text(RemoteViews result) {
@@ -3725,7 +3750,7 @@ public class Notification implements Parcelable
 
 
         private RemoteViews generateActionButton(Action action, boolean emphazisedMode,
-                boolean oddAction) {
+                boolean oddAction, boolean ambient) {
             final boolean tombstone = (action.actionIntent == null);
             RemoteViews button = new BuilderRemoteViews(mContext.getApplicationInfo(),
                     emphazisedMode ? getEmphasizedActionLayoutResource()
@@ -3763,7 +3788,8 @@ public class Notification implements Parcelable
             } else {
                 button.setTextViewText(R.id.action0, processLegacyText(action.title));
                 if (mN.color != COLOR_DEFAULT) {
-                    button.setTextColor(R.id.action0, resolveContrastColor());
+                    button.setTextColor(R.id.action0,
+                            ambient ? resolveAmbientColor() : resolveContrastColor());
                 }
             }
             return button;
@@ -3894,15 +3920,17 @@ public class Notification implements Parcelable
         /**
          * Apply any necessariy colors to the small icon
          */
-        private void processSmallIconColor(Icon smallIcon, RemoteViews contentView) {
+        private void processSmallIconColor(Icon smallIcon, RemoteViews contentView,
+                boolean ambient) {
             boolean colorable = !isLegacy() || getColorUtil().isGrayscaleIcon(mContext, smallIcon);
+            int color = ambient ? resolveAmbientColor() : resolveContrastColor();
             if (colorable) {
-                contentView.setDrawableParameters(R.id.icon, false, -1, resolveContrastColor(),
+                contentView.setDrawableParameters(R.id.icon, false, -1, color,
                         PorterDuff.Mode.SRC_ATOP, -1);
 
             }
             contentView.setInt(R.id.notification_header, "setOriginalIconColor",
-                    colorable ? resolveContrastColor() : NotificationHeaderView.NO_COLOR);
+                    colorable ? color : NotificationHeaderView.NO_COLOR);
         }
 
         /**
@@ -3933,6 +3961,16 @@ public class Notification implements Parcelable
 
             mCachedContrastColorIsFor = mN.color;
             return mCachedContrastColor = contrasted;
+        }
+
+        int resolveAmbientColor() {
+            if (mCachedAmbientColorIsFor == mN.color && mCachedAmbientColorIsFor != COLOR_INVALID) {
+                return mCachedAmbientColor;
+            }
+            final int contrasted = NotificationColorUtil.resolveAmbientColor(mContext, mN.color);
+
+            mCachedAmbientColorIsFor = mN.color;
+            return mCachedAmbientColor = contrasted;
         }
 
         /**
