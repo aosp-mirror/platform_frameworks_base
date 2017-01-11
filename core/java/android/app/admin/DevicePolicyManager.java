@@ -279,6 +279,8 @@ public class DevicePolicyManager {
      * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_COOKIE_HEADER}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_LABEL}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_ICON_URI}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_LOCAL_TIME} (convert to String), optional</li>
      * <li>{@link #EXTRA_PROVISIONING_TIME_ZONE}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_LOCALE}, optional</li>
@@ -290,6 +292,8 @@ public class DevicePolicyManager {
      * <li>{@link #EXTRA_PROVISIONING_WIFI_PROXY_PORT} (convert to String), optional</li>
      * <li>{@link #EXTRA_PROVISIONING_WIFI_PROXY_BYPASS}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_WIFI_PAC_URL}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_SUPPORT_URL}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_ORGANIZATION_NAME}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}, optional</li></ul>
      *
      * @hide
@@ -688,6 +692,67 @@ public class DevicePolicyManager {
         = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION";
 
     /**
+     * A String extra holding the localized name of the organization under management.
+     *
+     * The name is displayed only during provisioning.
+     *
+     * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_PROVISIONING_ORGANIZATION_NAME =
+            "android.app.extra.PROVISIONING_ORGANIZATION_NAME";
+
+    /**
+     * A String extra holding a url to the website of the device's provider. The website can be
+     * opened in a browser during provisioning.
+     *
+     * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_PROVISIONING_SUPPORT_URL =
+            "android.app.extra.PROVISIONING_SUPPORT_URL";
+
+    /**
+     * A String extra holding the localized name of the device admin package. It should be the same
+     * as the app label of the package.
+     *
+     * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_LABEL =
+            "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_LABEL";
+
+    /**
+     * A {@link Uri} extra pointing to the app icon of device admin package. This image will be
+     * shown during the provisioning.
+     * <h5>The following URI schemes are accepted:</h5>
+     * <ul>
+     * <li>content ({@link android.content.ContentResolver#SCHEME_CONTENT})</li>
+     * <li>android.resource ({@link android.content.ContentResolver#SCHEME_ANDROID_RESOURCE})</li>
+     * </ul>
+     *
+     * <p> It is the responsibility of the caller to provide an image with a reasonable
+     * pixel density for the device.
+     *
+     * <p> If a content: URI is passed, the intent should have the flag
+     * {@link Intent#FLAG_GRANT_READ_URI_PERMISSION} and the uri should be added to the
+     * {@link android.content.ClipData} of the intent too.
+     *
+     * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_ICON_URI =
+            "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_ICON_URI";
+
+    /**
      * An int extra holding a minimum required version code for the device admin package. If the
      * device admin is already installed on the device, it will only be re-downloaded from
      * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION} if the version of the
@@ -808,7 +873,7 @@ public class DevicePolicyManager {
      * </ul>
      *
      * <p> It is the responsibility of the caller to provide an image with a reasonable
-     * pixed density for the device.
+     * pixel density for the device.
      *
      * <p> If a content: URI is passed, the intent should have the flag
      * {@link Intent#FLAG_GRANT_READ_URI_PERMISSION} and the uri should be added to the
