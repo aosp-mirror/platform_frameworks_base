@@ -19,14 +19,13 @@
 
 #include <inttypes.h>
 
+#include <cutils/trace.h>
+#include <utils/String8.h>
+#include <log/log.h>
+
 #include <JNIHelp.h>
 #include <ScopedUtfChars.h>
 #include <ScopedStringChars.h>
-
-#include <utils/String8.h>
-
-#include <cutils/trace.h>
-#include <cutils/log.h>
 
 namespace android {
 

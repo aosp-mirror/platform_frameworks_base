@@ -15,18 +15,20 @@
  */
 #include "JankTracker.h"
 
-#include "Properties.h"
-#include "utils/TimeUtils.h"
-
-#include <algorithm>
-#include <cutils/ashmem.h>
-#include <cutils/log.h>
-#include <cstdio>
 #include <errno.h>
 #include <inttypes.h>
-#include <limits>
+
+#include <algorithm>
 #include <cmath>
+#include <cstdio>
+#include <limits>
 #include <sys/mman.h>
+
+#include <cutils/ashmem.h>
+#include <log/log.h>
+
+#include "Properties.h"
+#include "utils/TimeUtils.h"
 
 namespace android {
 namespace uirenderer {

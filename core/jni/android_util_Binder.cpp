@@ -29,19 +29,19 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <utils/Atomic.h>
 #include <binder/IInterface.h>
+#include <binder/IServiceManager.h>
 #include <binder/IPCThreadState.h>
-#include <utils/Log.h>
-#include <utils/SystemClock.h>
-#include <utils/List.h>
-#include <utils/KeyedVector.h>
-#include <log/logger.h>
 #include <binder/Parcel.h>
 #include <binder/ProcessState.h>
-#include <binder/IServiceManager.h>
-#include <utils/threads.h>
+#include <log/log.h>
+#include <utils/Atomic.h>
+#include <utils/KeyedVector.h>
+#include <utils/List.h>
+#include <utils/Log.h>
 #include <utils/String8.h>
+#include <utils/SystemClock.h>
+#include <utils/threads.h>
 
 #include <ScopedUtfChars.h>
 #include <ScopedLocalRef.h>
