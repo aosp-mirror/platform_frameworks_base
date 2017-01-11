@@ -217,26 +217,11 @@ class PackageDexOptimizer {
                             dexoptNeeded);
                 }
 
-                final String dexoptType;
-                String oatDir = null;
-                boolean isOdexLocation = (dexoptNeeded < 0);
-                switch (Math.abs(dexoptNeeded)) {
-                    case DexFile.NO_DEXOPT_NEEDED:
-                        continue;
-                    case DexFile.DEX2OAT_FROM_SCRATCH:
-                    case DexFile.DEX2OAT_FOR_BOOT_IMAGE:
-                    case DexFile.DEX2OAT_FOR_FILTER:
-                    case DexFile.DEX2OAT_FOR_RELOCATION:
-                        dexoptType = "dex2oat";
-                        oatDir = createOatDirIfSupported(pkg, dexCodeInstructionSet);
-                        break;
-                    case DexFile.PATCHOAT_FOR_RELOCATION:
-                        dexoptType = "patchoat";
-                        break;
-                    default:
-                        throw new IllegalStateException("Invalid dexopt:" + dexoptNeeded);
+                if (dexoptNeeded == DexFile.NO_DEXOPT_NEEDED) {
+                    continue;
                 }
 
+                String oatDir = createOatDirIfSupported(pkg, dexCodeInstructionSet);
                 String sharedLibrariesPath = null;
                 if (sharedLibraries != null && sharedLibraries.length != 0) {
                     StringBuilder sb = new StringBuilder();
@@ -248,7 +233,7 @@ class PackageDexOptimizer {
                     }
                     sharedLibrariesPath = sb.toString();
                 }
-                Log.i(TAG, "Running dexopt (" + dexoptType + ") on: " + path + " pkg="
+                Log.i(TAG, "Running dexopt on: " + path + " pkg="
                         + pkg.applicationInfo.packageName + " isa=" + dexCodeInstructionSet
                         + " vmSafeMode=" + vmSafeMode + " debuggable=" + debuggable
                         + " target-filter=" + targetCompilerFilter + " oatDir = " + oatDir
