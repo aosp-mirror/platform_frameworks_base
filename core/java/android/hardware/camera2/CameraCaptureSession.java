@@ -221,8 +221,8 @@ public abstract class CameraCaptureSession implements AutoCloseable {
     public abstract void tearDown(@NonNull Surface surface) throws CameraAccessException;
 
     /**
-     * <p>Finish the deferred output configurations where the output Surface was not configured
-     * before.</p>
+     * <p>Finalize the output configurations that now have their deferred and/or extra Surfaces
+     * included.</p>
      *
      * <p>For camera use cases where a preview and other output configurations need to be
      * configured, it can take some time for the preview Surface to be ready. For example, if the
@@ -235,22 +235,31 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * and defer the preview output configuration until the Surface is ready. After the
      * {@link CameraCaptureSession} is created successfully with this deferred output and other
      * normal outputs, the application can start submitting requests as long as they do not include
-     * deferred output Surfaces. Once a deferred Surface is ready, the application can set the
-     * Surface on the deferred output configuration with the
-     * {@link OutputConfiguration#setDeferredSurface} method, and then finish the deferred output
+     * deferred output Surfaces. Once a deferred Surface is ready, the application can add the
+     * Surface to the deferred output configuration with the
+     * {@link OutputConfiguration#addSurface} method, and then update the deferred output
      * configuration via this method, before it can submit capture requests with this output
      * target.</p>
      *
-     * <p>The output Surfaces included by this list of deferred
+     * <p>This function can also be called in case where multiple surfaces share the same
+     * OutputConfiguration, and one of the surfaces becomes available after the {@link
+     * CameraCaptureSession} is created. In that case, the application must first create the
+     * OutputConfiguration with the available Surface, then enable furture surface sharing via
+     * {@link OutputConfiguration#enableSurfaceSharing}, before creating the CameraCaptureSession.
+     * After the CameraCaptureSession is created, and once the extra Surface becomes available, the
+     * application must then call {@link OutputConfiguration#addSurface} before finalizing the
+     * configuration with this method.</p>
+     *
+     * <p>The output Surfaces included by this list of
      * {@link OutputConfiguration OutputConfigurations} can be used as {@link CaptureRequest}
      * targets as soon as this call returns.</p>
      *
      * <p>This method is not supported by
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY LEGACY}-level devices.</p>
      *
-     * @param deferredOutputConfigs a list of {@link OutputConfiguration OutputConfigurations} that
-     *            have had {@link OutputConfiguration#setDeferredSurface setDeferredSurface} invoked
-     *            with a valid output Surface.
+     * @param outputConfigs a list of {@link OutputConfiguration OutputConfigurations} that
+     *            have had {@link OutputConfiguration#addSurface addSurface} invoked with a valid
+     *            output Surface after {@link CameraDevice#createCaptureSessionByOutputConfigurations}.
      * @throws CameraAccessException if the camera device is no longer connected or has encountered
      *             a fatal error.
      * @throws IllegalStateException if this session is no longer active, either because the session
@@ -261,8 +270,8 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *             source. Or if one of the output configuration was already finished with an
      *             included surface in a prior call.
      */
-    public abstract void finishDeferredConfiguration(
-            List<OutputConfiguration> deferredOutputConfigs) throws CameraAccessException;
+    public abstract void finalizeOutputConfigurations(
+            List<OutputConfiguration> outputConfigs) throws CameraAccessException;
 
     /**
      * <p>Submit a request for an image to be captured by the camera device.</p>

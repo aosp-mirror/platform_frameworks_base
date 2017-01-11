@@ -743,14 +743,14 @@ public class CameraDeviceImpl extends CameraDevice
         }
     }
 
-    public void finishDeferredConfig(List<OutputConfiguration> deferredConfigs)
+    public void finalizeOutputConfigs(List<OutputConfiguration> outputConfigs)
             throws CameraAccessException {
-        if (deferredConfigs == null || deferredConfigs.size() == 0) {
+        if (outputConfigs == null || outputConfigs.size() == 0) {
             throw new IllegalArgumentException("deferred config is null or empty");
         }
 
         synchronized(mInterfaceLock) {
-            for (OutputConfiguration config : deferredConfigs) {
+            for (OutputConfiguration config : outputConfigs) {
                 int streamId = -1;
                 for (int i = 0; i < mConfiguredOutputs.size(); i++) {
                     // Have to use equal here, as createCaptureSessionByOutputConfigurations() and
@@ -765,11 +765,11 @@ public class CameraDeviceImpl extends CameraDevice
                             + "session");
                 }
 
-                if (config.getSurface() == null) {
-                    throw new IllegalArgumentException("The deferred config for stream " + streamId
-                            + " must have a non-null surface");
+                if (config.getSurfaces().size() == 0) {
+                    throw new IllegalArgumentException("The final config for stream " + streamId
+                            + " must have at least 1 surface");
                 }
-                mRemoteDevice.setDeferredConfiguration(streamId, config);
+                mRemoteDevice.finalizeOutputConfigurations(streamId, config);
             }
         }
     }

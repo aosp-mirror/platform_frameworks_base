@@ -215,10 +215,10 @@ public class ICameraDeviceUserWrapper {
         }
     }
 
-    public void setDeferredConfiguration(int streamId, OutputConfiguration deferredConfig)
+    public void finalizeOutputConfigurations(int streamId, OutputConfiguration deferredConfig)
             throws CameraAccessException {
         try {
-            mRemoteDevice.setDeferredConfiguration(streamId, deferredConfig);
+            mRemoteDevice.finalizeOutputConfigurations(streamId, deferredConfig);
         } catch (Throwable t) {
             CameraManager.throwAsPublicException(t);
             throw new UnsupportedOperationException("Unexpected exception", t);

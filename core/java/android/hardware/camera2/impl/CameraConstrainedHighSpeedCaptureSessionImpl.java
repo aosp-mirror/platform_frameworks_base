@@ -258,9 +258,9 @@ public class CameraConstrainedHighSpeedCaptureSessionImpl
     }
 
     @Override
-    public void finishDeferredConfiguration(List<OutputConfiguration> deferredOutputConfigs)
+    public void finalizeOutputConfigurations(List<OutputConfiguration> deferredOutputConfigs)
             throws CameraAccessException {
-        mSessionImpl.finishDeferredConfiguration(deferredOutputConfigs);
+        mSessionImpl.finalizeOutputConfigurations(deferredOutputConfigs);
     }
 
     private class WrapperCallback extends StateCallback {

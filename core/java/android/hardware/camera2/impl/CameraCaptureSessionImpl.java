@@ -151,9 +151,9 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
     }
 
     @Override
-    public void finishDeferredConfiguration(
-            List<OutputConfiguration> deferredOutputConfigs) throws CameraAccessException {
-        mDeviceImpl.finishDeferredConfig(deferredOutputConfigs);
+    public void finalizeOutputConfigurations(
+            List<OutputConfiguration> outputConfigs) throws CameraAccessException {
+        mDeviceImpl.finalizeOutputConfigs(outputConfigs);
     }
 
     @Override
