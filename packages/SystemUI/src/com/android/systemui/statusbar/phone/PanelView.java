@@ -94,6 +94,7 @@ public abstract class PanelView extends FrameLayout {
     private VelocityTrackerInterface mVelocityTracker;
     private FlingAnimationUtils mFlingAnimationUtils;
     private FlingAnimationUtils mFlingAnimationUtilsClosing;
+    private FlingAnimationUtils mFlingAnimationUtilsDismissing;
     private FalsingManager mFalsingManager;
 
     /**
@@ -180,8 +181,13 @@ public abstract class PanelView extends FrameLayout {
 
     public PanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mFlingAnimationUtils = new FlingAnimationUtils(context, 0.6f);
-        mFlingAnimationUtilsClosing = new FlingAnimationUtils(context, 0.4f);
+        mFlingAnimationUtils = new FlingAnimationUtils(context, 0.6f /* maxLengthSeconds */,
+                0.6f /* speedUpFactor */);
+        mFlingAnimationUtilsClosing = new FlingAnimationUtils(context, 0.5f /* maxLengthSeconds */,
+                0.6f /* speedUpFactor */);
+        mFlingAnimationUtilsDismissing = new FlingAnimationUtils(context,
+                0.5f /* maxLengthSeconds */, 0.2f /* speedUpFactor */, 0.6f /* x2 */,
+                0.84f /* y2 */);
         mBounceInterpolator = new BounceInterpolator();
         mFalsingManager = FalsingManager.getInstance(context);
     }
@@ -700,13 +706,17 @@ public abstract class PanelView extends FrameLayout {
                 animator.setDuration(350);
             }
         } else {
-            mFlingAnimationUtilsClosing.apply(animator, mExpandedHeight, target, vel, getHeight());
+            if (shouldUseDismissingAnimation()) {
+                mFlingAnimationUtilsDismissing.apply(animator, mExpandedHeight, target, vel,
+                        getHeight());
+            } else {
+                mFlingAnimationUtilsClosing
+                        .apply(animator, mExpandedHeight, target, vel, getHeight());
+            }
 
             // Make it shorter if we run a canned animation
             if (vel == 0) {
-                animator.setDuration((long)
-                        (animator.getDuration() * getCannedFlingDurationFactor()
-                                / collapseSpeedUpFactor));
+                animator.setDuration((long) (animator.getDuration() / collapseSpeedUpFactor));
             }
         }
         animator.addListener(new AnimatorListenerAdapter() {
@@ -732,6 +742,8 @@ public abstract class PanelView extends FrameLayout {
         mHeightAnimator = animator;
         animator.start();
     }
+
+    protected abstract boolean shouldUseDismissingAnimation();
 
     @Override
     protected void onAttachedToWindow() {
@@ -1114,9 +1126,6 @@ public abstract class PanelView extends FrameLayout {
     public abstract void resetViews();
 
     protected abstract float getPeekHeight();
-
-    protected abstract float getCannedFlingDurationFactor();
-
     /**
      * @return whether "Clear all" button will be visible when the panel is fully expanded
      */

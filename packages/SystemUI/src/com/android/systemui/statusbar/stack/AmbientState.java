@@ -58,6 +58,7 @@ public class AmbientState {
     private float mExpandingVelocity;
     private boolean mPanelTracking;
     private boolean mExpansionChanging;
+    private boolean mPanelFullWidth;
 
     public AmbientState(Context context) {
         reload(context);
@@ -286,5 +287,13 @@ public class AmbientState {
 
     public boolean isPanelTracking() {
         return mPanelTracking;
+    }
+
+    public boolean isPanelFullWidth() {
+        return mPanelFullWidth;
+    }
+
+    public void setPanelFullWidth(boolean panelFullWidth) {
+        mPanelFullWidth = panelFullWidth;
     }
 }
