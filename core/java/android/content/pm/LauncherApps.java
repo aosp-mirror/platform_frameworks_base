@@ -1142,6 +1142,7 @@ public class LauncherApps {
         /** This is a request to pin app widget. */
         public static final int REQUEST_TYPE_APPWIDGET = 2;
 
+        /** @hide */
         @IntDef(value = {REQUEST_TYPE_SHORTCUT})
         @Retention(RetentionPolicy.SOURCE)
         public @interface RequestType {}
