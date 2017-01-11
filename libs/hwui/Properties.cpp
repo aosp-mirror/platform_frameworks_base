@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "Properties.h"
-
 #include "Debug.h"
-
-#include <cutils/compiler.h>
-#include <cutils/log.h>
-#include <cutils/properties.h>
 
 #include <algorithm>
 #include <cstdlib>
+
+#include <log/log.h>
+#include <cutils/compiler.h>
+#include <cutils/properties.h>
 
 namespace android {
 namespace uirenderer {
