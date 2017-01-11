@@ -3373,6 +3373,8 @@
             <flag name="flagRequestFilterKeyEvents" value="0x00000020" />
             <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_RETRIEVE_INTERACTIVE_WINDOWS} -->
             <flag name="flagRetrieveInteractiveWindows" value="0x00000040" />
+            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_ENABLE_ACCESSIBILITY_VOLUME} -->
+            <flag name="flagEnableAccessibilityVolume" value="0x00000080" />
         </attr>
         <!-- Component name of an activity that allows the user to modify
              the settings for this service. This setting cannot be changed at runtime. -->

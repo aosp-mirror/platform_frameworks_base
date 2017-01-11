@@ -1172,6 +1172,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 service.onAdded();
                 userState.mBoundServices.add(service);
                 userState.mComponentNameToServiceMap.put(service.mComponentName, service);
+                scheduleNotifyClientsOfServicesStateChange();
             }
         } catch (RemoteException re) {
             /* do nothing */
@@ -1193,6 +1194,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             Service boundService = userState.mBoundServices.get(i);
             userState.mComponentNameToServiceMap.put(boundService.mComponentName, boundService);
         }
+        scheduleNotifyClientsOfServicesStateChange();
     }
 
     /**
@@ -1357,8 +1359,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         || userState.mClients.getRegisteredCallbackCount() > 0)) {
             userState.mLastSentClientState = clientState;
             mMainHandler.obtainMessage(MainHandler.MSG_SEND_STATE_TO_CLIENTS,
-                    clientState, userState.mUserId) .sendToTarget();
+                    clientState, userState.mUserId).sendToTarget();
         }
+    }
+
+    private void scheduleNotifyClientsOfServicesStateChange() {
+        mMainHandler.obtainMessage(MainHandler.MSG_SEND_SERVICES_STATE_CHANGED_TO_CLIENTS)
+                .sendToTarget();
     }
 
     private void scheduleUpdateInputFilter(UserState userState) {
@@ -2057,6 +2064,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public static final int MSG_SHOW_ENABLED_TOUCH_EXPLORATION_DIALOG = 7;
         public static final int MSG_SEND_KEY_EVENT_TO_INPUT_FILTER = 8;
         public static final int MSG_CLEAR_ACCESSIBILITY_FOCUS = 9;
+        public static final int MSG_SEND_SERVICES_STATE_CHANGED_TO_CLIENTS = 10;
 
         public MainHandler(Looper looper) {
             super(looper);
@@ -2121,6 +2129,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     }
                     bridge.clearAccessibilityFocusNotLocked(windowId);
                 } break;
+
+                case MSG_SEND_SERVICES_STATE_CHANGED_TO_CLIENTS: {
+                    notifyClientsOfServicesStateChange();
+                } break;
             }
         }
 
@@ -2156,6 +2168,26 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     IAccessibilityManagerClient client = clients.getBroadcastItem(i);
                     try {
                         client.setState(clientState);
+                    } catch (RemoteException re) {
+                        /* ignore */
+                    }
+                }
+            } finally {
+                clients.finishBroadcast();
+            }
+        }
+
+        private void notifyClientsOfServicesStateChange() {
+            RemoteCallbackList<IAccessibilityManagerClient> clients;
+            synchronized (mLock) {
+                clients = getCurrentUserStateLocked().mClients;
+            }
+            try {
+                final int userClientCount = clients.beginBroadcast();
+                for (int i = 0; i < userClientCount; i++) {
+                    IAccessibilityManagerClient client = clients.getBroadcastItem(i);
+                    try {
+                        client.notifyServicesStateChanged();
                     } catch (RemoteException re) {
                         /* ignore */
                     }
@@ -2483,6 +2515,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     }
                     UserState userState = getUserStateLocked(mUserId);
                     onUserStateChangedLocked(userState);
+                    scheduleNotifyClientsOfServicesStateChange();
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
