@@ -100,11 +100,19 @@ public class WorkLockActivity extends Activity {
         final View blankView = new View(this);
         blankView.setBackgroundColor(color);
         setContentView(blankView);
+    }
 
-        // Respond to input events by showing the prompt to confirm credentials.
-        blankView.setOnClickListener((View v) -> {
+    /**
+     * Respond to focus events by showing the prompt to confirm credentials.
+     * <p>
+     * We don't have anything particularly interesting to show here (just a solid-colored page) so
+     * there is no sense in sitting in the foreground doing nothing.
+     */
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        if (hasFocus) {
             showConfirmCredentialActivity();
-        });
+        }
     }
 
     @Override
