@@ -74,4 +74,8 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     public void onActivityRequestedOrientationChanged(int taskId, int requestedOrientation)
             throws RemoteException {
     }
+
+    @Override
+    public void onTaskProfileLocked(int taskId, int userId) {
+    }
 }

@@ -483,6 +483,21 @@
             android:exported="true"
             android:enabled="@bool/config_enableKeyguardService" />
 
+        <activity android:name=".keyguard.WorkLockActivity"
+                  android:label="@string/accessibility_desc_work_lock"
+                  android:permission="android.permission.MANAGE_USERS"
+                  android:exported="false"
+                  android:launchMode="singleTop"
+                  android:excludeFromRecents="true"
+                  android:stateNotNeeded="true"
+                  android:resumeWhilePausing="true"
+                  android:theme="@android:style/Theme.Black.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.app.action.CONFIRM_DEVICE_CREDENTIAL_WITH_USER" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <activity android:name=".Somnambulator"
             android:label="@string/start_dreams"
             android:icon="@mipmap/ic_launcher_dreams"

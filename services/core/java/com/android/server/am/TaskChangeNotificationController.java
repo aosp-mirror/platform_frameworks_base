@@ -39,6 +39,7 @@ class TaskChangeNotificationController {
     static final int NOTIFY_TASK_DESCRIPTION_CHANGED_LISTENERS_MSG = 11;
     static final int NOTIFY_ACTIVITY_REQUESTED_ORIENTATION_CHANGED_LISTENERS = 12;
     static final int NOTIFY_TASK_REMOVAL_STARTED_LISTENERS = 13;
+    static final int NOTIFY_TASK_PROFILE_LOCKED_LISTENERS_MSG = 14;
 
     // Delay in notifying task stack change listeners (in millis)
     static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_DELAY = 100;
@@ -109,6 +110,9 @@ class TaskChangeNotificationController {
                     break;
                 case NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG:
                     forAllListeners((listener) -> listener.onActivityDismissingDockedStack());
+                    break;
+                case NOTIFY_TASK_PROFILE_LOCKED_LISTENERS_MSG:
+                    forAllListeners((listener) -> listener.onTaskProfileLocked(msg.arg1, msg.arg2));
                     break;
             }
         }
@@ -226,6 +230,15 @@ class TaskChangeNotificationController {
      */
     void notifyTaskRemovalStarted(int taskId) {
         mHandler.obtainMessage(NOTIFY_TASK_REMOVAL_STARTED_LISTENERS, taskId, 0 /* unused */)
+                .sendToTarget();
+    }
+
+    /**
+     * Notify listeners that the task has been put in a locked state because one or more of the
+     * activities inside it belong to a managed profile user that has been locked.
+     */
+    void notifyTaskProfileLocked(int taskId, int userId) {
+        mHandler.obtainMessage(NOTIFY_TASK_PROFILE_LOCKED_LISTENERS_MSG, taskId, userId)
                 .sendToTarget();
     }
 }

@@ -763,43 +763,52 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     /**
-     * TODO: Handle freefom mode.
-     * @return true when credential confirmation is needed for the user and there is any
-     *         activity started by the user in any visible stack.
+     * Detects whether we should show a lock screen in front of this task for a locked user.
+     * <p>
+     * We'll do this if either of the following holds:
+     * <ul>
+     *   <li>The top activity explicitly belongs to {@param userId}.</li>
+     *   <li>The top activity returns a result to an activity belonging to {@param userId}.</li>
+     * </ul>
+     *
+     * @return {@code true} if the top activity looks like it belongs to {@param userId}.
      */
-    boolean isUserLockedProfile(@UserIdInt int userId) {
-        if (!mService.mUserController.shouldConfirmCredentials(userId)) {
-            return false;
-        }
-        final ActivityStack fullScreenStack = getStack(FULLSCREEN_WORKSPACE_STACK_ID);
-        final ActivityStack dockedStack = getStack(DOCKED_STACK_ID);
-        final ActivityStack[] activityStacks = new ActivityStack[] {fullScreenStack, dockedStack};
-        for (final ActivityStack activityStack : activityStacks) {
-            if (activityStack == null) {
-                continue;
-            }
-            if (activityStack.topRunningActivityLocked() == null) {
-                continue;
-            }
-            if (activityStack.getStackVisibilityLocked(null) == STACK_INVISIBLE) {
-                continue;
-            }
-            if (activityStack.isDockedStack() && mIsDockMinimized) {
-                continue;
-            }
-            final TaskRecord topTask = activityStack.topTask();
-            if (topTask == null) {
-                continue;
-            }
-            // To handle the case that work app is in the task but just is not the top one.
-            for (int i = topTask.mActivities.size() - 1; i >= 0; i--) {
-                final ActivityRecord activityRecord = topTask.mActivities.get(i);
-                if (activityRecord.userId == userId) {
-                    return true;
+    private boolean taskTopActivityIsUser(TaskRecord task, @UserIdInt int userId) {
+        // To handle the case that work app is in the task but just is not the top one.
+        final ActivityRecord activityRecord = task.getTopActivity();
+        final ActivityRecord resultTo = (activityRecord != null ? activityRecord.resultTo : null);
+
+        return (activityRecord != null && activityRecord.userId == userId)
+                || (resultTo != null && resultTo.userId == userId);
+    }
+
+    /**
+     * Find all visible task stacks containing {@param userId} and intercept them with an activity
+     * to block out the contents and possibly start a credential-confirming intent.
+     *
+     * @param userId user handle for the locked managed profile.
+     */
+    void lockAllProfileTasks(@UserIdInt int userId) {
+        mWindowManager.deferSurfaceLayout();
+        try {
+            final List<ActivityStack> stacks = getStacks();
+            for (int stackNdx = stacks.size() - 1; stackNdx >= 0; stackNdx--) {
+                final List<TaskRecord> tasks = stacks.get(stackNdx).getAllTasks();
+                for (int taskNdx = tasks.size() - 1; taskNdx >= 0; taskNdx--) {
+                    final TaskRecord task = tasks.get(taskNdx);
+
+                    // Check the task for a top activity belonging to userId, or returning a result
+                    // to an activity belonging to userId. Example case: a document picker for
+                    // personal files, opened by a work app, should still get locked.
+                    if (taskTopActivityIsUser(task, userId)) {
+                        mService.mTaskChangeNotificationController.notifyTaskProfileLocked(
+                                task.taskId, userId);
+                    }
                 }
             }
+        } finally {
+            mWindowManager.continueSurfaceLayout();
         }
-        return false;
     }
 
     void setNextTaskIdForUserLocked(int taskId, int userId) {

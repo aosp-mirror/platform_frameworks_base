@@ -326,6 +326,12 @@ public class KeyguardViewMediator extends SystemUI {
      */
     private boolean mPendingLock;
 
+    /**
+     * Controller for showing individual "work challenge" lock screen windows inside managed profile
+     * tasks when the current user has been unlocked but the profile is still locked.
+     */
+    private WorkLockActivityController mWorkLockController;
+
     private boolean mLockLater;
 
     private boolean mWakeAndUnlocking;
@@ -708,6 +714,8 @@ public class KeyguardViewMediator extends SystemUI {
 
         mHideAnimation = AnimationUtils.loadAnimation(mContext,
                 com.android.internal.R.anim.lock_screen_behind_enter);
+
+        mWorkLockController = new WorkLockActivityController(mContext);
     }
 
     @Override

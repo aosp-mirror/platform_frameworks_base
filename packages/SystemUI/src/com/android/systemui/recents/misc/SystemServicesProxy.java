@@ -154,6 +154,7 @@ public class SystemServicesProxy {
         public void onPinnedStackAnimationEnded() { }
         public void onActivityForcedResizable(String packageName, int taskId) { }
         public void onActivityDismissingDockedStack() { }
+        public void onTaskProfileLocked(int taskId, int userId) { }
     }
 
     /**
@@ -196,6 +197,11 @@ public class SystemServicesProxy {
         @Override
         public void onActivityDismissingDockedStack() throws RemoteException {
             mHandler.sendEmptyMessage(H.ON_ACTIVITY_DISMISSING_DOCKED_STACK);
+        }
+
+        @Override
+        public void onTaskProfileLocked(int taskId, int userId) {
+            mHandler.obtainMessage(H.ON_TASK_PROFILE_LOCKED, taskId, userId).sendToTarget();
         }
     };
 
@@ -1155,6 +1161,7 @@ public class SystemServicesProxy {
         private static final int ON_PINNED_STACK_ANIMATION_ENDED = 4;
         private static final int ON_ACTIVITY_FORCED_RESIZABLE = 5;
         private static final int ON_ACTIVITY_DISMISSING_DOCKED_STACK = 6;
+        private static final int ON_TASK_PROFILE_LOCKED = 7;
 
         @Override
         public void handleMessage(Message msg) {
@@ -1193,6 +1200,12 @@ public class SystemServicesProxy {
                 case ON_ACTIVITY_DISMISSING_DOCKED_STACK: {
                     for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                         mTaskStackListeners.get(i).onActivityDismissingDockedStack();
+                    }
+                    break;
+                }
+                case ON_TASK_PROFILE_LOCKED: {
+                    for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                        mTaskStackListeners.get(i).onTaskProfileLocked(msg.arg1, msg.arg2);
                     }
                     break;
                 }

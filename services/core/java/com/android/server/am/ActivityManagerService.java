@@ -11839,20 +11839,20 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         synchronized (this) {
-            if (mStackSupervisor.isUserLockedProfile(userId)) {
-                final long ident = Binder.clearCallingIdentity();
-                try {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                if (mUserController.shouldConfirmCredentials(userId)) {
                     final int currentUserId = mUserController.getCurrentUserIdLocked();
-                    if (mUserController.isLockScreenDisabled(currentUserId)) {
-                        // If there is no device lock, we will show the profile's credential page.
-                        mActivityStarter.showConfirmDeviceCredential(userId);
+                    if (!mKeyguardController.isKeyguardLocked()) {
+                        // If the device is not locked, we will prompt for credentials immediately.
+                        mStackSupervisor.lockAllProfileTasks(userId);
                     } else {
                         // Showing launcher to avoid user entering credential twice.
                         startHomeActivityLocked(currentUserId, "notifyLockedProfile");
                     }
-                } finally {
-                    Binder.restoreCallingIdentity(ident);
                 }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
             }
         }
     }
