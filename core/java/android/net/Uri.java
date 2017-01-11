@@ -1746,8 +1746,8 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
      * begin with and a scheme component cannot be found.
      *
      * @return normalized Uri (never null)
-     * @see {@link android.content.Intent#setData}
-     * @see {@link android.content.Intent#setDataAndNormalize}
+     * @see android.content.Intent#setData
+     * @see android.content.Intent#setDataAndNormalize
      */
     public Uri normalizeScheme() {
         String scheme = getScheme();
