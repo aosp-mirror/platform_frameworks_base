@@ -287,26 +287,23 @@ public class ExternalStorageProvider extends DocumentsProvider {
         String path = file.getAbsolutePath();
 
         // Find the most-specific root path
-        String mostSpecificId = null;
-        String mostSpecificPath = null;
-        synchronized (mRootsLock) {
-            for (int i = 0; i < mRoots.size(); i++) {
-                final String rootId = mRoots.keyAt(i);
-                final String rootPath = mRoots.valueAt(i).path.getAbsolutePath();
-                if (path.startsWith(rootPath) && (mostSpecificPath == null
-                        || rootPath.length() > mostSpecificPath.length())) {
-                    mostSpecificId = rootId;
-                    mostSpecificPath = rootPath;
-                }
-            }
+        boolean visiblePath = false;
+        RootInfo mostSpecificRoot = getMostSpecificRootForPath(path, false);
+
+        if (mostSpecificRoot == null) {
+            // Try visible path if no internal path matches. MediaStore uses visible paths.
+            visiblePath = true;
+            mostSpecificRoot = getMostSpecificRootForPath(path, true);
         }
 
-        if (mostSpecificPath == null) {
+        if (mostSpecificRoot == null) {
             throw new FileNotFoundException("Failed to find root that contains " + path);
         }
 
         // Start at first char of path under root
-        final String rootPath = mostSpecificPath;
+        final String rootPath = visiblePath
+                ? mostSpecificRoot.visiblePath.getAbsolutePath()
+                : mostSpecificRoot.path.getAbsolutePath();
         if (rootPath.equals(path)) {
             path = "";
         } else if (rootPath.endsWith("/")) {
@@ -322,7 +319,29 @@ public class ExternalStorageProvider extends DocumentsProvider {
             }
         }
 
-        return mostSpecificId + ':' + path;
+        return mostSpecificRoot.rootId + ':' + path;
+    }
+
+    private RootInfo getMostSpecificRootForPath(String path, boolean visible) {
+        // Find the most-specific root path
+        RootInfo mostSpecificRoot = null;
+        String mostSpecificPath = null;
+        synchronized (mRootsLock) {
+            for (int i = 0; i < mRoots.size(); i++) {
+                final RootInfo root = mRoots.valueAt(i);
+                final File rootFile = visible ? root.visiblePath : root.path;
+                if (rootFile != null) {
+                    final String rootPath = rootFile.getAbsolutePath();
+                    if (path.startsWith(rootPath) && (mostSpecificPath == null
+                            || rootPath.length() > mostSpecificPath.length())) {
+                        mostSpecificRoot = root;
+                        mostSpecificPath = rootPath;
+                    }
+                }
+            }
+        }
+
+        return mostSpecificRoot;
     }
 
     private File getFileForDocId(String docId) throws FileNotFoundException {
@@ -519,15 +538,13 @@ public class ExternalStorageProvider extends DocumentsProvider {
                 boolean matchesRequestedDoc = false;
                 if (DocumentsContract.isTreeUri(uri)) {
                     final String parentDocId = DocumentsContract.getTreeDocumentId(uri);
-                    File parentFile = getFileForDocId(parentDocId);
-                    if (FileUtils.contains(parentFile, doc)) {
+                    if (isChildDocument(parentDocId, docId)) {
                         treeUriPermission = uriPermission;
                         matchesRequestedDoc = true;
                     }
                 } else {
                     final String candidateDocId = DocumentsContract.getDocumentId(uri);
-                    final File candidateDoc = getFileForDocId(candidateDocId);
-                    if (Objects.equals(doc.getAbsolutePath(), candidateDoc.getAbsolutePath())) {
+                    if (Objects.equals(docId, candidateDocId)) {
                         docUriPermission = uriPermission;
                         matchesRequestedDoc = true;
                     }
