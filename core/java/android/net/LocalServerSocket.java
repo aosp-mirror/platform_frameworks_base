@@ -89,7 +89,7 @@ public class LocalServerSocket {
 
         impl.accept(acceptedImpl);
 
-        return LocalSocket.createLocalSocketForAccept(acceptedImpl, LocalSocket.SOCKET_UNKNOWN);
+        return LocalSocket.createLocalSocketForAccept(acceptedImpl);
     }
 
     /**
