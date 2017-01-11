@@ -322,7 +322,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         if (!configChanged) {
             return null;
         }
-        displayContent.onOverrideConfigurationChanged(currentConfig);
+        displayContent.onOverrideConfigurationChanged(newConfiguration);
 
         if (displayId == DEFAULT_DISPLAY) {
             // Override configuration of the default display duplicates global config. In this case
