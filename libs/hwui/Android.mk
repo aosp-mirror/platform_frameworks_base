@@ -75,6 +75,7 @@ hwui_src_files := \
     FrameInfo.cpp \
     FrameInfoVisualizer.cpp \
     GammaFontRenderer.cpp \
+    GlLayer.cpp \
     GlopBuilder.cpp \
     GpuMemoryTracker.cpp \
     GradientCache.cpp \

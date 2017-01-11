@@ -28,6 +28,7 @@ namespace android {
 namespace uirenderer {
 
 class Caches;
+class GlLayer;
 class Matrix4;
 class Patch;
 class RenderState;
@@ -71,7 +72,7 @@ public:
     GlopBuilder& setFillClear();
     GlopBuilder& setFillLayer(Texture& texture, const SkColorFilter* colorFilter,
             float alpha, SkBlendMode mode, Blend::ModeOrderSwap modeUsage);
-    GlopBuilder& setFillTextureLayer(Layer& layer, float alpha);
+    GlopBuilder& setFillTextureLayer(GlLayer& layer, float alpha);
     // TODO: setFillLayer normally forces its own wrap & filter mode,
     // which isn't always correct.
     GlopBuilder& setFillExternalTexture(Texture& texture, Matrix4& textureTransform);

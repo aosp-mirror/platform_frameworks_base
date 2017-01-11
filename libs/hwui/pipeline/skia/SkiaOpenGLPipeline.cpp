@@ -17,6 +17,7 @@
 #include "SkiaOpenGLPipeline.h"
 
 #include "DeferredLayerUpdater.h"
+#include "GlLayer.h"
 #include "LayerDrawable.h"
 #include "renderthread/EglManager.h"
 #include "renderthread/Frame.h"
@@ -136,7 +137,7 @@ bool SkiaOpenGLPipeline::copyLayerInto(DeferredLayerUpdater* deferredLayer, SkBi
 
 DeferredLayerUpdater* SkiaOpenGLPipeline::createTextureLayer() {
     mEglManager.initialize();
-    Layer* layer = new Layer(mRenderThread.renderState(), 0, 0);
+    GlLayer* layer = new GlLayer(mRenderThread.renderState(), 0, 0);
     layer->generateTexture();
     return new DeferredLayerUpdater(layer);
 }

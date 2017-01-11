@@ -29,7 +29,6 @@ namespace uirenderer {
 
 class Caches;
 class Extensions;
-class Layer;
 class Texture;
 struct ProgramDescription;
 
@@ -45,7 +44,6 @@ enum SkiaShaderType {
     kBitmap_SkiaShaderType = 1,
     kGradient_SkiaShaderType = 2,
     kCompose_SkiaShaderType = kBitmap_SkiaShaderType | kGradient_SkiaShaderType,
-    kLayer_SkiaShaderType = 4,
 };
 
 struct SkiaShaderData {
@@ -71,15 +69,6 @@ struct SkiaShaderData {
         GLuint gradientSampler;
         GLenum wrapST;
     } gradientData;
-    struct LayerShaderData {
-        Layer* layer;
-        GLuint bitmapSampler;
-        GLenum wrapS;
-        GLenum wrapT;
-
-        Matrix4 textureTransform;
-        float textureDimension[2];
-    } layerData;
 };
 
 class SkiaShader {

@@ -159,10 +159,10 @@ public:
      */
     void* isInUse = nullptr;
 private:
-    // TODO: Temporarily grant private access to Layer, remove once
-    // Layer can be de-tangled from being a dual-purpose render target
+    // TODO: Temporarily grant private access to GlLayer, remove once
+    // GlLayer can be de-tangled from being a dual-purpose render target
     // and external texture wrapper
-    friend class Layer;
+    friend class GlLayer;
 
     // Returns true if the size changed, false if it was the same
     bool updateSize(uint32_t width, uint32_t height, GLint internalFormat,

@@ -19,6 +19,7 @@
 #include <BakedOpState.h>
 #include <DeferredLayerUpdater.h>
 #include <FrameBuilder.h>
+#include <GlLayer.h>
 #include <LayerUpdateQueue.h>
 #include <RecordedOp.h>
 #include <RecordingCanvas.h>
@@ -698,7 +699,10 @@ RENDERTHREAD_TEST(FrameBuilder, textureLayer_combineMatrices) {
 RENDERTHREAD_TEST(FrameBuilder, textureLayer_reject) {
     auto layerUpdater = TestUtils::createTextureLayerUpdater(renderThread, 100, 100,
             SkMatrix::MakeTrans(5, 5));
-    layerUpdater->backingLayer()->setRenderTarget(GL_NONE); // Should be rejected
+    if (layerUpdater->backingLayer()->getApi() != Layer::Api::OpenGL) return;
+
+    GlLayer* glLayer = static_cast<GlLayer*>(layerUpdater->backingLayer());
+    glLayer->setRenderTarget(GL_NONE); // Should be rejected
 
     auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
             [&layerUpdater](RenderProperties& props, RecordingCanvas& canvas) {

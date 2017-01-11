@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "GlLayer.h"
 #include "LayerDrawable.h"
 #include "SkColorFilter.h"
 #include "gl/GrGLTypes.h"
@@ -35,12 +36,14 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
         layer->getTransform().copyTo(transform);
         canvas->concat(transform);
     }
+
+    GlLayer* glLayer = static_cast<GlLayer*>(layer);
     GrGLTextureInfo externalTexture;
-    externalTexture.fTarget = layer->getRenderTarget();
-    externalTexture.fID = layer->getTextureId();
+    externalTexture.fTarget = glLayer->getRenderTarget();
+    externalTexture.fID = glLayer->getTextureId();
     GrBackendTextureDesc textureDescription;
-    textureDescription.fWidth = layer->getWidth();
-    textureDescription.fHeight = layer->getHeight();
+    textureDescription.fWidth = glLayer->getWidth();
+    textureDescription.fHeight = glLayer->getHeight();
     textureDescription.fConfig = kRGBA_8888_GrPixelConfig;
     textureDescription.fOrigin = kTopLeft_GrSurfaceOrigin;
     textureDescription.fTextureHandle = reinterpret_cast<GrBackendObject>(&externalTexture);

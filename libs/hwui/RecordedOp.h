@@ -17,6 +17,7 @@
 #pragma once
 
 #include "font/FontUtil.h"
+#include "GlLayer.h"
 #include "Matrix.h"
 #include "Rect.h"
 #include "RenderNode.h"
@@ -413,7 +414,7 @@ struct TextOnPathOp : RecordedOp {
 };
 
 struct TextureLayerOp : RecordedOp {
-    TextureLayerOp(BASE_PARAMS_PAINTLESS, Layer* layer)
+    TextureLayerOp(BASE_PARAMS_PAINTLESS, GlLayer* layer)
             : SUPER_PAINTLESS(TextureLayerOp)
             , layer(layer) {}
 
@@ -424,7 +425,7 @@ struct TextureLayerOp : RecordedOp {
             , layer(op.layer) {
 
     }
-    Layer* layer;
+    GlLayer* layer;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

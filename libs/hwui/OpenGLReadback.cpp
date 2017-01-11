@@ -19,7 +19,7 @@
 #include "Caches.h"
 #include "Image.h"
 #include "GlopBuilder.h"
-#include "Layer.h"
+#include "GlLayer.h"
 #include "renderstate/RenderState.h"
 #include "renderthread/EglManager.h"
 #include "utils/GLUtils.h"
@@ -262,7 +262,7 @@ CopyResult OpenGLReadbackImpl::copyImageInto(EGLImageKHR eglImage,
 }
 
 bool OpenGLReadbackImpl::copyLayerInto(renderthread::RenderThread& renderThread,
-        Layer& layer, SkBitmap* bitmap) {
+        GlLayer& layer, SkBitmap* bitmap) {
     return CopyResult::Success == copyTextureInto(Caches::getInstance(),
             renderThread.renderState(), layer.getTexture(), layer.getTexTransform(),
             Rect(), bitmap);

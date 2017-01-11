@@ -16,6 +16,7 @@
 #include "GlopBuilder.h"
 
 #include "Caches.h"
+#include "GlLayer.h"
 #include "Glop.h"
 #include "Layer.h"
 #include "Matrix.h"
@@ -440,7 +441,7 @@ GlopBuilder& GlopBuilder::setFillLayer(Texture& texture, const SkColorFilter* co
     return *this;
 }
 
-GlopBuilder& GlopBuilder::setFillTextureLayer(Layer& layer, float alpha) {
+GlopBuilder& GlopBuilder::setFillTextureLayer(GlLayer& layer, float alpha) {
     TRIGGER_STAGE(kFillStage);
     REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
 
