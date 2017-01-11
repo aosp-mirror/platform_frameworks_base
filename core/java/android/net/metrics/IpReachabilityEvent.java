@@ -16,7 +16,6 @@
 
 package android.net.metrics;
 
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.SparseArray;
@@ -28,7 +27,6 @@ import com.android.internal.util.MessageUtils;
  * a neighbor probe result.
  * {@hide}
  */
-@SystemApi
 public final class IpReachabilityEvent implements Parcelable {
 
     // Event types.
@@ -38,9 +36,9 @@ public final class IpReachabilityEvent implements Parcelable {
     public static final int NUD_FAILED                = 2 << 8;
     /** Neighbor unreachable after a forced probe, IP provisioning is also lost. */
     public static final int PROVISIONING_LOST         = 3 << 8;
-    /** {@hide} Neighbor unreachable notification from kernel. */
+    /** Neighbor unreachable notification from kernel. */
     public static final int NUD_FAILED_ORGANIC        = 4 << 8;
-    /** {@hide} Neighbor unreachable notification from kernel, IP provisioning is also lost. */
+    /** Neighbor unreachable notification from kernel, IP provisioning is also lost. */
     public static final int PROVISIONING_LOST_ORGANIC = 5 << 8;
 
     public final String ifName;
@@ -51,7 +49,6 @@ public final class IpReachabilityEvent implements Parcelable {
     // byte 3: when byte 2 == PROBE, errno code from RTNetlink or IpReachabilityMonitor.
     public final int eventType;
 
-    /** {@hide} */
     public IpReachabilityEvent(String ifName, int eventType) {
         this.ifName = ifName;
         this.eventType = eventType;
@@ -84,18 +81,8 @@ public final class IpReachabilityEvent implements Parcelable {
         }
     };
 
-    public static void logProbeEvent(String ifName, int nlErrorCode) {
-    }
-
-    public static void logNudFailed(String ifName) {
-    }
-
-    public static void logProvisioningLost(String ifName) {
-    }
-
     /**
      * Returns the NUD failure event type code corresponding to the given conditions.
-     * {@hide}
      */
     public static int nudFailureEventType(boolean isFromProbe, boolean isProvisioningLost) {
         if (isFromProbe) {

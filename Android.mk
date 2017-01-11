@@ -213,7 +213,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/hardware/usb/IUsbManager.aidl \
 	core/java/android/net/ICaptivePortal.aidl \
 	core/java/android/net/IConnectivityManager.aidl \
-	core/java/android/net/IConnectivityMetricsLogger.aidl \
 	core/java/android/net/IIpConnectivityMetrics.aidl \
 	core/java/android/net/IEthernetManager.aidl \
 	core/java/android/net/IEthernetServiceListener.aidl \

@@ -16,7 +16,6 @@
 
 package android.net.metrics;
 
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -24,7 +23,6 @@ import android.os.Parcelable;
  * An event recorded when a DhcpClient state machine transitions to a new state.
  * {@hide}
  */
-@SystemApi
 public final class DhcpClientEvent implements Parcelable {
 
     // Names for recording DhcpClient pseudo-state transitions.
@@ -37,7 +35,6 @@ public final class DhcpClientEvent implements Parcelable {
     public final String msg;
     public final int durationMs;
 
-    /** {@hide} */
     public DhcpClientEvent(String ifName, String msg, int durationMs) {
         this.ifName = ifName;
         this.msg = msg;
@@ -77,7 +74,4 @@ public final class DhcpClientEvent implements Parcelable {
             return new DhcpClientEvent[size];
         }
     };
-
-    public static void logStateEvent(String ifName, String state) {
-    }
 }

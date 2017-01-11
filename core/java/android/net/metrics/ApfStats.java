@@ -16,7 +16,6 @@
 
 package android.net.metrics;
 
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -24,7 +23,6 @@ import android.os.Parcelable;
  * An event logged for an interface with APF capabilities when its IpManager state machine exits.
  * {@hide}
  */
-@SystemApi
 public final class ApfStats implements Parcelable {
 
     public final long durationMs;     // time interval in milliseconds these stastistics covers
@@ -36,7 +34,6 @@ public final class ApfStats implements Parcelable {
     public final int programUpdates;  // number of APF program updates
     public final int maxProgramSize;  // maximum APF program size advertised by hardware
 
-    /** {@hide} */
     public ApfStats(long durationMs, int receivedRas, int matchingRas, int droppedRas,
             int zeroLifetimeRas, int parseErrors, int programUpdates, int maxProgramSize) {
         this.durationMs = durationMs;

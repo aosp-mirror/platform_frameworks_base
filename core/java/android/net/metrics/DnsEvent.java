@@ -16,7 +16,6 @@
 
 package android.net.metrics;
 
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -24,7 +23,6 @@ import android.os.Parcelable;
  * A DNS event recorded by NetdEventListenerService.
  * {@hide}
  */
-@SystemApi
 final public class DnsEvent implements Parcelable {
     public final int netId;
 
@@ -38,7 +36,6 @@ final public class DnsEvent implements Parcelable {
     // queries.
     public final int[] latenciesMs;
 
-    /** {@hide} */
     public DnsEvent(int netId, byte[] eventTypes, byte[] returnCodes, int[] latenciesMs) {
         this.netId = netId;
         this.eventTypes = eventTypes;
@@ -82,8 +79,4 @@ final public class DnsEvent implements Parcelable {
             return new DnsEvent[size];
         }
     };
-
-    public static void logEvent(
-            int netId, byte[] eventTypes, byte[] returnCodes, int[] latenciesMs) {
-    }
 }
