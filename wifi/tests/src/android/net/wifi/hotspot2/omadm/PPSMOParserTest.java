@@ -31,6 +31,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -78,7 +80,7 @@ public class PPSMOParserTest {
      *
      * @return {@link PasspointConfiguration}
      */
-    private PasspointConfiguration generateConfigurationFromPPSMOTree() {
+    private PasspointConfiguration generateConfigurationFromPPSMOTree() throws Exception {
         PasspointConfiguration config = new PasspointConfiguration();
 
         // HomeSP configuration.
@@ -95,11 +97,18 @@ public class PPSMOParserTest {
         config.homeSp.otherHomePartners = new String[] {"other.fqdn.com"};
 
         // Credential configuration.
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         config.credential = new Credential();
+        config.credential.creationTimeInMs = format.parse("2016-01-01T10:00:00Z").getTime();
+        config.credential.expirationTimeInMs = format.parse("2016-02-01T10:00:00Z").getTime();
         config.credential.realm = "shaken.stirred.com";
+        config.credential.checkAAAServerCertStatus = true;
         config.credential.userCredential = new Credential.UserCredential();
         config.credential.userCredential.username = "james";
         config.credential.userCredential.password = "Ym9uZDAwNw==";
+        config.credential.userCredential.machineManaged = true;
+        config.credential.userCredential.softTokenApp = "TestApp";
+        config.credential.userCredential.ableToShare = true;
         config.credential.userCredential.eapType = 21;
         config.credential.userCredential.nonEapInnerMethod = "MS-CHAP-V2";
         config.credential.certCredential = new Credential.CertificateCredential();
