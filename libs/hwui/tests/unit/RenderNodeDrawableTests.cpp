@@ -392,7 +392,7 @@ RENDERTHREAD_TEST(RenderNodeDrawable, projectionHwLayer) {
         sk_sp<SkSurface> onNewSurface(const SkImageInfo&) override {
             return sk_sp<SkSurface>();
         }
-        sk_sp<SkImage> onNewImageSnapshot(SkBudgeted, SkCopyPixelsMode) override {
+        sk_sp<SkImage> onNewImageSnapshot(SkBudgeted) override {
             return sk_sp<SkImage>();
         }
         void onCopyOnWrite(ContentChangeMode) override {}
