@@ -60,12 +60,12 @@ public abstract class AbstractStatsBase<T> {
         return new AtomicFile(fname);
     }
 
-    void writeNow(final T data) {
+    protected void writeNow(final T data) {
         writeImpl(data);
         mLastTimeWritten.set(SystemClock.elapsedRealtime());
     }
 
-    boolean maybeWriteAsync(final T data) {
+    protected boolean maybeWriteAsync(final T data) {
         if (SystemClock.elapsedRealtime() - mLastTimeWritten.get() < WRITE_INTERVAL_MS
             && !PackageManagerService.DEBUG_DEXOPT) {
             return false;
@@ -105,7 +105,7 @@ public abstract class AbstractStatsBase<T> {
 
     protected abstract void writeInternal(T data);
 
-    void read(T data) {
+    protected void read(T data) {
         if (mLock) {
             synchronized (data) {
                 synchronized (mFileLock) {
