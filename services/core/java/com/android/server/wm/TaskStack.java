@@ -507,8 +507,8 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     }
 
     // TODO: Checkout the call points of this method and the ones below to see how they can fit in WC.
-    void addTask(Task task, boolean toTop) {
-        addTask(task, toTop, task.showForAllUsers());
+    void addTask(Task task, int position) {
+        addTask(task, position, task.showForAllUsers(), true /* moveParents */);
     }
 
     /**
@@ -516,10 +516,10 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
      * When task is added to top of the stack, the entire branch of the hierarchy (including stack
      * and display) will be brought to top.
      * @param task The task to add.
-     * @param toTop Whether to add it to the top or bottom.
+     * @param position Target position to add the task to.
      * @param showForAllUsers Whether to show the task regardless of the current user.
      */
-    void addTask(Task task, boolean toTop, boolean showForAllUsers) {
+    void addTask(Task task, int position, boolean showForAllUsers, boolean moveParents) {
         final TaskStack currentStack = task.mStack;
         // TODO: We pass stack to task's constructor, but we still need to call this method.
         // This doesn't make sense, mStack will already be set equal to "this" at this point.
@@ -529,14 +529,12 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
                     + ", but it is already attached to stackId=" + task.mStack.mStackId);
         }
 
-        final int targetPosition = toTop ? mChildren.size() : 0;
-
         // Add child task.
         task.mStack = this;
-        addChild(task, targetPosition);
+        addChild(task, null);
 
         // Move child to a proper position, as some restriction for position might apply.
-        positionChildAt(targetPosition, task, true /* includingParents */, showForAllUsers);
+        positionChildAt(position, task, moveParents /* includingParents */, showForAllUsers);
     }
 
     @Override
@@ -546,7 +544,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
 
     /**
      * Overridden version of {@link TaskStack#positionChildAt(int, Task, boolean)}. Used in
-     * {@link TaskStack#addTask(Task, boolean, boolean showForAllUsers)}, as it can receive
+     * {@link TaskStack#addTask(Task, int, boolean showForAllUsers, boolean)}, as it can receive
      * showForAllUsers param from {@link AppWindowToken} instead of {@link Task#showForAllUsers()}.
      */
     private void positionChildAt(int position, Task child, boolean includingParents,

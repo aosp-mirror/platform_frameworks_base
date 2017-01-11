@@ -41,7 +41,6 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VER
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.os.Build.VERSION_CODES.HONEYCOMB;
 import static android.os.Process.SYSTEM_UID;
-import static android.view.Display.DEFAULT_DISPLAY;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SAVED_STATE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SCREENSHOTS;
@@ -75,7 +74,6 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
@@ -103,6 +101,7 @@ import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.am.ActivityStackSupervisor.ActivityContainer;
 import com.android.server.wm.AppWindowContainerController;
 import com.android.server.wm.AppWindowContainerListener;
+import com.android.server.wm.TaskWindowContainerController;
 
 import java.io.File;
 import java.io.IOException;
@@ -724,6 +723,10 @@ final class ActivityRecord implements AppWindowContainerListener {
                 null : ComponentName.unflattenFromString(aInfo.requestedVrComponent);
     }
 
+    AppWindowContainerController getWindowContainerController() {
+        return mWindowContainerController;
+    }
+
     void createWindowContainer() {
         if (mWindowContainerController != null) {
             throw new IllegalArgumentException("Window container=" + mWindowContainerController
@@ -734,9 +737,10 @@ final class ActivityRecord implements AppWindowContainerListener {
         inHistory = true;
 
         task.updateOverrideConfigurationFromLaunchBounds();
+        final TaskWindowContainerController taskController = task.getWindowContainerController();
 
-        mWindowContainerController = new AppWindowContainerController(appToken, this, task.taskId,
-                Integer.MAX_VALUE /* add on top */, info.screenOrientation, fullscreen,
+        mWindowContainerController = new AppWindowContainerController(taskController, appToken,
+                this, Integer.MAX_VALUE /* add on top */, info.screenOrientation, fullscreen,
                 (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0, info.configChanges,
                 task.voiceSession != null, mLaunchTaskBehind, isAlwaysFocusable(),
                 appInfo.targetSdkVersion, mRotationAnimationHint,
@@ -749,12 +753,7 @@ final class ActivityRecord implements AppWindowContainerListener {
 
     void removeWindowContainer() {
         mWindowContainerController.removeContainer(getDisplayId());
-    }
-
-    // TODO: Remove once task record is converted to use controller in which case we can use
-    // positionChildAt()
-    void positionWindowContainerAt(int index) {
-        mWindowContainerController.positionAt(task.taskId, index);
+        mWindowContainerController = null;
     }
 
     private boolean isHomeIntent(Intent intent) {

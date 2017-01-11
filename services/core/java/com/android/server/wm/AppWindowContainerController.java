@@ -31,7 +31,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.os.Binder;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
@@ -169,20 +168,21 @@ public class AppWindowContainerController
         }
     };
 
-    public AppWindowContainerController(IApplicationToken token,
-            AppWindowContainerListener listener, int taskId, int index, int requestedOrientation,
-            boolean fullscreen, boolean showForAllUsers, int configChanges,
+    public AppWindowContainerController(TaskWindowContainerController taskController,
+            IApplicationToken token, AppWindowContainerListener listener, int index,
+            int requestedOrientation, boolean fullscreen, boolean showForAllUsers, int configChanges,
             boolean voiceInteraction, boolean launchTaskBehind, boolean alwaysFocusable,
             int targetSdkVersion, int rotationAnimationHint, long inputDispatchingTimeoutNanos) {
-        this(token, listener, taskId, index, requestedOrientation, fullscreen, showForAllUsers,
+        this(taskController, token, listener, index, requestedOrientation, fullscreen,
+                showForAllUsers,
                 configChanges, voiceInteraction, launchTaskBehind, alwaysFocusable,
                 targetSdkVersion, rotationAnimationHint, inputDispatchingTimeoutNanos,
                 WindowManagerService.getInstance());
     }
 
-    public AppWindowContainerController(IApplicationToken token,
-            AppWindowContainerListener listener, int taskId, int index, int requestedOrientation,
-            boolean fullscreen, boolean showForAllUsers, int configChanges,
+    public AppWindowContainerController(TaskWindowContainerController taskController,
+            IApplicationToken token, AppWindowContainerListener listener, int index,
+            int requestedOrientation, boolean fullscreen, boolean showForAllUsers, int configChanges,
             boolean voiceInteraction, boolean launchTaskBehind, boolean alwaysFocusable,
             int targetSdkVersion, int rotationAnimationHint, long inputDispatchingTimeoutNanos,
             WindowManagerService service) {
@@ -196,11 +196,10 @@ public class AppWindowContainerController
                 return;
             }
 
-            // TODO: Have the controller for the task passed in when task are changed to use
-            // controller.
-            final Task task = mService.mTaskIdToTask.get(taskId);
+            final Task task = taskController.mContainer;
             if (task == null) {
-                throw new IllegalArgumentException("addAppToken: invalid taskId=" + taskId);
+                throw new IllegalArgumentException("AppWindowContainerController: invalid "
+                        + " controller=" + taskController);
             }
 
             atoken = new AppWindowToken(mService, token, voiceInteraction, task.getDisplayContent(),
@@ -208,47 +207,27 @@ public class AppWindowContainerController
                     requestedOrientation, rotationAnimationHint, configChanges, launchTaskBehind,
                     alwaysFocusable, this);
             if (DEBUG_TOKEN_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "addAppToken: " + atoken
-                    + " task=" + taskId + " at " + index);
+                    + " controller=" + taskController + " at " + index);
             task.addChild(atoken, index);
         }
     }
 
     public void removeContainer(int displayId) {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized(mWindowMap) {
-                final DisplayContent dc = mRoot.getDisplayContent(displayId);
-                if (dc == null) {
-                    Slog.w(TAG_WM, "removeAppToken: Attempted to remove binder token: "
-                            + mToken + " from non-existing displayId=" + displayId);
-                    return;
-                }
-                dc.removeAppToken(mToken.asBinder());
-                super.removeContainer();
+        synchronized(mWindowMap) {
+            final DisplayContent dc = mRoot.getDisplayContent(displayId);
+            if (dc == null) {
+                Slog.w(TAG_WM, "removeAppToken: Attempted to remove binder token: "
+                        + mToken + " from non-existing displayId=" + displayId);
+                return;
             }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
+            dc.removeAppToken(mToken.asBinder());
+            super.removeContainer();
         }
     }
 
-    // TODO: Move to task window controller when that is created and rename to positionChildAt()
-    public void positionAt(int taskId, int index) {
-        synchronized(mService.mWindowMap) {
-            if (mContainer == null) {
-                Slog.w(TAG_WM,
-                        "Attempted to position of non-existing app token: " + mToken);
-                return;
-            }
-
-            // TODO: Should get the window container from this owner when the task owner stuff is
-            // hooked-up.
-            final Task task = mService.mTaskIdToTask.get(taskId);
-            if (task == null) {
-                throw new IllegalArgumentException("positionChildAt: invalid taskId=" + taskId);
-            }
-            task.addChild(mContainer, index);
-        }
-
+    @Override
+    public void removeContainer() {
+        throw new UnsupportedOperationException("Use removeContainer(displayId) instead.");
     }
 
     public Configuration setOrientation(int requestedOrientation, int displayId,
@@ -570,9 +549,7 @@ public class AppWindowContainerController
                         "Attempted to freeze screen with non-existing app token: " + mContainer);
                 return;
             }
-            final long origId = Binder.clearCallingIdentity();
             mContainer.startFreezingScreen();
-            Binder.restoreCallingIdentity(origId);
         }
     }
 
@@ -581,11 +558,9 @@ public class AppWindowContainerController
             if (mContainer == null) {
                 return;
             }
-            final long origId = Binder.clearCallingIdentity();
             if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Clear freezing of " + mToken + ": hidden="
                     + mContainer.hidden + " freezing=" + mContainer.mAppAnimator.freezingScreen);
             mContainer.stopFreezingScreen(true, force);
-            Binder.restoreCallingIdentity(origId);
         }
     }
 
@@ -634,5 +609,10 @@ public class AppWindowContainerController
     /** Calls directly into activity manager so window manager lock shouldn't held. */
     boolean keyDispatchingTimedOut(String reason) {
         return mListener != null && mListener.keyDispatchingTimedOut(reason);
+    }
+
+    @Override
+    public String toString() {
+        return "{AppWindowContainerController token=" + mToken + "}";
     }
 }

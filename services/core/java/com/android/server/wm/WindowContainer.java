@@ -235,7 +235,7 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
     @CallSuper
     void positionChildAt(int position, E child, boolean includingParents) {
         if ((position < 0 && position != POSITION_BOTTOM)
-                || (position >= mChildren.size() && position != POSITION_TOP)) {
+                || (position > mChildren.size() && position != POSITION_TOP)) {
             throw new IllegalArgumentException("positionAt: invalid position=" + position
                     + ", children number=" + mChildren.size());
         }
@@ -248,7 +248,7 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
 
         switch (position) {
             case POSITION_TOP:
-                if (mChildren.getLast() != child) {
+                if (mChildren.peekLast() != child) {
                     mChildren.remove(child);
                     mChildren.addLast(child);
                 }
@@ -258,7 +258,7 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
                 }
                 break;
             case POSITION_BOTTOM:
-                if (mChildren.getFirst() != child) {
+                if (mChildren.peekFirst() != child) {
                     mChildren.remove(child);
                     mChildren.addFirst(child);
                 }

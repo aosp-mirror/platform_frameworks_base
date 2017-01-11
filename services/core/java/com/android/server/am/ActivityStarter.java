@@ -1770,8 +1770,8 @@ class ActivityStarter {
             mInTask.updateOverrideConfiguration(mLaunchBounds);
             int stackId = mInTask.getLaunchStackId();
             if (stackId != mInTask.getStackId()) {
-                final ActivityStack stack = mSupervisor.moveTaskToStackUncheckedLocked(
-                        mInTask, stackId, ON_TOP, !FORCE_FOCUS, "inTaskToFront");
+                final ActivityStack stack = mSupervisor.moveTaskToStackUncheckedLocked(mInTask,
+                        stackId, ON_TOP, !FORCE_FOCUS, "inTaskToFront", true /* allowStackOnTop */);
                 stackId = stack.mStackId;
             }
             if (StackId.resizeStackWithLaunchBounds(stackId)) {
@@ -1824,7 +1824,7 @@ class ActivityStarter {
                 mSupervisor.getNextTaskIdForUserLocked(mStartActivity.userId), mStartActivity.info,
                 mIntent, null, null, true, mStartActivity.mActivityType);
         mStartActivity.setTask(task, null);
-        mWindowManager.moveTaskToTop(mStartActivity.task.taskId);
+        mStartActivity.task.moveWindowContainerToTop(true /* includingParents */);
         if (DEBUG_TASKS) Slog.v(TAG_TASKS,
                 "Starting new activity " + mStartActivity + " in new guessed " + mStartActivity.task);
     }

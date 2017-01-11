@@ -707,8 +707,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private final BoundsAnimationController mBoundsAnimationController;
 
-    SparseArray<Task> mTaskIdToTask = new SparseArray<>();
-
     /** All of the TaskStacks in the window manager, unordered. For an ordered list call
      * DisplayContent.getStacks(). */
     // TODO: Don't believe this is needed with the WindowContainer model.
@@ -912,7 +910,6 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private static WindowManagerService sInstance;
-
     static WindowManagerService getInstance() {
         return sInstance;
     }
@@ -2441,35 +2438,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void addTask(int taskId, int stackId, int userId, Rect bounds,
-            Configuration overrideConfig, int resizeMode, boolean homeTask, boolean isOnTopLauncher,
-            boolean toTop, boolean showForAllUsers) {
-        if (!checkCallingPermission(MANAGE_APP_TOKENS, "addTask()")) {
-            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
-        }
-
-        synchronized(mWindowMap) {
-            Task task = mTaskIdToTask.get(taskId);
-            if (task != null) {
-                throw new IllegalArgumentException(
-                        "addTask: Attempt to add already existing task=" + task);
-            }
-
-            if (DEBUG_STACK) Slog.i(TAG_WM, "createTaskLocked: taskId=" + taskId
-                    + " stackId=" + stackId + " bounds=" + bounds);
-
-            final TaskStack stack = mStackIdToStack.get(stackId);
-            if (stack == null) {
-                throw new IllegalArgumentException("addTask: invalid stackId=" + stackId);
-            }
-            EventLog.writeEvent(WM_TASK_CREATED, taskId, stackId);
-            task = new Task(taskId, stack, userId, this, bounds, overrideConfig, isOnTopLauncher,
-                    resizeMode, homeTask);
-            mTaskIdToTask.put(taskId, task);
-            stack.addTask(task, toTop, showForAllUsers);
-        }
-    }
-
     @Override
     public Configuration updateOrientationFromAppTokens(Configuration currentConfig,
             IBinder freezeThisOneIfNeeded, int displayId) {
@@ -2851,50 +2819,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void moveTaskToTop(int taskId) {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized(mWindowMap) {
-                final Task task = mTaskIdToTask.get(taskId);
-                if (task == null) {
-                    // Normal behavior, addAppToken will be called next and task will be created.
-                    return;
-                }
-                task.mStack.positionChildAt(POSITION_TOP, task, true /* includingParents */);
-
-                if (mAppTransition.isTransitionSet()) {
-                    task.setSendingToBottom(false);
-                }
-                final DisplayContent displayContent = task.getDisplayContent();
-                displayContent.layoutAndAssignWindowLayersIfNeeded();
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
-    }
-
-    public void moveTaskToBottom(int taskId) {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized(mWindowMap) {
-                final Task task = mTaskIdToTask.get(taskId);
-                if (task == null) {
-                    Slog.e(TAG_WM, "moveTaskToBottom: taskId=" + taskId
-                            + " not found in mTaskIdToTask");
-                    return;
-                }
-                final TaskStack stack = task.mStack;
-                stack.positionChildAt(POSITION_BOTTOM, task, false /* includingParents */);
-                if (mAppTransition.isTransitionSet()) {
-                    task.setSendingToBottom(true);
-                }
-                stack.getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
-    }
-
     boolean isStackVisibleLocked(int stackId) {
         final TaskStack stack = mStackIdToStack.get(stackId);
         return (stack != null && stack.isVisible());
@@ -3064,58 +2988,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void removeTask(int taskId) {
-        synchronized (mWindowMap) {
-            Task task = mTaskIdToTask.get(taskId);
-            if (task == null) {
-                if (DEBUG_STACK) Slog.i(TAG_WM, "removeTask: could not find taskId=" + taskId);
-                return;
-            }
-            task.removeIfPossible();
-        }
-    }
-
-    @Override
-    public void cancelTaskWindowTransition(int taskId) {
-        synchronized (mWindowMap) {
-            Task task = mTaskIdToTask.get(taskId);
-            if (task != null) {
-                task.cancelTaskWindowTransition();
-            }
-        }
-    }
-
-    @Override
-    public void cancelTaskThumbnailTransition(int taskId) {
-        synchronized (mWindowMap) {
-            Task task = mTaskIdToTask.get(taskId);
-            if (task != null) {
-                task.cancelTaskThumbnailTransition();
-            }
-        }
-    }
-
-    public void moveTaskToStack(int taskId, int stackId, boolean toTop) {
-        synchronized (mWindowMap) {
-            if (DEBUG_STACK) Slog.i(TAG_WM, "moveTaskToStack: moving taskId=" + taskId
-                    + " to stackId=" + stackId + " at " + (toTop ? "top" : "bottom"));
-            Task task = mTaskIdToTask.get(taskId);
-            if (task == null) {
-                if (DEBUG_STACK) Slog.i(TAG_WM, "moveTaskToStack: could not find taskId=" + taskId);
-                return;
-            }
-            TaskStack stack = mStackIdToStack.get(stackId);
-            if (stack == null) {
-                if (DEBUG_STACK) Slog.i(TAG_WM, "moveTaskToStack: could not find stackId=" + stackId);
-                return;
-            }
-            task.moveTaskToStack(stack, toTop);
-            final DisplayContent displayContent = stack.getDisplayContent();
-            displayContent.setLayoutNeeded();
-            mWindowPlacerLocked.performSurfacePlacement();
-        }
-    }
-
     public void getStackDockedModeBounds(int stackId, Rect bounds, boolean ignoreVisibility) {
         synchronized (mWindowMap) {
             final TaskStack stack = mStackIdToStack.get(stackId);
@@ -3191,69 +3063,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    /** @see com.android.server.am.ActivityManagerService#positionTaskInStack(int, int, int). */
-    public void positionTaskInStack(int taskId, int stackId, int position, Rect bounds,
-            Configuration overrideConfig) {
-        synchronized (mWindowMap) {
-            if (DEBUG_STACK) Slog.i(TAG_WM, "positionTaskInStack: positioning taskId=" + taskId
-                    + " in stackId=" + stackId + " at " + position);
-            Task task = mTaskIdToTask.get(taskId);
-            if (task == null) {
-                if (DEBUG_STACK) Slog.i(TAG_WM,
-                        "positionTaskInStack: could not find taskId=" + taskId);
-                return;
-            }
-            TaskStack stack = mStackIdToStack.get(stackId);
-            if (stack == null) {
-                if (DEBUG_STACK) Slog.i(TAG_WM,
-                        "positionTaskInStack: could not find stackId=" + stackId);
-                return;
-            }
-            task.positionTaskInStack(stack, position, bounds, overrideConfig);
-            final DisplayContent displayContent = stack.getDisplayContent();
-            displayContent.setLayoutNeeded();
-            mWindowPlacerLocked.performSurfacePlacement();
-        }
-    }
-
-    /**
-     * Re-sizes the specified task and its containing windows.
-     * Returns a {@link Configuration} object that contains configurations settings
-     * that should be overridden due to the operation.
-     */
-    public void resizeTask(int taskId, Rect bounds, Configuration overrideConfig,
-            boolean relayout, boolean forced) {
-        synchronized (mWindowMap) {
-            Task task = mTaskIdToTask.get(taskId);
-            if (task == null) {
-                throw new IllegalArgumentException("resizeTask: taskId " + taskId
-                        + " not found.");
-            }
-
-            if (task.resizeLocked(bounds, overrideConfig, forced) && relayout) {
-                task.getDisplayContent().setLayoutNeeded();
-                mWindowPlacerLocked.performSurfacePlacement();
-            }
-        }
-    }
-
-    /**
-     * Puts a specific task into docked drag resizing mode. See {@link DragResizeMode}.
-     *
-     * @param taskId The id of the task to put into drag resize mode.
-     * @param resizing Whether to put the task into drag resize mode.
-     */
-    public void setTaskDockedResizing(int taskId, boolean resizing) {
-        synchronized (mWindowMap) {
-            Task task = mTaskIdToTask.get(taskId);
-            if (task == null) {
-                Slog.w(TAG, "setTaskDockedResizing: taskId " + taskId + " not found.");
-                return;
-            }
-            task.setDragResizing(resizing, DRAG_RESIZE_MODE_DOCKED_DIVIDER);
-        }
-    }
-
     /**
      * Starts deferring layout passes. Useful when doing multiple changes but to optimize
      * performance, only one layout pass should be done. This can be called multiple times, and
@@ -3271,24 +3080,6 @@ public class WindowManagerService extends IWindowManager.Stub
     public void continueSurfaceLayout() {
         synchronized (mWindowMap) {
             mWindowPlacerLocked.continueLayout();
-        }
-    }
-
-    public void getTaskBounds(int taskId, Rect bounds) {
-        synchronized (mWindowMap) {
-            Task task = mTaskIdToTask.get(taskId);
-            if (task != null) {
-                task.getBounds(bounds);
-                return;
-            }
-            bounds.setEmpty();
-        }
-    }
-
-    /** Return true if the input task id represents a valid window manager task. */
-    public boolean isValidTaskId(int taskId) {
-        synchronized (mWindowMap) {
-            return mTaskIdToTask.get(taskId) != null;
         }
     }
 
@@ -7824,15 +7615,6 @@ public class WindowManagerService extends IWindowManager.Stub
                             stack, originalBounds, bounds, animationDuration);
                 }
             });
-        }
-    }
-
-    public void setTaskResizeable(int taskId, int resizeMode) {
-        synchronized (mWindowMap) {
-            final Task task = mTaskIdToTask.get(taskId);
-            if (task != null) {
-                task.setResizeable(resizeMode);
-            }
         }
     }
 

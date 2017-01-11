@@ -27,6 +27,7 @@ import android.view.WindowManager;
 
 import static android.app.ActivityManager.StackId.FIRST_DYNAMIC_STACK_ID;
 import static android.app.AppOpsManager.OP_NONE;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.res.Configuration.EMPTY;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
@@ -39,6 +40,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -144,8 +146,8 @@ class WindowTestsBase {
     /**Creates a {@link Task} and adds it to the specified {@link TaskStack}. */
     Task createTaskInStack(TaskStack stack, int userId) {
         final Task newTask = new Task(sNextTaskId++, stack, userId, sWm, null, EMPTY, false, 0,
-                false);
-        stack.addTask(newTask, true);
+                false, null);
+        stack.addTask(newTask, POSITION_TOP);
         return newTask;
     }
 
@@ -190,6 +192,19 @@ class WindowTestsBase {
 
         WindowState getLastChild() {
             return mChildren.getLast();
+        }
+    }
+
+    /**
+     * Used so we can gain access to some protected members of {@link TaskWindowContainerController}
+     * class.
+     */
+    class TestTaskWindowContainerController extends TaskWindowContainerController {
+
+        TestTaskWindowContainerController(int stackId) {
+            super(sNextTaskId++, stackId, 0 /* userId */, null /* bounds */,
+                    EMPTY /* overrideConfig*/, RESIZE_MODE_UNRESIZEABLE, false /* homeTask*/,
+                    false /* isOnTopLauncher */, true /* toTop*/, true /* showForAllUsers */);
         }
     }
 }

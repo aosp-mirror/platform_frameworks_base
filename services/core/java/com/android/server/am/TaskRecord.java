@@ -39,6 +39,7 @@ import android.graphics.Rect;
 import android.os.Debug;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
@@ -48,6 +49,7 @@ import android.util.Slog;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.util.XmlUtils;
 
+import com.android.server.wm.TaskWindowContainerController;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -58,6 +60,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Objects;
 
+import static android.app.ActivityManager.RESIZE_MODE_FORCED;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
@@ -80,6 +83,7 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
+import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKTASK;
@@ -95,6 +99,7 @@ import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.STARTING_WINDOW_SHOWN;
+import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 
 final class TaskRecord extends ConfigurationContainer {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskRecord" : TAG_AM;
@@ -280,6 +285,8 @@ final class TaskRecord extends ConfigurationContainer {
     /** Helper object used for updating override configuration. */
     private Configuration mTmpConfig = new Configuration();
 
+    private TaskWindowContainerController mWindowContainerController;
+
     TaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info, Intent _intent,
             IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor, int type) {
         mService = service;
@@ -387,6 +394,155 @@ final class TaskRecord extends ConfigurationContainer {
         mMinWidth = minWidth;
         mMinHeight = minHeight;
         mService.mTaskChangeNotificationController.notifyTaskCreated(_taskId, realActivity);
+    }
+
+    TaskWindowContainerController getWindowContainerController() {
+        return mWindowContainerController;
+    }
+
+    void createWindowContainer(boolean onTop, boolean showForAllUsers) {
+        if (mWindowContainerController != null) {
+            throw new IllegalArgumentException("Window container=" + mWindowContainerController
+                    + " already created for task=" + this);
+        }
+
+        final Rect bounds = updateOverrideConfigurationFromLaunchBounds();
+        final Configuration overrideConfig = getOverrideConfiguration();
+        mWindowContainerController = new TaskWindowContainerController(taskId, getStackId(), userId,
+                bounds, overrideConfig, mResizeMode, isHomeTask(), isOnTopLauncher(), onTop,
+                showForAllUsers);
+    }
+
+    void removeWindowContainer() {
+        mService.mStackSupervisor.removeLockedTaskLocked(this);
+        mWindowContainerController.removeContainer();
+        if (!StackId.persistTaskBounds(getStackId())) {
+            // Reset current bounds for task whose bounds shouldn't be persisted so it uses
+            // default configuration the next time it launches.
+            updateOverrideConfiguration(null);
+        }
+        mService.mTaskChangeNotificationController.notifyTaskRemoved(taskId);
+        mWindowContainerController = null;
+    }
+
+    void setResizeMode(int resizeMode) {
+        if (mResizeMode == resizeMode) {
+            return;
+        }
+        mResizeMode = resizeMode;
+        mWindowContainerController.setResizeable(resizeMode);
+        mService.mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
+        mService.mStackSupervisor.resumeFocusedStackTopActivityLocked();
+    }
+
+    void setTaskDockedResizing(boolean resizing) {
+        mWindowContainerController.setTaskDockedResizing(resizing);
+    }
+
+    boolean resize(Rect bounds, int resizeMode, boolean preserveWindow, boolean deferResume) {
+        if (!isResizeable()) {
+            Slog.w(TAG, "resizeTask: task " + this + " not resizeable.");
+            return true;
+        }
+
+        // If this is a forced resize, let it go through even if the bounds is not changing,
+        // as we might need a relayout due to surface size change (to/from fullscreen).
+        final boolean forced = (resizeMode & RESIZE_MODE_FORCED) != 0;
+        if (Objects.equals(mBounds, bounds) && !forced) {
+            // Nothing to do here...
+            return true;
+        }
+        bounds = validateBounds(bounds);
+
+        if (mWindowContainerController == null) {
+            // Task doesn't exist in window manager yet (e.g. was restored from recents).
+            // All we can do for now is update the bounds so it can be used when the task is
+            // added to window manager.
+            updateOverrideConfiguration(bounds);
+            if (getStackId() != FREEFORM_WORKSPACE_STACK_ID) {
+                // re-restore the task so it can have the proper stack association.
+                mService.mStackSupervisor.restoreRecentTaskLocked(this,
+                        FREEFORM_WORKSPACE_STACK_ID);
+            }
+            return true;
+        }
+
+        if (!canResizeToBounds(bounds)) {
+            throw new IllegalArgumentException("resizeTask: Can not resize task=" + this
+                    + " to bounds=" + bounds + " resizeMode=" + mResizeMode);
+        }
+
+        // Do not move the task to another stack here.
+        // This method assumes that the task is already placed in the right stack.
+        // we do not mess with that decision and we only do the resize!
+
+        Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "am.resizeTask_" + taskId);
+
+        final boolean updatedConfig = updateOverrideConfiguration(bounds);
+        // This variable holds information whether the configuration didn't change in a significant
+        // way and the activity was kept the way it was. If it's false, it means the activity had
+        // to be relaunched due to configuration change.
+        boolean kept = true;
+        if (updatedConfig) {
+            final ActivityRecord r = topRunningActivityLocked();
+            if (r != null) {
+                kept = r.ensureActivityConfigurationLocked(0 /* globalChanges */, preserveWindow);
+
+                if (!deferResume) {
+                    // All other activities must be made visible with their correct configuration.
+                    mService.mStackSupervisor.ensureActivitiesVisibleLocked(r, 0, !PRESERVE_WINDOWS);
+                    if (!kept) {
+                        mService.mStackSupervisor.resumeFocusedStackTopActivityLocked();
+                    }
+                }
+            }
+        }
+        mWindowContainerController.resize(mBounds, getOverrideConfiguration(), kept, forced);
+
+        Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+        return kept;
+    }
+
+    // TODO: Investigate combining with the resize() method above.
+    void resizeWindowContainer() {
+        mWindowContainerController.resize(mBounds, getOverrideConfiguration(), false /* relayout */,
+                false /* forced */);
+    }
+
+    // TODO: Remove once we have a stack controller.
+    void positionWindowContainerAt(int stackId, int index) {
+        mWindowContainerController.positionAt(stackId, index, mBounds, getOverrideConfiguration());
+    }
+
+    // TODO: Replace with moveChildToTop?
+    void moveWindowContainerToTop(boolean includingParents) {
+        if (mWindowContainerController != null) {
+            mWindowContainerController.moveToTop(includingParents);
+        }
+    }
+
+    // TODO: Replace with moveChildToBottom?
+    void moveWindowContainerToBottom() {
+        if (mWindowContainerController != null) {
+            mWindowContainerController.moveToBottom();
+        }
+    }
+
+    void getWindowContainerBounds(Rect bounds) {
+        mWindowContainerController.getBounds(bounds);
+    }
+
+    // TODO: make this part of adding it to the stack?
+    void reparentWindowContainer(int stackId, int position) {
+        mWindowContainerController.reparent(stackId, position);
+    }
+
+    void cancelWindowTransition() {
+        mWindowContainerController.cancelWindowTransition();
+    }
+
+    void cancelThumbnailTransition() {
+        mWindowContainerController.cancelThumbnailTransition();
     }
 
     void touchActiveTime() {
@@ -852,7 +1008,7 @@ final class TaskRecord extends ConfigurationContainer {
 
         // Sync. with window manager
         updateOverrideConfigurationFromLaunchBounds();
-        r.positionWindowContainerAt(index);
+        mWindowContainerController.positionChildAt(r.getWindowContainerController(), index);
         r.onOverrideConfigurationSent();
     }
 
