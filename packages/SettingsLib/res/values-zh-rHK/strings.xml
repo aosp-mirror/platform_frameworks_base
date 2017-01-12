@@ -170,26 +170,16 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"永遠允許 Wi-Fi 漫遊掃瞄"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"經常啟用流動數據"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"停用絕對音量功能"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type (90597356942154882) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (6470824182074383881) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate (4788245703824623062) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (4263851572248033749) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample (2099645202720164141) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (2096170505745650345) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode (884855779449390540) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (4073812880900816325) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality (4846872213548295632) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (3940973633342423717) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"藍牙音訊編解碼器"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="6470824182074383881">"選取偏好的藍牙 A2DP 編解碼器"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"藍牙音訊取樣率"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="4263851572248033749">"選取偏好的藍牙 A2DP 編解碼器取樣率"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"藍牙音訊每個樣本位元數"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="2096170505745650345">"選取偏好的藍牙 A2DP 編解碼器每個樣本位元數"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"藍牙音訊聲道模式"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="4073812880900816325">"選取偏好的藍牙 A2DP 編解碼器聲道模式"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="4846872213548295632">"藍牙音訊 LDAC 播放音質"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3940973633342423717">"選取偏好的藍牙 A2DP 編解碼器 LDAC 播放音質"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"顯示無線螢幕分享認證的選項"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"讓 Wi‑Fi 記錄功能升級，在 Wi‑Fi 選擇器中依每個 SSID RSSI 顯示 Wi‑Fi 詳細紀錄"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"啟用時，Wi-Fi 連線會在訊號不穩的情況下更積極轉換成流動數據連線"</string>

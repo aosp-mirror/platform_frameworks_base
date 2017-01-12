@@ -170,26 +170,16 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"எப்போதும் வைஃபை ரோமிங் ஸ்கேன்களை அனுமதி"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"செல்லுலார் தரவு எப்போதும் இயக்கத்தில்"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"அப்சல்யூட் ஒலியளவு அம்சத்தை முடக்கு"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type (90597356942154882) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (6470824182074383881) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate (4788245703824623062) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (4263851572248033749) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample (2099645202720164141) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (2096170505745650345) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode (884855779449390540) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (4073812880900816325) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality (4846872213548295632) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (3940973633342423717) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"புளூடூத் ஆடியோ கோடெக்"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="6470824182074383881">"பரிந்துரைக்கப்படும் புளூடூத் A2DP கோடெக்கைத் தேர்ந்தெடுக்கவும்"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"புளூடூத் ஆடியோ சாம்பிள் ரேட்"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="4263851572248033749">"பரிந்துரைக்கப்படும் புளூடூத் A2DP கோடெக் சாம்பிள் ரேட்டைத் தேர்ந்தெடுக்கவும்"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"புளூடூத் ஆடியோ பிட்கள்/சாம்பிள்"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="2096170505745650345">"ஒரு சாம்பிளுக்குப் பரிந்துரைக்கப்படும் புளூடூத் A2DP கோடெக் பிட்களைத் தேர்ந்தெடுக்கவும்"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"புளூடூத் ஆடியோ சேனல் பயன்முறை"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="4073812880900816325">"பரிந்துரைக்கப்படும் புளூடூத் A2DP கோடெக் சேனல் பயன்முறையைத் தேர்ந்தெடுக்கவும்"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="4846872213548295632">"புளூடூத் ஆடியோ LDAC வீடியோவின் தரம்"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3940973633342423717">"பரிந்துரைக்கப்படும் புளூடூத் A2DP கோடெக் LDAC வீடியோவின் தரத்தைத் தேர்ந்தெடுக்கவும்"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"வயர்லெஸ் காட்சி சான்றுக்கான விருப்பங்களைக் காட்டு"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wifi நுழைவு அளவை அதிகரித்து, வைஃபை தேர்வியில் ஒவ்வொன்றிற்கும் SSID RSSI ஐ காட்டுக"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"இயக்கப்பட்டதும், வைஃபை சிக்னல் குறையும் போது, வைஃபை முழுமையாக ஒத்துழைக்காமல் இருப்பதால் செல்லுலாரின் தரவு இணைப்புக்கு மாறும்"</string>

@@ -170,26 +170,16 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Uvijek dopustiti Wi-Fi lutajuće skeniranje"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Mobilni podaci uvijek aktivni"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Onemogućite apsolutnu jačinu zvuka"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type (90597356942154882) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (6470824182074383881) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate (4788245703824623062) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (4263851572248033749) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample (2099645202720164141) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (2096170505745650345) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode (884855779449390540) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (4073812880900816325) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality (4846872213548295632) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (3940973633342423717) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth Audio kodek"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="6470824182074383881">"Izaberite željeni Bluetooth A2DP kodek"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Brzina uzorkovanja za Bluetooth audio"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="4263851572248033749">"Izaberite željenu brzinu uzorkovanja za Bluetooth A2DP kodek"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bluetooth audio bitovi po uzorku"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="2096170505745650345">"Izaberite željeni broj bitova po uzorku za Bluetooth A2DP kodek"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Način Bluetooth audio kanala"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="4073812880900816325">"Izaberite željeni način kanala Bluetooth A2DP kodeka"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="4846872213548295632">"Kvaliteta reprodukcije za Bluetooth Audio LDAC"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3940973633342423717">"Izaberite željenu kvalitetu LDAC reprodukcije za Bluetooth A2DP kodek"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Pokaži opcije za certifikaciju Bežičnog prikaza"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Povećajte nivo Wi-Fi zapisivanja, pokazati po SSID RSSI Wi-Fi Picker"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Kada je omogućeno, Wi-Fi će biti agresivniji u predavanju podatkovne veze mobilnoj, kada je Wi-Fi signal slab"</string>
