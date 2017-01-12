@@ -217,11 +217,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         @Override
         public void onUserRestrictionsChanged(int userId, Bundle newRestrictions,
                 Bundle prevRestrictions) {
-            if (!newRestrictions.containsKey(UserManager.DISALLOW_BLUETOOTH)
-                    && !prevRestrictions.containsKey(UserManager.DISALLOW_BLUETOOTH)) {
-                // The relevant restriction has not changed - do nothing.
-                return;
-            }
             final boolean bluetoothDisallowed =
                     newRestrictions.getBoolean(UserManager.DISALLOW_BLUETOOTH);
             if ((mEnable || mEnableExternal) && bluetoothDisallowed) {
@@ -232,7 +227,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                   // when from system.
                 }
             }
-            updateOppLauncherComponentState(bluetoothDisallowed);
         }
     };
 
@@ -950,9 +944,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         UserManagerInternal userManagerInternal =
                 LocalServices.getService(UserManagerInternal.class);
         userManagerInternal.addUserRestrictionsListener(mUserRestrictionsListener);
-        final boolean isBluetoothDisallowed = isBluetoothDisallowed();
-        updateOppLauncherComponentState(isBluetoothDisallowed);
-        if (isBluetoothDisallowed) {
+        if (isBluetoothDisallowed()) {
             return;
         }
         if (mEnableExternal && isBluetoothPersistedStateOnBluetooth()) {
@@ -2007,24 +1999,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(callingIdentity);
         }
-    }
-
-    /**
-     * Disables BluetoothOppLauncherActivity component, so the Bluetooth sharing option is not
-     * offered to the user if Bluetooth is disallowed. Puts the component to its default state if
-     * Bluetooth is not disallowed.
-     *
-     * @param bluetoothDisallowed whether the {@link UserManager.DISALLOW_BLUETOOTH} user
-     * restriction was set.
-     */
-    private void updateOppLauncherComponentState(boolean bluetoothDisallowed) {
-        final ComponentName oppLauncherComponent = new ComponentName("com.android.bluetooth",
-                "com.android.bluetooth.opp.BluetoothOppLauncherActivity");
-        final int newState = bluetoothDisallowed
-                ? PackageManager.COMPONENT_ENABLED_STATE_DISABLED
-                : PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
-        mContext.getPackageManager()
-                .setComponentEnabledSetting(oppLauncherComponent, newState, 0);
     }
 
     @Override
