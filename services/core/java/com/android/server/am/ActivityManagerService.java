@@ -21907,6 +21907,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                     profilerInfo.profileFd = fd;
                     proc.thread.profilerControl(start, profilerInfo, profileType);
                     fd = null;
+                    try {
+                        mProfileFd.close();
+                    } catch (IOException e) {
+                    }
                     mProfileFd = null;
                 } else {
                     stopProfilerLocked(proc, profileType);
