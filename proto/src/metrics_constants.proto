@@ -3185,6 +3185,11 @@ message MetricsEvent {
     // logged when we execute an app transition.
     APP_TRANSITION = 761;
 
+    // ACTION: User leaves Settings search UI without entering any query.
+    ACTION_LEAVE_SEARCH_RESULT_WITHOUT_QUERY = 762;
+
+    // ACTION: Clicking on any search result in Settings.
+    ACTION_CLICK_SETTINGS_SEARCH_RESULT = 763;
 
     // ---- End O Constants, all O constants go above this line ----
 
