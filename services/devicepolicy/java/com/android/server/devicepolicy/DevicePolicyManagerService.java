@@ -4360,8 +4360,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkArgument(timeoutMs >= 0, "Timeout must not be a negative number.");
         // timeoutMs with value 0 means that the admin doesn't participate
         // timeoutMs is clamped to the interval in case the internal constants change in the future
-        if (timeoutMs != 0 && timeoutMs < MINIMUM_STRONG_AUTH_TIMEOUT_MS) {
-            timeoutMs = MINIMUM_STRONG_AUTH_TIMEOUT_MS;
+        final long minimumStrongAuthTimeout = getMinimumStrongAuthTimeoutMs();
+        if (timeoutMs != 0 && timeoutMs < minimumStrongAuthTimeout) {
+            timeoutMs = minimumStrongAuthTimeout;
         }
         if (timeoutMs > DevicePolicyManager.DEFAULT_STRONG_AUTH_TIMEOUT_MS) {
             timeoutMs = DevicePolicyManager.DEFAULT_STRONG_AUTH_TIMEOUT_MS;
@@ -4405,8 +4406,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     strongAuthUnlockTimeout = Math.min(timeout, strongAuthUnlockTimeout);
                 }
             }
-            return Math.max(strongAuthUnlockTimeout, MINIMUM_STRONG_AUTH_TIMEOUT_MS);
+            return Math.max(strongAuthUnlockTimeout, getMinimumStrongAuthTimeoutMs());
         }
+    }
+
+    private long getMinimumStrongAuthTimeoutMs() {
+        if (!mInjector.isBuildDebuggable()) {
+            return MINIMUM_STRONG_AUTH_TIMEOUT_MS;
+        }
+        // ideally the property was named persist.sys.min_strong_auth_timeout, but system property
+        // name cannot be longer than 31 characters
+        return Math.min(mInjector.systemPropertiesGetLong("persist.sys.min_str_auth_timeo",
+                MINIMUM_STRONG_AUTH_TIMEOUT_MS),
+                MINIMUM_STRONG_AUTH_TIMEOUT_MS);
     }
 
     @Override
