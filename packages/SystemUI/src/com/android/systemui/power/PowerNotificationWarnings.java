@@ -37,6 +37,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
 
+import com.android.internal.messages.SystemMessageProto.SystemMessage;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
@@ -49,8 +50,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private static final String TAG = PowerUI.TAG + ".Notification";
     private static final boolean DEBUG = PowerUI.DEBUG;
 
-    private static final String TAG_NOTIFICATION_BATTERY = "low_battery";
-    private static final String TAG_NOTIFICATION_TEMPERATURE = "high_temp";
+    private static final String TAG_BATTERY = "low_battery";
+    private static final String TAG_TEMPERATURE = "high_temp";
 
     private static final int SHOWING_NOTHING = 0;
     private static final int SHOWING_WARNING = 1;
@@ -134,7 +135,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             showWarningNotification();
             mShowing = SHOWING_WARNING;
         } else {
-            mNoMan.cancelAsUser(TAG_NOTIFICATION_BATTERY, R.id.notification_power, UserHandle.ALL);
+            mNoMan.cancelAsUser(TAG_BATTERY, SystemMessage.NOTE_BAD_CHARGER, UserHandle.ALL);
+            mNoMan.cancelAsUser(TAG_BATTERY, SystemMessage.NOTE_POWER_LOW, UserHandle.ALL);
             mShowing = SHOWING_NOTHING;
         }
     }
@@ -153,7 +155,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                         com.android.internal.R.color.system_notification_accent_color));
         SystemUI.overrideNotificationAppName(mContext, nb);
         final Notification n = nb.build();
-        mNoMan.notifyAsUser(TAG_NOTIFICATION_BATTERY, R.id.notification_power, n, UserHandle.ALL);
+        mNoMan.cancelAsUser(TAG_BATTERY, SystemMessage.NOTE_POWER_LOW, UserHandle.ALL);
+        mNoMan.notifyAsUser(TAG_BATTERY, SystemMessage.NOTE_BAD_CHARGER, n, UserHandle.ALL);
     }
 
     private void showWarningNotification() {
@@ -183,8 +186,9 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             mPlaySound = false;
         }
         SystemUI.overrideNotificationAppName(mContext, nb);
-        mNoMan.notifyAsUser(
-                TAG_NOTIFICATION_BATTERY, R.id.notification_power, nb.build(), UserHandle.ALL);
+        final Notification n = nb.build();
+        mNoMan.cancelAsUser(TAG_BATTERY, SystemMessage.NOTE_BAD_CHARGER, UserHandle.ALL);
+        mNoMan.notifyAsUser(TAG_BATTERY, SystemMessage.NOTE_POWER_LOW, n, UserHandle.ALL);
     }
 
     private PendingIntent pendingBroadcast(String action) {
@@ -211,8 +215,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             return;
         }
         mTempWarning = false;
-        mNoMan.cancelAsUser(
-                TAG_NOTIFICATION_TEMPERATURE, R.id.notification_temperature, UserHandle.ALL);
+        mNoMan.cancelAsUser(TAG_TEMPERATURE, SystemMessage.NOTE_HIGH_TEMP,
+                UserHandle.ALL);
     }
 
     @Override
@@ -235,8 +239,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                         com.android.internal.R.color.battery_saver_mode_color));
         SystemUI.overrideNotificationAppName(mContext, nb);
         final Notification n = nb.build();
-        mNoMan.notifyAsUser(
-                TAG_NOTIFICATION_TEMPERATURE, R.id.notification_temperature, n, UserHandle.ALL);
+        mNoMan.notifyAsUser(TAG_TEMPERATURE, SystemMessage.NOTE_HIGH_TEMP, n, UserHandle.ALL);
 
     }
 
