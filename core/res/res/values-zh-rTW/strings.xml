@@ -1060,14 +1060,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"鬧鐘音效"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"通知音效"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"不明"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">有多個可用的 Wi-Fi 網路</item>
-      <item quantity="one">有一個可用的 Wi-Fi 網路</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">有多個可用的開放 Wi-Fi 網路</item>
-      <item quantity="one">有多個可用的開放 Wi-Fi 網路</item>
-    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"登入 Wi-Fi 網路"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"登入網路"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1559,8 +1551,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"公司<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"第 2 項工作：<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"第 3 項工作：<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"如要取消固定這個畫面，請按住「返回」按鈕和「總覽」按鈕。"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"應用程式已固定：無法在這部裝置取消固定。"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"已固定螢幕"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"已取消固定螢幕"</string>

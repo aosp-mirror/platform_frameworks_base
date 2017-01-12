@@ -224,9 +224,9 @@
     <string name="bugreport_title" msgid="2667494803742548533">"Lav fejlrapport"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Der indsamles oplysninger om din enheds aktuelle status, der efterfølgende sendes i en e-mail. Der går lidt tid, fra fejlrapporten påbegyndes, til den er klar til at blive sendt. Tak for tålmodigheden."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktiv rapport"</string>
-    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Brug dette workflow under de fleste omstændigheder. Det giver dig mulighed for at se status på rapporten, angive flere oplysninger om problemet og tage skærmbilleder. Nogle mindre brugte sektioner, der tager lang tid at rapportere, udelades muligvis."</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Brug dette workflow under de fleste omstændigheder. Det giver dig mulighed for at se status på rapporten, angive flere oplysninger om problemet og tage screenshots. Nogle mindre brugte sektioner, der tager lang tid at rapportere, udelades muligvis."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Fuld rapport"</string>
-    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Brug denne mulighed for at gribe mindst muligt ind, når enheden ikke reagerer eller er for langsom, eller når du har brug for alle rapportsektioner. Du har ikke mulighed for at angive flere oplysninger eller tage yderligere skærmbilleder."</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Brug denne mulighed for at gribe mindst muligt ind, når enheden ikke reagerer eller er for langsom, eller når du har brug for alle rapportsektioner. Du har ikke mulighed for at angive flere oplysninger eller tage yderligere screenshots."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">Der tages et screenshot til fejlrapporten om <xliff:g id="NUMBER_1">%d</xliff:g> sekund.</item>
       <item quantity="other">Der tages et screenshot til fejlrapporten om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder.</item>
@@ -1060,14 +1060,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Alarmlyde"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Meddelelseslyde"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Ukendt"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="one">Tilgængelige Wi-Fi-netværk</item>
-      <item quantity="other">Tilgængelige Wi-Fi-netværk</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="one">Åbne Wi-Fi-netværk er tilgængelige</item>
-      <item quantity="other">Åbne Wi-Fi-netværk er tilgængelige</item>
-    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Log ind på Wi-Fi-netværk"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Log ind på netværk"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1559,8 +1551,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> – arbejde"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2. <xliff:g id="LABEL">%1$s</xliff:g> til arbejde"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3. <xliff:g id="LABEL">%1$s</xliff:g> til arbejde"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"Hvis du vil frigøre dette skærmbillede, skal du trykke på Tilbage og Oversigt samt holde fingeren nede."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Appen er fastgjort: Det er ikke tilladt at frigøre den på denne enhed."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skærmen blev fastgjort"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Skærmen blev frigjort"</string>

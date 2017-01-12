@@ -1080,16 +1080,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Звуци аларма"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Звуци обавештења"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Непознато"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="one">Wi-Fi мреже су доступне</item>
-      <item quantity="few">Wi-Fi мреже су доступне</item>
-      <item quantity="other">Wi-Fi мреже су доступне</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="one">Отворене Wi-Fi мреже су доступне</item>
-      <item quantity="few">Отворене Wi-Fi мреже су доступне</item>
-      <item quantity="other">Отворене Wi-Fi мреже су доступне</item>
-    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Пријављивање на Wi-Fi мрежу"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Пријавите се на мрежу"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1583,8 +1573,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> на послу"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2. пословни <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3. пословни имејл <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"Да бисте откачили овај екран, додирните и задржите Назад и Преглед."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Апликација је закачена: откачињање није дозвољено на овом уређају."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Екран је закачен"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Екран је откачен"</string>

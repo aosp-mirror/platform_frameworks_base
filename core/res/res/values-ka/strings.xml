@@ -1060,14 +1060,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"მაღვიძარას ხმები"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"შეტყობინების ხმები"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"უცნობი"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">ხელმისაწვდომია Wi-Fi ქსელები</item>
-      <item quantity="one">ხელმისაწვდომია Wi-Fi ქსელი</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">ხელმისაწვდომია ღია Wi-Fi ქსელები</item>
-      <item quantity="one">ხელმისაწვდომია ღია Wi-Fi ქსელი</item>
-    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi ქსელთან დაკავშირება"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"ქსელში შესვლა"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1559,8 +1551,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"სამსახური <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"მე-2 სამსახური <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"მე-3 სამსახური <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"ამ ეკრანის ჩამაგრების მოსახსნელად, ხანგრძლივად შეეხეთ ღილაკს „უკან და მიმოხილვა“."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"აპი მიმაგრებულია: მიმაგრების მოხსნა არ არის ნებადართული ამ მოწყობილობაზე."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"ეკრანი დაფიქსირდა"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"ეკრანს ფიქსაცია მოეხსნა"</string>

@@ -1060,14 +1060,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Suoni delle sveglie"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Suoni di notifica"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Sconosciuta"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">Reti Wi-Fi disponibili</item>
-      <item quantity="one">Rete Wi-Fi disponibile</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">Apri reti Wi-Fi disponibili</item>
-      <item quantity="one">Apri rete Wi-Fi disponibile</item>
-    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Accedi a rete Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Accedi alla rete"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1559,8 +1551,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> lavoro"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"<xliff:g id="LABEL">%1$s</xliff:g> di lavoro (2°)"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"<xliff:g id="LABEL">%1$s</xliff:g> di lavoro (3°)"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"Per sbloccare questa schermata tieni premuto Indietro e Panoramica."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"L\'app è bloccata. Su questo dispositivo non è consentito lo sblocco."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Schermata bloccata"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Schermata sbloccata"</string>

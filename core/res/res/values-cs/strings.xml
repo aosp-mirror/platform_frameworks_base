@@ -1100,18 +1100,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Zvuky budíku"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Zvuky upozornění"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Neznámé"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="few">K dispozici jsou sítě Wi-Fi</item>
-      <item quantity="many">K dispozici jsou sítě Wi-Fi</item>
-      <item quantity="other">K dispozici jsou sítě Wi-Fi</item>
-      <item quantity="one">K dispozici je síť Wi-Fi</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="few">K dispozici jsou veřejné sítě Wi-Fi</item>
-      <item quantity="many">K dispozici jsou veřejné sítě Wi-Fi</item>
-      <item quantity="other">K dispozici jsou veřejné sítě Wi-Fi</item>
-      <item quantity="one">K dispozici je veřejná síť Wi-Fi</item>
-    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Přihlásit se k síti Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Přihlásit se k síti"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1607,8 +1595,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Pracovní <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2. <xliff:g id="LABEL">%1$s</xliff:g> do práce"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3. <xliff:g id="LABEL">%1$s</xliff:g> do práce"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"Chcete-li tuto obrazovku uvolnit, klepněte na tlačítko Zpět a poté na tlačítko Přehled a podržte jej."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Aplikace je připnutá: Odepnutí v tomto zařízení není povoleno."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Obrazovka připnuta"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Obrazovka uvolněna"</string>

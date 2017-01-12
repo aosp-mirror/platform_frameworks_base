@@ -1060,14 +1060,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"అలారం ధ్వనులు"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"నోటిఫికేషన్ ధ్వనులు"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"తెలియదు"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">Wi-Fi నెట్‌వర్క్‌లు అందుబాటులో ఉన్నాయి</item>
-      <item quantity="one">Wi-Fi నెట్‌వర్క్ అందుబాటులో ఉంది</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">ఓపెన్ Wi-Fi నెట్‌వర్క్‌లు అందుబాటులో ఉన్నాయి</item>
-      <item quantity="one">ఓపెన్ Wi-Fi నెట్‌వర్క్ అందుబాటులో ఉంది</item>
-    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi నెట్‌వర్క్‌కి సైన్ ఇన్ చేయండి"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"నెట్‌వర్క్‌కి సైన్ ఇన్ చేయండి"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1559,8 +1551,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"కార్యాలయం <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2వ కార్యాలయం <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3వ కార్యాలయం <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"ఈ స్క్రీన్‌ను అన్‌పిన్ చేయడానికి, వెనుకకు మరియు స్థూలదృష్టి తాకి &amp; అలాగే పట్టుకోండి."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"అనువర్తనం పిన్ చేయబడింది: ఈ పరికరంలో అన్‌పిన్ చేయడానికి అనుమతి లేదు."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"స్క్రీన్ పిన్ చేయబడింది"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"స్క్రీన్ అన్‌పిన్ చేయబడింది"</string>

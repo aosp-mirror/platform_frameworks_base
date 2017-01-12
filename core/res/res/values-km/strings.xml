@@ -1062,14 +1062,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"សំឡេងម៉ោងរោទិ៍"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"សំឡេងជូនដំណឹង"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"មិន​ស្គាល់"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">មានបណ្តាញ Wi-Fi</item>
-      <item quantity="one">មានបណ្តាញ Wi-Fi</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">បើកបណ្តាញ Wi-Fi ដែលមាន</item>
-      <item quantity="one">បើកបណ្តាញ Wi-Fi ដែលមាន</item>
-    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"ចូល​បណ្ដាញ​វ៉ាយហ្វាយ"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"ចូលទៅបណ្តាញ"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1561,8 +1553,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"កន្លែង​ធ្វើការ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"<xliff:g id="LABEL">%1$s</xliff:g> ការងារទី 2"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"<xliff:g id="LABEL">%1$s</xliff:g> ការងារទី 3"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"ដើម្បី​ដក​ការ​ខ្ទាស់​អេក្រង់​នេះ សូម​សង្កត់​ប៉ូតុង​ថយ​ក្រោយ និង​ប៊ូតុង​ថ្មី​ឲ្យ​ជាប់។"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"កម្មវិធីនេះត្រូវបានខ្ទាស់។ មិនអនុញ្ញាតឲ្យដោះការខ្ទាស់នៅលើឧបករណ៍នេះទេ។"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"បាន​ភ្ជាប់​អេក្រង់"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"មិន​បាន​ភ្ជាប់​អេក្រង់"</string>

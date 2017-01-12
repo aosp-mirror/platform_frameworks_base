@@ -1060,14 +1060,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Ήχοι ξυπνητηριού"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Ήχοι ειδοποίησης"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Άγνωστο"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">Υπάρχουν διαθέσιμα δίκτυα Wi-Fi</item>
-      <item quantity="one">Υπάρχει διαθέσιμο δίκτυο Wi-Fi</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">Υπάρχουν διαθέσιμα ανοικτά δίκτυα Wi-Fi</item>
-      <item quantity="one">Υπάρχει διαθέσιμο ανοικτό δίκτυο Wi-Fi</item>
-    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Συνδεθείτε στο δίκτυο Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Σύνδεση στο δίκτυο"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1559,8 +1551,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Εργασία <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"<xliff:g id="LABEL">%1$s</xliff:g> εργασίας 2"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"<xliff:g id="LABEL">%1$s</xliff:g> εργασίας 3"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"Για να ξεκαρφιτσώσετε αυτήν την οθόνη, αγγίξτε παρατεταμένα τις επιλογές \"Πίσω\" και \"Επισκόπηση\"."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Η εφαρμογή καρφιτσώθηκε: Το ξεκαρφίτσωμα δεν επιτρέπεται σε αυτήν τη συσκευή."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Η οθόνη καρφιτσώθηκε"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Η οθόνη ξεκαρφιτσώθηκε"</string>

@@ -1060,14 +1060,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Suara alarm"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Suara notifikasi"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Tidak diketahui"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">Jaringan Wi-Fi tersedia</item>
-      <item quantity="one">Jaringan Wi-Fi tersedia</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">Jaringan Wi-Fi terbuka tersedia</item>
-      <item quantity="one">Jaringan Wi-Fi terbuka tersedia</item>
-    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Masuk ke jaringan Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Masuk ke jaringan"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1559,8 +1551,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Kantor <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"Upaya ke-2 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"Upaya ke-3 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"Untuk melepas pin layar ini, sentuh &amp; tahan Kembali dan Ringkasan."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Pin dipasang ke aplikasi. Melepas pin tidak diizinkan di perangkat ini."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Layar disematkan"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Layar dicopot sematannya"</string>
