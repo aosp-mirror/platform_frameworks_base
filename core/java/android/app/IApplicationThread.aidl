@@ -152,4 +152,5 @@ oneway interface IApplicationThread {
             IVoiceInteractor voiceInteractor);
     void handleTrustStorageUpdate();
     void attachAgent(String path);
+    void scheduleApplicationInfoChanged(in ApplicationInfo ai);
 }

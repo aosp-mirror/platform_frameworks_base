@@ -671,6 +671,14 @@ public class ActivityInfo extends ComponentInfo
     public static final int CONFIG_LAYOUT_DIRECTION = 0x2000;
     /**
      * Bit in {@link #configChanges} that indicates that the activity
+     * can itself handle asset path changes.  Set from the {@link android.R.attr#configChanges}
+     * attribute. This is not a core resource configuration, but a higher-level value, so its
+     * constant starts at the high bits.
+     * @hide We do not want apps handling this yet, but we do need some kind of bit for diffs.
+     */
+    public static final int CONFIG_ASSETS_PATHS = 0x80000000;
+    /**
+     * Bit in {@link #configChanges} that indicates that the activity
      * can itself handle changes to the font scaling factor.  Set from the
      * {@link android.R.attr#configChanges} attribute.  This is
      * not a core resource configuration, but a higher-level value, so its
