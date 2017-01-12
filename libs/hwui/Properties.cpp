@@ -20,9 +20,9 @@
 #include <algorithm>
 #include <cstdlib>
 
-#include <log/log.h>
 #include <cutils/compiler.h>
 #include <cutils/properties.h>
+#include <log/log.h>
 
 namespace android {
 namespace uirenderer {
