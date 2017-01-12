@@ -1215,7 +1215,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             return getMinHeight();
         } else if (mIsSummaryWithChildren && !mOnKeyguard) {
             return mChildrenContainer.getIntrinsicHeight();
-        } else if (mIsHeadsUp || mHeadsupDisappearRunning) {
+        } else if (!mOnKeyguard && (mIsHeadsUp || mHeadsupDisappearRunning)) {
             if (isPinned() || mHeadsupDisappearRunning) {
                 return getPinnedHeadsUpHeight(true /* atLeastMinHeight */);
             } else if (isExpanded()) {
@@ -1514,11 +1514,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     @Override
     public int getMinHeight() {
-        if (mIsHeadsUp && mHeadsUpManager.isTrackingHeadsUp()) {
+        if (!mOnKeyguard && mIsHeadsUp && mHeadsUpManager.isTrackingHeadsUp()) {
                 return getPinnedHeadsUpHeight(false /* atLeastMinHeight */);
         } else if (mIsSummaryWithChildren && !isGroupExpanded() && !mShowingPublic) {
             return mChildrenContainer.getMinHeight();
-        } else if (mIsHeadsUp) {
+        } else if (!mOnKeyguard && mIsHeadsUp) {
             return mHeadsUpHeight;
         }
         NotificationContentView showingLayout = getShowingLayout();

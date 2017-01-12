@@ -34,6 +34,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
@@ -109,6 +110,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     private boolean mIsObserving;
     private boolean mRemoteInputActive;
     private VisualStabilityManager mVisualStabilityManager;
+    private int mStatusBarState;
 
     public HeadsUpManager(final Context context, View statusBarWindowView,
                           NotificationGroupManager groupManager) {
@@ -216,7 +218,8 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     }
 
     private boolean shouldHeadsUpBecomePinned(NotificationData.Entry entry) {
-        return !mIsExpanded || hasFullScreenIntent(entry);
+        return mStatusBarState != StatusBarState.KEYGUARD
+                && !mIsExpanded || hasFullScreenIntent(entry);
     }
 
     private boolean hasFullScreenIntent(NotificationData.Entry entry) {
@@ -621,6 +624,10 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
 
     public void setVisualStabilityManager(VisualStabilityManager visualStabilityManager) {
         mVisualStabilityManager = visualStabilityManager;
+    }
+
+    public void setStatusBarState(int statusBarState) {
+        mStatusBarState = statusBarState;
     }
 
     /**
