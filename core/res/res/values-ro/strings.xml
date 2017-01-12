@@ -1080,16 +1080,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Sunete de alarmă"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Sunete pentru notificare"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Necunoscut"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="few">Rețele Wi-Fi disponibile</item>
-      <item quantity="other">Rețele Wi-Fi disponibile</item>
-      <item quantity="one">Rețea Wi-Fi disponibilă</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="few">Rețele Wi-Fi deschise disponibile</item>
-      <item quantity="other">Rețele Wi-Fi deschise disponibile</item>
-      <item quantity="one">Rețea Wi-Fi deschisă disponibilă</item>
-    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Conectați-vă la rețeaua Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Conectați-vă la rețea"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1583,8 +1573,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> de serviciu"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"<xliff:g id="LABEL">%1$s</xliff:g> pentru serviciu (2)"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"<xliff:g id="LABEL">%1$s</xliff:g> pentru serviciu (3)"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"Pentru a anula fixarea acestui ecran, atingeți lung opțiunile Înapoi și Recente."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Aplicația este fixată: Anularea fixării nu este permisă pe acest dispozitiv."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ecran fixat"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Fixarea ecranului anulată"</string>

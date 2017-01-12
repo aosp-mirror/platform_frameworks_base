@@ -1100,18 +1100,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Įspėjimų garsai"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Pranešimų garsai"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Nežinoma"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="one">Pasiekiami „Wi-Fi“ tinklai</item>
-      <item quantity="few">Pasiekiami „Wi-Fi“ tinklai</item>
-      <item quantity="many">Pasiekiami „Wi-Fi“ tinklai</item>
-      <item quantity="other">Pasiekiami „Wi-Fi“ tinklai</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="one">Pasiekiami atvirieji „Wi-Fi“ tinklai</item>
-      <item quantity="few">Pasiekiami atvirieji „Wi-Fi“ tinklai</item>
-      <item quantity="many">Pasiekiami atvirieji „Wi-Fi“ tinklai</item>
-      <item quantity="other">Pasiekiami atvirieji „Wi-Fi“ tinklai</item>
-    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Prisijungti prie „Wi-Fi“ tinklo"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Prisijungti prie tinklo"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1607,8 +1595,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Darbo <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2-asis darbo <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3-iasis darbo <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"Kad atsegtumėte šį ekraną, palieskite ir palaikykite „Atgal“ ir „Apžvalga“."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Programa prisegta: šiame įrenginyje negalima atsegti."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekrano prisegtas"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Ekranas atsegtas"</string>

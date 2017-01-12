@@ -1060,14 +1060,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Sons do alarme"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Sons de notificação"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Desconhecido"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="one">Redes Wi-Fi disponíveis</item>
-      <item quantity="other">Redes Wi-Fi disponíveis</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="one">Abrir redes Wi-Fi disponíveis</item>
-      <item quantity="other">Abrir redes Wi-Fi disponíveis</item>
-    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Fazer login na rede Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Fazer login na rede"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1559,8 +1551,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Trabalho: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"Segundo <xliff:g id="LABEL">%1$s</xliff:g> de trabalho"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"Terceiro <xliff:g id="LABEL">%1$s</xliff:g> de trabalho"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"Para liberar essa tela, toque nos botões Voltar e Visão geral e mantenha-os pressionados."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"O app está fixado. A liberação não é permitida neste dispositivo."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Tela fixada"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Tela liberada"</string>

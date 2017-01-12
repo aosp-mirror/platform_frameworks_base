@@ -1060,14 +1060,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"알람 소리"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"알림 사운드"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"알 수 없음"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">Wi-Fi 네트워크 사용 가능</item>
-      <item quantity="one">Wi-Fi 네트워크 사용 가능</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">개방형 Wi-Fi 네트워크 사용 가능</item>
-      <item quantity="one">개방형 Wi-Fi 네트워크 사용 가능</item>
-    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi 네트워크에 로그인"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"네트워크에 로그인"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1559,8 +1551,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"업무용 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"두 번째 업무용 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"세 번째 업무용<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"이 화면을 고정 해제하려면 \'뒤로\' 및 \'최근 사용\'을 길게 터치하세요."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"앱이 고정되었습니다. 이 기기에서는 고정 해제를 허용하지 않습니다."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"화면 고정됨"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"화면 고정 해제됨"</string>

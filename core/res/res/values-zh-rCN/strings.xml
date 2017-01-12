@@ -1060,14 +1060,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"闹钟提示音"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"通知提示音"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"未知"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">有可用的 WLAN 网络</item>
-      <item quantity="one">有可用的 WLAN 网络</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">有可用的开放 WLAN 网络</item>
-      <item quantity="one">有可用的开放 WLAN 网络</item>
-    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"登录到WLAN网络"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"登录到网络"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1559,8 +1551,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"工作<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"第二个工作<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"第三个工作<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"要取消固定此屏幕，请触摸并按住“返回”和“概览”。"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"应用处于固定状态：在此设备上不允许退出该模式。"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"已固定屏幕"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"已取消固定屏幕"</string>

@@ -1062,14 +1062,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"එලාම හඬ"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"දැනුම්දීම් හඬ"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"නොදනී"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="one">Wi-Fi ජාල තිබේ</item>
-      <item quantity="other">Wi-Fi ජාල තිබේ</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="one">විවෘත Wi-Fi ජාල තිබේ</item>
-      <item quantity="other">විවෘත Wi-Fi ජාල තිබේ</item>
-    </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi ජාලයට පුරනය වන්න"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"ජාලයට පුරනය වන්න"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1561,8 +1553,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"වැඩ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2වන වැඩ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3වන වැඩ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"මෙම තිරය ඇමුණුම් ඉවත් කිරීමට, දළ විශ්ලේෂණය ස්පර්ශ කර අල්ලා ගෙන සිටින්න."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"යෙදුම අමුණා ඇත: ගැලවීමට මෙම උපාංගය මත ඉඩ දිය නොහැකිය.‍"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"තිරය අගුළු දමා ඇත"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"තිරයේ අගුළු ඇර ඇත"</string>
