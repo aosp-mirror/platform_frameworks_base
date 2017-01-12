@@ -26,6 +26,7 @@
 #include <fstream>
 #include <string>
 #include <map>
+#include <thread>
 
 #include <sys/types.h>
 #include <dirent.h>
@@ -34,6 +35,14 @@
 using namespace std;
 
 map<string,string> g_buildVars;
+
+static unsigned int
+get_thread_count()
+{
+    unsigned int threads = std::thread::hardware_concurrency();
+    // Guess if the value cannot be computed
+    return threads == 0 ? 4 : static_cast<unsigned int>(threads * 1.3f);
+}
 
 string
 get_build_var(const string& buildTop, const string& name, bool quiet)
@@ -44,6 +53,7 @@ get_build_var(const string& buildTop, const string& name, bool quiet)
     if (it == g_buildVars.end()) {
         Command cmd("make");
         cmd.AddArg("--no-print-directory");
+        cmd.AddArg(string("-j") + std::to_string(get_thread_count()));
         cmd.AddArg("-C");
         cmd.AddArg(buildTop);
         cmd.AddArg("-f");
@@ -199,6 +209,7 @@ int
 build_goals(const vector<string>& goals)
 {
     Command cmd("make");
+    cmd.AddArg(string("-j") + std::to_string(get_thread_count()));
     cmd.AddArg("-f");
     cmd.AddArg("build/core/main.mk");
     for (size_t i=0; i<goals.size(); i++) {
