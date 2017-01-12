@@ -1565,8 +1565,7 @@
     <string name="select_year" msgid="7952052866994196170">"ခုနှစ်ကို ရွေးပါ"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> ကို ဖျက်ပြီးပါပြီ"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"အလုပ် <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"ဤမျက်နှာပြင်ကို ပင်ဖြုတ်ရန်အတွက် Back နှင့် Overview ကိုနှိပ်၍ ဖိထားပါ။"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"အက်ပ်ကို ပင်ထိုးထားသည်။ ပင်ဖျက်ခြင်းကို ဒီစက်မှာ မရနိုင်ပါ။"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"မျက်နှာပြင်ကို ပင်ထိုးထား"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"မျက်နှာပြင် ပင်ထိုးမှု ဖြတ်လိုက်ပြီ"</string>

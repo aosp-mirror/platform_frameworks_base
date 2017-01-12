@@ -1567,8 +1567,7 @@
     <string name="select_year" msgid="7952052866994196170">"ជ្រើស​ឆ្នាំ"</string>
     <string name="deleted_key" msgid="7659477886625566590">"បាន​លុប <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"កន្លែង​ធ្វើការ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"ដើម្បី​ដក​ការ​ខ្ទាស់​អេក្រង់​នេះ សូម​សង្កត់​ប៉ូតុង​ថយ​ក្រោយ និង​ប៊ូតុង​ថ្មី​ឲ្យ​ជាប់។"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"កម្មវិធីនេះត្រូវបានខ្ទាស់។ មិនអនុញ្ញាតឲ្យដោះការខ្ទាស់នៅលើឧបករណ៍នេះទេ។"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"បាន​ភ្ជាប់​អេក្រង់"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"មិន​បាន​ភ្ជាប់​អេក្រង់"</string>

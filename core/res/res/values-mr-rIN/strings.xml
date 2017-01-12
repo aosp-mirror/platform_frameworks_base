@@ -323,7 +323,7 @@
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"अॅपला मेमरीमध्ये कायम असलेले त्याचे स्वतःचे भाग बनविण्यासाठी अनुमती देते. हे टीव्ही धीमा करून इतर अॅप्सवर उपलब्ध असलेली मेमरी मर्यादित करू शकते."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"अॅप ला मेमरीमध्ये कायम असलेले त्याचे स्वतःचे भाग बनविण्यास अनुमती देते. हे फोन धीमा करून अन्य अॅप्सवर उपलब्ध असलेल्या मेमरीवर मर्यादा घालू शकते."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"अॅप संचयन स्थान मोजा"</string>
-    <string name="permdesc_getPackageSize" msgid="3921068154420738296">"अॅप ला त्याचा कोड, डेटा आणि कॅशे आकार पुनर्प्राप्त करण्यासाठी अनुमती देते"</string>
+    <string name="permdesc_getPackageSize" msgid="3921068154420738296">"अॅप ला त्याचा कोड, डेटा आणि कॅश   आकार पुनर्प्राप्त करण्यासाठी अनुमती देते"</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"सिस्टम सेटिंग्ज सुधारित करा"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"सिस्टीमचा सेटिंग्ज डेटा सुधारित करण्यासाठी अॅप ला अनुमती देते. दुर्भावनापूर्ण अॅप्स आपल्या सिस्टीमचे कॉन्फिगरेशन दूषित करू शकतात."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"सुरूवातीस चालवा"</string>
@@ -1565,8 +1565,7 @@
     <string name="select_year" msgid="7952052866994196170">"वर्ष निवडा"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> हटविली"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"ही स्क्रीन अनपिन करण्यासाठी, परत आणि विहंगावलोकनास स्पर्श करा आणि धरून ठेवा."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"अॅप पिन केलेला आहे: या डिव्हाइसवर अनपिन करण्यास अनुमती नाही."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"स्क्रीन पिन केली"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"स्क्रीन अनपिन केली"</string>

@@ -1565,8 +1565,7 @@
     <string name="select_year" msgid="7952052866994196170">"سال منتخب کریں"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> کو حذف کر دیا گیا"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"دفتر <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"اس اسکرین سے پن ہٹانے کیلئے، ٹچ کریں، دبائیں اور مجموعی جائزہ۔"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"ایپ کو پن کر دیا گیا ہے: اس آلہ پر پن ہٹانے کی اجازت نہیں ہے۔"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"اسکرین کو پن کر دیا گیا"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"اسکرین کا پن ہٹا دیا گیا"</string>

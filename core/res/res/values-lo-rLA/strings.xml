@@ -1565,8 +1565,7 @@
     <string name="select_year" msgid="7952052866994196170">"ເລືອກ​ປີ"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> ຖືກລຶບແລ້ວ"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"​ບ່ອນ​ເຮັດ​ວຽກ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"To unpin this screen, touch &amp; hold Back and Overview."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"ແອັບ​ຖືກ​ປັກ​ໝຸດ​ແລ້ວ: ບໍ່​ອະ​ນຸ​ຍາດ​ໃຫ້​ຖອນ​ປັກ​ໝຸດ​ຢູ່​ເທິງ​ອຸ​ປະ​ກອນ​ນີ້."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​ແລ້ວ"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"ຍົກ​ເລີກ​ການ​ປັກ​ໝຸນ​​ຫນ້າ​ຈໍ​ແລ້ວ"</string>

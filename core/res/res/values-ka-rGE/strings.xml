@@ -1565,8 +1565,7 @@
     <string name="select_year" msgid="7952052866994196170">"აირჩიეთ წელი"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> წაიშალა"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"სამსახური <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"ამ ეკრანის ჩამაგრების მოსახსნელად, ხანგრძლივად შეეხეთ ღილაკს „უკან და მიმოხილვა“."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"აპი მიმაგრებულია: მიმაგრების მოხსნა არ არის ნებადართული ამ მოწყობილობაზე."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"ეკრანი დაფიქსირდა"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"ეკრანს ფიქსაცია მოეხსნა"</string>

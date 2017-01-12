@@ -1571,8 +1571,7 @@
     <string name="select_year" msgid="7952052866994196170">"वर्ष चयन गर्नुहोस्"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> हटाइयो"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"यस स्क्रिनलाई अनपिन गर्न पछाडि र परिदृश्य बटनलाई छोइराख्नुहोस्।"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"अनुप्रयोग पिन गरियो: यस यन्त्रमा अनपिन गर्ने अनुमति छैन।"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"स्क्रिन पिन गरियो"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"स्क्रिन अनपिन गरियो"</string>
