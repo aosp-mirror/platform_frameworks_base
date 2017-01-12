@@ -16,13 +16,14 @@
 
 package com.android.systemui.recents.model;
 
-import android.app.ActivityManager;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 
 /**
  * Data for a single thumbnail.
  */
 public class ThumbnailData {
     public Bitmap thumbnail;
-    public ActivityManager.TaskThumbnailInfo thumbnailInfo;
+    public int orientation;
+    public final Rect insets = new Rect();
 }

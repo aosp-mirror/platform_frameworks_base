@@ -22,6 +22,7 @@ import android.app.KeyguardManager;
 import android.app.Presentation;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.IBinder;
@@ -1317,6 +1318,17 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         public static final int PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE = 0x00040000;
+
+        /**
+         * Flag to indicate that this window is used as a task snapshot window. A task snapshot
+         * window is a starting window that gets shown with a screenshot from the previous state
+         * that is active until the app has drawn its first frame.
+         *
+         * <p>If this flag is set, SystemUI flags are ignored such that the real window behind can
+         * set the SystemUI flags.
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_TASK_SNAPSHOT = 0x00080000;
 
         /**
          * Control flags that are private to the platform.

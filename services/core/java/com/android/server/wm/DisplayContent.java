@@ -106,6 +106,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.DisplayMetrics;
+import android.util.MutableBoolean;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -2102,10 +2103,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @param frameScale the scale to apply to the frame, only used when width = -1 and height = -1
      * @param config of the output bitmap
      * @param wallpaperOnly true if only the wallpaper layer should be included in the screenshot
+     * @param includeDecor whether to include window decors, like the status or navigation bar
+     *                     background of the window
+     * @param toAshmem whether to convert the resulting bitmap to ashmem; this should be set to
+     *                 true if the Bitmap is sent over binder, and false otherwise
      */
     Bitmap screenshotApplications(IBinder appToken, int width, int height,
             boolean includeFullDisplay, float frameScale, Bitmap.Config config,
-            boolean wallpaperOnly) {
+            boolean wallpaperOnly, boolean includeDecor, boolean toAshmem) {
         int dw = mDisplayInfo.logicalWidth;
         int dh = mDisplayInfo.logicalHeight;
         if (dw == 0 || dh == 0) {
@@ -2137,7 +2142,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         final int aboveAppLayer = (mService.mPolicy.windowTypeToLayerLw(TYPE_APPLICATION) + 1)
                 * TYPE_LAYER_MULTIPLIER + TYPE_LAYER_OFFSET;
-
+        final MutableBoolean mutableIncludeFullDisplay = new MutableBoolean(includeFullDisplay);
         synchronized(mService.mWindowMap) {
             // Figure out the part of the screen that is actually the app.
             mScreenshotApplicationState.appWin = null;
@@ -2194,7 +2199,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 }
 
                 // Don't include wallpaper in bounds calculation
-                if (!includeFullDisplay && !w.mIsWallpaper) {
+                if (includeDecor && !stackBounds.isEmpty()) {
+                    frame.set(stackBounds);
+                } else if (includeDecor) {
+                    mutableIncludeFullDisplay.value = true;
+                } else if (!mutableIncludeFullDisplay.value && !w.mIsWallpaper) {
                     final Rect wf = w.mFrame;
                     final Rect cr = w.mContentInsets;
                     int left = wf.left + cr.left;
@@ -2252,7 +2261,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 return null;
             }
 
-            if (!includeFullDisplay) {
+            if (!mutableIncludeFullDisplay.value) {
                 // Constrain frame to the screen size.
                 if (!frame.intersect(0, 0, dw, dh)) {
                     frame.setEmpty();
@@ -2353,9 +2362,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         // Create a copy of the screenshot that is immutable and backed in ashmem.
         // This greatly reduces the overhead of passing the bitmap between processes.
-        Bitmap ret = bm.createAshmemBitmap(config);
-        bm.recycle();
-        return ret;
+        if (toAshmem) {
+            Bitmap ret = bm.createAshmemBitmap(config);
+            bm.recycle();
+            return ret;
+        } else {
+            return bm;
+        }
     }
 
     // TODO: Can this use createRotationMatrix()?

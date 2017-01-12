@@ -119,6 +119,12 @@ class WindowTestsBase {
                 : createWindow(parent, type, parent.mToken, name);
     }
 
+    WindowState createAppWindow(Task task, int type, String name) {
+        final AppWindowToken token = new TestAppWindowToken(sDisplayContent);
+        task.addChild(token, 0);
+        return createWindow(null, type, token, name);
+    }
+
     WindowState createWindow(WindowState parent, int type, DisplayContent dc, String name) {
         final WindowToken token = createWindowToken(dc, type);
         return createWindow(parent, type, token, name);

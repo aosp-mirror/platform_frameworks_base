@@ -26,6 +26,7 @@ import android.annotation.TestApi;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
+import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.os.BatteryStats;
@@ -124,6 +125,16 @@ public class ActivityManager {
     private final Context mContext;
 
     private static volatile boolean sSystemReady = false;
+
+    /**
+     * System property to enable task snapshots.
+     * @hide
+     */
+    public final static boolean ENABLE_TASK_SNAPSHOTS;
+
+    static {
+        ENABLE_TASK_SNAPSHOTS = SystemProperties.getBoolean("persist.enable_task_snapshots", false);
+    }
 
     static final class UidObserver extends IUidObserver.Stub {
         final OnUidImportanceListener mListener;
@@ -2111,6 +2122,62 @@ public class ActivityManager {
             }
             public TaskThumbnail[] newArray(int size) {
                 return new TaskThumbnail[size];
+            }
+        };
+    }
+
+    /**
+     * Represents a task snapshot.
+     * @hide
+     */
+    public static class TaskSnapshot implements Parcelable {
+
+        private final GraphicBuffer mSnapshot;
+        private final int mOrientation;
+        private final Rect mContentInsets;
+
+        public TaskSnapshot(GraphicBuffer snapshot, int orientation, Rect contentInsets) {
+            mSnapshot = snapshot;
+            mOrientation = orientation;
+            mContentInsets = new Rect(contentInsets);
+        }
+
+        private TaskSnapshot(Parcel source) {
+            mSnapshot = source.readParcelable(null /* classLoader */);
+            mOrientation = source.readInt();
+            mContentInsets = source.readParcelable(null /* classLoader */);
+        }
+
+        public GraphicBuffer getSnapshot() {
+            return mSnapshot;
+        }
+
+        public int getOrientation() {
+            return mOrientation;
+        }
+
+        public Rect getContentInsets() {
+            return mContentInsets;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeParcelable(mSnapshot, 0);
+            dest.writeInt(mOrientation);
+            dest.writeParcelable(mContentInsets, 0);
+        }
+
+        public static final Creator<TaskSnapshot> CREATOR = new Creator<TaskSnapshot>() {
+            public TaskSnapshot createFromParcel(Parcel source) {
+                return new TaskSnapshot(source);
+            }
+            public TaskSnapshot[] newArray(int size) {
+                return new TaskSnapshot[size];
             }
         };
     }

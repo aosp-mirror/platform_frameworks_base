@@ -313,11 +313,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void removeSplashScreen(IBinder appToken, StartingSurface surface) {
-
-    }
-
-    @Override
     public int prepareAddWindowLw(WindowState win,
             WindowManager.LayoutParams attrs) {
         return 0;

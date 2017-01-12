@@ -27,3 +27,5 @@ parcelable ActivityManager.RunningTaskInfo;
 parcelable ActivityManager.StackInfo;
 /** @hide */
 parcelable ActivityManager.TaskThumbnail;
+/** @hide */
+parcelable ActivityManager.TaskSnapshot;

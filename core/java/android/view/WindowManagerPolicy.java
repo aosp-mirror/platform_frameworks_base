@@ -439,10 +439,15 @@ public interface WindowManagerPolicy {
     /**
      * Holds the contents of a starting window. {@link #addSplashScreen} needs to wrap the
      * contents of the starting window into an class implementing this interface, which then will be
-     * held by WM and passed into {@link #removeSplashScreen} when the starting window is no
-     * longer needed.
+     * held by WM and released with {@link #remove} when no longer needed.
      */
     interface StartingSurface {
+
+        /**
+         * Removes the starting window surface. Do not hold the window manager lock when calling
+         * this method!
+         */
+        void remove();
     }
 
     /**
@@ -746,33 +751,12 @@ public interface WindowManagerPolicy {
      * @param overrideConfig override configuration to consider when generating
      *        context to for resources.
      *
-     * @return Optionally you can return the View that was used to create the
-     *         window, for easy removal in removeSplashScreen.
+     * @return The starting surface.
      *
-     * @see #removeSplashScreen
      */
     public StartingSurface addSplashScreen(IBinder appToken, String packageName, int theme,
             CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes, int icon,
             int logo, int windowFlags, Configuration overrideConfig);
-
-    /**
-     * Called when the first window of an application has been displayed, while
-     * {@link #addSplashScreen} has created a temporary initial window for
-     * that application.  You should at this point remove the window from the
-     * window manager.  This is called without the window manager locked so
-     * that you can call back into it.
-     *
-     * <p>Note: due to the nature of these functions not being called with the
-     * window manager locked, you must be prepared for this function to be
-     * called multiple times and/or an initial time with a null View window
-     * even if you previously returned one.
-     *
-     * @param appToken Token of the application that has started.
-     * @param surface Surface that was returned by {@link #addSplashScreen}.
-     *
-     * @see #addSplashScreen
-     */
-    public void removeSplashScreen(IBinder appToken, StartingSurface surface);
 
     /**
      * Prepare for a window being added to the window manager.  You can throw an

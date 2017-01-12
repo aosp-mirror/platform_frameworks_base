@@ -28,7 +28,7 @@ import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
-import android.app.ITaskStackListener;
+import android.app.KeyguardManager;
 import android.app.UiModeManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -74,7 +74,6 @@ import android.view.WindowManager;
 import android.view.WindowManager.KeyboardShortcutsReceiver;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
-import android.app.KeyguardManager;
 
 import com.android.internal.app.AssistUtils;
 import com.android.internal.os.BackgroundThread;
@@ -603,7 +602,7 @@ public class SystemServicesProxy {
         }
 
         getThumbnail(taskId, thumbnailData);
-        if (thumbnailData.thumbnail != null) {
+        if (thumbnailData.thumbnail != null && !ActivityManager.ENABLE_TASK_SNAPSHOTS) {
             thumbnailData.thumbnail.setHasAlpha(false);
             // We use a dumb heuristic for now, if the thumbnail is purely transparent in the top
             // left pixel, then assume the whole thumbnail is transparent. Generally, proper
@@ -627,25 +626,42 @@ public class SystemServicesProxy {
             return;
         }
 
-        ActivityManager.TaskThumbnail taskThumbnail = mAm.getTaskThumbnail(taskId);
-        if (taskThumbnail == null) {
-            return;
-        }
-
-        Bitmap thumbnail = taskThumbnail.mainThumbnail;
-        ParcelFileDescriptor descriptor = taskThumbnail.thumbnailFileDescriptor;
-        if (thumbnail == null && descriptor != null) {
-            thumbnail = BitmapFactory.decodeFileDescriptor(descriptor.getFileDescriptor(),
-                    null, sBitmapOptions);
-        }
-        if (descriptor != null) {
+        if (ActivityManager.ENABLE_TASK_SNAPSHOTS) {
+            ActivityManager.TaskSnapshot snapshot = null;
             try {
-                descriptor.close();
-            } catch (IOException e) {
+                snapshot = ActivityManager.getService().getTaskSnapshot(taskId);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed to retrieve snapshot", e);
             }
+            if (snapshot != null) {
+                thumbnailDataOut.thumbnail = Bitmap.createHardwareBitmap(snapshot.getSnapshot());
+                thumbnailDataOut.orientation = snapshot.getOrientation();
+                thumbnailDataOut.insets.set(snapshot.getContentInsets());
+            } else {
+                thumbnailDataOut.thumbnail = null;
+            }
+        } else {
+            ActivityManager.TaskThumbnail taskThumbnail = mAm.getTaskThumbnail(taskId);
+            if (taskThumbnail == null) {
+                return;
+            }
+
+            Bitmap thumbnail = taskThumbnail.mainThumbnail;
+            ParcelFileDescriptor descriptor = taskThumbnail.thumbnailFileDescriptor;
+            if (thumbnail == null && descriptor != null) {
+                thumbnail = BitmapFactory.decodeFileDescriptor(descriptor.getFileDescriptor(),
+                        null, sBitmapOptions);
+            }
+            if (descriptor != null) {
+                try {
+                    descriptor.close();
+                } catch (IOException e) {
+                }
+            }
+            thumbnailDataOut.thumbnail = thumbnail;
+            thumbnailDataOut.orientation = taskThumbnail.thumbnailInfo.screenOrientation;
+            thumbnailDataOut.insets.setEmpty();
         }
-        thumbnailDataOut.thumbnail = thumbnail;
-        thumbnailDataOut.thumbnailInfo = taskThumbnail.thumbnailInfo;
     }
 
     /**

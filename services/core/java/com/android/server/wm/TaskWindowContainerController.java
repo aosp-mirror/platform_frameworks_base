@@ -16,7 +16,9 @@
 
 package com.android.server.wm;
 
+import android.app.ActivityManager.TaskSnapshot;
 import android.content.res.Configuration;
+import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.util.EventLog;
 import android.util.Slog;
@@ -235,6 +237,19 @@ public class TaskWindowContainerController
                 return;
             }
             mContainer.cancelTaskThumbnailTransition();
+        }
+    }
+
+    /**
+     * @return a graphic buffer representing a screenshot of a task
+     */
+    public TaskSnapshot getSnapshot() {
+        synchronized (mWindowMap) {
+            if (mContainer == null) {
+                Slog.w(TAG_WM, "getSnapshot: taskId " + mTaskId + " not found.");
+                return null;
+            }
+            return mService.mTaskSnapshotController.getSnapshot(mContainer);
         }
     }
 

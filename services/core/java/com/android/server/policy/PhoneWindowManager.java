@@ -51,6 +51,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_ST
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TASK_SNAPSHOT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFADE;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_JUMPCUT;
@@ -2907,7 +2908,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             // Only return the view if it was successfully added to the
             // window manager... which we can tell by it having a parent.
-            return view.getParent() != null ? new SplashScreenSurface(view) : null;
+            return view.getParent() != null ? new SplashScreenSurface(view, appToken) : null;
         } catch (WindowManager.BadTokenException e) {
             // ignore
             Log.w(TAG, appToken + " already running, starting window not displayed. " +
@@ -2925,18 +2926,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         return null;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void removeSplashScreen(IBinder appToken, StartingSurface surface) {
-        if (DEBUG_SPLASH_SCREEN) Slog.v(TAG, "Removing splash screen window for " + appToken + ": "
-                + surface + " Callers=" + Debug.getCallers(4));
-
-        if (surface != null) {
-            WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
-            wm.removeView(((SplashScreenSurface) surface).view);
-        }
     }
 
     /**
@@ -5185,7 +5174,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void applyPostLayoutPolicyLw(WindowState win, WindowManager.LayoutParams attrs,
             WindowState attached, WindowState imeTarget) {
-        final boolean visible = win.isVisibleLw();
+        final boolean visible = !win.isGoneForLayoutLw();
         if (DEBUG_LAYOUT) Slog.i(TAG, "Win " + win + ": isVisible=" + visible);
         applyKeyguardPolicyLw(win, imeTarget);
         final int fl = PolicyControl.getWindowFlags(win, attrs);
@@ -5202,8 +5191,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
+        // Don't allow snapshots to influence SystemUI visibility flags.
+        // TODO: Revisit this once SystemUI flags for snapshots are handled correctly
         boolean appWindow = attrs.type >= FIRST_APPLICATION_WINDOW
-                && attrs.type < FIRST_SYSTEM_WINDOW;
+                && attrs.type < FIRST_SYSTEM_WINDOW
+                && (attrs.privateFlags & PRIVATE_FLAG_TASK_SNAPSHOT) == 0;
         final int stackId = win.getStackId();
         if (mTopFullscreenOpaqueWindowState == null && visible) {
             if ((fl & FLAG_FORCE_NOT_FULLSCREEN) != 0) {

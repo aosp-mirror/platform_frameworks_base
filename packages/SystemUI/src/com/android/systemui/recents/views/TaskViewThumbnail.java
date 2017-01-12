@@ -16,7 +16,6 @@
 
 package com.android.systemui.recents.views;
 
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -37,7 +36,7 @@ import android.view.ViewDebug;
 import com.android.systemui.R;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
-
+import com.android.systemui.recents.model.ThumbnailData;
 import java.io.PrintWriter;
 
 
@@ -65,12 +64,12 @@ public class TaskViewThumbnail extends View {
     private float mFullscreenThumbnailScale;
     private boolean mSizeToFit = false;
     private boolean mOverlayHeaderOnThumbnailActionBar = true;
-    private ActivityManager.TaskThumbnailInfo mThumbnailInfo;
+    private ThumbnailData mThumbnailData;
 
     private int mCornerRadius;
     @ViewDebug.ExportedProperty(category="recents")
     private float mDimAlpha;
-    private Matrix mScaleMatrix = new Matrix();
+    private Matrix mMatrix = new Matrix();
     private Paint mDrawPaint = new Paint();
     private Paint mLockedPaint = new Paint();
     private Paint mBgFillPaint = new Paint();
@@ -125,7 +124,7 @@ public class TaskViewThumbnail extends View {
 
         mTaskViewRect.set(0, 0, width, height);
         setLeftTopRightBottom(0, 0, width, height);
-        updateThumbnailScale();
+        updateThumbnailMatrix();
     }
 
     @Override
@@ -174,19 +173,22 @@ public class TaskViewThumbnail extends View {
     }
 
     /** Sets the thumbnail to a given bitmap. */
-    void setThumbnail(Bitmap bm, ActivityManager.TaskThumbnailInfo thumbnailInfo) {
-        if (bm != null) {
+    void setThumbnail(ThumbnailData thumbnailData) {
+        if (thumbnailData != null && thumbnailData.thumbnail != null) {
+            Bitmap bm = thumbnailData.thumbnail;
             bm.prepareToDraw();
             mBitmapShader = new BitmapShader(bm, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
             mDrawPaint.setShader(mBitmapShader);
-            mThumbnailRect.set(0, 0, bm.getWidth(), bm.getHeight());
-            mThumbnailInfo = thumbnailInfo;
-            updateThumbnailScale();
+            mThumbnailRect.set(0, 0,
+                    bm.getWidth() - thumbnailData.insets.left - thumbnailData.insets.right,
+                    bm.getHeight() - thumbnailData.insets.top - thumbnailData.insets.bottom);
+            mThumbnailData = thumbnailData;
+            updateThumbnailMatrix();
         } else {
             mBitmapShader = null;
             mDrawPaint.setShader(null);
             mThumbnailRect.setEmpty();
-            mThumbnailInfo = null;
+            mThumbnailData = null;
         }
     }
 
@@ -233,21 +235,21 @@ public class TaskViewThumbnail extends View {
     /**
      * Updates the scale of the bitmap relative to this view.
      */
-    public void updateThumbnailScale() {
+    public void updateThumbnailMatrix() {
         mThumbnailScale = 1f;
-        if (mBitmapShader != null) {
+        if (mBitmapShader != null && mThumbnailData != null) {
             // We consider this a stack task if it is not freeform (ie. has no bounds) or has been
             // dragged into the stack from the freeform workspace
             boolean isStackTask = !mTask.isFreeformTask() || mTask.bounds == null;
-            if (mTaskViewRect.isEmpty() || mThumbnailInfo == null ||
-                    mThumbnailInfo.taskWidth == 0 || mThumbnailInfo.taskHeight == 0) {
-                // If we haven't measured or the thumbnail is invalid, skip the thumbnail drawing
-                // and only draw the background color
+            int xOffset, yOffset = 0;
+            if (mTaskViewRect.isEmpty()) {
+                // If we haven't measured , skip the thumbnail drawing and only draw the background
+                // color
                 mThumbnailScale = 0f;
             } else if (isStackTask && !mSizeToFit) {
                 float invThumbnailScale = 1f / mFullscreenThumbnailScale;
                 if (mDisplayOrientation == Configuration.ORIENTATION_PORTRAIT) {
-                    if (mThumbnailInfo.screenOrientation == Configuration.ORIENTATION_PORTRAIT) {
+                    if (mThumbnailData.orientation == Configuration.ORIENTATION_PORTRAIT) {
                         // If we are in the same orientation as the screenshot, just scale it to the
                         // width of the task view
                         mThumbnailScale = (float) mTaskViewRect.width() / mThumbnailRect.width();
@@ -268,8 +270,9 @@ public class TaskViewThumbnail extends View {
                         (float) mTaskViewRect.width() / mThumbnailRect.width(),
                         (float) mTaskViewRect.height() / mThumbnailRect.height());
             }
-            mScaleMatrix.setScale(mThumbnailScale, mThumbnailScale);
-            mBitmapShader.setLocalMatrix(mScaleMatrix);
+            mMatrix.setTranslate(-mThumbnailData.insets.left, -mThumbnailData.insets.top);
+            mMatrix.postScale(mThumbnailScale, mThumbnailScale);
+            mBitmapShader.setLocalMatrix(mMatrix);
         }
         if (!mInvisible) {
             invalidate();
@@ -333,18 +336,14 @@ public class TaskViewThumbnail extends View {
      * Called when the bound task's data has loaded and this view should update to reflect the
      * changes.
      */
-    void onTaskDataLoaded(ActivityManager.TaskThumbnailInfo thumbnailInfo) {
-        if (mTask.thumbnail != null) {
-            setThumbnail(mTask.thumbnail, thumbnailInfo);
-        } else {
-            setThumbnail(null, null);
-        }
+    void onTaskDataLoaded(ThumbnailData thumbnailData) {
+        setThumbnail(thumbnailData);
     }
 
     /** Unbinds the thumbnail view from the task */
     void unbindFromTask() {
         mTask = null;
-        setThumbnail(null, null);
+        setThumbnail(null);
     }
 
     public void dump(String prefix, PrintWriter writer) {

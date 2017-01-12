@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.ENABLE_TASK_SNAPSHOTS;
 import static android.app.ActivityManager.StackId;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
@@ -26,11 +27,11 @@ import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE;
 import static android.content.pm.ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
+import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
 import static android.content.pm.ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS;
 import static android.content.pm.ActivityInfo.FLAG_IMMERSIVE;
 import static android.content.pm.ActivityInfo.FLAG_MULTIPROCESS;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
-import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
 import static android.content.pm.ActivityInfo.FLAG_STATE_NOT_NEEDED;
 import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
@@ -103,6 +104,10 @@ import com.android.server.wm.AppWindowContainerController;
 import com.android.server.wm.AppWindowContainerListener;
 import com.android.server.wm.TaskWindowContainerController;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -112,10 +117,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 /**
  * An entry in the history stack, representing an activity.
@@ -1204,6 +1205,14 @@ final class ActivityRecord implements AppWindowContainerListener {
 
     final Bitmap screenshotActivityLocked() {
         if (DEBUG_SCREENSHOTS) Slog.d(TAG_SCREENSHOTS, "screenshotActivityLocked: " + this);
+
+        if (ENABLE_TASK_SNAPSHOTS) {
+            // No need to screenshot if snapshots are enabled.
+            if (DEBUG_SCREENSHOTS) Slog.d(TAG_SCREENSHOTS,
+                    "\tSnapshots are enabled, abort taking screenshot");
+            return null;
+        }
+
         if (noDisplay) {
             if (DEBUG_SCREENSHOTS) Slog.d(TAG_SCREENSHOTS, "\tNo display");
             return null;
@@ -1792,12 +1801,12 @@ final class ActivityRecord implements AppWindowContainerListener {
         pendingVoiceInteractionStart = false;
     }
 
-    void showStartingWindow(ActivityRecord prev, boolean createIfNeeded) {
+    void showStartingWindow(ActivityRecord prev, boolean newTask, boolean taskSwitch) {
         final CompatibilityInfo compatInfo =
                 service.compatibilityInfoForPackageLocked(info.applicationInfo);
         final boolean shown = mWindowContainerController.addStartingWindow(packageName, theme,
                 compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
-                prev != null ? prev.appToken : null, createIfNeeded);
+                prev != null ? prev.appToken : null, newTask, taskSwitch, isProcessRunning());
         if (shown) {
             mStartingWindowState = STARTING_WINDOW_SHOWN;
         }
@@ -2087,6 +2096,14 @@ final class ActivityRecord implements AppWindowContainerListener {
         configChangeFlags = 0;
         deferRelaunchUntilPaused = false;
         preserveWindowOnDeferredRelaunch = false;
+    }
+
+    boolean isProcessRunning() {
+        ProcessRecord proc = app;
+        if (proc == null) {
+            proc = service.mProcessNames.get(processName, info.applicationInfo.uid);
+        }
+        return proc != null && proc.thread != null;
     }
 
     void saveToXml(XmlSerializer out) throws IOException, XmlPullParserException {

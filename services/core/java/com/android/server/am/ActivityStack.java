@@ -2459,7 +2459,8 @@ final class ActivityStack extends ConfigurationContainer {
                     next.hasBeenLaunched = true;
                 } else  if (SHOW_APP_STARTING_PREVIEW && lastStack != null &&
                         mStackSupervisor.isFrontStack(lastStack)) {
-                    next.showStartingWindow(null, true);
+                    next.showStartingWindow(null /* prev */, false /* newTask */,
+                            false /* taskSwitch */);
                 }
                 mStackSupervisor.startSpecificActivityLocked(next, true, false);
                 if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
@@ -2485,7 +2486,8 @@ final class ActivityStack extends ConfigurationContainer {
                 next.hasBeenLaunched = true;
             } else {
                 if (SHOW_APP_STARTING_PREVIEW) {
-                    next.showStartingWindow(null, true);
+                    next.showStartingWindow(null /* prev */, false /* newTask */,
+                            false /* taskSwich */);
                 }
                 if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Restarting: " + next);
             }
@@ -2686,17 +2688,6 @@ final class ActivityStack extends ConfigurationContainer {
         task.setFrontOfTask();
 
         if (!isHomeOrRecentsStack() || numActivities() > 0) {
-            // We want to show the starting preview window if we are
-            // switching to a new task, or the next activity's process is
-            // not currently running.
-            boolean showStartingIcon = newTask;
-            ProcessRecord proc = r.app;
-            if (proc == null) {
-                proc = mService.mProcessNames.get(r.processName, r.info.applicationInfo.uid);
-            }
-            if (proc == null || proc.thread == null) {
-                showStartingIcon = true;
-            }
             if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION,
                     "Prepare open transition: starting " + r);
             if ((r.intent.getFlags() & Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0) {
@@ -2756,13 +2747,18 @@ final class ActivityStack extends ConfigurationContainer {
                         prev = null;
                     }
                 }
-                r.showStartingWindow(prev, showStartingIcon);
+                r.showStartingWindow(prev, newTask, isTaskSwitch(r, focusedTopActivity));
             }
         } else {
             // If this is the first activity, don't do any fancy animations,
             // because there is nothing for it to animate on top of.
             ActivityOptions.abort(options);
         }
+    }
+
+    private boolean isTaskSwitch(ActivityRecord r,
+            ActivityRecord topFocusedActivity) {
+        return topFocusedActivity != null && r.task != topFocusedActivity.task;
     }
 
     /**

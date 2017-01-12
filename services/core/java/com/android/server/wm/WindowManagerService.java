@@ -16,6 +16,80 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.MANAGE_APP_TOKENS;
+import static android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS;
+import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.StatusBarManager.DISABLE_MASK;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.DOCKED_INVALID;
+import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
+import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
+import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
+import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
+import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
+import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
+import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TASK_SNAPSHOT;
+import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
+import static android.view.WindowManager.LayoutParams.TYPE_DRAG;
+import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION;
+import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
+import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
+import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.view.WindowManagerGlobal.RELAYOUT_DEFER_SURFACE_DESTROY;
+import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
+import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
+import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static com.android.server.wm.AppTransition.TRANSIT_UNSET;
+import static com.android.server.wm.AppWindowAnimator.PROLONG_ANIMATION_AT_END;
+import static com.android.server.wm.AppWindowAnimator.PROLONG_ANIMATION_AT_START;
+import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
+import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_BOOT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_CONFIGURATION;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_KEEP_SCREEN_ON;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREEN_ON;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_STACK_CRAWLS;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_VERBOSE_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_KEEP_SCREEN_ON;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+
 import android.Manifest;
 import android.Manifest.permission;
 import android.animation.ValueAnimator;
@@ -39,8 +113,8 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
-import android.graphics.PixelFormat;
 import android.graphics.Matrix;
+import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -88,7 +162,6 @@ import android.view.Choreographer;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Gravity;
-import android.view.PointerIcon;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IDockedStackListener;
 import android.view.IInputFilter;
@@ -107,6 +180,7 @@ import android.view.InputEventReceiver;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
 import android.view.MotionEvent;
+import android.view.PointerIcon;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
@@ -160,83 +234,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-
-import static android.Manifest.permission.MANAGE_APP_TOKENS;
-import static android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS;
-import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-import static android.app.StatusBarManager.DISABLE_MASK;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.WindowManager.DOCKED_INVALID;
-import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
-import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
-import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
-import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
-import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
-import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
-import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
-import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
-import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
-import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
-import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
-import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
-import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
-import static android.view.WindowManager.LayoutParams.TYPE_DRAG;
-import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
-import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
-import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
-import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
-import static android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION;
-import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
-import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
-import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
-import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
-import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
-import static android.view.WindowManagerGlobal.RELAYOUT_DEFER_SURFACE_DESTROY;
-import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
-import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
-import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-import static com.android.server.EventLogTags.WM_TASK_CREATED;
-import static com.android.server.wm.AppTransition.TRANSIT_UNSET;
-import static com.android.server.wm.AppWindowAnimator.PROLONG_ANIMATION_AT_END;
-import static com.android.server.wm.AppWindowAnimator.PROLONG_ANIMATION_AT_START;
-import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
-import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
-import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
-import static com.android.server.wm.WindowContainer.POSITION_TOP;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_BOOT;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_CONFIGURATION;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_KEEP_SCREEN_ON;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREEN_ON;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
-import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
-import static com.android.server.wm.WindowManagerDebugConfig.SHOW_STACK_CRAWLS;
-import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
-import static com.android.server.wm.WindowManagerDebugConfig.SHOW_VERBOSE_TRANSACTIONS;
-import static com.android.server.wm.WindowManagerDebugConfig.TAG_KEEP_SCREEN_ON;
-import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 /** {@hide} */
 public class WindowManagerService extends IWindowManager.Stub
@@ -580,6 +577,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final UnknownAppVisibilityController mUnknownAppVisibilityController =
             new UnknownAppVisibilityController(this);
+    final TaskSnapshotController mTaskSnapshotController = new TaskSnapshotController(this);
 
     boolean mIsTouchDevice;
 
@@ -1215,7 +1213,9 @@ public class WindowManagerService extends IWindowManager.Stub
                           + token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_APP_EXITING;
                 }
-                if (rootType == TYPE_APPLICATION_STARTING && atoken.firstWindowDrawn) {
+                if (rootType == TYPE_APPLICATION_STARTING
+                        && (attrs.privateFlags & PRIVATE_FLAG_TASK_SNAPSHOT) == 0
+                        && atoken.firstWindowDrawn) {
                     // No need for this guy!
                     if (DEBUG_STARTING_WINDOW || localLOGV) Slog.v(
                             TAG_WM, "**** NO NEED TO START: " + attrs.getTitle());
@@ -1966,7 +1966,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         + " newVis=" + viewVisibility, stack);
             }
             if (viewVisibility == View.VISIBLE &&
-                    (win.mAppToken == null || !win.mAppToken.clientHidden)) {
+                    (win.mAppToken == null || win.mAttrs.type == TYPE_APPLICATION_STARTING
+                            || !win.mAppToken.clientHidden)) {
                 result = relayoutVisibleWindow(outConfig, result, win, winAnimator, attrChanges,
                         oldVisibility);
                 try {
@@ -2073,7 +2074,10 @@ public class WindowManagerService extends IWindowManager.Stub
             win.setDisplayLayoutNeeded();
             win.mGivenInsetsPending = (flags&WindowManagerGlobal.RELAYOUT_INSETS_PENDING) != 0;
             configChanged = updateOrientationFromAppTokensLocked(false, displayId);
-            mWindowPlacerLocked.performSurfacePlacement();
+
+            // We may be deferring layout passes at the moment, but since the client is interested
+            // in the new out values right now we need to force a layout.
+            mWindowPlacerLocked.performSurfacePlacement(true /* force */);
             if (toBeDisplayed && win.mIsWallpaper) {
                 DisplayInfo displayInfo = win.getDisplayContent().getDisplayInfo();
                 dc.mWallpaperController.updateWallpaperOffset(
@@ -3858,7 +3862,8 @@ public class WindowManagerService extends IWindowManager.Stub
             Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "screenshotWallpaper");
             return screenshotApplications(null /* appToken */, DEFAULT_DISPLAY, -1 /* width */,
                     -1 /* height */, true /* includeFullDisplay */, 1f /* frameScale */,
-                    Bitmap.Config.ARGB_8888, true /* wallpaperOnly */);
+                    Bitmap.Config.ARGB_8888, true /* wallpaperOnly */, false /* includeDecor */,
+                    true /* toAshmem */);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
         }
@@ -3879,7 +3884,8 @@ public class WindowManagerService extends IWindowManager.Stub
         FgThread.getHandler().post(() -> {
             Bitmap bm = screenshotApplications(null /* appToken */, DEFAULT_DISPLAY,
                     -1 /* width */, -1 /* height */, true /* includeFullDisplay */,
-                    1f /* frameScale */, Bitmap.Config.ARGB_8888, false /* wallpaperOnly */);
+                    1f /* frameScale */, Bitmap.Config.ARGB_8888, false /* wallpaperOnly */,
+                    false /* includeDecor */, true /* toAshmem */);
             try {
                 receiver.send(bm);
             } catch (RemoteException e) {
@@ -3900,10 +3906,14 @@ public class WindowManagerService extends IWindowManager.Stub
      * @param frameScale the scale to apply to the frame, only used when width = -1 and height = -1
      * @param config of the output bitmap
      * @param wallpaperOnly true if only the wallpaper layer should be included in the screenshot
+     * @param includeDecor whether to include window decors, like the status or navigation bar
+     *                     background of the window
+     * @param toAshmem whether to convert the resulting bitmap to ashmem; this should be set to
+     *                 true if the Bitmap is sent over binder, and false otherwise
      */
     private Bitmap screenshotApplications(IBinder appToken, int displayId, int width,
             int height, boolean includeFullDisplay, float frameScale, Bitmap.Config config,
-            boolean wallpaperOnly) {
+            boolean wallpaperOnly, boolean includeDecor, boolean toAshmem) {
         final DisplayContent displayContent;
         synchronized(mWindowMap) {
             displayContent = mRoot.getDisplayContentOrCreate(displayId);
@@ -3914,7 +3924,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
         return displayContent.screenshotApplications(appToken, width, height,
-                includeFullDisplay, frameScale, config, wallpaperOnly);
+                includeFullDisplay, frameScale, config, wallpaperOnly, includeDecor, toAshmem);
     }
 
     /**

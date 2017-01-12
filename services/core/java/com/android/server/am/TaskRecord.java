@@ -21,6 +21,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.TaskDescription;
+import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityManager.TaskThumbnail;
 import android.app.ActivityManager.TaskThumbnailInfo;
 import android.app.ActivityOptions;
@@ -34,6 +35,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.GraphicBuffer;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Debug;
@@ -543,6 +545,13 @@ final class TaskRecord extends ConfigurationContainer {
 
     void cancelThumbnailTransition() {
         mWindowContainerController.cancelThumbnailTransition();
+    }
+
+    public TaskSnapshot getSnapshot() {
+        if (mWindowContainerController == null) {
+            return null;
+        }
+        return mWindowContainerController.getSnapshot();
     }
 
     void touchActiveTime() {

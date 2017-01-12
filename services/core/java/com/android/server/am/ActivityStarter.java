@@ -31,8 +31,8 @@ import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-import static android.app.ActivityManager.StackId.isStaticStack;
 import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
+import static android.app.ActivityManager.StackId.isStaticStack;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
@@ -53,7 +53,6 @@ import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
 import static android.view.Display.INVALID_DISPLAY;
-
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
@@ -106,7 +105,6 @@ import android.hardware.power.V1_0.PowerHint;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.PowerManagerInternal;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -1509,6 +1507,11 @@ class ActivityStarter {
                         mMovedToFront = true;
                     }
                     mOptions = null;
+
+                    // We are moving a task to the front, use starting window to hide initial drawn
+                    // delay.
+                    intentActivity.showStartingWindow(null /* prev */, false /* newTask */,
+                            true /* taskSwitch */);
                 }
                 updateTaskReturnToType(intentActivity.task, mLaunchFlags, focusStack);
             }

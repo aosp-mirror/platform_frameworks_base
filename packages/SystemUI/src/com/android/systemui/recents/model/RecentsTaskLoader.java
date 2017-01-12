@@ -220,8 +220,7 @@ class BackgroundTaskLoader implements Runnable {
                             mMainThreadHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    t.notifyTaskDataLoaded(newThumbnailData.thumbnail, newIcon,
-                                            newThumbnailData.thumbnailInfo);
+                                    t.notifyTaskDataLoaded(newThumbnailData, newIcon);
                                 }
                             });
                         }
@@ -364,11 +363,9 @@ public class RecentsTaskLoader {
     public void loadTaskData(Task t) {
         Drawable icon = mIconCache.getAndInvalidateIfModified(t.key);
         Bitmap thumbnail = null;
-        ActivityManager.TaskThumbnailInfo thumbnailInfo = null;
         ThumbnailData thumbnailData = mThumbnailCache.getAndInvalidateIfModified(t.key);
         if (thumbnailData != null) {
             thumbnail = thumbnailData.thumbnail;
-            thumbnailInfo = thumbnailData.thumbnailInfo;
         }
 
         // Grab the thumbnail/icon from the cache, if either don't exist, then trigger a reload and
@@ -378,8 +375,7 @@ public class RecentsTaskLoader {
         if (requiresLoad) {
             mLoadQueue.addTask(t);
         }
-        t.notifyTaskDataLoaded(thumbnail == mDefaultThumbnail ? null : thumbnail, icon,
-                thumbnailInfo);
+        t.notifyTaskDataLoaded(thumbnail == mDefaultThumbnail ? null : thumbnailData, icon);
     }
 
     /** Releases the task resource data back into the pool. */
