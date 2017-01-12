@@ -16,20 +16,23 @@
 
 #include "EglManager.h"
 
-#include "Texture.h"
+#include <string>
+
+#include "utils/StringUtils.h"
+#include <cutils/properties.h>
+#include <log/log.h>
+
 #include "Caches.h"
 #include "DeviceInfo.h"
 #include "Frame.h"
 #include "Properties.h"
 #include "RenderThread.h"
 #include "renderstate/RenderState.h"
-#include "utils/StringUtils.h"
-#include <cutils/log.h>
-#include <cutils/properties.h>
+#include "Texture.h"
+
 #include <EGL/eglext.h>
 #include <GrContextOptions.h>
 #include <gl/GrGLInterface.h>
-#include <string>
 
 #ifdef HWUI_GLES_WRAP_ENABLED
 #include "debug/GlesDriver.h"
