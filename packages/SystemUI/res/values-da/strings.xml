@@ -69,13 +69,13 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Stræk til fuld skærm"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Gemmer screenshot..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Gemmer screenshot..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"Skærmbilledet gemmes."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Skærmbilledet er gemt."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"Screenshottet gemmes."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Screenshottet er gemt."</string>
     <string name="screenshot_saved_text" msgid="2685605830386712477">"Tryk for at se dit screenshot."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"Skærmbilledet kunne ikke tages."</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Der opstod et problem ved lagringen af skærmbilledet."</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Skærmbilledet kan ikke gemmes pga. begrænset lagerplads."</string>
-    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Appen eller din organisation tillader ikke, at du tager skærmbilleder."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Screenshottet kunne ikke tages."</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Der opstod et problem ved lagringen af screenshottet."</string>
+    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Screenshottet kan ikke gemmes pga. begrænset lagerplads."</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Appen eller din organisation tillader ikke, at du tager screenshots."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Muligheder for USB-filoverførsel"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Isæt som en medieafspiller (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Isæt som et kamera (PTP)"</string>

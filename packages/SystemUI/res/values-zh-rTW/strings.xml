@@ -437,10 +437,8 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"展開"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"收合"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"螢幕已固定"</string>
-    <!-- no translation found for screen_pinning_description (8909878447196419623) -->
-    <skip />
-    <!-- no translation found for screen_pinning_description_accessible (426190689254018656) -->
-    <skip />
+    <string name="screen_pinning_description" msgid="8909878447196419623">"這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。按住 [返回] 按鈕和 [總覽] 按鈕即可取消固定。"</string>
+    <string name="screen_pinning_description_accessible" msgid="426190689254018656">"這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。按住 [總覽] 按鈕即可取消固定。"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"知道了"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"不用了，謝謝"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"隱藏<xliff:g id="TILE_LABEL">%1$s</xliff:g>？"</string>
@@ -661,7 +659,7 @@
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"編輯設定順序。"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"第 <xliff:g id="ID_1">%1$d</xliff:g> 頁，共 <xliff:g id="ID_2">%2$d</xliff:g> 頁"</string>
     <string name="cant_silence_or_block" msgid="999689262131488625">"無法關閉通知音效或封鎖通知"</string>
-    <string name="high_temp_title" msgid="4589508026407318374">"手機溫度上升中"</string>
+    <string name="high_temp_title" msgid="4589508026407318374">"手機變熱"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"手機降溫時，部分功能會受限"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"手機會自動嘗試降溫。你仍可繼續使用手機，但是手機的運作速度可能會較慢。\n\n手機降溫完畢後，就會恢復正常的運作速度。"</string>
 </resources>
