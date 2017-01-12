@@ -576,7 +576,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     /**
      * Whether the package parser cache is enabled.
      */
-    private static final boolean DEFAULT_PACKAGE_PARSER_CACHE_ENABLED = true;
+    private static final boolean DEFAULT_PACKAGE_PARSER_CACHE_ENABLED = false;
 
     final ServiceThread mHandlerThread;
 
