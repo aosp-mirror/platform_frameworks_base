@@ -23,8 +23,8 @@
 #include "renderthread/RenderTask.h"
 
 #include <benchmark/benchmark.h>
-#include <cutils/log.h>
 #include <gui/Surface.h>
+#include <log/log.h>
 #include <ui/PixelFormat.h>
 
 using namespace android;

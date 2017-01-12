@@ -20,7 +20,7 @@
 
 #include <vector>
 
-#include <android/log.h>
+#include <log/log.h>
 #include <utils/Log.h>
 
 #include "PdfUtils.h"

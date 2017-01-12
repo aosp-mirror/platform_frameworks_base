@@ -18,6 +18,8 @@
 
 #include <log/log_event_list.h>
 
+#include <log/log.h>
+
 #include "JNIHelp.h"
 #include "core_jni_helpers.h"
 #include "jni.h"

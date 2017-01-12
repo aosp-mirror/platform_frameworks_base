@@ -15,10 +15,11 @@
  */
 #define LOG_TAG "OpenGLRenderer"
 
+#include "android/log.h"
+
 #include "jni.h"
 #include "GraphicsJNI.h"
 #include "core_jni_helpers.h"
-#include "log/log.h"
 
 #include "Animator.h"
 #include "Interpolator.h"

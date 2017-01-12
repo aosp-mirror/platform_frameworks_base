@@ -17,6 +17,17 @@
 #define LOG_TAG "BatteryStatsService"
 //#define LOG_NDEBUG 0
 
+#include <errno.h>
+#include <fcntl.h>
+#include <inttypes.h>
+#include <semaphore.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 #include <android/hardware/power/1.0/IPower.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <jni.h>
@@ -24,21 +35,10 @@
 #include <ScopedLocalRef.h>
 #include <ScopedPrimitiveArray.h>
 
-#include <cutils/log.h>
+#include <log/log.h>
 #include <utils/misc.h>
 #include <utils/Log.h>
 #include <suspend/autosuspend.h>
-
-#include <inttypes.h>
-#include <stdio.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <semaphore.h>
-#include <stddef.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
 
 using android::hardware::Return;
 using android::hardware::Void;
