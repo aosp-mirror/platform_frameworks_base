@@ -290,6 +290,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         monitor.reportFailedStrongAuthUnlockAttempt(userId);
         mLockPatternUtils.reportFailedPasswordAttempt(userId);
         if (timeoutMs > 0) {
+            mLockPatternUtils.reportPasswordLockout(timeoutMs, userId);
             showTimeoutDialog(userId, timeoutMs);
         }
     }

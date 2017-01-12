@@ -105,6 +105,7 @@ public class TrustManagerService extends SystemService {
     private static final int MSG_FLUSH_TRUST_USUALLY_MANAGED = 10;
     private static final int MSG_UNLOCK_USER = 11;
     private static final int MSG_STOP_USER = 12;
+    private static final int MSG_DISPATCH_UNLOCK_LOCKOUT = 13;
 
     private static final int TRUST_USUALLY_MANAGED_FLUSH_DELAY = 2 * 60 * 1000;
 
@@ -335,13 +336,16 @@ public class TrustManagerService extends SystemService {
 
                 if (!mStrongAuthTracker.canAgentsRunForUser(userInfo.id)) {
                     int flag = mStrongAuthTracker.getStrongAuthForUser(userInfo.id);
-                    if (flag != StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT
-                        || !directUnlock) {
-                        if (DEBUG) Slog.d(TAG, "refreshAgentList: skipping user " + userInfo.id
-                            + ": prevented by StrongAuthTracker = 0x"
-                            + Integer.toHexString(mStrongAuthTracker.getStrongAuthForUser(
-                            userInfo.id)));
-                        continue;
+                    if (flag != StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT) {
+                        if (flag != StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT
+                            || !directUnlock) {
+                            if (DEBUG)
+                                Slog.d(TAG, "refreshAgentList: skipping user " + userInfo.id
+                                    + ": prevented by StrongAuthTracker = 0x"
+                                    + Integer.toHexString(mStrongAuthTracker.getStrongAuthForUser(
+                                    userInfo.id)));
+                            continue;
+                        }
                     }
                 }
 
@@ -650,6 +654,15 @@ public class TrustManagerService extends SystemService {
         }
     }
 
+    private void dispatchUnlockLockout(int timeoutMs, int userId) {
+        for (int i = 0; i < mActiveAgents.size(); i++) {
+            AgentInfo info = mActiveAgents.valueAt(i);
+            if (info.userId == userId) {
+                info.agent.onUnlockLockout(timeoutMs);
+            }
+        }
+    }
+
     // Listeners
 
     private void addListener(ITrustListener listener) {
@@ -741,6 +754,13 @@ public class TrustManagerService extends SystemService {
         public void reportUnlockAttempt(boolean authenticated, int userId) throws RemoteException {
             enforceReportPermission();
             mHandler.obtainMessage(MSG_DISPATCH_UNLOCK_ATTEMPT, authenticated ? 1 : 0, userId)
+                    .sendToTarget();
+        }
+
+        @Override
+        public void reportUnlockLockout(int timeoutMs, int userId) throws RemoteException {
+            enforceReportPermission();
+            mHandler.obtainMessage(MSG_DISPATCH_UNLOCK_LOCKOUT, timeoutMs, userId)
                     .sendToTarget();
         }
 
@@ -974,6 +994,9 @@ public class TrustManagerService extends SystemService {
                     break;
                 case MSG_DISPATCH_UNLOCK_ATTEMPT:
                     dispatchUnlockAttempt(msg.arg1 != 0, msg.arg2);
+                    break;
+                case MSG_DISPATCH_UNLOCK_LOCKOUT:
+                    dispatchUnlockLockout(msg.arg1, msg.arg2);
                     break;
                 case MSG_ENABLED_AGENTS_CHANGED:
                     refreshAgentList(UserHandle.USER_ALL);
