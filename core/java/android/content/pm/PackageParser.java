@@ -179,6 +179,13 @@ public class PackageParser {
     private static final String TAG_PACKAGE = "package";
     private static final String TAG_RESTRICT_UPDATE = "restrict-update";
 
+    /**
+     * Bit mask of all the valid bits that can be set in restartOnConfigChanges.
+     * @hide
+     */
+    private static final int RESTART_ON_CONFIG_CHANGES_MASK =
+            ActivityInfo.CONFIG_MCC | ActivityInfo.CONFIG_MNC;
+
     // These are the tags supported by child packages
     private static final Set<String> CHILD_PACKAGE_TAGS = new ArraySet<>();
     static {
@@ -3855,7 +3862,9 @@ public class PackageParser {
             a.info.maxRecents = sa.getInt(
                     R.styleable.AndroidManifestActivity_maxRecents,
                     ActivityManager.getDefaultAppRecentsLimitStatic());
-            a.info.configChanges = sa.getInt(R.styleable.AndroidManifestActivity_configChanges, 0);
+            a.info.configChanges = getActivityConfigChanges(
+                    sa.getInt(R.styleable.AndroidManifestActivity_configChanges, 0),
+                    sa.getInt(R.styleable.AndroidManifestActivity_restartOnConfigChanges, 0));
             a.info.softInputMode = sa.getInt(
                     R.styleable.AndroidManifestActivity_windowSoftInputMode, 0);
 
@@ -4081,6 +4090,17 @@ public class PackageParser {
         } else {
             aInfo.resizeMode = RESIZE_MODE_FORCE_RESIZEABLE;
         }
+    }
+
+    /**
+     * @param configChanges The bit mask of configChanges fetched from AndroidManifest.xml.
+     * @param restartOnConfigChanges The bit mask restartOnConfigChanges fetched from
+     *                               AndroidManifest.xml.
+     * @hide Exposed for unit testing only.
+     */
+    @TestApi
+    public static int getActivityConfigChanges(int configChanges, int restartOnConfigChanges) {
+        return configChanges | ((~restartOnConfigChanges) & RESTART_ON_CONFIG_CHANGES_MASK);
     }
 
     private void parseLayout(Resources res, AttributeSet attrs, Activity a) {
