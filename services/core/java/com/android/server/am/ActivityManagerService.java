@@ -6482,6 +6482,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // the pid if we are running in multiple processes, or just pull the
         // next app record if we are emulating process with anonymous threads.
         ProcessRecord app;
+        long startTime = SystemClock.uptimeMillis();
         if (pid != MY_PID && pid >= 0) {
             synchronized (mPidsSelfLocked) {
                 app = mPidsSelfLocked.get(pid);
@@ -6560,6 +6561,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             mHandler.sendMessageDelayed(msg, CONTENT_PROVIDER_PUBLISH_TIMEOUT);
         }
 
+        checkTime(startTime, "attachApplicationLocked: before bindApplication");
+        
         if (!normalMode) {
             Slog.i(TAG, "Launching preboot mode app: " + app);
         }
@@ -6618,7 +6621,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 profileFd = profileFd.dup();
             }
             ProfilerInfo profilerInfo = profileFile == null ? null
-                    : new ProfilerInfo(profileFile, profileFd, samplingInterval, profileAutoStop);
+                : new ProfilerInfo(profileFile, profileFd, samplingInterval, profileAutoStop);
+            checkTime(startTime, "attachApplicationLocked: immediately before bindApplication");
             thread.bindApplication(processName, appInfo, providers, app.instrumentationClass,
                     profilerInfo, app.instrumentationArguments, app.instrumentationWatcher,
                     app.instrumentationUiAutomationConnection, testMode,
@@ -6626,8 +6630,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                     isRestrictedBackupMode || !normalMode, app.persistent,
                     new Configuration(mConfiguration), app.compat,
                     getCommonServicesLocked(app.isolated),
-                    mCoreSettingsObserver.getCoreSettingsLocked());
+                                   mCoreSettingsObserver.getCoreSettingsLocked());
+            checkTime(startTime, "attachApplicationLocked: immediately after bindApplication");
             updateLruProcessLocked(app, false, null);
+            checkTime(startTime, "attachApplicationLocked: after updateLruProcessLocked");
             app.lastRequestedGc = app.lastLowMemory = SystemClock.uptimeMillis();
         } catch (Exception e) {
             // todo: Yikes!  What should we do?  For now we will try to
@@ -6666,6 +6672,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (!badApp) {
             try {
                 didSomething |= mServices.attachApplicationLocked(app, processName);
+                checkTime(startTime, "attachApplicationLocked: after mServices.attachApplicationLocked");
             } catch (Exception e) {
                 Slog.wtf(TAG, "Exception thrown starting services in " + app, e);
                 badApp = true;
@@ -6676,6 +6683,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (!badApp && isPendingBroadcastProcessLocked(pid)) {
             try {
                 didSomething |= sendPendingBroadcastsLocked(app);
+                checkTime(startTime, "attachApplicationLocked: after sendPendingBroadcastsLocked");
             } catch (Exception e) {
                 // If the app died trying to launch the receiver we declare it 'bad'
                 Slog.wtf(TAG, "Exception thrown dispatching broadcasts in " + app, e);
@@ -6707,6 +6715,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         if (!didSomething) {
             updateOomAdjLocked();
+            checkTime(startTime, "attachApplicationLocked: after updateOomAdjLocked");
         }
 
         return true;
