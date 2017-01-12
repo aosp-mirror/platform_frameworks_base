@@ -109,8 +109,8 @@ public class HardwarePropertiesManager {
      *         {@link #UNDEFINED_TEMPERATURE} if undefined.
      *         Empty if platform doesn't provide the queried temperature.
      *
-     * @throws SecurityException if something other than the profile or device owner, or the
-     *        current VR service tries to retrieve information provided by this service.
+     * @throws SecurityException if something other than the device owner or the current VR service
+     *         tries to retrieve information provided by this service.
     */
     public @NonNull float[] getDeviceTemperatures(@DeviceTemperatureType int type,
             @TemperatureSource int source) {
@@ -147,8 +147,8 @@ public class HardwarePropertiesManager {
      *         each unplugged core.
      *         Empty if CPU usage is not supported on this system.
      *
-     * @throws SecurityException if something other than the profile or device owner, or the
-     *        current VR service tries to retrieve information provided by this service.
+     * @throws SecurityException if something other than the device owner or the current VR service
+     *         tries to retrieve information provided by this service.
      */
     public @NonNull CpuUsageInfo[] getCpuUsages() {
         try {
@@ -164,8 +164,8 @@ public class HardwarePropertiesManager {
      * @return an array of float fan speeds in RPM. Empty if there are no fans or fan speed is not
      * supported on this system.
      *
-     * @throws SecurityException if something other than the profile or device owner, or the
-     *        current VR service tries to retrieve information provided by this service.
+     * @throws SecurityException if something other than the device owner or the current VR service
+     *         tries to retrieve information provided by this service.
      */
     public @NonNull float[] getFanSpeeds() {
         try {
