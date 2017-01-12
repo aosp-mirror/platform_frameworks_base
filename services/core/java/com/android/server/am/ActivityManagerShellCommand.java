@@ -171,7 +171,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runKill(pw);
                 case "kill-all":
                     return runKillAll(pw);
-                case "make-idle":
+                case "make-uid-idle":
                     return runMakeIdle(pw);
                 case "monitor":
                     return runMonitor(pw);
@@ -500,6 +500,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
             err.println("Error: Requires permission " + cn.getClassName());
             return -1;
         } else if (cn.getPackageName().equals("!!")) {
+            err.println("Error: " + cn.getClassName());
+            return -1;
+        } else if (cn.getPackageName().equals("?")) {
             err.println("Error: " + cn.getClassName());
             return -1;
         }
@@ -2481,6 +2484,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Kill all processes associated with the given application.");
             pw.println("  kill-all");
             pw.println("      Kill all processes that are safe to kill (cached, etc).");
+            pw.println("  make-uid-idle [--user <USER_ID> | all | current] <PACKAGE>");
+            pw.println("      If the given application's uid is in the background and waiting to");
+            pw.println("      become idle (not allowing background services), do that now.");
             pw.println("  monitor [--gdb <port>]");
             pw.println("      Start monitoring for crashes or ANRs.");
             pw.println("      --gdb: start gdbserv on the given port at crash/ANR");

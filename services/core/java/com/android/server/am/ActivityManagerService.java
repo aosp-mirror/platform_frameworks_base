@@ -62,7 +62,7 @@ import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ANR;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKGROUND;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKGROUND_CHECK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKUP;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST_BACKGROUND;
@@ -1152,6 +1152,16 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Access to DeviceIdleController service.
      */
     DeviceIdleController.LocalService mLocalDeviceIdleController;
+
+    /**
+     * Set of app ids that are whitelisted for device idle and thus background check.
+     */
+    int[] mDeviceIdleWhitelist = new int[0];
+
+    /**
+     * Set of app ids that are temporarily allowed to escape bg check due to high-pri message
+     */
+    int[] mDeviceIdleTempWhitelist = new int[0];
 
     /**
      * Information about and control over application operations
@@ -2611,7 +2621,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         mEnforceBackgroundCheck = SystemProperties.getBoolean("debug.bgcheck", false);
         mBackgroundLaunchBroadcasts = SystemConfig.getInstance().getAllowImplicitBroadcasts();
-        if (DEBUG_BACKGROUND) {
+        if (DEBUG_BACKGROUND_CHECK) {
             Slog.d(TAG, "Enforcing O+ bg restrictions: " + mEnforceBackgroundCheck);
             StringBuilder sb = new StringBuilder(200);
             sb.append("  ");
@@ -6314,6 +6324,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             // This is the first appearance of the uid, report it now!
             if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
                     "Creating new process uid: " + uidRec);
+            if (Arrays.binarySearch(mDeviceIdleTempWhitelist, UserHandle.getAppId(proc.uid)) >= 0) {
+                uidRec.setWhitelist = uidRec.curWhitelist = true;
+            }
             mActiveUids.put(proc.uid, uidRec);
             noteUidProcessState(uidRec.uid, uidRec.curProcState);
             enqueueUidChangeLocked(uidRec, -1, UidRecord.CHANGE_ACTIVE);
@@ -8058,12 +8071,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     // Unified app-op and target sdk check
-    boolean appRestrictedInBackgroundLocked(int uid, String packageName) {
+    int appRestrictedInBackgroundLocked(int uid, String packageName) {
         if (packageName == null) {
             packageName = mPackageManagerInt.getNameForUid(uid);
             if (packageName == null) {
                 Slog.w(TAG, "No package known for uid " + uid);
-                return false;
+                return ActivityManager.APP_START_MODE_NORMAL;
             }
         }
 
@@ -8073,62 +8086,69 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (app != null) {
             // Apps that target O+ are always subject to background check
             if (mEnforceBackgroundCheck && app.targetSdkVersion >= Build.VERSION_CODES.O) {
-                if (DEBUG_BACKGROUND) {
+                if (DEBUG_BACKGROUND_CHECK) {
                     Slog.i(TAG, "App " + uid + "/" + packageName + " targets O+, restricted");
                 }
-                return true;
+                return ActivityManager.APP_START_MODE_DELAYED_RIGID;
             }
             // ...and legacy apps get an AppOp check
             int appop = mAppOpsService.noteOperation(AppOpsManager.OP_RUN_IN_BACKGROUND,
                     uid, packageName);
-            if (DEBUG_BACKGROUND) {
+            if (DEBUG_BACKGROUND_CHECK) {
                 Slog.i(TAG, "Legacy app " + uid + "/" + packageName + " bg appop " + appop);
             }
-            return (appop != AppOpsManager.MODE_ALLOWED);
+            switch (appop) {
+                case AppOpsManager.MODE_ALLOWED:
+                    return ActivityManager.APP_START_MODE_NORMAL;
+                case AppOpsManager.MODE_IGNORED:
+                    return ActivityManager.APP_START_MODE_DELAYED;
+                default:
+                    return ActivityManager.APP_START_MODE_DELAYED_RIGID;
+            }
         } else {
             Slog.w(TAG, "Unknown app " + packageName + " / " + uid);
         }
-        return false;
+        return ActivityManager.APP_START_MODE_NORMAL;
     }
 
     // Service launch is available to apps with run-in-background exemptions but
     // some other background operations are not.  If we're doing a check
     // of service-launch policy, allow those callers to proceed unrestricted.
-    boolean appServicesRestrictedInBackgroundLocked(int uid, String packageName) {
+    int appServicesRestrictedInBackgroundLocked(int uid, String packageName) {
         if (packageName == null) {
             packageName = mPackageManagerInt.getNameForUid(uid);
             if (packageName == null) {
                 Slog.w(TAG, "No package known for uid " + uid);
-                return false;
+                return ActivityManager.APP_START_MODE_NORMAL;
             }
         }
 
         // Persistent app?  NB: expects that persistent uids are always active.
         final UidRecord uidRec = mActiveUids.get(uid);
         if (uidRec != null && uidRec.persistent) {
-            if (DEBUG_BACKGROUND) {
+            if (DEBUG_BACKGROUND_CHECK) {
                 Slog.i(TAG, "App " + uid + "/" + packageName
                         + " is persistent; not restricted in background");
             }
-            return false;
+            return ActivityManager.APP_START_MODE_NORMAL;
         }
 
         // Non-persistent but background whitelisted?
         if (uidOnBackgroundWhitelist(uid)) {
-            if (DEBUG_BACKGROUND) {
+            if (DEBUG_BACKGROUND_CHECK) {
                 Slog.i(TAG, "App " + uid + "/" + packageName
                         + " on background whitelist; not restricted in background");
             }
-            return false;
+            return ActivityManager.APP_START_MODE_NORMAL;
         }
 
         // Is this app on the battery whitelist?
-        if (mLocalDeviceIdleController.isAppOnWhitelist(UserHandle.getAppId(uid))) {
-            if (DEBUG_BACKGROUND) {
+        if (isOnDeviceIdleWhitelistLocked(uid)) {
+            if (DEBUG_BACKGROUND_CHECK) {
                 Slog.i(TAG, "App " + uid + "/" + packageName
                         + " on idle whitelist; not restricted in background");
             }
-            return false;
+            return ActivityManager.APP_START_MODE_NORMAL;
         }
 
         // None of the service-policy criteria apply, so we apply the common criteria
@@ -8138,6 +8158,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     int checkAllowBackgroundLocked(int uid, String packageName, int callingPid,
             boolean alwaysRestrict) {
         UidRecord uidRec = mActiveUids.get(uid);
+        if (DEBUG_BACKGROUND_CHECK) Slog.d(TAG, "checkAllowBackground: uid=" + uid + " pkg="
+                + packageName + " rec=" + uidRec + " always=" + alwaysRestrict + " idle="
+                + (uidRec != null ? uidRec.idle : false));
         if (uidRec == null || alwaysRestrict || uidRec.idle) {
             boolean ephemeral;
             if (uidRec == null) {
@@ -8151,6 +8174,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // We are hard-core about ephemeral apps not running in the background.
                 return ActivityManager.APP_START_MODE_DISABLED;
             } else {
+                /** Don't want to allow this exception in the final background check impl?
                 if (callingPid >= 0) {
                     ProcessRecord proc;
                     synchronized (mPidsSelfLocked) {
@@ -8163,18 +8187,24 @@ public class ActivityManagerService extends IActivityManager.Stub
                         return ActivityManager.APP_START_MODE_NORMAL;
                     }
                 }
-                final boolean restricted = (alwaysRestrict)
+                */
+
+                final int startMode = (alwaysRestrict)
                         ? appRestrictedInBackgroundLocked(uid, packageName)
                         : appServicesRestrictedInBackgroundLocked(uid, packageName);
-                if (restricted) {
-                    if (DEBUG_BACKGROUND) {
-                        Slog.i(TAG, "App " + uid + "/" + packageName + " restricted in background");
-                    }
-                    return ActivityManager.APP_START_MODE_DELAYED;
-                }
+                if (DEBUG_BACKGROUND_CHECK) Slog.d(TAG, "checkAllowBackground: uid=" + uid
+                        + " pkg=" + packageName + " startMode=" + startMode
+                        + " onwhitelist=" + isOnDeviceIdleWhitelistLocked(uid));
+                return startMode;
             }
         }
         return ActivityManager.APP_START_MODE_NORMAL;
+    }
+
+    boolean isOnDeviceIdleWhitelistLocked(int uid) {
+        final int appId = UserHandle.getAppId(uid);
+        return Arrays.binarySearch(mDeviceIdleWhitelist, appId) >= 0
+                || Arrays.binarySearch(mDeviceIdleTempWhitelist, appId) >= 0;
     }
 
     private ProviderInfo getProviderInfoLocked(String authority, int userHandle, int pmFlags) {
@@ -15107,6 +15137,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
             }
+            pw.println("  mDeviceIdleWhitelist=" + Arrays.toString(mDeviceIdleWhitelist));
+            pw.println("  mDeviceIdleTempWhitelist=" + Arrays.toString(mDeviceIdleTempWhitelist));
         }
         if (dumpPackage == null) {
             pw.println("  mWakefulness="
@@ -18309,7 +18341,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         if (action != null) {
             if (mBackgroundLaunchBroadcasts.contains(action)) {
-                if (DEBUG_BACKGROUND) {
+                if (DEBUG_BACKGROUND_CHECK) {
                     Slog.i(TAG, "Broadcast action " + action + " forcing include-background");
                 }
                 intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
@@ -21763,12 +21795,18 @@ public class ActivityManagerService extends IActivityManager.Stub
         for (int i=mActiveUids.size()-1; i>=0; i--) {
             final UidRecord uidRec = mActiveUids.valueAt(i);
             int uidChange = UidRecord.CHANGE_PROCSTATE;
-            if (uidRec.setProcState != uidRec.curProcState) {
+            if (uidRec.setProcState != uidRec.curProcState
+                    || uidRec.setWhitelist != uidRec.curWhitelist) {
                 if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
                         "Changes in " + uidRec + ": proc state from " + uidRec.setProcState
-                        + " to " + uidRec.curProcState);
-                if (ActivityManager.isProcStateBackground(uidRec.curProcState)) {
-                    if (!ActivityManager.isProcStateBackground(uidRec.setProcState)) {
+                        + " to " + uidRec.curProcState + ", whitelist from " + uidRec.setWhitelist
+                        + " to " + uidRec.curWhitelist);
+                if (ActivityManager.isProcStateBackground(uidRec.curProcState)
+                        && !uidRec.curWhitelist) {
+                    // UID is now in the background (and not on the temp whitelist).  Was it
+                    // previously in the foreground (or on the temp whitelist)?
+                    if (!ActivityManager.isProcStateBackground(uidRec.setProcState)
+                            || uidRec.setWhitelist) {
                         uidRec.lastBackgroundTime = nowElapsed;
                         if (!mHandler.hasMessages(IDLE_UIDS_MSG)) {
                             // Note: the background settle time is in elapsed realtime, while
@@ -21786,6 +21824,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     uidRec.lastBackgroundTime = 0;
                 }
                 uidRec.setProcState = uidRec.curProcState;
+                uidRec.setWhitelist = uidRec.curWhitelist;
                 enqueueUidChangeLocked(uidRec, -1, uidChange);
                 noteUidProcessState(uidRec.uid, uidRec.curProcState);
             }
@@ -21927,6 +21966,20 @@ public class ActivityManagerService extends IActivityManager.Stub
     final void doStopUidLocked(int uid, final UidRecord uidRec) {
         mServices.stopInBackgroundLocked(uid);
         enqueueUidChangeLocked(uidRec, uid, UidRecord.CHANGE_IDLE);
+    }
+
+    final void setAppIdTempWhitelistStateLocked(int appId, boolean onWhitelist) {
+        boolean changed = false;
+        for (int i=mActiveUids.size()-1; i>=0; i--) {
+            final UidRecord uidRec = mActiveUids.valueAt(i);
+            if (UserHandle.getAppId(uidRec.uid) == appId && uidRec.curWhitelist != onWhitelist) {
+                uidRec.curWhitelist = onWhitelist;
+                changed = true;
+            }
+        }
+        if (changed) {
+            updateOomAdjLocked();
+        }
     }
 
     final void trimApplications() {
@@ -22631,6 +22684,21 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return;
             }
             ((PendingIntentRecord) target).setWhitelistDuration(duration);
+        }
+
+        @Override
+        public void setDeviceIdleWhitelist(int[] appids) {
+            synchronized (ActivityManagerService.this) {
+                mDeviceIdleWhitelist = appids;
+            }
+        }
+
+        @Override
+        public void updateDeviceIdleTempWhitelist(int[] appids, int changingAppId, boolean adding) {
+            synchronized (ActivityManagerService.this) {
+                mDeviceIdleTempWhitelist = appids;
+                setAppIdTempWhitelistStateLocked(changingAppId, adding);
+            }
         }
 
         @Override

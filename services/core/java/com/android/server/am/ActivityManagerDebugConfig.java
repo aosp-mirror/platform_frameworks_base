@@ -48,7 +48,7 @@ class ActivityManagerDebugConfig {
     static final boolean DEBUG_ADD_REMOVE = DEBUG_ALL_ACTIVITIES || false;
     static final boolean DEBUG_ANR = false;
     static final boolean DEBUG_APP = DEBUG_ALL_ACTIVITIES || false;
-    static final boolean DEBUG_BACKGROUND = DEBUG_ALL || true;
+    static final boolean DEBUG_BACKGROUND_CHECK = DEBUG_ALL || false;
     static final boolean DEBUG_BACKUP = DEBUG_ALL || false;
     static final boolean DEBUG_BROADCAST = DEBUG_ALL || false;
     static final boolean DEBUG_BROADCAST_BACKGROUND = DEBUG_BROADCAST || false;
