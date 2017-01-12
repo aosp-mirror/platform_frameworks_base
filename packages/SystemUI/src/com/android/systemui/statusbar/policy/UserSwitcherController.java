@@ -47,6 +47,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
 import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.internal.messages.SystemMessageProto.SystemMessage;
 import com.android.internal.util.UserIcons;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.GuestResumeSessionReceiver;
@@ -79,8 +80,6 @@ public class UserSwitcherController {
     private static final String ACTION_LOGOUT_USER = "com.android.systemui.LOGOUT_USER";
     private static final int PAUSE_REFRESH_USERS_TIMEOUT_MS = 3000;
 
-    private static final int ID_REMOVE_GUEST = 1010;
-    private static final int ID_LOGOUT_USER = 1011;
     private static final String TAG_REMOVE_GUEST = "remove_guest";
     private static final String TAG_LOGOUT_USER = "logout_user";
 
@@ -553,8 +552,8 @@ public class UserSwitcherController {
                             mContext.getString(R.string.user_logout_notification_action),
                             logoutPI);
             SystemUI.overrideNotificationAppName(mContext, builder);
-            NotificationManager.from(mContext).notifyAsUser(TAG_LOGOUT_USER, ID_LOGOUT_USER,
-                    builder.build(), new UserHandle(userId));
+            NotificationManager.from(mContext).notifyAsUser(TAG_LOGOUT_USER,
+                    SystemMessage.NOTE_LOGOUT_USER, builder.build(), new UserHandle(userId));
         }
     };
 
@@ -576,8 +575,8 @@ public class UserSwitcherController {
                         mContext.getString(R.string.guest_notification_remove_action),
                         removeGuestPI);
         SystemUI.overrideNotificationAppName(mContext, builder);
-        NotificationManager.from(mContext).notifyAsUser(TAG_REMOVE_GUEST, ID_REMOVE_GUEST,
-                builder.build(), new UserHandle(guestUserId));
+        NotificationManager.from(mContext).notifyAsUser(TAG_REMOVE_GUEST,
+                SystemMessage.NOTE_REMOVE_GUEST, builder.build(), new UserHandle(guestUserId));
     }
 
     private final Runnable mUnpauseRefreshUsers = new Runnable() {
