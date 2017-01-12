@@ -41,7 +41,10 @@ public final class Adjustment implements Parcelable {
      */
     public static final String KEY_PEOPLE = "key_people";
     /**
-     * Parcelable {@code ArrayList} of {@link SnoozeCriterion}.
+     * Parcelable {@code ArrayList} of {@link SnoozeCriterion}. These criteria may be visible to
+     * users. If a user chooses to snooze a notification until one of these criterion, the
+     * assistant will be notified via
+     * {@link NotificationAssistantService#onNotificationSnoozedUntilContext}.
      */
     public static final String KEY_SNOOZE_CRITERIA = "key_snooze_criteria";
 

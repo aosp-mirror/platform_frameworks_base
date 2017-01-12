@@ -1829,7 +1829,7 @@ public class NotificationManagerService extends SystemService {
          *
          * {@see com.android.server.StatusBarManagerService.NotificationCallbacks#onNotificationClear}
          *
-         * @param token The binder for the listener, to check that the caller is allowed
+         * @param info The binder for the listener, to check that the caller is allowed
          */
         private void cancelNotificationFromListenerLocked(ManagedServiceInfo info,
                 int callingUid, int callingPid, String pkg, String tag, int id, int userId) {
@@ -1840,7 +1840,24 @@ public class NotificationManagerService extends SystemService {
         }
 
         /**
-         * Allow an INotificationListener to snooze a single notification.
+         * Allow an INotificationListener to snooze a single notification until a context.
+         *
+         * @param token The binder for the listener, to check that the caller is allowed
+         */
+        @Override
+        public void snoozeNotificationUntilContextFromListener(INotificationListener token,
+                String key, String snoozeCriterionId) {
+            long identity = Binder.clearCallingIdentity();
+            try {
+                final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
+                snoozeNotificationInt(key, snoozeCriterionId, info);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        /**
+         * Allow an INotificationListener to snooze a single notification until a time.
          *
          * @param token The binder for the listener, to check that the caller is allowed
          */
@@ -3845,12 +3862,31 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
+    void snoozeNotificationInt(String key, String snoozeCriterionId, ManagedServiceInfo listener) {
+        String listenerName = listener == null ? null : listener.component.toShortString();
+        // TODO: write to event log
+        if (DBG) {
+            Slog.d(TAG, String.format("snooze event(%s, %s, %s)",
+                    key, snoozeCriterionId, listenerName));
+        }
+        synchronized (mNotificationList) {
+            final NotificationRecord r = mNotificationsByKey.get(key);
+            if (r != null) {
+                mNotificationList.remove(r);
+                cancelNotificationLocked(r, false, REASON_SNOOZED);
+                mNotificationAssistants.notifyAssistantSnoozedLocked(r.sbn, snoozeCriterionId);
+                updateLightsLocked();
+                mSnoozeHelper.snooze(r);
+                savePolicyFile();
+            }
+        }
+    }
+
     void snoozeNotificationInt(String key, long until, ManagedServiceInfo listener) {
         String listenerName = listener == null ? null : listener.component.toShortString();
         // TODO: write to event log
         if (DBG) {
-            Slog.d(TAG, String.format("snooze event(%s, %d, %s)", key, until,
-                    listenerName));
+            Slog.d(TAG, String.format("snooze event(%s, %d, %s)", key, until, listenerName));
         }
         if (until < System.currentTimeMillis()) {
             return;
@@ -3861,7 +3897,7 @@ public class NotificationManagerService extends SystemService {
                 mNotificationList.remove(r);
                 cancelNotificationLocked(r, false, REASON_SNOOZED);
                 updateLightsLocked();
-                mSnoozeHelper.snooze(r, r.getUser().getIdentifier(), until);
+                mSnoozeHelper.snooze(r, until);
                 savePolicyFile();
             }
         }
@@ -3879,7 +3915,7 @@ public class NotificationManagerService extends SystemService {
                 mNotificationList.remove(r);
                 cancelNotificationLocked(r, false, REASON_SNOOZED);
                 updateLightsLocked();
-                mSnoozeHelper.snooze(r, r.getUser().getIdentifier());
+                mSnoozeHelper.snooze(r);
                 savePolicyFile();
             }
         }
@@ -3891,8 +3927,8 @@ public class NotificationManagerService extends SystemService {
         if (DBG) {
             Slog.d(TAG, String.format("unsnooze event(%s, %s)", key, listenerName));
         }
-        mSnoozeHelper.repost(key, Binder.getCallingUid());
-                savePolicyFile();
+        mSnoozeHelper.repost(key);
+        savePolicyFile();
     }
 
     void cancelAllLocked(int callingUid, int callingPid, int userId, int reason,
@@ -4270,6 +4306,33 @@ public class NotificationManagerService extends SystemService {
                 assistant.onNotificationEnqueued(sbnHolder, importance, fromUser);
             } catch (RemoteException ex) {
                 Log.e(TAG, "unable to notify assistant (enqueued): " + assistant, ex);
+            }
+        }
+
+        /**
+         * asynchronously notify the assistant that a notification has been snoozed until a
+         * context
+         */
+        public void notifyAssistantSnoozedLocked(final StatusBarNotification sbn,
+                final String snoozeCriterionId) {
+            TrimCache trimCache = new TrimCache(sbn);
+            for (final ManagedServiceInfo info : mServices) {
+                final StatusBarNotification sbnToPost =  trimCache.ForListener(info);
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        final INotificationListener assistant =
+                                (INotificationListener) info.service;
+                        StatusBarNotificationHolder sbnHolder
+                                = new StatusBarNotificationHolder(sbnToPost);
+                        try {
+                            assistant.onNotificationSnoozedUntilContext(
+                                    sbnHolder, snoozeCriterionId);
+                        } catch (RemoteException ex) {
+                            Log.e(TAG, "unable to notify assistant (snoozed): " + assistant, ex);
+                        }
+                    }
+                });
             }
         }
 

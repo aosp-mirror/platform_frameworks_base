@@ -2993,7 +2993,7 @@
         android:protectionLevel="signature" />
 
     <!-- Must be required by an {@link
-         android.service.notification.NotificationAssistantService to ensure that only the system
+         android.service.notification.NotificationAssistantService} to ensure that only the system
          can bind to it.
          <p>Protection level: signature
     -->
