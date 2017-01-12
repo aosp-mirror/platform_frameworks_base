@@ -23,6 +23,7 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pools;
 import android.view.View;
@@ -33,6 +34,8 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
@@ -48,7 +51,8 @@ import java.util.Stack;
  * A manager which handles heads up notifications which is a special mode where
  * they simply peek from the top of the screen.
  */
-public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsListener {
+public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsListener,
+        VisualStabilityManager.Callback {
     private static final String TAG = "HeadsUpManager";
     private static final boolean DEBUG = false;
     private static final String SETTING_HEADS_UP_SNOOZE_LENGTH_MS = "heads_up_snooze_length_ms";
@@ -96,6 +100,8 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     private boolean mReleaseOnExpandFinish;
     private boolean mTrackingHeadsUp;
     private HashSet<NotificationData.Entry> mEntriesToRemoveAfterExpand = new HashSet<>();
+    private ArraySet<NotificationData.Entry> mEntriesToRemoveWhenReorderingAllowed
+            = new ArraySet<>();
     private boolean mIsExpanded;
     private boolean mHasPinnedNotification;
     private int[] mTmpTwoArray = new int[2];
@@ -103,6 +109,8 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     private boolean mWaitingOnCollapseWhenGoingAway;
     private boolean mIsObserving;
     private boolean mRemoteInputActive;
+    private VisualStabilityManager mVisualStabilityManager;
+    private int mStatusBarState;
 
     public HeadsUpManager(final Context context, View statusBarWindowView,
                           NotificationGroupManager groupManager) {
@@ -210,7 +218,8 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     }
 
     private boolean shouldHeadsUpBecomePinned(NotificationData.Entry entry) {
-        return !mIsExpanded || hasFullScreenIntent(entry);
+        return mStatusBarState != StatusBarState.KEYGUARD
+                && !mIsExpanded || hasFullScreenIntent(entry);
     }
 
     private boolean hasFullScreenIntent(NotificationData.Entry entry) {
@@ -602,6 +611,25 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         }
     }
 
+    @Override
+    public void onReorderingAllowed() {
+        for (NotificationData.Entry entry : mEntriesToRemoveWhenReorderingAllowed) {
+            if (isHeadsUp(entry.key)) {
+                // Maybe the heads-up was removed already
+                removeHeadsUpEntry(entry);
+            }
+        }
+        mEntriesToRemoveWhenReorderingAllowed.clear();
+    }
+
+    public void setVisualStabilityManager(VisualStabilityManager visualStabilityManager) {
+        mVisualStabilityManager = visualStabilityManager;
+    }
+
+    public void setStatusBarState(int statusBarState) {
+        mStatusBarState = statusBarState;
+    }
+
     /**
      * This represents a notification and how long it is in a heads up mode. It also manages its
      * lifecycle automatically when created.
@@ -622,7 +650,10 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
             mRemoveHeadsUpRunnable = new Runnable() {
                 @Override
                 public void run() {
-                    if (!mTrackingHeadsUp) {
+                    if (!mVisualStabilityManager.isReorderingAllowed()) {
+                        mEntriesToRemoveWhenReorderingAllowed.add(entry);
+                        mVisualStabilityManager.addReorderingAllowedCallback(HeadsUpManager.this);
+                    } else if (!mTrackingHeadsUp) {
                         removeHeadsUpEntry(entry);
                     } else {
                         mEntriesToRemoveAfterExpand.add(entry);
@@ -645,6 +676,9 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
             removeAutoRemovalCallbacks();
             if (mEntriesToRemoveAfterExpand.contains(entry)) {
                 mEntriesToRemoveAfterExpand.remove(entry);
+            }
+            if (mEntriesToRemoveWhenReorderingAllowed.contains(entry)) {
+                mEntriesToRemoveWhenReorderingAllowed.remove(entry);
             }
             if (!isSticky()) {
                 long finishTime = postTime + mHeadsUpNotificationDecay;
@@ -715,30 +749,4 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         }
     }
 
-    public interface OnHeadsUpChangedListener {
-        /**
-         * The state whether there exist pinned heads-ups or not changed.
-         *
-         * @param inPinnedMode whether there are any pinned heads-ups
-         */
-        void onHeadsUpPinnedModeChanged(boolean inPinnedMode);
-
-        /**
-         * A notification was just pinned to the top.
-         */
-        void onHeadsUpPinned(ExpandableNotificationRow headsUp);
-
-        /**
-         * A notification was just unpinned from the top.
-         */
-        void onHeadsUpUnPinned(ExpandableNotificationRow headsUp);
-
-        /**
-         * A notification just became a heads up or turned back to its normal state.
-         *
-         * @param entry the entry of the changed notification
-         * @param isHeadsUp whether the notification is now a headsUp notification
-         */
-        void onHeadsUpStateChanged(NotificationData.Entry entry, boolean isHeadsUp);
-    }
 }
