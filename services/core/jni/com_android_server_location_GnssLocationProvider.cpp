@@ -58,6 +58,7 @@ static jmethodID method_reportGeofencePauseStatus;
 static jmethodID method_reportGeofenceResumeStatus;
 static jmethodID method_reportMeasurementData;
 static jmethodID method_reportNavigationMessages;
+static jmethodID method_reportLocationBatch;
 
 /*
  * Save a pointer to JavaVm to attach/detach threads executing
@@ -80,6 +81,8 @@ using android::hardware::gnss::V1_0::IAGnssCallback;
 using android::hardware::gnss::V1_0::IAGnssRil;
 using android::hardware::gnss::V1_0::IAGnssRilCallback;
 using android::hardware::gnss::V1_0::IGnss;
+using android::hardware::gnss::V1_0::IGnssBatching;
+using android::hardware::gnss::V1_0::IGnssBatchingCallback;
 using android::hardware::gnss::V1_0::IGnssCallback;
 using android::hardware::gnss::V1_0::IGnssConfiguration;
 using android::hardware::gnss::V1_0::IGnssDebug;
@@ -100,6 +103,7 @@ sp<IGnssXtra> gnssXtraIface = nullptr;
 sp<IAGnssRil> agnssRilIface = nullptr;
 sp<IGnssGeofencing> gnssGeofencingIface = nullptr;
 sp<IAGnss> agnssIface = nullptr;
+sp<IGnssBatching> gnssBatchingIface = nullptr;
 sp<IGnssDebug> gnssDebugIface = nullptr;
 sp<IGnssConfiguration> gnssConfigurationIface = nullptr;
 sp<IGnssNi> gnssNiIface = nullptr;
@@ -139,6 +143,7 @@ void JavaMethodHelper<T>::callJavaMethod(
 class JavaObject {
  public:
     JavaObject(JNIEnv* env, const char* class_name);
+    JavaObject(JNIEnv* env, const char* class_name, const char * sz_arg_1);
     virtual ~JavaObject();
 
     template<class T>
@@ -157,6 +162,12 @@ JavaObject::JavaObject(JNIEnv* env, const char* class_name) : env_(env) {
     clazz_ = env_->FindClass(class_name);
     jmethodID ctor = env->GetMethodID(clazz_, "<init>", "()V");
     object_ = env_->NewObject(clazz_, ctor);
+}
+
+JavaObject::JavaObject(JNIEnv* env, const char* class_name, const char * sz_arg_1) : env_(env) {
+    clazz_ = env_->FindClass(class_name);
+    jmethodID ctor = env->GetMethodID(clazz_, "<init>", "(Ljava/lang/String;)V");
+    object_ = env_->NewObject(clazz_, ctor, env->NewStringUTF(sz_arg_1));
 }
 
 JavaObject::~JavaObject() {
@@ -591,6 +602,7 @@ Return<void> GnssNavigationMessageCallback::gnssNavigationMessageCb(
     env->CallVoidMethod(mCallbacksObj,
                         method_reportNavigationMessages,
                         navigationMessage);
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
     env->DeleteLocalRef(navigationMessage);
     return Void();
 }
@@ -925,6 +937,81 @@ Return<void> AGnssRilCallback::requestRefLocCb() {
     return Void();
 }
 
+/*
+ * GnssBatchingCallback interface implements the callback methods
+ * required by the IGnssBatching interface.
+ */
+struct GnssBatchingCallback : public IGnssBatchingCallback {
+    /*
+    * Methods from ::android::hardware::gps::V1_0::IGnssBatchingCallback
+    * follow.
+    */
+    Return<void> gnssLocationBatchCb(
+        const ::android::hardware::hidl_vec<hardware::gnss::V1_0::GnssLocation> & locations)
+        override;
+ private:
+    jobject translateLocation(
+            JNIEnv* env, const hardware::gnss::V1_0::GnssLocation* location);
+};
+
+Return<void> GnssBatchingCallback::gnssLocationBatchCb(
+        const ::android::hardware::hidl_vec<hardware::gnss::V1_0::GnssLocation> & locations) {
+    JNIEnv* env = getJniEnv();
+
+    jobjectArray jLocations = env->NewObjectArray(locations.size(),
+            env->FindClass("android/location/Location"), nullptr);
+
+    for (uint16_t i = 0; i < locations.size(); ++i) {
+        jobject jLocation = translateLocation(env, &locations[i]);
+        env->SetObjectArrayElement(jLocations, i, jLocation);
+        env->DeleteLocalRef(jLocation);
+    }
+
+    env->CallVoidMethod(mCallbacksObj, method_reportLocationBatch, jLocations);
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+
+    env->DeleteLocalRef(jLocations);
+
+    return Void();
+}
+
+// TODO: Use this common code to translate location for Geofencing and regular Location
+jobject GnssBatchingCallback::translateLocation(
+        JNIEnv* env, const hardware::gnss::V1_0::GnssLocation* location) {
+    JavaObject object(env, "android/location/Location", "gps");
+
+    uint16_t flags = static_cast<uint32_t>(location->gnssLocationFlags);
+    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_LAT_LONG) {
+        SET(Latitude, location->latitudeDegrees);
+        SET(Longitude, location->longitudeDegrees);
+    }
+    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_ALTITUDE) {
+        SET(Altitude, location->altitudeMeters);
+    }
+    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_SPEED) {
+        SET(Speed, location->speedMetersPerSec);
+    }
+    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_BEARING) {
+        SET(Bearing, location->bearingDegrees);
+    }
+    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_HORIZONTAL_ACCURACY) {
+        SET(Accuracy, location->horizontalAccuracyMeters);
+    }
+    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_VERTICAL_ACCURACY) {
+        SET(VerticalAccuracyMeters, location->verticalAccuracyMeters);
+    }
+    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_SPEED_ACCURACY) {
+        SET(SpeedAccuracyMetersPerSecond, location->speedAccuracyMetersPerSecond);
+    }
+    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_BEARING_ACCURACY) {
+        SET(BearingAccuracyDegrees, location->bearingAccuracyDegrees);
+    }
+    SET(Time, location->timestamp);
+
+    return object.get();
+}
+
+
 static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env, jclass clazz) {
     method_reportLocation = env->GetMethodID(clazz, "reportLocation", "(IDDDFFFFFFJ)V");
     method_reportStatus = env->GetMethodID(clazz, "reportStatus", "(I)V");
@@ -959,6 +1046,10 @@ static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env,
             clazz,
             "reportNavigationMessage",
             "(Landroid/location/GnssNavigationMessage;)V");
+    method_reportLocationBatch = env->GetMethodID(
+            clazz,
+            "reportLocationBatch",
+            "([Landroid/location/Location;)V");
 
     /*
      * Save a pointer to JVM.
@@ -1032,6 +1123,13 @@ static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env,
             ALOGD("Unable to get a handle to GnssGeofencing");
         } else {
             gnssGeofencingIface = gnssGeofencing;
+        }
+
+        auto gnssBatching = gnssHal->getExtensionGnssBatching();
+        if (!gnssBatching.isOk()) {
+            ALOGD("Unable to get a handle to gnssBatching");
+        } else {
+            gnssBatchingIface = gnssBatching;
         }
     } else {
       ALOGE("Unable to get GPS service\n");
@@ -1704,6 +1802,67 @@ static jboolean android_location_GnssLocationProvider_set_gnss_pos_protocol_sele
     }
 }
 
+static jint android_location_GnssLocationProvider_get_batch_size(JNIEnv*, jclass) {
+    if (gnssBatchingIface == nullptr) {
+        return 0; // batching not supported, size = 0
+    }
+    auto result = gnssBatchingIface->getBatchSize();
+    if (result.isOk()) {
+        return static_cast<jint>(result);
+    } else {
+        return 0; // failure in binder, don't support batching
+    }
+}
+
+static jboolean android_location_GnssLocationProvider_init_batching(JNIEnv*, jclass) {
+    if (gnssBatchingIface == nullptr) {
+        return JNI_FALSE; // batching not supported
+    }
+    sp<IGnssBatchingCallback> gnssBatchingCbIface = new GnssBatchingCallback();
+
+    return static_cast<jboolean>(gnssBatchingIface->init(gnssBatchingCbIface));
+}
+
+static void android_location_GnssLocationProvider_cleanup_batching(JNIEnv*, jclass) {
+    if (gnssBatchingIface == nullptr) {
+        return; // batching not supported
+    }
+    gnssBatchingIface->cleanup();
+}
+
+static jboolean android_location_GnssLocationProvider_start_batch(JNIEnv*, jclass,
+        jlong periodNanos, jboolean wakeOnFifoFull) {
+    if (gnssBatchingIface == nullptr) {
+        return JNI_FALSE; // batching not supported
+    }
+
+    IGnssBatching::Options options;
+    options.periodNanos = periodNanos;
+    if (wakeOnFifoFull) {
+        options.flags = static_cast<uint8_t>(IGnssBatching::Flag::WAKEUP_ON_FIFO_FULL);
+    } else {
+        options.flags = 0;
+    }
+
+    return static_cast<jboolean>(gnssBatchingIface->start(options));
+}
+
+static void android_location_GnssLocationProvider_flush_batch(JNIEnv*, jclass) {
+    if (gnssBatchingIface == nullptr) {
+        return; // batching not supported
+    }
+
+    gnssBatchingIface->flush();
+}
+
+static jboolean android_location_GnssLocationProvider_stop_batch(JNIEnv*, jclass) {
+    if (gnssBatchingIface == nullptr) {
+        return JNI_FALSE; // batching not supported
+    }
+
+    return gnssBatchingIface->stop();
+}
+
 static const JNINativeMethod sMethods[] = {
      /* name, signature, funcPtr */
     {"class_init_native", "()V", reinterpret_cast<void *>(
@@ -1829,6 +1988,27 @@ static const JNINativeMethod sMethods[] = {
     {"native_set_emergency_supl_pdn",
             "(I)Z",
             reinterpret_cast<void *>(android_location_GnssLocationProvider_set_emergency_supl_pdn)},
+    {"native_get_batch_size",
+            "()I",
+            reinterpret_cast<void *>(android_location_GnssLocationProvider_get_batch_size)},
+    {"native_init_batching",
+            "()Z",
+            reinterpret_cast<void *>(android_location_GnssLocationProvider_init_batching)},
+    {"native_start_batch",
+            "(JZ)Z",
+            reinterpret_cast<void *>(android_location_GnssLocationProvider_start_batch)},
+    {"native_flush_batch",
+            "()V",
+            reinterpret_cast<void *>(android_location_GnssLocationProvider_flush_batch)},
+    {"native_stop_batch",
+            "()Z",
+            reinterpret_cast<void *>(android_location_GnssLocationProvider_stop_batch)},
+    {"native_init_batching",
+            "()Z",
+            reinterpret_cast<void *>(android_location_GnssLocationProvider_init_batching)},
+    {"native_cleanup_batching",
+            "()V",
+            reinterpret_cast<void *>(android_location_GnssLocationProvider_cleanup_batching)},
 };
 
 int register_android_server_location_GnssLocationProvider(JNIEnv* env) {

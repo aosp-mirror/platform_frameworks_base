@@ -21,6 +21,7 @@ import android.location.Address;
 import android.location.Criteria;
 import android.location.GeocoderParams;
 import android.location.Geofence;
+import android.location.IBatchedLocationCallback;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssStatusListener;
 import android.location.IGnssNavigationMessageListener;
@@ -71,6 +72,13 @@ interface ILocationManager
 
     int getGnssYearOfHardware();
 
+    int getGnssBatchSize(String packageName);
+    boolean addGnssBatchingCallback(in IBatchedLocationCallback callback, String packageName);
+    void removeGnssBatchingCallback();
+    boolean startGnssBatch(long periodNanos, boolean wakeOnFifoFull, String packageName);
+    void flushGnssBatch(String packageName);
+    boolean stopGnssBatch();
+
     // --- deprecated ---
     List<String> getAllProviders();
     List<String> getProviders(in Criteria criteria, boolean enabledOnly);
@@ -98,6 +106,9 @@ interface ILocationManager
     // Passive is true if the location is coming from the passive provider, in which case
     // it need not be shared with other providers.
     void reportLocation(in Location location, boolean passive);
+
+    // Used when a (initially Gnss) Location batch arrives
+    void reportLocationBatch(in List<Location> locations);
 
     // for reporting callback completion
     void locationCallbackFinished(ILocationListener listener);

@@ -383,6 +383,7 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/widget/IRemoteViewsAdapterConnection.aidl \
 	keystore/java/android/security/IKeyChainAliasCallback.aidl \
 	keystore/java/android/security/IKeyChainService.aidl \
+	location/java/android/location/IBatchedLocationCallback.aidl \
 	location/java/android/location/ICountryDetector.aidl \
 	location/java/android/location/ICountryListener.aidl \
 	location/java/android/location/IFusedProvider.aidl \

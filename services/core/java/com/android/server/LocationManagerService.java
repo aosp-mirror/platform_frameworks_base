@@ -17,6 +17,7 @@
 package com.android.server;
 
 import android.app.ActivityManager;
+import android.annotation.NonNull;
 import android.content.pm.PackageManagerInternal;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.location.ProviderProperties;
@@ -62,6 +63,7 @@ import android.location.Address;
 import android.location.Criteria;
 import android.location.GeocoderParams;
 import android.location.Geofence;
+import android.location.IBatchedLocationCallback;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssStatusListener;
 import android.location.IGnssStatusProvider;
@@ -101,6 +103,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
@@ -228,6 +231,11 @@ public class LocationManagerService extends ILocationManager.Stub {
     private int[] mCurrentUserProfiles = new int[] { UserHandle.USER_SYSTEM };
 
     private GnssLocationProvider.GnssSystemInfoProvider mGnssSystemInfoProvider;
+
+    private GnssLocationProvider.GnssBatchingProvider mGnssBatchingProvider;
+    private IBatchedLocationCallback mGnssBatchingCallback;
+    private LinkedCallback mGnssBatchingDeathCallback;
+    private boolean mGnssBatchingInProgress = false;
 
     public LocationManagerService(Context context) {
         super();
@@ -545,6 +553,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             GnssLocationProvider gnssProvider = new GnssLocationProvider(mContext, this,
                     mLocationHandler.getLooper());
             mGnssSystemInfoProvider = gnssProvider.getGnssSystemInfoProvider();
+            mGnssBatchingProvider = gnssProvider.getGnssBatchingProvider();
             mGnssStatusProvider = gnssProvider.getGnssStatusProvider();
             mNetInitiatedListener = gnssProvider.getNetInitiatedListener();
             addProviderLocked(gnssProvider);
@@ -1073,10 +1082,194 @@ public class LocationManagerService extends ILocationManager.Stub {
      */
     @Override
     public int getGnssYearOfHardware() {
-        if (mGnssNavigationMessageProvider != null) {
+        if (mGnssSystemInfoProvider != null) {
             return mGnssSystemInfoProvider.getGnssYearOfHardware();
         } else {
             return 0;
+        }
+    }
+
+    /**
+     * Runs some checks for GNSS (FINE) level permissions, used by several methods which directly
+     * (try to) access GNSS information at this layer.
+     */
+    private boolean hasGnssPermissions(String packageName) {
+        int allowedResolutionLevel = getCallerAllowedResolutionLevel();
+        checkResolutionLevelIsSufficientForProviderUse(
+                allowedResolutionLevel,
+                LocationManager.GPS_PROVIDER);
+
+        int pid = Binder.getCallingPid();
+        int uid = Binder.getCallingUid();
+        long identity = Binder.clearCallingIdentity();
+        boolean hasLocationAccess;
+        try {
+            hasLocationAccess = checkLocationAccess(pid, uid, packageName, allowedResolutionLevel);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+
+        return hasLocationAccess;
+    }
+
+    /**
+     * Returns the GNSS batching size, if available.
+     */
+    @Override
+    public int getGnssBatchSize(String packageName) {
+        mContext.enforceCallingPermission(android.Manifest.permission.LOCATION_HARDWARE,
+                "Location Hardware permission not granted to access hardware batching");
+
+        if (hasGnssPermissions(packageName) && mGnssBatchingProvider != null) {
+            return mGnssBatchingProvider.getSize();
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * Adds a callback for GNSS Batching events, if permissions allow, which are transported
+     * to potentially multiple listeners by the BatchedLocationCallbackTransport above this.
+     */
+    @Override
+    public boolean addGnssBatchingCallback(IBatchedLocationCallback callback, String packageName) {
+        mContext.enforceCallingPermission(android.Manifest.permission.LOCATION_HARDWARE,
+                "Location Hardware permission not granted to access hardware batching");
+
+        if (!hasGnssPermissions(packageName) || mGnssBatchingProvider == null) {
+            return false;
+        }
+
+        mGnssBatchingCallback = callback;
+        mGnssBatchingDeathCallback = new LinkedCallback(callback);
+        try {
+            callback.asBinder().linkToDeath(mGnssBatchingDeathCallback, 0 /* flags */);
+        } catch (RemoteException e) {
+            // if the remote process registering the listener is already dead, just swallow the
+            // exception and return
+            Log.e(TAG, "Remote listener already died.", e);
+            return false;
+        }
+
+        return true;
+    }
+
+    private class LinkedCallback implements IBinder.DeathRecipient {
+        private final IBatchedLocationCallback mCallback;
+
+        public LinkedCallback(@NonNull IBatchedLocationCallback callback) {
+            mCallback = callback;
+        }
+
+        @NonNull
+        public IBatchedLocationCallback getUnderlyingListener() {
+            return mCallback;
+        }
+
+        @Override
+        public void binderDied() {
+            Log.d(TAG, "Remote Batching Callback died: " + mCallback);
+            stopGnssBatch();
+            removeGnssBatchingCallback();
+        }
+    }
+
+    /**
+     * Removes callback for GNSS batching
+     */
+    @Override
+    public void removeGnssBatchingCallback() {
+        try {
+            mGnssBatchingCallback.asBinder().unlinkToDeath(mGnssBatchingDeathCallback,
+                    0 /* flags */);
+        } catch (NoSuchElementException e) {
+            // if the death callback isn't connected (it should be...), log error, swallow the
+            // exception and return
+            Log.e(TAG, "Couldn't unlink death callback.", e);
+        }
+        mGnssBatchingCallback = null;
+        mGnssBatchingDeathCallback = null;
+    }
+
+
+    /**
+     * Starts GNSS batching, if available.
+     */
+    @Override
+    public boolean startGnssBatch(long periodNanos, boolean wakeOnFifoFull, String packageName) {
+        mContext.enforceCallingPermission(android.Manifest.permission.LOCATION_HARDWARE,
+                "Location Hardware permission not granted to access hardware batching");
+
+        if (!hasGnssPermissions(packageName) || mGnssBatchingProvider == null) {
+            return false;
+        }
+
+        if (mGnssBatchingInProgress) {
+            // Current design does not expect multiple starts to be called repeatedly
+            Log.e(TAG, "startGnssBatch unexpectedly called w/o stopping prior batch");
+            // Try to clean up anyway, and continue
+            stopGnssBatch();
+        }
+
+        mGnssBatchingInProgress = true;
+        return mGnssBatchingProvider.start(periodNanos, wakeOnFifoFull);
+    }
+
+    /**
+     * Flushes a GNSS batch in progress
+     */
+    @Override
+    public void flushGnssBatch(String packageName) {
+        mContext.enforceCallingPermission(android.Manifest.permission.LOCATION_HARDWARE,
+                "Location Hardware permission not granted to access hardware batching");
+
+        if (!hasGnssPermissions(packageName)) {
+            Log.e(TAG, "flushGnssBatch called without GNSS permissions");
+            return;
+        }
+
+        if (!mGnssBatchingInProgress) {
+            Log.w(TAG, "flushGnssBatch called with no batch in progress");
+        }
+
+        if (mGnssBatchingProvider != null) {
+             mGnssBatchingProvider.flush();
+        }
+    }
+
+    /**
+     * Stops GNSS batching
+     */
+    @Override
+    public boolean stopGnssBatch() {
+        mContext.enforceCallingPermission(android.Manifest.permission.LOCATION_HARDWARE,
+                "Location Hardware permission not granted to access hardware batching");
+
+        if (mGnssBatchingProvider != null) {
+            mGnssBatchingInProgress = false;
+            return mGnssBatchingProvider.stop();
+        } else  {
+            return false;
+        }
+    }
+
+    @Override
+    public void reportLocationBatch(List<Location> locations) {
+        checkCallerIsProvider();
+
+        // Currently used only for GNSS locations - update permissions check if changed
+        if (isAllowedByCurrentUserSettingsLocked(LocationManager.GPS_PROVIDER)) {
+            if (mGnssBatchingCallback == null) {
+                Slog.e(TAG, "reportLocationBatch() called without active Callback");
+                return;
+            }
+            try {
+                mGnssBatchingCallback.onLocationBatch(locations);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "mGnssBatchingCallback.onLocationBatch failed", e);
+            }
+        } else {
+            Slog.w(TAG, "reportLocationBatch() called without user permission, locations blocked");
         }
     }
 
@@ -2000,22 +2193,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public boolean registerGnssStatusCallback(IGnssStatusListener callback, String packageName) {
-        int allowedResolutionLevel = getCallerAllowedResolutionLevel();
-        checkResolutionLevelIsSufficientForProviderUse(allowedResolutionLevel,
-                LocationManager.GPS_PROVIDER);
-
-        final int pid = Binder.getCallingPid();
-        final int uid = Binder.getCallingUid();
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            if (!checkLocationAccess(pid, uid, packageName, allowedResolutionLevel)) {
-                return false;
-            }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-
-        if (mGnssStatusProvider == null) {
+        if (!hasGnssPermissions(packageName) || mGnssStatusProvider == null) {
             return false;
         }
 
@@ -2043,22 +2221,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     public boolean addGnssMeasurementsListener(
             IGnssMeasurementsListener listener,
             String packageName) {
-        int allowedResolutionLevel = getCallerAllowedResolutionLevel();
-        checkResolutionLevelIsSufficientForProviderUse(
-                allowedResolutionLevel,
-                LocationManager.GPS_PROVIDER);
-
-        int pid = Binder.getCallingPid();
-        int uid = Binder.getCallingUid();
-        long identity = Binder.clearCallingIdentity();
-        boolean hasLocationAccess;
-        try {
-            hasLocationAccess = checkLocationAccess(pid, uid, packageName, allowedResolutionLevel);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-
-        if (!hasLocationAccess || mGnssMeasurementsProvider == null) {
+        if (!hasGnssPermissions(packageName) || mGnssMeasurementsProvider == null) {
             return false;
         }
         return mGnssMeasurementsProvider.addListener(listener);
@@ -2075,22 +2238,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     public boolean addGnssNavigationMessageListener(
             IGnssNavigationMessageListener listener,
             String packageName) {
-        int allowedResolutionLevel = getCallerAllowedResolutionLevel();
-        checkResolutionLevelIsSufficientForProviderUse(
-                allowedResolutionLevel,
-                LocationManager.GPS_PROVIDER);
-
-        int pid = Binder.getCallingPid();
-        int uid = Binder.getCallingUid();
-        long identity = Binder.clearCallingIdentity();
-        boolean hasLocationAccess;
-        try {
-            hasLocationAccess = checkLocationAccess(pid, uid, packageName, allowedResolutionLevel);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-
-        if (!hasLocationAccess || mGnssNavigationMessageProvider == null) {
+        if (!hasGnssPermissions(packageName) || mGnssNavigationMessageProvider == null) {
             return false;
         }
         return mGnssNavigationMessageProvider.addListener(listener);
@@ -2865,6 +3013,9 @@ public class LocationManagerService extends ILocationManager.Stub {
                 }
                 pw.println(":");
                 provider.dump(fd, pw, args);
+            }
+            if (mGnssBatchingInProgress) {
+                pw.println("  GNSS batching in progress");
             }
         }
     }
