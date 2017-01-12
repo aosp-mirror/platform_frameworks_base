@@ -1673,8 +1673,7 @@
     <string name="select_year" msgid="7952052866994196170">"تحديد العام"</string>
     <string name="deleted_key" msgid="7659477886625566590">"تم حذف <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> المخصص للعمل"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"لإزالة تثبيت هذه الشاشة، يمكنك لمس زر \"رجوع\" و\"نظرة عامة\" مع الاستمرار."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"التطبيق مقيد: ولا يسمح بإلغاء التقييد على هذا الجهاز."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"تم تثبيت الشاشة"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"تم إلغاء تثبيت الشاشة"</string>

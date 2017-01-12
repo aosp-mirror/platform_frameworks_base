@@ -1565,8 +1565,7 @@
     <string name="select_year" msgid="7952052866994196170">"Chọn năm"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Đã xóa <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> làm việc"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"Để bỏ ghim màn hình này, chạm và giữ Quay lại và Tổng quan."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Ứng dụng được ghim: Không được phép bỏ ghim trên thiết bị này."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Đã ghim màn hình"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Đã bỏ ghim màn hình"</string>

@@ -1565,8 +1565,7 @@
     <string name="select_year" msgid="7952052866994196170">"Përzgjidh vitin"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> u fshi"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Puna <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"Për të hequr gozhdimin e ekranit, prek dhe mbaj të shtypur \"Prapa\" dhe \"Përmbledhja\"."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Ekrani është i gozhduar. Anulimi i mbërthimit nuk lejohet nga organizata jote."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekrani u gozhdua"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Ekrani u hoq nga gozhdimi"</string>

@@ -1592,8 +1592,7 @@
     <string name="select_year" msgid="7952052866994196170">"Selectați anul"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> a fost șters"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> de serviciu"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"Pentru a anula fixarea acestui ecran, atingeți lung opțiunile Înapoi și Recente."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Aplicația este fixată: Anularea fixării nu este permisă pe acest dispozitiv."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ecran fixat"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Fixarea ecranului anulată"</string>

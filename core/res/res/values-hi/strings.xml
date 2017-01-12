@@ -1565,8 +1565,7 @@
     <string name="select_year" msgid="7952052866994196170">"वर्ष चुनें"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> को हटा दिया गया"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"कार्यस्थल का <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"इस स्क्रीन को अनपिन करने के लिए, वापस जाएं और अवलोकन को स्पर्श करके रखें."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"ऐप पिन किया गया है: इस डिवाइस पर अनपिन करने की अनुमति नहीं है."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"स्‍क्रीन पिन की गई"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"स्‍क्रीन अनपिन की गई"</string>

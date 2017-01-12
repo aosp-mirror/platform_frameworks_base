@@ -1565,8 +1565,7 @@
     <string name="select_year" msgid="7952052866994196170">"年を選択"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g>を削除しました"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"仕事の<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"この画面の固定を解除するには [戻る] と [概要] を押し続けます。"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"アプリは固定されています。この端末では固定を解除できません。"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"画面を固定しました"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"画面固定を解除しました"</string>

@@ -1565,8 +1565,7 @@
     <string name="select_year" msgid="7952052866994196170">"選取年份"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> 已刪除"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"公司<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"如要取消固定此畫面，請按住 [返回] 和 [概覽]。"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"應用程式已固定：不允許在此裝置上取消固定。"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"螢幕已固定"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"已取消固定螢幕"</string>

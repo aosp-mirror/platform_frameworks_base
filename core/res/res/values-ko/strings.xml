@@ -1565,8 +1565,7 @@
     <string name="select_year" msgid="7952052866994196170">"연도 선택"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> 삭제됨"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"업무용 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"이 화면을 고정 해제하려면 \'뒤로\' 및 \'최근 사용\'을 길게 터치하세요."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"앱이 고정되었습니다. 이 기기에서는 고정 해제를 허용하지 않습니다."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"화면 고정됨"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"화면 고정 해제됨"</string>

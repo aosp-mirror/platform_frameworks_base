@@ -1619,8 +1619,7 @@
     <string name="select_year" msgid="7952052866994196170">"Vyberte rok"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Číslice <xliff:g id="KEY">%1$s</xliff:g> byla smazána"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Pracovní <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"Chcete-li tuto obrazovku uvolnit, klepněte na tlačítko Zpět a poté na tlačítko Přehled a podržte jej."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Aplikace je připnutá: Odepnutí v tomto zařízení není povoleno."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Obrazovka připnuta"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Obrazovka uvolněna"</string>

@@ -1565,8 +1565,7 @@
     <string name="select_year" msgid="7952052866994196170">"Pumili ng taon"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Tinanggal ang <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> sa Trabaho"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"Upang i-unpin ang screen na ito, pindutin nang matagal ang Bumalik at Pangkalahatang-ideya."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Naka-pin ang app: Hindi pinapayagan ang pag-a-unpin sa device na ito."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Naka-pin ang screen"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Naka-unpin ang screen"</string>

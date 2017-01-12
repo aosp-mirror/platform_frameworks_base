@@ -1565,8 +1565,7 @@
     <string name="select_year" msgid="7952052866994196170">"选择年份"</string>
     <string name="deleted_key" msgid="7659477886625566590">"已删除<xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"工作<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (7693684144593484) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="7693684144593484">"要取消固定此屏幕，请触摸并按住“返回”和“概览”。"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"应用处于固定状态：在此设备上不允许退出该模式。"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"已固定屏幕"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"已取消固定屏幕"</string>
