@@ -71,6 +71,7 @@ public class Paint {
 
     private LocaleList  mLocales;
     private String      mFontFeatureSettings;
+    private String      mFontVariationSettings;
 
     private static final Object sCacheLock = new Object();
 
@@ -1491,6 +1492,37 @@ public class Paint {
         }
         mFontFeatureSettings = settings;
         nSetFontFeatureSettings(mNativePaint, settings);
+    }
+
+    /**
+     * Returns the font variation settings.
+     *
+     * @return the paint's currently set font variation settings. Default is null.
+     *
+     * @see #setFontVariationSettings(String)
+     */
+    public String getFontVariationSettings() {
+        return mFontVariationSettings;
+    }
+
+    /**
+     * Set font variation settings.
+     *
+     * @param settings font variation settings, e.g. "'wdth' 300, 'wght' 1.8"
+     *
+     * @see #getFontVariationSettings()
+     *
+     * @param settings the font variation settings. You can pass null or empty string as no
+     *                 variation settings.
+     */
+    public void setFontVariationSettings(String settings) {
+        settings = TextUtils.nullIfEmpty(settings);
+        if (settings == mFontVariationSettings
+                || (settings != null && settings.equals(mFontVariationSettings))) {
+            return;
+        }
+        mFontVariationSettings = settings;
+        setTypeface(Typeface.createFromTypefaceWithVariation(mTypeface, settings));
     }
 
     /**

@@ -17,7 +17,8 @@
 #include "MinikinSkia.h"
 
 #include <log/log.h>
-
+#include <SkFontDescriptor.h>
+#include <SkFontMgr.h>
 #include <SkPaint.h>
 #include <SkTypeface.h>
 
@@ -84,6 +85,28 @@ size_t MinikinFontSkia::GetFontSize() const {
 
 int MinikinFontSkia::GetFontIndex() const {
     return mTtcIndex;
+}
+
+minikin::MinikinFont* MinikinFontSkia::createFontWithVariation(
+        const std::vector<minikin::FontVariation>& variations) const {
+    SkFontMgr::FontParameters params;
+
+    int ttcIndex;
+    SkStreamAsset* stream = mTypeface->openStream(&ttcIndex);
+    LOG_ALWAYS_FATAL_IF(stream == nullptr, "openStream failed");
+
+    params.setCollectionIndex(ttcIndex);
+    std::vector<SkFontMgr::FontParameters::Axis> skAxes;
+    skAxes.resize(variations.size());
+    for (size_t i = 0; i < variations.size(); i++) {
+        skAxes[i].fTag = variations[i].axisTag;
+        skAxes[i].fStyleValue = SkFloatToScalar(variations[i].value);
+    }
+    params.setAxes(skAxes.data(), skAxes.size());
+    sk_sp<SkFontMgr> fm(SkFontMgr::RefDefault());
+    sk_sp<SkTypeface> face(fm->createFromStream(stream, params));
+
+    return new MinikinFontSkia(std::move(face), mFontData, mFontSize, ttcIndex);
 }
 
 uint32_t MinikinFontSkia::packPaintFlags(const SkPaint* paint) {

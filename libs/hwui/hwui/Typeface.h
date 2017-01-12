@@ -43,6 +43,9 @@ struct ANDROID_API Typeface {
 
     static Typeface* createFromTypeface(Typeface* src, SkTypeface::Style style);
 
+    static Typeface* createFromTypefaceWithVariation(Typeface* src,
+            const std::vector<minikin::FontVariation>& variations);
+
     static Typeface* createWeightAlias(Typeface* src, int baseweight);
 
     static Typeface* createFromFamilies(const std::vector<minikin::FontFamily*>& families);
