@@ -85,6 +85,9 @@ public class AppWindowContainerController
         final Configuration mergedOverrideConfiguration;
 
         synchronized (mWindowMap) {
+            if (mContainer == null) {
+                return;
+            }
             startingData = mContainer.startingData;
             mergedOverrideConfiguration = mContainer.getMergedOverrideConfiguration();
         }
@@ -150,6 +153,9 @@ public class AppWindowContainerController
                     + mContainer + ": startingWindow="
                     + mContainer.startingWindow + " startingView="
                     + mContainer.startingSurface);
+            if (mContainer == null) {
+                return;
+            }
             if (mContainer.startingWindow != null) {
                 contents = mContainer.startingSurface;
                 token = mContainer.token;
