@@ -1765,6 +1765,7 @@ public class WifiManager {
      * Interface for callback invocation on an application action
      * @hide
      */
+    @SystemApi
     public interface ActionListener {
         /** The operation succeeded */
         public void onSuccess();
@@ -1976,6 +1977,7 @@ public class WifiManager {
      *
      * @hide
      */
+    @SystemApi
     public void connect(WifiConfiguration config, ActionListener listener) {
         if (config == null) throw new IllegalArgumentException("config cannot be null");
         // Use INVALID_NETWORK_ID for arg1 when passing a config object
