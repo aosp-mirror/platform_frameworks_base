@@ -568,15 +568,16 @@ static jstring JHwParcel_native_readString(JNIEnv *env, jobject thiz) {
 
     size_t parentHandle;
 
-    const hidl_string *s = static_cast<const hidl_string *>(
-            parcel->readBuffer(&parentHandle));
+    const hidl_string *s;
+    status_t err = parcel->readBuffer(&parentHandle,
+            reinterpret_cast<const void**>(&s));
 
-    if (s == NULL) {
-        signalExceptionForError(env, UNKNOWN_ERROR);
+    if (err != OK) {
+        signalExceptionForError(env, err);
         return NULL;
     }
 
-    status_t err = ::android::hardware::readEmbeddedFromParcel(
+    err = ::android::hardware::readEmbeddedFromParcel(
             const_cast<hidl_string *>(s),
             *parcel, parentHandle, 0 /* parentOffset */);
 
@@ -593,20 +594,20 @@ static Type ## Array JHwParcel_native_read ## Suffix ## Vector(                \
         JNIEnv *env, jobject thiz) {                                           \
     hardware::Parcel *parcel =                                                 \
         JHwParcel::GetNativeContext(env, thiz)->getParcel();                   \
-                                                                               \
     size_t parentHandle;                                                       \
                                                                                \
-    const hidl_vec<Type> *vec =                                                \
-        (const hidl_vec<Type> *)parcel->readBuffer(&parentHandle);             \
+    const hidl_vec<Type> *vec;                                                 \
+    status_t err = parcel->readBuffer(&parentHandle,                           \
+            reinterpret_cast<const void**>(&vec));                             \
                                                                                \
-    if (vec == NULL) {                                                         \
-        signalExceptionForError(env, UNKNOWN_ERROR);                           \
+    if (err != OK) {                                                           \
+        signalExceptionForError(env, err);                                     \
         return NULL;                                                           \
     }                                                                          \
                                                                                \
     size_t childHandle;                                                        \
                                                                                \
-    status_t err = ::android::hardware::readEmbeddedFromParcel(                \
+    err = ::android::hardware::readEmbeddedFromParcel(                         \
                 const_cast<hidl_vec<Type> *>(vec),                             \
                 *parcel,                                                       \
                 parentHandle,                                                  \
@@ -638,17 +639,18 @@ static jbooleanArray JHwParcel_native_readBoolVector(
 
     size_t parentHandle;
 
-    const hidl_vec<bool> *vec =
-        (const hidl_vec<bool> *)parcel->readBuffer(&parentHandle);
+    const hidl_vec<bool> *vec;
+    status_t err = parcel->readBuffer(&parentHandle,
+            reinterpret_cast<const void**>(&vec));
 
-    if (vec == NULL) {
-        signalExceptionForError(env, UNKNOWN_ERROR);
+    if (err != OK) {
+        signalExceptionForError(env, err);
         return NULL;
     }
 
     size_t childHandle;
 
-    status_t err = ::android::hardware::readEmbeddedFromParcel(
+    err = ::android::hardware::readEmbeddedFromParcel(
                 const_cast<hidl_vec<bool> *>(vec),
                 *parcel,
                 parentHandle,
@@ -701,16 +703,17 @@ static jobjectArray JHwParcel_native_readStringVector(
 
     size_t parentHandle;
 
-    const string_vec *vec=
-        (const string_vec *)parcel->readBuffer(&parentHandle);
+    const string_vec *vec;
+    status_t err = parcel->readBuffer(&parentHandle,
+            reinterpret_cast<const void **>(&vec));
 
-    if (vec == NULL) {
-        signalExceptionForError(env, UNKNOWN_ERROR);
+    if (err != OK) {
+        signalExceptionForError(env, err);
         return NULL;
     }
 
     size_t childHandle;
-    status_t err = ::android::hardware::readEmbeddedFromParcel(
+    err = ::android::hardware::readEmbeddedFromParcel(
             const_cast<string_vec *>(vec),
             *parcel, parentHandle, 0 /* parentOffset */, &childHandle);
 
@@ -807,9 +810,10 @@ static jobject JHwParcel_native_readBuffer(JNIEnv *env, jobject thiz) {
         JHwParcel::GetNativeContext(env, thiz)->getParcel();
 
     size_t handle;
-    const void *ptr = parcel->readBuffer(&handle);
+    const void *ptr;
+    status_t status = parcel->readBuffer(&handle, &ptr);
 
-    if (ptr == nullptr) {
+    if (status != OK) {
         jniThrowException(env, "java/util/NoSuchElementException", NULL);
         return nullptr;
     }
@@ -824,10 +828,11 @@ static jobject JHwParcel_native_readEmbeddedBuffer(
 
     size_t childHandle;
 
-    const void *ptr =
-        parcel->readEmbeddedBuffer(&childHandle, parentHandle, offset);
+    const void *ptr;
+    status_t status =
+        parcel->readEmbeddedBuffer(&childHandle, parentHandle, offset, &ptr);
 
-    if (ptr == nullptr) {
+    if (status != OK) {
         jniThrowException(env, "java/util/NoSuchElementException", NULL);
         return 0;
     }
