@@ -2568,6 +2568,9 @@ public class NotificationManagerService extends SystemService {
             }
         }
         if (summaryRecord != null) {
+            synchronized (mEnqueuedNotifications) {
+                mEnqueuedNotifications.add(summaryRecord);
+            }
             mHandler.post(new EnqueueNotificationRunnable(userId, summaryRecord));
         }
     }
