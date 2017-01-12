@@ -285,7 +285,7 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
             return mContext.getString(R.string.monitoring_description_app_work,
                     profileOwnerPackage, profileVpn);
         } else if (profileOwnerPackage != null && hasProfileOwner) {
-            return mContext.getString(R.string.monitoring_description_device_owned,
+            return mContext.getString(R.string.do_disclosure_with_name,
                     profileOwnerPackage);
         } else {
             // No device owner, no personal VPN, no work VPN, no user owner. Why are we here?
