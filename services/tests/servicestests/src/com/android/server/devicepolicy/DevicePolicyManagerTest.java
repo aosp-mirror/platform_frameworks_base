@@ -3071,6 +3071,44 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertNull(dpm.getDeviceOwnerOrganizationName());
     }
 
+    public void testWipeDataManagedProfile() throws Exception {
+        final int MANAGED_PROFILE_USER_ID = 15;
+        final int MANAGED_PROFILE_ADMIN_UID = UserHandle.getUid(MANAGED_PROFILE_USER_ID, 19436);
+        addManagedProfile(admin1, MANAGED_PROFILE_ADMIN_UID, admin1);
+        mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
+
+        // Even if the caller is the managed profile, the current user is the user 0
+        when(mContext.iactivityManager.getCurrentUser())
+                .thenReturn(new UserInfo(UserHandle.USER_SYSTEM, "user system", 0));
+
+        dpm.wipeData(0);
+        verify(mContext.userManagerInternal).removeUserEvenWhenDisallowed(
+                MANAGED_PROFILE_USER_ID);
+    }
+
+    public void testWipeDataManagedProfileDisallowed() throws Exception {
+        final int MANAGED_PROFILE_USER_ID = 15;
+        final int MANAGED_PROFILE_ADMIN_UID = UserHandle.getUid(MANAGED_PROFILE_USER_ID, 19436);
+        addManagedProfile(admin1, MANAGED_PROFILE_ADMIN_UID, admin1);
+
+        // Even if the caller is the managed profile, the current user is the user 0
+        when(mContext.iactivityManager.getCurrentUser())
+                .thenReturn(new UserInfo(UserHandle.USER_SYSTEM, "user system", 0));
+
+        when(mContext.userManager.getUserRestrictionSource(
+                UserManager.DISALLOW_REMOVE_MANAGED_PROFILE,
+                UserHandle.of(MANAGED_PROFILE_USER_ID)))
+                .thenReturn(UserManager.RESTRICTION_SOURCE_SYSTEM);
+        mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
+        try {
+            // The PO is not allowed to remove the profile if the user restriction was set on the
+            // profile by the system
+            dpm.wipeData(0);
+            fail("SecurityException not thrown");
+        } catch (SecurityException expected) {
+        }
+    }
+
     private void setUserSetupCompleteForUser(boolean isUserSetupComplete, int userhandle) {
         when(mContext.settings.settingsSecureGetIntForUser(Settings.Secure.USER_SETUP_COMPLETE, 0,
                 userhandle)).thenReturn(isUserSetupComplete ? 1 : 0);
