@@ -80,9 +80,7 @@ public class ImageWallpaper extends WallpaperService {
 
         //noinspection PointlessBooleanExpression,ConstantConditions
         if (FIXED_SIZED_SURFACE && USE_OPENGL) {
-            if (!isEmulator()) {
-                mIsHwAccelerated = ActivityManager.isHighEndGfx();
-            }
+            mIsHwAccelerated = ActivityManager.isHighEndGfx();
         }
     }
 
@@ -91,10 +89,6 @@ public class ImageWallpaper extends WallpaperService {
         if (mEngine != null) {
             mEngine.trimMemory(level);
         }
-    }
-
-    private static boolean isEmulator() {
-        return "1".equals(SystemProperties.get(PROPERTY_KERNEL_QEMU, "0"));
     }
 
     @Override
