@@ -196,6 +196,7 @@ public class Typeface {
 
                 FontFamily fontFamily = new FontFamily();
                 if (fontFamily.addFontFromAsset(mgr, path)) {
+                    fontFamily.freeze();
                     FontFamily[] families = { fontFamily };
                     typeface = createFromFamiliesWithDefault(families);
                     sDynamicTypefaceCache.put(key, typeface);
@@ -245,6 +246,7 @@ public class Typeface {
         if (sFallbackFonts != null) {
             FontFamily fontFamily = new FontFamily();
             if (fontFamily.addFont(path, 0 /* ttcIndex */)) {
+                fontFamily.freeze();
                 FontFamily[] families = { fontFamily };
                 return createFromFamiliesWithDefault(families);
             }
@@ -315,6 +317,7 @@ public class Typeface {
                 Log.e(TAG, "Error creating font " + font.fontName + "#" + font.ttcIndex);
             }
         }
+        fontFamily.freeze();
         return fontFamily;
     }
 
