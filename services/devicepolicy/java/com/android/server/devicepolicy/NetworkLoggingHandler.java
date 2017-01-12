@@ -17,16 +17,11 @@
 package com.android.server.devicepolicy;
 
 import android.app.admin.DeviceAdminReceiver;
-import android.app.admin.ConnectEvent;
-import android.app.admin.DnsEvent;
 import android.app.admin.NetworkEvent;
-import android.net.IIpConnectivityMetrics;
-import android.net.INetdEventCallback;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -44,10 +39,9 @@ final class NetworkLoggingHandler extends Handler {
 
     static final String NETWORK_EVENT_KEY = "network_event";
 
-    // est. ~128kB of memory usage per full batch TODO(mkarpinski): fine tune based on testing data
     // If this value changes, update DevicePolicyManager#retrieveNetworkLogs() javadoc
     private static final int MAX_EVENTS_PER_BATCH = 1200;
-    static final long BATCH_FINALIZATION_TIMEOUT_MS = TimeUnit.MINUTES.toMillis(90);
+    private static final long BATCH_FINALIZATION_TIMEOUT_MS = TimeUnit.MINUTES.toMillis(90);
 
     static final int LOG_NETWORK_EVENT_MSG = 1;
     static final int FINALIZE_BATCH_MSG = 2;
@@ -78,31 +72,32 @@ final class NetworkLoggingHandler extends Handler {
                 if (networkEvent != null) {
                     mNetworkEvents.add(networkEvent);
                     if (mNetworkEvents.size() >= MAX_EVENTS_PER_BATCH) {
-                        finalizeBatchAndNotifyDeviceOwner();
+                        finalizeBatchAndNotifyDeviceOwnerIfNotEmpty();
                     }
                 }
                 break;
             }
             case FINALIZE_BATCH_MSG: {
-                finalizeBatchAndNotifyDeviceOwner();
+                finalizeBatchAndNotifyDeviceOwnerIfNotEmpty();
                 break;
             }
         }
     }
 
-    void scheduleBatchFinalization(long delay) {
+    void scheduleBatchFinalization() {
         removeMessages(FINALIZE_BATCH_MSG);
-        sendMessageDelayed(obtainMessage(FINALIZE_BATCH_MSG), delay);
+        sendMessageDelayed(obtainMessage(FINALIZE_BATCH_MSG), BATCH_FINALIZATION_TIMEOUT_MS);
+        Log.d(TAG, "Scheduled new batch finalization " + BATCH_FINALIZATION_TIMEOUT_MS
+                + "ms from now.");
     }
 
-    private synchronized void finalizeBatchAndNotifyDeviceOwner() {
-        mFullBatch = mNetworkEvents;
-        // start a new batch from scratch
-        mNetworkEvents = new ArrayList<NetworkEvent>();
-        scheduleBatchFinalization(BATCH_FINALIZATION_TIMEOUT_MS);
-        // notify DO that there's a new non-empty batch waiting
-        if (mFullBatch.size() > 0) {
+    private synchronized void finalizeBatchAndNotifyDeviceOwnerIfNotEmpty() {
+        if (mNetworkEvents.size() > 0) {
+            // finalize the batch and start a new one from scratch
+            mFullBatch = mNetworkEvents;
             mCurrentFullBatchToken++;
+            mNetworkEvents = new ArrayList<NetworkEvent>();
+            // notify DO that there's a new non-empty batch waiting
             Bundle extras = new Bundle();
             extras.putLong(DeviceAdminReceiver.EXTRA_NETWORK_LOGS_TOKEN, mCurrentFullBatchToken);
             extras.putInt(DeviceAdminReceiver.EXTRA_NETWORK_LOGS_COUNT, mFullBatch.size());
@@ -110,8 +105,14 @@ final class NetworkLoggingHandler extends Handler {
                     + mCurrentFullBatchToken);
             mDpm.sendDeviceOwnerCommand(DeviceAdminReceiver.ACTION_NETWORK_LOGS_AVAILABLE, extras);
         } else {
-            mFullBatch = null;
+            // don't notify the DO, since there are no events; DPC can still retrieve
+            // the last full batch
+            Log.d(TAG, "Was about to finalize the batch, but there were no events to send to"
+                    + " the DPC, the batchToken of last available batch: "
+                    + mCurrentFullBatchToken);
         }
+        // regardless of whether the batch was non-empty schedule a new finalization after timeout
+        scheduleBatchFinalization();
     }
 
     synchronized List<NetworkEvent> retrieveFullLogBatch(long batchToken) {

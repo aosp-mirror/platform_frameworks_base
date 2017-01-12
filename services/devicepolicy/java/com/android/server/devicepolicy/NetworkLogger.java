@@ -23,7 +23,6 @@ import android.content.pm.PackageManagerInternal;
 import android.net.IIpConnectivityMetrics;
 import android.net.INetdEventCallback;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
@@ -115,8 +114,7 @@ final class NetworkLogger {
                 mHandlerThread.start();
                 mNetworkLoggingHandler = new NetworkLoggingHandler(mHandlerThread.getLooper(),
                         mDpm);
-                mNetworkLoggingHandler.scheduleBatchFinalization(
-                        NetworkLoggingHandler.BATCH_FINALIZATION_TIMEOUT_MS);
+                mNetworkLoggingHandler.scheduleBatchFinalization();
                 mIsLoggingEnabled.set(true);
                 return true;
             } else {
