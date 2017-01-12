@@ -908,17 +908,24 @@ public abstract class Layout {
      * the paragraph's primary direction.
      */
     public float getPrimaryHorizontal(int offset) {
-        return getPrimaryHorizontal(offset, false /* not clamped */);
+        return getPrimaryHorizontal(offset, false /* not clamped */,
+                true /* getNewLineStartPosOnLineBreak */);
     }
 
     /**
      * Get the primary horizontal position for the specified text offset, but
      * optionally clamp it so that it doesn't exceed the width of the layout.
+     *
+     * @param offset the offset to get horizontal position
+     * @param clamped whether to clamp the position by using the width of this layout.
+     * @param getNewLineStartPosOnLineBreak whether to get the start position of new line when the
+     * offset is at automatic line break.
      * @hide
      */
-    public float getPrimaryHorizontal(int offset, boolean clamped) {
+    public float getPrimaryHorizontal(int offset, boolean clamped,
+            boolean getNewLineStartPosOnLineBreak) {
         boolean trailing = primaryIsTrailingPrevious(offset);
-        return getHorizontal(offset, trailing, clamped);
+        return getHorizontal(offset, trailing, clamped, getNewLineStartPosOnLineBreak);
     }
 
     /**
@@ -927,26 +934,37 @@ public abstract class Layout {
      * the direction other than the paragraph's primary direction.
      */
     public float getSecondaryHorizontal(int offset) {
-        return getSecondaryHorizontal(offset, false /* not clamped */);
+        return getSecondaryHorizontal(offset, false /* not clamped */,
+                true /* getNewLineStartPosOnLineBreak */);
     }
 
     /**
      * Get the secondary horizontal position for the specified text offset, but
      * optionally clamp it so that it doesn't exceed the width of the layout.
+     *
+     * @param offset the offset to get horizontal position
+     * @param clamped whether to clamp the position by using the width of this layout.
+     * @param getNewLineStartPosOnLineBreak whether to get the start position of new line when the
+     * offset is at automatic line break.
      * @hide
      */
-    public float getSecondaryHorizontal(int offset, boolean clamped) {
+    public float getSecondaryHorizontal(int offset, boolean clamped,
+            boolean getNewLineStartPosOnLineBreak) {
         boolean trailing = primaryIsTrailingPrevious(offset);
-        return getHorizontal(offset, !trailing, clamped);
+        return getHorizontal(offset, !trailing, clamped, getNewLineStartPosOnLineBreak);
     }
 
-    private float getHorizontal(int offset, boolean primary) {
-        return primary ? getPrimaryHorizontal(offset) : getSecondaryHorizontal(offset);
+    private float getHorizontal(int offset, boolean primary,
+            boolean getNewLineStartPosOnLineBreak) {
+        return primary ? getPrimaryHorizontal(offset, false /* not clamped */,
+                getNewLineStartPosOnLineBreak)
+                : getSecondaryHorizontal(offset, false /* not clamped */,
+                        getNewLineStartPosOnLineBreak);
     }
 
-    private float getHorizontal(int offset, boolean trailing, boolean clamped) {
-        int line = getLineForOffset(offset);
-
+    private float getHorizontal(int offset, boolean trailing, boolean clamped,
+            boolean getNewLineStartPosOnLineBreak) {
+        final int line = getLineForOffset(offset, getNewLineStartPosOnLineBreak);
         return getHorizontal(offset, trailing, line, clamped);
     }
 
@@ -1150,6 +1168,10 @@ public abstract class Layout {
      * beyond the end of the text, you get the last line.
      */
     public int getLineForOffset(int offset) {
+        return getLineForOffset(offset, true);
+    }
+
+    private int getLineForOffset(int offset, boolean getNewLineOnLineBreak) {
         int high = getLineCount(), low = -1, guess;
 
         while (high - low > 1) {
@@ -1161,10 +1183,15 @@ public abstract class Layout {
                 low = guess;
         }
 
-        if (low < 0)
+        if (low < 0) {
             return 0;
-        else
+        } else {
+            if (!getNewLineOnLineBreak && low > 0 && getLineStart(low) == offset
+                    && mText.charAt(offset - 1) != '\n') {
+                return low - 1;
+            }
             return low;
+        }
     }
 
     /**
@@ -1198,14 +1225,14 @@ public abstract class Layout {
                 false, null);
 
         final int max;
-        if (line == getLineCount() - 1) {
-            max = lineEndOffset;
-        } else {
+        if (line != getLineCount() - 1 && mText.charAt(lineEndOffset - 1) == '\n') {
             max = tl.getOffsetToLeftRightOf(lineEndOffset - lineStartOffset,
                     !isRtlCharAt(lineEndOffset - 1)) + lineStartOffset;
+        } else {
+            max = lineEndOffset;
         }
         int best = lineStartOffset;
-        float bestdist = Math.abs(getHorizontal(best, primary) - horiz);
+        float bestdist = Math.abs(getHorizontal(best, primary, true) - horiz);
 
         for (int i = 0; i < dirs.mDirections.length; i += 2) {
             int here = lineStartOffset + dirs.mDirections[i];
@@ -1221,10 +1248,13 @@ public abstract class Layout {
                 guess = (high + low) / 2;
                 int adguess = getOffsetAtStartOf(guess);
 
-                if (getHorizontal(adguess, primary) * swap >= horiz * swap)
+                if (getHorizontal(adguess, primary,
+                        adguess == lineStartOffset || adguess != lineEndOffset) * swap
+                                >= horiz * swap) {
                     high = guess;
-                else
+                } else {
                     low = guess;
+                }
             }
 
             if (low < here + 1)
@@ -1234,9 +1264,11 @@ public abstract class Layout {
                 int aft = tl.getOffsetToLeftRightOf(low - lineStartOffset, isRtl) + lineStartOffset;
                 low = tl.getOffsetToLeftRightOf(aft - lineStartOffset, !isRtl) + lineStartOffset;
                 if (low >= here && low < there) {
-                    float dist = Math.abs(getHorizontal(low, primary) - horiz);
+                    float dist = Math.abs(getHorizontal(low, primary,
+                            low == lineStartOffset || low != lineEndOffset) - horiz);
                     if (aft < there) {
-                        float other = Math.abs(getHorizontal(aft, primary) - horiz);
+                        float other = Math.abs(getHorizontal(aft, primary,
+                                aft == lineStartOffset || aft != lineEndOffset) - horiz);
 
                         if (other < dist) {
                             dist = other;
@@ -1251,7 +1283,8 @@ public abstract class Layout {
                 }
             }
 
-            float dist = Math.abs(getHorizontal(here, primary) - horiz);
+            float dist = Math.abs(getHorizontal(here, primary,
+                    here == lineStartOffset || here != lineEndOffset) - horiz);
 
             if (dist < bestdist) {
                 bestdist = dist;
@@ -1259,10 +1292,10 @@ public abstract class Layout {
             }
         }
 
-        float dist = Math.abs(getHorizontal(max, primary) - horiz);
+        float dist = Math.abs(getHorizontal(max, primary,
+                max == lineStartOffset || max != lineEndOffset) - horiz);
 
         if (dist <= bestdist) {
-            bestdist = dist;
             best = max;
         }
 
@@ -1459,8 +1492,9 @@ public abstract class Layout {
         int bottom = getLineTop(line+1);
 
         boolean clamped = shouldClampCursor(line);
-        float h1 = getPrimaryHorizontal(point, clamped) - 0.5f;
-        float h2 = isLevelBoundary(point) ? getSecondaryHorizontal(point, clamped) - 0.5f : h1;
+        float h1 = getPrimaryHorizontal(point, clamped, true) - 0.5f;
+        float h2 = isLevelBoundary(point)
+                ? getSecondaryHorizontal(point, clamped, true) - 0.5f : h1;
 
         int caps = TextKeyListener.getMetaState(editingBuffer, TextKeyListener.META_SHIFT_ON) |
                    TextKeyListener.getMetaState(editingBuffer, TextKeyListener.META_SELECTING);
@@ -1577,8 +1611,7 @@ public abstract class Layout {
         }
 
         int startline = getLineForOffset(start);
-        int endline = getLineForOffset(end);
-
+        int endline = getLineForOffset(end, false);
         int top = getLineTop(startline);
         int bottom = getLineBottom(endline);
 
