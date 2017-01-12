@@ -35,7 +35,5 @@ oneway interface INotificationListener
 
     // rankers only
     void onNotificationEnqueued(in IStatusBarNotificationHolder notificationHolder, int importance, boolean user);
-    void onNotificationVisibilityChanged(String key, long time, boolean visible);
-    void onNotificationClick(String key, long time);
-    void onNotificationActionClick(String key, long time, int actionIndex);
+    void onNotificationSnoozedUntilContext(in IStatusBarNotificationHolder notificationHolder, String snoozeCriterionId);
 }

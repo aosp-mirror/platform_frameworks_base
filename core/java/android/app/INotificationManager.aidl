@@ -70,7 +70,7 @@ interface INotificationManager
     void cancelNotificationFromListener(in INotificationListener token, String pkg, String tag, int id);
     void cancelNotificationsFromListener(in INotificationListener token, in String[] keys);
 
-
+    void snoozeNotificationUntilContextFromListener(in INotificationListener token, String key, String snoozeCriterionId);
     void snoozeNotificationUntilFromListener(in INotificationListener token, String key, long until);
     void snoozeNotificationFromListener(in INotificationListener token, String key);
     void unsnoozeNotificationFromListener(in INotificationListener token, String key);

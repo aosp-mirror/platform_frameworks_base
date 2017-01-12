@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
@@ -68,6 +69,8 @@ public class SnoozeHelper {
             mSnoozedNotifications = new ArrayMap<>();
     // notification key : package.
     private ArrayMap<String, String> mPackages = new ArrayMap<>();
+    // key : userId
+    private ArrayMap<String, Integer> mUsers = new ArrayMap<>();
     private Callback mCallback;
 
     public SnoozeHelper(Context context, Callback callback,
@@ -98,15 +101,16 @@ public class SnoozeHelper {
     /**
      * Snoozes a notification and schedules an alarm to repost at that time.
      */
-    protected void snooze(NotificationRecord record, int userId, long until) {
-        snooze(record, userId);
-        scheduleRepost(record.sbn.getPackageName(), record.getKey(), userId, until);
+    protected void snooze(NotificationRecord record, long until) {
+        snooze(record);
+        scheduleRepost(record.sbn.getPackageName(), record.getKey(), record.getUserId(), until);
     }
 
     /**
      * Records a snoozed notification.
      */
-    protected void snooze(NotificationRecord record, int userId) {
+    protected void snooze(NotificationRecord record) {
+        int userId = record.getUser().getIdentifier();
         if (DEBUG) {
             Slog.d(TAG, "Snoozing " + record.getKey());
         }
@@ -123,6 +127,7 @@ public class SnoozeHelper {
         records.put(record.sbn.getPackageName(), pkgRecords);
         mSnoozedNotifications.put(userId, records);
         mPackages.put(record.getKey(), record.sbn.getPackageName());
+        mUsers.put(record.getKey(), userId);
     }
 
     protected boolean cancel(int userId, String pkg, String tag, int id) {
@@ -142,6 +147,7 @@ public class SnoozeHelper {
                     recordsForPkg.remove(key);
                     cancelAlarm(userId, pkg, key);
                     mPackages.remove(key);
+                    mUsers.remove(key);
                     return true;
                 }
             }
@@ -165,8 +171,10 @@ public class SnoozeHelper {
                     if (records != null) {
                         int P = records.size();
                         for (int k = 0; k < P; k++) {
-                            cancelAlarm(userId, snoozedPkgs.keyAt(j), records.keyAt(k));
-                            mPackages.remove(records.keyAt(k));
+                            final String key = records.keyAt(k);
+                            cancelAlarm(userId, snoozedPkgs.keyAt(j), key);
+                            mPackages.remove(key);
+                            mUsers.remove(key);
                         }
                     }
                 }
@@ -183,8 +191,10 @@ public class SnoozeHelper {
                         mSnoozedNotifications.get(userId).remove(pkg);
                 int N = records.size();
                 for (int i = 0; i < N; i++) {
-                    cancelAlarm(userId, pkg, records.keyAt(i));
-                    mPackages.remove(records.keyAt(i));
+                    final String key = records.keyAt(i);
+                    cancelAlarm(userId, pkg, key);
+                    mPackages.remove(key);
+                    mUsers.remove(key);
                 }
                 return true;
             }
@@ -193,8 +203,13 @@ public class SnoozeHelper {
     }
 
     private void cancelAlarm(int userId, String pkg, String key) {
-        final PendingIntent pi = createPendingIntent(pkg, key, userId);
-        mAm.cancel(pi);
+        long identity = Binder.clearCallingIdentity();
+        try {
+            final PendingIntent pi = createPendingIntent(pkg, key, userId);
+            mAm.cancel(pi);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     /**
@@ -211,6 +226,13 @@ public class SnoozeHelper {
             return;
         }
         pkgRecords.put(record.getKey(), record);
+    }
+
+    protected void repost(String key) {
+        Integer userId = mUsers.get(key);
+        if (userId != null) {
+            repost(key, userId);
+        }
     }
 
     protected void repost(String key, int userId) {
@@ -243,10 +265,15 @@ public class SnoozeHelper {
     }
 
     private void scheduleRepost(String pkg, String key, int userId, long time) {
-        final PendingIntent pi = createPendingIntent(pkg, key, userId);
-        mAm.cancel(pi);
-        if (DEBUG) Slog.d(TAG, "Scheduling evaluate for " + new Date(time));
-        mAm.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pi);
+        long identity = Binder.clearCallingIdentity();
+        try {
+            final PendingIntent pi = createPendingIntent(pkg, key, userId);
+            mAm.cancel(pi);
+            if (DEBUG) Slog.d(TAG, "Scheduling evaluate for " + new Date(time));
+            mAm.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pi);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     public void dump(PrintWriter pw, NotificationManagerService.DumpFilter filter) {

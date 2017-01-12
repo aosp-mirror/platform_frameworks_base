@@ -68,7 +68,7 @@ public class SnoozeHelperTest {
     @Test
     public void testSnoozeForTime() throws Exception {
         NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
-        mSnoozeHelper.snooze(r , UserHandle.USER_SYSTEM, 1000);
+        mSnoozeHelper.snooze(r, 1000);
         verify(mAm, times(1)).setExactAndAllowWhileIdle(
                 anyInt(), eq((long) 1000), any(PendingIntent.class));
         assertTrue(mSnoozeHelper.isSnoozed(
@@ -78,7 +78,7 @@ public class SnoozeHelperTest {
     @Test
     public void testSnooze() throws Exception {
         NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
-        mSnoozeHelper.snooze(r , UserHandle.USER_SYSTEM);
+        mSnoozeHelper.snooze(r);
         verify(mAm, never()).setExactAndAllowWhileIdle(
                 anyInt(), anyLong(), any(PendingIntent.class));
         assertTrue(mSnoozeHelper.isSnoozed(
@@ -89,8 +89,8 @@ public class SnoozeHelperTest {
     public void testCancelByApp() throws Exception {
         NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
         NotificationRecord r2 = getNotificationRecord("pkg", 2, "two", UserHandle.SYSTEM);
-        mSnoozeHelper.snooze(r , UserHandle.USER_SYSTEM, 1000);
-        mSnoozeHelper.snooze(r2 , UserHandle.USER_SYSTEM, 1000);
+        mSnoozeHelper.snooze(r, 1000);
+        mSnoozeHelper.snooze(r2 , 1000);
         assertTrue(mSnoozeHelper.isSnoozed(
                 UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
         assertTrue(mSnoozeHelper.isSnoozed(
@@ -110,9 +110,9 @@ public class SnoozeHelperTest {
         NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
         NotificationRecord r2 = getNotificationRecord("pkg", 2, "two", UserHandle.SYSTEM);
         NotificationRecord r3 = getNotificationRecord("pkg", 3, "three", UserHandle.ALL);
-        mSnoozeHelper.snooze(r , UserHandle.USER_SYSTEM, 1000);
-        mSnoozeHelper.snooze(r2 , UserHandle.USER_SYSTEM, 1000);
-        mSnoozeHelper.snooze(r3 , UserHandle.USER_ALL, 1000);
+        mSnoozeHelper.snooze(r,  1000);
+        mSnoozeHelper.snooze(r2, 1000);
+        mSnoozeHelper.snooze(r3, 1000);
         assertTrue(mSnoozeHelper.isSnoozed(
                 UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
         assertTrue(mSnoozeHelper.isSnoozed(
@@ -136,9 +136,9 @@ public class SnoozeHelperTest {
         NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
         NotificationRecord r2 = getNotificationRecord("pkg", 2, "two", UserHandle.SYSTEM);
         NotificationRecord r3 = getNotificationRecord("pkg2", 3, "three", UserHandle.SYSTEM);
-        mSnoozeHelper.snooze(r , UserHandle.USER_SYSTEM, 1000);
-        mSnoozeHelper.snooze(r2 , UserHandle.USER_SYSTEM, 1000);
-        mSnoozeHelper.snooze(r3 , UserHandle.USER_SYSTEM, 1000);
+        mSnoozeHelper.snooze(r, 1000);
+        mSnoozeHelper.snooze(r2, 1000);
+        mSnoozeHelper.snooze(r3, 1000);
         assertTrue(mSnoozeHelper.isSnoozed(
                 UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
         assertTrue(mSnoozeHelper.isSnoozed(
@@ -160,17 +160,27 @@ public class SnoozeHelperTest {
     @Test
     public void testRepost() throws Exception {
         NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
-        mSnoozeHelper.snooze(r , UserHandle.USER_SYSTEM, 1000);
+        mSnoozeHelper.snooze(r, 1000);
         NotificationRecord r2 = getNotificationRecord("pkg", 2, "one", UserHandle.ALL);
-        mSnoozeHelper.snooze(r2 , UserHandle.USER_ALL, 1000);
+        mSnoozeHelper.snooze(r2, 1000);
         mSnoozeHelper.repost(r.getKey(), UserHandle.USER_SYSTEM);
+        verify(mCallback, times(1)).repost(UserHandle.USER_SYSTEM, r);
+    }
+
+    @Test
+    public void testRepost_noUser() throws Exception {
+        NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
+        mSnoozeHelper.snooze(r, 1000);
+        NotificationRecord r2 = getNotificationRecord("pkg", 2, "one", UserHandle.ALL);
+        mSnoozeHelper.snooze(r2, 1000);
+        mSnoozeHelper.repost(r.getKey());
         verify(mCallback, times(1)).repost(UserHandle.USER_SYSTEM, r);
     }
 
     @Test
     public void testUpdate() throws Exception {
         NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
-        mSnoozeHelper.snooze(r , UserHandle.USER_SYSTEM, 1000);
+        mSnoozeHelper.snooze(r , 1000);
         r.getNotification().category = "NEW CATEGORY";
 
         mSnoozeHelper.update(UserHandle.USER_SYSTEM, r);

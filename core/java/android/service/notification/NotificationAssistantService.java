@@ -63,6 +63,17 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     }
 
     /**
+     * A notification was snoozed until a context. For use with
+     * {@link Adjustment#KEY_SNOOZE_CRITERIA}. When the device reaches the given context, the
+     * assistant should restore the notification with {@link #unsnoozeNotification(String)}.
+     *
+     * @param sbn the notification to snooze
+     * @param snoozeCriterionId the {@link SnoozeCriterion#getId()} representing a device context.
+     */
+    abstract public void onNotificationSnoozedUntilContext(StatusBarNotification sbn,
+            String snoozeCriterionId);
+
+    /**
      * A notification was posted by an app. Called before alert.
      *
      * @param sbn the new notification
@@ -190,10 +201,30 @@ public abstract class NotificationAssistantService extends NotificationListenerS
             mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATION_ENQUEUED,
                     args).sendToTarget();
         }
+
+        @Override
+        public void onNotificationSnoozedUntilContext(
+                IStatusBarNotificationHolder sbnHolder, String snoozeCriterionId)
+                throws RemoteException {
+            StatusBarNotification sbn;
+            try {
+                sbn = sbnHolder.get();
+            } catch (RemoteException e) {
+                Log.w(TAG, "onNotificationSnoozed: Error receiving StatusBarNotification", e);
+                return;
+            }
+
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = sbn;
+            args.arg2 = snoozeCriterionId;
+            mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATION_SNOOZED,
+                    args).sendToTarget();
+        }
     }
 
     private final class MyHandler extends Handler {
         public static final int MSG_ON_NOTIFICATION_ENQUEUED = 1;
+        public static final int MSG_ON_NOTIFICATION_SNOOZED = 2;
 
         public MyHandler(Looper looper) {
             super(looper, null, false);
@@ -219,7 +250,16 @@ public abstract class NotificationAssistantService extends NotificationListenerS
                             throw ex.rethrowFromSystemServer();
                         }
                     }
-                } break;
+                    break;
+                }
+                case MSG_ON_NOTIFICATION_SNOOZED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    StatusBarNotification sbn = (StatusBarNotification) args.arg1;
+                    String snoozeCriterionId = (String) args.arg2;
+                    args.recycle();
+                    onNotificationSnoozedUntilContext(sbn, snoozeCriterionId);
+                    break;
+                }
             }
         }
     }
