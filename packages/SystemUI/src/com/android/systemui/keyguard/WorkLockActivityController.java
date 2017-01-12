@@ -48,7 +48,7 @@ public class WorkLockActivityController {
 
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchTaskId(taskId);
-        options.setTaskOverlay(true);
+        options.setTaskOverlay(true, false /* canResume */);
         mContext.startActivityAsUser(intent, options.toBundle(), UserHandle.CURRENT);
     }
 

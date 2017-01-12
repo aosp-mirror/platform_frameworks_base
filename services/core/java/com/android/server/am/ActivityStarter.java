@@ -1236,16 +1236,19 @@ class ActivityStarter {
             mDoResume = false;
         }
 
-        if (mOptions != null && mOptions.getLaunchTaskId() != -1 && mOptions.getTaskOverlay()) {
+        if (mOptions != null && mOptions.getLaunchTaskId() != -1
+                && mOptions.getTaskOverlay()) {
             r.mTaskOverlay = true;
-            final TaskRecord task = mSupervisor.anyTaskForIdLocked(mOptions.getLaunchTaskId());
-            final ActivityRecord top = task != null ? task.getTopActivity() : null;
-            if (top != null && top.state != RESUMED) {
+            if (!mOptions.canTaskOverlayResume()) {
+                final TaskRecord task = mSupervisor.anyTaskForIdLocked(mOptions.getLaunchTaskId());
+                final ActivityRecord top = task != null ? task.getTopActivity() : null;
+                if (top != null && top.state != RESUMED) {
 
-                // The caller specifies that we'd like to be avoided to be moved to the front, so be
-                // it!
-                mDoResume = false;
-                mAvoidMoveToFront = true;
+                    // The caller specifies that we'd like to be avoided to be moved to the front,
+                    // so be it!
+                    mDoResume = false;
+                    mAvoidMoveToFront = true;
+                }
             }
         }
 
