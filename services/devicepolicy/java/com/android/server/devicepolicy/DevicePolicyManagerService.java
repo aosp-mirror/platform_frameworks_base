@@ -2390,6 +2390,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.endTag(null, "failed-password-attempts");
             }
 
+            // Don't save metrics for FBE devices
+            final PasswordMetrics metrics = policy.mActivePasswordMetrics;
+            if (!mInjector.storageManagerIsFileBasedEncryptionEnabled() && !metrics.isDefault()) {
+                out.startTag(null, "active-password");
+                out.attribute(null, "quality", Integer.toString(metrics.quality));
+                out.attribute(null, "length", Integer.toString(metrics.length));
+                out.attribute(null, "uppercase", Integer.toString(metrics.upperCase));
+                out.attribute(null, "lowercase", Integer.toString(metrics.lowerCase));
+                out.attribute(null, "letters", Integer.toString(metrics.letters));
+                out.attribute(null, "numeric", Integer.toString(metrics.numeric));
+                out.attribute(null, "symbols", Integer.toString(metrics.symbols));
+                out.attribute(null, "nonletter", Integer.toString(metrics.nonLetter));
+                out.endTag(null, "active-password");
+            }
+
             for (int i = 0; i < policy.mAcceptedCaCertificates.size(); i++) {
                 out.startTag(null, TAG_ACCEPTED_CA_CERTIFICATES);
                 out.attribute(null, ATTR_NAME, policy.mAcceptedCaCertificates.valueAt(i));
@@ -2603,7 +2618,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 } else if (TAG_INITIALIZATION_BUNDLE.equals(tag)) {
                     policy.mInitBundle = PersistableBundle.restoreFromXml(parser);
                 } else if ("active-password".equals(tag)) {
-                    needsRewrite = true;
+                    if (mInjector.storageManagerIsFileBasedEncryptionEnabled()) {
+                        // Remove this from FBE devices
+                        needsRewrite = true;
+                    } else {
+                        final PasswordMetrics m = policy.mActivePasswordMetrics;
+                        m.quality = Integer.parseInt(parser.getAttributeValue(null, "quality"));
+                        m.length = Integer.parseInt(parser.getAttributeValue(null, "length"));
+                        m.upperCase = Integer.parseInt(parser.getAttributeValue(null, "uppercase"));
+                        m.lowerCase = Integer.parseInt(parser.getAttributeValue(null, "lowercase"));
+                        m.letters = Integer.parseInt(parser.getAttributeValue(null, "letters"));
+                        m.numeric = Integer.parseInt(parser.getAttributeValue(null, "numeric"));
+                        m.symbols = Integer.parseInt(parser.getAttributeValue(null, "symbols"));
+                        m.nonLetter = Integer.parseInt(parser.getAttributeValue(null, "nonletter"));
+                    }
                 } else {
                     Slog.w(LOG_TAG, "Unknown tag: " + tag);
                     XmlUtils.skipCurrentTag(parser);
