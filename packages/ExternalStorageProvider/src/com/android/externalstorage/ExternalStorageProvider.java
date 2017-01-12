@@ -687,7 +687,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
             parent = mRoots.get(rootId).path;
         }
 
-        final LinkedList<File> pending = new LinkedList<File>();
+        final LinkedList<File> pending = new LinkedList<>();
         pending.add(parent);
         while (!pending.isEmpty() && result.getCount() < 24) {
             final File file = pending.removeFirst();

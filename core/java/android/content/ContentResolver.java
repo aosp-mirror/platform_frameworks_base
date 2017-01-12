@@ -205,21 +205,111 @@ public abstract class ContentResolver {
      * Key for an SQL style selection string that may be present in the query Bundle argument
      * passed to {@link ContentProvider#query(Uri, String[], Bundle, CancellationSignal)}
      * when called by a legacy client.
+     *
+     * <p>Clients should never include user supplied values directly in the selection string,
+     * as this presents an avenue for SQL injection attacks. In lieu of this, a client
+     * should use standard placeholder notation to represent values in a selection string,
+     * then supply a corresponding value in {@value #QUERY_ARG_SQL_SELECTION_ARGS}.
+     *
+     * <p><b>Clients targeting Android O or higher are strongly encourage to use structured
+     * query arguments in lieu of opaque SQL query clauses.</b> See:
+     * {@link #QUERY_ARG_SORT_COLUMNS}, {@link #QUERY_ARG_SORT_DIRECTION}, and
+     * {@link #QUERY_ARG_SORT_COLLATION}.
      */
-    public static final String QUERY_ARG_SELECTION = "android:query-selection";
+    public static final String QUERY_ARG_SQL_SELECTION = "android:query-sql-selection";
 
     /**
-     * Key for sql selection string arguments list.
-     * @see #QUERY_ARG_SELECTION
+     * Key for SQL selection string arguments list.
+     *
+     * <p>Clients should never include user supplied values directly in the selection string,
+     * as this presents an avenue for SQL injection attacks. In lieu of this, a client
+     * should use standard placeholder notation to represent values in a selection string,
+     * then supply a corresponding value in {@value #QUERY_ARG_SQL_SELECTION_ARGS}.
+     *
+     * <p><b>Clients targeting Android O or higher are strongly encourage to use structured
+     * query arguments in lieu of opaque SQL query clauses.</b> See:
+     * {@link #QUERY_ARG_SORT_COLUMNS}, {@link #QUERY_ARG_SORT_DIRECTION}, and
+     * {@link #QUERY_ARG_SORT_COLLATION}.
      */
-    public static final String QUERY_ARG_SELECTION_ARGS = "android:query-selection-args";
+    public static final String QUERY_ARG_SQL_SELECTION_ARGS = "android:query-sql-selection-args";
 
     /**
      * Key for an SQL style sort string that may be present in the query Bundle argument
      * passed to {@link ContentProvider#query(Uri, String[], Bundle, CancellationSignal)}
      * when called by a legacy client.
+     *
+     * <p><b>Clients targeting Android O or higher are strongly encourage to use structured
+     * query arguments in lieu of opaque SQL query clauses.</b> See:
+     * {@link #QUERY_ARG_SORT_COLUMNS}, {@link #QUERY_ARG_SORT_DIRECTION}, and
+     * {@link #QUERY_ARG_SORT_COLLATION}.
      */
-    public static final String QUERY_ARG_SORT_ORDER = "android:query-sort-order";
+    public static final String QUERY_ARG_SQL_SORT_ORDER = "android:query-sql-sort-order";
+
+    /**
+     * Identifies the list columns against which to sort results.
+     *
+     * <p>Columns present in this list must also be included in the projection
+     * supplied to {@link ContentResolver#query(Uri, String[], Bundle, CancellationSignal)}.
+     *
+     * <p>Apps targeting {@link android.os.Build.VERSION_CODES#O} or higher are strongly
+     * encouraged to include an entry in Cursor extras under this same key as an indication
+     * to the client that column sorting was honored.
+     *
+     * <p>QUERY_SORT* values are exclusive from QUERY_ARG_SQL* arguments.
+     * When any QUERY_SORT arguments are present, any QUERY_ARG_SQL* values will be ignored.
+     */
+    public static final String QUERY_ARG_SORT_COLUMNS = "android:query-sort-columns";
+
+    /**
+     * Specifies desired sort order. When unspecified a provider may provide a default
+     * sort direction, or choose to return unsorted results.
+     *
+     * <p>Apps targeting {@link android.os.Build.VERSION_CODES#O} or higher are strongly
+     * encouraged to include an entry in Cursor extras under this same key as an indication
+     * to the client that sort direction was honored.
+     *
+     * @see #QUERY_SORT_DIRECTION_ASCENDING
+     * @see #QUERY_SORT_DIRECTION_DESCENDING
+     */
+    public static final String QUERY_ARG_SORT_DIRECTION = "android:query-sort-direction";
+
+    /**
+     * Allows client to specify a hint to the provider as to which collation
+     * to use when sorting text values.
+     *
+     * <p>Providers may provide their own collators. When selecting a custom collator
+     * the value will be determined by the Provider.
+     *
+     * <p>apps targeting {@link android.os.Build.VERSION_CODES#O} or higher are strongly
+     * encouraged to include an entry in Cursor extras under this same key as an indication
+     * to the client that collation was honored.
+     *
+     * @see #QUERY_COLLATOR_MODE_NOCASE
+     */
+    public static final String QUERY_ARG_SORT_COLLATION = "android:query-sort-collation";
+
+    /** @hide */
+    @IntDef(flag = false, value = {
+            QUERY_SORT_DIRECTION_ASCENDING,
+            QUERY_SORT_DIRECTION_DESCENDING
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SortDirection {}
+    public static final int QUERY_SORT_DIRECTION_ASCENDING = 0;
+    public static final int QUERY_SORT_DIRECTION_DESCENDING = 1;
+
+    /**
+     * @see {@link java.text.Collector} for details on respective collation strength.
+     * @hide
+     */
+    @IntDef(flag = false, value = {
+            java.text.Collator.PRIMARY,
+            java.text.Collator.SECONDARY,
+            java.text.Collator.TERTIARY,
+            java.text.Collator.IDENTICAL
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface QueryCollator {}
 
     /**
      * This is the Android platform's base MIME type for a content: URI
@@ -2685,8 +2775,8 @@ public abstract class ContentResolver {
             EventLogTags.CONTENT_QUERY_SAMPLE,
             uri.toString(),
             projectionBuffer.toString(),
-            queryArgs.getString(QUERY_ARG_SELECTION, ""),
-            queryArgs.getString(QUERY_ARG_SORT_ORDER, ""),
+            queryArgs.getString(QUERY_ARG_SQL_SELECTION, ""),
+            queryArgs.getString(QUERY_ARG_SQL_SORT_ORDER, ""),
             durationMillis,
             blockingPackage != null ? blockingPackage : "",
             samplePercent);
@@ -2815,14 +2905,54 @@ public abstract class ContentResolver {
 
         Bundle queryArgs = new Bundle();
         if (selection != null) {
-            queryArgs.putString(QUERY_ARG_SELECTION, selection);
+            queryArgs.putString(QUERY_ARG_SQL_SELECTION, selection);
         }
         if (selectionArgs != null) {
-            queryArgs.putStringArray(QUERY_ARG_SELECTION_ARGS, selectionArgs);
+            queryArgs.putStringArray(QUERY_ARG_SQL_SELECTION_ARGS, selectionArgs);
         }
         if (sortOrder != null) {
-            queryArgs.putString(QUERY_ARG_SORT_ORDER, sortOrder);
+            queryArgs.putString(QUERY_ARG_SQL_SORT_ORDER, sortOrder);
         }
         return queryArgs;
+    }
+
+    /**
+     * Returns structured sort args formatted as an SQL sort clause.
+     *
+     * Collator clauses are not included as column information is unknown, and
+     * collate clauses should only be included on text fields.
+     *
+     * TODO: Should we explicitly validate that colums are present in the projection?
+     *
+     * @hide
+     */
+    public static String createSqlSortClause(Bundle queryArgs) {
+        String[] columns = queryArgs.getStringArray(QUERY_ARG_SORT_COLUMNS);
+        if (columns == null || columns.length == 0) {
+            throw new IllegalArgumentException("Can't create sort clause without columns.");
+        }
+
+        String query = TextUtils.join(", ", columns);
+
+        switch (queryArgs.getInt(
+                QUERY_ARG_SORT_DIRECTION, Integer.MIN_VALUE)) {
+            case QUERY_SORT_DIRECTION_ASCENDING:
+                query += " ASC";
+                break;
+            case QUERY_SORT_DIRECTION_DESCENDING:
+                query += " DESC";
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported sort direction value."
+                        + " See ContentResolver documentation for details.");
+        }
+
+        // Interpret PRIMARY collation strength as no-case collation.
+        int collation = queryArgs.getInt(
+                ContentResolver.QUERY_ARG_SORT_COLLATION, java.text.Collator.IDENTICAL);
+        if (collation == java.text.Collator.PRIMARY || collation == java.text.Collator.SECONDARY) {
+            query += " COLLATE NOCASE";
+        }
+        return query;
     }
 }

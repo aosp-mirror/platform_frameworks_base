@@ -52,6 +52,7 @@ import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.OperationCanceledException;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.OnCloseListener;
 import android.provider.DocumentsContract.Document;
@@ -416,6 +417,9 @@ public abstract class DocumentsProvider extends ContentProvider {
      * must only return immediate descendants, as additional queries will be
      * issued to recursively explore the tree.
      * <p>
+     * Apps targeting {@link android.os.Build.VERSION_CODES#O} or higher
+     * should override {@link #queryChildDocuments(String, String[], Bundle)}.
+     * <p>
      * If your provider is cloud-based, and you have some data cached or pinned
      * locally, you may return the local data immediately, setting
      * {@link DocumentsContract#EXTRA_LOADING} on the Cursor to indicate that
@@ -450,10 +454,53 @@ public abstract class DocumentsProvider extends ContentProvider {
             String parentDocumentId, String[] projection, String sortOrder)
             throws FileNotFoundException;
 
+    /**
+     * Override this method to return the children documents contained
+     * in the requested directory. This must return immediate descendants only.
+     *
+     * <p>If your provider is cloud-based, and you have data cached
+     * locally, you may return the local data immediately, setting
+     * {@link DocumentsContract#EXTRA_LOADING} on Cursor extras to indicate that
+     * you are still fetching additional data. Then, when the network data is
+     * available, you can send a change notification to trigger a requery and
+     * return the complete contents. To return a Cursor with extras, you need to
+     * extend and override {@link Cursor#getExtras()}.
+     *
+     * <p>To support change notifications, you must
+     * {@link Cursor#setNotificationUri(ContentResolver, Uri)} with a relevant
+     * Uri, such as
+     * {@link DocumentsContract#buildChildDocumentsUri(String, String)}. Then
+     * you can call {@link ContentResolver#notifyChange(Uri,
+     * android.database.ContentObserver, boolean)} with that Uri to send change
+     * notifications.
+     *
+     * @param parentDocumentId the directory to return children for.
+     * @param projection list of {@link Document} columns to put into the
+     *            cursor. If {@code null} all supported columns should be
+     *            included.
+     * @param queryArgs Bundle containing sorting information or other
+     *            argument useful to the provider. If no sorting
+     *            information is available, default sorting
+     *            will be used, which may be unordered. See
+     *            {@link ContentResolver#QUERY_ARG_SORT_COLUMNS} for
+     *            details.
+     *
+     * @see DocumentsContract#EXTRA_LOADING
+     * @see DocumentsContract#EXTRA_INFO
+     * @see DocumentsContract#EXTRA_ERROR
+     */
+    public Cursor queryChildDocuments(
+            String parentDocumentId, @Nullable String[] projection, @Nullable Bundle queryArgs)
+            throws FileNotFoundException {
+
+        return queryChildDocuments(
+                parentDocumentId, projection, getSortClause(queryArgs));
+    }
+
     /** {@hide} */
     @SuppressWarnings("unused")
     public Cursor queryChildDocumentsForManage(
-            String parentDocumentId, String[] projection, String sortOrder)
+            String parentDocumentId, @Nullable String[] projection, @Nullable String sortOrder)
             throws FileNotFoundException {
         throw new UnsupportedOperationException("Manage not supported");
     }
@@ -594,6 +641,22 @@ public abstract class DocumentsProvider extends ContentProvider {
         throw new FileNotFoundException("The requested MIME type is not supported.");
     }
 
+    @Override
+    public final Cursor query(Uri uri, String[] projection, String selection,
+            String[] selectionArgs, String sortOrder) {
+        // As of Android-O, ContentProvider#query (w/ bundle arg) is the primary
+        // transport method. We override that, and don't ever delegate to this method.
+        throw new UnsupportedOperationException("Pre-Android-O query format not supported.");
+    }
+
+    @Override
+    public final Cursor query(Uri uri, String[] projection, String selection,
+            String[] selectionArgs, String sortOrder, CancellationSignal cancellationSignal) {
+        // As of Android-O, ContentProvider#query (w/ bundle arg) is the primary
+        // transport method. We override that, and don't ever delegate to this metohd.
+        throw new UnsupportedOperationException("Pre-Android-O query format not supported.");
+    }
+
     /**
      * Implementation is provided by the parent class. Cannot be overriden.
      *
@@ -604,8 +667,8 @@ public abstract class DocumentsProvider extends ContentProvider {
      * @see #querySearchDocuments(String, String, String[])
      */
     @Override
-    public final Cursor query(Uri uri, String[] projection, String selection,
-            String[] selectionArgs, String sortOrder) {
+    public final Cursor query(
+            Uri uri, String[] projection, Bundle queryArgs, CancellationSignal cancellationSignal) {
         try {
             switch (mMatcher.match(uri)) {
                 case MATCH_ROOTS:
@@ -623,10 +686,13 @@ public abstract class DocumentsProvider extends ContentProvider {
                 case MATCH_CHILDREN_TREE:
                     enforceTree(uri);
                     if (DocumentsContract.isManageMode(uri)) {
+                        // TODO: Update "ForManage" variant to support query args.
                         return queryChildDocumentsForManage(
-                                getDocumentId(uri), projection, sortOrder);
+                                getDocumentId(uri),
+                                projection,
+                                getSortClause(queryArgs));
                     } else {
-                        return queryChildDocuments(getDocumentId(uri), projection, sortOrder);
+                        return queryChildDocuments(getDocumentId(uri), projection, queryArgs);
                     }
                 default:
                     throw new UnsupportedOperationException("Unsupported Uri " + uri);
@@ -635,6 +701,17 @@ public abstract class DocumentsProvider extends ContentProvider {
             Log.w(TAG, "Failed during query", e);
             return null;
         }
+    }
+
+    private static @Nullable String getSortClause(@Nullable Bundle queryArgs) {
+        queryArgs = queryArgs != null ? queryArgs : Bundle.EMPTY;
+        String sortClause = queryArgs.getString(ContentResolver.QUERY_ARG_SQL_SORT_ORDER);
+
+        if (sortClause == null && queryArgs.containsKey(ContentResolver.QUERY_ARG_SORT_COLUMNS)) {
+            sortClause = ContentResolver.createSqlSortClause(queryArgs);
+        }
+
+        return sortClause;
     }
 
     /**
