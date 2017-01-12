@@ -32,7 +32,7 @@ LOCAL_PACKAGE_NAME := FrameworksNotificationTests
 LOCAL_CERTIFICATE := platform
 
 # These are not normally accessible from apps so they must be explicitly included.
-LOCAL_JNI_SHARED_LIBRARIES := libservicestestsjni \
+LOCAL_JNI_SHARED_LIBRARIES := \
     libbacktrace \
     libbase \
     libbinder \
