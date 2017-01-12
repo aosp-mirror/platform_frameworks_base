@@ -22,8 +22,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := bit
 
-# This tool doesn't build on darwin.
-LOCAL_MODULE_HOST_OS := linux
+LOCAL_MODULE_HOST_OS := linux darwin
 
 LOCAL_SRC_FILES := \
     aapt.cpp \
@@ -43,4 +42,3 @@ LOCAL_SHARED_LIBRARIES := \
     libprotobuf-cpp-full
 
 include $(BUILD_HOST_EXECUTABLE)
-
