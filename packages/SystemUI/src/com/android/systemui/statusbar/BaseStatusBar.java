@@ -983,12 +983,12 @@ public abstract class BaseStatusBar extends SystemUI implements
                 // Accessibility feedback
                 v.announceForAccessibility(
                         mContext.getString(R.string.accessibility_notification_dismissed));
-                performRemoveNotification(row.getStatusBarNotification(), false /* removeView */);
+                performRemoveNotification(row.getStatusBarNotification());
             }
         });
     }
 
-    protected void performRemoveNotification(StatusBarNotification n, boolean removeView) {
+    protected void performRemoveNotification(StatusBarNotification n) {
         final String pkg = n.getPackageName();
         final String tag = n.getTag();
         final int id = n.getId();
@@ -998,14 +998,8 @@ public abstract class BaseStatusBar extends SystemUI implements
             if (FORCE_REMOTE_INPUT_HISTORY
                     && mKeysKeptForRemoteInput.contains(n.getKey())) {
                 mKeysKeptForRemoteInput.remove(n.getKey());
-                removeView = true;
             }
-            if (mRemoteInputEntriesToRemoveOnCollapse.remove(mNotificationData.get(n.getKey()))) {
-                removeView = true;
-            }
-            if (removeView) {
-                removeNotification(n.getKey(), null);
-            }
+            removeNotification(n.getKey(), null);
 
         } catch (RemoteException ex) {
             // system process is dead if we're here.
@@ -2004,8 +1998,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                                         Runnable removeRunnable = new Runnable() {
                                             @Override
                                             public void run() {
-                                                performRemoveNotification(parentToCancelFinal,
-                                                        true);
+                                                performRemoveNotification(parentToCancelFinal);
                                             }
                                         };
                                         if (isCollapsing()) {

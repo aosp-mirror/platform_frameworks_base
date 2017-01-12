@@ -1699,12 +1699,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    protected void performRemoveNotification(StatusBarNotification n, boolean removeView) {
+    protected void performRemoveNotification(StatusBarNotification n) {
         Entry entry = mNotificationData.get(n.getKey());
         if (mRemoteInputController.isRemoteInputActive(entry)) {
             mRemoteInputController.removeRemoteInput(entry, null);
         }
-        super.performRemoveNotification(n, removeView);
+        super.performRemoveNotification(n);
     }
 
     @Override
