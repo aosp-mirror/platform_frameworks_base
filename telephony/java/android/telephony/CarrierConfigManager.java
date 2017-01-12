@@ -972,6 +972,13 @@ public class CarrierConfigManager {
     public static final int CDMA_ROAMING_MODE_AFFILIATED = 1;
     /** @hide */
     public static final int CDMA_ROAMING_MODE_ANY = 2;
+    /**
+     * Boolean indicating if support is provided for directly dialing FDN number from FDN list.
+     * If false, this feature is not supported.
+     * @hide
+     */
+    public static final String KEY_SUPPORT_DIRECT_FDN_DIALING_BOOL =
+            "support_direct_fdn_dialing_bool";
 
     /**
      * Report IMEI as device id even if it's a CDMA/LTE phone.
@@ -1312,6 +1319,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CONFIG_WIFI_DISABLE_IN_ECBM, false);
         sDefaults.putBoolean(KEY_CARRIER_NAME_OVERRIDE_BOOL, false);
         sDefaults.putString(KEY_CARRIER_NAME_STRING, "");
+        sDefaults.putBoolean(KEY_SUPPORT_DIRECT_FDN_DIALING_BOOL, false);
 
         // MMS defaults
         sDefaults.putBoolean(KEY_MMS_ALIAS_ENABLED_BOOL, false);
