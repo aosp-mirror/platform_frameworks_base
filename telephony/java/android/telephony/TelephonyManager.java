@@ -36,6 +36,7 @@ import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
@@ -1442,6 +1443,34 @@ public class TelephonyManager {
     public String getNetworkOperatorForPhone(int phoneId) {
         return getTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_OPERATOR_NUMERIC, "");
      }
+
+
+    /**
+     * Returns the network specifier of the subscription ID pinned to the TelephonyManager.
+     *
+     * @see android.net.NetworkRequest.Builder#setNetworkSpecifier(String)
+     * @see #createForSubscriptionId(int)
+     * @see #createForPhoneAccountHandle(PhoneAccountHandle)
+     */
+    public String getNetworkSpecifier() {
+        return String.valueOf(mSubId);
+    }
+
+    /**
+     * Returns the carrier config of the subscription ID pinned to the TelephonyManager.
+     *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE
+     * READ_PHONE_STATE}
+     *
+     * @see CarrierConfigManager#getConfigForSubId(int)
+     * @see #createForSubscriptionId(int)
+     * @see #createForPhoneAccountHandle(PhoneAccountHandle)
+     */
+    public PersistableBundle getCarrierConfig() {
+        CarrierConfigManager carrierConfigManager = mContext
+                .getSystemService(CarrierConfigManager.class);
+        return carrierConfigManager.getConfigForSubId(mSubId);
+    }
 
     /**
      * Returns true if the device is considered roaming on the current
