@@ -58,12 +58,15 @@ public class TelecomManager {
      * Input: get*Extra field {@link #EXTRA_PHONE_ACCOUNT_HANDLE} contains the component name of the
      * {@link android.telecom.ConnectionService} that Telecom should bind to. Telecom will then
      * ask the connection service for more information about the call prior to showing any UI.
+     *
+     * @deprecated Use {@link #addNewIncomingCall} instead.
      */
     public static final String ACTION_INCOMING_CALL = "android.telecom.action.INCOMING_CALL";
 
     /**
      * Similar to {@link #ACTION_INCOMING_CALL}, but is used only by Telephony to add a new
      * sim-initiated MO call for carrier testing.
+     * @deprecated Use {@link #addNewUnknownCall} instead.
      * @hide
      */
     public static final String ACTION_NEW_UNKNOWN_CALL = "android.telecom.action.NEW_UNKNOWN_CALL";
