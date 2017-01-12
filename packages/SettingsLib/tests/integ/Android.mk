@@ -28,7 +28,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-test \
     espresso-core \
     mockito-target-minus-junit4 \
-    legacy-android-test
+    legacy-android-test \
+    truth-prebuilt
 
 include frameworks/base/packages/SettingsLib/common.mk
 
