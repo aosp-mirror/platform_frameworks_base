@@ -26,7 +26,7 @@
 #include <JNIHelp.h>
 #include <android/hidl/manager/1.0/IServiceManager.h>
 #include <android/hidl/base/1.0/IBase.h>
-#include <android/hidl/base/1.0/BpBase.h>
+#include <android/hidl/base/1.0/BpHwBase.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <hidl/ServiceManagement.h>
 #include <hidl/Status.h>
@@ -262,7 +262,7 @@ static void JHwBinder_native_registerService(
     sp<hardware::IBinder> binder = JHwBinder::GetNativeContext(env, thiz);
 
     /* TODO(b/33440494) this is not right */
-    sp<hidl::base::V1_0::IBase> base = new hidl::base::V1_0::BpBase(binder);
+    sp<hidl::base::V1_0::IBase> base = new hidl::base::V1_0::BpHwBase(binder);
 
     auto manager = hardware::defaultServiceManager();
 
@@ -331,7 +331,7 @@ static jobject JHwBinder_native_getService(
     }
 
     sp<hardware::IBinder> service = hardware::toBinder<
-            hidl::base::V1_0::IBase, hidl::base::V1_0::BpBase>(ret);
+            hidl::base::V1_0::IBase, hidl::base::V1_0::BpHwBase>(ret);
 
     env->ReleaseStringUTFChars(ifaceNameObj, ifaceName);
     ifaceName = NULL;
