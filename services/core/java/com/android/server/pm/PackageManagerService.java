@@ -3714,12 +3714,19 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (mSafeMode) {
             flags |= PackageManager.MATCH_SYSTEM_ONLY;
         }
-        final String ephemeralPkgName = getEphemeralPackageName(Binder.getCallingUid());
-        if (ephemeralPkgName != null) {
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid == Process.SYSTEM_UID || callingUid == 0) {
+            // The system sees all components
+            flags |= PackageManager.MATCH_EPHEMERAL;
+        } else if (getEphemeralPackageName(callingUid) != null) {
+            // But, ephemeral apps see both ephemeral and exposed, non-ephemeral components
             flags |= PackageManager.MATCH_VISIBLE_TO_EPHEMERAL_ONLY;
             flags |= PackageManager.MATCH_EPHEMERAL;
+        } else {
+            // Otherwise, prevent leaking ephemeral components
+            flags &= ~PackageManager.MATCH_VISIBLE_TO_EPHEMERAL_ONLY;
+            flags &= ~PackageManager.MATCH_EPHEMERAL;
         }
-
         return updateFlagsForComponent(flags, userId, cookie);
     }
 
@@ -5601,11 +5608,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // used when either 1) the calling package is normal and the activity is within
                 // an ephemeral application or 2) the calling package is ephemeral and the
                 // activity is not visible to ephemeral applications.
+                boolean matchEphemeral =
+                        (flags & PackageManager.MATCH_EPHEMERAL) != 0;
+                boolean ephemeralVisibleOnly =
+                        (flags & PackageManager.MATCH_VISIBLE_TO_EPHEMERAL_ONLY) != 0;
                 boolean blockResolution =
-                        (ephemeralPkgName == null
+                        (!matchEphemeral && ephemeralPkgName == null
                                 && (ai.applicationInfo.privateFlags
                                         & ApplicationInfo.PRIVATE_FLAG_EPHEMERAL) != 0)
-                        || (ephemeralPkgName != null
+                        || (ephemeralVisibleOnly && ephemeralPkgName != null
                                 && (ai.flags & ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL) == 0);
                 if (!blockResolution) {
                     final ResolveInfo ri = new ResolveInfo();
