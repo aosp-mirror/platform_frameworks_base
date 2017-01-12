@@ -212,10 +212,8 @@ public class WifiNetworkScoreCache extends INetworkScoreCache.Stub {
         mContext.enforceCallingOrSelfPermission(permission.DUMP, TAG);
         writer.println("WifiNetworkScoreCache");
         writer.println("  All score curves:");
-        for (Map.Entry<String, ScoredNetwork> entry : mNetworkCache.entrySet()) {
-            ScoredNetwork scoredNetwork = entry.getValue();
-            writer.println("    " + entry.getKey() + ": " + scoredNetwork.rssiCurve
-                    + ", meteredHint=" + scoredNetwork.meteredHint);
+        for (ScoredNetwork score : mNetworkCache.values()) {
+            writer.println("    " + score);
         }
         writer.println("  Current network scores:");
         WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);

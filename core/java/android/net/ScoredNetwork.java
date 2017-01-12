@@ -214,12 +214,16 @@ public class ScoredNetwork implements Parcelable {
 
     @Override
     public String toString() {
-        return "ScoredNetwork{" +
+        StringBuilder out = new StringBuilder(
+                "ScoredNetwork{" +
                 "networkKey=" + networkKey +
                 ", rssiCurve=" + rssiCurve +
-                ", meteredHint=" + meteredHint +
-                ", attributes=" + attributes +
-                '}';
+                ", meteredHint=" + meteredHint);
+        if (attributes != null) {
+            out.append(", attributes=" + attributes);
+        }
+        out.append('}');
+        return out.toString();
     }
 
     /**
