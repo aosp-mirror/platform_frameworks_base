@@ -2912,6 +2912,11 @@
              will result when the reference is accessed.-->
         <attr name="nextSectionForward" format="reference"/>
 
+        <!-- Whether this view is a default-focus view.
+             Only one view per keyboard navigation cluster can have this attribute set to true.
+             See {@link android.view.View#setFocusedByDefault(boolean)}. -->
+        <attr name="focusedByDefault" format="boolean" />
+
     </declare-styleable>
 
     <!-- Attributes that can be assigned to a tag for a particular View. -->

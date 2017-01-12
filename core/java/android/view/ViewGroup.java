@@ -136,9 +136,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     // The view contained within this ViewGroup that has or contains focus.
     private View mFocused;
-    // The last view contained within this ViewGroup (excluding nested keyboard navigation clusters)
-    // that had or contained focus.
-    private View mLastFocused;
+    // The view contained within this ViewGroup (excluding nested keyboard navigation clusters)
+    // that is or contains a default-focus view.
+    private View mDefaultFocus;
 
     /**
      * A Transformation used when drawing children, to
@@ -722,7 +722,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (mFocused != null) {
             mFocused.unFocus(this);
             mFocused = null;
-            mLastFocused = null;
+            mDefaultFocus = null;
         }
         super.handleFocusGainInternal(direction, previouslyFocusedRect);
     }
@@ -753,17 +753,45 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
-     * Saves the current focus as the last focus for this view and all its ancestors.
+     * Sets the specified child view as the default focus for this view and all its ancestors.
      * If the view is inside a keyboard navigation cluster, stops at the root of the cluster since
-     * the cluster forms a separate keyboard navigation hierarchy from the focus saving point of
+     * the cluster forms a separate keyboard navigation hierarchy from the default focus point of
      * view.
      */
-    void saveFocus() {
-        mLastFocused = mFocused;
-
-        if (!isKeyboardNavigationCluster() && mParent instanceof ViewGroup) {
-            ((ViewGroup) mParent).saveFocus();
+    void setDefaultFocus(View child) {
+        if (child.isKeyboardNavigationCluster()) {
+            return;
         }
+
+        mDefaultFocus = child;
+
+        if (mParent instanceof ViewGroup) {
+            ((ViewGroup) mParent).setDefaultFocus(this);
+        }
+    }
+
+    /**
+     * Destroys the default focus chain.
+     */
+    void cleanDefaultFocus(View child) {
+        if (mDefaultFocus != child) {
+            return;
+        }
+
+        if (child.isKeyboardNavigationCluster()) {
+            return;
+        }
+
+        mDefaultFocus = null;
+
+        if (mParent instanceof ViewGroup) {
+            ((ViewGroup) mParent).cleanDefaultFocus(this);
+        }
+    }
+
+    @Override
+    boolean hasDefaultFocus() {
+        return mDefaultFocus != null || super.hasDefaultFocus();
     }
 
     @Override
@@ -3054,14 +3082,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
-    public boolean restoreLastFocus() {
-        if (mLastFocused != null && !mLastFocused.isKeyboardNavigationCluster()
+    public boolean restoreDefaultFocus(@FocusDirection int direction) {
+        if (mDefaultFocus != null && !mDefaultFocus.isKeyboardNavigationCluster()
                 && getDescendantFocusability() != FOCUS_BLOCK_DESCENDANTS
-                && (mLastFocused.mViewFlags & VISIBILITY_MASK) == VISIBLE
-                && mLastFocused.restoreLastFocus()) {
+                && (mDefaultFocus.mViewFlags & VISIBILITY_MASK) == VISIBLE
+                && mDefaultFocus.restoreDefaultFocus(direction)) {
             return true;
         }
-        return super.restoreLastFocus();
+        return super.restoreDefaultFocus(direction);
     }
 
     /**
@@ -4720,6 +4748,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (mCurrentDragStartEvent != null && child.getVisibility() == VISIBLE) {
             notifyChildOfDragStart(child);
         }
+
+        if (child.hasDefaultFocus()) {
+            // When adding a child that contains default focus, either during inflation or while
+            // manually assembling the hierarchy, update the ancestor default-focus chain.
+            setDefaultFocus(child);
+        }
     }
 
     private void addInArray(View child, int index) {
@@ -4931,8 +4965,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             view.unFocus(null);
             clearChildFocus = true;
         }
-        if (view == mLastFocused) {
-            mLastFocused = null;
+        if (view == mDefaultFocus) {
+            mDefaultFocus = null;
         }
 
         view.clearAccessibilityFocus();
@@ -5044,8 +5078,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 view.unFocus(null);
                 clearChildFocus = true;
             }
-            if (view == mLastFocused) {
-                mLastFocused = null;
+            if (view == mDefaultFocus) {
+                mDefaultFocus = null;
             }
 
             view.clearAccessibilityFocus();
@@ -5120,7 +5154,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         boolean clearChildFocus = false;
 
         needGlobalAttributesUpdate(false);
-        mLastFocused = null;
+        mDefaultFocus = null;
 
         for (int i = count - 1; i >= 0; i--) {
             final View view = children[i];
@@ -5192,8 +5226,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (child == mFocused) {
             child.clearFocus();
         }
-        if (child == mLastFocused) {
-            mLastFocused = null;
+        if (child == mDefaultFocus) {
+            mDefaultFocus = null;
         }
 
         child.clearAccessibilityFocus();
@@ -6276,11 +6310,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             Log.d(VIEW_LOG_TAG, output);
             mFocused.debug(depth + 1);
         }
-        if (mLastFocused != null) {
+        if (mDefaultFocus != null) {
             output = debugIndent(depth);
-            output += "mLastFocused";
+            output += "mDefaultFocus";
             Log.d(VIEW_LOG_TAG, output);
-            mLastFocused.debug(depth + 1);
+            mDefaultFocus.debug(depth + 1);
         }
         if (mChildrenCount != 0) {
             output = debugIndent(depth);

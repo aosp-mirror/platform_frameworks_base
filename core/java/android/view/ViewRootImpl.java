@@ -2155,7 +2155,7 @@ public final class ViewRootImpl implements ViewParent,
                     + mView.hasFocus());
             if (mView != null) {
                 if (!mView.hasFocus()) {
-                    mView.requestFocus(View.FOCUS_FORWARD);
+                    mView.restoreDefaultFocus(View.FOCUS_FORWARD);
                     if (DEBUG_INPUT_RESIZE) Log.v(mTag, "First: requested focused view="
                             + mView.findFocus());
                 } else {
@@ -4403,7 +4403,7 @@ public final class ViewRootImpl implements ViewParent,
                     ? focused.keyboardNavigationGroupSearch(groupType, null, direction)
                     : keyboardNavigationGroupSearch(groupType, null, direction);
 
-            if (group != null && group.restoreLastFocus()) {
+            if (group != null && group.restoreDefaultFocus(View.FOCUS_DOWN)) {
                 return true;
             }
 

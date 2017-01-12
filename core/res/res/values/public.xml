@@ -2781,6 +2781,7 @@
         <public name="nextClusterForward" />
         <public name="nextSectionForward" />
         <public name="textColorError" />
+        <public name="focusedByDefault" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">

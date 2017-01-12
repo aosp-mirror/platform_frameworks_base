@@ -2502,7 +2502,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                  1                PFLAG3_CLUSTER
      *                 1                 PFLAG3_SECTION
      *                1                  PFLAG3_FINGER_DOWN
-     *           xxxxx                   * NO LONGER NEEDED, SHOULD BE REUSED *
+     *               1                   PFLAG3_FOCUSED_BY_DEFAULT
+     *           xxxx                    * NO LONGER NEEDED, SHOULD BE REUSED *
      *          1                        PFLAG3_OVERLAPPING_RENDERING_FORCED_VALUE
      *         1                         PFLAG3_HAS_OVERLAPPING_RENDERING_FORCED
      *        1                          PFLAG3_TEMPORARY_DETACH
@@ -2721,6 +2722,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Currently used for the tooltip positioning only.
      */
     private static final int PFLAG3_FINGER_DOWN = 0x20000;
+
+    /**
+     * Flag indicating that this view is the default-focus view.
+     *
+     * @see #isFocusedByDefault()
+     * @see #setFocusedByDefault(boolean)
+     */
+    private static final int PFLAG3_FOCUSED_BY_DEFAULT = 0x40000;
 
     /**
      * Whether this view has rendered elements that overlap (see {@link
@@ -4765,6 +4774,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         setKeyboardNavigationSection(a.getBoolean(attr, true));
                     }
                     break;
+                case R.styleable.View_focusedByDefault:
+                    if (a.peekValue(attr) != null) {
+                        setFocusedByDefault(a.getBoolean(attr, true));
+                    }
+                    break;
             }
         }
 
@@ -6156,8 +6170,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             if (mParent != null) {
                 mParent.requestChildFocus(this, this);
-                if (!isKeyboardNavigationCluster() && mParent instanceof ViewGroup) {
-                    ((ViewGroup) mParent).saveFocus();
+                if (mParent instanceof ViewGroup) {
+                    ((ViewGroup) mParent).setDefaultFocus(this);
                 }
             }
 
@@ -9211,6 +9225,66 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Returns whether this View should receive focus when the focus is restored for the view
+     * hierarchy containing this view.
+     * <p>
+     * Focus gets restored for a view hierarchy when the root of the hierarchy gets added to a
+     * window or serves as a target of cluster or section navigation.
+     *
+     * @see #restoreDefaultFocus(int)
+     *
+     * @return {@code true} if this view is the default-focus view, {@code false} otherwise
+     * @attr ref android.R.styleable#View_focusedByDefault
+     */
+    @ViewDebug.ExportedProperty(category = "focusedByDefault")
+    public final boolean isFocusedByDefault() {
+        return (mPrivateFlags3 & PFLAG3_FOCUSED_BY_DEFAULT) != 0;
+    }
+
+    /**
+     * Sets whether this View should receive focus when the focus is restored for the view
+     * hierarchy containing this view.
+     * <p>
+     * Focus gets restored for a view hierarchy when the root of the hierarchy gets added to a
+     * window or serves as a target of cluster or section navigation.
+     *
+     * @param isFocusedByDefault {@code true} to set this view as the default-focus view,
+     *                           {@code false} otherwise.
+     *
+     * @see #restoreDefaultFocus(int)
+     *
+     * @attr ref android.R.styleable#View_focusedByDefault
+     */
+    public void setFocusedByDefault(boolean isFocusedByDefault) {
+        if (isFocusedByDefault == ((mPrivateFlags3 & PFLAG3_FOCUSED_BY_DEFAULT) != 0)) {
+            return;
+        }
+
+        if (isFocusedByDefault) {
+            mPrivateFlags3 |= PFLAG3_FOCUSED_BY_DEFAULT;
+        } else {
+            mPrivateFlags3 &= ~PFLAG3_FOCUSED_BY_DEFAULT;
+        }
+
+        if (mParent instanceof ViewGroup) {
+            if (isFocusedByDefault) {
+                ((ViewGroup) mParent).setDefaultFocus(this);
+            } else {
+                ((ViewGroup) mParent).cleanDefaultFocus(this);
+            }
+        }
+    }
+
+    /**
+     * Returns whether the view hierarchy with this view as a root contain a default-focus view.
+     *
+     * @return {@code true} if this view has default focus, {@code false} otherwise
+     */
+    boolean hasDefaultFocus() {
+        return isFocusedByDefault();
+    }
+
+    /**
      * Find the nearest keyboard navigation group in the specified direction. The group type can be
      * either a cluster or a section.
      * This does not actually give focus to that group.
@@ -9586,15 +9660,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Gives focus to the last focused view in the view hierarchy that has this view as a root.
-     * If the last focused view cannot be found, fall back to calling {@link #requestFocus()}.
-     * Nested keyboard navigation clusters are excluded from the hierarchy considered for saving the
-     * last focus.
+     * Gives focus to the default-focus view in the view hierarchy that has this view as a root.
+     * If the default-focus view cannot be found, falls back to calling {@link #requestFocus(int)}.
+     * Nested keyboard navigation clusters are excluded from the hierarchy.
      *
-     * @return Whether this view or one of its descendants actually took focus.
+     * @param direction The direction of the focus
+     * @return Whether this view or one of its descendants actually took focus
      */
-    public boolean restoreLastFocus() {
-        return requestFocus();
+    public boolean restoreDefaultFocus(@FocusDirection int direction) {
+        return requestFocus(direction);
     }
 
     /**
