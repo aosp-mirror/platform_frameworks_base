@@ -1984,7 +1984,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (!createStaticStackIfNeeded || !StackId.isStaticStack(stackId)) {
             return null;
         }
-        // TODO(multi-display): Allow creating stacks on secondary displays.
         return createStackOnDisplay(stackId, DEFAULT_DISPLAY, createOnTop);
     }
 

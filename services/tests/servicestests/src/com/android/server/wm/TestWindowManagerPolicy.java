@@ -65,6 +65,7 @@ import android.content.Context;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.hardware.display.DisplayManagerInternal;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -75,10 +76,12 @@ import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
 import android.view.animation.Animation;
+import android.os.PowerManagerInternal;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
 import com.android.server.input.InputManagerService;
+import com.android.server.LocalServices;
 
 import java.io.PrintWriter;
 
@@ -87,10 +90,20 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     private static WindowManagerService sWm = null;
 
+    int rotationToReport = 0;
+
     static synchronized WindowManagerService getWindowManagerService(Context context) {
         if (sWm == null) {
             // We only want to do this once for the test process as we don't want WM to try to
             // register a bunch of local services again.
+            if (LocalServices.getService(DisplayManagerInternal.class) == null) {
+                LocalServices.addService(DisplayManagerInternal.class,
+                        mock(DisplayManagerInternal.class));
+            }
+            if (LocalServices.getService(PowerManagerInternal.class) == null) {
+                LocalServices.addService(PowerManagerInternal.class,
+                        mock(PowerManagerInternal.class));
+            }
             sWm = WindowManagerService.main(context, mock(InputManagerService.class), true, false,
                     false, new TestWindowManagerPolicy());
         }
@@ -543,7 +556,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     @Override
     public int rotationForOrientationLw(int orientation,
             int lastRotation) {
-        return 0;
+        return rotationToReport;
     }
 
     @Override

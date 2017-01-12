@@ -22,7 +22,11 @@ import org.junit.runner.RunWith;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.view.Surface;
+import android.view.WindowManager;
 
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
@@ -82,5 +86,67 @@ public class AppWindowTokenTests extends WindowTestsBase {
         assertEquals(window1, token.findMainWindow());
         final WindowState window2 = createWindow(null, TYPE_APPLICATION_STARTING, token, "window2");
         assertEquals(window2, token.findMainWindow());
+    }
+
+    @Test
+    public void testLandscapeSeascapeRotationByApp() throws Exception {
+        // Some plumbing to get the service ready for rotation updates.
+        sWm.mDisplayReady = true;
+        sWm.mDisplayEnabled = true;
+
+        // Create an app window with token on a display.
+        final TaskStack stack = createTaskStackOnDisplay(sDisplayContent);
+        final Task task = createTaskInStack(stack, 0 /* userId */);
+        final TestAppWindowToken appWindowToken = new TestAppWindowToken(sDisplayContent);
+        task.addChild(appWindowToken, 0);
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(
+                TYPE_BASE_APPLICATION);
+        attrs.setTitle("AppWindow");
+        final TestWindowState appWindow = new TestWindowState(attrs, appWindowToken);
+        appWindowToken.addWindow(appWindow);
+
+        // Set initial orientation and update.
+        appWindowToken.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        sWm.updateOrientationFromAppTokens(sDisplayContent.getOverrideConfiguration(), null,
+                sDisplayContent.getDisplayId());
+        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, sWm.mLastOrientation);
+        appWindow.resizeReported = false;
+
+        // Update the orientation to perform 180 degree rotation and check that resize was reported.
+        appWindowToken.setOrientation(SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
+        sWm.updateOrientationFromAppTokens(sDisplayContent.getOverrideConfiguration(), null,
+                sDisplayContent.getDisplayId());
+        sWm.mRoot.performSurfacePlacement(false /* recoveringMemory */);
+        assertEquals(SCREEN_ORIENTATION_REVERSE_LANDSCAPE, sWm.mLastOrientation);
+        assertTrue(appWindow.resizeReported);
+    }
+
+    @Test
+    public void testLandscapeSeascapeRotationByPolicy() throws Exception {
+        // Some plumbing to get the service ready for rotation updates.
+        sWm.mDisplayReady = true;
+        sWm.mDisplayEnabled = true;
+
+        // Create an app window with token on a display.
+        final TaskStack stack = createTaskStackOnDisplay(sDisplayContent);
+        final Task task = createTaskInStack(stack, 0 /* userId */);
+        final TestAppWindowToken appWindowToken = new TestAppWindowToken(sDisplayContent);
+        task.addChild(appWindowToken, 0);
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(
+                TYPE_BASE_APPLICATION);
+        attrs.setTitle("AppWindow");
+        final TestWindowState appWindow = new TestWindowState(attrs, appWindowToken);
+        appWindowToken.addWindow(appWindow);
+
+        // Set initial orientation and update.
+        ((TestWindowManagerPolicy) sWm.mPolicy).rotationToReport = Surface.ROTATION_90;
+        sWm.updateRotation(false, false);
+        appWindow.resizeReported = false;
+
+        // Update the rotation to perform 180 degree rotation and check that resize was reported.
+        ((TestWindowManagerPolicy) sWm.mPolicy).rotationToReport = Surface.ROTATION_270;
+        sWm.updateRotation(false, false);
+        sWm.mRoot.performSurfacePlacement(false /* recoveringMemory */);
+        assertTrue(appWindow.resizeReported);
     }
 }
