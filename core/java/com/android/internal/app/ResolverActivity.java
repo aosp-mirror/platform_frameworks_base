@@ -106,6 +106,8 @@ public class ResolverActivity extends Activity {
     private final ArrayList<Intent> mIntents = new ArrayList<>();
     private PickTargetOptionRequest mPickOptionRequest;
     private String mReferrerPackage;
+    private CharSequence mTitle;
+    private int mDefaultTitleResId;
 
     protected ResolverDrawerLayout mResolverDrawerLayout;
     protected String mContentType;
@@ -261,14 +263,17 @@ public class ResolverActivity extends Activity {
         mPackageMonitor.register(this, getMainLooper(), false);
         mRegistered = true;
         mReferrerPackage = getReferrerPackageName();
+        mAlwaysUseOption = alwaysUseOption;
 
         final ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
         mIconDpi = am.getLauncherLargeIconDensity();
 
         // Add our initial intent as the first item, regardless of what else has already been added.
         mIntents.add(0, new Intent(intent));
+        mTitle = title;
+        mDefaultTitleResId = defaultTitleRes;
 
-        if (configureContentView(mIntents, initialIntents, rList, alwaysUseOption)) {
+        if (configureContentView(mIntents, initialIntents, rList)) {
             return;
         }
 
@@ -284,56 +289,6 @@ public class ResolverActivity extends Activity {
                 rdl.setCollapsed(false);
             }
             mResolverDrawerLayout = rdl;
-        }
-
-        if (title == null) {
-            title = getTitleForAction(intent.getAction(), defaultTitleRes);
-        }
-        if (!TextUtils.isEmpty(title)) {
-            final TextView titleView = (TextView) findViewById(R.id.title);
-            if (titleView != null) {
-                titleView.setText(title);
-            }
-            setTitle(title);
-
-            // Try to initialize the title icon if we have a view for it and a title to match
-            final ImageView titleIcon = (ImageView) findViewById(R.id.title_icon);
-            if (titleIcon != null) {
-                ApplicationInfo ai = null;
-                try {
-                    if (!TextUtils.isEmpty(mReferrerPackage)) {
-                        ai = mPm.getApplicationInfo(mReferrerPackage, 0);
-                    }
-                } catch (NameNotFoundException e) {
-                    Log.e(TAG, "Could not find referrer package " + mReferrerPackage);
-                }
-
-                if (ai != null) {
-                    titleIcon.setImageDrawable(ai.loadIcon(mPm));
-                }
-            }
-        }
-
-        final ImageView iconView = (ImageView) findViewById(R.id.icon);
-        final DisplayResolveInfo iconInfo = mAdapter.getFilteredItem();
-        if (iconView != null && iconInfo != null) {
-            new LoadIconIntoViewTask(iconInfo, iconView).execute();
-        }
-
-        if (alwaysUseOption || mAdapter.hasFilteredItem()) {
-            final ViewGroup buttonLayout = (ViewGroup) findViewById(R.id.button_bar);
-            if (buttonLayout != null) {
-                buttonLayout.setVisibility(View.VISIBLE);
-                mAlwaysButton = (Button) buttonLayout.findViewById(R.id.button_always);
-                mOnceButton = (Button) buttonLayout.findViewById(R.id.button_once);
-            } else {
-                mAlwaysUseOption = false;
-            }
-        }
-
-        if (mAdapter.hasFilteredItem()) {
-            setAlwaysButtonEnabled(true, mAdapter.getFilteredPosition(), false);
-            mOnceButton.setEnabled(true);
         }
 
         mProfileView = findViewById(R.id.profile_button);
@@ -893,23 +848,22 @@ public class ResolverActivity extends Activity {
      * Returns true if the activity is finishing and creation should halt
      */
     public boolean configureContentView(List<Intent> payloadIntents, Intent[] initialIntents,
-            List<ResolveInfo> rList, boolean alwaysUseOption) {
+            List<ResolveInfo> rList) {
         // The last argument of createAdapter is whether to do special handling
         // of the last used choice to highlight it in the list.  We need to always
         // turn this off when running under voice interaction, since it results in
         // a more complicated UI that the current voice interaction flow is not able
         // to handle.
         mAdapter = createAdapter(this, payloadIntents, initialIntents, rList,
-                mLaunchedFromUid, alwaysUseOption && !isVoiceInteraction());
+                mLaunchedFromUid, mAlwaysUseOption && !isVoiceInteraction());
         boolean rebuildCompleted = mAdapter.rebuildList();
 
         if (mAdapter.hasFilteredItem()) {
             mLayoutId = R.layout.resolver_list_with_default;
-            alwaysUseOption = false;
+            mAlwaysUseOption = false;
         } else {
             mLayoutId = getLayoutResource();
         }
-        mAlwaysUseOption = alwaysUseOption;
 
         int count = mAdapter.getUnfilteredCount();
 
@@ -929,13 +883,11 @@ public class ResolverActivity extends Activity {
             }
         }
 
+        setContentView(mLayoutId);
         if (count > 0 || !rebuildCompleted) {
-            setContentView(mLayoutId);
             mAdapterView = (AbsListView) findViewById(R.id.resolver_list);
             onPrepareAdapterView(mAdapterView, mAdapter, mAlwaysUseOption);
         } else {
-            setContentView(R.layout.resolver_list);
-
             final TextView empty = (TextView) findViewById(R.id.empty);
             empty.setVisibility(View.VISIBLE);
 
@@ -960,9 +912,64 @@ public class ResolverActivity extends Activity {
             listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
         }
 
-        if (useHeader && listView != null) {
+        // In case this method is called again (due to activity recreation), avoid adding a new
+        // header if one is already present.
+        if (useHeader && listView != null && listView.getHeaderViewsCount() == 0) {
             listView.addHeaderView(LayoutInflater.from(this).inflate(
                     R.layout.resolver_different_item_header, listView, false));
+        }
+    }
+
+    public void setTitleAndIcon() {
+        if (mTitle == null) {
+            mTitle = getTitleForAction(getTargetIntent().getAction(), mDefaultTitleResId);
+        }
+
+        if (!TextUtils.isEmpty(mTitle)) {
+            final TextView titleView = (TextView) findViewById(R.id.title);
+            if (titleView != null) {
+                titleView.setText(mTitle);
+            }
+            setTitle(mTitle);
+
+            // Try to initialize the title icon if we have a view for it and a title to match
+            final ImageView titleIcon = (ImageView) findViewById(R.id.title_icon);
+            if (titleIcon != null) {
+                ApplicationInfo ai = null;
+                try {
+                    if (!TextUtils.isEmpty(mReferrerPackage)) {
+                        ai = mPm.getApplicationInfo(mReferrerPackage, 0);
+                    }
+                } catch (NameNotFoundException e) {
+                    Log.e(TAG, "Could not find referrer package " + mReferrerPackage);
+                }
+
+                if (ai != null) {
+                    titleIcon.setImageDrawable(ai.loadIcon(mPm));
+                }
+            }
+        }
+
+        final ImageView iconView = (ImageView) findViewById(R.id.icon);
+        final DisplayResolveInfo iconInfo = mAdapter.getFilteredItem();
+        if (iconView != null && iconInfo != null) {
+            new LoadIconIntoViewTask(iconInfo, iconView).execute();
+        }
+    }
+
+    public void resetAlwaysOrOnceButtonBar() {
+        if (mAlwaysUseOption || mAdapter.mLastChosen != null) {
+            final ViewGroup buttonLayout = (ViewGroup) findViewById(R.id.button_bar);
+            if (buttonLayout != null) {
+                buttonLayout.setVisibility(View.VISIBLE);
+                mAlwaysButton = (Button) buttonLayout.findViewById(R.id.button_always);
+                mOnceButton = (Button) buttonLayout.findViewById(R.id.button_once);
+            }
+        }
+
+        if (mAdapter.hasFilteredItem()) {
+            setAlwaysButtonEnabled(true, mAdapter.getFilteredPosition(), false);
+            mOnceButton.setEnabled(true);
         }
     }
 
@@ -1227,7 +1234,7 @@ public class ResolverActivity extends Activity {
         private final List<Intent> mIntents;
         private final Intent[] mInitialIntents;
         private final List<ResolveInfo> mBaseResolveList;
-        private ResolveInfo mLastChosen;
+        protected ResolveInfo mLastChosen;
         private DisplayResolveInfo mOtherProfile;
         private boolean mHasExtendedInfo;
         private ResolverListController mResolverListController;
@@ -1282,7 +1289,7 @@ public class ResolverActivity extends Activity {
         }
 
         public boolean hasFilteredItem() {
-            return mFilterLastUsed && mLastChosenPosition >= 0;
+            return mFilterLastUsed && mLastChosen != null;
         }
 
         public float getScore(DisplayResolveInfo target) {
@@ -1307,7 +1314,7 @@ public class ResolverActivity extends Activity {
                         primaryIntent, primaryIntent.resolveTypeIfNeeded(getContentResolver()),
                         PackageManager.MATCH_DEFAULT_ONLY);
             } catch (RemoteException re) {
-                Log.d(TAG, "Error calling setLastChosenActivity\n" + re);
+                Log.d(TAG, "Error calling getLastChosenActivity\n" + re);
             }
 
             // Clear the value of mOtherProfile from previous call.
@@ -1319,7 +1326,7 @@ public class ResolverActivity extends Activity {
                         getTargetIntent(),
                         mBaseResolveList);
             } else {
-                currentResolveList =
+                currentResolveList = mUnfilteredResolveList =
                         mResolverListController.getResolversForIntent(shouldGetResolvedFilter(),
                                 shouldGetActivityMetadata(),
                                 mIntents);
@@ -1456,6 +1463,9 @@ public class ResolverActivity extends Activity {
                 // Process last group
                 processGroup(sortedComponents, start, (N - 1), rci0, r0Label);
             }
+
+            setTitleAndIcon();
+            resetAlwaysOrOnceButtonBar();
             disableLastChosenIfNeeded();
             onListRebuilt();
         }
