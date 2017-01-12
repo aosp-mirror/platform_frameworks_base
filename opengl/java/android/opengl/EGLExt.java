@@ -28,6 +28,7 @@ public class EGLExt {
     public static final int EGL_CONTEXT_MINOR_VERSION_KHR   = 0x30FB;
     public static final int EGL_CONTEXT_FLAGS_KHR           = 0x30FC;
     public static final int EGL_OPENGL_ES3_BIT_KHR          = 0x0040;
+    public static final int EGL_RECORDABLE_ANDROID          = 0x3142;
 
     native private static void _nativeClassInit();
     static {
