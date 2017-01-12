@@ -103,6 +103,7 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.NotificationGuts.OnGutsClosedListener;
+import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.phone.NavigationBarView;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -118,14 +119,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.Stack;
 
 import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_HIGH;
 
 public abstract class BaseStatusBar extends SystemUI implements
         CommandQueue.Callbacks, ActivatableNotificationView.OnActivatedListener,
         ExpandableNotificationRow.ExpansionLogger, NotificationData.Environment,
-        ExpandableNotificationRow.OnExpandClickListener,
-        OnGutsClosedListener {
+        ExpandableNotificationRow.OnExpandClickListener, OnGutsClosedListener {
     public static final String TAG = "StatusBar";
     public static final boolean DEBUG = false;
     public static final boolean MULTIUSER_DEBUG = false;
@@ -178,6 +179,9 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     // for heads up notifications
     protected HeadsUpManager mHeadsUpManager;
+
+    // handling reordering
+    protected VisualStabilityManager mVisualStabilityManager = new VisualStabilityManager();
 
     protected int mCurrentUserId = 0;
     final protected SparseArray<UserInfo> mCurrentProfiles = new SparseArray<UserInfo>();
@@ -2249,9 +2253,8 @@ public abstract class BaseStatusBar extends SystemUI implements
      */
     protected void updateRowStates() {
         mKeyguardIconOverflowContainer.getIconsView().removeAllViews();
+        final int N = mStackScroller.getChildCount();
 
-        ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
-        final int N = activeNotifications.size();
 
         int visibleNotifications = 0;
         boolean onKeyguard = mState == StatusBarState.KEYGUARD;
@@ -2259,14 +2262,23 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (onKeyguard) {
             maxNotifications = getMaxKeyguardNotifications(true /* recompute */);
         }
-        for (int i = 0; i < N; i++) {
-            NotificationData.Entry entry = activeNotifications.get(i);
+        Stack<ExpandableNotificationRow> stack = new Stack<>();
+        for (int i = N - 1; i >= 0; i--) {
+            View child = mStackScroller.getChildAt(i);
+            if (!(child instanceof ExpandableNotificationRow)) {
+                continue;
+            }
+            stack.push((ExpandableNotificationRow) child);
+        }
+        while(!stack.isEmpty()) {
+            ExpandableNotificationRow row = stack.pop();
+            NotificationData.Entry entry = row.getEntry();
             boolean childNotification = mGroupManager.isChildInGroupWithSummary(entry.notification);
             if (onKeyguard) {
-                entry.row.setOnKeyguard(true);
+                row.setOnKeyguard(true);
             } else {
-                entry.row.setOnKeyguard(false);
-                entry.row.setSystemExpanded(visibleNotifications == 0 && !childNotification);
+                row.setOnKeyguard(false);
+                row.setSystemExpanded(visibleNotifications == 0 && !childNotification);
             }
             boolean suppressedSummary = mGroupManager.isSummaryOfSuppressedGroup(
                     entry.notification) && !entry.row.isRemoved();
@@ -2291,6 +2303,14 @@ public abstract class BaseStatusBar extends SystemUI implements
                                 !showOnKeyguard /* fromMoreCard */);
                     }
                     visibleNotifications++;
+                }
+            }
+            if (row.isSummaryWithChildren()) {
+                List<ExpandableNotificationRow> notificationChildren =
+                        row.getNotificationChildren();
+                int size = notificationChildren.size();
+                for (int i = size - 1; i >= 0; i--) {
+                    stack.push(notificationChildren.get(i));
                 }
             }
         }
