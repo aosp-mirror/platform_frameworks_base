@@ -8755,40 +8755,43 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     "can broadcast update information.");
             return;
         }
-        Intent intent = new Intent(DeviceAdminReceiver.ACTION_NOTIFY_PENDING_SYSTEM_UPDATE);
+        final Intent intent = new Intent(DeviceAdminReceiver.ACTION_NOTIFY_PENDING_SYSTEM_UPDATE);
         intent.putExtra(DeviceAdminReceiver.EXTRA_SYSTEM_UPDATE_RECEIVED_TIME,
                 updateReceivedTime);
 
-        synchronized (this) {
-            final String deviceOwnerPackage =
-                    mOwners.hasDeviceOwner() ? mOwners.getDeviceOwnerComponent().getPackageName()
-                            : null;
-            if (deviceOwnerPackage == null) {
-                return;
-            }
-            final UserHandle deviceOwnerUser = new UserHandle(mOwners.getDeviceOwnerUserId());
-
-            ActivityInfo[] receivers = null;
-            try {
-                receivers  = mInjector.getPackageManager().getPackageInfo(
-                        deviceOwnerPackage, PackageManager.GET_RECEIVERS).receivers;
-            } catch (NameNotFoundException e) {
-                Log.e(LOG_TAG, "Cannot find device owner package", e);
-            }
-            if (receivers != null) {
-                long ident = mInjector.binderClearCallingIdentity();
-                try {
-                    for (int i = 0; i < receivers.length; i++) {
-                        if (permission.BIND_DEVICE_ADMIN.equals(receivers[i].permission)) {
-                            intent.setComponent(new ComponentName(deviceOwnerPackage,
-                                    receivers[i].name));
-                            mContext.sendBroadcastAsUser(intent, deviceOwnerUser);
-                        }
-                    }
-                } finally {
-                    mInjector.binderRestoreCallingIdentity(ident);
+        final long ident = mInjector.binderClearCallingIdentity();
+        try {
+            synchronized (this) {
+                // Broadcast to device owner first if there is one.
+                if (mOwners.hasDeviceOwner()) {
+                    final UserHandle deviceOwnerUser =
+                            UserHandle.of(mOwners.getDeviceOwnerUserId());
+                    intent.setComponent(mOwners.getDeviceOwnerComponent());
+                    mContext.sendBroadcastAsUser(intent, deviceOwnerUser);
                 }
             }
+            // Get running users.
+            final int runningUserIds[];
+            try {
+                runningUserIds = mInjector.getIActivityManager().getRunningUserIds();
+            } catch (RemoteException e) {
+                // Shouldn't happen.
+                Log.e(LOG_TAG, "Could not retrieve the list of running users", e);
+                return;
+            }
+            // Send broadcasts to corresponding profile owners if any.
+            for (final int userId : runningUserIds) {
+                synchronized (this) {
+                    final ComponentName profileOwnerPackage =
+                            mOwners.getProfileOwnerComponent(userId);
+                    if (profileOwnerPackage != null) {
+                        intent.setComponent(profileOwnerPackage);
+                        mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
+                    }
+                }
+            }
+        } finally {
+            mInjector.binderRestoreCallingIdentity(ident);
         }
     }
 
