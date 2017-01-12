@@ -16,7 +16,11 @@
 
 package android.app;
 
-import static java.lang.Character.MIN_VALUE;
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.app.IVoiceInteractor;
+import com.android.internal.app.ToolbarActionBar;
+import com.android.internal.app.WindowDecorActionBar;
+import com.android.internal.policy.PhoneWindow;
 
 import android.annotation.CallSuper;
 import android.annotation.DrawableRes;
@@ -114,21 +118,13 @@ import android.view.Window.WindowControllerCallback;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.autofill.VirtualViewDelegate;
+import android.view.autofill.AutoFillId;
 import android.view.autofill.Dataset;
 import android.view.autofill.DatasetField;
-import android.view.autofill.AutoFillId;
-import android.view.autofill.FillResponse;
+import android.view.autofill.VirtualViewDelegate;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.Toast;
 import android.widget.Toolbar;
-
-import com.android.internal.annotations.GuardedBy;
-import com.android.internal.app.IVoiceInteractor;
-import com.android.internal.app.ToolbarActionBar;
-import com.android.internal.app.WindowDecorActionBar;
-import com.android.internal.policy.PhoneWindow;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -138,6 +134,8 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import static java.lang.Character.MIN_VALUE;
 
 /**
  * An activity is a single, focused thing that the user can do.  Almost all
@@ -852,7 +850,6 @@ public class Activity extends ContextThemeWrapper
     SharedElementCallback mExitTransitionListener = SharedElementCallback.NULL_CALLBACK;
 
     private boolean mHasCurrentPermissionsRequest;
-    private boolean mEatKeyUpEvent;
 
     @GuardedBy("this")
     private WeakReference<IAutoFillAppCallback> mAutoFillCallback;
@@ -3181,20 +3178,6 @@ public class Activity extends ContextThemeWrapper
         if (keyCode == KeyEvent.KEYCODE_MENU &&
                 mActionBar != null && mActionBar.onMenuKeyEvent(event)) {
             return true;
-        } else if (event.isCtrlPressed() &&
-                event.getUnicodeChar(event.getMetaState() & ~KeyEvent.META_CTRL_MASK) == '<') {
-            // Capture the Control-< and send focus to the ActionBar
-            final int action = event.getAction();
-            if (action == KeyEvent.ACTION_DOWN) {
-                final ActionBar actionBar = getActionBar();
-                if (actionBar != null && actionBar.isShowing() && actionBar.requestFocus()) {
-                    mEatKeyUpEvent = true;
-                    return true;
-                }
-            } else if (action == KeyEvent.ACTION_UP && mEatKeyUpEvent) {
-                mEatKeyUpEvent = false;
-                return true;
-            }
         }
 
         Window win = getWindow();
