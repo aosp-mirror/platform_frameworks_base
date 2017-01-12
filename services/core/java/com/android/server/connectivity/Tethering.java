@@ -1076,15 +1076,11 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         }
 
         public void stop() {
-            if (mDefaultNetworkCallback != null) {
-                cm().unregisterNetworkCallback(mDefaultNetworkCallback);
-                mDefaultNetworkCallback = null;
-            }
+            releaseCallback(mDefaultNetworkCallback);
+            mDefaultNetworkCallback = null;
 
-            if (mDunTetheringCallback != null) {
-                cm().unregisterNetworkCallback(mDunTetheringCallback);
-                mDunTetheringCallback = null;
-            }
+            releaseCallback(mDunTetheringCallback);
+            mDunTetheringCallback = null;
 
             mNetworkMap.clear();
         }
@@ -1093,88 +1089,87 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             return (network != null) ? mNetworkMap.get(network) : null;
         }
 
-        public NetworkState processCallback(int arg1, Object obj) {
-            switch (arg1) {
-                case EVENT_ON_AVAILABLE: {
-                    final Network network = (Network) obj;
-                    if (VDBG) {
-                        Log.d(TAG, "EVENT_ON_AVAILABLE for " + network);
-                    }
-                    if (!mNetworkMap.containsKey(network)) {
-                        mNetworkMap.put(network,
-                                new NetworkState(null, null, null, network, null, null));
-                    }
-
-                    final ConnectivityManager cm = cm();
-
-                    if (mDefaultNetworkCallback != null) {
-                        cm.requestNetworkCapabilities(mDefaultNetworkCallback);
-                        cm.requestLinkProperties(mDefaultNetworkCallback);
-                    }
-
-                    // Requesting updates for mDunTetheringCallback is not
-                    // necessary. Because it's a listen, it will already have
-                    // heard all NetworkCapabilities and LinkProperties updates
-                    // since UpstreamNetworkMonitor was started. Because we
-                    // start UpstreamNetworkMonitor before chooseUpstreamType()
-                    // is ever invoked (it can register a DUN request) this is
-                    // mostly safe. However, if a DUN network is already up for
-                    // some reason (unlikely, because DUN is restricted and,
-                    // unless the DUN network is shared with another APN, only
-                    // the system can request it and this is the only part of
-                    // the system that requests it) we won't know its
-                    // LinkProperties or NetworkCapabilities.
-
-                    return mNetworkMap.get(network);
-                }
-                case EVENT_ON_CAPABILITIES: {
-                    final NetworkState ns = (NetworkState) obj;
-                    if (!mNetworkMap.containsKey(ns.network)) {
-                        // Ignore updates for networks for which we have not yet
-                        // received onAvailable() - which should never happen -
-                        // or for which we have already received onLost().
-                        return null;
-                    }
-                    if (VDBG) {
-                        Log.d(TAG, String.format("EVENT_ON_CAPABILITIES for %s: %s",
-                                ns.network, ns.networkCapabilities));
-                    }
-
-                    final NetworkState prev = mNetworkMap.get(ns.network);
-                    mNetworkMap.put(ns.network,
-                            new NetworkState(null, prev.linkProperties, ns.networkCapabilities,
-                                             ns.network, null, null));
-                    return mNetworkMap.get(ns.network);
-                }
-                case EVENT_ON_LINKPROPERTIES: {
-                    final NetworkState ns = (NetworkState) obj;
-                    if (!mNetworkMap.containsKey(ns.network)) {
-                        // Ignore updates for networks for which we have not yet
-                        // received onAvailable() - which should never happen -
-                        // or for which we have already received onLost().
-                        return null;
-                    }
-                    if (VDBG) {
-                        Log.d(TAG, String.format("EVENT_ON_LINKPROPERTIES for %s: %s",
-                                ns.network, ns.linkProperties));
-                    }
-
-                    final NetworkState prev = mNetworkMap.get(ns.network);
-                    mNetworkMap.put(ns.network,
-                            new NetworkState(null, ns.linkProperties, prev.networkCapabilities,
-                                             ns.network, null, null));
-                    return mNetworkMap.get(ns.network);
-                }
-                case EVENT_ON_LOST: {
-                    final Network network = (Network) obj;
-                    if (VDBG) {
-                        Log.d(TAG, "EVENT_ON_LOST for " + network);
-                    }
-                    return mNetworkMap.remove(network);
-                }
-                default:
-                    return null;
+        private void handleAvailable(Network network) {
+            if (VDBG) {
+                Log.d(TAG, "EVENT_ON_AVAILABLE for " + network);
             }
+            if (!mNetworkMap.containsKey(network)) {
+                mNetworkMap.put(network,
+                        new NetworkState(null, null, null, network, null, null));
+            }
+
+            final ConnectivityManager cm = cm();
+
+            if (mDefaultNetworkCallback != null) {
+                cm.requestNetworkCapabilities(mDefaultNetworkCallback);
+                cm.requestLinkProperties(mDefaultNetworkCallback);
+            }
+
+            // Requesting updates for mDunTetheringCallback is not
+            // necessary. Because it's a listen, it will already have
+            // heard all NetworkCapabilities and LinkProperties updates
+            // since UpstreamNetworkMonitor was started. Because we
+            // start UpstreamNetworkMonitor before chooseUpstreamType()
+            // is ever invoked (it can register a DUN request) this is
+            // mostly safe. However, if a DUN network is already up for
+            // some reason (unlikely, because DUN is restricted and,
+            // unless the DUN network is shared with another APN, only
+            // the system can request it and this is the only part of
+            // the system that requests it) we won't know its
+            // LinkProperties or NetworkCapabilities.
+
+            notifyTarget(EVENT_ON_AVAILABLE, network);
+        }
+
+        private void handleNetCap(Network network, NetworkCapabilities newNc) {
+            if (!mNetworkMap.containsKey(network)) {
+                // Ignore updates for networks for which we have not yet
+                // received onAvailable() - which should never happen -
+                // or for which we have already received onLost().
+                return;
+            }
+            if (VDBG) {
+                Log.d(TAG, String.format("EVENT_ON_CAPABILITIES for %s: %s",
+                        network, newNc));
+            }
+
+            final NetworkState prev = mNetworkMap.get(network);
+            mNetworkMap.put(network,
+                    new NetworkState(null, prev.linkProperties, newNc,
+                                     network, null, null));
+            notifyTarget(EVENT_ON_CAPABILITIES, network);
+        }
+
+        private void handleLinkProp(Network network, LinkProperties newLp) {
+            if (!mNetworkMap.containsKey(network)) {
+                // Ignore updates for networks for which we have not yet
+                // received onAvailable() - which should never happen -
+                // or for which we have already received onLost().
+                return;
+            }
+            if (VDBG) {
+                Log.d(TAG, String.format("EVENT_ON_LINKPROPERTIES for %s: %s",
+                        network, newLp));
+            }
+
+            final NetworkState prev = mNetworkMap.get(network);
+            mNetworkMap.put(network,
+                    new NetworkState(null, newLp, prev.networkCapabilities,
+                                     network, null, null));
+            notifyTarget(EVENT_ON_LINKPROPERTIES, network);
+        }
+
+        private void handleLost(Network network) {
+            if (!mNetworkMap.containsKey(network)) {
+                // Ignore updates for networks for which we have not yet
+                // received onAvailable() - which should never happen -
+                // or for which we have already received onLost().
+                return;
+            }
+            if (VDBG) {
+                Log.d(TAG, "EVENT_ON_LOST for " + network);
+            }
+            notifyTarget(EVENT_ON_LOST, mNetworkMap.remove(network));
         }
 
         // Fetch (and cache) a ConnectivityManager only if and when we need one.
@@ -1192,25 +1187,35 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         private class UpstreamNetworkCallback extends NetworkCallback {
             @Override
             public void onAvailable(Network network) {
-                mTarget.sendMessage(mWhat, EVENT_ON_AVAILABLE, 0, network);
+                mTarget.getHandler().post(() -> handleAvailable(network));
             }
 
             @Override
             public void onCapabilitiesChanged(Network network, NetworkCapabilities newNc) {
-                mTarget.sendMessage(mWhat, EVENT_ON_CAPABILITIES, 0,
-                        new NetworkState(null, null, newNc, network, null, null));
+                mTarget.getHandler().post(() -> handleNetCap(network, newNc));
             }
 
             @Override
             public void onLinkPropertiesChanged(Network network, LinkProperties newLp) {
-                mTarget.sendMessage(mWhat, EVENT_ON_LINKPROPERTIES, 0,
-                        new NetworkState(null, newLp, null, network, null, null));
+                mTarget.getHandler().post(() -> handleLinkProp(network, newLp));
             }
 
             @Override
             public void onLost(Network network) {
-                mTarget.sendMessage(mWhat, EVENT_ON_LOST, 0, network);
+                mTarget.getHandler().post(() -> handleLost(network));
             }
+        }
+
+        private void releaseCallback(NetworkCallback cb) {
+            if (cb != null) cm().unregisterNetworkCallback(cb);
+        }
+
+        private void notifyTarget(int which, Network network) {
+            notifyTarget(which, mNetworkMap.get(network));
+        }
+
+        private void notifyTarget(int which, NetworkState netstate) {
+            mTarget.sendMessage(mWhat, which, 0, netstate);
         }
     }
 
@@ -1728,9 +1733,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                         mTryCell = !mTryCell;
                         break;
                     case EVENT_UPSTREAM_CALLBACK: {
-                        // First: always update local state about every network.
-                        final NetworkState ns = mUpstreamNetworkMonitor.processCallback(
-                                message.arg1, message.obj);
+                        final NetworkState ns = (NetworkState) message.obj;
 
                         if (ns == null || !pertainsToCurrentUpstream(ns)) {
                             // TODO: In future, this is where upstream evaluation and selection
