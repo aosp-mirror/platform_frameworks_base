@@ -318,6 +318,15 @@ struct ContextHubServiceCallback : IContexthubCallback {
         return android::hardware::Void();
     }
 
+    virtual Return<void> handleAppAbort(uint64_t appId, uint32_t abortCode) {
+        ALOGI("Handle app aport called from %" PRIx64 " with abort code %" PRIu32,
+            appId,
+            abortCode);
+
+        // TODO: Plumb this to the clients interested in this app
+        return android::hardware::Void();
+    }
+
     void setContextHubId(uint32_t id) {
         mContextHubId = id;
     }
