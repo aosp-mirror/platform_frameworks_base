@@ -1022,6 +1022,19 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void setUserExpandedChild(View v, boolean userExpanded) {
         if (v instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) v;
+            if (userExpanded && onKeyguard()) {
+                // Due to a race when locking the screen while touching, a notification may be
+                // expanded even after we went back to keyguard. An example of this happens if
+                // you click in the empty space while expanding a group.
+
+                // We also need to un-user lock it here, since otherwise the content height
+                // calculated might be wrong. We also can't invert the two calls since
+                // un-userlocking it will trigger a layout switch in the content view.
+                row.setUserLocked(false);
+                updateContentHeight();
+                notifyHeightChangeListener(row);
+                return;
+            }
             row.setUserExpanded(userExpanded, true /* allowChildrenExpansion */);
             row.onExpandedByGesture(userExpanded);
         }
