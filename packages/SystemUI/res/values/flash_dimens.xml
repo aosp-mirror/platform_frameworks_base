@@ -26,4 +26,8 @@
 
     <!-- QS title visibility -->
     <dimen name="qs_tile_height_wo_label">48dp</dimen>
+
+    <!-- QS headers -->
+    <dimen name="qs_panel_top_offset_normal">80dp</dimen>
+    <dimen name="qs_panel_top_offset_header">110dp</dimen>
 </resources>

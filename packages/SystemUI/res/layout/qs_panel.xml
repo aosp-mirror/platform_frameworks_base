@@ -26,7 +26,7 @@
     <com.android.systemui.qs.QSPanel
             android:id="@+id/quick_settings_panel"
             android:background="#0000"
-            android:layout_marginTop="80dp"
+            android:layout_marginTop="@dimen/qs_panel_top_offset_normal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="8dp" />

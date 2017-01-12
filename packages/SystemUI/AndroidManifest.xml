@@ -508,6 +508,14 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".DaylightHeaderDefault"
+                  android:label="Default" >
+            <intent-filter>
+                <action android:name="org.omnirom.DaylightHeaderPack" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <!-- Doze with notifications, run in main sysui process for every user  -->
         <service
             android:name=".doze.DozeService"
