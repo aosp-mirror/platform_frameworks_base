@@ -576,7 +576,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     /**
      * Whether the package parser cache is enabled.
      */
-    private static final boolean DEFAULT_PACKAGE_PARSER_CACHE_ENABLED = false;
+    private static final boolean DEFAULT_PACKAGE_PARSER_CACHE_ENABLED = true;
 
     final ServiceThread mHandlerThread;
 
@@ -2842,7 +2842,12 @@ public class PackageManagerService extends IPackageManager.Stub {
             return null;
         }
 
-        if (SystemProperties.getBoolean("ro.boot.disable_package_cache", false)) {
+        // Disable package parsing on eng builds to allow for faster incremental development.
+        if ("eng".equals(Build.TYPE)) {
+            return null;
+        }
+
+        if (SystemProperties.getBoolean("pm.boot.disable_package_cache", false)) {
             Slog.i(TAG, "Disabling package parser cache due to system property.");
             return null;
         }
@@ -2861,9 +2866,33 @@ public class PackageManagerService extends IPackageManager.Stub {
             FileUtils.deleteContents(cacheBaseDir);
         }
 
+
         // Return the versioned package cache directory. This is something like
         // "/data/system/package_cache/1"
-        return FileUtils.createDir(cacheBaseDir, PACKAGE_PARSER_CACHE_VERSION);
+        File cacheDir = FileUtils.createDir(cacheBaseDir, PACKAGE_PARSER_CACHE_VERSION);
+
+        // The following is a workaround to aid development on non-numbered userdebug
+        // builds or cases where "adb sync" is used on userdebug builds. If we detect that
+        // the system partition is newer.
+        //
+        // NOTE: When no BUILD_NUMBER is set by the build system, it defaults to a build
+        // that starts with "eng." to signify that this is an engineering build and not
+        // destined for release.
+        if ("userdebug".equals(Build.TYPE) && Build.VERSION.INCREMENTAL.startsWith("eng.")) {
+            Slog.w(TAG, "Wiping cache directory because the system partition changed.");
+
+            // Heuristic: If the /system directory has been modified recently due to an "adb sync"
+            // or a regular make, then blow away the cache. Note that mtimes are *NOT* reliable
+            // in general and should not be used for production changes. In this specific case,
+            // we know that they will work.
+            File frameworkDir = new File(Environment.getRootDirectory(), "framework");
+            if (cacheDir.lastModified() < frameworkDir.lastModified()) {
+                FileUtils.deleteContents(cacheBaseDir);
+                cacheDir = FileUtils.createDir(cacheBaseDir, PACKAGE_PARSER_CACHE_VERSION);
+            }
+        }
+
+        return cacheDir;
     }
 
     @Override
