@@ -119,6 +119,7 @@ interface IDevicePolicyManager {
 
     void setActivePasswordState(int quality, int length, int letters, int uppercase, int lowercase,
         int numbers, int symbols, int nonletter, int userHandle);
+    void reportPasswordChanged(int userId);
     void reportFailedPasswordAttempt(int userHandle);
     void reportSuccessfulPasswordAttempt(int userHandle);
     void reportFailedFingerprintAttempt(int userHandle);
