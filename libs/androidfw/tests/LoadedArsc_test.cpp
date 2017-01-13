@@ -139,6 +139,36 @@ TEST(LoadedArscTest, LoadAppAsSharedLibrary) {
   EXPECT_EQ(0x7f, packages[0]->GetPackageId());
 }
 
+TEST(LoadedArscTest, LoadFeatureSplit) {
+  std::string contents;
+  ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/feature/feature.apk", "resources.arsc",
+                                      &contents));
+  std::unique_ptr<LoadedArsc> loaded_arsc = LoadedArsc::Load(contents.data(), contents.size());
+  ASSERT_NE(nullptr, loaded_arsc);
+
+  ResTable_config desired_config;
+  memset(&desired_config, 0, sizeof(desired_config));
+
+  LoadedArscEntry entry;
+  ResTable_config selected_config;
+  uint32_t flags;
+
+  ASSERT_TRUE(loaded_arsc->FindEntry(basic::R::string::test3, desired_config, &entry,
+                                     &selected_config, &flags));
+
+  size_t len;
+  const char16_t* type_name16 = entry.type_string_ref.string16(&len);
+  ASSERT_NE(nullptr, type_name16);
+  ASSERT_NE(0u, len);
+
+  size_t utf8_len = utf16_to_utf8_length(type_name16, len);
+  std::string type_name;
+  type_name.resize(utf8_len);
+  utf16_to_utf8(type_name16, len, &*type_name.begin(), utf8_len + 1);
+
+  EXPECT_EQ(std::string("string"), type_name);
+}
+
 // structs with size fields (like Res_value, ResTable_entry) should be
 // backwards and forwards compatible (aka checking the size field against
 // sizeof(Res_value) might not be backwards compatible.
