@@ -715,11 +715,13 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Activity Action: Creates a shortcut.
      * <p>Input: Nothing.</p>
-     * <p>Output: An Intent representing the shortcut. The intent must contain three
+     * <p>Output: An Intent representing the {@link android.content.pm.ShortcutInfo} result.</p>
+     * <p>For compatibility with older versions of android the intent may also contain three
      * extras: SHORTCUT_INTENT (value: Intent), SHORTCUT_NAME (value: String),
      * and SHORTCUT_ICON (value: Bitmap) or SHORTCUT_ICON_RESOURCE
      * (value: ShortcutIconResource).</p>
      *
+     * @see android.content.pm.ShortcutManager#createShortcutResultIntent
      * @see #EXTRA_SHORTCUT_INTENT
      * @see #EXTRA_SHORTCUT_NAME
      * @see #EXTRA_SHORTCUT_ICON
@@ -733,26 +735,34 @@ public class Intent implements Parcelable, Cloneable {
      * The name of the extra used to define the Intent of a shortcut.
      *
      * @see #ACTION_CREATE_SHORTCUT
+     * @deprecated Replaced with {@link android.content.pm.ShortcutManager#createShortcutResultIntent}
      */
+    @Deprecated
     public static final String EXTRA_SHORTCUT_INTENT = "android.intent.extra.shortcut.INTENT";
     /**
      * The name of the extra used to define the name of a shortcut.
      *
      * @see #ACTION_CREATE_SHORTCUT
+     * @deprecated Replaced with {@link android.content.pm.ShortcutManager#createShortcutResultIntent}
      */
+    @Deprecated
     public static final String EXTRA_SHORTCUT_NAME = "android.intent.extra.shortcut.NAME";
     /**
      * The name of the extra used to define the icon, as a Bitmap, of a shortcut.
      *
      * @see #ACTION_CREATE_SHORTCUT
+     * @deprecated Replaced with {@link android.content.pm.ShortcutManager#createShortcutResultIntent}
      */
+    @Deprecated
     public static final String EXTRA_SHORTCUT_ICON = "android.intent.extra.shortcut.ICON";
     /**
      * The name of the extra used to define the icon, as a ShortcutIconResource, of a shortcut.
      *
      * @see #ACTION_CREATE_SHORTCUT
      * @see android.content.Intent.ShortcutIconResource
+     * @deprecated Replaced with {@link android.content.pm.ShortcutManager#createShortcutResultIntent}
      */
+    @Deprecated
     public static final String EXTRA_SHORTCUT_ICON_RESOURCE =
             "android.intent.extra.shortcut.ICON_RESOURCE";
 

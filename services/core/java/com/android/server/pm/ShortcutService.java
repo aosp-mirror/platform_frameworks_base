@@ -1529,7 +1529,7 @@ public class ShortcutService extends IShortcutService.Stub {
         if (UserHandle.getUserId(callingUid) != userId) {
             throw new SecurityException("Invalid user-ID");
         }
-        if (injectGetPackageUid(packageName, userId) == injectBinderCallingUid()) {
+        if (injectGetPackageUid(packageName, userId) == callingUid) {
             return; // Caller is valid.
         }
         throw new SecurityException("Calling package name mismatch");
@@ -1852,6 +1852,25 @@ public class ShortcutService extends IShortcutService.Stub {
         Preconditions.checkNotNull(shortcut);
         Preconditions.checkArgument(shortcut.isEnabled(), "Shortcut must be enabled");
         return requestPinItem(packageName, userId, shortcut, null, resultIntent);
+    }
+
+    @Override
+    public Intent createShortcutResultIntent(String packageName, ShortcutInfo shortcut, int userId)
+            throws RemoteException {
+        Preconditions.checkNotNull(shortcut);
+        Preconditions.checkArgument(shortcut.isEnabled(), "Shortcut must be enabled");
+        verifyCaller(packageName, userId);
+
+        final Intent ret;
+        synchronized (mLock) {
+            throwIfUserLockedL(userId);
+
+            // Send request to the launcher, if supported.
+            ret = mShortcutRequestPinProcessor.createShortcutResultIntent(shortcut, userId);
+        }
+
+        verifyStates();
+        return ret;
     }
 
     /**

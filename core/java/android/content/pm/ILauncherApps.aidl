@@ -18,6 +18,7 @@ package android.content.pm;
 
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IOnAppsChangedListener;
@@ -60,4 +61,8 @@ interface ILauncherApps {
             int userId);
 
     boolean hasShortcutHostPermission(String callingPackage);
+
+    ParceledListSlice getShortcutConfigActivities(String packageName, in UserHandle user);
+    IntentSender getShortcutConfigActivityIntent(String callingPackage, in ComponentName component,
+            in UserHandle user);
 }
