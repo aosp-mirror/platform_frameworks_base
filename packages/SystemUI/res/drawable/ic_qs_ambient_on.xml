@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2017 The ABC rom
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+          http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="32dp"
+    android:height="32dp"
+    android:viewportWidth="32"
+    android:viewportHeight="32">
+
+    <path
+        android:fillColor="#ffffff"
+        android:pathData="M6.13531,15.9648 C6.13531,12.3536,6.13531,8.74244,6.13531,5.1312 C6.13531,2.25987,7.86163,0.49832,10.7153,0.49832 C14.2736,0.49832,17.8144,0.49832,21.3727,0.49832 C24.0679,0.49832,25.8647,2.27749,25.8647,4.95504 C25.8647,12.3184,25.8647,19.6816,25.8647,27.0449 C25.8647,29.7225,24.0679,31.484,21.3727,31.5016 C17.7967,31.5016,14.2208,31.5016,10.6272,31.5016 C7.89679,31.5016,6.13524,29.7224,6.13524,26.9568 C6.13524,23.2928,6.13524,19.6287,6.13524,15.9647 Z M8.67194,4.7613 C8.67194,11.3847,8.67194,17.9025,8.67194,24.4202 C13.6043,24.4202,18.4662,24.4202,23.3457,24.4202 C23.3457,17.8496,23.3457,11.3319,23.3457,4.7613 C18.431,4.7613,13.5691,4.7613,8.672,4.7613 Z M13.2167,28.6479 C15.1192,28.6479,16.9336,28.6479,18.7656,28.6479 C18.7656,28.1899,18.7656,27.7671,18.7656,27.3444 C16.8807,27.3444,15.0487,27.3444,13.2167,27.3444 C13.2167,27.7848,13.2167,28.1899,13.2167,28.6479 Z" />
+    <path
+        android:fillColor="#ffffff"
+        android:pathData="m 9.699183,10.012113 0,8.487583 1.467933,0 -1.467933,3.488111 4.282967,-3.488111 8.318607,0 0,-8.487583 -12.6015741,0 z m 11.528235,7.412358 -7.246213,0 -0.383266,0 -0.294531,0.241665 -0.938345,0.764648 0.423859,-1.006313 -1.622749,0 -0.394596,0 0,-6.336189 10.455841,0 0,6.336189 z" />
+</vector>
