@@ -110,7 +110,6 @@ public class ResolverActivity extends Activity {
     private int mDefaultTitleResId;
 
     protected ResolverDrawerLayout mResolverDrawerLayout;
-    protected String mContentType;
     protected PackageManager mPm;
     protected int mLaunchedFromUid;
 
