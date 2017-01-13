@@ -255,6 +255,7 @@ public class PowerUI extends SystemUI {
             boolean shouldShowTempWarning = false;
             for (float temp : temps) {
                 if (temp >= mThrottlingTemp) {
+                    Slog.i(TAG, "currentTemp=" + temp + ", throttlingTemp=" + mThrottlingTemp);
                     shouldShowTempWarning = true;
                     break;
                 }
