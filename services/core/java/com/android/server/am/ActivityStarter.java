@@ -1777,7 +1777,7 @@ class ActivityStarter {
             int stackId = mInTask.getLaunchStackId();
             if (stackId != mInTask.getStackId()) {
                 final ActivityStack stack = mSupervisor.moveTaskToStackUncheckedLocked(mInTask,
-                        stackId, ON_TOP, !FORCE_FOCUS, "inTaskToFront", true /* allowStackOnTop */);
+                        stackId, ON_TOP, !FORCE_FOCUS, "inTaskToFront");
                 stackId = stack.mStackId;
             }
             if (StackId.resizeStackWithLaunchBounds(stackId)) {

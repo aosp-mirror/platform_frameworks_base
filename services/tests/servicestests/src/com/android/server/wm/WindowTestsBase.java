@@ -16,6 +16,10 @@
 
 package com.android.server.wm;
 
+import android.content.res.Configuration;
+import android.graphics.Rect;
+import android.os.Binder;
+import android.view.IApplicationToken;
 import org.junit.Assert;
 import org.junit.Before;
 
@@ -28,6 +32,7 @@ import android.view.WindowManager;
 import static android.app.ActivityManager.StackId.FIRST_DYNAMIC_STACK_ID;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.EMPTY;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
@@ -50,7 +55,7 @@ class WindowTestsBase {
     static WindowManagerService sWm = null;
     private final IWindow mIWindow = new TestIWindow();
     private final Session mMockSession = mock(Session.class);
-    private static int sNextStackId = FIRST_DYNAMIC_STACK_ID;
+    static int sNextStackId = FIRST_DYNAMIC_STACK_ID;
     private static int sNextTaskId = 0;
 
     private static boolean sOneTimeSetupDone = false;
@@ -201,16 +206,78 @@ class WindowTestsBase {
         }
     }
 
+    /* Used so we can gain access to some protected members of the {@link Task} class */
+    class TestTask extends Task {
+
+        boolean mShouldDeferRemoval = false;
+
+        TestTask(int taskId, TaskStack stack, int userId, WindowManagerService service, Rect bounds,
+                Configuration overrideConfig, boolean isOnTopLauncher, int resizeMode,
+                boolean homeTask, TaskWindowContainerController controller) {
+            super(taskId, stack, userId, service, bounds, overrideConfig, isOnTopLauncher,
+                    resizeMode, homeTask, controller);
+        }
+
+        boolean shouldDeferRemoval() {
+            return mShouldDeferRemoval;
+        }
+
+        int positionInParent() {
+            return getParent().mChildren.indexOf(this);
+        }
+    }
+
     /**
      * Used so we can gain access to some protected members of {@link TaskWindowContainerController}
      * class.
      */
     class TestTaskWindowContainerController extends TaskWindowContainerController {
 
+        TestTaskWindowContainerController() {
+            this(createTaskStackOnDisplay(sDisplayContent).mStackId);
+        }
+
         TestTaskWindowContainerController(int stackId) {
             super(sNextTaskId++, stackId, 0 /* userId */, null /* bounds */,
                     EMPTY /* overrideConfig*/, RESIZE_MODE_UNRESIZEABLE, false /* homeTask*/,
                     false /* isOnTopLauncher */, true /* toTop*/, true /* showForAllUsers */);
+        }
+
+        @Override
+        TestTask createTask(int taskId, TaskStack stack, int userId, Rect bounds,
+                Configuration overrideConfig, int resizeMode, boolean homeTask,
+                boolean isOnTopLauncher) {
+            return new TestTask(taskId, stack, userId, mService, bounds, overrideConfig,
+                    isOnTopLauncher, resizeMode, homeTask, this);
+        }
+    }
+
+    class TestAppWindowContainerController extends AppWindowContainerController {
+
+        final IApplicationToken mToken;
+
+        TestAppWindowContainerController(TestTaskWindowContainerController taskController) {
+            this(taskController, new TestIApplicationToken());
+        }
+
+        TestAppWindowContainerController(TestTaskWindowContainerController taskController,
+                IApplicationToken token) {
+            super(taskController, token, null /* listener */, 0 /* index */,
+                    SCREEN_ORIENTATION_UNSPECIFIED, true /* fullscreen */,
+                    true /* showForAllUsers */, 0 /* configChanges */, false /* voiceInteraction */,
+                    false /* launchTaskBehind */, false /* alwaysFocusable */,
+                    0 /* targetSdkVersion */, 0 /* rotationAnimationHint */,
+                    0 /* inputDispatchingTimeoutNanos */, sWm);
+            mToken = token;
+        }
+    }
+
+    class TestIApplicationToken implements IApplicationToken {
+
+        private final Binder mBinder = new Binder();
+        @Override
+        public IBinder asBinder() {
+            return mBinder;
         }
     }
 }

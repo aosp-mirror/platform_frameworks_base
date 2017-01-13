@@ -9572,7 +9572,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 boolean preserveWindow = (resizeMode & RESIZE_MODE_PRESERVE_WINDOW) != 0;
                 if (stackId != task.getStackId()) {
                     mStackSupervisor.moveTaskToStackUncheckedLocked(task, stackId, ON_TOP,
-                            !FORCE_FOCUS, "resizeTask", true /* allowStackOnTop */);
+                            !FORCE_FOCUS, "resizeTask");
                     preserveWindow = false;
                 }
 
@@ -10020,7 +10020,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // Defer the resume so resume/pausing while moving stacks is dangerous.
                 mStackSupervisor.moveTaskToStackLocked(topTask.taskId, DOCKED_STACK_ID,
                         false /* toTop */, !FORCE_FOCUS, "swapDockedAndFullscreenStack",
-                        ANIMATE, true /* deferResume */, true /* allowStackOnTop */);
+                        ANIMATE, true /* deferResume */);
                 final int size = tasks.size();
                 for (int i = 0; i < size; i++) {
                     final int id = tasks.get(i).taskId;
@@ -10029,8 +10029,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     mStackSupervisor.moveTaskToStackLocked(id,
                             FULLSCREEN_WORKSPACE_STACK_ID, true /* toTop */, !FORCE_FOCUS,
-                            "swapDockedAndFullscreenStack", ANIMATE, true /* deferResume */,
-                            true /* allowStackOnTop */);
+                            "swapDockedAndFullscreenStack", ANIMATE, true /* deferResume */);
                 }
 
                 // Because we deferred the resume, to avoid conflicts with stack switches while
@@ -10071,7 +10070,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mWindowManager.setDockedStackCreateState(createMode, initialBounds);
                 final boolean moved = mStackSupervisor.moveTaskToStackLocked(
                         taskId, DOCKED_STACK_ID, toTop, !FORCE_FOCUS, "moveTaskToDockedStack",
-                        animate, DEFER_RESUME, true /* allowStackOnTop */);
+                        animate, DEFER_RESUME);
                 if (moved) {
                     if (moveHomeStackFront) {
                         mStackSupervisor.moveHomeStackToFront("moveTaskToDockedStack");
@@ -10187,10 +10186,24 @@ public class ActivityManagerService extends IActivityManager.Stub
             try {
                 if (DEBUG_STACK) Slog.d(TAG_STACK, "positionTaskInStack: positioning task="
                         + taskId + " in stackId=" + stackId + " at position=" + position);
+                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
+                if (task == null) {
+                    throw new IllegalArgumentException("positionTaskInStack: no task for id="
+                            + taskId);
+                }
+
                 final ActivityStack stack = mStackSupervisor.getStack(stackId, CREATE_IF_NEEDED,
                         !ON_TOP);
 
-                stack.positionChildAt(taskId, position);
+                // TODO: Have the callers of this API call a separate reparent method if that is
+                // what they intended to do vs. having this method also do reparenting.
+                if (task.getStack() == stack) {
+                    // Change position in current stack.
+                    stack.positionChildAt(task, position);
+                } else {
+                    // Reparent to new stack.
+                    task.reparent(stackId, position, "positionTaskInStack");
+                }
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

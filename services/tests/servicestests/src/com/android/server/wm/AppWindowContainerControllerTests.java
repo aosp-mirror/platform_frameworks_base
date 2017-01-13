@@ -77,35 +77,8 @@ public class AppWindowContainerControllerTests extends WindowTestsBase {
     }
 
     private TestAppWindowContainerController createAppWindowController() {
-        final TaskStack stack = createTaskStackOnDisplay(sDisplayContent);
         final TestTaskWindowContainerController taskController =
-                new TestTaskWindowContainerController(stack.mStackId);
-        final IApplicationToken token = new TestIApplicationToken();
-        return new TestAppWindowContainerController(taskController, token);
-    }
-
-    private class TestAppWindowContainerController extends AppWindowContainerController {
-
-        final IApplicationToken mToken;
-
-        TestAppWindowContainerController(TestTaskWindowContainerController taskController,
-                IApplicationToken token) {
-            super(taskController, token, null /* listener */, 0 /* index */,
-                    SCREEN_ORIENTATION_UNSPECIFIED, true /* fullscreen */,
-                    true /* showForAllUsers */, 0 /* configChanges */, false /* voiceInteraction */,
-                    false /* launchTaskBehind */, false /* alwaysFocusable */,
-                    0 /* targetSdkVersion */, 0 /* rotationAnimationHint */,
-                    0 /* inputDispatchingTimeoutNanos */, sWm);
-            mToken = token;
-        }
-    }
-
-    private class TestIApplicationToken implements IApplicationToken {
-
-        private final Binder mBinder = new Binder();
-        @Override
-        public IBinder asBinder() {
-            return mBinder;
-        }
+                new TestTaskWindowContainerController();
+        return new TestAppWindowContainerController(taskController);
     }
 }
