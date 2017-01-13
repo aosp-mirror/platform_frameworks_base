@@ -101,6 +101,13 @@ public:
 // GraphicBuffer lifecycle
 // ----------------------------------------------------------------------------
 
+static jlong android_graphics_GraphicBuffer_wrap(JNIEnv* env, jobject clazz,
+        jlong unwrapped) {
+    sp<GraphicBuffer> b(reinterpret_cast<GraphicBuffer*>(unwrapped));
+    GraphicBufferWrapper* wrapper = new GraphicBufferWrapper(b);
+    return reinterpret_cast<jlong>(wrapper);
+}
+
 static jlong android_graphics_GraphicBuffer_create(JNIEnv* env, jobject clazz,
         jint width, jint height, jint format, jint usage) {
 
@@ -298,7 +305,9 @@ static const JNINativeMethod gMethods[] = {
     { "nLockCanvas", "(JLandroid/graphics/Canvas;Landroid/graphics/Rect;)Z",
             (void*) android_graphics_GraphicBuffer_lockCanvas },
     { "nUnlockCanvasAndPost", "(JLandroid/graphics/Canvas;)Z",
-            (void*) android_graphics_GraphicBuffer_unlockCanvasAndPost }
+            (void*) android_graphics_GraphicBuffer_unlockCanvasAndPost },
+    { "nWrapGraphicBuffer", "(J)J",
+            (void*) android_graphics_GraphicBuffer_wrap }
 };
 
 int register_android_graphics_GraphicBuffer(JNIEnv* env) {

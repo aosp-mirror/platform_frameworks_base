@@ -15,6 +15,7 @@
  */
 
 #define LOG_TAG "SurfaceControl"
+#define LOG_NDEBUG 0
 
 #include "android_os_Parcel.h"
 #include "android_util_Binder.h"
@@ -89,6 +90,11 @@ static struct {
     jmethodID ctor;
 } gHdrCapabilitiesClassInfo;
 
+static struct {
+    jclass clazz;
+    jmethodID builder;
+} gGraphicBufferClassInfo;
+
 // ----------------------------------------------------------------------------
 
 static jlong nativeCreate(JNIEnv* env, jclass clazz, jobject sessionObj,
@@ -123,6 +129,44 @@ static void nativeDisconnect(JNIEnv* env, jclass clazz, jlong nativeObject) {
     }
 }
 
+static Rect rectFromObj(JNIEnv* env, jobject rectObj) {
+    int left = env->GetIntField(rectObj, gRectClassInfo.left);
+    int top = env->GetIntField(rectObj, gRectClassInfo.top);
+    int right = env->GetIntField(rectObj, gRectClassInfo.right);
+    int bottom = env->GetIntField(rectObj, gRectClassInfo.bottom);
+    return Rect(left, top, right, bottom);
+}
+
+static jobject nativeScreenshotToBuffer(JNIEnv* env, jclass clazz,
+        jobject displayTokenObj, jobject sourceCropObj, jint width, jint height,
+        jint minLayer, jint maxLayer, bool allLayers, bool useIdentityTransform,
+        int rotation) {
+    sp<IBinder> displayToken = ibinderForJavaObject(env, displayTokenObj);
+    if (displayToken == NULL) {
+        return NULL;
+    }
+    Rect sourceCrop = rectFromObj(env, sourceCropObj);
+    if (allLayers) {
+        minLayer = 0;
+        maxLayer = -1;
+    }
+    sp<GraphicBuffer> buffer;
+    status_t res = ScreenshotClient::captureToBuffer(displayToken,
+            sourceCrop, width, height, minLayer, maxLayer, useIdentityTransform,
+            rotation, &buffer);
+    if (res != NO_ERROR) {
+        return NULL;
+    }
+
+    return env->CallStaticObjectMethod(gGraphicBufferClassInfo.clazz,
+            gGraphicBufferClassInfo.builder,
+            buffer->getWidth(),
+            buffer->getHeight(),
+            buffer->getPixelFormat(),
+            buffer->getUsage(),
+            (void*)buffer.get());
+}
+
 static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
         jobject displayTokenObj, jobject sourceCropObj, jint width, jint height,
         jint minLayer, jint maxLayer, bool allLayers, bool useIdentityTransform,
@@ -132,11 +176,7 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
         return NULL;
     }
 
-    int left = env->GetIntField(sourceCropObj, gRectClassInfo.left);
-    int top = env->GetIntField(sourceCropObj, gRectClassInfo.top);
-    int right = env->GetIntField(sourceCropObj, gRectClassInfo.right);
-    int bottom = env->GetIntField(sourceCropObj, gRectClassInfo.bottom);
-    Rect sourceCrop(left, top, right, bottom);
+    Rect sourceCrop = rectFromObj(env, sourceCropObj);
 
     std::unique_ptr<ScreenshotClient> screenshot(new ScreenshotClient());
     status_t res;
@@ -786,7 +826,10 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
     {"nativeGetHandle", "(J)Landroid/os/IBinder;",
             (void*)nativeGetHandle },
     {"nativeGetTransformToDisplayInverse", "(J)Z",
-            (void*)nativeGetTransformToDisplayInverse },
+     (void*)nativeGetTransformToDisplayInverse },
+    {"nativeScreenshotToBuffer",
+     "(Landroid/os/IBinder;Landroid/graphics/Rect;IIIIZZI)Landroid/graphics/GraphicBuffer;",
+     (void*)nativeScreenshotToBuffer },
 };
 
 int register_android_view_SurfaceControl(JNIEnv* env)
@@ -835,6 +878,11 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gHdrCapabilitiesClassInfo.clazz = MakeGlobalRefOrDie(env, hdrCapabilitiesClazz);
     gHdrCapabilitiesClassInfo.ctor = GetMethodIDOrDie(env, hdrCapabilitiesClazz, "<init>",
             "([IFFF)V");
+
+    jclass graphicsBufferClazz = FindClassOrDie(env, "android/graphics/GraphicBuffer");
+    gGraphicBufferClassInfo.clazz = MakeGlobalRefOrDie(env, graphicsBufferClazz);
+    gGraphicBufferClassInfo.builder = GetStaticMethodIDOrDie(env, graphicsBufferClazz,
+            "createFromExisting", "(IIIIJ)Landroid/graphics/GraphicBuffer;");
 
     return err;
 }
