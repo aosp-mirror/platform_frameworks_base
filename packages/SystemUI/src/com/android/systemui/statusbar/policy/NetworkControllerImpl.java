@@ -24,6 +24,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
+import android.net.NetworkScoreManager;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -88,6 +89,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private final DataSaverController mDataSaverController;
     private final CurrentUserTracker mUserTracker;
     private Config mConfig;
+    private final NetworkScoreManager mNetworkScoreManager;
 
     // Subcontrollers.
     @VisibleForTesting
@@ -145,9 +147,12 @@ public class NetworkControllerImpl extends BroadcastReceiver
     public NetworkControllerImpl(Context context, Looper bgLooper,
             DeviceProvisionedController deviceProvisionedController) {
         this(context, (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE),
+                context.getSystemService(NetworkScoreManager.class),
                 (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE),
                 (WifiManager) context.getSystemService(Context.WIFI_SERVICE),
-                SubscriptionManager.from(context), Config.readConfig(context), bgLooper,
+                SubscriptionManager.from(context),
+                Config.readConfig(context),
+                bgLooper,
                 new CallbackHandler(),
                 new AccessPointControllerImpl(context, bgLooper),
                 new DataUsageController(context),
@@ -158,8 +163,12 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
     @VisibleForTesting
     NetworkControllerImpl(Context context, ConnectivityManager connectivityManager,
-            TelephonyManager telephonyManager, WifiManager wifiManager,
-            SubscriptionManager subManager, Config config, Looper bgLooper,
+            NetworkScoreManager networkScoreManager,
+            TelephonyManager telephonyManager,
+            WifiManager wifiManager,
+            SubscriptionManager subManager,
+            Config config,
+            Looper bgLooper,
             CallbackHandler callbackHandler,
             AccessPointControllerImpl accessPointController,
             DataUsageController dataUsageController,
@@ -182,6 +191,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
         // wifi
         mWifiManager = wifiManager;
+        mNetworkScoreManager = networkScoreManager;
 
         mLocale = mContext.getResources().getConfiguration().locale;
         mAccessPoints = accessPointController;
@@ -195,7 +205,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             }
         });
         mWifiSignalController = new WifiSignalController(mContext, mHasMobileDataFeature,
-                mCallbackHandler, this);
+                mCallbackHandler, this, mNetworkScoreManager);
 
         mEthernetSignalController = new EthernetSignalController(mContext, mCallbackHandler, this);
 

@@ -53,7 +53,8 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         // Turn off mobile network support.
         Mockito.when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(false);
         // Create a new NetworkController as this is currently handled in constructor.
-        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
+        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockNetworkScoreManager,
+                mMockTm, mMockWm, mMockSm,
                 mConfig, Looper.getMainLooper(), mCallbackHandler,
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
                 mMockSubDefaults, mock(DeviceProvisionedController.class));
@@ -107,7 +108,8 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         // Turn off mobile network support.
         Mockito.when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(false);
         // Create a new NetworkController as this is currently handled in constructor.
-        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
+        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockNetworkScoreManager,
+                mMockTm, mMockWm, mMockSm,
                 mConfig, Looper.getMainLooper(), mCallbackHandler,
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
                 mMockSubDefaults, mock(DeviceProvisionedController.class));

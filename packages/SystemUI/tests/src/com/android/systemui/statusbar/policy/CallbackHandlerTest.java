@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.policy;
 import android.os.HandlerThread;
 import android.support.test.runner.AndroidJUnit4;
 import android.telephony.SubscriptionInfo;
-import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.NetworkController.EmergencyListener;

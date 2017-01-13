@@ -12,13 +12,17 @@ package com.android.settingslib.wifi;
 
 import android.content.Intent;
 import android.net.NetworkInfo;
+import android.net.NetworkKey;
+import android.net.WifiKey;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.util.Log;
 
 import java.util.List;
 
 public class WifiStatusTracker {
+    private static final String TAG = "WifiStatusTracker";
 
     private final WifiManager mWifiManager;
     public boolean enabled;
@@ -26,6 +30,7 @@ public class WifiStatusTracker {
     public String ssid;
     public int rssi;
     public int level;
+    public NetworkKey networkKey;
 
     public WifiStatusTracker(WifiManager wifiManager) {
         mWifiManager = wifiManager;
@@ -40,19 +45,32 @@ public class WifiStatusTracker {
             final NetworkInfo networkInfo = (NetworkInfo)
                     intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
             connected = networkInfo != null && networkInfo.isConnected();
+            WifiInfo info = intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO) != null
+                    ? (WifiInfo) intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO)
+                    : mWifiManager.getConnectionInfo();
+
             // If Connected grab the signal strength and ssid.
-            if (connected) {
-                // try getting it out of the intent first
-                WifiInfo info = intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO) != null
-                        ? (WifiInfo) intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO)
-                        : mWifiManager.getConnectionInfo();
-                if (info != null) {
-                    ssid = getSsid(info);
+            if (connected && info != null) {
+                ssid = getSsid(info);
+                String bssid = info.getBSSID();
+                if ((ssid != null) && (bssid != null)) {
+                    // Reuse existing network key object if possible.
+                    if ((networkKey == null)
+                            || !networkKey.wifiKey.ssid.equals(ssid)
+                            || !networkKey.wifiKey.bssid.equals(bssid)) {
+                        try {
+                            networkKey = new NetworkKey(
+                                    new WifiKey(ssid, bssid));
+                        } catch (IllegalArgumentException e) {
+                            Log.e(TAG, "Cannot create NetworkKey", e);
+                        }
+                    }
                 } else {
-                    ssid = null;
+                    networkKey = null;
                 }
-            } else if (!connected) {
+            } else {
                 ssid = null;
+                networkKey = null;
             }
         } else if (action.equals(WifiManager.RSSI_CHANGED_ACTION)) {
             // Default to -200 as its below WifiManager.MIN_RSSI.
