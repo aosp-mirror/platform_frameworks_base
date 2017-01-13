@@ -104,6 +104,8 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Global;
+import android.service.NetworkInterfaceProto;
+import android.service.NetworkStatsServiceDumpProto;
 import android.telephony.TelephonyManager;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
@@ -115,6 +117,7 @@ import android.util.NtpTrustedTime;
 import android.util.Slog;
 import android.util.SparseIntArray;
 import android.util.TrustedTime;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.net.VpnInfo;
@@ -1255,6 +1258,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final IndentingPrintWriter pw = new IndentingPrintWriter(rawWriter, "  ");
 
         synchronized (mStatsLock) {
+            if (args.length > 0 && "--proto".equals(args[0])) {
+                // In this case ignore all other arguments.
+                dumpProto(fd);
+                return;
+            }
+
             if (poll) {
                 performPollLocked(FLAG_PERSIST_ALL | FLAG_PERSIST_FORCE);
                 pw.println("Forced poll");
@@ -1324,6 +1333,33 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 mUidTagRecorder.dumpLocked(pw, fullHistory);
                 pw.decreaseIndent();
             }
+        }
+    }
+
+    private void dumpProto(FileDescriptor fd) {
+        final ProtoOutputStream proto = new ProtoOutputStream(fd);
+
+        // TODO Right now it writes all history.  Should it limit to the "since-boot" log?
+
+        dumpInterfaces(proto, NetworkStatsServiceDumpProto.ACTIVE_INTERFACES, mActiveIfaces);
+        dumpInterfaces(proto, NetworkStatsServiceDumpProto.ACTIVE_UID_INTERFACES, mActiveUidIfaces);
+        mDevRecorder.writeToProtoLocked(proto, NetworkStatsServiceDumpProto.DEV_STATS);
+        mXtRecorder.writeToProtoLocked(proto, NetworkStatsServiceDumpProto.XT_STATS);
+        mUidRecorder.writeToProtoLocked(proto, NetworkStatsServiceDumpProto.UID_STATS);
+        mUidTagRecorder.writeToProtoLocked(proto, NetworkStatsServiceDumpProto.UID_TAG_STATS);
+
+        proto.flush();
+    }
+
+    private static void dumpInterfaces(ProtoOutputStream proto, long tag,
+            ArrayMap<String, NetworkIdentitySet> ifaces) {
+        for (int i = 0; i < ifaces.size(); i++) {
+            final long start = proto.start(tag);
+
+            proto.write(NetworkInterfaceProto.INTERFACE, ifaces.keyAt(i));
+            ifaces.valueAt(i).writeToProto(proto, NetworkInterfaceProto.IDENTITIES);
+
+            proto.end(start);
         }
     }
 

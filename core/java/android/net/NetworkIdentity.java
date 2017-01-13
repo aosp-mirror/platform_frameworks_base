@@ -24,8 +24,10 @@ import android.content.Context;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.service.NetworkIdentityProto;
 import android.telephony.TelephonyManager;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 
 import java.util.Objects;
 
@@ -108,6 +110,23 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
         }
         builder.append(", metered=").append(mMetered);
         return builder.append("}").toString();
+    }
+
+    public void writeToProto(ProtoOutputStream proto, long tag) {
+        final long start = proto.start(tag);
+
+        proto.write(NetworkIdentityProto.TYPE, mType);
+
+        // Not dumping mSubType, subtypes are no longer supported.
+
+        if (mSubscriberId != null) {
+            proto.write(NetworkIdentityProto.SUBSCRIBER_ID, scrubSubscriberId(mSubscriberId));
+        }
+        proto.write(NetworkIdentityProto.NETWORK_ID, mNetworkId);
+        proto.write(NetworkIdentityProto.ROAMING, mRoaming);
+        proto.write(NetworkIdentityProto.METERED, mMetered);
+
+        proto.end(start);
     }
 
     public int getType() {
