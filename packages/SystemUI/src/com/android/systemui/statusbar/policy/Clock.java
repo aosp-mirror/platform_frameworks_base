@@ -33,14 +33,13 @@ import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
 import android.text.style.CharacterStyle;
 import android.text.style.RelativeSizeSpan;
-import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.view.Display;
-import android.view.View;
 import android.widget.TextView;
 
 import com.android.systemui.DemoMode;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
@@ -108,7 +107,7 @@ public class Clock extends TextView implements DemoMode, Tunable {
             filter.addAction(Intent.ACTION_USER_SWITCHED);
 
             getContext().registerReceiverAsUser(mIntentReceiver, UserHandle.ALL, filter,
-                    null, getHandler());
+                    null, PhoneStatusBar.getTimeTickHandler(getContext()));
             TunerService.get(getContext()).addTunable(this, CLOCK_SECONDS,
                     StatusBarIconController.ICON_BLACKLIST);
         }
@@ -140,18 +139,22 @@ public class Clock extends TextView implements DemoMode, Tunable {
             String action = intent.getAction();
             if (action.equals(Intent.ACTION_TIMEZONE_CHANGED)) {
                 String tz = intent.getStringExtra("time-zone");
-                mCalendar = Calendar.getInstance(TimeZone.getTimeZone(tz));
-                if (mClockFormat != null) {
-                    mClockFormat.setTimeZone(mCalendar.getTimeZone());
-                }
+                getHandler().post(() -> {
+                    mCalendar = Calendar.getInstance(TimeZone.getTimeZone(tz));
+                    if (mClockFormat != null) {
+                        mClockFormat.setTimeZone(mCalendar.getTimeZone());
+                    }
+                });
             } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
                 final Locale newLocale = getResources().getConfiguration().locale;
-                if (! newLocale.equals(mLocale)) {
-                    mLocale = newLocale;
-                    mClockFormatString = ""; // force refresh
-                }
+                getHandler().post(() -> {
+                    if (!newLocale.equals(mLocale)) {
+                        mLocale = newLocale;
+                        mClockFormatString = ""; // force refresh
+                    }
+                });
             }
-            updateClock();
+            getHandler().post(() -> updateClock());
         }
     };
 

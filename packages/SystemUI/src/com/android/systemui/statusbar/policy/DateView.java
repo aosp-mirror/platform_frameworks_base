@@ -23,12 +23,13 @@ import android.content.IntentFilter;
 import android.content.res.TypedArray;
 import android.icu.text.DateFormat;
 import android.icu.text.DisplayContext;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
@@ -52,9 +53,9 @@ public class DateView extends TextView {
                 if (Intent.ACTION_LOCALE_CHANGED.equals(action)
                         || Intent.ACTION_TIMEZONE_CHANGED.equals(action)) {
                     // need to get a fresh date format
-                    mDateFormat = null;
+                    getHandler().post(() -> mDateFormat = null);
                 }
-                updateClock();
+                getHandler().post(() -> updateClock());
             }
         }
     };
@@ -85,7 +86,8 @@ public class DateView extends TextView {
         filter.addAction(Intent.ACTION_TIME_CHANGED);
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
         filter.addAction(Intent.ACTION_LOCALE_CHANGED);
-        getContext().registerReceiver(mIntentReceiver, filter, null, null);
+        getContext().registerReceiver(mIntentReceiver, filter, null,
+                PhoneStatusBar.getTimeTickHandler(getContext()));
 
         updateClock();
     }
