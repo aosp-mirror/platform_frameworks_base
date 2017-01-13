@@ -211,6 +211,7 @@ public class NotificationPanelView extends PanelView implements
     private boolean mOpening;
     private int mIndicationBottomPadding;
     private boolean mIsFullWidth;
+    private boolean mDark;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -391,7 +392,9 @@ public class NotificationPanelView extends PanelView implements
                     mNotificationStackScroller.getNotGoneChildCount(),
                     getHeight(),
                     mKeyguardStatusView.getHeight(),
-                    mEmptyDragAmount);
+                    mEmptyDragAmount,
+                    mKeyguardStatusView.getClockBottom(),
+                    mDark);
             mClockPositionAlgorithm.run(mClockPositionResult);
             if (animate || mClockAnimator != null) {
                 startClockAnimation(mClockPositionResult.clockY);
@@ -2453,4 +2456,10 @@ public class NotificationPanelView extends PanelView implements
             }
         }
     };
+
+    public void setDark(boolean dark) {
+        mDark = dark;
+        mKeyguardStatusView.setDark(dark);
+        positionClockAndNotifications();
+    }
 }

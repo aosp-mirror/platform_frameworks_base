@@ -44,7 +44,7 @@ public class DozeScrimController {
 
     private final Context mContext;
     private final View mStackScroller;
-    private final KeyguardStatusView mKeyguardStatusView;
+    private final NotificationPanelView mNotificationPanelView;
 
     private boolean mDozing;
     private DozeHost.PulseCallback mPulseCallback;
@@ -55,12 +55,12 @@ public class DozeScrimController {
     private float mBehindTarget;
 
     public DozeScrimController(ScrimController scrimController, Context context,
-            View stackScroller, KeyguardStatusView keyguardStatusView) {
+            View stackScroller, NotificationPanelView notificationPanelView) {
         mContext = context;
         mStackScroller = stackScroller;
         mScrimController = scrimController;
         mDozeParameters = new DozeParameters(context);
-        mKeyguardStatusView = keyguardStatusView;
+        mNotificationPanelView = notificationPanelView;
     }
 
     public void setDozing(boolean dozing, boolean animate) {
@@ -70,7 +70,7 @@ public class DozeScrimController {
             abortAnimations();
             mScrimController.setDozeBehindAlpha(1f);
             mScrimController.setDozeInFrontAlpha(mDozeParameters.getAlwaysOn() ? 0f : 1f);
-            mKeyguardStatusView.setDark(true);
+            mNotificationPanelView.setDark(true);
         } else {
             cancelPulsing();
             if (animate) {
@@ -86,7 +86,7 @@ public class DozeScrimController {
                 mScrimController.setDozeInFrontAlpha(0f);
             }
             // TODO: animate
-            mKeyguardStatusView.setDark(false);
+            mNotificationPanelView.setDark(false);
         }
     }
 

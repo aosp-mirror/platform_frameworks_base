@@ -170,6 +170,11 @@ public class KeyguardStatusView extends GridLayout {
         }
     }
 
+    public int getClockBottom() {
+        return mClockView.getBottom() +
+                ((MarginLayoutParams) mClockView.getLayoutParams()).bottomMargin;
+    }
+
     public static String formatNextAlarm(Context context, AlarmManager.AlarmClockInfo info) {
         if (info == null) {
             return "";

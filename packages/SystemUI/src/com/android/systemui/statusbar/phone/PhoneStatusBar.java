@@ -898,7 +898,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStackScroller.setScrimController(mScrimController);
         mStatusBarView.setScrimController(mScrimController);
         mDozeScrimController = new DozeScrimController(mScrimController, context, mStackScroller,
-                mKeyguardStatusView);
+                mNotificationPanel);
 
         // Other icons
         mLocationController = new LocationControllerImpl(mContext,

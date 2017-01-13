@@ -68,6 +68,8 @@ public class KeyguardClockPositionAlgorithm {
     }
 
     private AccelerateInterpolator mAccelerateInterpolator = new AccelerateInterpolator();
+    private int mClockBottom;
+    private boolean mDark;
 
     /**
      * Refreshes the dimension values.
@@ -86,7 +88,8 @@ public class KeyguardClockPositionAlgorithm {
     }
 
     public void setup(int maxKeyguardNotifications, int maxPanelHeight, float expandedHeight,
-            int notificationCount, int height, int keyguardStatusHeight, float emptyDragAmount) {
+            int notificationCount, int height, int keyguardStatusHeight, float emptyDragAmount,
+            int clockBottom, boolean dark) {
         mMaxKeyguardNotifications = maxKeyguardNotifications;
         mMaxPanelHeight = maxPanelHeight;
         mExpandedHeight = expandedHeight;
@@ -94,6 +97,8 @@ public class KeyguardClockPositionAlgorithm {
         mHeight = height;
         mKeyguardStatusHeight = keyguardStatusHeight;
         mEmptyDragAmount = emptyDragAmount;
+        mClockBottom = clockBottom;
+        mDark = dark;
     }
 
     public float getMinStackScrollerPadding(int height, int keyguardStatusHeight) {
@@ -115,6 +120,9 @@ public class KeyguardClockPositionAlgorithm {
                 result.clockY,
                 y + getClockNotificationsPadding() + mKeyguardStatusHeight);
         result.clockAlpha = getClockAlpha(result.clockScale);
+        if (mDark) {
+            result.stackScrollerPadding = mClockBottom + y;
+        }
     }
 
     private float getClockScale(int notificationPadding, int clockY, int startPadding) {
