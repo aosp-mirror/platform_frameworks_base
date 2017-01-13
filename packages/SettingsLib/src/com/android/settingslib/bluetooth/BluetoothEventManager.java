@@ -30,6 +30,7 @@ import com.android.settingslib.R;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -44,8 +45,9 @@ public final class BluetoothEventManager {
     private final LocalBluetoothAdapter mLocalAdapter;
     private final CachedBluetoothDeviceManager mDeviceManager;
     private LocalBluetoothProfileManager mProfileManager;
-    private final IntentFilter mAdapterIntentFilter, mProfileIntentFilter;
+    private final IntentFilter mIntentFilter;
     private final Map<String, Handler> mHandlerMap;
+    private Set<String> mProfileActions;
     private Context mContext;
 
     private final Collection<BluetoothCallback> mCallbacks =
@@ -59,12 +61,12 @@ public final class BluetoothEventManager {
 
     private void addHandler(String action, Handler handler) {
         mHandlerMap.put(action, handler);
-        mAdapterIntentFilter.addAction(action);
+        mIntentFilter.addAction(action);
     }
 
     void addProfileHandler(String action, Handler handler) {
         mHandlerMap.put(action, handler);
-        mProfileIntentFilter.addAction(action);
+        mProfileActions.add(action);
     }
 
     // Set profile manager after construction due to circular dependency
@@ -76,9 +78,9 @@ public final class BluetoothEventManager {
             CachedBluetoothDeviceManager deviceManager, Context context) {
         mLocalAdapter = adapter;
         mDeviceManager = deviceManager;
-        mAdapterIntentFilter = new IntentFilter();
-        mProfileIntentFilter = new IntentFilter();
+        mIntentFilter = new IntentFilter();
         mHandlerMap = new HashMap<String, Handler>();
+        mProfileActions = new HashSet<String>();
         mContext = context;
 
         // Bluetooth on/off broadcasts
@@ -106,18 +108,20 @@ public final class BluetoothEventManager {
         // Dock event broadcasts
         addHandler(Intent.ACTION_DOCK_EVENT, new DockEventHandler());
 
-        mContext.registerReceiver(mBroadcastReceiver, mAdapterIntentFilter, null, mReceiverHandler);
+        mContext.registerReceiver(mBroadcastReceiver, mIntentFilter, null, mReceiverHandler);
     }
 
-    void registerProfileIntentReceiver() {
-        mContext.registerReceiver(mBroadcastReceiver, mProfileIntentFilter, null, mReceiverHandler);
+    void refreshProfileIntents() {
+        for (String action : mProfileActions) {
+          mIntentFilter.addAction(action);
+        }
+        setReceiverHandler(mReceiverHandler);
     }
 
     public void setReceiverHandler(android.os.Handler handler) {
         mContext.unregisterReceiver(mBroadcastReceiver);
         mReceiverHandler = handler;
-        mContext.registerReceiver(mBroadcastReceiver, mAdapterIntentFilter, null, mReceiverHandler);
-        registerProfileIntentReceiver();
+        mContext.registerReceiver(mBroadcastReceiver, mIntentFilter, null, mReceiverHandler);
     }
 
     /** Register to start receiving callbacks for Bluetooth events. */
