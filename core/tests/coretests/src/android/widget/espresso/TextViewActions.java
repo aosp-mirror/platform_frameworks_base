@@ -331,15 +331,37 @@ public final class TextViewActions {
      */
     public static ViewAction dragHandle(TextView textView, Handle handleType, int endIndex,
             boolean primary) {
+        return dragHandle(textView, handleType, endIndex, primary, true);
+    }
+
+    /**
+     * Returns an action that tap then drags on the handle from the current position to endIndex on
+     * the TextView.<br>
+     * <br>
+     * View constraints:
+     * <ul>
+     * <li>must be a TextView's drag-handle displayed on screen
+     * <ul>
+     *
+     * @param textView TextView the handle is on
+     * @param handleType Type of the handle
+     * @param endIndex The index of the TextView's text to end the drag at
+     * @param primary whether to use primary direction to get coordinate form index when endIndex is
+     * at a direction boundary.
+     * @param getNewLineStartPosOnLineBreak whether to use new line start coordinate on a line break
+     * within a paragraph.
+     */
+    public static ViewAction dragHandle(TextView textView, Handle handleType, int endIndex,
+            boolean primary, boolean getNewLineStartPosOnLineBreak) {
         return actionWithAssertions(
                 new DragAction(
                         DragAction.Drag.TAP,
                         new CurrentHandleCoordinates(textView),
-                        new HandleCoordinates(textView, handleType, endIndex, primary),
+                        new HandleCoordinates(textView, handleType, endIndex, primary,
+                                getNewLineStartPosOnLineBreak),
                         Press.FINGER,
                         Editor.HandleView.class));
     }
-
     /**
      * A provider of the x, y coordinates of the handle dragging point.
      */
@@ -402,13 +424,16 @@ public final class TextViewActions {
         private final Handle mHandleType;
         private final int mIndex;
         private final boolean mPrimary;
+        private final boolean mGetNewLineStartPosOnLineBreak;
         private final String mActionDescription;
 
-        public HandleCoordinates(TextView textView, Handle handleType, int index, boolean primary) {
+        public HandleCoordinates(TextView textView, Handle handleType, int index, boolean primary,
+                boolean getNewLineStartPosOnLineBreak) {
             mTextView = textView;
             mHandleType = handleType;
             mIndex = index;
             mPrimary = primary;
+            mGetNewLineStartPosOnLineBreak = getNewLineStartPosOnLineBreak;
             mActionDescription = "Could not locate " + handleType.toString()
                     + " handle that points text index: " + index
                     + " (" + (primary ? "primary" : "secondary" ) + ")";
@@ -445,9 +470,10 @@ public final class TextViewActions {
             final float currentX = handleView.getHorizontal(layout, currentOffset);
             final float currentY = layout.getLineTop(currentLine);
             final float[] currentCoordinates =
-                    TextCoordinates.convertToScreenCoordinates(mTextView, currentX, currentY);
+                    convertToScreenCoordinates(mTextView, currentX, currentY);
             final float[] targetCoordinates =
-                    (new TextCoordinates(mIndex, mPrimary)).calculateCoordinates(mTextView);
+                    (new TextCoordinates(mIndex, mPrimary, mGetNewLineStartPosOnLineBreak))
+                            .calculateCoordinates(mTextView);
             final Rect bounds = new Rect();
             view.getBoundsOnScreen(bounds);
             final Rect visibleDisplayBounds = new Rect();
@@ -485,23 +511,27 @@ public final class TextViewActions {
 
         private final int mIndex;
         private final boolean mPrimary;
+        private final boolean mGetNewLineStartPosOnLineBreak;
         private final String mActionDescription;
 
         public TextCoordinates(int index) {
-            this(index, true);
+            this(index, true, true);
         }
 
-        public TextCoordinates(int index, boolean primary) {
+        public TextCoordinates(int index, boolean primary, boolean getNewLineStartPosOnLineBreak) {
             mIndex = index;
             mPrimary = primary;
+            mGetNewLineStartPosOnLineBreak = getNewLineStartPosOnLineBreak;
             mActionDescription = "Could not locate text at index: " + mIndex
-                    + " (" + (primary ? "primary" : "secondary" ) + ")";
+                    + " (" + (primary ? "primary" : "secondary" )
+                    + ", mGetNewLineStartPosOnLineBreak: " + mGetNewLineStartPosOnLineBreak + ")";
         }
 
         @Override
         public float[] calculateCoordinates(View view) {
             try {
-                return locateTextAtIndex((TextView) view, mIndex, mPrimary);
+                return locateTextAtIndex((TextView) view, mIndex, mPrimary,
+                        mGetNewLineStartPosOnLineBreak);
             } catch (ClassCastException e) {
                 throw new PerformException.Builder()
                         .withActionDescription(mActionDescription)
@@ -520,30 +550,38 @@ public final class TextViewActions {
         /**
          * @throws StringIndexOutOfBoundsException
          */
-        private float[] locateTextAtIndex(TextView textView, int index, boolean primary) {
+        private float[] locateTextAtIndex(TextView textView, int index, boolean primary,
+                boolean getNewLineStartPosOnLineBreak) {
             if (index < 0 || index > textView.getText().length()) {
                 throw new StringIndexOutOfBoundsException(index);
             }
             final Layout layout = textView.getLayout();
-            final int line = layout.getLineForOffset(index);
+
+            int line = layout.getLineForOffset(index);
+            if (!getNewLineStartPosOnLineBreak && line > 0 && layout.getLineStart(line) == index
+                    && textView.getText().charAt(index - 1) != '\n') {
+                line = line - 1;
+            }
             return convertToScreenCoordinates(textView,
-                    (primary ? layout.getPrimaryHorizontal(index)
-                            : layout.getSecondaryHorizontal(index)),
+                    (primary ? layout.getPrimaryHorizontal(index, false,
+                            getNewLineStartPosOnLineBreak)
+                            : layout.getSecondaryHorizontal(index, false,
+                                    getNewLineStartPosOnLineBreak)),
                     layout.getLineTop(line));
         }
+    }
 
-        /**
-         * Convert TextView's local coordinates to on screen coordinates.
-         * @param textView the TextView
-         * @param x local horizontal coordinate
-         * @param y local vertical coordinate
-         * @return
-         */
-        public static float[] convertToScreenCoordinates(TextView textView, float x, float y) {
-            final int[] xy = new int[2];
-            textView.getLocationOnScreen(xy);
-            return new float[]{ x + textView.getTotalPaddingLeft() - textView.getScrollX() + xy[0],
-                    y + textView.getTotalPaddingTop() - textView.getScrollY() + xy[1] };
-        }
+    /**
+     * Convert TextView's local coordinates to on screen coordinates.
+     * @param textView the TextView
+     * @param x local horizontal coordinate
+     * @param y local vertical coordinate
+     * @return
+     */
+    public static float[] convertToScreenCoordinates(TextView textView, float x, float y) {
+        final int[] xy = new int[2];
+        textView.getLocationOnScreen(xy);
+        return new float[]{ x + textView.getTotalPaddingLeft() - textView.getScrollX() + xy[0],
+                y + textView.getTotalPaddingTop() - textView.getScrollY() + xy[1] };
     }
 }
