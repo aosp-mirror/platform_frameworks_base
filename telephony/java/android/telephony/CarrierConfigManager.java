@@ -843,6 +843,58 @@ public class CarrierConfigManager {
             "signal_pco_receiver_string_array";
 
     /**
+     * Defines carrier-specific actions which act upon
+     * android.intent.action.CARRIER_SIGNAL_REDIRECTED, used for customization of the
+     * default carrier app
+     * Format: "CARRIER_ACTION_IDX, ..."
+     * Where {@code CARRIER_ACTION_IDX} is an integer defined in
+     * {@link com.android.carrierdefaultapp.CarrierActionUtils CarrierActionUtils}
+     * Example:
+     * {@link com.android.carrierdefaultapp.CarrierActionUtils#CARRIER_ACTION_DISABLE_METERED_APNS
+     * disable_metered_apns}
+     * @hide
+     */
+    public static final String KEY_CARRIER_DEFAULT_ACTIONS_ON_REDIRECTION_STRING_ARRAY =
+            "carrier_default_actions_on_redirection_string_array";
+
+    /**
+     * Defines carrier-specific actions which act upon
+     * android.intent.action.CARRIER_SIGNAL_REQUEST_NETWORK_FAILED
+     * and configured signal args:
+     * {@link com.android.internal.telephony.TelephonyIntents#EXTRA_APN_TYPE_KEY apnType},
+     * {@link com.android.internal.telephony.TelephonyIntents#EXTRA_ERROR_CODE_KEY errorCode}
+     * used for customization of the default carrier app
+     * Format:
+     * {
+     *     "APN_1, ERROR_CODE_1 : CARRIER_ACTION_IDX_1, CARRIER_ACTION_IDX_2...",
+     *     "APN_1, ERROR_CODE_2 : CARRIER_ACTION_IDX_1 "
+     * }
+     * Where {@code APN_1} is a string defined in
+     * {@link com.android.internal.telephony.PhoneConstants PhoneConstants}
+     * Example: "default"
+     *
+     * {@code ERROR_CODE_1} is an integer defined in
+     * {@link com.android.internal.telephony.dataconnection.DcFailCause DcFailure}
+     * Example:
+     * {@link com.android.internal.telephony.dataconnection.DcFailCause#MISSING_UNKNOWN_APN}
+     *
+     * {@code CARRIER_ACTION_IDX_1} is an integer defined in
+     * {@link com.android.carrierdefaultapp.CarrierActionUtils CarrierActionUtils}
+     * Example:
+     * {@link com.android.carrierdefaultapp.CarrierActionUtils#CARRIER_ACTION_DISABLE_METERED_APNS}
+     * @hide
+     */
+    public static final String KEY_CARRIER_DEFAULT_ACTIONS_ON_DCFAILURE_STRING_ARRAY =
+            "carrier_default_actions_on_dcfailure_string_array";
+
+    /**
+     * Defines a list of acceptable redirection url for default carrier app
+     * @hides
+     */
+    public static final String KEY_CARRIER_DEFAULT_REDIRECTION_URL_STRING_ARRAY =
+            "carrier_default_redirection_url_string_array";
+
+    /**
      * Determines whether the carrier supports making non-emergency phone calls while the phone is
      * in emergency callback mode.  Default value is {@code true}, meaning that non-emergency calls
      * are allowed in emergency callback mode.
@@ -1228,6 +1280,15 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_SIGNAL_DCFAILURE_RECEIVER_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_SIGNAL_PCO_RECEIVER_STRING_ARRAY, null);
         sDefaults.putString(KEY_CARRIER_SETUP_APP_STRING, "");
+
+        // Default carrier app configurations
+        sDefaults.putStringArray(KEY_CARRIER_DEFAULT_ACTIONS_ON_REDIRECTION_STRING_ARRAY,
+                new String[]{
+                        "4, 1"
+                        //4: CARRIER_ACTION_DISABLE_METERED_APNS
+                        //1: CARRIER_ACTION_SHOW_PORTAL_NOTIFICATION
+                });
+        sDefaults.putStringArray(KEY_CARRIER_DEFAULT_REDIRECTION_URL_STRING_ARRAY, null);
 
         // Rat families: {GPRS, EDGE}, {EVDO, EVDO_A, EVDO_B}, {UMTS, HSPA, HSDPA, HSUPA, HSPAP},
         // {LTE, LTE_CA}
