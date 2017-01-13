@@ -2783,6 +2783,7 @@
         <public name="textColorError" />
         <public name="focusedByDefault" />
         <public name="appCategory" />
+        <public name="autoSizeMaxTextSize" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">
