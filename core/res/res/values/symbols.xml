@@ -476,6 +476,9 @@
   <java-symbol type="string" name="replace" />
   <java-symbol type="string" name="undo" />
   <java-symbol type="string" name="redo" />
+  <java-symbol type="string" name="email" />
+  <java-symbol type="string" name="dial" />
+  <java-symbol type="string" name="map" />
   <java-symbol type="string" name="textSelectionCABTitle" />
   <java-symbol type="string" name="BaMmi" />
   <java-symbol type="string" name="CLIRDefaultOffNextCallOff" />

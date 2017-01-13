@@ -18,9 +18,18 @@ package android.view.textclassifier;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.os.ParcelFileDescriptor;
+import android.text.LangId;
+import android.util.Log;
 
+import com.android.internal.util.Preconditions;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Interface to the text classification service.
@@ -30,14 +39,35 @@ import java.util.List;
  */
 public final class TextClassificationManager {
 
+    private static final String LOG_TAG = "TextClassificationManager";
+
+    private final Context mContext;
+    // TODO: Implement a way to close the file descriptor.
+    private ParcelFileDescriptor mFd;
+    private TextClassifier mDefault;
+    private LangId mLangId;
+
     /** @hide */
-    public TextClassificationManager(Context context) {}
+    public TextClassificationManager(Context context) {
+        mContext = Preconditions.checkNotNull(context);
+    }
 
     /**
      * Returns the default text classifier.
      */
     public TextClassifier getDefaultTextClassifier() {
-        return TextClassifier.NO_OP;
+        if (mDefault == null) {
+            try {
+                mFd = ParcelFileDescriptor.open(
+                        new File("/etc/assistant/smart-selection.model"),
+                        ParcelFileDescriptor.MODE_READ_ONLY);
+                mDefault = new TextClassifierImpl(mContext, mFd);
+            } catch (FileNotFoundException e) {
+                Log.e(LOG_TAG, "Error accessing 'text classifier selection' model file.", e);
+                mDefault = TextClassifier.NO_OP;
+            }
+        }
+        return mDefault;
     }
 
     /**
@@ -47,7 +77,30 @@ public final class TextClassificationManager {
      * @throws IllegalArgumentException if text is null
      */
     public List<TextLanguage> detectLanguages(@NonNull CharSequence text) {
-        // TODO: Implement
+        Preconditions.checkArgument(text != null);
+        try {
+            if (text.length() > 0) {
+                final String language = getLanguageDetector().findLanguage(text.toString());
+                final Locale locale = new Locale.Builder().setLanguageTag(language).build();
+                return Collections.unmodifiableList(Arrays.asList(
+                        new TextLanguage.Builder(0, text.length())
+                                .setLanguage(locale, 1.0f /* confidence */)
+                                .build()));
+            }
+        } catch (Throwable t) {
+            // Avoid throwing from this method. Log the error.
+            Log.e(LOG_TAG, "Error detecting languages for text. Returning empty result.", t);
+        }
+        // Getting here means something went wrong. Return an empty result.
         return Collections.emptyList();
+    }
+
+    private LangId getLanguageDetector() {
+        if (mLangId == null) {
+            // TODO: Use a file descriptor as soon as we start to depend on a model file
+            // for language detection.
+            mLangId = new LangId(0);
+        }
+        return mLangId;
     }
 }
