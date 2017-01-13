@@ -86,6 +86,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             case AppOpsManager.MODE_DEFAULT:
                 mContext.enforceCallingPermission(
                         android.Manifest.permission.PACKAGE_USAGE_STATS, TAG);
+                return;
             default:
                 throw new SecurityException("Blocked by mode " + mode);
         }
