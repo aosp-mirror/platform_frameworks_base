@@ -5,7 +5,6 @@
 #include "SkBitmap.h"
 #include "SkBRDAllocator.h"
 #include "SkCodec.h"
-#include "SkDevice.h"
 #include "SkPixelRef.h"
 #include "SkMallocPixelRef.h"
 #include "SkPoint.h"
