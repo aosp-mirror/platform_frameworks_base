@@ -64,9 +64,11 @@ public class ChooserActivityTest {
     @Test
     public void customTitle() throws InterruptedException {
         Intent sendIntent = createSendImageIntent();
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+
         when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
-                Mockito.isA(List.class))).thenReturn(null);
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, "chooser test"));
         waitForIdle();
         onView(withId(R.id.title)).check(matches(withText("chooser test")));
@@ -74,11 +76,12 @@ public class ChooserActivityTest {
 
     @Test
     public void emptyTitle() throws InterruptedException {
-        sOverrides.isVoiceInteraction = false;
         Intent sendIntent = createSendImageIntent();
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+
         when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
-                Mockito.isA(List.class))).thenReturn(null);
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
         waitForIdle();
         onView(withId(R.id.title))
