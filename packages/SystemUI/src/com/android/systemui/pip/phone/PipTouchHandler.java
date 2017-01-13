@@ -212,6 +212,17 @@ public class PipTouchHandler implements TunerService.Tunable {
         }
     }
 
+    public void onActivityPinned() {
+        // Reset some states once we are pinned
+        if (mIsTappingThrough) {
+            mIsTappingThrough = false;
+            registerInputConsumer();
+        }
+        if (mIsMinimized) {
+            setMinimizedState(false);
+        }
+    }
+
     public void onConfigurationChanged() {
         mSnapAlgorithm.onConfigurationChanged();
         updateBoundedPinnedStackBounds(false /* updatePinnedStackBounds */);

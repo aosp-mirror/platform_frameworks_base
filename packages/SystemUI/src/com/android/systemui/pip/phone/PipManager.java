@@ -30,6 +30,9 @@ import android.view.IPinnedStackListener;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 
+import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.recents.misc.SystemServicesProxy.TaskStackListener;
+
 /**
  * Manages the picture-in-picture (PIP) UI and states for Phones.
  */
@@ -47,6 +50,26 @@ public class PipManager {
 
     private PipMenuActivityController mMenuController;
     private PipTouchHandler mTouchHandler;
+
+    /**
+     * Handler for system task stack changes.
+     */
+    TaskStackListener mTaskStackListener = new TaskStackListener() {
+        @Override
+        public void onActivityPinned() {
+            mTouchHandler.onActivityPinned();
+        }
+
+        @Override
+        public void onPinnedStackAnimationEnded() {
+            // TODO(winsonc): Disable touch interaction with the PiP until the animation ends
+        }
+
+        @Override
+        public void onPinnedActivityRestartAttempt() {
+            // TODO(winsonc): Hide the menu and expand the PiP
+        }
+    };
 
     /**
      * Handler for messages from the PIP controller.
@@ -102,6 +125,7 @@ public class PipManager {
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to register pinned stack listener", e);
         }
+        SystemServicesProxy.getInstance(mContext).registerTaskStackListener(mTaskStackListener);
 
         mMenuController = new PipMenuActivityController(context, mActivityManager, mWindowManager);
         mTouchHandler = new PipTouchHandler(context, mMenuController, mActivityManager,

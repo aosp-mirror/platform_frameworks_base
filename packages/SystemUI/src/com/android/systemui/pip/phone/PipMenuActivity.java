@@ -137,13 +137,6 @@ public class PipMenuActivity extends Activity {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        notifyMenuVisibility(true);
-        repostDelayedFinish(INITIAL_DISMISS_DELAY);
-    }
-
-    @Override
     public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
         if (!isInPictureInPictureMode) {
             finish();
