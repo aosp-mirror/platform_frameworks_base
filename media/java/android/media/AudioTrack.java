@@ -214,6 +214,66 @@ public class AudioTrack extends PlayerBase
      */
     public final static int WRITE_NON_BLOCKING = 1;
 
+    /** @hide */
+    @IntDef({
+        PERFORMANCE_MODE_NONE,
+        PERFORMANCE_MODE_LOW_LATENCY,
+        PERFORMANCE_MODE_POWER_SAVING
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PerformanceMode {}
+
+    /**
+     * Default performance mode for an {@link AudioTrack}.
+     */
+    public static final int PERFORMANCE_MODE_NONE = 0;
+
+    /**
+     * Low latency performance mode for an {@link AudioTrack}.
+     * If the device supports it, this mode
+     * enables a lower latency path through to the audio output sink.
+     * Effects may no longer work with such an {@code AudioTrack} and
+     * the sample rate must match that of the output sink.
+     * <p>
+     * Applications should be aware that low latency requires careful
+     * buffer management, with smaller chunks of audio data written by each
+     * {@code write()} call.
+     * <p>
+     * If this flag is used without specifying a {@code bufferSizeInBytes} then the
+     * {@code AudioTrack}'s actual buffer size may be too small.
+     * It is recommended that a fairly
+     * large buffer should be specified when the {@code AudioTrack} is created.
+     * Then the actual size can be reduced by calling
+     * {@link #setBufferSizeInFrames(int)}. The buffer size can be optimized
+     * by lowering it after each {@code write()} call until the audio glitches,
+     * which is detected by calling
+     * {@link #getUnderrunCount()}. Then the buffer size can be increased
+     * until there are no glitches.
+     * This tuning step should be done while playing silence.
+     * This technique provides a compromise between latency and glitch rate.
+     */
+    public static final int PERFORMANCE_MODE_LOW_LATENCY = 1;
+
+    /**
+     * Power saving performance mode for an {@link AudioTrack}.
+     * If the device supports it, this
+     * mode will enable a lower power path to the audio output sink.
+     * In addition, this lower power path typically will have
+     * deeper internal buffers and better underrun resistance,
+     * with a tradeoff of higher latency.
+     * <p>
+     * In this mode, applications should attempt to use a larger buffer size
+     * and deliver larger chunks of audio data per {@code write()} call.
+     * Use {@link #getBufferSizeInFrames()} to determine
+     * the actual buffer size of the {@code AudioTrack} as it may have increased
+     * to accommodate a deeper buffer.
+     */
+    public static final int PERFORMANCE_MODE_POWER_SAVING = 2;
+
+    // keep in sync with system/media/audio/include/system/audio-base.h
+    private static final int AUDIO_OUTPUT_FLAG_FAST = 0x4;
+    private static final int AUDIO_OUTPUT_FLAG_DEEP_BUFFER = 0x8;
+
     //--------------------------------------------------------------------------
     // Member variables
     //--------------------
@@ -648,6 +708,7 @@ public class AudioTrack extends PlayerBase
         private int mBufferSizeInBytes;
         private int mSessionId = AudioManager.AUDIO_SESSION_ID_GENERATE;
         private int mMode = MODE_STREAM;
+        private int mPerformanceMode = PERFORMANCE_MODE_NONE;
 
         /**
          * Constructs a new Builder with the default values as described above.
@@ -752,6 +813,32 @@ public class AudioTrack extends PlayerBase
         }
 
         /**
+         * Sets the {@link AudioTrack} performance mode.  This is an advisory request which
+         * may not be supported by the particular device, and the framework is free
+         * to ignore such request if it is incompatible with other requests or hardware.
+         *
+         * @param performanceMode one of
+         * {@link AudioTrack#PERFORMANCE_MODE_NONE},
+         * {@link AudioTrack#PERFORMANCE_MODE_LOW_LATENCY},
+         * or {@link AudioTrack#PERFORMANCE_MODE_POWER_SAVING}.
+         * @return the same Builder instance.
+         * @throws IllegalArgumentException if {@code performanceMode} is not valid.
+         */
+        public @NonNull Builder setPerformanceMode(@PerformanceMode int performanceMode) {
+            switch (performanceMode) {
+                case PERFORMANCE_MODE_NONE:
+                case PERFORMANCE_MODE_LOW_LATENCY:
+                case PERFORMANCE_MODE_POWER_SAVING:
+                    mPerformanceMode = performanceMode;
+                    break;
+                default:
+                    throw new IllegalArgumentException(
+                            "Invalid performance mode " + performanceMode);
+            }
+            return this;
+        }
+
+        /**
          * Builds an {@link AudioTrack} instance initialized with all the parameters set
          * on this <code>Builder</code>.
          * @return a new successfully initialized {@link AudioTrack} instance.
@@ -765,6 +852,25 @@ public class AudioTrack extends PlayerBase
                         .setUsage(AudioAttributes.USAGE_MEDIA)
                         .build();
             }
+            switch (mPerformanceMode) {
+            case PERFORMANCE_MODE_LOW_LATENCY:
+                mAttributes = new AudioAttributes.Builder(mAttributes)
+                    .replaceFlags((mAttributes.getAllFlags()
+                            | AudioAttributes.FLAG_LOW_LATENCY)
+                            & ~AudioAttributes.FLAG_DEEP_BUFFER)
+                    .build();
+                break;
+            case PERFORMANCE_MODE_NONE:
+                break;
+            case PERFORMANCE_MODE_POWER_SAVING:
+                mAttributes = new AudioAttributes.Builder(mAttributes)
+                .replaceFlags((mAttributes.getAllFlags()
+                        | AudioAttributes.FLAG_DEEP_BUFFER)
+                        & ~AudioAttributes.FLAG_LOW_LATENCY)
+                .build();
+                break;
+            }
+
             if (mFormat == null) {
                 mFormat = new AudioFormat.Builder()
                         .setChannelMask(AudioFormat.CHANNEL_OUT_STEREO)
@@ -1275,6 +1381,27 @@ public class AudioTrack extends PlayerBase
      */
     public int getUnderrunCount() {
         return native_get_underrun_count();
+    }
+
+    /**
+     * Returns the current performance mode of the {@link AudioTrack}.
+     *
+     * @return one of {@link AudioTrack#PERFORMANCE_MODE_NONE},
+     * {@link AudioTrack#PERFORMANCE_MODE_LOW_LATENCY},
+     * or {@link AudioTrack#PERFORMANCE_MODE_POWER_SAVING}.
+     * Use {@link AudioTrack.Builder#setPerformanceMode}
+     * in the {@link AudioTrack.Builder} to enable a performance mode.
+     * @throws IllegalStateException if track is not initialized.
+     */
+    public @PerformanceMode int getPerformanceMode() {
+        final int flags = native_get_flags();
+        if ((flags & AUDIO_OUTPUT_FLAG_FAST) != 0) {
+            return PERFORMANCE_MODE_LOW_LATENCY;
+        } else if ((flags & AUDIO_OUTPUT_FLAG_DEEP_BUFFER) != 0) {
+            return PERFORMANCE_MODE_POWER_SAVING;
+        } else {
+            return PERFORMANCE_MODE_NONE;
+        }
     }
 
     /**
@@ -2854,6 +2981,8 @@ public class AudioTrack extends PlayerBase
     private native final int native_get_latency();
 
     private native final int native_get_underrun_count();
+
+    private native final int native_get_flags();
 
     // longArray must be a non-null array of length >= 2
     // [0] is assigned the frame position

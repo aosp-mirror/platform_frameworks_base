@@ -972,6 +972,18 @@ static jint android_media_AudioTrack_get_underrun_count(JNIEnv *env,  jobject th
 }
 
 // ----------------------------------------------------------------------------
+static jint android_media_AudioTrack_get_flags(JNIEnv *env,  jobject thiz) {
+    sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
+
+    if (lpTrack == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+            "Unable to retrieve AudioTrack pointer for getFlags()");
+        return (jint)AUDIO_JAVA_ERROR;
+    }
+    return (jint)lpTrack->getFlags();
+}
+
+// ----------------------------------------------------------------------------
 static jint android_media_AudioTrack_get_timestamp(JNIEnv *env,  jobject thiz, jlongArray jTimestamp) {
     sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
 
@@ -1212,6 +1224,7 @@ static const JNINativeMethod gMethods[] = {
     {"native_get_position",  "()I",      (void *)android_media_AudioTrack_get_position},
     {"native_get_latency",   "()I",      (void *)android_media_AudioTrack_get_latency},
     {"native_get_underrun_count", "()I",      (void *)android_media_AudioTrack_get_underrun_count},
+    {"native_get_flags",     "()I",      (void *)android_media_AudioTrack_get_flags},
     {"native_get_timestamp", "([J)I",    (void *)android_media_AudioTrack_get_timestamp},
     {"native_set_loop",      "(III)I",   (void *)android_media_AudioTrack_set_loop},
     {"native_reload_static", "()I",      (void *)android_media_AudioTrack_reload},
