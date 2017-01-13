@@ -57,6 +57,7 @@ import android.os.Debug;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -234,6 +235,8 @@ public class AppTransition implements Dump {
     private boolean mLastHadClipReveal;
     private boolean mProlongedAnimationsEnded;
 
+    private final boolean mGridLayoutRecentsEnabled;
+
     AppTransition(Context context, WindowManagerService service) {
         mContext = context;
         mService = service;
@@ -272,6 +275,7 @@ public class AppTransition implements Dump {
         };
         mClipRevealTranslationY = (int) (CLIP_REVEAL_TRANSLATION_Y_DP
                 * mContext.getResources().getDisplayMetrics().density);
+        mGridLayoutRecentsEnabled = SystemProperties.getBoolean("ro.recents.grid", false);
     }
 
     boolean isTransitionSet() {
@@ -926,7 +930,7 @@ public class AppTransition implements Dump {
         final float toY;
         final float pivotX;
         final float pivotY;
-        if (isTvUiMode(uiMode) || orientation == Configuration.ORIENTATION_PORTRAIT) {
+        if (shouldScaleDownThumbnailTransition(uiMode, orientation)) {
             fromX = mTmpRect.left;
             fromY = mTmpRect.top;
 
@@ -1097,7 +1101,7 @@ public class AppTransition implements Dump {
                     mTmpFromClipRect.inset(contentInsets);
                     mNextAppTransitionInsets.set(contentInsets);
 
-                    if (isTvUiMode(uiMode) || orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    if (shouldScaleDownThumbnailTransition(uiMode, orientation)) {
                         // We scale the width and clip to the top/left square
                         float scale = thumbWidth /
                                 (appWidth - contentInsets.left - contentInsets.right);
@@ -1957,6 +1961,15 @@ public class AppTransition implements Dump {
             mService.mH.sendEmptyMessageDelayed(H.APP_TRANSITION_TIMEOUT, APP_TRANSITION_TIMEOUT_MS);
         }
         return prepared;
+    }
+
+    /**
+     * @return whether the transition should show the thumbnail being scaled down.
+     */
+    private boolean shouldScaleDownThumbnailTransition(int uiMode, int orientation) {
+        return isTvUiMode(uiMode)
+                || mGridLayoutRecentsEnabled
+                || orientation == Configuration.ORIENTATION_PORTRAIT;
     }
 
     /**
