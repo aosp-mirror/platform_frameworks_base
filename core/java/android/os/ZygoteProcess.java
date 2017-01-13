@@ -487,11 +487,11 @@ public class ZygoteProcess {
      * Instructs the zygote to pre-load the classes and native libraries at the given paths
      * for the specified abi. Not all zygotes support this function.
      */
-    public void preloadPackageForAbi(String packagePath, String libsPath, String abi)
-            throws ZygoteStartFailedEx, IOException {
+    public void preloadPackageForAbi(String packagePath, String libsPath, String cacheKey,
+                                     String abi) throws ZygoteStartFailedEx, IOException {
         synchronized(mLock) {
             ZygoteState state = openZygoteSocketIfNeeded(abi);
-            state.writer.write("3");
+            state.writer.write("4");
             state.writer.newLine();
 
             state.writer.write("--preload-package");
@@ -501,6 +501,9 @@ public class ZygoteProcess {
             state.writer.newLine();
 
             state.writer.write(libsPath);
+            state.writer.newLine();
+
+            state.writer.write(cacheKey);
             state.writer.newLine();
 
             state.writer.flush();

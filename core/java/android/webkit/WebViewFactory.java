@@ -280,6 +280,44 @@ public final class WebViewFactory {
         }
     }
 
+    /**
+     * If the ApplicationInfo provided is for a stub WebView, fix up the object to include the
+     * required values from the donor package. If the ApplicationInfo is for a full WebView,
+     * leave it alone. Throws MissingWebViewPackageException if the donor is missing.
+     */
+    private static void fixupStubApplicationInfo(ApplicationInfo ai, PackageManager pm) {
+        String donorPackageName = null;
+        if (ai.metaData != null) {
+            donorPackageName = ai.metaData.getString("com.android.webview.WebViewDonorPackage");
+        }
+        if (donorPackageName != null) {
+            PackageInfo donorPackage;
+            try {
+                donorPackage = pm.getPackageInfo(
+                        donorPackageName,
+                        PackageManager.GET_SHARED_LIBRARY_FILES
+                        | PackageManager.MATCH_DEBUG_TRIAGED_MISSING
+                        | PackageManager.MATCH_UNINSTALLED_PACKAGES
+                        | PackageManager.MATCH_FACTORY_ONLY);
+            } catch (PackageManager.NameNotFoundException e) {
+                throw new MissingWebViewPackageException("Failed to find donor package: " +
+                                                         donorPackageName);
+            }
+            ApplicationInfo donorInfo = donorPackage.applicationInfo;
+
+            // Replace the stub's code locations with the donor's.
+            ai.sourceDir = donorInfo.sourceDir;
+            ai.splitSourceDirs = donorInfo.splitSourceDirs;
+            ai.nativeLibraryDir = donorInfo.nativeLibraryDir;
+            ai.secondaryNativeLibraryDir = donorInfo.secondaryNativeLibraryDir;
+
+            // Copy the donor's primary and secondary ABIs, since the stub doesn't have native code
+            // and so they are unset.
+            ai.primaryCpuAbi = donorInfo.primaryCpuAbi;
+            ai.secondaryCpuAbi = donorInfo.secondaryCpuAbi;
+        }
+    }
+
     private static Context getWebViewContextAndSetProvider() {
         Application initialApplication = AppGlobals.getInitialApplication();
         try {
@@ -307,9 +345,10 @@ public final class WebViewFactory {
             }
             // Fetch package info and verify it against the chosen package
             PackageInfo newPackageInfo = null;
+            PackageManager pm = initialApplication.getPackageManager();
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "PackageManager.getPackageInfo()");
             try {
-                newPackageInfo = initialApplication.getPackageManager().getPackageInfo(
+                newPackageInfo = pm.getPackageInfo(
                     response.packageInfo.packageName,
                     PackageManager.GET_SHARED_LIBRARY_FILES
                     | PackageManager.MATCH_DEBUG_TRIAGED_MISSING
@@ -328,12 +367,15 @@ public final class WebViewFactory {
             // failure
             verifyPackageInfo(response.packageInfo, newPackageInfo);
 
+            ApplicationInfo ai = newPackageInfo.applicationInfo;
+            fixupStubApplicationInfo(ai, pm);
+
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW,
                     "initialApplication.createApplicationContext");
             try {
                 // Construct an app context to load the Java code into the current app.
                 Context webViewContext = initialApplication.createApplicationContext(
-                        newPackageInfo.applicationInfo,
+                        ai,
                         Context.CONTEXT_INCLUDE_CODE | Context.CONTEXT_IGNORE_SECURITY);
                 sPackageInfo = newPackageInfo;
                 return webViewContext;
@@ -449,7 +491,11 @@ public final class WebViewFactory {
      */
     public static int onWebViewProviderChanged(PackageInfo packageInfo) {
         String[] nativeLibs = null;
+        String originalSourceDir = packageInfo.applicationInfo.sourceDir;
         try {
+            fixupStubApplicationInfo(packageInfo.applicationInfo,
+                                     AppGlobals.getInitialApplication().getPackageManager());
+
             nativeLibs = WebViewFactory.getWebViewNativeLibraryPaths(packageInfo);
             if (nativeLibs != null) {
                 long newVmSize = 0L;
@@ -498,7 +544,7 @@ public final class WebViewFactory {
             Log.e(LOGTAG, "error preparing webview native library", t);
         }
 
-        WebViewZygote.onWebViewProviderChanged(packageInfo);
+        WebViewZygote.onWebViewProviderChanged(packageInfo, originalSourceDir);
 
         return prepareWebViewInSystemServer(nativeLibs);
     }
