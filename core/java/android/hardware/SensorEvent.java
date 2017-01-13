@@ -564,6 +564,42 @@ public class SensorEvent {
      * completely unlikely to be anywhere else on the QRS complex.
      * </p>
      *
+     * <h4>{@link android.hardware.Sensor#TYPE_LOW_LATENCY_OFFBODY_DETECT
+     * Sensor.TYPE_LOW_LATENCY_OFFBODY_DETECT}:</h4>
+     *
+     * <p>
+     * A sensor of this type returns an event every time the device transitions
+     * from off-body to on-body and from on-body to off-body (e.g. a wearable
+     * device being removed from the wrist would trigger an event indicating an
+     * off-body transition). The event returned will contain a single value to
+     * indicate off-body state:
+     * </p>
+     *
+     * <ul>
+     *  <li> values[0]: off-body state</li>
+     * </ul>
+     *
+     * <p>
+     *     Valid values for off-body state:
+     * <ul>
+     *  <li> 1.0 (device is on-body)</li>
+     *  <li> 0.0 (device is off-body)</li>
+     * </ul>
+     * </p>
+     *
+     * <p>
+     * When a sensor of this type is activated, it must deliver the initial
+     * on-body or off-body event representing the current device state within
+     * 5 seconds of activating the sensor.
+     * </p>
+     *
+     * <p>
+     * This sensor must be able to detect and report an on-body to off-body
+     * transition within 1 second of the device being removed from the body,
+     * and must be able to detect and report an off-body to on-body transition
+     * within 5 seconds of the device being put back onto the body.
+     * </p>
+     *
      * <h4>{@link android.hardware.Sensor#TYPE_ACCELEROMETER_UNCALIBRATED
      * Sensor.TYPE_ACCELEROMETER_UNCALIBRATED}:</h4> All values are in SI
      * units (m/s^2)
