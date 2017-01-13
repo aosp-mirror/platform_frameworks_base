@@ -476,19 +476,20 @@ class Owners {
     }
 
     /**
-     * @return Whether update received time has changed.
+     * Saves the given {@link SystemUpdateInfo} if it is different from the existing one, or if
+     * none exists.
+     *
+     * @return Whether the saved system update information has changed.
      */
-    boolean saveSystemUpdateInfo(long receivedTime) {
-        final SystemUpdateInfo newSystemUpdateInfo = SystemUpdateInfo.of(receivedTime);
+    boolean saveSystemUpdateInfo(@Nullable SystemUpdateInfo newInfo) {
         synchronized (mLock) {
             // Check if we already have the same update information.
-            if (Objects.equals(newSystemUpdateInfo, mSystemUpdateInfo)) {
+            if (Objects.equals(newInfo, mSystemUpdateInfo)) {
                 return false;
             }
 
-            mSystemUpdateInfo = newSystemUpdateInfo;
+            mSystemUpdateInfo = newInfo;
             new DeviceOwnerReadWriter().writeToFileLocked();
-
             return true;
         }
     }

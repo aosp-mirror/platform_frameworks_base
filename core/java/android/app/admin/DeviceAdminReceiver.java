@@ -707,17 +707,24 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     }
 
     /**
-     * Allows the receiver to be notified when information about a pending system update is
+     * Called when the information about a pending system update is available.
+     *
+     * <p>Allows the receiver to be notified when information about a pending system update is
      * available from the system update service. The same pending system update can trigger multiple
      * calls to this method, so it is necessary to examine the incoming parameters for details about
      * the update.
-     * <p>
-     * This callback is only applicable to device owners.
+     *
+     * <p>This callback is only applicable to device owners and profile owners.
+     *
+     * <p>To get further information about a pending system update (for example, whether or not the
+     * update is a security patch), the device owner or profile owner can call
+     * {@link DevicePolicyManager#getPendingSystemUpdate}.
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
      * @param receivedTime The time as given by {@link System#currentTimeMillis()} indicating when
      *        the current pending update was first available. -1 if no pending update is available.
+     * @see DevicePolicyManager#getPendingSystemUpdate
      */
     public void onSystemUpdatePending(Context context, Intent intent, long receivedTime) {
     }

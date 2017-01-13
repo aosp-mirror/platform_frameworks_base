@@ -264,7 +264,7 @@ interface IDevicePolicyManager {
     boolean setStatusBarDisabled(in ComponentName who, boolean disabled);
     boolean getDoNotAskCredentialsOnBoot();
 
-    void notifyPendingSystemUpdate(in long updateReceivedTime);
+    void notifyPendingSystemUpdate(in SystemUpdateInfo info);
     SystemUpdateInfo getPendingSystemUpdate(in ComponentName admin);
 
     void setPermissionPolicy(in ComponentName admin, int policy);

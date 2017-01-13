@@ -1438,6 +1438,7 @@ public class DevicePolicyManager {
         }
         return false;
     }
+
     /**
      * Return true if the given administrator component is currently being removed
      * for the user.
@@ -1453,7 +1454,6 @@ public class DevicePolicyManager {
         }
         return false;
     }
-
 
     /**
      * Return a list of all currently active device administrators' component
@@ -6199,12 +6199,18 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Callable by the system update service to notify device owners about pending updates.
-     * The caller must hold {@link android.Manifest.permission#NOTIFY_PENDING_SYSTEM_UPDATE}
-     * permission.
+     * Called by the system update service to notify device and profile owners of pending system
+     * updates.
      *
-     * @param updateReceivedTime The time as given by {@link System#currentTimeMillis()} indicating
-     *        when the current pending update was first available. -1 if no update is available.
+     * The caller must hold {@link android.Manifest.permission#NOTIFY_PENDING_SYSTEM_UPDATE}
+     * permission. This method should only be used when it is unknown whether the pending system
+     * update is a security patch. Otherwise, use
+     * {@link #notifyPendingSystemUpdate(long, boolean)}.
+     *
+     * @param updateReceivedTime The time as given by {@link System#currentTimeMillis()}
+     *         indicating when the current pending update was first available. {@code -1} if no
+     *         update is available.
+     * @see #notifyPendingSystemUpdate(long, boolean)
      * @hide
      */
     @SystemApi
@@ -6212,7 +6218,36 @@ public class DevicePolicyManager {
         throwIfParentInstance("notifyPendingSystemUpdate");
         if (mService != null) {
             try {
-                mService.notifyPendingSystemUpdate(updateReceivedTime);
+                mService.notifyPendingSystemUpdate(SystemUpdateInfo.of(updateReceivedTime));
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Called by the system update service to notify device and profile owners of pending system
+     * updates.
+     *
+     * The caller must hold {@link android.Manifest.permission#NOTIFY_PENDING_SYSTEM_UPDATE}
+     * permission. This method should be used instead of {@link #notifyPendingSystemUpdate(long)}
+     * when it is known whether the pending system update is a security patch.
+     *
+     * @param updateReceivedTime The time as given by {@link System#currentTimeMillis()}
+     *         indicating when the current pending update was first available. {@code -1} if no
+     *         update is available.
+     * @param isSecurityPatch {@code true} if this system update is purely a security patch;
+     *         {@code false} if not.
+     * @see #notifyPendingSystemUpdate(long)
+     * @hide
+     */
+    @SystemApi
+    public void notifyPendingSystemUpdate(long updateReceivedTime, boolean isSecurityPatch) {
+        throwIfParentInstance("notifyPendingSystemUpdate");
+        if (mService != null) {
+            try {
+                mService.notifyPendingSystemUpdate(SystemUpdateInfo.of(updateReceivedTime,
+                        isSecurityPatch));
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
