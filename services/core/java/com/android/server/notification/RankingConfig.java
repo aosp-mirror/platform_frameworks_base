@@ -27,8 +27,10 @@ public interface RankingConfig {
             boolean fromTargetApp);
     void updateNotificationChannel(String pkg, int uid, NotificationChannel channel);
     void updateNotificationChannelFromAssistant(String pkg, int uid, NotificationChannel channel);
-    NotificationChannel getNotificationChannel(String pkg, int uid, String channelId);
-    NotificationChannel getNotificationChannelWithFallback(String pkg, int uid, String channelId);
+    NotificationChannel getNotificationChannel(String pkg, int uid, String channelId, boolean includeDeleted);
+    NotificationChannel getNotificationChannelWithFallback(String pkg, int uid, String channelId, boolean includeDeleted);
     void deleteNotificationChannel(String pkg, int uid, String channelId);
-    ParceledListSlice<NotificationChannel> getNotificationChannels(String pkg, int uid);
+    void permanentlyDeleteNotificationChannel(String pkg, int uid, String channelId);
+    void permanentlyDeleteNotificationChannels(String pkg, int uid);
+    ParceledListSlice<NotificationChannel> getNotificationChannels(String pkg, int uid, boolean includeDeleted);
 }

@@ -702,16 +702,19 @@ public class NotificationManagerService extends SystemService {
                 int changeUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
                         UserHandle.USER_ALL);
                 String pkgList[] = null;
+                int uidList[] = null;
                 boolean removingPackage = queryRemove &&
                         !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
                 if (DBG) Slog.i(TAG, "action=" + action + " removing=" + removingPackage);
                 if (action.equals(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE)) {
                     pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                    uidList = intent.getIntArrayExtra(Intent.EXTRA_CHANGED_UID_LIST);
                 } else if (action.equals(Intent.ACTION_PACKAGES_SUSPENDED)) {
                     pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
                     reason = REASON_PACKAGE_SUSPENDED;
                 } else if (queryRestart) {
                     pkgList = intent.getStringArrayExtra(Intent.EXTRA_PACKAGES);
+                    uidList = new int[] {intent.getIntExtra(Intent.EXTRA_UID, -1)};
                 } else {
                     Uri uri = intent.getData();
                     if (uri == null) {
@@ -743,8 +746,8 @@ public class NotificationManagerService extends SystemService {
                         }
                     }
                     pkgList = new String[]{pkgName};
+                    uidList = new int[] {intent.getIntExtra(Intent.EXTRA_UID, -1)};
                 }
-
                 if (pkgList != null && (pkgList.length > 0)) {
                     for (String pkgName : pkgList) {
                         if (cancelNotifications) {
@@ -756,7 +759,8 @@ public class NotificationManagerService extends SystemService {
                 mListeners.onPackagesChanged(removingPackage, pkgList);
                 mNotificationAssistants.onPackagesChanged(removingPackage, pkgList);
                 mConditionProviders.onPackagesChanged(removingPackage, pkgList);
-                mRankingHelper.onPackagesChanged(removingPackage, changeUserId, pkgList);
+                mRankingHelper.onPackagesChanged(removingPackage, changeUserId, pkgList, uidList);
+                savePolicyFile();
             }
         }
     };
@@ -1527,14 +1531,16 @@ public class NotificationManagerService extends SystemService {
         @Override
         public NotificationChannel getNotificationChannel(String pkg, String channelId) {
             checkCallerIsSystemOrSameApp(pkg);
-            return mRankingHelper.getNotificationChannel(pkg, Binder.getCallingUid(), channelId);
+            return mRankingHelper.getNotificationChannel(
+                    pkg, Binder.getCallingUid(), channelId, false /* includeDeleted */);
         }
 
         @Override
         public NotificationChannel getNotificationChannelForPackage(String pkg, int uid,
-                String channelId) {
+                String channelId, boolean includeDeleted) {
             checkCallerIsSystem();
-            return mRankingHelper.getNotificationChannel(pkg, uid, channelId);
+            return mRankingHelper.getNotificationChannel
+                    (pkg, uid, channelId, includeDeleted);
         }
 
         @Override
@@ -1566,16 +1572,41 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public ParceledListSlice<NotificationChannel> getNotificationChannelsForPackage(String pkg,
-                int uid) {
+                int uid, boolean includeDeleted) {
             checkCallerIsSystem();
-            return mRankingHelper.getNotificationChannels(pkg, uid);
+            return mRankingHelper.getNotificationChannels(pkg, uid, includeDeleted);
         }
 
         @Override
         public ParceledListSlice<NotificationChannel> getNotificationChannels(String pkg) {
             checkCallerIsSystemOrSameApp(pkg);
-            return mRankingHelper.getNotificationChannels(pkg, Binder.getCallingUid());
+            return mRankingHelper.getNotificationChannels(
+                    pkg, Binder.getCallingUid(), false /* includeDeleted */);
         }
+
+
+        @Override
+        public void clearData(String packageName, int uid) throws RemoteException {
+            checkCallerIsSystem();
+
+            // Cancel posted notifications
+            cancelAllNotificationsInt(MY_UID, MY_PID, packageName, null, 0, 0, true,
+                    UserHandle.getUserId(Binder.getCallingUid()), REASON_CHANNEL_BANNED, null);
+
+            // Listener & assistant
+            mListeners.onPackagesChanged(true, new String[] {packageName});
+            mNotificationAssistants.onPackagesChanged(true, new String[] {packageName});
+
+            // Zen
+            mConditionProviders.onPackagesChanged(true, new String[] {packageName});
+
+            // Reset notification preferences
+            mRankingHelper.onPackagesChanged(true, UserHandle.getCallingUserId(),
+                    new String[] {packageName}, new int[] {uid});
+
+            savePolicyFile();
+        }
+
 
         /**
          * System-only API for getting a list of current (i.e. not cleared) notifications.
@@ -2475,7 +2506,7 @@ public class NotificationManagerService extends SystemService {
                 INotificationListener token, String pkg) throws RemoteException {
             ManagedServiceInfo info = mNotificationAssistants.checkServiceTokenLocked(token);
             int uid = mPackageManager.getPackageUid(pkg, 0, info.userid);
-            return mRankingHelper.getNotificationChannels(pkg, uid);
+            return mRankingHelper.getNotificationChannels(pkg, uid, false /* includeDeleted */);
         }
     };
 
@@ -2493,7 +2524,8 @@ public class NotificationManagerService extends SystemService {
                     adjustment.getSignals().getParcelableArrayList(Adjustment.KEY_SNOOZE_CRITERIA);
             if (!TextUtils.isEmpty(overrideChannelId)) {
                 n.setNotificationChannelOverride(mRankingHelper.getNotificationChannel(
-                        n.sbn.getPackageName(), n.sbn.getUid(), overrideChannelId));
+                        n.sbn.getPackageName(), n.sbn.getUid(), overrideChannelId,
+                        false /* includeDeleted */));
             }
             n.setPeopleOverride(people);
             n.setSnoozeCriteria(snoozeCriterionList);
@@ -2846,7 +2878,7 @@ public class NotificationManagerService extends SystemService {
                     + " id=" + id + " notification=" + notification);
         }
         final NotificationChannel channel =  mRankingHelper.getNotificationChannelWithFallback(pkg,
-                callingUid, notification.getChannel());
+                callingUid, notification.getChannel(), false /* includeDeleted */);
         final StatusBarNotification n = new StatusBarNotification(
                 pkg, opPkg, channel, id, tag, callingUid, callingPid, notification,
                 user, null, System.currentTimeMillis());

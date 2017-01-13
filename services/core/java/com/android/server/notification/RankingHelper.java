@@ -18,6 +18,7 @@ package com.android.server.notification;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import android.app.Notification;
@@ -29,7 +30,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
 import android.os.Build;
-import android.os.Process;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.text.TextUtils;
@@ -432,9 +432,13 @@ public class RankingHelper implements RankingConfig {
         if (IMPORTANCE_NONE == r.importance) {
             throw new IllegalArgumentException("Package blocked");
         }
-        if (r.channels.containsKey(channel.getId()) || channel.getName().equals(
-                mContext.getString(R.string.default_notification_channel_label))) {
-            // Channel already exists, no-op.
+        NotificationChannel existing = r.channels.get(channel.getId());
+        // Keep existing settings
+        if (existing != null) {
+            if (existing.isDeleted()) {
+                existing.setDeleted(false);
+                updateConfig();
+            }
             return;
         }
         if (channel.getImportance() < NotificationManager.IMPORTANCE_NONE
@@ -471,7 +475,7 @@ public class RankingHelper implements RankingConfig {
             throw new IllegalArgumentException("Invalid package");
         }
         NotificationChannel channel = r.channels.get(updatedChannel.getId());
-        if (channel == null) {
+        if (channel == null || channel.isDeleted()) {
             throw new IllegalArgumentException("Channel does not exist");
         }
         if (updatedChannel.getLockscreenVisibility() == Notification.VISIBILITY_PUBLIC) {
@@ -489,7 +493,7 @@ public class RankingHelper implements RankingConfig {
             throw new IllegalArgumentException("Invalid package");
         }
         NotificationChannel channel = r.channels.get(updatedChannel.getId());
-        if (channel == null) {
+        if (channel == null || channel.isDeleted()) {
             throw new IllegalArgumentException("Channel does not exist");
         }
 
@@ -519,6 +523,9 @@ public class RankingHelper implements RankingConfig {
         if ((channel.getUserLockedFields() & NotificationChannel.USER_LOCKED_SHOW_BADGE) == 0) {
             channel.setShowBadge(updatedChannel.canShowBadge());
         }
+        if (updatedChannel.isDeleted()) {
+            updatedChannel.setDeleted(true);
+        }
 
         r.channels.put(channel.getId(), channel);
         updateConfig();
@@ -526,13 +533,13 @@ public class RankingHelper implements RankingConfig {
 
     @Override
     public NotificationChannel getNotificationChannelWithFallback(String pkg, int uid,
-            String channelId) {
+            String channelId, boolean includeDeleted) {
         Record r = getOrCreateRecord(pkg, uid);
         if (channelId == null) {
             channelId = NotificationChannel.DEFAULT_CHANNEL_ID;
         }
         NotificationChannel channel = r.channels.get(channelId);
-        if (channel != null) {
+        if (channel != null && (includeDeleted || !channel.isDeleted())) {
             return channel;
         } else {
             return r.channels.get(NotificationChannel.DEFAULT_CHANNEL_ID);
@@ -540,16 +547,21 @@ public class RankingHelper implements RankingConfig {
     }
 
     @Override
-    public NotificationChannel getNotificationChannel(String pkg, int uid, String channelId) {
+    public NotificationChannel getNotificationChannel(String pkg, int uid, String channelId,
+            boolean includeDeleted) {
         Preconditions.checkNotNull(pkg);
         Record r = getOrCreateRecord(pkg, uid);
         if (r == null) {
-            throw new IllegalArgumentException("Invalid package");
+            return null;
         }
         if (channelId == null) {
             channelId = NotificationChannel.DEFAULT_CHANNEL_ID;
         }
-        return r.channels.get(channelId);
+        final NotificationChannel nc = r.channels.get(channelId);
+        if (nc != null && (includeDeleted || !nc.isDeleted())) {
+            return nc;
+        }
+        return null;
     }
 
     @Override
@@ -558,24 +570,57 @@ public class RankingHelper implements RankingConfig {
         Preconditions.checkNotNull(channelId);
         Record r = getRecord(pkg, uid);
         if (r == null) {
-            throw new IllegalArgumentException("Invalid package");
+            return;
         }
-        if (r != null) {
-            r.channels.remove(channelId);
+        NotificationChannel channel = r.channels.get(channelId);
+        if (channel != null) {
+            channel.setDeleted(true);
         }
     }
 
     @Override
-    public ParceledListSlice<NotificationChannel> getNotificationChannels(String pkg, int uid) {
+    @VisibleForTesting
+    public void permanentlyDeleteNotificationChannel(String pkg, int uid, String channelId) {
+        Preconditions.checkNotNull(pkg);
+        Preconditions.checkNotNull(channelId);
+        Record r = getRecord(pkg, uid);
+        if (r == null) {
+            return;
+        }
+        r.channels.remove(channelId);
+    }
+
+    @Override
+    public void permanentlyDeleteNotificationChannels(String pkg, int uid) {
+        Preconditions.checkNotNull(pkg);
+        Record r = getRecord(pkg, uid);
+        if (r == null) {
+            return;
+        }
+        int N = r.channels.size() - 1;
+        for (int i = N; i >= 0; i--) {
+            String key = r.channels.keyAt(i);
+            if (!NotificationChannel.DEFAULT_CHANNEL_ID.equals(key)) {
+                r.channels.remove(key);
+            }
+        }
+    }
+
+    @Override
+    public ParceledListSlice<NotificationChannel> getNotificationChannels(String pkg, int uid,
+            boolean includeDeleted) {
         Preconditions.checkNotNull(pkg);
         List<NotificationChannel> channels = new ArrayList<>();
         Record r = getRecord(pkg, uid);
         if (r == null) {
-            throw new IllegalArgumentException("Invalid package");
+            return ParceledListSlice.emptyList();
         }
         int N = r.channels.size();
         for (int i = 0; i < N; i++) {
-            channels.add(r.channels.valueAt(i));
+            final NotificationChannel nc = r.channels.valueAt(i);
+            if (includeDeleted || !nc.isDeleted()) {
+                channels.add(nc);
+            }
         }
         return new ParceledListSlice<>(channels);
     }
@@ -738,30 +783,46 @@ public class RankingHelper implements RankingConfig {
         return packageBans;
     }
 
-    public void onPackagesChanged(boolean removingPackage, int changeUserId, String[] pkgList) {
-        if (removingPackage || pkgList == null || pkgList.length == 0) {
+    public void onPackagesChanged(boolean removingPackage, int changeUserId, String[] pkgList,
+            int[] uidList) {
+        if (pkgList == null || pkgList.length == 0) {
             return; // nothing to do
         }
         boolean updated = false;
-        for (String pkg : pkgList) {
-            final Record r = mRestoredWithoutUids.get(pkg);
-            if (r != null) {
+        if (removingPackage) {
+            // Remove notification settings for uninstalled package
+            int size = Math.min(pkgList.length, uidList.length);
+            for (int i = 0; i < size; i++) {
+                final String pkg = pkgList[i];
+                final int uid = uidList[i];
+                mRecords.remove(recordKey(pkg, uid));
+                mRestoredWithoutUids.remove(pkg);
+                updated = true;
+            }
+        } else {
+            for (String pkg : pkgList) {
+                // Package install
+                final Record r = mRestoredWithoutUids.get(pkg);
+                if (r != null) {
+                    try {
+                        r.uid = mPm.getPackageUidAsUser(r.pkg, changeUserId);
+                        mRestoredWithoutUids.remove(pkg);
+                        mRecords.put(recordKey(r.pkg, r.uid), r);
+                        updated = true;
+                    } catch (NameNotFoundException e) {
+                        // noop
+                    }
+                }
+                // Package upgrade
                 try {
-                    r.uid = mPm.getPackageUidAsUser(r.pkg, changeUserId);
-                    mRestoredWithoutUids.remove(pkg);
-                    mRecords.put(recordKey(r.pkg, r.uid), r);
-                    updated = true;
+                    Record fullRecord = getRecord(pkg,
+                            mPm.getPackageUidAsUser(pkg, changeUserId));
+                    if (fullRecord != null) {
+                        clampDefaultChannel(fullRecord);
+                    }
                 } catch (NameNotFoundException e) {
-                    // noop
                 }
             }
-            try {
-                Record fullRecord = getRecord(pkg,
-                        mPm.getPackageUidAsUser(pkg, changeUserId));
-                if (fullRecord != null) {
-                    clampDefaultChannel(fullRecord);
-                }
-            } catch (NameNotFoundException e) {}
         }
 
         if (updated) {

@@ -44,6 +44,7 @@ public final class NotificationChannel implements Parcelable {
     private static final String TAG_CHANNEL = "channel";
     private static final String ATT_NAME = "name";
     private static final String ATT_ID = "id";
+    private static final String ATT_DELETED = "deleted";
     private static final String ATT_PRIORITY = "priority";
     private static final String ATT_VISIBILITY = "visibility";
     private static final String ATT_IMPORTANCE = "importance";
@@ -120,7 +121,7 @@ public final class NotificationChannel implements Parcelable {
             NotificationManager.VISIBILITY_NO_OVERRIDE;
     private static final int DEFAULT_IMPORTANCE =
             NotificationManager.IMPORTANCE_UNSPECIFIED;
-    private static final boolean DEFAULT_ALLOWED = true;
+    private static final boolean DEFAULT_DELETED = false;
 
     private final String mId;
     private CharSequence mName;
@@ -133,7 +134,7 @@ public final class NotificationChannel implements Parcelable {
     private int mUserLockedFields;
     private boolean mVibrationEnabled;
     private boolean mShowBadge;
-    private boolean mAllowed = DEFAULT_ALLOWED;
+    private boolean mDeleted = DEFAULT_DELETED;
 
     /**
      * Creates a notification channel.
@@ -170,7 +171,7 @@ public final class NotificationChannel implements Parcelable {
         mUserLockedFields = in.readInt();
         mVibrationEnabled = in.readByte() != 0;
         mShowBadge = in.readByte() != 0;
-        mAllowed = in.readByte() != 0;
+        mDeleted = in.readByte() != 0;
     }
 
     @Override
@@ -196,7 +197,7 @@ public final class NotificationChannel implements Parcelable {
         dest.writeInt(mUserLockedFields);
         dest.writeByte(mVibrationEnabled ? (byte) 1 : (byte) 0);
         dest.writeByte(mShowBadge ? (byte) 1 : (byte) 0);
-        dest.writeByte(mAllowed ? (byte) 1 : (byte) 0);
+        dest.writeByte(mDeleted ? (byte) 1 : (byte) 0);
     }
 
     /**
@@ -205,6 +206,14 @@ public final class NotificationChannel implements Parcelable {
     @SystemApi
     public void lockFields(int field) {
         mUserLockedFields |= field;
+    }
+
+    /**
+     * @hide
+     */
+    @SystemApi
+    public void setDeleted(boolean deleted) {
+        mDeleted = deleted;
     }
 
     // Modifiable by a notification ranker.
@@ -365,10 +374,11 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
-     * Returns whether notifications are allowed to post to this channel.
+     * @hide
      */
-    public boolean isAllowed() {
-        return mAllowed;
+    @SystemApi
+    public boolean isDeleted() {
+        return mDeleted;
     }
 
     /**
@@ -393,6 +403,7 @@ public final class NotificationChannel implements Parcelable {
         enableVibration(safeBool(parser, ATT_VIBRATION_ENABLED, false));
         setVibrationPattern(safeLongArray(parser, ATT_VIBRATION, null));
         setShowBadge(safeBool(parser, ATT_SHOW_BADGE, false));
+        setDeleted(safeBool(parser, ATT_DELETED, false));
         lockFields(safeInt(parser, ATT_USER_LOCKED, 0));
     }
 
@@ -434,6 +445,9 @@ public final class NotificationChannel implements Parcelable {
         if (canShowBadge()) {
             out.attribute(null, ATT_SHOW_BADGE, Boolean.toString(canShowBadge()));
         }
+        if (isDeleted()) {
+            out.attribute(null, ATT_DELETED, Boolean.toString(isDeleted()));
+        }
 
         out.endTag(null, TAG_CHANNEL);
     }
@@ -464,6 +478,7 @@ public final class NotificationChannel implements Parcelable {
         record.put(ATT_USER_LOCKED, Integer.toString(getUserLockedFields()));
         record.put(ATT_VIBRATION, longArrayToString(getVibrationPattern()));
         record.put(ATT_SHOW_BADGE, Boolean.toString(canShowBadge()));
+        record.put(ATT_DELETED, Boolean.toString(isDeleted()));
         return record;
     }
 
@@ -547,7 +562,7 @@ public final class NotificationChannel implements Parcelable {
         if (mUserLockedFields != that.mUserLockedFields) return false;
         if (mVibrationEnabled != that.mVibrationEnabled) return false;
         if (mShowBadge != that.mShowBadge) return false;
-        if (mAllowed != that.mAllowed) return false;
+        if (mDeleted != that.mDeleted) return false;
         if (mId != null ? !mId.equals(that.mId) : that.mId != null) return false;
         if (mName != null ? !mName.equals(that.mName) : that.mName != null) return false;
         if (mSound != null ? !mSound.equals(that.mSound) : that.mSound != null) return false;
@@ -568,7 +583,7 @@ public final class NotificationChannel implements Parcelable {
         result = 31 * result + mUserLockedFields;
         result = 31 * result + (mVibrationEnabled ? 1 : 0);
         result = 31 * result + (mShowBadge ? 1 : 0);
-        result = 31 * result + (mAllowed ? 1 : 0);
+        result = 31 * result + (mDeleted ? 1 : 0);
         return result;
     }
 
@@ -586,7 +601,7 @@ public final class NotificationChannel implements Parcelable {
                 ", mUserLockedFields=" + mUserLockedFields +
                 ", mVibrationEnabled=" + mVibrationEnabled +
                 ", mShowBadge=" + mShowBadge +
-                ", mAllowed=" + mAllowed +
+                ", mDeleted=" + mDeleted +
                 '}';
     }
 }
