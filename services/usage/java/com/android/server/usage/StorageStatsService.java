@@ -75,6 +75,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         mPackage = context.getSystemService(PackageManager.class);
         mStorage = context.getSystemService(StorageManager.class);
         mInstaller = new Installer(context);
+        mInstaller.onStart();
     }
 
     private void enforcePermission(int callingUid, String callingPackage) {
