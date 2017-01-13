@@ -2712,6 +2712,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.System.MUTE_STREAMS_AFFECTED,
                 SystemSettingsProto.Volume.MUTE_STREAMS_AFFECTED);
+        dumpSetting(s, p,
+                Settings.System.MASTER_BALANCE,
+                SystemSettingsProto.Volume.MASTER_BALANCE);
         p.end(volumeToken);
 
         dumpSetting(s, p,
