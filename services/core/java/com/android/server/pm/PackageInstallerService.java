@@ -145,6 +145,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     private static final String ATTR_ABI_OVERRIDE = "abiOverride";
     private static final String ATTR_VOLUME_UUID = "volumeUuid";
     private static final String ATTR_NAME = "name";
+    private static final String ATTR_INSTALL_REASON = "installRason";
 
     /** Automatically destroy sessions older than this */
     private static final long MAX_AGE_MILLIS = 3 * DateUtils.DAY_IN_MILLIS;
@@ -412,6 +413,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         params.abiOverride = readStringAttribute(in, ATTR_ABI_OVERRIDE);
         params.volumeUuid = readStringAttribute(in, ATTR_VOLUME_UUID);
         params.grantedRuntimePermissions = readGrantedRuntimePermissions(in);
+        params.installReason = readIntAttribute(in, ATTR_INSTALL_REASON);
 
         final File appIconFile = buildAppIconFile(sessionId);
         if (appIconFile.exists()) {
@@ -484,6 +486,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         writeUriAttribute(out, ATTR_REFERRER_URI, params.referrerUri);
         writeStringAttribute(out, ATTR_ABI_OVERRIDE, params.abiOverride);
         writeStringAttribute(out, ATTR_VOLUME_UUID, params.volumeUuid);
+        writeIntAttribute(out, ATTR_INSTALL_REASON, params.installReason);
 
         // Persist app icon if changed since last written
         final File appIconFile = buildAppIconFile(session.sessionId);
