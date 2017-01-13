@@ -1754,13 +1754,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     public final void onBusEvent(DismissTaskViewEvent event) {
         // For visible children, defer removing the task until after the animation
-        mAnimationHelper.startDeleteTaskAnimation(event.taskView, event.getAnimationTrigger());
+        mAnimationHelper.startDeleteTaskAnimation(
+                event.taskView, useGridLayout(), event.getAnimationTrigger());
     }
 
     public final void onBusEvent(final DismissAllTaskViewsEvent event) {
         // Keep track of the tasks which will have their data removed
         ArrayList<Task> tasks = new ArrayList<>(mStack.getStackTasks());
-        mAnimationHelper.startDeleteAllTasksAnimation(getTaskViews(), event.getAnimationTrigger());
+        mAnimationHelper.startDeleteAllTasksAnimation(
+                getTaskViews(), useGridLayout(), event.getAnimationTrigger());
         event.addPostAnimationCallback(new Runnable() {
             @Override
             public void run() {
