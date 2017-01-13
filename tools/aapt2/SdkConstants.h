@@ -45,6 +45,9 @@ enum {
   SDK_LOLLIPOP = 21,
   SDK_LOLLIPOP_MR1 = 22,
   SDK_MARSHMALLOW = 23,
+  SDK_NOUGAT = 24,
+  SDK_NOUGAT_MR1 = 25,
+  SDK_O = 26, // STOPSHIP Replace with real version
 };
 
 size_t FindAttributeSdkLevel(const ResourceId& id);

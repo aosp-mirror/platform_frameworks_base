@@ -99,4 +99,12 @@ TEST(ConfigDescriptionTest, TestParsingRoundQualifier) {
   EXPECT_EQ(std::string("notround-v23"), config.toString().string());
 }
 
+TEST(ConfigDescriptionTest, ParseVrAttribute) {
+  ConfigDescription config;
+  EXPECT_TRUE(TestParse("vrheadset", &config));
+  EXPECT_EQ(android::ResTable_config::UI_MODE_TYPE_VR_HEADSET, config.uiMode);
+  EXPECT_EQ(SDK_O, config.sdkVersion);
+  EXPECT_EQ(std::string("vrheadset-v26"), config.toString().string());
+}
+
 }  // namespace aapt

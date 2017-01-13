@@ -755,6 +755,7 @@
              4  UI_MODE_TYPE_TELEVISION
              5  UI_MODE_TYPE_APPLIANCE
              6  UI_MODE_TYPE_WATCH
+             7  UI_MODE_TYPE_VR_HEADSET
          Any other values will have surprising consequences. -->
     <integer name="config_defaultUiModeType">1</integer>
 

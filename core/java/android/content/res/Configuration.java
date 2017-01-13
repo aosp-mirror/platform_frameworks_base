@@ -552,6 +552,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * <a href="{@docRoot}guide/topics/resources/providing-resources.html#UiModeQualifier">watch</a>
      * resource qualifier. */
     public static final int UI_MODE_TYPE_WATCH = 0x06;
+    /** Constant for {@link #uiMode}: a {@link #UI_MODE_TYPE_MASK}
+     * value that corresponds to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#UiModeQualifier">vrheadset</a>
+     * resource qualifier. */
+    public static final int UI_MODE_TYPE_VR_HEADSET = 0x07;
 
     /** Constant for {@link #uiMode}: bits that encode the night mode. */
     public static final int UI_MODE_NIGHT_MASK = 0x30;
@@ -575,7 +580,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * device. They may be one of {@link #UI_MODE_TYPE_UNDEFINED},
      * {@link #UI_MODE_TYPE_NORMAL}, {@link #UI_MODE_TYPE_DESK},
      * {@link #UI_MODE_TYPE_CAR}, {@link #UI_MODE_TYPE_TELEVISION},
-     * {@link #UI_MODE_TYPE_APPLIANCE}, or {@link #UI_MODE_TYPE_WATCH}.
+     * {@link #UI_MODE_TYPE_APPLIANCE}, {@link #UI_MODE_TYPE_WATCH},
+     * or {@link #UI_MODE_TYPE_VR_HEADSET}.
      *
      * <p>The {@link #UI_MODE_NIGHT_MASK} defines whether the screen
      * is in a special mode. They may be one of {@link #UI_MODE_NIGHT_UNDEFINED},
@@ -869,6 +875,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             case UI_MODE_TYPE_TELEVISION: sb.append(" television"); break;
             case UI_MODE_TYPE_APPLIANCE: sb.append(" appliance"); break;
             case UI_MODE_TYPE_WATCH: sb.append(" watch"); break;
+            case UI_MODE_TYPE_VR_HEADSET: sb.append(" vrheadset"); break;
             default: sb.append(" uimode="); sb.append(uiMode&UI_MODE_TYPE_MASK); break;
         }
         switch ((uiMode&UI_MODE_NIGHT_MASK)) {
@@ -1745,6 +1752,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 break;
             case Configuration.UI_MODE_TYPE_WATCH:
                 parts.add("watch");
+                break;
+            case Configuration.UI_MODE_TYPE_VR_HEADSET:
+                parts.add("vrheadset");
                 break;
             default:
                 break;

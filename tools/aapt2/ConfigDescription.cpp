@@ -254,6 +254,11 @@ static bool parseUiModeType(const char* name, ResTable_config* out) {
       out->uiMode = (out->uiMode & ~ResTable_config::MASK_UI_MODE_TYPE) |
                     ResTable_config::UI_MODE_TYPE_WATCH;
     return true;
+  } else if (strcmp(name, "vrheadset") == 0) {
+    if (out)
+      out->uiMode = (out->uiMode & ~ResTable_config::MASK_UI_MODE_TYPE) |
+                    ResTable_config::UI_MODE_TYPE_VR_HEADSET;
+    return true;
   }
 
   return false;
@@ -772,7 +777,10 @@ success:
 void ConfigDescription::ApplyVersionForCompatibility(
     ConfigDescription* config) {
   uint16_t min_sdk = 0;
-  if (config->screenLayout2 & ResTable_config::MASK_SCREENROUND) {
+  if ((config->uiMode & ResTable_config::MASK_UI_MODE_TYPE)
+                == ResTable_config::UI_MODE_TYPE_VR_HEADSET) {
+        min_sdk = SDK_O;
+  } else if (config->screenLayout2 & ResTable_config::MASK_SCREENROUND) {
     min_sdk = SDK_MARSHMALLOW;
   } else if (config->density == ResTable_config::DENSITY_ANY) {
     min_sdk = SDK_LOLLIPOP;

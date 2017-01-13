@@ -38,10 +38,13 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.dreams.Sandman;
+import android.service.vr.IVrManager;
+import android.service.vr.IVrStateCallbacks;
 import android.util.Slog;
 import android.view.WindowManagerInternal;
 import android.view.WindowManagerPolicy;
@@ -77,6 +80,7 @@ final class UiModeManagerService extends SystemService {
     private boolean mDeskModeKeepsScreenOn;
     private boolean mTelevision;
     private boolean mWatch;
+    private boolean mVrHeadset;
     private boolean mComputedNightMode;
     private int mCarModeEnableFlags;
 
@@ -164,6 +168,18 @@ final class UiModeManagerService extends SystemService {
             synchronized (mLock) {
                 if (mNightMode == UiModeManager.MODE_NIGHT_AUTO) {
                     updateComputedNightModeLocked();
+                    updateLocked(0, 0);
+                }
+            }
+        }
+    };
+
+    private final IVrStateCallbacks mVrStateCallbacks = new IVrStateCallbacks.Stub() {
+        @Override
+        public void onVrStateChanged(boolean enabled) {
+            synchronized (mLock) {
+                mVrHeadset = enabled;
+                if (mSystemReady) {
                     updateLocked(0, 0);
                 }
             }
@@ -394,6 +410,7 @@ final class UiModeManagerService extends SystemService {
                 mSystemReady = true;
                 mCarModeEnabled = mDockState == Intent.EXTRA_DOCK_STATE_CAR;
                 updateComputedNightModeLocked();
+                registerVrStateListener();
                 updateLocked(0, 0);
             }
         }
@@ -441,6 +458,8 @@ final class UiModeManagerService extends SystemService {
             uiMode = Configuration.UI_MODE_TYPE_CAR;
         } else if (isDeskDockState(mDockState)) {
             uiMode = Configuration.UI_MODE_TYPE_DESK;
+        } else if (mVrHeadset) {
+            uiMode = Configuration.UI_MODE_TYPE_VR_HEADSET;
         }
 
         if (mNightMode == UiModeManager.MODE_NIGHT_AUTO) {
@@ -721,5 +740,15 @@ final class UiModeManagerService extends SystemService {
         }
     }
 
+    private void registerVrStateListener() {
+        IVrManager vrManager = IVrManager.Stub.asInterface(ServiceManager.getService("vrmanager"));
+        try {
+            if (vrManager != null) {
+                vrManager.registerListener(mVrStateCallbacks);
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to register VR mode state listener: " + e);
+        }
+    }
 
 }
