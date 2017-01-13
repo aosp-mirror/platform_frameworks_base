@@ -238,7 +238,19 @@ public class ViewOverlay {
 
         @Override
         protected void dispatchDraw(Canvas canvas) {
+            /*
+             * The OverlayViewGroup doesn't draw with a DisplayList, because
+             * draw(Canvas, View, long) is never called on it. This is fine, since it doesn't need
+             * RenderNode/DisplayList features, and can just draw into the owner's Canvas.
+             *
+             * This means that we need to insert reorder barriers manually though, so that children
+             * of the OverlayViewGroup can cast shadows and Z reorder with each other.
+             */
+            canvas.insertReorderBarrier();
+
             super.dispatchDraw(canvas);
+
+            canvas.insertInorderBarrier();
             final int numDrawables = (mDrawables == null) ? 0 : mDrawables.size();
             for (int i = 0; i < numDrawables; ++i) {
                 mDrawables.get(i).draw(canvas);
