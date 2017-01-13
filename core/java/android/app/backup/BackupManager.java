@@ -17,6 +17,7 @@
 package android.app.backup;
 
 import android.annotation.SystemApi;
+import android.content.ComponentName;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
@@ -156,6 +157,25 @@ public class BackupManager {
      */
     @SystemApi
     public static final String PACKAGE_MANAGER_SENTINEL = "@pm@";
+
+
+    /**
+     * This error code is passed to {@link SelectBackupTransportCallback#onFailure(int)}
+     * if the requested transport is unavailable.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ERROR_TRANSPORT_UNAVAILABLE = -1;
+
+    /**
+     * This error code is passed to {@link SelectBackupTransportCallback#onFailure(int)} if the
+     * requested transport is not a valid BackupTransport.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ERROR_TRANSPORT_INVALID = -2;
 
     private Context mContext;
     private static IBackupManager sService;
@@ -390,17 +410,20 @@ public class BackupManager {
     }
 
     /**
-     * Specify the current backup transport.  Callers must hold the
-     * android.permission.BACKUP permission to use this method.
+     * Specify the current backup transport.
+     *
+     * <p> Callers must hold the android.permission.BACKUP permission to use this method.
      *
      * @param transport The name of the transport to select.  This should be one
-     *   of the names returned by {@link #listAllTransports()}.
+     *   of the names returned by {@link #listAllTransports()}. This is the String returned by
+     *   {@link BackupTransport#name()} for the particular transport.
      * @return The name of the previously selected transport.  If the given transport
      *   name is not one of the currently available transports, no change is made to
      *   the current transport setting and the method returns null.
      *
      * @hide
      */
+    @Deprecated
     @SystemApi
     public String selectBackupTransport(String transport) {
         checkServiceBinder();
@@ -412,6 +435,34 @@ public class BackupManager {
             }
         }
         return null;
+    }
+
+    /**
+     * Specify the current backup transport and get notified when the transport is ready to be used.
+     * This method is async because BackupManager might need to bind to the specified transport
+     * which is in a separate process.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     *
+     * @param transport ComponentName of the service hosting the transport. This is different from
+     *                  the transport's name that is returned by {@link BackupTransport#name()}.
+     * @param listener A listener object to get a callback on the transport being selected.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void selectBackupTransport(ComponentName transport,
+            SelectBackupTransportCallback listener) {
+        checkServiceBinder();
+        if (sService != null) {
+            try {
+                SelectTransportListenerWrapper wrapper = listener == null ?
+                        null : new SelectTransportListenerWrapper(mContext, listener);
+                sService.selectBackupTransportAsync(transport, wrapper);
+            } catch (RemoteException e) {
+                Log.e(TAG, "selectBackupTransportAsync() couldn't connect");
+            }
+        }
     }
 
     /**
@@ -596,6 +647,37 @@ public class BackupManager {
         public void backupFinished(int status) {
             mHandler.sendMessage(
                 mHandler.obtainMessage(MSG_FINISHED, status, 0));
+        }
+    }
+
+    private class SelectTransportListenerWrapper extends ISelectBackupTransportCallback.Stub {
+
+        private final Handler mHandler;
+        private final SelectBackupTransportCallback mListener;
+
+        SelectTransportListenerWrapper(Context context, SelectBackupTransportCallback listener) {
+            mHandler = new Handler(context.getMainLooper());
+            mListener = listener;
+        }
+
+        @Override
+        public void onSuccess(final String transportName) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mListener.onSuccess(transportName);
+                }
+            });
+        }
+
+        @Override
+        public void onFailure(final int reason) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mListener.onFailure(reason);
+                }
+            });
         }
     }
 }

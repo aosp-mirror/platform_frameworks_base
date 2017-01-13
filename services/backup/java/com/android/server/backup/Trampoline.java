@@ -20,6 +20,8 @@ import android.app.backup.IBackupManager;
 import android.app.backup.IBackupObserver;
 import android.app.backup.IFullBackupRestoreObserver;
 import android.app.backup.IRestoreSession;
+import android.app.backup.ISelectBackupTransportCallback;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
@@ -275,6 +277,12 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     @Override
+    public ComponentName[] listAllTransportComponents() throws RemoteException {
+        BackupManagerService svc = mService;
+        return (svc != null) ? svc.listAllTransportComponents() : null;
+    }
+
+    @Override
     public String[] getTransportWhitelist() {
         BackupManagerService svc = mService;
         return (svc != null) ? svc.getTransportWhitelist() : null;
@@ -284,6 +292,15 @@ public class Trampoline extends IBackupManager.Stub {
     public String selectBackupTransport(String transport) throws RemoteException {
         BackupManagerService svc = mService;
         return (svc != null) ? svc.selectBackupTransport(transport) : null;
+    }
+
+    @Override
+    public void selectBackupTransportAsync(ComponentName transport,
+            ISelectBackupTransportCallback listener) throws RemoteException {
+        BackupManagerService svc = mService;
+        if (svc != null) {
+            svc.selectBackupTransportAsync(transport, listener);
+        }
     }
 
     @Override
