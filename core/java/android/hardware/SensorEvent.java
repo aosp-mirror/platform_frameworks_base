@@ -578,6 +578,33 @@ public class SensorEvent {
      * A confidence value of 1.0 indicates complete certainly - that a peak is
      * completely unlikely to be anywhere else on the QRS complex.
      * </p>
+     *
+     * <h4>{@link android.hardware.Sensor#TYPE_ACCELEROMETER_UNCALIBRATED
+     * Sensor.TYPE_ACCELEROMETER_UNCALIBRATED}:</h4> All values are in SI
+     * units (m/s^2)
+     *
+     * Similar to {@link android.hardware.Sensor#TYPE_ACCELEROMETER},
+     * Factory calibration and temperature compensation will still be applied
+     * to the "uncalibrated" measurement.
+     *
+     * <p>
+     * The values array is shown below:
+     * <ul>
+     * <li> values[0] = x_uncalib without bias compensation </li>
+     * <li> values[1] = y_uncalib without bias compensation </li>
+     * <li> values[2] = z_uncalib without bias compensation </li>
+     * <li> values[3] = estimated x_bias </li>
+     * <li> values[4] = estimated y_bias </li>
+     * <li> values[5] = estimated z_bias </li>
+     * </ul>
+     * </p>
+     * <p>
+     * x_uncalib, y_uncalib, z_uncalib are the measured acceleration in X, Y, Z
+     * axes similar to the  {@link android.hardware.Sensor#TYPE_ACCELEROMETER},
+     * without any bias correction (factory bias compensation and any
+     * temperature compensation is allowed).
+     * x_bias, y_bias, z_bias are the estimated biases.
+     * </p>
      */
     public final float[] values;
 
