@@ -16,6 +16,11 @@
 
 package com.android.server;
 
+import static android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE;
+import static android.Manifest.permission.READ_CONTACTS;
+import static android.content.Context.KEYGUARD_SERVICE;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
+
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
@@ -35,31 +40,23 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
-
-import static android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE;
-import static android.content.Context.KEYGUARD_SERVICE;
-import static android.content.Context.USER_SERVICE;
-import static android.Manifest.permission.READ_CONTACTS;
-import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
-
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IProgressListener;
-import android.os.Parcel;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
-import android.os.ShellCallback;
-import android.os.storage.IStorageManager;
-import android.os.storage.StorageManager;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
 import android.os.StrictMode;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.IStorageManager;
+import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.provider.Settings.SettingNotFoundException;
@@ -109,20 +106,21 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 
 /**
- * Keeps the lock pattern/password data and related settings for each user.
- * Used by LockPatternUtils. Needs to be a service because Settings app also needs
- * to be able to save lockscreen information for secondary users.
+ * Keeps the lock pattern/password data and related settings for each user. Used by
+ * LockPatternUtils. Needs to be a service because Settings app also needs to be able to save
+ * lockscreen information for secondary users.
+ *
  * @hide
  */
 public class LockSettingsService extends ILockSettings.Stub {
     private static final String TAG = "LockSettingsService";
     private static final String PERMISSION = ACCESS_KEYGUARD_SECURE_STORAGE;
-    private static final Intent ACTION_NULL; // hack to ensure notification shows the bouncer
     private static final int FBE_ENCRYPTED_NOTIFICATION = 0;
     private static final boolean DEBUG = false;
 
     private static final int PROFILE_KEY_IV_SIZE = 12;
     private static final String SEPARATE_PROFILE_CHALLENGE_KEY = "lockscreen.profilechallenge";
+
     private final Object mSeparateChallengeLock = new Object();
 
     private final Context mContext;
@@ -142,21 +140,9 @@ public class LockSettingsService extends ILockSettings.Stub {
     /**
      * The UIDs that are used for system credential storage in keystore.
      */
-    private static final int[] SYSTEM_CREDENTIAL_UIDS = {Process.WIFI_UID, Process.VPN_UID,
-        Process.ROOT_UID, Process.SYSTEM_UID};
-
-    static {
-        // Just launch the home screen, which happens anyway
-        ACTION_NULL = new Intent(Intent.ACTION_MAIN);
-        ACTION_NULL.addCategory(Intent.CATEGORY_HOME);
-    }
-
-    private interface CredentialUtil {
-        void setCredential(String credential, String savedCredential, int userId)
-                throws RemoteException;
-        byte[] toHash(String credential, int userId);
-        String adjustForKeystore(String credential);
-    }
+    private static final int[] SYSTEM_CREDENTIAL_UIDS = {
+            Process.WIFI_UID, Process.VPN_UID,
+            Process.ROOT_UID, Process.SYSTEM_UID };
 
     // This class manages life cycle events for encrypted users on File Based Encryption (FBE)
     // devices. The most basic of these is to show/hide notifications about missing features until
@@ -258,7 +244,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         try {
             randomLockSeed = SecureRandom.getInstance("SHA1PRNG").generateSeed(40);
             String newPassword = String.valueOf(HexEncoding.encode(randomLockSeed));
-            setLockPasswordInternal(newPassword, managedUserPassword, managedUserId);
+            setLockCredentialInternal(newPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
+                    managedUserPassword, managedUserId);
             // We store a private credential for the managed user that's unlocked by the primary
             // account holder's credential. As such, the user will never be prompted to enter this
             // password directly, so we always store a password.
@@ -306,8 +293,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     /**
-     * If the account is credential-encrypted, show notification requesting the user to unlock
-     * the device.
+     * If the account is credential-encrypted, show notification requesting the user to unlock the
+     * device.
      */
     private void maybeShowEncryptionNotificationForUser(@UserIdInt int userId) {
         final UserInfo user = mUserManager.getUserInfo(userId);
@@ -342,19 +329,21 @@ public class LockSettingsService extends ILockSettings.Stub {
                 com.android.internal.R.string.profile_encrypted_detail);
 
         final KeyguardManager km = (KeyguardManager) mContext.getSystemService(KEYGUARD_SERVICE);
-        final Intent unlockIntent = km.createConfirmDeviceCredentialIntent(null, null, user.getIdentifier());
+        final Intent unlockIntent = km.createConfirmDeviceCredentialIntent(null, null,
+                user.getIdentifier());
         if (unlockIntent == null) {
             return;
         }
-        unlockIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+        unlockIntent.setFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
         PendingIntent intent = PendingIntent.getActivity(mContext, 0, unlockIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
 
         showEncryptionNotification(user, title, message, detail, intent);
     }
 
-    private void showEncryptionNotification(UserHandle user, CharSequence title, CharSequence message,
-            CharSequence detail, PendingIntent intent) {
+    private void showEncryptionNotification(UserHandle user, CharSequence title,
+            CharSequence message, CharSequence detail, PendingIntent intent) {
         if (DEBUG) Slog.v(TAG, "showing encryption notification, user: " + user.getIdentifier());
 
         // Suppress all notifications on non-FBE devices for now
@@ -365,7 +354,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 .setWhen(0)
                 .setOngoing(true)
                 .setTicker(title)
-                .setDefaults(0)  // please be quiet
+                .setDefaults(0) // please be quiet
                 .setPriority(Notification.PRIORITY_MAX)
                 .setColor(mContext.getColor(
                         com.android.internal.R.color.system_notification_accent_color))
@@ -379,7 +368,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void hideEncryptionNotification(UserHandle userHandle) {
-        if (DEBUG) Slog.v(TAG, "hide encryption notification, user: "+ userHandle.getIdentifier());
+        if (DEBUG) Slog.v(TAG, "hide encryption notification, user: " + userHandle.getIdentifier());
         mNotificationManager.cancelAsUser(null, FBE_ENCRYPTED_NOTIFICATION, userHandle);
     }
 
@@ -491,7 +480,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                         Settings.Secure.putStringForUser(cr, OWNER_INFO, "", userId);
                     }
 
-                    // Migrate owner info enabled.  Note there was a bug where older platforms only
+                    // Migrate owner info enabled. Note there was a bug where older platforms only
                     // stored this value if the checkbox was toggled at least once. The code detects
                     // this case by handling the exception.
                     final String OWNER_INFO_ENABLED = Secure.LOCK_SCREEN_OWNER_INFO_ENABLED;
@@ -788,8 +777,9 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private void unlockChildProfile(int profileHandle) throws RemoteException {
         try {
-            doVerifyPassword(getDecryptedPasswordForTiedProfile(profileHandle), false,
-                    0 /* no challenge */, profileHandle, null /* progressCallback */);
+            doVerifyCredential(getDecryptedPasswordForTiedProfile(profileHandle),
+                    LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
+                    false, 0 /* no challenge */, profileHandle, null /* progressCallback */);
         } catch (UnrecoverableKeyException | InvalidKeyException | KeyStoreException
                 | NoSuchAlgorithmException | NoSuchPaddingException
                 | InvalidAlgorithmParameterException | IllegalBlockSizeException
@@ -852,35 +842,13 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private byte[] getCurrentHandle(int userId) {
-        CredentialHash credential;
-        byte[] currentHandle;
-
-        int currentHandleType = mStorage.getStoredCredentialType(userId);
-        switch (currentHandleType) {
-            case CredentialHash.TYPE_PATTERN:
-                credential = mStorage.readPatternHash(userId);
-                currentHandle = credential != null
-                        ? credential.hash
-                        : null;
-                break;
-            case CredentialHash.TYPE_PASSWORD:
-                credential = mStorage.readPasswordHash(userId);
-                currentHandle = credential != null
-                        ? credential.hash
-                        : null;
-                break;
-            case CredentialHash.TYPE_NONE:
-            default:
-                currentHandle = null;
-                break;
-        }
+        CredentialHash credential = mStorage.readCredentialHash(userId);
 
         // sanity check
-        if (currentHandleType != CredentialHash.TYPE_NONE && currentHandle == null) {
-            Slog.e(TAG, "Stored handle type [" + currentHandleType + "] but no handle available");
+        if (credential.type != LockPatternUtils.CREDENTIAL_TYPE_NONE && credential.hash == null) {
+            Slog.e(TAG, "Stored handle type [" + credential.type + "] but no handle available");
         }
-
-        return currentHandle;
+        return credential.hash;
     }
 
     private void onUserLockChanged(int userId) throws RemoteException {
@@ -902,7 +870,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 } else {
                     clearUserKeyProtection(managedUserId);
                     getGateKeeperService().clearSecureUserId(managedUserId);
-                    mStorage.writePatternHash(null, managedUserId);
+                    mStorage.writeCredentialHash(CredentialHash.createEmptyHash(), managedUserId);
                     setKeystorePassword(null, managedUserId);
                     fixateNewestUserKeyAuth(managedUserId);
                     mStorage.removeChildProfileLock(managedUserId);
@@ -923,97 +891,37 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     // This method should be called by LockPatternUtil only, all internal methods in this class
-    // should call setLockPatternInternal.
+    // should call setLockCredentialInternal.
     @Override
-    public void setLockPattern(String pattern, String savedCredential, int userId)
+    public void setLockCredential(String credential, int type, String savedCredential, int userId)
             throws RemoteException {
         checkWritePermission(userId);
         synchronized (mSeparateChallengeLock) {
-            setLockPatternInternal(pattern, savedCredential, userId);
+            setLockCredentialInternal(credential, type, savedCredential, userId);
             setSeparateProfileChallengeEnabled(userId, true, null);
             notifyPasswordChanged(userId);
         }
     }
 
-    private void setLockPatternInternal(String pattern, String savedCredential, int userId)
-            throws RemoteException {
+    private void setLockCredentialInternal(String credential, int credentialType,
+            String savedCredential, int userId) throws RemoteException {
         byte[] currentHandle = getCurrentHandle(userId);
-
-        if (pattern == null) {
+        if (credentialType == LockPatternUtils.CREDENTIAL_TYPE_NONE) {
+            if (credential != null) {
+                Slog.wtf(TAG, "CredentialType is none, but credential is non-null.");
+            }
             clearUserKeyProtection(userId);
             getGateKeeperService().clearSecureUserId(userId);
-            mStorage.writePatternHash(null, userId);
+            mStorage.writeCredentialHash(CredentialHash.createEmptyHash(), userId);
             setKeystorePassword(null, userId);
             fixateNewestUserKeyAuth(userId);
             onUserLockChanged(userId);
             notifyActivePasswordMetricsAvailable(null, userId);
             return;
         }
-
-        if (isManagedProfileWithUnifiedLock(userId)) {
-            // get credential from keystore when managed profile has unified lock
-            try {
-                savedCredential = getDecryptedPasswordForTiedProfile(userId);
-            } catch (UnrecoverableKeyException | InvalidKeyException | KeyStoreException
-                    | NoSuchAlgorithmException | NoSuchPaddingException
-                    | InvalidAlgorithmParameterException | IllegalBlockSizeException
-                    | BadPaddingException | CertificateException | IOException e) {
-                if (e instanceof FileNotFoundException) {
-                    Slog.i(TAG, "Child profile key not found");
-                } else {
-                    Slog.e(TAG, "Failed to decrypt child profile key", e);
-                }
-            }
-        } else {
-            if (currentHandle == null) {
-                if (savedCredential != null) {
-                    Slog.w(TAG, "Saved credential provided, but none stored");
-                }
-                savedCredential = null;
-            }
+        if (credential == null) {
+            throw new RemoteException("Null credential with mismatched credential type");
         }
-
-        byte[] enrolledHandle = enrollCredential(currentHandle, savedCredential, pattern, userId);
-        if (enrolledHandle != null) {
-            CredentialHash willStore
-                = new CredentialHash(enrolledHandle, CredentialHash.VERSION_GATEKEEPER);
-            setUserKeyProtection(userId, pattern,
-                doVerifyPattern(pattern, willStore, true, 0, userId, null /* progressCallback */));
-            mStorage.writePatternHash(enrolledHandle, userId);
-            fixateNewestUserKeyAuth(userId);
-            onUserLockChanged(userId);
-        } else {
-            throw new RemoteException("Failed to enroll pattern");
-        }
-    }
-
-    // This method should be called by LockPatternUtil only, all internal methods in this class
-    // should call setLockPasswordInternal.
-    @Override
-    public void setLockPassword(String password, String savedCredential, int userId)
-            throws RemoteException {
-        checkWritePermission(userId);
-        synchronized (mSeparateChallengeLock) {
-            setLockPasswordInternal(password, savedCredential, userId);
-            setSeparateProfileChallengeEnabled(userId, true, null);
-            notifyPasswordChanged(userId);
-        }
-    }
-
-    private void setLockPasswordInternal(String password, String savedCredential, int userId)
-            throws RemoteException {
-        byte[] currentHandle = getCurrentHandle(userId);
-        if (password == null) {
-            clearUserKeyProtection(userId);
-            getGateKeeperService().clearSecureUserId(userId);
-            mStorage.writePasswordHash(null, userId);
-            setKeystorePassword(null, userId);
-            fixateNewestUserKeyAuth(userId);
-            onUserLockChanged(userId);
-            notifyActivePasswordMetricsAvailable(null, userId);
-            return;
-        }
-
         if (isManagedProfileWithUnifiedLock(userId)) {
             // get credential from keystore when managed profile has unified lock
             try {
@@ -1035,18 +943,21 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
         }
 
-        byte[] enrolledHandle = enrollCredential(currentHandle, savedCredential, password, userId);
+        byte[] enrolledHandle = enrollCredential(currentHandle, savedCredential, credential,
+                userId);
         if (enrolledHandle != null) {
-            CredentialHash willStore
-                = new CredentialHash(enrolledHandle, CredentialHash.VERSION_GATEKEEPER);
-            setUserKeyProtection(userId, password,
-                doVerifyPassword(password, willStore, true, 0, userId,
-                        null /* progressCallback */));
-            mStorage.writePasswordHash(enrolledHandle, userId);
+            CredentialHash willStore = CredentialHash.create(enrolledHandle, credentialType);
+            mStorage.writeCredentialHash(willStore, userId);
+            // Refresh the auth token
+            setUserKeyProtection(userId, credential,
+                    doVerifyCredential(credential, credentialType, true, 0, userId,
+                            null /* progressCallback */));
             fixateNewestUserKeyAuth(userId);
             onUserLockChanged(userId);
         } else {
-            throw new RemoteException("Failed to enroll password");
+            throw new RemoteException("Failed to enroll " +
+                    (credentialType == LockPatternUtils.CREDENTIAL_TYPE_PASSWORD ? "password"
+                            : "pattern"));
         }
     }
 
@@ -1143,7 +1054,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
         if (vcr.getResponseCode() != VerifyCredentialResponse.RESPONSE_OK) {
             throw new RemoteException("Non-OK response verifying a credential we just set: "
-                + vcr.getResponseCode());
+                    + vcr.getResponseCode());
         }
         byte[] token = vcr.getPayload();
         if (token == null) {
@@ -1240,90 +1151,61 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public VerifyCredentialResponse checkPattern(String pattern, int userId,
+    public VerifyCredentialResponse checkCredential(String credential, int type, int userId,
             ICheckCredentialProgressCallback progressCallback) throws RemoteException {
-        return doVerifyPattern(pattern, false, 0, userId, progressCallback);
+        checkPasswordReadPermission(userId);
+        return doVerifyCredential(credential, type, false, 0, userId, progressCallback);
     }
 
     @Override
-    public VerifyCredentialResponse verifyPattern(String pattern, long challenge, int userId)
-            throws RemoteException {
-        return doVerifyPattern(pattern, true, challenge, userId, null /* progressCallback */);
+    public VerifyCredentialResponse verifyCredential(String credential, int type, long challenge,
+            int userId) throws RemoteException {
+        checkPasswordReadPermission(userId);
+        return doVerifyCredential(credential, type, true, challenge, userId,
+                null /* progressCallback */);
     }
 
-    private VerifyCredentialResponse doVerifyPattern(String pattern, boolean hasChallenge,
-            long challenge, int userId, ICheckCredentialProgressCallback progressCallback)
-            throws RemoteException {
-       checkPasswordReadPermission(userId);
-       if (TextUtils.isEmpty(pattern)) {
-           throw new IllegalArgumentException("Pattern can't be null or empty");
-       }
-       CredentialHash storedHash = mStorage.readPatternHash(userId);
-       return doVerifyPattern(pattern, storedHash, hasChallenge, challenge, userId,
-               progressCallback);
-    }
-
-    private VerifyCredentialResponse doVerifyPattern(String pattern, CredentialHash storedHash,
+    /**
+     * Verify user credential and unlock the user. Fix pattern bug by deprecating the old base zero
+     * format.
+     */
+    private VerifyCredentialResponse doVerifyCredential(String credential, int credentialType,
             boolean hasChallenge, long challenge, int userId,
             ICheckCredentialProgressCallback progressCallback) throws RemoteException {
+        if (TextUtils.isEmpty(credential)) {
+            throw new IllegalArgumentException("Credential can't be null or empty");
+        }
 
-       if (TextUtils.isEmpty(pattern)) {
-           throw new IllegalArgumentException("Pattern can't be null or empty");
-       }
-       boolean shouldReEnrollBaseZero = storedHash != null && storedHash.isBaseZeroPattern;
+        CredentialHash storedHash = mStorage.readCredentialHash(userId);
+        if (storedHash.type != credentialType) {
+            Slog.wtf(TAG, "doVerifyCredential type mismatch with stored credential??"
+                    + " stored: " + storedHash.type + " passed in: " + credentialType);
+            return VerifyCredentialResponse.ERROR;
+        }
 
-       String patternToVerify;
-       if (shouldReEnrollBaseZero) {
-           patternToVerify = LockPatternUtils.patternStringToBaseZero(pattern);
-       } else {
-           patternToVerify = pattern;
-       }
+        boolean shouldReEnrollBaseZero = storedHash.type == LockPatternUtils.CREDENTIAL_TYPE_PATTERN
+                && storedHash.isBaseZeroPattern;
 
-       VerifyCredentialResponse response = verifyCredential(userId, storedHash, patternToVerify,
-               hasChallenge, challenge,
-               new CredentialUtil() {
-                   @Override
-                   public void setCredential(String pattern, String oldPattern, int userId)
-                           throws RemoteException {
-                        setLockPatternInternal(pattern, oldPattern, userId);
-                   }
+        String credentialToVerify;
+        if (shouldReEnrollBaseZero) {
+            credentialToVerify = LockPatternUtils.patternStringToBaseZero(credential);
+        } else {
+            credentialToVerify = credential;
+        }
 
-                   @Override
-                   public byte[] toHash(String pattern, int userId) {
-                       return LockPatternUtils.patternToHash(
-                               LockPatternUtils.stringToPattern(pattern));
-                   }
+        VerifyCredentialResponse response = verifyCredential(userId, storedHash, credentialToVerify,
+                hasChallenge, challenge, progressCallback);
 
-                   @Override
-                   public String adjustForKeystore(String pattern) {
-                       return LockPatternUtils.patternStringToBaseZero(pattern);
-                   }
-               },
-               progressCallback
-       );
+        if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK
+                && shouldReEnrollBaseZero) {
+            setLockCredentialInternal(credential, storedHash.type, credentialToVerify, userId);
+        }
 
-       if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK
-               && shouldReEnrollBaseZero) {
-            setLockPatternInternal(pattern, patternToVerify, userId);
-       }
-
-       return response;
+        return response;
     }
 
     @Override
-    public VerifyCredentialResponse checkPassword(String password, int userId,
-            ICheckCredentialProgressCallback progressCallback) throws RemoteException {
-        return doVerifyPassword(password, false, 0, userId, progressCallback);
-    }
-
-    @Override
-    public VerifyCredentialResponse verifyPassword(String password, long challenge, int userId)
-            throws RemoteException {
-        return doVerifyPassword(password, true, challenge, userId, null /* progressCallback */);
-    }
-
-    @Override
-    public VerifyCredentialResponse verifyTiedProfileChallenge(String password, boolean isPattern,
+    public VerifyCredentialResponse verifyTiedProfileChallenge(String credential, int type,
             long challenge, int userId) throws RemoteException {
         checkPasswordReadPermission(userId);
         if (!isManagedProfileWithUnifiedLock(userId)) {
@@ -1331,11 +1213,13 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
         final int parentProfileId = mUserManager.getProfileParent(userId).id;
         // Unlock parent by using parent's challenge
-        final VerifyCredentialResponse parentResponse = isPattern
-                ? doVerifyPattern(password, true, challenge, parentProfileId,
-                        null /* progressCallback */)
-                : doVerifyPassword(password, true, challenge, parentProfileId,
-                        null /* progressCallback */);
+        final VerifyCredentialResponse parentResponse = doVerifyCredential(
+                credential,
+                type,
+                true /* hasChallenge */,
+                challenge,
+                parentProfileId,
+                null /* progressCallback */);
         if (parentResponse.getResponseCode() != VerifyCredentialResponse.RESPONSE_OK) {
             // Failed, just return parent's response
             return parentResponse;
@@ -1343,7 +1227,9 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         try {
             // Unlock work profile, and work profile with unified lock must use password only
-            return doVerifyPassword(getDecryptedPasswordForTiedProfile(userId), true,
+            return doVerifyCredential(getDecryptedPasswordForTiedProfile(userId),
+                    LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
+                    true,
                     challenge,
                     userId, null /* progressCallback */);
         } catch (UnrecoverableKeyException | InvalidKeyException | KeyStoreException
@@ -1355,48 +1241,14 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    private VerifyCredentialResponse doVerifyPassword(String password, boolean hasChallenge,
-            long challenge, int userId, ICheckCredentialProgressCallback progressCallback)
-            throws RemoteException {
-       checkPasswordReadPermission(userId);
-       if (TextUtils.isEmpty(password)) {
-           throw new IllegalArgumentException("Password can't be null or empty");
-       }
-       CredentialHash storedHash = mStorage.readPasswordHash(userId);
-       return doVerifyPassword(password, storedHash, hasChallenge, challenge, userId,
-               progressCallback);
-    }
-
-    private VerifyCredentialResponse doVerifyPassword(String password, CredentialHash storedHash,
-            boolean hasChallenge, long challenge, int userId,
-            ICheckCredentialProgressCallback progressCallback) throws RemoteException {
-       if (TextUtils.isEmpty(password)) {
-           throw new IllegalArgumentException("Password can't be null or empty");
-       }
-       return verifyCredential(userId, storedHash, password, hasChallenge, challenge,
-               new CredentialUtil() {
-                   @Override
-                   public void setCredential(String password, String oldPassword, int userId)
-                           throws RemoteException {
-                        setLockPasswordInternal(password, oldPassword, userId);
-                   }
-
-                   @Override
-                   public byte[] toHash(String password, int userId) {
-                       return mLockPatternUtils.passwordToHash(password, userId);
-                   }
-
-                   @Override
-                   public String adjustForKeystore(String password) {
-                       return password;
-                   }
-               }, progressCallback);
-    }
-
+    /**
+     * Lowest-level credential verification routine that talks to GateKeeper. If verification
+     * passes, unlock the corresponding user and keystore. Also handles the migration from legacy
+     * hash to GK.
+     */
     private VerifyCredentialResponse verifyCredential(int userId, CredentialHash storedHash,
-            String credential, boolean hasChallenge, long challenge, CredentialUtil credentialUtil,
-            ICheckCredentialProgressCallback progressCallback)
-                throws RemoteException {
+            String credential, boolean hasChallenge, long challenge,
+            ICheckCredentialProgressCallback progressCallback) throws RemoteException {
         if ((storedHash == null || storedHash.hash.length == 0) && TextUtils.isEmpty(credential)) {
             // don't need to pass empty credentials to GateKeeper
             return VerifyCredentialResponse.OK;
@@ -1411,10 +1263,18 @@ public class LockSettingsService extends ILockSettings.Stub {
         StrictMode.noteDiskRead();
 
         if (storedHash.version == CredentialHash.VERSION_LEGACY) {
-            byte[] hash = credentialUtil.toHash(credential, userId);
+            final byte[] hash;
+            if (storedHash.type == LockPatternUtils.CREDENTIAL_TYPE_PATTERN) {
+                hash = LockPatternUtils.patternToHash(LockPatternUtils.stringToPattern(credential));
+            } else {
+                hash = mLockPatternUtils.passwordToHash(credential, userId);
+            }
             if (Arrays.equals(hash, storedHash.hash)) {
-                unlockKeystore(credentialUtil.adjustForKeystore(credential), userId);
-
+                if (storedHash.type == LockPatternUtils.CREDENTIAL_TYPE_PATTERN) {
+                    unlockKeystore(LockPatternUtils.patternStringToBaseZero(credential), userId);
+                } else {
+                    unlockKeystore(credential, userId);
+                }
                 // Users with legacy credentials don't have credential-backed
                 // FBE keys, so just pass through a fake token/secret
                 Slog.i(TAG, "Unlocking user with fake token: " + userId);
@@ -1422,7 +1282,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 unlockUser(userId, fakeToken, fakeToken);
 
                 // migrate credential to GateKeeper
-                credentialUtil.setCredential(credential, null, userId);
+                setLockCredentialInternal(credential, storedHash.type, null, userId);
                 if (!hasChallenge) {
                     notifyActivePasswordMetricsAvailable(credential, userId);
                     return VerifyCredentialResponse.OK;
@@ -1441,7 +1301,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 .verifyChallenge(userId, challenge, storedHash.hash, credential.getBytes());
         int responseCode = gateKeeperResponse.getResponseCode();
         if (responseCode == GateKeeperResponse.RESPONSE_RETRY) {
-             response = new VerifyCredentialResponse(gateKeeperResponse.getTimeout());
+            response = new VerifyCredentialResponse(gateKeeperResponse.getTimeout());
         } else if (responseCode == GateKeeperResponse.RESPONSE_OK) {
             byte[] token = gateKeeperResponse.getPayload();
             if (token == null) {
@@ -1458,7 +1318,6 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
 
-
             // credential has matched
 
             if (progressCallback != null) {
@@ -1468,7 +1327,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             unlockKeystore(credential, userId);
 
             Slog.i(TAG, "Unlocking user " + userId +
-                " with token length " + response.getPayload().length);
+                    " with token length " + response.getPayload().length);
             unlockUser(userId, response.getPayload(), secretFromCredential(credential));
 
             if (isManagedProfileWithSeparatedLock(userId)) {
@@ -1477,7 +1336,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 trustManager.setDeviceLockedForUser(userId, false);
             }
             if (shouldReEnroll) {
-                credentialUtil.setCredential(credential, credential, userId);
+                setLockCredentialInternal(credential, storedHash.type, credential, userId);
             }
         } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_RETRY) {
             if (response.getTimeout() > 0) {
@@ -1550,8 +1409,9 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         try {
             if (mLockPatternUtils.isLockPatternEnabled(userId)) {
-                if (checkPattern(password, userId, null /* progressCallback */).getResponseCode()
-                        == GateKeeperResponse.RESPONSE_OK) {
+                if (checkCredential(password, LockPatternUtils.CREDENTIAL_TYPE_PATTERN, userId,
+                        null /* progressCallback */)
+                                .getResponseCode() == GateKeeperResponse.RESPONSE_OK) {
                     return true;
                 }
             }
@@ -1560,8 +1420,9 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         try {
             if (mLockPatternUtils.isLockPasswordEnabled(userId)) {
-                if (checkPassword(password, userId, null /* progressCallback */).getResponseCode()
-                        == GateKeeperResponse.RESPONSE_OK) {
+                if (checkCredential(password, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, userId,
+                        null /* progressCallback */)
+                                .getResponseCode() == GateKeeperResponse.RESPONSE_OK) {
                     return true;
                 }
             }
@@ -1581,7 +1442,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         try {
             final IGateKeeperService gk = getGateKeeperService();
             if (gk != null) {
-                    gk.clearSecureUserId(userId);
+                gk.clearSecureUserId(userId);
             }
         } catch (RemoteException ex) {
             Slog.w(TAG, "unable to clear GK secure user id");
@@ -1661,28 +1522,28 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private static final String[] VALID_SETTINGS = new String[] {
-        LockPatternUtils.LOCKOUT_PERMANENT_KEY,
-        LockPatternUtils.LOCKOUT_ATTEMPT_DEADLINE,
-        LockPatternUtils.PATTERN_EVER_CHOSEN_KEY,
-        LockPatternUtils.PASSWORD_TYPE_KEY,
-        LockPatternUtils.PASSWORD_TYPE_ALTERNATE_KEY,
-        LockPatternUtils.LOCK_PASSWORD_SALT_KEY,
-        LockPatternUtils.DISABLE_LOCKSCREEN_KEY,
-        LockPatternUtils.LOCKSCREEN_OPTIONS,
-        LockPatternUtils.LOCKSCREEN_BIOMETRIC_WEAK_FALLBACK,
-        LockPatternUtils.BIOMETRIC_WEAK_EVER_CHOSEN_KEY,
-        LockPatternUtils.LOCKSCREEN_POWER_BUTTON_INSTANTLY_LOCKS,
-        LockPatternUtils.PASSWORD_HISTORY_KEY,
-        Secure.LOCK_PATTERN_ENABLED,
-        Secure.LOCK_BIOMETRIC_WEAK_FLAGS,
-        Secure.LOCK_PATTERN_VISIBLE,
-        Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED
+            LockPatternUtils.LOCKOUT_PERMANENT_KEY,
+            LockPatternUtils.LOCKOUT_ATTEMPT_DEADLINE,
+            LockPatternUtils.PATTERN_EVER_CHOSEN_KEY,
+            LockPatternUtils.PASSWORD_TYPE_KEY,
+            LockPatternUtils.PASSWORD_TYPE_ALTERNATE_KEY,
+            LockPatternUtils.LOCK_PASSWORD_SALT_KEY,
+            LockPatternUtils.DISABLE_LOCKSCREEN_KEY,
+            LockPatternUtils.LOCKSCREEN_OPTIONS,
+            LockPatternUtils.LOCKSCREEN_BIOMETRIC_WEAK_FALLBACK,
+            LockPatternUtils.BIOMETRIC_WEAK_EVER_CHOSEN_KEY,
+            LockPatternUtils.LOCKSCREEN_POWER_BUTTON_INSTANTLY_LOCKS,
+            LockPatternUtils.PASSWORD_HISTORY_KEY,
+            Secure.LOCK_PATTERN_ENABLED,
+            Secure.LOCK_BIOMETRIC_WEAK_FLAGS,
+            Secure.LOCK_PATTERN_VISIBLE,
+            Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED
     };
 
     // Reading these settings needs the contacts permission
     private static final String[] READ_CONTACTS_PROTECTED_SETTINGS = new String[] {
-        Secure.LOCK_SCREEN_OWNER_INFO_ENABLED,
-        Secure.LOCK_SCREEN_OWNER_INFO
+            Secure.LOCK_SCREEN_OWNER_INFO_ENABLED,
+            Secure.LOCK_SCREEN_OWNER_INFO
     };
 
     // Reading these settings needs the same permission as checking the password
@@ -1694,8 +1555,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     };
 
     private static final String[] SETTINGS_TO_BACKUP = new String[] {
-        Secure.LOCK_SCREEN_OWNER_INFO_ENABLED,
-        Secure.LOCK_SCREEN_OWNER_INFO
+            Secure.LOCK_SCREEN_OWNER_INFO_ENABLED,
+            Secure.LOCK_SCREEN_OWNER_INFO
     };
 
     private IStorageManager getStorageManager() {
@@ -1720,8 +1581,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             return mGateKeeperService;
         }
 
-        final IBinder service =
-            ServiceManager.getService(Context.GATEKEEPER_SERVICE);
+        final IBinder service = ServiceManager.getService(Context.GATEKEEPER_SERVICE);
         if (service != null) {
             service.linkToDeath(new GateKeeperDiedRecipient(), 0);
             mGateKeeperService = IGateKeeperService.Stub.asInterface(service);

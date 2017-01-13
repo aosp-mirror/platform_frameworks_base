@@ -45,6 +45,8 @@ import android.util.SparseIntArray;
 
 import com.google.android.collect.Lists;
 
+import libcore.util.HexEncoding;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.StandardCharsets;
@@ -55,8 +57,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import libcore.util.HexEncoding;
-
 /**
  * Utilities for the lock pattern and its settings.
  */
@@ -66,7 +66,7 @@ public class LockPatternUtils {
     private static final boolean DEBUG = false;
 
     /**
-     * The key to identify when the lock pattern enabled flag is being acccessed for legacy reasons.
+     * The key to identify when the lock pattern enabled flag is being accessed for legacy reasons.
      */
     public static final String LEGACY_LOCK_PATTERN_ENABLED = "legacy_lock_pattern_enabled";
 
@@ -104,6 +104,12 @@ public class LockPatternUtils {
      * {@link #FAILED_ATTEMPTS_BEFORE_TIMEOUT} and {@link #FAILED_ATTEMPTS_BEFORE_RESET}
      */
     public static final int MIN_PATTERN_REGISTER_FAIL = MIN_LOCK_PATTERN_SIZE;
+
+    public static final int CREDENTIAL_TYPE_NONE = -1;
+
+    public static final int CREDENTIAL_TYPE_PATTERN = 1;
+
+    public static final int CREDENTIAL_TYPE_PASSWORD = 2;
 
     @Deprecated
     public final static String LOCKOUT_PERMANENT_KEY = "lockscreen.lockedoutpermanently";
@@ -301,6 +307,42 @@ public class LockPatternUtils {
                 null /* componentName */, userId);
     }
 
+    private byte[] verifyCredential(String credential, int type, long challenge, int userId)
+            throws RequestThrottledException {
+        try {
+            VerifyCredentialResponse response = getLockSettings().verifyCredential(credential,
+                    type, challenge, userId);
+            if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
+                return response.getPayload();
+            } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_RETRY) {
+                throw new RequestThrottledException(response.getTimeout());
+            } else {
+                return null;
+            }
+        } catch (RemoteException re) {
+            return null;
+        }
+    }
+
+    private boolean checkCredential(String credential, int type, int userId,
+            @Nullable CheckCredentialProgressCallback progressCallback)
+            throws RequestThrottledException {
+        try {
+            VerifyCredentialResponse response = getLockSettings().checkCredential(credential, type,
+                    userId, wrapCallback(progressCallback));
+
+            if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
+                return true;
+            } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_RETRY) {
+                throw new RequestThrottledException(response.getTimeout());
+            } else {
+                return false;
+            }
+        } catch (RemoteException re) {
+            return false;
+        }
+    }
+
     /**
      * Check to see if a pattern matches the saved pattern.
      * If pattern matches, return an opaque attestation that the challenge
@@ -313,24 +355,8 @@ public class LockPatternUtils {
     public byte[] verifyPattern(List<LockPatternView.Cell> pattern, long challenge, int userId)
             throws RequestThrottledException {
         throwIfCalledOnMainThread();
-        try {
-            VerifyCredentialResponse response =
-                getLockSettings().verifyPattern(patternToString(pattern), challenge, userId);
-            if (response == null) {
-                // Shouldn't happen
-                return null;
-            }
-
-            if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
-                return response.getPayload();
-            } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_RETRY) {
-                throw new RequestThrottledException(response.getTimeout());
-            } else {
-                return null;
-            }
-        } catch (RemoteException re) {
-            return null;
-        }
+        return verifyCredential(patternToString(pattern), CREDENTIAL_TYPE_PATTERN, challenge,
+                userId);
     }
 
     /**
@@ -354,21 +380,8 @@ public class LockPatternUtils {
             @Nullable CheckCredentialProgressCallback progressCallback)
             throws RequestThrottledException {
         throwIfCalledOnMainThread();
-        try {
-            VerifyCredentialResponse response =
-                    getLockSettings().checkPattern(patternToString(pattern), userId,
-                            wrapCallback(progressCallback));
-
-            if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
-                return true;
-            } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_RETRY) {
-                throw new RequestThrottledException(response.getTimeout());
-            } else {
-                return false;
-            }
-        } catch (RemoteException re) {
-            return false;
-        }
+        return checkCredential(patternToString(pattern), CREDENTIAL_TYPE_PATTERN, userId,
+                progressCallback);
     }
 
     /**
@@ -383,20 +396,7 @@ public class LockPatternUtils {
     public byte[] verifyPassword(String password, long challenge, int userId)
             throws RequestThrottledException {
         throwIfCalledOnMainThread();
-        try {
-            VerifyCredentialResponse response =
-                    getLockSettings().verifyPassword(password, challenge, userId);
-
-            if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
-                return response.getPayload();
-            } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_RETRY) {
-                throw new RequestThrottledException(response.getTimeout());
-            } else {
-                return null;
-            }
-        } catch (RemoteException re) {
-            return null;
-        }
+        return verifyCredential(password, CREDENTIAL_TYPE_PASSWORD, challenge, userId);
     }
 
 
@@ -414,7 +414,8 @@ public class LockPatternUtils {
         throwIfCalledOnMainThread();
         try {
             VerifyCredentialResponse response =
-                    getLockSettings().verifyTiedProfileChallenge(password, isPattern, challenge,
+                    getLockSettings().verifyTiedProfileChallenge(password,
+                            isPattern ? CREDENTIAL_TYPE_PATTERN : CREDENTIAL_TYPE_PASSWORD, challenge,
                             userId);
 
             if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
@@ -449,19 +450,7 @@ public class LockPatternUtils {
             @Nullable CheckCredentialProgressCallback progressCallback)
             throws RequestThrottledException {
         throwIfCalledOnMainThread();
-        try {
-            VerifyCredentialResponse response =
-                    getLockSettings().checkPassword(password, userId, wrapCallback(progressCallback));
-            if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
-                return true;
-            } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_RETRY) {
-                throw new RequestThrottledException(response.getTimeout());
-            } else {
-                return false;
-            }
-        } catch (RemoteException re) {
-            return false;
-        }
+        return checkCredential(password, CREDENTIAL_TYPE_PASSWORD, userId, progressCallback);
     }
 
     /**
@@ -578,8 +567,7 @@ public class LockPatternUtils {
         setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, userHandle);
 
         try {
-            getLockSettings().setLockPassword(null, null, userHandle);
-            getLockSettings().setLockPattern(null, null, userHandle);
+            getLockSettings().setLockCredential(null, CREDENTIAL_TYPE_NONE, null, userHandle);
         } catch (RemoteException e) {
             // well, we tried...
         }
@@ -643,8 +631,8 @@ public class LockPatternUtils {
             }
 
             setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, userId);
-            getLockSettings().setLockPattern(patternToString(pattern), savedPattern, userId);
-            DevicePolicyManager dpm = getDevicePolicyManager();
+            getLockSettings().setLockCredential(patternToString(pattern), CREDENTIAL_TYPE_PATTERN,
+                    savedPattern, userId);
 
             // Update the device encryption password.
             if (userId == UserHandle.USER_SYSTEM
@@ -772,7 +760,8 @@ public class LockPatternUtils {
 
             final int computedQuality = PasswordMetrics.computeForPassword(password).quality;
             setLong(PASSWORD_TYPE_KEY, Math.max(quality, computedQuality), userHandle);
-            getLockSettings().setLockPassword(password, savedPassword, userHandle);
+            getLockSettings().setLockCredential(password, CREDENTIAL_TYPE_PASSWORD, savedPassword,
+                    userHandle);
 
             // Update the device encryption password.
             if (userHandle == UserHandle.USER_SYSTEM

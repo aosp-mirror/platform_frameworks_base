@@ -16,7 +16,7 @@
 
 package com.android.server;
 
-import com.android.internal.annotations.VisibleForTesting;
+import static android.content.Context.USER_SERVICE;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -29,13 +29,14 @@ import android.os.UserManager;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
-import android.util.SparseArray;
+
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
+import com.android.internal.widget.LockPatternUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-
-import static android.content.Context.USER_SERVICE;
 
 /**
  * Storage for the lock settings service.
@@ -72,29 +73,48 @@ class LockSettingsStorage {
     private final Cache mCache = new Cache();
     private final Object mFileWriteLock = new Object();
 
-    private SparseArray<Integer> mStoredCredentialType;
-
-    static class CredentialHash {
-        static final int TYPE_NONE = -1;
-        static final int TYPE_PATTERN = 1;
-        static final int TYPE_PASSWORD = 2;
-
+    @VisibleForTesting
+    public static class CredentialHash {
         static final int VERSION_LEGACY = 0;
         static final int VERSION_GATEKEEPER = 1;
 
-        CredentialHash(byte[] hash, int version) {
+        private CredentialHash(byte[] hash, int type, int version) {
+            if (type != LockPatternUtils.CREDENTIAL_TYPE_NONE) {
+                if (hash == null) {
+                    throw new RuntimeException("Empty hash for CredentialHash");
+                }
+            } else /* type == LockPatternUtils.CREDENTIAL_TYPE_NONE */ {
+                if (hash != null) {
+                    throw new RuntimeException("None type CredentialHash should not have hash");
+                }
+            }
             this.hash = hash;
+            this.type = type;
             this.version = version;
             this.isBaseZeroPattern = false;
         }
 
-        CredentialHash(byte[] hash, boolean isBaseZeroPattern) {
+        private CredentialHash(byte[] hash, boolean isBaseZeroPattern) {
             this.hash = hash;
+            this.type = LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
             this.version = VERSION_GATEKEEPER;
             this.isBaseZeroPattern = isBaseZeroPattern;
         }
 
+        static CredentialHash create(byte[] hash, int type) {
+            if (type == LockPatternUtils.CREDENTIAL_TYPE_NONE) {
+                throw new RuntimeException("Bad type for CredentialHash");
+            }
+            return new CredentialHash(hash, type, VERSION_GATEKEEPER);
+        }
+
+        static CredentialHash createEmptyHash() {
+            return new CredentialHash(null, LockPatternUtils.CREDENTIAL_TYPE_NONE,
+                    VERSION_GATEKEEPER);
+        }
+
         byte[] hash;
+        int type;
         int version;
         boolean isBaseZeroPattern;
     }
@@ -102,7 +122,6 @@ class LockSettingsStorage {
     public LockSettingsStorage(Context context, Callback callback) {
         mContext = context;
         mOpenHelper = new DatabaseHelper(context, callback);
-        mStoredCredentialType = new SparseArray<Integer>();
     }
 
     public void writeKeyValue(String key, String value, int userId) {
@@ -178,73 +197,60 @@ class LockSettingsStorage {
         }
 
         // Populate cache by reading the password and pattern files.
-        readPasswordHash(userId);
-        readPatternHash(userId);
+        readCredentialHash(userId);
     }
 
-    public int getStoredCredentialType(int userId) {
-        final Integer cachedStoredCredentialType = mStoredCredentialType.get(userId);
-        if (cachedStoredCredentialType != null) {
-            return cachedStoredCredentialType.intValue();
-        }
-
-        int storedCredentialType;
-        CredentialHash pattern = readPatternHash(userId);
-        if (pattern == null) {
-            if (readPasswordHash(userId) != null) {
-                storedCredentialType = CredentialHash.TYPE_PASSWORD;
-            } else {
-                storedCredentialType = CredentialHash.TYPE_NONE;
-            }
-        } else {
-            CredentialHash password = readPasswordHash(userId);
-            if (password != null) {
-                // Both will never be GateKeeper
-                if (password.version == CredentialHash.VERSION_GATEKEEPER) {
-                    storedCredentialType = CredentialHash.TYPE_PASSWORD;
-                } else {
-                    storedCredentialType = CredentialHash.TYPE_PATTERN;
-                }
-            } else {
-                storedCredentialType = CredentialHash.TYPE_PATTERN;
-            }
-        }
-        mStoredCredentialType.put(userId, storedCredentialType);
-        return storedCredentialType;
-    }
-
-
-    public CredentialHash readPasswordHash(int userId) {
+    private CredentialHash readPasswordHashIfExists(int userId) {
         byte[] stored = readFile(getLockPasswordFilename(userId));
-        if (stored != null && stored.length > 0) {
-            return new CredentialHash(stored, CredentialHash.VERSION_GATEKEEPER);
+        if (!ArrayUtils.isEmpty(stored)) {
+            return new CredentialHash(stored, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
+                    CredentialHash.VERSION_GATEKEEPER);
         }
 
         stored = readFile(getLegacyLockPasswordFilename(userId));
-        if (stored != null && stored.length > 0) {
-            return new CredentialHash(stored, CredentialHash.VERSION_LEGACY);
+        if (!ArrayUtils.isEmpty(stored)) {
+            return new CredentialHash(stored, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
+                    CredentialHash.VERSION_LEGACY);
         }
-
         return null;
     }
 
-    public CredentialHash readPatternHash(int userId) {
+    private CredentialHash readPatternHashIfExists(int userId) {
         byte[] stored = readFile(getLockPatternFilename(userId));
-        if (stored != null && stored.length > 0) {
-            return new CredentialHash(stored, CredentialHash.VERSION_GATEKEEPER);
+        if (!ArrayUtils.isEmpty(stored)) {
+            return new CredentialHash(stored, LockPatternUtils.CREDENTIAL_TYPE_PATTERN,
+                    CredentialHash.VERSION_GATEKEEPER);
         }
 
         stored = readFile(getBaseZeroLockPatternFilename(userId));
-        if (stored != null && stored.length > 0) {
+        if (!ArrayUtils.isEmpty(stored)) {
             return new CredentialHash(stored, true);
         }
 
         stored = readFile(getLegacyLockPatternFilename(userId));
-        if (stored != null && stored.length > 0) {
-            return new CredentialHash(stored, CredentialHash.VERSION_LEGACY);
+        if (!ArrayUtils.isEmpty(stored)) {
+            return new CredentialHash(stored, LockPatternUtils.CREDENTIAL_TYPE_PATTERN,
+                    CredentialHash.VERSION_LEGACY);
         }
-
         return null;
+    }
+
+    public CredentialHash readCredentialHash(int userId) {
+        CredentialHash passwordHash = readPasswordHashIfExists(userId);
+        CredentialHash patternHash = readPatternHashIfExists(userId);
+        if (passwordHash != null && patternHash != null) {
+            if (passwordHash.version == CredentialHash.VERSION_GATEKEEPER) {
+                return passwordHash;
+            } else {
+                return patternHash;
+            }
+        } else if (passwordHash != null) {
+            return passwordHash;
+        } else if (patternHash != null) {
+            return patternHash;
+        } else {
+            return CredentialHash.createEmptyHash();
+        }
     }
 
     public void removeChildProfileLock(int userId) {
@@ -355,26 +361,17 @@ class LockSettingsStorage {
         }
     }
 
-    public void writePatternHash(byte[] hash, int userId) {
-        mStoredCredentialType.put(userId, hash == null ? CredentialHash.TYPE_NONE
-                : CredentialHash.TYPE_PATTERN);
-        writeFile(getLockPatternFilename(userId), hash);
-        clearPasswordHash(userId);
-    }
+    public void writeCredentialHash(CredentialHash hash, int userId) {
+        byte[] patternHash = null;
+        byte[] passwordHash = null;
 
-    private void clearPatternHash(int userId) {
-        writeFile(getLockPatternFilename(userId), null);
-    }
-
-    public void writePasswordHash(byte[] hash, int userId) {
-        mStoredCredentialType.put(userId, hash == null ? CredentialHash.TYPE_NONE
-                : CredentialHash.TYPE_PASSWORD);
-        writeFile(getLockPasswordFilename(userId), hash);
-        clearPatternHash(userId);
-    }
-
-    private void clearPasswordHash(int userId) {
-        writeFile(getLockPasswordFilename(userId), null);
+        if (hash.type == LockPatternUtils.CREDENTIAL_TYPE_PASSWORD) {
+            passwordHash = hash.hash;
+        } else if (hash.type == LockPatternUtils.CREDENTIAL_TYPE_PATTERN) {
+            patternHash = hash.hash;
+        }
+        writeFile(getLockPasswordFilename(userId), passwordHash);
+        writeFile(getLockPatternFilename(userId), patternHash);
     }
 
     @VisibleForTesting
