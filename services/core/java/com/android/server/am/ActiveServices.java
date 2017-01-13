@@ -1907,6 +1907,7 @@ public final class ActiveServices {
                     mAm.grantUriPermissionUncheckedFromIntentLocked(si.neededGrants,
                             si.getUriPermissionsLocked());
                 }
+                // TODO b/34123112; Insert ephemeral grant here
                 bumpServiceExecutingLocked(r, execInFg, "start");
                 if (!oomAdjusted) {
                     oomAdjusted = true;
