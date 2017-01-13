@@ -479,6 +479,12 @@ public class WifiConfiguration implements Parcelable {
 
     /**
      * @hide
+     * Set to true if this is a Carrier Network, else set to false.
+     */
+    public boolean isCarrierNetwork = false;
+
+    /**
+     * @hide
      * A summary of the RSSI and Band status for that configuration
      * This is used as a temporary value by the auto-join controller
      */
@@ -1552,6 +1558,7 @@ public class WifiConfiguration implements Parcelable {
         sbuf.append(" lcuid=" + lastConnectUid);
         sbuf.append(" userApproved=" + userApprovedAsString(userApproved));
         sbuf.append(" noInternetAccessExpected=" + noInternetAccessExpected);
+        sbuf.append(" isCarrierNetwork=" + isCarrierNetwork);
         sbuf.append(" ");
 
         if (this.lastConnected != 0) {
@@ -1917,6 +1924,7 @@ public class WifiConfiguration implements Parcelable {
             userApproved = source.userApproved;
             numNoInternetAccessReports = source.numNoInternetAccessReports;
             noInternetAccessExpected = source.noInternetAccessExpected;
+            isCarrierNetwork = source.isCarrierNetwork;
             creationTime = source.creationTime;
             updateTime = source.updateTime;
             shared = source.shared;
@@ -1988,6 +1996,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(userApproved);
         dest.writeInt(numNoInternetAccessReports);
         dest.writeInt(noInternetAccessExpected ? 1 : 0);
+        dest.writeInt(isCarrierNetwork ? 1 : 0);
         dest.writeInt(shared ? 1 : 0);
         dest.writeString(mPasspointManagementObjectTree);
     }
@@ -2059,6 +2068,7 @@ public class WifiConfiguration implements Parcelable {
                 config.userApproved = in.readInt();
                 config.numNoInternetAccessReports = in.readInt();
                 config.noInternetAccessExpected = in.readInt() != 0;
+                config.isCarrierNetwork = in.readInt() != 0;
                 config.shared = in.readInt() != 0;
                 config.mPasspointManagementObjectTree = in.readString();
                 return config;
