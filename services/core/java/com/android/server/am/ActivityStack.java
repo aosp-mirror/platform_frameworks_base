@@ -72,6 +72,8 @@ import static com.android.server.wm.AppTransition.TRANSIT_TASK_OPEN;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_OPEN_BEHIND;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_TO_BACK;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_TO_FRONT;
+import static java.lang.Integer.MAX_VALUE;
+import static java.lang.Integer.MIN_VALUE;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -2534,6 +2536,30 @@ final class ActivityStack extends ConfigurationContainer {
         return null;
     }
 
+    /** Returns the position the input task should be placed in this stack. */
+    int getAdjustedPositionForTask(TaskRecord task, int suggestedPosition,
+            ActivityRecord starting) {
+
+        int maxPosition = mTaskHistory.size();
+        if ((starting != null && starting.okToShowLocked())
+                || (starting == null && task.okToShowLocked())) {
+            // If the task or starting activity can be shown, then whatever position is okay.
+            return Math.min(suggestedPosition, maxPosition);
+        }
+
+        // The task can't be shown, put non-current user tasks below current user tasks.
+        while (maxPosition > 0) {
+            final TaskRecord tmpTask = mTaskHistory.get(maxPosition - 1);
+            if (!mStackSupervisor.isCurrentProfileLocked(tmpTask.userId)
+                    || tmpTask.topRunningActivityLocked() == null) {
+                break;
+            }
+            maxPosition--;
+        }
+
+        return  Math.min(suggestedPosition, maxPosition);
+    }
+
     /**
      * Used from {@link ActivityStack#positionTask(TaskRecord, int)}.
      * @see ActivityManagerService#positionTaskInStack(int, int, int).
@@ -2543,32 +2569,25 @@ final class ActivityStack extends ConfigurationContainer {
             insertTaskAtTop(task, null);
             return;
         }
-        // Calculate maximum possible position for this task.
-        int maxPosition = mTaskHistory.size();
-        if (!task.okToShowLocked()) {
-            // Put non-current user tasks below current user tasks.
-            while (maxPosition > 0) {
-                final TaskRecord tmpTask = mTaskHistory.get(maxPosition - 1);
-                if (!mStackSupervisor.isCurrentProfileLocked(tmpTask.userId)
-                        || tmpTask.topRunningActivityLocked() == null) {
-                    break;
-                }
-                maxPosition--;
-            }
-        }
-        position = Math.min(position, maxPosition);
+        position = getAdjustedPositionForTask(task, position, null /* starting */);
         mTaskHistory.remove(task);
         mTaskHistory.add(position, task);
-        task.positionWindowContainerAt(mStackId, position);
+        task.positionWindowContainerAt(position);
         updateTaskMovement(task, true);
     }
 
-    private void insertTaskAtTop(TaskRecord task, ActivityRecord newActivity) {
-        insertTaskAtTop(task, newActivity, true /* allowStackOnTop */);
+    private void insertTaskAtTop(TaskRecord task, ActivityRecord starting) {
+        updateTaskReturnToForTopInsertion(task);
+        // TODO: Better place to put all the code below...may be addTask...
+        mTaskHistory.remove(task);
+        // Now put task at top.
+        final int position = getAdjustedPositionForTask(task, mTaskHistory.size(), starting);
+        mTaskHistory.add(position, task);
+        updateTaskMovement(task, true);
+        task.moveWindowContainerToTop(true /* includingParents */);
     }
 
-    private void insertTaskAtTop(TaskRecord task, ActivityRecord newActivity,
-            boolean allowStackOnTop) {
+    private void updateTaskReturnToForTopInsertion(TaskRecord task) {
         boolean isLastTaskOverHome = false;
         // If the moving task is over home stack, transfer its return type to next task
         if (task.isOverHomeStack()) {
@@ -2585,49 +2604,27 @@ final class ActivityStack extends ConfigurationContainer {
         if (isOnHomeDisplay()) {
             ActivityStack lastStack = mStackSupervisor.getLastStack();
             final boolean fromHomeOrRecents = lastStack.isHomeOrRecentsStack();
-            final boolean fromOnTopLauncher = lastStack.topTask() != null &&
-                    lastStack.topTask().isOnTopLauncher();
+            final TaskRecord topTask = lastStack.topTask();
+            final boolean fromOnTopLauncher = topTask != null && topTask.isOnTopLauncher();
             if (fromOnTopLauncher) {
                 // Since an on-top launcher will is moved to back when tasks are launched from it,
                 // those tasks should first try to return to a non-home activity.
                 // This also makes sure that non-home activities are visible under a transparent
                 // non-home activity.
                 task.setTaskToReturnTo(APPLICATION_ACTIVITY_TYPE);
-            } else if (!isHomeOrRecentsStack() && (fromHomeOrRecents || topTask() != task)) {
+            } else if (!isHomeOrRecentsStack() && (fromHomeOrRecents || topTask != task)) {
                 // If it's a last task over home - we default to keep its return to type not to
                 // make underlying task focused when this one will be finished.
                 int returnToType = isLastTaskOverHome
                         ? task.getTaskToReturnTo() : APPLICATION_ACTIVITY_TYPE;
                 if (fromHomeOrRecents && StackId.allowTopTaskToReturnHome(mStackId)) {
-                    returnToType = lastStack.topTask() == null
-                            ? HOME_ACTIVITY_TYPE : lastStack.topTask().taskType;
+                    returnToType = topTask == null ? HOME_ACTIVITY_TYPE : topTask.taskType;
                 }
                 task.setTaskToReturnTo(returnToType);
             }
         } else {
             task.setTaskToReturnTo(APPLICATION_ACTIVITY_TYPE);
         }
-
-        mTaskHistory.remove(task);
-        // Now put task at top.
-        int taskNdx = mTaskHistory.size();
-        final boolean notShownWhenLocked =
-                (newActivity != null && !newActivity.okToShowLocked())
-                || (newActivity == null && !task.okToShowLocked());
-        if (notShownWhenLocked) {
-            // Put non-current user tasks below current user tasks.
-            while (--taskNdx >= 0) {
-                final TaskRecord tmpTask = mTaskHistory.get(taskNdx);
-                if (!mStackSupervisor.isCurrentProfileLocked(tmpTask.userId)
-                        || tmpTask.topRunningActivityLocked() == null) {
-                    break;
-                }
-            }
-            ++taskNdx;
-        }
-        mTaskHistory.add(taskNdx, task);
-        updateTaskMovement(task, true);
-        task.moveWindowContainerToTop(allowStackOnTop /* includingParents */);
     }
 
     final void startActivityLocked(ActivityRecord r, ActivityRecord focusedTopActivity,
@@ -4891,38 +4888,49 @@ final class ActivityStack extends ConfigurationContainer {
     }
 
     void addTask(final TaskRecord task, final boolean toTop, String reason) {
-        addTask(task, toTop, reason, true /* allowStackOnTop */);
+        addTask(task, toTop ? MAX_VALUE : 0, reason);
+        if (toTop) {
+            // TODO: figure-out a way to remove this call.
+            task.moveWindowContainerToTop(true /* includingParents */);
+        }
     }
 
-    void addTask(final TaskRecord task, final boolean toTop, String reason,
-            boolean allowStackOnTop) {
+    // TODO: This shouldn't allow automatic reparenting. Remove the call to preAddTask and deal
+    // with the fall-out...
+    void addTask(final TaskRecord task, int position, String reason) {
+        // TODO: Is this remove really needed? Need to look into the call path for the other addTask
+        mTaskHistory.remove(task);
+        position = getAdjustedPositionForTask(task, position, null /* starting */);
+        final boolean toTop = position >= mTaskHistory.size();
         final ActivityStack prevStack = preAddTask(task, reason, toTop);
 
         task.setStack(this);
+
         if (toTop) {
-            insertTaskAtTop(task, null, allowStackOnTop);
-        } else {
-            mTaskHistory.add(0, task);
-            updateTaskMovement(task, false);
+            updateTaskReturnToForTopInsertion(task);
         }
+
+        mTaskHistory.add(position, task);
+        updateTaskMovement(task, toTop);
+
         postAddTask(task, prevStack);
     }
 
-    void positionChildAt(int taskId, int index) {
-        final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
-        if (task == null) {
-            Slog.w(TAG, "positionTaskInStackLocked: no task for id=" + taskId);
-            return;
+    void positionChildAt(TaskRecord task, int index) {
+
+        if (task.getStack() != this) {
+            throw new IllegalArgumentException("AS.positionChildAt: task=" + task
+                    + " is not a child of stack=" + this + " current parent=" + task.getStack());
         }
 
         task.updateOverrideConfigurationForStack(this);
 
         final ActivityRecord topRunningActivity = task.topRunningActivityLocked();
         final boolean wasResumed = topRunningActivity == task.getStack().mResumedActivity;
-        final ActivityStack prevStack = preAddTask(task, "positionTask", !ON_TOP);
         task.setStack(this);
         insertTaskAtPosition(task, index);
-        postAddTask(task, prevStack);
+        postAddTask(task, null /* prevStack */);
+
         if (wasResumed) {
             if (mResumedActivity != null) {
                 Log.wtf(TAG, "mResumedActivity was already set when moving mResumedActivity from"

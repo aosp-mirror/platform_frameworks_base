@@ -18,10 +18,10 @@ package com.android.server.wm;
 
 import android.app.ActivityManager.TaskSnapshot;
 import android.content.res.Configuration;
-import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.util.EventLog;
 import android.util.Slog;
+import com.android.internal.annotations.VisibleForTesting;
 
 import static com.android.server.EventLogTags.WM_TASK_CREATED;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
@@ -59,11 +59,19 @@ public class TaskWindowContainerController
                         + stackId);
             }
             EventLog.writeEvent(WM_TASK_CREATED, taskId, stackId);
-            final Task task = new Task(taskId, stack, userId, mService, bounds, overrideConfig,
-                    isOnTopLauncher, resizeMode, homeTask, this);
+            final Task task = createTask(taskId, stack, userId, bounds, overrideConfig, resizeMode,
+                    homeTask, isOnTopLauncher);
             final int position = toTop ? POSITION_TOP : POSITION_BOTTOM;
             stack.addTask(task, position, showForAllUsers, true /* moveParents */);
         }
+    }
+
+    @VisibleForTesting
+    Task createTask(int taskId, TaskStack stack, int userId, Rect bounds,
+            Configuration overrideConfig, int resizeMode, boolean homeTask,
+            boolean isOnTopLauncher) {
+        return new Task(taskId, stack, userId, mService, bounds, overrideConfig, isOnTopLauncher,
+                resizeMode, homeTask, this);
     }
 
     @Override
@@ -78,7 +86,7 @@ public class TaskWindowContainerController
         }
     }
 
-    public void positionChildAt(AppWindowContainerController childController, int index) {
+    public void positionChildAt(AppWindowContainerController childController, int position) {
         synchronized(mService.mWindowMap) {
             final AppWindowToken aToken = childController.mContainer;
             if (aToken == null) {
@@ -91,7 +99,7 @@ public class TaskWindowContainerController
             if (task == null) {
                 throw new IllegalArgumentException("positionChildAt: invalid task=" + this);
             }
-            task.addChild(aToken, index);
+            task.positionChildAt(position, aToken, false /* includeParents */);
         }
     }
 
@@ -106,9 +114,7 @@ public class TaskWindowContainerController
             }
             final TaskStack stack = mService.mStackIdToStack.get(stackId);
             if (stack == null) {
-                if (DEBUG_STACK) Slog.i(TAG_WM,
-                        "reparent: could not find stackId=" + stackId);
-                return;
+                throw new IllegalArgumentException("reparent: could not find stackId=" + stackId);
             }
             mContainer.reparent(stack, position);
             final DisplayContent displayContent = stack.getDisplayContent();
@@ -140,22 +146,22 @@ public class TaskWindowContainerController
     }
 
     // TODO: Move to positionChildAt() in stack controller once we have a stack controller.
-    public void positionAt(int stackId, int index, Rect bounds, Configuration overrideConfig) {
+    public void positionAt(int position, Rect bounds, Configuration overrideConfig) {
         synchronized (mWindowMap) {
             if (DEBUG_STACK) Slog.i(TAG_WM, "positionChildAt: positioning taskId=" + mTaskId
-                    + " in stackId=" + stackId + " at " + index);
+                    + " at " + position);
             if (mContainer == null) {
                 if (DEBUG_STACK) Slog.i(TAG_WM,
-                        "positionTaskInStack: could not find taskId=" + mTaskId);
+                        "positionAt: could not find taskId=" + mTaskId);
                 return;
             }
-            final TaskStack stack = mService.mStackIdToStack.get(stackId);
+            final TaskStack stack = mContainer.mStack;
             if (stack == null) {
                 if (DEBUG_STACK) Slog.i(TAG_WM,
-                        "positionTaskInStack: could not find stackId=" + stackId);
+                        "positionAt: could not find stack for task=" + mContainer);
                 return;
             }
-            mContainer.positionTaskInStack(stack, index, bounds, overrideConfig);
+            mContainer.positionAt(position, bounds, overrideConfig);
             final DisplayContent displayContent = stack.getDisplayContent();
             displayContent.setLayoutNeeded();
             mService.mWindowPlacerLocked.performSurfacePlacement();

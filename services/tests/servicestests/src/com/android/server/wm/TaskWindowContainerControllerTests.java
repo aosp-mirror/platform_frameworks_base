@@ -22,6 +22,11 @@ import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 /**
  * Test class for {@link TaskWindowContainerController}.
  *
@@ -32,7 +37,73 @@ import android.support.test.runner.AndroidJUnit4;
 @Presubmit
 @org.junit.runner.RunWith(AndroidJUnit4.class)
 public class TaskWindowContainerControllerTests extends WindowTestsBase {
-// TODO Add tests once StackWindowContainerController is created.
+
     @Test
-    public void dummyTest() throws Exception {}
+    public void testRemoveContainer() throws Exception {
+        final TestTaskWindowContainerController taskController =
+                new TestTaskWindowContainerController();
+        final TestAppWindowContainerController appController =
+                new TestAppWindowContainerController(taskController);
+
+        taskController.removeContainer();
+        // Assert that the container was removed.
+        assertNull(taskController.mContainer);
+        assertNull(appController.mContainer);
+    }
+
+    @Test
+    public void testRemoveContainer_DeferRemoval() throws Exception {
+        final TestTaskWindowContainerController taskController =
+                new TestTaskWindowContainerController();
+        final TestAppWindowContainerController appController =
+                new TestAppWindowContainerController(taskController);
+
+        final TestTask task = (TestTask) taskController.mContainer;
+        final AppWindowToken app = appController.mContainer;
+        task.mShouldDeferRemoval = true;
+
+        taskController.removeContainer();
+        // For the case of deferred removal the task controller will no longer be connected to the
+        // container, but the app controller will still be connected to the its container until
+        // the task window container is removed.
+        assertNull(taskController.mContainer);
+        assertNull(task.getController());
+        assertNotNull(appController.mContainer);
+        assertNotNull(app.getController());
+
+        task.removeImmediately();
+        assertNull(appController.mContainer);
+        assertNull(app.getController());
+    }
+
+    @Test
+    public void testReparent() throws Exception {
+        final TaskStack stack1 = createTaskStackOnDisplay(sDisplayContent);
+        final TestTaskWindowContainerController taskController =
+                new TestTaskWindowContainerController(stack1.mStackId);
+        final TaskStack stack2 = createTaskStackOnDisplay(sDisplayContent);
+        final TestTaskWindowContainerController taskController2 =
+                new TestTaskWindowContainerController(stack2.mStackId);
+
+        boolean gotException = false;
+        try {
+            taskController.reparent(stack1.mStackId, 0);
+        } catch (IllegalArgumentException e) {
+            gotException = true;
+        }
+        assertTrue("Should not be able to reparent to the same parent", gotException);
+
+        gotException = false;
+        try {
+            taskController.reparent(sNextStackId + 1, 0);
+        } catch (IllegalArgumentException e) {
+            gotException = true;
+        }
+        assertTrue("Should not be able to reparent to a stackId that doesn't exist", gotException);
+
+        taskController.reparent(stack2.mStackId, 0);
+        assertEquals(stack2, taskController.mContainer.getParent());
+        assertEquals(0, ((TestTask) taskController.mContainer).positionInParent());
+        assertEquals(1, ((TestTask) taskController2.mContainer).positionInParent());
+    }
 }

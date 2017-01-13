@@ -101,6 +101,8 @@ import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.STARTING_WINDOW_SHOWN;
+import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_MOVING;
+import static com.android.server.am.ActivityStackSupervisor.CREATE_IF_NEEDED;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 
 final class TaskRecord extends ConfigurationContainer {
@@ -512,8 +514,8 @@ final class TaskRecord extends ConfigurationContainer {
     }
 
     // TODO: Remove once we have a stack controller.
-    void positionWindowContainerAt(int stackId, int index) {
-        mWindowContainerController.positionAt(stackId, index, mBounds, getOverrideConfiguration());
+    void positionWindowContainerAt(int position) {
+        mWindowContainerController.positionAt(position, mBounds, getOverrideConfiguration());
     }
 
     // TODO: Replace with moveChildToTop?
@@ -534,9 +536,36 @@ final class TaskRecord extends ConfigurationContainer {
         mWindowContainerController.getBounds(bounds);
     }
 
-    // TODO: make this part of adding it to the stack?
-    void reparentWindowContainer(int stackId, int position) {
-        mWindowContainerController.reparent(stackId, position);
+    // TODO: Should we be doing all the stuff in ASS.moveTaskToStackLocked?
+    void reparent(int stackId, int position, String reason) {
+        mService.mWindowManager.deferSurfaceLayout();
+
+        try {
+            final ActivityStackSupervisor supervisor = mService.mStackSupervisor;
+            final ActivityStack newStack = supervisor.getStack(stackId,
+                    CREATE_IF_NEEDED, false /* toTop */);
+            // Adjust the position for the new parent stack as needed.
+            position = newStack.getAdjustedPositionForTask(this, position, null /* starting */);
+
+            // Must reparent first in window manager to avoid a situation where AM can delete the
+            // we are coming from in WM before we reparent because it became empty.
+            mWindowContainerController.reparent(stackId, position);
+
+            final ActivityStack prevStack = mStack;
+            prevStack.removeTask(this, reason, REMOVE_TASK_MODE_MOVING);
+            newStack.addTask(this, position, reason);
+
+            supervisor.scheduleReportPictureInPictureModeChangedIfNeeded(this, prevStack);
+
+            if (voiceSession != null) {
+                try {
+                    voiceSession.taskStarted(intent, taskId);
+                } catch (RemoteException e) {
+                }
+            }
+        } finally {
+            mService.mWindowManager.continueSurfaceLayout();
+        }
     }
 
     void cancelWindowTransition() {
@@ -978,6 +1007,8 @@ final class TaskRecord extends ConfigurationContainer {
         addActivityAtIndex(mActivities.size(), r);
     }
 
+    // TODO: Figure-out if any of the call points expect the window container to be reparented and
+    // correct them to use the right method.
     void addActivityAtIndex(int index, ActivityRecord r) {
         // Remove r first, and if it wasn't already in the list and it's fullscreen, count it.
         if (!mActivities.remove(r) && r.fullscreen) {
