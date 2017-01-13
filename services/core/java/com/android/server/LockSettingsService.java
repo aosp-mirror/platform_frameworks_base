@@ -1196,9 +1196,11 @@ public class LockSettingsService extends ILockSettings.Stub {
         VerifyCredentialResponse response = verifyCredential(userId, storedHash, credentialToVerify,
                 hasChallenge, challenge, progressCallback);
 
-        if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK
-                && shouldReEnrollBaseZero) {
-            setLockCredentialInternal(credential, storedHash.type, credentialToVerify, userId);
+        if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
+            mStrongAuth.reportSuccessfulStrongAuthUnlock(userId);
+            if (shouldReEnrollBaseZero) {
+                setLockCredentialInternal(credential, storedHash.type, credentialToVerify, userId);
+            }
         }
 
         return response;
