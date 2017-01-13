@@ -736,18 +736,10 @@ easier.
     <!-- DeviceDefault theme for a window that should look like the Settings app.  -->
     <style name="Theme.DeviceDefault.Settings" parent="Theme.Material.Settings">
         <!-- Color palette -->
-        <item name="colorPrimary">@color/primary_device_default_settings</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_settings</item>
-        <item name="colorSecondary">@color/secondary_device_default_settings</item>
+        <item name="colorPrimary">@color/primary_device_default_settings_light</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_settings_light</item>
+        <item name="colorSecondary">@color/secondary_device_default_settings_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
-    </style>
-
-    <!-- @hide DeviceDefault theme that should look like the Settings app. The action bar will use a
-         light background and accent color for text and icon. -->
-    <style name="Theme.DeviceDefault.Settings.LightActionBar">
-        <!-- ActionBar -->
-        <item name="actionBarTheme">@style/ThemeOverlay.DeviceDefault.ActionBar.Accent</item>
-        <item name="actionBarStyle">@style/Widget.DeviceDefault.Light.ActionBar</item>
     </style>
 
     <!-- @hide DeviceDefault theme for a window that should use Settings theme colors
@@ -816,12 +808,6 @@ easier.
     <style name="Theme.DeviceDefault.System" parent="Theme.DeviceDefault.Light.DarkActionBar" />
 
     <style name="ThemeOverlay.DeviceDefault" />
-
-    <!-- @hide Theme overlay that inherits from material actionbar,  and use accent color for
-             primary text -->
-    <style name="ThemeOverlay.DeviceDefault.ActionBar.Accent" parent="ThemeOverlay.Material.ActionBar">
-        <item name="textColorPrimary">@color/btn_colored_borderless_text_material</item>
-    </style>
 
     <style name="ThemeOverlay.DeviceDefault.Accent">
         <item name="colorAccent">@color/accent_device_default_dark</item>
