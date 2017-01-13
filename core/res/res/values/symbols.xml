@@ -1254,6 +1254,11 @@
   <java-symbol type="drawable" name="platlogo" />
   <java-symbol type="drawable" name="stat_notify_sync_error" />
   <java-symbol type="drawable" name="stat_notify_wifi_in_range" />
+  <java-symbol type="drawable" name="ic_wifi_signal_0" />
+  <java-symbol type="drawable" name="ic_wifi_signal_1" />
+  <java-symbol type="drawable" name="ic_wifi_signal_2" />
+  <java-symbol type="drawable" name="ic_wifi_signal_3" />
+  <java-symbol type="drawable" name="ic_wifi_signal_4" />
   <java-symbol type="drawable" name="ic_signal_wifi_badged_0_bars" />
   <java-symbol type="drawable" name="ic_signal_wifi_badged_1_bar" />
   <java-symbol type="drawable" name="ic_signal_wifi_badged_2_bars" />
