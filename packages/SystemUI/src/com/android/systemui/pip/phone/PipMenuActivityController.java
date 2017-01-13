@@ -133,7 +133,7 @@ public class PipMenuActivityController {
                     ActivityOptions options = ActivityOptions.makeCustomAnimation(mContext, 0, 0);
                     options.setLaunchTaskId(
                             pinnedStackInfo.taskIds[pinnedStackInfo.taskIds.length - 1]);
-                    options.setTaskOverlay(true);
+                    options.setTaskOverlay(true, true /* canResume */);
                     mContext.startActivityAsUser(intent, options.toBundle(), UserHandle.CURRENT);
                 } else {
                     Log.e(TAG, "No PIP tasks found");

@@ -177,6 +177,13 @@ public class ActivityOptions {
     private static final String KEY_TASK_OVERLAY = "android.activity.taskOverlay";
 
     /**
+     * See {@link #setTaskOverlay}.
+     * @hide
+     */
+    private static final String KEY_TASK_OVERLAY_CAN_RESUME =
+            "android.activity.taskOverlayCanResume";
+
+    /**
      * Where the docked stack should be positioned.
      * @hide
      */
@@ -252,6 +259,7 @@ public class ActivityOptions {
     private int mLaunchTaskId = -1;
     private int mDockCreateMode = DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
     private boolean mTaskOverlay;
+    private boolean mTaskOverlayCanResume;
     private AppTransitionAnimationSpec mAnimSpecs[];
     private int mRotationAnimationHint = -1;
 
@@ -862,6 +870,7 @@ public class ActivityOptions {
         mLaunchStackId = opts.getInt(KEY_LAUNCH_STACK_ID, INVALID_STACK_ID);
         mLaunchTaskId = opts.getInt(KEY_LAUNCH_TASK_ID, -1);
         mTaskOverlay = opts.getBoolean(KEY_TASK_OVERLAY, false);
+        mTaskOverlayCanResume = opts.getBoolean(KEY_TASK_OVERLAY_CAN_RESUME, false);
         mDockCreateMode = opts.getInt(KEY_DOCK_CREATE_MODE, DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT);
         if (opts.containsKey(KEY_ANIM_SPECS)) {
             Parcelable[] specs = opts.getParcelableArray(KEY_ANIM_SPECS);
@@ -1071,12 +1080,13 @@ public class ActivityOptions {
 
     /**
      * Set's whether the activity launched with this option should be a task overlay. That is the
-     * activity will always be the top activity of the task and doesn't cause the task to be moved
-     * to the front when it is added.
+     * activity will always be the top activity of the task.  If {@param canResume} is true, then
+     * the task will also not be moved to the front of the stack.
      * @hide
      */
-    public void setTaskOverlay(boolean taskOverlay) {
+    public void setTaskOverlay(boolean taskOverlay, boolean canResume) {
         mTaskOverlay = taskOverlay;
+        mTaskOverlayCanResume = canResume;
     }
 
     /**
@@ -1084,6 +1094,13 @@ public class ActivityOptions {
      */
     public boolean getTaskOverlay() {
         return mTaskOverlay;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean canTaskOverlayResume() {
+        return mTaskOverlayCanResume;
     }
 
     /** @hide */
@@ -1241,6 +1258,7 @@ public class ActivityOptions {
         b.putInt(KEY_LAUNCH_STACK_ID, mLaunchStackId);
         b.putInt(KEY_LAUNCH_TASK_ID, mLaunchTaskId);
         b.putBoolean(KEY_TASK_OVERLAY, mTaskOverlay);
+        b.putBoolean(KEY_TASK_OVERLAY_CAN_RESUME, mTaskOverlayCanResume);
         b.putInt(KEY_DOCK_CREATE_MODE, mDockCreateMode);
         if (mAnimSpecs != null) {
             b.putParcelableArray(KEY_ANIM_SPECS, mAnimSpecs);
