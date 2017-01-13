@@ -92,6 +92,9 @@ public class AppWindowContainerController
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Remove starting " + mContainer
                     + ": startingWindow=" + mContainer.startingWindow
                     + " startingView=" + mContainer.startingSurface);
+            if (mContainer == null) {
+                return;
+            }
             if (mContainer.startingWindow != null) {
                 surface = mContainer.startingSurface;
                 data = mContainer.startingData;
