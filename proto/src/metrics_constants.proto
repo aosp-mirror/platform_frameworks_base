@@ -3191,6 +3191,69 @@ message MetricsEvent {
     // ACTION: Clicking on any search result in Settings.
     ACTION_CLICK_SETTINGS_SEARCH_RESULT = 763;
 
+    // ACTION: Allow Battery optimization for an app
+    APP_SPECIAL_PERMISSION_BATTERY_ALLOW = 764;
+
+    // ACTION: Deny Battery optimization for an app
+    APP_SPECIAL_PERMISSION_BATTERY_DENY = 765;
+
+    // ACTION: Enable Device Admin app
+    APP_SPECIAL_PERMISSION_ADMIN_ALLOW = 766;
+
+    // ACTION: Disable Device Admin app
+    APP_SPECIAL_PERMISSION_ADMIN_DENY = 767;
+
+    // ACTION: Allow "Do Not Disturb access" for an app
+    APP_SPECIAL_PERMISSION_DND_ALLOW = 768;
+
+    // ACTION: Deny "Do Not Disturb access" for an app
+    APP_SPECIAL_PERMISSION_DND_DENY = 769;
+
+    // ACTION: Allow "Draw over other apps" for an app
+    APP_SPECIAL_PERMISSION_APPDRAW_ALLOW = 770;
+
+    // ACTION: Deny "Draw over other apps" for an app
+    APP_SPECIAL_PERMISSION_APPDRAW_DENY = 771;
+
+    // ACTION: Allow "VR helper services" for an app
+    APP_SPECIAL_PERMISSION_VRHELPER_ALLOW = 772;
+
+    // ACTION: Deny "VR helper services" for an app
+    APP_SPECIAL_PERMISSION_VRHELPER_DENY = 773;
+
+    // ACTION: Allow "Modify system settings" for an app
+    APP_SPECIAL_PERMISSION_SETTINGS_CHANGE_ALLOW = 774;
+
+    // ACTION: Deny "Modify system settings" for an app
+    APP_SPECIAL_PERMISSION_SETTINGS_CHANGE_DENY = 775;
+
+    // ACTION: Allow "Notification access" for an app
+    APP_SPECIAL_PERMISSION_NOTIVIEW_ALLOW = 776;
+
+    // ACTION: Deny "Notification access" for an app
+    APP_SPECIAL_PERMISSION_NOTIVIEW_DENY = 777;
+
+    // ACTION: "Premium SMS access" for an app - "ask user" option
+    APP_SPECIAL_PERMISSION_PREMIUM_SMS_ASK = 778;
+
+    // ACTION: "Premium SMS access" for an app - "never allow" option
+    APP_SPECIAL_PERMISSION_PREMIUM_SMS_DENY = 779;
+
+    // ACTION: "Premium SMS access" for an app - "always allow" option
+    APP_SPECIAL_PERMISSION_PREMIUM_SMS_ALWAYS_ALLOW = 780;
+
+    // ACTION: Allow "Unrestricted data access" for an app
+    APP_SPECIAL_PERMISSION_UNL_DATA_ALLOW = 781;
+
+    // ACTION: Deny "Unrestricted data access" for an app
+    APP_SPECIAL_PERMISSION_UNL_DATA_DENY = 782;
+
+    // ACTION: Allow "Usage access" for an app
+    APP_SPECIAL_PERMISSION_USAGE_VIEW_ALLOW = 783;
+
+    // ACTION: Deny "Usage access" for an app
+    APP_SPECIAL_PERMISSION_USAGE_VIEW_DENY = 784;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
