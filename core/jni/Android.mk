@@ -128,7 +128,6 @@ LOCAL_SRC_FILES:= \
     android/graphics/Matrix.cpp \
     android/graphics/Movie.cpp \
     android/graphics/MovieImpl.cpp \
-    android/graphics/Movie_FactoryDefault.cpp \
     android/graphics/NinePatch.cpp \
     android/graphics/NinePatchPeeker.cpp \
     android/graphics/Paint.cpp \
