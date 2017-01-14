@@ -740,6 +740,21 @@ public abstract class PackageManager {
      */
     public static final int DONT_KILL_APP = 0x00000001;
 
+    /** @hide */
+    @IntDef({INSTALL_REASON_UNKNOWN, INSTALL_REASON_POLICY})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface InstallReason {}
+
+    /**
+     * Code indicating that the reason for installing this package is unknown.
+     */
+    public static final int INSTALL_REASON_UNKNOWN = 0;
+
+    /**
+     * Code indicating that this package was installed due to enterprise policy.
+     */
+    public static final int INSTALL_REASON_POLICY = 1;
+
     /**
      * Installation return code: this is passed to the
      * {@link IPackageInstallObserver} on success.
@@ -5881,4 +5896,25 @@ public abstract class PackageManager {
             }
         }
     }
+
+    /**
+     * Return the install reason that was recorded when a package was first installed for a specific
+     * user. Requesting the install reason for another user will require the permission
+     * INTERACT_ACROSS_USERS_FULL.
+     *
+     * @param packageName The package for which to retrieve the install reason
+     * @param user The user for whom to retrieve the install reason
+     *
+     * @return The install reason, currently one of {@code INSTALL_REASON_UNKNOWN} and
+     *         {@code INSTALL_REASON_POLICY}. If the package is not installed for the given user,
+     *         {@code INSTALL_REASON_UNKNOWN} is returned.
+     *
+     * @see #INSTALL_REASON_UNKNOWN
+     * @see #INSTALL_REASON_POLICY
+     *
+     * @hide
+     */
+    @TestApi
+    public abstract @InstallReason int getInstallReason(String packageName,
+            @NonNull UserHandle user);
 }

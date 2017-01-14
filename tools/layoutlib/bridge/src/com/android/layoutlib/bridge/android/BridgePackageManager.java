@@ -868,4 +868,9 @@ public class BridgePackageManager extends PackageManager {
     public boolean isPackageAvailable(String packageName) {
         return false;
     }
+
+    @Override
+    public int getInstallReason(String packageName, UserHandle user) {
+        return INSTALL_REASON_UNKNOWN;
+    }
 }

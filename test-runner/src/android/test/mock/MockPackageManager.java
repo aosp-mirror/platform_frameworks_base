@@ -1064,4 +1064,11 @@ public class MockPackageManager extends PackageManager {
     public Drawable loadUnbadgedItemIcon(PackageItemInfo itemInfo, ApplicationInfo appInfo) {
         throw new UnsupportedOperationException();
     }
+
+    /**
+     * @hide
+     */
+    public int getInstallReason(String packageName, UserHandle user) {
+        throw new UnsupportedOperationException();
+    }
 }

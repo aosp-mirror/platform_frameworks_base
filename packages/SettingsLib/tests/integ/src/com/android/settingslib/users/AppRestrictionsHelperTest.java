@@ -145,7 +145,8 @@ public class AppRestrictionsHelperTest extends BaseTest {
                 mock(AppRestrictionsHelper.OnDisableUiForPackageListener.class);
         mHelper.applyUserAppsStates(mockListener);
 
-        verify(mIpm, times(1)).installExistingPackageAsUser("app1", testUserId);
+        verify(mIpm, times(1)).installExistingPackageAsUser("app1", testUserId,
+                PackageManager.INSTALL_REASON_UNKNOWN);
         verify(mIpm, times(1)).setApplicationHiddenSettingAsUser("app2", false, testUserId);
         verify(mockListener).onDisableUiForPackage("app2");
         verify(mPm, times(1)).deletePackageAsUser(eq("app3"), any(IPackageDeleteObserver.class),
