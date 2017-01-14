@@ -5153,13 +5153,6 @@
         <attr name="layout_scale" format="float" />
     </declare-styleable>
 
-    <!-- attributes for internal rotary widget used in lock screen and phone app
-      @hide -->
-    <declare-styleable name="RotarySelector">
-        <!-- Use "horizontal" or "vertical".  The default is horizontal. -->
-        <attr name="orientation" />
-    </declare-styleable>
-
     <!-- @hide -->
     <declare-styleable name="WeightedLinearLayout">
         <attr name="majorWeightMin" format="float" />
