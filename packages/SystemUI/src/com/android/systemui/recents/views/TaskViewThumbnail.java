@@ -18,6 +18,7 @@ package com.android.systemui.recents.views;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
@@ -62,6 +63,8 @@ public class TaskViewThumbnail extends View {
     @ViewDebug.ExportedProperty(category="recents")
     private float mThumbnailScale;
     private float mFullscreenThumbnailScale;
+    /** The height, in pixels, of the task view's title bar. */
+    private int mTitleBarHeight;
     private boolean mSizeToFit = false;
     private boolean mOverlayHeaderOnThumbnailActionBar = true;
     private ThumbnailData mThumbnailData;
@@ -104,12 +107,13 @@ public class TaskViewThumbnail extends View {
         mDrawPaint.setColorFilter(mLightingColorFilter);
         mDrawPaint.setFilterBitmap(true);
         mDrawPaint.setAntiAlias(true);
-        mCornerRadius = getResources().getDimensionPixelSize(
-                R.dimen.recents_task_view_rounded_corners_radius);
+        Resources res = getResources();
+        mCornerRadius = res.getDimensionPixelSize(R.dimen.recents_task_view_rounded_corners_radius);
         mBgFillPaint.setColor(Color.WHITE);
         mLockedPaint.setColor(Color.WHITE);
-        mFullscreenThumbnailScale = context.getResources().getFraction(
+        mFullscreenThumbnailScale = res.getFraction(
                 com.android.internal.R.fraction.thumbnail_fullscreen_scale, 1, 1);
+        mTitleBarHeight = res.getDimensionPixelSize(R.dimen.recents_grid_task_view_header_height);
     }
 
     /**
@@ -246,7 +250,20 @@ public class TaskViewThumbnail extends View {
                 // If we haven't measured , skip the thumbnail drawing and only draw the background
                 // color
                 mThumbnailScale = 0f;
-            } else if (isStackTask && !mSizeToFit) {
+            } else if (mSizeToFit) {
+                // Make sure we fill the entire space regardless of the orientation.
+                float viewAspectRatio = (float) mTaskViewRect.width() /
+                        (float) (mTaskViewRect.height() - mTitleBarHeight);
+                float thumbnailAspectRatio =
+                        (float) mThumbnailRect.width() / (float) mThumbnailRect.height();
+                if (viewAspectRatio > thumbnailAspectRatio) {
+                    mThumbnailScale =
+                            (float) mTaskViewRect.width() / (float) mThumbnailRect.width();
+                } else {
+                    mThumbnailScale = (float) (mTaskViewRect.height() - mTitleBarHeight)
+                            / (float) mThumbnailRect.height();
+                }
+            } else if (isStackTask) {
                 float invThumbnailScale = 1f / mFullscreenThumbnailScale;
                 if (mDisplayOrientation == Configuration.ORIENTATION_PORTRAIT) {
                     if (mThumbnailData.orientation == Configuration.ORIENTATION_PORTRAIT) {
