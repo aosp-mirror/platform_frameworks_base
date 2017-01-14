@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Process;
 import android.os.UserHandle;
 import android.security.KeyChain;
 
@@ -123,7 +124,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * of the new password with {@link DevicePolicyManager#isActivePasswordSufficient()
      * DevicePolicyManager.isActivePasswordSufficient()}.
      * You will generally
-     * handle this in {@link DeviceAdminReceiver#onPasswordChanged}.
+     * handle this in {@link DeviceAdminReceiver#onPasswordChanged(Context, Intent, UserHandle)}.
      *
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to receive
@@ -139,7 +140,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * number of failed password attempts there have been with
      * {@link DevicePolicyManager#getCurrentFailedPasswordAttempts
      * DevicePolicyManager.getCurrentFailedPasswordAttempts()}.  You will generally
-     * handle this in {@link DeviceAdminReceiver#onPasswordFailed}.
+     * handle this in {@link DeviceAdminReceiver#onPasswordFailed(Context, Intent, UserHandle)}.
      *
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN} to receive
@@ -152,7 +153,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     /**
      * Action sent to a device administrator when the user has successfully entered their device
      * or profile challenge password, after failing one or more times.  You will generally
-     * handle this in {@link DeviceAdminReceiver#onPasswordSucceeded}.
+     * handle this in {@link DeviceAdminReceiver#onPasswordSucceeded(Context, Intent, UserHandle)}.
      *
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN} to receive
@@ -165,7 +166,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     /**
      * Action periodically sent to a device administrator when the device or profile challenge
      * password is expiring.  You will generally
-     * handle this in {@link DeviceAdminReceiver#onPasswordExpiring}.
+     * handle this in {@link DeviceAdminReceiver#onPasswordExpiring(Context, Intent, UserHandle)}.
      *
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_EXPIRE_PASSWORD} to receive
@@ -497,8 +498,27 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * to retrieve the active password characteristics.
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
+     *
+     * @deprecated From {@link android.os.Build.VERSION_CODES#O}, use
+     *             {@link #onPasswordChanged(Context, Intent, UserHandle)} instead.
      */
+    @Deprecated
     public void onPasswordChanged(Context context, Intent intent) {
+    }
+
+    /**
+     * Called after the user has changed their device or profile challenge password, as a result of
+     * receiving {@link #ACTION_PASSWORD_CHANGED}.  At this point you
+     * can use {@link DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
+     * to retrieve the active password characteristics.
+     * @param context The running context as per {@link #onReceive}.
+     * @param intent The received intent as per {@link #onReceive}.
+     * @param user The user or profile for whom the password changed. To see whether this
+     *        user is the current profile or a parent user, check for equality with
+     *        {@link Process#myUserHandle}.
+     */
+    public void onPasswordChanged(Context context, Intent intent, UserHandle user) {
+        onPasswordChanged(context, intent);
     }
 
     /**
@@ -508,8 +528,27 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * failed password attempts.
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
+     *
+     * @deprecated From {@link android.os.Build.VERSION_CODES#O}, use
+     *             {@link #onPasswordFailed(Context, Intent, UserHandle)} instead.
      */
+    @Deprecated
     public void onPasswordFailed(Context context, Intent intent) {
+    }
+
+    /**
+     * Called after the user has failed at entering their device or profile challenge password,
+     * as a result of receiving {@link #ACTION_PASSWORD_FAILED}.  At this point you can use
+     * {@link DevicePolicyManager#getCurrentFailedPasswordAttempts()} to retrieve the number of
+     * failed password attempts.
+     * @param context The running context as per {@link #onReceive}.
+     * @param intent The received intent as per {@link #onReceive}.
+     * @param user The user or profile for whom the password check failed. To see whether this
+     *        user is the current profile or a parent user, check for equality with
+     *        {@link Process#myUserHandle}.
+     */
+    public void onPasswordFailed(Context context, Intent intent, UserHandle user) {
+        onPasswordFailed(context, intent);
     }
 
     /**
@@ -519,8 +558,27 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * failed.
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
+     *
+     * @deprecated From {@link android.os.Build.VERSION_CODES#O}, use
+     *             {@link #onPasswordSucceeded(Context, Intent, UserHandle)} instead.
      */
+    @Deprecated
     public void onPasswordSucceeded(Context context, Intent intent) {
+    }
+
+    /**
+     * Called after the user has succeeded at entering their device or profile challenge password,
+     * as a result of receiving {@link #ACTION_PASSWORD_SUCCEEDED}.  This will
+     * only be received the first time they succeed after having previously
+     * failed.
+     * @param context The running context as per {@link #onReceive}.
+     * @param intent The received intent as per {@link #onReceive}.
+     * @param user The user of profile for whom the password check succeeded.  To see whether this
+     *        user is the current profile or a parent user, check for equality with
+     *        {@link Process#myUserHandle}.
+     */
+    public void onPasswordSucceeded(Context context, Intent intent, UserHandle user) {
+        onPasswordSucceeded(context, intent);
     }
 
     /**
@@ -540,8 +598,37 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
+     *
+     * @deprecated From {@link android.os.Build.VERSION_CODES#O}, use
+     *             {@link #onPasswordExpiring(Context, Intent, UserHandle)} instead.
      */
+    @Deprecated
     public void onPasswordExpiring(Context context, Intent intent) {
+    }
+
+    /**
+     * Called periodically when the device or profile challenge password is about to expire
+     * or has expired.  It will typically be called at these times: on device boot, once per day
+     * before the password expires, and at the time when the password expires.
+     *
+     * <p>If the password is not updated by the user, this method will continue to be called
+     * once per day until the password is changed or the device admin disables password expiration.
+     *
+     * <p>The admin will typically post a notification requesting the user to change their password
+     * in response to this call. The actual password expiration time can be obtained by calling
+     * {@link DevicePolicyManager#getPasswordExpiration(ComponentName) }
+     *
+     * <p>The admin should be sure to take down any notifications it posted in response to this call
+     * when it receives {@link DeviceAdminReceiver#onPasswordChanged(Context, Intent, UserHandle) }.
+     *
+     * @param context The running context as per {@link #onReceive}.
+     * @param intent The received intent as per {@link #onReceive}.
+     * @param user The user or profile for whom the password is expiring. To see whether this
+     *        user is the current profile or a parent user, check for equality with
+     *        {@link Process#myUserHandle}.
+     */
+    public void onPasswordExpiring(Context context, Intent intent, UserHandle user) {
+        onPasswordExpiring(context, intent);
     }
 
     /**
@@ -741,11 +828,11 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
         String action = intent.getAction();
 
         if (ACTION_PASSWORD_CHANGED.equals(action)) {
-            onPasswordChanged(context, intent);
+            onPasswordChanged(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER));
         } else if (ACTION_PASSWORD_FAILED.equals(action)) {
-            onPasswordFailed(context, intent);
+            onPasswordFailed(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER));
         } else if (ACTION_PASSWORD_SUCCEEDED.equals(action)) {
-            onPasswordSucceeded(context, intent);
+            onPasswordSucceeded(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER));
         } else if (ACTION_DEVICE_ADMIN_ENABLED.equals(action)) {
             onEnabled(context, intent);
         } else if (ACTION_DEVICE_ADMIN_DISABLE_REQUESTED.equals(action)) {
@@ -757,7 +844,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
         } else if (ACTION_DEVICE_ADMIN_DISABLED.equals(action)) {
             onDisabled(context, intent);
         } else if (ACTION_PASSWORD_EXPIRING.equals(action)) {
-            onPasswordExpiring(context, intent);
+            onPasswordExpiring(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER));
         } else if (ACTION_PROFILE_PROVISIONING_COMPLETE.equals(action)) {
             onProfileProvisioningComplete(context, intent);
         } else if (ACTION_CHOOSE_PRIVATE_KEY_ALIAS.equals(action)) {

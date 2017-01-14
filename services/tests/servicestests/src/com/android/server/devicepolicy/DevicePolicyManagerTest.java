@@ -71,6 +71,7 @@ import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -543,6 +544,83 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // TODO Check other internal calls.
     }
 
+    /**
+     * Test for: @{link DevicePolicyManager#setActivePasswordState}
+     *
+     * Validates that when the password for a user changes, the notification broadcast intent
+     * {@link DeviceAdminReceiver#ACTION_PASSWORD_CHANGED} is sent to managed profile owners, in
+     * addition to ones in the original user.
+     */
+    public void testSetActivePasswordState_sendToProfiles() throws Exception {
+        mContext.callerPermissions.add(permission.BIND_DEVICE_ADMIN);
+
+        final int MANAGED_PROFILE_USER_ID = 78;
+        final int MANAGED_PROFILE_ADMIN_UID =
+                UserHandle.getUid(MANAGED_PROFILE_USER_ID, DpmMockContext.SYSTEM_UID);
+
+        // Setup device owner.
+        mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
+        mContext.packageName = admin1.getPackageName();
+        setupDeviceOwner();
+
+        // Add a managed profile belonging to the system user.
+        addManagedProfile(admin1, MANAGED_PROFILE_ADMIN_UID, admin1);
+
+        // Change the parent user's password.
+        dpm.reportPasswordChanged(UserHandle.USER_SYSTEM);
+
+        // Both the device owner and the managed profile owner should receive this broadcast.
+        final Intent intent = new Intent(DeviceAdminReceiver.ACTION_PASSWORD_CHANGED);
+        intent.setComponent(admin1);
+        intent.putExtra(Intent.EXTRA_USER, UserHandle.of(UserHandle.USER_SYSTEM));
+
+        verify(mContext.spiedContext, times(1)).sendBroadcastAsUser(
+                MockUtils.checkIntent(intent),
+                MockUtils.checkUserHandle(UserHandle.USER_SYSTEM));
+        verify(mContext.spiedContext, times(1)).sendBroadcastAsUser(
+                MockUtils.checkIntent(intent),
+                MockUtils.checkUserHandle(MANAGED_PROFILE_USER_ID));
+    }
+
+    /**
+     * Test for: @{link DevicePolicyManager#setActivePasswordState}
+     *
+     * Validates that when the password for a managed profile changes, the notification broadcast
+     * intent {@link DeviceAdminReceiver#ACTION_PASSWORD_CHANGED} is only sent to the profile, not
+     * its parent.
+     */
+    public void testSetActivePasswordState_notSentToParent() throws Exception {
+        mContext.callerPermissions.add(permission.BIND_DEVICE_ADMIN);
+
+        final int MANAGED_PROFILE_USER_ID = 78;
+        final int MANAGED_PROFILE_ADMIN_UID =
+                UserHandle.getUid(MANAGED_PROFILE_USER_ID, DpmMockContext.SYSTEM_UID);
+
+        // Setup device owner.
+        mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
+        mContext.packageName = admin1.getPackageName();
+        doReturn(true).when(mContext.lockPatternUtils)
+                .isSeparateProfileChallengeEnabled(MANAGED_PROFILE_USER_ID);
+        setupDeviceOwner();
+
+        // Add a managed profile belonging to the system user.
+        addManagedProfile(admin1, MANAGED_PROFILE_ADMIN_UID, admin1);
+
+        // Change the profile's password.
+        dpm.reportPasswordChanged(MANAGED_PROFILE_USER_ID);
+
+        // Both the device owner and the managed profile owner should receive this broadcast.
+        final Intent intent = new Intent(DeviceAdminReceiver.ACTION_PASSWORD_CHANGED);
+        intent.setComponent(admin1);
+        intent.putExtra(Intent.EXTRA_USER, UserHandle.of(MANAGED_PROFILE_USER_ID));
+
+        verify(mContext.spiedContext, never()).sendBroadcastAsUser(
+                MockUtils.checkIntent(intent),
+                MockUtils.checkUserHandle(UserHandle.USER_SYSTEM));
+        verify(mContext.spiedContext, times(1)).sendBroadcastAsUser(
+                MockUtils.checkIntent(intent),
+                MockUtils.checkUserHandle(MANAGED_PROFILE_USER_ID));
+    }
     /**
      * Test for: {@link DevicePolicyManager#setDeviceOwner} DO on system user installs successfully.
      */

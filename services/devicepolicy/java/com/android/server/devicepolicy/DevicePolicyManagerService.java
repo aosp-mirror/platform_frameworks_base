@@ -2218,15 +2218,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     /**
      * Send an update to all admins of a user that enforce a specified policy.
      */
-    void sendAdminCommandLocked(String action, int reqPolicy, int userHandle) {
+    void sendAdminCommandLocked(String action, int reqPolicy, int userHandle, Bundle adminExtras) {
         final DevicePolicyData policy = getUserData(userHandle);
         final int count = policy.mAdminList.size();
-        if (count > 0) {
-            for (int i = 0; i < count; i++) {
-                final ActiveAdmin admin = policy.mAdminList.get(i);
-                if (admin.info.usesPolicy(reqPolicy)) {
-                    sendAdminCommandLocked(admin, action);
-                }
+        for (int i = 0; i < count; i++) {
+            final ActiveAdmin admin = policy.mAdminList.get(i);
+            if (admin.info.usesPolicy(reqPolicy)) {
+                sendAdminCommandLocked(admin, action, adminExtras, null);
             }
         }
     }
@@ -2236,10 +2234,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * enforce a specified policy.
      */
     private void sendAdminCommandToSelfAndProfilesLocked(String action, int reqPolicy,
-            int userHandle) {
+            int userHandle, Bundle adminExtras) {
         int[] profileIds = mUserManager.getProfileIdsWithDisabled(userHandle);
         for (int profileId : profileIds) {
-            sendAdminCommandLocked(action, reqPolicy, profileId);
+            sendAdminCommandLocked(action, reqPolicy, profileId, adminExtras);
         }
     }
 
@@ -2248,10 +2246,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      */
     private void sendAdminCommandForLockscreenPoliciesLocked(
             String action, int reqPolicy, int userHandle) {
+        final Bundle extras = new Bundle();
+        extras.putParcelable(Intent.EXTRA_USER, UserHandle.of(userHandle));
         if (isSeparateProfileChallengeEnabled(userHandle)) {
-            sendAdminCommandLocked(action, reqPolicy, userHandle);
+            sendAdminCommandLocked(action, reqPolicy, userHandle, extras);
         } else {
-            sendAdminCommandToSelfAndProfilesLocked(action, reqPolicy, userHandle);
+            sendAdminCommandToSelfAndProfilesLocked(action, reqPolicy, userHandle, extras);
         }
     }
 
@@ -2829,6 +2829,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private void handlePasswordExpirationNotification(int userHandle) {
+        final Bundle adminExtras = new Bundle();
+        adminExtras.putParcelable(Intent.EXTRA_USER, UserHandle.of(userHandle));
+
         synchronized (this) {
             final long now = System.currentTimeMillis();
 
@@ -2842,7 +2845,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         && now >= admin.passwordExpirationDate - EXPIRATION_GRACE_PERIOD_MS
                         && admin.passwordExpirationDate > 0L) {
                     sendAdminCommandLocked(admin,
-                            DeviceAdminReceiver.ACTION_PASSWORD_EXPIRING);
+                            DeviceAdminReceiver.ACTION_PASSWORD_EXPIRING, adminExtras, null);
                 }
             }
             setExpirationAlarmCheckLocked(mContext, userHandle, /* parent */ false);
