@@ -22,9 +22,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
-import android.util.Property;
 import android.view.View;
-import android.view.animation.Interpolator;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -32,7 +30,6 @@ import com.android.systemui.statusbar.AlphaOptimizedFrameLayout;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.stack.AnimationFilter;
 import com.android.systemui.statusbar.stack.AnimationProperties;
-import com.android.systemui.statusbar.stack.HeadsUpAppearInterpolator;
 import com.android.systemui.statusbar.stack.ViewState;
 
 import java.util.HashMap;
@@ -106,6 +103,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     private int mIconSize;
     private float mOpenedAmount = 0.0f;
     private float mVisualOverflowAdaption;
+    private boolean mDisallowNextAnimation;
 
     public NotificationIconContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -166,6 +164,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         }
         mAddAnimationStartIndex = -1;
         mCannedAnimationStartIndex = -1;
+        mDisallowNextAnimation = false;
     }
 
     @Override
@@ -389,8 +388,9 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         mChangingViewPositions = changingViewPositions;
     }
 
-    public void setCentered(boolean centered) {
-        mCentered = centered;
+    public void setAmbient(boolean ambient) {
+        mCentered = ambient;
+        mDisallowNextAnimation = true;
     }
 
     public IconState getIconState(StatusBarIconView icon) {
@@ -483,7 +483,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                     animate = true;
                 }
                 icon.setVisibleState(visibleState);
-                if (animate) {
+                if (animate && !mDisallowNextAnimation) {
                     animateTo(icon, animationProperties);
                 } else {
                     super.applyToView(view);
