@@ -135,7 +135,7 @@ public:
 
     void setUTF8(bool val) { mUTF8 = val; }
 
-    status_t parseValues(const sp<AaptAssets>& assets, ResourceTable* table);
+    status_t parseValues(const Bundle* bundle, const sp<AaptAssets>& assets, ResourceTable* table);
 
     status_t assignResourceIds(const sp<AaptAssets>& assets,
                                const ResourceTable* table = NULL);
