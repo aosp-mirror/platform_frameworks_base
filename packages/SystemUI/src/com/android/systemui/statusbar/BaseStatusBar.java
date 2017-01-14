@@ -2439,7 +2439,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             Log.d(TAG, "failed to query dream manager", e);
         }
 
-        if (!inUse) {
+        if (!inUse && !isDozing()) {
             if (DEBUG) {
                 Log.d(TAG, "No peeking: not in use: " + sbn.getKey());
             }

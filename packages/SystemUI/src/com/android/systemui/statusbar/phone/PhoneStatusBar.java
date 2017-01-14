@@ -80,7 +80,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
@@ -2660,6 +2659,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
         } else {
             updateNotificationRanking(null);
+            if (isHeadsUp) {
+                mDozeServiceHost.fireNotificationHeadsUp();
+            }
         }
 
     }
@@ -3076,9 +3078,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     @Override // CommandQueue
     public void buzzBeepBlinked() {
-        if (mDozeServiceHost != null) {
-            mDozeServiceHost.fireBuzzBeepBlinked();
-        }
     }
 
     @Override
@@ -5240,9 +5239,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
         }
 
-        public void fireBuzzBeepBlinked() {
+        public void fireNotificationHeadsUp() {
             for (Callback callback : mCallbacks) {
-                callback.onBuzzBeepBlinked();
+                callback.onNotificationHeadsUp();
             }
         }
 
@@ -5286,12 +5285,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 public void onPulseStarted() {
                     callback.onPulseStarted();
                     mStackScroller.setPulsing(true);
+                    mVisualStabilityManager.setPulsing(true);
                 }
 
                 @Override
                 public void onPulseFinished() {
                     callback.onPulseFinished();
                     mStackScroller.setPulsing(false);
+                    mVisualStabilityManager.setPulsing(false);
                 }
             }, reason);
         }

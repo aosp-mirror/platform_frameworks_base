@@ -309,7 +309,7 @@ public class DozeTriggers implements DozeMachine.Part {
 
     private DozeHost.Callback mHostCallback = new DozeHost.Callback() {
         @Override
-        public void onBuzzBeepBlinked() {
+        public void onNotificationHeadsUp() {
             onNotification();
         }
 
