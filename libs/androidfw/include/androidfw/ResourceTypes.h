@@ -1188,6 +1188,8 @@ struct ResTable_config
     int compare(const ResTable_config& o) const;
     int compareLogical(const ResTable_config& o) const;
 
+    inline bool operator<(const ResTable_config& o) const { return compare(o) < 0; }
+
     // Flags indicating a set of config values.  These flag constants must
     // match the corresponding ones in android.content.pm.ActivityInfo and
     // attrs_manifest.xml.

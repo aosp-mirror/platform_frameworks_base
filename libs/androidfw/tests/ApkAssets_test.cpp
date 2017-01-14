@@ -24,7 +24,8 @@ using com::android::basic::R;
 namespace android {
 
 TEST(ApkAssetsTest, LoadApk) {
-  std::unique_ptr<ApkAssets> loaded_apk = ApkAssets::Load(GetTestDataPath() + "/basic/basic.apk");
+  std::unique_ptr<const ApkAssets> loaded_apk =
+      ApkAssets::Load(GetTestDataPath() + "/basic/basic.apk");
   ASSERT_NE(nullptr, loaded_apk);
   EXPECT_NE(nullptr, loaded_apk->GetLoadedArsc());
 
@@ -33,7 +34,7 @@ TEST(ApkAssetsTest, LoadApk) {
 }
 
 TEST(ApkAssetsTest, LoadApkAsSharedLibrary) {
-  std::unique_ptr<ApkAssets> loaded_apk =
+  std::unique_ptr<const ApkAssets> loaded_apk =
       ApkAssets::Load(GetTestDataPath() + "/appaslib/appaslib.apk");
   ASSERT_NE(nullptr, loaded_apk);
   const LoadedArsc* loaded_arsc = loaded_apk->GetLoadedArsc();

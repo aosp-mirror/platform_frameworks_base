@@ -46,10 +46,10 @@ class ThemeTest : public ::testing::Test {
   }
 
  protected:
-  std::unique_ptr<ApkAssets> style_assets_;
-  std::unique_ptr<ApkAssets> libclient_assets_;
-  std::unique_ptr<ApkAssets> lib_one_assets_;
-  std::unique_ptr<ApkAssets> lib_two_assets_;
+  std::unique_ptr<const ApkAssets> style_assets_;
+  std::unique_ptr<const ApkAssets> libclient_assets_;
+  std::unique_ptr<const ApkAssets> lib_one_assets_;
+  std::unique_ptr<const ApkAssets> lib_two_assets_;
 };
 
 TEST_F(ThemeTest, EmptyTheme) {

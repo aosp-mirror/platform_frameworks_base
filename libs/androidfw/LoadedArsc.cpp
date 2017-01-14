@@ -321,6 +321,57 @@ static bool VerifyType(const Chunk& chunk) {
   return true;
 }
 
+void LoadedPackage::CollectConfigurations(bool exclude_mipmap,
+                                          std::set<ResTable_config>* out_configs) const {
+  const static std::u16string kMipMap = u"mipmap";
+  const size_t type_count = type_specs_.size();
+  for (size_t i = 0; i < type_count; i++) {
+    const util::unique_cptr<TypeSpec>& type_spec = type_specs_[i];
+    if (type_spec != nullptr) {
+      if (exclude_mipmap) {
+        const int type_idx = type_spec->type_spec->id - 1;
+        size_t type_name_len;
+        const char16_t* type_name16 = type_string_pool_.stringAt(type_idx, &type_name_len);
+        if (type_name16 != nullptr) {
+          if (kMipMap.compare(0, std::u16string::npos, type_name16, type_name_len) == 0) {
+            // This is a mipmap type, skip collection.
+            continue;
+          }
+        }
+        const char* type_name = type_string_pool_.string8At(type_idx, &type_name_len);
+        if (type_name != nullptr) {
+          if (strncmp(type_name, "mipmap", type_name_len) == 0) {
+            // This is a mipmap type, skip collection.
+            continue;
+          }
+        }
+      }
+
+      for (size_t j = 0; j < type_spec->type_count; j++) {
+        out_configs->insert(type_spec->types[j].configuration);
+      }
+    }
+  }
+}
+
+void LoadedPackage::CollectLocales(bool canonicalize, std::set<std::string>* out_locales) const {
+  char temp_locale[RESTABLE_MAX_LOCALE_LEN];
+  const size_t type_count = type_specs_.size();
+  for (size_t i = 0; i < type_count; i++) {
+    const util::unique_cptr<TypeSpec>& type_spec = type_specs_[i];
+    if (type_spec != nullptr) {
+      for (size_t j = 0; j < type_spec->type_count; j++) {
+        const ResTable_config& configuration = type_spec->types[j].configuration;
+        if (configuration.locale != 0) {
+          configuration.getBcp47Locale(temp_locale, canonicalize);
+          std::string locale(temp_locale);
+          out_locales->insert(std::move(locale));
+        }
+      }
+    }
+  }
+}
+
 std::unique_ptr<LoadedPackage> LoadedPackage::Load(const Chunk& chunk) {
   ATRACE_CALL();
   std::unique_ptr<LoadedPackage> loaded_package{new LoadedPackage()};
@@ -574,6 +625,7 @@ bool LoadedArsc::LoadTable(const Chunk& chunk, bool load_as_shared_library) {
         if (loaded_package->package_id_ == kAppPackageId) {
           loaded_package->dynamic_ = load_as_shared_library;
         }
+        loaded_package->system_ = system_;
         packages_.push_back(std::move(loaded_package));
       } break;
 
@@ -590,12 +642,13 @@ bool LoadedArsc::LoadTable(const Chunk& chunk, bool load_as_shared_library) {
   return true;
 }
 
-std::unique_ptr<LoadedArsc> LoadedArsc::Load(const void* data, size_t len,
-                                             bool load_as_shared_library) {
+std::unique_ptr<const LoadedArsc> LoadedArsc::Load(const void* data, size_t len, bool system,
+                                                   bool load_as_shared_library) {
   ATRACE_CALL();
 
   // Not using make_unique because the constructor is private.
   std::unique_ptr<LoadedArsc> loaded_arsc(new LoadedArsc());
+  loaded_arsc->system_ = system;
 
   ChunkIterator iter(data, len);
   while (iter.HasNext()) {
@@ -617,7 +670,9 @@ std::unique_ptr<LoadedArsc> LoadedArsc::Load(const void* data, size_t len,
     LOG(ERROR) << iter.GetLastError();
     return {};
   }
-  return loaded_arsc;
+
+  // Need to force a move for mingw32.
+  return std::move(loaded_arsc);
 }
 
 }  // namespace android

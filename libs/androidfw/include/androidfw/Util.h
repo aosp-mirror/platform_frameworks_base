@@ -94,7 +94,11 @@ class unique_cptr {
 
   inline bool operator==(const unique_cptr& o) const { return ptr_ == o.ptr_; }
 
+  inline bool operator!=(const unique_cptr& o) const { return ptr_ != o.ptr_; }
+
   inline bool operator==(std::nullptr_t) const { return ptr_ == nullptr; }
+
+  inline bool operator!=(std::nullptr_t) const { return ptr_ != nullptr; }
 
  private:
   DISALLOW_COPY_AND_ASSIGN(unique_cptr);

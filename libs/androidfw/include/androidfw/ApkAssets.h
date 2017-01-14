@@ -31,8 +31,9 @@ namespace android {
 // Holds an APK.
 class ApkAssets {
  public:
-  static std::unique_ptr<ApkAssets> Load(const std::string& path);
-  static std::unique_ptr<ApkAssets> LoadAsSharedLibrary(const std::string& path);
+  static std::unique_ptr<const ApkAssets> Load(const std::string& path, bool system = false);
+  static std::unique_ptr<const ApkAssets> LoadAsSharedLibrary(const std::string& path,
+                                                              bool system = false);
 
   std::unique_ptr<Asset> Open(const std::string& path,
                               Asset::AccessMode mode = Asset::AccessMode::ACCESS_RANDOM) const;
@@ -44,7 +45,8 @@ class ApkAssets {
  private:
   DISALLOW_COPY_AND_ASSIGN(ApkAssets);
 
-  static std::unique_ptr<ApkAssets> LoadImpl(const std::string& path, bool load_as_shared_library);
+  static std::unique_ptr<const ApkAssets> LoadImpl(const std::string& path, bool system,
+                                                   bool load_as_shared_library);
 
   ApkAssets() = default;
 
@@ -57,7 +59,7 @@ class ApkAssets {
   ZipArchivePtr zip_handle_;
   std::string path_;
   std::unique_ptr<Asset> resources_asset_;
-  std::unique_ptr<LoadedArsc> loaded_arsc_;
+  std::unique_ptr<const LoadedArsc> loaded_arsc_;
 };
 
 }  // namespace android

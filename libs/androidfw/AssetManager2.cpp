@@ -18,6 +18,8 @@
 
 #include "androidfw/AssetManager2.h"
 
+#include <set>
+
 #include "android-base/logging.h"
 #include "android-base/stringprintf.h"
 #include "utils/ByteOrder.h"
@@ -141,6 +143,36 @@ void AssetManager2::SetConfiguration(const ResTable_config& configuration) {
   if (diff) {
     InvalidateCaches(static_cast<uint32_t>(diff));
   }
+}
+
+std::set<ResTable_config> AssetManager2::GetResourceConfigurations(bool exclude_system,
+                                                                   bool exclude_mipmap) {
+  ATRACE_CALL();
+  std::set<ResTable_config> configurations;
+  for (const PackageGroup& package_group : package_groups_) {
+    for (const LoadedPackage* package : package_group.packages_) {
+      if (exclude_system && package->IsSystem()) {
+        continue;
+      }
+      package->CollectConfigurations(exclude_mipmap, &configurations);
+    }
+  }
+  return configurations;
+}
+
+std::set<std::string> AssetManager2::GetResourceLocales(bool exclude_system,
+                                                        bool merge_equivalent_languages) {
+  ATRACE_CALL();
+  std::set<std::string> locales;
+  for (const PackageGroup& package_group : package_groups_) {
+    for (const LoadedPackage* package : package_group.packages_) {
+      if (exclude_system && package->IsSystem()) {
+        continue;
+      }
+      package->CollectLocales(merge_equivalent_languages, &locales);
+    }
+  }
+  return locales;
 }
 
 std::unique_ptr<Asset> AssetManager2::Open(const std::string& filename, Asset::AccessMode mode) {
@@ -325,8 +357,15 @@ ApkAssetsCookie AssetManager2::GetResource(uint32_t resid, bool may_be_bag,
   if (dtohl(entry.entry->flags) & ResTable_entry::FLAG_COMPLEX) {
     if (!may_be_bag) {
       LOG(ERROR) << base::StringPrintf("Resource %08x is a complex map type.", resid);
+      return kInvalidCookie;
     }
-    return kInvalidCookie;
+
+    // Create a reference since we can't represent this complex type as a Res_value.
+    out_value->dataType = Res_value::TYPE_REFERENCE;
+    out_value->data = resid;
+    *out_selected_config = config;
+    *out_flags = flags;
+    return cookie;
   }
 
   const Res_value* device_value = reinterpret_cast<const Res_value*>(
@@ -338,6 +377,37 @@ ApkAssetsCookie AssetManager2::GetResource(uint32_t resid, bool may_be_bag,
 
   *out_selected_config = config;
   *out_flags = flags;
+  return cookie;
+}
+
+ApkAssetsCookie AssetManager2::ResolveReference(ApkAssetsCookie cookie, Res_value* in_out_value,
+                                                ResTable_config* in_out_selected_config,
+                                                uint32_t* in_out_flags,
+                                                ResTable_ref* out_last_reference) {
+  ATRACE_CALL();
+  constexpr const int kMaxIterations = 20;
+
+  out_last_reference->ident = 0u;
+  for (size_t iteration = 0u; in_out_value->dataType == Res_value::TYPE_REFERENCE &&
+                              in_out_value->data != 0u && iteration < kMaxIterations;
+       iteration++) {
+    if (out_last_reference != nullptr) {
+      out_last_reference->ident = in_out_value->data;
+    }
+    uint32_t new_flags = 0u;
+    cookie = GetResource(in_out_value->data, true /*may_be_bag*/, 0u /*density_override*/,
+                         in_out_value, in_out_selected_config, &new_flags);
+    if (cookie == kInvalidCookie) {
+      return kInvalidCookie;
+    }
+    if (in_out_flags != nullptr) {
+      *in_out_flags |= new_flags;
+    }
+    if (out_last_reference->ident == in_out_value->data) {
+      // This reference can't be resolved, so exit now and let the caller deal with it.
+      return cookie;
+    }
+  }
   return cookie;
 }
 
@@ -499,6 +569,15 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid) {
   ResolvedBag* result = final_bag.get();
   cached_bags_[resid] = std::move(final_bag);
   return result;
+}
+
+uint32_t AssetManager2::GetResourceId(const std::string& resource_name,
+                                      const std::string& fallback_type,
+                                      const std::string& fallback_package) {
+  (void)resource_name;
+  (void)fallback_type;
+  (void)fallback_package;
+  return 0u;
 }
 
 void AssetManager2::InvalidateCaches(uint32_t diff) {

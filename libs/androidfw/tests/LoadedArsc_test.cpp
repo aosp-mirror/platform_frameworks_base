@@ -32,7 +32,8 @@ TEST(LoadedArscTest, LoadSinglePackageArsc) {
   ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/styles/styles.apk", "resources.arsc",
                                       &contents));
 
-  std::unique_ptr<LoadedArsc> loaded_arsc = LoadedArsc::Load(contents.data(), contents.size());
+  std::unique_ptr<const LoadedArsc> loaded_arsc =
+      LoadedArsc::Load(contents.data(), contents.size());
   ASSERT_NE(nullptr, loaded_arsc);
 
   const std::vector<std::unique_ptr<const LoadedPackage>>& packages = loaded_arsc->GetPackages();
@@ -58,7 +59,8 @@ TEST(LoadedArscTest, FindDefaultEntry) {
   ASSERT_TRUE(
       ReadFileFromZipToString(GetTestDataPath() + "/basic/basic.apk", "resources.arsc", &contents));
 
-  std::unique_ptr<LoadedArsc> loaded_arsc = LoadedArsc::Load(contents.data(), contents.size());
+  std::unique_ptr<const LoadedArsc> loaded_arsc =
+      LoadedArsc::Load(contents.data(), contents.size());
   ASSERT_NE(nullptr, loaded_arsc);
 
   ResTable_config desired_config;
@@ -80,7 +82,8 @@ TEST(LoadedArscTest, LoadSharedLibrary) {
   ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/lib_one/lib_one.apk", "resources.arsc",
                                       &contents));
 
-  std::unique_ptr<LoadedArsc> loaded_arsc = LoadedArsc::Load(contents.data(), contents.size());
+  std::unique_ptr<const LoadedArsc> loaded_arsc =
+      LoadedArsc::Load(contents.data(), contents.size());
   ASSERT_NE(nullptr, loaded_arsc);
 
   const auto& packages = loaded_arsc->GetPackages();
@@ -101,7 +104,8 @@ TEST(LoadedArscTest, LoadAppLinkedAgainstSharedLibrary) {
   ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/libclient/libclient.apk",
                                       "resources.arsc", &contents));
 
-  std::unique_ptr<LoadedArsc> loaded_arsc = LoadedArsc::Load(contents.data(), contents.size());
+  std::unique_ptr<const LoadedArsc> loaded_arsc =
+      LoadedArsc::Load(contents.data(), contents.size());
   ASSERT_NE(nullptr, loaded_arsc);
 
   const auto& packages = loaded_arsc->GetPackages();
@@ -128,8 +132,8 @@ TEST(LoadedArscTest, LoadAppAsSharedLibrary) {
   ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/appaslib/appaslib.apk",
                                       "resources.arsc", &contents));
 
-  std::unique_ptr<LoadedArsc> loaded_arsc =
-      LoadedArsc::Load(contents.data(), contents.size(), true /*load_as_shared_library*/);
+  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(
+      contents.data(), contents.size(), false /*system*/, true /*load_as_shared_library*/);
   ASSERT_NE(nullptr, loaded_arsc);
 
   const auto& packages = loaded_arsc->GetPackages();
@@ -143,7 +147,8 @@ TEST(LoadedArscTest, LoadFeatureSplit) {
   std::string contents;
   ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/feature/feature.apk", "resources.arsc",
                                       &contents));
-  std::unique_ptr<LoadedArsc> loaded_arsc = LoadedArsc::Load(contents.data(), contents.size());
+  std::unique_ptr<const LoadedArsc> loaded_arsc =
+      LoadedArsc::Load(contents.data(), contents.size());
   ASSERT_NE(nullptr, loaded_arsc);
 
   ResTable_config desired_config;

@@ -21,6 +21,7 @@
 
 #include <array>
 #include <limits>
+#include <set>
 #include <unordered_map>
 
 #include "androidfw/ApkAssets.h"
@@ -112,6 +113,24 @@ class AssetManager2 : public ::AAssetManager {
 
   inline const ResTable_config& GetConfiguration() const { return configuration_; }
 
+  // Returns all configurations for which there are resources defined. This includes resource
+  // configurations in all the ApkAssets set for this AssetManager.
+  // If `exclude_system` is set to true, resource configurations from system APKs
+  // ('android' package, other libraries) will be excluded from the list.
+  // If `exclude_mipmap` is set to true, resource configurations defined for resource type 'mipmap'
+  // will be excluded from the list.
+  std::set<ResTable_config> GetResourceConfigurations(bool exclude_system = false,
+                                                      bool exclude_mipmap = false);
+
+  // Returns all the locales for which there are resources defined. This includes resource
+  // locales in all the ApkAssets set for this AssetManager.
+  // If `exclude_system` is set to true, resource locales from system APKs
+  // ('android' package, other libraries) will be excluded from the list.
+  // If `merge_equivalent_languages` is set to true, resource locales will be canonicalized
+  // and de-duped in the resulting list.
+  std::set<std::string> GetResourceLocales(bool exclude_system = false,
+                                           bool merge_equivalent_languages = false);
+
   // Searches the set of APKs loaded by this AssetManager and opens the first one found located
   // in the assets/ directory.
   // `mode` controls how the file is opened.
@@ -149,6 +168,14 @@ class AssetManager2 : public ::AAssetManager {
   // Returns false if the resource was not found.
   bool GetResourceFlags(uint32_t resid, uint32_t* out_flags);
 
+  // Finds the resource ID assigned to `resource_name`.
+  // `resource_name` must be of the form '[package:][type/]entry'.
+  // If no package is specified in `resource_name`, then `fallback_package` is used as the package.
+  // If no type is specified in `resource_name`, then `fallback_type` is used as the type.
+  // Returns 0x0 if no resource by that name was found.
+  uint32_t GetResourceId(const std::string& resource_name, const std::string& fallback_type = {},
+                         const std::string& fallback_package = {});
+
   // Retrieves the best matching resource with ID `resid`. The resource value is filled into
   // `out_value` and the configuration for the selected value is populated in `out_selected_config`.
   // `out_flags` holds the same flags as retrieved with GetResourceFlags().
@@ -161,6 +188,22 @@ class AssetManager2 : public ::AAssetManager {
   ApkAssetsCookie GetResource(uint32_t resid, bool may_be_bag, uint16_t density_override,
                               Res_value* out_value, ResTable_config* out_selected_config,
                               uint32_t* out_flags);
+
+  // Resolves the resource reference in `in_out_value` if the data type is
+  // Res_value::TYPE_REFERENCE.
+  // `cookie` is the ApkAssetsCookie of the reference in `in_out_value`.
+  // `in_out_value` is the reference to resolve. The result is placed back into this object.
+  // `in_out_flags` is the type spec flags returned from calls to GetResource() or
+  // GetResourceFlags(). Configuration flags of the values pointed to by the reference
+  // are OR'd together with `in_out_flags`.
+  // `in_out_config` is populated with the configuration for which the resolved value was defined.
+  // `out_last_reference` is populated with the last reference ID before resolving to an actual
+  // value.
+  // Returns the cookie of the APK the resolved resource was defined in, or kInvalidCookie if
+  // it was not found.
+  ApkAssetsCookie ResolveReference(ApkAssetsCookie cookie, Res_value* in_out_value,
+                                   ResTable_config* in_out_selected_config, uint32_t* in_out_flags,
+                                   ResTable_ref* out_last_reference);
 
   // Retrieves the best matching bag/map resource with ID `resid`.
   // This method will resolve all parent references for this bag and merge keys with the child.
