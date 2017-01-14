@@ -2069,7 +2069,10 @@ public class GnssLocationProvider implements LocationProviderInterface {
         // note that this assumes the message will not be removed from the queue before
         // it is handled (otherwise the wake lock would be leaked).
         mWakeLock.acquire();
-        Log.i(TAG, "WakeLock acquired by sendMessage(" + message + ", " + arg + ", " + obj + ")");
+        if (Log.isLoggable(TAG, Log.INFO)) {
+            Log.i(TAG, "WakeLock acquired by sendMessage(" + messageIdAsString(message) + ", " + arg
+                    + ", " + obj + ")");
+        }
         mHandler.obtainMessage(message, arg, 1, obj).sendToTarget();
     }
 
@@ -2127,8 +2130,10 @@ public class GnssLocationProvider implements LocationProviderInterface {
             if (msg.arg2 == 1) {
                 // wakelock was taken for this message, release it
                 mWakeLock.release();
-                Log.i(TAG, "WakeLock released by handleMessage(" + message + ", " + msg.arg1 + ", "
-                        + msg.obj + ")");
+                if (Log.isLoggable(TAG, Log.INFO)) {
+                    Log.i(TAG, "WakeLock released by handleMessage(" + messageIdAsString(message)
+                            + ", " + msg.arg1 + ", " + msg.obj + ")");
+                }
             }
         }
 
@@ -2376,6 +2381,40 @@ public class GnssLocationProvider implements LocationProviderInterface {
         }
     }
 
+    /**
+     * @return A string representing the given message ID.
+     */
+    private String messageIdAsString(int message) {
+        switch (message) {
+            case ENABLE:
+                return "ENABLE";
+            case SET_REQUEST:
+                return "SET_REQUEST";
+            case UPDATE_NETWORK_STATE:
+                return "UPDATE_NETWORK_STATE";
+            case REQUEST_SUPL_CONNECTION:
+                return "REQUEST_SUPL_CONNECTION";
+            case RELEASE_SUPL_CONNECTION:
+                return "RELEASE_SUPL_CONNECTION";
+            case INJECT_NTP_TIME:
+                return "INJECT_NTP_TIME";
+            case DOWNLOAD_XTRA_DATA:
+                return "DOWNLOAD_XTRA_DATA";
+            case INJECT_NTP_TIME_FINISHED:
+                return "INJECT_NTP_TIME_FINISHED";
+            case DOWNLOAD_XTRA_DATA_FINISHED:
+                return "DOWNLOAD_XTRA_DATA_FINISHED";
+            case UPDATE_LOCATION:
+                return "UPDATE_LOCATION";
+            case SUBSCRIPTION_OR_SIM_CHANGED:
+                return "SUBSCRIPTION_OR_SIM_CHANGED";
+            case INITIALIZE_HANDLER:
+                return "INITIALIZE_HANDLER";
+            default:
+                return "<Unknown>";
+        }
+    }
+
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         StringBuilder s = new StringBuilder();
@@ -2439,7 +2478,13 @@ public class GnssLocationProvider implements LocationProviderInterface {
     // preallocated to avoid memory allocation in reportNmea()
     private byte[] mNmeaBuffer = new byte[120];
 
-    static { class_init_native(); }
+    static {
+        class_init_native();
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "class_init_native()");
+        }
+    }
+
     private static native void class_init_native();
     private static native boolean native_is_supported();
     private static native boolean native_is_agps_ril_supported();
