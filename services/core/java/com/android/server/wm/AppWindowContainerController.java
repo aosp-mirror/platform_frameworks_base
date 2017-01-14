@@ -150,6 +150,9 @@ public class AppWindowContainerController
                     + mContainer + ": startingWindow="
                     + mContainer.startingWindow + " startingView="
                     + mContainer.startingSurface);
+            if (mContainer == null) {
+                return;
+            }
             if (mContainer.startingWindow != null) {
                 contents = mContainer.startingSurface;
                 token = mContainer.token;
