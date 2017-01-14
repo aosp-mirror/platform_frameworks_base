@@ -251,7 +251,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         boolean result;
-        if (mDimmed && !isTouchExplorationEnabled()) {
+        if (mDimmed && !isTouchExplorationEnabled() && isInteractive()) {
             boolean wasActivated = mActivated;
             result = handleTouchEventDimmed(event);
             if (wasActivated && result && event.getAction() == MotionEvent.ACTION_UP) {
@@ -261,6 +261,13 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             result = super.onTouchEvent(event);
         }
         return result;
+    }
+
+    /**
+     * @return whether this view is interactive and can be double tapped
+     */
+    protected boolean isInteractive() {
+        return true;
     }
 
     @Override

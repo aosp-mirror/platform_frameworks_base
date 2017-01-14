@@ -67,6 +67,7 @@ public class NotificationShelf extends ActivatableNotificationView {
     private int mStatusBarState;
     private float mMaxShelfEnd;
     private int mRelativeOffset;
+    private boolean mInteractive;
 
     public NotificationShelf(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -555,11 +556,16 @@ public class NotificationShelf extends ActivatableNotificationView {
     }
 
     private void updateInteractiveness() {
-        boolean interactive = mStatusBarState == StatusBarState.KEYGUARD && mHasItemsInStableShelf;
-        setClickable(interactive);
-        setFocusable(interactive);
-        setImportantForAccessibility(interactive ? View.IMPORTANT_FOR_ACCESSIBILITY_YES
+        mInteractive = mStatusBarState == StatusBarState.KEYGUARD && mHasItemsInStableShelf;
+        setClickable(mInteractive);
+        setFocusable(mInteractive);
+        setImportantForAccessibility(mInteractive ? View.IMPORTANT_FOR_ACCESSIBILITY_YES
                 : View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+    }
+
+    @Override
+    protected boolean isInteractive() {
+        return mInteractive;
     }
 
     public void setMaxShelfEnd(float maxShelfEnd) {
