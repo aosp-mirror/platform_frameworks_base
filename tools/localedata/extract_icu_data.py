@@ -48,6 +48,8 @@ def read_likely_subtags(input_file_name):
             # they may be used by apps for other purposes.)
             "en_XA": "~~~A",
             "ar_XB": "~~~B",
+            # Removed data from later versions of ICU
+            "ji": "Hebr", # Old code for Yiddish, still used in Java and Android
         }
         representative_locales = {
             # Android's additions
@@ -69,7 +71,7 @@ def read_likely_subtags(input_file_name):
                 _, to_scr, to_region = get_locale_parts(to_locale)
                 if from_lang == 'und':
                     continue  # not very useful for our purposes
-                if from_region is None and to_region != '001':
+                if from_region is None and to_region not in ['001', 'ZZ']:
                     representative_locales.add(to_locale)
                 if from_scr is None:
                     likely_script_dict[from_locale] = to_scr
