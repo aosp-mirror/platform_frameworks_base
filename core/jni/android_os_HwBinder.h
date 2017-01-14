@@ -24,7 +24,7 @@
 
 namespace android {
 
-struct JHwBinder : public hardware::BBinder {
+struct JHwBinder : public hardware::BHwBinder {
     static void InitClass(JNIEnv *env);
 
     static sp<JHwBinder> SetNativeContext(
