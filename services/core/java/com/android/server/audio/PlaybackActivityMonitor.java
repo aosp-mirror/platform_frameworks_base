@@ -41,7 +41,8 @@ import java.util.List;
 /**
  * Class to receive and dispatch updates from AudioSystem about recording configurations.
  */
-public final class PlaybackActivityMonitor {
+public final class PlaybackActivityMonitor
+        implements AudioPlaybackConfiguration.PlayerDeathMonitor {
 
     public final static String TAG = "AudioService.PlaybackActivityMonitor";
     private final static boolean DEBUG = false;
@@ -57,7 +58,8 @@ public final class PlaybackActivityMonitor {
             new HashMap<Integer, AudioPlaybackConfiguration>();
 
     PlaybackActivityMonitor() {
-        PlayMonitorClient.sMonitor = this;
+        PlayMonitorClient.sListenerDeathMonitor = this;
+        AudioPlaybackConfiguration.sPlayerDeathMonitor = this;
     }
 
     //=================================================================
@@ -72,6 +74,7 @@ public final class PlaybackActivityMonitor {
         final AudioPlaybackConfiguration apc =
                 new AudioPlaybackConfiguration(pic, newPiid,
                         Binder.getCallingUid(), Binder.getCallingPid());
+        apc.init();
         synchronized(mPlayerLock) {
             mPlayers.put(newPiid, apc);
         }
@@ -122,6 +125,12 @@ public final class PlaybackActivityMonitor {
                 Log.e(TAG, "Error releasing player " + piid);
             }
         }
+    }
+
+    // Implementation of AudioPlaybackConfiguration.PlayerDeathMonitor
+    @Override
+    public void playerDeath(int piid) {
+        releasePlayer(piid, 0);
     }
 
     protected void dump(PrintWriter pw) {
@@ -275,7 +284,7 @@ public final class PlaybackActivityMonitor {
     private final static class PlayMonitorClient implements IBinder.DeathRecipient {
 
         // can afford to be static because only one PlaybackActivityMonitor ever instantiated
-        static PlaybackActivityMonitor sMonitor;
+        static PlaybackActivityMonitor sListenerDeathMonitor;
 
         final IPlaybackConfigDispatcher mDispatcherCb;
         final boolean mIsPrivileged;
@@ -291,7 +300,7 @@ public final class PlaybackActivityMonitor {
 
         public void binderDied() {
             Log.w(TAG, "client died");
-            sMonitor.unregisterPlaybackCallback(mDispatcherCb);
+            sListenerDeathMonitor.unregisterPlaybackCallback(mDispatcherCb);
         }
 
         boolean init() {

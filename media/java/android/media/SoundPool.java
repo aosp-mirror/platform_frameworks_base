@@ -159,6 +159,8 @@ public class SoundPool extends PlayerBase {
         }
         mLock = new Object();
         mAttributes = attributes;
+
+        baseRegisterPlayer();
     }
 
     /**
@@ -397,6 +399,21 @@ public class SoundPool extends PlayerBase {
     int playerSetAuxEffectSendLevel(boolean muting, float level) {
         // no aux send functionality so no-op
         return AudioSystem.SUCCESS;
+    }
+
+    @Override
+    void playerStart() {
+        // FIXME implement resuming any paused sound
+    }
+
+    @Override
+    void playerPause() {
+        // FIXME implement pausing any playing sound
+    }
+
+    @Override
+    void playerStop() {
+        // FIXME implement pausing any playing sound
     }
 
     /**

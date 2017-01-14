@@ -56,14 +56,14 @@ public abstract class PlayerBase {
     protected float mAuxEffectSendLevel = 0.0f;
 
     // for AppOps
-    private final IAppOpsService mAppOps;
-    private final IAppOpsCallback mAppOpsCallback;
+    private IAppOpsService mAppOps;
+    private IAppOpsCallback mAppOpsCallback;
     private boolean mHasAppOpsPlayAudio = true;
     private final Object mAppOpsLock = new Object();
 
     private final int mImplType;
     // uniquely identifies the Player Interface throughout the system (P I Id)
-    private final int mPlayerIId;
+    private int mPlayerIId;
 
     private int mState;
 
@@ -78,6 +78,12 @@ public abstract class PlayerBase {
         }
         mAttributes = attr;
         mImplType = implType;
+    };
+
+    /**
+     * Call from derived class when instantiation / initialization is successful
+     */
+    protected void baseRegisterPlayer() {
         int newPiid = AudioPlaybackConfiguration.PLAYER_PIID_INVALID;
         IBinder b = ServiceManager.getService(Context.APP_OPS_SERVICE);
         mAppOps = IAppOpsService.Stub.asInterface(b);
@@ -100,13 +106,15 @@ public abstract class PlayerBase {
             mHasAppOpsPlayAudio = false;
         }
         try {
-            newPiid = getService().trackPlayer(new PlayerIdCard(mImplType, mAttributes));
+            if (mIPlayer == null) {
+                throw new IllegalStateException("Cannot register a player with a null mIPlayer");
+            }
+            newPiid = getService().trackPlayer(new PlayerIdCard(mImplType, mAttributes, mIPlayer));
         } catch (RemoteException e) {
             Log.e(TAG, "Error talking to audio service, player will not be tracked", e);
         }
         mPlayerIId = newPiid;
     }
-
 
     /**
      * To be called whenever the audio attributes of the player change
@@ -295,16 +303,34 @@ public abstract class PlayerBase {
      */
     abstract void playerSetVolume(boolean muting, float leftVolume, float rightVolume);
     abstract int playerSetAuxEffectSendLevel(boolean muting, float level);
+    abstract void playerStart();
+    abstract void playerPause();
+    abstract void playerStop();
 
     //=====================================================================
-    // Implementation of IPlayer
-    private final IPlayer mIPlayer = new IPlayer.Stub() {
+    /**
+     * Implementation of IPlayer for all subclasses of PlayerBase
+     */
+    private IPlayer mIPlayer = new IPlayer.Stub() {
         @Override
-        public void start() {}
+        public void start() {
+            playerStart();
+        }
+
         @Override
-        public void pause() {}
+        public void pause() {
+            playerPause();
+        }
+
         @Override
-        public void stop() {}
+        public void stop() {
+            playerStop();
+        }
+
+        @Override
+        public void setVolume(float vol) {
+            baseSetVolume(vol, vol);
+        }
     };
 
     //=====================================================================
@@ -317,10 +343,12 @@ public abstract class PlayerBase {
         public final static int AUDIO_ATTRIBUTES_NONE = 0;
         public final static int AUDIO_ATTRIBUTES_DEFINED = 1;
         public final AudioAttributes mAttributes;
+        public final IPlayer mIPlayer;
 
-        PlayerIdCard(int type, @NonNull AudioAttributes attr) {
+        PlayerIdCard(int type, @NonNull AudioAttributes attr, @NonNull IPlayer iplayer) {
             mPlayerType = type;
             mAttributes = attr;
+            mIPlayer = iplayer;
         }
 
         @Override
@@ -337,6 +365,7 @@ public abstract class PlayerBase {
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(mPlayerType);
             mAttributes.writeToParcel(dest, 0);
+            dest.writeStrongBinder(mIPlayer == null ? null : mIPlayer.asBinder());
         }
 
         public static final Parcelable.Creator<PlayerIdCard> CREATOR
@@ -357,6 +386,9 @@ public abstract class PlayerBase {
         private PlayerIdCard(Parcel in) {
             mPlayerType = in.readInt();
             mAttributes = AudioAttributes.CREATOR.createFromParcel(in);
+            // IPlayer can be null if unmarshalling a Parcel coming from who knows where
+            final IBinder b = in.readStrongBinder();
+            mIPlayer = (b == null ? null : IPlayer.Stub.asInterface(b));
         }
 
         @Override

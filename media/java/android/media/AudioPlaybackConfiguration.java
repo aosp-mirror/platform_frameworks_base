@@ -20,8 +20,10 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Binder;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.RemoteException;
 import android.util.Log;
 
 import java.io.PrintWriter;
@@ -35,6 +37,8 @@ import java.util.Objects;
  */
 public final class AudioPlaybackConfiguration implements Parcelable {
     private final static String TAG = new String("AudioPlaybackConfiguration");
+
+    private final static boolean DEBUG = false;
 
     /** @hide */
     public final static int PLAYER_PIID_INVALID = -1;
@@ -147,6 +151,8 @@ public final class AudioPlaybackConfiguration implements Parcelable {
     private int mPlayerType;
     private int mClientUid;
     private int mClientPid;
+    // the IPlayer reference and death monitor
+    private IPlayerShell mIPlayerShell;
 
     private int mPlayerState;
     private AudioAttributes mPlayerAttr; // never null
@@ -156,18 +162,34 @@ public final class AudioPlaybackConfiguration implements Parcelable {
      */
     private AudioPlaybackConfiguration(int piid) {
         mPlayerIId = piid;
+        mIPlayerShell = null;
     }
 
     /**
      * @hide
      */
     public AudioPlaybackConfiguration(PlayerBase.PlayerIdCard pic, int piid, int uid, int pid) {
+        if (DEBUG) { Log.d(TAG, "new: piid=" + piid + " iplayer=" + pic.mIPlayer); }
         mPlayerIId = piid;
         mPlayerType = pic.mPlayerType;
         mClientUid = uid;
         mClientPid = pid;
         mPlayerState = PLAYER_STATE_IDLE;
         mPlayerAttr = pic.mAttributes;
+        if ((sPlayerDeathMonitor != null) && (pic.mIPlayer != null)) {
+            mIPlayerShell = new IPlayerShell(this, pic.mIPlayer);
+        } else {
+            mIPlayerShell = null;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void init() {
+        if (mIPlayerShell != null) {
+            mIPlayerShell.monitorDeath();
+        }
     }
 
     // Note that this method is called server side, so no "privileged" information is ever sent
@@ -191,6 +213,7 @@ public final class AudioPlaybackConfiguration implements Parcelable {
         anonymCopy.mPlayerType = PLAYER_TYPE_UNKNOWN;
         anonymCopy.mClientUid = PLAYER_UPID_INVALID;
         anonymCopy.mClientPid = PLAYER_UPID_INVALID;
+        anonymCopy.mIPlayerShell = null;
         return anonymCopy;
     }
 
@@ -250,6 +273,25 @@ public final class AudioPlaybackConfiguration implements Parcelable {
 
     /**
      * @hide
+     * Return an identifier unique for the lifetime of the player.
+     * @return a player interface identifier
+     */
+    @SystemApi
+    public int getPlayerInterfaceId() {
+        return mPlayerIId;
+    }
+
+    /**
+     * @hide
+     * FIXME return a player proxy instead, make systemApi
+     * @return
+     */
+    public IPlayer getPlayerProxy() {
+        return mIPlayerShell == null ? null : mIPlayerShell.getIPlayer();
+    }
+
+    /**
+     * @hide
      * Handle a change of audio attributes
      * @param attr
      */
@@ -268,7 +310,24 @@ public final class AudioPlaybackConfiguration implements Parcelable {
     public boolean handleStateEvent(int event) {
         final boolean changed = (mPlayerState != event);
         mPlayerState = event;
+        if ((event == PLAYER_STATE_RELEASED) && (mIPlayerShell != null)) {
+            mIPlayerShell.release();
+        }
         return changed;
+    }
+
+    // To report IPlayer death from death recipient
+    /** @hide */
+    public interface PlayerDeathMonitor {
+        public void playerDeath(int piid);
+    }
+    /** @hide */
+    public static PlayerDeathMonitor sPlayerDeathMonitor;
+
+    private void playerDied() {
+        if (sPlayerDeathMonitor != null) {
+            sPlayerDeathMonitor.playerDeath(mPlayerIId);
+        }
     }
 
     /**
@@ -338,6 +397,7 @@ public final class AudioPlaybackConfiguration implements Parcelable {
         dest.writeInt(mClientPid);
         dest.writeInt(mPlayerState);
         mPlayerAttr.writeToParcel(dest, 0);
+        dest.writeStrongInterface(mIPlayerShell == null ? null : mIPlayerShell.getIPlayer());
     }
 
     private AudioPlaybackConfiguration(Parcel in) {
@@ -347,6 +407,8 @@ public final class AudioPlaybackConfiguration implements Parcelable {
         mClientPid = in.readInt();
         mPlayerState = in.readInt();
         mPlayerAttr = AudioAttributes.CREATOR.createFromParcel(in);
+        final IPlayer p = IPlayer.Stub.asInterface(in.readStrongBinder());
+        mIPlayerShell = (p == null) ? null : new IPlayerShell(null, p);
     }
 
     @Override
@@ -360,6 +422,46 @@ public final class AudioPlaybackConfiguration implements Parcelable {
                 && (mPlayerType == that.mPlayerType)
                 && (mClientUid == that.mClientUid)
                 && (mClientPid == that.mClientPid));
+    }
+
+    //=====================================================================
+    // Inner class for corresponding IPlayer and its death monitoring
+    final static class IPlayerShell implements IBinder.DeathRecipient {
+
+        final AudioPlaybackConfiguration mMonitor; // never null
+        private IPlayer mIPlayer;
+
+        IPlayerShell(@NonNull AudioPlaybackConfiguration monitor, @NonNull IPlayer iplayer) {
+            mMonitor = monitor;
+            mIPlayer = iplayer;
+        }
+
+        void monitorDeath() {
+            try {
+                mIPlayer.asBinder().linkToDeath(this, 0);
+            } catch (RemoteException e) {
+                if (mMonitor != null) {
+                    Log.w(TAG, "Could not link to client death for piid=" + mMonitor.mPlayerIId, e);
+                } else {
+                    Log.w(TAG, "Could not link to client death", e);
+                }
+            }
+        }
+
+        IPlayer getIPlayer() {
+            return mIPlayer;
+        }
+
+        public void binderDied() {
+            if (mMonitor != null) {
+                if (DEBUG) { Log.i(TAG, "IPlayerShell binderDied for piid=" + mMonitor.mPlayerIId);}
+                mMonitor.playerDied();
+            } else if (DEBUG) { Log.i(TAG, "IPlayerShell binderDied"); }
+        }
+
+        void release() {
+            mIPlayer.asBinder().unlinkToDeath(this, 0);
+        }
     }
 
     //=====================================================================

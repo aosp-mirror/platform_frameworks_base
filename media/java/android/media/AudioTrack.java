@@ -537,6 +537,8 @@ public class AudioTrack extends PlayerBase
         } else {
             mState = STATE_INITIALIZED;
         }
+
+        baseRegisterPlayer();
     }
 
     /**
@@ -566,6 +568,7 @@ public class AudioTrack extends PlayerBase
 
         // other initialization...
         if (nativeTrackInJavaObj != 0) {
+            baseRegisterPlayer();
             deferred_connect(nativeTrackInJavaObj);
         } else {
             mState = STATE_UNINITIALIZED;
@@ -2736,6 +2739,24 @@ public class AudioTrack extends PlayerBase
         Handler getHandler() {
             return mHandler;
         }
+    }
+
+    //---------------------------------------------------------
+    // Methods for IPlayer interface
+    //--------------------
+    @Override
+    void playerStart() {
+        play();
+    }
+
+    @Override
+    void playerPause() {
+        pause();
+    }
+
+    @Override
+    void playerStop() {
+        stop();
     }
 
     //---------------------------------------------------------
