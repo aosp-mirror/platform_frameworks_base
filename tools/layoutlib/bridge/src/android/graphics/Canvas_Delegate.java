@@ -20,24 +20,14 @@ import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.layoutlib.bridge.impl.GcSnapshot;
-import com.android.layoutlib.bridge.impl.PorterDuffUtility;
-import com.android.ninepatch.NinePatchChunk;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.annotation.Nullable;
 import android.graphics.Bitmap.Config;
-import android.text.TextUtils;
 
-import java.awt.Color;
-import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.Shape;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Arc2D;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
 
 import libcore.util.NativeAllocationRegistry_Delegate;
 
@@ -398,23 +388,6 @@ public final class Canvas_Delegate extends BaseCanvas_Delegate {
         }
 
         return canvasDelegate.mSnapshot.clip(pathDelegate.getJavaShape(), regionOp);
-    }
-
-    @LayoutlibDelegate
-    public static boolean nClipRegion(long nativeCanvas,
-                                                    long nativeRegion,
-                                                    int regionOp) {
-        Canvas_Delegate canvasDelegate = Canvas_Delegate.getDelegate(nativeCanvas);
-        if (canvasDelegate == null) {
-            return true;
-        }
-
-        Region_Delegate region = Region_Delegate.getDelegate(nativeRegion);
-        if (region == null) {
-            return true;
-        }
-
-        return canvasDelegate.mSnapshot.clip(region.getJavaArea(), regionOp);
     }
 
     @LayoutlibDelegate
