@@ -651,6 +651,8 @@ public class TaskPersister {
                                         "omitting from persistentTaskIds task=" + task);
                             }
                         }
+                        mService.mWindowManager.removeObsoleteTaskFiles(persistentTaskIds,
+                                mRecentTasks.usersWithRecentsLoadedLocked());
                     }
                     removeObsoleteFiles(persistentTaskIds);
                 }
