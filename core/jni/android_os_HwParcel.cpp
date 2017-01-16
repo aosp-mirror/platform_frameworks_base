@@ -822,7 +822,8 @@ static jobject JHwParcel_native_readBuffer(JNIEnv *env, jobject thiz) {
 }
 
 static jobject JHwParcel_native_readEmbeddedBuffer(
-        JNIEnv *env, jobject thiz, jlong parentHandle, jlong offset) {
+        JNIEnv *env, jobject thiz, jlong parentHandle, jlong offset,
+        jboolean nullable) {
     hardware::Parcel *parcel =
         JHwParcel::GetNativeContext(env, thiz)->getParcel();
 
@@ -830,10 +831,14 @@ static jobject JHwParcel_native_readEmbeddedBuffer(
 
     const void *ptr;
     status_t status =
-        parcel->readEmbeddedBuffer(&childHandle, parentHandle, offset, &ptr);
+        parcel->readNullableEmbeddedBuffer(&childHandle, parentHandle, offset,
+                &ptr);
 
     if (status != OK) {
         jniThrowException(env, "java/util/NoSuchElementException", NULL);
+        return 0;
+    } else if (status == OK && !nullable && ptr == nullptr) {
+        jniThrowException(env, "java/lang/NullPointerException", NULL);
         return 0;
     }
 
@@ -945,7 +950,7 @@ static JNINativeMethod gMethods[] = {
     { "readBuffer", "()L" PACKAGE_PATH "/HwBlob;",
         (void *)JHwParcel_native_readBuffer },
 
-    { "readEmbeddedBuffer", "(JJ)L" PACKAGE_PATH "/HwBlob;",
+    { "readEmbeddedBuffer", "(JJZ)L" PACKAGE_PATH "/HwBlob;",
         (void *)JHwParcel_native_readEmbeddedBuffer },
 
     { "writeBuffer", "(L" PACKAGE_PATH "/HwBlob;)V",
