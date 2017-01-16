@@ -20,6 +20,8 @@
 
 #include "util/Util.h"
 
+using android::StringPiece;
+
 namespace aapt {
 
 void AnnotationProcessor::AppendCommentLine(std::string& comment) {
@@ -54,7 +56,7 @@ void AnnotationProcessor::AppendComment(const StringPiece& comment) {
   for (StringPiece line : util::Tokenize(comment, '\n')) {
     line = util::TrimWhitespace(line);
     if (!line.empty()) {
-      std::string lineCopy = line.ToString();
+      std::string lineCopy = line.to_string();
       AppendCommentLine(lineCopy);
     }
   }

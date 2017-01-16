@@ -23,6 +23,7 @@
 
 #include "android-base/errors.h"
 #include "android-base/file.h"
+#include "androidfw/StringPiece.h"
 #include "google/protobuf/io/coded_stream.h"
 
 #include "AppInfo.h"
@@ -51,9 +52,9 @@
 #include "split/TableSplitter.h"
 #include "unflatten/BinaryResourceParser.h"
 #include "util/Files.h"
-#include "util/StringPiece.h"
 #include "xml/XmlDom.h"
 
+using android::StringPiece;
 using ::google::protobuf::io::CopyingOutputStreamAdaptor;
 
 namespace aapt {
@@ -121,7 +122,7 @@ class LinkContext : public IAaptContext {
   }
 
   void SetCompilationPackage(const StringPiece& package_name) {
-    compilation_package_ = package_name.ToString();
+    compilation_package_ = package_name.to_string();
   }
 
   uint8_t GetPackageId() override { return package_id_; }
@@ -2011,14 +2012,14 @@ int Link(const std::vector<StringPiece>& args) {
   for (std::string& extra_package : extra_java_packages) {
     // A given package can actually be a colon separated list of packages.
     for (StringPiece package : util::Split(extra_package, ':')) {
-      options.extra_java_packages.insert(package.ToString());
+      options.extra_java_packages.insert(package.to_string());
     }
   }
 
   if (product_list) {
     for (StringPiece product : util::Tokenize(product_list.value(), ',')) {
       if (product != "" && product != "default") {
-        options.products.insert(product.ToString());
+        options.products.insert(product.to_string());
       }
     }
   }

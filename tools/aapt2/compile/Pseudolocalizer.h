@@ -20,10 +20,10 @@
 #include <memory>
 
 #include "android-base/macros.h"
+#include "androidfw/StringPiece.h"
 
 #include "ResourceValues.h"
 #include "StringPool.h"
-#include "util/StringPiece.h"
 
 namespace aapt {
 
@@ -32,8 +32,8 @@ class PseudoMethodImpl {
   virtual ~PseudoMethodImpl() {}
   virtual std::string Start() { return {}; }
   virtual std::string End() { return {}; }
-  virtual std::string Text(const StringPiece& text) = 0;
-  virtual std::string Placeholder(const StringPiece& text) = 0;
+  virtual std::string Text(const android::StringPiece& text) = 0;
+  virtual std::string Placeholder(const android::StringPiece& text) = 0;
 };
 
 class Pseudolocalizer {
@@ -48,7 +48,7 @@ class Pseudolocalizer {
   void SetMethod(Method method);
   std::string Start() { return impl_->Start(); }
   std::string End() { return impl_->End(); }
-  std::string Text(const StringPiece& text);
+  std::string Text(const android::StringPiece& text);
 
  private:
   std::unique_ptr<PseudoMethodImpl> impl_;

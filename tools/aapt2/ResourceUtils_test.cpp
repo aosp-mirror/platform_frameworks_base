@@ -48,8 +48,7 @@ TEST(ResourceUtilsTest, ParseResourceName) {
   EXPECT_EQ(ResourceNameRef("android", ResourceType::kColor, "foo"), actual);
   EXPECT_TRUE(actual_priv);
 
-  EXPECT_FALSE(
-      ResourceUtils::ParseResourceName(StringPiece(), &actual, &actual_priv));
+  EXPECT_FALSE(ResourceUtils::ParseResourceName(android::StringPiece(), &actual, &actual_priv));
 }
 
 TEST(ResourceUtilsTest, ParseReferenceWithNoPackage) {

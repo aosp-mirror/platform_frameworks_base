@@ -26,6 +26,8 @@
 
 #include "util/Util.h"
 
+using android::StringPiece;
+
 namespace aapt {
 extern int Compile(const std::vector<StringPiece> &args);
 extern int Link(const std::vector<StringPiece> &args);
@@ -65,9 +67,8 @@ static std::vector<ScopedUtfChars> list_to_utfchars(JNIEnv *env, jobject obj) {
  * The returned pieces can only be used while the original ones have not been
  * destroyed.
  */
-static std::vector<aapt::StringPiece> extract_pieces(
-    const std::vector<ScopedUtfChars> &strings) {
-  std::vector<aapt::StringPiece> pieces;
+static std::vector<StringPiece> extract_pieces(const std::vector<ScopedUtfChars> &strings) {
+  std::vector<StringPiece> pieces;
 
   std::for_each(
       strings.begin(), strings.end(),
@@ -80,8 +81,7 @@ JNIEXPORT void JNICALL Java_com_android_tools_aapt2_Aapt2Jni_nativeCompile(
     JNIEnv *env, jclass aapt_obj, jobject arguments_obj) {
   std::vector<ScopedUtfChars> compile_args_jni =
       list_to_utfchars(env, arguments_obj);
-  std::vector<aapt::StringPiece> compile_args =
-      extract_pieces(compile_args_jni);
+  std::vector<StringPiece> compile_args = extract_pieces(compile_args_jni);
   aapt::Compile(compile_args);
 }
 
@@ -89,7 +89,7 @@ JNIEXPORT void JNICALL Java_com_android_tools_aapt2_Aapt2Jni_nativeLink(
     JNIEnv *env, jclass aapt_obj, jobject arguments_obj) {
   std::vector<ScopedUtfChars> link_args_jni =
       list_to_utfchars(env, arguments_obj);
-  std::vector<aapt::StringPiece> link_args = extract_pieces(link_args_jni);
+  std::vector<StringPiece> link_args = extract_pieces(link_args_jni);
   aapt::Link(link_args);
 }
 

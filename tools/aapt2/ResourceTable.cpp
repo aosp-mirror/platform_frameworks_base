@@ -28,6 +28,8 @@
 #include <string>
 #include <tuple>
 
+using android::StringPiece;
+
 namespace aapt {
 
 static bool less_than_type(const std::unique_ptr<ResourceTableType>& lhs,
@@ -87,7 +89,7 @@ ResourceTablePackage* ResourceTable::FindOrCreatePackage(
 
   std::unique_ptr<ResourceTablePackage> new_package =
       util::make_unique<ResourceTablePackage>();
-  new_package->name = name.ToString();
+  new_package->name = name.to_string();
   return packages.emplace(iter, std::move(new_package))->get();
 }
 

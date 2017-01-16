@@ -19,6 +19,12 @@
 #include <fstream>
 #include <string>
 
+#include "android-base/errors.h"
+#include "android-base/file.h"
+#include "androidfw/StringPiece.h"
+#include "google/protobuf/io/coded_stream.h"
+#include "google/protobuf/io/zero_copy_stream_impl_lite.h"
+
 #include "ConfigDescription.h"
 #include "Diagnostics.h"
 #include "Flags.h"
@@ -38,11 +44,7 @@
 #include "xml/XmlDom.h"
 #include "xml/XmlPullParser.h"
 
-#include "android-base/errors.h"
-#include "android-base/file.h"
-#include "google/protobuf/io/coded_stream.h"
-#include "google/protobuf/io/zero_copy_stream_impl_lite.h"
-
+using android::StringPiece;
 using google::protobuf::io::CopyingOutputStreamAdaptor;
 using google::protobuf::io::ZeroCopyOutputStream;
 
@@ -103,9 +105,8 @@ static Maybe<ResourcePathData> ExtractResourcePathData(const std::string& path,
     name = name.substr(0, dot_pos);
   }
 
-  return ResourcePathData{Source(path),          dir_str.ToString(),
-                          name.ToString(),       extension.ToString(),
-                          config_str.ToString(), config};
+  return ResourcePathData{Source(path),          dir_str.to_string(),    name.to_string(),
+                          extension.to_string(), config_str.to_string(), config};
 }
 
 struct CompileOptions {

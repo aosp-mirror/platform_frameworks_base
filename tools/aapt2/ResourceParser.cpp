@@ -29,6 +29,8 @@
 #include "util/Util.h"
 #include "xml/XmlPullParser.h"
 
+using android::StringPiece;
+
 namespace aapt {
 
 constexpr const char* sXliffNamespaceUri =
@@ -101,7 +103,7 @@ static bool AddResourcesToTable(ResourceTable* table, IDiagnostics* diag,
   StringPiece trimmed_comment = util::TrimWhitespace(res->comment);
   if (trimmed_comment.size() != res->comment.size()) {
     // Only if there was a change do we re-assign.
-    res->comment = trimmed_comment.ToString();
+    res->comment = trimmed_comment.to_string();
   }
 
   if (res->symbol_state) {
@@ -297,7 +299,7 @@ bool ResourceParser::ParseResources(xml::XmlPullParser* parser) {
     // Extract the product name if it exists.
     if (Maybe<StringPiece> maybe_product =
             xml::FindNonEmptyAttribute(parser, "product")) {
-      parsed_resource.product = maybe_product.value().ToString();
+      parsed_resource.product = maybe_product.value().to_string();
     }
 
     // Parse the resource regardless of product.
@@ -383,7 +385,7 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
     // Items have their type encoded in the type attribute.
     if (Maybe<StringPiece> maybe_type =
             xml::FindNonEmptyAttribute(parser, "type")) {
-      resource_type = maybe_type.value().ToString();
+      resource_type = maybe_type.value().to_string();
     } else {
       diag_->Error(DiagMessage(source_.WithLine(parser->line_number()))
                    << "<item> must have a 'type' attribute");
@@ -419,7 +421,7 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
     }
 
     out_resource->name.type = ResourceType::kId;
-    out_resource->name.entry = maybe_name.value().ToString();
+    out_resource->name.entry = maybe_name.value().to_string();
     out_resource->value = util::make_unique<Id>();
     return true;
   }
@@ -436,7 +438,7 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
     }
 
     out_resource->name.type = item_iter->second.type;
-    out_resource->name.entry = maybe_name.value().ToString();
+    out_resource->name.entry = maybe_name.value().to_string();
 
     // Only use the implicit format for this type if it wasn't overridden.
     if (!resource_format) {
@@ -461,7 +463,7 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
         return false;
       }
 
-      out_resource->name.entry = maybe_name.value().ToString();
+      out_resource->name.entry = maybe_name.value().to_string();
     }
 
     // Call the associated parse method. The type will be filled in by the
@@ -484,7 +486,7 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
     }
 
     out_resource->name.type = *parsed_type;
-    out_resource->name.entry = maybe_name.value().ToString();
+    out_resource->name.entry = maybe_name.value().to_string();
     out_resource->value =
         ParseXml(parser, android::ResTable_map::TYPE_REFERENCE, kNoRawString);
     if (!out_resource->value) {
@@ -718,7 +720,7 @@ bool ResourceParser::ParsePublicGroup(xml::XmlPullParser* parser,
   const size_t depth = parser->depth();
   while (xml::XmlPullParser::NextChildNode(parser, depth)) {
     if (parser->event() == xml::XmlPullParser::Event::kComment) {
-      comment = util::TrimWhitespace(parser->comment()).ToString();
+      comment = util::TrimWhitespace(parser->comment()).to_string();
       continue;
     } else if (parser->event() != xml::XmlPullParser::Event::kStartElement) {
       // Skip text.
@@ -754,7 +756,7 @@ bool ResourceParser::ParsePublicGroup(xml::XmlPullParser* parser,
 
       ParsedResource child_resource;
       child_resource.name.type = *parsed_type;
-      child_resource.name.entry = maybe_name.value().ToString();
+      child_resource.name.entry = maybe_name.value().to_string();
       child_resource.id = next_id;
       child_resource.comment = std::move(comment);
       child_resource.source = item_source;
@@ -899,7 +901,7 @@ bool ResourceParser::ParseAttrImpl(xml::XmlPullParser* parser,
   const size_t depth = parser->depth();
   while (xml::XmlPullParser::NextChildNode(parser, depth)) {
     if (parser->event() == xml::XmlPullParser::Event::kComment) {
-      comment = util::TrimWhitespace(parser->comment()).ToString();
+      comment = util::TrimWhitespace(parser->comment()).to_string();
       continue;
     } else if (parser->event() != xml::XmlPullParser::Event::kStartElement) {
       // Skip text.
@@ -1288,7 +1290,7 @@ bool ResourceParser::ParseDeclareStyleable(xml::XmlPullParser* parser,
   const size_t depth = parser->depth();
   while (xml::XmlPullParser::NextChildNode(parser, depth)) {
     if (parser->event() == xml::XmlPullParser::Event::kComment) {
-      comment = util::TrimWhitespace(parser->comment()).ToString();
+      comment = util::TrimWhitespace(parser->comment()).to_string();
       continue;
     } else if (parser->event() != xml::XmlPullParser::Event::kStartElement) {
       // Ignore text.

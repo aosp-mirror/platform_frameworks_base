@@ -22,6 +22,8 @@
 #include "Source.h"
 #include "util/Util.h"
 
+using android::StringPiece;
+
 namespace aapt {
 namespace io {
 
@@ -107,7 +109,7 @@ std::unique_ptr<ZipFileCollection> ZipFileCollection::Create(
     std::string zip_entry_path =
         std::string(reinterpret_cast<const char*>(zip_entry_name.name),
                     zip_entry_name.name_length);
-    std::string nested_path = path.ToString() + "@" + zip_entry_path;
+    std::string nested_path = path.to_string() + "@" + zip_entry_path;
     collection->files_[zip_entry_path] = util::make_unique<ZipFile>(
         collection->handle_, zip_data, Source(nested_path));
   }
@@ -120,7 +122,7 @@ std::unique_ptr<ZipFileCollection> ZipFileCollection::Create(
 }
 
 IFile* ZipFileCollection::FindFile(const StringPiece& path) {
-  auto iter = files_.find(path.ToString());
+  auto iter = files_.find(path.to_string());
   if (iter != files_.end()) {
     return iter->second.get();
   }

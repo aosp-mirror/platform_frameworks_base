@@ -17,7 +17,7 @@
 #include <iostream>
 #include <vector>
 
-#include "util/StringPiece.h"
+#include "androidfw/StringPiece.h"
 
 namespace aapt {
 
@@ -33,10 +33,10 @@ int PrintVersion() {
   return 0;
 }
 
-extern int Compile(const std::vector<StringPiece>& args);
-extern int Link(const std::vector<StringPiece>& args);
-extern int Dump(const std::vector<StringPiece>& args);
-extern int Diff(const std::vector<StringPiece>& args);
+extern int Compile(const std::vector<android::StringPiece>& args);
+extern int Link(const std::vector<android::StringPiece>& args);
+extern int Dump(const std::vector<android::StringPiece>& args);
+extern int Diff(const std::vector<android::StringPiece>& args);
 
 }  // namespace aapt
 
@@ -45,12 +45,12 @@ int main(int argc, char** argv) {
     argv += 1;
     argc -= 1;
 
-    std::vector<aapt::StringPiece> args;
+    std::vector<android::StringPiece> args;
     for (int i = 1; i < argc; i++) {
       args.push_back(argv[i]);
     }
 
-    aapt::StringPiece command(argv[0]);
+    android::StringPiece command(argv[0]);
     if (command == "compile" || command == "c") {
       return aapt::Compile(args);
     } else if (command == "link" || command == "l") {

@@ -21,20 +21,22 @@
 #include <string>
 #include <vector>
 
-#include "util/StringPiece.h"
+#include "androidfw/StringPiece.h"
+
 #include "util/Util.h"
+
+using android::StringPiece;
 
 namespace aapt {
 
 Flags& Flags::RequiredFlag(const StringPiece& name,
                            const StringPiece& description, std::string* value) {
   auto func = [value](const StringPiece& arg) -> bool {
-    *value = arg.ToString();
+    *value = arg.to_string();
     return true;
   };
 
-  flags_.push_back(
-      Flag{name.ToString(), description.ToString(), func, true, 1, false});
+  flags_.push_back(Flag{name.to_string(), description.to_string(), func, true, 1, false});
   return *this;
 }
 
@@ -42,12 +44,11 @@ Flags& Flags::RequiredFlagList(const StringPiece& name,
                                const StringPiece& description,
                                std::vector<std::string>* value) {
   auto func = [value](const StringPiece& arg) -> bool {
-    value->push_back(arg.ToString());
+    value->push_back(arg.to_string());
     return true;
   };
 
-  flags_.push_back(
-      Flag{name.ToString(), description.ToString(), func, true, 1, false});
+  flags_.push_back(Flag{name.to_string(), description.to_string(), func, true, 1, false});
   return *this;
 }
 
@@ -55,12 +56,11 @@ Flags& Flags::OptionalFlag(const StringPiece& name,
                            const StringPiece& description,
                            Maybe<std::string>* value) {
   auto func = [value](const StringPiece& arg) -> bool {
-    *value = arg.ToString();
+    *value = arg.to_string();
     return true;
   };
 
-  flags_.push_back(
-      Flag{name.ToString(), description.ToString(), func, false, 1, false});
+  flags_.push_back(Flag{name.to_string(), description.to_string(), func, false, 1, false});
   return *this;
 }
 
@@ -68,12 +68,11 @@ Flags& Flags::OptionalFlagList(const StringPiece& name,
                                const StringPiece& description,
                                std::vector<std::string>* value) {
   auto func = [value](const StringPiece& arg) -> bool {
-    value->push_back(arg.ToString());
+    value->push_back(arg.to_string());
     return true;
   };
 
-  flags_.push_back(
-      Flag{name.ToString(), description.ToString(), func, false, 1, false});
+  flags_.push_back(Flag{name.to_string(), description.to_string(), func, false, 1, false});
   return *this;
 }
 
@@ -81,12 +80,11 @@ Flags& Flags::OptionalFlagList(const StringPiece& name,
                                const StringPiece& description,
                                std::unordered_set<std::string>* value) {
   auto func = [value](const StringPiece& arg) -> bool {
-    value->insert(arg.ToString());
+    value->insert(arg.to_string());
     return true;
   };
 
-  flags_.push_back(
-      Flag{name.ToString(), description.ToString(), func, false, 1, false});
+  flags_.push_back(Flag{name.to_string(), description.to_string(), func, false, 1, false});
   return *this;
 }
 
@@ -97,8 +95,7 @@ Flags& Flags::OptionalSwitch(const StringPiece& name,
     return true;
   };
 
-  flags_.push_back(
-      Flag{name.ToString(), description.ToString(), func, false, 0, false});
+  flags_.push_back(Flag{name.to_string(), description.to_string(), func, false, 0, false});
   return *this;
 }
 
@@ -141,7 +138,7 @@ bool Flags::Parse(const StringPiece& command,
   for (size_t i = 0; i < args.size(); i++) {
     StringPiece arg = args[i];
     if (*(arg.data()) != '-') {
-      args_.push_back(arg.ToString());
+      args_.push_back(arg.to_string());
       continue;
     }
 

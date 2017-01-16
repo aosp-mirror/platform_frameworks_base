@@ -23,9 +23,10 @@
 #include <unordered_map>
 #include <vector>
 
+#include "androidfw/StringPiece.h"
+
 #include "ConfigDescription.h"
 #include "util/BigBuffer.h"
-#include "util/StringPiece.h"
 
 namespace aapt {
 
@@ -149,14 +150,14 @@ class StringPool {
    * Adds a string to the pool, unless it already exists. Returns
    * a reference to the string in the pool.
    */
-  Ref MakeRef(const StringPiece& str);
+  Ref MakeRef(const android::StringPiece& str);
 
   /**
    * Adds a string to the pool, unless it already exists, with a context
    * object that can be used when sorting the string pool. Returns
    * a reference to the string in the pool.
    */
-  Ref MakeRef(const StringPiece& str, const Context& context);
+  Ref MakeRef(const android::StringPiece& str, const Context& context);
 
   /**
    * Adds a style to the string pool and returns a reference to it.
@@ -208,11 +209,11 @@ class StringPool {
 
   static bool Flatten(BigBuffer* out, const StringPool& pool, bool utf8);
 
-  Ref MakeRefImpl(const StringPiece& str, const Context& context, bool unique);
+  Ref MakeRefImpl(const android::StringPiece& str, const Context& context, bool unique);
 
   std::vector<std::unique_ptr<Entry>> strings_;
   std::vector<std::unique_ptr<StyleEntry>> styles_;
-  std::unordered_multimap<StringPiece, Entry*> indexed_strings_;
+  std::unordered_multimap<android::StringPiece, Entry*> indexed_strings_;
 };
 
 //

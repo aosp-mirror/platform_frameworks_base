@@ -20,6 +20,7 @@
 #include <memory>
 
 #include "android-base/macros.h"
+#include "androidfw/StringPiece.h"
 
 #include "ConfigDescription.h"
 #include "Diagnostics.h"
@@ -27,7 +28,6 @@
 #include "ResourceValues.h"
 #include "StringPool.h"
 #include "util/Maybe.h"
-#include "util/StringPiece.h"
 #include "xml/XmlPullParser.h"
 
 namespace aapt {
@@ -101,7 +101,7 @@ class ResourceParser {
   bool ParseAttrImpl(xml::XmlPullParser* parser, ParsedResource* out_resource,
                      bool weak);
   Maybe<Attribute::Symbol> ParseEnumOrFlagItem(xml::XmlPullParser* parser,
-                                               const StringPiece& tag);
+                                               const android::StringPiece& tag);
   bool ParseStyle(xml::XmlPullParser* parser, ParsedResource* out_resource);
   bool ParseStyleItem(xml::XmlPullParser* parser, Style* style);
   bool ParseDeclareStyleable(xml::XmlPullParser* parser,

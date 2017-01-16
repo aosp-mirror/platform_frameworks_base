@@ -70,8 +70,8 @@ class Context : public IAaptContext {
 
 class ContextBuilder {
  public:
-  ContextBuilder& SetCompilationPackage(const StringPiece& package) {
-    context_->compilation_package_ = package.ToString();
+  ContextBuilder& SetCompilationPackage(const android::StringPiece& package) {
+    context_->compilation_package_ = package.to_string();
     return *this;
   }
 
@@ -103,9 +103,8 @@ class ContextBuilder {
 
 class StaticSymbolSourceBuilder {
  public:
-  StaticSymbolSourceBuilder& AddPublicSymbol(
-      const StringPiece& name, ResourceId id,
-      std::unique_ptr<Attribute> attr = {}) {
+  StaticSymbolSourceBuilder& AddPublicSymbol(const android::StringPiece& name, ResourceId id,
+                                             std::unique_ptr<Attribute> attr = {}) {
     std::unique_ptr<SymbolTable::Symbol> symbol =
         util::make_unique<SymbolTable::Symbol>(id, std::move(attr), true);
     symbol_source_->name_map_[ParseNameOrDie(name)] = symbol.get();
@@ -114,7 +113,7 @@ class StaticSymbolSourceBuilder {
     return *this;
   }
 
-  StaticSymbolSourceBuilder& AddSymbol(const StringPiece& name, ResourceId id,
+  StaticSymbolSourceBuilder& AddSymbol(const android::StringPiece& name, ResourceId id,
                                        std::unique_ptr<Attribute> attr = {}) {
     std::unique_ptr<SymbolTable::Symbol> symbol =
         util::make_unique<SymbolTable::Symbol>(id, std::move(attr), false);

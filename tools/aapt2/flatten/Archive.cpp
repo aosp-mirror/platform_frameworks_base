@@ -22,10 +22,12 @@
 #include <vector>
 
 #include "android-base/macros.h"
+#include "androidfw/StringPiece.h"
 #include "ziparchive/zip_writer.h"
 
 #include "util/Files.h"
-#include "util/StringPiece.h"
+
+using android::StringPiece;
 
 namespace aapt {
 
@@ -36,7 +38,7 @@ class DirectoryWriter : public IArchiveWriter {
   DirectoryWriter() = default;
 
   bool Open(IDiagnostics* diag, const StringPiece& out_dir) {
-    dir_ = out_dir.ToString();
+    dir_ = out_dir.to_string();
     file::FileType type = file::GetFileType(dir_);
     if (type == file::FileType::kNonexistant) {
       diag->Error(DiagMessage() << "directory " << dir_ << " does not exist");

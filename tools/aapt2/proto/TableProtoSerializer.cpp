@@ -22,7 +22,7 @@
 #include "proto/ProtoSerialize.h"
 #include "util/BigBuffer.h"
 
-#include <android-base/logging.h>
+#include "android-base/logging.h"
 
 using google::protobuf::io::CodedOutputStream;
 using google::protobuf::io::CodedInputStream;
@@ -239,7 +239,7 @@ std::unique_ptr<pb::ResourceTable> SerializeTableToPb(ResourceTable* table) {
       if (type->id) {
         pb_type->set_id(type->id.value());
       }
-      pb_type->set_name(ToString(type->type).ToString());
+      pb_type->set_name(ToString(type->type).to_string());
 
       for (auto& entry : type->entries) {
         pb::Entry* pb_entry = pb_type->add_entries();

@@ -24,6 +24,8 @@
 #include "process/SymbolTable.h"
 #include "unflatten/BinaryResourceParser.h"
 
+using android::StringPiece;
+
 namespace aapt {
 
 class DiffContext : public IAaptContext {

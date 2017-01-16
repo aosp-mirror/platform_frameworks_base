@@ -18,9 +18,12 @@
 
 #include <string>
 
+#include "androidfw/StringPiece.h"
+
 #include "SdkConstants.h"
 #include "test/Test.h"
-#include "util/StringPiece.h"
+
+using android::StringPiece;
 
 namespace aapt {
 

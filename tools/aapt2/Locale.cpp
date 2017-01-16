@@ -72,7 +72,7 @@ static inline bool is_number(const std::string& str) {
   return std::all_of(std::begin(str), std::end(str), ::isdigit);
 }
 
-bool LocaleValue::InitFromFilterString(const StringPiece& str) {
+bool LocaleValue::InitFromFilterString(const android::StringPiece& str) {
   // A locale (as specified in the filter) is an underscore separated name such
   // as "en_US", "en_Latn_US", or "en_US_POSIX".
   std::vector<std::string> parts = util::SplitAndLowercase(str, '_');

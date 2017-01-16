@@ -28,11 +28,11 @@
 #include <vector>
 
 #include "android-base/macros.h"
+#include "androidfw/StringPiece.h"
 
 #include "Resource.h"
 #include "process/IResourceTableConsumer.h"
 #include "util/Maybe.h"
-#include "util/StringPiece.h"
 #include "xml/XmlUtil.h"
 
 namespace aapt {
@@ -119,8 +119,7 @@ class XmlPullParser : public IPackageDeclStack {
    * 'package' will be set to 'defaultPackage'.
    */
   Maybe<ExtractedPackage> TransformPackageAlias(
-      const StringPiece& alias,
-      const StringPiece& local_package) const override;
+      const android::StringPiece& alias, const android::StringPiece& local_package) const override;
 
   //
   // Remaining methods are for retrieving information about attributes
@@ -146,8 +145,7 @@ class XmlPullParser : public IPackageDeclStack {
   const_iterator begin_attributes() const;
   const_iterator end_attributes() const;
   size_t attribute_count() const;
-  const_iterator FindAttribute(StringPiece namespace_uri,
-                               StringPiece name) const;
+  const_iterator FindAttribute(android::StringPiece namespace_uri, android::StringPiece name) const;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(XmlPullParser);
@@ -190,16 +188,16 @@ class XmlPullParser : public IPackageDeclStack {
 /**
  * Finds the attribute in the current element within the global namespace.
  */
-Maybe<StringPiece> FindAttribute(const XmlPullParser* parser,
-                                 const StringPiece& name);
+Maybe<android::StringPiece> FindAttribute(const XmlPullParser* parser,
+                                          const android::StringPiece& name);
 
 /**
  * Finds the attribute in the current element within the global namespace. The
  * attribute's value
  * must not be the empty string.
  */
-Maybe<StringPiece> FindNonEmptyAttribute(const XmlPullParser* parser,
-                                         const StringPiece& name);
+Maybe<android::StringPiece> FindNonEmptyAttribute(const XmlPullParser* parser,
+                                                  const android::StringPiece& name);
 
 //
 // Implementation
@@ -299,13 +297,13 @@ inline bool XmlPullParser::Attribute::operator!=(const Attribute& rhs) const {
 }
 
 inline XmlPullParser::const_iterator XmlPullParser::FindAttribute(
-    StringPiece namespace_uri, StringPiece name) const {
+    android::StringPiece namespace_uri, android::StringPiece name) const {
   const auto end_iter = end_attributes();
   const auto iter = std::lower_bound(
       begin_attributes(), end_iter,
-      std::pair<StringPiece, StringPiece>(namespace_uri, name),
+      std::pair<android::StringPiece, android::StringPiece>(namespace_uri, name),
       [](const Attribute& attr,
-         const std::pair<StringPiece, StringPiece>& rhs) -> bool {
+         const std::pair<android::StringPiece, android::StringPiece>& rhs) -> bool {
         int cmp = attr.namespace_uri.compare(
             0, attr.namespace_uri.size(), rhs.first.data(), rhs.first.size());
         if (cmp < 0) return true;

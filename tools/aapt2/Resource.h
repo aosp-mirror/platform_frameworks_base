@@ -24,11 +24,11 @@
 #include <tuple>
 #include <vector>
 
+#include "androidfw/StringPiece.h"
 #include "utils/JenkinsHash.h"
 
 #include "ConfigDescription.h"
 #include "Source.h"
-#include "util/StringPiece.h"
 
 namespace aapt {
 
@@ -63,13 +63,13 @@ enum class ResourceType {
   kXml,
 };
 
-StringPiece ToString(ResourceType type);
+android::StringPiece ToString(ResourceType type);
 
 /**
  * Returns a pointer to a valid ResourceType, or nullptr if
  * the string was invalid.
  */
-const ResourceType* ParseResourceType(const StringPiece& str);
+const ResourceType* ParseResourceType(const android::StringPiece& str);
 
 /**
  * A resource's name. This can uniquely identify
@@ -81,7 +81,7 @@ struct ResourceName {
   std::string entry;
 
   ResourceName() = default;
-  ResourceName(const StringPiece& p, ResourceType t, const StringPiece& e);
+  ResourceName(const android::StringPiece& p, ResourceType t, const android::StringPiece& e);
 
   int compare(const ResourceName& other) const;
 
@@ -96,15 +96,15 @@ struct ResourceName {
  * of the original string.
  */
 struct ResourceNameRef {
-  StringPiece package;
+  android::StringPiece package;
   ResourceType type = ResourceType::kRaw;
-  StringPiece entry;
+  android::StringPiece entry;
 
   ResourceNameRef() = default;
   ResourceNameRef(const ResourceNameRef&) = default;
   ResourceNameRef(ResourceNameRef&&) = default;
   ResourceNameRef(const ResourceName& rhs);  // NOLINT(implicit)
-  ResourceNameRef(const StringPiece& p, ResourceType t, const StringPiece& e);
+  ResourceNameRef(const android::StringPiece& p, ResourceType t, const android::StringPiece& e);
   ResourceNameRef& operator=(const ResourceNameRef& rhs) = default;
   ResourceNameRef& operator=(ResourceNameRef&& rhs) = default;
   ResourceNameRef& operator=(const ResourceName& rhs);
@@ -258,9 +258,9 @@ inline ::std::ostream& operator<<(::std::ostream& out,
 // ResourceName implementation.
 //
 
-inline ResourceName::ResourceName(const StringPiece& p, ResourceType t,
-                                  const StringPiece& e)
-    : package(p.ToString()), type(t), entry(e.ToString()) {}
+inline ResourceName::ResourceName(const android::StringPiece& p, ResourceType t,
+                                  const android::StringPiece& e)
+    : package(p.to_string()), type(t), entry(e.to_string()) {}
 
 inline int ResourceName::compare(const ResourceName& other) const {
   int cmp = package.compare(other.package);
@@ -311,8 +311,8 @@ inline std::string ResourceName::ToString() const {
 inline ResourceNameRef::ResourceNameRef(const ResourceName& rhs)
     : package(rhs.package), type(rhs.type), entry(rhs.entry) {}
 
-inline ResourceNameRef::ResourceNameRef(const StringPiece& p, ResourceType t,
-                                        const StringPiece& e)
+inline ResourceNameRef::ResourceNameRef(const android::StringPiece& p, ResourceType t,
+                                        const android::StringPiece& e)
     : package(p), type(t), entry(e) {}
 
 inline ResourceNameRef& ResourceNameRef::operator=(const ResourceName& rhs) {

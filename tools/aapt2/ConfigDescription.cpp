@@ -20,15 +20,16 @@
 #include <vector>
 
 #include "androidfw/ResourceTypes.h"
+#include "androidfw/StringPiece.h"
 
 #include "Locale.h"
 #include "SdkConstants.h"
-#include "util/StringPiece.h"
 #include "util/Util.h"
 
-namespace aapt {
-
 using android::ResTable_config;
+using android::StringPiece;
+
+namespace aapt {
 
 static const char* kWildcardName = "any";
 

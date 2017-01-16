@@ -14,26 +14,24 @@
  * limitations under the License.
  */
 
-#ifndef AAPT_STRING_PIECE_H
-#define AAPT_STRING_PIECE_H
+#ifndef ANDROIDFW_STRING_PIECE_H
+#define ANDROIDFW_STRING_PIECE_H
 
 #include <ostream>
 #include <string>
 
 #include "utils/JenkinsHash.h"
-#include "utils/String8.h"
 #include "utils/Unicode.h"
 
-namespace aapt {
+namespace android {
 
-/**
- * Read only wrapper around basic C strings.
- * Prevents excessive copying.
- *
- * WARNING: When creating from std::basic_string<>, moving the original
- * std::basic_string<> will invalidate the data held in a BasicStringPiece<>.
- * BasicStringPiece<> should only be used transitively.
- */
+// Read only wrapper around basic C strings. Prevents excessive copying.
+// StringPiece does not own the data it is wrapping. The lifetime of the underlying
+// data must outlive this StringPiece.
+//
+// WARNING: When creating from std::basic_string<>, moving the original
+// std::basic_string<> will invalidate the data held in a BasicStringPiece<>.
+// BasicStringPiece<> should only be used transitively.
 template <typename TChar>
 class BasicStringPiece {
  public:
@@ -53,15 +51,14 @@ class BasicStringPiece {
   BasicStringPiece<TChar>& assign(const TChar* str, size_t len);
 
   BasicStringPiece<TChar> substr(size_t start, size_t len = npos) const;
-  BasicStringPiece<TChar> substr(
-      BasicStringPiece<TChar>::const_iterator begin,
-      BasicStringPiece<TChar>::const_iterator end) const;
+  BasicStringPiece<TChar> substr(BasicStringPiece<TChar>::const_iterator begin,
+                                 BasicStringPiece<TChar>::const_iterator end) const;
 
   const TChar* data() const;
   size_t length() const;
   size_t size() const;
   bool empty() const;
-  std::basic_string<TChar> ToString() const;
+  std::basic_string<TChar> to_string() const;
 
   bool contains(const BasicStringPiece<TChar>& rhs) const;
   int compare(const BasicStringPiece<TChar>& rhs) const;
@@ -89,17 +86,14 @@ template <typename TChar>
 constexpr const size_t BasicStringPiece<TChar>::npos;
 
 template <typename TChar>
-inline BasicStringPiece<TChar>::BasicStringPiece()
-    : data_(nullptr), length_(0) {}
+inline BasicStringPiece<TChar>::BasicStringPiece() : data_(nullptr), length_(0) {}
 
 template <typename TChar>
-inline BasicStringPiece<TChar>::BasicStringPiece(
-    const BasicStringPiece<TChar>& str)
+inline BasicStringPiece<TChar>::BasicStringPiece(const BasicStringPiece<TChar>& str)
     : data_(str.data_), length_(str.length_) {}
 
 template <typename TChar>
-inline BasicStringPiece<TChar>::BasicStringPiece(
-    const std::basic_string<TChar>& str)
+inline BasicStringPiece<TChar>::BasicStringPiece(const std::basic_string<TChar>& str)
     : data_(str.data()), length_(str.length()) {}
 
 template <>
@@ -123,16 +117,14 @@ inline BasicStringPiece<TChar>& BasicStringPiece<TChar>::operator=(
 }
 
 template <typename TChar>
-inline BasicStringPiece<TChar>& BasicStringPiece<TChar>::assign(
-    const TChar* str, size_t len) {
+inline BasicStringPiece<TChar>& BasicStringPiece<TChar>::assign(const TChar* str, size_t len) {
   data_ = str;
   length_ = len;
   return *this;
 }
 
 template <typename TChar>
-inline BasicStringPiece<TChar> BasicStringPiece<TChar>::substr(
-    size_t start, size_t len) const {
+inline BasicStringPiece<TChar> BasicStringPiece<TChar>::substr(size_t start, size_t len) const {
   if (len == npos) {
     len = length_ - start;
   }
@@ -171,13 +163,12 @@ inline bool BasicStringPiece<TChar>::empty() const {
 }
 
 template <typename TChar>
-inline std::basic_string<TChar> BasicStringPiece<TChar>::ToString() const {
+inline std::basic_string<TChar> BasicStringPiece<TChar>::to_string() const {
   return std::basic_string<TChar>(data_, length_);
 }
 
 template <>
-inline bool BasicStringPiece<char>::contains(
-    const BasicStringPiece<char>& rhs) const {
+inline bool BasicStringPiece<char>::contains(const BasicStringPiece<char>& rhs) const {
   if (!data_ || !rhs.data_) {
     return false;
   }
@@ -188,8 +179,7 @@ inline bool BasicStringPiece<char>::contains(
 }
 
 template <>
-inline int BasicStringPiece<char>::compare(
-    const BasicStringPiece<char>& rhs) const {
+inline int BasicStringPiece<char>::compare(const BasicStringPiece<char>& rhs) const {
   const char nullStr = '\0';
   const char* b1 = data_ != nullptr ? data_ : &nullStr;
   const char* e1 = b1 + length_;
@@ -205,15 +195,21 @@ inline int BasicStringPiece<char>::compare(
   return static_cast<int>(length_ - rhs.length_);
 }
 
-inline ::std::ostream& operator<<(::std::ostream& out,
-                                  const BasicStringPiece<char16_t>& str) {
-  android::String8 utf8(str.data(), str.size());
-  return out.write(utf8.string(), utf8.size());
+inline ::std::ostream& operator<<(::std::ostream& out, const BasicStringPiece<char16_t>& str) {
+  const ssize_t result_len = utf16_to_utf8_length(str.data(), str.size());
+  if (result_len < 0) {
+    // Empty string.
+    return out;
+  }
+
+  std::string result;
+  result.resize(static_cast<size_t>(result_len));
+  utf16_to_utf8(str.data(), str.length(), &*result.begin(), static_cast<size_t>(result_len) + 1);
+  return out << result;
 }
 
 template <>
-inline bool BasicStringPiece<char16_t>::contains(
-    const BasicStringPiece<char16_t>& rhs) const {
+inline bool BasicStringPiece<char16_t>::contains(const BasicStringPiece<char16_t>& rhs) const {
   if (!data_ || !rhs.data_) {
     return false;
   }
@@ -224,8 +220,7 @@ inline bool BasicStringPiece<char16_t>::contains(
 }
 
 template <>
-inline int BasicStringPiece<char16_t>::compare(
-    const BasicStringPiece<char16_t>& rhs) const {
+inline int BasicStringPiece<char16_t>::compare(const BasicStringPiece<char16_t>& rhs) const {
   const char16_t nullStr = u'\0';
   const char16_t* b1 = data_ != nullptr ? data_ : &nullStr;
   const char16_t* b2 = rhs.data_ != nullptr ? rhs.data_ : &nullStr;
@@ -233,66 +228,52 @@ inline int BasicStringPiece<char16_t>::compare(
 }
 
 template <typename TChar>
-inline bool BasicStringPiece<TChar>::operator<(
-    const BasicStringPiece<TChar>& rhs) const {
+inline bool BasicStringPiece<TChar>::operator<(const BasicStringPiece<TChar>& rhs) const {
   return compare(rhs) < 0;
 }
 
 template <typename TChar>
-inline bool BasicStringPiece<TChar>::operator>(
-    const BasicStringPiece<TChar>& rhs) const {
+inline bool BasicStringPiece<TChar>::operator>(const BasicStringPiece<TChar>& rhs) const {
   return compare(rhs) > 0;
 }
 
 template <typename TChar>
-inline bool BasicStringPiece<TChar>::operator==(
-    const BasicStringPiece<TChar>& rhs) const {
+inline bool BasicStringPiece<TChar>::operator==(const BasicStringPiece<TChar>& rhs) const {
   return compare(rhs) == 0;
 }
 
 template <typename TChar>
-inline bool BasicStringPiece<TChar>::operator!=(
-    const BasicStringPiece<TChar>& rhs) const {
+inline bool BasicStringPiece<TChar>::operator!=(const BasicStringPiece<TChar>& rhs) const {
   return compare(rhs) != 0;
 }
 
 template <typename TChar>
-inline typename BasicStringPiece<TChar>::const_iterator
-BasicStringPiece<TChar>::begin() const {
+inline typename BasicStringPiece<TChar>::const_iterator BasicStringPiece<TChar>::begin() const {
   return data_;
 }
 
 template <typename TChar>
-inline typename BasicStringPiece<TChar>::const_iterator
-BasicStringPiece<TChar>::end() const {
+inline typename BasicStringPiece<TChar>::const_iterator BasicStringPiece<TChar>::end() const {
   return data_ + length_;
 }
 
-inline ::std::ostream& operator<<(::std::ostream& out,
-                                  const BasicStringPiece<char>& str) {
+inline ::std::ostream& operator<<(::std::ostream& out, const BasicStringPiece<char>& str) {
   return out.write(str.data(), str.size());
 }
 
-}  // namespace aapt
-
-inline ::std::ostream& operator<<(::std::ostream& out,
-                                  const std::u16string& str) {
-  android::String8 utf8(str.data(), str.size());
-  return out.write(utf8.string(), utf8.size());
-}
+}  // namespace android
 
 namespace std {
 
 template <typename TChar>
-struct hash<aapt::BasicStringPiece<TChar>> {
-  size_t operator()(const aapt::BasicStringPiece<TChar>& str) const {
+struct hash<android::BasicStringPiece<TChar>> {
+  size_t operator()(const android::BasicStringPiece<TChar>& str) const {
     uint32_t hashCode = android::JenkinsHashMixBytes(
-        0, reinterpret_cast<const uint8_t*>(str.data()),
-        sizeof(TChar) * str.size());
+        0, reinterpret_cast<const uint8_t*>(str.data()), sizeof(TChar) * str.size());
     return static_cast<size_t>(hashCode);
   }
 };
 
 }  // namespace std
 
-#endif  // AAPT_STRING_PIECE_H
+#endif  // ANDROIDFW_STRING_PIECE_H

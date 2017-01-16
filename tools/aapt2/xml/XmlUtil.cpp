@@ -21,6 +21,8 @@
 #include "util/Maybe.h"
 #include "util/Util.h"
 
+using android::StringPiece;
+
 namespace aapt {
 namespace xml {
 
@@ -42,7 +44,7 @@ Maybe<ExtractedPackage> ExtractPackageFromNamespace(
     if (package.empty()) {
       return {};
     }
-    return ExtractedPackage{package.ToString(), false /* is_private */};
+    return ExtractedPackage{package.to_string(), false /* is_private */};
 
   } else if (util::StartsWith(namespace_uri, kSchemaPrivatePrefix)) {
     StringPiece schema_prefix = kSchemaPrivatePrefix;
@@ -52,7 +54,7 @@ Maybe<ExtractedPackage> ExtractPackageFromNamespace(
     if (package.empty()) {
       return {};
     }
-    return ExtractedPackage{package.ToString(), true /* is_private */};
+    return ExtractedPackage{package.to_string(), true /* is_private */};
 
   } else if (namespace_uri == kSchemaAuto) {
     return ExtractedPackage{std::string(), true /* is_private */};

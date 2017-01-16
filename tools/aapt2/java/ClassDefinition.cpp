@@ -16,7 +16,9 @@
 
 #include "java/ClassDefinition.h"
 
-#include "util/StringPiece.h"
+#include "androidfw/StringPiece.h"
+
+using android::StringPiece;
 
 namespace aapt {
 
@@ -43,7 +45,7 @@ void ClassDefinition::WriteToStream(const StringPiece& prefix, bool final,
   }
   *out << "final class " << name_ << " {\n";
 
-  std::string new_prefix = prefix.ToString();
+  std::string new_prefix = prefix.to_string();
   new_prefix.append(kIndent);
 
   for (const std::unique_ptr<ClassMember>& member : members_) {

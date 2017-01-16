@@ -16,13 +16,15 @@
 
 #include "io/FileSystem.h"
 
+#include "androidfw/StringPiece.h"
 #include "utils/FileMap.h"
 
 #include "Source.h"
 #include "util/Files.h"
 #include "util/Maybe.h"
-#include "util/StringPiece.h"
 #include "util/Util.h"
+
+using android::StringPiece;
 
 namespace aapt {
 namespace io {
@@ -54,13 +56,11 @@ IFile* FileCollectionIterator::Next() {
 }
 
 IFile* FileCollection::InsertFile(const StringPiece& path) {
-  return (files_[path.ToString()] =
-              util::make_unique<RegularFile>(Source(path)))
-      .get();
+  return (files_[path.to_string()] = util::make_unique<RegularFile>(Source(path))).get();
 }
 
 IFile* FileCollection::FindFile(const StringPiece& path) {
-  auto iter = files_.find(path.ToString());
+  auto iter = files_.find(path.to_string());
   if (iter != files_.end()) {
     return iter->second.get();
   }

@@ -26,6 +26,9 @@
 #include "util/Files.h"
 #include "util/Util.h"
 
+using android::StringPiece;
+using android::StringPiece16;
+
 namespace aapt {
 namespace ResourceUtils {
 
@@ -59,7 +62,7 @@ Maybe<ResourceName> ToResourceName(
     name_out.entry =
         util::Utf16ToUtf8(StringPiece16(name_in.name, name_in.nameLen));
   } else if (name_in.name8) {
-    name_out.entry = StringPiece(name_in.name8, name_in.nameLen).ToString();
+    name_out.entry.assign(name_in.name8, name_in.nameLen);
   } else {
     return {};
   }
@@ -303,9 +306,7 @@ Maybe<Reference> ParseXmlAttributeName(const StringPiece& str) {
     p++;
   }
 
-  ref.name =
-      ResourceName(package.ToString(), ResourceType::kAttr,
-                   name.empty() ? trimmed_str.ToString() : name.ToString());
+  ref.name = ResourceName(package, ResourceType::kAttr, name.empty() ? trimmed_str : name);
   return Maybe<Reference>(std::move(ref));
 }
 

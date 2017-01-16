@@ -21,8 +21,9 @@
 
 #include <map>
 
+#include "androidfw/StringPiece.h"
+
 #include "io/File.h"
-#include "util/StringPiece.h"
 
 namespace aapt {
 namespace io {
@@ -64,10 +65,10 @@ class ZipFileCollectionIterator : public IFileCollectionIterator {
  */
 class ZipFileCollection : public IFileCollection {
  public:
-  static std::unique_ptr<ZipFileCollection> Create(const StringPiece& path,
+  static std::unique_ptr<ZipFileCollection> Create(const android::StringPiece& path,
                                                    std::string* outError);
 
-  io::IFile* FindFile(const StringPiece& path) override;
+  io::IFile* FindFile(const android::StringPiece& path) override;
   std::unique_ptr<IFileCollectionIterator> Iterator() override;
 
   ~ZipFileCollection() override;

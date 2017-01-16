@@ -20,8 +20,7 @@
 #include <ostream>
 
 #include "androidfw/ResourceTypes.h"
-
-#include "util/StringPiece.h"
+#include "androidfw/StringPiece.h"
 
 namespace aapt {
 
@@ -42,7 +41,7 @@ struct ConfigDescription : public android::ResTable_config {
    * The resulting configuration has the appropriate sdkVersion defined
    * for backwards compatibility.
    */
-  static bool Parse(const StringPiece& str, ConfigDescription* out = nullptr);
+  static bool Parse(const android::StringPiece& str, ConfigDescription* out = nullptr);
 
   /**
    * If the configuration uses an axis that was added after

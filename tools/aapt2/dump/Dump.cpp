@@ -16,6 +16,8 @@
 
 #include <vector>
 
+#include "androidfw/StringPiece.h"
+
 #include "Debug.h"
 #include "Diagnostics.h"
 #include "Flags.h"
@@ -24,7 +26,8 @@
 #include "proto/ProtoSerialize.h"
 #include "unflatten/BinaryResourceParser.h"
 #include "util/Files.h"
-#include "util/StringPiece.h"
+
+using android::StringPiece;
 
 namespace aapt {
 

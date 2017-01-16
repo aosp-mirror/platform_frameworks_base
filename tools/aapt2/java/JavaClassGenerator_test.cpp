@@ -22,6 +22,8 @@
 #include "test/Test.h"
 #include "util/Util.h"
 
+using android::StringPiece;
+
 namespace aapt {
 
 TEST(JavaClassGeneratorTest, FailWhenEntryIsJavaKeyword) {

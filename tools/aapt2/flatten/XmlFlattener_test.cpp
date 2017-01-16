@@ -23,6 +23,8 @@
 #include "util/BigBuffer.h"
 #include "util/Util.h"
 
+using android::StringPiece16;
+
 namespace aapt {
 
 class XmlFlattenerTest : public ::testing::Test {

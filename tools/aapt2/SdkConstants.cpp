@@ -21,6 +21,8 @@
 #include <unordered_map>
 #include <vector>
 
+using android::StringPiece;
+
 namespace aapt {
 
 static const char* sDevelopmentSdkCodeName = "O";

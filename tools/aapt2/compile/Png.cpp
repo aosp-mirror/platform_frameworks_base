@@ -15,17 +15,20 @@
  */
 
 #include "Png.h"
-#include "Source.h"
-#include "util/BigBuffer.h"
-#include "util/Util.h"
 
-#include <androidfw/ResourceTypes.h>
 #include <png.h>
 #include <zlib.h>
+
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include "androidfw/ResourceTypes.h"
+
+#include "Source.h"
+#include "util/BigBuffer.h"
+#include "util/Util.h"
 
 namespace aapt {
 

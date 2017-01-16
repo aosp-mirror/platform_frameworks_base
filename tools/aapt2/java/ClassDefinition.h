@@ -21,10 +21,10 @@
 #include <string>
 
 #include "android-base/macros.h"
+#include "androidfw/StringPiece.h"
 
 #include "Resource.h"
 #include "java/AnnotationProcessor.h"
-#include "util/StringPiece.h"
 #include "util/Util.h"
 
 namespace aapt {
@@ -41,7 +41,7 @@ class ClassMember {
 
   virtual bool empty() const = 0;
 
-  virtual void WriteToStream(const StringPiece& prefix, bool final,
+  virtual void WriteToStream(const android::StringPiece& prefix, bool final,
                              std::ostream* out) const {
     processor_.WriteToStream(out, prefix);
   }
@@ -53,12 +53,12 @@ class ClassMember {
 template <typename T>
 class PrimitiveMember : public ClassMember {
  public:
-  PrimitiveMember(const StringPiece& name, const T& val)
-      : name_(name.ToString()), val_(val) {}
+  PrimitiveMember(const android::StringPiece& name, const T& val)
+      : name_(name.to_string()), val_(val) {}
 
   bool empty() const override { return false; }
 
-  void WriteToStream(const StringPiece& prefix, bool final,
+  void WriteToStream(const android::StringPiece& prefix, bool final,
                      std::ostream* out) const override {
     ClassMember::WriteToStream(prefix, final, out);
 
@@ -79,12 +79,12 @@ class PrimitiveMember : public ClassMember {
 template <>
 class PrimitiveMember<std::string> : public ClassMember {
  public:
-  PrimitiveMember(const StringPiece& name, const std::string& val)
-      : name_(name.ToString()), val_(val) {}
+  PrimitiveMember(const android::StringPiece& name, const std::string& val)
+      : name_(name.to_string()), val_(val) {}
 
   bool empty() const override { return false; }
 
-  void WriteToStream(const StringPiece& prefix, bool final,
+  void WriteToStream(const android::StringPiece& prefix, bool final,
                      std::ostream* out) const override {
     ClassMember::WriteToStream(prefix, final, out);
 
@@ -106,14 +106,13 @@ using StringMember = PrimitiveMember<std::string>;
 template <typename T>
 class PrimitiveArrayMember : public ClassMember {
  public:
-  explicit PrimitiveArrayMember(const StringPiece& name)
-      : name_(name.ToString()) {}
+  explicit PrimitiveArrayMember(const android::StringPiece& name) : name_(name.to_string()) {}
 
   void AddElement(const T& val) { elements_.push_back(val); }
 
   bool empty() const override { return false; }
 
-  void WriteToStream(const StringPiece& prefix, bool final,
+  void WriteToStream(const android::StringPiece& prefix, bool final,
                      std::ostream* out) const override {
     ClassMember::WriteToStream(prefix, final, out);
 
@@ -147,22 +146,18 @@ enum class ClassQualifier { None, Static };
 
 class ClassDefinition : public ClassMember {
  public:
-  static bool WriteJavaFile(const ClassDefinition* def,
-                            const StringPiece& package, bool final,
-                            std::ostream* out);
+  static bool WriteJavaFile(const ClassDefinition* def, const android::StringPiece& package,
+                            bool final, std::ostream* out);
 
-  ClassDefinition(const StringPiece& name, ClassQualifier qualifier,
-                  bool createIfEmpty)
-      : name_(name.ToString()),
-        qualifier_(qualifier),
-        create_if_empty_(createIfEmpty) {}
+  ClassDefinition(const android::StringPiece& name, ClassQualifier qualifier, bool createIfEmpty)
+      : name_(name.to_string()), qualifier_(qualifier), create_if_empty_(createIfEmpty) {}
 
   void AddMember(std::unique_ptr<ClassMember> member) {
     members_.push_back(std::move(member));
   }
 
   bool empty() const override;
-  void WriteToStream(const StringPiece& prefix, bool final,
+  void WriteToStream(const android::StringPiece& prefix, bool final,
                      std::ostream* out) const override;
 
  private:

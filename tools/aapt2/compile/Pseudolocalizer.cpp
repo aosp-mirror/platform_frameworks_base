@@ -18,6 +18,8 @@
 
 #include "util/Util.h"
 
+using android::StringPiece;
+
 namespace aapt {
 
 // String basis to generate expansion
@@ -40,10 +42,8 @@ static const char kArgEnd = '}';
 
 class PseudoMethodNone : public PseudoMethodImpl {
  public:
-  std::string Text(const StringPiece& text) override { return text.ToString(); }
-  std::string Placeholder(const StringPiece& text) override {
-    return text.ToString();
-  }
+  std::string Text(const StringPiece& text) override { return text.to_string(); }
+  std::string Placeholder(const StringPiece& text) override { return text.to_string(); }
 };
 
 class PseudoMethodBidi : public PseudoMethodImpl {
@@ -116,7 +116,7 @@ std::string Pseudolocalizer::Text(const StringPiece& text) {
       }
       size_t size = nextpos - lastpos;
       if (size) {
-        std::string chunk = text.substr(lastpos, size).ToString();
+        std::string chunk = text.substr(lastpos, size).to_string();
         if (pseudo) {
           chunk = impl_->Text(chunk);
         } else if (str[lastpos] == kArgStart && str[nextpos - 1] == kArgEnd) {
@@ -437,7 +437,7 @@ std::string PseudoMethodAccent::Text(const StringPiece& source) {
 
 std::string PseudoMethodAccent::Placeholder(const StringPiece& source) {
   // Surround a placeholder with brackets
-  return kPlaceholderOpen + source.ToString() + kPlaceholderClose;
+  return kPlaceholderOpen + source.to_string() + kPlaceholderClose;
 }
 
 std::string PseudoMethodBidi::Text(const StringPiece& source) {
@@ -467,7 +467,7 @@ std::string PseudoMethodBidi::Text(const StringPiece& source) {
 
 std::string PseudoMethodBidi::Placeholder(const StringPiece& source) {
   // Surround a placeholder with directionality change sequence
-  return kRlm + kRlo + source.ToString() + kPdf + kRlm;
+  return kRlm + kRlo + source.to_string() + kPdf + kRlm;
 }
 
 }  // namespace aapt

@@ -20,6 +20,8 @@
 
 #include "test/Test.h"
 
+using android::StringPiece;
+
 namespace aapt {
 
 TEST(UtilTest, TrimOnlyWhitespace) {

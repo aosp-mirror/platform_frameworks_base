@@ -24,6 +24,8 @@
 #include "util/Maybe.h"
 #include "xml/XmlDom.h"
 
+using android::StringPiece;
+
 namespace aapt {
 
 static Maybe<StringPiece> ExtractJavaIdentifier(IDiagnostics* diag,

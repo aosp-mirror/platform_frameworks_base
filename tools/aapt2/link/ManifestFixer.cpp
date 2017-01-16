@@ -25,6 +25,8 @@
 #include "xml/XmlActionExecutor.h"
 #include "xml/XmlDom.h"
 
+using android::StringPiece;
+
 namespace aapt {
 
 /**
@@ -293,7 +295,7 @@ static bool RenameManifestPackage(const StringPiece& package_override,
   CHECK(attr != nullptr);
 
   std::string original_package = std::move(attr->value);
-  attr->value = package_override.ToString();
+  attr->value = package_override.to_string();
 
   FullyQualifiedClassNameVisitor visitor(original_package);
   manifest_el->Accept(&visitor);

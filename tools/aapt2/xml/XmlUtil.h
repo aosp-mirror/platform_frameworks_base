@@ -74,7 +74,7 @@ Maybe<ExtractedPackage> ExtractPackageFromNamespace(
  *
  * http://schemas.android.com/apk/prv/res/<package>
  */
-std::string BuildPackageNamespace(const StringPiece& package,
+std::string BuildPackageNamespace(const android::StringPiece& package,
                                   bool private_reference = false);
 
 /**
@@ -90,7 +90,7 @@ struct IPackageDeclStack {
    * package declaration.
    */
   virtual Maybe<ExtractedPackage> TransformPackageAlias(
-      const StringPiece& alias, const StringPiece& local_package) const = 0;
+      const android::StringPiece& alias, const android::StringPiece& local_package) const = 0;
 };
 
 /**
@@ -100,8 +100,7 @@ struct IPackageDeclStack {
  * the namespace of the package declaration was private.
  */
 void TransformReferenceFromNamespace(IPackageDeclStack* decl_stack,
-                                     const StringPiece& local_package,
-                                     Reference* in_ref);
+                                     const android::StringPiece& local_package, Reference* in_ref);
 
 }  // namespace xml
 }  // namespace aapt

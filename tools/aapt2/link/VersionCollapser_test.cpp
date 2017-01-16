@@ -18,6 +18,8 @@
 
 #include "test/Test.h"
 
+using android::StringPiece;
+
 namespace aapt {
 
 static std::unique_ptr<ResourceTable> BuildTableWithConfigs(

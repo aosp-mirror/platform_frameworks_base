@@ -21,8 +21,7 @@
 #include <vector>
 
 #include "androidfw/ResourceTypes.h"
-
-#include "util/StringPiece.h"
+#include "androidfw/StringPiece.h"
 
 namespace aapt {
 
@@ -40,7 +39,7 @@ struct LocaleValue {
   /**
    * Initialize this LocaleValue from a config string.
    */
-  bool InitFromFilterString(const StringPiece& config);
+  bool InitFromFilterString(const android::StringPiece& config);
 
   /**
    * Initialize this LocaleValue from parts of a vector.

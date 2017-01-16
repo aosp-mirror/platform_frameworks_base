@@ -20,8 +20,9 @@
 #include <ostream>
 #include <string>
 
+#include "androidfw/StringPiece.h"
+
 #include "util/Maybe.h"
-#include "util/StringPiece.h"
 
 namespace aapt {
 
@@ -35,12 +36,11 @@ struct Source {
 
   Source() = default;
 
-  inline Source(const StringPiece& path)
-      : path(path.ToString()) {  // NOLINT(implicit)
+  inline Source(const android::StringPiece& path) : path(path.to_string()) {  // NOLINT(implicit)
   }
 
-  inline Source(const StringPiece& path, size_t line)
-      : path(path.ToString()), line(line) {}
+  inline Source(const android::StringPiece& path, size_t line)
+      : path(path.to_string()), line(line) {}
 
   inline Source WithLine(size_t line) const { return Source(path, line); }
 };

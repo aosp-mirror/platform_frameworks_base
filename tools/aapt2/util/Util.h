@@ -24,11 +24,11 @@
 #include <vector>
 
 #include "androidfw/ResourceTypes.h"
+#include "androidfw/StringPiece.h"
 #include "utils/ByteOrder.h"
 
 #include "util/BigBuffer.h"
 #include "util/Maybe.h"
-#include "util/StringPiece.h"
 
 #ifdef _WIN32
 // TODO(adamlesinski): remove once http://b/32447322 is resolved.
@@ -44,26 +44,24 @@
 namespace aapt {
 namespace util {
 
-std::vector<std::string> Split(const StringPiece& str, char sep);
-std::vector<std::string> SplitAndLowercase(const StringPiece& str, char sep);
+std::vector<std::string> Split(const android::StringPiece& str, char sep);
+std::vector<std::string> SplitAndLowercase(const android::StringPiece& str, char sep);
 
 /**
  * Returns true if the string starts with prefix.
  */
-bool StartsWith(const StringPiece& str, const StringPiece& prefix);
+bool StartsWith(const android::StringPiece& str, const android::StringPiece& prefix);
 
 /**
  * Returns true if the string ends with suffix.
  */
-bool EndsWith(const StringPiece& str, const StringPiece& suffix);
+bool EndsWith(const android::StringPiece& str, const android::StringPiece& suffix);
 
 /**
  * Creates a new StringPiece16 that points to a substring
  * of the original string without leading or trailing whitespace.
  */
-StringPiece TrimWhitespace(const StringPiece& str);
-
-StringPiece TrimWhitespace(const StringPiece& str);
+android::StringPiece TrimWhitespace(const android::StringPiece& str);
 
 /**
  * UTF-16 isspace(). It basically checks for lower range characters that are
@@ -75,18 +73,18 @@ inline bool isspace16(char16_t c) { return c < 0x0080 && isspace(c); }
  * Returns an iterator to the first character that is not alpha-numeric and that
  * is not in the allowedChars set.
  */
-StringPiece::const_iterator FindNonAlphaNumericAndNotInSet(
-    const StringPiece& str, const StringPiece& allowed_chars);
+android::StringPiece::const_iterator FindNonAlphaNumericAndNotInSet(
+    const android::StringPiece& str, const android::StringPiece& allowed_chars);
 
 /**
  * Tests that the string is a valid Java class name.
  */
-bool IsJavaClassName(const StringPiece& str);
+bool IsJavaClassName(const android::StringPiece& str);
 
 /**
  * Tests that the string is a valid Java package name.
  */
-bool IsJavaPackageName(const StringPiece& str);
+bool IsJavaPackageName(const android::StringPiece& str);
 
 /**
  * Converts the class name to a fully qualified class name from the given
@@ -97,8 +95,8 @@ bool IsJavaPackageName(const StringPiece& str);
  * .a.b         --> package.a.b
  * asdf.adsf    --> asdf.adsf
  */
-Maybe<std::string> GetFullyQualifiedClassName(const StringPiece& package,
-                                              const StringPiece& class_name);
+Maybe<std::string> GetFullyQualifiedClassName(const android::StringPiece& package,
+                                              const android::StringPiece& class_name);
 
 /**
  * Makes a std::unique_ptr<> with the template parameter inferred by the
@@ -138,7 +136,7 @@ template <typename Container>
  * stored as UTF-8,
  * the conversion to UTF-16 happens within ResStringPool.
  */
-StringPiece16 GetString16(const android::ResStringPool& pool, size_t idx);
+android::StringPiece16 GetString16(const android::ResStringPool& pool, size_t idx);
 
 /**
  * Helper method to extract a UTF-8 string from a StringPool. If the string is
@@ -159,11 +157,11 @@ std::string GetString(const android::ResStringPool& pool, size_t idx);
  * which will
  * break the string interpolation.
  */
-bool VerifyJavaStringFormat(const StringPiece& str);
+bool VerifyJavaStringFormat(const android::StringPiece& str);
 
 class StringBuilder {
  public:
-  StringBuilder& Append(const StringPiece& str);
+  StringBuilder& Append(const android::StringPiece& str);
   const std::string& ToString() const;
   const std::string& Error() const;
 
@@ -194,8 +192,8 @@ inline StringBuilder::operator bool() const { return error_.empty(); }
 /**
  * Converts a UTF8 string to a UTF16 string.
  */
-std::u16string Utf8ToUtf16(const StringPiece& utf8);
-std::string Utf16ToUtf8(const StringPiece16& utf16);
+std::u16string Utf8ToUtf16(const android::StringPiece& utf8);
+std::string Utf16ToUtf8(const android::StringPiece16& utf16);
 
 /**
  * Writes the entire BigBuffer to the output stream.
@@ -220,22 +218,22 @@ class Tokenizer {
 
     iterator& operator++();
 
-    StringPiece operator*() { return token_; }
+    android::StringPiece operator*() { return token_; }
     bool operator==(const iterator& rhs) const;
     bool operator!=(const iterator& rhs) const;
 
    private:
     friend class Tokenizer;
 
-    iterator(StringPiece s, char sep, StringPiece tok, bool end);
+    iterator(android::StringPiece s, char sep, android::StringPiece tok, bool end);
 
-    StringPiece str_;
+    android::StringPiece str_;
     char separator_;
-    StringPiece token_;
+    android::StringPiece token_;
     bool end_;
   };
 
-  Tokenizer(StringPiece str, char sep);
+  Tokenizer(android::StringPiece str, char sep);
 
   iterator begin() { return begin_; }
 
@@ -246,9 +244,7 @@ class Tokenizer {
   const iterator end_;
 };
 
-inline Tokenizer Tokenize(const StringPiece& str, char sep) {
-  return Tokenizer(str, sep);
-}
+inline Tokenizer Tokenize(const android::StringPiece& str, char sep) { return Tokenizer(str, sep); }
 
 inline uint16_t HostToDevice16(uint16_t value) { return htods(value); }
 
@@ -267,8 +263,8 @@ inline uint32_t DeviceToHost32(uint32_t value) { return dtohl(value); }
  *
  * Returns true if successful.
  */
-bool ExtractResFilePathParts(const StringPiece& path, StringPiece* out_prefix,
-                             StringPiece* out_entry, StringPiece* out_suffix);
+bool ExtractResFilePathParts(const android::StringPiece& path, android::StringPiece* out_prefix,
+                             android::StringPiece* out_entry, android::StringPiece* out_suffix);
 
 }  // namespace util
 

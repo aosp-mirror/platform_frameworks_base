@@ -15,15 +15,20 @@
  */
 
 #include "util/Util.h"
-#include "util/BigBuffer.h"
-#include "util/Maybe.h"
-#include "util/StringPiece.h"
 
 #include <utils/Unicode.h>
 #include <algorithm>
 #include <ostream>
 #include <string>
 #include <vector>
+
+#include "androidfw/StringPiece.h"
+
+#include "util/BigBuffer.h"
+#include "util/Maybe.h"
+
+using android::StringPiece;
+using android::StringPiece16;
 
 namespace aapt {
 namespace util {
@@ -36,7 +41,7 @@ static std::vector<std::string> SplitAndTransform(
   StringPiece::const_iterator current;
   do {
     current = std::find(start, end, sep);
-    parts.emplace_back(str.substr(start, current).ToString());
+    parts.emplace_back(str.substr(start, current).to_string());
     if (f) {
       std::string& part = parts.back();
       std::transform(part.begin(), part.end(), part.begin(), f);
@@ -162,7 +167,7 @@ Maybe<std::string> GetFullyQualifiedClassName(const StringPiece& package,
   }
 
   if (util::IsJavaClassName(classname)) {
-    return classname.ToString();
+    return classname.to_string();
   }
 
   if (package.empty()) {

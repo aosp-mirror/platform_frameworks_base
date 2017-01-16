@@ -25,6 +25,8 @@
 #include "ValueVisitor.h"
 #include "util/Util.h"
 
+using android::StringPiece;
+
 namespace aapt {
 
 void SymbolTable::AppendSource(std::unique_ptr<ISymbolSource> source) {

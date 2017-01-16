@@ -19,6 +19,8 @@
 #include <map>
 #include <string>
 
+using android::StringPiece;
+
 namespace aapt {
 
 StringPiece ToString(ResourceType type) {

@@ -18,8 +18,13 @@
 
 #include <string>
 
+#include "androidfw/StringPiece.h"
+
 #include "test/Test.h"
 #include "util/Util.h"
+
+using android::StringPiece;
+using android::StringPiece16;
 
 namespace aapt {
 
@@ -236,8 +241,7 @@ TEST(StringPoolTest, Flatten) {
     EXPECT_EQ(StringPiece16(u"goodbye"), util::GetString16(test, 1));
 
     EXPECT_EQ(StringPiece(sLongString), util::GetString(test, 2));
-    EXPECT_EQ(util::Utf8ToUtf16(sLongString),
-              util::GetString16(test, 2).ToString());
+    EXPECT_EQ(util::Utf8ToUtf16(sLongString), util::GetString16(test, 2).to_string());
 
     size_t len;
     EXPECT_TRUE(test.stringAt(3, &len) != nullptr ||

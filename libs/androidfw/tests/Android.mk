@@ -32,6 +32,7 @@ testFiles := \
     Main.cpp \
     ResTable_test.cpp \
     Split_test.cpp \
+    StringPiece_test.cpp \
     TestHelpers.cpp \
     Theme_test.cpp \
     TypeWrappers_test.cpp \
