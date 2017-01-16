@@ -263,19 +263,6 @@ public class TaskWindowContainerController
         }
     }
 
-    /**
-     * @return a graphic buffer representing a screenshot of a task
-     */
-    public TaskSnapshot getSnapshot() {
-        synchronized (mWindowMap) {
-            if (mContainer == null) {
-                Slog.w(TAG_WM, "getSnapshot: taskId " + mTaskId + " not found.");
-                return null;
-            }
-            return mService.mTaskSnapshotController.getSnapshot(mContainer);
-        }
-    }
-
     void reportSnapshotChanged(TaskSnapshot snapshot) {
         mHandler.obtainMessage(REPORT_SNAPSHOT_CHANGED, snapshot).sendToTarget();
     }

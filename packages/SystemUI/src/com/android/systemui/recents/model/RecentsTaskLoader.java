@@ -209,7 +209,8 @@ class BackgroundTaskLoader implements Runnable {
                             // When svelte, we trim the memory to just the visible thumbnails when
                             // leaving, so don't thrash the cache as the user scrolls (just load
                             // them from scratch each time)
-                            if (config.svelteLevel < RecentsConfiguration.SVELTE_LIMIT_CACHE) {
+                            if (config.svelteLevel < RecentsConfiguration.SVELTE_LIMIT_CACHE
+                                    && !ActivityManager.ENABLE_TASK_SNAPSHOTS) {
                                 mThumbnailCache.put(t.key, cachedThumbnailData);
                             }
                         }
@@ -553,7 +554,9 @@ public class RecentsTaskLoader {
                 // Load the thumbnail from the system
                 thumbnailData = ssp.getTaskThumbnail(taskKey.id);
                 if (thumbnailData.thumbnail != null) {
-                    mThumbnailCache.put(taskKey, thumbnailData);
+                    if (!ActivityManager.ENABLE_TASK_SNAPSHOTS) {
+                        mThumbnailCache.put(taskKey, thumbnailData);
+                    }
                     return thumbnailData.thumbnail;
                 }
             }

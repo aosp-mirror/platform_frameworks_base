@@ -9781,15 +9781,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         enforceCallingPermission(READ_FRAME_BUFFER, "getTaskSnapshot()");
         final long ident = Binder.clearCallingIdentity();
         try {
+            final TaskRecord task;
             synchronized (this) {
-                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(
+                task = mStackSupervisor.anyTaskForIdLocked(
                         taskId, !RESTORE_FROM_RECENTS, INVALID_STACK_ID);
                 if (task == null) {
                     Slog.w(TAG, "getTaskSnapshot: taskId=" + taskId + " not found");
                     return null;
                 }
-                return task.getSnapshot();
             }
+            // Don't call this while holding the lock as this operation might hit the disk.
+            return task.getSnapshot();
         } finally {
             Binder.restoreCallingIdentity(ident);
         }

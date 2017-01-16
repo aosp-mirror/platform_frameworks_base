@@ -28,7 +28,6 @@ import android.view.WindowManagerPolicy.StartingSurface;
 
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.io.File;
 import java.io.PrintWriter;
 
 /**
@@ -48,7 +47,7 @@ class TaskSnapshotController {
 
     private final WindowManagerService mService;
 
-    private final TaskSnapshotCache mCache = new TaskSnapshotCache();
+    private final TaskSnapshotCache mCache;
     private final TaskSnapshotPersister mPersister = new TaskSnapshotPersister(
             Environment::getDataSystemCeDirectory);
     private final TaskSnapshotLoader mLoader = new TaskSnapshotLoader(mPersister);
@@ -56,6 +55,7 @@ class TaskSnapshotController {
 
     TaskSnapshotController(WindowManagerService service) {
         mService = service;
+        mCache = new TaskSnapshotCache(mService, mLoader);
     }
 
     void systemReady() {
@@ -86,8 +86,12 @@ class TaskSnapshotController {
         }
     }
 
-    @Nullable TaskSnapshot getSnapshot(Task task) {
-        return mCache.getSnapshot(task);
+    /**
+     * Retrieves a snapshot. If {@param restoreFromDisk} equals {@code true}, DO HOLD THE WINDOW
+     * MANAGER LOCK WHEN CALLING THIS METHOD!
+     */
+    @Nullable TaskSnapshot getSnapshot(int taskId, int userId, boolean restoreFromDisk) {
+        return mCache.getSnapshot(taskId, userId, restoreFromDisk);
     }
 
     /**
@@ -138,20 +142,18 @@ class TaskSnapshotController {
      * Called when an {@link AppWindowToken} has been removed.
      */
     void onAppRemoved(AppWindowToken wtoken) {
-        // TODO: Clean from both recents and running cache.
-        mCache.cleanCache(wtoken);
+        mCache.onAppRemoved(wtoken);
     }
 
     /**
      * Called when the process of an {@link AppWindowToken} has died.
      */
     void onAppDied(AppWindowToken wtoken) {
-
-        // TODO: Only clean from running cache.
-        mCache.cleanCache(wtoken);
+        mCache.onAppDied(wtoken);
     }
 
     void notifyTaskRemovedFromRecents(int taskId, int userId) {
+        mCache.onTaskRemoved(taskId);
         mPersister.onTaskRemovedFromRecents(taskId, userId);
     }
 

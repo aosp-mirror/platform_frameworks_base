@@ -492,7 +492,7 @@ public class AppWindowContainerController
 
     private boolean createSnapshot() {
         final TaskSnapshot snapshot = mService.mTaskSnapshotController.getSnapshot(
-                mContainer.mTask);
+                mContainer.mTask.mTaskId, mContainer.mTask.mUserId, false /* restoreFromDisk */);
 
         if (snapshot == null) {
             return false;

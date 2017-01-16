@@ -19,8 +19,11 @@ package com.android.server.wm;
 import android.annotation.Nullable;
 import android.app.ActivityManager.TaskSnapshot;
 import android.util.ArrayMap;
+import android.util.LruCache;
 
 import java.io.PrintWriter;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Caches snapshots. See {@link TaskSnapshotController}.
@@ -29,51 +32,125 @@ import java.io.PrintWriter;
  */
 class TaskSnapshotCache {
 
-    private final ArrayMap<AppWindowToken, Task> mAppTaskMap = new ArrayMap<>();
-    private final ArrayMap<Task, CacheEntry> mCache = new ArrayMap<>();
+    // TODO: Make this more dynamic to accomodate for different clients.
+    private static final int RETRIEVAL_CACHE_SIZE = 4;
+
+    private final WindowManagerService mService;
+    private final TaskSnapshotLoader mLoader;
+    private final ArrayMap<AppWindowToken, Integer> mAppTaskMap = new ArrayMap<>();
+    private final ArrayMap<Integer, CacheEntry> mRunningCache = new ArrayMap<>();
+    private final LruCache<Integer, TaskSnapshot> mRetrievalCache =
+            new LruCache<>(RETRIEVAL_CACHE_SIZE);
+
+    TaskSnapshotCache(WindowManagerService service, TaskSnapshotLoader loader) {
+        mService = service;
+        mLoader = loader;
+    }
 
     void putSnapshot(Task task, TaskSnapshot snapshot) {
-        final CacheEntry entry = mCache.get(task);
+        final CacheEntry entry = mRunningCache.get(task.mTaskId);
         if (entry != null) {
             mAppTaskMap.remove(entry.topApp);
         }
         final AppWindowToken top = task.getTopChild();
-        mAppTaskMap.put(top, task);
-        mCache.put(task, new CacheEntry(snapshot, task.getTopChild()));
-    }
-
-    @Nullable TaskSnapshot getSnapshot(Task task) {
-        final CacheEntry entry = mCache.get(task);
-        return entry != null ? entry.snapshot : null;
+        mAppTaskMap.put(top, task.mTaskId);
+        mRunningCache.put(task.mTaskId, new CacheEntry(snapshot, task.getTopChild()));
+        mRetrievalCache.put(task.mTaskId, snapshot);
     }
 
     /**
-     * Cleans the cache after an app window token's process died.
+     * If {@param restoreFromDisk} equals {@code true}, DO NOT HOLD THE WINDOW MANAGER LOCK!
      */
-    void cleanCache(AppWindowToken wtoken) {
-        final Task task = mAppTaskMap.get(wtoken);
-        if (task != null) {
-            removeEntry(task);
+    @Nullable TaskSnapshot getSnapshot(int taskId, int userId, boolean restoreFromDisk) {
+
+        synchronized (mService.mWindowMap) {
+            // Try the running cache.
+            final CacheEntry entry = mRunningCache.get(taskId);
+            if (entry != null) {
+                return entry.snapshot;
+            }
+
+            // Try the retrieval cache.
+            final TaskSnapshot snapshot = mRetrievalCache.get(taskId);
+            if (snapshot != null) {
+                return snapshot;
+            }
+        }
+
+        // Try to restore from disk if asked.
+        if (!restoreFromDisk) {
+            return null;
+        }
+        return tryRestoreFromDisk(taskId, userId);
+    }
+
+    /**
+     * DO NOT HOLD THE WINDOW MANAGER LOCK WHEN CALLING THIS METHOD!
+     */
+    private TaskSnapshot tryRestoreFromDisk(int taskId, int userId) {
+        final TaskSnapshot snapshot = mLoader.loadTask(taskId, userId);
+        if (snapshot == null) {
+            return null;
+        }
+        synchronized (mService.mWindowMap) {
+            mRetrievalCache.put(taskId, snapshot);
+        }
+        return snapshot;
+    }
+
+    /**
+     * Called when an app token has been removed
+     */
+    void onAppRemoved(AppWindowToken wtoken) {
+        final Integer taskId = mAppTaskMap.get(wtoken);
+        if (taskId != null) {
+            removeRunningEntry(taskId);
+        }
+        if (wtoken.mTask != null) {
+            mRetrievalCache.remove(wtoken.mTask.mTaskId);
         }
     }
 
-    private void removeEntry(Task task) {
-        final CacheEntry entry = mCache.get(task);
+    /**
+     * Callend when an app window token's process died.
+     */
+    void onAppDied(AppWindowToken wtoken) {
+        final Integer taskId = mAppTaskMap.get(wtoken);
+        if (taskId != null) {
+            removeRunningEntry(taskId);
+        }
+    }
+
+    void onTaskRemoved(int taskId) {
+        removeRunningEntry(taskId);
+        mRetrievalCache.remove(taskId);
+    }
+
+    private void removeRunningEntry(int taskId) {
+        final CacheEntry entry = mRunningCache.get(taskId);
         if (entry != null) {
             mAppTaskMap.remove(entry.topApp);
-            mCache.remove(task);
+            mRunningCache.remove(taskId);
         }
     }
 
     void dump(PrintWriter pw, String prefix) {
         final String doublePrefix = prefix + "  ";
         final String triplePrefix = doublePrefix + "  ";
+        final String quadruplePrefix = triplePrefix + "  ";
         pw.println(prefix + "SnapshotCache");
-        for (int i = mCache.size() - 1; i >= 0; i--) {
-            final CacheEntry entry = mCache.valueAt(i);
-            pw.println(doublePrefix + "Entry taskId=" + mCache.keyAt(i).mTaskId);
-            pw.println(triplePrefix + "topApp=" + entry.topApp);
-            pw.println(triplePrefix + "snapshot=" + entry.snapshot);
+        pw.println(doublePrefix + "RunningCache");
+        for (int i = mRunningCache.size() - 1; i >= 0; i--) {
+            final CacheEntry entry = mRunningCache.valueAt(i);
+            pw.println(triplePrefix + "Entry taskId=" + mRunningCache.keyAt(i));
+            pw.println(quadruplePrefix + "topApp=" + entry.topApp);
+            pw.println(quadruplePrefix + "snapshot=" + entry.snapshot);
+        }
+        pw.println(doublePrefix + "RetrievalCache");
+        final Map<Integer, TaskSnapshot> retrievalSnapshot = mRetrievalCache.snapshot();
+        for (Entry<Integer, TaskSnapshot> entry : retrievalSnapshot.entrySet()) {
+            pw.println(triplePrefix + "Entry taskId=" + entry.getKey());
+            pw.println(quadruplePrefix + "snapshot=" + entry.getValue());
         }
     }
 

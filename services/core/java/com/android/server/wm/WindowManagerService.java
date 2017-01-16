@@ -97,6 +97,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
@@ -3899,6 +3900,10 @@ public class WindowManagerService extends IWindowManager.Stub
         });
 
         return true;
+    }
+
+    public TaskSnapshot getTaskSnapshot(int taskId, int userId) {
+        return mTaskSnapshotController.getSnapshot(taskId, userId, true /* restoreFromDisk */);
     }
 
     /**
