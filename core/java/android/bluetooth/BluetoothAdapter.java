@@ -26,6 +26,7 @@ import android.annotation.SystemApi;
 import android.app.ActivityThread;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.PeriodicAdvertisingManager;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanRecord;
@@ -525,6 +526,7 @@ public final class BluetoothAdapter {
 
     private static BluetoothLeScanner sBluetoothLeScanner;
     private static BluetoothLeAdvertiser sBluetoothLeAdvertiser;
+    private static PeriodicAdvertisingManager sPeriodicAdvertisingManager;
 
     private final IBluetoothManager mManagerService;
     private IBluetooth mService;
@@ -627,6 +629,30 @@ public final class BluetoothAdapter {
             }
         }
         return sBluetoothLeAdvertiser;
+    }
+
+    /**
+     * Returns a {@link PeriodicAdvertisingManager} object for Bluetooth LE Periodic Advertising
+     * operations. Will return null if Bluetooth is turned off or if Bluetooth LE Periodic
+     * Advertising is not supported on this device.
+     * <p>
+     * Use {@link #isLePeriodicAdvertisingSupported()} to check whether LE Periodic Advertising is
+     * supported on this device before calling this method.
+     */
+    public PeriodicAdvertisingManager getPeriodicAdvertisingManager() {
+      if (!getLeAccess())
+        return null;
+
+      if (!isLePeriodicAdvertisingSupported())
+        return null;
+
+      synchronized (mLock) {
+        if (sPeriodicAdvertisingManager == null) {
+          sPeriodicAdvertisingManager =
+              new PeriodicAdvertisingManager(mManagerService);
+        }
+      }
+      return sPeriodicAdvertisingManager;
     }
 
     /**
